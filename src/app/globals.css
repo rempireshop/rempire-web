@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/*
+ * REMPIRE questionnaire tokens.
+ * Ink is the exact dark from rempire_logo_2025 (#1c1a00 — near-black with an
+ * olive cast), paper is warm white. Monochrome per the design direction;
+ * the brand assets provide everything else.
+ */
+@theme {
+  --color-ink: #1c1a00;
+  --color-paper: #fdfcf9;
+  --color-mist: #edeae1;
+  --color-fog: #78745f;
+
+  --font-display: "Korolev", "Arial Narrow", "Segoe UI", sans-serif;
+  --font-body: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+}
+
+@font-face {
+  font-family: "Korolev";
+  src: url("/fonts/KorolevBold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
