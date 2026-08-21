@@ -14,9 +14,11 @@ his phone, answers in ~10 minutes, and returns answers with one tap.
    `rempire-api` (ASP.NET Core → Railway, skeleton for now). Supersedes the
    monorepo preference in the master build prompt.
 2. **Russian only** — source questionnaire is already Russian.
-3. **Interactive form**, no backend: tap-choices + few textareas, localStorage
-   autosave, returns answers via native share sheet (WhatsApp/Telegram),
-   clipboard, or prefilled mailto.
+3. **Interactive form**: tap-choices + few textareas, localStorage autosave.
+   Amended same day (Dmitri asked for guaranteed delivery/storage): primary
+   «Отправить Диме» → `/api/submit` → private Vercel Blob store `rempire-qa`
+   + env-gated Telegram/Resend forwarding; share sheet / clipboard / mailto
+   demoted to manual fallbacks. Static export dropped for the API route.
 4. **Brand assets** downloaded from the client Dropbox (2025 tower badge
    identity, Korolev/VodkaBrush fonts).
 

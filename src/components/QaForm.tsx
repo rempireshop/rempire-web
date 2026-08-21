@@ -27,6 +27,9 @@ export default function QaForm() {
   const [hydrated, setHydrated] = useState(false);
   const [canShare, setCanShare] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sendState, setSendState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -47,6 +50,8 @@ export default function QaForm() {
     } catch {
       // ignore
     }
+    // изменил ответ после отправки — можно отправить заново
+    setSendState((s) => (s === "sent" ? "idle" : s));
   }, [answers, hydrated]);
 
   const numbered = useMemo(() => {
@@ -103,6 +108,27 @@ export default function QaForm() {
     }
     lines.push(`Отвечено: ${answeredCount} из ${TOTAL_QUESTIONS}`);
     return lines.join("\n");
+  };
+
+  const handleSubmit = async () => {
+    if (sendState === "sending") return;
+    setSendState("sending");
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          answers,
+          summary: buildSummary(),
+          answered: answeredCount,
+          total: TOTAL_QUESTIONS,
+        }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setSendState("sent");
+    } catch {
+      setSendState("error");
+    }
   };
 
   const handleShare = async () => {
@@ -301,16 +327,44 @@ export default function QaForm() {
             Готово?
           </h2>
           <p className="mt-3 leading-relaxed">
-            Нажми «Поделиться» и выбери WhatsApp или Telegram — ответы улетят
-            Диме одним сообщением. Неотвеченные вопросы уйдут с прочерком, это
-            нормально.
+            Одна кнопка — и ответы сразу придут Диме. Неотвеченные вопросы
+            уйдут с прочерком, это нормально.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={sendState === "sending" || sendState === "sent"}
+              className="min-h-14 w-full rounded bg-paper px-6 py-3 font-display text-lg font-bold uppercase tracking-[0.15em] text-ink transition-opacity hover:opacity-85 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper sm:w-auto sm:min-w-72"
+            >
+              {sendState === "sending"
+                ? "Отправляю…"
+                : sendState === "sent"
+                  ? "Отправлено ✓"
+                  : "Отправить Диме"}
+            </button>
+            {sendState === "sent" && (
+              <p className="mt-3 text-sm text-paper/80">
+                Ответы у Димы. Спасибо! Если что-то вспомнишь — измени ответ и
+                нажми ещё раз.
+              </p>
+            )}
+            {sendState === "error" && (
+              <p className="mt-3 text-sm text-paper/80">
+                Не получилось отправить — проверь интернет и попробуй ещё раз,
+                или отправь через WhatsApp кнопкой ниже.
+              </p>
+            )}
+          </div>
+          <p className="mt-6 text-sm uppercase tracking-widest text-paper/60">
+            Продублировать по-другому
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
             {canShare && (
               <button
                 type="button"
                 onClick={handleShare}
-                className="min-h-12 rounded bg-paper px-6 py-3 font-display text-base font-bold uppercase tracking-[0.15em] text-ink transition-opacity hover:opacity-85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper"
+                className="min-h-12 rounded border-2 border-paper px-6 py-3 font-display text-base font-bold uppercase tracking-[0.15em] transition-colors hover:bg-paper/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper"
               >
                 Поделиться
               </button>

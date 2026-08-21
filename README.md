@@ -12,7 +12,7 @@ Project brief and master prompts live in the `Rempire` docs folder
 
 | Concern | Choice |
 |---|---|
-| Framework | Next.js 15 App Router, static export (`output: "export"`) — remove the export flag when the real storefront needs a server |
+| Framework | Next.js 15 App Router, serverful on Vercel (static export dropped 2026-08-21 for `/api/submit`) |
 | Language | TypeScript |
 | Styling | Tailwind CSS 4, tokens in `src/app/globals.css` |
 | Fonts | Korolev Bold, self-hosted from `public/fonts` |
@@ -29,12 +29,33 @@ bun run typecheck
 ## Routes
 
 ```
-/      → client redirect to /qa/
-/qa/   → Russian questionnaire for Renat (22 questions, localStorage autosave)
+/            → client redirect to /qa/
+/qa/         → Russian questionnaire for Renat (26 questions, localStorage autosave)
+/api/submit  → POST: stores answers, forwards to Telegram/email when configured
 ```
 
-Answers never leave the browser until Renat presses share/copy/email —
-there is no backend. The share sheet / mailto target the project owner.
+## Submissions
+
+Primary path: «Отправить Диме» POSTs `{answers, summary, answered, total}` to
+`/api/submit`, which
+
+1. **always** writes JSON to the private Vercel Blob store `rempire-qa`
+   (`store_QvhPeh4dCJ2fVftE`, iad1) under `qa/<timestamp>-<random>.json`;
+2. forwards the summary to Telegram if `TELEGRAM_BOT_TOKEN` +
+   `TELEGRAM_CHAT_ID` are set;
+3. emails the summary via Resend if `RESEND_API_KEY` is set
+   (`RESEND_FROM`/`RESEND_TO` optional, defaults to the project owner).
+
+Forwarding failures never fail the request; Blob storage is the contract.
+Share/copy/mailto remain as manual fallbacks under the primary button.
+
+Read submissions (rw token comes from `.env.local`, created by
+`vercel blob create-store`):
+
+```bash
+bun x vercel@latest blob list --rw-token "$BLOB_READ_WRITE_TOKEN"
+bun x vercel@latest blob get <pathname> --access private --rw-token "$BLOB_READ_WRITE_TOKEN"
+```
 
 ## Staging SEO safety
 
