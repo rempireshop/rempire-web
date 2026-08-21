@@ -65,7 +65,7 @@ woff2). VodkaBrush is not used on the site yet — it lives in `design/` only.
 
 ## Link previews (OG)
 
-`public/og-qa.png` is the 1200×630 card for `/qa`, wired in
+`public/og-qa-v2.png` is the 1200×630 card for `/qa`, wired in
 `src/app/qa/page.tsx`. Rules that keep Telegram/WhatsApp happy (learned on
 FrameForge): absolute image URL via `metadataBase`, explicit
 `og:image:width/height`, the PNG must answer `200 image/png` with no

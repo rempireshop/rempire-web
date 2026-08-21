@@ -11,7 +11,7 @@ interface Answer {
 
 type Answers = Record<string, Answer>;
 
-const STORAGE_KEY = "rempire-qa-v1";
+const STORAGE_KEY = "rempire-qa-v2";
 const MAIL_TO = "dim.novare@gmail.com";
 
 const EMPTY: Answer = { sel: [], text: "" };
@@ -199,7 +199,7 @@ export default function QaForm() {
             кнопка «Поделиться» — и всё улетит Диме.
           </p>
           <p className="mt-5 border-l-2 border-ink pl-4 text-sm uppercase tracking-widest text-fog">
-            22 вопроса · ≈10 минут
+            26 вопросов · ≈10 минут
           </p>
         </section>
 
