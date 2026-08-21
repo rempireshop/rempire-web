@@ -114,7 +114,8 @@ export default function QaForm() {
     if (sendState === "sending") return;
     setSendState("sending");
     try {
-      const res = await fetch("/api/submit", {
+      // trailing slash matches next.config trailingSlash — avoids a 308 hop
+      const res = await fetch("/api/submit/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
