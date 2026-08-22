@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     description: "Вторая часть · ~3 минуты · ответы сохраняются сами",
     images: [
       {
-        url: "/og-qa-v2.png",
+        url: "/og-qa2.png",
         width: 1200,
         height: 630,
-        alt: "REMPIRE — вопросы перед разработкой нового магазина",
+        alt: "REMPIRE — часть 2, ещё шесть вопросов о новом магазине",
       },
     ],
   },
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "REMPIRE — ещё 6 вопросов",
     description: "Вторая часть · ~3 минуты",
-    images: ["/og-qa-v2.png"],
+    images: ["/og-qa2.png"],
   },
 };
 
