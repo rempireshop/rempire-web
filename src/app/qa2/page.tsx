@@ -3,7 +3,7 @@ import QaForm from "@/components/QaForm";
 import { SECTIONS_ROUND2 } from "@/data/questions2";
 
 export const metadata: Metadata = {
-  title: "Ещё 7 вопросов",
+  title: "Ещё 6 вопросов",
   description:
     "Вторая часть вопросов про новый магазин REMPIRE. Примерно 3 минуты, ответы сохраняются автоматически.",
   openGraph: {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     siteName: "REMPIRE",
     locale: "ru_RU",
     url: "/qa2/",
-    title: "REMPIRE — ещё 7 вопросов",
+    title: "REMPIRE — ещё 6 вопросов",
     description: "Вторая часть · ~3 минуты · ответы сохраняются сами",
     images: [
       {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "REMPIRE — ещё 7 вопросов",
+    title: "REMPIRE — ещё 6 вопросов",
     description: "Вторая часть · ~3 минуты",
     images: ["/og-qa-v2.png"],
   },
@@ -36,7 +36,7 @@ export default function Qa2Page() {
       sections={SECTIONS_ROUND2}
       storageKey="rempire-qa-round2"
       round="2"
-      lead="Спасибо за ответы — они очень помогли. Осталось несколько уточнений: без них можно начать, но потом придётся переделывать. Это быстро."
+      lead="Спасибо за ответы — они очень помогли. Мы уже изучили твой магазин и многое выяснили сами. Осталось шесть вещей, которые можешь знать только ты. Это быстро."
       note="Отвечай коротко и своими словами, можно пропускать. Ответы сохраняются сами. В конце одна кнопка — и всё улетит Диме."
     />
   );
