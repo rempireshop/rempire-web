@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     answers?: unknown;
     answered?: unknown;
     total?: unknown;
+    round?: unknown;
   };
   try {
     body = JSON.parse(raw);
@@ -42,10 +43,17 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
+  // раунд опроса: только цифры/буквы, иначе не пускаем в имя файла
+  const round =
+    typeof body.round === "string" && /^[a-z0-9-]{1,12}$/i.test(body.round)
+      ? body.round
+      : "1";
+
   const receivedAt = new Date();
   const record = JSON.stringify(
     {
       receivedAt: receivedAt.toISOString(),
+      round,
       answered: body.answered,
       total: body.total,
       summary,
@@ -58,7 +66,7 @@ export async function POST(req: Request) {
   let stored = false;
   try {
     const stamp = receivedAt.toISOString().replace(/[:.]/g, "-");
-    await put(`qa/${stamp}.json`, record, {
+    await put(`qa/round${round}-${stamp}.json`, record, {
       access: "private", // store rempire-qa is private — reads require auth
       addRandomSuffix: true,
       contentType: "application/json",

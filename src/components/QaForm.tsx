@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Tower from "@/components/Tower";
-import { SECTIONS, TOTAL_QUESTIONS, type Question } from "@/data/questions";
+import {
+  SECTIONS as ROUND1_SECTIONS,
+  type Question,
+  type Section,
+} from "@/data/questions";
 
 interface Answer {
   sel: string[];
@@ -11,10 +15,32 @@ interface Answer {
 
 type Answers = Record<string, Answer>;
 
-const STORAGE_KEY = "rempire-qa-v2";
 const MAIL_TO = "dim.novare@gmail.com";
 
+export interface QaFormProps {
+  /** набор вопросов; по умолчанию — первый раунд */
+  sections?: Section[];
+  /** ключ localStorage — свой у каждого раунда, иначе ответы смешаются */
+  storageKey?: string;
+  /** метка раунда в письме/Telegram и в имени файла */
+  round?: string;
+  /** вводный текст */
+  lead?: string;
+  /** подпись под вводным текстом */
+  note?: string;
+}
+
 const EMPTY: Answer = { sel: [], text: "" };
+
+/** русское склонение: 1 вопрос, 2 вопроса, 5 вопросов, 11 вопросов */
+function plural(n: number, one: string, few: string, many: string): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 14) return many;
+  const mod10 = n % 10;
+  if (mod10 === 1) return one;
+  if (mod10 >= 2 && mod10 <= 4) return few;
+  return many;
+}
 
 function isAnswered(q: Question, a: Answer | undefined): boolean {
   if (!a) return false;
@@ -22,7 +48,21 @@ function isAnswered(q: Question, a: Answer | undefined): boolean {
   return a.sel.length > 0 || a.text.trim().length > 0;
 }
 
-export default function QaForm() {
+export default function QaForm({
+  sections = ROUND1_SECTIONS,
+  storageKey = "rempire-qa-v2",
+  round = "1",
+  lead = "Мы переносим rempireshop.com со Shopify на собственную платформу — быстрее, без ежемесячной аренды и с админкой, собранной под то, как ты реально работаешь. Чтобы построить правильно, ответь на вопросы ниже.",
+  note = "Отвечай коротко и своими словами, можно пропускать. Ответы сохраняются сами — можно закрыть и вернуться позже. В конце одна кнопка — и всё улетит Диме.",
+}: QaFormProps) {
+  const SECTIONS = sections;
+  const TOTAL_QUESTIONS = useMemo(
+    () => sections.reduce((n, s) => n + s.questions.length, 0),
+    [sections],
+  );
+  const STORAGE_KEY = storageKey;
+  const minutes = Math.max(3, Math.round(TOTAL_QUESTIONS * 0.4));
+
   const [answers, setAnswers] = useState<Answers>({});
   const [hydrated, setHydrated] = useState(false);
   const [canShare, setCanShare] = useState(false);
@@ -52,21 +92,21 @@ export default function QaForm() {
     }
     // изменил ответ после отправки — можно отправить заново
     setSendState((s) => (s === "sent" ? "idle" : s));
-  }, [answers, hydrated]);
+  }, [answers, hydrated, STORAGE_KEY]);
 
   const numbered = useMemo(() => {
     const map = new Map<string, number>();
     let n = 0;
     for (const s of SECTIONS) for (const q of s.questions) map.set(q.id, ++n);
     return map;
-  }, []);
+  }, [SECTIONS]);
 
   const answeredCount = useMemo(() => {
     let n = 0;
     for (const s of SECTIONS)
       for (const q of s.questions) if (isAnswered(q, answers[q.id])) n++;
     return n;
-  }, [answers]);
+  }, [answers, SECTIONS]);
 
   const get = (id: string): Answer => answers[id] ?? EMPTY;
 
@@ -93,7 +133,12 @@ export default function QaForm() {
   };
 
   const buildSummary = (): string => {
-    const lines: string[] = ["REMPIRE — ответы на вопросы", ""];
+    const lines: string[] = [
+      round === "1"
+        ? "REMPIRE — ответы на вопросы"
+        : `REMPIRE — ответы на вопросы (часть ${round})`,
+      "",
+    ];
     for (const s of SECTIONS) {
       lines.push(`${s.letter}. ${s.title.toUpperCase()}`);
       for (const q of s.questions) {
@@ -123,6 +168,7 @@ export default function QaForm() {
           summary: buildSummary(),
           answered: answeredCount,
           total: TOTAL_QUESTIONS,
+          round,
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
@@ -214,19 +260,12 @@ export default function QaForm() {
           <p className="mt-2 font-display text-base uppercase tracking-[0.3em] text-fog">
             Новый интернет-магазин
           </p>
-          <p className="mt-6 text-lg leading-relaxed">
-            Мы переносим rempireshop.com со Shopify на собственную платформу —
-            быстрее, без ежемесячной аренды и с админкой, собранной под то, как
-            ты реально работаешь. Чтобы построить правильно, ответь на вопросы
-            ниже.
-          </p>
-          <p className="mt-3 text-base leading-relaxed text-fog">
-            Отвечай коротко и своими словами, можно пропускать. Ответы
-            сохраняются сами — можно закрыть и вернуться позже. В конце одна
-            кнопка «Поделиться» — и всё улетит Диме.
-          </p>
+          <p className="mt-6 text-lg leading-relaxed">{lead}</p>
+          <p className="mt-3 text-base leading-relaxed text-fog">{note}</p>
           <p className="mt-5 border-l-2 border-ink pl-4 text-sm uppercase tracking-widest text-fog">
-            26 вопросов · ≈10 минут
+            {TOTAL_QUESTIONS}{" "}
+            {plural(TOTAL_QUESTIONS, "вопрос", "вопроса", "вопросов")} · ≈
+            {minutes} {plural(minutes, "минута", "минуты", "минут")}
           </p>
         </section>
 
