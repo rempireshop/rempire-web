@@ -55,6 +55,9 @@ export default function DemoHub() {
   const towerRef = useRef<TowerAnimatedHandle>(null);
   const [playing, setPlaying] = useState<number | null>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  // герой: ролики Рената из Instagram по кругу, как в направлении З
+  const [heroIdx, setHeroIdx] = useState(0);
+  const heroRef = useRef<HTMLVideoElement | null>(null);
 
   const toggleVideo = (i: number) => {
     videoRefs.current.forEach((v, j) => {
@@ -80,16 +83,18 @@ export default function DemoHub() {
       {/* hero: их собственное видео */}
       <section data-fb="Видео-обложка" className="relative overflow-hidden bg-ink">
         <video
+          ref={heroRef}
+          key={heroIdx}
           className="h-[52svh] max-h-[440px] w-full object-cover opacity-80 [filter:grayscale(1)_contrast(1.05)] motion-reduce:hidden"
-          src="/media/hero-720p.mp4"
-          poster="/media/hero-poster.jpg"
+          src={OWNER_VIDEOS[heroIdx].src}
+          poster={OWNER_VIDEOS[heroIdx].poster}
           autoPlay
           muted
-          loop
           playsInline
+          onEnded={() => setHeroIdx((i) => (i + 1) % OWNER_VIDEOS.length)}
         />
         <img
-          src="/media/hero-poster.jpg"
+          src={OWNER_VIDEOS[0].poster}
           alt=""
           className="hidden h-[52svh] max-h-[440px] w-full object-cover opacity-80 [filter:grayscale(1)] motion-reduce:block"
         />
