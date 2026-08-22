@@ -1,5 +1,6 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
+import { forwardEmail, forwardTelegram } from "@/lib/notify";
 
 /**
  * Questionnaire submissions.
@@ -13,7 +14,6 @@ import { NextResponse } from "next/server";
  */
 
 const MAX_BYTES = 100_000;
-const TELEGRAM_CHUNK = 3500; // API hard limit is 4096 chars per message
 
 export async function POST(req: Request) {
   let raw: string;
@@ -77,64 +77,14 @@ export async function POST(req: Request) {
   }
 
   const telegram = await forwardTelegram(summary);
-  const email = await forwardEmail(summary, receivedAt);
+  const email = await forwardEmail(
+    `REMPIRE — ответы Рената (${receivedAt.toISOString().slice(0, 10)})`,
+    summary,
+  );
 
   if (!stored && !telegram && !email) {
     // nothing durable happened — let the client fall back to share/copy
     return NextResponse.json({ ok: false }, { status: 502 });
   }
   return NextResponse.json({ ok: true, stored, telegram, email });
-}
-
-async function forwardTelegram(summary: string): Promise<boolean> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return false;
-  try {
-    const chunks = summary.match(
-      new RegExp(`[\\s\\S]{1,${TELEGRAM_CHUNK}}`, "g"),
-    ) ?? [summary];
-    for (const text of chunks) {
-      const res = await fetch(
-        `https://api.telegram.org/bot${token}/sendMessage`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatId, text }),
-        },
-      );
-      if (!res.ok) return false;
-    }
-    return true;
-  } catch (err) {
-    console.error("telegram forward failed", err);
-    return false;
-  }
-}
-
-async function forwardEmail(
-  summary: string,
-  receivedAt: Date,
-): Promise<boolean> {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return false;
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM ?? "REMPIRE QA <onboarding@resend.dev>",
-        to: [process.env.RESEND_TO ?? "dim.novare@gmail.com"],
-        subject: `REMPIRE — ответы Рената (${receivedAt.toISOString().slice(0, 10)})`,
-        text: summary,
-      }),
-    });
-    return res.ok;
-  } catch (err) {
-    console.error("email forward failed", err);
-    return false;
-  }
 }

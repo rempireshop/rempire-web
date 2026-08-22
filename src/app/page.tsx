@@ -4,12 +4,12 @@ import { useEffect } from "react";
 import Tower from "@/components/Tower";
 
 /**
- * The root has nothing to show during the questionnaire phase — it forwards
- * to /qa. Client-side because static export cannot emit server redirects.
+ * The root forwards to the current centre of gravity: the /demo review hub
+ * (it links onward to the questionnaires and prototypes).
  */
 export default function Home() {
   useEffect(() => {
-    window.location.replace("/qa/");
+    window.location.replace("/demo/");
   }, []);
 
   return (

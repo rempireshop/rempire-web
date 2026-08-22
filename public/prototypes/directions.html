@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&amp;family=Golos+Text:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<script src="image-slot.js"></script>
+<style>
+html,body{margin:0;padding:0;background:#e9e6dd;color:#1c1a00}
+a{color:#1c1a00;text-decoration:none}
+a:hover{opacity:.6}
+button{font-family:inherit;transition:opacity .15s ease}
+button:hover{opacity:.72}
+summary:hover{opacity:.7}
+#frame section{animation:scrIn .42s cubic-bezier(.2,.8,.2,1) both}
+@keyframes scrIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes twdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes twfill{from{opacity:0}to{opacity:1}}
+@keyframes twfillop{from{fill-opacity:0}to{fill-opacity:1}}
+@keyframes twout{to{opacity:0;visibility:hidden}}
+@keyframes spread{from{letter-spacing:.08em;opacity:0}to{letter-spacing:.42em;opacity:1}}
+@keyframes slideIn{from{transform:translateX(var(--sx))}to{transform:none}}
+@keyframes toastUp{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes fadeIn{from{opacity:0}}
+[data-gal]{scrollbar-width:none}
+[data-gal]::-webkit-scrollbar{display:none}
+@keyframes tick{to{transform:translateX(-50%)}}
+.twlogo{transition:transform .18s ease;color:#1c1a00}
+.twlogo:hover{transform:translateX(2px)}
+.twlogo .tw-band{animation:twIdle 8s ease-in-out infinite}
+@keyframes twIdle{0%,91%,98%,100%{transform:translateX(0)}94%{transform:translateX(-13px)}}
+.twlogo .tw-draw{opacity:0;stroke:currentColor;stroke-width:7;fill:none;stroke-dasharray:1}
+.tw-loading .tw-draw{opacity:1;animation:twDrawLoop .62s cubic-bezier(.45,0,.25,1) both}
+.tw-loading .tw-rest,.tw-loading .tw-band{opacity:0;animation:twfill .22s ease .6s forwards}
+@keyframes twDrawLoop{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@font-face{font-family:'Korolev Bold';src:url('public/fonts/KorolevBold.otf') format('opentype');font-display:swap}
+::selection{background:#1c1a00;color:#fdfcf9}
+</style>
+</helmet>
+<div style="min-height:100vh;font-family:'Golos Text',system-ui,sans-serif;font-size:14px;line-height:1.5;color:#1c1a00">
+<sc-if value="{{ introOn }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ skipIntro }}" title="Пропустить" style="position:fixed;inset:0;z-index:50;background:#fdfcf9;display:flex;flex-direction:column;gap:20px;align-items:center;justify-content:center;cursor:pointer;animation:twout .5s ease 2.45s both">
+  <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:min(44vh,290px);width:auto;overflow:visible">
+    <path fill="#1c1a00" pathLength="1" style="stroke-dasharray:1;fill-opacity:0;stroke:#1c1a00;stroke-width:1.7;animation:twdraw 1.3s cubic-bezier(.45,0,.25,1) .15s both,twfillop .65s ease 1.25s both" d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path>
+  </svg>
+  <div style="font-family:Oswald;font-weight:600;font-size:16px;color:#1c1a00;animation:spread .8s cubic-bezier(.2,.8,.2,1) 1.6s both">REMPIRE</div>
+  <div style="font-size:10px;letter-spacing:.16em;color:rgba(28,26,0,.45);animation:twfill .5s ease 1.95s both">ПРОФЕССИОНАЛЬНЫЙ УХОД · ТАЛЛИНН · EST 2018</div>
+</div>
+</sc-if>
+<header data-screen-label="Shell" style="position:sticky;top:0;z-index:20;background:#e9e6dd;border-bottom:1px solid rgba(28,26,0,.25);padding:10px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px">
+  <span style="font-family:Oswald;font-weight:600;font-size:13px;letter-spacing:.22em">REMPIRE · НАПРАВЛЕНИЯ</span>
+  <span style="display:inline-flex;border:1px solid #1c1a00">
+    <button onClick="{{ setDirA }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ aBg }};color:{{ aFg }}">А — Белый зал</button>
+    <button onClick="{{ setDirB }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ bBg }};color:{{ bFg }}">Б — Башня</button>
+    <button onClick="{{ setDirC }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ cBg }};color:{{ cFg }}">В — Синтез</button>
+    <button onClick="{{ setDirD }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ gBg }};color:{{ gFg }}">Г — Редакция /qa</button>
+    <button onClick="{{ setDirE }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ eBg }};color:{{ eFg }}">Д — Урбан (архив)</button>
+    <button onClick="{{ setDirF }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ lvBg }};color:{{ lvFg }}">Е — Lovable</button>
+    <button onClick="{{ setDirG }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ fnBg }};color:{{ fnFg }}">Ж — Opus×Fable ★</button>
+    <button onClick="{{ setDirH }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ zBg }};color:{{ zFg }}">З — Видео</button>
+  </span>
+  <span style="display:inline-flex;border:1px solid #1c1a00">
+    <button onClick="{{ setPhone }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;white-space:nowrap;background:{{ pBg }};color:{{ pFg }}">Телефон</button>
+    <button onClick="{{ setDesk }}" style="border:none;cursor:pointer;padding:7px 14px;font-size:12px;white-space:nowrap;background:{{ dBg }};color:{{ dFg }}">Компьютер</button>
+  </span>
+  <button onClick="{{ replayIntro }}" style="border:1px solid rgba(28,26,0,.4);background:transparent;color:#1c1a00;cursor:pointer;padding:7px 12px;font-size:11px;letter-spacing:.08em;white-space:nowrap">▶ ИНТРО</button>
+  <span style="display:inline-flex;gap:4px;align-items:center;font-size:12px">
+    <sc-for list="{{ screens }}" as="s" hint-placeholder-count="7">
+      <button onClick="{{ s.go }}" style="border:none;background:transparent;cursor:{{ s.cur }};padding:6px 8px;font-size:12px;color:#1c1a00;opacity:{{ s.op }};border-bottom:{{ s.bb }}">{{ s.name }}</button>
+    </sc-for>
+  </span>
+</header>
+<p style="max-width:1280px;margin:14px auto 0;padding:0 20px;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">{{ dirNote }}</p>
+<main style="display:flex;justify-content:center;padding:18px 12px 64px">
+  <div id="frame" style="width:{{ frameW }};max-width:100%;background:#fdfcf9;border:1px solid rgba(28,26,0,.35);box-shadow:0 18px 50px rgba(28,26,0,.12);container-type:inline-size;transition:width .25s ease;position:relative">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+      <path id="twp2" fill="currentColor" d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path>
+      <path id="twp2s" fill="none" pathLength="1" d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path>
+      <clipPath id="twb2"><path d="M335,242H502V304H335Z"></path></clipPath>
+      <clipPath id="twr2"><path clip-rule="evenodd" d="M270,150H580V600H270Z M337,244H500V302H337Z"></path></clipPath>
+    </defs></svg>
+
+    <sc-if value="{{ isA }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="A Главная">
+      <div style="background:#1c1a00;color:#fdfcf9;text-align:center;font-size:11px;padding:7px 12px;letter-spacing:.04em">Бесплатная доставка: EE, LV, LT, FI — от 50 € · Европа — от 200 €</div>
+      <sc-if value="{{ langNote }}" hint-placeholder-val="{{ false }}"><div style="background:#edeae1;text-align:center;font-size:11px;padding:6px 12px;color:rgba(28,26,0,.75)">Версия {{ langPicked }} заполняется переводами из админки — ассистент переводит страницы и карточки, структура одинаковая.</div></sc-if>
+      <div style="display:flex;align-items:center;gap:12px 16px;padding:14px 4.5cqi;border-bottom:1px solid rgba(28,26,0,.15);flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:10px;flex-shrink:0">
+          <svg viewBox="292.24 171.22 265.18 409.8" class="{{ twCls }}" role="img" aria-label="REMPIRE" style="height:42px;width:auto;display:block;overflow:visible"><g class="tw-rest" clip-path="url(#twr2)"><use href="#twp2"></use></g><g class="tw-band" clip-path="url(#twb2)"><use href="#twp2"></use></g><use href="#twp2s" class="tw-draw"></use></svg>
+          <sc-if value="{{ dWm }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Korolev Bold',Oswald,sans-serif;font-weight:700;font-size:16px;letter-spacing:.24em">REMPIRE</span></sc-if>
+          <sc-if value="{{ ndWm }}" hint-placeholder-val="{{ true }}"><span style="font-family:Oswald;font-weight:600;font-size:14px;letter-spacing:.3em">REMPIRE</span></sc-if>
+        </span>
+        <input onFocus="{{ goSearch }}" placeholder="Поиск: шампунь, Davines, воск…" style="order:{{ shOrd }};flex:{{ shF }};min-width:120px;border:none;border-bottom:1px solid rgba(28,26,0,.3);background:transparent;padding:6px 2px;font:inherit;font-size:13px;outline:none">
+        <span style="order:{{ clOrd }};margin-left:auto;display:inline-flex;gap:12px;font-size:12px;flex-shrink:0;align-items:center"><span style="display:inline-flex;gap:6px"><sc-for list="{{ langs }}" as="lg" hint-placeholder-count="3"><button onClick="{{ lg.go }}" title="{{ lg.t }}" aria-label="{{ lg.t }}" style="border:none;background:transparent;cursor:pointer;padding:7px 4px;opacity:{{ lg.op }};border-bottom:{{ lg.bb }};display:inline-flex"><span style="width:19px;height:13px;display:block;background-image:url('{{ lg.f }}');background-size:cover;background-position:center;border:1px solid rgba(28,26,0,.15)"></span></button></sc-for></span><button onClick="{{ goAccount }}" title="Кабинет" aria-label="Кабинет" style="border:none;background:transparent;cursor:pointer;padding:7px;color:#1c1a00;display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"></path></svg></button><button onClick="{{ openCart }}" title="Корзина" aria-label="Корзина" style="border:none;background:transparent;cursor:pointer;padding:7px;color:#1c1a00;display:flex;position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px"><path d="M5.5 8.5h13l-.9 11a1.8 1.8 0 0 1-1.8 1.6H8.2a1.8 1.8 0 0 1-1.8-1.6z"></path><path d="M8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5"></path></svg><span style="position:absolute;top:-4px;right:-7px;background:#1c1a00;color:#fdfcf9;font-size:9px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 2px">{{ cartN }}</span></button></span>
+      </div>
+      <nav style="display:flex;gap:22px;padding:12px 4.5cqi;border-bottom:1px solid rgba(28,26,0,.15);overflow-x:auto;white-space:nowrap;font-size:12.5px">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6"><a href="#" onClick="{{ goCat }}" style="letter-spacing:.02em">{{ c.name }}</a></sc-for>
+      </nav>
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ hStage }}" hint-placeholder-val="{{ false }}">
+      <section style="position:relative;overflow:hidden;border-bottom:1px solid rgba(28,26,0,.15);background:#1c1a00;height:58cqi;max-height:560px;min-height:300px">
+        <video data-vid autoPlay="{{ true }}" muted="{{ vidMut }}" playsInline="{{ true }}" onEnded="{{ vidEnd }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);opacity:.88"></video>
+        <div style="position:absolute;left:0;bottom:0;background:#1c1a00;color:#fdfcf9;padding:16px 22px;max-width:82%">
+          <div style="font-family:Oswald;font-weight:600;font-size:clamp(20px,4.2cqi,38px);line-height:1.1;text-transform:uppercase;letter-spacing:.04em;text-wrap:balance">Процесс. Результат. Всё, что между ними.</div>
+          <div style="font-size:12.5px;opacity:.75;margin-top:6px">Качественная косметика по дружелюбным ценам · Mardi 1, Таллинн</div>
+        </div>
+        <div style="position:absolute;top:12px;right:12px;display:flex;gap:8px">
+          <sc-for list="{{ vidBtns }}" as="v" hint-placeholder-count="4"><button onClick="{{ v.go }}" style="min-height:34px;border:{{ v.bd }};background:rgba(28,26,0,.55);color:#fdfcf9;cursor:pointer;padding:0 10px;font-size:10.5px;letter-spacing:.1em">{{ v.n }}</button></sc-for>
+          <button onClick="{{ sndT }}" style="min-height:34px;border:1px solid rgba(253,252,249,.5);background:rgba(28,26,0,.55);color:#fdfcf9;cursor:pointer;padding:0 10px;font-size:10.5px;letter-spacing:.1em">{{ sndL }}</button>
+        </div>
+      </section>
+      <div style="overflow:hidden;border-bottom:1px solid rgba(28,26,0,.15);padding:9px 0">
+        <div style="display:inline-flex;white-space:nowrap;animation:tick 22s linear infinite;font-family:Oswald;font-size:12px;letter-spacing:.24em;color:rgba(28,26,0,.65)">
+          <span style="padding-right:40px">ПРОЦЕСС · РЕЗУЛЬТАТ · ВСЁ МЕЖДУ НИМИ · KEVIN.MURPHY · DAVINES · SYSTEM 4 · PAUL MITCHELL · MARDI 1 · TALLINN · EST 2018 ·</span>
+          <span style="padding-right:40px">ПРОЦЕСС · РЕЗУЛЬТАТ · ВСЁ МЕЖДУ НИМИ · KEVIN.MURPHY · DAVINES · SYSTEM 4 · PAUL MITCHELL · MARDI 1 · TALLINN · EST 2018 ·</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 4.5cqi;border-bottom:1px solid rgba(28,26,0,.15);flex-wrap:wrap">
+        <span style="font-size:11.5px;color:rgba(28,26,0,.6)">4 видео владельца сменяются автоматически по кругу — загружаются в админке (Маркетинг → Медиа), звук по клику, автоплей без звука.</span>
+        <button onClick="{{ goCat }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:11px 20px;font-size:12px;letter-spacing:.1em;cursor:pointer">В КАТАЛОГ</button>
+      </div>
+      </sc-if>
+      <sc-if value="{{ gStage }}" hint-placeholder-val="{{ false }}">
+      <section style="position:relative;overflow:hidden;border-bottom:1px solid rgba(28,26,0,.13);padding:52px 4.5cqi 46px">
+        <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="position:absolute;right:2cqi;top:50%;transform:translateY(-50%);height:86%;color:#1c1a00;opacity:.11;pointer-events:none"><use href="#twp2"></use></svg>
+        <div style="position:relative;max-width:min(100%,27ch)">
+          <div style="font-size:10px;letter-spacing:.26em;color:rgba(28,26,0,.5)">ТАЛЛИНН · MARDI 1 · EST 2018</div>
+          <h1 style="font-weight:500;font-size:clamp(29px,5.4cqi,52px);line-height:1.05;letter-spacing:-.035em;margin:16px 0 14px;text-wrap:balance">Уход, которым мы работаем каждый день</h1>
+          <p style="margin:0;font-size:13.5px;color:rgba(28,26,0,.72);max-width:38ch;text-wrap:pretty">Салонные бренды — Kevin.Murphy, Davines, System 4, Paul Mitchell. Те же средства, что стоят в кресле у мастера.</p>
+          <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
+            <button onClick="{{ goCat }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:13px 24px;font-size:12px;letter-spacing:.1em;cursor:pointer">В КАТАЛОГ</button>
+            <button onClick="{{ goBlog }}" style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;padding:13px 24px;font-size:12px;letter-spacing:.1em;cursor:pointer">ЖУРНАЛ</button>
+          </div>
+        </div>
+      </section>
+      <section style="border-bottom:1px solid rgba(28,26,0,.13)">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(50%,190px),1fr))">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+            <a href="#" onClick="{{ goCat }}" style="display:flex;align-items:baseline;gap:10px;padding:18px 16px;border-right:1px solid rgba(28,26,0,.13);border-bottom:1px solid rgba(28,26,0,.13);transition:background .18s ease" style-hover="background:#f2efe7">
+              <span style="font-size:10px;color:rgba(28,26,0,.4)">{{ c.n }}</span>
+              <span style="font-size:13.5px;flex:1;letter-spacing:-.01em">{{ c.name }}</span>
+              <span style="font-size:12px;opacity:.5">→</span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ fStage }}" hint-placeholder-val="{{ false }}">
+      <section style="position:relative;overflow:hidden;border-bottom:1px solid rgba(28,26,0,.15);padding:42px 4.5cqi 38px">
+        <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="position:absolute;right:3cqi;top:50%;transform:translateY(-50%);height:86%;color:#1c1a00;opacity:.1;pointer-events:none"><use href="#twp2"></use></svg>
+        <div style="position:relative">
+          <div style="font-family:Oswald;font-size:11px;letter-spacing:.26em;color:rgba(28,26,0,.55)">REMPIRE · ТАЛЛИНН · EST 2018</div>
+          <h1 style="font-family:Oswald;font-weight:600;font-size:clamp(26px,5cqi,46px);line-height:1.06;letter-spacing:.02em;margin:12px 0 10px;text-transform:uppercase;text-wrap:balance">Профессиональный уход</h1>
+          <p style="margin:0;font-size:13px;color:rgba(28,26,0,.72);max-width:46ch;text-wrap:pretty">Салонные бренды, которыми команда Rempire работает каждый день — для волос, бороды, лица и тела.</p>
+          <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+            <button onClick="{{ goCat }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:12px 22px;font-size:12px;letter-spacing:.1em;cursor:pointer">В КАТАЛОГ</button>
+          </div>
+        </div>
+      </section>
+      <div style="background:#edeae1;border-bottom:1px solid rgba(28,26,0,.15);padding:10px 4.5cqi;display:flex;gap:8px 26px;flex-wrap:wrap;font-family:Oswald;font-size:11px;letter-spacing:.14em;color:rgba(28,26,0,.75)">
+        <span>ДОСТАВКА 1–3 ДНЯ</span><span>ВОЗВРАТ 14 ДНЕЙ</span><span>MARDI 1 · ТАЛЛИНН</span><span>БЕСПЛАТНО ОТ 50 €</span>
+      </div>
+      </sc-if>
+      <sc-if value="{{ eStage }}" hint-placeholder-val="{{ false }}">
+      <section style="border-bottom:1px solid rgba(28,26,0,.15)">
+        <div style="position:relative;height:52cqi;max-height:500px;background:#edeae1;overflow:hidden">
+          <image-slot id="e-campaign" shape="rect" placeholder="Кампейн-фото: мастер за работой, ч/б"></image-slot>
+          <div style="position:absolute;left:0;bottom:0;background:#1c1a00;color:#fdfcf9;padding:16px 22px;max-width:82%">
+            <div style="font-family:Oswald;font-weight:600;font-size:clamp(22px,4.6cqi,42px);line-height:1.08;text-transform:uppercase;letter-spacing:.04em;text-wrap:balance">Городская косметика для профессионалов</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 4.5cqi;flex-wrap:wrap">
+          <span style="font-family:Oswald;font-size:11px;letter-spacing:.26em;color:rgba(28,26,0,.6)">URBAN · EDITORIAL · TALLINN · EST 2018</span>
+          <button onClick="{{ goCat }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:11px 20px;font-size:12px;letter-spacing:.1em;cursor:pointer">СМОТРЕТЬ КАТАЛОГ</button>
+        </div>
+        <div style="display:flex;gap:28px;overflow-x:auto;padding:10px 4.5cqi 16px;white-space:nowrap;border-top:1px solid rgba(28,26,0,.15)">
+          <sc-for list="{{ brands }}" as="b" hint-placeholder-count="7"><span style="font-family:Oswald;font-weight:600;font-size:19px;letter-spacing:.08em;text-transform:uppercase;color:rgba(28,26,0,.35)">{{ b.name }}</span></sc-for>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ dStage }}" hint-placeholder-val="{{ false }}">
+      <section style="border-bottom:1px solid rgba(28,26,0,.15);padding:48px 4.5cqi 42px;text-align:center">
+        <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" class="twlogo" style="height:64px;width:auto;display:inline-block;overflow:visible"><g class="tw-rest" clip-path="url(#twr2)"><use href="#twp2"></use></g><g class="tw-band" clip-path="url(#twb2)"><use href="#twp2"></use></g></svg>
+        <h1 style="font-family:'Korolev Bold',Oswald,sans-serif;font-weight:700;font-size:clamp(40px,8cqi,74px);letter-spacing:.05em;line-height:1;margin:16px 0 6px">REMPIRE</h1>
+        <div style="font-family:'Korolev Bold',Oswald,sans-serif;font-size:12px;letter-spacing:.5em;color:rgba(28,26,0,.55)">TOWER · EST 2018</div>
+        <div style="width:44px;height:1px;background:#1c1a00;margin:18px auto"></div>
+        <p style="margin:0 auto;font-size:13px;color:rgba(28,26,0,.7);max-width:46ch;text-wrap:pretty">Профессиональный уход — волосы, борода, лицо, тело. Монохромная редакция: тот же язык, что и в самом первом экране проекта.</p>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+          <button onClick="{{ goCat }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:12px 22px;font-size:12px;letter-spacing:.1em;cursor:pointer">В КАТАЛОГ</button>
+          <button onClick="{{ goBlog }}" style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;padding:12px 22px;font-size:12px;letter-spacing:.1em;cursor:pointer">ЖУРНАЛ</button>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ cStage }}" hint-placeholder-val="{{ false }}">
+      <section style="position:relative;overflow:hidden;border-bottom:1px solid rgba(28,26,0,.15);padding:44px 4.5cqi 40px">
+        <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="position:absolute;right:4cqi;top:50%;transform:translateY(-50%);height:90%;color:#1c1a00;opacity:.12;pointer-events:none"><use href="#twp2"></use></svg>
+        <div style="min-width:0;position:relative;max-width:60ch">
+          <div style="font-size:10px;letter-spacing:.3em;color:rgba(28,26,0,.55)">ТАЛЛИНН · EST 2018</div>
+          <h1 style="font-family:Oswald;font-weight:600;font-size:clamp(30px,6cqi,58px);letter-spacing:.12em;margin:10px 0 8px;text-transform:uppercase">REMPIRE</h1>
+          <p style="margin:0;font-size:13px;color:rgba(28,26,0,.7);max-width:44ch;text-wrap:pretty">Профессиональный уход — волосы, борода, лицо, тело. Салонные бренды, которыми работает наша команда.</p>
+          <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
+            <button onClick="{{ goCat }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:12px 22px;font-size:12px;letter-spacing:.1em;cursor:pointer">В КАТАЛОГ</button>
+            <button onClick="{{ goSearch }}" style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;padding:12px 22px;font-size:12px;letter-spacing:.1em;cursor:pointer">ПОИСК</button>
+          </div>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ aPlainHero }}" hint-placeholder-val="{{ true }}">
+      <section style="padding:34px 4.5cqi 8px">
+        <h1 style="font-size:clamp(19px,2.6cqi,26px);font-weight:500;margin:0;letter-spacing:-.01em;text-wrap:pretty">Профессиональный уход — волосы, борода, лицо, тело.</h1>
+        <p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.6)">Салонные бренды, которыми работает команда Rempire в Таллинне.</p>
+      </section>
+      </sc-if>
+      <section style="padding:26px 4.5cqi 34px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #1c1a00;padding-bottom:8px;margin-bottom:18px">
+          <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0">БЕСТСЕЛЛЕРЫ</h2>
+          <button onClick="{{ goCat }}" style="border:none;background:transparent;font-size:12px;border-bottom:1px solid rgba(28,26,0,.4);padding:0;color:#1c1a00;cursor:pointer">Все товары</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:26px 14px">
+          <sc-for list="{{ products }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+              <div style="aspect-ratio:1;background:#fff;border:1px solid rgba(28,26,0,.08);display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:82%;height:82%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12.5px;line-height:1.35">{{ p.name }}</div>
+              <div style="font-size:12.5px;font-weight:600">{{ p.price }}</div>
+              <button onClick="{{ addQuick }}" style="border:none;background:transparent;font-size:11.5px;border-bottom:1px solid rgba(28,26,0,.4);width:max-content;margin-top:2px;padding:0;color:#1c1a00;cursor:pointer">В корзину</button>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <sc-if value="{{ cStage }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#1c1a00;color:#fdfcf9;padding:34px 4.5cqi;margin-bottom:34px">
+        <div style="font-family:Oswald;font-size:11px;letter-spacing:.24em;opacity:.6;margin-bottom:10px">REMPIRE · EST 2018</div>
+        <p style="font-family:Oswald;font-weight:500;font-size:clamp(19px,3cqi,28px);line-height:1.2;margin:0;max-width:24ch;text-transform:uppercase;text-wrap:balance">Косметика, которой работает наша команда</p>
+        <p style="margin:12px 0 0;font-size:13px;opacity:.75;max-width:52ch">Каждый бренд используется мастерами Rempire ежедневно — мы продаём то, чем работаем сами.</p>
+        <a href="#" onClick="{{ goBlog }}" style="display:inline-block;margin-top:16px;color:#fdfcf9;border-bottom:1px solid rgba(253,252,249,.5);font-size:12.5px">Журнал →</a>
+      </section>
+      </sc-if>
+      <section style="padding:0 4.5cqi 34px">
+        <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 4px;border-bottom:1px solid #1c1a00;padding-bottom:8px">КАТЕГОРИИ</h2>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+            <a href="#" onClick="{{ goCat }}" style="display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid rgba(28,26,0,.15);font-size:14px"><span>{{ c.name }}</span><span style="font-size:12px;color:rgba(28,26,0,.5)">→</span></a>
+          </sc-for>
+        </div>
+      </section>
+      <section style="padding:0 4.5cqi 34px">
+        <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 14px">БРЕНДЫ</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border-left:1px solid rgba(28,26,0,.14);border-top:1px solid rgba(28,26,0,.14)">
+          <sc-for list="{{ brandLogos }}" as="b" hint-placeholder-count="7">
+            <a href="#" onClick="{{ goCat }}" style="display:flex;flex-direction:column;border-right:1px solid rgba(28,26,0,.14);border-bottom:1px solid rgba(28,26,0,.14)">
+              <span style="display:block;aspect-ratio:3/2;background:#fff;background-image:url('{{ b.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;box-shadow:inset 0 0 0 8px #fff;filter:grayscale(1);transition:filter .25s ease" style-hover="filter:grayscale(0)"></span>
+              <span style="padding:8px 10px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(28,26,0,.7)">{{ b.n }}</span>
+            </a>
+          </sc-for>
+          <a href="#" onClick="{{ goCat }}" style="display:flex;align-items:center;justify-content:center;min-height:96px;border-right:1px solid rgba(28,26,0,.14);border-bottom:1px solid rgba(28,26,0,.14);font-size:11px;letter-spacing:.14em">ВСЕ БРЕНДЫ →</a>
+        </div>
+      </section>
+      <section style="padding:0 4.5cqi 38px;display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap">
+        <div style="width:150px;flex-shrink:0"><image-slot id="a-journal" shape="rect" style="width:150px;height:110px" placeholder="Фото для статьи"></image-slot></div>
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:10px;letter-spacing:.16em;color:rgba(28,26,0,.55)">ЖУРНАЛ</div>
+          <h3 style="margin:6px 0 8px;font-size:16px;font-weight:500;text-wrap:pretty">Как подобрать шампунь System 4 по типу кожи головы</h3>
+          <a href="#" onClick="{{ goBlog }}" style="font-size:12px;border-bottom:1px solid rgba(28,26,0,.4)">Читать</a>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ isCat }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:22px 4.5cqi 6px">
+        <div style="font-size:11px;color:rgba(28,26,0,.55)"><a href="#" onClick="{{ goHome }}">Главная</a> / Уход за волосами</div>
+        <h1 style="font-size:clamp(20px,2.8cqi,28px);font-weight:500;margin:14px 0 8px">Уход за волосами</h1>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.7);max-width:64ch;text-wrap:pretty">Профессиональные шампуни, кондиционеры, маски и уходовые средства — Kevin.Murphy, Davines, System 4 и Paul Mitchell. Те же продукты, которыми команда Rempire работает в салоне.</p>
+      </section>
+      <section style="padding:14px 4.5cqi 34px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid rgba(28,26,0,.2);border-bottom:1px solid rgba(28,26,0,.2);padding:10px 0;margin-bottom:20px;flex-wrap:wrap">
+          <button onClick="{{ openFilter }}" style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;padding:7px 14px;font-size:12px;cursor:pointer">Фильтры</button>
+          <span style="font-size:12px;color:rgba(28,26,0,.55)">{{ catCount }} товаров</span>
+          <label style="font-size:12px;display:inline-flex;gap:8px;align-items:center;color:rgba(28,26,0,.7)">Сортировка
+            <select style="border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;font:inherit;font-size:12px;padding:3px 2px"><option>Популярные</option><option>Цена ↑</option><option>Цена ↓</option><option>Новинки</option></select>
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:26px 14px">
+          <sc-for list="{{ catProducts }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+              <div style="aspect-ratio:1;background:#fff;border:1px solid rgba(28,26,0,.08);display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:82%;height:82%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12.5px;line-height:1.35">{{ p.name }}</div>
+              <div style="font-size:12.5px;font-weight:600">{{ p.price }}</div>
+              <button onClick="{{ addQuick }}" style="border:none;background:transparent;font-size:11.5px;border-bottom:1px solid rgba(28,26,0,.4);width:max-content;margin-top:2px;padding:0;color:#1c1a00;cursor:pointer">В корзину</button>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:28px"><button style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;padding:10px 22px;font-size:12px;letter-spacing:.06em;cursor:pointer">ПОКАЗАТЬ ЕЩЁ 12</button></div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ isProd }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:20px 4.5cqi 0;font-size:11px;color:rgba(28,26,0,.55)"><a href="#" onClick="{{ goHome }}">Главная</a> / <a href="#" onClick="{{ goCat }}">Уход за волосами</a> / Kevin.Murphy</section>
+      <section style="padding:16px 4.5cqi 30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:30px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div data-gal onScroll="{{ galScroll }}" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;aspect-ratio:1;background:#fff;border:1px solid rgba(28,26,0,.1)">
+            <div style="flex:0 0 100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative"><span aria-hidden="true" style="position:absolute;right:12px;bottom:12px;width:16px;height:25px;background:#1c1a00;opacity:.14;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><img src="https://rempireshop.com/cdn/shop/files/photo-6.jpg?v=1688742837&amp;width=1445" alt="KEVIN.MURPHY REPAIR-ME.WASH — флакон" style="max-width:80%;max-height:80%;object-fit:contain;mix-blend-mode:multiply"></div>
+            <div style="flex:0 0 100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative"><span aria-hidden="true" style="position:absolute;right:12px;bottom:12px;width:16px;height:25px;background:#1c1a00;opacity:.14;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><img src="https://rempireshop.com/cdn/shop/files/photo-5.jpg?v=1688742837&amp;width=1445" alt="KEVIN.MURPHY REPAIR-ME.WASH — вид сзади" style="max-width:80%;max-height:80%;object-fit:contain;mix-blend-mode:multiply"></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button onClick="{{ galTo0 }}" aria-label="Фото 1" style="width:58px;height:58px;background:#fff;border:{{ g0b }};display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0"><img src="https://rempireshop.com/cdn/shop/files/photo-6.jpg?v=1688742837&amp;width=533" alt="" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></button>
+            <button onClick="{{ galTo1 }}" aria-label="Фото 2" style="width:58px;height:58px;background:#fff;border:{{ g1b }};display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0"><img src="https://rempireshop.com/cdn/shop/files/photo-5.jpg?v=1688742837&amp;width=533" alt="" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></button>
+            <span style="font-size:10.5px;color:rgba(28,26,0,.45)">{{ galHint }}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <div style="font-size:10px;letter-spacing:.16em;color:rgba(28,26,0,.55)">KEVIN.MURPHY</div>
+            <h1 style="font-size:clamp(18px,2.4cqi,24px);font-weight:500;margin:6px 0 4px;line-height:1.25">REPAIR-ME.WASH — восстанавливающий шампунь</h1>
+            <div style="font-size:12.5px;color:rgba(28,26,0,.65)">Для сухих и повреждённых волос · протеины и аминокислоты</div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:20px;font-weight:600">{{ prodPrice }}</span><span style="font-size:11px;color:rgba(28,26,0,.55)">Налоги включены · В наличии</span></div>
+          <div>
+            <div style="font-size:11px;letter-spacing:.12em;color:rgba(28,26,0,.55);margin-bottom:8px">ОБЪЁМ</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="2"><button onClick="{{ s.go }}" style="border:1px solid #1c1a00;cursor:pointer;padding:9px 16px;font-size:12.5px;background:{{ s.bg }};color:{{ s.fg }}">{{ s.label }}</button></sc-for>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:stretch">
+            <span style="display:inline-flex;border:1px solid rgba(28,26,0,.4)">
+              <button onClick="{{ decQ }}" aria-label="Меньше" style="border:none;background:transparent;width:36px;font-size:15px;cursor:pointer;color:#1c1a00">−</button>
+              <span style="display:inline-flex;align-items:center;min-width:26px;justify-content:center;font-size:13px">{{ qty }}</span>
+              <button onClick="{{ incQ }}" aria-label="Больше" style="border:none;background:transparent;width:36px;font-size:15px;cursor:pointer;color:#1c1a00">+</button>
+            </span>
+            <button onClick="{{ addToCart }}" style="flex:1;border:none;background:#1c1a00;color:#fdfcf9;padding:13px;font-size:12.5px;letter-spacing:.1em;cursor:pointer">В КОРЗИНУ</button>
+          </div>
+          <div style="font-size:12px;color:rgba(28,26,0,.7);border-top:1px solid rgba(28,26,0,.15);padding-top:12px">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · бесплатно от 50 € (EE, LV, LT, FI)</div>
+          <div style="display:flex;flex-direction:column">
+            <details open style="border-top:1px solid rgba(28,26,0,.15);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Описание</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">Восстанавливающий шампунь-уход с протеинами и аминокислотами. Укрепляет волосы от корней до кончиков, мягко очищает и возвращает сухим, повреждённым и пористым волосам плотность и гладкость.</p></details>
+            <details style="border-top:1px solid rgba(28,26,0,.15);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Преимущества</summary><ul style="margin:8px 0 0;padding-left:16px;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.7"><li>Протеины и энзимы в рабочей концентрации</li><li>Питает и восстанавливает структуру волоса</li><li>Волосы более гладкие и плотные</li><li>Даёт необходимое увлажнение</li><li>Для всех типов волос, которым нужно восстановление</li><li>Без сульфатов и парабенов · cruelty-free</li></ul></details>
+            <details style="border-top:1px solid rgba(28,26,0,.15);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Применение</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">Нанесите на влажные волосы, мягко помассируйте волосы и кожу головы, смойте. Далее используйте REPAIR-ME.RINSE. Подходит для ежедневного применения.</p></details>
+            <details style="border-top:1px solid rgba(28,26,0,.15);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Состав и предупреждения</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">Полный состав (INCI) и предупреждения переносятся из карточки поставщика и печатаются на упаковке.</p></details>
+            <details style="border-top:1px solid rgba(28,26,0,.15);border-bottom:1px solid rgba(28,26,0,.15);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Доставка и возврат</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">DPD, Omniva, SmartPosti, курьер до двери. Возврат — 14 дней; запечатанная косметика возвращается только невскрытой.</p></details>
+          </div>
+        </div>
+      </section>
+      <section style="padding:0 4.5cqi 36px">
+        <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 16px;border-bottom:1px solid #1c1a00;padding-bottom:8px">С ЭТИМ ПОКУПАЮТ</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:22px 16px">
+          <sc-for list="{{ relProducts }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+              <div style="aspect-ratio:1;background:#fff;border:1px solid rgba(28,26,0,.08);display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:82%;height:82%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12px;line-height:1.35">{{ p.name }}</div>
+              <div style="font-size:12px;font-weight:600">{{ p.price }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <div style="position:sticky;bottom:0;z-index:4;display:{{ buyBarDisp }};gap:12px;align-items:center;background:#fdfcf9;border-top:1px solid #1c1a00;padding:10px 4.5cqi">
+        <span style="font-size:14px;font-weight:600">{{ prodPrice }}</span>
+        <button onClick="{{ addToCart }}" style="flex:1;border:none;background:#1c1a00;color:#fdfcf9;padding:12px;font-size:12px;letter-spacing:.1em;cursor:pointer">В КОРЗИНУ</button>
+      </div>
+      </sc-if>
+      <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:26px 4.5cqi 6px">
+        <label style="display:block;font-size:11px;letter-spacing:.14em;color:rgba(28,26,0,.55);margin-bottom:8px">ПОИСК ПО МАГАЗИНУ</label>
+        <input value="кондиционер" style="width:100%;border:none;border-bottom:2px solid #1c1a00;background:transparent;padding:8px 2px;font:inherit;font-size:19px;outline:none">
+        <div style="font-size:12px;color:rgba(28,26,0,.6);margin-top:10px">Похожие запросы: <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">несмываемый кондиционер</a> · <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">kevin murphy rinse</a> · <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">для кудрявых волос</a></div>
+      </section>
+      <section style="padding:18px 4.5cqi 30px">
+        <div style="font-size:12px;color:rgba(28,26,0,.55);border-bottom:1px solid #1c1a00;padding-bottom:8px;margin-bottom:18px">Найдено 4 товара по запросу «кондиционер»</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:26px 14px">
+          <sc-for list="{{ searchResults }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:transform .18s ease" style-hover="transform:translateY(-2px)">
+              <div style="aspect-ratio:1;background:#fff;border:1px solid rgba(28,26,0,.08);display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:82%;height:82%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12.5px;line-height:1.35">{{ p.name }}</div>
+              <div style="font-size:12.5px;font-weight:600">{{ p.price }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <section style="padding:0 4.5cqi 36px">
+        <div style="border:1px solid rgba(28,26,0,.25);padding:18px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:10px;letter-spacing:.16em;color:rgba(28,26,0,.5)">ЕСЛИ НИЧЕГО НЕ НАШЛОСЬ</div>
+          <div style="font-size:14px">По запросу «духи» ничего не найдено.</div>
+          <div style="font-size:12.5px;color:rgba(28,26,0,.7)">Посмотрите категории: <a href="#" style="border-bottom:1px solid rgba(28,26,0,.35)">Уход за лицом</a> · <a href="#" style="border-bottom:1px solid rgba(28,26,0,.35)">Уход за телом</a> — или <a href="#" style="border-bottom:1px solid rgba(28,26,0,.35)">напишите нам</a>, подскажем аналог.</div>
+          <div style="font-size:11px;color:rgba(28,26,0,.5)">Запрос сохранён: магазин записывает, что ищут покупатели, — так видно, каких товаров не хватает.</div>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ isBlog }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:26px 4.5cqi 8px">
+        <h1 style="font-size:clamp(20px,2.8cqi,28px);font-weight:500;margin:0">Журнал</h1>
+        <p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.65);max-width:60ch">Разборы и подборки от команды Rempire: как выбирать и использовать профессиональный уход.</p>
+      </section>
+      <section style="padding:14px 4.5cqi 26px">
+        <sc-for list="{{ blogPosts }}" as="p" hint-placeholder-count="3">
+          <a href="#" style="display:flex;gap:18px;align-items:center;padding:16px 0;border-bottom:1px solid rgba(28,26,0,.15)">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10.5px;color:rgba(28,26,0,.5)">{{ p.d }}</div>
+              <div style="font-size:15px;font-weight:500;margin:4px 0;line-height:1.3">{{ p.t }}</div>
+              <div style="font-size:12px;color:rgba(28,26,0,.65)">{{ p.teaser }}</div>
+            </div>
+            <div style="width:96px;height:72px;flex-shrink:0"><image-slot id="{{ p.slot }}" shape="rect" placeholder="Фото"></image-slot></div>
+          </a>
+        </sc-for>
+      </section>
+      <section data-screen-label="A Статья" style="padding:8px 4.5cqi 40px;max-width:660px">
+        <div style="font-size:10px;letter-spacing:.16em;color:rgba(28,26,0,.5);border-top:1px solid #1c1a00;padding-top:16px">ОТКРЫТАЯ СТАТЬЯ · УХОД ЗА ВОЛОСАМИ · 21.08.2026</div>
+        <h2 style="font-size:clamp(20px,2.6cqi,26px);font-weight:500;margin:12px 0 10px;line-height:1.25;text-wrap:pretty">Как подобрать шампунь System 4 по типу кожи головы</h2>
+        <div style="width:100%;height:180px;margin:14px 0"><image-slot id="art-hero" shape="rect" placeholder="Фото к статье — линейка System 4"></image-slot></div>
+        <p style="font-size:14px;line-height:1.7;margin:0 0 14px;color:rgba(28,26,0,.85)">System 4 — финская линия для кожи головы, с которой мы работаем в салоне каждый день. Её сила в том, что средства подбираются не «по волосам», а по состоянию кожи головы — и результат виден уже через несколько недель регулярного применения.</p>
+        <h3 style="font-size:15px;font-weight:600;margin:18px 0 8px">С чего начать</h3>
+        <ul style="margin:0 0 14px;padding-left:18px;font-size:13.5px;line-height:1.8;color:rgba(28,26,0,.8)">
+          <li>Чувствительная кожа головы — мягкое очищение без сульфатов: Mild Shampoo 3</li>
+          <li>Жирная кожа и быстрое загрязнение — регулярное глубокое очищение: Scalp Tonic T</li>
+          <li>Сухость и зуд — питание и себорегуляция: Oil Cure Treatment O</li>
+        </ul>
+        <p style="font-size:13.5px;line-height:1.7;margin:0;color:rgba(28,26,0,.8)">Не уверены в типе кожи головы — напишите нам в Instagram или загляните в магазин на Mardi 1: посмотрим и подберём. <a href="#" style="border-bottom:1px solid rgba(28,26,0,.4)">Смотреть все средства System 4 →</a></p>
+      </section>
+      </sc-if>
+      <section style="border-top:1px solid rgba(28,26,0,.15);padding:24px 4.5cqi;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px;font-size:12px;color:rgba(28,26,0,.75)">
+        <div><strong style="display:block;color:#1c1a00;margin-bottom:4px">Доставка</strong>DPD · Omniva · SmartPosti · курьер до двери</div>
+        <div><strong style="display:block;color:#1c1a00;margin-bottom:4px">Оплата</strong>Банковские ссылки · карта · Apple Pay · Google Pay · PayPal · по счёту</div>
+        <div><strong style="display:block;color:#1c1a00;margin-bottom:4px">Магазин в Таллинне</strong>Mardi 1 · остатки синхронизированы с сайтом</div>
+      </section>
+      <section style="border-top:1px solid rgba(28,26,0,.15);padding:24px 4.5cqi;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:12.5px;margin-bottom:8px">Новости и новинки — раз в месяц, без спама.</div>
+          <input placeholder="Ваш e-mail" style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:7px 2px;font:inherit;font-size:13px;outline:none">
+        </div>
+        <button style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;padding:9px 18px;font-size:12px;letter-spacing:.08em;cursor:pointer">ПОДПИСАТЬСЯ</button>
+      </section>
+      <footer style="border-top:1px solid rgba(28,26,0,.25);padding:22px 4.5cqi;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:11px;color:rgba(28,26,0,.6)">
+        <span style="display:inline-flex;gap:10px;align-items:center"><img src="uploads/rempire-tower.svg" alt="" style="height:16px;opacity:.8">© 2026 Rempire Store OÜ</span>
+        <span style="display:inline-flex;gap:14px;flex-wrap:wrap"><a href="#">Доставка</a><a href="#">Возвраты</a><a href="#">Конфиденциальность</a><a href="#">Реквизиты</a><a href="#">Instagram</a></span>
+      </footer>
+      <div style="position:sticky;bottom:0;z-index:9;display:{{ cBotDisp }};background:#fdfcf9;border-top:1px solid #1c1a00">
+        <button onClick="{{ goHome }}" style="flex:1;border:none;background:transparent;color:#1c1a00;cursor:pointer;padding:13px 4px;font-size:10px;letter-spacing:.12em">ГЛАВНАЯ</button>
+        <button onClick="{{ goCat }}" style="flex:1;border:none;background:transparent;color:#1c1a00;cursor:pointer;padding:13px 4px;font-size:10px;letter-spacing:.12em;border-left:1px solid rgba(28,26,0,.15)">КАТАЛОГ</button>
+        <button onClick="{{ goSearch }}" style="flex:1;border:none;background:transparent;color:#1c1a00;cursor:pointer;padding:13px 4px;font-size:10px;letter-spacing:.12em;border-left:1px solid rgba(28,26,0,.15)">ПОИСК</button>
+        <button onClick="{{ openCart }}" style="flex:1;border:none;background:transparent;color:#1c1a00;cursor:pointer;padding:13px 4px;font-size:10px;letter-spacing:.12em;border-left:1px solid rgba(28,26,0,.15)">КОРЗИНА · {{ cartN }}</button>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="B Главная">
+      <div style="background:#1c1a00;color:#fdfcf9;text-align:center;font-size:11px;padding:7px 12px;letter-spacing:.04em">Бесплатная доставка: EE, LV, LT, FI — от 50 € · Европа — от 200 €</div>
+      <sc-if value="{{ langNote }}" hint-placeholder-val="{{ false }}"><div style="background:#edeae1;text-align:center;font-size:11px;padding:6px 12px;color:rgba(28,26,0,.75)">Версия {{ langPicked }} заполняется переводами из админки — ассистент переводит страницы и карточки, структура одинаковая.</div></sc-if>
+      <div style="display:flex;align-items:center;gap:12px 16px;padding:16px 4.5cqi;border-bottom:2px solid #1c1a00;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:12px;flex-shrink:0"><svg viewBox="292.24 171.22 265.18 409.8" class="{{ twCls }}" role="img" aria-label="REMPIRE" style="height:46px;width:auto;display:block;overflow:visible"><g class="tw-rest" clip-path="url(#twr2)"><use href="#twp2"></use></g><g class="tw-band" clip-path="url(#twb2)"><use href="#twp2"></use></g><use href="#twp2s" class="tw-draw"></use></svg><span style="font-family:Oswald;font-weight:600;font-size:17px;letter-spacing:.34em">REMPIRE</span></span>
+        <input onFocus="{{ goSearch }}" placeholder="Поиск" style="order:{{ shOrd }};flex:{{ shF }};min-width:110px;border:none;border-bottom:1px solid rgba(28,26,0,.3);background:transparent;padding:6px 2px;font:inherit;font-size:13px;outline:none">
+        <span style="order:{{ clOrd }};margin-left:auto;display:inline-flex;gap:12px;font-size:12px;flex-shrink:0;align-items:center"><span style="display:inline-flex;gap:6px"><sc-for list="{{ langs }}" as="lg" hint-placeholder-count="3"><button onClick="{{ lg.go }}" title="{{ lg.t }}" aria-label="{{ lg.t }}" style="border:none;background:transparent;cursor:pointer;padding:7px 4px;opacity:{{ lg.op }};border-bottom:{{ lg.bb }};display:inline-flex"><span style="width:19px;height:13px;display:block;background-image:url('{{ lg.f }}');background-size:cover;background-position:center;border:1px solid rgba(28,26,0,.15)"></span></button></sc-for></span><button onClick="{{ goAccount }}" title="Кабинет" aria-label="Кабинет" style="border:none;background:transparent;cursor:pointer;padding:7px;color:#1c1a00;display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"></path></svg></button><button onClick="{{ openCart }}" title="Корзина" aria-label="Корзина" style="border:none;background:transparent;cursor:pointer;padding:7px;color:#1c1a00;display:flex;position:relative"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:20px;height:20px"><path d="M5.5 8.5h13l-.9 11a1.8 1.8 0 0 1-1.8 1.6H8.2a1.8 1.8 0 0 1-1.8-1.6z"></path><path d="M8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5"></path></svg><span style="position:absolute;top:-4px;right:-7px;background:#1c1a00;color:#fdfcf9;font-size:9px;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 2px">{{ cartN }}</span></button></span>
+      </div>
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <section style="position:relative;overflow:hidden;border-bottom:2px solid #1c1a00">
+        <img src="uploads/rempire-tower.svg" alt="" style="position:absolute;right:5cqi;top:50%;transform:translateY(-50%);height:86%;opacity:.09;pointer-events:none">
+        <div style="padding:34px 4.5cqi 30px;position:relative">
+          <h1 style="font-family:Oswald;font-weight:600;font-size:clamp(30px,7cqi,64px);line-height:1.02;letter-spacing:.01em;margin:0;text-transform:uppercase;text-wrap:balance">Профессиональный уход</h1>
+          <div style="margin-top:22px;display:flex;flex-direction:column">
+            <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+              <a href="#" onClick="{{ goCat }}" style="display:flex;align-items:baseline;gap:14px;padding:9px 2px;border-top:1px solid rgba(28,26,0,.2)">
+                <span style="font-family:Oswald;font-size:11px;color:rgba(28,26,0,.45)">{{ c.n }}</span>
+                <span style="font-family:Oswald;font-weight:500;font-size:clamp(17px,3cqi,26px);text-transform:uppercase;letter-spacing:.03em">{{ c.name }}</span>
+                <span style="margin-left:auto;font-size:13px">→</span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+      <section style="padding:28px 4.5cqi 36px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px">
+          <h2 style="font-family:Oswald;font-weight:600;font-size:clamp(18px,2.6cqi,24px);letter-spacing:.08em;margin:0">БЕСТСЕЛЛЕРЫ</h2>
+          <button onClick="{{ goCat }}" style="border:none;background:transparent;font-size:12px;border-bottom:1px solid rgba(28,26,0,.4);padding:0;color:#1c1a00;cursor:pointer">Все товары</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0;border-left:1px solid rgba(28,26,0,.2);border-top:1px solid rgba(28,26,0,.2)">
+          <sc-for list="{{ products }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="border-right:1px solid rgba(28,26,0,.2);border-bottom:1px solid rgba(28,26,0,.2);padding:14px 12px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:background .18s ease" style-hover="background:#fff">
+              <div style="font-family:Oswald;font-size:10px;color:rgba(28,26,0,.4)">{{ p.n }}</div>
+              <div style="aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;margin:2px 0 8px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:80%;height:80%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12.5px;line-height:1.35">{{ p.name }}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px"><span style="font-size:13px;font-weight:600">{{ p.price }}</span><button onClick="{{ addQuick }}" style="border:none;background:transparent;font-size:11.5px;border-bottom:1px solid rgba(28,26,0,.4);padding:0;color:#1c1a00;cursor:pointer">В корзину</button></div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <section style="background:#1c1a00;color:#fdfcf9;padding:38px 4.5cqi">
+        <div style="font-family:Oswald;font-size:11px;letter-spacing:.24em;opacity:.6;margin-bottom:12px">REMPIRE · EST 2018</div>
+        <p style="font-family:Oswald;font-weight:500;font-size:clamp(20px,3.4cqi,32px);line-height:1.2;margin:0;max-width:22ch;text-transform:uppercase;text-wrap:balance">Косметика, которой работает наша команда</p>
+        <p style="margin:14px 0 0;font-size:13px;opacity:.75;max-width:52ch">Каждый бренд в магазине используется мастерами Rempire ежедневно — мы продаём то, чем работаем сами.</p>
+        <a href="#" onClick="{{ goBlog }}" style="display:inline-block;margin-top:18px;color:#fdfcf9;border-bottom:1px solid rgba(253,252,249,.5);font-size:12.5px">Журнал →</a>
+      </section>
+      <section style="padding:30px 4.5cqi 36px">
+        <h2 style="font-family:Oswald;font-weight:600;font-size:12px;letter-spacing:.2em;margin:0 0 14px">БРЕНДЫ</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-left:1px solid rgba(28,26,0,.2);border-top:1px solid rgba(28,26,0,.2)">
+          <sc-for list="{{ brandLogos }}" as="b" hint-placeholder-count="7">
+            <a href="#" onClick="{{ goCat }}" style="display:flex;flex-direction:column;border-right:1px solid rgba(28,26,0,.2);border-bottom:1px solid rgba(28,26,0,.2);background:#fff">
+              <span style="display:block;aspect-ratio:3/2;background:#fff;background-image:url('{{ b.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;box-shadow:inset 0 0 0 8px #fff;filter:grayscale(1);transition:filter .25s ease" style-hover="filter:grayscale(0)"></span>
+              <span style="padding:9px 12px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.1em;text-transform:uppercase;border-top:1px solid rgba(28,26,0,.2)">{{ b.n }}</span>
+            </a>
+          </sc-for>
+          <a href="#" onClick="{{ goCat }}" style="display:flex;align-items:center;justify-content:center;min-height:96px;border-right:1px solid rgba(28,26,0,.2);border-bottom:1px solid rgba(28,26,0,.2);font-family:Oswald;font-weight:500;font-size:13px;letter-spacing:.14em">ВСЕ БРЕНДЫ →</a>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ isCat }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:24px 4.5cqi 0">
+        <div style="font-size:11px;color:rgba(28,26,0,.55)"><a href="#" onClick="{{ goHome }}">Главная</a> / Уход за волосами</div>
+        <div style="display:flex;align-items:baseline;gap:14px;margin-top:14px;border-bottom:2px solid #1c1a00;padding-bottom:12px">
+          <span style="font-family:Oswald;font-size:12px;color:rgba(28,26,0,.45)">01</span>
+          <h1 style="font-family:Oswald;font-weight:600;font-size:clamp(26px,5cqi,46px);line-height:1;letter-spacing:.02em;margin:0;text-transform:uppercase">Уход за волосами</h1>
+          <span style="margin-left:auto;font-size:12px;color:rgba(28,26,0,.55);white-space:nowrap">{{ catCount }} товаров</span>
+        </div>
+        <p style="margin:12px 0 0;font-size:12.5px;color:rgba(28,26,0,.7);max-width:64ch;text-wrap:pretty">Профессиональные шампуни, кондиционеры, маски и уходовые средства — Kevin.Murphy, Davines, System 4 и Paul Mitchell. Те же продукты, которыми команда Rempire работает в салоне.</p>
+      </section>
+      <section style="padding:16px 4.5cqi 36px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0 14px;flex-wrap:wrap">
+          <button onClick="{{ openFilter }}" style="border:none;background:transparent;color:#1c1a00;padding:4px 0;font-size:12.5px;cursor:pointer;border-bottom:1px solid #1c1a00">Фильтры +</button>
+          <label style="font-size:12px;display:inline-flex;gap:8px;align-items:center;color:rgba(28,26,0,.7)">Сортировка
+            <select style="border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;font:inherit;font-size:12px;padding:3px 2px"><option>Популярные</option><option>Цена ↑</option><option>Цена ↓</option><option>Новинки</option></select>
+          </label>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0;border-left:1px solid rgba(28,26,0,.2);border-top:1px solid rgba(28,26,0,.2)">
+          <sc-for list="{{ catProducts }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="border-right:1px solid rgba(28,26,0,.2);border-bottom:1px solid rgba(28,26,0,.2);padding:14px 12px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:background .18s ease" style-hover="background:#fff">
+              <div style="aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;margin:2px 0 8px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:80%;height:80%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12.5px;line-height:1.35">{{ p.name }}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px"><span style="font-size:13px;font-weight:600">{{ p.price }}</span><button onClick="{{ addQuick }}" style="border:none;background:transparent;font-size:11.5px;border-bottom:1px solid rgba(28,26,0,.4);padding:0;color:#1c1a00;cursor:pointer">В корзину</button></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:28px"><button style="border:none;background:#1c1a00;color:#fdfcf9;padding:11px 24px;font-size:12px;letter-spacing:.06em;cursor:pointer">ПОКАЗАТЬ ЕЩЁ 12</button></div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ isProd }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:22px 4.5cqi 0;font-size:11px;color:rgba(28,26,0,.55)"><a href="#" onClick="{{ goHome }}">Главная</a> / <a href="#" onClick="{{ goCat }}">Уход за волосами</a> / Kevin.Murphy</section>
+      <section style="padding:14px 4.5cqi 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:0;border:1px solid rgba(28,26,0,.25)">
+        <div style="border-right:1px solid rgba(28,26,0,.25);background:#fff;display:flex;flex-direction:column">
+          <div data-gal onScroll="{{ galScroll }}" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;aspect-ratio:1">
+            <div style="flex:0 0 100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative"><span aria-hidden="true" style="position:absolute;right:12px;bottom:12px;width:16px;height:25px;background:#1c1a00;opacity:.14;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><img src="https://rempireshop.com/cdn/shop/files/photo-6.jpg?v=1688742837&amp;width=1445" alt="KEVIN.MURPHY REPAIR-ME.WASH — флакон" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></div>
+            <div style="flex:0 0 100%;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;position:relative"><span aria-hidden="true" style="position:absolute;right:12px;bottom:12px;width:16px;height:25px;background:#1c1a00;opacity:.14;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><img src="https://rempireshop.com/cdn/shop/files/photo-5.jpg?v=1688742837&amp;width=1445" alt="KEVIN.MURPHY REPAIR-ME.WASH — вид сзади" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></div>
+          </div>
+          <div style="display:flex;gap:0;border-top:1px solid rgba(28,26,0,.25);align-items:center">
+            <button onClick="{{ galTo0 }}" aria-label="Фото 1" style="width:58px;height:58px;border:none;border-right:1px solid rgba(28,26,0,.25);display:flex;align-items:center;justify-content:center;background:{{ g0bg }};cursor:pointer;padding:0"><img src="https://rempireshop.com/cdn/shop/files/photo-6.jpg?v=1688742837&amp;width=533" alt="" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></button>
+            <button onClick="{{ galTo1 }}" aria-label="Фото 2" style="width:58px;height:58px;border:none;border-right:1px solid rgba(28,26,0,.25);display:flex;align-items:center;justify-content:center;background:{{ g1bg }};cursor:pointer;padding:0"><img src="https://rempireshop.com/cdn/shop/files/photo-5.jpg?v=1688742837&amp;width=533" alt="" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></button>
+            <span style="font-size:10.5px;color:rgba(28,26,0,.45);padding:0 10px">{{ galHint }}</span>
+          </div>
+        </div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+          <div>
+            <div style="font-family:Oswald;font-size:11px;letter-spacing:.2em;color:rgba(28,26,0,.55)">KEVIN.MURPHY</div>
+            <h1 style="font-family:Oswald;font-weight:600;font-size:clamp(22px,3.4cqi,34px);line-height:1.05;letter-spacing:.02em;margin:8px 0 6px;text-transform:uppercase">Repair-Me.Wash</h1>
+            <div style="font-size:12.5px;color:rgba(28,26,0,.65)">Восстанавливающий шампунь · протеины и аминокислоты</div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px;border-top:2px solid #1c1a00;padding-top:12px"><span style="font-family:Oswald;font-size:24px;font-weight:600">{{ prodPrice }}</span><span style="font-size:11px;color:rgba(28,26,0,.55)">Налоги включены · В наличии</span></div>
+          <div>
+            <div style="font-size:11px;letter-spacing:.12em;color:rgba(28,26,0,.55);margin-bottom:8px">ОБЪЁМ</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="2"><button onClick="{{ s.go }}" style="border:1px solid #1c1a00;cursor:pointer;padding:9px 16px;font-size:12.5px;background:{{ s.bg }};color:{{ s.fg }}">{{ s.label }}</button></sc-for>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:stretch">
+            <span style="display:inline-flex;border:1px solid #1c1a00">
+              <button onClick="{{ decQ }}" aria-label="Меньше" style="border:none;background:transparent;width:36px;font-size:15px;cursor:pointer;color:#1c1a00">−</button>
+              <span style="display:inline-flex;align-items:center;min-width:26px;justify-content:center;font-size:13px">{{ qty }}</span>
+              <button onClick="{{ incQ }}" aria-label="Больше" style="border:none;background:transparent;width:36px;font-size:15px;cursor:pointer;color:#1c1a00">+</button>
+            </span>
+            <button onClick="{{ addToCart }}" style="flex:1;border:none;background:#1c1a00;color:#fdfcf9;padding:13px;font-family:Oswald;font-size:13px;letter-spacing:.14em;cursor:pointer">В КОРЗИНУ</button>
+          </div>
+          <div style="font-size:12px;color:rgba(28,26,0,.7)">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · бесплатно от 50 € (EE, LV, LT, FI)</div>
+          <div style="display:flex;flex-direction:column">
+            <details open style="border-top:1px solid rgba(28,26,0,.25);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Описание</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">Восстанавливающий шампунь-уход с протеинами и аминокислотами. Укрепляет волосы от корней до кончиков, мягко очищает и возвращает сухим, повреждённым и пористым волосам плотность и гладкость.</p></details>
+            <details style="border-top:1px solid rgba(28,26,0,.25);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Преимущества</summary><ul style="margin:8px 0 0;padding-left:16px;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.7"><li>Протеины и энзимы в рабочей концентрации</li><li>Питает и восстанавливает структуру волоса</li><li>Волосы более гладкие и плотные</li><li>Даёт необходимое увлажнение</li><li>Для всех типов волос, которым нужно восстановление</li><li>Без сульфатов и парабенов · cruelty-free</li></ul></details>
+            <details style="border-top:1px solid rgba(28,26,0,.25);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Применение</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">Нанесите на влажные волосы, мягко помассируйте волосы и кожу головы, смойте. Далее используйте REPAIR-ME.RINSE. Подходит для ежедневного применения.</p></details>
+            <details style="border-top:1px solid rgba(28,26,0,.25);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Состав и предупреждения</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">Полный состав (INCI) и предупреждения переносятся из карточки поставщика и печатаются на упаковке.</p></details>
+            <details style="border-top:1px solid rgba(28,26,0,.25);padding:11px 0"><summary style="cursor:pointer;font-size:12.5px;font-weight:600">Доставка и возврат</summary><p style="margin:8px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);line-height:1.6">DPD, Omniva, SmartPosti, курьер до двери. Возврат — 14 дней; запечатанная косметика возвращается только невскрытой.</p></details>
+          </div>
+        </div>
+      </section>
+      <section style="padding:0 4.5cqi 36px">
+        <h2 style="font-family:Oswald;font-weight:600;font-size:clamp(16px,2.4cqi,22px);letter-spacing:.08em;margin:0 0 14px">С ЭТИМ ПОКУПАЮТ</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0;border-left:1px solid rgba(28,26,0,.2);border-top:1px solid rgba(28,26,0,.2)">
+          <sc-for list="{{ relProducts }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="border-right:1px solid rgba(28,26,0,.2);border-bottom:1px solid rgba(28,26,0,.2);padding:12px;display:flex;flex-direction:column;gap:4px;cursor:pointer">
+              <div style="aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:80%;height:80%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12px;line-height:1.35">{{ p.name }}</div>
+              <div style="font-size:12px;font-weight:600">{{ p.price }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <div style="position:sticky;bottom:0;z-index:4;display:{{ buyBarDisp }};gap:12px;align-items:center;background:#fdfcf9;border-top:2px solid #1c1a00;padding:10px 4.5cqi">
+        <span style="font-family:Oswald;font-size:15px;font-weight:600">{{ prodPrice }}</span>
+        <button onClick="{{ addToCart }}" style="flex:1;border:none;background:#1c1a00;color:#fdfcf9;padding:12px;font-family:Oswald;font-size:12px;letter-spacing:.14em;cursor:pointer">В КОРЗИНУ</button>
+      </div>
+      </sc-if>
+      <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:28px 4.5cqi 6px;border-bottom:2px solid #1c1a00">
+        <label style="display:block;font-family:Oswald;font-size:11px;letter-spacing:.2em;color:rgba(28,26,0,.55);margin-bottom:8px">ПОИСК</label>
+        <input value="кондиционер" style="width:100%;border:none;background:transparent;padding:4px 0 14px;font-family:Oswald;font-weight:500;font-size:clamp(22px,4cqi,34px);outline:none;color:#1c1a00">
+      </section>
+      <section style="padding:14px 4.5cqi 30px">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:rgba(28,26,0,.6);margin-bottom:16px">
+          <span>Найдено 4 товара</span>
+          <span>Похожие: <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">несмываемый</a> · <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">rinse</a> · <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">для кудрявых</a></span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0;border-left:1px solid rgba(28,26,0,.2);border-top:1px solid rgba(28,26,0,.2)">
+          <sc-for list="{{ searchResults }}" as="p" hint-placeholder-count="0">
+            <div onClick="{{ goProd }}" style="border-right:1px solid rgba(28,26,0,.2);border-bottom:1px solid rgba(28,26,0,.2);padding:14px 12px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:background .18s ease" style-hover="background:#fff">
+              <div style="aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;margin:2px 0 8px;position:relative"><span aria-hidden="true" style="position:absolute;right:6px;bottom:6px;width:12px;height:19px;background:#1c1a00;opacity:.15;pointer-events:none;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span><div role="img" aria-label="{{ p.name }}" style="width:80%;height:80%;background-image:url('{{ p.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div></div>
+              <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.55);text-transform:uppercase">{{ p.brand }}</div>
+              <div style="font-size:12.5px;line-height:1.35">{{ p.name }}</div>
+              <div style="font-size:13px;font-weight:600">{{ p.price }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+      <section style="padding:0 4.5cqi 36px">
+        <div style="background:#1c1a00;color:#fdfcf9;padding:20px;display:flex;flex-direction:column;gap:10px">
+          <div style="font-family:Oswald;font-size:10px;letter-spacing:.2em;opacity:.6">ЕСЛИ НИЧЕГО НЕ НАШЛОСЬ</div>
+          <div style="font-size:14px">По запросу «духи» ничего не найдено.</div>
+          <div style="font-size:12.5px;opacity:.8">Категории: <a href="#" style="color:#fdfcf9;border-bottom:1px solid rgba(253,252,249,.4)">Уход за лицом</a> · <a href="#" style="color:#fdfcf9;border-bottom:1px solid rgba(253,252,249,.4)">Уход за телом</a> — или <a href="#" style="color:#fdfcf9;border-bottom:1px solid rgba(253,252,249,.4)">напишите нам</a>.</div>
+          <div style="font-size:11px;opacity:.55">Запрос сохранён — магазин видит, каких товаров не хватает.</div>
+        </div>
+      </section>
+      </sc-if>
+      <sc-if value="{{ isBlog }}" hint-placeholder-val="{{ false }}">
+      <section style="padding:28px 4.5cqi 10px;border-bottom:2px solid #1c1a00">
+        <h1 style="font-family:Oswald;font-weight:600;font-size:clamp(26px,5cqi,46px);line-height:1;letter-spacing:.02em;margin:0 0 10px;text-transform:uppercase">Журнал</h1>
+        <p style="margin:0 0 16px;font-size:12.5px;color:rgba(28,26,0,.65);max-width:60ch">Разборы и подборки от команды Rempire: как выбирать и использовать профессиональный уход.</p>
+      </section>
+      <section style="padding:0 4.5cqi 26px">
+        <sc-for list="{{ blogPosts }}" as="p" hint-placeholder-count="3">
+          <a href="#" style="display:flex;gap:18px;align-items:center;padding:18px 0;border-bottom:1px solid rgba(28,26,0,.2)">
+            <span style="font-family:Oswald;font-size:12px;color:rgba(28,26,0,.4);flex-shrink:0">{{ p.n }}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:Oswald;font-weight:500;font-size:clamp(16px,2.6cqi,22px);line-height:1.15;text-transform:uppercase;letter-spacing:.02em">{{ p.t }}</div>
+              <div style="font-size:12px;color:rgba(28,26,0,.6);margin-top:5px">{{ p.d }} · {{ p.teaser }}</div>
+            </div>
+            <div style="width:96px;height:72px;flex-shrink:0"><image-slot id="{{ p.slot }}" shape="rect" placeholder="Фото"></image-slot></div>
+          </a>
+        </sc-for>
+      </section>
+      <section data-screen-label="B Статья" style="padding:4px 4.5cqi 40px;max-width:700px">
+        <div style="font-family:Oswald;font-size:10px;letter-spacing:.2em;color:rgba(28,26,0,.5)">ОТКРЫТАЯ СТАТЬЯ · УХОД ЗА ВОЛОСАМИ · 21.08.2026</div>
+        <h2 style="font-family:Oswald;font-weight:600;font-size:clamp(22px,3.6cqi,34px);line-height:1.1;margin:12px 0 12px;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance">Как подобрать шампунь System 4 по типу кожи головы</h2>
+        <div style="width:100%;height:190px;margin:14px 0"><image-slot id="art-hero" shape="rect" placeholder="Фото к статье — линейка System 4"></image-slot></div>
+        <p style="font-size:14px;line-height:1.7;margin:0 0 14px;color:rgba(28,26,0,.85)">System 4 — финская линия для кожи головы, с которой мы работаем в салоне каждый день. Её сила в том, что средства подбираются не «по волосам», а по состоянию кожи головы — и результат виден уже через несколько недель регулярного применения.</p>
+        <h3 style="font-family:Oswald;font-size:14px;font-weight:600;letter-spacing:.08em;margin:18px 0 8px;text-transform:uppercase">С чего начать</h3>
+        <ul style="margin:0 0 14px;padding-left:18px;font-size:13.5px;line-height:1.8;color:rgba(28,26,0,.8)">
+          <li>Чувствительная кожа головы — мягкое очищение без сульфатов: Mild Shampoo 3</li>
+          <li>Жирная кожа и быстрое загрязнение — регулярное глубокое очищение: Scalp Tonic T</li>
+          <li>Сухость и зуд — питание и себорегуляция: Oil Cure Treatment O</li>
+        </ul>
+        <p style="font-size:13.5px;line-height:1.7;margin:0;color:rgba(28,26,0,.8)">Не уверены в типе кожи головы — напишите нам в Instagram или загляните в магазин на Mardi 1. <a href="#" style="border-bottom:1px solid rgba(28,26,0,.4)">Смотреть все средства System 4 →</a></p>
+      </section>
+      </sc-if>
+      <section style="border-top:2px solid #1c1a00;padding:24px 4.5cqi;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px;font-size:12px;color:rgba(28,26,0,.75)">
+        <div><strong style="display:block;color:#1c1a00;margin-bottom:4px">Доставка</strong>DPD · Omniva · SmartPosti · курьер до двери</div>
+        <div><strong style="display:block;color:#1c1a00;margin-bottom:4px">Оплата</strong>Банковские ссылки · карта · Apple Pay · Google Pay · PayPal · по счёту</div>
+        <div><strong style="display:block;color:#1c1a00;margin-bottom:4px">Магазин в Таллинне</strong>Mardi 1 · остатки синхронизированы с сайтом</div>
+      </section>
+      <section style="border-top:1px solid rgba(28,26,0,.15);padding:24px 4.5cqi;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:12.5px;margin-bottom:8px">Новости и новинки — раз в месяц, без спама.</div>
+          <input placeholder="Ваш e-mail" style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:7px 2px;font:inherit;font-size:13px;outline:none">
+        </div>
+        <button style="border:none;background:#1c1a00;color:#fdfcf9;padding:10px 20px;font-size:12px;letter-spacing:.08em;cursor:pointer">ПОДПИСАТЬСЯ</button>
+      </section>
+      <footer style="border-top:2px solid #1c1a00;padding:26px 4.5cqi;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:11px;color:rgba(28,26,0,.6)">
+        <img src="public/brand/rempire-badge-dark.svg" alt="REMPIRE TOWER — est 2018" style="height:92px;width:auto">
+        <span style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <span style="display:inline-flex;gap:14px;flex-wrap:wrap"><a href="#">Доставка</a><a href="#">Возвраты</a><a href="#">Конфиденциальность</a><a href="#">Реквизиты</a><a href="#">Instagram</a></span>
+          <span>© 2026 Rempire Store OÜ</span>
+        </span>
+      </footer>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Админка" style="background:#fdfcf9;min-height:640px;display:flex;align-items:stretch;flex-wrap:wrap">
+      <nav aria-label="Разделы панели" style="flex:{{ sbF }};max-width:100%;background:#1c1a00;color:#fdfcf9;display:flex;flex-direction:column;padding:{{ sbP }}">
+        <button onClick="{{ sbT }}" title="{{ sbTt }}" aria-label="{{ sbTt }}" style="border:none;background:transparent;color:#fdfcf9;cursor:pointer;opacity:.7;font-size:14px;padding:4px 8px;align-self:{{ sbAl }};min-height:32px" style-hover="opacity:1">{{ sbI }}</button>
+        <sc-if value="{{ sbOpen }}" hint-placeholder-val="{{ true }}">
+        <span role="img" aria-label="REMPIRE" style="width:92px;height:80px;display:block;margin:0 auto 24px;background:#fdfcf9;-webkit-mask:url('public/brand/rempire-badge-dark.svg') center / contain no-repeat;mask:url('public/brand/rempire-badge-dark.svg') center / contain no-repeat"></span>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <sc-for list="{{ sideTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.go }}" style="border:none;background:{{ t.bg }};color:#fdfcf9;cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;text-align:left">{{ t.l }}<span style="font-size:11px;opacity:.6;font-variant-numeric:tabular-nums">{{ t.c }}</span></button></sc-for>
+        </div>
+        <button onClick="{{ goHome }}" style="border:none;background:transparent;color:#fdfcf9;cursor:pointer;margin-top:24px;padding:8px 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;text-align:left;width:max-content" style-hover="opacity:1">На сайт →</button>
+        <div style="margin-top:auto;border-top:1px solid rgba(253,252,249,.18);padding-top:16px;font-size:12px;opacity:.7;line-height:1.7">Rempire Store OÜ<br>rempiretower@gmail.com</div>
+        </sc-if>
+        <sc-if value="{{ sbClosed }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;padding:2px 0">
+            <span role="img" aria-label="REMPIRE" style="width:22px;height:34px;display:block;margin:0 6px;background:#fdfcf9;-webkit-mask:url('uploads/rempire-tower.svg') center / contain no-repeat;mask:url('uploads/rempire-tower.svg') center / contain no-repeat"></span>
+            <sc-for list="{{ sideTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.go }}" title="{{ t.l }}" aria-label="{{ t.l }}" style="border:none;background:{{ t.bg }};color:#fdfcf9;cursor:pointer;min-height:40px;width:40px;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:0">{{ t.i }}</button></sc-for>
+          </div>
+        </sc-if>
+      </nav>
+      <div style="flex:999 1 320px;min-width:min(100%,300px);display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;flex-shrink:0" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input placeholder="Заказ, товар, клиент…" aria-label="Поиск по панели" style="width:100%;max-width:420px;background:transparent;border:none;font:inherit;font-size:13px;outline:none">
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:24px">
+          <sc-if value="{{ tStats }}" hint-placeholder-val="{{ true }}">
+            <h1 style="font-family:Oswald;font-weight:500;font-size:clamp(22px,3cqi,30px);letter-spacing:.04em;text-transform:uppercase;line-height:1.05;margin:0">Сводка</h1>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <button onClick="{{ attOrders }}" style="min-height:40px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 14px;font-size:12.5px">2 новых заказа — обработать →</button>
+              <button onClick="{{ attPay }}" style="min-height:40px;border:1px solid #8c1a0f;background:transparent;color:#8c1a0f;cursor:pointer;padding:0 14px;font-size:12.5px">1 заказ ждёт оплаты →</button>
+              <button onClick="{{ attStock }}" style="min-height:40px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 14px;font-size:12.5px">1 товар заканчивается →</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(46%,150px),1fr));gap:12px">
+              <sc-for list="{{ kpi2 }}" as="k" hint-placeholder-count="4">
+                <div style="border:1px solid rgba(28,26,0,.15);padding:16px">
+                  <p style="margin:0;font-size:11px;letter-spacing:.12em;color:#78745f;text-transform:uppercase">{{ k.l }}</p>
+                  <p style="margin:8px 0 0;font-family:Oswald;font-size:24px">{{ k.v }}</p>
+                  <p style="margin:0;font-size:12px;color:#78745f">{{ k.d }}</p>
+                </div>
+              </sc-for>
+            </div>
+            <section style="background:#1c1a00;color:#fdfcf9;padding:20px">
+              <p style="margin:0;font-family:Oswald;font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.7">Подсказка недели</p>
+              <p style="margin:12px 0 0;max-width:70ch;font-size:14px;line-height:1.55">«Davines oi масло» искали 41 раз за месяц, но такой позиции в каталоге нет. Это самый дорогой пропущенный спрос сейчас — могу подготовить карточку товара и текст категории.</p>
+              <div style="margin-top:16px"><button onClick="{{ hintAsk2 }}" style="min-height:34px;border:1px solid #fdfcf9;background:transparent;color:#fdfcf9;cursor:pointer;padding:0 10px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Спросить ассистента</button></div>
+            </section>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Что ищут, но нет в наличии</h2>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ missed }}" as="m" hint-placeholder-count="4">
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding-bottom:12px;font-size:13px">
+                      <span style="flex:1 1 120px">{{ m.q }}</span>
+                      <span style="color:#78745f;font-variant-numeric:tabular-nums">{{ m.c }} запросов</span>
+                      <button onClick="{{ m.go }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Спросить</button>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Брошенные корзины</h2>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ aband }}" as="a" hint-placeholder-count="3">
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding-bottom:12px;font-size:13px">
+                      <span style="flex:1 1 160px">{{ a.id }} · {{ a.items }}<span style="display:block;font-size:12px;color:#78745f">{{ a.when }}</span></span>
+                      <span style="font-family:Oswald">{{ a.v }}</span>
+                      <button onClick="{{ a.go }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Спросить</button>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Лучшие и худшие товары</h2>
+                <div style="padding:16px;font-size:13px;display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ tops2 }}" as="p" hint-placeholder-count="3">
+                    <div style="display:flex;justify-content:space-between;gap:12px"><span>{{ p.name }}</span><span style="font-variant-numeric:tabular-nums">{{ p.sold }} шт</span></div>
+                  </sc-for>
+                  <div style="padding-top:8px;font-size:11px;letter-spacing:.12em;color:#78745f;text-transform:uppercase">Отстают</div>
+                  <sc-for list="{{ weaks2 }}" as="p" hint-placeholder-count="2">
+                    <div style="display:flex;justify-content:space-between;gap:12px"><span>{{ p.name }}</span><span style="font-variant-numeric:tabular-nums;color:#8c1a0f">{{ p.sold }} шт</span></div>
+                  </sc-for>
+                  <div style="margin-top:8px"><button onClick="{{ weakAsk }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Спросить ассистента</button></div>
+                </div>
+              </section>
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Доли брендов</h2>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px;font-size:13px">
+                  <sc-for list="{{ shares }}" as="b" hint-placeholder-count="5">
+                    <div>
+                      <div style="display:flex;justify-content:space-between"><span>{{ b.b }}</span><span style="font-variant-numeric:tabular-nums">{{ b.s }}</span></div>
+                      <div style="margin-top:4px;height:2px;width:100%;background:#edeae1"><div style="height:100%;background:#1c1a00;width:{{ b.w }}"></div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tOrders }}" hint-placeholder-val="{{ false }}">
+            <h1 style="font-family:Oswald;font-weight:500;font-size:clamp(22px,3cqi,30px);letter-spacing:.04em;text-transform:uppercase;line-height:1.05;margin:0">Заказы</h1>
+            <p style="margin:0;font-size:13px;color:#78745f">Счета по оплате «по счёту» уходят на почту клиента автоматически при оформлении.</p>
+            <div style="border:1px solid rgba(28,26,0,.15)">
+              <sc-for list="{{ orders2 }}" as="o" hint-placeholder-count="6">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding:12px;font-size:13px">
+                  <span style="width:70px;font-family:Oswald;letter-spacing:.06em">{{ o.id }}</span>
+                  <span style="width:46px;color:#78745f">{{ o.dt }}</span>
+                  <span style="min-width:160px;flex:1">{{ o.who }}<span style="display:block;font-size:12px;color:#78745f">{{ o.sub }}</span></span>
+                  <span style="border:{{ o.cb }};color:{{ o.cc }};padding:4px 8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap">{{ o.st }}</span>
+                  <span style="width:70px;text-align:right;font-family:Oswald">{{ o.sum2 }}</span>
+                  <button onClick="{{ o.go }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap">{{ o.act }}</button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tGoods }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+              <h1 style="font-family:Oswald;font-weight:500;font-size:clamp(22px,3cqi,30px);letter-spacing:.04em;text-transform:uppercase;line-height:1.05;margin:0">Товары</h1>
+              <button onClick="{{ newGood2 }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">+ Новый товар — через ассистента</button>
+            </div>
+            <p style="margin:0;font-size:13px;color:#78745f">Фото товаров получают водяной знак — башню REMPIRE — автоматически при загрузке.</p>
+            <div style="border:1px solid rgba(28,26,0,.15)">
+              <sc-for list="{{ goods2 }}" as="g" hint-placeholder-count="4">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding:12px;font-size:13px">
+                  <span style="width:44px;height:44px;background:#fff;flex-shrink:0;display:block;background-image:url('{{ g.img }}');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></span>
+                  <span style="min-width:180px;flex:1">{{ g.name }}<span style="display:block;font-size:12px;color:#78745f">{{ g.pl }}</span></span>
+                  <span style="font-size:12px;font-variant-numeric:tabular-nums;color:{{ g.sc }}">{{ g.stTx }}<sc-if value="{{ g.low }}" hint-placeholder-val="{{ false }}"><span style="display:block">низкий остаток</span></sc-if></span>
+                  <span style="display:flex;flex-wrap:wrap;gap:8px">
+                    <button onClick="{{ g.ai1 }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap">AI: описание</button>
+                    <button onClick="{{ g.ai2 }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">ET/EN</button>
+                    <button onClick="{{ g.ai3 }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">SEO</button>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tMkt }}" hint-placeholder-val="{{ false }}">
+            <h1 style="font-family:Oswald;font-weight:500;font-size:clamp(22px,3cqi,30px);letter-spacing:.04em;text-transform:uppercase;line-height:1.05;margin:0">Маркетинг</h1>
+            <p style="margin:0;max-width:70ch;font-size:13px;color:#78745f">Промокоды, поздравления и рассылки. Черновики готовит ассистент — вы только подтверждаете.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Промокоды</h2>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <sc-for list="{{ promos }}" as="p" hint-placeholder-count="3">
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding-bottom:12px;font-size:13px">
+                      <span style="font-family:Oswald;letter-spacing:.06em;width:104px">{{ p.code }}</span>
+                      <span style="flex:1 1 130px">{{ p.d }}</span>
+                      <span style="border:{{ p.cb }};color:{{ p.cc }};padding:4px 8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap">{{ p.st }}</span>
+                      <span style="color:#78745f;font-variant-numeric:tabular-nums;font-size:12px">{{ p.u }} исп.</span>
+                    </div>
+                  </sc-for>
+                  <div><button onClick="{{ newPromo }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">+ Новый промокод — через ассистента</button></div>
+                </div>
+              </section>
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Дни рождения</h2>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+                  <p style="margin:0;font-size:12.5px;color:#78745f">За 3 дня до дня рождения клиент автоматически получает письмо и личный промокод −10%.</p>
+                  <sc-for list="{{ bdays }}" as="b" hint-placeholder-count="3">
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding-bottom:12px;font-size:13px">
+                      <span style="width:84px">{{ b.name }}</span>
+                      <span style="color:#78745f;font-variant-numeric:tabular-nums">{{ b.dt }}</span>
+                      <span style="flex:1;color:#78745f;font-size:12px">{{ b.note }}</span>
+                      <sc-if value="{{ b.canSee }}" hint-placeholder-val="{{ false }}"><button onClick="{{ b.go }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Посмотреть</button></sc-if>
+                    </div>
+                  </sc-for>
+                  <label style="display:flex;gap:10px;align-items:center;font-size:13px"><input type="checkbox" defaultChecked="{{ true }}"> Поздравлять автоматически</label>
+                </div>
+              </section>
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Рассылка</h2>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:12px;font-size:13px">
+                  <div style="display:flex;justify-content:space-between;gap:12px"><span>Подписчиков</span><span style="font-family:Oswald">1 962</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding-bottom:12px"><span style="flex:1">Последняя: «Paul Mitchell Clear» · 12.08</span><span style="color:#78745f">38% открытий</span></div>
+                  <div><button onClick="{{ newNl }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Создать рассылку — через ассистента</button></div>
+                </div>
+              </section>
+              <section style="border:1px solid rgba(28,26,0,.15)">
+                <h2 style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Автоматика</h2>
+                <div style="padding:16px;display:flex;flex-direction:column;gap:10px;font-size:13px">
+                  <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" defaultChecked="{{ true }}"> Брошенная корзина — письмо через 3 часа</label>
+                  <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" defaultChecked="{{ true }}"> Счёт при оплате «по счёту» — сразу на почту</label>
+                  <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" defaultChecked="{{ true }}"> Просьба об отзыве через 7 дней после доставки</label>
+                  <label style="display:flex;gap:10px;align-items:center"><input type="checkbox" defaultChecked="{{ true }}"> Низкий остаток — уведомление на почту</label>
+                </div>
+              </section>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tTexts }}" hint-placeholder-val="{{ false }}">
+            <h1 style="font-family:Oswald;font-weight:500;font-size:clamp(22px,3cqi,30px);letter-spacing:.04em;text-transform:uppercase;line-height:1.05;margin:0">Тексты и SEO</h1>
+            <p style="margin:0;max-width:70ch;font-size:13px;color:#78745f">Это обычный текст — правьте как в блокноте. Пока не нажали «Опубликовать», изменения видите только вы.</p>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <sc-for list="{{ cpages }}" as="p" hint-placeholder-count="4">
+                <section style="border:1px solid rgba(28,26,0,.15)">
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-bottom:1px solid rgba(28,26,0,.15);padding:12px 16px">
+                    <h2 style="margin:0;flex:1;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">{{ p.t2 }}</h2>
+                    <span style="font-size:12px;color:#78745f">{{ p.w2 }}</span>
+                    <span style="border:{{ p.cb2 }};color:{{ p.cc2 }};padding:4px 8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap">{{ p.st }}</span>
+                  </div>
+                  <div style="padding:16px">
+                    <textarea rows="3" defaultValue="{{ p.tx }}" onInput="{{ p.touch }}" aria-label="{{ p.t2 }}" style="width:100%;border:1px solid rgba(28,26,0,.15);padding:12px;font:inherit;font-size:13px;outline:none;resize:vertical;background:transparent;box-sizing:border-box"></textarea>
+                    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+                      <button onClick="{{ p.pubGo2 }}" style="min-height:40px;background:#1c1a00;color:#fdfcf9;border:none;cursor:pointer;padding:0 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase">Опубликовать</button>
+                      <button onClick="{{ p.askET }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Перевести на ET</button>
+                      <button onClick="{{ p.askSEO }}" style="min-height:34px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">SEO</button>
+                    </div>
+                  </div>
+                </section>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+      <aside aria-label="Ассистент" style="flex:{{ asF }};min-width:{{ asMw }};max-width:100%;background:#fdfcf9;border-left:{{ asBl }};border-top:{{ asBt }};display:flex;flex-direction:column;position:{{ asPos }};bottom:{{ asB }};z-index:{{ asZ }};max-height:{{ asMh }};overflow:{{ asOv }}">
+        <sc-if value="{{ adOpen }}" hint-placeholder-val="{{ true }}">
+        <div style="border-bottom:1px solid rgba(28,26,0,.15);padding:10px 12px 10px 16px;display:flex;align-items:flex-start;gap:10px">
+          <div style="flex:1">
+            <h2 style="margin:0;font-family:Oswald;font-weight:500;font-size:12px;letter-spacing:.14em;text-transform:uppercase">Ассистент</h2>
+            <p style="margin:4px 0 0;font-size:12px;color:#78745f">Черновики с предпросмотром · публикуете вы</p>
+          </div>
+          <button onClick="{{ adT }}" title="Свернуть ассистента" aria-label="Свернуть ассистента" style="border:none;background:transparent;color:#1c1a00;cursor:pointer;font-size:14px;opacity:.6;padding:4px 8px;min-height:32px" style-hover="opacity:1">»</button>
+        </div>
+        <div data-alog style="flex:1;padding:16px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;max-height:560px">
+          <sc-for list="{{ msgs2 }}" as="m" hint-placeholder-count="1">
+            <div>
+              <p style="margin:0;font-size:13px;line-height:1.55;border-left:{{ m.bl }};padding-left:{{ m.pl }};color:{{ m.col }}">{{ m.t }}</p>
+              <sc-if value="{{ m.hasD }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:12px;border:1px solid rgba(28,26,0,.15)">
+                  <p style="margin:0;border-bottom:1px solid rgba(28,26,0,.15);background:#edeae1;padding:8px 12px;font-family:Oswald;font-size:11px;letter-spacing:.14em;text-transform:uppercase">Черновик · {{ m.f }}</p>
+                  <div style="padding:12px;display:flex;flex-direction:column;gap:8px;font-size:12px">
+                    <p style="margin:0;color:#78745f">Было: {{ m.b }}</p>
+                    <p style="margin:0;white-space:pre-line">Станет: {{ m.a2 }}</p>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;border-top:1px solid rgba(28,26,0,.15);padding:8px">
+                    <sc-if value="{{ m.pend }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ m.pub2 }}" style="min-height:36px;background:#1c1a00;color:#fdfcf9;border:none;cursor:pointer;padding:0 12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase">Опубликовать</button>
+                      <button onClick="{{ m.rej2 }}" style="min-height:36px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase">Отклонить</button>
+                    </sc-if>
+                    <sc-if value="{{ m.pubd }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase">Опубликовано ✓</span>
+                      <button onClick="{{ m.undo2 }}" style="margin-left:auto;min-height:36px;border:1px solid #1c1a00;background:transparent;color:#1c1a00;cursor:pointer;padding:0 12px;font-size:11px;letter-spacing:.12em;text-transform:uppercase">↶ Отменить</button>
+                    </sc-if>
+                    <sc-if value="{{ m.und }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#78745f">Не применено</span></sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-top:1px solid rgba(28,26,0,.15);padding:12px">
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ quick2 }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.go }}" style="min-height:34px;border:1px solid rgba(28,26,0,.15);background:transparent;color:#1c1a00;cursor:pointer;padding:0 8px;font-size:11px">{{ c.l }}</button></sc-for>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <input value="{{ aIn }}" onInput="{{ aInT }}" onKeyDown="{{ aInK }}" placeholder="Спросите ассистента…" aria-label="Сообщение ассистенту" style="min-height:44px;flex:1;border:1px solid rgba(28,26,0,.15);background:transparent;padding:0 12px;font:inherit;font-size:13px;outline:none">
+            <button onClick="{{ aInGo }}" style="min-height:44px;background:#1c1a00;color:#fdfcf9;border:none;cursor:pointer;padding:0 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase">Отправить</button>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ adClosed }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ adT }}" title="Открыть ассистента" aria-label="Открыть ассистента" style="border:none;background:transparent;color:#1c1a00;cursor:pointer;padding:{{ asBtnPad }};display:flex;flex-direction:{{ asBtnDir }};align-items:center;justify-content:center;gap:10px;min-height:44px;width:100%" style-hover="opacity:.7"><span style="font-size:14px">«</span><span style="writing-mode:{{ asWm }};font-family:Oswald;font-size:11px;letter-spacing:.18em;text-transform:uppercase">Ассистент</span></button>
+        </sc-if>
+      </aside>
+    </div>
+    </sc-if>
+    <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Кабинет">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 4.5cqi;border-bottom:1px solid rgba(28,26,0,.2)">
+        <span style="font-family:Oswald;font-weight:600;font-size:14px;letter-spacing:.3em">REMPIRE</span>
+        <button onClick="{{ goHome }}" style="border:none;background:transparent;font-size:12px;color:#1c1a00;cursor:pointer;border-bottom:1px solid rgba(28,26,0,.4);padding:2px 0">← Вернуться в магазин</button>
+      </div>
+      <div style="max-width:560px;margin:0 auto;padding:34px 4.5cqi 56px">
+        <sc-if value="{{ acctOut }}" hint-placeholder-val="{{ true }}">
+          <h1 style="font-family:Oswald;font-weight:600;font-size:20px;letter-spacing:.14em;margin:0 0 6px">ВХОД В КАБИНЕТ</h1>
+          <p style="margin:0 0 20px;font-size:12.5px;color:rgba(28,26,0,.65);text-wrap:pretty">Без пароля: пришлём код на почту. Кабинет создаётся при первом входе — заказы, адреса и рассылка в одном месте.</p>
+          <label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:4px">E-mail</label>
+          <input placeholder="renat@gmail.com" style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:14px;outline:none">
+          <button onClick="{{ acctLogin }}" style="width:100%;border:none;background:#1c1a00;color:#fdfcf9;padding:13px;font-size:12.5px;letter-spacing:.1em;cursor:pointer;margin-top:16px">ПОЛУЧИТЬ КОД</button>
+          <p style="margin:14px 0 0;font-size:11px;color:rgba(28,26,0,.5)">Гостевые заказы остаются доступны по ссылке из письма — кабинет не обязателен.</p>
+        </sc-if>
+        <sc-if value="{{ acctIn }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:4px">
+            <h1 style="font-family:Oswald;font-weight:600;font-size:20px;letter-spacing:.14em;margin:0">КАБИНЕТ</h1>
+            <button onClick="{{ acctLogout }}" style="border:none;background:transparent;font-size:11.5px;color:rgba(28,26,0,.6);cursor:pointer;border-bottom:1px solid rgba(28,26,0,.3);padding:0">Выйти</button>
+          </div>
+          <h2 style="font-family:Oswald;font-size:11px;font-weight:600;letter-spacing:.2em;margin:0 0 10px;border-bottom:1px solid #1c1a00;padding-bottom:8px">МОИ ДАННЫЕ</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px;margin-bottom:12px">
+            <label style="display:block"><span style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:4px">Имя</span><input defaultValue="Renat" style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13.5px;outline:none;box-sizing:border-box"></label>
+            <label style="display:block"><span style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:4px">E-mail</span><input defaultValue="renat@gmail.com" style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13.5px;outline:none;box-sizing:border-box"></label>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:26px">
+            <button onClick="{{ acctSave }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:11px 18px;font-size:11.5px;letter-spacing:.1em;cursor:pointer;min-height:42px">СОХРАНИТЬ</button>
+            <span style="font-size:12px;color:rgba(28,26,0,.6)">{{ acctNote }}</span>
+          </div>
+          <h2 style="font-family:Oswald;font-size:11px;font-weight:600;letter-spacing:.2em;margin:0 0 10px;border-bottom:1px solid #1c1a00;padding-bottom:8px">МОИ ПРОМОКОДЫ</h2>
+          <div style="display:flex;flex-direction:column;margin-bottom:24px">
+            <div style="display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid rgba(28,26,0,.15);flex-wrap:wrap;font-size:12.5px">
+              <span style="font-family:Oswald;letter-spacing:.06em">DR-RENAT10</span>
+              <span style="flex:1;color:rgba(28,26,0,.65)">−10% ко дню рождения · до 30.09</span>
+              <span style="font-size:10px;letter-spacing:.06em;padding:3px 8px;border:1px solid #1c1a00">АКТИВЕН</span>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid rgba(28,26,0,.15);flex-wrap:wrap;font-size:12.5px;color:rgba(28,26,0,.5)">
+              <span style="font-family:Oswald;letter-spacing:.06em">WELCOME5</span>
+              <span style="flex:1">−5 € на первый заказ</span>
+              <span style="font-size:10px;letter-spacing:.06em;padding:3px 8px;border:1px solid rgba(28,26,0,.3)">ИСПОЛЬЗОВАН</span>
+            </div>
+          </div>
+          <h2 style="font-family:Oswald;font-size:11px;font-weight:600;letter-spacing:.2em;margin:0 0 10px;border-bottom:1px solid #1c1a00;padding-bottom:8px">МОИ ЗАКАЗЫ</h2>
+          <div style="display:flex;flex-direction:column;margin-bottom:24px">
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(28,26,0,.15);flex-wrap:wrap">
+              <span style="font-size:12.5px;font-weight:600">№1291</span><span style="font-size:12px;color:rgba(28,26,0,.6);flex:1">21.08 · Repair-Me.Wash ×2</span>
+              <span style="font-size:10px;letter-spacing:.06em;padding:3px 8px;border:1px solid #1c1a00;background:#1c1a00;color:#fdfcf9">В ПУТИ</span><span style="font-size:12.5px;font-weight:600">54,50 €</span>
+              <button onClick="{{ addQuick }}" style="border:none;background:transparent;font-size:11px;color:#1c1a00;cursor:pointer;border-bottom:1px solid rgba(28,26,0,.4);padding:0">Повторить</button>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(28,26,0,.15);flex-wrap:wrap">
+              <span style="font-size:12.5px;font-weight:600">№1244</span><span style="font-size:12px;color:rgba(28,26,0,.6);flex:1">02.07 · Touchable спрей-воск</span>
+              <span style="font-size:10px;letter-spacing:.06em;padding:3px 8px;border:1px solid #1c1a00">ДОСТАВЛЕН</span><span style="font-size:12.5px;font-weight:600">27 €</span>
+              <button onClick="{{ addQuick }}" style="border:none;background:transparent;font-size:11px;color:#1c1a00;cursor:pointer;border-bottom:1px solid rgba(28,26,0,.4);padding:0">Повторить</button>
+            </div>
+          </div>
+          <h2 style="font-family:Oswald;font-size:11px;font-weight:600;letter-spacing:.2em;margin:0 0 10px;border-bottom:1px solid #1c1a00;padding-bottom:8px">ДОСТАВКА ПО УМОЛЧАНИЮ</h2>
+          <div style="display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:10px 0;border-bottom:1px solid rgba(28,26,0,.15);margin-bottom:24px;flex-wrap:wrap">
+            <span>Пакомат Omniva — Tallinn, Kristiine keskus</span>
+            <button style="border:none;background:transparent;font-size:11px;color:#1c1a00;cursor:pointer;border-bottom:1px solid rgba(28,26,0,.4);padding:0">Изменить</button>
+          </div>
+          <label style="display:flex;gap:10px;align-items:center;font-size:12.5px"><input type="checkbox" checked> Рассылка: новинки и советы — раз в месяц</label>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+    <sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Оформление">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 4.5cqi;border-bottom:1px solid rgba(28,26,0,.2)">
+        <span style="font-family:Oswald;font-weight:600;font-size:14px;letter-spacing:.3em">REMPIRE</span>
+        <button onClick="{{ goHome }}" style="border:none;background:transparent;font-size:12px;color:#1c1a00;cursor:pointer;border-bottom:1px solid rgba(28,26,0,.4);padding:2px 0">← Вернуться в магазин</button>
+      </div>
+      <div style="padding:26px 4.5cqi 44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:34px;max-width:980px;margin:0 auto">
+        <div style="display:flex;flex-direction:column;gap:26px">
+          <div>
+            <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 12px">1 · КОНТАКТ</h2>
+            <label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:4px">E-mail для подтверждения заказа</label>
+            <input value="renat@gmail" style="width:100%;border:none;border-bottom:2px solid #8c1a0f;background:transparent;padding:7px 2px;font:inherit;font-size:13px;outline:none">
+            <div style="font-size:11.5px;color:#8c1a0f;margin-top:5px">Похоже, в адресе опечатка — проверьте домен (например, gmail.com).</div>
+            <div style="font-size:11.5px;color:rgba(28,26,0,.55);margin-top:8px">Аккаунт не нужен — оформляйте как гость. Заказ и чек придут на почту.</div>
+          </div>
+          <div>
+            <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 12px">2 · ДОСТАВКА</h2>
+            <div style="display:flex;flex-direction:column;border-top:1px solid rgba(28,26,0,.2)">
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship" defaultChecked="{{ true }}"><span style="flex:1">Пакомат Omniva</span><span style="font-weight:600">3,50 €</span></label>
+              <div style="padding:4px 2px 14px;border-bottom:1px solid rgba(28,26,0,.2)">
+                <select style="width:100%;border:1px solid rgba(28,26,0,.35);background:transparent;font:inherit;font-size:12.5px;padding:9px 8px"><option>Tallinn — Kristiine keskus</option><option>Tallinn — Ülemiste keskus</option><option>Tallinn — Solaris</option><option>Tartu — Kvartal</option></select>
+              </div>
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship"><span style="flex:1">Пакомат SmartPosti</span><span style="font-weight:600">3,50 €</span></label>
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship"><span style="flex:1">Пакомат DPD</span><span style="font-weight:600">3,90 €</span></label>
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship"><span style="flex:1">Курьер до двери (DPD)</span><span style="font-weight:600">5,90 €</span></label>
+            </div>
+          </div>
+          <div>
+            <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 12px">3 · ОПЛАТА</h2>
+            <div style="display:flex;flex-direction:column;border-top:1px solid rgba(28,26,0,.2)">
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="pay" defaultChecked="{{ true }}"><span>Банковская ссылка</span></label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;padding:4px 2px 14px;border-bottom:1px solid rgba(28,26,0,.2)">
+                <span style="border:1px solid #1c1a00;padding:7px 12px;font-size:12px">Swedbank</span><span style="border:1px solid rgba(28,26,0,.3);padding:7px 12px;font-size:12px">SEB</span><span style="border:1px solid rgba(28,26,0,.3);padding:7px 12px;font-size:12px">LHV</span><span style="border:1px solid rgba(28,26,0,.3);padding:7px 12px;font-size:12px">Luminor</span><span style="border:1px solid rgba(28,26,0,.3);padding:7px 12px;font-size:12px">Coop</span>
+              </div>
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="pay"><span>Банковская карта</span></label>
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="pay"><span>Apple Pay / Google Pay</span></label>
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="pay"><span>PayPal</span></label>
+              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="pay"><span style="flex:1">По счёту — для компаний</span><span style="font-size:11px;color:rgba(28,26,0,.5)">название фирмы + рег. код</span></label>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="border:1px solid rgba(28,26,0,.25);padding:18px;position:sticky;top:70px;display:flex;flex-direction:column;gap:12px">
+            <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0">ВАШ ЗАКАЗ</h2>
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:44px;height:44px;background:#fff;border:1px solid rgba(28,26,0,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center"><img src="https://rempireshop.com/cdn/shop/files/photo-6.jpg?v=1688742837&amp;width=533" alt="" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></div>
+              <div style="flex:1;font-size:12.5px">Repair-Me.Wash · 250 мл × {{ checkoutQty }}</div>
+              <div style="font-size:12.5px;font-weight:600">{{ checkoutItems }}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;border-top:1px solid rgba(28,26,0,.15);padding-top:10px"><span>Доставка — пакомат Omniva</span><span>3,50 €</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;border-top:1px solid #1c1a00;padding-top:10px"><span>Итого</span><span>{{ checkoutTotal }}</span></div>
+            <button style="border:none;background:#1c1a00;color:#fdfcf9;padding:14px;font-size:13px;letter-spacing:.1em;cursor:pointer">ОПЛАТИТЬ {{ checkoutTotal }}</button>
+            <div style="font-size:10.5px;color:rgba(28,26,0,.55);line-height:1.5">Нажимая «Оплатить», вы соглашаетесь с <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">условиями</a> и <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">политикой возврата</a>. Оплата проходит через защищённое соединение банка.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+    <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeCart }}" style="position:absolute;inset:0;background:rgba(28,26,0,.35);z-index:5;animation:fadeIn .25s ease"></div>
+      <div data-screen-label="Корзина" style="position:absolute;top:0;bottom:0;right:0;width:min(360px,88cqi);background:#fdfcf9;border-left:1px solid #1c1a00;z-index:6;padding:20px;overflow:auto;--sx:100%;animation:slideIn .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:Oswald;font-weight:600;font-size:13px;letter-spacing:.18em;white-space:nowrap">КОРЗИНА ({{ cartN }})</span><button onClick="{{ closeCart }}" aria-label="Закрыть" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:#1c1a00">×</button></div>
+        <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start;padding:20px 0">
+            <div style="font-size:13px;color:rgba(28,26,0,.7)">Корзина пуста.</div>
+            <button onClick="{{ cartToHome }}" style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;padding:10px 16px;font-size:12px;cursor:pointer">К бестселлерам</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:12px;border-top:1px solid rgba(28,26,0,.15);padding-top:14px">
+            <div style="width:56px;height:56px;background:#fff;border:1px solid rgba(28,26,0,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center"><img src="https://rempireshop.com/cdn/shop/files/photo-6.jpg?v=1688742837&amp;width=533" alt="" style="max-width:78%;max-height:78%;object-fit:contain;mix-blend-mode:multiply"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:12.5px;line-height:1.3">Kevin.Murphy Repair-Me.Wash · 250 мл</div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="display:inline-flex;border:1px solid rgba(28,26,0,.35)">
+                  <button onClick="{{ cDec }}" aria-label="Меньше" style="border:none;background:transparent;width:28px;font-size:13px;cursor:pointer;color:#1c1a00">−</button>
+                  <span style="display:inline-flex;align-items:center;min-width:20px;justify-content:center;font-size:12px">{{ cartN }}</span>
+                  <button onClick="{{ cInc }}" aria-label="Больше" style="border:none;background:transparent;width:28px;font-size:13px;cursor:pointer;color:#1c1a00">+</button>
+                </span>
+                <span style="font-size:13px;font-weight:600">{{ cartItems }}</span>
+              </div>
+              <button onClick="{{ cRemove }}" style="border:none;background:transparent;color:rgba(28,26,0,.55);font-size:11px;cursor:pointer;padding:0;text-align:left;width:max-content;border-bottom:1px solid rgba(28,26,0,.25)">Убрать</button>
+            </div>
+          </div>
+          <div style="border-top:1px solid rgba(28,26,0,.15);padding-top:12px">
+            <div style="font-size:11.5px;color:rgba(28,26,0,.7);margin-bottom:6px">{{ shipNote }}</div>
+            <div style="height:2px;background:rgba(28,26,0,.15)"><div style="height:2px;background:#1c1a00;width:{{ progressW }};transition:width .3s ease"></div></div>
+          </div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;border-top:1px solid #1c1a00;padding-top:12px"><span>Итого</span><span>{{ cartItems }}</span></div>
+            <div style="font-size:10.5px;color:rgba(28,26,0,.55)">Налоги включены. Доставка рассчитается при оформлении.</div>
+            <button onClick="{{ goCheckout }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:13px;font-size:12.5px;letter-spacing:.1em;cursor:pointer">ОФОРМИТЬ ЗАКАЗ</button>
+            <button onClick="{{ closeCart }}" style="border:none;background:transparent;color:rgba(28,26,0,.65);padding:4px;font-size:12px;cursor:pointer">Продолжить покупки</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Допродажа" style="position:absolute;left:50%;transform:translateX(-50%);bottom:16px;z-index:8;background:#1c1a00;color:#fdfcf9;padding:12px 14px;width:min(430px,92cqi);display:flex;gap:12px;align-items:center;box-shadow:0 12px 34px rgba(28,26,0,.35);animation:toastUp .35s cubic-bezier(.2,.8,.2,1)">
+        <div style="width:46px;height:46px;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center"><div role="img" aria-label="Un.Tangled" style="width:80%;height:80%;background-image:url('https://rempireshop.com/cdn/shop/files/un.tangled_150ml-02-scaled-1.webp?v=1703257575&amp;width=533');background-size:contain;background-position:center;background-repeat:no-repeat"></div></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10.5px;opacity:.65;margin-bottom:2px">Добавлено в корзину ✓ · К шампуню подойдёт:</div>
+          <div style="font-size:12.5px;line-height:1.35">Kevin.Murphy Un.Tangled — несмываемый кондиционер, от 8 €</div>
+        </div>
+        <button onClick="{{ addQuick }}" style="border:1px solid rgba(253,252,249,.6);background:transparent;color:#fdfcf9;padding:8px 12px;font-size:11px;letter-spacing:.06em;cursor:pointer;white-space:nowrap">Добавить</button>
+        <button onClick="{{ closeToast }}" aria-label="Закрыть" style="border:none;background:transparent;color:#fdfcf9;font-size:16px;cursor:pointer;padding:4px">×</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ filterOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeFilter }}" style="position:absolute;inset:0;background:rgba(28,26,0,.35);z-index:5;animation:fadeIn .25s ease"></div>
+      <div data-screen-label="Фильтры" style="position:absolute;top:0;bottom:0;left:0;width:min(320px,85cqi);background:#fdfcf9;border-right:1px solid #1c1a00;z-index:6;padding:20px;overflow:auto;--sx:-100%;animation:slideIn .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:Oswald;font-weight:600;font-size:13px;letter-spacing:.18em">ФИЛЬТРЫ</span><button onClick="{{ closeFilter }}" aria-label="Закрыть" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:#1c1a00">×</button></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11px;letter-spacing:.14em;color:rgba(28,26,0,.55)">БРЕНД</div>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox" checked> Kevin.Murphy</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox"> System 4</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox"> Paul Mitchell</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox"> Davines</label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11px;letter-spacing:.14em;color:rgba(28,26,0,.55)">ТИП</div>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox"> Шампунь</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox"> Кондиционер</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox"> Маска и уход</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="checkbox"> Стайлинг</label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:11px;letter-spacing:.14em;color:rgba(28,26,0,.55)">ЦЕНА</div>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="radio" name="pr"> До 10 €</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="radio" name="pr" checked> 10–25 €</label>
+          <label style="display:flex;gap:10px;font-size:13px;align-items:center"><input type="radio" name="pr"> От 25 €</label>
+        </div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+          <button onClick="{{ closeFilter }}" style="border:none;background:#1c1a00;color:#fdfcf9;padding:12px;font-size:12.5px;letter-spacing:.06em;cursor:pointer">ПОКАЗАТЬ {{ catCount }} ТОВАРОВ</button>
+          <button onClick="{{ closeFilter }}" style="border:none;background:transparent;color:rgba(28,26,0,.6);padding:4px;font-size:12px;cursor:pointer">Сбросить всё</button>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+const CDN = "https://rempireshop.com/cdn/shop/files/";
+const CCDN = "https://rempireshop.com/cdn/shop/collections/";
+class Component extends DCLogic {
+  state = { dir: "a", w: 390, screen: "home", filterOpen: false, size: "250", qty: 1, gal: 0, vid: 0, vidMut: true, toastOpen: false, cartOpen: false, cartN: 0, acctIn: false, acctNote: "", introOn: true, lang: "RU", navLoad: false, adminTab: "stats", adminNav: true, adOpen: true, aDraft: "", aIn: "", cp: { h: "ОПУБЛИКОВАНО", ch: "ОПУБЛИКОВАНО", cb: "ЧЕРНОВИК", dl: "ОПУБЛИКОВАНО" }, am: [{ r: "a", t: "Готов помочь: тексты, переводы, SEO, ответы клиентам. Любое изменение сначала покажу черновиком — без вашего подтверждения ничего не публикуется." }], aMsgs: [{ q: "Обнови SEO-описание категории «Стайлинг» и переведи его на эстонский", a: "Готово: title, description и текст категории обновлены (RU). Эстонский перевод — в черновике. Открыть предпросмотр?" }] };
+  componentDidMount() { this._introT = setTimeout(() => this.setState({ introOn: false }), 3100); }
+  componentWillUnmount() { clearTimeout(this._introT); clearTimeout(this._toastT); }
+  aPush(q, a) { this.setState(s => ({ aMsgs: [...s.aMsgs, { q, a }], aDraft: "" })); setTimeout(() => { const el = document.querySelector("[data-alog]"); if (el) el.scrollTop = el.scrollHeight; }, 60); }
+  ask2(text) {
+    const R = [
+      [/перевести|\bET\b|эстон/i, "Подготовил перевод вводного текста категории «Уход за волосами» на эстонский. Проверьте и опубликуйте — сам ничего не сохраняю.", { f: "Категория «Уход за волосами» · ET", b: "— (перевода нет)", a: "Šampoonid, palsamid ja hooldusseerumid, millega töötame igapäevaselt salongis Mardi 1. Kevin.Murphy, Davines, System 4 ja Paul Mitchell." }],
+      [/SEO/i, "Черновик SEO-заголовка и описания для категории «Стайлинг». Длина в пределах 60 и 160 символов.", { f: "Стайлинг · title + description", b: "Стайлинг — REMPIRE", a: "Стайлинг волос: пасты, воски, спреи — REMPIRE\nПасты, воски и спреи Kevin.Murphy и Paul Mitchell. Доставка по Эстонии от 50 € бесплатно, магазин на Mardi 1." }],
+      [/instagram|пост/i, "Черновик поста. Без обещаний результата и медицинских формулировок.", { f: "Instagram · пост о Repair-Me.Wash", b: "— (черновика нет)", a: "Восстанавливающий шампунь, которым мы моем в салоне каждый день. Протеины и аминокислоты, сульфат-фри. 40 мл — попробовать, 250 мл — на курс. Mardi 1, Таллинн." }],
+      [/описан|davines oi|карточк/i, "Черновик описания товара по фото и названию. Характеристики не выдумывал — уточните объём и состав.", { f: "Товар · описание", b: "— (описания нет)", a: "Крем-паста для укладки с гибкой фиксацией. Легко распределяется, не оставляет плёнки, укладку можно поправить в течение дня." }],
+      [/./, "Понял. Могу подготовить черновик текста, перевод или ответ клиенту — каждое изменение покажу до публикации.", null]
+    ];
+    const hit = R.find(([re]) => re.test(text));
+    this.setState(s => ({ am: [...s.am, { r: "o", t: text }, { r: "a", t: hit[1], d: hit[2], st: hit[2] ? "p" : undefined }], aIn: "", adOpen: true }));
+    setTimeout(() => { const el = document.querySelector("[data-alog]"); if (el) el.scrollTop = el.scrollHeight; }, 60);
+  }
+  amSet(i, st) { this.setState(s => ({ am: s.am.map((m, j) => j === i ? { ...m, st } : m) })); }
+  vKick() { setTimeout(() => { const v = document.querySelector("[data-vid]"); if (v) { const want = "media/owner-" + (this.state.vid + 1) + ".mp4"; if (v.getAttribute("src") !== want) v.setAttribute("src", want); v.muted = this.state.vidMut; const p = v.play(); if (p && p.catch) p.catch(() => {}); } }, 120); }
+  nav(k) { clearTimeout(this._loadT); this.setState({ screen: k, filterOpen: false, cartOpen: false, navLoad: true, gal: 0 }); this._loadT = setTimeout(() => this.setState({ navLoad: false }), 850); this.vKick(); window.scrollTo({ top: 0 }); }
+  renderVals() {
+    const { dir, w, screen } = this.state;
+    const on = { background: "#1c1a00", color: "#fdfcf9" }, off = { background: "transparent", color: "#1c1a00" };
+    const built = ["home", "cat", "product", "cart", "checkout", "search", "blog", "account", "admin"];
+    const fmt = n => (Number.isInteger(Math.round(n * 100) / 100) ? String(n) : n.toFixed(2).replace(".", ",")) + " €";
+    const itemSum = 27 * this.state.cartN;
+    const names = [["home", "Главная"], ["cat", "Категория"], ["product", "Товар"], ["cart", "Корзина"], ["checkout", "Оформление"], ["search", "Поиск"], ["blog", "Блог"], ["account", "Кабинет"], ["admin", "Админка"]];
+    return {
+      isA: (dir === "a" || dir === "c" || dir === "d" || dir === "e" || dir === "f" || dir === "g" || dir === "h") && screen !== "checkout" && screen !== "admin" && screen !== "account",
+      fStage: dir === "f", gStage: dir === "g", hStage: dir === "h",
+      setDirH: () => { this.setState({ dir: "h" }); this.vKick(); },
+      zBg: dir === "h" ? on.background : off.background, zFg: dir === "h" ? on.color : off.color,
+      vidMut: this.state.vidMut,
+      vidBtns: [0, 1, 2, 3].map(i => ({
+        n: "В" + (i + 1),
+        go: () => { this.setState({ vid: i }); this.vKick(); },
+        bd: this.state.vid === i ? "1px solid #fdfcf9" : "1px solid rgba(253,252,249,.35)"
+      })),
+      vidEnd: () => { this.setState(s => ({ vid: (s.vid + 1) % 4 })); this.vKick(); },
+      sndT: () => { this.setState(s => ({ vidMut: !s.vidMut })); this.vKick(); },
+      sndL: this.state.vidMut ? "ЗВУК: ВЫКЛ" : "ЗВУК: ВКЛ",
+      setDirF: () => this.setState({ dir: "f" }), setDirG: () => this.setState({ dir: "g" }),
+      lvBg: dir === "f" ? on.background : off.background, lvFg: dir === "f" ? on.color : off.color,
+      fnBg: dir === "g" ? on.background : off.background, fnFg: dir === "g" ? on.color : off.color,
+      eStage: dir === "e",
+      setDirE: () => this.setState({ dir: "e" }),
+      eBg: dir === "e" ? on.background : off.background, eFg: dir === "e" ? on.color : off.color, isB: dir === "b" && screen !== "checkout" && screen !== "admin" && screen !== "account",
+      dStage: dir === "d", dWm: dir === "d" || dir === "g", ndWm: dir !== "d" && dir !== "g",
+      setDirD: () => this.setState({ dir: "d" }),
+      gBg: dir === "d" ? on.background : off.background, gFg: dir === "d" ? on.color : off.color,
+      isAccount: screen === "account", acctOut: !this.state.acctIn, acctIn: this.state.acctIn,
+      goAccount: () => this.nav("account"),
+      acctLogin: () => this.setState({ acctIn: true }),
+      acctLogout: () => this.setState({ acctIn: false }),
+      cStage: dir === "c", aPlainHero: dir === "a",
+      twCls: "twlogo" + (this.state.navLoad ? " tw-loading" : ""),
+      shOrd: w === 390 ? "2" : "0", clOrd: w === 390 ? "1" : "0",
+      shF: w === 390 ? "1 1 100%" : "1 1 150px",
+      g0b: this.state.gal === 0 ? "1px solid #1c1a00" : "1px solid rgba(28,26,0,.15)",
+      g1b: this.state.gal === 1 ? "1px solid #1c1a00" : "1px solid rgba(28,26,0,.15)",
+      g0bg: this.state.gal === 0 ? "#edeae1" : "#fff",
+      g1bg: this.state.gal === 1 ? "#edeae1" : "#fff",
+      galHint: w === 390 ? "листайте фото свайпом →" : "фото " + (this.state.gal + 1) + " / 2",
+      galTo0: () => { const el = document.querySelector("[data-gal]"); if (el) el.scrollTo({ left: 0, behavior: "smooth" }); },
+      galTo1: () => { const el = document.querySelector("[data-gal]"); if (el) el.scrollTo({ left: el.clientWidth, behavior: "smooth" }); },
+      galScroll: e => { const el = e.target; const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth)); if (i !== this.state.gal) this.setState({ gal: i }); },
+      cBotDisp: (dir === "c" || dir === "f" || dir === "g" || dir === "h") && w === 390 && screen !== "product" ? "flex" : "none",
+      setDirC: () => this.setState({ dir: "c" }),
+      cBg: dir === "c" ? on.background : off.background, cFg: dir === "c" ? on.color : off.color,
+      isAdmin: screen === "admin",
+      sideTabs: [["stats", "Сводка", "", "С"], ["orders", "Заказы", "6", "З"], ["goods", "Товары", "4", "Т"], ["mkt", "Маркетинг", "3", "М"], ["texts", "Тексты и SEO", "4", "SEO"]].map(([k, l, c, i]) => ({ l, c, i, go: () => this.setState({ adminTab: k }), bg: this.state.adminTab === k ? "rgba(253,252,249,.12)" : "transparent" })),
+      sbOpen: this.state.adminNav, sbClosed: !this.state.adminNav,
+      sbF: this.state.adminNav ? "1 0 240px" : "1 0 56px",
+      sbP: this.state.adminNav ? "12px 16px 20px" : "10px 8px 16px",
+      sbI: this.state.adminNav ? "«" : "»",
+      sbTt: this.state.adminNav ? "Свернуть меню" : "Развернуть меню",
+      sbAl: this.state.adminNav ? "flex-end" : "center",
+      sbT: () => this.setState(s => ({ adminNav: !s.adminNav })),
+      adOpen: this.state.adOpen, adClosed: !this.state.adOpen,
+      asF: this.state.adOpen ? (w === 390 ? "1 1 100%" : "1 1 clamp(280px,28cqi,360px)") : (w === 390 ? "1 0 100%" : "0 0 44px"),
+      asMw: this.state.adOpen ? "min(100%,280px)" : "0px",
+      asBl: w === 390 ? "none" : "2px solid #1c1a00",
+      asBt: w === 390 ? "2px solid #1c1a00" : "none",
+      asPos: w === 390 ? "sticky" : "static",
+      asB: w === 390 ? "0" : "auto",
+      asZ: w === 390 ? "15" : "auto",
+      asMh: w === 390 && this.state.adOpen ? "min(70vh,540px)" : "none",
+      asOv: w === 390 && this.state.adOpen ? "hidden" : "visible",
+      asBtnPad: w === 390 ? "10px 16px" : "14px 4px",
+      asBtnDir: w === 390 ? "row" : "column",
+      asWm: w === 390 ? "horizontal-tb" : "vertical-rl",
+      adT: () => this.setState(s => ({ adOpen: !s.adOpen })),
+      attOrders: () => this.setState({ adminTab: "orders" }),
+      attPay: () => this.setState({ adminTab: "orders" }),
+      attStock: () => this.setState({ adminTab: "goods" }),
+      kpi2: [["Выручка за 30 дней", "8 420 €", "+12% к июлю"], ["Заказов", "214", "+18 заказов"], ["Средний чек", "39,30 €", "−1,10 €"], ["Подписчиков", "1 962", "+87"]].map(([l, v, d]) => ({ l, v, d })),
+      hintAsk2: () => this.ask2("Подготовь описание и SEO для Davines OI масло"),
+      missed: [["davines oi масло", 41], ["kevin murphy hydrate me", 28], ["триммер", 19], ["подарочный сертификат", 14]].map(([q, c]) => ({ q, c, go: () => this.ask2("Что делать с запросом «" + q + "»?") })),
+      aband: [["C-8841", "Repair-Me.Wash 250 мл, Free.Hold 100 г", "3 часа назад", "74 €"], ["C-8837", "Clear Jelly Mask", "вчера", "29 €"], ["C-8830", "System 4 курс, Touchable", "2 дня назад", "132 €"]].map(([id, items, when, v]) => ({ id, items, when, v, go: () => this.ask2("Напиши письмо клиенту по брошенной корзине " + id) })),
+      tops2: [["Kevin.Murphy Repair-Me.Wash", "62"], ["System 4 Bio Botanical Shampoo", "47"], ["Kevin.Murphy Touchable", "38"]].map(([name, sold]) => ({ name, sold })),
+      weaks2: [["Paul Mitchell Clear Jelly Mask", "3"], ["System 4 Bio Botanical Serum", "5"]].map(([name, sold]) => ({ name, sold })),
+      weakAsk: () => this.ask2("Почему Clear Jelly Mask плохо продаётся и что написать в карточке?"),
+      shares: [["Kevin.Murphy", 44], ["System 4", 21], ["Davines", 14], ["Rempire Merch", 11], ["Прочее", 10]].map(([b, s]) => ({ b, s: s + "%", w: s + "%" })),
+      orders2: [
+        ["R-2481", "22.08", "Marek Tamm", "Tallinn · Omniva", "Swedbank", "61 €", "ОПЛАЧЕН", "Ярлык"],
+        ["R-2480", "22.08", "Анна Кузнецова", "Tartu · SmartPosti", "Карта", "34 €", "ОТПРАВЛЕН", "Где посылка"],
+        ["R-2479", "21.08", "Rempire Studio OÜ", "Tallinn · курьер", "По счёту", "218 €", "ЖДЁТ ОПЛАТЫ", "Напомнить о счёте"],
+        ["R-2478", "21.08", "Kristjan Saar", "Pärnu · DPD", "LHV", "27 €", "ДОСТАВЛЕН", "Написать клиенту"],
+        ["R-2477", "20.08", "Ольга Петрова", "Tallinn · самовывоз", "Apple Pay", "96 €", "ОПЛАЧЕН", "Ярлык"],
+        ["R-2476", "20.08", "Liis Kask", "Narva · Omniva", "SEB", "42 €", "ДОСТАВЛЕН", "Написать клиенту"]
+      ].map(([id, dt, who, city, method, sum2, st, act]) => ({
+        id, dt, who, sub: city + " · " + method, sum2, st, act,
+        cb: st === "ЖДЁТ ОПЛАТЫ" ? "1px solid #8c1a0f" : st === "ДОСТАВЛЕН" ? "1px solid rgba(28,26,0,.15)" : "1px solid #1c1a00",
+        cc: st === "ЖДЁТ ОПЛАТЫ" ? "#8c1a0f" : st === "ДОСТАВЛЕН" ? "#78745f" : "#1c1a00",
+        go: () => this.ask2(act + " по заказу " + id)
+      })),
+      goods2: [
+        ["Kevin.Murphy Repair-Me.Wash", "от 7 €", "photo-6.jpg?v=1688742837", 12, 4],
+        ["Kevin.Murphy Free.Hold", "от 11 €", "free.hold_100g-04copy.jpg?v=1688656773", 8, 3],
+        ["System 4 Bio Botanical Shampoo", "от 9 €", "6417150024437.jpg?v=1689780757", 23, 6],
+        ["Paul Mitchell Clear Jelly Mask", "29 €", "PM_Clear_Jelly_Mask_webp.jpg?v=1780512771", 3, 1]
+      ].map(([name, pl, ff, s1, s2]) => {
+        const low = s1 <= 3;
+        return { name, pl, img: CDN + ff + "&width=160", stTx: "сайт " + s1 + " · Mardi 1 " + s2, low, sc: low ? "#8c1a0f" : "#78745f",
+          ai1: () => this.ask2("AI: описание для " + name), ai2: () => this.ask2("Перевести карточку " + name + " на ET и EN"), ai3: () => this.ask2("SEO для " + name) };
+      }),
+      newGood2: () => this.ask2("Новый товар: загружу фото и название, собери карточку"),
+      cpages: [
+        ["h", "Главная — заголовок и подпись", "Главная страница", "Профессиональный уход для волос, бороды, лица и тела. Таллинн, с 2018 года."],
+        ["ch", "Уход за волосами — вводный текст категории", "/catalog/hair", "Шампуни, кондиционеры и уходовые сыворотки, которыми мы работаем в салоне на Mardi 1."],
+        ["cb", "Уход за бородой — вводный текст категории", "/catalog/beard", "Масла, бальзамы и шампуни для бороды: смягчают жёсткий волос и снимают раздражение кожи под ним."],
+        ["dl", "Доставка и возврат", "Футер и карточки товара", "DPD, Omniva, SmartPosti и курьер. Возврат в течение 14 дней, косметика — только в невскрытой упаковке."]
+      ].map(([id, t2, w2, tx]) => {
+        const st = this.state.cp[id];
+        return { t2, w2, tx, st,
+          cb2: st === "ЧЕРНОВИК" ? "1px solid #8c1a0f" : "1px solid #1c1a00", cc2: st === "ЧЕРНОВИК" ? "#8c1a0f" : "#1c1a00",
+          touch: () => this.setState(s => s.cp[id] === "ЧЕРНОВИК" ? null : ({ cp: { ...s.cp, [id]: "ЧЕРНОВИК" } })),
+          pubGo2: () => this.setState(s => ({ cp: { ...s.cp, [id]: "ОПУБЛИКОВАНО" } })),
+          askET: () => this.ask2("Перевести на ET текст: " + t2), askSEO: () => this.ask2("SEO для страницы " + w2) };
+      }),
+      msgs2: this.state.am.map((m, i) => ({
+        t: m.t, bl: m.r === "o" ? "2px solid #1c1a00" : "none", pl: m.r === "o" ? "12px" : "0", col: m.r === "o" ? "#1c1a00" : "#78745f",
+        hasD: !!m.d, f: m.d ? m.d.f : "", b: m.d ? m.d.b : "", a2: m.d ? m.d.a : "",
+        pend: m.st === "p", pubd: m.st === "y", und: m.st === "n",
+        pub2: () => this.amSet(i, "y"), rej2: () => this.amSet(i, "n"), undo2: () => this.amSet(i, "n")
+      })),
+      quick2: ["Перевести на ET", "SEO для категории", "Пост для Instagram", "Ответ клиенту"].map(l => ({ l, go: () => this.ask2(l) })),
+      aIn: this.state.aIn,
+      aInT: e => this.setState({ aIn: e.target.value }),
+      aInK: e => { if (e.key === "Enter" && this.state.aIn.trim()) this.ask2(this.state.aIn.trim()); },
+      aInGo: () => { if (this.state.aIn.trim()) this.ask2(this.state.aIn.trim()); },
+      tStats: this.state.adminTab === "stats", tOrders: this.state.adminTab === "orders", tGoods: this.state.adminTab === "goods", tTexts: this.state.adminTab === "texts", tMkt: this.state.adminTab === "mkt",
+      promos: [["REMPIRE10", "−10% на первый заказ", "АКТИВЕН", 41], ["SUMMER15", "−15% на стайлинг · до 31.08", "АКТИВЕН", 112], ["HAND5", "−5 € на «Уход за руками»", "ЧЕРНОВИК", 0]].map(([code, d, st, u]) => ({ code, d, st, u, cb: st === "ЧЕРНОВИК" ? "1px solid #8c1a0f" : "1px solid #1c1a00", cc: st === "ЧЕРНОВИК" ? "#8c1a0f" : "#1c1a00" })),
+      newPromo: () => this.ask2("Создай промокод −10% на категорию «Стайлинг» до конца месяца"),
+      bdays: [
+        { name: "Anna K.", dt: "26.08", note: "письмо и промокод DR-ANNA10 готовы", canSee: true, go: () => this.ask2("Покажи поздравление для Anna K.") },
+        { name: "Marek T.", dt: "03.09", note: "запланировано автоматически" },
+        { name: "Liis K.", dt: "11.09", note: "запланировано автоматически" }
+      ],
+      newNl: () => this.ask2("Собери рассылку: новинки Paul Mitchell и бестселлеры недели"),
+      acctSave: () => this.setState({ acctNote: "Сохранено ✓" }),
+      acctNote: this.state.acctNote,
+      adminTabs: [["stats", "Сводка", ""], ["orders", "Заказы", "4"], ["goods", "Товары", "128"], ["texts", "Тексты и SEO", "12"]].map(([k, l, c]) => ({
+        l, c, go: () => this.setState({ adminTab: k }),
+        bg: this.state.adminTab === k ? "rgba(253,252,249,.13)" : "transparent",
+        bl: this.state.adminTab === k ? "3px solid #fdfcf9" : "3px solid transparent"
+      })),
+      stats: [
+        { k: "Ищут, но нет в ассортименте", v: "«духи» — 14 · «gift card» — 9 · «крем для рук» — 7", hint: "добавить категорию?" },
+        { k: "Чаще всего смотрят", v: "Repair-Me.Wash · Free.Hold · Bio Botanical Shampoo" },
+        { k: "Кладут в корзину, но не покупают", v: "Clear Jelly Mask — 12 брошенных корзин за месяц", hint: "напомнить письмом" },
+        { k: "Продаётся лучше всего", v: "System 4 Bio Botanical Shampoo — 41 шт/мес" },
+        { k: "Продаётся хуже всего", v: "CBD Daily Soothing Serum — 1 шт/мес", hint: "акция −15%?" },
+        { k: "Популярные бренды и категории", v: "Kevin.Murphy 38% · System 4 27% · Волосы 61%" }
+      ].map(s => ({ ...s, ask: () => this.aPush(s.k + " — " + (s.hint || ""), "Предлагаю план: черновик уже в работе. Посмотрите предпросмотр — публикуем только после вашего «да».") })),
+      hintAsk: () => this.aPush("Стоит ли добавить категорию «Уход за руками»?", "Да: 30 запросов за 3 недели. Черновик категории готов — 6 товаров Davines и Korean Cosmetics из текущих поставщиков. Открыть?"),
+      orders: [
+        { n: "№1291", who: "Anna K. · Tallinn, Omniva", sum: "54,50 €", st: "ОПЛАЧЕН", stBg: "#1c1a00", stFg: "#fdfcf9", act: "Ярлык DPD ↗", r: "Ярлык доставки создан, трек-номер отправлен Anna K. на почту. Заказ можно собирать." },
+        { n: "№1290", who: "Marko T. · Tartu, DPD", sum: "27 €", st: "ОТПРАВЛЕН", stBg: "transparent", stFg: "#1c1a00", act: "Где посылка? ↗", r: "Посылка №1290 в сортировочном центре Тарту, вручение завтра до 17:00. Написать клиенту?" },
+        { n: "№1289", who: "Salon Elu OÜ · по счёту", sum: "212 €", st: "ЖДЁТ ОПЛАТЫ", stBg: "transparent", stFg: "#1c1a00", act: "Напомнить о счёте ↗", r: "Счёт №1289-A уже у клиента (отправлен автоматически). Вежливое напоминание готово — отправить?" },
+        { n: "№1288", who: "Diana S. · Tallinn, SmartPosti", sum: "46,50 €", st: "ДОСТАВЛЕН", stBg: "transparent", stFg: "#1c1a00" }
+      ].map(o => ({ ...o, go: () => this.aPush(o.act + " — заказ " + o.n, o.r) })),
+      goods: [
+        { name: "Kevin.Murphy Repair-Me.Wash 250 мл", price: "27 €", stock: "12 шт · Mardi 1: 4", stCol: "rgba(28,26,0,.6)" },
+        { name: "Kevin.Murphy Free.Hold 100 г", price: "от 11 €", stock: "8 шт · Mardi 1: 3", stCol: "rgba(28,26,0,.6)" },
+        { name: "System 4 Bio Botanical Shampoo 500 мл", price: "от 9 €", stock: "23 шт · Mardi 1: 6", stCol: "rgba(28,26,0,.6)" },
+        { name: "Paul Mitchell Clear Jelly Mask", price: "29 €", stock: "⚠ 5 шт · Mardi 1: 2 — заканчивается", stCol: "#8c1a0f" }
+      ].map(g => ({
+        ...g,
+        ai1: () => this.aPush("Обнови описание: " + g.name, "Черновик описания готов (RU) — тон бренда, без воды. Открыть предпросмотр?"),
+        ai2: () => this.aPush("Переведи карточку: " + g.name, "Перевод ET + EN готов в черновике. Термины бренда не переводились. Открыть предпросмотр?"),
+        ai3: () => this.aPush("Обнови SEO: " + g.name, "Title, description и alt-тексты обновлены в черновике. Прогноз: +позиции по «" + g.name.split(" ")[1] + "». Опубликовать?")
+      })),
+      newGood: () => this.aPush("Добавь новый товар", "Пришлите фото и название (или ссылку поставщика) — заполню карточку сам: описание, цену по прайсу, переводы ET/EN и SEO. Черновик покажу до публикации."),
+      pages: [
+        { t: "Главная", note: "SEO-текст обновлён вчера ассистентом" },
+        { t: "Доставка и оплата", note: "переводы ET / EN готовы — черновик", pub: true },
+        { t: "Возвраты", note: "⚠ проверить юр. формулировку (косметика)" },
+        { t: "Блог — 3 статьи", note: "черновик: «Уход за волосами зимой»", pub: true }
+      ].map(p => ({ ...p, pubGo: () => this.aPush("Опубликуй «" + p.t + "»", "Опубликовано ✓. Страница «" + p.t + "» обновлена на сайте, карта сайта и Google-фид отправлены на переиндексацию."), edit: () => this.aPush("Открой «" + p.t + "» на редактирование", "Открыл черновик страницы «" + p.t + "». Пишите правки обычным текстом — я внесу и покажу до/после.") })),
+      aMsgs: this.state.aMsgs, aDraft: this.state.aDraft,
+      aType: e => this.setState({ aDraft: e.target.value }),
+      aSend: () => { const q = this.state.aDraft.trim(); if (q) this.aPush(q, "Принято. Черновик изменений готов — посмотрите предпросмотр «до/после» и нажмите «Опубликовать»."); },
+      aKey: e => { if (e.key === "Enter") { const q = this.state.aDraft.trim(); if (q) this.aPush(q, "Принято. Черновик изменений готов — посмотрите предпросмотр «до/после» и нажмите «Опубликовать»."); } },
+      aQuick: [["Перевести страницу на ET", "Какую страницу перевести? Последняя изменённая — «Доставка и оплата», начать с неё?"], ["SEO для категории", "Какая категория? По данным поиска сильнее всего просядет без текста «Стайлинг»."], ["Пост для Instagram", "Черновик поста про Repair-Me.Wash готов: 2 варианта — экспертный и лёгкий. Показать?"], ["Ответ клиенту", "Вставьте вопрос клиента — отвечу в тоне Rempire, на языке клиента."]].map(([l, a]) => ({ l, go: () => this.aPush(l, a) })),
+      isHome: screen === "home", isCat: screen === "cat", isProd: screen === "product", isCheckout: screen === "checkout",
+      isSearch: screen === "search", isBlog: screen === "blog",
+      searchResults: [
+        { brand: "Kevin.Murphy", name: "Un.Tangled — несмываемый кондиционер", price: "от 8 €", img: CDN + "un.tangled_150ml-02-scaled-1.webp?v=1703257575&width=533" },
+        { brand: "System 4", name: "Hydro Care Conditioner H", price: "от 6,90 €", img: CDN + "6417150024383.jpg?v=1689778916&width=533" },
+        { brand: "Kevin.Murphy", name: "Killer.Curls Rinse — кондиционер", price: "от 6 €", img: CDN + "kevin-murphy-killer-curls-rinse.webp?v=1691506204&width=533" },
+        { brand: "Paul Mitchell", name: "Clear Essential Conditioner", price: "26 €", img: CDN + "clearconditioner_webp.jpg?v=1780505677&width=533" }
+      ],
+      blogPosts: [
+        { n: "01", d: "21.08.2026", t: "Как подобрать шампунь System 4 по типу кожи головы", teaser: "Четыре задачи — четыре средства. Разбираем, какое подходит вам.", slot: "blog-1" },
+        { n: "02", d: "14.08.2026", t: "Kevin.Murphy: Repair или Hydrate — что выбрать", teaser: "Восстановление и увлажнение решают разные проблемы.", slot: "blog-2" },
+        { n: "03", d: "02.08.2026", t: "Уход за бородой: три шага, которые работают", teaser: "Очищение, масло, расчёсывание — и ничего лишнего.", slot: "blog-3" }
+      ],
+      introOn: this.state.introOn,
+      skipIntro: () => { clearTimeout(this._introT); this.setState({ introOn: false }); },
+      replayIntro: () => { clearTimeout(this._introT); this.setState({ introOn: true }); this._introT = setTimeout(() => this.setState({ introOn: false }), 3100); },
+      goCat: () => this.nav("cat"), goProd: () => this.nav("product"), goSearch: () => this.nav("search"), goBlog: () => this.nav("blog"),
+      addQuick: e => { if (e && e.stopPropagation) e.stopPropagation(); this.setState(s => ({ toastOpen: true, cartN: Math.min(9, s.cartN + 1) })); clearTimeout(this._toastT); this._toastT = setTimeout(() => this.setState({ toastOpen: false }), 6000); },
+      langs: [["RU", "https://flagcdn.com/w40/ru.png", "Русский"], ["ET", "https://flagcdn.com/w40/ee.png", "Eesti"], ["EN", "https://flagcdn.com/w40/gb.png", "English"]].map(([l, f, t]) => ({ l, f, t, go: () => this.setState({ lang: l }), op: this.state.lang === l ? "1" : ".45", bb: this.state.lang === l ? "2px solid #1c1a00" : "2px solid transparent" })),
+      langNote: this.state.lang !== "RU", langPicked: this.state.lang,
+      brandLogos: [
+        { n: "Kevin.Murphy", img: CCDN + "KM_COVER.jpg?v=1697061397&width=800" },
+        { n: "Davines", img: CCDN + "davines.jpg?v=1716133848&width=800" },
+        { n: "System 4", img: CCDN + "orig.webp?v=1697062814&width=800" },
+        { n: "Korean Cosmetics", img: CCDN + "koreanaaaa.jpg?v=1716124462&width=800" },
+        { n: "Lumin Skin", img: CCDN + "lumin-v2-ecommerce-bundle_groups-badass_bundle_1810_1.png?v=1697060895&width=800" },
+        { n: "CBD Daily", img: CCDN + "Cbd_959d484a-47d6-4183-8c5e-9ecf7a00d03c.jpg?v=1697063934&width=800" },
+        { n: "Rempire Merch", img: CCDN + "photo-3-2.jpg?v=1697063367&width=800" }
+      ],
+      kpis: [
+        { v: "3 240 €", l: "ВЫРУЧКА · АВГУСТ", d: "+18% к июлю" },
+        { v: "87", l: "ЗАКАЗЫ · АВГУСТ", d: "+11 к июлю" },
+        { v: "37,20 €", l: "СРЕДНИЙ ЧЕК", d: "+2,10 €" },
+        { v: "412", l: "ПОДПИСЧИКИ", d: "+26 за месяц" }
+      ],
+      cartOpen: this.state.cartOpen, cartN: this.state.cartN,
+      cartEmpty: this.state.cartN === 0, cartHasItems: this.state.cartN > 0,
+      openCart: () => this.setState({ cartOpen: true, filterOpen: false }),
+      closeCart: () => this.setState({ cartOpen: false }),
+      cartToHome: () => this.setState({ cartOpen: false, screen: "home" }),
+      cInc: () => this.setState(s => ({ cartN: Math.min(9, s.cartN + 1) })),
+      cDec: () => this.setState(s => ({ cartN: Math.max(1, s.cartN - 1) })),
+      cRemove: () => this.setState({ cartN: 0 }),
+      cartItems: fmt(itemSum),
+      shipNote: itemSum >= 50 ? "Бесплатная доставка — порог 50 € достигнут ✓" : "До бесплатной доставки (EE, LV, LT, FI) — ещё " + fmt(50 - itemSum),
+      progressW: Math.min(100, itemSum / 50 * 100) + "%",
+      goCheckout: () => this.setState({ cartOpen: false, screen: "checkout" }),
+      goHome: () => this.nav("home"),
+      checkoutQty: Math.max(1, this.state.cartN),
+      checkoutItems: fmt(27 * Math.max(1, this.state.cartN)),
+      checkoutTotal: fmt(27 * Math.max(1, this.state.cartN) + 3.5),
+      prodPrice: this.state.size === "250" ? "27 €" : "7 €",
+      sizes: [["40", "40 мл"], ["250", "250 мл"]].map(([v, label]) => ({
+        label, go: () => this.setState({ size: v }),
+        bg: this.state.size === v ? "#1c1a00" : "transparent", fg: this.state.size === v ? "#fdfcf9" : "#1c1a00"
+      })),
+      qty: this.state.qty,
+      incQ: () => this.setState(s => ({ qty: Math.min(9, s.qty + 1) })),
+      decQ: () => this.setState(s => ({ qty: Math.max(1, s.qty - 1) })),
+      addToCart: () => { this.setState(s => ({ toastOpen: true, cartN: Math.min(9, s.cartN + s.qty) })); clearTimeout(this._toastT); this._toastT = setTimeout(() => this.setState({ toastOpen: false }), 6000); },
+      closeToast: () => { clearTimeout(this._toastT); this.setState({ toastOpen: false }); },
+      toastOpen: this.state.toastOpen,
+      buyBarDisp: w === 390 ? "flex" : "none",
+      relProducts: [
+        { brand: "Kevin.Murphy", name: "Un.Tangled — спрей-кондиционер", price: "от 8 €", img: CDN + "un.tangled_150ml-02-scaled-1.webp?v=1703257575&width=533" },
+        { brand: "Kevin.Murphy", name: "Killer.Curls Wash — шампунь", price: "от 6 €", img: CDN + "kevin-murphy-killer-curls-wash_1.webp?v=1691505575&width=533" },
+        { brand: "Kevin.Murphy", name: "Motion.Lotion — крем", price: "26 €", img: CDN + "motion.lotion-06-scaled-1.webp?v=1694970858&width=533" },
+        { brand: "System 4", name: "Bio Botanical Serum", price: "от 8 €", img: CDN + "6417150024451.jpg?v=1689780618&width=533" }
+      ],
+      screens: names.map(([key, name]) => ({
+        name,
+        go: key === "cart" ? () => this.setState({ cartOpen: true, filterOpen: false })
+          : built.includes(key) ? () => this.setState({ screen: key, filterOpen: false, cartOpen: false }) : () => {},
+        cur: built.includes(key) ? "pointer" : "default",
+        op: built.includes(key) ? "1" : ".38",
+        bb: screen === key ? "1px solid #1c1a00" : "1px solid transparent"
+      })),
+      filterOpen: this.state.filterOpen,
+      openFilter: () => this.setState({ filterOpen: true }),
+      closeFilter: () => this.setState({ filterOpen: false }),
+      catCount: 24,
+      setDirA: () => this.setState({ dir: "a" }), setDirB: () => this.setState({ dir: "b" }),
+      setPhone: () => this.setState({ w: 390 }), setDesk: () => this.setState({ w: 1280 }),
+      aBg: dir === "a" ? on.background : off.background, aFg: dir === "a" ? on.color : off.color,
+      bBg: dir === "b" ? on.background : off.background, bFg: dir === "b" ? on.color : off.color,
+      pBg: w === 390 ? on.background : off.background, pFg: w === 390 ? on.color : off.color,
+      dBg: w === 1280 ? on.background : off.background, dFg: w === 1280 ? on.color : off.color,
+      frameW: w + "px",
+      dirNote: screen === "admin" ? "Админка: заказы, товары, тексты и статистика в одном месте. Ассистент справа выполняет правки, переводы и SEO по команде — черновики публикуются только после вашего подтверждения." : dir === "h" ? "З — Видео: живая страница, как на frameforge. Видео владельца на всю ширину (ч/б, автоплей без звука, звук по клику), бегущая строка, дальше — спокойная витрина. Ролики Ренат загружает сам в админке; структура остаётся той же." : dir === "g" ? "Ж — Opus × Fable ★ (финал): один шрифт Golos для всего текста, Korolev только в слове REMPIRE, башня как архитектура справа, нумерованная сетка категорий, панельная дисциплина одобренной админки и нижняя навигация на телефоне. Пришлите экспорт Fable — волью его находки точечно." : dir === "f" ? "Е — Lovable: направление из хенд-оффа Lovable-прототипа. Те же токены и Oswald-заголовки, сцена с башней; фирменная деталь — панельные полосы на «shell» (сервисная лента под геро) и модель админки, где каждое действие ассистента — черновик «Было/Станет»." : dir === "e" ? "Д — Урбан (архивный бриф): «urban, editorial, a little bold» — образ из самого первого ТЗ, написанного ДО ответов Рената. Фото-первый, смелее, модный. Архив честно помечен: это направление противоречит его просьбе («минимализм и белый фон») — показано для полноты выбора." : dir === "d" ? "Г — Редакция /qa: самый первый дизайн проекта — язык анкеты, которую Ренат уже видел и одобрил. Монохромная редакция: штамп-башня, дисплей Korolev (латиница, как на бейдже), Golos для текста. Ноль риска: этот вид бренд уже носит." : dir === "c" ? "В — Синтез: спокойная белая витрина А + характер Б. Сцена с башней за словом REMPIRE, редакционная полоса, нижняя навигация на телефоне. Логотип живёт: рисуется линией при переходах, «моргает» в покое. Мастер-план так и предлагал: выбрать направление и перенести на него лучшее из второго." : dir === "a"
+        ? "А — Белый зал: максимально спокойно. Белый фон, тонкие линии, минимум акцентов — как сейчас, но точнее и быстрее. Выбрать это направление = магазин, который не отвлекает от товара."
+        : "Б — Башня: та же структура и те же блоки, но с характером — крупный шрифт, башня как архитектурный знак, тёмная редакционная полоса. Выбрать это направление = магазин, который выглядит как бренд, а не как шаблон.",
+      cats: [
+        { n: "01", name: "Уход за волосами" }, { n: "02", name: "Стайлинг" }, { n: "03", name: "Уход за бородой" },
+        { n: "04", name: "Уход за лицом" }, { n: "05", name: "Уход за телом" }, { n: "06", name: "Мерч" }
+      ],
+      brands: [{ name: "Kevin.Murphy" }, { name: "Davines" }, { name: "System 4" }, { name: "Paul Mitchell" }, { name: "Lumin Skin" }, { name: "CBD Daily" }, { name: "Korean Cosmetics" }],
+      products: [
+        { n: "01", brand: "Kevin.Murphy", name: "Touchable — спрей-воск", price: "27 €", img: CDN + "photo-18.jpg?v=1688742664&width=533" },
+        { n: "02", brand: "System 4", name: "Bio Botanical Shampoo", price: "от 9 €", img: CDN + "6417150024437.jpg?v=1689780757&width=533" },
+        { n: "03", brand: "Kevin.Murphy", name: "Free.Hold — паста", price: "от 11 €", img: CDN + "free.hold_100g-04copy.jpg?v=1688656773&width=533" },
+        { n: "04", brand: "System 4", name: "Bio Botanical Serum", price: "от 8 €", img: CDN + "6417150024451.jpg?v=1689780618&width=533" },
+        { n: "05", brand: "Kevin.Murphy", name: "Night.Rider — матовая паста", price: "от 11 €", img: CDN + "photo-12.jpg?v=1688741086&width=533" },
+        { n: "06", brand: "Paul Mitchell", name: "Clear Jelly Mask", price: "29 €", img: CDN + "PM_Clear_Jelly_Mask_webp.jpg?v=1780512771&width=533" },
+        { n: "07", brand: "Kevin.Murphy", name: "Repair-Me.Wash — шампунь", price: "от 7 €", img: CDN + "photo-6.jpg?v=1688742837&width=533" },
+        { n: "08", brand: "Rempire Merch", name: "Футболка oversized — фирменный принт", price: "35 €", img: CDN + "IMG_2893.jpg?v=1764194983&width=533" }
+      ],
+      catProducts: [
+        { brand: "Kevin.Murphy", name: "Repair-Me.Wash — шампунь", price: "от 7 €", img: CDN + "photo-6.jpg?v=1688742837&width=533" },
+        { brand: "System 4", name: "Bio Botanical Shampoo", price: "от 9 €", img: CDN + "6417150024437.jpg?v=1689780757&width=533" },
+        { brand: "Kevin.Murphy", name: "Un.Tangled — спрей-кондиционер", price: "от 8 €", img: CDN + "un.tangled_150ml-02-scaled-1.webp?v=1703257575&width=533" },
+        { brand: "System 4", name: "Hydro Care Conditioner H", price: "от 6,90 €", img: CDN + "6417150024383.jpg?v=1689778916&width=533" },
+        { brand: "Kevin.Murphy", name: "Killer.Curls Wash — шампунь", price: "от 6 €", img: CDN + "kevin-murphy-killer-curls-wash_1.webp?v=1691505575&width=533" },
+        { brand: "System 4", name: "Scalp Tonic T", price: "от 7,90 €", img: CDN + "6417150024291.jpg?v=1689779605&width=533" },
+        { brand: "Paul Mitchell", name: "Clear Essential Shampoo", price: "25,50 €", img: CDN + "PMCLEARSHAMPOO_webp_658264fc-53e7-4dd0-b09a-e3f6ce17adb2.jpg?v=1780432550&width=533" },
+        { brand: "System 4", name: "Mild Shampoo 3", price: "от 7,90 €", img: CDN + "6417150024369.jpg?v=1689780192&width=533" },
+        { brand: "Kevin.Murphy", name: "Motion.Lotion — крем", price: "26 €", img: CDN + "motion.lotion-06-scaled-1.webp?v=1694970858&width=533" },
+        { brand: "System 4", name: "Oil Cure Scalp Treatment O", price: "от 7,90 €", img: CDN + "6417150024390.jpg?v=1689779299&width=533" },
+        { brand: "Paul Mitchell", name: "Forever Blonde Shampoo", price: "29 €", img: CDN + "25_PM_Blonde_ForeverBlondeShampoo_10.14oz_CMYK.psd-JPG-PPT.jpg?v=1776965160&width=533" },
+        { brand: "System 4", name: "Chitosan Hair Repair R", price: "от 7,90 €", img: CDN + "6417150024307.jpg?v=1689779817&width=533" }
+      ]
+    };
+  }
+}
+</script>
+<script src="/feedback.js" defer></script></body></html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--tw-ease-firm:cubic-bezier(.2,.8,.2,1);--tw-ease-inout:cubic-bezier(.45,0,.25,1);--tw-ease-settle:cubic-bezier(.3,1.4,.4,1);--tw-t-reveal:640ms;--tw-t-drop:520ms;--tw-t-blink:380ms;--tw-t-turn:380ms;--tw-t-loop:2000ms;--tw-t-hover:200ms;--tw-t-draw:1600ms;--tw-t-brick:980ms;--tw-t-rise:900ms;--tw-t-turn:700ms;--tw-t-stamp:240ms;--tw-t-sundial:1800ms;--tw-t-breath:4200ms;--tw-t-build:1240ms;--tw-t-light:1300ms}
+html,body{margin:0;padding:0;background:#fdfcf9;color:#1c1a00}
+a{color:#1c1a00;text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:#1c1a00;opacity:.55}
+a:focus-visible,[tabindex]:focus-visible{outline:1px solid #1c1a00;outline-offset:3px}
+@keyframes tw-castle{0%{opacity:0;transform:translateX(-146px)}22%{opacity:1}72%{transform:translateX(8px);animation-timing-function:var(--tw-ease-settle)}100%{transform:translateX(0)}}
+@keyframes tw-drop{0%{opacity:0;transform:translateY(-73px)}14%{opacity:1}58%{transform:translateY(0);animation-timing-function:var(--tw-ease-settle)}78%{transform:translateY(-7px);animation-timing-function:var(--tw-ease-settle)}100%{transform:translateY(0)}}
+@keyframes tw-rise{0%{opacity:0;transform:translateY(24px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes tw-blink{0%{transform:translateX(0)}45%{transform:translateX(-14px)}100%{transform:translateX(0)}}
+@keyframes tw-turn{0%{transform:translateY(0)}38%{transform:translateY(-18px)}100%{transform:translateY(0)}}
+@keyframes tw-turnloop{0%{transform:translateY(0)}7.2%{transform:translateY(-18px)}19%,100%{transform:translateY(0)}}
+.play-castle [data-mark]{animation:tw-castle var(--tw-t-reveal) var(--tw-ease-firm) both}
+.play-placed [data-body]{animation:tw-drop var(--tw-t-drop) var(--tw-ease-firm) both}
+.play-placed [data-crown]{animation:tw-drop var(--tw-t-drop) var(--tw-ease-firm) 50ms both}
+.play-build [data-body]{animation:tw-b-body 340ms var(--tw-ease-firm) both}
+.play-build [data-band]{animation:tw-b-band 300ms var(--tw-ease-firm) 360ms both;transform-box:fill-box;transform-origin:50% 50%}
+.play-build [data-flare]{animation:tw-b-flare 300ms var(--tw-ease-firm) 480ms both}
+.play-build [data-merlon="1"]{animation:tw-b-merlon 340ms var(--tw-ease-firm) 620ms both}
+.play-build [data-merlon="2"]{animation:tw-b-merlon 340ms var(--tw-ease-firm) 700ms both}
+.play-build [data-merlon="3"]{animation:tw-b-merlon 340ms var(--tw-ease-firm) 780ms both}
+.play-blink [data-band]{animation:tw-blink var(--tw-t-blink) var(--tw-ease-inout) both}
+.play-ident [data-merlon="1"]{animation:tw-turn var(--tw-t-turn) var(--tw-ease-inout) both}
+.play-ident [data-merlon="2"]{animation:tw-turn var(--tw-t-turn) var(--tw-ease-inout) 110ms both}
+.play-ident [data-merlon="3"]{animation:tw-turn var(--tw-t-turn) var(--tw-ease-inout) 220ms both}
+.play-loop [data-merlon="1"]{animation:tw-turnloop var(--tw-t-loop) var(--tw-ease-inout) infinite}
+.play-loop [data-merlon="2"]{animation:tw-turnloop var(--tw-t-loop) var(--tw-ease-inout) 110ms infinite}
+.play-loop [data-merlon="3"]{animation:tw-turnloop var(--tw-t-loop) var(--tw-ease-inout) 220ms infinite}
+@keyframes tw-swap-in{0%,88%{opacity:0}100%{opacity:1}}
+@keyframes tw-swap-out{0%,88%{opacity:1}100%{opacity:0}}
+.play-draw [data-draw-plain]{animation:tw-swap-in-late var(--tw-t-draw) linear both}
+.play-draw [data-draw-masked]{animation:tw-sketch var(--tw-t-draw) linear both}
+.play-draw [data-draw-fill]{animation:tw-fill-hold var(--tw-t-draw) linear both}
+.play-light [data-light]{animation:tw-light var(--tw-t-light) var(--tw-ease-inout) both}
+.play-heroopen [data-ho-tower]{animation:tw-ho-tower 800ms var(--tw-ease-firm) both}
+.play-heroopen [data-ho-word]{animation:tw-ho-word 700ms var(--tw-ease-firm) 550ms both}
+.play-brick [data-brick-plain]{animation:tw-swap-in var(--tw-t-brick) linear both}
+.play-brick [data-brick-masked]{animation:tw-swap-out var(--tw-t-brick) linear both}
+@keyframes tw-b-body{0%{opacity:0;transform:translateY(46px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes tw-b-band{0%{opacity:0;transform:scaleX(.35)}100%{opacity:1;transform:scaleX(1)}}
+@keyframes tw-b-flare{0%{opacity:0;transform:translateY(26px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes tw-b-merlon{0%{opacity:0;transform:translateY(40px)}70%{opacity:1;transform:translateY(-4px)}100%{transform:translateY(0)}}
+@keyframes tw-light{0%{transform:translateY(0);opacity:0}10%{opacity:.09}90%{opacity:.09}100%{transform:translateY(-560px);opacity:0}}
+@keyframes tw-sketch{0%,96%{opacity:.45}100%{opacity:0}}
+@keyframes tw-fill-hold{0%,96%{opacity:1}100%{opacity:0}}
+@keyframes tw-swap-in-late{0%,96%{opacity:0}100%{opacity:1}}
+@keyframes tw-ho-tower{0%{opacity:0;transform:translateY(60px)}100%{opacity:.06;transform:translateY(0)}}
+@keyframes tw-ho-word{0%{opacity:0;letter-spacing:.62em}100%{opacity:1;letter-spacing:.5em}}
+@keyframes tw-turn3d{0%{transform:perspective(600px) rotateY(0deg)}45%{transform:perspective(600px) rotateY(-16deg)}100%{transform:perspective(600px) rotateY(0deg)}}
+@keyframes tw-stamp{0%{transform:scale(1)}45%{transform:scale(.982)}100%{transform:scale(1)}}
+@keyframes tw-sundial{0%{transform:skewX(-13deg);opacity:0}18%{opacity:.09}82%{opacity:.09}100%{transform:skewX(13deg);opacity:0}}
+@keyframes tw-breath{0%,100%{transform:scale(1)}50%{transform:scale(1.0065)}}
+.play-rise [data-rise-plain]{animation:tw-swap-in var(--tw-t-rise) linear both}
+.play-rise [data-rise-masked]{animation:tw-swap-out var(--tw-t-rise) linear both}
+.play-turn [data-turn-mark]{animation:tw-turn3d var(--tw-t-turn) var(--tw-ease-inout) both}
+.play-stamp [data-mark]{animation:tw-stamp var(--tw-t-stamp) var(--tw-ease-firm) both;transform-box:fill-box;transform-origin:50% 85%}
+.play-sundial [data-shadow-skew]{animation:tw-sundial var(--tw-t-sundial) var(--tw-ease-inout) both}
+.breath-on [data-breath]{animation:tw-breath var(--tw-t-breath) ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.tab-hidden [data-breath]{animation-play-state:paused}
+[data-parts]{opacity:0}
+.play-placed [data-parts],.play-build [data-parts],.play-ident [data-parts],.play-blink [data-parts],.play-loop [data-parts]{opacity:1}
+.play-placed [data-rest],.play-build [data-rest],.play-ident [data-rest],.play-blink [data-rest],.play-loop [data-rest]{opacity:0}
+.sim-reduce *{animation:none !important;transition:none !important}
+@media (prefers-reduced-motion: reduce){#twroot *{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div id="twroot" class="{{ simCls }}" style="min-height:100vh;background:#fdfcf9;color:#1c1a00;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="twp" fill="currentColor" d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path>
+    <clipPath id="twc-m1"><path d="M270,150H381V212H270Z"></path></clipPath>
+    <clipPath id="twc-m2"><path d="M381,150H466V212H381Z"></path></clipPath>
+    <clipPath id="twc-m3"><path d="M466,150H580V212H466Z"></path></clipPath>
+    <clipPath id="twc-fl"><path clip-rule="evenodd" d="M270,210H580V371H508V300H270Z M339.5,244H500V302H339.5Z"></path></clipPath>
+    <clipPath id="twc-bd"><path d="M337,244H500V302H337Z"></path></clipPath>
+    <clipPath id="twc-by"><path d="M270,300H508V371H580V600H270Z"></path></clipPath>
+    <clipPath id="twc-full"><path d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"></path></clipPath>
+    <mask id="twm-dhf" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><rect data-draw-fill-rect data-host="hero-mark" x="240" y="130" width="360" height="480" fill="#fff"></rect></mask>
+    <mask id="twm-d1f" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><rect data-draw-fill-rect data-host="card-draw" x="240" y="130" width="360" height="480" fill="#fff"></rect></mask>
+    <mask id="twm-d2f" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><rect data-draw-fill-rect data-host="card-draw" x="240" y="130" width="360" height="480" fill="#fff"></rect></mask>
+  </defs>
+</svg>
+<header id="site-head" data-screen-label="Live header 28px" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 32px;border-bottom:1px solid rgba(28,26,0,.16);position:sticky;top:0;background:#fdfcf9;z-index:5">
+  <span onClick="{{ identHead }}" title="click — ident" style="display:inline-flex;align-items:center;gap:14px;cursor:pointer;transition:transform var(--tw-t-hover) var(--tw-ease-firm)" style-hover="transform:translateY(-2px)">
+    <svg viewBox="292.24 171.22 265.18 409.8" role="img" aria-label="REMPIRE tower" style="height:28px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+    <span style="font-weight:700;font-size:13px;letter-spacing:.32em">REMPIRE</span>
+  </span>
+  <span style="display:inline-flex;align-items:center;gap:18px">
+    <span style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.06em;color:rgba(28,26,0,.55)">/brand/motion · staging · noindex</span>
+    <button onClick="{{ replayAll }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay all</button>
+  </span>
+</header>
+<main style="max-width:1140px;margin:0 auto;padding:56px 32px 72px">
+  <section data-screen-label="Intro" style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-end;justify-content:space-between;margin-bottom:72px">
+    <div style="max-width:560px;display:flex;flex-direction:column;gap:16px">
+      <div style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.18em;color:rgba(28,26,0,.55)">REMPIRE — TOWER MOTION SPEC · EST 2018</div>
+      <h1 style="font-size:32px;font-weight:400;line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:pretty">One confident chess move, not an animation library sample.</h1>
+      <p style="margin:0;max-width:54ch;color:rgba(28,26,0,.78)">Recommended opening: <strong>Tower Build</strong> — constructed upward like a luxury ident — then one <strong>light pass</strong>, then still. <strong>Sketch-then-solid</strong> is the long-form reveal for brand pages, <strong>Castling</strong> the quiet 28&nbsp;px header reveal, <strong>Sentry blink</strong> the rare idle, <strong>Turn of the rook</strong> the click ident and 2&nbsp;s loading loop. Everything is transform + opacity on clip-windowed copies of the untouched canonical path; the rest pose is the original file, verified below.</p>
+      <p style="margin:0;font:11px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">opening: build 1240 ms + light 1300 ms · draw 1600 ms · header 640 ms · idle 6–9 s · loop 2 s<br>ships first on /qa header: reveal + rare idle only</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+      <div id="hero-mark" onClick="{{ openHero }}" title="click — replay opening" style="display:flex;align-items:flex-end;justify-content:center;padding:0 48px;border-bottom:1px solid rgba(28,26,0,.3);cursor:pointer">
+        <svg viewBox="292.24 171.22 265.18 409.8" role="img" aria-label="REMPIRE tower" style="height:280px;width:auto;display:block;overflow:visible">
+          <defs><mask id="twm-dh" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><path data-draw-s1 d="M531,383 C534,398 537,430 539,455 C541,478 544,505 543,522 C542,538 532,548 512,554 C485,562 452,566 424,566 C396,566 362,562 336,554 C316,548 306,538 306,521 C306,505 309,472 311,450 C313,428 318,382 322,352 C324,336 330,328 344,323 C368,315 396,311 424,311 C452,311 474,313 492,319 C504,324 512,331 520,340" pathLength="1000" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1000"></path><path data-draw-s2 d="M529,343 C525,322 522,300 519,268 C517,244 516,228 515,216 C514,204 514,196 508,192 C500,188 490,196 486,204 C483,212 480,218 472,221 L457,220 C450,217 449,208 448,197 C448,186 446,179 436,176 C428,174 407,175 401,180 C397,184 398,192 397,200 C396,212 391,218 383,220 L371,220 C364,218 362,211 361,202 C360,195 354,190 347,191 C340,192 334,198 332,208 C329,216 328,224 327,234 C326,248 325,266 328,282 C330,291 338,289 347,284 C360,276 385,262 411,259 C432,257 452,260 465,266 C472,269 476,272 478,275" pathLength="1000" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1000"></path></mask></defs>
+          <g data-draw-plain><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></g>
+          <g data-draw-masked mask="url(#twm-dh)" style="opacity:0"><use href="#twp"></use></g>
+          <g data-draw-fill mask="url(#twm-dhf)" style="opacity:0"><use href="#twp"></use></g>
+          <g clip-path="url(#twc-full)"><rect data-light x="240" y="590" width="360" height="150" fill="#fdfcf9" opacity="0"></rect></g>
+        </svg>
+      </div>
+      <div style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.08em;color:rgba(28,26,0,.55)">click the mark — replay the opening (build + light)</div>
+    </div>
+  </section>
+
+  <section data-screen-label="01 Reveal" style="margin-bottom:64px">
+    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid #1c1a00;padding-bottom:8px;margin-bottom:24px">
+      <span style="font:11px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace">01</span>
+      <h2 style="font-size:13px;font-weight:700;letter-spacing:.22em;margin:0">REVEAL — FIVE CONCEPTS</h2>
+      <span style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">once per session · never per navigation</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px">
+      <div id="card-draw" style="flex:1;min-width:300px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">A · SKETCH, THEN SOLID</h3>
+          <span style="font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.12em;background:#1c1a00;color:#fdfcf9;padding:4px 7px">BRAND PAGES</span>
+        </div>
+        <div style="height:132px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:112px;width:auto;display:block;overflow:visible">
+            <defs><mask id="twm-d1" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><path data-draw-s1 d="M531,383 C534,398 537,430 539,455 C541,478 544,505 543,522 C542,538 532,548 512,554 C485,562 452,566 424,566 C396,566 362,562 336,554 C316,548 306,538 306,521 C306,505 309,472 311,450 C313,428 318,382 322,352 C324,336 330,328 344,323 C368,315 396,311 424,311 C452,311 474,313 492,319 C504,324 512,331 520,340" pathLength="1000" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1000"></path><path data-draw-s2 d="M529,343 C525,322 522,300 519,268 C517,244 516,228 515,216 C514,204 514,196 508,192 C500,188 490,196 486,204 C483,212 480,218 472,221 L457,220 C450,217 449,208 448,197 C448,186 446,179 436,176 C428,174 407,175 401,180 C397,184 398,192 397,200 C396,212 391,218 383,220 L371,220 C364,218 362,211 361,202 C360,195 354,190 347,191 C340,192 334,198 332,208 C329,216 328,224 327,234 C326,248 325,266 328,282 C330,291 338,289 347,284 C360,276 385,262 411,259 C432,257 452,260 465,266 C472,269 476,272 478,275" pathLength="1000" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1000"></path></mask></defs>
+            <g data-draw-plain><use href="#twp"></use></g>
+            <g data-draw-masked mask="url(#twm-d1)" style="opacity:0"><use href="#twp"></use></g>
+            <g data-draw-fill mask="url(#twm-d1f)" style="opacity:0"><use href="#twp"></use></g>
+          </svg>
+        </div>
+        <div style="border:1px solid rgba(28,26,0,.16);display:flex;align-items:center;gap:10px;padding:8px 12px">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible">
+            <defs><mask id="twm-d2" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><path data-draw-s1 d="M531,383 C534,398 537,430 539,455 C541,478 544,505 543,522 C542,538 532,548 512,554 C485,562 452,566 424,566 C396,566 362,562 336,554 C316,548 306,538 306,521 C306,505 309,472 311,450 C313,428 318,382 322,352 C324,336 330,328 344,323 C368,315 396,311 424,311 C452,311 474,313 492,319 C504,324 512,331 520,340" pathLength="1000" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1000"></path><path data-draw-s2 d="M529,343 C525,322 522,300 519,268 C517,244 516,228 515,216 C514,204 514,196 508,192 C500,188 490,196 486,204 C483,212 480,218 472,221 L457,220 C450,217 449,208 448,197 C448,186 446,179 436,176 C428,174 407,175 401,180 C397,184 398,192 397,200 C396,212 391,218 383,220 L371,220 C364,218 362,211 361,202 C360,195 354,190 347,191 C340,192 334,198 332,208 C329,216 328,224 327,234 C326,248 325,266 328,282 C330,291 338,289 347,284 C360,276 385,262 411,259 C432,257 452,260 465,266 C472,269 476,272 478,275" pathLength="1000" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1000"></path></mask></defs>
+            <g data-draw-plain><use href="#twp"></use></g>
+            <g data-draw-masked mask="url(#twm-d2)" style="opacity:0"><use href="#twp"></use></g>
+            <g data-draw-fill mask="url(#twm-d2f)" style="opacity:0"><use href="#twp"></use></g>
+          </svg>
+          <span style="font-weight:700;font-size:11px;letter-spacing:.3em">REMPIRE</span>
+          <span style="margin-left:auto;font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.45)">28 px header</span>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">An architectural sketch becoming the building: the mark's one continuous line draws itself at pencil weight — base, shoulder, battlements, the band's cut — then ink floods upward and it turns solid. Hero and brand pages; too long for navigation.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">stroke mask + rising fill, path untouched · 1600 ms<br>sketch 0–62% at 45% ink · flood 60–100%</div>
+        <div><button onClick="{{ replayDraw }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-brick" style="flex:1;min-width:300px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">B · BRICKWORK</h3>
+        <div style="height:132px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:112px;width:auto;display:block;overflow:visible">
+            <defs><mask id="twm-bk" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><sc-for list="{{ bricks }}" as="b" hint-placeholder-count="0"><rect data-brick data-d="{{ b.d }}" x="{{ b.x }}" y="{{ b.y }}" width="64" height="30" fill="#fff"></rect></sc-for></mask></defs>
+            <g data-brick-plain><use href="#twp"></use></g>
+            <g data-brick-masked mask="url(#twm-bk)" style="opacity:0"><use href="#twp"></use></g>
+          </svg>
+        </div>
+        <div style="border:1px solid rgba(28,26,0,.16);display:flex;align-items:center;gap:10px;padding:8px 12px">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible">
+            <g data-brick-plain><use href="#twp"></use></g>
+            <g data-brick-masked mask="url(#twm-bk)" style="opacity:0"><use href="#twp"></use></g>
+          </svg>
+          <span style="font-weight:700;font-size:11px;letter-spacing:.3em">REMPIRE</span>
+          <span style="margin-left:auto;font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.45)">28 px header</span>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">A tower is built from bricks — laid in courses from the crown down, running bond. The mortar seams show while the wall goes up and vanish when it sets.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">13 courses · 48 ms per course · 240 ms per brick<br>980 ms total · brick-grid mask, path untouched</div>
+        <div><button onClick="{{ replayBrick }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-castle" style="flex:1;min-width:300px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">C · CASTLING</h3>
+          <span style="font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.12em;background:#1c1a00;color:#fdfcf9;padding:4px 7px">HEADER PICK</span>
+        </div>
+        <div style="height:132px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:112px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+        </div>
+        <div style="border:1px solid rgba(28,26,0,.16);display:flex;align-items:center;gap:10px;padding:8px 12px">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+          <span style="font-weight:700;font-size:11px;letter-spacing:.3em">REMPIRE</span>
+          <span style="margin-left:auto;font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.45)">28 px header</span>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The rook slides — one short horizontal glide, a firm stop, ≤1 px overshoot. Doubles as the hover response direction.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">whole mark · 10 px travel @28 · 640 ms<br>ease-firm → ease-settle on arrival</div>
+        <div><button onClick="{{ replayCastle }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-placed" style="flex:1;min-width:300px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">D · PLACED ON THE BOARD</h3>
+        <div style="height:132px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:112px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+        </div>
+        <div style="border:1px solid rgba(28,26,0,.16);display:flex;align-items:center;gap:10px;padding:8px 12px">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+          <span style="font-weight:700;font-size:11px;letter-spacing:.3em">REMPIRE</span>
+          <span style="margin-left:auto;font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.45)">28 px header</span>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">Set down decisively: a 5 px drop, one compression-free rebound. The crown lags the body by 50 ms for weight.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">crown ↓ +50 ms after body · 520 ms<br>ease-firm → ease-settle rebound</div>
+        <div><button onClick="{{ replayPlaced }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-build" style="flex:1;min-width:300px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">E · TOWER BUILD</h3>
+          <span style="font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.12em;background:#1c1a00;color:#fdfcf9;padding:4px 7px">RECOMMENDED — DEFAULT</span>
+        </div>
+        <div style="height:132px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:112px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+        </div>
+        <div style="border:1px solid rgba(28,26,0,.16);display:flex;align-items:center;gap:10px;padding:8px 12px">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+          <span style="font-weight:700;font-size:11px;letter-spacing:.3em">REMPIRE</span>
+          <span style="margin-left:auto;font:9px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.45)">28 px header</span>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">Constructed upward like a luxury ident: the base rises, the band sweeps out from centre, the collar sets, and the three merlons land with a whisper of settle.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">base 0–340 · band 360–660 · collar 480–780<br>merlons 620–1120 with −4 u settle · ease-firm</div>
+        <div><button onClick="{{ replayBuild }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="02 Signature and idle" style="margin-bottom:64px">
+    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid #1c1a00;padding-bottom:8px;margin-bottom:24px">
+      <span style="font:11px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace">02</span>
+      <h2 style="font-size:13px;font-weight:700;letter-spacing:.22em;margin:0">SIGNATURE, IDLE, LOOP, HOVER</h2>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px">
+      <div id="card-ident" style="flex:1;min-width:260px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">TURN OF THE ROOK — IDENT</h3>
+        <div style="height:120px;display:flex;align-items:flex-end;justify-content:center;gap:36px;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:100px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">Merlons rise and return left to right, a wave of battlements. Logo click and order-confirmed. Gate below 48 px — at 28 px the rise is sub-pixel.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">380 ms per merlon · 110 ms stagger · 600 ms</div>
+        <div><button onClick="{{ replayIdent }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div style="flex:1;min-width:260px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">SENTRY BLINK — IDLE</h3>
+        <div data-idle-host style="height:120px;display:flex;align-items:flex-end;justify-content:center;gap:36px;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:100px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The band's diagonal cut is the accent: it slips 1 px toward its joint and returns. Rare, header only, suppressed when the tab is hidden.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">{{ idleNote }} · randomized<br>{{ idleInfo }}</div>
+        <div><button onClick="{{ blinkNow }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Blink now</button></div>
+      </div>
+      <div style="flex:1;min-width:260px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">LOADING LOOP</h3>
+        <div data-loop-host style="height:120px;display:flex;align-items:flex-end;justify-content:center;gap:36px;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:100px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:48px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The rook turn on a 2 s period — motion in the first 380 ms, still the rest. Route transitions and admin processing; stops only on the rest pose.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">2000 ms period · seamless · stop at iteration end</div>
+        <div><button onClick="{{ loopToggle }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">{{ loopLabel }}</button></div>
+      </div>
+      <div style="flex:1;min-width:260px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">HOVER / FOCUS</h3>
+        <div style="height:120px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <span tabindex="0" style="display:inline-flex;align-items:center;gap:12px;border:1px solid rgba(28,26,0,.16);padding:10px 16px;cursor:pointer;transition:transform var(--tw-t-hover) var(--tw-ease-firm)" style-hover="transform:translateY(-2px)">
+            <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:28px;width:auto;display:block;overflow:visible"><g data-mark><g data-parts><g data-crown><g data-merlon="1" clip-path="url(#twc-m1)"><use href="#twp"></use></g><g data-merlon="2" clip-path="url(#twc-m2)"><use href="#twp"></use></g><g data-merlon="3" clip-path="url(#twc-m3)"><use href="#twp"></use></g><g data-flare clip-path="url(#twc-fl)"><use href="#twp"></use></g><g data-band clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g data-body clip-path="url(#twc-by)"><use href="#twp"></use></g></g><g data-rest><use href="#twp"></use></g></g></svg>
+            <span style="font-weight:700;font-size:11px;letter-spacing:.3em">REMPIRE</span>
+          </span>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The mark rises 2 px and returns — a piece acknowledging the hand, fully reversible. Focus-visible draws a 1 px ink outline, offset 3 px.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">200 ms · ease-firm · transform only</div>
+        <div style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.45)">try it — hover or tab to the chip</div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="03 Explorations" style="margin-bottom:64px">
+    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid #1c1a00;padding-bottom:8px;margin-bottom:24px">
+      <span style="font:11px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace">03</span>
+      <h2 style="font-size:13px;font-weight:700;letter-spacing:.22em;margin:0">EXPLORATIONS — ALIVE, STILL CLASSY</h2>
+      <span style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">same rules: untouched path · monochrome · skipped on reduced motion</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px">
+      <div id="card-rise" style="flex:1;min-width:250px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:14px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">F · INK RISE</h3>
+        <div style="height:150px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:104px;width:auto;display:block;overflow:visible">
+            <defs><mask id="twm-rise" maskUnits="userSpaceOnUse" x="240" y="130" width="360" height="480"><rect data-rise x="240" y="130" width="360" height="480" fill="#fff"></rect></mask></defs>
+            <g data-rise-plain><use href="#twp"></use></g>
+            <g data-rise-masked mask="url(#twm-rise)" style="opacity:0"><use href="#twp"></use></g>
+          </svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The mark fills like ink poured into a mold, base to crown. Doubles as determinate progress — add-to-cart, upload. Never near checkout.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">rise mask · 900 ms · progress-capable (fill = %)</div>
+        <div><button onClick="{{ replayRise }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-light" style="flex:1;min-width:250px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:14px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">G · LIGHT PASS</h3>
+        <div style="height:150px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:104px;width:auto;display:block;overflow:visible">
+            <use href="#twp"></use>
+            <g clip-path="url(#twc-full)"><rect data-light x="240" y="590" width="360" height="150" fill="#fdfcf9" opacity="0"></rect></g>
+          </svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The tower stands; light travels up it once, like evening on a glass building. 9% luminance, clipped to the ink — no gradient, no glow. Pairs with Tower Build as the homepage opening.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">1300 ms · runs once, never loops · static clip</div>
+        <div><button onClick="{{ replayLight }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-sundial" style="flex:1;min-width:250px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:14px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">H · SUNDIAL</h3>
+        <div style="height:150px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:88px;width:auto;display:block;overflow:visible">
+            <g data-shadow-skew style="opacity:0;transform-box:fill-box;transform-origin:50% 0%"><g transform="translate(0,842.45) scale(1,-0.45)"><use href="#twp"></use></g></g>
+            <use href="#twp"></use>
+          </svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The tower stands; the light moves. A 9% shadow sweeps past like an afternoon — the quietest possible sign of life. Rare idle, hero only.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">1800 ms · opacity ≤ .09 · gate below 80 px</div>
+        <div><button onClick="{{ replaySundial }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-turn" style="flex:1;min-width:250px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:14px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">I · THE TURN</h3>
+        <div style="height:150px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg data-turn-mark viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:104px;width:auto;display:block;overflow:visible"><use href="#twp"></use></svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">A sentry's quarter-glance: the rook turns 16° toward you and returns. An ident alternative with more presence than the merlon wave.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">perspective 600 · 700 ms · transform only</div>
+        <div><button onClick="{{ replayTurn }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-stamp" style="flex:1;min-width:250px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:14px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">J · LETTERPRESS</h3>
+        <div style="height:150px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:104px;width:auto;display:block;overflow:visible"><g data-mark><use href="#twp"></use></g></svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">Order confirmed: the mark presses into the paper like a seal — one decisive dip, no bounce. The confirmation moment only.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">scale .982 dip · 240 ms · ease-firm</div>
+        <div><button onClick="{{ replayStamp }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
+      </div>
+      <div id="card-breath" class="breath-on" style="flex:1;min-width:250px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:14px">
+        <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">K · BREATH</h3>
+        <div style="height:150px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(28,26,0,.3)">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:104px;width:auto;display:block;overflow:visible"><g data-breath><use href="#twp"></use></g></svg>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">Alive at rest: a 0.65% swell from the base every 4 s. Visible if you look for it, invisible if you don't. Hero only, compositor only.</p>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">4200 ms loop · paused on hidden tab · {{ breathState }}</div>
+        <div><button onClick="{{ breathToggle }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">{{ breathLabel }}</button></div>
+      </div>
+      <div id="card-heroopen" style="flex:1 1 100%;min-width:300px;border:1px solid rgba(28,26,0,.18);display:flex;flex-direction:column;overflow:hidden">
+        <div style="position:relative;height:240px;overflow:hidden;background:#fdfcf9">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="position:absolute;right:-24px;bottom:-150px;height:430px;width:auto"><g data-ho-tower style="opacity:.06"><use href="#twp"></use></g></svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+            <div data-ho-word style="font-weight:700;font-size:30px;letter-spacing:.5em;text-indent:.5em">REMPIRE</div>
+            <div style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.34em;text-indent:.34em;color:rgba(28,26,0,.55)">EST 2018 · TOWER</div>
+          </div>
+        </div>
+        <div style="padding:18px 22px;display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-top:1px solid rgba(28,26,0,.16)">
+          <div style="max-width:640px">
+            <h3 style="font-size:12px;font-weight:700;letter-spacing:.18em;margin:0">L · HERO STAGE — TOWER BEHIND THE WORDMARK</h3>
+            <p style="margin:6px 0 0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The tower forms oversized at 6% behind the signature; the wordmark settles into its tracking. Both brand elements share one motion — a homepage opening, not just an animated mark.</p>
+          </div>
+          <button onClick="{{ replayHeroOpen }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="04 Quality gate" style="margin-bottom:64px">
+    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid #1c1a00;padding-bottom:8px;margin-bottom:24px">
+      <span style="font:11px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace">04</span>
+      <h2 style="font-size:13px;font-weight:700;letter-spacing:.22em;margin:0">QUALITY GATE — REST POSE DIFF</h2>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+      <div style="flex:2;min-width:320px;display:flex;flex-direction:column;gap:14px">
+        <div style="font:12px/2 ui-monospace,'SF Mono',Menlo,Consolas,monospace;border:1px solid rgba(28,26,0,.18);padding:16px 20px">
+          <div>rest pose — the canonical path node, exact by construction</div>
+          <div>motion composite (windowed copies) vs canonical:</div>
+          <div>{{ d28 }}</div>
+          <div>{{ d80 }}</div>
+          <div>{{ d400 }}</div>
+          <div style="border-top:1px solid rgba(28,26,0,.16);margin-top:8px;padding-top:8px;font-weight:700">{{ dSum }}</div>
+        </div>
+        <ul style="margin:0;padding-left:18px;font-size:12.5px;color:rgba(28,26,0,.78);display:flex;flex-direction:column;gap:6px">
+          <li>Path untouched — groups are clip windows over six copies of the canonical path; cuts run through paper, the two ink crossings are overlapped so coverage stays solid. At rest the mark is the canonical path node itself — the windowed copies composite only while a state plays.</li>
+          <li>Draw and brickwork reveal through masks — a stroked centerline and a brick grid — over the same untouched path. The mask layer is hidden at rest, so the rest pose stays canonical; mask reveals repaint, so they are reveal-only, never idle or loop.</li>
+          <li>Transform + opacity only, GPU-composited. No filters, no stroke tricks.</li>
+          <li>CLS 0: the mark owns its final box from first paint; server renders the rest pose, play classes attach after hydration.</li>
+          <li>prefers-reduced-motion: reduce → static mark, skipped not shortened. Try the tweak toggle.</li>
+          <li>Idle suppressed on hidden tab, never twice within 5 s, header only.</li>
+        </ul>
+      </div>
+      <div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div style="position:relative;border:1px solid rgba(28,26,0,.18);background:#fff;padding:20px 40px">
+          <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:160px;width:auto;display:block;color:#000"><g><g><g clip-path="url(#twc-m1)"><use href="#twp"></use></g><g clip-path="url(#twc-m2)"><use href="#twp"></use></g><g clip-path="url(#twc-m3)"><use href="#twp"></use></g><g clip-path="url(#twc-fl)"><use href="#twp"></use></g><g clip-path="url(#twc-bd)"><use href="#twp"></use></g></g><g clip-path="url(#twc-by)"><use href="#twp"></use></g></g></svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;mix-blend-mode:difference">
+            <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:160px;width:auto;display:block;color:#fff"><use href="#twp"></use></svg>
+          </div>
+        </div>
+        <div style="font:10px/1.6 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55);text-align:center;max-width:240px">difference composite of assembled × canonical —<br>a solid silhouette means identical; fringes would show as gaps</div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="04 Spec" style="margin-bottom:24px">
+    <div style="display:flex;align-items:baseline;gap:14px;border-bottom:1px solid #1c1a00;padding-bottom:8px;margin-bottom:24px">
+      <span style="font:11px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace">05</span>
+      <h2 style="font-size:13px;font-weight:700;letter-spacing:.22em;margin:0">TOKENS, STATES, RULES</h2>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:40px">
+      <div style="flex:1;min-width:320px">
+        <h3 style="font-size:11px;font-weight:700;letter-spacing:.18em;margin:0 0 10px">TOKENS</h3>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 18px;font:10.5px/1.8 ui-monospace,'SF Mono',Menlo,Consolas,monospace">
+          <span>--tw-ease-firm</span><span>cubic-bezier(.2,.8,.2,1) — reveals, drops, hover</span>
+          <span>--tw-ease-settle</span><span>cubic-bezier(.3,1.4,.4,1) — arrivals only, sparingly</span>
+          <span>--tw-ease-inout</span><span>cubic-bezier(.45,0,.25,1) — blink, rook turn</span>
+          <span>--tw-t-draw</span><span>1600 ms drawn in one line (house ident length)</span>
+          <span>--tw-t-brick</span><span>980 ms brickwork (48 ms/course)</span>
+          <span>--tw-t-reveal</span><span>640 ms castling</span>
+          <span>--tw-t-drop</span><span>520 ms placed (+50 ms crown lag)</span>
+          <span>--tw-t-rise</span><span>900 ms ink-rise reveal (mask fill + swap)</span>
+          <span>--tw-t-blink</span><span>380 ms idle blink</span>
+          <span>--tw-t-turn</span><span>380 ms merlon (110 ms stagger)</span>
+          <span>--tw-t-loop</span><span>2000 ms loop period</span>
+          <span>--tw-t-hover</span><span>160 ms hover nudge</span>
+          <span>--tw-t-rise</span><span>900 ms ink rise (progress-capable)</span>
+          <span>--tw-t-turn</span><span>700 ms sentry turn, perspective 600</span>
+          <span>--tw-t-stamp</span><span>240 ms letterpress dip</span>
+          <span>--tw-t-sundial</span><span>1800 ms shadow sweep, opacity ≤ .09</span>
+          <span>--tw-t-breath</span><span>4200 ms ambient swell, 0.65%</span>
+          <span>--tw-t-build</span><span>1240 ms tower build (default opening)</span>
+          <span>--tw-t-light</span><span>1300 ms light pass, runs once after build</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:320px">
+        <h3 style="font-size:11px;font-weight:700;letter-spacing:.18em;margin:0 0 10px">WHERE EACH STATE RUNS</h3>
+        <div style="font-size:12px;line-height:1.8;color:rgba(28,26,0,.85)">
+          <div><strong>Reveal</strong> — header/hero first paint, admin login. Once per session.</div>
+          <div><strong>Idle</strong> — header mark only. 6–9 s randomized, ≤380 ms.</div>
+          <div><strong>Hover/focus</strong> — logo links. 160 ms, reversible.</div>
+          <div><strong>Ident</strong> — logo click, order confirmed. Gate below 48 px.</div>
+          <div><strong>Loop</strong> — route transitions, admin processing. Stops at rest.</div>
+        </div>
+        <h3 style="font-size:11px;font-weight:700;letter-spacing:.18em;margin:20px 0 10px">NEVER</h3>
+        <div style="font-size:12px;line-height:1.8;color:rgba(28,26,0,.85)">
+          Never on checkout actions · never looping in viewport while the user types · never more than one animated mark visible · reduced motion is skipped, not shortened · never delay interaction or shift layout.
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:32px;border-top:1px solid rgba(28,26,0,.16);padding-top:16px;font:11px/1.8 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.7)">
+      handoff — <a href="TowerAnimated.tsx">TowerAnimated.tsx</a> (drop into rempire-web, API-compatible with Tower.tsx) · <a href="MOTION.md">docs/design/MOTION.md</a> · <a href="uploads/rempire-tower.svg">canonical mark</a> · <a href="rempire-tower-crown.svg">crown mark (favicon)</a> · <a href="rempire-tower-outline.svg">line variant (derived)</a>
+    </div>
+  </section>
+</main>
+<footer style="border-top:1px solid rgba(28,26,0,.16);padding:20px 32px;display:flex;justify-content:space-between;gap:16px;font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.08em;color:rgba(28,26,0,.5)">
+  <span>REMPIRE · EST 2018 · 666 WAYS</span>
+  <span>rempireshop.diipsolutions.eu/brand/motion</span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;simulateReducedMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;section&quot;:&quot;Accessibility&quot;,&quot;tsType&quot;:&quot;boolean&quot;},&quot;idleEvery&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:6,&quot;min&quot;:4,&quot;max&quot;:12,&quot;step&quot;:1,&quot;unit&quot;:&quot;s&quot;,&quot;section&quot;:&quot;Idle&quot;,&quot;tsType&quot;:&quot;number&quot;}}">
+const D = "M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z";
+const CLIPS = {
+  m1: "M270,150H381V212H270Z",
+  m2: "M381,150H466V212H381Z",
+  m3: "M466,150H580V212H466Z",
+  fl: "M270,210H580V371H508V300H270Z M339.5,244H500V302H339.5Z",
+  bd: "M337,244H500V302H337Z",
+  by: "M270,300H508V371H580V600H270Z"
+};
+const PLAYS = ["play-castle", "play-placed", "play-build", "play-blink", "play-ident", "play-draw", "play-brick", "play-rise", "play-turn", "play-stamp", "play-sundial", "play-light", "play-heroopen"];
+class Component extends DCLogic {
+  state = { loopOn: false, stopping: false, idleInfo: "armed — first blink shortly", d28: "28 px — measuring…", d80: "80 px — measuring…", d400: "400 px — measuring…", dSum: "" };
+  reducedNow() { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } }
+  blocked() { return this.reducedNow() || !!this.props.simulateReducedMotion; }
+  play(id, cls) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    PLAYS.forEach(c => el.classList.remove(c));
+    this._strips = this._strips || {};
+    clearTimeout(this._strips[id]);
+    void el.offsetWidth;
+    if (!this.blocked()) {
+      el.classList.add(cls);
+      const T = { "play-castle": 740, "play-placed": 680, "play-build": 1260, "play-ident": 720, "play-blink": 480, "play-draw": 1700, "play-brick": 1080, "play-rise": 1000, "play-turn": 780, "play-stamp": 320, "play-sundial": 1900, "play-light": 1400, "play-heroopen": 1450 };
+      if (cls === "play-draw") this.maskAnim(id, "draw");
+      if (cls === "play-brick") this.maskAnim(id, "brick");
+      if (cls === "play-rise") this.maskAnim(id, "rise");
+      if (T[cls]) this._strips[id] = setTimeout(() => el.classList.remove(cls), T[cls]);
+    }
+  }
+  maskAnim(hostId, kind) {
+    // CSS animations do not tick inside a <mask> subtree — drive it with rAF attribute writes.
+    const host = document.getElementById(hostId);
+    if (!host) return;
+    this._masks = this._masks || {};
+    cancelAnimationFrame(this._masks[hostId]);
+    const T = kind === "draw" ? 1600 : kind === "rise" ? 900 : 980;
+    const s1 = host.querySelectorAll("[data-draw-s1]"), s2 = host.querySelectorAll("[data-draw-s2]"), bricks = host.querySelectorAll("[data-brick]"), rises = host.querySelectorAll("[data-rise]");
+    const fills = document.querySelectorAll('[data-draw-fill-rect][data-host="' + hostId + '"]');
+    if (kind === "draw") {
+      s1.forEach(n => n.setAttribute("stroke-dashoffset", "1000"));
+      s2.forEach(n => n.setAttribute("stroke-dashoffset", "1000"));
+      fills.forEach(n => { n.setAttribute("y", "592"); n.setAttribute("height", "0"); });
+    }
+    const t0 = performance.now();
+    const step = () => {
+      const t = performance.now() - t0;
+      if (kind === "draw") {
+        const p1 = Math.min(1, t / (T * 0.42)), p2 = Math.max(0, Math.min(1, (t - T * 0.42) / (T * 0.20)));
+        s1.forEach(n => n.setAttribute("stroke-dashoffset", String(1000 * (1 - p1))));
+        s2.forEach(n => n.setAttribute("stroke-dashoffset", String(1000 * (1 - p2))));
+        const pf = Math.max(0, Math.min(1, (t - T * 0.60) / (T * 0.40))), ef = 1 - Math.pow(1 - pf, 3);
+        fills.forEach(n => { const y = 592 - 462 * ef; n.setAttribute("y", String(y)); n.setAttribute("height", String(618 - y)); });
+      } else if (kind === "rise") {
+        const p = Math.min(1, t / T), e = 1 - Math.pow(1 - p, 3);
+        rises.forEach(n => { const y = 592 - (592 - 130) * e; n.setAttribute("y", String(y)); n.setAttribute("height", String(618 - y)); });
+      } else {
+        bricks.forEach(n => {
+          const p = Math.max(0, Math.min(1, (t - (+n.getAttribute("data-d") || 0)) / 240));
+          const e = 1 - (1 - p) * (1 - p);
+          n.setAttribute("opacity", String(e));
+          n.setAttribute("transform", "translate(0 " + (-16 * (1 - e)) + ")");
+        });
+      }
+      if (t < T) this._masks[hostId] = requestAnimationFrame(step);
+    };
+    this._masks[hostId] = requestAnimationFrame(step);
+  }
+  blinkAll() {
+    if (this.blocked()) { this.setState({ idleInfo: "suppressed — reduced motion" }); return; }
+    const targets = Array.from(document.querySelectorAll("[data-idle-host]"));
+    const head = document.getElementById("site-head");
+    if (head && !PLAYS.some(c => head.classList.contains(c) && c !== "play-blink")) targets.push(head);
+    targets.forEach(el => { el.classList.remove("play-blink"); void el.offsetWidth; el.classList.add("play-blink"); setTimeout(() => el.classList.remove("play-blink"), 500); });
+    this.setState({ idleInfo: "last blink " + new Date().toLocaleTimeString([], { hour12: false }) });
+  }
+  armIdle() {
+    clearTimeout(this._t);
+    const base = (+this.props.idleEvery || 6) * 1000;
+    this._t = setTimeout(() => { if (!document.hidden) this.blinkAll(); this.armIdle(); }, base + Math.random() * 3000);
+  }
+  componentDidMount() {
+    this._vis = () => { document.body.classList.toggle("tab-hidden", document.hidden); if (document.hidden) clearTimeout(this._t); else this.armIdle(); };
+    document.addEventListener("visibilitychange", this._vis);
+    this.armIdle();
+    const go = (ms, id, cls) => setTimeout(() => this.play(id, cls), ms);
+    go(350, "site-head", "play-castle");
+    go(450, "hero-mark", "play-build");
+    go(1800, "hero-mark", "play-light");
+    go(450, "card-draw", "play-draw");
+    go(650, "card-brick", "play-brick");
+    go(850, "card-castle", "play-castle");
+    go(1000, "card-placed", "play-placed");
+    go(1150, "card-build", "play-build");
+    go(1350, "card-rise", "play-rise");
+    go(1450, "card-light", "play-light");
+    go(1550, "card-sundial", "play-sundial");
+    go(1700, "card-turn", "play-turn");
+    go(1850, "card-stamp", "play-stamp");
+    go(2000, "card-heroopen", "play-heroopen");
+    this.runDiff();
+  }
+  componentWillUnmount() { clearTimeout(this._t); document.removeEventListener("visibilitychange", this._vis); }
+  loopToggle() {
+    const hosts = Array.from(document.querySelectorAll("[data-loop-host]"));
+    if (!hosts.length) return;
+    if (!this.state.loopOn) {
+      if (this.blocked()) return;
+      hosts.forEach(h => h.classList.add("play-loop"));
+      this.setState({ loopOn: true, stopping: false });
+    } else if (!this.state.stopping) {
+      this.setState({ stopping: true });
+      const m = hosts[0].querySelector('[data-merlon="1"]');
+      const done = () => { hosts.forEach(h => h.classList.remove("play-loop")); this.setState({ loopOn: false, stopping: false }); };
+      if (!m) return done();
+      const h = () => { m.removeEventListener("animationiteration", h); done(); };
+      m.addEventListener("animationiteration", h);
+      setTimeout(() => { m.removeEventListener("animationiteration", h); if (this.state.stopping) done(); }, 2200);
+    }
+  }
+  svgStr(kind) {
+    const head = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="292.24 171.22 265.18 409.8">';
+    if (kind === "orig") return head + '<path fill="#000" d="' + D + '"/></svg>';
+    const keys = ["m1", "m2", "m3", "fl", "bd", "by"];
+    const defs = '<defs><path id="p" fill="#000" d="' + D + '"/>' + keys.map(k => '<clipPath id="c' + k + '"><path clip-rule="evenodd" d="' + CLIPS[k] + '"/></clipPath>').join("") + "</defs>";
+    return head + defs + keys.map(k => '<g clip-path="url(#c' + k + ')"><use href="#p"/></g>').join("") + "</svg>";
+  }
+  raster(str, h) {
+    return new Promise((res, rej) => {
+      const w = Math.round(h * 265.18 / 409.8);
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const x = c.getContext("2d", { willReadFrequently: true });
+        x.fillStyle = "#fff"; x.fillRect(0, 0, w, h);
+        x.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(img.src);
+        res(x.getImageData(0, 0, w, h).data);
+      };
+      img.onerror = () => rej(new Error("svg raster failed"));
+      img.src = URL.createObjectURL(new Blob([str], { type: "image/svg+xml" }));
+    });
+  }
+  async runDiff() {
+    try {
+      const a = this.svgStr("orig"), b = this.svgStr("split");
+      const out = {};
+      for (const h of [28, 80, 400]) {
+        const p = await this.raster(a, h), q = await this.raster(b, h);
+        let nSoft = 0, nHard = 0, mx = 0;
+        for (let i = 0; i < p.length; i += 4) { const d = Math.abs(p[i] - q[i]); if (d > mx) mx = d; if (d > 12) nSoft++; if (d > 128) nHard++; }
+        out[h] = { nSoft, nHard, mx };
+      }
+      const line = h => h + " px — tiling complete · " + out[h].nSoft + " sub-AA px · max Δ " + out[h].mx + "/255 · " + out[h].nHard + " past half-scale";
+      const pass = [28, 80, 400].every(h => out[h].nHard === 0 && out[h].mx <= 110);
+      this.setState({ d28: line(28), d80: line(80), d400: line(400), dSum: pass ? "PASS — rest pose exact (canonical node); motion tiling complete, residuals sub-antialias only" : "CHECK — hard deltas found, window regression" });
+    } catch (e) { this.setState({ dSum: "diff unavailable: " + e.message }); }
+  }
+  bricks() {
+    if (!this._bricks) {
+      const out = [];
+      for (let r = 0; r < 13; r++) {
+        const y = 150 + r * 34, x0 = 244 + (r % 2 ? -34 : 0);
+        for (let c = 0; c < 6; c++) {
+          const x = x0 + c * 68;
+          if (x + 64 < 270 || x > 566) continue;
+          out.push({ x, y, d: r * 48 + ((r * 7 + c * 13) % 3) * 14 });
+        }
+      }
+      this._bricks = out;
+    }
+    return this._bricks;
+  }
+  renderVals() {
+    const p = +this.props.idleEvery || 6;
+    return {
+      simCls: this.props.simulateReducedMotion ? "sim-reduce" : "",
+      bricks: this.bricks(),
+      replayDraw: () => this.play("card-draw", "play-draw"),
+      replayBrick: () => this.play("card-brick", "play-brick"),
+      replayCastle: () => this.play("card-castle", "play-castle"),
+      replayPlaced: () => this.play("card-placed", "play-placed"),
+      replayBuild: () => this.play("card-build", "play-build"),
+      replayLight: () => this.play("card-light", "play-light"),
+      replayHeroOpen: () => this.play("card-heroopen", "play-heroopen"),
+      replayIdent: () => this.play("card-ident", "play-ident"),
+      openHero: () => { this.play("hero-mark", "play-build"); clearTimeout(this._heroT); this._heroT = setTimeout(() => this.play("hero-mark", "play-light"), 1320); },
+      identHead: () => this.play("site-head", "play-ident"),
+      blinkNow: () => this.blinkAll(),
+      loopToggle: () => this.loopToggle(),
+      replayRise: () => this.play("card-rise", "play-rise"),
+      replaySundial: () => this.play("card-sundial", "play-sundial"),
+      replayTurn: () => this.play("card-turn", "play-turn"),
+      replayStamp: () => this.play("card-stamp", "play-stamp"),
+      breathToggle: () => { const el = document.getElementById("card-breath"); if (!el) return; if (this.blocked()) return; el.classList.toggle("breath-on"); this.setState({ breathOn: el.classList.contains("breath-on") }); },
+      breathLabel: this.state.breathOn === false ? "Resume" : "Pause",
+      breathState: this.state.breathOn === false ? "paused" : "breathing",
+      replayAll: () => {
+        this.play("site-head", "play-castle");
+        this.play("hero-mark", "play-build");
+        clearTimeout(this._heroT);
+        this._heroT = setTimeout(() => this.play("hero-mark", "play-light"), 1320);
+        this.play("card-draw", "play-draw");
+        setTimeout(() => this.play("card-brick", "play-brick"), 180);
+        setTimeout(() => this.play("card-castle", "play-castle"), 360);
+        setTimeout(() => this.play("card-placed", "play-placed"), 540);
+        setTimeout(() => this.play("card-build", "play-build"), 720);
+        setTimeout(() => this.play("card-ident", "play-ident"), 900);
+        setTimeout(() => this.play("card-rise", "play-rise"), 1080);
+        setTimeout(() => this.play("card-light", "play-light"), 1200);
+        setTimeout(() => this.play("card-sundial", "play-sundial"), 1320);
+        setTimeout(() => this.play("card-turn", "play-turn"), 1480);
+        setTimeout(() => this.play("card-stamp", "play-stamp"), 1640);
+        setTimeout(() => this.play("card-heroopen", "play-heroopen"), 1800);
+      },
+      loopLabel: this.state.stopping ? "stopping…" : (this.state.loopOn ? "Stop at rest" : "Run loop"),
+      idleInfo: this.state.idleInfo,
+      idleNote: "auto every " + p + "–" + (p + 3) + " s",
+      d28: this.state.d28, d80: this.state.d80, d400: this.state.d400, dSum: this.state.dSum
+    };
+  }
+}
+</script>
+<script src="/feedback.js" defer></script></body></html>
