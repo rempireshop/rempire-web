@@ -1034,22 +1034,40 @@ summary:hover{opacity:.7}
       <div style="padding:26px 4.5cqi 44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:34px;max-width:980px;margin:0 auto">
         <div style="display:flex;flex-direction:column;gap:26px">
           <div>
-            <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 12px">1 · КОНТАКТ</h2>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 0 12px"><h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0">1 · КОНТАКТ</h2><button onClick="{{ goAccountFromCo }}" style="border:none;background:transparent;cursor:pointer;font:inherit;font-size:11.5px;color:#1c1a00;padding:0;border-bottom:1px solid rgba(28,26,0,.4)">Войти в кабинет</button></div>
             <label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:4px">E-mail для подтверждения заказа</label>
-            <input value="renat@gmail" style="width:100%;border:none;border-bottom:2px solid #8c1a0f;background:transparent;padding:7px 2px;font:inherit;font-size:13px;outline:none">
-            <div style="font-size:11.5px;color:#8c1a0f;margin-top:5px">Похоже, в адресе опечатка — проверьте домен (например, gmail.com).</div>
+            <input defaultValue="{{ coEmail }}" onInput="{{ emailInput }}" style="width:100%;border:none;border-bottom:{{ emailBorder }};background:transparent;padding:7px 2px;font:inherit;font-size:13px;outline:none">
+            <div style="font-size:11.5px;color:#8c1a0f;margin-top:5px;display:{{ emailErrDisp }}">Похоже, в адресе опечатка — проверьте домен (например, gmail.com).</div>
             <div style="font-size:11.5px;color:rgba(28,26,0,.55);margin-top:8px">Аккаунт не нужен — оформляйте как гость. Заказ и чек придут на почту.</div>
           </div>
           <div>
             <h2 style="font-family:Oswald;font-size:12px;font-weight:600;letter-spacing:.2em;margin:0 0 12px">2 · ДОСТАВКА</h2>
+            <label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:4px">Страна доставки</label>
+            <select value="{{ coCountry }}" onChange="{{ setCountry }}" style="width:100%;border:1px solid rgba(28,26,0,.35);background:transparent;font:inherit;font-size:12.5px;padding:9px 8px;margin-bottom:10px"><option value="EE">Эстония</option><option value="LV">Латвия</option><option value="LT">Литва</option><option value="FI">Финляндия</option><option value="EU">Другая страна Европы</option></select>
             <div style="display:flex;flex-direction:column;border-top:1px solid rgba(28,26,0,.2)">
-              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship" defaultChecked="{{ true }}"><span style="flex:1">Пакомат Omniva</span><span style="font-weight:600">3,50 €</span></label>
-              <div style="padding:4px 2px 14px;border-bottom:1px solid rgba(28,26,0,.2)">
-                <select style="width:100%;border:1px solid rgba(28,26,0,.35);background:transparent;font:inherit;font-size:12.5px;padding:9px 8px"><option>Tallinn — Kristiine keskus</option><option>Tallinn — Ülemiste keskus</option><option>Tallinn — Solaris</option><option>Tartu — Kvartal</option></select>
+              <sc-for list="{{ shipMethods }}" as="sm" hint-placeholder-count="4"><label onClick="{{ sm.pick }}" style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px;cursor:pointer"><input type="radio" name="ship" checked="{{ sm.on }}" readOnly><span style="flex:1">{{ sm.label }}</span><span style="font-weight:600">{{ sm.price }}</span></label></sc-for>
+              <sc-if value="{{ pmVisible }}" hint-placeholder-val="{{ false }}"><div style="padding:10px 2px 14px;border-bottom:1px solid rgba(28,26,0,.2)">
+                <label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:4px">Пакомат</label>
+                <select style="width:100%;border:1px solid rgba(28,26,0,.35);background:transparent;font:inherit;font-size:12.5px;padding:9px 8px"><sc-for list="{{ machines }}" as="mc" hint-placeholder-count="3"><option>{{ mc.n }}</option></sc-for></select>
+              </div></sc-if>
+              <div style="font-size:11px;color:rgba(28,26,0,.55);padding:9px 2px">{{ freeNote }}</div>
+            </div>
+            <div style="margin-top:16px">
+              <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(28,26,0,.6);margin-bottom:8px">Получатель</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:12px 14px">
+                <div><label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:2px">Имя</label><input style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13px;outline:none"></div>
+                <div><label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:2px">Фамилия</label><input style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13px;outline:none"></div>
               </div>
-              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship"><span style="flex:1">Пакомат SmartPosti</span><span style="font-weight:600">3,50 €</span></label>
-              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship"><span style="flex:1">Пакомат DPD</span><span style="font-weight:600">3,90 €</span></label>
-              <label style="display:flex;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid rgba(28,26,0,.2);font-size:13px"><input type="radio" name="ship"><span style="flex:1">Курьер до двери (DPD)</span><span style="font-weight:600">5,90 €</span></label>
+              <sc-if value="{{ needAddr }}" hint-placeholder-val="{{ false }}"><div style="margin-top:12px">
+                <label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:2px">Адрес — улица, дом</label><input style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13px;outline:none">
+                <label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin:12px 0 2px">Квартира, этаж, код двери (необязательно)</label><input style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13px;outline:none">
+                <div style="display:grid;grid-template-columns:minmax(90px,120px) 1fr;gap:12px 14px;margin-top:12px">
+                  <div><label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:2px">Индекс</label><input style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13px;outline:none"></div>
+                  <div><label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:2px">Город</label><input style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13px;outline:none"></div>
+                </div>
+              </div></sc-if>
+              <div style="margin-top:12px"><label style="display:block;font-size:11px;color:rgba(28,26,0,.6);margin-bottom:2px">Телефон — для уведомления о доставке</label><input style="width:100%;border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;padding:8px 2px;font:inherit;font-size:13px;outline:none"></div>
+              <label style="display:flex;gap:8px;align-items:center;font-size:12.5px;margin-top:12px;cursor:pointer"><input type="checkbox"><span>Сохранить данные для следующего раза</span></label>
             </div>
           </div>
           <div>
@@ -1074,7 +1092,12 @@ summary:hover{opacity:.7}
               <div style="flex:1;font-size:12.5px">Repair-Me.Wash · 250 мл × {{ checkoutQty }}</div>
               <div style="font-size:12.5px;font-weight:600">{{ checkoutItems }}</div>
             </div>
-            <div style="display:flex;justify-content:space-between;font-size:12.5px;border-top:1px solid rgba(28,26,0,.15);padding-top:10px"><span>Доставка — пакомат Omniva</span><span>3,50 €</span></div>
+            <div style="border-top:1px solid rgba(28,26,0,.15);padding-top:10px">
+              <div style="display:flex;gap:8px"><input defaultValue="{{ promoDefault }}" onInput="{{ promoType }}" placeholder="Промокод" style="flex:1;border:1px solid rgba(28,26,0,.35);background:transparent;font:inherit;font-size:12.5px;padding:0 10px;height:38px;outline:none"><button onClick="{{ applyPromo }}" style="border:1px solid #1c1a00;background:transparent;color:#1c1a00;height:38px;padding:0 14px;font-size:11px;letter-spacing:.1em;cursor:pointer">ПРИМЕНИТЬ</button></div>
+              <div style="font-size:11.5px;color:#8c1a0f;margin-top:6px;display:{{ promoErrDisp }}">Код не найден — проверьте написание.</div>
+              <div style="justify-content:space-between;font-size:12.5px;margin-top:8px;display:{{ promoRowDisp }}"><span>REMPIRE10 — скидка 10%</span><span style="font-weight:600">{{ discountVal }}</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;border-top:1px solid rgba(28,26,0,.15);padding-top:10px"><span>{{ shipRowLabel }}</span><span>{{ shipRowVal }}</span></div>
             <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;border-top:1px solid #1c1a00;padding-top:10px"><span>Итого</span><span>{{ checkoutTotal }}</span></div>
             <button style="border:none;background:#1c1a00;color:#fdfcf9;padding:14px;font-size:13px;letter-spacing:.1em;cursor:pointer">ОПЛАТИТЬ {{ checkoutTotal }}</button>
             <div style="font-size:10.5px;color:rgba(28,26,0,.55);line-height:1.5">Нажимая «Оплатить», вы соглашаетесь с <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">условиями</a> и <a href="#" style="border-bottom:1px solid rgba(28,26,0,.3)">политикой возврата</a>. Оплата проходит через защищённое соединение банка.</div>
@@ -1171,7 +1194,7 @@ summary:hover{opacity:.7}
 const CDN = "https://rempireshop.com/cdn/shop/files/";
 const CCDN = "https://rempireshop.com/cdn/shop/collections/";
 class Component extends DCLogic {
-  state = { dir: "a", w: 390, screen: "home", filterOpen: false, size: "250", qty: 1, gal: 0, vid: 0, vidMut: true, toastOpen: false, cartOpen: false, cartN: 0, acctIn: false, acctNote: "", introOn: true, lang: "RU", langDd: false, gpay: false, navLoad: false, adminTab: "stats", adminNav: true, adOpen: true, aDraft: "", aIn: "", cp: { h: "ОПУБЛИКОВАНО", ch: "ОПУБЛИКОВАНО", cb: "ЧЕРНОВИК", dl: "ОПУБЛИКОВАНО" }, am: [{ r: "a", t: "Готов помочь: тексты, переводы, SEO, ответы клиентам. Любое изменение сначала покажу черновиком — без вашего подтверждения ничего не публикуется." }], aMsgs: [{ q: "Обнови SEO-описание категории «Стайлинг» и переведи его на эстонский", a: "Готово: title, description и текст категории обновлены (RU). Эстонский перевод — в черновике. Открыть предпросмотр?" }] };
+  state = { dir: "a", w: 390, screen: "home", filterOpen: false, size: "250", qty: 1, gal: 0, vid: 0, vidMut: true, toastOpen: false, cartOpen: false, cartN: 0, acctIn: false, acctNote: "", introOn: true, lang: "RU", langDd: false, gpay: false, country: "EE", methodIndex: 0, promoInput: "", promoApplied: false, promoError: false, coEmail: "renat@gmail", navLoad: false, adminTab: "stats", adminNav: true, adOpen: true, aDraft: "", aIn: "", cp: { h: "ОПУБЛИКОВАНО", ch: "ОПУБЛИКОВАНО", cb: "ЧЕРНОВИК", dl: "ОПУБЛИКОВАНО" }, am: [{ r: "a", t: "Готов помочь: тексты, переводы, SEO, ответы клиентам. Любое изменение сначала покажу черновиком — без вашего подтверждения ничего не публикуется." }], aMsgs: [{ q: "Обнови SEO-описание категории «Стайлинг» и переведи его на эстонский", a: "Готово: title, description и текст категории обновлены (RU). Эстонский перевод — в черновике. Открыть предпросмотр?" }] };
   componentDidMount() { this._introT = setTimeout(() => this.setState({ introOn: false }), 3100); }
   componentWillUnmount() { clearTimeout(this._introT); clearTimeout(this._toastT); }
   aPush(q, a) { this.setState(s => ({ aMsgs: [...s.aMsgs, { q, a }], aDraft: "" })); setTimeout(() => { const el = document.querySelector("[data-alog]"); if (el) el.scrollTop = el.scrollHeight; }, 60); }
@@ -1194,6 +1217,26 @@ class Component extends DCLogic {
     const { dir, w, screen } = this.state;
     const bnA = { op: "1", sw: "1.9", sh: "inset 0 2px 0 #1c1a00" }, bnI = { op: ".52", sw: "1.5", sh: "none" }, bnFor = k => screen === k ? bnA : bnI;
     const FLAGS = { RU: "https://flagcdn.com/w40/ru.png", ET: "https://flagcdn.com/w40/ee.png", EN: "https://flagcdn.com/w40/gb.png" };
+    const SHIP = {
+      EE: [{ l: "Пакомат Omniva", p: 3.5, pm: 1 }, { l: "Пакомат SmartPosti", p: 3.5, pm: 1 }, { l: "Пакомат DPD", p: 3.9, pm: 1 }, { l: "Курьер до двери (DPD)", p: 5.9, pm: 0 }],
+      LV: [{ l: "Пакомат Omniva", p: 4.9, pm: 1 }, { l: "Курьер DPD", p: 6.9, pm: 0 }],
+      LT: [{ l: "Пакомат Omniva", p: 4.9, pm: 1 }, { l: "Курьер DPD", p: 6.9, pm: 0 }],
+      FI: [{ l: "Пакомат SmartPosti", p: 5.9, pm: 1 }, { l: "Курьер DPD", p: 7.9, pm: 0 }],
+      EU: [{ l: "Курьер DPD — международная доставка", p: 12.9, pm: 0 }]
+    };
+    const MACH = {
+      EE: ["Tallinn — Kristiine keskus", "Tallinn — Ülemiste keskus", "Tallinn — Solaris", "Tartu — Kvartal", "Pärnu — keskus"],
+      LV: ["Rīga — Origo", "Rīga — Akropole", "Rīga — Spice", "Jūrmala — keskus"],
+      LT: ["Vilnius — Akropolis", "Vilnius — Panorama", "Kaunas — Mega"],
+      FI: ["Helsinki — Kamppi", "Helsinki — Itis", "Espoo — Iso Omena"],
+      EU: []
+    };
+    const coCtry = this.state.country, coList = SHIP[coCtry], coIdx = Math.min(this.state.methodIndex, coList.length - 1), coSel = coList[coIdx];
+    const coSubtotal = 27 * Math.max(1, this.state.cartN);
+    const coThr = coCtry === "EU" ? 200 : 50, coFree = coSubtotal >= coThr;
+    const coDisc = this.state.promoApplied ? Math.round(coSubtotal * 10) / 100 : 0;
+    const coTotal = coSubtotal - coDisc + (coFree ? 0 : coSel.p);
+    const coEmailBad = !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(this.state.coEmail);
     const on = { background: "#1c1a00", color: "#fdfcf9" }, off = { background: "transparent", color: "#1c1a00" };
     const built = ["home", "cat", "product", "cart", "checkout", "search", "blog", "account", "admin"];
     const fmt = n => (Number.isInteger(Math.round(n * 100) / 100) ? String(n) : n.toFixed(2).replace(".", ",")) + " €";
@@ -1433,8 +1476,28 @@ class Component extends DCLogic {
       goCheckout: () => this.setState({ cartOpen: false, gpay: false, screen: "checkout" }),
       goHome: () => this.nav("home"),
       checkoutQty: Math.max(1, this.state.cartN),
-      checkoutItems: fmt(27 * Math.max(1, this.state.cartN)),
-      checkoutTotal: fmt(27 * Math.max(1, this.state.cartN) + 3.5),
+      checkoutItems: fmt(coSubtotal),
+      checkoutTotal: fmt(coTotal),
+      coCountry: coCtry,
+      setCountry: e => this.setState({ country: e.target.value, methodIndex: 0 }),
+      shipMethods: coList.map((m, i) => ({ label: m.l, price: coFree ? "0 €" : fmt(m.p), on: i === coIdx, pick: () => this.setState({ methodIndex: i }) })),
+      pmVisible: !!coSel.pm && MACH[coCtry].length > 0,
+      machines: MACH[coCtry].map(n => ({ n: n })),
+      needAddr: !coSel.pm,
+      freeNote: coFree ? "Бесплатная доставка применена ✓" : ("Бесплатная доставка от " + coThr + " € — не хватает " + fmt(coThr - coSubtotal)),
+      coEmail: this.state.coEmail,
+      emailInput: e => this.setState({ coEmail: e.target.value }),
+      emailBorder: coEmailBad ? "2px solid #8c1a0f" : "1px solid rgba(28,26,0,.4)",
+      emailErrDisp: coEmailBad ? "block" : "none",
+      promoDefault: this.state.promoInput,
+      promoType: e => this.setState({ promoInput: e.target.value, promoError: false }),
+      applyPromo: () => { const ok = this.state.promoInput.trim().toUpperCase() === "REMPIRE10"; this.setState({ promoApplied: ok, promoError: !ok }); },
+      promoRowDisp: this.state.promoApplied ? "flex" : "none",
+      promoErrDisp: this.state.promoError ? "block" : "none",
+      discountVal: "−" + fmt(coDisc),
+      shipRowLabel: "Доставка — " + coSel.l,
+      shipRowVal: coFree ? "Бесплатно" : fmt(coSel.p),
+      goAccountFromCo: () => this.nav("account"),
       prodPrice: this.state.size === "250" ? "27 €" : "7 €",
       sizes: [["40", "40 мл"], ["250", "250 мл"]].map(([v, label]) => ({
         label, go: () => this.setState({ size: v }),

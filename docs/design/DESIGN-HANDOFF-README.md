@@ -138,3 +138,23 @@ Production note: render the real Google Pay button via the Payment Request /
 Google Pay JS API (buttonColor black, buttonType buy, RU locale) with the
 native sheet where supported — the prototype's inline SVG is placeholder
 art only.
+
+## Delta 23.08 (3) — checkout: country-driven delivery, guest data, promo
+
+Checkout rebuilt per the design session's text spec, all behavior live in
+the prototype: КОНТАКТ header gains «Войти в кабинет» (passwordless login);
+e-mail validates live (2px #8c1a0f + typo hint, clears as you type). Country
+select (EE/LV/LT/FI/Другая страна Европы) drives the method list with
+per-country prices (EE: Omniva/SmartPosti 3,50 · DPD 3,90 · курьер 5,90;
+LV/LT: Omniva 4,90 · DPD 6,90; FI: SmartPosti 5,90 · DPD 7,90; EU: DPD
+12,90 only), resets selection on change; parcel machines show a per-country
+location select and never ask for a street address; courier reveals the
+address block (улица/дом · квартира-этаж-код · индекс+город). ПОЛУЧАТЕЛЬ:
+имя+фамилия grid, телефон, «Сохранить данные» checkbox. Free shipping at
+50 € (EE/LV/LT/FI) / 200 € (EU): all prices flip to «0 €», note becomes
+«применена ✓», summary shows «Бесплатно». Summary card gains промокод —
+REMPIRE10 (case-insensitive) → «скидка 10% −N €», invalid → «Код не найден»
+in #8c1a0f; Итого = items − discount + shipping, live everywhere. State:
+country/methodIndex/promo, totals derived never stored, VAT included, no
+tax line. Production: pickup points come from live carrier APIs; promo codes
+from admin → Маркетинг → Промокоды.
