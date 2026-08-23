@@ -8,6 +8,11 @@
  */
 @theme {
   --color-ink: #1c1a00;
+  /* page = storefront ground, pure white per Renat's «минимализм и белый фон»
+     (matches live rempireshop.com). paper = warm white, kept ONLY for
+     text/icons on ink and for internal surfaces (admin, /qa, /demo).
+     Deliberately divergent — do not alias one to the other. */
+  --color-page: #ffffff;
   --color-paper: #fdfcf9;
   --color-mist: #edeae1;
   --color-fog: #78745f;

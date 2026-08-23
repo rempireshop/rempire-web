@@ -158,3 +158,18 @@ in #8c1a0f; Итого = items − discount + shipping, live everywhere. State:
 country/methodIndex/promo, totals derived never stored, VAT included, no
 tax line. Production: pickup points come from live carrier APIs; promo codes
 from admin → Маркетинг → Промокоды.
+
+## Delta 23.08 (4) — white storefront ground
+
+Renat's answer «Минимализм и белый фон»: storefront page ground is now pure
+white #ffffff like the live rempireshop.com — frame background (all
+directions and screens incl. checkout/account), both PDP sticky buy bars,
+mobile bottom nav, cart and filter drawers, both language dropdown panels.
+#fdfcf9 (paper) survives ONLY as text/icon color on ink surfaces, the intro
+overlay background, and the admin ground (internal tool). Product tiles are
+now white-on-white: their 1px rgba(28,26,0,.07-.08) border is the only
+separator - do not remove it; packshots stay mix-blend-mode:multiply. Shell
+#edeae1 fills and all hairline rules unchanged. Token rule for the real
+build: --page (#ffffff, storefront surfaces) and --paper (#fdfcf9, on-ink +
+admin) are deliberately divergent - never alias them. Added to
+src/app/globals.css.
