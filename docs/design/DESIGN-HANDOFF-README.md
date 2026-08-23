@@ -125,3 +125,16 @@ No gold/glow/gradients/rounded cards/shadows, no emoji, no invented products/cla
    play() re-kick) — no change needed.
 5. Feedback widget moved to the bottom-right corner (bottom nav now owns the
    bottom-left).
+
+## Delta 23.08 (2) — PDP express payment (applied from the design session's text spec)
+
+Both PDP variants get, below the qty + В КОРЗИНУ row: a black (#000, not
+ink) full-width G Pay button («Купить через» + colored G mark, 46px) and a
+centered «Другие способы оплаты» underline link. Both add the selected
+variant x qty to the cart without a toast and navigate straight to checkout;
+the G Pay path preselects the Apple Pay / Google Pay payment radio, the
+other-methods path and the regular drawer flow preselect Банковская ссылка.
+Production note: render the real Google Pay button via the Payment Request /
+Google Pay JS API (buttonColor black, buttonType buy, RU locale) with the
+native sheet where supported — the prototype's inline SVG is placeholder
+art only.
