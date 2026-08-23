@@ -224,10 +224,14 @@ export default function DemoHub() {
         <SavingsSection />
 
         <Card eyebrow="Что дальше" title="Три шага до магазина" fb="Что дальше">
+          <p className="text-fog">
+            На все вопросы ты уже ответил — спасибо, это сильно ускорило
+            работу. Дальше так:
+          </p>
           <ol className="list-decimal space-y-2 pl-5">
             <li>
               Ты смотришь варианты и оставляешь комментарии кнопкой 💬 — что
-              нравится, что поменять.
+              нравится, что поменять — и выбираешь направление.
             </li>
             <li>
               Мы собираем выбранный вариант по-настоящему: с твоими товарами,
@@ -237,13 +241,6 @@ export default function DemoHub() {
               Проверяем вместе, переносим всё со Shopify — и включаем.
             </li>
           </ol>
-          <p className="text-fog">
-            Осталось шесть коротких вопросов —{" "}
-            <a href="/qa2/" className="underline underline-offset-4">
-              ответить можно здесь
-            </a>
-            .
-          </p>
         </Card>
 
         <footer className="flex items-center justify-between border-t border-mist pt-6 text-sm text-fog">
