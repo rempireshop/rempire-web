@@ -104,3 +104,24 @@ No gold/glow/gradients/rounded cards/shadows, no emoji, no invented products/cla
 - `motion/Tower Motion.dc.html`, `motion/TowerAnimated.tsx`, `motion/MOTION.md` — logo motion system
 - `docs/ADMIN-PIXEL-SPEC.md` — authoritative admin spec (verbatim source §9)
 - `docs/REMPIRE_DESIGN_SYSTEM.md`, `docs/IMPLEMENTATION_INVENTORY.md` (mock-data map + open issues), `docs/LOVABLE_PROMPT.md` (compact brand brief), `docs/github.md` (repo association + screen map)
+
+---
+
+## Delta 23.08 (applied to the hosted prototype by Claude Code from the design session's text spec)
+
+1. Mobile bottom nav on ALL directions (was В/Е/Ж/З): 5 icon items ГЛАВНАЯ ·
+   КАТАЛОГ · ПОИСК · КАБИНЕТ · КОРЗИНА (20px stroke icons, 9px labels,
+   52px+ targets, active = inset 2px ink top bar + stroke 1.9, cart badge
+   top -4/right -7). Hidden on product screen and desktop frame. Б keeps a
+   2px ink top rule, others 1px.
+2. Mobile header language = one control: active flag + ▾ opens a bordered
+   dropdown (44px rows: flag + name + ✓, active row #edeae1); picking or any
+   navigation closes it. Desktop keeps three inline flags with underline.
+3. Part-2 answers bound in: admin requisites Rempire Store OÜ · Mardi 1,
+   Tallinn · 56237237 · rempireshopinfo@gmail.com; roles Владелец / Товары /
+   Заказы / Маркетинг; EAN scan-to-find; B2B tiers modeled but hidden;
+   image pipeline must survive a full reshoot (bulk re-upload + watermark).
+4. Video hero (З): already implemented in the 22.08 build (imperative src +
+   play() re-kick) — no change needed.
+5. Feedback widget moved to the bottom-right corner (bottom nav now owns the
+   bottom-left).

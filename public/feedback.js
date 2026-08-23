@@ -45,7 +45,7 @@
     // ---------- floating button ----------
     var fab = make(
       "button",
-      "position:fixed;left:14px;bottom:14px;z-index:99999;" +
+      "position:fixed;right: 14px;bottom:14px;z-index:99999;" +
         "width:52px;height:52px;border-radius:50%;border:none;" +
         "background:" + INK + ";color:" + PAPER + ";" +
         "display:flex;align-items:center;justify-content:center;" +
@@ -60,7 +60,7 @@
     // ---------- panel ----------
     var panel = make(
       "div",
-      "position:fixed;left:14px;bottom:78px;z-index:99999;" +
+      "position:fixed;right: 14px;bottom:78px;z-index:99999;" +
         "width:min(340px, calc(100vw - 28px));box-sizing:border-box;" +
         "background:" + PAPER + ";border:1px solid " + INK + ";" +
         "padding:16px;color:" + INK + ";font-family:" + FONT + ";" +
