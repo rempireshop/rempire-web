@@ -12,6 +12,14 @@ Still open: C (access hand-overs: Shopify admin, DNS, Google/Meta, Montonio
 contract), items 8–9 (accountant: VAT OSS; lawyer: returns policy) and D
 items 16–17. Original text below kept for the record.
 
+**New, 23.08 — PayPal.** Renat ticked PayPal in q16, but Montonio does not
+support it (nor does MakeCommerce). PayPal direct in Estonia is 3.4% + €0.35
+— €2.05 on a €50 order, a 4.1% effective rate, roughly triple the card cost.
+Ask him how many customers have actually asked for PayPal before we design
+around it. If it is genuinely required, SEB/EveryPay (PayPal at €0.10/tx,
+cards 1.35%) becomes the stronger single-provider answer; otherwise stay on
+Montonio Core. Full analysis: `rempire-api/docs/PAYMENT-PROVIDERS.md`.
+
 ## A. Blocks the architecture — ask Renat directly
 
 1. **Who else works in the admin, and what do they do?**
