@@ -308,7 +308,7 @@ a:focus-visible,[tabindex]:focus-visible{outline:1px solid #1c1a00;outline-offse
           </svg>
         </div>
         <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">The tower stands; light travels up it once, like evening on a glass building. 9% luminance, clipped to the ink — no gradient, no glow. Pairs with Tower Build as the homepage opening.</p>
-        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">1300 ms · runs once, never loops · static clip</div>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">1300 ms · runs once, never loops · static clip · demo shown ~4x (spec 9%)</div>
         <div><button onClick="{{ replayLight }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">Replay</button></div>
       </div>
       <div id="card-sundial" style="flex:1;min-width:250px;border:1px solid rgba(28,26,0,.18);padding:22px;display:flex;flex-direction:column;gap:14px">
@@ -347,7 +347,7 @@ a:focus-visible,[tabindex]:focus-visible{outline:1px solid #1c1a00;outline-offse
           <svg viewBox="292.24 171.22 265.18 409.8" aria-hidden="true" style="height:104px;width:auto;display:block;overflow:visible"><g data-breath><use href="#twp"></use></g></svg>
         </div>
         <p style="margin:0;font-size:12.5px;color:rgba(28,26,0,.75);text-wrap:pretty">Alive at rest: a 0.65% swell from the base every 4 s. Visible if you look for it, invisible if you don't. Hero only, compositor only.</p>
-        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">4200 ms loop · paused on hidden tab · {{ breathState }}</div>
+        <div style="font:10px/1.7 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:rgba(28,26,0,.55)">4200 ms loop · paused on hidden tab · demo shown ~5x (spec 0.65% = 0.7px here) · {{ breathState }}</div>
         <div><button onClick="{{ breathToggle }}" style="font:10px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid #1c1a00;color:#1c1a00;padding:7px 12px;cursor:pointer;white-space:nowrap" style-hover="background:#1c1a00;color:#fdfcf9">{{ breathLabel }}</button></div>
       </div>
       <div id="card-heroopen" style="flex:1 1 100%;min-width:300px;border:1px solid rgba(28,26,0,.18);display:flex;flex-direction:column;overflow:hidden">
@@ -686,4 +686,14 @@ class Component extends DCLogic {
   }
 }
 </script>
-<script src="/feedback.js" defer></script></body></html>
+<style data-demo-amp>
+/* Demo legibility only — production tokens are unchanged and documented on
+   each card. At the 104px demo size the spec values are sub-perceptual:
+   breath moves 0.68px in total, and 9% white over the thin ink outline is
+   near-invisible. These overrides amplify ONLY the two demo cards so the
+   concepts can actually be judged. */
+@keyframes tw-breath-demo{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+#card-breath.breath-on [data-breath]{animation-name:tw-breath-demo}
+@keyframes tw-light-demo{0%{transform:translateY(0);opacity:0}12%{opacity:.34}88%{opacity:.34}100%{transform:translateY(-560px);opacity:0}}
+#card-light.play-light [data-light]{animation-name:tw-light-demo;animation-duration:1700ms}
+</style><script src="/feedback.js" defer></script></body></html>
