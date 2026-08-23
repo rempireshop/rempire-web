@@ -91,7 +91,7 @@ summary::-webkit-details-marker{display:none}
 <p style="max-width:1240px;margin:14px auto 0;padding:0 18px;font-size:12.5px;color:rgba(28,26,0,.72);text-wrap:pretty">Одно направление вместо пяти: белая витрина, один шрифт для всего текста и Korolev только в слове REMPIRE — как на бейдже. Башня работает как архитектура страницы, а не как картинка. Прошлые пять вариантов сохранены в папке archive-v1.</p>
 
 <main style="display:flex;justify-content:center;padding:16px 12px 60px">
-<div id="f" style="width:{{ fw }};max-width:100%;background:#fdfcf9;border:1px solid rgba(28,26,0,.35);box-shadow:0 20px 60px rgba(28,26,0,.13);container-type:inline-size;position:relative;transition:width .28s ease">
+<div id="f" style="width:{{ fw }};max-width:100%;background:#ffffff;border:1px solid rgba(28,26,0,.35);box-shadow:0 20px 60px rgba(28,26,0,.13);container-type:inline-size;position:relative;transition:width .28s ease">
 
   <div style="background:#1c1a00;color:#fdfcf9;text-align:center;font-size:11px;padding:8px 12px;letter-spacing:.03em">Бесплатная доставка: EE, LV, LT, FI — от 50 € · Европа — от 200 €</div>
 
@@ -288,7 +288,7 @@ summary::-webkit-details-marker{display:none}
       </sc-for>
     </div>
   </section>
-  <div style="position:sticky;bottom:0;z-index:12;display:{{ barD }};gap:12px;align-items:center;background:#fdfcf9;border-top:1px solid #1c1a00;padding:11px 5cqi">
+  <div style="position:sticky;bottom:0;z-index:12;display:{{ barD }};gap:12px;align-items:center;background:#ffffff;border-top:1px solid #1c1a00;padding:11px 5cqi">
     <span style="font-size:15px;font-weight:600">{{ price }}</span>
     <button onClick="{{ addQ }}" style="flex:1;border:none;background:#1c1a00;color:#fdfcf9;padding:13px;font-size:12px;letter-spacing:.1em;cursor:pointer">В КОРЗИНУ</button>
   </div>
@@ -379,7 +379,7 @@ summary::-webkit-details-marker{display:none}
     </span>
     <span style="display:inline-flex;gap:14px;flex-wrap:wrap"><a href="#">Доставка</a><a href="#">Возвраты</a><a href="#">Конфиденциальность</a><a href="#">Реквизиты</a><a href="#">Instagram</a></span>
   </footer>
-  <div style="position:sticky;bottom:0;z-index:11;display:{{ navD }};background:#fdfcf9;border-top:1px solid #1c1a00">
+  <div style="position:sticky;bottom:0;z-index:11;display:{{ navD }};background:#ffffff;border-top:1px solid #1c1a00">
     <button onClick="{{ goHome }}" style="flex:1;border:none;background:transparent;cursor:pointer;padding:14px 4px;font-size:10px;letter-spacing:.12em">ГЛАВНАЯ</button>
     <button onClick="{{ goCat }}" style="flex:1;border:none;background:transparent;cursor:pointer;padding:14px 4px;font-size:10px;letter-spacing:.12em;border-left:1px solid rgba(28,26,0,.13)">КАТАЛОГ</button>
     <button onClick="{{ goSearch }}" style="flex:1;border:none;background:transparent;cursor:pointer;padding:14px 4px;font-size:10px;letter-spacing:.12em;border-left:1px solid rgba(28,26,0,.13)">ПОИСК</button>
@@ -388,7 +388,7 @@ summary::-webkit-details-marker{display:none}
 
   <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeCart }}" style="position:absolute;inset:0;background:rgba(28,26,0,.35);z-index:20;animation:fadeIn .25s ease"></div>
-    <div style="position:absolute;top:0;bottom:0;right:0;width:min(370px,88cqi);background:#fdfcf9;border-left:1px solid #1c1a00;z-index:21;padding:22px;overflow:auto;--x:100%;animation:slide .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:18px">
+    <div style="position:absolute;top:0;bottom:0;right:0;width:min(370px,88cqi);background:#ffffff;border-left:1px solid #1c1a00;z-index:21;padding:22px;overflow:auto;--x:100%;animation:slide .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:18px">
       <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;letter-spacing:.18em;white-space:nowrap">КОРЗИНА ({{ n }})</span><button onClick="{{ closeCart }}" aria-label="Закрыть" style="border:none;background:transparent;font-size:19px;cursor:pointer">×</button></div>
       <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start;padding:22px 0">
@@ -428,7 +428,7 @@ summary::-webkit-details-marker{display:none}
 
   <sc-if value="{{ filterOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeFilter }}" style="position:absolute;inset:0;background:rgba(28,26,0,.35);z-index:20;animation:fadeIn .25s ease"></div>
-    <div style="position:absolute;top:0;bottom:0;left:0;width:min(320px,85cqi);background:#fdfcf9;border-right:1px solid #1c1a00;z-index:21;padding:22px;overflow:auto;--x:-100%;animation:slide .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:22px">
+    <div style="position:absolute;top:0;bottom:0;left:0;width:min(320px,85cqi);background:#ffffff;border-right:1px solid #1c1a00;z-index:21;padding:22px;overflow:auto;--x:-100%;animation:slide .32s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;gap:22px">
       <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;letter-spacing:.18em">ФИЛЬТРЫ</span><button onClick="{{ closeFilter }}" aria-label="Закрыть" style="border:none;background:transparent;font-size:19px;cursor:pointer">×</button></div>
       <div style="display:flex;flex-direction:column;gap:9px">
         <div style="font-size:10px;letter-spacing:.14em;color:rgba(28,26,0,.5)">БРЕНД</div>
