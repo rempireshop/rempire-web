@@ -1,4 +1,4 @@
-# Renat's answers — 21.08.2026
+# Renat's answers — rounds 1 (21.08) and 2 (23.08)
 
 Source: `/qa` submission, 26/26 answered, received 2026-08-21T11:26:27Z.
 Raw JSON lives in the private Blob store `rempire-qa`
@@ -155,3 +155,64 @@ Also noted, non-blocking:
   visible to anyone checking the company.
 - EMTAK activity code is hairdressing, not retail trade. Harmless, but his
   accountant may want it updated now that the shop is the main activity.
+
+---
+
+# Round 2 — 23.08.2026, 6/6 answered
+
+Blob: `qa/round2-2026-08-23T06-26-13-853Z-*.json`.
+
+| # | Question | Answer |
+|---|---|---|
+| 1 | Кто ещё в админке | Помощник по товарам · сборщик/отправщик заказов · помощник по рекламе и текстам |
+| 2 | Касса в магазине | **Обычная касса без программы учёта** |
+| 3 | Штрихкоды на упаковке | **Да, почти у всех товаров** |
+| 4 | Салоны/опт по другой цене | Нет, но хочу в будущем |
+| 5 | Пересъёмка фото | **Готов переснять всё** |
+| 6 | Данные для счетов | 56237237 · rempireshopinfo@gmail.com · Mardi 1, Tallinn |
+
+## What this settles
+
+**Multi-user admin is v1 scope, not later.** Renat is not alone: at least
+three helpers (catalog, fulfilment, marketing/content). Roles can stay
+simple — Владелец / Товары / Заказы / Тексты — but accounts, per-user audit
+and basic permission gates go into the first version. This also explains the
+register's "0 employees": helpers, not payroll.
+
+**There is no POS to integrate — and that is good news.** The shop till is a
+plain cash register with no software. "Stock sync" therefore means: the new
+platform IS the inventory system, and offline sales are recorded in the
+admin. Design consequence: a fast «Продажа в магазине» action (scan or type
+barcode → quantity → done, works on a phone). No third-party integration, no
+API risk, and later the same screen can grow into a lightweight POS.
+
+**Barcodes are the master key.** Nearly all packaging carries a scannable
+EAN. The importer keys on barcode where present; the ~240 variants missing
+Shopify SKUs stop being a blocker. Admin product form gets a barcode field;
+the offline-sale action scans it. (Barcode values themselves still need
+Shopify Admin API access or a scanning session to capture.)
+
+**Wholesale pricing: schema now, UI later.** "Нет, но хочу в будущем" is the
+exact case for a customer-group price mechanism in the data model with no v1
+interface beyond a hidden flag.
+
+**Photography: he will reshoot everything.** The single biggest quality
+lever is unlocked. Next deliverable when a design direction is chosen: a
+one-page shooting spec (white tile, ratio, lighting, per-product shot list)
+so the reshoot lands consistent with the design system's packshot treatment.
+
+**Invoice/contact data — decided by Renat:** phone **56237237**, email
+**rempireshopinfo@gmail.com**, address **Mardi 1, Tallinn**. Combined with
+the register: legal name Rempire Store OÜ, reg 12216136, VAT EE102723858.
+The registered (Pärnu) address stays in the registry; business address goes
+on documents. To fix on the current site at migration: the legal notice's
+wrong "Rempire Shop OÜ", the stale privacy email blackboxestonia@gmail.com,
+and the second phone 53035580.
+
+## Nothing left blocking Phase 0
+
+Remaining opens are access/tasks, not questions: Shopify admin credentials
+(catalogue barcodes, customers, orders), DNS ownership for launch day,
+Google/Meta properties under Renat's accounts, the Montonio contract signed
+by Rempire Store OÜ, accountant's word on VAT OSS, legal sign-off on the
+rewritten returns policy.

@@ -1,7 +1,16 @@
 # Open questions after Renat's answers
 
-Status 22.08.2026. Everything here is unresolved after the 26-question round
-(`docs/RENAT-ANSWERS.md`). Grouped by what it blocks, not by topic.
+Status 23.08.2026: **sections A and B item 7 are RESOLVED** by round 2
+(answers + implications in `docs/RENAT-ANSWERS.md`). Short version: three
+helpers use the admin (roles = v1 scope), the till has no software (no POS
+integration — the platform becomes the inventory system with an offline-sale
+action), barcodes exist on nearly all packaging (sync key), wholesale
+pricing is schema-now/UI-later, he will reshoot all photography, and invoice
+data is 56237237 · rempireshopinfo@gmail.com · Mardi 1 Tallinn.
+
+Still open: C (access hand-overs: Shopify admin, DNS, Google/Meta, Montonio
+contract), items 8–9 (accountant: VAT OSS; lawyer: returns policy) and D
+items 16–17. Original text below kept for the record.
 
 ## A. Blocks the architecture — ask Renat directly
 
