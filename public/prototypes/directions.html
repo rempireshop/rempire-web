@@ -1488,10 +1488,10 @@ class Component extends DCLogic {
 <style data-mobile-patch>
 @media (max-width: 700px) {
   /* direction strip + screen tabs: wrap instead of forcing 900px page width */
-  x-dc span[style*="inline-flex"] { flex-wrap: wrap; max-width: 100%; }
+  span[style*="inline-flex"] { flex-wrap: wrap; max-width: 100%; }
   /* phone frame must fit real phones (content is container-query based, it adapts) */
-  x-dc [style*="width: 390px"] { width: min(390px, 100%) !important; }
+  [style*="width: 390px"] { width: min(390px, 100%) !important; }
   /* shell paddings tighter */
-  x-dc [style*="position: sticky"][style*="z-index: 20"] { padding-left: 12px !important; padding-right: 12px !important; }
+  [style*="position: sticky"][style*="z-index: 20"] { padding-left: 12px !important; padding-right: 12px !important; }
 }
 </style><script src="/feedback.js" defer></script></body></html>
