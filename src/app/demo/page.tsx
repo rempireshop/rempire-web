@@ -14,10 +14,10 @@ export const metadata: Metadata = {
     description: "8 вариантов дизайна · живой логотип · комментируй прямо на странице",
     images: [
       {
-        url: "/og-qa-v2.png",
+        url: "/og-demo.png",
         width: 1200,
         height: 630,
-        alt: "REMPIRE — обзор нового магазина",
+        alt: "REMPIRE — новый магазин, первый показ",
       },
     ],
   },
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Новый REMPIRE — что уже готово",
     description: "8 вариантов дизайна · живой логотип · комментируй прямо на странице",
-    images: ["/og-qa-v2.png"],
+    images: ["/og-demo.png"],
   },
 };
 
