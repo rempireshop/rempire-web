@@ -1517,4 +1517,21 @@ class Component extends DCLogic {
   /* shell paddings tighter */
   [style*="position: sticky"][style*="z-index: 20"] { padding-left: 12px !important; padding-right: 12px !important; }
 }
-</style><script src="/feedback.js" defer></script></body></html>
+</style><script data-deeplink>
+/* Hash deep-links from /demo: #kabinet opens the account tab once the app
+   has rendered. Retries because the template compiles asynchronously. */
+(function () {
+  var map = { "#kabinet": "Кабинет", "#admin": "Админка", "#checkout": "Оформление" };
+  var want = map[location.hash];
+  if (!want) return;
+  var tries = 0;
+  var t = setInterval(function () {
+    tries++;
+    var btn = Array.prototype.find.call(document.querySelectorAll("button"), function (b) {
+      return b.textContent && b.textContent.trim() === want;
+    });
+    if (btn) { clearInterval(t); btn.click(); window.scrollTo({ top: 0 }); }
+    else if (tries > 50) { clearInterval(t); }
+  }, 120);
+})();
+</script><script src="/feedback.js" defer></script></body></html>

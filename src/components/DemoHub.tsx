@@ -181,6 +181,27 @@ export default function DemoHub() {
           </p>
         </Card>
 
+        <Card
+          eyebrow="Для покупателей"
+          title="Личный кабинет"
+          href="/prototypes/directions.html#kabinet"
+          cta="Открыть кабинет"
+          fb="Личный кабинет"
+        >
+          <p>
+            Вход без пароля: клиент вводит e-mail и получает код — забытых
+            паролей больше не существует. Внутри: свои данные, заказы с
+            кнопкой «Повторить», любимый постамат по умолчанию — и личные
+            промокоды. Например, за три дня до дня рождения клиент сам
+            получает письмо с кодом на −10%.
+          </p>
+          <p className="text-fog">
+            Кнопка ниже откроет кабинет — нажми там «ПОЛУЧИТЬ КОД», и
+            увидишь его изнутри. Покупать без аккаунта тоже можно: гостевые
+            заказы никуда не деваются.
+          </p>
+        </Card>
+
         <section data-fb="Видео из Instagram" className="border-t-2 border-ink pt-5">
           <p className="text-xs uppercase tracking-[0.3em] text-fog">Контент</p>
           <h2 className="mt-2 font-display text-2xl font-bold uppercase tracking-[0.12em]">
