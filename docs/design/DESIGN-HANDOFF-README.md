@@ -173,3 +173,23 @@ separator - do not remove it; packshots stay mix-blend-mode:multiply. Shell
 build: --page (#ffffff, storefront surfaces) and --paper (#fdfcf9, on-ink +
 admin) are deliberately divergent - never alias them. Added to
 src/app/globals.css.
+
+## Direction И — «Как сейчас» (added 27.08 from Renat's feedback)
+
+Ninth direction mirroring the live rempireshop.com structure plus the two
+things Renat asked for in his comments. Order: announcement bar → shared
+header + category nav → HERO SLIDER → ПОПУЛЯРНЫЕ ТОВАРЫ → НОВЫЕ ТОВАРЫ →
+ТОП БРЕНДЫ. (The live site has no hero at all — hence his request.)
+
+Slider: 5 slides, image background under a 72% white wash so ink text stays
+readable, auto-advance every 4.5s, translucent ‹ › arrows (34px,
+rgba(253,252,249,.55) + blur), 5 dot indicators that jump directly. Auto
+-advance pauses when the tab is hidden and is disabled entirely under
+prefers-reduced-motion; manual arrows and dots always work. Production:
+slides become CMS entries (image or video, title, subtitle, CTA, link,
+schedule) — a slide can hold direction З's owner video, so the two concepts
+compose rather than compete.
+
+All non-home screens (category, product, cart, checkout, search, blog,
+account, admin) are inherited from the shared templates — И only overrides
+the home screen.
