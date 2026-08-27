@@ -128,6 +128,12 @@
     return (Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " €";
   }
   function byId(id) { for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i]; return CATALOGUE[0]; }
+  /* Real per-variant prices from the live shop where the catalogue has them;
+     falls back to the base price for single-variant products. */
+  function sizePrice(p, i) {
+    if (p.prices && p.prices.length) return p.prices[Math.min(i, p.prices.length - 1)];
+    return p.price;
+  }
   function cartCount() { var n = 0; S.cart.forEach(function (l) { n += l.qty; }); return n; }
   function cartSum() { var s = 0; S.cart.forEach(function (l) { s += byId(l.id).price * l.qty; }); return s; }
   function threshold() { return S.country === "EU" ? 200 : 50; }
@@ -322,7 +328,7 @@
         "<div>" +
           '<div class="card__brand" style="margin-bottom:6px">' + esc(p.brand) + "</div>" +
           '<h1 style="font-size:clamp(19px,3.4vw,26px);margin-bottom:10px">' + esc(p.name) + "</h1>" +
-          '<div class="num" style="font-size:20px;font-weight:600;margin-bottom:4px">' + eur(p.price) + "</div>" +
+          '<div class="num" style="font-size:20px;font-weight:600;margin-bottom:4px">' + eur(sizePrice(p, S.size)) + "</div>" +
           '<div style="font-size:12px;color:var(--muted);margin-bottom:18px">Налоги включены. Доставка рассчитается при оформлении.</div>' +
           (sizes.length > 1 ? '<div class="field"><span class="field__label">Объём</span><div style="display:flex;gap:8px;flex-wrap:wrap">' + sizes.map(function (sz, i) {
             return '<button data-size="' + i + '" style="min-height:44px;padding:0 16px;border:1px solid var(--ink);cursor:pointer;background:' + (i === S.size ? "var(--ink)" : "transparent") + ";color:" + (i === S.size ? "var(--paper)" : "var(--ink)") + '">' + sz + "</button>";
@@ -343,7 +349,7 @@
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
         CATALOGUE.filter(function (x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4).map(cardHTML).join("") +
       "</div></section></div>" +
-      '<div class="stickybar"><span class="num" style="font-weight:600">' + eur(p.price) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>';
+      '<div class="stickybar"><span class="num" style="font-weight:600">' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>';
   }
   function acc(title, body) {
     return '<details style="border-bottom:1px solid var(--rule)"><summary style="cursor:pointer;padding:14px 0;font-size:14px;font-weight:500;list-style:none">' + title + '</summary><div style="font-size:13.5px;color:rgba(28,26,0,.75);padding-bottom:14px">' + body + "</div></details>";
@@ -361,7 +367,7 @@
           : '<div style="border:1px solid var(--rule);padding:22px"><p style="margin:0 0 10px">По запросу «' + esc(S.query) + '» ничего не нашлось.</p>' +
             '<p style="margin:0 0 14px;color:var(--muted);font-size:13.5px">Проверьте написание или посмотрите категории:</p>' +
             '<div style="display:flex;gap:8px;flex-wrap:wrap">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost" style="min-height:40px;padding:0 14px;font-size:11px" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
-            '<p style="margin:14px 0 0;font-size:12px;color:var(--muted)">Запрос сохранён — если такого товара нет, мы увидим это в админке.</p></div>') +
+            '<p style="margin:14px 0 0;font-size:12px;color:var(--muted)">Напишите нам — поможем подобрать замену.</p></div>') +
       "</section></div>";
   }
 
@@ -370,7 +376,7 @@
       return '<div class="wrap" style="max-width:520px"><section class="sec">' +
         '<h1 class="display" style="font-size:20px;margin-bottom:8px">Кабинет</h1>' +
         '<p style="color:var(--muted);font-size:13.5px;margin-bottom:20px">Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.</p>' +
-        '<label class="field"><span class="field__label">E-mail</span><input class="input" data-email placeholder="you@example.com" value="' + esc(S.email) + '"></label>' +
+        '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" autocomplete="email" inputmode="email" data-email placeholder="you@example.com" value="' + esc(S.email) + '"></label>' +
         '<button class="btn btn--wide" data-login>Получить код</button>' +
         "</section></div>";
     }
@@ -423,7 +429,7 @@
           head(1, "Контакт", esc(S.email || "—")) +
           (step === 1 ? '<div style="margin-bottom:26px">' +
             '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
-            '<input class="input" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
+            '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
             (emailBad() ? '<div class="err">Похоже, в адресе опечатка — проверьте домен.</div>' : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
             '<label class="opt" style="border:none;padding-left:0"><input type="checkbox"><span style="font-size:13.5px">Хочу получать новости и скидки</span></label>' +
             '<button class="btn" data-step="2" style="margin-top:8px">Далее — доставка</button></div>' : "") +
@@ -622,7 +628,12 @@
     }
     if (d.remove) { S.cart = S.cart.filter(function (l) { return l.id !== d.remove; }); persist(); render(); return; }
     if (d.checkout !== undefined) { if (!S.cart.length) { toast("Корзина пуста"); return; } go("checkout"); return; }
-    if (d.pay !== undefined) { S.cart = []; persist(); go("done"); return; }
+    if (d.pay !== undefined) {
+      // A prototype still shouldn't let you "pay" with nothing filled in.
+      S.emailTouched = true;
+      if (emailBad()) { S.coStep = 1; render(); toast("Проверьте e-mail — на него придёт заказ"); return; }
+      S.cart = []; persist(); go("done"); return;
+    }
     if (d.step) { S.coStep = Number(d.step); render(); return; }
     if (d.method) { S.method = Number(d.method); render(); return; }
     if (d.acctm) { S.acctMethod = Number(d.acctm); render(); return; }
