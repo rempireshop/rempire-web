@@ -1,7 +1,13 @@
 /* REMPIRE — standalone prototype (direction К).
    Vanilla JS, no build step. State → render → DOM. Screens are pure
-   functions returning HTML strings; events are delegated from #app.
-   Depends on catalogue.js (CATALOGUE) and paylogos.js (PAYLOGOS). */
+   functions returning HTML strings; events are delegated from document.
+
+   The header and the bottom nav live in their own slots and are NOT rebuilt
+   on every render. Two reasons: an innerHTML swap restarts CSS animations
+   (the logo could never finish its draw) and it destroys the focused input
+   (typing in the header search lost the caret on the first keystroke).
+
+   Depends on catalogue.js (CATALOGUE, CAT_NAMES) and paylogos.js (PAYLOGOS). */
 
 (function () {
   "use strict";
@@ -12,8 +18,10 @@
   function tower(cls) {
     return '<svg viewBox="' + VB + '" role="img" aria-label="REMPIRE" class="' + (cls || "") + '"><path d="' + TOWER_D + '" fill="currentColor"/></svg>';
   }
-  function towerDraw() {
-    return '<svg viewBox="' + VB + '" aria-hidden="true"><path class="tw-draw" pathLength="1" d="' + TOWER_D + '"/><path class="tw-fill" fill="currentColor" d="' + TOWER_D + '"/></svg>';
+  function towerDraw(cls) {
+    return '<svg viewBox="' + VB + '" aria-hidden="true" class="' + (cls || "") + '">' +
+      '<path class="tw-draw" pathLength="1" d="' + TOWER_D + '"/>' +
+      '<path class="tw-fill" fill="currentColor" d="' + TOWER_D + '"/></svg>';
   }
 
   var ICON = {
@@ -21,7 +29,8 @@
     grid: '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
     search: '<path d="M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14zM16.2 16.2L21 21"/>',
     user: '<path d="M12 4a3.6 3.6 0 1 1 0 7.2A3.6 3.6 0 0 1 12 4zM4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/>',
-    bag: '<path d="M5.5 8.5h13l-.9 11a1.8 1.8 0 0 1-1.8 1.6H8.2a1.8 1.8 0 0 1-1.8-1.6zM8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5"/>'
+    bag: '<path d="M5.5 8.5h13l-.9 11a1.8 1.8 0 0 1-1.8 1.6H8.2a1.8 1.8 0 0 1-1.8-1.6zM8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5"/>',
+    check: '<path d="M4.5 12.5l5 5 10-11"/>'
   };
   function icon(name) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' + ICON[name] + "</svg>";
@@ -34,50 +43,81 @@
   };
   var LANGS = [["RU", "Русский"], ["ET", "Eesti"], ["EN", "English"]];
 
-  var CATS = [
-    { id: "hair", name: "Уход за волосами" },
-    { id: "styling", name: "Стайлинг" },
-    { id: "beard", name: "Уход за бородой" },
-    { id: "face", name: "Уход за лицом" },
-    { id: "body", name: "Уход за телом" },
-    { id: "merch", name: "Мерч" }
-  ];
+  var CATS = Object.keys(CAT_NAMES).map(function (k) { return { id: k, name: CAT_NAMES[k] }; });
 
-  // Slides carry a product photo, washed back so ink text keeps contrast.
-  // `cat` jumps the CTA straight to the relevant catalogue section.
   var BANNERS = [
     { eyebrow: "Таллинн · Mardi 1 · est 2018", t: "Профессиональный уход", s: "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.", c: "В каталог", cat: "hair" },
     { eyebrow: "Новинки", t: "Свежая поставка", s: "Уход и стайлинг, которые только приехали.", c: "Смотреть", cat: "styling" },
     { eyebrow: "Борода", t: "Всё для формы", s: "Масла, бальзамы и воски для ухода за бородой.", c: "В каталог", cat: "beard" },
-    { eyebrow: "Лицо", t: "Ежедневный уход", s: "Очищение, увлажнение и сыворотки для кожи.", c: "Смотреть", cat: "face" },
+    { eyebrow: "Парфюмерия", t: "Ниша и классика", s: "Creed, Tom Ford, Xerjoff, Byredo — то, что держим в наличии.", c: "Смотреть", cat: "perfume" },
     { eyebrow: "Rempire", t: "Мерч 666 ways", s: "Футболки с фирменным принтом.", c: "В мерч", cat: "merch" }
   ];
-  function bannerImg(cat) {
-    var p = CATALOGUE.filter(function (x) { return x.cat === cat; })[0];
-    return p ? p.img : "";
+  function bannerProduct(cat) {
+    var l = CATALOGUE.filter(function (x) { return x.cat === cat && x.stock !== "out"; });
+    return l[0] || CATALOGUE[0];
   }
 
+  /* Delivery prices are the carriers' own published rates (shipping-data.js:
+     Omniva business list valid 21.02.2025, SmartPosti business-prepaid
+     11.03.2026, DPD business list 2025), converted to VAT-inclusive at 24% and
+     rounded to ten cents. They are list prices for a shop under ~40 parcels a
+     month — Omniva and DPD both discount above that — so read them as a
+     ceiling, not as Rempire's eventual contract rate.
+     `pm` names the carrier whose real parcel-machine list to offer. Only
+     carriers with a verified location list are offered per country: Omniva has
+     no machines in Finland at all, and DPD publishes no open list for LV/LT. */
+  function shipPrice(carrier, service, dest, fallback) {
+    try {
+      var rows = SHIPPING_DATA.prices.parcelRef.rows;
+      for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        if (r.carrier === carrier && r.service === service &&
+            String(r.dest).indexOf(dest) === 0 && typeof r.incVat === "number") {
+          return Math.round(r.incVat * 10) / 10;
+        }
+      }
+    } catch (e) {}
+    return fallback;
+  }
   var SHIP = {
     EE: [
       { l: "Самовывоз — Mardi 1, Таллинн", p: 0, pickup: true },
-      { l: "Пакомат Omniva", p: 3.5, pm: true },
-      { l: "Пакомат SmartPosti", p: 3.5, pm: true },
-      { l: "Пакомат DPD", p: 3.9, pm: true },
-      { l: "Курьер до двери (DPD)", p: 5.9 }
+      { l: "Пакомат DPD", p: shipPrice("DPD", "Pickup", "EE", 4.5), pm: "dpd" },
+      { l: "Пакомат Omniva", p: shipPrice("Omniva", "pakiautomaat", "EE", 5.5), pm: "omniva" },
+      { l: "Пакомат SmartPosti", p: shipPrice("SmartPosti", "pakiautomaat", "EE", 5.5), pm: "smartpost" },
+      { l: "Курьер до двери (DPD)", p: shipPrice("DPD", "kuller", "EE", 9) }
     ],
-    LV: [{ l: "Пакомат Omniva", p: 4.9, pm: true }, { l: "Курьер DPD", p: 6.9 }],
-    LT: [{ l: "Пакомат Omniva", p: 4.9, pm: true }, { l: "Курьер DPD", p: 6.9 }],
-    FI: [{ l: "Пакомат SmartPosti", p: 5.9, pm: true }, { l: "Курьер DPD", p: 7.9 }],
-    EU: [{ l: "Курьер DPD — международная", p: 12.9 }]
+    LV: [
+      { l: "Пакомат Omniva", p: shipPrice("Omniva", "pakiautomaat", "LV", 10.6), pm: "omniva" },
+      { l: "Курьер DPD", p: shipPrice("DPD", "kuller", "LV", 13.6) }
+    ],
+    LT: [
+      { l: "Пакомат Omniva", p: shipPrice("Omniva", "pakiautomaat", "LT", 11.8), pm: "omniva" },
+      { l: "Курьер DPD", p: shipPrice("DPD", "kuller", "LT", 15.6) }
+    ],
+    FI: [
+      { l: "Пакомат SmartPosti", p: shipPrice("SmartPosti", "pakiautomaat", "FI", 15.7), pm: "smartpost" },
+      { l: "Курьер DPD", p: shipPrice("DPD", "kuller", "FI", 26) }
+    ],
+    EU: [{ l: "Курьер DPD — международная", p: 26 }]
   };
-  var MACHINES = {
-    EE: ["Tallinn — Kristiine keskus", "Tallinn — Ülemiste keskus", "Tallinn — Solaris", "Tartu — Kvartal", "Pärnu — keskus"],
-    LV: ["Rīga — Origo", "Rīga — Akropole", "Jūrmala — keskus"],
-    LT: ["Vilnius — Akropolis", "Kaunas — Mega"],
-    FI: ["Helsinki — Kamppi", "Espoo — Iso Omena"],
-    EU: []
-  };
+  function machinesFor(m) {
+    if (!m || !m.pm) return [];
+    try {
+      var byCarrier = SHIPPING_DATA.machines[S.country];
+      if (byCarrier && byCarrier[m.pm] && byCarrier[m.pm].length) return byCarrier[m.pm];
+    } catch (e) {}
+    return [];
+  }
   var COUNTRIES = [["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"], ["EU", "Другая страна Европы"]];
+
+  var PAYS = [
+    { l: "Банковская ссылка", h: "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке", k: "bank" },
+    { l: "Банковская карта", h: "Visa, Mastercard", k: "card" },
+    { l: "Apple Pay / Google Pay", h: "Оплата в одно касание", k: "wallet" },
+    { l: "По счёту — для компаний", h: "Счёт на е-мейл, оплата в течение 7 дней", k: "invoice" }
+  ];
+  var BANKS = ["Swedbank", "SEB", "LHV", "Luminor", "Coop"];
 
   // ---------- state ----------
   var S = {
@@ -87,24 +127,27 @@
     slide: 0,
     lang: "RU",
     langOpen: false,
-    cart: [],           // {id, qty, size}
+    cart: [],           // {id, size, qty}
     cartOpen: false,
     filterOpen: false,
     query: "",
-    shown: 8,           // catalog infinite scroll
+    shown: 12,          // catalog infinite scroll
     loading: false,
     country: "EE",
     method: 0,
+    machine: 0,
     promo: "",
     promoOk: false,
     promoErr: false,
     email: "",
     emailTouched: false,
     loggedIn: false,
-    acctMethod: 1,      // saved default delivery in Кабинет
+    acctMethod: 1,
     acctMachine: 0,
     toast: null,
-    coStep: 1,          // checkout progressive disclosure
+    coStep: 1,
+    pay: 0,
+    bank: 0,
     size: 0,
     qty: 1,
     gallery: 0,
@@ -128,12 +171,11 @@
     return (Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " €";
   }
   function byId(id) { for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i]; return CATALOGUE[0]; }
-  /* Real per-variant prices from the live shop where the catalogue has them;
-     falls back to the base price for single-variant products. */
   function sizePrice(p, i) {
     if (p.prices && p.prices.length) return p.prices[Math.min(i, p.prices.length - 1)];
     return p.price;
   }
+  function gal(p) { return p.gallery && p.gallery.length ? p.gallery : [p.img]; }
   function cartCount() { var n = 0; S.cart.forEach(function (l) { n += l.qty; }); return n; }
   function cartSum() { var s = 0; S.cart.forEach(function (l) { s += sizePrice(byId(l.id), l.size || 0) * l.qty; }); return s; }
   function threshold() { return S.country === "EU" ? 200 : 50; }
@@ -145,6 +187,7 @@
   function total() { return cartSum() - discount() + shipCost(); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function emailBad() { return S.emailTouched && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email); }
+  function wide() { try { return matchMedia("(min-width: 768px)").matches; } catch (e) { return true; } }
 
   function filtered() {
     var list = S.cat === "all" ? CATALOGUE.slice() : CATALOGUE.filter(function (p) { return p.cat === S.cat; });
@@ -159,19 +202,30 @@
     var q = S.query.trim().toLowerCase();
     if (!q) return [];
     return CATALOGUE.filter(function (p) {
-      return (p.name + " " + p.brand).toLowerCase().indexOf(q) >= 0;
+      return (p.name + " " + p.brand + " " + CAT_NAMES[p.cat]).toLowerCase().indexOf(q) >= 0;
     });
   }
 
   // ---------- components ----------
+  /* Product photos are local and background-stripped, so no blend mode is
+     needed to hide a white backing — which also means nothing breaks when a
+     parent picks up an opacity transition. Merch is a model shot: it keeps
+     its frame and fills the tile edge to edge instead. */
+  function media(p, i, cls) {
+    var g = gal(p), src = g[Math.min(i || 0, g.length - 1)];
+    return '<span class="' + (cls || "ph") + (p.fill === "cover" ? " ph--cover" : "") +
+      '" style="background-image:url(\'' + src + '\')"></span>';
+  }
+
   function cardHTML(p) {
     var price = (p.priceFrom ? "от " : "") + eur(p.price);
     var stock = p.stock === "low" ? '<span class="chip chip--low">мало</span>'
       : p.stock === "out" ? '<span class="chip chip--out">нет в наличии</span>' : "";
+    var g = gal(p);
     return '<button class="card" data-go-product="' + p.id + '">' +
       '<span class="card__media">' +
-        '<span class="card__img" style="background-image:url(\'' + p.img + '\')"></span>' +
-        '<span class="card__img2" style="background-image:url(\'' + p.img2 + '\')"></span>' +
+        media(p, 0, "ph card__img") +
+        (g.length > 1 ? media(p, 1, "ph card__img2") : "") +
         '<span class="card__wm"></span>' +
       "</span>" +
       '<span class="card__brand">' + esc(p.brand) + "</span>" +
@@ -181,61 +235,92 @@
       "</button>";
   }
 
-  /* Google Pay's "Pay" wordmark is #5F6368 — unreadable on the black express
-     button. Google publishes a reverse mark for dark surfaces; this swaps the
-     grey for white and leaves the four brand colours of the G untouched. */
   function gpayOnDark() {
     if (typeof PAYLOGOS === "undefined" || !PAYLOGOS.gpay) return "G Pay";
-    return '<span style="display:inline-flex;height:18px;margin-left:6px">' +
-      PAYLOGOS.gpay.replace(/#5F6368/gi, "#FFFFFF") + "</span>";
+    return '<span class="gpay-mark">' + PAYLOGOS.gpay + "</span>";
   }
 
-  function payLogosHTML() {
-    var order = ["bank", "visa", "mastercard", "applepay", "gpay"];
+  function payLogosHTML(keys) {
+    var order = keys || ["bank", "visa", "mastercard", "applepay", "gpay"];
     return '<span class="paylogos">' + order.map(function (k) {
-      return '<span class="paylogos__item">' + (typeof PAYLOGOS !== "undefined" && PAYLOGOS[k] ? PAYLOGOS[k] : k) + "</span>";
+      return '<span class="paylogos__item paylogos__item--' + k + '">' +
+        (typeof PAYLOGOS !== "undefined" && PAYLOGOS[k] ? PAYLOGOS[k] : k) + "</span>";
     }).join("") + "</span>";
   }
 
-  function header() {
-    var langMenu = S.langOpen ? '<div class="lang__menu" role="listbox">' + LANGS.map(function (l) {
-      return '<button class="lang__item" role="option" aria-selected="' + (S.lang === l[0]) + '" data-lang="' + l[0] + '">' +
-        '<span class="lang__flag" style="background-image:url(\'' + FLAG[l[0]] + '\')"></span>' +
-        "<span style=\"flex:1\">" + l[1] + "</span>" + (S.lang === l[0] ? "<span>✓</span>" : "") + "</button>";
-    }).join("") + "</div>" : "";
-
+  // ---------- header (persistent) ----------
+  function headerHTML() {
     return '<header class="hdr">' +
-      '<div class="hdr__announce">Бесплатная доставка: EE, LV, LT, FI — от 50 € · Европа — от 200 €</div>' +
+      '<div class="hdr__announce"><span class="wide-only">Бесплатная доставка: EE, LV, LT, FI — от 50 € · Европа — от 200 €</span>' +
+        '<span class="narrow-only">Бесплатная доставка от 50 €</span></div>' +
       '<div class="hdr__row">' +
-        '<button class="hdr__logo" data-go="home" title="На главную" aria-label="REMPIRE — на главную">' + tower() + '<span class="hdr__word">Rempire</span></button>' +
-        '<input class="hdr__search" data-search placeholder="Поиск: шампунь, Davines, воск…" value="' + esc(S.query) + '" aria-label="Поиск по магазину">' +
+        '<button class="hdr__logo" data-go="home" data-ident title="На главную" aria-label="REMPIRE — на главную">' +
+          towerDraw("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
+        '<div class="hdr__searchwrap">' +
+          '<span class="hdr__searchicon">' + icon("search") + "</span>" +
+          '<input class="hdr__search" data-search placeholder="Поиск: шампунь, Davines, воск…" aria-label="Поиск по магазину">' +
+        "</div>" +
         '<span class="hdr__tools">' +
-          '<span class="lang"><button class="lang__btn" data-langtoggle aria-label="Язык" aria-expanded="' + S.langOpen + '">' +
-            '<span class="lang__flag" style="background-image:url(\'' + FLAG[S.lang] + '\')"></span><span style="font-size:9px;opacity:.6">▾</span></button>' + langMenu + "</span>" +
+          '<span class="lang"><button class="lang__btn" data-langtoggle aria-label="Язык" aria-expanded="false">' +
+            '<span class="lang__flag" data-langflag></span><span class="lang__caret" aria-hidden="true">▾</span></button>' +
+            '<div class="lang__menuslot"></div></span>' +
           '<button class="iconbtn" data-go="account" aria-label="Кабинет">' + icon("user") + "</button>" +
-          '<button class="iconbtn" data-cart aria-label="Корзина">' + icon("bag") + (cartCount() ? '<span class="badge num">' + cartCount() + "</span>" : "") + "</button>" +
+          '<button class="iconbtn" data-cart aria-label="Корзина">' + icon("bag") + '<span data-cartbadge></span></button>' +
         "</span>" +
       "</div>" +
-      '<nav class="hdr__nav" aria-label="Категории">' + CATS.map(function (c) {
-        return '<button data-go-cat="' + c.id + '" aria-current="' + (S.screen === "catalog" && S.cat === c.id) + '">' + c.name + "</button>";
-      }).join("") + "</nav>" +
-    "</header>";
+      '<nav class="hdr__nav" aria-label="Категории">' +
+        '<button data-go-cat="all">Все товары</button>' +
+        CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
+      "</nav></header>";
   }
 
-  function botnav() {
-    var items = [
-      ["home", "home", "Главная"],
-      ["catalog", "grid", "Каталог"],
-      ["search", "search", "Поиск"],
-      ["account", "user", "Кабинет"],
-      ["cart", "bag", "Корзина"]
-    ];
-    return '<nav class="botnav" aria-label="Основная навигация">' + items.map(function (it) {
-      var cur = it[0] === "cart" ? S.cartOpen : S.screen === it[0];
-      var badge = it[0] === "cart" && cartCount() ? '<span class="badge num">' + cartCount() + "</span>" : "";
-      return '<button data-' + (it[0] === "cart" ? "cart" : "go") + '="' + (it[0] === "cart" ? "1" : it[0]) + '" aria-current="' + cur + '">' +
-        '<span style="position:relative;display:inline-flex">' + icon(it[1]) + badge + "</span>" + it[2] + "</button>";
+  function patchHeader() {
+    var h = hdrSlot;
+    if (!h.firstChild) return;
+    var badge = h.querySelector("[data-cartbadge]");
+    badge.outerHTML = cartCount()
+      ? '<span class="badge num" data-cartbadge>' + cartCount() + "</span>"
+      : '<span data-cartbadge hidden></span>';
+    h.querySelector("[data-langflag]").style.backgroundImage = "url('" + FLAG[S.lang] + "')";
+    h.querySelector("[data-langtoggle]").setAttribute("aria-expanded", String(S.langOpen));
+    h.querySelector(".lang__menuslot").innerHTML = S.langOpen
+      ? '<div class="lang__menu" role="listbox">' + LANGS.map(function (l) {
+          return '<button class="lang__item" role="option" aria-selected="' + (S.lang === l[0]) + '" data-lang="' + l[0] + '">' +
+            '<span class="lang__flag" style="background-image:url(\'' + FLAG[l[0]] + '\')"></span>' +
+            '<span style="flex:1">' + l[1] + "</span>" + (S.lang === l[0] ? "<span>✓</span>" : "") + "</button>";
+        }).join("") + "</div>"
+      : "";
+    var srch = h.querySelector("[data-search]");
+    if (document.activeElement !== srch) srch.value = S.query;
+    h.querySelectorAll(".hdr__nav button").forEach(function (b) {
+      b.setAttribute("aria-current", String(S.screen === "catalog" && S.cat === b.dataset.goCat));
+    });
+  }
+
+  // ---------- bottom nav (persistent) ----------
+  var NAVITEMS = [
+    ["home", "home", "Главная"],
+    ["catalog", "grid", "Каталог"],
+    ["search", "search", "Поиск"],
+    ["account", "user", "Кабинет"],
+    ["cart", "bag", "Корзина"]
+  ];
+  function botnavHTML() {
+    return '<nav class="botnav" aria-label="Основная навигация">' + NAVITEMS.map(function (it) {
+      return '<button data-' + (it[0] === "cart" ? "cart" : "go") + '="' + (it[0] === "cart" ? "1" : it[0]) + '" data-nav="' + it[0] + '">' +
+        '<span class="botnav__ico">' + icon(it[1]) + '<span data-navbadge="' + it[0] + '"></span></span>' + it[2] + "</button>";
     }).join("") + "</nav>";
+  }
+  function patchNav() {
+    if (!navSlot.firstChild) return;
+    navSlot.querySelectorAll("[data-nav]").forEach(function (b) {
+      var k = b.dataset.nav;
+      b.setAttribute("aria-current", String(k === "cart" ? S.cartOpen : S.screen === k));
+    });
+    var nb = navSlot.querySelector('[data-navbadge="cart"]');
+    nb.outerHTML = cartCount()
+      ? '<span class="badge num" data-navbadge="cart">' + cartCount() + "</span>"
+      : '<span data-navbadge="cart" hidden></span>';
   }
 
   function footer() {
@@ -246,22 +331,23 @@
         '<div><span class="ftr__h">Покупателю</span><a href="#">Доставка и оплата</a><a href="#">Возврат товара</a><a href="#">Условия продажи</a><a href="#">Блог и советы</a></div>' +
         '<div><span class="ftr__h">Правовое</span><a href="#">Конфиденциальность</a><a href="#">Правовая информация</a><a href="#">Настройки cookie</a><a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a></div>' +
       "</div>" +
-      '<div class="ftr__bottom"><span style="display:inline-flex;gap:9px;align-items:center;white-space:nowrap">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" + payLogosHTML() + "</div>" +
+      '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" + payLogosHTML() + "</div>" +
     "</div></footer>";
   }
 
   // ---------- screens ----------
   function screenHome() {
-    var pop = CATALOGUE.slice(0, 8), fresh = CATALOGUE.slice(8, 16);
-    return '<section class="hero">' +
+    var pop = spread(8, false), fresh = spread(8, true);
+    return '<section class="hero" aria-roledescription="карусель">' +
       BANNERS.map(function (b, i) {
-        return '<div class="hero__slide" data-on="' + (i === S.slide ? 1 : 0) + '">' +
+        var p = bannerProduct(b.cat);
+        return '<div class="hero__slide" data-on="' + (i === S.slide ? 1 : 0) + '" aria-hidden="' + (i !== S.slide) + '">' +
           '<div class="hero__box">' +
             '<div class="hero__inner"><div class="hero__eyebrow">' + b.eyebrow + "</div>" +
             '<h2 class="hero__title">' + b.t + "</h2>" +
             '<p class="hero__sub">' + b.s + "</p>" +
             '<button class="btn" data-go-cat="' + b.cat + '">' + b.c + "</button></div>" +
-            '<div class="hero__art" style="background-image:url(\'' + bannerImg(b.cat) + '\')" aria-hidden="true"></div>' +
+            media(p, 0, "hero__art") +
           "</div></div>";
       }).join("") +
       '<button class="hero__arrow hero__arrow--prev" data-slide="-1" aria-label="Предыдущий баннер">‹</button>' +
@@ -270,274 +356,372 @@
         return '<button data-dot="' + i + '" aria-current="' + (i === S.slide) + '" aria-label="Баннер ' + (i + 1) + '"></button>';
       }).join("") + "</div></section>" +
       '<div class="wrap">' +
-        '<section class="sec"><div class="sec__head"><h2 class="sec__title">Популярные товары</h2><button class="link" data-go="catalog" data-all="1">Все товары</button></div>' +
-        '<p class="sec__intro">Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.</p>' +
-        '<div class="grid">' + pop.map(cardHTML).join("") + "</div></section>" +
-        '<section class="sec"><div class="sec__head"><h2 class="sec__title">Новые товары</h2><button class="link" data-go="catalog" data-all="1">Все товары</button></div>' +
-        '<p class="sec__intro">Свежие поступления: уход и стайлинг для волос и бороды, косметика для лица и новый мерч.</p>' +
-        '<div class="grid">' + fresh.map(cardHTML).join("") + "</div></section>" +
+        rail("Популярные товары", "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.", pop) +
+        rail("Новые товары", "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.", fresh) +
+        '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
+        '<div class="cattiles">' + CATS.map(function (c) {
+          var p = bannerProduct(c.id);
+          return '<button class="cattile" data-go-cat="' + c.id + '">' +
+            '<span class="cattile__shot">' + media(p, 0, "ph cattile__img") + "</span>" +
+            '<span class="cattile__name">' + c.name + "</span>" +
+            '<span class="cattile__n num">' + CATALOGUE.filter(function (x) { return x.cat === c.id; }).length + " товаров</span></button>";
+        }).join("") + "</div></section>" +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Магазин в Таллинне</h2></div>' +
-        '<div style="display:grid;gap:16px 28px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));font-size:13.5px;color:var(--muted)">' +
+        '<div class="infogrid">' +
           '<div><span class="ftr__h">Доставка</span>DPD, Omniva, SmartPosti · 1–3 дня · бесплатно от 50 €</div>' +
-          '<div><span class="ftr__h">Оплата</span>Банковская ссылка, карта, Apple Pay, Google Pay</div>' +
+          '<div><span class="ftr__h">Оплата</span>' + payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + "</div>" +
           '<div><span class="ftr__h">Самовывоз</span>Mardi 1, Таллинн · бесплатно, заказ ждёт 7 дней</div>' +
         "</div></section>" +
       "</div>";
   }
+  /* Both home rails take one product per category before taking a second, so
+     neither ends up being eight shampoos or eight t-shirts. `fromEnd` is the
+     "new in" pass; the catalogue is built in shop order. */
+  function spread(n, fromEnd) {
+    var byCat = {};
+    CATALOGUE.forEach(function (p) { (byCat[p.cat] = byCat[p.cat] || []).push(p); });
+    var keys = Object.keys(byCat), out = [];
+    for (var round = 0; out.length < n && round < 10; round++) {
+      for (var i = 0; i < keys.length && out.length < n; i++) {
+        var list = byCat[keys[i]];
+        var p = fromEnd ? list[list.length - 1 - round] : list[round];
+        if (p && out.indexOf(p) < 0) out.push(p);
+      }
+    }
+    return out;
+  }
+
+  function rail(title, intro, list) {
+    return '<section class="sec"><div class="sec__head"><h2 class="sec__title">' + title +
+      '</h2><button class="link" data-go-cat="all">Все товары</button></div>' +
+      '<p class="sec__intro">' + intro + "</p>" +
+      '<div class="grid">' + list.map(cardHTML).join("") + "</div></section>";
+  }
 
   function screenCatalog() {
     var list = filtered(), visible = list.slice(0, S.shown);
-    var cat = S.cat === "all" ? { id: "all", name: "Все товары" } : CATS.filter(function (c) { return c.id === S.cat; })[0];
+    var name = S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
+    var intro = S.cat === "all"
+      ? "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч."
+      : "Профессиональные средства, которыми команда Rempire работает в салоне.";
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + cat.name + "</div>" +
+      '<div class="crumbs"><button data-go="home">Главная</button> / ' + name + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
-        '<h1 class="display" style="font-size:22px;margin-bottom:10px">' + cat.name + "</h1>" +
-        '<p class="sec__intro">Профессиональные средства, которыми команда Rempire работает в салоне. Подберите то, что подходит вашему типу волос и образу жизни.</p>' +
-        '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">' +
-          '<button class="btn btn--ghost" style="min-height:44px;padding:0 16px" data-filter>Фильтры' + ((S.brandFilter.length || S.onlyInStock) ? " ·&nbsp;" + (S.brandFilter.length + (S.onlyInStock ? 1 : 0)) : "") + "</button>" +
-          '<span class="num" style="font-size:13px;color:var(--muted)">' + list.length + " товаров</span>" +
-          '<label style="margin-left:auto;font-size:13px;color:var(--muted);display:inline-flex;gap:8px;align-items:center">Сортировка' +
-          '<select data-sort style="border:none;border-bottom:1px solid rgba(28,26,0,.4);background:transparent;font:inherit;font-size:13px;padding:4px 2px;min-height:44px">' +
+        '<h1 class="display h1">' + name + "</h1>" +
+        '<p class="sec__intro">' + intro + "</p>" +
+        '<div class="toolbar">' +
+          '<button class="btn btn--ghost toolbar__filter" data-filter>Фильтры<span data-fcount>' + fcountLabel() + "</span></button>" +
+          '<span class="toolbar__count num" data-count>' + list.length + " " + plural(list.length) + "</span>" +
+          '<label class="toolbar__sort"><span class="toolbar__sortlbl">Сортировка</span>' +
+          '<span class="sel"><select data-sort aria-label="Сортировка">' +
             '<option value="hit"' + (S.sort === "hit" ? " selected" : "") + ">Хиты продаж</option>" +
             '<option value="new"' + (S.sort === "new" ? " selected" : "") + ">Новинки</option>" +
-            '<option value="asc"' + (S.sort === "asc" ? " selected" : "") + ">Цена ↑</option>" +
-            '<option value="desc"' + (S.sort === "desc" ? " selected" : "") + ">Цена ↓</option>" +
-          "</select></label>" +
+            '<option value="asc"' + (S.sort === "asc" ? " selected" : "") + ">Сначала дешевле</option>" +
+            '<option value="desc"' + (S.sort === "desc" ? " selected" : "") + ">Сначала дороже</option>" +
+          "</select></span></label>" +
         "</div>" +
-        '<div class="grid" id="catgrid">' + visible.map(cardHTML).join("") + "</div>" +
-        (visible.length < list.length
-          ? '<div id="sentinel" style="height:1px"></div><div class="spinner" id="catspin"></div>'
-          : '<p style="text-align:center;color:var(--muted);font-size:13px;margin-top:28px">Показаны все ' + list.length + " товаров</p>") +
+        activeChips() +
+        (list.length
+          ? '<div class="grid" id="catgrid">' + visible.map(cardHTML).join("") + "</div>" +
+            '<div id="catmore">' + moreHTML(visible.length, list.length) + "</div>"
+          : '<div class="empty"><p>Под эти фильтры ничего не подошло.</p>' +
+            '<button class="btn btn--ghost" data-clearfilter>Сбросить фильтры</button></div>') +
       "</section></div>";
+  }
+  function plural(n) {
+    var a = n % 10, b = n % 100;
+    if (a === 1 && b !== 11) return "товар";
+    if (a >= 2 && a <= 4 && (b < 10 || b >= 20)) return "товара";
+    return "товаров";
+  }
+  function fcountLabel() {
+    var n = S.brandFilter.length + (S.onlyInStock ? 1 : 0);
+    return n ? " · " + n : "";
+  }
+  function moreHTML(shown, tot) {
+    return shown < tot
+      ? '<div id="sentinel"></div><div class="spinner"></div>'
+      : '<p class="allshown">Показаны все ' + tot + " " + plural(tot) + "</p>";
+  }
+  function activeChips() {
+    var out = [];
+    if (S.onlyInStock) out.push('<button class="fchip" data-unstock>В наличии ✕</button>');
+    S.brandFilter.forEach(function (b) {
+      out.push('<button class="fchip" data-unbrand="' + esc(b) + '">' + esc(b) + " ✕</button>");
+    });
+    if (!out.length) return '<div class="fchips" data-chips hidden></div>';
+    return '<div class="fchips" data-chips>' + out.join("") +
+      '<button class="link" data-clearfilter>Сбросить всё</button></div>';
   }
 
   function screenProduct() {
     var p = byId(S.productId);
-    var imgs = [p.img, p.img2];
-    var sizes = p.sizes && p.sizes.length ? p.sizes : ["один размер"];
+    var g = gal(p);
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [];
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CATS.filter(function (c) { return c.id === p.cat; })[0].name + "</button> / " + esc(p.brand) + "</div>" +
-      '<div style="display:grid;gap:26px 40px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));padding:18px 0 30px">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
+      '<div class="pdp">' +
         "<div>" +
-          '<div style="position:relative;aspect-ratio:1;border:1px solid var(--rule-soft);display:flex;align-items:center;justify-content:center;background:var(--page)">' +
-            '<div style="position:absolute;inset:8%;background-image:url(\'' + imgs[S.gallery] + '\');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></div>' +
-            '<span class="card__wm" style="width:16px;height:25px;right:12px;bottom:12px"></span>' +
-          "</div>" +
-          '<div style="display:flex;gap:8px;margin-top:10px">' + imgs.map(function (im, i) {
-            return '<button data-gal="' + i + '" aria-label="Фото ' + (i + 1) + '" style="width:56px;height:56px;border:1px solid ' + (i === S.gallery ? "var(--ink)" : "var(--rule)") + ';background:var(--page);cursor:pointer;position:relative"><span style="position:absolute;inset:10%;background-image:url(\'' + im + '\');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></span></button>';
-          }).join("") + "</div>" +
+          '<div class="pdp__stage">' + media(p, S.gallery, "ph pdp__img") +
+            '<span class="card__wm pdp__wm"></span></div>' +
+          (g.length > 1 ? '<div class="pdp__thumbs">' + g.map(function (im, i) {
+            return '<button data-gal="' + i + '" aria-label="Фото ' + (i + 1) + '" aria-current="' + (i === S.gallery) + '" class="pdp__thumb">' +
+              media(p, i, "ph") + "</button>";
+          }).join("") + "</div>" : "") +
         "</div>" +
         "<div>" +
-          '<div class="card__brand" style="margin-bottom:6px">' + esc(p.brand) + "</div>" +
-          '<h1 style="font-size:clamp(19px,3.4vw,26px);margin-bottom:10px">' + esc(p.name) + "</h1>" +
-          '<div class="num" style="font-size:20px;font-weight:600;margin-bottom:4px">' + eur(sizePrice(p, S.size)) + "</div>" +
-          '<div style="font-size:12px;color:var(--muted);margin-bottom:18px">Налоги включены. Доставка рассчитается при оформлении.</div>' +
-          (sizes.length > 1 ? '<div class="field"><span class="field__label">Объём</span><div style="display:flex;gap:8px;flex-wrap:wrap">' + sizes.map(function (sz, i) {
-            return '<button data-size="' + i + '" style="min-height:44px;padding:0 16px;border:1px solid var(--ink);cursor:pointer;background:' + (i === S.size ? "var(--ink)" : "transparent") + ";color:" + (i === S.size ? "var(--paper)" : "var(--ink)") + '">' + sz + "</button>";
+          '<div class="card__brand pdp__brand">' + esc(p.brand) + "</div>" +
+          '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
+          '<div class="num pdp__price">' + eur(sizePrice(p, S.size)) + "</div>" +
+          '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
+          (sizes.length > 1 ? '<div class="field"><span class="field__label">' + (p.cat === "merch" ? "Размер" : "Объём") + '</span><div class="sizes">' + sizes.map(function (sz, i) {
+            return '<button class="size" data-size="' + i + '" aria-current="' + (i === S.size) + '">' + sz + "</button>";
           }).join("") + "</div></div>" : "") +
-          '<div style="display:flex;gap:12px;align-items:center;margin:18px 0">' +
-            '<span style="display:inline-flex;border:1px solid var(--ink)"><button data-qty="-1" aria-label="Меньше" style="width:44px;height:48px;border:none;background:none;cursor:pointer">−</button><span class="num" style="width:44px;height:48px;display:flex;align-items:center;justify-content:center">' + S.qty + '</span><button data-qty="1" aria-label="Больше" style="width:44px;height:48px;border:none;background:none;cursor:pointer">+</button></span>' +
-            '<button class="btn" style="flex:1" data-add="' + p.id + '">В корзину</button>' +
+          '<div class="pdp__buy">' +
+            '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num">' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
+            '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
           "</div>" +
-          '<button class="btn btn--wide" style="background:#000;border-color:#000;color:#fff;margin-bottom:8px" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>" +
-          '<div style="text-align:center;margin-bottom:20px"><button class="link" data-checkout>Другие способы оплаты</button></div>' +
-          '<div style="font-size:13px;color:var(--muted);border-top:1px solid var(--rule);padding-top:14px">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · бесплатно от 50 € · самовывоз на Mardi 1</div>' +
+          '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>" +
+          '<div class="pdp__alt"><button class="link" data-checkout>Другие способы оплаты</button></div>' +
+          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · бесплатно от 50 € · самовывоз на Mardi 1</div>' +
           acc("Описание", "Профессиональное средство из салонного ассортимента Rempire. Подходит для регулярного ухода.") +
           acc("Применение", "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.") +
-          acc("Состав (INCI)", '<span style="color:var(--muted)">Полный состав будет заполнен при переносе каталога.</span>') +
+          acc("Состав (INCI)", '<span class="muted">Полный состав будет заполнен при переносе каталога.</span>') +
           acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.") +
         "</div>" +
       "</div>" +
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
         CATALOGUE.filter(function (x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4).map(cardHTML).join("") +
       "</div></section></div>" +
-      '<div class="stickybar"><span class="num" style="font-weight:600">' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>';
+      '<div class="stickybar"><span class="num stickybar__sum">' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>';
   }
   function acc(title, body) {
-    return '<details style="border-bottom:1px solid var(--rule)"><summary style="cursor:pointer;padding:14px 0;font-size:14px;font-weight:500;list-style:none">' + title + '</summary><div style="font-size:13.5px;color:rgba(28,26,0,.75);padding-bottom:14px">' + body + "</div></details>";
+    return '<details class="acc"><summary>' + title + "</summary><div class=\"acc__body\">" + body + "</div></details>";
   }
 
   function screenSearch() {
     var res = searchResults();
     return '<div class="wrap"><section class="sec">' +
-      '<h1 class="display" style="font-size:20px;margin-bottom:16px">Поиск</h1>' +
-      '<input class="input input--box" data-search2 value="' + esc(S.query) + '" placeholder="Что ищете?" aria-label="Поиск" style="font-size:16px;margin-bottom:16px">' +
+      '<h1 class="display h1">Поиск</h1>' +
+      '<input class="input input--box searchbox" data-search2 value="' + esc(S.query) + '" placeholder="Что ищете?" aria-label="Поиск">' +
       (!S.query.trim()
-        ? '<p style="color:var(--muted);font-size:13.5px">Популярные запросы: ' + ["шампунь", "Davines", "воск", "борода"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
+        ? '<p class="muted">Популярные запросы: ' + ["шампунь", "Davines", "воск", "борода", "парфюм"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
         : res.length
-          ? '<p style="color:var(--muted);font-size:13px;margin-bottom:16px" class="num">' + res.length + ' товаров</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
-          : '<div style="border:1px solid var(--rule);padding:22px"><p style="margin:0 0 10px">По запросу «' + esc(S.query) + '» ничего не нашлось.</p>' +
-            '<p style="margin:0 0 14px;color:var(--muted);font-size:13.5px">Проверьте написание или посмотрите категории:</p>' +
-            '<div style="display:flex;gap:8px;flex-wrap:wrap">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost" style="min-height:40px;padding:0 14px;font-size:11px" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
-            '<p style="margin:14px 0 0;font-size:12px;color:var(--muted)">Напишите нам — поможем подобрать замену.</p></div>') +
+          ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
+          : '<div class="empty"><p>По запросу «' + esc(S.query) + '» ничего не нашлось.</p>' +
+            '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
+            '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
+            '<p class="muted">Напишите нам — поможем подобрать замену.</p></div>') +
       "</section></div>";
   }
 
   function screenAccount() {
     if (!S.loggedIn) {
-      return '<div class="wrap" style="max-width:520px"><section class="sec">' +
-        '<h1 class="display" style="font-size:20px;margin-bottom:8px">Кабинет</h1>' +
-        '<p style="color:var(--muted);font-size:13.5px;margin-bottom:20px">Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.</p>' +
-        '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" autocomplete="email" inputmode="email" data-email placeholder="you@example.com" value="' + esc(S.email) + '"></label>' +
+      return '<div class="wrap wrap--narrow"><section class="sec">' +
+        '<h1 class="display h1">Кабинет</h1>' +
+        '<p class="muted" style="margin-bottom:20px">Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.</p>' +
+        '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" autocomplete="email" inputmode="email" data-email placeholder="you@example.com" value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '"></label>' +
+        (emailBad() ? '<div class="err">Проверьте адрес — на него придёт код.</div>' : "") +
         '<button class="btn btn--wide" data-login>Получить код</button>' +
         "</section></div>";
     }
     var m = methods();
-    return '<div class="wrap" style="max-width:640px"><section class="sec">' +
-      '<div style="display:flex;justify-content:space-between;align-items:baseline"><h1 class="display" style="font-size:20px">Кабинет</h1><button class="link" data-logout>Выйти</button></div>' +
-      '<div class="sec__head" style="margin-top:24px"><h2 class="sec__title">Мои данные</h2></div>' +
-      '<label class="field"><span class="field__label">Имя</span><input class="input" value="Renat"></label>' +
-      '<label class="field"><span class="field__label">E-mail</span><input class="input" value="' + esc(S.email || "renat@example.com") + '"></label>' +
-      '<button class="btn btn--ghost" style="min-height:44px" data-save>Сохранить</button>' +
+    return '<div class="wrap wrap--mid"><section class="sec">' +
+      '<div class="acct__top"><h1 class="display h1">Кабинет</h1><button class="link" data-logout>Выйти</button></div>' +
 
-      '<div class="sec__head" style="margin-top:32px"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
-      '<p style="color:var(--muted);font-size:13px;margin:0 0 10px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
-      '<div style="border:1px solid var(--rule)">' + m.map(function (x, i) {
-        return '<label class="opt" style="padding-inline:12px"><input type="radio" name="acctm" ' + (i === S.acctMethod ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" + (x.p ? '<span class="opt__price num">' + eur(x.p) + "</span>" : '<span class="opt__price">0 €</span>') + "</label>";
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои данные</h2></div>' +
+      '<label class="field"><span class="field__label">Имя</span><input class="input" value="" placeholder="Имя"></label>' +
+      '<label class="field"><span class="field__label">E-mail</span><input class="input" value="' + esc(S.email) + '"></label>' +
+      '<button class="btn btn--ghost btn--sm" data-save>Сохранить</button>' +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
+      '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
+      '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-acctcountry>' +
+        COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
+      "</select></span></label>" +
+      '<div class="optlist">' + m.map(function (x, i) {
+        return '<label class="opt"><input type="radio" name="acctm" ' + (i === S.acctMethod ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
+          '<span class="opt__price num">' + (x.p ? eur(x.p) : "0 €") + "</span></label>";
       }).join("") + "</div>" +
-      (m[S.acctMethod] && m[S.acctMethod].pm
-        ? '<label class="field" style="margin-top:12px"><span class="field__label">Пакомат по умолчанию</span><select class="input input--box" data-acctmachine>' + MACHINES[S.country].map(function (n, i) { return '<option' + (i === S.acctMachine ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select></label>"
+      (machinesFor(m[S.acctMethod]).length
+        ? '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию</span><span class="sel sel--box"><select data-acctmachine>' +
+          machinesFor(m[S.acctMethod]).map(function (n, i) { return "<option" + (i === S.acctMachine ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>"
         : "") +
 
-      '<div class="sec__head" style="margin-top:32px"><h2 class="sec__title">Мои заказы</h2></div>' +
-      '<div style="border:1px solid var(--rule);padding:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">' +
-        '<span class="num" style="font-weight:600">#1042</span><span style="font-size:13px;color:var(--muted)">12.08.2026 · 54 €</span>' +
-        '<span class="chip" style="color:var(--ok)">доставлен</span>' +
-        '<button class="link" style="margin-left:auto" data-repeat>Повторить заказ</button></div>' +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои заказы</h2></div>' +
+      '<div class="rowcard"><span class="num rowcard__id">#1042</span><span class="muted">12.08.2026 · 54 €</span>' +
+        '<span class="chip chip--ok">доставлен</span>' +
+        '<button class="link rowcard__act" data-repeat>Повторить заказ</button></div>' +
 
-      '<div class="sec__head" style="margin-top:32px"><h2 class="sec__title">Мои промокоды</h2></div>' +
-      '<div style="border:1px solid var(--rule);padding:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">' +
-        '<span class="display" style="font-size:13px;letter-spacing:.08em">DR-RENAT10</span>' +
-        '<span style="font-size:13px;color:var(--muted)">−10% ко дню рождения · до 30.09</span>' +
-        '<span class="chip" style="margin-left:auto;color:var(--ok)">активен</span></div>' +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои промокоды</h2></div>' +
+      '<div class="rowcard"><span class="display rowcard__code">REMPIRE10</span>' +
+        '<span class="muted">−10% ко дню рождения · до 30.09</span>' +
+        '<span class="chip chip--ok rowcard__act">активен</span></div>' +
       "</section></div>";
   }
 
+  // ---------- checkout ----------
+  function coHead(n, title, value) {
+    var open = S.coStep === n, done = S.coStep > n;
+    return '<button class="costep__head" data-step="' + n + '" aria-expanded="' + open + '"' + (open ? ' aria-current="true"' : "") + '>' +
+      '<span class="costep__n' + (done ? " costep__n--done" : "") + '">' + (done ? "✓" : n) + "</span>" +
+      '<span class="costep__t">' + title + "</span>" +
+      (open ? "" : '<span class="costep__v">' + (value || "") + "</span>") +
+      (open ? "" : '<span class="costep__edit">изменить</span>') + "</button>";
+  }
+
   function screenCheckout() {
-    var m = methods(), sel = method();
-    var step = S.coStep;
-    function head(n, title, done) {
-      return '<button class="sec__head" data-step="' + n + '" style="width:100%;background:none;border:none;border-bottom:1px solid var(--ink);cursor:pointer;text-align:left;padding:0 0 8px;margin-bottom:' + (step === n ? "16px" : "0") + '">' +
-        '<span class="sec__title">' + n + " · " + title + "</span>" +
-        '<span style="font-size:12px;color:var(--muted);font-weight:400">' + (step === n ? "" : (done || (n < step ? "изменить" : ""))) + "</span></button>";
-    }
-    return '<div class="wrap" style="max-width:980px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--rule);margin-bottom:20px">' +
-        '<button class="hdr__logo" data-go="home" aria-label="REMPIRE — на главную">' + tower() + '<span class="hdr__word">Rempire</span></button>' +
-        '<button class="link" data-go="home">← В магазин</button></div>' +
-      '<div style="display:grid;gap:30px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))">' +
-        "<div>" +
-          // 1 contact
-          head(1, "Контакт", esc(S.email || "—")) +
-          (step === 1 ? '<div style="margin-bottom:26px">' +
-            '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
-            '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
-            (emailBad() ? '<div class="err">Похоже, в адресе опечатка — проверьте домен.</div>' : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
-            '<label class="opt" style="border:none;padding-left:0"><input type="checkbox"><span style="font-size:13.5px">Хочу получать новости и скидки</span></label>' +
-            '<button class="btn" data-step="2" style="margin-top:8px">Далее — доставка</button></div>' : "") +
+    var m = methods(), sel = method(), step = S.coStep;
+    var summaryOpen = wide();
+    return '<div class="cohdr"><div class="wrap wrap--co">' +
+        '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — на главную">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
+        '<span class="cohdr__t">Оформление заказа</span>' +
+        '<button class="link" data-go="home">← В магазин</button></div></div>' +
+      '<div class="wrap wrap--co"><div class="co">' +
 
-          // 2 delivery
-          head(2, "Доставка", sel.l) +
-          (step === 2 ? '<div style="margin-bottom:26px">' +
-            '<label class="field"><span class="field__label">Страна</span><select class="input input--box" data-country>' +
-              COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></label>" +
-            '<div style="border:1px solid var(--rule);margin-bottom:10px">' + m.map(function (x, i) {
-              return '<label class="opt" style="padding-inline:12px"><input type="radio" name="ship" ' + (i === S.method ? "checked" : "") + ' data-method="' + i + '"><span>' + x.l + "</span>" +
-                '<span class="opt__price num">' + (!x.p ? "0 €" : freeShip() ? "Бесплатно" : eur(x.p)) + "</span></label>";
-            }).join("") + "</div>" +
-            (sel.pickup ? '<div class="hint" style="margin-bottom:10px">Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
-            (sel.pm ? '<label class="field"><span class="field__label">Пакомат</span><select class="input input--box">' + MACHINES[S.country].map(function (n) { return "<option>" + n + "</option>"; }).join("") + "</select></label>" : "") +
-            '<div class="hint" style="margin-bottom:14px">' + (freeShip() ? "Бесплатная доставка применена ✓" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
-            (sel.pickup ? "" :
-              '<label class="field"><span class="field__label">Имя и фамилия</span><input class="input" placeholder="Имя Фамилия"></label>' +
-              (sel.pm ? "" : '<label class="field"><span class="field__label">Адрес</span><input class="input" placeholder="улица, дом"></label><div style="display:grid;grid-template-columns:110px 1fr;gap:12px"><label class="field"><span class="field__label">Индекс</span><input class="input" placeholder="12345"></label><label class="field"><span class="field__label">Город</span><input class="input" placeholder="Город"></label></div>')) +
-            '<label class="field"><span class="field__label">Телефон</span><input class="input" placeholder="+372…" inputmode="tel"></label>' +
-            '<button class="btn" data-step="3">Далее — оплата</button></div>' : "") +
+        '<div class="co__steps">' +
+          '<section class="costep' + (step === 1 ? " is-open" : "") + '">' +
+            coHead(1, "Контакт", esc(S.email || "—")) +
+            (step === 1 ? '<div class="costep__body">' +
+              '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
+              '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
+              (emailBad() ? '<div class="err">Похоже, в адресе опечатка — проверьте домен.</div>' : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
+              '<label class="opt opt--plain"><input type="checkbox"><span>Хочу получать новости и скидки</span></label>' +
+              '<button class="btn btn--wide" data-step="2">Далее — доставка</button></div>' : "") +
+          "</section>" +
 
-          // 3 payment
-          head(3, "Оплата", "") +
-          (step === 3 ? '<div style="margin-bottom:26px"><div style="border:1px solid var(--rule)">' +
-            ["Банковская ссылка", "Банковская карта", "Apple Pay / Google Pay", "По счёту — для компаний"].map(function (o, i) {
-              return '<label class="opt" style="padding-inline:12px"><input type="radio" name="pay" ' + (i === 0 ? "checked" : "") + "><span>" + o + "</span></label>";
-            }).join("") + "</div>" +
-            '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' + ["Swedbank", "SEB", "LHV", "Luminor", "Coop"].map(function (b, i) {
-              return '<span style="border:1px solid ' + (i === 0 ? "var(--ink)" : "var(--rule)") + ';padding:8px 12px;font-size:12.5px">' + b + "</span>";
-            }).join("") + "</div></div>" : "") +
+          '<section class="costep' + (step === 2 ? " is-open" : "") + '">' +
+            coHead(2, "Доставка", sel.l) +
+            (step === 2 ? '<div class="costep__body">' +
+              '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
+                COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
+              '<div class="optlist">' + m.map(function (x, i) {
+                return '<label class="opt"><input type="radio" name="ship" ' + (i === S.method ? "checked" : "") + ' data-method="' + i + '"><span>' + x.l + "</span>" +
+                  '<span class="opt__price num">' + (!x.p ? "0 €" : freeShip() ? "Бесплатно" : eur(x.p)) + "</span></label>";
+              }).join("") + "</div>" +
+              (sel.pickup ? '<div class="hint">Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
+              (machinesFor(sel).length ? '<label class="field"><span class="field__label">Пакомат — ' + machinesFor(sel).length + ' точек</span><span class="sel sel--box"><select data-machine>' +
+                machinesFor(sel).map(function (n, i) { return "<option" + (i === S.machine ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>" : "") +
+              '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
+              (sel.pickup ? "" :
+                '<label class="field"><span class="field__label">Имя и фамилия</span><input class="input" placeholder="Имя Фамилия" autocomplete="name"></label>' +
+                (sel.pm ? "" : '<label class="field"><span class="field__label">Адрес</span><input class="input" placeholder="улица, дом" autocomplete="street-address"></label>' +
+                  '<div class="co__zip"><label class="field"><span class="field__label">Индекс</span><input class="input" placeholder="12345" inputmode="numeric" autocomplete="postal-code"></label>' +
+                  '<label class="field"><span class="field__label">Город</span><input class="input" placeholder="Город" autocomplete="address-level2"></label></div>')) +
+              '<label class="field"><span class="field__label">Телефон</span><input class="input" placeholder="+372…" inputmode="tel" autocomplete="tel"></label>' +
+              '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.</p>' +
+              '<button class="btn btn--wide" data-step="3">Далее — оплата</button></div>' : "") +
+          "</section>" +
+
+          '<section class="costep' + (step === 3 ? " is-open" : "") + '">' +
+            coHead(3, "Оплата", PAYS[S.pay].l) +
+            (step === 3 ? '<div class="costep__body">' +
+              '<div class="optlist">' + PAYS.map(function (o, i) {
+                return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
+                  '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
+                  '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
+              }).join("") + "</div>" +
+              (S.pay === 0 ? '<div class="banks">' + BANKS.map(function (b, i) {
+                return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' + b + "</button>";
+              }).join("") + "</div>" : "") +
+              (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" placeholder="OÜ Näidis · 12345678"></label>' : "") +
+              "</div>" : "") +
+          "</section>" +
+          '<ul class="cotrust">' +
+            "<li>Оплата через банк — данные карты магазин не видит</li>" +
+            "<li>14 дней на возврат по закону ЕС</li>" +
+            "<li>Вопросы — 56237237 или rempireshopinfo@gmail.com</li>" +
+          "</ul>" +
         "</div>" +
 
-        // summary
-        '<div><div style="border:1px solid var(--rule);padding:18px;position:sticky;top:20px;display:flex;flex-direction:column;gap:12px">' +
-          '<h2 class="sec__title">Ваш заказ</h2>' +
+        '<div class="co__sum"><details class="cosum"' + (summaryOpen ? " open" : "") + '>' +
+          '<summary class="cosum__head"><span class="sec__title">Ваш заказ</span>' +
+            '<span class="cosum__tot num">' + eur(total()) + "</span></summary>" +
+          '<div class="cosum__body">' +
           (S.cart.length ? S.cart.map(function (l) {
             var p = byId(l.id);
-            return '<div style="display:flex;gap:11px;align-items:center"><span style="width:44px;height:44px;border:1px solid var(--rule-soft);flex-shrink:0;position:relative"><span style="position:absolute;inset:10%;background-image:url(\'' + p.img + '\');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></span></span>' +
-              '<span style="flex:1;font-size:13px">' + esc(p.name) + lineLabel(l) + " × " + l.qty + "</span>" +
-              '<span class="num" style="font-size:13px;font-weight:600">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
-          }).join("") : '<p style="color:var(--muted);font-size:13px">Корзина пуста.</p>') +
-          '<div style="border-top:1px solid var(--rule);padding-top:12px"><div style="display:flex;gap:8px"><input class="input input--box" data-promo placeholder="Промокод" value="' + esc(S.promo) + '" style="flex:1;min-height:44px"><button class="btn btn--ghost" style="min-height:44px;padding:0 14px" data-applypromo>Применить</button></div>' +
+            return '<div class="cosum__line"><span class="cosum__ph">' + media(p, 0, "ph") + "</span>" +
+              '<span class="cosum__nm">' + esc(p.name) + lineLabel(l) + " × " + l.qty + "</span>" +
+              '<span class="num cosum__pr">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
+          }).join("") : '<p class="muted">Корзина пуста.</p>') +
+          '<div class="cosum__promo"><input class="input input--box" data-promo placeholder="Промокод" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo>Применить</button></div>' +
           (S.promoErr ? '<div class="err">Код не найден — проверьте написание.</div>' : "") +
-          (S.promoOk ? '<div style="display:flex;justify-content:space-between;font-size:13px;margin-top:8px"><span>REMPIRE10 — скидка 10%</span><span class="num" style="font-weight:600">−' + eur(discount()) + "</span></div>" : "") + "</div>" +
-          '<div style="display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--rule);padding-top:12px"><span>Доставка — ' + sel.l + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
-          '<div style="display:flex;justify-content:space-between;font-size:16px;font-weight:600;border-top:1px solid var(--ink);padding-top:12px"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
-          '<button class="btn btn--wide" data-pay>Оплатить ' + eur(total()) + "</button>" +
-          '<p style="font-size:11px;color:var(--muted);margin:0">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>' +
-        "</div></div>" +
+          (S.promoOk ? '<div class="cosum__row"><span>REMPIRE10 — скидка 10%</span><span class="num">−' + eur(discount()) + "</span></div>" : "") +
+          '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + sel.l + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
+          '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
+          '<button class="btn btn--wide co__pay" data-pay>Оплатить ' + eur(total()) + "</button>" +
+          '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>' +
+          "</div></details></div>" +
+
       "</div></div>" +
-      '<div class="stickybar"><span><span style="display:block;font-size:11px;color:var(--muted)">Итого</span><span class="num" style="font-weight:600;font-size:16px">' + eur(total()) + '</span></span><button class="btn" data-pay>Оплатить</button></div>';
+      '<div class="stickybar stickybar--co"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span><button class="btn" data-pay>Оплатить</button></div>';
+  }
+  function payMark(k) {
+    if (k === "bank") return PAYLOGOS.bank;
+    if (k === "card") return PAYLOGOS.visa + PAYLOGOS.mastercard;
+    if (k === "wallet") return PAYLOGOS.applepay + PAYLOGOS.gpay;
+    return "";
   }
 
   function screenDone() {
-    return '<div class="wrap" style="max-width:520px;text-align:center"><section class="sec">' +
-      '<div style="color:var(--ok);font-size:34px;margin-bottom:10px">✓</div>' +
-      '<h1 class="display" style="font-size:20px;margin-bottom:10px">Заказ оформлен</h1>' +
-      '<p style="color:var(--muted);font-size:14px;margin-bottom:22px">Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.</p>' +
+    return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
+      '<div class="done__tick">' + icon("check") + "</div>" +
+      '<h1 class="display h1">Заказ оформлен</h1>' +
+      '<p class="muted" style="margin-bottom:22px">Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.</p>' +
       '<button class="btn" data-go="home">На главную</button></section></div>';
   }
 
+  // ---------- overlays ----------
   function cartDrawer() {
     var sum = cartSum(), thr = threshold(), pct = Math.min(100, sum / thr * 100);
     return '<div class="scrim" data-closecart></div><aside class="drawer drawer--right" aria-label="Корзина">' +
-      '<div class="drawer__head"><span class="display" style="font-size:13px">Корзина (' + cartCount() + ')</span>' +
+      '<div class="drawer__head"><span class="display drawer__t">Корзина (' + cartCount() + ')</span>' +
       '<button class="iconbtn" data-closecart aria-label="Закрыть">✕</button></div>' +
       '<div class="drawer__body">' +
         (S.cart.length ? S.cart.map(function (l, li) {
           var p = byId(l.id);
-          return '<div style="display:flex;gap:12px;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--rule)">' +
-            '<span style="width:60px;height:60px;border:1px solid var(--rule-soft);flex-shrink:0;position:relative"><span style="position:absolute;inset:10%;background-image:url(\'' + p.img + '\');background-size:contain;background-position:center;background-repeat:no-repeat;mix-blend-mode:multiply"></span></span>' +
-            '<span style="flex:1"><span style="display:block;font-size:13.5px;margin-bottom:6px">' + esc(p.brand) + " " + esc(p.name) + lineLabel(l) + "</span>" +
-            '<span style="display:inline-flex;border:1px solid var(--rule)"><button data-line="' + li + '" data-d="-1" aria-label="Меньше" style="width:36px;height:36px;border:none;background:none;cursor:pointer">−</button><span class="num" style="width:34px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px">' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше" style="width:36px;height:36px;border:none;background:none;cursor:pointer">+</button></span> ' +
-            '<button class="link" style="font-size:12px;margin-left:8px" data-remove="' + li + '">Убрать</button></span>' +
-            '<span class="num" style="font-weight:600;font-size:13.5px">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
-        }).join("") : '<p style="color:var(--muted);font-size:14px">Пока пусто. <button class="link" data-go="catalog">К бестселлерам</button></p>') +
-        (S.cart.length ? '<div style="margin-top:6px"><div style="height:3px;background:var(--shell)"><div style="height:3px;background:var(--ink);width:' + pct + '%;transition:width .3s var(--ease)"></div></div>' +
-          '<p style="font-size:12px;color:var(--muted);margin:8px 0 0">' + (sum >= thr ? "Бесплатная доставка — порог " + thr + " € достигнут ✓" : "До бесплатной доставки (" + (S.country === "EU" ? "Европа" : "EE, LV, LT, FI") + ") — ещё " + eur(thr - sum)) + "</p></div>" : "") +
+          return '<div class="cline"><span class="cline__ph">' + media(p, 0, "ph") + "</span>" +
+            '<span class="cline__mid"><span class="cline__nm">' + esc(p.brand) + " " + esc(p.name) + lineLabel(l) + "</span>" +
+            '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше">−</button><span class="num">' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
+            '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
+            '<span class="num cline__pr">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
+        }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
+        (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
+          '<p class="muted">' + (sum >= thr ? "Бесплатная доставка — порог " + thr + " € достигнут ✓" : "До бесплатной доставки (" + (S.country === "EU" ? "Европа" : "EE, LV, LT, FI") + ") — ещё " + eur(thr - sum)) + "</p></div>" : "") +
       "</div>" +
-      (S.cart.length ? '<div class="drawer__foot"><div style="display:flex;justify-content:space-between;font-weight:600"><span>Итого</span><span class="num">' + eur(sum) + "</span></div>" +
+      (S.cart.length ? '<div class="drawer__foot"><div class="drawer__tot"><span>Итого</span><span class="num">' + eur(sum) + "</span></div>" +
         '<button class="btn btn--wide" data-checkout>Оформить заказ</button>' +
-        '<button class="link" style="align-self:center" data-closecart>Продолжить покупки</button></div>' : "") +
+        '<button class="link drawer__cont" data-closecart>Продолжить покупки</button></div>' : "") +
       "</aside>";
   }
 
   function filterDrawer() {
     var brands = [];
     CATALOGUE.forEach(function (p) { if ((S.cat === "all" || p.cat === S.cat) && brands.indexOf(p.brand) < 0) brands.push(p.brand); });
+    brands.sort();
     function count(b) { return CATALOGUE.filter(function (p) { return (S.cat === "all" || p.cat === S.cat) && p.brand === b; }).length; }
     var inStock = CATALOGUE.filter(function (p) { return (S.cat === "all" || p.cat === S.cat) && p.stock !== "out"; }).length;
     return '<div class="scrim" data-closefilter></div><aside class="drawer drawer--left" aria-label="Фильтры">' +
-      '<div class="drawer__head"><span class="display" style="font-size:13px">Фильтры</span><button class="iconbtn" data-closefilter aria-label="Закрыть">✕</button></div>' +
+      '<div class="drawer__head"><span class="display drawer__t">Фильтры</span><button class="iconbtn" data-closefilter aria-label="Закрыть">✕</button></div>' +
       '<div class="drawer__body">' +
-        '<div class="field__label">Наличие</div><label class="opt"><input type="checkbox" data-instock ' + (S.onlyInStock ? "checked" : "") + '><span>В наличии</span><span class="opt__price num" style="font-weight:400;color:var(--muted)">' + inStock + "</span></label>" +
+        '<div class="field__label">Наличие</div><label class="opt"><input type="checkbox" data-instock ' + (S.onlyInStock ? "checked" : "") + '><span>В наличии</span><span class="opt__price num opt__n">' + inStock + "</span></label>" +
         '<div class="field__label" style="margin-top:20px">Бренд</div>' +
         brands.map(function (b) {
-          return '<label class="opt"><input type="checkbox" data-brand="' + esc(b) + '" ' + (S.brandFilter.indexOf(b) >= 0 ? "checked" : "") + "><span>" + esc(b) + '</span><span class="opt__price num" style="font-weight:400;color:var(--muted)">' + count(b) + "</span></label>";
+          return '<label class="opt"><input type="checkbox" data-brand="' + esc(b) + '" ' + (S.brandFilter.indexOf(b) >= 0 ? "checked" : "") + "><span>" + esc(b) + '</span><span class="opt__price num opt__n">' + count(b) + "</span></label>";
         }).join("") +
       "</div>" +
-      '<div class="drawer__foot"><button class="btn btn--wide" data-closefilter>Показать ' + filtered().length + " товаров</button>" +
-      '<button class="link" style="align-self:center" data-clearfilter>Сбросить</button></div></aside>';
+      '<div class="drawer__foot"><button class="btn btn--wide" data-closefilter>Показать <span data-showcount>' + filtered().length + "</span> " + plural(filtered().length) + "</button>" +
+      '<button class="link drawer__cont" data-clearfilter>Сбросить</button></div></aside>';
   }
 
   // ---------- render ----------
   var app = document.getElementById("app");
+  app.innerHTML = '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div><div id="ovl"></div>';
+  var hdrSlot = document.getElementById("hdrslot");
+  var bodySlot = document.getElementById("bodyslot");
+  var navSlot = document.getElementById("navslot");
+  var ovl = document.getElementById("ovl");
+  var ovlKey = "";
 
   function render() {
     var body;
@@ -550,36 +734,75 @@
     else if (S.screen === "done") body = screenDone();
 
     var chromeless = S.screen === "checkout" || S.screen === "done";
-    app.innerHTML =
-      (chromeless ? "" : header()) +
-      '<main class="screen">' + body + "</main>" +
-      (chromeless ? "" : footer()) +
-      botnav() +
-      (S.cartOpen ? cartDrawer() : "") +
-      (S.filterOpen ? filterDrawer() : "") +
-      (S.toast ? '<div class="toast"><span style="flex:1;font-size:13px">' + S.toast + '</span><button class="iconbtn" style="color:var(--paper);min-width:32px;min-height:32px;padding:4px" data-closetoast aria-label="Закрыть">✕</button></div>' : "");
+    if (!hdrSlot.firstChild) hdrSlot.innerHTML = headerHTML();
+    hdrSlot.hidden = chromeless;
+    patchHeader();
+
+    bodySlot.innerHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
+      (chromeless ? "" : footer());
+
+    if (!navSlot.firstChild) navSlot.innerHTML = botnavHTML();
+    patchNav();
+
+    // Overlays are only re-mounted when the *kind* of overlay changes, so an
+    // open drawer never replays its slide-in while you tick its checkboxes.
+    var key = (S.cartOpen ? "c" : "") + (S.filterOpen ? "f" : "") + (S.toast ? "t" + S.toast : "");
+    if (key !== ovlKey) {
+      ovlKey = key;
+      ovl.innerHTML = (S.cartOpen ? cartDrawer() : "") + (S.filterOpen ? filterDrawer() : "") +
+        (S.toast ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>' : "");
+    } else if (S.cartOpen) {
+      // cart contents can change while the drawer stays mounted
+      ovl.innerHTML = cartDrawer() + (S.toast ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>' : "");
+    }
+    document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
 
     if (S.screen === "catalog") observeSentinel();
   }
 
+  /* Filtering re-renders only the grid. A full render would rebuild the open
+     filter drawer under the user's finger — that was the flicker. */
+  function patchCatalog() {
+    if (S.screen !== "catalog") { render(); return; }
+    var list = filtered(), visible = list.slice(0, S.shown);
+    var grid = document.getElementById("catgrid");
+    if (!grid) { render(); return; }
+    grid.innerHTML = visible.map(cardHTML).join("");
+    var more = document.getElementById("catmore");
+    if (more) more.innerHTML = moreHTML(visible.length, list.length);
+    var c = document.querySelector("[data-count]");
+    if (c) c.textContent = list.length + " " + plural(list.length);
+    var fc = document.querySelector("[data-fcount]");
+    if (fc) fc.textContent = fcountLabel();
+    var sc = document.querySelector("[data-showcount]");
+    if (sc) sc.textContent = list.length;
+    var chips = document.querySelector("[data-chips]");
+    if (chips) chips.outerHTML = activeChips();
+    observeSentinel();
+  }
+
   function go(screen) {
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
-    if (screen === "catalog") S.shown = 8;
+    if (screen === "catalog") S.shown = 12;
     if (screen === "checkout") S.coStep = 1;
     window.scrollTo({ top: 0 });
     render();
+  }
+  /* Brands differ per category, so a Davines filter left over from Уход за
+     волосами would silently empty Парфюмерия. Category change clears them. */
+  function goCat(cat) {
+    if (cat !== S.cat) { S.brandFilter = []; S.onlyInStock = false; }
+    S.cat = cat; go("catalog");
   }
 
   function toast(msg) {
     S.toast = msg; render();
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { S.toast = null; render(); }, 3000);
+    toast._t = setTimeout(function () { S.toast = null; render(); }, 2600);
   }
 
-  /* Lines are keyed by product AND size — two volumes of the same product are
-     different things and must not merge into one line. */
   function addToCart(id, sizeIdx) {
-    var si = sizeIdx === undefined ? (S.productId === id ? S.size : 0) : sizeIdx;
+    var si = sizeIdx === undefined ? (S.productId === id && S.screen === "product" ? S.size : 0) : sizeIdx;
     var qty = S.screen === "product" && S.productId === id ? S.qty : 1;
     var line = null;
     S.cart.forEach(function (l) { if (l.id === id && l.size === si) line = l; });
@@ -603,64 +826,122 @@
       if (!entries[0].isIntersecting || S.loading) return;
       S.loading = true;
       setTimeout(function () {
-        S.shown += 8; S.loading = false; render();
-      }, 400);
-    }, { rootMargin: "220px" });
+        S.shown += 12; S.loading = false;
+        if (S.screen === "catalog") patchCatalog();
+      }, 320);
+    }, { rootMargin: "300px" });
     io.observe(el);
   }
 
+  // ---------- hero ----------
+  var heroTimer = null;
+  function paintSlide() {
+    var slides = document.querySelectorAll(".hero__slide");
+    if (!slides.length) return false;
+    slides.forEach(function (s, i) {
+      s.setAttribute("data-on", i === S.slide ? "1" : "0");
+      s.setAttribute("aria-hidden", String(i !== S.slide));
+    });
+    document.querySelectorAll(".hero__dots button").forEach(function (b, i) {
+      b.setAttribute("aria-current", String(i === S.slide));
+    });
+    return true;
+  }
+  function setSlide(n, manual) {
+    S.slide = (n + BANNERS.length) % BANNERS.length;
+    if (!paintSlide()) render();
+    if (manual) restartHero();
+  }
+  function restartHero() {
+    clearInterval(heroTimer);
+    heroTimer = setInterval(function () {
+      if (S.screen !== "home" || document.hidden || S.cartOpen || S.filterOpen) return;
+      try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; } catch (e) {}
+      setSlide(S.slide + 1);
+    }, 6000);
+  }
+
+  // swipe: the hero is the one thing on the phone that looks swipeable
+  var swX = 0, swY = 0, swOn = false;
+  document.addEventListener("touchstart", function (e) {
+    var h = e.target.closest && e.target.closest(".hero");
+    if (!h || e.touches.length !== 1) { swOn = false; return; }
+    swOn = true; swX = e.touches[0].clientX; swY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener("touchend", function (e) {
+    if (!swOn) return;
+    swOn = false;
+    var t = e.changedTouches[0], dx = t.clientX - swX, dy = t.clientY - swY;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+    setSlide(S.slide + (dx < 0 ? 1 : -1), true);
+  }, { passive: true });
+
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-go],[data-go-cat],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast]");
+    var t = e.target.closest("[data-go],[data-go-cat],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank]");
     if (!t) {
-      if (S.langOpen) { S.langOpen = false; render(); }
+      if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
     }
     var d = t.dataset;
 
-    if (d.go) { if (d.go === "catalog" && d.all !== undefined) S.cat = "all"; go(d.go); return; }
-    if (d.goCat !== undefined) { S.cat = d.goCat; go("catalog"); return; }
-    if (d.goProduct) { S.productId = d.goProduct; S.size = 0; S.qty = 1; S.gallery = 0; go("product"); return; }
+    if (d.ident !== undefined) identLogo(t);
+    if (d.go) { go(d.go); return; }
+    if (d.goCat !== undefined) { goCat(d.goCat); return; }
+    if (d.goProduct) {
+      S.productId = d.goProduct; S.size = 0; S.qty = 1;
+      var np = byId(d.goProduct);
+      S.gallery = np.varImg && np.varImg.length ? np.varImg[0] : 0;
+      go("product"); return;
+    }
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
     if (d.buynow) { addToCart(d.buynow); go("checkout"); return; }
     if (d.cart !== undefined) { S.cartOpen = true; render(); return; }
     if (d.closecart !== undefined) { S.cartOpen = false; render(); return; }
     if (d.filter !== undefined) { S.filterOpen = true; render(); return; }
     if (d.closefilter !== undefined) { S.filterOpen = false; render(); return; }
-    if (d.clearfilter !== undefined) { S.brandFilter = []; S.onlyInStock = false; render(); return; }
-    if (d.slide) { S.slide = (S.slide + Number(d.slide) + BANNERS.length) % BANNERS.length; render(); return; }
-    if (d.dot !== undefined) { S.slide = Number(d.dot); render(); return; }
-    if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; render(); return; }
-    if (d.lang) { S.lang = d.lang; S.langOpen = false; persist(); render(); return; }
+    if (d.clearfilter !== undefined) { S.brandFilter = []; S.onlyInStock = false; S.shown = 12; S.filterOpen = false; render(); return; }
+    if (d.unbrand !== undefined) {
+      S.brandFilter = S.brandFilter.filter(function (x) { return x !== d.unbrand; });
+      S.shown = 12; patchCatalog(); return;
+    }
+    if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
+    if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
+    if (d.dot !== undefined) { setSlide(Number(d.dot), true); return; }
+    if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
+    if (d.lang) { S.lang = d.lang; S.langOpen = false; persist(); patchHeader(); return; }
     if (d.line !== undefined) {
       var li = Number(d.line);
       if (S.cart[li]) S.cart[li].qty = Math.max(1, Math.min(9, S.cart[li].qty + Number(d.d)));
       persist(); render(); return;
     }
-    if (d.remove !== undefined) {
-      S.cart.splice(Number(d.remove), 1); persist(); render(); return;
-    }
+    if (d.remove !== undefined) { S.cart.splice(Number(d.remove), 1); persist(); render(); return; }
     if (d.checkout !== undefined) { if (!S.cart.length) { toast("Корзина пуста"); return; } go("checkout"); return; }
     if (d.pay !== undefined) {
-      // A prototype still shouldn't let you "pay" with nothing filled in.
       S.emailTouched = true;
       if (emailBad()) { S.coStep = 1; render(); toast("Проверьте e-mail — на него придёт заказ"); return; }
       S.cart = []; persist(); go("done"); return;
     }
     if (d.step) {
       var n = Number(d.step);
-      // moving past contact requires a usable e-mail — the order goes there
       if (n > 1 && S.coStep === 1) { S.emailTouched = true; if (emailBad()) { render(); return; } }
       S.coStep = n; render(); return;
     }
-    if (d.method) { S.method = Number(d.method); render(); return; }
-    if (d.acctm) { S.acctMethod = Number(d.acctm); render(); return; }
-    if (d.size) { S.size = Number(d.size); render(); return; }
+    if (d.method !== undefined) { S.method = Number(d.method); S.machine = 0; render(); return; }
+    if (d.paym !== undefined) { S.pay = Number(d.paym); render(); return; }
+    if (d.bank !== undefined) { S.bank = Number(d.bank); render(); return; }
+    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); render(); return; }
+    if (d.size !== undefined) {
+      S.size = Number(d.size);
+      var sp = byId(S.productId);
+      if (sp.varImg && sp.varImg.length > S.size) S.gallery = sp.varImg[S.size];
+      render(); return;
+    }
     if (d.qty) { S.qty = Math.max(1, Math.min(9, S.qty + Number(d.qty))); render(); return; }
     if (d.gal !== undefined) { S.gallery = Number(d.gal); render(); return; }
     if (d.login !== undefined) {
       S.emailTouched = true;
-      if (emailBad()) { toast("Введите e-mail — на него придёт код"); return; }
+      if (emailBad()) { render(); toast("Введите e-mail — на него придёт код"); return; }
       S.loggedIn = true; render(); return;
     }
     if (d.logout !== undefined) { S.loggedIn = false; render(); return; }
@@ -674,61 +955,96 @@
     if (d.closetoast !== undefined) { S.toast = null; render(); return; }
   });
 
+  /* The header is persistent, so typing there no longer loses the caret —
+     the search screen is rendered underneath while the field keeps focus. */
   document.addEventListener("input", function (e) {
     var t = e.target;
-    if (t.matches("[data-search]")) { S.query = t.value; if (S.screen !== "search") { go("search"); var f = document.querySelector("[data-search2]"); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); } } else render(); }
-    else if (t.matches("[data-search2]")) { S.query = t.value; var pos = t.selectionStart; render(); var n = document.querySelector("[data-search2]"); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
-    else if (t.matches("[data-email]")) { S.email = t.value; }
+    if (t.matches("[data-search]")) {
+      S.query = t.value;
+      if (S.screen !== "search") { S.screen = "search"; S.cartOpen = false; S.filterOpen = false; }
+      render();
+    } else if (t.matches("[data-search2]")) {
+      S.query = t.value;
+      var pos = t.selectionStart;
+      render();
+      var n = document.querySelector("[data-search2]");
+      if (n) { n.focus(); n.setSelectionRange(pos, pos); }
+    } else if (t.matches("[data-email]")) { S.email = t.value; }
     else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; }
-    else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 8; render(); }
+    else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
       var b = t.dataset.brand;
-      if (t.checked) S.brandFilter.push(b); else S.brandFilter = S.brandFilter.filter(function (x) { return x !== b; });
-      S.shown = 8; render();
+      if (t.checked) S.brandFilter.push(b);
+      else S.brandFilter = S.brandFilter.filter(function (x) { return x !== b; });
+      S.shown = 12; patchCatalog();
     }
   });
 
   document.addEventListener("change", function (e) {
     var t = e.target;
-    if (t.matches("[data-country]")) { S.country = t.value; S.method = 0; render(); }
-    else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 8; render(); }
+    if (t.matches("[data-country]")) { S.country = t.value; S.method = 0; S.machine = 0; render(); }
+    else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
+    else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
+    else if (t.matches("[data-machine]")) { S.machine = t.selectedIndex; }
     else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
   });
 
   document.addEventListener("blur", function (e) {
-    if (e.target.matches("[data-email]")) { S.emailTouched = true; if (S.screen === "checkout") render(); }
+    if (e.target.matches("[data-email]")) {
+      S.emailTouched = true;
+      if (S.screen === "checkout" || S.screen === "account") render();
+    }
   }, true);
 
-  // intro — once per session, skippable, off under reduced motion
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (S.cartOpen || S.filterOpen) { S.cartOpen = false; S.filterOpen = false; render(); }
+    else if (S.langOpen) { S.langOpen = false; patchHeader(); }
+  });
+
+  // ---------- logo motion ----------
+  /* The mark draws itself once per session, then answers taps. Kept short and
+     never on a loop — it must not compete with the product grid. */
+  function identLogo(btn) {
+    var svg = btn.querySelector("svg");
+    if (!svg) return;
+    svg.classList.remove("is-ident");
+    void svg.offsetWidth;
+    svg.classList.add("is-ident");
+  }
+
   function intro() {
     var reduce = false;
     try { reduce = matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
     var seen = false;
     try { seen = sessionStorage.getItem("rempire-intro") === "1"; } catch (e) {}
-    if (reduce || seen) return;
+    if (reduce || seen) { document.body.classList.add("drawn"); return; }
     var el = document.createElement("div");
     el.className = "intro";
     el.setAttribute("title", "Пропустить");
     el.innerHTML = towerDraw() + '<div class="intro__word">Rempire</div>';
     document.body.appendChild(el);
     try { sessionStorage.setItem("rempire-intro", "1"); } catch (e) {}
-    var kill = function () { el.classList.add("intro--out"); setTimeout(function () { el.remove(); }, 500); };
+    var kill = function () {
+      el.classList.add("intro--out");
+      document.body.classList.add("drawn");
+      setTimeout(function () { el.remove(); }, 500);
+    };
     el.addEventListener("click", kill);
-    setTimeout(kill, 2600);
+    setTimeout(kill, 2400);
   }
 
-  // hero autoplay — pauses on hidden tab, off under reduced motion
-  setInterval(function () {
-    if (S.screen !== "home" || document.hidden || S.cartOpen || S.filterOpen) return;
-    try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; } catch (e) {}
-    S.slide = (S.slide + 1) % BANNERS.length;
-    var slides = document.querySelectorAll(".hero__slide");
-    var dots = document.querySelectorAll(".hero__dots button");
-    if (!slides.length) return;
-    slides.forEach(function (s, i) { s.setAttribute("data-on", i === S.slide ? "1" : "0"); });
-    dots.forEach(function (b, i) { b.setAttribute("aria-current", i === S.slide); });
-  }, 5000);
+  /* Some markup differs by breakpoint — the checkout summary ships `open` on a
+     desktop and collapsed on a phone. Without this, rotating the device left
+     the summary shut with its toggle disabled. */
+  try {
+    var mq = matchMedia("(min-width: 768px)");
+    var onMQ = function () { render(); };
+    if (mq.addEventListener) mq.addEventListener("change", onMQ);
+    else if (mq.addListener) mq.addListener(onMQ);
+  } catch (e) {}
 
   render();
+  restartHero();
   intro();
 })();
