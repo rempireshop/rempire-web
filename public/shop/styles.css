@@ -403,14 +403,21 @@ body:has(.stickybar) .ftr {
   transition: border-color .18s var(--ease), background .18s var(--ease);
 }
 .brandtile:hover { border-color: var(--ink); background: var(--hover); }
-.brandtile__mark { display: flex; align-items: center; justify-content: center; height: 56px; width: 100%; }
+/* Every mark is pre-rendered onto one 3:1 ink canvas at matched optical
+   weight (tools/normalise-brandlogos.mjs), so a box of this aspect renders
+   them all at exactly the same size. Word fallbacks share the same box, so a
+   brand with a logo and one without read as the same object. */
+.brandtile__mark {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; aspect-ratio: 3 / 1; max-height: 66px;
+}
 .brandtile__logo {
   display: block; width: 100%; height: 100%;
   background-size: contain; background-position: center; background-repeat: no-repeat;
 }
 .brandtile__word {
   font-family: Oswald, sans-serif; font-size: 15px; letter-spacing: .1em;
-  text-transform: uppercase; line-height: 1.2;
+  text-transform: uppercase; line-height: 1.2; text-align: center;
 }
 .brandtile__n { font-size: 11.5px; color: var(--muted); }
 
@@ -430,10 +437,15 @@ body:has(.stickybar) .ftr {
 }
 .brandchip:hover { border-color: var(--ink); background: var(--hover); }
 .brandchip__logo {
-  display: block; width: 68px; height: 30px;
+  display: block; width: 102px; height: 34px;  /* the canvas aspect, exactly */
   background-size: contain; background-position: center; background-repeat: no-repeat;
 }
-.brandchip__word { font-family: Oswald, sans-serif; font-size: 12.5px; letter-spacing: .1em; text-transform: uppercase; }
+.brandchip__word {
+  display: flex; align-items: center; justify-content: center;
+  width: 102px; height: 34px;
+  font-family: Oswald, sans-serif; font-size: 12.5px; letter-spacing: .1em;
+  text-transform: uppercase; text-align: center; line-height: 1.15;
+}
 .brandchip .num { font-size: 11.5px; color: var(--muted); }
 .pdp__brand {
   border: none; background: none; padding: 0; cursor: pointer;
