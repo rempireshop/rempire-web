@@ -39,10 +39,16 @@
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' + ICON[name] + "</svg>";
   }
 
+  /* Inline SVG rather than flagcdn.com — a decorative flag is not worth a
+     third-party request, and the prototype otherwise talks to nobody. */
+  function flagSVG(bars) {
+    return "url(\"data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">' + bars + "</svg>") + "\")";
+  }
   var FLAG = {
-    RU: "https://flagcdn.com/w40/ru.png",
-    ET: "https://flagcdn.com/w40/ee.png",
-    EN: "https://flagcdn.com/w40/gb.png"
+    RU: flagSVG('<rect width="30" height="20" fill="#fff"/><rect y="6.67" width="30" height="6.67" fill="#0039a6"/><rect y="13.33" width="30" height="6.67" fill="#d52b1e"/>'),
+    ET: flagSVG('<rect width="30" height="6.67" fill="#0072ce"/><rect y="6.67" width="30" height="6.67" fill="#000"/><rect y="13.33" width="30" height="6.67" fill="#fff"/>'),
+    EN: flagSVG('<rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#c8102e" stroke-width="2.4"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6.7"/><path d="M15 0v20M0 10h30" stroke="#c8102e" stroke-width="4"/>')
   };
   var LANGS = [["RU", "Русский"], ["ET", "Eesti"], ["EN", "English"]];
 
@@ -161,6 +167,7 @@
     gallery: 0,
     sort: "hit",
     onlyInStock: false,
+    brand: "",          // brand-scoped catalogue view (the Бренды section)
     brandFilter: []
   };
 
@@ -206,9 +213,35 @@
   function total() { return cartSum() - discount() + shipCost(); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function emailBad() { return S.emailTouched && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email); }
+  /* One regex, but not one message: "there is a typo in the domain" is simply
+     wrong for an empty field, which is the most common failure. */
+  function emailMsg() {
+    if (!S.email.trim()) return "Введите e-mail — на него придёт заказ.";
+    if (S.email.indexOf("@") < 0) return "В адресе не хватает знака @.";
+    return "Проверьте адрес — похоже, в нём опечатка.";
+  }
   function wide() { try { return matchMedia("(min-width: 768px)").matches; } catch (e) { return true; } }
 
+  /* Brands are how this shop is actually shopped — Renat's customers come for
+     Kevin.Murphy or Davines, not for "hair care". A brand view scopes the
+     catalogue across every category. */
+  function brands() {
+    var seen = {}, out = [];
+    CATALOGUE.forEach(function (p) {
+      if (!seen[p.brand]) { seen[p.brand] = { name: p.brand, n: 0, p: p }; out.push(seen[p.brand]); }
+      seen[p.brand].n++;
+    });
+    return out.sort(function (a, b) { return b.n - a.n || a.name.localeCompare(b.name); });
+  }
   function filtered() {
+    if (S.brand) {
+      var b = CATALOGUE.filter(function (p) { return p.brand === S.brand; });
+      if (S.onlyInStock) b = b.filter(function (p) { return p.stock !== "out"; });
+      if (S.sort === "new") b = b.slice().reverse();
+      if (S.sort === "asc") b = b.slice().sort(function (x, y) { return x.price - y.price; });
+      if (S.sort === "desc") b = b.slice().sort(function (x, y) { return y.price - x.price; });
+      return b;
+    }
     var list = S.cat === "all" ? CATALOGUE.slice() : CATALOGUE.filter(function (p) { return p.cat === S.cat; });
     if (S.onlyInStock) list = list.filter(function (p) { return p.stock !== "out"; });
     if (S.brandFilter.length) list = list.filter(function (p) { return S.brandFilter.indexOf(p.brand) >= 0; });
@@ -304,6 +337,7 @@
       '<nav class="hdr__nav" aria-label="Категории">' +
         '<button data-go-cat="all">Все товары</button>' +
         CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
+        '<button data-go="brands" data-nav-brands>Бренды</button>' +
       "</nav></header>";
   }
 
@@ -314,19 +348,26 @@
     badge.outerHTML = cartCount()
       ? '<span class="badge num" data-cartbadge>' + cartCount() + "</span>"
       : '<span data-cartbadge hidden></span>';
-    h.querySelector("[data-langflag]").style.backgroundImage = "url('" + FLAG[S.lang] + "')";
+    h.querySelector("[data-langflag]").style.backgroundImage = FLAG[S.lang];
     h.querySelector("[data-langtoggle]").setAttribute("aria-expanded", String(S.langOpen));
     h.querySelector(".lang__menuslot").innerHTML = S.langOpen
       ? '<div class="lang__menu" id="langmenu" role="listbox" aria-label="Язык интерфейса">' + LANGS.map(function (l) {
           return '<button class="lang__item" role="option" aria-selected="' + (S.lang === l[0]) + '" data-lang="' + l[0] + '">' +
-            '<span class="lang__flag" style="background-image:url(\'' + FLAG[l[0]] + '\')"></span>' +
+            '<span class="lang__flag" style="background-image:' + FLAG[l[0]] + '"></span>' +
             '<span style="flex:1">' + l[1] + "</span>" + (S.lang === l[0] ? "<span>✓</span>" : "") + "</button>";
-        }).join("") + "</div>"
+        }).join("") +
+        // the switch is real, the translations are not written yet — say so
+        // rather than letting it look broken
+        '<p class="lang__note">Магазин будет на трёх языках. В демо переведён только русский.</p></div>'
       : "";
     var srch = h.querySelector("[data-search]");
     if (document.activeElement !== srch) srch.value = S.query;
     h.querySelectorAll(".hdr__nav button").forEach(function (b) {
-      b.setAttribute("aria-current", String(S.screen === "catalog" && S.cat === b.dataset.goCat));
+      if (b.dataset.navBrands !== undefined) {
+        b.setAttribute("aria-current", String(S.screen === "brands" || (S.screen === "catalog" && !!S.brand)));
+      } else {
+        b.setAttribute("aria-current", String(S.screen === "catalog" && !S.brand && S.cat === b.dataset.goCat));
+      }
     });
   }
 
@@ -402,6 +443,12 @@
       '<div class="wrap">' +
         rail("Популярные товары", "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.", pop) +
         rail("Новые товары", "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.", fresh) +
+        '<section class="sec"><div class="sec__head"><h2 class="sec__title">Бренды</h2>' +
+          '<button class="link" data-go="brands">Все бренды</button></div>' +
+        '<div class="brandrow">' + brands().slice(0, 10).map(function (b) {
+          return '<button class="brandchip" data-go-brand="' + esc(b.name) + '">' + esc(b.name) +
+            '<span class="num">' + b.n + "</span></button>";
+        }).join("") + "</div></section>" +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
         '<div class="cattiles">' + CATS.map(function (c) {
           var p = bannerProduct(c.id);
@@ -442,19 +489,36 @@
       '<div class="grid">' + list.map(cardHTML).join("") + "</div></section>";
   }
 
+  function screenBrands() {
+    return '<div class="wrap">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / Бренды</div>' +
+      '<section class="sec" style="padding-top:14px">' +
+      '<h1 class="display h1">Бренды</h1>' +
+      '<p class="sec__intro">Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.</p>' +
+      '<div class="cattiles">' + brands().map(function (b) {
+        return '<button class="cattile" data-go-brand="' + esc(b.name) + '">' +
+          '<span class="cattile__shot">' + media(b.p, 0, "ph cattile__img") + "</span>" +
+          '<span class="cattile__name">' + esc(b.name) + "</span>" +
+          '<span class="cattile__n num">' + b.n + " " + plural(b.n) + "</span></button>";
+      }).join("") + "</div></section></div>";
+  }
+
   function screenCatalog() {
     var list = filtered(), visible = list.slice(0, S.shown);
-    var name = S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
-    var intro = S.cat === "all"
-      ? "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч."
-      : "Профессиональные средства, которыми команда Rempire работает в салоне.";
+    var name = S.brand ? S.brand : S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
+    var intro = S.brand
+      ? "Всё, что есть в наличии от " + esc(S.brand) + " — во всех разделах магазина."
+      : S.cat === "all"
+        ? "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч."
+        : "Профессиональные средства, которыми команда Rempire работает в салоне.";
     return '<div class="wrap">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + name + "</div>" +
+      '<div class="crumbs"><button data-go="home">Главная</button> / ' +
+        (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand) : name) + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
-        '<h1 class="display h1">' + name + "</h1>" +
+        '<h1 class="display h1">' + esc(name) + "</h1>" +
         '<p class="sec__intro">' + intro + "</p>" +
         '<div class="toolbar">' +
-          '<button class="btn btn--ghost toolbar__filter" data-filter>Фильтры<span data-fcount>' + fcountLabel() + "</span></button>" +
+          (S.brand ? "" : '<button class="btn btn--ghost toolbar__filter" data-filter>Фильтры<span data-fcount>' + fcountLabel() + "</span></button>") +
           '<span class="toolbar__count num" data-count>' + list.length + " " + plural(list.length) + "</span>" +
           '<label class="toolbar__sort"><span class="toolbar__sortlbl">Сортировка</span>' +
           '<span class="sel"><select data-sort>' +
@@ -509,20 +573,25 @@
       '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
       '<div class="pdp">' +
         "<div>" +
-          '<div class="pdp__stage">' + media(p, S.gallery, "ph pdp__img") +
-            '<span class="card__wm pdp__wm"></span></div>' +
+          // no watermark here: the stage is far larger than the product on a
+          // desktop, so the mark floated in empty white and read as an artefact
+          '<div class="pdp__stage">' + media(p, S.gallery, "ph pdp__img") + "</div>" +
           (g.length > 1 ? '<div class="pdp__thumbs">' + g.map(function (im, i) {
             return '<button data-gal="' + i + '" aria-label="Фото ' + (i + 1) + '" aria-current="' + (i === S.gallery) + '" class="pdp__thumb">' +
               media(p, i, "ph") + "</button>";
           }).join("") + "</div>" : "") +
         "</div>" +
         "<div>" +
-          '<div class="card__brand pdp__brand">' + esc(p.brand) + "</div>" +
+          '<button class="card__brand pdp__brand" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</button>" +
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
           '<div class="num pdp__price">' + eur(sizePrice(p, S.size)) + "</div>" +
           '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
-          (sizes.length > 1 ? '<div class="field"><span class="field__label">' + (p.cat === "merch" ? "Размер" : "Объём") + '</span><div class="sizes">' + sizes.map(function (sz, i) {
-            return '<button class="size" data-size="' + i + '" aria-current="' + (i === S.size) + '">' + sz + "</button>";
+          // merch variants are "colour / size", so they are not a size —
+          // calling them one put "white / S" under a heading reading Размер
+          (sizes.length > 1 ? '<div class="field"><span class="field__label">' +
+            (sizes[0].indexOf("/") >= 0 ? "Вариант" : p.cat === "merch" ? "Размер" : "Объём") +
+            '</span><div class="sizes">' + sizes.map(function (sz, i) {
+            return '<button class="size" data-size="' + i + '" aria-current="' + (i === S.size) + '">' + esc(sz.replace(" / ", " · ")) + "</button>";
           }).join("") + "</div></div>" : "") +
           '<div class="pdp__buy">' +
             '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num">' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
@@ -572,7 +641,7 @@
         '<h1 class="display h1">Кабинет</h1>' +
         '<p class="muted" style="margin-bottom:20px">Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.</p>' +
         '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" autocomplete="email" inputmode="email" data-email placeholder="you@example.com" value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '"></label>' +
-        (emailBad() ? '<div class="err">Проверьте адрес — на него придёт код.</div>' : "") +
+        (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : "") +
         '<button class="btn btn--wide" data-login>Получить код</button>' +
         "</section></div>";
     }
@@ -643,7 +712,7 @@
             (step === 1 ? '<div class="costep__body">' +
               '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
               '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
-              (emailBad() ? '<div class="err">Похоже, в адресе опечатка — проверьте домен.</div>' : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
+              (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
               '<label class="opt opt--plain"><input type="checkbox"><span>Хочу получать новости и скидки</span></label>' +
               '<button class="btn btn--wide" data-step="2">Далее — доставка</button></div>' : "") +
           "</section>" +
@@ -757,19 +826,47 @@
     return CATALOGUE.filter(function (p) { return p.stock !== "in"; });
   }
 
+  var ADM_NAV = [
+    ["over", "Обзор", "grid"],
+    ["orders", "Заказы", "bag"],
+    ["goods", "Товары", "grid"],
+    ["people", "Клиенты", "user"],
+    ["setup", "Настройки", "home"]
+  ];
+  function fakeCustomers() {
+    var orders = fakeOrders(), by = {};
+    orders.forEach(function (o) {
+      if (!by[o.who]) by[o.who] = { who: o.who, n: 0, sum: 0, last: o.date };
+      by[o.who].n++; by[o.who].sum += o.sum;
+    });
+    return Object.keys(by).map(function (k) { return by[k]; })
+      .sort(function (a, b) { return b.sum - a.sum; });
+  }
+
+  /* Three panes, the way a shop owner actually works: sections down the left,
+     the work in the middle, the assistant always in view on the right. On a
+     phone the nav becomes a scrolling strip and the assistant a sheet you
+     open from the bar. */
   function screenAdmin() {
     var orders = fakeOrders();
     var week = orders.slice(0, 7).reduce(function (a, o) { return a + o.sum; }, 0);
     var tab = S.adminTab;
-    var tabs = [["over", "Обзор"], ["orders", "Заказы"], ["goods", "Товары"], ["ai", "Помощник"]];
     return '<div class="cohdr"><div class="wrap wrap--co">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<span class="cohdr__t">Админка</span>' +
         '<button class="link" data-go="home">← В магазин</button></div></div>' +
-      '<div class="wrap"><div class="adm__note">Демонстрация. Заказы и цифры вымышленные, товары — настоящие, из вашего каталога.</div>' +
-      '<div class="adm__tabs" role="tablist">' + tabs.map(function (t) {
-        return '<button role="tab" aria-selected="' + (tab === t[0]) + '" data-admtab="' + t[0] + '">' + t[1] + "</button>";
-      }).join("") + "</div>" +
+      '<div class="adm">' +
+
+      '<aside class="adm__side"><nav class="adm__nav" aria-label="Разделы админки">' +
+        ADM_NAV.map(function (t) {
+          return '<button data-admtab="' + t[0] + '" aria-current="' + (tab === t[0]) + '">' +
+            icon(t[2]) + "<span>" + t[1] + "</span></button>";
+        }).join("") + "</nav>" +
+        '<div class="adm__who"><span class="adm__whoname">Renat</span>' +
+          '<span class="adm__sub">Rempire Store OÜ · владелец</span></div></aside>' +
+
+      '<main class="adm__main">' +
+      '<div class="adm__note">Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.</div>' +
 
       (tab === "over" ?
         '<div class="adm__kpis">' +
@@ -805,20 +902,58 @@
         }).join("") + "</div>" +
         '<p class="muted" style="margin-top:16px">Показаны первые 24 из ' + CATALOGUE.length + ".</p>" : "") +
 
-      (tab === "ai" ?
-        '<div class="adm__ai">' +
-          '<p>Помощник видит ваш каталог, заказы и остатки. Спрашивать можно обычными словами:</p>' +
+      (tab === "people" ?
+        '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.</p>' +
+        '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row">' +
+          "<span>Клиент</span><span>Заказов</span><span>Потратил</span><span>Последний</span><span></span></div>" +
+        fakeCustomers().map(function (c) {
+          return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + c.who + "</span>" +
+            '<span class="num">' + c.n + "</span>" +
+            '<span class="num">' + eur(c.sum) + "</span>" +
+            '<span class="muted">' + c.last + "</span>" +
+            '<button class="link" data-admedit>Промокод</button></div>';
+        }).join("") + "</div>" : "") +
+
+      (tab === "setup" ?
+        '<p class="muted" style="margin:16px 0">Всё, чем магазин управляется без программиста.</p>' +
+        setupBlock("Доставка", SHIP.EE.map(function (x) {
+          return x.l + " — " + (x.p ? eur(x.p) : "бесплатно");
+        }).concat(["Бесплатно от " + threshold() + " € (EE, LV, LT, FI)"])) +
+        setupBlock("Оплата", PAYS.map(function (p) { return p.l; })) +
+        setupBlock("Языки магазина", ["Русский — основной", "Eesti", "English"]) +
+        setupBlock("Письма клиенту", [
+          "Заказ принят", "Заказ отправлен + трекинг", "Товар снова в наличии",
+          "Скидка ко дню рождения", "Брошенная корзина"
+        ]) +
+        setupBlock("Реквизиты", [
+          "Rempire Store OÜ · рег. 12216136", "KMKR EE102723858", "Mardi 1, 10145 Таллинн"
+        ]) : "") +
+      "</main>" +
+
+      '<aside class="adm__ai" aria-label="Помощник">' +
+        '<div class="adm__aihead"><span class="sec__title">Помощник</span></div>' +
+        '<div class="adm__aibody">' +
+          (S.adminAsk
+            ? '<div class="adm__q">' + esc(S.adminAsk) + "</div>" +
+              '<div class="adm__a">' + adminAnswer(S.adminAsk) + "</div>"
+            : '<p class="adm__aiintro">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами.</p>') +
           '<div class="adm__chips">' + [
             "Что заканчивается и что дозаказать?",
-            "Сколько заработали на Kevin.Murphy за месяц?",
-            "Напиши описание для нового шампуня",
+            "Сколько заработали на Kevin.Murphy?",
+            "Напиши описание для шампуня",
             "Какие заказы ждут отправки?"
           ].map(function (q) { return '<button class="fchip" data-admask="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
-          (S.adminAsk ? '<div class="adm__answer"><div class="adm__q">' + esc(S.adminAsk) + "</div>" +
-            '<div class="adm__a">' + adminAnswer(S.adminAsk) + "</div></div>" : "") +
-          '<p class="muted">В рабочей версии помощник ещё и пишет письма клиентам, готовит отчёт для бухгалтера и предупреждает, если товар вот-вот кончится.</p>' +
-        "</div>" : "") +
-      "</div>";
+        "</div>" +
+        '<div class="adm__aifoot"><input class="input input--box" placeholder="Спросить…" aria-label="Вопрос помощнику">' +
+          '<button class="btn btn--sm" data-admedit>→</button></div>' +
+      "</aside></div>";
+  }
+  function setupBlock(title, rows) {
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">' + title + "</h2></div>" +
+      '<div class="adm__list">' + rows.map(function (r) {
+        return '<div class="adm__row"><span class="adm__nm">' + r + "</span>" +
+          '<button class="link" data-admedit>Изменить</button></div>';
+      }).join("") + "</div>";
   }
   function kpi(label, value, sub) {
     return '<div class="kpi"><span class="kpi__l">' + label + '</span><span class="kpi__v num">' + value + '</span><span class="kpi__s">' + sub + "</span></div>";
@@ -933,6 +1068,7 @@
     else if (S.screen === "account") body = screenAccount();
     else if (S.screen === "checkout") body = screenCheckout();
     else if (S.screen === "done") body = screenDone();
+    else if (S.screen === "brands") body = screenBrands();
     else if (S.screen === "admin") body = screenAdmin();
 
     var chromeless = S.screen === "checkout" || S.screen === "done" || S.screen === "admin";
@@ -1031,8 +1167,11 @@
   /* Brands differ per category, so a Davines filter left over from Уход за
      волосами would silently empty Парфюмерия. Category change clears them. */
   function goCat(cat) {
-    if (cat !== S.cat) { S.brandFilter = []; S.onlyInStock = false; }
-    S.cat = cat; go("catalog");
+    if (cat !== S.cat || S.brand) { S.brandFilter = []; S.onlyInStock = false; }
+    S.brand = ""; S.cat = cat; go("catalog");
+  }
+  function goBrand(name) {
+    S.brand = name; S.brandFilter = []; S.onlyInStock = false; go("catalog");
   }
 
   function toast(msg) {
@@ -1120,7 +1259,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-go],[data-go-cat],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
+    var t = e.target.closest("[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -1133,8 +1272,9 @@
     }
 
     if (d.ident !== undefined) identLogo(t);
-    if (d.go) { go(d.go); return; }
+    if (d.go) { if (d.go !== "catalog") S.brand = ""; go(d.go); return; }
     if (d.goCat !== undefined) { goCat(d.goCat); return; }
+    if (d.goBrand) { goBrand(d.goBrand); return; }
     if (d.goProduct) {
       S.productId = d.goProduct; S.size = 0; S.qty = 1;
       var np = byId(d.goProduct);

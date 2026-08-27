@@ -1477,7 +1477,7 @@ const CATALOGUE = [
   {
     "id": "gummy-sheet-mask-madecassoside-sticker",
     "brand": "Gummy",
-    "name": "sheet mask Madecassoside sticker",
+    "name": "Sheet Mask Madecassoside",
     "cat": "face",
     "price": 3,
     "priceFrom": false,
@@ -1533,7 +1533,7 @@ const CATALOGUE = [
   {
     "id": "handmade-soap-666",
     "brand": "Rempire",
-    "name": "Handmade black soap - 666",
+    "name": "Чёрное мыло 666 — ручная работа",
     "cat": "body",
     "price": 9,
     "priceFrom": false,
@@ -1550,7 +1550,7 @@ const CATALOGUE = [
   {
     "id": "handmade-soap-rule-nr-1",
     "brand": "Rempire",
-    "name": "Handmade pink soap - Rule Nr 1",
+    "name": "Розовое мыло Rule Nr 1 — ручная работа",
     "cat": "body",
     "price": 9,
     "priceFrom": false,

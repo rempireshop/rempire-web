@@ -206,9 +206,9 @@ img { max-width: 100%; display: block; }
 @media (min-width: 900px) { .hdr__nav { -webkit-mask-image: none; mask-image: none; } }
 .hdr__nav::-webkit-scrollbar { display: none; }
 .hdr__nav button {
-  border: none; background: none; padding: 4px 0; cursor: pointer;
+  border: none; background: none; padding: 11px 0; cursor: pointer;
   border-bottom: 2px solid transparent; color: var(--muted);
-  transition: color .18s var(--ease);
+  transition: color .18s var(--ease); min-height: 44px;
 }
 .hdr__nav button:hover { color: var(--ink); }
 .hdr__nav button[aria-current="true"] { border-bottom-color: var(--ink); color: var(--ink); }
@@ -248,6 +248,10 @@ img { max-width: 100%; display: block; }
 }
 .lang__item:hover { background: var(--paper); }
 .lang__item[aria-selected="true"] { background: var(--shell); }
+.lang__note {
+  margin: 0; padding: 9px 12px; font-size: 11px; line-height: 1.4;
+  color: var(--muted); border-top: 1px solid var(--rule);
+}
 
 /* ---------- bottom nav ---------- */
 .botnav {
@@ -270,10 +274,20 @@ img { max-width: 100%; display: block; }
 .botnav .badge { top: -4px; right: -9px; }
 @media (min-width: 768px) { .botnav { display: none; } }
 
-/* content inset so nothing hides behind fixed bars */
+/* Content inset so nothing hides behind the fixed bars. Any screen carrying a
+   sticky action bar has to clear the bar AND the nav — the product page did
+   not, which parked the footer's payment row permanently under the buy
+   button, unreachable at any scroll position. */
 .screen { padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom) + 24px); }
-.screen--co { padding-bottom: calc(var(--bottomnav-h) + var(--bar-h) + env(safe-area-inset-bottom) + 24px); }
-@media (min-width: 768px) { .screen, .screen--co { padding-bottom: 40px; } }
+.screen--co,
+body:has(.stickybar) .screen,
+body:has(.stickybar) .ftr {
+  padding-bottom: calc(var(--bottomnav-h) + var(--bar-h) + env(safe-area-inset-bottom) + 24px);
+}
+@media (min-width: 768px) {
+  .screen, .screen--co, body:has(.stickybar) .screen { padding-bottom: 40px; }
+  body:has(.stickybar) .ftr { padding-bottom: 0; }
+}
 
 /* ---------- sections ---------- */
 .sec { padding: var(--s6) 0 var(--s5); }
@@ -328,7 +342,9 @@ img { max-width: 100%; display: block; }
 .card__brand { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .card__name { font-size: 13px; line-height: 1.35; }
 .card__price { font-size: 13px; font-weight: 600; margin-top: auto; padding-top: 4px; }
-.card__add { align-self: start; margin-top: 5px; }
+/* 18px tall was well under the 44px touch minimum; the padding makes the hit
+   area comfortable without moving the underline. */
+.card__add { align-self: start; margin-top: 2px; padding: 12px 0; }
 
 .chip {
   display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
@@ -357,6 +373,23 @@ img { max-width: 100%; display: block; }
 .cattile__name { font-family: Oswald, sans-serif; font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; }
 .cattile__n { font-size: 11.5px; color: var(--muted); }
 
+/* ---------- brands ---------- */
+.brandrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.brandchip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--rule); background: var(--page); cursor: pointer;
+  min-height: 46px; padding: 0 15px; font-size: 13.5px;
+  transition: border-color .15s var(--ease), background .15s var(--ease);
+}
+.brandchip:hover { border-color: var(--ink); background: var(--paper); }
+.brandchip .num { font-size: 11.5px; color: var(--muted); }
+.pdp__brand {
+  border: none; background: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); text-align: left;
+}
+.pdp__brand:hover { color: var(--ink); }
+
 .infogrid {
   display: grid; gap: 16px 28px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
@@ -384,7 +417,9 @@ img { max-width: 100%; display: block; }
   display: flex; align-items: center; gap: clamp(16px, 4vw, 56px);
 }
 .hero__inner { flex: 1 1 46ch; max-width: 52ch; min-width: 0; }
-.hero__eyebrow { font-family: Oswald, sans-serif; font-size: 10.5px; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+/* --muted on the beige hero is 4.46:1 — just under AA. Darkened for this one
+   surface rather than darkening --muted everywhere. */
+.hero__eyebrow { font-family: Oswald, sans-serif; font-size: 10.5px; letter-spacing: .3em; text-transform: uppercase; color: #5c5947; margin-bottom: 8px; }
 .hero__title { font-family: Oswald, sans-serif; font-size: clamp(23px, 4.4vw, 40px); text-transform: uppercase; letter-spacing: .02em; line-height: 1.08; margin-bottom: 10px; }
 .hero__sub { font-size: 14px; color: rgba(28, 26, 0, .78); margin-bottom: 18px; }
 .hero__art {
@@ -492,7 +527,12 @@ img { max-width: 100%; display: block; }
   padding: 10px 26px 10px 2px; min-height: 46px; width: 100%;
   cursor: pointer; outline: none; color: var(--ink); border-radius: 0;
 }
-.sel select:focus-visible { border-bottom: 2px solid var(--ink); padding-bottom: 9px; background: var(--paper); }
+/* Strong enough to find with a keyboard, without the black rectangle the
+   native outline drew around a small control. */
+.sel select:focus-visible {
+  border-bottom: 2px solid var(--ink); padding-bottom: 9px;
+  background: var(--shell); box-shadow: 0 0 0 1px var(--ink);
+}
 .sel--box { width: 100%; }
 .sel--box select { border: 1px solid rgba(28, 26, 0, .35); padding: 12px 30px 12px 12px; font-size: 16px; }
 .sel--box select:focus-visible { border: 1px solid var(--ink); box-shadow: inset 0 0 0 1px var(--ink); padding-bottom: 12px; }
@@ -641,6 +681,9 @@ img { max-width: 100%; display: block; }
    value) pushed the whole column past the viewport. */
 .co { display: grid; gap: 26px; padding-top: 20px; grid-template-columns: minmax(0, 1fr); }
 .co > * { min-width: 0; }
+/* Phone: the collapsed «Ваш заказ» belongs above the form, not below three
+   steps and a reassurance list where it falls off the bottom of the page. */
+@media (max-width: 767px) { .co__sum { order: -1; } }
 /* No `align-items: start` — that collapses the summary column to its content
    height, leaving `position: sticky` inside it nothing to travel through.
    Two columns start at the same width where `wide()` flips, so the summary is
@@ -716,26 +759,64 @@ img { max-width: 100%; display: block; }
    button inside the summary read as two different actions. */
 @media (max-width: 767px) { .co__pay { display: none; } }
 
-/* ---------- admin (demo) ---------- */
+/* ---------- admin (demo) ----------
+   Three panes on a desktop: sections left, work centre, assistant right.
+   One column on a phone, with the nav as a scrolling strip. */
+.adm { display: grid; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) {
+  .adm { grid-template-columns: 196px minmax(0, 1fr) 300px; align-items: stretch; min-height: calc(100vh - 62px); }
+}
+@media (min-width: 1280px) { .adm { grid-template-columns: 220px minmax(0, 1fr) 340px; } }
+
+.adm__side { border-right: 1px solid var(--rule); display: flex; flex-direction: column; }
+.adm__nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding: 8px; }
+.adm__nav::-webkit-scrollbar { display: none; }
+.adm__nav button {
+  display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
+  border: none; background: none; cursor: pointer; padding: 10px 12px; min-height: 44px;
+  font-size: 13.5px; color: var(--muted); text-align: left;
+  transition: background .15s var(--ease), color .15s var(--ease);
+}
+.adm__nav button svg { width: 17px; height: 17px; flex-shrink: 0; }
+.adm__nav button:hover { background: var(--paper); color: var(--ink); }
+.adm__nav button[aria-current="true"] { background: var(--ink); color: var(--paper); }
+.adm__who { display: none; }
+@media (min-width: 900px) {
+  .adm__side { border-bottom: none; }
+  .adm__nav { flex-direction: column; gap: 1px; padding: 14px 10px; overflow: visible; }
+  .adm__nav button { width: 100%; }
+  .adm__who {
+    display: flex; flex-direction: column; margin-top: auto;
+    padding: 14px; border-top: 1px solid var(--rule); font-size: 12.5px;
+  }
+  .adm__whoname { font-weight: 600; }
+}
+@media (max-width: 899px) { .adm__side { border-right: none; border-bottom: 1px solid var(--rule); } }
+
+.adm__main { padding: 0 var(--gutter) 40px; min-width: 0; }
+
+.adm__ai {
+  border-left: 1px solid var(--rule); display: flex; flex-direction: column; min-width: 0;
+}
+@media (max-width: 899px) { .adm__ai { border-left: none; border-top: 1px solid var(--ink); } }
+.adm__aihead { padding: 14px 16px; border-bottom: 1px solid var(--rule); }
+.adm__aibody { flex: 1; padding: 16px; overflow: auto; }
+.adm__aiintro { margin: 0 0 14px; font-size: 13.5px; color: var(--muted); }
+.adm__aifoot { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--rule); }
+.adm__aifoot .input { flex: 1; min-height: 44px; font-size: 14px; }
+.adm__aifoot .btn { padding: 0 14px; }
+.adm__chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.adm__q { font-weight: 600; font-size: 13.5px; margin-bottom: 8px; }
+.adm__a { font-size: 13.5px; line-height: 1.6; border-left: 2px solid var(--ink); padding-left: 11px; }
+
 .adm__note {
   margin: 18px 0 16px; padding: 10px 12px; font-size: 12.5px; color: var(--muted);
   border-left: 3px solid var(--ink); background: var(--paper);
 }
-.adm__tabs {
-  display: flex; gap: 22px; border-bottom: 1px solid var(--ink);
-  overflow-x: auto; white-space: nowrap; scrollbar-width: none;
-}
-.adm__tabs::-webkit-scrollbar { display: none; }
-.adm__tabs button {
-  border: none; background: none; cursor: pointer; padding: 10px 0;
-  font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
-}
-.adm__tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
 
 .adm__kpis {
   display: grid; gap: 12px; margin-top: 22px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
 }
 .kpi { border: 1px solid var(--rule); padding: 14px; display: flex; flex-direction: column; gap: 2px; }
 .kpi__l { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
@@ -747,6 +828,7 @@ img { max-width: 100%; display: block; }
   display: grid; gap: 12px; align-items: center; padding: 11px 14px;
   grid-template-columns: 92px 1.1fr 1.4fr 84px 104px; min-width: 620px;
 }
+.adm__th--ppl, .adm__tr--ppl { grid-template-columns: 1.3fr 78px 96px 104px 92px; min-width: 520px; }
 .adm__th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--ink); }
 .adm__tr { border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; }
 .adm__tr:last-child { border-bottom: none; }
@@ -763,13 +845,6 @@ img { max-width: 100%; display: block; }
 .adm__ph { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
 .adm__nm { flex: 1 1 200px; min-width: 0; }
 .adm__pr { font-weight: 600; }
-
-.adm__ai { margin-top: 22px; max-width: 70ch; }
-.adm__ai p { font-size: 14px; }
-.adm__chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 18px; }
-.adm__answer { border: 1px solid var(--ink); padding: 14px; margin-bottom: 18px; }
-.adm__q { font-weight: 600; font-size: 13.5px; margin-bottom: 8px; }
-.adm__a { font-size: 14px; line-height: 1.6; }
 
 .ftr__admin { font-size: 11.5px; color: var(--muted); }
 
@@ -811,7 +886,8 @@ img { max-width: 100%; display: block; }
   font-size: 13px; color: rgba(28, 26, 0, .75);
 }
 .ftr__h { display: block; font-family: Oswald, sans-serif; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink); margin-bottom: 7px; }
-.ftr__cols a { display: block; padding: 3px 0; }
+/* stacked links with no gap: 26px rows sharing edges is a mis-tap generator */
+.ftr__cols a { display: block; padding: 9px 0; }
 .ftr__cols a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ftr__bottom {
   display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;
@@ -822,20 +898,20 @@ img { max-width: 100%; display: block; }
 
 /* Card marks are the real artwork, so they carry their own colour and their
    own aspect ratio. A fixed-height tile keeps the row optically even. */
-.paylogos { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+/* No tile borders. The Apple Pay mark ships inside its own rounded frame, so
+   any box we draw makes it the odd one out — a rounded pill among square
+   boxes. Dropping the boxes everywhere gives an even rhythm and lets each
+   mark be sized to its own optical weight. */
+.paylogos { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .paylogos__item {
-  height: 28px; width: 42px; padding: 4px 5px; border: 1px solid var(--rule);
-  display: inline-flex; align-items: center; justify-content: center; background: var(--page);
+  height: 26px; display: inline-flex; align-items: center; justify-content: center;
 }
-.paylogos__item svg { max-height: 100%; max-width: 100%; height: auto; width: auto; }
+.paylogos__item svg { max-height: 100%; width: auto; }
 .paylogos__item--bank { color: var(--ink); }
-.paylogos__item--gpay svg { height: 17px; }
-.paylogos__item--bank svg { height: 16px; }
-/* The Apple Pay mark ships inside its own rounded frame, so it needs no tile
-   border — and it must be sized against that frame, not against the glyph,
-   or it reads far smaller than the Visa and Mastercard marks beside it. */
-.paylogos__item--applepay { border-color: transparent; padding: 0; width: 46px; }
-.paylogos__item--applepay svg { height: 28px; max-height: 28px; }
+.paylogos__item--visa svg, .paylogos__item--mastercard svg { height: 26px; }
+.paylogos__item--applepay svg { height: 25px; }
+.paylogos__item--gpay svg { height: 18px; }
+.paylogos__item--bank svg { height: 18px; }
 
 /* ---------- misc ---------- */
 .crumbs { font-size: 12.5px; color: var(--muted); padding-top: 16px; }
@@ -886,24 +962,31 @@ img { max-width: 100%; display: block; }
 /* ---------- feedback widget ----------
    Must clear the fixed bottom nav and never sit above the sticky action bars
    or drawers — it was covering the cart total and the right edge of ОПЛАТИТЬ. */
+/* Where this thing sits has now bitten twice, so the reasoning is written
+   down. It is fixed-position, so it always covers *something*; the job is to
+   pick the column that carries no controls.
+     Phone: the product grid is two columns and every «В корзину» link is
+   left-aligned in its column, so the LEFT edge is the worst place — that is
+   what put the bubble on top of the first card's add link. Right edge it is.
+     Desktop: the checkout summary and its total live in the right column, so
+   the right edge is the worst place there. Left edge it is. */
 #rempire-feedback > button[title="Оставить комментарий"] {
   bottom: calc(var(--bottomnav-h) + 12px + env(safe-area-inset-bottom)) !important;
+  right: 12px !important; left: auto !important;
   z-index: 25 !important;
 }
-/* Both of these must stay inside the phone query. `:has(.stickybar)` carries
-   the specificity of its argument, so unscoped it would outrank the desktop
-   reset below — and `.stickybar` is `display: none` on a desktop but still in
-   the DOM, so the test would pass there too. */
+/* `:has()` carries the specificity of its argument, so this must stay inside
+   the phone query or it outranks the desktop reset — and `.stickybar` is
+   `display: none` on a desktop but still in the DOM, so it would match there. */
 @media (max-width: 767px) {
   body:has(.stickybar) #rempire-feedback > button[title="Оставить комментарий"] {
     bottom: calc(var(--bottomnav-h) + var(--bar-h) + 12px + env(safe-area-inset-bottom)) !important;
   }
-  /* park it on the left — every real control (summary toggle, add-to-cart
-     link, quantity stepper) lives on the right edge */
-  #rempire-feedback > button[title="Оставить комментарий"] { left: 14px !important; right: auto !important; }
 }
 @media (min-width: 768px) {
-  #rempire-feedback > button[title="Оставить комментарий"] { bottom: 16px !important; z-index: 25 !important; }
+  #rempire-feedback > button[title="Оставить комментарий"] {
+    bottom: 16px !important; left: 16px !important; right: auto !important; z-index: 25 !important;
+  }
 }
 body:has(.drawer) #rempire-feedback { display: none; }
 
