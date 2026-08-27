@@ -481,10 +481,12 @@
         rail("Новые товары", "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.", fresh) +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Бренды</h2>' +
           '<button class="link" data-go="brands">Все бренды</button></div>' +
-        // logo brands first — they carry the shop's recognisable marks
+        // logo brands first — they carry the shop's recognisable marks.
+        // 12, not 8: at eight the row stopped well short of the catalogue and
+        // read as though brands were missing.
         '<div class="brandrow">' + brands().slice().sort(function (a, b) {
           return (BRAND_LOGOS[b.name] ? 1 : 0) - (BRAND_LOGOS[a.name] ? 1 : 0);
-        }).slice(0, 8).map(function (b) {
+        }).slice(0, 12).map(function (b) {
           return '<button class="brandchip" data-go-brand="' + esc(b.name) + '">' +
             brandMark(b.name, "brandchip") + '<span class="num">' + b.n + "</span></button>";
         }).join("") + "</div></section>" +

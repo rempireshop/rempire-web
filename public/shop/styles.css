@@ -428,11 +428,17 @@ body:has(.stickybar) .ftr {
 }
 .brandhead__word { font-family: Oswald, sans-serif; font-size: 24px; letter-spacing: .18em; text-transform: uppercase; }
 
-.brandrow { display: flex; gap: 10px; flex-wrap: wrap; }
+/* A grid, not a wrapped flex row: chips were sized by their content, so a
+   two-digit count made one 160px and a single digit 153px, and the wrap fell
+   ragged — the holes read as missing brands. Equal columns cannot do that. */
+.brandrow {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(48%, 158px), 1fr));
+}
 .brandchip {
-  display: inline-flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
   border: 1px solid var(--rule); background: var(--page); cursor: pointer;
-  min-height: 56px; padding: 0 16px; font-size: 13.5px;
+  min-height: 56px; padding: 0 12px; font-size: 13.5px; width: 100%;
   transition: border-color .18s var(--ease), background .18s var(--ease);
 }
 .brandchip:hover { border-color: var(--ink); background: var(--hover); }
