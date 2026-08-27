@@ -211,6 +211,14 @@ img { max-width: 100%; display: block; }
   mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent);
 }
 @media (min-width: 900px) { .hdr__nav { -webkit-mask-image: none; mask-image: none; } }
+/* Once the row stops scrolling, spread the categories across the full content
+   width: the last one then lands under the cart, so the header has the same
+   two vertical edges as everything below it. Deliberately NOT a centred logo —
+   the whole page hangs off one hard left edge (hero copy, breadcrumbs, section
+   titles, cards), and a centred mark would be the only thing on a second axis. */
+@media (min-width: 1100px) {
+  .hdr__nav { justify-content: space-between; gap: 12px; }
+}
 .hdr__nav::-webkit-scrollbar { display: none; }
 .hdr__nav button {
   border: none; background: none; padding: 11px 0; cursor: pointer;
