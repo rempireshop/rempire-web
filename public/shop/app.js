@@ -175,6 +175,15 @@
       "</button>";
   }
 
+  /* Google Pay's "Pay" wordmark is #5F6368 — unreadable on the black express
+     button. Google publishes a reverse mark for dark surfaces; this swaps the
+     grey for white and leaves the four brand colours of the G untouched. */
+  function gpayOnDark() {
+    if (typeof PAYLOGOS === "undefined" || !PAYLOGOS.gpay) return "G Pay";
+    return '<span style="display:inline-flex;height:18px;margin-left:6px">' +
+      PAYLOGOS.gpay.replace(/#5F6368/gi, "#FFFFFF") + "</span>";
+  }
+
   function payLogosHTML() {
     var order = ["bank", "visa", "mastercard", "applepay", "gpay"];
     return '<span class="paylogos">' + order.map(function (k) {
@@ -322,7 +331,7 @@
             '<span style="display:inline-flex;border:1px solid var(--ink)"><button data-qty="-1" aria-label="Меньше" style="width:44px;height:48px;border:none;background:none;cursor:pointer">−</button><span class="num" style="width:44px;height:48px;display:flex;align-items:center;justify-content:center">' + S.qty + '</span><button data-qty="1" aria-label="Больше" style="width:44px;height:48px;border:none;background:none;cursor:pointer">+</button></span>' +
             '<button class="btn" style="flex:1" data-add="' + p.id + '">В корзину</button>' +
           "</div>" +
-          '<button class="btn btn--wide" style="background:#000;border-color:#000;color:#fff;margin-bottom:8px" data-buynow="' + p.id + '">Купить через ' + (typeof PAYLOGOS !== "undefined" && PAYLOGOS.gpay ? '<span style="display:inline-flex;height:18px;margin-left:4px">' + PAYLOGOS.gpay + "</span>" : "G Pay") + "</button>" +
+          '<button class="btn btn--wide" style="background:#000;border-color:#000;color:#fff;margin-bottom:8px" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>" +
           '<div style="text-align:center;margin-bottom:20px"><button class="link" data-checkout>Другие способы оплаты</button></div>' +
           '<div style="font-size:13px;color:var(--muted);border-top:1px solid var(--rule);padding-top:14px">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · бесплатно от 50 € · самовывоз на Mardi 1</div>' +
           acc("Описание", "Профессиональное средство из салонного ассортимента Rempire. Подходит для регулярного ухода.") +
