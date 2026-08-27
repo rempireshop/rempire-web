@@ -1,2 +1,50 @@
+# Staging. Keeping it out of search is done by the X-Robots-Tag header
+# (noindex, nofollow, noarchive — see vercel.json) and the per-page robots
+# meta tag, both of which are authoritative. A blanket Disallow here adds
+# nothing to that, and it actively breaks link previews: Facebook, WhatsApp
+# and LinkedIn all honour robots.txt in their link scrapers, so a shared
+# URL rendered no card at all.
+#
+# So: everything stays disallowed for general crawlers, and the link-preview
+# bots are named explicitly.
+
 User-agent: *
 Disallow: /
+
+# --- link preview scrapers ---
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: Slackbot-LinkExpanding
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: SkypeUriPreview
+Allow: /
+
+User-agent: vkShare
+Allow: /
