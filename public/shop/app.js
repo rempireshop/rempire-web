@@ -178,6 +178,8 @@
     bank: 0,
     adminTab: "over",
     adminAsk: "",
+    admNav: true,       // admin side panes collapse to rails
+    admAi: true,
     size: 0,
     qty: 1,
     gallery: 0,
@@ -243,6 +245,22 @@
   /* Brands are how this shop is actually shopped — Renat's customers come for
      Kevin.Murphy or Davines, not for "hair care". A brand view scopes the
      catalogue across every category. */
+  /* Brand marks lifted from the live shop's own collection covers (black on
+     white, flood-filled to alpha — see tools/build-brandlogos.mjs). Renat has
+     covers for these five only; every other brand falls back to its name set
+     in the display face, which keeps the tile grid consistent. */
+  var BRAND_LOGOS = {
+    "Captain Fawcett": "brands/captain-fawcett.webp",
+    "Davines": "brands/davines.webp",
+    "Kevin.Murphy": "brands/kevin-murphy.webp",
+    "System 4": "brands/system-4.webp",
+    "Lumin Skin": "brands/lumin-skin.webp"
+  };
+  function brandMark(name, cls) {
+    return BRAND_LOGOS[name]
+      ? '<span class="' + cls + '__logo" style="background-image:url(\'' + BRAND_LOGOS[name] + '\')" role="img" aria-label="' + esc(name) + '"></span>'
+      : '<span class="' + cls + '__word">' + esc(name) + "</span>";
+  }
   function brands() {
     var seen = {}, out = [];
     CATALOGUE.forEach(function (p) {
@@ -463,9 +481,12 @@
         rail("Новые товары", "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.", fresh) +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Бренды</h2>' +
           '<button class="link" data-go="brands">Все бренды</button></div>' +
-        '<div class="brandrow">' + brands().slice(0, 10).map(function (b) {
-          return '<button class="brandchip" data-go-brand="' + esc(b.name) + '">' + esc(b.name) +
-            '<span class="num">' + b.n + "</span></button>";
+        // logo brands first — they carry the shop's recognisable marks
+        '<div class="brandrow">' + brands().slice().sort(function (a, b) {
+          return (BRAND_LOGOS[b.name] ? 1 : 0) - (BRAND_LOGOS[a.name] ? 1 : 0);
+        }).slice(0, 8).map(function (b) {
+          return '<button class="brandchip" data-go-brand="' + esc(b.name) + '">' +
+            brandMark(b.name, "brandchip") + '<span class="num">' + b.n + "</span></button>";
         }).join("") + "</div></section>" +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
         '<div class="cattiles">' + CATS.map(function (c) {
@@ -513,11 +534,10 @@
       '<section class="sec" style="padding-top:14px">' +
       '<h1 class="display h1">Бренды</h1>' +
       '<p class="sec__intro">Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.</p>' +
-      '<div class="cattiles">' + brands().map(function (b) {
-        return '<button class="cattile" data-go-brand="' + esc(b.name) + '">' +
-          '<span class="cattile__shot">' + media(b.p, 0, "ph cattile__img") + "</span>" +
-          '<span class="cattile__name">' + esc(b.name) + "</span>" +
-          '<span class="cattile__n num">' + b.n + " " + plural(b.n) + "</span></button>";
+      '<div class="brandtiles">' + brands().map(function (b) {
+        return '<button class="brandtile" data-go-brand="' + esc(b.name) + '">' +
+          '<span class="brandtile__mark">' + brandMark(b.name, "brandtile") + "</span>" +
+          '<span class="brandtile__n num">' + b.n + " " + plural(b.n) + "</span></button>";
       }).join("") + "</div></section></div>";
   }
 
@@ -538,7 +558,9 @@
       '<div class="crumbs"><button data-go="home">Главная</button> / ' +
         (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand) : name) + "</div>" +
       '<section class="sec" style="padding-top:14px">' +
-        '<h1 class="display h1">' + esc(name) + "</h1>" +
+        (S.brand && BRAND_LOGOS[S.brand]
+          ? '<div class="brandhead">' + brandMark(S.brand, "brandhead") + "</div>"
+          : '<h1 class="display h1">' + esc(name) + "</h1>") +
         '<p class="sec__intro">' + intro + "</p>" +
         '<div class="toolbar">' +
           (S.brand ? "" : '<button class="btn btn--ghost toolbar__filter" data-filter>Фильтры<span data-fcount>' + fcountLabel() + "</span></button>") +
@@ -939,12 +961,16 @@
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<span class="cohdr__t">Админка</span>' +
         '<button class="link" data-go="home">← В магазин</button></div></div>' +
-      '<div class="adm">' +
+      '<div class="adm' + (S.admNav ? "" : " adm--navmin") + (S.admAi ? "" : " adm--aimin") + '">' +
 
-      '<aside class="adm__side"><nav class="adm__nav" aria-label="Разделы админки">' +
+      '<aside class="adm__side">' +
+        '<button class="adm__toggle" data-admnav aria-expanded="' + S.admNav + '" ' +
+          'aria-label="' + (S.admNav ? "Свернуть меню" : "Развернуть меню") + '" title="' +
+          (S.admNav ? "Свернуть меню" : "Развернуть меню") + '">' + (S.admNav ? "«" : "»") + "</button>" +
+        '<nav class="adm__nav" aria-label="Разделы админки">' +
         ADM_NAV.map(function (t) {
-          return '<button data-admtab="' + t[0] + '" aria-current="' + (tab === t[0]) + '">' +
-            icon(t[2]) + "<span>" + t[1] + "</span></button>";
+          return '<button data-admtab="' + t[0] + '" aria-current="' + (tab === t[0]) + '" title="' + t[1] + '">' +
+            icon(t[2]) + '<span class="adm__navlbl">' + t[1] + "</span></button>";
         }).join("") + "</nav>" +
         '<div class="adm__who"><span class="adm__whoname">Renat</span>' +
           '<span class="adm__sub">Rempire Store OÜ · владелец</span></div></aside>' +
@@ -1015,7 +1041,11 @@
       "</main>" +
 
       '<aside class="adm__ai" aria-label="Помощник">' +
-        '<div class="adm__aihead"><span class="sec__title">Помощник</span></div>' +
+        '<div class="adm__aihead">' +
+          '<button class="adm__toggle" data-admai aria-expanded="' + S.admAi + '" ' +
+            'aria-label="' + (S.admAi ? "Свернуть помощника" : "Открыть помощника") + '" title="' +
+            (S.admAi ? "Свернуть помощника" : "Открыть помощника") + '">' + (S.admAi ? "»" : "«") + "</button>" +
+          '<span class="sec__title adm__ailbl">Помощник</span></div>' +
         '<div class="adm__aibody">' +
           (S.adminAsk
             ? '<div class="adm__q">' + esc(S.adminAsk) + "</div>" +
@@ -1396,7 +1426,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-vcolour],[data-vsize],[data-notify],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -1476,6 +1506,8 @@
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
+    if (d.admnav !== undefined) { S.admNav = !S.admNav; render(); refocus("[data-admnav]"); return; }
+    if (d.admai !== undefined) { S.admAi = !S.admAi; render(); refocus("[data-admai]"); return; }
     if (d.admtab) { S.adminTab = d.admtab; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admask) { S.adminAsk = d.admask; render(); return; }
     if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
