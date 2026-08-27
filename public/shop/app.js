@@ -59,10 +59,16 @@
     { eyebrow: "Новинки", t: "Свежая поставка", s: "Уход и стайлинг, которые только приехали.", c: "Смотреть", cat: "styling" },
     { eyebrow: "Борода", t: "Всё для формы", s: "Масла, бальзамы и воски для ухода за бородой.", c: "В каталог", cat: "beard" },
     { eyebrow: "Парфюмерия", t: "Ниша и классика", s: "Creed, Tom Ford, Xerjoff, Byredo — то, что держим в наличии.", c: "Смотреть", cat: "perfume" },
-    { eyebrow: "Rempire", t: "Мерч 666 ways", s: "Футболки с фирменным принтом.", c: "В мерч", cat: "merch" }
+    // no merch here: the model shots don't cut out (vignette backdrop), and a
+    // cropped print in the hero read badly — the soaps are the house-made
+    // product that photographs like the rest of the catalogue
+    { eyebrow: "Сделано в Rempire", t: "Мыло ручной работы", s: "Чёрное 666 и розовое Rule Nr 1 — варим сами, маленькими партиями.", c: "Смотреть", cat: "body", pid: "handmade-soap-666" }
   ];
-  function bannerProduct(cat) {
-    var l = CATALOGUE.filter(function (x) { return x.cat === cat && x.stock !== "out"; });
+  function bannerProduct(b) {
+    if (b.pid) {
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === b.pid) return CATALOGUE[i];
+    }
+    var l = CATALOGUE.filter(function (x) { return x.cat === b.cat && x.stock !== "out"; });
     return l[0] || CATALOGUE[0];
   }
 
@@ -425,7 +431,7 @@
     var pop = spread(8, false), fresh = spread(8, true);
     return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель">' +
       BANNERS.map(function (b, i) {
-        var p = bannerProduct(b.cat);
+        var p = bannerProduct(b);
         return '<div class="hero__slide" data-on="' + (i === S.slide ? 1 : 0) + '" aria-hidden="' + (i !== S.slide) + '">' +
           '<div class="hero__box">' +
             '<div class="hero__inner"><div class="hero__eyebrow">' + b.eyebrow + "</div>" +
@@ -451,7 +457,7 @@
         }).join("") + "</div></section>" +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
         '<div class="cattiles">' + CATS.map(function (c) {
-          var p = bannerProduct(c.id);
+          var p = bannerProduct({ cat: c.id });
           return '<button class="cattile" data-go-cat="' + c.id + '">' +
             '<span class="cattile__shot">' + media(p, 0, "ph cattile__img") + "</span>" +
             '<span class="cattile__name">' + c.name + "</span>" +
@@ -586,13 +592,7 @@
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
           '<div class="num pdp__price">' + eur(sizePrice(p, S.size)) + "</div>" +
           '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
-          // merch variants are "colour / size", so they are not a size —
-          // calling them one put "white / S" under a heading reading Размер
-          (sizes.length > 1 ? '<div class="field"><span class="field__label">' +
-            (sizes[0].indexOf("/") >= 0 ? "Вариант" : p.cat === "merch" ? "Размер" : "Объём") +
-            '</span><div class="sizes">' + sizes.map(function (sz, i) {
-            return '<button class="size" data-size="' + i + '" aria-current="' + (i === S.size) + '">' + esc(sz.replace(" / ", " · ")) + "</button>";
-          }).join("") + "</div></div>" : "") +
+          variantPicker(p, sizes) +
           '<div class="pdp__buy">' +
             '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num">' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
             '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
@@ -615,6 +615,50 @@
   }
   function acc(title, body) {
     return '<details class="acc"><summary>' + title + "</summary><div class=\"acc__body\">" + body + "</div></details>";
+  }
+
+  /* Merch variants arrive as one flat "colour / size" list — ten buttons where
+     the shopper makes two decisions. Split them into a Цвет row and a Размер
+     row when the grid is complete; anything else falls back to one row. */
+  var COLOUR_RU = {
+    white: "белый", yellow: "жёлтый", black: "чёрный", pink: "розовый",
+    grey: "серый", gray: "серый", red: "красный", blue: "синий", green: "зелёный"
+  };
+  function colourRu(c) { return COLOUR_RU[c.toLowerCase()] || c; }
+  function splitVariants(sizes) {
+    if (!sizes.length || sizes[0].indexOf(" / ") < 0) return null;
+    var colours = [], szs = [], pairs = [];
+    for (var i = 0; i < sizes.length; i++) {
+      var parts = sizes[i].split(" / ");
+      if (parts.length !== 2) return null;
+      if (colours.indexOf(parts[0]) < 0) colours.push(parts[0]);
+      if (szs.indexOf(parts[1]) < 0) szs.push(parts[1]);
+      pairs.push(parts);
+    }
+    if (colours.length < 2 || colours.length * szs.length !== sizes.length) return null;
+    return { colours: colours, sizes: szs, pairs: pairs };
+  }
+  function variantIndex(sizes, colour, size) {
+    for (var i = 0; i < sizes.length; i++) if (sizes[i] === colour + " / " + size) return i;
+    return 0;
+  }
+  function variantPicker(p, sizes) {
+    if (sizes.length < 2) return "";
+    var sv = splitVariants(sizes);
+    if (!sv) {
+      return '<div class="field"><span class="field__label">' + (p.cat === "merch" ? "Размер" : "Объём") +
+        '</span><div class="sizes">' + sizes.map(function (sz, i) {
+          return '<button class="size" data-size="' + i + '" aria-current="' + (i === S.size) + '">' + esc(sz) + "</button>";
+        }).join("") + "</div></div>";
+    }
+    var cur = sizes[Math.min(S.size, sizes.length - 1)].split(" / ");
+    return '<div class="field"><span class="field__label">Цвет принта — ' + esc(colourRu(cur[0])) +
+      '</span><div class="sizes">' + sv.colours.map(function (c) {
+        return '<button class="size" data-vcolour="' + esc(c) + '" aria-current="' + (c === cur[0]) + '">' + esc(colourRu(c)) + "</button>";
+      }).join("") + "</div></div>" +
+      '<div class="field"><span class="field__label">Размер</span><div class="sizes">' + sv.sizes.map(function (s2) {
+        return '<button class="size" data-vsize="' + esc(s2) + '" aria-current="' + (s2 === cur[1]) + '">' + esc(s2) + "</button>";
+      }).join("") + "</div></div>";
   }
 
   function screenSearch() {
@@ -1192,7 +1236,11 @@
   }
   function lineLabel(l) {
     var p = byId(l.id);
-    return p.sizes && p.sizes.length > 1 ? " · " + p.sizes[Math.min(l.size || 0, p.sizes.length - 1)] : "";
+    if (!p.sizes || p.sizes.length < 2) return "";
+    var s = p.sizes[Math.min(l.size || 0, p.sizes.length - 1)];
+    // "white / S" → "белый · S" in the cart and the checkout summary
+    var parts = s.split(" / ");
+    return " · " + (parts.length === 2 ? colourRu(parts[0]) + " · " + parts[1] : s);
   }
 
   // infinite scroll
@@ -1259,7 +1307,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
+    var t = e.target.closest("[data-vcolour],[data-vsize],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -1341,6 +1389,14 @@
       S.size = Number(d.size);
       var sp = byId(S.productId);
       if (sp.varImg && sp.varImg.length > S.size) S.gallery = sp.varImg[S.size];
+      render(); return;
+    }
+    if (d.vcolour !== undefined || d.vsize !== undefined) {
+      var vp = byId(S.productId), vs = vp.sizes || [];
+      var cur2 = vs[Math.min(S.size, vs.length - 1)].split(" / ");
+      S.size = variantIndex(vs, d.vcolour !== undefined ? d.vcolour : cur2[0],
+                                d.vsize !== undefined ? d.vsize : cur2[1]);
+      if (vp.varImg && vp.varImg.length > S.size) S.gallery = vp.varImg[S.size];
       render(); return;
     }
     if (d.qty) { S.qty = Math.max(1, Math.min(9, S.qty + Number(d.qty))); render(); return; }

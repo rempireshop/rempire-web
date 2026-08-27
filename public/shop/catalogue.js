@@ -943,7 +943,7 @@ const CATALOGUE = [
   {
     "id": "proraso-wood-spice-beard-balm-100ml",
     "brand": "Proraso",
-    "name": "Wood & Spice Beard Balm — лосьон после бритья",
+    "name": "Wood & Spice — бальзам для бороды",
     "cat": "beard",
     "price": 16,
     "priceFrom": false,
@@ -1819,11 +1819,11 @@ const CATALOGUE = [
       0,
       0,
       0,
-      0,
-      0,
-      0,
-      0,
-      0
+      1,
+      1,
+      1,
+      1,
+      1
     ],
     "prices": [
       35,
@@ -1987,7 +1987,8 @@ const CATALOGUE = [
     "img2": "img/deep-cut-t-shirt-with-an-extended-back-1.webp",
     "gallery": [
       "img/deep-cut-t-shirt-with-an-extended-back-0.webp",
-      "img/deep-cut-t-shirt-with-an-extended-back-1.webp"
+      "img/deep-cut-t-shirt-with-an-extended-back-1.webp",
+      "img/deep-cut-t-shirt-with-an-extended-back-2.webp"
     ],
     "sizes": [
       "S-M / Pink",
@@ -1996,8 +1997,8 @@ const CATALOGUE = [
     ],
     "varImg": [
       0,
-      0,
-      0
+      1,
+      2
     ],
     "prices": [
       27,
