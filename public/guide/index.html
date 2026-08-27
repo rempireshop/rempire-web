@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>REMPIRE — что уже готово</title>
+<meta name="description" content="Новый магазин Rempire: что уже работает, как войти в кабинет, где админка и что она умеет, что поправили по замечаниям и что можем сделать дальше.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="REMPIRE">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://rempireshop.diipsolutions.eu/guide/">
+<meta property="og:title" content="REMPIRE — что уже готово">
+<meta property="og:description" content="Что умеет новый магазин, как войти в кабинет, где админка, что поправили по замечаниям и что можем сделать дальше.">
+<meta property="og:image" content="https://rempireshop.diipsolutions.eu/og-shop.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rempireshop.diipsolutions.eu/og-shop.png">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c1a00; --page:#fff; --paper:#fdfcf9; --shell:#edeae1;
+  --rule:rgba(28,26,0,.15); --muted:#6f6b57; --ok:#2f6a3f; --error:#8c1a0f;
+  --gutter:20px;
+}
+@media (min-width:768px){ :root{ --gutter:32px } }
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--page);color:var(--ink);font-family:"Golos Text",ui-sans-serif,system-ui,sans-serif;
+     font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:0 var(--gutter)}
+a{color:inherit}
+
+/* header */
+.top{background:var(--shell);padding:38px 0 34px;border-bottom:1px solid var(--rule)}
+.lock{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.lock svg{height:44px;width:auto}
+.lock span{font-family:Oswald,sans-serif;font-weight:600;font-size:17px;letter-spacing:.3em;text-transform:uppercase}
+h1{font-family:Oswald,sans-serif;font-weight:600;font-size:clamp(30px,7vw,50px);line-height:1.04;
+   text-transform:uppercase;letter-spacing:.01em;margin-bottom:16px}
+.lede{font-size:clamp(17px,2.4vw,20px);color:#4f4c3c;max-width:38ch}
+.stamp{margin-top:22px;font-size:13px;color:var(--muted)}
+
+/* nav */
+.toc{background:var(--paper);border-bottom:1px solid var(--rule);padding:18px 0}
+.toc ol{list-style:none;padding:0;margin:0;display:flex;gap:8px;flex-wrap:wrap}
+.toc a{display:inline-block;border:1px solid var(--rule);padding:9px 13px;font-size:13.5px;
+       text-decoration:none;transition:background .18s,border-color .18s}
+.toc a:hover{background:var(--shell);border-color:var(--ink)}
+
+/* sections */
+section{padding:46px 0;border-bottom:1px solid var(--rule)}
+section:last-of-type{border-bottom:none}
+h2{font-family:Oswald,sans-serif;font-weight:600;font-size:clamp(21px,4vw,28px);
+   text-transform:uppercase;letter-spacing:.08em;line-height:1.15;margin-bottom:8px}
+.h2sub{color:var(--muted);font-size:15px;margin-bottom:26px}
+h3{font-family:Oswald,sans-serif;font-weight:600;font-size:15px;letter-spacing:.16em;
+   text-transform:uppercase;margin:30px 0 10px;padding-top:14px;border-top:1px solid var(--rule)}
+h3:first-of-type{border-top:none;padding-top:0;margin-top:0}
+p{margin-bottom:14px}
+ul{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:8px}
+strong{font-weight:600}
+.muted{color:var(--muted)}
+
+/* links row */
+.links{display:grid;gap:12px;margin:6px 0 0}
+@media (min-width:600px){ .links{grid-template-columns:1fr 1fr} }
+.card{border:1px solid var(--ink);padding:18px;text-decoration:none;display:block;
+      transition:background .18s}
+.card:hover{background:var(--paper)}
+.card b{display:block;font-family:Oswald,sans-serif;font-size:14px;letter-spacing:.14em;
+        text-transform:uppercase;margin-bottom:6px}
+.card span{font-size:14.5px;color:var(--muted)}
+.card em{display:block;font-style:normal;font-size:13px;margin-top:8px;
+         font-family:"Golos Text";color:#4f4c3c;word-break:break-all}
+
+/* steps */
+.steps{counter-reset:s;list-style:none;padding:0;margin:0 0 18px}
+.steps li{counter-increment:s;position:relative;padding-left:44px;margin-bottom:16px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:28px;height:28px;
+  background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;
+  font-family:Oswald,sans-serif;font-size:13px}
+
+/* callout */
+.note{border-left:3px solid var(--ink);background:var(--paper);padding:14px 16px;margin:18px 0;font-size:15px}
+.note.warn{border-left-color:var(--error)}
+.note b{display:block;margin-bottom:4px}
+
+/* feature grid */
+.feat{display:grid;gap:0;border-top:1px solid var(--rule)}
+.feat > div{padding:15px 0;border-bottom:1px solid var(--rule);display:grid;gap:4px}
+@media (min-width:640px){ .feat > div{grid-template-columns:190px 1fr;gap:20px;align-items:baseline} }
+.feat b{font-family:Oswald,sans-serif;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.feat p{margin:0;font-size:15.5px}
+
+/* fixed log */
+.log{display:grid;gap:0;border-top:1px solid var(--rule)}
+.log > div{padding:14px 0;border-bottom:1px solid var(--rule)}
+@media (min-width:700px){ .log > div{display:grid;grid-template-columns:1fr 1fr;gap:24px} }
+.log .said{color:var(--muted);font-size:15px}
+.log .said::before{content:"«";}
+.log .said::after{content:"»";}
+.log .did{font-size:15.5px}
+.log .did::before{content:"→ ";color:var(--ok);font-weight:600}
+
+/* next */
+.next{display:grid;gap:14px}
+@media (min-width:640px){ .next{grid-template-columns:1fr 1fr} }
+.next > div{border:1px solid var(--rule);padding:16px}
+.next b{display:block;font-family:Oswald,sans-serif;font-size:13px;letter-spacing:.14em;
+        text-transform:uppercase;margin-bottom:6px}
+.next p{margin:0;font-size:15px;color:#4f4c3c}
+
+/* decisions */
+.dec{list-style:none;padding:0;margin:0}
+.dec li{border:1px solid var(--rule);padding:16px;margin-bottom:12px}
+.dec b{display:block;font-family:Oswald,sans-serif;font-size:13.5px;letter-spacing:.12em;
+       text-transform:uppercase;margin-bottom:6px}
+.dec p{margin:0;font-size:15px;color:#4f4c3c}
+
+footer{padding:36px 0 60px;font-size:14px;color:var(--muted)}
+footer a{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <div class="lock">
+    <svg viewBox="292.24 171.22 265.18 409.8" role="img" aria-label="REMPIRE"><path fill="currentColor" d="M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z"/></svg>
+    <span>Rempire</span>
+  </div>
+  <h1>Что уже<br>готово</h1>
+  <p class="lede">Новый магазин работает: можно искать, класть в корзину, оформлять заказ, заходить в кабинет и в админку. Ниже — что внутри, как всё открыть и что дальше.</p>
+  <p class="stamp">Обновлено 27 августа 2026 · черновик для обсуждения</p>
+</div></div>
+
+<nav class="toc"><div class="wrap"><ol>
+  <li><a href="#open">Куда смотреть</a></li>
+  <li><a href="#works">Что работает</a></li>
+  <li><a href="#account">Кабинет</a></li>
+  <li><a href="#admin">Админка</a></li>
+  <li><a href="#fixed">Что поправили</a></li>
+  <li><a href="#next">Что дальше</a></li>
+  <li><a href="#you">Нужно от тебя</a></li>
+</ol></div></nav>
+
+<main class="wrap">
+
+<section id="open">
+  <h2>Куда смотреть</h2>
+  <p class="h2sub">Лучше открыть и с компьютера, и с телефона — вёрстка разная, на телефоне баннер листается пальцем.</p>
+  <div class="links">
+    <a class="card" href="/shop/">
+      <b>Магазин</b>
+      <span>Рабочий магазин: 95 товаров, поиск, корзина, оформление, кабинет, админка.</span>
+      <em>rempireshop.diipsolutions.eu/shop/</em>
+    </a>
+    <a class="card" href="/demo/">
+      <b>Обзор и варианты дизайна</b>
+      <span>Восемь вариантов оформления, живой логотип и расчёт экономии против Shopify.</span>
+      <em>rempireshop.diipsolutions.eu/demo/</em>
+    </a>
+  </div>
+  <div class="note">
+    <b>Кнопка 💬 в углу</b>
+    Нажми на неё в любом месте магазина, напиши что нравится и что поменять — комментарий сразу прилетит Диме. Можно ткнуть в конкретное место на странице.
+  </div>
+</section>
+
+<section id="works">
+  <h2>Что уже работает</h2>
+  <p class="h2sub">Это не картинка и не макет — всё внутри нажимается и считается по-настоящему.</p>
+
+  <h3>Товары и фотографии</h3>
+  <div class="feat">
+    <div><b>95 товаров</b><p>Настоящие, из твоего магазина, в 7 разделах: уход за волосами (22), стайлинг (17), уход за бородой (15), уход за лицом (16), уход за телом (3), парфюмерия (14) и мерч (8).</p></div>
+    <div><b>Фото без фона</b><p>У всех баночек убрали белый и серый фон — они стоят прямо на странице, а не в рамке. 140 фотографий обработали.</p></div>
+    <div><b>Объёмы и цены</b><p>У 29 товаров несколько объёмов. Меняешь объём — меняется и фотография, и цена. У футболок отдельно выбирается цвет принта и размер, и фото меняется вместе с цветом.</p></div>
+    <div><b>Наличие</b><p>Товар, которого нет, нельзя положить в корзину: вместо кнопки «В корзину» появляется поле «сообщим, когда появится».</p></div>
+  </div>
+
+  <h3>Главная</h3>
+  <div class="feat">
+    <div><b>Баннер</b><p>Пять баннеров, листаются сами, стрелками или пальцем на телефоне.</p></div>
+    <div><b>Блоки товаров</b><p>«Популярные» и «Новые товары» — из разных разделов, чтобы не было восьми шампуней подряд.</p></div>
+    <div><b>Бренды и категории</b><p>Ряд брендов с настоящими логотипами и плитки категорий.</p></div>
+  </div>
+
+  <h3>Каталог и поиск</h3>
+  <div class="feat">
+    <div><b>Без страниц</b><p>Товары подгружаются сами при прокрутке — никаких «страница 1, 2, 3».</p></div>
+    <div><b>Фильтры</b><p>По бренду и наличию. Выбранные фильтры видны отдельными плашками, сбрасываются одним нажатием. При смене раздела фильтры очищаются.</p></div>
+    <div><b>Сортировка</b><p>Хиты, новинки, сначала дешевле, сначала дороже.</p></div>
+    <div><b>Поиск</b><p>Понимает падежи: «борода» находит и «уход за бородой», и «масло для бороды».</p></div>
+  </div>
+
+  <h3>Бренды</h3>
+  <div class="feat">
+    <div><b>Раздел «Бренды»</b><p>Все 20 марок отдельным разделом. У пяти — твои настоящие логотипы (Kevin.Murphy, Davines, System 4, Captain Fawcett, Lumin), как на нынешнем сайте.</p></div>
+    <div><b>Страница бренда</b><p>Нажимаешь на бренд — показываем всё, что от него есть, из всех разделов сразу.</p></div>
+  </div>
+
+  <h3>Корзина и оформление</h3>
+  <div class="feat">
+    <div><b>Корзина</b><p>Выезжает сбоку, полоска показывает, сколько осталось до бесплатной доставки.</p></div>
+    <div><b>Три шага</b><p>Контакт → доставка → оплата. Пройденные шаги сворачиваются в одну строку с галочкой, видно что выбрано.</p></div>
+    <div><b>Настоящая доставка</b><p>Цены взяты из прайс-листов Omniva, SmartPosti и DPD за 2025–2026 годы, с НДС. Пакоматы в списке настоящие — 230 адресов по Эстонии, Латвии, Литве и Финляндии.</p></div>
+    <div><b>Оплата</b><p>Банковская ссылка (5 банков), карта, Apple Pay / Google Pay, счёт для фирм. Логотипы настоящие. PayPal убрали.</p></div>
+    <div><b>Промокод</b><p>Для проверки работает код <strong>REMPIRE10</strong> — минус 10 %.</p></div>
+  </div>
+</section>
+
+<section id="account">
+  <h2>Личный кабинет</h2>
+  <p class="h2sub">Вход без пароля — забытых паролей просто не существует.</p>
+
+  <ol class="steps">
+    <li>Открой магазин: <a href="/shop/">rempireshop.diipsolutions.eu/shop/</a></li>
+    <li>На <strong>телефоне</strong> — нижняя полоска, кнопка <strong>«КАБИНЕТ»</strong> (человечек).<br>
+        На <strong>компьютере</strong> — значок человечка справа вверху, рядом с корзиной.</li>
+    <li>Впиши любой e-mail — например <strong>test@test.ee</strong> или свой.</li>
+    <li>Нажми <strong>«ПОЛУЧИТЬ КОД»</strong> — и ты внутри.</li>
+  </ol>
+
+  <div class="note">
+    <b>Это демонстрация</b>
+    Письмо с кодом сейчас никуда не уходит — кнопка пускает сразу. В рабочем магазине на этот адрес придёт код из шести цифр, и войти можно будет только с ним.
+  </div>
+
+  <p><strong>Что внутри кабинета:</strong></p>
+  <ul>
+    <li><strong>Мои данные</strong> — имя и почта.</li>
+    <li><strong>Доставка по умолчанию</strong> — страна, способ доставки и любимый пакомат. Подставится сам при следующем заказе.</li>
+    <li><strong>Мои заказы</strong> — с кнопкой «Повторить заказ».</li>
+    <li><strong>Мои промокоды</strong> — например, персональная скидка ко дню рождения.</li>
+  </ul>
+  <p class="muted">Покупать можно и без аккаунта — гостевые заказы никуда не деваются.</p>
+</section>
+
+<section id="admin">
+  <h2>Админка</h2>
+  <p class="h2sub">Твоя сторона магазина. Та самая, из-за которой всё и затевалось: чтобы менять цены, тексты и остатки без программиста.</p>
+
+  <ol class="steps">
+    <li>Открой магазин и <strong>прокрути в самый низ</strong>, до подвала с реквизитами.</li>
+    <li>В самой нижней строке, рядом со значком башни и «© 2026 Rempire Store OÜ», есть ссылка <strong>«Админка — демо»</strong>.</li>
+    <li>Нажми — откроется рабочий стол магазина. Вернуться в магазин — ссылка <strong>«← В магазин»</strong> справа вверху.</li>
+  </ol>
+
+  <div class="note">
+    <b>Лучше смотреть с компьютера</b>
+    На большом экране админка раскладывается в три панели: слева разделы, посередине работа, справа помощник. Боковые панели можно свернуть кнопками ««» и «»» — тогда таблица занимает весь экран. На телефоне всё это складывается в одну колонку.
+  </div>
+
+  <p><strong>Разделы слева:</strong></p>
+  <div class="feat">
+    <div><b>Обзор</b><p>Заказы за сегодня, выручка, средний чек, что заканчивается на складе, последние заказы.</p></div>
+    <div><b>Заказы</b><p>Список заказов: кто, что, куда, на сколько и на каком этапе. В рабочей версии заказ будет открываться в один клик — адрес, состав, оплата, наклейка на посылку и письмо клиенту с трекингом на одной странице.</p></div>
+    <div><b>Товары</b><p>Цены, остатки и тексты правятся прямо здесь. Сканер штрихкодов будет искать товар по EAN за секунду — приход и списание без ручного ввода.</p></div>
+    <div><b>Клиенты</b><p>Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.</p></div>
+    <div><b>Настройки</b><p>Способы доставки и их цены, способы оплаты, порог бесплатной доставки, языки магазина, письма клиентам, реквизиты. Всё меняется без программиста.</p></div>
+  </div>
+
+  <p><strong>Помощник справа</strong> — то, ради чего это всё. Он видит твой каталог, заказы и остатки, и отвечает обычными словами. Нажми любую подсказку, чтобы посмотреть, как это выглядит:</p>
+  <ul>
+    <li>«Что заканчивается и что дозаказать?»</li>
+    <li>«Сколько заработали на Kevin.Murphy?»</li>
+    <li>«Напиши описание для шампуня»</li>
+    <li>«Какие заказы ждут отправки?»</li>
+  </ul>
+  <p>В рабочей версии он ещё и пишет письма клиентам, готовит отчёт для бухгалтера, переводит карточки на эстонский и английский и предупреждает, если товар вот-вот кончится. Любое изменение он сначала показывает черновиком — без твоего подтверждения ничего не публикуется.</p>
+
+  <div class="note warn">
+    <b>Цифры в админке пока выдуманные</b>
+    Заказы, клиенты и выручка — для примера. Товары настоящие, из твоего каталога. Когда подключим настоящие заказы, цифры станут твоими.
+  </div>
+</section>
+
+<section id="fixed">
+  <h2>Что поправили по твоим замечаниям</h2>
+  <p class="h2sub">Слева — что ты написал, справа — что сделали.</p>
+  <div class="log">
+    <div><p class="said">Картинки на главной при смене получают белый фон</p><p class="did">Убрали фон у всех фотографий по-настоящему — обработали 140 файлов. Белых и серых квадратов больше нет нигде.</p></div>
+    <div><p class="said">Мерч тоже с фоном</p><p class="did">Футболки сняты на модели, вырезать их нельзя. Вернули полные фотографии, как ты просил, и убрали мерч из баннера — там теперь мыло ручной работы.</p></div>
+    <div><p class="said">В шапке Rempire не тем шрифтом и не заглавными</p><p class="did">REMPIRE заглавными, нашим шрифтом. Башня снова рисуется при открытии и отвечает на нажатие.</p></div>
+    <div><p class="said">Чёрная рамка вокруг сортировки некрасивая</p><p class="did">Убрали. Своя стрелочка, аккуратное подчёркивание, на телефоне сортировка на своей строке и никуда не убегает.</p></div>
+    <div><p class="said">При смене объёма фото не меняется</p><p class="did">Меняется и фото, и цена. У футболок цвет принта тоже меняет фотографию.</p></div>
+    <div><p class="said">Банки не нажимаются</p><p class="did">Нажимаются, выбранный подсвечивается. Способы оплаты — тоже.</p></div>
+    <div><p class="said">Фильтры мигают, старые остаются при смене раздела</p><p class="did">Не мигают: обновляется только сетка товаров. При смене раздела фильтры очищаются.</p></div>
+    <div><p class="said">Логотипы Visa, Mastercard выглядят нарисованными</p><p class="did">Заменили на настоящие. У Google Pay буква G снова в фирменных цветах, как на нынешнем сайте.</p></div>
+    <div><p class="said">Apple Pay слишком маленький</p><p class="did">Все значки выровняли по одной высоте, рамки вокруг них убрали.</p></div>
+    <div><p class="said">На телефоне в оформлении две кнопки оплаты, текст не виден</p><p class="did">Одна кнопка. Заказ свёрнут наверху, ничего не прячется за панелями.</p></div>
+    <div><p class="said">При наведении товар пропадает</p><p class="did">Исправили: вторая фотография показывается только там, где она есть.</p></div>
+    <div><p class="said">Соцсети — текстом, и криво стоят</p><p class="did">Три значка: Instagram, Facebook, TikTok — ровно под телефоном.</p></div>
+    <div><p class="said">Слово «Фильтры» не по центру</p><p class="did">По центру.</p></div>
+    <div><p class="said">Брендов нет</p><p class="did">Добавили раздел «Бренды» с твоими логотипами и страницу каждой марки.</p></div>
+    <div><p class="said">Нет доступа в админку</p><p class="did">Есть: ссылка внизу магазина. Три панели, сворачиваются, помощник всегда под рукой.</p></div>
+    <div><p class="said">В админке панели должны сворачиваться, поле помощника не внизу страницы</p><p class="did">Сворачиваются. Поле для вопроса теперь всегда видно, сколько ни прокручивай.</p></div>
+  </div>
+  <p class="muted" style="margin-top:20px">Кроме этого мы сами нашли и починили ещё около полусотни мелочей: товара, которого нет в наличии, больше нельзя купить; кнопки стали достаточно крупными для пальца; исправили десятки названий товаров, где из выгрузки Shopify приехал мусор вроде «Advanced Snail 96 Mucin Power Essence — крем для лица» (это не крем, а эссенция).</p>
+</section>
+
+<section id="next">
+  <h2>Что можем сделать дальше</h2>
+  <p class="h2sub">Всё это обсуждали раньше — теперь по порядку, когда что подключать.</p>
+
+  <h3>К запуску</h3>
+  <div class="next">
+    <div><b>Настоящие заказы</b><p>База, номера заказов, статусы, письма клиенту: «заказ принят», «отправлен» с трекингом.</p></div>
+    <div><b>Оплата</b><p>Подключение Montonio или MakeCommerce: банковские ссылки, карты, Apple Pay и Google Pay.</p></div>
+    <div><b>Доставка</b><p>Договоры с Omniva, SmartPosti и DPD, автоматические наклейки на посылки и трекинг.</p></div>
+    <div><b>Три языка</b><p>Русский, эстонский, английский. Переключатель уже стоит — остались сами переводы, их сделает помощник.</p></div>
+    <div><b>Перенос со Shopify</b><p>Все товары, тексты, картинки и адреса страниц — чтобы не потерять позиции в Google.</p></div>
+    <div><b>Правовые страницы</b><p>Доставка, возврат, условия продажи, конфиденциальность — с юристом.</p></div>
+  </div>
+
+  <h3>Сразу после запуска</h3>
+  <div class="next">
+    <div><b>Сканер штрихкодов</b><p>EAN с упаковки: приход товара и списание при продаже без ручного ввода.</p></div>
+    <div><b>Продажа в салоне</b><p>Быстрая кнопка «продал на месте» — остаток уменьшается, касса и сайт видят один склад.</p></div>
+    <div><b>Помощник в работе</b><p>Описания товаров, переводы, SEO-тексты, ответы клиентам, отчёт для бухгалтера.</p></div>
+    <div><b>Письма и напоминания</b><p>Брошенная корзина, «товар снова в наличии», скидка ко дню рождения.</p></div>
+    <div><b>Оптовые цены</b><p>Отдельный прайс для салонов и мастеров.</p></div>
+    <div><b>Блог и советы</b><p>Статьи под поисковые запросы — то, чего сейчас на сайте почти нет.</p></div>
+  </div>
+
+  <h3>Когда пойдут продажи</h3>
+  <div class="next">
+    <div><b>Аналитика</b><p>Что ищут, но не находят; что смотрят и не покупают; какие бренды приносят деньги.</p></div>
+    <div><b>Подарочные сертификаты</b><p>Их уже ищут на сайте — 14 запросов за месяц.</p></div>
+    <div><b>Программа лояльности</b><p>Баллы за покупки, скидка постоянным клиентам.</p></div>
+    <div><b>Фотографии</b><p>Переснимать всё не нужно — часть кадров просто улучшим.</p></div>
+  </div>
+</section>
+
+<section id="you">
+  <h2>Что нужно от тебя</h2>
+  <p class="h2sub">Без этого дальше не двинемся. Ответить можно кнопкой 💬 прямо в магазине.</p>
+  <ul class="dec">
+    <li>
+      <b>Порог бесплатной доставки</b>
+      <p>В анкете ты написал 50 € везде. Но курьер DPD в Финляндию стоит около 26 € с НДС — на заказе в 50 € бесплатная доставка съест половину. Мы поставили по-разному: Эстония 50 €, Латвия и Литва 75 €, Финляндия 100 €, остальная Европа 200 €. Скажи, оставляем так или меняем — это одна строчка.</p>
+    </li>
+    <li>
+      <b>Какая фирма продаёт</b>
+      <p>На нынешнем сайте три разных названия: в доставке THEFLOW OÜ, в правовой информации «Rempire Shop OÜ» с кодом НДС Rempire Store OÜ. Для счетов и договора с платёжной системой нужно одно. Это вопрос к бухгалтеру.</p>
+    </li>
+    <li>
+      <b>Доступы</b>
+      <p>Shopify, домен, Google и Meta — чтобы перенести всё без потери поисковых позиций.</p>
+    </li>
+    <li>
+      <b>PayPal</b>
+      <p>Ни один платёжный сервис в Эстонии его не подключает, а напрямую он берёт 3,4 % + 0,35 € — втрое дороже карты. Клиенты вообще спрашивают PayPal?</p>
+    </li>
+    <li>
+      <b>Возвраты</b>
+      <p>Текст политики возврата должен посмотреть юрист — по закону ЕС 14 дней, но вскрытая косметика возврату не подлежит, и это надо написать правильно.</p>
+    </li>
+  </ul>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <p>Вопросы и правки — кнопкой 💬 в магазине или напрямую Диме.</p>
+  <p style="margin-top:10px"><a href="/shop/">Открыть магазин</a> · <a href="/demo/">Обзор и варианты дизайна</a></p>
+</footer>
+
+</body>
+</html>
