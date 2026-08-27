@@ -30,7 +30,10 @@
     search: '<path d="M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14zM16.2 16.2L21 21"/>',
     user: '<path d="M12 4a3.6 3.6 0 1 1 0 7.2A3.6 3.6 0 0 1 12 4zM4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/>',
     bag: '<path d="M5.5 8.5h13l-.9 11a1.8 1.8 0 0 1-1.8 1.6H8.2a1.8 1.8 0 0 1-1.8-1.6zM8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5"/>',
-    check: '<path d="M4.5 12.5l5 5 10-11"/>'
+    check: '<path d="M4.5 12.5l5 5 10-11"/>',
+    instagram: '<rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>',
+    facebook: '<path d="M14.6 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H17.8V3.6A21 21 0 0 0 15.4 3.5c-2.4 0-4 1.45-4 4.1v2.3H8.7V13h2.7v8z" fill="currentColor" stroke="none"/>',
+    tiktok: '<path d="M15.6 3.5c.4 2.15 1.6 3.4 3.7 3.55v2.4c-1.2.12-2.3-.28-3.55-1.05v4.65c0 5.9-6.45 7.75-9.05 3.52-1.67-2.72-.65-7.5 4.68-7.69v2.53c-.4.07-.84.17-1.24.3-1.2.4-1.87 1.15-1.68 2.48.36 2.55 5.04 3.3 4.65-1.68V3.5z" fill="currentColor" stroke="none"/>'
   };
   function icon(name) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' + ICON[name] + "</svg>";
@@ -146,8 +149,13 @@
     acctMachine: 0,
     toast: null,
     coStep: 1,
+    sumOpen: null,      // checkout summary; null = follow the breakpoint
+    ship: { name: "", addr: "", zip: "", city: "", phone: "" },
+    acctName: "",
     pay: 0,
     bank: 0,
+    adminTab: "over",
+    adminAsk: "",
     size: 0,
     qty: 1,
     gallery: 0,
@@ -159,7 +167,13 @@
   var LS = "rempire-shop-proto";
   try {
     var saved = JSON.parse(localStorage.getItem(LS) || "{}");
-    if (saved.cart) S.cart = saved.cart;
+    // Drop lines whose product no longer exists — byId() falls back to the
+    // first product, which would silently show the wrong item at the wrong
+    // price after a catalogue change.
+    if (saved.cart) S.cart = saved.cart.filter(function (l) {
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === l.id) return true;
+      return false;
+    });
     if (saved.lang) S.lang = saved.lang;
   } catch (e) {}
   function persist() {
@@ -181,7 +195,12 @@
   function threshold() { return S.country === "EU" ? 200 : 50; }
   function freeShip() { return cartSum() >= threshold(); }
   function methods() { return SHIP[S.country]; }
-  function method() { var m = methods(); return m[Math.min(S.method, m.length - 1)]; }
+  /* Clamp the stored index rather than clamping only on read: the radio
+     markup compares `i === S.method` exactly, so an out-of-range index left
+     every radio unchecked while the summary still billed a method. */
+  function methodIdx() { S.method = Math.min(S.method, methods().length - 1); return S.method; }
+  function acctIdx() { S.acctMethod = Math.min(S.acctMethod, methods().length - 1); return S.acctMethod; }
+  function method() { return methods()[methodIdx()]; }
   function shipCost() { return freeShip() ? 0 : method().p; }
   function discount() { return S.promoOk ? Math.round(cartSum() * 10) / 100 : 0; }
   function total() { return cartSum() - discount() + shipCost(); }
@@ -198,11 +217,21 @@
     if (S.sort === "desc") list = list.slice().sort(function (a, b) { return b.price - a.price; });
     return list;
   }
+  /* Russian inflects, so a literal substring match fails on the obvious
+     queries: "борода" never appears inside "Уход за бородой". Trimming up to
+     two trailing letters (never below four) is enough of a stem for a
+     catalogue this size, and it keeps short brand names intact. */
+  function stem(w) {
+    return w.length > 5 ? w.slice(0, w.length - 2) : w.length > 4 ? w.slice(0, w.length - 1) : w;
+  }
   function searchResults() {
     var q = S.query.trim().toLowerCase();
     if (!q) return [];
+    var words = q.split(/\s+/).map(stem);
     return CATALOGUE.filter(function (p) {
-      return (p.name + " " + p.brand + " " + CAT_NAMES[p.cat]).toLowerCase().indexOf(q) >= 0;
+      var hay = (p.name + " " + p.brand + " " + CAT_NAMES[p.cat]).toLowerCase();
+      for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
+      return true;
     });
   }
 
@@ -222,17 +251,21 @@
     var stock = p.stock === "low" ? '<span class="chip chip--low">мало</span>'
       : p.stock === "out" ? '<span class="chip chip--out">нет в наличии</span>' : "";
     var g = gal(p);
-    return '<button class="card" data-go-product="' + p.id + '">' +
-      '<span class="card__media">' +
-        media(p, 0, "ph card__img") +
-        (g.length > 1 ? media(p, 1, "ph card__img2") : "") +
-        '<span class="card__wm"></span>' +
-      "</span>" +
-      '<span class="card__brand">' + esc(p.brand) + "</span>" +
-      '<span class="card__name">' + esc(p.name) + "</span>" +
-      '<span class="card__price num">' + price + " " + stock + "</span>" +
-      (p.stock === "out" ? "" : '<span class="link card__add" data-add="' + p.id + '">В корзину</span>') +
-      "</button>";
+    // card and add are siblings: a button inside a button is invalid markup
+    // and left the add link unreachable from the keyboard.
+    return '<div class="card' + (g.length > 1 ? " card--dual" : "") + '">' +
+      '<button class="card__go" data-go-product="' + p.id + '">' +
+        '<span class="card__media">' +
+          media(p, 0, "ph card__img") +
+          (g.length > 1 ? media(p, 1, "ph card__img2") : "") +
+          '<span class="card__wm"></span>' +
+        "</span>" +
+        '<span class="card__brand">' + esc(p.brand) + "</span>" +
+        '<span class="card__name">' + esc(p.name) + "</span>" +
+        '<span class="card__price num">' + price + " " + stock + "</span>" +
+      "</button>" +
+      (p.stock === "out" ? "" : '<button class="link card__add" data-add="' + p.id + '">В корзину</button>') +
+      "</div>";
   }
 
   function gpayOnDark() {
@@ -261,7 +294,7 @@
           '<input class="hdr__search" data-search placeholder="Поиск: шампунь, Davines, воск…" aria-label="Поиск по магазину">' +
         "</div>" +
         '<span class="hdr__tools">' +
-          '<span class="lang"><button class="lang__btn" data-langtoggle aria-label="Язык" aria-expanded="false">' +
+          '<span class="lang"><button class="lang__btn" data-langtoggle aria-label="Язык" aria-haspopup="listbox" aria-controls="langmenu" aria-expanded="false">' +
             '<span class="lang__flag" data-langflag></span><span class="lang__caret" aria-hidden="true">▾</span></button>' +
             '<div class="lang__menuslot"></div></span>' +
           '<button class="iconbtn" data-go="account" aria-label="Кабинет">' + icon("user") + "</button>" +
@@ -284,7 +317,7 @@
     h.querySelector("[data-langflag]").style.backgroundImage = "url('" + FLAG[S.lang] + "')";
     h.querySelector("[data-langtoggle]").setAttribute("aria-expanded", String(S.langOpen));
     h.querySelector(".lang__menuslot").innerHTML = S.langOpen
-      ? '<div class="lang__menu" role="listbox">' + LANGS.map(function (l) {
+      ? '<div class="lang__menu" id="langmenu" role="listbox" aria-label="Язык интерфейса">' + LANGS.map(function (l) {
           return '<button class="lang__item" role="option" aria-selected="' + (S.lang === l[0]) + '" data-lang="' + l[0] + '">' +
             '<span class="lang__flag" style="background-image:url(\'' + FLAG[l[0]] + '\')"></span>' +
             '<span style="flex:1">' + l[1] + "</span>" + (S.lang === l[0] ? "<span>✓</span>" : "") + "</button>";
@@ -308,14 +341,18 @@
   function botnavHTML() {
     return '<nav class="botnav" aria-label="Основная навигация">' + NAVITEMS.map(function (it) {
       return '<button data-' + (it[0] === "cart" ? "cart" : "go") + '="' + (it[0] === "cart" ? "1" : it[0]) + '" data-nav="' + it[0] + '">' +
-        '<span class="botnav__ico">' + icon(it[1]) + '<span data-navbadge="' + it[0] + '"></span></span>' + it[2] + "</button>";
+        '<span class="botnav__ico">' + icon(it[1]) +
+        (it[0] === "cart" ? '<span data-navbadge="cart"></span>' : "") + "</span>" + it[2] + "</button>";
     }).join("") + "</nav>";
   }
   function patchNav() {
     if (!navSlot.firstChild) return;
     navSlot.querySelectorAll("[data-nav]").forEach(function (b) {
       var k = b.dataset.nav;
-      b.setAttribute("aria-current", String(k === "cart" ? S.cartOpen : S.screen === k));
+      // the cart button opens a drawer, it is not a location — aria-expanded,
+      // not aria-current
+      if (k === "cart") b.setAttribute("aria-expanded", String(S.cartOpen));
+      else b.setAttribute("aria-current", String(S.screen === k));
     });
     var nb = navSlot.querySelector('[data-navbadge="cart"]');
     nb.outerHTML = cartCount()
@@ -327,18 +364,25 @@
     return '<footer class="ftr"><div class="wrap">' +
       '<div class="ftr__cols">' +
         '<div><span class="ftr__h">Реквизиты</span>Rempire Store OÜ<br>Рег. 12216136 · KMKR EE102723858<br>Mardi 1, 10145 Таллинн</div>' +
-        '<div><span class="ftr__h">Связаться</span><a href="tel:+37256237237">56237237</a><a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a><a href="https://www.instagram.com/rempire.shop/">Instagram</a></div>' +
+        '<div><span class="ftr__h">Связаться</span><a href="tel:+37256237237">56237237</a><a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a>' +
+          '<span class="socials">' +
+            '<a class="social" href="https://www.instagram.com/rempire.shop/" aria-label="Rempire в Instagram" title="Instagram">' + icon("instagram") + "</a>" +
+            '<a class="social" href="https://www.facebook.com/rempireshop" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
+            '<a class="social" href="https://www.tiktok.com/@rempire.shop" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
+          "</span></div>" +
         '<div><span class="ftr__h">Покупателю</span><a href="#">Доставка и оплата</a><a href="#">Возврат товара</a><a href="#">Условия продажи</a><a href="#">Блог и советы</a></div>' +
         '<div><span class="ftr__h">Правовое</span><a href="#">Конфиденциальность</a><a href="#">Правовая информация</a><a href="#">Настройки cookie</a><a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a></div>' +
       "</div>" +
-      '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" + payLogosHTML() + "</div>" +
+      '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" +
+        '<button class="link ftr__admin" data-go="admin">Админка — демо</button>' +
+        payLogosHTML() + "</div>" +
     "</div></footer>";
   }
 
   // ---------- screens ----------
   function screenHome() {
     var pop = spread(8, false), fresh = spread(8, true);
-    return '<section class="hero" aria-roledescription="карусель">' +
+    return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель">' +
       BANNERS.map(function (b, i) {
         var p = bannerProduct(b.cat);
         return '<div class="hero__slide" data-on="' + (i === S.slide ? 1 : 0) + '" aria-hidden="' + (i !== S.slide) + '">' +
@@ -364,7 +408,7 @@
           return '<button class="cattile" data-go-cat="' + c.id + '">' +
             '<span class="cattile__shot">' + media(p, 0, "ph cattile__img") + "</span>" +
             '<span class="cattile__name">' + c.name + "</span>" +
-            '<span class="cattile__n num">' + CATALOGUE.filter(function (x) { return x.cat === c.id; }).length + " товаров</span></button>";
+            '<span class="cattile__n num">' + (function (n) { return n + " " + plural(n); })(CATALOGUE.filter(function (x) { return x.cat === c.id; }).length) + "</span></button>";
         }).join("") + "</div></section>" +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Магазин в Таллинне</h2></div>' +
         '<div class="infogrid">' +
@@ -413,7 +457,7 @@
           '<button class="btn btn--ghost toolbar__filter" data-filter>Фильтры<span data-fcount>' + fcountLabel() + "</span></button>" +
           '<span class="toolbar__count num" data-count>' + list.length + " " + plural(list.length) + "</span>" +
           '<label class="toolbar__sort"><span class="toolbar__sortlbl">Сортировка</span>' +
-          '<span class="sel"><select data-sort aria-label="Сортировка">' +
+          '<span class="sel"><select data-sort>' +
             '<option value="hit"' + (S.sort === "hit" ? " selected" : "") + ">Хиты продаж</option>" +
             '<option value="new"' + (S.sort === "new" ? " selected" : "") + ">Новинки</option>" +
             '<option value="asc"' + (S.sort === "asc" ? " selected" : "") + ">Сначала дешевле</option>" +
@@ -428,19 +472,22 @@
             '<button class="btn btn--ghost" data-clearfilter>Сбросить фильтры</button></div>') +
       "</section></div>";
   }
-  function plural(n) {
+  /* Russian counts take three forms; "12 товаров / 22 товара / 21 товар". */
+  function pl(n, one, few, many) {
     var a = n % 10, b = n % 100;
-    if (a === 1 && b !== 11) return "товар";
-    if (a >= 2 && a <= 4 && (b < 10 || b >= 20)) return "товара";
-    return "товаров";
+    if (a === 1 && b !== 11) return one;
+    if (a >= 2 && a <= 4 && (b < 10 || b >= 20)) return few;
+    return many;
   }
+  function plural(n) { return pl(n, "товар", "товара", "товаров"); }
+  function points(n) { return n + " " + pl(n, "точка", "точки", "точек"); }
   function fcountLabel() {
     var n = S.brandFilter.length + (S.onlyInStock ? 1 : 0);
     return n ? " · " + n : "";
   }
   function moreHTML(shown, tot) {
     return shown < tot
-      ? '<div id="sentinel"></div><div class="spinner"></div>'
+      ? '<div id="sentinel"></div><div class="spinner" data-on="0"></div>'
       : '<p class="allshown">Показаны все ' + tot + " " + plural(tot) + "</p>";
   }
   function activeChips() {
@@ -482,7 +529,9 @@
             '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
           "</div>" +
           '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>" +
-          '<div class="pdp__alt"><button class="link" data-checkout>Другие способы оплаты</button></div>' +
+          // must add the product first — this used to jump to an empty cart
+          // and toast «Корзина пуста» at someone standing on a product page
+          '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>' +
           '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · бесплатно от 50 € · самовывоз на Mardi 1</div>' +
           acc("Описание", "Профессиональное средство из салонного ассортимента Rempire. Подходит для регулярного ухода.") +
           acc("Применение", "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.") +
@@ -505,7 +554,9 @@
       '<h1 class="display h1">Поиск</h1>' +
       '<input class="input input--box searchbox" data-search2 value="' + esc(S.query) + '" placeholder="Что ищете?" aria-label="Поиск">' +
       (!S.query.trim()
-        ? '<p class="muted">Популярные запросы: ' + ["шампунь", "Davines", "воск", "борода", "парфюм"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
+        // every chip must actually return something — «воск» returned nothing
+        // because the catalogue has no wax
+        ? '<p class="muted">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
         : res.length
           ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
           : '<div class="empty"><p>По запросу «' + esc(S.query) + '» ничего не нашлось.</p>' +
@@ -525,13 +576,13 @@
         '<button class="btn btn--wide" data-login>Получить код</button>' +
         "</section></div>";
     }
-    var m = methods();
+    var m = methods(), ai = acctIdx();
     return '<div class="wrap wrap--mid"><section class="sec">' +
       '<div class="acct__top"><h1 class="display h1">Кабинет</h1><button class="link" data-logout>Выйти</button></div>' +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои данные</h2></div>' +
-      '<label class="field"><span class="field__label">Имя</span><input class="input" value="" placeholder="Имя"></label>' +
-      '<label class="field"><span class="field__label">E-mail</span><input class="input" value="' + esc(S.email) + '"></label>' +
+      '<label class="field"><span class="field__label">Имя</span><input class="input" data-acctname value="' + esc(S.acctName) + '" placeholder="Имя" autocomplete="given-name"></label>' +
+      '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" data-email value="' + esc(S.email) + '" autocomplete="email"></label>' +
       '<button class="btn btn--ghost btn--sm" data-save>Сохранить</button>' +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
@@ -540,12 +591,12 @@
         COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
       "</select></span></label>" +
       '<div class="optlist">' + m.map(function (x, i) {
-        return '<label class="opt"><input type="radio" name="acctm" ' + (i === S.acctMethod ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
-          '<span class="opt__price num">' + (x.p ? eur(x.p) : "0 €") + "</span></label>";
+        return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
+          '<span class="opt__price num">' + (x.p ? eur(x.p) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
-      (machinesFor(m[S.acctMethod]).length
-        ? '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию</span><span class="sel sel--box"><select data-acctmachine>' +
-          machinesFor(m[S.acctMethod]).map(function (n, i) { return "<option" + (i === S.acctMachine ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>"
+      (machinesFor(m[ai]).length
+        ? '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(machinesFor(m[ai]).length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
+          machinesFor(m[ai]).map(function (n, i) { return "<option" + (i === Math.min(S.acctMachine, machinesFor(m[ai]).length - 1) ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>"
         : "") +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои заказы</h2></div>' +
@@ -561,6 +612,11 @@
   }
 
   // ---------- checkout ----------
+  function shipField(key, label, ph, auto, mode) {
+    return '<label class="field"><span class="field__label">' + label + "</span>" +
+      '<input class="input" data-shipf="' + key + '" value="' + esc(S.ship[key]) + '" placeholder="' + ph + '"' +
+      (auto ? ' autocomplete="' + auto + '"' : "") + (mode ? ' inputmode="' + mode + '"' : "") + "></label>";
+  }
   function coHead(n, title, value) {
     var open = S.coStep === n, done = S.coStep > n;
     return '<button class="costep__head" data-step="' + n + '" aria-expanded="' + open + '"' + (open ? ' aria-current="true"' : "") + '>' +
@@ -571,8 +627,10 @@
   }
 
   function screenCheckout() {
-    var m = methods(), sel = method(), step = S.coStep;
-    var summaryOpen = wide();
+    var m = methods(), mi = methodIdx(), sel = m[mi], step = S.coStep;
+    // The summary follows the breakpoint until the shopper touches it; after
+    // that their choice wins, so applying a promo can't slam it shut.
+    var summaryOpen = S.sumOpen === null ? wide() : S.sumOpen;
     return '<div class="cohdr"><div class="wrap wrap--co">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — на главную">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<span class="cohdr__t">Оформление заказа</span>' +
@@ -591,30 +649,32 @@
           "</section>" +
 
           '<section class="costep' + (step === 2 ? " is-open" : "") + '">' +
-            coHead(2, "Доставка", sel.l) +
+            coHead(2, "Доставка", sel.l + (S.ship.name ? " · " + esc(S.ship.name) : "")) +
             (step === 2 ? '<div class="costep__body">' +
               '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
                 COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
               '<div class="optlist">' + m.map(function (x, i) {
-                return '<label class="opt"><input type="radio" name="ship" ' + (i === S.method ? "checked" : "") + ' data-method="' + i + '"><span>' + x.l + "</span>" +
-                  '<span class="opt__price num">' + (!x.p ? "0 €" : freeShip() ? "Бесплатно" : eur(x.p)) + "</span></label>";
+                return '<label class="opt"><input type="radio" name="ship" ' + (i === mi ? "checked" : "") + ' data-method="' + i + '"><span>' + x.l + "</span>" +
+                  '<span class="opt__price num">' + (!x.p || freeShip() ? "Бесплатно" : eur(x.p)) + "</span></label>";
               }).join("") + "</div>" +
               (sel.pickup ? '<div class="hint">Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
-              (machinesFor(sel).length ? '<label class="field"><span class="field__label">Пакомат — ' + machinesFor(sel).length + ' точек</span><span class="sel sel--box"><select data-machine>' +
-                machinesFor(sel).map(function (n, i) { return "<option" + (i === S.machine ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>" : "") +
+              (machinesFor(sel).length ? '<label class="field"><span class="field__label">Пакомат — ' + points(machinesFor(sel).length) + '</span><span class="sel sel--box"><select data-machine>' +
+                machinesFor(sel).map(function (n, i) { return "<option" + (i === Math.min(S.machine, machinesFor(sel).length - 1) ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>" : "") +
               '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
+              // every field is bound to S.ship — a render (promo, blur, resize)
+              // used to wipe whatever the shopper had typed here
               (sel.pickup ? "" :
-                '<label class="field"><span class="field__label">Имя и фамилия</span><input class="input" placeholder="Имя Фамилия" autocomplete="name"></label>' +
-                (sel.pm ? "" : '<label class="field"><span class="field__label">Адрес</span><input class="input" placeholder="улица, дом" autocomplete="street-address"></label>' +
-                  '<div class="co__zip"><label class="field"><span class="field__label">Индекс</span><input class="input" placeholder="12345" inputmode="numeric" autocomplete="postal-code"></label>' +
-                  '<label class="field"><span class="field__label">Город</span><input class="input" placeholder="Город" autocomplete="address-level2"></label></div>')) +
-              '<label class="field"><span class="field__label">Телефон</span><input class="input" placeholder="+372…" inputmode="tel" autocomplete="tel"></label>' +
+                shipField("name", "Имя и фамилия", "Имя Фамилия", "name", "") +
+                (sel.pm ? "" : shipField("addr", "Адрес", "улица, дом", "street-address", "") +
+                  '<div class="co__zip">' + shipField("zip", "Индекс", "12345", "postal-code", "numeric") +
+                  shipField("city", "Город", "Город", "address-level2", "") + "</div>")) +
+              shipField("phone", "Телефон", "+372…", "tel", "tel") +
               '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.</p>' +
               '<button class="btn btn--wide" data-step="3">Далее — оплата</button></div>' : "") +
           "</section>" +
 
           '<section class="costep' + (step === 3 ? " is-open" : "") + '">' +
-            coHead(3, "Оплата", PAYS[S.pay].l) +
+            coHead(3, "Оплата", "") +
             (step === 3 ? '<div class="costep__body">' +
               '<div class="optlist">' + PAYS.map(function (o, i) {
                 return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
@@ -634,7 +694,7 @@
           "</ul>" +
         "</div>" +
 
-        '<div class="co__sum"><details class="cosum"' + (summaryOpen ? " open" : "") + '>' +
+        '<div class="co__sum"><details class="cosum" data-sum' + (summaryOpen ? " open" : "") + '>' +
           '<summary class="cosum__head"><span class="sec__title">Ваш заказ</span>' +
             '<span class="cosum__tot num">' + eur(total()) + "</span></summary>" +
           '<div class="cosum__body">' +
@@ -654,13 +714,143 @@
           "</div></details></div>" +
 
       "</div></div>" +
-      '<div class="stickybar stickybar--co"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span><button class="btn" data-pay>Оплатить</button></div>';
+      '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span><button class="btn" data-pay>Оплатить</button></div>';
   }
   function payMark(k) {
+    if (typeof PAYLOGOS === "undefined") return "";
     if (k === "bank") return PAYLOGOS.bank;
     if (k === "card") return PAYLOGOS.visa + PAYLOGOS.mastercard;
     if (k === "wallet") return PAYLOGOS.applepay + PAYLOGOS.gpay;
     return "";
+  }
+
+  /* ---------- admin (demo) ----------
+     Shop-owner side, so Renat can see what he would actually work in every
+     day. Numbers are derived from the catalogue with a fixed seed rather than
+     Math.random, so nothing jitters between renders. Clearly labelled demo. */
+  var ORDER_STATES = [
+    ["new", "новый", "--error"],
+    ["packing", "собирается", "--muted"],
+    ["sent", "отправлен", "--muted"],
+    ["done", "доставлен", "--ok"]
+  ];
+  function fakeOrders() {
+    var out = [];
+    for (var i = 0; i < 14; i++) {
+      var p1 = CATALOGUE[(i * 7 + 3) % CATALOGUE.length];
+      var p2 = CATALOGUE[(i * 13 + 11) % CATALOGUE.length];
+      var n = (i % 3) + 1;
+      var sum = Math.round((p1.price * n + p2.price) * 100) / 100;
+      out.push({
+        id: 1042 + i,
+        date: (27 - i) + ".08.2026",
+        who: ["М. Тамм", "K. Saar", "А. Иванов", "L. Kask", "Д. Петров", "R. Lepik", "J. Mägi"][i % 7],
+        items: n + 1,
+        sum: sum,
+        ship: SHIP.EE[(i % 4) + 1].l,
+        state: ORDER_STATES[i === 0 ? 0 : i < 3 ? 1 : i < 6 ? 2 : 3]
+      });
+    }
+    return out;
+  }
+  function lowStock() {
+    return CATALOGUE.filter(function (p) { return p.stock !== "in"; });
+  }
+
+  function screenAdmin() {
+    var orders = fakeOrders();
+    var week = orders.slice(0, 7).reduce(function (a, o) { return a + o.sum; }, 0);
+    var tab = S.adminTab;
+    var tabs = [["over", "Обзор"], ["orders", "Заказы"], ["goods", "Товары"], ["ai", "Помощник"]];
+    return '<div class="cohdr"><div class="wrap wrap--co">' +
+        '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
+        '<span class="cohdr__t">Админка</span>' +
+        '<button class="link" data-go="home">← В магазин</button></div></div>' +
+      '<div class="wrap"><div class="adm__note">Демонстрация. Заказы и цифры вымышленные, товары — настоящие, из вашего каталога.</div>' +
+      '<div class="adm__tabs" role="tablist">' + tabs.map(function (t) {
+        return '<button role="tab" aria-selected="' + (tab === t[0]) + '" data-admtab="' + t[0] + '">' + t[1] + "</button>";
+      }).join("") + "</div>" +
+
+      (tab === "over" ?
+        '<div class="adm__kpis">' +
+          kpi("Заказы сегодня", "3", "вчера — 5") +
+          kpi("Выручка за 7 дней", eur(week), "средний чек " + eur(week / 7)) +
+          kpi("Товаров в каталоге", String(CATALOGUE.length), CATS.length + " " + pl(CATS.length, "раздел", "раздела", "разделов")) +
+          kpi("Заканчиваются", String(lowStock().length), "нужно дозаказать") +
+        "</div>" +
+        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Последние заказы</h2><button class="link" data-admtab="orders">Все заказы</button></div>' +
+        orderTable(orders.slice(0, 5)) +
+        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заканчиваются на складе</h2></div>' +
+        '<div class="adm__list">' + lowStock().slice(0, 6).map(function (p) {
+          return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+            '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+            '<span class="chip ' + (p.stock === "out" ? "chip--out" : "chip--low") + '">' + (p.stock === "out" ? "нет" : "мало") + "</span>" +
+            '<span class="num adm__pr">' + eur(p.price) + "</span></div>";
+        }).join("") + "</div>" : "") +
+
+      (tab === "orders" ?
+        '<p class="muted" style="margin:16px 0">Здесь заказ открывается в один клик: адрес, состав, оплата, наклейка на посылку и письмо клиенту с трекингом — всё на одной странице.</p>' +
+        orderTable(orders) : "") +
+
+      (tab === "goods" ?
+        '<p class="muted" style="margin:16px 0">Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.</p>' +
+        '<div class="adm__list">' + CATALOGUE.slice(0, 24).map(function (p) {
+          return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+            '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
+              '<span class="adm__sub">' + CAT_NAMES[p.cat] + (p.sizes && p.sizes.length ? " · " + p.sizes.join(", ") : "") + "</span></span>" +
+            '<span class="chip ' + (p.stock === "out" ? "chip--out" : p.stock === "low" ? "chip--low" : "chip--ok") + '">' +
+              (p.stock === "out" ? "нет" : p.stock === "low" ? "мало" : "в наличии") + "</span>" +
+            '<span class="num adm__pr">' + eur(p.price) + "</span>" +
+            '<button class="link" data-admedit>Править</button></div>';
+        }).join("") + "</div>" +
+        '<p class="muted" style="margin-top:16px">Показаны первые 24 из ' + CATALOGUE.length + ".</p>" : "") +
+
+      (tab === "ai" ?
+        '<div class="adm__ai">' +
+          '<p>Помощник видит ваш каталог, заказы и остатки. Спрашивать можно обычными словами:</p>' +
+          '<div class="adm__chips">' + [
+            "Что заканчивается и что дозаказать?",
+            "Сколько заработали на Kevin.Murphy за месяц?",
+            "Напиши описание для нового шампуня",
+            "Какие заказы ждут отправки?"
+          ].map(function (q) { return '<button class="fchip" data-admask="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
+          (S.adminAsk ? '<div class="adm__answer"><div class="adm__q">' + esc(S.adminAsk) + "</div>" +
+            '<div class="adm__a">' + adminAnswer(S.adminAsk) + "</div></div>" : "") +
+          '<p class="muted">В рабочей версии помощник ещё и пишет письма клиентам, готовит отчёт для бухгалтера и предупреждает, если товар вот-вот кончится.</p>' +
+        "</div>" : "") +
+      "</div>";
+  }
+  function kpi(label, value, sub) {
+    return '<div class="kpi"><span class="kpi__l">' + label + '</span><span class="kpi__v num">' + value + '</span><span class="kpi__s">' + sub + "</span></div>";
+  }
+  function orderTable(list) {
+    return '<div class="adm__table" role="table">' +
+      '<div class="adm__th" role="row"><span>Заказ</span><span>Клиент</span><span>Доставка</span><span>Сумма</span><span>Статус</span></div>' +
+      list.map(function (o) {
+        return '<div class="adm__tr" role="row"><span class="num">#' + o.id + '<span class="adm__sub">' + o.date + "</span></span>" +
+          "<span>" + o.who + '<span class="adm__sub">' + o.items + " " + plural(o.items) + "</span></span>" +
+          '<span class="adm__ship">' + o.ship + "</span>" +
+          '<span class="num">' + eur(o.sum) + "</span>" +
+          '<span><span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span></span></div>";
+      }).join("") + "</div>";
+  }
+  function adminAnswer(q) {
+    var low = lowStock();
+    if (/заканчива|дозаказ/i.test(q)) {
+      return "Заканчиваются " + low.length + " " + plural(low.length) + ". Срочно: " +
+        low.slice(0, 3).map(function (p) { return esc(p.brand) + " " + esc(p.name); }).join(", ") +
+        ". Могу собрать заказ поставщику и отправить его вам на подпись.";
+    }
+    if (/заработал|выручк|месяц/i.test(q)) {
+      var km = CATALOGUE.filter(function (p) { return p.brand === "Kevin.Murphy"; });
+      return "Kevin.Murphy: " + km.length + " " + plural(km.length) + " в каталоге, средняя цена " +
+        eur(km.reduce(function (a, p) { return a + p.price; }, 0) / km.length) +
+        ". В рабочей версии здесь будет выручка за месяц по бренду и сравнение с прошлым.";
+    }
+    if (/описан|текст/i.test(q)) {
+      return "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Останется прочитать и нажать «Опубликовать».";
+    }
+    return "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?";
   }
 
   function screenDone() {
@@ -674,17 +864,18 @@
   // ---------- overlays ----------
   function cartDrawer() {
     var sum = cartSum(), thr = threshold(), pct = Math.min(100, sum / thr * 100);
-    return '<div class="scrim" data-closecart></div><aside class="drawer drawer--right" aria-label="Корзина">' +
+    return '<div class="scrim" data-closecart></div>' +
+      '<aside class="drawer drawer--right" role="dialog" aria-modal="true" aria-label="Корзина">' +
       '<div class="drawer__head"><span class="display drawer__t">Корзина (' + cartCount() + ')</span>' +
       '<button class="iconbtn" data-closecart aria-label="Закрыть">✕</button></div>' +
       '<div class="drawer__body">' +
         (S.cart.length ? S.cart.map(function (l, li) {
           var p = byId(l.id);
-          return '<div class="cline"><span class="cline__ph">' + media(p, 0, "ph") + "</span>" +
+          return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + media(p, 0, "ph") + "</span>" +
             '<span class="cline__mid"><span class="cline__nm">' + esc(p.brand) + " " + esc(p.name) + lineLabel(l) + "</span>" +
-            '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше">−</button><span class="num">' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
+            '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше">−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
             '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
-            '<span class="num cline__pr">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
+            '<span class="num cline__pr" data-linepr>' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
         }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
         (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
           '<p class="muted">' + (sum >= thr ? "Бесплатная доставка — порог " + thr + " € достигнут ✓" : "До бесплатной доставки (" + (S.country === "EU" ? "Европа" : "EE, LV, LT, FI") + ") — ещё " + eur(thr - sum)) + "</p></div>" : "") +
@@ -701,7 +892,8 @@
     brands.sort();
     function count(b) { return CATALOGUE.filter(function (p) { return (S.cat === "all" || p.cat === S.cat) && p.brand === b; }).length; }
     var inStock = CATALOGUE.filter(function (p) { return (S.cat === "all" || p.cat === S.cat) && p.stock !== "out"; }).length;
-    return '<div class="scrim" data-closefilter></div><aside class="drawer drawer--left" aria-label="Фильтры">' +
+    return '<div class="scrim" data-closefilter></div>' +
+      '<aside class="drawer drawer--left" role="dialog" aria-modal="true" aria-label="Фильтры">' +
       '<div class="drawer__head"><span class="display drawer__t">Фильтры</span><button class="iconbtn" data-closefilter aria-label="Закрыть">✕</button></div>' +
       '<div class="drawer__body">' +
         '<div class="field__label">Наличие</div><label class="opt"><input type="checkbox" data-instock ' + (S.onlyInStock ? "checked" : "") + '><span>В наличии</span><span class="opt__price num opt__n">' + inStock + "</span></label>" +
@@ -710,18 +902,27 @@
           return '<label class="opt"><input type="checkbox" data-brand="' + esc(b) + '" ' + (S.brandFilter.indexOf(b) >= 0 ? "checked" : "") + "><span>" + esc(b) + '</span><span class="opt__price num opt__n">' + count(b) + "</span></label>";
         }).join("") +
       "</div>" +
-      '<div class="drawer__foot"><button class="btn btn--wide" data-closefilter>Показать <span data-showcount>' + filtered().length + "</span> " + plural(filtered().length) + "</button>" +
-      '<button class="link drawer__cont" data-clearfilter>Сбросить</button></div></aside>';
+      '<div class="drawer__foot"><button class="btn btn--wide" data-closefilter data-showbtn>' + showLabel() + "</button>" +
+      '<button class="link drawer__cont" data-clearfilter="keep">Сбросить</button></div></aside>';
+  }
+  /* The whole label is patched, not just the number — «Показать 1 товаров» was
+     what you got when only the count was swapped in place. */
+  function showLabel() {
+    var n = filtered().length;
+    return "Показать " + n + " " + plural(n);
   }
 
   // ---------- render ----------
   var app = document.getElementById("app");
-  app.innerHTML = '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div><div id="ovl"></div>';
+  app.innerHTML = '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
+    '<div id="ovl"></div><div id="toastslot"></div>';
   var hdrSlot = document.getElementById("hdrslot");
   var bodySlot = document.getElementById("bodyslot");
   var navSlot = document.getElementById("navslot");
   var ovl = document.getElementById("ovl");
+  var toastSlot = document.getElementById("toastslot");
   var ovlKey = "";
+  var lastFocus = null;
 
   function render() {
     var body;
@@ -732,8 +933,9 @@
     else if (S.screen === "account") body = screenAccount();
     else if (S.screen === "checkout") body = screenCheckout();
     else if (S.screen === "done") body = screenDone();
+    else if (S.screen === "admin") body = screenAdmin();
 
-    var chromeless = S.screen === "checkout" || S.screen === "done";
+    var chromeless = S.screen === "checkout" || S.screen === "done" || S.screen === "admin";
     if (!hdrSlot.firstChild) hdrSlot.innerHTML = headerHTML();
     hdrSlot.hidden = chromeless;
     patchHeader();
@@ -742,31 +944,71 @@
       (chromeless ? "" : footer());
 
     if (!navSlot.firstChild) navSlot.innerHTML = botnavHTML();
+    navSlot.hidden = S.screen === "admin";
     patchNav();
 
-    // Overlays are only re-mounted when the *kind* of overlay changes, so an
-    // open drawer never replays its slide-in while you tick its checkboxes.
-    var key = (S.cartOpen ? "c" : "") + (S.filterOpen ? "f" : "") + (S.toast ? "t" + S.toast : "");
+    /* The overlay is re-mounted only when the *kind* of overlay changes, so an
+       open drawer never replays its slide-in — and the toast lives in its own
+       slot so showing one cannot re-mount a drawer either. */
+    var key = (S.cartOpen ? "c" : "") + (S.filterOpen ? "f" : "");
     if (key !== ovlKey) {
+      var opening = !ovlKey && key;
+      if (!ovlKey && key) lastFocus = document.activeElement;
       ovlKey = key;
-      ovl.innerHTML = (S.cartOpen ? cartDrawer() : "") + (S.filterOpen ? filterDrawer() : "") +
-        (S.toast ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>' : "");
-    } else if (S.cartOpen) {
-      // cart contents can change while the drawer stays mounted
-      ovl.innerHTML = cartDrawer() + (S.toast ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>' : "");
+      ovl.innerHTML = (S.cartOpen ? cartDrawer() : "") + (S.filterOpen ? filterDrawer() : "");
+      var close = ovl.querySelector(".drawer .iconbtn");
+      if (opening && close) close.focus();
+      if (!key && lastFocus && document.contains(lastFocus)) { lastFocus.focus(); lastFocus = null; }
     }
+    toastSlot.innerHTML = S.toast
+      ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
+      : "";
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
 
     if (S.screen === "catalog") observeSentinel();
   }
 
+  /* Quantity steppers patch the numbers in place. Rebuilding the drawer would
+     replay its slide-in and destroy the focused +/− button, so a keyboard user
+     could not press + twice. */
+  function patchCart() {
+    var d = ovl.querySelector(".drawer--right");
+    if (!d) { render(); return; }
+    d.querySelector(".drawer__t").textContent = "Корзина (" + cartCount() + ")";
+    S.cart.forEach(function (l, i) {
+      var row = d.querySelector('[data-cline="' + i + '"]');
+      if (!row) return;
+      row.querySelector("[data-qtyval]").textContent = l.qty;
+      row.querySelector("[data-linepr]").textContent = eur(sizePrice(byId(l.id), l.size || 0) * l.qty);
+    });
+    var sum = cartSum(), thr = threshold();
+    var fill = d.querySelector(".freebar__fill");
+    if (fill) fill.style.width = Math.min(100, sum / thr * 100) + "%";
+    var note = d.querySelector(".freebar p");
+    if (note) note.textContent = sum >= thr
+      ? "Бесплатная доставка — порог " + thr + " € достигнут ✓"
+      : "До бесплатной доставки (" + (S.country === "EU" ? "Европа" : "EE, LV, LT, FI") + ") — ещё " + eur(thr - sum);
+    var tot = d.querySelector(".drawer__tot .num");
+    if (tot) tot.textContent = eur(sum);
+    patchHeader(); patchNav();
+  }
+
   /* Filtering re-renders only the grid. A full render would rebuild the open
      filter drawer under the user's finger — that was the flicker. */
   function patchCatalog() {
-    if (S.screen !== "catalog") { render(); return; }
-    var list = filtered(), visible = list.slice(0, S.shown);
-    var grid = document.getElementById("catgrid");
-    if (!grid) { render(); return; }
+    // The drawer footer must update on every path, including the ones that
+    // fall through to a full render — otherwise it freezes at a stale count.
+    var showBtn = ovl.querySelector("[data-showbtn]");
+    if (showBtn) showBtn.textContent = showLabel();
+
+    var list = filtered();
+    var grid = S.screen === "catalog" ? document.getElementById("catgrid") : null;
+    // No grid to patch: either we are off the catalogue, or the last render
+    // produced the "nothing matched" block, or this change empties the list —
+    // all of which need the full screen back.
+    if (!grid || !list.length) { render(); return; }
+
+    var visible = list.slice(0, S.shown);
     grid.innerHTML = visible.map(cardHTML).join("");
     var more = document.getElementById("catmore");
     if (more) more.innerHTML = moreHTML(visible.length, list.length);
@@ -774,8 +1016,6 @@
     if (c) c.textContent = list.length + " " + plural(list.length);
     var fc = document.querySelector("[data-fcount]");
     if (fc) fc.textContent = fcountLabel();
-    var sc = document.querySelector("[data-showcount]");
-    if (sc) sc.textContent = list.length;
     var chips = document.querySelector("[data-chips]");
     if (chips) chips.outerHTML = activeChips();
     observeSentinel();
@@ -825,6 +1065,8 @@
     io = new IntersectionObserver(function (entries) {
       if (!entries[0].isIntersecting || S.loading) return;
       S.loading = true;
+      var sp = document.querySelector("#catmore .spinner");
+      if (sp) sp.setAttribute("data-on", "1");
       setTimeout(function () {
         S.shown += 12; S.loading = false;
         if (S.screen === "catalog") patchCatalog();
@@ -878,12 +1120,17 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-go],[data-go-cat],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank]");
+    var t = e.target.closest("[data-go],[data-go-cat],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
     }
     var d = t.dataset;
+    // any handled action dismisses the language menu — it used to stay open
+    // while you carried on shopping behind it
+    if (S.langOpen && d.langtoggle === undefined && d.lang === undefined) {
+      S.langOpen = false; patchHeader();
+    }
 
     if (d.ident !== undefined) identLogo(t);
     if (d.go) { go(d.go); return; }
@@ -900,7 +1147,14 @@
     if (d.closecart !== undefined) { S.cartOpen = false; render(); return; }
     if (d.filter !== undefined) { S.filterOpen = true; render(); return; }
     if (d.closefilter !== undefined) { S.filterOpen = false; render(); return; }
-    if (d.clearfilter !== undefined) { S.brandFilter = []; S.onlyInStock = false; S.shown = 12; S.filterOpen = false; render(); return; }
+    if (d.clearfilter !== undefined) {
+      S.brandFilter = []; S.onlyInStock = false; S.shown = 12;
+      // «Сбросить» inside the drawer keeps the drawer open so you can keep
+      // filtering; the chip row's version closes nothing because none is open.
+      if (d.clearfilter !== "keep") S.filterOpen = false;
+      if (S.filterOpen) { ovlKey = ""; render(); } else render();
+      return;
+    }
     if (d.unbrand !== undefined) {
       S.brandFilter = S.brandFilter.filter(function (x) { return x !== d.unbrand; });
       S.shown = 12; patchCatalog(); return;
@@ -913,14 +1167,21 @@
     if (d.line !== undefined) {
       var li = Number(d.line);
       if (S.cart[li]) S.cart[li].qty = Math.max(1, Math.min(9, S.cart[li].qty + Number(d.d)));
-      persist(); render(); return;
+      persist(); patchCart(); return;
     }
-    if (d.remove !== undefined) { S.cart.splice(Number(d.remove), 1); persist(); render(); return; }
+    if (d.remove !== undefined) {
+      S.cart.splice(Number(d.remove), 1); persist();
+      ovlKey = ""; render(); return;   // line indices shift, so rebuild
+    }
     if (d.checkout !== undefined) { if (!S.cart.length) { toast("Корзина пуста"); return; } go("checkout"); return; }
     if (d.pay !== undefined) {
       S.emailTouched = true;
       if (emailBad()) { S.coStep = 1; render(); toast("Проверьте e-mail — на него придёт заказ"); return; }
-      S.cart = []; persist(); go("done"); return;
+      // a finished order must not leave its promo, address or step state
+      // behind for the next one
+      S.cart = []; S.promo = ""; S.promoOk = false; S.promoErr = false; S.sumOpen = null;
+      S.ship = { name: "", addr: "", zip: "", city: "", phone: "" };
+      persist(); go("done"); return;
     }
     if (d.step) {
       var n = Number(d.step);
@@ -930,7 +1191,12 @@
     if (d.method !== undefined) { S.method = Number(d.method); S.machine = 0; render(); return; }
     if (d.paym !== undefined) { S.pay = Number(d.paym); render(); return; }
     if (d.bank !== undefined) { S.bank = Number(d.bank); render(); return; }
-    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); render(); return; }
+    // machine index must reset too — carriers have different-length lists, so
+    // the stored index pointed at a place the shopper never chose
+    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
+    if (d.admtab) { S.adminTab = d.admtab; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admask) { S.adminAsk = d.admask; render(); return; }
+    if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
     if (d.size !== undefined) {
       S.size = Number(d.size);
       var sp = byId(S.productId);
@@ -970,7 +1236,10 @@
       var n = document.querySelector("[data-search2]");
       if (n) { n.focus(); n.setSelectionRange(pos, pos); }
     } else if (t.matches("[data-email]")) { S.email = t.value; }
-    else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; }
+    else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
+    else if (t.matches("[data-shipf]")) { S.ship[t.dataset.shipf] = t.value; }
+    // editing the code must drop the applied discount, not just the error
+    else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; S.promoOk = false; }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
       var b = t.dataset.brand;
@@ -988,6 +1257,11 @@
     else if (t.matches("[data-machine]")) { S.machine = t.selectedIndex; }
     else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
   });
+
+  // the shopper's own open/closed choice for the summary wins from then on
+  document.addEventListener("toggle", function (e) {
+    if (e.target.matches && e.target.matches("[data-sum]")) S.sumOpen = e.target.open;
+  }, true);
 
   document.addEventListener("blur", function (e) {
     if (e.target.matches("[data-email]")) {
@@ -1018,16 +1292,16 @@
     try { reduce = matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
     var seen = false;
     try { seen = sessionStorage.getItem("rempire-intro") === "1"; } catch (e) {}
-    if (reduce || seen) { document.body.classList.add("drawn"); return; }
-    var el = document.createElement("div");
+    if (reduce || seen) return;
+    var el = document.createElement("button");
     el.className = "intro";
-    el.setAttribute("title", "Пропустить");
+    el.type = "button";
+    el.setAttribute("aria-label", "Пропустить заставку");
     el.innerHTML = towerDraw() + '<div class="intro__word">Rempire</div>';
     document.body.appendChild(el);
     try { sessionStorage.setItem("rempire-intro", "1"); } catch (e) {}
     var kill = function () {
       el.classList.add("intro--out");
-      document.body.classList.add("drawn");
       setTimeout(function () { el.remove(); }, 500);
     };
     el.addEventListener("click", kill);

@@ -119,6 +119,11 @@ img { max-width: 100%; display: block; }
   position: sticky; top: 0; z-index: var(--z-nav);
   background: var(--page); border-bottom: 1px solid var(--rule);
 }
+/* The header lives in a persistent slot div. `display: contents` takes that
+   div out of the box tree, otherwise it becomes the sticky header's
+   containing block — a box exactly as tall as the header, i.e. zero travel,
+   and the header scrolls away like a static element. */
+#hdrslot { display: contents; }
 #hdrslot[hidden] { display: none; }
 .hdr__announce {
   background: var(--ink); color: var(--paper);
@@ -260,8 +265,8 @@ img { max-width: 100%; display: block; }
 }
 .botnav__ico { position: relative; display: inline-flex; }
 .botnav button svg { width: 21px; height: 21px; stroke-width: 1.5; }
-.botnav button[aria-current="true"] { color: var(--ink); box-shadow: inset 0 2px 0 var(--ink); }
-.botnav button[aria-current="true"] svg { stroke-width: 1.9; }
+.botnav button[aria-current="true"], .botnav button[aria-expanded="true"] { color: var(--ink); box-shadow: inset 0 2px 0 var(--ink); }
+.botnav button[aria-current="true"] svg, .botnav button[aria-expanded="true"] svg { stroke-width: 1.9; }
 .botnav .badge { top: -4px; right: -9px; }
 @media (min-width: 768px) { .botnav { display: none; } }
 
@@ -290,9 +295,13 @@ img { max-width: 100%; display: block; }
 @media (min-width: 768px) { .grid { gap: 36px 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); } }
 @media (min-width: 1100px) { .sec .grid { grid-template-columns: repeat(4, 1fr); } }
 
-.card {
-  display: flex; flex-direction: column; gap: 3px; height: 100%;
+/* The add link used to be a <span> inside the card <button> — invalid nesting
+   and unreachable by keyboard. Card and add are now sibling buttons. */
+.card { display: flex; flex-direction: column; height: 100%; }
+.card__go {
+  display: flex; flex-direction: column; gap: 3px; flex: 1;
   cursor: pointer; background: none; border: none; padding: 0; text-align: left;
+  color: inherit; font: inherit;
 }
 /* No frame around the photo. The images carry real alpha now, so a border
    would be the only box left on the page — and a box is exactly what the
@@ -304,8 +313,10 @@ img { max-width: 100%; display: block; }
 .card__img, .card__img2 { transition: opacity .3s var(--ease), transform .5s var(--ease); }
 .card__img2 { opacity: 0; }
 @media (hover: hover) {
-  .card:hover .card__img { opacity: 0; }
-  .card:hover .card__img2 { opacity: 1; }
+  /* Only cross-fade where a second photo exists — `.card--dual`. Fading the
+     first image out on a single-photo product left an empty card on hover. */
+  .card--dual:hover .card__img { opacity: 0; }
+  .card--dual:hover .card__img2 { opacity: 1; }
   .card:hover .card__img, .card:hover .card__img2 { transform: scale(1.03); }
 }
 .card__wm {
@@ -317,7 +328,7 @@ img { max-width: 100%; display: block; }
 .card__brand { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .card__name { font-size: 13px; line-height: 1.35; }
 .card__price { font-size: 13px; font-weight: 600; margin-top: auto; padding-top: 4px; }
-.card__add { align-self: start; margin-top: 3px; }
+.card__add { align-self: start; margin-top: 5px; }
 
 .chip {
   display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
@@ -499,6 +510,8 @@ img { max-width: 100%; display: block; }
 .opt input { width: 19px; height: 19px; accent-color: var(--ink); flex-shrink: 0; }
 .opt__price { margin-left: auto; font-weight: 600; white-space: nowrap; }
 .opt__n { font-weight: 400; color: var(--muted); }
+.opt--pay { align-items: flex-start; padding-block: 12px; }
+.opt--pay input { margin-top: 2px; }
 .opt--plain { border: none; padding-left: 0; min-height: 46px; }
 .opt--plain span { font-size: 13.5px; }
 .opt__txt { display: flex; flex-direction: column; min-width: 0; }
@@ -521,6 +534,9 @@ img { max-width: 100%; display: block; }
   grid-template-columns: auto 1fr;
 }
 .toolbar__filter { min-height: 46px; padding: 0 16px; }
+/* .btn is a flex row with a gap; an empty count span still claims that gap
+   and pushed ФИЛЬТРЫ off centre. */
+.toolbar__filter [data-fcount]:empty { display: none; }
 .toolbar__count { font-size: 13px; color: var(--muted); }
 .toolbar__sort {
   grid-column: 1 / -1; display: flex; align-items: center; gap: 10px;
@@ -625,7 +641,12 @@ img { max-width: 100%; display: block; }
    value) pushed the whole column past the viewport. */
 .co { display: grid; gap: 26px; padding-top: 20px; grid-template-columns: minmax(0, 1fr); }
 .co > * { min-width: 0; }
-@media (min-width: 860px) { .co { grid-template-columns: minmax(0, 1fr) 380px; gap: 46px; align-items: start; } }
+/* No `align-items: start` — that collapses the summary column to its content
+   height, leaving `position: sticky` inside it nothing to travel through.
+   Two columns start at the same width where `wide()` flips, so the summary is
+   never force-opened while still stacked under the form. */
+@media (min-width: 768px) { .co { grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; } }
+@media (min-width: 1000px) { .co { grid-template-columns: minmax(0, 1fr) 380px; gap: 46px; } }
 
 .costep { border-bottom: 1px solid var(--rule); }
 .costep__head {
@@ -667,7 +688,7 @@ img { max-width: 100%; display: block; }
 }
 
 .cosum { border: 1px solid var(--rule); }
-@media (min-width: 860px) { .cosum { position: sticky; top: 84px; } }
+@media (min-width: 768px) { .cosum { position: sticky; top: 84px; } }
 .cosum__head {
   list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px;
   padding: 15px 34px 15px 16px; position: relative;
@@ -694,7 +715,73 @@ img { max-width: 100%; display: block; }
 /* The sticky bar already carries Оплатить on the phone; a second identical
    button inside the summary read as two different actions. */
 @media (max-width: 767px) { .co__pay { display: none; } }
-@media (min-width: 768px) { .cosum__head { pointer-events: none; } .cosum__head::after { display: none; } }
+
+/* ---------- admin (demo) ---------- */
+.adm__note {
+  margin: 18px 0 16px; padding: 10px 12px; font-size: 12.5px; color: var(--muted);
+  border-left: 3px solid var(--ink); background: var(--paper);
+}
+.adm__tabs {
+  display: flex; gap: 22px; border-bottom: 1px solid var(--ink);
+  overflow-x: auto; white-space: nowrap; scrollbar-width: none;
+}
+.adm__tabs::-webkit-scrollbar { display: none; }
+.adm__tabs button {
+  border: none; background: none; cursor: pointer; padding: 10px 0;
+  font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.adm__tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+
+.adm__kpis {
+  display: grid; gap: 12px; margin-top: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+}
+.kpi { border: 1px solid var(--rule); padding: 14px; display: flex; flex-direction: column; gap: 2px; }
+.kpi__l { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.kpi__v { font-family: Oswald, sans-serif; font-size: 26px; line-height: 1.1; }
+.kpi__s { font-size: 12px; color: var(--muted); }
+
+.adm__table { border: 1px solid var(--rule); margin-top: 6px; overflow-x: auto; }
+.adm__th, .adm__tr {
+  display: grid; gap: 12px; align-items: center; padding: 11px 14px;
+  grid-template-columns: 92px 1.1fr 1.4fr 84px 104px; min-width: 620px;
+}
+.adm__th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--ink); }
+.adm__tr { border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; }
+.adm__tr:last-child { border-bottom: none; }
+.adm__tr:hover { background: var(--paper); }
+.adm__sub { display: block; font-size: 11.5px; color: var(--muted); }
+.adm__ship { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.adm__list { border: 1px solid var(--rule); margin-top: 6px; }
+.adm__row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; flex-wrap: wrap;
+}
+.adm__row:last-child { border-bottom: none; }
+.adm__ph { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+.adm__nm { flex: 1 1 200px; min-width: 0; }
+.adm__pr { font-weight: 600; }
+
+.adm__ai { margin-top: 22px; max-width: 70ch; }
+.adm__ai p { font-size: 14px; }
+.adm__chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 18px; }
+.adm__answer { border: 1px solid var(--ink); padding: 14px; margin-bottom: 18px; }
+.adm__q { font-weight: 600; font-size: 13.5px; margin-bottom: 8px; }
+.adm__a { font-size: 14px; line-height: 1.6; }
+
+.ftr__admin { font-size: 11.5px; color: var(--muted); }
+
+/* ---------- socials ---------- */
+.socials { display: inline-flex; gap: 6px; margin-top: 8px; }
+.social {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border: 1px solid var(--rule); color: var(--ink);
+  transition: background .18s var(--ease), border-color .18s var(--ease);
+}
+.social:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.social svg { width: 19px; height: 19px; }
 
 /* ---------- sticky mobile action bar ---------- */
 .stickybar {
@@ -744,10 +831,11 @@ img { max-width: 100%; display: block; }
 .paylogos__item--bank { color: var(--ink); }
 .paylogos__item--gpay svg { height: 17px; }
 .paylogos__item--bank svg { height: 16px; }
-/* The Apple Pay mark ships with its own rounded frame — a second border
-   around it reads as a mistake. */
-.paylogos__item--applepay { border-color: transparent; }
-.paylogos__item--applepay svg { height: 26px; }
+/* The Apple Pay mark ships inside its own rounded frame, so it needs no tile
+   border — and it must be sized against that frame, not against the glyph,
+   or it reads far smaller than the Visa and Mastercard marks beside it. */
+.paylogos__item--applepay { border-color: transparent; padding: 0; width: 46px; }
+.paylogos__item--applepay svg { height: 28px; max-height: 28px; }
 
 /* ---------- misc ---------- */
 .crumbs { font-size: 12.5px; color: var(--muted); padding-top: 16px; }
@@ -758,6 +846,9 @@ img { max-width: 100%; display: block; }
   width: 22px; height: 22px; border: 2px solid var(--rule); border-top-color: var(--ink);
   border-radius: 50%; animation: spin .7s linear infinite; margin: 26px auto;
 }
+/* Reserve the row but only spin while a fetch is actually in flight — a
+   permanent spinner under the grid reads as a stall. */
+.spinner[data-on="0"] { visibility: hidden; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .toast {
@@ -779,7 +870,7 @@ img { max-width: 100%; display: block; }
 .intro {
   position: fixed; inset: 0; z-index: var(--z-intro); background: var(--page);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-  cursor: pointer;
+  cursor: pointer; border: none; width: 100%; color: inherit; font: inherit;
 }
 .intro svg { height: 92px; width: auto; }
 .intro__word { font-family: Oswald, sans-serif; font-size: 15px; text-transform: uppercase; letter-spacing: .1em; animation: spread .9s var(--ease) .9s both; }
@@ -799,13 +890,16 @@ img { max-width: 100%; display: block; }
   bottom: calc(var(--bottomnav-h) + 12px + env(safe-area-inset-bottom)) !important;
   z-index: 25 !important;
 }
-/* only lift it when a sticky action bar is actually on screen */
-body:has(.stickybar) #rempire-feedback > button[title="Оставить комментарий"] {
-  bottom: calc(var(--bottomnav-h) + var(--bar-h) + 12px + env(safe-area-inset-bottom)) !important;
-}
-/* phone: park it on the left — every real control (summary toggle, add-to-cart
-   link, quantity stepper) lives on the right edge */
+/* Both of these must stay inside the phone query. `:has(.stickybar)` carries
+   the specificity of its argument, so unscoped it would outrank the desktop
+   reset below — and `.stickybar` is `display: none` on a desktop but still in
+   the DOM, so the test would pass there too. */
 @media (max-width: 767px) {
+  body:has(.stickybar) #rempire-feedback > button[title="Оставить комментарий"] {
+    bottom: calc(var(--bottomnav-h) + var(--bar-h) + 12px + env(safe-area-inset-bottom)) !important;
+  }
+  /* park it on the left — every real control (summary toggle, add-to-cart
+     link, quantity stepper) lives on the right edge */
   #rempire-feedback > button[title="Оставить комментарий"] { left: 14px !important; right: auto !important; }
 }
 @media (min-width: 768px) {
