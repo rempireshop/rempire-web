@@ -426,8 +426,8 @@
         '<div><span class="ftr__h">Связаться</span><a href="tel:+37256237237">56237237</a><a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a>' +
           '<span class="socials">' +
             '<a class="social" href="https://www.instagram.com/rempire.shop/" aria-label="Rempire в Instagram" title="Instagram">' + icon("instagram") + "</a>" +
-            '<a class="social" href="https://www.facebook.com/rempireshop" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
-            '<a class="social" href="https://www.tiktok.com/@rempire.shop" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
+            '<a class="social" href="https://www.facebook.com/Rempire.Official.Tallinn" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
+            '<a class="social" href="https://www.tiktok.com/@rempire.official" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
           "</span></div>" +
         '<div><span class="ftr__h">Покупателю</span><a href="#">Доставка и оплата</a><a href="#">Возврат товара</a><a href="#">Условия продажи</a><a href="#">Блог и советы</a></div>' +
         '<div><span class="ftr__h">Правовое</span><a href="#">Конфиденциальность</a><a href="#">Правовая информация</a><a href="#">Настройки cookie</a><a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a></div>' +
