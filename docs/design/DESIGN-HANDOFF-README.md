@@ -193,3 +193,35 @@ compose rather than compete.
 All non-home screens (category, product, cart, checkout, search, blog,
 account, admin) are inherited from the shared templates — И only overrides
 the home screen.
+
+## Direction К — «Полная версия» ★ (27.08) — the reference build
+
+К is И plus every Tier 1/2 item from docs/shopify/LIVE-PAGES-AUDIT.md. It is
+the direction to build from.
+
+К home adds over И: intro copy under both product rails (reworked from the
+live site's own, already SEO-indexed), second product image on hover
+(prototype uses the neighbouring product photo as a stand-in; production
+uses the product's own image 2), and a FULL legal footer — Реквизиты
+(Rempire Store OÜ, рег. 12216136, KMKR EE102723858, Mardi 1), Связаться,
+Покупателю (доставка, возврат, условия, блог), Правовое (конфиденциальность,
+правовая информация, настройки cookie, ODR link), plus payment trust icons.
+
+Applied to the SHARED screens, so every direction benefits — these are
+corrections, not style choices:
+- **Free-shipping threshold is now country-aware** (50 EUR EE/LV/LT/FI vs
+  200 EUR rest of EU). The cart drawer previously promised free shipping to
+  a German customer at 50 EUR — a real bug the audit caught.
+- **Самовывоз — Mardi 1, Таллинн** added as a delivery method (0 EUR), with
+  the T&C terms shown inline: ID required, 7-day hold, then 1,50 EUR/day. It
+  hides the address block like parcel machines do.
+- Sort now leads with Хиты продаж (the live default) and Новинки.
+- Filter drawer gains a НАЛИЧИЕ facet and per-option counts on every facet.
+- Numbered pagination (1 2 3 … 8) replaces «показать ещё».
+- Newsletter opt-in checkbox in the checkout contact step.
+
+Still open, deliberately not in К: a standalone cart page (drawer only), the
+seven policy pages as real content screens (links exist, content pending
+legal sign-off), and the legal entity question — the footer currently shows
+Rempire Store OÜ per Renat's answer, but the live shipping policy names
+THEFLOW OÜ. See the audit.
