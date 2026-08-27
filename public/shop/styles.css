@@ -245,12 +245,21 @@ img { max-width: 100%; display: block; }
 
 /* ---------- hero slider ---------- */
 .hero { position: relative; background: var(--shell); overflow: hidden; }
-.hero__slide { display: none; }
-.hero__slide[data-on="1"] { display: block; }
-/* The reveal animates the INNER box, not the slide. Animating the slide
-   created a stacking context that isolated the blend group, so the artwork's
-   white background survived as a hard rectangle instead of dissolving. */
-.hero__slide[data-on="1"] .hero__box { animation: fadeUp .5s var(--ease) both; }
+/* Slides are stacked in one grid cell and crossfade. Two reasons this beats
+   display:none + an entrance animation: the animation did not re-run when
+   autoplay flipped the attribute, so `fill: both` left the incoming slide at
+   opacity 0 (an empty hero), and display-swapping blanked the hero for the
+   whole transition. Opacity alone also avoids creating a stacking context,
+   which is what killed the artwork's mix-blend-mode. */
+.hero { display: grid; }
+.hero__slide {
+  grid-area: 1 / 1; opacity: 0; visibility: hidden;
+  transition: opacity .45s var(--ease), visibility 0s linear .45s;
+}
+.hero__slide[data-on="1"] {
+  opacity: 1; visibility: visible;
+  transition: opacity .45s var(--ease), visibility 0s;
+}
 .hero__box {
   max-width: var(--maxw); margin: 0 auto;
   padding: var(--s5) var(--gutter);
@@ -262,7 +271,7 @@ img { max-width: 100%; display: block; }
 .hero__title { font-family: Oswald, sans-serif; font-size: clamp(21px, 4.4vw, 40px); text-transform: uppercase; letter-spacing: .02em; line-height: 1.08; margin-bottom: 10px; }
 .hero__sub { font-size: 13.5px; color: rgba(28, 26, 0, .78); margin-bottom: 18px; }
 .hero__arrow {
-  position: absolute; top: 50%; transform: translateY(-50%);
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
   width: 40px; height: 40px; border: none; cursor: pointer;
   background: rgba(255, 255, 255, .62); color: var(--ink);
   font-size: 18px; line-height: 1; backdrop-filter: blur(3px);
@@ -273,7 +282,7 @@ img { max-width: 100%; display: block; }
 .hero__arrow--next { right: 8px; }
 .hero__dots { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; gap: 6px; justify-content: center; }
 .hero__dots button { width: 26px; height: 3px; border: none; padding: 0; cursor: pointer; background: rgba(28, 26, 0, .25); }
-.hero__dots button[aria-current="true"] { background: var(--ink); }
+.hero__dots button[aria-current="true"] { background: none; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
@@ -418,7 +427,7 @@ body:has(.drawer) #rempire-feedback { display: none; }
 
 /* Hero dots: 3px tall was a 26x3 touch target. Keep the visual bar, give it
    a 44px-tall transparent hit area. */
-.hero__dots { bottom: 0; padding: 14px 0 18px; }
+.hero__dots { bottom: 0; padding: 14px 0 18px; z-index: 3; }
 .hero__dots button {
   height: 30px; min-width: 34px; background: none;
   display: flex; align-items: center; justify-content: center; padding: 0;
