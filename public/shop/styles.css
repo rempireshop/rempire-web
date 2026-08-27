@@ -701,7 +701,9 @@ body:has(.stickybar) .ftr {
   display: grid; gap: 24px 48px; padding: 16px 0 32px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
 }
-.pdp__stage { position: relative; aspect-ratio: 1; background: var(--page); }
+/* pan-y so a horizontal swipe through the gallery is not stolen by the
+   page scroll, exactly as on the hero */
+.pdp__stage { position: relative; aspect-ratio: 1; background: var(--page); touch-action: pan-y; }
 .pdp__img { inset: 6%; }
 .pdp__wm { width: 16px; height: 25px; right: 12px; bottom: 12px; }
 .pdp__thumbs { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }

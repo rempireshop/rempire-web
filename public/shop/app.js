@@ -1113,27 +1113,32 @@
   }
 
   // ---------- overlays ----------
-  function cartDrawer() {
+  function cartBody() {
     var sum = cartSum(), thr = threshold(), pct = Math.min(100, sum / thr * 100);
+    return (S.cart.length ? S.cart.map(function (l, li) {
+      var p = byId(l.id);
+      return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + media(p, 0, "ph") + "</span>" +
+        '<span class="cline__mid"><span class="cline__nm">' + esc(p.brand) + " " + esc(p.name) + lineLabel(l) + "</span>" +
+        '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше">−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
+        '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
+        '<span class="num cline__pr" data-linepr>' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
+    }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
+      (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
+        '<p class="muted">' + freebarText(sum, thr) + "</p></div>" : "");
+  }
+  function cartFoot() {
+    if (!S.cart.length) return "";
+    return '<div class="drawer__tot"><span>Итого</span><span class="num">' + eur(cartSum()) + "</span></div>" +
+      '<button class="btn btn--wide" data-checkout>Оформить заказ</button>' +
+      '<button class="link drawer__cont" data-closecart>Продолжить покупки</button>';
+  }
+  function cartDrawer() {
     return '<div class="scrim" data-closecart></div>' +
       '<aside class="drawer drawer--right" role="dialog" aria-modal="true" aria-label="Корзина">' +
       '<div class="drawer__head"><span class="display drawer__t">Корзина (' + cartCount() + ')</span>' +
       '<button class="iconbtn" data-closecart aria-label="Закрыть">✕</button></div>' +
-      '<div class="drawer__body">' +
-        (S.cart.length ? S.cart.map(function (l, li) {
-          var p = byId(l.id);
-          return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + media(p, 0, "ph") + "</span>" +
-            '<span class="cline__mid"><span class="cline__nm">' + esc(p.brand) + " " + esc(p.name) + lineLabel(l) + "</span>" +
-            '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше">−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
-            '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
-            '<span class="num cline__pr" data-linepr>' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
-        }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
-        (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
-          '<p class="muted">' + freebarText(sum, thr) + "</p></div>" : "") +
-      "</div>" +
-      (S.cart.length ? '<div class="drawer__foot"><div class="drawer__tot"><span>Итого</span><span class="num">' + eur(sum) + "</span></div>" +
-        '<button class="btn btn--wide" data-checkout>Оформить заказ</button>' +
-        '<button class="link drawer__cont" data-closecart>Продолжить покупки</button></div>' : "") +
+      '<div class="drawer__body">' + cartBody() + "</div>" +
+      '<div class="drawer__foot"' + (S.cart.length ? "" : " hidden") + ">" + cartFoot() + "</div>" +
       "</aside>";
   }
 
@@ -1275,6 +1280,20 @@
     patchHeader(); patchNav();
   }
 
+  /* Redraws the cart list when the line indices change, without re-mounting
+     the drawer — replacing the whole overlay replays the slide-in, which is
+     what read as a flicker on every «Убрать». */
+  function rebuildCart() {
+    var d = ovl.querySelector(".drawer--right");
+    if (!d) { render(); return; }
+    d.querySelector(".drawer__t").textContent = "Корзина (" + cartCount() + ")";
+    d.querySelector(".drawer__body").innerHTML = cartBody();
+    var foot = d.querySelector(".drawer__foot");
+    foot.innerHTML = cartFoot();
+    foot.hidden = !S.cart.length;
+    patchHeader(); patchNav();
+  }
+
   /* Filtering re-renders only the grid. A full render would rebuild the open
      filter drawer under the user's finger — that was the flicker. */
   function patchCatalog() {
@@ -1411,19 +1430,31 @@
     }, 6000);
   }
 
-  // swipe: the hero is the one thing on the phone that looks swipeable
-  var swX = 0, swY = 0, swOn = false;
+  /* Swipe. Two swipeable surfaces — the home banner and the product gallery —
+     so the handler resolves which one the finger started on rather than
+     assuming the hero. A horizontal move of 40px+ that is clearly more
+     horizontal than vertical counts; anything else is a scroll. */
+  var swX = 0, swY = 0, swTarget = null;
   document.addEventListener("touchstart", function (e) {
-    var h = e.target.closest && e.target.closest(".hero");
-    if (!h || e.touches.length !== 1) { swOn = false; return; }
-    swOn = true; swX = e.touches[0].clientX; swY = e.touches[0].clientY;
+    swTarget = null;
+    if (e.touches.length !== 1 || !e.target.closest) return;
+    var el = e.target.closest(".hero, .pdp__stage");
+    if (!el) return;
+    swTarget = el.classList.contains("hero") ? "hero" : "gallery";
+    swX = e.touches[0].clientX; swY = e.touches[0].clientY;
   }, { passive: true });
   document.addEventListener("touchend", function (e) {
-    if (!swOn) return;
-    swOn = false;
+    if (!swTarget) return;
+    var which = swTarget;
+    swTarget = null;
     var t = e.changedTouches[0], dx = t.clientX - swX, dy = t.clientY - swY;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
-    setSlide(S.slide + (dx < 0 ? 1 : -1), true);
+    var dir = dx < 0 ? 1 : -1;
+    if (which === "hero") { setSlide(S.slide + dir, true); return; }
+    var p = byId(S.productId), g = gal(p);
+    if (g.length < 2) return;
+    S.gallery = (S.gallery + dir + g.length) % g.length;
+    patchPdp();
   }, { passive: true });
 
   // ---------- events ----------
@@ -1483,7 +1514,12 @@
     }
     if (d.remove !== undefined) {
       S.cart.splice(Number(d.remove), 1); persist();
-      ovlKey = ""; render(); return;   // line indices shift, so rebuild
+      /* Taking out the last line closes the drawer — leaving it open on an
+         empty cart, which is what the old code did, looked like a flicker:
+         it tore the drawer down and slid an empty one back in. */
+      if (!S.cart.length) { S.cartOpen = false; render(); return; }
+      rebuildCart();                   // line indices shift, so redraw the list
+      return;
     }
     if (d.checkout !== undefined) { if (!S.cart.length) { toast("Корзина пуста"); return; } go("checkout"); return; }
     if (d.pay !== undefined) {
