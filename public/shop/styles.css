@@ -497,7 +497,7 @@ body:has(.stickybar) .ftr {
 .cline__ph { position: relative; width: 62px; height: 62px; flex-shrink: 0; }
 .cline__mid { flex: 1; min-width: 0; }
 .cline__nm { display: block; font-size: 13.5px; margin-bottom: 7px; }
-.cline__rm { font-size: 12px; margin-left: 12px; padding: 14px 0; }
+.cline__rm { font-size: 12px; margin-left: 8px; padding: 14px 4px; }
 .cline__pr { font-weight: 600; font-size: 13.5px; }
 
 .freebar { margin-top: 6px; }
@@ -678,7 +678,7 @@ body:has(.stickybar) .ftr {
 .stepper button { width: 46px; height: 48px; border: none; background: none; cursor: pointer; font-size: 16px; transition: background .18s var(--ease); }
 .stepper button:hover { background: var(--hover); }
 .stepper > span { width: 42px; height: 48px; display: flex; align-items: center; justify-content: center; }
-.stepper--sm button { width: 42px; height: 44px; font-size: 14px; }
+.stepper--sm button { width: 44px; height: 44px; font-size: 14px; }
 .stepper--sm > span { width: 34px; height: 44px; font-size: 13px; }
 
 /* ---------- accordions ---------- */
@@ -958,12 +958,13 @@ body:has(.stickybar) .ftr {
 .paylogos__item svg { max-height: 100%; width: auto; }
 .paylogos__item--bank { color: var(--ink); }
 .paylogos__item--visa svg, .paylogos__item--mastercard svg { height: 26px; }
-.paylogos__item--applepay svg { height: 23px; }
+/* both wallet wordmarks are bare now — matched by cap height, not canvas */
+.paylogos__item--applepay svg { height: 16px; }
 .paylogos__item--gpay svg { height: 14px; }
 .paylogos__item--bank svg { height: 18px; }
 /* the wallet rows in checkout reuse the marks at a smaller scale */
 .opt__logos svg[aria-label="Google Pay"] { height: 12px; }
-.opt__logos svg[aria-label="Apple Pay"] { height: 19px; }
+.opt__logos svg[aria-label="Apple Pay"] { height: 14px; }
 
 /* ---------- misc ---------- */
 .crumbs { font-size: 12.5px; color: var(--muted); padding-top: 16px; }
