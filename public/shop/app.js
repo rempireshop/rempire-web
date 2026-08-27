@@ -114,8 +114,16 @@
       { l: "Пакомат SmartPosti", p: shipPrice("SmartPosti", "pakiautomaat", "FI", 15.7), pm: "smartpost" },
       { l: "Курьер DPD", p: shipPrice("DPD", "kuller", "FI", 26) }
     ],
-    EU: [{ l: "Курьер DPD — международная", p: 26 }]
+    /* DPD's rest-of-Europe band is 26–56 € incl. VAT depending on country
+       (shipping-data.js restOfEuropeAt10kg); a flat 33 sits mid-band for the
+       common destinations (DE 37, PL 30, SE 29 incl. VAT). */
+    EU: [{ l: "Курьер DPD по Европе", p: 33 }]
   };
+  /* Free-shipping floors per country. 50 € everywhere was the questionnaire
+     answer, but the real carrier rates make it a giveaway outside Estonia:
+     FI courier alone is ~26 € incl. VAT. These floors keep the promise
+     sensible; the final numbers are Renat's call and trivially editable. */
+  var THRESH = { EE: 50, LV: 75, LT: 75, FI: 100, EU: 200 };
   function machinesFor(m) {
     if (!m || !m.pm) return [];
     try {
@@ -130,7 +138,7 @@
     { l: "Банковская ссылка", h: "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке", k: "bank" },
     { l: "Банковская карта", h: "Visa, Mastercard", k: "card" },
     { l: "Apple Pay / Google Pay", h: "Оплата в одно касание", k: "wallet" },
-    { l: "По счёту — для компаний", h: "Счёт на е-мейл, оплата в течение 7 дней", k: "invoice" }
+    { l: "По счёту — для компаний", h: "Счёт на почту, оплата в течение 7 дней", k: "invoice" }
   ];
   var BANKS = ["Swedbank", "SEB", "LHV", "Luminor", "Coop"];
 
@@ -163,6 +171,8 @@
     coStep: 1,
     sumOpen: null,      // checkout summary; null = follow the breakpoint
     ship: { name: "", addr: "", zip: "", city: "", phone: "" },
+    newsletter: false,
+    invoiceCo: "",
     acctName: "",
     pay: 0,
     bank: 0,
@@ -205,7 +215,9 @@
   function gal(p) { return p.gallery && p.gallery.length ? p.gallery : [p.img]; }
   function cartCount() { var n = 0; S.cart.forEach(function (l) { n += l.qty; }); return n; }
   function cartSum() { var s = 0; S.cart.forEach(function (l) { s += sizePrice(byId(l.id), l.size || 0) * l.qty; }); return s; }
-  function threshold() { return S.country === "EU" ? 200 : 50; }
+  function threshold() { return THRESH[S.country] || 200; }
+  // deliberately pre-discount: the industry norm is that a promo code does
+  // not revoke free shipping the cart already earned
   function freeShip() { return cartSum() >= threshold(); }
   function methods() { return SHIP[S.country]; }
   /* Clamp the stored index rather than clamping only on read: the radio
@@ -222,7 +234,7 @@
   /* One regex, but not one message: "there is a typo in the domain" is simply
      wrong for an empty field, which is the most common failure. */
   function emailMsg() {
-    if (!S.email.trim()) return "Введите e-mail — на него придёт заказ.";
+    if (!S.email.trim()) return "Введите e-mail — на него придёт подтверждение заказа.";
     if (S.email.indexOf("@") < 0) return "В адресе не хватает знака @.";
     return "Проверьте адрес — похоже, в нём опечатка.";
   }
@@ -323,14 +335,14 @@
   // ---------- header (persistent) ----------
   function headerHTML() {
     return '<header class="hdr">' +
-      '<div class="hdr__announce"><span class="wide-only">Бесплатная доставка: EE, LV, LT, FI — от 50 € · Европа — от 200 €</span>' +
-        '<span class="narrow-only">Бесплатная доставка от 50 €</span></div>' +
+      '<div class="hdr__announce"><span class="wide-only">Бесплатная доставка: Эстония от ' + THRESH.EE + " € · LV, LT от " + THRESH.LV + " € · Финляндия от " + THRESH.FI + " €</span>" +
+        '<span class="narrow-only">Бесплатная доставка по Эстонии от ' + THRESH.EE + " €</span></div>" +
       '<div class="hdr__row">' +
         '<button class="hdr__logo" data-go="home" data-ident title="На главную" aria-label="REMPIRE — на главную">' +
           towerDraw("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<div class="hdr__searchwrap">' +
           '<span class="hdr__searchicon">' + icon("search") + "</span>" +
-          '<input class="hdr__search" data-search placeholder="Поиск: шампунь, Davines, воск…" aria-label="Поиск по магазину">' +
+          '<input class="hdr__search" data-search placeholder="Поиск: шампунь, Davines, паста…" aria-label="Поиск по магазину">' +
         "</div>" +
         '<span class="hdr__tools">' +
           '<span class="lang"><button class="lang__btn" data-langtoggle aria-label="Язык" aria-haspopup="listbox" aria-controls="langmenu" aria-expanded="false">' +
@@ -465,7 +477,7 @@
         }).join("") + "</div></section>" +
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Магазин в Таллинне</h2></div>' +
         '<div class="infogrid">' +
-          '<div><span class="ftr__h">Доставка</span>DPD, Omniva, SmartPosti · 1–3 дня · бесплатно от 50 €</div>' +
+          '<div><span class="ftr__h">Доставка</span>DPD, Omniva, SmartPosti · 1–3 дня · по Эстонии бесплатно от ' + THRESH.EE + " €</div>" +
           '<div><span class="ftr__h">Оплата</span>' + payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + "</div>" +
           '<div><span class="ftr__h">Самовывоз</span>Mardi 1, Таллинн · бесплатно, заказ ждёт 7 дней</div>' +
         "</div></section>" +
@@ -511,12 +523,17 @@
 
   function screenCatalog() {
     var list = filtered(), visible = list.slice(0, S.shown);
+    var CAT_INTROS = {
+      merch: "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.",
+      perfume: "Ниша и классика, которые держим в наличии в Таллинне.",
+      body: "Гели, мыло и уход за телом — включая мыло собственной варки."
+    };
     var name = S.brand ? S.brand : S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat];
     var intro = S.brand
       ? "Всё, что есть в наличии от " + esc(S.brand) + " — во всех разделах магазина."
       : S.cat === "all"
         ? "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч."
-        : "Профессиональные средства, которыми команда Rempire работает в салоне.";
+        : CAT_INTROS[S.cat] || "Профессиональные средства, которыми команда Rempire работает в салоне.";
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / ' +
         (S.brand ? '<button data-go="brands">Бренды</button> / ' + esc(S.brand) : name) + "</div>" +
@@ -590,18 +607,26 @@
         "<div>" +
           '<button class="card__brand pdp__brand" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</button>" +
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
-          '<div class="num pdp__price">' + eur(sizePrice(p, S.size)) + "</div>" +
+          '<div class="num pdp__price"><span data-price>' + eur(sizePrice(p, S.size)) + "</span>" +
+            (p.stock === "out" ? ' <span class="chip chip--out">нет в наличии</span>'
+              : p.stock === "low" ? ' <span class="chip chip--low">мало</span>' : "") + "</div>" +
           '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
           variantPicker(p, sizes) +
-          '<div class="pdp__buy">' +
-            '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num">' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
-            '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
-          "</div>" +
-          '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>" +
-          // must add the product first — this used to jump to an empty cart
-          // and toast «Корзина пуста» at someone standing on a product page
-          '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>' +
-          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · бесплатно от 50 € · самовывоз на Mardi 1</div>' +
+          // the card hides its add button for stock:"out" — the product page
+          // must agree, or a shopper "pays" for an item the shop cannot ship
+          (p.stock === "out"
+            ? '<div class="pdp__oos"><p>Товара сейчас нет. Оставьте почту — напишем, когда появится.</p>' +
+              '<div class="pdp__oosrow"><input class="input input--box" type="email" inputmode="email" autocomplete="email" aria-label="E-mail для уведомления" placeholder="you@example.com">' +
+              '<button class="btn btn--ghost" data-notify>Сообщить</button></div></div>'
+            : '<div class="pdp__buy">' +
+                '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num" data-qtynum>' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
+                '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
+              "</div>" +
+              '<button class="btn btn--wide btn--express" data-buynow="' + p.id + '">Купить через ' + gpayOnDark() + "</button>" +
+              // must add the product first — this used to jump to an empty cart
+              // and toast «Корзина пуста» at someone standing on a product page
+              '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
+          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
           acc("Описание", "Профессиональное средство из салонного ассортимента Rempire. Подходит для регулярного ухода.") +
           acc("Применение", "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.") +
           acc("Состав (INCI)", '<span class="muted">Полный состав будет заполнен при переносе каталога.</span>') +
@@ -611,7 +636,8 @@
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
         CATALOGUE.filter(function (x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4).map(cardHTML).join("") +
       "</div></section></div>" +
-      '<div class="stickybar"><span class="num stickybar__sum">' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>';
+      (p.stock === "out" ? "" :
+        '<div class="stickybar"><span class="num stickybar__sum" data-stickysum>' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>');
   }
   function acc(title, body) {
     return '<details class="acc"><summary>' + title + "</summary><div class=\"acc__body\">" + body + "</div></details>";
@@ -643,6 +669,11 @@
     return 0;
   }
   function variantPicker(p, sizes) {
+    // a single-variant volume still matters: 27 € for 10 мл is not 27 € for
+    // 100 мл — show it as static text where the picker would sit
+    if (sizes.length === 1) {
+      return '<div class="pdp__vol">' + (p.cat === "merch" ? "Размер — " : "Объём — ") + esc(sizes[0]) + "</div>";
+    }
     if (sizes.length < 2) return "";
     var sv = splitVariants(sizes);
     if (!sv) {
@@ -652,8 +683,8 @@
         }).join("") + "</div></div>";
     }
     var cur = sizes[Math.min(S.size, sizes.length - 1)].split(" / ");
-    return '<div class="field"><span class="field__label">Цвет принта — ' + esc(colourRu(cur[0])) +
-      '</span><div class="sizes">' + sv.colours.map(function (c) {
+    return '<div class="field"><span class="field__label">Цвет принта — <span data-colourname>' + esc(colourRu(cur[0])) +
+      '</span></span><div class="sizes">' + sv.colours.map(function (c) {
         return '<button class="size" data-vcolour="' + esc(c) + '" aria-current="' + (c === cur[0]) + '">' + esc(colourRu(c)) + "</button>";
       }).join("") + "</div></div>" +
       '<div class="field"><span class="field__label">Размер</span><div class="sizes">' + sv.sizes.map(function (s2) {
@@ -675,7 +706,7 @@
           : '<div class="empty"><p>По запросу «' + esc(S.query) + '» ничего не нашлось.</p>' +
             '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
             '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
-            '<p class="muted">Напишите нам — поможем подобрать замену.</p></div>') +
+            '<p class="muted">Напишите нам — поможем подобрать замену: <a class="link" href="tel:+37256237237">56237237</a> · <a class="link" href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a></p></div>') +
       "</section></div>";
   }
 
@@ -757,7 +788,7 @@
               '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
               '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
               (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
-              '<label class="opt opt--plain"><input type="checkbox"><span>Хочу получать новости и скидки</span></label>' +
+              '<label class="opt opt--plain"><input type="checkbox" data-news' + (S.newsletter ? " checked" : "") + '><span>Хочу получать новости и скидки</span></label>' +
               '<button class="btn btn--wide" data-step="2">Далее — доставка</button></div>' : "") +
           "</section>" +
 
@@ -782,7 +813,9 @@
                   '<div class="co__zip">' + shipField("zip", "Индекс", "12345", "postal-code", "numeric") +
                   shipField("city", "Город", "Город", "address-level2", "") + "</div>")) +
               shipField("phone", "Телефон", "+372…", "tel", "tel") +
-              '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.</p>' +
+              '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.' +
+              (S.country === "FI" ? " Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика." : "") +
+              (S.country === "EU" ? " Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD." : "") + "</p>" +
               '<button class="btn btn--wide" data-step="3">Далее — оплата</button></div>' : "") +
           "</section>" +
 
@@ -797,7 +830,7 @@
               (S.pay === 0 ? '<div class="banks">' + BANKS.map(function (b, i) {
                 return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' + b + "</button>";
               }).join("") + "</div>" : "") +
-              (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" placeholder="OÜ Näidis · 12345678"></label>' : "") +
+              (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" data-invoiceco value="' + esc(S.invoiceCo) + '" placeholder="OÜ Näidis · 12345678"></label>' : "") +
               "</div>" : "") +
           "</section>" +
           '<ul class="cotrust">' +
@@ -817,8 +850,8 @@
               '<span class="cosum__nm">' + esc(p.name) + lineLabel(l) + " × " + l.qty + "</span>" +
               '<span class="num cosum__pr">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
           }).join("") : '<p class="muted">Корзина пуста.</p>') +
-          '<div class="cosum__promo"><input class="input input--box" data-promo placeholder="Промокод" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo>Применить</button></div>' +
-          (S.promoErr ? '<div class="err">Код не найден — проверьте написание.</div>' : "") +
+          '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод" placeholder="Промокод" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo>Применить</button></div>' +
+          (S.promoErr ? '<div class="err" role="alert">Код не найден — проверьте написание.</div>' : "") +
           (S.promoOk ? '<div class="cosum__row"><span>REMPIRE10 — скидка 10%</span><span class="num">−' + eur(discount()) + "</span></div>" : "") +
           '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + sel.l + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
           '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
@@ -895,7 +928,9 @@
     var orders = fakeOrders();
     var week = orders.slice(0, 7).reduce(function (a, o) { return a + o.sum; }, 0);
     var tab = S.adminTab;
-    return '<div class="cohdr"><div class="wrap wrap--co">' +
+    // the admin header shares the full-width panes' column, not the 1020px
+    // checkout column — otherwise the logo aligns with nothing below it
+    return '<div class="cohdr cohdr--adm"><div class="cohdr__row">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<span class="cohdr__t">Админка</span>' +
         '<button class="link" data-go="home">← В магазин</button></div></div>' +
@@ -915,7 +950,7 @@
       (tab === "over" ?
         '<div class="adm__kpis">' +
           kpi("Заказы сегодня", "3", "вчера — 5") +
-          kpi("Выручка за 7 дней", eur(week), "средний чек " + eur(week / 7)) +
+          kpi("Выручка за 7 дней", eur(week), "в среднем " + eur(week / 7) + " в день") +
           kpi("Товаров в каталоге", String(CATALOGUE.length), CATS.length + " " + pl(CATS.length, "раздел", "раздела", "разделов")) +
           kpi("Заканчиваются", String(lowStock().length), "нужно дозаказать") +
         "</div>" +
@@ -959,10 +994,10 @@
         }).join("") + "</div>" : "") +
 
       (tab === "setup" ?
-        '<p class="muted" style="margin:16px 0">Всё, чем магазин управляется без программиста.</p>' +
+        '<p class="muted" style="margin:16px 0">Всё, что можно настроить без программиста.</p>' +
         setupBlock("Доставка", SHIP.EE.map(function (x) {
           return x.l + " — " + (x.p ? eur(x.p) : "бесплатно");
-        }).concat(["Бесплатно от " + threshold() + " € (EE, LV, LT, FI)"])) +
+        }).concat(["Бесплатно: Эстония от " + THRESH.EE + " € · LV, LT от " + THRESH.LV + " € · FI от " + THRESH.FI + " € · Европа от " + THRESH.EU + " €"])) +
         setupBlock("Оплата", PAYS.map(function (p) { return p.l; })) +
         setupBlock("Языки магазина", ["Русский — основной", "Eesti", "English"]) +
         setupBlock("Письма клиенту", [
@@ -1057,7 +1092,7 @@
             '<span class="num cline__pr" data-linepr>' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
         }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
         (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
-          '<p class="muted">' + (sum >= thr ? "Бесплатная доставка — порог " + thr + " € достигнут ✓" : "До бесплатной доставки (" + (S.country === "EU" ? "Европа" : "EE, LV, LT, FI") + ") — ещё " + eur(thr - sum)) + "</p></div>" : "") +
+          '<p class="muted">' + freebarText(sum, thr) + "</p></div>" : "") +
       "</div>" +
       (S.cart.length ? '<div class="drawer__foot"><div class="drawer__tot"><span>Итого</span><span class="num">' + eur(sum) + "</span></div>" +
         '<button class="btn btn--wide" data-checkout>Оформить заказ</button>' +
@@ -1140,12 +1175,44 @@
       if (opening && close) close.focus();
       if (!key && lastFocus && document.contains(lastFocus)) { lastFocus.focus(); lastFocus = null; }
     }
-    toastSlot.innerHTML = S.toast
-      ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
-      : "";
+    paintToast();
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
 
     if (S.screen === "catalog") observeSentinel();
+  }
+
+  /* Size, colour, gallery and quantity clicks on the product page patch in
+     place — a full render destroyed the focused button, so a keyboard user
+     could not press «+» twice (the same bug the cart stepper had). */
+  function patchPdp() {
+    if (S.screen !== "product") { render(); return; }
+    var p = byId(S.productId);
+    var price = document.querySelector("[data-price]");
+    if (!price) { render(); return; }
+    price.textContent = eur(sizePrice(p, S.size));
+    var qn = document.querySelector("[data-qtynum]");
+    if (qn) qn.textContent = S.qty;
+    var ss = document.querySelector("[data-stickysum]");
+    if (ss) ss.textContent = eur(sizePrice(p, S.size) * S.qty);
+    var g = gal(p);
+    var stage = document.querySelector(".pdp__img");
+    if (stage) stage.style.backgroundImage = "url('" + g[Math.min(S.gallery, g.length - 1)] + "')";
+    document.querySelectorAll(".pdp__thumb").forEach(function (b) {
+      b.setAttribute("aria-current", String(Number(b.dataset.gal) === S.gallery));
+    });
+    var sizes = p.sizes || [];
+    var cur = sizes.length ? sizes[Math.min(S.size, sizes.length - 1)].split(" / ") : [];
+    document.querySelectorAll("[data-size]").forEach(function (b) {
+      b.setAttribute("aria-current", String(Number(b.dataset.size) === S.size));
+    });
+    document.querySelectorAll("[data-vcolour]").forEach(function (b) {
+      b.setAttribute("aria-current", String(b.dataset.vcolour === cur[0]));
+    });
+    document.querySelectorAll("[data-vsize]").forEach(function (b) {
+      b.setAttribute("aria-current", String(b.dataset.vsize === cur[1]));
+    });
+    var cn = document.querySelector("[data-colourname]");
+    if (cn && cur.length === 2) cn.textContent = colourRu(cur[0]);
   }
 
   /* Quantity steppers patch the numbers in place. Rebuilding the drawer would
@@ -1165,9 +1232,7 @@
     var fill = d.querySelector(".freebar__fill");
     if (fill) fill.style.width = Math.min(100, sum / thr * 100) + "%";
     var note = d.querySelector(".freebar p");
-    if (note) note.textContent = sum >= thr
-      ? "Бесплатная доставка — порог " + thr + " € достигнут ✓"
-      : "До бесплатной доставки (" + (S.country === "EU" ? "Европа" : "EE, LV, LT, FI") + ") — ещё " + eur(thr - sum);
+    if (note) note.textContent = freebarText(sum, thr);
     var tot = d.querySelector(".drawer__tot .num");
     if (tot) tot.textContent = eur(sum);
     patchHeader(); patchNav();
@@ -1218,13 +1283,26 @@
     S.brand = name; S.brandFilter = []; S.onlyInStock = false; go("catalog");
   }
 
+  /* The toast lives in its own slot and never triggers a full render — a
+     toast after «В корзину» must not destroy the button under the finger. */
+  function paintToast() {
+    toastSlot.innerHTML = S.toast
+      ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
+      : "";
+  }
+  function refocus(sel) {
+    var n = document.querySelector(sel);
+    if (n) n.focus();
+  }
   function toast(msg) {
-    S.toast = msg; render();
+    S.toast = msg; paintToast(); patchHeader(); patchNav();
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { S.toast = null; render(); }, 2600);
+    toast._t = setTimeout(function () { S.toast = null; paintToast(); }, 2600);
   }
 
   function addToCart(id, sizeIdx) {
+    // backstop: nothing out of stock enters the cart, whatever button sent it
+    if (byId(id).stock === "out") { toast("Товара нет в наличии"); return; }
     var si = sizeIdx === undefined ? (S.productId === id && S.screen === "product" ? S.size : 0) : sizeIdx;
     var qty = S.screen === "product" && S.productId === id ? S.qty : 1;
     var line = null;
@@ -1234,9 +1312,15 @@
     persist();
     toast("Добавлено в корзину ✓");
   }
+  var COUNTRY_SHORT = { EE: "Эстония", LV: "Латвия", LT: "Литва", FI: "Финляндия", EU: "Европа" };
+  function freebarText(sum, thr) {
+    return sum >= thr
+      ? "Бесплатная доставка — порог " + thr + " € достигнут ✓"
+      : "До бесплатной доставки (" + COUNTRY_SHORT[S.country] + ", от " + thr + " €) — ещё " + eur(thr - sum);
+  }
   function lineLabel(l) {
     var p = byId(l.id);
-    if (!p.sizes || p.sizes.length < 2) return "";
+    if (!p.sizes || !p.sizes.length) return "";
     var s = p.sizes[Math.min(l.size || 0, p.sizes.length - 1)];
     // "white / S" → "белый · S" in the cart and the checkout summary
     var parts = s.split(" / ");
@@ -1330,7 +1414,10 @@
       go("product"); return;
     }
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
-    if (d.buynow) { addToCart(d.buynow); go("checkout"); return; }
+    if (d.buynow) {
+      if (byId(d.buynow).stock === "out") { toast("Товара нет в наличии"); return; }
+      addToCart(d.buynow); go("checkout"); return;
+    }
     if (d.cart !== undefined) { S.cartOpen = true; render(); return; }
     if (d.closecart !== undefined) { S.cartOpen = false; render(); return; }
     if (d.filter !== undefined) { S.filterOpen = true; render(); return; }
@@ -1364,7 +1451,7 @@
     if (d.checkout !== undefined) { if (!S.cart.length) { toast("Корзина пуста"); return; } go("checkout"); return; }
     if (d.pay !== undefined) {
       S.emailTouched = true;
-      if (emailBad()) { S.coStep = 1; render(); toast("Проверьте e-mail — на него придёт заказ"); return; }
+      if (emailBad()) { S.coStep = 1; render(); toast("Проверьте e-mail — на него придёт подтверждение заказа"); return; }
       // a finished order must not leave its promo, address or step state
       // behind for the next one
       S.cart = []; S.promo = ""; S.promoOk = false; S.promoErr = false; S.sumOpen = null;
@@ -1376,9 +1463,11 @@
       if (n > 1 && S.coStep === 1) { S.emailTouched = true; if (emailBad()) { render(); return; } }
       S.coStep = n; render(); return;
     }
-    if (d.method !== undefined) { S.method = Number(d.method); S.machine = 0; render(); return; }
-    if (d.paym !== undefined) { S.pay = Number(d.paym); render(); return; }
-    if (d.bank !== undefined) { S.bank = Number(d.bank); render(); return; }
+    // checkout selections re-render the step, which destroys the clicked
+    // control — put keyboard focus back on its replacement
+    if (d.method !== undefined) { S.method = Number(d.method); S.machine = 0; render(); refocus('[data-method="' + d.method + '"]'); return; }
+    if (d.paym !== undefined) { S.pay = Number(d.paym); render(); refocus('[data-paym="' + d.paym + '"]'); return; }
+    if (d.bank !== undefined) { S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return; }
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
@@ -1389,7 +1478,7 @@
       S.size = Number(d.size);
       var sp = byId(S.productId);
       if (sp.varImg && sp.varImg.length > S.size) S.gallery = sp.varImg[S.size];
-      render(); return;
+      patchPdp(); return;
     }
     if (d.vcolour !== undefined || d.vsize !== undefined) {
       var vp = byId(S.productId), vs = vp.sizes || [];
@@ -1397,10 +1486,11 @@
       S.size = variantIndex(vs, d.vcolour !== undefined ? d.vcolour : cur2[0],
                                 d.vsize !== undefined ? d.vsize : cur2[1]);
       if (vp.varImg && vp.varImg.length > S.size) S.gallery = vp.varImg[S.size];
-      render(); return;
+      patchPdp(); return;
     }
-    if (d.qty) { S.qty = Math.max(1, Math.min(9, S.qty + Number(d.qty))); render(); return; }
-    if (d.gal !== undefined) { S.gallery = Number(d.gal); render(); return; }
+    if (d.notify !== undefined) { toast("Записали — сообщим, когда появится ✓"); return; }
+    if (d.qty) { S.qty = Math.max(1, Math.min(9, S.qty + Number(d.qty))); patchPdp(); return; }
+    if (d.gal !== undefined) { S.gallery = Number(d.gal); patchPdp(); return; }
     if (d.login !== undefined) {
       S.emailTouched = true;
       if (emailBad()) { render(); toast("Введите e-mail — на него придёт код"); return; }
@@ -1408,10 +1498,17 @@
     }
     if (d.logout !== undefined) { S.loggedIn = false; render(); return; }
     if (d.save !== undefined) { toast("Сохранено ✓"); return; }
-    if (d.repeat !== undefined) { addToCart(CATALOGUE[0].id); return; }
+    if (d.repeat !== undefined) {
+      // the fake order #1042 must put plausible things in the cart, not
+      // whatever happens to be first in the catalogue
+      addToCart("km-repair-me-wash", 0);
+      addToCart("proraso-wood-spice-beard-balm-100ml", 0);
+      toast("Товары заказа #1042 в корзине ✓");
+      return;
+    }
     if (d.applypromo !== undefined) {
       var ok = S.promo.trim().toUpperCase() === "REMPIRE10";
-      S.promoOk = ok; S.promoErr = !ok; render(); return;
+      S.promoOk = ok; S.promoErr = !ok; render(); refocus("[data-applypromo]"); return;
     }
     if (d.q) { S.query = d.q; go("search"); return; }
     if (d.closetoast !== undefined) { S.toast = null; render(); return; }
@@ -1434,6 +1531,8 @@
     } else if (t.matches("[data-email]")) { S.email = t.value; }
     else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
     else if (t.matches("[data-shipf]")) { S.ship[t.dataset.shipf] = t.value; }
+    else if (t.matches("[data-news]")) { S.newsletter = t.checked; }
+    else if (t.matches("[data-invoiceco]")) { S.invoiceCo = t.value; }
     // editing the code must drop the applied discount, not just the error
     else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; S.promoOk = false; }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
@@ -1467,9 +1566,23 @@
   }, true);
 
   document.addEventListener("keydown", function (e) {
-    if (e.key !== "Escape") return;
-    if (S.cartOpen || S.filterOpen) { S.cartOpen = false; S.filterOpen = false; render(); }
-    else if (S.langOpen) { S.langOpen = false; patchHeader(); }
+    if (e.key === "Escape") {
+      if (S.cartOpen || S.filterOpen) { S.cartOpen = false; S.filterOpen = false; render(); }
+      else if (S.langOpen) { S.langOpen = false; patchHeader(); }
+      return;
+    }
+    // drawers declare aria-modal — keep Tab inside them
+    if (e.key === "Tab" && (S.cartOpen || S.filterOpen)) {
+      var drawer = ovl.querySelector(".drawer");
+      if (!drawer) return;
+      var focusables = drawer.querySelectorAll("button, input, select, a[href]");
+      if (!focusables.length) return;
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      var inside = drawer.contains(document.activeElement);
+      if (!inside) { e.preventDefault(); first.focus(); }
+      else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
   });
 
   // ---------- logo motion ----------

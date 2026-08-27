@@ -44,7 +44,7 @@ const CATALOGUE = [
   {
     "id": "system-4-bio-botanical-serum",
     "brand": "System 4",
-    "name": "Bio Botanical Serum",
+    "name": "Bio Botanical Serum — сыворотка для кожи головы",
     "cat": "hair",
     "price": 8,
     "priceFrom": true,
@@ -75,7 +75,7 @@ const CATALOGUE = [
   {
     "id": "sim-sensitive-system-4-oil-cure-scalp-treatment-o",
     "brand": "System 4",
-    "name": "Oil Cure Scalp Treatment O",
+    "name": "Oil Cure Scalp Treatment O — маска для кожи головы",
     "cat": "hair",
     "price": 7.9,
     "priceFrom": true,
@@ -191,8 +191,8 @@ const CATALOGUE = [
       "img/night-rider-1.webp"
     ],
     "sizes": [
-      "100g",
-      "30g"
+      "100 г",
+      "30 г"
     ],
     "varImg": [
       0,
@@ -218,8 +218,8 @@ const CATALOGUE = [
       "img/free-hold-1.webp"
     ],
     "sizes": [
-      "100g",
-      "30g"
+      "100 г",
+      "30 г"
     ],
     "varImg": [
       0,
@@ -319,7 +319,7 @@ const CATALOGUE = [
   {
     "id": "sim-sensitive-system-4-scalp-tonic-t",
     "brand": "System 4",
-    "name": "Scalp Tonic T",
+    "name": "Scalp Tonic T — тоник для кожи головы",
     "cat": "hair",
     "price": 7.9,
     "priceFrom": true,
@@ -350,7 +350,7 @@ const CATALOGUE = [
   {
     "id": "system-4-hydro-care-conditioner-h",
     "brand": "System 4",
-    "name": "Hydro Care Conditioner H",
+    "name": "Hydro Care Conditioner H — кондиционер",
     "cat": "hair",
     "price": 6.9,
     "priceFrom": true,
@@ -492,8 +492,8 @@ const CATALOGUE = [
       "img/rough-rider-1.webp"
     ],
     "sizes": [
-      "100g",
-      "30g"
+      "100 г",
+      "30 г"
     ],
     "varImg": [
       0,
@@ -624,7 +624,7 @@ const CATALOGUE = [
   {
     "id": "gatsby-moving-rubber-grunge-mat-grey-hair-wax",
     "brand": "Gatsby",
-    "name": "Moving Rubber Grunge Mat (Grey) Hair Wax — паста для укладки",
+    "name": "Moving Rubber Grunge Mat — воск для укладки",
     "cat": "styling",
     "price": 15,
     "priceFrom": false,
@@ -670,7 +670,7 @@ const CATALOGUE = [
       "img/easy-rider-0.webp"
     ],
     "sizes": [
-      "100g"
+      "100 г"
     ],
     "varImg": [
       0
@@ -690,7 +690,7 @@ const CATALOGUE = [
       "img/gatsby-moving-rubber-wild-shake-15g-0.webp"
     ],
     "sizes": [
-      "80G"
+      "80 г"
     ],
     "varImg": [
       0
@@ -699,8 +699,8 @@ const CATALOGUE = [
   },
   {
     "id": "mandom-gatsby-moving-rubber",
-    "brand": "Mandom",
-    "name": "Gatsby Moving Rubber — паста для укладки",
+    "brand": "Gatsby",
+    "name": "Moving Rubber — паста для укладки",
     "cat": "styling",
     "price": 15,
     "priceFrom": false,
@@ -746,7 +746,7 @@ const CATALOGUE = [
       "img/super-goo-0.webp"
     ],
     "sizes": [
-      "100g"
+      "100 г"
     ],
     "varImg": [
       0
@@ -767,8 +767,8 @@ const CATALOGUE = [
       "img/body-builder-1.webp"
     ],
     "sizes": [
-      "400",
-      "100"
+      "400 мл",
+      "100 мл"
     ],
     "varImg": [
       0,
@@ -783,7 +783,7 @@ const CATALOGUE = [
   {
     "id": "paul-mitchell-mitch-construction-paste-flexible-styling-paste",
     "brand": "Paul Mitchell",
-    "name": "MITCH Construction Paste Flexible Styling Paste — паста для укладки",
+    "name": "MITCH Construction Paste — паста для укладки",
     "cat": "styling",
     "price": 23,
     "priceFrom": false,
@@ -873,7 +873,7 @@ const CATALOGUE = [
       "img/powder-puff-0.webp"
     ],
     "sizes": [
-      "14g"
+      "14 г"
     ],
     "varImg": [
       0
@@ -959,7 +959,7 @@ const CATALOGUE = [
   {
     "id": "captain-fawcett-beard-oil-cf-332-private-stock",
     "brand": "Captain Fawcett",
-    "name": "(CF.332) Private Stock Beard Oil — масло для бороды",
+    "name": "Private Stock — масло для бороды",
     "cat": "beard",
     "price": 17,
     "priceFrom": false,
@@ -980,7 +980,7 @@ const CATALOGUE = [
   {
     "id": "proraso-azur-lime-after-shave-balm-100-ml",
     "brand": "Proraso",
-    "name": "Azur Lime After Shave Balm — лосьон после бритья",
+    "name": "Azur Lime — бальзам после бритья",
     "cat": "beard",
     "price": 16,
     "priceFrom": false,
@@ -996,7 +996,7 @@ const CATALOGUE = [
   {
     "id": "proraso-white-aftershave-balm-soothing-for-sensitive-skin-100ml",
     "brand": "Proraso",
-    "name": "White Aftershave Balm | Soothing For Sensitive Skin — лосьон после бритья",
+    "name": "White — бальзам после бритья",
     "cat": "beard",
     "price": 14,
     "priceFrom": false,
@@ -1012,7 +1012,7 @@ const CATALOGUE = [
   {
     "id": "proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml",
     "brand": "Proraso",
-    "name": "Blue Protect Aftershave Balm | Aloe and Vitamin E — лосьон после бритья",
+    "name": "Blue Protect — бальзам после бритья",
     "cat": "beard",
     "price": 14,
     "priceFrom": false,
@@ -1028,7 +1028,7 @@ const CATALOGUE = [
   {
     "id": "proraso-aftershave-balm-green-refreshing-alcohol-free-mentholated-100ml",
     "brand": "Proraso",
-    "name": "Aftershave Balm - Green Refreshing | Alcohol Free Mentholated — лосьон после бритья",
+    "name": "Green Refreshing — бальзам после бритья",
     "cat": "beard",
     "price": 14,
     "priceFrom": false,
@@ -1044,7 +1044,7 @@ const CATALOGUE = [
   {
     "id": "proraso-red-nourishing-aftershave-lotion-100ml",
     "brand": "Proraso",
-    "name": "Red Nourishing Aftershave Lotion — лосьон после бритья",
+    "name": "Red Nourishing — лосьон после бритья",
     "cat": "beard",
     "price": 14,
     "priceFrom": false,
@@ -1060,7 +1060,7 @@ const CATALOGUE = [
   {
     "id": "proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml",
     "brand": "Proraso",
-    "name": "Green Refreshing Aftershave Lotion | Menthol Splash — лосьон после бритья",
+    "name": "Green Refreshing — лосьон после бритья",
     "cat": "beard",
     "price": 14,
     "priceFrom": false,
@@ -1124,7 +1124,7 @@ const CATALOGUE = [
   {
     "id": "proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml",
     "brand": "Proraso",
-    "name": "Beard Oil Wood Spice | Cedar Wood Citrus Fragrance — масло для бороды",
+    "name": "Beard Oil Wood Spice — масло для бороды",
     "cat": "beard",
     "price": 15,
     "priceFrom": false,
@@ -1201,7 +1201,7 @@ const CATALOGUE = [
     "id": "davines-medium-hold-styling-paste",
     "brand": "Davines",
     "name": "Pasta&Love Medium Hold Styling Paste",
-    "cat": "beard",
+    "cat": "styling",
     "price": 24.5,
     "priceFrom": false,
     "img": "img/davines-medium-hold-styling-paste-0.webp",
@@ -1236,7 +1236,7 @@ const CATALOGUE = [
   {
     "id": "anua-heartleaf-pore-control-cleansing-oil",
     "brand": "Anua",
-    "name": "Heartleaf Pore Control Cleansing Oil",
+    "name": "Heartleaf Pore Control Cleansing Oil — гидрофильное масло",
     "cat": "face",
     "price": 22.8,
     "priceFrom": false,
@@ -1268,7 +1268,7 @@ const CATALOGUE = [
   {
     "id": "cosrx-low-ph-good-morning-gel-cleanser",
     "brand": "Cosrx",
-    "name": "Low Ph Good Morning Gel Cleanser",
+    "name": "Low pH Good Morning Gel Cleanser — гель для умывания",
     "cat": "face",
     "price": 11.15,
     "priceFrom": false,
@@ -1342,7 +1342,7 @@ const CATALOGUE = [
       "img/cosrx-advanced-snail-92-all-in-one-cream-0.webp"
     ],
     "sizes": [
-      "100g"
+      "100 г"
     ],
     "varImg": [
       0
@@ -1352,7 +1352,7 @@ const CATALOGUE = [
   {
     "id": "cosrx-advanced-snail-96-mucin-power-essence",
     "brand": "Cosrx",
-    "name": "Advanced Snail 96 Mucin Power Essence — крем для лица",
+    "name": "Advanced Snail 96 Mucin Power Essence — эссенция для лица",
     "cat": "face",
     "price": 21.99,
     "priceFrom": false,
@@ -1372,7 +1372,7 @@ const CATALOGUE = [
   {
     "id": "lumin-skin-recovery-oil",
     "brand": "Lumin Skin",
-    "name": "Recovery Oil",
+    "name": "Recovery Oil — масло для лица",
     "cat": "face",
     "price": 21.95,
     "priceFrom": false,
@@ -1414,7 +1414,7 @@ const CATALOGUE = [
   {
     "id": "lumin-skin-charcoal-scrub-deep-detox",
     "brand": "Lumin Skin",
-    "name": "Charcoal Scrub Deep Detox",
+    "name": "Charcoal Scrub Deep Detox — скраб для лица",
     "cat": "face",
     "price": 18.95,
     "priceFrom": false,
@@ -1435,7 +1435,7 @@ const CATALOGUE = [
   {
     "id": "lumin-skin-charcoal-face-wash-daily-detox",
     "brand": "Lumin Skin",
-    "name": "Charcoal Face Wash Daily Detox",
+    "name": "Charcoal Face Wash Daily Detox — гель для умывания",
     "cat": "face",
     "price": 18.95,
     "priceFrom": false,
@@ -1477,7 +1477,7 @@ const CATALOGUE = [
   {
     "id": "gummy-sheet-mask-madecassoside-sticker",
     "brand": "Gummy",
-    "name": "Sheet Mask Madecassoside",
+    "name": "Sheet Mask Madecassoside — тканевая маска",
     "cat": "face",
     "price": 3,
     "priceFrom": false,
@@ -1791,7 +1791,7 @@ const CATALOGUE = [
   {
     "id": "oversized-t-shirt-unisex",
     "brand": "Rempire",
-    "name": "Your Pretty Face Is Going To Hell — оверсайз футболка",
+    "name": "Your Pretty Face Is Going To Hell — футболка оверсайз",
     "cat": "merch",
     "price": 35,
     "priceFrom": false,
@@ -1854,9 +1854,9 @@ const CATALOGUE = [
       "img/three-kings-1.webp"
     ],
     "sizes": [
-      "Graphite Grey / S-M",
-      "Graphite Grey / M-L",
-      "Graphite Grey / L-XL"
+      "S-M",
+      "M-L",
+      "L-XL"
     ],
     "varImg": [
       0,
@@ -1905,7 +1905,7 @@ const CATALOGUE = [
   {
     "id": "siim-hanikat-x-rempire",
     "brand": "Rempire",
-    "name": "Siim Hanikat × Rempire — оверсайз футболка",
+    "name": "Siim Hanikat × Rempire — футболка оверсайз",
     "cat": "merch",
     "price": 34.99,
     "priceFrom": false,
@@ -1942,7 +1942,7 @@ const CATALOGUE = [
   {
     "id": "oversized-t-shirt-unisex-with-print-love-is-the-gun",
     "brand": "Rempire",
-    "name": "Love Is The Gun — оверсайз футболка",
+    "name": "Love Is The Gun — футболка оверсайз",
     "cat": "merch",
     "price": 39,
     "priceFrom": false,
@@ -1991,9 +1991,9 @@ const CATALOGUE = [
       "img/deep-cut-t-shirt-with-an-extended-back-2.webp"
     ],
     "sizes": [
-      "S-M / Pink",
-      "M-L / Pink",
-      "L-XL / Pink"
+      "S-M",
+      "M-L",
+      "L-XL"
     ],
     "varImg": [
       0,
@@ -2011,7 +2011,7 @@ const CATALOGUE = [
   {
     "id": "oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water",
     "brand": "Rempire",
-    "name": "Three Elements Water — оверсайз футболка",
+    "name": "Three Elements Water — футболка оверсайз",
     "cat": "merch",
     "price": 35,
     "priceFrom": false,
@@ -2048,7 +2048,7 @@ const CATALOGUE = [
   {
     "id": "oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire",
     "brand": "Rempire",
-    "name": "Three Elements Fire — оверсайз футболка",
+    "name": "Three Elements Fire — футболка оверсайз",
     "cat": "merch",
     "price": 35,
     "priceFrom": false,
