@@ -414,7 +414,8 @@ body:has(.drawer) #rempire-feedback { display: none; }
    a 44px-tall transparent hit area. */
 .hero__dots { bottom: 0; padding: 14px 0 18px; }
 .hero__dots button {
-  height: 24px; background: none; display: flex; align-items: center; padding: 0;
+  height: 30px; min-width: 34px; background: none;
+  display: flex; align-items: center; justify-content: center; padding: 0;
 }
 .hero__dots button::after {
   content: ""; display: block; width: 26px; height: 3px; background: rgba(28, 26, 0, .25);
