@@ -31,6 +31,7 @@
     user: '<path d="M12 4a3.6 3.6 0 1 1 0 7.2A3.6 3.6 0 0 1 12 4zM4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/>',
     bag: '<path d="M5.5 8.5h13l-.9 11a1.8 1.8 0 0 1-1.8 1.6H8.2a1.8 1.8 0 0 1-1.8-1.6zM8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5"/>',
     check: '<path d="M4.5 12.5l5 5 10-11"/>',
+    share: '<path d="M12 3.5v12M12 3.5 8.2 7.3M12 3.5l3.8 3.8"/><path d="M6.5 11.5H5a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 5 20.5h14a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5h-1.5"/>',
     instagram: '<rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>',
     facebook: '<path d="M14.6 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H17.8V3.6A21 21 0 0 0 15.4 3.5c-2.4 0-4 1.45-4 4.1v2.3H8.7V13h2.7v8z" fill="currentColor" stroke="none"/>',
     tiktok: '<path d="M15.6 3.5c.4 2.15 1.6 3.4 3.7 3.55v2.4c-1.2.12-2.3-.28-3.55-1.05v4.65c0 5.9-6.45 7.75-9.05 3.52-1.67-2.72-.65-7.5 4.68-7.69v2.53c-.4.07-.84.17-1.24.3-1.2.4-1.87 1.15-1.68 2.48.36 2.55 5.04 3.3 4.65-1.68V3.5z" fill="currentColor" stroke="none"/>'
@@ -42,8 +43,12 @@
   /* Inline SVG rather than flagcdn.com — a decorative flag is not worth a
      third-party request, and the prototype otherwise talks to nobody. */
   function flagSVG(bars) {
-    return "url(\"data:image/svg+xml," + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">' + bars + "</svg>") + "\")";
+    /* Single quotes inside url(): this value also goes into a style="..."
+       attribute in the language menu, and double quotes there closed the
+       attribute early — which is why the menu flags rendered blank while the
+       header one (set via JS) was fine. */
+    return "url('data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20">' + bars + "</svg>") + "')";
   }
   var FLAG = {
     RU: flagSVG('<rect width="30" height="20" fill="#fff"/><rect y="6.67" width="30" height="6.67" fill="#0039a6"/><rect y="13.33" width="30" height="6.67" fill="#d52b1e"/>'),
@@ -250,11 +255,11 @@
      covers for these five only; every other brand falls back to its name set
      in the display face, which keeps the tile grid consistent. */
   var BRAND_LOGOS = {
-    "Captain Fawcett": "brands/captain-fawcett.webp",
-    "Davines": "brands/davines.webp",
-    "Kevin.Murphy": "brands/kevin-murphy.webp",
-    "System 4": "brands/system-4.webp",
-    "Lumin Skin": "brands/lumin-skin.webp"
+    "Captain Fawcett": "/shop/brands/captain-fawcett.webp",
+    "Davines": "/shop/brands/davines.webp",
+    "Kevin.Murphy": "/shop/brands/kevin-murphy.webp",
+    "System 4": "/shop/brands/system-4.webp",
+    "Lumin Skin": "/shop/brands/lumin-skin.webp"
   };
   function brandMark(name, cls) {
     return BRAND_LOGOS[name]
@@ -650,6 +655,7 @@
               // must add the product first — this used to jump to an empty cart
               // and toast «Корзина пуста» at someone standing on a product page
               '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
+          '<div class="pdp__share"><button class="link" data-share="' + p.id + '">' + icon("share") + "Поделиться</button></div>" +
           '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
           // t-shirts get t-shirt accordions — INCI on a футболка read absurd
           (p.cat === "merch"
@@ -1564,6 +1570,7 @@
       patchPdp(); return;
     }
     if (d.notify !== undefined) { toast("Записали — сообщим, когда появится ✓"); return; }
+    if (d.share) { shareProduct(d.share); return; }
     if (d.qty) { S.qty = Math.max(1, Math.min(9, S.qty + Number(d.qty))); patchPdp(); return; }
     if (d.gal !== undefined) { S.gallery = Number(d.gal); patchPdp(); return; }
     if (d.login !== undefined) {
@@ -1671,6 +1678,43 @@
     svg.classList.add("is-ident");
   }
 
+  /* Every product has a real page at /shop/p/<id>/ carrying its own link
+     preview, so sharing one shares that product rather than the shop. */
+  function productUrl(id) {
+    return location.origin + "/shop/p/" + id + "/";
+  }
+  function shareProduct(id) {
+    var p = byId(id), url = productUrl(id);
+    var title = p.brand + " — " + p.name;
+    if (navigator.share) {
+      navigator.share({ title: title, text: title, url: url }).catch(function () {});
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        toast("Ссылка скопирована ✓");
+      }).catch(function () { toast(url); });
+      return;
+    }
+    toast(url);
+  }
+
+  /* A product page is the same app served from a deeper path — open that
+     product instead of the home screen, and keep the URL. */
+  function routeFromPath() {
+    var m = location.pathname.match(/\/shop\/p\/([^/]+)\/?$/);
+    if (!m) return false;
+    var id = decodeURIComponent(m[1]);
+    var found = null;
+    CATALOGUE.forEach(function (x) { if (x.id === id) found = x; });
+    if (!found) return false;
+    S.productId = found.id;
+    S.size = 0; S.qty = 1;
+    S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
+    S.screen = "product";
+    return true;
+  }
+
   function intro() {
     var reduce = false;
     try { reduce = matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
@@ -1702,6 +1746,7 @@
     else if (mq.addListener) mq.addListener(onMQ);
   } catch (e) {}
 
+  routeFromPath();
   render();
   restartHero();
   intro();

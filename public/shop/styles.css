@@ -674,9 +674,15 @@ body:has(.stickybar) .ftr {
 }
 .toolbar__sortlbl { flex-shrink: 0; }
 .toolbar__sort .sel { flex: 1; min-width: 0; }
+/* Flex, not a fixed 3-column grid: the brand view drops the Фильтры button,
+   so with `auto auto 1fr` the sort landed in column 2 and `justify-self: end`
+   had nothing to push against — it sat on the left. margin-left:auto is right
+   whether the toolbar has two children or three. */
 @media (min-width: 640px) {
-  .toolbar { grid-template-columns: auto auto 1fr; }
-  .toolbar__sort { grid-column: auto; justify-self: end; border-top: none; padding-top: 0; }
+  .toolbar { display: flex; flex-wrap: wrap; }
+  .toolbar__sort {
+    margin-left: auto; border-top: none; padding-top: 0; flex: 0 0 auto;
+  }
   .toolbar__sort .sel { flex: 0 0 auto; min-width: 168px; }
 }
 
@@ -1165,3 +1171,8 @@ body:has(.drawer) #rempire-feedback { display: none; }
 
 /* cover fill last: merch is a model shot, it fills its frame */
 .ph--cover { inset: 0; background-size: cover; }
+
+/* share sits under the payment shortcut on the product page */
+.pdp__share { text-align: center; margin: -8px 0 20px; }
+.pdp__share .link { display: inline-flex; align-items: center; gap: 7px; padding: 10px 4px; }
+.pdp__share svg { width: 15px; height: 15px; stroke-width: 1.6; }
