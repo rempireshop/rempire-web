@@ -135,9 +135,15 @@ img { max-width: 100%; display: block; }
   font-size: 11px; letter-spacing: .04em; text-align: center;
   padding: 7px var(--gutter);
 }
+/* The header rows sit in the SAME centred column as the page content
+   (.wrap and .hero__box both cap at --maxw and auto-margin). Without this the
+   header was full-bleed: on a 2000px screen the logo sat at the window edge
+   while the hero began ~400px in, so nothing in the header lined up with
+   anything below it. */
 .hdr__row {
   display: flex; align-items: center; gap: 10px 18px;
   padding: 10px var(--gutter);
+  max-width: var(--maxw); margin-inline: auto;
 }
 .hdr__logo {
   display: inline-flex; align-items: center; gap: 9px;
@@ -204,6 +210,7 @@ img { max-width: 100%; display: block; }
 
 .hdr__nav {
   display: flex; gap: 18px; padding: 0 var(--gutter) 9px;
+  max-width: var(--maxw); margin-inline: auto;
   overflow-x: auto; white-space: nowrap; font-size: 13.5px;
   scrollbar-width: none;
   /* the row scrolls sideways on a phone; fade the right edge so that reads */
@@ -211,14 +218,6 @@ img { max-width: 100%; display: block; }
   mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent);
 }
 @media (min-width: 900px) { .hdr__nav { -webkit-mask-image: none; mask-image: none; } }
-/* Once the row stops scrolling, spread the categories across the full content
-   width: the last one then lands under the cart, so the header has the same
-   two vertical edges as everything below it. Deliberately NOT a centred logo —
-   the whole page hangs off one hard left edge (hero copy, breadcrumbs, section
-   titles, cards), and a centred mark would be the only thing on a second axis. */
-@media (min-width: 1100px) {
-  .hdr__nav { justify-content: space-between; gap: 12px; }
-}
 .hdr__nav::-webkit-scrollbar { display: none; }
 .hdr__nav button {
   border: none; background: none; padding: 11px 0; cursor: pointer;
