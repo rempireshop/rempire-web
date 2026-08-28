@@ -169,6 +169,7 @@
     promoErr: false,
     email: "",
     emailTouched: false,
+    shipTouched: false,   // delivery errors stay quiet until they try to continue
     loggedIn: false,
     acctMethod: 1,
     acctMachine: 0,
@@ -796,10 +797,54 @@
   }
 
   // ---------- checkout ----------
+  /* Which delivery fields matter depends on how the parcel travels: a
+     pickup needs no address at all, a parcel machine needs a name for the
+     label but no street, a courier needs the lot. The phone is always
+     needed — the courier rings it and the machine texts it. */
+  var SHIP_MSG = {
+    name: "Впишите имя и фамилию — их напечатают на посылке.",
+    addr: "Впишите улицу и дом.",
+    zip: "Впишите индекс.",
+    city: "Впишите город.",
+    phone: "Впишите телефон — по нему звонит курьер и приходит смс от пакомата."
+  };
+  function shipRequired(key) {
+    if (key === "phone") return true;
+    var sel = method();
+    if (sel.pickup) return false;
+    if (key === "name") return true;
+    return !sel.pm;
+  }
+  function phoneOk() { return S.ship.phone.replace(/\D/g, "").length >= 7; }
+  function shipEmpty(key) { return key === "phone" ? !phoneOk() : !S.ship[key].trim(); }
+  function shipMissing() {
+    return ["name", "addr", "zip", "city", "phone"].filter(function (k) {
+      return shipRequired(k) && shipEmpty(k);
+    });
+  }
+  function shipBad(key) { return S.shipTouched && shipRequired(key) && shipEmpty(key); }
+  function shipMsg(key) {
+    if (key === "phone" && S.ship.phone.trim()) return "Проверьте номер — похоже, в нём не хватает цифр.";
+    return SHIP_MSG[key];
+  }
+
   function shipField(key, label, ph, auto, mode) {
+    var bad = shipBad(key);
+    // the note lives inside the label so the two-column индекс/город row keeps
+    // each message in its own cell
     return '<label class="field"><span class="field__label">' + label + "</span>" +
       '<input class="input" data-shipf="' + key + '" value="' + esc(S.ship[key]) + '" placeholder="' + ph + '"' +
-      (auto ? ' autocomplete="' + auto + '"' : "") + (mode ? ' inputmode="' + mode + '"' : "") + "></label>";
+      (auto ? ' autocomplete="' + auto + '"' : "") + (mode ? ' inputmode="' + mode + '"' : "") +
+      ' aria-invalid="' + bad + '">' +
+      (bad ? '<div class="err" role="alert">' + shipMsg(key) + "</div>" : "") + "</label>";
+  }
+  /* Open the step that is wrong, draw its errors and put the caret in the
+     first field that needs a hand. */
+  function failStep(n, msg) {
+    S.coStep = n;
+    render();
+    if (msg) toast(msg);
+    refocus('.costep__body [aria-invalid="true"]');
   }
   function coHead(n, title, value) {
     var open = S.coStep === n, done = S.coStep > n;
@@ -895,12 +940,19 @@
           (S.promoOk ? '<div class="cosum__row"><span>REMPIRE10 — скидка 10%</span><span class="num">−' + eur(discount()) + "</span></div>" : "") +
           '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + sel.l + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
           '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
-          '<button class="btn btn--wide co__pay" data-pay>Оплатить ' + eur(total()) + "</button>" +
-          '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>' +
+          /* Both pay buttons wait for the payment step. Offered from step one
+             they compete with «Далее» for the same tap and invite a shopper to
+             pay before choosing how the parcel travels or how they are paying. */
+          (step === 3
+            ? '<button class="btn btn--wide co__pay" data-pay>Оплатить ' + eur(total()) + "</button>" +
+              '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>'
+            : "") +
           "</div></details></div>" +
 
       "</div></div>" +
-      '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span><button class="btn" data-pay>Оплатить</button></div>';
+      (step === 3
+        ? '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span><button class="btn" data-pay>Оплатить</button></div>'
+        : "");
   }
   function payMark(k) {
     if (typeof PAYLOGOS === "undefined") return "";
@@ -1332,6 +1384,19 @@
     else if (note) field.insertAdjacentHTML("afterend", note);
   }
 
+  /* Same rule as the e-mail field: change the two things that change and
+     leave the rest of the DOM alone, or the re-render swallows the click that
+     caused the blur. */
+  function patchShip(input) {
+    var key = input.dataset.shipf, bad = shipBad(key);
+    input.setAttribute("aria-invalid", String(bad));
+    var err = input.parentNode.querySelector(".err");
+    if (bad) {
+      if (err) err.innerHTML = shipMsg(key);
+      else input.insertAdjacentHTML("afterend", '<div class="err" role="alert">' + shipMsg(key) + "</div>");
+    } else if (err) err.remove();
+  }
+
   function patchCatalog() {
     // The drawer footer must update on every path, including the ones that
     // fall through to a full render — otherwise it freezes at a stale count.
@@ -1638,17 +1703,28 @@
     }
     if (d.checkout !== undefined) { if (!S.cart.length) { toast("Корзина пуста"); return; } go("checkout"); return; }
     if (d.pay !== undefined) {
-      S.emailTouched = true;
-      if (emailBad()) { S.coStep = 1; render(); toast("Проверьте e-mail — на него придёт подтверждение заказа"); return; }
+      S.emailTouched = true; S.shipTouched = true;
+      /* Nothing was checked here before: an order went through with no
+         address, no phone and no company for an invoice. Send the shopper to
+         the step that is short, with the fields marked, rather than refusing
+         with a toast and leaving them to hunt. */
+      if (emailBad()) { return failStep(1, "Проверьте e-mail — на него придёт подтверждение заказа"); }
+      if (shipMissing().length) { return failStep(2, "Заполните данные доставки"); }
+      if (S.pay === 3 && !S.invoiceCo.trim()) { return failStep(3, "Укажите фирму и регистрационный номер"); }
       // a finished order must not leave its promo, address or step state
       // behind for the next one
       S.cart = []; S.promo = ""; S.promoOk = false; S.promoErr = false; S.sumOpen = null;
       S.ship = { name: "", addr: "", zip: "", city: "", phone: "" };
+      S.emailTouched = false; S.shipTouched = false;
       persist(); go("done"); return;
     }
     if (d.step) {
       var n = Number(d.step);
-      if (n > 1 && S.coStep === 1) { S.emailTouched = true; if (emailBad()) { render(); return; } }
+      // forward only — going back to change something is always allowed
+      if (n > S.coStep) {
+        if (S.coStep === 1) { S.emailTouched = true; if (emailBad()) { return failStep(1); } }
+        if (S.coStep === 2) { S.shipTouched = true; if (shipMissing().length) { return failStep(2); } }
+      }
       S.coStep = n; render(); return;
     }
     // checkout selections re-render the step, which destroys the clicked
@@ -1758,6 +1834,10 @@
     if (e.target.matches("[data-email]")) {
       S.emailTouched = true;
       if (S.screen === "checkout" || S.screen === "account") patchEmail(e.target);
+    } else if (e.target.matches("[data-shipf]") && S.shipTouched) {
+      // only once they have tried to continue: marking fields red at someone
+      // who is still working down the form is nagging, not helping
+      patchShip(e.target);
     }
   }, true);
 
