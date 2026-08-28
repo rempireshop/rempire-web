@@ -1307,6 +1307,31 @@
 
   /* Filtering re-renders only the grid. A full render would rebuild the open
      filter drawer under the user's finger — that was the flicker. */
+  /* Leaving the e-mail field used to re-render the whole screen so the
+     validation note could appear. That ate the first click on «Далее»:
+     pressing the button blurs the field, the render replaces the button under
+     the pointer, and a mouseup on an element that was not the one moused down
+     on is not a click — so the shopper had to press twice. Only two things
+     ever change here, so change those and leave the rest of the DOM, and the
+     button being pressed, where they are. */
+  function patchEmail(input) {
+    // the account screen's plain e-mail row carries no aria-invalid and takes
+    // no note; that attribute is what marks the two validated fields
+    if (!input || !input.hasAttribute("aria-invalid")) return;
+    var field = input.closest(".field");
+    if (!field) return;
+    input.setAttribute("aria-invalid", String(emailBad()));
+    var note = emailBad()
+      ? '<div class="err" role="alert">' + emailMsg() + "</div>"
+      : S.screen === "checkout"
+        ? '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>'
+        : "";
+    var next = field.nextElementSibling;
+    var isNote = next && (next.classList.contains("err") || next.classList.contains("hint"));
+    if (isNote) { if (note) next.outerHTML = note; else next.remove(); }
+    else if (note) field.insertAdjacentHTML("afterend", note);
+  }
+
   function patchCatalog() {
     // The drawer footer must update on every path, including the ones that
     // fall through to a full render — otherwise it freezes at a stale count.
@@ -1732,7 +1757,7 @@
   document.addEventListener("blur", function (e) {
     if (e.target.matches("[data-email]")) {
       S.emailTouched = true;
-      if (S.screen === "checkout" || S.screen === "account") render();
+      if (S.screen === "checkout" || S.screen === "account") patchEmail(e.target);
     }
   }, true);
 
