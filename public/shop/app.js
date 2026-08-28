@@ -797,10 +797,12 @@
   }
 
   // ---------- checkout ----------
-  /* Which delivery fields matter depends on how the parcel travels: a
-     pickup needs no address at all, a parcel machine needs a name for the
-     label but no street, a courier needs the lot. The phone is always
-     needed — the courier rings it and the machine texts it. */
+  /* Which delivery fields matter depends on how the parcel travels: a parcel
+     machine needs a name for the label but no street, a courier needs the
+     lot, and both need a phone — the courier rings it, the machine texts it.
+     A pickup needs nothing: they are coming to the counter, and the order in
+     the confirmation e-mail is enough to hand it over. The phone is still
+     offered there, just not demanded. */
   var SHIP_MSG = {
     name: "Впишите имя и фамилию — их напечатают на посылке.",
     addr: "Впишите улицу и дом.",
@@ -809,10 +811,9 @@
     phone: "Впишите телефон — по нему звонит курьер и приходит смс от пакомата."
   };
   function shipRequired(key) {
-    if (key === "phone") return true;
     var sel = method();
     if (sel.pickup) return false;
-    if (key === "name") return true;
+    if (key === "name" || key === "phone") return true;
     return !sel.pm;
   }
   function phoneOk() { return S.ship.phone.replace(/\D/g, "").length >= 7; }
