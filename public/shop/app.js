@@ -1333,10 +1333,89 @@
     observeSentinel();
   }
 
+  /* ---------- history ----------
+     Screen changes used to be state only, with the URL frozen at /shop/, so
+     the phone's Back gesture left the shop from wherever the shopper had got
+     to — and a category could not be linked to at all. Every navigation now
+     writes a path that names the screen, and Back reads that path back into
+     the state. */
+  var BRAND_BY_SLUG = {};
+  function slugify(s) {
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  CATALOGUE.forEach(function (p) { BRAND_BY_SLUG[slugify(p.brand)] = p.brand; });
+
+  function pathFor() {
+    if (S.screen === "product" && S.productId) return "/shop/p/" + encodeURIComponent(S.productId) + "/";
+    if (S.screen === "catalog") return S.brand ? "/shop/b/" + slugify(S.brand) + "/" : "/shop/c/" + S.cat + "/";
+    if (S.screen === "search") return "/shop/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
+    if (S.screen === "home") return "/shop/";
+    return "/shop/" + S.screen + "/";
+  }
+  function here() { return location.pathname + location.search; }
+  /* Stamp the live scroll onto the entry being left, so Back returns to the
+     place on the page rather than to the top of it. */
+  function stamp() {
+    try {
+      var st = history.state || {};
+      history.replaceState({ y: window.scrollY, shown: S.shown, drawer: st.drawer }, "");
+    } catch (e) {}
+  }
+  function navTo(replace) {
+    var p = pathFor();
+    try {
+      /* Leaving an open drawer consumes the drawer's entry rather than
+         stacking on top of it — otherwise Back from the next screen lands on
+         a marker for a drawer that is no longer open and appears to do
+         nothing. Re-picking the screen you are already on replaces too. */
+      if (replace || S.histDrawer || p === here()) {
+        history.replaceState({ y: 0, shown: S.shown }, "", p);
+      } else {
+        stamp();
+        history.pushState({ y: 0, shown: 12 }, "", p);
+      }
+    } catch (e) {}
+    S.histDrawer = false;
+  }
+
+  /* An open drawer parks one entry on the stack, so Back closes it instead of
+     leaving the shop. On a phone the cart is a full-screen overlay, and Back
+     is the gesture people reach for to dismiss one. */
+  function openDrawer(which) {
+    if (which === "cart") S.cartOpen = true; else S.filterOpen = true;
+    if (!S.histDrawer) {
+      stamp();
+      try { history.pushState({ y: window.scrollY, shown: S.shown, drawer: which }, "", here()); } catch (e) {}
+      S.histDrawer = true;
+    }
+    render();
+  }
+  function closeDrawers() {
+    S.cartOpen = false; S.filterOpen = false;
+    // popstate does the rendering when there is a marker to spend
+    if (S.histDrawer) { S.histDrawer = false; history.back(); return; }
+    render();
+  }
+
+  window.addEventListener("popstate", function (e) {
+    var st = e.state || {};
+    S.histDrawer = !!st.drawer;
+    S.langOpen = false;
+    routeFromPath();
+    S.cartOpen = st.drawer === "cart";
+    S.filterOpen = st.drawer === "filter";
+    if (st.shown) S.shown = st.shown;
+    render();
+    window.scrollTo(0, st.y || 0);
+  });
+
   function go(screen) {
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
     if (screen === "catalog") S.shown = 12;
     if (screen === "checkout") S.coStep = 1;
+    // the receipt replaces the checkout it came from: Back from it belongs on
+    // the shop, not on a payment form for an order already placed
+    navTo(screen === "done");
     window.scrollTo({ top: 0 });
     render();
   }
@@ -1497,10 +1576,10 @@
       if (byId(d.buynow).stock === "out") { toast("Товара нет в наличии"); return; }
       addToCart(d.buynow); go("checkout"); return;
     }
-    if (d.cart !== undefined) { S.cartOpen = true; render(); return; }
-    if (d.closecart !== undefined) { S.cartOpen = false; render(); return; }
-    if (d.filter !== undefined) { S.filterOpen = true; render(); return; }
-    if (d.closefilter !== undefined) { S.filterOpen = false; render(); return; }
+    if (d.cart !== undefined) { openDrawer("cart"); return; }
+    if (d.closecart !== undefined) { closeDrawers(); return; }
+    if (d.filter !== undefined) { openDrawer("filter"); return; }
+    if (d.closefilter !== undefined) { closeDrawers(); return; }
     if (d.clearfilter !== undefined) {
       S.brandFilter = []; S.onlyInStock = false; S.shown = 12;
       // «Сбросить» inside the drawer keeps the drawer open so you can keep
@@ -1606,12 +1685,17 @@
   document.addEventListener("input", function (e) {
     var t = e.target;
     if (t.matches("[data-search]")) {
+      var wasSearch = S.screen === "search";
       S.query = t.value;
-      if (S.screen !== "search") { S.screen = "search"; S.cartOpen = false; S.filterOpen = false; }
+      if (!wasSearch) { S.screen = "search"; S.cartOpen = false; S.filterOpen = false; }
+      // one entry for the search, then the query rides along on it: a push per
+      // keystroke would bury the previous screen under a dozen entries
+      navTo(wasSearch);
       render();
     } else if (t.matches("[data-search2]")) {
       S.query = t.value;
       var pos = t.selectionStart;
+      navTo(true);
       render();
       var n = document.querySelector("[data-search2]");
       if (n) { n.focus(); n.setSelectionRange(pos, pos); }
@@ -1654,7 +1738,7 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
-      if (S.cartOpen || S.filterOpen) { S.cartOpen = false; S.filterOpen = false; render(); }
+      if (S.cartOpen || S.filterOpen) { closeDrawers(); }
       else if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
     }
@@ -1704,19 +1788,43 @@
     toast(url);
   }
 
-  /* A product page is the same app served from a deeper path — open that
-     product instead of the home screen, and keep the URL. */
+  /* The shop is one page served from several paths. Read the path into the
+     state so a deep link, a reload and the Back button all land on the same
+     screen — this is the only thing that turns a URL back into a view. */
   function routeFromPath() {
-    var m = location.pathname.match(/\/shop\/p\/([^/]+)\/?$/);
-    if (!m) return false;
-    var id = decodeURIComponent(m[1]);
-    var found = null;
-    CATALOGUE.forEach(function (x) { if (x.id === id) found = x; });
-    if (!found) return false;
-    S.productId = found.id;
-    S.size = 0; S.qty = 1;
-    S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
-    S.screen = "product";
+    var p = location.pathname.replace(/\/+$/, "");
+    var m;
+    if ((m = p.match(/\/shop\/p\/([^/]+)$/))) {
+      var id = decodeURIComponent(m[1]), found = null;
+      CATALOGUE.forEach(function (x) { if (x.id === id) found = x; });
+      if (found) {
+        S.productId = found.id;
+        S.size = 0; S.qty = 1;
+        S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
+        S.screen = "product";
+        return true;
+      }
+    }
+    if ((m = p.match(/\/shop\/c\/([^/]+)$/)) && (m[1] === "all" || CAT_NAMES[m[1]])) {
+      S.brand = ""; S.cat = m[1]; S.shown = 12; S.screen = "catalog";
+      return true;
+    }
+    if ((m = p.match(/\/shop\/b\/([^/]+)$/)) && BRAND_BY_SLUG[decodeURIComponent(m[1])]) {
+      S.brand = BRAND_BY_SLUG[decodeURIComponent(m[1])]; S.shown = 12; S.screen = "catalog";
+      return true;
+    }
+    if (/\/shop\/search$/.test(p)) {
+      var q = location.search.match(/[?&]q=([^&]*)/);
+      S.query = q ? decodeURIComponent(q[1].replace(/\+/g, " ")) : "";
+      S.screen = "search";
+      return true;
+    }
+    if ((m = p.match(/\/shop\/(brands|account|admin)$/))) { S.screen = m[1]; return true; }
+    /* A receipt and a payment form are not places to land cold: /shop/done/
+       has no order behind it on a fresh load, and checkout with an empty
+       basket only bounces the shopper straight back out. */
+    if (/\/shop\/checkout$/.test(p) && S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }
+    S.screen = "home";
     return true;
   }
 
@@ -1752,6 +1860,12 @@
   } catch (e) {}
 
   routeFromPath();
+  /* Scroll is restored from the entry's own record; letting the browser also
+     try leaves it fighting a page that has not been rendered yet. */
+  try {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    history.replaceState({ y: 0, shown: S.shown }, "", here());
+  } catch (e) {}
   render();
   restartHero();
   intro();
