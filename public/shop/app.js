@@ -634,7 +634,13 @@
           }).join("") + "</div>" : "") +
         "</div>" +
         "<div>" +
-          '<button class="card__brand pdp__brand" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</button>" +
+          // brand line and share on one byline row: the brand label is a short
+          // micro-caption with the whole row empty to its right, and sharing is
+          // metadata about the product rather than a step in buying it
+          '<div class="pdp__idrow">' +
+            '<button class="card__brand pdp__brand" data-go-brand="' + esc(p.brand) + '">' + esc(p.brand) + " →</button>" +
+            '<button class="pdp__share" data-share="' + p.id + '">' + icon("share") + "<span>Поделиться</span></button>" +
+          "</div>" +
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
           '<div class="num pdp__price"><span data-price>' + eur(sizePrice(p, S.size)) + "</span>" +
             (p.stock === "out" ? ' <span class="chip chip--out">нет в наличии</span>'
@@ -655,7 +661,6 @@
               // must add the product first — this used to jump to an empty cart
               // and toast «Корзина пуста» at someone standing on a product page
               '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
-          '<div class="pdp__share"><button class="link" data-share="' + p.id + '">' + icon("share") + "Поделиться</button></div>" +
           '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
           // t-shirts get t-shirt accordions — INCI on a футболка read absurd
           (p.cat === "merch"
@@ -1465,7 +1470,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
