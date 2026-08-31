@@ -255,9 +255,20 @@ the card in Shopify POS and it processes through it. Which means:
     wave) handles the *inventory* side — one stock for salon and web — and
     pairs with either reader above for the card itself.
 
+**«А не глобальнее ли Stripe?»** Cards are global by nature: a buyer in
+Germany or the US paying through MakeCommerce is just paying
+Visa/Mastercard/Apple Pay — rails that work worldwide behind any PSP. The
+only geographically local method here is the bank links, and that is
+exactly what Stripe lacks entirely. Stripe's real advantages (exotic
+currencies, a future non-EU entity, subscription billing, dev tooling) are
+problems this shop doesn't have; its real gap is Renat's first-named
+requirement. If a concrete Stripe-only need ever appears, it joins
+*alongside* MakeCommerce in a day — both are zero-monthly, and the checkout
+is provider-agnostic, so nothing is locked in.
+
 **Recommendation:**
 - **Web: MakeCommerce** — one agreement, bank links + cards + both wallets,
-  zero monthly. Sign-up is self-service at makecommerce.net (company
+  zero monthly, and card acceptance is worldwide anyway. Sign-up is self-service at makecommerce.net (company
   details + IBAN; KYC a few days). Montonio revisited only past ~20
   orders/month if Premium's 0,05 €/tx starts to matter.
 - **Salon: identify the terminal first** (below) — it may not need
