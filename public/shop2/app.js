@@ -2034,9 +2034,20 @@
      other screen) it is simply white. Feedback #1 rides on the same class —
      the header bleeds its background upward (see CSS), so the hole iOS Safari
      leaves while its address bar collapses shows header colour, not a gap. */
+  var lastY = 0;
   function paintTint() {
-    var tint = S.screen === "home" && window.scrollY < 340;
+    var y = window.scrollY;
+    var tint = S.screen === "home" && y < 340;
     document.documentElement.toggleAttribute("data-tint", tint);
+    /* The phone's chrome was eating half the screen, so the header gets the
+       standard mobile contract: scrolling down puts it away, any scroll up
+       brings it back, and near the top it always shows. CSS applies this
+       below 768px only — the desktop has room and keeps everything. */
+    var hide = y > 160 && y > lastY + 4;
+    var show = y < 160 || y < lastY - 4;
+    if (hide) document.documentElement.setAttribute("data-hidenav", "");
+    else if (show) document.documentElement.removeAttribute("data-hidenav");
+    lastY = y;
     // the subcat row docks right under the sticky header; the header's
     // height differs by breakpoint, so it is measured, not guessed
     var h = document.querySelector(".hdr");

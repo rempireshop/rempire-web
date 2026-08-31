@@ -1313,3 +1313,18 @@ body:has(.drawer) #rempire-feedback { display: none; }
   .ftr__accs { display: grid; grid-template-columns: 1fr 1fr; gap: 0 44px; border-top: none; }
   .ftr__acc:nth-child(1), .ftr__acc:nth-child(2) { border-top: 1px solid var(--rule); }
 }
+
+
+/* ---------- v2 mobile: give the screen back ---------- */
+@media (max-width: 767px) {
+  /* The header search duplicated the bottom nav's Поиск tab, which opens a
+     search screen with its own field — so the always-on bar was pure cost:
+     a full row of every viewport. Gone; search lives in the bottom nav. */
+  .hdr__searchwrap { display: none; }
+
+  /* Scroll down → the whole header (promo, row, categories) slides away and
+     the subcat chips take the top edge; scroll up → it returns. */
+  .hdr { transition: transform .28s var(--ease), background .25s var(--ease); }
+  html[data-hidenav] .hdr { transform: translateY(-100%); }
+  html[data-hidenav] .subcats { top: 0; }
+}
