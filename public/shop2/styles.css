@@ -1249,8 +1249,18 @@ body:has(.drawer) #rempire-feedback { display: none; }
   transition: color .18s var(--ease);
 }
 .brandstrip__it:hover { color: var(--ink); }
-/* socials share the © line: signature left, socials centred, admin right */
-.socials--bottom { display: inline-flex; gap: 14px; margin-inline: auto; }
+/* socials share the © line — truly centred. margin:auto in the old flex row
+   centred them between the neighbours, and © is wider than «Админка», so the
+   icons sat visibly off the page's axis. Equal 1fr side columns pin the
+   middle cell to the actual centre regardless of what the sides weigh. */
+.ftr__bottom { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.ftr__bottom .ftr__sig { justify-self: start; }
+.socials--bottom { display: inline-flex; gap: 14px; justify-self: center; }
+.ftr__bottom .ftr__admin { justify-self: end; }
+@media (max-width: 560px) {
+  .ftr__bottom { grid-template-columns: 1fr; gap: 12px; justify-items: center; }
+  .ftr__bottom .ftr__sig, .ftr__bottom .ftr__admin { justify-self: center; }
+}
 
 /* #2 — subcategory chips: a second scrollable row, never a dropdown */
 .subcats {
