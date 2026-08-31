@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
       { source: "/shop/c/:cat", destination: "/shop/index.html" },
       { source: "/shop/b/:brand", destination: "/shop/index.html" },
       { source: "/shop/:screen(search|brands|account|checkout|done|admin)", destination: "/shop/index.html" },
+      /* /shop2/ is the second-round-feedback variant living beside the
+         original for comparison. One shell serves every path under it —
+         including /shop2/p/..., which has no per-product files of its own. */
+      { source: "/shop2/:path+", destination: "/shop2/index.html" },
     ];
   },
 };
