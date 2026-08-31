@@ -1277,6 +1277,10 @@ body:has(.drawer) #rempire-feedback { display: none; }
 /* #5 — footer folded into short rows */
 .ftr__accs { border-top: 1px solid var(--rule); }
 .ftr__acc { border-bottom: 1px solid var(--rule); }
+/* the last row's underline would sit right on the © line's top border and
+   read as one thick rule — the © border is the closing line, so the last
+   accordion gives its own up */
+.ftr__acc:last-child { border-bottom: none; }
 .ftr__acc summary {
   cursor: pointer; list-style: none; position: relative;
   padding: 13px 26px 13px 0;
