@@ -217,22 +217,33 @@ At 5 orders × 40 €: Stripe costs ~4,25 €/мес all-in. Montonio would cost
 (~0,70 €/order vs a card) only overtakes Montonio's fee at roughly
 **17–20 orders/month**; below that the subscription eats the saving.
 
-**One thing to verify first — what "Stripe" actually is there.** Check
-Shopify admin → Settings → Payments:
-- If it says **Shopify Payments** — that is Shopify's own processor (Stripe
-  under the hood, but **not his account**). It cannot leave Shopify; it
-  simply ends when the shop moves. Not a problem, just not portable.
-- The **salon till runs on Stripe** — if that is a real Stripe account
-  (login at dashboard.stripe.com), the new shop plugs into **that same
-  account**: Developers → API keys, and online payments join the salon's
-  payouts in one place. No new contract, no onboarding wait, zero monthly.
-- If the salon "Stripe" turns out to be a terminal resold by someone else,
-  opening a fresh Stripe account is a same-day self-service signup anyway.
+**Resolved (31.08, from Renat):** the web shop runs **Shopify Payments**,
+and the salon "Stripe" is the **same Shopify Payments** — he enters/attaches
+the card in Shopify POS and it processes through it. Which means:
+
+- **There is no portable payment account.** Shopify Payments is Shopify's
+  own processor (Stripe infrastructure, not his account); both the web
+  payments **and the salon till** end the day Shopify closes.
+- **The till is therefore part of the migration scope** — new item, nobody
+  had it on the list. At the switch the salon needs a replacement for
+  taking cards in person. Options, all without monthly fees:
+  - **SumUp** — a ~30–40 € reader, ~1,95 %/tx, no subscription; works
+    standalone, five-minute setup. The boring safe answer.
+  - **MakeCommerce POS app** — card taking on a smartphone, 1,5 % + 0,05 €,
+    no fixed cost ([source](https://maksekeskus.ee/hinnad/)); pairs
+    naturally if MakeCommerce later takes the web bank links too.
+  - **Our own till screen** («продажа на месте», already in the second
+    wave) handles the *inventory* side — one stock for salon and web — and
+    pairs with either reader above for the card itself.
 
 **Recommendation:**
-- **Launch on Stripe** (his salon account if it is one, a fresh one
-  otherwise) — zero monthly, cards + Apple/Google Pay day one. Our
-  checkout's payment step doesn't care which provider sits behind it.
+- **Web: open a fresh Stripe account** — self-service, same-day, zero
+  monthly, cards + Apple/Google Pay day one. Our checkout's payment step
+  doesn't care which provider sits behind it, so a later move to
+  MakeCommerce/Montonio for bank links stays open.
+- **Salon: pick the reader before the switch date** (SumUp or MakeCommerce
+  app), so the till never has a gap. Cost of the whole answer: one-time
+  reader ~30–40 €, no subscriptions.
 - **Add bank links when orders justify it**: MakeCommerce first if its promo
   rate applies (no monthly — safe at any volume), Montonio once he's
   steadily past ~20 orders/month.
@@ -266,8 +277,9 @@ is still open).**
 7. Resend domain verification + Gmail send-as (#10); free MX forwarder for
    incoming.
 8. Renat sends the carrier API email (#8), DPD first.
-9. Check what Settings → Payments says (#12) and whether the salon Stripe
-   is a real Stripe account.
+9. ~~Check what Settings → Payments says~~ — resolved: Shopify Payments on
+   both web and POS, nothing portable (#12). Open a fresh Stripe account
+   (can happen any time, 1 day) and pick the salon reader before Phase 4.
 
 **Phase 3 — build v1 (after the freeze).**
 10. Real orders (DB, numbers, statuses, emails) · checkout wired to Stripe ·
@@ -278,7 +290,8 @@ is still open).**
 **Phase 4 — the switch (one evening, reversible).**
 11. Final content sync → repoint the domain's A/CNAME to the new shop →
     301 redirects live → watch GSC. Shopify subscription stays paid one
-    more month as the fallback, then closes. Parcely closes with it.
+    more month as the fallback, then closes — Parcely closes with it, and
+    the salon switches to its new reader the same day (#12).
 
 
 ---
