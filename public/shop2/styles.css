@@ -1229,6 +1229,7 @@ html[data-tint] .hdr:hover { background: var(--page); }
    28px gaps, native scrollbar left visible so a desktop knows the row moves */
 .brandstrip__row {
   display: flex; align-items: center; gap: 28px;
+  max-width: var(--maxw); margin-inline: auto;
   padding: 10px var(--gutter) 12px;
   overflow-x: auto; -webkit-overflow-scrolling: touch;
   scrollbar-width: thin; scrollbar-color: var(--shell-dark) transparent;
