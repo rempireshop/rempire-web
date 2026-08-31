@@ -284,7 +284,16 @@ img { max-width: 100%; display: block; }
 }
 .botnav__ico { position: relative; display: inline-flex; }
 .botnav button svg { width: 21px; height: 21px; stroke-width: 1.5; }
-.botnav button[aria-current="true"], .botnav button[aria-expanded="true"] { color: var(--ink); box-shadow: inset 0 2px 0 var(--ink); }
+/* The active marker used to be an inset box-shadow. Five tabs across a
+   390px phone give each a fractional width, and the browser bleeds an inset
+   shadow a subpixel down both side edges of such a box — faint full-height
+   hairlines that read as borders (Renat saw a "left border" on Поиск).
+   A real 2px bar has edges exactly where the tab's are. */
+.botnav button { position: relative; }
+.botnav button[aria-current="true"], .botnav button[aria-expanded="true"] { color: var(--ink); }
+.botnav button[aria-current="true"]::after, .botnav button[aria-expanded="true"]::after {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--ink);
+}
 .botnav button[aria-current="true"] svg, .botnav button[aria-expanded="true"] svg { stroke-width: 1.9; }
 .botnav .badge { top: -4px; right: -9px; }
 @media (min-width: 768px) { .botnav { display: none; } }
