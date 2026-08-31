@@ -103,11 +103,18 @@ DPD already invoices monthly) — the API changes workflow, not pricing.
 | **Omniva** | Parcel API (XML/JSON): registration, label PDF, manifest; public tracking endpoint | Business client contract → klienditugi issues partner code + API password |
 | **SmartPosti (Itella EE)** | SmartShip / Posti API: shipments, labels, parcel-machine list, tracking | Account manager issues API key on the business account |
 
-**Ready-to-send message (Estonian).** Renat forwards this to each carrier —
-DPD first, since the contract already exists. Addresses: the account manager
-on his DPD invoice; otherwise the general lines — DPD `myyk@dpd.ee`, Omniva
-`info@omniva.ee`, SmartPosti `info@smartposti.ee` (check the address on the
-carrier's own site before sending — these change).
+**Dmitri contacts the carriers himself** (decided 31.08). Carriers only act
+on the contract holder's word, so the message goes out with Renat CC'd, or
+after a one-line authorization from him («volitan Diip Solutions / Dmitri
+suhtlema meie lepingu teemal»). DPD first — contract exists, address = the
+account manager on his DPD invoice; general lines otherwise: DPD
+`myyk@dpd.ee`, Omniva `info@omniva.ee`, SmartPosti `info@smartposti.ee`
+(check on the carrier's site before sending — these change).
+
+**Prices:** our shipping data currently carries the carriers' public 2025–26
+price lists; his contract prices are lower. When the carriers answer, their
+contract price sheet replaces the public one — the shop's shipping config is
+one file, so this is a data swap, not a rebuild.
 
 > Tere!
 >
@@ -122,7 +129,7 @@ carrier's own site before sending — these change).
 >
 > Tehniline kontakt: Dmitri (Diip Solutions), dim.novare@gmail.com.
 >
-> Lugupidamisega, Renat · Rempire Store OÜ · +372 56237237
+> Lugupidamisega, Dmitri (Diip Solutions) · Rempire Store OÜ nimel · CC: Renat
 
 The APIs themselves are free; label prices stay whatever his contract says.
 
@@ -202,8 +209,10 @@ With collaborator access from #9 we do all five steps; without it, it's a
 
 ## 12. Payments math — Montonio's monthly fee vs 5 orders/month
 
-His today: Stripe, no monthly fee, ~1,5 % + 0,25 € per card. Last month:
-**5 orders**. Current prices ([Montonio](https://www.montonio.com/pricing),
+Real volume (31.08): **5–10 orders/month at 30–50 € each** — i.e.
+~150–500 €/month of online turnover. At that size *any* percentage fee is
+pocket change (2–10 €/мес) and every monthly subscription dominates the
+bill. Current prices ([Montonio](https://www.montonio.com/pricing),
 [MakeCommerce](https://maksekeskus.ee/hinnad/)):
 
 | | Monthly | Bank link | Cards |
@@ -212,10 +221,20 @@ His today: Stripe, no monthly fee, ~1,5 % + 0,25 € per card. Last month:
 | Montonio Standard | **11,99 €** | 0,15 €/шт | 1,49 % + 0,20 € |
 | MakeCommerce | 0 € | 2,5 % + 0,30 € (promo 1 % + 0,15 €) | ~similar |
 
-At 5 orders × 40 €: Stripe costs ~4,25 €/мес all-in. Montonio would cost
-11,99 € + pennies — **more than double, for nothing**. The bank-link saving
-(~0,70 €/order vs a card) only overtakes Montonio's fee at roughly
-**17–20 orders/month**; below that the subscription eats the saving.
+Montonio's pricing verified on their own page: **Standard 11,99 €/мес +
+0,15 €/bank tx; Premium 19,99 €/мес** ([montonio.com/pricing](https://www.montonio.com/pricing)).
+At 5–10 orders that subscription costs more than all transaction fees
+combined — ruled out until volume is ~20+ orders/month.
+
+**The functionality answer is MakeCommerce alone.** Renat's requirement —
+bank links + cards + Apple Pay + Google Pay, no PayPal — is exactly
+MakeCommerce's unified checkout: one agreement covering EE/LV/LT/FI, **no
+monthly fee**, and [Apple Pay / Google Pay activate automatically once card
+payments are on](https://makecommerce.net/google-pay-integration-guide/) —
+no separate wallet agreements. «По счёту для компаний» is our own checkout
+feature (invoice + bank transfer), no provider involved. So nothing Renat
+has or wants is lost, and nothing idles on a subscription. Stripe is then
+unnecessary — one provider instead of two.
 
 **Resolved (31.08, from Renat):** the web shop runs **Shopify Payments**,
 and the salon "Stripe" is the **same Shopify Payments** — he enters/attaches
@@ -237,13 +256,37 @@ the card in Shopify POS and it processes through it. Which means:
     pairs with either reader above for the card itself.
 
 **Recommendation:**
-- **Web: open a fresh Stripe account** — self-service, same-day, zero
-  monthly, cards + Apple/Google Pay day one. Our checkout's payment step
-  doesn't care which provider sits behind it, so a later move to
-  MakeCommerce/Montonio for bank links stays open.
-- **Salon: pick the reader before the switch date** (SumUp or MakeCommerce
-  app), so the till never has a gap. Cost of the whole answer: one-time
-  reader ~30–40 €, no subscriptions.
+- **Web: MakeCommerce** — one agreement, bank links + cards + both wallets,
+  zero monthly. Sign-up is self-service at makecommerce.net (company
+  details + IBAN; KYC a few days). Montonio revisited only past ~20
+  orders/month if Premium's 0,05 €/tx starts to matter.
+- **Salon: identify the terminal first** (below) — it may not need
+  replacing at all.
+
+**The salon terminal — identify before deciding.** A physical terminal
+"connected to a payment service" is one of two things:
+1. **A bank/acquirer terminal** (Ingenico, PAX, Verifone — rented from
+   Swedbank/SEB/LHV, processing via Nets/Worldline). That is **independent
+   of Shopify** and survives the migration untouched — the till problem
+   disappears.
+2. **Shopify POS card entry** (typing the card into the Shopify app, or
+   Shopify-linked hardware). That is Shopify Payments and dies with it —
+   then SumUp (~35 € reader, ~1,95 %) or the MakeCommerce POS app
+   (1,5 % + 0,05 €, phone as terminal) replaces it.
+
+How to tell, 2 minutes: the brand printed on the device; who invoices the
+acquiring fees (a bank/Nets line on the bank statement = case 1; it nets out
+of Shopify payouts = case 2); Shopify admin → Point of Sale → Hardware (if
+the terminal is listed there = case 2).
+
+**How clients actually pay him — where to look (needs collaborator access
+or a screen-share):** Shopify admin → Settings → Payments lists what's
+enabled (Shopify Payments, PayPal, …); Analytics → Reports → **Finances
+summary → Payments** breaks the period down by gateway; and at 5–10
+orders/month the Orders list itself shows each order's payment method — a
+five-minute read. Note: Shopify offers no Estonian bank links, so today's
+mix can only be cards (+ PayPal if enabled) — bank links are a new
+capability we add, not one we preserve.
 - **Add bank links when orders justify it**: MakeCommerce first if its promo
   rate applies (no monthly — safe at any volume), Montonio once he's
   steadily past ~20 orders/month.
