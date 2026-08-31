@@ -255,6 +255,25 @@ the card in Shopify POS and it processes through it. Which means:
     wave) handles the *inventory* side — one stock for salon and web — and
     pairs with either reader above for the card itself.
 
+### Three-way comparison (prices as published 31.08.2026; contract rates may differ — confirm at signup)
+
+| | **Montonio** | **MakeCommerce** | **Stripe** |
+|---|---|---|---|
+| What it is | Estonian PSP, payments + shipping platform | Estonian PSP (Maksekeskus AS, running since 2012, Finantsinspektsioon-licensed) — the local veteran Dmitri hasn't used yet | Global processor, US-based |
+| Home coverage | EE LV LT FI (+PL) | EE LV LT FI, one agreement | 45+ countries |
+| Baltic bank links | ✅ | ✅ all EE/LV/LT/FI banks | ❌ **none** |
+| Cards worldwide | ✅ 1,49 % + 0,20 € (Standard) | ✅ rate on their price page / contract — confirm | ✅ ~1,5 % + 0,25 € EEA (intl higher) |
+| Apple Pay / Google Pay | ✅ | ✅ auto-enabled with cards | ✅ |
+| **Monthly fee** | **11,99 €** (Standard) / 19,99 € (Premium) | **0 €** | **0 €** |
+| Bank-link fee | 0,15 € (Standard) / 0,05 € (Premium) | 2,5 % + 0,30 €; promo 1 % + 0,15 € | — |
+| ≈ cost at his volume (8×40 €) | ~13 €/мес (fee dominates) | ~4–10 €/мес | ~7 €/мес, **no bank links** |
+| POS / till option | — | POS app: 1,5 % + 0,05 €, phone as terminal | Stripe Terminal (availability in EE — check) |
+| Onboarding | days | days (KYC) | same-day to days |
+| Developer experience | modern API, good | older API, solid modules (Woo/Magento/Shopify), fine for us | best in class |
+| Right when… | steady 20+ orders/мес (fee amortizes, cheapest bank links) | **now: everything he wants, nothing on subscription** | non-EU entity, exotic currencies, subscriptions |
+
+Sources: [Montonio pricing](https://www.montonio.com/pricing) · [Maksekeskus hinnad](https://maksekeskus.ee/hinnad/) · [MakeCommerce wallets](https://makecommerce.net/google-pay-integration-guide/).
+
 **«А не глобальнее ли Stripe?»** Cards are global by nature: a buyer in
 Germany or the US paying through MakeCommerce is just paying
 Visa/Mastercard/Apple Pay — rails that work worldwide behind any PSP. The
