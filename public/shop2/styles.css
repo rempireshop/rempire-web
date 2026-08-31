@@ -1225,27 +1225,36 @@ html[data-tint] .hdr:hover { background: var(--page); }
 /* #4 — brand strip under the hero, one scrollable line, D-urban register:
    quiet grey wordmarks that ink up under the cursor. */
 .brandstrip { border-bottom: 1px solid var(--rule); background: var(--page); }
+/* the urban prototype's line, copied: Oswald 600 · 19px · .08em · ink at 35%,
+   28px gaps, native scrollbar left visible so a desktop knows the row moves */
 .brandstrip__row {
-  display: flex; align-items: center; gap: 34px;
-  max-width: var(--maxw); margin-inline: auto; padding: 14px var(--gutter);
-  overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  display: flex; align-items: center; gap: 28px;
+  padding: 10px var(--gutter) 12px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scrollbar-color: var(--shell-dark) transparent;
 }
-.brandstrip__row::-webkit-scrollbar { display: none; }
+.brandstrip__row::-webkit-scrollbar { height: 6px; }
+.brandstrip__row::-webkit-scrollbar-thumb { background: var(--shell-dark); border-radius: 3px; }
+.brandstrip__row::-webkit-scrollbar-track { background: transparent; }
 .brandstrip__it {
-  border: none; background: none; padding: 6px 0; cursor: pointer; flex: 0 0 auto;
-  font-family: Oswald, sans-serif; font-size: 12.5px; letter-spacing: .16em;
-  text-transform: uppercase; color: var(--muted); white-space: nowrap;
-  transition: color .18s var(--ease), opacity .18s var(--ease);
+  border: none; background: none; padding: 2px 0; cursor: pointer; flex: 0 0 auto;
+  font-family: Oswald, sans-serif; font-weight: 600; font-size: 19px; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(28, 26, 0, .35); white-space: nowrap;
+  transition: color .18s var(--ease);
 }
 .brandstrip__it:hover { color: var(--ink); }
-/* socials sit alone, centred, above the signature line */
-.ftr__socialrow { display: flex; justify-content: center; gap: 18px; padding: 20px 0 4px; }
+/* socials share the © line: signature left, socials centred, admin right */
+.socials--bottom { display: inline-flex; gap: 14px; margin-inline: auto; }
 
 /* #2 — subcategory chips: a second scrollable row, never a dropdown */
 .subcats {
-  display: flex; gap: 8px; margin: 2px 0 16px;
+  display: flex; gap: 8px;
+  position: sticky; top: var(--hdrh, 56px); z-index: 20;
+  background: var(--page);
+  margin: 2px calc(-1 * var(--gutter)) 16px;
+  padding: 10px var(--gutter);
+  border-bottom: 1px solid var(--rule);
   overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  padding-bottom: 2px;
 }
 .subcats::-webkit-scrollbar { display: none; }
 .scchip {

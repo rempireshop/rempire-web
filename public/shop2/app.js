@@ -504,12 +504,12 @@
       ftrSec("Покупателю", '<a href="#">Доставка и оплата</a> · <a href="#">Возврат товара</a> · <a href="#">Условия продажи</a> · <a href="#">Блог и советы</a>') +
       ftrSec("Правовое", '<a href="#">Конфиденциальность</a> · <a href="#">Правовая информация</a> · <a href="#">Настройки cookie</a> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
-      '<div class="ftr__socialrow">' +
-        '<a class="social" href="https://www.instagram.com/rempire.shop/" aria-label="Rempire в Instagram" title="Instagram">' + icon("instagram") + "</a>" +
-        '<a class="social" href="https://www.facebook.com/Rempire.Official.Tallinn" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
-        '<a class="social" href="https://www.tiktok.com/@rempire.official" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
-      "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" +
+        '<span class="socials socials--bottom">' +
+          '<a class="social" href="https://www.instagram.com/rempire.shop/" aria-label="Rempire в Instagram" title="Instagram">' + icon("instagram") + "</a>" +
+          '<a class="social" href="https://www.facebook.com/Rempire.Official.Tallinn" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
+          '<a class="social" href="https://www.tiktok.com/@rempire.official" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
+        "</span>" +
         '<button class="link ftr__admin" data-go="admin">Админка — демо</button></div>' +
     "</div></footer>";
   }
@@ -2037,6 +2037,10 @@
   function paintTint() {
     var tint = S.screen === "home" && window.scrollY < 340;
     document.documentElement.toggleAttribute("data-tint", tint);
+    // the subcat row docks right under the sticky header; the header's
+    // height differs by breakpoint, so it is measured, not guessed
+    var h = document.querySelector(".hdr");
+    if (h) document.documentElement.style.setProperty("--hdrh", h.offsetHeight + "px");
   }
   window.addEventListener("scroll", paintTint, { passive: true });
 

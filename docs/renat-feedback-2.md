@@ -1,5 +1,8 @@
 # Renat feedback — round 2 (31.08.2026)
 
+> **This document lives at `rempire-web/docs/renat-feedback-2.md`** — open it
+> in the repo, or ask Claude to send the current version as a file.
+
 Eleven items from Telegram. 1–6 are UI changes, built into a parallel shop at
 **`/shop2/`** so old and new can be compared side by side (`/shop/` untouched).
 7–11 are research / infrastructure — answered below with next actions.
@@ -214,10 +217,22 @@ At 5 orders × 40 €: Stripe costs ~4,25 €/мес all-in. Montonio would cost
 (~0,70 €/order vs a card) only overtakes Montonio's fee at roughly
 **17–20 orders/month**; below that the subscription eats the saving.
 
+**One thing to verify first — what "Stripe" actually is there.** Check
+Shopify admin → Settings → Payments:
+- If it says **Shopify Payments** — that is Shopify's own processor (Stripe
+  under the hood, but **not his account**). It cannot leave Shopify; it
+  simply ends when the shop moves. Not a problem, just not portable.
+- The **salon till runs on Stripe** — if that is a real Stripe account
+  (login at dashboard.stripe.com), the new shop plugs into **that same
+  account**: Developers → API keys, and online payments join the salon's
+  payouts in one place. No new contract, no onboarding wait, zero monthly.
+- If the salon "Stripe" turns out to be a terminal resold by someone else,
+  opening a fresh Stripe account is a same-day self-service signup anyway.
+
 **Recommendation:**
-- **Launch on his existing Stripe** — zero monthly, cards + Apple/Google Pay
-  work day one, no new contract, no onboarding wait. Our checkout's payment
-  step doesn't care which provider sits behind it.
+- **Launch on Stripe** (his salon account if it is one, a fresh one
+  otherwise) — zero monthly, cards + Apple/Google Pay day one. Our
+  checkout's payment step doesn't care which provider sits behind it.
 - **Add bank links when orders justify it**: MakeCommerce first if its promo
   rate applies (no monthly — safe at any volume), Montonio once he's
   steadily past ~20 orders/month.
@@ -228,6 +243,42 @@ At 5 orders × 40 €: Stripe costs ~4,25 €/мес all-in. Montonio would cost
 Sources: [Montonio pricing](https://www.montonio.com/pricing),
 [Maksekeskus hinnad](https://maksekeskus.ee/hinnad/),
 [comparison](https://celeht.com/comprehensive-comparison-of-e-commerce-payment-solutions-pricing/).
+
+---
+
+## How we proceed — design first, then the plumbing
+
+**Phase 1 — freeze the design (now).**
+1. Renat reviews **/shop2/** against **/shop/** — phone and desktop; comments
+   via the 💬 bubble or Telegram.
+2. Agreed changes get folded into the main shop; /shop2/ retires. Anything
+   rejected reverts — that's what the parallel copy is for.
+3. One message from Renat: «дизайн ок» = design frozen. After this, visual
+   changes are change requests, not the project.
+
+**Phase 2 — access + parallel groundwork (nothing moves, runs while Phase 1
+is still open).**
+4. Shopify **collaborator invite** → dim.novare@gmail.com (Settings → Users;
+   Domains + Payments permissions). This unblocks everything below.
+5. Look at Settings → Domains → is the domain Shopify-managed or
+   third-party (#9) → pick the DNS route.
+6. GSC Domain property via DNS TXT (#11) + add Dmitri as owner.
+7. Resend domain verification + Gmail send-as (#10); free MX forwarder for
+   incoming.
+8. Renat sends the carrier API email (#8), DPD first.
+9. Check what Settings → Payments says (#12) and whether the salon Stripe
+   is a real Stripe account.
+
+**Phase 3 — build v1 (after the freeze).**
+10. Real orders (DB, numbers, statuses, emails) · checkout wired to Stripe ·
+    real content from the Shopify export (texts, INCI, prices, photos) ·
+    legal pages · three languages. Timeline per the meeting brief: ~5–8
+    weeks full-time equivalent.
+
+**Phase 4 — the switch (one evening, reversible).**
+11. Final content sync → repoint the domain's A/CNAME to the new shop →
+    301 redirects live → watch GSC. Shopify subscription stays paid one
+    more month as the fallback, then closes. Parcely closes with it.
 
 
 ---
