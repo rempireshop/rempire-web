@@ -9,14 +9,15 @@ Eleven items from Telegram. 1–6 are UI changes, built into a parallel shop at
 | 1 | Safari address-bar gap over navbar | ✅ built | /shop2/ |
 | 2 | Subcategories under categories | ✅ built | /shop2/ |
 | 3 | Remove hero dots | ✅ built | /shop2/ |
-| 4 | Brand strip under hero (D-urban style) | ✅ built | /shop2/ |
-| 5 | Compact collapsible footer | ✅ built | /shop2/ |
+| 4 | Brand strip under hero (D-urban style) | ✅ built, wordmarks only | /shop2/ |
+| 5 | Compact collapsible footer | ✅ built, socials bottom-centre | /shop2/ |
 | 6 | Hero colour extends into nav, hover → white | ✅ built | /shop2/ |
 | 7 | His real DPD flow (manual labels) | 📋 answered | below |
 | 8 | DPD / Omniva / SmartPosti APIs | 📋 answered, needs his accounts | below |
 | 9 | Domain: Shopify → Cloudflare | 📋 answered, 2 paths | below |
-| 10 | Email @rempireshop.com | 📋 answered, needs decision | below |
-| 11 | Google Search Console | 📋 answered, 5-min job | below |
+| 10 | Email @rempireshop.com | ✅ decided: Resend + send-as | below |
+| 11 | Google Search Console | 📋 exact clicks below | below |
+| 12 | Montonio vs Stripe at 5 orders/мес | 📋 stay on Stripe for launch | below |
 
 ---
 
@@ -53,9 +54,9 @@ Arrows, swipe and auto-rotation stay.
 
 ## 4. Brand strip like D-urban (v2)
 
-One scrollable line directly under the hero: grey Oswald wordmarks (logos
-where the brand has one) that ink up on hover, every item opening the brand
-page. The old «Бренды» grid section is **removed from the home page**
+One scrollable line directly under the hero — **wordmarks only, no logos**,
+exactly the register of the urban sample: grey Oswald caps that ink up on
+hover, every item opening the brand page. The old «Бренды» grid section is **removed from the home page**
 (that's the "remove from the bottom" — it sat mid-page). The «Бренды» nav
 item and /brands page stay.
 
@@ -63,8 +64,9 @@ item and /brands page stay.
 
 Seven collapsed sections, exactly his list: **Доставка · Оплата · Самовывоз ·
 Реквизиты · Связаться · Покупателю · Правовое.** Closed by default; two
-columns on desktop, one on phone. Pay logos moved inside «Оплата»; the bottom
-line keeps only © + «Админка — демо». The duplicate «Магазин в Таллинне»
+columns on desktop, one on phone. Pay logos moved inside «Оплата»; **socials
+sit alone, centred, above the signature line** (out of «Связаться»); the
+bottom line keeps only © + «Админка — демо». The duplicate «Магазин в Таллинне»
 block on the home page is gone — the footer carries it now.
 
 ## 6. Hero colour into the nav, hover whitens (na-kd) (v2)
@@ -75,15 +77,15 @@ transition, and the Safari bleed from #1 inherits whichever colour is active.
 
 ---
 
-## 7. His real DPD flow
+## 7. His real DPD flow — confirmed
 
-The app on his bill (17,22 €/мес) is **Parcely.app** — yet he told us he
-still creates labels **manually on DPD's site**, and DPD invoices the labels
-monthly at contract rates. So today he pays for a label app he doesn't use.
+Parcely.app (17,22 €/мес) does exactly one thing for him: it shows the
+**parcel-machine picker in the Shopify checkout**. Labels and orders he does
+by hand on DPD's site; DPD invoices the labels monthly at contract rates.
 
-**Next action:** confirm with him what Parcely actually does for him (if
-anything). After migration it's cancelled either way — labels are part of our
-shipping block. That's −17 €/мес off his bill, on top of the comparison.
+Our checkout already has the machine picker built in (230 real machines), so
+the migration removes Parcely's entire job — **−17,22 €/мес** — and the
+carrier APIs (#8) later remove the manual label step too.
 
 ## 8. Carrier APIs (labels, tracking) — «Uuri API võimekust»
 
@@ -98,67 +100,135 @@ DPD already invoices monthly) — the API changes workflow, not pricing.
 | **Omniva** | Parcel API (XML/JSON): registration, label PDF, manifest; public tracking endpoint | Business client contract → klienditugi issues partner code + API password |
 | **SmartPosti (Itella EE)** | SmartShip / Posti API: shipments, labels, parcel-machine list, tracking | Account manager issues API key on the business account |
 
-**Next action (Renat):** one email/call per carrier — "prošu API-doступ к
-моему договору для интеграции интернет-магазина". DPD first (contract
-exists). We already ship their real parcel-machine lists and 2025–26 price
-lists in the prototype, so the integration slots straight in.
+**Ready-to-send message (Estonian).** Renat forwards this to each carrier —
+DPD first, since the contract already exists. Addresses: the account manager
+on his DPD invoice; otherwise the general lines — DPD `myyk@dpd.ee`, Omniva
+`info@omniva.ee`, SmartPosti `info@smartposti.ee` (check the address on the
+carrier's own site before sending — these change).
 
-## 9. Domain: Shopify → Cloudflare
+> Tere!
+>
+> Olen Rempire Store OÜ (klient/lepingu nr: …). Kolime oma e-poe uuele
+> platvormile ja soovime pakisildid ja jälgimise otse süsteemist API kaudu
+> teha (praegu trükime sildid käsitsi teie lehel).
+>
+> Palun saatke:
+> 1) API dokumentatsioon ja juurdepääsu tingimused,
+> 2) API kasutajatunnused meie lepingu jaoks,
+> 3) kinnitus, et API kasutamine ei muuda meie lepingu hinnakirja.
+>
+> Tehniline kontakt: Dmitri (Diip Solutions), dim.novare@gmail.com.
+>
+> Lugupidamisega, Renat · Rempire Store OÜ · +372 56237237
 
-Two paths; do the fast one first.
+The APIs themselves are free; label prices stay whatever his contract says.
 
-**Fast (recommended now): keep the registrar, move DNS.**
-Shopify admin → Settings → Domains → rempireshop.com → change
-**nameservers** to Cloudflare (free plan gives DNS + proxy). ~15 minutes of
-work, propagation up to a day, the Shopify shop keeps working (we recreate
-its A/CNAME records in Cloudflare first). From then on *we* control DNS:
-email records, GSC verification, the future switch to the new shop — all
-without touching Shopify again.
+## 9. Domain: Shopify → Cloudflare — in parallel, without touching the shop
 
-**Full (later, optional): transfer the registration.**
-Shopify domains are registered through their partner (OpenSRS/Tucows).
-Sequence: Shopify admin → Domains → **unlock** → get the **EPP/auth code**
-→ **disable DNSSEC** (his point — correct) → start the transfer at
-Cloudflare Registrar (at-cost, ~10 €/yr) → confirm the email → 5–7 days.
-Blocked if the domain was registered/transferred in the last 60 days.
-Zone.ee works the same way if he prefers everything beside rempire.ee.
+**Yes, all of this runs in parallel.** Nothing here moves the shop: DNS keeps
+pointing at Shopify until the day we change two records. The launch switch
+later is exactly that — edit A/CNAME, keep everything else.
 
-**Next action:** ask Renat for collaborator access to Shopify (Settings →
-Users) — the nameserver change is done from there, he types, no passwords.
+**Step 0 — find out what kind of domain it is (2 minutes, needs access).**
+Shopify admin → **Settings → Domains** → rempireshop.com. Two possibilities:
 
-## 10. Email on the domain instead of @gmail.com
+- It says **"Managed by Shopify"** → the domain was bought through Shopify.
+  Shopify-managed domains **do not allow changing nameservers**, but they DO
+  allow editing DNS records (Settings → Domains → the domain → *Domain
+  settings* → **Edit DNS settings**: A, CNAME, MX, TXT). That's enough for
+  everything below (GSC, Resend, mail) — done right inside Shopify, shop
+  untouched. Cloudflare then comes via a full **registrar transfer** when we
+  are ready: unlock → EPP/auth code → DNSSEC off → start transfer at
+  Cloudflare Registrar (~10 €/yr) → 5–7 days. No downtime if DNS records are
+  recreated first.
+- It says **"Third-party domain"** (bought elsewhere, e.g. zone.ee, just
+  connected to Shopify) → the registrar is outside Shopify. Then we can
+  change **nameservers to Cloudflare today** at that registrar: add the
+  domain in Cloudflare (free plan) → Cloudflare scans and copies existing
+  records (verify the Shopify A `23.227.38.65` / CNAME `shops.myshopify.com`
+  came across) → set the two Cloudflare nameservers at the registrar → done.
+  Shop keeps working; we hold DNS from then on.
 
-Today mail goes to rempireshopinfo@gmail.com. Once DNS is on Cloudflare (#9),
-two options:
+**Access to ask from Renat (no passwords):** Shopify → Settings → Users →
+*Add collaborator* → dim.novare@gmail.com with the **Domains** permission (or
+screen-share and he clicks). With that we do #9, #10, #11 ourselves.
 
-- **A. Cloudflare Email Routing — free.** info@rempireshop.com forwards to
-  the existing Gmail. Receiving only; replies still leave from @gmail.com
-  unless we add a send-as SMTP. Zero cost, 10 minutes.
-- **B. Google Workspace, 1 mailbox ≈ 7 €/мес.** Real
-  info@rempireshop.com in the Gmail interface he already lives in — send and
-  receive. This is the professional answer.
+## 10. Email @rempireshop.com — decided: Resend + Gmail «send as»
 
-Order confirmations and shop emails are separate either way — they go out
-via our transactional sender (e.g. Resend) as zakaz@rempireshop.com once we
-hold DNS.
+Same setup as Dmitri's own pages. Runs entirely on DNS records, so it works
+in parallel with the old shop (see #9 for where records get edited).
 
-**Next action:** Renat picks A (free, receive-only) or B (7 €/мес, full).
-Recommend B.
+**Outgoing (send as info@rempireshop.com from his Gmail):**
+1. Resend → Domains → Add `rempireshop.com` → it gives 3 records
+   (SPF TXT + two DKIM). Add them wherever DNS lives (#9). Verify.
+2. Gmail (rempireshopinfo@gmail.com) → Settings → Accounts → **Send mail
+   as** → Add: `info@rempireshop.com` → SMTP server `smtp.resend.com`,
+   port 465 (SSL), username `resend`, password = a Resend API key.
+3. Confirm the verification mail, tick "reply from the same address".
 
-## 11. Google Search Console
+**Incoming (mail TO info@rempireshop.com):** needs a forwarder, since Resend
+send-as covers only outgoing. Free MX forwarder (ImprovMX or
+forward-email) → forwards to the Gmail; or once the domain is on Cloudflare,
+its built-in Email Routing does this natively. Either is a 10-minute DNS job.
 
-No need to touch Shopify's theme at all. Verify a **Domain property** with a
-**DNS TXT record** — works no matter where the site is hosted:
+**Shop emails** (order confirmations, «отправлен» with tracking) go out via
+Resend from our side regardless — same domain verification serves both.
 
-1. GSC → Add property → *Domain* → rempireshop.com → copy the TXT value.
-2. Add the TXT record where DNS lives — today Shopify admin → Domains →
-   DNS settings; after #9, Cloudflare.
-3. Verify. Done — and the property survives the migration to the new shop,
-   which is exactly what we want for watching the 301s land.
+Cost: 0 €/мес (Resend free tier covers this volume many times over).
 
-The HTML-tag method (paste into `theme.liquid`) also works on Shopify, but
-the DNS route is cleaner and permanent. **After #9 this is a 5-minute job we
-do ourselves.**
+## 11. Google Search Console — exact clicks
+
+Use a **Domain property** verified by DNS TXT: it needs no Shopify theme
+edits, covers www/non-www/http/https at once, and survives the migration —
+the same property will show the 301s landing later. Steps:
+
+1. https://search.google.com/search-console → property dropdown → **Add
+   property** → left card **Domain** → enter `rempireshop.com` → Continue.
+2. It shows a TXT value like `google-site-verification=abc123…` → Copy.
+3. Where DNS lives (see #9): Shopify admin → Settings → Domains →
+   rempireshop.com → Domain settings → **Edit DNS settings** → Add custom
+   record → **TXT** → Name `@`, Value = the copied string → Save.
+   (After the move to Cloudflare: same record in Cloudflare → DNS.)
+4. Back in GSC → **Verify**. DNS can take up to an hour; retry if it fails
+   the first time.
+5. Then GSC → Settings → **Users and permissions** → Add user →
+   `dim.novare@gmail.com` as **Owner**, so we watch it without his login.
+
+With collaborator access from #9 we do all five steps; without it, it's a
+10-minute screen-share where Renat clicks.
+
+## 12. Payments math — Montonio's monthly fee vs 5 orders/month
+
+His today: Stripe, no monthly fee, ~1,5 % + 0,25 € per card. Last month:
+**5 orders**. Current prices ([Montonio](https://www.montonio.com/pricing),
+[MakeCommerce](https://maksekeskus.ee/hinnad/)):
+
+| | Monthly | Bank link | Cards |
+|---|---|---|---|
+| Stripe (has it) | 0 € | — (no EE bank links) | ~1,5 % + 0,25 € |
+| Montonio Standard | **11,99 €** | 0,15 €/шт | 1,49 % + 0,20 € |
+| MakeCommerce | 0 € | 2,5 % + 0,30 € (promo 1 % + 0,15 €) | ~similar |
+
+At 5 orders × 40 €: Stripe costs ~4,25 €/мес all-in. Montonio would cost
+11,99 € + pennies — **more than double, for nothing**. The bank-link saving
+(~0,70 €/order vs a card) only overtakes Montonio's fee at roughly
+**17–20 orders/month**; below that the subscription eats the saving.
+
+**Recommendation:**
+- **Launch on his existing Stripe** — zero monthly, cards + Apple/Google Pay
+  work day one, no new contract, no onboarding wait. Our checkout's payment
+  step doesn't care which provider sits behind it.
+- **Add bank links when orders justify it**: MakeCommerce first if its promo
+  rate applies (no monthly — safe at any volume), Montonio once he's
+  steadily past ~20 orders/month.
+- Growth is the goal of the new shop, so revisit this line in the first
+  monthly report — the checkout is built so the provider can swap without
+  the shopper noticing.
+
+Sources: [Montonio pricing](https://www.montonio.com/pricing),
+[Maksekeskus hinnad](https://maksekeskus.ee/hinnad/),
+[comparison](https://celeht.com/comprehensive-comparison-of-e-commerce-payment-solutions-pricing/).
+
 
 ---
 

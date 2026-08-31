@@ -1238,12 +1238,8 @@ html[data-tint] .hdr:hover { background: var(--page); }
   transition: color .18s var(--ease), opacity .18s var(--ease);
 }
 .brandstrip__it:hover { color: var(--ink); }
-.brandstrip__logo {
-  display: block; width: 92px; height: 31px;
-  background-size: contain; background-position: center; background-repeat: no-repeat;
-  opacity: .45; transition: opacity .18s var(--ease);
-}
-.brandstrip__it:hover .brandstrip__logo { opacity: 1; }
+/* socials sit alone, centred, above the signature line */
+.ftr__socialrow { display: flex; justify-content: center; gap: 18px; padding: 20px 0 4px; }
 
 /* #2 — subcategory chips: a second scrollable row, never a dropdown */
 .subcats {

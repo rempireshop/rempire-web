@@ -500,14 +500,14 @@
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       ftrSec("Самовывоз", "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.") +
       ftrSec("Реквизиты", "Rempire Store OÜ<br>Рег. 12216136 · KMKR EE102723858<br>Mardi 1, 10145 Таллинн") +
-      ftrSec("Связаться", '<a href="tel:+37256237237">56237237</a> · <a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a>' +
-        '<span class="socials">' +
-          '<a class="social" href="https://www.instagram.com/rempire.shop/" aria-label="Rempire в Instagram" title="Instagram">' + icon("instagram") + "</a>" +
-          '<a class="social" href="https://www.facebook.com/Rempire.Official.Tallinn" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
-          '<a class="social" href="https://www.tiktok.com/@rempire.official" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
-        "</span>") +
+      ftrSec("Связаться", '<a href="tel:+37256237237">56237237</a> · <a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a>') +
       ftrSec("Покупателю", '<a href="#">Доставка и оплата</a> · <a href="#">Возврат товара</a> · <a href="#">Условия продажи</a> · <a href="#">Блог и советы</a>') +
       ftrSec("Правовое", '<a href="#">Конфиденциальность</a> · <a href="#">Правовая информация</a> · <a href="#">Настройки cookie</a> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
+      "</div>" +
+      '<div class="ftr__socialrow">' +
+        '<a class="social" href="https://www.instagram.com/rempire.shop/" aria-label="Rempire в Instagram" title="Instagram">' + icon("instagram") + "</a>" +
+        '<a class="social" href="https://www.facebook.com/Rempire.Official.Tallinn" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
+        '<a class="social" href="https://www.tiktok.com/@rempire.official" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" +
         '<button class="link ftr__admin" data-go="admin">Админка — демо</button></div>' +
@@ -539,10 +539,9 @@
         brands().slice().sort(function (a, b) {
           return (BRAND_LOGOS[b.name] ? 1 : 0) - (BRAND_LOGOS[a.name] ? 1 : 0);
         }).map(function (b) {
-          return '<button class="brandstrip__it" data-go-brand="' + esc(b.name) + '">' +
-            (BRAND_LOGOS[b.name]
-              ? '<span class="brandstrip__logo" style="background-image:url(' + "'" + BRAND_LOGOS[b.name] + "'" + ')" role="img" aria-label="' + esc(b.name) + '"></span>'
-              : esc(b.name)) + "</button>";
+          // wordmarks only, as in the urban sample — one typographic voice,
+          // no logo/text zigzag along the line
+          return '<button class="brandstrip__it" data-go-brand="' + esc(b.name) + '">' + esc(b.name) + "</button>";
         }).join("") + "</div></nav>" +
       '<div class="wrap">' +
         rail("Популярные товары", "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.", pop) +
