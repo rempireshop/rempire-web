@@ -1746,6 +1746,17 @@
       S.subcat = d.subcat; S.shown = 12;
       render();
       refocus('[data-subcat="' + d.subcat + '"]');
+      /* Tapping a chip while scrolled deep left the shopper below the now
+         shorter list — a white page that read as a bug. Bring the first row
+         of products up under the sticky chip row; never move someone who is
+         already above the grid. */
+      var grid = document.getElementById("catgrid");
+      if (grid) {
+        var chips = document.querySelector(".subcats");
+        var off = (chips ? chips.offsetHeight + 10 : 10) + (hideOn ? 0 : hdrH);
+        var top = Math.max(0, grid.getBoundingClientRect().top + window.scrollY - off);
+        if (window.scrollY > top) window.scrollTo({ top: top });
+      }
       return;
     }
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
