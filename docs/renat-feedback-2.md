@@ -255,6 +255,16 @@ the card in Shopify POS and it processes through it. Which means:
     wave) handles the *inventory* side — one stock for salon and web — and
     pairs with either reader above for the card itself.
 
+> **UPD 01.09:** the live numbers and the full calculation moved to the
+> roadmap artifact (раздел 02) after checking the providers' own pricing
+> pages: Montonio ET packages are Starter 11,99 / **Core 14,99** (branded
+> tracking mails from Core) / Core Flex 39,99 with bank links 0,20/0,05 €;
+> **MakeCommerce cards carry a 10 €/мес module fee** (bank links 0,9 % +
+> 0,05 €), Shipping+ 0 €/мес on their carrier contracts or Pro 5 €/мес on
+> own contracts. Both providers print DPD/Omniva/SmartPosti labels and send
+> tracking mails — which can replace the direct three-carrier integration.
+> The table below kept for history.
+
 ### Three-way comparison (prices as published 31.08.2026; contract rates may differ — confirm at signup)
 
 | | **Montonio** | **MakeCommerce** | **Stripe** |
