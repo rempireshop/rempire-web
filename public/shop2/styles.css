@@ -1225,7 +1225,7 @@ body:has(.drawer) #rempire-feedback { display: none; }
    header colour instead of reading as a hole. */
 .hdr { transition: background .25s var(--ease); }
 .hdr::before {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 100vh;
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 140px;
   background: inherit; pointer-events: none;
 }
 /* The beige-over-hero and its hover-whitening are a desktop pointer story;
@@ -1332,8 +1332,23 @@ body:has(.drawer) #rempire-feedback { display: none; }
   .hdr__searchwrap { display: none; }
 
   /* Scroll down → the whole header (promo, row, categories) slides away and
-     the subcat chips take the top edge; scroll up → it returns. */
-  .hdr { transition: transform .28s var(--ease), background .25s var(--ease); }
+     the subcat chips take the top edge; scroll up → it returns. will-change
+     keeps the header on its own compositor layer so the slide never repaints
+     the page under it. */
+  .hdr { transition: transform .22s var(--ease), background .25s var(--ease); will-change: transform; }
   html[data-hidenav] .hdr { transform: translateY(-100%); }
   html[data-hidenav] .subcats { top: 0; }
+}
+
+/* ---------- fluidity ---------- */
+/* no 350ms double-tap ambiguity on anything tappable */
+button, a, summary, label { touch-action: manipulation; }
+/* a horizontal strip finishing its scroll must not hand the momentum to the
+   page (or to iOS's back-swipe) */
+.brandstrip__row, .subcats, .hdr__nav { overscroll-behavior-x: contain; }
+/* long grids: let the browser skip layout and paint of offscreen cards —
+   the single biggest win for scroll on a phone. Safari 18+/Chrome; older
+   engines simply ignore it. */
+@supports (content-visibility: auto) {
+  .card { content-visibility: auto; contain-intrinsic-size: auto 340px; }
 }

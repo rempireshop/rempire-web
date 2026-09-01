@@ -1322,6 +1322,7 @@
 
     if (!navSlot.firstChild) navSlot.innerHTML = botnavHTML();
     navSlot.hidden = S.screen === "admin";
+    measureHdr();
     paintTint();
     patchNav();
 
@@ -2034,26 +2035,43 @@
      other screen) it is simply white. Feedback #1 rides on the same class —
      the header bleeds its background upward (see CSS), so the hole iOS Safari
      leaves while its address bar collapses shows header colour, not a gap. */
-  var lastY = 0;
+  /* Scroll work is what made the iPhone stutter: the first version read
+     offsetHeight (forced layout) and wrote a CSS variable on every scroll
+     event, and iOS momentum scrolling fires hundreds of them. Now the
+     handler only reads scrollY, writes to the DOM only when a state actually
+     flips, runs at most once per frame, and the header is measured on
+     render/resize instead of on scroll. */
+  var lastY = 0, hdrH = 0, tintOn = null, hideOn = null, tickQueued = false;
+  function measureHdr() {
+    var h = document.querySelector(".hdr");
+    if (!h) return;
+    var v = h.offsetHeight;
+    if (v !== hdrH) { hdrH = v; document.documentElement.style.setProperty("--hdrh", v + "px"); }
+  }
   function paintTint() {
     var y = window.scrollY;
     var tint = S.screen === "home" && y < 340;
-    document.documentElement.toggleAttribute("data-tint", tint);
+    if (tint !== tintOn) { tintOn = tint; document.documentElement.toggleAttribute("data-tint", tint); }
     /* The phone's chrome was eating half the screen, so the header gets the
        standard mobile contract: scrolling down puts it away, any scroll up
        brings it back, and near the top it always shows. CSS applies this
        below 768px only — the desktop has room and keeps everything. */
-    var hide = y > 160 && y > lastY + 4;
-    var show = y < 160 || y < lastY - 4;
-    if (hide) document.documentElement.setAttribute("data-hidenav", "");
-    else if (show) document.documentElement.removeAttribute("data-hidenav");
+    var hide = hideOn;
+    if (y > 160 && y > lastY + 4) hide = true;
+    else if (y < 160 || y < lastY - 4) hide = false;
+    if (hide !== hideOn) {
+      hideOn = hide;
+      if (hide) document.documentElement.setAttribute("data-hidenav", "");
+      else document.documentElement.removeAttribute("data-hidenav");
+    }
     lastY = y;
-    // the subcat row docks right under the sticky header; the header's
-    // height differs by breakpoint, so it is measured, not guessed
-    var h = document.querySelector(".hdr");
-    if (h) document.documentElement.style.setProperty("--hdrh", h.offsetHeight + "px");
   }
-  window.addEventListener("scroll", paintTint, { passive: true });
+  window.addEventListener("scroll", function () {
+    if (tickQueued) return;
+    tickQueued = true;
+    requestAnimationFrame(function () { tickQueued = false; paintTint(); });
+  }, { passive: true });
+  window.addEventListener("resize", measureHdr, { passive: true });
 
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also
