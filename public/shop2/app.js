@@ -442,9 +442,7 @@
             '<span class="lang__flag" style="background-image:' + FLAG[l[0]] + '"></span>' +
             '<span style="flex:1">' + l[1] + "</span>" + (S.lang === l[0] ? "<span>✓</span>" : "") + "</button>";
         }).join("") +
-        // the switch is real, the translations are not written yet — say so
-        // rather than letting it look broken
-        '<p class="lang__note">Магазин будет на трёх языках. В демо переведён только русский.</p></div>'
+        '<p class="lang__note">Описания товаров и инфостраницы — на трёх языках. Интерфейс в демо пока русский.</p></div>'
       : "";
     var srch = h.querySelector("[data-search]");
     if (document.activeElement !== srch) srch.value = S.query;
@@ -583,10 +581,24 @@
       '<div class="grid">' + list.map(cardHTML).join("") + "</div></section>";
   }
 
+  /* Descriptions and info pages exist in three languages; the source text is
+     the shop's own English, RU/ET are its translations. UI chrome stays
+     Russian in this round — only the content follows the switcher. */
+  function descFor(p) {
+    if (S.lang === "RU" && typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) return CONTENT_RU[p.id];
+    if (S.lang === "ET" && typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) return CONTENT_ET[p.id];
+    return (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "";
+  }
+  function legalFor(slug) {
+    if (S.lang === "RU" && typeof LEGAL_RU !== "undefined" && LEGAL_RU[slug]) return LEGAL_RU[slug];
+    if (S.lang === "ET" && typeof LEGAL_ET !== "undefined" && LEGAL_ET[slug]) return LEGAL_ET[slug];
+    return typeof LEGAL !== "undefined" ? LEGAL[slug] : null;
+  }
+
   /* The old shop's own policy texts, served as real pages — placeholders
      until the lawyer pass, but real placeholders. */
   function screenInfo() {
-    var pg = typeof LEGAL !== "undefined" ? LEGAL[S.infoSlug] : null;
+    var pg = legalFor(S.infoSlug);
     if (!pg) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><button class="link" data-go="home">На главную</button></p></section></div>'; }
     return '<div class="wrap wrap--mid">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(pg.title) + "</div>" +
@@ -737,8 +749,8 @@
              95 products); the old placeholder text only where we somehow
              don't. Its images are stripped: cdn.shopify.com dies with the
              store, and the gallery already shows the product. */
-          (typeof CONTENT !== "undefined" && CONTENT[p.id]
-            ? acc("Описание", '<div class="acc__rich">' + CONTENT[p.id] + "</div>") +
+          (descFor(p)
+            ? acc("Описание", '<div class="acc__rich">' + descFor(p) + "</div>") +
               (p.cat === "merch"
                 ? acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.")
                 : acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам."))
@@ -1198,6 +1210,7 @@
           '<div class="adm__chips">' + [
             "Что заканчивается и что дозаказать?",
             "Сколько заработали на Kevin.Murphy?",
+            "Добавь новый товар — вот фото",
             "Напиши описание для шампуня",
             "Какие заказы ждут отправки?"
           ].map(function (q) { return '<button class="fchip" data-admask="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
@@ -1241,7 +1254,10 @@
         ". В рабочей версии здесь будет выручка за месяц по бренду и сравнение с прошлым.";
     }
     if (/описан|текст/i.test(q)) {
-      return "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Останется прочитать и нажать «Опубликовать».";
+      return "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».";
+    }
+    if (/добав|новый товар|фото|загруз/i.test(q)) {
+      return "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите.";
     }
     return "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?";
   }
@@ -1788,7 +1804,9 @@
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
     if (d.dot !== undefined) { setSlide(Number(d.dot), true); return; }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
-    if (d.lang) { S.lang = d.lang; S.langOpen = false; persist(); patchHeader(); return; }
+    // full render, not just the header: the description accordion and the
+    // legal pages follow the language now
+    if (d.lang) { S.lang = d.lang; S.langOpen = false; persist(); render(); return; }
     if (d.line !== undefined) {
       var li = Number(d.line);
       if (S.cart[li]) S.cart[li].qty = Math.max(1, Math.min(9, S.cart[li].qty + Number(d.d)));

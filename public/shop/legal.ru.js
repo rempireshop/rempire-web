@@ -1,0 +1,1 @@
+var LEGAL_RU = {};

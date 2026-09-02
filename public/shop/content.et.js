@@ -1,0 +1,1 @@
+var CONTENT_ET = {};
