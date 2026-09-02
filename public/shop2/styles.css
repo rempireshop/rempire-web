@@ -1352,3 +1352,17 @@ button, a, summary, label { touch-action: manipulation; }
 @supports (content-visibility: auto) {
   .card { content-visibility: auto; contain-intrinsic-size: auto 340px; }
 }
+
+
+/* harvested description + legal page typography */
+.acc__rich p, .legal p { margin: 0 0 10px; }
+.acc__rich ul, .legal ul, .legal ol { margin: 0 0 12px; padding-left: 20px; }
+.acc__rich li, .legal li { margin: 4px 0; }
+.acc__rich h1, .acc__rich h2, .acc__rich h3, .acc__rich h4 { font-size: 14px; margin: 14px 0 6px; font-family: Oswald, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.legal h1, .legal h2, .legal h3, .legal h4 { font-size: 15px; margin: 20px 0 8px; font-family: Oswald, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.legal { font-size: 14.5px; line-height: 1.65; }
+.legal table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
+.legal td, .legal th { border: 1px solid var(--rule); padding: 6px 9px; text-align: left; }
+.legal a { color: var(--ink); }
+.ftr__acc .link { font-size: inherit; color: inherit; border-bottom-color: var(--rule); }
+.ftr__acc .link:hover { border-bottom-color: var(--ink); }

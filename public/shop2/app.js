@@ -191,6 +191,7 @@
     gallery: 0,
     sort: "hit",
     subcat: "",         // one honest level below the category (v2)
+    infoSlug: "",       // which legal/info page is open
     onlyInStock: false,
     brand: "",          // brand-scoped catalogue view (the Бренды section)
     brandFilter: []
@@ -501,8 +502,8 @@
       ftrSec("Самовывоз", "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.") +
       ftrSec("Реквизиты", "Rempire Store OÜ<br>Рег. 12216136 · KMKR EE102723858<br>Mardi 1, 10145 Таллинн") +
       ftrSec("Связаться", '<a href="tel:+37256237237">56237237</a> · <a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a>') +
-      ftrSec("Покупателю", '<a href="#">Доставка и оплата</a> · <a href="#">Возврат товара</a> · <a href="#">Условия продажи</a> · <a href="#">Блог и советы</a>') +
-      ftrSec("Правовое", '<a href="#">Конфиденциальность</a> · <a href="#">Правовая информация</a> · <a href="#">Настройки cookie</a> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
+      ftrSec("Покупателю", '<button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
+      ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" +
         '<span class="socials socials--bottom">' +
@@ -580,6 +581,19 @@
       '</h2><button class="link" data-go-cat="all">Все товары</button></div>' +
       '<p class="sec__intro">' + intro + "</p>" +
       '<div class="grid">' + list.map(cardHTML).join("") + "</div></section>";
+  }
+
+  /* The old shop's own policy texts, served as real pages — placeholders
+     until the lawyer pass, but real placeholders. */
+  function screenInfo() {
+    var pg = typeof LEGAL !== "undefined" ? LEGAL[S.infoSlug] : null;
+    if (!pg) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><button class="link" data-go="home">На главную</button></p></section></div>'; }
+    return '<div class="wrap wrap--mid">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(pg.title) + "</div>" +
+      '<section class="sec"><h1 class="display h1">' + esc(pg.title) + "</h1>" +
+      '<div class="legal">' + pg.html + "</div>" +
+      '<p class="note" style="margin-top:22px">Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.</p>' +
+      "</section></div>";
   }
 
   function screenBrands() {
@@ -719,8 +733,16 @@
               // and toast «Корзина пуста» at someone standing on a product page
               '<div class="pdp__alt"><button class="link" data-buynow="' + p.id + '">Другие способы оплаты</button></div>') +
           '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
-          // t-shirts get t-shirt accordions — INCI on a футболка read absurd
-          (p.cat === "merch"
+          /* The live shop's own description when we have it (harvested — all
+             95 products); the old placeholder text only where we somehow
+             don't. Its images are stripped: cdn.shopify.com dies with the
+             store, and the gallery already shows the product. */
+          (typeof CONTENT !== "undefined" && CONTENT[p.id]
+            ? acc("Описание", '<div class="acc__rich">' + CONTENT[p.id] + "</div>") +
+              (p.cat === "merch"
+                ? acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.")
+                : acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам."))
+            : p.cat === "merch"
             ? acc("Описание", "Фирменная футболка Rempire с принтом нашего художника. Плотный хлопок, печать держит стирку.") +
               acc("Размеры и уход", "Стирать при 30° наизнанку, не сушить в машине, гладить не по принту. Сомневаетесь в размере — берите больший.") +
               acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.")
@@ -1310,6 +1332,7 @@
     else if (S.screen === "checkout") body = screenCheckout();
     else if (S.screen === "done") body = screenDone();
     else if (S.screen === "brands") body = screenBrands();
+    else if (S.screen === "info") body = screenInfo();
     else if (S.screen === "admin") body = screenAdmin();
 
     var chromeless = S.screen === "checkout" || S.screen === "done" || S.screen === "admin";
@@ -1498,6 +1521,7 @@
     if (S.screen === "product" && S.productId) return "/shop2/p/" + encodeURIComponent(S.productId) + "/";
     if (S.screen === "catalog") return S.brand ? "/shop2/b/" + slugify(S.brand) + "/" : "/shop2/c/" + S.cat + "/";
     if (S.screen === "search") return "/shop2/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
+    if (S.screen === "info" && S.infoSlug) return "/shop2/info/" + S.infoSlug + "/";
     if (S.screen === "home") return "/shop2/";
     return "/shop2/" + S.screen + "/";
   }
@@ -1699,7 +1723,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -1742,6 +1766,7 @@
       S.brandFilter = S.brandFilter.filter(function (x) { return x !== d.unbrand; });
       S.shown = 12; patchCatalog(); return;
     }
+    if (d.page !== undefined) { S.infoSlug = d.page; go("info"); return; }
     if (d.subcat !== undefined) {
       S.subcat = d.subcat; S.shown = 12;
       render();
@@ -2000,6 +2025,9 @@
       S.query = q ? decodeURIComponent(q[1].replace(/\+/g, " ")) : "";
       S.screen = "search";
       return true;
+    }
+    if ((m = p.match(/\/shop2\/info\/([a-z]+)$/)) && typeof LEGAL !== "undefined" && LEGAL[m[1]]) {
+      S.infoSlug = m[1]; S.screen = "info"; return true;
     }
     if ((m = p.match(/\/shop2\/(brands|account|admin)$/))) { S.screen = m[1]; return true; }
     /* A receipt and a payment form are not places to land cold: /shop/done/
