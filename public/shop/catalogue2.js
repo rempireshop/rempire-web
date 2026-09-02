@@ -16,12 +16,12 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 9,
   "priceFrom": true,
-  "img": "/shop/img/system-4-bio-botanical-shampoo-0.webp?v=4",
-  "img2": "/shop/img/system-4-bio-botanical-shampoo-1.webp?v=4",
+  "img": "/shop/img/system-4-bio-botanical-shampoo-0.webp?v=5",
+  "img2": "/shop/img/system-4-bio-botanical-shampoo-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-bio-botanical-shampoo-0.webp?v=4",
-   "/shop/img/system-4-bio-botanical-shampoo-1.webp?v=4",
-   "/shop/img/system-4-bio-botanical-shampoo-2.webp?v=4"
+   "/shop/img/system-4-bio-botanical-shampoo-0.webp?v=5",
+   "/shop/img/system-4-bio-botanical-shampoo-1.webp?v=5",
+   "/shop/img/system-4-bio-botanical-shampoo-2.webp?v=5"
   ],
   "sizes": [
    "75 мл",
@@ -47,12 +47,12 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 8,
   "priceFrom": true,
-  "img": "/shop/img/system-4-bio-botanical-serum-0.webp?v=4",
-  "img2": "/shop/img/system-4-bio-botanical-serum-1.webp?v=4",
+  "img": "/shop/img/system-4-bio-botanical-serum-0.webp?v=5",
+  "img2": "/shop/img/system-4-bio-botanical-serum-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-bio-botanical-serum-0.webp?v=4",
-   "/shop/img/system-4-bio-botanical-serum-1.webp?v=4",
-   "/shop/img/system-4-bio-botanical-serum-2.webp?v=4"
+   "/shop/img/system-4-bio-botanical-serum-0.webp?v=5",
+   "/shop/img/system-4-bio-botanical-serum-1.webp?v=5",
+   "/shop/img/system-4-bio-botanical-serum-2.webp?v=5"
   ],
   "sizes": [
    "50 мл",
@@ -78,12 +78,12 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7.9,
   "priceFrom": true,
-  "img": "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-0.webp?v=4",
-  "img2": "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-1.webp?v=4",
+  "img": "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-0.webp?v=5",
+  "img2": "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-1.webp?v=5",
   "gallery": [
-   "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-0.webp?v=4",
-   "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-1.webp?v=4",
-   "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-2.webp?v=4"
+   "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-0.webp?v=5",
+   "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-1.webp?v=5",
+   "/shop/img/sim-sensitive-system-4-oil-cure-scalp-treatment-o-2.webp?v=5"
   ],
   "sizes": [
    "75 мл",
@@ -109,10 +109,10 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 27,
   "priceFrom": false,
-  "img": "/shop/img/touchable-0.webp?v=4",
-  "img2": "/shop/img/touchable-0.webp?v=4",
+  "img": "/shop/img/touchable-0.webp?v=5",
+  "img2": "/shop/img/touchable-0.webp?v=5",
   "gallery": [
-   "/shop/img/touchable-0.webp?v=4"
+   "/shop/img/touchable-0.webp?v=5"
   ],
   "sizes": [
    "250 мл"
@@ -129,23 +129,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7,
   "priceFrom": true,
-  "img": "/shop/img/repair-me-wash-0.webp?v=4",
-  "img2": "/shop/img/repair-me-wash-1.webp?v=4",
+  "img": "/shop/img/repair-me-wash-0.webp?v=5",
+  "img2": "/shop/img/repair-me-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/repair-me-wash-0.webp?v=4",
-   "/shop/img/repair-me-wash-1.webp?v=4"
+   "/shop/img/repair-me-wash-0.webp?v=5",
+   "/shop/img/repair-me-wash-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
-   27,
-   7
+   7,
+   27
   ],
   "stock": "in"
  },
@@ -156,23 +156,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 8,
   "priceFrom": true,
-  "img": "/shop/img/kevin-murphy-un-tangled-spray-0.webp?v=4",
-  "img2": "/shop/img/kevin-murphy-un-tangled-spray-1.webp?v=4",
+  "img": "/shop/img/kevin-murphy-un-tangled-spray-0.webp?v=5",
+  "img2": "/shop/img/kevin-murphy-un-tangled-spray-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-un-tangled-spray-0.webp?v=4",
-   "/shop/img/kevin-murphy-un-tangled-spray-1.webp?v=4"
+   "/shop/img/kevin-murphy-un-tangled-spray-0.webp?v=5",
+   "/shop/img/kevin-murphy-un-tangled-spray-1.webp?v=5"
   ],
   "sizes": [
-   "150 мл",
-   "40 мл"
+   "40 мл",
+   "150 мл"
   ],
   "varImg": [
    0,
    0
   ],
   "prices": [
-   28,
-   8
+   8,
+   28
   ],
   "stock": "in"
  },
@@ -183,23 +183,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 11,
   "priceFrom": true,
-  "img": "/shop/img/night-rider-0.webp?v=4",
-  "img2": "/shop/img/night-rider-1.webp?v=4",
+  "img": "/shop/img/night-rider-0.webp?v=5",
+  "img2": "/shop/img/night-rider-1.webp?v=5",
   "gallery": [
-   "/shop/img/night-rider-0.webp?v=4",
-   "/shop/img/night-rider-1.webp?v=4"
+   "/shop/img/night-rider-0.webp?v=5",
+   "/shop/img/night-rider-1.webp?v=5"
   ],
   "sizes": [
-   "100 г",
-   "30 г"
+   "30 г",
+   "100 г"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
-   28,
-   11
+   11,
+   28
   ],
   "stock": "in"
  },
@@ -210,23 +210,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 11,
   "priceFrom": true,
-  "img": "/shop/img/free-hold-0.webp?v=4",
-  "img2": "/shop/img/free-hold-1.webp?v=4",
+  "img": "/shop/img/free-hold-0.webp?v=5",
+  "img2": "/shop/img/free-hold-1.webp?v=5",
   "gallery": [
-   "/shop/img/free-hold-0.webp?v=4",
-   "/shop/img/free-hold-1.webp?v=4"
+   "/shop/img/free-hold-0.webp?v=5",
+   "/shop/img/free-hold-1.webp?v=5"
   ],
   "sizes": [
-   "100 г",
-   "30 г"
+   "30 г",
+   "100 г"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
-   28,
-   11
+   11,
+   28
   ],
   "stock": "in"
  },
@@ -237,23 +237,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 6,
   "priceFrom": true,
-  "img": "/shop/img/killer-curls-rinse-0.webp?v=4",
-  "img2": "/shop/img/killer-curls-rinse-1.webp?v=4",
+  "img": "/shop/img/killer-curls-rinse-0.webp?v=5",
+  "img2": "/shop/img/killer-curls-rinse-1.webp?v=5",
   "gallery": [
-   "/shop/img/killer-curls-rinse-0.webp?v=4",
-   "/shop/img/killer-curls-rinse-1.webp?v=4"
+   "/shop/img/killer-curls-rinse-0.webp?v=5",
+   "/shop/img/killer-curls-rinse-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
    0,
    0
   ],
   "prices": [
-   27,
-   6
+   6,
+   27
   ],
   "stock": "in"
  },
@@ -264,23 +264,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 6,
   "priceFrom": true,
-  "img": "/shop/img/killer-curls-wash-0.webp?v=4",
-  "img2": "/shop/img/killer-curls-wash-1.webp?v=4",
+  "img": "/shop/img/killer-curls-wash-0.webp?v=5",
+  "img2": "/shop/img/killer-curls-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/killer-curls-wash-0.webp?v=4",
-   "/shop/img/killer-curls-wash-1.webp?v=4"
+   "/shop/img/killer-curls-wash-0.webp?v=5",
+   "/shop/img/killer-curls-wash-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
    0,
    0
   ],
   "prices": [
-   27,
-   6
+   6,
+   27
   ],
   "stock": "in"
  },
@@ -291,12 +291,12 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7.9,
   "priceFrom": true,
-  "img": "/shop/img/system-4-mild-shampoo-3-0.webp?v=4",
-  "img2": "/shop/img/system-4-mild-shampoo-3-1.webp?v=4",
+  "img": "/shop/img/system-4-mild-shampoo-3-0.webp?v=5",
+  "img2": "/shop/img/system-4-mild-shampoo-3-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-mild-shampoo-3-0.webp?v=4",
-   "/shop/img/system-4-mild-shampoo-3-1.webp?v=4",
-   "/shop/img/system-4-mild-shampoo-3-2.webp?v=4"
+   "/shop/img/system-4-mild-shampoo-3-0.webp?v=5",
+   "/shop/img/system-4-mild-shampoo-3-1.webp?v=5",
+   "/shop/img/system-4-mild-shampoo-3-2.webp?v=5"
   ],
   "sizes": [
    "75 мл",
@@ -322,12 +322,12 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7.9,
   "priceFrom": true,
-  "img": "/shop/img/sim-sensitive-system-4-scalp-tonic-t-0.webp?v=4",
-  "img2": "/shop/img/sim-sensitive-system-4-scalp-tonic-t-1.webp?v=4",
+  "img": "/shop/img/sim-sensitive-system-4-scalp-tonic-t-0.webp?v=5",
+  "img2": "/shop/img/sim-sensitive-system-4-scalp-tonic-t-1.webp?v=5",
   "gallery": [
-   "/shop/img/sim-sensitive-system-4-scalp-tonic-t-0.webp?v=4",
-   "/shop/img/sim-sensitive-system-4-scalp-tonic-t-1.webp?v=4",
-   "/shop/img/sim-sensitive-system-4-scalp-tonic-t-2.webp?v=4"
+   "/shop/img/sim-sensitive-system-4-scalp-tonic-t-0.webp?v=5",
+   "/shop/img/sim-sensitive-system-4-scalp-tonic-t-1.webp?v=5",
+   "/shop/img/sim-sensitive-system-4-scalp-tonic-t-2.webp?v=5"
   ],
   "sizes": [
    "50 мл",
@@ -353,11 +353,11 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 6.9,
   "priceFrom": true,
-  "img": "/shop/img/system-4-hydro-care-conditioner-h-0.webp?v=4",
-  "img2": "/shop/img/system-4-hydro-care-conditioner-h-1.webp?v=4",
+  "img": "/shop/img/system-4-hydro-care-conditioner-h-0.webp?v=5",
+  "img2": "/shop/img/system-4-hydro-care-conditioner-h-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-hydro-care-conditioner-h-0.webp?v=4",
-   "/shop/img/system-4-hydro-care-conditioner-h-1.webp?v=4"
+   "/shop/img/system-4-hydro-care-conditioner-h-0.webp?v=5",
+   "/shop/img/system-4-hydro-care-conditioner-h-1.webp?v=5"
   ],
   "sizes": [
    "75 мл",
@@ -383,10 +383,10 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 26,
   "priceFrom": false,
-  "img": "/shop/img/kevin-murphy-motion-lotion-0.webp?v=4",
-  "img2": "/shop/img/kevin-murphy-motion-lotion-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-motion-lotion-0.webp?v=5",
+  "img2": "/shop/img/kevin-murphy-motion-lotion-0.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-motion-lotion-0.webp?v=4"
+   "/shop/img/kevin-murphy-motion-lotion-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -403,11 +403,11 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7.9,
   "priceFrom": true,
-  "img": "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-0.webp?v=4",
-  "img2": "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-1.webp?v=4",
+  "img": "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-0.webp?v=5",
+  "img2": "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-1.webp?v=5",
   "gallery": [
-   "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-0.webp?v=4",
-   "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-1.webp?v=4"
+   "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-0.webp?v=5",
+   "/shop/img/sim-sensitive-system-4-chitosan-hair-repair-r-1.webp?v=5"
   ],
   "sizes": [
    "50 мл",
@@ -430,11 +430,11 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 6,
   "priceFrom": true,
-  "img": "/shop/img/kevin-murphy-blow-dry-wash-0.webp?v=4",
-  "img2": "/shop/img/kevin-murphy-blow-dry-wash-1.webp?v=4",
+  "img": "/shop/img/kevin-murphy-blow-dry-wash-0.webp?v=5",
+  "img2": "/shop/img/kevin-murphy-blow-dry-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-blow-dry-wash-0.webp?v=4",
-   "/shop/img/kevin-murphy-blow-dry-wash-1.webp?v=4"
+   "/shop/img/kevin-murphy-blow-dry-wash-0.webp?v=5",
+   "/shop/img/kevin-murphy-blow-dry-wash-1.webp?v=5"
   ],
   "sizes": [
    "40 мл",
@@ -457,23 +457,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 8,
   "priceFrom": true,
-  "img": "/shop/img/hair-resort-spray-0.webp?v=4",
-  "img2": "/shop/img/hair-resort-spray-1.webp?v=4",
+  "img": "/shop/img/hair-resort-spray-0.webp?v=5",
+  "img2": "/shop/img/hair-resort-spray-1.webp?v=5",
   "gallery": [
-   "/shop/img/hair-resort-spray-0.webp?v=4",
-   "/shop/img/hair-resort-spray-1.webp?v=4"
+   "/shop/img/hair-resort-spray-0.webp?v=5",
+   "/shop/img/hair-resort-spray-1.webp?v=5"
   ],
   "sizes": [
-   "150 мл",
-   "40 мл"
+   "40 мл",
+   "150 мл"
   ],
   "varImg": [
    0,
    0
   ],
   "prices": [
-   26,
-   8
+   8,
+   26
   ],
   "stock": "in"
  },
@@ -484,23 +484,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 11,
   "priceFrom": true,
-  "img": "/shop/img/rough-rider-0.webp?v=4",
-  "img2": "/shop/img/rough-rider-1.webp?v=4",
+  "img": "/shop/img/rough-rider-0.webp?v=5",
+  "img2": "/shop/img/rough-rider-1.webp?v=5",
   "gallery": [
-   "/shop/img/rough-rider-0.webp?v=4",
-   "/shop/img/rough-rider-1.webp?v=4"
+   "/shop/img/rough-rider-0.webp?v=5",
+   "/shop/img/rough-rider-1.webp?v=5"
   ],
   "sizes": [
-   "100 г",
-   "30 г"
+   "30 г",
+   "100 г"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
-   28,
-   11
+   11,
+   28
   ],
   "stock": "low"
  },
@@ -511,23 +511,23 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7,
   "priceFrom": true,
-  "img": "/shop/img/maxi-wash-0.webp?v=4",
-  "img2": "/shop/img/maxi-wash-1.webp?v=4",
+  "img": "/shop/img/maxi-wash-0.webp?v=5",
+  "img2": "/shop/img/maxi-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/maxi-wash-0.webp?v=4",
-   "/shop/img/maxi-wash-1.webp?v=4"
+   "/shop/img/maxi-wash-0.webp?v=5",
+   "/shop/img/maxi-wash-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
-   26,
-   7
+   7,
+   26
   ],
   "stock": "low"
  },
@@ -538,11 +538,11 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 16,
   "priceFrom": true,
-  "img": "/shop/img/system-4-bio-botanical-vital-cure-0.webp?v=4",
-  "img2": "/shop/img/system-4-bio-botanical-vital-cure-1.webp?v=4",
+  "img": "/shop/img/system-4-bio-botanical-vital-cure-0.webp?v=5",
+  "img2": "/shop/img/system-4-bio-botanical-vital-cure-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-bio-botanical-vital-cure-0.webp?v=4",
-   "/shop/img/system-4-bio-botanical-vital-cure-1.webp?v=4"
+   "/shop/img/system-4-bio-botanical-vital-cure-0.webp?v=5",
+   "/shop/img/system-4-bio-botanical-vital-cure-1.webp?v=5"
   ],
   "sizes": [
    "150 мл",
@@ -565,12 +565,12 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7.9,
   "priceFrom": true,
-  "img": "/shop/img/system-4-balancing-shampoo-2-0.webp?v=4",
-  "img2": "/shop/img/system-4-balancing-shampoo-2-1.webp?v=4",
+  "img": "/shop/img/system-4-balancing-shampoo-2-0.webp?v=5",
+  "img2": "/shop/img/system-4-balancing-shampoo-2-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-balancing-shampoo-2-0.webp?v=4",
-   "/shop/img/system-4-balancing-shampoo-2-1.webp?v=4",
-   "/shop/img/system-4-balancing-shampoo-2-2.webp?v=4"
+   "/shop/img/system-4-balancing-shampoo-2-0.webp?v=5",
+   "/shop/img/system-4-balancing-shampoo-2-1.webp?v=5",
+   "/shop/img/system-4-balancing-shampoo-2-2.webp?v=5"
   ],
   "sizes": [
    "75 мл",
@@ -596,12 +596,12 @@ const CATALOGUE = [
   "cat": "hair",
   "price": 7.9,
   "priceFrom": true,
-  "img": "/shop/img/system-4-special-shampoo-1-0.webp?v=4",
-  "img2": "/shop/img/system-4-special-shampoo-1-1.webp?v=4",
+  "img": "/shop/img/system-4-special-shampoo-1-0.webp?v=5",
+  "img2": "/shop/img/system-4-special-shampoo-1-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-special-shampoo-1-0.webp?v=4",
-   "/shop/img/system-4-special-shampoo-1-1.webp?v=4",
-   "/shop/img/system-4-special-shampoo-1-2.webp?v=4"
+   "/shop/img/system-4-special-shampoo-1-0.webp?v=5",
+   "/shop/img/system-4-special-shampoo-1-1.webp?v=5",
+   "/shop/img/system-4-special-shampoo-1-2.webp?v=5"
   ],
   "sizes": [
    "75 мл",
@@ -627,10 +627,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 15,
   "priceFrom": false,
-  "img": "/shop/img/gatsby-moving-rubber-grunge-mat-grey-hair-wax-0.webp?v=4",
-  "img2": "/shop/img/gatsby-moving-rubber-grunge-mat-grey-hair-wax-0.webp?v=4",
+  "img": "/shop/img/gatsby-moving-rubber-grunge-mat-grey-hair-wax-0.webp?v=5",
+  "img2": "/shop/img/gatsby-moving-rubber-grunge-mat-grey-hair-wax-0.webp?v=5",
   "gallery": [
-   "/shop/img/gatsby-moving-rubber-grunge-mat-grey-hair-wax-0.webp?v=4"
+   "/shop/img/gatsby-moving-rubber-grunge-mat-grey-hair-wax-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -643,10 +643,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 26,
   "priceFrom": false,
-  "img": "/shop/img/kevin-murphy-killer-twirls-0.webp?v=4",
-  "img2": "/shop/img/kevin-murphy-killer-twirls-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-killer-twirls-0.webp?v=5",
+  "img2": "/shop/img/kevin-murphy-killer-twirls-0.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-killer-twirls-0.webp?v=4"
+   "/shop/img/kevin-murphy-killer-twirls-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -663,10 +663,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 28,
   "priceFrom": false,
-  "img": "/shop/img/easy-rider-0.webp?v=4",
-  "img2": "/shop/img/easy-rider-0.webp?v=4",
+  "img": "/shop/img/easy-rider-0.webp?v=5",
+  "img2": "/shop/img/easy-rider-0.webp?v=5",
   "gallery": [
-   "/shop/img/easy-rider-0.webp?v=4"
+   "/shop/img/easy-rider-0.webp?v=5"
   ],
   "sizes": [
    "100 г"
@@ -683,10 +683,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 15,
   "priceFrom": false,
-  "img": "/shop/img/gatsby-moving-rubber-wild-shake-15g-0.webp?v=4",
-  "img2": "/shop/img/gatsby-moving-rubber-wild-shake-15g-0.webp?v=4",
+  "img": "/shop/img/gatsby-moving-rubber-wild-shake-15g-0.webp?v=5",
+  "img2": "/shop/img/gatsby-moving-rubber-wild-shake-15g-0.webp?v=5",
   "gallery": [
-   "/shop/img/gatsby-moving-rubber-wild-shake-15g-0.webp?v=4"
+   "/shop/img/gatsby-moving-rubber-wild-shake-15g-0.webp?v=5"
   ],
   "sizes": [
    "80 г"
@@ -703,10 +703,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 15,
   "priceFrom": false,
-  "img": "/shop/img/mandom-gatsby-moving-rubber-0.webp?v=4",
-  "img2": "/shop/img/mandom-gatsby-moving-rubber-0.webp?v=4",
+  "img": "/shop/img/mandom-gatsby-moving-rubber-0.webp?v=5",
+  "img2": "/shop/img/mandom-gatsby-moving-rubber-0.webp?v=5",
   "gallery": [
-   "/shop/img/mandom-gatsby-moving-rubber-0.webp?v=4"
+   "/shop/img/mandom-gatsby-moving-rubber-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -719,10 +719,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 33,
   "priceFrom": false,
-  "img": "/shop/img/killer-curls-0.webp?v=4",
-  "img2": "/shop/img/killer-curls-0.webp?v=4",
+  "img": "/shop/img/killer-curls-0.webp?v=5",
+  "img2": "/shop/img/killer-curls-0.webp?v=5",
   "gallery": [
-   "/shop/img/killer-curls-0.webp?v=4"
+   "/shop/img/killer-curls-0.webp?v=5"
   ],
   "sizes": [
    "200 мл"
@@ -739,10 +739,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 28,
   "priceFrom": false,
-  "img": "/shop/img/super-goo-0.webp?v=4",
-  "img2": "/shop/img/super-goo-0.webp?v=4",
+  "img": "/shop/img/super-goo-0.webp?v=5",
+  "img2": "/shop/img/super-goo-0.webp?v=5",
   "gallery": [
-   "/shop/img/super-goo-0.webp?v=4"
+   "/shop/img/super-goo-0.webp?v=5"
   ],
   "sizes": [
    "100 г"
@@ -759,23 +759,23 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 18,
   "priceFrom": true,
-  "img": "/shop/img/body-builder-0.webp?v=4",
-  "img2": "/shop/img/body-builder-1.webp?v=4",
+  "img": "/shop/img/body-builder-0.webp?v=5",
+  "img2": "/shop/img/body-builder-1.webp?v=5",
   "gallery": [
-   "/shop/img/body-builder-0.webp?v=4",
-   "/shop/img/body-builder-1.webp?v=4"
+   "/shop/img/body-builder-0.webp?v=5",
+   "/shop/img/body-builder-1.webp?v=5"
   ],
   "sizes": [
-   "400 мл",
-   "100 мл"
+   "100 мл",
+   "400 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
-   27,
-   18
+   18,
+   27
   ],
   "stock": "in"
  },
@@ -786,10 +786,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 23,
   "priceFrom": false,
-  "img": "/shop/img/paul-mitchell-mitch-construction-paste-flexible-styling-paste-0.webp?v=4",
-  "img2": "/shop/img/paul-mitchell-mitch-construction-paste-flexible-styling-paste-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-mitch-construction-paste-flexible-styling-paste-0.webp?v=5",
+  "img2": "/shop/img/paul-mitchell-mitch-construction-paste-flexible-styling-paste-0.webp?v=5",
   "gallery": [
-   "/shop/img/paul-mitchell-mitch-construction-paste-flexible-styling-paste-0.webp?v=4"
+   "/shop/img/paul-mitchell-mitch-construction-paste-flexible-styling-paste-0.webp?v=5"
   ],
   "sizes": [
    "75 мл"
@@ -806,10 +806,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 35,
   "priceFrom": false,
-  "img": "/shop/img/paul-mitchell-super-skinny-serum-0.webp?v=4",
-  "img2": "/shop/img/paul-mitchell-super-skinny-serum-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-super-skinny-serum-0.webp?v=5",
+  "img2": "/shop/img/paul-mitchell-super-skinny-serum-0.webp?v=5",
   "gallery": [
-   "/shop/img/paul-mitchell-super-skinny-serum-0.webp?v=4"
+   "/shop/img/paul-mitchell-super-skinny-serum-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -826,10 +826,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 26,
   "priceFrom": false,
-  "img": "/shop/img/paul-mitchell-clear-styling-glaze-0.webp?v=4",
-  "img2": "/shop/img/paul-mitchell-clear-styling-glaze-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-clear-styling-glaze-0.webp?v=5",
+  "img2": "/shop/img/paul-mitchell-clear-styling-glaze-0.webp?v=5",
   "gallery": [
-   "/shop/img/paul-mitchell-clear-styling-glaze-0.webp?v=4"
+   "/shop/img/paul-mitchell-clear-styling-glaze-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -846,10 +846,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 23,
   "priceFrom": false,
-  "img": "/shop/img/paul-mitchell-mitch-steady-grip-styling-gel-0.webp?v=4",
-  "img2": "/shop/img/paul-mitchell-mitch-steady-grip-styling-gel-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-mitch-steady-grip-styling-gel-0.webp?v=5",
+  "img2": "/shop/img/paul-mitchell-mitch-steady-grip-styling-gel-0.webp?v=5",
   "gallery": [
-   "/shop/img/paul-mitchell-mitch-steady-grip-styling-gel-0.webp?v=4"
+   "/shop/img/paul-mitchell-mitch-steady-grip-styling-gel-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -866,10 +866,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 30,
   "priceFrom": false,
-  "img": "/shop/img/powder-puff-0.webp?v=4",
-  "img2": "/shop/img/powder-puff-0.webp?v=4",
+  "img": "/shop/img/powder-puff-0.webp?v=5",
+  "img2": "/shop/img/powder-puff-0.webp?v=5",
   "gallery": [
-   "/shop/img/powder-puff-0.webp?v=4"
+   "/shop/img/powder-puff-0.webp?v=5"
   ],
   "sizes": [
    "14 г"
@@ -886,10 +886,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 27,
   "priceFrom": false,
-  "img": "/shop/img/kevin-murphy-full-again-0.webp?v=4",
-  "img2": "/shop/img/kevin-murphy-full-again-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-full-again-0.webp?v=5",
+  "img2": "/shop/img/kevin-murphy-full-again-0.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-full-again-0.webp?v=4"
+   "/shop/img/kevin-murphy-full-again-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -906,10 +906,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 26,
   "priceFrom": false,
-  "img": "/shop/img/hair-resort-0.webp?v=4",
-  "img2": "/shop/img/hair-resort-0.webp?v=4",
+  "img": "/shop/img/hair-resort-0.webp?v=5",
+  "img2": "/shop/img/hair-resort-0.webp?v=5",
   "gallery": [
-   "/shop/img/hair-resort-0.webp?v=4"
+   "/shop/img/hair-resort-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -926,10 +926,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 24.5,
   "priceFrom": false,
-  "img": "/shop/img/davines-pasta-love-strong-hold-mat-clay-0.webp?v=4",
-  "img2": "/shop/img/davines-pasta-love-strong-hold-mat-clay-0.webp?v=4",
+  "img": "/shop/img/davines-pasta-love-strong-hold-mat-clay-0.webp?v=5",
+  "img2": "/shop/img/davines-pasta-love-strong-hold-mat-clay-0.webp?v=5",
   "gallery": [
-   "/shop/img/davines-pasta-love-strong-hold-mat-clay-0.webp?v=4"
+   "/shop/img/davines-pasta-love-strong-hold-mat-clay-0.webp?v=5"
   ],
   "sizes": [
    "50 мл"
@@ -946,10 +946,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 16,
   "priceFrom": false,
-  "img": "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp?v=4",
+  "img": "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp?v=4"
+   "/shop/img/proraso-wood-spice-beard-balm-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -962,11 +962,11 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 17,
   "priceFrom": false,
-  "img": "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-0.webp?v=4",
-  "img2": "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-1.webp?v=4",
+  "img": "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-0.webp?v=5",
+  "img2": "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-0.webp?v=4",
-   "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-1.webp?v=4"
+   "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-0.webp?v=5",
+   "/shop/img/captain-fawcett-beard-oil-cf-332-private-stock-1.webp?v=5"
   ],
   "sizes": [
    "10 мл"
@@ -983,10 +983,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 16,
   "priceFrom": false,
-  "img": "/shop/img/proraso-azur-lime-after-shave-balm-100-ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-azur-lime-after-shave-balm-100-ml-0.webp?v=4",
+  "img": "/shop/img/proraso-azur-lime-after-shave-balm-100-ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-azur-lime-after-shave-balm-100-ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-azur-lime-after-shave-balm-100-ml-0.webp?v=4"
+   "/shop/img/proraso-azur-lime-after-shave-balm-100-ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -999,10 +999,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 14,
   "priceFrom": false,
-  "img": "/shop/img/proraso-white-aftershave-balm-soothing-for-sensitive-skin-100ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-white-aftershave-balm-soothing-for-sensitive-skin-100ml-0.webp?v=4",
+  "img": "/shop/img/proraso-white-aftershave-balm-soothing-for-sensitive-skin-100ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-white-aftershave-balm-soothing-for-sensitive-skin-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-white-aftershave-balm-soothing-for-sensitive-skin-100ml-0.webp?v=4"
+   "/shop/img/proraso-white-aftershave-balm-soothing-for-sensitive-skin-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1015,10 +1015,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 14,
   "priceFrom": false,
-  "img": "/shop/img/proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml-0.webp?v=4",
+  "img": "/shop/img/proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml-0.webp?v=4"
+   "/shop/img/proraso-blue-protect-aftershave-balm-aloe-and-vitamin-e-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1031,10 +1031,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 14,
   "priceFrom": false,
-  "img": "/shop/img/proraso-aftershave-balm-green-refreshing-alcohol-free-mentholated-100ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-aftershave-balm-green-refreshing-alcohol-free-mentholated-100ml-0.webp?v=4",
+  "img": "/shop/img/proraso-aftershave-balm-green-refreshing-alcohol-free-mentholated-100ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-aftershave-balm-green-refreshing-alcohol-free-mentholated-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-aftershave-balm-green-refreshing-alcohol-free-mentholated-100ml-0.webp?v=4"
+   "/shop/img/proraso-aftershave-balm-green-refreshing-alcohol-free-mentholated-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1047,10 +1047,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 14,
   "priceFrom": false,
-  "img": "/shop/img/proraso-red-nourishing-aftershave-lotion-100ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-red-nourishing-aftershave-lotion-100ml-0.webp?v=4",
+  "img": "/shop/img/proraso-red-nourishing-aftershave-lotion-100ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-red-nourishing-aftershave-lotion-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-red-nourishing-aftershave-lotion-100ml-0.webp?v=4"
+   "/shop/img/proraso-red-nourishing-aftershave-lotion-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1063,10 +1063,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 14,
   "priceFrom": false,
-  "img": "/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=4",
+  "img": "/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=4"
+   "/shop/img/proraso-green-refreshing-aftershave-lotion-menthol-splash-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1079,10 +1079,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 15,
   "priceFrom": false,
-  "img": "/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=4",
+  "img": "/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=4"
+   "/shop/img/proraso-beard-oil-azur-lime-30ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1095,10 +1095,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 15,
   "priceFrom": false,
-  "img": "/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=4",
+  "img": "/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=4"
+   "/shop/img/proraso-beard-oil-green-refreshing-30ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1111,10 +1111,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 15,
   "priceFrom": false,
-  "img": "/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=4",
+  "img": "/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=4"
+   "/shop/img/proraso-beard-oil-cypress-vetyver-30ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1127,10 +1127,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 15,
   "priceFrom": false,
-  "img": "/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=4",
-  "img2": "/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=4",
+  "img": "/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5",
+  "img2": "/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=4"
+   "/shop/img/proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1143,10 +1143,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 22,
   "priceFrom": false,
-  "img": "/shop/img/davines-pre-shaving-beard-oil-0.webp?v=4",
-  "img2": "/shop/img/davines-pre-shaving-beard-oil-0.webp?v=4",
+  "img": "/shop/img/davines-pre-shaving-beard-oil-0.webp?v=5",
+  "img2": "/shop/img/davines-pre-shaving-beard-oil-0.webp?v=5",
   "gallery": [
-   "/shop/img/davines-pre-shaving-beard-oil-0.webp?v=4"
+   "/shop/img/davines-pre-shaving-beard-oil-0.webp?v=5"
   ],
   "sizes": [
    "50 мл"
@@ -1163,10 +1163,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 23.5,
   "priceFrom": false,
-  "img": "/shop/img/davines-softening-shaving-gel-0.webp?v=4",
-  "img2": "/shop/img/davines-softening-shaving-gel-0.webp?v=4",
+  "img": "/shop/img/davines-softening-shaving-gel-0.webp?v=5",
+  "img2": "/shop/img/davines-softening-shaving-gel-0.webp?v=5",
   "gallery": [
-   "/shop/img/davines-softening-shaving-gel-0.webp?v=4"
+   "/shop/img/davines-softening-shaving-gel-0.webp?v=5"
   ],
   "sizes": [
    "200 мл"
@@ -1183,10 +1183,10 @@ const CATALOGUE = [
   "cat": "beard",
   "price": 24.5,
   "priceFrom": false,
-  "img": "/shop/img/davines-non-foaming-transparent-shaving-gel-0.webp?v=4",
-  "img2": "/shop/img/davines-non-foaming-transparent-shaving-gel-0.webp?v=4",
+  "img": "/shop/img/davines-non-foaming-transparent-shaving-gel-0.webp?v=5",
+  "img2": "/shop/img/davines-non-foaming-transparent-shaving-gel-0.webp?v=5",
   "gallery": [
-   "/shop/img/davines-non-foaming-transparent-shaving-gel-0.webp?v=4"
+   "/shop/img/davines-non-foaming-transparent-shaving-gel-0.webp?v=5"
   ],
   "sizes": [
    "150 мл"
@@ -1203,10 +1203,10 @@ const CATALOGUE = [
   "cat": "styling",
   "price": 24.5,
   "priceFrom": false,
-  "img": "/shop/img/davines-medium-hold-styling-paste-0.webp?v=4",
-  "img2": "/shop/img/davines-medium-hold-styling-paste-0.webp?v=4",
+  "img": "/shop/img/davines-medium-hold-styling-paste-0.webp?v=5",
+  "img2": "/shop/img/davines-medium-hold-styling-paste-0.webp?v=5",
   "gallery": [
-   "/shop/img/davines-medium-hold-styling-paste-0.webp?v=4"
+   "/shop/img/davines-medium-hold-styling-paste-0.webp?v=5"
   ],
   "sizes": [
    "125 мл"
@@ -1223,10 +1223,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 16.75,
   "priceFrom": false,
-  "img": "/shop/img/cosrx-full-fit-propolis-synergy-toner-0.webp?v=4",
-  "img2": "/shop/img/cosrx-full-fit-propolis-synergy-toner-0.webp?v=4",
+  "img": "/shop/img/cosrx-full-fit-propolis-synergy-toner-0.webp?v=5",
+  "img2": "/shop/img/cosrx-full-fit-propolis-synergy-toner-0.webp?v=5",
   "gallery": [
-   "/shop/img/cosrx-full-fit-propolis-synergy-toner-0.webp?v=4"
+   "/shop/img/cosrx-full-fit-propolis-synergy-toner-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1239,10 +1239,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 22.8,
   "priceFrom": false,
-  "img": "/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=4",
-  "img2": "/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=4",
+  "img": "/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=5",
+  "img2": "/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=5",
   "gallery": [
-   "/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=4"
+   "/shop/img/anua-heartleaf-pore-control-cleansing-oil-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1255,10 +1255,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 16.75,
   "priceFrom": false,
-  "img": "/shop/img/cosrx-aha-bha-clarifying-treatment-toner-0.webp?v=4",
-  "img2": "/shop/img/cosrx-aha-bha-clarifying-treatment-toner-0.webp?v=4",
+  "img": "/shop/img/cosrx-aha-bha-clarifying-treatment-toner-0.webp?v=5",
+  "img2": "/shop/img/cosrx-aha-bha-clarifying-treatment-toner-0.webp?v=5",
   "gallery": [
-   "/shop/img/cosrx-aha-bha-clarifying-treatment-toner-0.webp?v=4"
+   "/shop/img/cosrx-aha-bha-clarifying-treatment-toner-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1271,10 +1271,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 11.15,
   "priceFrom": false,
-  "img": "/shop/img/cosrx-low-ph-good-morning-gel-cleanser-0.webp?v=4",
-  "img2": "/shop/img/cosrx-low-ph-good-morning-gel-cleanser-0.webp?v=4",
+  "img": "/shop/img/cosrx-low-ph-good-morning-gel-cleanser-0.webp?v=5",
+  "img2": "/shop/img/cosrx-low-ph-good-morning-gel-cleanser-0.webp?v=5",
   "gallery": [
-   "/shop/img/cosrx-low-ph-good-morning-gel-cleanser-0.webp?v=4"
+   "/shop/img/cosrx-low-ph-good-morning-gel-cleanser-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1287,10 +1287,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 21.39,
   "priceFrom": false,
-  "img": "/shop/img/anua-bha-2-gentle-exfoliating-toner-150ml-0.webp?v=4",
-  "img2": "/shop/img/anua-bha-2-gentle-exfoliating-toner-150ml-0.webp?v=4",
+  "img": "/shop/img/anua-bha-2-gentle-exfoliating-toner-150ml-0.webp?v=5",
+  "img2": "/shop/img/anua-bha-2-gentle-exfoliating-toner-150ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/anua-bha-2-gentle-exfoliating-toner-150ml-0.webp?v=4"
+   "/shop/img/anua-bha-2-gentle-exfoliating-toner-150ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1303,10 +1303,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 23.99,
   "priceFrom": false,
-  "img": "/shop/img/anua-niacinamide-10-txa-4-serum-0.webp?v=4",
-  "img2": "/shop/img/anua-niacinamide-10-txa-4-serum-0.webp?v=4",
+  "img": "/shop/img/anua-niacinamide-10-txa-4-serum-0.webp?v=5",
+  "img2": "/shop/img/anua-niacinamide-10-txa-4-serum-0.webp?v=5",
   "gallery": [
-   "/shop/img/anua-niacinamide-10-txa-4-serum-0.webp?v=4"
+   "/shop/img/anua-niacinamide-10-txa-4-serum-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1319,10 +1319,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 18,
   "priceFrom": false,
-  "img": "/shop/img/anua-heartleaf-quercetinol-pore-deep-cleansing-foam-0.webp?v=4",
-  "img2": "/shop/img/anua-heartleaf-quercetinol-pore-deep-cleansing-foam-0.webp?v=4",
+  "img": "/shop/img/anua-heartleaf-quercetinol-pore-deep-cleansing-foam-0.webp?v=5",
+  "img2": "/shop/img/anua-heartleaf-quercetinol-pore-deep-cleansing-foam-0.webp?v=5",
   "gallery": [
-   "/shop/img/anua-heartleaf-quercetinol-pore-deep-cleansing-foam-0.webp?v=4"
+   "/shop/img/anua-heartleaf-quercetinol-pore-deep-cleansing-foam-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1335,10 +1335,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 22.99,
   "priceFrom": false,
-  "img": "/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=4",
-  "img2": "/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=4",
+  "img": "/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=5",
+  "img2": "/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=5",
   "gallery": [
-   "/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=4"
+   "/shop/img/cosrx-advanced-snail-92-all-in-one-cream-0.webp?v=5"
   ],
   "sizes": [
    "100 г"
@@ -1355,10 +1355,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 21.99,
   "priceFrom": false,
-  "img": "/shop/img/cosrx-advanced-snail-96-mucin-power-essence-0.webp?v=4",
-  "img2": "/shop/img/cosrx-advanced-snail-96-mucin-power-essence-0.webp?v=4",
+  "img": "/shop/img/cosrx-advanced-snail-96-mucin-power-essence-0.webp?v=5",
+  "img2": "/shop/img/cosrx-advanced-snail-96-mucin-power-essence-0.webp?v=5",
   "gallery": [
-   "/shop/img/cosrx-advanced-snail-96-mucin-power-essence-0.webp?v=4"
+   "/shop/img/cosrx-advanced-snail-96-mucin-power-essence-0.webp?v=5"
   ],
   "sizes": [
    "100 мл"
@@ -1375,11 +1375,11 @@ const CATALOGUE = [
   "cat": "face",
   "price": 21.95,
   "priceFrom": false,
-  "img": "/shop/img/lumin-skin-recovery-oil-0.webp?v=4",
-  "img2": "/shop/img/lumin-skin-recovery-oil-1.webp?v=4",
+  "img": "/shop/img/lumin-skin-recovery-oil-0.webp?v=5",
+  "img2": "/shop/img/lumin-skin-recovery-oil-1.webp?v=5",
   "gallery": [
-   "/shop/img/lumin-skin-recovery-oil-0.webp?v=4",
-   "/shop/img/lumin-skin-recovery-oil-1.webp?v=4"
+   "/shop/img/lumin-skin-recovery-oil-0.webp?v=5",
+   "/shop/img/lumin-skin-recovery-oil-1.webp?v=5"
   ],
   "sizes": [
    "8 мл"
@@ -1396,11 +1396,11 @@ const CATALOGUE = [
   "cat": "face",
   "price": 21.95,
   "priceFrom": false,
-  "img": "/shop/img/lumin-skin-wrinkle-defense-serum-0.webp?v=4",
-  "img2": "/shop/img/lumin-skin-wrinkle-defense-serum-1.webp?v=4",
+  "img": "/shop/img/lumin-skin-wrinkle-defense-serum-0.webp?v=5",
+  "img2": "/shop/img/lumin-skin-wrinkle-defense-serum-1.webp?v=5",
   "gallery": [
-   "/shop/img/lumin-skin-wrinkle-defense-serum-0.webp?v=4",
-   "/shop/img/lumin-skin-wrinkle-defense-serum-1.webp?v=4"
+   "/shop/img/lumin-skin-wrinkle-defense-serum-0.webp?v=5",
+   "/shop/img/lumin-skin-wrinkle-defense-serum-1.webp?v=5"
   ],
   "sizes": [
    "15 мл"
@@ -1417,11 +1417,11 @@ const CATALOGUE = [
   "cat": "face",
   "price": 18.95,
   "priceFrom": false,
-  "img": "/shop/img/lumin-skin-charcoal-scrub-deep-detox-0.webp?v=4",
-  "img2": "/shop/img/lumin-skin-charcoal-scrub-deep-detox-1.webp?v=4",
+  "img": "/shop/img/lumin-skin-charcoal-scrub-deep-detox-0.webp?v=5",
+  "img2": "/shop/img/lumin-skin-charcoal-scrub-deep-detox-1.webp?v=5",
   "gallery": [
-   "/shop/img/lumin-skin-charcoal-scrub-deep-detox-0.webp?v=4",
-   "/shop/img/lumin-skin-charcoal-scrub-deep-detox-1.webp?v=4"
+   "/shop/img/lumin-skin-charcoal-scrub-deep-detox-0.webp?v=5",
+   "/shop/img/lumin-skin-charcoal-scrub-deep-detox-1.webp?v=5"
   ],
   "sizes": [
    "30 мл"
@@ -1438,11 +1438,11 @@ const CATALOGUE = [
   "cat": "face",
   "price": 18.95,
   "priceFrom": false,
-  "img": "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-0.webp?v=4",
-  "img2": "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-1.webp?v=4",
+  "img": "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-0.webp?v=5",
+  "img2": "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-1.webp?v=5",
   "gallery": [
-   "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-0.webp?v=4",
-   "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-1.webp?v=4"
+   "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-0.webp?v=5",
+   "/shop/img/lumin-skin-charcoal-face-wash-daily-detox-1.webp?v=5"
   ],
   "sizes": [
    "100 мл"
@@ -1459,11 +1459,11 @@ const CATALOGUE = [
   "cat": "face",
   "price": 32.95,
   "priceFrom": false,
-  "img": "/shop/img/lumin-skin-dark-circle-defense-balm-0.webp?v=4",
-  "img2": "/shop/img/lumin-skin-dark-circle-defense-balm-1.webp?v=4",
+  "img": "/shop/img/lumin-skin-dark-circle-defense-balm-0.webp?v=5",
+  "img2": "/shop/img/lumin-skin-dark-circle-defense-balm-1.webp?v=5",
   "gallery": [
-   "/shop/img/lumin-skin-dark-circle-defense-balm-0.webp?v=4",
-   "/shop/img/lumin-skin-dark-circle-defense-balm-1.webp?v=4"
+   "/shop/img/lumin-skin-dark-circle-defense-balm-0.webp?v=5",
+   "/shop/img/lumin-skin-dark-circle-defense-balm-1.webp?v=5"
   ],
   "sizes": [
    "20 мл"
@@ -1480,10 +1480,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 3,
   "priceFrom": false,
-  "img": "/shop/img/gummy-sheet-mask-madecassoside-sticker-0.webp?v=4",
-  "img2": "/shop/img/gummy-sheet-mask-madecassoside-sticker-0.webp?v=4",
+  "img": "/shop/img/gummy-sheet-mask-madecassoside-sticker-0.webp?v=5",
+  "img2": "/shop/img/gummy-sheet-mask-madecassoside-sticker-0.webp?v=5",
   "gallery": [
-   "/shop/img/gummy-sheet-mask-madecassoside-sticker-0.webp?v=4"
+   "/shop/img/gummy-sheet-mask-madecassoside-sticker-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1496,10 +1496,10 @@ const CATALOGUE = [
   "cat": "face",
   "price": 6.99,
   "priceFrom": false,
-  "img": "/shop/img/anua-heartleaf-77-soothing-toner-0.webp?v=4",
-  "img2": "/shop/img/anua-heartleaf-77-soothing-toner-0.webp?v=4",
+  "img": "/shop/img/anua-heartleaf-77-soothing-toner-0.webp?v=5",
+  "img2": "/shop/img/anua-heartleaf-77-soothing-toner-0.webp?v=5",
   "gallery": [
-   "/shop/img/anua-heartleaf-77-soothing-toner-0.webp?v=4"
+   "/shop/img/anua-heartleaf-77-soothing-toner-0.webp?v=5"
   ],
   "sizes": [
    "40 мл"
@@ -1516,10 +1516,10 @@ const CATALOGUE = [
   "cat": "body",
   "price": 24.5,
   "priceFrom": false,
-  "img": "/shop/img/davines-hair-beard-body-wash-0.webp?v=4",
-  "img2": "/shop/img/davines-hair-beard-body-wash-0.webp?v=4",
+  "img": "/shop/img/davines-hair-beard-body-wash-0.webp?v=5",
+  "img2": "/shop/img/davines-hair-beard-body-wash-0.webp?v=5",
   "gallery": [
-   "/shop/img/davines-hair-beard-body-wash-0.webp?v=4"
+   "/shop/img/davines-hair-beard-body-wash-0.webp?v=5"
   ],
   "sizes": [
    "300 мл"
@@ -1536,11 +1536,11 @@ const CATALOGUE = [
   "cat": "body",
   "price": 9,
   "priceFrom": false,
-  "img": "/shop/img/handmade-soap-666-0.webp?v=4",
-  "img2": "/shop/img/handmade-soap-666-1.webp?v=4",
+  "img": "/shop/img/handmade-soap-666-0.webp?v=5",
+  "img2": "/shop/img/handmade-soap-666-1.webp?v=5",
   "gallery": [
-   "/shop/img/handmade-soap-666-0.webp?v=4",
-   "/shop/img/handmade-soap-666-1.webp?v=4"
+   "/shop/img/handmade-soap-666-0.webp?v=5",
+   "/shop/img/handmade-soap-666-1.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1553,11 +1553,11 @@ const CATALOGUE = [
   "cat": "body",
   "price": 9,
   "priceFrom": false,
-  "img": "/shop/img/handmade-soap-rule-nr-1-0.webp?v=4",
-  "img2": "/shop/img/handmade-soap-rule-nr-1-1.webp?v=4",
+  "img": "/shop/img/handmade-soap-rule-nr-1-0.webp?v=5",
+  "img2": "/shop/img/handmade-soap-rule-nr-1-1.webp?v=5",
   "gallery": [
-   "/shop/img/handmade-soap-rule-nr-1-0.webp?v=4",
-   "/shop/img/handmade-soap-rule-nr-1-1.webp?v=4"
+   "/shop/img/handmade-soap-rule-nr-1-0.webp?v=5",
+   "/shop/img/handmade-soap-rule-nr-1-1.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1570,10 +1570,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 190,
   "priceFrom": false,
-  "img": "/shop/img/xerjoff-tony-iommi-monkey-special-50ml-0.webp?v=4",
-  "img2": "/shop/img/xerjoff-tony-iommi-monkey-special-50ml-0.webp?v=4",
+  "img": "/shop/img/xerjoff-tony-iommi-monkey-special-50ml-0.webp?v=5",
+  "img2": "/shop/img/xerjoff-tony-iommi-monkey-special-50ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/xerjoff-tony-iommi-monkey-special-50ml-0.webp?v=4"
+   "/shop/img/xerjoff-tony-iommi-monkey-special-50ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1586,10 +1586,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 190,
   "priceFrom": false,
-  "img": "/shop/img/xerjoff-1861-naxos-eau-de-parfum-100ml-0.webp?v=4",
-  "img2": "/shop/img/xerjoff-1861-naxos-eau-de-parfum-100ml-0.webp?v=4",
+  "img": "/shop/img/xerjoff-1861-naxos-eau-de-parfum-100ml-0.webp?v=5",
+  "img2": "/shop/img/xerjoff-1861-naxos-eau-de-parfum-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/xerjoff-1861-naxos-eau-de-parfum-100ml-0.webp?v=4"
+   "/shop/img/xerjoff-1861-naxos-eau-de-parfum-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1602,10 +1602,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 199,
   "priceFrom": false,
-  "img": "/shop/img/creed-aventus-eau-de-parfum-for-men-50ml-0.webp?v=4",
-  "img2": "/shop/img/creed-aventus-eau-de-parfum-for-men-50ml-0.webp?v=4",
+  "img": "/shop/img/creed-aventus-eau-de-parfum-for-men-50ml-0.webp?v=5",
+  "img2": "/shop/img/creed-aventus-eau-de-parfum-for-men-50ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/creed-aventus-eau-de-parfum-for-men-50ml-0.webp?v=4"
+   "/shop/img/creed-aventus-eau-de-parfum-for-men-50ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1618,10 +1618,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 185,
   "priceFrom": false,
-  "img": "/shop/img/creed-creed-aventus-cologne-50ml-0.webp?v=4",
-  "img2": "/shop/img/creed-creed-aventus-cologne-50ml-0.webp?v=4",
+  "img": "/shop/img/creed-creed-aventus-cologne-50ml-0.webp?v=5",
+  "img2": "/shop/img/creed-creed-aventus-cologne-50ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/creed-creed-aventus-cologne-50ml-0.webp?v=4"
+   "/shop/img/creed-creed-aventus-cologne-50ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1650,10 +1650,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 65,
   "priceFrom": false,
-  "img": "/shop/img/versace-man-fraiche-eau-de-toilette-for-men-100ml-0.webp?v=4",
-  "img2": "/shop/img/versace-man-fraiche-eau-de-toilette-for-men-100ml-0.webp?v=4",
+  "img": "/shop/img/versace-man-fraiche-eau-de-toilette-for-men-100ml-0.webp?v=5",
+  "img2": "/shop/img/versace-man-fraiche-eau-de-toilette-for-men-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/versace-man-fraiche-eau-de-toilette-for-men-100ml-0.webp?v=4"
+   "/shop/img/versace-man-fraiche-eau-de-toilette-for-men-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1666,10 +1666,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 96,
   "priceFrom": false,
-  "img": "/shop/img/guerlain-habit-rouge-eau-de-parfum-100ml-0.webp?v=4",
-  "img2": "/shop/img/guerlain-habit-rouge-eau-de-parfum-100ml-0.webp?v=4",
+  "img": "/shop/img/guerlain-habit-rouge-eau-de-parfum-100ml-0.webp?v=5",
+  "img2": "/shop/img/guerlain-habit-rouge-eau-de-parfum-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/guerlain-habit-rouge-eau-de-parfum-100ml-0.webp?v=4"
+   "/shop/img/guerlain-habit-rouge-eau-de-parfum-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1682,10 +1682,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 100,
   "priceFrom": false,
-  "img": "/shop/img/guerlain-aqua-allegoria-forte-bosca-vanilla-edp-125ml-0.webp?v=4",
-  "img2": "/shop/img/guerlain-aqua-allegoria-forte-bosca-vanilla-edp-125ml-0.webp?v=4",
+  "img": "/shop/img/guerlain-aqua-allegoria-forte-bosca-vanilla-edp-125ml-0.webp?v=5",
+  "img2": "/shop/img/guerlain-aqua-allegoria-forte-bosca-vanilla-edp-125ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/guerlain-aqua-allegoria-forte-bosca-vanilla-edp-125ml-0.webp?v=4"
+   "/shop/img/guerlain-aqua-allegoria-forte-bosca-vanilla-edp-125ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1698,10 +1698,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 78.79,
   "priceFrom": false,
-  "img": "/shop/img/christian-dior-homme-intense-eau-de-parfum-50ml-0.webp?v=4",
-  "img2": "/shop/img/christian-dior-homme-intense-eau-de-parfum-50ml-0.webp?v=4",
+  "img": "/shop/img/christian-dior-homme-intense-eau-de-parfum-50ml-0.webp?v=5",
+  "img2": "/shop/img/christian-dior-homme-intense-eau-de-parfum-50ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/christian-dior-homme-intense-eau-de-parfum-50ml-0.webp?v=4"
+   "/shop/img/christian-dior-homme-intense-eau-de-parfum-50ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1714,10 +1714,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 198,
   "priceFrom": false,
-  "img": "/shop/img/roja-scandal-parfum-pour-femme-50ml-0.webp?v=4",
-  "img2": "/shop/img/roja-scandal-parfum-pour-femme-50ml-0.webp?v=4",
+  "img": "/shop/img/roja-scandal-parfum-pour-femme-50ml-0.webp?v=5",
+  "img2": "/shop/img/roja-scandal-parfum-pour-femme-50ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/roja-scandal-parfum-pour-femme-50ml-0.webp?v=4"
+   "/shop/img/roja-scandal-parfum-pour-femme-50ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1730,10 +1730,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 207.79,
   "priceFrom": false,
-  "img": "/shop/img/tom-ford-neroli-port-eau-de-parfum-spray-50ml-0.webp?v=4",
-  "img2": "/shop/img/tom-ford-neroli-port-eau-de-parfum-spray-50ml-0.webp?v=4",
+  "img": "/shop/img/tom-ford-neroli-port-eau-de-parfum-spray-50ml-0.webp?v=5",
+  "img2": "/shop/img/tom-ford-neroli-port-eau-de-parfum-spray-50ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/tom-ford-neroli-port-eau-de-parfum-spray-50ml-0.webp?v=4"
+   "/shop/img/tom-ford-neroli-port-eau-de-parfum-spray-50ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1746,10 +1746,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 133,
   "priceFrom": false,
-  "img": "/shop/img/tom-ford-black-orchid-eau-de-perfume-spray-100ml-0.webp?v=4",
-  "img2": "/shop/img/tom-ford-black-orchid-eau-de-perfume-spray-100ml-0.webp?v=4",
+  "img": "/shop/img/tom-ford-black-orchid-eau-de-perfume-spray-100ml-0.webp?v=5",
+  "img2": "/shop/img/tom-ford-black-orchid-eau-de-perfume-spray-100ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/tom-ford-black-orchid-eau-de-perfume-spray-100ml-0.webp?v=4"
+   "/shop/img/tom-ford-black-orchid-eau-de-perfume-spray-100ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1778,10 +1778,10 @@ const CATALOGUE = [
   "cat": "perfume",
   "price": 165,
   "priceFrom": false,
-  "img": "/shop/img/byredo-blanche-50ml-0.webp?v=4",
-  "img2": "/shop/img/byredo-blanche-50ml-0.webp?v=4",
+  "img": "/shop/img/byredo-blanche-50ml-0.webp?v=5",
+  "img2": "/shop/img/byredo-blanche-50ml-0.webp?v=5",
   "gallery": [
-   "/shop/img/byredo-blanche-50ml-0.webp?v=4"
+   "/shop/img/byredo-blanche-50ml-0.webp?v=5"
   ],
   "sizes": [],
   "varImg": [],
@@ -1794,11 +1794,11 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 35,
   "priceFrom": false,
-  "img": "/shop/img/oversized-t-shirt-unisex-0.webp?v=4",
-  "img2": "/shop/img/oversized-t-shirt-unisex-1.webp?v=4",
+  "img": "/shop/img/oversized-t-shirt-unisex-0.webp?v=5",
+  "img2": "/shop/img/oversized-t-shirt-unisex-1.webp?v=5",
   "gallery": [
-   "/shop/img/oversized-t-shirt-unisex-0.webp?v=4",
-   "/shop/img/oversized-t-shirt-unisex-1.webp?v=4"
+   "/shop/img/oversized-t-shirt-unisex-0.webp?v=5",
+   "/shop/img/oversized-t-shirt-unisex-1.webp?v=5"
   ],
   "sizes": [
    "white / S",
@@ -1846,11 +1846,11 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 27,
   "priceFrom": false,
-  "img": "/shop/img/three-kings-0.webp?v=4",
-  "img2": "/shop/img/three-kings-1.webp?v=4",
+  "img": "/shop/img/three-kings-0.webp?v=5",
+  "img2": "/shop/img/three-kings-1.webp?v=5",
   "gallery": [
-   "/shop/img/three-kings-0.webp?v=4",
-   "/shop/img/three-kings-1.webp?v=4"
+   "/shop/img/three-kings-0.webp?v=5",
+   "/shop/img/three-kings-1.webp?v=5"
   ],
   "sizes": [
    "S-M",
@@ -1877,11 +1877,11 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 27,
   "priceFrom": false,
-  "img": "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-0.webp?v=4",
-  "img2": "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-1.webp?v=4",
+  "img": "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-0.webp?v=5",
+  "img2": "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-1.webp?v=5",
   "gallery": [
-   "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-0.webp?v=4",
-   "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-1.webp?v=4"
+   "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-0.webp?v=5",
+   "/shop/img/king-of-the-night-deep-cut-t-shirt-with-an-extended-back-1.webp?v=5"
   ],
   "sizes": [
    "S-M",
@@ -1908,11 +1908,11 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 34.99,
   "priceFrom": false,
-  "img": "/shop/img/siim-hanikat-x-rempire-0.webp?v=4",
-  "img2": "/shop/img/siim-hanikat-x-rempire-1.webp?v=4",
+  "img": "/shop/img/siim-hanikat-x-rempire-0.webp?v=5",
+  "img2": "/shop/img/siim-hanikat-x-rempire-1.webp?v=5",
   "gallery": [
-   "/shop/img/siim-hanikat-x-rempire-0.webp?v=4",
-   "/shop/img/siim-hanikat-x-rempire-1.webp?v=4"
+   "/shop/img/siim-hanikat-x-rempire-0.webp?v=5",
+   "/shop/img/siim-hanikat-x-rempire-1.webp?v=5"
   ],
   "sizes": [
    "S",
@@ -1945,11 +1945,11 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 39,
   "priceFrom": false,
-  "img": "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-0.webp?v=4",
-  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-1.webp?v=4",
+  "img": "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-0.webp?v=5",
+  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-1.webp?v=5",
   "gallery": [
-   "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-0.webp?v=4",
-   "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-1.webp?v=4"
+   "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-0.webp?v=5",
+   "/shop/img/oversized-t-shirt-unisex-with-print-love-is-the-gun-1.webp?v=5"
   ],
   "sizes": [
    "L",
@@ -1982,12 +1982,12 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 27,
   "priceFrom": false,
-  "img": "/shop/img/deep-cut-t-shirt-with-an-extended-back-0.webp?v=4",
-  "img2": "/shop/img/deep-cut-t-shirt-with-an-extended-back-1.webp?v=4",
+  "img": "/shop/img/deep-cut-t-shirt-with-an-extended-back-0.webp?v=5",
+  "img2": "/shop/img/deep-cut-t-shirt-with-an-extended-back-1.webp?v=5",
   "gallery": [
-   "/shop/img/deep-cut-t-shirt-with-an-extended-back-0.webp?v=4",
-   "/shop/img/deep-cut-t-shirt-with-an-extended-back-1.webp?v=4",
-   "/shop/img/deep-cut-t-shirt-with-an-extended-back-2.webp?v=4"
+   "/shop/img/deep-cut-t-shirt-with-an-extended-back-0.webp?v=5",
+   "/shop/img/deep-cut-t-shirt-with-an-extended-back-1.webp?v=5",
+   "/shop/img/deep-cut-t-shirt-with-an-extended-back-2.webp?v=5"
   ],
   "sizes": [
    "S-M",
@@ -2014,11 +2014,11 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 35,
   "priceFrom": false,
-  "img": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-0.webp?v=4",
-  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-1.webp?v=4",
+  "img": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-0.webp?v=5",
+  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-1.webp?v=5",
   "gallery": [
-   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-0.webp?v=4",
-   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-1.webp?v=4"
+   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-0.webp?v=5",
+   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water-1.webp?v=5"
   ],
   "sizes": [
    "S",
@@ -2051,11 +2051,11 @@ const CATALOGUE = [
   "cat": "merch",
   "price": 35,
   "priceFrom": false,
-  "img": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-0.webp?v=4",
-  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-1.webp?v=4",
+  "img": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-0.webp?v=5",
+  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-1.webp?v=5",
   "gallery": [
-   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-0.webp?v=4",
-   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-1.webp?v=4"
+   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-0.webp?v=5",
+   "/shop/img/oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire-1.webp?v=5"
   ],
   "sizes": [
    "S",
@@ -2087,7 +2087,7 @@ const CATALOGUE = [
   "name": "Conditioner — кондиционер",
   "cat": "hair",
   "price": 19,
-  "img": "/shop/img/cbd-daily-conditioner-0.webp?v=4",
+  "img": "/shop/img/cbd-daily-conditioner-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2096,7 +2096,7 @@ const CATALOGUE = [
   "name": "Shampoo — шампунь",
   "cat": "hair",
   "price": 19,
-  "img": "/shop/img/cbd-daily-shampoo-0.webp?v=4",
+  "img": "/shop/img/cbd-daily-shampoo-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2105,7 +2105,7 @@ const CATALOGUE = [
   "name": "NaturalTech Nourishing Keratin Booster 100ml",
   "cat": "hair",
   "price": 52,
-  "img": "/shop/img/davines-naturaltech-nourishing-keratin-booster-100ml-0.webp?v=4",
+  "img": "/shop/img/davines-naturaltech-nourishing-keratin-booster-100ml-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2114,7 +2114,7 @@ const CATALOGUE = [
   "name": "Naturaltech Nourishing Keratin Sealer 100 ml — спрей",
   "cat": "hair",
   "price": 24,
-  "img": "/shop/img/davines-naturaltech-nourishing-keratin-sealer-100-ml-0.webp?v=4",
+  "img": "/shop/img/davines-naturaltech-nourishing-keratin-sealer-100-ml-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2123,11 +2123,11 @@ const CATALOGUE = [
   "name": "RENEWING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-renewing-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-renewing-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17.4,
@@ -2141,11 +2141,11 @@ const CATALOGUE = [
   "name": "WELLBEING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-wellbeing-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-wellbeing-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17.4,
@@ -2159,11 +2159,11 @@ const CATALOGUE = [
   "name": "DETOXIFYING Scrub Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-detoxifying-scrub-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-detoxifying-scrub-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17.4,
@@ -2177,11 +2177,11 @@ const CATALOGUE = [
   "name": "CALMING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-calming-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-calming-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17.4,
@@ -2195,11 +2195,11 @@ const CATALOGUE = [
   "name": "NOURISHING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-nourishing-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-nourishing-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17.4,
@@ -2213,11 +2213,11 @@ const CATALOGUE = [
   "name": "PURIFYING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-purifying-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-purifying-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17,
@@ -2231,11 +2231,11 @@ const CATALOGUE = [
   "name": "ENERGIZING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-energizing-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-energizing-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17,
@@ -2249,11 +2249,11 @@ const CATALOGUE = [
   "name": "REPLUMPING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-replumping-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-replumping-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17,
@@ -2267,11 +2267,11 @@ const CATALOGUE = [
   "name": "REBALANCING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
-  "img": "/shop/img/davines-rebalancing-shampoo-0.webp?v=4",
+  "img": "/shop/img/davines-rebalancing-shampoo-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    17,
@@ -2285,7 +2285,7 @@ const CATALOGUE = [
   "name": "The Quick Fix Circle — маска",
   "cat": "hair",
   "price": 7.99,
-  "img": "/shop/img/davines-the-quick-fix-circle-0.webp?v=4",
+  "img": "/shop/img/davines-the-quick-fix-circle-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2294,7 +2294,7 @@ const CATALOGUE = [
   "name": "The Spotlight Circle — маска",
   "cat": "hair",
   "price": 7.99,
-  "img": "/shop/img/davines-the-spotlight-circle-0.webp?v=4",
+  "img": "/shop/img/davines-the-spotlight-circle-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2303,7 +2303,7 @@ const CATALOGUE = [
   "name": "The Restless Circle — маска",
   "cat": "hair",
   "price": 7.99,
-  "img": "/shop/img/davines-the-restless-circle-0.webp?v=4",
+  "img": "/shop/img/davines-the-restless-circle-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2312,7 +2312,7 @@ const CATALOGUE = [
   "name": "The Renaissance Circle — маска",
   "cat": "hair",
   "price": 7.99,
-  "img": "/shop/img/davines-the-renaissance-circle-0.webp?v=4",
+  "img": "/shop/img/davines-the-renaissance-circle-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2321,7 +2321,7 @@ const CATALOGUE = [
   "name": "NIGHT.SHIFT 100ml — масло",
   "cat": "hair",
   "price": 38,
-  "img": "/shop/img/kevin-murphy-night-shift-100ml-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-night-shift-100ml-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2330,11 +2330,11 @@ const CATALOGUE = [
   "name": "RE.STORE",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/kevin-murphy-re-store-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-re-store-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "200 мл",
-   "40 мл"
+   "40 мл",
+   "200 мл"
   ],
   "prices": [
    36,
@@ -2348,12 +2348,12 @@ const CATALOGUE = [
   "name": "SMOOTH.AGAIN WASH — шампунь",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/kevin-murphy-smooth-again-wash-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-smooth-again-wash-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-smooth-again-wash-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-smooth-again-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-smooth-again-wash-0.webp?v=4",
-   "/shop/img/kevin-murphy-smooth-again-wash-1.webp?v=4"
+   "/shop/img/kevin-murphy-smooth-again-wash-0.webp?v=5",
+   "/shop/img/kevin-murphy-smooth-again-wash-1.webp?v=5"
   ],
   "sizes": [
    "40 мл",
@@ -2375,20 +2375,20 @@ const CATALOGUE = [
   "name": "FRESH.HAIR — шампунь",
   "cat": "hair",
   "price": 18,
-  "img": "/shop/img/kevin-murphy-fresh-hair-1-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-fresh-hair-1-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-fresh-hair-1-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-fresh-hair-1-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-fresh-hair-1-0.webp?v=4",
-   "/shop/img/kevin-murphy-fresh-hair-1-1.webp?v=4"
+   "/shop/img/kevin-murphy-fresh-hair-1-0.webp?v=5",
+   "/shop/img/kevin-murphy-fresh-hair-1-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -2402,20 +2402,20 @@ const CATALOGUE = [
   "name": "YOUNG.AGAIN DRY CONDITIONER — кондиционер",
   "cat": "hair",
   "price": 18,
-  "img": "/shop/img/young-again-dry-conditioner-0.webp?v=4",
+  "img": "/shop/img/young-again-dry-conditioner-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/young-again-dry-conditioner-1.webp?v=4",
+  "img2": "/shop/img/young-again-dry-conditioner-1.webp?v=5",
   "gallery": [
-   "/shop/img/young-again-dry-conditioner-0.webp?v=4",
-   "/shop/img/young-again-dry-conditioner-1.webp?v=4"
+   "/shop/img/young-again-dry-conditioner-0.webp?v=5",
+   "/shop/img/young-again-dry-conditioner-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -2429,7 +2429,7 @@ const CATALOGUE = [
   "name": "ANGEL.MASQUE — маска",
   "cat": "hair",
   "price": 35,
-  "img": "/shop/img/kevin-murphy-angel-masque-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-angel-masque-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2438,20 +2438,20 @@ const CATALOGUE = [
   "name": "BLOW.DRY RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-blow-dry-rinse-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-blow-dry-rinse-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-blow-dry-rinse-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-blow-dry-rinse-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-blow-dry-rinse-0.webp?v=4",
-   "/shop/img/kevin-murphy-blow-dry-rinse-1.webp?v=4"
+   "/shop/img/kevin-murphy-blow-dry-rinse-0.webp?v=5",
+   "/shop/img/kevin-murphy-blow-dry-rinse-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -2465,7 +2465,7 @@ const CATALOGUE = [
   "name": "CRYSTAL.ANGEL — кондиционер",
   "cat": "hair",
   "price": 26,
-  "img": "/shop/img/kevin-murphy-crystal-angel-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-crystal-angel-0.webp?v=5",
   "stock": "out"
  },
  {
@@ -2474,7 +2474,7 @@ const CATALOGUE = [
   "name": "BODY.MASS — спрей",
   "cat": "hair",
   "price": 39,
-  "img": "/shop/img/kevin-murphy-body-mass-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-body-mass-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2483,7 +2483,7 @@ const CATALOGUE = [
   "name": "EVERLASTING.COLOUR LEAVE-IN — спрей",
   "cat": "hair",
   "price": 34,
-  "img": "/shop/img/kevin-murphy-everlasting-colour-leave-in-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-everlasting-colour-leave-in-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2492,20 +2492,20 @@ const CATALOGUE = [
   "name": "EVERLASTING.COLOUR RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-everlasting-colour-rinse-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-everlasting-colour-rinse-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-everlasting-colour-rinse-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-everlasting-colour-rinse-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-everlasting-colour-rinse-0.webp?v=4",
-   "/shop/img/kevin-murphy-everlasting-colour-rinse-1.webp?v=4"
+   "/shop/img/kevin-murphy-everlasting-colour-rinse-0.webp?v=5",
+   "/shop/img/kevin-murphy-everlasting-colour-rinse-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -2519,20 +2519,20 @@ const CATALOGUE = [
   "name": "EVERLASTING.COLOUR WASH — шампунь",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-everlasting-colour-wash-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-everlasting-colour-wash-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-everlasting-colour-wash-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-everlasting-colour-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-everlasting-colour-wash-0.webp?v=4",
-   "/shop/img/kevin-murphy-everlasting-colour-wash-1.webp?v=4"
+   "/shop/img/kevin-murphy-everlasting-colour-wash-0.webp?v=5",
+   "/shop/img/kevin-murphy-everlasting-colour-wash-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -2546,20 +2546,20 @@ const CATALOGUE = [
   "name": "HYDRATE-ME.MASQUE — маска",
   "cat": "hair",
   "price": 8,
-  "img": "/shop/img/kevin-murphy-hydrate-me-masque-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-hydrate-me-masque-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-hydrate-me-masque-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-hydrate-me-masque-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-hydrate-me-masque-0.webp?v=4",
-   "/shop/img/kevin-murphy-hydrate-me-masque-1.webp?v=4"
+   "/shop/img/kevin-murphy-hydrate-me-masque-0.webp?v=5",
+   "/shop/img/kevin-murphy-hydrate-me-masque-1.webp?v=5"
   ],
   "sizes": [
-   "200 мл",
-   "40 мл"
+   "40 мл",
+   "200 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    34,
@@ -2573,7 +2573,7 @@ const CATALOGUE = [
   "name": "SMOOTH.AGAIN",
   "cat": "hair",
   "price": 34,
-  "img": "/shop/img/kevin-murphy-smooth-again-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-smooth-again-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2582,20 +2582,20 @@ const CATALOGUE = [
   "name": "SMOOTH.AGAIN.RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-smooth-again-rinse-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-smooth-again-rinse-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-smooth-again-rinse-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-smooth-again-rinse-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-smooth-again-rinse-0.webp?v=4",
-   "/shop/img/kevin-murphy-smooth-again-rinse-1.webp?v=4"
+   "/shop/img/kevin-murphy-smooth-again-rinse-0.webp?v=5",
+   "/shop/img/kevin-murphy-smooth-again-rinse-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    27,
@@ -2609,20 +2609,20 @@ const CATALOGUE = [
   "name": "STAYING.ALIVE SPRAY — спрей",
   "cat": "hair",
   "price": 8,
-  "img": "/shop/img/kevin-murphy-staying-alive-spray-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-staying-alive-spray-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-staying-alive-spray-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-staying-alive-spray-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-staying-alive-spray-0.webp?v=4",
-   "/shop/img/kevin-murphy-staying-alive-spray-1.webp?v=4"
+   "/shop/img/kevin-murphy-staying-alive-spray-0.webp?v=5",
+   "/shop/img/kevin-murphy-staying-alive-spray-1.webp?v=5"
   ],
   "sizes": [
-   "150 мл",
-   "40 мл"
+   "40 мл",
+   "150 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    27,
@@ -2636,7 +2636,7 @@ const CATALOGUE = [
   "name": "YOUNG.AGAIN OIL — масло",
   "cat": "hair",
   "price": 34,
-  "img": "/shop/img/kevin-murphy-young-again-oil-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-young-again-oil-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2645,7 +2645,7 @@ const CATALOGUE = [
   "name": "YOUNG.AGAIN.MASQUE — маска",
   "cat": "hair",
   "price": 34,
-  "img": "/shop/img/kevin-murphy-young-again-masque-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-young-again-masque-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2654,20 +2654,20 @@ const CATALOGUE = [
   "name": "YOUNG.AGAIN.RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-young-again-rinse-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-young-again-rinse-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-young-again-rinse-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-young-again-rinse-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-young-again-rinse-0.webp?v=4",
-   "/shop/img/kevin-murphy-young-again-rinse-1.webp?v=4"
+   "/shop/img/kevin-murphy-young-again-rinse-0.webp?v=5",
+   "/shop/img/kevin-murphy-young-again-rinse-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -2681,20 +2681,20 @@ const CATALOGUE = [
   "name": "YOUNG.AGAIN.WASH — шампунь",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-young-again-wash-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-young-again-wash-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-young-again-wash-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-young-again-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-young-again-wash-0.webp?v=4",
-   "/shop/img/kevin-murphy-young-again-wash-1.webp?v=4"
+   "/shop/img/kevin-murphy-young-again-wash-0.webp?v=5",
+   "/shop/img/kevin-murphy-young-again-wash-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -2708,11 +2708,11 @@ const CATALOGUE = [
   "name": "PLUMPING.RINSE — кондиционер",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/kevin-muprhy-plumping-rinse-0.webp?v=4",
+  "img": "/shop/img/kevin-muprhy-plumping-rinse-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    29,
@@ -2726,11 +2726,11 @@ const CATALOGUE = [
   "name": "PLUMPING.WASH — шампунь",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/kevin-muprhy-plumping-wash-0.webp?v=4",
+  "img": "/shop/img/kevin-muprhy-plumping-wash-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    29,
@@ -2744,11 +2744,11 @@ const CATALOGUE = [
   "name": "HYDRATE-ME.WASH — шампунь",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/kevin-muprhy-hydrate-me-wash-0.webp?v=4",
+  "img": "/shop/img/kevin-muprhy-hydrate-me-wash-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    26,
@@ -2762,11 +2762,11 @@ const CATALOGUE = [
   "name": "HYDRATE-ME.RINSE — кондиционер",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/kevin-murphy-hydrate-me-rinse-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-hydrate-me-rinse-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    26,
@@ -2780,11 +2780,11 @@ const CATALOGUE = [
   "name": "ANGEL.WASH — шампунь",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-angel-wash-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-angel-wash-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    26,
@@ -2798,11 +2798,11 @@ const CATALOGUE = [
   "name": "ANGEL.RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-angel-rinse-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-angel-rinse-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    26,
@@ -2816,20 +2816,20 @@ const CATALOGUE = [
   "name": "BLONDE.ANGEL — кондиционер",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-murphy-blonde-angel-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-blonde-angel-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-blonde-angel-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-blonde-angel-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-blonde-angel-0.webp?v=4",
-   "/shop/img/kevin-murphy-blonde-angel-1.webp?v=4"
+   "/shop/img/kevin-murphy-blonde-angel-0.webp?v=5",
+   "/shop/img/kevin-murphy-blonde-angel-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    26,
@@ -2843,11 +2843,11 @@ const CATALOGUE = [
   "name": "BLONDE.ANGEL.WASH — шампунь",
   "cat": "hair",
   "price": 6,
-  "img": "/shop/img/kevin-muprhy-blonde-angel-wash-0.webp?v=4",
+  "img": "/shop/img/kevin-muprhy-blonde-angel-wash-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    26,
@@ -2861,7 +2861,7 @@ const CATALOGUE = [
   "name": "BLOW DRY EVER.SMOOTH — спрей",
   "cat": "hair",
   "price": 30,
-  "img": "/shop/img/blow-dry-ever-smooth-0.webp?v=4",
+  "img": "/shop/img/blow-dry-ever-smooth-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2870,7 +2870,7 @@ const CATALOGUE = [
   "name": "HEATED.DEFENSE",
   "cat": "hair",
   "price": 28,
-  "img": "/shop/img/heated-defense-0.webp?v=4",
+  "img": "/shop/img/heated-defense-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2879,20 +2879,20 @@ const CATALOGUE = [
   "name": "REPAIR-ME.RINSE — кондиционер",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/repair-me-rinse-0.webp?v=4",
+  "img": "/shop/img/repair-me-rinse-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/repair-me-rinse-1.webp?v=4",
+  "img2": "/shop/img/repair-me-rinse-1.webp?v=5",
   "gallery": [
-   "/shop/img/repair-me-rinse-0.webp?v=4",
-   "/shop/img/repair-me-rinse-1.webp?v=4"
+   "/shop/img/repair-me-rinse-0.webp?v=5",
+   "/shop/img/repair-me-rinse-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    27,
@@ -2906,7 +2906,7 @@ const CATALOGUE = [
   "name": "LEAVE-IN.REPAIR",
   "cat": "hair",
   "price": 32,
-  "img": "/shop/img/leave-in-repair-0.webp?v=4",
+  "img": "/shop/img/leave-in-repair-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2915,7 +2915,7 @@ const CATALOGUE = [
   "name": "THICK.AGAIN — спрей",
   "cat": "hair",
   "price": 37,
-  "img": "/shop/img/thick-again-0.webp?v=4",
+  "img": "/shop/img/thick-again-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2924,7 +2924,7 @@ const CATALOGUE = [
   "name": "STIMULATE-ME.RINSE — кондиционер",
   "cat": "hair",
   "price": 26,
-  "img": "/shop/img/stimulate-me-rinse-0.webp?v=4",
+  "img": "/shop/img/stimulate-me-rinse-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -2933,16 +2933,16 @@ const CATALOGUE = [
   "name": "STIMULATE-ME.WASH — шампунь",
   "cat": "hair",
   "price": 7,
-  "img": "/shop/img/stimulate-me-wash-0.webp?v=4",
+  "img": "/shop/img/stimulate-me-wash-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/stimulate-me-wash-1.webp?v=4",
+  "img2": "/shop/img/stimulate-me-wash-1.webp?v=5",
   "gallery": [
-   "/shop/img/stimulate-me-wash-0.webp?v=4",
-   "/shop/img/stimulate-me-wash-1.webp?v=4"
+   "/shop/img/stimulate-me-wash-0.webp?v=5",
+   "/shop/img/stimulate-me-wash-1.webp?v=5"
   ],
   "sizes": [
-   "250 мл",
-   "40 мл"
+   "40 мл",
+   "250 мл"
   ],
   "prices": [
    26,
@@ -2956,7 +2956,7 @@ const CATALOGUE = [
   "name": "Keratin Fortifying Conditioner — кондиционер",
   "cat": "hair",
   "price": 15.95,
-  "img": "/shop/img/lumin-skin-keratin-fortifying-conditioner-0.webp?v=4",
+  "img": "/shop/img/lumin-skin-keratin-fortifying-conditioner-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2965,7 +2965,7 @@ const CATALOGUE = [
   "name": "Curl Quick Slip Styling Cream — крем",
   "cat": "hair",
   "price": 27,
-  "img": "/shop/img/paul-mitchell-curl-quick-slip-styling-cream-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-curl-quick-slip-styling-cream-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2974,7 +2974,7 @@ const CATALOGUE = [
   "name": "Clear Jelly Mask — маска",
   "cat": "hair",
   "price": 29,
-  "img": "/shop/img/paul-mitchell-clear-jelly-mask-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-clear-jelly-mask-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2983,7 +2983,7 @@ const CATALOGUE = [
   "name": "Clear Smoothing Serum — сыворотка",
   "cat": "hair",
   "price": 16,
-  "img": "/shop/img/paul-mitchell-clear-smoothing-serum-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-clear-smoothing-serum-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -2992,7 +2992,7 @@ const CATALOGUE = [
   "name": "Clear Essential Conditioner — кондиционер",
   "cat": "hair",
   "price": 26,
-  "img": "/shop/img/paul-mitchell-clear-essential-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-clear-essential-conditioner-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3001,7 +3001,7 @@ const CATALOGUE = [
   "name": "Clear Essential Shampoo — шампунь",
   "cat": "hair",
   "price": 25.5,
-  "img": "/shop/img/paul-mitchell-clear-essential-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-clear-essential-shampoo-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3010,7 +3010,7 @@ const CATALOGUE = [
   "name": "Curl Hydrating Foam — пенка",
   "cat": "hair",
   "price": 27,
-  "img": "/shop/img/paul-mitchell-curl-hydrating-foam-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-curl-hydrating-foam-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3019,7 +3019,7 @@ const CATALOGUE = [
   "name": "Curl Refreshing Mist — спрей",
   "cat": "hair",
   "price": 27,
-  "img": "/shop/img/paul-mitchell-curl-refreshing-mist-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-curl-refreshing-mist-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3028,7 +3028,7 @@ const CATALOGUE = [
   "name": "Curl Twirl Around Cream Serum — сыворотка",
   "cat": "hair",
   "price": 33,
-  "img": "/shop/img/paul-mitchell-curl-twirl-around-cream-serum-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-curl-twirl-around-cream-serum-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3037,7 +3037,7 @@ const CATALOGUE = [
   "name": "Curl Full Circle Leave-In Cream — крем",
   "cat": "hair",
   "price": 33,
-  "img": "/shop/img/paul-mitchell-curl-full-circle-leave-in-cream-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-curl-full-circle-leave-in-cream-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3046,7 +3046,7 @@ const CATALOGUE = [
   "name": "Curl Round Trip Defining Serum — сыворотка",
   "cat": "hair",
   "price": 25,
-  "img": "/shop/img/paul-mitchell-curl-round-trip-defining-serum-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-curl-round-trip-defining-serum-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3055,7 +3055,7 @@ const CATALOGUE = [
   "name": "Extra-Body Shampoo — шампунь",
   "cat": "hair",
   "price": 23,
-  "img": "/shop/img/paul-mitchell-extra-body-daily-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-extra-body-daily-shampoo-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3064,7 +3064,7 @@ const CATALOGUE = [
   "name": "Extra-Body Conditioner — кондиционер",
   "cat": "hair",
   "price": 24,
-  "img": "/shop/img/paul-mitchell-forever-blonde-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-forever-blonde-conditioner-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3073,7 +3073,7 @@ const CATALOGUE = [
   "name": "Forever Blonde Shampoo — шампунь",
   "cat": "hair",
   "price": 29,
-  "img": "/shop/img/paul-mitchell-forever-blonde-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-forever-blonde-shampoo-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3082,7 +3082,7 @@ const CATALOGUE = [
   "name": "MITCH Double Hitter 2-in-1 Shampoo & Conditioner — шампунь",
   "cat": "hair",
   "price": 21,
-  "img": "/shop/img/paul-mitchell-mitch-double-hitter-2-in-1-shampoo-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-mitch-double-hitter-2-in-1-shampoo-conditioner-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3091,7 +3091,7 @@ const CATALOGUE = [
   "name": "Awapuhi Wild Ginger Repair Cream Rinse — кондиционер",
   "cat": "hair",
   "price": 35,
-  "img": "/shop/img/paul-mitchell-awapuhi-wild-ginger-repair-cream-rinse-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-awapuhi-wild-ginger-repair-cream-rinse-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3100,7 +3100,7 @@ const CATALOGUE = [
   "name": "Awapuhi Wild Ginger Repair Nourishing Shampoo — шампунь",
   "cat": "hair",
   "price": 36,
-  "img": "/shop/img/paul-mitchell-awapuhi-shampoo-1-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-awapuhi-shampoo-1-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3109,7 +3109,7 @@ const CATALOGUE = [
   "name": "Super Smooth Shampoo — шампунь",
   "cat": "hair",
   "price": 22,
-  "img": "/shop/img/paul-mitchell-super-smooth-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-super-smooth-shampoo-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3118,7 +3118,7 @@ const CATALOGUE = [
   "name": "Super Smooth Conditioner — кондиционер",
   "cat": "hair",
   "price": 25,
-  "img": "/shop/img/paul-mitchell-super-smooth-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-super-smooth-conditioner-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3127,7 +3127,7 @@ const CATALOGUE = [
   "name": "Sheer Hydration Shampoo — шампунь",
   "cat": "hair",
   "price": 22,
-  "img": "/shop/img/paul-mitchell-sheer-hydration-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-sheer-hydration-shampoo-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3136,7 +3136,7 @@ const CATALOGUE = [
   "name": "Green Tea Tree Special Conditioner — кондиционер",
   "cat": "hair",
   "price": 25,
-  "img": "/shop/img/paul-mitchell-tea-tree-special-conditioner-1-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-tea-tree-special-conditioner-1-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3145,7 +3145,7 @@ const CATALOGUE = [
   "name": "Sheer Hydration Conditioner — кондиционер",
   "cat": "hair",
   "price": 25,
-  "img": "/shop/img/paul-mitchell-sheer-hydration-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-sheer-hydration-conditioner-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3154,7 +3154,7 @@ const CATALOGUE = [
   "name": "Color Protect Conditioner — кондиционер",
   "cat": "hair",
   "price": 24,
-  "img": "/shop/img/paul-mitchell-color-protect-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-color-protect-conditioner-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3163,7 +3163,7 @@ const CATALOGUE = [
   "name": "Color Protect Shampoo — шампунь",
   "cat": "hair",
   "price": 21,
-  "img": "/shop/img/paul-mitchell-color-protect-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-color-protect-shampoo-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3172,7 +3172,7 @@ const CATALOGUE = [
   "name": "Awapuhi Conditioner — кондиционер",
   "cat": "hair",
   "price": 24,
-  "img": "/shop/img/paul-mitchell-awapuhi-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-awapuhi-conditioner-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3181,7 +3181,7 @@ const CATALOGUE = [
   "name": "Awapuhi Shampoo — шампунь",
   "cat": "hair",
   "price": 20,
-  "img": "/shop/img/paul-mitchell-awapuhi-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-awapuhi-shampoo-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3190,7 +3190,7 @@ const CATALOGUE = [
   "name": "Green Tea Tree Special Shampoo — шампунь",
   "cat": "hair",
   "price": 24,
-  "img": "/shop/img/paul-mitchell-tea-tree-lavender-mint-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-tea-tree-lavender-mint-shampoo-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3199,7 +3199,7 @@ const CATALOGUE = [
   "name": "Shampoo Two — шампунь",
   "cat": "hair",
   "price": 22,
-  "img": "/shop/img/paul-mitchell-shampoo-two-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-shampoo-two-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3208,7 +3208,7 @@ const CATALOGUE = [
   "name": "Tea Tree Lavender Mint Moisturizing Conditioner — кондиционер",
   "cat": "hair",
   "price": 28,
-  "img": "/shop/img/paul-mitchell-tea-tree-special-conditioner-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-tea-tree-special-conditioner-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3217,7 +3217,7 @@ const CATALOGUE = [
   "name": "Tea Tree Lavender Mint Moisturizing Shampoo — шампунь",
   "cat": "hair",
   "price": 25,
-  "img": "/shop/img/paul-mitchell-tea-tree-special-shampoo-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-tea-tree-special-shampoo-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3226,7 +3226,7 @@ const CATALOGUE = [
   "name": "MOISTURE SCALP LOTION M — лосьон",
   "cat": "hair",
   "price": 14.9,
-  "img": "/shop/img/system-4-moisture-scalp-lotion-m-0.webp?v=4",
+  "img": "/shop/img/system-4-moisture-scalp-lotion-m-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3235,13 +3235,13 @@ const CATALOGUE = [
   "name": "SHALE OIL SHAMPOO 4 — шампунь",
   "cat": "hair",
   "price": 7.9,
-  "img": "/shop/img/system-4-shale-oil-shampoo-4-0.webp?v=4",
+  "img": "/shop/img/system-4-shale-oil-shampoo-4-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/system-4-shale-oil-shampoo-4-1.webp?v=4",
+  "img2": "/shop/img/system-4-shale-oil-shampoo-4-1.webp?v=5",
   "gallery": [
-   "/shop/img/system-4-shale-oil-shampoo-4-0.webp?v=4",
-   "/shop/img/system-4-shale-oil-shampoo-4-1.webp?v=4",
-   "/shop/img/system-4-shale-oil-shampoo-4-2.webp?v=4"
+   "/shop/img/system-4-shale-oil-shampoo-4-0.webp?v=5",
+   "/shop/img/system-4-shale-oil-shampoo-4-1.webp?v=5",
+   "/shop/img/system-4-shale-oil-shampoo-4-2.webp?v=5"
   ],
   "sizes": [
    "75 мл",
@@ -3266,7 +3266,7 @@ const CATALOGUE = [
   "name": "Expedition Reserve Matt Styling and Volumising Hair Powder — пудра",
   "cat": "styling",
   "price": 20,
-  "img": "/shop/img/captain-fawcett-expedition-reserve-matt-styling-and-volumising-hair-powder-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-expedition-reserve-matt-styling-and-volumising-hair-powder-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3275,12 +3275,12 @@ const CATALOGUE = [
   "name": "Sea Salt Spray — спрей",
   "cat": "styling",
   "price": 25,
-  "img": "/shop/img/captain-fawcett-sea-salt-spray-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-sea-salt-spray-0.webp?v=5",
   "stock": "out",
-  "img2": "/shop/img/captain-fawcett-sea-salt-spray-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-sea-salt-spray-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-sea-salt-spray-0.webp?v=4",
-   "/shop/img/captain-fawcett-sea-salt-spray-1.webp?v=4"
+   "/shop/img/captain-fawcett-sea-salt-spray-0.webp?v=5",
+   "/shop/img/captain-fawcett-sea-salt-spray-1.webp?v=5"
   ]
  },
  {
@@ -3289,7 +3289,7 @@ const CATALOGUE = [
   "name": "Moving Rubber Hair Wax 80g — воск",
   "cat": "styling",
   "price": 15,
-  "img": "/shop/img/gatsby-moving-rubber-hair-wax-80g-0.webp?v=4",
+  "img": "/shop/img/gatsby-moving-rubber-hair-wax-80g-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3298,20 +3298,20 @@ const CATALOGUE = [
   "name": "SESSION.SPRAY — спрей",
   "cat": "styling",
   "price": 18,
-  "img": "/shop/img/kevin-murphy-session-spray-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-session-spray-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-session-spray-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-session-spray-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-session-spray-0.webp?v=4",
-   "/shop/img/kevin-murphy-session-spray-1.webp?v=4"
+   "/shop/img/kevin-murphy-session-spray-0.webp?v=5",
+   "/shop/img/kevin-murphy-session-spray-1.webp?v=5"
   ],
   "sizes": [
-   "400 мл",
-   "100 мл"
+   "100 мл",
+   "400 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -3325,20 +3325,20 @@ const CATALOGUE = [
   "name": "SESSION.SPRAY FLEX — спрей",
   "cat": "styling",
   "price": 18,
-  "img": "/shop/img/kevin-murphy-session-spray-flex-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-session-spray-flex-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/kevin-murphy-session-spray-flex-1.webp?v=4",
+  "img2": "/shop/img/kevin-murphy-session-spray-flex-1.webp?v=5",
   "gallery": [
-   "/shop/img/kevin-murphy-session-spray-flex-0.webp?v=4",
-   "/shop/img/kevin-murphy-session-spray-flex-1.webp?v=4"
+   "/shop/img/kevin-murphy-session-spray-flex-0.webp?v=5",
+   "/shop/img/kevin-murphy-session-spray-flex-1.webp?v=5"
   ],
   "sizes": [
-   "400 мл",
-   "100 мл"
+   "100 мл",
+   "400 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    28,
@@ -3352,7 +3352,7 @@ const CATALOGUE = [
   "name": "SHIMMER.SHINE — спрей",
   "cat": "styling",
   "price": 29,
-  "img": "/shop/img/kevin-muprhy-shimmer-shine-0.webp?v=4",
+  "img": "/shop/img/kevin-muprhy-shimmer-shine-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3361,7 +3361,7 @@ const CATALOGUE = [
   "name": "SHIMMER.ME BLONDE 100ml — спрей",
   "cat": "styling",
   "price": 29,
-  "img": "/shop/img/kevin-murphy-shimmer-me-blonde-0.webp?v=4",
+  "img": "/shop/img/kevin-murphy-shimmer-me-blonde-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3370,11 +3370,11 @@ const CATALOGUE = [
   "name": "ANTI.GRAVITY.SPRAY — спрей",
   "cat": "styling",
   "price": 8,
-  "img": "/shop/img/anti-gravity-spray-0.webp?v=4",
+  "img": "/shop/img/anti-gravity-spray-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "150 мл",
-   "40 мл"
+   "40 мл",
+   "150 мл"
   ],
   "prices": [
    28,
@@ -3388,7 +3388,7 @@ const CATALOGUE = [
   "name": "ANTI.GRAVITY",
   "cat": "styling",
   "price": 27,
-  "img": "/shop/img/anti-gravity-0.webp?v=4",
+  "img": "/shop/img/anti-gravity-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3397,7 +3397,7 @@ const CATALOGUE = [
   "name": "DOO.OVER — спрей",
   "cat": "styling",
   "price": 27,
-  "img": "/shop/img/doo-over-0.webp?v=4",
+  "img": "/shop/img/doo-over-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3406,11 +3406,11 @@ const CATALOGUE = [
   "name": "BEDROOM.HAIR — спрей",
   "cat": "styling",
   "price": 18,
-  "img": "/shop/img/bedroom-hair-0.webp?v=4",
+  "img": "/shop/img/bedroom-hair-0.webp?v=5",
   "stock": "in",
   "sizes": [
-   "250 мл",
-   "100 мл"
+   "100 мл",
+   "250 мл"
   ],
   "prices": [
    28,
@@ -3424,7 +3424,7 @@ const CATALOGUE = [
   "name": "KILLER.WAVES",
   "cat": "styling",
   "price": 33,
-  "img": "/shop/img/killer-waves-0.webp?v=4",
+  "img": "/shop/img/killer-waves-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3433,7 +3433,7 @@ const CATALOGUE = [
   "name": "Awapuhi Texturizing Sea Spray — спрей",
   "cat": "styling",
   "price": 33.5,
-  "img": "/shop/img/paul-mitchell-awapuhi-texturizing-sea-spray-0.webp?v=4",
+  "img": "/shop/img/paul-mitchell-awapuhi-texturizing-sea-spray-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3442,12 +3442,12 @@ const CATALOGUE = [
   "name": "Nebula John Petrucci Beard Balm — бальзам",
   "cat": "beard",
   "price": 24,
-  "img": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=5",
   "stock": "low",
-  "img2": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=4",
-   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-1.webp?v=4"
+   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp?v=5",
+   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-1.webp?v=5"
   ]
  },
  {
@@ -3456,12 +3456,12 @@ const CATALOGUE = [
   "name": "Sid Sottung Barberism® Beard Balm — бальзам",
   "cat": "beard",
   "price": 24,
-  "img": "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5",
   "stock": "low",
-  "img2": "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=4",
-   "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-1.webp?v=4"
+   "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp?v=5",
+   "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-1.webp?v=5"
   ]
  },
  {
@@ -3470,12 +3470,12 @@ const CATALOGUE = [
   "name": "Ricki Hall Booze & Baccy Beard Balm — бальзам",
   "cat": "beard",
   "price": 24,
-  "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-0.webp?v=5",
   "stock": "low",
-  "img2": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-0.webp?v=4",
-   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-1.webp?v=4"
+   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-0.webp?v=5",
+   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-1.webp?v=5"
   ]
  },
  {
@@ -3484,12 +3484,12 @@ const CATALOGUE = [
   "name": "John Petrucci's Nebula Moustache Wax — воск",
   "cat": "beard",
   "price": 15,
-  "img": "/shop/img/captain-fawcett-nebula-moustache-wax-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-nebula-moustache-wax-0.webp?v=5",
   "stock": "low",
-  "img2": "/shop/img/captain-fawcett-nebula-moustache-wax-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-nebula-moustache-wax-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-nebula-moustache-wax-0.webp?v=4",
-   "/shop/img/captain-fawcett-nebula-moustache-wax-1.webp?v=4"
+   "/shop/img/captain-fawcett-nebula-moustache-wax-0.webp?v=5",
+   "/shop/img/captain-fawcett-nebula-moustache-wax-1.webp?v=5"
   ]
  },
  {
@@ -3498,7 +3498,7 @@ const CATALOGUE = [
   "name": "Ricki Hall Booze & Baccy Moustache wax — воск",
   "cat": "beard",
   "price": 15,
-  "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-moustache-wax-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-moustache-wax-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3507,12 +3507,12 @@ const CATALOGUE = [
   "name": "Barberism® Moustache Wax — воск",
   "cat": "beard",
   "price": 15,
-  "img": "/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5",
   "stock": "low",
-  "img2": "/shop/img/captain-fawcett-barberism-moustache-wax-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-barberism-moustache-wax-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=4",
-   "/shop/img/captain-fawcett-barberism-moustache-wax-1.webp?v=4"
+   "/shop/img/captain-fawcett-barberism-moustache-wax-0.webp?v=5",
+   "/shop/img/captain-fawcett-barberism-moustache-wax-1.webp?v=5"
   ]
  },
  {
@@ -3521,12 +3521,12 @@ const CATALOGUE = [
   "name": "Maharajah Beard Oil — масло",
   "cat": "beard",
   "price": 18,
-  "img": "/shop/img/captain-fawcett-maharajah-beard-oil-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-maharajah-beard-oil-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/captain-fawcett-maharajah-beard-oil-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-maharajah-beard-oil-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-maharajah-beard-oil-0.webp?v=4",
-   "/shop/img/captain-fawcett-maharajah-beard-oil-1.webp?v=4"
+   "/shop/img/captain-fawcett-maharajah-beard-oil-0.webp?v=5",
+   "/shop/img/captain-fawcett-maharajah-beard-oil-1.webp?v=5"
   ]
  },
  {
@@ -3535,12 +3535,12 @@ const CATALOGUE = [
   "name": "Nebula John Petrucci Beard Oil — масло",
   "cat": "beard",
   "price": 17,
-  "img": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-0.webp?v=4",
-   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-1.webp?v=4"
+   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-0.webp?v=5",
+   "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-1.webp?v=5"
   ]
  },
  {
@@ -3549,12 +3549,12 @@ const CATALOGUE = [
   "name": "Barberism® Beard Oil — масло",
   "cat": "beard",
   "price": 18,
-  "img": "/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/captain-fawcett-barberism-beard-oil-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-barberism-beard-oil-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=4",
-   "/shop/img/captain-fawcett-barberism-beard-oil-1.webp?v=4"
+   "/shop/img/captain-fawcett-barberism-beard-oil-0.webp?v=5",
+   "/shop/img/captain-fawcett-barberism-beard-oil-1.webp?v=5"
   ]
  },
  {
@@ -3563,12 +3563,12 @@ const CATALOGUE = [
   "name": "Ricki Hall Booze & Baccy Beard Oil — масло",
   "cat": "beard",
   "price": 18,
-  "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=4",
-   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-1.webp?v=4"
+   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp?v=5",
+   "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-1.webp?v=5"
   ]
  },
  {
@@ -3577,12 +3577,12 @@ const CATALOGUE = [
   "name": "Rufus Hound Triumphant Beard Oil — масло",
   "cat": "beard",
   "price": 18,
-  "img": "/shop/img/captain-fawcett-triumphant-beard-oil-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-triumphant-beard-oil-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/captain-fawcett-triumphant-beard-oil-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-triumphant-beard-oil-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-triumphant-beard-oil-0.webp?v=4",
-   "/shop/img/captain-fawcett-triumphant-beard-oil-1.webp?v=4"
+   "/shop/img/captain-fawcett-triumphant-beard-oil-0.webp?v=5",
+   "/shop/img/captain-fawcett-triumphant-beard-oil-1.webp?v=5"
   ]
  },
  {
@@ -3591,12 +3591,12 @@ const CATALOGUE = [
   "name": "The Gentleman's Tipple Whisky Beard Oil — масло",
   "cat": "beard",
   "price": 17,
-  "img": "/shop/img/captain-fawcett-whisky-beard-oil-0.webp?v=4",
+  "img": "/shop/img/captain-fawcett-whisky-beard-oil-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/captain-fawcett-whisky-beard-oil-1.webp?v=4",
+  "img2": "/shop/img/captain-fawcett-whisky-beard-oil-1.webp?v=5",
   "gallery": [
-   "/shop/img/captain-fawcett-whisky-beard-oil-0.webp?v=4",
-   "/shop/img/captain-fawcett-whisky-beard-oil-1.webp?v=4"
+   "/shop/img/captain-fawcett-whisky-beard-oil-0.webp?v=5",
+   "/shop/img/captain-fawcett-whisky-beard-oil-1.webp?v=5"
   ]
  },
  {
@@ -3605,7 +3605,7 @@ const CATALOGUE = [
   "name": "Advanced Snail Hydrogel Eye Patch 60pcs — патчи",
   "cat": "face",
   "price": 23.99,
-  "img": "/shop/img/cosrx-advanced-snail-hydrogel-eye-patch-60pcs-0.webp?v=4",
+  "img": "/shop/img/cosrx-advanced-snail-hydrogel-eye-patch-60pcs-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3614,7 +3614,7 @@ const CATALOGUE = [
   "name": "Aloe Sun Cream — крем",
   "cat": "face",
   "price": 15.49,
-  "img": "/shop/img/cosrx-aloe-sun-cream-0.webp?v=4",
+  "img": "/shop/img/cosrx-aloe-sun-cream-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3623,7 +3623,7 @@ const CATALOGUE = [
   "name": "Cica Sleeping Mask — маска",
   "cat": "face",
   "price": 4.99,
-  "img": "/shop/img/laneige-cica-sleeping-mask-0.webp?v=4",
+  "img": "/shop/img/laneige-cica-sleeping-mask-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3632,7 +3632,7 @@ const CATALOGUE = [
   "name": "GREEN TEA MASK SHEET — маска",
   "cat": "face",
   "price": 1.89,
-  "img": "/shop/img/real-nature-green-tea-mask-sheet-0.webp?v=4",
+  "img": "/shop/img/real-nature-green-tea-mask-sheet-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3641,7 +3641,7 @@ const CATALOGUE = [
   "name": "Blanche Body Wash 225 ml",
   "cat": "body",
   "price": 40,
-  "img": "/shop/img/byredo-blanche-body-wash-225-ml-for-women-0.webp?v=4",
+  "img": "/shop/img/byredo-blanche-body-wash-225-ml-for-women-0.webp?v=5",
   "stock": "in",
   "seo": {
    "t": "Byredo Blanche Body Wash 225 ml — For Women",
@@ -3654,7 +3654,7 @@ const CATALOGUE = [
   "name": "NUMB serum Instant Pain Relief for Tattoos — сыворотка",
   "cat": "body",
   "price": 39,
-  "img": "/shop/img/yumain-numb-serum-instant-pain-relief-for-tattoos-0.webp?v=4",
+  "img": "/shop/img/yumain-numb-serum-instant-pain-relief-for-tattoos-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3663,7 +3663,7 @@ const CATALOGUE = [
   "name": "Aftercare Washing Foam – Expert Care for Your Tattoos — пенка",
   "cat": "body",
   "price": 12,
-  "img": "/shop/img/yumain-aftercare-washing-foam-expert-care-for-your-tattoos-0.webp?v=4",
+  "img": "/shop/img/yumain-aftercare-washing-foam-expert-care-for-your-tattoos-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3672,7 +3672,7 @@ const CATALOGUE = [
   "name": "Tattoo Balm – The Ultimate Care for Your Tattoos — бальзам",
   "cat": "body",
   "price": 10,
-  "img": "/shop/img/yumain-tattoo-balm-the-ultimate-care-for-your-tattoos-0.webp?v=4",
+  "img": "/shop/img/yumain-tattoo-balm-the-ultimate-care-for-your-tattoos-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3681,7 +3681,7 @@ const CATALOGUE = [
   "name": "Tattoo cream — крем",
   "cat": "body",
   "price": 10,
-  "img": "/shop/img/yumain-tattoo-cream-0.webp?v=4",
+  "img": "/shop/img/yumain-tattoo-cream-0.webp?v=5",
   "stock": "in"
  },
  {
@@ -3690,7 +3690,7 @@ const CATALOGUE = [
   "name": "Mojave Ghost Eau De Parfum Spray - 50ml — спрей",
   "cat": "perfume",
   "price": 160,
-  "img": "/shop/img/byredo-mojave-ghost-eau-de-parfum-spray-50ml-0.webp?v=4",
+  "img": "/shop/img/byredo-mojave-ghost-eau-de-parfum-spray-50ml-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3699,7 +3699,7 @@ const CATALOGUE = [
   "name": "Unisex Kologne Shield Of Protection Eau de Parfum Spray 50ml — спрей",
   "cat": "perfume",
   "price": 208.39,
-  "img": "/shop/img/kilian-unisex-kologne-shield-of-protection-eau-de-parfum-spray-50ml-0.webp?v=4",
+  "img": "/shop/img/kilian-unisex-kologne-shield-of-protection-eau-de-parfum-spray-50ml-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3708,7 +3708,7 @@ const CATALOGUE = [
   "name": "Baccarat Rouge 540 Unisex 2.4oz Extrait De Parfum Spray — спрей",
   "cat": "perfume",
   "price": 330,
-  "img": "/shop/img/baccarat-rouge-540-eau-de-parfum-70ml-0.webp?v=4",
+  "img": "/shop/img/baccarat-rouge-540-eau-de-parfum-70ml-0.webp?v=5",
   "stock": "low"
  },
  {
@@ -3717,12 +3717,12 @@ const CATALOGUE = [
   "name": "Oversized T-shirt unisex with print “Three Elements” AIR",
   "cat": "merch",
   "price": 35,
-  "img": "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-0.webp?v=4",
+  "img": "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-1.webp?v=4",
+  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-1.webp?v=5",
   "gallery": [
-   "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-0.webp?v=4",
-   "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-1.webp?v=4"
+   "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-0.webp?v=5",
+   "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-1.webp?v=5"
   ],
   "sizes": [
    "s",
@@ -3749,13 +3749,13 @@ const CATALOGUE = [
   "name": "oversized t shirt unisex with print \"NOBODY LOVES NO ONE\"",
   "cat": "merch",
   "price": 29,
-  "img": "/shop/img/oversized-t-shirt-unisex-with-print-0.webp?v=4",
+  "img": "/shop/img/oversized-t-shirt-unisex-with-print-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-1.webp?v=4",
+  "img2": "/shop/img/oversized-t-shirt-unisex-with-print-1.webp?v=5",
   "gallery": [
-   "/shop/img/oversized-t-shirt-unisex-with-print-0.webp?v=4",
-   "/shop/img/oversized-t-shirt-unisex-with-print-1.webp?v=4",
-   "/shop/img/oversized-t-shirt-unisex-with-print-2.webp?v=4"
+   "/shop/img/oversized-t-shirt-unisex-with-print-0.webp?v=5",
+   "/shop/img/oversized-t-shirt-unisex-with-print-1.webp?v=5",
+   "/shop/img/oversized-t-shirt-unisex-with-print-2.webp?v=5"
   ],
   "sizes": [
    "yellow-1",
@@ -3772,13 +3772,13 @@ const CATALOGUE = [
   "name": "Dead head butterfly",
   "cat": "merch",
   "price": 99.9,
-  "img": "/shop/img/dead-head-butterfly-0.webp?v=4",
+  "img": "/shop/img/dead-head-butterfly-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/dead-head-butterfly-1.webp?v=4",
+  "img2": "/shop/img/dead-head-butterfly-1.webp?v=5",
   "gallery": [
-   "/shop/img/dead-head-butterfly-0.webp?v=4",
-   "/shop/img/dead-head-butterfly-1.webp?v=4",
-   "/shop/img/dead-head-butterfly-2.webp?v=4"
+   "/shop/img/dead-head-butterfly-0.webp?v=5",
+   "/shop/img/dead-head-butterfly-1.webp?v=5",
+   "/shop/img/dead-head-butterfly-2.webp?v=5"
   ]
  },
  {
@@ -3787,12 +3787,12 @@ const CATALOGUE = [
   "name": "\"King of Colours\" deep V-neck SLIM T-shirt",
   "cat": "merch",
   "price": 27,
-  "img": "/shop/img/queen-of-colours-0.webp?v=4",
+  "img": "/shop/img/queen-of-colours-0.webp?v=5",
   "stock": "in",
-  "img2": "/shop/img/queen-of-colours-1.webp?v=4",
+  "img2": "/shop/img/queen-of-colours-1.webp?v=5",
   "gallery": [
-   "/shop/img/queen-of-colours-0.webp?v=4",
-   "/shop/img/queen-of-colours-1.webp?v=4"
+   "/shop/img/queen-of-colours-0.webp?v=5",
+   "/shop/img/queen-of-colours-1.webp?v=5"
   ]
  }
 ];

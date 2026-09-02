@@ -129,6 +129,16 @@
   }
 
   // ---------- UI ----------
+  /* The chat lives in the SHOP: hidden inside the admin, and the owner can
+     switch it off entirely from Настройки (the admin demo store). */
+  function chatAllowed() {
+    try {
+      var adm = JSON.parse(localStorage.getItem("rempire-admin-demo"));
+      if (adm && adm.chatbot === false) return false;
+    } catch (e) {}
+    return document.body.dataset.screen !== "admin";
+  }
+
   var root = document.createElement("div");
   root.className = "sbot";
   root.innerHTML =
@@ -253,6 +263,15 @@
     }
     if (open) input.focus();
   }
+  function refreshVisibility() {
+    var ok = chatAllowed();
+    root.style.display = ok ? "" : "none";
+    if (!ok && !panel.hidden) openPanel(false);
+  }
+  refreshVisibility();
+  new MutationObserver(refreshVisibility)
+    .observe(document.body, { attributes: true, attributeFilter: ["data-screen"] });
+
   fab.addEventListener("click", function () { openPanel(panel.hidden); });
   root.querySelector(".sbot__x").addEventListener("click", function () { openPanel(false); });
   form.addEventListener("submit", function (e) {

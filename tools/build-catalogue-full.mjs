@@ -136,6 +136,24 @@ function mapCat(type, tags, title) {
   return "hair";
 }
 
+/* One product listed 75→250→500, its neighbour 150→40 — whatever order the
+   store's variants happened to be in. Volumes sort ascending; sizes, prices
+   and the variant-image map travel together so nothing desyncs. Non-volume
+   sizes (S/M/L shirts) keep their order. */
+function sortSizesAscending(entry) {
+  const ml = s => { const m = String(s).match(/^(\d+(?:[.,]\d+)?)\s*(мл|г)$/); return m ? parseFloat(m[1].replace(",", ".")) : null; };
+  const vols = entry.sizes.map(ml);
+  if (vols.some(v => v === null)) return;
+  const order = vols.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0]).map(e => e[1]);
+  if (order.every((ix, i) => ix === i)) return;
+  entry.sizes = order.map(i => entry.sizes[i]);
+  if (entry.varImg) entry.varImg = order.map(i => entry.varImg[i]);
+  if (entry.prices) {
+    entry.prices = order.map(i => entry.prices[i]);
+    entry.price = Math.min(...entry.prices);
+  }
+}
+
 function ruSize(v) {
   return String(v)
     .replace(/(\d+(?:[.,]\d+)?)\s*ml\b/i, "$1 мл")
@@ -176,7 +194,7 @@ const normId = h => h.replace(/[^\x20-\x7e]/g, "");
 
 /* Image URLs carry a version so a re-cut actually reaches browsers that
    cached the old files — bump on every image pipeline change. */
-const IMG_V = "4";
+const IMG_V = "5";
 const imgUrl = (h, i) => "/shop/img/" + h + "-" + i + ".webp?v=" + IMG_V;
 
 /* size-index -> image-index, from the export's Variant Image column.
@@ -221,6 +239,7 @@ for (const [rawH, rs] of active) {
        which variant. */
     const vi = variantImageMap(rs);
     if (vi && e.sizes && vi.length === e.sizes.length) e.varImg = vi;
+    if (e.sizes && e.prices) sortSizesAscending(e);
     const rev = u => String(u).replace(/\?v=\d+$/, "") + "?v=" + IMG_V;
     e.img = rev(e.img);
     if (e.img2) e.img2 = rev(e.img2);
@@ -266,6 +285,7 @@ for (const [rawH, rs] of active) {
     entry.sizes = o1.map(ruSize);
     const vi = variantImageMap(rs);
     if (vi && vi.length === o1.length && vi.every(ix => ix < uniq.length)) entry.varImg = vi;
+    sortSizesAscending(entry); // 40→150→500, никогда вразнобой
     const pMap = {}; vars.forEach(r => { const v = r[C.o1val]; if (v && r[C.price]) pMap[v] = parseFloat(r[C.price]); });
     entry.prices = o1.map(v => pMap[v] ?? price);
     if (entry.prices.some(p2 => p2 !== price)) entry.priceFrom = true;

@@ -174,7 +174,14 @@
       "← В магазин": "← Poodi", "изменить": "muuda",
       "Добавьте — и доставка бесплатно:": "Lisage — ja tarne on tasuta:",
       "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo-arvustused. Päris omad tulevad pärast käivitamist — kirjaga «hinnake tellimust».",
-      "из 5": "/ 5"
+      "из 5": "/ 5",
+      "Объём": "Maht", "Количество": "Kogus", "Цвет принта — ": "Trüki värv — ",
+      "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
+      "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Ühendused", "Настройки": "Seaded",
+      "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
+      "Все заказы": "Kõik tellimused", "Править": "Muuda", "Отменить": "Võta tagasi",
+      "Применить": "Rakenda", "Отмена": "Tühista", "Сохранить": "Salvesta",
+      "Найти товар: название, бренд…": "Otsi toodet: nimi, bränd…"
     },
     EN: {
       "Все товары": "All products", "Бренды": "Brands", "Все": "All",
@@ -281,7 +288,14 @@
       "← В магазин": "← Back to shop", "изменить": "edit",
       "Добавьте — и доставка бесплатно:": "Add one — and shipping is free:",
       "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo reviews. Real ones arrive after launch via a “rate your order” e-mail.",
-      "из 5": "out of 5"
+      "из 5": "out of 5",
+      "Объём": "Size", "Количество": "Quantity", "Цвет принта — ": "Print colour — ",
+      "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
+      "Аналитика": "Analytics", "Письма": "E-mails", "Подключения": "Integrations", "Настройки": "Settings",
+      "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
+      "Все заказы": "All orders", "Править": "Edit", "Отменить": "Undo",
+      "Применить": "Apply", "Отмена": "Cancel", "Сохранить": "Save",
+      "Найти товар: название, бренд…": "Find a product: name, brand…"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -302,6 +316,8 @@
     [/^Доставка — (.+)$/, { ET: "Tarne — $1", EN: "Shipping — $1" }],
     [/^Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от (.+) · самовывоз на Mardi 1$/,
       { ET: "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · Eestis tasuta alates $1 · järeletulek Mardi 1", EN: "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · free in Estonia from $1 · pickup at Mardi 1" }],
+    [/^(.+) · (\d+(?:[.,]\d+)?) мл × (\d+)$/, { ET: "$1 · $2 ml × $3", EN: "$1 · $2 ml × $3" }],
+    [/^(.+) · (\d+(?:[.,]\d+)?) г × (\d+)$/, { ET: "$1 · $2 g × $3", EN: "$1 · $2 g × $3" }],
     [/^(.+) × (\d+)$/, { ET: "$1 × $2", EN: "$1 × $2" }],
     [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от (.+) · 230 пакоматов в 4 странах$/,
       { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · Eestis tasuta alates $1 · 230 pakiautomaati 4 riigis", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days · free in Estonia from $1 · 230 parcel lockers in 4 countries" }],
@@ -312,6 +328,8 @@
     [/^По запросу «(.+)» ничего не нашлось\.$/, { ET: "Otsingule «$1» ei leidunud midagi.", EN: "Nothing found for “$1”." }],
     [/^\/ (.+)$/, { ET: "/ $1", EN: "/ $1" }],
     [/^Отзывы \((\d)\)$/, { ET: "Arvustused ($1)", EN: "Reviews ($1)" }],
+    [/^(\d+(?:[.,]\d+)?) мл$/, { ET: "$1 ml", EN: "$1 ml" }],
+    [/^(\d+(?:[.,]\d+)?) г$/, { ET: "$1 g", EN: "$1 g" }],
     [/^★ ([\d,\.]+) из 5$/, { ET: "★ $1 / 5", EN: "★ $1 out of 5" }],
     [/^Найдено: (\d+)$/, { ET: "Leitud: $1", EN: "Found: $1" }]
   ];
@@ -687,7 +705,7 @@
     var defs = !S.brand && SUBCATS[S.cat];
     if (!defs) return [];
     return defs.map(function (d) {
-      return { id: d.id, name: d.name, n: list.filter(function (p) { return d.re.test(p.name); }).length, re: d.re };
+      return { id: d.id, name: d.name, n: list.filter(function (p) { return DEMO.subcat[p.id] ? DEMO.subcat[p.id] === d.id : d.re.test(p.name); }).length, re: d.re };
     }).filter(function (d) { return d.n > 0; });
   }
 
@@ -703,7 +721,7 @@
     var list = S.cat === "all" ? CATALOGUE.slice() : CATALOGUE.filter(function (p) { return p.cat === S.cat; });
     if (S.subcat) {
       var sdef = (SUBCATS[S.cat] || []).filter(function (d) { return d.id === S.subcat; })[0];
-      if (sdef) list = list.filter(function (p) { return sdef.re.test(p.name); });
+      if (sdef) list = list.filter(function (p) { return DEMO.subcat[p.id] ? DEMO.subcat[p.id] === sdef.id : sdef.re.test(p.name); });
     }
     if (S.onlyInStock) list = list.filter(function (p) { return p.stock !== "out"; });
     if (S.brandFilter.length) list = list.filter(function (p) { return S.brandFilter.indexOf(p.brand) >= 0; });
@@ -1208,7 +1226,9 @@
   function hashStr(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
   function reviewsFor(p) {
     if (typeof REVIEWS_POOL === "undefined") return [];
-    var pool = REVIEWS_POOL[p.cat] || [];
+    // trilingual pool ({RU:{cat:[...]}}), with fallback for the flat shape
+    var byLang = REVIEWS_POOL[S.lang] || REVIEWS_POOL.RU || REVIEWS_POOL;
+    var pool = byLang[p.cat] || REVIEWS_POOL[p.cat] || [];
     if (!pool.length) return [];
     var h = hashStr(p.id);
     var n = [0, 2, 3, 2, 0, 3, 2][h % 7];
@@ -1579,6 +1599,9 @@
     return '<div class="cohdr cohdr--adm"><div class="cohdr__row">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<span class="cohdr__t">Админка</span>' +
+        '<span class="cohdr__langs" role="group" aria-label="Язык"> ' + LANGS.map(function (l) {
+          return '<button class="cohdr__lang" data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
+        }).join("") + "</span>" +
         '<button class="link" data-go="home">← В магазин</button></div></div>' +
       '<div class="adm' + (S.admNav ? "" : " adm--navmin") + (S.admAi ? "" : " adm--aimin") + '">' +
 
@@ -1705,6 +1728,11 @@
           "Заказ принят", "Заказ отправлен + трекинг", "Товар снова в наличии",
           "Скидка ко дню рождения", "Брошенная корзина"
         ]) +
+        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Магазин</h2></div>' +
+        '<div class="adm__list"><div class="adm__row"><span class="adm__nm">ИИ-чат для покупателей' +
+          '<span class="adm__sub">кружок-консультант в углу магазина — подбирает товары и собирает корзину</span></span>' +
+          '<span class="chip ' + (DEMO.chatbot ? "chip--ok" : "chip--low") + '">' + (DEMO.chatbot ? "включён" : "выключен") + "</span>" +
+          '<button class="link" data-admchatbot>' + (DEMO.chatbot ? "Выключить" : "Включить") + "</button></div></div>" +
         setupBlock("Реквизиты", [
           "Rempire Store OÜ · рег. 12216136", "KMKR EE102723858", "Mardi 1, 10145 Таллинн"
         ]) +
@@ -1830,25 +1858,56 @@
   }
 
   function goodsEditor(p) {
+    var subs = SUBCATS[p.cat] || [];
+    var curSub = DEMO.subcat[p.id] || "";
+    var g = gal(p);
+    var seoT = (p.seo && p.seo.t) || "";
+    var seoD = (p.seo && p.seo.d) || "";
     return '<button class="link" data-admclose>← Все товары</button>' +
       '<div class="adm__ohead"><span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" +
-        '<h2 class="sec__title" style="font-size:18px">' + esc(p.brand) + " — " + esc(p.name) + "</h2></div>" +
+        '<div><h2 class="sec__title" style="font-size:18px">' + esc(p.brand) + " — " + esc(p.name) + "</h2>" +
+        '<button class="link" data-go-product="' + p.id + '" style="font-size:13px">Открыть в магазине →</button></div></div>' +
+
       '<div class="adm__ocols">' +
       '<div>' +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Основное</h3></div>' +
         '<label class="field"><span class="field__label">Цена, €</span><input class="input" data-edprice inputmode="decimal" value="' + p.price + '"></label>' +
         '<label class="field"><span class="field__label">Наличие</span><span class="sel sel--box"><select data-edstock>' +
           [["in", "в наличии"], ["low", "мало"], ["out", "нет в наличии"]].map(function (o) {
             return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
           }).join("") + "</select></span></label>" +
-        '<label class="field"><span class="field__label">Раздел</span><span class="sel sel--box"><select>' +
+        '<label class="field"><span class="field__label">Раздел</span><span class="sel sel--box"><select disabled>' +
           CATS.map(function (c) { return "<option" + (c.id === p.cat ? " selected" : "") + ">" + c.name + "</option>"; }).join("") + "</select></span></label>" +
+        (subs.length
+          ? '<label class="field"><span class="field__label">Подкатегория</span><span class="sel sel--box"><select data-edsubcat>' +
+            '<option value=""' + (curSub ? "" : " selected") + '>Авто — по названию</option>' +
+            subs.map(function (s2) { return '<option value="' + s2.id + '"' + (curSub === s2.id ? " selected" : "") + ">" + s2.name + "</option>"; }).join("") +
+            "</select></span></label>"
+          : "") +
+        (p.sizes && p.sizes.length > 1 && g.length > 1
+          ? '<div class="sec__head sec__head--sub"><h3 class="sec__title">Фото по объёмам</h3></div>' +
+            '<p class="muted" style="font-size:12.5px;margin:2px 0 8px">Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.</p>' +
+            p.sizes.map(function (sz, si) {
+              var cur = p.varImg && p.varImg.length > si ? p.varImg[si] : -1;
+              return '<div class="adm__vrow" data-vrow="' + si + '"><span class="adm__vsz">' + esc(sz) + "</span>" +
+                g.map(function (u, gi) {
+                  return '<button class="adm__vthumb" data-vpick="' + si + ":" + gi + '" aria-current="' + (cur === gi) + '" style="background-image:url(\'' + u + '\')" aria-label="Фото ' + (gi + 1) + '"></button>';
+                }).join("") + "</div>";
+            }).join("")
+          : "") +
       "</div>" +
+
       '<div>' +
-        '<label class="field"><span class="field__label">Описание (русский — эстонский и английский пишутся сами)</span>' +
-        '<textarea class="input" rows="6">' + esc(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "").slice(0, 400)) + "</textarea></label>" +
-        '<div class="adm__acts"><button class="btn btn--sm" data-admsavegoods="' + p.id + '">Сохранить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-admedit>Новое фото → фон + водяной знак</button></div>' +
-        '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена и наличие сохраняются по-настоящему (демо-режим, видно и в магазине; отмена — в журнале). Текст и фото подключатся с рабочей версией.</p>' +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">SEO для Google</h3></div>' +
+        '<label class="field"><span class="field__label">Заголовок (до 60 знаков)</span><input class="input" data-edseot maxlength="70" value="' + esc(seoT) + '" placeholder="Kevin.Murphy … купить в Таллинне | Rempire"></label>' +
+        '<label class="field"><span class="field__label">Описание (до 155 знаков)</span><textarea class="input" data-edseod rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(seoD) + "</textarea></label>" +
+        '<button class="btn btn--ghost btn--sm" data-admseogen="' + p.id + '">Сгенерировать с ИИ</button>' +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Описание</h3></div>' +
+        '<label class="field"><span class="field__label">Русский — эстонский и английский пишутся сами</span>' +
+        '<textarea class="input" rows="5">' + esc(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "").slice(0, 400)) + "</textarea></label>" +
+        '<div class="adm__acts"><button class="btn" data-admsavegoods="' + p.id + '">Сохранить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-admclose>Отмена</button></div>' +
+        '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена, наличие, подкатегория, фото по объёмам и SEO сохраняются по-настоящему (демо: видно и в магазине, отмена — в журнале). Загрузка нового фото — с рабочей версией: фон снимется и водяной знак добавится сам.</p>' +
       "</div></div>";
   }
   // the assistant's answers end with a button that OPENS the right tab —
@@ -1868,11 +1927,14 @@
      in an undoable log. The real backend later replaces the storage, not the
      UX. */
   var ADM_LS = "rempire-admin-demo";
-  var DEMO = { price: {}, stock: {}, seo: {}, flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
+  var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, chatbot: true,
+    flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
       DEMO.price = _dj.price || {}; DEMO.stock = _dj.stock || {}; DEMO.seo = _dj.seo || {};
+      DEMO.subcat = _dj.subcat || {}; DEMO.varimg = _dj.varimg || {};
+      if (_dj.chatbot === false) DEMO.chatbot = false;
       DEMO.flows = Object.assign(DEMO.flows, _dj.flows || {});
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
     }
@@ -1887,6 +1949,7 @@
       }
       if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
       if (DEMO.seo[p.id]) p.seo = { t: DEMO.seo[p.id].t || "", d: DEMO.seo[p.id].d || "" };
+      if (DEMO.varimg[p.id] && p.sizes && DEMO.varimg[p.id].length === p.sizes.length) p.varImg = DEMO.varimg[p.id].slice();
     }
   }
   applyDemoOverrides();
@@ -1898,6 +1961,9 @@
     if (a.type === "set_stock") return "Наличие «" + (p ? p.name : a.id) + "»: " + ({ in: "в наличии", low: "мало", out: "нет" })[a.value];
     if (a.type === "set_seo") return "SEO «" + (p ? p.name : a.id) + "»: «" + (a.title || "—") + "» / «" + (a.description || "—") + "»";
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
+    if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
+    if (a.type === "set_subcat") return "Подкатегория «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "авто");
+    if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
     return "";
   }
   function demoApply(a) {
@@ -1907,6 +1973,9 @@
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
     else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; DEMO.seo[a.id] = { t: a.title, d: a.description }; }
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
+    else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
+    else if (a.type === "set_subcat") { entry.prev = { type: "set_subcat", id: a.id, value: DEMO.subcat[a.id] || "" }; if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
+    else if (a.type === "set_varimg") { entry.prev = { type: "set_varimg", id: a.id, map: (DEMO.varimg[a.id] || (p.varImg || []).slice()) }; DEMO.varimg[a.id] = a.map.slice(); }
     else return;
     DEMO.log.unshift(entry);
     DEMO.log = DEMO.log.slice(0, 40);
@@ -1921,6 +1990,9 @@
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
     else if (a.type === "set_seo") DEMO.seo[a.id] = { t: a.title, d: a.description };
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
+    else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
+    else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
+    else if (a.type === "set_varimg") DEMO.varimg[a.id] = a.map.slice();
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -1947,7 +2019,7 @@
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: "RU", mode: "admin" })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin" })
     })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
@@ -2184,6 +2256,7 @@
     }
     paintToast();
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
+    document.body.dataset.screen = S.screen; // chat.js hides itself in the admin
     translatePage();
     setHead();
     if (S.screen === "admin") {
@@ -2573,7 +2646,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -2709,8 +2782,36 @@
     if (d.admai !== undefined) { S.admAi = !S.admAi; render(); refocus("[data-admai]"); return; }
     if (d.admtab) { S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = ""; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admorder !== undefined) { S.adminOrder = d.admorder ? Number(d.admorder) : 0; S.adminTab = "orders"; window.scrollTo({ top: 0 }); render(); return; }
-    if (d.admgoods !== undefined) { S.adminEdit = d.admgoods; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admgoods !== undefined) { S.adminEdit = d.admgoods; S.adminTab = "goods"; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admclose !== undefined) { S.adminEdit = ""; render(); return; }
+    if (d.vpick !== undefined) {
+      // select a photo for one size inside the editor (applied on Save)
+      var pk = d.vpick.split(":");
+      var row = document.querySelector('[data-vrow="' + pk[0] + '"]');
+      if (row) row.querySelectorAll("[data-vpick]").forEach(function (b2) {
+        b2.setAttribute("aria-current", String(b2 === t));
+      });
+      return;
+    }
+    if (d.admseogen !== undefined) {
+      var sp2 = byId(d.admseogen);
+      var genBtn = t; genBtn.textContent = "…";
+      fetch("/api/assistant/", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ mode: "admin", lang: "RU", messages: [{ role: "user",
+          content: "Напиши SEO title и description для товара " + sp2.id + " (" + sp2.brand + " " + sp2.name + "). Верни action set_seo." }] })
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        genBtn.textContent = "Сгенерировать с ИИ";
+        var a = j.action;
+        if (a && a.type === "set_seo") {
+          var ti = document.querySelector("[data-edseot]"), de = document.querySelector("[data-edseod]");
+          if (ti && a.title) ti.value = a.title;
+          if (de && a.description) de.value = a.description;
+          toast("Черновик готов — проверьте и сохраните");
+        } else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { genBtn.textContent = "Сгенерировать с ИИ"; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
     if (d.admsavegoods !== undefined) {
       var gp = byId(d.admsavegoods);
       var priceEl = document.querySelector("[data-edprice]");
@@ -2722,6 +2823,26 @@
       }
       if (stockEl && stockEl.value !== gp.stock) {
         demoApply({ type: "set_stock", id: gp.id, value: stockEl.value }); changed = true;
+      }
+      var subEl = document.querySelector("[data-edsubcat]");
+      if (subEl && subEl.value !== (DEMO.subcat[gp.id] || "")) {
+        demoApply({ type: "set_subcat", id: gp.id, value: subEl.value }); changed = true;
+      }
+      var rowsV = [...document.querySelectorAll("[data-vrow]")];
+      if (rowsV.length) {
+        var map2 = rowsV.map(function (r2) {
+          var sel2 = r2.querySelector('[data-vpick][aria-current="true"]');
+          return sel2 ? Number(sel2.dataset.vpick.split(":")[1]) : -1;
+        });
+        if (map2.every(function (x) { return x >= 0; }) &&
+            JSON.stringify(map2) !== JSON.stringify(gp.varImg || [])) {
+          demoApply({ type: "set_varimg", id: gp.id, map: map2 }); changed = true;
+        }
+      }
+      var tEl = document.querySelector("[data-edseot]"), dEl = document.querySelector("[data-edseod]");
+      var nt = tEl ? tEl.value.trim() : "", nd = dEl ? dEl.value.trim() : "";
+      if ((nt || nd) && (nt !== ((gp.seo || {}).t || "") || nd !== ((gp.seo || {}).d || ""))) {
+        demoApply({ type: "set_seo", id: gp.id, title: nt, description: nd }); changed = true;
       }
       S.adminEdit = "";
       toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
@@ -2735,6 +2856,10 @@
     if (d.admflow !== undefined) {
       demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
       toast("Сохранено ✓"); render(); return;
+    }
+    if (d.admchatbot !== undefined) {
+      demoApply({ type: "toggle_chatbot", value: !DEMO.chatbot });
+      toast(DEMO.chatbot ? "Чат включён ✓" : "Чат выключен ✓"); render(); return;
     }
     if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }

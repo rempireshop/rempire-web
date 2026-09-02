@@ -868,6 +868,14 @@ body:has(.stickybar) .ftr {
 }
 .adm__step.is-done { border-color: var(--ok, #2e5b45); color: var(--ok, #2e5b45); }
 .adm__acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.adm__vrow { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.adm__vsz { font-family: var(--mono, monospace); font-size: 13px; min-width: 64px; }
+.adm__vthumb {
+  width: 46px; height: 46px; border: 2px solid var(--rule); background-color: #fff;
+  background-size: contain; background-position: center; background-repeat: no-repeat;
+  cursor: pointer; padding: 0;
+}
+.adm__vthumb[aria-current="true"] { border-color: var(--ink); }
 .adm__confirm {
   margin-top: 12px; padding: 12px; border: 1px solid var(--ink); background: var(--paper, #fff);
   font-size: 13px; line-height: 1.45;
