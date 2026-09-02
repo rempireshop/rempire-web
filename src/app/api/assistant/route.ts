@@ -12,6 +12,7 @@ import catalogue from "@/data/catalogue.min.json";
    except the key, which never reaches the client. */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+const PROMPT_V = 4; // echoed in responses so a stale deployment is visible from outside
 
 const ALLOWED_HOSTS = new Set([
   "rempireshop.diipsolutions.eu",
@@ -85,7 +86,7 @@ Respond ONLY with JSON: {"reply": "<answer>", "product_ids": [], "tab": "<tab id
 }
 
 export async function GET() {
-  return NextResponse.json({ enabled: Boolean(process.env.OPENAI_API_KEY) });
+  return NextResponse.json({ enabled: Boolean(process.env.OPENAI_API_KEY), v: PROMPT_V, model: MODEL });
 }
 
 export async function POST(req: NextRequest) {
@@ -147,5 +148,8 @@ export async function POST(req: NextRequest) {
   const ids = (parsed.product_ids ?? []).filter((id) => known.has(id)).slice(0, 4);
   const TABS = new Set(["over", "orders", "goods", "people", "stats", "mail", "apps", "setup"]);
   const tab = parsed.tab && TABS.has(parsed.tab) ? parsed.tab : "";
-  return NextResponse.json({ reply: String(parsed.reply ?? "").slice(0, 1200), product_ids: ids, tab });
+  return NextResponse.json({
+    reply: String(parsed.reply ?? "").slice(0, 1200), product_ids: ids, tab,
+    v: PROMPT_V, model: data.model ?? MODEL,
+  });
 }
