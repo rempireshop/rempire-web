@@ -895,6 +895,14 @@ body:has(.stickybar) .ftr {
 }
 .sbot__fab svg { width: 24px; height: 24px; }
 @media (min-width: 768px) { .sbot__fab { bottom: 20px; } }
+/* the product page and checkout park a sticky buy bar above the bottom nav
+   on phones — the bubble sits above it instead of on the button */
+@media (max-width: 767px) {
+  body[data-screen="product"] .sbot__fab,
+  body[data-screen="checkout"] .sbot__fab { bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
+  body[data-screen="product"] .sbot__panel,
+  body[data-screen="checkout"] .sbot__panel { bottom: calc(200px + env(safe-area-inset-bottom, 0px)); }
+}
 .sbot__panel {
   position: fixed; right: 12px; bottom: calc(132px + env(safe-area-inset-bottom, 0px));
   z-index: 61; width: min(360px, calc(100vw - 24px)); max-height: min(540px, 72vh);
