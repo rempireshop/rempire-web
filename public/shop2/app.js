@@ -351,7 +351,12 @@
     });
   }
   function trText(s, lang, allowName) {
+    // Russian is the source language — and UI has no RU table, so without
+    // this guard every direct trText caller (setHead, patchCart) threw in
+    // RU and took the rest of render() down with it, killing the catalogue's
+    // infinite scroll until the shopper switched language.
     var d = UI[lang];
+    if (!d) return s;
     if (d[s]) return d[s];
     for (var i = 0; i < UI_RX.length; i++) {
       var m = s.match(UI_RX[i][0]);
@@ -524,6 +529,8 @@
     bank: 0,
     adminTab: "over",
     adminAsk: "",
+    adminOrder: 0,   // opened order id (0 = list)
+    adminEdit: "",   // opened product id in goods
     admNav: true,       // admin side panes collapse to rails
     admAi: true,
     size: 0,
@@ -1523,6 +1530,7 @@
      phone the nav becomes a scrolling strip and the assistant a sheet you
      open from the bar. */
   function screenAdmin() {
+    probeAdmAI();
     var orders = fakeOrders();
     var week = orders.slice(0, 7).reduce(function (a, o) { return a + o.sum; }, 0);
     var tab = S.adminTab;
@@ -1567,21 +1575,25 @@
         }).join("") + "</div>" : "") +
 
       (tab === "orders" ?
-        '<p class="muted" style="margin:16px 0">Здесь заказ открывается в один клик: адрес, состав, оплата, наклейка на посылку и письмо клиенту с трекингом — всё на одной странице.</p>' +
-        orderTable(orders) : "") +
+        (S.adminOrder
+          ? orderDetail(orders.filter(function (o) { return o.id === S.adminOrder; })[0] || orders[0])
+          : '<p class="muted" style="margin:16px 0">Нажмите на заказ — адрес, состав, оплата, наклейка на посылку и письмо клиенту, всё на одной странице.</p>' +
+            orderTable(orders)) : "") +
 
       (tab === "goods" ?
-        '<p class="muted" style="margin:16px 0">Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.</p>' +
-        '<div class="adm__list">' + CATALOGUE.slice(0, 24).map(function (p) {
-          return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-            '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
-              '<span class="adm__sub">' + CAT_NAMES[p.cat] + (p.sizes && p.sizes.length ? " · " + p.sizes.join(", ") : "") + "</span></span>" +
-            '<span class="chip ' + (p.stock === "out" ? "chip--out" : p.stock === "low" ? "chip--low" : "chip--ok") + '">' +
-              (p.stock === "out" ? "нет" : p.stock === "low" ? "мало" : "в наличии") + "</span>" +
-            '<span class="num adm__pr">' + eur(p.price) + "</span>" +
-            '<button class="link" data-admedit>Править</button></div>';
-        }).join("") + "</div>" +
-        '<p class="muted" style="margin-top:16px">Показаны первые 24 из ' + CATALOGUE.length + ".</p>" : "") +
+        (S.adminEdit
+          ? goodsEditor(byId(S.adminEdit))
+          : '<p class="muted" style="margin:16px 0">Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.</p>' +
+            '<div class="adm__list">' + CATALOGUE.slice(0, 24).map(function (p) {
+              return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+                '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
+                  '<span class="adm__sub">' + CAT_NAMES[p.cat] + (p.sizes && p.sizes.length ? " · " + p.sizes.join(", ") : "") + "</span></span>" +
+                '<span class="chip ' + (p.stock === "out" ? "chip--out" : p.stock === "low" ? "chip--low" : "chip--ok") + '">' +
+                  (p.stock === "out" ? "нет" : p.stock === "low" ? "мало" : "в наличии") + "</span>" +
+                '<span class="num adm__pr">' + eur(p.price) + "</span>" +
+                '<button class="link" data-admgoods="' + p.id + '">Править</button></div>';
+            }).join("") + "</div>" +
+            '<p class="muted" style="margin-top:16px">Показаны первые 24 из ' + CATALOGUE.length + ".</p>") : "") +
 
       (tab === "people" ?
         '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.</p>' +
@@ -1672,7 +1684,7 @@
         '<div class="adm__aibody">' +
           (S.adminAsk
             ? '<div class="adm__q">' + esc(S.adminAsk) + "</div>" +
-              '<div class="adm__a">' + adminAnswer(S.adminAsk) + "</div>"
+              '<div class="adm__a" data-aians>' + (admAI ? "…" : adminAnswer(S.adminAsk)) + "</div>"
             : '<p class="adm__aiintro">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами.</p>') +
           '<div class="adm__chips">' + [
             "Что заканчивается и что дозаказать?",
@@ -1683,8 +1695,8 @@
             "Какие заказы ждут отправки?"
           ].map(function (q) { return '<button class="fchip" data-admask="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
         "</div>" +
-        '<div class="adm__aifoot"><input class="input input--box" placeholder="Спросить…" aria-label="Вопрос помощнику">' +
-          '<button class="btn btn--sm" data-admedit>→</button></div>' +
+        '<div class="adm__aifoot"><input class="input input--box" data-admq placeholder="Спросить…" aria-label="Вопрос помощнику">' +
+          '<button class="btn btn--sm" data-admsend aria-label="Спросить">→</button></div>' +
       "</aside></div>";
   }
   function setupBlock(title, rows) {
@@ -1701,17 +1713,116 @@
     return '<div class="adm__table" role="table">' +
       '<div class="adm__th" role="row"><span>Заказ</span><span>Клиент</span><span>Доставка</span><span>Сумма</span><span>Статус</span></div>' +
       list.map(function (o) {
-        return '<div class="adm__tr" role="row"><span class="num">#' + o.id + '<span class="adm__sub">' + o.date + "</span></span>" +
+        return '<button class="adm__tr adm__tr--link" role="row" data-admorder="' + o.id + '"><span class="num">#' + o.id + '<span class="adm__sub">' + o.date + "</span></span>" +
           "<span>" + o.who + '<span class="adm__sub">' + o.items + " " + plural(o.items) + "</span></span>" +
           '<span class="adm__ship">' + o.ship + "</span>" +
           '<span class="num">' + eur(o.sum) + "</span>" +
-          '<span><span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span></span></div>";
+          '<span><span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span></span></button>";
       }).join("") + "</div>";
+  }
+
+  /* The rows above open. A demo where nothing opens reads as a mock-up;
+     one real drill-down («вот как выглядит заказ») sells the whole admin. */
+  function orderDetail(o) {
+    var p1 = CATALOGUE[(o.id * 7 + 3) % CATALOGUE.length];
+    var p2 = CATALOGUE[(o.id * 13 + 11) % CATALOGUE.length];
+    var lines = [[p1, (o.id % 3) + 1], [p2, 1]];
+    var goods = lines.reduce(function (s, l) { return s + l[0].price * l[1]; }, 0);
+    var shipCostD = Math.max(0, Math.round((o.sum - goods) * 100) / 100);
+    var steps = [["Оплачен", true], ["Собран", o.state[0] !== "new"],
+      ["Передан в доставку", o.state[0] === "sent" || o.state[0] === "done"],
+      ["Доставлен", o.state[0] === "done"]];
+    return '<button class="link" data-admorder="">← Все заказы</button>' +
+      '<div class="adm__ohead"><h2 class="sec__title" style="font-size:20px">Заказ #' + o.id + "</h2>" +
+        '<span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span>" +
+        '<span class="muted">' + o.date + "</span></div>" +
+      '<div class="adm__ocols">' +
+      '<div>' +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Состав</h3></div>' +
+        '<div class="adm__list">' + lines.map(function (l) {
+          return '<div class="adm__row"><span class="adm__ph">' + media(l[0], 0, "ph") + "</span>" +
+            '<span class="adm__nm">' + esc(l[0].brand) + " — " + esc(l[0].name) +
+              '<span class="adm__sub">' + l[1] + " шт × " + eur(l[0].price) + "</span></span>" +
+            '<span class="num adm__pr">' + eur(l[0].price * l[1]) + "</span></div>";
+        }).join("") +
+        '<div class="adm__row"><span class="adm__nm">Доставка — ' + o.ship + '</span><span class="num adm__pr">' + (shipCostD ? eur(shipCostD) : "0 €") + "</span></div>" +
+        '<div class="adm__row"><span class="adm__nm"><b>Итого</b></span><span class="num adm__pr"><b>' + eur(o.sum) + "</b></span></div></div>" +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Статус</h3></div>' +
+        '<div class="adm__steps">' + steps.map(function (s) {
+          return '<span class="adm__step' + (s[1] ? " is-done" : "") + '">' + (s[1] ? "✓ " : "") + s[0] + "</span>";
+        }).join("") + "</div>" +
+      "</div>" +
+      '<div>' +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Покупатель</h3></div>' +
+        '<div class="adm__list">' +
+          '<div class="adm__row"><span class="adm__nm">' + o.who + '<span class="adm__sub">customer@example.com · +372 5• ••• •••</span></span></div>' +
+          '<div class="adm__row"><span class="adm__nm">' + o.ship + '<span class="adm__sub">' + (/Самовывоз/.test(o.ship) ? "Mardi 1, Таллинн" : "Пакомат: Kristiine keskus, Таллинн") + "</span></span></div></div>" +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Действия</h3></div>' +
+        '<div class="adm__acts">' +
+          '<button class="btn btn--sm" data-admedit>Напечатать наклейку</button>' +
+          '<button class="btn btn--ghost btn--sm" data-admedit>Письмо с трек-номером</button>' +
+          '<button class="btn btn--ghost btn--sm" data-admedit>Вернуть деньги</button></div>' +
+        '<p class="muted" style="font-size:12.5px;margin-top:14px">Демо: в рабочей версии наклейка печатается через платёжного провайдера, письмо уходит само при смене статуса.</p>' +
+      "</div></div>";
+  }
+
+  function goodsEditor(p) {
+    return '<button class="link" data-admclose>← Все товары</button>' +
+      '<div class="adm__ohead"><span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" +
+        '<h2 class="sec__title" style="font-size:18px">' + esc(p.brand) + " — " + esc(p.name) + "</h2></div>" +
+      '<div class="adm__ocols">' +
+      '<div>' +
+        '<label class="field"><span class="field__label">Цена, €</span><input class="input" value="' + p.price + '"></label>' +
+        '<label class="field"><span class="field__label">Остаток, шт</span><input class="input" value="' + (p.stock === "out" ? 0 : p.stock === "low" ? 2 : 14) + '"></label>' +
+        '<label class="field"><span class="field__label">Раздел</span><span class="sel sel--box"><select>' +
+          CATS.map(function (c) { return "<option" + (c.id === p.cat ? " selected" : "") + ">" + c.name + "</option>"; }).join("") + "</select></span></label>" +
+      "</div>" +
+      '<div>' +
+        '<label class="field"><span class="field__label">Описание (русский — эстонский и английский пишутся сами)</span>' +
+        '<textarea class="input" rows="6">' + esc(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "").slice(0, 400)) + "</textarea></label>" +
+        '<div class="adm__acts"><button class="btn btn--sm" data-admedit>Сохранить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-admedit>Новое фото → фон + водяной знак</button></div>' +
+        '<p class="muted" style="font-size:12.5px;margin-top:12px">Демо: правки не сохраняются. В рабочей версии помощник сам обновит переводы и SEO-поля после сохранения.</p>' +
+      "</div></div>";
   }
   // the assistant's answers end with a button that OPENS the right tab —
   // «где это?» answered by taking the owner there, not by describing a path
   function aiGo(tab, label) {
     return '<div style="margin-top:10px"><button class="btn btn--ghost btn--sm" data-admtab="' + tab + '">' + label + " →</button></div>";
+  }
+  var TAB_LABEL = { over: "Открыть обзор", orders: "Открыть заказы", goods: "Открыть товары",
+    people: "Открыть клиентов", stats: "Открыть аналитику", mail: "Открыть письма",
+    apps: "Открыть подключения", setup: "Открыть настройки" };
+
+  /* When /api/assistant/ has a key, the owner's questions go to the real
+     model (mode:"admin" — its own system prompt, demo-data caveats, tab
+     routing). The canned answers below stay as the offline fallback. */
+  var admAI = null, admConvo = [];
+  function probeAdmAI() {
+    if (admAI !== null) return;
+    admAI = false;
+    fetch("/api/assistant/").then(function (r) { return r.json(); })
+      .then(function (j) { admAI = !!j.enabled; }).catch(function () {});
+  }
+  function askAdminAI(q) {
+    admConvo.push({ role: "user", content: q });
+    fetch("/api/assistant/", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: "RU", mode: "admin" })
+    })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (j) {
+        admConvo.push({ role: "assistant", content: j.reply || "" });
+        var el = document.querySelector("[data-aians]");
+        if (el && S.adminAsk === q) {
+          el.innerHTML = esc(j.reply || "") + (j.tab ? aiGo(j.tab, TAB_LABEL[j.tab] || "Открыть") : "");
+        }
+      })
+      .catch(function () {
+        var el = document.querySelector("[data-aians]");
+        if (el && S.adminAsk === q) el.innerHTML = adminAnswer(q);
+      });
   }
   function adminAnswer(q) {
     var low = lowStock();
@@ -2293,7 +2404,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admedit]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -2427,8 +2538,17 @@
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) { S.admAi = !S.admAi; render(); refocus("[data-admai]"); return; }
-    if (d.admtab) { S.adminTab = d.admtab; window.scrollTo({ top: 0 }); render(); return; }
-    if (d.admask) { S.adminAsk = d.admask; render(); return; }
+    if (d.admtab) { S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = ""; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admorder !== undefined) { S.adminOrder = d.admorder ? Number(d.admorder) : 0; S.adminTab = "orders"; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admgoods !== undefined) { S.adminEdit = d.admgoods; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admclose !== undefined) { S.adminEdit = ""; render(); return; }
+    if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
+    if (d.admsend !== undefined) {
+      var qEl = document.querySelector("[data-admq]");
+      var q = qEl && qEl.value.trim();
+      if (q) { S.adminAsk = q; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+      return;
+    }
     if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
     if (d.size !== undefined) {
       S.size = Number(d.size);
@@ -2699,6 +2819,16 @@
     requestAnimationFrame(function () { tickQueued = false; paintTint(); });
   }, { passive: true });
   window.addEventListener("resize", measureHdr, { passive: true });
+  // Enter in the admin assistant's input asks, same as the → button
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    var t = e.target;
+    if (t && t.matches && t.matches("[data-admq]")) {
+      e.preventDefault();
+      var q = t.value.trim();
+      if (q) { S.adminAsk = q; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+    }
+  });
 
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also

@@ -821,6 +821,24 @@ body:has(.stickybar) .ftr {
 .cohdr__lang[aria-current="true"] { color: var(--ink); border-color: var(--ink); }
 .cosum__rm { font-size: 12px; color: var(--muted); margin-left: 6px; }
 
+/* ---------- admin drill-downs ---------- */
+.adm__tr--link {
+  border: none; background: none; font: inherit; text-align: left;
+  cursor: pointer; width: 100%; color: inherit;
+}
+.adm__tr--link:hover { background: var(--shell); }
+.adm__ohead { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; flex-wrap: wrap; }
+.adm__ph--big { width: 64px; height: 64px; flex: 0 0 64px; position: relative; }
+.adm__ocols { display: grid; gap: 0 36px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .adm__ocols { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.adm__steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.adm__step {
+  font-family: Oswald, sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 6px 10px; border: 1px solid var(--rule); color: var(--muted);
+}
+.adm__step.is-done { border-color: var(--ok, #2e5b45); color: var(--ok, #2e5b45); }
+.adm__acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
 /* ---------- shop assistant chat (demo) ---------- */
 .sbot__fab {
   position: fixed; right: 16px; bottom: calc(72px + env(safe-area-inset-bottom, 0px));
