@@ -171,7 +171,10 @@
       "Код не найден — проверьте написание.": "Koodi ei leitud — kontrollige kirjapilti.",
       "Город": "Linn",
       "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
-      "← В магазин": "← Poodi", "изменить": "muuda"
+      "← В магазин": "← Poodi", "изменить": "muuda",
+      "Добавьте — и доставка бесплатно:": "Lisage — ja tarne on tasuta:",
+      "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo-arvustused. Päris omad tulevad pärast käivitamist — kirjaga «hinnake tellimust».",
+      "из 5": "/ 5"
     },
     EN: {
       "Все товары": "All products", "Бренды": "Brands", "Все": "All",
@@ -275,7 +278,10 @@
       "Код не найден — проверьте написание.": "Code not found — check the spelling.",
       "Город": "City",
       "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
-      "← В магазин": "← Back to shop", "изменить": "edit"
+      "← В магазин": "← Back to shop", "изменить": "edit",
+      "Добавьте — и доставка бесплатно:": "Add one — and shipping is free:",
+      "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo reviews. Real ones arrive after launch via a “rate your order” e-mail.",
+      "из 5": "out of 5"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -305,6 +311,8 @@
       { ET: "Kõik, mis on laos brändilt $1 — kõigist osakondadest.", EN: "Everything in stock from $1 — across every section." }],
     [/^По запросу «(.+)» ничего не нашлось\.$/, { ET: "Otsingule «$1» ei leidunud midagi.", EN: "Nothing found for “$1”." }],
     [/^\/ (.+)$/, { ET: "/ $1", EN: "/ $1" }],
+    [/^Отзывы \((\d)\)$/, { ET: "Arvustused ($1)", EN: "Reviews ($1)" }],
+    [/^★ ([\d,\.]+) из 5$/, { ET: "★ $1 / 5", EN: "★ $1 out of 5" }],
     [/^Найдено: (\d+)$/, { ET: "Leitud: $1", EN: "Found: $1" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
@@ -531,6 +539,7 @@
     adminAsk: "",
     adminOrder: 0,   // opened order id (0 = list)
     adminEdit: "",   // opened product id in goods
+    goodsQ: "",      // admin goods search
     admNav: true,       // admin side panes collapse to rails
     admAi: true,
     size: 0,
@@ -1131,6 +1140,10 @@
               acc("Применение", "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.") +
               acc("Состав (INCI)", '<span class="muted">Полный состав будет заполнен при переносе каталога.</span>') +
               acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.")) +
+          (function () {
+            var rv = reviewsFor(p);
+            return rv.length ? acc("Отзывы (" + rv.length + ")", reviewsHTML(rv)) : "";
+          })() +
         "</div>" +
       "</div>" +
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
@@ -1189,6 +1202,33 @@
       return t.length > 2 && !/^(the|and|for|with|мл|ml)$/i.test(t);
     }).map(function (t) { return t.toUpperCase(); });
   }
+  /* Demo reviews: deterministic slice of the category pool, so a product
+     always shows the same reviews and roughly a third show none (honest —
+     a young shop does not have reviews under everything). */
+  function hashStr(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+  function reviewsFor(p) {
+    if (typeof REVIEWS_POOL === "undefined") return [];
+    var pool = REVIEWS_POOL[p.cat] || [];
+    if (!pool.length) return [];
+    var h = hashStr(p.id);
+    var n = [0, 2, 3, 2, 0, 3, 2][h % 7];
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(pool[(h + i * 3) % pool.length]);
+    return out;
+  }
+  function reviewsHTML(list) {
+    var avg = 0; list.forEach(function (r) { avg += r.r; });
+    avg = Math.round(avg / list.length * 10) / 10;
+    return '<div class="revs"><div class="revs__avg">★ ' + String(avg).replace(".", ",") + " из 5</div>" +
+      list.map(function (r) {
+        return '<div class="rev"><div class="rev__head"><b>' + esc(r.n) + "</b>" +
+          '<span class="rev__stars" aria-label="' + r.r + ' из 5">' + "★★★★★".slice(0, r.r) + "</span>" +
+          '<span class="muted">' + esc(r.d) + "</span></div>" +
+          '<p class="rev__t">' + esc(r.t) + "</p></div>";
+      }).join("") +
+      '<p class="muted" style="font-size:12px">Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.</p></div>';
+  }
+
   function complementsFor(p) {
     var mine = nameTokens(p), myType = nameType(p), mates = TYPE_MATES[myType] || [];
     var scored = [];
@@ -1584,16 +1624,8 @@
         (S.adminEdit
           ? goodsEditor(byId(S.adminEdit))
           : '<p class="muted" style="margin:16px 0">Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.</p>' +
-            '<div class="adm__list">' + CATALOGUE.slice(0, 24).map(function (p) {
-              return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-                '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
-                  '<span class="adm__sub">' + CAT_NAMES[p.cat] + (p.sizes && p.sizes.length ? " · " + p.sizes.join(", ") : "") + "</span></span>" +
-                '<span class="chip ' + (p.stock === "out" ? "chip--out" : p.stock === "low" ? "chip--low" : "chip--ok") + '">' +
-                  (p.stock === "out" ? "нет" : p.stock === "low" ? "мало" : "в наличии") + "</span>" +
-                '<span class="num adm__pr">' + eur(p.price) + "</span>" +
-                '<button class="link" data-admgoods="' + p.id + '">Править</button></div>';
-            }).join("") + "</div>" +
-            '<p class="muted" style="margin-top:16px">Показаны первые 24 из ' + CATALOGUE.length + ".</p>") : "") +
+            '<input class="input input--box" data-goodsq value="' + esc(S.goodsQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск по товарам" style="margin-bottom:12px;max-width:420px">' +
+            '<div class="adm__list" id="goodslist">' + goodsRows() + "</div>") : "") +
 
       (tab === "people" ?
         '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.</p>' +
@@ -1630,17 +1662,20 @@
         '<p class="muted" style="margin-top:16px">В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.</p>' : "") +
 
       (tab === "mail" ?
-        '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Включаются и выключаются одной кнопкой; текст можно менять через помощника.</p>' +
-        '<div class="adm__list">' + [
-          ["Заказ принят", "сразу после оплаты — номер заказа и состав", true],
-          ["Заказ отправлен", "трек-номер и кнопка отслеживания", true],
-          ["Товар снова в наличии", "тем, кто оставил почту на странице товара", true],
-          ["Брошенная корзина", "напоминание через 24 часа, если заказ не завершён", false],
-          ["Скидка ко дню рождения", "личный промокод за 3 дня до даты", false]
-        ].map(function (f) {
+        '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Текст письма можно менять через помощника.</p>' +
+        '<div class="adm__list">' +
+        [["Заказ принят", "сразу после оплаты — номер заказа и состав"],
+         ["Заказ отправлен", "трек-номер и кнопка отслеживания"]].map(function (f) {
           return '<div class="adm__row"><span class="adm__nm">' + f[0] + '<span class="adm__sub">' + f[1] + "</span></span>" +
-            '<span class="chip ' + (f[2] ? "chip--ok" : "chip--low") + '">' + (f[2] ? "включено" : "выключено") + "</span>" +
-            '<button class="link" data-admedit>' + (f[2] ? "Выключить" : "Включить") + "</button></div>";
+            '<span class="chip chip--ok">всегда включено</span></div>';
+        }).join("") +
+        [["backstock", "Товар снова в наличии", "тем, кто оставил почту на странице товара"],
+         ["abandoned", "Брошенная корзина", "напоминание через 24 часа, если заказ не завершён"],
+         ["birthday", "Скидка ко дню рождения", "личный промокод за 3 дня до даты"]].map(function (f) {
+          var on = !!DEMO.flows[f[0]];
+          return '<div class="adm__row"><span class="adm__nm">' + f[1] + '<span class="adm__sub">' + f[2] + "</span></span>" +
+            '<span class="chip ' + (on ? "chip--ok" : "chip--low") + '">' + (on ? "включено" : "выключено") + "</span>" +
+            '<button class="link" data-admflow="' + f[0] + '">' + (on ? "Выключить" : "Включить") + "</button></div>";
         }).join("") + "</div>" +
         '<p style="margin-top:16px"><a class="link" href="/shop/emails/" target="_blank" rel="noopener">Открыть превью всех писем →</a></p>' : "") +
 
@@ -1672,7 +1707,15 @@
         ]) +
         setupBlock("Реквизиты", [
           "Rempire Store OÜ · рег. 12216136", "KMKR EE102723858", "Mardi 1, 10145 Таллинн"
-        ]) : "") +
+        ]) +
+        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Журнал изменений</h2></div>' +
+        (DEMO.log.length
+          ? '<div class="adm__list">' + DEMO.log.map(function (e, i) {
+              return '<div class="adm__row"><span class="adm__nm">' + esc(e.txt) +
+                '<span class="adm__sub">' + esc(e.t) + " · помощник/панель</span></span>" +
+                '<button class="link" data-admundo="' + i + '">Отменить</button></div>';
+            }).join("") + "</div>"
+          : '<p class="muted">Пока пусто. Изменения через помощника и кнопки панели попадут сюда — каждое можно отменить.</p>') : "") +
       "</main>" +
 
       '<aside class="adm__ai" aria-label="Помощник">' +
@@ -1766,23 +1809,46 @@
       "</div></div>";
   }
 
+  function goodsRows() {
+    var q = (S.goodsQ || "").toLowerCase().trim();
+    var list = q
+      ? CATALOGUE.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
+      : CATALOGUE;
+    var shown = list.slice(0, 24);
+    return shown.map(function (p) {
+      return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+        '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
+          '<span class="adm__sub">' + CAT_NAMES[p.cat] + (p.sizes && p.sizes.length ? " · " + p.sizes.join(", ") : "") + "</span></span>" +
+        '<span class="chip ' + (p.stock === "out" ? "chip--out" : p.stock === "low" ? "chip--low" : "chip--ok") + '">' +
+          (p.stock === "out" ? "нет" : p.stock === "low" ? "мало" : "в наличии") + "</span>" +
+        '<span class="num adm__pr">' + eur(p.price) + "</span>" +
+        '<button class="link" data-admgoods="' + p.id + '">Править</button></div>';
+    }).join("") +
+    '<p class="muted" style="margin-top:16px;padding:0 2px">' +
+      (list.length > 24 ? "Показаны первые 24 из " + list.length : list.length + " " + plural(list.length)) +
+      (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
+  }
+
   function goodsEditor(p) {
     return '<button class="link" data-admclose>← Все товары</button>' +
       '<div class="adm__ohead"><span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" +
         '<h2 class="sec__title" style="font-size:18px">' + esc(p.brand) + " — " + esc(p.name) + "</h2></div>" +
       '<div class="adm__ocols">' +
       '<div>' +
-        '<label class="field"><span class="field__label">Цена, €</span><input class="input" value="' + p.price + '"></label>' +
-        '<label class="field"><span class="field__label">Остаток, шт</span><input class="input" value="' + (p.stock === "out" ? 0 : p.stock === "low" ? 2 : 14) + '"></label>' +
+        '<label class="field"><span class="field__label">Цена, €</span><input class="input" data-edprice inputmode="decimal" value="' + p.price + '"></label>' +
+        '<label class="field"><span class="field__label">Наличие</span><span class="sel sel--box"><select data-edstock>' +
+          [["in", "в наличии"], ["low", "мало"], ["out", "нет в наличии"]].map(function (o) {
+            return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
+          }).join("") + "</select></span></label>" +
         '<label class="field"><span class="field__label">Раздел</span><span class="sel sel--box"><select>' +
           CATS.map(function (c) { return "<option" + (c.id === p.cat ? " selected" : "") + ">" + c.name + "</option>"; }).join("") + "</select></span></label>" +
       "</div>" +
       '<div>' +
         '<label class="field"><span class="field__label">Описание (русский — эстонский и английский пишутся сами)</span>' +
         '<textarea class="input" rows="6">' + esc(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "").slice(0, 400)) + "</textarea></label>" +
-        '<div class="adm__acts"><button class="btn btn--sm" data-admedit>Сохранить</button>' +
+        '<div class="adm__acts"><button class="btn btn--sm" data-admsavegoods="' + p.id + '">Сохранить</button>' +
         '<button class="btn btn--ghost btn--sm" data-admedit>Новое фото → фон + водяной знак</button></div>' +
-        '<p class="muted" style="font-size:12.5px;margin-top:12px">Демо: правки не сохраняются. В рабочей версии помощник сам обновит переводы и SEO-поля после сохранения.</p>' +
+        '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена и наличие сохраняются по-настоящему (демо-режим, видно и в магазине; отмена — в журнале). Текст и фото подключатся с рабочей версией.</p>' +
       "</div></div>";
   }
   // the assistant's answers end with a button that OPENS the right tab —
@@ -1793,6 +1859,78 @@
   var TAB_LABEL = { over: "Открыть обзор", orders: "Открыть заказы", goods: "Открыть товары",
     people: "Открыть клиентов", stats: "Открыть аналитику", mail: "Открыть письма",
     apps: "Открыть подключения", setup: "Открыть настройки" };
+
+  /* ---------- demo changes layer ------------------------------------------
+     The assistant (and the panel's own buttons) really change things: price,
+     stock, SEO, mail flows. Changes live in localStorage, are applied onto
+     the catalogue at boot, show up in the storefront too (a price change is
+     visible on the card, a SEO change in the tab title) and every one lands
+     in an undoable log. The real backend later replaces the storage, not the
+     UX. */
+  var ADM_LS = "rempire-admin-demo";
+  var DEMO = { price: {}, stock: {}, seo: {}, flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
+  try {
+    var _dj = JSON.parse(localStorage.getItem(ADM_LS));
+    if (_dj && typeof _dj === "object") {
+      DEMO.price = _dj.price || {}; DEMO.stock = _dj.stock || {}; DEMO.seo = _dj.seo || {};
+      DEMO.flows = Object.assign(DEMO.flows, _dj.flows || {});
+      DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
+    }
+  } catch (e) {}
+  function demoSave() { try { localStorage.setItem(ADM_LS, JSON.stringify(DEMO)); } catch (e) {} }
+  function applyDemoOverrides() {
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      var p = CATALOGUE[i];
+      if (DEMO.price[p.id] != null) {
+        p.price = DEMO.price[p.id];
+        if (p.prices && p.prices.length) p.prices[0] = DEMO.price[p.id];
+      }
+      if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
+      if (DEMO.seo[p.id]) p.seo = { t: DEMO.seo[p.id].t || "", d: DEMO.seo[p.id].d || "" };
+    }
+  }
+  applyDemoOverrides();
+
+  var FLOW_NAMES = { abandoned: "Брошенная корзина", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии" };
+  function actionText(a) {
+    var p = a.id && byId(a.id);
+    if (a.type === "set_price") return "Цена «" + (p ? p.brand + " " + p.name : a.id) + "»: " + eur(p ? p.price : 0) + " → " + eur(a.value);
+    if (a.type === "set_stock") return "Наличие «" + (p ? p.name : a.id) + "»: " + ({ in: "в наличии", low: "мало", out: "нет" })[a.value];
+    if (a.type === "set_seo") return "SEO «" + (p ? p.name : a.id) + "»: «" + (a.title || "—") + "» / «" + (a.description || "—") + "»";
+    if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
+    return "";
+  }
+  function demoApply(a) {
+    var entry = { t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), txt: actionText(a), a: a, prev: null };
+    var p = a.id && byId(a.id);
+    if (a.type === "set_price") { entry.prev = { type: "set_price", id: a.id, value: DEMO.price[a.id] != null ? DEMO.price[a.id] : p.price }; DEMO.price[a.id] = a.value; }
+    else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
+    else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; DEMO.seo[a.id] = { t: a.title, d: a.description }; }
+    else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
+    else return;
+    DEMO.log.unshift(entry);
+    DEMO.log = DEMO.log.slice(0, 40);
+    demoSave();
+    applyDemoOverrides();
+  }
+  function demoUndo(i) {
+    var entry = DEMO.log[i];
+    if (!entry || !entry.prev) return;
+    var a = entry.prev;
+    if (a.type === "set_price") DEMO.price[a.id] = a.value;
+    else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
+    else if (a.type === "set_seo") DEMO.seo[a.id] = { t: a.title, d: a.description };
+    else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
+    DEMO.log.splice(i, 1);
+    demoSave();
+    applyDemoOverrides();
+  }
+  var pendingAction = null;
+  function confirmCard(a) {
+    return '<div class="adm__confirm"><b>Предпросмотр изменения</b>' + esc(actionText(a)) +
+      '<div class="adm__acts"><button class="btn btn--sm" data-admapply>Применить</button>' +
+      '<button class="btn btn--ghost btn--sm" data-admcancel>Отмена</button></div></div>';
+  }
 
   /* When /api/assistant/ has a key, the owner's questions go to the real
      model (mode:"admin" — its own system prompt, demo-data caveats, tab
@@ -1816,7 +1954,10 @@
         admConvo.push({ role: "assistant", content: j.reply || "" });
         var el = document.querySelector("[data-aians]");
         if (el && S.adminAsk === q) {
-          el.innerHTML = esc(j.reply || "") + (j.tab ? aiGo(j.tab, TAB_LABEL[j.tab] || "Открыть") : "");
+          pendingAction = j.action || null;
+          el.innerHTML = esc(j.reply || "") +
+            (pendingAction ? confirmCard(pendingAction) : "") +
+            (j.tab && !pendingAction ? aiGo(j.tab, TAB_LABEL[j.tab] || "Открыть") : "");
         }
       })
       .catch(function () {
@@ -1875,7 +2016,31 @@
         '<span class="num cline__pr" data-linepr>' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
     }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
       (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
-        '<p class="muted">' + freebarText(sum, thr) + "</p></div>" : "");
+        '<p class="muted">' + freebarText(sum, thr) + "</p></div>" + upsellHTML(sum, thr) : "");
+  }
+
+  /* The free-shipping bar states the gap; this closes it. One product that
+     bridges the gap in a single add, one cheaper alternative — both real,
+     in stock, not already in the cart. */
+  function upsellHTML(sum, thr) {
+    if (sum >= thr || !S.cart.length) return "";
+    var gap = thr - sum;
+    var inCart = {};
+    S.cart.forEach(function (l) { inCart[l.id] = true; });
+    var pool = CATALOGUE.filter(function (p) { return p.stock !== "out" && !inCart[p.id] && p.cat !== "merch"; });
+    var bridge = pool.filter(function (p) { return p.price >= gap && p.price <= gap + 25; })
+      .sort(function (a, b) { return a.price - b.price; })[0];
+    var last = byId(S.cart[S.cart.length - 1].id);
+    var mate = complementsFor(last).filter(function (p) { return !inCart[p.id] && p.stock !== "out" && p !== bridge; })[0];
+    var picks = [bridge, mate].filter(Boolean).slice(0, 2);
+    if (!picks.length) return "";
+    return '<div class="upsell"><div class="upsell__t">Добавьте — и доставка бесплатно:</div>' +
+      picks.map(function (p) {
+        return '<div class="upsell__row"><span class="upsell__ph">' + media(p, 0, "ph") + "</span>" +
+          '<button class="upsell__nm" data-go-product="' + p.id + '">' + esc(p.brand) + " " + esc(p.name) + "</button>" +
+          '<span class="num">' + (p.priceFrom ? "от " : "") + eur(p.price) + "</span>" +
+          '<button class="btn btn--sm" data-add="' + p.id + '">+</button></div>';
+      }).join("") + "</div>";
   }
   function cartFoot() {
     if (!S.cart.length) return "";
@@ -2408,7 +2573,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admedit]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -2546,6 +2711,32 @@
     if (d.admorder !== undefined) { S.adminOrder = d.admorder ? Number(d.admorder) : 0; S.adminTab = "orders"; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admgoods !== undefined) { S.adminEdit = d.admgoods; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admclose !== undefined) { S.adminEdit = ""; render(); return; }
+    if (d.admsavegoods !== undefined) {
+      var gp = byId(d.admsavegoods);
+      var priceEl = document.querySelector("[data-edprice]");
+      var stockEl = document.querySelector("[data-edstock]");
+      var np = priceEl ? parseFloat(String(priceEl.value).replace(",", ".")) : NaN;
+      var changed = false;
+      if (!isNaN(np) && np >= 1 && np <= 500 && Math.abs(np - gp.price) > 0.001) {
+        demoApply({ type: "set_price", id: gp.id, value: Math.round(np * 100) / 100 }); changed = true;
+      }
+      if (stockEl && stockEl.value !== gp.stock) {
+        demoApply({ type: "set_stock", id: gp.id, value: stockEl.value }); changed = true;
+      }
+      S.adminEdit = "";
+      toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
+      render(); return;
+    }
+    if (d.admapply !== undefined) {
+      if (pendingAction) { demoApply(pendingAction); pendingAction = null; toast("Применено ✓ · журнал в «Настройках»"); render(); }
+      return;
+    }
+    if (d.admcancel !== undefined) { pendingAction = null; render(); return; }
+    if (d.admflow !== undefined) {
+      demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
+      toast("Сохранено ✓"); render(); return;
+    }
+    if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
       var qEl = document.querySelector("[data-admq]");
@@ -2621,6 +2812,14 @@
     else if (t.matches("[data-invoiceco]")) { S.invoiceCo = t.value; }
     // editing the code must drop the applied discount, not just the error
     else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; S.promoOk = false; }
+    else if (t.matches("[data-goodsq]")) {
+      S.goodsQ = t.value;
+      var list = document.getElementById("goodslist");
+      if (list) {
+        list.innerHTML = goodsRows();
+        translateTree(list);
+      }
+    }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
       var b = t.dataset.brand;

@@ -197,12 +197,36 @@
         var cards = (j.product_ids || []).map(function (id) { return byIdMap[id]; })
           .filter(Boolean).map(productRow).join("");
         bubble("bot", esc(j.reply || "") + cards);
+        runAction(j.action);
       })
       .catch(function () { wait.remove(); rulesReply(q); });
   }
   function refreshHint() {
     var h = root.querySelector("[data-bh]");
     if (h && aiEnabled) h.textContent = { RU: "ИИ-помощник", ET: "AI-abiline", EN: "AI assistant" }[lang()] || "AI";
+  }
+
+  /* Server-validated actions: the assistant can put things in the cart and
+     walk the shopper to the right page. Everything goes through the shop's
+     own delegated buttons, so cart logic, toasts and history behave exactly
+     as if the shopper clicked. */
+  function appClick(attr, value) {
+    var b = document.createElement("button");
+    b.setAttribute(attr, value == null ? "1" : value);
+    document.body.appendChild(b); b.click(); b.remove();
+  }
+  function runAction(a) {
+    if (!a || !a.type) return;
+    if (a.type === "add_to_cart" && Array.isArray(a.ids)) {
+      a.ids.slice(0, 5).forEach(function (id) { if (byIdMap[id]) appClick("data-add", id); });
+      if (a.then === "checkout") { openPanel(false); appClick("data-checkout", "1"); }
+      else if (a.then === "open_cart") appClick("data-cart", "1");
+      return;
+    }
+    if (a.type === "open_product" && byIdMap[a.id]) { appClick("data-go-product", a.id); return; }
+    if (a.type === "open_category") { appClick("data-go-cat", a.id); return; }
+    if (a.type === "open_cart") { appClick("data-cart", "1"); return; }
+    if (a.type === "checkout") { openPanel(false); appClick("data-checkout", "1"); }
   }
 
   function openPanel(open) {
