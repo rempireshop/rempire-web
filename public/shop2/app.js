@@ -2553,6 +2553,9 @@
     if (line) line.qty = Math.min(9, line.qty + qty);
     else S.cart.push({ id: id, size: si, qty: Math.min(9, qty) });
     persist();
+    // adding from INSIDE the open drawer (the free-shipping upsell) must
+    // redraw the lines and totals, or the tap looks like it did nothing
+    if (S.cartOpen) rebuildCart();
     toast("Добавлено в корзину ✓");
   }
   var COUNTRY_SHORT = { EE: "Эстония", LV: "Латвия", LT: "Литва", FI: "Финляндия", EU: "Европа" };

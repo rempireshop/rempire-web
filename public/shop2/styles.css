@@ -904,6 +904,9 @@ body:has(.stickybar) .ftr {
 /* display:flex above beats the hidden attribute's UA display:none — without
    this the "closed" panel stayed on screen, empty, and ✕ looked broken */
 .sbot__panel[hidden] { display: none; }
+/* a drawer owns the screen on the phone — the chat bubble was sitting on
+   top of the cart's «Итого» */
+body.is-locked .sbot { display: none; }
 @media (min-width: 768px) { .sbot__panel { bottom: 84px; } }
 .sbot__head {
   display: flex; align-items: baseline; gap: 8px; padding: 12px 14px;
