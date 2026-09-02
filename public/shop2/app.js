@@ -71,7 +71,7 @@
   var UI = {
     ET: {
       "Все товары": "Kõik tooted", "Бренды": "Brändid", "Все": "Kõik",
-      "Уход за волосами": "Juuksehooldus", "Стайлинг": "Stiliseerimine",
+      "Уход за волосами": "Juuksehooldus", "Стайлинг": "Viimistlus",
       "Уход за бородой": "Habemehooldus", "Уход за лицом": "Näohooldus",
       "Уход за телом": "Kehahooldus", "Парфюмерия": "Parfüümid", "Мерч": "Merch",
       "Шампуни": "Šampoonid", "Кондиционеры": "Palsamid", "Маски и уход": "Maskid ja hooldus",
@@ -79,25 +79,25 @@
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
       "После бритья": "Habemeajamisjärgne", "Тоники": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
-      "В корзину": "Lisa korvi", "мало": "vähe", "нет в наличии": "otsas",
-      "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsing", "Корзина": "Ostukorv",
+      "В корзину": "Lisa ostukorvi", "мало": "vähe", "нет в наличии": "pole saadaval",
+      "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsi", "Корзина": "Ostukorv",
       "Кабинет": "Konto", "Описание": "Kirjeldus", "Доставка и возврат": "Tarne ja tagastus",
       "Похожие товары": "Sarnased tooted", "Вместе лучше": "Sobivad kokku",
-      "Оформить заказ": "Vormista tellimus", "Продолжить покупки": "Jätka ostlemist",
+      "Оформить заказ": "Vormista ost", "Продолжить покупки": "Jätka ostlemist",
       "Убрать": "Eemalda", "Итого": "Kokku", "Оплатить": "Maksa",
-      "Фильтры": "Filtrid", "Сортировка": "Sorteerimine", "Сбросить": "Lähtesta",
+      "Фильтры": "Filtrid", "Сортировка": "Järjesta", "Сбросить": "Lähtesta",
       "Сбросить всё": "Lähtesta kõik", "Сбросить фильтры": "Lähtesta filtrid",
       "Наличие": "Saadavus", "Бренд": "Bränd", "В наличии": "Laos",
       "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
-      "Пока пусто.": "Korv on tühi.", "К товарам": "Toodete juurde",
-      "Хиты продаж": "Müügihitid", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓", "Новинки": "Uued",
+      "Пока пусто.": "Ostukorv on tühi.", "К товарам": "Toodete juurde",
+      "Хиты продаж": "Populaarsemad enne", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓", "Новинки": "Uuemad",
       "Покупателю": "Ostjale", "Правовое": "Õigusinfo", "Контакты": "Kontakt",
-      "Доставка и оплата": "Tarne ja maksmine", "Возврат товара": "Tagastamine",
+      "Доставка и оплата": "Kohaletoimetamine ja maksmine", "Возврат товара": "Kauba tagastamine",
       "Условия продажи": "Müügitingimused", "Конфиденциальность": "Privaatsus",
       "Правовая информация": "Õigusinfo", "Споры онлайн (ODR)": "Vaidlused veebis (ODR)",
-      "Оформление заказа": "Tellimuse vormistamine",
-      "Контакт": "Kontakt", "Доставка": "Tarne", "Оплата": "Makse",
-      "Далее — доставка": "Edasi — tarne", "Далее — оплата": "Edasi — makse",
+      "Оформление заказа": "Ostu vormistamine",
+      "Контакт": "Kliendi info", "Доставка": "Tarne", "Оплата": "Maksmine",
+      "Далее — доставка": "Edasi — tarne", "Далее — оплата": "Edasi — maksmine",
       "Имя": "Nimi", "Телефон": "Telefon", "Страна": "Riik", "Город": "Linn",
       "Адрес": "Aadress", "Промокод": "Sooduskood", "Применить": "Rakenda",
       "Заказ оформлен": "Tellimus vormistatud", "На главную": "Avalehele",
@@ -136,7 +136,7 @@
       "Гели, мыло и уход за телом — включая мыло собственной варки.": "Geelid, seep ja kehahooldus — sealhulgas oma keedetud seep.",
       "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "Kogu Rempire'i valik: hooldus, stiliseerimine, habe, nägu, keha, parfüümid ja merch.",
       "Под эти фильтры ничего не подошло.": "Nende filtritega ei sobinud midagi.",
-      "Сначала дешевле": "Odavamad enne", "Сначала дороже": "Kallimad enne",
+      "Сначала дешевле": "Soodsamad enne", "Сначала дороже": "Kallimad enne",
       "Поделиться": "Jaga", "Купить через": "Osta kohe —", "Другие способы оплаты": "Teised makseviisid",
       "С этим покупают": "Sellega ostetakse koos",
       "Самовывоз": "Järeletulek", "Реквизиты": "Rekvisiidid", "Связаться": "Võta ühendust",
@@ -156,7 +156,7 @@
       "E-mail для подтверждения заказа": "E-post tellimuse kinnituseks",
       "Имя и фамилия": "Ees- ja perekonnanimi", "Индекс": "Postiindeks",
       "улица, дом": "tänav, maja", "Имя Фамилия": "Eesnimi Perenimi",
-      "Ваш заказ": "Teie tellimus", "Корзина пуста.": "Korv on tühi.",
+      "Ваш заказ": "Tellimuse kokkuvõte", "Корзина пуста.": "Ostukorv on tühi.",
       "Бесплатно": "Tasuta", "Бесплатная доставка применена ✓": "Tasuta tarne rakendatud ✓",
       "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek Mardi 1. Vaja on dokumenti. Tellimus ootab 7 päeva, edasi 1,50 € päevas.",
       "Оплата через банк — данные карты магазин не видит": "Makse läbi panga — pood kaardiandmeid ei näe",
@@ -167,7 +167,7 @@
       "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14 päeva tagastusõigust EL-i seaduse järgi. Särki võib proovida ja tagastada, kui ei sobinud.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Töötavas poes tuleb siia tellimuse number, arve e-postile ja paki jälgimine.",
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Tariifid — vedajate hinnakirjad 2025–2026, koos 24% käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20% allahindlust — lõplikud hinnad täpsustame liitumisel.",
-      "Добавлено в корзину ✓": "Lisatud korvi ✓",
+      "Добавлено в корзину ✓": "Lisatud ostukorvi ✓",
       "Код не найден — проверьте написание.": "Koodi ei leitud — kontrollige kirjapilti.",
       "Хиты продаж": "Müügihitid", "Город": "Linn",
       "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
@@ -547,13 +547,15 @@
       for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === l.id) return true;
       return false;
     });
-    if (saved.lang) S.lang = saved.lang;
+    if (saved.lang) { S.lang = saved.lang; savedHadLang = true; }
     else S.lang = guessLang();
   } catch (e) {}
+  var savedHadLang = false;
   /* First visit: follow the browser's language. Estonian browsers get ET,
      English get EN, everything else stays RU — the shop's core audience.
-     (When the real backend exists, the Cloudflare country header refines
-     this; the saved choice always wins over the guess.) */
+     A generic-English browser is then refined by the visitor's country
+     (/api/geo/, from Vercel's IP header) after the first paint; an explicit
+     choice from the switcher always wins and is never overridden. */
   function guessLang() {
     try {
       var ls = navigator.languages || [navigator.language || ""];
@@ -2038,7 +2040,28 @@
     if (!grid || !list.length) { render(); return; }
 
     var visible = list.slice(0, S.shown);
-    grid.innerHTML = visible.map(cardHTML).join("");
+    /* Loading the next batch used to rebuild the WHOLE grid's innerHTML —
+       every card re-created, the scroll anchor lost, the page visibly
+       jumping at each load. When the already-rendered cards are the same
+       prefix, only the new ones are appended. */
+    var kids = grid.children, samePrefix = kids.length <= visible.length;
+    if (samePrefix) {
+      for (var ci = 0; ci < kids.length; ci++) {
+        var a = kids[ci].querySelector("[data-go-product]");
+        if (!a || a.dataset.goProduct !== visible[ci].id) { samePrefix = false; break; }
+      }
+    }
+    if (samePrefix && kids.length) {
+      var addHTML = visible.slice(kids.length).map(cardHTML).join("");
+      if (addHTML) {
+        var frag = document.createElement("template");
+        frag.innerHTML = addHTML;
+        translateTree(frag.content);
+        grid.appendChild(frag.content);
+      }
+    } else {
+      grid.innerHTML = visible.map(cardHTML).join("");
+    }
     var more = document.getElementById("catmore");
     if (more) more.innerHTML = moreHTML(visible.length, list.length);
     var c = document.querySelector("[data-count]");
@@ -2322,13 +2345,21 @@
          shorter list — a white page that read as a bug. Bring the first row
          of products up under the sticky chip row; never move someone who is
          already above the grid. */
-      var grid = document.getElementById("catgrid");
-      if (grid) {
+      /* iOS cancels a programmatic scroll that lands during momentum, and the
+         page shrinking under the shopper clamps scrollY on its own schedule —
+         one scrollTo fired synchronously sometimes just lost. Re-assert the
+         position twice; the scroll is idempotent, so the repeats are free. */
+      var subcatScroll = function () {
+        var grid = document.getElementById("catgrid");
+        if (!grid) return;
         var chips = document.querySelector(".subcats");
         var off = (chips ? chips.offsetHeight + 10 : 10) + (hideOn ? 0 : hdrH);
         var top = Math.max(0, grid.getBoundingClientRect().top + window.scrollY - off);
-        if (window.scrollY > top) window.scrollTo({ top: top });
-      }
+        if (window.scrollY > top + 4) window.scrollTo({ top: top });
+      };
+      subcatScroll();
+      setTimeout(subcatScroll, 120);
+      setTimeout(subcatScroll, 400);
       return;
     }
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
@@ -2340,7 +2371,7 @@
     // their Russian templates — translateTree only converts FROM Russian, so
     // an already-translated header would otherwise stick on the old language.
     if (d.lang) {
-      S.lang = d.lang; S.langOpen = false; persist();
+      S.lang = d.lang; S.langOpen = false; savedHadLang = true; persist();
       hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
       render(); return;
     }
@@ -2679,4 +2710,23 @@
   render();
   restartHero();
   intro();
+
+  /* Country refinement for the first visit only: an English-language browser
+     physically in Estonia gets the Estonian shop, in a Russian-speaking
+     country the Russian one. A shopper who has ever touched the switcher is
+     left alone. */
+  if (!savedHadLang) {
+    fetch("/api/geo/").then(function (r) { return r.json(); }).then(function (j) {
+      var want = S.lang;
+      if (S.lang === "EN") {
+        if (j.country === "EE") want = "ET";
+        else if (j.country === "RU" || j.country === "BY" || j.country === "UA") want = "RU";
+      }
+      if (want !== S.lang && !savedHadLang) {
+        S.lang = want;
+        hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
+        render();
+      }
+    }).catch(function () {});
+  }
 })();

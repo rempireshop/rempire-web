@@ -12,6 +12,21 @@
   function lang() {
     try { return (JSON.parse(localStorage.getItem(LS)) || {}).lang || "RU"; } catch (e) { return "RU"; }
   }
+
+  /* When /api/assistant/ has an OpenAI key behind it, the chat talks to the
+     real model; without one, the rule-based demo below answers. The probe is
+     lazy (first open) and a network failure just means rules. */
+  var aiEnabled = null, convo = [];
+  function probeAI() {
+    if (aiEnabled !== null) return;
+    aiEnabled = false;
+    fetch("/api/assistant/", { method: "GET" })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { aiEnabled = !!j.enabled; refreshHint(); })
+      .catch(function () {});
+  }
+  var byIdMap = {};
+  CATALOGUE.forEach(function (p) { byIdMap[p.id] = p; });
   var T = {
     RU: {
       title: "Помощник Rempire", hint: "Демо: понимаю простые фразы",
@@ -26,7 +41,7 @@
       title: "Rempire abiline", hint: "Demo: saan aru lihtsatest fraasidest",
       hello: "Tere! Aitan valida. Öelge, mida otsite — näiteks «šampoon», «kingitus kuni 50 €» või «midagi habemele».",
       chips: ["Midagi habemele", "Šampoon", "Kingitus kuni 50 €", "Hoolduskomplekt", "Parfüüm"],
-      add: "Lisa korvi", open: "Ava", addAll: "Lisa kõik korvi",
+      add: "Lisa ostukorvi", open: "Ava", addAll: "Lisa kõik ostukorvi",
       found: "See sobib:", none: "Täpset vastet ei leidnud — siin on populaarsed:",
       set: "Panin komplekti kokku — koos:", cart: "Avan ostukorvi…",
       placeholder: "Näiteks: habemeõli…"
@@ -153,7 +168,7 @@
       '<button class="sbot__mini sbot__mini--ghost" data-go-product="' + p.id + '">' + tt().open + "</button></span>" +
       "</div>";
   }
-  function reply(q) {
+  function rulesReply(q) {
     var r = match(q), t = tt();
     if (r.kind === "set") {
       var sum = r.items.reduce(function (s, p) { return s + p.price; }, 0);
@@ -163,10 +178,37 @@
     }
     bubble("bot", (r.kind === "none" ? t.none : t.found) + r.items.map(productRow).join(""));
   }
+  function reply(q) {
+    convo.push({ role: "user", content: q });
+    if (!aiEnabled) { rulesReply(q); return; }
+    var wait = document.createElement("div");
+    wait.className = "sbot__msg sbot__msg--bot";
+    wait.textContent = "…";
+    log.appendChild(wait); log.scrollTop = log.scrollHeight;
+    fetch("/api/assistant/", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: convo.slice(-8), lang: lang() })
+    })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (j) {
+        wait.remove();
+        convo.push({ role: "assistant", content: j.reply || "" });
+        var cards = (j.product_ids || []).map(function (id) { return byIdMap[id]; })
+          .filter(Boolean).map(productRow).join("");
+        bubble("bot", esc(j.reply || "") + cards);
+      })
+      .catch(function () { wait.remove(); rulesReply(q); });
+  }
+  function refreshHint() {
+    var h = root.querySelector("[data-bh]");
+    if (h && aiEnabled) h.textContent = { RU: "ИИ-помощник", ET: "AI-abiline", EN: "AI assistant" }[lang()] || "AI";
+  }
 
   function openPanel(open) {
     panel.hidden = !open;
     fab.setAttribute("aria-expanded", String(open));
+    if (open) probeAI();
     if (open && !log.childNodes.length) {
       var t = tt();
       root.querySelector("[data-bt]").textContent = t.title;

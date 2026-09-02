@@ -40,7 +40,7 @@
 @media (min-width: 1100px) { :root { --gutter: 48px; } }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }
 
 body {
   margin: 0;
@@ -837,6 +837,9 @@ body:has(.stickybar) .ftr {
   background: var(--paper, #fff); border: 1px solid var(--ink);
   display: flex; flex-direction: column; box-shadow: 0 14px 44px rgba(28, 26, 0, .25);
 }
+/* display:flex above beats the hidden attribute's UA display:none — without
+   this the "closed" panel stayed on screen, empty, and ✕ looked broken */
+.sbot__panel[hidden] { display: none; }
 @media (min-width: 768px) { .sbot__panel { bottom: 84px; } }
 .sbot__head {
   display: flex; align-items: baseline; gap: 8px; padding: 12px 14px;
@@ -968,6 +971,9 @@ body:has(.stickybar) .ftr {
      That is what keeps the assistant's input box on screen instead of at the
      bottom of a long page. */
   .adm { grid-template-columns: 196px minmax(0, 1fr) 300px; align-items: start; min-height: calc(100vh - 62px); }
+  /* every tab at least a viewport tall: otherwise switching between a long
+     tab and a short one toggled the scrollbar and the whole layout jumped */
+  .adm__main { min-height: calc(100vh - 62px); }
   .adm--navmin { grid-template-columns: 58px minmax(0, 1fr) 300px; }
   .adm--aimin { grid-template-columns: 196px minmax(0, 1fr) 52px; }
   .adm--navmin.adm--aimin { grid-template-columns: 58px minmax(0, 1fr) 52px; }
