@@ -169,7 +169,7 @@
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Tariifid — vedajate hinnakirjad 2025–2026, koos 24% käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20% allahindlust — lõplikud hinnad täpsustame liitumisel.",
       "Добавлено в корзину ✓": "Lisatud ostukorvi ✓",
       "Код не найден — проверьте написание.": "Koodi ei leitud — kontrollige kirjapilti.",
-      "Хиты продаж": "Müügihitid", "Город": "Linn",
+      "Город": "Linn",
       "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
       "← В магазин": "← Poodi", "изменить": "muuda"
     },
@@ -273,7 +273,7 @@
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Rates — carrier price lists 2025–2026, incl. 24% VAT. From 40 parcels a month Omniva and DPD give 3–20% off — final prices to be confirmed on connection.",
       "Добавлено в корзину ✓": "Added to cart ✓",
       "Код не найден — проверьте написание.": "Code not found — check the spelling.",
-      "Хиты продаж": "Bestsellers", "Город": "City",
+      "Город": "City",
       "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
       "← В магазин": "← Back to shop", "изменить": "edit"
     }
