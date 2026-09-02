@@ -988,15 +988,18 @@ body:has(.stickybar) .ftr {
      panes have travel, while each pane is viewport-tall with its own scroll.
      That is what keeps the assistant's input box on screen instead of at the
      bottom of a long page. */
-  .adm { grid-template-columns: 196px minmax(0, 1fr) 300px; align-items: start; min-height: calc(100vh - 62px); }
+  .adm { grid-template-columns: 196px minmax(0, 1fr) 300px; align-items: start; min-height: calc(100vh - var(--cohdrh, 62px)); }
   /* every tab at least a viewport tall: otherwise switching between a long
      tab and a short one toggled the scrollbar and the whole layout jumped */
-  .adm__main { min-height: calc(100vh - 62px); }
+  .adm__main { min-height: calc(100vh - var(--cohdrh, 62px)); }
   .adm--navmin { grid-template-columns: 58px minmax(0, 1fr) 300px; }
   .adm--aimin { grid-template-columns: 196px minmax(0, 1fr) 52px; }
   .adm--navmin.adm--aimin { grid-template-columns: 58px minmax(0, 1fr) 52px; }
+  /* --cohdrh is measured from the real admin header: a hardcoded 62px made
+     sticky engage only on tabs tall enough to scroll, so the rails hopped
+     3px when switching between short and long tabs */
   .adm__side, .adm__ai {
-    position: sticky; top: 62px; height: calc(100vh - 62px);
+    position: sticky; top: var(--cohdrh, 62px); height: calc(100vh - var(--cohdrh, 62px));
   }
 }
 @media (min-width: 1280px) {

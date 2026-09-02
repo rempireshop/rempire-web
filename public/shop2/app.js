@@ -2021,6 +2021,10 @@
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
     translatePage();
     setHead();
+    if (S.screen === "admin") {
+      var coh = document.querySelector(".cohdr");
+      if (coh) document.documentElement.style.setProperty("--cohdrh", coh.offsetHeight + "px");
+    }
 
     if (S.screen === "catalog") observeSentinel();
   }
