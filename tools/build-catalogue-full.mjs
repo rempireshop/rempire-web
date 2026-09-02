@@ -174,6 +174,11 @@ function ruType(type, title) {
    translation chunks that were cut before this rule existed. */
 const normId = h => h.replace(/[^\x20-\x7e]/g, "");
 
+/* Image URLs carry a version so a re-cut actually reaches browsers that
+   cached the old files — bump on every image pipeline change. */
+const IMG_V = "4";
+const imgUrl = (h, i) => "/shop/img/" + h + "-" + i + ".webp?v=" + IMG_V;
+
 /* size-index -> image-index, from the export's Variant Image column.
    Returns null unless every variant with an image resolves cleanly. */
 function variantImageMap(rs) {
@@ -216,6 +221,10 @@ for (const [rawH, rs] of active) {
        which variant. */
     const vi = variantImageMap(rs);
     if (vi && e.sizes && vi.length === e.sizes.length) e.varImg = vi;
+    const rev = u => String(u).replace(/\?v=\d+$/, "") + "?v=" + IMG_V;
+    e.img = rev(e.img);
+    if (e.img2) e.img2 = rev(e.img2);
+    if (e.gallery) e.gallery = e.gallery.map(rev);
     out.push(e); kept++; continue;
   }
 
@@ -246,12 +255,12 @@ for (const [rawH, rs] of active) {
 
   const entry = {
     id: h, brand, name, cat,
-    price, img: "/shop/img/" + h + "-0.webp",
+    price, img: imgUrl(h, 0),
     stock: qty <= 0 ? "out" : qty <= 2 ? "low" : "in",
   };
   if (uniq.length > 1) {
-    entry.img2 = "/shop/img/" + h + "-1.webp";
-    entry.gallery = uniq.map((_, i) => "/shop/img/" + h + "-" + i + ".webp");
+    entry.img2 = imgUrl(h, 1);
+    entry.gallery = uniq.map((_, i) => imgUrl(h, i));
   }
   if (o1.length > 1) {
     entry.sizes = o1.map(ruSize);

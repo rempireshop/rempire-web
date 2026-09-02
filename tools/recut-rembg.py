@@ -73,7 +73,12 @@ for n, (slug, idx, dest) in enumerate(targets, 1):
         # un-premultiply the white matte: edge pixels are product colour
         # blended with the old white background; solving F=(O-(1-a))/a per
         # channel removes the white, so no grey rim on any tinted ground
-        magick(str(raw), "-channel", "RGB",
+        # rembg leaves 2-8% alpha noise across the whole background — a
+        # faint white veil whose trim boundary reads as a line around the
+        # product. Floor it to fully transparent before anything else.
+        magick(str(raw),
+               "-channel", "A", "-level", "8%,100%", "+channel",
+               "-channel", "RGB",
                "-fx", "u.a<=0?u:min(1,max(0,(u-1+u.a)/u.a))", "+channel",
                "-trim", "+repage",
                "-bordercolor", "none", "-border", "24",
