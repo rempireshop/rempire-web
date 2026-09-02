@@ -331,11 +331,15 @@ body:has(.stickybar) .ftr {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
 }
 @media (min-width: 768px) { .grid { gap: 36px 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); } }
-@media (min-width: 1100px) { .sec .grid { grid-template-columns: repeat(4, 1fr); } }
+/* minmax(0,1fr), NOT bare 1fr: a bare fr track's minimum is the widest card's
+   min-content, so one product with a long unbreakable name silently widened
+   all four tracks past the container and the page scrolled sideways. */
+@media (min-width: 1100px) { .sec .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 /* The add link used to be a <span> inside the card <button> — invalid nesting
    and unreachable by keyboard. Card and add are now sibling buttons. */
-.card { display: flex; flex-direction: column; height: 100%; }
+.card { display: flex; flex-direction: column; height: 100%; min-width: 0; }
+.card__name, .card__brand { overflow-wrap: anywhere; }
 .card__go {
   display: flex; flex-direction: column; gap: 3px; flex: 1;
   cursor: pointer; background: none; border: none; padding: 0; text-align: left;
@@ -805,6 +809,69 @@ body:has(.stickybar) .ftr {
   font-family: Oswald, sans-serif; font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase;
 }
 @media (max-width: 560px) { .cohdr__t { display: none; } .cohdr .wrap--co > .link { margin-left: auto; } }
+
+/* language pills in the checkout header — the shopper may realise mid-payment
+   that the form is in the wrong language, and the full header is hidden here */
+.cohdr__langs { display: flex; gap: 2px; }
+.cohdr__lang {
+  border: 1px solid transparent; background: none; cursor: pointer;
+  padding: 4px 7px; min-height: 32px; color: var(--muted);
+  font-family: Oswald, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .08em;
+}
+.cohdr__lang[aria-current="true"] { color: var(--ink); border-color: var(--ink); }
+.cosum__rm { font-size: 12px; color: var(--muted); margin-left: 6px; }
+
+/* ---------- shop assistant chat (demo) ---------- */
+.sbot__fab {
+  position: fixed; right: 16px; bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  z-index: 60; width: 52px; height: 52px; border-radius: 50%;
+  background: var(--ink); color: #fff; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(28, 26, 0, .28);
+}
+.sbot__fab svg { width: 24px; height: 24px; }
+@media (min-width: 768px) { .sbot__fab { bottom: 20px; } }
+.sbot__panel {
+  position: fixed; right: 12px; bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+  z-index: 61; width: min(360px, calc(100vw - 24px)); max-height: min(540px, 72vh);
+  background: var(--paper, #fff); border: 1px solid var(--ink);
+  display: flex; flex-direction: column; box-shadow: 0 14px 44px rgba(28, 26, 0, .25);
+}
+@media (min-width: 768px) { .sbot__panel { bottom: 84px; } }
+.sbot__head {
+  display: flex; align-items: baseline; gap: 8px; padding: 12px 14px;
+  border-bottom: 1px solid var(--rule);
+  font-family: Oswald, sans-serif; letter-spacing: .06em; text-transform: uppercase; font-size: 13px;
+}
+.sbot__hint { font-family: "Golos Text", sans-serif; text-transform: none; letter-spacing: 0; font-size: 11px; color: var(--muted); flex: 1; }
+.sbot__x { border: none; background: none; cursor: pointer; font-size: 14px; padding: 4px; min-width: 32px; min-height: 32px; }
+.sbot__log { overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 140px; }
+.sbot__msg { max-width: 92%; padding: 9px 12px; font-size: 13.5px; line-height: 1.45; }
+.sbot__msg--bot { background: var(--shell, #edeae1); align-self: flex-start; }
+.sbot__msg--me { background: var(--ink); color: #fff; align-self: flex-end; }
+.sbot__prod { display: flex; gap: 9px; align-items: center; margin-top: 10px; }
+.sbot__ph {
+  width: 44px; height: 44px; flex: 0 0 44px;
+  background-size: contain; background-position: center; background-repeat: no-repeat;
+  background-color: #fff; border: 1px solid var(--rule);
+}
+.sbot__pn { flex: 1; font-size: 12px; line-height: 1.3; min-width: 0; }
+.sbot__pp { display: block; font-weight: 600; margin-top: 2px; }
+.sbot__pact { display: flex; flex-direction: column; gap: 4px; }
+.sbot__mini {
+  border: 1px solid var(--ink); background: var(--ink); color: #fff;
+  font-size: 11px; padding: 5px 8px; cursor: pointer; white-space: nowrap;
+}
+.sbot__mini--ghost { background: none; color: var(--ink); }
+.sbot__all { margin-top: 10px; width: 100%; padding: 9px; }
+.sbot__chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 12px 10px; }
+.sbot__chip {
+  border: 1px solid var(--rule); background: none; cursor: pointer;
+  font-size: 12px; padding: 6px 10px; min-height: 32px;
+}
+.sbot__form { display: flex; border-top: 1px solid var(--rule); }
+.sbot__form input { flex: 1; border: none; padding: 12px 14px; font: inherit; font-size: 14px; min-width: 0; outline-offset: -2px; }
+.sbot__send { border: none; background: var(--ink); color: #fff; width: 48px; cursor: pointer; font-size: 16px; }
 
 /* minmax(0,…) not 1fr: a grid item's automatic minimum size is its
    min-content width, and the nowrap step summary ("изменить" + the chosen

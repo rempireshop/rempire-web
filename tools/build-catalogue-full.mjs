@@ -196,6 +196,11 @@ for (const [rawH, rs] of active) {
   const title = first[C.title];
   const brand = findBrand(title, first[C.tags] || "", first[C.vendor] || "");
   let name = title.replace(/\s*[-–—]\s*For (Wo)?men\s*$/i, "").replace(/\s+/g, " ").trim();
+  // the card already prints the brand on its own line — a name that repeats
+  // it ("KEVIN.MURPHY ANGEL.MASQUE" under "Kevin.Murphy") reads twice
+  const bWords = brand.replace(/[.\s]+/g, "[.\\s]*");
+  name = name.replace(new RegExp("^" + bWords + "[\\s:—–-]+", "i"), "").trim() || name;
+  name = name.replace(new RegExp("\\s+by\\s+" + bWords + "\\b", "i"), "").trim();
   const rt = ruType(first[C.type] || "", title);
   if (rt && !name.includes(rt)) name = name + " — " + rt;
 

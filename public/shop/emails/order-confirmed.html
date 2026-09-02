@@ -1,0 +1,131 @@
+<!-- subject: Заказ {{order_number}} принят — Rempire | preheader: Спасибо за заказ! Мы уже собираем его и напишем, когда он будет готов. -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light">
+<title>Заказ принят — Rempire</title>
+<style>
+  @media only screen and (max-width:620px){
+    .em-container{width:100% !important;}
+    .em-px{padding-left:24px !important;padding-right:24px !important;}
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#edeae1;">
+
+<!-- Скрытый прехедер -->
+<div style="display:none; font-size:1px; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden; mso-hide:all;">
+  Спасибо за заказ! Мы уже собираем его и напишем, когда он будет готов.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; background-color:#edeae1;">
+  <tr>
+    <td align="center" style="padding:32px 12px;">
+
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" class="em-container" style="width:600px; max-width:600px; border-collapse:collapse; background-color:#ffffff; border:1px solid #e5e1d6;">
+
+        <!-- Шапка: текстовый логотип, без картинок -->
+        <tr>
+          <td align="center" style="padding:30px 40px; border-bottom:1px solid #e5e1d6;">
+            <a href="https://rempireshop.com" style="font-family:Arial,Helvetica,sans-serif; font-size:20px; font-weight:bold; letter-spacing:8px; text-transform:uppercase; color:#1c1a00; text-decoration:none;">REMPIRE</a>
+          </td>
+        </tr>
+
+        <!-- Заголовок -->
+        <tr>
+          <td class="em-px" style="padding:40px 48px 8px 48px;">
+            <h1 style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:22px; line-height:30px; font-weight:bold; letter-spacing:3px; text-transform:uppercase; color:#1c1a00;">Заказ принят</h1>
+          </td>
+        </tr>
+
+        <!-- Вступление -->
+        <tr>
+          <td class="em-px" style="padding:12px 48px 28px 48px;">
+            <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:23px; color:#1c1a00;">
+              Здравствуйте, {{customer_name}}! Спасибо за заказ <strong>№&nbsp;{{order_number}}</strong> — мы его получили и уже собираем.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Состав заказа -->
+        <tr>
+          <td class="em-px" style="padding:0 48px 0 48px;">
+            <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; font-weight:bold; letter-spacing:2px; text-transform:uppercase; color:#6f6b57;">Состав заказа</p>
+          </td>
+        </tr>
+        <tr>
+          <td class="em-px" style="padding:6px 48px 0 48px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <!-- {{items_table}} — начало блока позиций. Строки ниже — пример наполнения. -->
+              <tr>
+                <td style="padding:13px 0; border-bottom:1px solid #e5e1d6; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#1c1a00;">Kevin.Murphy Fresh.Hair — шампунь&nbsp;·&nbsp;2&nbsp;шт</td>
+                <td align="right" style="padding:13px 0 13px 16px; border-bottom:1px solid #e5e1d6; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#1c1a00; white-space:nowrap;">54&nbsp;€</td>
+              </tr>
+              <tr>
+                <td style="padding:13px 0; border-bottom:1px solid #e5e1d6; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#1c1a00;">Uppercut Deluxe Matt Clay — глина для укладки&nbsp;·&nbsp;1&nbsp;шт</td>
+                <td align="right" style="padding:13px 0 13px 16px; border-bottom:1px solid #e5e1d6; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#1c1a00; white-space:nowrap;">24&nbsp;€</td>
+              </tr>
+              <tr>
+                <td style="padding:13px 0; border-bottom:1px solid #e5e1d6; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#1c1a00;">Proraso Wood &amp; Spice — масло для бороды&nbsp;·&nbsp;1&nbsp;шт</td>
+                <td align="right" style="padding:13px 0 13px 16px; border-bottom:1px solid #e5e1d6; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#1c1a00; white-space:nowrap;">17&nbsp;€</td>
+              </tr>
+              <!-- {{items_table}} — конец блока позиций -->
+              <tr>
+                <td style="padding:13px 0; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#6f6b57;">Доставка — самовывоз</td>
+                <td align="right" style="padding:13px 0 13px 16px; font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:21px; color:#6f6b57; white-space:nowrap;">0&nbsp;€</td>
+              </tr>
+              <tr>
+                <td style="padding:14px 0 0 0; border-top:2px solid #1c1a00; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:22px; font-weight:bold; letter-spacing:1px; text-transform:uppercase; color:#1c1a00;">Итого</td>
+                <!-- {{total}} — пример: 95 € -->
+                <td align="right" style="padding:14px 0 0 16px; border-top:2px solid #1c1a00; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:22px; font-weight:bold; color:#1c1a00; white-space:nowrap;">{{total}}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Способ получения -->
+        <tr>
+          <td class="em-px" style="padding:28px 48px 8px 48px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="background-color:#edeae1; padding:20px 24px;">
+                  <p style="margin:0 0 6px 0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:18px; font-weight:bold; letter-spacing:2px; text-transform:uppercase; color:#6f6b57;">Способ получения</p>
+                  <!-- {{delivery_method}} — пример «самовывоз». Для пакомата или курьера сюда подставляется служба доставки и адрес. -->
+                  <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:23px; font-weight:bold; color:#1c1a00;">Самовывоз — Rempire, Mardi 1, 10145 Таллинн</p>
+                  <p style="margin:6px 0 0 0; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:#6f6b57;">Мы напишем, когда заказ можно будет забрать — обычно в течение 1–2 рабочих дней.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Вопросы -->
+        <tr>
+          <td class="em-px" style="padding:16px 48px 40px 48px;">
+            <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:13px; line-height:20px; color:#6f6b57;">Есть вопрос по заказу? Просто ответьте на это письмо — мы на связи.</p>
+          </td>
+        </tr>
+
+        <!-- Подвал -->
+        <tr>
+          <td class="em-px" style="padding:24px 48px 32px 48px; border-top:1px solid #e5e1d6;">
+            <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:19px; color:#6f6b57;">
+              Rempire Store OÜ · Mardi 1, 10145 Tallinn ·
+              <a href="https://rempireshop.com" style="color:#6f6b57; text-decoration:underline;">rempireshop.com</a>
+            </p>
+            <p style="margin:8px 0 0 0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:19px; color:#6f6b57;">Это служебное письмо о вашем заказе.</p>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

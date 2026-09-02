@@ -2084,7 +2084,7 @@ const CATALOGUE = [
  {
   "id": "cbd-daily-conditioner",
   "brand": "CBD Daily",
-  "name": "CBD Daily Conditioner — кондиционер",
+  "name": "Conditioner — кондиционер",
   "cat": "hair",
   "price": 19,
   "img": "/shop/img/cbd-daily-conditioner-0.webp",
@@ -2093,7 +2093,7 @@ const CATALOGUE = [
  {
   "id": "cbd-daily-shampoo",
   "brand": "CBD Daily",
-  "name": "CBD Daily Shampoo — шампунь",
+  "name": "Shampoo — шампунь",
   "cat": "hair",
   "price": 19,
   "img": "/shop/img/cbd-daily-shampoo-0.webp",
@@ -2102,7 +2102,7 @@ const CATALOGUE = [
  {
   "id": "davines-naturaltech-nourishing-keratin-booster-100ml",
   "brand": "Davines",
-  "name": "Davines NaturalTech Nourishing Keratin Booster 100ml",
+  "name": "NaturalTech Nourishing Keratin Booster 100ml",
   "cat": "hair",
   "price": 52,
   "img": "/shop/img/davines-naturaltech-nourishing-keratin-booster-100ml-0.webp",
@@ -2111,7 +2111,7 @@ const CATALOGUE = [
  {
   "id": "davines-naturaltech-nourishing-keratin-sealer-100-ml",
   "brand": "Davines",
-  "name": "Davines Naturaltech Nourishing Keratin Sealer 100 ml — спрей",
+  "name": "Naturaltech Nourishing Keratin Sealer 100 ml — спрей",
   "cat": "hair",
   "price": 24,
   "img": "/shop/img/davines-naturaltech-nourishing-keratin-sealer-100-ml-0.webp",
@@ -2120,7 +2120,7 @@ const CATALOGUE = [
  {
   "id": "davines-renewing-shampoo",
   "brand": "Davines",
-  "name": "DAVINES RENEWING Shampoo — шампунь",
+  "name": "RENEWING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-renewing-shampoo-0.webp",
@@ -2138,7 +2138,7 @@ const CATALOGUE = [
  {
   "id": "davines-wellbeing-shampoo",
   "brand": "Davines",
-  "name": "DAVINES WELLBEING Shampoo — шампунь",
+  "name": "WELLBEING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-wellbeing-shampoo-0.webp",
@@ -2156,7 +2156,7 @@ const CATALOGUE = [
  {
   "id": "davines-detoxifying-scrub-shampoo",
   "brand": "Davines",
-  "name": "DAVINES DETOXIFYING Scrub Shampoo — шампунь",
+  "name": "DETOXIFYING Scrub Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-detoxifying-scrub-shampoo-0.webp",
@@ -2174,7 +2174,7 @@ const CATALOGUE = [
  {
   "id": "davines-calming-shampoo",
   "brand": "Davines",
-  "name": "DAVINES CALMING Shampoo — шампунь",
+  "name": "CALMING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-calming-shampoo-0.webp",
@@ -2192,7 +2192,7 @@ const CATALOGUE = [
  {
   "id": "davines-nourishing-shampoo",
   "brand": "Davines",
-  "name": "DAVINES NOURISHING Shampoo — шампунь",
+  "name": "NOURISHING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-nourishing-shampoo-0.webp",
@@ -2210,7 +2210,7 @@ const CATALOGUE = [
  {
   "id": "davines-purifying-shampoo",
   "brand": "Davines",
-  "name": "DAVINES PURIFYING Shampoo — шампунь",
+  "name": "PURIFYING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-purifying-shampoo-0.webp",
@@ -2228,7 +2228,7 @@ const CATALOGUE = [
  {
   "id": "davines-energizing-shampoo",
   "brand": "Davines",
-  "name": "DAVINES ENERGIZING Shampoo — шампунь",
+  "name": "ENERGIZING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-energizing-shampoo-0.webp",
@@ -2246,7 +2246,7 @@ const CATALOGUE = [
  {
   "id": "davines-replumping-shampoo",
   "brand": "Davines",
-  "name": "DAVINES REPLUMPING Shampoo — шампунь",
+  "name": "REPLUMPING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-replumping-shampoo-0.webp",
@@ -2264,7 +2264,7 @@ const CATALOGUE = [
  {
   "id": "davines-rebalancing-shampoo",
   "brand": "Davines",
-  "name": "DAVINES REBALANCING Shampoo — шампунь",
+  "name": "REBALANCING Shampoo — шампунь",
   "cat": "hair",
   "price": 9,
   "img": "/shop/img/davines-rebalancing-shampoo-0.webp",
@@ -2282,7 +2282,7 @@ const CATALOGUE = [
  {
   "id": "davines-the-quick-fix-circle",
   "brand": "Davines",
-  "name": "DAVINES The Quick Fix Circle — маска",
+  "name": "The Quick Fix Circle — маска",
   "cat": "hair",
   "price": 7.99,
   "img": "/shop/img/davines-the-quick-fix-circle-0.webp",
@@ -2291,7 +2291,7 @@ const CATALOGUE = [
  {
   "id": "davines-the-spotlight-circle",
   "brand": "Davines",
-  "name": "DAVINES The Spotlight Circle — маска",
+  "name": "The Spotlight Circle — маска",
   "cat": "hair",
   "price": 7.99,
   "img": "/shop/img/davines-the-spotlight-circle-0.webp",
@@ -2300,7 +2300,7 @@ const CATALOGUE = [
  {
   "id": "davines-the-restless-circle",
   "brand": "Davines",
-  "name": "DAVINES The Restless Circle — маска",
+  "name": "The Restless Circle — маска",
   "cat": "hair",
   "price": 7.99,
   "img": "/shop/img/davines-the-restless-circle-0.webp",
@@ -2309,7 +2309,7 @@ const CATALOGUE = [
  {
   "id": "davines-the-renaissance-circle",
   "brand": "Davines",
-  "name": "DAVINES The Renaissance Circle — маска",
+  "name": "The Renaissance Circle — маска",
   "cat": "hair",
   "price": 7.99,
   "img": "/shop/img/davines-the-renaissance-circle-0.webp",
@@ -2318,7 +2318,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-night-shift-100ml",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY NIGHT.SHIFT 100ml — масло",
+  "name": "NIGHT.SHIFT 100ml — масло",
   "cat": "hair",
   "price": 38,
   "img": "/shop/img/kevin-murphy-night-shift-100ml-0.webp",
@@ -2327,7 +2327,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-re-store",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY RE.STORE",
+  "name": "RE.STORE",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/kevin-murphy-re-store-0.webp",
@@ -2345,7 +2345,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-smooth-again-wash",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY SMOOTH.AGAIN WASH — шампунь",
+  "name": "SMOOTH.AGAIN WASH — шампунь",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/kevin-murphy-smooth-again-wash-0.webp",
@@ -2368,7 +2368,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-fresh-hair-1",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY FRESH.HAIR — шампунь",
+  "name": "FRESH.HAIR — шампунь",
   "cat": "hair",
   "price": 18,
   "img": "/shop/img/kevin-murphy-fresh-hair-1-0.webp",
@@ -2414,7 +2414,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-angel-masque",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY ANGEL.MASQUE — маска",
+  "name": "ANGEL.MASQUE — маска",
   "cat": "hair",
   "price": 35,
   "img": "/shop/img/kevin-murphy-angel-masque-0.webp",
@@ -2423,7 +2423,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-blow-dry-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY BLOW.DRY RINSE — кондиционер",
+  "name": "BLOW.DRY RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-blow-dry-rinse-0.webp",
@@ -2446,7 +2446,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-crystal-angel",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY CRYSTAL.ANGEL — кондиционер",
+  "name": "CRYSTAL.ANGEL — кондиционер",
   "cat": "hair",
   "price": 26,
   "img": "/shop/img/kevin-murphy-crystal-angel-0.webp",
@@ -2455,7 +2455,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-body-mass",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY BODY.MASS — спрей",
+  "name": "BODY.MASS — спрей",
   "cat": "hair",
   "price": 39,
   "img": "/shop/img/kevin-murphy-body-mass-0.webp",
@@ -2464,7 +2464,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-everlasting-colour-leave-in",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY EVERLASTING.COLOUR LEAVE-IN — спрей",
+  "name": "EVERLASTING.COLOUR LEAVE-IN — спрей",
   "cat": "hair",
   "price": 34,
   "img": "/shop/img/kevin-murphy-everlasting-colour-leave-in-0.webp",
@@ -2473,7 +2473,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-everlasting-colour-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY EVERLASTING.COLOUR RINSE — кондиционер",
+  "name": "EVERLASTING.COLOUR RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-everlasting-colour-rinse-0.webp",
@@ -2496,7 +2496,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-everlasting-colour-wash",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY EVERLASTING.COLOUR WASH — шампунь",
+  "name": "EVERLASTING.COLOUR WASH — шампунь",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-everlasting-colour-wash-0.webp",
@@ -2519,7 +2519,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-hydrate-me-masque",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY HYDRATE-ME.MASQUE — маска",
+  "name": "HYDRATE-ME.MASQUE — маска",
   "cat": "hair",
   "price": 8,
   "img": "/shop/img/kevin-murphy-hydrate-me-masque-0.webp",
@@ -2542,7 +2542,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-smooth-again",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY SMOOTH.AGAIN",
+  "name": "SMOOTH.AGAIN",
   "cat": "hair",
   "price": 34,
   "img": "/shop/img/kevin-murphy-smooth-again-0.webp",
@@ -2551,7 +2551,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-smooth-again-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY SMOOTH.AGAIN.RINSE — кондиционер",
+  "name": "SMOOTH.AGAIN.RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-smooth-again-rinse-0.webp",
@@ -2574,7 +2574,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-staying-alive-spray",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY STAYING.ALIVE SPRAY — спрей",
+  "name": "STAYING.ALIVE SPRAY — спрей",
   "cat": "hair",
   "price": 8,
   "img": "/shop/img/kevin-murphy-staying-alive-spray-0.webp",
@@ -2597,7 +2597,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-young-again-oil",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY YOUNG.AGAIN OIL — масло",
+  "name": "YOUNG.AGAIN OIL — масло",
   "cat": "hair",
   "price": 34,
   "img": "/shop/img/kevin-murphy-young-again-oil-0.webp",
@@ -2606,7 +2606,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-young-again-masque",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY YOUNG.AGAIN.MASQUE — маска",
+  "name": "YOUNG.AGAIN.MASQUE — маска",
   "cat": "hair",
   "price": 34,
   "img": "/shop/img/kevin-murphy-young-again-masque-0.webp",
@@ -2615,7 +2615,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-young-again-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY YOUNG.AGAIN.RINSE — кондиционер",
+  "name": "YOUNG.AGAIN.RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-young-again-rinse-0.webp",
@@ -2638,7 +2638,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-young-again-wash",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY YOUNG.AGAIN.WASH — шампунь",
+  "name": "YOUNG.AGAIN.WASH — шампунь",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-young-again-wash-0.webp",
@@ -2661,7 +2661,7 @@ const CATALOGUE = [
  {
   "id": "kevin-muprhy-plumping-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY PLUMPING.RINSE — кондиционер",
+  "name": "PLUMPING.RINSE — кондиционер",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/kevin-muprhy-plumping-rinse-0.webp",
@@ -2679,7 +2679,7 @@ const CATALOGUE = [
  {
   "id": "kevin-muprhy-plumping-wash",
   "brand": "Kevin.Murphy",
-  "name": "PLUMPING.WASH BY KEVIN.MURPHY — шампунь",
+  "name": "PLUMPING.WASH — шампунь",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/kevin-muprhy-plumping-wash-0.webp",
@@ -2697,7 +2697,7 @@ const CATALOGUE = [
  {
   "id": "kevin-muprhy-hydrate-me-wash",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY HYDRATE-ME.WASH — шампунь",
+  "name": "HYDRATE-ME.WASH — шампунь",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/kevin-muprhy-hydrate-me-wash-0.webp",
@@ -2715,7 +2715,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-hydrate-me-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY HYDRATE-ME.RINSE — кондиционер",
+  "name": "HYDRATE-ME.RINSE — кондиционер",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/kevin-murphy-hydrate-me-rinse-0.webp",
@@ -2733,7 +2733,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-angel-wash",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY ANGEL.WASH — шампунь",
+  "name": "ANGEL.WASH — шампунь",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-angel-wash-0.webp",
@@ -2751,7 +2751,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-angel-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY ANGEL.RINSE — кондиционер",
+  "name": "ANGEL.RINSE — кондиционер",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-angel-rinse-0.webp",
@@ -2769,7 +2769,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-blonde-angel",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY BLONDE.ANGEL — кондиционер",
+  "name": "BLONDE.ANGEL — кондиционер",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-murphy-blonde-angel-0.webp",
@@ -2792,7 +2792,7 @@ const CATALOGUE = [
  {
   "id": "kevin-muprhy-blonde-angel-wash",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY BLONDE.ANGEL.WASH — шампунь",
+  "name": "BLONDE.ANGEL.WASH — шампунь",
   "cat": "hair",
   "price": 6,
   "img": "/shop/img/kevin-muprhy-blonde-angel-wash-0.webp",
@@ -2810,7 +2810,7 @@ const CATALOGUE = [
  {
   "id": "blow-dry-ever-smooth",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY BLOW DRY EVER.SMOOTH — спрей",
+  "name": "BLOW DRY EVER.SMOOTH — спрей",
   "cat": "hair",
   "price": 30,
   "img": "/shop/img/blow-dry-ever-smooth-0.webp",
@@ -2819,7 +2819,7 @@ const CATALOGUE = [
  {
   "id": "heated-defense",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY HEATED.DEFENSE",
+  "name": "HEATED.DEFENSE",
   "cat": "hair",
   "price": 28,
   "img": "/shop/img/heated-defense-0.webp",
@@ -2828,7 +2828,7 @@ const CATALOGUE = [
  {
   "id": "repair-me-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY REPAIR-ME.RINSE — кондиционер",
+  "name": "REPAIR-ME.RINSE — кондиционер",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/repair-me-rinse-0.webp",
@@ -2851,7 +2851,7 @@ const CATALOGUE = [
  {
   "id": "leave-in-repair",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY LEAVE-IN.REPAIR",
+  "name": "LEAVE-IN.REPAIR",
   "cat": "hair",
   "price": 32,
   "img": "/shop/img/leave-in-repair-0.webp",
@@ -2860,7 +2860,7 @@ const CATALOGUE = [
  {
   "id": "thick-again",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY THICK.AGAIN — спрей",
+  "name": "THICK.AGAIN — спрей",
   "cat": "hair",
   "price": 37,
   "img": "/shop/img/thick-again-0.webp",
@@ -2869,7 +2869,7 @@ const CATALOGUE = [
  {
   "id": "stimulate-me-rinse",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY STIMULATE-ME.RINSE — кондиционер",
+  "name": "STIMULATE-ME.RINSE — кондиционер",
   "cat": "hair",
   "price": 26,
   "img": "/shop/img/stimulate-me-rinse-0.webp",
@@ -2878,7 +2878,7 @@ const CATALOGUE = [
  {
   "id": "stimulate-me-wash",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY STIMULATE-ME.WASH — шампунь",
+  "name": "STIMULATE-ME.WASH — шампунь",
   "cat": "hair",
   "price": 7,
   "img": "/shop/img/stimulate-me-wash-0.webp",
@@ -2901,7 +2901,7 @@ const CATALOGUE = [
  {
   "id": "lumin-skin-keratin-fortifying-conditioner",
   "brand": "Lumin Skin",
-  "name": "Lumin Skin Keratin Fortifying Conditioner — кондиционер",
+  "name": "Keratin Fortifying Conditioner — кондиционер",
   "cat": "hair",
   "price": 15.95,
   "img": "/shop/img/lumin-skin-keratin-fortifying-conditioner-0.webp",
@@ -2910,7 +2910,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-curl-quick-slip-styling-cream",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Curl Quick Slip Styling Cream — крем",
+  "name": "Curl Quick Slip Styling Cream — крем",
   "cat": "hair",
   "price": 27,
   "img": "/shop/img/paul-mitchell-curl-quick-slip-styling-cream-0.webp",
@@ -2919,7 +2919,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-clear-jelly-mask",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Clear Jelly Mask — маска",
+  "name": "Clear Jelly Mask — маска",
   "cat": "hair",
   "price": 29,
   "img": "/shop/img/paul-mitchell-clear-jelly-mask-0.webp",
@@ -2928,7 +2928,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-clear-smoothing-serum",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Clear Smoothing Serum — сыворотка",
+  "name": "Clear Smoothing Serum — сыворотка",
   "cat": "hair",
   "price": 16,
   "img": "/shop/img/paul-mitchell-clear-smoothing-serum-0.webp",
@@ -2937,7 +2937,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-clear-essential-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Clear Essential Conditioner — кондиционер",
+  "name": "Clear Essential Conditioner — кондиционер",
   "cat": "hair",
   "price": 26,
   "img": "/shop/img/paul-mitchell-clear-essential-conditioner-0.webp",
@@ -2946,7 +2946,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-clear-essential-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Clear Essential Shampoo — шампунь",
+  "name": "Clear Essential Shampoo — шампунь",
   "cat": "hair",
   "price": 25.5,
   "img": "/shop/img/paul-mitchell-clear-essential-shampoo-0.webp",
@@ -2955,7 +2955,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-curl-hydrating-foam",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Curl Hydrating Foam — пенка",
+  "name": "Curl Hydrating Foam — пенка",
   "cat": "hair",
   "price": 27,
   "img": "/shop/img/paul-mitchell-curl-hydrating-foam-0.webp",
@@ -2964,7 +2964,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-curl-refreshing-mist",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Curl Refreshing Mist — спрей",
+  "name": "Curl Refreshing Mist — спрей",
   "cat": "hair",
   "price": 27,
   "img": "/shop/img/paul-mitchell-curl-refreshing-mist-0.webp",
@@ -2973,7 +2973,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-curl-twirl-around-cream-serum",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Curl Twirl Around Cream Serum — сыворотка",
+  "name": "Curl Twirl Around Cream Serum — сыворотка",
   "cat": "hair",
   "price": 33,
   "img": "/shop/img/paul-mitchell-curl-twirl-around-cream-serum-0.webp",
@@ -2982,7 +2982,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-curl-full-circle-leave-in-cream",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Curl Full Circle Leave-In Cream — крем",
+  "name": "Curl Full Circle Leave-In Cream — крем",
   "cat": "hair",
   "price": 33,
   "img": "/shop/img/paul-mitchell-curl-full-circle-leave-in-cream-0.webp",
@@ -2991,7 +2991,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-curl-round-trip-defining-serum",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Curl Round Trip Defining Serum — сыворотка",
+  "name": "Curl Round Trip Defining Serum — сыворотка",
   "cat": "hair",
   "price": 25,
   "img": "/shop/img/paul-mitchell-curl-round-trip-defining-serum-0.webp",
@@ -3000,7 +3000,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-extra-body-daily-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Extra-Body Shampoo — шампунь",
+  "name": "Extra-Body Shampoo — шампунь",
   "cat": "hair",
   "price": 23,
   "img": "/shop/img/paul-mitchell-extra-body-daily-shampoo-0.webp",
@@ -3009,7 +3009,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-forever-blonde-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Extra-Body Conditioner — кондиционер",
+  "name": "Extra-Body Conditioner — кондиционер",
   "cat": "hair",
   "price": 24,
   "img": "/shop/img/paul-mitchell-forever-blonde-conditioner-0.webp",
@@ -3018,7 +3018,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-forever-blonde-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Forever Blonde Shampoo — шампунь",
+  "name": "Forever Blonde Shampoo — шампунь",
   "cat": "hair",
   "price": 29,
   "img": "/shop/img/paul-mitchell-forever-blonde-shampoo-0.webp",
@@ -3027,7 +3027,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-mitch-double-hitter-2-in-1-shampoo-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell MITCH Double Hitter 2-in-1 Shampoo & Conditioner — шампунь",
+  "name": "MITCH Double Hitter 2-in-1 Shampoo & Conditioner — шампунь",
   "cat": "hair",
   "price": 21,
   "img": "/shop/img/paul-mitchell-mitch-double-hitter-2-in-1-shampoo-conditioner-0.webp",
@@ -3036,7 +3036,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-awapuhi-wild-ginger-repair-cream-rinse",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Awapuhi Wild Ginger Repair Cream Rinse — кондиционер",
+  "name": "Awapuhi Wild Ginger Repair Cream Rinse — кондиционер",
   "cat": "hair",
   "price": 35,
   "img": "/shop/img/paul-mitchell-awapuhi-wild-ginger-repair-cream-rinse-0.webp",
@@ -3045,7 +3045,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-awapuhi-shampoo-1",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Awapuhi Wild Ginger Repair Nourishing Shampoo — шампунь",
+  "name": "Awapuhi Wild Ginger Repair Nourishing Shampoo — шампунь",
   "cat": "hair",
   "price": 36,
   "img": "/shop/img/paul-mitchell-awapuhi-shampoo-1-0.webp",
@@ -3054,7 +3054,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-super-smooth-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Super Smooth Shampoo — шампунь",
+  "name": "Super Smooth Shampoo — шампунь",
   "cat": "hair",
   "price": 22,
   "img": "/shop/img/paul-mitchell-super-smooth-shampoo-0.webp",
@@ -3063,7 +3063,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-super-smooth-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Super Smooth Conditioner — кондиционер",
+  "name": "Super Smooth Conditioner — кондиционер",
   "cat": "hair",
   "price": 25,
   "img": "/shop/img/paul-mitchell-super-smooth-conditioner-0.webp",
@@ -3072,7 +3072,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-sheer-hydration-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Sheer Hydration Shampoo — шампунь",
+  "name": "Sheer Hydration Shampoo — шампунь",
   "cat": "hair",
   "price": 22,
   "img": "/shop/img/paul-mitchell-sheer-hydration-shampoo-0.webp",
@@ -3081,7 +3081,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-tea-tree-special-conditioner-1",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Green Tea Tree Special Conditioner — кондиционер",
+  "name": "Green Tea Tree Special Conditioner — кондиционер",
   "cat": "hair",
   "price": 25,
   "img": "/shop/img/paul-mitchell-tea-tree-special-conditioner-1-0.webp",
@@ -3090,7 +3090,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-sheer-hydration-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Sheer Hydration Conditioner — кондиционер",
+  "name": "Sheer Hydration Conditioner — кондиционер",
   "cat": "hair",
   "price": 25,
   "img": "/shop/img/paul-mitchell-sheer-hydration-conditioner-0.webp",
@@ -3099,7 +3099,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-color-protect-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Color Protect Conditioner — кондиционер",
+  "name": "Color Protect Conditioner — кондиционер",
   "cat": "hair",
   "price": 24,
   "img": "/shop/img/paul-mitchell-color-protect-conditioner-0.webp",
@@ -3108,7 +3108,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-color-protect-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Color Protect Shampoo — шампунь",
+  "name": "Color Protect Shampoo — шампунь",
   "cat": "hair",
   "price": 21,
   "img": "/shop/img/paul-mitchell-color-protect-shampoo-0.webp",
@@ -3117,7 +3117,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-awapuhi-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Awapuhi Conditioner — кондиционер",
+  "name": "Awapuhi Conditioner — кондиционер",
   "cat": "hair",
   "price": 24,
   "img": "/shop/img/paul-mitchell-awapuhi-conditioner-0.webp",
@@ -3126,7 +3126,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-awapuhi-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Awapuhi Shampoo — шампунь",
+  "name": "Awapuhi Shampoo — шампунь",
   "cat": "hair",
   "price": 20,
   "img": "/shop/img/paul-mitchell-awapuhi-shampoo-0.webp",
@@ -3135,7 +3135,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-tea-tree-lavender-mint-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Green Tea Tree Special Shampoo — шампунь",
+  "name": "Green Tea Tree Special Shampoo — шампунь",
   "cat": "hair",
   "price": 24,
   "img": "/shop/img/paul-mitchell-tea-tree-lavender-mint-shampoo-0.webp",
@@ -3144,7 +3144,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-shampoo-two",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Shampoo Two — шампунь",
+  "name": "Shampoo Two — шампунь",
   "cat": "hair",
   "price": 22,
   "img": "/shop/img/paul-mitchell-shampoo-two-0.webp",
@@ -3153,7 +3153,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-tea-tree-special-conditioner",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Tea Tree Lavender Mint Moisturizing Conditioner — кондиционер",
+  "name": "Tea Tree Lavender Mint Moisturizing Conditioner — кондиционер",
   "cat": "hair",
   "price": 28,
   "img": "/shop/img/paul-mitchell-tea-tree-special-conditioner-0.webp",
@@ -3162,7 +3162,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-tea-tree-special-shampoo",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Tea Tree Lavender Mint Moisturizing Shampoo — шампунь",
+  "name": "Tea Tree Lavender Mint Moisturizing Shampoo — шампунь",
   "cat": "hair",
   "price": 25,
   "img": "/shop/img/paul-mitchell-tea-tree-special-shampoo-0.webp",
@@ -3171,7 +3171,7 @@ const CATALOGUE = [
  {
   "id": "system-4-moisture-scalp-lotion-m",
   "brand": "System 4",
-  "name": "SYSTEM 4 MOISTURE SCALP LOTION M — лосьон",
+  "name": "MOISTURE SCALP LOTION M — лосьон",
   "cat": "hair",
   "price": 14.9,
   "img": "/shop/img/system-4-moisture-scalp-lotion-m-0.webp",
@@ -3180,7 +3180,7 @@ const CATALOGUE = [
  {
   "id": "system-4-shale-oil-shampoo-4",
   "brand": "System 4",
-  "name": "SYSTEM 4 SHALE OIL SHAMPOO 4 — шампунь",
+  "name": "SHALE OIL SHAMPOO 4 — шампунь",
   "cat": "hair",
   "price": 7.9,
   "img": "/shop/img/system-4-shale-oil-shampoo-4-0.webp",
@@ -3206,7 +3206,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-expedition-reserve-matt-styling-and-volumising-hair-powder",
   "brand": "Captain Fawcett",
-  "name": "CAPTAIN FAWCETT Expedition Reserve Matt Styling and Volumising Hair Powder — пудра",
+  "name": "Expedition Reserve Matt Styling and Volumising Hair Powder — пудра",
   "cat": "styling",
   "price": 20,
   "img": "/shop/img/captain-fawcett-expedition-reserve-matt-styling-and-volumising-hair-powder-0.webp",
@@ -3215,7 +3215,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-sea-salt-spray",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Sea Salt Spray — спрей",
+  "name": "Sea Salt Spray — спрей",
   "cat": "styling",
   "price": 25,
   "img": "/shop/img/captain-fawcett-sea-salt-spray-0.webp",
@@ -3229,7 +3229,7 @@ const CATALOGUE = [
  {
   "id": "gatsby-moving-rubber-hair-wax-80g",
   "brand": "Gatsby",
-  "name": "Gatsby Moving Rubber Hair Wax 80g — воск",
+  "name": "Moving Rubber Hair Wax 80g — воск",
   "cat": "styling",
   "price": 15,
   "img": "/shop/img/gatsby-moving-rubber-hair-wax-80g-0.webp",
@@ -3238,7 +3238,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-session-spray",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY SESSION.SPRAY — спрей",
+  "name": "SESSION.SPRAY — спрей",
   "cat": "styling",
   "price": 18,
   "img": "/shop/img/kevin-murphy-session-spray-0.webp",
@@ -3261,7 +3261,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-session-spray-flex",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY SESSION.SPRAY FLEX — спрей",
+  "name": "SESSION.SPRAY FLEX — спрей",
   "cat": "styling",
   "price": 18,
   "img": "/shop/img/kevin-murphy-session-spray-flex-0.webp",
@@ -3284,7 +3284,7 @@ const CATALOGUE = [
  {
   "id": "kevin-muprhy-shimmer-shine",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY SHIMMER.SHINE — спрей",
+  "name": "SHIMMER.SHINE — спрей",
   "cat": "styling",
   "price": 29,
   "img": "/shop/img/kevin-muprhy-shimmer-shine-0.webp",
@@ -3293,7 +3293,7 @@ const CATALOGUE = [
  {
   "id": "kevin-murphy-shimmer-me-blonde",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY SHIMMER.ME BLONDE 100ml — спрей",
+  "name": "SHIMMER.ME BLONDE 100ml — спрей",
   "cat": "styling",
   "price": 29,
   "img": "/shop/img/kevin-murphy-shimmer-me-blonde-0.webp",
@@ -3302,7 +3302,7 @@ const CATALOGUE = [
  {
   "id": "anti-gravity-spray",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY ANTI.GRAVITY.SPRAY — спрей",
+  "name": "ANTI.GRAVITY.SPRAY — спрей",
   "cat": "styling",
   "price": 8,
   "img": "/shop/img/anti-gravity-spray-0.webp",
@@ -3320,7 +3320,7 @@ const CATALOGUE = [
  {
   "id": "anti-gravity",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY ANTI.GRAVITY",
+  "name": "ANTI.GRAVITY",
   "cat": "styling",
   "price": 27,
   "img": "/shop/img/anti-gravity-0.webp",
@@ -3329,7 +3329,7 @@ const CATALOGUE = [
  {
   "id": "doo-over",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY DOO.OVER — спрей",
+  "name": "DOO.OVER — спрей",
   "cat": "styling",
   "price": 27,
   "img": "/shop/img/doo-over-0.webp",
@@ -3338,7 +3338,7 @@ const CATALOGUE = [
  {
   "id": "bedroom-hair",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY BEDROOM.HAIR — спрей",
+  "name": "BEDROOM.HAIR — спрей",
   "cat": "styling",
   "price": 18,
   "img": "/shop/img/bedroom-hair-0.webp",
@@ -3356,7 +3356,7 @@ const CATALOGUE = [
  {
   "id": "killer-waves",
   "brand": "Kevin.Murphy",
-  "name": "KEVIN.MURPHY KILLER.WAVES",
+  "name": "KILLER.WAVES",
   "cat": "styling",
   "price": 33,
   "img": "/shop/img/killer-waves-0.webp",
@@ -3365,7 +3365,7 @@ const CATALOGUE = [
  {
   "id": "paul-mitchell-awapuhi-texturizing-sea-spray",
   "brand": "Paul Mitchell",
-  "name": "Paul Mitchell Awapuhi Texturizing Sea Spray — спрей",
+  "name": "Awapuhi Texturizing Sea Spray — спрей",
   "cat": "styling",
   "price": 33.5,
   "img": "/shop/img/paul-mitchell-awapuhi-texturizing-sea-spray-0.webp",
@@ -3374,7 +3374,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-nebula-john-petrucci-beard-balm",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Nebula John Petrucci Beard Balm — бальзам",
+  "name": "Nebula John Petrucci Beard Balm — бальзам",
   "cat": "beard",
   "price": 24,
   "img": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-balm-0.webp",
@@ -3388,7 +3388,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-sid-sottung-barberism-beard-balm",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Sid Sottung Barberism® Beard Balm — бальзам",
+  "name": "Sid Sottung Barberism® Beard Balm — бальзам",
   "cat": "beard",
   "price": 24,
   "img": "/shop/img/captain-fawcett-sid-sottung-barberism-beard-balm-0.webp",
@@ -3402,7 +3402,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-ricki-hall-booze-baccy-beard-balm",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Ricki Hall Booze & Baccy Beard Balm — бальзам",
+  "name": "Ricki Hall Booze & Baccy Beard Balm — бальзам",
   "cat": "beard",
   "price": 24,
   "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-balm-0.webp",
@@ -3416,7 +3416,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-nebula-moustache-wax",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett John Petrucci's Nebula Moustache Wax — воск",
+  "name": "John Petrucci's Nebula Moustache Wax — воск",
   "cat": "beard",
   "price": 15,
   "img": "/shop/img/captain-fawcett-nebula-moustache-wax-0.webp",
@@ -3430,7 +3430,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-ricki-hall-booze-baccy-moustache-wax",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Ricki Hall Booze & Baccy Moustache wax — воск",
+  "name": "Ricki Hall Booze & Baccy Moustache wax — воск",
   "cat": "beard",
   "price": 15,
   "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-moustache-wax-0.webp",
@@ -3439,7 +3439,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-barberism-moustache-wax",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Barberism® Moustache Wax — воск",
+  "name": "Barberism® Moustache Wax — воск",
   "cat": "beard",
   "price": 15,
   "img": "/shop/img/captain-fawcett-barberism-moustache-wax-0.webp",
@@ -3453,7 +3453,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-maharajah-beard-oil",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Maharajah Beard Oil — масло",
+  "name": "Maharajah Beard Oil — масло",
   "cat": "beard",
   "price": 18,
   "img": "/shop/img/captain-fawcett-maharajah-beard-oil-0.webp",
@@ -3467,7 +3467,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-nebula-john-petrucci-beard-oil",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Nebula John Petrucci Beard Oil — масло",
+  "name": "Nebula John Petrucci Beard Oil — масло",
   "cat": "beard",
   "price": 17,
   "img": "/shop/img/captain-fawcett-nebula-john-petrucci-beard-oil-0.webp",
@@ -3481,7 +3481,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-barberism-beard-oil",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Barberism® Beard Oil — масло",
+  "name": "Barberism® Beard Oil — масло",
   "cat": "beard",
   "price": 18,
   "img": "/shop/img/captain-fawcett-barberism-beard-oil-0.webp",
@@ -3495,7 +3495,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-ricki-hall-booze-baccy-beard-oil",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Ricki Hall Booze & Baccy Beard Oil — масло",
+  "name": "Ricki Hall Booze & Baccy Beard Oil — масло",
   "cat": "beard",
   "price": 18,
   "img": "/shop/img/captain-fawcett-ricki-hall-booze-baccy-beard-oil-0.webp",
@@ -3509,7 +3509,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-triumphant-beard-oil",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett Rufus Hound Triumphant Beard Oil — масло",
+  "name": "Rufus Hound Triumphant Beard Oil — масло",
   "cat": "beard",
   "price": 18,
   "img": "/shop/img/captain-fawcett-triumphant-beard-oil-0.webp",
@@ -3523,7 +3523,7 @@ const CATALOGUE = [
  {
   "id": "captain-fawcett-whisky-beard-oil",
   "brand": "Captain Fawcett",
-  "name": "Captain Fawcett The Gentleman's Tipple Whisky Beard Oil — масло",
+  "name": "The Gentleman's Tipple Whisky Beard Oil — масло",
   "cat": "beard",
   "price": 17,
   "img": "/shop/img/captain-fawcett-whisky-beard-oil-0.webp",
@@ -3537,7 +3537,7 @@ const CATALOGUE = [
  {
   "id": "cosrx-advanced-snail-hydrogel-eye-patch-60pcs",
   "brand": "Cosrx",
-  "name": "COSRX Advanced Snail Hydrogel Eye Patch 60pcs — патчи",
+  "name": "Advanced Snail Hydrogel Eye Patch 60pcs — патчи",
   "cat": "face",
   "price": 23.99,
   "img": "/shop/img/cosrx-advanced-snail-hydrogel-eye-patch-60pcs-0.webp",
@@ -3546,7 +3546,7 @@ const CATALOGUE = [
  {
   "id": "cosrx-aloe-sun-cream",
   "brand": "Cosrx",
-  "name": "Cosrx Aloe Sun Cream — крем",
+  "name": "Aloe Sun Cream — крем",
   "cat": "face",
   "price": 15.49,
   "img": "/shop/img/cosrx-aloe-sun-cream-0.webp",
@@ -3555,7 +3555,7 @@ const CATALOGUE = [
  {
   "id": "laneige-cica-sleeping-mask",
   "brand": "LANEIGE",
-  "name": "LANEIGE Cica Sleeping Mask — маска",
+  "name": "Cica Sleeping Mask — маска",
   "cat": "face",
   "price": 4.99,
   "img": "/shop/img/laneige-cica-sleeping-mask-0.webp",
@@ -3564,7 +3564,7 @@ const CATALOGUE = [
  {
   "id": "real-nature-green-tea-mask-sheet",
   "brand": "Nature Republic",
-  "name": "Nature Republic GREEN TEA MASK SHEET — маска",
+  "name": "GREEN TEA MASK SHEET — маска",
   "cat": "face",
   "price": 1.89,
   "img": "/shop/img/real-nature-green-tea-mask-sheet-0.webp",
@@ -3573,7 +3573,7 @@ const CATALOGUE = [
  {
   "id": "byredo-blanche-body-wash-225-ml-for-women",
   "brand": "Byredo",
-  "name": "Byredo Blanche Body Wash 225 ml",
+  "name": "Blanche Body Wash 225 ml",
   "cat": "body",
   "price": 40,
   "img": "/shop/img/byredo-blanche-body-wash-225-ml-for-women-0.webp",
@@ -3586,7 +3586,7 @@ const CATALOGUE = [
  {
   "id": "yumain-numb-serum-instant-pain-relief-for-tattoos",
   "brand": "Yumain",
-  "name": "YUMAIN NUMB serum Instant Pain Relief for Tattoos — сыворотка",
+  "name": "NUMB serum Instant Pain Relief for Tattoos — сыворотка",
   "cat": "body",
   "price": 39,
   "img": "/shop/img/yumain-numb-serum-instant-pain-relief-for-tattoos-0.webp",
@@ -3595,7 +3595,7 @@ const CATALOGUE = [
  {
   "id": "yumain-aftercare-washing-foam-expert-care-for-your-tattoos",
   "brand": "Yumain",
-  "name": "Yumain Aftercare Washing Foam – Expert Care for Your Tattoos — пенка",
+  "name": "Aftercare Washing Foam – Expert Care for Your Tattoos — пенка",
   "cat": "body",
   "price": 12,
   "img": "/shop/img/yumain-aftercare-washing-foam-expert-care-for-your-tattoos-0.webp",
@@ -3604,7 +3604,7 @@ const CATALOGUE = [
  {
   "id": "yumain-tattoo-balm-the-ultimate-care-for-your-tattoos",
   "brand": "Yumain",
-  "name": "Yumain Tattoo Balm – The Ultimate Care for Your Tattoos — бальзам",
+  "name": "Tattoo Balm – The Ultimate Care for Your Tattoos — бальзам",
   "cat": "body",
   "price": 10,
   "img": "/shop/img/yumain-tattoo-balm-the-ultimate-care-for-your-tattoos-0.webp",
@@ -3613,7 +3613,7 @@ const CATALOGUE = [
  {
   "id": "yumain-tattoo-cream",
   "brand": "Yumain",
-  "name": "Yumain Tattoo cream — крем",
+  "name": "Tattoo cream — крем",
   "cat": "body",
   "price": 10,
   "img": "/shop/img/yumain-tattoo-cream-0.webp",
@@ -3622,7 +3622,7 @@ const CATALOGUE = [
  {
   "id": "byredo-mojave-ghost-eau-de-parfum-spray-50ml",
   "brand": "Byredo",
-  "name": "Byredo Mojave Ghost Eau De Parfum Spray - 50ml — спрей",
+  "name": "Mojave Ghost Eau De Parfum Spray - 50ml — спрей",
   "cat": "perfume",
   "price": 160,
   "img": "/shop/img/byredo-mojave-ghost-eau-de-parfum-spray-50ml-0.webp",
@@ -3631,7 +3631,7 @@ const CATALOGUE = [
  {
   "id": "kilian-unisex-kologne-shield-of-protection-eau-de-parfum-spray-50ml",
   "brand": "Kilian",
-  "name": "Kilian Unisex Kologne Shield Of Protection Eau de Parfum Spray 50ml — спрей",
+  "name": "Unisex Kologne Shield Of Protection Eau de Parfum Spray 50ml — спрей",
   "cat": "perfume",
   "price": 208.39,
   "img": "/shop/img/kilian-unisex-kologne-shield-of-protection-eau-de-parfum-spray-50ml-0.webp",
@@ -3640,7 +3640,7 @@ const CATALOGUE = [
  {
   "id": "baccarat-rouge-540-eau-de-parfum-70ml",
   "brand": "Maison Francis Kurkdjian",
-  "name": "Baccarat Rouge 540 by Maison Francis Kurkdjian Unisex 2.4oz Extrait De Parfum Spray — спрей",
+  "name": "Baccarat Rouge 540 Unisex 2.4oz Extrait De Parfum Spray — спрей",
   "cat": "perfume",
   "price": 330,
   "img": "/shop/img/baccarat-rouge-540-eau-de-parfum-70ml-0.webp",
@@ -3649,7 +3649,7 @@ const CATALOGUE = [
  {
   "id": "oversized-t-shirt-unisex-with-print-three-elements-air",
   "brand": "Rempire",
-  "name": "REMPIRE Oversized T-shirt unisex with print “Three Elements” AIR",
+  "name": "Oversized T-shirt unisex with print “Three Elements” AIR",
   "cat": "merch",
   "price": 35,
   "img": "/shop/img/oversized-t-shirt-unisex-with-print-three-elements-air-0.webp",

@@ -25,6 +25,9 @@
   }
 
   var ICON = {
+    chart: '<path d="M4 20V10M10 20V4M16 20v-8M20 20H4"/>',
+    mail: '<path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/>',
+    plug: '<path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0zM12 16v5"/>',
     home: '<path d="M4 11l8-7 8 7v9h-5.4v-6H9.4v6H4z"/>',
     grid: '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
     search: '<path d="M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14zM16.2 16.2L21 21"/>',
@@ -58,6 +61,343 @@
   var LANGS = [["RU", "Русский"], ["ET", "Eesti"], ["EN", "English"]];
 
   var CATS = Object.keys(CAT_NAMES).map(function (k) { return { id: k, name: CAT_NAMES[k] }; });
+
+  /* ---------- interface translation -------------------------------------
+     Russian is the source of truth: every template renders RU, and when the
+     switcher is on ET/EN a dictionary pass rewrites the DOM after each
+     render. One hook instead of four hundred template edits; a phrase the
+     dictionary misses stays Russian instead of breaking. Keys are the full
+     trimmed text of a node; RX handles strings with numbers in them. */
+  var UI = {
+    ET: {
+      "Все товары": "Kõik tooted", "Бренды": "Brändid", "Все": "Kõik",
+      "Уход за волосами": "Juuksehooldus", "Стайлинг": "Stiliseerimine",
+      "Уход за бородой": "Habemehooldus", "Уход за лицом": "Näohooldus",
+      "Уход за телом": "Kehahooldus", "Парфюмерия": "Parfüümid", "Мерч": "Merch",
+      "Шампуни": "Šampoonid", "Кондиционеры": "Palsamid", "Маски и уход": "Maskid ja hooldus",
+      "Спреи": "Spreid", "Пасты и воски": "Pastad ja vahad", "Гели": "Geelid",
+      "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
+      "После бритья": "Habemeajamisjärgne", "Тоники": "Toonikud", "Очищение": "Puhastus",
+      "Кремы и сыворотки": "Kreemid ja seerumid",
+      "В корзину": "Lisa korvi", "мало": "vähe", "нет в наличии": "otsas",
+      "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsing", "Корзина": "Ostukorv",
+      "Кабинет": "Konto", "Описание": "Kirjeldus", "Доставка и возврат": "Tarne ja tagastus",
+      "Похожие товары": "Sarnased tooted", "Вместе лучше": "Sobivad kokku",
+      "Оформить заказ": "Vormista tellimus", "Продолжить покупки": "Jätka ostlemist",
+      "Убрать": "Eemalda", "Итого": "Kokku", "Оплатить": "Maksa",
+      "Фильтры": "Filtrid", "Сортировка": "Sorteerimine", "Сбросить": "Lähtesta",
+      "Сбросить всё": "Lähtesta kõik", "Сбросить фильтры": "Lähtesta filtrid",
+      "Наличие": "Saadavus", "Бренд": "Bränd", "В наличии": "Laos",
+      "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
+      "Пока пусто.": "Korv on tühi.", "К товарам": "Toodete juurde",
+      "Хиты продаж": "Müügihitid", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓", "Новинки": "Uued",
+      "Покупателю": "Ostjale", "Правовое": "Õigusinfo", "Контакты": "Kontakt",
+      "Доставка и оплата": "Tarne ja maksmine", "Возврат товара": "Tagastamine",
+      "Условия продажи": "Müügitingimused", "Конфиденциальность": "Privaatsus",
+      "Правовая информация": "Õigusinfo", "Споры онлайн (ODR)": "Vaidlused veebis (ODR)",
+      "Оформление заказа": "Tellimuse vormistamine",
+      "Контакт": "Kontakt", "Доставка": "Tarne", "Оплата": "Makse",
+      "Далее — доставка": "Edasi — tarne", "Далее — оплата": "Edasi — makse",
+      "Имя": "Nimi", "Телефон": "Telefon", "Страна": "Riik", "Город": "Linn",
+      "Адрес": "Aadress", "Промокод": "Sooduskood", "Применить": "Rakenda",
+      "Заказ оформлен": "Tellimus vormistatud", "На главную": "Avalehele",
+      "Поиск: шампунь, Davines, паста…": "Otsi: šampoon, Davines, pasta…",
+      "Что ищете?": "Mida otsite?", "Язык интерфейса": "Keel",
+      "Добавлено в корзину": "Lisatud korvi", "Товар снова в наличии — напишем!": "Anname teada, kui toode on taas laos!",
+      "Сообщить": "Teata mulle", "Получить код": "Saada kood", "Выйти": "Logi välja",
+      "Мои заказы": "Minu tellimused", "Мои данные": "Minu andmed", "Мои промокоды": "Minu sooduskoodid",
+      "Повторить заказ": "Korda tellimust", "Сохранить": "Salvesta",
+      "Страница не найдена": "Lehte ei leitud",
+      "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormistage külalisena.",
+      "Налоги включены. Доставка рассчитается при оформлении.": "Hinnad sisaldavad makse. Tarne arvutatakse vormistamisel.",
+      "Каталог, товары и инфостраницы — на трёх языках.": "Kataloog, tooted ja infolehed on kolmes keeles.",
+      "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Tekst on üle toodud praeguselt saidilt; enne käivitamist vaatab selle üle jurist.",
+      "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
+      "Европа": "Euroopa", "Таллинн": "Tallinn",
+      "Профессиональный уход": "Professionaalne hooldus",
+      "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — sellega töötab Rempire'i meeskond salongis.",
+      "В каталог": "Kataloogi", "Смотреть": "Vaata", "Новинки": "Uued",
+      "Свежая поставка": "Värske saadetis",
+      "Уход и стайлинг, которые только приехали.": "Hooldus ja stiliseerimine, mis just saabusid.",
+      "Борода": "Habe", "Всё для формы": "Kõik vormi jaoks",
+      "Масла, бальзамы и воски для ухода за бородой.": "Õlid, palsamid ja vahad habemehoolduseks.",
+      "Ниша и классика": "Nišš ja klassika",
+      "Creed, Tom Ford, Xerjoff, Byredo — то, что держим в наличии.": "Creed, Tom Ford, Xerjoff, Byredo — see, mida hoiame laos.",
+      "Сделано в Rempire": "Valminud Rempire'is", "Мыло ручной работы": "Käsitööseep",
+      "Чёрное 666 и розовое Rule Nr 1 — варим сами, маленькими партиями.": "Must 666 ja roosa Rule Nr 1 — keedame ise, väikeste partiidena.",
+      "Таллинн · Mardi 1 · est 2018": "Tallinn · Mardi 1 · est 2018",
+      "Популярные товары": "Populaarsed tooted", "Новые товары": "Uued tooted",
+      "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.": "Salongikosmeetika näole, kehale ja juustele — sellega töötab Rempire'i meeskond iga päev.",
+      "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Värsked saabumised: hooldus ja stiliseerimine, parfüümid ja uus merch.",
+      "Категории": "Kategooriad",
+      "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professionaalsed tooted, millega Rempire'i meeskond salongis töötab.",
+      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire'i särgid — meie kunstnike pildid, trükime väikeste tiraažidena.",
+      "Ниша и классика, которые держим в наличии в Таллинне.": "Nišš ja klassika, mida hoiame Tallinnas laos.",
+      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Geelid, seep ja kehahooldus — sealhulgas oma keedetud seep.",
+      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "Kogu Rempire'i valik: hooldus, stiliseerimine, habe, nägu, keha, parfüümid ja merch.",
+      "Под эти фильтры ничего не подошло.": "Nende filtritega ei sobinud midagi.",
+      "Сначала дешевле": "Odavamad enne", "Сначала дороже": "Kallimad enne",
+      "Поделиться": "Jaga", "Купить через": "Osta kohe —", "Другие способы оплаты": "Teised makseviisid",
+      "С этим покупают": "Sellega ostetakse koos",
+      "Самовывоз": "Järeletulek", "Реквизиты": "Rekvisiidid", "Связаться": "Võta ühendust",
+      "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Pangalink (Swedbank, SEB, LHV, Luminor, Coop), kaart, Apple Pay / Google Pay, arve ettevõtetele.",
+      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, edasi 1,50 € päevas. Vaja on dokumenti.",
+      "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
+      "Админка — демо": "Admin — demo",
+      "Банковская ссылка": "Pangalink", "Банковская карта": "Pangakaart",
+      "По счёту — для компаний": "Arvega — ettevõtetele",
+      "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — makse oma pangas",
+      "Оплата в одно касание": "Makse ühe puudutusega",
+      "Счёт на почту, оплата в течение 7 дней": "Arve e-postile, maksmine 7 päeva jooksul",
+      "Самовывоз — Mardi 1, Таллинн": "Järeletulek — Mardi 1, Tallinn",
+      "Курьер до двери (DPD)": "Kuller ukseni (DPD)", "Курьер DPD": "Kuller DPD",
+      "Курьер SmartPosti": "Kuller SmartPosti", "Курьер Omniva": "Kuller Omniva",
+      "Хочу получать новости и скидки": "Soovin uudiseid ja soodustusi",
+      "E-mail для подтверждения заказа": "E-post tellimuse kinnituseks",
+      "Имя и фамилия": "Ees- ja perekonnanimi", "Индекс": "Postiindeks",
+      "улица, дом": "tänav, maja", "Имя Фамилия": "Eesnimi Perenimi",
+      "Ваш заказ": "Teie tellimus", "Корзина пуста.": "Korv on tühi.",
+      "Бесплатно": "Tasuta", "Бесплатная доставка применена ✓": "Tasuta tarne rakendatud ✓",
+      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek Mardi 1. Vaja on dokumenti. Tellimus ootab 7 päeva, edasi 1,50 € päevas.",
+      "Оплата через банк — данные карты магазин не видит": "Makse läbi panga — pood kaardiandmeid ei näe",
+      "14 дней на возврат по закону ЕС": "14 päeva tagastusõigust EL-i seaduse järgi",
+      "Вопросы — 56237237 или rempireshopinfo@gmail.com": "Küsimused — 56237237 või rempireshopinfo@gmail.com",
+      "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades «Maksa» nõustute tingimuste ja tagastuspoliitikaga.",
+      "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14 päeva tagastusõigust EL-i seaduse järgi. Avatud kosmeetika ei kuulu hügieeni tõttu tagastamisele.",
+      "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14 päeva tagastusõigust EL-i seaduse järgi. Särki võib proovida ja tagastada, kui ei sobinud.",
+      "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Töötavas poes tuleb siia tellimuse number, arve e-postile ja paki jälgimine.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Tariifid — vedajate hinnakirjad 2025–2026, koos 24% käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20% allahindlust — lõplikud hinnad täpsustame liitumisel.",
+      "Добавлено в корзину ✓": "Lisatud korvi ✓",
+      "Код не найден — проверьте написание.": "Koodi ei leitud — kontrollige kirjapilti.",
+      "Хиты продаж": "Müügihitid", "Город": "Linn",
+      "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
+      "← В магазин": "← Poodi", "изменить": "muuda"
+    },
+    EN: {
+      "Все товары": "All products", "Бренды": "Brands", "Все": "All",
+      "Уход за волосами": "Hair care", "Стайлинг": "Styling",
+      "Уход за бородой": "Beard care", "Уход за лицом": "Face care",
+      "Уход за телом": "Body care", "Парфюмерия": "Fragrance", "Мерч": "Merch",
+      "Шампуни": "Shampoos", "Кондиционеры": "Conditioners", "Маски и уход": "Masks & care",
+      "Спреи": "Sprays", "Пасты и воски": "Pastes & waxes", "Гели": "Gels",
+      "Пудры": "Powders", "Масла": "Oils", "Бальзамы": "Balms",
+      "После бритья": "Aftershave", "Тоники": "Toners", "Очищение": "Cleansing",
+      "Кремы и сыворотки": "Creams & serums",
+      "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
+      "Главная": "Home", "Каталог": "Catalogue", "Поиск": "Search", "Корзина": "Cart",
+      "Кабинет": "Account", "Описание": "Description", "Доставка и возврат": "Shipping & returns",
+      "Похожие товары": "Similar products", "Вместе лучше": "Better together",
+      "Оформить заказ": "Checkout", "Продолжить покупки": "Continue shopping",
+      "Убрать": "Remove", "Итого": "Total", "Оплатить": "Pay",
+      "Фильтры": "Filters", "Сортировка": "Sort", "Сбросить": "Reset",
+      "Сбросить всё": "Reset all", "Сбросить фильтры": "Reset filters",
+      "Наличие": "Availability", "Бренд": "Brand", "В наличии": "In stock",
+      "Закрыть": "Close", "Меньше": "Less", "Больше": "More", "Размер": "Size",
+      "Пока пусто.": "Your cart is empty.", "К товарам": "Browse products",
+      "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓", "Новинки": "New in",
+      "Покупателю": "For customers", "Правовое": "Legal", "Контакты": "Contact",
+      "Доставка и оплата": "Shipping & payment", "Возврат товара": "Returns",
+      "Условия продажи": "Terms of sale", "Конфиденциальность": "Privacy",
+      "Правовая информация": "Legal information", "Споры онлайн (ODR)": "Online dispute resolution (ODR)",
+      "Оформление заказа": "Checkout",
+      "Контакт": "Contact", "Доставка": "Shipping", "Оплата": "Payment",
+      "Далее — доставка": "Next — shipping", "Далее — оплата": "Next — payment",
+      "Имя": "Name", "Телефон": "Phone", "Страна": "Country", "Город": "City",
+      "Адрес": "Address", "Промокод": "Promo code", "Применить": "Apply",
+      "Заказ оформлен": "Order placed", "На главную": "Back to home",
+      "Поиск: шампунь, Davines, паста…": "Search: shampoo, Davines, paste…",
+      "Что ищете?": "What are you looking for?", "Язык интерфейса": "Language",
+      "Добавлено в корзину": "Added to cart", "Товар снова в наличии — напишем!": "We'll email you when it's back!",
+      "Сообщить": "Notify me", "Получить код": "Send code", "Выйти": "Log out",
+      "Мои заказы": "My orders", "Мои данные": "My details", "Мои промокоды": "My promo codes",
+      "Повторить заказ": "Repeat order", "Сохранить": "Save",
+      "Страница не найдена": "Page not found",
+      "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
+      "Налоги включены. Доставка рассчитается при оформлении.": "Taxes included. Shipping is calculated at checkout.",
+      "Каталог, товары и инфостраницы — на трёх языках.": "The catalogue, products and info pages are in three languages.",
+      "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Text carried over from the current site; a lawyer reviews it before launch.",
+      "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
+      "Европа": "Europe", "Таллинн": "Tallinn",
+      "Профессиональный уход": "Professional care",
+      "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — what the Rempire team works with in the salon.",
+      "В каталог": "To catalogue", "Смотреть": "View", "Новинки": "New in",
+      "Свежая поставка": "Fresh delivery",
+      "Уход и стайлинг, которые только приехали.": "Care and styling that just arrived.",
+      "Борода": "Beard", "Всё для формы": "Everything for shape",
+      "Масла, бальзамы и воски для ухода за бородой.": "Oils, balms and waxes for beard care.",
+      "Ниша и классика": "Niche and classics",
+      "Creed, Tom Ford, Xerjoff, Byredo — то, что держим в наличии.": "Creed, Tom Ford, Xerjoff, Byredo — what we keep in stock.",
+      "Сделано в Rempire": "Made at Rempire", "Мыло ручной работы": "Handmade soap",
+      "Чёрное 666 и розовое Rule Nr 1 — варим сами, маленькими партиями.": "Black 666 and pink Rule Nr 1 — made in-house, in small batches.",
+      "Таллинн · Mardi 1 · est 2018": "Tallinn · Mardi 1 · est 2018",
+      "Популярные товары": "Popular products", "Новые товары": "New products",
+      "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.": "Salon-grade cosmetics for face, body and hair — what the Rempire team uses every day.",
+      "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Fresh arrivals: care and styling, fragrance and new merch.",
+      "Категории": "Categories",
+      "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professional products the Rempire team works with in the salon.",
+      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire tees — prints by our artists, small runs.",
+      "Ниша и классика, которые держим в наличии в Таллинне.": "Niche and classics we keep in stock in Tallinn.",
+      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Gels, soap and body care — including our own handmade soap.",
+      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "The full Rempire range: care, styling, beard, face, body, fragrance and merch.",
+      "Под эти фильтры ничего не подошло.": "Nothing matched these filters.",
+      "Сначала дешевле": "Price: low to high", "Сначала дороже": "Price: high to low",
+      "Поделиться": "Share", "Купить через": "Buy now with", "Другие способы оплаты": "Other payment methods",
+      "С этим покупают": "Bought together",
+      "Самовывоз": "Pickup", "Реквизиты": "Company details", "Связаться": "Get in touch",
+      "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Bank link (Swedbank, SEB, LHV, Luminor, Coop), card, Apple Pay / Google Pay, invoice for companies.",
+      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · free · your order waits 7 days, then 1.50 € per day. ID required.",
+      "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
+      "Админка — демо": "Admin — demo",
+      "Банковская ссылка": "Bank link", "Банковская карта": "Bank card",
+      "По счёту — для компаний": "By invoice — for companies",
+      "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — pay in your own bank",
+      "Оплата в одно касание": "One-tap payment",
+      "Счёт на почту, оплата в течение 7 дней": "Invoice by e-mail, payment within 7 days",
+      "Самовывоз — Mardi 1, Таллинн": "Pickup — Mardi 1, Tallinn",
+      "Курьер до двери (DPD)": "Courier to the door (DPD)", "Курьер DPD": "DPD courier",
+      "Курьер SmartPosti": "SmartPosti courier", "Курьер Omniva": "Omniva courier",
+      "Хочу получать новости и скидки": "Send me news and discounts",
+      "E-mail для подтверждения заказа": "E-mail for the order confirmation",
+      "Имя и фамилия": "Full name", "Индекс": "Postcode",
+      "улица, дом": "street, house", "Имя Фамилия": "Name Surname",
+      "Ваш заказ": "Your order", "Корзина пуста.": "Your cart is empty.",
+      "Бесплатно": "Free", "Бесплатная доставка применена ✓": "Free shipping applied ✓",
+      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Free pickup at Mardi 1. ID required. Your order waits 7 days, then 1.50 € per day.",
+      "Оплата через банк — данные карты магазин не видит": "Payment goes through the bank — the shop never sees card details",
+      "14 дней на возврат по закону ЕС": "14-day returns under EU law",
+      "Вопросы — 56237237 или rempireshopinfo@gmail.com": "Questions — 56237237 or rempireshopinfo@gmail.com",
+      "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Pay” you agree to the terms and the return policy.",
+      "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14-day returns under EU law. Opened cosmetics cannot be returned for hygiene reasons.",
+      "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14-day returns under EU law. You can try the tee on and return it if it doesn't fit.",
+      "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "This is a demo — no real order was created. In the live shop this page shows the order number, an e-mailed invoice and parcel tracking.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Rates — carrier price lists 2025–2026, incl. 24% VAT. From 40 parcels a month Omniva and DPD give 3–20% off — final prices to be confirmed on connection.",
+      "Добавлено в корзину ✓": "Added to cart ✓",
+      "Код не найден — проверьте написание.": "Code not found — check the spelling.",
+      "Хиты продаж": "Bestsellers", "Город": "City",
+      "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
+      "← В магазин": "← Back to shop", "изменить": "edit"
+    }
+  };
+  /* Strings with numbers or sums inside. $1 keeps the captured piece; a
+     captured piece that is itself a dictionary term (a country, a carrier
+     label) is translated too. */
+  var UI_RX = [
+    [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
+    [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
+    [/^Корзина \((\d+)\)$/, { ET: "Ostukorv ($1)", EN: "Cart ($1)" }],
+    [/^До бесплатной доставки \((.+), от (.+)\) — ещё (.+)$/, { ET: "Tasuta tarneni ($1, alates $2) — veel $3", EN: "$3 more to free shipping ($1, from $2)" }],
+    [/^Бесплатная доставка — порог (.+) достигнут ✓$/, { ET: "Tasuta tarne — $1 lävi käes ✓", EN: "Free shipping — $1 threshold reached ✓" }],
+    [/^Бесплатная доставка по Эстонии от (.+)$/, { ET: "Tasuta tarne Eestis alates $1", EN: "Free shipping in Estonia from $1" }],
+    [/^Бесплатная доставка от (.+) — не хватает (.+)$/, { ET: "Tasuta tarne alates $1 — puudu $2", EN: "Free shipping from $1 — $2 to go" }],
+    [/^Бесплатная доставка от (.+)$/, { ET: "Tasuta tarne alates $1", EN: "Free shipping from $1" }],
+    [/^Бесплатная доставка: Эстония от (.+) · LV, LT от (.+) · Финляндия от (.+)$/,
+      { ET: "Tasuta tarne: Eesti alates $1 · LV, LT alates $2 · Soome alates $3", EN: "Free shipping: Estonia from $1 · LV, LT from $2 · Finland from $3" }],
+    [/^от (\d.*)$/, { ET: "alates $1", EN: "from $1" }],
+    [/^Доставка — (.+)$/, { ET: "Tarne — $1", EN: "Shipping — $1" }],
+    [/^Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от (.+) · самовывоз на Mardi 1$/,
+      { ET: "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · Eestis tasuta alates $1 · järeletulek Mardi 1", EN: "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · free in Estonia from $1 · pickup at Mardi 1" }],
+    [/^(.+) × (\d+)$/, { ET: "$1 × $2", EN: "$1 × $2" }],
+    [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от (.+) · 230 пакоматов в 4 странах$/,
+      { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · Eestis tasuta alates $1 · 230 pakiautomaati 4 riigis", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days · free in Estonia from $1 · 230 parcel lockers in 4 countries" }],
+    [/^Пакомат (DPD|Omniva|SmartPosti)$/, { ET: "Pakiautomaat $1", EN: "$1 parcel locker" }],
+    [/^Пакомат — (\d+) (?:точка|точки|точек)$/, { ET: "Pakiautomaat — $1 punkti", EN: "Parcel locker — $1 locations" }],
+    [/^Всё, что есть в наличии от (.+) — во всех разделах магазина\.$/,
+      { ET: "Kõik, mis on laos brändilt $1 — kõigist osakondadest.", EN: "Everything in stock from $1 — across every section." }],
+    [/^По запросу «(.+)» ничего не нашлось\.$/, { ET: "Otsingule «$1» ei leidunud midagi.", EN: "Nothing found for “$1”." }],
+    [/^\/ (.+)$/, { ET: "/ $1", EN: "/ $1" }],
+    [/^Найдено: (\d+)$/, { ET: "Leitud: $1", EN: "Found: $1" }]
+  ];
+  /* Product names keep their Latin line names; only the Russian type tail
+     and the common Russian descriptors are localised. */
+  var NAME_TAILS = {
+    "шампунь": ["šampoon", "shampoo"], "кондиционер": ["palsam", "conditioner"],
+    "маска": ["mask", "mask"], "сыворотка": ["seerum", "serum"],
+    "тоник": ["toonik", "toner"], "спрей": ["sprei", "spray"],
+    "масло": ["õli", "oil"], "бальзам": ["palsam", "balm"],
+    "паста": ["pasta", "paste"], "воск": ["vaha", "wax"],
+    "пудра": ["puuder", "powder"], "гель": ["geel", "gel"],
+    "крем": ["kreem", "cream"], "пенка": ["vaht", "foam"],
+    "лосьон": ["losjoon", "lotion"], "патчи": ["plaastrid", "patches"]
+  };
+  var NAME_FRAGS = [
+    [/ для волос/g, { ET: " juustele", EN: " for hair" }],
+    [/ для кожи головы/g, { ET: " peanahale", EN: " for scalp" }],
+    [/ для укладки/g, { ET: " soengu jaoks", EN: " for styling" }],
+    [/ для лица/g, { ET: " näole", EN: " for face" }],
+    [/ для бороды/g, { ET: " habemele", EN: " for beard" }],
+    [/ для бритья/g, { ET: " raseerimiseks", EN: " for shaving" }],
+    [/(\d) мл\b/g, { ET: "$1 ml", EN: "$1 ml" }]
+  ];
+  var TAIL_EXACT = {
+    "футболка оверсайз": ["oversized T-särk", "oversized tee"],
+    "парфюм": ["parfüüm", "perfume"]
+  };
+  /* Product names only — the fragment rules would turn an ordinary sentence
+     into franglais, so this never runs outside name-bearing elements. */
+  function trName(s, lang) {
+    var i = lang === "ET" ? 0 : 1;
+    return s.replace(/ — ([а-яё][а-яё \-]*)$/i, function (m, tail) {
+      var low = tail.toLowerCase();
+      if (TAIL_EXACT[low]) return " — " + TAIL_EXACT[low][i];
+      var parts = low.split(" ");
+      var head = NAME_TAILS[parts[0]];
+      if (!head) return m;
+      var rest = " " + parts.slice(1).join(" ");
+      if (rest !== " ") {
+        NAME_FRAGS.forEach(function (fr) { rest = rest.replace(fr[0], fr[1][lang]); });
+        if (/[а-яё]/.test(rest)) return " — " + head[i]; // untranslatable remainder — drop it
+      } else rest = "";
+      return " — " + head[i] + rest;
+    });
+  }
+  function trText(s, lang, allowName) {
+    var d = UI[lang];
+    if (d[s]) return d[s];
+    for (var i = 0; i < UI_RX.length; i++) {
+      var m = s.match(UI_RX[i][0]);
+      if (m) {
+        return UI_RX[i][1][lang].replace(/\$(\d)/g, function (_, n) {
+          var piece = m[+n];
+          return d[piece] || (allowName ? trName(piece, lang) : piece) || piece;
+        });
+      }
+    }
+    if (allowName && /[А-Яа-яЁё]/.test(s)) {
+      var n2 = trName(s, lang);
+      if (n2 !== s) return n2;
+    }
+    return s;
+  }
+  var TR_ATTRS = ["placeholder", "aria-label", "title"];
+  var NAME_CTX = ".card__name,.cline__nm,.cosum__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm";
+  function translateTree(root) {
+    if (S.lang === "RU" || !root) return;
+    var lang = S.lang;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = w.nextNode())) {
+      var raw = node.nodeValue;
+      var t = raw.trim();
+      if (!t || !/[А-Яа-яЁё]/.test(t)) continue;
+      var el = node.parentElement;
+      var allowName = !!(el && el.closest && el.closest(NAME_CTX));
+      var tr = trText(t, lang, allowName);
+      if (tr !== t) node.nodeValue = raw.replace(t, tr);
+    }
+    var els = root.querySelectorAll ? root.querySelectorAll("[placeholder],[aria-label],[title]") : [];
+    for (var i = 0; i < els.length; i++) {
+      for (var a = 0; a < TR_ATTRS.length; a++) {
+        var v = els[i].getAttribute(TR_ATTRS[a]);
+        if (v && /[А-Яа-яЁё]/.test(v)) {
+          var tv = trText(v, S.lang, false);
+          if (tv !== v) els[i].setAttribute(TR_ATTRS[a], tv);
+        }
+      }
+    }
+  }
+  function translatePage() {
+    translateTree(hdrSlot); translateTree(bodySlot); translateTree(navSlot); translateTree(ovl);
+  }
 
   var BANNERS = [
     { eyebrow: "Таллинн · Mardi 1 · est 2018", t: "Профессиональный уход", s: "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.", c: "В каталог", cat: "hair" },
@@ -208,7 +548,24 @@
       return false;
     });
     if (saved.lang) S.lang = saved.lang;
+    else S.lang = guessLang();
   } catch (e) {}
+  /* First visit: follow the browser's language. Estonian browsers get ET,
+     English get EN, everything else stays RU — the shop's core audience.
+     (When the real backend exists, the Cloudflare country header refines
+     this; the saved choice always wins over the guess.) */
+  function guessLang() {
+    try {
+      var ls = navigator.languages || [navigator.language || ""];
+      for (var i = 0; i < ls.length; i++) {
+        var l = String(ls[i]).toLowerCase();
+        if (l.indexOf("et") === 0) return "ET";
+        if (l.indexOf("ru") === 0) return "RU";
+        if (l.indexOf("en") === 0) return "EN";
+      }
+    } catch (e) {}
+    return "RU";
+  }
   function persist() {
     try { localStorage.setItem(LS, JSON.stringify({ cart: S.cart, lang: S.lang })); } catch (e) {}
   }
@@ -443,7 +800,7 @@
             '<span class="lang__flag" style="background-image:' + FLAG[l[0]] + '"></span>' +
             '<span style="flex:1">' + l[1] + "</span>" + (S.lang === l[0] ? "<span>✓</span>" : "") + "</button>";
         }).join("") +
-        '<p class="lang__note">Описания товаров и инфостраницы — на трёх языках. Интерфейс в демо пока русский.</p></div>'
+        '<p class="lang__note">Каталог, товары и инфостраницы — на трёх языках.</p></div>'
       : "";
     var srch = h.querySelector("[data-search]");
     if (document.activeElement !== srch) srch.value = S.query;
@@ -454,6 +811,8 @@
         b.setAttribute("aria-current", String(S.screen === "catalog" && !S.brand && S.cat === b.dataset.goCat));
       }
     });
+    // the language menu is re-created above in Russian on every patch
+    translateTree(h);
   }
 
   // ---------- bottom nav (persistent) ----------
@@ -766,7 +1125,7 @@
         "</div>" +
       "</div>" +
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
-        CATALOGUE.filter(function (x) { return x.cat === p.cat && x.id !== p.id; }).slice(0, 4).map(cardHTML).join("") +
+        complementsFor(p).map(cardHTML).join("") +
       "</div></section></div>" +
       (p.stock === "out" ? "" :
         '<div class="stickybar"><span class="num stickybar__sum" data-stickysum>' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>');
@@ -799,6 +1158,52 @@
   function variantIndex(sizes, colour, size) {
     for (var i = 0; i < sizes.length; i++) if (sizes[i] === colour + " / " + size) return i;
     return 0;
+  }
+
+  /* ---------- «с этим покупают» — real pairing, not a category slice.
+     A shampoo's best offer is ITS OWN line's conditioner (YOUNG.AGAIN.WASH →
+     YOUNG.AGAIN.RINSE), then line-mates, then brand-mates of a complementary
+     type. Scoring: shared name tokens weigh most, complementary product type
+     next, same brand after that; in-stock beats out-of-stock. */
+  var TYPE_MATES = {
+    "шампунь": ["кондиционер", "маска"], "кондиционер": ["шампунь", "маска"],
+    "маска": ["шампунь", "кондиционер"], "паста": ["шампунь", "спрей"],
+    "воск": ["шампунь"], "гель": ["шампунь"], "пудра": ["спрей"],
+    "масло": ["бальзам", "шампунь"], "бальзам": ["масло", "воск"]
+  };
+  function nameType(p) {
+    var m = p.name.match(/ — ([а-яё]+)/i);
+    return m ? m[1].toLowerCase() : "";
+  }
+  function nameTokens(p) {
+    return p.name.split(/[^A-Za-z0-9]+/).filter(function (t) {
+      return t.length > 2 && !/^(the|and|for|with|мл|ml)$/i.test(t);
+    }).map(function (t) { return t.toUpperCase(); });
+  }
+  function complementsFor(p) {
+    var mine = nameTokens(p), myType = nameType(p), mates = TYPE_MATES[myType] || [];
+    var scored = [];
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      var x = CATALOGUE[i];
+      if (x.id === p.id) continue;
+      var s = 0;
+      var toks = nameTokens(x);
+      for (var t = 0; t < mine.length; t++) if (toks.indexOf(mine[t]) >= 0) s += 3;
+      var xt = nameType(x);
+      if (xt && mates.indexOf(xt) >= 0) s += 4;
+      if (x.brand === p.brand) s += 2;
+      if (x.cat === p.cat) s += 1;
+      if (x.stock !== "out") s += 1;
+      if (s > 1) scored.push([s, x]);
+    }
+    scored.sort(function (a, b) { return b[0] - a[0]; });
+    var out = scored.slice(0, 4).map(function (e) { return e[1]; });
+    // thin categories fall back to neighbours so the shelf is never empty
+    for (var j = 0; out.length < 4 && j < CATALOGUE.length; j++) {
+      var c = CATALOGUE[j];
+      if (c.id !== p.id && c.cat === p.cat && out.indexOf(c) < 0) out.push(c);
+    }
+    return out;
   }
   function variantPicker(p, sizes) {
     // a single-variant volume still matters: 27 € for 10 мл is not 27 € for
@@ -955,6 +1360,9 @@
     return '<div class="cohdr"><div class="wrap wrap--co">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — на главную">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<span class="cohdr__t">Оформление заказа</span>' +
+        '<span class="cohdr__langs" role="group" aria-label="Язык интерфейса">' + LANGS.map(function (l) {
+          return '<button class="cohdr__lang" data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
+        }).join("") + "</span>" +
         '<button class="link" data-go="home">← В магазин</button></div></div>' +
       '<div class="wrap wrap--co"><div class="co">' +
 
@@ -1024,7 +1432,8 @@
           (S.cart.length ? S.cart.map(function (l) {
             var p = byId(l.id);
             return '<div class="cosum__line"><span class="cosum__ph">' + media(p, 0, "ph") + "</span>" +
-              '<span class="cosum__nm">' + esc(p.name) + lineLabel(l) + " × " + l.qty + "</span>" +
+              '<span class="cosum__nm">' + esc(p.name) + lineLabel(l) + " × " + l.qty +
+                ' <button class="link cosum__rm" data-remove="' + S.cart.indexOf(l) + '" aria-label="Убрать из заказа">Убрать</button></span>' +
               '<span class="num cosum__pr">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
           }).join("") : '<p class="muted">Корзина пуста.</p>') +
           '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод" placeholder="Промокод" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo>Применить</button></div>' +
@@ -1092,6 +1501,9 @@
     ["orders", "Заказы", "bag"],
     ["goods", "Товары", "grid"],
     ["people", "Клиенты", "user"],
+    ["stats", "Аналитика", "chart"],
+    ["mail", "Письма", "mail"],
+    ["apps", "Подключения", "plug"],
     ["setup", "Настройки", "home"]
   ];
   function fakeCustomers() {
@@ -1181,6 +1593,58 @@
             '<button class="link" data-admedit>Промокод</button></div>';
         }).join("") + "</div>" : "") +
 
+      (tab === "stats" ?
+        '<p class="muted" style="margin:16px 0">Что происходит с магазином — простыми словами. Цифры вымышленные, вид настоящий.</p>' +
+        '<div class="adm__kpis">' +
+          kpi("Посетителей за 7 дней", "412", "+18% к прошлой неделе") +
+          kpi("Оформили заказ", "2,2%", "из 100 посетителей — 2 заказа") +
+          kpi("Средний чек", "43 €", "по последним 20 заказам") +
+          kpi("Выручка за 30 дней", "486 €", "12 заказов") +
+        "</div>" +
+        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Google — по каким словам находят</h2></div>' +
+        '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row"><span>Запрос</span><span>Место</span><span>Показы</span><span>Клики</span><span></span></div>' +
+        [["kevin murphy tallinn", "4", "320", "38"], ["давинес шампунь", "7", "210", "16"],
+         ["барбершоп мыло 666", "1", "95", "41"], ["system 4 шампунь купить", "9", "180", "9"]].map(function (r) {
+          return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + r[0] + '</span><span class="num">' + r[1] + '</span><span class="num">' + r[2] + '</span><span class="num">' + r[3] + "</span><span></span></div>";
+        }).join("") + "</div>" +
+        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Откуда приходят</h2></div>' +
+        '<div class="adm__list">' + [
+          ["Google (поиск)", "44%"], ["Instagram", "27%"], ["Напрямую / закладки", "19%"], ["TikTok", "7%"], ["Рассылка", "3%"]
+        ].map(function (r) {
+          return '<div class="adm__row"><span class="adm__nm">' + r[0] + '</span><span class="num adm__pr">' + r[1] + "</span></div>";
+        }).join("") + "</div>" +
+        '<p class="muted" style="margin-top:16px">В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.</p>' : "") +
+
+      (tab === "mail" ?
+        '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Включаются и выключаются одной кнопкой; текст можно менять через помощника.</p>' +
+        '<div class="adm__list">' + [
+          ["Заказ принят", "сразу после оплаты — номер заказа и состав", true],
+          ["Заказ отправлен", "трек-номер и кнопка отслеживания", true],
+          ["Товар снова в наличии", "тем, кто оставил почту на странице товара", true],
+          ["Брошенная корзина", "напоминание через 24 часа, если заказ не завершён", false],
+          ["Скидка ко дню рождения", "личный промокод за 3 дня до даты", false]
+        ].map(function (f) {
+          return '<div class="adm__row"><span class="adm__nm">' + f[0] + '<span class="adm__sub">' + f[1] + "</span></span>" +
+            '<span class="chip ' + (f[2] ? "chip--ok" : "chip--low") + '">' + (f[2] ? "включено" : "выключено") + "</span>" +
+            '<button class="link" data-admedit>' + (f[2] ? "Выключить" : "Включить") + "</button></div>";
+        }).join("") + "</div>" +
+        '<p style="margin-top:16px"><a class="link" href="/shop/emails/" target="_blank" rel="noopener">Открыть превью всех писем →</a></p>' : "") +
+
+      (tab === "apps" ?
+        '<p class="muted" style="margin:16px 0">Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.</p>' +
+        '<div class="adm__list">' + [
+          ["Приём оплат", "банковские ссылки, карты, Apple/Google Pay", "после выбора провайдера", false],
+          ["Доставка", "наклейки DPD / Omniva / SmartPosti и трекинг — через платёжного провайдера", "после выбора провайдера", false],
+          ["Письма клиентам", "info@rempireshop.com через Resend", "после переноса домена", false],
+          ["Google Search Console", "позиции в поиске и ошибки индексации", "настраивается", false],
+          ["Аналитика посещений", "откуда приходят и что покупают", "настраивается", false],
+          ["ИИ-помощник", "этот чат справа — умеет менять всё в магазине", "работает", true],
+          ["Касса в салоне", "работает отдельно от сайта — переезд её не трогает", "работает", true]
+        ].map(function (a) {
+          return '<div class="adm__row"><span class="adm__nm">' + a[0] + '<span class="adm__sub">' + a[1] + "</span></span>" +
+            '<span class="chip ' + (a[3] ? "chip--ok" : "chip--low") + '">' + a[2] + "</span></div>";
+        }).join("") + "</div>" : "") +
+
       (tab === "setup" ?
         '<p class="muted" style="margin:16px 0">Всё, что можно настроить без программиста.</p>' +
         setupBlock("Доставка", SHIP.EE.map(function (x) {
@@ -1212,7 +1676,8 @@
             "Что заканчивается и что дозаказать?",
             "Сколько заработали на Kevin.Murphy?",
             "Добавь новый товар — вот фото",
-            "Напиши описание для шампуня",
+            "Покажи аналитику за неделю",
+            "Какие письма получают клиенты?",
             "Какие заказы ждут отправки?"
           ].map(function (q) { return '<button class="fchip" data-admask="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
         "</div>" +
@@ -1241,6 +1706,11 @@
           '<span><span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span></span></div>";
       }).join("") + "</div>";
   }
+  // the assistant's answers end with a button that OPENS the right tab —
+  // «где это?» answered by taking the owner there, not by describing a path
+  function aiGo(tab, label) {
+    return '<div style="margin-top:10px"><button class="btn btn--ghost btn--sm" data-admtab="' + tab + '">' + label + " →</button></div>";
+  }
   function adminAnswer(q) {
     var low = lowStock();
     if (/заканчива|дозаказ/i.test(q)) {
@@ -1258,9 +1728,18 @@
       return "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».";
     }
     if (/добав|новый товар|фото|загруз/i.test(q)) {
-      return "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите.";
+      return "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите." + aiGo("goods", "Открыть товары");
     }
-    return "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?";
+    if (/аналитик|статист|посещ|сколько людей|конверси/i.test(q)) {
+      return "За неделю 412 посетителей, из них 2,2% оформили заказ. Лучше всего находят по «kevin murphy tallinn». Открыть подробности?" + aiGo("stats", "Открыть аналитику");
+    }
+    if (/письм|почт|рассылк|email|мейл/i.test(q)) {
+      return "Письма магазин шлёт сам: «заказ принят», «отправлен» с трек-номером, «снова в наличии». Могу включить напоминание о брошенной корзине и поздравление со скидкой ко дню рождения." + aiGo("mail", "Открыть письма");
+    }
+    if (/подключ|интеграц|google|гугл/i.test(q)) {
+      return "Вот что подключено к магазину и что появится на следующих шагах — всё настраивается без вас." + aiGo("apps", "Открыть подключения");
+    }
+    return "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?" + aiGo("orders", "Открыть заказы");
   }
 
   function screenDone() {
@@ -1339,6 +1818,52 @@
   var ovlKey = "";
   var lastFocus = null;
 
+  /* ---------- SEO head: title, description, Product JSON-LD --------------
+     The static build will prerender these; the demo sets them live so every
+     screen already carries an honest title and a product page carries
+     schema.org markup. SEO Title/Description exported from the old shop are
+     used when present. */
+  function stripTags(h) { return String(h || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+  function setMetaTag(name, content) {
+    var el = document.querySelector('meta[name="' + name + '"]');
+    if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
+    el.setAttribute("content", content);
+  }
+  function setHead() {
+    var base = { RU: "REMPIRE — магазин косметики в Таллинне", ET: "REMPIRE — kosmeetikapood Tallinnas", EN: "REMPIRE — grooming shop in Tallinn" }[S.lang];
+    var buy = { RU: "купить в Rempire", ET: "osta Rempire'ist", EN: "buy at Rempire" }[S.lang];
+    var t = base, d = "";
+    if (S.screen === "product") {
+      var p = byId(S.productId);
+      t = p.brand + " " + trText(p.name, S.lang, true) + " — " + buy + " · " + (p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price));
+      if (S.lang === "EN" && p.seo && p.seo.t) t = p.seo.t;
+      d = (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d : stripTags(descFor(p)).slice(0, 155);
+      var ld = {
+        "@context": "https://schema.org", "@type": "Product",
+        name: p.brand + " " + p.name, brand: { "@type": "Brand", name: p.brand },
+        image: location.origin + p.img,
+        description: stripTags(descFor(p)).slice(0, 500),
+        offers: {
+          "@type": "Offer", priceCurrency: "EUR",
+          price: String(p.price),
+          availability: "https://schema.org/" + (p.stock === "out" ? "OutOfStock" : "InStock"),
+          url: location.origin + "/shop2/p/" + p.id + "/"
+        }
+      };
+      var s = document.getElementById("ldjson");
+      if (!s) { s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ldjson"; document.head.appendChild(s); }
+      s.textContent = JSON.stringify(ld);
+    } else {
+      var s2 = document.getElementById("ldjson");
+      if (s2) s2.remove();
+      if (S.screen === "catalog") t = (S.brand || trText(S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat] || "", S.lang, false)) + " — REMPIRE";
+      else if (S.screen === "info") { var pg = legalFor(S.infoSlug); if (pg) t = pg.title + " — REMPIRE"; }
+      else if (S.screen === "brands") t = trText("Бренды", S.lang, false) + " — REMPIRE";
+    }
+    document.title = t;
+    if (d) setMetaTag("description", d);
+  }
+
   function render() {
     var body;
     if (S.screen === "home") body = screenHome();
@@ -1381,6 +1906,8 @@
     }
     paintToast();
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
+    translatePage();
+    setHead();
 
     if (S.screen === "catalog") observeSentinel();
   }
@@ -1425,7 +1952,7 @@
   function patchCart() {
     var d = ovl.querySelector(".drawer--right");
     if (!d) { render(); return; }
-    d.querySelector(".drawer__t").textContent = "Корзина (" + cartCount() + ")";
+    d.querySelector(".drawer__t").textContent = trText("Корзина (" + cartCount() + ")", S.lang);
     S.cart.forEach(function (l, i) {
       var row = d.querySelector('[data-cline="' + i + '"]');
       if (!row) return;
@@ -1436,7 +1963,7 @@
     var fill = d.querySelector(".freebar__fill");
     if (fill) fill.style.width = Math.min(100, sum / thr * 100) + "%";
     var note = d.querySelector(".freebar p");
-    if (note) note.textContent = freebarText(sum, thr);
+    if (note) note.textContent = trText(freebarText(sum, thr), S.lang);
     var tot = d.querySelector(".drawer__tot .num");
     if (tot) tot.textContent = eur(sum);
     patchHeader(); patchNav();
@@ -1448,11 +1975,12 @@
   function rebuildCart() {
     var d = ovl.querySelector(".drawer--right");
     if (!d) { render(); return; }
-    d.querySelector(".drawer__t").textContent = "Корзина (" + cartCount() + ")";
+    d.querySelector(".drawer__t").textContent = trText("Корзина (" + cartCount() + ")", S.lang);
     d.querySelector(".drawer__body").innerHTML = cartBody();
     var foot = d.querySelector(".drawer__foot");
     foot.innerHTML = cartFoot();
     foot.hidden = !S.cart.length;
+    translateTree(d);
     patchHeader(); patchNav();
   }
 
@@ -1519,6 +2047,7 @@
     if (fc) fc.textContent = fcountLabel();
     var chips = document.querySelector("[data-chips]");
     if (chips) chips.outerHTML = activeChips();
+    translateTree(bodySlot);
     observeSentinel();
   }
 
@@ -1626,6 +2155,7 @@
     toastSlot.innerHTML = S.toast
       ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
       : "";
+    translateTree(toastSlot);
   }
   function refocus(sel) {
     var n = document.querySelector(sel);
@@ -1805,9 +2335,15 @@
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
     if (d.dot !== undefined) { setSlide(Number(d.dot), true); return; }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
-    // full render, not just the header: the description accordion and the
-    // legal pages follow the language now
-    if (d.lang) { S.lang = d.lang; S.langOpen = false; persist(); render(); return; }
+    // full render, not just the header: descriptions, legal pages and the
+    // whole chrome follow the language. The persistent slots are rebuilt from
+    // their Russian templates — translateTree only converts FROM Russian, so
+    // an already-translated header would otherwise stick on the old language.
+    if (d.lang) {
+      S.lang = d.lang; S.langOpen = false; persist();
+      hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
+      render(); return;
+    }
     if (d.line !== undefined) {
       var li = Number(d.line);
       if (S.cart[li]) S.cart[li].qty = Math.max(1, Math.min(9, S.cart[li].qty + Number(d.d)));
@@ -1815,6 +2351,8 @@
     }
     if (d.remove !== undefined) {
       S.cart.splice(Number(d.remove), 1); persist();
+      // an emptied checkout has nothing left to pay for — back to the shop
+      if (!S.cart.length && S.screen === "checkout") { go("home"); return; }
       /* Taking out the last line closes the drawer — leaving it open on an
          empty cart, which is what the old code did, looked like a flicker:
          it tore the drawer down and slid an empty one back in. */
