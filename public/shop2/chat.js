@@ -229,19 +229,27 @@
     if (a.type === "checkout") { openPanel(false); appClick("data-checkout", "1"); }
   }
 
+  var uiLang = null;
   function openPanel(open) {
     panel.hidden = !open;
     fab.setAttribute("aria-expanded", String(open));
     if (open) probeAI();
-    if (open && !log.childNodes.length) {
+    if (open) {
+      // the chrome follows the site language on EVERY open, not only the
+      // first — switching the site to ET used to leave a Russian chat
       var t = tt();
       root.querySelector("[data-bt]").textContent = t.title;
       root.querySelector("[data-bh]").textContent = t.hint;
       input.placeholder = t.placeholder;
-      bubble("bot", t.hello);
       chipsEl.innerHTML = t.chips.map(function (c) {
         return '<button class="sbot__chip" data-q="' + esc(c) + '">' + esc(c) + "</button>";
       }).join("");
+      refreshHint();
+      if (!log.childNodes.length || uiLang !== lang()) {
+        if (uiLang !== null && uiLang !== lang()) { log.innerHTML = ""; convo = []; }
+        bubble("bot", t.hello);
+      }
+      uiLang = lang();
     }
     if (open) input.focus();
   }

@@ -70,7 +70,12 @@ for n, (slug, idx, dest) in enumerate(targets, 1):
         raw = OUT / f"{slug}-{idx}.png"
         raw.write_bytes(cut)
         tmp = OUT / f"{slug}-{idx}.webp"
-        magick(str(raw), "-trim", "+repage",
+        # un-premultiply the white matte: edge pixels are product colour
+        # blended with the old white background; solving F=(O-(1-a))/a per
+        # channel removes the white, so no grey rim on any tinted ground
+        magick(str(raw), "-channel", "RGB",
+               "-fx", "u.a<=0?u:min(1,max(0,(u-1+u.a)/u.a))", "+channel",
+               "-trim", "+repage",
                "-bordercolor", "none", "-border", "24",
                "-resize", "900x900>", "-quality", "86", str(tmp))
         # sanity: the model must not have lost the product

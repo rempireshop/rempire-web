@@ -29,9 +29,9 @@ const CATALOGUE = [
    "500 мл"
   ],
   "varImg": [
+   2,
    0,
-   1,
-   2
+   1
   ],
   "prices": [
    9,
@@ -60,8 +60,8 @@ const CATALOGUE = [
    "500 мл"
   ],
   "varImg": [
-   0,
    1,
+   0,
    2
   ],
   "prices": [
@@ -91,8 +91,8 @@ const CATALOGUE = [
    "500 мл"
   ],
   "varImg": [
-   0,
    1,
+   0,
    2
   ],
   "prices": [
@@ -304,8 +304,8 @@ const CATALOGUE = [
    "500 мл"
   ],
   "varImg": [
-   0,
    1,
+   0,
    2
   ],
   "prices": [
@@ -441,8 +441,8 @@ const CATALOGUE = [
    "250 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    6,
@@ -549,8 +549,8 @@ const CATALOGUE = [
    "500 мл"
   ],
   "varImg": [
-   0,
-   1
+   1,
+   0
   ],
   "prices": [
    16,
@@ -578,8 +578,8 @@ const CATALOGUE = [
    "500 мл"
   ],
   "varImg": [
-   0,
    1,
+   0,
    2
   ],
   "prices": [
@@ -609,8 +609,8 @@ const CATALOGUE = [
    "500 мл"
   ],
   "varImg": [
-   0,
    1,
+   0,
    2
   ],
   "prices": [
@@ -2359,6 +2359,10 @@ const CATALOGUE = [
    "40 мл",
    "250 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    7,
    26
@@ -2382,6 +2386,10 @@ const CATALOGUE = [
    "250 мл",
    "100 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    28,
    18
@@ -2404,6 +2412,10 @@ const CATALOGUE = [
   "sizes": [
    "250 мл",
    "100 мл"
+  ],
+  "varImg": [
+   0,
+   1
   ],
   "prices": [
    28,
@@ -2436,6 +2448,10 @@ const CATALOGUE = [
   "sizes": [
    "250 мл",
    "40 мл"
+  ],
+  "varImg": [
+   0,
+   1
   ],
   "prices": [
    28,
@@ -2487,6 +2503,10 @@ const CATALOGUE = [
    "250 мл",
    "40 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    28,
    6
@@ -2510,6 +2530,10 @@ const CATALOGUE = [
    "250 мл",
    "40 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    28,
    6
@@ -2532,6 +2556,10 @@ const CATALOGUE = [
   "sizes": [
    "200 мл",
    "40 мл"
+  ],
+  "varImg": [
+   0,
+   1
   ],
   "prices": [
    34,
@@ -2565,6 +2593,10 @@ const CATALOGUE = [
    "250 мл",
    "40 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    27,
    6
@@ -2587,6 +2619,10 @@ const CATALOGUE = [
   "sizes": [
    "150 мл",
    "40 мл"
+  ],
+  "varImg": [
+   0,
+   1
   ],
   "prices": [
    27,
@@ -2629,6 +2665,10 @@ const CATALOGUE = [
    "250 мл",
    "40 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    28,
    6
@@ -2651,6 +2691,10 @@ const CATALOGUE = [
   "sizes": [
    "250 мл",
    "40 мл"
+  ],
+  "varImg": [
+   0,
+   1
   ],
   "prices": [
    28,
@@ -2783,6 +2827,10 @@ const CATALOGUE = [
    "250 мл",
    "40 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    26,
    6
@@ -2841,6 +2889,10 @@ const CATALOGUE = [
   "sizes": [
    "250 мл",
    "40 мл"
+  ],
+  "varImg": [
+   0,
+   1
   ],
   "prices": [
    27,
@@ -3196,6 +3248,11 @@ const CATALOGUE = [
    "250 мл",
    "500 мл"
   ],
+  "varImg": [
+   1,
+   0,
+   2
+  ],
   "prices": [
    7.9,
    13.9,
@@ -3252,6 +3309,10 @@ const CATALOGUE = [
    "400 мл",
    "100 мл"
   ],
+  "varImg": [
+   0,
+   1
+  ],
   "prices": [
    28,
    18
@@ -3274,6 +3335,10 @@ const CATALOGUE = [
   "sizes": [
    "400 мл",
    "100 мл"
+  ],
+  "varImg": [
+   0,
+   1
   ],
   "prices": [
    28,

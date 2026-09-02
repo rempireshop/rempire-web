@@ -49,6 +49,7 @@ const C = {
   price: col("Variant Price"), qty: col("Variant Inventory Qty"),
   imgSrc: col("Image Src"), imgPos: col("Image Position"),
   seoT: col("SEO Title"), seoD: col("SEO Description"),
+  varImg: col("Variant Image"),
 };
 
 // group rows by handle
@@ -173,6 +174,25 @@ function ruType(type, title) {
    translation chunks that were cut before this rule existed. */
 const normId = h => h.replace(/[^\x20-\x7e]/g, "");
 
+/* size-index -> image-index, from the export's Variant Image column.
+   Returns null unless every variant with an image resolves cleanly. */
+function variantImageMap(rs) {
+  const imgs = rs.filter(r => r[C.imgSrc])
+    .sort((a, b) => (+a[C.imgPos] || 9) - (+b[C.imgPos] || 9))
+    .map(r => r[C.imgSrc].replace(/\?.*$/, ""));
+  const uniqImgs = [...new Set(imgs)];
+  const vars = rs.filter(r => r[C.price]);
+  if (!uniqImgs.length || vars.length < 2) return null;
+  const map = vars.map(r => {
+    const u = (r[C.varImg] || "").replace(/\?.*$/, "");
+    if (!u) return -1;
+    return uniqImgs.indexOf(u);
+  });
+  if (map.some(i => i < 0)) return null;
+  if (new Set(map).size === 1) return null; // all variants share one photo — no point
+  return map;
+}
+
 const newImages = {};
 const content = {};
 const out = [];
@@ -190,6 +210,12 @@ for (const [rawH, rs] of active) {
     const e = { ...existing.get(h) };
     const q = rs.reduce((s, r) => s + (parseInt(r[C.qty]) || 0), 0);
     e.stock = q <= 0 ? "out" : q <= 2 ? "low" : "in";
+    /* …and rebuild varImg from the export's own Variant Image column: the
+       original prototype guessed [0,1,2], which showed the 250ml pair shot
+       for a selected 75ml bottle. The CSV knows which photo belongs to
+       which variant. */
+    const vi = variantImageMap(rs);
+    if (vi && e.sizes && vi.length === e.sizes.length) e.varImg = vi;
     out.push(e); kept++; continue;
   }
 
@@ -229,6 +255,8 @@ for (const [rawH, rs] of active) {
   }
   if (o1.length > 1) {
     entry.sizes = o1.map(ruSize);
+    const vi = variantImageMap(rs);
+    if (vi && vi.length === o1.length && vi.every(ix => ix < uniq.length)) entry.varImg = vi;
     const pMap = {}; vars.forEach(r => { const v = r[C.o1val]; if (v && r[C.price]) pMap[v] = parseFloat(r[C.price]); });
     entry.prices = o1.map(v => pMap[v] ?? price);
     if (entry.prices.some(p2 => p2 !== price)) entry.priceFrom = true;

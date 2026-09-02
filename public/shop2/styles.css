@@ -250,7 +250,12 @@ img { max-width: 100%; display: block; }
 .lang { position: relative; }
 .lang__btn { display: inline-flex; align-items: center; gap: 5px; border: none; background: none; cursor: pointer; padding: 10px 6px; min-height: 44px; }
 .lang__caret { font-size: 9px; opacity: .55; }
-.lang__flag { width: 20px; height: 14px; border: 1px solid var(--rule); display: block; background-size: cover; background-position: center; }
+/* no-repeat + exact stretch: the default repeat let a rounding sliver of the
+   next tile show — a blue line under the Estonian flag, red above the Russian */
+.lang__flag {
+  width: 20px; height: 14px; border: 1px solid var(--rule); display: block;
+  background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+}
 .lang__menu {
   position: absolute; right: 0; top: 100%; min-width: 160px;
   background: var(--page); border: 1px solid var(--ink); z-index: 40;
