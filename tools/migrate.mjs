@@ -72,7 +72,11 @@ export async function migrate(db, opts = {}) {
 export function sslFor(url) {
   if (/localhost|127\.0\.0\.1|\[::1\]/.test(url)) return undefined;
   if (/[?&]sslmode=disable/.test(url)) return undefined;
-  return { rejectUnauthorized: process.env.DATABASE_SSL_NO_VERIFY !== "1" };
+  // Railway's Postgres (TCP proxy *.rlwy.net / *.railway.app) presents a
+  // self-signed certificate, so verification is off for those hosts only;
+  // every other provider is verified unless DATABASE_SSL_NO_VERIFY=1.
+  const selfSigned = /@[^/?#]*\.(rlwy\.net|railway\.app)(:\d+)?(\/|$)/i.test(url);
+  return { rejectUnauthorized: !selfSigned && process.env.DATABASE_SSL_NO_VERIFY !== "1" };
 }
 
 async function main() {
@@ -114,6 +118,13 @@ async function main() {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((err) => {
     console.error(err);
+    if (process.argv.includes("--if-configured")) {
+      // postbuild: a database that is unreachable at build time must not take
+      // the whole deploy down — the app degrades to demo mode and the admin
+      // can run POST /api/admin/migrate once the database is reachable.
+      console.error("migrate: failed, continuing the build (run migrations later via /api/admin/migrate).");
+      process.exit(0);
+    }
     process.exit(1);
   });
 }

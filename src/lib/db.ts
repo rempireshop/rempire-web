@@ -46,7 +46,11 @@ const g = globalThis as unknown as { __rempireDb?: Promise<Raw> };
 function sslFor(url: string) {
   if (/localhost|127\.0\.0\.1|\[::1\]/.test(url)) return undefined;
   if (/[?&]sslmode=disable/.test(url)) return undefined;
-  return { rejectUnauthorized: process.env.DATABASE_SSL_NO_VERIFY !== "1" };
+  // Railway's Postgres (TCP proxy *.rlwy.net / *.railway.app) presents a
+  // self-signed certificate, so verification is off for those hosts only;
+  // every other provider is verified unless DATABASE_SSL_NO_VERIFY=1.
+  const selfSigned = /@[^/?#]*\.(rlwy\.net|railway\.app)(:\d+)?(\/|$)/i.test(url);
+  return { rejectUnauthorized: !selfSigned && process.env.DATABASE_SSL_NO_VERIFY !== "1" };
 }
 
 async function makePg(): Promise<Raw> {
