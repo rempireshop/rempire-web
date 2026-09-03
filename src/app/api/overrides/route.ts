@@ -1,8 +1,8 @@
 /**
  * GET /api/overrides — everything the storefront needs to render the owner's
  * edits: per-product overrides (price, stock, SEO, subcategory, variant photo
- * order, video) and the shop settings (chat bot on/off, mail flows, shipping
- * rules).
+ * order, video) and the shop settings (chat bot on/off, the home-page banner,
+ * mail flows, shipping rules).
  *
  * Public and cached at the edge for half a minute — a price change is visible
  * within 30 s, and a burst of shoppers costs one query.
@@ -18,6 +18,9 @@ export const dynamic = "force-dynamic";
 const DEFAULT_SETTINGS: Record<string, unknown> = {
   chatbot: true,
   bundles: true,
+  // the home-page banner: null means «стандартный» — app.js draws its built-in
+  // slides. An object is { slides: [...], interval } written by the owner.
+  hero: null,
   flows: { abandoned: false, birthday: false, backstock: true },
   shipping: {},
 };

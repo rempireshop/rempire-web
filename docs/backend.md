@@ -54,7 +54,10 @@ because the session is signed with `SESSION_SECRET`, not with the password.
 ## Tables (`db/migrations/001_core.sql`, `002_order_discount_code.sql`)
 
 - **`settings`** — `key` → `value` (jsonb). What the storefront reads: `chatbot`
-  (bool), `flows` (which automatic e-mails are on), `shipping` (tariff rules).
+  (bool), `bundles` (bool), `hero` (the home-page banner — `null` means the
+  built-in slides in `app.js`, otherwise `{slides:[…], interval}`; see
+  docs/features.md «Главный баннер»), `flows` (which automatic e-mails are on),
+  `shipping` (tariff rules).
 - **`product_overrides`** — one row per product the owner has edited: `price`,
   `stock` (`in`/`low`/`out`), `seo_title`, `seo_desc`, `subcat`, `var_img`,
   `video_url`. Null means "no override, use the catalogue".
@@ -124,7 +127,7 @@ The site runs with `trailingSlash: true`, so call the paths with the slash
 | `POST /api/admin/logout/` | Clears the cookie. |
 | `GET /api/admin/me/` | 200 when signed in, 401 otherwise; `configured` says whether the server has a password at all. |
 | `PUT /api/admin/overrides/` | `{id, price?, stock?, seoTitle?, seoDesc?, subcat?, varImg?, videoUrl?}`, or `{items:[…]}` for several. Only the keys sent are touched; `null` clears one. `GET` returns the map uncached. |
-| `PUT /api/admin/settings/` | `{chatbot:false}`, `{flows:{…}}`, `{key, value}` or `{settings:{…}}`. `GET` returns everything. |
+| `PUT /api/admin/settings/` | `{chatbot:false}`, `{hero:{slides:[…],interval}}` or `{hero:null}`, `{flows:{…}}`, `{key, value}` or `{settings:{…}}`. `GET` returns everything. |
 | `GET /api/admin/orders/?status=&q=&limit=` | Newest first; `q` matches number, e-mail, name or phone. |
 | `GET/PATCH /api/admin/orders/<id>/` | The id is the uuid or the order number. `PATCH {status?, note?}`. |
 | `GET /api/admin/audit/?limit=` | The change log, newest first. |

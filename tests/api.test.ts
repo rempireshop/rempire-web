@@ -111,6 +111,27 @@ describe("api routes", () => {
     expect(body.overrides).toEqual({});
     expect(body.settings.chatbot).toBe(true);
     expect(body.settings.flows).toBeTruthy();
+    // the home banner: the key is always present, null = app.js's built-in slides
+    expect("hero" in body.settings).toBe(true);
+    expect(body.settings.hero).toBeNull();
+  });
+
+  it("PUT /api/admin/settings stores the home banner and hands it back publicly", async () => {
+    const { PUT } = await import("@/app/api/admin/settings/route");
+    const { GET: publicGet } = await import("@/app/api/overrides/route");
+    const hero = {
+      slides: [{ id: "s1", eyebrow: {}, title: { RU: "Скидка на бороду" }, sub: {}, cta: { RU: "Смотреть" }, go: "cat:beard", image: product.id, on: true }],
+      interval: 6000,
+    };
+
+    await PUT(put("/api/admin/settings/", { hero }, admin));
+    const body = await (await publicGet()).json();
+    expect(body.settings.hero).toEqual(hero);
+
+    // «Сбросить к стандартному» stores a real null, not a missing key
+    await PUT(put("/api/admin/settings/", { hero: null }, admin));
+    const back = await (await publicGet()).json();
+    expect(back.settings.hero).toBeNull();
   });
 
   it("admin routes refuse anonymous and forged callers", async () => {

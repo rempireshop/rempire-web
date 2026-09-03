@@ -315,7 +315,33 @@
       "Отзывы пока недоступны — база подключается. Как только она заработает, новые отзывы появятся здесь сами.":
         "Arvustused pole veel saadaval — andmebaasi ühendatakse. Kui see tööle hakkab, ilmuvad uued arvustused siia ise.",
       "Отзыв опубликован ✓": "Arvustus avaldatud ✓", "Отзыв отклонён ✓": "Arvustus tagasi lükatud ✓",
-      "Не получилось — попробуйте ещё раз": "Ei õnnestunud — proovi uuesti"
+      "Не получилось — попробуйте ещё раз": "Ei õnnestunud — proovi uuesti",
+      // главный баннер (hero) — витрина и редактор в админке
+      "Баннеры": "Bännerid", "Выбрать баннер": "Vali bänner",
+      "Предыдущий баннер": "Eelmine bänner", "Следующий баннер": "Järgmine bänner",
+      "Главный баннер": "Avalehe bänner",
+      "Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Тексты — на трёх языках: пустой эстонский или английский заменяем русским.":
+        "Suur pilt avalehel. Slaidid vahetuvad ringiratast; üks slaid on lihtsalt pilt, ilma nooolteta. Tekstid on kolmes keeles: tühja eesti- või ingliskeelse teksti asendame venekeelsega.",
+      "Слайдов нет — баннер на главной не показывается.": "Slaide pole — avalehel bännerit ei näidata.",
+      "Без заголовка": "Pealkirjata", "показан": "näidatakse", "скрыт": "peidetud",
+      "Выше": "Kõrgemale", "Ниже": "Madalamale",
+      "Изменить": "Muuda", "Удалить": "Kustuta", "Готово": "Valmis",
+      "Добавить слайд": "Lisa slaid", "Сбросить к стандартному": "Taasta tavaline",
+      "Смена слайдов, секунд": "Slaidivahetus, sekundit",
+      "Больше пяти слайдов не нужно": "Rohkem kui viit slaidi pole vaja",
+      "Язык баннера": "Bänneri keel",
+      "Строка сверху": "Rida ülal", "Заголовок": "Pealkiri",
+      "Подзаголовок": "Alapealkiri", "Надпись на кнопке": "Nupu tekst",
+      "Пусто — покажем русский текст.": "Tühi — näitame venekeelset teksti.",
+      "Куда ведёт кнопка": "Kuhu nupp viib",
+      "Разделы": "Osakonnad", "Страницы магазина": "Poe lehed", "Информация": "Info",
+      "Один товар": "Üks toode", "Товар — выберите ниже": "Toode — vali allpool",
+      "Картинка": "Pilt", "Найти товар": "Otsi toodet", "Найти фото товара": "Otsi toote fotot",
+      "Ссылка на картинку — или выберите фото товара ниже": "Pildi link — või vali allpool toote foto",
+      "https://… или /shop/img/…": "https://… või /shop/img/…",
+      "Предпросмотр": "Eelvaade", "Баннер: стандартный": "Bänner: tavaline",
+      "Ничего не нашлось — попробуйте другое слово.": "Midagi ei leitud — proovi teist sõna.",
+      "Есть несохранённые изменения — нажмите «Сохранить».": "Salvestamata muudatused — vajuta „Salvesta“."
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -563,7 +589,33 @@
       "Отзывы пока недоступны — база подключается. Как только она заработает, новые отзывы появятся здесь сами.":
         "Reviews aren't available yet — the database is being connected. Once it is live, new reviews show up here by themselves.",
       "Отзыв опубликован ✓": "Review published ✓", "Отзыв отклонён ✓": "Review rejected ✓",
-      "Не получилось — попробуйте ещё раз": "That didn't work — please try again"
+      "Не получилось — попробуйте ещё раз": "That didn't work — please try again",
+      // главный баннер (hero) — витрина и редактор в админке
+      "Баннеры": "Banners", "Выбрать баннер": "Choose a banner",
+      "Предыдущий баннер": "Previous banner", "Следующий баннер": "Next banner",
+      "Главный баннер": "Home banner",
+      "Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Тексты — на трёх языках: пустой эстонский или английский заменяем русским.":
+        "The big picture on the home page. Slides rotate; a single slide is just a picture, with no arrows. Texts come in three languages: an empty Estonian or English one falls back to the Russian.",
+      "Слайдов нет — баннер на главной не показывается.": "No slides — the home page shows no banner.",
+      "Без заголовка": "No title", "показан": "shown", "скрыт": "hidden",
+      "Выше": "Move up", "Ниже": "Move down",
+      "Изменить": "Edit", "Удалить": "Delete", "Готово": "Done",
+      "Добавить слайд": "Add a slide", "Сбросить к стандартному": "Reset to default",
+      "Смена слайдов, секунд": "Slide change, seconds",
+      "Больше пяти слайдов не нужно": "Five slides is plenty",
+      "Язык баннера": "Banner language",
+      "Строка сверху": "Line above", "Заголовок": "Title",
+      "Подзаголовок": "Subtitle", "Надпись на кнопке": "Button text",
+      "Пусто — покажем русский текст.": "Empty — we show the Russian text.",
+      "Куда ведёт кнопка": "Where the button goes",
+      "Разделы": "Sections", "Страницы магазина": "Shop pages", "Информация": "Information",
+      "Один товар": "A single product", "Товар — выберите ниже": "Product — pick one below",
+      "Картинка": "Picture", "Найти товар": "Find a product", "Найти фото товара": "Find a product photo",
+      "Ссылка на картинку — или выберите фото товара ниже": "Picture link — or pick a product photo below",
+      "https://… или /shop/img/…": "https://… or /shop/img/…",
+      "Предпросмотр": "Preview", "Баннер: стандартный": "Banner: default",
+      "Ничего не нашлось — попробуйте другое слово.": "Nothing found — try another word.",
+      "Есть несохранённые изменения — нажмите «Сохранить».": "Unsaved changes — press “Save”."
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -612,7 +664,10 @@
     [/^выгода (.+)$/, { ET: "sääst $1", EN: "you save $1" }],
     [/^В корзину — (.+)$/, { ET: "Lisa ostukorvi — $1", EN: "Add to cart — $1" }],
     [/^Подарочная карта ([A-Z0-9-]+)$/, { ET: "Kinkekaart $1", EN: "Gift card $1" }],
-    [/^(\d) из 5$/, { ET: "$1 / 5", EN: "$1 out of 5" }]
+    [/^(\d) из 5$/, { ET: "$1 / 5", EN: "$1 out of 5" }],
+    // главный баннер
+    [/^Баннер (\d+)$/, { ET: "Bänner $1", EN: "Banner $1" }],
+    [/^Кнопка ведёт на: (.+)$/, { ET: "Nupp viib: $1", EN: "The button goes to: $1" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -680,7 +735,9 @@
     }
     return s;
   }
-  var TR_ATTRS = ["placeholder", "aria-label", "title"];
+  // `label` is the <optgroup> heading — the only attribute in the shop that
+  // carries visible text without being a text node
+  var TR_ATTRS = ["placeholder", "aria-label", "title", "label"];
   // .cline__parts and .bitem__nm (features) list product names inside a set —
   // without them the Russian type tail survived into the Estonian cart
   var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm";
@@ -694,6 +751,10 @@
       var t = raw.trim();
       if (!t || !/[А-Яа-яЁё]/.test(t)) continue;
       var el = node.parentElement;
+      /* A <textarea>'s text node is its editable value, not a label. Rewriting
+         it handed the owner an English translation of his own Russian copy —
+         and saved it back as the Russian when he touched the field. */
+      if (el && el.tagName === "TEXTAREA") continue;
       var allowName = !!(el && el.closest && el.closest(NAME_CTX));
       var tr = trText(t, lang, allowName);
       if (tr !== t) node.nodeValue = raw.replace(t, tr);
@@ -729,6 +790,108 @@
     }
     var l = CATALOGUE.filter(function (x) { return x.cat === b.cat && x.stock !== "out"; });
     return l[0] || CATALOGUE[0];
+  }
+
+  /* ---------- главный баннер ----------------------------------------------
+     The hero is the one piece of the home page the owner writes himself, so
+     it is data, not markup: DEMO.hero = { slides: [...], interval }. Every
+     slide carries its own three languages, its own link and its own picture.
+
+     BANNERS above stays the built-in default. It is Russian-only on purpose —
+     a missing ET/EN falls back to the Russian original, which the dictionary
+     pass then translates, which is exactly how these five slides have always
+     reached Estonian and English. Nothing changes until the owner edits. */
+  var HERO_TICK = 6000;
+  function heroDefault() {
+    return {
+      slides: BANNERS.map(function (b, i) {
+        return {
+          id: "b" + (i + 1),
+          eyebrow: { RU: b.eyebrow }, title: { RU: b.t }, sub: { RU: b.s }, cta: { RU: b.c },
+          go: "cat:" + b.cat,
+          image: bannerProduct(b).id,
+          on: true
+        };
+      }),
+      interval: HERO_TICK
+    };
+  }
+  function heroConf() {
+    return DEMO.hero && Array.isArray(DEMO.hero.slides) ? DEMO.hero : heroDefault();
+  }
+  function heroSlides() {
+    return heroConf().slides.filter(function (s) { return s && s.on !== false; });
+  }
+  function heroCount() { return heroSlides().length; }
+  function heroInterval() {
+    var n = Number(heroConf().interval);
+    return n >= 2000 && n <= 30000 ? n : HERO_TICK;
+  }
+  /* One field of one slide in the language on screen; empty → Russian. */
+  function heroT(field) {
+    var v = field && typeof field === "object" ? field : {};
+    return String(v[S.lang] || v.RU || "");
+  }
+  /* The button reuses the storefront's own data-* actions, so a banner link
+     goes through the same delegated handler as every other link in the shop. */
+  function heroGoAttr(go) {
+    var g = String(go || "");
+    if (g.indexOf("cat:") === 0) return 'data-go-cat="' + esc(g.slice(4)) + '"';
+    if (g.indexOf("product:") === 0 && g.length > 8) return 'data-go-product="' + esc(g.slice(8)) + '"';
+    if (g.indexOf("page:") === 0) return 'data-page="' + esc(g.slice(5)) + '"';
+    if (g === "bundles" || g === "gift" || g === "brands") return 'data-go="' + g + '"';
+    return 'data-go-cat="all"';
+  }
+  function heroProduct(image) {
+    var v = String(image || "");
+    for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === v) return CATALOGUE[i];
+    return null;
+  }
+  function heroUrl(image) {
+    var v = String(image || "");
+    return /^(https?:\/\/|\/)/.test(v) ? v : "";
+  }
+  /* A picture is either a catalogue photo (by product id, drawn by the same
+     media() as everywhere else) or a plain URL the owner pasted. */
+  function heroArt(image, cls) {
+    var u = heroUrl(image);
+    if (u) {
+      return '<span class="' + (cls || "hero__art") + '" style="background-image:url(\'' +
+        esc(u).replace(/'/g, "%27") + '\')"></span>';
+    }
+    return media(heroProduct(image) || CATALOGUE[0], 0, cls || "hero__art");
+  }
+  /* `flat` draws the admin preview: the same markup with a dead button, so a
+     click inside the panel cannot navigate the owner out of the panel. */
+  function heroSlideHTML(s, i, cur, flat) {
+    var cta = heroT(s.cta);
+    return '<div class="hero__slide" data-on="' + (i === cur ? 1 : 0) + '" aria-hidden="' + (i !== cur) + '">' +
+      '<div class="hero__box">' +
+        '<div class="hero__inner"><div class="hero__eyebrow">' + esc(heroT(s.eyebrow)) + "</div>" +
+        '<h2 class="hero__title">' + esc(heroT(s.title)) + "</h2>" +
+        '<p class="hero__sub">' + esc(heroT(s.sub)) + "</p>" +
+        (cta
+          ? (flat ? '<span class="btn">' + esc(cta) + "</span>"
+                  : '<button class="btn" ' + heroGoAttr(s.go) + ">" + esc(cta) + "</button>")
+          : "") + "</div>" +
+        heroArt(s.image) +
+      "</div></div>";
+  }
+  function heroHTML() {
+    var list = heroSlides();
+    if (!list.length) return "";                       // every slide switched off
+    var cur = ((S.slide % list.length) + list.length) % list.length;
+    return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель">' +
+      list.map(function (s, i) { return heroSlideHTML(s, i, cur, false); }).join("") +
+      // one slide is a picture, not a carousel — no arrows, no dots, no autoplay
+      (list.length > 1
+        ? '<button class="hero__arrow hero__arrow--prev" data-slide="-1" aria-label="Предыдущий баннер">‹</button>' +
+          '<button class="hero__arrow hero__arrow--next" data-slide="1" aria-label="Следующий баннер">›</button>' +
+          '<div class="hero__dots" role="group" aria-label="Выбрать баннер">' + list.map(function (s, i) {
+            return '<button data-dot="' + i + '" aria-current="' + (i === cur) + '" aria-label="Баннер ' + (i + 1) + '"></button>';
+          }).join("") + "</div>"
+        : "") +
+      "</section>";
   }
 
   /* Delivery prices are the carriers' own published rates (shipping-data.js:
@@ -1027,6 +1190,12 @@
     adminOrder: 0,   // opened order id (0 = list)
     adminEdit: "",   // opened product id in goods
     goodsQ: "",      // admin goods search
+    // ---- «Главный баннер» in the admin panel ----
+    heroDraft: null, // working copy of the whole banner while it is being edited
+    heroEdit: -1,    // which slide's form is open (-1 = the list)
+    heroLang: "RU",  // which language pill the form shows
+    heroGoQ: "",     // link picker: product search
+    heroImgQ: "",    // image picker: product search
     mailTpl: "order-confirmed", // «Письма»: which letter the preview shows
     mailLang: "",    // letter language; "" follows the panel language
     mailTo: "",      // address typed into «отправить тест на…»
@@ -1702,21 +1871,7 @@
   // ---------- screens ----------
   function screenHome() {
     var pop = spread(8, false), fresh = spread(8, true);
-    return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель">' +
-      BANNERS.map(function (b, i) {
-        var p = bannerProduct(b);
-        return '<div class="hero__slide" data-on="' + (i === S.slide ? 1 : 0) + '" aria-hidden="' + (i !== S.slide) + '">' +
-          '<div class="hero__box">' +
-            '<div class="hero__inner"><div class="hero__eyebrow">' + b.eyebrow + "</div>" +
-            '<h2 class="hero__title">' + b.t + "</h2>" +
-            '<p class="hero__sub">' + b.s + "</p>" +
-            '<button class="btn" data-go-cat="' + b.cat + '">' + b.c + "</button></div>" +
-            media(p, 0, "hero__art") +
-          "</div></div>";
-      }).join("") +
-      '<button class="hero__arrow hero__arrow--prev" data-slide="-1" aria-label="Предыдущий баннер">‹</button>' +
-      '<button class="hero__arrow hero__arrow--next" data-slide="1" aria-label="Следующий баннер">›</button>' +
-      "</section>" +
+    return heroHTML() +
       /* Brand strip in place of the dots' old neighbourhood: one scrollable
          line under the hero, D-urban style — every name clickable, logos
          where the brand has one (feedback #4). */
@@ -3054,6 +3209,7 @@
           '<span class="adm__sub">готовые комплекты со скидкой 12 % — в меню, на главной и в каталоге; пока не согласовано с владельцем</span></span>' +
           '<span class="chip ' + (DEMO.bundles !== false ? "chip--ok" : "chip--low") + '">' + (DEMO.bundles !== false ? "показаны" : "скрыты") + "</span>" +
           '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
+        admHeroCard() +
         setupBlock("Реквизиты", [
           "Rempire Store OÜ · рег. 12216136", "KMKR EE102723858", "Mardi 1, 10145 Таллинн"
         ]) +
@@ -3134,6 +3290,206 @@
           'placeholder="Отправить тест на…" aria-label="Отправить тест на…" style="max-width:320px">' +
         '<button class="btn btn--sm" data-mailtest>Отправить тест</button></div>' +
       '<p class="muted" style="margin:8px 0 0;font-size:12.5px">В письме будут вымышленный заказ и товары — это образец вёрстки, не настоящий заказ.</p>';
+  }
+
+  /* ---------- «Главный баннер»: the owner's own banner editor --------------
+     Everything is edited on a copy (S.heroDraft) and nothing reaches the shop
+     until «Сохранить» — which goes through the same confirm card and the same
+     undoable log as every other change, as one set_hero action carrying the
+     whole banner. */
+  var HERO_PAGES = [
+    ["shipping", "Доставка и оплата"], ["returns", "Возврат товара"],
+    ["terms", "Условия продажи"], ["contact", "Контакты"], ["privacy", "Конфиденциальность"]
+  ];
+  function heroDraft() {
+    if (!S.heroDraft || !Array.isArray(S.heroDraft.slides)) {
+      try { S.heroDraft = JSON.parse(JSON.stringify(heroConf())); }
+      catch (e) { S.heroDraft = heroDefault(); }
+    }
+    return S.heroDraft;
+  }
+  /* The draft outlives a trip to another tab, so the card has to say when what
+     it shows is not yet what the shop shows. */
+  function heroDirty() {
+    if (!S.heroDraft) return false;
+    try { return JSON.stringify(heroClean(S.heroDraft)) !== JSON.stringify(heroClean(heroConf())); }
+    catch (e) { return true; }
+  }
+  /* What actually gets saved: trimmed strings, no empty translations, sane
+     interval. The server's own sanitiser is the strict one — this only keeps
+     the stored object tidy. */
+  function heroClean(d) {
+    var out = { slides: [], interval: Math.max(2000, Math.min(30000, Number(d.interval) || HERO_TICK)) };
+    (d.slides || []).slice(0, 5).forEach(function (s, i) {
+      var o = {
+        id: String(s.id || "s" + (i + 1)).slice(0, 24),
+        go: String(s.go || "cat:all").slice(0, 80),
+        image: String(s.image || "").slice(0, 300),
+        on: s.on !== false
+      };
+      ["eyebrow", "title", "sub", "cta"].forEach(function (f) {
+        var v = s[f] && typeof s[f] === "object" ? s[f] : {}, keep = {};
+        ["RU", "ET", "EN"].forEach(function (l) {
+          var txt = String(v[l] == null ? "" : v[l]).trim();
+          if (txt) keep[l] = txt.slice(0, 200);
+        });
+        o[f] = keep;
+      });
+      out.slides.push(o);
+    });
+    return out;
+  }
+  function heroGoLabel(go) {
+    var g = String(go || "");
+    if (g.indexOf("cat:") === 0) return g === "cat:all" ? "Все товары" : (CAT_NAMES[g.slice(4)] || g.slice(4));
+    if (g.indexOf("product:") === 0) {
+      var p = heroProduct(g.slice(8));
+      return p ? p.brand + " " + p.name : "Товар";
+    }
+    if (g.indexOf("page:") === 0) {
+      for (var i = 0; i < HERO_PAGES.length; i++) if (HERO_PAGES[i][0] === g.slice(5)) return HERO_PAGES[i][1];
+      return g.slice(5);
+    }
+    if (g === "bundles") return "Наборы";
+    if (g === "gift") return "Подарочная карта";
+    if (g === "brands") return "Бренды";
+    return "Все товары";
+  }
+  /* Search shared by both pickers: eight matches, popular products when the
+     box is empty, so the owner always has something to tap. */
+  function heroFind(q) {
+    var s = String(q || "").trim().toLowerCase();
+    if (!s) return spread(8, false);
+    return CATALOGUE.filter(function (p) {
+      return (p.brand + " " + p.name).toLowerCase().indexOf(s) >= 0;
+    }).slice(0, 8);
+  }
+  var HERO_NOHIT = '<p class="muted admhero__none">Ничего не нашлось — попробуйте другое слово.</p>';
+  function heroImgRows() {
+    var cur = heroDraft().slides[S.heroEdit] || {};
+    var list = heroFind(S.heroImgQ);
+    if (!list.length) return HERO_NOHIT;
+    return list.map(function (p) {
+      return '<button class="admhero__pick" data-heroimg="' + esc(p.id) + '" aria-current="' + (cur.image === p.id) +
+        '" title="' + esc(p.brand + " " + p.name) + '">' + media(p, 0, "ph admhero__pickimg") +
+        '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
+    }).join("");
+  }
+  function heroGoRows() {
+    var cur = heroDraft().slides[S.heroEdit] || {};
+    var list = heroFind(S.heroGoQ);
+    if (!list.length) return HERO_NOHIT;
+    return list.map(function (p) {
+      return '<button class="admhero__pick" data-herogopick="' + esc(p.id) + '" aria-current="' +
+        (cur.go === "product:" + p.id) + '" title="' + esc(p.brand + " " + p.name) + '">' +
+        media(p, 0, "ph admhero__pickimg") + '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
+    }).join("");
+  }
+  function heroRowHTML(s, i, n) {
+    var off = s.on === false;
+    return '<div class="adm__row"><span class="adm__ph">' + heroArt(s.image, "ph") + "</span>" +
+      '<span class="adm__nm">' + (esc(heroT(s.title)) || "Без заголовка") +
+        '<span class="adm__sub">' + esc(heroGoLabel(s.go)) + "</span></span>" +
+      '<span class="chip ' + (off ? "chip--low" : "chip--ok") + '">' + (off ? "скрыт" : "показан") + "</span>" +
+      '<span class="admhero__ops">' +
+        '<button class="iconbtn" data-heromove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
+        '<button class="iconbtn" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button>' +
+        '<button class="link" data-heroon="' + i + '">' + (off ? "Показать" : "Скрыть") + "</button>" +
+        '<button class="link" data-heroedit="' + i + '">Изменить</button>' +
+        '<button class="link" data-herodel="' + i + '">Удалить</button>' +
+      "</span></div>";
+  }
+  function heroFieldHTML(s, key, label, tag, max) {
+    var L = S.heroLang || "RU";
+    var val = (s[key] && s[key][L]) || "";
+    var ru = (s[key] && s[key].RU) || "";
+    var hint = L !== "RU" && !val && ru ? '<span class="admhero__hint">Пусто — покажем русский текст.</span>' : "";
+    return '<label class="field"><span class="field__label">' + label + "</span>" +
+      (tag === "textarea"
+        ? '<textarea class="input" rows="3" maxlength="' + max + '" data-herof="' + key + '">' + esc(val) + "</textarea>"
+        : '<input class="input" maxlength="' + max + '" data-herof="' + key + '" value="' + esc(val) + '">') +
+      hint + "</label>";
+  }
+  function heroFormHTML(i) {
+    var s = heroDraft().slides[i];
+    if (!s) return "";
+    var L = S.heroLang || "RU";
+    var go = String(s.go || "cat:all");
+    var isProduct = go.indexOf("product:") === 0;
+    var sel = isProduct ? "product" : go;
+    var opt = function (v, label) {
+      return '<option value="' + esc(v) + '"' + (sel === v ? " selected" : "") + ">" + esc(label) + "</option>";
+    };
+    return '<div class="admhero__form">' +
+      '<div class="adm__chips" role="group" aria-label="Язык баннера">' + LANGS.map(function (l) {
+        return '<button class="scchip" data-herolang="' + l[0] + '" aria-current="' + (L === l[0]) + '">' + l[1] + "</button>";
+      }).join("") + "</div>" +
+      heroFieldHTML(s, "eyebrow", "Строка сверху", "input", 40) +
+      heroFieldHTML(s, "title", "Заголовок", "input", 40) +
+      heroFieldHTML(s, "sub", "Подзаголовок", "textarea", 90) +
+      heroFieldHTML(s, "cta", "Надпись на кнопке", "input", 24) +
+
+      '<label class="field"><span class="field__label">Куда ведёт кнопка</span>' +
+        '<select class="input" data-herogo>' +
+          '<optgroup label="Разделы">' + opt("cat:all", "Все товары") +
+            CATS.map(function (c) { return opt("cat:" + c.id, c.name); }).join("") + "</optgroup>" +
+          '<optgroup label="Страницы магазина">' + opt("bundles", "Наборы") + opt("gift", "Подарочная карта") +
+            opt("brands", "Бренды") + "</optgroup>" +
+          '<optgroup label="Информация">' + HERO_PAGES.map(function (p) { return opt("page:" + p[0], p[1]); }).join("") + "</optgroup>" +
+          '<optgroup label="Один товар">' + opt("product", "Товар — выберите ниже") + "</optgroup>" +
+        "</select></label>" +
+      (isProduct
+        ? '<p class="muted admhero__note">Кнопка ведёт на: ' + esc(heroGoLabel(go)) + "</p>" +
+          '<input class="input input--box" data-heroq value="' + esc(S.heroGoQ || "") +
+            '" placeholder="Найти товар: название, бренд…" aria-label="Найти товар">' +
+          '<div class="admhero__picks" id="herogolist">' + heroGoRows() + "</div>"
+        : "") +
+
+      '<div class="field__label admhero__lbl">Картинка</div>' +
+      '<label class="field"><span class="field__label">Ссылка на картинку — или выберите фото товара ниже</span>' +
+        '<input class="input" data-heroimgurl value="' + esc(heroUrl(s.image)) +
+        '" placeholder="https://… или /shop/img/…"></label>' +
+      '<input class="input input--box" data-heroimgq value="' + esc(S.heroImgQ || "") +
+        '" placeholder="Найти товар: название, бренд…" aria-label="Найти фото товара">' +
+      '<div class="admhero__picks" id="heroimglist">' + heroImgRows() + "</div>" +
+
+      '<div class="field__label admhero__lbl">Предпросмотр</div>' +
+      '<div class="admhero__prev" id="heroprev"><section class="hero">' + heroSlideHTML(s, 0, 0, true) + "</section></div>" +
+      '<div class="adm__acts"><button class="btn btn--sm" data-heroclose>Готово</button></div>' +
+    "</div>";
+  }
+  function admHeroCard() {
+    var d = heroDraft(), n = d.slides.length;
+    var pending = pendingAction && pendingAction.type === "set_hero" ? confirmCard(pendingAction) : "";
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Главный баннер</h2></div>' +
+      '<p class="muted admhero__intro">Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Тексты — на трёх языках: пустой эстонский или английский заменяем русским.</p>' +
+      pending +
+      (heroDirty() && !pending ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      (n ? '<div class="adm__list">' + d.slides.map(function (s, i) { return heroRowHTML(s, i, n); }).join("") + "</div>"
+         : '<p class="muted">Слайдов нет — баннер на главной не показывается.</p>') +
+      (S.heroEdit >= 0 && S.heroEdit < n ? heroFormHTML(S.heroEdit) : "") +
+      '<label class="field admhero__tick"><span class="field__label">Смена слайдов, секунд</span>' +
+        '<input class="input" type="number" min="2" max="30" step="1" data-herotick value="' +
+        Math.round(heroInterval() / 1000) + '"></label>' +
+      '<div class="adm__acts">' +
+        '<button class="btn btn--ghost btn--sm" data-heroadd' + (n >= 5 ? " disabled" : "") + ">Добавить слайд</button>" +
+        '<button class="btn btn--sm" data-herosave>Сохранить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-heroreset>Сбросить к стандартному</button></div>';
+  }
+  /* Typing must not cost the caret, so the two moving parts of the form are
+     repainted on their own instead of through render(). */
+  function paintHeroPreview() {
+    var box = document.getElementById("heroprev");
+    var s = heroDraft().slides[S.heroEdit];
+    if (!box || !s) return;
+    box.innerHTML = '<section class="hero">' + heroSlideHTML(s, 0, 0, true) + "</section>";
+    translateTree(box);
+  }
+  function paintHeroPicks(id, html) {
+    var box = document.getElementById(id);
+    if (!box) return;
+    box.innerHTML = html;
+    translateTree(box);
   }
 
   function setupBlock(title, rows) {
@@ -3359,6 +3715,7 @@
      UX. */
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
+    hero: null,   // null = the built-in banner (heroDefault())
     flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
@@ -3368,6 +3725,7 @@
       DEMO.video = _dj.video || {};   // features: product video links
       if (_dj.chatbot === false) DEMO.chatbot = false;
       if (_dj.bundles === false) DEMO.bundles = false;
+      if (_dj.hero && typeof _dj.hero === "object" && Array.isArray(_dj.hero.slides)) DEMO.hero = _dj.hero;
       DEMO.flows = Object.assign(DEMO.flows, _dj.flows || {});
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
     }
@@ -3444,6 +3802,10 @@
     var s = j.settings || {};
     if (typeof s.chatbot === "boolean") DEMO.chatbot = s.chatbot;
     if (typeof s.bundles === "boolean") DEMO.bundles = s.bundles;
+    // the banner: null on the server means «стандартный», and it wins over the
+    // local copy exactly like every other setting
+    if (s.hero === null) DEMO.hero = null;
+    else if (s.hero && typeof s.hero === "object" && Array.isArray(s.hero.slides)) DEMO.hero = s.hero;
     if (s.flows && typeof s.flows === "object") DEMO.flows = Object.assign(DEMO.flows, s.flows);
   }
 
@@ -3480,6 +3842,7 @@
     else if (a.type === "toggle_flow") apiSend(st, "PUT", { flows: DEMO.flows }).catch(noop);
     else if (a.type === "toggle_chatbot") apiSend(st, "PUT", { chatbot: DEMO.chatbot }).catch(noop);
     else if (a.type === "toggle_bundles") apiSend(st, "PUT", { bundles: DEMO.bundles }).catch(noop);
+    else if (a.type === "set_hero") apiSend(st, "PUT", { hero: DEMO.hero }).catch(noop);
   }
 
   function admLogin(pw) {
@@ -3589,6 +3952,13 @@
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_bundles") return "Наборы на сайте: " + (a.value ? "показать" : "скрыть");
+    if (a.type === "set_hero") {
+      var hsl = a.value && Array.isArray(a.value.slides) ? a.value.slides : null;
+      if (!hsl || !hsl.length) return "Баннер: стандартный";
+      var h1 = hsl[0].title || {};
+      return "Баннер: " + hsl.length + " " + pl(hsl.length, "слайд", "слайда", "слайдов") +
+        ", первый — «" + (h1.RU || h1.ET || h1.EN || "—") + "»";
+    }
     if (a.type === "set_subcat") return "Подкатегория «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "авто");
     if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
     if (a.type === "set_video") return "Видео «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "убрано");   // features
@@ -3603,6 +3973,11 @@
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
     else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
     else if (a.type === "toggle_bundles") { entry.prev = { type: "toggle_bundles", value: DEMO.bundles !== false }; DEMO.bundles = a.value; }
+    else if (a.type === "set_hero") {
+      entry.prev = { type: "set_hero", value: DEMO.hero };
+      DEMO.hero = a.value && Array.isArray(a.value.slides) ? a.value : null;
+      S.heroDraft = null; S.heroEdit = -1; S.slide = 0; restartHero();
+    }
     else if (a.type === "set_subcat") { entry.prev = { type: "set_subcat", id: a.id, value: DEMO.subcat[a.id] || "" }; if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") { entry.prev = { type: "set_varimg", id: a.id, map: (DEMO.varimg[a.id] || (p.varImg || []).slice()) }; DEMO.varimg[a.id] = a.map.slice(); }
     // features
@@ -3624,6 +3999,10 @@
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
+    else if (a.type === "set_hero") {
+      DEMO.hero = a.value && Array.isArray(a.value.slides) ? a.value : null;
+      S.heroDraft = null; S.heroEdit = -1; S.slide = 0; restartHero();
+    }
     else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") DEMO.varimg[a.id] = a.map.slice();
     else if (a.type === "set_video") { DEMO.video[a.id] = a.value; pushOverride(a.id, { video_url: a.value }); }   // features
@@ -3649,12 +4028,25 @@
     fetch("/api/assistant/").then(function (r) { return r.json(); })
       .then(function (j) { admAI = !!j.enabled; }).catch(function () {});
   }
+  /* What the banner says right now, trimmed to what the assistant can act on —
+     «поменяй второй слайд» needs to know there is a second slide. */
+  function heroForAI() {
+    return heroConf().slides.slice(0, 5).map(function (s) {
+      return {
+        id: String(s.id || ""),
+        title: String((s.title && s.title.RU) || ""),
+        go: String(s.go || ""),
+        image: String(s.image || ""),
+        on: s.on !== false
+      };
+    });
+  }
   function askAdminAI(q) {
     admConvo.push({ role: "user", content: q });
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin" })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI() })
     })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
@@ -4429,17 +4821,21 @@
     return true;
   }
   function setSlide(n, manual) {
-    S.slide = (n + BANNERS.length) % BANNERS.length;
+    var total = heroCount();
+    if (!total) { S.slide = 0; return; }
+    S.slide = ((n % total) + total) % total;
     if (!paintSlide()) render();
     if (manual) restartHero();
   }
   function restartHero() {
     clearInterval(heroTimer);
+    // a single banner has nothing to rotate to
+    if (heroCount() < 2) return;
     heroTimer = setInterval(function () {
       if (S.screen !== "home" || document.hidden || S.cartOpen || S.filterOpen) return;
       try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; } catch (e) {}
       setSlide(S.slide + 1);
-    }, 6000);
+    }, heroInterval());
   }
 
   /* Swipe. Two swipeable surfaces — the home banner and the product gallery —
@@ -4471,7 +4867,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -4764,6 +5160,62 @@
       if (DEMO.bundles === false && (S.screen === "bundles" || S.screen === "bundle")) S.screen = "home";
       toast(DEMO.bundles !== false ? "Наборы показаны ✓" : "Наборы скрыты ✓"); render(); return;
     }
+    /* ---- «Главный баннер». Every button here edits the draft only; the shop
+       changes on «Сохранить», through the confirm card. ------------------- */
+    if (d.heroedit !== undefined) {
+      S.heroEdit = Number(d.heroedit); S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
+      render(); return;
+    }
+    if (d.heroclose !== undefined) { S.heroEdit = -1; render(); return; }
+    if (d.herolang) { S.heroLang = d.herolang; render(); return; }
+    if (d.heroadd !== undefined) {
+      var hAdd = heroDraft();
+      if (hAdd.slides.length >= 5) { toast("Больше пяти слайдов не нужно"); return; }
+      hAdd.slides.push({
+        id: "s" + Date.now().toString(36),
+        eyebrow: { RU: "" }, title: { RU: "Новый баннер" }, sub: { RU: "" }, cta: { RU: "Смотреть" },
+        go: "cat:all", image: (CATALOGUE[0] || {}).id || "", on: true
+      });
+      S.heroEdit = hAdd.slides.length - 1; S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
+      render(); return;
+    }
+    if (d.herodel !== undefined) {
+      heroDraft().slides.splice(Number(d.herodel), 1);
+      S.heroEdit = -1; render(); return;
+    }
+    if (d.heromove) {
+      var mv = d.heromove.split(":"), mi = Number(mv[0]), mj = mi + Number(mv[1]);
+      var hMove = heroDraft().slides;
+      if (mj >= 0 && mj < hMove.length) {
+        var tmp = hMove[mi]; hMove[mi] = hMove[mj]; hMove[mj] = tmp;
+        if (S.heroEdit === mi) S.heroEdit = mj;
+        else if (S.heroEdit === mj) S.heroEdit = mi;
+      }
+      render(); return;
+    }
+    if (d.heroon !== undefined) {
+      var hOn = heroDraft().slides[Number(d.heroon)];
+      if (hOn) hOn.on = hOn.on === false;
+      render(); return;
+    }
+    if (d.heroimg) {
+      var hImg = heroDraft().slides[S.heroEdit];
+      if (hImg) hImg.image = d.heroimg;
+      render(); return;
+    }
+    if (d.herogopick) {
+      var hGo = heroDraft().slides[S.heroEdit];
+      if (hGo) hGo.go = "product:" + d.herogopick;
+      render(); return;
+    }
+    if (d.herosave !== undefined) {
+      pendingAction = { type: "set_hero", value: heroClean(heroDraft()) };
+      render(); refocus("[data-admapply]"); return;
+    }
+    if (d.heroreset !== undefined) {
+      pendingAction = { type: "set_hero", value: null };
+      render(); refocus("[data-admapply]"); return;
+    }
     if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
@@ -4901,6 +5353,19 @@
         translateTree(list);
       }
     }
+    /* «Главный баннер»: a full render would take the caret out of the field,
+       so only the live preview (or the picker list) is repainted. */
+    else if (t.matches("[data-herof]")) {
+      var hSl = heroDraft().slides[S.heroEdit];
+      if (hSl) {
+        var hF = t.dataset.herof;
+        if (!hSl[hF] || typeof hSl[hF] !== "object") hSl[hF] = {};
+        hSl[hF][S.heroLang || "RU"] = t.value;
+        paintHeroPreview();
+      }
+    }
+    else if (t.matches("[data-heroq]")) { S.heroGoQ = t.value; paintHeroPicks("herogolist", heroGoRows()); }
+    else if (t.matches("[data-heroimgq]")) { S.heroImgQ = t.value; paintHeroPicks("heroimglist", heroImgRows()); }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
       var b = t.dataset.brand;
@@ -4923,6 +5388,24 @@
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-machine]")) { S.machine = t.selectedIndex; }
     else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
+    // «Главный баннер»: the link target, the picture URL and the timing —
+    // on change, so a half-typed URL never becomes the banner's picture
+    else if (t.matches("[data-herogo]")) {
+      var gSl = heroDraft().slides[S.heroEdit];
+      if (gSl) {
+        gSl.go = t.value === "product"
+          ? (String(gSl.go || "").indexOf("product:") === 0 ? gSl.go : "product:")
+          : t.value;
+      }
+      render();
+    }
+    else if (t.matches("[data-heroimgurl]")) {
+      var uSl = heroDraft().slides[S.heroEdit], uV = t.value.trim();
+      if (uSl && uV) { uSl.image = uV; render(); }
+    }
+    else if (t.matches("[data-herotick]")) {
+      heroDraft().interval = Math.max(2, Math.min(30, Number(t.value) || 6)) * 1000;
+    }
   });
 
   // the shopper's own open/closed choice for the summary wins from then on
