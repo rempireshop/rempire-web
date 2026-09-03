@@ -17,6 +17,9 @@ function sanitize(html) {
   let s = String(html);
   s = s.replace(/<(script|style|iframe|object|embed|form|svg)[\s\S]*?<\/\1>/gi, "");
   s = s.replace(/<(img|source|video|audio|picture)\b[^>]*>/gi, "");
+  // Stray <meta charset> tags in supplier HTML split words when rendered
+  // ("a<meta ...><span>dds" showed as "a dds"); eat the tag and the whitespace after it.
+  s = s.replace(/<meta\b[^>]*>\s*/gi, "");
   s = s.replace(/\son\w+="[^"]*"/gi, "").replace(/\son\w+='[^']*'/gi, "");
   s = s.replace(/\s(style|class|id|dir|data-[\w-]+)="[^"]*"/gi, "");
   s = s.replace(/\s(style|class|id|dir|data-[\w-]+)='[^']*'/gi, "");
@@ -34,7 +37,7 @@ const OLD = new Function(oldSrc + "\nreturn CONTENT;")();
 const normId = h => h.replace(/[^\x20-\x7e]/g, ""); // same rule as the catalogue build
 const bodies = JSON.parse(await readFile(path.join(ROOT, "tools/harvest/bodies-en.json"), "utf8"));
 const content = {};
-for (const [k, v] of Object.entries(OLD)) if (k === normId(k)) content[k] = v; // drop pre-rule ® keys
+for (const [k, v] of Object.entries(OLD)) if (k === normId(k)) content[k] = sanitize(v); // re-sanitise carried-over entries; drop pre-rule ® keys
 let fresh = 0;
 for (const [rawId, html] of Object.entries(bodies)) {
   const id = normId(rawId);

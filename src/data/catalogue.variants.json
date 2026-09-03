@@ -1,0 +1,742 @@
+{
+ "system-4-bio-botanical-shampoo": {
+  "sizes": [
+   "75 мл",
+   "250 мл",
+   "500 мл"
+  ],
+  "prices": [
+   9,
+   16,
+   25
+  ]
+ },
+ "system-4-bio-botanical-serum": {
+  "sizes": [
+   "50 мл",
+   "150 мл",
+   "500 мл"
+  ],
+  "prices": [
+   8,
+   16,
+   25
+  ]
+ },
+ "sim-sensitive-system-4-oil-cure-scalp-treatment-o": {
+  "sizes": [
+   "75 мл",
+   "150 мл",
+   "500 мл"
+  ],
+  "prices": [
+   7.9,
+   13.9,
+   19.9
+  ]
+ },
+ "repair-me-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   7,
+   27
+  ]
+ },
+ "kevin-murphy-un-tangled-spray": {
+  "sizes": [
+   "40 мл",
+   "150 мл"
+  ],
+  "prices": [
+   8,
+   28
+  ]
+ },
+ "night-rider": {
+  "sizes": [
+   "30 г",
+   "100 г"
+  ],
+  "prices": [
+   11,
+   28
+  ]
+ },
+ "free-hold": {
+  "sizes": [
+   "30 г",
+   "100 г"
+  ],
+  "prices": [
+   11,
+   28
+  ]
+ },
+ "killer-curls-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   6,
+   27
+  ]
+ },
+ "killer-curls-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   6,
+   27
+  ]
+ },
+ "system-4-mild-shampoo-3": {
+  "sizes": [
+   "75 мл",
+   "250 мл",
+   "500 мл"
+  ],
+  "prices": [
+   7.9,
+   13.9,
+   19.9
+  ]
+ },
+ "sim-sensitive-system-4-scalp-tonic-t": {
+  "sizes": [
+   "50 мл",
+   "150 мл",
+   "500 мл"
+  ],
+  "prices": [
+   7.9,
+   13.9,
+   19.9
+  ]
+ },
+ "system-4-hydro-care-conditioner-h": {
+  "sizes": [
+   "75 мл",
+   "150 мл",
+   "500 мл"
+  ],
+  "prices": [
+   6.9,
+   13.9,
+   19.9
+  ]
+ },
+ "sim-sensitive-system-4-chitosan-hair-repair-r": {
+  "sizes": [
+   "50 мл",
+   "150 мл"
+  ],
+  "prices": [
+   7.9,
+   13.9
+  ]
+ },
+ "kevin-murphy-blow-dry-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   6,
+   28
+  ]
+ },
+ "hair-resort-spray": {
+  "sizes": [
+   "40 мл",
+   "150 мл"
+  ],
+  "prices": [
+   8,
+   26
+  ]
+ },
+ "rough-rider": {
+  "sizes": [
+   "30 г",
+   "100 г"
+  ],
+  "prices": [
+   11,
+   28
+  ]
+ },
+ "maxi-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   7,
+   26
+  ]
+ },
+ "system-4-bio-botanical-vital-cure": {
+  "sizes": [
+   "150 мл",
+   "500 мл"
+  ],
+  "prices": [
+   16,
+   26
+  ]
+ },
+ "system-4-balancing-shampoo-2": {
+  "sizes": [
+   "75 мл",
+   "250 мл",
+   "500 мл"
+  ],
+  "prices": [
+   7.9,
+   13.9,
+   19.9
+  ]
+ },
+ "system-4-special-shampoo-1": {
+  "sizes": [
+   "75 мл",
+   "250 мл",
+   "500 мл"
+  ],
+  "prices": [
+   7.9,
+   13.9,
+   19.9
+  ]
+ },
+ "body-builder": {
+  "sizes": [
+   "100 мл",
+   "400 мл"
+  ],
+  "prices": [
+   18,
+   27
+  ]
+ },
+ "oversized-t-shirt-unisex": {
+  "sizes": [
+   "white / S",
+   "white / M",
+   "white / L",
+   "white / XL",
+   "white / XXL",
+   "yellow / S",
+   "yellow / M",
+   "yellow / L",
+   "yellow / XL",
+   "yellow / XXL"
+  ],
+  "prices": [
+   35,
+   35,
+   35,
+   35,
+   35,
+   35,
+   35,
+   35,
+   35,
+   35
+  ]
+ },
+ "three-kings": {
+  "sizes": [
+   "S-M",
+   "M-L",
+   "L-XL"
+  ],
+  "prices": [
+   27,
+   27,
+   27
+  ]
+ },
+ "king-of-the-night-deep-cut-t-shirt-with-an-extended-back": {
+  "sizes": [
+   "S-M",
+   "M-L",
+   "L-XL"
+  ],
+  "prices": [
+   27,
+   27,
+   27
+  ]
+ },
+ "siim-hanikat-x-rempire": {
+  "sizes": [
+   "S",
+   "M",
+   "L",
+   "XL",
+   "XXL"
+  ],
+  "prices": [
+   34.99,
+   34.99,
+   34.99,
+   34.99,
+   34.99
+  ]
+ },
+ "oversized-t-shirt-unisex-with-print-love-is-the-gun": {
+  "sizes": [
+   "L",
+   "S",
+   "M",
+   "XL",
+   "XXL"
+  ],
+  "prices": [
+   39,
+   39,
+   39,
+   39,
+   39
+  ]
+ },
+ "deep-cut-t-shirt-with-an-extended-back": {
+  "sizes": [
+   "S-M",
+   "M-L",
+   "L-XL"
+  ],
+  "prices": [
+   27,
+   27,
+   27
+  ]
+ },
+ "oversized-t-shirt-unisex-with-print-t-shirt-three-elements-water": {
+  "sizes": [
+   "S",
+   "M",
+   "L",
+   "XL",
+   "XXL"
+  ],
+  "prices": [
+   35,
+   35,
+   35,
+   35,
+   35
+  ]
+ },
+ "oversized-t-shirt-unisex-with-print-t-shirt-three-elements-fire": {
+  "sizes": [
+   "S",
+   "M",
+   "L",
+   "XL",
+   "XXL"
+  ],
+  "prices": [
+   35,
+   35,
+   35,
+   35,
+   35
+  ]
+ },
+ "davines-renewing-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17.4,
+   9
+  ]
+ },
+ "davines-wellbeing-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17.4,
+   9
+  ]
+ },
+ "davines-detoxifying-scrub-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17.4,
+   9
+  ]
+ },
+ "davines-calming-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17.4,
+   9
+  ]
+ },
+ "davines-nourishing-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17.4,
+   9
+  ]
+ },
+ "davines-purifying-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17,
+   9
+  ]
+ },
+ "davines-energizing-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17,
+   9
+  ]
+ },
+ "davines-replumping-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17,
+   9
+  ]
+ },
+ "davines-rebalancing-shampoo": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   17,
+   9
+  ]
+ },
+ "kevin-murphy-re-store": {
+  "sizes": [
+   "40 мл",
+   "200 мл"
+  ],
+  "prices": [
+   36,
+   7
+  ]
+ },
+ "kevin-murphy-smooth-again-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   7,
+   26
+  ]
+ },
+ "kevin-murphy-fresh-hair-1": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   18
+  ]
+ },
+ "young-again-dry-conditioner": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   18
+  ]
+ },
+ "kevin-murphy-blow-dry-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   6
+  ]
+ },
+ "kevin-murphy-everlasting-colour-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   6
+  ]
+ },
+ "kevin-murphy-everlasting-colour-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   6
+  ]
+ },
+ "kevin-murphy-hydrate-me-masque": {
+  "sizes": [
+   "40 мл",
+   "200 мл"
+  ],
+  "prices": [
+   34,
+   8
+  ]
+ },
+ "kevin-murphy-smooth-again-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   27,
+   6
+  ]
+ },
+ "kevin-murphy-staying-alive-spray": {
+  "sizes": [
+   "40 мл",
+   "150 мл"
+  ],
+  "prices": [
+   27,
+   8
+  ]
+ },
+ "kevin-murphy-young-again-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   6
+  ]
+ },
+ "kevin-murphy-young-again-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   6
+  ]
+ },
+ "kevin-muprhy-plumping-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   29,
+   7
+  ]
+ },
+ "kevin-muprhy-plumping-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   29,
+   7
+  ]
+ },
+ "kevin-muprhy-hydrate-me-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   26,
+   7
+  ]
+ },
+ "kevin-murphy-hydrate-me-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   26,
+   7
+  ]
+ },
+ "kevin-murphy-angel-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   26,
+   6
+  ]
+ },
+ "kevin-murphy-angel-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   26,
+   6
+  ]
+ },
+ "kevin-murphy-blonde-angel": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   26,
+   6
+  ]
+ },
+ "kevin-muprhy-blonde-angel-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   26,
+   6
+  ]
+ },
+ "repair-me-rinse": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   27,
+   7
+  ]
+ },
+ "stimulate-me-wash": {
+  "sizes": [
+   "40 мл",
+   "250 мл"
+  ],
+  "prices": [
+   26,
+   7
+  ]
+ },
+ "system-4-shale-oil-shampoo-4": {
+  "sizes": [
+   "75 мл",
+   "250 мл",
+   "500 мл"
+  ],
+  "prices": [
+   7.9,
+   13.9,
+   19.9
+  ]
+ },
+ "kevin-murphy-session-spray": {
+  "sizes": [
+   "100 мл",
+   "400 мл"
+  ],
+  "prices": [
+   28,
+   18
+  ]
+ },
+ "kevin-murphy-session-spray-flex": {
+  "sizes": [
+   "100 мл",
+   "400 мл"
+  ],
+  "prices": [
+   28,
+   18
+  ]
+ },
+ "anti-gravity-spray": {
+  "sizes": [
+   "40 мл",
+   "150 мл"
+  ],
+  "prices": [
+   28,
+   8
+  ]
+ },
+ "bedroom-hair": {
+  "sizes": [
+   "100 мл",
+   "250 мл"
+  ],
+  "prices": [
+   28,
+   18
+  ]
+ },
+ "oversized-t-shirt-unisex-with-print-three-elements-air": {
+  "sizes": [
+   "s",
+   "m",
+   "l",
+   "xl",
+   "xxl"
+  ],
+  "prices": [
+   35,
+   35,
+   35,
+   35,
+   35
+  ]
+ },
+ "oversized-t-shirt-unisex-with-print": {
+  "sizes": [
+   "yellow-1",
+   "white-1"
+  ],
+  "prices": [
+   29,
+   29
+  ]
+ }
+}

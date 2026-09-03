@@ -126,6 +126,7 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"set_seo","id":"<catalogue id>","title":"<up to 60 chars>","description":"<up to 155 chars>"} — write/replace SEO title and meta description (write them yourself, well-formed, language of the shop = Russian unless asked otherwise)
   {"type":"toggle_flow","id":"abandoned|birthday|backstock","value":true|false} — switch a customer e-mail flow on or off
   {"type":"toggle_chatbot","value":true|false} — switch the storefront AI chat widget on or off («выключи чат на сайте»)
+  {"type":"toggle_bundles","value":true|false} — show or hide the curated sets («наборы») on the storefront («скрой наборы»)
 Use exactly one action per reply, only when the owner asks for a change. If the owner asks to change several things, do the first and say you'll do the rest one by one.
 
 DEMO FIGURES you may quote (the panel shows the same): 412 visitors last 7 days (+18%); conversion 2.2%; average order 43 €; 486 € revenue / 12 orders last 30 days; orders #1043 and #1044 are waiting to be shipped; best search query "kevin murphy tallinn" (position 4). Traffic: Google 44%, Instagram 27%, direct 19%, TikTok 7%, newsletter 3%.
@@ -177,6 +178,9 @@ function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean): objec
     return { type: t, id: x.id, value: x.value };
   }
   if (t === "toggle_chatbot" && typeof x.value === "boolean") {
+    return { type: t, value: x.value };
+  }
+  if (t === "toggle_bundles" && typeof x.value === "boolean") {
     return { type: t, value: x.value };
   }
   return null;

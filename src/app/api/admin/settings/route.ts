@@ -1,0 +1,66 @@
+/**
+ * PUT /api/admin/settings — shop-wide switches.
+ *
+ *   { "chatbot": false }
+ *   { "flows": { "abandoned": true, "birthday": false, "backstock": true } }
+ *   { "settings": { "shipping": { "freeFrom": 59 } } }
+ *
+ * Each top-level key becomes one row in `settings`; the value is stored as
+ * jsonb exactly as sent. GET returns the whole map (admin only — the public
+ * copy lives at /api/overrides).
+ */
+import { requireAdmin } from "@/lib/auth";
+import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const KEY_RE = /^[a-z0-9_.-]{1,64}$/i;
+
+export async function GET(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+  try {
+    return Response.json({ ok: true, settings: await getSettings() }, { headers: { "cache-control": "no-store" } });
+  } catch (err) {
+    console.error("[api/admin/settings] read failed:", err);
+    return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+  }
+}
+
+export async function PUT(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
+  let body: Record<string, unknown>;
+  try {
+    body = (await req.json()) as Record<string, unknown>;
+  } catch {
+    return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+  }
+
+  // {key, value} · {settings:{…}} · a flat map — all mean the same thing here.
+  let entries: Array<[string, unknown]>;
+  if (typeof body.key === "string" && "value" in body) entries = [[body.key, body.value]];
+  else if (body.settings && typeof body.settings === "object") entries = Object.entries(body.settings as object);
+  else entries = Object.entries(body);
+
+  if (!entries.length || entries.length > 50) return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+  for (const [key] of entries) {
+    if (!KEY_RE.test(key)) return Response.json({ ok: false, error: "bad_key", detail: key }, { status: 400 });
+  }
+
+  try {
+    for (const [key, value] of entries) {
+      await setSetting(key, value);
+      await writeAuditSafe("admin", "setting.set", { key, value });
+    }
+    return Response.json({ ok: true, settings: await getSettings() }, { headers: { "cache-control": "no-store" } });
+  } catch (err) {
+    console.error("[api/admin/settings] write failed:", err);
+    return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
+  }
+}

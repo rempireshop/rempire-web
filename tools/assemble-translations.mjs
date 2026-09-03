@@ -18,6 +18,11 @@ function sanitize(html) {
   let s = String(html);
   s = s.replace(/<(script|style|iframe|object|embed|form|svg)[\s\S]*?<\/\1>/gi, "");
   s = s.replace(/<(img|source|video|audio|picture)\b[^>]*>/gi, "");
+  // Stray <meta charset> tags ride along in the supplier HTML and split words
+  // in the rendered page ("a<meta>\n<span>nnab" showed as "a nnab"). Eat the
+  // tag AND the whitespace after it so the two halves join back up; the space
+  // before it is kept, so a tag between two real words stays two words.
+  s = s.replace(/<meta\b[^>]*>\s*/gi, "");
   s = s.replace(/\son\w+="[^"]*"/gi, "").replace(/\son\w+='[^']*'/gi, "");
   s = s.replace(/\s(style|class|id|dir|data-[\w-]+)="[^"]*"/gi, "");
   s = s.replace(/\s(style|class|id|dir|data-[\w-]+)='[^']*'/gi, "");

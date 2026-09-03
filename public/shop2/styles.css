@@ -1517,3 +1517,234 @@ button, a, summary, label { touch-action: manipulation; }
 .legal a { color: var(--ink); }
 .ftr__acc .link { font-size: inherit; color: inherit; border-bottom-color: var(--rule); }
 .ftr__acc .link:hover { border-bottom-color: var(--ink); }
+
+/* ---------- checkout: carrier chips, parcel-machine picker ----------
+   The machine list is 400+ rows long in Estonia alone, so it is a searchable
+   sheet rather than a <select>: a bottom sheet on a phone (thumb reach, and it
+   can be swiped away by tapping the scrim), a centred panel on a desktop.
+   Every target here is at least 44px tall. */
+.carriers { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.carrier {
+  min-height: 44px; padding: 10px 16px;
+  border: 1px solid var(--rule); background: transparent;
+  font: inherit; font-size: 13.5px; cursor: pointer;
+  transition: background .15s var(--ease), border-color .15s var(--ease);
+}
+.carrier:hover { background: var(--hover); }
+.carrier[aria-current="true"] { border-color: var(--ink); background: var(--ink); color: var(--page); }
+
+.pointbtn {
+  display: grid; grid-template-columns: 1fr auto; align-items: center;
+  gap: 2px 12px; width: 100%; min-height: 56px; padding: 10px 12px;
+  border: 1px solid rgba(28, 26, 0, .35); background: transparent;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.pointbtn:hover { background: var(--hover); }
+.pointbtn--set { border-color: var(--ink); }
+.pointbtn[aria-invalid="true"] { border-color: var(--error); }
+.pointbtn__nm { grid-column: 1; font-size: 14.5px; }
+.pointbtn__ad { grid-column: 1; font-size: 12.5px; color: var(--muted); }
+.pointbtn__go { grid-column: 2; grid-row: 1 / span 2; font-size: 12px; color: var(--muted); text-decoration: underline; }
+
+.psheet {
+  position: fixed; z-index: var(--z-drawer); background: var(--page);
+  display: flex; flex-direction: column;
+  left: 0; right: 0; bottom: 0; max-height: 82vh;
+  border-top: 1px solid var(--ink);
+  animation: sheetUp .28s var(--ease);
+}
+@keyframes sheetUp { from { transform: translateY(100%); } }
+@media (min-width: 768px) {
+  .psheet {
+    left: 50%; right: auto; top: 50%; bottom: auto;
+    transform: translate(-50%, -50%);
+    width: min(520px, 92vw); max-height: 76vh;
+    border: 1px solid var(--ink);
+    animation: fade .2s ease;
+  }
+}
+.psheet__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--rule); }
+.psheet__search { padding: 12px 18px; border-bottom: 1px solid var(--rule); }
+.psheet__search .input { margin: 0; }
+.psheet__list { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; padding-bottom: env(safe-area-inset-bottom); }
+.psheet__msg { padding: 22px 18px; margin: 0; font-size: 13.5px; }
+.prow {
+  display: block; width: 100%; min-height: 56px;
+  padding: 10px 18px; border: none; border-bottom: 1px solid var(--rule-soft);
+  background: transparent; font: inherit; text-align: left; cursor: pointer;
+}
+.prow:hover { background: var(--hover); }
+.prow[aria-current="true"] { background: var(--shell); }
+.prow__nm { display: block; font-size: 14.5px; }
+.prow__ad { display: block; font-size: 12.5px; color: var(--muted); }
+
+/* receipt states — paid, failed, still waiting on the bank */
+.done__num { margin: 0 0 10px; font-size: 14px; }
+.done__tick--bad, .done__tick--wait {
+  display: grid; place-items: center;
+  font-size: 30px; line-height: 1; font-family: Oswald, sans-serif;
+}
+.done__tick--bad { color: var(--error); }
+.done__tick--wait { color: var(--muted); }
+
+/* ==========================================================================
+   FEATURES — наборы, подарочная карта, отзывы, видео
+   Appended by the features agent. Everything below belongs to those four and
+   is namespaced (.bstack/.bitem, .gift*, .rev*, .pvideo) so it cannot reach
+   the rest of the shop.
+   ========================================================================== */
+
+/* ---------- наборы: the photo stack ---------- */
+/* No new artwork for a set: three product photos, overlapped, on the same
+   square the product cards use. The stage is the card's own .card__media (or
+   .pdp__stage), which is already position:relative. */
+.bstack { position: absolute; inset: 0; display: block; }
+.bstack__i {
+  position: absolute; background-size: contain; background-position: center;
+  background-repeat: no-repeat; transition: transform .5s var(--ease);
+}
+.bstack__i--0 { inset: 8% 34% 20% 4%; }
+.bstack__i--1 { inset: 4% 16% 12% 22%; }
+.bstack__i--2 { inset: 10% 2% 8% 42%; }
+@media (hover: hover) {
+  .card--bundle:hover .bstack__i--0 { transform: translateX(-4%) scale(1.03); }
+  .card--bundle:hover .bstack__i--2 { transform: translateX(4%) scale(1.03); }
+}
+.bstack--big .bstack__i--0 { inset: 10% 36% 20% 2%; }
+.bstack--big .bstack__i--1 { inset: 5% 18% 12% 20%; }
+.bstack--big .bstack__i--2 { inset: 12% 0 8% 42%; }
+.bstack--line .bstack__i--0 { inset: 6% 40% 14% 0; }
+.bstack--line .bstack__i--1 { inset: 2% 20% 8% 20%; }
+.bstack--line .bstack__i--2 { inset: 8% 0 4% 40%; }
+/* two-item set: last, so it wins over the size modifiers above */
+.bstack--n2 .bstack__i--0 { inset: 7% 32% 16% 5%; }
+.bstack--n2 .bstack__i--1 { inset: 10% 5% 8% 32%; }
+
+.bbadge {
+  position: absolute; left: 0; top: 0; z-index: 1;
+  background: var(--ink); color: var(--page);
+  font-family: Oswald, sans-serif; font-size: 10.5px; letter-spacing: .1em;
+  padding: 3px 7px;
+}
+.bwas { color: var(--muted); font-weight: 400; text-decoration: line-through; margin-left: 5px; }
+/* a set grid nested inside the catalogue's own section keeps no extra top gap */
+.sec--bundles { padding-top: 0; }
+
+.bdesc { font-size: 14.5px; line-height: 1.6; margin: 14px 0 4px; }
+.bitems { border-top: 1px solid var(--rule); margin-bottom: 20px; }
+.bitem {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--rule-soft);
+}
+.bitem__ph { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+.bitem__nm {
+  flex: 1; min-width: 0; text-align: left; font: inherit; font-size: 13.5px;
+  background: none; border: none; padding: 8px 0; cursor: pointer; color: inherit;
+  border-bottom: 1px solid transparent;
+}
+.bitem__nm:hover { border-bottom-color: var(--rule); }
+.bitem__pr { font-size: 13.5px; font-weight: 600; flex-shrink: 0; }
+
+/* ---------- подарочная карта ---------- */
+.gifttile {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  border: 1px solid var(--ink); padding: 16px; margin-bottom: 28px;
+}
+.gifttile__art {
+  width: 54px; height: 54px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--shell);
+}
+.gifttile__mark { width: 22px; height: 34px; color: var(--ink); }
+.gifttile__txt { flex: 1 1 220px; min-width: 0; }
+.gifttile__txt .muted { margin: 4px 0 0; }
+
+.gamts { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 20px; }
+.gamt {
+  min-height: 48px; min-width: 84px; padding: 0 18px;
+  border: 1px solid var(--rule); background: var(--page); color: inherit;
+  font: inherit; font-size: 15px; cursor: pointer;
+  transition: border-color .18s var(--ease), background .18s var(--ease);
+}
+.gamt:hover { border-color: var(--ink); }
+.gamt[aria-current="true"] { border-color: var(--ink); background: var(--ink); color: var(--page); }
+
+/* the gift-card line in the cart has no photo — the mark stands in for one */
+.giftph {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--shell);
+}
+.giftph__mark { width: 40%; height: 55%; color: var(--ink); }
+
+/* what a set or a gift card adds under its name in the cart / the summary */
+.cline__parts {
+  display: block; font-size: 11.5px; color: var(--muted);
+  line-height: 1.45; margin: -3px 0 7px;
+}
+.cosum__nm .cline__parts { margin: 3px 0 0; }
+.cosum__row--note { margin-top: -6px; }
+
+/* ---------- отзывы ---------- */
+.revs--db { margin-bottom: 4px; }
+.rev--db .rev__head { flex-wrap: wrap; }
+.revbadge {
+  font-family: Oswald, sans-serif; font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ok); border: 1px solid currentColor;
+  padding: 1px 6px; white-space: nowrap;
+}
+.revadd { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 4px; }
+.revadd--done p { margin: 0 0 8px; font-size: 14px; }
+.revadd--open .field:first-of-type { margin-top: 10px; }
+.revstars { display: flex; align-items: center; gap: 2px; margin: 2px 0 16px; }
+.revstar {
+  /* ≥44px targets: a five-star row is the single easiest thing to mis-tap */
+  min-width: 44px; min-height: 44px; padding: 0;
+  background: none; border: none; cursor: pointer;
+  font-size: 26px; line-height: 1; color: var(--rule);
+  transition: color .15s var(--ease), transform .15s var(--ease);
+}
+.revstar:hover { transform: scale(1.08); }
+.revstar[aria-checked="true"] { color: var(--ink); }
+.revstars .muted { margin-left: 8px; font-size: 12.5px; }
+/* honeypot: present for a bot, gone for a human and for a screen reader */
+.revhp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* ---------- видео ---------- */
+.pvideo { margin: 8px 0 32px; }
+.pvideo__frame {
+  position: relative; display: block; width: 100%; aspect-ratio: 16 / 9;
+  background: var(--shell); border: none; padding: 0; overflow: hidden;
+}
+.pvideo__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.pvideo__play { cursor: pointer; }
+.pvideo__play img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.pvideo__blank { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.pvideo__mark { width: 32px; height: 50px; color: var(--muted); }
+.pvideo__btn {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(28, 26, 0, .82); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; padding-left: 4px;
+  transition: transform .2s var(--ease), background .2s var(--ease);
+}
+.pvideo__play:hover .pvideo__btn { transform: translate(-50%, -50%) scale(1.07); background: var(--ink); }
+@media (min-width: 900px) { .pvideo { max-width: 620px; } }
+
+/* The set page parks the same sticky buy bar as a product page. The chat
+   bubble's own rule (further up, chat.js's block) only knows about
+   data-screen product/checkout, so the set screen needs the same lift —
+   added here rather than by editing that block. */
+@media (max-width: 767px) {
+  body[data-screen="bundle"] .sbot__fab { bottom: calc(140px + env(safe-area-inset-bottom, 0px)); }
+  body[data-screen="bundle"] .sbot__panel { bottom: calc(200px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---------- админка: очередь отзывов ---------- */
+.adm__row--rev { align-items: flex-start; }
+.adm__revtext {
+  display: block; margin-top: 6px; font-size: 13px; line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.adm__revacts { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.adm__row--rev .rev__stars { color: var(--ink); font-size: 12px; margin-left: 6px; }

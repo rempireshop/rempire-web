@@ -39,19 +39,19 @@
     },
     ET: {
       title: "Rempire abiline", hint: "Demo: saan aru lihtsatest fraasidest",
-      hello: "Tere! Aitan valida. Öelge, mida otsite — näiteks «šampoon», «kingitus kuni 50 €» või «midagi habemele».",
+      hello: "Tere! Aitan valida. Ütle, mida otsid — näiteks „kohevust andev šampoon“, „kingitus kuni 50 €“ või „midagi habemele“.",
       chips: ["Midagi habemele", "Šampoon", "Kingitus kuni 50 €", "Hoolduskomplekt", "Parfüüm"],
       add: "Lisa ostukorvi", open: "Ava", addAll: "Lisa kõik ostukorvi",
-      found: "See sobib:", none: "Täpset vastet ei leidnud — siin on populaarsed:",
+      found: "Need sobivad:", none: "Täpset vastet ei leidnud — siin on populaarsed:",
       set: "Panin komplekti kokku — koos:", cart: "Avan ostukorvi…",
       placeholder: "Näiteks: habemeõli…"
     },
     EN: {
       title: "Rempire assistant", hint: "Demo: I understand simple phrases",
-      hello: "Hi! I'll help you choose. Tell me what you're after — e.g. “volume shampoo”, “gift under 50 €” or “something for the beard”.",
-      chips: ["Something for the beard", "Shampoo", "Gift under 50 €", "Care set", "Perfume"],
+      hello: "Hi! I'll help you choose. Tell me what you're after — e.g. “volume shampoo”, “gift under €50” or “something for the beard”.",
+      chips: ["Something for the beard", "Shampoo", "Gift under €50", "Care set", "Perfume"],
       add: "Add to cart", open: "Open", addAll: "Add all to cart",
-      found: "These fit:", none: "No exact match — here are the popular ones:",
+      found: "Here's what fits:", none: "No exact match — here are the popular ones:",
       set: "Here's a set — together:", cart: "Opening the cart…",
       placeholder: "e.g. beard oil…"
     }

@@ -70,6 +70,11 @@
      trimmed text of a node; RX handles strings with numbers in them. */
   var UI = {
     ET: {
+      "Включить": "Lülita sisse", "Выключить": "Lülita välja", "включён": "sees", "выключен": "väljas",
+      "Наборы на сайте": "Komplektid poes",
+      "готовые комплекты со скидкой 12 % — в меню, на главной и в каталоге; пока не согласовано с владельцем": "valmis komplektid 12 % soodsamalt — menüüs, avalehel ja kataloogis; omanikuga veel kooskõlastamata",
+      "показаны": "näidatakse", "скрыты": "peidetud", "Скрыть": "Peida", "Показать": "Näita",
+      "Наборы показаны ✓": "Komplektid näidatakse ✓", "Наборы скрыты ✓": "Komplektid peidetud ✓",
       "Все товары": "Kõik tooted", "Бренды": "Brändid", "Все": "Kõik",
       "Уход за волосами": "Juuksehooldus", "Стайлинг": "Viimistlus",
       "Уход за бородой": "Habemehooldus", "Уход за лицом": "Näohooldus",
@@ -77,49 +82,49 @@
       "Шампуни": "Šampoonid", "Кондиционеры": "Palsamid", "Маски и уход": "Maskid ja hooldus",
       "Спреи": "Spreid", "Пасты и воски": "Pastad ja vahad", "Гели": "Geelid",
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
-      "После бритья": "Habemeajamisjärgne", "Тоники": "Toonikud", "Очищение": "Puhastus",
+      "После бритья": "Pärast raseerimist", "Тоники": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
-      "В корзину": "Lisa ostukorvi", "мало": "vähe", "нет в наличии": "pole saadaval",
+      "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
       "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsi", "Корзина": "Ostukorv",
       "Кабинет": "Konto", "Описание": "Kirjeldus", "Доставка и возврат": "Tarne ja tagastus",
       "Похожие товары": "Sarnased tooted", "Вместе лучше": "Sobivad kokku",
-      "Оформить заказ": "Vormista ost", "Продолжить покупки": "Jätka ostlemist",
+      "Оформить заказ": "Vormista tellimus", "Продолжить покупки": "Jätka ostlemist",
       "Убрать": "Eemalda", "Итого": "Kokku", "Оплатить": "Maksa",
       "Фильтры": "Filtrid", "Сортировка": "Järjesta", "Сбросить": "Lähtesta",
       "Сбросить всё": "Lähtesta kõik", "Сбросить фильтры": "Lähtesta filtrid",
       "Наличие": "Saadavus", "Бренд": "Bränd", "В наличии": "Laos",
       "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
       "Пока пусто.": "Ostukorv on tühi.", "К товарам": "Toodete juurde",
-      "Хиты продаж": "Populaarsemad enne", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓", "Новинки": "Uuemad",
+      "Хиты продаж": "Populaarsemad ees", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓", "Новинки": "Uued",
       "Покупателю": "Ostjale", "Правовое": "Õigusinfo", "Контакты": "Kontakt",
-      "Доставка и оплата": "Kohaletoimetamine ja maksmine", "Возврат товара": "Kauba tagastamine",
+      "Доставка и оплата": "Tarne ja maksmine", "Возврат товара": "Kauba tagastamine",
       "Условия продажи": "Müügitingimused", "Конфиденциальность": "Privaatsus",
       "Правовая информация": "Õigusinfo", "Споры онлайн (ODR)": "Vaidlused veebis (ODR)",
-      "Оформление заказа": "Ostu vormistamine",
-      "Контакт": "Kliendi info", "Доставка": "Tarne", "Оплата": "Maksmine",
+      "Оформление заказа": "Tellimuse vormistamine",
+      "Контакт": "Kontaktandmed", "Доставка": "Tarne", "Оплата": "Maksmine",
       "Далее — доставка": "Edasi — tarne", "Далее — оплата": "Edasi — maksmine",
       "Имя": "Nimi", "Телефон": "Telefon", "Страна": "Riik", "Город": "Linn",
       "Адрес": "Aadress", "Промокод": "Sooduskood", "Применить": "Rakenda",
       "Заказ оформлен": "Tellimus vormistatud", "На главную": "Avalehele",
       "Поиск: шампунь, Davines, паста…": "Otsi: šampoon, Davines, pasta…",
-      "Что ищете?": "Mida otsite?", "Язык интерфейса": "Keel",
-      "Добавлено в корзину": "Lisatud korvi", "Товар снова в наличии — напишем!": "Anname teada, kui toode on taas laos!",
+      "Что ищете?": "Mida otsid?", "Язык интерфейса": "Keel",
+      "Добавлено в корзину": "Lisatud ostukorvi", "Товар снова в наличии — напишем!": "Anname teada, kui toode on taas laos!",
       "Сообщить": "Teata mulle", "Получить код": "Saada kood", "Выйти": "Logi välja",
       "Мои заказы": "Minu tellimused", "Мои данные": "Minu andmed", "Мои промокоды": "Minu sooduskoodid",
       "Повторить заказ": "Korda tellimust", "Сохранить": "Salvesta",
       "Страница не найдена": "Lehte ei leitud",
-      "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormistage külalisena.",
-      "Налоги включены. Доставка рассчитается при оформлении.": "Hinnad sisaldavad makse. Tarne arvutatakse vormistamisel.",
+      "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormista tellimus külalisena.",
+      "Налоги включены. Доставка рассчитается при оформлении.": "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
       "Каталог, товары и инфостраницы — на трёх языках.": "Kataloog, tooted ja infolehed on kolmes keeles.",
-      "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Tekst on üle toodud praeguselt saidilt; enne käivitamist vaatab selle üle jurist.",
+      "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Tekst on üle toodud praeguselt saidilt; enne poe avamist vaatab selle üle jurist.",
       "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
       "Европа": "Euroopa", "Таллинн": "Tallinn",
       "Профессиональный уход": "Professionaalne hooldus",
       "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — sellega töötab Rempire'i meeskond salongis.",
       "В каталог": "Kataloogi", "Смотреть": "Vaata", "Новинки": "Uued",
-      "Свежая поставка": "Värske saadetis",
-      "Уход и стайлинг, которые только приехали.": "Hooldus ja stiliseerimine, mis just saabusid.",
-      "Борода": "Habe", "Всё для формы": "Kõik vormi jaoks",
+      "Свежая поставка": "Värske kaup",
+      "Уход и стайлинг, которые только приехали.": "Hooldus ja viimistlus, mis just kohale jõudsid.",
+      "Борода": "Habe", "Всё для формы": "Kõik habeme kuju jaoks",
       "Масла, бальзамы и воски для ухода за бородой.": "Õlid, palsamid ja vahad habemehoolduseks.",
       "Ниша и классика": "Nišš ja klassika",
       "Creed, Tom Ford, Xerjoff, Byredo — то, что держим в наличии.": "Creed, Tom Ford, Xerjoff, Byredo — see, mida hoiame laos.",
@@ -128,62 +133,196 @@
       "Таллинн · Mardi 1 · est 2018": "Tallinn · Mardi 1 · est 2018",
       "Популярные товары": "Populaarsed tooted", "Новые товары": "Uued tooted",
       "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.": "Salongikosmeetika näole, kehale ja juustele — sellega töötab Rempire'i meeskond iga päev.",
-      "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Värsked saabumised: hooldus ja stiliseerimine, parfüümid ja uus merch.",
+      "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Värske kaup: hooldus ja viimistlus, parfüümid ja uus merch.",
       "Категории": "Kategooriad",
       "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professionaalsed tooted, millega Rempire'i meeskond salongis töötab.",
-      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire'i särgid — meie kunstnike pildid, trükime väikeste tiraažidena.",
+      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire'i firmasärgid — meie kunstnike kavandid, trükime väikestes kogustes.",
       "Ниша и классика, которые держим в наличии в Таллинне.": "Nišš ja klassika, mida hoiame Tallinnas laos.",
-      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Geelid, seep ja kehahooldus — sealhulgas oma keedetud seep.",
-      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "Kogu Rempire'i valik: hooldus, stiliseerimine, habe, nägu, keha, parfüümid ja merch.",
-      "Под эти фильтры ничего не подошло.": "Nende filtritega ei sobinud midagi.",
-      "Сначала дешевле": "Soodsamad enne", "Сначала дороже": "Kallimad enne",
+      "Гели, мыло и уход за телом — включая мыло собственной варки.": "Geelid, seep ja kehahooldus — sealhulgas ise keedetud seep.",
+      "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "Kogu Rempire'i valik: hooldus, viimistlus, habe, nägu, keha, parfüümid ja merch.",
+      "Под эти фильтры ничего не подошло.": "Nende filtritega ei leidnud ühtegi toodet.",
+      "Сначала дешевле": "Soodsamad ees", "Сначала дороже": "Kallimad ees",
       "Поделиться": "Jaga", "Купить через": "Osta kohe —", "Другие способы оплаты": "Teised makseviisid",
       "С этим покупают": "Sellega ostetakse koos",
-      "Самовывоз": "Järeletulek", "Реквизиты": "Rekvisiidid", "Связаться": "Võta ühendust",
+      "Самовывоз": "Järeletulek", "Реквизиты": "Ettevõtte andmed", "Связаться": "Võta ühendust",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Pangalink (Swedbank, SEB, LHV, Luminor, Coop), kaart, Apple Pay / Google Pay, arve ettevõtetele.",
-      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, edasi 1,50 € päevas. Vaja on dokumenti.",
+      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas. Vaja on isikut tõendavat dokumenti.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
       "Админка — демо": "Admin — demo",
       "Банковская ссылка": "Pangalink", "Банковская карта": "Pangakaart",
       "По счёту — для компаний": "Arvega — ettevõtetele",
-      "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — makse oma pangas",
+      "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — maksa oma pangas",
       "Оплата в одно касание": "Makse ühe puudutusega",
       "Счёт на почту, оплата в течение 7 дней": "Arve e-postile, maksmine 7 päeva jooksul",
       "Самовывоз — Mardi 1, Таллинн": "Järeletulek — Mardi 1, Tallinn",
-      "Курьер до двери (DPD)": "Kuller ukseni (DPD)", "Курьер DPD": "Kuller DPD",
-      "Курьер SmartPosti": "Kuller SmartPosti", "Курьер Omniva": "Kuller Omniva",
+      "Курьер до двери (DPD)": "Kuller uksele (DPD)", "Курьер DPD": "DPD kuller",
+      "Курьер SmartPosti": "SmartPosti kuller", "Курьер Omniva": "Omniva kuller",
       "Хочу получать новости и скидки": "Soovin uudiseid ja soodustusi",
       "E-mail для подтверждения заказа": "E-post tellimuse kinnituseks",
       "Имя и фамилия": "Ees- ja perekonnanimi", "Индекс": "Postiindeks",
-      "улица, дом": "tänav, maja", "Имя Фамилия": "Eesnimi Perenimi",
+      "улица, дом": "tänav, maja number", "Имя Фамилия": "Eesnimi Perekonnanimi",
       "Ваш заказ": "Tellimuse kokkuvõte", "Корзина пуста.": "Ostukorv on tühi.",
       "Бесплатно": "Tasuta", "Бесплатная доставка применена ✓": "Tasuta tarne rakendatud ✓",
-      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek Mardi 1. Vaja on dokumenti. Tellimus ootab 7 päeva, edasi 1,50 € päevas.",
-      "Оплата через банк — данные карты магазин не видит": "Makse läbi panga — pood kaardiandmeid ei näe",
-      "14 дней на возврат по закону ЕС": "14 päeva tagastusõigust EL-i seaduse järgi",
+      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek aadressil Mardi 1. Vaja on isikut tõendavat dokumenti. Tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
+      "Оплата через банк — данные карты магазин не видит": "Makse toimub panga kaudu — pood ei näe kaardiandmeid",
+      "14 дней на возврат по закону ЕС": "14-päevane tagastusõigus EL-i seaduse järgi",
       "Вопросы — 56237237 или rempireshopinfo@gmail.com": "Küsimused — 56237237 või rempireshopinfo@gmail.com",
-      "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades «Maksa» nõustute tingimuste ja tagastuspoliitikaga.",
-      "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14 päeva tagastusõigust EL-i seaduse järgi. Avatud kosmeetika ei kuulu hügieeni tõttu tagastamisele.",
-      "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14 päeva tagastusõigust EL-i seaduse järgi. Särki võib proovida ja tagastada, kui ei sobinud.",
-      "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Töötavas poes tuleb siia tellimuse number, arve e-postile ja paki jälgimine.",
-      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Tariifid — vedajate hinnakirjad 2025–2026, koos 24% käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20% allahindlust — lõplikud hinnad täpsustame liitumisel.",
+      "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Maksa“ nõustud tingimuste ja tagastuspoliitikaga.",
+      "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14-päevane tagastusõigus EL-i seaduse järgi. Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
+      "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14-päevane tagastusõigus EL-i seaduse järgi. Särki võib proovida ja tagastada, kui see ei sobi.",
+      "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Päris poes tuleb siia tellimuse number, arve e-postile ja paki jälgimisnumber.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel.",
       "Добавлено в корзину ✓": "Lisatud ostukorvi ✓",
-      "Код не найден — проверьте написание.": "Koodi ei leitud — kontrollige kirjapilti.",
+      "Код не найден — проверьте написание.": "Koodi ei leitud — kontrolli kirjapilti.",
       "Город": "Linn",
-      "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
+      "Рег. 12216136 · KMKR EE102723858": "Reg-kood 12216136 · KMKR EE102723858",
       "← В магазин": "← Poodi", "изменить": "muuda",
-      "Добавьте — и доставка бесплатно:": "Lisage — ja tarne on tasuta:",
-      "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo-arvustused. Päris omad tulevad pärast käivitamist — kirjaga «hinnake tellimust».",
+      "Добавьте — и доставка бесплатно:": "Lisa juurde — ja tarne on tasuta:",
+      "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo-arvustused. Päris arvustused tulevad pärast poe avamist — 10 päeva pärast saadetava kirjaga „Hinda tellimust“.",
       "из 5": "/ 5",
       "Объём": "Maht", "Количество": "Kogus", "Цвет принта — ": "Trüki värv — ",
       "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
-      "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Ühendused", "Настройки": "Seaded",
+      "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Liidestused", "Настройки": "Seaded",
       "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
       "Все заказы": "Kõik tellimused", "Править": "Muuda", "Отменить": "Võta tagasi",
       "Применить": "Rakenda", "Отмена": "Tühista", "Сохранить": "Salvesta",
-      "Найти товар: название, бренд…": "Otsi toodet: nimi, bränd…"
+      "Найти товар: название, бренд…": "Otsi toodet: nimi, bränd…",
+      /* вход в админку и настоящие заказы (backend) */
+      "Вход в админку": "Admini sisselogimine", "Пароль": "Parool", "Войти": "Logi sisse",
+      "Проверяем…": "Kontrollime…", "Неверный пароль": "Vale parool", "Введите пароль": "Sisestage parool",
+      "Пароль владельца. Магазин работает и без входа — здесь только управление.":
+        "Omaniku parool. Pood töötab ka ilma sisselogimiseta — siin on ainult haldus.",
+      "Слишком много попыток — подождите минуту.": "Liiga palju katseid — oodake minut.",
+      "Пароль ещё не настроен на сервере.": "Parool pole serveris veel seadistatud.",
+      "Сервер не отвечает": "Server ei vasta",
+      "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные.":
+        "Tellimused on päris, serverist. Kliendid ja analüütika on veel näidisandmed.",
+      "Сервер заказов не отвечает — показан демонстрационный список.":
+        "Tellimuste server ei vasta — näidatakse näidisnimekirja.",
+      "новый": "uus", "оплачен": "makstud", "не оплачен": "maksmata", "отправлен": "teele saadetud",
+      "отменён": "tühistatud", "возврат": "tagasimakse",
+      "Оформлен": "Vormistatud", "Оплачен": "Makstud", "Отправлен": "Teele saadetud",
+      "Состав": "Koosseis", "Статус": "Staatus", "Покупатель": "Ostja", "Скидка": "Soodustus",
+      "Заметка": "Märkus", "Видна только вам": "Näete ainult teie", "Сохранить заметку": "Salvesta märkus",
+      "Сохранено ✓": "Salvestatud ✓", "Не удалось сохранить": "Salvestamine ebaõnnestus",
+      "Пакомат": "Pakiautomaat", "Курьер": "Kuller", "Доставка": "Tarne",
+      /* оформление: доставка, выбор пакомата, оплата, чек */
+      "Курьер до двери": "Kuller ukseni", "Перевозчик": "Vedaja",
+      "Выберите пакомат": "Vali pakiautomaat", "выбрать": "vali",
+      "Поиск по адресу и городу": "Otsi aadressi või linna järgi",
+      "Загружаем список…": "Laadime nimekirja…",
+      "Выберите пакомат — туда приедет посылка.": "Vali pakiautomaat — sinna pakk saabubki.",
+      "Загружаем список пакоматов…": "Laadime pakiautomaatide nimekirja…",
+      "Для этой страны список пока пуст — выберите курьера.": "Selle riigi kohta nimekirja veel pole — vali kuller.",
+      "Ничего не нашли. Попробуйте название города или улицы.": "Midagi ei leitud. Proovi linna või tänava nime.",
+      "Выбор пакомата": "Pakiautomaadi valik",
+      "Город, улица или название": "Linn, tänav või nimi",
+      "Поиск пакомата": "Pakiautomaadi otsing",
+      "Готовим оплату…": "Valmistame makset…", "Готовим…": "Valmistame…",
+      "Заказ оплачен": "Tellimus makstud",
+      "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Aitäh! Kinnitus ja arve on juba teel e-postile. Kui pakk läheb vedajale, saadame jälgimisnumbri.",
+      "Оплата не прошла": "Makse ebaõnnestus",
+      "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "Raha ei võetud. Tellimus on alles — proovi uuesti maksta või vali teine makseviis.",
+      "Платёж обрабатывается": "Makset töödeldakse",
+      "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "Pank ei ole makset veel kinnitanud. Niipea kui ta vastab, saadame kirja — tavaliselt võtab see paar minutit.",
+      "Вернуться в магазин": "Tagasi poodi",
+      "Корзина пуста": "Ostukorv on tühi",
+      "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
+      "Проверьте e-mail": "Kontrolli e-posti aadressi",
+      "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
+      "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
+      "Не получилось оформить заказ — попробуйте ещё раз": "Tellimuse vormistamine ebaõnnestus — proovi uuesti",
+      "Не получилось оформить заказ": "Tellimuse vormistamine ebaõnnestus",
+      "Оплата пока недоступна — попробуйте позже": "Maksmine ei ole hetkel võimalik — proovi hiljem",
+      /* «Письма» — предпросмотр и тестовая отправка */
+      "Письма — предпросмотр и тест": "Kirjad — eelvaade ja test",
+      "Выберите письмо и язык — покажем его ровно таким, каким его получит покупатель. Ниже можно отправить образец себе на почту.": "Vali kiri ja keel — näitame seda täpselt sellisena, nagu klient selle saab. Allpool saab näidise endale saata.",
+      "Заказ принят": "Tellimus vastu võetud", "Заказ отправлен": "Tellimus teele saadetud",
+      "Брошенная корзина": "Pooleli jäänud ostukorv", "Товар снова в наличии": "Toode on taas laos",
+      "Скидка ко дню рождения": "Sünnipäevasoodustus",
+      "Письмо": "Kiri", "Язык письма": "Kirja keel", "Предпросмотр письма": "Kirja eelvaade",
+      "Отправить тест на…": "Saada test aadressile…", "Отправить тест": "Saada test",
+      "В письме будут вымышленный заказ и товары — это образец вёрстки, не настоящий заказ.": "Kirjas on väljamõeldud tellimus ja tooted — see on kujunduse näidis, mitte päris tellimus.",
+      "Тест отправлен ✓": "Test saadetud ✓", "Нужен вход в админку": "Logi administraatorina sisse",
+      "Отправка писем ещё не подключена": "Kirjade saatmine pole veel ühendatud",
+      "Слишком много писем — попробуйте позже": "Liiga palju kirju — proovi hiljem",
+      "Введите e-mail — на него придёт образец": "Sisesta e-posti aadress — sellele saadame näidise",
+      /* toasts and filter chips — text nodes the dictionary used to miss */
+      "Товара нет в наличии": "Toode on otsas", "Корзина пуста": "Ostukorv on tühi",
+      "В наличии ✕": "Laos ✕", "Ссылка скопирована ✓": "Link kopeeritud ✓",
+      "Записали — сообщим, когда появится ✓": "Kirja pandud — anname teada, kui toode on taas laos ✓",
+      "Введите e-mail — на него придёт код": "Sisesta e-posti aadress — sellele saadame koodi",
+      "Товары заказа #1042 в корзине ✓": "Tellimuse #1042 tooted on ostukorvis ✓",
+      "Сохранено ✓": "Salvestatud ✓",
+      /* ---- features: наборы, подарочная карта, отзывы, видео ---- */
+      "Наборы": "Komplektid", "Набор": "Komplekt", "Все наборы": "Kõik komplektid",
+      "Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.":
+        "Valmis komplektid samadest toodetest, mis on poes ka eraldi. Koos on soodsam.",
+      "Наборы скоро появятся.": "Komplektid tulevad varsti.",
+      "Что внутри": "Mis on sees",
+      "Одного из товаров сейчас нет — соберём набор, как только он приедет.":
+        "Üks toode on otsas — paneme komplekti kokku niipea, kui see saabub.",
+      "Набор сейчас не собрать — товар закончился": "Komplekti ei saa praegu kokku panna — toode on otsas",
+      "Набор в корзине ✓": "Komplekt on ostukorvis ✓",
+      "Подарочная карта": "Kinkekaart", "Выбрать сумму": "Vali summa", "Сумма": "Summa",
+      "25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
+        "25, 50 või 100 € — saadame kirjaga saajale. Kui ei tea, mida valida, sobib see alati.",
+      "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
+        "Kehtib kogu poes ega aegu kohe. Pärast maksmist tuleb kirjaga kood — sulle või kohe saajale.",
+      "Кому — имя": "Kellele — nimi", "Имя получателя": "Saaja nimi",
+      "E-mail получателя — не обязательно": "Saaja e-post — pole kohustuslik",
+      "Оставьте пустым — пришлём карту вам, подарите сами.": "Jäta tühjaks — saadame kaardi sulle ja kingid ise.",
+      "Короткое поздравление": "Lühike õnnesoov", "С днём рождения!": "Palju õnne sünnipäevaks!",
+      "Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.":
+        "Kaart kehtib aasta ostupäevast. Jääk säilib: seda saab kulutada mitme tellimusega.",
+      "Подарочная карта в корзине ✓": "Kinkekaart on ostukorvis ✓",
+      "Проверьте e-mail получателя": "Kontrolli saaja e-posti aadressi",
+      "Проверьте адрес — похоже, в нём опечатка.": "Kontrolli aadressi — tundub, et seal on trükiviga.",
+      "Промокод или подарочная карта": "Sooduskood või kinkekaart",
+      "убрать": "eemalda", "Останется на карте": "Kaardile jääb",
+      "На этой карте не осталось денег.": "Sellel kaardil pole enam raha.",
+      "Карта не найдена — проверьте код.": "Kaarti ei leitud — kontrolli koodi.",
+      "Сейчас не получилось проверить карту. Попробуйте позже.": "Praegu ei õnnestunud kaarti kontrollida. Proovi hiljem.",
+      "Проверенный отзыв": "Kontrollitud arvustus", "Оставить отзыв": "Jäta arvustus",
+      "Ваш отзыв": "Sinu arvustus", "Как вас зовут": "Kuidas sind kutsuda", "Оценка": "Hinnang",
+      "Что понравилось, что нет — от 20 знаков": "Mis meeldis, mis mitte — vähemalt 20 tähemärki",
+      "Пользуюсь месяц…": "Olen kasutanud kuu aega…",
+      "Согласен(на) опубликовать отзыв и имя на этой странице": "Nõustun arvustuse ja nime avaldamisega sellel lehel",
+      "Отправить отзыв": "Saada arvustus", "Отправляем…": "Saadame…",
+      "Публикуем после проверки — обычно в тот же день.": "Avaldame pärast ülevaatamist — tavaliselt samal päeval.",
+      "Спасибо! Отзыв отправлен — он появится на странице после проверки.":
+        "Aitäh! Arvustus on saadetud — see ilmub lehele pärast ülevaatamist.",
+      "Не получилось отправить — попробуйте ещё раз.": "Saatmine ebaõnnestus — proovi uuesti.",
+      "Напишите, как вас зовут.": "Kirjuta, kuidas sind kutsuda.",
+      "Поставьте оценку от 1 до 5.": "Anna hinnang 1 kuni 5.",
+      "Напишите хотя бы 20 знаков — так отзыв поможет другим.": "Kirjuta vähemalt 20 tähemärki — nii on arvustusest teistele kasu.",
+      "Слишком длинно — до 1500 знаков.": "Liiga pikk — kuni 1500 tähemärki.",
+      "Ссылки и адреса почты в отзывах не публикуем.": "Linke ja e-posti aadresse me arvustustes ei avalda.",
+      "Уберите, пожалуйста, грубые слова.": "Palun eemalda ropud sõnad.",
+      "Отметьте согласие на публикацию.": "Märgi nõusolek avaldamiseks.",
+      "Слишком много отзывов подряд — попробуйте через час.": "Liiga palju arvustusi järjest — proovi tunni pärast.",
+      "Сейчас не получилось сохранить. Попробуйте позже.": "Praegu ei õnnestunud salvestada. Proovi hiljem.",
+      "Видео": "Video", "Смотреть видео": "Vaata videot",
+      "Видео (YouTube/Vimeo ссылка)": "Video (YouTube'i või Vimeo link)",
+      "https://youtu.be/… или https://vimeo.com/…": "https://youtu.be/… või https://vimeo.com/…",
+      "Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.":
+        "Kleebi link — toote lehele tekib video. Tühi väli — plokki ei ole.",
+      "Отзывы": "Arvustused", "Новые": "Uued", "Опубликованные": "Avaldatud", "Отклонённые": "Tagasi lükatud",
+      "Загружаем…": "Laadime…", "Здесь пусто.": "Siin pole midagi.",
+      "Опубликовать": "Avalda", "Отклонить": "Lükka tagasi",
+      "Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.":
+        "Klientide arvustused. Poodi ei ilmu midagi iseenesest — kõigepealt loed, siis avaldad. Tagasi lükatud arvustust lihtsalt ei näidata.",
+      "Отзывы пока недоступны — база подключается. Как только она заработает, новые отзывы появятся здесь сами.":
+        "Arvustused pole veel saadaval — andmebaasi ühendatakse. Kui see tööle hakkab, ilmuvad uued arvustused siia ise.",
+      "Отзыв опубликован ✓": "Arvustus avaldatud ✓", "Отзыв отклонён ✓": "Arvustus tagasi lükatud ✓",
+      "Не получилось — попробуйте ещё раз": "Ei õnnestunud — proovi uuesti"
     },
     EN: {
+      "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
+      "Наборы на сайте": "Sets on the site",
+      "готовые комплекты со скидкой 12 % — в меню, на главной и в каталоге; пока не согласовано с владельцем": "ready-made sets at 12 % off — in the menu, on the home page and in the catalogue; not yet approved by the owner",
+      "показаны": "shown", "скрыты": "hidden", "Скрыть": "Hide", "Показать": "Show",
+      "Наборы показаны ✓": "Sets shown ✓", "Наборы скрыты ✓": "Sets hidden ✓",
       "Все товары": "All products", "Бренды": "Brands", "Все": "All",
       "Уход за волосами": "Hair care", "Стайлинг": "Styling",
       "Уход за бородой": "Beard care", "Уход за лицом": "Face care",
@@ -195,7 +334,7 @@
       "Кремы и сыворотки": "Creams & serums",
       "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
       "Главная": "Home", "Каталог": "Catalogue", "Поиск": "Search", "Корзина": "Cart",
-      "Кабинет": "Account", "Описание": "Description", "Доставка и возврат": "Shipping & returns",
+      "Кабинет": "Account", "Описание": "Description", "Доставка и возврат": "Delivery & returns",
       "Похожие товары": "Similar products", "Вместе лучше": "Better together",
       "Оформить заказ": "Checkout", "Продолжить покупки": "Continue shopping",
       "Убрать": "Remove", "Итого": "Total", "Оплатить": "Pay",
@@ -206,24 +345,24 @@
       "Пока пусто.": "Your cart is empty.", "К товарам": "Browse products",
       "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓", "Новинки": "New in",
       "Покупателю": "For customers", "Правовое": "Legal", "Контакты": "Contact",
-      "Доставка и оплата": "Shipping & payment", "Возврат товара": "Returns",
+      "Доставка и оплата": "Delivery & payment", "Возврат товара": "Returns",
       "Условия продажи": "Terms of sale", "Конфиденциальность": "Privacy",
       "Правовая информация": "Legal information", "Споры онлайн (ODR)": "Online dispute resolution (ODR)",
       "Оформление заказа": "Checkout",
-      "Контакт": "Contact", "Доставка": "Shipping", "Оплата": "Payment",
-      "Далее — доставка": "Next — shipping", "Далее — оплата": "Next — payment",
+      "Контакт": "Contact", "Доставка": "Delivery", "Оплата": "Payment",
+      "Далее — доставка": "Next — delivery", "Далее — оплата": "Next — payment",
       "Имя": "Name", "Телефон": "Phone", "Страна": "Country", "Город": "City",
       "Адрес": "Address", "Промокод": "Promo code", "Применить": "Apply",
       "Заказ оформлен": "Order placed", "На главную": "Back to home",
       "Поиск: шампунь, Davines, паста…": "Search: shampoo, Davines, paste…",
       "Что ищете?": "What are you looking for?", "Язык интерфейса": "Language",
-      "Добавлено в корзину": "Added to cart", "Товар снова в наличии — напишем!": "We'll email you when it's back!",
+      "Добавлено в корзину": "Added to cart", "Товар снова в наличии — напишем!": "We'll e-mail you when it's back in stock!",
       "Сообщить": "Notify me", "Получить код": "Send code", "Выйти": "Log out",
       "Мои заказы": "My orders", "Мои данные": "My details", "Мои промокоды": "My promo codes",
       "Повторить заказ": "Repeat order", "Сохранить": "Save",
       "Страница не найдена": "Page not found",
       "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
-      "Налоги включены. Доставка рассчитается при оформлении.": "Taxes included. Shipping is calculated at checkout.",
+      "Налоги включены. Доставка рассчитается при оформлении.": "Taxes included. Delivery is calculated at checkout.",
       "Каталог, товары и инфостраницы — на трёх языках.": "The catalogue, products and info pages are in three languages.",
       "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Text carried over from the current site; a lawyer reviews it before launch.",
       "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
@@ -231,9 +370,9 @@
       "Профессиональный уход": "Professional care",
       "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — what the Rempire team works with in the salon.",
       "В каталог": "To catalogue", "Смотреть": "View", "Новинки": "New in",
-      "Свежая поставка": "Fresh delivery",
-      "Уход и стайлинг, которые только приехали.": "Care and styling that just arrived.",
-      "Борода": "Beard", "Всё для формы": "Everything for shape",
+      "Свежая поставка": "Just arrived",
+      "Уход и стайлинг, которые только приехали.": "Care and styling that has just landed.",
+      "Борода": "Beard", "Всё для формы": "Everything to keep it in shape",
       "Масла, бальзамы и воски для ухода за бородой.": "Oils, balms and waxes for beard care.",
       "Ниша и классика": "Niche and classics",
       "Creed, Tom Ford, Xerjoff, Byredo — то, что держим в наличии.": "Creed, Tom Ford, Xerjoff, Byredo — what we keep in stock.",
@@ -245,7 +384,7 @@
       "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.": "Fresh arrivals: care and styling, fragrance and new merch.",
       "Категории": "Categories",
       "Профессиональные средства, которыми команда Rempire работает в салоне.": "Professional products the Rempire team works with in the salon.",
-      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire tees — prints by our artists, small runs.",
+      "Фирменные футболки Rempire — принты наших художников, печатаем небольшими тиражами.": "Rempire tees — prints by our own artists, made in small runs.",
       "Ниша и классика, которые держим в наличии в Таллинне.": "Niche and classics we keep in stock in Tallinn.",
       "Гели, мыло и уход за телом — включая мыло собственной варки.": "Gels, soap and body care — including our own handmade soap.",
       "Весь ассортимент Rempire: уход, стайлинг, борода, лицо, тело, парфюмерия и мерч.": "The full Rempire range: care, styling, beard, face, body, fragrance and merch.",
@@ -255,24 +394,24 @@
       "С этим покупают": "Bought together",
       "Самовывоз": "Pickup", "Реквизиты": "Company details", "Связаться": "Get in touch",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Bank link (Swedbank, SEB, LHV, Luminor, Coop), card, Apple Pay / Google Pay, invoice for companies.",
-      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · free · your order waits 7 days, then 1.50 € per day. ID required.",
+      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · free · your order waits 7 days, then €1.50 per day. Photo ID required.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
       "Админка — демо": "Admin — demo",
       "Банковская ссылка": "Bank link", "Банковская карта": "Bank card",
       "По счёту — для компаний": "By invoice — for companies",
-      "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — pay in your own bank",
+      "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — pay via your own bank",
       "Оплата в одно касание": "One-tap payment",
       "Счёт на почту, оплата в течение 7 дней": "Invoice by e-mail, payment within 7 days",
       "Самовывоз — Mardi 1, Таллинн": "Pickup — Mardi 1, Tallinn",
       "Курьер до двери (DPD)": "Courier to the door (DPD)", "Курьер DPD": "DPD courier",
-      "Курьер SmartPosti": "SmartPosti courier", "Курьер Omniva": "Omniva courier",
+      "Курьер SmartPosti": "SmartPost courier", "Курьер Omniva": "Omniva courier",
       "Хочу получать новости и скидки": "Send me news and discounts",
       "E-mail для подтверждения заказа": "E-mail for the order confirmation",
       "Имя и фамилия": "Full name", "Индекс": "Postcode",
-      "улица, дом": "street, house", "Имя Фамилия": "Name Surname",
+      "улица, дом": "street and house number", "Имя Фамилия": "First name Last name",
       "Ваш заказ": "Your order", "Корзина пуста.": "Your cart is empty.",
-      "Бесплатно": "Free", "Бесплатная доставка применена ✓": "Free shipping applied ✓",
-      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Free pickup at Mardi 1. ID required. Your order waits 7 days, then 1.50 € per day.",
+      "Бесплатно": "Free", "Бесплатная доставка применена ✓": "Free delivery applied ✓",
+      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Free pickup at Mardi 1. Photo ID required. Your order waits 7 days, then €1.50 per day.",
       "Оплата через банк — данные карты магазин не видит": "Payment goes through the bank — the shop never sees card details",
       "14 дней на возврат по закону ЕС": "14-day returns under EU law",
       "Вопросы — 56237237 или rempireshopinfo@gmail.com": "Questions — 56237237 or rempireshopinfo@gmail.com",
@@ -280,14 +419,14 @@
       "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14-day returns under EU law. Opened cosmetics cannot be returned for hygiene reasons.",
       "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14-day returns under EU law. You can try the tee on and return it if it doesn't fit.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "This is a demo — no real order was created. In the live shop this page shows the order number, an e-mailed invoice and parcel tracking.",
-      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Rates — carrier price lists 2025–2026, incl. 24% VAT. From 40 parcels a month Omniva and DPD give 3–20% off — final prices to be confirmed on connection.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Rates — carrier price lists 2025–2026, incl. 24% VAT. From 40 parcels a month Omniva and DPD give 3–20% off — final prices to be confirmed once the contracts are signed.",
       "Добавлено в корзину ✓": "Added to cart ✓",
       "Код не найден — проверьте написание.": "Code not found — check the spelling.",
       "Город": "City",
-      "Рег. 12216136 · KMKR EE102723858": "Reg 12216136 · KMKR EE102723858",
+      "Рег. 12216136 · KMKR EE102723858": "Reg. no 12216136 · VAT EE102723858",
       "← В магазин": "← Back to shop", "изменить": "edit",
-      "Добавьте — и доставка бесплатно:": "Add one — and shipping is free:",
-      "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo reviews. Real ones arrive after launch via a “rate your order” e-mail.",
+      "Добавьте — и доставка бесплатно:": "Add one more — and delivery is free:",
+      "Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.": "Demo reviews. Real ones arrive after launch, via a “rate your order” e-mail sent 10 days later.",
       "из 5": "out of 5",
       "Объём": "Size", "Количество": "Quantity", "Цвет принта — ": "Print colour — ",
       "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
@@ -295,43 +434,185 @@
       "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
       "Все заказы": "All orders", "Править": "Edit", "Отменить": "Undo",
       "Применить": "Apply", "Отмена": "Cancel", "Сохранить": "Save",
-      "Найти товар: название, бренд…": "Find a product: name, brand…"
+      "Найти товар: название, бренд…": "Find a product: name, brand…",
+      /* вход в админку и настоящие заказы (backend) */
+      "Вход в админку": "Admin sign-in", "Пароль": "Password", "Войти": "Sign in",
+      "Проверяем…": "Checking…", "Неверный пароль": "Wrong password", "Введите пароль": "Enter the password",
+      "Пароль владельца. Магазин работает и без входа — здесь только управление.":
+        "The owner's password. The shop runs without signing in — this is only the admin side.",
+      "Слишком много попыток — подождите минуту.": "Too many attempts — wait a minute.",
+      "Пароль ещё не настроен на сервере.": "No admin password is set on the server yet.",
+      "Сервер не отвечает": "The server is not responding",
+      "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные.":
+        "Orders are real, from the server. Customers and analytics are still demo data.",
+      "Сервер заказов не отвечает — показан демонстрационный список.":
+        "The orders server is not responding — showing the demo list.",
+      "новый": "new", "оплачен": "paid", "не оплачен": "unpaid", "отправлен": "shipped",
+      "отменён": "cancelled", "возврат": "refunded",
+      "Оформлен": "Placed", "Оплачен": "Paid", "Отправлен": "Shipped",
+      "Состав": "Items", "Статус": "Status", "Покупатель": "Customer", "Скидка": "Discount",
+      "Заметка": "Note", "Видна только вам": "Only you see it", "Сохранить заметку": "Save note",
+      "Сохранено ✓": "Saved ✓", "Не удалось сохранить": "Could not save",
+      "Пакомат": "Parcel locker", "Курьер": "Courier", "Доставка": "Delivery",
+      /* checkout: delivery, machine picker, payment, receipt */
+      "Курьер до двери": "Courier to your door", "Перевозчик": "Carrier",
+      "Выберите пакомат": "Choose a parcel locker", "выбрать": "choose",
+      "Поиск по адресу и городу": "Search by address or city",
+      "Загружаем список…": "Loading the list…",
+      "Выберите пакомат — туда приедет посылка.": "Choose a parcel locker — that is where the parcel goes.",
+      "Загружаем список пакоматов…": "Loading parcel lockers…",
+      "Для этой страны список пока пуст — выберите курьера.": "No lockers listed for this country yet — pick the courier.",
+      "Ничего не нашли. Попробуйте название города или улицы.": "Nothing found. Try a town or street name.",
+      "Выбор пакомата": "Parcel locker picker",
+      "Город, улица или название": "Town, street or name",
+      "Поиск пакомата": "Search parcel lockers",
+      "Готовим оплату…": "Preparing payment…", "Готовим…": "Preparing…",
+      "Заказ оплачен": "Order paid",
+      "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Thank you. The confirmation and receipt are on their way to your inbox; you will get a tracking number when the parcel is handed to the carrier.",
+      "Оплата не прошла": "Payment did not go through",
+      "Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.": "No money was taken. The order is saved — try paying again or choose another method.",
+      "Платёж обрабатывается": "Payment is being processed",
+      "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "The bank has not confirmed the payment yet. We will e-mail you as soon as it does — usually a couple of minutes.",
+      "Вернуться в магазин": "Back to the shop",
+      "Корзина пуста": "The cart is empty",
+      "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
+      "Проверьте e-mail": "Check the e-mail address",
+      "Товара не хватает на складе": "Not enough stock",
+      "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
+      "Не получилось оформить заказ — попробуйте ещё раз": "Could not place the order — please try again",
+      "Не получилось оформить заказ": "Could not place the order",
+      "Оплата пока недоступна — попробуйте позже": "Payment is not available right now — try again later",
+      /* «Письма» — предпросмотр и тестовая отправка */
+      "Письма — предпросмотр и тест": "E-mails — preview and test",
+      "Выберите письмо и язык — покажем его ровно таким, каким его получит покупатель. Ниже можно отправить образец себе на почту.": "Pick a letter and a language — we show it exactly as the customer receives it. Below you can send yourself a sample.",
+      "Заказ принят": "Order confirmed", "Заказ отправлен": "Order shipped",
+      "Брошенная корзина": "Abandoned cart", "Товар снова в наличии": "Back in stock",
+      "Скидка ко дню рождения": "Birthday discount",
+      "Письмо": "Letter", "Язык письма": "Letter language", "Предпросмотр письма": "Letter preview",
+      "Отправить тест на…": "Send a test to…", "Отправить тест": "Send a test",
+      "В письме будут вымышленный заказ и товары — это образец вёрстки, не настоящий заказ.": "The letter uses a made-up order and products — it is a layout sample, not a real order.",
+      "Тест отправлен ✓": "Test sent ✓", "Нужен вход в админку": "Sign in to the admin first",
+      "Отправка писем ещё не подключена": "E-mail sending is not connected yet",
+      "Слишком много писем — попробуйте позже": "Too many e-mails — try again later",
+      "Введите e-mail — на него придёт образец": "Enter an e-mail — we'll send the sample there",
+      /* toasts and filter chips — text nodes the dictionary used to miss */
+      "Товара нет в наличии": "This product is out of stock", "Корзина пуста": "Your cart is empty",
+      "В наличии ✕": "In stock ✕", "Ссылка скопирована ✓": "Link copied ✓",
+      "Записали — сообщим, когда появится ✓": "Noted — we'll let you know when it's back ✓",
+      "Введите e-mail — на него придёт код": "Enter your e-mail — we'll send the code there",
+      "Товары заказа #1042 в корзине ✓": "Items from order #1042 are in your cart ✓",
+      "Сохранено ✓": "Saved ✓",
+      /* ---- features: sets, gift card, reviews, video ---- */
+      "Наборы": "Sets", "Набор": "Set", "Все наборы": "All sets",
+      "Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.":
+        "Ready-made sets of the same products the shop sells separately. Together they cost less.",
+      "Наборы скоро появятся.": "Sets are coming soon.",
+      "Что внутри": "What's inside",
+      "Одного из товаров сейчас нет — соберём набор, как только он приедет.":
+        "One of the products is out of stock — we'll put the set together as soon as it arrives.",
+      "Набор сейчас не собрать — товар закончился": "The set can't be made up right now — a product is out of stock",
+      "Набор в корзине ✓": "Set added to your cart ✓",
+      "Подарочная карта": "Gift card", "Выбрать сумму": "Choose an amount", "Сумма": "Amount",
+      "25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
+        "€25, €50 or €100 — sent to the recipient by e-mail. When you don't know what to pick, this always works.",
+      "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
+        "Valid across the whole shop and it doesn't expire on you. After payment the code arrives by e-mail — to you or straight to the recipient.",
+      "Кому — имя": "To — name", "Имя получателя": "Recipient's name",
+      "E-mail получателя — не обязательно": "Recipient's e-mail — optional",
+      "Оставьте пустым — пришлём карту вам, подарите сами.": "Leave it empty and we'll send the card to you to give in person.",
+      "Короткое поздравление": "A short message", "С днём рождения!": "Happy birthday!",
+      "Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.":
+        "The card is valid for a year from purchase. The balance is kept: it can be spent over several orders.",
+      "Подарочная карта в корзине ✓": "Gift card added to your cart ✓",
+      "Проверьте e-mail получателя": "Check the recipient's e-mail",
+      "Проверьте адрес — похоже, в нём опечатка.": "Check the address — it looks like a typo.",
+      "Промокод или подарочная карта": "Promo code or gift card",
+      "убрать": "remove", "Останется на карте": "Left on the card",
+      "На этой карте не осталось денег.": "There is nothing left on this card.",
+      "Карта не найдена — проверьте код.": "Card not found — check the code.",
+      "Сейчас не получилось проверить карту. Попробуйте позже.": "We couldn't check the card just now. Please try later.",
+      "Проверенный отзыв": "Verified review", "Оставить отзыв": "Write a review",
+      "Ваш отзыв": "Your review", "Как вас зовут": "Your name", "Оценка": "Rating",
+      "Что понравилось, что нет — от 20 знаков": "What worked and what didn't — at least 20 characters",
+      "Пользуюсь месяц…": "I've been using it for a month…",
+      "Согласен(на) опубликовать отзыв и имя на этой странице": "I agree to publish this review and my name on this page",
+      "Отправить отзыв": "Send review", "Отправляем…": "Sending…",
+      "Публикуем после проверки — обычно в тот же день.": "We publish after a check — usually the same day.",
+      "Спасибо! Отзыв отправлен — он появится на странице после проверки.":
+        "Thank you! Your review has been sent — it appears on the page once checked.",
+      "Не получилось отправить — попробуйте ещё раз.": "Sending failed — please try again.",
+      "Напишите, как вас зовут.": "Tell us your name.",
+      "Поставьте оценку от 1 до 5.": "Give a rating from 1 to 5.",
+      "Напишите хотя бы 20 знаков — так отзыв поможет другим.": "Write at least 20 characters — that's what makes a review useful.",
+      "Слишком длинно — до 1500 знаков.": "Too long — up to 1500 characters.",
+      "Ссылки и адреса почты в отзывах не публикуем.": "We don't publish links or e-mail addresses in reviews.",
+      "Уберите, пожалуйста, грубые слова.": "Please take out the rude words.",
+      "Отметьте согласие на публикацию.": "Tick the consent box.",
+      "Слишком много отзывов подряд — попробуйте через час.": "Too many reviews in a row — try again in an hour.",
+      "Сейчас не получилось сохранить. Попробуйте позже.": "We couldn't save it just now. Please try later.",
+      "Видео": "Video", "Смотреть видео": "Watch the video",
+      "Видео (YouTube/Vimeo ссылка)": "Video (YouTube or Vimeo link)",
+      "https://youtu.be/… или https://vimeo.com/…": "https://youtu.be/… or https://vimeo.com/…",
+      "Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.":
+        "Paste a link and a video appears on the product page. Empty means no video block.",
+      "Отзывы": "Reviews", "Новые": "New", "Опубликованные": "Published", "Отклонённые": "Rejected",
+      "Загружаем…": "Loading…", "Здесь пусто.": "Nothing here.",
+      "Опубликовать": "Publish", "Отклонить": "Reject",
+      "Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.":
+        "Customer reviews. Nothing appears in the shop by itself — you read first, then publish. A rejected review is simply not shown.",
+      "Отзывы пока недоступны — база подключается. Как только она заработает, новые отзывы появятся здесь сами.":
+        "Reviews aren't available yet — the database is being connected. Once it is live, new reviews show up here by themselves.",
+      "Отзыв опубликован ✓": "Review published ✓", "Отзыв отклонён ✓": "Review rejected ✓",
+      "Не получилось — попробуйте ещё раз": "That didn't work — please try again"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    // real orders: «Заказ R-100042», «Пакомат · Kristiine keskus»
+    [/^Заказ (R-\d+)$/, { ET: "Tellimus $1", EN: "Order $1" }],
+    [/^Пакомат · (.+)$/, { ET: "Pakiautomaat · $1", EN: "Parcel locker · $1" }],
+    [/^Курьер · (.+)$/, { ET: "Kuller · $1", EN: "Courier · $1" }],
+    [/^Скидка · (.+)$/, { ET: "Soodustus · $1", EN: "Discount · $1" }],
     [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
     [/^Корзина \((\d+)\)$/, { ET: "Ostukorv ($1)", EN: "Cart ($1)" }],
-    [/^До бесплатной доставки \((.+), от (.+)\) — ещё (.+)$/, { ET: "Tasuta tarneni ($1, alates $2) — veel $3", EN: "$3 more to free shipping ($1, from $2)" }],
-    [/^Бесплатная доставка — порог (.+) достигнут ✓$/, { ET: "Tasuta tarne — $1 lävi käes ✓", EN: "Free shipping — $1 threshold reached ✓" }],
-    [/^Бесплатная доставка по Эстонии от (.+)$/, { ET: "Tasuta tarne Eestis alates $1", EN: "Free shipping in Estonia from $1" }],
-    [/^Бесплатная доставка от (.+) — не хватает (.+)$/, { ET: "Tasuta tarne alates $1 — puudu $2", EN: "Free shipping from $1 — $2 to go" }],
-    [/^Бесплатная доставка от (.+)$/, { ET: "Tasuta tarne alates $1", EN: "Free shipping from $1" }],
+    [/^До бесплатной доставки \((.+), от (.+)\) — ещё (.+)$/, { ET: "Tasuta tarneni ($1, alates $2) — veel $3", EN: "$3 more to free delivery ($1, from $2)" }],
+    [/^Бесплатная доставка — порог (.+) достигнут ✓$/, { ET: "Tasuta tarne — piir $1 saavutatud ✓", EN: "Free delivery — $1 threshold reached ✓" }],
+    [/^Бесплатная доставка по Эстонии от (.+)$/, { ET: "Tasuta tarne Eestis alates $1", EN: "Free delivery in Estonia from $1" }],
+    [/^Бесплатная доставка от (.+) — не хватает (.+)$/, { ET: "Tasuta tarne alates $1 — puudu $2", EN: "Free delivery from $1 — $2 to go" }],
+    [/^Бесплатная доставка от (.+)$/, { ET: "Tasuta tarne alates $1", EN: "Free delivery from $1" }],
     [/^Бесплатная доставка: Эстония от (.+) · LV, LT от (.+) · Финляндия от (.+)$/,
-      { ET: "Tasuta tarne: Eesti alates $1 · LV, LT alates $2 · Soome alates $3", EN: "Free shipping: Estonia from $1 · LV, LT from $2 · Finland from $3" }],
+      { ET: "Tasuta tarne: Eesti alates $1 · LV, LT alates $2 · Soome alates $3", EN: "Free delivery: Estonia from $1 · LV, LT from $2 · Finland from $3" }],
     [/^от (\d.*)$/, { ET: "alates $1", EN: "from $1" }],
-    [/^Доставка — (.+)$/, { ET: "Tarne — $1", EN: "Shipping — $1" }],
+    [/^Доставка — (.+)$/, { ET: "Tarne — $1", EN: "Delivery — $1" }],
     [/^Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от (.+) · самовывоз на Mardi 1$/,
-      { ET: "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · Eestis tasuta alates $1 · järeletulek Mardi 1", EN: "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · free in Estonia from $1 · pickup at Mardi 1" }],
+      { ET: "Tarne 1–3 päeva: DPD, Omniva, SmartPosti, kuller · Eestis tasuta alates $1 · järeletulek aadressil Mardi 1", EN: "Delivery 1–3 days: DPD, Omniva, SmartPosti, courier · free in Estonia from $1 · pickup at Mardi 1" }],
     [/^(.+) · (\d+(?:[.,]\d+)?) мл × (\d+)$/, { ET: "$1 · $2 ml × $3", EN: "$1 · $2 ml × $3" }],
     [/^(.+) · (\d+(?:[.,]\d+)?) г × (\d+)$/, { ET: "$1 · $2 g × $3", EN: "$1 · $2 g × $3" }],
     [/^(.+) × (\d+)$/, { ET: "$1 × $2", EN: "$1 × $2" }],
     [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от (.+) · 230 пакоматов в 4 странах$/,
       { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · Eestis tasuta alates $1 · 230 pakiautomaati 4 riigis", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days · free in Estonia from $1 · 230 parcel lockers in 4 countries" }],
-    [/^Пакомат (DPD|Omniva|SmartPosti)$/, { ET: "Pakiautomaat $1", EN: "$1 parcel locker" }],
+    [/^Пакомат (DPD|Omniva|SmartPosti)$/, { ET: "$1 pakiautomaat", EN: "$1 parcel locker" }],
     [/^Пакомат — (\d+) (?:точка|точки|точек)$/, { ET: "Pakiautomaat — $1 punkti", EN: "Parcel locker — $1 locations" }],
+    // the picker sheet counts on its own line
+    [/^(\d+) (?:точка|точки|точек)$/, { ET: "$1 punkti", EN: "$1 locations" }],
     [/^Всё, что есть в наличии от (.+) — во всех разделах магазина\.$/,
-      { ET: "Kõik, mis on laos brändilt $1 — kõigist osakondadest.", EN: "Everything in stock from $1 — across every section." }],
-    [/^По запросу «(.+)» ничего не нашлось\.$/, { ET: "Otsingule «$1» ei leidunud midagi.", EN: "Nothing found for “$1”." }],
+      { ET: "Kõik brändi $1 tooted, mis on laos — kõigist poe osadest.", EN: "Everything in stock from $1 — across every section." }],
+    [/^По запросу «(.+)» ничего не нашлось\.$/, { ET: "Otsingule „$1“ ei leidnud midagi.", EN: "Nothing found for “$1”." }],
     [/^\/ (.+)$/, { ET: "/ $1", EN: "/ $1" }],
-    [/^Отзывы \((\d)\)$/, { ET: "Arvustused ($1)", EN: "Reviews ($1)" }],
+    // \d+, not \d: with reviews from the database a product can pass ten
+    [/^Отзывы \((\d+)\)$/, { ET: "Arvustused ($1)", EN: "Reviews ($1)" }],
     [/^(\d+(?:[.,]\d+)?) мл$/, { ET: "$1 ml", EN: "$1 ml" }],
     [/^(\d+(?:[.,]\d+)?) г$/, { ET: "$1 g", EN: "$1 g" }],
     [/^★ ([\d,\.]+) из 5$/, { ET: "★ $1 / 5", EN: "★ $1 out of 5" }],
-    [/^Найдено: (\d+)$/, { ET: "Leitud: $1", EN: "Found: $1" }]
+    [/^Найдено: (\d+)$/, { ET: "Leitud: $1", EN: "Found: $1" }],
+    // features
+    [/^выгода (.+)$/, { ET: "sääst $1", EN: "you save $1" }],
+    [/^В корзину — (.+)$/, { ET: "Lisa ostukorvi — $1", EN: "Add to cart — $1" }],
+    [/^Подарочная карта ([A-Z0-9-]+)$/, { ET: "Kinkekaart $1", EN: "Gift card $1" }],
+    [/^(\d) из 5$/, { ET: "$1 / 5", EN: "$1 out of 5" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -355,7 +636,7 @@
     [/(\d) мл\b/g, { ET: "$1 ml", EN: "$1 ml" }]
   ];
   var TAIL_EXACT = {
-    "футболка оверсайз": ["oversized T-särk", "oversized tee"],
+    "футболка оверсайз": ["oversize T-särk", "oversized tee"],
     "парфюм": ["parfüüm", "perfume"]
   };
   /* Product names only — the fragment rules would turn an ordinary sentence
@@ -400,7 +681,9 @@
     return s;
   }
   var TR_ATTRS = ["placeholder", "aria-label", "title"];
-  var NAME_CTX = ".card__name,.cline__nm,.cosum__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm";
+  // .cline__parts and .bitem__nm (features) list product names inside a set —
+  // without them the Russian type tail survived into the Estonian cart
+  var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm";
   function translateTree(root) {
     if (S.lang === "RU" || !root) return;
     var lang = S.lang;
@@ -495,11 +778,26 @@
        common destinations (DE 37, PL 30, SE 29 incl. VAT). */
     EU: [{ l: "Курьер DPD по Европе", p: 33 }]
   };
-  /* Free-shipping floors per country. 50 € everywhere was the questionnaire
-     answer, but the real carrier rates make it a giveaway outside Estonia:
-     FI courier alone is ~26 € incl. VAT. These floors keep the promise
-     sensible; the final numbers are Renat's call and trivially editable. */
-  var THRESH = { EE: 50, LV: 75, LT: 75, FI: 100, EU: 200 };
+  /* Free-shipping floors per country, quoted by the announce bar, the footer,
+     the product page and the admin.
+     These are no longer a constant: whatever the shop *says* here has to be
+     what the checkout *charges*, and that number now comes from the server
+     (settings.shipping_rules → SHIP_RULES below, mirrored via /api/overrides).
+     The values seeded here are the same defaults src/lib/shipping.ts carries,
+     and refreshShipThresholds() updates them the moment the real rules land.
+     Per-country floors — 50 € everywhere is a giveaway outside Estonia, where
+     the FI courier alone costs ~26 € incl. VAT — are set through the rules'
+     freeFromByCountry, not here. */
+  var THRESH = { EE: 59, LV: 59, LT: 59, FI: 59, EU: 59 };
+  function refreshShipThresholds() {
+    Object.keys(THRESH).forEach(function (c) {
+      var by = SHIP_RULES.freeFromByCountry;
+      var v = by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : SHIP_RULES.freeFrom;
+      // null means "never free" — the marketing lines have no way to say that,
+      // so they keep the last real number while threshold() bills correctly
+      if (typeof v === "number" && isFinite(v)) THRESH[c] = v;
+    });
+  }
   function machinesFor(m) {
     if (!m || !m.pm) return [];
     try {
@@ -510,6 +808,168 @@
   }
   var COUNTRIES = [["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"], ["EU", "Другая страна Европы"]];
 
+  /* ---------- checkout delivery: rules, carriers, parcel points ------------
+     The SHIP table above still prices the account screen and the admin's
+     sample orders. Checkout works off the server's rules instead: three
+     delivery shapes, a carrier under the parcel one, and a price mirrored
+     from settings.shipping_rules through /api/overrides — so the summary the
+     shopper watches is the total the server bills. Defaults below match
+     src/lib/shipping.ts exactly; with no API behind the shop nothing here
+     fails, it just stays on the defaults and checks out as a demo. */
+  var SHIP_RULES = {
+    freeFrom: 59,
+    freeFromByCountry: null,
+    methods: {
+      parcel: { "default": 4.99, EE: 3.49, LV: 4.99, LT: 4.99 },
+      courier: { "default": 9.90, EE: 5.99 },
+      pickup: { "default": 0 }
+    },
+    carriers: null
+  };
+  var DELIVERY = [
+    { k: "parcel", l: "Пакомат" },
+    { k: "courier", l: "Курьер до двери" },
+    { k: "pickup", l: "Самовывоз — Mardi 1, Таллинн" }
+  ];
+  var CARRIER_NAMES = { omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD" };
+  /* Which carriers have machines we can actually list. Omniva's public feed
+     covers EE/LV/LT and SmartPosti EE; DPD publishes no point list at all
+     (contract API only), so DPD is offered as a courier, never as a pakomaat.
+     Finland has none of either yet — its SmartPosti points need a Posti API
+     key — so FI is courier-only and the parcel option is not offered there.
+     See docs/shipping.md. */
+  var CARRIERS_BY_COUNTRY = { EE: ["omniva", "smartpost"], LV: ["omniva"], LT: ["omniva"], FI: [], EU: [] };
+
+  /* Is there a server behind this page? null until the first call answers.
+     false puts the checkout back into demo mode — the prototype is hosted
+     statically for Renat, and it must still walk end to end there. */
+  var API = { ok: null };
+  function apiSeen(ok) { if (API.ok !== ok) API.ok = ok; }
+
+  /** Merge the owner's rules over the defaults, one key at a time. */
+  function applyShipRules(raw) {
+    if (!raw || typeof raw !== "object") return;
+    if (raw.freeFrom === null || typeof raw.freeFrom === "number") SHIP_RULES.freeFrom = raw.freeFrom;
+    if (raw.freeFromByCountry && typeof raw.freeFromByCountry === "object") SHIP_RULES.freeFromByCountry = raw.freeFromByCountry;
+    if (raw.methods && typeof raw.methods === "object") {
+      ["parcel", "courier", "pickup"].forEach(function (m) {
+        if (raw.methods[m] && typeof raw.methods[m] === "object") {
+          Object.keys(raw.methods[m]).forEach(function (c) {
+            var v = Number(raw.methods[m][c]);
+            if (isFinite(v) && v >= 0) SHIP_RULES.methods[m][c] = v;
+          });
+        }
+      });
+    }
+    if (raw.carriers && typeof raw.carriers === "object") SHIP_RULES.carriers = raw.carriers;
+    // the announce bar and the footer quote these — keep the promise and the
+    // bill the same number
+    refreshShipThresholds();
+  }
+  var shipRulesAsked = false;
+  function loadShipRules() {
+    if (shipRulesAsked) return;
+    shipRulesAsked = true;
+    fetch("/api/overrides/").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.ok) return;
+      apiSeen(true);
+      var s = j.settings || {};
+      applyShipRules(s.shipping_rules || s.shippingRules || s.shipping);
+      if (S.screen === "checkout") render();
+    }).catch(function () { apiSeen(false); });
+  }
+
+  /**
+   * Delivery shapes available for a country. The parcel option is offered only
+   * where there is a machine to choose — including "the feed answered and had
+   * nothing", which carriersFor() has already learned by then.
+   */
+  function deliveryFor(country) {
+    return DELIVERY.filter(function (d) {
+      if (d.k === "parcel") return carriersFor(country).length > 0;
+      if (d.k === "pickup") return country === "EE";   // the counter is in Tallinn
+      return true;
+    });
+  }
+  function shipMethod() {
+    var avail = deliveryFor(S.country);
+    for (var i = 0; i < avail.length; i++) if (avail[i].k === S.ship.method) return S.ship.method;
+    return avail.length ? avail[0].k : "courier";
+  }
+  /** Carriers worth offering: the country's list, minus any that came back empty. */
+  function carriersFor(country) {
+    var cc = country || S.country;
+    return (CARRIERS_BY_COUNTRY[cc] || []).filter(function (c) {
+      return !POINTS.empty[c + ":" + cc];
+    });
+  }
+  function shipCarrier() {
+    var list = carriersFor();
+    return list.indexOf(S.ship.carrier) >= 0 ? S.ship.carrier : (list[0] || "");
+  }
+  function isParcel() { return shipMethod() === "parcel"; }
+  function shipMethodLabel() {
+    var k = shipMethod();
+    for (var i = 0; i < DELIVERY.length; i++) if (DELIVERY[i].k === k) {
+      return k === "parcel" && shipCarrier() ? DELIVERY[i].l + " " + CARRIER_NAMES[shipCarrier()] : DELIVERY[i].l;
+    }
+    return "";
+  }
+
+  /* ---------- parcel points ----------
+     One list per carrier+country, fetched once and kept. A dead feed is not an
+     error the shopper should see: the API falls back to its committed seed,
+     and this falls back to shipping-data.js, so there is always something to
+     pick from. */
+  var POINTS = { by: {}, empty: {}, loading: {}, q: "" };
+  function pointsKey() { return shipCarrier() + ":" + S.country; }
+  function pointsList() { return POINTS.by[pointsKey()] || null; }
+  function demoPoints(carrier) {
+    try {
+      var names = SHIPPING_DATA.machines[S.country][carrier] || [];
+      return names.map(function (n, i) {
+        return { id: carrier + "-demo-" + i, name: n, address: "", city: "" };
+      });
+    } catch (e) { return []; }
+  }
+  function loadPoints() {
+    var carrier = shipCarrier();
+    if (!carrier) return;
+    var key = carrier + ":" + S.country;
+    if (POINTS.by[key] || POINTS.loading[key]) return;
+    POINTS.loading[key] = true;
+    var done = function (list, live) {
+      POINTS.loading[key] = false;
+      POINTS.by[key] = list;
+      if (live && !list.length) POINTS.empty[key] = true;
+      pointsArrived();
+    };
+    fetch("/api/shipping/points/?country=" + encodeURIComponent(S.country) + "&carrier=" + encodeURIComponent(carrier))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j && j.ok && j.points) { apiSeen(true); done(j.points, true); }
+        else done(demoPoints(carrier), false);
+      })
+      .catch(function () { apiSeen(false); done(demoPoints(carrier), false); });
+  }
+  /** Typeahead over name, address and city — the three things people type. */
+  function pointsFiltered() {
+    var all = pointsList() || [];
+    var q = POINTS.q.trim().toLowerCase();
+    if (!q) return all.slice(0, 80);
+    var words = q.split(/\s+/);
+    return all.filter(function (p) {
+      var hay = ((p.name || "") + " " + (p.address || "") + " " + (p.city || "")).toLowerCase();
+      for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
+      return true;
+    }).slice(0, 80);
+  }
+  function pointById(id) {
+    var all = pointsList() || [];
+    for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
+    return null;
+  }
+
   var PAYS = [
     { l: "Банковская ссылка", h: "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке", k: "bank" },
     { l: "Банковская карта", h: "Visa, Mastercard", k: "card" },
@@ -517,6 +977,11 @@
     { l: "По счёту — для компаний", h: "Счёт на почту, оплата в течение 7 дней", k: "invoice" }
   ];
   var BANKS = ["Swedbank", "SEB", "LHV", "Luminor", "Coop"];
+  /* features: the three gift-card amounts. Declared HERE, not down with the
+     rest of the gift-card code — the saved-cart filter below runs at load and
+     needs it, and a `var` assigned further down is still undefined by then
+     (which silently emptied the cart on every reload). */
+  var GIFT_AMOUNTS = [25, 50, 100];
 
   // ---------- state ----------
   var S = {
@@ -547,7 +1012,11 @@
     toast: null,
     coStep: 1,
     sumOpen: null,      // checkout summary; null = follow the breakpoint
-    ship: { name: "", addr: "", zip: "", city: "", phone: "" },
+    // method/carrier/point drive the real checkout; the rest is the address
+    ship: { name: "", addr: "", zip: "", city: "", phone: "", method: "parcel", carrier: "", point: null },
+    pointOpen: false,   // the parcel-machine picker sheet
+    paying: false,      // «Оплатить» is in flight — the button locks
+    done: null,         // receipt state when we got here without a redirect
     newsletter: false,
     invoiceCo: "",
     acctName: "",
@@ -558,6 +1027,9 @@
     adminOrder: 0,   // opened order id (0 = list)
     adminEdit: "",   // opened product id in goods
     goodsQ: "",      // admin goods search
+    mailTpl: "order-confirmed", // «Письма»: which letter the preview shows
+    mailLang: "",    // letter language; "" follows the panel language
+    mailTo: "",      // address typed into «отправить тест на…»
     admNav: true,       // admin side panes collapse to rails
     admAi: true,
     size: 0,
@@ -568,23 +1040,78 @@
     infoSlug: "",       // which legal/info page is open
     onlyInStock: false,
     brand: "",          // brand-scoped catalogue view (the Бренды section)
-    brandFilter: []
+    brandFilter: [],
+    // ---- наборы, подарочная карта, отзывы, видео (features) ----
+    bundleId: "",       // which set is open on the set page
+    giftAmount: 50,     // chosen gift-card amount
+    gift: { name: "", email: "", message: "" },
+    giftCard: null,     // {code, discount, remaining} once a card is applied at checkout
+    giftErr: "",
+    dbReviews: {},      // productId → [approved reviews from the database]
+    revForm: { name: "", rating: 0, text: "", website: "", consent: false },
+    revState: "",       // "" | "sending" | "sent" | an error code
+    revOpen: false,
+    admReviews: null,   // admin tab: {reviews, counts} once loaded
+    admRevFilter: "pending",
+    videoOn: false      // the product video is a click-to-play embed
   };
 
   var LS = "rempire-shop-proto";
+  /* Declared before the block that sets it. `var` hoists the declaration but
+     not the assignment, so with this line below the try{} it ran afterwards
+     and reset the flag to false every time — the saved preference was never
+     seen as explicit, and the geo refinement below overrode it. */
+  var savedHadLang = false;
+
+  /* ---------- the language in the URL ------------------------------------
+     /shop2/ is Russian and the x-default; /shop2/et/… and /shop2/en/… are the
+     same shop one language over. The prefix is the strongest signal there is —
+     it is what a search engine indexed and what a shopper pasted — so it beats
+     both the saved preference and the browser's languages. Paths without a
+     prefix behave exactly as they did: saved choice, else browser, else RU. */
+  var LANG_OF_SEG = { et: "ET", en: "EN", ru: "RU" };
+  var SEG_OF_LANG = { RU: "", ET: "/et", EN: "/en" };
+  function langFromPath(p) {
+    var m = String(p || "").match(/^\/shop2\/(et|en|ru)(?:\/|$)/i);
+    return m ? LANG_OF_SEG[m[1].toLowerCase()] : "";
+  }
+  /* Everything after /shop2/<lang> — the router matches on this, so one set of
+     patterns serves all three languages. */
+  function stripLangPrefix(p) {
+    return String(p || "").replace(/^\/shop2\/(et|en|ru)(?=\/|$)/i, "/shop2");
+  }
+  /* What the URL itself declares, which is not always what is on screen: an
+     unprefixed path stays Russian for the canonical and the hreflang cluster
+     even when the visitor's browser has us rendering English. Getting that
+     backwards would tell Google that /shop2/ is the English page. */
+  var urlLang = langFromPath(location.pathname);
+  var pathLang = urlLang || "RU";
+  // the path this document was served for — what any prerendered markup in it
+  // describes, and therefore what stops being true the moment we navigate
+  var loadedPath = location.pathname;
+
   try {
     var saved = JSON.parse(localStorage.getItem(LS) || "{}");
     // Drop lines whose product no longer exists — byId() falls back to the
     // first product, which would silently show the wrong item at the wrong
     // price after a catalogue change.
     if (saved.cart) S.cart = saved.cart.filter(function (l) {
+      // sets and gift cards are not catalogue products: a set survives only
+      // while it is still curated, a gift card while the amount is still sold
+      if (l.type === "bundle") return !!bundleById(l.id);
+      if (l.type === "gift") return GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0;
       for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === l.id) return true;
       return false;
     });
     if (saved.lang) { S.lang = saved.lang; savedHadLang = true; }
     else S.lang = guessLang();
   } catch (e) {}
-  var savedHadLang = false;
+  /* Applied last so it beats both. It is deliberately not persisted: someone
+     who arrives on /shop2/en/ from a search result and never touches the
+     switcher keeps their own preference on the unprefixed paths. The flag is
+     set because the language IS decided — the geo refinement below must not
+     second-guess a URL. */
+  if (urlLang) { S.lang = urlLang; savedHadLang = true; }
   /* First visit: follow the browser's language. Estonian browsers get ET,
      English get EN, everything else stays RU — the shop's core audience.
      A generic-English browser is then refined by the visitor's country
@@ -608,7 +1135,15 @@
 
   // ---------- helpers ----------
   function eur(n) {
-    return (Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " €";
+    // ET/RU: «12,90 €»; EN: «€12.90» (whole euros drop the decimals in all three)
+    var v = (Math.round(n * 100) / 100).toFixed(2);
+    if (S.lang === "EN") return "€" + v.replace(".00", "");
+    return v.replace(".", ",").replace(",00", "") + " €";
+  }
+  function num1(n) {
+    // one decimal, language-aware separator (ratings)
+    var v = (Math.round(n * 10) / 10).toFixed(1);
+    return S.lang === "EN" ? v : v.replace(".", ",");
   }
   function byId(id) { for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i]; return CATALOGUE[0]; }
   function sizePrice(p, i) {
@@ -617,8 +1152,17 @@
   }
   function gal(p) { return p.gallery && p.gallery.length ? p.gallery : [p.img]; }
   function cartCount() { var n = 0; S.cart.forEach(function (l) { n += l.qty; }); return n; }
-  function cartSum() { var s = 0; S.cart.forEach(function (l) { s += sizePrice(byId(l.id), l.size || 0) * l.qty; }); return s; }
-  function threshold() { return THRESH[S.country] || 200; }
+  // lineUnit() knows the three line kinds — product, set, gift card
+  function cartSum() { var s = 0; S.cart.forEach(function (l) { s += lineUnit(l) * l.qty; }); return s; }
+  /* The free-shipping floor now comes from the same rules the server bills on
+     (SHIP_RULES, mirrored from settings.shipping_rules). THRESH above is the
+     old demo table and still serves the account screen. A null floor means
+     delivery is never free in that country. */
+  function threshold() {
+    var by = SHIP_RULES.freeFromByCountry;
+    var f = by && Object.prototype.hasOwnProperty.call(by, S.country) ? by[S.country] : SHIP_RULES.freeFrom;
+    return f === null || f === undefined ? Infinity : f;
+  }
   // deliberately pre-discount: the industry norm is that a promo code does
   // not revoke free shipping the cart already earned
   function freeShip() { return cartSum() >= threshold(); }
@@ -629,9 +1173,30 @@
   function methodIdx() { S.method = Math.min(S.method, methods().length - 1); return S.method; }
   function acctIdx() { S.acctMethod = Math.min(S.acctMethod, methods().length - 1); return S.acctMethod; }
   function method() { return methods()[methodIdx()]; }
-  function shipCost() { return freeShip() ? 0 : method().p; }
+  /** Delivery price for any method, straight off the rules: carrier, then method. */
+  function shipPriceFor(m, carrier) {
+    if (m === "pickup" || freeShip()) return 0;
+    var byCarrier = SHIP_RULES.carriers && SHIP_RULES.carriers[carrier];
+    var v = byCarrier ? (byCarrier[S.country] !== undefined ? byCarrier[S.country] : byCarrier["default"]) : undefined;
+    if (v === undefined || v === null) {
+      var table = SHIP_RULES.methods[m] || {};
+      v = table[S.country] !== undefined ? table[S.country] : table["default"];
+    }
+    return typeof v === "number" && isFinite(v) ? Math.round(v * 100) / 100 : 0;
+  }
+  function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
   function discount() { return S.promoOk ? Math.round(cartSum() * 10) / 100 : 0; }
-  function total() { return cartSum() - discount() + shipCost(); }
+  /* ---- features: gift card at checkout -----------------------------------
+     A card pays for goods and delivery both, but never more than the order
+     costs — the remainder stays on the card for the next one. Applied after
+     the promo code, so a code can still be used with a card. */
+  function giftDiscount() {
+    if (!S.giftCard) return 0;
+    var rest = cartSum() - discount() + shipCost();
+    return Math.round(Math.min(S.giftCard.balance, Math.max(0, rest)) * 100) / 100;
+  }
+  /* ---- /features ---------------------------------------------------------- */
+  function total() { return cartSum() - discount() + shipCost() - giftDiscount(); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function emailBad() { return S.emailTouched && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email); }
   /* One regex, but not one message: "there is a typo in the domain" is simply
@@ -781,6 +1346,228 @@
       "</div>";
   }
 
+  /* ---------- наборы (bundles) --------------------------------------------
+     Curated sets, generated by tools/build-bundles.mjs from
+     tools/bundles.config.mjs into public/shop/bundles.js. A set is NOT a
+     catalogue product: it has its own id space («bundle:<id>» in the cart and
+     in the order), one fixed price, and it carries the real products it is
+     made of, so the shopper — and later whoever packs the parcel — sees
+     exactly what is inside. Titles and descriptions arrive in three
+     languages, like the product texts, so they are picked by S.lang instead
+     of going through the interface dictionary.
+
+     The file is optional: if bundles.js fails to load the shop simply has no
+     sets, rather than a blank page. */
+  function allBundles() {
+    if (DEMO.bundles === false) return [];   // owner switched sets off (admin → Магазин)
+    return typeof BUNDLES === "undefined" ? [] : BUNDLES;
+  }
+  function bundleById(id) {
+    var key = String(id || "").replace(/^bundle:/, "");
+    var list = allBundles();
+    for (var i = 0; i < list.length; i++) if (list[i].id === key) return list[i];
+    return null;
+  }
+  function bundleTitle(b) { return (b.title && (b.title[S.lang] || b.title.RU)) || b.id; }
+  function bundleDesc(b) { return (b.desc && (b.desc[S.lang] || b.desc.RU)) || ""; }
+  /* The live catalogue wins over the snapshot inside the set: a renamed or
+     re-priced product must not show two different names on two pages. */
+  function bundleItemProduct(it) {
+    for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === it.id) return CATALOGUE[i];
+    return null;
+  }
+  function bundleItemName(it) {
+    var p = bundleItemProduct(it);
+    return (p ? p.brand + " " + p.name : (it.brand || "") + " " + (it.name || it.id)).trim();
+  }
+  /* Three product photos stacked instead of a new photo shoot: at card size
+     the overlap reads as «несколько вещей», and no set needs an asset. */
+  function bundleStack(b, cls) {
+    var imgs = (b.images || []).slice(0, 3);
+    // --n2 rebalances a two-item set: three slots with one empty read as a
+    // photo that failed to load
+    return '<span class="bstack bstack--n' + imgs.length + " " + (cls || "") + '">' + imgs.map(function (src, i) {
+      return '<span class="bstack__i bstack__i--' + i + '" style="background-image:url(\'' + src + '\')"></span>';
+    }).join("") + "</span>";
+  }
+  function bundleCardHTML(b) {
+    var out = b.stock === "out";
+    return '<div class="card card--bundle">' +
+      '<button class="card__go" data-go-bundle="' + b.id + '">' +
+        '<span class="card__media">' + bundleStack(b, "bstack--card") +
+          '<span class="bbadge num">−' + b.pct + ' %</span></span>' +
+        '<span class="card__brand">Набор</span>' +
+        '<span class="card__name">' + esc(bundleTitle(b)) + "</span>" +
+        '<span class="card__price num">' + eur(b.price) +
+          ' <s class="bwas">' + eur(b.sum) + "</s>" +
+          (out ? ' <span class="chip chip--out">нет в наличии</span>' : "") + "</span>" +
+      "</button>" +
+      (out ? "" : '<button class="link card__add" data-addbundle="' + b.id + '">В корзину</button>') +
+      "</div>";
+  }
+  /* Sets belonging to the section being browsed, shown above the grid. Hidden
+     the moment the shopper narrows anything down — a set cannot honour a
+     brand filter or a subcategory chip, so offering one there would lie. */
+  function bundlesForCatalog() {
+    if (S.brand || S.subcat || S.brandFilter.length || S.onlyInStock) return [];
+    return allBundles().filter(function (b) {
+      return b.stock !== "out" && (S.cat === "all" || b.cat === S.cat);
+    });
+  }
+  function bundleGridHTML(list, title) {
+    if (!list.length) return "";
+    return '<section class="sec sec--bundles"><div class="sec__head"><h2 class="sec__title">' + title +
+      '</h2><button class="link" data-go="bundles">Все наборы</button></div>' +
+      '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div></section>";
+  }
+
+  function screenBundles() {
+    var list = allBundles();
+    return '<div class="wrap">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / Наборы</div>' +
+      '<section class="sec" style="padding-top:14px">' +
+        '<h1 class="display h1">Наборы</h1>' +
+        '<p class="sec__intro">Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.</p>' +
+        giftTileHTML() +
+        (list.length
+          ? '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div>"
+          : '<p class="muted">Наборы скоро появятся.</p>') +
+      "</section></div>";
+  }
+
+  function screenBundle() {
+    var b = bundleById(S.bundleId);
+    if (!b) {
+      return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1>' +
+        '<p><button class="link" data-go="bundles">Все наборы</button></p></section></div>';
+    }
+    var out = b.stock === "out";
+    return '<div class="wrap">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="bundles">Наборы</button> / ' +
+        esc(bundleTitle(b)) + "</div>" +
+      '<div class="pdp">' +
+        '<div><div class="pdp__stage">' + bundleStack(b, "bstack--big") + "</div></div>" +
+        "<div>" +
+          '<div class="pdp__idrow"><span class="card__brand pdp__brand">Набор</span></div>' +
+          '<h1 class="pdp__title">' + esc(bundleTitle(b)) + "</h1>" +
+          '<div class="num pdp__price"><span>' + eur(b.price) + '</span> <s class="bwas">' + eur(b.sum) + "</s>" +
+            ' <span class="chip chip--ok">выгода ' + eur(b.save) + "</span>" +
+            (out ? ' <span class="chip chip--out">нет в наличии</span>' : "") + "</div>" +
+          '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
+          '<p class="bdesc">' + esc(bundleDesc(b)) + "</p>" +
+          '<div class="sec__head sec__head--sub"><h2 class="sec__title">Что внутри</h2></div>' +
+          '<div class="bitems">' + b.items.map(function (it) {
+            var p = bundleItemProduct(it);
+            return '<div class="bitem"><span class="bitem__ph">' +
+                '<span class="ph" style="background-image:url(\'' + (p ? p.img : it.img) + '\')"></span></span>' +
+              '<button class="bitem__nm" data-go-product="' + it.id + '">' + esc(bundleItemName(it)) +
+                (it.sizeLabel ? ' <span class="muted">· ' + esc(it.sizeLabel) + "</span>" : "") + "</button>" +
+              '<span class="num bitem__pr">' + eur(it.price) + "</span></div>";
+          }).join("") + "</div>" +
+          (out
+            ? '<p class="muted">Одного из товаров сейчас нет — соберём набор, как только он приедет.</p>'
+            : '<button class="btn btn--wide" data-addbundle="' + b.id + '">В корзину — ' + eur(b.price) + "</button>") +
+          '<div class="pdp__ship">Доставка 1–3 дня: DPD, Omniva, SmartPosti, курьер · по Эстонии бесплатно от ' + THRESH.EE + " € · самовывоз на Mardi 1</div>" +
+        "</div>" +
+      "</div></div>" +
+      (out ? "" :
+        '<div class="stickybar"><span class="num stickybar__sum">' + eur(b.price) +
+        '</span><button class="btn" data-addbundle="' + b.id + '">В корзину</button></div>');
+  }
+
+  /* ---------- подарочная карта --------------------------------------------
+     A virtual product: no catalogue entry, no stock, three fixed amounts. It
+     travels in the cart as {type:"gift", id:"gift:50", meta:{…}} and reaches
+     the order as the item id «gift:50»; the code itself is made server-side
+     once the order is paid (src/lib/giftcards.ts).
+     GIFT_AMOUNTS lives up with BANKS — see the note there. */
+  function giftAmount(id) {
+    var m = /^gift:(\d+)$/.exec(String(id || ""));
+    return m ? Number(m[1]) : 0;
+  }
+  function giftTileHTML() {
+    return '<div class="gifttile"><span class="gifttile__art" aria-hidden="true">' + tower("gifttile__mark") + "</span>" +
+      '<div class="gifttile__txt"><h2 class="sec__title">Подарочная карта</h2>' +
+      '<p class="muted">25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.</p></div>' +
+      '<button class="btn btn--ghost" data-go="gift">Выбрать сумму</button></div>';
+  }
+  function giftEmailBad() {
+    var v = S.gift.email.trim();
+    return !!v && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v);
+  }
+  function screenGift() {
+    return '<div class="wrap wrap--mid">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="bundles">Наборы</button> / Подарочная карта</div>' +
+      '<section class="sec" style="padding-top:14px">' +
+        '<h1 class="display h1">Подарочная карта</h1>' +
+        '<p class="sec__intro">Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.</p>' +
+        '<div class="field__label">Сумма</div>' +
+        '<div class="gamts" role="group" aria-label="Сумма карты">' + GIFT_AMOUNTS.map(function (a) {
+          return '<button class="gamt" data-giftamt="' + a + '" aria-current="' + (S.giftAmount === a) + '">' + a + " €</button>";
+        }).join("") + "</div>" +
+        '<label class="field"><span class="field__label">Кому — имя</span>' +
+          '<input class="input" data-giftf="name" value="' + esc(S.gift.name) + '" placeholder="Имя получателя"></label>' +
+        '<label class="field"><span class="field__label">E-mail получателя — не обязательно</span>' +
+          '<input class="input" type="email" inputmode="email" data-giftf="email" value="' + esc(S.gift.email) + '" aria-invalid="' + giftEmailBad() + '" placeholder="you@example.com"></label>' +
+        (giftEmailBad() ? '<div class="err" role="alert">Проверьте адрес — похоже, в нём опечатка.</div>'
+          : '<div class="hint">Оставьте пустым — пришлём карту вам, подарите сами.</div>') +
+        '<label class="field"><span class="field__label">Короткое поздравление</span>' +
+          '<textarea class="input" rows="3" maxlength="300" data-giftf="message" placeholder="С днём рождения!">' + esc(S.gift.message) + "</textarea></label>" +
+        '<button class="btn btn--wide" data-addgift="' + S.giftAmount + '">В корзину — ' + eur(S.giftAmount) + "</button>" +
+        '<p class="muted" style="margin-top:14px">Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.</p>' +
+      "</section></div>";
+  }
+
+  /* ---------- cart lines of every kind ------------------------------------
+     Three kinds share one list: a catalogue product, a set and a gift card.
+     Everything that used to call byId(l.id) goes through these instead. */
+  function lineUnit(l) {
+    if (l.type === "bundle") { var b = bundleById(l.id); return b ? b.price : 0; }
+    if (l.type === "gift") return giftAmount(l.id);
+    return sizePrice(byId(l.id), l.size || 0);
+  }
+  /* The kind word is picked here rather than left to the dictionary: in the
+     checkout summary the whole line is one text node («Набор · X × 1»), and
+     the generic «$1 × $2» rule claims it before any set-specific rule can. */
+  var LINE_KIND = {
+    bundle: { RU: "Набор", ET: "Komplekt", EN: "Set" },
+    gift: { RU: "Подарочная карта", ET: "Kinkekaart", EN: "Gift card" }
+  };
+  function lineTitle(l) {
+    if (l.type === "bundle") {
+      var b = bundleById(l.id);
+      var word = LINE_KIND.bundle[S.lang] || LINE_KIND.bundle.RU;
+      return b ? word + " · " + bundleTitle(b) : word;
+    }
+    if (l.type === "gift") {
+      return (LINE_KIND.gift[S.lang] || LINE_KIND.gift.RU) + " · " + eur(giftAmount(l.id));
+    }
+    var p = byId(l.id);
+    return p.brand + " " + p.name;
+  }
+  function lineImageHTML(l, cls) {
+    if (l.type === "bundle") { var b = bundleById(l.id); return b ? bundleStack(b, "bstack--line") : ""; }
+    if (l.type === "gift") return '<span class="ph giftph">' + tower("giftph__mark") + "</span>";
+    return media(byId(l.id), 0, cls || "ph");
+  }
+  /* What sits under the name in the cart and in the checkout summary: the
+     components of a set, the recipient of a gift card, nothing for a product. */
+  function lineNoteHTML(l) {
+    if (l.type === "bundle") {
+      var b = bundleById(l.id);
+      if (!b) return "";
+      return '<span class="cline__parts">' + b.items.map(function (it) {
+        return esc(bundleItemName(it)) + (it.sizeLabel ? " · " + esc(it.sizeLabel) : "");
+      }).join("<br>") + "</span>";
+    }
+    if (l.type === "gift") {
+      var m = l.meta || {};
+      var who = [m.name, m.email].filter(Boolean).join(" · ");
+      return who ? '<span class="cline__parts">' + esc(who) + "</span>" : "";
+    }
+    return "";
+  }
+
   function gpayOnDark() {
     if (typeof PAYLOGOS === "undefined" || !PAYLOGOS.gpay) return "G Pay";
     return '<span class="gpay-mark">' + PAYLOGOS.gpay + "</span>";
@@ -817,6 +1604,7 @@
       '<nav class="hdr__nav" aria-label="Категории">' +
         '<button data-go-cat="all">Все товары</button>' +
         CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
+        (allBundles().length ? '<button data-go="bundles" data-nav-bundles>Наборы</button>' : "") +
         '<button data-go="brands" data-nav-brands>Бренды</button>' +
       "</nav></header>";
   }
@@ -841,7 +1629,9 @@
     var srch = h.querySelector("[data-search]");
     if (document.activeElement !== srch) srch.value = S.query;
     h.querySelectorAll(".hdr__nav button").forEach(function (b) {
-      if (b.dataset.navBrands !== undefined) {
+      if (b.dataset.navBundles !== undefined) {
+        b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle" || S.screen === "gift"));
+      } else if (b.dataset.navBrands !== undefined) {
         b.setAttribute("aria-current", String(S.screen === "brands" || (S.screen === "catalog" && !!S.brand)));
       } else {
         b.setAttribute("aria-current", String(S.screen === "catalog" && !S.brand && S.cat === b.dataset.goCat));
@@ -896,7 +1686,7 @@
       ftrSec("Самовывоз", "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.") +
       ftrSec("Реквизиты", "Rempire Store OÜ<br>Рег. 12216136 · KMKR EE102723858<br>Mardi 1, 10145 Таллинн") +
       ftrSec("Связаться", '<a href="tel:+37256237237">56237237</a> · <a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a>') +
-      ftrSec("Покупателю", '<button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
+      ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
       ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" +
@@ -941,6 +1731,9 @@
       '<div class="wrap">' +
         rail("Популярные товары", "Салонная косметика для лица, тела и волос — то, чем команда Rempire работает каждый день.", pop) +
         rail("Новые товары", "Свежие поступления: уход и стайлинг, парфюмерия и новый мерч.", fresh) +
+
+        // features: sets sit between the two product rails and the categories
+        bundleGridHTML(allBundles().filter(function (b) { return b.stock !== "out"; }).slice(0, 4), "Наборы") +
 
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
         '<div class="cattiles">' + CATS.map(function (c) {
@@ -1060,6 +1853,12 @@
           "</select></span></label>" +
         "</div>" +
         activeChips() +
+        /* features: sets for this section, in their own grid ABOVE the
+           catalogue one. They deliberately do not live inside #catgrid —
+           patchCatalog() matches the already-rendered prefix by
+           [data-go-product], and a set card would break that match and make
+           every infinite-scroll batch rebuild the whole grid. */
+        bundleGridHTML(bundlesForCatalog(), "Наборы") +
         (list.length
           ? '<div class="grid" id="catgrid">' + visible.map(cardHTML).join("") + "</div>" +
             '<div id="catmore">' + moreHTML(visible.length, list.length) + "</div>"
@@ -1158,12 +1957,22 @@
               acc("Применение", "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.") +
               acc("Состав (INCI)", '<span class="muted">Полный состав будет заполнен при переносе каталога.</span>') +
               acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.")) +
+          /* features: approved reviews from the database come first and carry
+             a badge; the demo pool keeps its place underneath, and the form
+             sits at the bottom of the same accordion. */
           (function () {
-            var rv = reviewsFor(p);
-            return rv.length ? acc("Отзывы (" + rv.length + ")", reviewsHTML(rv)) : "";
+            var db = dbReviewsFor(p), rv = reviewsFor(p);
+            var n = db.length + rv.length;
+            var body = (db.length ? dbReviewsHTML(db) : "") +
+              (rv.length ? reviewsHTML(rv) : "") + reviewFormHTML(p);
+            // «Отзывы (0)» on every young product reads as a verdict; with
+            // nothing to show yet the heading is just the invitation
+            return acc(n ? "Отзывы (" + n + ")" : "Отзывы", body);
           })() +
         "</div>" +
       "</div>" +
+      // features: click-to-play video, below the gallery and the buy column
+      videoHTML(p) +
       '<section class="sec"><div class="sec__head"><h2 class="sec__title">С этим покупают</h2></div><div class="grid">' +
         complementsFor(p).map(cardHTML).join("") +
       "</div></section></div>" +
@@ -1239,7 +2048,7 @@
   function reviewsHTML(list) {
     var avg = 0; list.forEach(function (r) { avg += r.r; });
     avg = Math.round(avg / list.length * 10) / 10;
-    return '<div class="revs"><div class="revs__avg">★ ' + String(avg).replace(".", ",") + " из 5</div>" +
+    return '<div class="revs"><div class="revs__avg">★ ' + num1(avg) + " из 5</div>" +
       list.map(function (r) {
         return '<div class="rev"><div class="rev__head"><b>' + esc(r.n) + "</b>" +
           '<span class="rev__stars" aria-label="' + r.r + ' из 5">' + "★★★★★".slice(0, r.r) + "</span>" +
@@ -1247,6 +2056,241 @@
           '<p class="rev__t">' + esc(r.t) + "</p></div>";
       }).join("") +
       '<p class="muted" style="font-size:12px">Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.</p></div>';
+  }
+
+  /* ---------- features: real reviews from the database ---------------------
+     The demo pool above stays where it is — a young shop with nothing under
+     any product looks abandoned. Rows that real customers wrote and Renat
+     approved are rendered ABOVE it, each with a «Проверенный отзыв» badge, so
+     the two can never be mistaken for one another.
+     Read:  GET  /api/reviews/?product=<id>
+     Write: POST /api/reviews/  → status «pending» until approved. */
+  function loadReviews(id) {
+    if (!id || S.dbReviews[id] !== undefined) return;
+    S.dbReviews[id] = null;                       // in flight — never asked twice
+    fetch("/api/reviews/?product=" + encodeURIComponent(id))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        S.dbReviews[id] = (j && j.ok && j.reviews) || [];
+        if (S.screen === "product" && S.productId === id && S.dbReviews[id].length) render();
+      })
+      .catch(function () { S.dbReviews[id] = []; });
+  }
+  function dbReviewsFor(p) {
+    var list = S.dbReviews[p.id];
+    return list && list.length ? list : [];
+  }
+  function dbReviewsHTML(list) {
+    var avg = 0; list.forEach(function (r) { avg += r.rating; });
+    avg = Math.round(avg / list.length * 10) / 10;
+    return '<div class="revs revs--db"><div class="revs__avg">★ ' + num1(avg) + " из 5</div>" +
+      list.map(function (r) {
+        var d = String(r.createdAt || "").slice(0, 10).split("-");
+        return '<div class="rev rev--db"><div class="rev__head"><b>' + esc(r.name) + "</b>" +
+          '<span class="rev__stars" aria-label="' + r.rating + ' из 5">' + "★★★★★".slice(0, r.rating) + "</span>" +
+          (d.length === 3 ? '<span class="muted">' + d[2] + "." + d[1] + "." + d[0] + "</span>" : "") +
+          '<span class="revbadge">Проверенный отзыв</span></div>' +
+          '<p class="rev__t">' + esc(r.text) + "</p></div>";
+      }).join("") + "</div>";
+  }
+  function reviewReady() {
+    return S.revForm.name.trim().length >= 2 &&
+      S.revForm.rating >= 1 &&
+      S.revForm.text.trim().length >= 20 &&
+      !!S.revForm.consent;
+  }
+  var REV_ERR = {
+    bot: "Не получилось отправить — попробуйте ещё раз.",
+    no_name: "Напишите, как вас зовут.",
+    bad_rating: "Поставьте оценку от 1 до 5.",
+    short_text: "Напишите хотя бы 20 знаков — так отзыв поможет другим.",
+    long_text: "Слишком длинно — до 1500 знаков.",
+    links: "Ссылки и адреса почты в отзывах не публикуем.",
+    profanity: "Уберите, пожалуйста, грубые слова.",
+    no_consent: "Отметьте согласие на публикацию.",
+    rate_limited: "Слишком много отзывов подряд — попробуйте через час.",
+    unavailable: "Сейчас не получилось сохранить. Попробуйте позже."
+  };
+  function reviewFormHTML(p) {
+    if (!S.revOpen) {
+      return '<div class="revadd"><button class="btn btn--ghost" data-revopen>Оставить отзыв</button></div>';
+    }
+    if (S.revState === "sent") {
+      return '<div class="revadd revadd--done"><p>Спасибо! Отзыв отправлен — он появится на странице после проверки.</p>' +
+        '<button class="link" data-revopen>Закрыть</button></div>';
+    }
+    var err = S.revState && S.revState !== "sending" ? REV_ERR[S.revState] || REV_ERR.unavailable : "";
+    return '<div class="revadd revadd--open">' +
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Ваш отзыв</h3>' +
+        '<button class="link" data-revopen>Закрыть</button></div>' +
+      '<label class="field"><span class="field__label">Как вас зовут</span>' +
+        '<input class="input" data-revf="name" maxlength="60" value="' + esc(S.revForm.name) + '" placeholder="Имя"></label>' +
+      '<div class="field__label">Оценка</div>' +
+      '<div class="revstars" role="radiogroup" aria-label="Оценка от 1 до 5">' +
+        [1, 2, 3, 4, 5].map(function (n) {
+          return '<button class="revstar" role="radio" data-revstar="' + n + '" aria-checked="' +
+            (n <= S.revForm.rating) + '" aria-label="' + n + ' из 5">★</button>';
+        }).join("") +
+        '<span class="muted" data-revrating>' + (S.revForm.rating ? S.revForm.rating + " из 5" : "") + "</span></div>" +
+      '<label class="field"><span class="field__label">Что понравилось, что нет — от 20 знаков</span>' +
+        '<textarea class="input" rows="4" maxlength="1500" data-revf="text" placeholder="Пользуюсь месяц…">' + esc(S.revForm.text) + "</textarea></label>" +
+      // honeypot: off-screen, no label, never focusable by keyboard
+      '<div class="revhp" aria-hidden="true"><input tabindex="-1" autocomplete="off" data-revf="website" value="' + esc(S.revForm.website) + '"></div>' +
+      '<label class="opt opt--plain"><input type="checkbox" data-revf="consent"' + (S.revForm.consent ? " checked" : "") + ">" +
+        "<span>Согласен(на) опубликовать отзыв и имя на этой странице</span></label>" +
+      (err ? '<div class="err" role="alert">' + err + "</div>" : "") +
+      '<button class="btn btn--wide" data-revsend' + (reviewReady() && S.revState !== "sending" ? "" : " disabled") + ">" +
+        (S.revState === "sending" ? "Отправляем…" : "Отправить отзыв") + "</button>" +
+      '<p class="muted" style="font-size:12.5px">Публикуем после проверки — обычно в тот же день.</p>' +
+      "</div>";
+  }
+  function sendReview() {
+    if (!reviewReady() || S.revState === "sending") return;
+    S.revState = "sending"; render();
+    fetch("/api/reviews/", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        product: S.productId, name: S.revForm.name.trim(), rating: S.revForm.rating,
+        text: S.revForm.text.trim(), lang: S.lang, website: S.revForm.website, consent: !!S.revForm.consent
+      })
+    }).then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+      .then(function (j) {
+        if (j && j.ok) {
+          S.revState = "sent";
+          S.revForm = { name: "", rating: 0, text: "", website: "", consent: false };
+        } else S.revState = (j && j.error) || "unavailable";
+        render();
+      })
+      .catch(function () { S.revState = "unavailable"; render(); });
+  }
+
+  /* ---------- features: product video --------------------------------------
+     One optional link per product (admin → Товары → Видео). Nothing from
+     YouTube or Vimeo is loaded until the shopper taps: the poster is a plain
+     <img>, and only then does the iframe appear — privacy-enhanced domain,
+     so a page view is not a visit to Google. */
+  function videoOf(p) {
+    var raw = (DEMO.video && DEMO.video[p.id]) || p.video || "";
+    raw = String(raw).trim();
+    if (!raw) return null;
+    var m;
+    if ((m = raw.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/))) {
+      return { kind: "yt", id: m[1],
+        poster: "https://i.ytimg.com/vi/" + m[1] + "/hqdefault.jpg",
+        src: "https://www.youtube-nocookie.com/embed/" + m[1] + "?autoplay=1&rel=0&modestbranding=1" };
+    }
+    if ((m = raw.match(/vimeo\.com\/(?:video\/)?(\d{6,12})/))) {
+      return { kind: "vimeo", id: m[1], poster: "",
+        src: "https://player.vimeo.com/video/" + m[1] + "?autoplay=1&dnt=1" };
+    }
+    return null;
+  }
+  function videoHTML(p) {
+    var v = videoOf(p);
+    if (!v) return "";
+    return '<div class="pvideo">' +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Видео</h2></div>' +
+      (S.videoOn
+        ? '<div class="pvideo__frame"><iframe src="' + v.src + '" loading="lazy" title="Видео о товаре" ' +
+          'allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>'
+        : '<button class="pvideo__frame pvideo__play" data-playvideo aria-label="Смотреть видео">' +
+          (v.poster
+            ? '<img src="' + v.poster + '" alt="" loading="lazy" decoding="async">'
+            : '<span class="pvideo__blank">' + tower("pvideo__mark") + "</span>") +
+          '<span class="pvideo__btn" aria-hidden="true">▶</span></button>') +
+      "</div>";
+  }
+
+  /* ---------- features: gift card at checkout ---------------------------- */
+  function applyGiftCode(code, btn) {
+    var label = btn ? btn.textContent : "";
+    if (btn) { btn.textContent = "…"; btn.disabled = true; }
+    fetch("/api/giftcards/check/", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code: code })
+    }).then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+      .then(function (j) {
+        if (j && j.ok) {
+          S.giftCard = { code: j.code, balance: j.balance };
+          S.giftErr = ""; S.promo = ""; S.promoErr = false;
+        } else {
+          S.giftCard = null;
+          var er = (j && j.error) || "";
+          S.giftErr = er === "empty" ? "На этой карте не осталось денег."
+            : er === "unavailable" || er === "rate_limited"
+              ? "Сейчас не получилось проверить карту. Попробуйте позже."
+              : "Карта не найдена — проверьте код.";
+        }
+        render(); refocus("[data-applypromo]");
+      })
+      .catch(function () {
+        if (btn) { btn.textContent = label; btn.disabled = false; }
+        S.giftErr = "Сейчас не получилось проверить карту. Попробуйте позже.";
+        render();
+      });
+  }
+
+  /* ---------- features: review moderation in the admin ------------------- */
+  function loadAdminReviews(force) {
+    if (S.admReviews && !force) return;
+    if (loadAdminReviews._busy) return;
+    loadAdminReviews._busy = true;
+    fetch("/api/admin/reviews/?status=" + encodeURIComponent(S.admRevFilter))
+      .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+      .then(function (j) {
+        loadAdminReviews._busy = false;
+        S.admReviews = j && j.ok ? j : { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: (j && j.error) || "unavailable" };
+        if (S.screen === "admin" && S.adminTab === "reviews") render();
+      })
+      .catch(function () {
+        loadAdminReviews._busy = false;
+        S.admReviews = { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: "unavailable" };
+        if (S.screen === "admin" && S.adminTab === "reviews") render();
+      });
+  }
+  function moderateReview(id, status) {
+    fetch("/api/admin/reviews/", {
+      method: "PATCH", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id: id, status: status })
+    }).then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+      .then(function (j) {
+        toast(j && j.ok ? (status === "approved" ? "Отзыв опубликован ✓" : "Отзыв отклонён ✓") : "Не получилось — попробуйте ещё раз");
+        loadAdminReviews(true);
+        render();
+      })
+      .catch(function () { toast("Не получилось — попробуйте ещё раз"); });
+  }
+  var REV_TABS = [["pending", "Новые"], ["approved", "Опубликованные"], ["rejected", "Отклонённые"]];
+  function admReviewsHTML() {
+    var data = S.admReviews;
+    var counts = (data && data.counts) || { pending: 0, approved: 0, rejected: 0 };
+    var head = '<p class="muted" style="margin:16px 0">Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.</p>' +
+      '<div class="fchips">' + REV_TABS.map(function (tt) {
+        return '<button class="fchip" data-admrevfilter="' + tt[0] + '" aria-current="' + (S.admRevFilter === tt[0]) + '">' +
+          tt[1] + ' <span class="num">' + (counts[tt[0]] || 0) + "</span></button>";
+      }).join("") + "</div>";
+    if (!data) return head + '<p class="muted" style="margin-top:16px">Загружаем…</p>';
+    if (data.error) {
+      return head + '<p class="muted" style="margin-top:16px">Отзывы пока недоступны — база подключается. ' +
+        "Как только она заработает, новые отзывы появятся здесь сами.</p>";
+    }
+    if (!data.reviews.length) {
+      return head + '<p class="muted" style="margin-top:16px">Здесь пусто.</p>';
+    }
+    return head + '<div class="adm__list">' + data.reviews.map(function (r) {
+      var p = null;
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === r.productId) { p = CATALOGUE[i]; break; }
+      return '<div class="adm__row adm__row--rev">' +
+        (p ? '<span class="adm__ph">' + media(p, 0, "ph") + "</span>" : "") +
+        '<span class="adm__nm">' + esc(r.name) + ' <span class="rev__stars">' + "★★★★★".slice(0, r.rating) + "</span>" +
+          '<span class="adm__sub">' + (p ? esc(p.brand + " — " + p.name) : esc(r.productId)) +
+            " · " + String(r.createdAt || "").slice(0, 10) + " · " + esc(r.lang) + "</span>" +
+          '<span class="adm__revtext">' + esc(r.text) + "</span></span>" +
+        '<span class="adm__revacts">' +
+          (r.status === "approved" ? "" : '<button class="btn btn--sm" data-admrev="' + r.id + ':approved">Опубликовать</button>') +
+          (r.status === "rejected" ? "" : '<button class="btn btn--ghost btn--sm" data-admrev="' + r.id + ':rejected">Отклонить</button>') +
+        "</span></div>";
+    }).join("") + "</div>";
   }
 
   function complementsFor(p) {
@@ -1376,10 +2420,10 @@
     phone: "Впишите телефон — по нему звонит курьер и приходит смс от пакомата."
   };
   function shipRequired(key) {
-    var sel = method();
-    if (sel.pickup) return false;
+    var m = shipMethod();
+    if (m === "pickup") return false;
     if (key === "name" || key === "phone") return true;
-    return !sel.pm;
+    return m === "courier";
   }
   function phoneOk() { return S.ship.phone.replace(/\D/g, "").length >= 7; }
   function shipEmpty(key) { return key === "phone" ? !phoneOk() : !S.ship[key].trim(); }
@@ -1388,6 +2432,8 @@
       return shipRequired(k) && shipEmpty(k);
     });
   }
+  /** A parcel machine has to be chosen before the order can be priced. */
+  function pointMissing() { return isParcel() && !S.ship.point; }
   function shipBad(key) { return S.shipTouched && shipRequired(key) && shipEmpty(key); }
   function shipMsg(key) {
     if (key === "phone" && S.ship.phone.trim()) return "Проверьте номер — похоже, в нём не хватает цифр.";
@@ -1421,8 +2467,217 @@
       (open ? "" : '<span class="costep__edit">изменить</span>') + "</button>";
   }
 
+  /* ---------- delivery picker ----------
+     Method, then carrier, then the machine itself. The machine list is long
+     (469 Omniva points in Estonia alone), so it lives behind a search rather
+     than in a <select> nobody can scroll on a phone. */
+  function deliveryPicker() {
+    var avail = deliveryFor(S.country), cur = shipMethod(), chips = carriersFor();
+    return '<div class="optlist">' + avail.map(function (d) {
+        var p = shipPriceFor(d.k, d.k === "parcel" ? shipCarrier() : "");
+        return '<label class="opt"><input type="radio" name="ship"' + (d.k === cur ? " checked" : "") +
+          ' data-dm="' + d.k + '"><span>' + d.l + "</span>" +
+          '<span class="opt__price num">' + (p ? eur(p) : "Бесплатно") + "</span></label>";
+      }).join("") + "</div>" +
+      (cur === "parcel" && chips.length > 1
+        ? '<div class="carriers" role="group" aria-label="Перевозчик">' + chips.map(function (c) {
+            return '<button class="carrier" data-carrier="' + c + '" aria-current="' + (c === shipCarrier()) + '">' +
+              CARRIER_NAMES[c] + "</button>";
+          }).join("") + "</div>"
+        : "") +
+      (cur === "parcel" ? pointField() : "") +
+      (S.pointOpen ? pointSheet() : "");
+  }
+  /* The label is built from phrases the dictionary already knows — «Пакомат
+     Omniva» matches a UI_RX rule, «Пакомат Omniva — 469 точек» would match
+     nothing — so the count lives in the sheet instead. */
+  function carrierLabel() {
+    var c = CARRIER_NAMES[shipCarrier()];
+    return c ? "Пакомат " + c : "Пакомат";
+  }
+  function pointField() {
+    var chosen = S.ship.point, bad = S.shipTouched && !chosen;
+    var list = pointsList();
+    return '<div class="field"><span class="field__label">' + carrierLabel() + "</span>" +
+      '<button class="pointbtn' + (chosen ? " pointbtn--set" : "") + '" data-pointopen aria-invalid="' + bad + '">' +
+        (chosen
+          ? '<span class="pointbtn__nm">' + esc(chosen.name) + "</span>" +
+            '<span class="pointbtn__ad">' + esc([chosen.address, chosen.city].filter(Boolean).join(", ")) + "</span>"
+          : '<span class="pointbtn__nm">Выберите пакомат</span>' +
+            '<span class="pointbtn__ad">' + (list ? "Поиск по адресу и городу" : "Загружаем список…") + "</span>") +
+        '<span class="pointbtn__go">' + (chosen ? "изменить" : "выбрать") + "</span></button>" +
+      (bad ? '<div class="err" role="alert">Выберите пакомат — туда приедет посылка.</div>' : "") + "</div>";
+  }
+  /** The list is patched in place so typing never costs the input its focus. */
+  function pointRows() {
+    var list = pointsList();
+    if (!list) return '<p class="muted psheet__msg">Загружаем список пакоматов…</p>';
+    if (!list.length) return '<p class="muted psheet__msg">Для этой страны список пока пуст — выберите курьера.</p>';
+    var found = pointsFiltered();
+    if (!found.length) return '<p class="muted psheet__msg">Ничего не нашли. Попробуйте название города или улицы.</p>';
+    return found.map(function (p) {
+      return '<button class="prow" data-pointpick="' + esc(p.id) + '"' +
+        (S.ship.point && S.ship.point.id === p.id ? ' aria-current="true"' : "") + ">" +
+        '<span class="prow__nm">' + esc(p.name) + "</span>" +
+        '<span class="prow__ad">' + esc([p.address, p.city].filter(Boolean).join(", ")) + "</span></button>";
+    }).join("");
+  }
+  /* Typing patches only the list: a full render would take the search input
+     down with it and the caret with the input. Everything else — the button's
+     label, the carrier chips — needs the whole step redrawn. */
+  function patchPointList() {
+    var box = document.getElementById("pointlist");
+    if (!box) return;
+    box.innerHTML = pointRows();
+    translateTree(box);
+  }
+  function pointsArrived() {
+    if (S.screen !== "checkout") return;
+    if (S.pointOpen) patchPointList();
+    else render();
+  }
+  /** A bottom sheet on a phone, a centred panel on a desktop. */
+  function pointSheet() {
+    return '<div class="scrim" data-pointclose></div>' +
+      '<aside class="psheet" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
+        '<div class="psheet__head"><span class="display drawer__t">' + carrierLabel() + "</span>" +
+          '<button class="iconbtn" data-pointclose aria-label="Закрыть">✕</button></div>' +
+        '<div class="psheet__search"><input class="input input--box" data-pointq value="' + esc(POINTS.q) +
+          '" placeholder="Город, улица или название" aria-label="Поиск пакомата" autocomplete="off">' +
+          (pointsList() ? '<div class="psheet__n muted">' + points(pointsList().length) + "</div>" : "") + "</div>" +
+        '<div class="psheet__list" id="pointlist">' + pointRows() + "</div>" +
+      "</aside>";
+  }
+
+  /* ---------- placing the order ----------
+     Two calls. /api/orders re-prices the basket on the server — the browser's
+     numbers are never trusted — and /api/payments/create turns that order into
+     a payment; then the browser leaves for the bank. With no API behind the
+     page (the prototype is also served statically for Renat) the same button
+     finishes the demo exactly as it always did. */
+  function lineVariant(l) {
+    if (l.size === undefined || l.size === null) return null;
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      if (CATALOGUE[i].id === l.id) {
+        return CATALOGUE[i].prices && CATALOGUE[i].prices.length > 1 ? l.size : null;
+      }
+    }
+    return null;
+  }
+  function orderPayload() {
+    return {
+      lang: S.lang,
+      items: S.cart.map(function (l) { return { id: l.id, variant: lineVariant(l), qty: l.qty }; }),
+      customer: { name: S.ship.name, email: S.email, phone: S.ship.phone },
+      shipping: {
+        method: shipMethod(),
+        country: S.country,
+        carrier: isParcel() ? shipCarrier() : "",
+        pointId: S.ship.point ? S.ship.point.id : null,
+        pointName: S.ship.point ? S.ship.point.name : null,
+        address: shipMethod() === "courier"
+          ? { addr: S.ship.addr, zip: S.ship.zip, city: S.ship.city }
+          : null
+      },
+      discountCode: S.promoOk && S.promo ? S.promo : null
+    };
+  }
+  /* Bank codes for Montonio's `preferredProvider`. ASSUMPTION: these are the
+     banks' BICs, which is what the codes look like in Montonio's docs — the
+     authoritative list is GET /stores/payment-methods and must be checked in
+     sandbox before go-live (docs/payments.md). A wrong or missing code is not
+     fatal: Montonio then simply asks the shopper to pick the bank itself. */
+  var BANK_CODES = {
+    Swedbank: "HABAEE2X", SEB: "EEUHEE2X", LHV: "LHVBEE22",
+    Luminor: "RIKOEE22", Coop: "EKRDEE22"
+  };
+  /**
+   * POST JSON and say plainly whether there is an API behind this page at all.
+   * `offline` means "no server here" (a static host answers 404/HTML); a real
+   * error from a real API comes back as a body with ok:false.
+   */
+  function postJSON(url, body) {
+    return fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true };
+      return r.json().then(function (j) { return { body: j, status: r.status }; },
+        function () { return { offline: true }; });
+    }, function () { return { offline: true }; });
+  }
+  var ORDER_ERRS = {
+    empty_order: "Корзина пуста",
+    rate_limited: "Слишком много попыток — подождите минуту",
+    bad_email: "Проверьте e-mail",
+    out_of_stock: "Товара не хватает на складе",
+    db_unavailable: "Магазин временно недоступен — попробуйте позже"
+  };
+  function orderErrText(code) {
+    return ORDER_ERRS[code] || "Не получилось оформить заказ — попробуйте ещё раз";
+  }
+  /** A finished order must leave nothing behind for the next one. */
+  function clearOrderState() {
+    S.cart = []; S.promo = ""; S.promoOk = false; S.promoErr = false; S.sumOpen = null;
+    S.giftCard = null; S.giftErr = "";   // features: a card applied here is spent
+    S.ship = { name: "", addr: "", zip: "", city: "", phone: "", method: shipMethod(), carrier: S.ship.carrier, point: null };
+    S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
+    persist();
+  }
+  function finishDemo() {
+    apiSeen(false);
+    S.paying = false;
+    clearOrderState();
+    S.done = { demo: true };
+    go("done");
+  }
+  function payNow() {
+    S.emailTouched = true; S.shipTouched = true;
+    /* Send the shopper to the step that is short, with the fields marked,
+       rather than refusing with a toast and leaving them to hunt. */
+    if (emailBad()) { return failStep(1, "Проверьте e-mail — на него придёт подтверждение заказа"); }
+    if (shipMissing().length) { return failStep(2, "Заполните данные доставки"); }
+    if (pointMissing()) { return failStep(2, "Выберите пакомат"); }
+    if (S.pay === 3 && !S.invoiceCo.trim()) { return failStep(3, "Укажите фирму и регистрационный номер"); }
+    if (!S.cart.length) { toast("Корзина пуста"); return; }
+    if (S.paying) return;
+    if (API.ok === false) return finishDemo();
+
+    S.paying = true; render();
+    postJSON("/api/orders/", orderPayload()).then(function (res) {
+      if (res.offline) return finishDemo();
+      apiSeen(true);
+      if (!res.body || !res.body.ok || !res.body.orderId) {
+        throw new Error(orderErrText(res.body && res.body.error));
+      }
+      return postJSON("/api/payments/create/", {
+        orderId: res.body.orderId,
+        method: PAYS[S.pay] && PAYS[S.pay].k === "card" ? "card" : "bank",
+        bank: S.pay === 0 ? BANK_CODES[BANKS[S.bank]] : undefined,
+        lang: S.lang
+      }).then(function (pay) {
+        if (pay.offline) return finishDemo();
+        if (!pay.body || !pay.body.ok || !pay.body.redirectUrl) {
+          throw new Error("Оплата пока недоступна — попробуйте позже");
+        }
+        // the basket is cleared before leaving: coming back from the bank must
+        // not find the same order still sitting in the cart
+        clearOrderState();
+        location.href = pay.body.redirectUrl;
+      });
+    }).catch(function (err) {
+      S.paying = false; render();
+      toast(err && err.message ? err.message : "Не получилось оформить заказ");
+    });
+  }
+
   function screenCheckout() {
-    var m = methods(), mi = methodIdx(), sel = m[mi], step = S.coStep;
+    var step = S.coStep;
+    // The rules and the machine list are wanted the moment the shopper lands
+    // here; both are one-shot and both fail quietly.
+    loadShipRules();
+    if (isParcel()) loadPoints();
     // The summary follows the breakpoint until the shopper touches it; after
     // that their choice wins, so applying a promo can't slam it shut.
     var summaryOpen = S.sumOpen === null ? wide() : S.sumOpen;
@@ -1447,23 +2702,18 @@
           "</section>" +
 
           '<section class="costep' + (step === 2 ? " is-open" : "") + '">' +
-            coHead(2, "Доставка", sel.l + (S.ship.name ? " · " + esc(S.ship.name) : "")) +
+            coHead(2, "Доставка", shipMethodLabel() + (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
             (step === 2 ? '<div class="costep__body">' +
               '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
                 COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
-              '<div class="optlist">' + m.map(function (x, i) {
-                return '<label class="opt"><input type="radio" name="ship" ' + (i === mi ? "checked" : "") + ' data-method="' + i + '"><span>' + x.l + "</span>" +
-                  '<span class="opt__price num">' + (!x.p || freeShip() ? "Бесплатно" : eur(x.p)) + "</span></label>";
-              }).join("") + "</div>" +
-              (sel.pickup ? '<div class="hint">Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
-              (machinesFor(sel).length ? '<label class="field"><span class="field__label">Пакомат — ' + points(machinesFor(sel).length) + '</span><span class="sel sel--box"><select data-machine>' +
-                machinesFor(sel).map(function (n, i) { return "<option" + (i === Math.min(S.machine, machinesFor(sel).length - 1) ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>" : "") +
-              '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
+              deliveryPicker() +
+              (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
+              '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
               // every field is bound to S.ship — a render (promo, blur, resize)
               // used to wipe whatever the shopper had typed here
-              (sel.pickup ? "" :
+              (shipMethod() === "pickup" ? "" :
                 shipField("name", "Имя и фамилия", "Имя Фамилия", "name", "") +
-                (sel.pm ? "" : shipField("addr", "Адрес", "улица, дом", "street-address", "") +
+                (isParcel() ? "" : shipField("addr", "Адрес", "улица, дом", "street-address", "") +
                   '<div class="co__zip">' + shipField("zip", "Индекс", "12345", "postal-code", "numeric") +
                   shipField("city", "Город", "Город", "address-level2", "") + "</div>")) +
               shipField("phone", "Телефон", "+372…", "tel", "tel") +
@@ -1499,29 +2749,49 @@
             '<span class="cosum__tot num">' + eur(total()) + "</span></summary>" +
           '<div class="cosum__body">' +
           (S.cart.length ? S.cart.map(function (l) {
-            var p = byId(l.id);
-            return '<div class="cosum__line"><span class="cosum__ph">' + media(p, 0, "ph") + "</span>" +
-              '<span class="cosum__nm">' + esc(p.name) + lineLabel(l) + " × " + l.qty +
-                ' <button class="link cosum__rm" data-remove="' + S.cart.indexOf(l) + '" aria-label="Убрать из заказа">Убрать</button></span>' +
-              '<span class="num cosum__pr">' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
+            // features: a line can be a product, a set or a gift card
+            return '<div class="cosum__line"><span class="cosum__ph">' + lineImageHTML(l) + "</span>" +
+              '<span class="cosum__nm">' + esc(lineTitle(l)) + lineLabel(l) + " × " + l.qty +
+                ' <button class="link cosum__rm" data-remove="' + S.cart.indexOf(l) + '" aria-label="Убрать из заказа">Убрать</button>' +
+                lineNoteHTML(l) + "</span>" +
+              '<span class="num cosum__pr">' + eur(lineUnit(l) * l.qty) + "</span></div>";
           }).join("") : '<p class="muted">Корзина пуста.</p>') +
-          '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод" placeholder="Промокод" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo>Применить</button></div>' +
+          '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод или подарочная карта" placeholder="Промокод или подарочная карта" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo>Применить</button></div>' +
           (S.promoErr ? '<div class="err" role="alert">Код не найден — проверьте написание.</div>' : "") +
           (S.promoOk ? '<div class="cosum__row"><span>REMPIRE10 — скидка 10%</span><span class="num">−' + eur(discount()) + "</span></div>" : "") +
-          '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + sel.l + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
+          /* ---- features: gift card ------------------------------------------
+             Owned by the features agent. The same input above accepts a card
+             code (RMP-XXXX-XXXX); the applypromo handler recognises the shape
+             and calls POST /api/giftcards/check/. Everything the card adds to
+             this screen is the two lines below plus giftDiscount() in total().
+             ------------------------------------------------------------------ */
+          (S.giftErr ? '<div class="err" role="alert">' + esc(S.giftErr) + "</div>" : "") +
+          (S.giftCard
+            ? '<div class="cosum__row"><span>Подарочная карта ' + esc(S.giftCard.code) +
+                ' <button class="link" data-giftoff>убрать</button></span>' +
+                '<span class="num">−' + eur(giftDiscount()) + "</span></div>" +
+              (S.giftCard.balance - giftDiscount() > 0.004
+                ? '<div class="cosum__row cosum__row--note"><span class="muted">Останется на карте</span>' +
+                  '<span class="num muted">' + eur(S.giftCard.balance - giftDiscount()) + "</span></div>"
+                : "")
+            : "") +
+          /* ---- /features ---------------------------------------------------- */
+          '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + shipMethodLabel() + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
           '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
           /* Both pay buttons wait for the payment step. Offered from step one
              they compete with «Далее» for the same tap and invite a shopper to
              pay before choosing how the parcel travels or how they are paying. */
           (step === 3
-            ? '<button class="btn btn--wide co__pay" data-pay>Оплатить ' + eur(total()) + "</button>" +
+            ? '<button class="btn btn--wide co__pay" data-pay' + (S.paying ? " disabled" : "") + ">" +
+                (S.paying ? "Готовим оплату…" : "Оплатить " + eur(total())) + "</button>" +
               '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>'
             : "") +
           "</div></details></div>" +
 
       "</div></div>" +
       (step === 3
-        ? '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span><button class="btn" data-pay>Оплатить</button></div>'
+        ? '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span>' +
+          '<button class="btn" data-pay' + (S.paying ? " disabled" : "") + ">" + (S.paying ? "Готовим…" : "Оплатить") + "</button></div>"
         : "");
   }
   function payMark(k) {
@@ -1570,6 +2840,7 @@
     ["orders", "Заказы", "bag"],
     ["goods", "Товары", "grid"],
     ["people", "Клиенты", "user"],
+    ["reviews", "Отзывы", "check"],   // features
     ["stats", "Аналитика", "chart"],
     ["mail", "Письма", "mail"],
     ["apps", "Подключения", "plug"],
@@ -1589,9 +2860,46 @@
      the work in the middle, the assistant always in view on the right. On a
      phone the nav becomes a scrolling strip and the assistant a sheet you
      open from the bar. */
+  /* The panel asks for the password as soon as there is a server to ask. On
+     the static prototype — no API behind it — this never appears and the demo
+     panel opens exactly as it always did. */
+  function admHeader() {
+    return '<div class="cohdr cohdr--adm"><div class="cohdr__row">' +
+      '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
+      '<span class="cohdr__t">Админка</span>' +
+      '<span class="cohdr__langs" role="group" aria-label="Язык"> ' + LANGS.map(function (l) {
+        return '<button class="cohdr__lang" data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
+      }).join("") + "</span>" +
+      '<button class="link" data-go="home">← В магазин</button></div></div>';
+  }
+  function admWaitScreen() {
+    return admHeader() +
+      '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
+        '<p class="muted" style="margin:28px 0">Проверяем…</p></main></div>';
+  }
+  function admLoginScreen() {
+    return admHeader() +
+      '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
+        '<div class="adm__list" style="max-width:420px;margin:28px auto;padding:18px 16px">' +
+          '<div class="sec__head sec__head--sub"><h2 class="sec__title">Вход в админку</h2></div>' +
+          '<p class="muted" style="margin:0 0 12px;font-size:13px">Пароль владельца. Магазин работает и без входа — здесь только управление.</p>' +
+          '<label class="field"><span class="field__label">Пароль</span>' +
+            '<input class="input" type="password" data-admpw autocomplete="current-password" aria-invalid="' + (SRV.err ? "true" : "false") + '"></label>' +
+          (SRV.err ? '<div class="err" role="alert">' + esc(SRV.err) + "</div>" : "") +
+          '<div class="adm__acts"><button class="btn" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
+            (SRV.busy ? "Проверяем…" : "Войти") + "</button></div>" +
+        "</div></main></div>";
+  }
+
   function screenAdmin() {
     probeAdmAI();
-    var orders = fakeOrders();
+    probeAdmin();
+    if (SRV.on && SRV.admin === null) return admWaitScreen();
+    if (SRV.on && SRV.admin === false) return admLoginScreen();
+    // real orders when the owner is signed in and the shop has some; the demo
+    // set otherwise, so the panel is never an empty room
+    var live = SRV.admin === true && SRV.orders && SRV.orders.length ? SRV.orders : null;
+    var orders = live || fakeOrders();
     var week = orders.slice(0, 7).reduce(function (a, o) { return a + o.sum; }, 0);
     var tab = S.adminTab;
     // the admin header shares the full-width panes' column, not the 1020px
@@ -1615,10 +2923,14 @@
             icon(t[2]) + '<span class="adm__navlbl">' + t[1] + "</span></button>";
         }).join("") + "</nav>" +
         '<div class="adm__who"><span class="adm__whoname">Renat</span>' +
-          '<span class="adm__sub">Rempire Store OÜ · владелец</span></div></aside>' +
+          '<span class="adm__sub">Rempire Store OÜ · владелец</span>' +
+          (SRV.admin === true ? '<button class="link" data-admlogout>Выйти</button>' : "") +
+        "</div></aside>" +
 
       '<main class="adm__main">' +
-      '<div class="adm__note">Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.</div>' +
+      '<div class="adm__note">' + (live
+        ? "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные."
+        : "Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.") + "</div>" +
 
       (tab === "over" ?
         '<div class="adm__kpis">' +
@@ -1639,8 +2951,9 @@
 
       (tab === "orders" ?
         (S.adminOrder
-          ? orderDetail(orders.filter(function (o) { return o.id === S.adminOrder; })[0] || orders[0])
+          ? admOrderDetail(orders)
           : '<p class="muted" style="margin:16px 0">Нажмите на заказ — адрес, состав, оплата, наклейка на посылку и письмо клиенту, всё на одной странице.</p>' +
+            (SRV.admin === true && SRV.ordersErr ? '<div class="adm__note">Сервер заказов не отвечает — показан демонстрационный список.</div>' : "") +
             orderTable(orders)) : "") +
 
       (tab === "goods" ?
@@ -1661,6 +2974,9 @@
             '<span class="muted">' + c.last + "</span>" +
             '<button class="link" data-admedit>Промокод</button></div>';
         }).join("") + "</div>" : "") +
+
+      // features: review moderation
+      (tab === "reviews" ? admReviewsHTML() : "") +
 
       (tab === "stats" ?
         '<p class="muted" style="margin:16px 0">Что происходит с магазином — простыми словами. Цифры вымышленные, вид настоящий.</p>' +
@@ -1700,6 +3016,7 @@
             '<span class="chip ' + (on ? "chip--ok" : "chip--low") + '">' + (on ? "включено" : "выключено") + "</span>" +
             '<button class="link" data-admflow="' + f[0] + '">' + (on ? "Выключить" : "Включить") + "</button></div>";
         }).join("") + "</div>" +
+        mailCard() +
         '<p style="margin-top:16px"><a class="link" href="/shop/emails/" target="_blank" rel="noopener">Открыть превью всех писем →</a></p>' : "") +
 
       (tab === "apps" ?
@@ -1732,7 +3049,11 @@
         '<div class="adm__list"><div class="adm__row"><span class="adm__nm">ИИ-чат для покупателей' +
           '<span class="adm__sub">кружок-консультант в углу магазина — подбирает товары и собирает корзину</span></span>' +
           '<span class="chip ' + (DEMO.chatbot ? "chip--ok" : "chip--low") + '">' + (DEMO.chatbot ? "включён" : "выключен") + "</span>" +
-          '<button class="link" data-admchatbot>' + (DEMO.chatbot ? "Выключить" : "Включить") + "</button></div></div>" +
+          '<button class="link" data-admchatbot>' + (DEMO.chatbot ? "Выключить" : "Включить") + "</button></div>" +
+          '<div class="adm__row"><span class="adm__nm">Наборы на сайте' +
+          '<span class="adm__sub">готовые комплекты со скидкой 12 % — в меню, на главной и в каталоге; пока не согласовано с владельцем</span></span>' +
+          '<span class="chip ' + (DEMO.bundles !== false ? "chip--ok" : "chip--low") + '">' + (DEMO.bundles !== false ? "показаны" : "скрыты") + "</span>" +
+          '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
         setupBlock("Реквизиты", [
           "Rempire Store OÜ · рег. 12216136", "KMKR EE102723858", "Mardi 1, 10145 Таллинн"
         ]) +
@@ -1770,6 +3091,51 @@
           '<button class="btn btn--sm" data-admsend aria-label="Спросить">→</button></div>' +
       "</aside></div>";
   }
+  /* ---------- «Письма»: preview + test send -----------------------------
+     The five real templates live in src/emails and are rendered server-side;
+     this card is the window onto them. The letter's language is its own
+     setting — Renat reads the panel in Russian but has to be able to check
+     what an Estonian customer receives. */
+  var MAIL_TPL = [
+    ["order-confirmed", "Заказ принят"],
+    ["order-shipped", "Заказ отправлен"],
+    ["abandoned-cart", "Брошенная корзина"],
+    ["back-in-stock", "Товар снова в наличии"],
+    ["birthday", "Скидка ко дню рождения"]
+  ];
+  function mailTpl() {
+    for (var i = 0; i < MAIL_TPL.length; i++) if (MAIL_TPL[i][0] === S.mailTpl) return S.mailTpl;
+    return MAIL_TPL[0][0];
+  }
+  function mailLang() { return S.mailLang || S.lang; }
+  /* Keep whatever is half-typed in the address box: every chip re-renders the
+     panel, and losing the address after each click made the button unusable. */
+  function keepMailTo() {
+    var el = document.querySelector("[data-mailto]");
+    if (el) S.mailTo = el.value;
+  }
+  function mailCard() {
+    var tpl = mailTpl(), lang = mailLang();
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Письма — предпросмотр и тест</h2></div>' +
+      '<p class="muted" style="margin:0 0 12px">Выберите письмо и язык — покажем его ровно таким, каким его получит покупатель. Ниже можно отправить образец себе на почту.</p>' +
+      '<div class="adm__chips" role="group" aria-label="Письмо">' +
+        MAIL_TPL.map(function (m) {
+          return '<button class="scchip" data-mailtpl="' + m[0] + '" aria-current="' + (tpl === m[0]) + '">' + m[1] + "</button>";
+        }).join("") + "</div>" +
+      '<div class="adm__chips" role="group" aria-label="Язык письма">' +
+        LANGS.map(function (l) {
+          return '<button class="scchip" data-maillang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
+        }).join("") + "</div>" +
+      '<iframe title="Предпросмотр письма" loading="lazy" ' +
+        'src="/api/admin/mail/preview/?template=' + encodeURIComponent(tpl) + "&amp;lang=" + encodeURIComponent(lang) + '" ' +
+        'style="display:block;width:100%;height:520px;margin-top:14px;border:1px solid var(--rule);background:#fff"></iframe>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px">' +
+        '<input class="input input--box" type="email" data-mailto value="' + esc(S.mailTo || "") + '" ' +
+          'placeholder="Отправить тест на…" aria-label="Отправить тест на…" style="max-width:320px">' +
+        '<button class="btn btn--sm" data-mailtest>Отправить тест</button></div>' +
+      '<p class="muted" style="margin:8px 0 0;font-size:12.5px">В письме будут вымышленный заказ и товары — это образец вёрстки, не настоящий заказ.</p>';
+  }
+
   function setupBlock(title, rows) {
     return '<div class="sec__head sec__head--sub"><h2 class="sec__title">' + title + "</h2></div>" +
       '<div class="adm__list">' + rows.map(function (r) {
@@ -1784,12 +3150,70 @@
     return '<div class="adm__table" role="table">' +
       '<div class="adm__th" role="row"><span>Заказ</span><span>Клиент</span><span>Доставка</span><span>Сумма</span><span>Статус</span></div>' +
       list.map(function (o) {
-        return '<button class="adm__tr adm__tr--link" role="row" data-admorder="' + o.id + '"><span class="num">#' + o.id + '<span class="adm__sub">' + o.date + "</span></span>" +
-          "<span>" + o.who + '<span class="adm__sub">' + o.items + " " + plural(o.items) + "</span></span>" +
+        return '<button class="adm__tr adm__tr--link" role="row" data-admorder="' + esc(o.id) + '"><span class="num">' +
+          (o.number ? esc(o.number) : "#" + o.id) + '<span class="adm__sub">' + o.date + "</span></span>" +
+          "<span>" + esc(o.who) + '<span class="adm__sub">' + o.items + " " + plural(o.items) + "</span></span>" +
           '<span class="adm__ship">' + o.ship + "</span>" +
           '<span class="num">' + eur(o.sum) + "</span>" +
           '<span><span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span></span></button>";
       }).join("") + "</div>";
+  }
+
+  /* Demo rows and real rows share the table, so the drill-down picks the right
+     renderer instead of the table having to know which it is holding. */
+  function admOrderDetail(list) {
+    var o = list.filter(function (x) { return String(x.id) === String(S.adminOrder); })[0] || list[0];
+    if (!o) return "";
+    return o.srv ? orderDetailSrv(o) : orderDetail(o);
+  }
+  function srvAddrLine(s) {
+    if (!s) return "";
+    if (s.pointName) return s.pointName;
+    var a = s.address || {};
+    return [a.addr || a.street || "", a.zip || "", a.city || "", s.country || ""].filter(Boolean).join(", ");
+  }
+  /* A real order, drawn from what the server actually stored: the lines it
+     priced itself, the address it was given, and the status the owner moves. */
+  function orderDetailSrv(row) {
+    var o = row.srv, s = o.shipping || {};
+    var paidish = o.status === "paid" || o.status === "shipped" || o.status === "refunded";
+    var steps = [["Оформлен", true], ["Оплачен", paidish], ["Отправлен", o.status === "shipped"]];
+    return '<button class="link" data-admorder="">← Все заказы</button>' +
+      '<div class="adm__ohead"><h2 class="sec__title" style="font-size:20px">Заказ ' + esc(o.number) + "</h2>" +
+        '<span class="chip" style="color:var(' + row.state[2] + ')">' + row.state[1] + "</span>" +
+        '<span class="muted">' + row.date + "</span></div>" +
+      '<div class="adm__ocols"><div>' +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Состав</h3></div>' +
+        '<div class="adm__list">' + (o.items || []).map(function (l) {
+          return '<div class="adm__row"><span class="adm__nm">' + esc((l.brand ? l.brand + " — " : "") + (l.title || l.id)) +
+            '<span class="adm__sub">' + (l.variant ? esc(l.variant) + " · " : "") + l.qty + " шт × " + eur(l.price) + "</span></span>" +
+            '<span class="num adm__pr">' + eur(l.sum) + "</span></div>";
+        }).join("") +
+        '<div class="adm__row"><span class="adm__nm">Доставка — ' + esc(row.ship) + '</span><span class="num adm__pr">' +
+          (o.shippingPrice ? eur(o.shippingPrice) : "0 €") + "</span></div>" +
+        (o.discount ? '<div class="adm__row"><span class="adm__nm">Скидка' + (o.discountCode ? " · " + esc(o.discountCode) : "") +
+          '</span><span class="num adm__pr">−' + eur(o.discount) + "</span></div>" : "") +
+        '<div class="adm__row"><span class="adm__nm"><b>Итого</b></span><span class="num adm__pr"><b>' + eur(o.total) + "</b></span></div></div>" +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Статус</h3></div>' +
+        '<div class="adm__steps">' + steps.map(function (st) {
+          return '<span class="adm__step' + (st[1] ? " is-done" : "") + '">' + (st[1] ? "✓ " : "") + st[0] + "</span>";
+        }).join("") + "</div>" +
+        '<div class="adm__acts">' + ["paid", "shipped", "cancelled", "refunded"].map(function (k) {
+          return '<button class="btn btn--ghost btn--sm" data-admstatus="' + k + '"' + (o.status === k ? " disabled" : "") +
+            ">" + SRV_STATES[k][1] + "</button>";
+        }).join("") + "</div>" +
+      "</div><div>" +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Покупатель</h3></div>' +
+        '<div class="adm__list">' +
+          '<div class="adm__row"><span class="adm__nm">' + esc(o.name || "—") +
+            '<span class="adm__sub">' + esc(o.email || "") + (o.phone ? " · " + esc(o.phone) : "") + "</span></span></div>" +
+          '<div class="adm__row"><span class="adm__nm">' + esc(row.ship) +
+            '<span class="adm__sub">' + esc(srvAddrLine(s)) + "</span></span></div></div>" +
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Заметка</h3></div>' +
+        '<label class="field"><span class="field__label">Видна только вам</span>' +
+          '<textarea class="input" data-admnote rows="3">' + esc(o.notes || "") + "</textarea></label>" +
+        '<div class="adm__acts"><button class="btn btn--sm" data-admnotesave>Сохранить заметку</button></div>' +
+      "</div></div>";
   }
 
   /* The rows above open. A demo where nothing opens reads as a mock-up;
@@ -1902,6 +3326,13 @@
         '<label class="field"><span class="field__label">Заголовок (до 60 знаков)</span><input class="input" data-edseot maxlength="70" value="' + esc(seoT) + '" placeholder="Kevin.Murphy … купить в Таллинне | Rempire"></label>' +
         '<label class="field"><span class="field__label">Описание (до 155 знаков)</span><textarea class="input" data-edseod rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(seoD) + "</textarea></label>" +
         '<button class="btn btn--ghost btn--sm" data-admseogen="' + p.id + '">Сгенерировать с ИИ</button>' +
+        /* features: one optional video per product. Stored in the demo layer
+           and sent to the server as product_overrides.video_url. */
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Видео</h3></div>' +
+        '<label class="field"><span class="field__label">Видео (YouTube/Vimeo ссылка)</span>' +
+        '<input class="input" data-edvideo value="' + esc((DEMO.video && DEMO.video[p.id]) || p.video || "") +
+        '" placeholder="https://youtu.be/… или https://vimeo.com/…"></label>' +
+        '<p class="muted" style="font-size:12.5px;margin:-4px 0 12px">Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.</p>' +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Описание</h3></div>' +
         '<label class="field"><span class="field__label">Русский — эстонский и английский пишутся сами</span>' +
         '<textarea class="input" rows="5">' + esc(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "").slice(0, 400)) + "</textarea></label>" +
@@ -1916,7 +3347,7 @@
     return '<div style="margin-top:10px"><button class="btn btn--ghost btn--sm" data-admtab="' + tab + '">' + label + " →</button></div>";
   }
   var TAB_LABEL = { over: "Открыть обзор", orders: "Открыть заказы", goods: "Открыть товары",
-    people: "Открыть клиентов", stats: "Открыть аналитику", mail: "Открыть письма",
+    people: "Открыть клиентов", reviews: "Открыть отзывы", stats: "Открыть аналитику", mail: "Открыть письма",
     apps: "Открыть подключения", setup: "Открыть настройки" };
 
   /* ---------- demo changes layer ------------------------------------------
@@ -1927,22 +3358,36 @@
      in an undoable log. The real backend later replaces the storage, not the
      UX. */
   var ADM_LS = "rempire-admin-demo";
-  var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, chatbot: true,
+  var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
     flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
       DEMO.price = _dj.price || {}; DEMO.stock = _dj.stock || {}; DEMO.seo = _dj.seo || {};
       DEMO.subcat = _dj.subcat || {}; DEMO.varimg = _dj.varimg || {};
+      DEMO.video = _dj.video || {};   // features: product video links
       if (_dj.chatbot === false) DEMO.chatbot = false;
+      if (_dj.bundles === false) DEMO.bundles = false;
       DEMO.flows = Object.assign(DEMO.flows, _dj.flows || {});
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
     }
   } catch (e) {}
   function demoSave() { try { localStorage.setItem(ADM_LS, JSON.stringify(DEMO)); } catch (e) {} }
+  /* The catalogue is patched in place, so its untouched values are kept aside
+     once. Undoing a change — or losing an override the server no longer has —
+     has to put the original price back, not merely stop overwriting it. */
+  var BASE = CATALOGUE.map(function (p) {
+    return { price: p.price, prices: p.prices ? p.prices.slice() : null,
+      stock: p.stock, seo: p.seo, varImg: p.varImg ? p.varImg.slice() : null };
+  });
   function applyDemoOverrides() {
     for (var i = 0; i < CATALOGUE.length; i++) {
-      var p = CATALOGUE[i];
+      var p = CATALOGUE[i], b = BASE[i];
+      p.price = b.price;
+      if (b.prices) p.prices = b.prices.slice();
+      p.stock = b.stock;
+      p.seo = b.seo;
+      if (b.varImg) p.varImg = b.varImg.slice();
       if (DEMO.price[p.id] != null) {
         p.price = DEMO.price[p.id];
         if (p.prices && p.prices.length) p.prices[0] = DEMO.price[p.id];
@@ -1950,9 +3395,190 @@
       if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
       if (DEMO.seo[p.id]) p.seo = { t: DEMO.seo[p.id].t || "", d: DEMO.seo[p.id].d || "" };
       if (DEMO.varimg[p.id] && p.sizes && DEMO.varimg[p.id].length === p.sizes.length) p.varImg = DEMO.varimg[p.id].slice();
+      if (DEMO.video && DEMO.video[p.id] != null) p.video = DEMO.video[p.id];   // features
     }
   }
   applyDemoOverrides();
+
+  /* ---------- the real backend --------------------------------------------
+     The prototype has to keep working with nothing behind it — a static folder,
+     no database, changes in localStorage. So the API is *detected*, never
+     assumed: anything that is not a JSON answer (a 404 page, an offline phone,
+     the static export) leaves the old behaviour exactly as it was.
+
+     When the API does answer, it wins: /api/overrides/ is read at boot and its
+     prices, stock, SEO and settings replace the local copy, which stays behind
+     as an offline cache. And when the owner is signed in, every change the
+     panel applies is written through to the server as well — including undo,
+     which re-sends the previous value. */
+  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false };
+  function noop() {}
+
+  function apiJson(url, opts) {
+    return fetch(url, opts || {}).then(function (res) {
+      var ct = res.headers.get("content-type") || "";
+      if (ct.indexOf("json") < 0) throw new Error("no-api");
+      return res.json().then(function (body) { return { status: res.status, body: body || {} }; });
+    });
+  }
+  function apiSend(url, method, body) {
+    return apiJson(url, {
+      method: method,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body || {})
+    });
+  }
+
+  function adoptServer(j) {
+    var ov = j.overrides || {};
+    DEMO.price = {}; DEMO.stock = {}; DEMO.seo = {}; DEMO.subcat = {}; DEMO.varimg = {}; DEMO.video = {};
+    Object.keys(ov).forEach(function (id) {
+      var o = ov[id] || {};
+      if (o.price != null) DEMO.price[id] = o.price;
+      if (o.stock) DEMO.stock[id] = o.stock;
+      if (o.seoTitle || o.seoDesc) DEMO.seo[id] = { t: o.seoTitle || "", d: o.seoDesc || "" };
+      if (o.subcat) DEMO.subcat[id] = o.subcat;
+      if (o.varImg) DEMO.varimg[id] = o.varImg;
+      if (o.videoUrl) DEMO.video[id] = o.videoUrl;
+    });
+    var s = j.settings || {};
+    if (typeof s.chatbot === "boolean") DEMO.chatbot = s.chatbot;
+    if (typeof s.bundles === "boolean") DEMO.bundles = s.bundles;
+    if (s.flows && typeof s.flows === "object") DEMO.flows = Object.assign(DEMO.flows, s.flows);
+  }
+
+  function loadServerOverrides() {
+    return apiJson("/api/overrides/").then(function (r) {
+      SRV.on = r.status !== 404;
+      if (r.status !== 200 || r.body.ok !== true) return;
+      adoptServer(r.body);
+      demoSave();
+      applyDemoOverrides();
+      render();
+    }).catch(noop);
+  }
+
+  function checkAdmin() {
+    return apiJson("/api/admin/me/").then(function (r) {
+      SRV.on = true;
+      SRV.admin = r.status === 200 && r.body.ok === true;
+      return SRV.admin;
+    }).catch(function () { SRV.admin = null; return null; });
+  }
+
+  /* One place where an applied change becomes a server write. Undo passes the
+     previous action through the same door, so the server ends up holding what
+     the panel shows. set_video is written by the features layer itself. */
+  function srvPush(a) {
+    if (!SRV.admin || !a) return;
+    var ov = "/api/admin/overrides/", st = "/api/admin/settings/";
+    if (a.type === "set_price") apiSend(ov, "PUT", { id: a.id, price: a.value }).catch(noop);
+    else if (a.type === "set_stock") apiSend(ov, "PUT", { id: a.id, stock: a.value }).catch(noop);
+    else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seoTitle: a.title || "", seoDesc: a.description || "" }).catch(noop);
+    else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
+    else if (a.type === "set_varimg") apiSend(ov, "PUT", { id: a.id, varImg: a.map }).catch(noop);
+    else if (a.type === "toggle_flow") apiSend(st, "PUT", { flows: DEMO.flows }).catch(noop);
+    else if (a.type === "toggle_chatbot") apiSend(st, "PUT", { chatbot: DEMO.chatbot }).catch(noop);
+    else if (a.type === "toggle_bundles") apiSend(st, "PUT", { bundles: DEMO.bundles }).catch(noop);
+  }
+
+  function admLogin(pw) {
+    if (!pw) { SRV.err = "Введите пароль"; render(); return; }
+    SRV.busy = true; SRV.err = ""; render();
+    apiSend("/api/admin/login/", "POST", { password: pw }).then(function (r) {
+      SRV.busy = false;
+      if (r.status === 200 && r.body.ok) {
+        SRV.admin = true; SRV.err = "";
+        loadSrvOrders(true);
+      } else if (r.status === 429) SRV.err = "Слишком много попыток — подождите минуту.";
+      else if (r.body.error === "not_configured") SRV.err = "Пароль ещё не настроен на сервере.";
+      else SRV.err = "Неверный пароль";
+      render();
+      if (!SRV.admin) refocus("[data-admpw]");
+    }).catch(function () {
+      SRV.busy = false; SRV.err = "Сервер не отвечает"; render();
+    });
+  }
+
+  function admLogout() {
+    apiSend("/api/admin/logout/", "POST", {}).catch(noop).then(function () {
+      SRV.admin = false; SRV.orders = null; S.adminOrder = 0; render();
+    });
+  }
+
+  /* Real orders, drawn by the same table as the demo ones. */
+  var SRV_STATES = {
+    new: ["new", "новый", "--error"],
+    paid: ["paid", "оплачен", "--ok"],
+    failed: ["failed", "не оплачен", "--error"],
+    shipped: ["shipped", "отправлен", "--muted"],
+    cancelled: ["cancelled", "отменён", "--muted"],
+    refunded: ["refunded", "возврат", "--muted"]
+  };
+  var SHIP_WORD = { parcel: "Пакомат", courier: "Курьер", pickup: "Самовывоз" };
+  function srvShipLabel(s) {
+    if (!s) return "—";
+    var m = SHIP_WORD[String(s.method || "").toLowerCase()] || s.method || "Доставка";
+    return s.pointName ? m + " · " + s.pointName : m;
+  }
+  function srvRow(o) {
+    var n = 0;
+    (o.items || []).forEach(function (l) { n += Number(l.qty) || 0; });
+    return {
+      id: o.id, number: o.number,
+      date: String(o.createdAt || "").slice(0, 10).split("-").reverse().join("."),
+      who: o.name || o.email || "—", items: n, sum: o.total,
+      ship: srvShipLabel(o.shipping), state: SRV_STATES[o.status] || SRV_STATES.new, srv: o
+    };
+  }
+  function loadSrvOrders(force) {
+    if (!SRV.admin || (SRV.orders && !force)) return;
+    apiJson("/api/admin/orders/?limit=100").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; SRV.orders = null; render(); return; }
+      SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
+      SRV.orders = SRV.ordersErr ? null : (r.body.orders || []).map(srvRow);
+      render();
+    }).catch(function () { SRV.ordersErr = true; render(); });
+  }
+  function srvOrderPatch(id, patch) {
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", patch).then(function (r) {
+      if (r.status === 200 && r.body.ok) { toast("Сохранено ✓"); loadSrvOrders(true); }
+      else if (r.status === 401) { SRV.admin = false; render(); }
+      else toast("Не удалось сохранить");
+    }).catch(function () { toast("Сервер не отвечает"); });
+  }
+
+  /* Only the overrides are read for everybody — they change what the shop
+     shows. Whether this browser is the owner is asked once, and only when the
+     admin screen is actually opened, so a shopper never pays for that call. */
+  var admProbed = false;
+  function probeAdmin() {
+    if (admProbed) return;
+    admProbed = true;
+    checkAdmin().then(function (ok) {
+      if (ok) loadSrvOrders(true);
+      render();
+    });
+  }
+  loadServerOverrides();
+
+  /* ---- features: mirror one editor change to the server ---------------------
+     The demo layer is what the prototype shows; product_overrides is what the
+     real shop will read. PUT /api/admin/overrides belongs to backend-core —
+     this is best effort, and its absence must never break the editor. */
+  function pushOverride(id, patch) {
+    // only a signed-in admin can write; without a session this would just be
+    // a 401 in the console. srvPush() below handles the other fields.
+    if (typeof SRV === "undefined" || !SRV || SRV.admin !== true) return;
+    var body = { product_id: id };
+    for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) body[k] = patch[k];
+    try {
+      fetch("/api/admin/overrides/", {
+        method: "PUT", headers: { "content-type": "application/json" },
+        body: JSON.stringify(body)
+      }).catch(function () {});
+    } catch (e) {}
+  }
 
   var FLOW_NAMES = { abandoned: "Брошенная корзина", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии" };
   function actionText(a) {
@@ -1962,8 +3588,10 @@
     if (a.type === "set_seo") return "SEO «" + (p ? p.name : a.id) + "»: «" + (a.title || "—") + "» / «" + (a.description || "—") + "»";
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
+    if (a.type === "toggle_bundles") return "Наборы на сайте: " + (a.value ? "показать" : "скрыть");
     if (a.type === "set_subcat") return "Подкатегория «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "авто");
     if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
+    if (a.type === "set_video") return "Видео «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "убрано");   // features
     return "";
   }
   function demoApply(a) {
@@ -1974,13 +3602,17 @@
     else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; DEMO.seo[a.id] = { t: a.title, d: a.description }; }
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
     else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
+    else if (a.type === "toggle_bundles") { entry.prev = { type: "toggle_bundles", value: DEMO.bundles !== false }; DEMO.bundles = a.value; }
     else if (a.type === "set_subcat") { entry.prev = { type: "set_subcat", id: a.id, value: DEMO.subcat[a.id] || "" }; if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") { entry.prev = { type: "set_varimg", id: a.id, map: (DEMO.varimg[a.id] || (p.varImg || []).slice()) }; DEMO.varimg[a.id] = a.map.slice(); }
+    // features
+    else if (a.type === "set_video") { entry.prev = { type: "set_video", id: a.id, value: (DEMO.video[a.id] != null ? DEMO.video[a.id] : (p.video || "")) }; DEMO.video[a.id] = a.value; pushOverride(a.id, { video_url: a.value }); }
     else return;
     DEMO.log.unshift(entry);
     DEMO.log = DEMO.log.slice(0, 40);
     demoSave();
     applyDemoOverrides();
+    srvPush(a);   // and through to the server when the owner is signed in
   }
   function demoUndo(i) {
     var entry = DEMO.log[i];
@@ -1991,11 +3623,14 @@
     else if (a.type === "set_seo") DEMO.seo[a.id] = { t: a.title, d: a.description };
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
+    else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
     else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") DEMO.varimg[a.id] = a.map.slice();
+    else if (a.type === "set_video") { DEMO.video[a.id] = a.value; pushOverride(a.id, { video_url: a.value }); }   // features
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
+    srvPush(a);   // the previous value goes back to the server too
   }
   var pendingAction = null;
   function confirmCard(a) {
@@ -2068,24 +3703,64 @@
     return "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?" + aiGo("orders", "Открыть заказы");
   }
 
+  /* The receipt. The payment provider sends the shopper back to
+     /shop2/done/?n=R-100042&s=paid|failed|pending, so this screen reads the
+     query rather than any state it kept — a bank redirect is a fresh page
+     load, and whatever was in memory before it is gone. */
+  function doneState() {
+    if (S.done) return S.done;
+    var q = {};
+    try {
+      String(location.search || "").replace(/^\?/, "").split("&").forEach(function (kv) {
+        if (!kv) return;
+        var i = kv.indexOf("=");
+        q[decodeURIComponent(i < 0 ? kv : kv.slice(0, i))] = i < 0 ? "" : decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " "));
+      });
+    } catch (e) {}
+    var s = q.s === "paid" || q.s === "failed" || q.s === "pending" ? q.s : "";
+    return { status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n };
+  }
   function screenDone() {
+    var d = doneState();
+    // one text node, so the «Заказ R-100042» dictionary rule can rewrite it
+    var num = d.number ? '<p class="done__num">Заказ ' + esc(d.number) + "</p>" : "";
+    if (d.status === "failed") {
+      return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
+        '<div class="done__tick done__tick--bad">✕</div>' +
+        '<h1 class="display h1">Оплата не прошла</h1>' + num +
+        '<p class="muted" style="margin-bottom:22px">Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.</p>' +
+        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+    }
+    if (d.status === "pending") {
+      return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
+        '<div class="done__tick done__tick--wait">…</div>' +
+        '<h1 class="display h1">Платёж обрабатывается</h1>' + num +
+        '<p class="muted" style="margin-bottom:22px">Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.</p>' +
+        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+    }
     return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
       '<div class="done__tick">' + icon("check") + "</div>" +
-      '<h1 class="display h1">Заказ оформлен</h1>' +
-      '<p class="muted" style="margin-bottom:22px">Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.</p>' +
-      '<button class="btn" data-go="home">На главную</button></section></div>';
+      '<h1 class="display h1">' + (d.status === "paid" ? "Заказ оплачен" : "Заказ оформлен") + "</h1>" + num +
+      '<p class="muted" style="margin-bottom:22px">' +
+        (d.status === "paid"
+          ? "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер."
+          : "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.") +
+      "</p>" +
+      '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
   }
 
   // ---------- overlays ----------
   function cartBody() {
     var sum = cartSum(), thr = threshold(), pct = Math.min(100, sum / thr * 100);
     return (S.cart.length ? S.cart.map(function (l, li) {
-      var p = byId(l.id);
-      return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + media(p, 0, "ph") + "</span>" +
-        '<span class="cline__mid"><span class="cline__nm">' + esc(p.brand) + " " + esc(p.name) + lineLabel(l) + "</span>" +
+      // a line is a product, a set or a gift card — lineTitle/lineImageHTML/
+      // lineNoteHTML resolve which, so this markup stays one shape
+      return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + lineImageHTML(l) + "</span>" +
+        '<span class="cline__mid"><span class="cline__nm">' + esc(lineTitle(l)) + lineLabel(l) + "</span>" +
+        lineNoteHTML(l) +
         '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше">−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
         '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
-        '<span class="num cline__pr" data-linepr>' + eur(sizePrice(p, l.size || 0) * l.qty) + "</span></div>";
+        '<span class="num cline__pr" data-linepr>' + eur(lineUnit(l) * l.qty) + "</span></div>";
     }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
       (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
         '<p class="muted">' + freebarText(sum, thr) + "</p></div>" + upsellHTML(sum, thr) : "");
@@ -2102,8 +3777,13 @@
     var pool = CATALOGUE.filter(function (p) { return p.stock !== "out" && !inCart[p.id] && p.cat !== "merch"; });
     var bridge = pool.filter(function (p) { return p.price >= gap && p.price <= gap + 25; })
       .sort(function (a, b) { return a.price - b.price; })[0];
-    var last = byId(S.cart[S.cart.length - 1].id);
-    var mate = complementsFor(last).filter(function (p) { return !inCart[p.id] && p.stock !== "out" && p !== bridge; })[0];
+    // the pairing is read off the last real product: a set or a gift card has
+    // no complements, and byId() would have silently used CATALOGUE[0]
+    var lastLine = null;
+    for (var li2 = S.cart.length - 1; li2 >= 0; li2--) if (!S.cart[li2].type) { lastLine = S.cart[li2]; break; }
+    var mate = lastLine
+      ? complementsFor(byId(lastLine.id)).filter(function (p) { return !inCart[p.id] && p.stock !== "out" && p !== bridge; })[0]
+      : null;
     var picks = [bridge, mate].filter(Boolean).slice(0, 2);
     if (!picks.length) return "";
     return '<div class="upsell"><div class="upsell__t">Добавьте — и доставка бесплатно:</div>' +
@@ -2158,8 +3838,16 @@
 
   // ---------- render ----------
   var app = document.getElementById("app");
-  app.innerHTML = '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
-    '<div id="ovl"></div><div id="toastslot"></div>';
+  /* A prerendered page (tools/prerender-shop2.mjs) ships the product, the
+     category or the home screen as real HTML inside #app, so the page says
+     something before this file has run. Append the slots next to it instead of
+     replacing it, and drop it only once the first render() has filled them —
+     boot is one synchronous task, so nothing is ever painted twice, and if
+     this script fails on the way the static page stays up instead of blanking. */
+  var preRendered = document.getElementById("prerender");
+  app.insertAdjacentHTML("beforeend",
+    '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
+    '<div id="ovl"></div><div id="toastslot"></div>');
   var hdrSlot = document.getElementById("hdrslot");
   var bodySlot = document.getElementById("bodyslot");
   var navSlot = document.getElementById("navslot");
@@ -2179,25 +3867,89 @@
     if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
     el.setAttribute("content", content);
   }
+  function setMetaProp(prop, content) {
+    var el = document.querySelector('meta[property="' + prop + '"]');
+    if (!el) { el = document.createElement("meta"); el.setAttribute("property", prop); document.head.appendChild(el); }
+    el.setAttribute("content", content);
+  }
+  /* The prerendered pages already carry these tags, marked with data-seo so
+     this finds and rewrites them instead of appending a second set. */
+  function setLinkTag(key, rel, href, hreflang) {
+    var el = document.querySelector('link[data-seo="' + key + '"]');
+    if (!el) {
+      el = document.createElement("link");
+      el.setAttribute("data-seo", key);
+      el.setAttribute("rel", rel);
+      if (hreflang) el.setAttribute("hreflang", hreflang);
+      document.head.appendChild(el);
+    }
+    el.setAttribute("href", href);
+  }
+  /* Google shows about sixty characters of a title. Take the longest version
+     that fits — tools/prerender-shop2.mjs runs the same ladder, so the tab does
+     not change under the shopper when this script takes over a static page. */
+  function fitTitle(core, full) {
+    if (full && full.length <= 60) return full;
+    if (core.length + 10 <= 60) return core + " — REMPIRE";
+    if (core.length <= 60) return core;
+    return core.slice(0, 59).replace(/[\s·—–-]+$/, "") + "…";
+  }
+  /* One page, three URLs, one cluster: canonical plus ru/et/en/x-default. The
+     addresses come from the path, never from S.lang — a German browser
+     rendering /shop2/ in English must not tell a crawler that /shop2/ is the
+     English page. x-default is the unprefixed path, which is what every old
+     link and every legacy redirect already points at. */
+  var ALT_TAGS = [["RU", "ru"], ["ET", "et"], ["EN", "en"]];
+  function setAltTags() {
+    var rest = stripLangPrefix(location.pathname).replace(/^\/shop2/, "") || "/";
+    var origin = location.origin;
+    setLinkTag("canonical", "canonical", origin + "/shop2" + SEG_OF_LANG[pathLang] + rest);
+    for (var i = 0; i < ALT_TAGS.length; i++) {
+      setLinkTag("alt-" + ALT_TAGS[i][1], "alternate",
+        origin + "/shop2" + SEG_OF_LANG[ALT_TAGS[i][0]] + rest, ALT_TAGS[i][1]);
+    }
+    setLinkTag("alt-x", "alternate", origin + "/shop2" + rest, "x-default");
+    setMetaProp("og:url", origin + "/shop2" + SEG_OF_LANG[pathLang] + rest);
+    setMetaProp("og:locale", { RU: "ru_RU", ET: "et_EE", EN: "en_US" }[pathLang]);
+    // the displayed language, not the path's: this one is read by screen
+    // readers and by the browser's own translation prompt
+    try { document.documentElement.lang = { RU: "ru", ET: "et", EN: "en" }[S.lang]; } catch (e) {}
+  }
   function setHead() {
     var base = { RU: "REMPIRE — магазин косметики в Таллинне", ET: "REMPIRE — kosmeetikapood Tallinnas", EN: "REMPIRE — grooming shop in Tallinn" }[S.lang];
     var buy = { RU: "купить в Rempire", ET: "osta Rempire'ist", EN: "buy at Rempire" }[S.lang];
     var t = base, d = "";
+    /* A prerendered page ships JSON-LD describing itself — a breadcrumb, a
+       product list, the organisation. It is right until the shopper walks
+       somewhere else, and then it is a description of a page they have left. */
+    if (location.pathname !== loadedPath) {
+      var stale = document.querySelectorAll('script[data-seo="ldjson-page"]');
+      for (var si = 0; si < stale.length; si++) stale[si].remove();
+    }
     if (S.screen === "product") {
       var p = byId(S.productId);
-      t = p.brand + " " + trText(p.name, S.lang, true) + " — " + buy + " · " + (p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price));
-      if (S.lang === "EN" && p.seo && p.seo.t) t = p.seo.t;
+      var core = p.brand + " " + trText(p.name, S.lang, true);
+      t = fitTitle(core, core + " — " + buy + " · " + (p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price)));
+      if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
       d = (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d : stripTags(descFor(p)).slice(0, 155);
+      var pUrl = location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/p/" + encodeURIComponent(p.id) + "/";
+      // same shape the prerendered pages carry, so taking over a static page
+      // does not quietly thin out its structured data
       var ld = {
         "@context": "https://schema.org", "@type": "Product",
         name: p.brand + " " + p.name, brand: { "@type": "Brand", name: p.brand },
-        image: location.origin + p.img,
+        image: [location.origin + p.img],
         description: stripTags(descFor(p)).slice(0, 500),
+        category: trText(CAT_NAMES[p.cat] || "", S.lang, false),
+        sku: p.id,
+        url: pUrl,
         offers: {
           "@type": "Offer", priceCurrency: "EUR",
           price: String(p.price),
           availability: "https://schema.org/" + (p.stock === "out" ? "OutOfStock" : "InStock"),
-          url: location.origin + "/shop2/p/" + p.id + "/"
+          itemCondition: "https://schema.org/NewCondition",
+          url: pUrl,
+          seller: { "@type": "Organization", name: "REMPIRE" }
         }
       };
       var s = document.getElementById("ldjson");
@@ -2209,9 +3961,21 @@
       if (S.screen === "catalog") t = (S.brand || trText(S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat] || "", S.lang, false)) + " — REMPIRE";
       else if (S.screen === "info") { var pg = legalFor(S.infoSlug); if (pg) t = pg.title + " — REMPIRE"; }
       else if (S.screen === "brands") t = trText("Бренды", S.lang, false) + " — REMPIRE";
+      // features
+      else if (S.screen === "bundles") t = trText("Наборы", S.lang, false) + " — REMPIRE";
+      else if (S.screen === "bundle") {
+        var bb = bundleById(S.bundleId);
+        if (bb) { t = bundleTitle(bb) + " — REMPIRE"; d = bundleDesc(bb).slice(0, 155); }
+      } else if (S.screen === "gift") t = trText("Подарочная карта", S.lang, false) + " — REMPIRE";
     }
     document.title = t;
     if (d) setMetaTag("description", d);
+    /* Client navigation has to move the canonical and the hreflang set with
+       the screen, or a crawler that runs JS reads the landing page's cluster
+       on every product it walks to. */
+    setAltTags();
+    setMetaProp("og:title", t);
+    if (d) setMetaProp("og:description", d);
   }
 
   function render() {
@@ -2224,6 +3988,9 @@
     else if (S.screen === "checkout") body = screenCheckout();
     else if (S.screen === "done") body = screenDone();
     else if (S.screen === "brands") body = screenBrands();
+    else if (S.screen === "bundles") body = screenBundles();   // features
+    else if (S.screen === "bundle") body = screenBundle();     // features
+    else if (S.screen === "gift") body = screenGift();         // features
     else if (S.screen === "info") body = screenInfo();
     else if (S.screen === "admin") body = screenAdmin();
 
@@ -2265,6 +4032,9 @@
     }
 
     if (S.screen === "catalog") observeSentinel();
+    // features: real reviews and the moderation queue are fetched once each
+    if (S.screen === "product") loadReviews(S.productId);
+    if (S.screen === "admin" && S.adminTab === "reviews") loadAdminReviews(false);
   }
 
   /* Size, colour, gallery and quantity clicks on the product page patch in
@@ -2439,13 +4209,21 @@
   }
   CATALOGUE.forEach(function (p) { BRAND_BY_SLUG[slugify(p.brand)] = p.brand; });
 
+  /* Whatever language prefix the visitor arrived on rides along on every
+     internal navigation, so a link copied out of the address bar keeps its
+     language and the canonical keeps agreeing with the path. Russian has no
+     prefix — it is the default and the x-default. */
   function pathFor() {
-    if (S.screen === "product" && S.productId) return "/shop2/p/" + encodeURIComponent(S.productId) + "/";
-    if (S.screen === "catalog") return S.brand ? "/shop2/b/" + slugify(S.brand) + "/" : "/shop2/c/" + S.cat + "/";
-    if (S.screen === "search") return "/shop2/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
-    if (S.screen === "info" && S.infoSlug) return "/shop2/info/" + S.infoSlug + "/";
-    if (S.screen === "home") return "/shop2/";
-    return "/shop2/" + S.screen + "/";
+    var b = "/shop2" + SEG_OF_LANG[pathLang];
+    if (S.screen === "product" && S.productId) return b + "/p/" + encodeURIComponent(S.productId) + "/";
+    if (S.screen === "catalog") return S.brand ? b + "/b/" + slugify(S.brand) + "/" : b + "/c/" + S.cat + "/";
+    if (S.screen === "search") return b + "/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
+    if (S.screen === "info" && S.infoSlug) return b + "/info/" + S.infoSlug + "/";
+    // features: /shop2/sets/ is the list, /shop2/set/<id>/ one set
+    if (S.screen === "bundles") return b + "/sets/";
+    if (S.screen === "bundle" && S.bundleId) return b + "/set/" + encodeURIComponent(S.bundleId) + "/";
+    if (S.screen === "home") return b + "/";
+    return b + "/" + S.screen + "/";
   }
   function here() { return location.pathname + location.search; }
   /* Stamp the live scroll onto the entry being left, so Back returns to the
@@ -2507,7 +4285,9 @@
   function go(screen) {
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
     if (screen === "catalog") S.shown = 12;
-    if (screen === "checkout") S.coStep = 1;
+    if (screen === "checkout") { S.coStep = 1; S.pointOpen = false; }
+    // leaving the receipt drops the receipt: the next one reads its own query
+    if (screen !== "done") S.done = null;
     // the receipt replaces the checkout it came from: Back from it belongs on
     // the shop, not on a payment form for an order already placed
     navTo(screen === "done");
@@ -2558,6 +4338,46 @@
     if (S.cartOpen) rebuildCart();
     toast("Добавлено в корзину ✓");
   }
+
+  /* ---- features: sets and gift cards in the cart --------------------------
+     Both are one line with a price of their own. The set carries the products
+     it is made of, so the order — and the person packing it — has the list
+     even if the set is retired later; the gift card carries its recipient. */
+  function addBundleToCart(bid) {
+    var b = bundleById(bid);
+    if (!b) return;
+    if (b.stock === "out") { toast("Набор сейчас не собрать — товар закончился"); return; }
+    var id = "bundle:" + b.id, line = null;
+    S.cart.forEach(function (l) { if (l.type === "bundle" && l.id === id) line = l; });
+    if (line) line.qty = Math.min(9, line.qty + 1);
+    else S.cart.push({
+      type: "bundle", id: id, qty: 1, price: b.price,
+      components: b.items.map(function (it) { return { id: it.id, size: it.size || 0, qty: 1 }; })
+    });
+    persist();
+    if (S.cartOpen) rebuildCart();
+    toast("Набор в корзине ✓");
+  }
+  function addGiftToCart(amount) {
+    var a = Number(amount);
+    if (GIFT_AMOUNTS.indexOf(a) < 0) return;
+    if (giftEmailBad()) { toast("Проверьте e-mail получателя"); return; }
+    // every card is its own line: two cards for two people must not merge
+    S.cart.push({
+      type: "gift", id: "gift:" + a, qty: 1, price: a,
+      meta: {
+        name: S.gift.name.trim().slice(0, 80),
+        email: S.gift.email.trim().slice(0, 120),
+        message: S.gift.message.trim().slice(0, 300)
+      }
+    });
+    S.gift = { name: "", email: "", message: "" };
+    persist();
+    if (S.cartOpen) rebuildCart();
+    toast("Подарочная карта в корзине ✓");
+  }
+  /* ---- /features ---------------------------------------------------------- */
+
   var COUNTRY_SHORT = { EE: "Эстония", LV: "Латвия", LT: "Литва", FI: "Финляндия", EU: "Европа" };
   function freebarText(sum, thr) {
     return sum >= thr
@@ -2565,6 +4385,8 @@
       : "До бесплатной доставки (" + COUNTRY_SHORT[S.country] + ", от " + thr + " €) — ещё " + eur(thr - sum);
   }
   function lineLabel(l) {
+    // sets and gift cards carry no size — their detail is in lineNoteHTML
+    if (l.type) return "";
     var p = byId(l.id);
     if (!p.sizes || !p.sizes.length) return "";
     var s = p.sizes[Math.min(l.size || 0, p.sizes.length - 1)];
@@ -2649,7 +4471,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -2669,6 +4491,8 @@
       S.productId = d.goProduct; S.size = 0; S.qty = 1;
       var np = byId(d.goProduct);
       S.gallery = np.varImg && np.varImg.length ? np.varImg[0] : 0;
+      // features: the video and the review form belong to the product we left
+      S.videoOn = false; S.revOpen = false; S.revState = "";
       go("product"); return;
     }
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
@@ -2728,6 +4552,13 @@
     // an already-translated header would otherwise stick on the old language.
     if (d.lang) {
       S.lang = d.lang; S.langOpen = false; savedHadLang = true; persist();
+      /* The URL is half the answer: switching language rewrites the prefix in
+         place, so the address bar, the canonical and what is on screen never
+         disagree, and the link the shopper copies opens in the language they
+         are reading. replaceState, not push — Back should leave the shop, not
+         walk back through language changes. */
+      pathLang = d.lang;
+      try { history.replaceState(history.state || { y: window.scrollY, shown: S.shown }, "", pathFor()); } catch (e) {}
       hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
       render(); return;
     }
@@ -2748,30 +4579,40 @@
       return;
     }
     if (d.checkout !== undefined) { if (!S.cart.length) { toast("Корзина пуста"); return; } go("checkout"); return; }
-    if (d.pay !== undefined) {
-      S.emailTouched = true; S.shipTouched = true;
-      /* Nothing was checked here before: an order went through with no
-         address, no phone and no company for an invoice. Send the shopper to
-         the step that is short, with the fields marked, rather than refusing
-         with a toast and leaving them to hunt. */
-      if (emailBad()) { return failStep(1, "Проверьте e-mail — на него придёт подтверждение заказа"); }
-      if (shipMissing().length) { return failStep(2, "Заполните данные доставки"); }
-      if (S.pay === 3 && !S.invoiceCo.trim()) { return failStep(3, "Укажите фирму и регистрационный номер"); }
-      // a finished order must not leave its promo, address or step state
-      // behind for the next one
-      S.cart = []; S.promo = ""; S.promoOk = false; S.promoErr = false; S.sumOpen = null;
-      S.ship = { name: "", addr: "", zip: "", city: "", phone: "" };
-      S.emailTouched = false; S.shipTouched = false;
-      persist(); go("done"); return;
-    }
+    if (d.pay !== undefined) { payNow(); return; }
     if (d.step) {
       var n = Number(d.step);
       // forward only — going back to change something is always allowed
       if (n > S.coStep) {
         if (S.coStep === 1) { S.emailTouched = true; if (emailBad()) { return failStep(1); } }
-        if (S.coStep === 2) { S.shipTouched = true; if (shipMissing().length) { return failStep(2); } }
+        if (S.coStep === 2) {
+          S.shipTouched = true;
+          if (shipMissing().length || pointMissing()) { return failStep(2); }
+        }
       }
       S.coStep = n; render(); return;
+    }
+    /* ---------- delivery picker ---------- */
+    if (d.dm) {
+      S.ship.method = d.dm;
+      if (d.dm !== "parcel") S.ship.point = null;
+      else loadPoints();
+      render(); refocus('[data-dm="' + d.dm + '"]'); return;
+    }
+    if (d.carrier) {
+      // another carrier is another set of machines — the old choice is not one
+      S.ship.carrier = d.carrier; S.ship.point = null; POINTS.q = "";
+      loadPoints(); render(); refocus('[data-carrier="' + d.carrier + '"]'); return;
+    }
+    if (d.pointopen !== undefined) {
+      loadPoints(); POINTS.q = ""; S.pointOpen = true; render();
+      refocus("[data-pointq]"); return;
+    }
+    if (d.pointclose !== undefined) { S.pointOpen = false; render(); refocus("[data-pointopen]"); return; }
+    if (d.pointpick) {
+      var picked = pointById(d.pointpick);
+      if (picked) S.ship.point = picked;
+      S.pointOpen = false; render(); refocus("[data-pointopen]"); return;
     }
     // checkout selections re-render the step, which destroys the clicked
     // control — put keyboard focus back on its replacement
@@ -2784,7 +4625,20 @@
     if (d.admnav !== undefined) { S.admNav = !S.admNav; render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) { S.admAi = !S.admAi; render(); refocus("[data-admai]"); return; }
     if (d.admtab) { S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = ""; window.scrollTo({ top: 0 }); render(); return; }
-    if (d.admorder !== undefined) { S.adminOrder = d.admorder ? Number(d.admorder) : 0; S.adminTab = "orders"; window.scrollTo({ top: 0 }); render(); return; }
+    // demo orders are numbered, real ones carry a uuid — keep both as they came
+    if (d.admorder !== undefined) { S.adminOrder = d.admorder ? (/^\d+$/.test(d.admorder) ? Number(d.admorder) : d.admorder) : 0; S.adminTab = "orders"; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admlogin !== undefined) {
+      var pwEl = document.querySelector("[data-admpw]");
+      admLogin(pwEl ? pwEl.value.trim() : "");
+      return;
+    }
+    if (d.admlogout !== undefined) { admLogout(); return; }
+    if (d.admstatus) { srvOrderPatch(S.adminOrder, { status: d.admstatus }); return; }
+    if (d.admnotesave !== undefined) {
+      var noteEl = document.querySelector("[data-admnote]");
+      srvOrderPatch(S.adminOrder, { note: noteEl ? noteEl.value : "" });
+      return;
+    }
     if (d.admgoods !== undefined) { S.adminEdit = d.admgoods; S.adminTab = "goods"; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admclose !== undefined) { S.adminEdit = ""; render(); return; }
     if (d.vpick !== undefined) {
@@ -2847,6 +4701,16 @@
       if ((nt || nd) && (nt !== ((gp.seo || {}).t || "") || nd !== ((gp.seo || {}).d || ""))) {
         demoApply({ type: "set_seo", id: gp.id, title: nt, description: nd }); changed = true;
       }
+      /* ---- features: the video link -------------------------------------- */
+      var vEl = document.querySelector("[data-edvideo]");
+      if (vEl) {
+        var nv = vEl.value.trim();
+        var curV = (DEMO.video && DEMO.video[gp.id]) || gp.video || "";
+        // demoApply() writes the demo layer, the log and the server copy —
+        // srvPush() deliberately leaves set_video to us
+        if (nv !== curV) { demoApply({ type: "set_video", id: gp.id, value: nv }); changed = true; }
+      }
+      /* ---- /features ------------------------------------------------------ */
       S.adminEdit = "";
       toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
       render(); return;
@@ -2860,9 +4724,45 @@
       demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
       toast("Сохранено ✓"); render(); return;
     }
+    if (d.mailtpl !== undefined) { keepMailTo(); S.mailTpl = d.mailtpl; render(); return; }
+    if (d.maillang !== undefined) { keepMailTo(); S.mailLang = d.maillang; render(); return; }
+    if (d.mailtest !== undefined) {
+      keepMailTo();
+      var mailAddr = (S.mailTo || "").trim();
+      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(mailAddr)) {
+        toast("Введите e-mail — на него придёт образец"); refocus("[data-mailto]"); return;
+      }
+      if (t.disabled) return;
+      t.disabled = true;
+      /* trailing slash on purpose: next.config has trailingSlash:true, and a
+         308 on a POST drops the body */
+      fetch("/api/admin/mail/test/", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ template: mailTpl(), to: mailAddr, lang: mailLang() })
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) { return { code: r.status, j: j }; });
+      }).then(function (res) {
+        t.disabled = false;
+        var err = res.j && res.j.error;
+        if (res.j && res.j.ok) toast("Тест отправлен ✓");
+        else if (res.code === 401) toast("Нужен вход в админку");
+        else if (err === "no_api_key") toast("Отправка писем ещё не подключена");
+        else if (err === "rate_limited") toast("Слишком много писем — попробуйте позже");
+        else if (err === "bad_email") toast("Введите e-mail — на него придёт образец");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () {
+        t.disabled = false; toast("Не получилось — попробуйте ещё раз");
+      });
+      return;
+    }
     if (d.admchatbot !== undefined) {
       demoApply({ type: "toggle_chatbot", value: !DEMO.chatbot });
       toast(DEMO.chatbot ? "Чат включён ✓" : "Чат выключен ✓"); render(); return;
+    }
+    if (d.admbundles !== undefined) {
+      demoApply({ type: "toggle_bundles", value: DEMO.bundles === false });
+      if (DEMO.bundles === false && (S.screen === "bundles" || S.screen === "bundle")) S.screen = "home";
+      toast(DEMO.bundles !== false ? "Наборы показаны ✓" : "Наборы скрыты ✓"); render(); return;
     }
     if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
@@ -2907,9 +4807,52 @@
       return;
     }
     if (d.applypromo !== undefined) {
+      /* ---- features: the same field takes a gift-card code ----------------
+         RMP- plus eight letters is a card, everything else is a promo code —
+         so the shopper has one box to type into instead of two. Owned by the
+         features agent; the promo branch below is the original one. */
+      var typed = S.promo.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (typed.indexOf("RMP") === 0 && typed.length === 11) {
+        applyGiftCode(S.promo.trim(), t);
+        return;
+      }
+      /* ---- /features ------------------------------------------------------ */
       var ok = S.promo.trim().toUpperCase() === "REMPIRE10";
       S.promoOk = ok; S.promoErr = !ok; render(); refocus("[data-applypromo]"); return;
     }
+
+    /* ---------- features: sets, gift card, reviews, video ---------------- */
+    if (d.goBundle) {
+      S.bundleId = d.goBundle; S.videoOn = false; go("bundle"); return;
+    }
+    if (d.addbundle) { e.stopPropagation(); addBundleToCart(d.addbundle); return; }
+    if (d.giftamt) { S.giftAmount = Number(d.giftamt); render(); refocus('[data-giftamt="' + d.giftamt + '"]'); return; }
+    if (d.addgift) { addGiftToCart(d.addgift); render(); return; }
+    if (d.giftoff !== undefined) { S.giftCard = null; S.giftErr = ""; render(); return; }
+    if (d.revopen !== undefined) {
+      S.revOpen = !S.revOpen; S.revState = ""; render();
+      if (S.revOpen) refocus('[data-revf="name"]');
+      return;
+    }
+    if (d.revstar) {
+      S.revForm.rating = Number(d.revstar);
+      document.querySelectorAll("[data-revstar]").forEach(function (b) {
+        b.setAttribute("aria-checked", String(Number(b.dataset.revstar) <= S.revForm.rating));
+      });
+      var live = document.querySelector("[data-revrating]");
+      if (live) live.textContent = S.revForm.rating + " из 5";
+      return;
+    }
+    if (d.revsend !== undefined) { sendReview(); return; }
+    if (d.admrevfilter) { S.admRevFilter = d.admrevfilter; loadAdminReviews(true); render(); return; }
+    if (d.admrev) {
+      var parts = d.admrev.split(":");
+      moderateReview(parts[0], parts[1]);
+      return;
+    }
+    if (d.playvideo !== undefined) { S.videoOn = true; render(); return; }
+    /* ---------- /features ------------------------------------------------ */
+
     if (d.q) { S.query = d.q; go("search"); return; }
     if (d.closetoast !== undefined) { S.toast = null; render(); return; }
   });
@@ -2939,7 +4882,17 @@
     else if (t.matches("[data-news]")) { S.newsletter = t.checked; }
     else if (t.matches("[data-invoiceco]")) { S.invoiceCo = t.value; }
     // editing the code must drop the applied discount, not just the error
-    else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; S.promoOk = false; }
+    else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; S.promoOk = false; S.giftErr = ""; }
+    /* Only the list is redrawn — a full render would replace this very input
+       and take the caret with it. */
+    else if (t.matches("[data-pointq]")) { POINTS.q = t.value; patchPointList(); }
+    // features: the gift-card form and the review form keep their own state
+    else if (t.matches("[data-giftf]")) { S.gift[t.dataset.giftf] = t.value; }
+    else if (t.matches("[data-revf]")) {
+      S.revForm[t.dataset.revf] = t.type === "checkbox" ? t.checked : t.value;
+      var send = document.querySelector("[data-revsend]");
+      if (send) send.disabled = !reviewReady();
+    }
     else if (t.matches("[data-goodsq]")) {
       S.goodsQ = t.value;
       var list = document.getElementById("goodslist");
@@ -2959,7 +4912,13 @@
 
   document.addEventListener("change", function (e) {
     var t = e.target;
-    if (t.matches("[data-country]")) { S.country = t.value; S.method = 0; S.machine = 0; render(); }
+    if (t.matches("[data-country]")) {
+      S.country = t.value; S.method = 0; S.machine = 0;
+      // another country is another carrier and another set of machines
+      S.ship.carrier = ""; S.ship.point = null; POINTS.q = "";
+      if (isParcel()) loadPoints();
+      render();
+    }
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-machine]")) { S.machine = t.selectedIndex; }
@@ -2984,7 +4943,8 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
-      if (S.cartOpen || S.filterOpen) { closeDrawers(); }
+      if (S.pointOpen) { S.pointOpen = false; render(); refocus("[data-pointopen]"); }
+      else if (S.cartOpen || S.filterOpen) { closeDrawers(); }
       else if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
     }
@@ -3016,7 +4976,9 @@
   /* Every product has a real page at /shop/p/<id>/ carrying its own link
      preview, so sharing one shares that product rather than the shop. */
   function productUrl(id) {
-    return location.origin + "/shop2/p/" + id + "/";
+    // in the language the sharer is reading, so the link opens that way for
+    // whoever gets it — /shop2/p/… is Russian, /shop2/et/p/… Estonian
+    return location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/p/" + encodeURIComponent(id) + "/";
   }
   function shareProduct(id) {
     var p = byId(id), url = productUrl(id);
@@ -3038,7 +5000,21 @@
      state so a deep link, a reload and the Back button all land on the same
      screen — this is the only thing that turns a URL back into a view. */
   function routeFromPath() {
-    var p = location.pathname.replace(/\/+$/, "");
+    /* Read the language off the path first and strip it, so one set of
+       patterns below serves all three languages. Doing it here and not only at
+       boot is what makes Back work across a language switch: stepping into an
+       entry written as /shop2/et/… returns to Estonian. */
+    var lp = langFromPath(location.pathname);
+    pathLang = lp || "RU";
+    if (lp && lp !== S.lang) {
+      S.lang = lp;
+      // the persistent slots hold already-translated markup; translateTree only
+      // converts FROM Russian, so they have to be rebuilt, not re-translated
+      if (hdrSlot) hdrSlot.innerHTML = "";
+      if (navSlot) navSlot.innerHTML = "";
+      ovlKey = "";
+    }
+    var p = stripLangPrefix(location.pathname).replace(/\/+$/, "");
     var m;
     if ((m = p.match(/\/shop2\/p\/([^/]+)$/))) {
       var id = decodeURIComponent(m[1]), found = null;
@@ -3047,6 +5023,7 @@
         S.productId = found.id;
         S.size = 0; S.qty = 1;
         S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
+        S.videoOn = false; S.revOpen = false; S.revState = "";   // features
         S.screen = "product";
         return true;
       }
@@ -3068,10 +5045,20 @@
     if ((m = p.match(/\/shop2\/info\/([a-z]+)$/)) && typeof LEGAL !== "undefined" && LEGAL[m[1]]) {
       S.infoSlug = m[1]; S.screen = "info"; return true;
     }
+    // features: sets and the gift card
+    if ((m = p.match(/\/shop2\/set\/([^/]+)$/)) && bundleById(decodeURIComponent(m[1]))) {
+      S.bundleId = decodeURIComponent(m[1]); S.screen = "bundle"; return true;
+    }
+    if (/\/shop2\/sets$/.test(p)) { S.screen = "bundles"; return true; }
+    if (/\/shop2\/gift$/.test(p)) { S.screen = "gift"; return true; }
     if ((m = p.match(/\/shop2\/(brands|account|admin)$/))) { S.screen = m[1]; return true; }
-    /* A receipt and a payment form are not places to land cold: /shop/done/
-       has no order behind it on a fresh load, and checkout with an empty
-       basket only bounces the shopper straight back out. */
+    /* The receipt IS a place to land cold — it is where the bank sends the
+       shopper back to, with ?n=&s= naming the order and how it went. Without
+       that query there is no order behind it, and home is the honest answer.
+       A payment form with an empty basket bounces straight back out anyway. */
+    if (/\/shop2\/done$/.test(p) && /[?&]s=(paid|failed|pending)\b/.test(location.search)) {
+      S.screen = "done"; return true;
+    }
     if (/\/shop2\/checkout$/.test(p) && S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }
     S.screen = "home";
     return true;
@@ -3159,6 +5146,11 @@
       var q = t.value.trim();
       if (q) { S.adminAsk = q; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
     }
+    // Enter in the password field signs in, same as «Войти»
+    if (t && t.matches && t.matches("[data-admpw]")) {
+      e.preventDefault();
+      admLogin(t.value.trim());
+    }
   });
 
   routeFromPath();
@@ -3169,6 +5161,13 @@
     history.replaceState({ y: 0, shown: S.shown }, "", here());
   } catch (e) {}
   render();
+  /* The slots are filled now, so the static page underneath them has done its
+     job. Still one synchronous task — the browser has not painted between the
+     two, which is why the swap is invisible. */
+  if (preRendered) {
+    try { preRendered.remove(); } catch (e) {}
+    preRendered = null;
+  }
   restartHero();
   intro();
 

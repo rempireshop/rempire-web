@@ -18,3 +18,10 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# generated at build by tools/prerender-shop2.mjs (npm run prerender / prebuild)
+public/shop2/p/
+public/shop2/c/
+public/shop2/b/
+public/shop2/et/
+public/shop2/en/

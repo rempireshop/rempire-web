@@ -48,3 +48,21 @@ Allow: /
 
 User-agent: vkShare
 Allow: /
+
+# --- what stays closed once the site opens -------------------------------
+# These are listed here so the rule is written down while staging is still
+# shut, and so the preview bots above never wander into a cart. Nothing
+# behind a basket, a payment form or a login belongs in an index.
+User-agent: *
+Disallow: /shop2/admin
+Disallow: /shop2/checkout
+Disallow: /shop2/cart
+Disallow: /shop2/*/admin
+Disallow: /shop2/*/checkout
+Disallow: /shop2/*/cart
+Disallow: /api/
+
+# The open-to-everyone version of this file is generated beside it as
+# public/robots.production.txt by `npm run prerender`; at the switch it
+# replaces this one. See docs/seo.md.
+Sitemap: https://rempireshop.diipsolutions.eu/sitemap.xml
