@@ -69,6 +69,34 @@ because the session is signed with `SESSION_SECRET`, not with the password.
   `items` and `shipping` as jsonb, the four money columns, `payment` as jsonb,
   `notes`, `discount_code`.
 - **`admin_audit`** — who changed what, when.
+- **`promo_codes`** / **`promo_code_uses`** — real promo codes
+  (`db/migrations/060_promo_codes.sql`, `src/lib/promos.ts`). `code` is the
+  primary key (A–Z, 0–9 and `-`, up to 24 characters); `kind` is
+  `percent` / `fixed` / `free_shipping`; plus `value`, `min_subtotal`,
+  `starts_at`, `ends_at`, `max_uses`, `used`, `active`, `note`. The uses table
+  is append-only with a unique `(code, order_id)`, so a webhook retry cannot
+  count the same order twice. Nothing is seeded — an empty table means the shop
+  has no codes, which was the truth until Renat made one.
+
+### How a discount code is priced
+
+One box at the checkout takes two different things, and `createOrder` tells
+them apart by shape: `RMP-XXXX-XXXX` is a gift card (`src/lib/giftcards.ts`),
+anything else is looked up in `promo_codes`. Both are only **quoted** onto the
+order — `discount` and `discount_code` — and both are **spent** on the single
+transition into `paid` in `src/lib/payments/apply.ts`: the card's balance by
+`redeemGiftCard`, the code's counter by `consumePromo`. A checkout abandoned on
+the bank's page therefore costs the customer nothing and burns no promo use.
+
+A `free_shipping` code comes back as a discount **equal to the delivery price**
+rather than as a zeroed shipping line, so `shipping_price` keeps meaning "what
+this parcel costs" and the receipt, the summary and the e-mail all print the
+same three lines.
+
+If the card has emptied or the code has run out between checkout and payment,
+the order **stays paid** and the mismatch is written to `admin_audit` as
+`giftcard_redeem_failed` / `promo_consume_failed`. The money arrived; settling a
+few euro by hand is a better failure than an unpaid-looking paid order.
 
 ## Shared modules
 
@@ -123,6 +151,7 @@ The site runs with `trailingSlash: true`, so call the paths with the slash
 | --- | --- |
 | `POST /api/orders/` | Body `{lang, items:[{id, variant?, qty}], customer:{name,email,phone}, shipping:{method, country, carrier?, pointId?, pointName?, address?}, discountCode?, notes?}` → `{ok, orderId, number, total}`. 10 per minute per IP, body capped at 16 KB (`too_large`, 413). `shipping` is rebuilt from a whitelist: `method` becomes one of `parcel`/`courier`/`pickup`, `country` two letters, `carrier` one of `omniva`/`smartpost`/`dpd`/`venipak` (lower-cased, anything else `null`), `pointId` ≤ 80 chars, `pointName` ≤ 160, `address` only `{addr,street,zip,city,house,flat}` at ≤ 160 chars each. Errors: `empty_order`, `bad_qty`, `bad_name`, `bad_email`, `unknown_item`, `out_of_stock`, `bundle_unknown`, `rate_limited`, `too_large`. |
 | `GET /api/overrides/` | `{ok, overrides, settings}` — everything the storefront needs. `Cache-Control: s-maxage=30`. 503 `db_unavailable` when there is no database. |
+| `POST /api/promos/check/` | `{code, subtotal?, shipping?}` → `{ok, code, kind, value, discount, freeShipping, minSubtotal}`, or `{ok:false, error}` with `bad_code`, `not_found`, `inactive`, `not_started`, `expired`, `used_up`, `min_subtotal` (which carries `minSubtotal`, so the shop can say «ещё 12 €»), `rate_limited`, `unavailable`. 20 a minute per IP, body capped at 2 KB. Read-only — the use is counted when the payment is confirmed, never here. |
 
 ### Admin (cookie `rmp_admin`)
 
@@ -133,7 +162,8 @@ The site runs with `trailingSlash: true`, so call the paths with the slash
 | `GET /api/admin/me/` | 200 when signed in, 401 otherwise; `configured` says whether the server has a password at all. |
 | `PUT /api/admin/overrides/` | `{id, price?, stock?, seoTitle?, seoDesc?, subcat?, varImg?, videoUrl?, gallery?}`, or `{items:[…]}` for several. Only the keys sent are touched; `null` clears one. `GET` returns the map uncached. |
 | `POST /api/admin/upload/` | multipart `file`, `kind=product\|hero\|review`, `productId?`/`reviewId?` → `{ok, url, thumbUrl, key, width, height, bytes}`. 60 an hour per session. `DELETE ?key=` removes one object, `GET` says whether the bucket is configured. See docs/media.md. |
-| `PUT /api/admin/settings/` | `{chatbot:false}`, `{hero:{slides:[…],interval}}` or `{hero:null}`, `{flows:{…}}`, `{key, value}` or `{settings:{…}}`. `GET` returns everything. |
+| `PUT /api/admin/settings/` | `{chatbot:false}`, `{hero:{slides:[…],interval}}` or `{hero:null}`, `{flows:{…}}`, `{shipping_rules:{…}}` (docs/shipping.md — writing this key also drops the tariff cache so the next order bills the new price), `{key, value}` or `{settings:{…}}`. `GET` returns everything. |
+| `GET/POST/PATCH /api/admin/promos/` | `GET` → `{ok, promos}`, newest first. `POST {code, kind, value, minSubtotal, startsAt, endsAt, maxUses, active, note}` creates or edits one (`used` is never reset by an edit); errors `bad_code`, `bad_value`, `bad_min`, `bad_date`, `bad_uses`. `PATCH {code, active}` switches one on or off. There is no `DELETE`: a code that has been used is part of the order history. |
 | `GET /api/admin/orders/?status=&q=&limit=` | Newest first; `q` matches number, e-mail, name or phone. |
 | `GET/PATCH /api/admin/orders/<id>/` | The id is the uuid or the order number. `PATCH {status?, note?}`. |
 | `GET /api/admin/audit/?limit=` | The change log, newest first. |

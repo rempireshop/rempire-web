@@ -17,8 +17,9 @@ import type { PaymentStatus, VerifyResult } from "./types";
  *     entry, so retries stay quiet.
  *   - pending never changes the order's status; it only records the attempt.
  *   - everything that may happen only once per order — the gift-card redeem
- *     here, the owner ping and the customer letter in the caller — hangs off
- *     the single transition into `paid`, reported as `alreadyPaid: false`.
+ *     and the promo-code use here, the owner ping and the customer letter in
+ *     the caller — hangs off the single transition into `paid`, reported as
+ *     `alreadyPaid: false`.
  */
 
 export interface OrderLike {
@@ -62,6 +63,15 @@ export interface ApplyDeps {
     amount: number,
     orderId: string,
   ): Promise<{ ok?: boolean; error?: string } | null>;
+  /**
+   * Count the promo code the order was quoted against. Same story as the gift
+   * card: quoted at checkout, spent here, exactly once per order.
+   */
+  consumePromo?(
+    code: string,
+    orderId: string,
+    amount: number,
+  ): Promise<{ ok?: boolean; error?: string; already?: boolean } | null>;
   /** Same story: the audit writer, so a failed redeem is visible to Renat. */
   writeAudit?(actor: string, action: string, payload?: unknown): Promise<unknown>;
 }
@@ -75,10 +85,16 @@ export interface ApplyOutcome {
    * True when the order was ALREADY paid before this call — a webhook retry, a
    * refreshed return URL, the return and the notification racing. The caller
    * must not re-run the side effects of payment (owner ping, customer letter)
-   * when this is set (audit H4).
+   * when this is set (audit H4). Issuing the gift cards bought in the order is
+   * the one thing the caller re-runs regardless: it is idempotent, and a retry
+   * is the only chance to mint them if the first pass died before the hook.
    */
   alreadyPaid: boolean;
-  /** Set when the order's gift card could not be spent — see the audit row. */
+  /**
+   * Set when the order's discount code could not be settled — a gift card that
+   * emptied, or a promo code that ran out of uses, between checkout and
+   * payment. See the audit row (`giftcard_redeem_failed` / `promo_consume_failed`).
+   */
   giftShortfall?: { code: string; amount: number; error?: string };
   payment: PaymentBlob;
 }
@@ -102,7 +118,16 @@ async function redeemQuotedGiftCard(
 ): Promise<ApplyOutcome["giftShortfall"]> {
   const code = typeof order.discountCode === "string" ? order.discountCode.trim() : "";
   const amount = toNumber(order.discount) ?? 0;
-  if (!code || !(amount > 0)) return undefined;
+  if (!code) return undefined;
+
+  /* The same checkout box takes a gift card and a promo code, so the order's
+     `discount_code` can be either. A promo handed to redeemGiftCard() would
+     come back "not_found" and write a giftcard_redeem_failed row about a card
+     that never existed — tell them apart by shape first. A free-shipping promo
+     carries a discount of 0 on a free basket, so the promo branch runs on the
+     code alone; only the card needs money to redeem. */
+  if (await isPromoCode(code)) return consumeQuotedPromo(order, deps, code, amount);
+  if (!(amount > 0)) return undefined;
 
   let redeem = deps.redeemGiftCard;
   if (!redeem) {
@@ -136,6 +161,70 @@ async function redeemQuotedGiftCard(
     });
   } catch (err) {
     console.error("[payments] giftcard_redeem_failed not audited", err);
+  }
+  return shortfall;
+}
+
+/**
+ * `RMP-XXXX-XXXX` is a gift card; anything else the checkout accepted is a
+ * promo code. Asked of src/lib/promos.ts so the shape lives in one file; if
+ * that module is missing the answer is "not a promo", and the old gift-card
+ * path runs exactly as before.
+ */
+async function isPromoCode(code: string): Promise<boolean> {
+  try {
+    const mod = await import("@/lib/promos");
+    return !mod.looksLikeGiftCode(code);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Count the promo code's use, once, on the paid transition.
+ *
+ * Failure is not fatal for the same reason the gift card's is not: the money
+ * arrived. A code that ran out of uses between checkout and payment leaves the
+ * order paid and an audit row `promo_consume_failed` for Renat.
+ */
+async function consumeQuotedPromo(
+  order: OrderLike,
+  deps: ApplyDeps,
+  code: string,
+  amount: number,
+): Promise<ApplyOutcome["giftShortfall"]> {
+  let consume = deps.consumePromo;
+  if (!consume) {
+    try {
+      const mod = await import("@/lib/promos");
+      consume = mod.consumePromo as ApplyDeps["consumePromo"];
+    } catch (err) {
+      console.error("[payments] promo codes module not available", err);
+    }
+  }
+
+  let error: string | undefined = "unavailable";
+  try {
+    const out = consume ? await consume(code, order.id, amount) : null;
+    if (out?.ok) return undefined;
+    error = out?.error ?? error;
+  } catch (err) {
+    console.error(`[payments] consumePromo failed on ${order.number}`, err);
+    error = "exception";
+  }
+
+  const shortfall = { code, amount, error };
+  try {
+    const write =
+      deps.writeAudit ??
+      ((await import("@/lib/orders")).writeAuditSafe as ApplyDeps["writeAudit"]);
+    await write?.("system", "promo_consume_failed", {
+      orderId: order.id,
+      number: order.number,
+      ...shortfall,
+    });
+  } catch (err) {
+    console.error("[payments] promo_consume_failed not audited", err);
   }
   return shortfall;
 }
@@ -204,7 +293,8 @@ export async function applyPaymentResult(
 
   if (result.status === "paid") {
     // Already paid: a retry, not a payment. Write the blob, touch nothing else
-    // — no status change, no gift card, and the caller sends no mail (H4).
+    // — no status change, no gift-card redeem, and the caller sends no mail
+    // (H4); it only makes sure the order's own gift cards exist.
     if (wasPaid) return { status: "paid", keptPaid: false, alreadyPaid: true, payment };
 
     await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);

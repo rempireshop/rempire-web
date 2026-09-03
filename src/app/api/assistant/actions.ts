@@ -12,6 +12,8 @@
  * may only export handlers, and this is the piece the tests need.
  */
 
+import { sanitizeContentPatch } from "@/lib/content";
+
 export const CATEGORIES = ["hair", "styling", "beard", "face", "body", "perfume", "merch", "all"];
 export const INFO_PAGES = ["shipping", "returns", "terms", "contact", "privacy"];
 
@@ -89,6 +91,157 @@ export function sanitizeHero(raw: unknown, known: Set<string>): object | null {
   return { slides, interval: Math.min(30_000, Math.max(2_000, tick)) };
 }
 
+/* ---- promo codes (create_promo, toggle_promo) --------------------------- */
+
+/**
+ * Bounds are duplicated from src/lib/promos.ts on purpose: this file must stay
+ * free of database imports (the tests run it as a pure function), and the two
+ * copies are checked against each other in tests/promos.test.ts. The server
+ * validates again in POST /api/admin/promos — this is the first door, not the
+ * only one.
+ */
+const PROMO_KINDS = ["percent", "fixed", "free_shipping"] as const;
+const PROMO_CODE_RE = /^[A-Z0-9-]{1,24}$/;
+
+/** An ISO date the model wrote, or null. Anything unparseable is dropped. */
+function promoDate(raw: unknown): string | null {
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  const d = new Date(raw.trim());
+  if (Number.isNaN(d.getTime())) return null;
+  // a code that expired before it was made is a mistake, not an instruction
+  if (d.getTime() < Date.now() - 365 * 24 * 3600_000) return null;
+  return d.toISOString();
+}
+
+export function sanitizePromo(raw: unknown): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+
+  const code = String(x.code ?? "").toUpperCase().replace(/\s+/g, "");
+  if (!PROMO_CODE_RE.test(code) || !/[A-Z0-9]/.test(code)) return null;
+
+  const kind = (PROMO_KINDS as readonly string[]).includes(String(x.kind))
+    ? (String(x.kind) as (typeof PROMO_KINDS)[number])
+    : "percent";
+
+  let value = 0;
+  if (kind === "percent") {
+    const n = Math.round(Number(x.value));
+    if (!Number.isFinite(n) || n < 1 || n > 90) return null;
+    value = n;
+  } else if (kind === "fixed") {
+    const n = Math.round(Number(x.value) * 100) / 100;
+    if (!Number.isFinite(n) || !(n > 0) || n > 200) return null;
+    value = n;
+  }
+
+  const minRaw = Math.round(Number(x.minSubtotal ?? 0) * 100) / 100;
+  const minSubtotal = Number.isFinite(minRaw) && minRaw >= 0 && minRaw <= 10_000 ? minRaw : 0;
+
+  const usesRaw = Math.trunc(Number(x.maxUses));
+  const maxUses = Number.isFinite(usesRaw) && usesRaw >= 1 && usesRaw <= 1_000_000 ? usesRaw : null;
+
+  const startsAt = promoDate(x.startsAt);
+  const endsAt = promoDate(x.endsAt);
+  // an end before the start is nonsense; keep the start and drop the end
+  const ends = startsAt && endsAt && new Date(endsAt) <= new Date(startsAt) ? null : endsAt;
+
+  const note = typeof x.note === "string" ? x.note.replace(/\s+/g, " ").trim().slice(0, 200) : "";
+
+  return {
+    code,
+    kind,
+    value,
+    minSubtotal,
+    startsAt,
+    endsAt: ends,
+    maxUses,
+    active: x.active !== false,
+    note,
+  };
+}
+
+/* ---- delivery prices (set_shipping_rules) ------------------------------- */
+
+/** The countries the checkout offers, plus "default" for everything else. */
+const SHIP_COUNTRIES = ["EE", "LV", "LT", "FI", "EU"];
+const SHIP_METHODS = ["parcel", "courier", "pickup"] as const;
+const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak"];
+
+/** 0–99 €, two decimals. A price outside that is a typo, not a tariff. */
+function shipPrice(raw: unknown): number | null {
+  const n = typeof raw === "number" ? raw : Number(String(raw ?? "").replace(",", "."));
+  if (!Number.isFinite(n) || n < 0 || n > 99) return null;
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * A PARTIAL rules patch — «сделай доставку в Латвию 6,90» must not wipe the
+ * other eleven prices. Only the keys the model actually named come back, and
+ * every one of them is a known method, a known country and a number in range;
+ * the storefront merges the patch over what it already has.
+ */
+export function sanitizeShippingRules(raw: unknown): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+
+  if (x.freeFrom === null) out.freeFrom = null;
+  else if (x.freeFrom !== undefined) {
+    const n = typeof x.freeFrom === "number" ? x.freeFrom : Number(String(x.freeFrom).replace(",", "."));
+    if (Number.isFinite(n) && n >= 0 && n <= 10_000) out.freeFrom = Math.round(n * 100) / 100;
+  }
+
+  if (x.freeFromByCountry && typeof x.freeFromByCountry === "object" && !Array.isArray(x.freeFromByCountry)) {
+    const by: Record<string, number | null> = {};
+    for (const [c, v] of Object.entries(x.freeFromByCountry as Record<string, unknown>)) {
+      const country = c.toUpperCase();
+      if (!SHIP_COUNTRIES.includes(country)) continue;
+      if (v === null) { by[country] = null; continue; }
+      const n = typeof v === "number" ? v : Number(String(v).replace(",", "."));
+      if (Number.isFinite(n) && n >= 0 && n <= 10_000) by[country] = Math.round(n * 100) / 100;
+    }
+    if (Object.keys(by).length) out.freeFromByCountry = by;
+  }
+
+  if (x.methods && typeof x.methods === "object" && !Array.isArray(x.methods)) {
+    const methods: Record<string, Record<string, number>> = {};
+    for (const m of SHIP_METHODS) {
+      const table: unknown = (x.methods as Record<string, unknown>)[m];
+      if (!table || typeof table !== "object" || Array.isArray(table)) continue;
+      const row: Record<string, number> = {};
+      for (const [c, v] of Object.entries(table as Record<string, unknown>) as Array<[string, unknown]>) {
+        const key: string = c === "default" ? "default" : c.toUpperCase();
+        if (key !== "default" && !SHIP_COUNTRIES.includes(key)) continue;
+        const p = shipPrice(v);
+        if (p !== null) row[key] = p;
+      }
+      if (Object.keys(row).length) methods[m] = row;
+    }
+    if (Object.keys(methods).length) out.methods = methods;
+  }
+
+  if (x.carriers && typeof x.carriers === "object" && !Array.isArray(x.carriers)) {
+    const carriers: Record<string, Record<string, number>> = {};
+    for (const [name, table] of Object.entries(x.carriers as Record<string, unknown>)) {
+      const carrier = name.toLowerCase();
+      if (!SHIP_CARRIERS.includes(carrier)) continue;
+      if (!table || typeof table !== "object" || Array.isArray(table)) continue;
+      const row: Record<string, number> = {};
+      for (const [c, v] of Object.entries(table as Record<string, unknown>)) {
+        const key = c === "default" ? "default" : c.toUpperCase();
+        if (key !== "default" && !SHIP_COUNTRIES.includes(key)) continue;
+        const p = shipPrice(v);
+        if (p !== null) row[key] = p;
+      }
+      if (Object.keys(row).length) carriers[carrier] = row;
+    }
+    if (Object.keys(carriers).length) out.carriers = carriers;
+  }
+
+  return Object.keys(out).length ? out : null;
+}
+
 /* ---- everything the assistant may propose ------------------------------- */
 
 export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean): object | null {
@@ -133,6 +286,28 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
     if (x.value === null) return { type: t, value: null };
     const hero = sanitizeHero(x.value, known);
     return hero ? { type: t, value: hero } : null;
+  }
+  if (t === "create_promo") {
+    const promo = sanitizePromo(x.promo ?? x.value ?? x);
+    return promo ? { type: t, promo } : null;
+  }
+  if (t === "toggle_promo" && typeof x.value === "boolean") {
+    const code = String(x.code ?? "").toUpperCase().replace(/\s+/g, "");
+    if (!PROMO_CODE_RE.test(code) || !/[A-Z0-9]/.test(code)) return null;
+    return { type: t, code, value: x.value };
+  }
+  if (t === "set_shipping_rules") {
+    const rules = sanitizeShippingRules(x.rules ?? x.value);
+    return rules ? { type: t, rules } : null;
+  }
+  /* The shop's own details — company, hours, socials, announcement bar,
+     contact page, letter footer. A PATCH, not a document: «поменяй телефон»
+     sends only the phone, and everything else keeps the value it had. The
+     rebuild-field-by-field sanitiser lives in @/lib/content so the panel and
+     this route can never disagree about what is allowed. */
+  if (t === "set_content") {
+    const patch = sanitizeContentPatch(x.value ?? x.content);
+    return patch ? { type: t, value: patch } : null;
   }
   return null;
 }

@@ -153,11 +153,15 @@ address block (улица/дом · квартира-этаж-код · инде
 имя+фамилия grid, телефон, «Сохранить данные» checkbox. Free shipping at
 50 € (EE/LV/LT/FI) / 200 € (EU): all prices flip to «0 €», note becomes
 «применена ✓», summary shows «Бесплатно». Summary card gains промокод —
-REMPIRE10 (case-insensitive) → «скидка 10% −N €», invalid → «Код не найден»
-in #8c1a0f; Итого = items − discount + shipping, live everywhere. State:
-country/methodIndex/promo, totals derived never stored, VAT included, no
-tax line. Production: pickup points come from live carrier APIs; promo codes
-from admin → Маркетинг → Промокоды.
+the prototype's hard-coded REMPIRE10 is gone: the field now goes to the server,
+which validates a code the owner created in админка → Промокоды (percent, euro
+amount or free delivery, with an optional minimum order, expiry date and use
+limit — counted only after payment) or, for `RMP-XXXX-XXXX`, a gift card, and
+answers «скидка 10% −N €» or «Код не найден» in #8c1a0f; Итого = items −
+discount + shipping, live everywhere. State: country/methodIndex/promo, totals
+derived never stored, VAT included, no tax line. Production: pickup points come
+from live carrier APIs; promo codes and cards are re-checked at checkout, so the
+browser never decides a discount (docs/features.md § Промокоды).
 
 ## Delta 23.08 (4) — white storefront ground
 

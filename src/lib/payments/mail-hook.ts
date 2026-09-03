@@ -10,12 +10,12 @@
  * production, which is the one failure mode this file must not have.
  */
 
-type OrderPaidHook = (order: unknown) => unknown | Promise<unknown>;
+type OrderHook = (order: unknown) => unknown | Promise<unknown>;
 
-export async function notifyOrderPaid(order: unknown): Promise<boolean> {
+async function call(name: "onOrderPaid" | "issueOrderGiftCards", order: unknown): Promise<boolean> {
   try {
     const mod: Record<string, unknown> = await import("@/lib/mail-hooks");
-    const hook = mod?.onOrderPaid as OrderPaidHook | undefined;
+    const hook = mod?.[name] as OrderHook | undefined;
     if (typeof hook !== "function") return false;
     await hook(order);
     return true;
@@ -23,8 +23,23 @@ export async function notifyOrderPaid(order: unknown): Promise<boolean> {
     const message = err instanceof Error ? err.message : String(err);
     // "module not found" is the normal case before the mail agent lands
     if (!/cannot find module|failed to resolve|not found/i.test(message)) {
-      console.error("onOrderPaid failed", message);
+      console.error(`${name} failed`, message);
     }
     return false;
   }
+}
+
+/** The transition into paid: the customer's letter, Renat's ping, the gift cards. */
+export async function notifyOrderPaid(order: unknown): Promise<boolean> {
+  return call("onOrderPaid", order);
+}
+
+/**
+ * A "paid" for an order that is already paid (audit H4): no letter, no ping —
+ * but the gift cards bought in the order must exist, and if the first pass
+ * died between the status write and the hook, this retry is the only thing
+ * that will ever mint them. Idempotent on the mail side.
+ */
+export async function issueOrderGiftCards(order: unknown): Promise<boolean> {
+  return call("issueOrderGiftCards", order);
 }

@@ -12,6 +12,7 @@
  * file exists (the import is resolved at run time and a miss is swallowed):
  *   src/lib/shipping.ts   computeShipping({country, method, subtotal})
  *   src/lib/giftcards.ts  applyGiftCard(code, total)
+ *   src/lib/promos.ts     quotePromo(code, subtotal, shipping)
  *   src/lib/mail-hooks.ts onOrderCreated(order)
  *   src/data/bundles.json bundle definitions for items with id "bundle:<id>"
  * Without them the order still goes through: a flat shipping table, no
@@ -196,10 +197,11 @@ function num(v: unknown, fallback = 0): number {
  */
 type AnyModule = Record<string, unknown>;
 
-async function optionalLib(name: "shipping" | "giftcards" | "mail-hooks"): Promise<AnyModule | null> {
+async function optionalLib(name: "shipping" | "giftcards" | "promos" | "mail-hooks"): Promise<AnyModule | null> {
   try {
     if (name === "shipping") return (await import("@/lib/shipping")) as unknown as AnyModule;
     if (name === "giftcards") return (await import("@/lib/giftcards")) as unknown as AnyModule;
+    if (name === "promos") return (await import("@/lib/promos")) as unknown as AnyModule;
     return (await import("@/lib/mail-hooks")) as unknown as AnyModule;
   } catch (err) {
     console.error(`[orders] optional module ${name} not loaded:`, err);
@@ -262,11 +264,54 @@ async function shippingPrice(
 /* ---------- discount ----------------------------------------------------- */
 
 /**
+ * One box at the checkout takes two different things, so one function resolves
+ * both. `RMP-XXXX-XXXX` is a gift card (src/lib/giftcards.ts); anything else is
+ * looked up in `promo_codes` (src/lib/promos.ts). Neither is spent here — both
+ * are quoted onto the order and taken on the paid transition in
+ * src/lib/payments/apply.ts.
+ *
+ * A free-shipping code comes back as a discount equal to the delivery price
+ * rather than as a zeroed shipping line: the receipt then still shows what the
+ * parcel costs and what the code took off it, and `shipping_price` keeps
+ * meaning «what this delivery costs» for everything downstream.
+ */
+async function codeDiscount(
+  code: string | null | undefined,
+  subtotal: number,
+  shipping: number,
+): Promise<number> {
+  if (!code) return 0;
+  const promos = await optionalLib("promos");
+  const isGift = fn(promos, "looksLikeGiftCode");
+  const quote = fn(promos, "quotePromo");
+  /* Only take the promo branch when the module can positively say this is not
+     a card. Missing module, missing export, half-written file — all of them
+     fall through to the gift-card path, which answers 0 for a code it does not
+     know. The degradation is «no discount», never «the wrong discount». */
+  if (isGift && quote && !isGift(code)) {
+    try {
+      const out = (await quote(code, subtotal, shipping)) as {
+        ok?: boolean;
+        discount?: unknown;
+      } | null;
+      if (!out?.ok) return 0;
+      const discount = num(out.discount, 0);
+      if (!Number.isFinite(discount) || discount <= 0) return 0;
+      return money(Math.min(discount, subtotal + shipping));
+    } catch (err) {
+      console.error("[orders] quotePromo failed, order priced without a discount:", err);
+      return 0;
+    }
+  }
+  return giftDiscountFor(code, money(subtotal + shipping));
+}
+
+/**
  * Gift cards are the features agent's. Whatever shape applyGiftCard returns —
  * a number, {discount}, {amount} or the new {total} — it comes out of here as
  * a discount in euro, clamped to the order.
  */
-async function discountFor(code: string | null | undefined, total: number): Promise<number> {
+async function giftDiscountFor(code: string | null | undefined, total: number): Promise<number> {
   if (!code) return 0;
   const apply = fn(await optionalLib("giftcards"), "applyGiftCard");
   if (!apply) return 0;
@@ -353,6 +398,21 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
        on conflict (product_id) do update set updated_at = now()
        returning *`;
   const rows = await query<OverrideRow>(sql, params);
+
+  /* «Снова в наличии» (account-flows). Pending stock_alerts rows only exist
+     for a product somebody found sold out, so "the owner set stock to in and
+     there are rows waiting" IS the out→in transition — no before/after read
+     needed. Loaded lazily and swallowed: a mail problem must never stop the
+     owner saving a price. */
+  if (cols.stock === "in") {
+    try {
+      const { runBackInStock } = await import("@/lib/flows");
+      await runBackInStock(productId);
+    } catch (err) {
+      console.error("[orders] back-in-stock flow failed:", err);
+    }
+  }
+
   return mapOverride(rows[0]);
 }
 
@@ -757,7 +817,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const shipPrice = giftOnly ? 0 : await shippingPrice(country, method, subtotal, carrier);
   shippingJson.price = shipPrice;
 
-  const discount = await discountFor(input.discountCode, money(subtotal + shipPrice));
+  const discount = await codeDiscount(input.discountCode, subtotal, shipPrice);
   const total = money(Math.max(0, subtotal + shipPrice - discount));
 
   const rows = await query<OrderRow>(
@@ -781,22 +841,55 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   );
   const order = mapOrder(rows[0]);
 
-  /* The gift card is NOT spent here (audit H3). The discount and the code are
-     quoted onto the order; the balance is taken in src/lib/payments/apply.ts
-     the moment the payment is confirmed. A checkout that is abandoned on the
-     bank's page, or that fails, costs the customer nothing — which is what
-     applyGiftCard()'s own docstring has always promised. */
+  /* Neither the gift card nor the promo code is spent here (audit H3). The
+     discount and the code are quoted onto the order; the card's balance and
+     the code's use counter are taken in src/lib/payments/apply.ts the moment
+     the payment is confirmed. A checkout that is abandoned on the bank's page,
+     or that fails, costs the customer nothing and burns no promo use — which
+     is what applyGiftCard()'s own docstring has always promised. */
+
+  /* An order is the end of an abandoned cart: the reminder must not go out
+     after the person has already paid (account-flows). Never fatal. */
+  try {
+    const { markCartRecovered } = await import("@/lib/customers");
+    await markCartRecovered(email);
+  } catch (err) {
+    console.error("[orders] cart recovery failed:", err);
+  }
 
   // The mail agent's hook must never be able to lose an order that is already
   // in the database.
   try {
     const hook = fn(await optionalLib("mail-hooks"), "onOrderCreated");
-    if (hook) await hook(order);
+    /* `sendPending` used to be missing entirely, so the "order received,
+       awaiting payment" letter could never fire whatever the setting said
+       (audit top-15 #3). The owner's switch is `settings.flows.pending`; with
+       no row, MAIL_PENDING_PAYMENT still decides inside the hook. */
+    if (hook) await hook(order, await pendingMailOptions());
   } catch (err) {
     console.error("[orders] onOrderCreated failed:", err);
   }
 
   return order;
+}
+
+/**
+ * `{ sendPending: true }` when the owner has turned «письмо об ожидании
+ * оплаты» on, `{}` when there is no setting at all — which leaves
+ * MAIL_PENDING_PAYMENT in charge, exactly as docs/mail.md describes.
+ */
+async function pendingMailOptions(): Promise<Record<string, unknown>> {
+  try {
+    const rows = await query<{ value: unknown }>("select value from settings where key = 'flows'");
+    const raw = rows.length ? rows[0].value : null;
+    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+    if (!parsed || typeof parsed !== "object") return {};
+    const v = (parsed as Record<string, unknown>).pending;
+    if (v === undefined) return {};
+    return { sendPending: v === true || v === 1 || /^(1|true|on|yes|да)$/i.test(String(v)) };
+  } catch {
+    return {};
+  }
 }
 
 export async function getOrder(id: string): Promise<Order | null> {

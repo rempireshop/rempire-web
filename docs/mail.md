@@ -40,7 +40,7 @@ Railway, into the project's environment settings.
 |---|---|---|
 | `RESEND_API_KEY` | sending anything | missing ⇒ every send is *skipped*, logged, and reported as `{ ok:false, skipped:true }`. Nothing throws. |
 | `RESEND_FROM` | the From: header | default `Rempire <shop@rempireshop.com>`. Must be on a verified Resend domain. |
-| `MAIL_REPLY_TO` | where replies land | see "Sender and reply-to" below. Omitted ⇒ no `reply_to` header at all. |
+| `MAIL_REPLY_TO` | where replies land | see "Sender and reply-to" below. Omitted ⇒ `info@rempireshop.com`. |
 | `PUBLIC_BASE_URL` | absolute image and link URLs | e.g. `https://rempireshop.com`. Default is that same value; set it on staging or every letter links to production. |
 | `MAIL_PENDING_PAYMENT` | `onOrderCreated` | `1`/`true`/`on` turns on the "order received, awaiting payment" letter. **Off by default** — see below. |
 | `MAIL_RETRY_DELAY_MS` | the 5xx retry pause | default `400`. Tests set `0`. |
@@ -73,15 +73,15 @@ Separate keys per environment are cheap: make a second one named
 
 - **From** = `RESEND_FROM`, default `Rempire <shop@rempireshop.com>`. The
   mailbox does not have to exist — Resend only needs the *domain* verified.
-- **Reply-to** = `MAIL_REPLY_TO`. It has to be a mailbox somebody actually
-  reads, because `@rempireshop.com` has **no inbound mail**: the MX records
-  were deliberately not pointed at Resend (`docs/accounts.md`). A reply to
-  `shop@rempireshop.com` would bounce.
-  - **Now:** set `MAIL_REPLY_TO` to the mailbox Renat reads — the shop's Google
-    account `rempireshopinfo@gmail.com`.
-  - **Later:** when `@rempireshop.com` gets real inbound mail (Google Workspace,
-    Zone mail, or Resend inbound), point it at `info@rempireshop.com` and change
-    nothing else.
+- **Reply-to** = `MAIL_REPLY_TO`, default **`info@rempireshop.com`**. It has to
+  be a mailbox somebody actually reads, and that one now is: Cloudflare Email
+  Routing forwards `info@` and `shop@` to the shop's Google account
+  (`docs/accounts.md`). It is also the address the letter's own footer prints,
+  so a customer who replies and a customer who copies the footer reach the same
+  inbox. Set `MAIL_REPLY_TO` only to send replies somewhere else.
+  - Resend still has **no inbound mail** on the domain — the MX records point at
+    Cloudflare's routing, not at Resend. `shop@rempireshop.com` (the From:) is
+    forwarded too, but nothing reads a From: address by policy.
 - Every letter also says "just reply to this e-mail" in the customer's own
   language, so the reply-to must be right before the shop opens.
 
@@ -97,8 +97,9 @@ await onOrderPaid(order);           // returns, never throws
 
 | Hook | When | What it does |
 |---|---|---|
-| `onOrderCreated(order, { sendPending? })` | order row written, payment not confirmed | **nothing**, unless `MAIL_PENDING_PAYMENT` is on or the caller passes `sendPending: true`. An unpaid order abandoned two minutes later should not have produced a letter. Turn it on for bank-link flows, where the customer leaves the site to pay. |
-| `onOrderPaid(order)` | payment confirmed | «Заказ принят» to the customer, in the order's own language, plus the shop's own Telegram + e-mail ping through `notify.ts`. |
+| `onOrderCreated(order, { sendPending? })` | order row written, payment not confirmed | **nothing**, unless `MAIL_PENDING_PAYMENT` is on or the caller passes `sendPending: true`. An unpaid order abandoned two minutes later should not have produced a letter. Turn it on for bank-link flows, where the customer leaves the site to pay. `createOrder` now passes `sendPending` from `settings.flows.pending`; with no such key, `MAIL_PENDING_PAYMENT` decides as before. |
+| `onOrderPaid(order)` | payment confirmed | «Заказ принят» to the customer, in the order's own language, plus the shop's own Telegram + e-mail ping through `notify.ts`, plus the gift cards bought in the order (below). |
+| `issueOrderGiftCards(order)` | the payment routes see "paid" for an order that is already paid — a webhook retry, the shopper's return after the webhook | the gift-card half of `onOrderPaid` on its own: mint the cards bought in the order (idempotent — existing cards win) and mail each to its recipient, Resend key `gift:<code>`. No customer letter, no ping. Exists so a crash between the status write and the hook cannot leave a paid order without its cards. |
 | `onOrderShipped(order, tracking)` | parcel handed to the carrier | «Заказ отправлен» with the tracking code and a carrier link. `tracking` is a bare code string, or `{ code, url?, carrier? }`. |
 
 Each returns `{ ok, skipped?, reason?, id?, notified? }`. Callers may ignore it.
@@ -119,6 +120,7 @@ variant and a jsonb address still renders a correct letter.
 | `abandoned-cart` | `renderAbandonedCart(cart, lang, resumeUrl)` | marketing — unsubscribe link |
 | `back-in-stock` | `renderBackInStock(product, lang)` | marketing — unsubscribe link |
 | `birthday` | `renderBirthday(customer, lang, code)` | marketing — unsubscribe link |
+| `login-code` | `renderLoginCode(code, lang, {minutes})` | service — the account sign-in code (docs/flows.md) |
 
 `lang` accepts anything the row carries — `"RU"`, `"et-EE"`, `"ee"`, `null` —
 and normalises to `ru` / `et` / `en`, Russian being the fallback. Subject,
@@ -188,6 +190,11 @@ including "does not throw on a garbage order".
 - No mail is logged to the database. If a delivery log is ever needed, that is
   a `040_*.sql` migration (the mail range is 040–049) and a `mail_log` table —
   deliberately not built yet.
-- The three flow letters (`abandoned-cart`, `back-in-stock`, `birthday`) have
-  renderers and previews but no scheduler yet: nothing sends them
-  automatically. The admin toggles for them are still the demo's.
+- The three flow letters (`abandoned-cart`, `back-in-stock`, `birthday`) now
+  have senders, storage and a scheduler, and the admin toggles drive them for
+  real — see **docs/flows.md**. `back-in-stock` fires from the admin's own
+  stock switch; the other two from `GET /api/cron/flows` (env `CRON_SECRET`).
+  All three are **off** until the owner turns them on.
+- A sixth renderer, `login-code`, was added with the customer account
+  (docs/flows.md). It is a service letter — no unsubscribe link — and it shows
+  up in the admin preview like the rest.

@@ -11,6 +11,7 @@ import { renderAbandonedCart } from "./abandoned-cart";
 import { renderBackInStock } from "./back-in-stock";
 import { renderBirthday } from "./birthday";
 import { renderGiftCard, type GiftCardLike } from "./gift-card";
+import { renderLoginCode } from "./login-code";
 import { renderOrderConfirmed } from "./order-confirmed";
 import { renderOrderShipped } from "./order-shipped";
 import type {
@@ -29,6 +30,7 @@ export { renderAbandonedCart } from "./abandoned-cart";
 export { renderBackInStock } from "./back-in-stock";
 export { renderBirthday } from "./birthday";
 export { renderGiftCard } from "./gift-card";
+export { renderLoginCode } from "./login-code";
 export type { GiftCardLike } from "./gift-card";
 export { normalizeLang, isLang, ALL_LANGS, baseUrl } from "./layout";
 
@@ -39,6 +41,7 @@ export const TEMPLATE_IDS = [
   "back-in-stock",
   "gift-card",
   "birthday",
+  "login-code",
 ] as const;
 
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
@@ -55,6 +58,7 @@ export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "back-in-stock": "Товар снова в наличии",
   "gift-card": "Подарочная карта",
   birthday: "Скидка ко дню рождения",
+  "login-code": "Код для входа",
 };
 
 /* ---------- demo data --------------------------------------------------- */
@@ -227,6 +231,8 @@ export function renderDemo(
       return renderBirthday(demoCustomer(L), L, "REM-BDAY-2417", {
         percent: 15,
       });
+    case "login-code":
+      return renderLoginCode("482915", L);
     case "order-confirmed":
     default:
       return renderOrderConfirmed(demoOrder(L), L);

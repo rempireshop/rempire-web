@@ -9,12 +9,12 @@
  * Env:
  *   RESEND_API_KEY   — required to actually send; missing ⇒ skipped
  *   RESEND_FROM      — "Rempire <shop@rempireshop.com>" by default
- *   MAIL_REPLY_TO    — where customer replies land (Renat's mailbox for now)
+ *   MAIL_REPLY_TO    — where customer replies land; info@rempireshop.com by default
  *   MAIL_RETRY_DELAY_MS — pause before the single 5xx retry (default 400)
  */
 
 const ENDPOINT = "https://api.resend.com/emails";
-const DEFAULT_REPLY_TO = "rempireshopinfo@gmail.com";
+const DEFAULT_REPLY_TO = "info@rempireshop.com";
 const DEFAULT_FROM = "Rempire <shop@rempireshop.com>";
 const TIMEOUT_MS = 12_000;
 const EMAIL_RX = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
@@ -97,7 +97,10 @@ export function replyToAddress(
 ): string | string[] | undefined {
   if (override && (!Array.isArray(override) || override.length)) return override;
   const env = (process.env.MAIL_REPLY_TO ?? "").trim();
-  // Until @rempireshop.com has a real mailbox, replies land in the shop's Gmail.
+  /* info@rempireshop.com is a real address now — Cloudflare Email Routing
+     forwards it to the shop's mailbox — so it is the default a customer sees,
+     and it is the same address the letter's own footer prints. MAIL_REPLY_TO
+     still wins when someone wants replies elsewhere. */
   return env || DEFAULT_REPLY_TO;
 }
 

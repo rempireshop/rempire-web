@@ -57,6 +57,17 @@ export async function PUT(req: Request) {
     for (const [key, value] of entries) {
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
+      /* src/lib/shipping.ts caches the tariff row for a minute. Without this
+         the owner saves a price in «Настройки → Доставка» and the very next
+         checkout still bills the old one — which is exactly the "the panel
+         says one thing, the shop charges another" the editor exists to fix. */
+      if (key === "shipping_rules") {
+        try {
+          (await import("@/lib/shipping")).resetShippingRulesCache();
+        } catch {
+          // no shipping module, nothing to invalidate
+        }
+      }
     }
     return Response.json({ ok: true, settings: await getSettings() }, { headers: { "cache-control": "no-store" } });
   } catch (err) {

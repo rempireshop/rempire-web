@@ -1,0 +1,599 @@
+/**
+ * Customer accounts — passwordless, e-mail only.
+ *
+ * There is no password and no customer table full of secrets: a shopper types
+ * an address, gets a six-digit code, and the code is traded for a signed
+ * cookie. The code lives fifteen minutes, is stored as an HMAC (a stolen
+ * database dump is not a set of logins), and dies after five wrong guesses.
+ *
+ * The cookie is `rmp_cust` = `v1.<expiry-ms>.<base64url(email)>.<hmac>`, signed
+ * with SESSION_SECRET like the admin cookie in src/lib/auth.ts — but under its
+ * own domain prefix, so an admin token can never be replayed as a customer one
+ * and the other way round. It is httpOnly, SameSite=Lax, Secure everywhere
+ * except plain-http localhost, and lasts 90 days.
+ *
+ * Nothing in here is allowed to be a hard dependency of the shop: the
+ * storefront works signed out, and every route that uses this file answers
+ * `{ok:false}` rather than throwing when the database is missing.
+ */
+import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
+import catalogueMin from "@/data/catalogue.min.json";
+import variantData from "@/data/catalogue.variants.json";
+import { query } from "@/lib/db";
+
+export const CUSTOMER_COOKIE = "rmp_cust";
+export const CUSTOMER_SESSION_DAYS = 90;
+const SESSION_MS = CUSTOMER_SESSION_DAYS * 24 * 60 * 60 * 1000;
+
+/** How long a login code is good for, and how many guesses it survives. */
+export const CODE_TTL_MS = 15 * 60 * 1000;
+export const CODE_MAX_ATTEMPTS = 5;
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+const LANGS = ["RU", "ET", "EN"] as const;
+export type LangCode = (typeof LANGS)[number];
+
+/* ---------- small shared bits -------------------------------------------- */
+
+function secret(): string | null {
+  const s = process.env.SESSION_SECRET;
+  return s && s.length >= 16 ? s : null;
+}
+
+function hmac(payload: string, key: string): string {
+  return createHmac("sha256", key).update(payload).digest("base64url");
+}
+
+/** Lower-cased, trimmed, capped. Everything in this module keys on the result. */
+export function normalizeEmail(v: unknown): string {
+  return String(v ?? "").trim().toLowerCase().slice(0, 160);
+}
+
+export function isEmail(v: unknown): boolean {
+  const s = normalizeEmail(v);
+  return s.length >= 5 && EMAIL_RE.test(s);
+}
+
+/** "ru", "et-EE", "EN" → "RU" | "ET" | "EN". Russian is the fallback. */
+export function normalizeLangCode(v: unknown): LangCode {
+  const s = String(v ?? "").trim().slice(0, 5).toUpperCase();
+  for (const l of LANGS) if (s.startsWith(l)) return l;
+  return "RU";
+}
+
+function text(v: unknown, max: number): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.replace(/\p{Cc}+/gu, " ").replace(/\s+/g, " ").trim().slice(0, max).trim();
+  return s || null;
+}
+
+/** `YYYY-MM-DD` or nothing. A birthday nobody can parse is not stored. */
+export function normalizeBirthday(v: unknown): string | null {
+  if (v == null || v === "") return null;
+  const s = String(v).trim().slice(0, 10);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const [, y, mo, d] = m;
+  const year = Number(y);
+  const month = Number(mo);
+  const day = Number(d);
+  if (year < 1900 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  // Reject 31 February and friends rather than storing a date Postgres refuses.
+  const probe = new Date(Date.UTC(year, month - 1, day));
+  if (probe.getUTCMonth() !== month - 1 || probe.getUTCDate() !== day) return null;
+  return `${y}-${mo}-${d}`;
+}
+
+/* ---------- the session cookie ------------------------------------------- */
+
+function payloadOf(email: string, expiry: number): string {
+  return `cust.v1.${expiry}.${Buffer.from(email, "utf8").toString("base64url")}`;
+}
+
+/** `v1.<expiry>.<email>.<signature>` — the value that goes into the cookie. */
+export function makeCustomerToken(email: string, now: number = Date.now()): string {
+  const key = secret();
+  if (!key) throw new Error("SESSION_SECRET is not set (needs at least 16 characters) — see docs/backend.md");
+  const addr = normalizeEmail(email);
+  const expiry = now + SESSION_MS;
+  const b64 = Buffer.from(addr, "utf8").toString("base64url");
+  return `v1.${expiry}.${b64}.${hmac(payloadOf(addr, expiry), key)}`;
+}
+
+/** The e-mail a valid, unexpired token carries, or null. Never throws. */
+export function readCustomerToken(token: string | null | undefined, now: number = Date.now()): string | null {
+  const key = secret();
+  if (!key || !token) return null;
+  const parts = String(token).split(".");
+  if (parts.length !== 4 || parts[0] !== "v1") return null;
+  const expiry = Number(parts[1]);
+  if (!Number.isFinite(expiry) || expiry <= now) return null;
+  let email: string;
+  try {
+    email = Buffer.from(parts[2], "base64url").toString("utf8");
+  } catch {
+    return null;
+  }
+  if (!isEmail(email)) return null;
+  const want = Buffer.from(hmac(payloadOf(normalizeEmail(email), expiry), key));
+  const got = Buffer.from(parts[3]);
+  if (want.length !== got.length) return null;
+  return timingSafeEqual(want, got) ? normalizeEmail(email) : null;
+}
+
+/** Reads one cookie off a Request. A value that will not decode is no cookie. */
+export function readCookie(req: Request, name: string): string | null {
+  const header = req.headers.get("cookie");
+  if (!header) return null;
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq < 0) continue;
+    if (part.slice(0, eq).trim() !== name) continue;
+    try {
+      return decodeURIComponent(part.slice(eq + 1).trim());
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/* A Secure cookie is dropped by the browser over plain http, which would make
+   local development impossible; everywhere else it is on. Same rule as
+   src/lib/auth.ts — duplicated rather than imported because auth.ts belongs to
+   backend-core and this file must not edit it. */
+function isLocal(req: Request): boolean {
+  try {
+    const u = new URL(req.url);
+    return u.protocol === "http:" && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function cookie(req: Request, value: string, maxAge: number): string {
+  const bits = [`${CUSTOMER_COOKIE}=${value}`, "Path=/", "HttpOnly", "SameSite=Lax", `Max-Age=${maxAge}`];
+  if (!isLocal(req)) bits.push("Secure");
+  return bits.join("; ");
+}
+
+export function customerCookie(req: Request, token: string): string {
+  return cookie(req, token, CUSTOMER_SESSION_DAYS * 24 * 60 * 60);
+}
+
+export function clearCustomerCookie(req: Request): string {
+  return cookie(req, "", 0);
+}
+
+/** The signed-in shopper's e-mail, or null. The only guard the account routes need. */
+export function sessionEmail(req: Request): string | null {
+  return readCustomerToken(readCookie(req, CUSTOMER_COOKIE));
+}
+
+/* ---------- login codes --------------------------------------------------- */
+
+/** Six digits, uniformly random — `randomInt`, not `Math.random`. */
+export function generateCode(): string {
+  return String(randomInt(0, 1_000_000)).padStart(6, "0");
+}
+
+/** The code is never stored: this is. Falls back to a fixed key without env. */
+export function hashCode(email: string, code: string): string {
+  return hmac(`${normalizeEmail(email)}:${String(code).trim()}`, secret() ?? "rempire-login-code");
+}
+
+export interface LoginCodeRow {
+  email: string;
+  code_hash: string;
+  expires_at: string | Date;
+  attempts: number | string;
+}
+
+/**
+ * Issues a code for an address, replacing whatever was in flight. Returns the
+ * plain code — the caller mails it and forgets it.
+ */
+export async function issueLoginCode(email: string, now: number = Date.now()): Promise<{ code: string; expiresAt: Date }> {
+  const addr = normalizeEmail(email);
+  const code = generateCode();
+  const expiresAt = new Date(now + CODE_TTL_MS);
+  await query(
+    `insert into login_codes (email, code_hash, expires_at, attempts, created_at)
+     values ($1, $2, $3, 0, now())
+     on conflict (email) do update set code_hash = $2, expires_at = $3, attempts = 0, created_at = now()`,
+    [addr, hashCode(addr, code), expiresAt.toISOString()],
+  );
+  return { code, expiresAt };
+}
+
+export type LoginCheck = "ok" | "no_code" | "expired" | "too_many" | "bad_code";
+
+/**
+ * Trades a code for a verdict. A correct code is consumed (the row is deleted),
+ * a wrong one costs an attempt, and five wrong ones kill the code entirely —
+ * a million guesses at six digits is otherwise a weekend's work.
+ */
+export async function checkLoginCode(email: string, code: string, now: number = Date.now()): Promise<LoginCheck> {
+  const addr = normalizeEmail(email);
+  const typed = String(code ?? "").replace(/\D/g, "").slice(0, 6);
+  const rows = await query<LoginCodeRow>("select * from login_codes where email = $1", [addr]);
+  if (!rows.length) return "no_code";
+  const row = rows[0];
+  if (new Date(row.expires_at as string).getTime() <= now) {
+    await query("delete from login_codes where email = $1", [addr]);
+    return "expired";
+  }
+  if (Number(row.attempts) >= CODE_MAX_ATTEMPTS) {
+    await query("delete from login_codes where email = $1", [addr]);
+    return "too_many";
+  }
+  if (typed.length !== 6) {
+    await query("update login_codes set attempts = attempts + 1 where email = $1", [addr]);
+    return "bad_code";
+  }
+  const want = Buffer.from(row.code_hash);
+  const got = Buffer.from(hashCode(addr, typed));
+  const ok = want.length === got.length && timingSafeEqual(want, got);
+  if (!ok) {
+    await query("update login_codes set attempts = attempts + 1 where email = $1", [addr]);
+    return "bad_code";
+  }
+  await query("delete from login_codes where email = $1", [addr]);
+  return "ok";
+}
+
+/* ---------- customers ----------------------------------------------------- */
+
+export interface Customer {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  lang: LangCode;
+  /** `YYYY-MM-DD` or null. */
+  birthday: string | null;
+  marketing: boolean;
+  createdAt: string | null;
+  lastLoginAt: string | null;
+}
+
+type CustomerRow = {
+  id: string;
+  email: string;
+  name: string | null;
+  phone: string | null;
+  lang: string | null;
+  birthday: string | Date | null;
+  marketing: boolean | string | null;
+  created_at: string | Date | null;
+  last_login_at: string | Date | null;
+};
+
+function isoDay(v: unknown): string | null {
+  if (v == null) return null;
+  if (v instanceof Date) return Number.isNaN(v.getTime()) ? null : v.toISOString().slice(0, 10);
+  const s = String(v);
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null;
+}
+
+function iso(v: unknown): string | null {
+  if (v == null) return null;
+  const d = new Date(v as string);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+export function mapCustomer(r: CustomerRow): Customer {
+  return {
+    id: String(r.id),
+    email: r.email,
+    name: r.name ?? "",
+    phone: r.phone ?? "",
+    lang: normalizeLangCode(r.lang),
+    birthday: isoDay(r.birthday),
+    marketing: r.marketing === true || r.marketing === "t" || r.marketing === "true",
+    createdAt: iso(r.created_at),
+    lastLoginAt: iso(r.last_login_at),
+  };
+}
+
+export async function getCustomer(email: string): Promise<Customer | null> {
+  const rows = await query<CustomerRow>("select * from customers where email = $1", [normalizeEmail(email)]);
+  return rows.length ? mapCustomer(rows[0]) : null;
+}
+
+/**
+ * Called when a code is accepted: the row is created on the first ever login,
+ * and `last_login_at` moves every time. The language follows the shop the
+ * shopper signed in from, so their letters arrive in it.
+ */
+export async function recordLogin(email: string, lang?: unknown): Promise<Customer> {
+  const addr = normalizeEmail(email);
+  const l = normalizeLangCode(lang);
+  const rows = await query<CustomerRow>(
+    `insert into customers (email, lang, last_login_at) values ($1, $2, now())
+     on conflict (email) do update set last_login_at = now(), lang = $2
+     returning *`,
+    [addr, l],
+  );
+  return mapCustomer(rows[0]);
+}
+
+export interface CustomerPatch {
+  name?: unknown;
+  phone?: unknown;
+  birthday?: unknown;
+  marketing?: unknown;
+  lang?: unknown;
+}
+
+/** Only the keys present are touched; `null`/`""` clears one. */
+export async function updateCustomer(email: string, patch: CustomerPatch): Promise<Customer | null> {
+  const addr = normalizeEmail(email);
+  const cols: Record<string, unknown> = {};
+  if ("name" in patch) cols.name = text(patch.name, 120);
+  if ("phone" in patch) cols.phone = text(patch.phone, 40);
+  if ("birthday" in patch) cols.birthday = normalizeBirthday(patch.birthday);
+  if ("marketing" in patch) cols.marketing = patch.marketing === true || patch.marketing === "true" || patch.marketing === 1;
+  if ("lang" in patch) cols.lang = normalizeLangCode(patch.lang);
+
+  const keys = Object.keys(cols);
+  if (!keys.length) return getCustomer(addr);
+  const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(", ");
+  const rows = await query<CustomerRow>(
+    `update customers set ${sets} where email = $1 returning *`,
+    [addr, ...keys.map((k) => cols[k])],
+  );
+  return rows.length ? mapCustomer(rows[0]) : null;
+}
+
+export interface CustomerOrder {
+  number: string;
+  status: string;
+  total: number;
+  currency: string;
+  createdAt: string | null;
+  items: Array<{ title: string; variant: string | null; qty: number }>;
+  tracking: string | null;
+  trackingUrl: string | null;
+}
+
+/**
+ * The account screen's «Мои заказы»: the last 20 orders that carry this
+ * address. Orders are matched by e-mail, not by customer id — a guest checkout
+ * placed before the account existed still belongs to the person who owns the
+ * mailbox.
+ */
+export async function listCustomerOrders(email: string, limit = 20): Promise<CustomerOrder[]> {
+  const rows = await query<{
+    number: string;
+    status: string;
+    total: string | number;
+    currency: string | null;
+    created_at: string | Date;
+    items: unknown;
+    payment: unknown;
+  }>(
+    `select number, status, total, currency, created_at, items, payment
+       from orders where lower(email) = $1 order by created_at desc limit $2`,
+    [normalizeEmail(email), Math.min(Math.max(Number(limit) || 20, 1), 50)],
+  );
+  return rows.map((r) => {
+    const items = parseJson<Array<Record<string, unknown>>>(r.items, []);
+    const payment = parseJson<Record<string, unknown>>(r.payment, {});
+    const tr = payment && typeof payment === "object" ? (payment.tracking as unknown) : null;
+    const code = typeof tr === "string" ? tr : tr && typeof tr === "object" ? String((tr as Record<string, unknown>).code ?? "") : "";
+    const url = tr && typeof tr === "object" ? String((tr as Record<string, unknown>).url ?? "") : "";
+    return {
+      number: r.number,
+      status: r.status,
+      total: Math.round(Number(r.total) * 100) / 100 || 0,
+      currency: r.currency || "EUR",
+      createdAt: iso(r.created_at),
+      items: (Array.isArray(items) ? items : []).slice(0, 20).map((it) => ({
+        title: [it.brand, it.title ?? it.name].filter(Boolean).join(" ").trim() || "—",
+        variant: it.variant == null ? null : String(it.variant),
+        qty: Math.max(1, Math.round(Number(it.qty) || 1)),
+      })),
+      tracking: code || null,
+      trackingUrl: url || null,
+    };
+  });
+}
+
+function parseJson<T>(v: unknown, fallback: T): T {
+  if (v == null) return fallback;
+  if (typeof v === "string") {
+    try {
+      return JSON.parse(v) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return v as T;
+}
+
+/* ---------- cart snapshots ------------------------------------------------ */
+
+type MinProduct = { id: string; b: string; n: string; c: string; p: number; s: string };
+const CATALOGUE = catalogueMin as MinProduct[];
+const BY_ID = new Map<string, MinProduct>(CATALOGUE.map((p) => [p.id, p]));
+const VARIANTS = variantData as Record<string, { sizes: string[]; prices: number[] }>;
+
+export interface CartLine {
+  id: string;
+  title: string;
+  brand: string;
+  /** The size label as the shopper saw it, e.g. "250 мл". */
+  variant: string | null;
+  /** The index the storefront uses, so a resume link can rebuild the line. */
+  size: number | null;
+  qty: number;
+  price: number;
+}
+
+export interface CartSnapshot {
+  items: CartLine[];
+  total: number;
+}
+
+function money(n: number): number {
+  return Math.round((Number(n) || 0) * 100) / 100;
+}
+
+/**
+ * Turns the browser's `[{id, size|variant, qty}]` into a snapshot with names
+ * and prices taken from the catalogue and the owner's overrides — never from
+ * the request. Unknown ids are dropped rather than refused: this is a
+ * reminder letter, not an order.
+ */
+export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
+  const list = Array.isArray(rawItems) ? rawItems.slice(0, 50) : [];
+  const ids = new Set<string>();
+  for (const raw of list) {
+    const it = raw as Record<string, unknown> | null;
+    const id = typeof it?.id === "string" ? it.id.slice(0, 120) : "";
+    if (id && BY_ID.has(id)) ids.add(id);
+  }
+  let prices: Record<string, number | null> = {};
+  if (ids.size) {
+    try {
+      const holes = [...ids].map((_, i) => `$${i + 1}`).join(",");
+      const rows = await query<{ product_id: string; price: string | number | null }>(
+        `select product_id, price from product_overrides where product_id in (${holes})`,
+        [...ids],
+      );
+      for (const r of rows) prices[r.product_id] = r.price == null ? null : Number(r.price);
+    } catch {
+      /* No database, or the overrides table is not there yet: catalogue prices
+         are still the honest answer for a reminder letter. */
+      prices = {};
+    }
+  }
+
+  const items: CartLine[] = [];
+  let total = 0;
+  for (const raw of list) {
+    const it = raw as Record<string, unknown> | null;
+    const id = typeof it?.id === "string" ? it.id.slice(0, 120) : "";
+    const p = BY_ID.get(id);
+    if (!p) continue;
+    const qty = Math.max(1, Math.min(99, Math.round(Number(it?.qty) || 1)));
+    const rawSize = it?.size ?? it?.variant;
+    const v = VARIANTS[id];
+    let size: number | null = null;
+    let label: string | null = null;
+    let sized: number | null = null;
+    if (v && rawSize != null && rawSize !== "") {
+      const asIndex = typeof rawSize === "number" ? rawSize : /^\d+$/.test(String(rawSize)) ? Number(rawSize) : -1;
+      const idx = asIndex >= 0 && asIndex < v.sizes.length ? asIndex : v.sizes.indexOf(String(rawSize));
+      if (idx >= 0) {
+        size = idx;
+        label = v.sizes[idx];
+        sized = Number(v.prices[idx]);
+      }
+    }
+    const override = prices[id];
+    const base = override != null && Number.isFinite(override) ? override : Number.isFinite(sized as number) ? (sized as number) : p.p;
+    const price = money(base);
+    items.push({ id, title: p.n, brand: p.b, variant: label, size, qty, price });
+    total += price * qty;
+  }
+  return { items, total: money(total) };
+}
+
+/* ---------- carts --------------------------------------------------------- */
+
+export interface CartRow {
+  id: string;
+  email: string;
+  lang: string;
+  items: unknown;
+  total: string | number;
+  updated_at: string | Date;
+  recovered_at: string | Date | null;
+  reminded_at: string | Date | null;
+}
+
+/**
+ * One live cart per address. An empty cart deletes the row: a shopper who
+ * emptied their basket on purpose must not get a letter about it.
+ *
+ * `recovered_at` is cleared — this is a cart in play again — while
+ * `reminded_at` is left alone, so editing a cart the reminder already went out
+ * for does not earn a second letter.
+ */
+export async function saveCart(input: { email: string; lang?: unknown; items?: unknown }): Promise<CartSnapshot | null> {
+  const addr = normalizeEmail(input.email);
+  if (!isEmail(addr)) return null;
+  const snap = await cartSnapshot(input.items);
+  if (!snap.items.length) {
+    await query("delete from carts where email = $1", [addr]);
+    return snap;
+  }
+  await query(
+    `insert into carts (email, lang, items, total, updated_at, recovered_at)
+     values ($1, $2, $3::jsonb, $4, now(), null)
+     on conflict (email) do update set
+       lang = $2, items = $3::jsonb, total = $4, updated_at = now(), recovered_at = null`,
+    [addr, normalizeLangCode(input.lang), JSON.stringify(snap.items), snap.total],
+  );
+  return snap;
+}
+
+/** An order was placed — the cart is no longer abandoned. */
+export async function markCartRecovered(email: string): Promise<void> {
+  const addr = normalizeEmail(email);
+  if (!isEmail(addr)) return;
+  // reminded_at is cleared too: the next cart this person abandons is a new
+  // story and deserves its own single reminder.
+  await query("update carts set recovered_at = now(), reminded_at = null where email = $1", [addr]);
+}
+
+export async function getCart(email: string): Promise<CartRow | null> {
+  const rows = await query<CartRow>("select * from carts where email = $1", [normalizeEmail(email)]);
+  return rows.length ? rows[0] : null;
+}
+
+/* ---------- stock alerts -------------------------------------------------- */
+
+export interface StockAlertRow {
+  id: string;
+  email: string;
+  product_id: string;
+  lang: string;
+  created_at: string | Date;
+  sent_at: string | Date | null;
+}
+
+/** «Сообщить о наличии». Asking twice is one subscription, not two letters. */
+export async function addStockAlert(input: { email: string; productId: unknown; lang?: unknown }): Promise<boolean> {
+  const addr = normalizeEmail(input.email);
+  const productId = typeof input.productId === "string" ? input.productId.slice(0, 120) : "";
+  if (!isEmail(addr) || !productId || !BY_ID.has(productId)) return false;
+  await query(
+    `insert into stock_alerts (email, product_id, lang) values ($1, $2, $3)
+     on conflict (email, product_id) do update set lang = $3, sent_at = null, created_at = now()`,
+    [addr, productId, normalizeLangCode(input.lang)],
+  );
+  return true;
+}
+
+export async function pendingStockAlerts(productId?: string): Promise<StockAlertRow[]> {
+  if (productId) {
+    return query<StockAlertRow>(
+      "select * from stock_alerts where product_id = $1 and sent_at is null order by created_at",
+      [productId],
+    );
+  }
+  return query<StockAlertRow>("select * from stock_alerts where sent_at is null order by created_at limit 500");
+}
+
+export async function markStockAlertSent(id: string): Promise<void> {
+  await query("update stock_alerts set sent_at = now() where id = $1", [id]);
+}
+
+/** What the catalogue knows about a product — the back-in-stock letter's data. */
+export function productForAlert(productId: string): { id: string; brand: string; name: string; price: number; stock: string } | null {
+  const p = BY_ID.get(productId);
+  return p ? { id: p.id, brand: p.b, name: p.n, price: p.p, stock: p.s } : null;
+}

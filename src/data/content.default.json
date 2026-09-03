@@ -1,0 +1,56 @@
+{
+  "company": {
+    "legalName": "Rempire Store OÜ",
+    "regCode": "12216136",
+    "vatNumber": "EE102723858",
+    "address": "Mardi 1, 10145 Tallinn",
+    "email": "info@rempireshop.com",
+    "phone": "+372 5623 7237",
+    "iban": ""
+  },
+  "hours": {
+    "mon": "",
+    "tue": "",
+    "wed": "",
+    "thu": "",
+    "fri": "",
+    "sat": "",
+    "sun": "",
+    "note": {
+      "RU": "",
+      "ET": "",
+      "EN": ""
+    }
+  },
+  "social": {
+    "instagram": "https://www.instagram.com/rempire.shop/",
+    "tiktok": "https://www.tiktok.com/@rempire.official",
+    "facebook": "https://www.facebook.com/Rempire.Official.Tallinn",
+    "youtube": "https://www.youtube.com/@rempire.official"
+  },
+  "announcement": {
+    "on": true,
+    "text": {
+      "RU": "Бесплатная доставка: Эстония от {EE} € · LV, LT от {LV} € · Финляндия от {FI} €",
+      "ET": "Tasuta tarne: Eesti alates {EE} € · LV, LT alates {LV} € · Soome alates {FI} €",
+      "EN": "Free delivery: Estonia from {EE} € · LV, LT from {LV} € · Finland from {FI} €"
+    },
+    "short": {
+      "RU": "Бесплатная доставка по Эстонии от {EE} €",
+      "ET": "Tasuta tarne Eestis alates {EE} €",
+      "EN": "Free delivery in Estonia from {EE} €"
+    },
+    "link": ""
+  },
+  "contactPage": {
+    "RU": "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.",
+    "ET": "Kirjutage või helistage — vastame tööpäeva jooksul. Tellimuste, tagastuste ja tooteküsimuste puhul on e-kiri kõige kiirem.",
+    "EN": "Write or call — we answer within the working day. For orders, returns and product questions e-mail is the fastest way to reach us."
+  },
+  "emailFooter": {
+    "RU": "",
+    "ET": "",
+    "EN": ""
+  },
+  "legal": {}
+}

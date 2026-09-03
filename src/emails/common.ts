@@ -8,6 +8,8 @@
  */
 
 import {
+  BRAND,
+  brandAddress,
   COMMON,
   esc,
   money,
@@ -120,7 +122,6 @@ const SHIP_WORDS: Record<
     courier: (carrier: string) => string;
     post: string;
     generic: string;
-    pickupPlace: string;
   }
 > = {
   ru: {
@@ -129,7 +130,6 @@ const SHIP_WORDS: Record<
     courier: (c) => (c ? `Курьер ${c}` : "Курьер"),
     post: "Почта",
     generic: "Доставка",
-    pickupPlace: "Rempire, Mardi 1, 10145 Таллинн",
   },
   et: {
     pickup: "Järeletulek",
@@ -137,7 +137,6 @@ const SHIP_WORDS: Record<
     courier: (c) => (c ? `Kuller ${c}` : "Kuller"),
     post: "Post",
     generic: "Tarne",
-    pickupPlace: "Rempire, Mardi 1, 10145 Tallinn",
   },
   en: {
     pickup: "Pickup",
@@ -145,9 +144,19 @@ const SHIP_WORDS: Record<
     courier: (c) => (c ? `Courier ${c}` : "Courier"),
     post: "Post",
     generic: "Delivery",
-    pickupPlace: "Rempire, Mardi 1, 10145 Tallinn",
   },
 };
+
+/**
+ * Where a pickup order is collected. Not a per-language constant any more:
+ * the address is the shop's own, the owner edits it in Настройки → Контент,
+ * and `setBrandOverride()` puts it here — three hard-coded copies of "Mardi 1"
+ * were three places to forget on the day the salon moves. It is written the
+ * same way in all three letters, because a street address is not translated.
+ */
+function pickupPlace(): string {
+  return [BRAND.name, brandAddress()].filter(Boolean).join(", ");
+}
 
 export type ShipKind = "pickup" | "locker" | "courier" | "other";
 
@@ -248,7 +257,7 @@ export function deliveryLine(
 
   const tail =
     kind === "pickup"
-      ? w.pickupPlace
+      ? pickupPlace()
       : [
           pick(shipping?.point, shipping?.pointName),
           addressLine(shipping?.address),

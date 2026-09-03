@@ -57,6 +57,55 @@ export const BRAND = {
   site: "rempireshop.com",
 } as const;
 
+/* ---------- who the letter is from ------------------------------------- */
+
+/**
+ * The company details in the footer are owner-editable (`settings.content`),
+ * and the renderers must stay pure — `renderOrderConfirmed(order, lang)` is a
+ * function of its arguments, called from tests, the preview route and the
+ * hooks alike. So the letter's identity is ambient rather than threaded
+ * through six templates: `src/lib/mail-hooks.ts` reads the setting once per
+ * send, drops it here, and every `shell()` in that send picks it up.
+ *
+ * Nothing is required: an empty override, a missing database or a test that
+ * never calls the loader all render exactly the BRAND constants above.
+ */
+export interface BrandOverride {
+  /** "Rempire Store OÜ" — replaces BRAND.legal. */
+  legal?: string;
+  /** "Mardi 1, 10145 Tallinn" — replaces BRAND.address. */
+  address?: string;
+  /** Printed in the footer when set; "" keeps the line as it was. */
+  email?: string;
+  /** The owner's own extra footer line, per language. */
+  note?: Partial<Record<Lang, string>>;
+}
+
+let OVERRIDE: BrandOverride = {};
+
+/** Called by the mail hooks before rendering; `null` restores the defaults. */
+export function setBrandOverride(o: BrandOverride | null | undefined): void {
+  OVERRIDE = o && typeof o === "object" ? o : {};
+}
+
+export function brandLegal(): string {
+  return pick(OVERRIDE.legal, BRAND.legal);
+}
+export function brandAddress(): string {
+  return pick(OVERRIDE.address, BRAND.address);
+}
+export function brandEmail(): string {
+  return pick(OVERRIDE.email);
+}
+/**
+ * The owner's extra footer line. No cross-language fallback on purpose: a
+ * Russian sentence at the bottom of an English letter reads worse than no
+ * sentence at all, so a language he left blank simply has no extra line.
+ */
+export function brandNote(lang: Lang): string {
+  return OVERRIDE.note ? pick(OVERRIDE.note[lang]) : "";
+}
+
 /* ---------- primitives ------------------------------------------------- */
 
 export function esc(v: unknown): string {
@@ -326,10 +375,18 @@ ${body}
         <tr>
           <td class="em-px em-card em-hr" style="padding:24px 48px 32px 48px; border-top:1px solid ${C.line}; background-color:${C.card};">
             <p class="em-muted" style="margin:0; font-family:${FONT_BODY}; font-size:12px; line-height:19px; color:${C.muted};">
-              ${esc(BRAND.legal)} · ${esc(BRAND.address)} ·
-              <a href="${esc(site)}/" class="em-link" style="color:${C.muted}; text-decoration:underline;">${esc(BRAND.site)}</a>
+              ${esc(brandLegal())} · ${esc(brandAddress())} ·
+${
+  brandEmail()
+    ? `              <a href="mailto:${esc(brandEmail())}" class="em-link" style="color:${C.muted}; text-decoration:underline;">${esc(brandEmail())}</a> ·\n`
+    : ""
+}              <a href="${esc(site)}/" class="em-link" style="color:${C.muted}; text-decoration:underline;">${esc(BRAND.site)}</a>
             </p>
-            <p class="em-muted" style="margin:8px 0 0 0; font-family:${FONT_BODY}; font-size:12px; line-height:19px; color:${C.muted};">${footerNote}</p>
+${
+  brandNote(lang)
+    ? `            <p class="em-muted" style="margin:8px 0 0 0; font-family:${FONT_BODY}; font-size:12px; line-height:19px; color:${C.muted};">${esc(brandNote(lang))}</p>\n`
+    : ""
+}            <p class="em-muted" style="margin:8px 0 0 0; font-family:${FONT_BODY}; font-size:12px; line-height:19px; color:${C.muted};">${footerNote}</p>
           </td>
         </tr>
 
@@ -518,13 +575,14 @@ ${body}
 /** Footer legal block for the plain-text alternative. */
 export function textFooter(lang: Lang, note: string): string {
   const site = baseUrl();
-  return [
-    "",
-    "—",
-    `${BRAND.legal} · ${BRAND.address}`,
+  const lines = [
+    `${brandLegal()} · ${brandAddress()}`,
+    brandEmail(),
     `${site}/`,
+    brandNote(lang),
     note || COMMON[lang].serviceNote,
-  ].join("\n");
+  ].filter(Boolean);
+  return ["", "—", ...lines].join("\n");
 }
 
 /** Collapse blank runs so the plain-text part never ships three empty lines. */

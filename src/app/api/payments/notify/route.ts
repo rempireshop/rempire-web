@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getOrderByNumber, setOrderPayment, setOrderStatus } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { applyPaymentResult } from "@/lib/payments/apply";
-import { notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { issueOrderGiftCards, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 
 /**
@@ -78,9 +78,14 @@ export async function POST(req: Request) {
 
   // Only the transition into paid sends mail. A replayed webhook — Montonio's
   // 48-hour retry, or someone re-posting the same body — must not ping Renat
-  // again (audit H4).
-  if (outcome.status === "paid" && !outcome.alreadyPaid) {
-    await notifyOrderPaid({ ...order, status: "paid", payment: outcome.payment });
+  // or write to the customer again (audit H4). The gift cards bought in the
+  // order are the exception: issuing them is idempotent, and if the first pass
+  // died between the status write and the hook, this retry is the only thing
+  // that will ever mint them.
+  if (outcome.status === "paid") {
+    const paid = { ...order, status: "paid", payment: outcome.payment };
+    if (outcome.alreadyPaid) await issueOrderGiftCards(paid);
+    else await notifyOrderPaid(paid);
   }
   if (outcome.keptPaid) {
     console.error(

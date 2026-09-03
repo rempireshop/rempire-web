@@ -1849,3 +1849,29 @@ button, a, summary, label { touch-action: manipulation; }
   .admphoto__grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
   .admphoto__ph { height: 76px; }
 }
+
+/* ---------- checkout-gaps: delivery prices and promo codes ----------------
+   Two admin tables that carry inputs rather than text: «Настройки → Доставка»
+   (the tariffs the checkout actually bills) and the «Промокоды» tab. Both
+   reuse .adm__table's grid and only redefine the column track, so they inherit
+   the borders, hover and horizontal scroll every other admin table has. */
+.adm__th--ship, .adm__tr--ship { grid-template-columns: 1.2fr 96px 96px 96px 112px; min-width: 560px; }
+.adm__th--promo, .adm__tr--promo { grid-template-columns: 1.2fr 110px 1.2fr 92px 96px 148px; min-width: 700px; }
+.adm__tr--ship { align-items: center; }
+/* A price cell: short, right-aligned, and never wider than its column. */
+.adm__shipin { max-width: 100%; padding: 6px 8px; font-size: 13.5px; text-align: right; }
+.adm__row--ship { gap: 10px; }
+.adm__row--ship .adm__nm { flex: 0 0 108px; }
+.adm__shipcell { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.adm__shipcell .adm__shipin { width: 78px; }
+.acc--ship { margin-top: 12px; }
+.adm__promoform { display: block; }
+.adm__promoform .field { margin-top: 10px; }
+.adm__promoform .optlist { margin-top: 6px; }
+/* «Отзывов пока нет» sits where the review list would be, so it needs the
+   same air above the form as a list of reviews would have had. */
+.revs__none { margin: 0 0 14px; font-size: 13.5px; }
+@media (max-width: 767px) {
+  .adm__row--ship { flex-direction: column; align-items: flex-start; }
+  .adm__row--ship .adm__nm { flex: none; }
+}

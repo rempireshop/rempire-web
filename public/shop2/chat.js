@@ -35,7 +35,10 @@
       add: "В корзину", open: "Открыть", addAll: "Добавить всё в корзину",
       found: "Вот что подходит:", none: "Точного совпадения не нашёл — вот популярное из каталога:",
       set: "Собрал набор — вместе:", cart: "Открываю корзину…",
-      placeholder: "Например: масло для бороды…"
+      placeholder: "Например: масло для бороды…",
+      // the chat root hangs off document.body, outside translateTree()'s four
+      // slots, so the screen-reader labels and the price prefix live here too
+      aria: "Чат с помощником", close: "Закрыть", send: "Отправить", from: "от "
     },
     ET: {
       title: "Rempire abiline", hint: "Demo: saan aru lihtsatest fraasidest",
@@ -44,7 +47,8 @@
       add: "Lisa ostukorvi", open: "Ava", addAll: "Lisa kõik ostukorvi",
       found: "Need sobivad:", none: "Täpset vastet ei leidnud — siin on populaarsed:",
       set: "Panin komplekti kokku — koos:", cart: "Avan ostukorvi…",
-      placeholder: "Näiteks: habemeõli…"
+      placeholder: "Näiteks: habemeõli…",
+      aria: "Vestlus abilisega", close: "Sule", send: "Saada", from: "alates "
     },
     EN: {
       title: "Rempire assistant", hint: "Demo: I understand simple phrases",
@@ -53,7 +57,8 @@
       add: "Add to cart", open: "Open", addAll: "Add all to cart",
       found: "Here's what fits:", none: "No exact match — here are the popular ones:",
       set: "Here's a set — together:", cart: "Opening the cart…",
-      placeholder: "e.g. beard oil…"
+      placeholder: "e.g. beard oil…",
+      aria: "Chat with the assistant", close: "Close", send: "Send", from: "from "
     }
   };
 
@@ -159,6 +164,17 @@
     input = root.querySelector("[data-in]"), form = root.querySelector("form");
 
   function tt() { return T[lang()] || T.RU; }
+  /* The markup above is written in Russian like every template in the shop,
+     but translateTree() never reaches this root — so the labels are set from
+     T here: once at load for the closed bubble, and again on every open. */
+  function paintLabels() {
+    var t = tt();
+    fab.setAttribute("aria-label", t.aria);
+    panel.setAttribute("aria-label", t.aria);
+    root.querySelector(".sbot__x").setAttribute("aria-label", t.close);
+    root.querySelector(".sbot__send").setAttribute("aria-label", t.send);
+  }
+  paintLabels();
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
   function eur(n) { return (Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " €"; }
 
@@ -173,7 +189,7 @@
     return '<div class="sbot__prod">' +
       '<span class="sbot__ph" style="background-image:url(\'' + (p.img || "") + '\')"></span>' +
       '<span class="sbot__pn">' + esc(p.brand) + " " + esc(p.name) +
-        '<span class="sbot__pp">' + (p.priceFrom ? "от " : "") + eur(p.price) + "</span></span>" +
+        '<span class="sbot__pp">' + (p.priceFrom ? tt().from : "") + eur(p.price) + "</span></span>" +
       '<span class="sbot__pact"><button class="sbot__mini" data-add="' + p.id + '">' + tt().add + "</button>" +
       '<button class="sbot__mini sbot__mini--ghost" data-go-product="' + p.id + '">' + tt().open + "</button></span>" +
       "</div>";
@@ -240,27 +256,29 @@
   }
 
   var uiLang = null;
+  // the chrome follows the site language on EVERY open, not only the first —
+  // switching the site to ET used to leave a Russian chat
+  function paintPanel() {
+    var t = tt();
+    root.querySelector("[data-bt]").textContent = t.title;
+    root.querySelector("[data-bh]").textContent = t.hint;
+    input.placeholder = t.placeholder;
+    paintLabels();
+    chipsEl.innerHTML = t.chips.map(function (c) {
+      return '<button class="sbot__chip" data-q="' + esc(c) + '">' + esc(c) + "</button>";
+    }).join("");
+    refreshHint();
+    if (!log.childNodes.length || uiLang !== lang()) {
+      if (uiLang !== null && uiLang !== lang()) { log.innerHTML = ""; convo = []; }
+      bubble("bot", t.hello);
+    }
+    uiLang = lang();
+  }
   function openPanel(open) {
     panel.hidden = !open;
     fab.setAttribute("aria-expanded", String(open));
     if (open) probeAI();
-    if (open) {
-      // the chrome follows the site language on EVERY open, not only the
-      // first — switching the site to ET used to leave a Russian chat
-      var t = tt();
-      root.querySelector("[data-bt]").textContent = t.title;
-      root.querySelector("[data-bh]").textContent = t.hint;
-      input.placeholder = t.placeholder;
-      chipsEl.innerHTML = t.chips.map(function (c) {
-        return '<button class="sbot__chip" data-q="' + esc(c) + '">' + esc(c) + "</button>";
-      }).join("");
-      refreshHint();
-      if (!log.childNodes.length || uiLang !== lang()) {
-        if (uiLang !== null && uiLang !== lang()) { log.innerHTML = ""; convo = []; }
-        bubble("bot", t.hello);
-      }
-      uiLang = lang();
-    }
+    if (open) paintPanel();
     if (open) input.focus();
   }
   function refreshVisibility() {
@@ -271,6 +289,15 @@
   refreshVisibility();
   new MutationObserver(refreshVisibility)
     .observe(document.body, { attributes: true, attributeFilter: ["data-screen"] });
+
+  /* The language switch sits in the header, which stays clickable while the
+     chat is open — and the chat root is outside translateTree(), so nothing
+     else would repaint it. setHead() writes <html lang> on every render, so
+     one observer catches every switch: the header menu and the checkout
+     header alike. Closed bubble → labels only; open panel → the whole chrome. */
+  new MutationObserver(function () {
+    if (panel.hidden) paintLabels(); else paintPanel();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
 
   fab.addEventListener("click", function () { openPanel(panel.hidden); });
   root.querySelector(".sbot__x").addEventListener("click", function () { openPanel(false); });

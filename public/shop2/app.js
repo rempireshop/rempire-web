@@ -34,10 +34,15 @@
     user: '<path d="M12 4a3.6 3.6 0 1 1 0 7.2A3.6 3.6 0 0 1 12 4zM4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/>',
     bag: '<path d="M5.5 8.5h13l-.9 11a1.8 1.8 0 0 1-1.8 1.6H8.2a1.8 1.8 0 0 1-1.8-1.6zM8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5"/>',
     check: '<path d="M4.5 12.5l5 5 10-11"/>',
+    // «Промокоды» in the admin nav — a price tag with its hole
+    tag: '<path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.2" cy="8.2" r="1.4"/>',
     share: '<path d="M12 3.5v12M12 3.5 8.2 7.3M12 3.5l3.8 3.8"/><path d="M6.5 11.5H5a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 5 20.5h14a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5h-1.5"/>',
     instagram: '<rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>',
     facebook: '<path d="M14.6 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H17.8V3.6A21 21 0 0 0 15.4 3.5c-2.4 0-4 1.45-4 4.1v2.3H8.7V13h2.7v8z" fill="currentColor" stroke="none"/>',
-    tiktok: '<path d="M15.6 3.5c.4 2.15 1.6 3.4 3.7 3.55v2.4c-1.2.12-2.3-.28-3.55-1.05v4.65c0 5.9-6.45 7.75-9.05 3.52-1.67-2.72-.65-7.5 4.68-7.69v2.53c-.4.07-.84.17-1.24.3-1.2.4-1.87 1.15-1.68 2.48.36 2.55 5.04 3.3 4.65-1.68V3.5z" fill="currentColor" stroke="none"/>'
+    tiktok: '<path d="M15.6 3.5c.4 2.15 1.6 3.4 3.7 3.55v2.4c-1.2.12-2.3-.28-3.55-1.05v4.65c0 5.9-6.45 7.75-9.05 3.52-1.67-2.72-.65-7.5 4.68-7.69v2.53c-.4.07-.84.17-1.24.3-1.2.4-1.87 1.15-1.68 2.48.36 2.55 5.04 3.3 4.65-1.68V3.5z" fill="currentColor" stroke="none"/>',
+    // content: the shop has a YouTube channel (@rempire.official) and the
+    // footer links to it once the owner keeps the link in «Контент»
+    youtube: '<path d="M21.5 8.2a2.6 2.6 0 0 0-1.83-1.84C18.05 5.92 12 5.92 12 5.92s-6.05 0-7.67.44A2.6 2.6 0 0 0 2.5 8.2 27 27 0 0 0 2.06 12a27 27 0 0 0 .44 3.8 2.6 2.6 0 0 0 1.83 1.84c1.62.44 7.67.44 7.67.44s6.05 0 7.67-.44a2.6 2.6 0 0 0 1.83-1.84A27 27 0 0 0 21.94 12a27 27 0 0 0-.44-3.8zM10.06 14.9V9.1L15.1 12z" fill="currentColor" stroke="none"/>'
   };
   function icon(name) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' + ICON[name] + "</svg>";
@@ -95,29 +100,28 @@
       "Наличие": "Saadavus", "Бренд": "Bränd", "В наличии": "Laos",
       "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
       "Пока пусто.": "Ostukorv on tühi.", "К товарам": "Toodete juurde",
-      "Хиты продаж": "Populaarsemad ees", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓", "Новинки": "Uued",
+      "Хиты продаж": "Populaarsemad ees", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓",
       "Покупателю": "Ostjale", "Правовое": "Õigusinfo", "Контакты": "Kontakt",
       "Доставка и оплата": "Tarne ja maksmine", "Возврат товара": "Kauba tagastamine",
       "Условия продажи": "Müügitingimused", "Конфиденциальность": "Privaatsus",
       "Правовая информация": "Õigusinfo", "Споры онлайн (ODR)": "Vaidlused veebis (ODR)",
       "Оформление заказа": "Tellimuse vormistamine",
-      "Контакт": "Kontaktandmed", "Доставка": "Tarne", "Оплата": "Maksmine",
+      "Контакт": "Kontaktandmed", "Оплата": "Maksmine",
       "Далее — доставка": "Edasi — tarne", "Далее — оплата": "Edasi — maksmine",
-      "Имя": "Nimi", "Телефон": "Telefon", "Страна": "Riik", "Город": "Linn",
-      "Адрес": "Aadress", "Промокод": "Sooduskood", "Применить": "Rakenda",
+      "Имя": "Nimi",
+      "Адрес": "Aadress", "Промокод": "Sooduskood",
       "Заказ оформлен": "Tellimus vormistatud", "На главную": "Avalehele",
       "Поиск: шампунь, Davines, паста…": "Otsi: šampoon, Davines, pasta…",
       "Что ищете?": "Mida otsid?", "Язык интерфейса": "Keel",
       "Добавлено в корзину": "Lisatud ostukorvi", "Товар снова в наличии — напишем!": "Anname teada, kui toode on taas laos!",
       "Сообщить": "Teata mulle", "Получить код": "Saada kood", "Выйти": "Logi välja",
       "Мои заказы": "Minu tellimused", "Мои данные": "Minu andmed", "Мои промокоды": "Minu sooduskoodid",
-      "Повторить заказ": "Korda tellimust", "Сохранить": "Salvesta",
+      "Повторить заказ": "Korda tellimust",
       "Страница не найдена": "Lehte ei leitud",
       "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormista tellimus külalisena.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
       "Каталог, товары и инфостраницы — на трёх языках.": "Kataloog, tooted ja infolehed on kolmes keeles.",
       "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Tekst on üle toodud praeguselt saidilt; enne poe avamist vaatab selle üle jurist.",
-      "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
       "Европа": "Euroopa", "Таллинн": "Tallinn",
       "Профессиональный уход": "Professionaalne hooldus",
       "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — sellega töötab Rempire'i meeskond salongis.",
@@ -144,7 +148,13 @@
       "Сначала дешевле": "Soodsamad ees", "Сначала дороже": "Kallimad ees",
       "Поделиться": "Jaga", "Купить через": "Osta kohe —", "Другие способы оплаты": "Teised makseviisid",
       "С этим покупают": "Sellega ostetakse koos",
-      "Самовывоз": "Järeletulek", "Реквизиты": "Ettevõtte andmed", "Связаться": "Võta ühendust",
+      "Реквизиты": "Ettevõtte andmed", "Связаться": "Võta ühendust",
+      // content: footer «Часы работы» and the rebuilt «Контакты» page
+      "Часы работы": "Lahtiolekuajad", "Эл. почта": "E-post", "выходной": "suletud", "Рег.": "Reg.",
+      "Понедельник": "Esmaspäev", "Вторник": "Teisipäev", "Среда": "Kolmapäev",
+      "Четверг": "Neljapäev", "Пятница": "Reede", "Суббота": "Laupäev", "Воскресенье": "Pühapäev",
+      "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas. Vaja on isikut tõendavat dokumenti.",
+      "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Kirjutage või helistage — vastame tööpäeva jooksul. Tellimuste, tagastuste ja tooteküsimuste puhul on e-kiri kõige kiirem.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Pangalink (Swedbank, SEB, LHV, Luminor, Coop), kaart, Apple Pay / Google Pay, arve ettevõtetele.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas. Vaja on isikut tõendavat dokumenti.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
@@ -166,14 +176,12 @@
       "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek aadressil Mardi 1. Vaja on isikut tõendavat dokumenti. Tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
       "Оплата через банк — данные карты магазин не видит": "Makse toimub panga kaudu — pood ei näe kaardiandmeid",
       "14 дней на возврат по закону ЕС": "14-päevane tagastusõigus EL-i seaduse järgi",
-      "Вопросы — 56237237 или rempireshopinfo@gmail.com": "Küsimused — 56237237 või rempireshopinfo@gmail.com",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Maksa“ nõustud tingimuste ja tagastuspoliitikaga.",
       "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14-päevane tagastusõigus EL-i seaduse järgi. Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
       "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14-päevane tagastusõigus EL-i seaduse järgi. Särki võib proovida ja tagastada, kui see ei sobi.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "See on demo — päris tellimust ei loodud. Päris poes tuleb siia tellimuse number, arve e-postile ja paki jälgimisnumber.",
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel.",
       "Добавлено в корзину ✓": "Lisatud ostukorvi ✓",
-      "Код не найден — проверьте написание.": "Koodi ei leitud — kontrolli kirjapilti.",
       "Город": "Linn",
       "Рег. 12216136 · KMKR EE102723858": "Reg-kood 12216136 · KMKR EE102723858",
       "← В магазин": "← Poodi", "изменить": "muuda",
@@ -188,34 +196,32 @@
       "Применить": "Rakenda", "Отмена": "Tühista", "Сохранить": "Salvesta",
       "Найти товар: название, бренд…": "Otsi toodet: nimi, bränd…",
       /* вход в админку и настоящие заказы (backend) */
-      "Вход в админку": "Admini sisselogimine", "Пароль": "Parool", "Войти": "Logi sisse",
-      "Проверяем…": "Kontrollime…", "Неверный пароль": "Vale parool", "Введите пароль": "Sisestage parool",
+      "Вход в админку": "Admini sisselogimine", "Пароль": "Parool",
+      "Неверный пароль": "Vale parool", "Введите пароль": "Sisestage parool",
       "Пароль владельца. Магазин работает и без входа — здесь только управление.":
         "Omaniku parool. Pood töötab ka ilma sisselogimiseta — siin on ainult haldus.",
-      "Слишком много попыток — подождите минуту.": "Liiga palju katseid — oodake minut.",
       "Пароль ещё не настроен на сервере.": "Parool pole serveris veel seadistatud.",
       "Сервер не отвечает": "Server ei vasta",
       "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные.":
         "Tellimused on päris, serverist. Kliendid ja analüütika on veel näidisandmed.",
       "Сервер заказов не отвечает — показан демонстрационный список.":
         "Tellimuste server ei vasta — näidatakse näidisnimekirja.",
-      "новый": "uus", "оплачен": "makstud", "не оплачен": "maksmata", "отправлен": "teele saadetud",
-      "отменён": "tühistatud", "возврат": "tagasimakse",
+      "новый": "uus", "не оплачен": "maksmata",
       "Оформлен": "Vormistatud", "Оплачен": "Makstud", "Отправлен": "Teele saadetud",
-      "Состав": "Koosseis", "Статус": "Staatus", "Покупатель": "Ostja", "Скидка": "Soodustus",
+      "Состав": "Koosseis", "Покупатель": "Ostja",
       "Заметка": "Märkus", "Видна только вам": "Näete ainult teie", "Сохранить заметку": "Salvesta märkus",
-      "Сохранено ✓": "Salvestatud ✓", "Не удалось сохранить": "Salvestamine ebaõnnestus",
+      "Не удалось сохранить": "Salvestamine ebaõnnestus",
       /* отправления Montonio */
       "Отправление": "Saadetis", "Создать отправление": "Loo saadetis",
       "Создаём отправление…": "Loome saadetist…", "Отправление создано ✓": "Saadetis loodud ✓",
       "Не удалось создать отправление": "Saadetise loomine ebaõnnestus",
       "Доставка Montonio не подключена": "Montonio tarne pole ühendatud",
       "Пакомат не найден у Montonio": "Montonio ei tunne seda pakiautomaati",
-      "Этикетка PDF": "Silt PDF", "Отследить": "Jälgi",
+      "Этикетка PDF": "Silt PDF",
       "Трек-номер": "Jälgimisnumber", "Код сдачи посылки": "Paki üleandmise kood",
       "Отправление создаётся после оплаты.": "Saadetise saab luua pärast tasumist.",
       "Самовывоз — отправление не нужно.": "Järeletulek — saadetist pole vaja.",
-      "Пакомат": "Pakiautomaat", "Курьер": "Kuller", "Доставка": "Tarne",
+      "Доставка": "Tarne",
       /* оформление: доставка, выбор пакомата, оплата, чек */
       "Курьер до двери": "Kuller ukseni", "Перевозчик": "Vedaja",
       "Выберите пакомат": "Vali pakiautomaat", "выбрать": "vali",
@@ -236,7 +242,6 @@
       "Платёж обрабатывается": "Makset töödeldakse",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "Pank ei ole makset veel kinnitanud. Niipea kui ta vastab, saadame kirja — tavaliselt võtab see paar minutit.",
       "Вернуться в магазин": "Tagasi poodi",
-      "Корзина пуста": "Ostukorv on tühi",
       "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
@@ -264,6 +269,37 @@
       "Введите e-mail — на него придёт код": "Sisesta e-posti aadress — sellele saadame koodi",
       "Товары заказа #1042 в корзине ✓": "Tellimuse #1042 tooted on ostukorvis ✓",
       "Сохранено ✓": "Salvestatud ✓",
+      /* ---- account-flows: кабинет, код входа, письма-автоматы ---- */
+      "Войти": "Logi sisse", "Другой e-mail": "Teine e-posti aadress",
+      "Код из письма": "Kood kirjast",
+      "Код отправлен на почту — шесть цифр, годен 15 минут.":
+        "Kood on saadetud e-postile — kuus numbrit, kehtib 15 minutit.",
+      "Код отправлен — проверьте почту ✓": "Kood on saadetud — vaata e-posti ✓",
+      "Вы вошли ✓": "Oled sisse logitud ✓", "Вы вышли ✓": "Oled välja logitud ✓",
+      "Войдите ещё раз": "Logi uuesti sisse",
+      "Код не подошёл — проверьте цифры": "Kood ei sobinud — kontrolli numbreid",
+      "Код не найден — запросите новый": "Koodi ei leitud — küsi uus",
+      "Код истёк — запросите новый": "Kood on aegunud — küsi uus",
+      "Слишком много попыток — запросите новый код": "Liiga palju katseid — küsi uus kood",
+      "Слишком много попыток — подождите немного": "Liiga palju katseid — oota veidi",
+      "Кабинет заработает, когда магазин подключат к серверу": "Konto hakkab tööle, kui pood on serveriga ühendatud",
+      "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
+        "Tellimusi veel ei ole. Kõik, mis selle e-posti aadressiga tellid, ilmub siia.",
+      "Отследить": "Jälgi pakki",
+      "принят": "vastu võetud", "оплачен": "makstud", "отправлен": "teele saadetud",
+      "отменён": "tühistatud", "возврат": "tagastatud",
+      "Телефон": "Telefon",
+      "День рождения — пришлём скидку": "Sünnipäev — saadame soodustuse",
+      "Хочу получать новости, скидки и поздравление ко дню рождения":
+        "Soovin uudiseid, sooduspakkumisi ja sünnipäevaõnnitlust",
+      "Сообщить о наличии": "Anna teada, kui on laos",
+      "Корзина восстановлена ✓": "Ostukorv on taastatud ✓",
+      "Ждут письма:": "Ootavad kirja:", "Дней рождения за неделю:": "Sünnipäevi nädalas:",
+      "Код для входа": "Sisselogimiskood",
+      "напоминание через 3 часа, если заказ не завершён":
+        "meeldetuletus 3 tunni pärast, kui tellimus jäi lõpetamata",
+      "личный промокод в день рождения, действует 14 дней":
+        "isiklik sooduskood sünnipäeval, kehtib 14 päeva",
       /* ---- features: наборы, подарочная карта, отзывы, видео ---- */
       "Наборы": "Komplektid", "Набор": "Komplekt", "Все наборы": "Kõik komplektid",
       "Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.":
@@ -289,7 +325,7 @@
       "Проверьте e-mail получателя": "Kontrolli saaja e-posti aadressi",
       "Проверьте адрес — похоже, в нём опечатка.": "Kontrolli aadressi — tundub, et seal on trükiviga.",
       "Промокод или подарочная карта": "Sooduskood või kinkekaart",
-      "убрать": "eemalda", "Останется на карте": "Kaardile jääb",
+      "Останется на карте": "Kaardile jääb",
       "На этой карте не осталось денег.": "Sellel kaardil pole enam raha.",
       "Карта не найдена — проверьте код.": "Kaarti ei leitud — kontrolli koodi.",
       "Сейчас не получилось проверить карту. Попробуйте позже.": "Praegu ei õnnestunud kaarti kontrollida. Proovi hiljem.",
@@ -318,7 +354,7 @@
       "Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.":
         "Kleebi link — toote lehele tekib video. Tühi väli — plokki ei ole.",
       "Отзывы": "Arvustused", "Новые": "Uued", "Опубликованные": "Avaldatud", "Отклонённые": "Tagasi lükatud",
-      "Загружаем…": "Laadime…", "Здесь пусто.": "Siin pole midagi.",
+      "Здесь пусто.": "Siin pole midagi.",
       "Опубликовать": "Avalda", "Отклонить": "Lükka tagasi",
       "Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.":
         "Klientide arvustused. Poodi ei ilmu midagi iseenesest — kõigepealt loed, siis avaldad. Tagasi lükatud arvustust lihtsalt ei näidata.",
@@ -373,7 +409,404 @@
       "Не получилось прочитать фотографию — попробуйте другой файл.": "Fotot ei õnnestunud lugeda — proovi teist faili.",
       "Слишком много загрузок за час — подождите немного.": "Liiga palju üleslaadimisi tunnis — oota veidi.",
       "Не получилось загрузить — попробуйте ещё раз": "Üleslaadimine ebaõnnestus — proovi uuesti",
-      "Главная фотография выбрана — нажмите «Сохранить»": "Peamine foto on valitud — vajuta „Salvesta“"
+      "Главная фотография выбрана — нажмите «Сохранить»": "Peamine foto on valitud — vajuta „Salvesta“",
+
+      // i18n pass 2: checkout field errors — the shopper meets these mid-address
+      "Впишите имя и фамилию — их напечатают на посылке.": "Kirjuta ees- ja perekonnanimi — need trükitakse pakile.",
+      "Впишите улицу и дом.": "Kirjuta tänav ja maja number.",
+      "Впишите индекс.": "Kirjuta postiindeks.",
+      "Впишите город.": "Kirjuta linn.",
+      "Впишите телефон — по нему звонит курьер и приходит смс от пакомата.":
+        "Kirjuta telefoninumber — sellele helistab kuller ja tuleb pakiautomaadi SMS.",
+      "Проверьте номер — похоже, в нём не хватает цифр.": "Kontrolli numbrit — tundub, et mõni number on puudu.",
+      "Введите e-mail — на него придёт подтверждение заказа.": "Sisesta e-posti aadress — sellele tuleb tellimuse kinnitus.",
+      "В адресе не хватает знака @.": "Aadressist puudub @-märk.",
+      "Проверьте e-mail — на него придёт подтверждение заказа": "Kontrolli e-posti aadressi — sellele tuleb tellimuse kinnitus",
+      "Заполните данные доставки": "Täida tarneandmed",
+      "Укажите фирму и регистрационный номер": "Sisesta ettevõtte nimi ja registrikood",
+      "Название фирмы и рег. номер": "Ettevõtte nimi ja registrikood",
+      "Убрать из заказа": "Eemalda tellimusest",
+      "Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
+        "DPD kullerihind Soome on esialgne ja ootab vedaja kinnitust.",
+      "Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
+        "Täpne hind Euroopas sõltub riigist — DPD hinnakirja järgi 26–56 €.",
+      // the tariff note renders as one text node, so the two country variants
+      // need the whole sentence, not just their tail
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
+        "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel. DPD kullerihind Soome on esialgne ja ootab vedaja kinnitust.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
+        "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel. Täpne hind Euroopas sõltub riigist — DPD hinnakirja järgi 26–56 €.",
+
+      // i18n pass 2: product page
+      "Товара сейчас нет. Оставьте почту — напишем, когда появится.":
+        "Toode on praegu otsas. Jäta e-posti aadress — anname teada, kui see tagasi tuleb.",
+      "E-mail для уведомления": "E-post teavituse jaoks",
+      "Фирменная футболка Rempire с принтом нашего художника. Плотный хлопок, печать держит стирку.":
+        "Rempire’i firmasärk meie kunstniku kavandiga. Tihe puuvill, trükk peab pesu vastu.",
+      "Размеры и уход": "Suurused ja hooldus",
+      "Стирать при 30° наизнанку, не сушить в машине, гладить не по принту. Сомневаетесь в размере — берите больший.":
+        "Pese pahupidi 30° juures, ära kuivata trumlis, ära triigi üle trüki. Kui suuruses kahtled, võta suurem.",
+      "Профессиональное средство из салонного ассортимента Rempire. Подходит для регулярного ухода.":
+        "Professionaalne toode Rempire’i salongivalikust. Sobib igapäevaseks hoolduseks.",
+      "Применение": "Kasutamine",
+      "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.":
+        "Kanna niisketele juustele, vahusta, jäta 2–5 minutiks mõjuma ja loputa põhjalikult.",
+      "Состав (INCI)": "Koostis (INCI)",
+      "Полный состав будет заполнен при переносе каталога.": "Täielik koostis lisatakse kataloogi ülekandmisel.",
+      // the rendered node is the trimmed label; the older key kept a trailing space
+      "Цвет принта —": "Trüki värv —",
+      "белый": "valge", "жёлтый": "kollane", "чёрный": "must", "розовый": "roosa",
+      "серый": "hall", "красный": "punane", "синий": "sinine", "зелёный": "roheline",
+      "Оценка от 1 до 5": "Hinnang 1 kuni 5", "Видео о товаре": "Toote video",
+
+      // i18n pass 2: search
+      "Популярные запросы:": "Populaarsed otsingud:",
+      "шампунь": "šampoon", "борода": "habe", "парфюм": "parfüüm", "футболка": "T-särk",
+      "Проверьте написание или посмотрите категории:": "Kontrolli kirjapilti või vaata kategooriaid:",
+      "Напишите нам — поможем подобрать замену:": "Kirjuta meile — aitame asenduse leida:",
+
+      // i18n pass 2: account
+      "Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.":
+        "Sisselogimine ilma paroolita — saadame koodi e-postile. Osta saab ka ilma kontota.",
+      "Доставка по умолчанию": "Vaikimisi tarneviis",
+      "Подставим это при следующем заказе — менять можно в любой момент.":
+        "Täidame selle järgmisel tellimusel automaatselt — muuta saad igal ajal.",
+      "доставлен": "kohale toimetatud", "активен": "kehtiv",
+      "−10% ко дню рождения · до 30.09": "−10% sünnipäevaks · kuni 30.09",
+
+      // i18n pass 2: shell, aria-labels and the splash
+      "REMPIRE — на главную": "REMPIRE — avalehele", "Поиск по магазину": "Otsi poest",
+      "Язык": "Keel", "Основная навигация": "Peamine navigatsioon",
+      "Rempire в Instagram": "Rempire Instagramis", "Rempire в Facebook": "Rempire Facebookis",
+      "Rempire в TikTok": "Rempire TikTokis", "Пропустить заставку": "Jäta sissejuhatus vahele",
+      "Подкатегории": "Alamkategooriad", "Сумма карты": "Kinkekaardi summa",
+      "Курьер DPD по Европе": "DPD kuller Euroopas", "Другая страна Европы": "Muu Euroopa riik",
+      "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.":
+        "Brändid, millega Rempire’i salong töötab. Vajuta brändile — näitame kõike, mis laos on.",
+      /* ---- checkout-gaps: real reviews, real promo codes, delivery prices --- */
+      "Отзывов пока нет — станьте первым.": "Arvustusi veel pole — ole esimene.",
+      "Проверяем…": "Kontrollime…",
+      "убрать": "eemalda",
+      "Такого кода не бывает — проверьте написание.": "Sellist koodi ei saa olla — kontrolli kirjapilti.",
+      "Код не найден — проверьте написание.": "Koodi ei leitud — kontrolli kirjapilti.",
+      "Этот код больше не действует.": "See kood enam ei kehti.",
+      "Код ещё не начал действовать.": "Kood ei ole veel jõustunud.",
+      "Срок действия кода вышел.": "Koodi kehtivus on läbi.",
+      "Код уже использован полностью.": "Kood on juba täielikult ära kasutatud.",
+      "Слишком много попыток — подождите минуту.": "Liiga palju katseid — oota minut.",
+      "Промокоды проверяет сервер — в демонстрации код не применяется.":
+        "Sooduskoode kontrollib server — näidises koodi ei rakendata.",
+      "Сейчас не получилось проверить код. Попробуйте позже.":
+        "Koodi ei õnnestunud praegu kontrollida. Proovi hiljem.",
+      "Промокоды": "Sooduskoodid", "Новый промокод": "Uus sooduskood",
+      "Изменить промокод": "Muuda sooduskoodi",
+      "Код — латиница, цифры и дефис": "Kood — ladina tähed, numbrid ja sidekriips",
+      "Что даёт": "Mida annab", "Процент": "Protsent", "Сумма в евро": "Summa eurodes",
+      "Бесплатная доставка": "Tasuta tarne",
+      "Скидка в процентах — от 1 до 90": "Soodustus protsentides — 1 kuni 90",
+      "Скидка в евро — до 200": "Soodustus eurodes — kuni 200",
+      "Минимальная сумма заказа, € — 0 если без условия":
+        "Tellimuse miinimumsumma, € — 0, kui tingimust pole",
+      "Действует до — пусто, если бессрочно": "Kehtib kuni — tühi, kui tähtajatu",
+      "Сколько раз можно использовать — пусто, если без ограничения":
+        "Mitu korda võib kasutada — tühi, kui piiranguta",
+      "Заметка для себя": "Märkus endale",
+      "Промокодов пока нет.": "Sooduskoode veel pole.", "Загружаем…": "Laadime…",
+      "Код": "Kood", "Скидка": "Soodustus", "Условия": "Tingimused",
+      "Использован": "Kasutatud", "Статус": "Olek",
+      "без условий": "tingimusteta",
+      "Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.":
+        "Sooduskoodid ostjatele. Koodi kontrollib server tellimuse vormistamisel ja „kasutatud“ loetakse alles pärast tasumist — pooleli jäänud ostukorv koodi ei kuluta.",
+      "Войдите как владелец, чтобы создавать промокоды.": "Koodide loomiseks logi omanikuna sisse.",
+      "Список промокодов не загрузился.": "Sooduskoodide nimekiri ei laadinud.",
+      "Промокод сохранён ✓": "Sooduskood salvestatud ✓",
+      "Промокод включён ✓": "Sooduskood sisse lülitatud ✓",
+      "Промокод выключен ✓": "Sooduskood välja lülitatud ✓",
+      "Не получилось сохранить промокод.": "Sooduskoodi ei õnnestunud salvestada.",
+      "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.":
+        "Kood võib sisaldada ainult ladina tähti, numbreid ja sidekriipsu — kuni 24 märki.",
+      "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
+        "Kontrolli soodustuse suurust: protsent 1–90, summa kuni 200 €.",
+      "Проверьте дату окончания.": "Kontrolli lõppkuupäeva.",
+      "Число использований должно быть целым и больше нуля.":
+        "Kasutuskordade arv peab olema täisarv ja suurem kui null.",
+      "Сохранить тарифы": "Salvesta tariifid",
+      "Вернуть значения по умолчанию": "Taasta vaikeväärtused",
+      "Тарифы доставки сохранены ✓": "Tarnetariifid salvestatud ✓",
+      "Вернули значения по умолчанию ✓": "Vaikeväärtused taastatud ✓",
+      "Цены по перевозчикам — необязательно": "Vedajate hinnad — valikuline",
+      "Бесплатно от": "Tasuta alates", "Пакомат": "Pakiautomaat", "Курьер": "Kuller",
+      "Самовывоз": "Järeletulek", "Страна": "Riik",
+      "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
+      "Другие страны Европы": "Muud Euroopa riigid", "Остальные страны": "Ülejäänud riigid",
+      "Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.":
+        "Neid hindu pood nii näitab kui ka arvestab tellimuse vormistamisel. Tühi — võetakse rida „Ülejäänud riigid“. „нет“ veerus „Tasuta alates“ — sinna riiki ei ole tarne kunagi tasuta.",
+      "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
+        "Kui vedajal on oma hind, kirjuta see siia — see on tugevam kui ülemine tabel. Tühi — hind võetakse tabelist.",
+
+      // i18n pass 2 — contacts, opening hours and the account
+      "Размер —": "Suurus —",
+      "Объём —": "Maht —",
+      // i18n pass 2 — admin: chrome, overview and tables
+      "собирается": "komplekteerimisel",
+      "REMPIRE — в магазин": "REMPIRE — poodi",
+      "Свернуть меню": "Ahenda menüü",
+      "Развернуть меню": "Laienda menüü",
+      "Разделы админки": "Halduse jaotised",
+      "Rempire Store OÜ · владелец": "Rempire Store OÜ · omanik",
+      "Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.":
+        "Demo. Tellimused, kliendid ja numbrid on välja mõeldud, tooted on päris — sinu enda kataloogist.",
+      "Заказы сегодня": "Tellimusi täna",
+      "вчера — 5": "eile — 5",
+      "Выручка за 7 дней": "Käive 7 päevaga",
+      "Товаров в каталоге": "Tooteid kataloogis",
+      "Заканчиваются": "Lõppemas",
+      "нужно дозаказать": "vaja juurde tellida",
+      "Последние заказы": "Viimased tellimused",
+      "Заканчиваются на складе": "Laos lõppemas",
+      "нет": "otsas",
+      "в наличии": "laos",
+      "Заказ": "Tellimus",
+      "Товар": "Toode",
+      "Нажмите на заказ — адрес, состав, оплата, наклейка на посылку и письмо клиенту, всё на одной странице.":
+        "Vajuta tellimusele — aadress, sisu, makse, pakisilt ja kiri kliendile, kõik ühel lehel.",
+      "Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.":
+        "Hindu, laoseisu ja tekste saab siinsamas muuta. Skanneri triipkood leiab toote sekundiga — sissetulek ja mahakandmine ilma käsitsi sisestamata.",
+      "Поиск по товарам": "Otsi toodete seast",
+      "Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.":
+        "Kes ostab, kui tihti ja kui palju. Siit saab saata ka sünnipäevakirja ja isikliku sooduskoodi.",
+      "Клиент": "Klient",
+      "Заказов": "Tellimusi",
+      "Потратил": "Kulutanud",
+      "Последний": "Viimane",
+      // i18n pass 2 — admin: analytics
+      "Что происходит с магазином — простыми словами. Цифры вымышленные, вид настоящий.":
+        "Mis poes toimub — lihtsate sõnadega. Numbrid on välja mõeldud, vaade on päris.",
+      "Посетителей за 7 дней": "Külastajaid 7 päevaga",
+      "+18% к прошлой неделе": "+18% eelmise nädalaga võrreldes",
+      "Оформили заказ": "Vormistas tellimuse",
+      "из 100 посетителей — 2 заказа": "100 külastaja kohta 2 tellimust",
+      "Средний чек": "Keskmine ostukorv",
+      "по последним 20 заказам": "viimase 20 tellimuse põhjal",
+      "Выручка за 30 дней": "Käive 30 päevaga",
+      "12 заказов": "12 tellimust",
+      "Google — по каким словам находят": "Google — milliste sõnadega leitakse",
+      "Запрос": "Otsingusõna",
+      "Место": "Koht",
+      "Показы": "Näitamised",
+      "Клики": "Klikid",
+      "давинес шампунь": "davines šampoon",
+      "барбершоп мыло 666": "barbershop seep 666",
+      "system 4 шампунь купить": "system 4 šampoon",
+      "Откуда приходят": "Kust tullakse",
+      "Google (поиск)": "Google (otsing)",
+      "Напрямую / закладки": "Otse / järjehoidjad",
+      "Рассылка": "Uudiskiri",
+      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
+        "Päris versioonis ühendatakse siia Google Search Console ja külastusstatistika — kõik seadistab Dmitri, sinul pole vaja midagi teha.",
+      // i18n pass 2 — admin: e-mails and connections
+      "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Текст письма можно менять через помощника.":
+        "Kirjad, mida pood saadab ise. Nupud töötavad: seadistus salvestub (demo) ja läheb logisse. Kirja teksti saab muuta abilise kaudu.",
+      "сразу после оплаты — номер заказа и состав": "kohe pärast maksmist — tellimuse number ja sisu",
+      "трек-номер и кнопка отслеживания": "jälgimisnumber ja jälgimisnupp",
+      "всегда включено": "alati sees",
+      "включено": "sees",
+      "выключено": "väljas",
+      "тем, кто оставил почту на странице товара": "neile, kes jätsid tootelehel oma e-posti",
+      "напоминание через 24 часа, если заказ не завершён":
+        "meeldetuletus 24 tunni pärast, kui tellimus jäi lõpetamata",
+      "личный промокод за 3 дня до даты": "isiklik sooduskood 3 päeva enne tähtpäeva",
+      "Открыть превью всех писем →": "Ava kõigi kirjade eelvaade →",
+      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.":
+        "Mis on poega ühendatud. Roheline töötab ise; hall lisandub järgmiste sammudega — kõik seadistab Dmitri.",
+      "Приём оплат": "Maksete vastuvõtt",
+      "банковские ссылки, карты, Apple/Google Pay": "pangalingid, kaardid, Apple/Google Pay",
+      "после выбора провайдера": "pärast teenusepakkuja valikut",
+      "наклейки DPD / Omniva / SmartPosti и трекинг — через платёжного провайдера":
+        "DPD / Omniva / SmartPosti sildid ja jälgimine — makseteenuse pakkuja kaudu",
+      "Письма клиентам": "Kirjad klientidele",
+      "info@rempireshop.com через Resend": "info@rempireshop.com Resendi kaudu",
+      "после переноса домена": "pärast domeeni üleviimist",
+      "позиции в поиске и ошибки индексации": "positsioonid otsingus ja indekseerimisvead",
+      "настраивается": "seadistamisel",
+      "работает": "töötab",
+      "Аналитика посещений": "Külastusstatistika",
+      "откуда приходят и что покупают": "kust tullakse ja mida ostetakse",
+      "ИИ-помощник": "AI-abiline",
+      "этот чат справа — умеет менять всё в магазине": "see vestlus paremal — oskab poes kõike muuta",
+      "Касса в салоне": "Salongi kassa",
+      "работает отдельно от сайта — переезд её не трогает": "töötab saidist eraldi — kolimine seda ei puuduta",
+      // i18n pass 2 — admin: settings, journal and the assistant
+      "Всё, что можно настроить без программиста.": "Kõik, mida saab seadistada ilma programmeerijata.",
+      "Языки магазина": "Poe keeled",
+      "Русский — основной": "Vene keel — põhikeel",
+      "Письма клиенту": "Kirjad kliendile",
+      "Заказ отправлен + трекинг": "Tellimus saadetud + jälgimine",
+      "Магазин": "Pood",
+      "ИИ-чат для покупателей": "AI-vestlus ostjatele",
+      "кружок-консультант в углу магазина — подбирает товары и собирает корзину":
+        "nõustaja-nupp poe nurgas — aitab tooteid valida ja paneb ostukorvi kokku",
+      "Пока пусто. Изменения через помощника и кнопки панели попадут сюда — каждое можно отменить.":
+        "Praegu tühi. Abilise ja paneeli nuppudega tehtud muudatused jõuavad siia — igaühe saab tagasi võtta.",
+      "Свернуть помощника": "Ahenda abiline",
+      "Открыть помощника": "Ava abiline",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами.":
+        "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega.",
+      "Что заканчивается и что дозаказать?": "Mis on lõppemas ja mida juurde tellida?",
+      "Сколько заработали на Kevin.Murphy?": "Kui palju teenisime Kevin.Murphy pealt?",
+      "Добавь новый товар — вот фото": "Lisa uus toode — siin on foto",
+      "Покажи аналитику за неделю": "Näita nädala statistikat",
+      "Какие письма получают клиенты?": "Milliseid kirju kliendid saavad?",
+      "Какие заказы ждут отправки?": "Millised tellimused ootavad saatmist?",
+      "Спросить…": "Küsi…",
+      "Вопрос помощнику": "Küsimus abilisele",
+      "Спросить": "Küsi",
+      "Предпросмотр изменения": "Muudatuse eelvaade",
+      "Открыть": "Ava",
+      "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».":
+        "Valmis — mustand vene, eesti ja inglise keeles, koos koostise ja kasutusjuhisega. Google'i pealkiri ja kirjeldus on valitud automaatselt. Jääb üle läbi lugeda ja vajutada „Avalda“.",
+      "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите.":
+        "Saada foto ja hind — ülejäänu teen ise: eemaldan fotolt tausta, panen Rempire'i vesimärgi, kirjutan kirjelduse kolmes keeles koos SEO-pealkirjadega ja pakun jaotise. Sina ainult kontrollid ja kinnitad.",
+      "За неделю 412 посетителей, из них 2,2% оформили заказ. Лучше всего находят по «kevin murphy tallinn». Открыть подробности?":
+        "Nädalaga 412 külastajat, neist 2,2% vormistas tellimuse. Kõige paremini leitakse otsinguga „kevin murphy tallinn“. Kas avan üksikasjad?",
+      "Письма магазин шлёт сам: «заказ принят», «отправлен» с трек-номером, «снова в наличии». Могу включить напоминание о брошенной корзине и поздравление со скидкой ко дню рождения.":
+        "Kirjad saadab pood ise: „tellimus vastu võetud“, „saadetud“ koos jälgimisnumbriga, „taas laos“. Võin sisse lülitada pooleli jäänud ostukorvi meeldetuletuse ja sünnipäevasoodustuse.",
+      "Вот что подключено к магазину и что появится на следующих шагах — всё настраивается без вас.":
+        "Siin on see, mis on poega ühendatud ja mis lisandub järgmiste sammudega — kõik seadistatakse sinuta.",
+      "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?":
+        "Saatmist ootab 2 tellimust: #1043 ja #1044. Sildid on juba valmis — kas prindin?",
+      // i18n pass 2 — admin: order detail, media and the goods editor
+      "← Все заказы": "← Kõik tellimused",
+      "← Все товары": "← Kõik tooted",
+      "Собран": "Komplekteeritud",
+      "Передан в доставку": "Antud vedajale",
+      "Доставлен": "Kohale toimetatud",
+      "Mardi 1, Таллинн": "Mardi 1, Tallinn",
+      "Пакомат: Kristiine keskus, Таллинн": "Pakiautomaat: Kristiine keskus, Tallinn",
+      "Действия": "Tegevused",
+      "Напечатать наклейку": "Prindi pakisilt",
+      "Письмо с трек-номером": "Kiri jälgimisnumbriga",
+      "Вернуть деньги": "Tagasta raha",
+      "Демо: в рабочей версии наклейка печатается через платёжного провайдера, письмо уходит само при смене статуса.":
+        "Demo: päris versioonis prinditakse silt makseteenuse pakkuja kaudu ja kiri läheb staatuse muutmisel ise välja.",
+      "Файл пустой — попробуйте ещё раз.": "Fail on tühi — proovi uuesti.",
+      "Вы вышли из админки — войдите снова.": "Sind logiti haldusest välja — logi uuesti sisse.",
+      "Обработка фото на сервере недоступна.": "Fotode töötlemine serveris ei ole saadaval.",
+      "Открыть в магазине →": "Ava poes →",
+      "Основное": "Põhiandmed",
+      "Цена, €": "Hind, €",
+      "Раздел": "Jaotis",
+      "Подкатегория": "Alamkategooria",
+      "Авто — по названию": "Automaatne — nime järgi",
+      "Фото по объёмам": "Fotod mahtude kaupa",
+      "Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.":
+        "Millist fotot iga mahu juures näidatakse. Täidetakse poe andmetest automaatselt; siin saab käsitsi parandada.",
+      "Kevin.Murphy … купить в Таллинне | Rempire": "Kevin.Murphy … osta Tallinnas | Rempire",
+      "Короткое продающее описание для сниппета Google": "Lühike müüv kirjeldus Google'i otsingutulemuse jaoks",
+      "SEO для Google": "SEO Google'i jaoks",
+      "Заголовок (до 60 знаков)": "Pealkiri (kuni 60 tähemärki)",
+      "Описание (до 155 знаков)": "Kirjeldus (kuni 155 tähemärki)",
+      "Сгенерировать с ИИ": "Loo AI-ga",
+      "Русский — эстонский и английский пишутся сами": "Vene keeles — eesti ja inglise keel kirjutatakse ise",
+      "Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.":
+        "Hind, laoseis, alamkategooria, fotod, fotod mahtude kaupa ja SEO salvestuvad päriselt (näha ka poes, tagasivõtmine on logis). Üleslaetud foto vähendatakse ja teisendatakse kergesse vormingusse ise; tausta tuleb praegu veel eelnevalt eemaldada.",
+      "Открыть обзор": "Ava ülevaade",
+      "Открыть заказы": "Ava tellimused",
+      "Открыть товары": "Ava tooted",
+      "Открыть клиентов": "Ava kliendid",
+      "Открыть отзывы": "Ava arvustused",
+      "Открыть аналитику": "Ava statistika",
+      "Открыть письма": "Ava kirjad",
+      "Открыть подключения": "Ava ühendused",
+      "Открыть настройки": "Ava seaded",
+      // i18n pass 2 — admin: delivery rates and promo codes
+      "бесплатная доставка": "tasuta tarne",
+      "Сервер не отвечает.": "Server ei vasta.",
+      "Минимальная сумма заказа выглядит неправдоподобно.": "Tellimuse miinimumsumma tundub ebausutav.",
+      "Сервер не отвечает — попробуйте позже.": "Server ei vasta — proovi hiljem.",
+      "Промокод не сохранился — проверьте условия": "Sooduskood ei salvestunud — kontrolli tingimusi",
+      "Не получилось изменить промокод": "Sooduskoodi ei õnnestunud muuta",
+      // i18n pass 2 — admin: the content editor's own words
+      "название компании": "ettevõtte nimi",
+      "рег. номер": "registrikood",
+      "номер KMKR": "KMKR-number",
+      "адрес": "aadress",
+      "почта": "e-post",
+      "телефон": "telefon",
+      "реквизиты": "ettevõtte andmed",
+      "часы работы": "lahtiolekuajad",
+      "соцсети": "sotsiaalmeedia",
+      "верхняя полоска": "ülemine riba",
+      "страница «Контакты»": "leht „Kontakt“",
+      "подпись в письмах": "allkiri kirjades",
+      "правовые тексты": "õigustekstid",
+      "пакомат": "pakiautomaat",
+      "курьер": "kuller",
+      "самовывоз": "järeletulek",
+      // i18n pass 2 — admin: toasts
+      "Черновик готов — проверьте и сохраните": "Mustand on valmis — kontrolli ja salvesta",
+      "Сохранено ✓ · отмена — в журнале": "Salvestatud ✓ · tagasivõtmine on logis",
+      "Изменений нет": "Muudatusi ei ole",
+      "Применено ✓ · журнал в «Настройках»": "Rakendatud ✓ · logi on jaotises „Seaded“",
+      "Чат включён ✓": "Vestlus on sees ✓",
+      "Чат выключен ✓": "Vestlus on väljas ✓",
+      "Отменено ✓": "Tagasi võetud ✓",
+      "В демо правка не сохраняется": "Demos muudatust ei salvestata",
+
+      // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
+      "Контент": "Sisu",
+      "Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
+        "Kõik, mida pood enda kohta ütleb: ettevõtte andmed, lahtiolekuajad, sotsiaalmeedia, must riba päise kohal, leht „Kontakt“ ja allkiri kirjades. Muuda siin üks kord — ja muutub kõikjal: jaluses, lehel „Kontakt“, õigustekstides ja kirjades.",
+      "Название компании": "Ettevõtte nimi",
+      "Регистрационный номер": "Registrikood",
+      "Только цифры.": "Ainult numbrid.",
+      "Номер KMKR": "KMKR-number",
+      "Электронная почта": "E-posti aadress",
+      "IBAN (если нужен счёт для компаний)": "IBAN (kui on vaja arvet ettevõtetele)",
+      "показываем в подвале и на «Контактах»": "näitame jaluses ja lehel „Kontakt“",
+      "не указаны — раздел не показывается": "määramata — jaotist ei näidata",
+      "Соцсети": "Sotsiaalmeedia",
+      "нет ссылок": "linke ei ole",
+      "Пустая строка убирает значок из подвала.": "Tühi rida eemaldab ikooni jalusest.",
+      "Верхняя полоска": "Ülemine riba",
+      "стандартный текст": "standardtekst",
+      "выключена": "väljas",
+      "Показывать полоску": "Näita riba",
+      "чёрная строка над шапкой магазина": "must riba poe päise kohal",
+      "показана": "näidatakse",
+      "скрыта": "peidetud",
+      "Текст полоски": "Riba tekst",
+      "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.":
+        "Kui kõigis kolmes keeles on tühi, tuleb tagasi standardne rida tasuta tarne kohta. {EE} {LV} {FI} asendatakse tasuta tarne summadega.",
+      "Короткий текст для телефона": "Lühike tekst telefoni jaoks",
+      "Пусто — покажем основной текст.": "Tühi — näitame põhiteksti.",
+      "Ссылка (необязательно)": "Link (vabatahtlik)",
+      "Страница «Контакты»": "Leht „Kontakt“",
+      "вступительный абзац; телефон, почта, адрес и часы подставляются сами":
+        "sissejuhatav lõik; telefon, e-post, aadress ja lahtiolekuajad lisatakse ise",
+      "Текст страницы": "Lehe tekst",
+      "Подпись в письмах": "Allkiri kirjades",
+      "Строка внизу письма": "Rida kirja lõpus",
+      "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.":
+        "Üks rida ettevõtte andmete all igas kirjas. Kui keel on tühi, siis selles keeles kirjas rida ei ole.",
+      "Язык текстов": "Tekstide keel",
+      "Свернуть": "Ahenda",
+      "Рабочий день": "Tööpäev",
+      "Выходной": "Suletud",
+      "Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.":
+        "Kellaaeg kujul 10:00–19:00. Tühi rida — päeva ei näidata; „Suletud“ kirjuta sõnaga.",
+      "Примечание под часами": "Märkus lahtiolekuaegade all",
+      "Например: в праздники — по записи.": "Näiteks: pühade ajal ainult ette registreerides.",
+      "Ничего не изменилось": "Midagi ei muutunud",
+      "Уже стандартные значения": "Juba vaikeväärtused",
+      /* meta descriptions — the same sentences tools/prerender-shop2.mjs
+         writes into /info/…/, /sets/ and /gift/ */
+      "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.":
+        "Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.",
+      "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.":
+        "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
+      "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
+        "Rempire'i kinkekaart 25, 50 või 100 € — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib."
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -401,29 +834,28 @@
       "Наличие": "Availability", "Бренд": "Brand", "В наличии": "In stock",
       "Закрыть": "Close", "Меньше": "Less", "Больше": "More", "Размер": "Size",
       "Пока пусто.": "Your cart is empty.", "К товарам": "Browse products",
-      "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓", "Новинки": "New in",
+      "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓",
       "Покупателю": "For customers", "Правовое": "Legal", "Контакты": "Contact",
       "Доставка и оплата": "Delivery & payment", "Возврат товара": "Returns",
       "Условия продажи": "Terms of sale", "Конфиденциальность": "Privacy",
       "Правовая информация": "Legal information", "Споры онлайн (ODR)": "Online dispute resolution (ODR)",
       "Оформление заказа": "Checkout",
-      "Контакт": "Contact", "Доставка": "Delivery", "Оплата": "Payment",
+      "Контакт": "Contact", "Оплата": "Payment",
       "Далее — доставка": "Next — delivery", "Далее — оплата": "Next — payment",
-      "Имя": "Name", "Телефон": "Phone", "Страна": "Country", "Город": "City",
-      "Адрес": "Address", "Промокод": "Promo code", "Применить": "Apply",
+      "Имя": "Name",
+      "Адрес": "Address", "Промокод": "Promo code",
       "Заказ оформлен": "Order placed", "На главную": "Back to home",
       "Поиск: шампунь, Davines, паста…": "Search: shampoo, Davines, paste…",
       "Что ищете?": "What are you looking for?", "Язык интерфейса": "Language",
       "Добавлено в корзину": "Added to cart", "Товар снова в наличии — напишем!": "We'll e-mail you when it's back in stock!",
       "Сообщить": "Notify me", "Получить код": "Send code", "Выйти": "Log out",
       "Мои заказы": "My orders", "Мои данные": "My details", "Мои промокоды": "My promo codes",
-      "Повторить заказ": "Repeat order", "Сохранить": "Save",
+      "Повторить заказ": "Repeat order",
       "Страница не найдена": "Page not found",
       "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Taxes included. Delivery is calculated at checkout.",
       "Каталог, товары и инфостраницы — на трёх языках.": "The catalogue, products and info pages are in three languages.",
       "Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.": "Text carried over from the current site; a lawyer reviews it before launch.",
-      "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
       "Европа": "Europe", "Таллинн": "Tallinn",
       "Профессиональный уход": "Professional care",
       "Kevin.Murphy, Davines, System 4 — то, чем работает команда Rempire в салоне.": "Kevin.Murphy, Davines, System 4 — what the Rempire team works with in the salon.",
@@ -450,7 +882,13 @@
       "Сначала дешевле": "Price: low to high", "Сначала дороже": "Price: high to low",
       "Поделиться": "Share", "Купить через": "Buy now with", "Другие способы оплаты": "Other payment methods",
       "С этим покупают": "Bought together",
-      "Самовывоз": "Pickup", "Реквизиты": "Company details", "Связаться": "Get in touch",
+      "Реквизиты": "Company details", "Связаться": "Get in touch",
+      // content: footer «Часы работы» and the rebuilt «Контакты» page
+      "Часы работы": "Opening hours", "Эл. почта": "E-mail", "выходной": "closed", "Рег.": "Reg. no.",
+      "Понедельник": "Monday", "Вторник": "Tuesday", "Среда": "Wednesday",
+      "Четверг": "Thursday", "Пятница": "Friday", "Суббота": "Saturday", "Воскресенье": "Sunday",
+      "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "free · your order waits 7 days, then €1.50 per day. Photo ID required.",
+      "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Write or call — we answer within the working day. For orders, returns and product questions e-mail is the fastest way to reach us.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Bank link (Swedbank, SEB, LHV, Luminor, Coop), card, Apple Pay / Google Pay, invoice for companies.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · free · your order waits 7 days, then €1.50 per day. Photo ID required.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
@@ -472,14 +910,12 @@
       "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Free pickup at Mardi 1. Photo ID required. Your order waits 7 days, then €1.50 per day.",
       "Оплата через банк — данные карты магазин не видит": "Payment goes through the bank — the shop never sees card details",
       "14 дней на возврат по закону ЕС": "14-day returns under EU law",
-      "Вопросы — 56237237 или rempireshopinfo@gmail.com": "Questions — 56237237 or rempireshopinfo@gmail.com",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Pay” you agree to the terms and the return policy.",
       "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "14-day returns under EU law. Opened cosmetics cannot be returned for hygiene reasons.",
       "14 дней на возврат по закону ЕС. Футболку можно примерить и вернуть, если не подошла.": "14-day returns under EU law. You can try the tee on and return it if it doesn't fit.",
       "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.": "This is a demo — no real order was created. In the live shop this page shows the order number, an e-mailed invoice and parcel tracking.",
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.": "Rates — carrier price lists 2025–2026, incl. 24% VAT. From 40 parcels a month Omniva and DPD give 3–20% off — final prices to be confirmed once the contracts are signed.",
       "Добавлено в корзину ✓": "Added to cart ✓",
-      "Код не найден — проверьте написание.": "Code not found — check the spelling.",
       "Город": "City",
       "Рег. 12216136 · KMKR EE102723858": "Reg. no 12216136 · VAT EE102723858",
       "← В магазин": "← Back to shop", "изменить": "edit",
@@ -494,34 +930,32 @@
       "Применить": "Apply", "Отмена": "Cancel", "Сохранить": "Save",
       "Найти товар: название, бренд…": "Find a product: name, brand…",
       /* вход в админку и настоящие заказы (backend) */
-      "Вход в админку": "Admin sign-in", "Пароль": "Password", "Войти": "Sign in",
-      "Проверяем…": "Checking…", "Неверный пароль": "Wrong password", "Введите пароль": "Enter the password",
+      "Вход в админку": "Admin sign-in", "Пароль": "Password",
+      "Неверный пароль": "Wrong password", "Введите пароль": "Enter the password",
       "Пароль владельца. Магазин работает и без входа — здесь только управление.":
         "The owner's password. The shop runs without signing in — this is only the admin side.",
-      "Слишком много попыток — подождите минуту.": "Too many attempts — wait a minute.",
       "Пароль ещё не настроен на сервере.": "No admin password is set on the server yet.",
       "Сервер не отвечает": "The server is not responding",
       "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные.":
         "Orders are real, from the server. Customers and analytics are still demo data.",
       "Сервер заказов не отвечает — показан демонстрационный список.":
         "The orders server is not responding — showing the demo list.",
-      "новый": "new", "оплачен": "paid", "не оплачен": "unpaid", "отправлен": "shipped",
-      "отменён": "cancelled", "возврат": "refunded",
+      "новый": "new", "не оплачен": "unpaid",
       "Оформлен": "Placed", "Оплачен": "Paid", "Отправлен": "Shipped",
-      "Состав": "Items", "Статус": "Status", "Покупатель": "Customer", "Скидка": "Discount",
+      "Состав": "Items", "Покупатель": "Customer",
       "Заметка": "Note", "Видна только вам": "Only you see it", "Сохранить заметку": "Save note",
-      "Сохранено ✓": "Saved ✓", "Не удалось сохранить": "Could not save",
+      "Не удалось сохранить": "Could not save",
       /* Montonio shipments */
       "Отправление": "Shipment", "Создать отправление": "Create a shipment",
       "Создаём отправление…": "Creating the shipment…", "Отправление создано ✓": "Shipment created ✓",
       "Не удалось создать отправление": "Could not create the shipment",
       "Доставка Montonio не подключена": "Montonio Shipping is not connected",
       "Пакомат не найден у Montonio": "Montonio does not know that parcel locker",
-      "Этикетка PDF": "Label PDF", "Отследить": "Track",
+      "Этикетка PDF": "Label PDF",
       "Трек-номер": "Tracking number", "Код сдачи посылки": "Drop-off code",
       "Отправление создаётся после оплаты.": "A shipment can be created once the order is paid.",
       "Самовывоз — отправление не нужно.": "Pickup in store — no shipment needed.",
-      "Пакомат": "Parcel locker", "Курьер": "Courier", "Доставка": "Delivery",
+      "Доставка": "Delivery",
       /* checkout: delivery, machine picker, payment, receipt */
       "Курьер до двери": "Courier to your door", "Перевозчик": "Carrier",
       "Выберите пакомат": "Choose a parcel locker", "выбрать": "choose",
@@ -542,7 +976,6 @@
       "Платёж обрабатывается": "Payment is being processed",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "The bank has not confirmed the payment yet. We will e-mail you as soon as it does — usually a couple of minutes.",
       "Вернуться в магазин": "Back to the shop",
-      "Корзина пуста": "The cart is empty",
       "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
@@ -570,6 +1003,38 @@
       "Введите e-mail — на него придёт код": "Enter your e-mail — we'll send the code there",
       "Товары заказа #1042 в корзине ✓": "Items from order #1042 are in your cart ✓",
       "Сохранено ✓": "Saved ✓",
+      /* ---- account-flows: account, login code, automatic letters ---- */
+      "Войти": "Sign in", "Другой e-mail": "Use another e-mail",
+      "Код из письма": "Code from the e-mail",
+      "Код отправлен на почту — шесть цифр, годен 15 минут.":
+        "The code is on its way — six digits, valid for 15 minutes.",
+      "Код отправлен — проверьте почту ✓": "Code sent — check your e-mail ✓",
+      "Вы вошли ✓": "You are signed in ✓", "Вы вышли ✓": "You are signed out ✓",
+      "Войдите ещё раз": "Please sign in again",
+      "Код не подошёл — проверьте цифры": "That code did not match — check the digits",
+      "Код не найден — запросите новый": "No code found — ask for a new one",
+      "Код истёк — запросите новый": "The code has expired — ask for a new one",
+      "Слишком много попыток — запросите новый код": "Too many tries — ask for a new code",
+      "Слишком много попыток — подождите немного": "Too many tries — wait a moment",
+      "Кабинет заработает, когда магазин подключат к серверу":
+        "The account works once the shop is connected to its server",
+      "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
+        "No orders yet. Everything you order with this e-mail will show up here.",
+      "Отследить": "Track",
+      "принят": "received", "оплачен": "paid", "отправлен": "shipped",
+      "отменён": "cancelled", "возврат": "refunded",
+      "Телефон": "Phone",
+      "День рождения — пришлём скидку": "Birthday — we'll send a discount",
+      "Хочу получать новости, скидки и поздравление ко дню рождения":
+        "Send me news, offers and a birthday greeting",
+      "Сообщить о наличии": "Tell me when it's back",
+      "Корзина восстановлена ✓": "Cart restored ✓",
+      "Ждут письма:": "Waiting for a letter:", "Дней рождения за неделю:": "Birthdays this week:",
+      "Код для входа": "Sign-in code",
+      "напоминание через 3 часа, если заказ не завершён":
+        "a reminder 3 hours later if the order was not finished",
+      "личный промокод в день рождения, действует 14 дней":
+        "a personal promo code on the day, valid 14 days",
       /* ---- features: sets, gift card, reviews, video ---- */
       "Наборы": "Sets", "Набор": "Set", "Все наборы": "All sets",
       "Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.":
@@ -595,7 +1060,7 @@
       "Проверьте e-mail получателя": "Check the recipient's e-mail",
       "Проверьте адрес — похоже, в нём опечатка.": "Check the address — it looks like a typo.",
       "Промокод или подарочная карта": "Promo code or gift card",
-      "убрать": "remove", "Останется на карте": "Left on the card",
+      "Останется на карте": "Left on the card",
       "На этой карте не осталось денег.": "There is nothing left on this card.",
       "Карта не найдена — проверьте код.": "Card not found — check the code.",
       "Сейчас не получилось проверить карту. Попробуйте позже.": "We couldn't check the card just now. Please try later.",
@@ -624,7 +1089,7 @@
       "Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.":
         "Paste a link and a video appears on the product page. Empty means no video block.",
       "Отзывы": "Reviews", "Новые": "New", "Опубликованные": "Published", "Отклонённые": "Rejected",
-      "Загружаем…": "Loading…", "Здесь пусто.": "Nothing here.",
+      "Здесь пусто.": "Nothing here.",
       "Опубликовать": "Publish", "Отклонить": "Reject",
       "Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.":
         "Customer reviews. Nothing appears in the shop by itself — you read first, then publish. A rejected review is simply not shown.",
@@ -679,13 +1144,415 @@
       "Не получилось прочитать фотографию — попробуйте другой файл.": "The photo could not be read — try another file.",
       "Слишком много загрузок за час — подождите немного.": "Too many uploads this hour — please wait a little.",
       "Не получилось загрузить — попробуйте ещё раз": "The upload failed — please try again",
-      "Главная фотография выбрана — нажмите «Сохранить»": "Main photo chosen — press “Save”"
+      "Главная фотография выбрана — нажмите «Сохранить»": "Main photo chosen — press “Save”",
+
+      // i18n pass 2: checkout field errors — the shopper meets these mid-address
+      "Впишите имя и фамилию — их напечатают на посылке.": "Enter your first and last name — they are printed on the parcel.",
+      "Впишите улицу и дом.": "Enter your street and house number.",
+      "Впишите индекс.": "Enter your postcode.",
+      "Впишите город.": "Enter your town or city.",
+      "Впишите телефон — по нему звонит курьер и приходит смс от пакомата.":
+        "Enter your phone number — the courier rings it and the parcel locker texts it.",
+      "Проверьте номер — похоже, в нём не хватает цифр.": "Check the number — it looks like a digit is missing.",
+      "Введите e-mail — на него придёт подтверждение заказа.": "Enter your e-mail — the order confirmation goes there.",
+      "В адресе не хватает знака @.": "The address is missing the @ sign.",
+      "Проверьте e-mail — на него придёт подтверждение заказа": "Check your e-mail — the order confirmation goes there",
+      "Заполните данные доставки": "Fill in the delivery details",
+      "Укажите фирму и регистрационный номер": "Enter the company name and registry code",
+      "Название фирмы и рег. номер": "Company name and registry code",
+      "Убрать из заказа": "Remove from the order",
+      "Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
+        "The DPD courier rate to Finland is provisional and awaits the carrier’s confirmation.",
+      "Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
+        "The exact price across Europe depends on the country — €26–56 on the DPD rate card.",
+      // the tariff note renders as one text node, so the two country variants
+      // need the whole sentence, not just their tail
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
+        "Rates — the carriers’ 2025–2026 price lists, including 24 % VAT. From 40 parcels a month Omniva and DPD give 3–20 % off — final prices are confirmed when the contract is signed. The DPD courier rate to Finland is provisional and awaits the carrier’s confirmation.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
+        "Rates — the carriers’ 2025–2026 price lists, including 24 % VAT. From 40 parcels a month Omniva and DPD give 3–20 % off — final prices are confirmed when the contract is signed. The exact price across Europe depends on the country — €26–56 on the DPD rate card.",
+
+      // i18n pass 2: product page
+      "Товара сейчас нет. Оставьте почту — напишем, когда появится.":
+        "This one is out of stock right now. Leave your e-mail and we will write when it is back.",
+      "E-mail для уведомления": "E-mail for the notification",
+      "Фирменная футболка Rempire с принтом нашего художника. Плотный хлопок, печать держит стирку.":
+        "A Rempire T-shirt with a print by our own artist. Heavy cotton, and the print survives the wash.",
+      "Размеры и уход": "Sizes and care",
+      "Стирать при 30° наизнанку, не сушить в машине, гладить не по принту. Сомневаетесь в размере — берите больший.":
+        "Wash inside out at 30°, do not tumble dry, do not iron over the print. If you are unsure of the size, take the larger one.",
+      "Профессиональное средство из салонного ассортимента Rempire. Подходит для регулярного ухода.":
+        "A professional product from the Rempire salon range. Made for regular use.",
+      "Применение": "How to use",
+      "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.":
+        "Apply to damp hair, work into a lather, leave for 2–5 minutes and rinse thoroughly.",
+      "Состав (INCI)": "Ingredients (INCI)",
+      "Полный состав будет заполнен при переносе каталога.": "The full ingredient list will be added when the catalogue is migrated.",
+      // the rendered node is the trimmed label; the older key kept a trailing space
+      "Цвет принта —": "Print colour —",
+      "белый": "white", "жёлтый": "yellow", "чёрный": "black", "розовый": "pink",
+      "серый": "grey", "красный": "red", "синий": "blue", "зелёный": "green",
+      "Оценка от 1 до 5": "Rating from 1 to 5", "Видео о товаре": "Product video",
+
+      // i18n pass 2: search
+      "Популярные запросы:": "Popular searches:",
+      "шампунь": "shampoo", "борода": "beard", "парфюм": "perfume", "футболка": "T-shirt",
+      "Проверьте написание или посмотрите категории:": "Check the spelling, or browse the categories:",
+      "Напишите нам — поможем подобрать замену:": "Write to us — we will help you find an alternative:",
+
+      // i18n pass 2: account
+      "Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.":
+        "Password-free sign-in — we send a code to your e-mail. You can buy without an account too.",
+      "Доставка по умолчанию": "Default delivery",
+      "Подставим это при следующем заказе — менять можно в любой момент.":
+        "We will fill this in on your next order — you can change it at any time.",
+      "доставлен": "delivered", "активен": "active",
+      "−10% ко дню рождения · до 30.09": "−10% birthday discount · until 30.09",
+
+      // i18n pass 2: shell, aria-labels and the splash
+      "REMPIRE — на главную": "REMPIRE — home", "Поиск по магазину": "Search the shop",
+      "Язык": "Language", "Основная навигация": "Main navigation",
+      "Rempire в Instagram": "Rempire on Instagram", "Rempire в Facebook": "Rempire on Facebook",
+      "Rempire в TikTok": "Rempire on TikTok", "Пропустить заставку": "Skip the intro",
+      "Подкатегории": "Subcategories", "Сумма карты": "Gift card amount",
+      "Курьер DPD по Европе": "DPD courier across Europe", "Другая страна Европы": "Another European country",
+      "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.":
+        "The brands the Rempire salon works with. Tap a brand and we will show everything in stock.",
+      /* ---- checkout-gaps: real reviews, real promo codes, delivery prices --- */
+      "Отзывов пока нет — станьте первым.": "No reviews yet — be the first.",
+      "Проверяем…": "Checking…",
+      "убрать": "remove",
+      "Такого кода не бывает — проверьте написание.": "That is not a valid code — check the spelling.",
+      "Код не найден — проверьте написание.": "Code not found — check the spelling.",
+      "Этот код больше не действует.": "This code is no longer active.",
+      "Код ещё не начал действовать.": "This code has not started yet.",
+      "Срок действия кода вышел.": "This code has expired.",
+      "Код уже использован полностью.": "This code has been fully used.",
+      "Слишком много попыток — подождите минуту.": "Too many tries — wait a minute.",
+      "Промокоды проверяет сервер — в демонстрации код не применяется.":
+        "Promo codes are checked on the server — in this demo the code is not applied.",
+      "Сейчас не получилось проверить код. Попробуйте позже.":
+        "The code could not be checked right now. Please try again later.",
+      "Промокоды": "Promo codes", "Новый промокод": "New promo code",
+      "Изменить промокод": "Edit promo code",
+      "Код — латиница, цифры и дефис": "Code — Latin letters, digits and a hyphen",
+      "Что даёт": "What it gives", "Процент": "Per cent", "Сумма в евро": "Amount in euro",
+      "Бесплатная доставка": "Free delivery",
+      "Скидка в процентах — от 1 до 90": "Discount in per cent — 1 to 90",
+      "Скидка в евро — до 200": "Discount in euro — up to 200",
+      "Минимальная сумма заказа, € — 0 если без условия":
+        "Minimum order value, € — 0 for no condition",
+      "Действует до — пусто, если бессрочно": "Valid until — leave empty for no end date",
+      "Сколько раз можно использовать — пусто, если без ограничения":
+        "How many times it may be used — leave empty for unlimited",
+      "Заметка для себя": "A note to yourself",
+      "Промокодов пока нет.": "No promo codes yet.", "Загружаем…": "Loading…",
+      "Код": "Code", "Скидка": "Discount", "Условия": "Conditions",
+      "Использован": "Used", "Статус": "Status",
+      "без условий": "no conditions",
+      "Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.":
+        "Promo codes for customers. The server checks the code at checkout and counts it as used only once the order is paid — an abandoned basket spends nothing.",
+      "Войдите как владелец, чтобы создавать промокоды.": "Sign in as the owner to create promo codes.",
+      "Список промокодов не загрузился.": "The promo code list did not load.",
+      "Промокод сохранён ✓": "Promo code saved ✓",
+      "Промокод включён ✓": "Promo code switched on ✓",
+      "Промокод выключен ✓": "Promo code switched off ✓",
+      "Не получилось сохранить промокод.": "The promo code could not be saved.",
+      "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.":
+        "A code may contain only Latin letters, digits and a hyphen — up to 24 characters.",
+      "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.":
+        "Check the size of the discount: 1–90 per cent, or up to 200 €.",
+      "Проверьте дату окончания.": "Check the end date.",
+      "Число использований должно быть целым и больше нуля.":
+        "The number of uses must be a whole number above zero.",
+      "Сохранить тарифы": "Save the tariffs",
+      "Вернуть значения по умолчанию": "Restore the defaults",
+      "Тарифы доставки сохранены ✓": "Delivery tariffs saved ✓",
+      "Вернули значения по умолчанию ✓": "Defaults restored ✓",
+      "Цены по перевозчикам — необязательно": "Prices per carrier — optional",
+      "Бесплатно от": "Free from", "Пакомат": "Parcel locker", "Курьер": "Courier",
+      "Самовывоз": "Pickup", "Страна": "Country",
+      "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
+      "Другие страны Европы": "Other European countries", "Остальные страны": "All other countries",
+      "Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.":
+        "These are the prices the shop shows and the prices it charges at checkout. Empty — the «All other countries» row applies. «нет» in the «Free from» column means delivery to that country is never free.",
+      "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
+        "If a carrier has its own price, put it here — it beats the table above. Empty — the price comes from the table.",
+
+      // i18n pass 2 — contacts, opening hours and the account
+      "Размер —": "Size —",
+      "Объём —": "Volume —",
+      // i18n pass 2 — admin: chrome, overview and tables
+      "собирается": "being picked",
+      "REMPIRE — в магазин": "REMPIRE — to the shop",
+      "Свернуть меню": "Collapse the menu",
+      "Развернуть меню": "Expand the menu",
+      "Разделы админки": "Admin sections",
+      "Rempire Store OÜ · владелец": "Rempire Store OÜ · owner",
+      "Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.":
+        "Demo. The orders, customers and figures are invented; the products are real, from your own catalogue.",
+      "Заказы сегодня": "Orders today",
+      "вчера — 5": "yesterday — 5",
+      "Выручка за 7 дней": "Revenue over 7 days",
+      "Товаров в каталоге": "Products in the catalogue",
+      "Заканчиваются": "Running low",
+      "нужно дозаказать": "need reordering",
+      "Последние заказы": "Latest orders",
+      "Заканчиваются на складе": "Running low in stock",
+      "нет": "out",
+      "в наличии": "in stock",
+      "Заказ": "Order",
+      "Товар": "Product",
+      "Нажмите на заказ — адрес, состав, оплата, наклейка на посылку и письмо клиенту, всё на одной странице.":
+        "Tap an order — address, contents, payment, parcel label and the customer's e-mail, all on one page.",
+      "Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.":
+        "Prices, stock and texts are edited right here. A scanner barcode finds a product in a second — goods in and goods out with no typing.",
+      "Поиск по товарам": "Search the products",
+      "Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.":
+        "Who buys, how often and for how much. Birthday e-mails and personal promo codes go out from here too.",
+      "Клиент": "Customer",
+      "Заказов": "Orders",
+      "Потратил": "Spent",
+      "Последний": "Last",
+      // i18n pass 2 — admin: analytics
+      "Что происходит с магазином — простыми словами. Цифры вымышленные, вид настоящий.":
+        "What is happening in the shop, in plain words. The figures are invented, the view is real.",
+      "Посетителей за 7 дней": "Visitors over 7 days",
+      "+18% к прошлой неделе": "+18% on last week",
+      "Оформили заказ": "Placed an order",
+      "из 100 посетителей — 2 заказа": "2 orders per 100 visitors",
+      "Средний чек": "Average order value",
+      "по последним 20 заказам": "over the last 20 orders",
+      "Выручка за 30 дней": "Revenue over 30 days",
+      "12 заказов": "12 orders",
+      "Google — по каким словам находят": "Google — the words people find you by",
+      "Запрос": "Query",
+      "Место": "Position",
+      "Показы": "Impressions",
+      "Клики": "Clicks",
+      "давинес шампунь": "davines shampoo",
+      "барбершоп мыло 666": "barbershop soap 666",
+      "system 4 шампунь купить": "buy system 4 shampoo",
+      "Откуда приходят": "Where they come from",
+      "Google (поиск)": "Google (search)",
+      "Напрямую / закладки": "Direct / bookmarks",
+      "Рассылка": "Newsletter",
+      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
+        "In the live version Google Search Console and visitor analytics plug in here — Dmitri sets it all up, you do not have to do anything.",
+      // i18n pass 2 — admin: e-mails and connections
+      "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Текст письма можно менять через помощника.":
+        "The e-mails the shop sends by itself. The buttons work: the setting is saved (demo) and lands in the log. The wording can be changed through the assistant.",
+      "сразу после оплаты — номер заказа и состав": "right after payment — order number and contents",
+      "трек-номер и кнопка отслеживания": "the tracking number and a tracking button",
+      "всегда включено": "always on",
+      "включено": "on",
+      "выключено": "off",
+      "тем, кто оставил почту на странице товара": "to everyone who left their e-mail on a product page",
+      "напоминание через 24 часа, если заказ не завершён": "a reminder after 24 hours if the order was not finished",
+      "личный промокод за 3 дня до даты": "a personal promo code 3 days before the date",
+      "Открыть превью всех писем →": "Open the preview of every e-mail →",
+      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.":
+        "What is connected to the shop. Green works on its own; grey arrives in the next steps — Dmitri sets it all up.",
+      "Приём оплат": "Taking payments",
+      "банковские ссылки, карты, Apple/Google Pay": "bank links, cards, Apple/Google Pay",
+      "после выбора провайдера": "once a provider is chosen",
+      "наклейки DPD / Omniva / SmartPosti и трекинг — через платёжного провайдера":
+        "DPD / Omniva / SmartPosti labels and tracking — through the payment provider",
+      "Письма клиентам": "Customer e-mails",
+      "info@rempireshop.com через Resend": "info@rempireshop.com via Resend",
+      "после переноса домена": "once the domain has moved",
+      "позиции в поиске и ошибки индексации": "search positions and indexing errors",
+      "настраивается": "being set up",
+      "работает": "working",
+      "Аналитика посещений": "Visitor analytics",
+      "откуда приходят и что покупают": "where people come from and what they buy",
+      "ИИ-помощник": "AI assistant",
+      "этот чат справа — умеет менять всё в магазине": "this chat on the right — it can change anything in the shop",
+      "Касса в салоне": "The salon till",
+      "работает отдельно от сайта — переезд её не трогает":
+        "runs separately from the site — the move does not touch it",
+      // i18n pass 2 — admin: settings, journal and the assistant
+      "Всё, что можно настроить без программиста.": "Everything you can set up without a developer.",
+      "Языки магазина": "Shop languages",
+      "Русский — основной": "Russian — the main one",
+      "Письма клиенту": "E-mails to the customer",
+      "Заказ отправлен + трекинг": "Order shipped + tracking",
+      "Магазин": "Shop",
+      "ИИ-чат для покупателей": "AI chat for shoppers",
+      "кружок-консультант в углу магазина — подбирает товары и собирает корзину":
+        "the round assistant in the corner of the shop — it picks products and fills the cart",
+      "Пока пусто. Изменения через помощника и кнопки панели попадут сюда — каждое можно отменить.":
+        "Empty for now. Changes made through the assistant and the panel buttons land here — each one can be undone.",
+      "Свернуть помощника": "Collapse the assistant",
+      "Открыть помощника": "Open the assistant",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами.":
+        "I can see your catalogue, orders and stock. Just ask in plain words.",
+      "Что заканчивается и что дозаказать?": "What is running low and what should I reorder?",
+      "Сколько заработали на Kevin.Murphy?": "How much did we make on Kevin.Murphy?",
+      "Добавь новый товар — вот фото": "Add a new product — here is the photo",
+      "Покажи аналитику за неделю": "Show me this week's analytics",
+      "Какие письма получают клиенты?": "What e-mails do customers get?",
+      "Какие заказы ждут отправки?": "Which orders are waiting to be shipped?",
+      "Спросить…": "Ask…",
+      "Вопрос помощнику": "Question for the assistant",
+      "Спросить": "Ask",
+      "Предпросмотр изменения": "Preview of the change",
+      "Открыть": "Open",
+      "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».":
+        "Done — a draft in Russian, Estonian and English, with the ingredients and how to use it. The Google title and description were chosen automatically. All that is left is to read it and press “Publish”.",
+      "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите.":
+        "Send me a photo and a price — I will do the rest: cut out the background, add the Rempire watermark, write the description in three languages with SEO titles and suggest a section. You only check it and confirm.",
+      "За неделю 412 посетителей, из них 2,2% оформили заказ. Лучше всего находят по «kevin murphy tallinn». Открыть подробности?":
+        "412 visitors this week, 2.2% of them placed an order. The best-performing search is “kevin murphy tallinn”. Open the details?",
+      "Письма магазин шлёт сам: «заказ принят», «отправлен» с трек-номером, «снова в наличии». Могу включить напоминание о брошенной корзине и поздравление со скидкой ко дню рождения.":
+        "The shop sends the e-mails itself: “order received”, “shipped” with a tracking number, “back in stock”. I can switch on the abandoned-cart reminder and the birthday discount greeting.",
+      "Вот что подключено к магазину и что появится на следующих шагах — всё настраивается без вас.":
+        "Here is what is connected to the shop and what arrives in the next steps — it is all set up without you.",
+      "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?":
+        "2 orders are waiting to be shipped: #1043 and #1044. The labels are ready — shall I print them?",
+      // i18n pass 2 — admin: order detail, media and the goods editor
+      "← Все заказы": "← All orders",
+      "← Все товары": "← All products",
+      "Собран": "Picked",
+      "Передан в доставку": "Handed to the carrier",
+      "Доставлен": "Delivered",
+      "Mardi 1, Таллинн": "Mardi 1, Tallinn",
+      "Пакомат: Kristiine keskus, Таллинн": "Parcel locker: Kristiine keskus, Tallinn",
+      "Действия": "Actions",
+      "Напечатать наклейку": "Print the label",
+      "Письмо с трек-номером": "E-mail with the tracking number",
+      "Вернуть деньги": "Refund",
+      "Демо: в рабочей версии наклейка печатается через платёжного провайдера, письмо уходит само при смене статуса.":
+        "Demo: in the live version the label prints through the payment provider and the e-mail goes out by itself when the status changes.",
+      "Файл пустой — попробуйте ещё раз.": "The file is empty — try again.",
+      "Вы вышли из админки — войдите снова.": "You have been signed out of the admin — sign in again.",
+      "Обработка фото на сервере недоступна.": "Photo processing on the server is unavailable.",
+      "Открыть в магазине →": "Open in the shop →",
+      "Основное": "Basics",
+      "Цена, €": "Price, €",
+      "Раздел": "Section",
+      "Подкатегория": "Subcategory",
+      "Авто — по названию": "Automatic — from the name",
+      "Фото по объёмам": "Photos per size",
+      "Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.":
+        "Which photo is shown for each size. Filled in automatically from the shop's data; you can correct it by hand here.",
+      "Kevin.Murphy … купить в Таллинне | Rempire": "Kevin.Murphy … buy in Tallinn | Rempire",
+      "Короткое продающее описание для сниппета Google": "A short selling description for the Google snippet",
+      "SEO для Google": "SEO for Google",
+      "Заголовок (до 60 знаков)": "Title (up to 60 characters)",
+      "Описание (до 155 знаков)": "Description (up to 155 characters)",
+      "Сгенерировать с ИИ": "Generate with AI",
+      "Русский — эстонский и английский пишутся сами": "In Russian — Estonian and English write themselves",
+      "Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.":
+        "Price, stock, subcategory, photos, photos per size and SEO are saved for real (visible in the shop too; undo is in the log). An uploaded photo is resized and converted to a light format automatically; the background still has to be removed beforehand.",
+      "Открыть обзор": "Open the overview",
+      "Открыть заказы": "Open orders",
+      "Открыть товары": "Open products",
+      "Открыть клиентов": "Open customers",
+      "Открыть отзывы": "Open reviews",
+      "Открыть аналитику": "Open analytics",
+      "Открыть письма": "Open e-mails",
+      "Открыть подключения": "Open connections",
+      "Открыть настройки": "Open settings",
+      // i18n pass 2 — admin: delivery rates and promo codes
+      "бесплатная доставка": "free delivery",
+      "Сервер не отвечает.": "The server is not responding.",
+      "Минимальная сумма заказа выглядит неправдоподобно.": "That minimum order value does not look plausible.",
+      "Сервер не отвечает — попробуйте позже.": "The server is not responding — try again later.",
+      "Промокод не сохранился — проверьте условия": "The promo code was not saved — check the conditions",
+      "Не получилось изменить промокод": "The promo code could not be changed",
+      // i18n pass 2 — admin: the content editor's own words
+      "название компании": "company name",
+      "рег. номер": "registry code",
+      "номер KMKR": "VAT number",
+      "адрес": "address",
+      "почта": "e-mail",
+      "телефон": "phone",
+      "реквизиты": "company details",
+      "часы работы": "opening hours",
+      "соцсети": "social media",
+      "верхняя полоска": "the top bar",
+      "страница «Контакты»": "the “Contact” page",
+      "подпись в письмах": "the e-mail signature",
+      "правовые тексты": "the legal texts",
+      "пакомат": "parcel locker",
+      "курьер": "courier",
+      "самовывоз": "pickup",
+      // i18n pass 2 — admin: toasts
+      "Черновик готов — проверьте и сохраните": "The draft is ready — check it and save",
+      "Сохранено ✓ · отмена — в журнале": "Saved ✓ · undo is in the log",
+      "Изменений нет": "No changes",
+      "Применено ✓ · журнал в «Настройках»": "Applied ✓ · the log is under “Settings”",
+      "Чат включён ✓": "Chat switched on ✓",
+      "Чат выключен ✓": "Chat switched off ✓",
+      "Отменено ✓": "Undone ✓",
+      "В демо правка не сохраняется": "In the demo this change is not saved",
+
+      // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
+      "Контент": "Content",
+      "Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
+        "Everything the shop says about itself: company details, opening hours, social media, the black bar above the header, the “Contact” page and the e-mail signature. Change it here once and it changes everywhere: in the footer, on “Contact”, in the legal texts and in the e-mails.",
+      "Название компании": "Company name",
+      "Регистрационный номер": "Registry code",
+      "Только цифры.": "Digits only.",
+      "Номер KMKR": "VAT number",
+      "Электронная почта": "E-mail address",
+      "IBAN (если нужен счёт для компаний)": "IBAN (if you invoice companies)",
+      "показываем в подвале и на «Контактах»": "shown in the footer and on “Contact”",
+      "не указаны — раздел не показывается": "not set — the section is not shown",
+      "Соцсети": "Social media",
+      "нет ссылок": "no links",
+      "Пустая строка убирает значок из подвала.": "An empty line removes the icon from the footer.",
+      "Верхняя полоска": "The top bar",
+      "стандартный текст": "the standard text",
+      "выключена": "off",
+      "Показывать полоску": "Show the bar",
+      "чёрная строка над шапкой магазина": "the black line above the shop header",
+      "показана": "shown",
+      "скрыта": "hidden",
+      "Текст полоски": "The text on the bar",
+      "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.":
+        "Empty in all three languages and the standard free-delivery line comes back. {EE} {LV} {FI} are replaced by the free-delivery thresholds.",
+      "Короткий текст для телефона": "A short version for phones",
+      "Пусто — покажем основной текст.": "Empty — we show the main text.",
+      "Ссылка (необязательно)": "Link (optional)",
+      "Страница «Контакты»": "The “Contact” page",
+      "вступительный абзац; телефон, почта, адрес и часы подставляются сами":
+        "the intro paragraph; phone, e-mail, address and hours are filled in automatically",
+      "Текст страницы": "The page text",
+      "Подпись в письмах": "The e-mail signature",
+      "Строка внизу письма": "The line at the bottom of the e-mail",
+      "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.":
+        "One line under the company details in every e-mail. Leave a language empty and the line is left out of e-mails in that language.",
+      "Язык текстов": "Text language",
+      "Свернуть": "Collapse",
+      "Рабочий день": "Open",
+      "Выходной": "Closed",
+      "Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.":
+        "Times as 10:00–19:00. An empty line hides that day; write “Closed” as a word.",
+      "Примечание под часами": "A note under the hours",
+      "Например: в праздники — по записи.": "For example: on public holidays, by appointment.",
+      "Ничего не изменилось": "Nothing changed",
+      "Уже стандартные значения": "Already the default values",
+      /* meta descriptions — the same sentences tools/prerender-shop2.mjs
+         writes into /info/…/, /sets/ and /gift/ */
+      "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.":
+        "Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.",
+      "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.":
+        "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
+      "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
+        "A Rempire gift card for €25, €50 or €100 — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over."
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* checkout trust line — the phone and the e-mail come from the content
+       layer, so only the label around them is translated. The two-value rule
+       has to come first: the one-value rule would swallow the «или». */
+    [/^Вопросы — (.+) или (.+)$/, { ET: "Küsimused — $1 või $2", EN: "Questions — $1 or $2" }],
+    [/^Вопросы — (.+)$/, { ET: "Küsimused — $1", EN: "Questions — $1" }],
     // real orders: «Заказ R-100042», «Пакомат · Kristiine keskus»
     [/^Заказ (R-\d+)$/, { ET: "Tellimus $1", EN: "Order $1" }],
     [/^Пакомат · (.+)$/, { ET: "Pakiautomaat · $1", EN: "Parcel locker · $1" }],
@@ -733,7 +1600,57 @@
     [/^(\d) из 5$/, { ET: "$1 / 5", EN: "$1 out of 5" }],
     // главный баннер
     [/^Баннер (\d+)$/, { ET: "Bänner $1", EN: "Banner $1" }],
-    [/^Кнопка ведёт на: (.+)$/, { ET: "Nupp viib: $1", EN: "The button goes to: $1" }]
+    [/^Кнопка ведёт на: (.+)$/, { ET: "Nupp viib: $1", EN: "The button goes to: $1" }],
+    /* checkout-gaps: the applied promo code carries the code and the number
+       inside the same line, so it cannot be a plain dictionary key. */
+    [/^([A-Z0-9-]+) — скидка (\d+)%$/, { ET: "$1 — soodustus $2%", EN: "$1 — $2% off" }],
+    [/^([A-Z0-9-]+) — скидка (.+)$/, { ET: "$1 — soodustus $2", EN: "$1 — $2 off" }],
+    [/^([A-Z0-9-]+) — бесплатная доставка$/, { ET: "$1 — tasuta tarne", EN: "$1 — free delivery" }],
+    [/^Код действует от (.+) — добавьте ещё на (.+)\.$/,
+      { ET: "Kood kehtib alates $1 — lisa veel $2 eest.", EN: "The code applies from $1 — add $2 more." }],
+    [/^от (.+) · до (.+)$/, { ET: "alates $1 · kuni $2", EN: "from $1 · until $2" }],
+    [/^до (\d{2}\.\d{2}\.\d{4})$/, { ET: "kuni $1", EN: "until $1" }],
+    [/^(\d+) из (\d+)$/, { ET: "$1 / $2", EN: "$1 of $2" }],
+    // «Сейчас: пакомат Эстония 3,49 € · курьер Эстония 5,99 € · бесплатно от 59 €.»
+    [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. За пределами Эстонии значения по умолчанию ниже себестоимости перевозчиков — см\. docs\/shipping\.md\.$/,
+      { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Väljaspool Eestit on vaikeväärtused vedajate omahinnast madalamad — vt docs/shipping.md.",
+        EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. Outside Estonia the defaults are below the carriers’ own cost — see docs/shipping.md." }],
+    /* i18n pass 2 — strings the shop builds around a number or a name.
+       The volume rules come before the catch-all so «Объём — 150 мл» keeps
+       its unit; the arrow rule is last, because it matches almost anything. */
+    [/^Объём — (\d+(?:[.,]\d+)?) мл$/, { ET: "Maht — $1 ml", EN: "Volume — $1 ml" }],
+    [/^Объём — (\d+(?:[.,]\d+)?) г$/, { ET: "Maht — $1 g", EN: "Volume — $1 g" }],
+    [/^Объём — (.+)$/, { ET: "Maht — $1", EN: "Volume — $1" }],
+    [/^Размер — (.+)$/, { ET: "Suurus — $1", EN: "Size — $1" }],
+    [/^Фото (\d+)$/, { ET: "Foto $1", EN: "Photo $1" }],
+    [/^Показать (\d+) товар(?:|а|ов)$/, { ET: "Näita $1 toodet", EN: "Show $1 products" }],
+    [/^Оплатить (.+)$/, { ET: "Maksa $1", EN: "Pay $1" }],
+    [/^Пакомат по умолчанию — (\d+) (?:точка|точки|точек)$/,
+      { ET: "Vaikimisi pakiautomaat — $1 punkti", EN: "Default parcel locker — $1 locations" }],
+    [/^Рег\. (.+)$/, { ET: "Reg-kood $1", EN: "Reg. no $1" }],
+    [/^рег\. (.+)$/, { ET: "reg-kood $1", EN: "reg. no $1" }],
+    [/^Rempire в (.+)$/, { ET: "Rempire — $1", EN: "Rempire on $1" }],
+    // admin
+    [/^Заказ #(\d+)$/, { ET: "Tellimus #$1", EN: "Order #$1" }],
+    [/^в среднем (.+) в день$/, { ET: "keskmiselt $1 päevas", EN: "$1 a day on average" }],
+    [/^(.+) · помощник\/панель$/, { ET: "$1 · abiline/paneel", EN: "$1 · assistant/panel" }],
+    [/^Загружаем… (\d+) из (\d+)$/, { ET: "Laadime… $1 / $2", EN: "Uploading… $1 of $2" }],
+    [/^Больше (\d+) фотографий на товар не нужно$/,
+      { ET: "Rohkem kui $1 fotot toote kohta pole vaja", EN: "No more than $1 photos per product" }],
+    [/^Бесплатно от — (.+)$/, { ET: "Tasuta alates — $1", EN: "Free from — $1" }],
+    [/^Показаны первые 24 из (\d+) по запросу «(.+)»$/,
+      { ET: "Kuvatud esimesed 24, kokku $1 · otsing „$2“", EN: "First 24 shown, $1 in total · search “$2”" }],
+    [/^Показаны первые 24 из (\d+)$/, { ET: "Kuvatud esimesed 24, kokku $1", EN: "First 24 shown, $1 in total" }],
+    [/^(\d+) товар(?:|а|ов) по запросу «(.+)»$/,
+      { ET: "$1 toodet otsingule „$2“", EN: "$1 products for “$2”" }],
+    [/^Заканчиваются (\d+) товар(?:|а|ов)\. Срочно: (.+)\. Могу собрать заказ поставщику и отправить его вам на подпись\.$/,
+      { ET: "Lõppemas on $1 toodet. Kiireloomulised: $2. Võin koostada tarnijale tellimuse ja saata selle sulle allkirjastamiseks.",
+        EN: "$1 products are running low. Urgent: $2. I can put a supplier order together and send it to you to sign." }],
+    [/^Kevin\.Murphy: (\d+) товар(?:|а|ов) в каталоге, средняя цена (.+)\. В рабочей версии здесь будет выручка за месяц по бренду и сравнение с прошлым\.$/,
+      { ET: "Kevin.Murphy: kataloogis $1 toodet, keskmine hind $2. Päris versioonis on siin brändi kuukäive ja võrdlus eelmisega.",
+        EN: "Kevin.Murphy: $1 products in the catalogue, average price $2. In the live version this shows the brand’s monthly revenue and a comparison with last month." }],
+    // «Открыть товары →» — the label is a dictionary key, the arrow is not
+    [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -1059,6 +1976,12 @@
     },
     carriers: null
   };
+  /* The seeded values, kept whole: «Вернуть значения по умолчанию» in the
+     admin has to put back exactly what src/lib/shipping.ts carries, and a
+     full save has to start from them rather than from whatever the last
+     partial merge left behind. */
+  function cloneRules(r) { return JSON.parse(JSON.stringify(r)); }
+  var SHIP_RULES_DEFAULT = cloneRules(SHIP_RULES);
   var DELIVERY = [
     { k: "parcel", l: "Пакомат" },
     { k: "courier", l: "Курьер до двери" },
@@ -1105,6 +2028,17 @@
     if (raw.carriers && typeof raw.carriers === "object") SHIP_RULES.carriers = raw.carriers;
     // the announce bar and the footer quote these — keep the promise and the
     // bill the same number
+    refreshShipThresholds();
+  }
+  /** A whole-table save: back to the defaults, then the owner's rules over them.
+      applyShipRules() can only add and change, so a price the owner cleared
+      would otherwise survive its own deletion. */
+  function setShipRules(raw) {
+    SHIP_RULES.freeFrom = SHIP_RULES_DEFAULT.freeFrom;
+    SHIP_RULES.freeFromByCountry = null;
+    SHIP_RULES.methods = cloneRules(SHIP_RULES_DEFAULT.methods);
+    SHIP_RULES.carriers = null;
+    applyShipRules(raw);
     refreshShipThresholds();
   }
   var shipRulesAsked = false;
@@ -1251,12 +2185,36 @@
     method: 0,
     machine: 0,
     promo: "",
-    promoOk: false,
-    promoErr: false,
+    /* The code the SERVER accepted, as a rule rather than a number:
+       {code, kind, value, minSubtotal}. The euro figure is recomputed from it
+       on every render so it follows the basket, and the server re-prices the
+       whole order anyway — the browser never decides what a discount is worth.
+       null = no code applied. */
+    promoInfo: null,
+    promoErr: "",        // an error code from /api/promos/check, "" when fine
+    promoMin: 0,         // what the basket has to reach, when that was why
+    promoBusy: false,
     email: "",
     emailTouched: false,
     shipTouched: false,   // delivery errors stay quiet until they try to continue
+    /* ---- account: a real passwordless session (account-flows) -------------
+       `cust` is the profile the server returned, null when signed out. The
+       screen used to fake this with loggedIn:true and a hard-coded order —
+       audit top-15 #8. `loggedIn` is kept as a derived flag so the rest of the
+       file (the header icon, the checkout hints) reads the same property it
+       always did. */
     loggedIn: false,
+    cust: null,           // {email, name, phone, lang, birthday, marketing}
+    acctOrders: [],       // the last 20 orders for that address
+    acctStage: "email",   // "email" → "code" → signed in
+    acctCode: "",         // the six digits being typed
+    acctBusy: false,      // a request is in flight — the button locks
+    acctErr: "",          // dictionary key of the last failure, "" when fine
+    acctSaved: false,     // «Сохранено ✓» on the profile form
+    acctForm: { name: "", phone: "", birthday: "", marketing: false },
+    notifyOpen: "",       // product id whose «сообщить о наличии» form is open
+    notifyEmail: "",
+    notifyBusy: false,
     acctMethod: 1,
     acctMachine: 0,
     toast: null,
@@ -1283,6 +2241,10 @@
     heroLang: "RU",  // which language pill the form shows
     heroGoQ: "",     // link picker: product search
     heroImgQ: "",    // image picker: product search
+    // ---- «Контент» in the admin panel (content) ----
+    contentDraft: null,  // working copy of the shop's own details
+    contentLang: "RU",   // which language pill the trilingual fields show
+    contentOpen: "",     // which sub-block is unfolded ("" = the summary)
     mailTpl: "order-confirmed", // «Письма»: which letter the preview shows
     mailLang: "",    // letter language; "" follows the panel language
     mailTo: "",      // address typed into «отправить тест на…»
@@ -1309,6 +2271,13 @@
     revOpen: false,
     admReviews: null,   // admin tab: {reviews, counts} once loaded
     admRevFilter: "pending",
+    // checkout-gaps: the delivery-price table and the promo-code editor
+    shipDraft: null,    // working copy of settings.shipping_rules while editing
+    shipErr: "",
+    admPromos: null,    // admin tab «Промокоды»: [promo] once loaded
+    admPromoErr: "",
+    promoForm: null,    // the code being created or edited, or null
+    promoFormErr: "",
     videoOn: false      // the product video is a click-to-play embed
   };
 
@@ -1441,7 +2410,29 @@
     return typeof v === "number" && isFinite(v) ? Math.round(v * 100) / 100 : 0;
   }
   function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
-  function discount() { return S.promoOk ? Math.round(cartSum() * 10) / 100 : 0; }
+  /* What the applied promo code takes off. The RULE comes from the server
+     (POST /api/promos/check); the euro figure is recomputed here so it tracks
+     a basket the shopper is still editing, using the same arithmetic
+     src/lib/promos.ts uses — and the server re-prices everything at
+     /api/orders anyway, so the two can never disagree about what is charged.
+     A free-shipping code shows up as a discount equal to the delivery price,
+     exactly as createOrder() records it, so the summary here, the confirmation
+     screen and the e-mail all print the same three lines. */
+  function discount() {
+    var p = S.promoInfo;
+    if (!p) return 0;
+    var goods = cartSum();
+    if (p.minSubtotal && goods < p.minSubtotal) return 0;
+    if (p.kind === "free_shipping") return shipCost();
+    var raw = p.kind === "percent" ? goods * p.value / 100 : Math.min(p.value, goods);
+    return Math.round(Math.max(0, Math.min(goods, raw)) * 100) / 100;
+  }
+  /** The applied code once the basket is big enough for it — else null. */
+  function promoLive() {
+    var p = S.promoInfo;
+    if (!p) return null;
+    return !p.minSubtotal || cartSum() >= p.minSubtotal ? p : null;
+  }
   /* ---- features: gift card at checkout -----------------------------------
      A card pays for goods and delivery both, but never more than the order
      costs — the remainder stays on the card for the next one. Applied after
@@ -1840,11 +2831,147 @@
     }).join("") + "</span>";
   }
 
+  /* ---------- content: what the shop says about itself --------------------
+     Company details, opening hours, social links, the announcement strip, the
+     contact page and the extra line in every letter used to be eight separate
+     hard-coded places — two of them naming a different OÜ than the other six.
+     They are one object now, `DEMO.content`, mirrored to `settings.content`
+     and served back through /api/overrides/.
+
+     The defaults below are the site's own current copy, so an empty database
+     renders exactly what it rendered before. Empty means «как было»: a blank
+     ET/EN string falls back to Russian, a blank announcement to the built-in
+     free-shipping line, blank opening hours to no hours block at all.
+     src/lib/content.ts holds the same defaults for the server. */
+  var CONTENT_DEFAULT = {
+    company: {
+      legalName: "Rempire Store OÜ", regCode: "12216136", vatNumber: "EE102723858",
+      address: "Mardi 1, 10145 Tallinn", email: "info@rempireshop.com",
+      phone: "+372 5623 7237", iban: ""
+    },
+    // "" = не указано (раздел не показывается), "closed" = выходной
+    hours: { mon: "", tue: "", wed: "", thu: "", fri: "", sat: "", sun: "", note: { RU: "", ET: "", EN: "" } },
+    social: {
+      instagram: "https://www.instagram.com/rempire.shop/",
+      tiktok: "https://www.tiktok.com/@rempire.official",
+      facebook: "https://www.facebook.com/Rempire.Official.Tallinn",
+      youtube: "https://www.youtube.com/@rempire.official"
+    },
+    announcement: {
+      on: true,
+      text: {
+        RU: "Бесплатная доставка: Эстония от {EE} € · LV, LT от {LV} € · Финляндия от {FI} €",
+        ET: "Tasuta tarne: Eesti alates {EE} € · LV, LT alates {LV} € · Soome alates {FI} €",
+        EN: "Free delivery: Estonia from {EE} € · LV, LT from {LV} € · Finland from {FI} €"
+      },
+      short: {
+        RU: "Бесплатная доставка по Эстонии от {EE} €",
+        ET: "Tasuta tarne Eestis alates {EE} €",
+        EN: "Free delivery in Estonia from {EE} €"
+      },
+      link: ""
+    },
+    contactPage: {
+      RU: "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.",
+      ET: "Kirjutage või helistage — vastame tööpäeva jooksul. Tellimuste, tagastuste ja tooteküsimuste puhul on e-kiri kõige kiirem.",
+      EN: "Write or call — we answer within the working day. For orders, returns and product questions e-mail is the fastest way to reach us."
+    },
+    emailFooter: { RU: "", ET: "", EN: "" },
+    legal: {}
+  };
+  var CONTENT_DAYS = [
+    ["mon", "Понедельник"], ["tue", "Вторник"], ["wed", "Среда"], ["thu", "Четверг"],
+    ["fri", "Пятница"], ["sat", "Суббота"], ["sun", "Воскресенье"]
+  ];
+  var CONTENT_SOCIALS = [
+    ["instagram", "Instagram"], ["facebook", "Facebook"],
+    ["tiktok", "TikTok"], ["youtube", "YouTube"]
+  ];
+  function triCopy(t) {
+    var v = t && typeof t === "object" ? t : {};
+    return { RU: String(v.RU || ""), ET: String(v.ET || ""), EN: String(v.EN || "") };
+  }
+  /* The stored object may be older than this build (or hand-edited), so every
+     field is taken one by one and anything missing falls back to the default —
+     the same shape always comes out. */
+  function contentConf() {
+    var s = DEMO.content && typeof DEMO.content === "object" ? DEMO.content : {};
+    var d = CONTENT_DEFAULT, out = {};
+    var co = s.company && typeof s.company === "object" ? s.company : {};
+    out.company = {};
+    Object.keys(d.company).forEach(function (k) {
+      out.company[k] = typeof co[k] === "string" && co[k] ? co[k] : (co[k] === "" ? "" : d.company[k]);
+    });
+    var ho = s.hours && typeof s.hours === "object" ? s.hours : {};
+    out.hours = { note: triCopy(ho.note || d.hours.note) };
+    CONTENT_DAYS.forEach(function (row) {
+      out.hours[row[0]] = typeof ho[row[0]] === "string" ? ho[row[0]] : d.hours[row[0]];
+    });
+    var so = s.social && typeof s.social === "object" ? s.social : {};
+    out.social = {};
+    CONTENT_SOCIALS.forEach(function (row) {
+      out.social[row[0]] = typeof so[row[0]] === "string" ? so[row[0]] : d.social[row[0]];
+    });
+    var an = s.announcement && typeof s.announcement === "object" ? s.announcement : {};
+    out.announcement = {
+      on: an.on !== false,
+      text: triCopy(an.text || d.announcement.text),
+      short: triCopy(an.short || d.announcement.short),
+      link: typeof an.link === "string" ? an.link : d.announcement.link
+    };
+    out.contactPage = triCopy(s.contactPage || d.contactPage);
+    out.emailFooter = triCopy(s.emailFooter || d.emailFooter);
+    out.legal = s.legal && typeof s.legal === "object" ? s.legal : {};
+    return out;
+  }
+  /** One trilingual field in the language on screen; empty → Russian. */
+  function cText(t) {
+    var v = t && typeof t === "object" ? t : {};
+    return String(v[S.lang] || v.RU || "");
+  }
+  /* {EE} {LV} {FI} {EU} in the announcement become the live free-shipping
+     thresholds, so the default strip keeps telling the truth after the
+     shipping rules change. */
+  function cTokens(s) {
+    return String(s || "").replace(/\{(EE|LV|LT|FI|EU)\}/g, function (whole, code) {
+      return THRESH[code] != null ? String(THRESH[code]) : whole;
+    });
+  }
+  /* {{legalName}} & co in the legal texts (public/shop/legal*.js) — the pages
+     carry placeholders instead of a frozen company identity. */
+  var CONTENT_PH = ["legalName", "regCode", "vatNumber", "address", "email", "phone", "iban"];
+  function cResolve(html) {
+    if (!html || String(html).indexOf("{{") < 0) return html;
+    var co = contentConf().company;
+    return String(html).replace(/\{\{([a-zA-Z]{1,20})\}\}/g, function (whole, key) {
+      return CONTENT_PH.indexOf(key) >= 0 ? esc(co[key] || "") : whole;
+    });
+  }
+  /* The black strip above the header. Its contents are rebuilt by
+     patchHeader() — the header slot itself is never re-rendered, and the strip
+     has to follow both the language switcher and an edit in the panel. */
+  function announceBody() {
+    var a = contentConf().announcement;
+    if (a.on === false) return "";
+    var full = cTokens(cText(a.text)).trim();
+    var short = cTokens(cText(a.short)).trim();
+    // every language blank → the built-in line, thresholds and all
+    if (!full) full = cTokens(cText(CONTENT_DEFAULT.announcement.text));
+    if (!short) short = full;
+    var body = short === full
+      ? esc(full)
+      : '<span class="wide-only">' + esc(full) + '</span><span class="narrow-only">' + esc(short) + "</span>";
+    return a.link ? '<a href="' + esc(a.link) + '">' + body + "</a>" : body;
+  }
+  function announceHTML() {
+    var body = announceBody();
+    return '<div class="hdr__announce" data-announce' + (body ? "" : " hidden") + ">" + body + "</div>";
+  }
+
   // ---------- header (persistent) ----------
   function headerHTML() {
     return '<header class="hdr">' +
-      '<div class="hdr__announce"><span class="wide-only">Бесплатная доставка: Эстония от ' + THRESH.EE + " € · LV, LT от " + THRESH.LV + " € · Финляндия от " + THRESH.FI + " €</span>" +
-        '<span class="narrow-only">Бесплатная доставка по Эстонии от ' + THRESH.EE + " €</span></div>" +
+      announceHTML() +
       '<div class="hdr__row">' +
         '<button class="hdr__logo" data-go="home" data-ident title="На главную" aria-label="REMPIRE — на главную">' +
           towerDraw("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
@@ -1871,6 +2998,15 @@
   function patchHeader() {
     var h = hdrSlot;
     if (!h.firstChild) return;
+    /* content: the announcement strip is owner-written text, so the dictionary
+       pass at the end of this function cannot translate it — it is rebuilt in
+       the current language instead. */
+    var ann = h.querySelector("[data-announce]");
+    if (ann) {
+      var annBody = announceBody();
+      ann.innerHTML = annBody;
+      ann.hidden = !annBody;
+    }
     var badge = h.querySelector("[data-cartbadge]");
     badge.outerHTML = cartCount()
       ? '<span class="badge num" data-cartbadge>' + cartCount() + "</span>"
@@ -1937,23 +3073,87 @@
   function ftrSec(title, body) {
     return '<details class="ftr__acc"><summary>' + title + "</summary><div>" + body + "</div></details>";
   }
+  /* content: the four blocks below all read contentConf(). Everything the
+     owner can empty is treated as «не показывать» rather than as an empty
+     line — a footer with «Телефон: » in it is worse than one without. */
+  function cPhoneHTML(cls) {
+    var p = contentConf().company.phone;
+    if (!p) return "";
+    return '<a' + (cls ? ' class="' + cls + '"' : "") +
+      ' href="tel:' + esc(p.replace(/[^\d+]/g, "")) + '">' + esc(p) + "</a>";
+  }
+  function cMailHTML(cls) {
+    var m = contentConf().company.email;
+    if (!m) return "";
+    return '<a' + (cls ? ' class="' + cls + '"' : "") +
+      ' href="mailto:' + esc(m) + '">' + esc(m) + "</a>";
+  }
+  /* The checkout's «Вопросы — …» line. The phone and the e-mail come from
+     Настройки → Контент, never from the markup — the hard-coded pair here was
+     a Gmail nobody reads and a number without a country code. One text node,
+     so the two UI_RX rules can translate the label around them. */
+  function cQuestionsLine() {
+    var c = contentConf().company;
+    var both = [c.phone, c.email].filter(Boolean);
+    if (!both.length) return "";
+    if (both.length > 1) return "Вопросы — " + esc(both[0]) + " или " + esc(both[1]);
+    return "Вопросы — " + esc(both[0]);
+  }
+  function cCompanyHTML() {
+    var c = contentConf().company;
+    // «Рег.» in its own node so the dictionary can reach it — the number next
+    // to it is data and must not go through the translator
+    var codes = [];
+    if (c.regCode) codes.push("<span>Рег.</span> " + esc(c.regCode));
+    if (c.vatNumber) codes.push("KMKR " + esc(c.vatNumber));
+    return [esc(c.legalName), codes.join(" · "), esc(c.address),
+      c.iban ? "IBAN " + esc(c.iban) : ""].filter(Boolean).join("<br>");
+  }
+  /** Rows only for the days the owner filled in; nothing at all when none. */
+  function cHoursRows() {
+    var h = contentConf().hours, rows = [];
+    CONTENT_DAYS.forEach(function (d) {
+      var v = h[d[0]];
+      if (!v) return;
+      /* The weekday and «выходной» are wrapped so each is its own text node —
+         the dictionary matches whole nodes, and «Понедельник — 10:00–19:00»
+         as one string would stay Russian on /et/ and /en/. */
+      rows.push("<span>" + esc(d[1]) + "</span> — " +
+        (v === "closed" ? "<span>выходной</span>" : esc(v)));
+    });
+    if (!rows.length) return "";
+    var note = cText(h.note);
+    return rows.join("<br>") + (note ? '<br><span class="ftr__pay">' + esc(note) + "</span>" : "");
+  }
+  function cSocialsHTML(cls) {
+    var s = contentConf().social;
+    var out = CONTENT_SOCIALS.map(function (row) {
+      var url = s[row[0]];
+      if (!url) return "";
+      return '<a class="social" href="' + esc(url) + '" aria-label="Rempire в ' + esc(row[1]) +
+        '" title="' + esc(row[1]) + '" rel="noopener">' + icon(row[0]) + "</a>";
+    }).join("");
+    return out ? '<span class="socials ' + cls + '">' + out + "</span>" : "";
+  }
   function footer() {
+    var hours = cHoursRows();
+    var addr = contentConf().company.address;
     return '<footer class="ftr"><div class="wrap">' +
       '<div class="ftr__accs">' +
       ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE + " € · 230 пакоматов в 4 странах") +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
-      ftrSec("Самовывоз", "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.") +
-      ftrSec("Реквизиты", "Rempire Store OÜ<br>Рег. 12216136 · KMKR EE102723858<br>Mardi 1, 10145 Таллинн") +
-      ftrSec("Связаться", '<a href="tel:+37256237237">56237237</a> · <a href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a>') +
+      /* content: the address is data now, so the sentence after it lives in its
+         own element — the dictionary matches whole text nodes, and gluing an
+         editable address onto a translatable sentence made both untranslatable. */
+      ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.</span>") +
+      (hours ? ftrSec("Часы работы", hours) : "") +
+      ftrSec("Реквизиты", cCompanyHTML()) +
+      ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
       ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
       ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
-      '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 Rempire Store OÜ</span>" +
-        '<span class="socials socials--bottom">' +
-          '<a class="social" href="https://www.instagram.com/rempire.shop/" aria-label="Rempire в Instagram" title="Instagram">' + icon("instagram") + "</a>" +
-          '<a class="social" href="https://www.facebook.com/Rempire.Official.Tallinn" aria-label="Rempire в Facebook" title="Facebook">' + icon("facebook") + "</a>" +
-          '<a class="social" href="https://www.tiktok.com/@rempire.official" aria-label="Rempire в TikTok" title="TikTok">' + icon("tiktok") + "</a>" +
-        "</span>" +
+      '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 " + esc(contentConf().company.legalName) + "</span>" +
+        cSocialsHTML("socials--bottom") +
         '<button class="link ftr__admin" data-go="admin">Админка — демо</button></div>' +
     "</div></footer>";
   }
@@ -2026,19 +3226,54 @@
   function legalFor(slug) {
     if (S.lang === "RU" && typeof LEGAL_RU !== "undefined" && LEGAL_RU[slug]) return LEGAL_RU[slug];
     if (S.lang === "ET" && typeof LEGAL_ET !== "undefined" && LEGAL_ET[slug]) return LEGAL_ET[slug];
+    if (S.lang === "EN" && typeof LEGAL_EN !== "undefined" && LEGAL_EN[slug]) return LEGAL_EN[slug];
     return typeof LEGAL !== "undefined" ? LEGAL[slug] : null;
   }
 
-  /* The old shop's own policy texts, served as real pages — placeholders
-     until the lawyer pass, but real placeholders. */
-  function screenInfo() {
-    var pg = legalFor(S.infoSlug);
-    if (!pg) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><button class="link" data-go="home">На главную</button></p></section></div>'; }
+  /* content: «Контакты» is not a policy page — it is the shop's own details,
+     and it is now built from them instead of from the 2019 Shopify page that
+     still named another company, another address and a Gmail nobody reads. */
+  function screenContact() {
+    var c = contentConf(), hours = cHoursRows();
+    var intro = cText(c.contactPage);
+    var rows = [
+      ["Телефон", cPhoneHTML()],
+      ["Эл. почта", cMailHTML()],
+      ["Адрес", esc(c.company.address)],
+      ["Реквизиты", cCompanyHTML()]
+    ].filter(function (r) { return r[1]; });
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(pg.title) + "</div>" +
-      '<section class="sec"><h1 class="display h1">' + esc(pg.title) + "</h1>" +
-      '<div class="legal">' + pg.html + "</div>" +
-      '<p class="note" style="margin-top:22px">Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.</p>' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / Контакты</div>' +
+      '<section class="sec"><h1 class="display h1">Контакты</h1>' +
+      (intro ? '<p class="sec__intro">' + esc(intro) + "</p>" : "") +
+      '<div class="legal">' + rows.map(function (r) {
+        return "<p><b>" + r[0] + "</b><br>" + r[1] + "</p>";
+      }).join("") +
+      (hours ? "<p><b>Часы работы</b><br>" + hours + "</p>" : "") + "</div>" +
+      cSocialsHTML("socials--contact") +
+      "</section></div>";
+  }
+
+  /* The old shop's own policy texts, served as real pages — placeholders
+     until the lawyer pass, but real placeholders. The company identity inside
+     them is NOT frozen: the texts carry {{legalName}} / {{regCode}} /
+     {{address}}, filled in from «Настройки → Контент» by cResolve(). An owner
+     override in content.legal[slug] replaces the page's body outright. */
+  function screenInfo() {
+    if (S.infoSlug === "contact") return screenContact();
+    var pg = legalFor(S.infoSlug);
+    var own = (contentConf().legal || {})[S.infoSlug];
+    var ownText = own ? cText(own) : "";
+    if (!pg && !ownText) { return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1><p><button class="link" data-go="home">На главную</button></p></section></div>'; }
+    var title = pg ? pg.title : "Информация";
+    var body = ownText
+      ? esc(ownText).replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>")
+      : cResolve(pg.html);
+    return '<div class="wrap wrap--mid">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(title) + "</div>" +
+      '<section class="sec"><h1 class="display h1">' + esc(title) + "</h1>" +
+      '<div class="legal">' + (ownText ? "<p>" + body + "</p>" : body) + "</div>" +
+      (ownText ? "" : '<p class="note" style="margin-top:22px">Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.</p>') +
       "</section></div>";
   }
 
@@ -2174,8 +3409,14 @@
           // must agree, or a shopper "pays" for an item the shop cannot ship
           (p.stock === "out"
             ? '<div class="pdp__oos"><p>Товара сейчас нет. Оставьте почту — напишем, когда появится.</p>' +
-              '<div class="pdp__oosrow"><input class="input input--box" type="email" inputmode="email" autocomplete="email" aria-label="E-mail для уведомления" placeholder="you@example.com">' +
-              '<button class="btn btn--ghost" data-notify>Сообщить</button></div></div>'
+              /* account-flows: the button used to be a toast with nothing
+                 behind it (audit top-15 #12). It now opens a one-field form
+                 that POSTs to /api/stock-alerts, and the letter goes out when
+                 the owner puts the product back in stock. */
+              (S.notifyOpen === p.id
+                ? '<div class="pdp__oosrow"><input class="input input--box" type="email" inputmode="email" autocomplete="email" data-notifyf aria-label="E-mail для уведомления" placeholder="you@example.com" value="' + esc(S.notifyEmail) + '">' +
+                  '<button class="btn btn--ghost" data-notifysend="' + p.id + '"' + (S.notifyBusy ? " disabled" : "") + ">" + (S.notifyBusy ? "Отправляем…" : "Сообщить") + "</button></div></div>"
+                : '<button class="btn btn--ghost" data-notify="' + p.id + '">Сообщить о наличии</button></div>')
             : '<div class="pdp__buy">' +
                 '<span class="stepper"><button data-qty="-1" aria-label="Меньше">−</button><span class="num" data-qtynum>' + S.qty + '</span><button data-qty="1" aria-label="Больше">+</button></span>' +
                 '<button class="btn pdp__add" data-add="' + p.id + '">В корзину</button>' +
@@ -2202,17 +3443,17 @@
               acc("Применение", "Нанести на влажные волосы, вспенить, оставить на 2–5 минут, тщательно смыть.") +
               acc("Состав (INCI)", '<span class="muted">Полный состав будет заполнен при переносе каталога.</span>') +
               acc("Доставка и возврат", "14 дней на возврат по закону ЕС. Вскрытая косметика возврату не подлежит по гигиеническим причинам.")) +
-          /* features: approved reviews from the database come first and carry
-             a badge; the demo pool keeps its place underneath, and the form
-             sits at the bottom of the same accordion. */
+          /* Only real reviews. The deterministic demo pool that used to render
+             here (public/shop/reviews-pool.js) was invented text on a selling
+             page — an EU Omnibus / consumer-protection problem, not a cosmetic
+             one — and the small «Демо-отзывы» note did not fix it. A product
+             with nothing yet says so and offers the form. */
           (function () {
-            var db = dbReviewsFor(p), rv = reviewsFor(p);
-            var n = db.length + rv.length;
-            var body = (db.length ? dbReviewsHTML(db) : "") +
-              (rv.length ? reviewsHTML(rv) : "") + reviewFormHTML(p);
+            var db = dbReviewsFor(p);
+            var body = (db.length ? dbReviewsHTML(db) : emptyReviewsHTML()) + reviewFormHTML(p);
             // «Отзывы (0)» on every young product reads as a verdict; with
             // nothing to show yet the heading is just the invitation
-            return acc(n ? "Отзывы (" + n + ")" : "Отзывы", body);
+            return acc(db.length ? "Отзывы (" + db.length + ")" : "Отзывы", body);
           })() +
         "</div>" +
       "</div>" +
@@ -2274,40 +3515,17 @@
       return t.length > 2 && !/^(the|and|for|with|мл|ml)$/i.test(t);
     }).map(function (t) { return t.toUpperCase(); });
   }
-  /* Demo reviews: deterministic slice of the category pool, so a product
-     always shows the same reviews and roughly a third show none (honest —
-     a young shop does not have reviews under everything). */
-  function hashStr(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
-  function reviewsFor(p) {
-    if (typeof REVIEWS_POOL === "undefined") return [];
-    // trilingual pool ({RU:{cat:[...]}}), with fallback for the flat shape
-    var byLang = REVIEWS_POOL[S.lang] || REVIEWS_POOL.RU || REVIEWS_POOL;
-    var pool = byLang[p.cat] || REVIEWS_POOL[p.cat] || [];
-    if (!pool.length) return [];
-    var h = hashStr(p.id);
-    var n = [0, 2, 3, 2, 0, 3, 2][h % 7];
-    var out = [];
-    for (var i = 0; i < n; i++) out.push(pool[(h + i * 3) % pool.length]);
-    return out;
-  }
-  function reviewsHTML(list) {
-    var avg = 0; list.forEach(function (r) { avg += r.r; });
-    avg = Math.round(avg / list.length * 10) / 10;
-    return '<div class="revs"><div class="revs__avg">★ ' + num1(avg) + " из 5</div>" +
-      list.map(function (r) {
-        return '<div class="rev"><div class="rev__head"><b>' + esc(r.n) + "</b>" +
-          '<span class="rev__stars" aria-label="' + r.r + ' из 5">' + "★★★★★".slice(0, r.r) + "</span>" +
-          '<span class="muted">' + esc(r.d) + "</span></div>" +
-          '<p class="rev__t">' + esc(r.t) + "</p></div>";
-      }).join("") +
-      '<p class="muted" style="font-size:12px">Демо-отзывы. Настоящие появятся после запуска — письмом «оцените заказ» через 10 дней.</p></div>';
+  /* The invented-review pool that used to live here is gone from the product
+     page. public/shop/reviews-pool.js stays in the repository — it is still
+     the sample data behind the review layout — but nothing in the shop reads
+     it, and nothing on a selling page is fabricated any more. */
+  function emptyReviewsHTML() {
+    return '<p class="muted revs__none">Отзывов пока нет — станьте первым.</p>';
   }
 
   /* ---------- features: real reviews from the database ---------------------
-     The demo pool above stays where it is — a young shop with nothing under
-     any product looks abandoned. Rows that real customers wrote and Renat
-     approved are rendered ABOVE it, each with a «Проверенный отзыв» badge, so
-     the two can never be mistaken for one another.
+     The only reviews the shop shows. Rows that real customers wrote and Renat
+     approved, each with a «Проверенный отзыв» badge.
      Read:  GET  /api/reviews/?product=<id>
      Write: POST /api/reviews/  → status «pending» until approved. */
   function loadReviews(id) {
@@ -2457,7 +3675,10 @@
       .then(function (j) {
         if (j && j.ok) {
           S.giftCard = { code: j.code, balance: j.balance };
-          S.giftErr = ""; S.promo = ""; S.promoErr = false;
+          // one order carries one code (orders.discount_code) — see
+          // orderPayload(). A card replaces a promo rather than stacking on it,
+          // so the summary can never show a discount the server will not bill.
+          S.giftErr = ""; S.promo = ""; S.promoErr = ""; S.promoInfo = null;
         } else {
           S.giftCard = null;
           var er = (j && j.error) || "";
@@ -2473,6 +3694,74 @@
         S.giftErr = "Сейчас не получилось проверить карту. Попробуйте позже.";
         render();
       });
+  }
+
+  /* ---------- checkout: promo codes -------------------------------------
+     Every code lives in the database (promo_codes) and is priced by the
+     server. The browser only asks POST /api/promos/check what the code is
+     worth and remembers the RULE — so a code cannot be read out of app.js any
+     more, and two shoppers with the same basket always see the same total.
+     The use is counted when the payment is confirmed, never at checkout. */
+  var PROMO_ERRS = {
+    bad_code: "Такого кода не бывает — проверьте написание.",
+    not_found: "Код не найден — проверьте написание.",
+    inactive: "Этот код больше не действует.",
+    not_started: "Код ещё не начал действовать.",
+    expired: "Срок действия кода вышел.",
+    used_up: "Код уже использован полностью.",
+    rate_limited: "Слишком много попыток — подождите минуту.",
+    offline: "Промокоды проверяет сервер — в демонстрации код не применяется.",
+    unavailable: "Сейчас не получилось проверить код. Попробуйте позже."
+  };
+  function promoErrText() {
+    if (S.promoErr === "min_subtotal") {
+      return "Код действует от " + eur(S.promoMin) + " — добавьте ещё на " + eur(Math.max(0, S.promoMin - cartSum())) + ".";
+    }
+    return PROMO_ERRS[S.promoErr] || PROMO_ERRS.unavailable;
+  }
+  function promoLabel(p) {
+    if (p.kind === "free_shipping") return p.code + " — бесплатная доставка";
+    if (p.kind === "fixed") return p.code + " — скидка " + eur(p.value);
+    return p.code + " — скидка " + p.value + "%";
+  }
+  function promoRowHTML() {
+    var p = promoLive();
+    if (!p) return "";
+    var d = discount();
+    // a free-shipping code on a basket that already ships free is honest about
+    // taking nothing off, rather than quietly showing «−0 €»
+    return '<div class="cosum__row"><span>' + esc(promoLabel(p)) +
+      ' <button class="link" data-promooff>убрать</button></span>' +
+      '<span class="num">' + (d > 0 ? "−" + eur(d) : "—") + "</span></div>";
+  }
+  function applyPromoCode() {
+    var code = S.promo.trim();
+    if (!code) { S.promoInfo = null; S.promoErr = ""; render(); refocus("[data-applypromo]"); return; }
+    if (S.promoBusy) return;
+    S.promoBusy = true; S.promoErr = ""; render();
+    postJSON("/api/promos/check/", {
+      code: code,
+      subtotal: Math.round(cartSum() * 100) / 100,
+      shipping: shipCost()
+    }).then(function (res) {
+      S.promoBusy = false;
+      if (res.offline) { apiSeen(false); S.promoInfo = null; S.promoErr = "offline"; render(); refocus("[data-applypromo]"); return; }
+      apiSeen(true);
+      var j = res.body || {};
+      if (j.ok) {
+        S.promoInfo = { code: j.code, kind: j.kind, value: Number(j.value) || 0, minSubtotal: Number(j.minSubtotal) || 0 };
+        S.promoErr = ""; S.promoMin = 0;
+        // one order, one code — the mirror of applyGiftCode() above
+        S.giftErr = ""; S.giftCard = null;
+      } else {
+        S.promoInfo = null;
+        S.promoErr = j.error || "unavailable";
+        S.promoMin = Number(j.minSubtotal) || 0;
+      }
+      render(); refocus("[data-applypromo]");
+    }).catch(function () {
+      S.promoBusy = false; S.promoInfo = null; S.promoErr = "unavailable"; render();
+    });
   }
 
   /* ---------- features: review moderation in the admin ------------------- */
@@ -2601,28 +3890,96 @@
           : '<div class="empty"><p>По запросу «' + esc(S.query) + '» ничего не нашлось.</p>' +
             '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
             '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
-            '<p class="muted">Напишите нам — поможем подобрать замену: <a class="link" href="tel:+37256237237">56237237</a> · <a class="link" href="mailto:rempireshopinfo@gmail.com">rempireshopinfo@gmail.com</a></p></div>') +
+            // content: the contact line follows «Настройки → Контент» like the
+            // footer does — this was the last place still printing the Gmail
+            '<p class="muted">Напишите нам — поможем подобрать замену: ' +
+              [cPhoneHTML("link"), cMailHTML("link")].filter(Boolean).join(" · ") + "</p></div>") +
       "</section></div>";
   }
 
+  /* ---------- account: real, passwordless (account-flows) -------------------
+     An address, a six-digit code by e-mail, a signed cookie the server sets.
+     Everything on the signed-in screen comes from /api/account/me — the
+     hard-coded order #1042 and the invented REMPIRE10 promo are gone (audit
+     top-15 #8). With no API behind the page the screen says so instead of
+     pretending to sign anybody in. */
+  var ACCT_ORDER_STATE = {
+    "new": ["принят", "chip--low"],
+    paid: ["оплачен", "chip--ok"],
+    shipped: ["отправлен", "chip--ok"],
+    failed: ["не оплачен", "chip--out"],
+    cancelled: ["отменён", "chip--out"],
+    refunded: ["возврат", "chip--low"]
+  };
+  var ACCT_ERRS = {
+    bad_email: "Проверьте e-mail",
+    rate_limited: "Слишком много попыток — подождите немного",
+    bad_code: "Код не подошёл — проверьте цифры",
+    no_code: "Код не найден — запросите новый",
+    expired: "Код истёк — запросите новый",
+    too_many: "Слишком много попыток — запросите новый код",
+    db_unavailable: "Магазин временно недоступен — попробуйте позже",
+    offline: "Кабинет заработает, когда магазин подключат к серверу"
+  };
+  function acctErrText() { return ACCT_ERRS[S.acctErr] || "Не получилось — попробуйте ещё раз"; }
+  function shortDate(iso) {
+    var d = new Date(iso || "");
+    if (isNaN(d.getTime())) return "";
+    function p(n) { return n < 10 ? "0" + n : String(n); }
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear();
+  }
+  function acctOrderRow(o) {
+    var st = ACCT_ORDER_STATE[o.status] || ["принят", "chip--low"];
+    var track = o.trackingUrl
+      ? ' <a class="link rowcard__act" href="' + esc(o.trackingUrl) + '" target="_blank" rel="noopener">Отследить</a>'
+      : o.tracking ? ' <span class="muted num">' + esc(o.tracking) + "</span>" : "";
+    var what = (o.items || []).map(function (i) { return i.title + (i.qty > 1 ? " ×" + i.qty : ""); }).join(", ");
+    return '<div class="rowcard"><span class="num rowcard__id">' + esc(o.number) + "</span>" +
+      '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
+      '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + track +
+      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + "</div>";
+  }
   function screenAccount() {
+    acctLoad();
     if (!S.loggedIn) {
+      var stage = S.acctStage === "code" ? "code" : "email";
       return '<div class="wrap wrap--narrow"><section class="sec">' +
         '<h1 class="display h1">Кабинет</h1>' +
-        '<p class="muted" style="margin-bottom:20px">Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.</p>' +
-        '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" autocomplete="email" inputmode="email" data-email placeholder="you@example.com" value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '"></label>' +
-        (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : "") +
-        '<button class="btn btn--wide" data-login>Получить код</button>' +
+        (stage === "email"
+          ? '<p class="muted" style="margin-bottom:20px">Вход без пароля — пришлём код на почту. Покупать можно и без аккаунта.</p>' +
+            '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" autocomplete="email" inputmode="email" data-email placeholder="you@example.com" value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '"></label>' +
+            (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : "") +
+            (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
+            '<button class="btn btn--wide" data-login' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctBusy ? "Отправляем…" : "Получить код") + "</button>"
+          /* The address is its own node: translateTree() rewrites whole text
+             nodes, and a sentence with an e-mail baked into it can never
+             match a dictionary key. */
+          : '<p class="muted" style="margin-bottom:6px">Код отправлен на почту — шесть цифр, годен 15 минут.</p>' +
+            '<p class="num" style="margin-bottom:20px">' + esc(S.email) + "</p>" +
+            '<label class="field"><span class="field__label">Код из письма</span><input class="input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-acctcode placeholder="123456" value="' + esc(S.acctCode) + '"></label>' +
+            (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
+            '<button class="btn btn--wide" data-logincode' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctBusy ? "Проверяем…" : "Войти") + "</button>" +
+            '<p style="margin-top:14px"><button class="link" data-loginback>Другой e-mail</button></p>') +
         "</section></div>";
     }
     var m = methods(), ai = acctIdx();
+    var f = S.acctForm;
     return '<div class="wrap wrap--mid"><section class="sec">' +
       '<div class="acct__top"><h1 class="display h1">Кабинет</h1><button class="link" data-logout>Выйти</button></div>' +
 
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои заказы</h2></div>' +
+      (S.acctOrders.length
+        ? S.acctOrders.map(acctOrderRow).join("")
+        : '<p class="muted">Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.</p>') +
+
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои данные</h2></div>' +
-      '<label class="field"><span class="field__label">Имя</span><input class="input" data-acctname value="' + esc(S.acctName) + '" placeholder="Имя" autocomplete="given-name"></label>' +
-      '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" data-email value="' + esc(S.email) + '" autocomplete="email"></label>' +
-      '<button class="btn btn--ghost btn--sm" data-save>Сохранить</button>' +
+      '<label class="field"><span class="field__label">Имя</span><input class="input" data-acctf="name" value="' + esc(f.name) + '" placeholder="Имя" autocomplete="given-name"></label>' +
+      '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" value="' + esc(S.cust ? S.cust.email : S.email) + '" autocomplete="email" readonly aria-readonly="true"></label>' +
+      '<label class="field"><span class="field__label">Телефон</span><input class="input" type="tel" data-acctf="phone" value="' + esc(f.phone) + '" placeholder="+372…" autocomplete="tel"></label>' +
+      '<label class="field"><span class="field__label">День рождения — пришлём скидку</span><input class="input" type="date" data-acctf="birthday" value="' + esc(f.birthday) + '"></label>' +
+      '<label class="opt opt--plain"><input type="checkbox" data-acctmk' + (f.marketing ? " checked" : "") + '><span>Хочу получать новости, скидки и поздравление ко дню рождения</span></label>' +
+      (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
+      '<button class="btn btn--ghost btn--sm" data-save' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctSaved ? "Сохранено ✓" : "Сохранить") + "</button>" +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
@@ -2638,16 +3995,214 @@
           machinesFor(m[ai]).map(function (n, i) { return "<option" + (i === Math.min(S.acctMachine, machinesFor(m[ai]).length - 1) ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>"
         : "") +
 
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои заказы</h2></div>' +
-      '<div class="rowcard"><span class="num rowcard__id">#1042</span><span class="muted">12.08.2026 · 54 €</span>' +
-        '<span class="chip chip--ok">доставлен</span>' +
-        '<button class="link rowcard__act" data-repeat>Повторить заказ</button></div>' +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои промокоды</h2></div>' +
-      '<div class="rowcard"><span class="display rowcard__code">REMPIRE10</span>' +
-        '<span class="muted">−10% ко дню рождения · до 30.09</span>' +
-        '<span class="chip chip--ok rowcard__act">активен</span></div>' +
       "</section></div>";
+  }
+
+  /* ---------- account: the five calls ------------------------------------
+     Every one of them treats "no server behind this page" as a state to show,
+     not an error to swallow: the prototype is also hosted statically, and a
+     sign-in button that silently does nothing is what the audit found here. */
+  function acctApply(j) {
+    if (!j || !j.ok) return false;
+    S.cust = j.customer || null;
+    S.acctOrders = Array.isArray(j.orders) ? j.orders : S.acctOrders;
+    S.loggedIn = !!S.cust;
+    if (S.cust) {
+      S.acctForm = {
+        name: S.cust.name || "",
+        phone: S.cust.phone || "",
+        birthday: S.cust.birthday || "",
+        marketing: !!S.cust.marketing
+      };
+      S.email = S.cust.email || S.email;
+      /* Checkout pre-fill: only into empty fields, so a shopper who is part
+         way through typing another address is never overwritten. */
+      if (!S.ship.name && S.cust.name) S.ship.name = S.cust.name;
+      if (!S.ship.phone && S.cust.phone) S.ship.phone = S.cust.phone;
+    }
+    return true;
+  }
+  function acctForget() {
+    S.cust = null; S.loggedIn = false; S.acctOrders = []; S.acctStage = "email";
+    S.acctCode = ""; S.acctSaved = false;
+    S.acctForm = { name: "", phone: "", birthday: "", marketing: false };
+  }
+  /**
+   * Is there a customer cookie? A 401 is the normal answer, not a fault.
+   *
+   * Asked once, and only from the two screens that care — the account and the
+   * checkout. The cookie is httpOnly, so the page cannot know without asking;
+   * asking on every visit would spend a server call on every anonymous
+   * shopper for nothing.
+   */
+  var acctAsked = false;
+  function acctLoad() {
+    if (acctAsked) return;
+    acctAsked = true;
+    fetch("/api/account/me/", { headers: { accept: "application/json" } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.ok) return;
+        apiSeen(true);
+        if (acctApply(j)) render();
+      })
+      .catch(noop);
+  }
+  function acctSendCode() {
+    S.emailTouched = true;
+    if (emailBad()) { S.acctErr = ""; render(); toast("Введите e-mail — на него придёт код"); return; }
+    if (S.acctBusy) return;
+    S.acctBusy = true; S.acctErr = ""; render();
+    postJSON("/api/account/code/", { email: S.email.trim(), lang: S.lang }).then(function (res) {
+      S.acctBusy = false;
+      if (res.offline) { apiSeen(false); S.acctErr = "offline"; render(); return; }
+      apiSeen(true);
+      if (!res.body || !res.body.ok) { S.acctErr = (res.body && res.body.error) || "error"; render(); return; }
+      S.acctStage = "code"; S.acctCode = ""; S.acctErr = ""; render();
+      refocus("[data-acctcode]");
+      toast("Код отправлен — проверьте почту ✓");
+    }).catch(function () { S.acctBusy = false; S.acctErr = "error"; render(); });
+  }
+  function acctVerify() {
+    var code = String(S.acctCode || "").replace(/\D/g, "");
+    if (code.length !== 6) { S.acctErr = "bad_code"; render(); return; }
+    if (S.acctBusy) return;
+    S.acctBusy = true; S.acctErr = ""; render();
+    postJSON("/api/account/login/", { email: S.email.trim(), code: code, lang: S.lang }).then(function (res) {
+      S.acctBusy = false;
+      if (res.offline) { apiSeen(false); S.acctErr = "offline"; render(); return; }
+      apiSeen(true);
+      if (!res.body || !res.body.ok) {
+        S.acctErr = (res.body && res.body.error) || "error";
+        S.acctCode = ""; render(); refocus("[data-acctcode]"); return;
+      }
+      acctApply(res.body);
+      S.acctStage = "email"; S.acctCode = ""; S.acctErr = "";
+      render();
+      toast("Вы вошли ✓");
+      // the cart in front of them is now attached to a known address
+      pushCart(true);
+    }).catch(function () { S.acctBusy = false; S.acctErr = "error"; render(); });
+  }
+  function acctSave() {
+    if (S.acctBusy) return;
+    S.acctBusy = true; S.acctErr = ""; S.acctSaved = false; render();
+    fetch("/api/account/me/", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: S.acctForm.name,
+        phone: S.acctForm.phone,
+        birthday: S.acctForm.birthday,
+        marketing: !!S.acctForm.marketing,
+        lang: S.lang
+      })
+    }).then(function (r) { return r.json().then(function (j) { return { body: j, status: r.status }; }, function () { return {}; }); })
+      .then(function (res) {
+        S.acctBusy = false;
+        if (!res.body || !res.body.ok) {
+          if (res.status === 401) { acctForget(); render(); toast("Войдите ещё раз"); return; }
+          S.acctErr = (res.body && res.body.error) || "error"; render(); return;
+        }
+        S.cust = res.body.customer || S.cust;
+        S.acctSaved = true; render();
+        toast("Сохранено ✓");
+      })
+      .catch(function () { S.acctBusy = false; S.acctErr = "error"; render(); });
+  }
+  function acctLogout() {
+    acctForget(); render(); toast("Вы вышли ✓");
+    fetch("/api/account/logout/", { method: "POST" }).catch(noop);
+  }
+
+  /* ---------- the abandoned-cart snapshot ---------------------------------
+     Sent as ids and quantities only — the server rebuilds names and prices,
+     the same rule the order endpoint follows. Debounced, because the checkout
+     e-mail field fires this on every keystroke. */
+  var cartPush = { t: 0, last: "" };
+  function cartLines() {
+    return S.cart.filter(function (l) { return !l.type; })
+      .map(function (l) { return { id: l.id, size: l.size, qty: l.qty }; });
+  }
+  function cartEmail() {
+    if (S.cust && S.cust.email) return S.cust.email;
+    var e = String(S.email || "").trim();
+    return /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(e) ? e : "";
+  }
+  function pushCart(now) {
+    if (API.ok === false) return;
+    var email = cartEmail();
+    var lines = cartLines();
+    if (!email || !lines.length) return;
+    var key = email + "|" + S.lang + "|" + JSON.stringify(lines);
+    if (key === cartPush.last) return;
+    clearTimeout(cartPush.t);
+    cartPush.t = setTimeout(function () {
+      cartPush.last = key;
+      postJSON("/api/carts/", { email: email, lang: S.lang, items: lines }).then(function (res) {
+        if (res.offline) { apiSeen(false); cartPush.last = ""; }
+      }).catch(noop);
+    }, now ? 0 : 900);
+  }
+
+  /* ---------- «Сообщить о наличии» ---------------------------------------- */
+  function notifySend(productId) {
+    var e = String(S.notifyEmail || "").trim();
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(e)) { toast("Проверьте e-mail"); return; }
+    if (S.notifyBusy) return;
+    S.notifyBusy = true; render();
+    postJSON("/api/stock-alerts/", { email: e, productId: productId, lang: S.lang }).then(function (res) {
+      S.notifyBusy = false;
+      if (res.offline) { apiSeen(false); S.notifyOpen = ""; render(); toast("Записали — сообщим, когда появится ✓"); return; }
+      apiSeen(true);
+      if (!res.body || !res.body.ok) {
+        render();
+        toast(res.body && res.body.error === "rate_limited" ? "Слишком много попыток — подождите немного" : "Не получилось — попробуйте ещё раз");
+        return;
+      }
+      S.notifyOpen = ""; S.notifyEmail = ""; render();
+      toast("Записали — сообщим, когда появится ✓");
+    }).catch(function () { S.notifyBusy = false; render(); toast("Не получилось — попробуйте ещё раз"); });
+  }
+
+  /* ---------- ?resume=… from the abandoned-cart letter --------------------
+     The token is signed by the server, but nothing here trusts it: only
+     catalogue ids survive, quantity is capped at nine, and the lines are
+     merged into whatever is already in the basket. The worst a forged link
+     can do is put products in its own reader's cart. */
+  function resumeCart() {
+    var m = String(location.search || "").match(/[?&]resume=([^&]+)/);
+    if (!m) return;
+    var payload = null;
+    try {
+      var raw = decodeURIComponent(m[1]).split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+      var bin = atob(raw + "===".slice((raw.length + 3) % 4));
+      var bytes = new Uint8Array(bin.length);
+      for (var bi = 0; bi < bin.length; bi++) bytes[bi] = bin.charCodeAt(bi);
+      payload = JSON.parse(new TextDecoder().decode(bytes));
+    } catch (e) { payload = null; }
+    var list = payload && Array.isArray(payload.i) ? payload.i : null;
+    if (!list) return;
+    var added = 0;
+    list.slice(0, 50).forEach(function (l) {
+      var id = String(l && l.id || "");
+      var known = false;
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) { known = true; break; }
+      if (!known) return;
+      var size = Number(l.s) || 0;
+      var qty = Math.max(1, Math.min(9, Math.round(Number(l.q) || 1)));
+      var line = null;
+      S.cart.forEach(function (x) { if (x.id === id && x.size === size) line = x; });
+      if (line) line.qty = Math.min(9, Math.max(line.qty, qty));
+      else S.cart.push({ id: id, size: size, qty: qty });
+      added += 1;
+    });
+    if (!added) return;
+    persist();
+    // the token is spent — a reload must not re-add the same lines
+    try { history.replaceState(history.state || null, "", location.pathname); } catch (e) {}
+    render();
+    toast("Корзина восстановлена ✓");
   }
 
   // ---------- checkout ----------
@@ -2809,10 +4364,31 @@
     }
     return null;
   }
+  /* A gift line carries who the card is for. Dropping it here — which is what
+     this function used to do — mailed every card to the buyer and threw the
+     personal message away, while the server's giftMeta() reader sat waiting
+     for it. `from` is the buyer's own name off the checkout form, so the card
+     can say who sent it. */
+  function lineMeta(l) {
+    if (l.type !== "gift" || !l.meta) return undefined;
+    var m = {};
+    ["name", "email", "message"].forEach(function (k) {
+      var v = typeof l.meta[k] === "string" ? l.meta[k].trim() : "";
+      if (v) m[k] = v.slice(0, 300);
+    });
+    var from = (l.meta.from || S.ship.name || "").trim();
+    if (from) m.from = from.slice(0, 300);
+    return Object.keys(m).length ? m : undefined;
+  }
   function orderPayload() {
     return {
       lang: S.lang,
-      items: S.cart.map(function (l) { return { id: l.id, variant: lineVariant(l), qty: l.qty }; }),
+      items: S.cart.map(function (l) {
+        var line = { id: l.id, variant: lineVariant(l), qty: l.qty };
+        var meta = lineMeta(l);
+        if (meta) line.meta = meta;
+        return line;
+      }),
       customer: { name: S.ship.name, email: S.email, phone: S.ship.phone },
       shipping: {
         method: shipMethod(),
@@ -2824,7 +4400,13 @@
           ? { addr: S.ship.addr, zip: S.ship.zip, city: S.ship.city }
           : null
       },
-      discountCode: S.promoOk && S.promo ? S.promo : null
+      /* An order carries one code: `orders.discount_code`. A gift card wins
+         over a promo because it is money the customer has already paid for —
+         and the two are kept mutually exclusive when they are applied, so the
+         summary on screen and the total the server bills are always the same
+         arithmetic. The card's code used to be dropped here entirely: the
+         checkout showed the discount and the server charged full price. */
+      discountCode: S.giftCard ? S.giftCard.code : (promoLive() ? promoLive().code : null)
     };
   }
   /* Bank codes for Montonio's `preferredProvider`. ASSUMPTION: these are the
@@ -2864,7 +4446,7 @@
   }
   /** A finished order must leave nothing behind for the next one. */
   function clearOrderState() {
-    S.cart = []; S.promo = ""; S.promoOk = false; S.promoErr = false; S.sumOpen = null;
+    S.cart = []; S.promo = ""; S.promoInfo = null; S.promoErr = ""; S.promoMin = 0; S.promoBusy = false; S.sumOpen = null;
     S.giftCard = null; S.giftErr = "";   // features: a card applied here is spent
     S.ship = { name: "", addr: "", zip: "", city: "", phone: "", method: shipMethod(), carrier: S.ship.carrier, point: null };
     S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
@@ -2923,6 +4505,9 @@
     // here; both are one-shot and both fail quietly.
     loadShipRules();
     if (isParcel()) loadPoints();
+    // account-flows: a signed-in shopper should not retype their own name,
+    // address line and phone. One-shot, and silent when nobody is signed in.
+    acctLoad();
     // The summary follows the breakpoint until the shopper touches it; after
     // that their choice wins, so applying a promo can't slam it shut.
     var summaryOpen = S.sumOpen === null ? wide() : S.sumOpen;
@@ -2985,7 +4570,7 @@
           '<ul class="cotrust">' +
             "<li>Оплата через банк — данные карты магазин не видит</li>" +
             "<li>14 дней на возврат по закону ЕС</li>" +
-            "<li>Вопросы — 56237237 или rempireshopinfo@gmail.com</li>" +
+            (cQuestionsLine() ? "<li>" + cQuestionsLine() + "</li>" : "") +
           "</ul>" +
         "</div>" +
 
@@ -3001,9 +4586,10 @@
                 lineNoteHTML(l) + "</span>" +
               '<span class="num cosum__pr">' + eur(lineUnit(l) * l.qty) + "</span></div>";
           }).join("") : '<p class="muted">Корзина пуста.</p>') +
-          '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод или подарочная карта" placeholder="Промокод или подарочная карта" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo>Применить</button></div>' +
-          (S.promoErr ? '<div class="err" role="alert">Код не найден — проверьте написание.</div>' : "") +
-          (S.promoOk ? '<div class="cosum__row"><span>REMPIRE10 — скидка 10%</span><span class="num">−' + eur(discount()) + "</span></div>" : "") +
+          '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод или подарочная карта" placeholder="Промокод или подарочная карта" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo' + (S.promoBusy ? " disabled" : "") + ">" +
+            (S.promoBusy ? "Проверяем…" : "Применить") + "</button></div>" +
+          (S.promoErr ? '<div class="err" role="alert">' + esc(promoErrText()) + "</div>" : "") +
+          promoRowHTML() +
           /* ---- features: gift card ------------------------------------------
              Owned by the features agent. The same input above accepts a card
              code (RMP-XXXX-XXXX); the applypromo handler recognises the shape
@@ -3086,6 +4672,7 @@
     ["goods", "Товары", "grid"],
     ["people", "Клиенты", "user"],
     ["reviews", "Отзывы", "check"],   // features
+    ["promos", "Промокоды", "tag"],   // checkout-gaps
     ["stats", "Аналитика", "chart"],
     ["mail", "Письма", "mail"],
     ["apps", "Подключения", "plug"],
@@ -3147,6 +4734,8 @@
     var orders = live || fakeOrders();
     var week = orders.slice(0, 7).reduce(function (a, o) { return a + o.sum; }, 0);
     var tab = S.adminTab;
+    // account-flows: the queue sizes under the three switches, once
+    if (tab === "mail" && SRV.admin === true) loadFlowCounts();
     // the admin header shares the full-width panes' column, not the 1020px
     // checkout column — otherwise the logo aligns with nothing below it
     return '<div class="cohdr cohdr--adm"><div class="cohdr__row">' +
@@ -3223,6 +4812,9 @@
       // features: review moderation
       (tab === "reviews" ? admReviewsHTML() : "") +
 
+      // checkout-gaps: promo codes
+      (tab === "promos" ? admPromosHTML() : "") +
+
       (tab === "stats" ?
         '<p class="muted" style="margin:16px 0">Что происходит с магазином — простыми словами. Цифры вымышленные, вид настоящий.</p>' +
         '<div class="adm__kpis">' +
@@ -3253,11 +4845,14 @@
           return '<div class="adm__row"><span class="adm__nm">' + f[0] + '<span class="adm__sub">' + f[1] + "</span></span>" +
             '<span class="chip chip--ok">всегда включено</span></div>';
         }).join("") +
-        [["backstock", "Товар снова в наличии", "тем, кто оставил почту на странице товара"],
-         ["abandoned", "Брошенная корзина", "напоминание через 24 часа, если заказ не завершён"],
-         ["birthday", "Скидка ко дню рождения", "личный промокод за 3 дня до даты"]].map(function (f) {
+        /* account-flows: these three switches now drive real senders
+           (src/lib/flows.ts), so the descriptions say what actually happens
+           and each row carries the size of its own queue. */
+        [["backstock", "Товар снова в наличии", "тем, кто оставил почту на странице товара", "alerts"],
+         ["abandoned", "Брошенная корзина", "напоминание через 3 часа, если заказ не завершён", "carts"],
+         ["birthday", "Скидка ко дню рождения", "личный промокод в день рождения, действует 14 дней", "birthdays"]].map(function (f) {
           var on = !!DEMO.flows[f[0]];
-          return '<div class="adm__row"><span class="adm__nm">' + f[1] + '<span class="adm__sub">' + f[2] + "</span></span>" +
+          return '<div class="adm__row"><span class="adm__nm">' + f[1] + '<span class="adm__sub">' + f[2] + "</span>" + flowCountHTML(f[3]) + "</span>" +
             '<span class="chip ' + (on ? "chip--ok" : "chip--low") + '">' + (on ? "включено" : "выключено") + "</span>" +
             '<button class="link" data-admflow="' + f[0] + '">' + (on ? "Выключить" : "Включить") + "</button></div>";
         }).join("") + "</div>" +
@@ -3281,9 +4876,7 @@
 
       (tab === "setup" ?
         '<p class="muted" style="margin:16px 0">Всё, что можно настроить без программиста.</p>' +
-        setupBlock("Доставка", SHIP.EE.map(function (x) {
-          return x.l + " — " + (x.p ? eur(x.p) : "бесплатно");
-        }).concat(["Бесплатно: Эстония от " + THRESH.EE + " € · LV, LT от " + THRESH.LV + " € · FI от " + THRESH.FI + " € · Европа от " + THRESH.EU + " €"])) +
+        shipRulesCard() +
         setupBlock("Оплата", PAYS.map(function (p) { return p.l; })) +
         setupBlock("Языки магазина", ["Русский — основной", "Eesti", "English"]) +
         setupBlock("Письма клиенту", [
@@ -3300,9 +4893,7 @@
           '<span class="chip ' + (DEMO.bundles !== false ? "chip--ok" : "chip--low") + '">' + (DEMO.bundles !== false ? "показаны" : "скрыты") + "</span>" +
           '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
         admHeroCard() +
-        setupBlock("Реквизиты", [
-          "Rempire Store OÜ · рег. 12216136", "KMKR EE102723858", "Mardi 1, 10145 Таллинн"
-        ]) +
+        admContentCard() +
         '<div class="sec__head sec__head--sub"><h2 class="sec__title">Журнал изменений</h2></div>' +
         (DEMO.log.length
           ? '<div class="adm__list">' + DEMO.log.map(function (e, i) {
@@ -3347,8 +4938,32 @@
     ["order-shipped", "Заказ отправлен"],
     ["abandoned-cart", "Брошенная корзина"],
     ["back-in-stock", "Товар снова в наличии"],
-    ["birthday", "Скидка ко дню рождения"]
+    ["birthday", "Скидка ко дню рождения"],
+    ["login-code", "Код для входа"]
   ];
+
+  /* ---- account-flows: how big each queue is right now --------------------
+     One admin-only call, made when the «Письма» tab is first opened. Missing
+     numbers simply do not draw — an unconfigured shop must not show zeros it
+     cannot stand behind. */
+  var FLOW_COUNTS = null;
+  var flowCountsAsked = false;
+  function loadFlowCounts() {
+    if (flowCountsAsked) return;
+    flowCountsAsked = true;
+    fetch("/api/admin/flows/").then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && j.ok && j.counters) { FLOW_COUNTS = j.counters; render(); } })
+      .catch(noop);
+  }
+  var FLOW_COUNT_LABEL = {
+    carts: "Ждут письма:",
+    alerts: "Ждут письма:",
+    birthdays: "Дней рождения за неделю:"
+  };
+  function flowCountHTML(key) {
+    if (!FLOW_COUNTS || FLOW_COUNTS[key] === undefined) return "";
+    return '<span class="adm__sub">' + FLOW_COUNT_LABEL[key] + ' <span class="num">' + Number(FLOW_COUNTS[key]) + "</span></span>";
+  }
   function mailTpl() {
     for (var i = 0; i < MAIL_TPL.length; i++) if (MAIL_TPL[i][0] === S.mailTpl) return S.mailTpl;
     return MAIL_TPL[0][0];
@@ -3582,6 +5197,443 @@
     if (!box) return;
     box.innerHTML = html;
     translateTree(box);
+  }
+
+  /* ---------- admin: «Контент» — the shop's own details --------------------
+     Everything that used to be frozen in eight files: the company, the
+     opening hours, the social links, the black strip above the header, the
+     «Контакты» page and the extra line at the bottom of every letter.
+
+     Edited on a copy (S.contentDraft) exactly like the banner; nothing reaches
+     the shop until «Сохранить», which goes through the same confirm card and
+     the same undoable journal as every other change — as ONE set_content
+     action carrying only the fields that actually differ, so the confirm card
+     can say «телефон → +372 …» instead of dumping the whole document. */
+  function contentDraft() {
+    if (!S.contentDraft || typeof S.contentDraft !== "object") {
+      try { S.contentDraft = JSON.parse(JSON.stringify(contentConf())); }
+      catch (e) { S.contentDraft = JSON.parse(JSON.stringify(CONTENT_DEFAULT)); }
+    }
+    return S.contentDraft;
+  }
+  function cDraftGet(path) {
+    var parts = String(path).split("."), o = contentDraft();
+    for (var i = 0; i < parts.length; i++) {
+      if (o == null || typeof o !== "object") return "";
+      o = o[parts[i]];
+    }
+    return o == null ? "" : o;
+  }
+  function cDraftSet(path, value) {
+    var parts = String(path).split("."), o = contentDraft();
+    for (var i = 0; i < parts.length - 1; i++) {
+      if (!o[parts[i]] || typeof o[parts[i]] !== "object") o[parts[i]] = {};
+      o = o[parts[i]];
+    }
+    o[parts[parts.length - 1]] = value;
+  }
+  /** Same rule as the server: "" · "closed" · "HH:MM–HH:MM". */
+  function cHoursNorm(v) {
+    var s = String(v || "").trim().toLowerCase();
+    if (!s) return "";
+    if (/^(closed|выходной|закрыто|suletud)$/.test(s)) return "closed";
+    var m = s.split(/\s*[–—−-]\s*/);
+    if (m.length !== 2) return "";
+    var ok = /^([01]\d|2[0-3]):[0-5]\d$/;
+    return ok.test(m[0]) && ok.test(m[1]) ? m[0] + "–" + m[1] : "";
+  }
+  function cTriDiff(base, draft) {
+    var out = {}, b = base || {}, d = draft || {};
+    ["RU", "ET", "EN"].forEach(function (l) {
+      if (String(d[l] || "") !== String(b[l] || "")) out[l] = String(d[l] || "");
+    });
+    return Object.keys(out).length ? out : null;
+  }
+  /** What changed between what the shop shows and what the form holds. */
+  function contentDiff(base, draft) {
+    var out = {};
+    ["company", "social"].forEach(function (k) {
+      var sub = {};
+      Object.keys(base[k]).forEach(function (f) {
+        if (String(draft[k][f] || "") !== String(base[k][f] || "")) sub[f] = String(draft[k][f] || "");
+      });
+      if (Object.keys(sub).length) out[k] = sub;
+    });
+    var hrs = {};
+    CONTENT_DAYS.forEach(function (d) {
+      var v = cHoursNorm(draft.hours[d[0]]);
+      if (v !== String(base.hours[d[0]] || "")) hrs[d[0]] = v;
+    });
+    var note = cTriDiff(base.hours.note, draft.hours.note);
+    if (note) hrs.note = note;
+    if (Object.keys(hrs).length) out.hours = hrs;
+
+    var an = {};
+    if (draft.announcement.on !== base.announcement.on) an.on = draft.announcement.on !== false;
+    if (String(draft.announcement.link || "") !== String(base.announcement.link || "")) {
+      an.link = String(draft.announcement.link || "");
+    }
+    var at = cTriDiff(base.announcement.text, draft.announcement.text);
+    if (at) an.text = at;
+    var ash = cTriDiff(base.announcement.short, draft.announcement.short);
+    if (ash) an.short = ash;
+    if (Object.keys(an).length) out.announcement = an;
+
+    var cp = cTriDiff(base.contactPage, draft.contactPage);
+    if (cp) out.contactPage = cp;
+    var ef = cTriDiff(base.emailFooter, draft.emailFooter);
+    if (ef) out.emailFooter = ef;
+    return out;
+  }
+  function contentDirty() {
+    try { return Object.keys(contentDiff(contentConf(), contentDraft())).length > 0; }
+    catch (e) { return false; }
+  }
+  function cInput(path, label, ph, max, hint) {
+    return '<label class="field"><span class="field__label">' + label + "</span>" +
+      '<input class="input" maxlength="' + max + '" data-contentf="' + path + '" value="' +
+      esc(cDraftGet(path)) + '" placeholder="' + esc(ph || "") + '">' +
+      (hint ? '<span class="admhero__hint">' + hint + "</span>" : "") + "</label>";
+  }
+  /* A trilingual field follows the language pills at the top of the card; an
+     empty ET/EN says out loud that the Russian will be shown instead. */
+  function cTri(base, label, tag, max, hint) {
+    var L = S.contentLang || "RU";
+    var path = base + "." + L;
+    var val = String(cDraftGet(path) || "");
+    var ru = String(cDraftGet(base + ".RU") || "");
+    var fell = L !== "RU" && !val && ru ? '<span class="admhero__hint">Пусто — покажем русский текст.</span>' : "";
+    return '<label class="field"><span class="field__label">' + label + "</span>" +
+      (tag === "textarea"
+        ? '<textarea class="input" rows="4" maxlength="' + max + '" data-contentf="' + path + '">' + esc(val) + "</textarea>"
+        : '<input class="input" maxlength="' + max + '" data-contentf="' + path + '" value="' + esc(val) + '">') +
+      (hint ? '<span class="admhero__hint">' + hint + "</span>" : "") + fell + "</label>";
+  }
+  function cLangPills() {
+    var L = S.contentLang || "RU";
+    return '<div class="adm__chips" role="group" aria-label="Язык текстов">' + LANGS.map(function (l) {
+      return '<button class="scchip" data-contentlang="' + l[0] + '" aria-current="' + (L === l[0]) + '">' + l[1] + "</button>";
+    }).join("") + "</div>";
+  }
+  /** One collapsible sub-block — the card is long, a phone screen is not. */
+  function cBlock(id, title, sub, body) {
+    var open = S.contentOpen === id;
+    return '<div class="adm__row"><span class="adm__nm">' + title +
+        '<span class="adm__sub">' + sub + "</span></span>" +
+        '<button class="link" data-contentblock="' + id + '">' + (open ? "Свернуть" : "Изменить") + "</button></div>" +
+      (open ? '<div class="admhero__form">' + body + "</div>" : "");
+  }
+  function cHoursBody() {
+    var d = contentDraft();
+    return CONTENT_DAYS.map(function (row) {
+      var v = String(d.hours[row[0]] || "");
+      return '<div class="field">' +
+        '<label class="field__label" for="ch-' + row[0] + '">' + row[1] + "</label>" +
+        '<input class="input" id="ch-' + row[0] + '" maxlength="20" data-contenthours="' + row[0] +
+        '" value="' + esc(v) + '" placeholder="10:00–19:00">' +
+        '<button class="link" data-contentclosed="' + row[0] + '">' +
+        (v === "closed" ? "Рабочий день" : "Выходной") + "</button></div>";
+    }).join("") +
+      '<p class="muted admhero__note">Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.</p>' +
+      cTri("hours.note", "Примечание под часами", "input", 300, "Например: в праздники — по записи.");
+  }
+  function admContentCard() {
+    var d = contentDraft();
+    var pending = pendingAction && pendingAction.type === "set_content" ? confirmCard(pendingAction) : "";
+    var annOn = d.announcement.on !== false;
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Контент</h2></div>' +
+      '<p class="muted admhero__intro">Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.</p>' +
+      pending +
+      (contentDirty() && !pending ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      cLangPills() +
+      '<div class="adm__list">' +
+        cBlock("company", "Реквизиты",
+          esc([d.company.legalName, d.company.regCode ? "рег. " + d.company.regCode : "", d.company.address].filter(Boolean).join(" · ")),
+          cInput("company.legalName", "Название компании", "Rempire Store OÜ", 120) +
+          cInput("company.regCode", "Регистрационный номер", "12216136", 24, "Только цифры.") +
+          cInput("company.vatNumber", "Номер KMKR", "EE102723858", 24) +
+          cInput("company.address", "Адрес", "Mardi 1, 10145 Tallinn", 200) +
+          cInput("company.email", "Электронная почта", "info@rempireshop.com", 190) +
+          cInput("company.phone", "Телефон", "+372 5623 7237", 30) +
+          cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42)) +
+        cBlock("hours", "Часы работы",
+          (CONTENT_DAYS.filter(function (r) { return d.hours[r[0]]; }).length
+            ? "показываем в подвале и на «Контактах»"
+            : "не указаны — раздел не показывается"),
+          cHoursBody()) +
+        cBlock("social", "Соцсети",
+          esc(CONTENT_SOCIALS.filter(function (r) { return d.social[r[0]]; }).map(function (r) { return r[1]; }).join(" · ") || "нет ссылок"),
+          CONTENT_SOCIALS.map(function (r) {
+            return cInput("social." + r[0], r[1], "https://…", 300);
+          }).join("") +
+          '<p class="muted admhero__note">Пустая строка убирает значок из подвала.</p>') +
+        cBlock("announcement", "Верхняя полоска",
+          (annOn ? esc(cTokens(cText(d.announcement.text)) || "стандартный текст") : "выключена"),
+          '<div class="adm__row"><span class="adm__nm">Показывать полоску' +
+            '<span class="adm__sub">чёрная строка над шапкой магазина</span></span>' +
+            '<span class="chip ' + (annOn ? "chip--ok" : "chip--low") + '">' + (annOn ? "показана" : "скрыта") + "</span>" +
+            '<button class="link" data-contentannon>' + (annOn ? "Скрыть" : "Показать") + "</button></div>" +
+          cTri("announcement.text", "Текст полоски", "input", 300,
+            "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
+          cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
+          cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300)) +
+        cBlock("contact", "Страница «Контакты»",
+          "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
+          cTri("contactPage", "Текст страницы", "textarea", 1200)) +
+        cBlock("emailfooter", "Подпись в письмах",
+          esc(cText(d.emailFooter) || "нет"),
+          cTri("emailFooter", "Строка внизу письма", "input", 300,
+            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.")) +
+      "</div>" +
+      '<div class="adm__acts">' +
+        '<button class="btn btn--sm" data-contentsave>Сохранить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-contentreset>Сбросить к стандартному</button></div>';
+  }
+
+  /* ---------- admin: delivery prices (settings.shipping_rules) -------------
+     This block used to print the carriers' 2025–26 list prices (SHIP.EE) while
+     the checkout billed something else entirely — the owner read one number and
+     the shop charged another. It is now an editor bound to the very rules both
+     sides price from: what is typed here is what /api/orders charges, what the
+     announce bar promises and what the summary shows.
+     Saving goes through demoApply → PUT /api/admin/settings {shipping_rules},
+     so it lands in the change log with an undo like everything else. */
+  var SHIP_ROWS = [
+    ["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"],
+    ["EU", "Другие страны Европы"], ["default", "Остальные страны"]
+  ];
+  var SHIP_METHOD_ROWS = [["parcel", "Пакомат"], ["courier", "Курьер"], ["pickup", "Самовывоз"]];
+  var SHIP_CARRIER_ROWS = [
+    ["omniva", "Omniva", ["EE", "LV", "LT"]],
+    ["smartpost", "SmartPosti", ["EE", "FI"]],
+    ["dpd", "DPD", ["EE", "LV", "LT", "FI"]],
+    ["venipak", "Venipak", ["EE", "LV", "LT"]]
+  ];
+  /** A working copy, so a half-typed table never prices a live basket. */
+  function shipDraft() {
+    if (!S.shipDraft) S.shipDraft = cloneRules(SHIP_RULES);
+    return S.shipDraft;
+  }
+  function shipNum(raw, max) {
+    var s = String(raw == null ? "" : raw).trim().replace(",", ".");
+    if (!s) return undefined;                 // «empty» — remove the override
+    if (/^(нет|no|-|—)$/i.test(s)) return null;  // «never free here»
+    var n = Number(s);
+    if (!isFinite(n) || n < 0 || n > max) return NaN;   // ignore, keep the old value
+    return Math.round(n * 100) / 100;
+  }
+  function shipShow(v) { return v === null ? "нет" : (v === undefined ? "" : String(v)); }
+  function shipCell(m, c) {
+    var t = shipDraft().methods[m] || {};
+    return shipShow(Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined);
+  }
+  function shipFreeCell(c) {
+    var d = shipDraft();
+    if (c === "default") return shipShow(d.freeFrom);
+    var by = d.freeFromByCountry;
+    return shipShow(by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : undefined);
+  }
+  function shipCarrierCell(k, c) {
+    var by = shipDraft().carriers;
+    var t = by && by[k];
+    return shipShow(t && Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined);
+  }
+  /** One field of the draft. Garbage is ignored rather than stored. */
+  function setShipDraftField(key, raw) {
+    var d = shipDraft(), parts = String(key).split(":");
+    if (parts[0] === "m") {
+      var v = shipNum(raw, 99);
+      if (v !== v) return;                                  // NaN — out of range
+      if (!d.methods[parts[1]]) d.methods[parts[1]] = {};
+      if (v === undefined || v === null) delete d.methods[parts[1]][parts[2]];
+      else d.methods[parts[1]][parts[2]] = v;
+      return;
+    }
+    if (parts[0] === "free") {
+      var f = shipNum(raw, 10000);
+      if (f !== f) return;
+      if (parts[1] === "default") { d.freeFrom = f === undefined ? null : f; return; }
+      if (!d.freeFromByCountry) d.freeFromByCountry = {};
+      if (f === undefined) delete d.freeFromByCountry[parts[1]];
+      else d.freeFromByCountry[parts[1]] = f;
+      return;
+    }
+    if (parts[0] === "c") {
+      var cv = shipNum(raw, 99);
+      if (cv !== cv) return;
+      if (!d.carriers) d.carriers = {};
+      if (!d.carriers[parts[1]]) d.carriers[parts[1]] = {};
+      if (cv === undefined || cv === null) delete d.carriers[parts[1]][parts[2]];
+      else d.carriers[parts[1]][parts[2]] = cv;
+      if (!Object.keys(d.carriers[parts[1]]).length) delete d.carriers[parts[1]];
+    }
+  }
+  function shipInput(key, value, label) {
+    return '<input class="input input--box adm__shipin" data-shiprule="' + key + '" value="' +
+      esc(value) + '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">';
+  }
+  function shipRulesCard() {
+    var d = shipDraft();
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка</h2></div>' +
+      '<p class="muted" style="margin:0 0 12px">Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.</p>' +
+      '<div class="adm__table adm__table--ship" role="table">' +
+        '<div class="adm__th adm__th--ship" role="row"><span>Страна</span>' +
+          SHIP_METHOD_ROWS.map(function (m) { return "<span>" + m[1] + "</span>"; }).join("") +
+          "<span>Бесплатно от</span></div>" +
+        SHIP_ROWS.map(function (r) {
+          return '<div class="adm__tr adm__tr--ship" role="row"><span>' + r[1] + "</span>" +
+            SHIP_METHOD_ROWS.map(function (m) {
+              // pickup is only offered in Estonia and is always free there
+              if (m[0] === "pickup" && r[0] !== "EE" && r[0] !== "default") return "<span></span>";
+              return "<span>" + shipInput("m:" + m[0] + ":" + r[0], shipCell(m[0], r[0]), m[1] + " — " + r[1]) + "</span>";
+            }).join("") +
+            "<span>" + shipInput("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1]) + "</span></div>";
+        }).join("") +
+      "</div>" +
+      '<details class="acc acc--ship"><summary>Цены по перевозчикам — необязательно</summary><div class="acc__body">' +
+        '<p class="muted">Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.</p>' +
+        SHIP_CARRIER_ROWS.map(function (c) {
+          return '<div class="adm__row adm__row--ship"><span class="adm__nm">' + c[1] + "</span>" +
+            c[2].map(function (cc) {
+              return '<span class="adm__shipcell">' + cc + " " + shipInput("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) + "</span>";
+            }).join("") + "</div>";
+        }).join("") +
+      "</div></details>" +
+      (S.shipErr ? '<div class="err" role="alert">' + esc(S.shipErr) + "</div>" : "") +
+      '<div class="adm__acts"><button class="btn btn--sm" data-admshipsave>Сохранить тарифы</button>' +
+        '<button class="btn btn--ghost btn--sm" data-admshipreset>Вернуть значения по умолчанию</button></div>' +
+      '<p class="muted" style="font-size:12.5px;margin-top:8px">Сейчас: пакомат Эстония ' +
+        eur(d.methods.parcel && d.methods.parcel.EE != null ? d.methods.parcel.EE : 0) + ' · курьер Эстония ' +
+        eur(d.methods.courier && d.methods.courier.EE != null ? d.methods.courier.EE : 0) + ' · бесплатно от ' +
+        (d.freeFrom == null ? "— " : eur(d.freeFrom)) + '. За пределами Эстонии значения по умолчанию ниже себестоимости перевозчиков — см. docs/shipping.md.</p>';
+  }
+
+  /* ---------- admin: promo codes (tab «Промокоды») -------------------------
+     Codes live in the promo_codes table and are priced by the server; nothing
+     here is a demo. The tab is the only place a code is made, so «REMPIRE10»
+     baked into app.js is gone for good. */
+  var PROMO_KIND_ROWS = [["percent", "Процент"], ["fixed", "Сумма в евро"], ["free_shipping", "Бесплатная доставка"]];
+  function loadAdminPromos(force) {
+    if (SRV.admin !== true) return;
+    if (S.admPromos && !force) return;
+    if (loadAdminPromos._busy) return;
+    loadAdminPromos._busy = true;
+    apiJson("/api/admin/promos/").then(function (r) {
+      loadAdminPromos._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      S.admPromos = r.status === 200 && r.body.ok ? (r.body.promos || []) : [];
+      S.admPromoErr = r.status === 200 && r.body.ok ? "" : "Список промокодов не загрузился.";
+      render();
+    }).catch(function () {
+      loadAdminPromos._busy = false;
+      S.admPromos = []; S.admPromoErr = "Сервер не отвечает."; render();
+    });
+  }
+  function blankPromo() {
+    return { code: "", kind: "percent", value: 10, minSubtotal: 0, endsAt: "", maxUses: "", note: "", active: true };
+  }
+  function promoKindLabel(p) {
+    if (p.kind === "free_shipping") return "бесплатная доставка";
+    if (p.kind === "fixed") return "−" + eur(p.value);
+    return "−" + p.value + "%";
+  }
+  function promoWhen(p) {
+    var out = [];
+    if (p.minSubtotal) out.push("от " + eur(p.minSubtotal));
+    if (p.endsAt) out.push("до " + String(p.endsAt).slice(0, 10).split("-").reverse().join("."));
+    return out.join(" · ") || "без условий";
+  }
+  function promoFormHTML() {
+    var f = S.promoForm;
+    return '<div class="adm__confirm adm__promoform">' +
+      "<b>" + (f.editing ? "Изменить промокод" : "Новый промокод") + "</b>" +
+      '<label class="field"><span class="field__label">Код — латиница, цифры и дефис</span>' +
+        '<input class="input" data-promof="code" maxlength="24" value="' + esc(f.code) + '" placeholder="SUVI10"' +
+        (f.editing ? " readonly" : "") + "></label>" +
+      '<div class="field__label">Что даёт</div><div class="optlist">' +
+        PROMO_KIND_ROWS.map(function (k) {
+          return '<label class="opt opt--plain"><input type="radio" name="promokind" data-promof="kind" value="' + k[0] + '"' +
+            (f.kind === k[0] ? " checked" : "") + "><span>" + k[1] + "</span></label>";
+        }).join("") + "</div>" +
+      (f.kind === "free_shipping" ? "" :
+        '<label class="field"><span class="field__label">' + (f.kind === "fixed" ? "Скидка в евро — до 200" : "Скидка в процентах — от 1 до 90") + "</span>" +
+        '<input class="input" data-promof="value" inputmode="decimal" value="' + esc(String(f.value)) + '"></label>') +
+      '<label class="field"><span class="field__label">Минимальная сумма заказа, € — 0 если без условия</span>' +
+        '<input class="input" data-promof="minSubtotal" inputmode="decimal" value="' + esc(String(f.minSubtotal)) + '"></label>' +
+      '<label class="field"><span class="field__label">Действует до — пусто, если бессрочно</span>' +
+        '<input class="input" type="date" data-promof="endsAt" value="' + esc(String(f.endsAt || "").slice(0, 10)) + '"></label>' +
+      '<label class="field"><span class="field__label">Сколько раз можно использовать — пусто, если без ограничения</span>' +
+        '<input class="input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
+      '<label class="field"><span class="field__label">Заметка для себя</span>' +
+        '<input class="input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
+      (S.promoFormErr ? '<div class="err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
+      '<div class="adm__acts"><button class="btn btn--sm" data-admpromosave>Сохранить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-admpromocancel>Отмена</button></div></div>';
+  }
+  function admPromosHTML() {
+    loadAdminPromos(false);
+    var list = S.admPromos || [];
+    return '<p class="muted" style="margin:16px 0">Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.</p>' +
+      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы создавать промокоды.</div>') +
+      (S.admPromoErr ? '<div class="adm__note">' + esc(S.admPromoErr) + "</div>" : "") +
+      (S.promoForm ? promoFormHTML() :
+        '<div class="adm__acts"><button class="btn btn--sm" data-admpromonew>Новый промокод</button></div>') +
+      (list.length
+        ? '<div class="adm__table" role="table"><div class="adm__th adm__th--promo" role="row">' +
+            "<span>Код</span><span>Скидка</span><span>Условия</span><span>Использован</span><span>Статус</span><span></span></div>" +
+          list.map(function (p) {
+            var used = p.used + (p.maxUses ? " из " + p.maxUses : "");
+            return '<div class="adm__tr adm__tr--promo" role="row"><span class="num">' + esc(p.code) +
+              (p.note ? '<span class="adm__sub">' + esc(p.note) + "</span>" : "") + "</span>" +
+              "<span>" + esc(promoKindLabel(p)) + "</span>" +
+              '<span class="muted">' + esc(promoWhen(p)) + "</span>" +
+              '<span class="num">' + used + "</span>" +
+              '<span class="chip ' + (p.active ? "chip--ok" : "chip--low") + '">' + (p.active ? "активен" : "выключен") + "</span>" +
+              '<span><button class="link" data-admpromoedit="' + esc(p.code) + '">Изменить</button> ' +
+                '<button class="link" data-admpromotoggle="' + esc(p.code) + '">' + (p.active ? "Выключить" : "Включить") + "</button></span></div>";
+          }).join("") + "</div>"
+        : (S.admPromos ? '<p class="muted">Промокодов пока нет.</p>' : '<p class="muted">Загружаем…</p>'));
+  }
+  function promoFormPayload() {
+    var f = S.promoForm;
+    var body = {
+      code: String(f.code || "").trim().toUpperCase(),
+      kind: f.kind,
+      value: f.kind === "free_shipping" ? 0 : Number(String(f.value).replace(",", ".")),
+      minSubtotal: Number(String(f.minSubtotal || 0).replace(",", ".")) || 0,
+      endsAt: f.endsAt ? new Date(f.endsAt + "T23:59:59Z").toISOString() : null,
+      maxUses: String(f.maxUses).trim() ? Math.trunc(Number(f.maxUses)) : null,
+      note: f.note || "",
+      active: f.active !== false
+    };
+    return body;
+  }
+  var PROMO_SAVE_ERRS = {
+    bad_code: "Код может состоять только из латинских букв, цифр и дефиса — до 24 знаков.",
+    bad_value: "Проверьте размер скидки: процент от 1 до 90, сумма до 200 €.",
+    bad_min: "Минимальная сумма заказа выглядит неправдоподобно.",
+    bad_date: "Проверьте дату окончания.",
+    bad_uses: "Число использований должно быть целым и больше нуля.",
+    db_unavailable: "Сервер не отвечает — попробуйте позже."
+  };
+  function savePromo() {
+    if (!S.promoForm) return;
+    S.promoFormErr = "";
+    apiSend("/api/admin/promos/", "POST", promoFormPayload()).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.promoForm = null; toast("Промокод сохранён ✓"); loadAdminPromos(true); return;
+      }
+      S.promoFormErr = PROMO_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить промокод.";
+      render();
+    }).catch(function () { S.promoFormErr = "Сервер не отвечает."; render(); });
+  }
+  function togglePromoActive(code, active) {
+    apiSend("/api/admin/promos/", "PATCH", { code: code, active: active }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { toast(active ? "Промокод включён ✓" : "Промокод выключен ✓"); loadAdminPromos(true); return; }
+      toast("Не получилось изменить промокод");
+    }).catch(function () { toast("Сервер не отвечает"); });
   }
 
   function setupBlock(title, rows) {
@@ -4054,6 +6106,7 @@
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
     gallery: {},  // media: photos the owner uploaded, per product id
     hero: null,   // null = the built-in banner (heroDefault())
+    content: null,  // content: null = CONTENT_DEFAULT (the shop's own details)
     flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
@@ -4065,6 +6118,8 @@
       if (_dj.chatbot === false) DEMO.chatbot = false;
       if (_dj.bundles === false) DEMO.bundles = false;
       if (_dj.hero && typeof _dj.hero === "object" && Array.isArray(_dj.hero.slides)) DEMO.hero = _dj.hero;
+      // content: the offline copy of the shop's own details
+      if (_dj.content && typeof _dj.content === "object" && !Array.isArray(_dj.content)) DEMO.content = _dj.content;
       DEMO.flows = Object.assign(DEMO.flows, _dj.flows || {});
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
     }
@@ -4177,6 +6232,19 @@
     if (s.hero === null) DEMO.hero = null;
     else if (s.hero && typeof s.hero === "object" && Array.isArray(s.hero.slides)) DEMO.hero = s.hero;
     if (s.flows && typeof s.flows === "object") DEMO.flows = Object.assign(DEMO.flows, s.flows);
+    /* content: the server always answers with the merged document (defaults +
+       whatever the owner wrote), so it replaces the local copy outright and
+       the panel's draft is dropped — the same rule as the banner. */
+    if (s.content && typeof s.content === "object" && !Array.isArray(s.content)) {
+      DEMO.content = s.content;
+      S.contentDraft = null;
+    }
+    /* Delivery prices come down with the rest of the settings, and the whole
+       shop quotes them — the announce bar, the footer, the product page and
+       the checkout — so they are adopted at boot, not only when the checkout
+       is opened. What the shop promises and what it bills is one number. */
+    setShipRules(s.shipping_rules || s.shippingRules || s.shipping);
+    S.shipDraft = null;
   }
 
   function loadServerOverrides() {
@@ -4216,6 +6284,23 @@
     else if (a.type === "toggle_chatbot") apiSend(st, "PUT", { chatbot: DEMO.chatbot }).catch(noop);
     else if (a.type === "toggle_bundles") apiSend(st, "PUT", { bundles: DEMO.bundles }).catch(noop);
     else if (a.type === "set_hero") apiSend(st, "PUT", { hero: DEMO.hero }).catch(noop);
+    // content: the whole document travels, so undo re-sends the previous one
+    else if (a.type === "set_content") apiSend(st, "PUT", { content: DEMO.content }).catch(noop);
+    /* checkout-gaps: the whole delivery table travels, because a merge cannot
+       express a price the owner deleted. Promo codes have their own routes —
+       they are rows in promo_codes, not a settings blob. */
+    else if (a.type === "set_shipping_rules") apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_RULES) }).catch(noop);
+    else if (a.type === "create_promo") {
+      apiSend("/api/admin/promos/", "POST", a.promo).then(function (r) {
+        if (!(r.status === 200 && r.body.ok)) toast("Промокод не сохранился — проверьте условия");
+        loadAdminPromos(true);
+      }).catch(noop);
+    }
+    else if (a.type === "toggle_promo") {
+      apiSend("/api/admin/promos/", "PATCH", { code: a.code, active: a.value }).then(function () {
+        loadAdminPromos(true);
+      }).catch(noop);
+    }
   }
 
   function admLogin(pw) {
@@ -4360,7 +6445,131 @@
       var gl = Array.isArray(a.list) ? a.list.length : 0;
       return "Фото «" + (p ? p.name : a.id) + "»: " + (gl ? gl + " " + pl(gl, "фотография", "фотографии", "фотографий") : "как в каталоге");
     }
+    // checkout-gaps
+    if (a.type === "create_promo") {
+      var pr = a.promo || {};
+      var what = pr.kind === "free_shipping" ? "бесплатная доставка"
+        : pr.kind === "fixed" ? "скидка " + eur(pr.value) : "скидка " + pr.value + "%";
+      var cond = [];
+      if (pr.minSubtotal) cond.push("от " + eur(pr.minSubtotal));
+      if (pr.endsAt) cond.push("до " + String(pr.endsAt).slice(0, 10).split("-").reverse().join("."));
+      if (pr.maxUses) cond.push(pr.maxUses + " " + pl(pr.maxUses, "использование", "использования", "использований"));
+      return "Промокод " + pr.code + ": " + what + (cond.length ? " · " + cond.join(" · ") : "");
+    }
+    if (a.type === "toggle_promo") return "Промокод " + a.code + ": " + (a.value ? "включить" : "выключить");
+    if (a.type === "set_shipping_rules") return shipActionText(a);
+    if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
     return "";
+  }
+  /* «Контент: телефон → +372 5555 1234» — the confirm card has to say what is
+     about to change in the shop's own details, and a patch object is not
+     something Renat can read. One changed field is spelled out with its new
+     value; several are listed by name. */
+  var CONTENT_FIELD_WORD = {
+    legalName: "название компании", regCode: "рег. номер", vatNumber: "номер KMKR",
+    address: "адрес", email: "почта", phone: "телефон", iban: "IBAN"
+  };
+  var CONTENT_BLOCK_WORD = {
+    company: "реквизиты", hours: "часы работы", social: "соцсети",
+    announcement: "верхняя полоска", contactPage: "страница «Контакты»",
+    emailFooter: "подпись в письмах", legal: "правовые тексты"
+  };
+  function contentActionText(v) {
+    var patch = v && typeof v === "object" ? v : {};
+    var parts = [];
+    if (patch.company) {
+      var keys = Object.keys(patch.company);
+      if (keys.length === 1) {
+        parts.push((CONTENT_FIELD_WORD[keys[0]] || keys[0]) + " → " + (patch.company[keys[0]] || "убрать"));
+      } else {
+        parts.push(keys.map(function (k) { return CONTENT_FIELD_WORD[k] || k; }).join(", "));
+      }
+    }
+    if (patch.announcement) {
+      if (patch.announcement.on === false) parts.push("верхняя полоска: выключить");
+      else {
+        var at = patch.announcement.text || {};
+        var line = at.RU || at.ET || at.EN;
+        parts.push(line ? "верхняя полоска: «" + line + "»" : "верхняя полоска: включить");
+      }
+    }
+    ["hours", "social", "contactPage", "emailFooter", "legal"].forEach(function (k) {
+      if (patch[k]) parts.push(CONTENT_BLOCK_WORD[k]);
+    });
+    return parts.length ? parts.join(" · ") : "без изменений";
+  }
+  /* Deep-merge one patch into the whole document. Only known fields survive —
+     the server's sanitiser is the strict one, this keeps the local copy the
+     same shape as what /api/overrides/ hands back. */
+  function contentApply(base, patch) {
+    var out = JSON.parse(JSON.stringify(base));
+    if (!patch || typeof patch !== "object") return out;
+    var triFields = function (dst, src) {
+      if (!src || typeof src !== "object") return;
+      ["RU", "ET", "EN"].forEach(function (l) {
+        if (typeof src[l] === "string") dst[l] = src[l];
+      });
+    };
+    ["company", "social"].forEach(function (k) {
+      if (!patch[k] || typeof patch[k] !== "object") return;
+      Object.keys(out[k]).forEach(function (f) {
+        if (typeof patch[k][f] === "string") out[k][f] = patch[k][f];
+      });
+    });
+    if (patch.hours && typeof patch.hours === "object") {
+      CONTENT_DAYS.forEach(function (d) {
+        if (typeof patch.hours[d[0]] === "string") out.hours[d[0]] = patch.hours[d[0]];
+      });
+      triFields(out.hours.note, patch.hours.note);
+    }
+    if (patch.announcement && typeof patch.announcement === "object") {
+      if (typeof patch.announcement.on === "boolean") out.announcement.on = patch.announcement.on;
+      if (typeof patch.announcement.link === "string") out.announcement.link = patch.announcement.link;
+      triFields(out.announcement.text, patch.announcement.text);
+      triFields(out.announcement.short, patch.announcement.short);
+    }
+    triFields(out.contactPage, patch.contactPage);
+    triFields(out.emailFooter, patch.emailFooter);
+    if (patch.legal && typeof patch.legal === "object") {
+      out.legal = out.legal || {};
+      Object.keys(patch.legal).forEach(function (slug) {
+        var cur = out.legal[slug] || { RU: "", ET: "", EN: "" };
+        triFields(cur, patch.legal[slug]);
+        if (cur.RU || cur.ET || cur.EN) out.legal[slug] = cur;
+        else delete out.legal[slug];   // empty in all three = built-in page back
+      });
+    }
+    return out;
+  }
+  /* «Доставка: пакомат LV 6,90 €» — the owner has to be able to read what he
+     is confirming, and a rules object is not readable. */
+  var SHIP_METHOD_WORD = { parcel: "пакомат", courier: "курьер", pickup: "самовывоз" };
+  function shipActionText(a) {
+    var r = a.rules || {}, parts = [];
+    if (r.methods) {
+      Object.keys(r.methods).forEach(function (m) {
+        Object.keys(r.methods[m]).forEach(function (c) {
+          parts.push((SHIP_METHOD_WORD[m] || m) + " " + (c === "default" ? "везде" : c) + " " + eur(r.methods[m][c]));
+        });
+      });
+    }
+    if (r.carriers) {
+      Object.keys(r.carriers).forEach(function (k) {
+        Object.keys(r.carriers[k]).forEach(function (c) {
+          parts.push(k + " " + (c === "default" ? "везде" : c) + " " + eur(r.carriers[k][c]));
+        });
+      });
+    }
+    if (r.freeFrom !== undefined) parts.push("бесплатно от " + (r.freeFrom === null ? "— никогда" : eur(r.freeFrom)));
+    if (r.freeFromByCountry) {
+      Object.keys(r.freeFromByCountry).forEach(function (c) {
+        var v = r.freeFromByCountry[c];
+        parts.push("бесплатно " + c + " " + (v === null ? "— никогда" : "от " + eur(v)));
+      });
+    }
+    if (!parts.length) return "Доставка: без изменений";
+    var head = a.full ? "Тарифы доставки: " : "Доставка: ";
+    return head + (parts.length <= 4 ? parts.join(" · ") : parts.slice(0, 4).join(" · ") + " и ещё " + (parts.length - 4));
   }
   function demoApply(a) {
     var entry = { t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), txt: actionText(a), a: a, prev: null };
@@ -4386,6 +6595,31 @@
       entry.prev = { type: "set_gallery", id: a.id, list: (DEMO.gallery[a.id] || []).slice() };
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
+    }
+    /* checkout-gaps: delivery prices and promo codes have no demo layer — they
+       live on the server and nowhere else, so applying one is the server write
+       (srvPush below) plus a log entry. */
+    else if (a.type === "set_shipping_rules") {
+      entry.prev = { type: "set_shipping_rules", rules: cloneRules(SHIP_RULES), full: true };
+      if (a.full) setShipRules(a.rules); else applyShipRules(a.rules);
+      S.shipDraft = null; S.shipErr = "";
+    }
+    // undoing a code the assistant just made switches it off again
+    else if (a.type === "create_promo") {
+      entry.prev = { type: "toggle_promo", code: (a.promo || {}).code, value: false };
+      S.admPromos = null; S.promoForm = null;
+    }
+    else if (a.type === "toggle_promo") {
+      entry.prev = { type: "toggle_promo", code: a.code, value: !a.value };
+      S.admPromos = null;
+    }
+    /* content: the action carries a PATCH («поменяй телефон» touches one
+       field), but undo has to restore the whole document — the patch alone
+       cannot say what a field looked like before it existed. */
+    else if (a.type === "set_content") {
+      entry.prev = { type: "set_content", whole: DEMO.content };
+      DEMO.content = contentApply(contentConf(), a.value);
+      S.contentDraft = null;
     }
     else return;
     DEMO.log.unshift(entry);
@@ -4415,6 +6649,11 @@
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
     }
+    // checkout-gaps
+    else if (a.type === "set_shipping_rules") { setShipRules(a.rules); S.shipDraft = null; }
+    else if (a.type === "toggle_promo") { S.admPromos = null; }
+    // content: `whole` is the document as it was, null meaning «стандартный»
+    else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -4450,12 +6689,23 @@
       };
     });
   }
+  /* content: the same idea for the shop's own details — «поменяй телефон»
+     needs to know what the telephone is now. The route trims it again before
+     it reaches the prompt (briefContent in src/lib/content.ts). */
+  function contentForAI() {
+    var c = contentConf();
+    return {
+      company: c.company, hours: c.hours, social: c.social,
+      announcement: { on: c.announcement.on, text: c.announcement.text },
+      contactPage: c.contactPage, emailFooter: c.emailFooter
+    };
+  }
   function askAdminAI(q) {
     admConvo.push({ role: "user", content: q });
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI() })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI() })
     })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
@@ -4662,7 +6912,18 @@
      screen already carries an honest title and a product page carries
      schema.org markup. SEO Title/Description exported from the old shop are
      used when present. */
-  function stripTags(h) { return String(h || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+  /* Inline tags vanish, block tags become a space. Replacing every tag with a
+     space split words that carry markup inside them — «сильный <b>эффект</b>»
+     was fine, but «s<b>trong</b>» came out as «s trong» in the meta
+     description and in the JSON-LD. */
+  var INLINE_TAGS = /^(?:span|b|i|strong|em|a|u|sup|sub)$/i;
+  function stripTags(h) {
+    return String(h || "")
+      .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, function (_, tag) { return INLINE_TAGS.test(tag) ? "" : " "; })
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
   function setMetaTag(name, content) {
     var el = document.querySelector('meta[name="' + name + '"]');
     if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
@@ -4716,6 +6977,12 @@
     // readers and by the browser's own translation prompt
     try { document.documentElement.lang = { RU: "ru", ET: "et", EN: "en" }[S.lang]; } catch (e) {}
   }
+  /* The three meta descriptions the info, sets and gift screens carry. They
+     are dictionary keys, so ET and EN come from UI — and they are word for
+     word what tools/prerender-shop2.mjs writes into the same static pages. */
+  var INFO_DESC_TAIL = "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.";
+  var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
+  var GIFT_DESC = "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
   function setHead() {
     var base = { RU: "REMPIRE — магазин косметики в Таллинне", ET: "REMPIRE — kosmeetikapood Tallinnas", EN: "REMPIRE — grooming shop in Tallinn" }[S.lang];
     var buy = { RU: "купить в Rempire", ET: "osta Rempire'ist", EN: "buy at Rempire" }[S.lang];
@@ -4760,14 +7027,35 @@
       var s2 = document.getElementById("ldjson");
       if (s2) s2.remove();
       if (S.screen === "catalog") t = (S.brand || trText(S.cat === "all" ? "Все товары" : CAT_NAMES[S.cat] || "", S.lang, false)) + " — REMPIRE";
-      else if (S.screen === "info") { var pg = legalFor(S.infoSlug); if (pg) t = pg.title + " — REMPIRE"; }
+      /* The body of a policy page goes through translateTree(), the title did
+         not: legalFor() serves Russian titles on LEGAL, so an English page
+         showed «Доставка и оплата» in the tab. The four descriptions below are
+         the strings tools/prerender-shop2.mjs writes into the same pages, so a
+         client-side navigation no longer changes the head under a crawler. */
+      else if (S.screen === "info") {
+        var pg = legalFor(S.infoSlug);
+        if (pg) {
+          var pgTitle = trText(pg.title, S.lang, false);
+          t = pgTitle + " — REMPIRE";
+          d = (pgTitle + " — " + trText(INFO_DESC_TAIL, S.lang, false)).slice(0, 158);
+        }
+      }
       else if (S.screen === "brands") t = trText("Бренды", S.lang, false) + " — REMPIRE";
       // features
-      else if (S.screen === "bundles") t = trText("Наборы", S.lang, false) + " — REMPIRE";
+      else if (S.screen === "bundles") {
+        t = trText("Наборы", S.lang, false) + " — REMPIRE";
+        d = trText(SETS_DESC, S.lang, false).slice(0, 158);
+      }
       else if (S.screen === "bundle") {
         var bb = bundleById(S.bundleId);
-        if (bb) { t = bundleTitle(bb) + " — REMPIRE"; d = bundleDesc(bb).slice(0, 155); }
-      } else if (S.screen === "gift") t = trText("Подарочная карта", S.lang, false) + " — REMPIRE";
+        if (bb) {
+          t = bundleTitle(bb) + " — REMPIRE";
+          d = (bundleDesc(bb) || trText(SETS_DESC, S.lang, false)).slice(0, 158);
+        }
+      } else if (S.screen === "gift") {
+        t = trText("Подарочная карта", S.lang, false) + " — REMPIRE";
+        d = trText(GIFT_DESC, S.lang, false).slice(0, 158);
+      }
     }
     document.title = t;
     if (d) setMetaTag("description", d);
@@ -5134,6 +7422,9 @@
     if (line) line.qty = Math.min(9, line.qty + qty);
     else S.cart.push({ id: id, size: si, qty: Math.min(9, qty) });
     persist();
+    // account-flows: a signed-in shopper's basket is filed for the
+    // abandoned-cart letter as it is built, not only at the checkout
+    pushCart();
     // adding from INSIDE the open drawer (the free-shipping upsell) must
     // redraw the lines and totals, or the tap looks like it did nothing
     if (S.cartOpen) rebuildCart();
@@ -5276,7 +7567,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -5684,7 +7975,68 @@
       pendingAction = { type: "set_hero", value: null };
       render(); refocus("[data-admapply]"); return;
     }
+    /* ---- content: «Контент». Every button edits the draft; the shop changes
+       on «Сохранить», through the same confirm card as everything else. ---- */
+    if (d.contentlang) { S.contentLang = d.contentlang; render(); return; }
+    if (d.contentblock !== undefined) {
+      S.contentOpen = S.contentOpen === d.contentblock ? "" : d.contentblock;
+      render(); return;
+    }
+    if (d.contentannon !== undefined) {
+      var cAnn = contentDraft().announcement;
+      cAnn.on = cAnn.on === false;
+      render(); return;
+    }
+    if (d.contentclosed) {
+      var cH = contentDraft().hours;
+      cH[d.contentclosed] = cH[d.contentclosed] === "closed" ? "" : "closed";
+      render(); return;
+    }
+    if (d.contentsave !== undefined) {
+      var cPatch = contentDiff(contentConf(), contentDraft());
+      if (!Object.keys(cPatch).length) { toast("Ничего не изменилось"); return; }
+      pendingAction = { type: "set_content", value: cPatch };
+      render(); refocus("[data-admapply]"); return;
+    }
+    if (d.contentreset !== undefined) {
+      var cBack = contentDiff(contentConf(), CONTENT_DEFAULT);
+      if (!Object.keys(cBack).length) { toast("Уже стандартные значения"); return; }
+      pendingAction = { type: "set_content", value: cBack };
+      render(); refocus("[data-admapply]"); return;
+    }
     if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
+
+    /* ---------- checkout-gaps: delivery prices and promo codes ------------ */
+    if (d.admshipsave !== undefined) {
+      demoApply({ type: "set_shipping_rules", rules: cloneRules(shipDraft()), full: true });
+      toast("Тарифы доставки сохранены ✓"); render(); return;
+    }
+    if (d.admshipreset !== undefined) {
+      demoApply({ type: "set_shipping_rules", rules: cloneRules(SHIP_RULES_DEFAULT), full: true });
+      toast("Вернули значения по умолчанию ✓"); render(); return;
+    }
+    if (d.admpromonew !== undefined) {
+      S.promoForm = blankPromo(); S.promoFormErr = ""; render(); refocus('[data-promof="code"]'); return;
+    }
+    if (d.admpromoedit) {
+      var found = (S.admPromos || []).filter(function (x) { return x.code === d.admpromoedit; })[0];
+      if (found) {
+        S.promoForm = {
+          editing: true, code: found.code, kind: found.kind, value: found.value,
+          minSubtotal: found.minSubtotal, endsAt: found.endsAt ? String(found.endsAt).slice(0, 10) : "",
+          maxUses: found.maxUses == null ? "" : found.maxUses, note: found.note || "", active: found.active
+        };
+        S.promoFormErr = ""; render();
+      }
+      return;
+    }
+    if (d.admpromosave !== undefined) { savePromo(); return; }
+    if (d.admpromocancel !== undefined) { S.promoForm = null; S.promoFormErr = ""; render(); return; }
+    if (d.admpromotoggle) {
+      var cur = (S.admPromos || []).filter(function (x) { return x.code === d.admpromotoggle; })[0];
+      togglePromoActive(d.admpromotoggle, !(cur && cur.active));
+      return;
+    }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
       var qEl = document.querySelector("[data-admq]");
@@ -5707,25 +8059,23 @@
       if (vp.varImg && vp.varImg.length > S.size) S.gallery = vp.varImg[S.size];
       patchPdp(); return;
     }
-    if (d.notify !== undefined) { toast("Записали — сообщим, когда появится ✓"); return; }
+    /* ---- account-flows: the account and the stock alert are real now ------ */
+    if (d.notify !== undefined) {
+      S.notifyOpen = d.notify || S.productId;
+      if (!S.notifyEmail) S.notifyEmail = (S.cust && S.cust.email) || S.email || "";
+      render(); refocus("[data-notifyf]"); return;
+    }
+    if (d.notifysend !== undefined) { notifySend(d.notifysend || S.productId); return; }
     if (d.share) { shareProduct(d.share); return; }
     if (d.qty) { S.qty = Math.max(1, Math.min(9, S.qty + Number(d.qty))); patchPdp(); return; }
     if (d.gal !== undefined) { S.gallery = Number(d.gal); patchPdp(); return; }
-    if (d.login !== undefined) {
-      S.emailTouched = true;
-      if (emailBad()) { render(); toast("Введите e-mail — на него придёт код"); return; }
-      S.loggedIn = true; render(); return;
+    if (d.login !== undefined) { acctSendCode(); return; }
+    if (d.logincode !== undefined) { acctVerify(); return; }
+    if (d.loginback !== undefined) {
+      S.acctStage = "email"; S.acctCode = ""; S.acctErr = ""; render(); refocus("[data-email]"); return;
     }
-    if (d.logout !== undefined) { S.loggedIn = false; render(); return; }
-    if (d.save !== undefined) { toast("Сохранено ✓"); return; }
-    if (d.repeat !== undefined) {
-      // the fake order #1042 must put plausible things in the cart, not
-      // whatever happens to be first in the catalogue
-      addToCart("km-repair-me-wash", 0);
-      addToCart("proraso-wood-spice-beard-balm-100ml", 0);
-      toast("Товары заказа #1042 в корзине ✓");
-      return;
-    }
+    if (d.logout !== undefined) { acctLogout(); return; }
+    if (d.save !== undefined) { acctSave(); return; }
     if (d.applypromo !== undefined) {
       /* ---- features: the same field takes a gift-card code ----------------
          RMP- plus eight letters is a card, everything else is a promo code —
@@ -5737,9 +8087,9 @@
         return;
       }
       /* ---- /features ------------------------------------------------------ */
-      var ok = S.promo.trim().toUpperCase() === "REMPIRE10";
-      S.promoOk = ok; S.promoErr = !ok; render(); refocus("[data-applypromo]"); return;
+      applyPromoCode(); return;
     }
+    if (d.promooff !== undefined) { S.promoInfo = null; S.promoErr = ""; S.promo = ""; render(); return; }
 
     /* ---------- features: sets, gift card, reviews, video ---------------- */
     if (d.goBundle) {
@@ -5796,13 +8146,26 @@
       render();
       var n = document.querySelector("[data-search2]");
       if (n) { n.focus(); n.setSelectionRange(pos, pos); }
-    } else if (t.matches("[data-email]")) { S.email = t.value; }
+    } else if (t.matches("[data-email]")) {
+      S.email = t.value;
+      /* account-flows: the abandoned-cart snapshot is filed the moment the
+         address is usable, not when the order is placed — that is the whole
+         point of the letter. Debounced inside pushCart(). Only from the
+         checkout: the same field on the account screen is a sign-in box, and
+         half-typed addresses there would file carts under `a@b.co` on the way
+         to `a@b.com`. A signed-in shopper's basket is filed by addToCart. */
+      if (S.screen === "checkout") pushCart();
+    }
+    else if (t.matches("[data-acctcode]")) { S.acctCode = t.value.replace(/\D/g, "").slice(0, 6); }
+    else if (t.matches("[data-acctf]")) { S.acctForm[t.dataset.acctf] = t.value; S.acctSaved = false; }
+    else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; S.acctSaved = false; }
+    else if (t.matches("[data-notifyf]")) { S.notifyEmail = t.value; }
     else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
     else if (t.matches("[data-shipf]")) { S.ship[t.dataset.shipf] = t.value; }
     else if (t.matches("[data-news]")) { S.newsletter = t.checked; }
     else if (t.matches("[data-invoiceco]")) { S.invoiceCo = t.value; }
     // editing the code must drop the applied discount, not just the error
-    else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = false; S.promoOk = false; S.giftErr = ""; }
+    else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = ""; S.promoInfo = null; S.giftErr = ""; }
     /* Only the list is redrawn — a full render would replace this very input
        and take the caret with it. */
     else if (t.matches("[data-pointq]")) { POINTS.q = t.value; patchPointList(); }
@@ -5832,8 +8195,26 @@
         paintHeroPreview();
       }
     }
+    /* checkout-gaps: the delivery table and the promo form both keep the caret
+       — a full render on every keystroke would take it out of the field. The
+       draft holds only values that parse; garbage is ignored and the field
+       snaps back on the next render. */
+    else if (t.matches("[data-shiprule]")) { setShipDraftField(t.dataset.shiprule, t.value); }
+    else if (t.matches("[data-promof]")) {
+      if (!S.promoForm) return;
+      var pf = t.dataset.promof;
+      if (pf === "code") S.promoForm.code = t.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 24);
+      else S.promoForm[pf] = t.value;
+      if (pf === "code" && t.value !== S.promoForm.code) t.value = S.promoForm.code;
+    }
     else if (t.matches("[data-heroq]")) { S.heroGoQ = t.value; paintHeroPicks("herogolist", heroGoRows()); }
     else if (t.matches("[data-heroimgq]")) { S.heroImgQ = t.value; paintHeroPicks("heroimglist", heroImgRows()); }
+    /* content: «Контент» writes straight into the draft and does NOT render —
+       every field here is a text box the owner is in the middle of typing in,
+       and a render would take the caret with it. The card redraws when a
+       button is pressed, and «Сохранить» reads the draft, not the DOM. */
+    else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); }
+    else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
       var b = t.dataset.brand;
@@ -5854,6 +8235,16 @@
     }
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
+    /* checkout-gaps: the promo kind decides whether there is a «сколько»
+       field at all, so this one does need a redraw. */
+    else if (t.matches('[data-promof="kind"]')) {
+      if (S.promoForm) {
+        S.promoForm.kind = t.value;
+        if (t.value === "percent" && !(Number(S.promoForm.value) >= 1 && Number(S.promoForm.value) <= 90)) S.promoForm.value = 10;
+        if (t.value === "fixed" && !(Number(S.promoForm.value) > 0)) S.promoForm.value = 5;
+        render();
+      }
+    }
     else if (t.matches("[data-machine]")) { S.machine = t.selectedIndex; }
     else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
     // «Главный баннер»: the link target, the picture URL and the timing —
@@ -6135,6 +8526,16 @@
       e.preventDefault();
       admLogin(t.value.trim());
     }
+    // account-flows: Enter in the login-code box is the «Войти» button, and
+    // Enter on the address is «Получить код» — a six-digit code is typed, and
+    // then people press Enter.
+    if (t && t.matches && t.matches("[data-acctcode]")) { e.preventDefault(); acctVerify(); }
+    if (t && t.matches && t.matches("[data-email]") && S.screen === "account" && !S.loggedIn) {
+      e.preventDefault(); acctSendCode();
+    }
+    if (t && t.matches && t.matches("[data-notifyf]")) {
+      e.preventDefault(); notifySend(S.notifyOpen || S.productId);
+    }
   });
 
   routeFromPath();
@@ -6154,6 +8555,12 @@
   }
   restartHero();
   intro();
+
+  /* account-flows: did they arrive from an abandoned-cart letter? After the
+     first paint and after the boot replaceState above, which would otherwise
+     put ?resume= straight back into the address bar. The customer session is
+     asked for by the two screens that need it, not on every visit. */
+  resumeCart();
 
   /* Country refinement for the first visit only: an English-language browser
      physically in Estonia gets the Estonian shop, in a Russian-speaking

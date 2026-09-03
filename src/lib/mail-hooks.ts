@@ -1,6 +1,7 @@
 /**
  * Order lifecycle → e-mail. Backend-core and the checkout agent call these by
- * dynamic import, so the three names are a contract:
+ * dynamic import, so the names are a contract — the three hooks, and
+ * `issueOrderGiftCards` for the payment routes' replay path:
  *
  *   const { onOrderPaid } = await import("@/lib/mail-hooks");
  *   await onOrderPaid(order);
@@ -13,7 +14,7 @@
 import { renderOrderConfirmed } from "@/emails/order-confirmed";
 import { renderOrderShipped } from "@/emails/order-shipped";
 import { renderGiftCard, type GiftCardLike } from "@/emails/gift-card";
-import { money, normalizeLang, num, pick } from "@/emails/layout";
+import { money, normalizeLang, num, pick, setBrandOverride } from "@/emails/layout";
 import {
   customerName,
   deliveryLine,
@@ -48,6 +49,42 @@ function langOf(order: OrderLike) {
 
 function truthy(v: string | undefined | null): boolean {
   return /^(1|true|on|yes|да)$/i.test((v ?? "").trim());
+}
+
+/**
+ * The company name, address and e-mail in every letter's footer are the
+ * owner's to change (`settings.content`, edited in «Настройки → Контент»).
+ *
+ * Read once per send, at the top of each hook, and handed to the layout —
+ * the renderers themselves stay pure functions of (order, lang). `@/lib/orders`
+ * and `@/lib/content` come in by dynamic import so a letter rendered in a test
+ * or in the preview route never drags `pg` in behind it.
+ *
+ * Everything about this is best effort: no database, an empty row or a
+ * malformed one all end with the built-in Rempire details, never an
+ * exception — a paid order must not fail because a settings query did.
+ */
+async function loadBrand(): Promise<void> {
+  try {
+    const [{ getSettings }, { mergeContent }] = await Promise.all([
+      import("@/lib/orders"),
+      import("@/lib/content"),
+    ]);
+    const content = mergeContent((await getSettings()).content);
+    setBrandOverride({
+      legal: content.company.legalName,
+      address: content.company.address,
+      email: content.company.email,
+      note: {
+        ru: content.emailFooter.RU,
+        et: content.emailFooter.ET,
+        en: content.emailFooter.EN,
+      },
+    });
+  } catch (err) {
+    console.warn("[mail-hooks] shop details unavailable, using defaults", err);
+    setBrandOverride(null);
+  }
 }
 
 /**
@@ -116,6 +153,7 @@ export async function onOrderCreated(
     const to = customerEmail(order);
     if (!to) return { ok: true, skipped: true, reason: "no_customer_email" };
 
+    await loadBrand();
     const lang = langOf(order);
     const mail = renderOrderConfirmed(order, lang);
     const res = await sendRendered(to, mail, {
@@ -140,6 +178,7 @@ export async function onOrderCreated(
  */
 export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
   try {
+    await loadBrand();
     const lang = langOf(order);
     const to = customerEmail(order);
 
@@ -168,9 +207,9 @@ export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
       ownerSummary(order, "💶 Заказ оплачен"),
     );
 
-    // Gift cards bought in this order: issue the codes (idempotent) and mail
-    // each one to its recipient, falling back to the buyer's address.
-    await sendGiftCards(order, to, lang);
+    // Gift cards bought in this order — the same path the payment routes run
+    // on their own when a "paid" arrives twice, see issueOrderGiftCards().
+    await issueOrderGiftCards(order);
 
     return { ok: ok || notified, skipped, reason, id, notified };
   } catch (err) {
@@ -180,32 +219,56 @@ export async function onOrderPaid(order: OrderLike): Promise<MailHookResult> {
 }
 
 /**
- * Issue + mail the gift cards of a paid order. The features agent's
- * `issueGiftCards` is loaded lazily (it pulls in `pg`) and is safe to call
- * again on a repeated webhook: cards already attached to the order come back
- * unchanged, and Resend's idempotency key stops a second letter.
+ * The gift-card half of onOrderPaid, on its own.
+ *
+ * The payment routes call this — not onOrderPaid — when the provider says
+ * "paid" for an order that is already paid (audit H4: a webhook retry, a
+ * refreshed return URL, notify and return racing). A retry must not ping Renat
+ * or write to the customer again, but it is also the only thing that can
+ * finish the job when the process died between `setOrderStatus(paid)` and the
+ * hook: without it, the cards bought in that order would never be minted.
+ *
+ * Safe to run any number of times. The features agent's `issueGiftCards`
+ * (loaded lazily — it pulls in `pg`) hands back the cards already attached to
+ * the order instead of making more, and the letter's idempotency key
+ * (`gift:<code>`) stops Resend from sending it twice.
  */
-async function sendGiftCards(order: OrderLike, buyerEmail: string, lang: ReturnType<typeof langOf>): Promise<void> {
-  const items = Array.isArray(order.items) ? order.items : [];
-  if (!items.some((it) => typeof it?.id === "string" && it.id.startsWith("gift:"))) return;
+export async function issueOrderGiftCards(order: OrderLike): Promise<MailHookResult> {
   try {
-    const mod = (await import("@/lib/giftcards")) as {
-      issueGiftCards?: (o: unknown) => Promise<GiftCardLike[]>;
-    };
-    if (!mod.issueGiftCards) return;
-    const cards = await mod.issueGiftCards(order);
-    for (const card of cards) {
-      const to = pick(card.recipient?.email, buyerEmail);
-      if (!to || !card.code) continue;
-      const mail = renderGiftCard(card, card.lang || lang);
-      await sendRendered(to, mail, {
-        tags: { template: "gift-card", stage: "paid" },
-        idempotencyKey: `gift:${card.code}`,
-      });
-    }
+    return await sendGiftCards(order);
   } catch (err) {
-    console.error("[mail-hooks] gift cards failed", err);
+    console.error("[mail-hooks] issueOrderGiftCards failed", err);
+    return { ok: false, reason: "exception" };
   }
+}
+
+/** Issue + mail the gift cards of a paid order; a no-op when it holds none. */
+async function sendGiftCards(order: OrderLike): Promise<MailHookResult> {
+  const items = Array.isArray(order.items) ? order.items : [];
+  if (!items.some((it) => typeof it?.id === "string" && it.id.startsWith("gift:"))) {
+    return { ok: true, skipped: true, reason: "no_gift_items" };
+  }
+  const mod = (await import("@/lib/giftcards")) as {
+    issueGiftCards?: (o: unknown) => Promise<GiftCardLike[]>;
+  };
+  if (!mod.issueGiftCards) return { ok: false, reason: "giftcards_unavailable" };
+
+  const cards = await mod.issueGiftCards(order);
+  const buyerEmail = customerEmail(order);
+  const lang = langOf(order);
+  let ok = true;
+  for (const card of cards) {
+    // each card to its recipient, falling back to the buyer's address
+    const to = pick(card.recipient?.email, buyerEmail);
+    if (!to || !card.code) continue;
+    const mail = renderGiftCard(card, card.lang || lang);
+    const res = await sendRendered(to, mail, {
+      tags: { template: "gift-card", stage: "paid" },
+      idempotencyKey: `gift:${card.code}`,
+    });
+    ok = ok && res.ok;
+  }
+  return ok ? { ok } : { ok, reason: "send_failed" };
 }
 
 /** Parcel handed to the carrier — tracking code goes out to the customer. */
@@ -217,6 +280,7 @@ export async function onOrderShipped(
     const to = customerEmail(order);
     if (!to) return { ok: true, skipped: true, reason: "no_customer_email" };
 
+    await loadBrand();
     const lang = langOf(order);
     const mail = renderOrderShipped(order, lang, tracking);
     const code =

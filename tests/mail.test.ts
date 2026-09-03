@@ -84,7 +84,7 @@ describe("sendMail", () => {
       { name: "template", value: "order-confirmed" },
     ]);
     // no MAIL_REPLY_TO configured → replies go to the shop mailbox by default
-    expect(body.reply_to).toEqual("rempireshopinfo@gmail.com");
+    expect(body.reply_to).toEqual("info@rempireshop.com");
   });
 
   it("uses RESEND_FROM and MAIL_REPLY_TO when they are set", async () => {

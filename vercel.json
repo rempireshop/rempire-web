@@ -1,12 +1,7 @@
 {
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
-    }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "comment": "Headers live in next.config.ts headers(). The cron runs the three automatic letters (docs/flows.md); Hobby allows one run a day, so the schedule is daily — Pro or Railway can call the same endpoint hourly.",
+  "crons": [
+    { "path": "/api/cron/flows/", "schedule": "0 7 * * *" }
   ]
 }

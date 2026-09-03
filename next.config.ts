@@ -61,7 +61,21 @@ function prerenderedRewrites() {
     if (prefix && existsSync(path.join(PUBLIC, dir, "index.html"))) {
       out.push({ source: `/shop2${prefix}`, destination: `/shop2${prefix}/index.html` });
     }
-    for (const kind of ["p", "c", "b"]) group(`/shop2${prefix}/${kind}`, path.join(dir, kind));
+    /* p/c/b are the catalogue; info and set were added when the policy pages,
+       the sets and the gift card stopped being shell-only. `set` is singular
+       and `sets` is the landing — that is what pathFor() in app.js pushes, so
+       that is what has to resolve. */
+    for (const kind of ["p", "c", "b", "info", "set"]) {
+      group(`/shop2${prefix}/${kind}`, path.join(dir, kind));
+    }
+    /* Two single pages, so no alternation to build — but still listed off
+       disk, so a run of `npm run prerender` that has not happened yet leaves
+       them falling through to the shell rather than 404ing. */
+    for (const one of ["sets", "gift"]) {
+      if (existsSync(path.join(PUBLIC, dir, one, "index.html"))) {
+        out.push({ source: `/shop2${prefix}/${one}`, destination: `/shop2${prefix}/${one}/index.html` });
+      }
+    }
   }
   /* The old per-product pages under /shop/p/... — they carry the link previews
      the shop has been sharing and hand humans over with a script, so they have
@@ -163,11 +177,12 @@ const nextConfig: NextConfig = {
      shares (catalogue, images, content) stay where they are, and the
      prerendered /shop/p/... pages keep their link previews and hand humans
      over with a script. */
-  /* SEO, 03.09: products, categories, brands and the three home pages are no
-     longer shell-only — each is written out per language under public/shop2/
-     by `npm run prerender`, and the language lives in the path (/shop2/ is
-     Russian and the x-default, /shop2/et/… and /shop2/en/… the others). See
-     prerenderedRewrites() above and docs/seo.md. */
+  /* SEO, 03.09: products, categories, brands, the three home pages, the five
+     policy pages, the sets and the gift card are no longer shell-only — each
+     is written out per language under public/shop2/ by `npm run prerender`,
+     and the language lives in the path (/shop2/ is Russian and the x-default,
+     /shop2/et/… and /shop2/en/… the others). See prerenderedRewrites() above
+     and docs/seo.md. */
   async headers() {
     return [
       /* Everything, including the Next-rendered pages and the legacy
@@ -178,6 +193,35 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline'") },
           ...baseSecurityHeaders(),
         ],
+      },
+      /* Keep search engines out of everything that is not the shop's own
+         domain. This used to be a global `X-Robots-Tag: noindex, nofollow,
+         noarchive` on `/(.*)` in vercel.json, from the days when the whole
+         thing was a prototype nobody should find. Left there it would have
+         quietly outranked every canonical, hreflang and sitemap on the
+         production domain the day the DNS moved (audit row 9, docs/seo.md).
+
+         `missing` inverts the host test into an ALLOWLIST: the header is sent
+         unless the host is rempireshop.com or www.rempireshop.com. The old
+         `has` version was a denylist — it named *.vercel.app and the staging
+         host, so anything it did not name (a new preview alias, a custom
+         staging domain, an IP, a copy someone points at the app) was indexable
+         by default. This way a host nobody thought about is closed, which is
+         the same rule the `<meta name="robots">` layer and robots.txt already
+         follow (docs/seo.md, "The three noindex layers").
+
+         Next compiles the value as `^…$` itself; the anchors are written here
+         too so the intent survives a copy-paste. A request with no Host header
+         matches nothing and therefore gets the header — the safe direction. */
+      {
+        source: "/:path*",
+        missing: [
+          {
+            type: "host",
+            value: "^(www\\.)?rempireshop\\.com$",
+          },
+        ],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       /* The shop and the admin panel: no inline script anywhere, so no
          'unsafe-inline'. This is the rule that turns the class of innerHTML
@@ -232,9 +276,11 @@ const nextConfig: NextConfig = {
          per language for search engines — those win. */
       ...prerenderedRewrites(),
       /* Everything else under /shop2/ — search, the cart, the account, the
-         policy pages — is still one shell that reads the path back into its
-         state on boot. index.html is both that shell and the Russian home
-         page; see the comment at the top of the file. */
+         checkout, the receipt, the admin — is still one shell that reads the
+         path back into its state on boot. Those need state to mean anything,
+         they are robots-disallowed, and none of them is prerendered or in the
+         sitemap. index.html is both that shell and the Russian home page; see
+         the comment at the top of the file. */
       { source: "/shop2/:path+", destination: "/shop2/index.html" },
     ];
   },

@@ -33,6 +33,24 @@ const catSrc = await readFile(path.join(PUB, "shop", "catalogue2.js"), "utf8");
 const CATALOGUE = new Function(catSrc + "\nreturn CATALOGUE;")();
 const CAT_NAMES = new Function(catSrc + "\nreturn CAT_NAMES;")();
 
+const loadObj = async (file, name) => {
+  try { return new Function(await readFile(path.join(PUB, "shop", file), "utf8") + "\nreturn " + name + ";")(); }
+  catch { return null; }
+};
+const LEGAL = (await loadObj("legal.js", "LEGAL")) || {};
+const LEGAL_SLUGS = Object.keys(LEGAL);
+const BUNDLES = (await loadObj("bundles.js", "BUNDLES")) || [];
+
+/* Every og:image the tool writes is meant to be a 1 200×630 file that is
+   actually on disk — that is the whole promise behind declaring
+   summary_large_image on every page. The set of distinct images is small
+   (one card per product and per set, plus two shared ones), so each one is
+   measured once with sharp rather than trusted. */
+const OG_SEEN = new Map();      // absolute url -> local path
+const PAGE_ROBOTS = new Set();  // the <meta name="robots"> values seen, which must be one value
+let sharp = null;
+try { ({ default: sharp } = await import("sharp")); } catch { /* dimensions unchecked */ }
+
 const shell = await readFile(path.join(SHOP2, "index.html"), "utf8");
 const ASSET_V = (shell.match(/app\.js\?v=([^"']*)/) || [])[1];
 const SCRIPTS = (shell.match(/<!-- prerender:end -->\s*<\/div>\s*([\s\S]*?)<\/body>/) || [])[1];
@@ -50,7 +68,7 @@ const decode = (s) => String(s)
   .replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">")
   .replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, "&");
 
-async function checkPage(file, { lang, seg, rest, product }) {
+async function checkPage(file, { lang, seg, rest, product, needImg = true, minBody = 400 }) {
   checked++;
   let html;
   try { html = await readFile(file, "utf8"); }
@@ -66,6 +84,10 @@ async function checkPage(file, { lang, seg, rest, product }) {
   const desc = decode((html.match(/<meta name="description" content="([^"]*)"/) || [])[1] || "");
   if (!desc) fail(file, "no meta description");
   if (desc.length > 160) fail(file, `description is ${desc.length} chars (max 160)`);
+
+  const meta = (html.match(/<meta name="robots" content="([^"]*)"/) || [])[1];
+  if (!meta) fail(file, "no robots meta");
+  else PAGE_ROBOTS.add(meta);
 
   const canonical = (html.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
   const wantPath = "/shop2" + (seg ? "/" + seg : "") + rest;
@@ -85,39 +107,84 @@ async function checkPage(file, { lang, seg, rest, product }) {
     if (altHrefs[i] && !altHrefs[i].endsWith(want)) fail(file, `alternate ${i} ends "${altHrefs[i].slice(-50)}", expected "${want}"`);
   }
 
-  for (const [ldRaw, i] of all(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g, html).map((s, i) => [s, i])) {
-    try {
-      const ld = JSON.parse(ldRaw);
-      if (!ld["@type"]) fail(file, `JSON-LD block ${i} has no @type`);
-      if (product && ld["@type"] === "Product") {
-        if (!ld.offers) fail(file, "Product JSON-LD has no offers");
-        else {
-          if (ld.offers.priceCurrency !== "EUR") fail(file, `offers.priceCurrency is ${ld.offers.priceCurrency}`);
-          if (!(Number(ld.offers.price) >= 0)) fail(file, `offers.price is ${ld.offers.price}`);
-          if (!/schema\.org\/(In|Out Of|OutOf)Stock/.test(ld.offers.availability || "")) {
-            fail(file, `offers.availability is ${ld.offers.availability}`);
-          }
+  /* The tag carries an attribute — id="ldjson" on a product page, otherwise
+     data-seo="ldjson-page" — so the pattern has to allow one. It did not
+     until 03.09, which meant every block matched nothing and none of the
+     assertions below had ever run. */
+  const blocks = all(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g, html);
+  if (!blocks.length) fail(file, "no JSON-LD at all");
+  const types = [];
+  for (const [i, ldRaw] of blocks.entries()) {
+    let ld;
+    try { ld = JSON.parse(ldRaw); }
+    catch (e) { fail(file, `JSON-LD block ${i} does not parse: ${e.message}`); continue; }
+    if (!ld["@context"]) fail(file, `JSON-LD block ${i} has no @context`);
+    if (!ld["@type"]) { fail(file, `JSON-LD block ${i} has no @type`); continue; }
+    types.push(ld["@type"]);
+    if (ld["@type"] === "BreadcrumbList") {
+      const items = ld.itemListElement || [];
+      if (!items.length) fail(file, "BreadcrumbList has no itemListElement");
+      items.forEach((it, n) => {
+        if (it.position !== n + 1) fail(file, `BreadcrumbList item ${n} has position ${it.position}`);
+        if (!it.name) fail(file, `BreadcrumbList item ${n} has no name`);
+      });
+    }
+    if (ld["@type"] === "Product") {
+      if (!ld.name) fail(file, "Product JSON-LD has no name");
+      if (!ld.offers) fail(file, "Product JSON-LD has no offers");
+      else {
+        if (ld.offers.priceCurrency !== "EUR") fail(file, `offers.priceCurrency is ${ld.offers.priceCurrency}`);
+        if (!(Number(ld.offers.price) >= 0)) fail(file, `offers.price is ${ld.offers.price}`);
+        if (!/schema\.org\/(In|Out Of|OutOf)Stock/.test(ld.offers.availability || "")) {
+          fail(file, `offers.availability is ${ld.offers.availability}`);
         }
+        if (!/^https?:\/\//.test(ld.offers.url || "")) fail(file, `offers.url is not absolute: ${ld.offers.url}`);
       }
-    } catch (e) { fail(file, `JSON-LD block ${i} does not parse: ${e.message}`); }
+    }
+    if (ld["@type"] === "ItemList") {
+      if (!(ld.itemListElement || []).length) fail(file, "ItemList has no itemListElement");
+    }
   }
-  const types = all(/"@type":"([^"]+)"/g, html);
   if (product && !types.includes("Product")) fail(file, "no Product JSON-LD");
   if (rest !== "/" && !types.includes("BreadcrumbList")) fail(file, "no BreadcrumbList JSON-LD");
   if (rest === "/" && !types.includes("Organization")) fail(file, "home page has no Organization JSON-LD");
 
+  /* setHead() in app.js deletes #ldjson on every screen that is not a
+     catalogue product, and Googlebot reads the rendered DOM — so a Product
+     block outside a product page must NOT carry that id or it is thrown away
+     before anything reads it. */
+  const idBlock = /<script type="application\/ld\+json" id="ldjson">/.test(html);
+  if (idBlock !== rest.startsWith("/p/")) {
+    fail(file, idBlock
+      ? 'JSON-LD carries id="ldjson" on a page app.js is not going to rewrite — it will be deleted on boot'
+      : 'the product page has no id="ldjson" block for app.js to rewrite in place');
+  }
+
+  /* The link preview. A page without one shares as a bare URL; a .webp one
+     shares as a bare URL too, because Facebook, WhatsApp and LinkedIn will
+     not read the format. So: present, absolute, on disk, a JPEG or a PNG,
+     declared 1 200×630 and actually 1 200×630, and offered as a wide card. */
   const og = (html.match(/<meta property="og:image" content="([^"]+)"/) || [])[1] || "";
-  if (!/^https?:\/\//.test(og)) fail(file, `og:image is not absolute: ${og}`);
+  if (!og) fail(file, "no og:image");
+  else if (!/^https?:\/\//.test(og)) fail(file, `og:image is not absolute: ${og}`);
+  if (/\.(webp|svg|gif)(\?|$)/i.test(og)) {
+    once(file, "ogfmt:" + og, `og:image is a format link scrapers refuse: ${og}`);
+  }
   const local = og.replace(/^https?:\/\/[^/]+/, "").split("?")[0];
   if (local && !existsSync(path.join(PUB, local.replace(/^\//, "")))) {
     once(file, "ogfile:" + local, `og:image file is missing: ${local}`);
-  }
+  } else if (local) OG_SEEN.set(og, path.join(PUB, local.replace(/^\//, "")));
+  const ogW = (html.match(/<meta property="og:image:width" content="(\d+)"/) || [])[1];
+  const ogH = (html.match(/<meta property="og:image:height" content="(\d+)"/) || [])[1];
+  if (ogW !== "1200" || ogH !== "630") fail(file, `og:image:width/height are ${ogW}×${ogH}, expected 1200×630`);
+  const tw = (html.match(/<meta name="twitter:card" content="([^"]+)"/) || [])[1];
+  if (tw !== "summary_large_image") fail(file, `twitter:card is "${tw}", expected summary_large_image`);
 
   // visible content, not just a head
   const body = (html.match(/<div id="prerender">([\s\S]*?)<\/div><!-- prerender:end -->/) || [])[1] || "";
-  if (body.length < 400) fail(file, `prerendered body is ${body.length} chars — nothing meaningful inside #app`);
+  if (body.length < minBody) fail(file, `prerendered body is ${body.length} chars — nothing meaningful inside #app`);
   if (!/<h1[^>]*>[^<]/.test(body)) fail(file, "no <h1> in the prerendered body");
-  if (!/<img [^>]*alt="[^"]+"/.test(body)) fail(file, "no <img> with a non-empty alt");
+  if (needImg && !/<img [^>]*alt="[^"]+"/.test(body)) fail(file, "no <img> with a non-empty alt");
   if (!/<a href="\/shop2/.test(body)) fail(file, "no crawlable /shop2 links");
   if (product) {
     if (!/pdp__price/.test(body)) fail(file, "no price on the product page");
@@ -146,24 +213,83 @@ for (const [lang, seg] of LANGS) {
     await checkPage(path.join(SHOP2, seg, "p", p.id, "index.html"),
       { lang, seg, rest: `/p/${encodeURIComponent(p.id)}/`, product: true });
   }
+  /* The four screens that used to be shell-only. The paths are the ones
+     app.js pushes in pathFor() — the singular /set/<id>/ beside the plural
+     /sets/ — so a mismatch here is a mismatch with the router. */
+  for (const slug of LEGAL_SLUGS) {
+    /* A policy page has no photograph and app.js does not draw one either;
+       the body is the legal text, which is thousands of characters. */
+    await checkPage(path.join(SHOP2, seg, "info", slug, "index.html"),
+      { lang, seg, rest: `/info/${slug}/`, needImg: false, minBody: 600 });
+  }
+  if (BUNDLES.length) {
+    await checkPage(path.join(SHOP2, seg, "sets", "index.html"), { lang, seg, rest: "/sets/" });
+    for (const b of BUNDLES) {
+      await checkPage(path.join(SHOP2, seg, "set", b.id, "index.html"),
+        { lang, seg, rest: `/set/${encodeURIComponent(b.id)}/`, product: true });
+    }
+  }
+  await checkPage(path.join(SHOP2, seg, "gift", "index.html"),
+    { lang, seg, rest: "/gift/", minBody: 700 });
+}
+
+/* ---------- the OG cards are really 1200×630 ---------------------------- */
+if (sharp) {
+  let bad = 0;
+  for (const [url, file] of OG_SEEN) {
+    try {
+      const m = await sharp(file).metadata();
+      if (m.width !== 1200 || m.height !== 630) {
+        failed++; bad++;
+        console.error(`FAIL og:image ${url} is ${m.width}×${m.height} on disk, declared 1200×630`);
+      }
+    } catch (e) { failed++; bad++; console.error(`FAIL og:image ${url} does not open: ${e.message}`); }
+  }
+  console.log(`og:image: ${OG_SEEN.size} distinct cards, ${OG_SEEN.size - bad} at 1200×630`);
+} else {
+  console.log(`og:image: ${OG_SEEN.size} distinct cards (sharp missing — dimensions unchecked)`);
 }
 
 /* ---------- nothing prerendered that is not in the catalogue ------------- */
-const ids = new Set(CATALOGUE.map((p) => p.id));
+const stale = [
+  ["p", new Set(CATALOGUE.map((p) => p.id)), "product"],
+  ["set", new Set(BUNDLES.map((b) => b.id)), "set"],
+  ["info", new Set(LEGAL_SLUGS), "policy page"],
+];
 for (const [, seg] of LANGS) {
-  const dir = path.join(SHOP2, seg, "p");
-  for (const d of await readdir(dir).catch(() => [])) {
-    if (!ids.has(d)) { failed++; console.error(`FAIL stale page for a product that no longer exists: ${seg || "ru"}/p/${d}/`); }
+  for (const [kind, keep, what] of stale) {
+    for (const d of await readdir(path.join(SHOP2, seg, kind)).catch(() => [])) {
+      if (!keep.has(d)) {
+        failed++;
+        console.error(`FAIL stale page for a ${what} that no longer exists: ${seg || "ru"}/${kind}/${d}/`);
+      }
+    }
   }
 }
 
 /* ---------- sitemap + robots -------------------------------------------- */
+let SITE_BASE = "";
 const smFile = path.join(PUB, "sitemap.xml");
 if (!existsSync(smFile)) { failed++; console.error("FAIL public/sitemap.xml is missing"); }
 else {
-  const sm = await readFile(smFile, "utf8");
+  let sm = await readFile(smFile, "utf8");
+  /* Above 1 000 URLs the tool writes a sitemapindex and the pages move into
+     sitemap-N.xml, so follow it rather than counting the index's own rows. */
+  if (/<sitemapindex/.test(sm)) {
+    const chunks = all(/<loc>([^<]+)<\/loc>/g, sm).map((u) => u.replace(/^https?:\/\/[^/]+\//, ""));
+    let joined = "";
+    for (const c of chunks) {
+      const f = path.join(PUB, c);
+      if (!existsSync(f)) { failed++; console.error(`FAIL sitemapindex points at a missing ${c}`); continue; }
+      joined += await readFile(f, "utf8");
+    }
+    sm = joined;
+  }
   const locs = all(/<loc>([^<]+)<\/loc>/g, sm);
-  const expected = LANGS.length * (1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + CATALOGUE.length);
+  SITE_BASE = (locs[0] || "").match(/^https?:\/\/[^/]+/)?.[0] || "";
+  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + CATALOGUE.length +
+    LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1;
+  const expected = LANGS.length * perLang;
   if (locs.length !== expected) { failed++; console.error(`FAIL sitemap has ${locs.length} <loc>, expected ${expected}`); }
   if (new Set(locs).size !== locs.length) { failed++; console.error("FAIL sitemap has duplicate <loc> entries"); }
   const xh = (sm.match(/<xhtml:link/g) || []).length;
@@ -173,23 +299,80 @@ else {
   // every prerendered page must be in it, and only those
   const paths = new Set(locs.map((l) => l.replace(/^https?:\/\/[^/]+/, "")));
   for (const [, seg] of LANGS) {
-    const want = "/shop2" + (seg ? "/" + seg : "") + "/p/" + CATALOGUE[0].id + "/";
-    if (!paths.has(want)) { failed++; console.error(`FAIL sitemap is missing ${want}`); }
+    const b = "/shop2" + (seg ? "/" + seg : "");
+    const want = [
+      b + "/p/" + CATALOGUE[0].id + "/",
+      ...LEGAL_SLUGS.map((s) => b + "/info/" + s + "/"),
+      ...(BUNDLES.length ? [b + "/sets/", ...BUNDLES.map((x) => b + "/set/" + x.id + "/")] : []),
+      b + "/gift/",
+    ];
+    for (const w of want) if (!paths.has(w)) { failed++; console.error(`FAIL sitemap is missing ${w}`); }
+  }
+  /* A screen that needs a basket, a payment form or a login behind it must
+     never be offered to a crawler — it renders empty without state, it is
+     robots-disallowed, and asking for it spends crawl budget on nothing. */
+  const NEVER = /^\/shop2(?:\/(?:et|en))?\/(?:checkout|cart|account|admin|done|search)\/?$/;
+  for (const p of paths) {
+    if (NEVER.test(p)) { failed++; console.error(`FAIL sitemap offers a screen that must never be indexed: ${p}`); }
   }
   console.log(`sitemap: ${locs.length} urls, ${xh} hreflang alternates`);
 }
 
-const rp = path.join(PUB, "robots.production.txt");
-if (!existsSync(rp)) { failed++; console.error("FAIL public/robots.production.txt is missing"); }
-else {
-  const r = await readFile(rp, "utf8");
-  for (const want of ["User-agent: *", "Allow: /", "Disallow: /shop2/admin", "Disallow: /shop2/checkout",
-    "Disallow: /shop2/cart", "Disallow: /api/", "Sitemap: "]) {
-    if (!r.includes(want)) { failed++; console.error(`FAIL robots.production.txt has no "${want}"`); }
+/* Three robots files: the two policies, and public/robots.txt which must be
+   a copy of whichever one matches the base the pages were built against. A
+   staging build with the open policy shipped beside it is how a half-built
+   shop ends up in an index. */
+const robotsFiles = {
+  production: path.join(PUB, "robots.production.txt"),
+  staging: path.join(PUB, "robots.staging.txt"),
+};
+const NO_INDEX = ["/shop2/admin", "/shop2/checkout", "/shop2/cart", "/shop2/account",
+  "/shop2/done", "/shop2/search", "/api/"];
+
+for (const [name, f] of Object.entries(robotsFiles)) {
+  if (!existsSync(f)) { failed++; console.error(`FAIL public/robots.${name}.txt is missing`); continue; }
+  const r = await readFile(f, "utf8");
+  for (const want of [...NO_INDEX.map((p) => "Disallow: " + p), "User-agent: *", "Sitemap: "]) {
+    if (!r.includes(want)) { failed++; console.error(`FAIL robots.${name}.txt has no "${want}"`); }
   }
 }
+if (existsSync(robotsFiles.production) && !/\nAllow: \/\n/.test(await readFile(robotsFiles.production, "utf8"))) {
+  failed++; console.error("FAIL robots.production.txt does not open the site (no bare `Allow: /`)");
+}
+if (existsSync(robotsFiles.staging) && !/User-agent: \*\nDisallow: \/\n/.test(await readFile(robotsFiles.staging, "utf8"))) {
+  failed++; console.error("FAIL robots.staging.txt does not close the site to general crawlers");
+}
+
+/* The layer that has to agree with robots.txt is the robots META, not the
+   host: both come out of the same `LIVE` decision in the same run of the
+   tool, so a disagreement means one of them was written by a different run.
+   The sitemap host is a separate axis — a run with no PUBLIC_BASE_URL writes
+   live URLs *and* noindex on purpose, and that is a state to report, not a
+   contradiction. */
 const rs = await readFile(path.join(PUB, "robots.txt"), "utf8");
 if (!/Sitemap:/.test(rs)) { failed++; console.error("FAIL public/robots.txt does not point at a sitemap"); }
+if (PAGE_ROBOTS.size > 1) {
+  failed++;
+  console.error(`FAIL the pages carry ${PAGE_ROBOTS.size} different robots metas ` +
+    `(${[...PAGE_ROBOTS].join(" | ")}) — some are from an older run`);
+}
+const metaRobots = [...PAGE_ROBOTS][0] || "";
+const wantName = /noindex/.test(metaRobots) ? "staging" : "production";
+const wantFile = robotsFiles[wantName];
+if (existsSync(wantFile) && rs.trim() !== (await readFile(wantFile, "utf8")).trim()) {
+  failed++;
+  console.error(`FAIL the pages say robots "${metaRobots}" but public/robots.txt is not the ${wantName} ` +
+    "policy — they come from the same switch, so one of them is from an older run. Re-run `npm run prerender`.");
+}
+if (SITE_BASE && !rs.includes(SITE_BASE)) {
+  failed++;
+  console.error(`FAIL public/robots.txt points at a different host from the sitemap (${SITE_BASE})`);
+}
+console.log(`robots: ${wantName} policy, pages "${metaRobots}", base ${SITE_BASE || "?"}`);
+if (SITE_BASE && wantName === "staging" && /(^|\.)rempireshop\.com$/i.test(new URL(SITE_BASE).hostname)) {
+  console.log("        note: live URLs with noindex — this is what a run with no PUBLIC_BASE_URL writes.\n" +
+    "        Safe, but not what should be deployed; set the variable and re-run.");
+}
 
 console.log(`checked ${checked} pages · ${failed} failure(s)`);
 process.exit(failed ? 1 : 0);

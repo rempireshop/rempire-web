@@ -685,7 +685,7 @@ the other admin routes carry.
 Written by the agent that did the work, straight after the review above. Line
 numbers are where the change landed; the surrounding files were being edited by
 other agents at the same time, so search for the quoted code if an offset has
-drifted. Verified with `npm run typecheck`, `npm test` (20 files, 305 tests),
+drifted. Verified with `npm run typecheck`, `npm test` (21 files, 311 tests),
 `node --check public/shop2/app.js`, `npm run build`, and a local `next start`
 walked with curl and a browser.
 
@@ -705,6 +705,8 @@ walked with curl and a browser.
 | **H3** | The gift card is no longer spent at checkout. `createOrder` stores the quote (`discount` + `discount_code`) and nothing else; `applyPaymentResult` redeems it on the single transition into `paid`, never on failed or pending, never on a replay. A card that emptied in the meantime leaves the order paid and writes `admin_audit.giftcard_redeem_failed`. | `src/lib/payments/apply.ts` `redeemQuotedGiftCard()`, `src/lib/orders.ts` `createOrder` |
 | | Covered on PGlite: quote-does-not-spend, spend-once, replay-does-not-spend-twice, failed/pending leave it alone, emptied-card audit row, no-code no-op. | `tests/payments-giftcard.test.ts` |
 | **H4** | `ApplyOutcome` gained `alreadyPaid`, so the routes can tell a payment from a retry. Both `notify` and `return` now send the owner ping and the customer letter only when `!alreadyPaid`. Both routes got a 60/min/IP limiter. `notify` still answers 200 on a duplicate. | `apply.ts:193-215`, `notify/route.ts:24-30,73-79`, `return/route.ts:51-62,96-101` |
+| | **The window that fix opened is closed.** Skipping `notifyOrderPaid` on a replay also skipped the gift cards bought *in* the order, so a crash between `setOrderStatus(paid)` and the hook would have left a paid order with no `gift_cards` row for good. The gift-card half of `onOrderPaid` is now its own export, `issueOrderGiftCards`, and both routes run it on **every** paid outcome — only the ping and the customer letter stay behind `!alreadyPaid`. Idempotent: `issueGiftCards` returns the cards already attached to the order, and the letter's Resend key is `gift:<code>`. | `src/lib/mail-hooks.ts` `issueOrderGiftCards()`, `src/lib/payments/mail-hook.ts`, `notify/route.ts` and `return/route.ts` (the `outcome.status === "paid"` block) |
+| | Covered on PGlite through the real routes with mock-provider tickets: the first payment mints, mails and pings once; a replayed webhook and a return-after-webhook mint nothing new and ping nobody; a paid order with no cards gets exactly them — and no ping, no letter — from the retry, by webhook and by return. | `tests/payments-giftcard-issue.test.ts` |
 | **H5** | `next.config.ts` grew a `headers()` block: CSP, `X-Frame-Options: DENY`, HSTS (1 year, includeSubDomains, **no** preload), `Referrer-Policy`, `X-Content-Type-Options`, a minimal `Permissions-Policy`. `/shop2/*` — the shop and the admin panel — gets `script-src 'self'` with no `'unsafe-inline'`; everything else gets `'unsafe-inline'` because Next's App Router streams its flight payload inline and the 95 legacy `/shop/p/…` stubs redirect with an inline `location.replace()`. `style-src` needs `'unsafe-inline'`: `app.js` writes `style="…"` attributes on nearly every row. `/api/admin/mail/preview/` is the one exception to `frame-ancestors 'none'` — the «Письма» card frames it. | `next.config.ts` `csp()`, `baseSecurityHeaders()`, `headers()` |
 | **M1** | `/api/overrides` publishes only `PUBLIC_SETTINGS` (chatbot, bundles, hero, flows, shipping, shipping_rules) instead of the whole `settings` table. | `src/app/api/overrides/route.ts:28-45` |
 | **M4** | No `SESSION_SECRET`, no `ip_hash` — the fake-salted hash is gone, the column is nullable and `addReview` already accepted `null`. | `src/app/api/reviews/route.ts:20-34` |
@@ -754,16 +756,6 @@ the shipping whitelist, `computeShipping(…, carrier)`, gift-card timing),
   is a two-line change nobody has asked for yet.
 - **L9 — failed logins write an unauthenticated row.** Keep the forensics; the
   bound comes from M3's durable limiter, and the retention job is its own task.
-- **A narrow window opened by H4's fix, worth knowing about.** `notifyOrderPaid`
-  is now skipped entirely on a replay, and it is what issues the gift cards
-  bought *in* an order (`mail-hooks.ts` → `sendGiftCards`). If the process died
-  between `setOrderStatus(paid)` and that call, the retry would now skip it and
-  the cards would never be minted. `issueGiftCards` is idempotent, so the clean
-  fix is to call the gift-card path unconditionally on a paid outcome and keep
-  only the *ping* behind `alreadyPaid` — that means restructuring
-  `src/lib/mail-hooks.ts`, which belongs to the mail agent. Left for them, with
-  this note: the exposure is a crash inside a two-statement window, and the
-  symptom is visible (a paid gift-card order with no `gift_cards` row).
 - The **honeypot** on `/api/submit` and `/api/feedback` is enforced server-side
   only. The two forms are JS-driven rather than plain HTML, so a hidden input
   would add nothing that the rate limit does not already cover — worth adding

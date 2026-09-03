@@ -45,9 +45,18 @@ const decodeEntities = (s) =>
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 
-/* strip HTML to plain text: tags -> spaces, entities decoded, whitespace collapsed */
+/* strip HTML to plain text: an INLINE tag vanishes, a block tag becomes a
+   space, entities decoded, whitespace collapsed. Same rule as stripTags() in
+   public/shop2/app.js and tools/prerender-shop2.mjs — turning every tag into a
+   space split words that carry markup inside them, and Google Merchant read
+   «s trong durable hold» in the Davines clay's description. */
+const INLINE_TAGS = /^(?:span|b|i|strong|em|a|u|sup|sub)$/i;
 const stripHtml = (html) =>
-  decodeEntities(String(html).replace(/<[^>]*>/g, " "))
+  decodeEntities(
+    String(html)
+      .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, (_, tag) => (INLINE_TAGS.test(tag) ? "" : " "))
+      .replace(/<[^>]*>/g, " "),
+  )
     .replace(/\s+/g, " ")
     .trim();
 

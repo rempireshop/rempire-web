@@ -5,6 +5,11 @@ what the HTML says before any script runs, so every page a shopper could land
 on is written out as a static file, in all three languages, by
 `tools/prerender-shop2.mjs`. app.js then takes over in the browser.
 
+**810 pages** — 270 per language: 220 products, 8 categories plus `all`, 26
+brands, the home page, the 5 policy pages, 8 sets plus their landing, and the
+gift card. Every one of them carries a 1 200×630 link-preview card that exists
+on disk. Verify with `npm run prerender:check`.
+
 Nothing has been submitted to Google yet. The Search Console **domain property
 for rempireshop.com is verified** (03.09.2026); the site switch happens later.
 Everything below is generated against the staging base until then.
@@ -23,15 +28,32 @@ at, and changing it would have thrown away the whole existing link graph.
 | category | `/shop2/c/<cat>/` | `/shop2/et/c/<cat>/` | `/shop2/en/c/<cat>/` |
 | brand | `/shop2/b/<brand>/` | `/shop2/et/b/<brand>/` | `/shop2/en/b/<brand>/` |
 | product | `/shop2/p/<id>/` | `/shop2/et/p/<id>/` | `/shop2/en/p/<id>/` |
+| policy page | `/shop2/info/<slug>/` | `/shop2/et/info/<slug>/` | `/shop2/en/info/<slug>/` |
+| sets landing | `/shop2/sets/` | `/shop2/et/sets/` | `/shop2/en/sets/` |
+| one set | `/shop2/set/<id>/` | `/shop2/et/set/<id>/` | `/shop2/en/set/<id>/` |
+| gift card | `/shop2/gift/` | `/shop2/et/gift/` | `/shop2/en/gift/` |
 
 `<cat>` is a catalogue key (`hair`, `styling`, `beard`, `face`, `body`,
 `perfume`, `merch`) plus `all`. `<brand>` is the brand name slugified.
-`<id>` is the product id from `public/shop/catalogue2.js`.
+`<id>` is the product id from `public/shop/catalogue2.js`. `<slug>` is a key of
+`LEGAL` in `public/shop/legal.js` — `shipping`, `returns`, `terms`, `privacy`,
+`contact`; the router in app.js gates on that same object, so a page that
+existed only in a translation could not be reached cold and is not written.
+For sets, `<id>` is a `BUNDLES` id from `public/shop/bundles.js`.
 
-The other screens — `search`, `brands`, `account`, `checkout`, `done`, `admin`,
-`info/<slug>`, `sets`, `set/<id>`, `gift` — are client-side only and take the
-same prefixes (`/shop2/et/search/`). They are not prerendered and not in the
-sitemap.
+**Note the singular `/set/<id>/` beside the plural `/sets/`.** That is what
+`pathFor()` in app.js pushes and what `routeFromPath()` matches, so it is what
+the prerender writes — an indexed URL and a clicked URL have to be one address.
+
+The remaining screens — `search`, `brands`, `account`, `checkout`, `done`,
+`admin` — are client-side only and take the same prefixes
+(`/shop2/et/search/`). They are deliberately **not** prerendered and **not** in
+the sitemap: five of the six need state to mean anything (an empty basket
+renders an empty checkout), all but `brands` are robots-disallowed, and a
+static copy of them would be a page that lies. `tools/prerender-shop2.mjs`
+throws if one of them ever reaches the sitemap, and `check-prerender.mjs`
+fails if one is found there. `brands` is the one that could be added later —
+it duplicates the brand list already on every home page, so it was left out.
 
 `/shop2/ru/...` is accepted by the router so a hand-typed URL still works, but
 `next.config.ts` 301s it to the unprefixed path so it can never become a second
@@ -87,25 +109,115 @@ PUBLIC_BASE_URL=https://rempireshop.diipsolutions.eu npm run prerender
 PUBLIC_BASE_URL=https://rempireshop.com npm run prerender
 
 # then always
-node tools/check-prerender.mjs
+npm run prerender:check
 ```
 
-`PUBLIC_BASE_URL` defaults to `https://rempireshop.com`. The base decides two
-things beyond the absolute URLs: a base on `rempireshop.com` writes
-`robots: index, follow, max-image-preview:large` into every page, anything else
-writes `noindex, nofollow`. Staging cannot leak into an index even if the
-`X-Robots-Tag` header in `vercel.json` is ever dropped.
+The check reads the 810 files off disk — no DOM library, no network — and
+asserts the things that are easy to get wrong and impossible to see: a missing
+hreflang, a canonical pointing at the wrong language, JSON-LD that does not
+parse or has no `@context`, a `Product` without `offers`, a title Google would
+cut in half, an `og:image` that is not on disk or is not really 1 200×630, a
+page whose asset tags drifted from `index.html`, a stale page for a product
+that no longer exists, a `robots.txt` that disagrees with the robots meta the
+pages carry, and any screen behind a basket that has found its way into the
+sitemap.
 
-**Re-run it after anything that changes the catalogue, the translations or the
-shell**: `tools/build-catalogue-full.mjs`, `tools/assemble-translations.mjs`,
-or an edit to `public/shop2/index.html` (a new script, a bumped `?v=`). The run
-is idempotent and takes under a second — it rewrites only the files whose
-content actually changed and deletes pages for products that no longer exist.
+`PUBLIC_BASE_URL` is **set on the Vercel project** to the staging host
+(`docs/accounts.md`). For the absolute URLs it defaults to
+`https://rempireshop.com` when unset; for indexing it does not default at all.
+Beyond the URLs the base decides two things, and it decides them together —
+that is the point:
+
+| `PUBLIC_BASE_URL` | robots meta in every page | `public/robots.txt` |
+|---|---|---|
+| set, on `*.rempireshop.com` | `index, follow, max-image-preview:large` | the open policy |
+| set, anything else | `noindex, nofollow` | the closed policy |
+| **unset** | `noindex, nofollow` | the closed policy |
+
+Opening the site takes an explicit variable, not merely the absence of one. A
+bare `npm run prerender` used to write "index, follow" into 810 pages and swap
+`robots.txt` for the open policy without saying so — which happened during the
+build wave, in a working tree somebody could have committed. It now fails safe
+and prints a warning, and the state it leaves (live URLs with noindex) is
+reported by `prerender:check` as a note rather than passed over in silence.
+
+What `prerender:check` *fails* on is `robots.txt` disagreeing with the robots
+meta in the pages. Those two come out of the same decision in the same run of
+the tool, so a disagreement can only mean one of them is left over from an
+earlier run with a different `PUBLIC_BASE_URL` — which is exactly the way a
+staging deployment ends up serving an open `robots.txt`. The sitemap host is a
+separate axis and is checked separately: `robots.txt`'s `Sitemap:` line has to
+name the same host the sitemap's own `<loc>`s do.
+
+One fact, one switch. The old arrangement had the meta follow `PUBLIC_BASE_URL`
+while `robots.txt` was hand-maintained and `X-Robots-Tag` lived in
+`vercel.json`, and they had already drifted: the committed `sitemap.xml` was
+built for `rempireshop.com` while `robots.txt` pointed at the staging sitemap.
+`check-prerender.mjs` now fails if `public/robots.txt` is not the policy that
+matches the host in `sitemap.xml`.
+
+`npm run build` runs the tool through `prebuild`. Note that npm does **not**
+load `.env.local` for a lifecycle script, so a local `npm run build` with no
+`PUBLIC_BASE_URL` in the environment builds for the live domain and writes the
+open `robots.txt` into the working tree. The tool prints a warning line when
+the variable is unset; pass it explicitly:
+
+```bash
+PUBLIC_BASE_URL=https://rempireshop.diipsolutions.eu npm run build
+```
+
+### The three noindex layers, and where they disagree
+
+Three things independently decide whether a page may be indexed, and all three
+have to agree or the strictest wins silently:
+
+| layer | where | keyed on |
+|---|---|---|
+| `X-Robots-Tag` header | `next.config.ts` `headers()` | the **request** host |
+| `<meta name="robots">` | every prerendered page | `PUBLIC_BASE_URL` at build |
+| `robots.txt` | `public/robots.txt`, generated | `PUBLIC_BASE_URL` at build |
+
+The global `X-Robots-Tag: noindex` on `/(.*)` that used to live in
+`vercel.json` is gone (audit row 9) — it is now a
+`missing: [{ type: "host", value: "^(www\.)?rempireshop\.com$" }]` rule in
+`next.config.ts`: every request whose host is **not** the shop's own domain is
+served `X-Robots-Tag: noindex, nofollow`.
+
+**All three are now shaped the same way — an allowlist.** The header names the
+one host that may be indexed instead of naming the hosts that may not; the meta
+tag and `robots.txt` close any base that is not `*.rempireshop.com`. A **new**
+host — a second staging domain, `rempireshop.ee`, a custom preview alias, a bare
+IP, a copy someone points at the app — is therefore closed by all three without
+anyone remembering to add it anywhere. Only `rempireshop.com` and
+`www.rempireshop.com` are open, and only with `PUBLIC_BASE_URL` set to match.
+
+It was a *denylist* until 03.09 (a `has` rule naming `*.vercel.app` and
+`rempireshop.diipsolutions.eu`), which meant a host it did not name was
+indexable by default; the other two layers still held it shut, so nothing
+leaked. If the shop ever gains a second indexable hostname, widen the `missing`
+value — a host outside it is closed, which is the failure everybody notices
+rather than the one nobody does.
+
+**Re-run it after anything that changes the catalogue, the translations, the
+policy texts, the sets, the shop's own details or the shell**:
+`tools/build-catalogue-full.mjs`, `tools/assemble-translations.mjs`,
+`tools/build-bundles.mjs`, an edit to `DEFAULT_CONTENT` in `src/lib/content.ts`
+(run `npm run pack:content` first, or just `npm run build`), or an edit to
+`public/shop2/index.html` (a new script, a bumped `?v=`). The run is idempotent
+and takes a couple of seconds — it rewrites only the files whose content
+actually changed, redraws only OG cards that are not already on disk, and
+deletes pages for products, sets and policy slugs that no longer exist.
 `tools/check-prerender.mjs` fails loudly if the pages have drifted from
 `index.html`.
 
-Consider wiring it as a `prebuild` script when the build pipeline settles; it
-was left manual during the parallel build wave.
+The company details, the socials and the contact-page intro come from
+`src/data/content.default.json` — **generated**, never hand-edited:
+`tools/pack-content.mjs` writes it from `DEFAULT_CONTENT` in
+`src/lib/content.ts`. A missing file is not fatal; the prerender says so and
+falls back to built-in constants.
+
+`prebuild` is `pack-migrations` → `pack-content` → `prerender`, so
+`npm run build` regenerates everything before `next build`.
 
 ### What it writes
 
@@ -116,21 +228,71 @@ was left manual during the parallel build wave.
 | `public/shop2/{,et/,en/}c/<cat>/index.html` | 8 categories × 3 |
 | `public/shop2/{,et/,en/}b/<brand>/index.html` | 26 brands × 3 |
 | `public/shop2/{,et/,en/}p/<id>/index.html` | 220 products × 3 |
-| `public/sitemap.xml` | 765 URLs with `xhtml:link` alternates |
-| `public/robots.production.txt` | the open policy, for the switch |
+| `public/shop2/{,et/,en/}info/<slug>/index.html` | 5 policy pages × 3 |
+| `public/shop2/{,et/,en/}sets/index.html` | the sets landing × 3 |
+| `public/shop2/{,et/,en/}set/<id>/index.html` | 8 sets × 3 |
+| `public/shop2/{,et/,en/}gift/index.html` | the gift card × 3 |
+| `public/shop/og/<id>.jpg` | one 1 200×630 card per product — drawn once |
+| `public/shop/og/set-<id>.jpg` | one card per set — drawn once |
+| `public/brand/og-default.png` | the card for pages with no photograph |
+| `public/sitemap.xml` | 810 URLs with `xhtml:link` alternates |
+| `public/robots.txt` | **the policy that matches `PUBLIC_BASE_URL`** |
+| `public/robots.production.txt` | the open policy, for reading and diffing |
+| `public/robots.staging.txt` | the closed policy, ditto |
 
-765 files. Above 1 000 sitemap URLs the tool switches by itself to a
-`sitemapindex` at `public/sitemap.xml` plus `public/sitemap-N.xml` chunks.
+810 pages — 270 per language: 220 products, 8 categories + `all`, 26 brands,
+1 home, 5 policy pages, 8 sets + the landing, 1 gift card. Above 1 000 sitemap
+URLs the tool switches by itself to a `sitemapindex` at `public/sitemap.xml`
+plus `public/sitemap-N.xml` chunks, and the checker follows the index.
+
+The HTML pages are gitignored (`.gitignore`) because `prebuild` regenerates
+them. The OG cards are **not**: they are drawn once from images that are in the
+repo, and committing them keeps 228 sharp calls out of every future build.
+Delete one and the next run draws it again.
 
 Each page carries: `<html lang>`, a title of at most 60 characters, a
 description of at most 160, `canonical`, `hreflang` ru/et/en/x-default,
-OpenGraph and Twitter cards with the product image, and JSON-LD — `Product`
-with `offers` (price, `EUR`, availability) and `BreadcrumbList` on product
-pages, `BreadcrumbList` + `ItemList` on listings, `Organization` + `WebSite` on
-the home pages. Inside `#app` it carries the real screen: breadcrumbs, brand,
-`<h1>`, price, stock, sizes with per-size prices, the description, an `<img>`
-with a real `alt`, and `<a>` links onward — which is the only path a crawler
-has from a category to the 220 product pages.
+OpenGraph and Twitter cards, and JSON-LD:
+
+| page | JSON-LD |
+|---|---|
+| home | `Organization` + `WebSite` |
+| category, brand | `BreadcrumbList` + `ItemList` |
+| product | `Product` with `offers` (price, `EUR`, availability) + `BreadcrumbList` |
+| set | `Product` with `offers` and `isRelatedTo` (the items) + `Organization` + `BreadcrumbList` |
+| sets landing | `Organization` + `BreadcrumbList` + `ItemList` |
+| policy page, gift card | `Organization` + `BreadcrumbList` |
+
+Inside `#app` it carries the real screen: breadcrumbs, brand, `<h1>`, price,
+stock, sizes with per-size prices, the description, an `<img>` with a real
+`alt`, and `<a>` links onward — which is the only path a crawler has from a
+category to the 220 product pages. A policy page carries the whole legal text
+(the `<h1>`s inside it are demoted to `<h2>` so the page has one heading), a
+set page lists its items as links to their product pages, and every page ends
+with the three-language nav.
+
+### Link previews
+
+**Every `og:image` this tool writes is a 1 200×630 file that exists in
+`public/`** — that is the invariant, and `check-prerender.mjs` measures each
+distinct card with sharp to prove it. Which is why every page can declare
+`og:image:width`/`height` and `twitter:card: summary_large_image` without
+promising a crop that is not there.
+
+Before this, 125 of the 220 products pointed `og:image` at their square
+`.webp` cutout. Facebook, WhatsApp and LinkedIn do not read WebP at all, so
+those 125 products shared as a bare URL with no card — the audit's item 15.
+The old shop had ImageMagick-built cards for the 95 products it used to sell;
+the tool now draws the rest itself with sharp, on the same recipe (the cutout
+on the `#edeae1` ground with the tower mark at +56/+48, no text — the title
+and the price travel as OG text fields and each platform sets those in its own
+type). A set gets its three items in a row on the same ground.
+
+The chain, first hit wins: the page's own card → for a listing, the first
+product's card → `/brand/og-default.png` (the tower alone, for the policy
+pages and the gift card) → `/og-shop.png`. The last is the safety net for a
+run where sharp could not load: it is committed, it is 1 200×630, and it keeps
+the invariant true rather than falling back to a `.webp` no scraper reads.
 
 ### index.html is the shell *and* the Russian home page
 
@@ -143,14 +305,15 @@ rather than rewritten:
 
 Everything outside the markers is hand-maintained and survives every run: the
 asset tags, the `?v=` token, the script list. The tool reads those from there
-and copies them into the other 764 pages, so all of them always load the same
+and copies them into the other 809 pages, so all of them always load the same
 assets. If the markers go missing the tool refuses to run rather than guess.
 
-The consequence: every non-prerendered `/shop2/` path (search, checkout, the
-policy pages) is served that same file, so its raw HTML carries the home page's
+The consequence: every non-prerendered `/shop2/` path (search, the cart, the
+checkout) is served that same file, so its raw HTML carries the home page's
 head. app.js corrects the title, canonical and hreflang on boot. Those screens
-are either robots-disallowed or not worth indexing; `info/<slug>` is the one
-that would benefit from real prerendering later.
+are robots-disallowed and out of the sitemap, so nobody arrives on one from a
+search. `info/<slug>`, `sets`, `set/<id>` and `gift` used to be in that list —
+they are prerendered now.
 
 ### Translation fidelity
 
@@ -170,6 +333,22 @@ removes the prerendered block only once the first `render()` has filled them.
 Boot is one synchronous task, so the browser never paints between the two and
 the swap is invisible. If app.js fails to load, the static page stays up.
 
+The JSON-LD survives the same handover, and **which attribute a block carries
+decides whether it survives at all** — Googlebot reads the rendered DOM, not
+the file:
+
+- `id="ldjson"` — only on a `/p/<id>/` page. `setHead()` rewrites that element
+  in place with its own `Product`, so handing it one means one Product, not
+  two.
+- `data-seo="ldjson-page"` — everything else, including the **set** pages'
+  `Product`. `setHead()` *removes* `#ldjson` on every screen that is not a
+  catalogue product, so a set's Product block carrying that id would be deleted
+  on boot and never read. Blocks marked `ldjson-page` are dropped only once the
+  shopper navigates away from the path the page was loaded on
+  (`location.pathname !== loadedPath`), so they survive the first render.
+
+`check-prerender.mjs` asserts that split both ways.
+
 ---
 
 ## Routing
@@ -187,6 +366,10 @@ the swap is invisible. If app.js fails to load, the static page stays up.
   rendering client-side. Listed this way, anything not on disk falls through to
   the `/shop2/:path+` shell rewrite. Next caps a rewrite source at 4 096
   characters, so the 220 ids are split across several rules.
+- The kinds it groups are `p`, `c`, `b`, `info` and `set`; `sets` and `gift`
+  are single pages and get one rule each, also only when the file is on disk.
+  So a fresh clone that has not run `npm run prerender` yet still serves the
+  shell everywhere rather than 404ing.
 - **The config is read once**, at dev-server start and at build. Restart `next
   dev` after `npm run prerender` or the new pages will not be routed locally.
 - Legacy `/shop/...` paths still land on `/shop2/...`: `/shop`, `/shop/c/:cat`,
@@ -200,30 +383,44 @@ the swap is invisible. If app.js fails to load, the static page stays up.
 
 ## At the switch
 
-1. Regenerate with the live base and verify:
+1. Change `PUBLIC_BASE_URL` on the Vercel project to
+   `https://rempireshop.com`. That is the whole switch — the robots meta, the
+   absolute URLs and `public/robots.txt` all follow it, and `prebuild`
+   regenerates the 810 pages on the next deploy.
+2. Verify locally first:
    ```bash
    PUBLIC_BASE_URL=https://rempireshop.com npm run prerender
-   node tools/check-prerender.mjs
+   npm run prerender:check
    ```
-   Confirm the run printed `robots "index, follow, max-image-preview:large"`.
-2. Replace `public/robots.txt` with `public/robots.production.txt` (the current
-   file is the staging policy: everything closed to general crawlers, link-preview
-   bots named individually).
-3. Drop the blanket `X-Robots-Tag: noindex, nofollow, noarchive` header from
-   `vercel.json`. It overrides everything above and nothing will be indexed
-   while it is there.
+   Confirm the run printed `robots "index, follow, max-image-preview:large"`
+   and `robots.txt = production`, and that the checker printed `0 failure(s)`.
+   Then regenerate for staging again if the deploy is not happening yet — a
+   working tree carrying the open `robots.txt` is one merge away from being
+   live.
+3. Check the `missing: [{ type: "host" }]` noindex rule in `next.config.ts`
+   `headers()` still names the production host — `^(www\.)?rempireshop\.com$`
+   is the *only* host that is not sent `noindex`. Nothing needs changing when
+   the DNS moves, but this is the header that would silently outrank every
+   canonical, hreflang and sitemap below it, so look rather than assume.
 4. Deploy, then check `https://rempireshop.com/robots.txt` and
-   `https://rempireshop.com/sitemap.xml` return the live-domain versions.
+   `https://rempireshop.com/sitemap.xml` return the live-domain versions, and
+   that `curl -sI https://rempireshop.com/shop2/ | grep -i x-robots` returns
+   nothing.
 5. **Google Search Console** — the domain property `rempireshop.com` is already
    verified, so nothing needs re-verifying:
-   - Sitemaps → submit `sitemap.xml` (one entry; it is a plain urlset today and
-     becomes a sitemapindex automatically above 1 000 URLs).
+   - Sitemaps → submit `sitemap.xml`. One entry: it is a plain urlset of 810
+     URLs today and becomes a sitemapindex automatically above 1 000.
    - URL Inspection → Request indexing for `/shop2/`, `/shop2/et/`,
-     `/shop2/en/` and a couple of top products, to prime the crawl.
+     `/shop2/en/`, `/shop2/sets/`, a couple of top products and
+     `/shop2/info/shipping/` — the policy pages are what a shopper checks
+     before paying and they have never been indexed before.
    - International Targeting → watch for hreflang errors for a week or two;
      "no return tags" means one of the three pages is missing an alternate.
    - Coverage → expect the old Shopify `/products/...` URLs to move to
      "Page with redirect" as the redirects are picked up.
+   - Re-share a couple of product links in a Facebook/WhatsApp chat and in the
+     Sharing Debugger to confirm the new cards render; the 125 products that
+     used to share as a bare URL now have one.
 6. Redirects from the old Shopify URLs: **`docs/redirect-map.csv`** — 1 638
    rows, `old_url, new_path, kind, note`. It maps the live
    `https://rempireshop.com/...` URLs onto `/shop/...` paths, which the
@@ -233,13 +430,45 @@ the swap is invisible. If app.js fails to load, the static page stays up.
 
 ## Known gaps
 
-- `info/<slug>` (the policy pages) and `brands` are not prerendered; they render
-  client-side with a corrected head. Worth adding if those pages should rank.
-- `og:image` is the 1 200×630 card at `/shop/og/<id>.jpg` for the 95 products
-  the old shop had, and the square product cutout for the other 125 — the card
-  type follows the image (`summary_large_image` vs `summary`) rather than
-  promising a wide crop that is not there. Generating the missing 125 cards is a
-  follow-up for `tools/build-product-pages.mjs`.
+- **`brands` is still shell-only.** It is the one remaining screen a shopper
+  might land on cold, and it duplicates the brand list that is already on all
+  three home pages, so it was left out rather than made into a fourth copy.
+- ~~Three things in app.js do not agree with the prerendered pages.~~ **Closed
+  03.09.** `setHead()` now runs an info page's `<title>` through
+  `trText(pg.title, S.lang, false)` (the English tab read «Доставка и оплата»
+  over an English `<h1>`); `legalFor()` has its `LEGAL_EN` branch, so English
+  policy pages take `public/shop/legal.en.js` the way the prerender already
+  did; and `info`, `sets`, `set` and `gift` each set a `description` — the same
+  sentence the static page carries, from the same dictionary, so a crawler that
+  runs JS sees the head it was served. A **set** uses its own description, as
+  the prerendered `/set/<id>/` does.
+- **Two identities and two registration numbers.** The policy texts still trade
+  as `REMPIRE (THEFLOW OÜ)`, registrikood 16320586, while the footer says
+  `Rempire Store OÜ`, 12216136 — audit row 13. The policy pages are now
+  indexable, so the wrong company is now the *published* one. Fix the texts
+  before the switch, not after.
+- **The English policy texts are broken** — 77 clause numbers glued to the next
+  word (`1.1Seller`), "at the Web Web store" (audit row 14,
+  `docs/proofread-report.md`). They are now prerendered, so they are what
+  Google will read.
 - Product descriptions are AI translations pending a native proofread (see the
   header of `public/shop/content.ru.js`). They are what the meta descriptions
   are cut from.
+- The OG cards carry no text — no name, no price, no logotype beyond the tower.
+  That is deliberate (every platform sets the title and price itself, from the
+  OG text fields, in its own type), but a card with the product name burnt in
+  reads better in a WhatsApp thread. A follow-up, not a defect.
+- ~~Social links still disagree.~~ **Closed 03.09.** The `Organization`
+  `sameAs` used to name `instagram.com/rempireshop/` and
+  `facebook.com/rempireshop/` while the shop links `rempire.shop` and
+  `Rempire.Official.Tallinn`. Both now come from one place: `prebuild` runs
+  `tools/pack-content.mjs`, which writes `DEFAULT_CONTENT` from
+  `src/lib/content.ts` into `src/data/content.default.json`, and the prerender
+  reads its `company` block for the identity tokens and its `social` block for
+  `sameAs` (Instagram, Facebook, TikTok, YouTube — four links now, in the order
+  the shop shows them). Which accounts are the live ones is still a question
+  for Renat: `docs/OPEN-QUESTIONS.md`.
+- `/info/contact/` is prerendered from those same defaults, mirroring
+  `screenContact()`, instead of from the 2019 Shopify page in `legal.js` (which
+  carried a stylesheet link to Shopify's CDN and a contact form that goes
+  nowhere). The other four info slugs are still the policy texts.

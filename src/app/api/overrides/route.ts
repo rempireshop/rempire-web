@@ -11,6 +11,7 @@
  * When there is no database the shop must still work, so the answer is a plain
  * 503 with {ok:false}; public/shop2/app.js falls back to its localStorage copy.
  */
+import { mergeContent } from "@/lib/content";
 import { getOverrides, getSettings } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -42,6 +43,10 @@ const PUBLIC_SETTINGS = [
   "flows",
   "shipping",
   "shipping_rules",
+  // the shop's own words about itself — company details, hours, socials, the
+  // announcement bar, the contact page. Public by nature: every one of these
+  // strings is printed in the footer of every page.
+  "content",
 ] as const;
 
 export async function GET() {
@@ -50,8 +55,12 @@ export async function GET() {
     const published = Object.fromEntries(
       Object.entries(stored).filter(([k]) => (PUBLIC_SETTINGS as readonly string[]).includes(k)),
     );
+    /* `content` is the one setting that is a document rather than a value: a
+       spread would let a half-written row erase the company name, so it is
+       merged onto the defaults (and sanitised on the way) instead. */
+    const content = mergeContent(published.content);
     return Response.json(
-      { ok: true, overrides, settings: { ...DEFAULT_SETTINGS, ...published } },
+      { ok: true, overrides, settings: { ...DEFAULT_SETTINGS, ...published, content } },
       { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
     );
   } catch (err) {

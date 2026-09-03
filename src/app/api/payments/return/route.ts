@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getOrderByNumber, setOrderPayment, setOrderStatus } from "@/lib/orders";
 import { getProvider, publicBaseUrl } from "@/lib/payments";
 import { applyPaymentResult } from "@/lib/payments/apply";
-import { notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { issueOrderGiftCards, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 
 /**
@@ -101,11 +101,16 @@ async function handle(req: Request, params: URLSearchParams) {
     return done(base, order.number, result.status);
   }
 
-  if (outcome.status === "paid" && !outcome.alreadyPaid) {
+  if (outcome.status === "paid") {
     // The confirmation e-mail must not hold up the redirect, and must not be
     // able to break it either. Only the first arrival sends it: this route and
-    // the webhook race by design, and refreshing it is free (audit H4).
-    await notifyOrderPaid({ ...order, status: "paid", payment: outcome.payment });
+    // the webhook race by design, and refreshing it is free (audit H4). The
+    // gift cards bought in the order are made sure of on every arrival —
+    // issuing is idempotent, and a paid order whose first pass died before the
+    // hook has no other way of getting them.
+    const paid = { ...order, status: "paid", payment: outcome.payment };
+    if (outcome.alreadyPaid) await issueOrderGiftCards(paid);
+    else await notifyOrderPaid(paid);
   }
 
   const state =
