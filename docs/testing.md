@@ -191,6 +191,41 @@ generous about them:
   Linux-to-Linux and the generous-but-not-infinite threshold above is doing
   real work again, not just papering over a font stack.
 
+## Real bugs this suite found while being built
+
+Four, all reported to the team as they were found (not fixed here — app.js/
+styles.css were off limits while this suite was built, per the brief). Three
+were worked around so the affected spec could still exercise the real flow;
+one is left as a standing, correctly-failing test, because papering over a
+genuine WCAG violation would defeat the point of having the check.
+
+- **Reviews accordion collapses shut on "Оставить отзыв."** `acc()` (app.js)
+  always emits `<details>` with no `open` attribute, and the review-form
+  actions go through the general `render()` full-rebuild rather than a
+  targeted patch — so the whole Reviews section visibly closes the moment a
+  shopper clicks the button that was supposed to reveal the form. Worked
+  around in `e2e/product.spec.ts` (`settled()` — reopen-and-retry as one
+  unit); full detail in that file's own comment.
+- **Pickup checkout cannot complete.** The order payload's `customer.name`
+  comes from `S.ship.name`, which the UI never collects for the "Самовывоз"
+  method (that field is only rendered for parcel/courier) — every pickup
+  order 400s with `bad_name`. Every "just get me a paid order" helper in this
+  suite uses the courier method instead; see `payOrder()` in
+  `e2e/fixtures.ts`.
+- **A set in the cart does not survive a reload.** Restoring the cart from
+  `localStorage` runs before `DEMO` is assigned (cart-restore is near the top
+  of app.js; `var DEMO = {...}` is ~4700 lines later), and the restore filter
+  calls `bundleById()` → `allBundles()` → `DEMO.bundles` for any bundle line —
+  throwing, which aborts the *whole* filter and empties `S.cart`, not just
+  the bundle line. `e2e/sets.spec.ts` navigates to checkout client-side (the
+  cart drawer's own button) instead of reloading, specifically to route
+  around this.
+- **Home page brand-strip text fails WCAG AA color contrast** (`#b0afa6` on
+  white, 2.2:1 against a 4.5:1 requirement) — a real, unfixed design issue.
+  `e2e/accessibility.spec.ts`'s `home` test fails on it, correctly: that file
+  is designed to fail on serious/critical axe violations, not to hide them.
+  Expect this one test to keep failing until the color is fixed.
+
 ## What could not be automated, and why
 
 - **`/api/assistant` admin-mode-without-cookie is a 401, literally.** The

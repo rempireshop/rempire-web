@@ -1,0 +1,103 @@
+import { expect, test } from "@playwright/test";
+import { eur, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+
+/** Gallery, size switch → price, add to cart, cart drawer count, reviews.
+ *  Desktop only — see docs/testing.md "Why most specs run on desktop only". */
+test.beforeEach(async ({}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+});
+test.use({ extraHTTPHeaders: ipHeaders(30) });
+
+for (const lang of LANGS) {
+  test.describe(`product page — ${lang.code}`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, `/p/${PRODUCT.id}/`));
+      await waitForScreen(page, "product");
+    });
+
+    test("gallery: thumbnails switch the main image", async ({ page }) => {
+      const thumbs = page.locator(".pdp__thumbs [data-gal]");
+      await expect(thumbs).toHaveCount(3); // catalogue2.js ships 3 photos for PRODUCT
+
+      const stage = page.locator(".pdp__stage .pdp__img").first();
+      const before = await stage.getAttribute("style");
+
+      await thumbs.nth(1).click();
+      await expect(thumbs.nth(1)).toHaveAttribute("aria-current", "true");
+      await expect(async () => {
+        expect(await stage.getAttribute("style")).not.toBe(before);
+      }).toPass({ timeout: 5_000 });
+    });
+
+    test("size switch changes the price", async ({ page }) => {
+      const price = page.locator("[data-price]");
+      const sizeButtons = page.locator(".sizes [data-size]");
+      await expect(sizeButtons).toHaveCount(PRODUCT.sizes.length);
+
+      for (let i = 0; i < PRODUCT.sizes.length; i++) {
+        await sizeButtons.nth(i).click();
+        await expect(sizeButtons.nth(i)).toHaveAttribute("aria-current", "true");
+        await expect(price).toHaveText(eur(PRODUCT.prices[i], lang.code));
+      }
+    });
+
+    test("add to cart updates the cart badge", async ({ page }) => {
+      // A fresh browser context per test (Playwright default) means an empty
+      // cart at the start — no need to read a "before" count.
+      await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+      await expect(page.getByRole("status")).toBeVisible(); // the "Добавлено в корзину ✓" toast
+      await expect(page.locator("[data-cartbadge]")).toHaveText("1");
+
+      // Opening the drawer confirms the line is really there, not just the badge.
+      await page.locator("[data-cart]").first().click();
+      const dialog = page.getByRole("dialog", { name: /Корзина|Ostukorv|Cart/ });
+      await expect(dialog).toBeVisible();
+      await expect(dialog.locator(`[data-add="${PRODUCT.id}"], .cline`, { hasText: PRODUCT.brand })).toBeVisible();
+    });
+
+    test("reviews block: empty state, then the form opens and validates", async ({ page }) => {
+      // KNOWN APP BEHAVIOR, not a test bug: acc() (app.js) always emits a
+      // fresh <details class="acc"> with no `open` attribute, and several
+      // review-form actions (at least [data-revopen], and apparently typing
+      // into the form fields too) go through the general render()
+      // full-rebuild rather than a targeted patch — so the accordion
+      // visibly collapses shut on those actions even though the content
+      // Playwright is about to interact with is already in the DOM.
+      // Confirmed by inspecting a failed run's accessibility snapshot
+      // ("Отзывы +", the closed-state summary, right where an open one was
+      // expected). Filed as a UX bug via spawn_task rather than silently
+      // worked around and forgotten; this test still needs to exercise the
+      // form, so every step below is wrapped in `settled()`, which retries
+      // "make sure it's open, then do the thing" as one unit for exactly as
+      // many collapses as it takes.
+      const acc = page.locator("details.acc", { hasText: /Отзыв|Arvustus|Review/ }).first();
+      const settled = (step: () => Promise<void>) =>
+        expect(async () => {
+          if (!(await acc.getAttribute("open"))) await acc.locator("summary").click();
+          await step();
+        }).toPass({ timeout: 10_000 });
+
+      // A product nobody has reviewed yet in this fresh database.
+      await settled(() => expect(acc.getByText(tr("Отзывов пока нет — станьте первым.", lang.code))).toBeVisible({ timeout: 1_000 }));
+
+      await settled(() => acc.locator("[data-revopen]").click({ timeout: 1_000 }));
+      const submit = acc.locator("[data-revsend]");
+      await settled(() => expect(submit).toBeDisabled({ timeout: 1_000 }));
+
+      await settled(() => acc.locator('[data-revf="name"]').fill("E2E Reviewer", { timeout: 1_000 }));
+      await settled(() => acc.locator('[role="radio"][data-revstar="5"]').click({ timeout: 1_000 }));
+      await settled(() =>
+        acc.locator('[data-revf="text"]').fill("Отличный товар, пользуюсь уже месяц и всё устраивает полностью.", { timeout: 1_000 }),
+      );
+      await settled(() => acc.locator('[data-revf="consent"]').check({ timeout: 1_000 }));
+      await settled(() => expect(submit).toBeEnabled({ timeout: 1_000 }));
+
+      await settled(() => submit.click({ timeout: 1_000 }));
+      await settled(() =>
+        expect(acc.getByText(tr("Спасибо! Отзыв отправлен — он появится на странице после проверки.", lang.code))).toBeVisible({
+          timeout: 1_000,
+        }),
+      );
+    });
+  });
+}
