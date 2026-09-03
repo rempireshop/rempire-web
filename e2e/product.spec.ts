@@ -88,3 +88,49 @@ for (const lang of LANGS) {
     });
   });
 }
+
+/** Regression: pressing «−» on a cart line at qty 1 used to remove the whole
+ *  line. The stepper now floors at 1 and disables «−» there — removal only
+ *  ever happens through the explicit «Убрать» control. Interaction logic,
+ *  not i18n, so one language is enough (docs/testing.md). */
+test.describe("cart drawer — quantity stepper", () => {
+  test("«−» at qty 1 is disabled and never removes the line", async ({ page }) => {
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+
+    await page.locator("[data-cart]").first().click();
+    const dialog = page.getByRole("dialog", { name: /Корзина|Ostukorv|Cart/ });
+    await expect(dialog).toBeVisible();
+    const line = dialog.locator(".cline").first();
+    const minus = line.locator('[data-d="-1"]');
+    const plus = line.locator('[data-d="1"]');
+    const qty = line.locator("[data-qtyval]");
+    await expect(qty).toHaveText("1");
+    await expect(minus).toHaveAttribute("aria-disabled", "true");
+
+    // force: true — aria-disabled (not the disabled attribute) keeps the
+    // button focusable, and CSS (pointer-events: none) is what actually
+    // blocks a pointer click; force bypasses Playwright's own actionability
+    // wait so this proves the app.js guard itself, the same way a keyboard
+    // Enter on the focused button would reach it.
+    await minus.click({ force: true });
+    await expect(dialog.locator(".cline")).toHaveCount(1);
+    await expect(qty).toHaveText("1");
+
+    // Above 1 the control re-enables, and coming back down to 1 disables it
+    // again — still one line throughout, never removed by the stepper.
+    await plus.click();
+    await expect(qty).toHaveText("2");
+    await expect(minus).not.toHaveAttribute("aria-disabled", "true");
+    await minus.click();
+    await expect(qty).toHaveText("1");
+    await expect(minus).toHaveAttribute("aria-disabled", "true");
+    await expect(dialog.locator(".cline")).toHaveCount(1);
+
+    // Only the explicit control actually removes the line.
+    await line.locator("[data-remove]").click();
+    await expect(dialog.locator(".cline")).toHaveCount(0);
+  });
+});

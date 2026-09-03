@@ -83,7 +83,10 @@ export async function POST(req: Request) {
   // died between the status write and the hook, this retry is the only thing
   // that will ever mint them.
   if (outcome.status === "paid") {
-    const paid = { ...order, status: "paid", payment: outcome.payment };
+    // wholesale/loyalty: loyaltyEarned rides along only on the first arrival
+    // (undefined on a retry — settleLoyalty() in apply.ts only ever runs once
+    // per order) so the confirmation e-mail can mention points earned.
+    const paid = { ...order, status: "paid", payment: outcome.payment, loyaltyEarned: outcome.pointsEarned };
     if (outcome.alreadyPaid) await issueOrderGiftCards(paid);
     else await notifyOrderPaid(paid);
   }

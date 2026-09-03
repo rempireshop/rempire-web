@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, type Route, test } from "@playwright/test";
 import { continueButton, freshEmail, ipHeaders, type LangCode, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /** Cart → checkout → mock payment → receipt (paid and failed). Desktop only
@@ -161,5 +161,71 @@ test.describe("checkout — pickup", () => {
     await waitForScreen(page, "done");
     await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));
     await expect(page.locator(".done__num")).toContainText(/R-\d+/);
+  });
+});
+
+/** Regression: the checkout screen's own background probes (shipping rules,
+ *  one loadPointsFor() per carrier — 5 for EE, the signed-in account check,
+ *  payment methods) used to call the full render() the instant each landed,
+ *  tearing out and recreating the e-mail input on step 1 mid-keystroke — a
+ *  visible flicker, and on a phone it also dropped the keyboard. app.js now
+ *  coalesces render() itself into one rebuild per animation frame and, for
+ *  checkout specifically, has those probes patch their own container
+ *  ([data-co-delivery]/[data-co-payment]/[data-co-summary]) instead of
+ *  calling render() at all — so the contact block is never touched while
+ *  they resolve. All four probes are delayed here so they are still in
+ *  flight (or only just landing) while the shopper is mid-keystroke on the
+ *  very first field, which is exactly the timing that used to flicker.
+ *  Not per-language: this is a DOM-stability check, not an i18n one. */
+test.describe("checkout — e-mail field stability", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(44) });
+
+  test("the e-mail input is never re-created while the checkout probes resolve", async ({ page }) => {
+    const delayed = (body: unknown) => async (route: Route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+    };
+    await page.route("**/api/overrides/**", delayed({ ok: true, settings: {} }));
+    await page.route("**/api/shipping/points/**", delayed({ ok: false }));
+    await page.route("**/api/account/me/**", delayed({ ok: false }));
+    await page.route(
+      "**/api/payments/methods/**",
+      delayed({ ok: true, banks: [{ name: "E2E Bank", code: "E2E", logoUrl: null }] }),
+    );
+
+    await addProductAndGoToCheckout(page, "");
+
+    const email = page.locator("[data-email]");
+    await expect(email).toBeVisible();
+    const emailHandle = await email.elementHandle();
+    if (!emailHandle) throw new Error("checkout: [data-email] has no element handle");
+
+    // Count DOM mutations on the input's own parent from this point on —
+    // "after the initial paint" means from here forward, not from navigation.
+    await page.evaluate((input) => {
+      const w = window as unknown as Record<string, unknown>;
+      w.__coMutations = 0;
+      const observer = new MutationObserver((records) => {
+        w.__coMutations = (w.__coMutations as number) + records.length;
+      });
+      observer.observe(input.parentElement as Node, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true,
+      });
+      w.__coObserver = observer; // kept alive for the duration of the test
+    }, emailHandle);
+
+    const typed = "flicker-guard@example.com";
+    await email.fill(typed);
+
+    // The four mocked probes above all resolve within ~1.5s; wait past that
+    // so the assertions below cover the fully-settled state, not mid-flight.
+    await page.waitForTimeout(3000);
+
+    expect(await page.evaluate((input) => input.isConnected, emailHandle)).toBe(true);
+    expect(await email.inputValue()).toBe(typed);
+    expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__coMutations)).toBe(0);
   });
 });

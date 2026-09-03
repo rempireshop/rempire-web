@@ -21,6 +21,14 @@
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { query } from "@/lib/db";
+// Wholesale/pro pricing — src/lib/loyalty.ts (100_tiers_loyalty), a module of
+// this same build, unlike the optional neighbours below: no try/catch needed.
+import { customerTier, getPricingSettings, proUnitPrice, quoteLoyaltyRedeem } from "@/lib/loyalty";
+// Shipping defaults — src/lib/shipping.ts is a module of this build too (see
+// docs/shipping.md), imported only for its constant so FALLBACK_SHIPPING below
+// cannot drift from it; the live computeShipping() call itself still goes
+// through the optional-neighbour door a few lines down.
+import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
 
 /* ---------- types -------------------------------------------------------- */
 
@@ -73,6 +81,15 @@ export type Order = {
   shippingPrice: number;
   discount: number;
   discountCode: string | null;
+  /** inventory: 'web' | 'pos' — where the order was made. db/migrations/091_pos_channel.sql. */
+  channel: "web" | "pos";
+  /* ---- wholesale/loyalty: db/migrations/100_tiers_loyalty.sql ------------ */
+  /** The signed-in customer this order belongs to, or null (guest checkout, or an order placed before this column existed). */
+  customerId: string | null;
+  /** What was actually charged — 'retail' | 'pro' | null (guest). Never recomputed after the fact. */
+  pricingTier: "retail" | "pro" | null;
+  /** Euro taken off by «Использовать баллы» — quoted here, spent in src/lib/payments/apply.ts on the paid transition. */
+  loyaltyDiscount: number;
   total: number;
   payment: Record<string, unknown> | null;
   notes: string | null;
@@ -82,6 +99,8 @@ export type Order = {
 
 export type CreateOrderInput = {
   lang?: string;
+  /** inventory: 'web' (default, the storefront checkout) or 'pos' (in-salon quick sale, POST /api/admin/pos-orders). */
+  channel?: "web" | "pos";
   items: Array<{ id: string; variant?: string | number | null; qty: number; meta?: Record<string, unknown> | null }>;
   customer: { name?: string; email?: string; phone?: string };
   shipping: {
@@ -93,7 +112,12 @@ export type CreateOrderInput = {
     address?: Record<string, unknown> | null;
   };
   discountCode?: string | null;
+  /** inventory: channel:'pos' only — a flat percent off the goods, typed at the register. */
+  posDiscountPercent?: number | null;
   notes?: string | null;
+  /* ---- wholesale/loyalty: db/migrations/100_tiers_loyalty.sql ------------ */
+  /** «Использовать баллы» toggle at checkout — the amount is quoted server-side, never sent by the client. */
+  redeemPoints?: boolean;
 };
 
 /** Every failure the caller can report to the shopper by code. */
@@ -117,6 +141,8 @@ export type OverrideRow = {
   var_img: unknown;
   video_url: string | null;
   gallery: unknown;
+  /** Wholesale/pro price override — db/migrations/100_tiers_loyalty.sql. Null = computed from settings.pricing.proDiscountPct. */
+  pro_price: string | number | null;
   updated_at: string | Date;
 };
 
@@ -133,6 +159,8 @@ export type Override = {
   videoUrl: string | null;
   /** null = the catalogue's own photos; an array replaces them, first = main. */
   gallery: GalleryPhoto[] | null;
+  /** Wholesale/pro price override, null = base price × (1 − proDiscountPct/100). Admin-only — never in the public /api/overrides response. */
+  proPrice: number | null;
   updatedAt: string | null;
 };
 
@@ -229,8 +257,19 @@ function fn(mod: AnyModule | null, key: string): ((...args: unknown[]) => unknow
 
 /* ---------- shipping ----------------------------------------------------- */
 
-/** Fallback tariffs, live only until src/lib/shipping.ts exists. */
-export const FALLBACK_SHIPPING = { parcelEE: 3.49, courierEE: 5.99, eu: 9.9, freeFrom: 59 };
+/**
+ * Last-resort numbers if src/lib/shipping.ts's own computeShipping() throws —
+ * derived from DEFAULT_SHIPPING_RULES there (docs/shipping.md § «Тарифы
+ * Montonio») instead of a second hand-typed copy, so the two cannot drift
+ * apart the way they already had once (EE parcel/courier sat at the old
+ * 3.49/5.99 brief numbers here while the real defaults moved to 5.47/10.84).
+ */
+export const FALLBACK_SHIPPING = {
+  parcelEE: DEFAULT_SHIPPING_RULES.methods.parcel.EE,
+  courierEE: DEFAULT_SHIPPING_RULES.methods.courier.EE,
+  eu: DEFAULT_SHIPPING_RULES.methods.courier.default,
+  freeFrom: DEFAULT_SHIPPING_RULES.freeFrom ?? 59,
+};
 
 export function fallbackShipping(country: string, method: string, subtotal: number): number {
   const m = String(method || "").toLowerCase();
@@ -347,6 +386,7 @@ function mapOverride(r: OverrideRow): Override {
     varImg: Array.isArray(r.var_img) ? (r.var_img as number[]) : null,
     videoUrl: r.video_url ?? null,
     gallery: cleanGallery(r.gallery),
+    proPrice: r.pro_price == null ? null : money(num(r.pro_price)),
     updatedAt: r.updated_at ? new Date(r.updated_at as string).toISOString() : null,
   };
 }
@@ -362,6 +402,26 @@ export async function getOverrides(ids?: string[]): Promise<Record<string, Overr
   }
   const out: Record<string, Override> = {};
   for (const r of rows) out[r.product_id] = mapOverride(r);
+
+  /* inventory: numeric stock wins over the manual in/low/out override the
+     moment a product has actually been counted — see src/lib/inventory.ts's
+     module doc ("tracked" = at least one real stock_moves row). A product
+     nobody has scanned or adjusted yet is left untouched here and keeps its
+     manual value. Best effort and dynamically imported like every optional
+     neighbour above: a broken inventory module must not take the storefront
+     down with it. */
+  try {
+    const { productStockStates } = await import("@/lib/inventory");
+    const derived = await productStockStates(ids);
+    for (const [id, stock] of Object.entries(derived)) {
+      out[id] = out[id]
+        ? { ...out[id], stock }
+        : { price: null, stock, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null };
+    }
+  } catch (err) {
+    console.error("[orders] inventory stock derivation failed, using manual overrides:", err);
+  }
+
   return out;
 }
 
@@ -379,6 +439,7 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
     const list = cleanGallery(patch.gallery);
     cols.gallery = list == null ? null : JSON.stringify(list);
   }
+  if ("proPrice" in patch) cols.pro_price = patch.proPrice == null ? null : money(num(patch.proPrice));
 
   if (cols.stock != null && !["in", "low", "out"].includes(String(cols.stock))) {
     throw new OrderError("bad_stock", String(cols.stock));
@@ -538,14 +599,25 @@ function bundlePrice(def: BundleDef, overrides: Record<string, Override>): numbe
   return money(Math.max(0, sum));
 }
 
+/** What the caller already knows about who is buying — wholesale/loyalty (100_tiers_loyalty). */
+export type PriceContext = { customerId?: string | null };
+
 /**
  * Turns the browser's `{id, variant, qty}` list into priced lines. Throws
  * OrderError on anything it cannot price honestly.
+ *
+ * `ctx.customerId`, when given, may turn plain product lines into pro-priced
+ * ones — see the "wholesale" block below. Bundles and gift cards never get a
+ * pro price: a bundle is already one fixed price, and a gift card's face
+ * value is not a markup to discount. `pricingTier` on the result is what was
+ * actually charged ('retail' even for a pro customer whose basket did not
+ * reach settings.pricing.proMinOrder), for the admin to see on the order.
  */
 export async function priceItems(
   items: CreateOrderInput["items"],
   lang = "RU",
-): Promise<{ lines: PricedLine[]; subtotal: number }> {
+  ctx: PriceContext = {},
+): Promise<{ lines: PricedLine[]; subtotal: number; pricingTier: "retail" | "pro" | null }> {
   if (!Array.isArray(items) || !items.length) throw new OrderError("empty_order");
   if (items.length > 50) throw new OrderError("too_many_items");
 
@@ -553,6 +625,26 @@ export async function priceItems(
   const bundles = items.some((it) => typeof it?.id === "string" && it.id.startsWith("bundle:"))
     ? await bundleDefs()
     : {};
+
+  /* ---- wholesale: is this a customer the owner approved for pro pricing? ---
+     Resolved once, up front — every product line below asks only "what does
+     THIS unit cost at the pro rate", never the database again. */
+  let pricingTier: "retail" | "pro" | null = null;
+  let proDiscountPct = 0;
+  let proMinOrder = 0;
+  if (ctx.customerId) {
+    const tier = await customerTier(ctx.customerId);
+    pricingTier = tier ?? "retail";
+    if (tier === "pro") {
+      const pricing = await getPricingSettings();
+      proDiscountPct = pricing.proDiscountPct;
+      proMinOrder = pricing.proMinOrder;
+    }
+  }
+  // the pro unit price for each line pushed below, in the same order —
+  // null for bundle/gift lines and for any line priced before a pro rate
+  // could be resolved (i.e. this customer is not pro at all)
+  const proUnits: Array<number | null> = [];
 
   const lines: PricedLine[] = [];
   for (const raw of items) {
@@ -580,6 +672,7 @@ export async function priceItems(
         price,
         sum: money(price * qty),
       });
+      proUnits.push(null); // no pro price on a set — it is already one fixed price
       continue;
     }
 
@@ -600,6 +693,7 @@ export async function priceItems(
         sum: money(amount * qty),
         meta,
       });
+      proUnits.push(null); // no pro price on a gift card — its face value is not a markup
       continue;
     }
 
@@ -632,10 +726,32 @@ export async function priceItems(
       price: money(unit),
       sum: money(unit * qty),
     });
+    // Same "override replaces the base, the size keeps its own premium" rule
+    // as above, just for the pro base instead of the retail one — see
+    // proUnitPrice() in src/lib/loyalty.ts.
+    const base = o?.price != null ? o.price : p.p;
+    proUnits.push(pricingTier === "pro" ? proUnitPrice(base, unit, o?.proPrice, proDiscountPct) : null);
   }
 
-  const subtotal = money(lines.reduce((s, l) => s + l.sum, 0));
-  return { lines, subtotal };
+  const retailSubtotal = money(lines.reduce((s, l) => s + l.sum, 0));
+  let subtotal = retailSubtotal;
+  if (pricingTier === "pro" && retailSubtotal >= proMinOrder) {
+    // Swap in the pro unit price on every line that has one, then reprice —
+    // gated on the RETAIL subtotal (not yet discounted) so «от 200 €»
+    // means the same 200 € the basket would otherwise have cost.
+    for (let i = 0; i < lines.length; i++) {
+      const pro = proUnits[i];
+      if (pro == null) continue;
+      lines[i] = { ...lines[i], price: pro, sum: money(pro * lines[i].qty) };
+    }
+    subtotal = money(lines.reduce((s, l) => s + l.sum, 0));
+  } else if (pricingTier === "pro") {
+    // approved for pro pricing, but this basket has not reached proMinOrder —
+    // billed (and recorded) as retail for this one order
+    pricingTier = "retail";
+  }
+
+  return { lines, subtotal, pricingTier };
 }
 
 function giftTitle(amount: number, lang: string): string {
@@ -673,6 +789,10 @@ type OrderRow = {
   shipping_price: string | number;
   discount: string | number;
   discount_code: string | null;
+  channel: string;
+  customer_id: string | null;
+  pricing_tier: string | null;
+  loyalty_discount: string | number | null;
   total: string | number;
   payment: unknown;
   notes: string | null;
@@ -708,6 +828,10 @@ export function mapOrder(r: OrderRow): Order {
     shippingPrice: money(num(r.shipping_price)),
     discount: money(num(r.discount)),
     discountCode: r.discount_code ?? null,
+    channel: r.channel === "pos" ? "pos" : "web",
+    customerId: r.customer_id ?? null,
+    pricingTier: r.pricing_tier === "pro" || r.pricing_tier === "retail" ? r.pricing_tier : null,
+    loyaltyDiscount: money(num(r.loyalty_discount)),
     total: money(num(r.total)),
     payment: jsonOf<Record<string, unknown> | null>(r.payment, null),
     notes: r.notes ?? null,
@@ -798,16 +922,33 @@ function cleanShipping(ship: CreateOrderInput["shipping"], price: number): Order
   };
 }
 
-export async function createOrder(input: CreateOrderInput): Promise<Order> {
+/**
+ * `ctx.customerId` is resolved by the caller (the route reads the `rmp_cust`
+ * cookie — this file has no Request to read it from itself) from a valid,
+ * signed-in session, never from anything the body claims. It drives both pro
+ * pricing (priceItems) and, below, the loyalty redeem quote and the
+ * `customer_id`/`pricing_tier` columns.
+ */
+export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {}): Promise<Order> {
+  // inventory: 'pos' is the in-salon till (POST /api/admin/pos-orders) — a
+  // walk-in sale has no e-mail and often no name typed at all, unlike the
+  // web checkout where both identify the shopper for the receipt and account.
+  const channel: "web" | "pos" = input.channel === "pos" ? "pos" : "web";
   const customer = input?.customer ?? {};
-  const name = String(customer.name ?? "").trim().slice(0, 120);
+  const name = String(customer.name ?? "").trim().slice(0, 120) || (channel === "pos" ? "Продажа в салоне" : "");
   const email = String(customer.email ?? "").trim().toLowerCase().slice(0, 160);
   const phone = String(customer.phone ?? "").trim().slice(0, 40);
   if (!name) throw new OrderError("bad_name");
-  if (!EMAIL_RE.test(email)) throw new OrderError("bad_email");
+  if (channel === "pos") {
+    // optional, but if the cashier did type one it still has to be a real
+    // address — an account-history lookup on a malformed e-mail is silent junk
+    if (email && !EMAIL_RE.test(email)) throw new OrderError("bad_email");
+  } else if (!EMAIL_RE.test(email)) {
+    throw new OrderError("bad_email");
+  }
 
   const lang = String(input.lang ?? "RU").toUpperCase().slice(0, 5);
-  const { lines, subtotal } = await priceItems(input.items, lang);
+  const { lines, subtotal, pricingTier } = await priceItems(input.items, lang, ctx);
 
   // Rebuilt from a whitelist before anything is priced or stored (audit C2/M2).
   const shippingJson = cleanShipping(input?.shipping ?? {}, 0);
@@ -817,12 +958,41 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const shipPrice = giftOnly ? 0 : await shippingPrice(country, method, subtotal, carrier);
   shippingJson.price = shipPrice;
 
-  const discount = await codeDiscount(input.discountCode, subtotal, shipPrice);
-  const total = money(Math.max(0, subtotal + shipPrice - discount));
+  /* inventory: POS has no promo/gift-card box — it has a percent the cashier
+     types at the register. The two are mutually exclusive by construction
+     (a POS order never carries a discountCode), and the percent is folded
+     into `discount_code` as a readable label so the existing admin order
+     screen (and receipt) show it with zero extra rendering code — the same
+     column that would otherwise hold "SUVI10" holds "POS -15%". */
+  let discount: number;
+  let discountCodeStored: string | null;
+  if (channel === "pos") {
+    const pct = Math.round(num(input.posDiscountPercent, 0));
+    discount = pct > 0 && pct <= 90 ? money(subtotal * (pct / 100)) : 0;
+    discountCodeStored = discount > 0 ? `POS -${pct}%` : null;
+  } else {
+    discount = await codeDiscount(input.discountCode, subtotal, shipPrice);
+    discountCodeStored = input.discountCode ? String(input.discountCode).trim().slice(0, 60) : null;
+  }
+
+  /* «Использовать баллы» — quoted here, exactly like the gift card and the
+     promo code above: nothing is spent yet, only the euro amount is baked
+     into the total the customer is about to pay. Spent once, on the paid
+     transition, in src/lib/payments/apply.ts. */
+  let loyaltyDiscount = 0;
+  if (input.redeemPoints && ctx.customerId) {
+    const pricing = await getPricingSettings();
+    if (pricing.loyalty.enabled) {
+      const quote = await quoteLoyaltyRedeem(ctx.customerId, subtotal, pricing.loyalty);
+      if (quote.balance >= quote.minRedeem) loyaltyDiscount = money(quote.maxRedeemable);
+    }
+  }
+
+  const total = money(Math.max(0, subtotal + shipPrice - discount - loyaltyDiscount));
 
   const rows = await query<OrderRow>(
-    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, total, notes)
-     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12)
+    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, channel, customer_id, pricing_tier, loyalty_discount, total, notes)
+     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
      returning *`,
     [
       lang,
@@ -834,7 +1004,11 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
       subtotal,
       shipPrice,
       discount,
-      input.discountCode ? String(input.discountCode).trim().slice(0, 60) : null,
+      discountCodeStored,
+      channel,
+      ctx.customerId ?? null,
+      ctx.customerId ? pricingTier : null,
+      loyaltyDiscount,
       total,
       typeof input.notes === "string" ? input.notes.replace(/\s+$/, "").slice(0, 2000) || null : null,
     ],
@@ -928,6 +1102,36 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
   ]);
   const after = mapOrder(rows[0]);
   await writeAudit(actor, "order.status", { id, number: after.number, from: before.status, to: status });
+
+  /* inventory: a refund or a cancellation that follows a paid (or already-
+     shipped) order is goods coming back — put the quantity back with a
+     'return' move. An order that was never paid never took stock in the
+     first place (see the paid-transition decrement in
+     src/lib/payments/apply.ts), so cancelling one here has nothing to return.
+     Product lines only: a bundle line's id ("bundle:<id>") is not a catalogue
+     product, so its parts are not resolved and returned individually here —
+     out of scope for this pass, same boundary the decrement below draws.
+     Best effort: a stock hiccup must never stop a refund from being recorded. */
+  const wasPaid = before.status === "paid" || before.status === "shipped";
+  if (wasPaid && (status === "refunded" || status === "cancelled")) {
+    try {
+      const { move } = await import("@/lib/inventory");
+      for (const item of before.items) {
+        if (item.kind !== "product" || !item.qty) continue;
+        await move({
+          productId: item.id,
+          variant: item.variant ?? "",
+          delta: Math.abs(item.qty),
+          reason: "return",
+          ref: after.number,
+          actor,
+        });
+      }
+    } catch (err) {
+      console.error("[orders] return stock move failed:", err);
+    }
+  }
+
   return after;
 }
 

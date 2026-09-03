@@ -17,6 +17,13 @@ import { sanitizeContentPatch } from "@/lib/content";
 export const CATEGORIES = ["hair", "styling", "beard", "face", "body", "perfume", "merch", "all"];
 export const INFO_PAGES = ["shipping", "returns", "terms", "contact", "privacy"];
 
+/* inventory: duplicated from src/lib/inventory.ts's MOVE_REASONS on purpose —
+   this file must stay free of database imports (it is tested as a pure
+   function; @/lib/inventory pulls in @/lib/db). A conversational adjustment
+   only ever gets the three reasons a human plausibly means to say out loud;
+   'sale_web'/'sale_pos' are written by a real sale, never by this action. */
+export const STOCK_ADJUST_REASONS = ["goods_in", "adjust", "return"] as const;
+
 /* ---- the home-page banner (set_hero) ----------------------------------- */
 
 const HERO_MAX_SLIDES = 5;
@@ -311,6 +318,91 @@ export function sanitizePublishPost(raw: unknown): object | null {
   return { slug, publish: x.publish };
 }
 
+/* ---- wholesale/loyalty (set_pricing, adjust_points) ---------------------
+ *
+ * Bounds are duplicated from src/lib/loyalty.ts PRICING_BOUNDS on purpose —
+ * same reasoning as PROMO_MAX_* above: this file stays free of database
+ * imports so its tests run as pure functions. tests/loyalty.test.ts checks
+ * the two copies agree.
+ */
+const PRICING_BOUNDS = {
+  proDiscountPct: [0, 90] as const,
+  proMinOrder: [0, 100_000] as const,
+  earnPct: [0, 50] as const,
+  redeemMaxPct: [0, 100] as const,
+  minRedeem: [0, 10_000] as const,
+};
+function inRange(v: unknown, [lo, hi]: readonly [number, number]): number | null {
+  const n = typeof v === "number" ? v : Number(String(v ?? "").replace(",", "."));
+  return Number.isFinite(n) && n >= lo && n <= hi ? n : null;
+}
+
+/**
+ * A PARTIAL patch — «подними скидку для салонов до 25 %» must not silently
+ * reset the loyalty rates. The panel (demoApply's set_pricing case,
+ * public/shop2/app.js) merges this over what it already has, and
+ * PUT /api/admin/settings clamps again on the way into the database
+ * (cleanPricing() in src/lib/loyalty.ts) — this is the first door, not the
+ * only one.
+ */
+export function sanitizePricing(raw: unknown): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+
+  const pct = inRange(x.proDiscountPct, PRICING_BOUNDS.proDiscountPct);
+  if (pct !== null) out.proDiscountPct = pct;
+  const min = inRange(x.proMinOrder, PRICING_BOUNDS.proMinOrder);
+  if (min !== null) out.proMinOrder = min;
+
+  if (x.loyalty && typeof x.loyalty === "object" && !Array.isArray(x.loyalty)) {
+    const l = x.loyalty as Record<string, unknown>;
+    const loyalty: Record<string, unknown> = {};
+    if (typeof l.enabled === "boolean") loyalty.enabled = l.enabled;
+    const earn = inRange(l.earnPct, PRICING_BOUNDS.earnPct);
+    if (earn !== null) loyalty.earnPct = earn;
+    const redeemMax = inRange(l.redeemMaxPct, PRICING_BOUNDS.redeemMaxPct);
+    if (redeemMax !== null) loyalty.redeemMaxPct = redeemMax;
+    const minRedeem = inRange(l.minRedeem, PRICING_BOUNDS.minRedeem);
+    if (minRedeem !== null) loyalty.minRedeem = minRedeem;
+    if (Object.keys(loyalty).length) out.loyalty = loyalty;
+  }
+
+  return Object.keys(out).length ? out : null;
+}
+
+const CUSTOMER_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// integration: format check only — duplicated from customers.ts's EMAIL_RE on
+// purpose, same reasoning as CUSTOMER_ID_RE duplicating loyalty.ts's UUID_RE:
+// this file stays free of database imports. The real resolution (and the
+// only place an unknown address is rejected) is getCustomerAdminByEmail() in
+// src/lib/loyalty.ts, called from the customers/[id] route.
+const CUSTOMER_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+
+/**
+ * A manual credit or correction to one customer's point balance — reachable
+ * once the panel is looking at that customer's card (customerId, the uuid it
+ * already has) OR once the owner has named the customer by e-mail in the
+ * conversation (customerEmail — the one identifier a model can plausibly
+ * know without the card being open; resolved to a row server-side, see the
+ * customers/[id] route). Exactly one of the two travels in the sanitised
+ * action, never both.
+ */
+export function sanitizePointsAdjust(raw: unknown): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const customerId = typeof x.customerId === "string" ? x.customerId.trim() : "";
+  const emailRaw = typeof x.customerEmail === "string" ? x.customerEmail : typeof x.customer_email === "string" ? x.customer_email : "";
+  const customerEmail = emailRaw.trim().toLowerCase().slice(0, 160);
+  const hasId = CUSTOMER_ID_RE.test(customerId);
+  const hasEmail = !hasId && CUSTOMER_EMAIL_RE.test(customerEmail);
+  if (!hasId && !hasEmail) return null;
+  const delta = Math.trunc(Number(x.delta));
+  if (!Number.isFinite(delta) || delta === 0 || Math.abs(delta) > 100_000) return null;
+  const note = typeof x.note === "string" ? x.note.replace(/\s+/g, " ").trim().slice(0, 300) : "";
+  return hasId ? { customerId, delta, note } : { customerEmail, delta, note };
+}
+
 /* ---- everything the assistant may propose ------------------------------- */
 
 export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean): object | null {
@@ -388,6 +480,47 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
   if (t === "publish_post") {
     const pub = sanitizePublishPost(x);
     return pub ? { type: t, ...pub } : null;
+  }
+  // assistant-work: the accountant export — «выгрузи отчёт за август» hands
+  // back a month, the panel turns it into a download link
+  // (GET /api/admin/reports/orders?month=…) rather than a demoApply/undo
+  // change, so this is the whole of the sanitising this action needs.
+  if (t === "export_report") {
+    const month = String(x.month ?? "").trim();
+    return /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? { type: t, month } : null;
+  }
+  // wholesale/loyalty: pro discount, loyalty rates, on/off («подними скидку
+  // для салонов до 25 %», «выключи баллы»); adjust_points is a manual credit
+  // on one customer's card, only ever proposed once the panel has an id.
+  if (t === "set_pricing") {
+    const pricing = sanitizePricing(x.value ?? x);
+    return pricing ? { type: t, value: pricing } : null;
+  }
+  if (t === "adjust_points") {
+    const adj = sanitizePointsAdjust(x);
+    return adj ? { type: t, ...adj } : null;
+  }
+  /* inventory: numeric stock, always variant-aware. stock_adjust is a
+     relative move («приход 6 штук масла Proraso» → delta +6, reason
+     'goods_in'); stock_set is an absolute «останется 10 штук». Both are
+     admin-only and applied straight through POST /api/admin/inventory/moves/
+     (applyStockAction() in public/shop2/app.js) — no demo layer, same story
+     as the blog posts above. reason is deliberately NOT the full move-reason
+     set: 'sale_web'/'sale_pos' are what a real web or till sale writes on
+     its own, and letting the assistant claim one from a chat message risks
+     a manual adjustment double-counting as a sale in the ledger. */
+  if (t === "stock_adjust" && typeof x.product_id === "string" && known.has(x.product_id)) {
+    const delta = Math.trunc(Number(x.delta));
+    if (!Number.isFinite(delta) || delta === 0 || Math.abs(delta) > 10_000) return null;
+    const reason = (STOCK_ADJUST_REASONS as readonly string[]).includes(String(x.reason)) ? String(x.reason) : "adjust";
+    const variant = typeof x.variant === "string" && x.variant.trim() ? x.variant.trim().slice(0, 120) : "";
+    return { type: t, product_id: x.product_id, variant, delta, reason };
+  }
+  if (t === "stock_set" && typeof x.product_id === "string" && known.has(x.product_id)) {
+    const qty = Math.trunc(Number(x.qty));
+    if (!Number.isFinite(qty) || qty < 0 || qty > 100_000) return null;
+    const variant = typeof x.variant === "string" && x.variant.trim() ? x.variant.trim().slice(0, 120) : "";
+    return { type: t, product_id: x.product_id, variant, qty };
   }
   return null;
 }

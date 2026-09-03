@@ -94,6 +94,13 @@ export interface OrderLike {
   status?: string | null;
   phone?: string | null;
   created_at?: string | Date | null;
+  /**
+   * Loyalty points credited on this order's paid transition (100_tiers_
+   * loyalty) — set by src/app/api/payments/return|notify on the first
+   * arrival only, undefined otherwise. order-confirmed.ts prints one line
+   * when this is > 0.
+   */
+  loyaltyEarned?: Money;
 }
 
 export interface CartLike {

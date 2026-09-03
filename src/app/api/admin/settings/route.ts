@@ -11,6 +11,7 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
+import { cleanPricing } from "@/lib/loyalty";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,7 +55,12 @@ export async function PUT(req: Request) {
   }
 
   try {
-    for (const [key, value] of entries) {
+    for (let [key, value] of entries) {
+      // wholesale/loyalty: clamp to sane bounds regardless of who is
+      // writing (panel form, demoApply's undo, or the assistant's
+      // set_pricing action) — the same "first door, not the only one"
+      // reasoning as every other validated setting.
+      if (key === "pricing") value = cleanPricing(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

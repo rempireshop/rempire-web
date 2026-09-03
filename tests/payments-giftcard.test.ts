@@ -65,7 +65,13 @@ describe("a gift card is spent when the money arrives, not before", () => {
   afterAll(teardownDb);
   beforeEach(async () => {
     await exec("truncate gift_card_uses, gift_cards restart identity cascade");
-    await exec("truncate orders, admin_audit restart identity");
+    // cascade: order_messages (111_order_messages.sql) has a foreign key onto orders.
+    // stock_levels/stock_moves: applyPaymentResult's paid transition decrements
+    // real stock (src/lib/payments/apply.ts decrementStock(), inventory agent)
+    // whenever deps.decrementStock is not injected, which this file's deps()
+    // does not — so a product sold in one case must not stay "tracked" (and
+    // possibly out of stock) for the next.
+    await exec("truncate orders, admin_audit, stock_levels, stock_moves restart identity cascade");
   });
 
   it("quotes the discount at checkout and touches nothing", async () => {

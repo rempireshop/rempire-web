@@ -166,7 +166,7 @@ describe("api routes", () => {
     // the override, not the catalogue, is what the next order pays
     const { POST } = await import("@/app/api/orders/route");
     const order = await (await POST(post("/api/orders/", goodOrder))).json();
-    expect(order.total).toBeCloseTo(4.2 + 3.49, 2);
+    expect(order.total).toBeCloseTo(4.2 + 5.47, 2);
 
     const audit = await (await auditGet(get("/api/admin/audit/", admin))).json();
     expect(audit.audit.some((a: { action: string }) => a.action === "override.set")).toBe(true);

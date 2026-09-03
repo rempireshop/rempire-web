@@ -767,6 +767,11 @@ body:has(.stickybar) .ftr {
 .stepper { display: inline-flex; border: 1px solid var(--ink); flex-shrink: 0; }
 .stepper button { width: 46px; height: 48px; border: none; background: none; cursor: pointer; font-size: 16px; transition: background .18s var(--ease); }
 .stepper button:hover { background: var(--hover); }
+/* The «−» side stops at qty 1 — removal only happens through the explicit
+   «Убрать» control. aria-disabled (not the disabled attribute) so the button
+   stays reachable by Tab; pointer-events blocks the click, the qty handler
+   in app.js still guards the state change itself for a keyboard activation. */
+.stepper button[aria-disabled="true"] { opacity: .35; cursor: not-allowed; pointer-events: none; }
 .stepper > span { width: 42px; height: 48px; display: flex; align-items: center; justify-content: center; }
 .stepper--sm button { width: 44px; height: 44px; font-size: 14px; }
 .stepper--sm > span { width: 34px; height: 44px; font-size: 13px; }
@@ -2012,3 +2017,42 @@ button, a, summary, label { touch-action: manipulation; }
 }
 .admblog__acts { flex-wrap: wrap; }
 .admblog__delconfirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--error); }
+
+/* ---------- inventory: the barcode scanner ------------------------------
+   A full-screen overlay mounted OUTSIDE #bodyslot (see scanMount() in
+   app.js) so its <video> survives every render(). z-index above the toast
+   (--z-toast: 70) and the intro (--z-intro: 90) — nothing should be able to
+   sit on top of a phone camera view. */
+.scanoverlay {
+  position: fixed; inset: 0; z-index: 95;
+  display: flex; flex-direction: column;
+  background: #000; color: #fff;
+}
+.scan__box { position: relative; flex: 1 1 auto; min-height: 0; background: #000; }
+.scan__video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+.scan__target {
+  position: absolute; left: 12%; right: 12%; top: 32%; bottom: 32%;
+  border: 2px solid rgba(255, 255, 255, .85); border-radius: 12px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, .28);
+  pointer-events: none;
+}
+.scan__close, .scan__torch {
+  position: absolute; top: 14px; width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(0, 0, 0, .55); color: #fff; border: none; font-size: 18px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.scan__close { right: 14px; }
+.scan__torch { left: 14px; }
+.scan__torch[aria-pressed="true"] { background: rgba(255, 255, 255, .85); color: #000; }
+.scan__panel {
+  flex: 0 0 auto; max-height: 52vh; overflow-y: auto;
+  background: var(--page); color: var(--ink);
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+}
+.scan__err { color: var(--error); font-size: 13px; margin: 0 0 10px; }
+.scan__card { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.scan__card .adm__ph--big { width: 56px; height: 56px; flex: none; }
+.scan__actions { display: flex; gap: 10px; margin-bottom: 10px; }
+.scan__btn { flex: 1 1 0; min-height: 48px; font-size: 14px; }
+.scan__manual { display: flex; gap: 8px; margin: 12px 0; }
+.scan__manual .input { flex: 1 1 auto; }

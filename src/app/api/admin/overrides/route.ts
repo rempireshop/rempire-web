@@ -13,6 +13,20 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import { getOverrides, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
+import {
+  getDescriptionOverrides,
+  setDescriptionOverride,
+  type DescriptionOverride,
+} from "@/lib/product-descriptions";
+
+type OverrideOut = Override & { description?: DescriptionOverride | null };
+
+function emptyOverride(): Override {
+  return {
+    price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
+    varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null,
+  };
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,10 +56,18 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
      through cleanGallery() in upsertOverride, so a malformed entry is dropped
      rather than stored; an empty list means «back to the catalogue photos». */
   pick(["gallery", "photos"], "gallery");
+  // wholesale/loyalty: the salon/pro price for this one product — null clears
+  // it back to base price × (1 − settings.pricing.proDiscountPct/100).
+  pick(["proPrice", "pro_price"], "proPrice");
   if ("price" in patch && patch.price != null) {
     const n = Number(patch.price);
     if (!Number.isFinite(n) || n < 0 || n > 100000) throw new OrderError("bad_price", id);
     patch.price = n;
+  }
+  if ("proPrice" in patch && patch.proPrice != null) {
+    const n = Number(patch.proPrice);
+    if (!Number.isFinite(n) || n < 0 || n > 100000) throw new OrderError("bad_price", id);
+    patch.proPrice = n;
   }
   return { id, patch };
 }
@@ -54,7 +76,12 @@ export async function GET(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
   try {
-    return Response.json({ ok: true, overrides: await getOverrides() }, { headers: { "cache-control": "no-store" } });
+    const [overrides, descriptions] = await Promise.all([getOverrides(), getDescriptionOverrides()]);
+    const out: Record<string, OverrideOut> = overrides;
+    for (const [id, description] of Object.entries(descriptions)) {
+      out[id] = { ...(out[id] ?? emptyOverride()), description };
+    }
+    return Response.json({ ok: true, overrides: out }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     console.error("[api/admin/overrides] read failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });
@@ -79,12 +106,20 @@ export async function PUT(req: Request) {
       : [body as Patch];
   if (!list.length || list.length > 200) return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
 
-  const saved: Record<string, Override> = {};
+  const saved: Record<string, OverrideOut> = {};
   try {
-    for (const raw of list) {
-      const { id, patch } = normalise(raw as Record<string, unknown>);
+    for (const raw0 of list) {
+      const raw = raw0 as Record<string, unknown>;
+      const { id, patch } = normalise(raw);
       if (!id) return Response.json({ ok: false, error: "bad_id" }, { status: 400 });
-      saved[id] = await upsertOverride(id, patch);
+      const row: OverrideOut = await upsertOverride(id, patch);
+      // assistant-work: description {RU,ET,EN} lives in its own column
+      // (src/lib/product-descriptions.ts) — see the GET handler's comment.
+      if ("description" in raw || "descriptions" in raw) {
+        row.description = await setDescriptionOverride(id, raw.description ?? raw.descriptions);
+        await writeAuditSafe("admin", "override.description", { id });
+      }
+      saved[id] = row;
       await writeAuditSafe("admin", "override.set", { id, patch });
     }
   } catch (err) {

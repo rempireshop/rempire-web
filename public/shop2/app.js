@@ -44,7 +44,13 @@
     tiktok: '<path d="M15.6 3.5c.4 2.15 1.6 3.4 3.7 3.55v2.4c-1.2.12-2.3-.28-3.55-1.05v4.65c0 5.9-6.45 7.75-9.05 3.52-1.67-2.72-.65-7.5 4.68-7.69v2.53c-.4.07-.84.17-1.24.3-1.2.4-1.87 1.15-1.68 2.48.36 2.55 5.04 3.3 4.65-1.68V3.5z" fill="currentColor" stroke="none"/>',
     // content: the shop has a YouTube channel (@rempire.official) and the
     // footer links to it once the owner keeps the link in «Контент»
-    youtube: '<path d="M21.5 8.2a2.6 2.6 0 0 0-1.83-1.84C18.05 5.92 12 5.92 12 5.92s-6.05 0-7.67.44A2.6 2.6 0 0 0 2.5 8.2 27 27 0 0 0 2.06 12a27 27 0 0 0 .44 3.8 2.6 2.6 0 0 0 1.83 1.84c1.62.44 7.67.44 7.67.44s6.05 0 7.67-.44a2.6 2.6 0 0 0 1.83-1.84A27 27 0 0 0 21.94 12a27 27 0 0 0-.44-3.8zM10.06 14.9V9.1L15.1 12z" fill="currentColor" stroke="none"/>'
+    youtube: '<path d="M21.5 8.2a2.6 2.6 0 0 0-1.83-1.84C18.05 5.92 12 5.92 12 5.92s-6.05 0-7.67.44A2.6 2.6 0 0 0 2.5 8.2 27 27 0 0 0 2.06 12a27 27 0 0 0 .44 3.8 2.6 2.6 0 0 0 1.83 1.84c1.62.44 7.67.44 7.67.44s6.05 0 7.67-.44a2.6 2.6 0 0 0 1.83-1.84A27 27 0 0 0 21.94 12a27 27 0 0 0-.44-3.8zM10.06 14.9V9.1L15.1 12z" fill="currentColor" stroke="none"/>',
+    // inventory: «Склад» — a crate
+    box: '<path d="M4 8.2 12 4l8 4.2-8 4.2-8-4.2Z"/><path d="M4 8.2v7.6L12 20l8-4.2V8.2"/><path d="M12 12.4V20"/>',
+    // inventory: «Продажа в салоне» — a card terminal
+    till: '<rect x="3.5" y="5.5" width="17" height="14" rx="2"/><path d="M3.5 9.5h17"/><path d="M7 13.2h4M7 16h7"/>',
+    // inventory: the scanner button on the Склад screen — a viewfinder
+    scan: '<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M4 12h16"/>'
   };
   function icon(name) {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' + ICON[name] + "</svg>";
@@ -194,7 +200,7 @@
       "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
       "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Liidestused", "Настройки": "Seaded",
       "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
-      "Все заказы": "Kõik tellimused", "Править": "Muuda", "Отменить": "Võta tagasi",
+      "Все заказы": "Kõik tellimused", "Отменить": "Võta tagasi",
       "Применить": "Rakenda", "Отмена": "Tühista", "Сохранить": "Salvesta",
       "Найти товар: название, бренд…": "Otsi toodet: nimi, bränd…",
       /* вход в админку и настоящие заказы (backend) */
@@ -575,8 +581,8 @@
       "Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.":
         "Hindu, laoseisu ja tekste saab siinsamas muuta. Skanneri triipkood leiab toote sekundiga — sissetulek ja mahakandmine ilma käsitsi sisestamata.",
       "Поиск по товарам": "Otsi toodete seast",
-      "Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.":
-        "Kes ostab, kui tihti ja kui palju. Siit saab saata ka sünnipäevakirja ja isikliku sooduskoodi.",
+      "Кто покупает, как часто и на сколько. Отсюда же — заявки на оптовые цены для салонов.":
+        "Kes ostab, kui tihti ja kui palju. Siit tulevad ka salongihinna taotlused.",
       "Клиент": "Klient",
       "Заказов": "Tellimusi",
       "Потратил": "Kulutanud",
@@ -761,7 +767,6 @@
       "Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
         "Kõik, mida pood enda kohta ütleb: ettevõtte andmed, lahtiolekuajad, sotsiaalmeedia, must riba päise kohal, leht „Kontakt“ ja allkiri kirjades. Muuda siin üks kord — ja muutub kõikjal: jaluses, lehel „Kontakt“, õigustekstides ja kirjades.",
       "Название компании": "Ettevõtte nimi",
-      "Регистрационный номер": "Registrikood",
       "Только цифры.": "Ainult numbrid.",
       "Номер KMKR": "KMKR-number",
       "Электронная почта": "E-posti aadress",
@@ -793,7 +798,6 @@
       "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.":
         "Üks rida ettevõtte andmete all igas kirjas. Kui keel on tühi, siis selles keeles kirjas rida ei ole.",
       "Язык текстов": "Tekstide keel",
-      "Свернуть": "Ahenda",
       "Рабочий день": "Tööpäev",
       "Выходной": "Suletud",
       "Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.":
@@ -891,7 +895,178 @@
       "Google Search Console сейчас не отвечает — попробуйте позже.": "Google Search Console ei vasta praegu — proovi hiljem uuesti.",
       "Позиция": "Positsioon", "Топ запросов": "Populaarseimad päringud", "Топ страниц": "Populaarseimad lehed",
       "Аналитика считается на сервере из настоящих заходов и заказов — откроется здесь, как только вы войдёте в панель.":
-        "Analüütika arvutatakse serveris tegelike külastuste ja tellimuste põhjal — see ilmub siia niipea, kui logite paneeli sisse."
+        "Analüütika arvutatakse serveris tegelike külastuste ja tellimuste põhjal — see ilmub siia niipea, kui logite paneeli sisse.",
+      // assistant-work: goods-editor AI buttons, blog outline/translate, order reply, reports card
+      "Сгенерировать описание": "Genereeri kirjeldus", "Перевести на ET/EN": "Tõlgi ET/EN keelde",
+      "SEO-тексты": "SEO-tekstid",
+      "Описание на русском": "Kirjeldus vene keeles", "Описание на эстонском": "Kirjeldus eesti keeles",
+      "Описание на английском": "Kirjeldus inglise keeles",
+      "Текста пока нет — можно написать вручную или сгенерировать с ИИ": "Teksti veel pole — kirjuta ise või genereeri AI-ga",
+      "Черновик из темы": "Mustand teemast", "Тема статьи": "Artikli teema",
+      "Например: уход за бородой зимой": "Näiteks: habemehooldus talvel", "Перевести": "Tõlgi",
+      "Ответить клиенту": "Vasta kliendile", "Сообщение клиента": "Kliendi sõnum",
+      "Составить ответ": "Koosta vastus", "Ваш ответ клиенту": "Sinu vastus kliendile",
+      "Переписка с клиентом": "Kirjavahetus kliendiga", "Переписки пока нет.": "Kirjavahetust veel pole.",
+      "Письмо отправлено ✓": "Kiri saadetud ✓", "Не удалось отправить письмо": "Kirja saatmine ei õnnestunud",
+      "Отчёты": "Aruanded", "Месяц": "Kuu", "Скачать CSV": "Laadi alla CSV", "Скачать XLSX": "Laadi alla XLSX",
+      "НДС": "KM",
+      "Вставьте сюда, что написал покупатель": "Kleebi siia, mida klient kirjutas",
+      "Выгрузка заказов для бухгалтера за один месяц — с разбивкой НДС.": "Tellimuste eksport raamatupidajale ühe kuu kohta — koos käibemaksu jaotusega.",
+      "Вставьте сообщение клиента": "Kleebi kliendi sõnum",
+      "У заказа нет e-mail покупателя": "Tellimusel pole kliendi e-posti",
+      "Сначала напишите или сгенерируйте русское описание": "Kirjuta või genereeri esmalt venekeelne kirjeldus",
+      "Отчёт скачивается ✓": "Aruanne laaditakse alla ✓",
+      "Введите тему статьи": "Sisesta artikli teema",
+      "Сначала напишите статью хотя бы на одном языке": "Kirjuta artikkel esmalt vähemalt ühes keeles",
+      "Слишком много запросов — попробуйте позже": "Liiga palju päringuid — proovi hiljem",
+      // wholesale/loyalty: salon/pro pricing + points programme
+      "Цена для салонов": "Salongihind", "Баллы лояльности": "Lojaalsuspunktid",
+      "Начисление баллов сейчас выключено.": "Punktide kogumine on praegu väljas.",
+      "Пока нет начислений — они появятся здесь после первой оплаченной покупки.":
+        "Kogumisi veel pole — need ilmuvad pärast esimest tasutud ostu.",
+      "Стать партнёром (салон/мастер)": "Saa partneriks (salong/meister)", "партнёр": "partner",
+      "Вам доступны цены для салонов — на карточках товаров, в товаре и в корзине.":
+        "Teile kehtivad salongihinnad — tootekaartidel, tootelehel ja ostukorvis.",
+      "на рассмотрении": "läbivaatamisel",
+      "Заявку получили, скоро рассмотрим и напишем.": "Taotlus on saabunud, vaatame peagi läbi ja anname teada.",
+      "Оптовые цены для салонов и мастеров — оставьте заявку, мы свяжемся и подтвердим.":
+        "Hulgihinnad salongidele ja meistritele — jäta taotlus, võtame ühendust ja kinnitame.",
+      "Регистрационный номер": "Registrikood", "Отправить заявку": "Saada taotlus",
+      "Заполните название компании и регистрационный номер": "Täitke ettevõtte nimi ja registrikood",
+      "Сначала войдите в кабинет": "Kõigepealt logige kontosse sisse",
+      "Не получилось отправить — попробуйте ещё раз": "Ei õnnestunud saata — proovige uuesti",
+      "Заявка отправлена ✓": "Taotlus saadetud ✓",
+      "Начислено": "Kogutud", "Списано": "Kasutatud", "Корректировка": "Korrigeeritud", "Сгорело": "Aegunud",
+      "Баллы": "Punktid",
+      "Войдите как владелец, чтобы видеть настоящих клиентов.": "Logige omanikuna sisse, et näha päris kliente.",
+      "Никого не нашлось.": "Kedagi ei leitud.",
+      "На рассмотрении": "Läbivaatamisel", "Партнёры": "Partnerid", "Розница": "Jaemüük", "розница": "jaemüük",
+      "Заявка отклонена": "Taotlus lükati tagasi", "Партнёр одобрен ✓": "Partner kinnitatud ✓",
+      "Статус партнёра снят": "Partneri staatus eemaldatud",
+      "Начислить или списать баллы": "Lisa või vähenda punkte",
+      "Баллы — можно отрицательное число": "Punktid — võib olla negatiivne arv",
+      "Заметка — за что": "Märkus — mille eest",
+      "История баллов": "Punktide ajalugu", "Заметка о клиенте": "Märkus kliendi kohta",
+      "Начислений ещё не было.": "Kogumisi pole veel olnud.",
+      "Одобрить": "Kinnita", "Убрать статус партнёра": "Eemalda partneri staatus",
+      "Цены и лояльность": "Hinnad ja lojaalsus",
+      "Скидка для салонов и то, как покупатели зарабатывают и тратят баллы.":
+        "Salongisoodustus ning see, kuidas kliendid punkte koguvad ja kasutavad.",
+      "Войдите как владелец, чтобы менять цены и лояльность.": "Logige omanikuna sisse, et muuta hindu ja lojaalsusprogrammi.",
+      "Скидка для салонов, % — 0, если сейчас нет оптовых цен": "Salongisoodustus, % — 0, kui hulgihindu praegu ei ole",
+      "Скидка действует от суммы корзины, € — 0, если без условия":
+        "Soodustus kehtib alates ostukorvi summast, € — 0, kui tingimust ei ole",
+      "Баллы за покупки включены": "Ostude eest punktide kogumine on sees",
+      "Начисляем баллов — % от суммы оплаченного заказа": "Kogume punkte — % tasutud tellimuse summast",
+      "Списать можно не больше — % от суммы корзины": "Kasutada saab kuni — % ostukorvi summast",
+      "Списание доступно от — сколько баллов на счету": "Kasutamine on võimalik alates — mitu punkti kontol",
+      "Отменить правки": "Loobu muudatustest",
+      "Не получилось сохранить": "Ei õnnestunud salvestada",
+      "Не получилось изменить баллы": "Punktide muutmine ei õnnestunud",
+      "Введите число баллов, не 0": "Sisestage punktide arv, mitte 0",
+      "Не получилось сохранить заметку": "Märkuse salvestamine ei õnnestunud",
+      "Баллы изменены ✓": "Punktid muudetud ✓", "Заметка сохранена ✓": "Märkus salvestatud ✓",
+      // inventory: «Склад», the scanner, «Продажа в салоне»
+      "Склад": "Ladu",
+      "Открыть склад": "Ava ladu", "Открыть продажу в салоне": "Ava müük salongis",
+      "Салон": "Salong",
+      "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
+        "Tegelikud jäägid — mitu tükki on tegelikult laos. Skaneerige triipkood, et võtta kaup vastu või kanda maha müük.",
+      "📱 Откройте эту страницу на телефоне и добавьте на экран: в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». Быстрее, чем открывать сайт заново каждый раз.":
+        "📱 Avage see leht telefonis ja lisage avakuvale: Safaris — «Jaga» → «Lisa avakuvale»; Chrome'is — menüü (⋮) → «Paigalda rakendus». Kiirem kui iga kord saiti uuesti avada.",
+      "Войдите в панель, чтобы видеть склад.": "Logige paneeli sisse, et näha laoseisu.",
+      "Сканировать": "Skaneeri",
+      "Найти товар, бренд, EAN…": "Otsi toodet, brändi, EAN…",
+      "Поиск по складу": "Otsing laos",
+      "История приёмок и продаж →": "Vastuvõttude ja müükide ajalugu →",
+      "История приёмок и продаж": "Vastuvõttude ja müükide ajalugu",
+      "Мало": "Vähe", "Нет": "Otsas", "Не учтено": "Arvestamata", "не учтено": "arvestamata",
+      "Склад не отвечает — попробуйте обновить страницу.": "Ladu ei vasta — proovige lehte värskendada.",
+      "EAN / штрихкод": "EAN / triipkood", "нет штрихкода": "triipkoodi pole",
+      "Порог «мало»": "Läve «vähe»", "Остаток сейчас": "Jääk praegu",
+      "Причина (видна в истории)": "Põhjus (nähtav ajaloos)",
+      "например: пересчёт на полке": "näiteks: ülelugemine riiulil",
+      "Свернуть": "Ahenda", "Править": "Muuda",
+      "← Склад": "← Ladu", "Тип движения": "Liikumise tüüp",
+      "Приход": "Vastuvõtt", "Продажа на сайте": "Müük veebis", "Продажа в салоне": "Müük salongis",
+      "Ручная правка": "Käsitsi parandus", "Возврат": "Tagastus",
+      "Движений пока нет.": "Liikumisi veel ei ole.",
+      "Ничего не найдено.": "Midagi ei leitud.",
+      "Привязать": "Seo", "Код не привязан": "Kood pole seotud",
+      "+1 приход": "+1 vastuvõtt", "−1 продажа": "−1 müük",
+      "Приход по количеству": "Vastuvõtt koguse järgi", "Количество приёмки": "Vastuvõtu kogus",
+      "Найти товар…": "Otsi toodet…", "Найти товар для привязки": "Otsi toodet sidumiseks",
+      "Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.": "Suunake kaamera EAN-13/EAN-8/UPC-A triipkoodile.",
+      "Закрыть сканер": "Sulge skanner", "Фонарик": "Taskulamp",
+      "Код вручную": "Kood käsitsi", "Ввести код вручную": "Sisesta kood käsitsi", "Найти": "Otsi",
+      "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.":
+        "Kaamera pole selles brauseris toetatud — triipkoodi tuvastus töötab Chrome'is/Edge'is Androidil ja Safaris 17+ iPhone'is. Kasutage allpool otsingut või käsitsi sisestust.",
+      "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.":
+        "Kaamera pole selles brauseris saadaval. Kasutage allpool otsingut või koodi käsitsi sisestust.",
+      "Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».":
+        "Koostage müük — otsige toodet siit või skaneerige triipkood «Laos», märkige makseviis ja vormistage. Tellimus muutub kohe makstuks ja ilmub «Tellimustes» märkega «Salong».",
+      "Поиск товара": "Toote otsing",
+      "Пока пусто — добавьте товар выше или отсканируйте штрихкод в «Складе».":
+        "Praegu tühi — lisage toode ülal või skaneerige triipkood «Laos».",
+      "Покупатель (необязательно)": "Klient (valikuline)",
+      "E-mail": "E-post",
+      "Наличные": "Sularaha", "Терминал": "Kaardimakse",
+      "Скидка, %": "Allahindlus, %",
+      "Оформляем…": "Vormistame…", "Оформить продажу": "Vormista müük",
+      "Добавьте хотя бы один товар.": "Lisage vähemalt üks toode.",
+      "Выберите способ оплаты.": "Valige makseviis.",
+      "Не удалось оформить продажу — попробуйте ещё раз.": "Müüki ei õnnestunud vormistada — proovige uuesti.",
+      "Продажа оформлена ✓": "Müük vormistatud ✓",
+      "Чек для печати": "Kviitung printimiseks", "Новая продажа": "Uus müük",
+      "Добавить": "Lisa",
+      // integration: scanner size-pick when binding an EAN to a multi-size product
+      "Какой объём?": "Milline maht?",
+      // integration: goods-editor pro-price field label
+      "Цена для салонов, €": "Salongihind, €",
+      // integration: wave-4 i18n cleanup (inventory scanner, loyalty/customers, blog editor, POS, stats)
+      "Склад обновлён ✓": "Ladu uuendatud ✓",
+      "← Все статьи": "← Kõik artiklid",
+      "Язык статьи": "Artikli keel",
+      "JPEG, PNG или WebP, до 12 МБ.": "JPEG, PNG või WebP, kuni 12 MB.",
+      "SEO-заголовок ·": "SEO-pealkiri ·",
+      "SEO-описание ·": "SEO-kirjeldus ·",
+      "Прочее": "Muu",
+      "Период": "Periood",
+      "Страница": "Leht",
+      "Список клиентов не загрузился.": "Klientide loend ei laadinud.",
+      "← Ко всем клиентам": "← Kõikide klientide juurde",
+      "например, извинение за задержку": "näiteks, vabandus viivituse eest",
+      "например: постоянный клиент, оптовик": "näiteks: püsiklient, hulgimüügiklient",
+      "Имя, почта, телефон, компания…": "Nimi, e-post, telefon, ettevõte…",
+      "Поиск по клиентам": "Otsing klientide seas",
+      "Отправить": "Saada",
+      "Пусто — на странице товара показывается текст магазина (виден в подсказке поля). Своё описание для языка появляется на сайте вместо него.":
+        "Tühi — tootelehel kuvatakse poe tavatekst (näha vihjena välja all). Selle keele oma kirjeldus ilmub saidile selle asemel.",
+      "продажа на сайте": "müük veebis",
+      "продажа в салоне": "müük salongis",
+      "приход": "sissetulek",
+      "ручная правка": "käsitsi parandus",
+      "Фильтр": "Filter",
+      "ошибка": "viga",
+      "Код привязан ✓": "Kood seotud ✓",
+      "Не удалось привязать — возможно, код уже занят": "Ei õnnestunud siduda — võib-olla on kood juba kasutusel",
+      "Войдите в панель.": "Logige paneeli sisse.",
+      "Способ оплаты": "Makseviis",
+      "Часть изменений не сохранилась": "Osa muudatusi ei salvestunud",
+      "Тарифы Montonio применены ✓": "Montonio tariifid rakendatud ✓",
+      "Приход +1 ✓": "Sissetulek +1 ✓",
+      "Продажа −1 ✓": "Müük −1 ✓",
+      // integration: shipRulesCard's live-Montonio-rates fill controls
+      "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
+        "«Täida Montonio tariifide järgi» kirjutab ülaltoodud tariifid pluss juurdehindluse, ümardatud X,X9 € peale — aga ainult seal, kus tariif on teada: Venipak, Unisend, «Muu Euroopa» ja «Ülejäänud riigid» nuppu ei puuduta.",
+      "Наценка, %": "Juurdehindlus, %",
+      "Наценка на тарифы Montonio, проценты": "Juurdehindlus Montonio tariifidele, protsentides",
+      "Наценка, €": "Juurdehindlus, €",
+      "Наценка на тарифы Montonio, евро": "Juurdehindlus Montonio tariifidele, eurodes",
+      "Разрешить снижать текущие цены": "Luba praeguseid hindu alandada",
+      "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
+        "Vaikimisi ei lange hind juba salvestatust madalamale — tariif ainult tõstab selle tegeliku maksumuseni.",
+      "Заполнить по тарифам Montonio": "Täida Montonio tariifide järgi"
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -1011,7 +1186,7 @@
       "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
       "Аналитика": "Analytics", "Письма": "E-mails", "Подключения": "Integrations", "Настройки": "Settings",
       "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
-      "Все заказы": "All orders", "Править": "Edit", "Отменить": "Undo",
+      "Все заказы": "All orders", "Отменить": "Undo",
       "Применить": "Apply", "Отмена": "Cancel", "Сохранить": "Save",
       "Найти товар: название, бренд…": "Find a product: name, brand…",
       /* вход в админку и настоящие заказы (backend) */
@@ -1393,8 +1568,8 @@
       "Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.":
         "Prices, stock and texts are edited right here. A scanner barcode finds a product in a second — goods in and goods out with no typing.",
       "Поиск по товарам": "Search the products",
-      "Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.":
-        "Who buys, how often and for how much. Birthday e-mails and personal promo codes go out from here too.",
+      "Кто покупает, как часто и на сколько. Отсюда же — заявки на оптовые цены для салонов.":
+        "Who buys, how often and for how much. Salon pricing requests come in from here too.",
       "Клиент": "Customer",
       "Заказов": "Orders",
       "Потратил": "Spent",
@@ -1579,7 +1754,6 @@
       "Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
         "Everything the shop says about itself: company details, opening hours, social media, the black bar above the header, the “Contact” page and the e-mail signature. Change it here once and it changes everywhere: in the footer, on “Contact”, in the legal texts and in the e-mails.",
       "Название компании": "Company name",
-      "Регистрационный номер": "Registry code",
       "Только цифры.": "Digits only.",
       "Номер KMKR": "VAT number",
       "Электронная почта": "E-mail address",
@@ -1611,7 +1785,6 @@
       "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.":
         "One line under the company details in every e-mail. Leave a language empty and the line is left out of e-mails in that language.",
       "Язык текстов": "Text language",
-      "Свернуть": "Collapse",
       "Рабочий день": "Open",
       "Выходной": "Closed",
       "Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.":
@@ -1709,7 +1882,178 @@
       "Google Search Console сейчас не отвечает — попробуйте позже.": "Google Search Console is not responding right now — try again later.",
       "Позиция": "Position", "Топ запросов": "Top queries", "Топ страниц": "Top pages",
       "Аналитика считается на сервере из настоящих заходов и заказов — откроется здесь, как только вы войдёте в панель.":
-        "Analytics is computed on the server from real visits and orders — it will appear here as soon as you sign in to the panel."
+        "Analytics is computed on the server from real visits and orders — it will appear here as soon as you sign in to the panel.",
+      // assistant-work: goods-editor AI buttons, blog outline/translate, order reply, reports card
+      "Сгенерировать описание": "Generate description", "Перевести на ET/EN": "Translate to ET/EN",
+      "SEO-тексты": "SEO texts",
+      "Описание на русском": "Description in Russian", "Описание на эстонском": "Description in Estonian",
+      "Описание на английском": "Description in English",
+      "Текста пока нет — можно написать вручную или сгенерировать с ИИ": "No text yet — write it yourself or generate it with AI",
+      "Черновик из темы": "Draft from topic", "Тема статьи": "Article topic",
+      "Например: уход за бородой зимой": "For example: beard care in winter", "Перевести": "Translate",
+      "Ответить клиенту": "Reply to customer", "Сообщение клиента": "Customer's message",
+      "Составить ответ": "Draft a reply", "Ваш ответ клиенту": "Your reply to the customer",
+      "Переписка с клиентом": "Conversation with the customer", "Переписки пока нет.": "No messages yet.",
+      "Письмо отправлено ✓": "Message sent ✓", "Не удалось отправить письмо": "Could not send the message",
+      "Отчёты": "Reports", "Месяц": "Month", "Скачать CSV": "Download CSV", "Скачать XLSX": "Download XLSX",
+      "НДС": "VAT",
+      "Вставьте сюда, что написал покупатель": "Paste in what the customer wrote",
+      "Выгрузка заказов для бухгалтера за один месяц — с разбивкой НДС.": "Order export for the accountant for one month — with a VAT breakdown.",
+      "Вставьте сообщение клиента": "Paste in the customer's message",
+      "У заказа нет e-mail покупателя": "This order has no customer e-mail",
+      "Сначала напишите или сгенерируйте русское описание": "First write or generate the Russian description",
+      "Отчёт скачивается ✓": "The report is downloading ✓",
+      "Введите тему статьи": "Enter the article topic",
+      "Сначала напишите статью хотя бы на одном языке": "First write the article in at least one language",
+      "Слишком много запросов — попробуйте позже": "Too many requests — try again later",
+      // wholesale/loyalty: salon/pro pricing + points programme
+      "Цена для салонов": "Salon price", "Баллы лояльности": "Loyalty points",
+      "Начисление баллов сейчас выключено.": "Points are not being earned right now.",
+      "Пока нет начислений — они появятся здесь после первой оплаченной покупки.":
+        "No points earned yet — they will appear here after the first paid purchase.",
+      "Стать партнёром (салон/мастер)": "Become a partner (salon/pro)", "партнёр": "partner",
+      "Вам доступны цены для салонов — на карточках товаров, в товаре и в корзине.":
+        "Salon pricing is available to you — on product cards, the product page and the cart.",
+      "на рассмотрении": "under review",
+      "Заявку получили, скоро рассмотрим и напишем.": "We've got your request — we'll review it soon and let you know.",
+      "Оптовые цены для салонов и мастеров — оставьте заявку, мы свяжемся и подтвердим.":
+        "Wholesale pricing for salons and pros — send a request, we'll reach out and confirm.",
+      "Регистрационный номер": "Registration number", "Отправить заявку": "Send request",
+      "Заполните название компании и регистрационный номер": "Fill in the company name and registration number",
+      "Сначала войдите в кабинет": "Sign in to your account first",
+      "Не получилось отправить — попробуйте ещё раз": "Could not send — please try again",
+      "Заявка отправлена ✓": "Request sent ✓",
+      "Начислено": "Earned", "Списано": "Redeemed", "Корректировка": "Adjustment", "Сгорело": "Expired",
+      "Баллы": "Points",
+      "Войдите как владелец, чтобы видеть настоящих клиентов.": "Sign in as the owner to see real customers.",
+      "Никого не нашлось.": "Nobody found.",
+      "На рассмотрении": "Under review", "Партнёры": "Partners", "Розница": "Retail", "розница": "retail",
+      "Заявка отклонена": "Request rejected", "Партнёр одобрен ✓": "Partner approved ✓",
+      "Статус партнёра снят": "Partner status removed",
+      "Начислить или списать баллы": "Credit or deduct points",
+      "Баллы — можно отрицательное число": "Points — a negative number is fine",
+      "Заметка — за что": "Note — what for",
+      "История баллов": "Points history", "Заметка о клиенте": "Note about the customer",
+      "Начислений ещё не было.": "No points earned yet.",
+      "Одобрить": "Approve", "Убрать статус партнёра": "Remove partner status",
+      "Цены и лояльность": "Pricing and loyalty",
+      "Скидка для салонов и то, как покупатели зарабатывают и тратят баллы.":
+        "The salon discount, and how customers earn and spend points.",
+      "Войдите как владелец, чтобы менять цены и лояльность.": "Sign in as the owner to change pricing and loyalty.",
+      "Скидка для салонов, % — 0, если сейчас нет оптовых цен": "Salon discount, % — 0 if there is no wholesale pricing right now",
+      "Скидка действует от суммы корзины, € — 0, если без условия":
+        "Discount applies from this cart total, € — 0 for no minimum",
+      "Баллы за покупки включены": "Points for purchases are on",
+      "Начисляем баллов — % от суммы оплаченного заказа": "We credit points — % of the paid order total",
+      "Списать можно не больше — % от суммы корзины": "The most that can be redeemed — % of the cart total",
+      "Списание доступно от — сколько баллов на счету": "Redeeming is available from — how many points on the balance",
+      "Отменить правки": "Discard changes",
+      "Не получилось сохранить": "Could not save",
+      "Не получилось изменить баллы": "Could not change the points",
+      "Введите число баллов, не 0": "Enter a points amount other than 0",
+      "Не получилось сохранить заметку": "Could not save the note",
+      "Баллы изменены ✓": "Points updated ✓", "Заметка сохранена ✓": "Note saved ✓",
+      // inventory: «Склад», the scanner, «Продажа в салоне»
+      "Склад": "Stock",
+      "Открыть склад": "Open the stock", "Открыть продажу в салоне": "Open the in-salon sale",
+      "Салон": "Salon",
+      "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
+        "Real stock levels — how many units are actually on the shelf. Scan a barcode to receive goods or log a sale.",
+      "📱 Откройте эту страницу на телефоне и добавьте на экран: в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». Быстрее, чем открывать сайт заново каждый раз.":
+        "📱 Open this page on your phone and add it to the home screen: Safari — «Share» → «Add to Home Screen»; Chrome — menu (⋮) → «Install app». Faster than opening the site again each time.",
+      "Войдите в панель, чтобы видеть склад.": "Sign in to the panel to see the stock.",
+      "Сканировать": "Scan",
+      "Найти товар, бренд, EAN…": "Find a product, brand, EAN…",
+      "Поиск по складу": "Search the stock",
+      "История приёмок и продаж →": "Goods-in and sales history →",
+      "История приёмок и продаж": "Goods-in and sales history",
+      "Мало": "Low", "Нет": "Out", "Не учтено": "Untracked", "не учтено": "untracked",
+      "Склад не отвечает — попробуйте обновить страницу.": "The stock isn't responding — try refreshing the page.",
+      "EAN / штрихкод": "EAN / barcode", "нет штрихкода": "no barcode",
+      "Порог «мало»": "«Low» threshold", "Остаток сейчас": "Current stock",
+      "Причина (видна в истории)": "Reason (shown in the history)",
+      "например: пересчёт на полке": "e.g. recount on the shelf",
+      "Свернуть": "Collapse", "Править": "Edit",
+      "← Склад": "← Stock", "Тип движения": "Move type",
+      "Приход": "Goods in", "Продажа на сайте": "Web sale", "Продажа в салоне": "In-salon sale",
+      "Ручная правка": "Manual correction", "Возврат": "Return",
+      "Движений пока нет.": "No moves yet.",
+      "Ничего не найдено.": "Nothing found.",
+      "Привязать": "Link", "Код не привязан": "Code not linked",
+      "+1 приход": "+1 goods in", "−1 продажа": "−1 sale",
+      "Приход по количеству": "Receive by quantity", "Количество приёмки": "Quantity received",
+      "Найти товар…": "Find a product…", "Найти товар для привязки": "Find a product to link",
+      "Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.": "Point the camera at an EAN-13/EAN-8/UPC-A barcode.",
+      "Закрыть сканер": "Close scanner", "Фонарик": "Flashlight",
+      "Код вручную": "Code by hand", "Ввести код вручную": "Enter the code by hand", "Найти": "Find",
+      "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.":
+        "The camera isn't supported in this browser — barcode scanning works in Chrome/Edge on Android and Safari 17+ on iPhone. Use the search or manual entry below.",
+      "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.":
+        "The camera is not available in this browser. Use the search or manual code entry below.",
+      "Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».":
+        "Put the sale together — search for a product here or scan a barcode in «Склад», set the payment and confirm. The order is marked paid immediately and shows up in «Orders» tagged «Salon».",
+      "Поиск товара": "Product search",
+      "Пока пусто — добавьте товар выше или отсканируйте штрихкод в «Складе».":
+        "Empty for now — add a product above or scan a barcode in «Склад».",
+      "Покупатель (необязательно)": "Customer (optional)",
+      "E-mail": "E-mail",
+      "Наличные": "Cash", "Терминал": "Card terminal",
+      "Скидка, %": "Discount, %",
+      "Оформляем…": "Placing the order…", "Оформить продажу": "Complete the sale",
+      "Добавьте хотя бы один товар.": "Add at least one product.",
+      "Выберите способ оплаты.": "Choose a payment method.",
+      "Не удалось оформить продажу — попробуйте ещё раз.": "Couldn't complete the sale — try again.",
+      "Продажа оформлена ✓": "Sale complete ✓",
+      "Чек для печати": "Printable receipt", "Новая продажа": "New sale",
+      "Добавить": "Add",
+      // integration: scanner size-pick when binding an EAN to a multi-size product
+      "Какой объём?": "Which size?",
+      // integration: goods-editor pro-price field label
+      "Цена для салонов, €": "Salon price, €",
+      // integration: wave-4 i18n cleanup (inventory scanner, loyalty/customers, blog editor, POS, stats)
+      "Склад обновлён ✓": "Stock updated ✓",
+      "← Все статьи": "← All posts",
+      "Язык статьи": "Post language",
+      "JPEG, PNG или WebP, до 12 МБ.": "JPEG, PNG or WebP, up to 12 MB.",
+      "SEO-заголовок ·": "SEO title ·",
+      "SEO-описание ·": "SEO description ·",
+      "Прочее": "Other",
+      "Период": "Period",
+      "Страница": "Page",
+      "Список клиентов не загрузился.": "The customer list didn't load.",
+      "← Ко всем клиентам": "← Back to all customers",
+      "например, извинение за задержку": "e.g., an apology for the delay",
+      "например: постоянный клиент, оптовик": "e.g.: regular customer, wholesale buyer",
+      "Имя, почта, телефон, компания…": "Name, e-mail, phone, company…",
+      "Поиск по клиентам": "Search customers",
+      "Отправить": "Send",
+      "Пусто — на странице товара показывается текст магазина (виден в подсказке поля). Своё описание для языка появляется на сайте вместо него.":
+        "Empty — the product page shows the shop's own text (visible as the field's hint). Your own description for this language appears on the site instead.",
+      "продажа на сайте": "web sale",
+      "продажа в салоне": "in-store sale",
+      "приход": "goods in",
+      "ручная правка": "manual correction",
+      "Фильтр": "Filter",
+      "ошибка": "error",
+      "Код привязан ✓": "Code linked ✓",
+      "Не удалось привязать — возможно, код уже занят": "Couldn't link it — the code may already be taken",
+      "Войдите в панель.": "Sign in to the panel.",
+      "Способ оплаты": "Payment method",
+      "Часть изменений не сохранилась": "Some changes weren't saved",
+      "Тарифы Montonio применены ✓": "Montonio tariffs applied ✓",
+      "Приход +1 ✓": "Goods in +1 ✓",
+      "Продажа −1 ✓": "Sale −1 ✓",
+      // integration: shipRulesCard's live-Montonio-rates fill controls
+      "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
+        "«Fill from Montonio tariffs» writes the tariffs above plus the markup, rounded to X.X9 €, but only where a tariff is known: the button doesn't touch Venipak, Unisend, «Other European countries» or «Other countries».",
+      "Наценка, %": "Markup, %",
+      "Наценка на тарифы Montonio, проценты": "Markup on Montonio tariffs, percent",
+      "Наценка, €": "Markup, €",
+      "Наценка на тарифы Montonio, евро": "Markup on Montonio tariffs, euros",
+      "Разрешить снижать текущие цены": "Allow lowering current prices",
+      "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
+        "By default the price never drops below what's already saved — the tariff only raises it to the real cost.",
+      "Заполнить по тарифам Montonio": "Fill from Montonio tariffs"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -1820,7 +2164,38 @@
     // «Открыть товары →» — the label is a dictionary key, the arrow is not
     [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }],
     // analytics agent — the KPI cards' delta line, e.g. "+12,3% к прошлому периоду"
-    [/^([-+][\d.,]+%) к прошлому периоду$/, { ET: "$1 võrreldes eelmise perioodiga", EN: "$1 vs. previous period" }]
+    [/^([-+][\d.,]+%) к прошлому периоду$/, { ET: "$1 võrreldes eelmise perioodiga", EN: "$1 vs. previous period" }],
+    // wholesale/loyalty — the account screen's points balance («15 баллов»)
+    // and the checkout's redeem toggle («Использовать баллы — доступно 15»)
+    [/^(\d+) (?:балл|балла|баллов)$/, { ET: "$1 punkti", EN: "$1 points" }],
+    [/^Использовать баллы — доступно (\d+)$/, { ET: "Kasuta punkte — saadaval $1", EN: "Use points — $1 available" }],
+    // the account screen's loyalty rates paragraph — earnPct and redeemMaxPct
+    // are the shop's own settings, not something a plain dictionary key can hold
+    [/^Один балл — одно евро\. Начисляем ([\d.,]+)% с каждой оплаченной покупки\. Списать можно при оформлении — не больше ([\d.,]+)% от суммы корзины\.$/,
+      { ET: "Üks punkt on üks euro. Kogume $1% igast tasutud ostust. Kasutada saab tellimuse vormistamisel — kuni $2% ostukorvi summast.",
+        EN: "One point is one euro. We credit $1% of every paid purchase. Redeem it at checkout — up to $2% of the cart total." }],
+    // integration: goods-editor pro-price hint (proPriceHint())
+    [/^Сейчас для салонов: (.+) — своя цена$/, { ET: "Praegu salongile: $1 — oma hind", EN: "Currently for salons: $1 — custom price" }],
+    [/^Сейчас для салонов: (.+) \(скидка ([\d.,]+)%\)$/, { ET: "Praegu salongile: $1 (allahindlus $2%)", EN: "Currently for salons: $1 (discount $2%)" }],
+    // integration: admin «Склад» search count — mirrors the catalogue's own
+    // "первые 24" rules just above, only the shown-count differs (60 rows)
+    [/^Показаны первые 60 из (\d+) по запросу «(.+)»$/, { ET: "Kuvatud esimesed 60, kokku $1 · otsing „$2“", EN: "First 60 shown, $1 in total · search “$2”" }],
+    [/^Показаны первые 60 из (\d+)$/, { ET: "Kuvatud esimesed 60, kokku $1", EN: "First 60 shown, $1 in total" }],
+    [/^· рег\. (.+)$/, { ET: "· reg. $1", EN: "· reg. $1" }],
+    [/^([+-]?[\d.,]+)% к прошлому периоду$/, { ET: "$1% eelmise perioodiga võrreldes", EN: "$1% vs. previous period" }],
+    [/^Остаток: (.+)$/, { ET: "Jääk: $1", EN: "Stock: $1" }],
+    [/^Штрихкод «(.+)» ни к чему не привязан\. Найдите товар и привяжите код к нему\.$/,
+      { ET: "Triipkood „$1” pole millegagi seotud. Leidke toode ja siduge kood sellega.",
+        EN: "Barcode “$1” isn't linked to anything. Find the product and link the code to it." }],
+    [/^Нет доступа к камере \((.+)\)\. Проверьте разрешения браузера или используйте поиск\/ручной ввод ниже\.$/,
+      { ET: "Kaamera pole saadaval ($1). Kontrollige brauseri õigusi või kasutage allolevat otsingut/käsitsi sisestust.",
+        EN: "No camera access ($1). Check the browser permissions or use the search/manual entry below." }],
+    [/^Приход \+(\d+) ✓$/, { ET: "Sissetulek +$1 ✓", EN: "Goods in +$1 ✓" }],
+    [/^тариф Montonio \(live\): (.+)$/, { ET: "Montonio tariif (live): $1", EN: "Montonio tariff (live): $1" }],
+    [/^тариф Montonio \(прайс-лист\): (.+)$/, { ET: "Montonio tariif (hinnakiri): $1", EN: "Montonio tariff (price list): $1" }],
+    [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
+      { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Läti, Leedu ja teiste riikide vaikehinnad on endiselt vedajate tariifidest madalamad — vt docs/shipping.md.",
+        EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -2134,16 +2509,19 @@
      from settings.shipping_rules through /api/overrides — so the summary the
      shopper watches is the total the server bills. Defaults below match
      src/lib/shipping.ts exactly; with no API behind the shop nothing here
-     fails, it just stays on the defaults and checks out as a demo. */
+     fails, it just stays on the defaults and checks out as a demo.
+     EE parcel/courier are the Montonio-tariff numbers, not the old brief
+     ones — see docs/shipping.md § «Тарифы Montonio» and src/lib/shipping.ts. */
   var SHIP_RULES = {
     freeFrom: 59,
     freeFromByCountry: null,
     methods: {
-      parcel: { "default": 4.99, EE: 3.49, LV: 4.99, LT: 4.99 },
-      courier: { "default": 9.90, EE: 5.99 },
+      parcel: { "default": 4.99, EE: 5.47, LV: 4.99, LT: 4.99 },
+      courier: { "default": 9.90, EE: 10.84 },
       pickup: { "default": 0 }
     },
-    carriers: null
+    carriers: null,
+    markup: { percent: 0, fixed: 0 }
   };
   /* The seeded values, kept whole: «Вернуть значения по умолчанию» in the
      admin has to put back exactly what src/lib/shipping.ts carries, and a
@@ -2195,6 +2573,11 @@
       });
     }
     if (raw.carriers && typeof raw.carriers === "object") SHIP_RULES.carriers = raw.carriers;
+    if (raw.markup && typeof raw.markup === "object") {
+      var mp = Number(raw.markup.percent), mf = Number(raw.markup.fixed);
+      if (isFinite(mp) && mp >= 0) SHIP_RULES.markup.percent = mp;
+      if (isFinite(mf) && mf >= 0) SHIP_RULES.markup.fixed = mf;
+    }
     // the announce bar and the footer quote these — keep the promise and the
     // bill the same number
     refreshShipThresholds();
@@ -2207,6 +2590,7 @@
     SHIP_RULES.freeFromByCountry = null;
     SHIP_RULES.methods = cloneRules(SHIP_RULES_DEFAULT.methods);
     SHIP_RULES.carriers = null;
+    SHIP_RULES.markup = cloneRules(SHIP_RULES_DEFAULT.markup);
     applyShipRules(raw);
     refreshShipThresholds();
   }
@@ -2219,7 +2603,10 @@
       apiSeen(true);
       var s = j.settings || {};
       applyShipRules(s.shipping_rules || s.shippingRules || s.shipping);
-      if (S.screen === "checkout") render();
+      // Rules move both the delivery-method prices/free-shipping hint and the
+      // shipping row + total in the summary — never the contact block, so
+      // never a full render() (see patchDelivery/patchSummary near patchEmail).
+      patchDelivery(); patchSummary();
     }).catch(function () { apiSeen(false); });
   }
 
@@ -2353,7 +2740,7 @@
       // a different list can be a different length or order — the index a
       // shopper had picked in the fallback list may no longer be that bank
       S.bank = 0;
-      if (S.screen === "checkout") render();
+      patchPayment();
     }).catch(function () { apiSeen(false); });
   }
   function bankChipsHTML() {
@@ -2492,6 +2879,8 @@
     // checkout-gaps: the delivery-price table and the promo-code editor
     shipDraft: null,    // working copy of settings.shipping_rules while editing
     shipErr: "",
+    shipLiveRates: null,   // integration: {EE:[...], LV:[...], ...} once loadShipLiveRates() lands
+    shipAllowLower: false, // integration: let «Заполнить по тарифам Montonio» lower an already-saved price
     admPromos: null,    // admin tab «Промокоды»: [promo] once loaded
     admPromoErr: "",
     promoForm: null,    // the code being created or edited, or null
@@ -2509,7 +2898,67 @@
     adminBlogQ: "",        // featured-products search inside the editor
     adminBlogBusy: false,  // a save/publish/delete request is in flight
     adminBlogErr: "",
-    adminBlogConfirmDelete: false
+    adminBlogConfirmDelete: false,
+    // ---- wholesale (salon/pro) pricing & loyalty points ----
+    pro: null,          // {tier, proDiscountPct, proMinOrder, proPrices} — loadProPricing(), only once S.cust.tier === "pro"
+    loyalty: null,      // {balance, history, settings:{enabled,earnPct,redeemMaxPct,minRedeem}} — from acctLoad()/acctVerify()
+    loyaltyRedeem: false, // checkout: «Использовать баллы» toggle
+    acctProForm: { company: "", regCode: "", phone: "" },
+    acctProBusy: false,
+    acctProErr: "",
+    // ---- admin tab «Клиенты» ----
+    admCustomers: null,  // [customer,...] once loaded
+    admCustErr: "",
+    admCustQ: "",
+    admCustTier: "",     // "" | "retail" | "pro" | "pending"
+    admCustOpen: "",     // opened customer id — "" is the list
+    admCustDetail: null, // {customer, history} for the opened card
+    admCustBusy: false,
+    admCustPoints: "",   // the +/− points field on an open card
+    admCustNote: "",     // the points adjustment note field
+    admCustNotesDraft: null, // working copy of the admin's own note about this customer; null = not editing
+    // ---- admin «Настройки» → «Цены и лояльность» ----
+    pricingLoaded: null, // the full settings.pricing as last read from the server (admin-only)
+    pricingDraft: null,  // working copy while the card is being edited
+    // ---- inventory: «Склад» ----
+    stockLevels: null,   // [level,...] once GET /api/admin/inventory/ answers
+    stockBusy: false,
+    stockErr: "",
+    stockQ: "",
+    stockFilter: "all",  // "all" | "low" | "out" | "untracked"
+    stockEdit: "",        // "<productId> <variant>" (space-joined) of the row whose qty/EAN/threshold form is open
+    stockEditQty: "",
+    stockEditReason: "",
+    stockEditEan: "",
+    stockEditLow: "",
+    stockMovesOpen: false, // the ledger sub-view
+    stockMoves: null,
+    stockMovesBusy: false,
+    stockMovesReason: "",
+    // ---- inventory: the scanner (camera primary, keyboard-wedge hidden fallback) ----
+    scanOpen: false,
+    scanEngine: "",       // "native" | "zxing" | "" (not started / unsupported)
+    scanSupport: null,    // {native:bool, zxing:bool} once checked
+    scanErr: "",
+    scanTorchOn: false,
+    scanTorchOk: false,
+    scanHit: null,        // {productId, variant, qty, lowThreshold, state, product} from the last successful lookup
+    scanHitAt: 0,
+    scanAssignQ: "",       // product search when a scanned code matches nothing
+    scanAssignPick: "",    // product id currently showing its size picker (multi-size assign)
+    scanManual: "",
+    scanQty: 1,            // the number typed before «Приход: N»
+    scanToday: null,       // [move,...] today's moves, refreshed after each hit
+    // ---- inventory: «Продажа в салоне» ----
+    posCart: [],           // [{id, variant, qty}]
+    posQ: "",
+    posEmail: "",
+    posPhone: "",
+    posPayment: "cash",    // "cash" | "terminal"
+    posDiscount: "",
+    posBusy: false,
+    posErr: "",
+    posDone: null          // {orderId, number, total} once a sale is completed — the receipt/"new sale" screen
   };
 
   var LS = "rempire-shop-proto";
@@ -2629,6 +3078,36 @@
     if (p.prices && p.prices.length) return p.prices[Math.min(i, p.prices.length - 1)];
     return p.price;
   }
+  /* ---- wholesale/loyalty: pro (salon) pricing --------------------------
+     S.pro is filled in by loadProPricing() once signed in on a 'pro'
+     account — {tier, proDiscountPct, proMinOrder, proPrices}. Mirrors
+     proUnitPrice() in src/lib/loyalty.ts: a per-product proPrices[id]
+     override replaces the BASE price and the variant keeps its own premium
+     over that base, so a cheaper 75 ml pro price does not silently hand
+     away the markup on the 500 ml. Returns null for anyone this does not
+     apply to, so callers always write `proPrice(p,i) != null ? … : …`.
+     Cosmetic only — POST /api/orders recomputes the real total server-side
+     regardless of what this shows. */
+  function proPrice(p, i) {
+    if (!S.pro || S.pro.tier !== "pro") return null;
+    if (S.pro.proMinOrder && cartSumRetail() < S.pro.proMinOrder) return null;
+    var base = p.price;
+    var override = S.pro.proPrices && S.pro.proPrices[p.id];
+    var proBase = override != null ? override : Math.round(base * (1 - S.pro.proDiscountPct / 100) * 100) / 100;
+    var premium = sizePrice(p, i) - base;
+    return Math.round((proBase + premium) * 100) / 100;
+  }
+  /* Always retail — used only for the proMinOrder gate above, so proPrice()
+     can never recurse through lineUnit()/cartSum(). */
+  function cartSumRetail() {
+    var s = 0;
+    S.cart.forEach(function (l) {
+      if (l.type === "bundle") { var b = bundleById(l.id); s += (b ? b.price : 0) * l.qty; return; }
+      if (l.type === "gift") { s += giftAmount(l.id) * l.qty; return; }
+      s += sizePrice(byId(l.id), l.size || 0) * l.qty;
+    });
+    return s;
+  }
   function gal(p) { return p.gallery && p.gallery.length ? p.gallery : [p.img]; }
   function cartCount() { var n = 0; S.cart.forEach(function (l) { n += l.qty; }); return n; }
   // lineUnit() knows the three line kinds — product, set, gift card
@@ -2697,7 +3176,22 @@
     return Math.round(Math.min(S.giftCard.balance, Math.max(0, rest)) * 100) / 100;
   }
   /* ---- /features ---------------------------------------------------------- */
-  function total() { return cartSum() - discount() + shipCost() - giftDiscount(); }
+  /* ---- wholesale/loyalty: «Использовать баллы» at checkout ----------------
+     A preview only — one point is one euro (src/lib/loyalty.ts eurosToPoints),
+     capped by the balance and by redeemMaxPct of the goods subtotal. Stacks
+     with a promo/gift code (a different discount stream, orders.loyalty_discount),
+     unlike the gift card and the promo which are mutually exclusive with each
+     other. createOrder() quotes the real amount from the real balance — this
+     browser never decides what a point is worth. */
+  function loyaltyMaxRedeem() {
+    if (!S.loyalty || !S.loyalty.settings || !S.loyalty.settings.enabled) return 0;
+    var st = S.loyalty.settings;
+    if (S.loyalty.balance < st.minRedeem) return 0;
+    var cap = Math.round(cartSum() * st.redeemMaxPct / 100);
+    return Math.max(0, Math.min(S.loyalty.balance, cap));
+  }
+  function loyaltyDiscount() { return S.loyaltyRedeem ? loyaltyMaxRedeem() : 0; }
+  function total() { return cartSum() - discount() + shipCost() - giftDiscount() - loyaltyDiscount(); }
   /* The apostrophe is escaped too: every attribute written here is
      double-quoted today, but one single-quoted attribute would silently make
      this wrong, and the e-mail templates already escape all five. */
@@ -2902,7 +3396,9 @@
   }
 
   function cardHTML(p) {
-    var price = (p.priceFrom ? "от " : "") + eur(p.price);
+    var pro = proPrice(p, 0);
+    var price = (p.priceFrom ? "от " : "") + eur(pro != null ? pro : p.price);
+    var proTag = pro != null ? ' <span class="chip chip--ok">Цена для салонов</span>' : "";
     var stock = p.stock === "low" ? '<span class="chip chip--low">мало</span>'
       : p.stock === "out" ? '<span class="chip chip--out">нет в наличии</span>' : "";
     var g = gal(p);
@@ -2917,7 +3413,7 @@
         "</span>" +
         '<span class="card__brand">' + esc(p.brand) + "</span>" +
         '<span class="card__name">' + esc(p.name) + "</span>" +
-        '<span class="card__price num">' + price + " " + stock + "</span>" +
+        '<span class="card__price num">' + price + proTag + " " + stock + "</span>" +
       "</button>" +
       (p.stock === "out" ? "" : '<button class="link card__add" data-add="' + p.id + '">В корзину</button>') +
       "</div>";
@@ -3236,7 +3732,9 @@
   function lineUnit(l) {
     if (l.type === "bundle") { var b = bundleById(l.id); return b ? b.price : 0; }
     if (l.type === "gift") return giftAmount(l.id);
-    return sizePrice(byId(l.id), l.size || 0);
+    var p = byId(l.id);
+    var pro = proPrice(p, l.size || 0);
+    return pro != null ? pro : sizePrice(p, l.size || 0);
   }
   /* The kind word is picked here rather than left to the dictionary: in the
      checkout summary the whole line is one text node («Набор · X × 1»), and
@@ -3683,7 +4181,20 @@
   /* Descriptions and info pages exist in three languages; the source text is
      the shop's own English, RU/ET are its translations. UI chrome stays
      Russian in this round — only the content follows the switcher. */
+  // assistant-work: the override is plain text (typed by the owner, or the
+  // AI's own output), not the hand-authored HTML the static content files
+  // carry — this is descFor()'s only caller of esc(), so a paragraph break
+  // is never rendered raw.
+  function descOvHtml(t) {
+    return String(t || "").split(/\n{2,}/).map(function (p) { return p.trim(); }).filter(Boolean)
+      .map(function (p) { return "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>"; }).join("");
+  }
   function descFor(p) {
+    // assistant-work: product_overrides.description {RU,ET,EN} — set from the
+    // goods editor's «Сгенерировать описание»/«Перевести на ET/EN» buttons or
+    // by hand. Present for the current language → wins; absent → the static
+    // content.ru.js/content.et.js/content.js text below, same as always.
+    if (p.descOv && p.descOv[S.lang]) return descOvHtml(p.descOv[S.lang]);
     if (S.lang === "RU" && typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) return CONTENT_RU[p.id];
     if (S.lang === "ET" && typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) return CONTENT_ET[p.id];
     return (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "";
@@ -3844,6 +4355,8 @@
     var p = byId(S.productId);
     var g = gal(p);
     var sizes = p.sizes && p.sizes.length ? p.sizes : [];
+    var pro = proPrice(p, S.size);
+    var unitPrice = pro != null ? pro : sizePrice(p, S.size);
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go-cat="' + p.cat + '">' + CAT_NAMES[p.cat] + "</button> / " + esc(p.brand) + "</div>" +
       '<div class="pdp">' +
@@ -3865,7 +4378,8 @@
             '<button class="pdp__share" data-share="' + p.id + '">' + icon("share") + "<span>Поделиться</span></button>" +
           "</div>" +
           '<h1 class="pdp__title">' + esc(p.name) + "</h1>" +
-          '<div class="num pdp__price"><span data-price>' + eur(sizePrice(p, S.size)) + "</span>" +
+          '<div class="num pdp__price"><span data-price>' + eur(unitPrice) + "</span>" +
+            (pro != null ? ' <span class="chip chip--ok">Цена для салонов</span>' : "") +
             (p.stock === "out" ? ' <span class="chip chip--out">нет в наличии</span>'
               : p.stock === "low" ? ' <span class="chip chip--low">мало</span>' : "") + "</div>" +
           '<div class="pdp__tax">Налоги включены. Доставка рассчитается при оформлении.</div>' +
@@ -3928,7 +4442,7 @@
         complementsFor(p).map(cardHTML).join("") +
       "</div></section></div>" +
       (p.stock === "out" ? "" :
-        '<div class="stickybar"><span class="num stickybar__sum" data-stickysum>' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>');
+        '<div class="stickybar"><span class="num stickybar__sum" data-stickysum>' + eur(unitPrice * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>');
   }
   /* `open`/`id` are optional — every call site but Reviews still gets a
      details that starts closed with no id, exactly as before. Reviews passes
@@ -4596,6 +5110,20 @@
     }
   }
 
+  /* inventory: like the blog actions above, real stock has no demo layer —
+     straight to POST /api/admin/inventory/moves/, still behind the same
+     «Предпросмотр изменения» confirm card everything else gets. */
+  function applyStockAction(a) {
+    var body = a.type === "stock_adjust"
+      ? { productId: a.product_id, variant: a.variant || "", delta: a.delta, reason: a.reason || "adjust", ref: "помощник" }
+      : { productId: a.product_id, variant: a.variant || "", qty: a.qty, reason: "adjust", ref: "помощник" };
+    apiSend("/api/admin/inventory/moves/", "POST", body).then(function (r) {
+      toast(r.status === 200 && r.body.ok ? "Склад обновлён ✓" : "Не получилось сохранить — попробуйте ещё раз.");
+      if (r.status === 200 && r.body.ok) reloadStock();
+      render();
+    }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); render(); });
+  }
+
   function admBlogEditor(d) {
     var L = S.adminBlogLang || "RU";
     var busy = S.adminBlogBusy;
@@ -4617,6 +5145,18 @@
       '<div class="adm__chips" role="group" aria-label="Язык статьи">' + LANGS.map(function (l) {
         return '<button class="scchip" data-admbloglang="' + l[0] + '" aria-current="' + (L === l[0]) + '">' + l[1] + "</button>";
       }).join("") + "</div>" +
+
+      /* assistant-work: «Черновик из темы» fills title+body (as an H2
+         skeleton) + SEO for the language tab open right now; «Перевести»
+         reads whichever language already has a title and fills the other
+         two. Both write straight into the draft (S.adminBlogEdit), exactly
+         like typing — see the [data-blogf] input handler's own comment. */
+      '<label class="field"><span class="field__label">Тема статьи</span>' +
+        '<input class="input" data-admblogtopic placeholder="Например: уход за бородой зимой"></label>' +
+      '<div class="adm__acts" style="margin:-6px 0 14px">' +
+        '<button class="btn btn--ghost btn--sm" data-admblogoutline>Черновик из темы</button>' +
+        '<button class="btn btn--ghost btn--sm" data-admblogtranslate>Перевести</button>' +
+      "</div>" +
 
       '<label class="field"><span class="field__label">Заголовок</span>' +
         '<input class="input" data-blogf="title" maxlength="200" value="' + esc(d.title[L]) + '"></label>' +
@@ -4857,6 +5397,31 @@
       (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
       '<button class="btn btn--ghost btn--sm" data-save' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctSaved ? "Сохранено ✓" : "Сохранить") + "</button>" +
 
+      /* ---- wholesale/loyalty: points balance/history ---------------------- */
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Баллы лояльности</h2></div>' +
+      (S.loyalty
+        ? '<p class="num" style="font-size:20px;margin:0 0 6px">' + S.loyalty.balance + " " + pl(S.loyalty.balance, "балл", "балла", "баллов") + "</p>" +
+          '<p class="muted" style="margin:0 0 12px">' + (S.loyalty.settings.enabled
+            ? "Один балл — одно евро. Начисляем " + S.loyalty.settings.earnPct + "% с каждой оплаченной покупки. Списать можно при оформлении — не больше " + S.loyalty.settings.redeemMaxPct + "% от суммы корзины."
+            : "Начисление баллов сейчас выключено.") + "</p>" +
+          (S.loyalty.history.length
+            ? '<div class="adm__list">' + S.loyalty.history.slice(0, 10).map(loyaltyRowHTML).join("") + "</div>"
+            : '<p class="muted">Пока нет начислений — они появятся здесь после первой оплаченной покупки.</p>')
+        : '<p class="muted">Загружаем…</p>') +
+
+      /* ---- wholesale: «Стать партнёром» ------------------------------------ */
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Стать партнёром (салон/мастер)</h2></div>' +
+      (S.cust && S.cust.tier === "pro"
+        ? '<p><span class="chip chip--ok">партнёр</span></p><p class="muted" style="margin:8px 0 0">Вам доступны цены для салонов — на карточках товаров, в товаре и в корзине.</p>'
+        : S.cust && S.cust.proRequestedAt
+          ? '<p><span class="chip chip--low">на рассмотрении</span></p><p class="muted" style="margin:8px 0 0">Заявку получили, скоро рассмотрим и напишем.</p>'
+          : '<p class="muted" style="margin:0 0 12px">Оптовые цены для салонов и мастеров — оставьте заявку, мы свяжемся и подтвердим.</p>' +
+            '<label class="field"><span class="field__label">Название компании</span><input class="input" data-acctprof="company" value="' + esc(S.acctProForm.company) + '" placeholder="OÜ Näidis"></label>' +
+            '<label class="field"><span class="field__label">Регистрационный номер</span><input class="input" data-acctprof="regCode" value="' + esc(S.acctProForm.regCode) + '" placeholder="12345678"></label>' +
+            '<label class="field"><span class="field__label">Телефон</span><input class="input" type="tel" data-acctprof="phone" value="' + esc(S.acctProForm.phone) + '" placeholder="+372…"></label>' +
+            (S.acctProErr ? '<div class="err" role="alert">' + esc(acctProErrText()) + "</div>" : "") +
+            '<button class="btn btn--ghost btn--sm" data-acctprosend' + (S.acctProBusy ? " disabled" : "") + ">" + (S.acctProBusy ? "Отправляем…" : "Отправить заявку") + "</button>") +
+
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
       '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-acctcountry>' +
@@ -4883,6 +5448,9 @@
     S.cust = j.customer || null;
     S.acctOrders = Array.isArray(j.orders) ? j.orders : S.acctOrders;
     S.loggedIn = !!S.cust;
+    // wholesale/loyalty: balance/history/rates travel with every profile
+    // fetch and every login response — see accountLoyaltySummary() server-side.
+    if (j.loyalty) S.loyalty = j.loyalty;
     if (S.cust) {
       S.acctForm = {
         name: S.cust.name || "",
@@ -4895,13 +5463,33 @@
          way through typing another address is never overwritten. */
       if (!S.ship.name && S.cust.name) S.ship.name = S.cust.name;
       if (!S.ship.phone && S.cust.phone) S.ship.phone = S.cust.phone;
+      // pro pricing only exists for an approved salon/pro account, and only
+      // needs fetching once — S.pro stays put across re-renders until logout.
+      if (S.cust.tier === "pro" && !S.pro) loadProPricing();
     }
     return true;
   }
   function acctForget() {
     S.cust = null; S.loggedIn = false; S.acctOrders = []; S.acctStage = "email";
-    S.acctCode = ""; S.acctSaved = false;
+    S.acctCode = ""; S.acctSaved = false; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
     S.acctForm = { name: "", phone: "", birthday: "", marketing: false };
+    S.acctProForm = { company: "", regCode: "", phone: "" }; S.acctProErr = "";
+  }
+  /** Fetched once, only for a 'pro' account — see proPrice() near sizePrice(). */
+  function loadProPricing() {
+    apiJson("/api/account/pricing/").then(function (r) {
+      if (r.status !== 200 || !r.body || !r.body.ok) return;
+      S.pro = {
+        tier: r.body.tier,
+        proDiscountPct: Number(r.body.proDiscountPct) || 0,
+        proMinOrder: Number(r.body.proMinOrder) || 0,
+        proPrices: r.body.proPrices || {}
+      };
+      // Only the checkout summary's per-line prices/total need to move for
+      // this — everywhere else (catalogue, product, cart) still needs the
+      // full render() it always got, since pro pricing touches those too.
+      if (S.screen === "checkout") patchSummary(); else render();
+    }).catch(noop);
   }
   /**
    * Is there a customer cookie? A 401 is the normal answer, not a fault.
@@ -4920,7 +5508,11 @@
       .then(function (j) {
         if (!j || !j.ok) return;
         apiSeen(true);
-        if (acctApply(j)) render();
+        // On checkout this only ever needs to reveal/update the loyalty row
+        // in the summary — S.ship.name/phone prefill (acctApply, only into
+        // still-empty fields) is picked up fresh whenever step 2 actually
+        // renders, with no patch needed since the shopper starts on step 1.
+        if (acctApply(j)) { if (S.screen === "checkout") patchSummary(); else render(); }
       })
       .catch(noop);
   }
@@ -4989,6 +5581,38 @@
   function acctLogout() {
     acctForget(); render(); toast("Вы вышли ✓");
     fetch("/api/account/logout/", { method: "POST" }).catch(noop);
+  }
+
+  /* ---------- wholesale/loyalty: account-screen history + pro request ---- */
+  var LOYALTY_REASON = { earn: "Начислено", redeem: "Списано", adjust: "Корректировка", expire: "Сгорело" };
+  function loyaltyRowHTML(e) {
+    var sign = e.delta > 0 ? "+" : "";
+    return '<div class="adm__row"><span class="adm__nm">' + (LOYALTY_REASON[e.reason] || e.reason) +
+      '<span class="adm__sub">' + shortDate(e.at) + (e.note ? " · " + esc(e.note) : "") + "</span></span>" +
+      '<span class="num">' + sign + e.delta + "</span></div>";
+  }
+  var ACCT_PRO_ERRS = {
+    bad_company: "Заполните название компании и регистрационный номер",
+    not_found: "Сначала войдите в кабинет",
+    rate_limited: "Слишком много попыток — подождите минуту",
+    error: "Не получилось отправить — попробуйте ещё раз"
+  };
+  function acctProErrText() { return ACCT_PRO_ERRS[S.acctProErr] || ACCT_PRO_ERRS.error; }
+  function acctProSubmit() {
+    var f = S.acctProForm;
+    if (!f.company.trim() || !f.regCode.trim()) { S.acctProErr = "bad_company"; render(); return; }
+    if (S.acctProBusy) return;
+    S.acctProBusy = true; S.acctProErr = ""; render();
+    postJSON("/api/account/pro-request/", { company: f.company.trim(), regCode: f.regCode.trim(), phone: f.phone.trim() }).then(function (res) {
+      S.acctProBusy = false;
+      if (res.offline) { S.acctProErr = "error"; render(); return; }
+      if (!res.body || !res.body.ok) { S.acctProErr = (res.body && res.body.error) || "error"; render(); return; }
+      // the server sets pro_requested_at now(); good enough to reflect locally
+      // without a round trip — the next acctLoad()/login response confirms it
+      if (S.cust) S.cust.proRequestedAt = new Date().toISOString();
+      S.acctProErr = ""; render();
+      toast("Заявка отправлена ✓");
+    }).catch(function () { S.acctProBusy = false; S.acctProErr = "error"; render(); });
   }
 
   /* ---------- the abandoned-cart snapshot ---------------------------------
@@ -5216,7 +5840,11 @@
     if (S.screen !== "checkout") return;
     if (S.pointOpen && POINTS.view === "map") { paintPointMarkers(); return; }
     if (S.pointOpen) patchPointList();
-    else render();
+    // The picker is closed: refresh the carrier chips (an empty carrier can
+    // now drop out) without touching the rest of the screen — five of these
+    // can land back to back (one loadPointsFor() per carrier), and a full
+    // render() on each one is exactly the checkout flicker this avoids.
+    else patchDelivery();
   }
   /* Points with no lat/lng (every Montonio pickup point — docs/shipping.md
      §3: "Координат в ответе Montonio нет вообще") cannot go on the map. */
@@ -5381,7 +6009,11 @@
          summary on screen and the total the server bills are always the same
          arithmetic. The card's code used to be dropped here entirely: the
          checkout showed the discount and the server charged full price. */
-      discountCode: S.giftCard ? S.giftCard.code : (promoLive() ? promoLive().code : null)
+      discountCode: S.giftCard ? S.giftCard.code : (promoLive() ? promoLive().code : null),
+      /* wholesale/loyalty: a bare toggle — the server quotes the actual euro
+         amount from the real balance (createOrder() in src/lib/orders.ts),
+         never a number the browser proposes. */
+      redeemPoints: !!S.loyaltyRedeem
     };
   }
   /* Bank codes for Montonio's `preferredProvider`. ASSUMPTION: these are the
@@ -5423,6 +6055,7 @@
   function clearOrderState() {
     S.cart = []; S.promo = ""; S.promoInfo = null; S.promoErr = ""; S.promoMin = 0; S.promoBusy = false; S.sumOpen = null;
     S.giftCard = null; S.giftErr = "";   // features: a card applied here is spent
+    S.loyaltyRedeem = false;   // wholesale/loyalty: points applied here are spent too
     S.ship = { name: "", addr: "", zip: "", city: "", phone: "", method: shipMethod(), carrier: S.ship.carrier, point: null };
     S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
     persist();
@@ -5474,6 +6107,92 @@
     });
   }
 
+  /* ---------- checkout blocks (patchable) ----------
+     Each function below renders exactly the innerHTML of one stable
+     container in screenCheckout() — [data-co-delivery], [data-co-payment],
+     [data-co-summary]. The async probes that used to call the full render()
+     the instant they landed — shipping rules, one loadPointsFor() per
+     carrier, payment methods, salon/pro pricing — now call patchDelivery()/
+     patchPayment()/patchSummary() instead (near patchEmail, below), which
+     replace only their own container. A probe landing while the shopper is
+     on step 1 therefore never touches the e-mail input: it lives outside
+     all three containers, and none of the three is ever the whole
+     bodySlot. */
+  function deliveryBlockHTML() {
+    return deliveryPicker() +
+      (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
+      '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>";
+  }
+  function paymentBlockHTML() {
+    return '<div class="optlist">' + PAYS.map(function (o, i) {
+        return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
+          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
+          '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
+      }).join("") + "</div>" +
+      (S.pay === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
+      // UX fix 10: one line under "Банковская карта" — Apple/Google Pay are
+      // not their own option in the checkout, they ride on Montonio's own
+      // card element, so a static hint is all this needs
+      (S.pay === 1 ? '<p class="hint">Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.</p>' : "") +
+      (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" data-invoiceco value="' + esc(S.invoiceCo) + '" placeholder="OÜ Näidis · 12345678"></label>' : "");
+  }
+  function summaryBlockHTML() {
+    return '<summary class="cosum__head"><span class="sec__title">Ваш заказ</span>' +
+        '<span class="cosum__tot num">' + eur(total()) + "</span></summary>" +
+      '<div class="cosum__body">' +
+      (S.cart.length ? S.cart.map(function (l) {
+        // features: a line can be a product, a set or a gift card
+        return '<div class="cosum__line"><span class="cosum__ph">' + lineImageHTML(l) + "</span>" +
+          '<span class="cosum__nm">' + esc(lineTitle(l)) + lineLabel(l) + " × " + l.qty +
+            ' <button class="link cosum__rm" data-remove="' + S.cart.indexOf(l) + '" aria-label="Убрать из заказа">Убрать</button>' +
+            lineNoteHTML(l) + "</span>" +
+          '<span class="num cosum__pr">' + eur(lineUnit(l) * l.qty) + "</span></div>";
+      }).join("") : '<p class="muted">Корзина пуста.</p>') +
+      '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод или подарочная карта" placeholder="Промокод или подарочная карта" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo' + (S.promoBusy ? " disabled" : "") + ">" +
+        (S.promoBusy ? "Проверяем…" : "Применить") + "</button></div>" +
+      (S.promoErr ? '<div class="err" role="alert">' + esc(promoErrText()) + "</div>" : "") +
+      promoRowHTML() +
+      /* ---- features: gift card ------------------------------------------
+         Owned by the features agent. The same input above accepts a card
+         code (RMP-XXXX-XXXX); the applypromo handler recognises the shape
+         and calls POST /api/giftcards/check/. Everything the card adds to
+         this screen is the two lines below plus giftDiscount() in total().
+         ------------------------------------------------------------------ */
+      (S.giftErr ? '<div class="err" role="alert">' + esc(S.giftErr) + "</div>" : "") +
+      (S.giftCard
+        ? '<div class="cosum__row"><span>Подарочная карта ' + esc(S.giftCard.code) +
+            ' <button class="link" data-giftoff>убрать</button></span>' +
+            '<span class="num">−' + eur(giftDiscount()) + "</span></div>" +
+          (S.giftCard.balance - giftDiscount() > 0.004
+            ? '<div class="cosum__row cosum__row--note"><span class="muted">Останется на карте</span>' +
+              '<span class="num muted">' + eur(S.giftCard.balance - giftDiscount()) + "</span></div>"
+            : "")
+        : "") +
+      /* ---- /features ---------------------------------------------------- */
+      /* ---- wholesale/loyalty: «Использовать баллы» ----------------------
+         Independent of the promo/gift box above — a checkbox, not a code,
+         so it stacks with either. Shown only once signed in with a real,
+         usable balance; loyaltyMaxRedeem() already checks minRedeem. */
+      (S.loggedIn && S.loyalty && loyaltyMaxRedeem() > 0
+        ? '<label class="opt opt--plain cosum__loyalty"><input type="checkbox" data-loyaltyredeem' + (S.loyaltyRedeem ? " checked" : "") + '>' +
+            '<span>Использовать баллы — доступно ' + S.loyalty.balance + "</span></label>" +
+          (S.loyaltyRedeem
+            ? '<div class="cosum__row"><span>Баллы</span><span class="num">−' + eur(loyaltyDiscount()) + "</span></div>"
+            : "")
+        : "") +
+      '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + shipMethodLabel() + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
+      '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
+      /* Both pay buttons wait for the payment step. Offered from step one
+         they compete with «Далее» for the same tap and invite a shopper to
+         pay before choosing how the parcel travels or how they are paying. */
+      (S.coStep === 3
+        ? '<button class="btn btn--wide co__pay" data-pay' + (S.paying ? " disabled" : "") + ">" +
+            (S.paying ? "Готовим оплату…" : "Оплатить " + eur(total())) + "</button>" +
+          '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>'
+        : "") +
+      "</div>";
+  }
+
   function screenCheckout() {
     var step = S.coStep;
     // The rules and the machine list are wanted the moment the shopper lands
@@ -5513,9 +6232,7 @@
             (step === 2 ? '<div class="costep__body">' +
               '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
                 COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
-              deliveryPicker() +
-              (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
-              '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
+              '<div data-co-delivery>' + deliveryBlockHTML() + "</div>" +
               // every field is bound to S.ship — a render (promo, blur, resize)
               // used to wipe whatever the shopper had typed here
               // Contact block (name + phone, email lives in step 1) always
@@ -5537,19 +6254,7 @@
 
           '<section class="costep' + (step === 3 ? " is-open" : "") + '">' +
             coHead(3, "Оплата", "") +
-            (step === 3 ? '<div class="costep__body">' +
-              '<div class="optlist">' + PAYS.map(function (o, i) {
-                return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
-                  '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
-                  '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
-              }).join("") + "</div>" +
-              (S.pay === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
-              // UX fix 10: one line under "Банковская карта" — Apple/Google Pay
-              // are not their own option in the checkout, they ride on Montonio's
-              // own card element, so a static hint is all this needs
-              (S.pay === 1 ? '<p class="hint">Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.</p>' : "") +
-              (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" data-invoiceco value="' + esc(S.invoiceCo) + '" placeholder="OÜ Näidis · 12345678"></label>' : "") +
-              "</div>" : "") +
+            (step === 3 ? '<div class="costep__body" data-co-payment>' + paymentBlockHTML() + "</div>" : "") +
           "</section>" +
           '<ul class="cotrust">' +
             "<li>Оплата через банк — данные карты магазин не видит</li>" +
@@ -5558,50 +6263,9 @@
           "</ul>" +
         "</div>" +
 
-        '<div class="co__sum"><details class="cosum" data-sum' + (summaryOpen ? " open" : "") + '>' +
-          '<summary class="cosum__head"><span class="sec__title">Ваш заказ</span>' +
-            '<span class="cosum__tot num">' + eur(total()) + "</span></summary>" +
-          '<div class="cosum__body">' +
-          (S.cart.length ? S.cart.map(function (l) {
-            // features: a line can be a product, a set or a gift card
-            return '<div class="cosum__line"><span class="cosum__ph">' + lineImageHTML(l) + "</span>" +
-              '<span class="cosum__nm">' + esc(lineTitle(l)) + lineLabel(l) + " × " + l.qty +
-                ' <button class="link cosum__rm" data-remove="' + S.cart.indexOf(l) + '" aria-label="Убрать из заказа">Убрать</button>' +
-                lineNoteHTML(l) + "</span>" +
-              '<span class="num cosum__pr">' + eur(lineUnit(l) * l.qty) + "</span></div>";
-          }).join("") : '<p class="muted">Корзина пуста.</p>') +
-          '<div class="cosum__promo"><input class="input input--box" data-promo aria-label="Промокод или подарочная карта" placeholder="Промокод или подарочная карта" value="' + esc(S.promo) + '"><button class="btn btn--ghost btn--sm" data-applypromo' + (S.promoBusy ? " disabled" : "") + ">" +
-            (S.promoBusy ? "Проверяем…" : "Применить") + "</button></div>" +
-          (S.promoErr ? '<div class="err" role="alert">' + esc(promoErrText()) + "</div>" : "") +
-          promoRowHTML() +
-          /* ---- features: gift card ------------------------------------------
-             Owned by the features agent. The same input above accepts a card
-             code (RMP-XXXX-XXXX); the applypromo handler recognises the shape
-             and calls POST /api/giftcards/check/. Everything the card adds to
-             this screen is the two lines below plus giftDiscount() in total().
-             ------------------------------------------------------------------ */
-          (S.giftErr ? '<div class="err" role="alert">' + esc(S.giftErr) + "</div>" : "") +
-          (S.giftCard
-            ? '<div class="cosum__row"><span>Подарочная карта ' + esc(S.giftCard.code) +
-                ' <button class="link" data-giftoff>убрать</button></span>' +
-                '<span class="num">−' + eur(giftDiscount()) + "</span></div>" +
-              (S.giftCard.balance - giftDiscount() > 0.004
-                ? '<div class="cosum__row cosum__row--note"><span class="muted">Останется на карте</span>' +
-                  '<span class="num muted">' + eur(S.giftCard.balance - giftDiscount()) + "</span></div>"
-                : "")
-            : "") +
-          /* ---- /features ---------------------------------------------------- */
-          '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + shipMethodLabel() + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
-          '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
-          /* Both pay buttons wait for the payment step. Offered from step one
-             they compete with «Далее» for the same tap and invite a shopper to
-             pay before choosing how the parcel travels or how they are paying. */
-          (step === 3
-            ? '<button class="btn btn--wide co__pay" data-pay' + (S.paying ? " disabled" : "") + ">" +
-                (S.paying ? "Готовим оплату…" : "Оплатить " + eur(total())) + "</button>" +
-              '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>'
-            : "") +
-          "</div></details></div>" +
+        '<div class="co__sum"><details class="cosum" data-sum data-co-summary' + (summaryOpen ? " open" : "") + '>' +
+          summaryBlockHTML() +
+        "</details></div>" +
 
       "</div></div>" +
       (step === 3
@@ -5654,6 +6318,8 @@
     ["over", "Обзор", "grid"],
     ["orders", "Заказы", "bag"],
     ["goods", "Товары", "grid"],
+    ["stock", "Склад", "box"],           // inventory
+    ["pos", "Продажа в салоне", "till"], // inventory
     ["people", "Клиенты", "user"],
     ["reviews", "Отзывы", "check"],   // features
     ["promos", "Промокоды", "tag"],   // checkout-gaps
@@ -6026,17 +6692,14 @@
             '<input class="input input--box" data-goodsq value="' + esc(S.goodsQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск по товарам" style="margin-bottom:12px;max-width:420px">' +
             '<div class="adm__list" id="goodslist">' + goodsRows() + "</div>") : "") +
 
-      (tab === "people" ?
-        '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — письмо ко дню рождения и личный промокод.</p>' +
-        '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row">' +
-          "<span>Клиент</span><span>Заказов</span><span>Потратил</span><span>Последний</span><span></span></div>" +
-        fakeCustomers().map(function (c) {
-          return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + c.who + "</span>" +
-            '<span class="num">' + c.n + "</span>" +
-            '<span class="num">' + eur(c.sum) + "</span>" +
-            '<span class="muted">' + c.last + "</span>" +
-            '<button class="link" data-admedit>Промокод</button></div>';
-        }).join("") + "</div>" : "") +
+      // inventory: numeric stock, EAN scanner, moves ledger
+      (tab === "stock" ? admStockHTML() : "") +
+      // inventory: the in-salon quick sale
+      (tab === "pos" ? admPosHTML() : "") +
+
+      // wholesale/loyalty: real customers, search, tier filter, pro-request
+      // queue and CSV export once signed in; the old demo table otherwise
+      (tab === "people" ? admCustomersHTML() : "") +
 
       // features: review moderation
       (tab === "reviews" ? admReviewsHTML() : "") +
@@ -6107,6 +6770,8 @@
           '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
         admHeroCard() +
         admContentCard() +
+        admPricingCard() +
+        reportsCard() +
         '<div class="sec__head sec__head--sub"><h2 class="sec__title">Журнал изменений</h2></div>' +
         (DEMO.log.length
           ? '<div class="adm__list">' + DEMO.log.map(function (e, i) {
@@ -6140,6 +6805,11 @@
         '<div class="adm__aifoot"><input class="input input--box" data-admq placeholder="Спросить…" aria-label="Вопрос помощнику">' +
           '<button class="btn btn--sm" data-admsend aria-label="Спросить">→</button></div>' +
       "</aside></div>";
+    // inventory: the scanner overlay is NOT part of this string — a <video>
+    // element in here would be torn down and recreated (losing its camera
+    // stream) on every render(). It is mounted as its own persistent DOM
+    // node outside bodySlot instead; see scanMount()/scanRenderPanel() near
+    // the bottom of the file, called from render() itself.
   }
   /* ---------- «Письма»: preview + test send -----------------------------
      The five real templates live in src/emails and are rendered server-side;
@@ -6603,6 +7273,106 @@
         '<button class="btn btn--ghost btn--sm" data-contentreset>Сбросить к стандартному</button></div>';
   }
 
+  /* ---------- wholesale/loyalty: «Цены и лояльность» ------------------------
+     Unlike hero/content/shipping_rules, this settings key has a PRIVATE half
+     (proDiscountPct, proMinOrder) that the public /api/overrides feed never
+     carries (see publicPricing() in src/lib/loyalty.ts) — so DEMO.* is not
+     enough to fill this form, and it is loaded from the admin-only
+     GET /api/admin/settings instead, the same door shipRulesCard() and
+     admContentCard() write through (PUT /api/admin/settings), so a save here
+     lands in the change log with an undo like everything else. */
+  var PRICING_DEFAULT = { proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } };
+  function normalisePricing(raw) {
+    var r = raw && typeof raw === "object" ? raw : {};
+    var l = r.loyalty && typeof r.loyalty === "object" ? r.loyalty : {};
+    return {
+      proDiscountPct: isFinite(Number(r.proDiscountPct)) ? Number(r.proDiscountPct) : PRICING_DEFAULT.proDiscountPct,
+      proMinOrder: isFinite(Number(r.proMinOrder)) ? Number(r.proMinOrder) : PRICING_DEFAULT.proMinOrder,
+      loyalty: {
+        enabled: l.enabled !== false,
+        earnPct: isFinite(Number(l.earnPct)) ? Number(l.earnPct) : PRICING_DEFAULT.loyalty.earnPct,
+        redeemMaxPct: isFinite(Number(l.redeemMaxPct)) ? Number(l.redeemMaxPct) : PRICING_DEFAULT.loyalty.redeemMaxPct,
+        minRedeem: isFinite(Number(l.minRedeem)) ? Number(l.minRedeem) : PRICING_DEFAULT.loyalty.minRedeem
+      }
+    };
+  }
+  /** A patch (assistant's set_pricing, or a full save from the form) merged over the base. */
+  function mergePricing(base, patch) {
+    var b = normalisePricing(base), p = patch || {}, pl2 = p.loyalty || {};
+    return {
+      proDiscountPct: p.proDiscountPct != null ? p.proDiscountPct : b.proDiscountPct,
+      proMinOrder: p.proMinOrder != null ? p.proMinOrder : b.proMinOrder,
+      loyalty: {
+        enabled: pl2.enabled != null ? pl2.enabled : b.loyalty.enabled,
+        earnPct: pl2.earnPct != null ? pl2.earnPct : b.loyalty.earnPct,
+        redeemMaxPct: pl2.redeemMaxPct != null ? pl2.redeemMaxPct : b.loyalty.redeemMaxPct,
+        minRedeem: pl2.minRedeem != null ? pl2.minRedeem : b.loyalty.minRedeem
+      }
+    };
+  }
+  function loadAdminPricing(force) {
+    if (SRV.admin !== true) return;
+    if (S.pricingLoaded && !force) return;
+    if (loadAdminPricing._busy) return;
+    loadAdminPricing._busy = true;
+    apiJson("/api/admin/settings/").then(function (r) {
+      loadAdminPricing._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.pricingLoaded = normalisePricing(r.body.settings && r.body.settings.pricing);
+        render();
+      }
+    }).catch(function () { loadAdminPricing._busy = false; });
+  }
+  function pricingDraft() {
+    if (!S.pricingDraft) S.pricingDraft = cloneRules(S.pricingLoaded || normalisePricing(null));
+    return S.pricingDraft;
+  }
+  function pricingDirty() {
+    return JSON.stringify(pricingDraft()) !== JSON.stringify(S.pricingLoaded || normalisePricing(null));
+  }
+  /** One field of the draft — out-of-range or non-numeric input is ignored, never stored. */
+  function setPricingDraftField(key, raw) {
+    var d = pricingDraft();
+    var n = Number(String(raw).replace(",", "."));
+    if (!isFinite(n) || n < 0) return;
+    if (key === "proDiscountPct") d.proDiscountPct = Math.min(90, n);
+    else if (key === "proMinOrder") d.proMinOrder = Math.min(100000, Math.round(n * 100) / 100);
+    else if (key === "earnPct") d.loyalty.earnPct = Math.min(50, n);
+    else if (key === "redeemMaxPct") d.loyalty.redeemMaxPct = Math.min(100, n);
+    else if (key === "minRedeem") d.loyalty.minRedeem = Math.min(10000, Math.round(n * 100) / 100);
+  }
+  function savePricing() {
+    demoApply({ type: "set_pricing", value: pricingDraft() });
+    S.pricingDraft = null;
+    toast("Сохранено ✓");
+  }
+  function admPricingCard() {
+    loadAdminPricing(false);
+    var d = pricingDraft();
+    var pending = pendingAction && pendingAction.type === "set_pricing" ? confirmCard(pendingAction) : "";
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Цены и лояльность</h2></div>' +
+      '<p class="muted" style="margin:0 0 12px">Скидка для салонов и то, как покупатели зарабатывают и тратят баллы.</p>' +
+      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы менять цены и лояльность.</div>') +
+      pending +
+      (pricingDirty() && !pending ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      '<label class="field"><span class="field__label">Скидка для салонов, % — 0, если сейчас нет оптовых цен</span>' +
+        '<input class="input" data-pricingf="proDiscountPct" inputmode="decimal" value="' + esc(String(d.proDiscountPct)) + '"></label>' +
+      '<label class="field"><span class="field__label">Скидка действует от суммы корзины, € — 0, если без условия</span>' +
+        '<input class="input" data-pricingf="proMinOrder" inputmode="decimal" value="' + esc(String(d.proMinOrder)) + '"></label>' +
+      '<label class="opt opt--plain"><input type="checkbox" data-pricingtoggle' + (d.loyalty.enabled ? " checked" : "") + '><span>Баллы за покупки включены</span></label>' +
+      '<label class="field"><span class="field__label">Начисляем баллов — % от суммы оплаченного заказа</span>' +
+        '<input class="input" data-pricingf="earnPct" inputmode="decimal" value="' + esc(String(d.loyalty.earnPct)) + '"></label>' +
+      '<label class="field"><span class="field__label">Списать можно не больше — % от суммы корзины</span>' +
+        '<input class="input" data-pricingf="redeemMaxPct" inputmode="decimal" value="' + esc(String(d.loyalty.redeemMaxPct)) + '"></label>' +
+      '<label class="field"><span class="field__label">Списание доступно от — сколько баллов на счету</span>' +
+        '<input class="input" data-pricingf="minRedeem" inputmode="decimal" value="' + esc(String(d.loyalty.minRedeem)) + '"></label>' +
+      (pricingDirty()
+        ? '<div class="adm__acts"><button class="btn btn--sm" data-admpricingsave>Сохранить</button>' +
+          '<button class="btn btn--ghost btn--sm" data-admpricingreset>Отменить правки</button></div>'
+        : "");
+  }
+
   /* ---------- admin: delivery prices (settings.shipping_rules) -------------
      This block used to print the carriers' 2025–26 list prices (SHIP.EE) while
      the checkout billed something else entirely — the owner read one number and
@@ -6623,6 +7393,159 @@
     ["venipak", "Venipak", ["EE", "LV", "LT"]],
     ["unisend", "Unisend", ["EE", "LV", "LT"]]
   ];
+  /* ---------- Montonio tariffs (fallback table) -----------------------------
+     Mirrors the `rates` in src/data/montonio-tariffs.json — restated here so
+     the admin panel (a static bundle, no server round trip) can show a hint
+     next to each price and compute the «Заполнить по тарифам Montonio» fill
+     without one. src/lib/shipping/tariffs.ts is the tested, canonical version
+     of this same math, plus a live Montonio quote this static mirror cannot
+     make (that needs MONTONIO_SECRET_KEY, which must never reach a browser).
+     Keep the two files in sync by hand; see docs/shipping.md § «Тарифы
+     Montonio» for the sources and dates behind every number. Carriers with no
+     researched price (Venipak, Unisend) are simply absent — no invented
+     number takes their place. */
+  var MONTONIO_TARIFFS = {
+    omniva: { EE: { parcel: 5.46 }, LV: { parcel: 10.61 }, LT: { parcel: 11.79 } },
+    smartpost: {
+      EE: { parcel: 5.47, courier: 10.84 }, LV: { parcel: 9.94 }, LT: { parcel: 11.17 },
+      FI: { parcel: 15.65, courier: 23.47 }
+    },
+    dpd: {
+      EE: { parcel: 4.50, courier: 10.78 }, LV: { parcel: 8.06, courier: 16.28 },
+      LT: { parcel: 8.62, courier: 17.74 }, FI: { parcel: 18.60, courier: 26.04 }
+    }
+  };
+  /** Smallest price ending in 9 cents at or above `n` — never rounds down.
+      Mirrors src/lib/shipping/tariffs.ts roundUpToX9() exactly. */
+  function shipRoundUpToX9(n) {
+    if (!isFinite(n) || n <= 0) return 0;
+    var cents = Math.ceil(n * 100 - 1e-7);
+    var rem = ((cents % 10) + 10) % 10;
+    var up = rem === 9 ? 0 : (9 - rem + 10) % 10;
+    return (cents + up) / 100;
+  }
+  /** tariff × markup, rounded up to .x9 — mirrors tariffs.ts customerPrice(). */
+  function montonioPrice(tariff, markup) {
+    var mk = markup || {};
+    var pct = typeof mk.percent === "number" && mk.percent >= 0 ? mk.percent : 0;
+    var fix = typeof mk.fixed === "number" && mk.fixed >= 0 ? mk.fixed : 0;
+    var marked = Math.round((tariff * (1 + pct / 100) + fix + 1e-9) * 100) / 100;
+    return shipRoundUpToX9(marked);
+  }
+  /** integration: live tariffs for the four fill-button countries — fetched
+      once per admin session (GET /api/admin/shipping/rates/?country=), each
+      row already carrying source:"live"|"static" from the server
+      (src/lib/shipping/tariffs.ts). null until the fetch lands; tariffRowsFor()
+      below falls back to the offline MONTONIO_TARIFFS mirror until then. */
+  function loadShipLiveRates() {
+    if (SRV.admin !== true || S.shipLiveRates || loadShipLiveRates._busy) return;
+    loadShipLiveRates._busy = true;
+    var out = {};
+    Promise.all(["EE", "LV", "LT", "FI"].map(function (cc) {
+      return apiJson("/api/admin/shipping/rates/?country=" + cc).then(function (r) {
+        out[cc] = (r.status === 200 && r.body && r.body.ok && Array.isArray(r.body.rates)) ? r.body.rates : [];
+      }).catch(function () { out[cc] = []; });
+    })).then(function () {
+      S.shipLiveRates = out;
+      loadShipLiveRates._busy = false;
+      render();
+    });
+  }
+  /** Every tariff row for one country: the live-or-static server merge once
+      loaded, the offline MONTONIO_TARIFFS mirror until then — same shape
+      either way ({carrier, country, method, price, source}), so
+      montonioCeiling()/montonioCarrierHint() do not need to know which. */
+  function tariffRowsFor(country) {
+    if (S.shipLiveRates && S.shipLiveRates[country]) return S.shipLiveRates[country];
+    var out = [];
+    Object.keys(MONTONIO_TARIFFS).forEach(function (carrier) {
+      var row = MONTONIO_TARIFFS[carrier][country];
+      if (!row) return;
+      ["parcel", "courier"].forEach(function (m) {
+        if (typeof row[m] === "number") out.push({ carrier: carrier, country: country, method: m, price: row[m], source: "static" });
+      });
+    });
+    return out;
+  }
+  /** The highest tariff among carriers that have one, for a method+country —
+      the safe generic price when no specific carrier is known: whichever
+      carrier Montonio actually ships it with, this never sells below cost.
+      {price, source} — source is "live" only when the carrier that set the
+      max price is itself live; a country with no live answer yet reads as
+      static, matching what montonioHint() below actually shows for it. */
+  function montonioCeiling(method, country) {
+    var max = null, source = "static";
+    tariffRowsFor(country).forEach(function (r) {
+      if (r.method === method && (max === null || r.price > max)) { max = r.price; source = r.source; }
+    });
+    return max === null ? null : { price: max, source: source };
+  }
+  /** «тариф Montonio (live): 4,49 €» / «…(прайс-лист): …» next to a
+      method-table price — "" when nothing was sourced for it. */
+  /** integration: a plain variable, not an inline ternary in the return's own
+      "+" chain — same reasoning as cameraErrName() above, so the i18n
+      checker sees one hole in the rendered sentence, not the two label
+      variants as false-positive standalone fragments. */
+  function montonioSourceLabel(source) {
+    return source === "live" ? "тариф Montonio (live): " : "тариф Montonio (прайс-лист): ";
+  }
+  function montonioHint(method, country) {
+    var t = montonioCeiling(method, country);
+    if (t == null) return "";
+    return '<span class="muted adm__shiphint" style="display:block;font-size:11px;margin-top:2px">' +
+      montonioSourceLabel(t.source) + eur(t.price) + "</span>";
+  }
+  /** Same hint, for one carrier's own cell in «Цены по перевозчикам» (parcel tariffs only — see below). */
+  function montonioCarrierHint(carrier, country) {
+    var r = tariffRowsFor(country).filter(function (x) { return x.carrier === carrier && x.method === "parcel"; })[0];
+    if (!r) return "";
+    return '<span class="muted adm__shiphint" style="display:block;font-size:11px;margin-top:2px">' +
+      montonioSourceLabel(r.source) + eur(r.price) + "</span>";
+  }
+  /**
+   * What «Заполнить по тарифам Montonio» writes: methods.{parcel,courier} get
+   * the priciest known carrier for that country (never sold below cost no
+   * matter which carrier ships it); carriers.* get that carrier's own, often
+   * cheaper, price — but only for the parcel tariff, because the checkout
+   * (public/shop2/app.js, ship.carrier) only ever tags a carrier on a "parcel"
+   * order, never on a "courier" one, so a courier-only carrier price here
+   * would just be dead data src/lib/shipping.ts would never read.
+   * Only touches EE/LV/LT/FI and the carriers this module has a tariff for —
+   * Venipak, Unisend, «EU» and «default» are left exactly as they were.
+   * Prefers live tariffs (tariffRowsFor(), fed by loadShipLiveRates()) over
+   * the offline MONTONIO_TARIFFS mirror wherever they have landed.
+   * integration: `allowLower` false (the default — the «Разрешить снижать
+   * текущие цены» checkbox in the card) clamps every cell at its own current
+   * price, so the fill can only raise a price to match the tariff, never
+   * quietly lower one the owner may have set above cost on purpose.
+   */
+  function computeMontonioFillPatch(allowLower) {
+    var markup = shipDraft().markup || { percent: 0, fixed: 0 };
+    var draft = shipDraft();
+    var methods = { parcel: {}, courier: {} };
+    // applyShipRules() merges `methods` key by key but REPLACES `carriers`
+    // wholesale — so a Venipak/Unisend price the owner typed by hand (or any
+    // carrier this table has no tariff for) would vanish under the fill
+    // unless the patch already carries it forward. Start from what is there.
+    var carriers = draft.carriers ? cloneRules(draft.carriers) : {};
+    ["EE", "LV", "LT", "FI"].forEach(function (cc) {
+      ["parcel", "courier"].forEach(function (m) {
+        var ceil = montonioCeiling(m, cc);
+        if (ceil == null) return;
+        var price = montonioPrice(ceil.price, markup);
+        var current = draft.methods[m] && draft.methods[m][cc];
+        methods[m][cc] = (!allowLower && typeof current === "number") ? Math.max(price, current) : price;
+      });
+      tariffRowsFor(cc).forEach(function (row) {
+        if (row.method !== "parcel") return;
+        var price = montonioPrice(row.price, markup);
+        var current = draft.carriers && draft.carriers[row.carrier] && draft.carriers[row.carrier][cc];
+        carriers[row.carrier] = carriers[row.carrier] || {};
+        carriers[row.carrier][cc] = (!allowLower && typeof current === "number") ? Math.max(price, current) : price;
+      });
+    });
+    return { methods: methods, carriers: carriers };
+  }
   /** A working copy, so a half-typed table never prices a live basket. */
   function shipDraft() {
     if (!S.shipDraft) S.shipDraft = cloneRules(SHIP_RULES);
@@ -6652,6 +7575,11 @@
     var t = by && by[k];
     return shipShow(t && Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined);
   }
+  /** Наценка, % / € — always a plain number, never "empty" or "нет". */
+  function shipMarkupCell(k) {
+    var m = shipDraft().markup;
+    return String(m && typeof m[k] === "number" ? m[k] : 0);
+  }
   /** One field of the draft. Garbage is ignored rather than stored. */
   function setShipDraftField(key, raw) {
     var d = shipDraft(), parts = String(key).split(":");
@@ -6680,6 +7608,13 @@
       if (cv === undefined || cv === null) delete d.carriers[parts[1]][parts[2]];
       else d.carriers[parts[1]][parts[2]] = cv;
       if (!Object.keys(d.carriers[parts[1]]).length) delete d.carriers[parts[1]];
+      return;
+    }
+    if (parts[0] === "markup") {
+      var mv = shipNum(raw, parts[1] === "fixed" ? 20 : 100);
+      if (mv !== mv) return;                                // NaN — out of range
+      if (!d.markup) d.markup = { percent: 0, fixed: 0 };
+      d.markup[parts[1]] = (mv === undefined || mv === null) ? 0 : mv;   // "" or "нет" — back to 0, not deleted
     }
   }
   function shipInput(key, value, label) {
@@ -6687,6 +7622,7 @@
       esc(value) + '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">';
   }
   function shipRulesCard() {
+    loadShipLiveRates();   // integration: live tariffs for the grey hints below, once per session
     var d = shipDraft();
     return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.</p>' +
@@ -6699,7 +7635,8 @@
             SHIP_METHOD_ROWS.map(function (m) {
               // pickup is only offered in Estonia and is always free there
               if (m[0] === "pickup" && r[0] !== "EE" && r[0] !== "default") return "<span></span>";
-              return "<span>" + shipInput("m:" + m[0] + ":" + r[0], shipCell(m[0], r[0]), m[1] + " — " + r[1]) + "</span>";
+              return "<span>" + shipInput("m:" + m[0] + ":" + r[0], shipCell(m[0], r[0]), m[1] + " — " + r[1]) +
+                montonioHint(m[0], r[0]) + "</span>";
             }).join("") +
             "<span>" + shipInput("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1]) + "</span></div>";
         }).join("") +
@@ -6709,18 +7646,36 @@
         SHIP_CARRIER_ROWS.map(function (c) {
           return '<div class="adm__row adm__row--ship"><span class="adm__nm">' + c[1] + "</span>" +
             c[2].map(function (cc) {
-              return '<span class="adm__shipcell">' + cc + " " + shipInput("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) + "</span>";
+              return '<span class="adm__shipcell">' + cc + " " +
+                shipInput("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) +
+                montonioCarrierHint(c[0], cc) + "</span>";
             }).join("") + "</div>";
         }).join("") +
       "</div></details>" +
+      '<div class="adm__shipfill">' +
+        '<p class="muted" style="margin:12px 0 6px">«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.</p>' +
+        '<label class="field" style="display:inline-block;margin:0 16px 10px 0"><span class="field__label">Наценка, %</span>' +
+          shipInput("markup:percent", shipMarkupCell("percent"), "Наценка на тарифы Montonio, проценты") + "</label>" +
+        '<label class="field" style="display:inline-block;margin:0 16px 10px 0"><span class="field__label">Наценка, €</span>' +
+          shipInput("markup:fixed", shipMarkupCell("fixed"), "Наценка на тарифы Montonio, евро") + "</label>" +
+        '<label class="opt opt--plain" style="display:block;margin:0 0 8px"><input type="checkbox" data-shipallowlower' +
+          (S.shipAllowLower ? " checked" : "") + '><span>Разрешить снижать текущие цены</span></label>' +
+        '<p class="muted" style="font-size:11.5px;margin:-4px 0 10px">По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.</p>' +
+        '<button class="btn btn--ghost btn--sm" data-admshipfill>Заполнить по тарифам Montonio</button>' +
+      "</div>" +
       (S.shipErr ? '<div class="err" role="alert">' + esc(S.shipErr) + "</div>" : "") +
       '<div class="adm__acts"><button class="btn btn--sm" data-admshipsave>Сохранить тарифы</button>' +
         '<button class="btn btn--ghost btn--sm" data-admshipreset>Вернуть значения по умолчанию</button></div>' +
       '<p class="muted" style="font-size:12.5px;margin-top:8px">Сейчас: пакомат Эстония ' +
         eur(d.methods.parcel && d.methods.parcel.EE != null ? d.methods.parcel.EE : 0) + ' · курьер Эстония ' +
         eur(d.methods.courier && d.methods.courier.EE != null ? d.methods.courier.EE : 0) + ' · бесплатно от ' +
-        (d.freeFrom == null ? "— " : eur(d.freeFrom)) + '. За пределами Эстонии значения по умолчанию ниже себестоимости перевозчиков — см. docs/shipping.md.</p>';
+        shipFreeFromText(d.freeFrom) + '. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см. docs/shipping.md.</p>';
   }
+  // integration: a plain helper, not an inline ternary in the "+" chain above
+  // — same reasoning as cameraErrName()/montonioSourceLabel(): keeps the
+  // footer to one hole for the i18n checker instead of splitting "— " off
+  // as a false-positive standalone fragment
+  function shipFreeFromText(freeFrom) { return freeFrom == null ? "— " : eur(freeFrom); }
 
   /* ---------- admin: promo codes (tab «Промокоды») -------------------------
      Codes live in the promo_codes table and are priced by the server; nothing
@@ -6850,6 +7805,180 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
+  /* ---------- wholesale/loyalty: admin «Клиенты» -------------------------
+     List + search + tier filter + CSV once signed in (GET /api/admin/
+     customers), the demo table otherwise — same "always something to look
+     at" rule as orders/goods. Search and the tier filter both run client
+     side over the one fetched page (this shop does three to five orders a
+     month — there is no list here worth paginating). */
+  function loadAdminCustomers(force) {
+    if (SRV.admin !== true) return;
+    if (S.admCustomers && !force) return;
+    if (loadAdminCustomers._busy) return;
+    loadAdminCustomers._busy = true;
+    apiJson("/api/admin/customers/?limit=500").then(function (r) {
+      loadAdminCustomers._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      S.admCustomers = r.status === 200 && r.body.ok ? (r.body.customers || []) : [];
+      S.admCustErr = r.status === 200 && r.body.ok ? "" : "Список клиентов не загрузился.";
+      render();
+    }).catch(function () {
+      loadAdminCustomers._busy = false;
+      S.admCustomers = []; S.admCustErr = "Сервер не отвечает."; render();
+    });
+  }
+  function admCustTierChip(c) {
+    if (c.tier === "pro") return ["партнёр", "chip--ok"];
+    if (c.proRequestedAt) return ["на рассмотрении", "chip--low"];
+    return ["розница", ""];
+  }
+  function filteredAdminCustomers() {
+    var list = S.admCustomers || [];
+    if (S.admCustTier === "pro") list = list.filter(function (c) { return c.tier === "pro"; });
+    else if (S.admCustTier === "retail") list = list.filter(function (c) { return c.tier !== "pro"; });
+    else if (S.admCustTier === "pending") list = list.filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; });
+    var q = (S.admCustQ || "").toLowerCase().trim();
+    if (q) {
+      list = list.filter(function (c) {
+        return ((c.email || "") + " " + (c.name || "") + " " + (c.phone || "") + " " + (c.company || "")).toLowerCase().indexOf(q) >= 0;
+      });
+    }
+    return list;
+  }
+  function admCustRowsHTML() {
+    var list = filteredAdminCustomers();
+    if (!list.length) return '<p class="muted">' + (S.admCustomers ? "Никого не нашлось." : "Загружаем…") + "</p>";
+    return '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row">' +
+        "<span>Клиент</span><span>Статус</span><span>Заказов</span><span>Потратил</span><span>Баллы</span><span></span></div>" +
+      list.map(function (c) {
+        var st = admCustTierChip(c);
+        return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + esc(c.name || c.email) +
+            '<span class="adm__sub">' + esc(c.email) + "</span></span>" +
+          '<span><span class="chip ' + (st[1] || "chip--low") + '">' + st[0] + "</span></span>" +
+          '<span class="num">' + c.ordersCount + "</span>" +
+          '<span class="num">' + eur(c.revenue) + "</span>" +
+          '<span class="num">' + c.pointsBalance + "</span>" +
+          '<button class="link" data-admcustopen="' + c.id + '">Открыть</button></div>';
+      }).join("") + "</div>";
+  }
+  var ADM_CUST_TIERS = [["", "Все"], ["pending", "На рассмотрении"], ["pro", "Партнёры"], ["retail", "Розница"]];
+  function loadAdminCustomerDetail(id, force) {
+    if (SRV.admin !== true) return;
+    if (S.admCustDetail && S.admCustDetail.customer.id === id && !force) return;
+    apiJson("/api/admin/customers/" + encodeURIComponent(id) + "/").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { S.admCustDetail = { customer: r.body.customer, history: r.body.history || [] }; render(); }
+    }).catch(noop);
+  }
+  function admCustomerCardHTML() {
+    loadAdminCustomerDetail(S.admCustOpen, false);
+    var d = S.admCustDetail;
+    if (!d || d.customer.id !== S.admCustOpen) {
+      return '<button class="link" data-admcustclose>← Ко всем клиентам</button><p class="muted" style="margin:16px 0">Загружаем…</p>';
+    }
+    var c = d.customer;
+    if (S.admCustNotesDraft === null) S.admCustNotesDraft = c.notes || "";
+    var st = admCustTierChip(c);
+    return '<button class="link" data-admcustclose>← Ко всем клиентам</button>' +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">' + esc(c.name || c.email) + "</h2>" +
+        '<span class="chip ' + (st[1] || "chip--low") + '">' + st[0] + "</span></div>" +
+      '<p class="muted">' + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</p>" +
+      (c.company ? '<p class="muted">' + esc(c.company) + (c.regCode ? " · рег. " + esc(c.regCode) : "") + "</p>" : "") +
+      '<div class="adm__kpis">' +
+        kpi("Заказов", String(c.ordersCount), "") +
+        kpi("Потратил", eur(c.revenue), "") +
+        kpi("Баллы", String(c.pointsBalance), "") +
+      "</div>" +
+      (c.tier !== "pro" && c.proRequestedAt
+        ? '<div class="adm__acts"><button class="btn btn--sm" data-admcustapprove="' + c.id + '">Одобрить</button>' +
+          '<button class="btn btn--ghost btn--sm" data-admcustreject="' + c.id + '">Отклонить</button></div>'
+        : c.tier === "pro"
+          ? '<div class="adm__acts"><button class="link" data-admcustdemote="' + c.id + '">Убрать статус партнёра</button></div>'
+          : "") +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Начислить или списать баллы</h2></div>' +
+      '<label class="field"><span class="field__label">Баллы — можно отрицательное число</span>' +
+        '<input class="input" data-admcustpoints value="' + esc(S.admCustPoints) + '" inputmode="numeric" placeholder="10"></label>' +
+      '<label class="field"><span class="field__label">Заметка — за что</span>' +
+        '<input class="input" data-admcustnote value="' + esc(S.admCustNote) + '" placeholder="например, извинение за задержку"></label>' +
+      '<button class="btn btn--ghost btn--sm" data-admcustadjust="' + c.id + '"' + (S.admCustBusy ? " disabled" : "") + ">Применить</button>" +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">История баллов</h2></div>' +
+      (d.history.length ? '<div class="adm__list">' + d.history.map(loyaltyRowHTML).join("") + "</div>" : '<p class="muted">Начислений ещё не было.</p>') +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заметка о клиенте</h2></div>' +
+      '<label class="field"><span class="field__label">Видна только вам</span>' +
+        '<input class="input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
+      '<button class="btn btn--ghost btn--sm" data-admcustsavenotes="' + c.id + '">Сохранить заметку</button>';
+  }
+  function admCustomersHTML() {
+    if (SRV.admin !== true) {
+      return '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — заявки на оптовые цены для салонов.</p>' +
+        '<div class="adm__note">Войдите как владелец, чтобы видеть настоящих клиентов.</div>' +
+        '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row">' +
+          "<span>Клиент</span><span>Заказов</span><span>Потратил</span><span>Последний</span><span></span></div>" +
+        fakeCustomers().map(function (c) {
+          return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + c.who + "</span>" +
+            '<span class="num">' + c.n + "</span>" +
+            '<span class="num">' + eur(c.sum) + "</span>" +
+            '<span class="muted">' + c.last + "</span><span></span></div>";
+        }).join("") + "</div>";
+    }
+    loadAdminCustomers(false);
+    if (S.admCustOpen) return admCustomerCardHTML();
+    return '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — заявки на оптовые цены для салонов.</p>' +
+      (S.admCustErr ? '<div class="adm__note">' + esc(S.admCustErr) + "</div>" : "") +
+      '<div class="adm__acts" style="flex-wrap:wrap;gap:8px 12px">' +
+        '<input class="input input--box" data-admcustq value="' + esc(S.admCustQ || "") + '" placeholder="Имя, почта, телефон, компания…" aria-label="Поиск по клиентам" style="max-width:280px">' +
+        ADM_CUST_TIERS.map(function (f) {
+          return '<button class="chip ' + (S.admCustTier === f[0] ? "chip--ok" : "chip--low") + '" data-admcusttier="' + f[0] + '">' + f[1] + "</button>";
+        }).join(" ") +
+        '<a class="link" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
+      "</div>" +
+      '<div id="admcustlist">' + admCustRowsHTML() + "</div>";
+  }
+  function admCustPatch(id, body, okMsg) {
+    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", body).then(function (r) {
+      S.admCustBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.admCustDetail = { customer: r.body.customer, history: (S.admCustDetail && S.admCustDetail.history) || [] };
+        loadAdminCustomerDetail(id, true);
+        loadAdminCustomers(true);
+        toast(okMsg);
+        render();
+        return;
+      }
+      toast("Не получилось сохранить");
+      render();
+    }).catch(function () { S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
+  }
+  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен ✓"); }
+  function rejectCustomer(id) { admCustPatch(id, { action: "reject" }, "Заявка отклонена"); }
+  function demoteCustomer(id) { admCustPatch(id, { tier: "retail" }, "Статус партнёра снят"); }
+  function adjustCustomerPoints(id) {
+    var delta = Math.trunc(Number(String(S.admCustPoints).replace(",", ".")));
+    if (!delta) { toast("Введите число баллов, не 0"); return; }
+    if (S.admCustBusy) return;
+    S.admCustBusy = true; render();
+    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { pointsDelta: delta, note: S.admCustNote }).then(function (r) {
+      S.admCustBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.admCustPoints = ""; S.admCustNote = "";
+        loadAdminCustomerDetail(id, true);
+        loadAdminCustomers(true);
+        toast("Баллы изменены ✓");
+        return;
+      }
+      toast("Не получилось изменить баллы"); render();
+    }).catch(function () { S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
+  }
+  function saveCustomerNotes(id) {
+    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { notes: S.admCustNotesDraft || null }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { toast("Заметка сохранена ✓"); loadAdminCustomers(true); return; }
+      toast("Не получилось сохранить заметку");
+    }).catch(function () { toast("Сервер не отвечает"); });
+  }
+
   function setupBlock(title, rows) {
     return '<div class="sec__head sec__head--sub"><h2 class="sec__title">' + title + "</h2></div>" +
       '<div class="adm__list">' + rows.map(function (r) {
@@ -6869,7 +7998,10 @@
       '<div class="adm__th" role="row"><span>Заказ</span><span>Клиент</span><span>Доставка</span><span>Сумма</span><span>Статус</span></div>' +
       list.map(function (o) {
         return '<button class="adm__tr adm__tr--link" role="row" data-admorder="' + esc(o.id) + '"><span class="num">' +
-          (o.number ? esc(o.number) : "#" + esc(o.id)) + '<span class="adm__sub">' + esc(o.date) + "</span></span>" +
+          (o.number ? esc(o.number) : "#" + esc(o.id)) +
+          // inventory: an in-salon quick sale, told apart from a web order at a glance
+          (o.srv && o.srv.channel === "pos" ? ' <span class="chip" style="font-size:10px">Салон</span>' : "") +
+          '<span class="adm__sub">' + esc(o.date) + "</span></span>" +
           "<span>" + esc(o.who) + '<span class="adm__sub">' + esc(o.items) + " " + plural(o.items) + "</span></span>" +
           '<span class="adm__ship">' + esc(o.ship) + "</span>" +
           '<span class="num">' + eur(o.sum) + "</span>" +
@@ -6899,6 +8031,10 @@
     return '<button class="link" data-admorder="">← Все заказы</button>' +
       '<div class="adm__ohead"><h2 class="sec__title" style="font-size:20px">Заказ ' + esc(o.number) + "</h2>" +
         '<span class="chip" style="color:var(' + row.state[2] + ')">' + row.state[1] + "</span>" +
+        // integration: reuse the POS payment-method words as already
+        // capitalised in the dictionary ("Терминал"/"Наличные") instead of a
+        // lowercase mid-sentence copy — same words, one fewer pair of keys
+        (o.channel === "pos" ? '<span class="chip">Салон' + (o.payment && o.payment.method ? " · " + (o.payment.method === "terminal" ? "Терминал" : "Наличные") : "") + "</span>" : "") +
         '<span class="muted">' + row.date + "</span></div>" +
       '<div class="adm__ocols"><div>' +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Состав</h3></div>' +
@@ -6911,7 +8047,12 @@
           (o.shippingPrice ? eur(o.shippingPrice) : "0 €") + "</span></div>" +
         (o.discount ? '<div class="adm__row"><span class="adm__nm">Скидка' + (o.discountCode ? " · " + esc(o.discountCode) : "") +
           '</span><span class="num adm__pr">−' + eur(o.discount) + "</span></div>" : "") +
-        '<div class="adm__row"><span class="adm__nm"><b>Итого</b></span><span class="num adm__pr"><b>' + eur(o.total) + "</b></span></div></div>" +
+        // wholesale/loyalty: what this order was actually priced at, and
+        // whatever points it spent — src/lib/orders.ts createOrder()
+        (o.loyaltyDiscount ? '<div class="adm__row"><span class="adm__nm">Баллы</span><span class="num adm__pr">−' + eur(o.loyaltyDiscount) + "</span></div>" : "") +
+        '<div class="adm__row"><span class="adm__nm"><b>Итого</b></span><span class="num adm__pr"><b>' + eur(o.total) + "</b></span></div>" +
+        (o.pricingTier === "pro" ? '<p class="muted" style="margin:8px 0 0">Цена для салонов</p>' : "") +
+        "</div>" +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Статус</h3></div>' +
         '<div class="adm__steps">' + steps.map(function (st) {
           return '<span class="adm__step' + (st[1] ? " is-done" : "") + '">' + (st[1] ? "✓ " : "") + st[0] + "</span>";
@@ -6932,7 +8073,37 @@
         '<label class="field"><span class="field__label">Видна только вам</span>' +
           '<textarea class="input" data-admnote rows="3">' + esc(o.notes || "") + "</textarea></label>" +
         '<div class="adm__acts"><button class="btn btn--sm" data-admnotesave>Сохранить заметку</button></div>' +
+        /* assistant-work: the customer-reply thread — see orderReplyPanel()
+           and the admorderreply/admordercompose/admordersend click handlers. */
+        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Переписка с клиентом</h3></div>' +
+        '<div class="adm__acts"><button class="btn btn--ghost btn--sm" data-admorderreply>' +
+          (S.orderReplyOpen ? "Скрыть" : "Ответить клиенту") + "</button></div>" +
+        (S.orderReplyOpen ? orderReplyPanel(o) : "") +
       "</div></div>";
+  }
+  function orderReplyPanel(o) {
+    var msgs = S.orderMsgs && S.orderMsgsFor === o.id ? S.orderMsgs : null;
+    return (msgs
+      ? (msgs.length
+        ? '<div class="adm__list">' + msgs.map(function (m) {
+            return '<div class="adm__row"><span class="adm__nm">' + (m.direction === "in" ? "Клиент" : "Магазин") +
+              '<span class="adm__sub">' + esc(m.body).replace(/\n/g, "<br>") + "</span></span>" +
+              '<span class="muted" style="font-size:11.5px;white-space:nowrap">' +
+                esc(String(m.createdAt || "").slice(0, 16).replace("T", " ")) + "</span></div>";
+          }).join("") + "</div>"
+        : '<p class="muted">Переписки пока нет.</p>')
+      : '<p class="muted">Загружаем…</p>') +
+      '<label class="field"><span class="field__label">Сообщение клиента</span>' +
+        '<textarea class="input" rows="3" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель"></textarea></label>' +
+      '<div class="adm__acts"><button class="btn btn--ghost btn--sm" data-admordercompose>Составить ответ</button></div>' +
+      '<label class="field"><span class="field__label">Ваш ответ клиенту</span>' +
+        '<textarea class="input" rows="5" data-orderreplydraft>' + esc(S.orderReplyDraft || "") + "</textarea></label>" +
+      // no disabled="" gated on S.orderReplyDraft here: «Составить ответ»
+      // fills the draft textarea via a direct DOM write, not a render() (see
+      // the click handler), so a disabled attribute set at render time would
+      // never turn itself back on — the handler's own empty-draft guard is
+      // the only check that has to stay correct.
+      '<div class="adm__acts"><button class="btn btn--sm" data-admordersend>Отправить</button></div>';
   }
 
   /* Montonio Shipping, in one block: a button that registers the parcel with
@@ -7086,6 +8257,25 @@
      photo is only dropped from the list, because undo has to be able to put
      it back. */
   var GAL = { id: "", list: [], fresh: {}, reset: false };
+  /* assistant-work: one snapshot of the description+SEO fields, taken the
+     first time an AI button is pressed for the product currently open — so
+     «Отменить» always restores what was on screen before any AI call this
+     visit, however many times describe/translate/SEO were pressed after
+     that. Cleared when the editor closes or saves. */
+  var AI_UNDO = null;
+  /** First AI button pressed for this product this visit: remembers what was
+   *  on screen (not what is saved) and shows «Отменить» via a direct DOM
+   *  patch — see the click handlers' own comment for why not render(). */
+  function admDescSnapshot(p) {
+    if (AI_UNDO && AI_UNDO.id === p.id) return;
+    var g = function (sel) { var e = document.querySelector(sel); return e ? e.value : ""; };
+    AI_UNDO = {
+      id: p.id, seoT: g("[data-edseot]"), seoD: g("[data-edseod]"),
+      descRU: g("[data-eddescru]"), descET: g("[data-eddescet]"), descEN: g("[data-eddescen]"),
+    };
+    var slot = document.querySelector("[data-descundoslot]");
+    if (slot) slot.innerHTML = '<button class="link" data-admdescundo>Отменить</button>';
+  }
   /** The photos that ship with the catalogue — what «Вернуть фото из каталога»
    *  goes back to, read from BASE so a saved override cannot hide them. */
   function baseGallery(id) {
@@ -7245,7 +8435,19 @@
       (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
   }
 
+  /** wholesale/loyalty: the price a salon pays right now — the override if
+      one is set, otherwise the base price minus the global discount, so the
+      owner sees the real number before typing anything here. "" while the
+      discount setting has not loaded yet (loadAdminPricing() below) and no
+      override is set — nothing to compute from. */
+  function proPriceHint(p) {
+    if (p.proPrice != null) return "Сейчас для салонов: " + eur(p.proPrice) + " — своя цена";
+    if (!S.pricingLoaded) return "";
+    var eff = Math.round(p.price * (1 - S.pricingLoaded.proDiscountPct / 100) * 100) / 100;
+    return "Сейчас для салонов: " + eur(eff) + " (скидка " + S.pricingLoaded.proDiscountPct + "%)";
+  }
   function goodsEditor(p) {
+    loadAdminPricing(false);   // wholesale/loyalty: for proPriceHint() above
     var subs = SUBCATS[p.cat] || [];
     var curSub = DEMO.subcat[p.id] || "";
     /* media: the size→photo picker below reads the list the owner is editing,
@@ -7254,6 +8456,16 @@
     var g = galDraft(p).map(function (ph) { return ph.thumb || ph.url; });
     var seoT = (p.seo && p.seo.t) || "";
     var seoD = (p.seo && p.seo.d) || "";
+    // assistant-work: the trilingual description override — dov holds only
+    // what the owner (or the AI) wrote for this product; the fields stay
+    // empty when there is none, and the static shop text shows through the
+    // placeholder so the owner can see what a shopper sees right now.
+    var dov = p.descOv || {};
+    var descHint = "Текста пока нет — можно написать вручную или сгенерировать с ИИ";
+    var descPhRU = (stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "") || descHint).slice(0, 300);
+    var descPhET = (stripTags(typeof CONTENT_ET !== "undefined" ? CONTENT_ET[p.id] : "") || descHint).slice(0, 300);
+    var descPhEN = (stripTags(typeof CONTENT !== "undefined" ? CONTENT[p.id] : "") || descHint).slice(0, 300);
+    var descUndoShown = AI_UNDO && AI_UNDO.id === p.id;
     return '<button class="link" data-admclose>← Все товары</button>' +
       '<div class="adm__ohead"><span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" +
         '<div><h2 class="sec__title" style="font-size:18px">' + esc(p.brand) + " — " + esc(p.name) + "</h2>" +
@@ -7263,6 +8475,11 @@
       '<div>' +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Основное</h3></div>' +
         '<label class="field"><span class="field__label">Цена, €</span><input class="input" data-edprice inputmode="decimal" value="' + p.price + '"></label>' +
+        // wholesale/loyalty: salon/pro price override, next to retail — empty
+        // means "no override", the effective price still shown as a hint below
+        '<label class="field"><span class="field__label">Цена для салонов, €</span><input class="input" data-edproprice inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '">' +
+          (proPriceHint(p) ? '<span class="muted" style="display:block;font-size:11px;margin-top:2px">' + proPriceHint(p) + '</span>' : "") +
+        '</label>' +
         '<label class="field"><span class="field__label">Наличие</span><span class="sel sel--box"><select data-edstock>' +
           [["in", "в наличии"], ["low", "мало"], ["out", "нет в наличии"]].map(function (o) {
             return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
@@ -7295,7 +8512,7 @@
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">SEO для Google</h3></div>' +
         '<label class="field"><span class="field__label">Заголовок (до 60 знаков)</span><input class="input" data-edseot maxlength="70" value="' + esc(seoT) + '" placeholder="Kevin.Murphy … купить в Таллинне | Rempire"></label>' +
         '<label class="field"><span class="field__label">Описание (до 155 знаков)</span><textarea class="input" data-edseod rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(seoD) + "</textarea></label>" +
-        '<button class="btn btn--ghost btn--sm" data-admseogen="' + p.id + '">Сгенерировать с ИИ</button>' +
+        '<button class="btn btn--ghost btn--sm" data-admseogen="' + p.id + '">SEO-тексты</button>' +
         /* features: one optional video per product. Stored in the demo layer
            and sent to the server as product_overrides.video_url. */
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Видео</h3></div>' +
@@ -7303,20 +8520,633 @@
         '<input class="input" data-edvideo value="' + esc((DEMO.video && DEMO.video[p.id]) || p.video || "") +
         '" placeholder="https://youtu.be/… или https://vimeo.com/…"></label>' +
         '<p class="muted" style="font-size:12.5px;margin:-4px 0 12px">Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.</p>' +
+        /* assistant-work: the trilingual description override — see the `dov`
+           comment above. «Сгенерировать описание» writes the Russian field;
+           «Перевести на ET/EN» reads whatever is in the Russian field (or the
+           shop's own text when that field is empty) and fills the other two. */
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Описание</h3></div>' +
-        '<label class="field"><span class="field__label">Русский — эстонский и английский пишутся сами</span>' +
-        '<textarea class="input" rows="5">' + esc(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "").slice(0, 400)) + "</textarea></label>" +
+        '<p class="muted" style="font-size:12.5px;margin:-4px 0 10px">Пусто — на странице товара показывается текст магазина (виден в подсказке поля). Своё описание для языка появляется на сайте вместо него.</p>' +
+        '<label class="field"><span class="field__label">Описание на русском</span>' +
+        '<textarea class="input" rows="4" maxlength="4000" data-eddescru placeholder="' + esc(descPhRU) + '">' + esc(dov.RU || "") + "</textarea></label>" +
+        '<div class="adm__acts" style="margin:-6px 0 14px">' +
+          '<button class="btn btn--ghost btn--sm" data-admdescgen="' + p.id + '">Сгенерировать описание</button>' +
+          '<button class="btn btn--ghost btn--sm" data-admtranslate="' + p.id + '">Перевести на ET/EN</button>' +
+          // assistant-work: patched directly (no render()) the moment a
+          // generation lands, so it appears without discarding whatever the
+          // owner is mid-typing elsewhere on this form — see the click handlers.
+          '<span data-descundoslot>' + (descUndoShown ? '<button class="link" data-admdescundo>Отменить</button>' : "") + "</span>" +
+        "</div>" +
+        '<label class="field"><span class="field__label">Описание на эстонском</span>' +
+        '<textarea class="input" rows="4" maxlength="4000" data-eddescet placeholder="' + esc(descPhET) + '">' + esc(dov.ET || "") + "</textarea></label>" +
+        '<label class="field"><span class="field__label">Описание на английском</span>' +
+        '<textarea class="input" rows="4" maxlength="4000" data-eddescen placeholder="' + esc(descPhEN) + '">' + esc(dov.EN || "") + "</textarea></label>" +
         '<div class="adm__acts"><button class="btn" data-admsavegoods="' + p.id + '">Сохранить</button>' +
         '<button class="btn btn--ghost btn--sm" data-admclose>Отмена</button></div>' +
         '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.</p>' +
       "</div></div>";
   }
+  /* ---------- inventory: «Склад» — numeric stock, EAN, the moves ledger ---
+     Real quantities live in stock_levels/stock_moves (src/lib/inventory.ts,
+     db/migrations/090_inventory.sql). A product with no move yet reads
+     «не учтено» — untracked, its badge everywhere else in the shop still
+     follows the old manual в наличии/мало/нет override; see getOverrides()
+     in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
+     that fallback matters. Levels are fetched once (like the catalogue) and
+     filtered/searched client-side, same pattern as goodsRows() below. ---- */
+  var STOCK = { asked: false };
+  function loadStockLevels(force) {
+    if (SRV.admin !== true) return;
+    if ((S.stockLevels || STOCK.asked) && !force) return;
+    STOCK.asked = true;
+    S.stockBusy = true;
+    apiJson("/api/admin/inventory/?filter=all&limit=1000").then(function (r) {
+      S.stockBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { S.stockLevels = r.body.levels; S.stockErr = ""; }
+      else S.stockErr = "Склад не отвечает — попробуйте обновить страницу.";
+      render();
+    }).catch(function () { S.stockBusy = false; S.stockErr = "Сервер не отвечает."; render(); });
+  }
+  function reloadStock() { STOCK.asked = false; loadStockLevels(true); }
+
+  var STOCK_MOVE_WORD = {
+    sale_web: "продажа на сайте", sale_pos: "продажа в салоне",
+    // integration: "ручная правка", not "корректировка" — the loyalty ledger
+    // already owns that word for a different, past-participle-style label
+    // (Начислено/Списано/Корректировка/Сгорело), and one RU string cannot
+    // carry two different ET translations in this dictionary
+    goods_in: "приход", adjust: "ручная правка", return: "возврат"
+  };
+  function stockKey(productId, variant) { return productId + " " + (variant || ""); }
+  function stockFindRow(key) {
+    var rows = S.stockLevels || [];
+    for (var i = 0; i < rows.length; i++) if (stockKey(rows[i].productId, rows[i].variant) === key) return rows[i];
+    return null;
+  }
+  function stockStateChip(r) {
+    if (!r.tracked) return '<span class="chip">не учтено</span>';
+    var label = r.state === "out" ? "нет" : r.state === "low" ? "мало" : "в наличии";
+    var cls = r.state === "out" ? "chip--out" : r.state === "low" ? "chip--low" : "chip--ok";
+    return '<span class="chip ' + cls + '">' + label + "</span>";
+  }
+  function stockEditFormHTML(r) {
+    return '<div class="adm__row" style="flex-direction:column;align-items:stretch;background:var(--shell)">' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+        '<label class="field" style="flex:1 1 160px"><span class="field__label">EAN / штрихкод</span>' +
+          '<input class="input" data-stockeaninput value="' + esc(S.stockEditEan || "") + '" placeholder="нет штрихкода" inputmode="numeric"></label>' +
+        '<label class="field" style="flex:0 1 130px"><span class="field__label">Порог «мало»</span>' +
+          '<input class="input" data-stocklowinput value="' + esc(S.stockEditLow || "") + '" inputmode="numeric"></label>' +
+      "</div>" +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+        '<label class="field" style="flex:0 1 130px"><span class="field__label">Остаток сейчас</span>' +
+          '<input class="input" data-stockqtyinput value="' + esc(S.stockEditQty || "") + '" inputmode="numeric" placeholder="' + (r.tracked ? r.qty : "0") + '"></label>' +
+        '<label class="field" style="flex:1 1 220px"><span class="field__label">Причина (видна в истории)</span>' +
+          '<input class="input" data-stockreasoninput value="' + esc(S.stockEditReason || "") + '" placeholder="например: пересчёт на полке"></label>' +
+      "</div>" +
+      '<div class="adm__acts"><button class="btn btn--sm" data-stocksave="' + esc(stockKey(r.productId, r.variant)) + '">Сохранить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-stockedit="">Отмена</button></div>' +
+    "</div>";
+  }
+  function stockRowHTML(r) {
+    var p = byId(r.productId);
+    var key = stockKey(r.productId, r.variant);
+    var open = S.stockEdit === key;
+    return '<div class="adm__row"><span class="adm__ph">' + (p ? media(p, 0, "ph") : "") + "</span>" +
+      '<span class="adm__nm">' + esc(r.brand) + " — " + esc(r.name) +
+        (r.variant ? '<span class="adm__sub">' + esc(r.variant) + "</span>" : "") + "</span>" +
+      '<span class="muted num" style="min-width:100px">' + (r.ean ? esc(r.ean) : "—") + "</span>" +
+      '<span class="num" style="min-width:44px">' + (r.tracked ? r.qty : "—") + "</span>" +
+      "<span>" + stockStateChip(r) + "</span>" +
+      '<button class="link" data-stockedit="' + (open ? "" : esc(key)) + '">' + (open ? "Свернуть" : "Править") + "</button>" +
+    "</div>" + (open ? stockEditFormHTML(r) : "");
+  }
+  function stockRows() {
+    var q = (S.stockQ || "").toLowerCase().trim();
+    var f = S.stockFilter || "all";
+    var rows = (S.stockLevels || []).filter(function (r) {
+      if (f === "low" && !(r.tracked && r.state === "low")) return false;
+      if (f === "out" && !(r.tracked && r.state === "out")) return false;
+      if (f === "untracked" && r.tracked) return false;
+      if (!q) return true;
+      return (r.brand + " " + r.name + " " + r.productId + " " + (r.ean || "")).toLowerCase().indexOf(q) >= 0;
+    });
+    var shown = rows.slice(0, 60);
+    return shown.map(stockRowHTML).join("") +
+      '<p class="muted" style="margin:10px 2px">' +
+        (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
+        (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
+  }
+  function pwaHintHTML() {
+    try {
+      if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return "";
+      if (window.navigator && window.navigator.standalone) return "";
+      if (localStorage.getItem("rmp-pwa-hint-dismissed") === "1") return "";
+    } catch (e) {}
+    return '<div class="adm__note" data-pwahint>📱 Откройте эту страницу на телефоне и добавьте на экран: в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». Быстрее, чем открывать сайт заново каждый раз. ' +
+      '<button class="link" data-pwahintclose>Скрыть</button></div>';
+  }
+  function admStockHTML() {
+    if (SRV.admin !== true) return '<p class="muted" style="margin:16px 0">Войдите в панель, чтобы видеть склад.</p>';
+    loadStockLevels(false);
+    if (S.stockMovesOpen) return admStockMovesHTML();
+    var FILTERS = [["all", "Все"], ["low", "Мало"], ["out", "Нет"], ["untracked", "Не учтено"]];
+    return '<p class="muted" style="margin:16px 0">Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.</p>' +
+      pwaHintHTML() +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">' +
+        '<button class="btn" data-scanopen>' + icon("scan") + " Сканировать</button>" +
+        '<input class="input input--box" data-stockq value="' + esc(S.stockQ || "") + '" placeholder="Найти товар, бренд, EAN…" aria-label="Поиск по складу" style="max-width:320px">' +
+        '<button class="link" data-stockmovesopen="1">История приёмок и продаж →</button>' +
+      "</div>" +
+      '<div class="adm__chips" role="group" aria-label="Фильтр">' +
+        FILTERS.map(function (f) {
+          return '<button class="scchip" data-stockfilter="' + f[0] + '" aria-current="' + ((S.stockFilter || "all") === f[0]) + '">' + f[1] + "</button>";
+        }).join("") +
+      "</div>" +
+      (S.stockErr ? '<div class="adm__note">' + esc(S.stockErr) + "</div>" : "") +
+      (S.stockBusy && !S.stockLevels ? '<p class="muted">Загружаем…</p>' :
+        '<div class="adm__list" id="stocklist">' + stockRows() + "</div>");
+  }
+  function admStockMovesHTML() {
+    loadStockMoves(false);
+    var moves = S.stockMoves || [];
+    var REASONS = [["", "Все"], ["goods_in", "Приход"], ["sale_web", "Продажа на сайте"], ["sale_pos", "Продажа в салоне"], ["adjust", "Ручная правка"], ["return", "Возврат"]];
+    return '<button class="link" data-stockmovesopen="">← Склад</button>' +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">История приёмок и продаж</h2></div>' +
+      '<div class="adm__chips" role="group" aria-label="Тип движения">' +
+        REASONS.map(function (r) {
+          return '<button class="scchip" data-stockmovesreason="' + r[0] + '" aria-current="' + ((S.stockMovesReason || "") === r[0]) + '">' + r[1] + "</button>";
+        }).join("") +
+      "</div>" +
+      (S.stockMovesBusy && !S.stockMoves ? '<p class="muted">Загружаем…</p>' :
+        (moves.length ? '<div class="adm__list">' + moves.map(function (m) {
+          var sign = m.delta > 0 ? "+" : "";
+          return '<div class="adm__row"><span class="adm__nm">' + esc(m.brand || m.productId) + (m.brand ? " — " + esc(m.name) : "") +
+              '<span class="adm__sub">' + (m.variant ? esc(m.variant) + " · " : "") + esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
+            '<span class="muted">' + esc(String(m.at).slice(0, 16).replace("T", " ")) + "</span>" +
+            '<span class="num">' + sign + m.delta + "</span></div>";
+        }).join("") + "</div>" : '<p class="muted">Пока пусто.</p>'));
+  }
+
+  /* ---------- inventory: the scanner --------------------------------------
+     Camera-first: BarcodeDetector natively where the browser has it
+     (Android Chrome), a vendored zxing decoder where it does not (iOS
+     Safari — public/vendor/zxing/, lazy-loaded here). The keyboard-wedge
+     input (a bluetooth/USB handheld scanner typing + Enter) is the SAME
+     small manual-entry field, not a second dedicated one — see the shell
+     below.
+     Mounted OUTSIDE bodySlot as its own persistent DOM node: a <video> living
+     inside the render()-driven innerHTML would be torn down (losing its
+     camera stream) on every unrelated state change. See scanMount() and the
+     hook near the top-level render(). */
+  var SCANEL = null;
+  var SCAN = { stream: null, controls: null, engine: "", timer: null, lastCode: "", lastAt: 0, video: null };
+
+  function scanSupportInfo() {
+    return {
+      native: typeof window !== "undefined" && "BarcodeDetector" in window,
+      camera: typeof navigator !== "undefined" && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+    };
+  }
+  // integration: a plain helper (not an inline "||" literal) so the i18n
+  // checker sees one hole in the sentence that uses it, not the fallback
+  // word as a false-positive standalone fragment
+  function cameraErrName(err) { return (err && err.name) || "ошибка"; }
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var existing = document.querySelector('script[src="' + src + '"]');
+      if (existing) {
+        if (existing.dataset.loaded === "1") resolve();
+        else existing.addEventListener("load", function () { resolve(); });
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = src;
+      s.onload = function () { s.dataset.loaded = "1"; resolve(); };
+      s.onerror = function () { reject(new Error("load_failed")); };
+      document.head.appendChild(s);
+    });
+  }
+  function scanBeep() {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        var ctx = new AC(), osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.frequency.value = 880; gain.gain.value = 0.08;
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.09);
+        osc.onended = function () { ctx.close(); };
+      }
+    } catch (e) {}
+    try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
+  }
+  function scanAssignResultsHTML() {
+    var q = (S.scanAssignQ || "").toLowerCase().trim();
+    if (!q) return "";
+    var found = CATALOGUE.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; }).slice(0, 6);
+    if (!found.length) return '<p class="muted">Ничего не найдено.</p>';
+    return '<div class="adm__list">' + found.map(function (p) {
+      // inventory: a barcode is one specific size, not the whole product —
+      // ask which before binding when there is more than one to choose from
+      if (p.sizes && p.sizes.length > 1 && S.scanAssignPick === p.id) {
+        return '<div class="adm__row"><span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
+          '<span class="adm__sub">Какой объём?</span></span>' +
+          '<span class="scan__actions" style="margin:0">' + p.sizes.map(function (sz) {
+            return '<button class="btn btn--sm" data-scanbindsize="' + esc(sz) + '">' + esc(sz) + "</button>";
+          }).join("") + "</span></div>";
+      }
+      return '<div class="adm__row"><span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+        '<button class="btn btn--sm" data-scanassign="' + p.id + '">Привязать</button></div>';
+    }).join("") + "</div>";
+  }
+  /** inventory: binds the last scanned code to productId+variant, then
+      re-looks it up so the goods-in card takes over — shared by the direct
+      (single/no-size product) and size-picked (multi-size) paths above. */
+  function scanBindEan(productId, variant) {
+    var assignCode = S.scanHit ? S.scanHit.code : "";
+    if (!assignCode) return;
+    stockLevelSave({ productId: productId, variant: variant || "", ean: assignCode }).then(function (ok) {
+      if (ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); }
+      else toast("Не удалось привязать — возможно, код уже занят");
+    });
+  }
+  function scanPanelHTML() {
+    var parts = "";
+    if (S.scanErr) parts += '<p class="scan__err">' + esc(S.scanErr) + "</p>";
+    if (S.scanHit) {
+      var h = S.scanHit, p = h.product ? byId(h.product.id) : null;
+      parts += '<div class="scan__card">' +
+        (p ? '<span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" : "") +
+        '<div><b>' + (p ? esc(p.brand + " — " + p.name) : "Код не привязан") + "</b>" +
+          (h.variant ? '<span class="adm__sub">' + esc(h.variant) + "</span>" : "") +
+          '<span class="adm__sub">' + (h.tracked === false ? "не учтено" : "Остаток: " + h.qty) + "</span></div></div>";
+      if (p) {
+        parts += '<div class="scan__actions">' +
+          '<button class="btn scan__btn" data-scanplus>+1 приход</button>' +
+          '<button class="btn btn--ghost scan__btn" data-scanminus>−1 продажа</button></div>' +
+          '<div class="scan__actions"><input class="input" id="scanqtyinput" style="width:64px" value="1" inputmode="numeric" aria-label="Количество приёмки">' +
+          '<button class="btn scan__btn" data-scangoodsin>Приход по количеству</button></div>';
+      } else {
+        parts += '<p class="muted">Штрихкод «' + esc(h.code) + '» ни к чему не привязан. Найдите товар и привяжите код к нему.</p>' +
+          '<input class="input input--box" data-scanassignq value="' + esc(S.scanAssignQ || "") + '" placeholder="Найти товар…" aria-label="Найти товар для привязки">' +
+          '<div id="scanassignresults">' + scanAssignResultsHTML() + "</div>";
+      }
+    } else if (!S.scanErr) {
+      parts += '<p class="muted">Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.</p>';
+    }
+    // The manual/keyboard-wedge input itself lives in the STATIC shell
+    // (scannerShellHTML()), not here — #scanpanel is fully replaced on every
+    // scanRenderPanel() call, which would silently drop the keydown listener
+    // scanMount() attaches to it if the input were recreated here too.
+    if (S.scanToday && S.scanToday.length) {
+      parts += '<div class="sec__head sec__head--sub"><h3 class="sec__title">Сегодня</h3></div><div class="adm__list">' +
+        S.scanToday.slice(0, 8).map(function (m) {
+          return '<div class="adm__row"><span class="adm__nm">' + esc((m.brand ? m.brand + " — " : "") + m.name) + "</span>" +
+            '<span class="num">' + (m.delta > 0 ? "+" : "") + m.delta + "</span></div>";
+        }).join("") + "</div>";
+    }
+    return parts;
+  }
+  function scannerShellHTML() {
+    return '<div class="scan__box">' +
+        '<video class="scan__video" data-scanvideo autoplay playsinline muted></video>' +
+        '<div class="scan__target" aria-hidden="true"></div>' +
+        '<button class="iconbtn scan__close" type="button" data-scanclose aria-label="Закрыть сканер">✕</button>' +
+        '<button class="iconbtn scan__torch" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>' +
+      "</div>" +
+      // The manual-entry field IS the keyboard-wedge target too (a bluetooth/
+      // USB scanner just types digits + Enter into whatever is focused) — one
+      // small, low-emphasis input serves both. It lives here, in the shell
+      // that scanMount() builds once, specifically so the keydown listener
+      // attached to it (also in scanMount()) survives every #scanpanel update.
+      '<div class="scan__manual"><input class="input" data-scanmanual inputmode="numeric" autocomplete="off" placeholder="Код вручную" aria-label="Ввести код вручную">' +
+        '<button class="btn btn--ghost btn--sm" data-scanmanualsubmit type="button">Найти</button></div>' +
+      '<div id="scanpanel" class="scan__panel"></div>';
+  }
+  function scanRenderPanel() {
+    if (!SCANEL) return;
+    var panel = SCANEL.querySelector("#scanpanel");
+    if (panel) { panel.innerHTML = scanPanelHTML(); translateTree(panel); }
+    var torchBtn = SCANEL.querySelector("[data-scantorch]");
+    if (torchBtn) torchBtn.hidden = !S.scanTorchOk;
+    // keyboard-wedge fallback: refocus the manual field, but never steal focus
+    // from something the admin is actively typing into (assign search, qty)
+    var active = document.activeElement;
+    var manual = SCANEL.querySelector("[data-scanmanual]");
+    // inventory: an unmatched code needs the product search next, not another
+    // scan — focus that field instead so binding a barcode stays fast
+    var assignQ = SCANEL.querySelector("[data-scanassignq]");
+    if (assignQ) {
+      if (!active || active === document.body || active === manual) assignQ.focus();
+      return;
+    }
+    if (manual && (!active || active === document.body || active === manual)) manual.focus();
+  }
+  function stopScanEngine() {
+    if (SCAN.timer) { clearTimeout(SCAN.timer); SCAN.timer = null; }
+    if (SCAN.controls && SCAN.controls.stop) { try { SCAN.controls.stop(); } catch (e) {} }
+    SCAN.controls = null;
+    if (SCAN.stream) { try { SCAN.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
+    SCAN.stream = null;
+    SCAN.engine = "";
+  }
+  function handleScanCode(code) {
+    var now = Date.now();
+    if (!code || (code === SCAN.lastCode && now - SCAN.lastAt < 1500)) return;
+    SCAN.lastCode = code; SCAN.lastAt = now;
+    scanLookup(code);
+  }
+  function scanLookup(code) {
+    apiJson("/api/admin/inventory/lookup/?ean=" + encodeURIComponent(code)).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; closeScanner(); render(); return; }
+      if (r.status !== 200 || !r.body.ok) return;
+      var hit = r.body.hit;
+      S.scanHit = hit
+        ? { code: code, productId: hit.productId, variant: hit.variant, qty: hit.qty, lowThreshold: hit.lowThreshold, ean: hit.ean, state: hit.state, tracked: true, product: hit.product }
+        : { code: code, product: null, tracked: false };
+      S.scanAssignQ = "";
+      S.scanAssignPick = "";
+      scanBeep();
+      loadScanToday();
+      scanRenderPanel();
+    }).catch(noop);
+  }
+  function loadScanToday() {
+    var d = new Date(); d.setUTCHours(0, 0, 0, 0);
+    apiJson("/api/admin/inventory/moves/?limit=20&since=" + encodeURIComponent(d.toISOString())).then(function (r) {
+      if (r.status === 200 && r.body.ok) { S.scanToday = r.body.moves; scanRenderPanel(); }
+    }).catch(noop);
+  }
+  function submitManualScan() {
+    var input = SCANEL && SCANEL.querySelector("[data-scanmanual]");
+    var code = input ? input.value.trim() : "";
+    if (!code) return;
+    if (input) input.value = "";
+    SCAN.lastCode = ""; // a manually re-typed code always counts, even if it is the last camera hit
+    handleScanCode(code);
+  }
+  function setScanTorch(on) {
+    S.scanTorchOn = on;
+    if (SCAN.engine === "zxing" && SCAN.controls && SCAN.controls.switchTorch) SCAN.controls.switchTorch(on).catch(noop);
+    else if (SCAN.engine === "native" && SCAN.stream) {
+      var track = SCAN.stream.getVideoTracks()[0];
+      if (track && track.applyConstraints) track.applyConstraints({ advanced: [{ torch: on }] }).catch(noop);
+    }
+    var btn = SCANEL && SCANEL.querySelector("[data-scantorch]");
+    if (btn) btn.setAttribute("aria-pressed", String(on));
+  }
+  function startNativeEngine() {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false }).then(function (stream) {
+      if (!S.scanOpen) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+      SCAN.stream = stream; SCAN.engine = "native";
+      var video = SCAN.video;
+      if (!video) return;
+      video.srcObject = stream;
+      video.play().catch(noop);
+      var track = stream.getVideoTracks()[0];
+      var caps = {};
+      try { caps = track && track.getCapabilities ? track.getCapabilities() : {}; } catch (e) {}
+      S.scanTorchOk = !!(caps && caps.torch);
+      scanRenderPanel();
+      var detector = new window.BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] });
+      var loop = function () {
+        if (!S.scanOpen || SCAN.engine !== "native") return;
+        detector.detect(video).then(function (codes) {
+          if (codes && codes.length) handleScanCode(codes[0].rawValue);
+        }).catch(noop).then(function () { SCAN.timer = setTimeout(loop, 280); });
+      };
+      loop();
+    }).catch(function (err) {
+      S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
+      scanRenderPanel();
+    });
+  }
+  function startZxingEngine() {
+    loadScript("/vendor/zxing/zxing-browser.min.js").then(function () {
+      if (!S.scanOpen) return;
+      if (!window.ZXingBrowser) throw new Error("no_global");
+      SCAN.engine = "zxing";
+      var reader = new window.ZXingBrowser.BrowserMultiFormatOneDReader();
+      reader.decodeFromVideoDevice(undefined, SCAN.video, function (result, err, controls) {
+        SCAN.controls = controls;
+        if (!S.scanTorchOk && controls && controls.switchTorch) { S.scanTorchOk = true; scanRenderPanel(); }
+        if (result) handleScanCode(result.getText());
+      }).catch(function (err) {
+        S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
+        scanRenderPanel();
+      });
+    }).catch(function () {
+      S.scanErr = "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.";
+      scanRenderPanel();
+    });
+  }
+  function startScanEngine() {
+    var supp = scanSupportInfo();
+    S.scanSupport = supp;
+    if (!supp.camera) {
+      S.scanErr = "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.";
+      scanRenderPanel();
+      return;
+    }
+    if (supp.native) startNativeEngine(); else startZxingEngine();
+  }
+  function scanMount() {
+    if (SCANEL) return SCANEL;
+    SCANEL = document.createElement("div");
+    SCANEL.className = "scanoverlay";
+    document.body.appendChild(SCANEL);
+    SCANEL.innerHTML = scannerShellHTML();
+    translateTree(SCANEL);
+    SCAN.video = SCANEL.querySelector("[data-scanvideo]");
+    var manual = SCANEL.querySelector("[data-scanmanual]");
+    if (manual) {
+      manual.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); submitManualScan(); }
+      });
+      manual.focus();
+    }
+    startScanEngine();
+    return SCANEL;
+  }
+  function scanUnmount() {
+    stopScanEngine();
+    if (SCANEL) { SCANEL.remove(); SCANEL = null; }
+  }
+  function openScanner() {
+    S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = "";
+    S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null;
+    render();
+  }
+  function closeScanner() {
+    S.scanOpen = false;
+    render();
+  }
+
+  /* ---------- inventory: «Продажа в салоне» -------------------------------
+     Picks products (search here, or scan in «Склад» first and come back —
+     both feed the same S.posCart), takes an optional e-mail/phone, a
+     payment method and a flat discount %, and POSTs the whole thing to
+     POST /api/admin/pos-orders/ once — that route creates the order, marks
+     it paid and decrements stock (reason 'sale_pos') in one request. */
+  function posVariantPrice(p, variant) {
+    if (variant && p && p.sizes && p.prices) {
+      var idx = p.sizes.indexOf(variant);
+      if (idx >= 0) return p.prices[idx];
+    }
+    return p ? p.price : 0;
+  }
+  function posSubtotal() {
+    var sum = 0;
+    S.posCart.forEach(function (l) { sum += posVariantPrice(byId(l.id), l.variant) * l.qty; });
+    return Math.round(sum * 100) / 100;
+  }
+  function posAddProduct(id) {
+    var p = byId(id);
+    if (!p) return;
+    var variant = p.sizes && p.sizes.length ? p.sizes[0] : "";
+    for (var i = 0; i < S.posCart.length; i++) {
+      if (S.posCart[i].id === id && (S.posCart[i].variant || "") === variant) { S.posCart[i].qty++; render(); return; }
+    }
+    S.posCart.push({ id: id, variant: variant, qty: 1 });
+    render();
+  }
+  function posSearchResultsHTML() {
+    var q = (S.posQ || "").toLowerCase().trim();
+    if (!q) return "";
+    var found = CATALOGUE.filter(function (p) { return p.stock !== "out" && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; }).slice(0, 8);
+    if (!found.length) return '<p class="muted">Ничего не найдено.</p>';
+    return '<div class="adm__list">' + found.map(function (p) {
+      return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+        '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+        '<span class="num">' + eur(p.price) + "</span>" +
+        '<button class="btn btn--sm" data-posadd="' + p.id + '">Добавить</button></div>';
+    }).join("") + "</div>";
+  }
+  function admPosReceiptHTML() {
+    var d = S.posDone;
+    return '<div class="adm__list" style="max-width:420px;margin:24px auto;padding:24px;text-align:center">' +
+      '<p style="font-size:15px">Продажа оформлена ✓</p>' +
+      '<p class="sec__title" style="font-size:20px;margin:6px 0">' + esc(d.number) + "</p>" +
+      '<p class="num" style="font-size:18px">' + eur(d.total) + "</p>" +
+      '<div class="adm__acts" style="justify-content:center">' +
+        '<a class="btn" href="/api/admin/pos-orders/' + encodeURIComponent(d.orderId) + '/receipt/" target="_blank" rel="noopener">Чек для печати</a>' +
+        '<button class="btn btn--ghost" data-posnew>Новая продажа</button></div></div>';
+  }
+  function admPosHTML() {
+    if (SRV.admin !== true) return '<p class="muted" style="margin:16px 0">Войдите в панель.</p>';
+    if (S.posDone) return admPosReceiptHTML();
+    var subtotal = posSubtotal();
+    var pct = Math.min(90, Math.max(0, Math.round(Number(S.posDiscount) || 0)));
+    var discount = pct ? Math.round(subtotal * pct) / 100 : 0;
+    var total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
+    return '<p class="muted" style="margin:16px 0">Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».</p>' +
+      '<input class="input input--box" data-posq value="' + esc(S.posQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск товара" style="margin-bottom:8px;max-width:420px">' +
+      '<div id="poslist">' + posSearchResultsHTML() + "</div>" +
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Корзина</h3></div>' +
+      (S.posCart.length ? '<div class="adm__list">' + S.posCart.map(function (l, i) {
+        var p = byId(l.id), price = posVariantPrice(p, l.variant);
+        return '<div class="adm__row"><span class="adm__nm">' + (p ? esc(p.brand + " — " + p.name) : esc(l.id)) +
+            (l.variant ? '<span class="adm__sub">' + esc(l.variant) + "</span>" : "") + "</span>" +
+          '<button class="iconbtn" data-posqty="' + i + ":-1" + '" aria-label="Меньше">−</button>' +
+          '<span class="num" style="min-width:24px;text-align:center">' + l.qty + "</span>" +
+          '<button class="iconbtn" data-posqty="' + i + ":1" + '" aria-label="Больше">+</button>' +
+          '<span class="num">' + eur(price * l.qty) + "</span>" +
+          '<button class="link" data-posremove="' + i + '">Убрать</button></div>';
+      }).join("") + "</div>" : '<p class="muted">Пока пусто — добавьте товар выше или отсканируйте штрихкод в «Складе».</p>') +
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Покупатель (необязательно)</h3></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+        '<label class="field" style="flex:1 1 220px"><span class="field__label">E-mail</span><input class="input" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
+        '<label class="field" style="flex:1 1 180px"><span class="field__label">Телефон</span><input class="input" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
+      "</div>" +
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Оплата</h3></div>' +
+      '<div class="adm__chips" role="group" aria-label="Способ оплаты">' +
+        '<button class="scchip" data-pospayment="cash" aria-current="' + ((S.posPayment || "cash") === "cash") + '">Наличные</button>' +
+        '<button class="scchip" data-pospayment="terminal" aria-current="' + (S.posPayment === "terminal") + '">Терминал</button>' +
+      "</div>" +
+      '<label class="field" style="max-width:160px;margin-top:10px"><span class="field__label">Скидка, %</span><input class="input" data-posdiscount value="' + esc(S.posDiscount || "") + '" inputmode="numeric"></label>' +
+      '<div class="adm__row" style="border:none;padding:8px 0 0"><span class="adm__nm">Сумма</span><span class="num">' + eur(subtotal) + "</span></div>" +
+      (discount ? '<div class="adm__row" style="border:none;padding:2px 0"><span class="adm__nm">Скидка</span><span class="num">−' + eur(discount) + "</span></div>" : "") +
+      '<div class="adm__row" style="border:none;padding:2px 0 8px"><span class="adm__nm"><b>Итого</b></span><span class="num"><b>' + eur(total) + "</b></span></div>" +
+      (S.posErr ? '<div class="adm__note">' + esc(S.posErr) + "</div>" : "") +
+      '<div class="adm__acts"><button class="btn" data-possend' + (S.posBusy || !S.posCart.length ? " disabled" : "") + ">" + (S.posBusy ? "Оформляем…" : "Оформить продажу") + "</button></div>";
+  }
+  function posSend() {
+    if (S.posBusy || !S.posCart.length) return;
+    S.posBusy = true; S.posErr = ""; render();
+    apiSend("/api/admin/pos-orders/", "POST", {
+      items: S.posCart.map(function (l) { return { id: l.id, variant: l.variant || undefined, qty: l.qty }; }),
+      customer: { email: S.posEmail || undefined, phone: S.posPhone || undefined },
+      payment: { method: S.posPayment === "terminal" ? "terminal" : "cash" },
+      discountPercent: Number(S.posDiscount) || 0
+    }).then(function (r) {
+      S.posBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 201 && r.body.ok) {
+        S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total };
+        S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
+        loadSrvOrders(true);
+      } else {
+        S.posErr = r.body && r.body.error === "empty_order" ? "Добавьте хотя бы один товар."
+          : r.body && r.body.error === "bad_payment_method" ? "Выберите способ оплаты."
+          : "Не удалось оформить продажу — попробуйте ещё раз.";
+      }
+      render();
+    }).catch(function () { S.posBusy = false; S.posErr = "Сервер не отвечает."; render(); });
+  }
+
+  /* ---------- inventory: writes — the ledger and the static fields -------- */
+  function stockLevelSave(body) {
+    return apiSend("/api/admin/inventory/", "PUT", body).then(function (r) { return r.status === 200 && r.body.ok; });
+  }
+  function stockMoveSend(body) {
+    return apiSend("/api/admin/inventory/moves/", "POST", body).then(function (r) { return r.status === 200 && r.body.ok; });
+  }
+  function loadStockMoves(force) {
+    if (SRV.admin !== true) return;
+    if (S.stockMoves && !force) return;
+    S.stockMovesBusy = true;
+    var qs = "?limit=200" + (S.stockMovesReason ? "&reason=" + encodeURIComponent(S.stockMovesReason) : "");
+    apiJson("/api/admin/inventory/moves/" + qs).then(function (r) {
+      S.stockMovesBusy = false;
+      if (r.status === 200 && r.body.ok) S.stockMoves = r.body.moves;
+      render();
+    }).catch(function () { S.stockMovesBusy = false; render(); });
+  }
+  /** One row's edit form → up to two calls (the static fields, then a qty move), then a fresh list. */
+  function stockCommit(key) {
+    var r = stockFindRow(key);
+    if (!r) return;
+    var jobs = [];
+    var eanChanged = (S.stockEditEan || "") !== (r.ean || "");
+    var lowChanged = S.stockEditLow !== "" && Number(S.stockEditLow) !== r.lowThreshold;
+    if (eanChanged || lowChanged) {
+      var patch = { productId: r.productId, variant: r.variant };
+      if (eanChanged) patch.ean = S.stockEditEan || null;
+      if (lowChanged) patch.lowThreshold = Number(S.stockEditLow);
+      jobs.push(stockLevelSave(patch));
+    }
+    var qtyChanged = S.stockEditQty !== "" && Number(S.stockEditQty) !== (r.tracked ? r.qty : 0);
+    if (qtyChanged) {
+      jobs.push(stockMoveSend({
+        productId: r.productId, variant: r.variant, qty: Math.max(0, Math.trunc(Number(S.stockEditQty))),
+        reason: "adjust", ref: S.stockEditReason || undefined
+      }));
+    }
+    if (!jobs.length) { S.stockEdit = ""; render(); return; }
+    Promise.all(jobs).then(function (results) {
+      var ok = results.every(function (x) { return x; });
+      toast(ok ? "Сохранено ✓" : "Часть изменений не сохранилась");
+      S.stockEdit = "";
+      reloadStock();
+    });
+  }
+
   // the assistant's answers end with a button that OPENS the right tab —
   // «где это?» answered by taking the owner there, not by describing a path
   function aiGo(tab, label) {
     return '<div style="margin-top:10px"><button class="btn btn--ghost btn--sm" data-admtab="' + tab + '">' + label + " →</button></div>";
   }
   var TAB_LABEL = { over: "Открыть обзор", orders: "Открыть заказы", goods: "Открыть товары",
+    stock: "Открыть склад", pos: "Открыть продажу в салоне",
     people: "Открыть клиентов", reviews: "Открыть отзывы", blog: "Открыть блог", stats: "Открыть аналитику", mail: "Открыть письма",
     apps: "Открыть подключения", setup: "Открыть настройки" };
 
@@ -7329,7 +9159,9 @@
      UX. */
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
+    proPrice: {}, // wholesale/loyalty: product_overrides.pro_price, per product id — null/absent = computed from the global discount
     gallery: {},  // media: photos the owner uploaded, per product id
+    desc: {},     // assistant-work: product_overrides.description {RU,ET,EN}, per product id
     hero: null,   // null = the built-in banner (heroDefault())
     content: null,  // content: null = CONTENT_DEFAULT (the shop's own details)
     flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
@@ -7338,8 +9170,10 @@
     if (_dj && typeof _dj === "object") {
       DEMO.price = _dj.price || {}; DEMO.stock = _dj.stock || {}; DEMO.seo = _dj.seo || {};
       DEMO.subcat = _dj.subcat || {}; DEMO.varimg = _dj.varimg || {};
+      DEMO.proPrice = _dj.proPrice || {};   // wholesale/loyalty: pro-price overrides
       DEMO.video = _dj.video || {};   // features: product video links
       DEMO.gallery = _dj.gallery || {};   // media: uploaded photos
+      DEMO.desc = _dj.desc || {};   // assistant-work: description overrides
       if (_dj.chatbot === false) DEMO.chatbot = false;
       if (_dj.bundles === false) DEMO.bundles = false;
       if (_dj.hero && typeof _dj.hero === "object" && Array.isArray(_dj.hero.slides)) DEMO.hero = _dj.hero;
@@ -7386,10 +9220,14 @@
         p.price = DEMO.price[p.id];
         if (p.prices && p.prices.length) p.prices[0] = DEMO.price[p.id];
       }
+      // wholesale/loyalty: salon/pro price override — null means "computed
+      // from the global discount", same convention as product_overrides.pro_price
+      p.proPrice = (DEMO.proPrice && DEMO.proPrice[p.id] != null) ? DEMO.proPrice[p.id] : null;
       if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
       if (DEMO.seo[p.id]) p.seo = { t: DEMO.seo[p.id].t || "", d: DEMO.seo[p.id].d || "" };
       if (DEMO.varimg[p.id] && p.sizes && DEMO.varimg[p.id].length === p.sizes.length) p.varImg = DEMO.varimg[p.id].slice();
       if (DEMO.video && DEMO.video[p.id] != null) p.video = DEMO.video[p.id];   // features
+      p.descOv = (DEMO.desc && DEMO.desc[p.id]) || null;   // assistant-work: descFor() reads this first
       /* media: uploaded photos replace the catalogue's, and the per-size photo
          map points at positions in this list — a shorter list would otherwise
          leave «500 мл» pointing at a photo that no longer exists, so anything
@@ -7439,15 +9277,22 @@
     var ov = j.overrides || {};
     DEMO.price = {}; DEMO.stock = {}; DEMO.seo = {}; DEMO.subcat = {}; DEMO.varimg = {}; DEMO.video = {};
     DEMO.gallery = {};   // media
+    DEMO.desc = {};   // assistant-work
+    DEMO.proPrice = {};   // wholesale/loyalty
     Object.keys(ov).forEach(function (id) {
       var o = ov[id] || {};
       if (o.price != null) DEMO.price[id] = o.price;
+      if (o.proPrice != null) DEMO.proPrice[id] = o.proPrice;   // wholesale/loyalty
       if (o.stock) DEMO.stock[id] = o.stock;
       if (Array.isArray(o.gallery) && o.gallery.length) DEMO.gallery[id] = o.gallery;   // media
       if (o.seoTitle || o.seoDesc) DEMO.seo[id] = { t: o.seoTitle || "", d: o.seoDesc || "" };
       if (o.subcat) DEMO.subcat[id] = o.subcat;
       if (o.varImg) DEMO.varimg[id] = o.varImg;
       if (o.videoUrl) DEMO.video[id] = o.videoUrl;
+      // assistant-work: {RU,ET,EN} product-page description override
+      if (o.description && typeof o.description === "object" && (o.description.RU || o.description.ET || o.description.EN)) {
+        DEMO.desc[id] = o.description;
+      }
     });
     var s = j.settings || {};
     if (typeof s.chatbot === "boolean") DEMO.chatbot = s.chatbot;
@@ -7479,7 +9324,15 @@
       adoptServer(r.body);
       demoSave();
       applyDemoOverrides();
-      render();
+      // On checkout, adoptServer()'s prices/stock/ship-rules only ever move
+      // the delivery block and the summary — never the contact block, so
+      // never a full render() (same reasoning as loadShipRules() above,
+      // whose own /api/overrides/ fetch this one duplicates at boot time).
+      // Every other screen still gets the full rebuild: a new hero, a
+      // catalogue price change, the chatbot toggle, etc. are not scoped to
+      // any one container the way checkout's own blocks are.
+      if (S.screen === "checkout") { patchDelivery(); patchSummary(); }
+      else render();
     }).catch(noop);
   }
 
@@ -7498,6 +9351,9 @@
     if (!SRV.admin || !a) return;
     var ov = "/api/admin/overrides/", st = "/api/admin/settings/";
     if (a.type === "set_price") apiSend(ov, "PUT", { id: a.id, price: a.value }).catch(noop);
+    // wholesale/loyalty: the salon/pro price override — null clears it back
+    // to base price × (1 − discount%), same PUT the retail price uses
+    else if (a.type === "set_pro_price") apiSend(ov, "PUT", { id: a.id, proPrice: a.value }).catch(noop);
     else if (a.type === "set_stock") apiSend(ov, "PUT", { id: a.id, stock: a.value }).catch(noop);
     else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seoTitle: a.title || "", seoDesc: a.description || "" }).catch(noop);
     else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
@@ -7505,6 +9361,8 @@
     // media: the whole list travels every time — adding, reordering, choosing
     // the main photo and deleting are all one write
     else if (a.type === "set_gallery") apiSend(ov, "PUT", { id: a.id, gallery: a.list }).catch(noop);
+    // assistant-work: {RU,ET,EN} product-page description override
+    else if (a.type === "set_description") apiSend(ov, "PUT", { id: a.id, description: a.value || null }).catch(noop);
     else if (a.type === "toggle_flow") apiSend(st, "PUT", { flows: DEMO.flows }).catch(noop);
     else if (a.type === "toggle_chatbot") apiSend(st, "PUT", { chatbot: DEMO.chatbot }).catch(noop);
     else if (a.type === "toggle_bundles") apiSend(st, "PUT", { bundles: DEMO.bundles }).catch(noop);
@@ -7525,6 +9383,21 @@
       apiSend("/api/admin/promos/", "PATCH", { code: a.code, active: a.value }).then(function () {
         loadAdminPromos(true);
       }).catch(noop);
+    }
+    // wholesale/loyalty: the private half of settings.pricing (proDiscountPct,
+    // proMinOrder) only ever travels through this admin-only route — never
+    // the public /api/overrides one. adjust_points is a manual credit on one
+    // customer's card, not a settings write.
+    else if (a.type === "set_pricing") apiSend(st, "PUT", { pricing: S.pricingLoaded }).catch(noop);
+    else if (a.type === "adjust_points") {
+      // integration: the assistant may propose an e-mail instead of a uuid
+      // (sanitizePointsAdjust) — the customers/[id] route resolves either
+      var adjId = a.customerId || a.customerEmail;
+      apiSend("/api/admin/customers/" + encodeURIComponent(adjId) + "/", "PATCH", { pointsDelta: a.delta, note: a.note || "" })
+        .then(function () {
+          loadAdminCustomers(true);
+          if (S.admCustOpen === adjId) loadAdminCustomerDetail(adjId, true);
+        }).catch(noop);
     }
   }
 
@@ -7614,6 +9487,38 @@
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }
 
+  /* ---- assistant-work: «Ответить клиенту» — see orderDetailSrv() --------- */
+  /** The full server order object for the order currently open, or null —
+   *  never falls back to "some other order" the way admOrderDetail()'s list
+   *  filter does, because sending mail to the wrong order would be worse
+   *  than doing nothing. */
+  function currentAdminOrderRow() {
+    if (!SRV.orders) return null;
+    for (var i = 0; i < SRV.orders.length; i++) {
+      if (String(SRV.orders[i].id) === String(S.adminOrder)) return SRV.orders[i];
+    }
+    return null;
+  }
+  function srvLoadOrderMessages(orderId) {
+    if (!orderId) return;
+    apiJson("/api/admin/orders/" + encodeURIComponent(orderId) + "/messages/").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { S.orderMsgs = r.body.messages || []; S.orderMsgsFor = orderId; render(); }
+    }).catch(noop);
+  }
+
+  /* ---- assistant-work: «Отчёты» — see reportsCard() ---------------------- */
+  function srvLoadReportSummary(month) {
+    if (!SRV.admin) return;
+    apiJson("/api/admin/reports/orders/?month=" + encodeURIComponent(reportMonthOr(month)) + "&format=json").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.reportSummary = r.body.summary; S.reportSummaryFor = reportMonthOr(month);
+        render();
+      }
+    }).catch(noop);
+  }
+
   /* Only the overrides are read for everybody — they change what the shop
      shows. Whether this browser is the owner is asked once, and only when the
      admin screen is actually opened, so a shopper never pays for that call. */
@@ -7650,10 +9555,66 @@
   }
 
   var FLOW_NAMES = { abandoned: "Брошенная корзина", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии" };
+  // assistant-work: "2026-08" → "август 2026", for the confirm card and the log
+  var MONTH_RU = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
+  function monthLabelRu(m) {
+    var mm = /^(\d{4})-(\d{2})$/.exec(String(m || ""));
+    if (!mm) return String(m || "");
+    return (MONTH_RU[Number(mm[2]) - 1] || mm[2]) + " " + mm[1];
+  }
+  /** "2026-08" → the current month, defensively, so an assistant action or a
+   *  stale picker value can never build a request with no `month` at all. */
+  function reportMonthOr(m) {
+    return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(m || "")) ? m : new Date().toISOString().slice(0, 7);
+  }
+  function openReportLink(month, format) {
+    var url = "/api/admin/reports/orders/?month=" + encodeURIComponent(reportMonthOr(month)) +
+      "&format=" + (format === "xlsx" ? "xlsx" : "csv");
+    window.open(url, "_blank");
+  }
+  /* «Отчёты»: month picker + CSV/XLSX download + a summary line, same
+     "fetch once, cache in S" idiom as loadFlowCounts() above the «Письма»
+     card — the first render of this card kicks the summary off, later
+     renders just read what landed. */
+  var reportSummaryAsked = false;
+  function loadReportSummaryOnce() {
+    if (reportSummaryAsked) return;
+    reportSummaryAsked = true;
+    srvLoadReportSummary(S.reportMonth);
+  }
+  function reportsCard() {
+    loadReportSummaryOnce();
+    var month = S.reportMonth || reportMonthOr();
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Отчёты</h2></div>' +
+      '<p class="muted" style="margin:0 0 12px">Выгрузка заказов для бухгалтера за один месяц — с разбивкой НДС.</p>' +
+      '<label class="field"><span class="field__label">Месяц</span>' +
+        '<input class="input input--box" type="month" data-admreportsmonth value="' + esc(month) + '" style="max-width:200px"></label>' +
+      '<div class="adm__acts">' +
+        '<button class="btn btn--sm" data-admreportdl="csv">Скачать CSV</button>' +
+        '<button class="btn btn--ghost btn--sm" data-admreportdl="xlsx">Скачать XLSX</button>' +
+      "</div>" +
+      (S.reportSummary && S.reportSummaryFor === month
+        ? '<div class="adm__kpis" style="margin-top:14px">' +
+            kpi("Заказы", String(S.reportSummary.orders), "") +
+            kpi("Выручка", eur(S.reportSummary.revenue), "") +
+            kpi("НДС", eur(S.reportSummary.vat), "") +
+          "</div>"
+        : '<p class="muted" style="margin-top:10px">Загружаем…</p>');
+  }
   function actionText(a) {
     var p = a.id && byId(a.id);
     if (a.type === "set_price") return "Цена «" + (p ? p.brand + " " + p.name : a.id) + "»: " + eur(p ? p.price : 0) + " → " + eur(a.value);
+    // wholesale/loyalty: a.value null means "cleared back to the global discount"
+    if (a.type === "set_pro_price") return "Цена для салонов «" + (p ? p.brand + " " + p.name : a.id) + "»: " + (a.value == null ? "по умолчанию (скидка)" : eur(a.value));
     if (a.type === "set_stock") return "Наличие «" + (p ? p.name : a.id) + "»: " + ({ in: "в наличии", low: "мало", out: "нет" })[a.value];
+    // inventory: numeric stock — a.id is empty for these (they key off product_id, not id)
+    if (a.type === "stock_adjust" || a.type === "stock_set") {
+      var sp = a.product_id && byId(a.product_id);
+      var spName = (sp ? sp.brand + " " + sp.name : a.product_id) + (a.variant ? " (" + a.variant + ")" : "");
+      return a.type === "stock_adjust"
+        ? "Склад «" + spName + "»: " + (a.delta > 0 ? "+" : "") + a.delta + " (" + (STOCK_MOVE_WORD[a.reason] || a.reason || "ручная правка") + ")"
+        : "Склад «" + spName + "»: остаток → " + a.qty;
+    }
     if (a.type === "set_seo") return "SEO «" + (p ? p.name : a.id) + "»: «" + (a.title || "—") + "» / «" + (a.description || "—") + "»";
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
@@ -7673,6 +9634,9 @@
       var gl = Array.isArray(a.list) ? a.list.length : 0;
       return "Фото «" + (p ? p.name : a.id) + "»: " + (gl ? gl + " " + pl(gl, "фотография", "фотографии", "фотографий") : "как в каталоге");
     }
+    // assistant-work
+    if (a.type === "set_description") return "Описание «" + (p ? p.name : a.id) + "» обновлено";
+    if (a.type === "export_report") return "Отчёт для бухгалтера за " + monthLabelRu(a.month);
     // checkout-gaps
     if (a.type === "create_promo") {
       var pr = a.promo || {};
@@ -7695,6 +9659,20 @@
     }
     if (a.type === "publish_post") {
       return "Статья «" + a.slug + "»: " + (a.publish ? "опубликовать" : "снять с публикации");
+    }
+    // wholesale/loyalty
+    if (a.type === "set_pricing") {
+      var pv = a.value || {}, plo = pv.loyalty || {}, bits = [];
+      if (pv.proDiscountPct != null) bits.push("скидка для салонов " + pv.proDiscountPct + "%");
+      if (pv.proMinOrder != null) bits.push("от " + eur(pv.proMinOrder));
+      if (plo.enabled != null) bits.push("баллы " + (plo.enabled ? "включены" : "выключены"));
+      if (plo.earnPct != null) bits.push("начисление " + plo.earnPct + "%");
+      if (plo.redeemMaxPct != null) bits.push("списание до " + plo.redeemMaxPct + "%");
+      if (plo.minRedeem != null) bits.push("от " + plo.minRedeem + " баллов");
+      return "Цены и лояльность: " + (bits.length ? bits.join(" · ") : "без изменений");
+    }
+    if (a.type === "adjust_points") {
+      return "Баллы клиента: " + (a.delta > 0 ? "+" : "") + a.delta + (a.note ? " — " + a.note : "");
     }
     return "";
   }
@@ -7804,6 +9782,7 @@
         parts.push("бесплатно " + c + " " + (v === null ? "— никогда" : "от " + eur(v)));
       });
     }
+    if (r.markup) parts.push("наценка " + (r.markup.percent || 0) + "% + " + eur(r.markup.fixed || 0));
     if (!parts.length) return "Доставка: без изменений";
     var head = a.full ? "Тарифы доставки: " : "Доставка: ";
     return head + (parts.length <= 4 ? parts.join(" · ") : parts.slice(0, 4).join(" · ") + " и ещё " + (parts.length - 4));
@@ -7812,6 +9791,9 @@
     var entry = { t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), txt: actionText(a), a: a, prev: null };
     var p = a.id && byId(a.id);
     if (a.type === "set_price") { entry.prev = { type: "set_price", id: a.id, value: DEMO.price[a.id] != null ? DEMO.price[a.id] : p.price }; DEMO.price[a.id] = a.value; }
+    // wholesale/loyalty: a.value null clears the override back to "computed
+    // from the global discount" — same null-clears convention as set_seo/set_varimg
+    else if (a.type === "set_pro_price") { entry.prev = { type: "set_pro_price", id: a.id, value: DEMO.proPrice[a.id] != null ? DEMO.proPrice[a.id] : null }; DEMO.proPrice[a.id] = a.value; }
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
     else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; DEMO.seo[a.id] = { t: a.title, d: a.description }; }
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
@@ -7832,6 +9814,12 @@
       entry.prev = { type: "set_gallery", id: a.id, list: (DEMO.gallery[a.id] || []).slice() };
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
+    }
+    // assistant-work: {RU,ET,EN} product-page description override
+    else if (a.type === "set_description") {
+      entry.prev = { type: "set_description", id: a.id, value: DEMO.desc[a.id] || null };
+      if (a.value && (a.value.RU || a.value.ET || a.value.EN)) DEMO.desc[a.id] = a.value;
+      else delete DEMO.desc[a.id];
     }
     /* checkout-gaps: delivery prices and promo codes have no demo layer — they
        live on the server and nowhere else, so applying one is the server write
@@ -7858,6 +9846,24 @@
       DEMO.content = contentApply(contentConf(), a.value);
       S.contentDraft = null;
     }
+    /* wholesale/loyalty: settings.pricing has no demo layer either (same
+       reasoning as delivery prices above) — S.pricingLoaded IS the last
+       known server value, and mergePricing() turns either a full save from
+       the form or a partial assistant patch into the next one. */
+    else if (a.type === "set_pricing") {
+      entry.prev = { type: "set_pricing", value: cloneRules(S.pricingLoaded || normalisePricing(null)) };
+      S.pricingLoaded = mergePricing(S.pricingLoaded, a.value);
+      S.pricingDraft = null;
+    }
+    // a manual points credit/correction — nothing to keep "in sync" locally,
+    // just force whichever customer views are open to reload after the write
+    else if (a.type === "adjust_points") {
+      // integration: carry whichever identifier the action used (uuid or
+      // e-mail) so the undo's own srvPush() can PATCH the same customer
+      entry.prev = { type: "adjust_points", customerId: a.customerId, customerEmail: a.customerEmail, delta: -a.delta, note: "отмена начисления" };
+      S.admCustomers = null;
+      if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
+    }
     else return;
     DEMO.log.unshift(entry);
     DEMO.log = DEMO.log.slice(0, 40);
@@ -7870,6 +9876,7 @@
     if (!entry || !entry.prev) return;
     var a = entry.prev;
     if (a.type === "set_price") DEMO.price[a.id] = a.value;
+    else if (a.type === "set_pro_price") DEMO.proPrice[a.id] = a.value;
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
     else if (a.type === "set_seo") DEMO.seo[a.id] = { t: a.title, d: a.description };
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
@@ -7886,11 +9893,21 @@
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
     }
+    else if (a.type === "set_description") {   // assistant-work
+      if (a.value && (a.value.RU || a.value.ET || a.value.EN)) DEMO.desc[a.id] = a.value;
+      else delete DEMO.desc[a.id];
+    }
     // checkout-gaps
     else if (a.type === "set_shipping_rules") { setShipRules(a.rules); S.shipDraft = null; }
     else if (a.type === "toggle_promo") { S.admPromos = null; }
     // content: `whole` is the document as it was, null meaning «стандартный»
     else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }
+    // wholesale/loyalty
+    else if (a.type === "set_pricing") { S.pricingLoaded = mergePricing(S.pricingLoaded, a.value); S.pricingDraft = null; }
+    else if (a.type === "adjust_points") {
+      S.admCustomers = null;
+      if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
+    }
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -8058,7 +10075,7 @@
       return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + lineImageHTML(l) + "</span>" +
         '<span class="cline__mid"><span class="cline__nm">' + esc(lineTitle(l)) + lineLabel(l) + "</span>" +
         lineNoteHTML(l) +
-        '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше">−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
+        '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше"' + (l.qty <= 1 ? ' aria-disabled="true"' : "") + '>−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
         '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
         '<span class="num cline__pr" data-linepr>' + eur(lineUnit(l) * l.qty) + "</span></div>";
     }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
@@ -8334,7 +10351,7 @@
     if (d) setMetaProp("og:description", d);
   }
 
-  function render() {
+  function renderImpl() {
     var body;
     if (S.screen === "home") body = screenHome();
     else if (S.screen === "catalog") body = screenCatalog();
@@ -8414,6 +10431,11 @@
     }
     paintToast();
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
+    // inventory: the scanner lives outside bodySlot on purpose (module doc
+    // above scanMount()) — mount/unmount here, once per render(), rather than
+    // as part of the body string that just got replaced above.
+    if (S.scanOpen) { scanMount(); scanRenderPanel(); }
+    else if (SCANEL) { scanUnmount(); }
     document.body.dataset.screen = S.screen; // chat.js hides itself in the admin
     translatePage();
     setHead();
@@ -8435,6 +10457,29 @@
     if (S.screen === "checkout" && S.pointOpen && POINTS.view === "map") openPointMap();
   }
 
+  /* render() itself coalesces into at most one rebuild per animation frame.
+     The first call in any burst still runs renderImpl() synchronously — every
+     "render(); refocus(...)" call site in this file depends on the DOM
+     already being up to date the instant render() returns — but a second (or
+     third, …) call that lands before that frame is painted no longer tears
+     the screen down again immediately; it is folded into one trailing
+     catch-up render instead. Harmless on its own (most screens only ever
+     call render() once per user action), but it matters once several
+     independent async probes resolve close together — see the checkout
+     screen's patchDelivery/patchPayment/patchSummary below, which mostly
+     avoid calling render() at all now, and this is the backstop for
+     whatever still does. */
+  var renderQueued = false, renderPending = false;
+  function render() {
+    if (renderQueued) { renderPending = true; return; }
+    renderQueued = true;
+    renderImpl();
+    requestAnimationFrame(function () {
+      renderQueued = false;
+      if (renderPending) { renderPending = false; renderImpl(); }
+    });
+  }
+
   /* Size, colour, gallery and quantity clicks on the product page patch in
      place — a full render destroyed the focused button, so a keyboard user
      could not press «+» twice (the same bug the cart stepper had). */
@@ -8443,11 +10488,13 @@
     var p = byId(S.productId);
     var price = document.querySelector("[data-price]");
     if (!price) { render(); return; }
-    price.textContent = eur(sizePrice(p, S.size));
+    var pro = proPrice(p, S.size);
+    var unitPrice = pro != null ? pro : sizePrice(p, S.size);
+    price.textContent = eur(unitPrice);
     var qn = document.querySelector("[data-qtynum]");
     if (qn) qn.textContent = S.qty;
     var ss = document.querySelector("[data-stickysum]");
-    if (ss) ss.textContent = eur(sizePrice(p, S.size) * S.qty);
+    if (ss) ss.textContent = eur(unitPrice * S.qty);
     var g = gal(p);
     var stage = document.querySelector(".pdp__img");
     if (stage) stage.style.backgroundImage = "url('" + g[Math.min(S.gallery, g.length - 1)] + "')";
@@ -8481,6 +10528,11 @@
       if (!row) return;
       row.querySelector("[data-qtyval]").textContent = l.qty;
       row.querySelector("[data-linepr]").textContent = eur(sizePrice(byId(l.id), l.size || 0) * l.qty);
+      var minus = row.querySelector('[data-d="-1"]');
+      if (minus) {
+        if (l.qty <= 1) minus.setAttribute("aria-disabled", "true");
+        else minus.removeAttribute("aria-disabled");
+      }
     });
     var sum = cartSum(), thr = threshold();
     var fill = d.querySelector(".freebar__fill");
@@ -8545,6 +10597,45 @@
       if (err) err.innerHTML = shipMsg(key);
       else input.insertAdjacentHTML("afterend", '<div class="err" role="alert">' + shipMsg(key) + "</div>");
     } else if (err) err.remove();
+  }
+
+  /* The checkout screen's async probes — shipping rules, one loadPointsFor()
+     per carrier, the signed-in account lookup, payment methods, salon/pro
+     pricing — used to call the full render() the instant each one landed.
+     Every one of those is a background refresh nobody asked for by typing;
+     rebuilding the WHOLE screen for it tore out whatever field the shopper
+     had focused (the "UX fix 4" comment on render() covers the *previous*,
+     partial fix: put focus and the caret back afterwards — the field itself
+     was still a brand-new DOM node each time, which on a phone also drops
+     the keyboard). These three patch only the one container the data in
+     question actually belongs to, so a probe landing while the shopper is on
+     step 1 touches nothing at all: [data-co-delivery] and [data-co-payment]
+     do not even exist in the DOM until step 2 / step 3 is open, and none of
+     the three containers is ever the e-mail input itself or an ancestor of
+     the rest of the contact block. Each is a no-op — not a render()
+     fallback — when its container is not currently mounted; the state
+     (SHIP_RULES, POINTS, PAYMETHODS, S.pro, …) is already updated, so the
+     next real render (a step change, say) picks it up fresh regardless. */
+  function patchDelivery() {
+    if (S.screen !== "checkout") return;
+    var box = document.querySelector("[data-co-delivery]");
+    if (!box) return;
+    box.innerHTML = deliveryBlockHTML();
+    translateTree(box);
+  }
+  function patchPayment() {
+    if (S.screen !== "checkout") return;
+    var box = document.querySelector("[data-co-payment]");
+    if (!box) return;
+    box.innerHTML = paymentBlockHTML();
+    translateTree(box);
+  }
+  function patchSummary() {
+    if (S.screen !== "checkout") return;
+    var box = document.querySelector("[data-co-summary]");
+    if (!box) return;
+    box.innerHTML = summaryBlockHTML();
+    translateTree(box);
   }
 
   function patchCatalog() {
@@ -8886,7 +10977,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-statsrange]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanplus],[data-scanminus],[data-scangoodsin],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -8979,7 +11070,12 @@
     }
     if (d.line !== undefined) {
       var li = Number(d.line);
-      if (S.cart[li]) S.cart[li].qty = Math.max(1, Math.min(9, S.cart[li].qty + Number(d.d)));
+      var cln = S.cart[li];
+      if (!cln) return;
+      // «−» is disabled at qty 1 (aria-disabled in cartBody()) — removal is
+      // only ever through the explicit «Убрать» control, never the stepper.
+      if (Number(d.d) < 0 && cln.qty <= 1) return;
+      cln.qty = Math.max(1, Math.min(9, cln.qty + Number(d.d)));
       persist(); patchCart(); return;
     }
     if (d.remove !== undefined) {
@@ -9050,7 +11146,13 @@
     }
     if (d.statsrange) { S.statsRange = d.statsrange; render(); return; }   // analytics agent
     // demo orders are numbered, real ones carry a uuid — keep both as they came
-    if (d.admorder !== undefined) { S.adminOrder = d.admorder ? (/^\d+$/.test(d.admorder) ? Number(d.admorder) : d.admorder) : 0; S.adminTab = "orders"; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admorder !== undefined) {
+      S.adminOrder = d.admorder ? (/^\d+$/.test(d.admorder) ? Number(d.admorder) : d.admorder) : 0;
+      S.adminTab = "orders";
+      // assistant-work: a fresh order gets a fresh reply panel
+      S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+      window.scrollTo({ top: 0 }); render(); return;
+    }
     if (d.admlogin !== undefined) {
       var pwEl = document.querySelector("[data-admpw]");
       admLogin(pwEl ? pwEl.value.trim() : "");
@@ -9064,11 +11166,75 @@
       srvOrderPatch(S.adminOrder, { note: noteEl ? noteEl.value : "" });
       return;
     }
+    /* ---- assistant-work: «Ответить клиенту» — see orderDetailSrv() -------- */
+    if (d.admorderreply !== undefined) {
+      S.orderReplyOpen = !S.orderReplyOpen;
+      if (S.orderReplyOpen) srvLoadOrderMessages(S.adminOrder);
+      render(); return;
+    }
+    if (d.admordercompose !== undefined) {
+      // no render() while composing — see the goods-editor AI handlers'
+      // comment above; the pasted customer-message textarea must survive
+      if (t.disabled) return;
+      var ordRow = currentAdminOrderRow();
+      var custEl = document.querySelector("[data-ordercustmsg]");
+      var custMsg = custEl ? custEl.value.trim() : "";
+      if (!ordRow) return;
+      if (!custMsg) { toast("Вставьте сообщение клиента"); refocus("[data-ordercustmsg]"); return; }
+      var composeBtn = t, composeLabel = t.textContent; t.disabled = true; t.textContent = "…";
+      var ordr = ordRow.srv;
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "reply", lang: ordr.lang || "RU",
+        input: {
+          customerMessage: custMsg,
+          order: {
+            number: ordr.number, status: ordr.status, name: ordr.name,
+            items: (ordr.items || []).slice(0, 20).map(function (l) { return { title: l.title, qty: l.qty }; })
+          }
+        }
+      }).then(function (r) {
+        composeBtn.disabled = false; composeBtn.textContent = composeLabel;
+        if (r.status === 200 && r.body.ok && typeof r.body.text === "string") {
+          S.orderReplyDraft = r.body.text;
+          var draftEl0 = document.querySelector("[data-orderreplydraft]");
+          if (draftEl0) draftEl0.value = S.orderReplyDraft;
+          toast("Черновик готов — проверьте и сохраните");
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { composeBtn.disabled = false; composeBtn.textContent = composeLabel; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    if (d.admordersend !== undefined) {
+      if (t.disabled) return;
+      var ordRow2 = currentAdminOrderRow();
+      var draftEl = document.querySelector("[data-orderreplydraft]");
+      var custEl2 = document.querySelector("[data-ordercustmsg]");
+      var draft = draftEl ? draftEl.value.trim() : "";
+      if (!ordRow2 || !draft) return;
+      t.disabled = true;
+      apiSend("/api/admin/mail/send/", "POST", {
+        orderId: ordRow2.srv.id, reply: draft, customerMessage: custEl2 ? custEl2.value.trim() : ""
+      }).then(function (r) {
+        t.disabled = false;
+        if (r.status === 200 && r.body.ok) {
+          S.orderReplyDraft = "";
+          if (custEl2) custEl2.value = "";
+          S.orderMsgs = r.body.messages || null; S.orderMsgsFor = ordRow2.srv.id;
+          toast("Письмо отправлено ✓");
+        } else if (r.status === 401) { SRV.admin = false; }
+        else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
+        else toast("Не удалось отправить письмо");
+        render();
+      }).catch(function () { t.disabled = false; toast("Не удалось отправить письмо"); render(); });
+      return;
+    }
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; mediaProbe();   // media
+      AI_UNDO = null; AI_BUSY = "";   // assistant-work: a fresh product, a fresh undo snapshot
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admclose !== undefined) { S.adminEdit = ""; GAL.id = ""; render(); return; }
+    if (d.admclose !== undefined) { S.adminEdit = ""; GAL.id = ""; AI_UNDO = null; AI_BUSY = ""; render(); return; }
     /* ---- media: the «Фото» block ----------------------------------------
        Everything here edits the draft list only; «Сохранить» is what turns it
        into a set_gallery action, so «Отмена» really cancels. */
@@ -9123,23 +11289,88 @@
       });
       return;
     }
+    /* ---- assistant-work: goods-editor AI buttons --------------------------
+       Deliberately no render() anywhere in these four handlers: the editor
+       has several other unsaved fields (price, SEO, the other description
+       textareas) that a full re-render would reset to their last-saved
+       value, wiping whatever the owner was mid-typing. Every DOM change
+       here — the busy label, the filled-in text, the «Отменить» button — is
+       therefore a direct, targeted patch, same idiom as toast()/patchNav(). */
     if (d.admseogen !== undefined) {
       var sp2 = byId(d.admseogen);
-      var genBtn = t; genBtn.textContent = "…";
-      fetch("/api/assistant/", {
-        method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mode: "admin", lang: "RU", messages: [{ role: "user",
-          content: "Напиши SEO title и description для товара " + sp2.id + " (" + sp2.brand + " " + sp2.name + "). Верни action set_seo." }] })
-      }).then(function (r) { return r.json(); }).then(function (j) {
-        genBtn.textContent = "Сгенерировать с ИИ";
-        var a = j.action;
-        if (a && a.type === "set_seo") {
+      admDescSnapshot(sp2);
+      var genBtn = t, genLabel = t.textContent; t.disabled = true; t.textContent = "…";
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "seo", lang: "RU",
+        input: { kind: "product", name: sp2.name, brand: sp2.brand, category: CAT_NAMES[sp2.cat] || sp2.cat },
+      }).then(function (r) {
+        genBtn.disabled = false; genBtn.textContent = genLabel;
+        if (r.status === 200 && r.body.ok && r.body.text) {
           var ti = document.querySelector("[data-edseot]"), de = document.querySelector("[data-edseod]");
-          if (ti && a.title) ti.value = a.title;
-          if (de && a.description) de.value = a.description;
+          if (ti && r.body.text.title) ti.value = r.body.text.title;
+          if (de && r.body.text.description) de.value = r.body.text.description;
           toast("Черновик готов — проверьте и сохраните");
-        } else toast("Не получилось — попробуйте ещё раз");
-      }).catch(function () { genBtn.textContent = "Сгенерировать с ИИ"; toast("Не получилось — попробуйте ещё раз"); });
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { genBtn.disabled = false; genBtn.textContent = genLabel; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    if (d.admdescgen !== undefined) {
+      var dp = byId(d.admdescgen);
+      admDescSnapshot(dp);
+      var descBtn = t, descLabel = t.textContent; t.disabled = true; t.textContent = "…";
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "describe", lang: "RU",
+        input: { name: dp.name, brand: dp.brand, category: CAT_NAMES[dp.cat] || dp.cat, sizes: dp.sizes || [] },
+      }).then(function (r) {
+        descBtn.disabled = false; descBtn.textContent = descLabel;
+        if (r.status === 200 && r.body.ok && r.body.text) {
+          var ru = document.querySelector("[data-eddescru]");
+          var body = r.body.text.description || "";
+          var bullets = Array.isArray(r.body.text.bullets) ? r.body.text.bullets : [];
+          if (ru) ru.value = bullets.length ? body + "\n\n" + bullets.map(function (b) { return "• " + b; }).join("\n") : body;
+          toast("Черновик готов — проверьте и сохраните");
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { descBtn.disabled = false; descBtn.textContent = descLabel; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    if (d.admtranslate !== undefined) {
+      var tp = byId(d.admtranslate);
+      admDescSnapshot(tp);
+      var trBtn = t, trLabel = t.textContent;
+      var ruEl = document.querySelector("[data-eddescru]");
+      var srcText = (ruEl && ruEl.value.trim()) ||
+        stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[tp.id]) || (typeof CONTENT !== "undefined" && CONTENT[tp.id]) || "");
+      if (!srcText) { toast("Сначала напишите или сгенерируйте русское описание"); refocus("[data-eddescru]"); return; }
+      t.disabled = true; t.textContent = "…";
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "translate", lang: "RU",
+        input: { text: srcText, sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: [tp.brand, tp.name] },
+      }).then(function (r) {
+        trBtn.disabled = false; trBtn.textContent = trLabel;
+        if (r.status === 200 && r.body.ok && r.body.texts) {
+          var etEl = document.querySelector("[data-eddescet]"), enEl = document.querySelector("[data-eddescen]");
+          if (etEl && r.body.texts.ET) etEl.value = r.body.texts.ET;
+          if (enEl && r.body.texts.EN) enEl.value = r.body.texts.EN;
+          toast("Черновик готов — проверьте и сохраните");
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { trBtn.disabled = false; trBtn.textContent = trLabel; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    if (d.admdescundo !== undefined) {
+      if (!AI_UNDO) return;
+      var setv = function (sel, v) { var e = document.querySelector(sel); if (e) e.value = v || ""; };
+      setv("[data-eddescru]", AI_UNDO.descRU); setv("[data-eddescet]", AI_UNDO.descET); setv("[data-eddescen]", AI_UNDO.descEN);
+      setv("[data-edseot]", AI_UNDO.seoT); setv("[data-edseod]", AI_UNDO.seoD);
+      AI_UNDO = null;
+      var slot2 = document.querySelector("[data-descundoslot]");
+      if (slot2) slot2.innerHTML = "";
+      toast("Отменено ✓");
       return;
     }
     if (d.admsavegoods !== undefined) {
@@ -9150,6 +11381,20 @@
       var changed = false;
       if (!isNaN(np) && np >= 1 && np <= 500 && Math.abs(np - gp.price) > 0.001) {
         demoApply({ type: "set_price", id: gp.id, value: Math.round(np * 100) / 100 }); changed = true;
+      }
+      // wholesale/loyalty: salon/pro price — empty field clears the override
+      var priceProEl = document.querySelector("[data-edproprice]");
+      if (priceProEl) {
+        var rawPP = priceProEl.value.trim();
+        var curPP = gp.proPrice != null ? gp.proPrice : null;
+        if (!rawPP) {
+          if (curPP != null) { demoApply({ type: "set_pro_price", id: gp.id, value: null }); changed = true; }
+        } else {
+          var npp = parseFloat(rawPP.replace(",", "."));
+          if (!isNaN(npp) && npp >= 1 && npp <= 500 && (curPP == null || Math.abs(npp - curPP) > 0.001)) {
+            demoApply({ type: "set_pro_price", id: gp.id, value: Math.round(npp * 100) / 100 }); changed = true;
+          }
+        }
       }
       if (stockEl && stockEl.value !== gp.stock) {
         demoApply({ type: "set_stock", id: gp.id, value: stockEl.value }); changed = true;
@@ -9193,6 +11438,17 @@
         if (nv !== curV) { demoApply({ type: "set_video", id: gp.id, value: nv }); changed = true; }
       }
       /* ---- /features ------------------------------------------------------ */
+      /* ---- assistant-work: the trilingual description override ----------- */
+      var druEl = document.querySelector("[data-eddescru]"), detEl = document.querySelector("[data-eddescet]"), denEl = document.querySelector("[data-eddescen]");
+      if (druEl || detEl || denEl) {
+        var ndesc = { RU: druEl ? druEl.value.trim() : "", ET: detEl ? detEl.value.trim() : "", EN: denEl ? denEl.value.trim() : "" };
+        var curDesc = gp.descOv || {};
+        if (ndesc.RU !== (curDesc.RU || "") || ndesc.ET !== (curDesc.ET || "") || ndesc.EN !== (curDesc.EN || "")) {
+          demoApply({ type: "set_description", id: gp.id, value: ndesc }); changed = true;
+        }
+      }
+      /* ---- /assistant-work -------------------------------------------------- */
+      AI_UNDO = null;
       S.adminEdit = "";
       toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
       render(); return;
@@ -9203,6 +11459,12 @@
         // blog: posts skip the demo/undo layer entirely — straight to the
         // real admin API, same as the owner's own «Сохранить»/«Опубликовать»
         if (pa.type === "draft_post" || pa.type === "publish_post") applyBlogAction(pa);
+        // assistant-work: a report download is not a state change — nothing
+        // to demoApply/undo, just open the link the same click would follow
+        else if (pa.type === "export_report") { openReportLink(pa.month); toast("Отчёт скачивается ✓"); }
+        // inventory: real stock has no demo layer either — straight to
+        // POST /api/admin/inventory/moves/, same story as the blog posts above
+        else if (pa.type === "stock_adjust" || pa.type === "stock_set") applyStockAction(pa);
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
         render();
       }
@@ -9213,6 +11475,9 @@
       demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
       toast("Сохранено ✓"); render(); return;
     }
+    // assistant-work: «Отчёты» — the browser follows content-disposition:
+    // attachment and downloads it; nothing here needs a fetch/promise.
+    if (d.admreportdl !== undefined) { openReportLink(S.reportMonth, d.admreportdl); return; }
     if (d.mailtpl !== undefined) { keepMailTo(); S.mailTpl = d.mailtpl; render(); return; }
     if (d.maillang !== undefined) { keepMailTo(); S.mailLang = d.maillang; render(); return; }
     if (d.mailtest !== undefined) {
@@ -9350,6 +11615,108 @@
       demoApply({ type: "set_shipping_rules", rules: cloneRules(SHIP_RULES_DEFAULT), full: true });
       toast("Вернули значения по умолчанию ✓"); render(); return;
     }
+    if (d.admshipfill !== undefined) {
+      // partial merge (full:false) — Venipak, Unisend, EU and default stay whatever they were
+      demoApply({ type: "set_shipping_rules", rules: computeMontonioFillPatch(!!S.shipAllowLower), full: false });
+      toast("Тарифы Montonio применены ✓"); render(); return;
+    }
+    /* ---- wholesale/loyalty ------------------------------------------------ */
+    if (d.acctprosend !== undefined) { acctProSubmit(); return; }
+    if (d.admcusttier !== undefined) { S.admCustTier = d.admcusttier; render(); return; }
+    if (d.admcustopen) { S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
+    if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
+    if (d.admcustapprove) { approveCustomer(d.admcustapprove); return; }
+    if (d.admcustreject) { rejectCustomer(d.admcustreject); return; }
+    if (d.admcustdemote) { demoteCustomer(d.admcustdemote); return; }
+    if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
+    if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
+    if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
+    if (d.admpricingreset !== undefined) { S.pricingDraft = null; render(); return; }
+
+    /* ---------- inventory: «Склад» — row edit form, filters, ledger, the PWA hint ---------- */
+    if (d.stockedit !== undefined) {
+      S.stockEdit = d.stockedit;
+      if (d.stockedit) {
+        var stRow = stockFindRow(d.stockedit);
+        if (stRow) {
+          S.stockEditEan = stRow.ean || "";
+          S.stockEditLow = String(stRow.lowThreshold);
+          S.stockEditQty = "";
+          S.stockEditReason = "";
+        }
+      }
+      render(); return;
+    }
+    if (d.stocksave) { stockCommit(d.stocksave); return; }
+    if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; render(); return; }
+    if (d.stockmovesopen !== undefined) { S.stockMovesOpen = !!d.stockmovesopen; render(); return; }
+    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; S.stockMoves = null; render(); return; }
+    if (d.pwahintclose !== undefined) {
+      try { localStorage.setItem("rmp-pwa-hint-dismissed", "1"); } catch (e) {}
+      render(); return;
+    }
+
+    /* ---------- inventory: the scanner (camera-first — see scanMount()) ---------- */
+    if (d.scanopen !== undefined) { openScanner(); return; }
+    if (d.scanclose !== undefined) { closeScanner(); return; }
+    if (d.scantorch !== undefined) { setScanTorch(!S.scanTorchOn); return; }
+    if (d.scanmanualsubmit !== undefined) { submitManualScan(); return; }
+    if (d.scanplus !== undefined) {
+      if (S.scanHit && S.scanHit.product) {
+        stockMoveSend({ productId: S.scanHit.productId, variant: S.scanHit.variant, delta: 1, reason: "goods_in", ref: "сканер" }).then(function (ok) {
+          if (ok) { toast("Приход +1 ✓"); scanLookup(S.scanHit.code); } else toast("Не удалось сохранить");
+        });
+      }
+      return;
+    }
+    if (d.scanminus !== undefined) {
+      if (S.scanHit && S.scanHit.product) {
+        stockMoveSend({ productId: S.scanHit.productId, variant: S.scanHit.variant, delta: -1, reason: "sale_pos", ref: "сканер" }).then(function (ok) {
+          if (ok) { toast("Продажа −1 ✓"); scanLookup(S.scanHit.code); } else toast("Не удалось сохранить");
+        });
+      }
+      return;
+    }
+    if (d.scangoodsin !== undefined) {
+      var scanQtyEl = SCANEL && SCANEL.querySelector("#scanqtyinput");
+      var scanQty = Math.max(1, Math.trunc(Number(scanQtyEl ? scanQtyEl.value : 1)) || 1);
+      if (S.scanHit && S.scanHit.product) {
+        stockMoveSend({ productId: S.scanHit.productId, variant: S.scanHit.variant, delta: scanQty, reason: "goods_in", ref: "сканер" }).then(function (ok) {
+          if (ok) { toast("Приход +" + scanQty + " ✓"); scanLookup(S.scanHit.code); } else toast("Не удалось сохранить");
+        });
+      }
+      return;
+    }
+    if (d.scanassign) {
+      var assignP = byId(d.scanassign);
+      var assignSizes = assignP && assignP.sizes && assignP.sizes.length ? assignP.sizes : [];
+      if (assignSizes.length > 1) {
+        // inventory: more than one size — ask which before binding
+        S.scanAssignPick = d.scanassign;
+        var assignResEl = SCANEL && SCANEL.querySelector("#scanassignresults");
+        if (assignResEl) { assignResEl.innerHTML = scanAssignResultsHTML(); translateTree(assignResEl); }
+        return;
+      }
+      scanBindEan(d.scanassign, assignSizes.length ? assignSizes[0] : "");
+      return;
+    }
+    if (d.scanbindsize) {
+      if (S.scanAssignPick) scanBindEan(S.scanAssignPick, d.scanbindsize);
+      return;
+    }
+
+    /* ---------- inventory: «Продажа в салоне» ---------- */
+    if (d.posadd) { posAddProduct(d.posadd); return; }
+    if (d.posqty) {
+      var pq = d.posqty.split(":"), pqi = Number(pq[0]), pqd = Number(pq[1]);
+      var pqLine = S.posCart[pqi];
+      if (pqLine) { pqLine.qty = Math.max(1, Math.min(99, pqLine.qty + pqd)); render(); }
+      return;
+    }
+    if (d.posremove !== undefined) { S.posCart.splice(Number(d.posremove), 1); render(); return; }
+    if (d.pospayment) { S.posPayment = d.pospayment; render(); return; }
+    if (d.possend !== undefined) { posSend(); return; }
+    if (d.posnew !== undefined) { S.posDone = null; render(); return; }
     if (d.admpromonew !== undefined) {
       S.promoForm = blankPromo(); S.promoFormErr = ""; render(); refocus('[data-promof="code"]'); return;
     }
@@ -9475,6 +11842,75 @@
     if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
     if (d.admblogback !== undefined) { S.adminBlogEdit = null; render(); return; }
     if (d.admbloglang) { S.adminBlogLang = d.admbloglang; render(); return; }
+    /* ---- assistant-work: blog AI buttons ------------------------------------
+       Unlike the goods editor, a render() here is safe: the draft
+       (S.adminBlogEdit) is already the live source of truth for every field
+       (see the [data-blogf] input handler above), so filling it in and
+       re-rendering just shows what was written, the same as typing would. */
+    if (d.admblogoutline !== undefined) {
+      if (t.disabled) return;
+      var bdOut = S.adminBlogEdit;
+      if (!bdOut) return;
+      var topicEl = document.querySelector("[data-admblogtopic]");
+      var topic = topicEl ? topicEl.value.trim() : "";
+      if (!topic) { toast("Введите тему статьи"); refocus("[data-admblogtopic]"); return; }
+      var obtn = t, olabel = t.textContent; t.disabled = true; t.textContent = "…";
+      var bl = S.adminBlogLang || "RU";
+      apiSend("/api/admin/ai/text/", "POST", { task: "blog_outline", lang: bl, input: { topic: topic } }).then(function (r) {
+        obtn.disabled = false; obtn.textContent = olabel;
+        if (r.status === 200 && r.body.ok && r.body.text) {
+          var tx = r.body.text;
+          if (tx.title) bdOut.title[bl] = tx.title;
+          if (Array.isArray(tx.h2) && tx.h2.length) bdOut.body[bl] = tx.h2.map(function (h) { return "## " + h + "\n\n"; }).join("");
+          if (tx.meta && tx.meta.title) bdOut.seoTitle[bl] = tx.meta.title;
+          if (tx.meta && tx.meta.description) bdOut.seoDesc[bl] = tx.meta.description;
+          if (bl === "RU" && bdOut.slugAuto && tx.title) bdOut.slug = blogSlugify(tx.title);
+          toast("Черновик готов — проверьте и сохраните");
+          render();
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { obtn.disabled = false; obtn.textContent = olabel; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    if (d.admblogtranslate !== undefined) {
+      if (t.disabled) return;
+      var bdTr = S.adminBlogEdit;
+      if (!bdTr) return;
+      var srcLang = bdTr.title.RU ? "RU" : bdTr.title.ET ? "ET" : bdTr.title.EN ? "EN" : "";
+      if (!srcLang) { toast("Сначала напишите статью хотя бы на одном языке"); return; }
+      var targets = ["RU", "ET", "EN"].filter(function (l) { return l !== srcLang; });
+      var jobs = [
+        { field: "title", text: bdTr.title[srcLang] },
+        { field: "excerpt", text: bdTr.excerpt[srcLang] },
+        { field: "body", text: bdTr.body[srcLang] },
+      ].filter(function (j) { return j.text; });
+      var tbtn = t, tlabel = t.textContent; t.disabled = true; t.textContent = "…";
+      Promise.all(jobs.map(function (j) {
+        return apiSend("/api/admin/ai/text/", "POST", {
+          task: "translate", lang: srcLang,
+          input: { text: j.text, sourceLang: srcLang, targetLangs: targets },
+        }).then(function (r) { return { field: j.field, r: r }; });
+      })).then(function (results) {
+        tbtn.disabled = false; tbtn.textContent = tlabel;
+        var ok = false, authFail = false, limited2 = false;
+        results.forEach(function (res) {
+          if (res.r.status === 401) { authFail = true; return; }
+          if (res.r.body && res.r.body.error === "rate_limited") limited2 = true;
+          if (res.r.status === 200 && res.r.body.ok && res.r.body.texts) {
+            targets.forEach(function (l) {
+              var v = res.r.body.texts[l];
+              if (v) { bdTr[res.field][l] = v; ok = true; }
+            });
+          }
+        });
+        if (authFail) { SRV.admin = false; }
+        else if (ok) toast("Черновик готов — проверьте и сохраните");
+        else toast(limited2 ? "Слишком много запросов — попробуйте позже" : "Не получилось — попробуйте ещё раз");
+        render();
+      }).catch(function () { tbtn.disabled = false; tbtn.textContent = tlabel; toast("Не получилось — попробуйте ещё раз"); render(); });
+      return;
+    }
     if (d.admblogproductadd) {
       if (S.adminBlogEdit && S.adminBlogEdit.products.indexOf(d.admblogproductadd) < 0) {
         S.adminBlogEdit.products.push(d.admblogproductadd);
@@ -9534,6 +11970,21 @@
     else if (t.matches("[data-acctcode]")) { S.acctCode = t.value.replace(/\D/g, "").slice(0, 6); }
     else if (t.matches("[data-acctf]")) { S.acctForm[t.dataset.acctf] = t.value; S.acctSaved = false; }
     else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; S.acctSaved = false; }
+    /* ---- wholesale/loyalty ------------------------------------------------ */
+    else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
+    // the checkbox drives totals shown in several places on screen — unlike
+    // the plain text fields below, this one needs a real render()
+    else if (t.matches("[data-loyaltyredeem]")) { S.loyaltyRedeem = t.checked; render(); }
+    else if (t.matches("[data-pricingf]")) { setPricingDraftField(t.dataset.pricingf, t.value); }
+    else if (t.matches("[data-pricingtoggle]")) { pricingDraft().loyalty.enabled = t.checked; render(); }
+    else if (t.matches("[data-admcustq]")) {
+      S.admCustQ = t.value;
+      var custList = document.getElementById("admcustlist");
+      if (custList) { custList.innerHTML = admCustRowsHTML(); translateTree(custList); }
+    }
+    else if (t.matches("[data-admcustpoints]")) { S.admCustPoints = t.value; }
+    else if (t.matches("[data-admcustnote]")) { S.admCustNote = t.value; }
+    else if (t.matches("[data-admcustnotesf]")) { S.admCustNotesDraft = t.value; }
     else if (t.matches("[data-notifyf]")) { S.notifyEmail = t.value; }
     else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
     else if (t.matches("[data-shipf]")) { S.ship[t.dataset.shipf] = t.value; }
@@ -9563,6 +12014,29 @@
         translateTree(list);
       }
     }
+    /* ---- inventory: «Склад», «Продажа в салоне», the scanner's assign search — targeted patches, same reasoning as data-goodsq above ---- */
+    else if (t.matches("[data-stockq]")) {
+      S.stockQ = t.value;
+      var stockList = document.getElementById("stocklist");
+      if (stockList) { stockList.innerHTML = stockRows(); translateTree(stockList); }
+    }
+    else if (t.matches("[data-stockeaninput]")) { S.stockEditEan = t.value; }
+    else if (t.matches("[data-stocklowinput]")) { S.stockEditLow = t.value; }
+    else if (t.matches("[data-stockqtyinput]")) { S.stockEditQty = t.value; }
+    else if (t.matches("[data-stockreasoninput]")) { S.stockEditReason = t.value; }
+    else if (t.matches("[data-posq]")) {
+      S.posQ = t.value;
+      var posList = document.getElementById("poslist");
+      if (posList) { posList.innerHTML = posSearchResultsHTML(); translateTree(posList); }
+    }
+    else if (t.matches("[data-posemail]")) { S.posEmail = t.value; }
+    else if (t.matches("[data-posphone]")) { S.posPhone = t.value; }
+    else if (t.matches("[data-posdiscount]")) { S.posDiscount = t.value.replace(/[^\d]/g, "").slice(0, 2); }
+    else if (t.matches("[data-scanassignq]")) {
+      S.scanAssignQ = t.value;
+      var assignResults = SCANEL && SCANEL.querySelector("#scanassignresults");
+      if (assignResults) { assignResults.innerHTML = scanAssignResultsHTML(); translateTree(assignResults); }
+    }
     /* «Главный баннер»: a full render would take the caret out of the field,
        so only the live preview (or the picker list) is repainted. */
     else if (t.matches("[data-herof]")) {
@@ -9579,6 +12053,10 @@
        draft holds only values that parse; garbage is ignored and the field
        snaps back on the next render. */
     else if (t.matches("[data-shiprule]")) { setShipDraftField(t.dataset.shiprule, t.value); }
+    // integration: «Разрешить снижать текущие цены» — computeMontonioFillPatch()
+    // clamps at the current price unless this is checked, so it just needs to
+    // be readable when the fill button is clicked; no render() needed
+    else if (t.matches("[data-shipallowlower]")) { S.shipAllowLower = t.checked; }
     else if (t.matches("[data-promof]")) {
       if (!S.promoForm) return;
       var pf = t.dataset.promof;
@@ -9707,6 +12185,13 @@
       if (where === "hero") heroUpload(picked);
       else if (where === "blog") blogCoverUpload(picked);   // blog
       else galUpload(picked, byId(where));
+    }
+    // assistant-work: «Отчёты» — see reportsCard()
+    else if (t.matches("[data-admreportsmonth]")) {
+      S.reportMonth = t.value;
+      S.reportSummary = null;
+      srvLoadReportSummary(S.reportMonth);
+      render();
     }
   });
 

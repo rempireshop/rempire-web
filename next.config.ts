@@ -150,18 +150,29 @@ function csp(scriptSrc: string, frameAncestors = "'none'", connectExtra = ""): s
   ].join("; ");
 }
 
+/** Locked down everywhere by default — see SHOP2_PERMISSIONS_POLICY below for the one exception. */
+const DEFAULT_PERMISSIONS_POLICY =
+  "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), " +
+  "geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()";
+
+/**
+ * inventory: the admin's barcode scanner needs the camera — BarcodeDetector
+ * or the zxing fallback both read frames off a same-origin <video> fed by
+ * getUserMedia (public/shop2/app.js, scanMount()/startNativeEngine()). Same
+ * default-deny policy as everywhere else, with `camera=(self)` as the one
+ * opening: no third party, no cross-origin frame, gets it either. Every
+ * other permission — microphone, geolocation, usb, payment, … — stays
+ * denied under /shop2/* exactly like it is everywhere else.
+ */
+const SHOP2_PERMISSIONS_POLICY = DEFAULT_PERMISSIONS_POLICY.replace("camera=()", "camera=(self)");
+
 /** The headers every response carries, whatever the CSP on top of it. */
-function baseSecurityHeaders(frameOptions = "DENY") {
+function baseSecurityHeaders(frameOptions = "DENY", permissionsPolicy = DEFAULT_PERMISSIONS_POLICY) {
   return [
     { key: "X-Frame-Options", value: frameOptions },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-    {
-      key: "Permissions-Policy",
-      value:
-        "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), " +
-        "geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()",
-    },
+    { key: "Permissions-Policy", value: permissionsPolicy },
     /* One year, subdomains included. `preload` is deliberately absent: it is
        submitted once and is painful to undo, and the domain move is not done —
        see docs/accounts.md. Add it after the move, not before. */
@@ -244,14 +255,14 @@ const nextConfig: NextConfig = {
         source: "/shop2",
         headers: [
           { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
-          ...baseSecurityHeaders(),
+          ...baseSecurityHeaders("DENY", SHOP2_PERMISSIONS_POLICY),
         ],
       },
       {
         source: "/shop2/:path*",
         headers: [
           { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
-          ...baseSecurityHeaders(),
+          ...baseSecurityHeaders("DENY", SHOP2_PERMISSIONS_POLICY),
         ],
       },
       /* The one page the shop frames itself: «Письма» in the admin shows the

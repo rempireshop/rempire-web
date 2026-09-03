@@ -355,6 +355,102 @@ export async function fetchMontonioPickupPoints(
   return answered ? out : null;
 }
 
+/* ---------- rates (cost quote) -------------------------------------------- */
+
+/** One parcel's measurements for a rate quote — Montonio wants cm and kg. */
+export interface RateParcelItem {
+  length: number;
+  width: number;
+  height: number;
+  weight: number;
+  quantity?: number;
+}
+
+export interface MontonioRate {
+  carrier: string;
+  /** "pickupPoint" maps to our "parcel"; "courier" to our "courier". */
+  methodType: "pickupPoint" | "courier";
+  /** Montonio's own subtype code — parcelMachine/postOffice/parcelShop, or standard/standardB2B for a courier. */
+  subtype: string;
+  price: number;
+  currency: string;
+}
+
+/**
+ * `POST /shipping-methods/rates` — reference § "Calculate shipping costs",
+ * confirmed to exist 03.09.2026 (see docs/shipping.md § «Тарифы Montonio»).
+ * One call prices every carrier and method this store has active for a single
+ * destination country against one parcel shape; there is no per-carrier or
+ * per-method request. `null` — never a throw — when there are no keys or
+ * Montonio would not answer, exactly like the pickup-point reader, so a caller
+ * (src/lib/shipping/tariffs.ts) can fall back to the static table without a
+ * try/catch of its own.
+ */
+export async function fetchMontonioRates(
+  destination: string,
+  items: RateParcelItem[],
+): Promise<MontonioRate[] | null> {
+  const config = montonioShippingConfig();
+  if (!config) return null;
+  const cc = String(destination || "").toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc) || !items.length) return null;
+
+  try {
+    const body = await call<{
+      carriers?: Array<{
+        carrierCode?: string;
+        shippingMethods?: Array<{
+          type?: string;
+          subtypes?: Array<{ code?: string; rate?: string | number; currency?: string }>;
+        }>;
+      }>;
+    }>(config, "/shipping-methods/rates", {
+      method: "POST",
+      body: {
+        destination: cc,
+        parcels: [
+          {
+            items: items.map((i) => ({
+              length: i.length,
+              width: i.width,
+              height: i.height,
+              dimensionUnit: "cm",
+              weight: i.weight,
+              weightUnit: "kg",
+              quantity: i.quantity && i.quantity > 0 ? Math.round(i.quantity) : 1,
+            })),
+          },
+        ],
+      },
+    });
+
+    const out: MontonioRate[] = [];
+    for (const carrierRow of body.carriers ?? []) {
+      const carrier = str(carrierRow.carrierCode).toLowerCase();
+      if (!carrier) continue;
+      for (const method of carrierRow.shippingMethods ?? []) {
+        const methodType: "pickupPoint" | "courier" =
+          str(method.type) === "courier" ? "courier" : "pickupPoint";
+        for (const sub of method.subtypes ?? []) {
+          const price = Number(sub.rate);
+          if (!Number.isFinite(price) || price < 0) continue;
+          out.push({
+            carrier,
+            methodType,
+            subtype: str(sub.code) || "standard",
+            price: Math.round(price * 100) / 100,
+            currency: str(sub.currency) || "EUR",
+          });
+        }
+      }
+    }
+    return out;
+  } catch (err) {
+    console.error(`[montonio shipping] rates ${cc} failed —`, err);
+    return null;
+  }
+}
+
 /* ---------- merging with the public feeds -------------------------------- */
 
 /** A carrier-feed point in Montonio vocabulary, so the two lists can be one. */

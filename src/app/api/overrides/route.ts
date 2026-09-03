@@ -13,6 +13,8 @@
  */
 import { mergeContent } from "@/lib/content";
 import { getOverrides, getSettings } from "@/lib/orders";
+import { getDescriptionOverrides } from "@/lib/product-descriptions";
+import { cleanPricing, publicPricing } from "@/lib/loyalty";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,6 +27,10 @@ const DEFAULT_SETTINGS: Record<string, unknown> = {
   hero: null,
   flows: { abandoned: false, birthday: false, backstock: true },
   shipping: {},
+  // wholesale/loyalty: enabled + earn rate only, for the storefront's own
+  // copy («зарабатывайте баллы») — proDiscountPct never leaves the server
+  // this way, see publicPricing() in src/lib/loyalty.ts.
+  pricing: publicPricing(cleanPricing(null)),
 };
 
 /**
@@ -49,9 +55,36 @@ const PUBLIC_SETTINGS = [
   "content",
 ] as const;
 
+/** The pro (salon) price is commercial information: never on the public feed.
+    Signed-in partners get their prices from /api/account/pricing instead. */
+function publicOverrides<T extends Record<string, unknown>>(all: Record<string, T>): Record<string, Omit<T, "proPrice">> {
+  const out: Record<string, Omit<T, "proPrice">> = {};
+  for (const [id, o] of Object.entries(all)) {
+    const { proPrice: _pro, ...rest } = o as T & { proPrice?: unknown };
+    void _pro;
+    out[id] = rest as Omit<T, "proPrice">;
+  }
+  return out;
+}
+
 export async function GET() {
   try {
-    const [overrides, stored] = await Promise.all([getOverrides(), getSettings()]);
+    const [overrides, descriptions, stored] = await Promise.all([
+      getOverrides(),
+      getDescriptionOverrides(),
+      getSettings(),
+    ]);
+    /* assistant-work: product_overrides.description {RU,ET,EN} — its own
+       column (src/lib/product-descriptions.ts), merged in here rather than
+       added to getOverrides() itself, which is owned by backend-core
+       (docs/build-contracts.md). Absent for a product = no override, the
+       storefront keeps the static content.ru.js/content.et.js/content.js text. */
+    for (const [id, description] of Object.entries(descriptions)) {
+      Object.assign(overrides[id] ??= {
+        price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
+        varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null,
+      }, { description });
+    }
     const published = Object.fromEntries(
       Object.entries(stored).filter(([k]) => (PUBLIC_SETTINGS as readonly string[]).includes(k)),
     );
@@ -59,8 +92,13 @@ export async function GET() {
        spread would let a half-written row erase the company name, so it is
        merged onto the defaults (and sanitised on the way) instead. */
     const content = mergeContent(published.content);
+    /* wholesale/loyalty: "pricing" is deliberately NOT in PUBLIC_SETTINGS —
+       proDiscountPct/proMinOrder must never reach an anonymous shopper. This
+       recomputes the redacted subset straight from the real settings row,
+       after the generic `published` spread, so it always wins. */
+    const pricing = publicPricing(cleanPricing(stored.pricing));
     return Response.json(
-      { ok: true, overrides, settings: { ...DEFAULT_SETTINGS, ...published, content } },
+      { ok: true, overrides: publicOverrides(overrides), settings: { ...DEFAULT_SETTINGS, ...published, content, pricing } },
       { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
     );
   } catch (err) {

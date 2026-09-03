@@ -141,17 +141,17 @@ describe("createOrder", () => {
     const abroad = await createOrder(order({ items: [{ id: plain.id, qty: 1 }], shipping: { method: "courier", country: "LV" } }));
     const pickup = await createOrder(order({ items: [{ id: plain.id, qty: 1 }], shipping: { method: "pickup", country: "EE" } }));
     const free = await createOrder(order({ items: [{ id: plain.id, qty: 3 }], shipping: { method: "parcel", country: "EE" } }));
-    expect(cheap.shippingPrice).toBe(3.49);
-    expect(courier.shippingPrice).toBe(5.99);
+    expect(cheap.shippingPrice).toBe(5.47);
+    expect(courier.shippingPrice).toBe(10.84);
     expect(abroad.shippingPrice).toBe(9.9);
     expect(pickup.shippingPrice).toBe(0);
     expect(free.subtotal).toBeGreaterThanOrEqual(59);
     expect(free.shippingPrice).toBe(0);
   });
 
-  it("has a fallback table for when src/lib/shipping.ts is unavailable", () => {
-    expect(fallbackShipping("EE", "parcel", 10)).toBe(3.49);
-    expect(fallbackShipping("EE", "courier", 10)).toBe(5.99);
+  it("has a fallback table for when src/lib/shipping.ts is unavailable, mirroring DEFAULT_SHIPPING_RULES", () => {
+    expect(fallbackShipping("EE", "parcel", 10)).toBe(5.47);
+    expect(fallbackShipping("EE", "courier", 10)).toBe(10.84);
     expect(fallbackShipping("LV", "courier", 10)).toBe(9.9);
     expect(fallbackShipping("EE", "pickup", 10)).toBe(0);
     expect(fallbackShipping("EE", "parcel", 59)).toBe(0);

@@ -1,0 +1,662 @@
+import { query, withTx } from "@/lib/db";
+import { normalizeEmail } from "@/lib/customers";
+
+/**
+ * Wholesale (salon/pro) pricing and the loyalty points programme.
+ *
+ * Storage: db/migrations/100_tiers_loyalty.sql — customers.tier/company/
+ * reg_code/pro_requested_at/pro_approved_at/notes, product_overrides.pro_price,
+ * orders.customer_id/pricing_tier/loyalty_discount, and loyalty_ledger.
+ *
+ * Two independent things live in one file because they share the same
+ * customer row and the same settings key (`pricing`):
+ *
+ *   pro pricing   a flat discount off the whole catalogue, or a per-product
+ *     override, for customers the owner has approved as a salon/pro account.
+ *     Quoted in src/lib/orders.ts priceItems()/createOrder(), never trusted
+ *     from the browser — see docs/loyalty.md.
+ *   loyalty points  every paid order from a signed-in customer earns points
+ *     (earnPct of the goods subtotal, rounded to whole euro); points redeem
+ *     1-for-1 as euro off a later order. loyalty_ledger is the only source of
+ *     truth for a balance — sum(delta), never a running column that could
+ *     drift from its own history.
+ *
+ * Who calls what
+ *   · getPricingSettings() / cleanPricing()      — settings.pricing, read and
+ *     validated. Called from priceItems()/createOrder(), from the account and
+ *     admin routes, and from the public /api/overrides (redacted — see
+ *     publicPricing()).
+ *   · customerTier(id), proUnitPrice(...)        — the pro-pricing maths.
+ *   · quoteLoyaltyRedeem(...)                    — read-only, from
+ *     createOrder(): what this basket could redeem right now. Nothing is
+ *     spent here, exactly like applyGiftCard()/quotePromo().
+ *   · earnLoyaltyPoints(...) / redeemLoyaltyPoints(...) — from
+ *     src/lib/payments/apply.ts, on the single transition into `paid`. Both
+ *     are idempotent per order (the return route and the webhook race by
+ *     design, same as the gift-card redeem and the promo consume).
+ *   · adjustLoyaltyPoints(...)                   — the admin/assistant
+ *     `adjust_points` action.
+ *   · listCustomersAdmin/getCustomerAdmin/approveProCustomer/… — the admin
+ *     «Клиенты» tab.
+ */
+
+/* ---------- pricing settings ---------------------------------------------- */
+
+export interface LoyaltySettings {
+  enabled: boolean;
+  /** Per cent of the paid goods subtotal credited as points. */
+  earnPct: number;
+  /** The most a basket may redeem, as a per cent of its own goods subtotal. */
+  redeemMaxPct: number;
+  /** Balance (in points/euro) a customer needs before redeeming is offered. */
+  minRedeem: number;
+}
+
+export interface PricingSettings {
+  proDiscountPct: number;
+  /** Goods subtotal (retail prices) a basket needs before pro pricing applies. 0 = always. */
+  proMinOrder: number;
+  loyalty: LoyaltySettings;
+}
+
+export const DEFAULT_LOYALTY: LoyaltySettings = { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 };
+export const DEFAULT_PRICING: PricingSettings = { proDiscountPct: 20, proMinOrder: 0, loyalty: DEFAULT_LOYALTY };
+
+/**
+ * Bounds for every number in `settings.pricing`. Mirrored — not imported —
+ * into src/app/api/assistant/actions.ts, which stays free of database
+ * imports on purpose (the same reasoning as PROMO_MAX_* there); tests/
+ * loyalty.test.ts checks the two copies agree.
+ */
+export const PRICING_BOUNDS = {
+  proDiscountPct: [0, 90] as const,
+  proMinOrder: [0, 100_000] as const,
+  earnPct: [0, 50] as const,
+  redeemMaxPct: [0, 100] as const,
+  minRedeem: [0, 10_000] as const,
+};
+
+function num(v: unknown, fallback = 0): number {
+  const n = typeof v === "number" ? v : parseFloat(String(v));
+  return Number.isFinite(n) ? n : fallback;
+}
+function clamp(n: number, bounds: readonly [number, number]): number {
+  return Math.min(bounds[1], Math.max(bounds[0], n));
+}
+function money(n: number): number {
+  return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+}
+
+function cleanLoyalty(raw: unknown): LoyaltySettings {
+  const x = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  return {
+    enabled: "enabled" in x ? x.enabled !== false : DEFAULT_LOYALTY.enabled,
+    earnPct: clamp(num(x.earnPct, DEFAULT_LOYALTY.earnPct), PRICING_BOUNDS.earnPct),
+    redeemMaxPct: clamp(num(x.redeemMaxPct, DEFAULT_LOYALTY.redeemMaxPct), PRICING_BOUNDS.redeemMaxPct),
+    minRedeem: clamp(num(x.minRedeem, DEFAULT_LOYALTY.minRedeem), PRICING_BOUNDS.minRedeem),
+  };
+}
+
+/** Fills in anything missing or malformed — a half-written settings row is never a crash. */
+export function cleanPricing(raw: unknown): PricingSettings {
+  const x = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  return {
+    proDiscountPct: clamp(num(x.proDiscountPct, DEFAULT_PRICING.proDiscountPct), PRICING_BOUNDS.proDiscountPct),
+    proMinOrder: money(clamp(num(x.proMinOrder, DEFAULT_PRICING.proMinOrder), PRICING_BOUNDS.proMinOrder)),
+    loyalty: cleanLoyalty(x.loyalty),
+  };
+}
+
+/**
+ * Reads `settings.pricing` directly (one row, not the whole settings table —
+ * getSettings() in src/lib/orders.ts would work too, but this file
+ * deliberately never imports orders.ts: orders.ts imports THIS file for the
+ * pricing maths, and a two-way import is worth avoiding even though Node
+ * would tolerate it).
+ */
+export async function getPricingSettings(): Promise<PricingSettings> {
+  const rows = await query<{ value: unknown }>("select value from settings where key = 'pricing'", []);
+  return cleanPricing(rows.length ? rows[0].value : null);
+}
+
+/** The subset the anonymous storefront may see — never the pro discount (docs/loyalty.md). */
+export function publicPricing(p: PricingSettings): { loyalty: { enabled: boolean; earnPct: number } } {
+  return { loyalty: { enabled: p.loyalty.enabled, earnPct: p.loyalty.earnPct } };
+}
+
+/* ---------- pro pricing: the maths ----------------------------------------- */
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** 'retail' | 'pro' for an existing customer id, null when there is no such row. */
+export async function customerTier(customerId: string): Promise<"retail" | "pro" | null> {
+  if (!UUID_RE.test(customerId)) return null;
+  const rows = await query<{ tier: string | null }>("select tier from customers where id = $1", [customerId]);
+  if (!rows.length) return null;
+  return rows[0].tier === "pro" ? "pro" : "retail";
+}
+
+/**
+ * The price a pro customer pays for one unit.
+ *
+ * Mirrors the retail-override rule in priceItems() exactly: a pro_price
+ * override replaces the BASE price and the variant keeps its own premium over
+ * that base, so a cheaper 75 ml pro price does not silently hand away the
+ * markup on the 500 ml too. `baseRetail`/`unitRetail` are what this same line
+ * would have charged at retail (already carrying any override/size premium);
+ * for a product with no variant they are equal, and `unitRetail - baseRetail`
+ * is simply 0.
+ */
+export function proUnitPrice(
+  baseRetail: number,
+  unitRetail: number,
+  proPriceOverride: number | null | undefined,
+  proDiscountPct: number,
+): number {
+  const premium = unitRetail - baseRetail;
+  const proBase =
+    proPriceOverride != null && Number.isFinite(proPriceOverride)
+      ? proPriceOverride
+      : baseRetail * (1 - proDiscountPct / 100);
+  return money(Math.max(0, proBase + premium));
+}
+
+/* ---------- points ----------------------------------------------------------
+   One point = one euro, rounded. Earning 5 % on a 118.40 € goods subtotal
+   credits round(118.40 * 0.05) = round(5.92) = 6 points; redeeming 6 points
+   takes 6.00 € off a later order. Whole numbers only — nobody needs to do
+   fractional-point arithmetic in their head, least of all Renat. */
+
+/** `points = round(cents / 100)` — a euro amount to a whole-point count. */
+export function eurosToPoints(euros: number): number {
+  const cents = Math.round((Number(euros) || 0) * 100);
+  return Math.round(cents / 100);
+}
+
+export interface LedgerEntry {
+  id: number;
+  at: string;
+  delta: number;
+  reason: "earn" | "redeem" | "adjust" | "expire";
+  orderId: string | null;
+  note: string | null;
+}
+
+interface LedgerDbRow {
+  id: number | string;
+  at: string | Date;
+  delta: number | string;
+  reason: string;
+  order_id: string | null;
+  note: string | null;
+}
+
+function toEntry(r: LedgerDbRow): LedgerEntry {
+  return {
+    id: Number(r.id),
+    at: new Date(r.at as string).toISOString(),
+    delta: Math.trunc(num(r.delta)),
+    reason: (["earn", "redeem", "adjust", "expire"].includes(r.reason) ? r.reason : "adjust") as LedgerEntry["reason"],
+    orderId: r.order_id,
+    note: r.note,
+  };
+}
+
+export async function getLoyaltyBalance(customerId: string): Promise<number> {
+  if (!UUID_RE.test(customerId)) return 0;
+  const rows = await query<{ sum: string | number | null }>(
+    "select coalesce(sum(delta), 0) as sum from loyalty_ledger where customer_id = $1",
+    [customerId],
+  );
+  return Math.trunc(num(rows[0]?.sum, 0));
+}
+
+export async function getLoyaltyHistory(customerId: string, limit = 20): Promise<LedgerEntry[]> {
+  if (!UUID_RE.test(customerId)) return [];
+  const rows = await query<LedgerDbRow>(
+    `select id, at, delta, reason, order_id, note from loyalty_ledger
+     where customer_id = $1 order by at desc, id desc limit $2`,
+    [customerId, Math.min(Math.max(Math.trunc(Number(limit)) || 20, 1), 100)],
+  );
+  return rows.map(toEntry);
+}
+
+/** True unique-constraint violation (Postgres/PGlite error code 23505). */
+function isUniqueViolation(err: unknown): boolean {
+  return !!err && typeof err === "object" && (err as { code?: unknown }).code === "23505";
+}
+
+export interface LedgerWrite {
+  ok: boolean;
+  /** This order had already posted this reason — a webhook retry, not a new line. */
+  already?: boolean;
+  points?: number;
+  error?: string;
+}
+
+/**
+ * Credit points for a paid order: earnPct of `paidSubtotalExclShipping`
+ * (the goods subtotal — orders.subtotal already excludes shipping). Only
+ * ever called with a customerId, so "no account" is never a case here —
+ * src/lib/payments/apply.ts skips the call entirely for a guest order.
+ *
+ * Idempotent: the select-then-insert runs inside one transaction, and the
+ * partial unique index loyalty_ledger_earn_once_idx is the backstop if two
+ * transactions ever raced past the select (the return route and the webhook
+ * race by design) — a unique-violation on the insert is treated as
+ * "already posted", not an error.
+ */
+export async function earnLoyaltyPoints(
+  customerId: string,
+  orderId: string,
+  paidSubtotalExclShipping: number,
+): Promise<LedgerWrite> {
+  if (!UUID_RE.test(customerId)) return { ok: false, error: "bad_customer" };
+  const pricing = await getPricingSettings();
+  if (!pricing.loyalty.enabled) return { ok: true, points: 0 };
+  const points = eurosToPoints((Math.max(0, num(paidSubtotalExclShipping)) * pricing.loyalty.earnPct) / 100);
+  if (!(points > 0)) return { ok: true, points: 0 };
+
+  try {
+    return await withTx(async (q) => {
+      const seen = await q<{ id: number }>(
+        "select id from loyalty_ledger where order_id = $1 and reason = 'earn'",
+        [orderId],
+      );
+      if (seen.length) return { ok: true, already: true, points };
+      await q(
+        `insert into loyalty_ledger (customer_id, delta, reason, order_id, note)
+         values ($1, $2, 'earn', $3, $4)`,
+        [customerId, points, orderId, `${pricing.loyalty.earnPct}% от суммы заказа`],
+      );
+      return { ok: true, points };
+    });
+  } catch (err) {
+    if (isUniqueViolation(err)) return { ok: true, already: true, points };
+    throw err;
+  }
+}
+
+export interface RedeemResult extends LedgerWrite {
+  /** How many points were actually taken — may be less than asked (see below). */
+  taken: number;
+}
+
+/**
+ * Spend up to `points` off this customer's balance, for `orderId`.
+ *
+ * Quoted at checkout (quoteLoyaltyRedeem, baked into orders.loyalty_discount)
+ * and spent here, on the single transition into `paid` — the same shape as
+ * the gift-card redeem and the promo consume just above in apply.ts. If the
+ * balance has shrunk since the quote (another order redeemed some in
+ * between — rare, and the only way it can happen at all) only what remains
+ * is taken: the customer has already been charged the discounted total, so
+ * asking for more is not an option — this is the same "money arrived, settle
+ * the difference by hand" reasoning docs/backend.md gives for a gift card
+ * that emptied between checkout and payment. `ok:false` only when literally
+ * nothing could be taken.
+ */
+export async function redeemLoyaltyPoints(
+  customerId: string,
+  orderId: string,
+  points: number,
+  note = "",
+): Promise<RedeemResult> {
+  if (!UUID_RE.test(customerId)) return { ok: false, error: "bad_customer", taken: 0 };
+  const want = Math.max(0, Math.trunc(Number(points) || 0));
+  if (!(want > 0)) return { ok: true, taken: 0 };
+
+  try {
+    return await withTx(async (q) => {
+      const seen = await q<{ id: number }>(
+        "select id from loyalty_ledger where order_id = $1 and reason = 'redeem'",
+        [orderId],
+      );
+      if (seen.length) return { ok: true, already: true, taken: want };
+
+      const balRows = await q<{ sum: string | number | null }>(
+        "select coalesce(sum(delta), 0) as sum from loyalty_ledger where customer_id = $1",
+        [customerId],
+      );
+      const balance = Math.trunc(num(balRows[0]?.sum, 0));
+      const take = Math.min(want, Math.max(0, balance));
+      if (!(take > 0)) return { ok: false, error: "insufficient", taken: 0 };
+
+      await q(
+        `insert into loyalty_ledger (customer_id, delta, reason, order_id, note)
+         values ($1, $2, 'redeem', $3, $4)`,
+        [customerId, -take, orderId, note || null],
+      );
+      return { ok: true, taken: take };
+    });
+  } catch (err) {
+    if (isUniqueViolation(err)) return { ok: true, already: true, taken: want };
+    throw err;
+  }
+}
+
+/** Admin/assistant `adjust_points` — a manual credit or correction, no order attached. */
+export async function adjustLoyaltyPoints(
+  customerId: string,
+  delta: number,
+  note = "",
+): Promise<LedgerWrite> {
+  if (!UUID_RE.test(customerId)) return { ok: false, error: "bad_customer" };
+  const d = Math.trunc(Number(delta) || 0);
+  if (!d) return { ok: false, error: "bad_delta" };
+  await query(
+    "insert into loyalty_ledger (customer_id, delta, reason, note) values ($1, $2, 'adjust', $3)",
+    [customerId, d, note ? note.slice(0, 300) : null],
+  );
+  return { ok: true, points: d };
+}
+
+/* ---------- checkout: what a basket could redeem right now ----------------- */
+
+export interface LoyaltyQuote {
+  enabled: boolean;
+  balance: number;
+  minRedeem: number;
+  /** The most this basket could redeem right now — capped by the balance AND redeemMaxPct of its own subtotal. */
+  maxRedeemable: number;
+}
+
+export async function quoteLoyaltyRedeem(
+  customerId: string,
+  subtotal: number,
+  settings: LoyaltySettings,
+): Promise<LoyaltyQuote> {
+  const balance = await getLoyaltyBalance(customerId);
+  const capFromSubtotal = eurosToPoints((Math.max(0, num(subtotal)) * settings.redeemMaxPct) / 100);
+  const maxRedeemable = Math.max(0, Math.min(balance, capFromSubtotal));
+  return { enabled: settings.enabled, balance, minRedeem: settings.minRedeem, maxRedeemable };
+}
+
+export interface AccountLoyalty {
+  balance: number;
+  history: LedgerEntry[];
+  settings: { enabled: boolean; earnPct: number; redeemMaxPct: number; minRedeem: number };
+}
+
+/**
+ * The account screen's / checkout's own loyalty block: balance, the last 30
+ * ledger lines, and the rates this shopper is told about. Shared by
+ * GET /api/account/me and POST /api/account/login so both answer the same
+ * shape — `acctVerify()` in app.js applies a login response exactly like a
+ * profile fetch, and must not lose the balance until the next reload.
+ * `customerId` null (no row yet) is an empty, well-formed answer, not an error.
+ */
+export async function accountLoyaltySummary(customerId: string | null): Promise<AccountLoyalty> {
+  const settings = await getPricingSettings();
+  const [balance, history] = customerId
+    ? await Promise.all([getLoyaltyBalance(customerId), getLoyaltyHistory(customerId, 30)])
+    : [0, [] as LedgerEntry[]];
+  return {
+    balance,
+    history,
+    settings: {
+      enabled: settings.loyalty.enabled,
+      earnPct: settings.loyalty.earnPct,
+      redeemMaxPct: settings.loyalty.redeemMaxPct,
+      minRedeem: settings.loyalty.minRedeem,
+    },
+  };
+}
+
+/* ---------- pro requests: the customer's side ------------------------------- */
+
+function text(v: unknown, max: number): string | null {
+  if (typeof v !== "string") return null;
+  const s = v
+    .replace(/\p{Cc}+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max)
+    .trim();
+  return s || null;
+}
+
+export interface ProRequestInput {
+  company: unknown;
+  regCode: unknown;
+  phone: unknown;
+}
+
+/**
+ * «Стать партнёром (салон/мастер)». Stores the request and stamps
+ * pro_requested_at; the tier itself only changes when the owner approves it
+ * in «Клиенты». A customer already pro, or one who has not verified an
+ * e-mail yet (no row), gets nothing written.
+ */
+export async function requestProTier(
+  email: string,
+  input: ProRequestInput,
+): Promise<{ ok: boolean; error?: string }> {
+  const company = text(input.company, 160);
+  const regCode = text(input.regCode, 40);
+  if (!company || !regCode) return { ok: false, error: "bad_company" };
+  const phone = text(input.phone, 40);
+  const rows = await query<{ id: string }>(
+    `update customers set company = $2, reg_code = $3, phone = coalesce($4, phone), pro_requested_at = now()
+     where email = $1 and tier <> 'pro'
+     returning id`,
+    [normalizeEmail(email), company, regCode, phone],
+  );
+  return { ok: rows.length > 0, error: rows.length ? undefined : "not_found" };
+}
+
+/* ---------- admin: «Клиенты» ------------------------------------------------ */
+
+export interface AdminCustomerRow {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  tier: "retail" | "pro";
+  company: string | null;
+  regCode: string | null;
+  notes: string | null;
+  proRequestedAt: string | null;
+  proApprovedAt: string | null;
+  createdAt: string | null;
+  lastLoginAt: string | null;
+  ordersCount: number;
+  revenue: number;
+  pointsBalance: number;
+}
+
+interface AdminCustomerDbRow {
+  id: string;
+  email: string;
+  name: string | null;
+  phone: string | null;
+  tier: string;
+  company: string | null;
+  reg_code: string | null;
+  notes: string | null;
+  pro_requested_at: string | Date | null;
+  pro_approved_at: string | Date | null;
+  created_at: string | Date | null;
+  last_login_at: string | Date | null;
+  orders_count: string | number | null;
+  revenue: string | number | null;
+  points_balance: string | number | null;
+}
+
+function isoOrNull(v: unknown): string | null {
+  if (v == null) return null;
+  const d = new Date(v as string);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
+  return {
+    id: String(r.id),
+    email: r.email,
+    name: r.name ?? "",
+    phone: r.phone ?? "",
+    tier: r.tier === "pro" ? "pro" : "retail",
+    company: r.company,
+    regCode: r.reg_code,
+    notes: r.notes,
+    proRequestedAt: isoOrNull(r.pro_requested_at),
+    proApprovedAt: isoOrNull(r.pro_approved_at),
+    createdAt: isoOrNull(r.created_at),
+    lastLoginAt: isoOrNull(r.last_login_at),
+    ordersCount: Math.trunc(num(r.orders_count)),
+    revenue: money(num(r.revenue)),
+    pointsBalance: Math.trunc(num(r.points_balance)),
+  };
+}
+
+/* orders placed as a guest (customer_id null) or later cancelled do not count
+   toward "ordersCount"/"revenue" on a customer card — a cancelled order is
+   not revenue, and a guest order belongs to nobody's account. */
+const CUSTOMER_COLS = `
+  c.id, c.email, c.name, c.phone, c.tier, c.company, c.reg_code, c.notes,
+  c.pro_requested_at, c.pro_approved_at, c.created_at, c.last_login_at,
+  coalesce(agg.orders_count, 0) as orders_count,
+  coalesce(agg.revenue, 0) as revenue,
+  coalesce(led.points_balance, 0) as points_balance`;
+const CUSTOMER_JOIN = `
+  from customers c
+  left join (
+    select customer_id, count(*) as orders_count, sum(total) as revenue
+    from orders where customer_id is not null and status <> 'cancelled'
+    group by customer_id
+  ) agg on agg.customer_id = c.id
+  left join (
+    select customer_id, sum(delta) as points_balance
+    from loyalty_ledger group by customer_id
+  ) led on led.customer_id = c.id`;
+
+export interface AdminCustomerFilter {
+  q?: string;
+  /** "" = everyone, "pending" = asked for pro and not yet decided. */
+  tier?: "retail" | "pro" | "pending" | "";
+  limit?: number;
+}
+
+export async function listCustomersAdmin(filter: AdminCustomerFilter = {}): Promise<AdminCustomerRow[]> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  const q = String(filter.q ?? "").trim().slice(0, 100).toLowerCase();
+  if (q) {
+    params.push(`%${q}%`);
+    const i = params.length;
+    where.push(
+      `(lower(c.email) like $${i} or lower(coalesce(c.name,'')) like $${i} or lower(coalesce(c.phone,'')) like $${i} or lower(coalesce(c.company,'')) like $${i})`,
+    );
+  }
+  if (filter.tier === "pro" || filter.tier === "retail") {
+    params.push(filter.tier);
+    where.push(`c.tier = $${params.length}`);
+  } else if (filter.tier === "pending") {
+    where.push(`c.pro_requested_at is not null and c.tier = 'retail'`);
+  }
+  params.push(Math.min(Math.max(Math.trunc(Number(filter.limit)) || 200, 1), 1000));
+  const rows = await query<AdminCustomerDbRow>(
+    `select ${CUSTOMER_COLS} ${CUSTOMER_JOIN}
+     ${where.length ? `where ${where.join(" and ")}` : ""}
+     order by c.created_at desc nulls last limit $${params.length}`,
+    params,
+  );
+  return rows.map(toAdminCustomer);
+}
+
+export async function getCustomerAdmin(id: string): Promise<AdminCustomerRow | null> {
+  if (!UUID_RE.test(id)) return null;
+  const rows = await query<AdminCustomerDbRow>(`select ${CUSTOMER_COLS} ${CUSTOMER_JOIN} where c.id = $1`, [id]);
+  return rows.length ? toAdminCustomer(rows[0]) : null;
+}
+
+/**
+ * Same shape as getCustomerAdmin, keyed by e-mail instead of a uuid — lets an
+ * admin caller (the assistant's adjust_points action, docs/loyalty.md) name a
+ * customer by the one identifier a human/model can actually type. The
+ * customers/[id] route resolves through this when its id segment is not a
+ * uuid, then uses the resolved row's real id for every write that follows.
+ */
+export async function getCustomerAdminByEmail(email: string): Promise<AdminCustomerRow | null> {
+  const e = normalizeEmail(email);
+  if (!e) return null;
+  const rows = await query<AdminCustomerDbRow>(`select ${CUSTOMER_COLS} ${CUSTOMER_JOIN} where lower(c.email) = $1`, [e]);
+  return rows.length ? toAdminCustomer(rows[0]) : null;
+}
+
+/** «Одобрить» — flips the tier and stamps when. */
+export async function approveProCustomer(id: string): Promise<AdminCustomerRow | null> {
+  if (!UUID_RE.test(id)) return null;
+  await query("update customers set tier = 'pro', pro_approved_at = now() where id = $1", [id]);
+  return getCustomerAdmin(id);
+}
+
+/** «Отклонить» — clears the request so the customer can ask again later; tier stays retail. */
+export async function rejectProCustomer(id: string): Promise<AdminCustomerRow | null> {
+  if (!UUID_RE.test(id)) return null;
+  await query("update customers set pro_requested_at = null where id = $1", [id]);
+  return getCustomerAdmin(id);
+}
+
+/** Also how the owner demotes a pro account back to retail. */
+export async function setCustomerTier(id: string, tier: "retail" | "pro"): Promise<AdminCustomerRow | null> {
+  if (!UUID_RE.test(id) || (tier !== "retail" && tier !== "pro")) return null;
+  if (tier === "pro") {
+    await query("update customers set tier = 'pro', pro_approved_at = coalesce(pro_approved_at, now()) where id = $1", [id]);
+  } else {
+    await query("update customers set tier = 'retail' where id = $1", [id]);
+  }
+  return getCustomerAdmin(id);
+}
+
+export async function setCustomerNotes(id: string, notes: string | null): Promise<AdminCustomerRow | null> {
+  if (!UUID_RE.test(id)) return null;
+  await query("update customers set notes = $2 where id = $1", [id, notes ? String(notes).slice(0, 2000) : null]);
+  return getCustomerAdmin(id);
+}
+
+/* ---------- admin: CSV export ----------------------------------------------- */
+
+function csvCell(v: unknown): string {
+  const s = String(v ?? "");
+  return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+const CSV_HEAD = [
+  "email",
+  "name",
+  "phone",
+  "tier",
+  "company",
+  "regCode",
+  "ordersCount",
+  "revenue",
+  "pointsBalance",
+  "createdAt",
+  "lastLoginAt",
+];
+
+/** \r\n line endings and a leading BOM — Excel opens this correctly on the first try. */
+export function customersToCsv(rows: AdminCustomerRow[]): string {
+  const lines = [CSV_HEAD.join(",")];
+  for (const r of rows) {
+    lines.push(
+      [
+        r.email,
+        r.name,
+        r.phone,
+        r.tier,
+        r.company ?? "",
+        r.regCode ?? "",
+        r.ordersCount,
+        r.revenue,
+        r.pointsBalance,
+        r.createdAt ?? "",
+        r.lastLoginAt ?? "",
+      ]
+        .map(csvCell)
+        .join(","),
+    );
+  }
+  return "﻿" + lines.join("\r\n") + "\r\n";
+}

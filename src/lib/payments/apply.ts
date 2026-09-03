@@ -31,6 +31,16 @@ export interface OrderLike {
   /** Quoted at checkout, spent here — see redeemQuotedGiftCard() below. */
   discount?: number | string | null;
   discountCode?: string | null;
+  /* ---- wholesale/loyalty: db/migrations/100_tiers_loyalty.sql ------------ */
+  /** Set only for a signed-in customer's order — see settleLoyalty() below. */
+  customerId?: string | null;
+  /** Goods subtotal, excluding shipping — what points are earned on. */
+  subtotal?: number | string | null;
+  /** Quoted at checkout by «Использовать баллы», spent here. */
+  loyaltyDiscount?: number | string | null;
+  /* ---- inventory: migration 090_inventory.sql ---------------------------- */
+  /** The order's priced lines — what decrementStock() below walks. */
+  items?: Array<{ id: string; kind?: string; variant?: string | null; qty: number }>;
 }
 
 /* A type alias, not an interface: setOrderPayment() takes a
@@ -82,6 +92,36 @@ export interface ApplyDeps {
    * effort: a tracking row must never be the reason a payment fails to save.
    */
   recordPurchaseEvent?(order: { id: string; total?: number | string | null }): Promise<unknown>;
+  /**
+   * Credit points for a paid order. Injected by the tests; production leaves
+   * it out and gets @/lib/loyalty by dynamic import — same story as the gift
+   * card and the promo code above.
+   */
+  earnLoyaltyPoints?(
+    customerId: string,
+    orderId: string,
+    paidSubtotalExclShipping: number,
+  ): Promise<{ ok?: boolean; points?: number; already?: boolean } | null>;
+  /** Spend the points quoted at checkout (order.loyaltyDiscount). Same story. */
+  redeemLoyaltyPoints?(
+    customerId: string,
+    orderId: string,
+    points: number,
+    note?: string,
+  ): Promise<{ ok?: boolean; taken?: number; already?: boolean; error?: string } | null>;
+  /**
+   * Take the order's product lines out of stock, once, on the paid
+   * transition — inventory agent, migration 090. Injected by the tests;
+   * production leaves it out and loops @/lib/inventory's move() itself (see
+   * decrementStock() below). Never below 0 — move() clamps and logs, it does
+   * not throw — so a stock shortfall can never be the reason a confirmed
+   * payment fails to save.
+   */
+  decrementStock?(order: {
+    id: string;
+    number: string;
+    items: NonNullable<OrderLike["items"]>;
+  }): Promise<unknown>;
 }
 
 export interface ApplyOutcome {
@@ -104,6 +144,20 @@ export interface ApplyOutcome {
    * payment. See the audit row (`giftcard_redeem_failed` / `promo_consume_failed`).
    */
   giftShortfall?: { code: string; amount: number; error?: string };
+  /**
+   * Same idea as giftShortfall, for «Использовать баллы»: the balance shrank
+   * between checkout and payment (another order redeemed some in between —
+   * rare), so less than the quoted amount was taken. See the audit row
+   * (`loyalty_redeem_failed`).
+   */
+  loyaltyShortfall?: { amount: number; taken: number; error?: string };
+  /**
+   * Points credited to the customer on THIS transition — 0/undefined for a
+   * guest order, a disabled programme, or an order worth nothing after
+   * discounts. Read by the caller to put one line in the confirmation e-mail
+   * (src/emails/order-confirmed.ts).
+   */
+  pointsEarned?: number;
   payment: PaymentBlob;
 }
 
@@ -237,6 +291,89 @@ async function consumeQuotedPromo(
   return shortfall;
 }
 
+/**
+ * Loyalty points — spent and earned on the single transition into `paid`,
+ * exactly like the gift card and the promo code above: quoted (or, for
+ * earning, simply not yet possible) at checkout, settled here exactly once.
+ * Only ever does anything for a signed-in customer's order — createOrder()
+ * only ever fills in customerId when one was signed in at checkout.
+ *
+ * Redeeming and earning are independent: a shortfall on the redeem side (the
+ * balance shrank between checkout and payment — rare) must not cancel the
+ * earn, and vice versa.
+ */
+async function settleLoyalty(
+  order: OrderLike,
+  deps: ApplyDeps,
+): Promise<{ shortfall?: ApplyOutcome["loyaltyShortfall"]; pointsEarned?: number }> {
+  const customerId = typeof order.customerId === "string" ? order.customerId : "";
+  if (!customerId) return {};
+
+  let shortfall: ApplyOutcome["loyaltyShortfall"];
+  const loyaltyDiscount = toNumber(order.loyaltyDiscount) ?? 0;
+  if (loyaltyDiscount > 0) {
+    let redeem = deps.redeemLoyaltyPoints;
+    if (!redeem) {
+      try {
+        const mod = await import("@/lib/loyalty");
+        redeem = mod.redeemLoyaltyPoints as ApplyDeps["redeemLoyaltyPoints"];
+      } catch (err) {
+        console.error("[payments] loyalty module not available", err);
+      }
+    }
+    const points = Math.round(loyaltyDiscount);
+    let taken = 0;
+    let error: string | undefined = "unavailable";
+    try {
+      const out = redeem ? await redeem(customerId, order.id, points, `списание на заказ ${order.number}`) : null;
+      taken = out?.taken ?? 0;
+      if (out?.ok && taken >= points) {
+        taken = points; // full redemption — nothing to report
+      } else {
+        error = out?.error ?? error;
+      }
+    } catch (err) {
+      console.error(`[payments] redeemLoyaltyPoints failed on ${order.number}`, err);
+      error = "exception";
+    }
+    if (taken < points) {
+      shortfall = { amount: loyaltyDiscount, taken, error };
+      try {
+        const write =
+          deps.writeAudit ??
+          ((await import("@/lib/orders")).writeAuditSafe as ApplyDeps["writeAudit"]);
+        await write?.("system", "loyalty_redeem_failed", {
+          orderId: order.id,
+          number: order.number,
+          ...shortfall,
+        });
+      } catch (err) {
+        console.error("[payments] loyalty_redeem_failed not audited", err);
+      }
+    }
+  }
+
+  let earn = deps.earnLoyaltyPoints;
+  if (!earn) {
+    try {
+      const mod = await import("@/lib/loyalty");
+      earn = mod.earnLoyaltyPoints as ApplyDeps["earnLoyaltyPoints"];
+    } catch (err) {
+      console.error("[payments] loyalty module not available", err);
+    }
+  }
+  let pointsEarned: number | undefined;
+  const subtotal = toNumber(order.subtotal) ?? 0;
+  try {
+    const out = earn ? await earn(customerId, order.id, subtotal) : null;
+    if (out?.ok && out.points) pointsEarned = out.points;
+  } catch (err) {
+    console.error(`[payments] earnLoyaltyPoints failed on ${order.number}`, err);
+  }
+
+  return { shortfall, pointsEarned };
+}
+
 function toNumber(v: unknown): number | null {
   if (typeof v === "number" && Number.isFinite(v)) return v;
   if (typeof v === "string" && v.trim()) {
@@ -278,6 +415,58 @@ async function recordPurchase(order: OrderLike, deps: ApplyDeps): Promise<void> 
     await record?.({ id: order.id, total: order.total });
   } catch (err) {
     console.error(`[payments] recordPurchaseEvent failed on ${order.number}`, err);
+  }
+}
+
+/**
+ * Take every product line out of stock, once, on the transition into paid —
+ * inventory agent, migration 090. Bundle lines (id "bundle:<id>") and gift
+ * lines carry no catalogue product to decrement and are skipped; the same
+ * boundary the matching 'return' move draws in src/lib/orders.ts
+ * setOrderStatus(). Best effort per line: one product's stock hiccup must
+ * never stop the rest of the order — or the payment itself — from saving.
+ */
+async function decrementStock(order: OrderLike, deps: ApplyDeps): Promise<void> {
+  const items = Array.isArray(order.items) ? order.items : [];
+  if (!items.length) return;
+
+  if (deps.decrementStock) {
+    try {
+      await deps.decrementStock({ id: order.id, number: order.number, items });
+    } catch (err) {
+      console.error(`[payments] decrementStock failed on ${order.number}`, err);
+    }
+    return;
+  }
+
+  let move: (input: {
+    productId: string;
+    variant?: string | null;
+    delta: number;
+    reason: string;
+    ref?: string | null;
+    actor?: string | null;
+  }) => Promise<unknown>;
+  try {
+    move = (await import("@/lib/inventory")).move as typeof move;
+  } catch (err) {
+    console.error("[payments] inventory module not available", err);
+    return;
+  }
+  for (const item of items) {
+    if (item.kind !== "product" || !item.qty) continue;
+    try {
+      await move({
+        productId: item.id,
+        variant: item.variant ?? "",
+        delta: -Math.abs(Number(item.qty) || 0),
+        reason: "sale_web",
+        ref: order.number,
+        actor: "system",
+      });
+    } catch (err) {
+      console.error(`[payments] stock decrement failed on ${order.number} (${item.id}):`, err);
+    }
   }
 }
 
@@ -332,8 +521,18 @@ export async function applyPaymentResult(
 
     await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);
     const giftShortfall = await redeemQuotedGiftCard(order, deps);
+    const loyalty = await settleLoyalty(order, deps);
     await recordPurchase(order, deps);
-    return { status: "paid", keptPaid: false, alreadyPaid: false, giftShortfall, payment };
+    await decrementStock(order, deps);
+    return {
+      status: "paid",
+      keptPaid: false,
+      alreadyPaid: false,
+      giftShortfall,
+      loyaltyShortfall: loyalty.shortfall,
+      pointsEarned: loyalty.pointsEarned,
+      payment,
+    };
   }
   if (result.status === "failed") {
     if (order.status !== "failed") {

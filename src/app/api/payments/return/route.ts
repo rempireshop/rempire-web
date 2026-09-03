@@ -118,7 +118,10 @@ async function handle(req: Request, params: URLSearchParams) {
     // gift cards bought in the order are made sure of on every arrival —
     // issuing is idempotent, and a paid order whose first pass died before the
     // hook has no other way of getting them.
-    const paid = { ...order, status: "paid", payment: outcome.payment };
+    // wholesale/loyalty: loyaltyEarned rides along only on the first arrival
+    // (undefined on a retry — settleLoyalty() in apply.ts only ever runs once
+    // per order) so the confirmation e-mail can mention points earned.
+    const paid = { ...order, status: "paid", payment: outcome.payment, loyaltyEarned: outcome.pointsEarned };
     if (outcome.alreadyPaid) await issueOrderGiftCards(paid);
     else await notifyOrderPaid(paid);
   }

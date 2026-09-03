@@ -24,7 +24,7 @@ const quote = (
 
 describe("the default price list", () => {
   it("prices a parcel machine per country", () => {
-    expect(quote("EE", "parcel", 10).price).toBe(3.49);
+    expect(quote("EE", "parcel", 10).price).toBe(5.47);
     expect(quote("LV", "parcel", 10).price).toBe(4.99);
     expect(quote("LT", "parcel", 10).price).toBe(4.99);
     // anything not named falls to the method's default
@@ -32,7 +32,7 @@ describe("the default price list", () => {
   });
 
   it("prices a courier per country", () => {
-    expect(quote("EE", "courier", 10).price).toBe(5.99);
+    expect(quote("EE", "courier", 10).price).toBe(10.84);
     expect(quote("DE", "courier", 10).price).toBe(9.9);
     expect(quote("FI", "courier", 10).price).toBe(9.9);
   });
@@ -46,7 +46,7 @@ describe("the default price list", () => {
 
 describe("free delivery", () => {
   it("kicks in at the threshold, not a cent before", () => {
-    expect(quote("EE", "parcel", 58.99).price).toBe(3.49);
+    expect(quote("EE", "parcel", 58.99).price).toBe(5.47);
     expect(quote("EE", "parcel", 58.99).free).toBe(false);
     expect(quote("EE", "parcel", 59).price).toBe(0);
     expect(quote("EE", "parcel", 59).free).toBe(true);
@@ -87,7 +87,7 @@ describe("carrier overrides", () => {
     expect(quote("EE", "parcel", 10, "OMNIVA", withCarriers).price).toBe(2.99);
     expect(quote("LV", "parcel", 10, "dpd", withCarriers).price).toBe(6.5);
     // a carrier with no entry falls back to the method table
-    expect(quote("EE", "parcel", 10, "smartpost", withCarriers).price).toBe(3.49);
+    expect(quote("EE", "parcel", 10, "smartpost", withCarriers).price).toBe(5.47);
   });
 });
 
@@ -104,7 +104,7 @@ describe("method names as the checkout actually sends them", () => {
   });
 
   it("prices a courier label as a courier, not as a parcel", () => {
-    expect(quote("EE", "Курьер до двери (DPD)", 10).price).toBe(5.99);
+    expect(quote("EE", "Курьер до двери (DPD)", 10).price).toBe(10.84);
     expect(quote("EE", "Самовывоз — Mardi 1", 10).price).toBe(0);
   });
 
@@ -122,7 +122,7 @@ describe("parsing the settings row", () => {
     expect(parseShippingRules("not an object")).toEqual(DEFAULT_SHIPPING_RULES);
     expect(parseShippingRules([1, 2])).toEqual(DEFAULT_SHIPPING_RULES);
     expect(parseShippingRules({ freeFrom: "rubbish" }).freeFrom).toBe(59);
-    expect(parseShippingRules({ methods: { parcel: { EE: "nope" } } }).methods.parcel.EE).toBe(3.49);
+    expect(parseShippingRules({ methods: { parcel: { EE: "nope" } } }).methods.parcel.EE).toBe(5.47);
   });
 
   it("merges a partial row over the defaults one line at a time", () => {
@@ -134,13 +134,13 @@ describe("parsing the settings row", () => {
     expect(parsed.methods.parcel.EE).toBe(2.5);
     // untouched entries survive
     expect(parsed.methods.parcel.LV).toBe(4.99);
-    expect(parsed.methods.courier.EE).toBe(5.99);
+    expect(parsed.methods.courier.EE).toBe(10.84);
   });
 
   it("accepts freeFrom: null as 'never free'", () => {
     expect(parseShippingRules({ freeFrom: null }).freeFrom).toBeNull();
     expect(quote("EE", "parcel", 10_000, undefined, parseShippingRules({ freeFrom: null })).price).toBe(
-      3.49,
+      5.47,
     );
   });
 
@@ -192,7 +192,7 @@ describe("against the database", () => {
     await query("delete from settings where key = 'shipping_rules'");
     resetShippingRulesCache();
     const q = await computeShipping({ country: "EE", method: "parcel", subtotal: 10 });
-    expect(q.price).toBe(3.49);
+    expect(q.price).toBe(5.47);
     expect(q.source).toBe("defaults");
   });
 });

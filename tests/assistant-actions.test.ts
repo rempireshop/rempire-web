@@ -217,3 +217,64 @@ describe("the banner handed to the model", () => {
     expect(briefHero("nonsense")).toEqual([]);
   });
 });
+
+// inventory: stock_adjust and stock_set — real numbers, not the демо в наличии/мало/нет badge
+describe("stock_adjust", () => {
+  it("accepts a relative move on a known product", () => {
+    const out = sanitizeAction(
+      { type: "stock_adjust", product_id: someId, delta: 6, reason: "goods_in" },
+      known,
+      true,
+    );
+    expect(out).toEqual({ type: "stock_adjust", product_id: someId, variant: "", delta: 6, reason: "goods_in" });
+  });
+
+  it("defaults an unnamed or invalid reason to 'adjust'", () => {
+    const noReason = sanitizeAction({ type: "stock_adjust", product_id: someId, delta: -2 }, known, true);
+    expect(noReason).toMatchObject({ reason: "adjust" });
+    // 'sale_web'/'sale_pos' are written by a real sale, never claimed from chat
+    const fakeSale = sanitizeAction(
+      { type: "stock_adjust", product_id: someId, delta: -2, reason: "sale_pos" },
+      known,
+      true,
+    );
+    expect(fakeSale).toMatchObject({ reason: "adjust" });
+  });
+
+  it("carries a variant through when given one", () => {
+    const out = sanitizeAction(
+      { type: "stock_adjust", product_id: someId, variant: "75 мл", delta: 1, reason: "return" },
+      known,
+      true,
+    );
+    expect(out).toMatchObject({ variant: "75 мл", reason: "return" });
+  });
+
+  it("refuses an unknown product, a zero delta, and a delta that is not a number", () => {
+    expect(sanitizeAction({ type: "stock_adjust", product_id: "ghost", delta: 1 }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "stock_adjust", product_id: someId, delta: 0 }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "stock_adjust", product_id: someId, delta: "six" }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "stock_adjust", product_id: someId, delta: 50_000 }, known, true)).toBeNull();
+  });
+
+  it("is admin-only", () => {
+    expect(sanitizeAction({ type: "stock_adjust", product_id: someId, delta: 1 }, known, false)).toBeNull();
+  });
+});
+
+describe("stock_set", () => {
+  it("accepts an absolute count on a known product", () => {
+    const out = sanitizeAction({ type: "stock_set", product_id: someId, qty: 10 }, known, true);
+    expect(out).toEqual({ type: "stock_set", product_id: someId, variant: "", qty: 10 });
+  });
+
+  it("refuses a negative or out-of-range quantity", () => {
+    expect(sanitizeAction({ type: "stock_set", product_id: someId, qty: -1 }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "stock_set", product_id: someId, qty: 1_000_000 }, known, true)).toBeNull();
+  });
+
+  it("refuses an unknown product and is admin-only", () => {
+    expect(sanitizeAction({ type: "stock_set", product_id: "ghost", qty: 1 }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "stock_set", product_id: someId, qty: 1 }, known, false)).toBeNull();
+  });
+});

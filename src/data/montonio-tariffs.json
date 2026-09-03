@@ -1,0 +1,42 @@
+{
+  "_comment": "Fallback carrier tariffs used to price Montonio Shipping deliveries when the live POST /shipping-methods/rates quote (src/lib/shipping/montonio.ts, src/lib/shipping/tariffs.ts) is not configured or not reachable. Montonio itself publishes no per-carrier/country/size price list on montonio.com/pricing (that page shows dashes and gates real numbers behind a signed-in account) — see docs/shipping.md § «Тарифы Montonio» for the research trail. These rows are the carriers' own published EU business list prices, which Montonio's marketing states its contract rates match or beat («Pre-negotiated rates with top carriers»); until Renat's Montonio account has carriers activated and the live endpoint returns real per-merchant numbers, this table is used as a conservative stand-in so the shop never prices a delivery below the carrier's own list cost. Refresh with tools/fetch-montonio-tariffs.mjs.",
+  "compiledDate": "2026-09-03",
+  "sourceDataCompiledOn": "2026-08-27",
+  "sourceDataFile": "public/shop/shipping-data.js",
+  "referenceParcel": {
+    "weightKg": 5,
+    "lengthCm": 30,
+    "widthCm": 30,
+    "heightCm": 30,
+    "note": "Matches the 'L' locker size used throughout public/shop/shipping-data.js (parcelRef) so every row here is the same nominal parcel."
+  },
+  "vatRateEE": 0.24,
+  "rates": [
+    { "carrier": "omniva", "country": "EE", "method": "parcel", "price": 5.46, "currency": "EUR", "effectiveDate": "2025-02-21", "vatIncluded": true, "source": "https://old.omniva.ee/public/files/failid/hinnakiri-pakk-pakiteenus-uues-eteeninduses-ari-est-ee-2025.pdf", "note": "Business list, ex-VAT 4.40, computed incl. 24% VAT." },
+    { "carrier": "omniva", "country": "LV", "method": "parcel", "price": 10.61, "currency": "EUR", "effectiveDate": "2025-02-21", "vatIncluded": true, "source": "https://old.omniva.ee/public/files/failid/hinnakiri-pakk-pakiteenus-uues-eteeninduses-ari-est-ee-2025.pdf", "note": "Business list, ex-VAT 8.56, computed incl. 24% VAT." },
+    { "carrier": "omniva", "country": "LT", "method": "parcel", "price": 11.79, "currency": "EUR", "effectiveDate": "2025-02-21", "vatIncluded": true, "source": "https://old.omniva.ee/public/files/failid/hinnakiri-pakk-pakiteenus-uues-eteeninduses-ari-est-ee-2025.pdf", "note": "Business list, ex-VAT 9.51, computed incl. 24% VAT." },
+
+    { "carrier": "smartpost", "country": "EE", "method": "parcel", "price": 5.47, "currency": "EUR", "effectiveDate": "2026-03-11", "vatIncluded": true, "source": "https://www.smartposti.ee/ariklient/klienditeenindus/ariklientide-pakkide-hinnad", "note": "Business-prepaid list, VAT already included at source." },
+    { "carrier": "smartpost", "country": "LV", "method": "parcel", "price": 9.94, "currency": "EUR", "effectiveDate": "2026-03-11", "vatIncluded": true, "source": "https://www.smartposti.ee/ariklient/klienditeenindus/ariklientide-pakkide-hinnad" },
+    { "carrier": "smartpost", "country": "LT", "method": "parcel", "price": 11.17, "currency": "EUR", "effectiveDate": "2026-03-11", "vatIncluded": true, "source": "https://www.smartposti.ee/ariklient/klienditeenindus/ariklientide-pakkide-hinnad" },
+    { "carrier": "smartpost", "country": "FI", "method": "parcel", "price": 15.65, "currency": "EUR", "effectiveDate": "2026-03-11", "vatIncluded": true, "source": "https://www.smartposti.ee/ariklient/klienditeenindus/ariklientide-pakkide-hinnad" },
+    { "carrier": "smartpost", "country": "EE", "method": "courier", "price": 10.84, "currency": "EUR", "effectiveDate": "2026-03-11", "vatIncluded": true, "source": "https://www.smartposti.ee/paki-saatmine/hinnakirjad" },
+    { "carrier": "smartpost", "country": "FI", "method": "courier", "price": 23.47, "currency": "EUR", "effectiveDate": "2026-03-11", "vatIncluded": true, "source": "https://www.smartposti.ee/paki-saatmine/hinnakirjad" },
+
+    { "carrier": "dpd", "country": "EE", "method": "parcel", "price": 4.50, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf", "note": "DPD Pickup, business list, ex-VAT 3.63, computed incl. 24% VAT." },
+    { "carrier": "dpd", "country": "LV", "method": "parcel", "price": 8.06, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf" },
+    { "carrier": "dpd", "country": "LT", "method": "parcel", "price": 8.62, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf" },
+    { "carrier": "dpd", "country": "FI", "method": "parcel", "price": 18.60, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf", "uncertain": true, "note": "The Finland row of the 'Muu Euroopa' table could not be aligned to its column header with full confidence on text extraction (ex-VAT 15, computed incl. VAT 18.60) — verify before quoting to a customer." },
+
+    { "carrier": "dpd", "country": "EE", "method": "courier", "price": 10.78, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf", "note": "DPD Classic, up-to-10kg band, zone 4 (rest of Estonia — the priciest of 3 zones, used deliberately so no zone is billed below cost); zone 1&2 (Tallinn/Tartu and main towns) is cheaper at 8.99. ex-VAT 8.69, computed incl. 24% VAT." },
+    { "carrier": "dpd", "country": "LV", "method": "courier", "price": 16.28, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf", "note": "Up-to-10kg band, zone 3 (priciest of 3; zone 1 / Riga is cheaper at 13.57). ex-VAT 13.13, computed incl. 24% VAT." },
+    { "carrier": "dpd", "country": "LT", "method": "courier", "price": 17.74, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf", "note": "Up-to-10kg band, zone 3 (priciest of 3; zone 1 / Vilnius-Kaunas is cheaper at 15.56). ex-VAT 14.31, computed incl. 24% VAT." },
+    { "carrier": "dpd", "country": "FI", "method": "courier", "price": 26.04, "currency": "EUR", "effectiveDate": "2025", "vatIncluded": true, "source": "https://www.dpd.com/wp-content/uploads/sites/235/2025/02/DPD-Eesti-AS-hinnakiri-2025.pdf", "uncertain": true, "note": "Up-to-10kg band, no zones for FI. ex-VAT 21, computed incl. 24% VAT — same extraction caveat as the DPD FI parcel row." }
+  ],
+  "notMeasured": [
+    "venipak — no public price list or business PDF found; not in public/shop/shipping-data.js. Fill in once Montonio's live rates endpoint returns a number, or a Venipak price list is sourced.",
+    "unisend — same as venipak, no source at all yet.",
+    "omniva/FI — Omniva runs no parcel machines in Finland (confirmed against https://www.omniva.ee/locations.json, zero FI rows); Finland is not served by Omniva through this shop.",
+    "'EU' / 'default' rows (other European countries) — DPD's rest-of-Europe band (21-45 EUR ex VAT at 10kg, see public/shop/shipping-data.js restOfEuropeAt10kg) was deliberately left out of this table: it is a per-country band, not a single carrier tariff, and folding it into one number here would reintroduce an invented default of exactly the kind this table exists to replace."
+  ]
+}

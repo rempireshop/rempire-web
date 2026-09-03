@@ -255,6 +255,14 @@ export interface Customer {
   marketing: boolean;
   createdAt: string | null;
   lastLoginAt: string | null;
+  /* ---- wholesale (salon/pro) — db/migrations/100_tiers_loyalty.sql ------- */
+  /** 'retail' | 'pro'. Flips to 'pro' only when the owner approves the request. */
+  tier: "retail" | "pro";
+  company: string | null;
+  regCode: string | null;
+  /** Set the moment «Стать партнёром» is submitted; null once decided either way. */
+  proRequestedAt: string | null;
+  proApprovedAt: string | null;
 }
 
 type CustomerRow = {
@@ -267,6 +275,11 @@ type CustomerRow = {
   marketing: boolean | string | null;
   created_at: string | Date | null;
   last_login_at: string | Date | null;
+  tier: string | null;
+  company: string | null;
+  reg_code: string | null;
+  pro_requested_at: string | Date | null;
+  pro_approved_at: string | Date | null;
 };
 
 function isoDay(v: unknown): string | null {
@@ -293,6 +306,11 @@ export function mapCustomer(r: CustomerRow): Customer {
     marketing: r.marketing === true || r.marketing === "t" || r.marketing === "true",
     createdAt: iso(r.created_at),
     lastLoginAt: iso(r.last_login_at),
+    tier: r.tier === "pro" ? "pro" : "retail",
+    company: r.company ?? null,
+    regCode: r.reg_code ?? null,
+    proRequestedAt: iso(r.pro_requested_at),
+    proApprovedAt: iso(r.pro_approved_at),
   };
 }
 

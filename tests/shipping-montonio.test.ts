@@ -16,6 +16,7 @@ import {
   createMontonioShipment,
   estimateWeightKg,
   fetchMontonioPickupPoints,
+  fetchMontonioRates,
   fromParcelPoint,
   getMontonioLabel,
   mapMontonioPickupPoints,
@@ -351,6 +352,10 @@ describe("creating a shipment", () => {
     shippingPrice: 3.49,
     discount: 0,
     discountCode: null,
+    channel: "web",
+    customerId: null,
+    pricingTier: null,
+    loyaltyDiscount: 0,
     total: 25.49,
     payment: null,
     notes: null,
@@ -879,5 +884,101 @@ describe("GET /api/shipping/points", () => {
     expect(body.source).toBe("seed");
     expect(body.count).toBeGreaterThan(100);
     expect(body.seedAt).toBeTruthy();
+  });
+});
+
+/* ---------- rate quotes (Shipping API v2 "Calculate shipping costs") -----
+   src/lib/shipping/tariffs.ts builds the cached, marked-up, .x9-rounded
+   admin-facing tariff on top of this; what is tested here is only the raw
+   call — request shape and response mapping — against the documented example
+   (docs.montonio.com/api/shipping-v2/reference § POST /shipping-methods/rates,
+   read 03.09.2026; see docs/shipping.md § «Тарифы Montonio»). */
+
+describe("fetchMontonioRates", () => {
+  it("is null without keys, and asks nobody anything", async () => {
+    const calls = stubFetch([[/rates/, () => json({ carriers: [] })]]);
+    const rates = await fetchMontonioRates("EE", [{ length: 30, width: 30, height: 30, weight: 5 }]);
+    expect(rates).toBeNull();
+    expect(calls).toHaveLength(0);
+  });
+
+  it("sends destination, dimensions in cm and weight in kg", async () => {
+    withKeys();
+    const calls = stubFetch([[/shipping-methods\/rates/, () => json({ destination: "EE", carriers: [] })]]);
+    await fetchMontonioRates("ee", [{ length: 20, width: 15, height: 10, weight: 0.5, quantity: 2 }]);
+    expect(calls).toHaveLength(1);
+    const body = JSON.parse(String(calls[0].init?.body));
+    expect(body).toEqual({
+      destination: "EE",
+      parcels: [
+        {
+          items: [
+            { length: 20, width: 15, height: 10, dimensionUnit: "cm", weight: 0.5, weightUnit: "kg", quantity: 2 },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("reads the documented response into a flat list of carrier/method/subtype rates", async () => {
+    withKeys();
+    stubFetch([
+      [
+        /rates/,
+        () =>
+          json({
+            calculationDetails: {},
+            destination: "EE",
+            carriers: [
+              {
+                carrierCode: "omniva",
+                shippingMethods: [
+                  {
+                    type: "pickupPoint",
+                    subtypes: [
+                      { code: "parcelMachine", rate: "2.50", currency: "EUR" },
+                      { code: "postOffice", rate: "2.50", currency: "EUR" },
+                    ],
+                  },
+                ],
+              },
+              {
+                carrierCode: "dpd",
+                shippingMethods: [
+                  { type: "courier", subtypes: [{ code: "standard", rate: "9.90", currency: "EUR" }] },
+                ],
+              },
+            ],
+          }),
+      ],
+    ]);
+    const rates = await fetchMontonioRates("EE", [{ length: 30, width: 30, height: 30, weight: 5 }]);
+    expect(rates).toEqual([
+      { carrier: "omniva", methodType: "pickupPoint", subtype: "parcelMachine", price: 2.5, currency: "EUR" },
+      { carrier: "omniva", methodType: "pickupPoint", subtype: "postOffice", price: 2.5, currency: "EUR" },
+      { carrier: "dpd", methodType: "courier", subtype: "standard", price: 9.9, currency: "EUR" },
+    ]);
+  });
+
+  it("is null — not a throw — on a bad destination, an empty parcel list, or a network failure", async () => {
+    withKeys();
+    expect(await fetchMontonioRates("estonia", [{ length: 1, width: 1, height: 1, weight: 1 }])).toBeNull();
+    expect(await fetchMontonioRates("EE", [])).toBeNull();
+
+    stubFetch([
+      [
+        /rates/,
+        () => {
+          throw new Error("ECONNRESET");
+        },
+      ],
+    ]);
+    expect(await fetchMontonioRates("EE", [{ length: 1, width: 1, height: 1, weight: 1 }])).toBeNull();
+  });
+
+  it("is null when Montonio rejects the request", async () => {
+    withKeys();
+    stubFetch([[/rates/, () => json({ error: "bad parcel" }, 400)]]);
+    expect(await fetchMontonioRates("EE", [{ length: 1, width: 1, height: 1, weight: 1 }])).toBeNull();
   });
 });

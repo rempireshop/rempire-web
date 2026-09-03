@@ -25,6 +25,16 @@ export interface ShippingRules {
   methods: Record<ShipMethod, Record<string, number>>;
   /** Optional per-carrier override of the method price, same shape. */
   carriers?: Record<string, Record<string, number>>;
+  /**
+   * Markup added to a Montonio carrier tariff to get the customer-facing
+   * price: `tariff * (1 + percent/100) + fixed`, then rounded up to the next
+   * price ending in 9 cents (src/lib/shipping/tariffs.ts, customerPrice()).
+   * Only the admin's «Заполнить по тарифам Montonio» button reads this —
+   * quoteFromRules() below still prices strictly off `methods`/`carriers`, so
+   * a markup change alone does nothing until that button (or a hand edit) is
+   * used to refill the table. Default: no markup at all.
+   */
+  markup?: { percent: number; fixed: number };
 }
 
 export interface ShippingInput {
@@ -54,22 +64,37 @@ export interface ShippingQuote {
 }
 
 /**
- * Defaults, per the checkout brief: parcel EE 3.49 / LV, LT 4.99; courier EE
- * 5.99, EU 9.90; pickup free; free delivery from 59 €.
+ * Defaults, per the checkout brief: parcel LV, LT 4.99; courier EU 9.90;
+ * pickup free; free delivery from 59 €. **EE parcel and courier are no longer
+ * the brief's numbers** — see docs/shipping.md § «Тарифы Montonio», researched
+ * 03.09.2026: the brief's 3.49/5.99 sat below every sourced Omniva/SmartPosti/
+ * DPD business-list tariff for Estonia, so this shop was paying more for a
+ * delivery than it charged for it on day one, in its home market. EE parcel is
+ * now 5.47 (the highest of Omniva 5.46, SmartPosti 5.47, DPD Pickup 4.50 — the
+ * ceiling, since a plain "parcel" order with no carrier override can land on
+ * any of the three) and EE courier is 10.84 (SmartPosti's flat rate, itself
+ * above DPD's priciest zone at 10.78).
  *
- * Note for whoever tunes these: the storefront demo table (public/shop2/app.js
- * SHIP) carries the 2025–26 carrier list prices, which are higher — Omniva EE
- * 5.50, DPD courier EE 9.00, LV/LT 10–15. These defaults are the brief's, and
- * they are below cost outside Estonia. Renat's real numbers belong in
- * settings.shipping_rules; see docs/shipping.md.
+ * LV, LT and the EU/default rows are untouched on purpose: those are below
+ * cost by the same evidence (LV/LT parcel 4.99 against a sourced 8.06–11.79;
+ * courier against 16–26), but closing that gap for every market — and
+ * deciding whether Rempire keeps eating it for reach — is Renat's call, not a
+ * default this file should make for him. He can close all of it in one click
+ * with «Заполнить по тарифам Montonio» in Настройки → Доставка, which prices
+ * every country this way (src/lib/shipping/tariffs.ts), or by hand.
+ *
+ * Note for whoever tunes these next: the storefront demo table
+ * (public/shop2/app.js SHIP) and src/data/montonio-tariffs.json carry the
+ * sourced 2025–26 carrier list prices these numbers are computed from.
  */
 export const DEFAULT_SHIPPING_RULES: ShippingRules = {
   freeFrom: 59,
   methods: {
-    parcel: { default: 4.99, EE: 3.49, LV: 4.99, LT: 4.99 },
-    courier: { default: 9.9, EE: 5.99 },
+    parcel: { default: 4.99, EE: 5.47, LV: 4.99, LT: 4.99 },
+    courier: { default: 9.9, EE: 10.84 },
     pickup: { default: 0 },
   },
+  markup: { percent: 0, fixed: 0 },
 };
 
 const SETTINGS_KEY = "shipping_rules";
@@ -141,6 +166,10 @@ export function parseShippingRules(value: unknown): ShippingRules {
       courier: { ...DEFAULT_SHIPPING_RULES.methods.courier },
       pickup: { ...DEFAULT_SHIPPING_RULES.methods.pickup },
     },
+    markup: {
+      percent: DEFAULT_SHIPPING_RULES.markup?.percent ?? 0,
+      fixed: DEFAULT_SHIPPING_RULES.markup?.fixed ?? 0,
+    },
   };
 
   if (raw.freeFrom === null) rules.freeFrom = null;
@@ -179,6 +208,16 @@ export function parseShippingRules(value: unknown): ShippingRules {
       if (parsed) out[name.toLowerCase()] = parsed;
     }
     if (Object.keys(out).length) rules.carriers = out;
+  }
+
+  const markup = raw.markup;
+  if (typeof markup === "object" && markup !== null && !Array.isArray(markup)) {
+    const m = markup as Record<string, unknown>;
+    const percent = toNumber(m.percent);
+    const fixed = toNumber(m.fixed);
+    // generous but bounded: a markup is a surcharge, not a second price list
+    if (percent !== null && percent >= 0 && percent <= 100) rules.markup!.percent = percent;
+    if (fixed !== null && fixed >= 0 && fixed <= 20) rules.markup!.fixed = fixed;
   }
 
   return rules;

@@ -255,11 +255,21 @@ const INTENTIONAL = [
   [/^(Русский|Eesti|English)$/, "language menu — each language names itself"],
   [/^(шампунь|кондиционер|маска|паста|спрей|воск|гель|пудра|масло|бальзам|сыворотка|тоник|крем|пенка|лосьон|патчи)$/,
     "product-type key used for matching (TYPE_MATES / NAME_TAILS), never rendered"],
-  [/^(товар|товара|товаров|точка|точки|точек|раздел|раздела|разделов|заказ|заказа|заказов)$/,
+  [/^(товар|товара|товаров|точка|точки|точек|раздел|раздела|разделов|заказ|заказа|заказов|балл|балла|баллов)$/,
     "plural word form — pl() glues it to a number, the composed string is translated"],
   [/^[А-ЯЁ]\. [А-ЯЁ][а-яё]+$/, "demo customer name in the admin — names are not translated"],
   [/^от$/, "price prefix — glued to the amount, «от 12,90 €» is covered by a UI_RX rule"],
   [/^Напиши SEO title/, "prompt text sent to the model, never shown to anyone"],
+  // integration: stock_moves.ref free text — a fixed "who moved this" tag
+  // shown only in the ledger's own history row, same "Russian by decision"
+  // convention as every other free-text audit/note field in this file
+  [/^(помощник|сканер)$/, "stock_moves.ref tag (applyStockAction/scanner buttons) — shown in the moves history row, Russian by convention like a note field"],
+  [/^отмена начисления$/, "loyalty ledger note on an assistant-driven points undo — free-text note field, Russian by convention"],
+  // integration: montonioSourceLabel()'s two branches — a ternary with no
+  // "+" involved, so each string is its own fragment here; the rendered
+  // sentence is always this label plus a price, covered by the UI_RX rules
+  // /^тариф Montonio \(live\): (.+)$/ and /^тариф Montonio \(прайс-лист\): (.+)$/
+  [/^тариф Montonio \((live|прайс-лист)\):$/, "prefix half of montonioHint()/montonioCarrierHint()'s sentence — see the two UI_RX rules for the whole thing"],
 ];
 /* Fragments that are only half of a string the shop assembles at runtime: the
    extractor cuts at the string-literal boundary, the browser does not. Each
@@ -269,6 +279,9 @@ const ASSEMBLED = [
   [/^из $/, "half of «5 из 100» — rule /^(\\d+) из (\\d+)$/"],
   [/^Скидка$/, "«Скидка» on its own is a key; with a code it is rule /^Скидка · (.+)$/"],
   [/^Показаны первые 24 из /, "rules /^Показаны первые 24 из (\\d+)( по запросу «(.+)»)?$/"],
+  // integration: admin «Склад» search — same two-hole chunking artifact as
+  // the catalogue's own "24" case just above, only the shown-count differs
+  [/^Показаны первые 60 из /, "rules /^Показаны первые 60 из (\\d+)( по запросу «(.+)»)?$/, plus the shared /^(\\d+) товар… по запросу «(.+)»$/"],
   [/^по запросу «$/, "tail of the goods-list count — same two rules"],
   [/^Заканчиваются .* Срочно: /, "rule /^Заканчиваются (\\d+) товар… Могу собрать заказ…$/"],
   [/^\. Могу собрать заказ поставщику/, "tail of the same assistant answer — same rule"],
@@ -284,6 +297,17 @@ const ASSEMBLED = [
   [/^Вот что подключено к магазину/, "key — the hole is the aiGo() button markup"],
   [/^Отправки ждут 2 заказа/, "key — the hole is the aiGo() button markup"],
   [/^Напишите нам — поможем подобрать замену: $/, "key — the hole is the phone/e-mail link markup"],
+  // integration: orderDetailSrv's POS-channel chip — the ternary literals
+  // inside break the "+"-only glue heuristic, but the rendered node is
+  // always one whole runtime string, and one of these three plain keys:
+  // «Салон», «Салон · Терминал», «Салон · Наличные» (payment words reuse the
+  // existing capitalised POS-button keys, not a separate lowercase copy)
+  [/^Салон/, "keys «Салон» / «Салон · Терминал» / «Салон · Наличные» (orderDetailSrv)"],
+  // integration: admStockHTML's «Сканировать» button — icon("scan") returns
+  // an inline <svg>, a sibling element, not text; the hole here is that
+  // element, not a runtime value glued into the same text node. «Сканировать»
+  // on its own is already a real key (used since the storefront pass).
+  [/ Сканировать$/, "key «Сканировать» — the hole is icon(\"scan\")'s <svg>, a separate element, not text"],
 ];
 function assembled(text) {
   if (!text.includes(HOLE)) return null;
@@ -311,6 +335,12 @@ const INTENTIONAL_FNS = {
   shipActionText: "change-log line in Renat's private admin journal — Russian by decision",
   contentActionText: "change-log line in Renat's private admin journal — Russian by decision",
   promoActionText: "change-log line in Renat's private admin journal — Russian by decision",
+  // integration: data tables, never rendered as their own text node — a
+  // per-letter transliteration map (blogSlugify()) and a month-name array
+  // whose only reader is monthLabelRu(), itself only ever called from the
+  // already-exempted actionText() above
+  BLOG_TRANSLIT: "transliteration table (blogSlugify()) — object keys/values, never rendered",
+  MONTH_RU: "month names for monthLabelRu(), consumed only by the exempted actionText() above",
 };
 function intentional(text, fn) {
   if (INTENTIONAL_FNS[fn]) return INTENTIONAL_FNS[fn];

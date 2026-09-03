@@ -150,7 +150,8 @@ describe("gift cards bought in an order survive a replayed payment", () => {
     process.env.TELEGRAM_CHAT_ID = "42";
     resetRateLimits();
     await exec("truncate gift_card_uses, gift_cards restart identity cascade");
-    await exec("truncate orders, admin_audit restart identity");
+    // cascade: order_messages (111_order_messages.sql) has a foreign key onto orders.
+    await exec("truncate orders, admin_audit restart identity cascade");
   });
 
   afterEach(() => {

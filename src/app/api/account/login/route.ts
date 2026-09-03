@@ -16,6 +16,7 @@ import {
   normalizeLangCode,
   recordLogin,
 } from "@/lib/customers";
+import { accountLoyaltySummary } from "@/lib/loyalty";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -65,9 +66,12 @@ export async function POST(req: Request) {
 
     const customer = await recordLogin(email, body.lang ?? normalizeLangCode(undefined));
     const orders = await listCustomerOrders(email);
+    // wholesale/loyalty: acctApply() in app.js applies this response exactly
+    // like a GET /api/account/me one, so both must carry the same "loyalty" shape.
+    const loyalty = await accountLoyaltySummary(customer.id);
     const token = makeCustomerToken(email);
     return Response.json(
-      { ok: true, customer, orders },
+      { ok: true, customer, orders, loyalty },
       {
         status: 200,
         headers: {

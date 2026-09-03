@@ -1,0 +1,15 @@
+-- 110_product_overrides_description.sql — assistant-at-work agent (migration range 110–119)
+--
+-- Trilingual product description override, written by hand or by the admin
+-- assistant's «Сгенерировать описание» / «Перевести на ET/EN» buttons.
+--
+-- Shape: {"RU": "...", "ET": "...", "EN": "..."} — any subset of the three
+-- keys may be present. Null (the default) means «no override, use the
+-- catalogue's static content.ru.js/content.et.js/content.js text», same
+-- fallback rule as every other field in product_overrides. A language key
+-- that is absent from the object falls back to the static text for that one
+-- language only, not to Russian — see src/lib/product-descriptions.ts.
+--
+-- Deliberately its own column rather than reusing seo_desc: SEO description
+-- is the ≤155-char Google snippet, this is the full product-page copy.
+alter table product_overrides add column if not exists description jsonb;

@@ -8,6 +8,7 @@
  * for 1 €; every shipping field is rebuilt there from a whitelist.
  */
 import { clientIp, rateLimit } from "@/lib/auth";
+import { getCustomer, sessionEmail } from "@/lib/customers";
 import { createOrder, OrderError } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -44,8 +45,20 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
 
+  /* wholesale/loyalty: who is checking out, if anyone — resolved from the
+     signed `rmp_cust` cookie, never from the body. createOrder() uses this
+     both for pro pricing and to stamp orders.customer_id, so a signed-in
+     shopper's order is theirs even before this page existed to say so. */
+  let customerId: string | null = null;
   try {
-    const order = await createOrder(body as Parameters<typeof createOrder>[0]);
+    const email = sessionEmail(req);
+    if (email) customerId = (await getCustomer(email))?.id ?? null;
+  } catch (err) {
+    console.error("[api/orders] customer lookup failed, pricing as a guest:", err);
+  }
+
+  try {
+    const order = await createOrder(body as Parameters<typeof createOrder>[0], { customerId });
     return Response.json(
       { ok: true, orderId: order.id, number: order.number, total: order.total },
       { status: 201, headers: { "cache-control": "no-store" } },

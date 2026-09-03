@@ -1,0 +1,15 @@
+{
+  "name": "Rempire админ",
+  "short_name": "Rempire",
+  "description": "Склад, сканер штрихкодов и продажа в салоне — админка Rempire.",
+  "start_url": "/shop2/admin/",
+  "scope": "/shop2/",
+  "display": "standalone",
+  "background_color": "#edeae1",
+  "theme_color": "#1c1a00",
+  "lang": "ru",
+  "icons": [
+    { "src": "/shop2/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/shop2/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

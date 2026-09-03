@@ -13,6 +13,7 @@ import {
   sessionEmail,
   updateCustomer,
 } from "@/lib/customers";
+import { accountLoyaltySummary } from "@/lib/loyalty";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,8 +28,26 @@ export async function GET(req: Request) {
   }
   try {
     const [customer, orders] = await Promise.all([getCustomer(email), listCustomerOrders(email)]);
+    const loyalty = await accountLoyaltySummary(customer?.id ?? null);
     return Response.json(
-      { ok: true, customer: customer ?? { email, name: "", phone: "", lang: "RU", birthday: null, marketing: false }, orders },
+      {
+        ok: true,
+        customer: customer ?? {
+          email,
+          name: "",
+          phone: "",
+          lang: "RU",
+          birthday: null,
+          marketing: false,
+          tier: "retail",
+          company: null,
+          regCode: null,
+          proRequestedAt: null,
+          proApprovedAt: null,
+        },
+        orders,
+        loyalty,
+      },
       { headers: NO_STORE },
     );
   } catch (err) {

@@ -13,6 +13,7 @@
     "prerender:check": "node tools/check-prerender.mjs",
     "typecheck": "tsc --noEmit",
     "migrate": "node tools/migrate.mjs",
+    "seed:stock": "node tools/seed-stock.mjs",
     "build:variants": "node tools/build-catalogue-variants.mjs",
     "build:bundles": "node tools/build-bundles.mjs",
     "test": "vitest run",
@@ -26,6 +27,7 @@
   "dependencies": {
     "@types/pg": "^8.23.1",
     "@vercel/blob": "^2.8.0",
+    "@zxing/browser": "^0.2.1",
     "leaflet": "^1.9.4",
     "next": "15.5.23",
     "pg": "^8.23.0",

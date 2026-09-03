@@ -17,6 +17,7 @@ import {
   COMMON,
   esc,
   normalizeLang,
+  num,
   rowLabel,
   rowLead,
   rowLines,
@@ -41,6 +42,17 @@ interface Strings {
   waitShip: string;
   reply: string;
   textIntro: string;
+  /** wholesale/loyalty (100_tiers_loyalty) — one line, only when order.loyaltyEarned > 0. */
+  points: (n: number) => string;
+}
+
+/** 1 балл, 2–4 балла, 5(-20) баллов — standard Russian numeral agreement. */
+function ruPluralPoints(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return "балл";
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "балла";
+  return "баллов";
 }
 
 const T: Record<Lang, Strings> = {
@@ -59,6 +71,7 @@ const T: Record<Lang, Strings> = {
       "Мы напишем, когда передадим посылку в доставку — обычно в течение 1–2 рабочих дней.",
     reply: "Есть вопрос по заказу? Просто ответьте на это письмо — мы на связи.",
     textIntro: "Состав заказа:",
+    points: (n) => `Вам начислено ${n} ${ruPluralPoints(n)} лояльности за этот заказ — уже доступны в личном кабинете.`,
   },
   et: {
     subject: (n) => `Tellimus ${n} on vastu võetud — Rempire`,
@@ -76,6 +89,7 @@ const T: Record<Lang, Strings> = {
     reply:
       "Küsimus tellimuse kohta? Vastake lihtsalt sellele kirjale — oleme olemas.",
     textIntro: "Tellimuse sisu:",
+    points: (n) => `Selle ostuga kogusite ${n} boonuspunkti — need juba ootavad teie kontol.`,
   },
   en: {
     subject: (n) => `Order ${n} confirmed — Rempire`,
@@ -92,6 +106,7 @@ const T: Record<Lang, Strings> = {
       "We will write as soon as the parcel is handed to the carrier — usually within 1–2 business days.",
     reply: "A question about the order? Just reply to this e-mail — we read it.",
     textIntro: "Order summary:",
+    points: (n) => `You earned ${n} loyalty ${n === 1 ? "point" : "points"} on this order — already in your account.`,
   },
 };
 
@@ -116,13 +131,18 @@ export function renderOrderConfirmed(
   // already has its own panel below.
   const rows = totalRows(totals, delivery.split(" — ")[0], L);
 
+  // wholesale/loyalty: only on the first arrival (return|notify route set
+  // this from ApplyOutcome.pointsEarned) and only when it is actually > 0.
+  const pointsEarned = Math.round(num(order.loyaltyEarned, 0));
+  const pointsLine = pointsEarned > 0 ? t.points(pointsEarned) : "";
+
   const body =
     rowTitle(t.title) +
     rowLead(t.lead(esc(hello), esc(number))) +
     rowLabel(t.items) +
     rowLines([...items.lines, ...rows.lines]) +
     rowPanel(t.method, esc(delivery), esc(wait)) +
-    rowNote([esc(t.reply)]);
+    rowNote(pointsLine ? [esc(pointsLine), esc(t.reply)] : [esc(t.reply)]);
 
   const html = shell({
     lang: L,
@@ -144,6 +164,7 @@ export function renderOrderConfirmed(
     `${t.method}: ${delivery}`,
     wait,
     "",
+    ...(pointsLine ? [pointsLine, ""] : []),
     t.reply,
     textFooter(L, c.serviceNote),
   ]);

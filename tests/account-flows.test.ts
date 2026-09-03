@@ -100,7 +100,9 @@ beforeEach(async () => {
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
   await exec(
-    "truncate customers, login_codes, carts, stock_alerts, orders, settings, product_overrides restart identity",
+    // cascade: order_messages (111_order_messages.sql) has a foreign key onto
+    // orders, so a plain truncate of orders alone is refused by Postgres.
+    "truncate customers, login_codes, carts, stock_alerts, orders, settings, product_overrides restart identity cascade",
   );
 });
 
