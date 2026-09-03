@@ -242,6 +242,75 @@ export function sanitizeShippingRules(raw: unknown): object | null {
   return Object.keys(out).length ? out : null;
 }
 
+/* ---- blog posts (draft_post, publish_post) ------------------------------
+ *
+ * Mirrors the shape @/lib/blog's upsertPost() cleans again server-side in
+ * POST /api/admin/blog — this is the first door, not the only one. The body
+ * cap here (6000/language) is the assistant's own ceiling, tighter than what
+ * a human typing in the editor is allowed (20 000, see db/migrations/070):
+ * a model that free-writes an article should not be able to fill the page
+ * with output nobody asked it to keep going on.
+ */
+const BLOG_LANGS = ["RU", "ET", "EN"] as const;
+const BLOG_TITLE_MAX = 200;
+const BLOG_EXCERPT_MAX = 500;
+const BLOG_BODY_MAX = 6000;
+const BLOG_TAG_MAX = 30;
+const BLOG_TAGS_MAX = 12;
+const BLOG_PRODUCTS_MAX = 12;
+
+function blogTrilingual(raw: unknown, max: number): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+  const src = raw as Record<string, unknown>;
+  for (const lang of BLOG_LANGS) {
+    const v = src[lang];
+    if (typeof v !== "string") continue;
+    const t = v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max);
+    if (t) out[lang] = t;
+  }
+  return out;
+}
+
+function blogList(raw: unknown, maxItems: number, maxLen: number): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const v of raw) {
+    if (typeof v !== "string") continue;
+    const t = v.replace(/\s+/g, " ").trim().slice(0, maxLen);
+    if (!t || seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+    if (out.length >= maxItems) break;
+  }
+  return out;
+}
+
+/** A post the assistant cannot even name in Russian is not a draft. */
+export function sanitizeDraftPost(raw: unknown, known: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const title = blogTrilingual(x.title, BLOG_TITLE_MAX);
+  if (!title.RU) return null;
+  return {
+    title,
+    excerpt: blogTrilingual(x.excerpt, BLOG_EXCERPT_MAX),
+    body: blogTrilingual(x.body, BLOG_BODY_MAX),
+    tags: blogList(x.tags, BLOG_TAGS_MAX, BLOG_TAG_MAX),
+    products: blogList(x.products, BLOG_PRODUCTS_MAX, 80).filter((id) => known.has(id)),
+  };
+}
+
+const BLOG_SLUG_RE = /^[a-z0-9-]{1,80}$/;
+export function sanitizePublishPost(raw: unknown): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const slug = typeof x.slug === "string" ? x.slug.trim().toLowerCase() : "";
+  if (!BLOG_SLUG_RE.test(slug) || typeof x.publish !== "boolean") return null;
+  return { slug, publish: x.publish };
+}
+
 /* ---- everything the assistant may propose ------------------------------- */
 
 export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean): object | null {
@@ -309,6 +378,17 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
     const patch = sanitizeContentPatch(x.value ?? x.content);
     return patch ? { type: t, value: patch } : null;
   }
+  // blog: no demo layer to write into, so the panel calls the admin API
+  // directly once the owner clicks «Применить» — see applyBlogAction() in
+  // public/shop2/app.js. Both still go through the same confirm-first flow.
+  if (t === "draft_post") {
+    const post = sanitizeDraftPost(x, known);
+    return post ? { type: t, ...post } : null;
+  }
+  if (t === "publish_post") {
+    const pub = sanitizePublishPost(x);
+    return pub ? { type: t, ...pub } : null;
+  }
   return null;
 }
 
@@ -336,4 +416,49 @@ export function briefHero(raw: unknown): HeroBrief[] {
       on: row.on !== false,
     };
   });
+}
+
+/* ---- analytics agent: what the panel tells the model about sales -------- */
+
+export type AnalyticsBrief = {
+  revenue: number;
+  orders: number;
+  aov: number;
+  conversionPct: number;
+  topProducts: Array<{ name: string; brand: string; revenue: number }>;
+  topSearchTerms: Array<{ term: string; count: number }>;
+};
+
+/**
+ * analyticsForAI() in app.js posts a 30-day summary along with the owner's
+ * question — «сколько продали за неделю» needs numbers to answer from. It is
+ * plain figures the panel itself fetched from GET /api/admin/analytics, not
+ * anything the owner typed, so there is nothing here worth sanitising the way
+ * briefHero() does for free-form text; this only re-shapes and bounds it, the
+ * same defensive distance every other body field gets before it reaches a
+ * prompt.
+ */
+export function briefAnalytics(raw: unknown): AnalyticsBrief | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const n = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+  const clean = (v: unknown, max: number) =>
+    typeof v === "string" ? v.replace(/[`\r\n]+/g, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
+
+  const products = Array.isArray(x.topProducts) ? x.topProducts.slice(0, 5) : [];
+  const terms = Array.isArray(x.topSearchTerms) ? x.topSearchTerms.slice(0, 5) : [];
+  return {
+    revenue: n(x.revenue),
+    orders: n(x.orders),
+    aov: n(x.aov),
+    conversionPct: n(x.conversionPct),
+    topProducts: products.map((p) => {
+      const row = (p && typeof p === "object" ? p : {}) as Record<string, unknown>;
+      return { name: clean(row.name, 80), brand: clean(row.brand, 40), revenue: n(row.revenue) };
+    }),
+    topSearchTerms: terms.map((t) => {
+      const row = (t && typeof t === "object" ? t : {}) as Record<string, unknown>;
+      return { term: clean(row.term, 60), count: n(row.count) };
+    }),
+  };
 }

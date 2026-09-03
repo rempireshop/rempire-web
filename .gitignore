@@ -36,3 +36,9 @@ public/shop2/en/
 
 # generated at build by tools/copy-vendor.mjs (prebuild) from node_modules/leaflet
 public/vendor/leaflet/
+
+# Playwright (docs/testing.md) — run artifacts only. e2e/__screenshots__/ is
+# NOT ignored: those .png files are the committed visual-regression baselines.
+/playwright-report/
+/test-results/
+/blob-report/

@@ -40,7 +40,7 @@ export const dynamic = "force-dynamic";
 const UPLOADS_PER_HOUR = 60;
 const HOUR = 60 * 60 * 1000;
 
-const KINDS: MediaKind[] = ["product", "hero", "review"];
+const KINDS: MediaKind[] = ["product", "hero", "review", "blog"];
 
 function bad(error: string, status = 400, detail?: string) {
   return Response.json({ ok: false, error, ...(detail ? { detail } : {}) }, { status });
@@ -76,7 +76,9 @@ export async function POST(req: Request) {
   const kind = kindRaw as MediaKind;
 
   const ownerId = String(form.get(kind === "review" ? "reviewId" : "productId") || "").trim();
-  if (kind !== "hero" && !ownerId) return bad(kind === "review" ? "bad_review" : "bad_product");
+  // hero and blog covers are uploaded before there is any row to attach them
+  // to — the URL rides along in the slide/post draft and is saved with it
+  if (kind !== "hero" && kind !== "blog" && !ownerId) return bad(kind === "review" ? "bad_review" : "bad_product");
 
   const file = form.get("file");
   if (!file || typeof file === "string" || typeof (file as File).arrayBuffer !== "function") return bad("no_file");

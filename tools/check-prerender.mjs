@@ -68,7 +68,7 @@ const decode = (s) => String(s)
   .replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">")
   .replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, "&");
 
-async function checkPage(file, { lang, seg, rest, product, needImg = true, minBody = 400 }) {
+async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = true, minBody = 400 }) {
   checked++;
   let html;
   try { html = await readFile(file, "utf8"); }
@@ -146,6 +146,7 @@ async function checkPage(file, { lang, seg, rest, product, needImg = true, minBo
     }
   }
   if (product && !types.includes("Product")) fail(file, "no Product JSON-LD");
+  if (blogPost && !types.includes("BlogPosting")) fail(file, "no BlogPosting JSON-LD");
   if (rest !== "/" && !types.includes("BreadcrumbList")) fail(file, "no BreadcrumbList JSON-LD");
   if (rest === "/" && !types.includes("Organization")) fail(file, "home page has no Organization JSON-LD");
 
@@ -201,6 +202,18 @@ const LANGS = [["ru", ""], ["et", "et"], ["en", "en"]];
 const BRANDS = [...new Set(CATALOGUE.map((p) => p.brand))]
   .map((b) => b.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""));
 
+/* blog: unlike CATALOGUE/LEGAL_SLUGS/BUNDLES, there is no committed file that
+   says which posts exist — the database is the only source of truth, and
+   this script reads no network and no database (file header). So the set of
+   slugs to check is read off the Russian pages themselves; `null` means "no
+   /shop2/blog/ at all", which is exactly what a build with no DATABASE_URL
+   (or no published post) writes — the whole blog section below is then
+   skipped, the same way it is skipped for an empty BUNDLES. */
+const BLOG_SLUGS = await readdir(path.join(SHOP2, "blog"), { withFileTypes: true })
+  .then((es) => new Set(es.filter((e) => e.isDirectory()).map((e) => e.name)))
+  .catch(() => null);
+if (!BLOG_SLUGS) console.log("blog: no public/shop2/blog/ — nothing to check this run");
+
 for (const [lang, seg] of LANGS) {
   await checkPage(path.join(SHOP2, seg, "index.html"), { lang, seg, rest: "/" });
   for (const c of ["all", ...Object.keys(CAT_NAMES)]) {
@@ -231,6 +244,16 @@ for (const [lang, seg] of LANGS) {
   }
   await checkPage(path.join(SHOP2, seg, "gift", "index.html"),
     { lang, seg, rest: "/gift/", minBody: 700 });
+  // blog: skipped whole when BLOG_SLUGS is null (see its declaration above) —
+  // a cover is optional, so needImg is off for both the listing and a post
+  if (BLOG_SLUGS) {
+    await checkPage(path.join(SHOP2, seg, "blog", "index.html"),
+      { lang, seg, rest: "/blog/", needImg: false, minBody: 200 });
+    for (const slug of BLOG_SLUGS) {
+      await checkPage(path.join(SHOP2, seg, "blog", slug, "index.html"),
+        { lang, seg, rest: `/blog/${encodeURIComponent(slug)}/`, needImg: false, minBody: 300, blogPost: true });
+    }
+  }
 }
 
 /* ---------- the OG cards are really 1200×630 ---------------------------- */
@@ -255,6 +278,9 @@ const stale = [
   ["p", new Set(CATALOGUE.map((p) => p.id)), "product"],
   ["set", new Set(BUNDLES.map((b) => b.id)), "set"],
   ["info", new Set(LEGAL_SLUGS), "policy page"],
+  // the Russian slugs ARE the keep-set here (see BLOG_SLUGS above), so this
+  // only ever flags et/en drifting from ru, not ru drifting from the database
+  ...(BLOG_SLUGS ? [["blog", BLOG_SLUGS, "blog post"]] : []),
 ];
 for (const [, seg] of LANGS) {
   for (const [kind, keep, what] of stale) {
@@ -288,7 +314,8 @@ else {
   const locs = all(/<loc>([^<]+)<\/loc>/g, sm);
   SITE_BASE = (locs[0] || "").match(/^https?:\/\/[^/]+/)?.[0] || "";
   const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + CATALOGUE.length +
-    LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1;
+    LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 +
+    (BLOG_SLUGS ? BLOG_SLUGS.size + 1 : 0);
   const expected = LANGS.length * perLang;
   if (locs.length !== expected) { failed++; console.error(`FAIL sitemap has ${locs.length} <loc>, expected ${expected}`); }
   if (new Set(locs).size !== locs.length) { failed++; console.error("FAIL sitemap has duplicate <loc> entries"); }
@@ -305,6 +332,7 @@ else {
       ...LEGAL_SLUGS.map((s) => b + "/info/" + s + "/"),
       ...(BUNDLES.length ? [b + "/sets/", ...BUNDLES.map((x) => b + "/set/" + x.id + "/")] : []),
       b + "/gift/",
+      ...(BLOG_SLUGS ? [b + "/blog/", ...[...BLOG_SLUGS].map((s) => b + "/blog/" + s + "/")] : []),
     ];
     for (const w of want) if (!paths.has(w)) { failed++; console.error(`FAIL sitemap is missing ${w}`); }
   }

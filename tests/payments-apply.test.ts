@@ -261,3 +261,39 @@ describe("MakeCommerce", () => {
     ).rejects.toMatchObject({ code: "not_implemented" });
   });
 });
+
+/* analytics agent: the one authoritative revenue row (db/migrations/080_events.sql)
+   is written from exactly here — see recordPurchase() in src/lib/payments/apply.ts. */
+describe("the authoritative revenue row", () => {
+  it("is recorded once, on the transition into paid", async () => {
+    const recordPurchaseEvent = vi.fn(async () => ({}));
+    const out = await applyPaymentResult(order, result(), "montonio", { ...deps(), recordPurchaseEvent });
+    expect(out.alreadyPaid).toBe(false);
+    expect(recordPurchaseEvent).toHaveBeenCalledOnce();
+    expect(recordPurchaseEvent).toHaveBeenCalledWith({ id: order.id, total: order.total });
+  });
+
+  it("is not recorded again when the same paid result arrives twice (webhook retry)", async () => {
+    const recordPurchaseEvent = vi.fn(async () => ({}));
+    const d = { ...deps(), recordPurchaseEvent };
+    await applyPaymentResult(order, result(), "montonio", d);
+    await applyPaymentResult({ ...order, status: "paid" }, result(), "montonio", d);
+    expect(recordPurchaseEvent).toHaveBeenCalledOnce();
+  });
+
+  it("is not recorded when the payment fails or is only pending", async () => {
+    const recordPurchaseEvent = vi.fn(async () => ({}));
+    const d = { ...deps(), recordPurchaseEvent };
+    await applyPaymentResult(order, result({ status: "failed" }), "montonio", d);
+    await applyPaymentResult(order, result({ status: "pending" }), "montonio", d);
+    expect(recordPurchaseEvent).not.toHaveBeenCalled();
+  });
+
+  it("a tracking failure never stops the payment from being recorded as paid", async () => {
+    const recordPurchaseEvent = vi.fn(async () => { throw new Error("db down"); });
+    const d = deps();
+    const out = await applyPaymentResult(order, result(), "montonio", { ...d, recordPurchaseEvent });
+    expect(out.status).toBe("paid");
+    expect(d.setOrderStatus).toHaveBeenCalledWith(order.id, "paid", "payment:montonio");
+  });
+});

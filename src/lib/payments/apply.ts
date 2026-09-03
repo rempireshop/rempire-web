@@ -74,6 +74,14 @@ export interface ApplyDeps {
   ): Promise<{ ok?: boolean; error?: string; already?: boolean } | null>;
   /** Same story: the audit writer, so a failed redeem is visible to Renat. */
   writeAudit?(actor: string, action: string, payload?: unknown): Promise<unknown>;
+  /**
+   * The one authoritative revenue row (analytics agent, migration 080):
+   * written once, right here, on the single transition into `paid` — never
+   * from the browser, never blocked by an ad blocker. Injected by the tests;
+   * production leaves it out and gets @/lib/events by dynamic import. Best
+   * effort: a tracking row must never be the reason a payment fails to save.
+   */
+  recordPurchaseEvent?(order: { id: string; total?: number | string | null }): Promise<unknown>;
 }
 
 export interface ApplyOutcome {
@@ -248,6 +256,31 @@ function alreadyPaid(order: OrderLike): boolean {
   );
 }
 
+/**
+ * The one authoritative revenue row — see ApplyDeps.recordPurchaseEvent above
+ * and db/migrations/080_events.sql. Written once, right here, on the single
+ * transition into paid; never re-run on a webhook retry because the caller
+ * only reaches this from the `!wasPaid` branch. Best effort, same shape as
+ * the audit writer just above: a tracking row must never be the reason a
+ * confirmed payment fails to save.
+ */
+async function recordPurchase(order: OrderLike, deps: ApplyDeps): Promise<void> {
+  let record = deps.recordPurchaseEvent;
+  if (!record) {
+    try {
+      const mod = await import("@/lib/events");
+      record = mod.recordPurchaseEvent as ApplyDeps["recordPurchaseEvent"];
+    } catch (err) {
+      console.error("[payments] events module not available", err);
+    }
+  }
+  try {
+    await record?.({ id: order.id, total: order.total });
+  } catch (err) {
+    console.error(`[payments] recordPurchaseEvent failed on ${order.number}`, err);
+  }
+}
+
 export async function applyPaymentResult(
   order: OrderLike,
   result: VerifyResult,
@@ -299,6 +332,7 @@ export async function applyPaymentResult(
 
     await deps.setOrderStatus(order.id, "paid", `payment:${providerName}`);
     const giftShortfall = await redeemQuotedGiftCard(order, deps);
+    await recordPurchase(order, deps);
     return { status: "paid", keptPaid: false, alreadyPaid: false, giftShortfall, payment };
   }
   if (result.status === "failed") {

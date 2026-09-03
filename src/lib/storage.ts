@@ -26,8 +26,8 @@ export const R2_REGION = "auto";
 export const R2_SERVICE = "s3";
 
 /** Where an uploaded file is allowed to land. Nothing else is ever written. */
-export const KEY_PREFIXES = ["products/", "hero/", "reviews/"] as const;
-export type MediaKind = "product" | "hero" | "review";
+export const KEY_PREFIXES = ["products/", "hero/", "reviews/", "blog/"] as const;
+export type MediaKind = "product" | "hero" | "review" | "blog";
 
 export class StorageError extends Error {
   code: string;
@@ -116,6 +116,7 @@ export function mediaKey(kind: MediaKind, filename: string, ownerId?: string | n
   const stamp = String(now);
   const slug = slugify(filename);
   if (kind === "hero") return `hero/${stamp}-${slug}.webp`;
+  if (kind === "blog") return `blog/${stamp}-${slug}.webp`;
   if (kind === "product") return `products/${safeId(String(ownerId || ""))}/${stamp}-${slug}.webp`;
   if (kind === "review") return `reviews/${safeId(String(ownerId || ""))}/${stamp}-${slug}.webp`;
   throw new StorageError("bad_kind", 400, String(kind));

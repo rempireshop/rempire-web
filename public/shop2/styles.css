@@ -1941,3 +1941,70 @@ button, a, summary, label { touch-action: manipulation; }
   .adm__row--ship { flex-direction: column; align-items: flex-start; }
   .adm__row--ship .adm__nm { flex: none; }
 }
+
+/* ---------- blog: the listing and one article ----------------------------
+   Cards are text-heavy (a title and an excerpt, not just a price), so the
+   grid gets wider tracks than the product grid's — narrower ones read fine
+   for a bottle and a price, not for two sentences. */
+.blog__grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
+@media (min-width: 1100px) { .sec .blog__grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); } }
+.blog__tile { text-decoration: none; color: inherit; }
+.blog__tileimg {
+  display: block; aspect-ratio: 1200 / 630; background: var(--page) center / cover no-repeat;
+  margin-bottom: 9px;
+}
+.blog__tileimg--none { display: flex; align-items: center; justify-content: center; }
+.blog__mark { width: 34px; height: auto; opacity: .3; }
+.blog__tilebody { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.blog__date { font-size: 12px; }
+.blog__tiletitle { font-family: Oswald, sans-serif; font-size: 15px; font-weight: 500; line-height: 1.3; }
+.blog__tilebody p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.5; overflow-wrap: anywhere; }
+.blog__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.blog__tags .chip { font-size: 10px; }
+.blog__more { text-align: center; margin: 26px 0 6px; }
+
+.blog__post { padding-top: 14px; }
+.blog__cover {
+  display: block; width: 100%; aspect-ratio: 1200 / 630; background: var(--page) center / cover no-repeat;
+  margin-bottom: 18px;
+}
+.blog__meta { display: flex; align-items: center; gap: 16px; margin: 6px 0 14px; font-size: 12.5px; color: var(--muted); }
+.blog__meta .link { display: inline-flex; align-items: center; gap: 6px; }
+.blog__meta svg { width: 16px; height: 16px; }
+.blog__post > .blog__tags { margin-bottom: 10px; }
+/* The article body: .acc__rich already carries the shop's rich-text rules
+   (headings, lists, links — the same ones a product description uses);
+   this only caps the measure and gives images and quotes their own room. */
+.blog__body { max-width: 68ch; }
+.blog__body img { display: block; max-width: 100%; height: auto; margin: 18px 0; }
+.blog__body blockquote {
+  margin: 18px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--rule); color: var(--muted);
+}
+@media (max-width: 767px) {
+  .blog__tiletitle { font-size: 14px; }
+}
+
+/* ---------- админка: «Блог» ------------------------------------------------
+   Posts save for real (no demo/undo layer), so the note at the top of the
+   editor says that in plain words rather than leaving Renat to guess why
+   there is no «Отменить» in the journal for a post. */
+.admblog__note { margin: 16px 0; }
+.admblog__hint { margin: -4px 0 12px; font-size: 12.5px; }
+.admblog__body { font-family: inherit; resize: vertical; }
+.admblog__preview {
+  border: 1px solid var(--rule); padding: 10px 14px; margin-bottom: 18px;
+  max-height: 260px; overflow: auto; background: var(--hover);
+}
+.admblog__preview:empty::before { content: "…"; color: var(--muted); }
+.admblog__cover { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.admblog__coverimg {
+  display: block; width: 96px; height: 50px; background: var(--page) center / cover no-repeat;
+  border: 1px solid var(--rule); flex: none;
+}
+.admblog__products { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.admblog__products .chip { display: inline-flex; align-items: center; gap: 6px; text-transform: none; letter-spacing: normal; }
+.admblog__products .chip button {
+  border: none; background: none; padding: 0; margin: 0; cursor: pointer; color: inherit; font-size: 12px; line-height: 1;
+}
+.admblog__acts { flex-wrap: wrap; }
+.admblog__delconfirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--error); }

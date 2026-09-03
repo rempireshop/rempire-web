@@ -64,14 +64,16 @@ function prerenderedRewrites() {
     /* p/c/b are the catalogue; info and set were added when the policy pages,
        the sets and the gift card stopped being shell-only. `set` is singular
        and `sets` is the landing — that is what pathFor() in app.js pushes, so
-       that is what has to resolve. */
-    for (const kind of ["p", "c", "b", "info", "set"]) {
+       that is what has to resolve. `blog` here is the per-post pages, one
+       level under the listing (/shop2/blog/<slug>/) — the listing itself is
+       the single page below, same shape as `sets`/`gift`. */
+    for (const kind of ["p", "c", "b", "info", "set", "blog"]) {
       group(`/shop2${prefix}/${kind}`, path.join(dir, kind));
     }
-    /* Two single pages, so no alternation to build — but still listed off
-       disk, so a run of `npm run prerender` that has not happened yet leaves
-       them falling through to the shell rather than 404ing. */
-    for (const one of ["sets", "gift"]) {
+    /* Single pages, so no alternation to build — but still listed off disk,
+       so a run of `npm run prerender` that has not happened yet leaves them
+       falling through to the shell rather than 404ing. */
+    for (const one of ["sets", "gift", "blog"]) {
       if (existsSync(path.join(PUBLIC, dir, one, "index.html"))) {
         out.push({ source: `/shop2${prefix}/${one}`, destination: `/shop2${prefix}/${one}/index.html` });
       }
@@ -119,7 +121,19 @@ function prerenderedRewrites() {
  */
 const MONTONIO = "https://stargate.montonio.com https://sandbox-stargate.montonio.com";
 
-function csp(scriptSrc: string, frameAncestors = "'none'"): string {
+/* Cloudflare Web Analytics beacon — analytics agent, docs/analytics.md. The
+ * owner adds the site in Cloudflare and pastes the token that comes back over
+ * the CF_BEACON_TOKEN placeholder in public/shop2/index.html; the script tag
+ * is already there either way, so this CSP allowance is needed as soon as a
+ * token is filled in, not something to remember to add later. The script
+ * itself loads from the "static." subdomain, but the beacon's own reporting
+ * call lands on the bare domain — both are allowed so a mismatch here cannot
+ * silently turn "token filled in" into "blocked by our own CSP". /shop2/*
+ * only: this must never widen the strict default policy everywhere else. */
+const CF_BEACON_SCRIPT = "https://static.cloudflareinsights.com";
+const CF_BEACON_CONNECT = "https://static.cloudflareinsights.com https://cloudflareinsights.com";
+
+function csp(scriptSrc: string, frameAncestors = "'none'", connectExtra = ""): string {
   return [
     "default-src 'self'",
     `script-src ${scriptSrc}`,
@@ -127,7 +141,7 @@ function csp(scriptSrc: string, frameAncestors = "'none'"): string {
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: https:",
     "media-src 'self' data: https:",
-    "connect-src 'self' " + MONTONIO,
+    "connect-src 'self' " + [MONTONIO, connectExtra].filter(Boolean).join(" "),
     "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
     "form-action 'self' " + MONTONIO,
     `frame-ancestors ${frameAncestors}`,
@@ -229,14 +243,14 @@ const nextConfig: NextConfig = {
       {
         source: "/shop2",
         headers: [
-          { key: "Content-Security-Policy", value: csp("'self'") },
+          { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
           ...baseSecurityHeaders(),
         ],
       },
       {
         source: "/shop2/:path*",
         headers: [
-          { key: "Content-Security-Policy", value: csp("'self'") },
+          { key: "Content-Security-Policy", value: csp(`'self' ${CF_BEACON_SCRIPT}`, "'none'", CF_BEACON_CONNECT) },
           ...baseSecurityHeaders(),
         ],
       },

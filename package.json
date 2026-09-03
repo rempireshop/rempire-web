@@ -18,7 +18,10 @@
     "test": "vitest run",
     "i18n:gaps": "node tools/i18n-gaps.mjs",
     "pack:migrations": "node tools/pack-migrations.mjs",
-    "pack:content": "node tools/pack-content.mjs"
+    "pack:content": "node tools/pack-content.mjs",
+    "e2e": "node tools/e2e-build.mjs && playwright test",
+    "e2e:ui": "node tools/e2e-build.mjs && playwright test --ui",
+    "e2e:update": "node tools/e2e-build.mjs && playwright test --update-snapshots"
   },
   "dependencies": {
     "@types/pg": "^8.23.1",

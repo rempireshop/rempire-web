@@ -46,6 +46,9 @@ import { readFile, writeFile, mkdir, readdir, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+// blog: published posts come straight out of Postgres, when there is one to
+// read — see tools/lib/blog-export.mjs for why this is a separate module.
+import { fetchPublishedPosts, markdownToHtml, pickLang } from "./lib/blog-export.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -219,6 +222,17 @@ const BUNDLES = await (async () => {
 })();
 const bundleText = (b, field, code) => (b[field] && (b[field][code] || b[field].RU)) || "";
 
+/* blog: [] silently when DATABASE_URL is not set, or when the database could
+   not be reached — this run then simply writes no /blog/ pages, exactly like
+   an empty BUNDLES writes no /sets/ pages. Publishing a post needs a redeploy
+   to show up here; docs/blog.md says so for Renat. */
+const BLOG_POSTS = await fetchPublishedPosts();
+if (!BLOG_POSTS.length) {
+  console.log(process.env.DATABASE_URL
+    ? "  (no published posts — no /blog/ pages this run)"
+    : "  (DATABASE_URL not set — no /blog/ pages this run)");
+}
+
 /* ---------- translation tables, borrowed from app.js -------------------
 
    The dictionaries live in app.js and only there. Rather than keep a second
@@ -320,7 +334,10 @@ const T = {
     setsDesc: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.",
     setDesc: (price, save, n) => `${price} вместо розницы, ${save} — ${n} в наборе. Магазин Rempire, Таллинн: доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
     giftDesc: "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.",
-    infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`
+    infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`,
+    blogDesc: "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.",
+    blogEmpty: "Статей пока нет — загляните позже.",
+    otherPosts: "Другие статьи"
   },
   ET: {
     base: "REMPIRE — kosmeetikapood Tallinnas",
@@ -344,7 +361,10 @@ const T = {
     setsDesc: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
     setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
     giftDesc: "Rempire'i kinkekaart 25, 50 või 100 € — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
-    infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`
+    infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`,
+    blogDesc: "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
+    blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
+    otherPosts: "Teised artiklid"
   },
   EN: {
     base: "REMPIRE — grooming shop in Tallinn",
@@ -368,7 +388,10 @@ const T = {
     setsDesc: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
     setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
     giftDesc: "A Rempire gift card for €25, €50 or €100 — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
-    infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`
+    infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`,
+    blogDesc: "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
+    blogEmpty: "No articles yet — check back soon.",
+    otherPosts: "More articles"
   }
 };
 
@@ -643,6 +666,20 @@ async function drawCard(file, sources) {
   cardsMade++;
 }
 
+/* blog: the cover is a photo the owner uploaded to R2 (docs/media.md), not a
+   local file, so there is nothing on disk to composite — it is downloaded
+   once and cropped to the card size instead. "attention" picks the most
+   detailed region rather than a plain centre crop, which matters for a
+   cover shot at an odd aspect ratio. */
+async function drawBlogCard(file, coverUrl) {
+  const res = await fetch(coverUrl);
+  if (!res.ok) throw new Error("fetch " + res.status);
+  const buf = Buffer.from(await res.arrayBuffer());
+  await mkdir(path.dirname(file), { recursive: true });
+  await sharp(buf).resize(OG_W, OG_H, { fit: "cover", position: "attention" }).jpeg({ quality: 84 }).toFile(file);
+  cardsMade++;
+}
+
 if (sharp) {
   await mkdir(OGDIR, { recursive: true });
   /* The last resort: the mark alone. Used by the policy pages, the gift card
@@ -671,6 +708,13 @@ if (sharp) {
     try { await drawCard(f, (b.images || []).slice(0, 3)); }
     catch (e) { console.warn("! og card for set " + b.id + ": " + e.message); }
   }
+  for (const post of BLOG_POSTS) {
+    if (!post.coverUrl) continue;
+    const f = path.join(OGDIR, "blog-" + post.slug + ".jpg");
+    if (existsSync(f)) continue;
+    try { await drawBlogCard(f, post.coverUrl); }
+    catch (e) { console.warn("! og card for blog/" + post.slug + ": " + e.message); }
+  }
 }
 
 const OG_CARDS = new Set(existsSync(OGDIR) ? await readdir(OGDIR) : []);
@@ -685,6 +729,7 @@ function ogPick(...candidates) {
   return abs(OG_FALLBACK);
 }
 const productCard = p => (OG_CARDS.has(p.id + ".jpg") ? "/shop/og/" + p.id + ".jpg" : null);
+const blogCard1200 = post => (OG_CARDS.has("blog-" + post.slug + ".jpg") ? "/shop/og/blog-" + post.slug + ".jpg" : null);
 
 function productPage(p, lang) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
@@ -1197,6 +1242,146 @@ function giftPage(lang) {
   };
 }
 
+/* ---------- blog ---------------------------------------------------------
+   Posts live in Postgres (BLOG_POSTS, read by tools/lib/blog-export.mjs) —
+   the only screen in this file whose content is not one of the generated
+   JS files under public/shop/. Publishing a post needs a redeploy to reach
+   this static page (docs/blog.md); the SPA renders it live off the API the
+   moment it is published, redeploy or not. */
+
+const dmy = iso => String(iso || "").slice(0, 10).split("-").reverse().join(".");
+
+function blogTile(post, seg, code, t) {
+  const title = pickLang(post.title, code) || post.slug;
+  const excerpt = pickLang(post.excerpt, code);
+  const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
+  return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
+    (post.coverUrl
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="400" height="400">'
+      : "") +
+    '<span class="pre__nm">' + esc(title) + "</span>" +
+    (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
+    (excerpt ? "<p>" + esc(clip(excerpt, 140)) + "</p>" : "") +
+    "</a></li>";
+}
+
+function blogListPage(lang) {
+  const { code, seg } = lang;
+  const t = T[code];
+  const rest = "/blog/";
+  const heading = tr("Блог", code, false);
+  const content = '<div class="wrap">' +
+    crumbs([[t.home, langPath(seg, "/")], [heading, null]]) +
+    '<section class="sec">' +
+      '<h1 class="display h1">' + esc(heading) + "</h1>" +
+      (BLOG_POSTS.length
+        ? '<ul class="grid blog__grid" style="list-style:none;padding:0">' + BLOG_POSTS.map(p => blogTile(p, seg, code, t)).join("") + "</ul>"
+        : '<p class="muted">' + esc(t.blogEmpty) + "</p>") +
+    "</section>" +
+    langNav(seg, rest, t) +
+    "</div>";
+
+  return {
+    file: path.join(SHOP2, seg, "blog", "index.html"),
+    spec: {
+      lang, seg, rest,
+      title: fitTitle(heading, heading + " — REMPIRE"),
+      desc: clip(t.blogDesc, 158),
+      image: ogPick(BLOG_POSTS[0] ? blogCard1200(BLOG_POSTS[0]) : null, OG_DEFAULT),
+      imageAlt: heading, ogType: "website",
+      jsonld: [
+        ORG_LD,
+        breadcrumbLD([[t.home, langPath(seg, "/")], [heading, null]]),
+        {
+          "@context": "https://schema.org", "@type": "ItemList",
+          name: heading, numberOfItems: BLOG_POSTS.length,
+          itemListElement: BLOG_POSTS.slice(0, 50).map((p, i) => ({
+            "@type": "ListItem", position: i + 1,
+            url: abs(langPath(seg, "/blog/" + encodeURIComponent(p.slug) + "/")),
+            name: pickLang(p.title, code) || p.slug
+          }))
+        }
+      ],
+      content
+    }
+  };
+}
+
+function blogPostPage(post, lang) {
+  const { code, seg } = lang;
+  const t = T[code];
+  const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
+  const title = pickLang(post.title, code) || post.slug;
+  const excerpt = pickLang(post.excerpt, code);
+  const bodyHtml = markdownToHtml(pickLang(post.body, code));
+  const bodyText = stripTags(bodyHtml);
+  const desc = clip((code === "EN" && pickLang(post.seoDesc, code)) || excerpt || bodyText, 158);
+  const seoTitleRaw = pickLang(post.seoTitle, code);
+  const pageTitle = fitTitle(title, (seoTitleRaw || title) + " — REMPIRE");
+  const blogLabel = tr("Блог", code, false);
+  const crumbItems = [[t.home, langPath(seg, "/")], [blogLabel, langPath(seg, "/blog/")], [title, null]];
+
+  const featured = (post.products || [])
+    .map(id => CATALOGUE.find(p => p.id === id))
+    .filter(Boolean)
+    .slice(0, 8);
+
+  const tagsHtml = post.tags && post.tags.length
+    ? '<ul class="blog__tags">' + post.tags.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>"
+    : "";
+
+  const others = BLOG_POSTS.filter(p => p.slug !== post.slug).slice(0, 3);
+
+  const content = '<div class="wrap wrap--mid">' +
+    crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
+    '<article class="sec blog__post">' +
+      (post.coverUrl
+        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630">'
+        : "") +
+      '<h1 class="display h1">' + esc(title) + "</h1>" +
+      (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +
+      tagsHtml +
+      '<div class="acc__rich blog__body">' + bodyHtml + "</div>" +
+    "</article>" +
+    (featured.length
+      ? '<section class="sec"><h2 class="display h1">' + esc(tr("Товары из статьи", code, false)) + "</h2>" + grid(featured, seg, code, t) + "</section>"
+      : "") +
+    (others.length
+      ? '<section class="sec"><h2 class="display h1">' + esc(t.otherPosts) + "</h2>" +
+        '<ul class="grid blog__grid" style="list-style:none;padding:0">' + others.map(p => blogTile(p, seg, code, t)).join("") + "</ul></section>"
+      : "") +
+    langNav(seg, rest, t) +
+    "</div>";
+
+  return {
+    file: path.join(SHOP2, seg, "blog", post.slug, "index.html"),
+    spec: {
+      lang, seg, rest,
+      title: pageTitle, desc,
+      image: ogPick(blogCard1200(post)), imageAlt: title, ogType: "article",
+      jsonld: [
+        {
+          "@context": "https://schema.org", "@type": "BlogPosting",
+          headline: title,
+          image: [ogPick(blogCard1200(post))],
+          datePublished: post.publishedAt || post.updatedAt,
+          dateModified: post.updatedAt || post.publishedAt,
+          author: { "@type": "Organization", name: post.author || "Rempire" },
+          publisher: {
+            "@type": "Organization", name: "REMPIRE",
+            logo: { "@type": "ImageObject", url: abs("/brand/rempire-tower.svg") }
+          },
+          description: desc,
+          mainEntityOfPage: { "@type": "WebPage", "@id": abs(langPath(seg, rest)) },
+          url: abs(langPath(seg, rest))
+        },
+        breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))
+      ],
+      content
+    }
+  };
+}
+
 /* ---------- build the set ----------------------------------------------- */
 
 const pages = [];
@@ -1236,6 +1421,12 @@ for (const lang of LANGS) {
     for (const b of BUNDLES) pages.push(setPage(b, lang));
   }
   pages.push(giftPage(lang));
+  // blog: [] when there is no database at build time — no /blog/ pages then,
+  // same as an empty BUNDLES writing no /sets/ pages
+  if (BLOG_POSTS.length) {
+    pages.push(blogListPage(lang));
+    for (const post of BLOG_POSTS) pages.push(blogPostPage(post, lang));
+  }
 }
 
 /* ---------- write, only what changed ------------------------------------ */
@@ -1258,7 +1449,7 @@ for (const { file, spec } of pages) {
 /* Anything left over under the directories this tool owns is a product,
    category or brand that no longer exists — a page Google would keep asking
    for. Sweep it. index.html, app.js, chat.js and styles.css are not ours. */
-const OWNED = ["p", "c", "b", "info", "set", "sets", "gift", "et", "en"];
+const OWNED = ["p", "c", "b", "info", "set", "sets", "gift", "blog", "et", "en"];
 let removed = 0;
 async function sweep(dir) {
   let entries;
@@ -1312,6 +1503,10 @@ for (const lang of LANGS) {
     for (const b of BUNDLES) entries.push(urlEntry("/set/" + encodeURIComponent(b.id) + "/", lang.seg, "0.7"));
   }
   entries.push(urlEntry("/gift/", lang.seg, "0.6"));
+  if (BLOG_POSTS.length) {
+    entries.push(urlEntry("/blog/", lang.seg, "0.7"));
+    for (const post of BLOG_POSTS) entries.push(urlEntry("/blog/" + encodeURIComponent(post.slug) + "/", lang.seg, "0.6"));
+  }
 }
 
 /* Belt and braces: if one of these ever appears in the list, a page was
@@ -1414,12 +1609,14 @@ await writeFile(path.join(PUB, "robots.staging.txt"), robotsStaging, "utf8");
 await writeFile(path.join(PUB, "robots.txt"), LIVE ? robotsProduction : robotsStaging, "utf8");
 
 const perLang = CATALOGUE.length + CATS.length + 1 + BRANDS.length + 1 +
-  LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1;
+  LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 +
+  (BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0);
 
 console.log(
   `prerender: ${pages.length} pages (${written} written, ${same} unchanged, ${removed} stale removed)\n` +
   `           ${LANGS.length} languages × ${perLang}: ${CATALOGUE.length} products + ${CATS.length + 1} categories + ` +
-    `${BRANDS.length} brands + 1 home + ${LEGAL_SLUGS.length} info + ${BUNDLES.length ? BUNDLES.length + 1 : 0} sets + 1 gift\n` +
+    `${BRANDS.length} brands + 1 home + ${LEGAL_SLUGS.length} info + ${BUNDLES.length ? BUNDLES.length + 1 : 0} sets + 1 gift + ` +
+    `${BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0} blog\n` +
   `           base ${BASE}  robots "${ROBOTS}"  robots.txt = ${LIVE ? "production" : "staging"}  assets ?v=${ASSET_V}\n` +
   `           og cards: ${OG_CARDS.size} on disk (${cardsMade} drawn this run)  every og:image ${OG_W}×${OG_H}\n` +
   `           sitemap: ${entries.length} urls in ${sitemapFiles.length || 1} file(s)`

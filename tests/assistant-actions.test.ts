@@ -127,6 +127,81 @@ describe("the rest of the whitelist still holds", () => {
   });
 });
 
+describe("draft_post", () => {
+  const goodPost = {
+    title: { RU: "Как ухаживать за бородой зимой", ET: "Kuidas hooldada habet talvel", EN: "Beard care in winter" },
+    excerpt: { RU: "Три привычки на холодный сезон.", ET: "Kolm harjumust külmaks hooajaks.", EN: "Three habits for the cold season." },
+    body: { RU: "# Зима\n\nМасло **каждый день**.", ET: "# Talv\n\nÕli **iga päev**.", EN: "# Winter\n\nOil **every day**." },
+    tags: ["борода", "зима"],
+    products: [someId],
+  };
+
+  it("accepts a well-formed draft and rebuilds it field by field", () => {
+    const out = sanitizeAction({ type: "draft_post", ...goodPost }, known, true) as {
+      type: string; title: Record<string, string>; tags: string[]; products: string[];
+    };
+    expect(out).toBeTruthy();
+    expect(out.type).toBe("draft_post");
+    expect(out.title).toEqual(goodPost.title);
+    expect(out.tags).toEqual(["борода", "зима"]);
+    expect(out.products).toEqual([someId]);
+  });
+
+  it("requires at least a Russian title", () => {
+    expect(sanitizeAction({ type: "draft_post", ...goodPost, title: { ET: "Ainult eesti keeles" } }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "draft_post", ...goodPost, title: {} }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "draft_post", ...goodPost, title: null }, known, true)).toBeNull();
+  });
+
+  it("drops a product id the catalogue does not have", () => {
+    const out = sanitizeAction(
+      { type: "draft_post", ...goodPost, products: [someId, "not-a-real-product"] },
+      known,
+      true,
+    ) as { products: string[] };
+    expect(out.products).toEqual([someId]);
+  });
+
+  it("caps the body length per language, tighter than a human editor's own limit", () => {
+    const out = sanitizeAction(
+      { type: "draft_post", ...goodPost, body: { RU: "я".repeat(9000) } },
+      known,
+      true,
+    ) as { body: Record<string, string> };
+    expect(out.body.RU).toHaveLength(6000);
+  });
+
+  it("is admin-only", () => {
+    expect(sanitizeAction({ type: "draft_post", ...goodPost }, known, false)).toBeNull();
+  });
+});
+
+describe("publish_post", () => {
+  it("accepts a slug and a publish flag", () => {
+    expect(sanitizeAction({ type: "publish_post", slug: "beard-care-winter", publish: true }, known, true))
+      .toEqual({ type: "publish_post", slug: "beard-care-winter", publish: true });
+    expect(sanitizeAction({ type: "publish_post", slug: "beard-care-winter", publish: false }, known, true))
+      .toEqual({ type: "publish_post", slug: "beard-care-winter", publish: false });
+  });
+
+  it("lower-cases the slug and rejects one that could not have come from slugify()", () => {
+    expect(sanitizeAction({ type: "publish_post", slug: "Beard-Care-Winter", publish: true }, known, true))
+      .toEqual({ type: "publish_post", slug: "beard-care-winter", publish: true });
+    for (const slug of ["../etc/passwd", "beard care winter", "beard_care", "", "a".repeat(81)]) {
+      expect(sanitizeAction({ type: "publish_post", slug, publish: true }, known, true)).toBeNull();
+    }
+  });
+
+  it("requires a boolean publish flag", () => {
+    expect(sanitizeAction({ type: "publish_post", slug: "beard-care-winter" }, known, true)).toBeNull();
+    expect(sanitizeAction({ type: "publish_post", slug: "beard-care-winter", publish: "true" }, known, true)).toBeNull();
+  });
+
+  it("is admin-only", () => {
+    expect(sanitizeAction({ type: "publish_post", slug: "beard-care-winter", publish: true }, known, false)).toBeNull();
+  });
+});
+
 describe("the banner handed to the model", () => {
   it("trims it and strips anything that could read as prompt structure", () => {
     const out = briefHero([

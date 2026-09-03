@@ -146,6 +146,19 @@ describe("admin upload", () => {
     });
   });
 
+  // blog: a cover is uploaded before there is a post row to attach it to —
+  // same as kind=hero, no productId/reviewId required.
+  it("accepts kind=blog with no owner id and keys it under blog/", async () => {
+    const { POST } = await import("@/app/api/admin/upload/route");
+    stubBucket();
+    const res = await POST(upload(await png(40, 40), "Cover Shot.png", { kind: "blog", productId: "" }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.key).toMatch(/^blog\/\d{13}-cover-shot\.webp$/);
+    expect(body.url).toBe(`${R2_ENV.R2_PUBLIC_BASE}/${body.key}`);
+  });
+
   it("stops after 60 uploads an hour", async () => {
     const { POST } = await import("@/app/api/admin/upload/route");
     stubBucket();

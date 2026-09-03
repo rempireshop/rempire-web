@@ -36,6 +36,8 @@
     check: '<path d="M4.5 12.5l5 5 10-11"/>',
     // «Промокоды» in the admin nav — a price tag with its hole
     tag: '<path d="M4 4h7l9 9-7 7-9-9z"/><circle cx="8.2" cy="8.2" r="1.4"/>',
+    // blog: «Блог» in the admin nav — a sheet of text with a folded corner
+    doc: '<path d="M6.5 3.5h7l4 4V20a1 1 0 0 1-1 1h-10a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M13.5 3.5V8h4"/><path d="M9 12.5h6M9 16h6"/>',
     share: '<path d="M12 3.5v12M12 3.5 8.2 7.3M12 3.5l3.8 3.8"/><path d="M6.5 11.5H5a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 5 20.5h14a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5h-1.5"/>',
     instagram: '<rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.2" cy="6.8" r="1.15" fill="currentColor" stroke="none"/>',
     facebook: '<path d="M14.6 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.25-1.5 1.55-1.5H17.8V3.6A21 21 0 0 0 15.4 3.5c-2.4 0-4 1.45-4 4.1v2.3H8.7V13h2.7v8z" fill="currentColor" stroke="none"/>',
@@ -715,6 +717,7 @@
       "Открыть товары": "Ava tooted",
       "Открыть клиентов": "Ava kliendid",
       "Открыть отзывы": "Ava arvustused",
+      "Открыть блог": "Ava ajaveeb",
       "Открыть аналитику": "Ava statistika",
       "Открыть письма": "Ava kirjad",
       "Открыть подключения": "Ava ühendused",
@@ -815,7 +818,80 @@
         "Kaart ei laadinud — pakiautomaatide nimekiri töötab tavapäraselt",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
-        "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi."
+        "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
+      // blog
+      "Блог": "Ajaveeb",
+      "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
+        "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
+      "Статей пока нет — загляните позже.": "Artikleid veel pole — vaata varsti uuesti.",
+      "Другие статьи": "Teised artiklid",
+      "Товары из статьи": "Tooted artiklist",
+      "Статья не найдена.": "Artiklit ei leitud.",
+      "Вернуться в блог": "Tagasi ajaveebi",
+      "Новая статья": "Uus artikkel",
+      "Черновик": "Mustand",
+      "Опубликовано": "Avaldatud",
+      "Пока нет ни одной статьи — нажмите «Новая статья».": "Ühtegi artiklit pole veel — vajuta „Uus artikkel“.",
+      "Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.":
+        "Artiklid ei kuulu demorežiimi: salvestamine, avaldamine ja kustutamine on päris ega ole tagasivõetavad.",
+      "Анонс": "Lühitutvustus",
+      "Текст статьи (Markdown)": "Artikli tekst (Markdown)",
+      "Форматирование: **жирный**, *курсив*, [ссылка](https://…), ![картинка](https://…), «- » список, «> » цитата, «# » заголовок.":
+        "Vormindus: **paks**, *kaldkiri*, [link](https://…), ![pilt](https://…), «- » loend, «> » tsitaat, «# » pealkiri.",
+      "Обложка": "Kaanepilt",
+      "Загрузить обложку": "Laadi üles kaanepilt",
+      "Alt-текст обложки": "Kaanepildi alt-tekst",
+      "Теги": "Sildid",
+      "Тег и запятая": "Silt ja koma",
+      "Товары в статье": "Artikli tooted",
+      "Найти товар по названию": "Otsi toodet nime järgi",
+      "SEO-заголовок": "SEO-pealkiri",
+      "SEO-описание": "SEO-kirjeldus",
+      "Адрес страницы (slug)": "Lehe aadress (slug)",
+      "Автор": "Autor",
+      "Сохранить черновик": "Salvesta mustandina",
+      "Снять с публикации": "Võta avaldamisest maha",
+      "Статья опубликована ✓": "Artikkel avaldatud ✓",
+      "Статья снята с публикации ✓": "Artikkel võetud avaldamisest maha ✓",
+      "Черновик сохранён ✓": "Mustand salvestatud ✓",
+      "Изменения сохранены ✓": "Muudatused salvestatud ✓",
+      "Статья удалена ✓": "Artikkel kustutatud ✓",
+      "Точно удалить эту статью? Она перейдёт в черновики — текст останется, но в магазине его будет не увидеть.":
+        "Kas kindlasti kustutada see artikkel? See läheb mustandisse — tekst jääb alles, kuid poes seda enam ei näe.",
+      "Да, удалить": "Jah, kustuta",
+      "Не получилось сохранить — попробуйте ещё раз.": "Salvestamine ei õnnestunud — proovi uuesti.",
+      "Заполните заголовок хотя бы на русском.": "Täida pealkiri vähemalt vene keeles.",
+      "Показать ещё": "Näita veel",
+      // analytics agent — «Аналитика» tab
+      "Что происходит с магазином — простыми словами.": "Mis toimub poes — lihtsate sõnadega.",
+      "Сегодня": "Täna", "7 дней": "7 päeva", "30 дней": "30 päeva", "90 дней": "90 päeva",
+      "Выручка": "Käive", "Конверсия": "Konversioon",
+      "нет данных за прошлый период": "eelmise perioodi kohta andmed puuduvad",
+      "Данных пока нет — они появятся после первых заходов.": "Andmeid veel pole — need ilmuvad pärast esimesi külastusi.",
+      "Выручка по дням": "Käive päevade kaupa", "Пока нет данных.": "Andmeid veel pole.",
+      "Воронка": "Müügilehter", "Сессии": "Sessioonid", "Смотрели товар": "Vaatasid toodet",
+      "Добавили в корзину": "Lisasid ostukorvi", "Открыли оформление": "Avasid tellimuse vormistamise",
+      "Купили": "Ostsid",
+      "Топ товаров по выручке": "Enimmüüdud tooted käibe järgi", "Пока нет продаж.": "Müüke veel pole.",
+      "Бренды: что приносит деньги": "Brändid: mis toob raha",
+      "Топ товаров по просмотрам": "Enim vaadatud tooted", "Пока нет просмотров.": "Vaatamisi veel pole.",
+      "Смотрят, но не покупают": "Vaatavad, aga ei osta", "Таких товаров нет.": "Selliseid tooteid pole.",
+      "Популярные запросы": "Populaarsed otsingud", "Пока не искали.": "Veel ei ole otsitud.",
+      "Ищут, но не находят": "Otsivad, aga ei leia", "Таких запросов нет.": "Selliseid otsinguid pole.",
+      "Промокоды пока не использовали.": "Sooduskoode pole veel kasutatud.",
+      "Устройства": "Seadmed", "Мобильные": "Mobiilseadmed", "Компьютеры": "Arvutid", "Страны": "Riigid",
+      "Ещё цифры": "Muud näitajad", "Брошенные корзины": "Hüljatud ostukorvid",
+      "Открытий чата": "Vestluse avamisi",
+      "Подарочных карт продано": "Kinkekaarte müüdud", "Подарочных карт потрачено": "Kinkekaarte kasutatud",
+      "Всё в наличии.": "Kõik on laos.",
+      "Google Search Console — последние 28 дней": "Google Search Console — viimased 28 päeva",
+      "Аналитика сейчас не отвечает — попробуйте позже.": "Analüütika ei vasta praegu — proovi hiljem uuesti.",
+      "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
+        "Lisage teenusekonto Search Console'i kasutajaks → vt docs/analytics.md",
+      "Google Search Console сейчас не отвечает — попробуйте позже.": "Google Search Console ei vasta praegu — proovi hiljem uuesti.",
+      "Позиция": "Positsioon", "Топ запросов": "Populaarseimad päringud", "Топ страниц": "Populaarseimad lehed",
+      "Аналитика считается на сервере из настоящих заходов и заказов — откроется здесь, как только вы войдёте в панель.":
+        "Analüütika arvutatakse serveris tegelike külastuste ja tellimuste põhjal — see ilmub siia niipea, kui logite paneeli sisse."
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -1459,6 +1535,7 @@
       "Открыть товары": "Open products",
       "Открыть клиентов": "Open customers",
       "Открыть отзывы": "Open reviews",
+      "Открыть блог": "Open the blog",
       "Открыть аналитику": "Open analytics",
       "Открыть письма": "Open e-mails",
       "Открыть подключения": "Open connections",
@@ -1559,7 +1636,80 @@
         "The map failed to load — the pickup-point list still works as usual",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
-        "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop."
+        "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop.",
+      // blog
+      "Блог": "Blog",
+      "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
+        "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
+      "Статей пока нет — загляните позже.": "No articles yet — check back soon.",
+      "Другие статьи": "More articles",
+      "Товары из статьи": "Products from this article",
+      "Статья не найдена.": "Article not found.",
+      "Вернуться в блог": "Back to the blog",
+      "Новая статья": "New article",
+      "Черновик": "Draft",
+      "Опубликовано": "Published",
+      "Пока нет ни одной статьи — нажмите «Новая статья».": "No articles yet — click “New article”.",
+      "Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.":
+        "Posts are not part of the demo mode: saving, publishing and deleting are real and cannot be undone.",
+      "Анонс": "Excerpt",
+      "Текст статьи (Markdown)": "Article body (Markdown)",
+      "Форматирование: **жирный**, *курсив*, [ссылка](https://…), ![картинка](https://…), «- » список, «> » цитата, «# » заголовок.":
+        "Formatting: **bold**, *italic*, [link](https://…), ![image](https://…), \"- \" list, \"> \" quote, \"# \" heading.",
+      "Обложка": "Cover",
+      "Загрузить обложку": "Upload a cover",
+      "Alt-текст обложки": "Cover alt text",
+      "Теги": "Tags",
+      "Тег и запятая": "Tag, then comma",
+      "Товары в статье": "Products in this article",
+      "Найти товар по названию": "Find a product by name",
+      "SEO-заголовок": "SEO title",
+      "SEO-описание": "SEO description",
+      "Адрес страницы (slug)": "Page address (slug)",
+      "Автор": "Author",
+      "Сохранить черновик": "Save as draft",
+      "Снять с публикации": "Unpublish",
+      "Статья опубликована ✓": "Article published ✓",
+      "Статья снята с публикации ✓": "Article unpublished ✓",
+      "Черновик сохранён ✓": "Draft saved ✓",
+      "Изменения сохранены ✓": "Changes saved ✓",
+      "Статья удалена ✓": "Article deleted ✓",
+      "Точно удалить эту статью? Она перейдёт в черновики — текст останется, но в магазине его будет не увидеть.":
+        "Delete this article? It goes back to drafts — the text stays, but it will not be visible in the shop.",
+      "Да, удалить": "Yes, delete",
+      "Не получилось сохранить — попробуйте ещё раз.": "Could not save — try again.",
+      "Заполните заголовок хотя бы на русском.": "Fill in the title in at least Russian.",
+      "Показать ещё": "Show more",
+      // analytics agent — «Аналитика» tab
+      "Что происходит с магазином — простыми словами.": "What's happening in the shop — in plain terms.",
+      "Сегодня": "Today", "7 дней": "7 days", "30 дней": "30 days", "90 дней": "90 days",
+      "Выручка": "Revenue", "Конверсия": "Conversion",
+      "нет данных за прошлый период": "no data for the previous period",
+      "Данных пока нет — они появятся после первых заходов.": "No data yet — it will appear after the first visits.",
+      "Выручка по дням": "Revenue by day", "Пока нет данных.": "No data yet.",
+      "Воронка": "Funnel", "Сессии": "Sessions", "Смотрели товар": "Viewed a product",
+      "Добавили в корзину": "Added to cart", "Открыли оформление": "Opened checkout",
+      "Купили": "Purchased",
+      "Топ товаров по выручке": "Top products by revenue", "Пока нет продаж.": "No sales yet.",
+      "Бренды: что приносит деньги": "Brands: what brings in money",
+      "Топ товаров по просмотрам": "Top products by views", "Пока нет просмотров.": "No views yet.",
+      "Смотрят, но не покупают": "Viewed but not bought", "Таких товаров нет.": "No such products.",
+      "Популярные запросы": "Popular searches", "Пока не искали.": "No searches yet.",
+      "Ищут, но не находят": "Searched but not found", "Таких запросов нет.": "No such searches.",
+      "Промокоды пока не использовали.": "No promo codes used yet.",
+      "Устройства": "Devices", "Мобильные": "Mobile", "Компьютеры": "Desktop", "Страны": "Countries",
+      "Ещё цифры": "More numbers", "Брошенные корзины": "Abandoned carts",
+      "Открытий чата": "Chat opens",
+      "Подарочных карт продано": "Gift cards sold", "Подарочных карт потрачено": "Gift cards redeemed",
+      "Всё в наличии.": "Everything is in stock.",
+      "Google Search Console — последние 28 дней": "Google Search Console — last 28 days",
+      "Аналитика сейчас не отвечает — попробуйте позже.": "Analytics is not responding right now — try again later.",
+      "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
+        "Add the service account as a user in Search Console → see docs/analytics.md",
+      "Google Search Console сейчас не отвечает — попробуйте позже.": "Google Search Console is not responding right now — try again later.",
+      "Позиция": "Position", "Топ запросов": "Top queries", "Топ страниц": "Top pages",
+      "Аналитика считается на сервере из настоящих заходов и заказов — откроется здесь, как только вы войдёте в панель.":
+        "Analytics is computed on the server from real visits and orders — it will appear here as soon as you sign in to the panel."
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -1668,7 +1818,9 @@
       { ET: "Kevin.Murphy: kataloogis $1 toodet, keskmine hind $2. Päris versioonis on siin brändi kuukäive ja võrdlus eelmisega.",
         EN: "Kevin.Murphy: $1 products in the catalogue, average price $2. In the live version this shows the brand’s monthly revenue and a comparison with last month." }],
     // «Открыть товары →» — the label is a dictionary key, the arrow is not
-    [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }]
+    [/^(.+) →$/, { ET: "$1 →", EN: "$1 →" }],
+    // analytics agent — the KPI cards' delta line, e.g. "+12,3% к прошлому периоду"
+    [/^([-+][\d.,]+%) к прошлому периоду$/, { ET: "$1 võrreldes eelmise perioodiga", EN: "$1 vs. previous period" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -2343,7 +2495,20 @@
     admPromoErr: "",
     promoForm: null,    // the code being created or edited, or null
     promoFormErr: "",
-    videoOn: false      // the product video is a click-to-play embed
+    videoOn: false,      // the product video is a click-to-play embed
+    // ---- blog: posts live in their own table, not the demo/undo layer ----
+    blogSlug: "",         // which post /blog/<slug>/ is open
+    blogList: null,       // {posts, total, page, perPage} once the listing loaded
+    blogListBusy: false,
+    blogPosts: {},         // slug -> post once fetched; null = not found, undefined = not asked yet
+    adminBlog: null,       // admin tab «Блог»: [post,...] once loaded
+    adminBlogEdit: null,   // the post being created/edited (a draft object), or null for the list
+    adminBlogEditBusy: false, // fetching the full post before the editor can open
+    adminBlogLang: "RU",   // which language pill the editor shows
+    adminBlogQ: "",        // featured-products search inside the editor
+    adminBlogBusy: false,  // a save/publish/delete request is in flight
+    adminBlogErr: "",
+    adminBlogConfirmDelete: false
   };
 
   var LS = "rempire-shop-proto";
@@ -2436,6 +2601,19 @@
     return S.lang === "EN" ? v : v.replace(".", ",");
   }
   function byId(id) { for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i]; return CATALOGUE[0]; }
+  /* byId() always returns SOMETHING (see above) — exactly wrong for a list of
+     ids that may no longer exist (a post's featured products, deleted since
+     it was written): this one drops what it cannot find instead of quietly
+     substituting the first product in the catalogue. */
+  function productsById(ids) {
+    var out = [];
+    (ids || []).forEach(function (id) {
+      for (var i = 0; i < CATALOGUE.length; i++) {
+        if (CATALOGUE[i].id === id) { out.push(CATALOGUE[i]); break; }
+      }
+    });
+    return out;
+  }
   function sizePrice(p, i) {
     if (p.prices && p.prices.length) return p.prices[Math.min(i, p.prices.length - 1)];
     return p.price;
@@ -2513,6 +2691,79 @@
      double-quoted today, but one single-quoted attribute would silently make
      this wrong, and the e-mail templates already escape all five. */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+  /* ---------- analytics agent: first-party events, privacy-first ----------
+     One helper, called from the handful of places named in docs/analytics.md
+     — the router (go()/popstate/boot), the product screen, search, add to
+     cart, checkout open, the done screen and chat.js. Always sendBeacon (or
+     a keepalive fetch where it is missing), so a track() call never holds up
+     a render or a navigation, and a request that outlives the tab is fine —
+     the server only cares that it arrived.
+
+     sid: a random id kept in sessionStorage only — gone the moment the tab
+     closes, never written to a cookie, never sent anywhere else. */
+  var SID_KEY = "rmp_sid";
+  function sid() {
+    try {
+      var s = sessionStorage.getItem(SID_KEY);
+      if (!s) {
+        s = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+          : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+        sessionStorage.setItem(SID_KEY, s);
+      }
+      return s;
+    } catch (e) { return ""; }
+  }
+  /* document.referrer is set once, when the browser first navigated to the
+     shop, and does not change as the SPA pushes its own history — so reading
+     it at any point in the session still answers "who sent this visitor",
+     which is what "top referrer hosts" needs. Host only, never the path or
+     query a referring page might have carried (e.g. a Google search term). */
+  function refHost() {
+    try {
+      if (!document.referrer) return "";
+      var h = new URL(document.referrer).hostname;
+      return h && h !== location.hostname ? h : "";
+    } catch (e) { return ""; }
+  }
+  function track(type, extra) {
+    try {
+      var body = { sid: sid(), type: type, lang: S.lang, ref: refHost() };
+      if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) body[k] = extra[k];
+      var json = JSON.stringify(body);
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon("/api/track/", new Blob([json], { type: "application/json" }));
+      } else {
+        fetch("/api/track/", { method: "POST", headers: { "content-type": "application/json" }, body: json, keepalive: true }).catch(function () {});
+      }
+    } catch (e) { /* a tracking call must never be why a click failed */ }
+  }
+  // chat.js runs after app.js (see index.html) and cannot reach an id inside
+  // this closure any other way — one deliberate, narrow bridge.
+  window.__rmpTrack = track;
+
+  /* "view" (whatever screen this is) plus "product" when it is a product
+     page — called once per real navigation from go(), from the popstate
+     handler and once at boot, never from render() itself (render() also
+     runs on every keystroke and toggle, which must not each count as a
+     view). */
+  function trackNav() {
+    track("view", { path: pathFor() });
+    if (S.screen === "product" && S.productId) track("product", { productId: S.productId });
+  }
+  /* Search fires once per pause in typing, not once per keystroke — a
+     700 ms debounce shared by the header search box, the search screen's
+     own input and the "popular query" chips. */
+  var searchTrackTimer = null;
+  function scheduleSearchTrack() {
+    clearTimeout(searchTrackTimer);
+    searchTrackTimer = setTimeout(function () {
+      var q = String(S.query || "").trim();
+      if (!q) return;
+      track("search", { path: q, value: searchResults().length });
+    }, 700);
+  }
+
   function emailBad() { return S.emailTouched && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email); }
   /* One regex, but not one message: "there is a typo in the domain" is simply
      wrong for an empty field, which is the most common failure. */
@@ -2833,6 +3084,137 @@
       "</section></div>";
   }
 
+  /* ---------- blog ----------------------------------------------------------
+     Articles Renat writes (or the admin assistant drafts) in RU/ET/EN — a
+     real table (db/migrations/070_blog.sql), not the demo/undo layer, so the
+     storefront simply fetches whatever the API answers, same shape as the
+     real-reviews block above: read once, cache in S, render what is there.
+     GET /api/blog/?lang=&page=      → the list, 10 at a time
+     GET /api/blog/<slug>/?lang=     → one published post, bodyHtml already
+                                        rendered server-side (@/lib/blog) */
+  function blogDate(iso) {
+    var d = String(iso || "").slice(0, 10).split("-");
+    return d.length === 3 ? d[2] + "." + d[1] + "." + d[0] : "";
+  }
+  function blogUrl(slug) {
+    return location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/blog/" + encodeURIComponent(slug) + "/";
+  }
+  function blogTileHTML(p) {
+    return '<li><a class="card blog__tile" data-go-blog="' + esc(p.slug) + '">' +
+      (p.coverUrl
+        ? '<span class="blog__tileimg" style="background-image:url(\'' + esc(p.coverUrl) + '\')" role="img" aria-label="' + esc(p.coverAlt || p.title) + '"></span>'
+        : '<span class="blog__tileimg blog__tileimg--none">' + tower("blog__mark") + "</span>") +
+      '<span class="blog__tilebody">' +
+        (p.publishedAt ? '<span class="muted blog__date">' + blogDate(p.publishedAt) + "</span>" : "") +
+        '<span class="blog__tiletitle">' + esc(p.title) + "</span>" +
+        (p.excerpt ? "<p>" + esc(p.excerpt) + "</p>" : "") +
+        (p.tags && p.tags.length ? '<span class="blog__tags">' + p.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</span>" : "") +
+      "</span></a></li>";
+  }
+  function loadBlogList(more) {
+    if (S.blogListBusy) return;
+    var page = more && S.blogList ? S.blogList.page + 1 : 1;
+    S.blogListBusy = true; if (!more) render();
+    fetch("/api/blog/?lang=" + S.lang + "&page=" + page)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        S.blogListBusy = false;
+        if (!j || !j.ok) { if (!S.blogList) S.blogList = { posts: [], total: 0, page: 1, perPage: 10 }; render(); return; }
+        if (more && S.blogList) S.blogList = { posts: S.blogList.posts.concat(j.posts), total: j.total, page: j.page, perPage: j.perPage };
+        else S.blogList = { posts: j.posts, total: j.total, page: j.page, perPage: j.perPage };
+        render();
+      })
+      .catch(function () {
+        S.blogListBusy = false;
+        if (!S.blogList) S.blogList = { posts: [], total: 0, page: 1, perPage: 10 };
+        render();
+      });
+  }
+  function screenBlog() {
+    var posts = S.blogList ? S.blogList.posts : [];
+    var canMore = S.blogList && posts.length < S.blogList.total;
+    var body = posts.length
+      ? '<ul class="grid blog__grid" style="list-style:none;padding:0">' + posts.map(blogTileHTML).join("") + "</ul>" +
+        (canMore
+          ? '<div class="blog__more"><button class="btn btn--ghost" data-blogmore' + (S.blogListBusy ? " disabled" : "") + ">" +
+            (S.blogListBusy ? "…" : "Показать ещё") + "</button></div>"
+          : "")
+      : '<p class="muted" style="margin:16px 0">Статей пока нет — загляните позже.</p>';
+    return '<div class="wrap">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / Блог</div>' +
+      '<section class="sec" style="padding-top:14px">' +
+        '<h1 class="display h1">Блог</h1>' +
+        body +
+      "</section></div>";
+  }
+
+  function loadBlogPost(slug) {
+    if (S.blogPosts[slug] !== undefined) return;
+    S.blogPosts[slug] = null; // in flight — never asked twice; null also reads as "not found" until it answers
+    fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + S.lang)
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
+      .then(function (res) {
+        S.blogPosts[slug] = (res.j && res.j.ok) ? res.j.post : null;
+        if (S.screen === "blogpost" && S.blogSlug === slug) render();
+      })
+      .catch(function () {
+        S.blogPosts[slug] = null;
+        if (S.screen === "blogpost" && S.blogSlug === slug) render();
+      });
+  }
+  function screenBlogPost() {
+    var post = S.blogPosts[S.blogSlug];
+    if (post === undefined) return '<div class="wrap wrap--mid"><p class="muted" style="margin:16px 0">…</p></div>';
+    if (!post) {
+      return '<div class="wrap wrap--mid">' +
+        '<section class="sec" style="padding-top:14px">' +
+          '<h1 class="display h1">Статья не найдена.</h1>' +
+          '<p><button class="link" data-go="blog">Вернуться в блог</button></p>' +
+        "</section></div>";
+    }
+    var featured = productsById(post.products).slice(0, 8);
+    var others = (S.blogList ? S.blogList.posts : []).filter(function (p) { return p.slug !== post.slug; }).slice(0, 3);
+    return '<div class="wrap wrap--mid">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="blog">Блог</button> / ' + esc(post.title) + "</div>" +
+      '<article class="sec blog__post" style="padding-top:14px">' +
+        (post.coverUrl
+          ? '<span class="blog__cover" style="background-image:url(\'' + esc(post.coverUrl) + '\')" role="img" aria-label="' + esc(post.coverAlt || post.title) + '"></span>'
+          : "") +
+        '<h1 class="display h1">' + esc(post.title) + "</h1>" +
+        '<div class="blog__meta">' +
+          (post.publishedAt ? '<span class="muted">' + blogDate(post.publishedAt) + "</span>" : "") +
+          '<button class="link" data-blogshare="' + esc(post.slug) + '">' + icon("share") + "<span>Поделиться</span></button>" +
+        "</div>" +
+        (post.tags && post.tags.length ? '<div class="blog__tags">' + post.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</div>" : "") +
+        '<div class="acc__rich blog__body">' + post.bodyHtml + "</div>" +
+      "</article>" +
+      (featured.length
+        ? '<section class="sec"><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Товары из статьи</h2>' +
+          '<div class="grid">' + featured.map(cardHTML).join("") + "</div></section>"
+        : "") +
+      (others.length
+        ? '<section class="sec"><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Другие статьи</h2>' +
+          '<ul class="grid blog__grid" style="list-style:none;padding:0">' + others.map(blogTileHTML).join("") + "</ul></section>"
+        : "") +
+      "</div>";
+  }
+  function shareBlogPost(slug) {
+    var post = S.blogPosts[slug];
+    var url = blogUrl(slug);
+    var title = (post && post.title) || url;
+    if (navigator.share) {
+      navigator.share({ title: title, text: title, url: url }).catch(function () {});
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        toast("Ссылка скопирована ✓");
+      }).catch(function () { toast(url); });
+      return;
+    }
+    toast(url);
+  }
+
   /* ---------- cart lines of every kind ------------------------------------
      Three kinds share one list: a catalogue product, a set and a gift card.
      Everything that used to call byId(l.id) goes through these instead. */
@@ -3057,6 +3439,7 @@
         CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
         (allBundles().length ? '<button data-go="bundles" data-nav-bundles>Наборы</button>' : "") +
         '<button data-go="brands" data-nav-brands>Бренды</button>' +
+        '<button data-go="blog" data-nav-blog>Блог</button>' +
       "</nav></header>";
   }
 
@@ -3093,6 +3476,8 @@
         b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle" || S.screen === "gift"));
       } else if (b.dataset.navBrands !== undefined) {
         b.setAttribute("aria-current", String(S.screen === "brands" || (S.screen === "catalog" && !!S.brand)));
+      } else if (b.dataset.navBlog !== undefined) {
+        b.setAttribute("aria-current", String(S.screen === "blog" || S.screen === "blogpost"));
       } else {
         b.setAttribute("aria-current", String(S.screen === "catalog" && !S.brand && S.cat === b.dataset.goCat));
       }
@@ -3214,7 +3599,7 @@
       (hours ? ftrSec("Часы работы", hours) : "") +
       ftrSec("Реквизиты", cCompanyHTML()) +
       ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
-      ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
+      ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-go="blog">Блог</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
       ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 " + esc(contentConf().company.legalName) + "</span>" +
@@ -3889,6 +4274,409 @@
           (r.status === "approved" ? "" : '<button class="btn btn--sm" data-admrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
           (r.status === "rejected" ? "" : '<button class="btn btn--ghost btn--sm" data-admrev="' + esc(r.id) + ':rejected">Отклонить</button>') +
         "</span></div>";
+    }).join("") + "</div>";
+  }
+
+  /* ---------- blog: the admin tab -------------------------------------------
+     Posts are rows in `posts` (db/migrations/070_blog.sql), not the demo/undo
+     layer — «Сохранить», «Опубликовать», «Снять с публикации» and «Удалить»
+     all write straight to /api/admin/blog/ and there is no undo, which is why
+     the editor says so in its own first line. The list only ever holds
+     summaries (no body — see @/lib/blog PostSummary), so opening one for
+     editing is its own fetch. */
+  function loadAdminBlog(force) {
+    if (S.adminBlog && !force) return;
+    apiJson("/api/admin/blog/").then(function (r) {
+      S.adminBlog = (r.status === 200 && r.body.ok) ? r.body.posts : [];
+      if (S.screen === "admin" && S.adminTab === "blog") render();
+    }).catch(function () {
+      S.adminBlog = [];
+      if (S.screen === "admin" && S.adminTab === "blog") render();
+    });
+  }
+
+  // A Latin slug out of a Cyrillic or Estonian title — mirrors slugify() in
+  // src/lib/blog.ts (see that file for why this is a deliberate duplicate,
+  // not an import: this is a browser script with no build step).
+  var BLOG_TRANSLIT = {
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh", "з": "z", "и": "i",
+    "й": "y", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t",
+    "у": "u", "ф": "f", "х": "h", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sch", "ъ": "", "ы": "y", "ь": "",
+    "э": "e", "ю": "yu", "я": "ya", "і": "i", "ї": "yi", "ґ": "g",
+    "ä": "a", "ö": "o", "ü": "u", "õ": "o", "š": "s", "ž": "z"
+  };
+  function blogSlugify(text) {
+    var lower = String(text || "").toLowerCase(), out = "";
+    for (var i = 0; i < lower.length; i++) {
+      var ch = lower.charAt(i);
+      out += Object.prototype.hasOwnProperty.call(BLOG_TRANSLIT, ch) ? BLOG_TRANSLIT[ch] : ch;
+    }
+    out = out.normalize("NFKD").replace(/[̀-ͯ]/g, "");
+    out = out.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80).replace(/-+$/g, "");
+    return out || "post";
+  }
+
+  /* A twin of markdownToHtml() in src/lib/blog.ts, for the editor's live
+     preview only — the published HTML the storefront actually shows always
+     comes from the server (GET /api/blog/…), which is the real safety
+     boundary. Kept in sync by hand; a drift here is a wrong preview, not a
+     hole, and tests/blog.test.ts exercises the real one. Reuses esc() —
+     identical escaping, one fewer copy to keep in step. */
+  function blogSafeUrl(raw) {
+    var v = String(raw || "").trim();
+    if (!v) return null;
+    if (/^https?:\/\/[^\s<>"']+$/i.test(v)) return v;
+    if (/^mailto:[^\s<>"']+$/i.test(v)) return v;
+    if (/^\/(?!\/)[^\s<>"']*$/.test(v)) return v;
+    return null;
+  }
+  function blogInline(escaped) {
+    var s = escaped;
+    s = s.replace(/!\[([^\]\n]*)\]\(\s*([^)\s]+)\s*\)/g, function (whole, alt, url) {
+      var u = blogSafeUrl(url);
+      return u ? '<img src="' + u + '" alt="' + alt + '" loading="lazy">' : whole;
+    });
+    s = s.replace(/\[([^\]\n]*)\]\(\s*([^)\s]+)\s*\)/g, function (whole, text, url) {
+      var u = blogSafeUrl(url);
+      if (!u) return whole;
+      var ext = /^https?:\/\//i.test(u) ? ' target="_blank" rel="noopener noreferrer"' : "";
+      return '<a href="' + u + '"' + ext + ">" + (text || u) + "</a>";
+    });
+    s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/__([^_\n]+)__/g, "<strong>$1</strong>");
+    s = s.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+    s = s.replace(/_([^_\n]+)_/g, "<em>$1</em>");
+    return s;
+  }
+  function blogPara(text) {
+    var t = text.trim();
+    return t ? "<p>" + blogInline(esc(t)) + "</p>" : "";
+  }
+  function blogMdPreview(md) {
+    var lines = String(md || "").replace(/\r\n?/g, "\n").split("\n");
+    var blocks = [], i = 0;
+    while (i < lines.length) {
+      var line = lines[i];
+      if (!line.trim()) { i++; continue; }
+      var h = line.match(/^(#{1,6})\s+(.*)$/);
+      if (h) { blocks.push({ k: "h", lvl: h[1].length, t: h[2] }); i++; continue; }
+      if (/^>\s?/.test(line)) {
+        var qlines = [];
+        while (i < lines.length && /^>\s?/.test(lines[i])) { qlines.push(lines[i].replace(/^>\s?/, "")); i++; }
+        blocks.push({ k: "quote", lines: qlines });
+        continue;
+      }
+      if (/^[-*]\s+/.test(line)) {
+        var uitems = [];
+        while (i < lines.length && /^[-*]\s+/.test(lines[i])) { uitems.push(lines[i].replace(/^[-*]\s+/, "")); i++; }
+        blocks.push({ k: "ul", items: uitems });
+        continue;
+      }
+      if (/^\d+\.\s+/.test(line)) {
+        var oitems = [];
+        while (i < lines.length && /^\d+\.\s+/.test(lines[i])) { oitems.push(lines[i].replace(/^\d+\.\s+/, "")); i++; }
+        blocks.push({ k: "ol", items: oitems });
+        continue;
+      }
+      var plines = [];
+      while (i < lines.length && lines[i].trim() && !/^(#{1,6})\s+/.test(lines[i]) &&
+             !/^>\s?/.test(lines[i]) && !/^[-*]\s+/.test(lines[i]) && !/^\d+\.\s+/.test(lines[i])) {
+        plines.push(lines[i]); i++;
+      }
+      blocks.push({ k: "p", lines: plines });
+    }
+    var html = blocks.map(function (b) {
+      if (b.k === "h") { var lvl = Math.min(6, Math.max(1, b.lvl)); return "<h" + lvl + ">" + blogInline(esc(b.t.trim())) + "</h" + lvl + ">"; }
+      if (b.k === "quote") return "<blockquote>" + blogPara(b.lines.join(" ")) + "</blockquote>";
+      if (b.k === "ul" || b.k === "ol") {
+        var items = b.items.map(function (it) { return "<li>" + blogInline(esc(it.trim())) + "</li>"; }).join("");
+        return "<" + b.k + ">" + items + "</" + b.k + ">";
+      }
+      return blogPara(b.lines.join(" "));
+    }).join("");
+    return html.replace(/<script[\s\S]*?<\/script\s*>/gi, "").replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+  }
+
+  var BLOG_EMPTY3 = { RU: "", ET: "", EN: "" };
+  function blogNewDraft() {
+    return {
+      id: "", slug: "", slugAuto: true, status: "draft",
+      title: { RU: "", ET: "", EN: "" }, excerpt: { RU: "", ET: "", EN: "" }, body: { RU: "", ET: "", EN: "" },
+      coverUrl: "", coverAlt: { RU: "", ET: "", EN: "" },
+      tagsText: "", products: [],
+      seoTitle: { RU: "", ET: "", EN: "" }, seoDesc: { RU: "", ET: "", EN: "" },
+      author: "Rempire", publishedAt: null
+    };
+  }
+  function blogDraftFromPost(p) {
+    return {
+      id: p.id, slug: p.slug, slugAuto: false, status: p.status,
+      title: Object.assign({}, BLOG_EMPTY3, p.title), excerpt: Object.assign({}, BLOG_EMPTY3, p.excerpt),
+      body: Object.assign({}, BLOG_EMPTY3, p.body),
+      coverUrl: p.coverUrl || "", coverAlt: Object.assign({}, BLOG_EMPTY3, p.coverAlt),
+      tagsText: (p.tags || []).join(", "), products: (p.products || []).slice(),
+      seoTitle: Object.assign({}, BLOG_EMPTY3, p.seoTitle), seoDesc: Object.assign({}, BLOG_EMPTY3, p.seoDesc),
+      author: p.author || "Rempire", publishedAt: p.publishedAt || null
+    };
+  }
+  function openBlogEditor(id) {
+    if (S.adminBlogEditBusy) return;
+    S.adminBlogEditBusy = true; render();
+    apiJson("/api/admin/blog/?id=" + encodeURIComponent(id)).then(function (r) {
+      S.adminBlogEditBusy = false;
+      if (r.status === 200 && r.body.ok && r.body.post) {
+        S.adminBlogEdit = blogDraftFromPost(r.body.post);
+        S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+      } else toast("Не получилось сохранить — попробуйте ещё раз.");
+      render();
+    }).catch(function () {
+      S.adminBlogEditBusy = false;
+      toast("Не получилось сохранить — попробуйте ещё раз.");
+      render();
+    });
+  }
+
+  function blogFieldsPayload(d) {
+    return {
+      slug: d.slugAuto ? undefined : d.slug,
+      title: d.title, excerpt: d.excerpt, body: d.body,
+      coverUrl: d.coverUrl || null, coverAlt: d.coverAlt,
+      tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      products: d.products,
+      seoTitle: d.seoTitle, seoDesc: d.seoDesc,
+      author: d.author
+    };
+  }
+  function saveBlogFields() {
+    var d = S.adminBlogEdit;
+    if (!d) return Promise.reject(new Error("no_draft"));
+    var body = blogFieldsPayload(d);
+    var req = d.id
+      ? apiSend("/api/admin/blog/", "PATCH", Object.assign({ id: d.id }, body))
+      : apiSend("/api/admin/blog/", "POST", body);
+    return req.then(function (r) {
+      if (!(r.status === 200 && r.body.ok && r.body.post)) throw new Error((r.body && r.body.error) || "save_failed");
+      var p = r.body.post;
+      d.id = p.id; d.slug = p.slug; d.status = p.status; d.publishedAt = p.publishedAt;
+      S.adminBlog = null; // the list is stale now
+      return p;
+    });
+  }
+  // A post with nothing in its Russian title is not a post yet — the slug
+  // would fall back to the bare word "post" and the list would show it as
+  // a blank row. Checked before either write, not on every keystroke.
+  function blogTitleMissing(d) {
+    return !((d.title.RU || "").trim());
+  }
+  // Errors show two ways on purpose: a toast (matches every other admin
+  // action in this file) for the moment it happens, and S.adminBlogErr —
+  // inline, under the buttons — because a toast fades in a few seconds and
+  // "try again" is exactly when a retry needs the reason to still be on
+  // screen. Both read the same sentence.
+  var BLOG_SAVE_ERR = "Не получилось сохранить — попробуйте ещё раз.";
+  function blogFail() {
+    S.adminBlogErr = BLOG_SAVE_ERR;
+    toast(BLOG_SAVE_ERR);
+  }
+  function saveBlogDraft() {
+    if (S.adminBlogBusy || !S.adminBlogEdit) return;
+    if (blogTitleMissing(S.adminBlogEdit)) {
+      S.adminBlogErr = "Заполните заголовок хотя бы на русском."; render(); return;
+    }
+    S.adminBlogBusy = true; S.adminBlogErr = ""; render();
+    saveBlogFields().then(function (p) {
+      S.adminBlogBusy = false;
+      toast(p.status === "published" ? "Изменения сохранены ✓" : "Черновик сохранён ✓");
+      render();
+    }).catch(function () {
+      S.adminBlogBusy = false; blogFail(); render();
+    });
+  }
+  function publishBlogPost() {
+    if (S.adminBlogBusy || !S.adminBlogEdit) return;
+    if (blogTitleMissing(S.adminBlogEdit)) {
+      S.adminBlogErr = "Заполните заголовок хотя бы на русском."; render(); return;
+    }
+    S.adminBlogBusy = true; S.adminBlogErr = ""; render();
+    saveBlogFields().then(function (p) {
+      return apiSend("/api/admin/blog/", "PATCH", { id: p.id, publish: true });
+    }).then(function (r) {
+      S.adminBlogBusy = false;
+      if (r.status === 200 && r.body.ok && r.body.post && S.adminBlogEdit) {
+        S.adminBlogEdit.status = r.body.post.status; S.adminBlogEdit.publishedAt = r.body.post.publishedAt;
+        toast("Статья опубликована ✓");
+      } else blogFail();
+      S.adminBlog = null;
+      render();
+    }).catch(function () {
+      S.adminBlogBusy = false; blogFail(); render();
+    });
+  }
+  function unpublishBlogPost() {
+    var d = S.adminBlogEdit;
+    if (!d || !d.id || S.adminBlogBusy) return;
+    S.adminBlogBusy = true; S.adminBlogErr = ""; render();
+    apiSend("/api/admin/blog/", "PATCH", { id: d.id, publish: false }).then(function (r) {
+      S.adminBlogBusy = false;
+      if (r.status === 200 && r.body.ok && r.body.post && S.adminBlogEdit) {
+        S.adminBlogEdit.status = r.body.post.status;
+        toast("Статья снята с публикации ✓");
+      } else blogFail();
+      S.adminBlog = null;
+      render();
+    }).catch(function () {
+      S.adminBlogBusy = false; blogFail(); render();
+    });
+  }
+  function deleteBlogPost() {
+    var d = S.adminBlogEdit;
+    if (!d || !d.id || S.adminBlogBusy) return;
+    S.adminBlogBusy = true; render();
+    apiJson("/api/admin/blog/?id=" + encodeURIComponent(d.id), { method: "DELETE" }).then(function (r) {
+      S.adminBlogBusy = false; S.adminBlogConfirmDelete = false;
+      if (r.status === 200 && r.body.ok) {
+        toast("Статья удалена ✓");
+        S.adminBlog = null; S.adminBlogEdit = null;
+      } else blogFail();
+      render();
+    }).catch(function () {
+      S.adminBlogBusy = false; S.adminBlogConfirmDelete = false;
+      blogFail(); render();
+    });
+  }
+
+  /* The admin assistant's two blog actions (src/app/api/assistant/route.ts,
+     src/app/api/assistant/actions.ts). Like every assistant action, the owner
+     sees «Предпросмотр изменения» first and this only runs after «Применить»
+     — but unlike the rest, it skips demoApply()/srvPush() entirely and calls
+     the real admin API directly, because a post has no demo layer to write
+     into first. */
+  function applyBlogAction(a) {
+    if (a.type === "draft_post") {
+      apiSend("/api/admin/blog/", "POST", {
+        title: a.title, excerpt: a.excerpt, body: a.body, tags: a.tags, products: a.products
+      }).then(function (r) {
+        if (r.status === 200 && r.body.ok) {
+          toast("Черновик сохранён ✓");
+          S.adminBlog = null; S.adminTab = "blog"; S.adminBlogEdit = null;
+        } else toast("Не получилось сохранить — попробуйте ещё раз.");
+        render();
+      }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); render(); });
+    } else if (a.type === "publish_post") {
+      apiSend("/api/admin/blog/", "PATCH", { slug: a.slug, publish: a.publish }).then(function (r) {
+        toast(r.status === 200 && r.body.ok
+          ? (a.publish ? "Статья опубликована ✓" : "Статья снята с публикации ✓")
+          : "Не получилось сохранить — попробуйте ещё раз.");
+        S.adminBlog = null;
+        render();
+      }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); render(); });
+    }
+  }
+
+  function admBlogEditor(d) {
+    var L = S.adminBlogLang || "RU";
+    var busy = S.adminBlogBusy;
+    var seoTLen = (d.seoTitle[L] || "").length;
+    var seoDLen = (d.seoDesc[L] || "").length;
+    var picked = productsById(d.products);
+    var q = (S.adminBlogQ || "").trim().toLowerCase();
+    var matches = q ? CATALOGUE.filter(function (p) {
+      return d.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
+    }).slice(0, 8) : [];
+    var slugPlaceholder = blogSlugify(d.title.RU || d.title.ET || d.title.EN || "");
+
+    return '<button class="link" data-admblogback>← Все статьи</button>' +
+      '<div class="adm__ohead"><h2 class="sec__title" style="font-size:18px">' + esc(d.title.RU || d.slug || "Новая статья") + "</h2>" +
+        '<span class="chip ' + (d.status === "published" ? "chip--ok" : "chip--low") + '">' +
+          (d.status === "published" ? "Опубликовано" : "Черновик") + "</span></div>" +
+      '<p class="muted admblog__note">Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.</p>' +
+
+      '<div class="adm__chips" role="group" aria-label="Язык статьи">' + LANGS.map(function (l) {
+        return '<button class="scchip" data-admbloglang="' + l[0] + '" aria-current="' + (L === l[0]) + '">' + l[1] + "</button>";
+      }).join("") + "</div>" +
+
+      '<label class="field"><span class="field__label">Заголовок</span>' +
+        '<input class="input" data-blogf="title" maxlength="200" value="' + esc(d.title[L]) + '"></label>' +
+      '<label class="field"><span class="field__label">Анонс</span>' +
+        '<textarea class="input" rows="2" maxlength="500" data-blogf="excerpt">' + esc(d.excerpt[L]) + "</textarea></label>" +
+      '<label class="field"><span class="field__label">Текст статьи (Markdown)</span>' +
+        '<textarea class="input admblog__body" rows="14" maxlength="20000" data-blogf="body">' + esc(d.body[L]) + "</textarea></label>" +
+      '<p class="muted admblog__hint">Форматирование: **жирный**, *курсив*, [ссылка](https://…), ![картинка](https://…), «- » список, «> » цитата, «# » заголовок.</p>' +
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Предпросмотр</h3></div>' +
+      '<div class="acc__rich admblog__preview" data-admblogpreview>' + (blogMdPreview(d.body[L]) || "") + "</div>" +
+
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Обложка</h3></div>' +
+      (d.coverUrl
+        ? '<div class="admblog__cover"><span class="admblog__coverimg" style="background-image:url(\'' + esc(d.coverUrl) + '\')"></span>' +
+          '<button class="link" data-admblogcoverdel>Удалить</button></div>'
+        : "") +
+      galDropZone("blog", "Загрузить обложку", "JPEG, PNG или WebP, до 12 МБ.") +
+      '<label class="field"><span class="field__label">Alt-текст обложки</span>' +
+        '<input class="input" data-blogf="coverAlt" maxlength="160" value="' + esc(d.coverAlt[L]) + '"></label>' +
+
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Теги</h3></div>' +
+      '<label class="field"><input class="input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="Тег и запятая"></label>' +
+
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Товары в статье</h3></div>' +
+      (picked.length
+        ? '<div class="admblog__products">' + picked.map(function (p) {
+            return '<span class="chip">' + esc(p.brand + " " + p.name) + '<button data-admblogproductdel="' + esc(p.id) + '" aria-label="Убрать">✕</button></span>';
+          }).join("") + "</div>"
+        : "") +
+      '<input class="input input--box" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию" style="margin-bottom:8px;max-width:420px">' +
+      '<div id="admblogproducts">' + (matches.length
+        ? '<div class="adm__list">' + matches.map(function (p) {
+            return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+              '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+              '<button class="link" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
+          }).join("") + "</div>"
+        : "") + "</div>" +
+
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">SEO для Google</h3></div>' +
+      '<label class="field"><span class="field__label">SEO-заголовок · <span data-blogcount="seoTitle">' + seoTLen + "/70</span></span>" +
+        '<input class="input" data-blogf="seoTitle" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
+      '<label class="field"><span class="field__label">SEO-описание · <span data-blogcount="seoDesc">' + seoDLen + "/170</span></span>" +
+        '<textarea class="input" rows="3" maxlength="170" data-blogf="seoDesc">' + esc(d.seoDesc[L]) + "</textarea></label>" +
+
+      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Прочее</h3></div>' +
+      '<label class="field"><span class="field__label">Адрес страницы (slug)</span>' +
+        '<input class="input" data-blogslug value="' + esc(d.slug) + '" placeholder="' + esc(slugPlaceholder) + '"></label>' +
+      '<label class="field"><span class="field__label">Автор</span>' +
+        '<input class="input" data-blogf="author" maxlength="60" value="' + esc(d.author) + '"></label>' +
+
+      (S.adminBlogErr ? '<div class="err" role="alert">' + esc(S.adminBlogErr) + "</div>" : "") +
+
+      '<div class="adm__acts admblog__acts">' +
+        '<button class="btn" data-admblogsave' + (busy ? " disabled" : "") + ">" +
+          (d.status === "published" ? "Сохранить" : "Сохранить черновик") + "</button>" +
+        (d.status === "published"
+          ? '<button class="btn btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
+          : '<button class="btn btn--ghost" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>") +
+        (d.id
+          ? (S.adminBlogConfirmDelete
+            ? '<span class="admblog__delconfirm">Точно удалить эту статью? Она перейдёт в черновики — текст останется, но в магазине его будет не увидеть. ' +
+              '<button class="btn btn--sm" data-admblogdelyes' + (busy ? " disabled" : "") + ">Да, удалить</button> " +
+              '<button class="link" data-admblogdelno>Отмена</button></span>'
+            : '<button class="btn btn--ghost btn--sm" data-admblogdel>Удалить</button>')
+          : "") +
+      "</div>";
+  }
+
+  function admBlogHTML() {
+    if (S.adminBlogEditBusy && !S.adminBlogEdit) return '<p class="muted" style="margin:16px 0">Загружаем…</p>';
+    if (S.adminBlogEdit) return admBlogEditor(S.adminBlogEdit);
+    var posts = S.adminBlog;
+    var head = '<p class="muted" style="margin:16px 0">Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.</p>' +
+      '<div class="adm__acts" style="margin-bottom:14px"><button class="btn" data-admblognew>Новая статья</button></div>';
+    if (!posts) return head + '<p class="muted">Загружаем…</p>';
+    if (!posts.length) return head + '<p class="muted">Пока нет ни одной статьи — нажмите «Новая статья».</p>';
+    return head + '<div class="adm__list">' + posts.map(function (p) {
+      var title = p.title.RU || p.title.ET || p.title.EN || p.slug;
+      return '<div class="adm__row"><span class="adm__nm">' + esc(title) +
+          '<span class="adm__sub">' + (p.publishedAt ? blogDate(p.publishedAt) : "—") + "</span></span>" +
+        '<span class="chip ' + (p.status === "published" ? "chip--ok" : "chip--low") + '">' +
+          (p.status === "published" ? "Опубликовано" : "Черновик") + "</span>" +
+        '<button class="link" data-admblogedit="' + esc(p.id) + '">Править</button></div>';
     }).join("") + "</div>";
   }
 
@@ -4836,6 +5624,7 @@
     ["people", "Клиенты", "user"],
     ["reviews", "Отзывы", "check"],   // features
     ["promos", "Промокоды", "tag"],   // checkout-gaps
+    ["blog", "Блог", "doc"],
     ["stats", "Аналитика", "chart"],
     ["mail", "Письма", "mail"],
     ["apps", "Подключения", "plug"],
@@ -4884,6 +5673,250 @@
           '<div class="adm__acts"><button class="btn btn--wide" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
             (SRV.busy ? "Проверяем…" : "Войти") + "</button></div>" +
         "</div></main></div>";
+  }
+
+  /* ---------- analytics agent: «Аналитика» ---------------------------------
+     GET /api/admin/analytics/?range=… (src/lib/analytics.ts) and GET
+     /api/admin/analytics/gsc/ (src/lib/gsc.ts). One cache per range so
+     switching pills back and forth does not refetch, and one 30-day fetch
+     kept warm from probeAdmin() for analyticsForAI() (near heroForAI()). */
+  var ANALYTICS = {};
+  function loadAnalytics(range) {
+    if (SRV.admin !== true) return;
+    if (ANALYTICS[range]) return;
+    if (loadAnalytics._busy && loadAnalytics._busy[range]) return;
+    loadAnalytics._busy = loadAnalytics._busy || {};
+    loadAnalytics._busy[range] = true;
+    apiJson("/api/admin/analytics/?range=" + encodeURIComponent(range)).then(function (r) {
+      loadAnalytics._busy[range] = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      ANALYTICS[range] = r.status === 200 && r.body.ok ? { data: r.body, err: null } : { data: null, err: (r.body && r.body.error) || "error" };
+      render();
+    }).catch(function () {
+      loadAnalytics._busy[range] = false;
+      ANALYTICS[range] = { data: null, err: "offline" };
+      render();
+    });
+  }
+  /* The admin assistant's compact context — mirrors heroForAI()/contentForAI()
+     just below; re-trimmed server-side in briefAnalytics()
+     (src/app/api/assistant/actions.ts) before it reaches the prompt. */
+  function analyticsForAI() {
+    var rec = ANALYTICS["30d"];
+    var a = rec && rec.data;
+    if (!a) return null;
+    return {
+      revenue: a.kpi.revenue.value, orders: a.kpi.orders.value, aov: a.kpi.aov.value,
+      conversionPct: Math.round(a.kpi.conversion.value * 1000) / 10,
+      topProducts: a.topProductsByRevenue.slice(0, 5).map(function (p) { return { name: p.name, brand: p.brand, revenue: p.revenue }; }),
+      topSearchTerms: a.searchTerms.slice(0, 5).map(function (s) { return { term: s.term, count: s.count }; })
+    };
+  }
+  var GSC = null;
+  function loadGsc() {
+    if (SRV.admin !== true || GSC || loadGsc._busy) return;
+    loadGsc._busy = true;
+    apiJson("/api/admin/analytics/gsc/").then(function (r) {
+      loadGsc._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      GSC = (r.status === 200 || r.status === 502) ? r.body : { ok: false, error: "error" };
+      render();
+    }).catch(function () { loadGsc._busy = false; GSC = { ok: false, error: "offline" }; render(); });
+  }
+
+  var STATS_RANGES = [["today", "Сегодня"], ["7d", "7 дней"], ["30d", "30 дней"], ["90d", "90 дней"]];
+  function statsRange() {
+    var r = S.statsRange || "7d";
+    for (var i = 0; i < STATS_RANGES.length; i++) if (STATS_RANGES[i][0] === r) return r;
+    return "7d";
+  }
+  function statsRangePills() {
+    var cur = statsRange();
+    return '<div class="adm__acts" role="group" aria-label="Период">' + STATS_RANGES.map(function (r) {
+      return '<button class="btn btn--sm' + (r[0] === cur ? "" : " btn--ghost") + '" data-statsrange="' + r[0] + '" aria-current="' + (r[0] === cur) + '">' + r[1] + "</button>";
+    }).join(" ") + "</div>";
+  }
+  /* KPI card with a delta vs. the previous period of the same length — reuses
+     .kpi/.kpi__l/.kpi__v/.kpi__s (kpi() above), just with a coloured third
+     line. deltaPct null (no previous-period data at all, e.g. a brand-new
+     shop) reads as a sentence rather than a misleading "+0%". */
+  function statKpi(label, value, deltaPct) {
+    var sub = deltaPct == null ? "нет данных за прошлый период" : (deltaPct >= 0 ? "+" : "") + num1(deltaPct) + "% к прошлому периоду";
+    var color = deltaPct == null ? "" : deltaPct > 0 ? "color:var(--ok)" : deltaPct < 0 ? "color:var(--error)" : "";
+    return '<div class="kpi"><span class="kpi__l">' + label + '</span><span class="kpi__v num">' + value + "</span>" +
+      '<span class="kpi__s"' + (color ? ' style="' + color + '"' : "") + ">" + sub + "</span></div>";
+  }
+  /* No chart library: a plain inline SVG line + fill, scaled to the data's
+     own min/max. Reads var(--ink)/var(--rule-soft) like the rest of the
+     panel, so it is never a colour of its own. */
+  function revenueChartSVG(rows) {
+    var W = 600, H = 130, PAD = 4;
+    var vals = rows.map(function (r) { return r.revenue; });
+    var max = Math.max.apply(null, vals.concat([0.01]));
+    var stepX = rows.length > 1 ? (W - PAD * 2) / (rows.length - 1) : 0;
+    var pts = rows.map(function (r, i) {
+      return [PAD + i * stepX, H - PAD - (r.revenue / max) * (H - PAD * 2)];
+    });
+    var line = pts.map(function (p, i) { return (i === 0 ? "M" : "L") + p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
+    var area = line + " L" + pts[pts.length - 1][0].toFixed(1) + "," + (H - PAD) + " L" + pts[0][0].toFixed(1) + "," + (H - PAD) + " Z";
+    return '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="Выручка по дням" style="width:100%;height:130px;display:block">' +
+      '<path d="' + area + '" fill="var(--rule-soft)" stroke="none"></path>' +
+      '<path d="' + line + '" fill="none" stroke="var(--ink)" stroke-width="2"></path>' +
+      "</svg>";
+  }
+  var FUNNEL_STAGES = [
+    ["sessions", "Сессии"], ["product", "Смотрели товар"], ["addToCart", "Добавили в корзину"],
+    ["checkout", "Открыли оформление"], ["purchase", "Купили"]
+  ];
+  function funnelHTML(funnel) {
+    var max = Math.max(funnel.sessions, 1);
+    return '<div class="adm__list">' + FUNNEL_STAGES.map(function (s) {
+      var v = funnel[s[0]] || 0;
+      var pct = v ? Math.max(2, Math.round((v / max) * 100)) : 0;
+      return '<div class="adm__row" style="flex-direction:column;align-items:stretch;gap:5px">' +
+        '<span style="display:flex;justify-content:space-between"><span class="adm__nm">' + s[1] + '</span><span class="num adm__pr">' + v + "</span></span>" +
+        '<span style="display:block;height:8px;border-radius:4px;background:var(--rule-soft);overflow:hidden">' +
+          '<span style="display:block;height:100%;width:' + pct + '%;background:var(--ink)"></span></span>' +
+        "</div>";
+    }).join("") + "</div>";
+  }
+  /* Generic two-column list — name + one number — reused across most tables
+     below. rows is an array of [name, valueText]. */
+  function nameValueRows(rows, emptyMsg) {
+    if (!rows.length) return '<p class="muted">' + emptyMsg + "</p>";
+    return '<div class="adm__list">' + rows.map(function (r) {
+      return '<div class="adm__row"><span class="adm__nm">' + esc(String(r[0])) + '</span><span class="num adm__pr">' + esc(String(r[1])) + "</span></div>";
+    }).join("") + "</div>";
+  }
+  function brandRevenueTable(rows) {
+    if (!rows.length) return '<p class="muted">Пока нет продаж.</p>';
+    return '<div class="adm__list">' + rows.map(function (r) {
+      return '<div class="adm__row"><span class="adm__nm">' + esc(r.brand) + '</span>' +
+        '<span class="num adm__pr">' + eur(r.revenue) + '</span><span class="num">' + r.orders + "</span></div>";
+    }).join("") + "</div>";
+  }
+  function promoUsageTable(rows) {
+    if (!rows.length) return '<p class="muted">Промокоды пока не использовали.</p>';
+    return '<div class="adm__list">' + rows.map(function (r) {
+      return '<div class="adm__row"><span class="adm__nm">' + esc(r.code) + '</span>' +
+        '<span class="num adm__pr">' + eur(r.amount) + '</span><span class="num">' + r.uses + "</span></div>";
+    }).join("") + "</div>";
+  }
+  /* Same list Renat already sees on the Overview tab (lowStock() over the
+     live CATALOGUE + his own overrides), with an edit link on each row —
+     data-admgoods jumps straight into the goods editor for that product. */
+  function lowStockEditableHTML() {
+    var list = lowStock();
+    if (!list.length) return '<p class="muted">Всё в наличии.</p>';
+    return '<div class="adm__list">' + list.map(function (p) {
+      return '<div class="adm__row"><span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+        '<span class="chip ' + (p.stock === "out" ? "chip--out" : "chip--low") + '">' + (p.stock === "out" ? "нет" : "мало") + "</span>" +
+        '<button class="link" data-admgoods="' + esc(p.id) + '">Править</button></div>';
+    }).join("") + "</div>";
+  }
+  function gscTable(rows, isQuery) {
+    if (!rows || !rows.length) return '<p class="muted">Пока нет данных.</p>';
+    return '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row"><span>' +
+      (isQuery ? "Запрос" : "Страница") + "</span><span>Место</span><span>Показы</span><span>Клики</span><span>CTR</span></div>" +
+      rows.map(function (r) {
+        return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + esc(isQuery ? r.query : r.page) + "</span>" +
+          '<span class="num">' + num1(r.position) + '</span><span class="num">' + r.impressions + '</span>' +
+          '<span class="num">' + r.clicks + '</span><span class="num">' + num1(r.ctr * 100) + "%</span></div>";
+      }).join("") + "</div>";
+  }
+  function gscSectionHTML() {
+    loadGsc();
+    if (!GSC) return '<p class="muted">Загружаем…</p>';
+    if (!GSC.ok) {
+      return GSC.error === "not_configured"
+        ? '<p class="muted">Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md</p>'
+        : '<p class="muted">Google Search Console сейчас не отвечает — попробуйте позже.</p>';
+    }
+    return '<div class="adm__kpis">' +
+        kpi("Клики", String(GSC.clicks), "") + kpi("Показы", String(GSC.impressions), "") +
+        kpi("CTR", num1(GSC.ctr * 100) + "%", "") + kpi("Позиция", num1(GSC.position), "") +
+      "</div>" +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ запросов</h2></div>' + gscTable(GSC.topQueries, true) +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ страниц</h2></div>' + gscTable(GSC.topPages, false);
+  }
+  function offlineStatsHTML() {
+    return '<p class="muted" style="margin:16px 0">Аналитика считается на сервере из настоящих заходов и заказов — откроется здесь, как только вы войдёте в панель.</p>';
+  }
+  function admStatsHTML() {
+    if (SRV.admin !== true) return offlineStatsHTML();
+    var range = statsRange();
+    loadAnalytics(range);
+    var rec = ANALYTICS[range];
+    var a = rec && rec.data;
+
+    var body = '<p class="muted" style="margin:16px 0">Что происходит с магазином — простыми словами.</p>' + statsRangePills();
+    if (!a) {
+      return body + '<p class="muted" style="margin-top:16px">' + (rec && rec.err ? "Аналитика сейчас не отвечает — попробуйте позже." : "Загружаем…") + "</p>";
+    }
+
+    body += '<div class="adm__kpis" style="margin-top:16px">' +
+      statKpi("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct) +
+      statKpi("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct) +
+      statKpi("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct) +
+      statKpi("Конверсия", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct) +
+    "</div>";
+
+    if (!a.kpi.orders.value && !a.funnel.sessions) {
+      body += '<p class="muted" style="margin-top:16px">Данных пока нет — они появятся после первых заходов.</p>';
+    }
+
+    body +=
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Выручка по дням</h2></div>' +
+      (a.revenueByDay.length > 1 ? revenueChartSVG(a.revenueByDay) : '<p class="muted">Пока нет данных.</p>') +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Воронка</h2></div>' +
+      funnelHTML(a.funnel) +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ товаров по выручке</h2></div>' +
+      nameValueRows(a.topProductsByRevenue.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, eur(p.revenue)]; }), "Пока нет продаж.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Бренды: что приносит деньги</h2></div>' +
+      brandRevenueTable(a.brandRevenue) +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ товаров по просмотрам</h2></div>' +
+      nameValueRows(a.topProductsByViews.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)]; }), "Пока нет просмотров.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Смотрят, но не покупают</h2></div>' +
+      nameValueRows(a.viewedNotBought.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)]; }), "Таких товаров нет.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Популярные запросы</h2></div>' +
+      nameValueRows(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Ищут, но не находят</h2></div>' +
+      nameValueRows(a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }), "Таких запросов нет.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Промокоды</h2></div>' +
+      promoUsageTable(a.promoUsage) +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Устройства</h2></div>' +
+      nameValueRows([["Мобильные", String(a.traffic.device.mobile)], ["Компьютеры", String(a.traffic.device.desktop)]], "Пока нет данных.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Страны</h2></div>' +
+      nameValueRows(a.traffic.countries.map(function (c) { return [c.country, String(c.sessions)]; }), "Пока нет данных.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Откуда приходят</h2></div>' +
+      nameValueRows(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; }), "Пока нет данных.") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Ещё цифры</h2></div>' +
+      nameValueRows([
+        ["Брошенные корзины", String(a.abandonedCarts)],
+        ["Открытий чата", String(a.chatOpens)],
+        ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount)],
+        ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount)]
+      ], "") +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заканчиваются на складе</h2></div>' +
+      lowStockEditableHTML() +
+
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Google Search Console — последние 28 дней</h2></div>' +
+      gscSectionHTML();
+
+    return body;
   }
 
   function screenAdmin() {
@@ -4975,30 +6008,14 @@
       // features: review moderation
       (tab === "reviews" ? admReviewsHTML() : "") +
 
+      // blog
+      (tab === "blog" ? admBlogHTML() : "") +
+
       // checkout-gaps: promo codes
       (tab === "promos" ? admPromosHTML() : "") +
 
-      (tab === "stats" ?
-        '<p class="muted" style="margin:16px 0">Что происходит с магазином — простыми словами. Цифры вымышленные, вид настоящий.</p>' +
-        '<div class="adm__kpis">' +
-          kpi("Посетителей за 7 дней", "412", "+18% к прошлой неделе") +
-          kpi("Оформили заказ", "2,2%", "из 100 посетителей — 2 заказа") +
-          kpi("Средний чек", "43 €", "по последним 20 заказам") +
-          kpi("Выручка за 30 дней", "486 €", "12 заказов") +
-        "</div>" +
-        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Google — по каким словам находят</h2></div>' +
-        '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row"><span>Запрос</span><span>Место</span><span>Показы</span><span>Клики</span><span></span></div>' +
-        [["kevin murphy tallinn", "4", "320", "38"], ["давинес шампунь", "7", "210", "16"],
-         ["барбершоп мыло 666", "1", "95", "41"], ["system 4 шампунь купить", "9", "180", "9"]].map(function (r) {
-          return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + r[0] + '</span><span class="num">' + r[1] + '</span><span class="num">' + r[2] + '</span><span class="num">' + r[3] + "</span><span></span></div>";
-        }).join("") + "</div>" +
-        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Откуда приходят</h2></div>' +
-        '<div class="adm__list">' + [
-          ["Google (поиск)", "44%"], ["Instagram", "27%"], ["Напрямую / закладки", "19%"], ["TikTok", "7%"], ["Рассылка", "3%"]
-        ].map(function (r) {
-          return '<div class="adm__row"><span class="adm__nm">' + r[0] + '</span><span class="num adm__pr">' + r[1] + "</span></div>";
-        }).join("") + "</div>" +
-        '<p class="muted" style="margin-top:16px">В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.</p>' : "") +
+      // analytics agent: real sales + traffic data, see admStatsHTML() above
+      (tab === "stats" ? admStatsHTML() : "") +
 
       (tab === "mail" ?
         '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Текст письма можно менять через помощника.</p>' +
@@ -6110,6 +7127,17 @@
       toast("Картинка загружена ✓");
     }).catch(upFail);
   }
+  // blog: same one-file upload as the banner, but onto the post draft's cover
+  function blogCoverUpload(files) {
+    if (!files || !files.length || !S.adminBlogEdit) return;
+    UP.err = ""; UP.total = 1; UP.busy = 1; render();
+    uploadPhoto(files[0], "blog").then(function (r) {
+      UP.busy = 0; UP.total = 0;
+      if (S.adminBlogEdit) S.adminBlogEdit.coverUrl = r.url;
+      render();
+      toast("Картинка загружена ✓");
+    }).catch(upFail);
+  }
   /* The drop zone doubles as the button row: `data-galdrop` carries the product
      id, or "hero" for the banner, so one pair of listeners serves both. */
   function galDropZone(target, label, hint) {
@@ -6256,7 +7284,7 @@
     return '<div style="margin-top:10px"><button class="btn btn--ghost btn--sm" data-admtab="' + tab + '">' + label + " →</button></div>";
   }
   var TAB_LABEL = { over: "Открыть обзор", orders: "Открыть заказы", goods: "Открыть товары",
-    people: "Открыть клиентов", reviews: "Открыть отзывы", stats: "Открыть аналитику", mail: "Открыть письма",
+    people: "Открыть клиентов", reviews: "Открыть отзывы", blog: "Открыть блог", stats: "Открыть аналитику", mail: "Открыть письма",
     apps: "Открыть подключения", setup: "Открыть настройки" };
 
   /* ---------- demo changes layer ------------------------------------------
@@ -6561,7 +7589,10 @@
     if (admProbed) return;
     admProbed = true;
     checkAdmin().then(function (ok) {
-      if (ok) loadSrvOrders(true);
+      // analytics agent: warm the 30-day summary as soon as we know this is
+      // the owner, so analyticsForAI() already has something to say the
+      // first time he asks a sales question, whatever tab he opens first.
+      if (ok) { loadSrvOrders(true); loadAnalytics("30d"); }
       render();
     });
   }
@@ -6623,6 +7654,15 @@
     if (a.type === "toggle_promo") return "Промокод " + a.code + ": " + (a.value ? "включить" : "выключить");
     if (a.type === "set_shipping_rules") return shipActionText(a);
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
+    // blog: posts have no demo layer, so this text is all the confirm card
+    // shows — there is no undo entry to read it back from later
+    if (a.type === "draft_post") {
+      var bTitle = (a.title && (a.title.RU || a.title.ET || a.title.EN)) || "—";
+      return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "");
+    }
+    if (a.type === "publish_post") {
+      return "Статья «" + a.slug + "»: " + (a.publish ? "опубликовать" : "снять с публикации");
+    }
     return "";
   }
   /* «Контент: телефон → +372 5555 1234» — the confirm card has to say what is
@@ -6869,7 +7909,7 @@
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI() })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI() })
     })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
@@ -6933,6 +7973,18 @@
       });
     } catch (e) {}
     var s = q.s === "paid" || q.s === "failed" || q.s === "pending" ? q.s : "";
+    /* analytics agent: funnel-only purchase beacon, fired exactly once (the
+       S.done cache above means everything past this point in doneState()
+       runs a single time per page load, even across later re-renders — a
+       language switch on this screen must not send a second "purchase").
+       The euro figure that actually counts as revenue is written
+       server-side, on the paid transition, in src/lib/payments/apply.ts —
+       see db/migrations/080_events.sql for the full split. `t` rides on the
+       redirect from /api/payments/return only when s=paid. */
+    if (s === "paid") {
+      var total = parseFloat(String(q.t || "").replace(",", "."));
+      track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
+    }
     return { status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n };
   }
   function screenDone() {
@@ -7147,6 +8199,7 @@
   var INFO_DESC_TAIL = "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.";
   var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
   var GIFT_DESC = "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
+  var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
   function setHead() {
     var base = { RU: "REMPIRE — магазин косметики в Таллинне", ET: "REMPIRE — kosmeetikapood Tallinnas", EN: "REMPIRE — grooming shop in Tallinn" }[S.lang];
     var buy = { RU: "купить в Rempire", ET: "osta Rempire'ist", EN: "buy at Rempire" }[S.lang];
@@ -7220,6 +8273,23 @@
         t = trText("Подарочная карта", S.lang, false) + " — REMPIRE";
         d = trText(GIFT_DESC, S.lang, false).slice(0, 158);
       }
+      // blog: the listing's title/description are UI chrome (through the
+      // dictionary); a post's are the author's own text, already in S.lang
+      // from the API — never translated, only fitted to the tab.
+      else if (S.screen === "blog") {
+        t = trText("Блог", S.lang, false) + " — REMPIRE";
+        d = trText(BLOG_DESC, S.lang, false).slice(0, 158);
+      } else if (S.screen === "blogpost") {
+        var post = S.blogPosts[S.blogSlug];
+        if (post) {
+          t = fitTitle(post.seoTitle || post.title, (post.seoTitle || post.title) + " — REMPIRE");
+          d = (post.seoDesc || post.excerpt || "").slice(0, 158);
+        } else if (post === null) {
+          // fetched and confirmed missing — the loading instant (undefined)
+          // is left on the generic title rather than flashing this
+          t = trText("Статья не найдена.", S.lang, false) + " — REMPIRE";
+        }
+      }
     }
     document.title = t;
     if (d) setMetaTag("description", d);
@@ -7244,6 +8314,8 @@
     else if (S.screen === "bundles") body = screenBundles();   // features
     else if (S.screen === "bundle") body = screenBundle();     // features
     else if (S.screen === "gift") body = screenGift();         // features
+    else if (S.screen === "blog") body = screenBlog();         // blog
+    else if (S.screen === "blogpost") body = screenBlogPost(); // blog
     else if (S.screen === "info") body = screenInfo();
     else if (S.screen === "admin") body = screenAdmin();
 
@@ -7321,6 +8393,10 @@
     // features: real reviews and the moderation queue are fetched once each
     if (S.screen === "product") loadReviews(S.productId);
     if (S.screen === "admin" && S.adminTab === "reviews") loadAdminReviews(false);
+    // blog: the listing and one post are fetched once each, like reviews above
+    if (S.screen === "blog" && !S.blogList && !S.blogListBusy) loadBlogList();
+    if (S.screen === "blogpost" && S.blogSlug && S.blogPosts[S.blogSlug] === undefined) loadBlogPost(S.blogSlug);
+    if (S.screen === "admin" && S.adminTab === "blog" && !S.adminBlogEdit) loadAdminBlog(false);
     // UX fix 8: #pointmap is a brand-new node after every render() — (re)bind
     // Leaflet to it whenever the picker is open in map view
     if (S.screen === "checkout" && S.pointOpen && POINTS.view === "map") openPointMap();
@@ -7511,6 +8587,9 @@
     // features: /shop2/sets/ is the list, /shop2/set/<id>/ one set
     if (S.screen === "bundles") return b + "/sets/";
     if (S.screen === "bundle" && S.bundleId) return b + "/set/" + encodeURIComponent(S.bundleId) + "/";
+    // blog: /shop2/blog/ is the list (falls through to the generic rule
+    // below), /shop2/blog/<slug>/ one post
+    if (S.screen === "blogpost" && S.blogSlug) return b + "/blog/" + encodeURIComponent(S.blogSlug) + "/";
     if (S.screen === "home") return b + "/";
     return b + "/" + S.screen + "/";
   }
@@ -7569,6 +8648,7 @@
     if (st.shown) S.shown = st.shown;
     render();
     window.scrollTo(0, st.y || 0);
+    trackNav();   // analytics agent: back/forward lands on a new screen too
   });
 
   function go(screen) {
@@ -7582,6 +8662,11 @@
     navTo(screen === "done");
     window.scrollTo({ top: 0 });
     render();
+    // analytics agent: one "view" per real navigation, plus "product" when
+    // it is a product page, plus "checkout" the moment that screen opens —
+    // see trackNav()/track() near esc() and docs/analytics.md.
+    trackNav();
+    if (screen === "checkout") track("checkout", { value: cartSum() });
   }
   /* Brands differ per category, so a Davines filter left over from Уход за
      волосами would silently empty Парфюмерия. Category change clears them. */
@@ -7629,6 +8714,7 @@
     // redraw the lines and totals, or the tap looks like it did nothing
     if (S.cartOpen) rebuildCart();
     toast("Добавлено в корзину ✓");
+    track("add_to_cart", { productId: id, value: sizePrice(byId(id), si) });   // analytics agent
   }
 
   /* ---- features: sets and gift cards in the cart --------------------------
@@ -7767,7 +8853,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-statsrange]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -7924,7 +9010,12 @@
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) { S.admAi = !S.admAi; render(); refocus("[data-admai]"); return; }
-    if (d.admtab) { S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = ""; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admtab) {
+      S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = "";
+      S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
+      window.scrollTo({ top: 0 }); render(); return;
+    }
+    if (d.statsrange) { S.statsRange = d.statsrange; render(); return; }   // analytics agent
     // demo orders are numbered, real ones carry a uuid — keep both as they came
     if (d.admorder !== undefined) { S.adminOrder = d.admorder ? (/^\d+$/.test(d.admorder) ? Number(d.admorder) : d.admorder) : 0; S.adminTab = "orders"; window.scrollTo({ top: 0 }); render(); return; }
     if (d.admlogin !== undefined) {
@@ -8074,7 +9165,14 @@
       render(); return;
     }
     if (d.admapply !== undefined) {
-      if (pendingAction) { demoApply(pendingAction); pendingAction = null; toast("Применено ✓ · журнал в «Настройках»"); render(); }
+      if (pendingAction) {
+        var pa = pendingAction; pendingAction = null;
+        // blog: posts skip the demo/undo layer entirely — straight to the
+        // real admin API, same as the owner's own «Сохранить»/«Опубликовать»
+        if (pa.type === "draft_post" || pa.type === "publish_post") applyBlogAction(pa);
+        else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
+        render();
+      }
       return;
     }
     if (d.admcancel !== undefined) { pendingAction = null; render(); return; }
@@ -8299,6 +9397,9 @@
     if (d.goBundle) {
       S.bundleId = d.goBundle; S.videoOn = false; go("bundle"); return;
     }
+    if (d.goBlog) { S.blogSlug = d.goBlog; go("blogpost"); return; }
+    if (d.blogmore !== undefined) { loadBlogList(true); return; }
+    if (d.blogshare) { shareBlogPost(d.blogshare); return; }
     if (d.addbundle) { e.stopPropagation(); addBundleToCart(d.addbundle); return; }
     if (d.giftamt) { S.giftAmount = Number(d.giftamt); render(); refocus('[data-giftamt="' + d.giftamt + '"]'); return; }
     if (d.addgift) { addGiftToCart(d.addgift); render(); return; }
@@ -8327,7 +9428,37 @@
     if (d.playvideo !== undefined) { S.videoOn = true; render(); return; }
     /* ---------- /features ------------------------------------------------ */
 
-    if (d.q) { S.query = d.q; go("search"); return; }
+    /* ---------- blog: the admin editor ------------------------------------ */
+    if (d.admblognew !== undefined) {
+      S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
+      S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+      window.scrollTo({ top: 0 }); render(); return;
+    }
+    if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
+    if (d.admblogback !== undefined) { S.adminBlogEdit = null; render(); return; }
+    if (d.admbloglang) { S.adminBlogLang = d.admbloglang; render(); return; }
+    if (d.admblogproductadd) {
+      if (S.adminBlogEdit && S.adminBlogEdit.products.indexOf(d.admblogproductadd) < 0) {
+        S.adminBlogEdit.products.push(d.admblogproductadd);
+      }
+      S.adminBlogQ = ""; render(); return;
+    }
+    if (d.admblogproductdel) {
+      if (S.adminBlogEdit) {
+        S.adminBlogEdit.products = S.adminBlogEdit.products.filter(function (id) { return id !== d.admblogproductdel; });
+      }
+      render(); return;
+    }
+    if (d.admblogcoverdel !== undefined) { if (S.adminBlogEdit) S.adminBlogEdit.coverUrl = ""; render(); return; }
+    if (d.admblogsave !== undefined) { saveBlogDraft(); return; }
+    if (d.admblogpublish !== undefined) { publishBlogPost(); return; }
+    if (d.admblogunpublish !== undefined) { unpublishBlogPost(); return; }
+    if (d.admblogdel !== undefined) { S.adminBlogConfirmDelete = true; render(); return; }
+    if (d.admblogdelyes !== undefined) { deleteBlogPost(); return; }
+    if (d.admblogdelno !== undefined) { S.adminBlogConfirmDelete = false; render(); return; }
+    /* ---------- /blog ------------------------------------------------------ */
+
+    if (d.q) { S.query = d.q; scheduleSearchTrack(); go("search"); return; }   // analytics agent
     if (d.closetoast !== undefined) { S.toast = null; render(); return; }
   });
 
@@ -8343,6 +9474,7 @@
       // keystroke would bury the previous screen under a dozen entries
       navTo(wasSearch);
       render();
+      scheduleSearchTrack();   // analytics agent — debounced, see near esc()
     } else if (t.matches("[data-search2]")) {
       S.query = t.value;
       var pos = t.selectionStart;
@@ -8350,6 +9482,7 @@
       render();
       var n = document.querySelector("[data-search2]");
       if (n) { n.focus(); n.setSelectionRange(pos, pos); }
+      scheduleSearchTrack();   // analytics agent
     } else if (t.matches("[data-email]")) {
       S.email = t.value;
       /* account-flows: the abandoned-cart snapshot is filed the moment the
@@ -8430,6 +9563,58 @@
       else S.brandFilter = S.brandFilter.filter(function (x) { return x !== b; });
       S.shown = 12; patchCatalog();
     }
+    /* blog: the editor writes straight into the draft, like «Главный баннер»
+       and «Контент» above — a full render on every keystroke would take the
+       caret out of the field, so only the live preview / counters / slug
+       mirror are patched in place. */
+    else if (t.matches("[data-blogf]")) {
+      var bd = S.adminBlogEdit;
+      if (!bd) return;
+      var bf = t.dataset.blogf;
+      var bl = S.adminBlogLang || "RU";
+      bd[bf][bl] = t.value;
+      if (bf === "title" && bl === "RU" && bd.slugAuto) {
+        bd.slug = blogSlugify(t.value);
+        var slugEl = document.querySelector("[data-blogslug]");
+        if (slugEl) slugEl.value = bd.slug;
+      }
+      if (bf === "body") {
+        var prevEl = document.querySelector("[data-admblogpreview]");
+        if (prevEl) prevEl.innerHTML = blogMdPreview(t.value);
+      }
+      if (bf === "seoTitle" || bf === "seoDesc") {
+        var cntEl = document.querySelector('[data-blogcount="' + bf + '"]');
+        if (cntEl) cntEl.textContent = t.value.length + (bf === "seoTitle" ? "/70" : "/170");
+      }
+    }
+    else if (t.matches("[data-blogslug]")) {
+      if (S.adminBlogEdit) {
+        S.adminBlogEdit.slug = t.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+        S.adminBlogEdit.slugAuto = false;
+      }
+    }
+    else if (t.matches("[data-blogtags]")) {
+      if (S.adminBlogEdit) S.adminBlogEdit.tagsText = t.value;
+    }
+    else if (t.matches("[data-admblogq]")) {
+      S.adminBlogQ = t.value;
+      var plist = document.getElementById("admblogproducts");
+      if (plist && S.adminBlogEdit) {
+        var pd = S.adminBlogEdit;
+        var pq = (S.adminBlogQ || "").trim().toLowerCase();
+        var pmatches = pq ? CATALOGUE.filter(function (p) {
+          return pd.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(pq) >= 0;
+        }).slice(0, 8) : [];
+        plist.innerHTML = pmatches.length
+          ? '<div class="adm__list">' + pmatches.map(function (p) {
+              return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+                '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+                '<button class="link" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
+            }).join("") + "</div>"
+          : "";
+        translateTree(plist);
+      }
+    }
   });
 
   document.addEventListener("change", function (e) {
@@ -8481,7 +9666,9 @@
       var where = t.dataset.galfile;
       t.value = "";   // so choosing the same file twice still fires
       if (!picked || !picked.length) return;
-      if (where === "hero") heroUpload(picked); else galUpload(picked, byId(where));
+      if (where === "hero") heroUpload(picked);
+      else if (where === "blog") blogCoverUpload(picked);   // blog
+      else galUpload(picked, byId(where));
     }
   });
 
@@ -8505,7 +9692,9 @@
     var files = e.dataTransfer && e.dataTransfer.files;
     if (!files || !files.length || UP.busy) return;
     var where = z.dataset.galdrop;
-    if (where === "hero") heroUpload(files); else galUpload(files, byId(where));
+    if (where === "hero") heroUpload(files);
+    else if (where === "blog") blogCoverUpload(files);   // blog
+    else galUpload(files, byId(where));
   });
 
   // the shopper's own open/closed choice for the summary wins from then on
@@ -8642,6 +9831,14 @@
     }
     if (/\/shop2\/sets$/.test(p)) { S.screen = "bundles"; return true; }
     if (/\/shop2\/gift$/.test(p)) { S.screen = "gift"; return true; }
+    /* blog: posts live in the database, not in a client-side list like
+       CATALOGUE or BUNDLES, so there is nothing to check synchronously here
+       — the slug is accepted optimistically and screenBlogPost() resolves it
+       (found / not found / still loading) once its fetch answers. */
+    if ((m = p.match(/\/shop2\/blog\/([^/]+)$/))) {
+      S.blogSlug = decodeURIComponent(m[1]); S.screen = "blogpost"; return true;
+    }
+    if (/\/shop2\/blog$/.test(p)) { S.screen = "blog"; return true; }
     if ((m = p.match(/\/shop2\/(brands|account|admin)$/))) { S.screen = m[1]; return true; }
     /* The receipt IS a place to land cold — it is where the bank sends the
        shopper back to, with ?n=&s= naming the order and how it went. Without
@@ -8762,6 +9959,7 @@
     history.replaceState({ y: 0, shown: S.shown }, "", here());
   } catch (e) {}
   render();
+  trackNav();   // analytics agent: the very first view of this tab's session
   /* The slots are filled now, so the static page underneath them has done its
      job. Still one synchronous task — the browser has not painted between the
      two, which is why the swap is invisible. */

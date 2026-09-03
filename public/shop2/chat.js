@@ -280,6 +280,9 @@
     if (open) probeAI();
     if (open) paintPanel();
     if (open) input.focus();
+    // analytics agent: app.js exposes track() as window.__rmpTrack for
+    // exactly this — chat.js has no other way to reach it (docs/analytics.md)
+    if (open && window.__rmpTrack) window.__rmpTrack("chat");
   }
   function refreshVisibility() {
     var ok = chatAllowed();

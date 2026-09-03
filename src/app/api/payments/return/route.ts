@@ -20,10 +20,20 @@ import { allow, clientIp } from "@/lib/payments/ratelimit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function done(base: string, number: string | null, state: string) {
+/**
+ * `total` (analytics agent) rides along only on a paid receipt — it is what
+ * lets the done screen's client-side `track("purchase", …)` beacon report a
+ * total without app.js having to remember anything across the redirect to
+ * the bank and back. It is a funnel signal only: the euro amount that
+ * actually counts as revenue is written server-side, here, by
+ * applyPaymentResult → src/lib/events.ts recordPurchaseEvent — see
+ * db/migrations/080_events.sql for the full "which is used where".
+ */
+function done(base: string, number: string | null, state: string, total?: number) {
   const params = new URLSearchParams();
   if (number) params.set("n", number);
   params.set("s", state);
+  if (total != null && Number.isFinite(total)) params.set("t", total.toFixed(2));
   return NextResponse.redirect(`${base}/shop2/done/?${params.toString()}`, 303);
 }
 
@@ -119,5 +129,5 @@ async function handle(req: Request, params: URLSearchParams) {
       : outcome.status === "failed"
         ? "failed"
         : result.status;
-  return done(base, order.number, state);
+  return done(base, order.number, state, state === "paid" ? Number(order.total) : undefined);
 }
