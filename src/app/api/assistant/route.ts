@@ -198,7 +198,11 @@ export async function POST(req: NextRequest) {
   const origin = req.headers.get("origin");
   if (origin) {
     try {
-      if (!ALLOWED_HOSTS.has(new URL(origin).host)) {
+      const originHost = new URL(origin).host;
+      // Same-origin calls are fine on any deployment URL (staging, previews,
+      // *.vercel.app, the real domain); anything cross-origin must be listed.
+      const selfHost = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "";
+      if (originHost !== selfHost && !ALLOWED_HOSTS.has(originHost)) {
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
     } catch {
