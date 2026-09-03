@@ -127,3 +127,16 @@ they need back-and-forth and, in several cases, him logging into something
 while you watch. Items 8, 9 and 15 need other people (accountant, lawyer,
 photographer) and should be started now because they run on someone else's
 schedule.
+
+## Telegram-уведомления (добавлено 03.09.2026)
+
+**Вопрос Ренату:** нужны ли уведомления в Telegram? Бесплатно. Смысл: мгновенный «пуш» на телефон
+о новом заказе, оплате, новом отзыве и о товарах, которые заканчиваются, — без того, чтобы открывать
+почту или админку. По e-mail (Resend) те же уведомления уже приходят. Если «да»: Ренат создаёт бота
+через @BotFather (2 минуты, инструкция дадим), присылает токен Дмитрию → `TELEGRAM_BOT_TOKEN` +
+`TELEGRAM_CHAT_ID` в Vercel. Если «нет» — ничего не делаем.
+
+Готовый текст для Рената:
+> Ренат, вопрос: хочешь получать уведомления о новых заказах прямо в Telegram (на телефон, мгновенно)?
+> Это бесплатно. На почту они и так будут приходить. Если да — напиши, скажу, как за две минуты
+> сделать бота.
