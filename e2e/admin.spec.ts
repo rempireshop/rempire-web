@@ -34,6 +34,14 @@ async function placeOrder(page: Page, email: string): Promise<string> {
   return payOrder(page, email, "paid");
 }
 
+/** «Применить» writes through to PUT /api/admin/settings only after the
+ *  optimistic toast — the storefront visit below must not race that write. */
+async function applyAndWaitForSettingsWrite(page: Page): Promise<void> {
+  const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+  await page.locator("[data-admapply]").click();
+  expect((await put).ok()).toBe(true);
+}
+
 /** Opens Settings ("Настройки") — hero, content, sets, chatbot all live there. */
 async function openSettings(page: Page): Promise<void> {
   await page.locator('[data-admtab="setup"]').click();
@@ -136,7 +144,7 @@ test.describe("admin", () => {
         await page.locator('[data-herof="title"]').fill("E2E hero title");
         await page.locator("[data-herosave]").click();
         await expect(page.locator("[data-admapply]")).toBeVisible();
-        await page.locator("[data-admapply]").click();
+        await applyAndWaitForSettingsWrite(page);
         await expect(page.getByRole("status")).toBeVisible();
 
         const home = await freshStorefrontPage(browser);
@@ -168,7 +176,7 @@ test.describe("admin", () => {
         await page.locator('[data-contentf="company.phone"]').fill("+372 5000000");
         await page.locator("[data-contentsave]").click();
         await expect(page.locator("[data-admapply]")).toBeVisible();
-        await page.locator("[data-admapply]").click();
+        await applyAndWaitForSettingsWrite(page);
         await expect(page.getByRole("status")).toBeVisible();
 
         const home = await freshStorefrontPage(browser);

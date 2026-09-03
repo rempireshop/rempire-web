@@ -11231,10 +11231,10 @@
     }
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; mediaProbe();   // media
-      AI_UNDO = null; AI_BUSY = "";   // assistant-work: a fresh product, a fresh undo snapshot
+      AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admclose !== undefined) { S.adminEdit = ""; GAL.id = ""; AI_UNDO = null; AI_BUSY = ""; render(); return; }
+    if (d.admclose !== undefined) { S.adminEdit = ""; GAL.id = ""; AI_UNDO = null; render(); return; }
     /* ---- media: the «Фото» block ----------------------------------------
        Everything here edits the draft list only; «Сохранить» is what turns it
        into a set_gallery action, so «Отмена» really cancels. */
