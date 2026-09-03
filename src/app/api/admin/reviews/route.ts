@@ -12,7 +12,14 @@ import { listReviews, reviewCounts, setReviewStatus, type ReviewStatus } from "@
  * NB: trailing slash on both (next.config has trailingSlash: true).
  */
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const STATUSES: ReviewStatus[] = ["pending", "approved", "rejected"];
+
+/* Moderation data — customer names and unpublished text. Every other admin
+   route says so; this one used to leave it to the browser (audit L10). */
+const NO_STORE = { "cache-control": "no-store" } as const;
 
 export async function GET(req: Request) {
   const denied = await requireAdmin(req);
@@ -24,7 +31,7 @@ export async function GET(req: Request) {
 
   try {
     const [reviews, counts] = await Promise.all([listReviews(status), reviewCounts()]);
-    return Response.json({ ok: true, reviews, counts });
+    return Response.json({ ok: true, reviews, counts }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin/reviews GET failed", err);
     return Response.json({ ok: false, error: "unavailable" }, { status: 503 });
@@ -52,7 +59,7 @@ export async function PATCH(req: Request) {
   try {
     const review = await setReviewStatus(id, status as ReviewStatus);
     if (!review) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
-    return Response.json({ ok: true, review });
+    return Response.json({ ok: true, review }, { headers: NO_STORE });
   } catch (err) {
     console.error("admin/reviews PATCH failed", err);
     return Response.json({ ok: false, error: "unavailable" }, { status: 503 });

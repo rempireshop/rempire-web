@@ -353,18 +353,27 @@ if (raw.id.startsWith("gift:")) {
 его в каждый запрос:
 
 ```ts
-const { applyGiftCard, redeemGiftCard } = await import("@/lib/giftcards");
-const quote = await applyGiftCard(code, total);   // только считает, ничего не тратит
-if (quote.ok) {
-  // …создать заказ со скидкой quote.discount…
-  await redeemGiftCard(code, quote.discount, order.id);   // а вот это тратит
-}
+// при оформлении (src/lib/orders.ts) — только считаем
+const { applyGiftCard } = await import("@/lib/giftcards");
+const quote = await applyGiftCard(code, total);   // ничего не тратит
+// …создать заказ со скидкой quote.discount и кодом в discount_code…
+
+// при подтверждении оплаты (src/lib/payments/apply.ts) — вот тут тратим
+await redeemGiftCard(order.discountCode, order.discount, order.id);
 ```
 
-Порядок именно такой: `applyGiftCard` не списывает ничего, поэтому
-незавершённое оформление не съедает деньги с карты. Само списание —
-`redeemGiftCard`, одним условным `UPDATE`, так что две одновременные оплаты не
-потратят одни и те же деньги дважды.
+**Списание происходит в момент оплаты, а не при оформлении** (аудит H3,
+`docs/audit/security-api.md`). Раньше `createOrder` списывал деньги сразу после
+`insert` — и если банковская ссылка отваливалась, покупатель терял баланс карты
+и не получал товар; вернуть его можно было только руками в базе. Теперь заказ
+хранит только «обещанную» скидку и код, а баланс уходит один раз — на переходе
+заказа в `paid`, так что повторный вебхук не спишет дважды.
+
+Само списание — `redeemGiftCard`, одним условным `UPDATE`, так что две
+одновременные оплаты не потратят одни и те же деньги дважды. Если к моменту
+оплаты карта уже пуста, заказ **остаётся оплаченным** (деньги-то пришли), а в
+`admin_audit` пишется строка `giftcard_redeem_failed` — Ренат видит её и
+разбирается руками.
 
 **3. Выпуск карт — в хуке `onOrderPaid`.** Вызывает почтовый агент (или
 backend там, где заказ переводится в `paid`):

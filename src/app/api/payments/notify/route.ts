@@ -3,6 +3,7 @@ import { getOrderByNumber, setOrderPayment, setOrderStatus } from "@/lib/orders"
 import { getProvider } from "@/lib/payments";
 import { applyPaymentResult } from "@/lib/payments/apply";
 import { notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { allow, clientIp } from "@/lib/payments/ratelimit";
 
 /**
  * POST /api/payments/notify/ — the provider's webhook. This, not the shopper's
@@ -21,13 +22,24 @@ import { notifyOrderPaid } from "@/lib/payments/mail-hook";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/* Generous — Montonio retries for 48 hours and a busy day is a few dozen
+   webhooks — but finite: the signed token is the security boundary, the
+   limiter is what stops a replay loop from becoming a bill (audit H4). */
+const RATE_LIMIT = 60;
+const RATE_WINDOW_MS = 60_000;
+
 export async function POST(req: Request) {
+  if (!allow(`pay:notify:${clientIp(req)}`, RATE_LIMIT, RATE_WINDOW_MS)) {
+    return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
+  }
+
   let provider;
   try {
     provider = getProvider();
   } catch (err) {
+    // No payment provider configured ⇒ nothing here can be believed (C1).
     console.error("payments/notify: no provider", err);
-    return NextResponse.json({ ok: false, error: "provider_unconfigured" }, { status: 503 });
+    return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }
 
   let result;
@@ -64,7 +76,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "apply_failed" }, { status: 503 });
   }
 
-  if (outcome.status === "paid") {
+  // Only the transition into paid sends mail. A replayed webhook — Montonio's
+  // 48-hour retry, or someone re-posting the same body — must not ping Renat
+  // again (audit H4).
+  if (outcome.status === "paid" && !outcome.alreadyPaid) {
     await notifyOrderPaid({ ...order, status: "paid", payment: outcome.payment });
   }
   if (outcome.keptPaid) {

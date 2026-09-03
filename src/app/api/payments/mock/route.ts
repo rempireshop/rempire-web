@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicBaseUrl } from "@/lib/payments";
 import { mockSecret, readMockTicket, signMockTicket } from "@/lib/payments/mock";
 
 /**
@@ -30,7 +31,17 @@ function eur(n: number): string {
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const token = url.searchParams.get("t") ?? "";
-  const secret = mockSecret();
+
+  let secret: string;
+  try {
+    secret = mockSecret();
+  } catch {
+    // no SESSION_SECRET ⇒ no mock provider at all (audit C1)
+    return new NextResponse("Тестовая оплата не настроена.", {
+      status: 503,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
 
   let ticket;
   try {
@@ -45,7 +56,26 @@ export async function GET(req: Request) {
   const decision = url.searchParams.get("do");
   if (decision === "paid" || decision === "failed") {
     const settled = signMockTicket({ ...ticket, status: decision }, secret);
-    const back = new URL(ticket.returnUrl);
+    /* The ticket names where to send the shopper, so this page could be used
+       to bounce anyone anywhere from the shop's own domain (audit M7). It
+       leads back here or nowhere. */
+    let back: URL;
+    try {
+      back = new URL(ticket.returnUrl);
+    } catch {
+      return new NextResponse("Ссылка недействительна.", {
+        status: 400,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      });
+    }
+    const base = publicBaseUrl(req);
+    const allowed = new Set([url.origin, base ? new URL(base).origin : url.origin]);
+    if (!allowed.has(back.origin)) {
+      return new NextResponse("Ссылка недействительна.", {
+        status: 400,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      });
+    }
     back.searchParams.set("mock-token", settled);
     return NextResponse.redirect(back.toString(), 303);
   }

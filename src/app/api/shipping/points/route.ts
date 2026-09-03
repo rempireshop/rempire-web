@@ -1,17 +1,37 @@
 import { NextResponse } from "next/server";
-import { getPoints, isCarrier, seedGeneratedAt, type ParcelPoint } from "@/lib/parcel-points";
+import { CARRIERS, getPoints, isCarrier, seedGeneratedAt } from "@/lib/parcel-points";
+import {
+  fetchMontonioPickupPoints,
+  fromParcelPoint,
+  mergePoints,
+  type MontonioPoint,
+} from "@/lib/shipping/montonio";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 
 /**
- * GET /api/shipping/points/?country=EE&carrier=omniva|dpd|smartpost
- *   → { ok: true, points: [{ id, carrier, name, address, city, zip, lat, lng }] }
+ * GET /api/shipping/points/?country=EE&carrier=omniva|dpd|smartpost|venipak|all
+ *   → { ok: true, points: [{ id, carrier, name, address, city, zip, lat, lng, type }] }
  *
  * The checkout's parcel-machine picker. Cached hard at the edge (an hour) and
  * for six hours in the instance, because a carrier's machine list changes a
  * few times a month, not a few times a minute.
  *
- * `source` says where the answer came from — "live", "cache" or "seed" — so a
- * carrier feed that has quietly died is visible without reading the logs.
+ * Two sources, in this order:
+ *   1. **Montonio Shipping**, when MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY are
+ *      set. One key pair, every carrier Renat has activated — including DPD in
+ *      EE/LV/LT and anything at all in Finland, neither of which has a public
+ *      feed. Its ids are UUIDs, and only those can address a shipment later.
+ *   2. the carriers' own feeds and the committed seed, for whatever Montonio
+ *      did not answer for. A carrier Montonio covered is not merged from the
+ *      feed at all — see mergePoints().
+ *
+ * `source` says which paths served the answer ("montonio", "montonio+seed",
+ * "live", "cache", "seed"), so a feed — or a key — that has quietly died is
+ * visible without reading the logs.
+ *
+ * An unknown carrier is not an error: it answers `{ ok: true, points: [] }`, and
+ * the storefront drops that chip. A 400 there would leave the checkout showing
+ * a carrier nobody can pick from.
  */
 
 export const runtime = "nodejs";
@@ -20,9 +40,10 @@ export const dynamic = "force-dynamic";
 const RATE_LIMIT = 60;
 const RATE_WINDOW_MS = 60_000;
 const COUNTRY_RE = /^[A-Z]{2}$/;
+const CARRIER_RE = /^[a-z][a-z0-9_-]{1,20}$/;
 
 /** The wire shape stays small — this list can be 3000 rows long. */
-function slim(p: ParcelPoint) {
+function slim(p: MontonioPoint) {
   return {
     id: p.id,
     carrier: p.carrier,
@@ -32,6 +53,7 @@ function slim(p: ParcelPoint) {
     zip: p.zip,
     lat: p.lat,
     lng: p.lng,
+    type: p.type,
   };
 }
 
@@ -47,11 +69,36 @@ export async function GET(req: Request) {
   if (!COUNTRY_RE.test(country)) {
     return NextResponse.json({ ok: false, error: "bad_country" }, { status: 400 });
   }
-  if (!isCarrier(carrierParam)) {
+  if (carrierParam !== "all" && !CARRIER_RE.test(carrierParam)) {
     return NextResponse.json({ ok: false, error: "bad_carrier" }, { status: 400 });
   }
 
-  const { points, source } = await getPoints(carrierParam, country);
+  const sources: string[] = [];
+  let points: MontonioPoint[] = [];
+
+  const montonio = await fetchMontonioPickupPoints({
+    country,
+    carrier: carrierParam === "all" ? undefined : carrierParam,
+  });
+  if (montonio && montonio.length) {
+    points = montonio;
+    sources.push("montonio");
+  }
+
+  /* Whatever Montonio did not cover, the public feeds still might — but only
+     for the three carriers that have one at all, and only where Montonio has
+     not already answered for that carrier. Skipping those saves the 850 KB
+     Omniva download on every request once Montonio is live. */
+  const feedCarriers = carrierParam === "all" ? CARRIERS : isCarrier(carrierParam) ? [carrierParam] : [];
+  for (const carrier of feedCarriers) {
+    if (points.some((p) => p.carrier === carrier)) continue;
+    const feed = await getPoints(carrier, country);
+    if (!feed.points.length) continue;
+    points = mergePoints(points, feed.points.map(fromParcelPoint));
+    if (!sources.includes(feed.source)) sources.push(feed.source);
+  }
+
+  const source = sources.length ? sources.join("+") : montonio ? "montonio" : "seed";
 
   return NextResponse.json(
     {
@@ -59,7 +106,7 @@ export async function GET(req: Request) {
       country,
       carrier: carrierParam,
       source,
-      seedAt: source === "seed" ? seedGeneratedAt() : undefined,
+      seedAt: sources.includes("seed") ? seedGeneratedAt() : undefined,
       count: points.length,
       points: points.map(slim),
     },

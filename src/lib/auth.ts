@@ -64,7 +64,16 @@ export function readCookie(req: Request, name: string): string | null {
   for (const part of header.split(";")) {
     const eq = part.indexOf("=");
     if (eq < 0) continue;
-    if (part.slice(0, eq).trim() === name) return decodeURIComponent(part.slice(eq + 1).trim());
+    if (part.slice(0, eq).trim() !== name) continue;
+    try {
+      return decodeURIComponent(part.slice(eq + 1).trim());
+    } catch {
+      /* `rmp_admin=%` is a URIError, and an unhandled one turns every admin
+         route — including /api/admin/me/, which the storefront calls on boot —
+         into a 500. A cookie that cannot be decoded is a cookie we do not
+         have: show the login card (audit L1). */
+      return null;
+    }
   }
   return null;
 }

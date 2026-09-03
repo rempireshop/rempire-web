@@ -1,11 +1,12 @@
 /**
  * GET /api/overrides — everything the storefront needs to render the owner's
  * edits: per-product overrides (price, stock, SEO, subcategory, variant photo
- * order, video) and the shop settings (chat bot on/off, the home-page banner,
- * mail flows, shipping rules).
+ * order, video, the photo gallery he uploaded) and the shop settings (chat bot
+ * on/off, the home-page banner, mail flows, shipping rules).
  *
  * Public and cached at the edge for half a minute — a price change is visible
- * within 30 s, and a burst of shoppers costs one query.
+ * within 30 s, and a burst of shoppers costs one query. "Public" is meant
+ * literally, so only the keys in PUBLIC_SETTINGS below leave the server.
  *
  * When there is no database the shop must still work, so the answer is a plain
  * 503 with {ok:false}; public/shop2/app.js falls back to its localStorage copy.
@@ -25,11 +26,32 @@ const DEFAULT_SETTINGS: Record<string, unknown> = {
   shipping: {},
 };
 
+/**
+ * The settings this route is allowed to publish.
+ *
+ * `settings` is a free-form key/value table — PUT /api/admin/settings takes any
+ * key matching /^[a-z0-9_.-]{1,64}$/i with an arbitrary jsonb value. Serving all
+ * of it made every future note-to-self, token or internal flag a public
+ * document, cached at the edge for 30 s (audit M1). A key that is not on this
+ * list stays on the server until someone puts it here on purpose.
+ */
+const PUBLIC_SETTINGS = [
+  "chatbot",
+  "bundles",
+  "hero",
+  "flows",
+  "shipping",
+  "shipping_rules",
+] as const;
+
 export async function GET() {
   try {
     const [overrides, stored] = await Promise.all([getOverrides(), getSettings()]);
+    const published = Object.fromEntries(
+      Object.entries(stored).filter(([k]) => (PUBLIC_SETTINGS as readonly string[]).includes(k)),
+    );
     return Response.json(
-      { ok: true, overrides, settings: { ...DEFAULT_SETTINGS, ...stored } },
+      { ok: true, overrides, settings: { ...DEFAULT_SETTINGS, ...published } },
       { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
     );
   } catch (err) {

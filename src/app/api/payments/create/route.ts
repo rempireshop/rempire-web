@@ -72,8 +72,11 @@ export async function POST(req: Request) {
   try {
     provider = getProvider();
   } catch (err) {
+    /* No PAYMENT_PROVIDER and no Montonio keys: the shop refuses to take the
+       money rather than falling back to the mock gateway, which would mark the
+       order paid for free (audit C1). Set the keys, or PAYMENT_PROVIDER=mock. */
     console.error("payments/create: no provider", err);
-    return bad("provider_unconfigured", 503);
+    return bad("not_configured", 503);
   }
 
   const country =

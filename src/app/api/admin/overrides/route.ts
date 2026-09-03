@@ -7,6 +7,7 @@
  *   { "id": "touchable", "price": 25.5 }
  *   { "id": "touchable", "stock": "low", "seoTitle": "…", "seoDesc": "…" }
  *   { "items": [ { "id": "a", "price": 9 }, { "id": "b", "stock": "out" } ] }
+ *   { "id": "touchable", "gallery": [ { "url": "…", "thumb": "…", "alt": "" } ] }
  *
  * GET returns the same map as /api/overrides but uncached, for the panel.
  */
@@ -37,6 +38,10 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
   pick(["subcat", "sub"], "subcat");
   pick(["varImg", "var_img"], "varImg");
   pick(["videoUrl", "video_url", "video"], "videoUrl");
+  /* The photos the owner uploaded (docs/media.md). Whatever arrives is put
+     through cleanGallery() in upsertOverride, so a malformed entry is dropped
+     rather than stored; an empty list means «back to the catalogue photos». */
+  pick(["gallery", "photos"], "gallery");
   if ("price" in patch && patch.price != null) {
     const n = Number(patch.price);
     if (!Number.isFinite(n) || n < 0 || n > 100000) throw new OrderError("bad_price", id);

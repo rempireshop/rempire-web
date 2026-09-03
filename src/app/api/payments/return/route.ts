@@ -3,6 +3,7 @@ import { getOrderByNumber, setOrderPayment, setOrderStatus } from "@/lib/orders"
 import { getProvider, publicBaseUrl } from "@/lib/payments";
 import { applyPaymentResult } from "@/lib/payments/apply";
 import { notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { allow, clientIp } from "@/lib/payments/ratelimit";
 
 /**
  * GET /api/payments/return/ — where the provider sends the shopper back.
@@ -48,13 +49,24 @@ export async function POST(req: Request) {
   return handle(req, params);
 }
 
+/* A shopper comes back once or twice; a refresh loop is not a shopper. Kept
+   loose enough that reloading the receipt never locks anyone out (audit H4). */
+const RATE_LIMIT = 60;
+const RATE_WINDOW_MS = 60_000;
+
 async function handle(req: Request, params: URLSearchParams) {
   const base = publicBaseUrl(req);
 
+  if (!allow(`pay:return:${clientIp(req)}`, RATE_LIMIT, RATE_WINDOW_MS)) {
+    return done(base, params.get("n"), "pending");
+  }
+
   let provider;
   try {
+    // No provider configured ⇒ refuse: nothing signed can be verified (C1).
     provider = getProvider();
-  } catch {
+  } catch (err) {
+    console.error("payments/return: no provider", err);
     return done(base, null, "failed");
   }
 
@@ -89,9 +101,10 @@ async function handle(req: Request, params: URLSearchParams) {
     return done(base, order.number, result.status);
   }
 
-  if (outcome.status === "paid") {
+  if (outcome.status === "paid" && !outcome.alreadyPaid) {
     // The confirmation e-mail must not hold up the redirect, and must not be
-    // able to break it either.
+    // able to break it either. Only the first arrival sends it: this route and
+    // the webhook race by design, and refreshing it is free (audit H4).
     await notifyOrderPaid({ ...order, status: "paid", payment: outcome.payment });
   }
 

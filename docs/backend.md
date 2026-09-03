@@ -20,7 +20,8 @@ into the project's environment settings.
 | `DATABASE_SSL_NO_VERIFY` | optional | `1` turns off certificate verification — only for a provider whose CA is not in Node's trust store. |
 
 Other agents own `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_REPLY_TO`,
-`PAYMENT_PROVIDER`, `MONTONIO_*`, `OPENAI_API_KEY`, `PUBLIC_BASE_URL`.
+`PAYMENT_PROVIDER`, `MONTONIO_*`, `OPENAI_API_KEY`, `PUBLIC_BASE_URL`, and the
+five `R2_*` for photo uploads (docs/media.md).
 
 ## Setting it up
 
@@ -60,7 +61,9 @@ because the session is signed with `SESSION_SECRET`, not with the password.
   `shipping` (tariff rules).
 - **`product_overrides`** — one row per product the owner has edited: `price`,
   `stock` (`in`/`low`/`out`), `seo_title`, `seo_desc`, `subcat`, `var_img`,
-  `video_url`. Null means "no override, use the catalogue".
+  `video_url`, `gallery` (jsonb `[{url, thumb, alt}]`, the photos he uploaded —
+  `db/migrations/003_product_gallery.sql`, see docs/media.md). Null means "no
+  override, use the catalogue".
 - **`orders`** — uuid `id`, human `number` (`R-100001`, from `order_number_seq`),
   `status` (`new`/`paid`/`failed`/`shipped`/`cancelled`/`refunded`), the customer,
   `items` and `shipping` as jsonb, the four money columns, `payment` as jsonb,
@@ -94,10 +97,12 @@ then rebuilds every number from:
 3. the `product_overrides` row, if any — an override price replaces the base
    price and keeps the size premium, so "−1 € on the 75 ml" does not give away
    16 € on the 500 ml;
-4. `src/lib/shipping.ts` `computeShipping({country, method, subtotal})` when it
-   exists, otherwise a flat fallback: parcel machine EE 3.49, courier EE 5.99,
-   anything else 9.90, free over 59 €;
-5. `src/lib/giftcards.ts` `applyGiftCard(code, total)` when it exists;
+4. `src/lib/shipping.ts` `computeShipping({country, method, subtotal, carrier})`
+   when it exists, otherwise a flat fallback: parcel machine EE 3.49, courier EE
+   5.99, anything else 9.90, free over 59 €;
+5. `src/lib/giftcards.ts` `applyGiftCard(code, total)` when it exists — it only
+   **quotes** the discount. The card is spent when the payment is confirmed
+   (`src/lib/payments/apply.ts`), never at checkout;
 6. `src/data/bundles.json` for items whose id is `bundle:<id>`.
 
 Items whose effective stock is `out` are refused (`out_of_stock`), as are
@@ -116,7 +121,7 @@ The site runs with `trailingSlash: true`, so call the paths with the slash
 
 | Route | What it does |
 | --- | --- |
-| `POST /api/orders/` | Body `{lang, items:[{id, variant?, qty}], customer:{name,email,phone}, shipping:{method, country, pointId?, pointName?, address?}, discountCode?}` → `{ok, orderId, number, total}`. 10 per minute per IP. Errors: `empty_order`, `bad_qty`, `bad_name`, `bad_email`, `unknown_item`, `out_of_stock`, `bundle_unknown`, `rate_limited`. |
+| `POST /api/orders/` | Body `{lang, items:[{id, variant?, qty}], customer:{name,email,phone}, shipping:{method, country, carrier?, pointId?, pointName?, address?}, discountCode?, notes?}` → `{ok, orderId, number, total}`. 10 per minute per IP, body capped at 16 KB (`too_large`, 413). `shipping` is rebuilt from a whitelist: `method` becomes one of `parcel`/`courier`/`pickup`, `country` two letters, `carrier` one of `omniva`/`smartpost`/`dpd`/`venipak` (lower-cased, anything else `null`), `pointId` ≤ 80 chars, `pointName` ≤ 160, `address` only `{addr,street,zip,city,house,flat}` at ≤ 160 chars each. Errors: `empty_order`, `bad_qty`, `bad_name`, `bad_email`, `unknown_item`, `out_of_stock`, `bundle_unknown`, `rate_limited`, `too_large`. |
 | `GET /api/overrides/` | `{ok, overrides, settings}` — everything the storefront needs. `Cache-Control: s-maxage=30`. 503 `db_unavailable` when there is no database. |
 
 ### Admin (cookie `rmp_admin`)
@@ -126,7 +131,8 @@ The site runs with `trailingSlash: true`, so call the paths with the slash
 | `POST /api/admin/login/` | `{password}` → sets the cookie. 5 tries a minute per IP. |
 | `POST /api/admin/logout/` | Clears the cookie. |
 | `GET /api/admin/me/` | 200 when signed in, 401 otherwise; `configured` says whether the server has a password at all. |
-| `PUT /api/admin/overrides/` | `{id, price?, stock?, seoTitle?, seoDesc?, subcat?, varImg?, videoUrl?}`, or `{items:[…]}` for several. Only the keys sent are touched; `null` clears one. `GET` returns the map uncached. |
+| `PUT /api/admin/overrides/` | `{id, price?, stock?, seoTitle?, seoDesc?, subcat?, varImg?, videoUrl?, gallery?}`, or `{items:[…]}` for several. Only the keys sent are touched; `null` clears one. `GET` returns the map uncached. |
+| `POST /api/admin/upload/` | multipart `file`, `kind=product\|hero\|review`, `productId?`/`reviewId?` → `{ok, url, thumbUrl, key, width, height, bytes}`. 60 an hour per session. `DELETE ?key=` removes one object, `GET` says whether the bucket is configured. See docs/media.md. |
 | `PUT /api/admin/settings/` | `{chatbot:false}`, `{hero:{slides:[…],interval}}` or `{hero:null}`, `{flows:{…}}`, `{key, value}` or `{settings:{…}}`. `GET` returns everything. |
 | `GET /api/admin/orders/?status=&q=&limit=` | Newest first; `q` matches number, e-mail, name or phone. |
 | `GET/PATCH /api/admin/orders/<id>/` | The id is the uuid or the order number. `PATCH {status?, note?}`. |

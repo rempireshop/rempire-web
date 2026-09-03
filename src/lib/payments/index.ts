@@ -11,9 +11,14 @@ export { MakeCommerceProvider } from "./makecommerce";
 /**
  * Which provider this deployment pays through.
  *
- * PAYMENT_PROVIDER decides when it is set. When it is not, Montonio wins if its
- * keys are present and the mock provider takes over if they are not — so a
- * fresh clone with an empty .env.local still has a checkout that completes.
+ * PAYMENT_PROVIDER decides when it is set. When it is not, Montonio is used if
+ * its keys are present — and if they are not, this **throws**. A shop with no
+ * payment provider must refuse to take payments, never invent one: the mock
+ * provider signs its own "this order is paid" tickets, so falling back to it
+ * silently is the same as publishing a free-order endpoint (audit C1).
+ *
+ * The mock provider is therefore reachable one way only: PAYMENT_PROVIDER=mock,
+ * typed by a human who meant it. See docs/payments.md.
  */
 export function getProvider(env: NodeJS.ProcessEnv = process.env): PaymentProvider {
   const choice = env.PAYMENT_PROVIDER?.trim().toLowerCase();
@@ -22,10 +27,12 @@ export function getProvider(env: NodeJS.ProcessEnv = process.env): PaymentProvid
   if (choice === "makecommerce") return new MakeCommerceProvider();
   if (choice === "montonio") {
     const montonio = createMontonioProvider(env);
-    if (!montonio) throw new PaymentError("provider_unconfigured");
+    if (!montonio) throw new PaymentError("not_configured");
     return montonio;
   }
-  return createMontonioProvider(env) ?? new MockProvider(mockSecret(env));
+  const montonio = createMontonioProvider(env);
+  if (montonio) return montonio;
+  throw new PaymentError("not_configured");
 }
 
 /**

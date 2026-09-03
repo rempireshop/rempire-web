@@ -1,0 +1,16 @@
+-- 003_product_gallery.sql — backend-core (migration range 001–009)
+--
+-- The owner's own photos for a product, uploaded from the admin into
+-- Cloudflare R2 (docs/media.md). Null means «no override» — the storefront
+-- keeps the photos that ship with the catalogue in public/shop/img.
+--
+-- Shape: a jsonb array, in display order, first entry = the main photo:
+--   [{"url": "https://media.rempireshop.com/products/touchable/1725…-a.webp",
+--     "thumb": "https://…-thumb.webp",
+--     "alt": "Kevin.Murphy Touchable"}, …]
+--
+-- Deliberately not a table: the list is always read and written whole (adding,
+-- reordering and deleting a photo are all one save), it never joins to
+-- anything, and product_overrides.var_img already points into it by index —
+-- keeping the two side by side in one row is what makes that consistent.
+alter table product_overrides add column if not exists gallery jsonb;

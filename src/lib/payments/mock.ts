@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { signHs256, verifyHs256 } from "./jwt";
 import {
   PaymentError,
@@ -12,10 +13,11 @@ import {
 /**
  * The keyless provider.
  *
- * Selected automatically when no Montonio keys are set, so the whole checkout —
- * create order, redirect, pay, come back, receipt — can be walked end to end on
- * a laptop before anyone has opened a Montonio account. The "gateway" is
- * /api/payments/mock/: one page, two buttons.
+ * Selected ONLY by PAYMENT_PROVIDER=mock, so the whole checkout — create order,
+ * redirect, pay, come back, receipt — can be walked end to end on a laptop
+ * before anyone has opened a Montonio account. It is never a fallback: see
+ * getProvider() in ./index.ts. The "gateway" is /api/payments/mock/: one page,
+ * two buttons.
  *
  * It is not a toy in one respect: the ticket it carries is a real signed JWT
  * with the same claim names Montonio uses, so the return and notify routes
@@ -25,13 +27,20 @@ import {
 const TOKEN_TTL_SECONDS = 3600;
 
 /**
- * Dev-only signing key. Real deployments have SESSION_SECRET; a bare laptop
- * gets the constant, which is fine because the mock provider must never be
- * selected in production (getProvider() prefers Montonio whenever keys exist,
- * and PAYMENT_PROVIDER=mock is an explicit choice).
+ * The signing key for mock tickets.
+ *
+ * There is no fallback constant any more (audit C1): a published default key
+ * means anyone can mint a "this order is paid" token. No SESSION_SECRET, no
+ * mock provider — the caller gets `not_configured` and the route answers 503.
+ *
+ * The key is *derived* from SESSION_SECRET rather than being it (audit M5), so
+ * a leaked payment ticket says nothing about the admin session HMAC and vice
+ * versa. Two trust domains, two keys, one secret to rotate.
  */
 export function mockSecret(env: NodeJS.ProcessEnv = process.env): string {
-  return env.SESSION_SECRET?.trim() || "rempire-mock-payments";
+  const s = env.SESSION_SECRET?.trim();
+  if (!s) throw new PaymentError("not_configured");
+  return createHmac("sha256", s).update("mock-payments").digest("base64url");
 }
 
 export interface MockTicket {

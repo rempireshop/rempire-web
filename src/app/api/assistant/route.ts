@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import catalogue from "@/data/catalogue.min.json";
+import { requireAdmin } from "@/lib/auth";
 import { briefHero, sanitizeAction } from "./actions";
 
 /* The shop chat's brain. Rule-based fallback lives in the client
@@ -8,9 +9,14 @@ import { briefHero, sanitizeAction } from "./actions";
 
    Abuse posture: same-origin only, per-IP rate limit (best-effort in-memory
    — resets on cold start, good enough to stop casual hammering), short
-   inputs, capped output, temperature low, and a system prompt that refuses
-   off-topic work. The catalogue is public data — nothing here is secret
-   except the key, which never reaches the client. */
+   inputs, a ceiling on the whole conversation, capped output, temperature
+   low, and a system prompt that refuses off-topic work. The catalogue is
+   public data — nothing here is secret except the key, which never reaches
+   the client.
+
+   mode:"admin" is a different route in everything but the URL: it needs the
+   admin cookie AND an Origin header, because it inlines the whole catalogue
+   and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
 const PROMPT_V = 11; // echoed in responses so a stale deployment is visible from outside
@@ -189,7 +195,21 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "bad json" }, { status: 400 });
   }
-  const isAdmin = body.mode === "admin";
+
+  /* mode:"admin" used to be a word in the request body, and that was the whole
+     check. It bought an anonymous caller the admin system prompt, the full
+     catalogue inlined on every call, and a bill on the shop's OpenAI key. It
+     is now what it always should have been: the admin cookie (audit H1). */
+  const wantsAdmin = body.mode === "admin";
+  if (wantsAdmin) {
+    // A browser always sends Origin on a fetch POST. Nothing that omits it is
+    // the admin panel, so the admin prompt fails closed rather than open.
+    if (!origin) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    const denied = await requireAdmin(req);
+    if (denied) return denied; // 401 {ok:false,error:"unauthorized"|"not_configured"}
+  }
+  const isAdmin = wantsAdmin;
+
   const history = (body.messages ?? [])
     .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
     .slice(-8)
@@ -202,6 +222,21 @@ export async function POST(req: NextRequest) {
         : m.content.slice(0, 500),
     }));
   if (!history.length) return NextResponse.json({ error: "empty" }, { status: 400 });
+
+  /* Per-message caps are not a budget: eight turns of 500 characters is still
+     a bill someone else pays. This is the ceiling for the conversation as a
+     whole — the oldest turns are dropped, the newest one always survives (it
+     is already capped at 500). A limiter bounds how many requests arrive;
+     this bounds what one of them may cost. */
+  const MAX_HISTORY_CHARS = 2400;
+  let used = 0;
+  for (let i = history.length - 1; i >= 0; i--) {
+    used += history[i].content.length;
+    if (used > MAX_HISTORY_CHARS && i < history.length - 1) {
+      history.splice(0, i + 1);
+      break;
+    }
+  }
 
   const lastUser = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
   const system =

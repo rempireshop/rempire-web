@@ -205,6 +205,16 @@
       "Состав": "Koosseis", "Статус": "Staatus", "Покупатель": "Ostja", "Скидка": "Soodustus",
       "Заметка": "Märkus", "Видна только вам": "Näete ainult teie", "Сохранить заметку": "Salvesta märkus",
       "Сохранено ✓": "Salvestatud ✓", "Не удалось сохранить": "Salvestamine ebaõnnestus",
+      /* отправления Montonio */
+      "Отправление": "Saadetis", "Создать отправление": "Loo saadetis",
+      "Создаём отправление…": "Loome saadetist…", "Отправление создано ✓": "Saadetis loodud ✓",
+      "Не удалось создать отправление": "Saadetise loomine ebaõnnestus",
+      "Доставка Montonio не подключена": "Montonio tarne pole ühendatud",
+      "Пакомат не найден у Montonio": "Montonio ei tunne seda pakiautomaati",
+      "Этикетка PDF": "Silt PDF", "Отследить": "Jälgi",
+      "Трек-номер": "Jälgimisnumber", "Код сдачи посылки": "Paki üleandmise kood",
+      "Отправление создаётся после оплаты.": "Saadetise saab luua pärast tasumist.",
+      "Самовывоз — отправление не нужно.": "Järeletulek — saadetist pole vaja.",
       "Пакомат": "Pakiautomaat", "Курьер": "Kuller", "Доставка": "Tarne",
       /* оформление: доставка, выбор пакомата, оплата, чек */
       "Курьер до двери": "Kuller ukseni", "Перевозчик": "Vedaja",
@@ -341,7 +351,29 @@
       "https://… или /shop/img/…": "https://… või /shop/img/…",
       "Предпросмотр": "Eelvaade", "Баннер: стандартный": "Bänner: tavaline",
       "Ничего не нашлось — попробуйте другое слово.": "Midagi ei leitud — proovi teist sõna.",
-      "Есть несохранённые изменения — нажмите «Сохранить».": "Salvestamata muudatused — vajuta „Salvesta“."
+      "Есть несохранённые изменения — нажмите «Сохранить».": "Salvestamata muudatused — vajuta „Salvesta“.",
+      // media: фотографии товара и картинка баннера
+      "Фото": "Fotod", "Главное фото": "Peamine foto", "Сделать главным": "Tee peamiseks",
+      "Первая фотография — главная: её видно в каталоге, в поиске и в письмах. Перетащите файлы сюда или нажмите кнопку.":
+        "Esimene foto on peamine: seda näeb kataloogis, otsingus ja kirjades. Lohista failid siia või vajuta nuppu.",
+      "Фотографий нет — загрузите первую.": "Fotosid ei ole — lae esimene üles.",
+      "Загрузить фото": "Lae foto üles", "Загрузить свою картинку": "Lae oma pilt üles",
+      "Картинка загружена ✓": "Pilt on üles laetud ✓",
+      "JPEG, PNG или WebP, до 12 МБ. Фотография уменьшится и станет лёгкой сама.":
+        "JPEG, PNG või WebP, kuni 12 MB. Foto vähendatakse ja tehakse kergemaks automaatselt.",
+      "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "Lai foto — JPEG, PNG või WebP, kuni 12 MB.",
+      "Вернуть фото из каталога": "Taasta kataloogi fotod",
+      "Загрузка фото пока не настроена — нужно подключить хранилище.":
+        "Fotode üleslaadimine pole veel seadistatud — hoidla tuleb ühendada.",
+      "Файл больше 12 МБ — уменьшите фотографию и попробуйте ещё раз.":
+        "Fail on üle 12 MB — vähenda fotot ja proovi uuesti.",
+      "Такой файл не подходит: нужен JPEG, PNG или WebP.": "See fail ei sobi: vaja on JPEG, PNG või WebP.",
+      "Формат HEIC с айфона мы прочитать не можем. В «Настройки → Камера → Форматы» выберите «Наиболее совместимый» — снимки станут JPEG.":
+        "iPhone’i HEIC-vormingut me lugeda ei oska. Vali „Seaded → Kaamera → Vormingud“ alt „Kõige ühilduvam“ — pildid salvestuvad JPEG-ina.",
+      "Не получилось прочитать фотографию — попробуйте другой файл.": "Fotot ei õnnestunud lugeda — proovi teist faili.",
+      "Слишком много загрузок за час — подождите немного.": "Liiga palju üleslaadimisi tunnis — oota veidi.",
+      "Не получилось загрузить — попробуйте ещё раз": "Üleslaadimine ebaõnnestus — proovi uuesti",
+      "Главная фотография выбрана — нажмите «Сохранить»": "Peamine foto on valitud — vajuta „Salvesta“"
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -479,6 +511,16 @@
       "Состав": "Items", "Статус": "Status", "Покупатель": "Customer", "Скидка": "Discount",
       "Заметка": "Note", "Видна только вам": "Only you see it", "Сохранить заметку": "Save note",
       "Сохранено ✓": "Saved ✓", "Не удалось сохранить": "Could not save",
+      /* Montonio shipments */
+      "Отправление": "Shipment", "Создать отправление": "Create a shipment",
+      "Создаём отправление…": "Creating the shipment…", "Отправление создано ✓": "Shipment created ✓",
+      "Не удалось создать отправление": "Could not create the shipment",
+      "Доставка Montonio не подключена": "Montonio Shipping is not connected",
+      "Пакомат не найден у Montonio": "Montonio does not know that parcel locker",
+      "Этикетка PDF": "Label PDF", "Отследить": "Track",
+      "Трек-номер": "Tracking number", "Код сдачи посылки": "Drop-off code",
+      "Отправление создаётся после оплаты.": "A shipment can be created once the order is paid.",
+      "Самовывоз — отправление не нужно.": "Pickup in store — no shipment needed.",
       "Пакомат": "Parcel locker", "Курьер": "Courier", "Доставка": "Delivery",
       /* checkout: delivery, machine picker, payment, receipt */
       "Курьер до двери": "Courier to your door", "Перевозчик": "Carrier",
@@ -615,7 +657,29 @@
       "https://… или /shop/img/…": "https://… or /shop/img/…",
       "Предпросмотр": "Preview", "Баннер: стандартный": "Banner: default",
       "Ничего не нашлось — попробуйте другое слово.": "Nothing found — try another word.",
-      "Есть несохранённые изменения — нажмите «Сохранить».": "Unsaved changes — press “Save”."
+      "Есть несохранённые изменения — нажмите «Сохранить».": "Unsaved changes — press “Save”.",
+      // media: product photos and the banner picture
+      "Фото": "Photos", "Главное фото": "Main photo", "Сделать главным": "Make it the main one",
+      "Первая фотография — главная: её видно в каталоге, в поиске и в письмах. Перетащите файлы сюда или нажмите кнопку.":
+        "The first photo is the main one: it shows in the catalogue, in search and in e-mails. Drop files here or press the button.",
+      "Фотографий нет — загрузите первую.": "No photos yet — upload the first one.",
+      "Загрузить фото": "Upload a photo", "Загрузить свою картинку": "Upload your own picture",
+      "Картинка загружена ✓": "Picture uploaded ✓",
+      "JPEG, PNG или WebP, до 12 МБ. Фотография уменьшится и станет лёгкой сама.":
+        "JPEG, PNG or WebP, up to 12 MB. The photo is resized and made light automatically.",
+      "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.": "A wide photo — JPEG, PNG or WebP, up to 12 MB.",
+      "Вернуть фото из каталога": "Restore the catalogue photos",
+      "Загрузка фото пока не настроена — нужно подключить хранилище.":
+        "Photo uploads are not set up yet — the storage has to be connected.",
+      "Файл больше 12 МБ — уменьшите фотографию и попробуйте ещё раз.":
+        "The file is over 12 MB — make the photo smaller and try again.",
+      "Такой файл не подходит: нужен JPEG, PNG или WebP.": "That file will not do: JPEG, PNG or WebP, please.",
+      "Формат HEIC с айфона мы прочитать не можем. В «Настройки → Камера → Форматы» выберите «Наиболее совместимый» — снимки станут JPEG.":
+        "We cannot read the iPhone’s HEIC format. Under Settings → Camera → Formats choose “Most Compatible” and photos will be saved as JPEG.",
+      "Не получилось прочитать фотографию — попробуйте другой файл.": "The photo could not be read — try another file.",
+      "Слишком много загрузок за час — подождите немного.": "Too many uploads this hour — please wait a little.",
+      "Не получилось загрузить — попробуйте ещё раз": "The upload failed — please try again",
+      "Главная фотография выбрана — нажмите «Сохранить»": "Main photo chosen — press “Save”"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -646,7 +710,9 @@
     [/^(.+) × (\d+)$/, { ET: "$1 × $2", EN: "$1 × $2" }],
     [/^DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от (.+) · 230 пакоматов в 4 странах$/,
       { ET: "DPD, Omniva, SmartPosti ja kuller · 1–3 päeva · Eestis tasuta alates $1 · 230 pakiautomaati 4 riigis", EN: "DPD, Omniva, SmartPosti and courier · 1–3 days · free in Estonia from $1 · 230 parcel lockers in 4 countries" }],
-    [/^Пакомат (DPD|Omniva|SmartPosti)$/, { ET: "$1 pakiautomaat", EN: "$1 parcel locker" }],
+    [/^Пакомат (DPD|Omniva|SmartPosti|Venipak)$/, { ET: "$1 pakiautomaat", EN: "$1 parcel locker" }],
+    [/^Трек-номер: (.+)$/, { ET: "Jälgimisnumber: $1", EN: "Tracking number: $1" }],
+    [/^Код сдачи посылки: (.+)$/, { ET: "Paki üleandmise kood: $1", EN: "Drop-off code: $1" }],
     [/^Пакомат — (\d+) (?:точка|точки|точек)$/, { ET: "Pakiautomaat — $1 punkti", EN: "Parcel locker — $1 locations" }],
     // the picker sheet counts on its own line
     [/^(\d+) (?:точка|точки|точек)$/, { ET: "$1 punkti", EN: "$1 locations" }],
@@ -847,9 +913,13 @@
     for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === v) return CATALOGUE[i];
     return null;
   }
+  /* The banner URL is served to every visitor and lands inside a style
+     attribute, where a stray ")" or ";" would inject extra declarations. Only
+     the characters a URL is actually made of survive. */
   function heroUrl(image) {
     var v = String(image || "");
-    return /^(https?:\/\/|\/)/.test(v) ? v : "";
+    if (!/^(https?:\/\/|\/)/.test(v)) return "";
+    return /^[A-Za-z0-9._~:/?#[\]@!$&*+,=%-]+$/.test(v) ? v : "";
   }
   /* A picture is either a catalogue photo (by product id, drawn by the same
      media() as everywhere else) or a plain URL the owner pasted. */
@@ -994,14 +1064,22 @@
     { k: "courier", l: "Курьер до двери" },
     { k: "pickup", l: "Самовывоз — Mardi 1, Таллинн" }
   ];
-  var CARRIER_NAMES = { omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD" };
-  /* Which carriers have machines we can actually list. Omniva's public feed
-     covers EE/LV/LT and SmartPosti EE; DPD publishes no point list at all
-     (contract API only), so DPD is offered as a courier, never as a pakomaat.
-     Finland has none of either yet — its SmartPosti points need a Posti API
-     key — so FI is courier-only and the parcel option is not offered there.
-     See docs/shipping.md. */
-  var CARRIERS_BY_COUNTRY = { EE: ["omniva", "smartpost"], LV: ["omniva"], LT: ["omniva"], FI: [], EU: [] };
+  var CARRIER_NAMES = { omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak" };
+  /* Carriers worth *asking* about, per country — deliberately optimistic.
+     /api/shipping/points answers for every one of them, and a carrier that
+     comes back with nothing is struck off (POINTS.empty) before its chip is
+     drawn. So DPD and Venipak appear only where Montonio Shipping is connected
+     and actually has points, and Finland gains a parcel option the day Montonio
+     returns Finnish ones — with no second deploy. Without Montonio the public
+     feeds still answer for Omniva (EE/LV/LT) and the seed for SmartPosti EE,
+     exactly as before. See docs/shipping.md. */
+  var CARRIERS_BY_COUNTRY = {
+    EE: ["omniva", "smartpost", "dpd", "venipak"],
+    LV: ["omniva", "dpd", "venipak"],
+    LT: ["omniva", "dpd", "venipak"],
+    FI: ["smartpost", "dpd"],
+    EU: []
+  };
 
   /* Is there a server behind this page? null until the first call answers.
      false puts the checkout back into demo mode — the prototype is hosted
@@ -1095,25 +1173,34 @@
       });
     } catch (e) { return []; }
   }
+  /* Every carrier of the country, not only the selected one: the chips can be
+     honest only once each list has answered, and a carrier with nothing behind
+     it has to disappear before anyone clicks it. Each list is fetched once and
+     kept, and the route is CDN-cached for an hour — four cheap calls, not four
+     expensive ones. */
   function loadPoints() {
-    var carrier = shipCarrier();
+    var all = CARRIERS_BY_COUNTRY[S.country] || [];
+    for (var i = 0; i < all.length; i++) loadPointsFor(all[i]);
+  }
+  function loadPointsFor(carrier) {
     if (!carrier) return;
     var key = carrier + ":" + S.country;
     if (POINTS.by[key] || POINTS.loading[key]) return;
     POINTS.loading[key] = true;
-    var done = function (list, live) {
+    var done = function (list) {
       POINTS.loading[key] = false;
       POINTS.by[key] = list;
-      if (live && !list.length) POINTS.empty[key] = true;
+      // nothing to pick from — drop the chip, whichever source said so
+      if (!list.length) POINTS.empty[key] = true;
       pointsArrived();
     };
     fetch("/api/shipping/points/?country=" + encodeURIComponent(S.country) + "&carrier=" + encodeURIComponent(carrier))
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        if (j && j.ok && j.points) { apiSeen(true); done(j.points, true); }
-        else done(demoPoints(carrier), false);
+        if (j && j.ok && j.points) { apiSeen(true); done(j.points); }
+        else done(demoPoints(carrier));
       })
-      .catch(function () { apiSeen(false); done(demoPoints(carrier), false); });
+      .catch(function () { apiSeen(false); done(demoPoints(carrier)); });
   }
   /** Typeahead over name, address and city — the three things people type. */
   function pointsFiltered() {
@@ -1366,7 +1453,10 @@
   }
   /* ---- /features ---------------------------------------------------------- */
   function total() { return cartSum() - discount() + shipCost() - giftDiscount(); }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  /* The apostrophe is escaped too: every attribute written here is
+     double-quoted today, but one single-quoted attribute would silently make
+     this wrong, and the e-mail templates already escape all five. */
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function emailBad() { return S.emailTouched && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email); }
   /* One regex, but not one message: "there is a typo in the domain" is simply
      wrong for an empty field, which is the most common failure. */
@@ -2437,13 +2527,13 @@
       for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === r.productId) { p = CATALOGUE[i]; break; }
       return '<div class="adm__row adm__row--rev">' +
         (p ? '<span class="adm__ph">' + media(p, 0, "ph") + "</span>" : "") +
-        '<span class="adm__nm">' + esc(r.name) + ' <span class="rev__stars">' + "★★★★★".slice(0, r.rating) + "</span>" +
+        '<span class="adm__nm">' + esc(r.name) + ' <span class="rev__stars">' + "★★★★★".slice(0, Number(r.rating) || 0) + "</span>" +
           '<span class="adm__sub">' + (p ? esc(p.brand + " — " + p.name) : esc(r.productId)) +
-            " · " + String(r.createdAt || "").slice(0, 10) + " · " + esc(r.lang) + "</span>" +
+            " · " + esc(String(r.createdAt || "").slice(0, 10)) + " · " + esc(r.lang) + "</span>" +
           '<span class="adm__revtext">' + esc(r.text) + "</span></span>" +
         '<span class="adm__revacts">' +
-          (r.status === "approved" ? "" : '<button class="btn btn--sm" data-admrev="' + r.id + ':approved">Опубликовать</button>') +
-          (r.status === "rejected" ? "" : '<button class="btn btn--ghost btn--sm" data-admrev="' + r.id + ':rejected">Отклонить</button>') +
+          (r.status === "approved" ? "" : '<button class="btn btn--sm" data-admrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
+          (r.status === "rejected" ? "" : '<button class="btn btn--ghost btn--sm" data-admrev="' + esc(r.id) + ':rejected">Отклонить</button>') +
         "</span></div>";
     }).join("") + "</div>";
   }
@@ -3449,6 +3539,8 @@
       '<label class="field"><span class="field__label">Ссылка на картинку — или выберите фото товара ниже</span>' +
         '<input class="input" data-heroimgurl value="' + esc(heroUrl(s.image)) +
         '" placeholder="https://… или /shop/img/…"></label>' +
+      /* media: a picture of the owner's own, straight into the field above */
+      galDropZone("hero", "Загрузить свою картинку", "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.") +
       '<input class="input input--box" data-heroimgq value="' + esc(S.heroImgQ || "") +
         '" placeholder="Найти товар: название, бренд…" aria-label="Найти фото товара">' +
       '<div class="admhero__picks" id="heroimglist">' + heroImgRows() + "</div>" +
@@ -3502,16 +3594,20 @@
   function kpi(label, value, sub) {
     return '<div class="kpi"><span class="kpi__l">' + label + '</span><span class="kpi__v num">' + value + '</span><span class="kpi__s">' + sub + "</span></div>";
   }
+  /* Every string in this table came from a stranger filling in a checkout form —
+     the order does not even have to be paid to be listed here. One unescaped
+     column (`ship`) was enough to turn an anonymous order into script running
+     in the owner's session, so nothing goes in raw any more. */
   function orderTable(list) {
     return '<div class="adm__table" role="table">' +
       '<div class="adm__th" role="row"><span>Заказ</span><span>Клиент</span><span>Доставка</span><span>Сумма</span><span>Статус</span></div>' +
       list.map(function (o) {
         return '<button class="adm__tr adm__tr--link" role="row" data-admorder="' + esc(o.id) + '"><span class="num">' +
-          (o.number ? esc(o.number) : "#" + o.id) + '<span class="adm__sub">' + o.date + "</span></span>" +
-          "<span>" + esc(o.who) + '<span class="adm__sub">' + o.items + " " + plural(o.items) + "</span></span>" +
-          '<span class="adm__ship">' + o.ship + "</span>" +
+          (o.number ? esc(o.number) : "#" + esc(o.id)) + '<span class="adm__sub">' + esc(o.date) + "</span></span>" +
+          "<span>" + esc(o.who) + '<span class="adm__sub">' + esc(o.items) + " " + plural(o.items) + "</span></span>" +
+          '<span class="adm__ship">' + esc(o.ship) + "</span>" +
           '<span class="num">' + eur(o.sum) + "</span>" +
-          '<span><span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span></span></button>";
+          '<span><span class="chip" style="color:var(' + esc(o.state[2]) + ')">' + esc(o.state[1]) + "</span></span></button>";
       }).join("") + "</div>";
   }
 
@@ -3565,11 +3661,48 @@
             '<span class="adm__sub">' + esc(o.email || "") + (o.phone ? " · " + esc(o.phone) : "") + "</span></span></div>" +
           '<div class="adm__row"><span class="adm__nm">' + esc(row.ship) +
             '<span class="adm__sub">' + esc(srvAddrLine(s)) + "</span></span></div></div>" +
+        srvShipmentBlock(o) +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Заметка</h3></div>' +
         '<label class="field"><span class="field__label">Видна только вам</span>' +
           '<textarea class="input" data-admnote rows="3">' + esc(o.notes || "") + "</textarea></label>" +
         '<div class="adm__acts"><button class="btn btn--sm" data-admnotesave>Сохранить заметку</button></div>' +
       "</div></div>";
+  }
+
+  /* Montonio Shipping, in one block: a button that registers the parcel with
+     the carrier, and after that the tracking code and a link to the label PDF.
+     The button only appears where a parcel can actually be booked — a paid
+     order with a carrier delivery. Everything it needs is already in the order
+     the server sent; the shipment lands in orders.shipping.montonio.
+     See docs/shipping.md § «Montonio Shipping». */
+  function srvShipmentBlock(o) {
+    var s = o.shipping || {}, sh = s.montonio || null;
+    var head = '<div class="sec__head sec__head--sub"><h3 class="sec__title">Отправление</h3></div>';
+    if (sh && sh.shipmentId) {
+      return head + '<div class="adm__list">' +
+        '<div class="adm__row"><span class="adm__nm">' + esc(CARRIER_NAMES[sh.carrier] || sh.carrier || "Montonio") +
+          '<span class="adm__sub">' + (sh.trackingCode ? esc("Трек-номер: " + sh.trackingCode) : "Трек-номер") +
+          "</span></span></div>" +
+        (sh.dropOffPin
+          ? '<div class="adm__row"><span class="adm__nm">' + esc("Код сдачи посылки: " + sh.dropOffPin) + "</span></div>"
+          : "") + "</div>" +
+        '<div class="adm__acts">' +
+          '<a class="btn btn--sm" href="/api/admin/shipments/' + encodeURIComponent(o.id) +
+            '/label/" target="_blank" rel="noopener">Этикетка PDF</a>' +
+          // http(s) only: an href is a place a "javascript:" string would run
+          (/^https?:\/\//i.test(String(sh.trackingUrl || ""))
+            ? '<a class="btn btn--ghost btn--sm" href="' + esc(sh.trackingUrl) +
+              '" target="_blank" rel="noopener">Отследить</a>'
+            : "") + "</div>";
+    }
+    if (String(s.method || "").toLowerCase().indexOf("pickup") === 0 || /самовыв|kohapeal/i.test(String(s.method || ""))) {
+      return head + '<p class="muted" style="font-size:12.5px">Самовывоз — отправление не нужно.</p>';
+    }
+    if (o.status !== "paid" && o.status !== "shipped") {
+      return head + '<p class="muted" style="font-size:12.5px">Отправление создаётся после оплаты.</p>';
+    }
+    return head + '<div class="adm__acts"><button class="btn btn--sm" data-admship>' +
+      (SRV.shipBusy ? "Создаём отправление…" : "Создать отправление") + "</button></div>";
   }
 
   /* The rows above open. A demo where nothing opens reads as a mock-up;
@@ -3596,7 +3729,7 @@
               '<span class="adm__sub">' + l[1] + " шт × " + eur(l[0].price) + "</span></span>" +
             '<span class="num adm__pr">' + eur(l[0].price * l[1]) + "</span></div>";
         }).join("") +
-        '<div class="adm__row"><span class="adm__nm">Доставка — ' + o.ship + '</span><span class="num adm__pr">' + (shipCostD ? eur(shipCostD) : "0 €") + "</span></div>" +
+        '<div class="adm__row"><span class="adm__nm">Доставка — ' + esc(o.ship) + '</span><span class="num adm__pr">' + (shipCostD ? eur(shipCostD) : "0 €") + "</span></div>" +
         '<div class="adm__row"><span class="adm__nm"><b>Итого</b></span><span class="num adm__pr"><b>' + eur(o.sum) + "</b></span></div></div>" +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Статус</h3></div>' +
         '<div class="adm__steps">' + steps.map(function (s) {
@@ -3606,8 +3739,8 @@
       '<div>' +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Покупатель</h3></div>' +
         '<div class="adm__list">' +
-          '<div class="adm__row"><span class="adm__nm">' + o.who + '<span class="adm__sub">customer@example.com · +372 5• ••• •••</span></span></div>' +
-          '<div class="adm__row"><span class="adm__nm">' + o.ship + '<span class="adm__sub">' + (/Самовывоз/.test(o.ship) ? "Mardi 1, Таллинн" : "Пакомат: Kristiine keskus, Таллинн") + "</span></span></div></div>" +
+          '<div class="adm__row"><span class="adm__nm">' + esc(o.who) + '<span class="adm__sub">customer@example.com · +372 5• ••• •••</span></span></div>' +
+          '<div class="adm__row"><span class="adm__nm">' + esc(o.ship) + '<span class="adm__sub">' + (/Самовывоз/.test(o.ship) ? "Mardi 1, Таллинн" : "Пакомат: Kristiine keskus, Таллинн") + "</span></span></div></div>" +
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Действия</h3></div>' +
         '<div class="adm__acts">' +
           '<button class="btn btn--sm" data-admedit>Напечатать наклейку</button>' +
@@ -3615,6 +3748,204 @@
           '<button class="btn btn--ghost btn--sm" data-admedit>Вернуть деньги</button></div>' +
         '<p class="muted" style="font-size:12.5px;margin-top:14px">Демо: в рабочей версии наклейка печатается через платёжного провайдера, письмо уходит само при смене статуса.</p>' +
       "</div></div>";
+  }
+
+  /* ---------- media: the owner's own photos --------------------------------
+     Photos go straight from the phone to POST /api/admin/upload/, which turns
+     them into WebP in a Cloudflare R2 bucket and answers with two URLs — the
+     picture and its thumbnail (docs/media.md). Nothing here knows about R2:
+     an upload is one fetch, and the list of photos it fills in is ordinary
+     override data, saved with the rest of the goods editor.
+
+     Without the bucket configured the server says so once, the button greys
+     out with a plain sentence, and every other part of the panel is unchanged.
+     The prototype with no backend behind it lands in the same place. */
+  var MEDIA = { on: null, busy: false };
+  function mediaProbe() {
+    if (MEDIA.on !== null || MEDIA.busy) return;
+    MEDIA.busy = true;
+    apiJson("/api/admin/upload/")
+      .then(function (r) { MEDIA.on = r.status === 200 && r.body.ok === true && r.body.configured === true; })
+      .catch(function () { MEDIA.on = false; })
+      .then(function () { MEDIA.busy = false; render(); });
+  }
+  var MEDIA_ERR = {
+    storage_not_configured: "Загрузка фото пока не настроена — нужно подключить хранилище.",
+    too_large: "Файл больше 12 МБ — уменьшите фотографию и попробуйте ещё раз.",
+    bad_type: "Такой файл не подходит: нужен JPEG, PNG или WebP.",
+    heic_unsupported: "Формат HEIC с айфона мы прочитать не можем. В «Настройки → Камера → Форматы» выберите «Наиболее совместимый» — снимки станут JPEG.",
+    bad_image: "Не получилось прочитать фотографию — попробуйте другой файл.",
+    empty_file: "Файл пустой — попробуйте ещё раз.",
+    rate_limited: "Слишком много загрузок за час — подождите немного.",
+    unauthorized: "Вы вышли из админки — войдите снова.",
+    not_configured: "Загрузка фото пока не настроена — нужно подключить хранилище.",
+    image_tools_unavailable: "Обработка фото на сервере недоступна."
+  };
+  function mediaErrText(e) {
+    return MEDIA_ERR[String((e && e.message) || e || "")] || "Не получилось загрузить — попробуйте ещё раз";
+  }
+  /* One file, one request. multipart/form-data, so no base64 and no size
+     surprises; the browser sets its own boundary, which is why no content-type
+     header is set here. */
+  function uploadPhoto(file, kind, id) {
+    var fd = new FormData();
+    fd.append("file", file);
+    fd.append("kind", kind);
+    if (kind === "product") fd.append("productId", id || "");
+    if (kind === "review") fd.append("reviewId", id || "");
+    return fetch("/api/admin/upload/", { method: "POST", body: fd }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (j) {
+        if (!res.ok || j.ok !== true) throw new Error(j.error || "upload_failed");
+        return j;
+      });
+    });
+  }
+  /* Only one editor is open at a time, so one progress state serves both the
+     goods editor and the banner. */
+  var UP = { busy: 0, total: 0, err: "" };
+  function upBusyText() {
+    return UP.total > 1 ? "Загружаем… " + (UP.total - UP.busy + 1) + " из " + UP.total : "Загружаем…";
+  }
+  function upFail(e) {
+    UP.busy = 0; UP.total = 0; UP.err = mediaErrText(e);
+    toast(UP.err); render();
+  }
+
+  var MAX_PHOTOS = 12;
+  /* The list the owner is editing. It starts as what the shop shows now — the
+     uploaded photos if there are any, otherwise the catalogue's — so ↑↓ and
+     «Сделать главным» work from the first click instead of only after an
+     upload. `fresh` remembers the keys uploaded in this sitting: deleting one
+     of those before saving really removes it from the bucket, while an older
+     photo is only dropped from the list, because undo has to be able to put
+     it back. */
+  var GAL = { id: "", list: [], fresh: {}, reset: false };
+  /** The photos that ship with the catalogue — what «Вернуть фото из каталога»
+   *  goes back to, read from BASE so a saved override cannot hide them. */
+  function baseGallery(id) {
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      if (CATALOGUE[i].id !== id) continue;
+      var b = BASE[i], urls = b.gallery && b.gallery.length ? b.gallery : [b.img];
+      return urls.map(function (u) { return { url: u, thumb: u, alt: "" }; });
+    }
+    return [];
+  }
+  function galPhotos(p) {
+    var saved = DEMO.gallery && DEMO.gallery[p.id];
+    if (Array.isArray(saved) && saved.length) {
+      return saved.map(function (g) {
+        return { url: g.url, thumb: g.thumb || g.url, alt: g.alt || "" };
+      });
+    }
+    return gal(p).map(function (u) { return { url: u, thumb: u, alt: "" }; });
+  }
+  function galDraft(p) {
+    if (GAL.id !== p.id) {
+      GAL.id = p.id; GAL.list = galPhotos(p); GAL.fresh = {}; GAL.reset = false;
+      UP.busy = 0; UP.total = 0; UP.err = "";
+    }
+    return GAL.list;
+  }
+  function galDirty(p) {
+    if (GAL.id !== p.id) return false;
+    if (GAL.reset) return !!(DEMO.gallery && DEMO.gallery[p.id]);
+    return JSON.stringify(GAL.list) !== JSON.stringify(galPhotos(p));
+  }
+  /** What «Сохранить» sends: an empty list means «фото из каталога». */
+  function galSaveList() {
+    return GAL.reset ? [] : GAL.list.slice();
+  }
+  function galDrop(key) {
+    if (!key || MEDIA.on !== true) return;
+    fetch("/api/admin/upload/?key=" + encodeURIComponent(key), { method: "DELETE" }).catch(noop);
+  }
+  function galUpload(files, p) {
+    var queue = [];
+    for (var i = 0; i < files.length; i++) queue.push(files[i]);
+    if (!queue.length) return;
+    galDraft(p);
+    if (GAL.list.length + queue.length > MAX_PHOTOS) {
+      UP.err = "Больше " + MAX_PHOTOS + " фотографий на товар не нужно";
+      toast(UP.err); render(); return;
+    }
+    GAL.reset = false;
+    UP.err = ""; UP.total = queue.length; UP.busy = queue.length; render();
+    var step = function () {
+      var f = queue.shift();
+      if (!f) { UP.busy = 0; UP.total = 0; render(); return; }
+      uploadPhoto(f, "product", p.id).then(function (r) {
+        GAL.list.push({ url: r.url, thumb: r.thumbUrl || r.url, alt: "" });
+        if (r.key) GAL.fresh[r.url] = r.key;
+        UP.busy = queue.length;
+        render();
+        step();
+      }).catch(upFail);
+    };
+    step();
+  }
+  function heroUpload(files) {
+    if (!files || !files.length) return;
+    UP.err = ""; UP.total = 1; UP.busy = 1; render();
+    uploadPhoto(files[0], "hero").then(function (r) {
+      UP.busy = 0; UP.total = 0;
+      var s = heroDraft().slides[S.heroEdit];
+      if (s) s.image = r.url;
+      render();
+      toast("Картинка загружена ✓");
+    }).catch(upFail);
+  }
+  /* The drop zone doubles as the button row: `data-galdrop` carries the product
+     id, or "hero" for the banner, so one pair of listeners serves both. */
+  function galDropZone(target, label, hint) {
+    return '<div class="admphoto__drop" data-galdrop="' + esc(target) + '">' +
+      '<button class="btn btn--ghost btn--sm" data-galup="' + esc(target) + '"' +
+        (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" + (UP.busy ? upBusyText() : label) + "</button>" +
+      '<input class="admphoto__file" type="file" accept="image/*"' + (target === "hero" ? "" : " multiple") +
+        ' data-galfile="' + esc(target) + '" aria-label="' + esc(label) + '">' +
+      '<span class="muted admphoto__hint">' + hint + "</span>" +
+      "</div>" +
+      (MEDIA.on === false ? '<p class="admphoto__off">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
+      (UP.err ? '<p class="admphoto__err">' + esc(UP.err) + "</p>" : "");
+  }
+  function galBlock(p) {
+    var list = galDraft(p), n = list.length;
+    return '<div class="sec__head sec__head--sub"><h3 class="sec__title">Фото</h3></div>' +
+      '<p class="muted admphoto__intro">Первая фотография — главная: её видно в каталоге, в поиске и в письмах. Перетащите файлы сюда или нажмите кнопку.</p>' +
+      (n
+        ? '<div class="admphoto__grid">' + list.map(function (ph, i) {
+            return '<div class="admphoto__item' + (i === 0 ? " is-main" : "") + '">' +
+              '<span class="admphoto__ph" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
+              (i === 0 ? '<span class="admphoto__badge">Главное фото</span>' : "") +
+              '<span class="admphoto__ops">' +
+                '<button class="iconbtn" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
+                '<button class="iconbtn" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button>' +
+                (i === 0 ? "" : '<button class="link" data-galmain="' + i + '">Сделать главным</button>') +
+                '<button class="link" data-galdel="' + i + '">Удалить</button>' +
+              "</span></div>";
+          }).join("") + "</div>"
+        : '<p class="muted">Фотографий нет — загрузите первую.</p>') +
+      galDropZone(p.id, "Загрузить фото", "JPEG, PNG или WebP, до 12 МБ. Фотография уменьшится и станет лёгкой сама.") +
+      (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset
+        ? '<div class="adm__acts"><button class="btn btn--ghost btn--sm" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
+        : "") +
+      (galDirty(p) ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "");
+  }
+  /**
+   * Which draft photo «Фото по объёмам» should have ticked for one size.
+   *
+   * The stored map holds positions in the saved list, and the draft can be in
+   * a different order — so the position is turned back into a photo, and the
+   * photo is looked up in the draft. Move a photo to the front and the size
+   * that pointed at it still points at it; delete it and the size falls back
+   * to the main photo.
+   */
+  function galSizePick(p, si) {
+    var saved = galPhotos(p);
+    var idx = p.varImg && p.varImg.length > si ? p.varImg[si] : -1;
+    var url = idx >= 0 && idx < saved.length ? saved[idx].url : null;
+    if (!url) return 0;
+    for (var i = 0; i < GAL.list.length; i++) if (GAL.list[i].url === url) return i;
+    return 0;
   }
 
   function goodsRows() {
@@ -3640,7 +3971,10 @@
   function goodsEditor(p) {
     var subs = SUBCATS[p.cat] || [];
     var curSub = DEMO.subcat[p.id] || "";
-    var g = gal(p);
+    /* media: the size→photo picker below reads the list the owner is editing,
+       not the saved one, so a photo uploaded a second ago can be assigned to
+       «500 мл» in the same visit. */
+    var g = galDraft(p).map(function (ph) { return ph.thumb || ph.url; });
     var seoT = (p.seo && p.seo.t) || "";
     var seoD = (p.seo && p.seo.d) || "";
     return '<button class="link" data-admclose>← Все товары</button>' +
@@ -3664,14 +3998,17 @@
             subs.map(function (s2) { return '<option value="' + s2.id + '"' + (curSub === s2.id ? " selected" : "") + ">" + s2.name + "</option>"; }).join("") +
             "</select></span></label>"
           : "") +
+        galBlock(p) +   // media: «Фото» — the gallery and the upload button
         (p.sizes && p.sizes.length > 1 && g.length > 1
           ? '<div class="sec__head sec__head--sub"><h3 class="sec__title">Фото по объёмам</h3></div>' +
             '<p class="muted" style="font-size:12.5px;margin:2px 0 8px">Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.</p>' +
             p.sizes.map(function (sz, si) {
-              var cur = p.varImg && p.varImg.length > si ? p.varImg[si] : -1;
+              // media: follows the photo, not its position, so reordering and
+              // deleting above do not silently repoint a size at another photo
+              var cur = galSizePick(p, si);
               return '<div class="adm__vrow" data-vrow="' + si + '"><span class="adm__vsz">' + esc(sz) + "</span>" +
                 g.map(function (u, gi) {
-                  return '<button class="adm__vthumb" data-vpick="' + si + ":" + gi + '" aria-current="' + (cur === gi) + '" style="background-image:url(\'' + u + '\')" aria-label="Фото ' + (gi + 1) + '"></button>';
+                  return '<button class="adm__vthumb" data-vpick="' + si + ":" + gi + '" aria-current="' + (cur === gi) + '" style="background-image:url(\'' + esc(u) + '\')" aria-label="Фото ' + (gi + 1) + '"></button>';
                 }).join("") + "</div>";
             }).join("")
           : "") +
@@ -3694,7 +4031,7 @@
         '<textarea class="input" rows="5">' + esc(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "").slice(0, 400)) + "</textarea></label>" +
         '<div class="adm__acts"><button class="btn" data-admsavegoods="' + p.id + '">Сохранить</button>' +
         '<button class="btn btn--ghost btn--sm" data-admclose>Отмена</button></div>' +
-        '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена, наличие, подкатегория, фото по объёмам и SEO сохраняются по-настоящему (демо: видно и в магазине, отмена — в журнале). Загрузка нового фото — с рабочей версией: фон снимется и водяной знак добавится сам.</p>' +
+        '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.</p>' +
       "</div></div>";
   }
   // the assistant's answers end with a button that OPENS the right tab —
@@ -3715,6 +4052,7 @@
      UX. */
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
+    gallery: {},  // media: photos the owner uploaded, per product id
     hero: null,   // null = the built-in banner (heroDefault())
     flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
   try {
@@ -3723,6 +4061,7 @@
       DEMO.price = _dj.price || {}; DEMO.stock = _dj.stock || {}; DEMO.seo = _dj.seo || {};
       DEMO.subcat = _dj.subcat || {}; DEMO.varimg = _dj.varimg || {};
       DEMO.video = _dj.video || {};   // features: product video links
+      DEMO.gallery = _dj.gallery || {};   // media: uploaded photos
       if (_dj.chatbot === false) DEMO.chatbot = false;
       if (_dj.bundles === false) DEMO.bundles = false;
       if (_dj.hero && typeof _dj.hero === "object" && Array.isArray(_dj.hero.slides)) DEMO.hero = _dj.hero;
@@ -3736,8 +4075,23 @@
      has to put the original price back, not merely stop overwriting it. */
   var BASE = CATALOGUE.map(function (p) {
     return { price: p.price, prices: p.prices ? p.prices.slice() : null,
-      stock: p.stock, seo: p.seo, varImg: p.varImg ? p.varImg.slice() : null };
+      stock: p.stock, seo: p.seo, varImg: p.varImg ? p.varImg.slice() : null,
+      // media: the catalogue's own photos, so deleting an upload brings them back
+      img: p.img, gallery: p.gallery ? p.gallery.slice() : null };
   });
+  /* media: the owner's photos, as gal() wants them — a plain list of URLs.
+     p.img follows the first one, because the bundle rows and the JSON-LD read
+     that field directly instead of going through gal(). */
+  function galleryUrls(id) {
+    var list = DEMO.gallery && DEMO.gallery[id];
+    if (!Array.isArray(list) || !list.length) return null;
+    var urls = [];
+    for (var i = 0; i < list.length; i++) {
+      var u = list[i] && (typeof list[i] === "string" ? list[i] : list[i].url);
+      if (u) urls.push(u);
+    }
+    return urls.length ? urls : null;
+  }
   function applyDemoOverrides() {
     for (var i = 0; i < CATALOGUE.length; i++) {
       var p = CATALOGUE[i], b = BASE[i];
@@ -3746,6 +4100,8 @@
       p.stock = b.stock;
       p.seo = b.seo;
       if (b.varImg) p.varImg = b.varImg.slice();
+      p.img = b.img;
+      if (b.gallery) p.gallery = b.gallery.slice(); else delete p.gallery;
       if (DEMO.price[p.id] != null) {
         p.price = DEMO.price[p.id];
         if (p.prices && p.prices.length) p.prices[0] = DEMO.price[p.id];
@@ -3754,6 +4110,18 @@
       if (DEMO.seo[p.id]) p.seo = { t: DEMO.seo[p.id].t || "", d: DEMO.seo[p.id].d || "" };
       if (DEMO.varimg[p.id] && p.sizes && DEMO.varimg[p.id].length === p.sizes.length) p.varImg = DEMO.varimg[p.id].slice();
       if (DEMO.video && DEMO.video[p.id] != null) p.video = DEMO.video[p.id];   // features
+      /* media: uploaded photos replace the catalogue's, and the per-size photo
+         map points at positions in this list — a shorter list would otherwise
+         leave «500 мл» pointing at a photo that no longer exists, so anything
+         out of range falls back to the main photo. */
+      var gUrls = galleryUrls(p.id);
+      if (gUrls) {
+        p.gallery = gUrls;
+        p.img = gUrls[0];
+        if (p.varImg && p.varImg.length) {
+          p.varImg = p.varImg.map(function (x) { return x >= 0 && x < gUrls.length ? x : 0; });
+        }
+      }
     }
   }
   applyDemoOverrides();
@@ -3769,7 +4137,7 @@
      as an offline cache. And when the owner is signed in, every change the
      panel applies is written through to the server as well — including undo,
      which re-sends the previous value. */
-  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false };
+  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false };
   function noop() {}
 
   function apiJson(url, opts) {
@@ -3790,10 +4158,12 @@
   function adoptServer(j) {
     var ov = j.overrides || {};
     DEMO.price = {}; DEMO.stock = {}; DEMO.seo = {}; DEMO.subcat = {}; DEMO.varimg = {}; DEMO.video = {};
+    DEMO.gallery = {};   // media
     Object.keys(ov).forEach(function (id) {
       var o = ov[id] || {};
       if (o.price != null) DEMO.price[id] = o.price;
       if (o.stock) DEMO.stock[id] = o.stock;
+      if (Array.isArray(o.gallery) && o.gallery.length) DEMO.gallery[id] = o.gallery;   // media
       if (o.seoTitle || o.seoDesc) DEMO.seo[id] = { t: o.seoTitle || "", d: o.seoDesc || "" };
       if (o.subcat) DEMO.subcat[id] = o.subcat;
       if (o.varImg) DEMO.varimg[id] = o.varImg;
@@ -3839,6 +4209,9 @@
     else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seoTitle: a.title || "", seoDesc: a.description || "" }).catch(noop);
     else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
     else if (a.type === "set_varimg") apiSend(ov, "PUT", { id: a.id, varImg: a.map }).catch(noop);
+    // media: the whole list travels every time — adding, reordering, choosing
+    // the main photo and deleting are all one write
+    else if (a.type === "set_gallery") apiSend(ov, "PUT", { id: a.id, gallery: a.list }).catch(noop);
     else if (a.type === "toggle_flow") apiSend(st, "PUT", { flows: DEMO.flows }).catch(noop);
     else if (a.type === "toggle_chatbot") apiSend(st, "PUT", { chatbot: DEMO.chatbot }).catch(noop);
     else if (a.type === "toggle_bundles") apiSend(st, "PUT", { bundles: DEMO.bundles }).catch(noop);
@@ -3911,6 +4284,26 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
+  /* Book the parcel with the carrier through Montonio. The two failures worth
+     naming get their own sentence — «нет ключей» and «этого пакомата у Montonio
+     нет» need different actions from Renat; everything else is one line. */
+  var SHIP_ERR = {
+    not_configured: "Доставка Montonio не подключена",
+    point_unresolved: "Пакомат не найден у Montonio",
+    not_paid: "Отправление создаётся после оплаты."
+  };
+  function srvCreateShipment(id) {
+    if (SRV.shipBusy) return;
+    SRV.shipBusy = true; render();
+    apiSend("/api/admin/shipments/", "POST", { orderId: id }).then(function (r) {
+      SRV.shipBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { toast("Отправление создано ✓"); loadSrvOrders(true); return; }
+      toast(SHIP_ERR[r.body && r.body.error] || "Не удалось создать отправление");
+      render();
+    }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
+  }
+
   /* Only the overrides are read for everybody — they change what the shop
      shows. Whether this browser is the owner is asked once, and only when the
      admin screen is actually opened, so a shopper never pays for that call. */
@@ -3962,6 +4355,11 @@
     if (a.type === "set_subcat") return "Подкатегория «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "авто");
     if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
     if (a.type === "set_video") return "Видео «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "убрано");   // features
+    // media
+    if (a.type === "set_gallery") {
+      var gl = Array.isArray(a.list) ? a.list.length : 0;
+      return "Фото «" + (p ? p.name : a.id) + "»: " + (gl ? gl + " " + pl(gl, "фотография", "фотографии", "фотографий") : "как в каталоге");
+    }
     return "";
   }
   function demoApply(a) {
@@ -3982,6 +4380,13 @@
     else if (a.type === "set_varimg") { entry.prev = { type: "set_varimg", id: a.id, map: (DEMO.varimg[a.id] || (p.varImg || []).slice()) }; DEMO.varimg[a.id] = a.map.slice(); }
     // features
     else if (a.type === "set_video") { entry.prev = { type: "set_video", id: a.id, value: (DEMO.video[a.id] != null ? DEMO.video[a.id] : (p.video || "")) }; DEMO.video[a.id] = a.value; pushOverride(a.id, { video_url: a.value }); }
+    // media: an empty list means «back to the catalogue photos», and undo puts
+    // the previous list back — including that empty one
+    else if (a.type === "set_gallery") {
+      entry.prev = { type: "set_gallery", id: a.id, list: (DEMO.gallery[a.id] || []).slice() };
+      if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
+      else delete DEMO.gallery[a.id];
+    }
     else return;
     DEMO.log.unshift(entry);
     DEMO.log = DEMO.log.slice(0, 40);
@@ -4006,6 +4411,10 @@
     else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") DEMO.varimg[a.id] = a.map.slice();
     else if (a.type === "set_video") { DEMO.video[a.id] = a.value; pushOverride(a.id, { video_url: a.value }); }   // features
+    else if (a.type === "set_gallery") {   // media
+      if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
+      else delete DEMO.gallery[a.id];
+    }
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -4867,7 +5276,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -5030,13 +5439,62 @@
     }
     if (d.admlogout !== undefined) { admLogout(); return; }
     if (d.admstatus) { srvOrderPatch(S.adminOrder, { status: d.admstatus }); return; }
+    if (d.admship !== undefined) { srvCreateShipment(S.adminOrder); return; }
     if (d.admnotesave !== undefined) {
       var noteEl = document.querySelector("[data-admnote]");
       srvOrderPatch(S.adminOrder, { note: noteEl ? noteEl.value : "" });
       return;
     }
-    if (d.admgoods !== undefined) { S.adminEdit = d.admgoods; S.adminTab = "goods"; window.scrollTo({ top: 0 }); render(); return; }
-    if (d.admclose !== undefined) { S.adminEdit = ""; render(); return; }
+    if (d.admgoods !== undefined) {
+      S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; mediaProbe();   // media
+      window.scrollTo({ top: 0 }); render(); return;
+    }
+    if (d.admclose !== undefined) { S.adminEdit = ""; GAL.id = ""; render(); return; }
+    /* ---- media: the «Фото» block ----------------------------------------
+       Everything here edits the draft list only; «Сохранить» is what turns it
+       into a set_gallery action, so «Отмена» really cancels. */
+    if (d.galup !== undefined) {
+      var upIn = document.querySelector('[data-galfile="' + (d.galup || "").replace(/"/g, "") + '"]');
+      if (upIn) upIn.click();
+      return;
+    }
+    if (d.galmove !== undefined) {
+      var mv = d.galmove.split(":"), mi = Number(mv[0]), mj = mi + Number(mv[1]);
+      if (mj >= 0 && mj < GAL.list.length) {
+        var moved = GAL.list.splice(mi, 1)[0];
+        GAL.list.splice(mj, 0, moved);
+        GAL.reset = false;
+        render();
+      }
+      return;
+    }
+    if (d.galmain !== undefined) {
+      var mn = Number(d.galmain);
+      if (mn > 0 && mn < GAL.list.length) {
+        GAL.list.unshift(GAL.list.splice(mn, 1)[0]);
+        GAL.reset = false;
+        toast("Главная фотография выбрана — нажмите «Сохранить»");
+        render();
+      }
+      return;
+    }
+    if (d.galdel !== undefined) {
+      var di = Number(d.galdel);
+      if (di >= 0 && di < GAL.list.length) {
+        var gone = GAL.list.splice(di, 1)[0];
+        // only a photo uploaded in this sitting is removed from the bucket —
+        // an older one has to survive so undo can bring it back
+        if (gone && GAL.fresh[gone.url]) { galDrop(GAL.fresh[gone.url]); delete GAL.fresh[gone.url]; }
+        GAL.reset = false;
+        render();
+      }
+      return;
+    }
+    if (d.galreset !== undefined) {
+      GAL.list = baseGallery(d.galreset);
+      GAL.reset = true;
+      render(); return;
+    }
     if (d.vpick !== undefined) {
       // select a photo for one size inside the editor (applied on Save)
       var pk = d.vpick.split(":");
@@ -5081,6 +5539,15 @@
       if (subEl && subEl.value !== (DEMO.subcat[gp.id] || "")) {
         demoApply({ type: "set_subcat", id: gp.id, value: subEl.value }); changed = true;
       }
+      /* ---- media: the photo list ----------------------------------------
+         Before the per-size map, so the map is compared against the list that
+         is about to be in force rather than the one being replaced. */
+      if (galDirty(gp)) {
+        demoApply({ type: "set_gallery", id: gp.id, list: galSaveList() });
+        changed = true;
+      }
+      GAL.id = ""; UP.err = "";
+      /* ---- /media ---------------------------------------------------------- */
       var rowsV = [...document.querySelectorAll("[data-vrow]")];
       if (rowsV.length) {
         var map2 = rowsV.map(function (r2) {
@@ -5164,6 +5631,7 @@
        changes on «Сохранить», through the confirm card. ------------------- */
     if (d.heroedit !== undefined) {
       S.heroEdit = Number(d.heroedit); S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
+      UP.err = ""; mediaProbe();   // media: the «Загрузить» button under the picture
       render(); return;
     }
     if (d.heroclose !== undefined) { S.heroEdit = -1; render(); return; }
@@ -5406,6 +5874,39 @@
     else if (t.matches("[data-herotick]")) {
       heroDraft().interval = Math.max(2, Math.min(30, Number(t.value) || 6)) * 1000;
     }
+    /* media: the file picker — «Загрузить фото» in the goods editor and the
+       banner's own button both land here. On a phone the same input offers the
+       camera, because accept="image/*" is what asks for it. */
+    else if (t.matches("[data-galfile]")) {
+      var picked = t.files;
+      var where = t.dataset.galfile;
+      t.value = "";   // so choosing the same file twice still fires
+      if (!picked || !picked.length) return;
+      if (where === "hero") heroUpload(picked); else galUpload(picked, byId(where));
+    }
+  });
+
+  /* media: drag-and-drop onto the same zone. Desktop only in practice — a
+     phone has no drag — and it never swallows a drop outside the panel. */
+  document.addEventListener("dragover", function (e) {
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    if (!z) return;
+    e.preventDefault();
+    z.classList.add("is-over");
+  });
+  document.addEventListener("dragleave", function (e) {
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    if (z) z.classList.remove("is-over");
+  });
+  document.addEventListener("drop", function (e) {
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    if (!z) return;
+    e.preventDefault();
+    z.classList.remove("is-over");
+    var files = e.dataTransfer && e.dataTransfer.files;
+    if (!files || !files.length || UP.busy) return;
+    var where = z.dataset.galdrop;
+    if (where === "hero") heroUpload(files); else galUpload(files, byId(where));
   });
 
   // the shopper's own open/closed choice for the summary wins from then on

@@ -41,9 +41,16 @@ export type OrderItem = {
   sum: number; // price × qty
 };
 
+/**
+ * Every field here is rendered in the admin panel, so every field here is
+ * whitelisted and capped by cleanShipping() before it is stored — see the
+ * comment there. `method` is one of three words, never the shopper's text.
+ */
 export type OrderShipping = {
   method: string;
   country: string;
+  /** Parcel-machine operator: omniva | smartpost | dpd | venipak. */
+  carrier?: string | null;
   pointId?: string | null;
   pointName?: string | null;
   address?: Record<string, unknown> | null;
@@ -79,6 +86,7 @@ export type CreateOrderInput = {
   shipping: {
     method?: string;
     country?: string;
+    carrier?: string | null;
     pointId?: string | null;
     pointName?: string | null;
     address?: Record<string, unknown> | null;
@@ -107,8 +115,12 @@ export type OverrideRow = {
   subcat: string | null;
   var_img: unknown;
   video_url: string | null;
+  gallery: unknown;
   updated_at: string | Date;
 };
+
+/** One photo the owner uploaded — see db/migrations/003_product_gallery.sql. */
+export type GalleryPhoto = { url: string; thumb: string; alt: string };
 
 export type Override = {
   price: number | null;
@@ -118,8 +130,44 @@ export type Override = {
   subcat: string | null;
   varImg: number[] | null;
   videoUrl: string | null;
+  /** null = the catalogue's own photos; an array replaces them, first = main. */
+  gallery: GalleryPhoto[] | null;
   updatedAt: string | null;
 };
+
+/** Up to a dozen photos per product; more is a mistake, not a gallery. */
+export const MAX_GALLERY = 12;
+
+/**
+ * The only door into `gallery`. Anything that is not a {url, thumb, alt} with
+ * an http(s) or /-rooted url is dropped, because this list is rendered as an
+ * image source on every product card in the shop.
+ */
+export function cleanGallery(value: unknown): GalleryPhoto[] | null {
+  if (value == null) return null;
+  const raw = typeof value === "string" ? safeParse(value) : value;
+  if (!Array.isArray(raw)) return null;
+  const out: GalleryPhoto[] = [];
+  for (const item of raw) {
+    const o = (item && typeof item === "object" ? item : { url: item }) as Record<string, unknown>;
+    const url = typeof o.url === "string" ? o.url.trim() : "";
+    if (!url || url.length > 500 || !/^(https:\/\/|http:\/\/|\/)[^\s"'<>]+$/.test(url)) continue;
+    const thumb = typeof o.thumb === "string" && /^(https?:\/\/|\/)[^\s"'<>]+$/.test(o.thumb.trim())
+      ? o.thumb.trim().slice(0, 500)
+      : url;
+    out.push({ url, thumb, alt: typeof o.alt === "string" ? o.alt.slice(0, 120) : "" });
+    if (out.length >= MAX_GALLERY) break;
+  }
+  return out.length ? out : null;
+}
+
+function safeParse(s: string): unknown {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+}
 
 /* ---------- catalogue ---------------------------------------------------- */
 
@@ -191,11 +239,17 @@ export function fallbackShipping(country: string, method: string, subtotal: numb
   return FALLBACK_SHIPPING.eu;
 }
 
-async function shippingPrice(country: string, method: string, subtotal: number): Promise<number> {
+async function shippingPrice(
+  country: string,
+  method: string,
+  subtotal: number,
+  carrier?: string | null,
+): Promise<number> {
   const compute = fn(await optionalLib("shipping"), "computeShipping");
   if (compute) {
     try {
-      const out = await compute({ country, method, subtotal });
+      // carrier lets settings.shipping_rules.carriers override the method price
+      const out = await compute({ country, method, subtotal, carrier: carrier ?? undefined });
       const price = typeof out === "number" ? out : num((out as { price?: unknown } | null)?.price, NaN);
       if (Number.isFinite(price) && price >= 0) return money(price);
     } catch (err) {
@@ -247,6 +301,7 @@ function mapOverride(r: OverrideRow): Override {
     subcat: r.subcat ?? null,
     varImg: Array.isArray(r.var_img) ? (r.var_img as number[]) : null,
     videoUrl: r.video_url ?? null,
+    gallery: cleanGallery(r.gallery),
     updatedAt: r.updated_at ? new Date(r.updated_at as string).toISOString() : null,
   };
 }
@@ -275,6 +330,10 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
   if ("subcat" in patch) cols.subcat = patch.subcat ?? null;
   if ("varImg" in patch) cols.var_img = patch.varImg == null ? null : JSON.stringify(patch.varImg);
   if ("videoUrl" in patch) cols.video_url = patch.videoUrl ?? null;
+  if ("gallery" in patch) {
+    const list = cleanGallery(patch.gallery);
+    cols.gallery = list == null ? null : JSON.stringify(list);
+  }
 
   if (cols.stock != null && !["in", "low", "out"].includes(String(cols.stock))) {
     throw new OrderError("bad_stock", String(cols.stock));
@@ -282,7 +341,8 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
 
   const keys = Object.keys(cols);
   const params: unknown[] = [productId, ...keys.map((k) => cols[k])];
-  const holes = keys.map((k, i) => (k === "var_img" ? `$${i + 2}::jsonb` : `$${i + 2}`));
+  const JSONB = new Set(["var_img", "gallery"]);
+  const holes = keys.map((k, i) => (JSONB.has(k) ? `$${i + 2}::jsonb` : `$${i + 2}`));
   const sql = keys.length
     ? `insert into product_overrides (product_id, ${keys.join(", ")}, updated_at)
        values ($1, ${holes.join(", ")}, now())
@@ -602,6 +662,82 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 
+/* ---------- shipping, whitelisted --------------------------------------- */
+
+/**
+ * The shipping blob is the one part of an order the shopper writes freely, and
+ * every field of it is drawn in the admin panel. It used to be stored as sent —
+ * unchecked type, no length, no character rules — which made an anonymous order
+ * a script injection into the owner's own screen (audit C2/M2).
+ *
+ * Nothing here is "sanitised": each field is rebuilt from scratch out of a
+ * known set. Anything that does not fit becomes null, never an error — a
+ * shopper must not be able to lose an order to a stray character in a parcel
+ * machine's name.
+ */
+const SHIP_METHODS = ["parcel", "courier", "pickup"] as const;
+const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak"] as const;
+/** Address fields the checkout actually sends. Anything else is dropped. */
+const SHIP_ADDRESS_KEYS = ["addr", "street", "zip", "city", "house", "flat"] as const;
+
+/** Printable, single-line, trimmed, capped. Control characters never survive. */
+function shipText(v: unknown, max: number): string | null {
+  if (typeof v !== "string") return null;
+  const s = v
+    .replace(/\p{Cc}+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max)
+    .trim();
+  return s || null;
+}
+
+/**
+ * "parcel" | "courier" | "pickup". Older clients (and the Estonian/Russian
+ * labels the first checkout sent) are mapped rather than refused, so the stored
+ * value is always one of three words — which is what the admin renders.
+ */
+export function shipMethodOf(v: unknown): (typeof SHIP_METHODS)[number] {
+  const s = String(v ?? "").toLowerCase().trim();
+  if ((SHIP_METHODS as readonly string[]).includes(s)) {
+    return s as (typeof SHIP_METHODS)[number];
+  }
+  if (/pickup|самовыв|заберу|ise|tule|kohapeal|store|shop/.test(s)) return "pickup";
+  if (/courier|kuller|курьер|door|uks|дверь/.test(s)) return "courier";
+  return "parcel";
+}
+
+export function shipCarrierOf(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const s = v.toLowerCase().trim().slice(0, 20);
+  return (SHIP_CARRIERS as readonly string[]).includes(s) ? s : null;
+}
+
+function shipAddress(v: unknown): Record<string, string> | null {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+  const raw = v as Record<string, unknown>;
+  const out: Record<string, string> = {};
+  for (const k of SHIP_ADDRESS_KEYS) {
+    const s = shipText(raw[k], 160);
+    if (s) out[k] = s;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+function cleanShipping(ship: CreateOrderInput["shipping"], price: number): OrderShipping {
+  return {
+    method: shipMethodOf(ship?.method),
+    country: /^[A-Za-z]{2}$/.test(String(ship?.country ?? ""))
+      ? String(ship.country).toUpperCase()
+      : "EE",
+    carrier: shipCarrierOf(ship?.carrier),
+    pointId: shipText(ship?.pointId, 80),
+    pointName: shipText(ship?.pointName, 160),
+    address: shipAddress(ship?.address),
+    price,
+  };
+}
+
 export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const customer = input?.customer ?? {};
   const name = String(customer.name ?? "").trim().slice(0, 120);
@@ -613,24 +749,16 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const lang = String(input.lang ?? "RU").toUpperCase().slice(0, 5);
   const { lines, subtotal } = await priceItems(input.items, lang);
 
-  const ship = input?.shipping ?? {};
-  const country = String(ship.country ?? "EE").toUpperCase().slice(0, 2);
-  const method = String(ship.method ?? "").slice(0, 60);
+  // Rebuilt from a whitelist before anything is priced or stored (audit C2/M2).
+  const shippingJson = cleanShipping(input?.shipping ?? {}, 0);
+  const { method, country, carrier } = shippingJson;
   // Nothing physical ships when the whole order is gift cards.
   const giftOnly = lines.every((l) => l.kind === "gift");
-  const shipPrice = giftOnly ? 0 : await shippingPrice(country, method, subtotal);
+  const shipPrice = giftOnly ? 0 : await shippingPrice(country, method, subtotal, carrier);
+  shippingJson.price = shipPrice;
 
   const discount = await discountFor(input.discountCode, money(subtotal + shipPrice));
   const total = money(Math.max(0, subtotal + shipPrice - discount));
-
-  const shippingJson: OrderShipping = {
-    method,
-    country,
-    pointId: ship.pointId ?? null,
-    pointName: ship.pointName ?? null,
-    address: ship.address ?? null,
-    price: shipPrice,
-  };
 
   const rows = await query<OrderRow>(
     `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, total, notes)
@@ -648,33 +776,16 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
       discount,
       input.discountCode ? String(input.discountCode).trim().slice(0, 60) : null,
       total,
-      input.notes ? String(input.notes).slice(0, 2000) : null,
+      typeof input.notes === "string" ? input.notes.replace(/\s+$/, "").slice(0, 2000) || null : null,
     ],
   );
-  let order = mapOrder(rows[0]);
+  const order = mapOrder(rows[0]);
 
-  // A gift-card discount was only quoted so far; spend it now, against this
-  // order. If the card was emptied by a concurrent order in the meantime, the
-  // order stands but at full price — we never hand out money twice.
-  if (discount > 0 && input.discountCode) {
-    let spent = false;
-    try {
-      const redeem = fn(await optionalLib("giftcards"), "redeemGiftCard");
-      const r = redeem ? ((await redeem(input.discountCode, discount, order.id)) as { ok?: boolean } | null) : null;
-      spent = !!r?.ok;
-    } catch (err) {
-      console.error("[orders] redeemGiftCard failed:", err);
-    }
-    if (!spent) {
-      const fixed = await query<OrderRow>(
-        `update orders set discount = 0, discount_code = null, total = subtotal + shipping_price, updated_at = now()
-         where id = $1 returning *`,
-        [order.id],
-      );
-      if (fixed.length) order = mapOrder(fixed[0]);
-      await writeAuditSafe("system", "giftcard_redeem_failed", { orderId: order.id, code: input.discountCode, discount });
-    }
-  }
+  /* The gift card is NOT spent here (audit H3). The discount and the code are
+     quoted onto the order; the balance is taken in src/lib/payments/apply.ts
+     the moment the payment is confirmed. A checkout that is abandoned on the
+     bank's page, or that fails, costs the customer nothing — which is what
+     applyGiftCard()'s own docstring has always promised. */
 
   // The mail agent's hook must never be able to lose an order that is already
   // in the database.
@@ -746,7 +857,8 @@ export async function listOrders(opts: { status?: string; q?: string; limit?: nu
     params.push(opts.status);
     where.push(`status = $${params.length}`);
   }
-  const q = String(opts.q ?? "").trim();
+  // capped: a 4 MB search term is four `like '%…%'` scans, not a search (L8)
+  const q = String(opts.q ?? "").trim().slice(0, 100);
   if (q) {
     params.push(`%${q.toLowerCase()}%`);
     const i = params.length;

@@ -32,7 +32,9 @@ export async function POST(req: Request) {
     await writeAuditSafe("admin", "db.migrate", result);
     return Response.json({ ok: true, ...result }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
+    /* The detail goes to the log, not to the browser: a Postgres error carries
+       table names, column names and sometimes a role or host (audit L2). */
     console.error("[api/admin/migrate] failed:", err);
-    return Response.json({ ok: false, error: "migrate_failed", detail: String((err as Error)?.message ?? err) }, { status: 500 });
+    return Response.json({ ok: false, error: "migrate_failed" }, { status: 500 });
   }
 }

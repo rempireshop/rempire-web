@@ -1,5 +1,6 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
+import { clientIp, rateLimit } from "@/lib/auth";
 import { forwardEmail, forwardTelegram } from "@/lib/notify";
 
 /**
@@ -12,9 +13,15 @@ import { forwardEmail, forwardTelegram } from "@/lib/notify";
  *
  * NB: clients must POST to "/api/feedback/" WITH the trailing slash
  * (next.config has trailingSlash: true; without it the POST 308s).
+ *
+ * Every accepted call sends a Telegram message and a Resend e-mail, so it is
+ * limited the same way the review form is: five an hour per IP, the `website`
+ * honeypot, and a body cap (audit H2).
  */
 
 const MAX_BYTES = 20_000;
+const RATE_MAX = 5;
+const RATE_WINDOW_MS = 60 * 60 * 1000;
 
 const MOOD_LABELS = {
   good: "Нравится",
@@ -48,6 +55,10 @@ function parseElement(v: unknown): FeedbackElement | undefined {
 }
 
 export async function POST(req: Request) {
+  if (rateLimit("feedback", clientIp(req), RATE_MAX, RATE_WINDOW_MS)) {
+    return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
+  }
+
   let raw: string;
   try {
     raw = await req.text();
@@ -65,11 +76,16 @@ export async function POST(req: Request) {
     mood?: unknown;
     text?: unknown;
     element?: unknown;
+    website?: unknown;
   };
   try {
     body = JSON.parse(raw);
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });
+  }
+  // honeypot: a filled hidden field is a bot. Say thank you, do nothing.
+  if (typeof body.website === "string" && body.website.trim()) {
+    return NextResponse.json({ ok: true, stored: false, telegram: false, email: false });
   }
 
   const text = typeof body.text === "string" ? body.text.trim() : "";

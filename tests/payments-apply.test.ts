@@ -5,7 +5,7 @@ import {
   type OrderLike,
   type PaymentBlob,
 } from "@/lib/payments/apply";
-import { MockProvider } from "@/lib/payments/mock";
+import { MockProvider, mockSecret } from "@/lib/payments/mock";
 import { getProvider } from "@/lib/payments";
 import type { VerifyResult } from "@/lib/payments/types";
 
@@ -141,16 +141,18 @@ describe("amount checking", () => {
 describe("the keyless provider", () => {
   const env = { SESSION_SECRET: "test-session-secret-at-least-16-chars" } as unknown as NodeJS.ProcessEnv;
 
-  it("is what getProvider picks when there are no Montonio keys", () => {
-    expect(getProvider(env).name).toBe("mock");
+  /* The mock provider signs its own "this order is paid" tickets, so being
+     picked by accident is the whole of audit C1. It is reachable one way. */
+  it("is NEVER picked by default — an unconfigured shop refuses to take money", () => {
+    expect(() => getProvider(env)).toThrowError(
+      expect.objectContaining({ code: "not_configured" }),
+    );
+  });
+
+  it("is picked only when PAYMENT_PROVIDER=mock says so, even over live keys", () => {
     expect(
-      getProvider({
-        ...env,
-        MONTONIO_ACCESS_KEY: "a",
-        MONTONIO_SECRET_KEY: "b",
-      } as unknown as NodeJS.ProcessEnv).name,
-    ).toBe("montonio");
-    // an explicit choice always wins
+      getProvider({ ...env, PAYMENT_PROVIDER: "mock" } as unknown as NodeJS.ProcessEnv).name,
+    ).toBe("mock");
     expect(
       getProvider({
         ...env,
@@ -161,10 +163,29 @@ describe("the keyless provider", () => {
     ).toBe("mock");
   });
 
+  it("hands over to Montonio as soon as its keys exist", () => {
+    expect(
+      getProvider({
+        ...env,
+        MONTONIO_ACCESS_KEY: "a",
+        MONTONIO_SECRET_KEY: "b",
+      } as unknown as NodeJS.ProcessEnv).name,
+    ).toBe("montonio");
+  });
+
   it("refuses to start when montonio is demanded without keys", () => {
     expect(() =>
       getProvider({ ...env, PAYMENT_PROVIDER: "montonio" } as unknown as NodeJS.ProcessEnv),
-    ).toThrow();
+    ).toThrowError(expect.objectContaining({ code: "not_configured" }));
+  });
+
+  /* The old fallback key was a constant printed in this repository. */
+  it("refuses to sign anything without SESSION_SECRET", () => {
+    expect(() =>
+      getProvider({ PAYMENT_PROVIDER: "mock" } as unknown as NodeJS.ProcessEnv),
+    ).toThrowError(expect.objectContaining({ code: "not_configured" }));
+    expect(mockSecret(env)).not.toBe(env.SESSION_SECRET);
+    expect(mockSecret(env)).toBe(mockSecret(env));
   });
 
   it("walks the whole flow: redirect, decide, come back", async () => {

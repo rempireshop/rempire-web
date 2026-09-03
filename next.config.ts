@@ -73,6 +73,74 @@ function prerenderedRewrites() {
   return out;
 }
 
+/* ---------- security headers -------------------------------------------
+ *
+ * A Content-Security-Policy is the difference between "one missed esc() is a
+ * defaced string" and "one missed esc() is the customer list" — see
+ * docs/audit/security-api.md H5. The policy below is written around what this
+ * repository actually loads, verified against the built output:
+ *
+ *   · scripts   — every script in public/shop2/ is a file with a src. The two
+ *                 <script type="application/ld+json"> blocks in the prerendered
+ *                 pages are data, not code, and are not covered by script-src.
+ *                 So /shop2/* gets a strict `script-src 'self'`.
+ *                 Everything else needs 'unsafe-inline': Next's App Router
+ *                 streams its flight payload through inline <script> tags on
+ *                 /, /qa, /qa2, /demo, and the 95 legacy product pages under
+ *                 public/shop/p/ hand humans over with an inline
+ *                 location.replace(). Both are ours, neither renders untrusted
+ *                 input; the admin panel — the one screen a stranger's text
+ *                 reaches — is under /shop2/ and gets the strict policy.
+ *   · styles    — app.js writes style="…" attributes on nearly every row, so
+ *                 'unsafe-inline' is load-bearing here and cannot be dropped
+ *                 without rewriting the renderer. Google Fonts is a stylesheet.
+ *   · frames    — YouTube (nocookie) and Vimeo players on product pages.
+ *   · connect   — only our own API. The Montonio hosts are listed because the
+ *                 checkout hands the shopper over to them; the handover is a
+ *                 navigation and a form post, not a fetch.
+ *
+ * Header rules are applied in order and the LAST match wins for a given key
+ * (Next writes them with res.setHeader), so the general rule comes first and
+ * the two narrower ones override it.
+ */
+const MONTONIO = "https://stargate.montonio.com https://sandbox-stargate.montonio.com";
+
+function csp(scriptSrc: string, frameAncestors = "'none'"): string {
+  return [
+    "default-src 'self'",
+    `script-src ${scriptSrc}`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https:",
+    "media-src 'self' data: https:",
+    "connect-src 'self' " + MONTONIO,
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
+    "form-action 'self' " + MONTONIO,
+    `frame-ancestors ${frameAncestors}`,
+    "base-uri 'none'",
+    "object-src 'none'",
+  ].join("; ");
+}
+
+/** The headers every response carries, whatever the CSP on top of it. */
+function baseSecurityHeaders(frameOptions = "DENY") {
+  return [
+    { key: "X-Frame-Options", value: frameOptions },
+    { key: "X-Content-Type-Options", value: "nosniff" },
+    { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+    {
+      key: "Permissions-Policy",
+      value:
+        "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), " +
+        "geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()",
+    },
+    /* One year, subdomains included. `preload` is deliberately absent: it is
+       submitted once and is painful to undo, and the domain move is not done —
+       see docs/accounts.md. Add it after the move, not before. */
+    { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+  ];
+}
+
 /**
  * Serverful Next.js on Vercel: /api/submit persists questionnaire answers
  * (Vercel Blob) and forwards them to Telegram/email when tokens are set.
@@ -100,6 +168,45 @@ const nextConfig: NextConfig = {
      by `npm run prerender`, and the language lives in the path (/shop2/ is
      Russian and the x-default, /shop2/et/… and /shop2/en/… the others). See
      prerenderedRewrites() above and docs/seo.md. */
+  async headers() {
+    return [
+      /* Everything, including the Next-rendered pages and the legacy
+         /shop/p/... redirect stubs, which carry an inline script. */
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline'") },
+          ...baseSecurityHeaders(),
+        ],
+      },
+      /* The shop and the admin panel: no inline script anywhere, so no
+         'unsafe-inline'. This is the rule that turns the class of innerHTML
+         mistakes the audit found into a broken layout instead of a takeover. */
+      {
+        source: "/shop2",
+        headers: [
+          { key: "Content-Security-Policy", value: csp("'self'") },
+          ...baseSecurityHeaders(),
+        ],
+      },
+      {
+        source: "/shop2/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: csp("'self'") },
+          ...baseSecurityHeaders(),
+        ],
+      },
+      /* The one page the shop frames itself: «Письма» in the admin shows the
+         real templates in an <iframe>. frame-ancestors 'none' would blank it. */
+      {
+        source: "/api/admin/mail/preview/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline'", "'self'") },
+          ...baseSecurityHeaders("SAMEORIGIN"),
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       { source: "/shop", destination: "/shop2/", permanent: false },

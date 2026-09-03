@@ -17,10 +17,19 @@ import { addReview, approvedReviews, ratingFor, validateReview } from "@/lib/rev
 
 const MAX_BYTES = 8_000;
 
-/** Salted — the raw IP is never written to the database. */
-function ipHash(ip: string): string {
+/**
+ * Salted — the raw IP is never written to the database.
+ *
+ * There is no fallback salt (audit M4): a SHA-256 over the 32-bit IPv4 space
+ * with a salt that is published in this repository is not a hash, it is an
+ * encoding, and db/migrations/021_reviews.sql promises otherwise. No
+ * SESSION_SECRET, no ip_hash — the column is nullable for exactly this.
+ */
+function ipHash(ip: string): string | null {
+  const salt = process.env.SESSION_SECRET;
+  if (!salt) return null;
   return createHash("sha256")
-    .update((process.env.SESSION_SECRET || "rempire") + "|" + ip)
+    .update(salt + "|" + ip)
     .digest("base64url")
     .slice(0, 22);
 }

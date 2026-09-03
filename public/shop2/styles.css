@@ -1801,3 +1801,51 @@ button, a, summary, label { touch-action: manipulation; }
 @media (max-width: 767px) {
   .admhero__prev .hero__art { height: 34vw; max-height: 160px; min-height: 110px; }
 }
+
+/* ---------- media: the «Фото» block in the goods editor ----------
+   Product photos are cut-outs on nothing, so every tile is painted white
+   behind the picture — a transparent PNG on the panel's own paper would look
+   like a photo with a hole in it. */
+.admphoto__intro { font-size: 12.5px; margin: 2px 0 10px; }
+.admphoto__grid {
+  display: grid; gap: 10px; margin-bottom: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+}
+.admphoto__item {
+  position: relative; border: 1px solid var(--rule); background: #fff; padding: 8px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.admphoto__item.is-main { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.admphoto__ph {
+  display: block; height: 96px; background-color: #fff;
+  background-size: contain; background-position: center; background-repeat: no-repeat;
+}
+.admphoto__badge {
+  position: absolute; top: 0; left: 0; background: var(--ink); color: var(--page);
+  font-family: Oswald, sans-serif; font-size: 9.5px; letter-spacing: .12em;
+  text-transform: uppercase; padding: 3px 6px;
+}
+.admphoto__ops { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
+.admphoto__ops .iconbtn { min-width: 28px; }
+
+/* The drop zone is also the button row, so the same markup serves a mouse
+   (drag a file onto it), a desktop click and a phone camera. */
+.admphoto__drop {
+  position: relative; border: 1px dashed var(--rule); padding: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.admphoto__drop.is-over { border-color: var(--ink); background: var(--hover); }
+.admphoto__hint { font-size: 12px; flex: 1 1 180px; }
+/* Visually hidden rather than display:none — a hidden input can still be
+   opened from the button, and it keeps its accessible name. */
+.admphoto__file {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.admphoto__err, .admphoto__off { font-size: 12.5px; line-height: 1.45; margin: 8px 0 0; }
+.admphoto__err { color: var(--error); }
+.admphoto__off { color: var(--muted); }
+@media (max-width: 767px) {
+  .admphoto__grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+  .admphoto__ph { height: 76px; }
+}
