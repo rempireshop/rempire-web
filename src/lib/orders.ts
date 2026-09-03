@@ -50,7 +50,7 @@ export type OrderItem = {
 export type OrderShipping = {
   method: string;
   country: string;
-  /** Parcel-machine operator: omniva | smartpost | dpd | venipak. */
+  /** Parcel-machine operator: omniva | smartpost | dpd | venipak | unisend. */
   carrier?: string | null;
   pointId?: string | null;
   pointName?: string | null;
@@ -736,7 +736,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
  * machine's name.
  */
 const SHIP_METHODS = ["parcel", "courier", "pickup"] as const;
-const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak"] as const;
+const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend"] as const;
 /** Address fields the checkout actually sends. Anything else is dropped. */
 const SHIP_ADDRESS_KEYS = ["addr", "street", "zip", "city", "house", "flat"] as const;
 

@@ -74,7 +74,7 @@ Values are never written here. Names only, grouped by what stops working without
 | PUBLIC_BASE_URL | absolute links in e-mails, payment return URLs, sitemap/robots | Dmitri | ✅ = https://rempireshop.diipsolutions.eu (domain moved to the Rempire project 03.09 evening) |
 | CRON_SECRET | daily flows job `/api/cron/flows/` (abandoned cart, back-in-stock, birthday) — Vercel cron sends `Authorization: Bearer <secret>` | Dmitri | ✅ 03.09 |
 | PAYMENT_PROVIDER | `montonio` / `mock`. Unset = Montonio if its keys exist, otherwise **payments are off** (503 `not_configured`) — the test «bank» is never a silent default, see docs/payments.md | Dmitri | ✅ montonio |
-| MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY / MONTONIO_ENV | Montonio sandbox → live (`sandbox` / `live`) | Dmitri (sandbox), Renat's account (live) | ✅ sandbox; e2e test order R-100002 paid + confirmation mail 03.09 |
+| MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY / MONTONIO_ENV | Montonio sandbox → live (`sandbox` / `live`) | Dmitri (sandbox), Renat's account (live) | ✅ sandbox; e2e test order R-100002 paid + confirmation mail 03.09; all carriers activated in the Montonio store 03.09 (Omniva, Unisend, DPD, Venipak, Montonio International, SmartPosti); business verification (KYC) still pending — Renat |
 | R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET / R2_PUBLIC_BASE | photo uploads from the admin — product galleries, the banner picture (without them the upload button is greyed out and nothing else changes) | Dmitri (bucket `rempire-media`, bucket-scoped «Object Read & Write» token, see docs/media.md) | ✅ set 03.09 |
 
 ## Cloudflare (added 03.09.2026, account rempireshopinfo@)

@@ -33,3 +33,6 @@ public/shop2/en/
 # same tool but are NOT ignored: they are drawn once from images that are in
 # the repo, and committing them keeps them out of every future build. Delete
 # one and the next `npm run prerender` draws it again.
+
+# generated at build by tools/copy-vendor.mjs (prebuild) from node_modules/leaflet
+public/vendor/leaflet/

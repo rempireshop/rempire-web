@@ -179,3 +179,55 @@ Montonio и MakeCommerce остался правкой одного файла: 
 | `provider_unreachable` / `provider_rejected` | Montonio не ответил или отказал |
 | `db_unavailable` | База недоступна |
 | `rate_limited` | Больше 20 попыток в минуту с одного адреса |
+
+## 9. Логотипы банков — `GET /stores/payment-methods`
+
+UX fix 9 (панель «Банковская ссылка» в кассе): вместо простых текстовых
+кнопок с названием банка — настоящий логотип. Источник —
+`https://docs.montonio.com/api/stargate/guides/payment-methods` (и та же
+страница в справочнике, `.../api/stargate/reference`), сверено 03.09.2026.
+
+```
+GET https://stargate.montonio.com/api/stores/payment-methods           (бой)
+GET https://sandbox-stargate.montonio.com/api/stores/payment-methods   (песочница)
+Authorization: Bearer <HS256 { accessKey, exp }>
+```
+
+Авторизация — **Bearer JWT из одних `accessKey`/`exp`**, как у Shipping API
+(раздел 3 `docs/shipping.md`), а не подписанный payload в теле, как у
+`POST /orders`. Неверный или отсутствующий токен — `401 STORE_NOT_FOUND`.
+
+Тело ответа — `paymentMethods`, объект без отдельного поля-дискриминатора:
+тип метода — это сам ключ (`blik`, `cardPayments`, `mobilePay`, `bnpl`,
+`hirePurchase`, `paymentInitiation`). Банковские ссылки лежат в
+`paymentInitiation.setup`, по одному объекту на страну (`EE`, `LV`, `LT`,
+`FI`, `PL`) — страна названа только так, отдельного поля `country` у банка
+нет, наш код добавляет его сам при разборе (`src/lib/payments/methods.ts`,
+`mapBanks()`). У каждого банка внутри `paymentMethods[]`: **`code`** (тот же
+BIC, что мы шлём как `preferredProvider` — совпадение подтверждено:
+`HABAEE2X` Swedbank, `EEUHEE2X` SEB, `LHVBEE22` LHV, `RIKOEE22` Luminor,
+`EKRDEE22` Coop, все — в блоке `EE`), **`name`**, **`logoUrl`**. У
+`cardPayments` и `mobilePay` — свои `logoUrl` и `requiredToBeEnabled: true`.
+
+Apple Pay и Google Pay в этом списке отдельной строкой не приходят — они
+включаются самим Montonio как экспресс-кнопки внутри карточной формы
+(`cardPayments`), а не как отдельный метод оплаты. Поэтому в кассе это
+статичная строка под «Банковская карта» (UX fix 10), а не что-то, что читает
+этот ответ.
+
+**Одна нестыковка между двумя страницами документации Montonio**: id магазина
+в верхнем поле ответа называется `uuid` в примере на странице-гайде и `id` —
+в примере на странице справочника. Ни то, ни другое поле нашему коду не
+нужно (список читается только через `paymentMethods`), но если он
+понадобится — сначала проверить оба поля в песочнице, а не полагаться на
+одно имя.
+
+Про лимиты запросов и точный TTL для этого конкретного маршрута в
+документации ничего не сказано (в отличие от Shipping API, где кэш явно
+рекомендован). `GET /api/payments/methods/` — наш собственный маршрут,
+`src/app/api/payments/methods/route.ts` — держит ответ 6 часов в памяти
+инстанса (`src/lib/payments/methods.ts`) и ещё 6 часов на CDN
+(`s-maxage=21600`); отвечает только когда заданы `MONTONIO_ACCESS_KEY` /
+`MONTONIO_SECRET_KEY`, иначе `503 not_configured` — касса в этом случае
+молча рисует те же пять банков текстом, что и раньше (`BANKS`/`BANK_CODES`
+в `public/shop2/app.js`).

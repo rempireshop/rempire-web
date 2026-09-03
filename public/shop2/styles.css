@@ -528,19 +528,9 @@ body:has(.stickybar) .ftr {
 .hero__arrow--next { right: 8px; }
 @media (max-width: 767px) { .hero__arrow { display: none; } }
 
-.hero__dots {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
-  display: flex; gap: 6px; justify-content: center; padding: 12px 0 16px;
-}
-.hero__dots button {
-  height: 44px; min-width: 44px; border: none; padding: 0; cursor: pointer;
-  background: none; display: flex; align-items: center; justify-content: center;
-}
-.hero__dots button::after {
-  content: ""; display: block; width: 26px; height: 3px;
-  background: rgba(28, 26, 0, .25); transition: background .18s var(--ease);
-}
-.hero__dots button[aria-current="true"]::after { background: var(--ink); }
+/* UX fix 1: dot indicators removed (staging review) — arrows, swipe and
+   autoplay carry the carousel on their own; the .hero__dots rules they used
+   to draw are gone with them. */
 
 /* Phone: photo on top, words underneath — a wash behind the text made the
    product unreadable and the merch shot unrecognisable. */
@@ -676,12 +666,17 @@ body:has(.stickybar) .ftr {
 
 .banks { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .bank {
+  display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--rule); background: var(--page); cursor: pointer;
   min-height: 44px; padding: 0 14px; font-size: 13px;
   transition: border-color .18s var(--ease), background .18s var(--ease);
 }
 .bank:hover { border-color: var(--ink); }
 .bank[aria-current="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+/* UX fix 9: real bank logo, GET /api/payments/methods — height:24 as briefed,
+   width left to the image's own ratio; a 404/timeout swaps it for the bank
+   name (the "error" listener near the bottom of app.js) */
+.bank__logo { height: 24px; width: auto; display: block; }
 
 /* ---------- catalogue toolbar ---------- */
 .toolbar {
@@ -991,7 +986,17 @@ body.is-locked .sbot { display: none; }
 .costep__edit { font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--rule); flex-shrink: 0; transition: color .18s var(--ease), border-color .18s var(--ease); }
 .costep__head:hover .costep__edit { color: var(--ink); border-bottom-color: var(--ink); }
 .costep__body { padding-bottom: 24px; animation: stepIn .28s var(--ease); }
-@keyframes stepIn { from { opacity: 0; transform: translateY(-4px); } }
+/* UX fix 7, real root cause: an ANIMATED transform on an ancestor makes it a
+   containing block for position:fixed descendants for as long as the
+   animation runs (CSS Transforms spec) — .psheet (the parcel-machine sheet)
+   is one, nested inside .costep__body two levels down. With transform in
+   this keyframe, opening the picker on step 2 re-renders .costep__body fresh
+   (every render() replaces the whole step body) with stepIn restarting, and
+   .psheet spent its first ~280ms positioned against that box instead of the
+   viewport — hence "jumps from left to centre" the moment stepIn ended and
+   .psheet snapped to its real position. Fading alone leaves nothing here for
+   position:fixed to key off. */
+@keyframes stepIn { from { opacity: 0; } }
 .co__zip { display: grid; grid-template-columns: 118px 1fr; gap: 12px; }
 .cosrc { font-size: 11.5px; color: var(--muted); margin: 0 0 16px; line-height: 1.45; }
 .cotrust {
@@ -1118,6 +1123,12 @@ body.is-locked .sbot { display: none; }
 @media (max-width: 899px) { .adm__side { border-right: none; border-bottom: 1px solid var(--rule); } }
 
 .adm__main { padding: 0 var(--gutter) 40px; min-width: 0; }
+/* UX fix 3: the login/"checking…" screens render .adm__main as the ONLY
+   child of the 3-column .adm grid (no .adm__side, no .adm__ai) — without this
+   the grid auto-placed that lone child into column 1, which is 58px wide in
+   the collapsed nav state these screens use, and the card inside wrapped to
+   one word per line. Only bites when there is nothing else to place. */
+.adm__main:only-child { grid-column: 1 / -1; }
 
 .adm__ai {
   border-left: 1px solid var(--rule); display: flex; flex-direction: column; min-width: 0;
@@ -1523,14 +1534,32 @@ button, a, summary, label { touch-action: manipulation; }
    sheet rather than a <select>: a bottom sheet on a phone (thumb reach, and it
    can be swiped away by tapping the scrim), a centred panel on a desktop.
    Every target here is at least 44px tall. */
+/* UX fix 6: the method list (.optlist: Пакомат / Курьер / Самовывоз) used to
+   run straight into whatever chooser followed it — the carrier chips, or the
+   pakomat field itself when a country has only one live carrier and the chips
+   never render — with zero space between the last row and it. */
+.optlist + .carriers, .optlist + .field { margin-top: 14px; }
 .carriers { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
 .carrier {
+  display: inline-flex; align-items: center; gap: 7px;
   min-height: 44px; padding: 10px 16px;
   border: 1px solid var(--rule); background: transparent;
   font: inherit; font-size: 13.5px; cursor: pointer;
   transition: background .15s var(--ease), border-color .15s var(--ease);
 }
 .carrier:hover { background: var(--hover); }
+/* Carrier colour marks — own brand colours, no logo files.
+   TODO logo: swap this ::before dot for the carrier's real mark once we have
+   licensed artwork; data-carrier already names the carrier for that <img>. */
+.carrier::before {
+  content: ""; flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--muted);
+}
+.carrier[data-carrier="omniva"]::before { background: #f47a20; }
+.carrier[data-carrier="dpd"]::before { background: #dc0032; }
+.carrier[data-carrier="smartpost"]::before { background: linear-gradient(135deg, #ffcf00 50%, #111 50%); }
+.carrier[data-carrier="venipak"]::before { background: #1e4b9d; }
+.carrier[data-carrier="unisend"]::before { background: #7dd957; }
 .carrier[aria-current="true"] { border-color: var(--ink); background: var(--ink); color: var(--page); }
 
 .pointbtn {
@@ -1560,14 +1589,45 @@ button, a, summary, label { touch-action: manipulation; }
     transform: translate(-50%, -50%);
     width: min(520px, 92vw); max-height: 76vh;
     border: 1px solid var(--ink);
-    animation: fade .2s ease;
+    /* UX fix 7: the shared `fade` keyframes only ever touch opacity, so the
+       static translate(-50%,-50%) above should already hold it centred for
+       every frame — but the plain fade still read as a left-to-centre jump
+       on open. psheetIn keyframes the SAME translate at both ends explicitly
+       (only scale differs), so the panel cannot move horizontally by
+       construction, whatever produced the jump. */
+    animation: psheetIn .2s ease;
   }
 }
+@keyframes psheetIn { from { opacity: 0; transform: translate(-50%, -50%) scale(.96); } }
 .psheet__head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--rule); }
-.psheet__search { padding: 12px 18px; border-bottom: 1px solid var(--rule); }
-.psheet__search .input { margin: 0; }
+.psheet__search { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--rule); }
+.psheet__search .input { flex: 1; margin: 0; }
+/* UX fix 8: the Карта/Kaart/Map toggle next to the search box */
+.psheet__maptoggle {
+  flex-shrink: 0; min-height: 44px; padding: 0 14px;
+  border: 1px solid var(--rule); background: transparent;
+  font: inherit; font-size: 13px; cursor: pointer;
+  transition: background .15s var(--ease), border-color .15s var(--ease);
+}
+.psheet__maptoggle:hover { background: var(--hover); }
+.psheet__maptoggle[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--page); }
 .psheet__list { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; padding-bottom: env(safe-area-inset-bottom); }
 .psheet__msg { padding: 22px 18px; margin: 0; font-size: 13.5px; }
+/* Leaflet needs its container to carry a real computed height — flex:1 inside
+   .psheet's column gives it exactly the room .psheet__list would have had. */
+.psheet__map { flex: 1; min-height: 0; }
+.psheet__maphint { padding: 8px 18px; margin: 0; font-size: 12px; color: var(--muted); border-top: 1px solid var(--rule); }
+/* a phone wants the whole screen to pan and zoom a map; the fixed-height
+   bottom sheet that suits a short list of rows is cramped for it */
+@media (max-width: 767px) { .psheet--map { max-height: 100vh; height: 100vh; } }
+/* .psheet itself only ever carries max-height — the LIST view's few hundred
+   rows push its auto/content height up against that cap on their own, which
+   is what lets .psheet__list's flex:1 fill the rest. #pointmap starts empty
+   (Leaflet paints into it, but contributes no intrinsic height of its own),
+   so without an explicit height here the sheet never grows past its header
+   and search row and the map has no box to fill — an explicit height, not
+   just a cap, is what flex:1 needs to have anything to grow into. */
+@media (min-width: 768px) { .psheet--map { height: 76vh; } }
 .prow {
   display: block; width: 100%; min-height: 56px;
   padding: 10px 18px; border: none; border-bottom: 1px solid var(--rule-soft);
@@ -1627,8 +1687,14 @@ button, a, summary, label { touch-action: manipulation; }
   padding: 3px 7px;
 }
 .bwas { color: var(--muted); font-weight: 400; text-decoration: line-through; margin-left: 5px; }
-/* a set grid nested inside the catalogue's own section keeps no extra top gap */
-.sec--bundles { padding-top: 0; }
+/* UX fix 2: on the catalogue page the set grid is nested INSIDE that page's
+   own <section class="sec">, right under the toolbar, so it keeps no extra
+   top gap of its own there — hence the descendant selector, not a bare
+   .sec--bundles. On the home page the same bundleGridHTML() output is a
+   top-level sibling of the two product rails (each a plain .sec), so it falls
+   through to the ordinary .sec padding-top and now keeps the same rhythm
+   between "Новинки" and "Наборы" as between the two rails above it. */
+.sec .sec--bundles { padding-top: 0; }
 
 .bdesc { font-size: 14.5px; line-height: 1.6; margin: 14px 0 4px; }
 .bitems { border-top: 1px solid var(--rule); margin-bottom: 20px; }

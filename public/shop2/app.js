@@ -153,10 +153,10 @@
       "Часы работы": "Lahtiolekuajad", "Эл. почта": "E-post", "выходной": "suletud", "Рег.": "Reg.",
       "Понедельник": "Esmaspäev", "Вторник": "Teisipäev", "Среда": "Kolmapäev",
       "Четверг": "Neljapäev", "Пятница": "Reede", "Суббота": "Laupäev", "Воскресенье": "Pühapäev",
-      "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas. Vaja on isikut tõendavat dokumenti.",
+      "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
       "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Kirjutage või helistage — vastame tööpäeva jooksul. Tellimuste, tagastuste ja tooteküsimuste puhul on e-kiri kõige kiirem.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Pangalink (Swedbank, SEB, LHV, Luminor, Coop), kaart, Apple Pay / Google Pay, arve ettevõtetele.",
-      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas. Vaja on isikut tõendavat dokumenti.",
+      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
       "Админка — демо": "Admin — demo",
       "Банковская ссылка": "Pangalink", "Банковская карта": "Pangakaart",
@@ -173,7 +173,7 @@
       "улица, дом": "tänav, maja number", "Имя Фамилия": "Eesnimi Perekonnanimi",
       "Ваш заказ": "Tellimuse kokkuvõte", "Корзина пуста.": "Ostukorv on tühi.",
       "Бесплатно": "Tasuta", "Бесплатная доставка применена ✓": "Tasuta tarne rakendatud ✓",
-      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek aadressil Mardi 1. Vaja on isikut tõendavat dokumenti. Tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
+      "Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Tasuta järeletulek aadressil Mardi 1. Tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
       "Оплата через банк — данные карты магазин не видит": "Makse toimub panga kaudu — pood ei näe kaardiandmeid",
       "14 дней на возврат по закону ЕС": "14-päevane tagastusõigus EL-i seaduse järgi",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "Vajutades „Maksa“ nõustud tingimuste ja tagastuspoliitikaga.",
@@ -806,7 +806,16 @@
       "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.":
         "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
       "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
-        "Rempire'i kinkekaart 25, 50 või 100 € — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib."
+        "Rempire'i kinkekaart 25, 50 või 100 € — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
+      // UX fix 8: parcel-machine map
+      "Карта": "Kaart", "Список": "Nimekiri",
+      "Часть пакоматов видна только в списке — у них нет координат для карты.":
+        "Osa pakiautomaate on näha ainult nimekirjas — neil pole kaardi jaoks koordinaate.",
+      "Карта не загрузилась — список пакоматов работает как обычно":
+        "Kaart ei laadinud — pakiautomaatide nimekiri töötab tavapäraselt",
+      // UX fix 10: card / Apple Pay / Google Pay hint
+      "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
+        "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi."
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -887,10 +896,10 @@
       "Часы работы": "Opening hours", "Эл. почта": "E-mail", "выходной": "closed", "Рег.": "Reg. no.",
       "Понедельник": "Monday", "Вторник": "Tuesday", "Среда": "Wednesday",
       "Четверг": "Thursday", "Пятница": "Friday", "Суббота": "Saturday", "Воскресенье": "Sunday",
-      "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "free · your order waits 7 days, then €1.50 per day. Photo ID required.",
+      "бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "free · your order waits 7 days, then €1.50 per day.",
       "Пишите или звоните — отвечаем в течение рабочего дня. По заказам, возврату и вопросам о товарах быстрее всего ответить на письмо.": "Write or call — we answer within the working day. For orders, returns and product questions e-mail is the fastest way to reach us.",
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Bank link (Swedbank, SEB, LHV, Luminor, Coop), card, Apple Pay / Google Pay, invoice for companies.",
-      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.": "Mardi 1, Tallinn · free · your order waits 7 days, then €1.50 per day. Photo ID required.",
+      "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · free · your order waits 7 days, then €1.50 per day.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
       "Админка — демо": "Admin — demo",
       "Банковская ссылка": "Bank link", "Банковская карта": "Bank card",
@@ -907,7 +916,7 @@
       "улица, дом": "street and house number", "Имя Фамилия": "First name Last name",
       "Ваш заказ": "Your order", "Корзина пуста.": "Your cart is empty.",
       "Бесплатно": "Free", "Бесплатная доставка применена ✓": "Free delivery applied ✓",
-      "Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Free pickup at Mardi 1. Photo ID required. Your order waits 7 days, then €1.50 per day.",
+      "Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.": "Free pickup at Mardi 1. Your order waits 7 days, then €1.50 per day.",
       "Оплата через банк — данные карты магазин не видит": "Payment goes through the bank — the shop never sees card details",
       "14 дней на возврат по закону ЕС": "14-day returns under EU law",
       "Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.": "By pressing “Pay” you agree to the terms and the return policy.",
@@ -1541,7 +1550,16 @@
       "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.":
         "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
       "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
-        "A Rempire gift card for €25, €50 or €100 — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over."
+        "A Rempire gift card for €25, €50 or €100 — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
+      // UX fix 8: parcel-machine map
+      "Карта": "Map", "Список": "List",
+      "Часть пакоматов видна только в списке — у них нет координат для карты.":
+        "Some pickup points show only in the list — they have no map coordinates.",
+      "Карта не загрузилась — список пакоматов работает как обычно":
+        "The map failed to load — the pickup-point list still works as usual",
+      // UX fix 10: card / Apple Pay / Google Pay hint
+      "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
+        "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop."
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -1870,13 +1888,12 @@
     var cur = ((S.slide % list.length) + list.length) % list.length;
     return '<section class="hero" aria-label="Баннеры" aria-roledescription="карусель">' +
       list.map(function (s, i) { return heroSlideHTML(s, i, cur, false); }).join("") +
-      // one slide is a picture, not a carousel — no arrows, no dots, no autoplay
+      // one slide is a picture, not a carousel — no arrows, no autoplay
+      // UX fix 1: dot indicators removed (staging review) — arrows, swipe and
+      // autoplay still work off S.slide alone, no dots required
       (list.length > 1
         ? '<button class="hero__arrow hero__arrow--prev" data-slide="-1" aria-label="Предыдущий баннер">‹</button>' +
-          '<button class="hero__arrow hero__arrow--next" data-slide="1" aria-label="Следующий баннер">›</button>' +
-          '<div class="hero__dots" role="group" aria-label="Выбрать баннер">' + list.map(function (s, i) {
-            return '<button data-dot="' + i + '" aria-current="' + (i === cur) + '" aria-label="Баннер ' + (i + 1) + '"></button>';
-          }).join("") + "</div>"
+          '<button class="hero__arrow hero__arrow--next" data-slide="1" aria-label="Следующий баннер">›</button>'
         : "") +
       "</section>";
   }
@@ -1987,7 +2004,7 @@
     { k: "courier", l: "Курьер до двери" },
     { k: "pickup", l: "Самовывоз — Mardi 1, Таллинн" }
   ];
-  var CARRIER_NAMES = { omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak" };
+  var CARRIER_NAMES = { omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend" };
   /* Carriers worth *asking* about, per country — deliberately optimistic.
      /api/shipping/points answers for every one of them, and a carrier that
      comes back with nothing is struck off (POINTS.empty) before its chip is
@@ -1997,9 +2014,9 @@
      feeds still answer for Omniva (EE/LV/LT) and the seed for SmartPosti EE,
      exactly as before. See docs/shipping.md. */
   var CARRIERS_BY_COUNTRY = {
-    EE: ["omniva", "smartpost", "dpd", "venipak"],
-    LV: ["omniva", "dpd", "venipak"],
-    LT: ["omniva", "dpd", "venipak"],
+    EE: ["omniva", "smartpost", "dpd", "venipak", "unisend"],
+    LV: ["omniva", "dpd", "venipak", "unisend"],
+    LT: ["omniva", "dpd", "venipak", "unisend"],
     FI: ["smartpost", "dpd"],
     EU: []
   };
@@ -2096,7 +2113,7 @@
      error the shopper should see: the API falls back to its committed seed,
      and this falls back to shipping-data.js, so there is always something to
      pick from. */
-  var POINTS = { by: {}, empty: {}, loading: {}, q: "" };
+  var POINTS = { by: {}, empty: {}, loading: {}, q: "", view: "list" };  // view: "list" | "map" (UX fix 8)
   function pointsKey() { return shipCarrier() + ":" + S.country; }
   function pointsList() { return POINTS.by[pointsKey()] || null; }
   function demoPoints(carrier) {
@@ -2136,17 +2153,25 @@
       })
       .catch(function () { apiSeen(false); done(demoPoints(carrier)); });
   }
-  /** Typeahead over name, address and city — the three things people type. */
-  function pointsFiltered() {
+  /** Name, address and city — the three things people type. No cap: the list
+      view caps its own render (pointsFiltered), and the map applies its own
+      cap AFTER filtering to the current bounds, which a pre-capped 80 would
+      have silently defeated — panning to a city outside the first 80 would
+      always have shown nothing. */
+  function pointsMatching() {
     var all = pointsList() || [];
     var q = POINTS.q.trim().toLowerCase();
-    if (!q) return all.slice(0, 80);
+    if (!q) return all;
     var words = q.split(/\s+/);
     return all.filter(function (p) {
       var hay = ((p.name || "") + " " + (p.address || "") + " " + (p.city || "")).toLowerCase();
       for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
       return true;
-    }).slice(0, 80);
+    });
+  }
+  /** Typeahead over name, address and city — the three things people type. */
+  function pointsFiltered() {
+    return pointsMatching().slice(0, 80);
   }
   function pointById(id) {
     var all = pointsList() || [];
@@ -2161,6 +2186,46 @@
     { l: "По счёту — для компаний", h: "Счёт на почту, оплата в течение 7 дней", k: "invoice" }
   ];
   var BANKS = ["Swedbank", "SEB", "LHV", "Luminor", "Coop"];
+  /* UX fix 9: real bank logos from GET /api/payments/methods (server route:
+     src/app/api/payments/methods/route.ts, 6h cache, only answers when
+     Montonio is configured). Until it answers — or if it never does — the
+     chips fall back to the plain BANKS/BANK_CODES pair above, unchanged. */
+  var PAYMETHODS = { banks: null, asked: false };
+  function loadPayMethods() {
+    if (PAYMETHODS.asked) return;
+    PAYMETHODS.asked = true;
+    fetch("/api/payments/methods/").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.ok || !j.banks || !j.banks.length) return;
+      apiSeen(true);
+      PAYMETHODS.banks = j.banks;
+      // a different list can be a different length or order — the index a
+      // shopper had picked in the fallback list may no longer be that bank
+      S.bank = 0;
+      if (S.screen === "checkout") render();
+    }).catch(function () { apiSeen(false); });
+  }
+  function bankChipsHTML() {
+    var real = PAYMETHODS.banks;
+    if (real && real.length) {
+      return real.map(function (b, i) {
+        return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' +
+          (b.logoUrl
+            ? '<img class="bank__logo" src="' + esc(b.logoUrl) + '" alt="' + esc(b.name) + '" height="24">'
+            : esc(b.name)) +
+          "</button>";
+      }).join("");
+    }
+    return BANKS.map(function (b, i) {
+      return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' + b + "</button>";
+    }).join("");
+  }
+  /** The BIC `preferredProvider` Montonio wants, from whichever bank list is
+      currently on screen — the real one when it loaded, BANK_CODES otherwise. */
+  function selectedBankCode() {
+    var real = PAYMETHODS.banks;
+    if (real && real.length) return real[S.bank] ? real[S.bank].code : undefined;
+    return BANK_CODES[BANKS[S.bank]];
+  }
   /* features: the three gift-card amounts. Declared HERE, not down with the
      rest of the gift-card code — the saved-cart filter below runs at load and
      needs it, and a `var` assigned further down is still undefined by then
@@ -3145,7 +3210,7 @@
       /* content: the address is data now, so the sentence after it lives in its
          own element — the dictionary matches whole text nodes, and gluing an
          editable address onto a translatable sentence made both untranslatable. */
-      ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день. Нужен документ.</span>") +
+      ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.</span>") +
       (hours ? ftrSec("Часы работы", hours) : "") +
       ftrSec("Реквизиты", cCompanyHTML()) +
       ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
@@ -4333,21 +4398,115 @@
   }
   function pointsArrived() {
     if (S.screen !== "checkout") return;
+    if (S.pointOpen && POINTS.view === "map") { paintPointMarkers(); return; }
     if (S.pointOpen) patchPointList();
     else render();
   }
+  /* Points with no lat/lng (every Montonio pickup point — docs/shipping.md
+     §3: "Координат в ответе Montonio нет вообще") cannot go on the map. */
+  function pointGeo(p) { return typeof p.lat === "number" && typeof p.lng === "number" ? p : null; }
   /** A bottom sheet on a phone, a centred panel on a desktop. */
   function pointSheet() {
+    var mapOn = POINTS.view === "map";
+    var ungeo = mapOn ? pointsMatching().filter(function (p) { return !pointGeo(p); }).length : 0;
     return '<div class="scrim" data-pointclose></div>' +
-      '<aside class="psheet" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
+      '<aside class="psheet' + (mapOn ? " psheet--map" : "") + '" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
         '<div class="psheet__head"><span class="display drawer__t">' + carrierLabel() + "</span>" +
           '<button class="iconbtn" data-pointclose aria-label="Закрыть">✕</button></div>' +
         '<div class="psheet__search"><input class="input input--box" data-pointq value="' + esc(POINTS.q) +
           '" placeholder="Город, улица или название" aria-label="Поиск пакомата" autocomplete="off">' +
+          '<button class="psheet__maptoggle" data-pointview aria-pressed="' + mapOn + '">' + (mapOn ? "Список" : "Карта") + "</button>" +
           (pointsList() ? '<div class="psheet__n muted">' + points(pointsList().length) + "</div>" : "") + "</div>" +
-        '<div class="psheet__list" id="pointlist">' + pointRows() + "</div>" +
+        (mapOn
+          ? '<div class="psheet__map" id="pointmap"></div>' +
+            (ungeo ? '<p class="psheet__maphint muted">Часть пакоматов видна только в списке — у них нет координат для карты.</p>' : "")
+          : '<div class="psheet__list" id="pointlist">' + pointRows() + "</div>") +
       "</aside>";
   }
+
+  /* ---------- parcel-machine map (UX fix 8) ----------
+     Leaflet loads only the first time someone opens "Карта", and only from
+     our own vendored copy (tools/copy-vendor.mjs → public/vendor/leaflet/):
+     /shop2/ ships script-src 'self' (next.config.ts), so a CDN <script>
+     would simply be blocked, and OSM's own usage policy asks self-hosted
+     sites not to hotlink their JS/CSS from a third party anyway. */
+  var LEAFLET = { loading: false, ready: false, cbs: [] };
+  function loadLeaflet(cb) {
+    if (LEAFLET.ready) { cb(); return; }
+    LEAFLET.cbs.push(cb);
+    if (LEAFLET.loading) return;
+    LEAFLET.loading = true;
+    if (!document.getElementById("leafletcss")) {
+      var link = document.createElement("link");
+      link.id = "leafletcss"; link.rel = "stylesheet"; link.href = "/vendor/leaflet/leaflet.css";
+      document.head.appendChild(link);
+    }
+    var s = document.createElement("script");
+    s.src = "/vendor/leaflet/leaflet.js";
+    s.onload = function () {
+      // self-hosted, not bundled: skip Leaflet's own CSS-heuristic for the
+      // marker images and just say where they are
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "/vendor/leaflet/images/marker-icon-2x.png",
+        iconUrl: "/vendor/leaflet/images/marker-icon.png",
+        shadowUrl: "/vendor/leaflet/images/marker-shadow.png"
+      });
+      LEAFLET.ready = true;
+      var run = LEAFLET.cbs; LEAFLET.cbs = [];
+      run.forEach(function (fn) { fn(); });
+    };
+    s.onerror = function () { LEAFLET.loading = false; LEAFLET.cbs = []; toast("Карта не загрузилась — список пакоматов работает как обычно"); };
+    document.head.appendChild(s);
+  }
+  var TALLINN_LATLNG = [59.437, 24.7536];
+  function pointMapCenter() {
+    var found = pointsMatching().map(pointGeo).filter(Boolean);
+    if (!found.length) return TALLINN_LATLNG;
+    var sy = 0, sx = 0;
+    found.forEach(function (p) { sy += p.lat; sx += p.lng; });
+    return [sy / found.length, sx / found.length];
+  }
+  var pmap = null, pmapMarkers = [];
+  function pickPoint(p) { S.ship.point = p; S.pointOpen = false; render(); refocus("[data-pointopen]"); }
+  /* Only the markers inside the current view, capped — a country's full list
+     can run past 400 points and nobody can read that many pins at once
+     anyway. Re-run on "moveend" so panning/zooming keeps the cap honest
+     without ever recentring the map out from under the shopper's own pan. */
+  function paintPointMarkers() {
+    if (!pmap) return;
+    pmapMarkers.forEach(function (m) { pmap.removeLayer(m); });
+    pmapMarkers = [];
+    var b = pmap.getBounds();
+    var withGeo = pointsMatching().map(pointGeo).filter(function (p) { return p && b.contains([p.lat, p.lng]); });
+    withGeo.slice(0, 500).forEach(function (p) {
+      var mk = L.marker([p.lat, p.lng]).addTo(pmap);
+      mk.bindTooltip(esc(p.name));
+      mk.on("click", function () { pickPoint(p); });
+      pmapMarkers.push(mk);
+    });
+  }
+  /** (Re)builds the map into #pointmap. Safe to call repeatedly: a full
+      render() replaces #pointmap with a fresh DOM node every time, so any
+      Leaflet instance bound to the old one is detected as stale and remade
+      rather than driven into a detached element. */
+  function paintPointMap() {
+    var box = document.getElementById("pointmap");
+    if (!box || typeof L === "undefined") return;
+    if (pmap && pmap.getContainer() !== box) { pmap.remove(); pmap = null; }
+    if (!pmap) {
+      pmap = L.map(box).setView(pointMapCenter(), 12);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+      }).addTo(pmap);
+      pmap.on("moveend", paintPointMarkers);
+    } else {
+      pmap.invalidateSize();
+    }
+    paintPointMarkers();
+  }
+  function openPointMap() { loadLeaflet(paintPointMap); }
 
   /* ---------- placing the order ----------
      Two calls. /api/orders re-prices the basket on the server — the browser's
@@ -4481,7 +4640,7 @@
       return postJSON("/api/payments/create/", {
         orderId: res.body.orderId,
         method: PAYS[S.pay] && PAYS[S.pay].k === "card" ? "card" : "bank",
-        bank: S.pay === 0 ? BANK_CODES[BANKS[S.bank]] : undefined,
+        bank: S.pay === 0 ? selectedBankCode() : undefined,
         lang: S.lang
       }).then(function (pay) {
         if (pay.offline) return finishDemo();
@@ -4508,6 +4667,8 @@
     // account-flows: a signed-in shopper should not retype their own name,
     // address line and phone. One-shot, and silent when nobody is signed in.
     acctLoad();
+    // UX fix 9: real bank logos, one-shot and silent when Montonio has none
+    loadPayMethods();
     // The summary follows the breakpoint until the shopper touches it; after
     // that their choice wins, so applying a promo can't slam it shut.
     var summaryOpen = S.sumOpen === null ? wide() : S.sumOpen;
@@ -4537,7 +4698,7 @@
               '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
                 COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
               deliveryPicker() +
-              (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Нужен документ. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
+              (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
               '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
               // every field is bound to S.ship — a render (promo, blur, resize)
               // used to wipe whatever the shopper had typed here
@@ -4561,9 +4722,11 @@
                   '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
                   '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
               }).join("") + "</div>" +
-              (S.pay === 0 ? '<div class="banks">' + BANKS.map(function (b, i) {
-                return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' + b + "</button>";
-              }).join("") + "</div>" : "") +
+              (S.pay === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
+              // UX fix 10: one line under "Банковская карта" — Apple/Google Pay
+              // are not their own option in the checkout, they ride on Montonio's
+              // own card element, so a static hint is all this needs
+              (S.pay === 1 ? '<p class="hint">Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.</p>' : "") +
               (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" data-invoiceco value="' + esc(S.invoiceCo) + '" placeholder="OÜ Näidis · 12345678"></label>' : "") +
               "</div>" : "") +
           "</section>" +
@@ -4718,7 +4881,7 @@
           '<label class="field"><span class="field__label">Пароль</span>' +
             '<input class="input" type="password" data-admpw autocomplete="current-password" aria-invalid="' + (SRV.err ? "true" : "false") + '"></label>' +
           (SRV.err ? '<div class="err" role="alert">' + esc(SRV.err) + "</div>" : "") +
-          '<div class="adm__acts"><button class="btn" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
+          '<div class="adm__acts"><button class="btn btn--wide" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
             (SRV.busy ? "Проверяем…" : "Войти") + "</button></div>" +
         "</div></main></div>";
   }
@@ -5407,7 +5570,8 @@
     ["omniva", "Omniva", ["EE", "LV", "LT"]],
     ["smartpost", "SmartPosti", ["EE", "FI"]],
     ["dpd", "DPD", ["EE", "LV", "LT", "FI"]],
-    ["venipak", "Venipak", ["EE", "LV", "LT"]]
+    ["venipak", "Venipak", ["EE", "LV", "LT"]],
+    ["unisend", "Unisend", ["EE", "LV", "LT"]]
   ];
   /** A working copy, so a half-typed table never prices a live basket. */
   function shipDraft() {
@@ -7088,8 +7252,41 @@
     hdrSlot.hidden = chromeless;
     patchHeader();
 
+    /* UX fix 4: checkout (and the account sign-in box) each carry one text
+       field the shopper is typing straight into — e-mail, then name/address/
+       phone — while a background probe can still resolve behind them:
+       shipping rules, parcel points per carrier, the signed-in account
+       lookup. Every one of those calls this same render() the instant it
+       lands, whatever the shopper is doing. The VALUE is never stale (every
+       keystroke already lives in S.email / S.ship, see the "input" listener),
+       only the DOM node gets torn down and rebuilt — which blurs the field,
+       drops the caret and, on a phone, dismisses the keyboard: the "flicker".
+       So: remember which field held focus before the swap and hand focus (and
+       the caret) back to its replacement after, rather than leaving the
+       shopper wherever the rebuild happened to drop them. */
+    var refocusSel = null, refocusRange = null;
+    (function () {
+      var af = document.activeElement;
+      if (!af || !bodySlot.contains(af) || (af.tagName !== "INPUT" && af.tagName !== "TEXTAREA")) return;
+      var sel = af.hasAttribute("data-email") ? "[data-email]"
+        : af.hasAttribute("data-shipf") ? '[data-shipf="' + af.getAttribute("data-shipf") + '"]'
+        : af.hasAttribute("data-invoiceco") ? "[data-invoiceco]"
+        : null;
+      if (!sel) return;
+      refocusSel = sel;
+      try { refocusRange = [af.selectionStart, af.selectionEnd]; } catch (e) {}
+    })();
+
     bodySlot.innerHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
       (chromeless ? "" : footer());
+
+    if (refocusSel) {
+      var nf = bodySlot.querySelector(refocusSel);
+      if (nf) {
+        nf.focus();
+        if (refocusRange) { try { nf.setSelectionRange(refocusRange[0], refocusRange[1]); } catch (e) {} }
+      }
+    }
 
     if (!navSlot.firstChild) navSlot.innerHTML = botnavHTML();
     navSlot.hidden = S.screen === "admin";
@@ -7124,6 +7321,9 @@
     // features: real reviews and the moderation queue are fetched once each
     if (S.screen === "product") loadReviews(S.productId);
     if (S.screen === "admin" && S.adminTab === "reviews") loadAdminReviews(false);
+    // UX fix 8: #pointmap is a brand-new node after every render() — (re)bind
+    // Leaflet to it whenever the picker is open in map view
+    if (S.screen === "checkout" && S.pointOpen && POINTS.view === "map") openPointMap();
   }
 
   /* Size, colour, gallery and quantity clicks on the product page patch in
@@ -7567,7 +7767,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -7705,10 +7905,14 @@
       refocus("[data-pointq]"); return;
     }
     if (d.pointclose !== undefined) { S.pointOpen = false; render(); refocus("[data-pointopen]"); return; }
+    if (d.pointview !== undefined) {
+      POINTS.view = POINTS.view === "map" ? "list" : "map";
+      render(); refocus("[data-pointview]"); return;
+    }
     if (d.pointpick) {
       var picked = pointById(d.pointpick);
-      if (picked) S.ship.point = picked;
-      S.pointOpen = false; render(); refocus("[data-pointopen]"); return;
+      if (picked) pickPoint(picked); else { S.pointOpen = false; render(); refocus("[data-pointopen]"); }
+      return;
     }
     // checkout selections re-render the step, which destroys the clicked
     // control — put keyboard focus back on its replacement
@@ -8166,9 +8370,13 @@
     else if (t.matches("[data-invoiceco]")) { S.invoiceCo = t.value; }
     // editing the code must drop the applied discount, not just the error
     else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = ""; S.promoInfo = null; S.giftErr = ""; }
-    /* Only the list is redrawn — a full render would replace this very input
-       and take the caret with it. */
-    else if (t.matches("[data-pointq]")) { POINTS.q = t.value; patchPointList(); }
+    /* Only the list (or, in map view, the pins) is redrawn — a full render
+       would replace this very input and take the caret with it. */
+    else if (t.matches("[data-pointq]")) {
+      POINTS.q = t.value;
+      if (POINTS.view === "map" && pmap) { pmap.setView(pointMapCenter(), pmap.getZoom()); paintPointMarkers(); }
+      else patchPointList();
+    }
     // features: the gift-card form and the review form keep their own state
     else if (t.matches("[data-giftf]")) { S.gift[t.dataset.giftf] = t.value; }
     else if (t.matches("[data-revf]")) {
@@ -8314,6 +8522,14 @@
       // who is still working down the form is nagging, not helping
       patchShip(e.target);
     }
+  }, true);
+
+  /* UX fix 9: a bank's logoUrl that 404s or times out falls back to its name
+     — "error" does not bubble, so this has to run on the capture phase, same
+     as the blur delegate above. */
+  document.addEventListener("error", function (e) {
+    var t = e.target;
+    if (t && t.matches && t.matches(".bank__logo")) t.replaceWith(document.createTextNode(t.alt));
   }, true);
 
   document.addEventListener("keydown", function (e) {
