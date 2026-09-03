@@ -90,6 +90,12 @@ async function main() {
 
   const url = process.env.DATABASE_URL;
   if (!url) {
+    // `--if-configured` is what the postbuild hook uses: a build without a
+    // database (staging, previews, local) must not fail because of it.
+    if (process.argv.includes("--if-configured")) {
+      console.log("migrate: DATABASE_URL not set, nothing to do.");
+      return;
+    }
     console.error("DATABASE_URL is not set. Put it in .env.local (see docs/backend.md) or run with DB_DRIVER=pglite.");
     process.exit(1);
   }

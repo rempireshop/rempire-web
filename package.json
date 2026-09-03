@@ -5,8 +5,9 @@
   "description": "REMPIRE shop rebuild — storefront + admin (Next.js). First route: /qa questionnaire for Renat.",
   "scripts": {
     "dev": "next dev --port 3300",
-    "prebuild": "node tools/prerender-shop2.mjs",
+    "prebuild": "node tools/pack-migrations.mjs && node tools/prerender-shop2.mjs",
     "build": "next build",
+    "postbuild": "node tools/migrate.mjs --if-configured",
     "start": "next start --port 3300",
     "prerender": "node tools/prerender-shop2.mjs",
     "prerender:check": "node tools/check-prerender.mjs",
@@ -14,7 +15,8 @@
     "migrate": "node tools/migrate.mjs",
     "build:variants": "node tools/build-catalogue-variants.mjs",
     "build:bundles": "node tools/build-bundles.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "pack:migrations": "node tools/pack-migrations.mjs"
   },
   "dependencies": {
     "@types/pg": "^8.23.1",

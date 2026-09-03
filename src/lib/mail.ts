@@ -14,6 +14,7 @@
  */
 
 const ENDPOINT = "https://api.resend.com/emails";
+const DEFAULT_REPLY_TO = "rempireshopinfo@gmail.com";
 const DEFAULT_FROM = "Rempire <shop@rempireshop.com>";
 const TIMEOUT_MS = 12_000;
 const EMAIL_RX = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
@@ -96,7 +97,8 @@ export function replyToAddress(
 ): string | string[] | undefined {
   if (override && (!Array.isArray(override) || override.length)) return override;
   const env = (process.env.MAIL_REPLY_TO ?? "").trim();
-  return env || undefined;
+  // Until @rempireshop.com has a real mailbox, replies land in the shop's Gmail.
+  return env || DEFAULT_REPLY_TO;
 }
 
 export function fromAddress(override?: string): string {

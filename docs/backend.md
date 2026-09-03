@@ -157,3 +157,13 @@ Bump the `?v=` token in `public/shop2/index.html` whenever `app.js`,
 nothing to clean up: migrations apply, `createOrder` recomputes totals and
 refuses tampered prices and out-of-stock items, the login/logout cookie makes a
 round trip, and `requireAdmin` turns away forged cookies.
+
+## Migrations on deploy
+
+`npm run build` now runs `tools/pack-migrations.mjs` before the build (embeds `db/migrations/*.sql`
+into `src/db/migrations.generated.ts`) and `tools/migrate.mjs --if-configured` after it: when
+`DATABASE_URL` is set in the build environment, pending migrations are applied as part of every
+deploy; when it is not set (staging without a database, previews, local), the step prints one line
+and exits 0. Manual fallback, admin-only: `GET /api/admin/migrate` (applied / pending) and
+`POST /api/admin/migrate` (apply). Railway trial or Hobby Postgres: use `DATABASE_PUBLIC_URL`
+(the TCP proxy) for Vercel; the internal `DATABASE_URL` only resolves inside Railway.
