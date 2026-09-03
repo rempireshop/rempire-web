@@ -83,8 +83,8 @@ describe("sendMail", () => {
     expect(body.tags).toEqual([
       { name: "template", value: "order-confirmed" },
     ]);
-    // no reply-to configured → the key is absent rather than null
-    expect("reply_to" in body).toBe(false);
+    // no MAIL_REPLY_TO configured → replies go to the shop mailbox by default
+    expect(body.reply_to).toEqual("rempireshopinfo@gmail.com");
   });
 
   it("uses RESEND_FROM and MAIL_REPLY_TO when they are set", async () => {
