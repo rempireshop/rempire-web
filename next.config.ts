@@ -17,6 +17,19 @@ const nextConfig: NextConfig = {
    * are written out per product for their link previews, so /shop/p/... is
    * already real and must not be swallowed here.
    */
+  /* Design accepted 03.09: the round-two variant IS the shop. Every page
+     route of the original prototype lands on its /shop2/ twin; the assets it
+     shares (catalogue, images, content) stay where they are, and the
+     prerendered /shop/p/... pages keep their link previews and hand humans
+     over with a script. */
+  async redirects() {
+    return [
+      { source: "/shop", destination: "/shop2/", permanent: false },
+      { source: "/shop/c/:cat", destination: "/shop2/c/:cat/", permanent: false },
+      { source: "/shop/b/:brand", destination: "/shop2/b/:brand/", permanent: false },
+      { source: "/shop/:screen(search|brands|account|checkout|done|admin)", destination: "/shop2/:screen/", permanent: false },
+    ];
+  },
   async rewrites() {
     return [
       { source: "/shop/c/:cat", destination: "/shop/index.html" },
