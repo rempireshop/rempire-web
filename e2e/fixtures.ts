@@ -109,14 +109,13 @@ export async function loginAsAdmin(page: Page): Promise<void> {
  * (src/app/api/payments/mock/route.ts) through to a paid or failed receipt.
  * Returns the order number from the receipt URL (`?n=R-100042`).
  *
- * Courier, not pickup: pickup checkout does not currently work — its UI
- * never renders a name field (shipMethod()==="pickup" skips shipField
- * ("name",…) in app.js), yet POST /api/orders/ requires customer.name
- * non-empty (src/lib/orders.ts), so a pickup order always 400s with
- * bad_name. Confirmed by driving it; flagged separately (spawn_task). Every
- * "just get me a paid order" helper in this suite uses courier instead,
- * with a fixed Estonian address — no parcel-machine/carrier API involved,
- * so it is also the fastest of the three methods to complete.
+ * Courier, not pickup: every "just get me a paid order" caller in this suite
+ * (account, admin, gift-card specs) needs the order itself, not delivery
+ * method coverage — a fixed Estonian address with no parcel-machine/carrier
+ * API involved is also the fastest of the three methods to complete.
+ * Pickup's own checkout path (once broken — a pickup order always 400ed with
+ * bad_name, since its UI never rendered a name field at all) has its own
+ * dedicated end-to-end test in checkout.spec.ts ("checkout — pickup").
  */
 export async function payOrder(page: Page, email: string, outcome: "paid" | "failed"): Promise<string> {
   await page.locator("[data-email]").fill(email);

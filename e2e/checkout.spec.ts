@@ -131,3 +131,35 @@ for (const [i, lang] of LANGS.entries()) {
     });
   });
 }
+
+/** Pickup delivery («Самовывоз») completing a real order end to end — not
+ *  per-language: this is a delivery-method regression check (POST
+ *  /api/orders used to 400 bad_name for every pickup order, because the
+ *  contact block's name field was only ever rendered for parcel/courier —
+ *  shipField()/shipRequired() in app.js), not an i18n one, so one language is
+ *  enough — same reasoning visual.spec.ts stays ET-only (docs/testing.md). */
+test.describe("checkout — pickup", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(43) });
+
+  test("pickup completes an order end to end with the mock provider", async ({ page }) => {
+    await addProductAndGoToCheckout(page, "");
+    await fillContactStep(page, freshEmail("pickup"));
+
+    await page.locator('input[data-dm="pickup"]').check();
+    // Still no address fields for pickup — only the always-on contact block.
+    await expect(page.locator('[data-shipf="addr"]')).toHaveCount(0);
+    await page.locator('[data-shipf="name"]').fill("E2E Pickup");
+    await page.locator('[data-shipf="phone"]').fill("+372 5550001");
+    await continueButton(page, 3).click();
+
+    await page.locator('input[data-paym="1"]').check();
+    await page.locator(".co__pay[data-pay]").click();
+    await page.waitForURL(/\/api\/payments\/mock\//);
+    await page.getByRole("link", { name: "Оплатить" }).click();
+
+    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await waitForScreen(page, "done");
+    await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));
+    await expect(page.locator(".done__num")).toContainText(/R-\d+/);
+  });
+});

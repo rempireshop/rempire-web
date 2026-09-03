@@ -180,51 +180,71 @@ generous about them:
   file on font/anti-aliasing noise while still catching a real layout break.
 - **Per-platform baselines**: the path template includes `{platform}`
   (`process.platform`), so Windows and Linux never compare against each
-  other's images. The baselines in this repo right now were generated on
-  Windows (this session ran locally, not in CI). **The first CI run will not
-  have a Linux baseline and will fail on all three `visual.spec.ts` tests for
-  that reason alone** — this is expected, not a regression. Fix it once by
-  running `npm run e2e:update` in the same environment CI uses (or download
-  the artifact CI produces on that failing run, since `trace`/`screenshot` on
-  failure are both captured) and committing the new
-  `e2e/__screenshots__/**/*-linux.png` files. After that, CI compares
-  Linux-to-Linux and the generous-but-not-infinite threshold above is doing
-  real work again, not just papering over a font stack.
+  other's images. The baselines committed in this repo right now are Windows
+  only (this session ran locally, not in CI) — there is no Linux baseline yet
+  for any of the three `visual.spec.ts` tests.
+  `toHaveScreenshot()` does not treat a missing baseline as "nothing to
+  compare" — even in CI it writes the actual screenshot as a brand-new
+  baseline and still fails the assertion ("A snapshot doesn't exist …
+  writing actual"), which is not a real visual regression but reads as one on
+  every single CI run until someone notices and commits the generated image.
+  Each test in `visual.spec.ts` therefore calls `skipIfNoBaseline(testInfo,
+  name)` first: under `process.env.CI`, if `testInfo.snapshotPath(name, {
+  kind: "screenshot" })` — the same resolution `snapshotPathTemplate` drives —
+  does not exist on disk yet, the test is skipped with a message naming the
+  missing file, instead of failing. Local runs (no `CI` env var) are
+  unaffected and keep comparing/writing exactly as before.
+  **Generate the real Linux baselines once**, from CI itself or a Linux
+  container — running `npm run e2e:update` from a plain Windows checkout
+  cannot produce them, `{platform}` in the template always reflects the
+  machine that ran it — and commit the resulting
+  `e2e/__screenshots__/**/*-linux.png` files (the Windows ones stay; they are
+  what this machine's own runs compare against). After that, CI compares
+  Linux-to-Linux, `skipIfNoBaseline` never triggers again, and the
+  generous-but-not-infinite threshold above is doing real work, not just
+  papering over a missing file.
 
 ## Real bugs this suite found while being built
 
-Four, all reported to the team as they were found (not fixed here — app.js/
-styles.css were off limits while this suite was built, per the brief). Three
-were worked around so the affected spec could still exercise the real flow;
-one is left as a standing, correctly-failing test, because papering over a
-genuine WCAG violation would defeat the point of having the check.
+Four, all reported to the team as they were found — app.js/styles.css were
+off limits while this suite was itself being built, per the brief — and all
+four since fixed directly in those two files. Each has its own regression
+coverage now instead of the workaround it briefly needed.
 
-- **Reviews accordion collapses shut on "Оставить отзыв."** `acc()` (app.js)
-  always emits `<details>` with no `open` attribute, and the review-form
+- **Reviews accordion collapsed shut on "Оставить отзыв."** `acc()` (app.js)
+  always emitted `<details>` with no `open` attribute, and the review-form
   actions go through the general `render()` full-rebuild rather than a
-  targeted patch — so the whole Reviews section visibly closes the moment a
-  shopper clicks the button that was supposed to reveal the form. Worked
-  around in `e2e/product.spec.ts` (`settled()` — reopen-and-retry as one
-  unit); full detail in that file's own comment.
-- **Pickup checkout cannot complete.** The order payload's `customer.name`
-  comes from `S.ship.name`, which the UI never collects for the "Самовывоз"
-  method (that field is only rendered for parcel/courier) — every pickup
-  order 400s with `bad_name`. Every "just get me a paid order" helper in this
-  suite uses the courier method instead; see `payOrder()` in
-  `e2e/fixtures.ts`.
-- **A set in the cart does not survive a reload.** Restoring the cart from
-  `localStorage` runs before `DEMO` is assigned (cart-restore is near the top
+  targeted patch — so the whole Reviews section visibly closed the moment a
+  shopper clicked the button that was supposed to reveal the form. Fixed by
+  persisting the accordion's own open state in `S.revAccOpen` — synced from
+  the native `toggle` event, same idiom as the order summary's own
+  `S.sumOpen`, and set explicitly by the actions that trigger a render — and
+  rendering `open` from it in `acc()`. `e2e/product.spec.ts`'s reviews test
+  now asserts `open` stays on `details.acc` throughout, with no
+  reopen-and-retry needed.
+- **Pickup checkout could not complete.** The order payload's `customer.name`
+  came from `S.ship.name`, which the UI never collected for the "Самовывоз"
+  method (that field was only rendered for parcel/courier) — every pickup
+  order 400ed with `bad_name`. Fixed by always rendering and requiring the
+  contact block (name, e-mail, phone) regardless of delivery method
+  (`shipRequired()` and the checkout step-2 body in app.js), leaving only the
+  postal address courier-only. `e2e/checkout.spec.ts`'s "checkout — pickup"
+  test drives a pickup order through the mock provider to a paid receipt.
+- **A set in the cart did not survive a reload.** Restoring the cart from
+  `localStorage` ran before `DEMO` was assigned (cart-restore is near the top
   of app.js; `var DEMO = {...}` is ~4700 lines later), and the restore filter
-  calls `bundleById()` → `allBundles()` → `DEMO.bundles` for any bundle line —
-  throwing, which aborts the *whole* filter and empties `S.cart`, not just
-  the bundle line. `e2e/sets.spec.ts` navigates to checkout client-side (the
-  cart drawer's own button) instead of reloading, specifically to route
-  around this.
-- **Home page brand-strip text fails WCAG AA color contrast** (`#b0afa6` on
-  white, 2.2:1 against a 4.5:1 requirement) — a real, unfixed design issue.
-  `e2e/accessibility.spec.ts`'s `home` test fails on it, correctly: that file
-  is designed to fail on serious/critical axe violations, not to hide them.
-  Expect this one test to keep failing until the color is fixed.
+  called `bundleById()` → `allBundles()` → `DEMO.bundles` for any bundle
+  line — throwing, which aborted the *whole* filter and emptied `S.cart`, not
+  just the bundle line. Fixed by guarding `allBundles()` against `DEMO` not
+  being initialised yet, plus a `try`/`catch` around the restore filter so a
+  throw there can never again wipe a saved cart. `e2e/sets.spec.ts` now adds
+  a product and a set, reloads for real, and checks both lines survive.
+- **Home page brand-strip text failed WCAG AA color contrast** (`#b0afa6` on
+  white, 2.2:1 against a 4.5:1 requirement). Fixed by switching
+  `.brandstrip__it` to the design system's own muted-text token
+  (`var(--muted)`, ~5.4:1 on white) instead of the one-off
+  `rgba(28,26,0,.35)` that flattened to it — same quiet grey, passing
+  contrast. `e2e/accessibility.spec.ts`'s `home` test now passes.
 
 ## What could not be automated, and why
 

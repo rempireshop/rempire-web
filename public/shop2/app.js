@@ -2485,7 +2485,8 @@
     dbReviews: {},      // productId → [approved reviews from the database]
     revForm: { name: "", rating: 0, text: "", website: "", consent: false },
     revState: "",       // "" | "sending" | "sent" | an error code
-    revOpen: false,
+    revOpen: false,      // the review-submission form is shown (vs the "Оставить отзыв" button)
+    revAccOpen: false,   // the Reviews <details> itself is open — see acc()
     admReviews: null,   // admin tab: {reviews, counts} once loaded
     admRevFilter: "pending",
     // checkout-gaps: the delivery-price table and the promo-code editor
@@ -2550,14 +2551,24 @@
     // Drop lines whose product no longer exists — byId() falls back to the
     // first product, which would silently show the wrong item at the wrong
     // price after a catalogue change.
-    if (saved.cart) S.cart = saved.cart.filter(function (l) {
-      // sets and gift cards are not catalogue products: a set survives only
-      // while it is still curated, a gift card while the amount is still sold
-      if (l.type === "bundle") return !!bundleById(l.id);
-      if (l.type === "gift") return GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0;
-      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === l.id) return true;
-      return false;
-    });
+    if (saved.cart) {
+      // Belt-and-braces on top of the allBundles() guard above: a throw
+      // anywhere in this per-line filter must never cost the shopper the
+      // *whole* saved cart. Its own try/catch, separate from the outer one,
+      // so a bad line falls back to keeping everything that was saved
+      // instead of silently emptying S.cart — and so saved.lang below still
+      // gets read even if this ever throws again.
+      try {
+        S.cart = saved.cart.filter(function (l) {
+          // sets and gift cards are not catalogue products: a set survives only
+          // while it is still curated, a gift card while the amount is still sold
+          if (l.type === "bundle") return !!bundleById(l.id);
+          if (l.type === "gift") return GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0;
+          for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === l.id) return true;
+          return false;
+        });
+      } catch (e) { S.cart = saved.cart; }
+    }
     if (saved.lang) { S.lang = saved.lang; savedHadLang = true; }
     else S.lang = guessLang();
   } catch (e) {}
@@ -2925,7 +2936,11 @@
      The file is optional: if bundles.js fails to load the shop simply has no
      sets, rather than a blank page. */
   function allBundles() {
-    if (DEMO.bundles === false) return [];   // owner switched sets off (admin → Магазин)
+    // DEMO (var DEMO = {...}, ~4700 lines below) is only a name at this point
+    // during the cart-restore try{} near the top of the file — `var` hoists
+    // the binding but not the assignment. Guard rather than read .bundles off
+    // undefined: no demo override could possibly be in effect yet anyway.
+    if (DEMO && DEMO.bundles === false) return [];   // owner switched sets off (admin → Магазин)
     return typeof BUNDLES === "undefined" ? [] : BUNDLES;
   }
   function bundleById(id) {
@@ -3903,7 +3918,7 @@
             var body = (db.length ? dbReviewsHTML(db) : emptyReviewsHTML()) + reviewFormHTML(p);
             // «Отзывы (0)» on every young product reads as a verdict; with
             // nothing to show yet the heading is just the invitation
-            return acc(db.length ? "Отзывы (" + db.length + ")" : "Отзывы", body);
+            return acc(db.length ? "Отзывы (" + db.length + ")" : "Отзывы", body, S.revAccOpen, "reviews");
           })() +
         "</div>" +
       "</div>" +
@@ -3915,8 +3930,16 @@
       (p.stock === "out" ? "" :
         '<div class="stickybar"><span class="num stickybar__sum" data-stickysum>' + eur(sizePrice(p, S.size) * S.qty) + '</span><button class="btn" data-add="' + p.id + '">В корзину</button></div>');
   }
-  function acc(title, body) {
-    return '<details class="acc"><summary>' + title + "</summary><div class=\"acc__body\">" + body + "</div></details>";
+  /* `open`/`id` are optional — every call site but Reviews still gets a
+     details that starts closed with no id, exactly as before. Reviews passes
+     both: the review-form actions (data-revopen, sendReview()) go through a
+     full render(), which would otherwise silently drop <details open> and
+     collapse the section shut on the shopper mid-action — see the toggle
+     listener (S.revAccOpen) that keeps this in sync with the shopper's own
+     clicks on <summary>, same idiom as data-sum's S.sumOpen. */
+  function acc(title, body, open, id) {
+    return '<details class="acc"' + (id ? ' data-accid="' + id + '"' : "") + (open ? " open" : "") +
+      '><summary>' + title + "</summary><div class=\"acc__body\">" + body + "</div></details>";
   }
 
   /* Merch variants arrive as one flat "colour / size" list — ten buttons where
@@ -5074,8 +5097,13 @@
   };
   function shipRequired(key) {
     var m = shipMethod();
-    if (m === "pickup") return false;
-    if (key === "name" || key === "phone") return true;
+    // Contact block (name, phone) is not shipping-method-specific: the name
+    // is always required — POST /api/orders throws bad_name for any method,
+    // pickup included (src/lib/orders.ts) — so it must not be short-circuited
+    // by the pickup check below the way phone and the address fields are.
+    if (key === "name") return true;
+    if (m === "pickup") return false;   // phone offered there, just not demanded
+    if (key === "phone") return true;
     return m === "courier";
   }
   function phoneOk() { return S.ship.phone.replace(/\D/g, "").length >= 7; }
@@ -5490,11 +5518,16 @@
               '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>" +
               // every field is bound to S.ship — a render (promo, blur, resize)
               // used to wipe whatever the shopper had typed here
-              (shipMethod() === "pickup" ? "" :
-                shipField("name", "Имя и фамилия", "Имя Фамилия", "name", "") +
-                (isParcel() ? "" : shipField("addr", "Адрес", "улица, дом", "street-address", "") +
-                  '<div class="co__zip">' + shipField("zip", "Индекс", "12345", "postal-code", "numeric") +
-                  shipField("city", "Город", "Город", "address-level2", "") + "</div>")) +
+              // Contact block (name + phone, email lives in step 1) always
+              // renders and is always submitted, regardless of delivery
+              // method — POST /api/orders requires customer.name for every
+              // order, pickup included (bad_name, src/lib/orders.ts). Only
+              // the postal address is delivery-method-specific, so it alone
+              // stays gated — courier only, never pickup or a parcel machine.
+              shipField("name", "Имя и фамилия", "Имя Фамилия", "name", "") +
+              (shipMethod() === "courier" ? shipField("addr", "Адрес", "улица, дом", "street-address", "") +
+                '<div class="co__zip">' + shipField("zip", "Индекс", "12345", "postal-code", "numeric") +
+                shipField("city", "Город", "Город", "address-level2", "") + "</div>" : "") +
               shipField("phone", "Телефон", "+372…", "tel", "tel") +
               '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.' +
               (S.country === "FI" ? " Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика." : "") +
@@ -8874,7 +8907,7 @@
       var np = byId(d.goProduct);
       S.gallery = np.varImg && np.varImg.length ? np.varImg[0] : 0;
       // features: the video and the review form belong to the product we left
-      S.videoOn = false; S.revOpen = false; S.revState = "";
+      S.videoOn = false; S.revOpen = false; S.revState = ""; S.revAccOpen = false;
       go("product"); return;
     }
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
@@ -9405,6 +9438,11 @@
     if (d.addgift) { addGiftToCart(d.addgift); render(); return; }
     if (d.giftoff !== undefined) { S.giftCard = null; S.giftErr = ""; render(); return; }
     if (d.revopen !== undefined) {
+      // Reaching this button at all means the Reviews accordion is already
+      // open — keep it that way across the render() below. acc() otherwise
+      // always rebuilds <details> with no `open`, collapsing the whole
+      // section shut on the very click that was supposed to reveal the form.
+      S.revAccOpen = true;
       S.revOpen = !S.revOpen; S.revState = ""; render();
       if (S.revOpen) refocus('[data-revf="name"]');
       return;
@@ -9700,6 +9738,10 @@
   // the shopper's own open/closed choice for the summary wins from then on
   document.addEventListener("toggle", function (e) {
     if (e.target.matches && e.target.matches("[data-sum]")) S.sumOpen = e.target.open;
+    // Same idea for the Reviews accordion (acc() renders `open` from
+    // S.revAccOpen) — a native click on <summary> has to be captured here or
+    // it is forgotten the moment data-revopen/sendReview() next call render().
+    else if (e.target.matches && e.target.matches('[data-accid="reviews"]')) S.revAccOpen = e.target.open;
   }, true);
 
   document.addEventListener("blur", function (e) {
@@ -9803,7 +9845,7 @@
         S.productId = found.id;
         S.size = 0; S.qty = 1;
         S.gallery = found.varImg && found.varImg.length ? found.varImg[0] : 0;
-        S.videoOn = false; S.revOpen = false; S.revState = "";   // features
+        S.videoOn = false; S.revOpen = false; S.revState = ""; S.revAccOpen = false;   // features
         S.screen = "product";
         return true;
       }

@@ -56,48 +56,35 @@ for (const lang of LANGS) {
     });
 
     test("reviews block: empty state, then the form opens and validates", async ({ page }) => {
-      // KNOWN APP BEHAVIOR, not a test bug: acc() (app.js) always emits a
-      // fresh <details class="acc"> with no `open` attribute, and several
-      // review-form actions (at least [data-revopen], and apparently typing
-      // into the form fields too) go through the general render()
-      // full-rebuild rather than a targeted patch — so the accordion
-      // visibly collapses shut on those actions even though the content
-      // Playwright is about to interact with is already in the DOM.
-      // Confirmed by inspecting a failed run's accessibility snapshot
-      // ("Отзывы +", the closed-state summary, right where an open one was
-      // expected). Filed as a UX bug via spawn_task rather than silently
-      // worked around and forgotten; this test still needs to exercise the
-      // form, so every step below is wrapped in `settled()`, which retries
-      // "make sure it's open, then do the thing" as one unit for exactly as
-      // many collapses as it takes.
+      // acc() persists the Reviews accordion's open state in S.revAccOpen and
+      // renders `open` from it (app.js) — a native click on <summary> is
+      // captured by a "toggle" listener, and data-revopen/sendReview() set it
+      // explicitly before their own render(), so the section no longer
+      // collapses shut from under the shopper on any of the actions below.
       const acc = page.locator("details.acc", { hasText: /Отзыв|Arvustus|Review/ }).first();
-      const settled = (step: () => Promise<void>) =>
-        expect(async () => {
-          if (!(await acc.getAttribute("open"))) await acc.locator("summary").click();
-          await step();
-        }).toPass({ timeout: 10_000 });
+      await acc.locator("summary").click();
+      await expect(acc).toHaveAttribute("open", "");
 
       // A product nobody has reviewed yet in this fresh database.
-      await settled(() => expect(acc.getByText(tr("Отзывов пока нет — станьте первым.", lang.code))).toBeVisible({ timeout: 1_000 }));
+      await expect(acc.getByText(tr("Отзывов пока нет — станьте первым.", lang.code))).toBeVisible();
 
-      await settled(() => acc.locator("[data-revopen]").click({ timeout: 1_000 }));
+      await acc.locator("[data-revopen]").click();
       const submit = acc.locator("[data-revsend]");
-      await settled(() => expect(submit).toBeDisabled({ timeout: 1_000 }));
+      await expect(submit).toBeDisabled();
 
-      await settled(() => acc.locator('[data-revf="name"]').fill("E2E Reviewer", { timeout: 1_000 }));
-      await settled(() => acc.locator('[role="radio"][data-revstar="5"]').click({ timeout: 1_000 }));
-      await settled(() =>
-        acc.locator('[data-revf="text"]').fill("Отличный товар, пользуюсь уже месяц и всё устраивает полностью.", { timeout: 1_000 }),
-      );
-      await settled(() => acc.locator('[data-revf="consent"]').check({ timeout: 1_000 }));
-      await settled(() => expect(submit).toBeEnabled({ timeout: 1_000 }));
+      await acc.locator('[data-revf="name"]').fill("E2E Reviewer");
+      await acc.locator('[role="radio"][data-revstar="5"]').click();
+      await acc.locator('[data-revf="text"]').fill("Отличный товар, пользуюсь уже месяц и всё устраивает полностью.");
+      await acc.locator('[data-revf="consent"]').check();
+      await expect(submit).toBeEnabled();
 
-      await settled(() => submit.click({ timeout: 1_000 }));
-      await settled(() =>
-        expect(acc.getByText(tr("Спасибо! Отзыв отправлен — он появится на странице после проверки.", lang.code))).toBeVisible({
-          timeout: 1_000,
-        }),
-      );
+      await submit.click();
+      await expect(
+        acc.getByText(tr("Спасибо! Отзыв отправлен — он появится на странице после проверки.", lang.code)),
+      ).toBeVisible();
+      // Not just the content — the accordion itself is still open, which is
+      // the actual bug this test used to have to route around.
+      await expect(acc).toHaveAttribute("open", "");
     });
   });
 }

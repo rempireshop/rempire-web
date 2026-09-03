@@ -1401,7 +1401,7 @@ body:has(.drawer) #rempire-feedback { display: none; }
 /* #4 — brand strip under the hero, one scrollable line, D-urban register:
    quiet grey wordmarks that ink up under the cursor. */
 .brandstrip { border-bottom: 1px solid var(--rule); background: var(--page); }
-/* the urban prototype's line, copied: Oswald 600 · 19px · .08em · ink at 35%,
+/* the urban prototype's line, copied: Oswald 600 · 19px · .08em · quiet grey,
    28px gaps, native scrollbar left visible so a desktop knows the row moves */
 .brandstrip__row {
   display: flex; align-items: center; gap: 28px;
@@ -1416,7 +1416,11 @@ body:has(.drawer) #rempire-feedback { display: none; }
 .brandstrip__it {
   border: none; background: none; padding: 2px 0; cursor: pointer; flex: 0 0 auto;
   font-family: Oswald, sans-serif; font-weight: 600; font-size: 19px; letter-spacing: .08em;
-  text-transform: uppercase; color: rgba(28, 26, 0, .35); white-space: nowrap;
+  /* was rgba(28, 26, 0, .35) — flattened to #b0afa6 on the strip's white
+     background, a 2.2:1 contrast ratio that failed WCAG AA (needs 4.5:1).
+     The design system's own muted-text token reads as the same quiet grey
+     and is already proven to pass elsewhere on this page (~5.4:1 on white). */
+  text-transform: uppercase; color: var(--muted); white-space: nowrap;
   transition: color .18s var(--ease);
 }
 .brandstrip__it:hover { color: var(--ink); }
