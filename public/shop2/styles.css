@@ -921,18 +921,7 @@ body:has(.stickybar) .ftr {
 }
 .adm__tr--link:hover { background: var(--shell); }
 .adm__ohead { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; flex-wrap: wrap; }
-.adm__ph--big { width: 64px; height: 64px; flex: 0 0 64px; position: relative; }
-.adm__ocols { display: grid; gap: 0 36px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 900px) { .adm__ocols { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
 .adm__acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.adm__vrow { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
-.adm__vsz { font-family: var(--mono, monospace); font-size: 13px; min-width: 64px; }
-.adm__vthumb {
-  width: 46px; height: 46px; border: 2px solid var(--rule); background-color: #fff;
-  background-size: contain; background-position: center; background-repeat: no-repeat;
-  cursor: pointer; padding: 0;
-}
-.adm__vthumb[aria-current="true"] { border-color: var(--ink); }
 .adm__confirm {
   margin-top: 12px; padding: 12px; border: 1px solid var(--ink); background: var(--paper, #fff);
   font-size: 13px; line-height: 1.45;
@@ -1854,31 +1843,6 @@ button, a, summary, label { touch-action: manipulation; }
   .admhero__prev .hero__art { height: 34vw; max-height: 160px; min-height: 110px; }
 }
 
-/* ---------- media: the «Фото» block in the goods editor ----------
-   Product photos are cut-outs on nothing, so every tile is painted white
-   behind the picture — a transparent PNG on the panel's own paper would look
-   like a photo with a hole in it. */
-.admphoto__intro { font-size: 12.5px; margin: 2px 0 10px; }
-.admphoto__grid {
-  display: grid; gap: 10px; margin-bottom: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
-}
-.admphoto__item {
-  position: relative; border: 1px solid var(--rule); background: #fff; padding: 8px;
-  display: flex; flex-direction: column; gap: 6px;
-}
-.admphoto__item.is-main { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
-.admphoto__ph {
-  display: block; height: 96px; background-color: #fff;
-  background-size: contain; background-position: center; background-repeat: no-repeat;
-}
-.admphoto__badge {
-  position: absolute; top: 0; left: 0; background: var(--ink); color: var(--page);
-  font-family: Oswald, sans-serif; font-size: 9.5px; letter-spacing: .12em;
-  text-transform: uppercase; padding: 3px 6px;
-}
-.admphoto__ops { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; }
-.admphoto__ops .iconbtn { min-width: 28px; }
 
 /* The drop zone is also the button row, so the same markup serves a mouse
    (drag a file onto it), a desktop click and a phone camera. */
@@ -1897,10 +1861,6 @@ button, a, summary, label { touch-action: manipulation; }
 .admphoto__err, .admphoto__off { font-size: 12.5px; line-height: 1.45; margin: 8px 0 0; }
 .admphoto__err { color: var(--error); }
 .admphoto__off { color: var(--muted); }
-@media (max-width: 767px) {
-  .admphoto__grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
-  .admphoto__ph { height: 76px; }
-}
 
 /* ---------- checkout-gaps: delivery prices and promo codes ----------------
    Two admin tables that carry inputs rather than text: «Настройки → Доставка»
@@ -2037,90 +1997,3 @@ button, a, summary, label { touch-action: manipulation; }
 .admblog__acts { flex-wrap: wrap; }
 .admblog__delconfirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--error); }
 
-/* ---------- inventory: the barcode scanner ------------------------------
-   A full-screen overlay mounted OUTSIDE #bodyslot (see scanMount() in
-   app.js) so its <video> survives every render(). --z-scan (95) is above the
-   intro (90) and everything below it — nothing should be able to sit on top
-   of a phone camera view. */
-.scanoverlay {
-  position: fixed; inset: 0; z-index: var(--z-scan);
-  display: flex; flex-direction: column;
-  background: #000; color: #fff;
-}
-/* …with exactly one exception, and it is the reason the scanner is worth
-   using: «Приход +3 ✓» is the receipt for the tap that just wrote to the
-   warehouse. Under the overlay it was invisible — the owner pressed a button
-   and nothing appeared to happen. The body class is set by the same render
-   hook that mounts the overlay (renderImpl()). */
-body.is-scanning .toast { z-index: calc(var(--z-scan) + 1); }
-.scan__box { position: relative; flex: 1 1 auto; min-height: 0; background: #000; }
-.scan__video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
-.scan__target {
-  position: absolute; left: 12%; right: 12%; top: 32%; bottom: 32%;
-  border: 2px solid rgba(255, 255, 255, .85); border-radius: 12px;
-  box-shadow: 0 0 0 999px rgba(0, 0, 0, .28);
-  pointer-events: none;
-}
-.scan__close, .scan__torch {
-  position: absolute; top: 14px; width: 48px; height: 48px; border-radius: 50%;
-  background: rgba(0, 0, 0, .55); color: #fff; border: none; font-size: 18px;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-}
-.scan__close { right: 14px; }
-.scan__torch { left: 14px; }
-.scan__torch[aria-pressed="true"] { background: rgba(255, 255, 255, .85); color: #000; }
-.scan__panel {
-  flex: 0 0 auto; max-height: 52vh; overflow-y: auto;
-  background: var(--page); color: var(--ink);
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
-}
-.scan__err { color: var(--error); font-size: 13px; margin: 0 0 10px; }
-.scan__card { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.scan__card .adm__ph--big { width: 56px; height: 56px; flex: none; }
-.scan__actions { display: flex; gap: 10px; margin-bottom: 10px; }
-.scan__btn { flex: 1 1 0; min-height: 48px; font-size: 14px; }
-/* The manual field is a sibling of #scanpanel, not part of it, so on the
-   overlay's own black ground its input text and its «Найти» button were black
-   on black — invisible exactly when they matter most, since this row IS the
-   interface whenever the camera is unavailable. It wears the panel's ground
-   instead and reads as the top of it. */
-.scan__manual {
-  display: flex; gap: 8px; margin: 0; flex: 0 0 auto;
-  background: var(--page); color: var(--ink); padding: 12px 16px 0;
-}
-.scan__manual .input { flex: 1 1 auto; }
-
-/* ---------- scanner app: /shop2/scan/ ------------------------------------
-   The same overlay, standing on its own route as a third installable icon
-   (screenScan()/scanRouteSync() in app.js). It grows a bar of its own —
-   there is no admin screen underneath it to go back to with a ✕ — and the
-   panel is given more of the phone, since here it is the whole interface,
-   not a sheet over the warehouse table. */
-.scanoverlay--app { padding-top: env(safe-area-inset-top, 0px); }
-.scan__top {
-  flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
-  padding: 8px 12px; background: #000; color: #fff;
-}
-.scan__brand { font-size: 13px; font-weight: 600; letter-spacing: .02em; margin-right: auto; }
-.scan__topbtn {
-  width: 40px; height: 40px; border-radius: 50%; flex: none;
-  background: rgba(255, 255, 255, .12); color: #fff; border: none; font-size: 16px;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-}
-.scan__topbtn[aria-pressed="true"] { background: rgba(255, 255, 255, .85); color: #000; }
-.scan__toplink { color: #fff; font-size: 13px; white-space: nowrap; }
-.scanoverlay--app .scan__panel { max-height: 64vh; }
-/* No camera (denied, absent, or a desktop): the viewfinder is dead space and
-   the manual field is the interface — see scanRenderPanel(). The «Склад»
-   overlay keeps a strip of it because its ✕ and torch live inside the box;
-   the app has those in its top bar, so there the box goes entirely. */
-.scanoverlay.is-nocam .scan__box { flex: 0 0 84px; }
-.scanoverlay.is-nocam .scan__target { display: none; }
-.scanoverlay--app.is-nocam .scan__box { display: none; }
-.scanoverlay.is-nocam .scan__panel { flex: 1 1 auto; max-height: none; }
-
-/* One line, one number, two thumbs: the quantity for the confirm below. */
-.scan__step { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.scan__stepbtn { width: 48px; min-height: 48px; flex: none; font-size: 20px; line-height: 1; padding: 0; }
-.scan__qty { width: 84px; text-align: center; font-size: 17px; }
-.scan__ready { margin: 0 0 4px; font-size: 12.5px; color: var(--muted); }
