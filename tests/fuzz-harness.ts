@@ -297,6 +297,9 @@ const FUZZ_ENV: Record<string, string> = {
   R2_SECRET_ACCESS_KEY: "fuzz-secret",
   R2_BUCKET: "fuzz-bucket",
   R2_PUBLIC_BASE: "https://media.example.test",
+  // product creation: «Убрать фон» on, so POST /api/admin/upload/cutout runs
+  // its whole path against the stub instead of answering 503 to everything
+  PHOTO_CUTOUT: "openai",
 };
 const FUZZ_ENV_OFF = [
   "E2E_BOOTSTRAP",
@@ -328,6 +331,11 @@ export function setFuzzEnv(): () => void {
 }
 
 const OPENAI_REPLY = JSON.stringify({ reply: "ok", product_ids: [], tab: "", description: "d", title: "t" });
+/** A 1×1 PNG — what the media host and the image edit endpoint hand back. */
+const TINY_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64",
+);
 
 /** Hosts the stub was asked for and had no answer to — asserted empty by the suite. */
 export const unexpectedFetches = new Set<string>();
@@ -339,9 +347,13 @@ export function installFetchStub(): void {
     const json = (body: unknown, status = 200) =>
       new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
+    // product creation: the image edit endpoint answers a picture, the chat
+    // one an answer; the public media host serves the «original» photo
+    if (url.includes("api.openai.com/v1/images/")) return json({ data: [{ b64_json: TINY_PNG.toString("base64") }] });
     if (url.includes("api.openai.com")) {
       return json({ model: "gpt-4.1-mini", choices: [{ message: { content: OPENAI_REPLY } }], usage: {} });
     }
+    if (url.startsWith(FUZZ_ENV.R2_PUBLIC_BASE + "/")) return new Response(new Uint8Array(TINY_PNG), { status: 200 });
     if (url.includes("api.resend.com")) return json({ id: "re_fuzz_1" });
     if (url.includes("api.telegram.org")) return json({ ok: true });
     if (url.includes("r2.cloudflarestorage.com")) return new Response("", { status: 200 });

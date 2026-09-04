@@ -17,6 +17,7 @@ import { getDescriptionOverrides } from "@/lib/product-descriptions";
 import { getSeoOverrides } from "@/lib/product-seo";
 import { cleanPricing, publicPricing } from "@/lib/loyalty";
 import { cleanGiftAmounts } from "@/lib/giftcards";
+import { listCustomProducts, toCatalogueProduct, type CatalogueProduct } from "@/lib/custom-products";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -74,13 +75,29 @@ function publicOverrides<T extends Record<string, unknown>>(all: Record<string, 
   return out;
 }
 
+/**
+ * The owner's own products (db/migrations/131_custom_products.sql), active
+ * ones only, in the catalogue's product shape — the storefront merges them
+ * into CATALOGUE at boot. Best effort on purpose: a deployment whose
+ * migration has not run yet must still serve prices and settings.
+ */
+async function customForFeed(): Promise<CatalogueProduct[]> {
+  try {
+    return (await listCustomProducts({ activeOnly: true })).map(toCatalogueProduct);
+  } catch (err) {
+    console.error("[api/overrides] custom products unavailable:", err);
+    return [];
+  }
+}
+
 export async function GET() {
   try {
-    const [overrides, descriptions, seos, stored] = await Promise.all([
+    const [overrides, descriptions, seos, stored, custom] = await Promise.all([
       getOverrides(),
       getDescriptionOverrides(),
       getSeoOverrides(),
       getSettings(),
+      customForFeed(),
     ]);
     /* assistant-work: product_overrides.description {RU,ET,EN} — its own
        column (src/lib/product-descriptions.ts), merged in here rather than
@@ -120,7 +137,7 @@ export async function GET() {
        here rather than trusted through the generic spread. */
     const giftAmounts = cleanGiftAmounts(stored.gift_amounts);
     return Response.json(
-      { ok: true, overrides: publicOverrides(overrides), settings: { ...DEFAULT_SETTINGS, ...published, content, pricing, gift_amounts: giftAmounts } },
+      { ok: true, overrides: publicOverrides(overrides), custom, settings: { ...DEFAULT_SETTINGS, ...published, content, pricing, gift_amounts: giftAmounts } },
       { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
     );
   } catch (err) {

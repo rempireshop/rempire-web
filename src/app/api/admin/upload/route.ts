@@ -34,6 +34,7 @@ import {
   type MediaKind,
 } from "@/lib/storage";
 import { MAX_VIDEO_BYTES, sniffVideo, VIDEO_EXT } from "@/lib/video";
+import { cutoutEnabled } from "@/lib/photo-cutout";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -176,12 +177,13 @@ export async function DELETE(req: Request) {
   }
 }
 
-/** Whether the admin can offer an upload button at all. */
+/** Whether the admin can offer an upload button at all — and, beside it, the
+ *  optional «Убрать фон» (src/lib/photo-cutout.ts, PHOTO_CUTOUT="openai"). */
 export async function GET(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
   return Response.json(
-    { ok: true, configured: storageConfigured(), maxBytes: MAX_UPLOAD_BYTES, maxVideoBytes: MAX_VIDEO_BYTES },
+    { ok: true, configured: storageConfigured(), cutout: cutoutEnabled(), maxBytes: MAX_UPLOAD_BYTES, maxVideoBytes: MAX_VIDEO_BYTES },
     { headers: { "cache-control": "no-store" } },
   );
 }
