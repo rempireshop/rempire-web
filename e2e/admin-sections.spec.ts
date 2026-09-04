@@ -29,11 +29,16 @@ import { freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen } 
  */
 async function section(page: Page, key: string, sub?: string): Promise<void> {
   const direct = page.locator(`[data-admtab="${key}"][aria-current]:visible`);
-  if ((await direct.count()) === 0) {
-    await page.locator("[data-admmore]:visible").first().click();
-    await page.locator(`.adm-sheet [data-admtab="${key}"]`).first().click();
-  } else {
+  const more = page.locator("[data-admmore]:visible");
+  /* Wait for whichever navigation this viewport draws before counting: after a
+     reload the shell is a frame or two behind, and an immediate count of zero
+     would send a desktop run looking for the phone's «Ещё» button. */
+  await expect(direct.or(more).first()).toBeVisible();
+  if (await direct.count()) {
     await direct.first().click();
+  } else {
+    await more.first().click();
+    await page.locator(`.adm-sheet [data-admtab="${key}"]`).first().click();
   }
   if (sub) await page.locator(`[data-admtab="${sub}"][aria-current]:visible`).first().click();
 }

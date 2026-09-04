@@ -915,11 +915,6 @@ body:has(.stickybar) .ftr {
 .rev__t { margin: 5px 0 0; font-size: 13.5px; line-height: 1.5; }
 
 /* ---------- admin drill-downs ---------- */
-.adm__tr--link {
-  border: none; background: none; font: inherit; text-align: left;
-  cursor: pointer; width: 100%; color: inherit;
-}
-.adm__tr--link:hover { background: var(--shell); }
 .adm__ohead { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; flex-wrap: wrap; }
 .adm__ph--big { width: 64px; height: 64px; flex: 0 0 64px; position: relative; }
 .adm__ocols { display: grid; gap: 0 36px; grid-template-columns: minmax(0, 1fr); }
@@ -933,15 +928,6 @@ body:has(.stickybar) .ftr {
   cursor: pointer; padding: 0;
 }
 .adm__vthumb[aria-current="true"] { border-color: var(--ink); }
-.adm__confirm {
-  margin-top: 12px; padding: 12px; border: 1px solid var(--ink); background: var(--paper, #fff);
-  font-size: 13px; line-height: 1.45;
-}
-.adm__confirm > b {
-  display: block; font-family: Oswald, sans-serif; font-size: 10.5px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
-}
-
 /* ---------- shop assistant chat (demo) ---------- */
 .sbot__fab {
   position: fixed; right: 16px; bottom: calc(72px + env(safe-area-inset-bottom, 0px));
@@ -1101,12 +1087,14 @@ body.is-locked .sbot { display: none; }
    button inside the summary read as two different actions. */
 @media (max-width: 767px) { .co__pay { display: none; } }
 
-/* ---------- admin: the sections phases 2 and 3 still have to redesign ----
-   The panel's own shell — sidebar, bottom bar, assistant, and every screen
-   phase 1 redesigned — lives in public/shop2/admin.css under `.adm2` /
-   `adm-*`. What is left here styles the legacy markup those older sections
-   still render inside `.adm-legacy`: the list rows, the tables, the KPI cells
-   and the confirm strip. Each block goes when its screen is redesigned. */
+/* ---------- admin: the markup phase 2 still has to redesign ---------------
+   The panel's own design system — shell, screens, rows, cards — lives in
+   public/shop2/admin.css under `.adm2` / `adm-*`. What is left here styles
+   what is not redrawn yet: «Салон» inside `.adm-legacy`, and the handful of
+   cards a settings sub-page still embeds inside `.adm-embed` (the banner
+   editor, the content document, the loyalty form, the accountant's report).
+   Each block goes when its screen is redesigned — phase 3 took the tables,
+   the reviews queue, the promo form and the blog editor with it. */
 
 .adm__chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
 
@@ -1124,16 +1112,6 @@ body.is-locked .sbot { display: none; }
 .kpi__v { font-family: Oswald, sans-serif; font-size: 26px; line-height: 1.1; }
 .kpi__s { font-size: 12px; color: var(--muted); }
 
-.adm__table { border: 1px solid var(--rule); margin-top: 6px; overflow-x: auto; }
-.adm__th, .adm__tr {
-  display: grid; gap: 12px; align-items: center; padding: 11px 14px;
-  grid-template-columns: 92px 1.1fr 1.4fr 84px 104px; min-width: 620px;
-}
-.adm__th--ppl, .adm__tr--ppl { grid-template-columns: 1.3fr 78px 96px 104px 92px; min-width: 520px; }
-.adm__th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--ink); }
-.adm__tr { border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; }
-.adm__tr:last-child { border-bottom: none; }
-.adm__tr:hover { background: var(--hover); }
 .adm__sub { display: block; font-size: 11.5px; color: var(--muted); }
 .adm__ship { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -1145,7 +1123,6 @@ body.is-locked .sbot { display: none; }
 .adm__row:last-child { border-bottom: none; }
 .adm__ph { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
 .adm__nm { flex: 1 1 200px; min-width: 0; }
-.adm__pr { font-weight: 600; }
 
 .ftr__admin { font-size: 11.5px; color: var(--muted); }
 
@@ -1792,15 +1769,6 @@ button, a, summary, label { touch-action: manipulation; }
   body[data-screen="bundle"] .sbot__panel { bottom: calc(200px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* ---------- админка: очередь отзывов ---------- */
-.adm__row--rev { align-items: flex-start; }
-.adm__revtext {
-  display: block; margin-top: 6px; font-size: 13px; line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-.adm__revacts { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
-.adm__row--rev .rev__stars { color: var(--ink); font-size: 12px; margin-left: 6px; }
-
 /* ---------- админка: «Главный баннер» ----------
    The banner editor is the one place in the panel where the owner writes
    copy, so it is a form first: full-width fields on a phone, 44px targets on
@@ -1902,31 +1870,9 @@ button, a, summary, label { touch-action: manipulation; }
   .admphoto__ph { height: 76px; }
 }
 
-/* ---------- checkout-gaps: delivery prices and promo codes ----------------
-   Two admin tables that carry inputs rather than text: «Настройки → Доставка»
-   (the tariffs the checkout actually bills) and the «Промокоды» tab. Both
-   reuse .adm__table's grid and only redefine the column track, so they inherit
-   the borders, hover and horizontal scroll every other admin table has. */
-.adm__th--ship, .adm__tr--ship { grid-template-columns: 1.2fr 96px 96px 96px 112px; min-width: 560px; }
-.adm__th--promo, .adm__tr--promo { grid-template-columns: 1.2fr 110px 1.2fr 92px 96px 148px; min-width: 700px; }
-.adm__tr--ship { align-items: center; }
-/* A price cell: short, right-aligned, and never wider than its column. */
-.adm__shipin { max-width: 100%; padding: 6px 8px; font-size: 13.5px; text-align: right; }
-.adm__row--ship { gap: 10px; }
-.adm__row--ship .adm__nm { flex: 0 0 108px; }
-.adm__shipcell { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
-.adm__shipcell .adm__shipin { width: 78px; }
-.acc--ship { margin-top: 12px; }
-.adm__promoform { display: block; }
-.adm__promoform .field { margin-top: 10px; }
-.adm__promoform .optlist { margin-top: 6px; }
 /* «Отзывов пока нет» sits where the review list would be, so it needs the
    same air above the form as a list of reviews would have had. */
 .revs__none { margin: 0 0 14px; font-size: 13.5px; }
-@media (max-width: 767px) {
-  .adm__row--ship { flex-direction: column; align-items: flex-start; }
-  .adm__row--ship .adm__nm { flex: none; }
-}
 
 /* ---------- blog: the listing and one article ----------------------------
    Cards are text-heavy (a title and an excerpt, not just a price), so the
@@ -1991,51 +1937,17 @@ button, a, summary, label { touch-action: manipulation; }
 }
 
 /* ---------- админка: «Блог» ------------------------------------------------
-   Posts save for real (no demo/undo layer), so the note at the top of the
-   editor says that in plain words rather than leaving Renat to guess why
-   there is no «Отменить» in the journal for a post. */
-.admblog__note { margin: 16px 0; }
-/* The visual editor. The box carries .acc__rich as well, so a heading, a
-   list and a picture look inside it exactly as they will on the article
-   page — that is why there is no separate preview under it any more. */
-.admblog__tb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
-.admblog__tb .btn { min-height: 38px; padding: 0 11px; }
+   The editor itself is `adm-` markup since the phase-3 redesign
+   (public/shop2/admin.css: .adm-title-in, .adm-drop, .adm-tools, .adm-canvas).
+   What is left here is the one piece that is neither: the sheet the «Ссылка»,
+   «Картинка» and «Товар» buttons open, which is drawn by blogToolSheet() out
+   of the same `.input`/`.btn` controls the rest of the shop uses. */
 .admblog__tool:empty { display: none; }
 .admblog__tool {
   border: 1px solid var(--rule); padding: 10px 12px; margin-bottom: 8px; background: var(--hover);
 }
 .admblog__toolrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .admblog__toolrow .input { flex: 1 1 200px; min-width: 0; }
-.admblog__rte {
-  border: 1px solid rgba(28, 26, 0, .35); padding: 12px 14px; min-height: 260px;
-  max-height: 60vh; overflow-y: auto; background: var(--page);
-  font-family: inherit; font-size: 14px; line-height: 1.6; white-space: normal;
-}
-.admblog__rte:focus { border: 1px solid var(--ink); box-shadow: inset 0 0 0 1px var(--ink); outline: none; }
-.admblog__rte:empty::before { content: attr(placeholder); color: var(--muted); }
-.admblog__rte img { display: block; max-width: 100%; height: auto; margin: 12px 0; }
-.admblog__rte figure { margin: 12px 0; }
-.admblog__rte a { text-decoration: underline; }
-.admblog__rte a[data-product] { text-decoration: none; border-bottom: 2px solid var(--rule); font-weight: 500; }
-/* 375 px: the seven buttons wrap into three short rows instead of scrolling
-   sideways — a toolbar you have to scroll to find «Отменить» in is not one. */
-@media (max-width: 480px) {
-  .admblog__tb { gap: 5px; }
-  .admblog__tb .btn { min-height: 36px; padding: 0 8px; font-size: 11px; }
-  .admblog__rte { min-height: 220px; padding: 10px 12px; }
-}
-.admblog__cover { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.admblog__coverimg {
-  display: block; width: 96px; height: 50px; background: var(--page) center / cover no-repeat;
-  border: 1px solid var(--rule); flex: none;
-}
-.admblog__products { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-.admblog__products .chip { display: inline-flex; align-items: center; gap: 6px; text-transform: none; letter-spacing: normal; }
-.admblog__products .chip button {
-  border: none; background: none; padding: 0; margin: 0; cursor: pointer; color: inherit; font-size: 12px; line-height: 1;
-}
-.admblog__acts { flex-wrap: wrap; }
-.admblog__delconfirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--error); }
 
 /* ---------- inventory: the barcode scanner ------------------------------
    A full-screen overlay mounted OUTSIDE #bodyslot (see scanMount() in

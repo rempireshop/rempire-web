@@ -9513,7 +9513,11 @@
       /* `placeholder` on a div is not a real one — the CSS prints it with
          content: attr(placeholder). Written that way so translateTree()
          rewrites it like any other placeholder in this panel. */
-      '<div class="adm-canvas acc__rich" contenteditable="true" data-blogbody role="textbox" aria-multiline="true" ' +
+      /* Not `.acc__rich`: the shop's rich-text rules set headings in uppercase
+         letter-spaced Oswald, which is the one thing the redesign bans
+         everywhere (README). `.adm-canvas` carries the same shapes in the
+         panel's own type instead. */
+      '<div class="adm-canvas" contenteditable="true" data-blogbody role="textbox" aria-multiline="true" ' +
         'aria-label="Текст статьи" placeholder="Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.">' +
         (d.body[L] || "") + "</div>" +
       '<label class="adm-field">Анонс — две строки в списке и в поиске' +
@@ -9861,9 +9865,11 @@
         "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
       SHIP_ROWS.map(function (r) {
         return '<div class="adm-tariffs" style="margin-top:8px"><span>' + r[1] + "</span>" +
-          admShipCellHTML("m:parcel:" + r[0], shipCell("parcel", r[0]), "Пакомат — " + r[1]) +
-          admShipCellHTML("m:courier:" + r[0], shipCell("courier", r[0]), "Курьер — " + r[1]) +
-          admShipCellHTML("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1]) + "</div>";
+          '<span>' + admShipCellHTML("m:parcel:" + r[0], shipCell("parcel", r[0]), "Пакомат — " + r[1]) +
+            montonioHint("parcel", r[0]) + "</span>" +
+          '<span>' + admShipCellHTML("m:courier:" + r[0], shipCell("courier", r[0]), "Курьер — " + r[1]) +
+            montonioHint("courier", r[0]) + "</span>" +
+          '<span>' + admShipCellHTML("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1]) + "</span></div>";
       }).join("") +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       '<div class="adm-acts" style="margin-top:16px">' +
@@ -9880,7 +9886,8 @@
             return '<div style="margin-top:12px"><div class="adm-sec__t">' + c[1] + "</div>" +
               c[2].map(function (cc) {
                 return '<label class="adm-field" style="margin-top:6px">' + cc +
-                  admShipCellHTML("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) + "</label>";
+                  admShipCellHTML("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) +
+                  montonioCarrierHint(c[0], cc) + "</label>";
               }).join("") + "</div>";
           }).join("") +
           '<label class="adm-field" style="margin-top:12px"><span>Наценка, %</span>' +
@@ -9999,10 +10006,6 @@
     alerts: "Ждут письма:",
     birthdays: "Дней рождения за неделю:"
   };
-  function flowCountHTML(key) {
-    if (!FLOW_COUNTS || FLOW_COUNTS[key] === undefined) return "";
-    return '<span class="adm__sub">' + FLOW_COUNT_LABEL[key] + ' <span class="num">' + Number(FLOW_COUNTS[key]) + "</span></span>";
-  }
   function mailTpl() {
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === S.mailTpl) return S.mailTpl;
     return ADM_MAIL_ROWS[0][0];
@@ -10683,7 +10686,6 @@
     ["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"],
     ["EU", "Другие страны Европы"], ["default", "Остальные страны"]
   ];
-  var SHIP_METHOD_ROWS = [["parcel", "Пакомат"], ["courier", "Курьер"], ["pickup", "Самовывоз"]];
   var SHIP_CARRIER_ROWS = [
     ["omniva", "Omniva", ["EE", "LV", "LT"]],
     ["smartpost", "SmartPosti", ["EE", "FI"]],
@@ -10915,66 +10917,6 @@
       d.markup[parts[1]] = (mv === undefined || mv === null) ? 0 : mv;   // "" or "нет" — back to 0, not deleted
     }
   }
-  function shipInput(key, value, label) {
-    return '<input class="input input--box adm__shipin" data-shiprule="' + key + '" value="' +
-      esc(value) + '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">';
-  }
-  function shipRulesCard() {
-    loadShipLiveRates();   // integration: live tariffs for the grey hints below, once per session
-    var d = shipDraft();
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка</h2></div>' +
-      '<p class="muted" style="margin:0 0 12px">Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.</p>' +
-      '<div class="adm__table adm__table--ship" role="table">' +
-        '<div class="adm__th adm__th--ship" role="row"><span>Страна</span>' +
-          SHIP_METHOD_ROWS.map(function (m) { return "<span>" + m[1] + "</span>"; }).join("") +
-          "<span>Бесплатно от</span></div>" +
-        SHIP_ROWS.map(function (r) {
-          return '<div class="adm__tr adm__tr--ship" role="row"><span>' + r[1] + "</span>" +
-            SHIP_METHOD_ROWS.map(function (m) {
-              // pickup is only offered in Estonia and is always free there
-              if (m[0] === "pickup" && r[0] !== "EE" && r[0] !== "default") return "<span></span>";
-              return "<span>" + shipInput("m:" + m[0] + ":" + r[0], shipCell(m[0], r[0]), m[1] + " — " + r[1]) +
-                montonioHint(m[0], r[0]) + "</span>";
-            }).join("") +
-            "<span>" + shipInput("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1]) + "</span></div>";
-        }).join("") +
-      "</div>" +
-      '<details class="acc acc--ship"><summary>Цены по перевозчикам — необязательно</summary><div class="acc__body">' +
-        '<p class="muted">Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.</p>' +
-        SHIP_CARRIER_ROWS.map(function (c) {
-          return '<div class="adm__row adm__row--ship"><span class="adm__nm">' + c[1] + "</span>" +
-            c[2].map(function (cc) {
-              return '<span class="adm__shipcell">' + cc + " " +
-                shipInput("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) +
-                montonioCarrierHint(c[0], cc) + "</span>";
-            }).join("") + "</div>";
-        }).join("") +
-      "</div></details>" +
-      '<div class="adm__shipfill">' +
-        '<p class="muted" style="margin:12px 0 6px">«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.</p>' +
-        '<label class="field" style="display:inline-block;margin:0 16px 10px 0"><span class="field__label">Наценка, %</span>' +
-          shipInput("markup:percent", shipMarkupCell("percent"), "Наценка на тарифы Montonio, проценты") + "</label>" +
-        '<label class="field" style="display:inline-block;margin:0 16px 10px 0"><span class="field__label">Наценка, €</span>' +
-          shipInput("markup:fixed", shipMarkupCell("fixed"), "Наценка на тарифы Montonio, евро") + "</label>" +
-        '<label class="opt opt--plain" style="display:block;margin:0 0 8px"><input type="checkbox" data-shipallowlower' +
-          (S.shipAllowLower ? " checked" : "") + '><span>Разрешить снижать текущие цены</span></label>' +
-        '<p class="muted" style="font-size:11.5px;margin:-4px 0 10px">По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.</p>' +
-        '<button class="btn btn--ghost btn--sm" data-admshipfill>Заполнить по тарифам Montonio</button>' +
-      "</div>" +
-      (S.shipErr ? '<div class="err" role="alert">' + esc(S.shipErr) + "</div>" : "") +
-      '<div class="adm__acts"><button class="btn btn--sm" data-admshipsave>Сохранить тарифы</button>' +
-        '<button class="btn btn--ghost btn--sm" data-admshipreset>Вернуть значения по умолчанию</button></div>' +
-      '<p class="muted" style="font-size:12.5px;margin-top:8px">Сейчас: пакомат Эстония ' +
-        eur(d.methods.parcel && d.methods.parcel.EE != null ? d.methods.parcel.EE : 0) + ' · курьер Эстония ' +
-        eur(d.methods.courier && d.methods.courier.EE != null ? d.methods.courier.EE : 0) + ' · бесплатно от ' +
-        shipFreeFromText(d.freeFrom) + '. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см. docs/shipping.md.</p>';
-  }
-  // integration: a plain helper, not an inline ternary in the "+" chain above
-  // — same reasoning as cameraErrName()/montonioSourceLabel(): keeps the
-  // footer to one hole for the i18n checker instead of splitting "— " off
-  // as a false-positive standalone fragment
-  function shipFreeFromText(freeFrom) { return freeFrom == null ? "— " : eur(freeFrom); }
-
   /* ---------- admin: promo codes (tab «Промокоды») -------------------------
      Codes live in the promo_codes table and are priced by the server; nothing
      here is a demo. The tab is the only place a code is made, so «REMPIRE10»

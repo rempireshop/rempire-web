@@ -610,9 +610,19 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   border: 1px solid var(--a-rule); padding: 16px; min-height: 280px;
   line-height: 24px; font-size: 16px; background: var(--a-paper);
 }
+/* The article as the reader will see it, in the panel's own type — the shop's
+   `.acc__rich` sets headings in uppercase letter-spaced Oswald, which is
+   exactly what the redesign banned. Same shapes, none of that. */
 .adm-canvas h2, .adm-canvas h3 { font-weight: 600; font-size: 20px; line-height: 26px; margin: 0 0 8px; font-family: inherit; }
 .adm-canvas p { margin: 0 0 12px; }
-.adm-canvas img { max-width: 100%; height: auto; display: block; }
+.adm-canvas ul, .adm-canvas ol { margin: 0 0 12px; padding-left: 20px; }
+.adm-canvas li { margin: 4px 0; }
+.adm-canvas img { max-width: 100%; height: auto; display: block; margin: 12px 0; }
+.adm-canvas figure { margin: 12px 0; }
+.adm-canvas a { text-decoration: underline; text-underline-offset: 3px; }
+/* the product marker the «Товар» button inserts — a card in the shop, a
+   quietly underlined name here, so the sentence around it stays readable */
+.adm-canvas a[data-product] { text-decoration: none; border-bottom: 2px solid var(--a-rule); font-weight: 500; }
 .adm-canvas:empty::before { content: attr(placeholder); color: var(--a-muted); }
 .adm-card--soft { border-color: var(--a-rule); }
 .adm-card--soft .adm-btn { width: 100%; }
