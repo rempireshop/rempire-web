@@ -2350,6 +2350,8 @@
     [/^Вопросы — (.+)$/, { ET: "Küsimused — $1", EN: "Questions — $1" }],
     // real orders: «Заказ R-100042», «Пакомат · Kristiine keskus»
     [/^Заказ (R-\d+)$/, { ET: "Tellimus $1", EN: "Order $1" }],
+    // the card's add-to-cart toast: «Добавлено: Un.Tangled Spray · 150 мл»
+    [/^Добавлено: (.+)$/, { ET: "Lisatud: $1", EN: "Added: $1" }],
     [/^Пакомат · (.+)$/, { ET: "Pakiautomaat · $1", EN: "Parcel locker · $1" }],
     [/^Курьер · (.+)$/, { ET: "Kuller · $1", EN: "Courier · $1" }],
     [/^Скидка · (.+)$/, { ET: "Soodustus · $1", EN: "Discount · $1" }],
@@ -3180,7 +3182,7 @@
        rebuild of the list and stays the same when the product shows up in two
        lists at once (both home rails, a rail and «с этим покупают»). Absent =
        the smallest size, which is what a card added before this existed. */
-    cardSize: {},
+    cardSize: {}, cardPop: null,
     qty: 1,
     gallery: 0,
     sort: "hit",
@@ -3791,23 +3793,53 @@
     var pro = proPrice(p, idx);
     return (!multi && p.priceFrom ? "от " : "") + eur(pro != null ? pro : (multi ? sizePrice(p, idx) : p.price));
   }
+  /* The size trigger: plain text with a chevron, no border, no background —
+     the size reads as part of the price line, not as a form control. The
+     listbox under it (cardPopHTML) is a sibling absolutely positioned under
+     the row, so it spans the card and never widens it. One popover per grid:
+     S.cardPop holds the open card's id. */
+  function cardSizeLabel(p) { return p.cat === "merch" ? "Размер" : "Объём"; }
   function cardSizeHTML(p) {
     var sizes = cardSizes(p);
     if (!sizes.length) return "";       // single size: no control at all
-    var cur = cardSizeIdx(p.id);
-    return '<span class="sel card__sel"><select data-cardsize="' + p.id + '" aria-label="' +
-      (p.cat === "merch" ? "Размер" : "Объём") + '">' +
+    var cur = cardSizeIdx(p.id), open = S.cardPop === p.id;
+    return '<button type="button" class="card__sizebtn" data-cardsizeopen="' + p.id + '" aria-haspopup="listbox"' +
+      ' aria-expanded="' + open + '" aria-label="' + cardSizeLabel(p) + '">' +
+      '<span class="card__sizelbl">' + esc(sizes[cur]) + "</span>" + '<svg class="card__chev" width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>' + "</button>";
+  }
+  function cardPopHTML(p) {
+    var sizes = cardSizes(p), cur = cardSizeIdx(p.id);
+    if (!sizes.length || S.cardPop !== p.id) return "";
+    return '<div class="card__pop" role="listbox" aria-label="' + cardSizeLabel(p) + '" data-cardpop="' + p.id + '">' +
       sizes.map(function (sz, i) {
-        return '<option value="' + i + '"' + (i === cur ? " selected" : "") + ">" + esc(sz) + "</option>";
-      }).join("") + "</select></span>";
+        var pro = proPrice(p, i);
+        return '<button type="button" class="card__opt" role="option" aria-selected="' + (i === cur) + '" data-cardsizepick="' + p.id + ":" + i + '">' +
+          "<span>" + esc(sz) + "</span><span class=\"card__optpr num\">" + eur(pro != null ? pro : sizePrice(p, i)) + "</span></button>";
+      }).join("") + "</div>";
+  }
+  /* The whole foot row as one string, so a size change or a popover toggle
+     can rebuild just this row in place (patchCardFoot) — the photo and the
+     title above it stay put, nothing flickers, focus is re-placed by hand. */
+  function cardFootInnerHTML(p) {
+    var i = cardSizeIdx(p.id);
+    return '<span class="card__price num" data-cardpr>' + cardPriceText(p, i) + "</span>" +
+      (p.stock === "out" ? "" : cardSizeHTML(p)) +
+      '<span class="card__sp"></span>' +
+      (p.stock === "out"
+        // out of stock keeps the row, so prices and links line up across the
+        // grid — the link leads to the product page, where the «сообщить о
+        // наличии» form lives
+        ? '<button type="button" class="card__add card__add--notify" data-go-product="' + p.id + '">Сообщить о наличии</button>'
+        : '<button type="button" class="card__add" data-add="' + p.id + '">В корзину</button>') +
+      cardPopHTML(p);
   }
 
   function cardHTML(p) {
     var i = cardSizeIdx(p.id);
     var pro = proPrice(p, i);
-    var proTag = pro != null ? ' <span class="chip chip--ok">Цена для салонов</span>' : "";
-    var stock = p.stock === "low" ? '<span class="chip chip--low">мало</span>'
-      : p.stock === "out" ? '<span class="chip chip--out">нет в наличии</span>' : "";
+    var flags = (pro != null ? '<span class="chip chip--ok card__flag">Цена для салонов</span>' : "") +
+      (p.stock === "low" ? '<span class="chip chip--low card__flag">мало</span>'
+        : p.stock === "out" ? '<span class="chip chip--out card__flag">нет в наличии</span>' : "");
     var g = gal(p);
     // card and add are siblings: a button inside a button is invalid markup
     // and left the add link unreachable from the keyboard.
@@ -3817,28 +3849,18 @@
           media(p, 0, "ph card__img") +
           (g.length > 1 ? media(p, 1, "ph card__img2") : "") +
           '<span class="card__wm"></span>' +
+          (flags ? '<span class="card__flags">' + flags + "</span>" : "") +
         "</span>" +
         '<span class="card__brand">' + esc(p.brand) + "</span>" +
         '<span class="card__name">' + esc(p.name) + "</span>" +
       "</button>" +
-      /* The foot is a sibling of the card button, not inside it: a <select>
+      /* The foot is a sibling of the card button, not inside it: a control
          inside a <button> is invalid markup and every tap on it would open
-         the product. Price and size picker share one row — the picker is a
-         compact pill on the right of the price, so it costs the card no
-         extra height (the full-width box it replaced ate a whole row on a
-         phone). The price is its own node so the picker can patch it in
-         place without touching the chips beside it. */
-      '<div class="card__foot">' +
-        '<span class="card__price num"><span data-cardpr>' + cardPriceText(p, i) + "</span>" + proTag + " " + stock + "</span>" +
-        // out of stock keeps neither control — there is nothing to choose or add
-        (p.stock === "out" ? "" : cardSizeHTML(p)) +
-      "</div>" +
-      // out of stock keeps the action row too, so prices and links sit at the
-      // same height across the grid — the link leads to the product page,
-      // where the «сообщить о наличии» form lives
-      (p.stock === "out"
-        ? '<button class="link card__add card__add--notify" data-go-product="' + p.id + '">Сообщить о наличии</button>'
-        : '<button class="link card__add" data-add="' + p.id + '">В корзину</button>') +
+         the product. One row — price · size · «В корзину» — pinned to the
+         card bottom by margin-top:auto, so rows line up across one- and
+         two-line titles. Stock and salon-price flags sit on the photo
+         instead of beside the price: the row must never wrap. */
+      '<div class="card__foot" data-cardfoot="' + p.id + '">' + cardFootInnerHTML(p) + "</div>" +
       "</div>";
   }
 
@@ -12706,16 +12728,42 @@
      once (both home rails, a rail and «с этим покупают») and both copies must
      agree with the one value in S.cardSize. eur() reads S.lang itself, so the
      patched text needs no translateTree() pass. */
-  function patchCardSize(id) {
-    var p = byId(id), i = cardSizeIdx(id);
-    var sels = document.querySelectorAll("[data-cardsize]");
-    for (var k = 0; k < sels.length; k++) {
-      if (sels[k].dataset.cardsize !== id) continue;
-      if (Number(sels[k].value) !== i) sels[k].value = String(i);
-      var card = sels[k].closest(".card");
-      var pr = card && card.querySelector("[data-cardpr]");
-      if (pr) pr.textContent = cardPriceText(p, i);
+  /* Rebuilds every foot row of one product in place (the same product can
+     sit in two rails on the home page) and translates the fresh Russian
+     markup. `focusSel` names what to focus afterwards: the trigger when a
+     popover closes, the selected option when it opens. */
+  function patchCardFoot(id, focusSel) {
+    var p = byId(id);
+    if (!p) return;
+    var feet = document.querySelectorAll('[data-cardfoot="' + id + '"]');
+    for (var k = 0; k < feet.length; k++) {
+      feet[k].innerHTML = cardFootInnerHTML(p);
+      translateTree(feet[k]);
+      // .card--pop lifts the card's paint containment so the listbox can hang below it
+      var card = feet[k].closest(".card");
+      if (card) card.classList.toggle("card--pop", S.cardPop === id);
     }
+    if (focusSel) {
+      var el = document.querySelector(focusSel);
+      if (el) el.focus();
+    }
+  }
+  function openCardPop(id) {
+    var prev = S.cardPop;
+    S.cardPop = id;
+    if (prev && prev !== id) patchCardFoot(prev);
+    patchCardFoot(id, '[data-cardsizepick="' + id + ":" + cardSizeIdx(id) + '"]');
+  }
+  function closeCardPop(focusTrigger) {
+    var id = S.cardPop;
+    if (!id) return;
+    S.cardPop = null;
+    patchCardFoot(id, focusTrigger ? '[data-cardsizeopen="' + id + '"]' : null);
+  }
+  function pickCardSize(id, i) {
+    S.cardSize[id] = Number(i) || 0;
+    S.cardPop = null;
+    patchCardFoot(id, '[data-cardsizeopen="' + id + '"]');
   }
 
   /* Quantity steppers patch the numbers in place. Rebuilding the drawer would
@@ -13064,7 +13112,11 @@
     // adding from INSIDE the open drawer (the free-shipping upsell) must
     // redraw the lines and totals, or the tap looks like it did nothing
     if (S.cartOpen) rebuildCart();
-    toast("Добавлено в корзину ✓");
+    // a card with a size picker says which size went in — «Добавлено: Un.Tangled Spray · 150 мл»
+    var addedP = byId(id);
+    toast(cardSizes(addedP).length && !(S.screen === "product" && S.productId === id)
+      ? "Добавлено: " + addedP.name + " · " + addedP.sizes[si]
+      : "Добавлено в корзину ✓");
     track("add_to_cart", { productId: id, value: sizePrice(byId(id), si) });   // analytics agent
   }
 
@@ -13207,7 +13259,9 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsize],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
+    // the card's size popover closes on any click outside itself and its trigger
+    if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -13285,6 +13339,15 @@
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
     if (d.dot !== undefined) { setSlide(Number(d.dot), true); return; }
+    if (d.cardsizeopen !== undefined) {
+      if (S.cardPop === d.cardsizeopen) closeCardPop(true); else openCardPop(d.cardsizeopen);
+      return;
+    }
+    if (d.cardsizepick !== undefined) {
+      var pk = d.cardsizepick.split(":");
+      pickCardSize(pk[0], pk[1]);
+      return;
+    }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
     // full render, not just the header: descriptions, legal pages and the
     // whole chrome follow the language. The persistent slots are rebuilt from
@@ -14631,11 +14694,6 @@
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     // the card's size picker — state first, then patch the price in place
-    else if (t.matches("[data-cardsize]")) {
-      var cid = t.dataset.cardsize;
-      S.cardSize[cid] = Number(t.value) || 0;
-      patchCardSize(cid);
-    }
     /* checkout-gaps: the promo kind decides whether there is a «сколько»
        field at all, so this one does need a redraw. */
     else if (t.matches('[data-promof="kind"]')) {
@@ -14764,6 +14822,21 @@
   }, true);
 
   document.addEventListener("keydown", function (e) {
+    /* the card's size popover: Esc closes, arrows walk the options, Enter
+       and Space pick (they are buttons, so the click handler does the rest) */
+    if (S.cardPop) {
+      if (e.key === "Escape") { e.preventDefault(); closeCardPop(true); return; }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        var opts = document.querySelectorAll('[data-cardpop="' + S.cardPop + '"] [data-cardsizepick]');
+        if (!opts.length) return;
+        e.preventDefault();
+        var at = -1;
+        for (var oi = 0; oi < opts.length; oi++) if (opts[oi] === document.activeElement) at = oi;
+        var next = at < 0 ? 0 : (at + (e.key === "ArrowDown" ? 1 : opts.length - 1)) % opts.length;
+        opts[next].focus();
+        return;
+      }
+    }
     if (e.key === "Escape") {
       if (S.pointOpen) { S.pointOpen = false; render(); refocus("[data-pointopen]"); }
       else if (S.cartOpen || S.filterOpen) { closeDrawers(); }

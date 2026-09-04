@@ -109,16 +109,26 @@ for (const lang of LANGS) {
      *  variable: patchCatalog() and render() both replace the element. */
     const cardFor = (page: import("@playwright/test").Page, id: string) =>
       page.locator(".card", { has: page.locator(`[data-go-product="${id}"]`) }).first();
+    /** Opens the card's size listbox and picks option `i`; the foot row is
+     *  rebuilt in place, so everything is re-queried afterwards. */
+    const pick = async (page: import("@playwright/test").Page, id: string, i: number) => {
+      await cardFor(page, id).locator("[data-cardsizeopen]").click();
+      await cardFor(page, id).locator(`[data-cardsizepick="${id}:${i}"]`).click();
+      await expect(cardFor(page, id).locator(".card__pop")).toHaveCount(0);
+    };
 
     test("the price follows the chosen size, and the cart line gets that size", async ({ page }) => {
       await page.goto(shopUrl(lang.seg, "/c/hair/"));
       await waitForScreen(page, "catalog");
 
       const card = cardFor(page, PRODUCT.id);
-      const picker = card.locator("select[data-cardsize]");
-      // The picker's only label — «Объём» / «Maht» / «Size».
+      const picker = card.locator("[data-cardsizeopen]");
+      // The trigger's label — «Объём» / «Maht» / «Size» — and the listbox behind it.
       await expect(picker).toHaveAttribute("aria-label", tr("Объём", lang.code));
-      await expect(picker.locator("option")).toHaveCount(PRODUCT.sizes.length);
+      await picker.click();
+      await expect(card.locator("[data-cardsizepick]")).toHaveCount(PRODUCT.sizes.length);
+      await page.keyboard.press("Escape");
+      await expect(card.locator(".card__pop")).toHaveCount(0);
 
       // Untouched, the card shows the smallest size's exact price. It used to
       // read «от 9 €», which is the wrong thing to say next to a control that
@@ -127,13 +137,13 @@ for (const lang of LANGS) {
       await expect(price).toHaveText(eur(PRODUCT.prices[0], lang.code));
 
       for (let i = PRODUCT.sizes.length - 1; i >= 0; i--) {
-        await picker.selectOption(String(i));
+        await pick(page, PRODUCT.id, i);
         await expect(price).toHaveText(eur(PRODUCT.prices[i], lang.code));
       }
 
       // The real point: the cart, not just the card.
       const last = PRODUCT.sizes.length - 1;
-      await picker.selectOption(String(last));
+      await pick(page, PRODUCT.id, last);
       await card.locator(`[data-add="${PRODUCT.id}"]`).click();
       await expect(page.getByRole("status")).toBeVisible();
       await expect(page.locator("[data-cartbadge]")).toHaveText("1");
@@ -154,7 +164,7 @@ for (const lang of LANGS) {
       await page.goto(shopUrl(lang.seg, "/c/hair/"));
       await waitForScreen(page, "catalog");
 
-      await cardFor(page, PRODUCT.id).locator("select[data-cardsize]").selectOption("1");
+      await pick(page, PRODUCT.id, 1);
       await expect(cardFor(page, PRODUCT.id).locator("[data-cardpr]")).toHaveText(eur(PRODUCT.prices[1], lang.code));
 
       // A real navigation and back: the grid is rebuilt from nothing, so this
@@ -165,7 +175,7 @@ for (const lang of LANGS) {
       await page.goBack();
       await waitForScreen(page, "catalog");
 
-      await expect(cardFor(page, PRODUCT.id).locator("select[data-cardsize]")).toHaveValue("1");
+      await expect(cardFor(page, PRODUCT.id).locator(".card__sizelbl")).toContainText(PRODUCT.sizes[1].replace(/\D+/g, ""));
       await expect(cardFor(page, PRODUCT.id).locator("[data-cardpr]")).toHaveText(eur(PRODUCT.prices[1], lang.code));
     });
 
@@ -174,17 +184,17 @@ for (const lang of LANGS) {
       await waitForScreen(page, "catalog");
       const single = cardFor(page, SINGLE_SIZE_PRODUCT);
       await expect(single).toBeVisible();
-      await expect(single.locator("select[data-cardsize]")).toHaveCount(0);
+      await expect(single.locator("[data-cardsizeopen]")).toHaveCount(0);
 
       // cardHTML() is shared, so the picker reaches every list built from it —
       // the home rails and the search results, not only the catalogue grid.
       await page.goto(shopUrl(lang.seg, "/"));
       await waitForScreen(page, "home");
-      expect(await page.locator(".sec .grid select[data-cardsize]").count()).toBeGreaterThan(0);
+      expect(await page.locator(".sec .grid [data-cardsizeopen]").count()).toBeGreaterThan(0);
 
       await page.locator("[data-search]").fill("System");
       await waitForScreen(page, "search");
-      expect(await page.locator(".grid select[data-cardsize]").count()).toBeGreaterThan(0);
+      expect(await page.locator(".grid [data-cardsizeopen]").count()).toBeGreaterThan(0);
     });
   });
 }
@@ -207,19 +217,20 @@ test.describe("card size picker — layout", () => {
 
       const report = await page.evaluate(() => {
         const escaped: string[] = [];
-        const pickers = document.querySelectorAll<HTMLSelectElement>("select[data-cardsize]");
+        const pickers = document.querySelectorAll<HTMLElement>("[data-cardfoot]");
         pickers.forEach((sel) => {
           const card = sel.closest(".card");
           if (!card) {
-            escaped.push(`${sel.dataset.cardsize}: no .card around the picker`);
+            escaped.push(`${sel.dataset.cardfoot}: no .card around the foot row`);
             return;
           }
           const s = sel.getBoundingClientRect();
           const c = card.getBoundingClientRect();
-          // 1px of slack for sub-pixel layout rounding.
-          if (s.right > c.right + 1 || s.left < c.left - 1) {
+          // 1px of slack for sub-pixel layout rounding; the row must not wrap
+          // either (its height would then be two lines).
+          if (s.right > c.right + 1 || s.left < c.left - 1 || sel.scrollWidth > sel.clientWidth + 1 || s.height > 40) {
             escaped.push(
-              `${sel.dataset.cardsize}: picker ${Math.round(s.left)}…${Math.round(s.right)}` +
+              `${sel.dataset.cardfoot}: foot ${Math.round(s.left)}…${Math.round(s.right)} h${Math.round(s.height)} sw${sel.scrollWidth}` +
                 ` vs card ${Math.round(c.left)}…${Math.round(c.right)}`,
             );
           }
