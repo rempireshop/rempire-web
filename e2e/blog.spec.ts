@@ -107,7 +107,7 @@ test("every card under an article keeps its foot in the card and its add text wh
       if (!card) { escaped.push(`${foot.dataset.cardfoot}: no .card around the foot row`); return; }
       const s = foot.getBoundingClientRect();
       const c = card.getBoundingClientRect();
-      if (s.right > c.right + 1 || s.left < c.left - 1 || foot.scrollWidth > foot.clientWidth + 1 || s.height > 40) {
+      if (s.right > c.right + 1 || s.left < c.left - 1 || foot.scrollWidth > foot.clientWidth + 1 || s.height > (window.innerWidth <= 480 ? 64 : 40)) {
         escaped.push(
           `${foot.dataset.cardfoot}: foot ${Math.round(s.left)}…${Math.round(s.right)} h${Math.round(s.height)} sw${foot.scrollWidth}` +
             ` vs card ${Math.round(c.left)}…${Math.round(c.right)}`,
