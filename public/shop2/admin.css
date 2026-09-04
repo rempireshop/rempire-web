@@ -661,10 +661,13 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 /* The save bar follows the page to the bottom of every tab. */
 .adm-savebar {
-  position: sticky; bottom: 0; z-index: 2; display: flex; gap: 8px; align-items: center;
+  position: sticky; bottom: 0; z-index: 2; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
   padding: 12px 0; margin-top: 8px; background: var(--a-paper); border-top: 1px solid var(--a-rule);
 }
 .adm-savebar__sp { flex: 1; }
+/* the editor's refusal («Цена — число от 1 до 500 €…») rides in the bar, a
+   full line above the buttons, so it is on screen wherever the owner is */
+.adm-savebar__err { flex-basis: 100%; margin: 0 0 4px; }
 /* On a phone the bar sits above the nav — and so does the assistant's
    floating button, which was landing on top of «Снять с продажи». The button
    is the one that moves: the save bar is the screen's own controls, and a

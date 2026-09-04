@@ -177,6 +177,15 @@ function routes(): RouteCase[] {
     { name: "POST /api/admin/ai/text/", path: "/api/admin/ai/text/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/ai/text/route"), auth: "admin", req: { ...admin, next: true }, body: { task: "seo", lang: "RU", input: { name: "X", brand: "Y", category: "hair" } } },
     { name: "GET /api/admin/upload/", path: "/api/admin/upload/", method: "GET", exports: ["GET", "POST", "DELETE"], load: () => import("@/app/api/admin/upload/route"), auth: "admin", req: admin },
     { name: "DELETE /api/admin/upload/", path: "/api/admin/upload/", method: "DELETE", exports: ["GET", "POST", "DELETE"], load: () => import("@/app/api/admin/upload/route"), auth: "admin", req: admin, queries: ["?key=products/a.webp", "?key=../../etc/passwd", "?key=", "?key=%00"] },
+    /* product creation: «Убрать фон» is off in this suite (no PHOTO_CUTOUT), so
+       every body answers 503 before any network — the fetch stub sees nothing */
+    { name: "POST /api/admin/upload/cutout/", path: "/api/admin/upload/cutout/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/upload/cutout/route"), auth: "admin", req: admin, body: { key: "products/a/1-a.webp", url: "https://media.rempireshop.com/products/a/1-a.webp" } },
+    /* product creation: the owner's own products (custom_products) */
+    { name: "GET /api/admin/products/", path: "/api/admin/products/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/admin/products/route"), auth: "admin", req: admin },
+    { deep: true, name: "POST /api/admin/products/", path: "/api/admin/products/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/admin/products/route"), auth: "admin", req: admin, body: { brand: "Фазз", name: "Balm — бальзам для бороды", cat: "beard", subcat: "ba", price: 9.9, sizes: ["100 мл"], prices: [9.9], description: { RU: "о", ET: "e", EN: "e" }, seo: { RU: { title: "t", desc: "d" } }, gallery: [{ url: "/a.webp", thumb: "/a.webp", alt: "" }] } },
+    { name: "GET /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "GET", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" } },
+    { deep: true, name: "PUT /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "PUT", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" }, body: { brand: "Фазз", name: "Balm", cat: "beard", price: 12, sizes: ["75 мл", "250 мл"], prices: [9, 16], active: true } },
+    { name: "DELETE /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "DELETE", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" } },
 
     /* ---- assistant, cron, e2e -------------------------------------------- */
     { name: "GET /api/assistant/", path: "/api/assistant/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true } },

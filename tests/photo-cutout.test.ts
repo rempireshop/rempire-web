@@ -88,10 +88,10 @@ describe("photo cutout", () => {
   });
 
   it("cutoutEnabled() needs both the switch and a key; cutoutKey() lands next to the original", () => {
-    expect(cutoutEnabled({ PHOTO_CUTOUT: "openai", OPENAI_API_KEY: "k" } as NodeJS.ProcessEnv)).toBe(true);
-    expect(cutoutEnabled({ PHOTO_CUTOUT: "openai" } as NodeJS.ProcessEnv)).toBe(false);
-    expect(cutoutEnabled({ OPENAI_API_KEY: "k" } as NodeJS.ProcessEnv)).toBe(false);
-    expect(cutoutEnabled({ PHOTO_CUTOUT: "yes", OPENAI_API_KEY: "k" } as NodeJS.ProcessEnv)).toBe(false);
+    expect(cutoutEnabled({ PHOTO_CUTOUT: "openai", OPENAI_API_KEY: "k" })).toBe(true);
+    expect(cutoutEnabled({ PHOTO_CUTOUT: "openai" })).toBe(false);
+    expect(cutoutEnabled({ OPENAI_API_KEY: "k" })).toBe(false);
+    expect(cutoutEnabled({ PHOTO_CUTOUT: "yes", OPENAI_API_KEY: "k" })).toBe(false);
     expect(cutoutKey(KEY)).toBe("products/touchable/1700000000000-photo-cutout.png");
     expect(cutoutKey("products/touchable/1-a-cutout.png")).toBe("products/touchable/1-a-cutout.png");
   });

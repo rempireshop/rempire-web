@@ -4310,6 +4310,11 @@
              the only place that can honestly say a set no longer exists. */
           if (l.type === "bundle") return true;
           if (l.type === "gift") return GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0;
+          /* product creation: the owner's own products (ids «c-…») are merged
+             into CATALOGUE further down (adoptCustom), after this runs — the
+             same story as the sets above. Kept here, pruned by adoptServer()
+             once the feed has said which of them still exist. */
+          if (typeof l.id === "string" && l.id.indexOf("c-") === 0) return true;
           for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === l.id) return true;
           return false;
         });
@@ -9622,11 +9627,24 @@
     "Какие заказы ждут отправки?",
     "Покажи аналитику за неделю"
   ];
+  /** The assistant's last answer, kept in S (askAdminAI) so a render() that
+      lands after it — a probe finishing, the products list arriving — draws
+      the same reply and the same confirm card again instead of putting «…»
+      back over a proposal the owner was about to confirm. The card itself
+      follows pendingAction: applied or cancelled, it is gone next render. */
+  function admAnswerHTML() {
+    var a = S.adminAns;
+    if (!a || a.q !== S.adminAsk) return "…";
+    if (a.fallback) return adminAnswer(a.q);
+    return esc(a.reply || "") +
+      (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
+      (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "");
+  }
   function admAsstBodyHTML() {
     return '<div class="adm-asst__body">' +
       (S.adminAsk
         ? '<div class="adm-msg adm-msg--me">' + esc(S.adminAsk) + "</div>" +
-          '<div class="adm-msg" data-aians>' + (admAI ? "…" : adminAnswer(S.adminAsk)) + "</div>"
+          '<div class="adm-msg" data-aians>' + (admAI ? admAnswerHTML() : adminAnswer(S.adminAsk)) + "</div>"
         : '<div class="adm-msg">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — ' +
           'а изменения предложу на подтверждение.</div>') +
       '<div class="adm-asst__chips">' + ADM_ASK.map(function (q) {
@@ -12594,10 +12612,12 @@
     return '<div class="adm-edpane" data-edpane="main"' + (edTab() === "main" ? "" : " hidden") + ">" +
       '<div class="adm-edcols">' +
         '<div class="adm-edcol">' +
-          '<label class="adm-field">Бренд <span class="adm-req" aria-hidden="true">*</span>' +
+          // the label text and its asterisk are one flex item of the column, so
+          // the asterisk stays on the label's line instead of taking a row
+          '<label class="adm-field"><span>Бренд <span class="adm-req" aria-hidden="true">*</span></span>' +
             '<input class="adm-input" data-edbrand list="edbrands" value="' + esc(p.brand) + '" maxlength="60" placeholder="Например, Proraso" autocomplete="off"></label>' +
           '<datalist id="edbrands">' + edBrandOptions() + "</datalist>" +
-          '<label class="adm-field">Название <span class="adm-req" aria-hidden="true">*</span>' +
+          '<label class="adm-field"><span>Название <span class="adm-req" aria-hidden="true">*</span></span>' +
             '<input class="adm-input" data-edname value="' + esc(p.name) + '" maxlength="120" placeholder="Beard Balm — бальзам для бороды"></label>' +
           '<div class="adm-edpair">' +
             '<label class="adm-field">Раздел<select class="adm-input" data-edcat>' +
@@ -13048,9 +13068,11 @@
       edPaneMain(p) + edPaneSizes(p) + edPaneMedia(p) + edPaneDesc(p) + edPaneSeo(p) +
       // goodsFail() fills this in place, so the message appears without a
       // render() taking the caret out of whatever field is being fixed — and
-      // it sits outside the panes so a refusal is readable from any tab.
-      '<p class="adm-err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
+      // it sits in the sticky save bar, outside the panes, so a refusal is on
+      // screen from any tab and on a phone, right above the button that was
+      // just pressed, rather than somewhere below the fold.
       '<div class="adm-savebar">' +
+        '<p class="adm-err adm-savebar__err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
         '<button class="adm-btn" data-admsavegoods="' + esc(p.id) + '">' + (isNew ? "Сохранить товар" : "Сохранить") + "</button>" +
         '<button class="adm-btn adm-btn--ghost" data-admclose>Отмена</button>' +
         '<span class="adm-savebar__sp"></span>' +
@@ -14336,8 +14358,14 @@
 
   function adoptServer(j) {
     var ov = j.overrides || {};
-    // product creation: the feed's own products replace the offline copy
+    // product creation: the feed's own products replace the offline copy —
+    // and a cart line pointing at one the feed no longer carries (hidden
+    // since, or a server that predates the table) is dropped here, the one
+    // place that can honestly say so (see the cart restore near the top)
     if (Array.isArray(j.custom)) { DEMO.custom = j.custom; adoptCustom(DEMO.custom); }
+    S.cart = S.cart.filter(function (l) {
+      return l.type === "bundle" || l.type === "gift" || String(l.id).indexOf("c-") !== 0 || !!byIdOrNull(l.id);
+    });
     DEMO.price = {}; DEMO.stock = {}; DEMO.seo = {}; DEMO.subcat = {}; DEMO.varimg = {}; DEMO.video = {};
     DEMO.gallery = {};   // media
     DEMO.desc = {};   // assistant-work
@@ -15200,17 +15228,18 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (j) {
         admConvo.push({ role: "assistant", content: j.reply || "" });
+        if (S.adminAsk !== q) return;
+        pendingAction = j.action || null;
+        // kept in S, drawn by admAnswerHTML() — here and on every later render
+        S.adminAns = { q: q, reply: j.reply || "", action: pendingAction, tab: j.tab || "" };
         var el = document.querySelector("[data-aians]");
-        if (el && S.adminAsk === q) {
-          pendingAction = j.action || null;
-          el.innerHTML = esc(j.reply || "") +
-            (pendingAction ? confirmCard(pendingAction) : "") +
-            (j.tab && !pendingAction ? aiGo(j.tab, TAB_LABEL[j.tab] || "Открыть") : "");
-        }
+        if (el) { el.innerHTML = admAnswerHTML(); translateTree(el); }
       })
       .catch(function () {
+        if (S.adminAsk !== q) return;
+        S.adminAns = { q: q, fallback: true };
         var el = document.querySelector("[data-aians]");
-        if (el && S.adminAsk === q) el.innerHTML = adminAnswer(q);
+        if (el) el.innerHTML = adminAnswer(q);
       });
   }
   function adminAnswer(q) {
@@ -18429,27 +18458,30 @@
        banner's own button both land here. On a phone the same input offers the
        camera, because accept="image/*" is what asks for it. */
     else if (t.matches("[data-galfile]")) {
-      var picked = t.files;
+      /* a copy, not the live FileList: clearing the input below empties the
+         list it hands out, so a reference taken here would be empty by the
+         time the upload reads it (caught by the product-creation e2e) */
+      var picked = [].slice.call(t.files || []);
       var where = t.dataset.galfile;
       t.value = "";   // so choosing the same file twice still fires
-      if (!picked || !picked.length) return;
+      if (!picked.length) return;
       if (where === "hero") heroUpload(picked);
       else if (where === "blog") blogCoverUpload(picked);   // blog
       else galUpload(picked, admEditProduct(where));   // product creation: a hidden custom product too
     }
     // blog: the «Картинка» button's own picker — the article body, not the cover
     else if (t.matches("[data-blogtoolfile]")) {
-      var pickedBlog = t.files;
+      var pickedBlog = [].slice.call(t.files || []);   // a copy — see [data-galfile] above
       t.value = "";
-      if (pickedBlog && pickedBlog.length) blogUploadImage(pickedBlog);
+      if (pickedBlog.length) blogUploadImage(pickedBlog);
     }
     // media: the video picker — its own input, so a 60 MB file can never end
     // up in the photo queue by accident
     else if (t.matches("[data-vidfile]")) {
-      var pickedV = t.files;
+      var pickedV = [].slice.call(t.files || []);   // a copy — see [data-galfile] above
       var forId = t.dataset.vidfile;
       t.value = "";
-      if (pickedV && pickedV.length) videoUpload(pickedV, admEditProduct(forId));
+      if (pickedV.length) videoUpload(pickedV, admEditProduct(forId));
     }
     // assistant-work: «Отчёты» — see reportsCard()
     else if (t.matches("[data-admreportsmonth]")) {
@@ -18482,7 +18514,7 @@
     var where = z.dataset.galdrop;
     if (where === "hero") heroUpload(files);
     else if (where === "blog") blogCoverUpload(files);   // blog
-    else galUpload(files, byId(where));
+    else galUpload(files, admEditProduct(where));   // product creation: a hidden custom product too
   });
 
   // the shopper's own open/closed choice for the summary wins from then on
@@ -18876,8 +18908,16 @@
      waits for /api/overrides/ (four seconds at most) instead of landing on
      the home page and jumping to the product a moment later. Every other
      page paints at once, exactly as it always has. */
-  var bootCustom = stripLangPrefix(location.pathname).match(/\/shop2\/p\/(c-[^/]+)\/?$/);
-  if (bootCustom && !byIdOrNull(decodeURIComponent(bootCustom[1])) && OV_BOOT) {
+  var bootWait = false;
+  try {
+    var bootPath = stripLangPrefix(location.pathname);
+    var bootProd = bootPath.match(/\/shop2\/p\/(c-[^/]+)\/?$/);
+    var bootBrand = bootPath.match(/\/shop2\/b\/([^/]+)\/?$/);
+    bootWait = !!((bootProd && !byIdOrNull(decodeURIComponent(bootProd[1]))) ||
+      // …or a brand page of a brand only the owner's own products carry
+      (bootBrand && !BRAND_BY_SLUG[decodeURIComponent(bootBrand[1])]));
+  } catch (e) { bootWait = false; }
+  if (bootWait && OV_BOOT) {
     bootHeld = true;
     var painted = false;
     var paintOnce = function () { if (painted) return; painted = true; bootHeld = false; firstPaint(); };

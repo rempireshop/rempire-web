@@ -33,7 +33,7 @@ export class CutoutError extends Error {
 }
 
 /** True only when the deployment opted in AND there is a key to pay with. */
-export function cutoutEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+export function cutoutEnabled(env: Record<string, string | undefined> = process.env): boolean {
   return (env.PHOTO_CUTOUT || "").trim().toLowerCase() === "openai" && Boolean((env.OPENAI_API_KEY || "").trim());
 }
 

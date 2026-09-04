@@ -37,18 +37,20 @@ function limiterKey(req: Request): string {
 export async function POST(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
-  if (!storageConfigured()) return bad("storage_not_configured", 503);
-  if (!cutoutEnabled()) return bad("cutout_disabled", 503);
 
+  // the body first: a request that names no photo of ours is a 400 whatever
+  // the deployment's switches say
   let body: { key?: unknown; url?: unknown };
   try {
     body = (await req.json()) as typeof body;
   } catch {
     return bad("bad_json");
   }
-  if (!body || typeof body !== "object") return bad("bad_json");
+  if (!body || typeof body !== "object" || Array.isArray(body)) return bad("bad_json");
   const key = isAllowedKey(body.key) ? body.key : typeof body.url === "string" ? keyFromUrl(body.url) : null;
   if (!key || !key.startsWith("products/") || !/\.(webp|png|jpe?g)$/.test(key)) return bad("bad_key");
+  if (!storageConfigured()) return bad("storage_not_configured", 503);
+  if (!cutoutEnabled()) return bad("cutout_disabled", 503);
   if (rateLimit("admin_cutout", limiterKey(req), CUTOUTS_PER_HOUR, HOUR)) return bad("rate_limited", 429);
 
   try {
