@@ -6912,7 +6912,7 @@
             "Какие заказы ждут отправки?"
           ].map(function (q) { return '<button class="fchip" data-admask="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
         "</div>" +
-        '<div class="adm__aifoot"><input class="input input--box" data-admq placeholder="Спросить…" aria-label="Вопрос помощнику">' +
+        '<div class="adm__aifoot"><input class="input input--box" data-admq value="' + esc(S.adminQ || "") + '" placeholder="Спросить…" aria-label="Вопрос помощнику">' +
           '<button class="btn btn--sm" data-admsend aria-label="Спросить">→</button></div>' +
       "</aside></div>";
     // inventory: the scanner overlay is NOT part of this string — a <video>
@@ -12056,8 +12056,8 @@
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
       var qEl = document.querySelector("[data-admq]");
-      var q = qEl && qEl.value.trim();
-      if (q) { S.adminAsk = q; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+      var q = ((qEl && qEl.value) || S.adminQ || "").trim();
+      if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
       return;
     }
     if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
@@ -12369,6 +12369,10 @@
     }
     /* «Главный баннер»: a full render would take the caret out of the field,
        so only the live preview (or the picker list) is repainted. */
+    /* the assistant question box: a background render (delivery rates,
+       pricing, the report summary landing) rebuilds the panel — the draft
+       lives in S so the rebuilt box shows it and «Спросить» reads it. */
+    else if (t.matches("[data-admq]")) { S.adminQ = t.value; }
     else if (t.matches("[data-herof]")) {
       var hSl = heroDraft().slides[S.heroEdit];
       if (hSl) {
@@ -12793,8 +12797,8 @@
     var t = e.target;
     if (t && t.matches && t.matches("[data-admq]")) {
       e.preventDefault();
-      var q = t.value.trim();
-      if (q) { S.adminAsk = q; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+      var q = (t.value || S.adminQ || "").trim();
+      if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
     }
     // Enter in the password field signs in, same as «Войти»
     if (t && t.matches && t.matches("[data-admpw]")) {
