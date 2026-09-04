@@ -149,6 +149,10 @@ describe("getOverviewSummary", () => {
     await orderAt(at("2026-06-15T09:00:00Z"), "paid");     // waiting to be shipped
     await orderAt(at("2026-06-14T09:00:00Z"), "shipped");  // already gone — not waiting
     await orderAt(at("2026-06-14T09:00:00Z"), "new");      // never paid — not waiting either
+    // a salon sale is created paid and handed over at the counter — never a
+    // parcel, so never «ждёт отправки» (the list filters it out the same way)
+    const salon = await orderAt(at("2026-06-15T10:00:00Z"), "paid");
+    await query("update orders set channel = 'pos' where id = $1", [salon.id]);
 
     await query(
       "insert into customers (email, tier, pro_requested_at) values ($1, 'retail', now()), ($2, 'retail', null), ($3, 'pro', now())",

@@ -239,4 +239,122 @@ test.describe("admin — the product editor", () => {
       await clearToast(page);
     }
   });
+
+  /**
+   * «Google»: one title/description pair per language behind the same
+   * segmented control «Описание» has. What is pinned: the AI button fills the
+   * language that is on screen (it used to send Russian whatever was shown),
+   * «все три языка» fills all three, what is saved comes back per language,
+   * and the shop's own <title> reads the page's language with the Russian
+   * pair as the fallback. The model is stubbed at the network edge — this
+   * checks what the panel asks for and where the answer lands, not OpenAI.
+   */
+  test("Google tab: one pair per language, the AI fills the language shown, the shop reads the right one", async ({ page, browser }) => {
+    test.setTimeout(180_000);
+    const w = watch(page);
+    const id = PRODUCT_2.id;
+    const asked: string[] = [];
+    await page.route("**/api/admin/ai/text/", async (route) => {
+      const body = route.request().postDataJSON() as { task: string; lang: string };
+      asked.push(`${body.task}:${body.lang}`);
+      await route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({ ok: true, text: { title: `Title ${body.lang}`, description: `Snippet ${body.lang}` } }),
+      });
+    });
+
+    await openAdmin(page);
+    await openEditor(page, id);
+    await edTab(page, "seo");
+
+    // Russian first, the other two behind the control — one language on screen
+    await expect(page.locator('[data-edseolang="ru"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator("[data-edseot]")).toBeVisible();
+    await expect(page.locator("[data-edseotet]")).toBeHidden();
+    await page.locator('[data-edseolang="et"]').click();
+    await expect(page.locator("[data-edseotet]")).toBeVisible();
+    await expect(page.locator("[data-edseot]")).toBeHidden();
+
+    // the AI button asks for the language that is on screen, and only that pair moves
+    await page.locator(`[data-admseogen="${id}"]`).click();
+    await expect(page.locator("[data-edseotet]")).toHaveValue("Title ET");
+    await expect(page.locator("[data-edseodet]")).toHaveValue("Snippet ET");
+    expect(asked).toEqual(["seo:ET"]);
+    expect(await page.locator("[data-edseot]").inputValue(), "the Russian pair was written over").toBe("");
+    await clearToast(page);
+
+    // «все три языка»: three questions, three pairs
+    await page.locator(`[data-admseoall="${id}"]`).click();
+    await expect(page.locator("[data-edseoten]")).toHaveValue("Title EN");
+    await expect(page.locator("[data-edseot]")).toHaveValue("Title RU");
+    expect(asked.slice(1).sort()).toEqual(["seo:EN", "seo:ET", "seo:RU"]);
+    await clearToast(page);
+    await assertClean(page, w, "Google tab AI fill");
+
+    try {
+      // the owner's own words: Russian and Estonian, English left empty
+      await page.locator('[data-edseolang="ru"]').click();
+      await page.locator("[data-edseot]").fill("Русский заголовок для Google");
+      await page.locator("[data-edseod]").fill("Русское описание");
+      await page.locator('[data-edseolang="et"]').click();
+      await page.locator("[data-edseotet]").fill("Eesti pealkiri Google'ile");
+      await page.locator("[data-edseodet]").fill("");
+      await page.locator('[data-edseolang="en"]').click();
+      await page.locator("[data-edseoten]").fill("");
+      await page.locator("[data-edseoden]").fill("");
+      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      expect(await toastText(page)).toMatch(/Сохранено/);
+      await clearToast(page);
+      await assertClean(page, w, "Google tab saved");
+
+      // the public feed carries the set per language, the Russian pair in the legacy fields too
+      await expect.poll(async () => {
+        const body = await (await page.request.get("/api/overrides/")).json();
+        return ((body.overrides || {})[id] || {}).seo || null;
+      }, { timeout: 15_000, message: "the overrides feed never carried the per-language pairs" })
+        .toEqual({ RU: { title: "Русский заголовок для Google", desc: "Русское описание" }, ET: { title: "Eesti pealkiri Google'ile" } });
+      const feed = await (await page.request.get("/api/overrides/")).json();
+      expect(feed.overrides[id].seoTitle).toBe("Русский заголовок для Google");
+
+      // …and the editor shows each pair where it belongs
+      await openEditor(page, id);
+      await edTab(page, "seo");
+      expect(await page.locator("[data-edseot]").inputValue()).toBe("Русский заголовок для Google");
+      await page.locator('[data-edseolang="et"]').click();
+      expect(await page.locator("[data-edseotet]").inputValue()).toBe("Eesti pealkiri Google'ile");
+      await page.locator('[data-edseolang="en"]').click();
+      expect(await page.locator("[data-edseoten]").inputValue()).toBe("");
+
+      // the shop: the Estonian page reads its own title, the English one — with
+      // nothing of its own — the Russian pair, and the Russian page its own
+      const shop = await freshShop(browser);
+      await shop.page.goto(shopUrl("/et", `/p/${id}/`));
+      await waitForScreen(shop.page, "product");
+      await expect(shop.page).toHaveTitle(/Eesti pealkiri Google'ile/);
+      await shop.page.goto(shopUrl("/en", `/p/${id}/`));
+      await waitForScreen(shop.page, "product");
+      await expect(shop.page).toHaveTitle(/Русский заголовок для Google/);
+      expect(await shop.page.locator('meta[name="description"]').getAttribute("content")).toBe("Русское описание");
+      await shop.page.goto(shopUrl("", `/p/${id}/`));
+      await waitForScreen(shop.page, "product");
+      await expect(shop.page).toHaveTitle(/Русский заголовок для Google/);
+      await assertClean(shop.page, shop.w, "product page titles per language");
+      await shop.close();
+    } finally {
+      // every pair emptied = the override is gone, not stored as blanks
+      await openEditor(page, id);
+      await edTab(page, "seo");
+      for (const [lang, t, d] of [["ru", "[data-edseot]", "[data-edseod]"], ["et", "[data-edseotet]", "[data-edseodet]"], ["en", "[data-edseoten]", "[data-edseoden]"]]) {
+        await page.locator(`[data-edseolang="${lang}"]`).click();
+        await page.locator(t).fill("");
+        await page.locator(d).fill("");
+      }
+      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      await clearToast(page);
+      await expect.poll(async () => {
+        const body = await (await page.request.get("/api/overrides/")).json();
+        return ((body.overrides || {})[id] || {}).seo || null;
+      }, { timeout: 15_000 }).toBeNull();
+    }
+  });
 });

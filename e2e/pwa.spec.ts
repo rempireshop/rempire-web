@@ -50,6 +50,66 @@ test.describe("pwa manifests", () => {
     expect(JSON.stringify(shop).toLowerCase()).not.toMatch(/админ|admin|сканер|scan/);
   });
 
+  /**
+   * The app identity (docs/inventory.md → PWA): every icon the three
+   * manifests point at is a real PNG under /shop2/icons/ — the header's
+   * tower mark, ink on white, drawn by tools/gen-pwa-icons.mjs — with both
+   * an "any" and a "maskable" variant, and the splash (background_color) and
+   * the status bar (theme_color) are white in all three apps. index.html's
+   * own links (the iOS home-screen icon, the tab icon pair) resolve too, and
+   * the prerendered pages carry the same head.
+   */
+  test("every app's icons resolve and its splash and status bar are white", async ({ page, request }) => {
+    const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    for (const name of ["manifest", "admin", "scanner"]) {
+      const m = await (await request.get(shopUrl("", `/${name}.webmanifest`))).json();
+      expect(m.background_color, `${name}: splash`).toBe("#ffffff");
+      expect(m.theme_color, `${name}: status bar`).toBe("#ffffff");
+      const icons = m.icons as Array<{ src: string; sizes: string; type: string; purpose?: string }>;
+      const purposes = icons.map((i) => i.purpose);
+      expect(purposes, `${name}: purpose any`).toContain("any");
+      expect(purposes, `${name}: purpose maskable`).toContain("maskable");
+      expect(icons.filter((i) => i.purpose === "maskable").map((i) => i.sizes).sort()).toEqual(["192x192", "512x512"]);
+      for (const icon of icons) {
+        expect(icon.src, `${name}: the tower files only`).toMatch(/^\/shop2\/icons\/icon-(maskable-)?(192|512)\.png$/);
+        expect(icon.type).toBe("image/png");
+        const res = await request.get(icon.src);
+        expect(res.status(), `${name}: ${icon.src}`).toBe(200);
+        expect(res.headers()["content-type"], `${name}: ${icon.src}`).toMatch(/^image\/png/);
+        // a real PNG, not the SPA shell served with a guessed header
+        expect((await res.body()).subarray(0, 8), `${name}: ${icon.src} is a PNG`).toEqual(PNG_MAGIC);
+      }
+    }
+
+    await page.goto(shopUrl("", "/"));
+    await waitForScreen(page, "home");
+    // index.html's own links: iOS reads apple-touch-icon, browsers the favicon pair
+    const links = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('link[rel="apple-touch-icon"], link[rel="icon"]')).map((l) => ({
+        rel: l.getAttribute("rel") ?? "",
+        href: l.getAttribute("href") ?? "",
+        type: l.getAttribute("type") ?? "",
+      })),
+    );
+    expect(links.find((l) => l.rel === "apple-touch-icon")?.href).toBe("/shop2/icons/apple-touch-icon-180.png");
+    expect(links.find((l) => l.rel === "icon" && l.type === "image/svg+xml")?.href).toBe("/shop2/icons/favicon.svg");
+    expect(links.find((l) => l.rel === "icon" && l.type === "image/png")?.href).toBe("/shop2/icons/favicon-32.png");
+    for (const l of links) {
+      const res = await request.get(l.href);
+      expect(res.status(), l.href).toBe(200);
+      expect(res.headers()["content-type"], l.href).toMatch(l.type === "image/svg+xml" ? /^image\/svg\+xml/ : /^image\/png/);
+    }
+    // the status bar meta and the very first paint agree with the manifests: white
+    expect(await page.evaluate(() => document.querySelector('meta[name="theme-color"]')?.getAttribute("content"))).toBe("#ffffff");
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).toBe("rgb(255, 255, 255)");
+
+    // the prerendered pages copy index.html's head (tools/prerender-shop2.mjs)
+    const et = await (await request.get(shopUrl("/et", "/"))).text();
+    expect(et).toContain('href="/shop2/icons/apple-touch-icon-180.png"');
+    expect(et).toContain('href="/shop2/icons/favicon.svg"');
+    expect(et).toContain("<style>html{background:#fff}</style>");
+  });
+
   test("the admin route swaps to the admin manifest and back", async ({ page }) => {
     await page.goto(shopUrl("", "/admin/"));
     await waitForScreen(page, "admin");

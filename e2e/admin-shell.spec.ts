@@ -252,6 +252,21 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     // «Новые» has it, «Ждут оплаты» does not — and says so rather than showing
     // an empty box
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
+
+    /* The count on the «Новые» chip and the badge on the nav item are the
+       same number as the rows — read off the loaded list, not off the
+       overview's cached summary, which used to lag a shipped order. The chip
+       is one text node («Новые 2»), which is why it needs its own rule to be
+       translated: on the Estonian panel it reads «Uued 2», not «Новые 2». */
+    const chip = page.locator('[data-admfilter="new"]');
+    await expect(chip).toHaveText(/^Новые \d+$/);
+    const waiting = Number(((await chip.textContent()) || "").replace(/\D+/g, ""));
+    expect(waiting, "the chip did not count the paid order").toBeGreaterThan(0);
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(waiting));
+    await page.locator('.adm-side [data-lang="ET"]').click();
+    await expect(chip).toHaveText(`Uued ${waiting}`);
+    await page.locator('.adm-side [data-lang="RU"]').click();
+    await expect(chip).toHaveText(`Новые ${waiting}`);
     await page.locator('[data-admfilter="unpaid"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
     await page.locator('[data-admfilter="salon"]').click();
@@ -280,6 +295,12 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     await expect(page.locator(".adm-toast__undo")).toBeVisible();
     await page.locator("[data-closetoast]").click();
 
+    // …and the chip and the badge follow the shipped order down at once
+    const left = waiting - 1;
+    await expect(chip).toHaveText(left ? `Новые ${left}` : "Новые");
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveCount(left ? 1 : 0);
+    if (left) await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(left));
+
     // the list agrees, and so does the journal in «Настройки»
     await page.locator('[data-admfilter="shipped"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
@@ -287,6 +308,151 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     // the journal is a page of its own since the phase-3 redesign (README fix #6)
     await page.locator('[data-admsetpage="journal"]').click();
     await expect(page.getByText(`Заказ ${number}: отправлен`)).toBeVisible();
+  });
+});
+
+/**
+ * Once its data has arrived the panel stands still. Every fetch and every
+ * state change ends in render(), and a render used to rebuild the whole tree
+ * — replaying the entrance fade each time, which the owner saw as «the panel
+ * keeps blinking». Now a render patches the DOM in place, so an unchanged
+ * screen produces no mutation at all, and nothing polls in the background.
+ */
+async function still(page: Page, label: string): Promise<void> {
+  // let the panel's own start-up fetches land — orders, overview, analytics
+  // (each compiles on its first hit under `next dev`) — and their renders paint
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(1000);
+  const calls: string[] = [];
+  const onRequest = (r: { url(): string; method(): string }) => {
+    if (r.url().includes("/api/")) calls.push(`${r.method()} ${r.url()}`);
+  };
+  page.on("request", onRequest);
+  const mutations = await page.evaluate(() => new Promise<string[]>((resolve) => {
+    const root = document.querySelector("main.screen")!;
+    const seen: string[] = [];
+    const mo = new MutationObserver((list) => {
+      for (const m of list) {
+        const el = m.target as Element;
+        seen.push(`${m.type} ${el.nodeName.toLowerCase()}${(el as Element).className ? "." + String((el as Element).className).split(" ")[0] : ""}${m.attributeName ? "[" + m.attributeName + "]" : ""}`);
+      }
+    });
+    mo.observe(root, { subtree: true, childList: true, attributes: true, characterData: true });
+    setTimeout(() => { mo.disconnect(); resolve(seen.slice(0, 20)); }, 5000);
+  }));
+  page.off("request", onRequest);
+  expect(mutations, `${label}: the DOM kept changing while nothing happened`).toEqual([]);
+  expect(calls, `${label}: the panel kept fetching while nothing happened`).toEqual([]);
+}
+
+test.describe("admin shell — the panel stands still once its data has arrived", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(126) });
+
+  test("Обзор and Заказы: no DOM mutation and no request for five seconds", async ({ page }) => {
+    test.setTimeout(90_000);
+    await loginAsAdmin(page);
+    await expect(page.locator("h1.adm-h1")).toHaveText("Обзор");
+    await still(page, "Обзор");
+
+    // moving to another section plays the entrance fade once (the class is
+    // set only when the screen key changes) …
+    await nav(page, "orders").click();
+    await expect(page.locator("h1.adm-h1")).toHaveText("Заказы");
+    await expect(page.locator(".adm-page")).toHaveClass(/adm-page--enter/);
+    await expect(page.locator("#orderlist")).toBeVisible();
+    // …and then this screen, too, is left alone
+    await still(page, "Заказы");
+  });
+});
+
+/**
+ * The phone layout at the width Renat actually holds. Every screen the
+ * redesign owns fits the viewport — the page never scrolls sideways (a panel
+ * that does is a panel whose bottom bar cannot be tapped) — and every
+ * control is a thumb's size: 44 px each way (README § Constraints).
+ */
+async function fitsThePhone(page: Page, label: string): Promise<void> {
+  const r = await page.evaluate(() => {
+    const doc = document.documentElement;
+    const small: string[] = [];
+    document.querySelectorAll<HTMLElement>(".adm2 button, .adm2 a").forEach((el) => {
+      const b = el.getBoundingClientRect();
+      if (!b.width || !b.height) return;   // hidden, or on the nav this viewport does not show
+      if (b.height < 44 || b.width < 44) {
+        const name = `${el.tagName.toLowerCase()}.${String(el.className).split(" ")[0]}`;
+        const text = (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 24);
+        small.push(`${name} ${Math.round(b.width)}×${Math.round(b.height)} «${text}»`);
+      }
+    });
+    return { overflow: doc.scrollWidth - doc.clientWidth, small };
+  });
+  expect(r.overflow, `${label}: the page scrolls sideways`).toBeLessThanOrEqual(0);
+  expect(r.small, `${label}: tap targets under 44 px`).toEqual([]);
+}
+
+/** A footer's content sits on the footer's own centre line — the group as a
+ *  whole (the sheet lays its three items out in one row), and each item on
+ *  its own where the footer is a column (the sidebar). */
+async function centred(page: Page, selector: string, label: string, each: boolean): Promise<void> {
+  const r = await page.locator(selector).evaluate((foot) => {
+    const f = foot.getBoundingClientRect();
+    const mid = f.left + f.width / 2;
+    const kids = Array.from(foot.children).map((c) => c.getBoundingClientRect()).filter((b) => b.width > 0);
+    const left = Math.min(...kids.map((b) => b.left));
+    const right = Math.max(...kids.map((b) => b.right));
+    return { group: Math.round((left + right) / 2 - mid), each: kids.map((b) => Math.round(b.left + b.width / 2 - mid)) };
+  });
+  expect(Math.abs(r.group), `${label}: the footer's content is ${r.group}px off centre`).toBeLessThanOrEqual(2);
+  if (each) for (const d of r.each) expect(Math.abs(d), `${label}: a footer item is ${d}px off centre`).toBeLessThanOrEqual(2);
+}
+
+test.describe("admin shell — the phone fits, and the footers are centred", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(127) });
+
+  test("no sideways scroll, 44-px targets, centred footers", async ({ page }, testInfo) => {
+    test.setTimeout(120_000);
+    const mobile = testInfo.project.name === "mobile";
+    await loginAsAdmin(page);
+
+    if (!mobile) {
+      // the desktop sidebar's foot: language switch, «Открыть магазин ↗», «Выйти»
+      await centred(page, ".adm-side__foot", "sidebar foot", true);
+      return;
+    }
+
+    await fitsThePhone(page, "Обзор");
+    await nav(page, "orders").click();
+    await expect(page.locator("#orderlist")).toBeVisible();
+    await fitsThePhone(page, "Заказы");
+    await page.locator("[data-admorder]").first().click();
+    await expect(page.locator('[data-admorder=""]')).toBeVisible();
+    await fitsThePhone(page, "Заказ");
+    await page.locator('[data-admorder=""]').click();
+
+    await nav(page, "goods").click();
+    await expect(page.locator("#goodslist")).toBeVisible();
+    await fitsThePhone(page, "Товары");
+    await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
+    await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
+    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+    for (const tab of ["main", "sizes", "media", "desc", "seo"]) {
+      await page.locator(`[data-edtab="${tab}"]`).click();
+      await expect(page.locator(`[data-edpane="${tab}"]`)).toBeVisible();
+      await fitsThePhone(page, `Товар · ${tab}`);
+    }
+    await page.locator("[data-admclose]").first().click();
+
+    await nav(page, "pos").click();
+    await expect(page.locator("[data-posq]")).toBeVisible();
+    await fitsThePhone(page, "Салон");
+
+    // the «Ещё» sheet, and the same footer inside it
+    await page.locator("[data-admmore]").click();
+    await expect(page.locator(".adm-sheet")).toBeVisible();
+    await fitsThePhone(page, "Ещё");
+    await centred(page, ".adm-sheet__foot", "sheet foot", false);
+    await page.locator("[data-admmoreclose]").click({ position: { x: 20, y: 20 } });
+    await expect(page.locator(".adm-sheet")).toHaveCount(0);
   });
 });
 

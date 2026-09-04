@@ -14,6 +14,7 @@
 import { mergeContent } from "@/lib/content";
 import { getOverrides, getSettings } from "@/lib/orders";
 import { getDescriptionOverrides } from "@/lib/product-descriptions";
+import { getSeoOverrides } from "@/lib/product-seo";
 import { cleanPricing, publicPricing } from "@/lib/loyalty";
 import { cleanGiftAmounts } from "@/lib/giftcards";
 
@@ -75,9 +76,10 @@ function publicOverrides<T extends Record<string, unknown>>(all: Record<string, 
 
 export async function GET() {
   try {
-    const [overrides, descriptions, stored] = await Promise.all([
+    const [overrides, descriptions, seos, stored] = await Promise.all([
       getOverrides(),
       getDescriptionOverrides(),
+      getSeoOverrides(),
       getSettings(),
     ]);
     /* assistant-work: product_overrides.description {RU,ET,EN} — its own
@@ -90,6 +92,16 @@ export async function GET() {
         price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
         varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null,
       }, { description });
+    }
+    /* The per-language Google title/description (src/lib/product-seo.ts):
+       the storefront's setHead() reads `seo[lang]` with a Russian fallback.
+       `seoTitle`/`seoDesc` stay in the row as the Russian pair for anything
+       older that still reads them. */
+    for (const [id, seo] of Object.entries(seos)) {
+      Object.assign(overrides[id] ??= {
+        price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
+        varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null,
+      }, { seo });
     }
     const published = Object.fromEntries(
       Object.entries(stored).filter(([k]) => (PUBLIC_SETTINGS as readonly string[]).includes(k)),

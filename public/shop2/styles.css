@@ -1849,7 +1849,16 @@ button, a, summary, label { touch-action: manipulation; }
    for a bottle and a price, not for two sentences. */
 .blog__grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
 @media (min-width: 1100px) { .sec .blog__grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); } }
-.blog__tile { text-decoration: none; color: inherit; }
+/* A tile is a link and has to read as one: the pointer, and on hover the
+   title underlines and the cover lifts a touch — quiet, like the product
+   cards' own hover, not a box appearing around it. */
+.blog__tile { text-decoration: none; color: inherit; cursor: pointer; }
+.blog__tile .blog__tileimg { transition: transform .4s var(--ease); }
+@media (hover: hover) {
+  .blog__tile:hover .blog__tiletitle, .blog__tile:hover .pre__nm { text-decoration: underline; text-underline-offset: 3px; }
+  .blog__tile:hover .blog__tileimg { transform: translateY(-2px); }
+}
+.blog__tile:focus-visible .blog__tiletitle { text-decoration: underline; text-underline-offset: 3px; }
 /* contain, not cover: most covers are catalogue photos (square, on white) and
    cover-cropping a 1:1 photo into a 1200/630 box zoomed into the label. A real
    1200×630 cover fills the box either way. */
@@ -1876,6 +1885,13 @@ button, a, summary, label { touch-action: manipulation; }
 .blog__meta .link { display: inline-flex; align-items: center; gap: 6px; }
 .blog__meta svg { width: 16px; height: 16px; }
 .blog__post > .blog__tags { margin-bottom: 10px; }
+/* The article page: breadcrumbs in the ordinary .wrap, where every other
+   page keeps them; the article itself a reading column in the middle; the
+   products it names and the other articles below it at the full width, on
+   the catalogue's own grid — a card there is as wide as on a category page,
+   so its foot row (price · size · «В корзину») never runs out of room. */
+.blog__read { max-width: 760px; margin-inline: auto; }
+.blog__h2 { font-size: 13px; letter-spacing: .18em; }
 /* The article body: .acc__rich already carries the shop's rich-text rules
    (headings, lists, links — the same ones a product description uses);
    this only caps the measure and gives images and quotes their own room. */
@@ -1894,6 +1910,7 @@ button, a, summary, label { touch-action: manipulation; }
   border: 1px solid var(--rule); background: var(--page); color: inherit; cursor: pointer;
 }
 .blog__prod:hover { border-color: var(--ink); }
+.blog__prod:hover .blog__prodname { text-decoration: underline; text-underline-offset: 3px; }
 /* .ph is absolute inside a sized frame everywhere else in the shop; here the
    photo IS the frame, so it is put back in flow at a fixed size. */
 .blog__prodimg { position: relative; inset: auto; width: 46px; height: 46px; flex: none; background-size: contain; }
@@ -1904,6 +1921,20 @@ button, a, summary, label { touch-action: manipulation; }
   .blog__tiletitle { font-size: 14px; }
   .blog__prod { width: 100%; }
 }
+/* While the API really is still answering (a cold miss — nothing embedded
+   in the page, nothing in the tab yet): the shapes of what is coming, grey
+   blocks where the cover, the date, the title and the text will be, instead
+   of a «…». The blocks breathe slowly; not at all for reduced motion. */
+.blog__sk, .blog__skimg, .blog__skline { pointer-events: none; }
+.blog__skimg { display: block; aspect-ratio: 1200 / 630; background: rgba(28, 26, 0, .06); margin-bottom: 9px; }
+.blog__skimg--cover { width: 100%; margin-bottom: 18px; }   /* where the article's cover will be */
+.blog__skline { display: block; height: 11px; margin: 7px 0; background: rgba(28, 26, 0, .08); }
+.blog__skline--t { height: 15px; margin: 4px 0 6px; }
+.blog__skline--h { height: 26px; width: 70%; margin: 0 0 22px; }
+.blog__body.blog__sk { min-height: 240px; }
+.blog__skimg, .blog__skline { animation: blogsk 1.3s ease-in-out infinite; }
+@keyframes blogsk { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .blog__skimg, .blog__skline { animation: none; } }
 
 /* ---------- админка: «Блог» ------------------------------------------------
    The editor itself is `adm-` markup since the phase-3 redesign
