@@ -139,9 +139,9 @@ force-inverts the letter cannot produce dark-on-dark.
 ## What the owner may rewrite — `settings.mail_texts`
 
 Three strings per letter per language are the owner's, edited in the admin's
-«Письма» tab without touching HTML: **the subject line**, **the intro
-paragraph** (the text under the greeting) and **the closing line** at the
-bottom of the letter. Everything else — the greeting itself, the order table,
+«Маркетинг → Письма» tab without touching HTML: **the subject line**, **the
+intro paragraph** (the text under the greeting) and **the closing line** at
+the bottom of the letter. Everything else — the greeting itself, the order table,
 the delivery panel, the buttons, the unsubscribe line, the footer and the legal
 line — stays as coded, because those are the parts a wrong edit breaks.
 
@@ -236,10 +236,14 @@ field the owner types into is a trap worth more than the non-breaking space.
 
 ## Previewing and test-sending
 
-**In the admin** (`/shop2/admin/` → «Письма»): the card «Письма — предпросмотр
-и тест» has a chip per template, a pill per language, a live preview iframe and
-an address box. The preview is demo data — a made-up order — so nothing real
-ever leaves the browser.
+**In the admin** (`/shop2/admin/` → «Маркетинг» → «Письма»): the tab is a list
+of the letters the shop sends by itself — the three account flows carry a
+switch, the transactional three say «всегда». Opening one opens its editor:
+the three fields on the left, the letter as the customer will see it on the
+right (redrawn from the draft as it is typed, placeholders filled in), the RU /
+ET / EN segmented control above them, and the full server render in an iframe
+under both, with the test-address box beside «Отправить мне тест». The preview
+is demo data — a made-up order — so nothing real ever leaves the browser.
 
 **By URL** (demo data, no login needed — it is the admin iframe's source):
 

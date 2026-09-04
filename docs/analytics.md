@@ -64,6 +64,9 @@ showing zeros that would read as "you have sold nothing".
 
 Four range pills — **Сегодня / 7 дней / 30 дней / 90 дней** — pick a trailing
 window ending now (not a calendar period: "30 дней" is the last 30×24 hours).
+Since the phase-3 redesign the top of the screen is four KPI cells, a bar per
+day of the window and two short lists («Топ товаров», «Искали, но не нашли»);
+everything else below is the same table it always was.
 Every KPI card also shows the change against the *immediately preceding*
 window of the same length, so "7 дней" compares against the 7 days before
 that.
@@ -73,8 +76,8 @@ that.
 | **Выручка** | Sum of `total` on orders placed in the window that were paid — `paid`, or `shipped` once the owner pressed «Отправлен» (`PAID_STATUSES`, the same rule as the Overview). Includes shipping and any promo/gift-card discount already taken off — it is the money that actually arrived and stayed; `cancelled` and `refunded` are out. |
 | **Заказы** | Count of the same paid-or-shipped orders placed in the window. |
 | **Средний чек** | Выручка ÷ Заказы. |
-| **Конверсия** | Paid orders ÷ distinct visitor sessions that viewed at least one page — "out of every 100 people who opened the shop, this many bought something." |
-| **Выручка по дням** | A small line chart, one point per calendar day, from the same paid orders. |
+| **Из корзины в заказ** | Paid orders ÷ distinct visitor sessions that viewed at least one page — "out of every 100 people who opened the shop, this many bought something." Called «Конверсия» before the redesign; same number. |
+| **Выручка по дням** | One bar per calendar day of the window (at most a fortnight of them), labelled with its weekday; today's bar is the ink one. Same paid orders. |
 | **Воронка** | How many *sessions* (not page views) reached each step: opened the shop → looked at a product → added to cart → opened checkout → finished a purchase. Each bar is a hard floor under the next — normal, since not everyone who looks buys. |
 | **Топ товаров по выручке / по просмотрам** | Which products earned the most money, and separately which were looked at the most — the two lists are often different. |
 | **Бренды: что приносит деньги** | Same idea, rolled up by brand. |
