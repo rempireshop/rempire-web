@@ -82,8 +82,15 @@ create index if not exists events_type_ref_idx
 
 -- Every money query in src/lib/analytics.ts filters "paid orders in this
 -- date range" — orders_status_idx and orders_created_idx (001_core.sql) can
--- satisfy that with a bitmap AND, but a partial composite index answers it
--- directly. Index-only, no column, no data touched — orders itself stays
--- backend-core's table.
+-- satisfy that with a bitmap AND, but a partial index answers it directly.
+-- Index-only, no column, no data touched — orders itself stays backend-core's
+-- table.
+--
+-- SUPERSEDED by 081_orders_sales_idx.sql. "Paid" has since become
+-- `status in ('paid', 'shipped')` (PAID_STATUSES in src/lib/analytics.ts), a
+-- predicate this index does not cover, so 081 drops it and creates one that
+-- does. The statement below is left exactly as it was: migrations are tracked
+-- by file name (tools/migrate.mjs), so a fresh database still runs it and
+-- 081 then removes it, while an existing database only sees 081's drop.
 create index if not exists orders_paid_created_idx
   on orders (created_at) where status = 'paid';

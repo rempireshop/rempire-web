@@ -1,10 +1,66 @@
 # Analytics — sales, traffic and search (analytics agent)
 
-What the admin's **«Аналитика»** tab shows, where every number comes from, and
-the two things that need a one-time setup step from Renat: Google Search
-Console and (optionally) the Cloudflare traffic beacon.
+What the admin's **«Обзор»** and **«Аналитика»** tabs show, where every number
+comes from, and the two things that need a one-time setup step from Renat:
+Google Search Console and (optionally) the Cloudflare traffic beacon.
 
-## What Renat sees, and what it means
+## The «Обзор» tab — the first screen, and all of it real
+
+Every figure on the Overview comes from one call, `GET /api/admin/overview/`
+(`getOverviewSummary()` in `src/lib/analytics.ts`). Nothing on that screen is
+invented any more: it used to mix a real catalogue count with a hard-coded
+«3 заказа сегодня» and a random «вчера — 5», which is worse than showing
+nothing — the owner had no way to tell which half to believe. The banner at
+the top of the panel no longer says the customers or the figures are a demo,
+because they are not; the one thing still made up, once he is signed in, is
+the sample order list shown while the shop has taken no orders at all, and the
+banner says exactly that.
+
+| Card / block | What it means for Renat |
+| --- | --- |
+| **Заказы сегодня** | How many paid orders were placed today, with «вчера — N» underneath. |
+| **Выручка за 7 дней** | Sum of `total` over the last 7×24 hours of paid orders, and the same figure ÷ 7 as the daily average. |
+| **Товаров в каталоге** | `catalogue.min.json`, the catalogue the shop actually ships — always was real. |
+| **Заканчиваются** | How many products are «мало» or «нет», with «из них нет в наличии — N» underneath. |
+| **Требует внимания** | Four queues only the owner can empty, each linking to the tab that empties it: orders paid but not yet shipped, partner (pro) requests waiting for a decision, reviews waiting for moderation, and shoppers subscribed to «сообщить о поступлении» whose letter has not gone out. All four at zero reads «Ничего не ждёт — всё разобрано.» |
+| **Последние заказы** | The five newest orders, from `/api/admin/orders/`, as before. |
+| **Заканчиваются на складе** | The first six of the same low-stock list as the card above. |
+
+Three decisions behind those numbers, all of them visible on screen and all
+three written down in the block comment above `getOverviewSummary()`:
+
+- **Which date.** `orders` has no `paid_at` column
+  (`db/migrations/001_core.sql`) — only `created_at`, and `updated_at`, which
+  moves again on every note and status change. So «заказы сегодня» means
+  *orders placed today that have been paid*, never "orders whose payment
+  landed today". The line under the cards says so: «Заказы и выручка — только
+  оплаченные, по дате заказа.»
+- **Which statuses count as paid.** `paid` **and** `shipped`
+  (`PAID_STATUSES`, top of `src/lib/analytics.ts`). Pressing «Отправлен»
+  must not make today's count and today's revenue fall over in front of the
+  owner, which is what a strict `status = 'paid'` does in a shop that ships
+  the same day. `cancelled` and `refunded` stay out: that money left again.
+  The «Аналитика» tab below reads the same constant for every money figure,
+  so the two tabs agree by construction.
+- **Which stock.** Not a query of its own: `getOverrides()`
+  (`src/lib/orders.ts`) already merges the numeric levels over the manual
+  в наличии/мало/нет override, tracked variants only — see the module doc in
+  `src/lib/inventory.ts` for what "tracked" means. Reading that is what makes
+  «Заканчиваются» agree with the badge in the shop by construction, instead
+  of being a second opinion about the same thing.
+
+Day boundaries are **UTC**, the same convention `rangeBounds("today")` already
+uses for the «Сегодня» pill. Estonia is one or two hours ahead, so a sale made
+after 22:00/23:00 local counts towards tomorrow — worth knowing, and better
+than two different definitions of «сегодня» in one panel.
+
+Without a backend behind it (the standalone prototype, or a browser that is
+not signed in) the Overview keeps the demo numbers it always had, and the
+banner calls them a demo. If the call itself fails while signed in, the panel
+falls back to the same demo numbers and says so in one line rather than
+showing zeros that would read as "you have sold nothing".
+
+## What Renat sees on «Аналитика», and what it means
 
 Four range pills — **Сегодня / 7 дней / 30 дней / 90 дней** — pick a trailing
 window ending now (not a calendar period: "30 дней" is the last 30×24 hours).
@@ -14,8 +70,8 @@ that.
 
 | Card / section | What it means for Renat |
 | --- | --- |
-| **Выручка** | Sum of `total` on orders that reached `paid` in the window. Includes shipping and any promo/gift-card discount already taken off — it is the money that actually arrived. |
-| **Заказы** | Count of orders that became `paid` in the window. |
+| **Выручка** | Sum of `total` on orders placed in the window that were paid — `paid`, or `shipped` once the owner pressed «Отправлен» (`PAID_STATUSES`, the same rule as the Overview). Includes shipping and any promo/gift-card discount already taken off — it is the money that actually arrived and stayed; `cancelled` and `refunded` are out. |
+| **Заказы** | Count of the same paid-or-shipped orders placed in the window. |
 | **Средний чек** | Выручка ÷ Заказы. |
 | **Конверсия** | Paid orders ÷ distinct visitor sessions that viewed at least one page — "out of every 100 people who opened the shop, this many bought something." |
 | **Выручка по дням** | A small line chart, one point per calendar day, from the same paid orders. |
@@ -193,6 +249,7 @@ never a regression.
 | Route | What it does |
 | --- | --- |
 | `POST /api/track/` | Public. `{sid, type, path?, productId?, value?, lang?, ref?}`, ≤ 1 KB. 60/minute/IP. Always 204 for anything it could not use (bad JSON, unknown `type`, a bot User-Agent, no database) — a beacon caller never reads the body anyway. `ua_class` and `country` come from the request's own headers, never the body. |
+| `GET /api/admin/overview/` | requireAdmin. Everything on the «Обзор» tab: `{orders:{today,yesterday}, revenue7d:{total,perDay,orders}, lowStock:{total,low,out,items}, attention:{ordersToShip,proRequests,reviewsPending,stockAlerts}}`. No parameters — the windows are fixed (today, yesterday, the last 7×24 h). `no-store`; 503 `db_unavailable` when there is no database. |
 | `GET /api/admin/analytics/?range=today\|7d\|30d\|90d` | requireAdmin. Everything on the tab except the GSC block, one `Promise.all` of small indexed queries (`src/lib/analytics.ts`). |
 | `GET /api/admin/analytics/gsc/` | requireAdmin. `{ok:false,error:"not_configured"}` (200 — an ordinary state, not a failure) when the env above is not set; `{ok:false,error:"fetch_failed"}` (502) if Google's API errors; otherwise the cached-or-live summary. |
 | `GET`/`POST /api/cron/events-retention/` | `authorization: Bearer <CRON_SECRET>`, same shape as `/api/cron/flows`. Deletes `events` rows older than 90 days. Registered in `vercel.json` at 03:30 daily. |
@@ -207,12 +264,22 @@ never a regression.
 - `tests/events.test.ts` — `src/lib/events.ts` directly (clamping, dropped
   bad values, the search-term/result-count convention, `deleteOldEvents`),
   and the retention cron route's auth.
+- `tests/overview.test.ts` — `getOverviewSummary()` and its route: a fresh
+  database is all zeros (no invented «вчера — 5»); today apart from yesterday
+  across the UTC boundary; an order still counted after it is marked
+  «Отправлен»; the seven-day sum and its ÷ 7 average; low stock from a real
+  count where there is one and from the manual override elsewhere, with the
+  count winning for the same product; an override for a product the catalogue
+  no longer carries ignored; and each of the four attention queues counting
+  only what is genuinely still waiting.
 - `tests/analytics.test.ts` — `getAnalyticsSummary()` against seeded orders
-  and events: the KPIs and their previous-period deltas, the revenue/brand
-  breakdowns from real order line items, the funnel's session counting (and
-  that the server's `sid:"server"` purchase row is excluded from it), viewed-
-  but-not-bought, the search-term/zero-result split, promo/gift-card/cart/
-  stock reads, and the traffic split.
+  and events: the KPIs and their previous-period deltas, an order still
+  counted in every money figure after it is marked «Отправлен» (with
+  `cancelled` and `refunded` kept out), the revenue/brand breakdowns from
+  real order line items, the funnel's session counting (and that the
+  server's `sid:"server"` purchase row is excluded from it), viewed-but-not-
+  bought, the search-term/zero-result split, promo/gift-card/cart/stock
+  reads, and the traffic split.
 - `tests/gsc.test.ts` — signs a real RS256 JWT against a throwaway keypair
   generated in the test and verifies the signature Google's own verifier
   would check, stubs the two Google endpoints, and checks the 24 h

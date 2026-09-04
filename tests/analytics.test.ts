@@ -6,9 +6,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken } from "@/lib/auth";
-import { getAnalyticsSummary, rangeBounds } from "@/lib/analytics";
+import { getAnalyticsSummary, PAID_STATUSES, rangeBounds } from "@/lib/analytics";
 import { exec, query } from "@/lib/db";
-import { createOrder } from "@/lib/orders";
+import { createOrder, type OrderStatus } from "@/lib/orders";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
@@ -23,13 +23,15 @@ const days = (n: number) => new Date(NOW.getTime() - n * 86_400_000);
 const customer = { name: "Мария Тамм", email: "maria@example.com", phone: "+372 5555 5555" };
 
 /** createOrder() always makes a fresh, unpaid, now-stamped order — this backdates
- *  it and marks it paid, exactly what would have happened on the real paid
- *  transition (src/lib/payments/apply.ts), without re-implementing pricing here.
- *  Returns the order (id + its real total, which includes shipping — a test
- *  must compare against THIS, not against price × qty on its own). */
-async function paidOrderAt(items: Array<{ id: string; qty: number }>, at: Date) {
+ *  it and marks it paid (or whatever `status` says: 'shipped' is what «Отправлен»
+ *  leaves behind), exactly what would have happened on the real paid transition
+ *  (src/lib/payments/apply.ts) plus the admin's status button, without
+ *  re-implementing pricing here. Returns the order (id + its real total, which
+ *  includes shipping — a test must compare against THIS, not against price × qty
+ *  on its own). */
+async function orderAt(items: Array<{ id: string; qty: number }>, at: Date, status: OrderStatus = "paid") {
   const o = await createOrder({ lang: "ru", items, customer, shipping: { method: "parcel", country: "EE" } });
-  await query("update orders set status = 'paid', created_at = $2, updated_at = $2 where id = $1", [o.id, at.toISOString()]);
+  await query("update orders set status = $2, created_at = $3, updated_at = $3 where id = $1", [o.id, status, at.toISOString()]);
   return o;
 }
 
@@ -56,10 +58,10 @@ describe("getAnalyticsSummary", () => {
   });
 
   it("computes revenue, orders and AOV for paid orders in range only, with a previous-period delta", async () => {
-    const o1 = await paidOrderAt([{ id: productA.id, qty: 1 }], days(2));   // in the 7d window
-    const o2 = await paidOrderAt([{ id: productA.id, qty: 2 }], days(3));   // in the 7d window
-    await paidOrderAt([{ id: productA.id, qty: 1 }], days(20));  // well outside 7d and its previous period
-    const o3 = await paidOrderAt([{ id: productA.id, qty: 5 }], days(10)); // the PREVIOUS 7-day period (7..14 days back)
+    const o1 = await orderAt([{ id: productA.id, qty: 1 }], days(2));   // in the 7d window
+    const o2 = await orderAt([{ id: productA.id, qty: 2 }], days(3));   // in the 7d window
+    await orderAt([{ id: productA.id, qty: 1 }], days(20));  // well outside 7d and its previous period
+    const o3 = await orderAt([{ id: productA.id, qty: 5 }], days(10)); // the PREVIOUS 7-day period (7..14 days back)
     const unpaid = await createOrder({ lang: "ru", items: [{ id: productA.id, qty: 9 }], customer, shipping: { method: "parcel", country: "EE" } });
     await query("update orders set created_at = $2 where id = $1", [unpaid.id, days(1).toISOString()]); // stays 'new'
 
@@ -74,6 +76,46 @@ describe("getAnalyticsSummary", () => {
     expect(a.kpi.revenue.deltaPct).not.toBeNull();
   });
 
+  it("keeps counting an order after «Отправлен» — shipped is money that stayed; cancelled and refunded are not", async () => {
+    // Same-day shipping is the norm here: if 'shipped' dropped out of the money
+    // queries, every figure on the tab would fall over the moment the owner
+    // pressed the button. PAID_STATUSES (src/lib/analytics.ts) is the one rule
+    // both tabs share; this pins «Аналитика» to it.
+    const shipped = await orderAt([{ id: productA.id, qty: 1 }], days(1), "shipped");
+    await orderAt([{ id: productB.id, qty: 1 }], days(1), "cancelled"); // money left again
+    await orderAt([{ id: productB.id, qty: 1 }], days(1), "refunded");  // and again
+    await event({ at: days(1), sid: "s1", type: "product", productId: productA.id }); // viewed, then bought (shipped)
+
+    const a = await getAnalyticsSummary("7d", NOW);
+    expect(a.kpi.orders.value).toBe(1);
+    expect(a.kpi.revenue.value).toBeCloseTo(shipped.total, 2);
+    expect(a.revenueByDay).toHaveLength(1);
+    expect(a.revenueByDay[0]).toMatchObject({ orders: 1 });
+    expect(a.revenueByDay[0].revenue).toBeCloseTo(shipped.total, 2);
+    expect(a.topProductsByRevenue.map((p) => p.id)).toEqual([productA.id]);
+    expect(a.brandRevenue.map((b) => b.brand)).toEqual([productA.b]);
+    // bought (in the shipped order) → not «смотрят, но не покупают»
+    expect(a.viewedNotBought.map((p) => p.id)).not.toContain(productA.id);
+  });
+
+  it("keeps the partial index on orders literally in sync with PAID_STATUSES", async () => {
+    // Postgres uses a partial index only when the query's predicate implies
+    // the index's. The money queries filter `status in (PAID_SQL)`, so the
+    // index in db/migrations/081_orders_sales_idx.sql must spell out exactly
+    // the same statuses — widen one without the other and the index is dead
+    // weight (which is what happened to 080's `status = 'paid'` one).
+    const rows = await query<{ indexname: string; indexdef: string }>(
+      `select indexname, indexdef from pg_indexes
+        where tablename = 'orders' and indexname in ('orders_sales_created_idx', 'orders_paid_created_idx')`,
+    );
+    expect(rows.map((r) => r.indexname)).toEqual(["orders_sales_created_idx"]); // and the 080 one is dropped
+    const def = rows[0].indexdef;
+    expect(def).toContain("(created_at)");
+    // Postgres stores `in ('paid', 'shipped')` as `= ANY (ARRAY['paid'::text, 'shipped'::text])`
+    const literals = [...def.matchAll(/'([a-z_]+)'::/g)].map((m) => m[1]).sort();
+    expect(literals).toEqual([...PAID_STATUSES].sort());
+  });
+
   it("bounds today/7d/30d/90d as trailing windows ending now, each one longer than the last", () => {
     const t = rangeBounds("today", NOW), d7 = rangeBounds("7d", NOW), d30 = rangeBounds("30d", NOW), d90 = rangeBounds("90d", NOW);
     expect(t.to.getTime()).toBe(NOW.getTime());
@@ -86,8 +128,8 @@ describe("getAnalyticsSummary", () => {
   });
 
   it("breaks revenue down by product and by brand from the paid orders' own line items", async () => {
-    await paidOrderAt([{ id: productA.id, qty: 1 }], days(1));
-    await paidOrderAt([{ id: productB.id, qty: 1 }], days(1));
+    await orderAt([{ id: productA.id, qty: 1 }], days(1));
+    await orderAt([{ id: productB.id, qty: 1 }], days(1));
     const a = await getAnalyticsSummary("7d", NOW);
 
     const top = a.topProductsByRevenue.find((p) => p.id === productA.id);
