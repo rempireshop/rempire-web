@@ -418,15 +418,21 @@ body:has(.stickybar) .ftr {
 .card__add:hover { border-bottom-color: var(--ink); }
 .card__add:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .card__add--notify { color: var(--muted); border-bottom-color: rgba(28, 26, 0, .25); flex: 0 1 auto !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-/* Variant 2b for narrow cards: the row «7,90 € · 75 мл · В корзину» does not
-   fit a 155px phone card once the size label is long or the fallback font is
-   wide, so under 480px the link becomes the bag icon (aria-label keeps the
-   name) and drops its underline. */
+/* Narrow cards (two per row on a phone): the row «7,90 € · 75 мл · В корзину»
+   does not fit a 155px card once the size label is long or the fallback font
+   is wide. The link keeps its words — a bag icon on its own was not obvious
+   enough to the owner — and takes a second line of the foot, right-aligned,
+   under the price and the size. The icon in the markup stays unused. */
 .card__bag { display: none; flex: none; }
 @media (max-width: 480px) {
-  .card__add:not(.card__add--notify) { border-bottom: 0; padding: 4px 2px; }
-  .card__add:not(.card__add--notify) .card__addtxt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .card__add:not(.card__add--notify) .card__bag { display: block; }
+  .card__foot { flex-wrap: wrap; row-gap: 2px; }
+  .card__add { flex: 1 0 100% !important; text-align: right; }
+  /* the underline should sit under the words, not run the full row; the
+     «Сообщить о наличии» button has no inner span and keeps its own */
+  .card__add:not(.card__add--notify) { border-bottom: 0; }
+  .card__add:not(.card__add--notify) .card__addtxt { border-bottom: 1px solid rgba(28, 26, 0, .4); }
+  .card__add:not(.card__add--notify):hover .card__addtxt { border-bottom-color: var(--ink); }
+  .card__add--notify { overflow: hidden; text-overflow: ellipsis; }
 }
 /* the listbox */
 .card__pop {

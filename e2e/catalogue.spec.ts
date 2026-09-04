@@ -226,9 +226,12 @@ test.describe("card size picker — layout", () => {
           }
           const s = sel.getBoundingClientRect();
           const c = card.getBoundingClientRect();
-          // 1px of slack for sub-pixel layout rounding; the row must not wrap
-          // either (its height would then be two lines).
-          if (s.right > c.right + 1 || s.left < c.left - 1 || sel.scrollWidth > sel.clientWidth + 1 || s.height > 40) {
+          // 1px of slack for sub-pixel layout rounding. On a wide viewport the
+          // row must not wrap (its height would then be two lines); under
+          // 480px the «В корзину» link deliberately takes a second line of the
+          // foot (styles.css), so two lines are the design there, three are not.
+          const maxH = window.innerWidth <= 480 ? 64 : 40;
+          if (s.right > c.right + 1 || s.left < c.left - 1 || sel.scrollWidth > sel.clientWidth + 1 || s.height > maxH) {
             escaped.push(
               `${sel.dataset.cardfoot}: foot ${Math.round(s.left)}…${Math.round(s.right)} h${Math.round(s.height)} sw${sel.scrollWidth}` +
                 ` vs card ${Math.round(c.left)}…${Math.round(c.right)}`,
