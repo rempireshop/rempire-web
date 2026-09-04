@@ -1313,7 +1313,80 @@
       "Пока пусто": "Praegu tühi",
       "Склад не принял правку": "Ladu ei võtnud muudatust vastu",
       "Не удалось сохранить статус": "Staatust ei õnnestunud salvestada",
-      "Отменено": "Tagasi võetud"
+      "Отменено": "Tagasi võetud",
+      /* админка, редизайн (этап 2): «Товар», «Салон», сканер */
+      "Размеры и цены": "Suurused ja hinnad",
+      "Фото и видео": "Fotod ja video",
+      "главное": "peamine",
+      "Название": "Nimetus",
+      "Подраздел": "Alajaotus",
+      "у этого раздела нет подразделов": "sellel jaotusel pole alajaotusi",
+      "Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dmitri. Kõike muud sellel lehel muudate ise.",
+      "Нет в наличии": "Pole laos",
+      "Показывать в магазине": "Näidata poes",
+      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Kõik kataloogi tooted on poes näha. Toote päriselt eemaldamiseks kirjutage Dmitrile; müügi peatamiseks valige «Pole laos».",
+      "Салон, €": "Salong, €",
+      "Остаток": "Jääk",
+      "Штрихкод": "Triipkood",
+      "один объём": "üks maht",
+      "сканер ›": "skanner ›",
+      "Убрать размер": "Eemalda suurus",
+      "+ Размер": "+ Suurus",
+      "Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dmitri. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
+      "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui seda on 3 või vähem. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
+      "Левее": "Vasakule",
+      "Правее": "Paremale",
+      "Убрать фото": "Eemalda foto",
+      "Фото с телефона": "Foto telefonist",
+      "Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Водяной знак ставится сам.": "Esimene foto on peamine: seda näeb kataloogis, otsingus ja kirjades. ← → muudavad järjekorda, ★ teeb foto peamiseks. Vesimärk lisandub ise.",
+      "Какое фото показывать для каждого объёма.": "Millist fotot iga mahu juures näidata.",
+      "Откуда видео": "Kust video tuleb",
+      "Загрузить": "Laadi üles",
+      "Ссылка на reel или пост": "Reeli või postituse link",
+      "Ссылка на видео": "Video link",
+      "Выбрать видео на телефоне · MP4 или MOV до 60 МБ": "Vali telefonist video · MP4 või MOV kuni 60 MB",
+      "Убрать видео": "Eemalda video",
+      "Пусто — блока с видео на странице товара нет.": "Tühi — tootelehel videoplokki ei ole.",
+      "Язык описания": "Kirjelduse keel",
+      "Написать черновик": "Kirjuta mustand",
+      "Перевести с русского": "Tõlgi vene keelest",
+      "Русский — основной. Эстонский и английский можно перевести одной кнопкой и поправить. Пусто — на странице товара показывается текст магазина (он виден в подсказке поля).": "Vene keel on põhikeel. Eesti ja inglise keele saab ühe nupuga tõlkida ja üle vaadata. Tühi — tootelehel näidatakse poe enda teksti (see on välja vihjes näha).",
+      "Заголовок для Google": "Pealkiri Google'i jaoks",
+      "Описание для Google": "Kirjeldus Google'i jaoks",
+      "Заполнить автоматически": "Täida automaatselt",
+      "Это то, что человек видит в поиске Google. Пусто — Google берёт текст со страницы сам.": "Seda näeb inimene Google'i otsingus. Tühi — Google võtab teksti lehelt ise.",
+      "Начните вводить название — товар найдётся.": "Hakake nime sisestama — toode leitakse.",
+      "· без кода": "· ilma koodita",
+      "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Suunake triipkoodile. Toode leitakse ise — jääb üle kogus märkida.",
+      "Найдено ·": "Leitud ·",
+      "Сканировать дальше": "Skaneeri edasi",
+      "Код не привязан ·": "Kood pole seotud ·",
+      "К какому товару?": "Millise tootega?",
+      "Начните вводить название": "Hakake nime sisestama",
+      "Продажа: товар добавится в корзину": "Müük: toode läheb ostukorvi",
+      "Склад: приёмка и списание": "Ladu: vastuvõtt ja mahakandmine",
+      "или введите код вручную": "või sisestage kood käsitsi",
+      "Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.": "Seesama ekraan on telefonis eraldi rakendus «Rempire Skanner». Sisse pääseb ainult omanik.",
+      "Нет на складе": "Laos pole",
+      "Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».": "Hakake sisestama nime, brändi või triipkoodi — või vajutage «Skaneeri».",
+      "наличные": "sularaha",
+      "терминал": "terminal",
+      "Снять с продажи?": "Eemaldada müügilt?",
+      "Снять": "Eemalda",
+      "Остаток — целое число от 0. Пусто — оставить как есть.": "Jääk on täisarv alates 0-st. Tühi — jätta nii, nagu on.",
+      "Не удалось привязать штрихкод": "Triipkoodi ei õnnestunud siduda",
+      "Оформить продажу?": "Vormistada müük?",
+      "Оформить": "Vormista",
+      "← Товары": "← Tooted",
+      "Открыть в магазине ↗": "Ava poes ↗",
+      "Снять с продажи": "Eemalda müügilt",
+      "Войдите в панель, чтобы оформлять продажи": "Logige sisse, et müüke vormistada",
+      "Название, бренд или штрихкод": "Nimetus, bränd või triipkood",
+      "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "Nuppudel olevad hinnad lähevad tšekile. Salongi allahindlus märgitakse ostukorvis protsendina.",
+      "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Praegu tühi — leidke toode vasakult või skaneerige triipkood.",
+      "Почта клиента": "Kliendi e-post",
+      "Покупатель не обязателен. С почтой клиент получит чек письмом.": "Ostja pole kohustuslik. E-postiga saab klient tšeki kirjaga.",
+      "Ничего не найдено": "Midagi ei leitud"
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -2542,7 +2615,80 @@
       "Пока пусто": "Nothing yet",
       "Склад не принял правку": "The warehouse did not accept the change",
       "Не удалось сохранить статус": "Could not save the status",
-      "Отменено": "Undone"
+      "Отменено": "Undone",
+      /* админка, редизайн (этап 2): «Товар», «Салон», сканер */
+      "Размеры и цены": "Sizes and prices",
+      "Фото и видео": "Photos and video",
+      "главное": "main",
+      "Название": "Name",
+      "Подраздел": "Subsection",
+      "у этого раздела нет подразделов": "this section has no subsections",
+      "Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dmitri changes those. Everything else on this page is yours to edit.",
+      "Нет в наличии": "Out of stock",
+      "Показывать в магазине": "Show in the shop",
+      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Every catalogue product is visible in the shop. To remove one for good, write to Dmitri; to simply stop selling it, choose «Out of stock».",
+      "Салон, €": "Salon, €",
+      "Остаток": "Stock",
+      "Штрихкод": "Barcode",
+      "один объём": "one size",
+      "сканер ›": "scanner ›",
+      "Убрать размер": "Remove the size",
+      "+ Размер": "+ Size",
+      "Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dmitri adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
+      "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red at 3 or fewer. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
+      "Левее": "Left",
+      "Правее": "Right",
+      "Убрать фото": "Remove the photo",
+      "Фото с телефона": "Photo from the phone",
+      "Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Водяной знак ставится сам.": "The first photo is the main one: it shows in the catalogue, in search and in letters. ← → change the order, ★ makes a photo the main one. The watermark is added by itself.",
+      "Какое фото показывать для каждого объёма.": "Which photo to show for each size.",
+      "Откуда видео": "Where the video comes from",
+      "Загрузить": "Upload",
+      "Ссылка на reel или пост": "Link to a reel or a post",
+      "Ссылка на видео": "Video link",
+      "Выбрать видео на телефоне · MP4 или MOV до 60 МБ": "Pick a video on the phone · MP4 or MOV up to 60 MB",
+      "Убрать видео": "Remove the video",
+      "Пусто — блока с видео на странице товара нет.": "Empty — there is no video block on the product page.",
+      "Язык описания": "Description language",
+      "Написать черновик": "Write a draft",
+      "Перевести с русского": "Translate from Russian",
+      "Русский — основной. Эстонский и английский можно перевести одной кнопкой и поправить. Пусто — на странице товара показывается текст магазина (он виден в подсказке поля).": "Russian is the source. Estonian and English can be translated with one button and edited. Empty — the product page shows the shop's own text (visible in the field's hint).",
+      "Заголовок для Google": "Title for Google",
+      "Описание для Google": "Description for Google",
+      "Заполнить автоматически": "Fill in automatically",
+      "Это то, что человек видит в поиске Google. Пусто — Google берёт текст со страницы сам.": "This is what a person sees in Google search. Empty — Google takes the text off the page itself.",
+      "Начните вводить название — товар найдётся.": "Start typing the name — the product will turn up.",
+      "· без кода": "· no code",
+      "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Point at the barcode. The product finds itself — all that is left is the quantity.",
+      "Найдено ·": "Found ·",
+      "Сканировать дальше": "Keep scanning",
+      "Код не привязан ·": "Code not linked ·",
+      "К какому товару?": "To which product?",
+      "Начните вводить название": "Start typing the name",
+      "Продажа: товар добавится в корзину": "Sale: the product goes into the cart",
+      "Склад: приёмка и списание": "Warehouse: goods in and goods out",
+      "или введите код вручную": "or type the code by hand",
+      "Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.": "This same screen is a separate «Rempire Scanner» app on the phone. Owner access only.",
+      "Нет на складе": "Not in the warehouse",
+      "Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».": "Start typing a name, a brand or a barcode — or press «Scan».",
+      "наличные": "cash",
+      "терминал": "card terminal",
+      "Снять с продажи?": "Take it off sale?",
+      "Снять": "Take off",
+      "Остаток — целое число от 0. Пусто — оставить как есть.": "The stock is a whole number from 0 up. Empty — leave it as it is.",
+      "Не удалось привязать штрихкод": "The barcode could not be linked",
+      "Оформить продажу?": "Complete the sale?",
+      "Оформить": "Complete",
+      "← Товары": "← Products",
+      "Открыть в магазине ↗": "Open in the shop ↗",
+      "Снять с продажи": "Take off sale",
+      "Войдите в панель, чтобы оформлять продажи": "Log in to ring up sales",
+      "Название, бренд или штрихкод": "Name, brand or barcode",
+      "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "The prices on the chips are the ones that reach the receipt. The salon discount is set as a percentage in the cart.",
+      "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Empty for now — find a product on the left or scan a barcode.",
+      "Почта клиента": "Customer e-mail",
+      "Покупатель не обязателен. С почтой клиент получит чек письмом.": "The customer is optional. With an e-mail the customer gets the receipt by letter.",
+      "Ничего не найдено": "Nothing found"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -2700,9 +2846,6 @@
     [/^Один балл — одно евро\. Начисляем ([\d.,]+)% с каждой оплаченной покупки\. Списать можно при оформлении — не больше ([\d.,]+)% от суммы корзины\.$/,
       { ET: "Üks punkt on üks euro. Kogume $1% igast tasutud ostust. Kasutada saab tellimuse vormistamisel — kuni $2% ostukorvi summast.",
         EN: "One point is one euro. We credit $1% of every paid purchase. Redeem it at checkout — up to $2% of the cart total." }],
-    // integration: goods-editor pro-price hint (proPriceHint())
-    [/^Сейчас для салонов: (.+) — своя цена$/, { ET: "Praegu salongile: $1 — oma hind", EN: "Currently for salons: $1 — custom price" }],
-    [/^Сейчас для салонов: (.+) \(скидка ([\d.,]+)%\)$/, { ET: "Praegu salongile: $1 (allahindlus $2%)", EN: "Currently for salons: $1 (discount $2%)" }],
     // integration: admin «Склад» search count — mirrors the catalogue's own
     // "первые 24" rules just above, only the shown-count differs (60 rows)
     [/^Показаны первые 60 из (\d+) по запросу «(.+)»$/, { ET: "Kuvatud esimesed 60, kokku $1 · otsing „$2“", EN: "First 60 shown, $1 in total · search “$2”" }],
@@ -2724,6 +2867,26 @@
     [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
       { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Läti, Leedu ja teiste riikide vaikehinnad on endiselt vedajate tariifidest madalamad — vt docs/shipping.md.",
         EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }]
+    /* админка, редизайн (этап 2): «Товар», «Салон» и сканер — строки с числом
+       или названием внутри. */
+    [/^Цены и остатки — на вкладке «Размеры и цены»\. Салон платит на ([\d.,]+) % меньше, если для товара не задана своя цена\.$/,
+      { ET: "Hinnad ja jäägid on vahekaardil «Suurused ja hinnad». Salong maksab $1 % vähem, kui tootele pole oma hinda pandud.",
+        EN: "Prices and stock are on the «Sizes and prices» tab. A salon pays $1 % less unless the product has a price of its own." }],
+    [/^(.+) … купить в Таллинне \| Rempire$/, { ET: "$1 … osta Tallinnas | Rempire", EN: "$1 … buy in Tallinn | Rempire" }],
+    [/^Принять \+(\d+)$/, { ET: "Võta vastu +$1", EN: "Take in +$1" }],
+    [/^Списать −(\d+)$/, { ET: "Kanna maha −$1", EN: "Write off −$1" }],
+    [/^Добавить в продажу · (\d+)$/, { ET: "Lisa müüki · $1", EN: "Add to the sale · $1" }],
+    [/^на складе (\d+)$/, { ET: "laos $1", EN: "in stock $1" }],
+    [/^Снято с продажи · (.+)$/, { ET: "Eemaldatud müügilt · $1", EN: "Taken off sale · $1" }],
+    [/^(\d+) поз\. · (.+) · остатки списаны$/,
+      { ET: "$1 rida · $2 · jäägid maha kantud", EN: "$1 lines · $2 · stock written off" }],
+    /* the confirm card before a salon sale — one pre-line block, so the whole
+       thing is one text node (same shape as the shipping confirm above) */
+    [/^([\s\S]+)\n\nИтого (.+) · (.+)$/, { ET: "$1\n\nKokku $2 · $3", EN: "$1\n\nTotal $2 · $3" }],
+    /* the confirm card before a product is taken off sale — one pre-line block */
+    [/^(.+) — (.+)\nВ магазине останется страница товара, но купить его будет нельзя\. Вернуть можно здесь же — «Наличие»\.$/,
+      { ET: "$1 — $2\nTootel jääb poes leht alles, aga osta seda ei saa. Tagasi saab siinsamas — «Saadavus».",
+        EN: "$1 — $2\nThe product page stays in the shop, but nobody can buy it. Put it back right here — «Availability»." }],
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -8994,10 +9157,9 @@
     // «Товары» owns the goods editor too, but the editor keeps the whole pane
     // to itself: a tab strip above an unsaved edit is a way to lose it.
     else if (tab === "goods" || tab === "stock") {
-      body = S.adminEdit
-        ? '<div class="adm-legacy">' + goodsEditor(byId(S.adminEdit)) + "</div>"
-        : admProductsHTML();
+      body = S.adminEdit ? goodsEditor(byId(S.adminEdit)) : admProductsHTML();
     }
+    else if (tab === "pos") body = admSalonHTML();
     else body = '<div class="adm-legacy">' + admLegacyHTML(tab) + "</div>";
 
     return admHeader("Админка") +
@@ -9030,7 +9192,6 @@
     }).join("") + "</div>";
   }
   function admLegacyHTML(tab) {
-    if (tab === "pos") return admHead("", "Салон", "") + admPosHTML();
     if (tab === "people" || tab === "reviews") {
       var pend = (S.admReviews && S.admReviews.counts && S.admReviews.counts.pending) || 0;
       return admHead("", "Клиенты", "") +
@@ -11009,20 +11170,6 @@
       toast("Видео загружено ✓");
     }).catch(vidFail);
   }
-  /* No drag-and-drop here on purpose: the one drop zone in this editor belongs
-     to the photo list, and a 60 MB file dropped on it by accident should stay
-     a photo error rather than silently becoming a video. */
-  function vidUploadZone(p) {
-    return '<div class="admphoto__drop">' +
-      '<button class="btn btn--ghost btn--sm" data-vidup="' + esc(p.id) + '"' +
-        (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" + (UP.busy ? upBusyText() : "Загрузить видео") + "</button>" +
-      '<input class="admphoto__file" type="file" accept="video/mp4,video/quicktime"' +
-        ' data-vidfile="' + esc(p.id) + '" aria-label="Загрузить видео">' +
-      '<span class="muted admphoto__hint">MP4 или MOV, до 60 МБ. Файл ложится в ваше хранилище — на сторонние сайты ничего не уходит.</span>' +
-      "</div>" +
-      (MEDIA.on === false ? '<p class="admphoto__off">Загрузка видео пока не настроена — нужно подключить хранилище.</p>' : "") +
-      (UP.err ? '<p class="admphoto__err">' + esc(UP.err) + "</p>" : "");
-  }
 
   /* The drop zone doubles as the button row: `data-galdrop` carries the product
      id, or "hero" for the banner, so one pair of listeners serves both. */
@@ -11036,29 +11183,6 @@
       "</div>" +
       (MEDIA.on === false ? '<p class="admphoto__off">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
       (UP.err ? '<p class="admphoto__err">' + esc(UP.err) + "</p>" : "");
-  }
-  function galBlock(p) {
-    var list = galDraft(p), n = list.length;
-    return '<div class="sec__head sec__head--sub"><h3 class="sec__title">Фото</h3></div>' +
-      '<p class="muted admphoto__intro">Первая фотография — главная: её видно в каталоге, в поиске и в письмах. Перетащите файлы сюда или нажмите кнопку.</p>' +
-      (n
-        ? '<div class="admphoto__grid">' + list.map(function (ph, i) {
-            return '<div class="admphoto__item' + (i === 0 ? " is-main" : "") + '">' +
-              '<span class="admphoto__ph" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
-              (i === 0 ? '<span class="admphoto__badge">Главное фото</span>' : "") +
-              '<span class="admphoto__ops">' +
-                '<button class="iconbtn" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
-                '<button class="iconbtn" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button>' +
-                (i === 0 ? "" : '<button class="link" data-galmain="' + i + '">Сделать главным</button>') +
-                '<button class="link" data-galdel="' + i + '">Удалить</button>' +
-              "</span></div>";
-          }).join("") + "</div>"
-        : '<p class="muted">Фотографий нет — загрузите первую.</p>') +
-      galDropZone(p.id, "Загрузить фото", "JPEG, PNG или WebP, до 12 МБ. Фотография уменьшится и станет лёгкой сама.") +
-      (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset
-        ? '<div class="adm__acts"><button class="btn btn--ghost btn--sm" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
-        : "") +
-      (galDirty(p) ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "");
   }
   /**
    * Which draft photo «Фото по объёмам» should have ticked for one size.
@@ -11079,17 +11203,6 @@
   }
 
 
-  /** wholesale/loyalty: the price a salon pays right now — the override if
-      one is set, otherwise the base price minus the global discount, so the
-      owner sees the real number before typing anything here. "" while the
-      discount setting has not loaded yet (loadAdminPricing() below) and no
-      override is set — nothing to compute from. */
-  function proPriceHint(p) {
-    if (p.proPrice != null) return "Сейчас для салонов: " + eur(p.proPrice) + " — своя цена";
-    if (!S.pricingLoaded) return "";
-    var eff = Math.round(p.price * (1 - S.pricingLoaded.proDiscountPct / 100) * 100) / 100;
-    return "Сейчас для салонов: " + eur(eff) + " (скидка " + S.pricingLoaded.proDiscountPct + "%)";
-  }
   /* ---- the editor's own «нет» -------------------------------------------
      A value the editor cannot use has to be refused OUT LOUD. It used to be
      dropped in silence: «abc», «-5», «0» and «1e9» in the price box all left
@@ -11129,111 +11242,289 @@
     if (!isFinite(n) || n < 1 || n > 500) return null;
     return Math.round(n * 100) / 100;
   }
-  function goodsEditor(p) {
-    loadAdminPricing(false);   // wholesale/loyalty: for proPriceHint() above
+  /* ---------- Товар: the editor ------------------------------------------
+     Redesign phase 2 (docs/design/admin-handoff-README.md § «Товар (editor)»).
+     Five tabs over ONE form — Основное · Размеры и цены · Фото и видео ·
+     Описание · Google — with a sticky save bar under all of them.
+
+     All five panes are in the DOM at once; the inactive ones carry `hidden`.
+     This form is the only one in the panel with no draft in S: every field is
+     read straight off the DOM when «Сохранить» is pressed (see the
+     [data-admsavegoods] handler and GOODS_FIELDS), so a tab that unmounted
+     its inputs would silently throw away everything typed on it the moment
+     the owner looked at another tab. Switching tabs is therefore a DOM patch
+     (edShowTab below), not a render() — same reasoning as goodsFail().
+
+     What the catalogue owns, the panel shows read-only with one line saying
+     so: the name, the brand, the section and the list of sizes live in
+     src/data/catalogue*.json and no admin route writes them. A box that
+     accepted a new name and dropped it on save would be the worst kind of
+     lie this editor can tell. */
+  var ED_TABS = [["main", "Основное"], ["sizes", "Размеры и цены"], ["media", "Фото и видео"],
+    ["desc", "Описание"], ["seo", "Google"]];
+  function edTab() { return S.goodsEditTab || "main"; }
+  /** The stock row behind one size — null while «Склад» has not loaded, or
+      when nobody has ever counted this variant (`tracked` false). */
+  function edStockFor(p, variant) {
+    var rows = S.stockLevels || [];
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].productId === p.id && (rows[i].variant || "") === (variant || "")) return rows[i];
+    }
+    return null;
+  }
+  /** wholesale/loyalty: the discount a salon gets when the product has no
+      price of its own — the real setting, not the prototype's flat 20 %. */
+  function edSalonPct() {
+    return (S.pricingLoaded && S.pricingLoaded.proDiscountPct != null) ? S.pricingLoaded.proDiscountPct : 20;
+  }
+  function edSalonOf(price) { return Math.round(price * (1 - edSalonPct() / 100) * 100) / 100; }
+  /** Which size (if any) shows this photo — the tag the design puts on every
+      picture after the first. Reads the draft list, like the picker below. */
+  function edPhotoTag(p, i) {
+    if (i === 0) return "главное";
+    var names = [];
+    if (p.sizes && p.sizes.length) {
+      for (var s = 0; s < p.sizes.length; s++) if (galSizePick(p, s) === i) names.push(p.sizes[s]);
+    }
+    return names.join(" · ");
+  }
+  /** YouTube · Instagram · Загрузить — which chip is lit. Derived from the
+      value in the field, so a pasted reel selects «Instagram» by itself. */
+  function edVideoKind(url) {
+    if (S.goodsVidKind) return S.goodsVidKind;
+    if (/instagram\.com/i.test(url)) return "ig";
+    if (url && !/youtu|vimeo/i.test(url)) return "up";
+    return "yt";
+  }
+  function edPaneMain(p) {
     var subs = SUBCATS[p.cat] || [];
     var curSub = DEMO.subcat[p.id] || "";
-    /* media: the size→photo picker below reads the list the owner is editing,
-       not the saved one, so a photo uploaded a second ago can be assigned to
-       «500 мл» in the same visit. */
-    var g = galDraft(p).map(function (ph) { return ph.thumb || ph.url; });
-    var seoT = (p.seo && p.seo.t) || "";
-    var seoD = (p.seo && p.seo.d) || "";
-    // assistant-work: the trilingual description override — dov holds only
-    // what the owner (or the AI) wrote for this product; the fields stay
-    // empty when there is none, and the static shop text shows through the
-    // placeholder so the owner can see what a shopper sees right now.
-    var dov = p.descOv || {};
-    var descHint = "Текста пока нет — можно написать вручную или сгенерировать с ИИ";
-    var descPhRU = (stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "") || descHint).slice(0, 300);
-    var descPhET = (stripTags(typeof CONTENT_ET !== "undefined" ? CONTENT_ET[p.id] : "") || descHint).slice(0, 300);
-    var descPhEN = (stripTags(typeof CONTENT !== "undefined" ? CONTENT[p.id] : "") || descHint).slice(0, 300);
-    var descUndoShown = AI_UNDO && AI_UNDO.id === p.id;
-    return '<button class="link" data-admclose>← Все товары</button>' +
-      '<div class="adm__ohead"><span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" +
-        '<div><h2 class="sec__title" style="font-size:18px">' + esc(p.brand) + " — " + esc(p.name) + "</h2>" +
-        '<button class="link" data-go-product="' + p.id + '" style="font-size:13px">Открыть в магазине →</button></div></div>' +
-
-      '<div class="adm__ocols">' +
-      '<div>' +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Основное</h3></div>' +
-        '<label class="field"><span class="field__label">Цена, €</span><input class="input" data-edprice inputmode="decimal" value="' + p.price + '"></label>' +
-        // wholesale/loyalty: salon/pro price override, next to retail — empty
-        // means "no override", the effective price still shown as a hint below
-        '<label class="field"><span class="field__label">Цена для салонов, €</span><input class="input" data-edproprice inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '">' +
-          (proPriceHint(p) ? '<span class="muted" style="display:block;font-size:11px;margin-top:2px">' + proPriceHint(p) + '</span>' : "") +
-        '</label>' +
-        '<label class="field"><span class="field__label">Наличие</span><span class="sel sel--box"><select data-edstock>' +
-          [["in", "в наличии"], ["low", "мало"], ["out", "нет в наличии"]].map(function (o) {
-            return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
-          }).join("") + "</select></span></label>" +
-        '<label class="field"><span class="field__label">Раздел</span><span class="sel sel--box"><select disabled>' +
-          CATS.map(function (c) { return "<option" + (c.id === p.cat ? " selected" : "") + ">" + c.name + "</option>"; }).join("") + "</select></span></label>" +
-        (subs.length
-          ? '<label class="field"><span class="field__label">Подкатегория</span><span class="sel sel--box"><select data-edsubcat>' +
-            '<option value=""' + (curSub ? "" : " selected") + '>Авто — по названию</option>' +
-            subs.map(function (s2) { return '<option value="' + s2.id + '"' + (curSub === s2.id ? " selected" : "") + ">" + s2.name + "</option>"; }).join("") +
-            "</select></span></label>"
-          : "") +
-        galBlock(p) +   // media: «Фото» — the gallery and the upload button
-        (p.sizes && p.sizes.length > 1 && g.length > 1
-          ? '<div class="sec__head sec__head--sub"><h3 class="sec__title">Фото по объёмам</h3></div>' +
-            '<p class="muted" style="font-size:12.5px;margin:2px 0 8px">Какая фотография показывается для каждого объёма. Заполняется из данных магазина автоматически; здесь можно поправить вручную.</p>' +
-            p.sizes.map(function (sz, si) {
-              // media: follows the photo, not its position, so reordering and
-              // deleting above do not silently repoint a size at another photo
-              var cur = galSizePick(p, si);
-              return '<div class="adm__vrow" data-vrow="' + si + '"><span class="adm__vsz">' + esc(sz) + "</span>" +
-                g.map(function (u, gi) {
-                  return '<button class="adm__vthumb" data-vpick="' + si + ":" + gi + '" aria-current="' + (cur === gi) + '" style="background-image:url(\'' + esc(u) + '\')" aria-label="Фото ' + (gi + 1) + '"></button>';
-                }).join("") + "</div>";
-            }).join("")
-          : "") +
-      "</div>" +
-
-      '<div>' +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">SEO для Google</h3></div>' +
-        '<label class="field"><span class="field__label">Заголовок (до 60 знаков)</span><input class="input" data-edseot maxlength="70" value="' + esc(seoT) + '" placeholder="Kevin.Murphy … купить в Таллинне | Rempire"></label>' +
-        '<label class="field"><span class="field__label">Описание (до 155 знаков)</span><textarea class="input" data-edseod rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(seoD) + "</textarea></label>" +
-        '<button class="btn btn--ghost btn--sm" data-admseogen="' + p.id + '">SEO-тексты</button>' +
-        /* features: one optional video per product. Stored in the demo layer
-           and sent to the server as product_overrides.video_url.
-           media: the same field now also takes an Instagram reel/post and the
-           address of a file uploaded through the button below — one field,
-           because on the product page it is one video either way. */
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Видео</h3></div>' +
-        '<label class="field"><span class="field__label">Видео (ссылка YouTube, Vimeo или Instagram)</span>' +
-        '<input class="input" data-edvideo value="' + esc(vidValue(p)) +
-        '" placeholder="https://youtu.be/… · https://vimeo.com/… · https://www.instagram.com/reel/…"></label>' +
-        vidUploadZone(p) +
-        '<p class="muted" style="font-size:12.5px;margin:-4px 0 12px">Вставьте ссылку или загрузите свой файл — на странице товара появится видео. Пусто — блока нет.</p>' +
-        /* assistant-work: the trilingual description override — see the `dov`
-           comment above. «Сгенерировать описание» writes the Russian field;
-           «Перевести на ET/EN» reads whatever is in the Russian field (or the
-           shop's own text when that field is empty) and fills the other two. */
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Описание</h3></div>' +
-        '<p class="muted" style="font-size:12.5px;margin:-4px 0 10px">Пусто — на странице товара показывается текст магазина (виден в подсказке поля). Своё описание для языка появляется на сайте вместо него.</p>' +
-        '<label class="field"><span class="field__label">Описание на русском</span>' +
-        '<textarea class="input" rows="4" maxlength="4000" data-eddescru placeholder="' + esc(descPhRU) + '">' + esc(dov.RU || "") + "</textarea></label>" +
-        '<div class="adm__acts" style="margin:-6px 0 14px">' +
-          '<button class="btn btn--ghost btn--sm" data-admdescgen="' + p.id + '">Сгенерировать описание</button>' +
-          '<button class="btn btn--ghost btn--sm" data-admtranslate="' + p.id + '">Перевести на ET/EN</button>' +
-          // assistant-work: patched directly (no render()) the moment a
-          // generation lands, so it appears without discarding whatever the
-          // owner is mid-typing elsewhere on this form — see the click handlers.
-          '<span data-descundoslot>' + (descUndoShown ? '<button class="link" data-admdescundo>Отменить</button>' : "") + "</span>" +
+    return '<div class="adm-edpane" data-edpane="main"' + (edTab() === "main" ? "" : " hidden") + ">" +
+      '<div class="adm-edcols">' +
+        '<div class="adm-edcol">' +
+          '<label class="adm-field">Название' +
+            '<input class="adm-input" value="' + esc(p.brand + " — " + p.name) + '" readonly></label>' +
+          '<label class="adm-field">Бренд' +
+            '<input class="adm-input" value="' + esc(p.brand) + '" readonly></label>' +
+          '<div class="adm-edpair">' +
+            '<label class="adm-field">Раздел<select class="adm-input" disabled>' +
+              CATS.map(function (c) { return "<option" + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") +
+            "</select></label>" +
+            (subs.length
+              ? '<label class="adm-field">Подраздел<select class="adm-input" data-edsubcat>' +
+                '<option value=""' + (curSub ? "" : " selected") + '>Авто — по названию</option>' +
+                subs.map(function (s2) { return '<option value="' + esc(s2.id) + '"' + (curSub === s2.id ? " selected" : "") + ">" + esc(s2.name) + "</option>"; }).join("") +
+                "</select></label>"
+              : '<label class="adm-field">Подраздел<input class="adm-input" value="" readonly placeholder="у этого раздела нет подразделов"></label>') +
+          "</div>" +
+          '<p class="adm-hint">Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.</p>' +
         "</div>" +
-        '<label class="field"><span class="field__label">Описание на эстонском</span>' +
-        '<textarea class="input" rows="4" maxlength="4000" data-eddescet placeholder="' + esc(descPhET) + '">' + esc(dov.ET || "") + "</textarea></label>" +
-        '<label class="field"><span class="field__label">Описание на английском</span>' +
-        '<textarea class="input" rows="4" maxlength="4000" data-eddescen placeholder="' + esc(descPhEN) + '">' + esc(dov.EN || "") + "</textarea></label>" +
-        // goodsFail() also fills this in place, so the message appears without
-        // a render() taking the caret out of whatever field is being fixed
-        '<p class="err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
-        '<div class="adm__acts"><button class="btn" data-admsavegoods="' + p.id + '">Сохранить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-admclose>Отмена</button></div>' +
-        '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.</p>' +
+        '<div class="adm-edcol">' +
+          '<label class="adm-field">Наличие<select class="adm-input" data-edstock>' +
+            [["in", "В наличии"], ["low", "Мало"], ["out", "Нет в наличии"]].map(function (o) {
+              return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
+            }).join("") + "</select></label>" +
+          /* The switch the design asks for, honestly dead: there is no
+             `hidden` column in product_overrides and no route that writes one
+             (src/app/api/admin/overrides), so it shows the truth — every
+             catalogue product is in the shop — and says who can change that. */
+          '<span class="adm-switch" aria-disabled="true"><span>Показывать в магазине</span>' +
+            '<span class="adm-switch__t is-on" aria-hidden="true"><i></i></span></span>' +
+          '<p class="adm-hint">Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».</p>' +
+          '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>' +
+        "</div>" +
       "</div></div>";
+  }
+  function edPaneSizes(p) {
+    loadStockLevels(false);
+    var sizes = (p.sizes && p.sizes.length) ? p.sizes : [""];
+    var prices = (p.prices && p.prices.length) ? p.prices : [p.price];
+    var head = '<div class="adm-grid__head"><span>Размер</span><span>Цена, €</span><span>Салон, €</span>' +
+      "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
+    var rows = sizes.map(function (sz, i) {
+      var lv = edStockFor(p, sz);
+      var price = prices[Math.min(i, prices.length - 1)];
+      var key = stockKey(p.id, sz);
+      var qty = lv && lv.tracked ? String(lv.qty) : "";
+      var low = lv && lv.tracked && lv.qty <= 3;
+      /* Only the first size has a price of its own here, because that is the
+         only one the shop stores: product_overrides.price patches p.price and
+         p.prices[0] (applyDemoOverrides). The rest are the catalogue's, shown
+         so the owner sees the whole ladder — read-only rather than editable
+         and quietly dropped. */
+      return '<div class="adm-grid__row">' +
+        '<span class="adm-grid__sz">' + (sz ? esc(sz) : "один объём") + "</span>" +
+        (i === 0
+          ? '<input class="adm-input adm-input--cell" data-edprice inputmode="decimal" value="' + price + '" aria-label="Цена, €">'
+          : '<input class="adm-input adm-input--cell" value="' + price + '" readonly aria-label="Цена, €">') +
+        (i === 0
+          ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
+            '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
+            '" placeholder="' + edSalonOf(price) + '" aria-label="Салон, €">'
+          : '<input class="adm-input adm-input--cell" value="' + edSalonOf(price) + '" readonly aria-label="Салон, €">') +
+        '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
+          '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">' +
+        '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
+          esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">' +
+        '<button class="adm-grid__x" type="button" disabled title="скоро" aria-label="Убрать размер">×</button>' +
+      "</div>";
+    }).join("");
+    return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
+      '<div class="adm-grid">' + head + rows + "</div>" +
+      '<button class="adm-btn adm-btn--dash" type="button" disabled title="скоро">+ Размер</button>' +
+      '<p class="adm-hint">Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
+      '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
+      "</div>";
+  }
+  function edPaneMedia(p) {
+    var list = galDraft(p), n = list.length;
+    var g = list.map(function (ph) { return ph.thumb || ph.url; });
+    var vurl = vidValue(p), vk = edVideoKind(vurl);
+    var tiles = list.map(function (ph, i) {
+      var tag = edPhotoTag(p, i);
+      return '<div class="adm-photo' + (i === 0 ? " is-main" : "") + '">' +
+        '<span class="adm-photo__img" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
+        (tag ? '<span class="adm-photo__tag' + (i === 0 ? " adm-photo__tag--ink" : "") + '">' + esc(tag) + "</span>" : "") +
+        '<span class="adm-photo__ops">' +
+          '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее">←</button>' +
+          '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее">→</button>' +
+          (i === 0 ? "" : '<button class="adm-photo__op" data-galmain="' + i + '" aria-label="Сделать главным">★</button>') +
+          '<button class="adm-photo__op" data-galdel="' + i + '" aria-label="Убрать фото">×</button>' +
+        "</span></div>";
+    }).join("");
+    return '<div class="adm-edpane" data-edpane="media"' + (edTab() === "media" ? "" : " hidden") + ">" +
+      '<div class="adm-sec"><span class="adm-sec__t">Фото</span></div>' +
+      '<div class="adm-photos" data-galdrop="' + esc(p.id) + '">' + tiles +
+        '<button class="adm-photo adm-photo--add" data-galup="' + esc(p.id) + '"' +
+          (UP.busy || MEDIA.on === false ? " disabled" : "") + '><span class="adm-photo__plus">+</span>' +
+          (UP.busy ? esc(upBusyText()) : "Фото с телефона") + "</button>" +
+        '<input class="adm-photo__file" type="file" accept="image/*" multiple data-galfile="' + esc(p.id) + '" aria-label="Загрузить фото">' +
+      "</div>" +
+      '<p class="adm-hint">Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Водяной знак ставится сам.</p>' +
+      (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
+      (UP.err ? '<p class="adm-hint adm-hint--warn">' + esc(UP.err) + "</p>" : "") +
+      (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset
+        ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
+        : "") +
+      (galDirty(p) ? '<p class="adm-hint adm-hint--warn">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      (p.sizes && p.sizes.length > 1 && g.length > 1
+        ? '<div class="adm-sec"><span class="adm-sec__t">Фото по объёмам</span></div>' +
+          '<p class="adm-hint">Какое фото показывать для каждого объёма.</p>' +
+          p.sizes.map(function (sz, si) {
+            var cur = galSizePick(p, si);
+            return '<div class="adm-vrow" data-vrow="' + si + '"><span class="adm-vrow__sz">' + esc(sz) + "</span>" +
+              g.map(function (u, gi) {
+                return '<button class="adm-vthumb" data-vpick="' + si + ":" + gi + '" aria-current="' + (cur === gi) +
+                  '" style="background-image:url(\'' + esc(u) + '\')" aria-label="Фото ' + (gi + 1) + '"></button>';
+              }).join("") + "</div>";
+          }).join("")
+        : "") +
+      '<div class="adm-sec"><span class="adm-sec__t">Видео</span></div>' +
+      '<div class="adm-chips" role="group" aria-label="Откуда видео">' +
+        [["yt", "YouTube"], ["ig", "Instagram"], ["up", "Загрузить"]].map(function (k) {
+          return '<button class="adm-chip" data-edvidkind="' + k[0] + '" aria-current="' + (vk === k[0]) + '">' + k[1] + "</button>";
+        }).join("") + "</div>" +
+      /* One field for all three, because on the product page it is one video
+         either way: an uploaded file comes back as an address and lands in
+         the same box a pasted link does (docs/media.md). */
+      '<label class="adm-field"' + (vk === "up" ? " hidden" : "") + '>' + (vk === "ig" ? "Ссылка на reel или пост" : "Ссылка на видео") +
+        '<input class="adm-input adm-mono" data-edvideo value="' + esc(vurl) + '" placeholder="' +
+        (vk === "ig" ? "https://www.instagram.com/reel/…" : "https://youtu.be/… · https://vimeo.com/…") + '"></label>' +
+      (vk === "up"
+        ? '<button class="adm-btn adm-btn--dash adm-btn--tall" data-vidup="' + esc(p.id) + '"' +
+            (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" +
+            (UP.busy ? esc(upBusyText()) : "Выбрать видео на телефоне · MP4 или MOV до 60 МБ") + "</button>" +
+          '<input class="adm-photo__file" type="file" accept="video/mp4,video/quicktime" data-vidfile="' + esc(p.id) + '" aria-label="Загрузить видео">' +
+          (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка видео пока не настроена — нужно подключить хранилище.</p>' : "")
+        : "") +
+      (vurl
+        ? '<div class="adm-vidrow"><span class="adm-vidrow__play" aria-hidden="true">▶</span>' +
+          '<span class="adm-vidrow__nm">' + esc(vurl) + "</span>" +
+          '<button class="adm-vidrow__x" data-edvidclear aria-label="Убрать видео">×</button></div>'
+        : "") +
+      '<p class="adm-hint">Пусто — блока с видео на странице товара нет.</p>' +
+      "</div>";
+  }
+  function edPaneDesc(p) {
+    var dov = p.descOv || {};
+    var lang = S.goodsDescLang || "ru";
+    var hint = "Текста пока нет — можно написать вручную или сгенерировать с ИИ";
+    var ph = {
+      ru: (stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "") || hint).slice(0, 300),
+      et: (stripTags(typeof CONTENT_ET !== "undefined" ? CONTENT_ET[p.id] : "") || hint).slice(0, 300),
+      en: (stripTags(typeof CONTENT !== "undefined" ? CONTENT[p.id] : "") || hint).slice(0, 300)
+    };
+    var box = function (code, hook, value) {
+      return '<textarea class="adm-input adm-area" rows="8" maxlength="4000" ' + hook +
+        ' placeholder="' + esc(ph[code]) + '"' + (lang === code ? "" : " hidden") + ">" + esc(value || "") + "</textarea>";
+    };
+    return '<div class="adm-edpane" data-edpane="desc"' + (edTab() === "desc" ? "" : " hidden") + ">" +
+      '<div class="adm-edbar">' +
+        '<div class="adm-seg" role="group" aria-label="Язык описания">' +
+          [["ru", "Русский"], ["et", "Eesti"], ["en", "English"]].map(function (l) {
+            return '<button class="adm-seg__b" data-eddesclang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
+          }).join("") + "</div>" +
+        '<div class="adm-acts">' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admdescgen="' + esc(p.id) + '">Написать черновик</button>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admtranslate="' + esc(p.id) + '">Перевести с русского</button>' +
+          '<span data-descundoslot>' + (AI_UNDO && AI_UNDO.id === p.id ? '<button class="adm-link" data-admdescundo>Отменить</button>' : "") + "</span>" +
+        "</div>" +
+      "</div>" +
+      box("ru", "data-eddescru", dov.RU) + box("et", "data-eddescet", dov.ET) + box("en", "data-eddescen", dov.EN) +
+      '<p class="adm-hint">Русский — основной. Эстонский и английский можно перевести одной кнопкой и поправить. Пусто — на странице товара показывается текст магазина (он виден в подсказке поля).</p>' +
+      "</div>";
+  }
+  function edPaneSeo(p) {
+    var seoT = (p.seo && p.seo.t) || "", seoD = (p.seo && p.seo.d) || "";
+    return '<div class="adm-edpane" data-edpane="seo"' + (edTab() === "seo" ? "" : " hidden") + ">" +
+      '<label class="adm-field">Заголовок для Google' +
+        '<input class="adm-input" data-edseot maxlength="70" value="' + esc(seoT) + '" placeholder="' + esc(p.brand) + ' … купить в Таллинне | Rempire"></label>' +
+      '<label class="adm-field">Описание для Google' +
+        '<textarea class="adm-input adm-area adm-area--sm" data-edseod rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(seoD) + "</textarea></label>" +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admseogen="' + esc(p.id) + '">Заполнить автоматически</button>' +
+      '<p class="adm-hint">Это то, что человек видит в поиске Google. Пусто — Google берёт текст со страницы сам.</p>' +
+      "</div>";
+  }
+  function goodsEditor(p) {
+    loadAdminPricing(false);   // wholesale/loyalty: for the salon column below
+    var t = edTab();
+    return '<div class="adm-screen adm-screen--tight">' +
+      '<button class="adm-link adm-link--back" data-admclose>← Товары</button>' +
+      '<div class="adm-head"><div>' +
+        '<div class="adm-head__kicker">' + esc(p.brand) + " · " + esc(CAT_NAMES[p.cat] || p.cat) + "</div>" +
+        '<h1 class="adm-h1 adm-h1--flat">' + esc(p.name) + "</h1></div>" +
+        '<button class="adm-link" data-go-product="' + esc(p.id) + '">Открыть в магазине ↗</button></div>' +
+      '<div class="adm-tabs" role="group" aria-label="Что показываем">' +
+        ED_TABS.map(function (x) {
+          return '<button class="adm-tab" data-edtab="' + x[0] + '" aria-current="' + (t === x[0]) + '" title="' + x[1] + '">' + x[1] + "</button>";
+        }).join("") + "</div>" +
+      edPaneMain(p) + edPaneSizes(p) + edPaneMedia(p) + edPaneDesc(p) + edPaneSeo(p) +
+      // goodsFail() fills this in place, so the message appears without a
+      // render() taking the caret out of whatever field is being fixed — and
+      // it sits outside the panes so a refusal is readable from any tab.
+      '<p class="adm-err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
+      '<div class="adm-savebar">' +
+        '<button class="adm-btn" data-admsavegoods="' + esc(p.id) + '">Сохранить</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-admclose>Отмена</button>' +
+        '<span class="adm-savebar__sp"></span>' +
+        /* The destructive slot of the design. There is no DELETE for a
+           catalogue product — the catalogue is a file, not a table — so the
+           button does the strongest thing the shop really has, says exactly
+           that, and goes through the confirm card with an undo like every
+           other money-side change. */
+        '<button class="adm-del" data-admgoodspull="' + esc(p.id) + '">Снять с продажи</button>' +
+      "</div></div>";
+  }
+  /** Tabs are a DOM patch, never a render(): the panes hold everything the
+      owner has typed and no draft of it exists anywhere else. */
+  function edShowTab(key) {
+    S.goodsEditTab = key;
+    var panes = document.querySelectorAll("[data-edpane]");
+    for (var i = 0; i < panes.length; i++) panes[i].hidden = panes[i].getAttribute("data-edpane") !== key;
+    var tabs = document.querySelectorAll("[data-edtab]");
+    for (var j = 0; j < tabs.length; j++) {
+      tabs[j].setAttribute("aria-current", String(tabs[j].getAttribute("data-edtab") === key));
+    }
   }
   /* ---------- inventory: «Склад» — numeric stock, EAN, the moves ledger ---
      Real quantities live in stock_levels/stock_moves (src/lib/inventory.ts,
@@ -11495,28 +11786,31 @@
     } catch (e) {}
     try { if (navigator.vibrate) navigator.vibrate(60); } catch (e) {}
   }
+  /* One tap binds. The list is flat — one row per product AND size — because
+     a barcode belongs to one bottle, not to a product: asking «какой объём?»
+     after «какой товар?» was two taps for a decision the owner had already
+     made when they picked the row (README § Сканер, «Three taps max»). */
   function scanAssignResultsHTML() {
     var q = (S.scanAssignQ || "").toLowerCase().trim();
-    if (!q) return "";
-    var found = CATALOGUE.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; }).slice(0, 6);
-    if (!found.length) return '<p class="muted">Ничего не найдено.</p>';
-    return '<div class="adm__list">' + found.map(function (p) {
-      // inventory: a barcode is one specific size, not the whole product —
-      // ask which before binding when there is more than one to choose from
-      if (p.sizes && p.sizes.length > 1 && S.scanAssignPick === p.id) {
-        return '<div class="adm__row"><span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
-          '<span class="adm__sub">Какой объём?</span></span>' +
-          '<span class="scan__actions" style="margin:0">' + p.sizes.map(function (sz) {
-            return '<button class="btn btn--sm" data-scanbindsize="' + esc(sz) + '">' + esc(sz) + "</button>";
-          }).join("") + "</span></div>";
+    if (!q) return '<p class="scan__hint scan__hint--sm">Начните вводить название — товар найдётся.</p>';
+    var rows = [];
+    for (var i = 0; i < CATALOGUE.length && rows.length < 8; i++) {
+      var p = CATALOGUE[i];
+      if ((p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) < 0) continue;
+      var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+      for (var j = 0; j < sizes.length && rows.length < 8; j++) {
+        var lv = edStockFor(p, sizes[j]);
+        rows.push('<button class="scan__cand" data-scanbind="' + esc(p.id) + "|" + esc(sizes[j]) + '">' +
+          '<span class="scan__cand__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+          '<span class="scan__cand__sz">' + (sizes[j] ? esc(sizes[j]) : "один объём") +
+            (lv && lv.ean ? "" : " · без кода") + "</span></button>");
       }
-      return '<div class="adm__row"><span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-        '<button class="btn btn--sm" data-scanassign="' + p.id + '">Привязать</button></div>';
-    }).join("") + "</div>";
+    }
+    if (!rows.length) return '<p class="scan__hint scan__hint--sm">Ничего не найдено.</p>';
+    return '<div class="scan__cands">' + rows.join("") + "</div>";
   }
   /** inventory: binds the last scanned code to productId+variant, then
-      re-looks it up so the goods-in card takes over — shared by the direct
-      (single/no-size product) and size-picked (multi-size) paths above. */
+      re-looks it up so the goods-in card takes over. */
   function scanBindEan(productId, variant) {
     var assignCode = S.scanHit ? S.scanHit.code : "";
     if (!assignCode) return;
@@ -11526,82 +11820,143 @@
       else toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать — возможно, код уже занят");
     });
   }
+  /** «Принять +3» / «Списать −3» — the number is on the buttons, so the
+      stepper and the promise can never disagree. Its own function because the
+      ± patches the labels in place rather than repainting the card. */
+  function scanTakeLabel(n) { return "Принять +" + n; }
+  function scanDropLabel(n) { return "Списать −" + n; }
+  function scanCartLabel(n) { return "Добавить в продажу · " + n; }
   function scanPanelHTML() {
-    var parts = "";
-    if (S.scanErr) parts += '<p class="scan__err">' + esc(S.scanErr) + "</p>";
-    if (S.scanHit) {
-      var h = S.scanHit, p = h.product ? byId(h.product.id) : null;
-      parts += '<div class="scan__card">' +
-        (p ? '<span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" : "") +
-        '<div><b>' + (p ? esc(p.brand + " — " + p.name) : "Код не найден") + "</b>" +
-          (h.variant ? '<span class="adm__sub">' + esc(h.variant) + "</span>" : "") +
-          '<span class="adm__sub">' + (h.tracked === false ? "не учтено" : "Остаток: " + h.qty) + "</span></div></div>";
-      if (p) {
-        /* Three taps, at most: scan, set the number (it is already 1), press
-           one of the two. The stepper's value is read off the DOM at commit
-           time (scanQtyNow()), so a typed number counts exactly like a
-           stepped one and neither needs a re-render per keystroke. */
-        parts += '<div class="scan__step" role="group" aria-label="Количество">' +
-            '<button class="btn btn--ghost scan__stepbtn" type="button" data-scanqty="-1" aria-label="Меньше">−</button>' +
-            '<input class="input scan__qty" id="scanqtyinput" data-scanqtyinput value="' + esc(String(S.scanQty || 1)) +
-              '" inputmode="numeric" aria-label="Количество">' +
-            '<button class="btn btn--ghost scan__stepbtn" type="button" data-scanqty="1" aria-label="Больше">+</button>' +
-          "</div>" +
-          '<div class="scan__actions">' +
-            '<button class="btn scan__btn" data-scanmove="in"' + (S.scanBusy ? " disabled" : "") + ">+ Приход</button>" +
-            '<button class="btn btn--ghost scan__btn" data-scanmove="out"' + (S.scanBusy ? " disabled" : "") + ">− Списание</button></div>" +
-          (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "");
-      } else {
-        parts += '<p class="muted">Штрихкод «' + esc(h.code) + '» ни к чему не привязан. Найдите товар и привяжите код к нему.</p>' +
-          '<div class="sec__head sec__head--sub"><h3 class="sec__title">Привязать к товару</h3></div>' +
-          '<input class="input input--box" data-scanassignq value="' + esc(S.scanAssignQ || "") + '" placeholder="Найти товар…" aria-label="Найти товар для привязки">' +
-          '<div id="scanassignresults">' + scanAssignResultsHTML() + "</div>";
-      }
-    } else if (!S.scanErr) {
-      parts += '<p class="muted">Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.</p>';
+    /* «Нет доступа к камере» is a LINE above whatever else is on screen, never
+       instead of it: the manual field is the interface on a machine with no
+       camera, so a code typed into it must still bring its card up. */
+    var err = S.scanErr ? '<div class="scan__card scan__card--err"><p>' + esc(S.scanErr) + "</p></div>" : "";
+    if (!S.scanHit) {
+      /* «Сегодня» belongs to the idle state and only there: while a card is up
+         the three taps are the whole job, but between codes this is the only
+         place that answers «что я уже принял сегодня». */
+      return err + '<p class="scan__hint">Наведите на штрихкод. Товар найдётся сам — останется указать количество.</p>' +
+        (S.scanToday && S.scanToday.length
+          ? '<div class="scan__today"><div class="scan__today__t">Сегодня</div>' +
+            S.scanToday.slice(0, 6).map(function (m) {
+              return '<div class="scan__today__r"><span>' + esc((m.brand ? m.brand + " — " : "") + m.name) + "</span>" +
+                "<b>" + (m.delta > 0 ? "+" : "") + m.delta + "</b></div>";
+            }).join("") + "</div>"
+          : "");
     }
-    // The manual/keyboard-wedge input itself lives in the STATIC shell
-    // (scannerShellHTML()), not here — #scanpanel is fully replaced on every
-    // scanRenderPanel() call, which would silently drop the keydown listener
-    // scanMount() attaches to it if the input were recreated here too.
-    if (S.scanToday && S.scanToday.length) {
-      parts += '<div class="sec__head sec__head--sub"><h3 class="sec__title">Сегодня</h3></div><div class="adm__list">' +
-        S.scanToday.slice(0, 8).map(function (m) {
-          return '<div class="adm__row"><span class="adm__nm">' + esc((m.brand ? m.brand + " — " : "") + m.name) + "</span>" +
-            '<span class="num">' + (m.delta > 0 ? "+" : "") + m.delta + "</span></div>";
-        }).join("") + "</div>";
-    }
-    return parts;
-  }
-  /* scanner app: on /shop2/scan/ the overlay IS the whole screen, so it wears
-     a small bar of its own — who this is, the way back into the panel, and
-     the two controls that are otherwise circles floating on the video. In the
-     «Склад» overlay there is a panel underneath and a ✕ is all it needs. */
-  function scanTopBarHTML() {
-    return '<div class="scan__top">' +
-        '<span class="scan__brand">Rempire · Сканер</span>' +
-        '<button class="iconbtn scan__topbtn" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>' +
-        '<button class="iconbtn scan__topbtn" type="button" data-scanmanualfocus aria-label="Ввести код вручную">⌨</button>' +
-        '<button class="link scan__toplink" type="button" data-scanadmin>В админку</button>' +
+    var h = S.scanHit, p = h.product ? byId(h.product.id) : null;
+    var n = S.scanQty || 1;
+    if (p) {
+      /* Three taps, at most: scan, set the number (it is already 1), press
+         one of the two. The stepper's value is read off the DOM at commit
+         time (scanQtyNow()), so a typed number counts exactly like a stepped
+         one and neither needs a re-render per keystroke. */
+      return err + '<div class="scan__card">' +
+        '<div class="scan__found">Найдено · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
+        '<div class="scan__nm">' + esc(p.brand + " — " + p.name) + "</div>" +
+        '<div class="scan__sub">' + (h.variant ? esc(h.variant) + " · " : "") +
+          (h.tracked === false ? "не учтено" : scanStockLine(h.qty)) + "</div>" +
+        '<div class="scan__step" role="group" aria-label="Количество">' +
+          '<button class="scan__stepbtn" type="button" data-scanqty="-1" aria-label="Меньше">−</button>' +
+          '<input class="scan__qty" id="scanqtyinput" data-scanqtyinput value="' + esc(String(n)) +
+            '" inputmode="numeric" aria-label="Количество">' +
+          '<button class="scan__stepbtn" type="button" data-scanqty="1" aria-label="Больше">+</button>' +
+        "</div>" +
+        /* «Салон» opened this scanner to fill a basket, not to count a shelf:
+           one button, and it takes the owner straight back to the register. */
+        (S.scanFrom === "pos"
+          ? '<div class="scan__acts scan__acts--one">' +
+              '<button class="scan__btn scan__btn--pri" data-scanmove="cart"' + (S.scanBusy ? " disabled" : "") +
+              ' data-scanlabel="cart">' + scanCartLabel(n) + "</button></div>"
+          : '<div class="scan__acts">' +
+              '<button class="scan__btn scan__btn--pri" data-scanmove="in"' + (S.scanBusy ? " disabled" : "") +
+                ' data-scanlabel="in">' + scanTakeLabel(n) + "</button>" +
+              '<button class="scan__btn" data-scanmove="out"' + (S.scanBusy ? " disabled" : "") +
+                ' data-scanlabel="out">' + scanDropLabel(n) + "</button></div>") +
+        '<button class="scan__more" type="button" data-scanreset>Сканировать дальше</button>' +
+        (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "") +
       "</div>";
+    }
+    return err + '<div class="scan__card">' +
+      '<div class="scan__warn">Код не привязан · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
+      '<div class="scan__nm">К какому товару?</div>' +
+      '<input class="scan__find" data-scanassignq value="' + esc(S.scanAssignQ || "") +
+        '" placeholder="Начните вводить название" aria-label="Найти товар для привязки">' +
+      '<div id="scanassignresults">' + scanAssignResultsHTML() + "</div>" +
+      '<button class="scan__more" type="button" data-scanreset>Отмена</button>' +
+    "</div>";
+  }
+  /** «на складе 12» — one fragment with one hole, so the i18n check sees a
+      sentence rather than a stray preposition. */
+  function scanStockLine(qty) { return "на складе " + qty; }
+  /** The ± steps the field, not the card — so the two buttons that promise a
+      number have to be told about it. A patch, for the same reason the field
+      itself is one: a repaint here would fight the finger holding «+». */
+  function scanPaintLabels() {
+    if (!SCANEL) return;
+    var n = S.scanQty || 1;
+    var texts = { in: scanTakeLabel(n), out: scanDropLabel(n), cart: scanCartLabel(n) };
+    var btns = SCANEL.querySelectorAll("[data-scanlabel]");
+    for (var i = 0; i < btns.length; i++) {
+      var kind = btns[i].getAttribute("data-scanlabel");
+      if (texts[kind] === undefined) continue;
+      btns[i].textContent = texts[kind];
+      translateTree(btns[i]);
+    }
+  }
+  /* «Салон» mode: the scan is a line in the basket, not a move on the shelf —
+     the sale itself writes the shelf off later (POST /api/admin/pos-orders/),
+     and writing it twice would take the bottle off the shelf twice. */
+  function scanToCart() {
+    var h = S.scanHit;
+    if (!h || !h.product) return;
+    var qty = scanQtyNow(), variant = h.variant || "";
+    for (var i = 0; i < S.posCart.length; i++) {
+      if (S.posCart[i].id === h.productId && (S.posCart[i].variant || "") === variant) {
+        S.posCart[i].qty += qty;
+        closeScanner(); toast("Добавлено в корзину"); return;
+      }
+    }
+    S.posCart.push({ id: h.productId, variant: variant, qty: qty });
+    closeScanner();
+    toast("Добавлено в корзину");
+  }
+  /* Same screen for both doors: the standalone /shop2/scan/ app and the
+     overlay «Склад»/«Салон» raise. Only two things differ — the wordmark (the
+     app is its own icon on the home screen) and where the × leads. */
+  function scanTopBarHTML() {
+    return '<div class="scan__head">' +
+      (S.scanApp
+        ? '<span class="scan__brand">Rempire · Сканер</span>'
+        : '<span class="scan__brand scan__brand--plain">Сканер</span>') +
+      '<span class="scan__mode">' + scanModeLine() + "</span>" +
+      '<button class="scan__hbtn" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>' +
+      '<button class="scan__hbtn" type="button" ' + (S.scanApp ? "data-scanadmin" : "data-scanclose") +
+        ' aria-label="Закрыть сканер">×</button>' +
+    "</div>";
+  }
+  function scanModeLine() {
+    return S.scanFrom === "pos" ? "Продажа: товар добавится в корзину" : "Склад: приёмка и списание";
   }
   function scannerShellHTML() {
-    return (S.scanApp ? scanTopBarHTML() : "") +
-      '<div class="scan__box">' +
-        '<video class="scan__video" data-scanvideo autoplay playsinline muted></video>' +
-        '<div class="scan__target" aria-hidden="true"></div>' +
-        (S.scanApp ? "" :
-          '<button class="iconbtn scan__close" type="button" data-scanclose aria-label="Закрыть сканер">✕</button>' +
-          '<button class="iconbtn scan__torch" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>') +
+    return scanTopBarHTML() +
+      '<div class="scan__stage">' +
+        '<div class="scan__box">' +
+          '<video class="scan__video" data-scanvideo autoplay playsinline muted></video>' +
+          '<div class="scan__target" aria-hidden="true"></div>' +
+          '<div class="scan__line" aria-hidden="true"></div>' +
+        "</div>" +
+        '<div id="scanpanel" class="scan__panel"></div>' +
+        // The manual-entry field IS the keyboard-wedge target too (a bluetooth/
+        // USB scanner just types digits + Enter into whatever is focused) — one
+        // small, low-emphasis input serves both. It lives here, in the shell
+        // that scanMount() builds once, specifically so the keydown listener
+        // attached to it (also in scanMount()) survives every #scanpanel update.
+        '<div class="scan__manual"><input class="scan__mfield adm-mono" data-scanmanual inputmode="numeric" ' +
+          'autocomplete="off" placeholder="или введите код вручную" aria-label="Ввести код вручную">' +
+          '<button class="scan__mbtn" data-scanmanualsubmit type="button">Найти</button></div>' +
       "</div>" +
-      // The manual-entry field IS the keyboard-wedge target too (a bluetooth/
-      // USB scanner just types digits + Enter into whatever is focused) — one
-      // small, low-emphasis input serves both. It lives here, in the shell
-      // that scanMount() builds once, specifically so the keydown listener
-      // attached to it (also in scanMount()) survives every #scanpanel update.
-      '<div class="scan__manual"><input class="input" data-scanmanual inputmode="numeric" autocomplete="off" placeholder="Код вручную" aria-label="Ввести код вручную">' +
-        '<button class="btn btn--ghost btn--sm" data-scanmanualsubmit type="button">Найти</button></div>' +
-      '<div id="scanpanel" class="scan__panel"></div>';
+      '<div class="scan__foot">Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.</div>';
   }
   function scanRenderPanel() {
     if (!SCANEL) return;
@@ -11609,9 +11964,14 @@
     if (panel) { panel.innerHTML = scanPanelHTML(); translateTree(panel); }
     var torchBtn = SCANEL.querySelector("[data-scantorch]");
     if (torchBtn) torchBtn.hidden = !S.scanTorchOk;
+    var modeEl = SCANEL.querySelector(".scan__mode");
+    if (modeEl) { modeEl.textContent = scanModeLine(); translateTree(modeEl); }
     // scanner app: no camera (denied, absent, or a desktop) — the viewfinder
     // is dead space, so it shrinks and the manual field gets the screen
     SCANEL.classList.toggle("is-nocam", !!S.scanErr);
+    // a card is up: the viewfinder steps back so the card owns the screen,
+    // exactly as the design's found/unknown states show it
+    SCANEL.classList.toggle("is-card", !!S.scanHit);
     // keyboard-wedge fallback: refocus the manual field, but never steal focus
     // from something the admin is actively typing into (assign search, qty)
     var active = document.activeElement;
@@ -11803,8 +12163,13 @@
     S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null;
     S.scanQty = 1; S.scanBusy = false; S.scanReady = false;
   }
+  /* Which door the scanner was opened through — «Склад» counts a shelf,
+     «Салон» fills a basket. It changes the caption in the header and the
+     buttons on the found card, and nothing else: one screen, two jobs
+     (README § Сканер). */
   function openScanner() {
     scanResetState();
+    S.scanFrom = S.adminTab === "pos" ? "pos" : "stock";
     render();
   }
   function closeScanner() {
@@ -11819,6 +12184,9 @@
   function scanRouteSync() {
     var onRoute = S.screen === "scan";
     if (onRoute) {
+      // the standalone app is always the warehouse one: nobody rings a sale
+      // up from an icon that has no register behind it
+      S.scanFrom = "stock";
       if (SRV.admin === true && !S.scanOpen) scanResetState();
       if (SRV.admin !== true && S.scanOpen) S.scanOpen = false;
     } else if (S.scanApp && S.scanOpen) {
@@ -11862,37 +12230,48 @@
     S.posCart.forEach(function (l) { sum += posVariantPrice(byId(l.id), l.variant) * l.qty; });
     return Math.round(sum * 100) / 100;
   }
-  function posAddProduct(id) {
-    var p = byId(id);
+  /** `id` or `id:<sizeIndex>` — the size chips carry the index, and a bare id
+      (the assistant's «добавить в продажу», an old deep link) still means the
+      first size, which is what the register always did. */
+  function posAddProduct(spec) {
+    var bits = String(spec).split(":");
+    var p = byId(bits[0]);
     if (!p) return;
-    var variant = p.sizes && p.sizes.length ? p.sizes[0] : "";
-    for (var i = 0; i < S.posCart.length; i++) {
-      if (S.posCart[i].id === id && (S.posCart[i].variant || "") === variant) { S.posCart[i].qty++; render(); return; }
+    var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+    var i = bits.length > 1 ? Math.max(0, Math.min(sizes.length - 1, Number(bits[1]) || 0)) : 0;
+    var variant = sizes[i] || "";
+    // out of stock is a refusal the owner has to hear — the shelf is the one
+    // number a salon sale must not go behind, and the chip is already muted
+    var lv = edStockFor(p, variant);
+    if (lv && lv.tracked && lv.qty <= 0) { toast("Нет на складе"); return; }
+    for (var k = 0; k < S.posCart.length; k++) {
+      if (S.posCart[k].id === p.id && (S.posCart[k].variant || "") === variant) { S.posCart[k].qty++; render(); return; }
     }
-    S.posCart.push({ id: id, variant: variant, qty: 1 });
+    S.posCart.push({ id: p.id, variant: variant, qty: 1 });
+    S.posQ = "";
     render();
   }
+  /* One row per product, one 44-px chip per size — «150 мл · 21,60 €». The
+     chip is the whole control: no «Добавить» button, no size select, one tap
+     from the search box to a line in the cart. */
   function posSearchResultsHTML() {
     var q = (S.posQ || "").toLowerCase().trim();
-    if (!q) return "";
-    var found = CATALOGUE.filter(function (p) { return p.stock !== "out" && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; }).slice(0, 8);
-    if (!found.length) return '<p class="muted">Ничего не найдено.</p>';
-    return '<div class="adm__list">' + found.map(function (p) {
-      return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-        '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-        '<span class="num">' + eur(p.price) + "</span>" +
-        '<button class="btn btn--sm" data-posadd="' + p.id + '">Добавить</button></div>';
+    var list = q
+      ? CATALOGUE.filter(function (p) { return p.stock !== "out" && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
+      : [];
+    if (!q) return '<p class="adm-hint">Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».</p>';
+    if (!list.length) return '<div class="adm-empty">Ничего не найдено</div>';
+    return '<div class="adm-list adm-list--flat">' + list.slice(0, 8).map(function (p) {
+      var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+      return '<div class="adm-row adm-row--chips">' +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
+        '<span class="adm-poschips">' + sizes.map(function (sz, i) {
+          var lv = edStockFor(p, sz);
+          var none = !!(lv && lv.tracked && lv.qty <= 0);
+          return '<button class="adm-poschip' + (none ? " is-none" : "") + '" data-posadd="' + esc(p.id) + ":" + i + '">' +
+            (sz ? esc(sz) + " · " : "") + eur(posVariantPrice(p, sz)) + "</button>";
+        }).join("") + "</span></div>";
     }).join("") + "</div>";
-  }
-  function admPosReceiptHTML() {
-    var d = S.posDone;
-    return '<div class="adm__list" style="max-width:420px;margin:24px auto;padding:24px;text-align:center">' +
-      '<p style="font-size:15px">Продажа оформлена ✓</p>' +
-      '<p class="sec__title" style="font-size:20px;margin:6px 0">' + esc(d.number) + "</p>" +
-      '<p class="num" style="font-size:18px">' + eur(d.total) + "</p>" +
-      '<div class="adm__acts" style="justify-content:center">' +
-        '<a class="btn" href="/api/admin/pos-orders/' + encodeURIComponent(d.orderId) + '/receipt/" target="_blank" rel="noopener">Чек для печати</a>' +
-        '<button class="btn btn--ghost" data-posnew>Новая продажа</button></div></div>';
   }
   /** Сумма / Скидка / Итого — its own block so typing a discount can repaint
       just these three rows instead of the whole register (see the
@@ -11902,44 +12281,100 @@
     var pct = Math.min(90, Math.max(0, Math.round(Number(S.posDiscount) || 0)));
     var discount = pct ? Math.round(subtotal * pct) / 100 : 0;
     var total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
-    return '<div class="adm__row" style="border:none;padding:8px 0 0"><span class="adm__nm">Сумма</span><span class="num">' + eur(subtotal) + "</span></div>" +
-      (discount ? '<div class="adm__row" style="border:none;padding:2px 0"><span class="adm__nm">Скидка</span><span class="num">−' + eur(discount) + "</span></div>" : "") +
-      '<div class="adm__row" style="border:none;padding:2px 0 8px"><span class="adm__nm"><b>Итого</b></span><span class="num"><b>' + eur(total) + "</b></span></div>";
+    return (discount
+      ? '<div class="adm-poskv"><span>Сумма</span><span class="adm-row__amt">' + eur(subtotal) + "</span></div>" +
+        '<div class="adm-poskv"><span>Скидка</span><span class="adm-row__amt">−' + eur(discount) + "</span></div>"
+      : "") +
+      '<div class="adm-total"><span>Итого</span><span class="adm-total__v adm-total__v--big">' + eur(total) + "</span></div>";
   }
-  function admPosHTML() {
-    if (SRV.admin !== true) return '<p class="muted" style="margin:16px 0">Войдите в панель.</p>';
-    if (S.posDone) return admPosReceiptHTML();
-    return '<p class="muted" style="margin:16px 0">Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».</p>' +
-      '<input class="input input--box" data-posq value="' + esc(S.posQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск товара" style="margin-bottom:8px;max-width:420px">' +
-      '<div id="poslist">' + posSearchResultsHTML() + "</div>" +
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Корзина</h3></div>' +
-      (S.posCart.length ? '<div class="adm__list">' + S.posCart.map(function (l, i) {
-        var p = byId(l.id), price = posVariantPrice(p, l.variant);
-        return '<div class="adm__row"><span class="adm__nm">' + (p ? esc(p.brand + " — " + p.name) : esc(l.id)) +
-            (l.variant ? '<span class="adm__sub">' + esc(l.variant) + "</span>" : "") + "</span>" +
-          '<button class="iconbtn" data-posqty="' + i + ":-1" + '" aria-label="Меньше">−</button>' +
-          '<span class="num" style="min-width:24px;text-align:center">' + l.qty + "</span>" +
-          '<button class="iconbtn" data-posqty="' + i + ":1" + '" aria-label="Больше">+</button>' +
-          '<span class="num">' + eur(price * l.qty) + "</span>" +
-          '<button class="link" data-posremove="' + i + '">Убрать</button></div>';
-      }).join("") + "</div>" : '<p class="muted">Пока пусто — добавьте товар выше или отсканируйте штрихкод в «Складе».</p>') +
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Покупатель (необязательно)</h3></div>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<label class="field" style="flex:1 1 220px"><span class="field__label">E-mail</span><input class="input" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
-        '<label class="field" style="flex:1 1 180px"><span class="field__label">Телефон</span><input class="input" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
-      "</div>" +
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Оплата</h3></div>' +
-      '<div class="adm__chips" role="group" aria-label="Способ оплаты">' +
-        '<button class="scchip" data-pospayment="cash" aria-current="' + ((S.posPayment || "cash") === "cash") + '">Наличные</button>' +
-        '<button class="scchip" data-pospayment="terminal" aria-current="' + (S.posPayment === "terminal") + '">Терминал</button>' +
-      "</div>" +
-      '<label class="field" style="max-width:160px;margin-top:10px"><span class="field__label">Скидка, %</span><input class="input" data-posdiscount value="' + esc(S.posDiscount || "") + '" inputmode="numeric"></label>' +
-      '<div id="postotals">' + posTotalsHTML() + "</div>" +
-      (S.posErr ? '<div class="adm__note">' + esc(S.posErr) + "</div>" : "") +
-      '<div class="adm__acts"><button class="btn" data-possend' + (S.posBusy || !S.posCart.length ? " disabled" : "") + ">" + (S.posBusy ? "Оформляем…" : "Оформить продажу") + "</button></div>";
+  /** What the confirm card lists before the money is taken — the same lines
+      the receipt will carry, so «Оформить» is never a leap of faith. */
+  function posConfirmDetail(how) {
+    var lines = S.posCart.map(function (l) {
+      var p = byId(l.id);
+      return (p ? p.name : l.id) + (l.variant ? " " + l.variant : "") + " × " + l.qty;
+    });
+    var pct = Math.min(90, Math.max(0, Math.round(Number(S.posDiscount) || 0)));
+    var subtotal = posSubtotal();
+    var total = Math.max(0, Math.round((subtotal - (pct ? Math.round(subtotal * pct) / 100 : 0)) * 100) / 100);
+    return lines.join("\n") + "\n\n" + "Итого " + eur(total) + " · " + POS_HOW[how];
+  }
+  var POS_HOW = { cash: "наличные", terminal: "терминал" };
+  function admPosReceiptHTML() {
+    var d = S.posDone;
+    return '<div class="adm-receipt">' +
+      '<div class="adm-receipt__ok">Продажа оформлена ✓</div>' +
+      '<div class="adm-mono adm-receipt__id">' + esc(d.number) + "</div>" +
+      '<div class="adm-receipt__sum">' + eur(d.total) + "</div>" +
+      '<div class="adm-hint">' + admPosDoneMeta(d) + "</div>" +
+      '<div class="adm-acts adm-acts--mid">' +
+        '<a class="adm-btn adm-btn--ghost" href="/api/admin/pos-orders/' + encodeURIComponent(d.orderId) +
+          '/receipt/" target="_blank" rel="noopener">Чек для печати</a>' +
+        '<button class="adm-btn" data-posnew>Новая продажа</button></div></div>';
+  }
+  /** «3 поз. · терминал · остатки списаны» — its own function so the i18n
+      checker sees one sentence with two holes rather than three fragments. */
+  function admPosDoneMeta(d) {
+    return d.items + " поз. · " + POS_HOW[d.how] + " · остатки списаны";
+  }
+  /** The line the sale leaves in Renat's change journal. Nothing to undo — a
+      sale that happened in the room cannot be taken back from here — so it
+      goes in through journalNote(), like the record of an undo itself. */
+  function admPosJournalLine(number, total) { return "Продажа " + number + " · " + eur(total); }
+  function admSalonHTML() {
+    if (SRV.admin !== true) {
+      return '<div class="adm-screen adm-screen--tight">' + admHead("", "Продажа в салоне", "") +
+        '<div class="adm-empty">Войдите в панель, чтобы оформлять продажи</div></div>';
+    }
+    loadStockLevels(false);   // the chips need the shelf to know what is out
+    var scan = '<button class="adm-btn adm-btn--head" data-scanopen>Сканировать' + admIcon("scan", false, 20) + "</button>";
+    var head = admHead("", "Продажа в салоне", scan);
+    if (S.posDone) return '<div class="adm-screen adm-screen--tight">' + head + admPosReceiptHTML() + "</div>";
+    var cart = S.posCart.map(function (l, i) {
+      var p = byId(l.id), price = posVariantPrice(p, l.variant);
+      return '<div class="adm-posline">' +
+        '<span class="adm-posline__body"><span class="adm-row__nm">' + (p ? esc(p.brand + " — " + p.name) : esc(l.id)) + "</span>" +
+          '<span class="adm-row__sub">' + (l.variant ? esc(l.variant) + " · " : "") + eur(price) + "</span></span>" +
+        '<span class="adm-step-qty">' +
+          '<button data-posqty="' + i + ':-1" aria-label="Меньше">−</button>' +
+          '<span class="adm-step-qty__v">' + l.qty + "</span>" +
+          '<button data-posqty="' + i + ':1" aria-label="Больше">+</button></span>' +
+        '<button class="adm-link adm-link--muted" data-posremove="' + i + '">Убрать</button></div>';
+    }).join("");
+    return '<div class="adm-screen adm-screen--tight">' + head +
+      '<div class="adm-cols adm-cols--wide">' +
+        '<div class="adm-stack adm-stack--tight">' +
+          '<input class="adm-input adm-input--find" data-posq value="' + esc(S.posQ || "") +
+            '" placeholder="Название, бренд или штрихкод" aria-label="Поиск товара">' +
+          '<div id="poslist">' + posSearchResultsHTML() + "</div>" +
+          '<p class="adm-hint">Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.</p>' +
+        "</div>" +
+        '<div class="adm-card">' +
+          '<div class="adm-sec"><span class="adm-sec__t">Корзина</span></div>' +
+          (S.posCart.length ? cart : '<p class="adm-hint">Пока пусто — найдите товар слева или отсканируйте штрихкод.</p>') +
+          '<div id="postotals">' + (S.posCart.length ? posTotalsHTML() : "") + "</div>" +
+          '<label class="adm-field">Скидка, %<input class="adm-input adm-input--row" data-posdiscount value="' +
+            esc(S.posDiscount || "") + '" inputmode="numeric"></label>' +
+          '<div class="adm-edpair">' +
+            '<label class="adm-field">Почта клиента<input class="adm-input adm-input--row" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
+            '<label class="adm-field">Телефон<input class="adm-input adm-input--row" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
+          "</div>" +
+          '<p class="adm-hint">Покупатель не обязателен. С почтой клиент получит чек письмом.</p>' +
+          (S.posErr ? '<p class="adm-err">' + esc(S.posErr) + "</p>" : "") +
+          '<div class="adm-pospay">' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--pay" data-possend="cash"' +
+              (S.posBusy || !S.posCart.length ? " disabled" : "") + ">Наличные</button>" +
+            '<button class="adm-btn adm-btn--pay" data-possend="terminal"' +
+              (S.posBusy || !S.posCart.length ? " disabled" : "") + ">" + (S.posBusy ? "Оформляем…" : "Терминал") + "</button>" +
+          "</div>" +
+        "</div>" +
+      "</div></div>";
   }
   function posSend() {
     if (S.posBusy || !S.posCart.length) return;
+    // the receipt says «N поз. · терминал», and both are gone from S the
+    // moment the sale lands — read them while the cart is still here
+    var nLines = S.posCart.length, how = S.posPayment === "terminal" ? "terminal" : "cash";
     S.posBusy = true; S.posErr = ""; render();
     apiSend("/api/admin/pos-orders/", "POST", {
       items: S.posCart.map(function (l) { return { id: l.id, variant: l.variant || undefined, qty: l.qty }; }),
@@ -11950,8 +12385,9 @@
       S.posBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 201 && r.body.ok) {
-        S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total };
+        S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how };
         S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
+        journalNote(admPosJournalLine(r.body.number, r.body.total));
         loadSrvOrders(true);
       } else {
         S.posErr = r.body && r.body.error === "empty_order" ? "Добавьте хотя бы один товар."
@@ -13456,6 +13892,14 @@
           var gel = bodySlot.querySelector(GOODS_FIELDS[gi]);
           if (gel) goodsKeep[GOODS_FIELDS[gi]] = gel.value;
         }
+        /* The «Размеры и цены» grid has one Остаток and one Штрихкод box per
+           size, keyed by «productId variant» — a fixed selector list cannot
+           name them, so they are collected by the key they carry. */
+        var gcells = bodySlot.querySelectorAll("[data-edqty],[data-edean]");
+        for (var gc = 0; gc < gcells.length; gc++) {
+          var attr = gcells[gc].hasAttribute("data-edqty") ? "data-edqty" : "data-edean";
+          goodsKeep['[' + attr + '="' + gcells[gc].getAttribute(attr) + '"]'] = gcells[gc].value;
+        }
       }
     }
 
@@ -14187,7 +14631,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -14542,9 +14986,55 @@
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; mediaProbe();   // media
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
+      // a fresh product opens on «Основное», in the language and the video
+      // kind the design starts from — not on whatever the last one was left on
+      S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsVidKind = "";
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admclose !== undefined) { S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null; render(); return; }
+    if (d.admclose !== undefined) {
+      S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
+      S.goodsEditTab = "main"; S.goodsVidKind = ""; render(); return;
+    }
+    /* ---- Товар: the five tabs -------------------------------------------
+       A DOM patch, never a render(): every pane is in the page at once
+       precisely because this form keeps no draft in S, and rebuilding it
+       would put the SAVED values back over whatever is being typed. */
+    if (d.edtab !== undefined) { edShowTab(d.edtab); return; }
+    if (d.eddesclang !== undefined) {
+      S.goodsDescLang = d.eddesclang;
+      var boxes = { ru: "[data-eddescru]", et: "[data-eddescet]", en: "[data-eddescen]" };
+      for (var lk in boxes) {
+        if (!Object.prototype.hasOwnProperty.call(boxes, lk)) continue;
+        var bel = document.querySelector(boxes[lk]);
+        if (bel) bel.hidden = lk !== d.eddesclang;
+      }
+      var segs = document.querySelectorAll("[data-eddesclang]");
+      for (var si2 = 0; si2 < segs.length; si2++) {
+        segs[si2].setAttribute("aria-current", String(segs[si2].getAttribute("data-eddesclang") === d.eddesclang));
+      }
+      return;
+    }
+    // The chip only decides which door is shown; the value stays in the one
+    // field, so switching YouTube → Instagram never loses a pasted link.
+    if (d.edvidkind !== undefined) {
+      var vidKeep = document.querySelector("[data-edvideo]");
+      if (vidKeep) { VID.id = S.adminEdit; VID.url = vidKeep.value; }
+      S.goodsVidKind = d.edvidkind; render(); return;
+    }
+    if (d.edvidclear !== undefined) {
+      VID.id = S.adminEdit; VID.url = "";
+      var vidEl0 = document.querySelector("[data-edvideo]");
+      if (vidEl0) vidEl0.value = "";
+      render(); return;
+    }
+    if (d.admgoodspull !== undefined) {
+      var pullP = byId(d.admgoodspull);
+      if (!pullP) return;
+      pendingAction = { type: "goods_pull", id: pullP.id, name: pullP.brand + " — " + pullP.name,
+        title: "Снять с продажи?", ok: "Снять", danger: true, overlay: true,
+        detail: pullP.brand + " — " + pullP.name + "\nВ магазине останется страница товара, но купить его будет нельзя. Вернуть можно здесь же — «Наличие»." };
+      render(); return;
+    }
     /* ---- media: the «Фото» block ----------------------------------------
        Everything here edits the draft list only; «Сохранить» is what turns it
        into a set_gallery action, so «Отмена» really cancels. */
@@ -14717,6 +15207,19 @@
       if (nv && !parseVideo(nv)) {
         goodsFail("Ссылка на видео — YouTube, Vimeo, Instagram или загруженный файл.", "[data-edvideo]"); return;
       }
+      /* inventory: the «Остаток» column of the sizes grid. A shelf count is a
+         whole number or nothing at all — «abc» must not travel as a null the
+         moves route would read as 0 and wipe the shelf with (see
+         stockQtyValue's own comment). Checked here, before any write. */
+      var qtyCells = [].slice.call(document.querySelectorAll("[data-edqty]"));
+      for (var qc = 0; qc < qtyCells.length; qc++) {
+        var qRaw = qtyCells[qc].value.trim();
+        if (qRaw && stockQtyValue(qRaw) === null) {
+          goodsFail("Остаток — целое число от 0. Пусто — оставить как есть.",
+            '[data-edqty="' + qtyCells[qc].getAttribute("data-edqty") + '"]');
+          return;
+        }
+      }
       goodsErrClear();
 
       var changed = false;
@@ -14787,6 +15290,43 @@
         }
       }
       /* ---- /assistant-work -------------------------------------------------- */
+      /* ---- inventory: the sizes grid's own two columns --------------------
+         Остаток and Штрихкод are not overrides — they are the warehouse
+         (stock_levels / stock_moves), the same rows «Склад» and the scanner
+         write. The quantity travels as a RELATIVE move, because that is the
+         only shape the route takes and the only one two clients can race
+         safely; the barcode is a plain PUT whose refusal («этот код уже
+         занят») is the server's to word. */
+      for (var qi = 0; qi < qtyCells.length; qi++) {
+        var qKey = qtyCells[qi].getAttribute("data-edqty");
+        var qRow = stockFindRow(qKey);
+        var qVal = qtyCells[qi].value.trim();
+        if (!qVal) continue;
+        var qWant = stockQtyValue(qVal);
+        var qHas = qRow && qRow.tracked ? qRow.qty : 0;
+        if (qWant === qHas && qRow && qRow.tracked) continue;
+        demoApply({
+          type: "stock_adjust", product_id: gp.id,
+          variant: qRow ? qRow.variant : qKey.slice(gp.id.length + 1),
+          delta: qWant - qHas, reason: "adjust"
+        });
+        changed = true;
+      }
+      var eanCells = document.querySelectorAll("[data-edean]");
+      for (var ei = 0; ei < eanCells.length; ei++) {
+        var eKey = eanCells[ei].getAttribute("data-edean");
+        var eRow = stockFindRow(eKey);
+        var eVal = eanCells[ei].value.trim();
+        if (eVal === ((eRow && eRow.ean) || "")) continue;
+        changed = true;
+        stockLevelSaveDetailed({
+          productId: gp.id, variant: eRow ? eRow.variant : eKey.slice(gp.id.length + 1),
+          ean: eVal || null
+        }).then(function (res) {
+          if (!res.ok) toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать штрихкод");
+          reloadStock();
+        });
+      }
       AI_UNDO = null;
       S.adminEdit = "";
       toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
@@ -14804,6 +15344,17 @@
         // inventory: real stock has no demo layer either — straight to
         // POST /api/admin/inventory/moves/, same story as the blog posts above
         else if (pa.type === "stock_adjust" || pa.type === "stock_set") applyStockAction(pa);
+        // «Салон»: the till already has the money; POST /api/admin/pos-orders/
+        // creates the order, marks it paid and writes the shelf off in one go
+        else if (pa.type === "pos_sale") posSend();
+        /* «Товар» → «Снять с продажи». There is no DELETE for a catalogue
+           product, so the destructive slot does the strongest thing that
+           really exists — «нет в наличии», journalled and undoable. */
+        else if (pa.type === "goods_pull") {
+          var pullEntry = demoApply({ type: "set_stock", id: pa.id, value: "out" });
+          S.adminEdit = "";
+          toast("Снято с продажи · " + pa.name, pullEntry);
+        }
         /* «Заказы»: the status moves, the letter goes out by itself, and the
            journal keeps the way back — so the toast can offer «Отменить». */
         else if (pa.type === "order_status") {
@@ -15035,41 +15586,34 @@
     if (d.scanclose !== undefined) { closeScanner(); return; }
     if (d.scantorch !== undefined) { setScanTorch(!S.scanTorchOn); return; }
     if (d.scanmanualsubmit !== undefined) { submitManualScan(); return; }
-    /* scanner app: the standalone route, its way back, and the top bar's
-       keyboard button (the manual field is always there — this only puts the
-       caret in it, so «ввести код руками» is one tap on a phone). */
+    /* scanner app: the standalone route and its way back — the × in the
+       header on /shop2/scan/, so there is one way out and not two. */
     if (d.scanapp !== undefined) { go("scan"); return; }
     if (d.scanadmin !== undefined) { go("admin"); return; }
-    if (d.scanmanualfocus !== undefined) {
-      var manualEl = SCANEL && SCANEL.querySelector("[data-scanmanual]");
-      if (manualEl) { manualEl.focus(); manualEl.select(); }
-      return;
-    }
     if (d.scanqty) {
-      // the stepper never repaints the panel — it writes the field it steps,
-      // so a finger on «+» cannot lose the caret or the scroll position
+      // the stepper never repaints the panel — it writes the field it steps
+      // and the two labels that promise the number, so a finger on «+» cannot
+      // lose the caret, the scroll position, or the truth
       S.scanQty = Math.max(1, Math.min(999, scanQtyNow() + Number(d.scanqty)));
       var stepEl = SCANEL && SCANEL.querySelector("[data-scanqtyinput]");
       if (stepEl) stepEl.value = String(S.scanQty);
+      scanPaintLabels();
       return;
     }
-    if (d.scanmove) { scanCommitMove(d.scanmove === "out" ? -1 : 1); return; }
-    if (d.scanassign) {
-      var assignP = byId(d.scanassign);
-      var assignSizes = assignP && assignP.sizes && assignP.sizes.length ? assignP.sizes : [];
-      if (assignSizes.length > 1) {
-        // inventory: more than one size — ask which before binding
-        S.scanAssignPick = d.scanassign;
-        var assignResEl = SCANEL && SCANEL.querySelector("#scanassignresults");
-        if (assignResEl) { assignResEl.innerHTML = scanAssignResultsHTML(); translateTree(assignResEl); }
-        return;
-      }
-      scanBindEan(d.scanassign, assignSizes.length ? assignSizes[0] : "");
+    if (d.scanmove) {
+      if (d.scanmove === "cart") { scanToCart(); return; }
+      scanCommitMove(d.scanmove === "out" ? -1 : 1); return;
+    }
+    // «productId|variant» — one tap, one bottle (scanAssignResultsHTML)
+    if (d.scanbind) {
+      var bindAt = d.scanbind.indexOf("|");
+      scanBindEan(d.scanbind.slice(0, bindAt), d.scanbind.slice(bindAt + 1));
       return;
     }
-    if (d.scanbindsize) {
-      if (S.scanAssignPick) scanBindEan(S.scanAssignPick, d.scanbindsize);
-      return;
+    if (d.scanreset !== undefined) {
+      S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanQty = 1; S.scanReady = false;
+      SCAN.lastCode = "";   // the same code, scanned again, has to count
+      scanRenderPanel(); return;
     }
 
     /* ---------- inventory: «Продажа в салоне» ---------- */
@@ -15081,8 +15625,16 @@
       return;
     }
     if (d.posremove !== undefined) { S.posCart.splice(Number(d.posremove), 1); render(); return; }
-    if (d.pospayment) { S.posPayment = d.pospayment; render(); return; }
-    if (d.possend !== undefined) { posSend(); return; }
+    /* «Наличные» / «Терминал» ARE the two ways to finish a sale — the method
+       and the send are one tap, and the confirm card in between is the rule
+       for anything that touches money (README § State). */
+    if (d.possend !== undefined) {
+      if (S.posBusy || !S.posCart.length) return;
+      S.posPayment = d.possend === "terminal" ? "terminal" : "cash";
+      pendingAction = { type: "pos_sale", title: "Оформить продажу?", detail: posConfirmDetail(S.posPayment),
+        ok: "Оформить", overlay: true };
+      render(); return;
+    }
     if (d.posnew !== undefined) { S.posDone = null; render(); return; }
     if (d.admpromonew !== undefined) {
       S.promoForm = blankPromo(); S.promoFormErr = ""; render(); refocus('[data-promof="code"]'); return;
@@ -15514,6 +16066,20 @@
     else if (t.matches("[data-stocklowinput]")) { S.stockEditLow = t.value; }
     else if (t.matches("[data-stockqtyinput]")) { S.stockEditQty = t.value; }
     else if (t.matches("[data-stockreasoninput]")) { S.stockEditReason = t.value; }
+    /* «Размеры и цены»: the salon column follows the price — the design's
+       «auto = price × 0.8», with the shop's own discount instead of the
+       prototype's flat number. It stops following the moment the owner types
+       a salon price of their own (data-edauto="0"), so a deliberate wholesale
+       price is never quietly rewritten by a retail edit. */
+    else if (t.matches("[data-edprice]")) {
+      var salonEl = document.querySelector("[data-edproprice]");
+      var np0 = goodsPrice(t.value);
+      if (salonEl && np0 !== null && salonEl.getAttribute("data-edauto") !== "0") {
+        salonEl.value = String(edSalonOf(np0));
+      }
+      if (salonEl) salonEl.placeholder = String(edSalonOf(np0 === null ? 0 : np0));
+    }
+    else if (t.matches("[data-edproprice]")) { t.setAttribute("data-edauto", "0"); }
     else if (t.matches("[data-posq]")) {
       S.posQ = t.value;
       var posList = document.getElementById("poslist");

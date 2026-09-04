@@ -43,9 +43,10 @@
    впишите число), потом «+ Приход». Всё, штуки на складе.
 6. После этого сканер сразу готов к следующему коду — ничего нажимать не
    надо.
-7. Если код ни к чему не привязан («Код не найден») — «Привязать к товару»:
-   наберите 2–3 буквы названия, нажмите на товар, при необходимости выберите
-   объём. Дальше этот же штрихкод будет находить этот товар всегда.
+7. Если код ни к чему не привязан — экран спросит «К какому товару?»: наберите
+   2–3 буквы названия и нажмите на нужную строку. В списке сразу товар и объём
+   («Kevin.Murphy — Un.Tangled Spray · 40 мл»), поэтому привязка — одно
+   нажатие. Дальше этот же штрихкод будет находить этот товар всегда.
 
 Если камера не видит код (плохое освещение, помятая упаковка) — впишите цифры
 штрихкода вручную в поле под камерой и нажмите «Найти». Если камеры нет
@@ -69,17 +70,24 @@
 
 ## Как продать в салоне
 
-1. «Продажа в салоне» → найдите товар (или сначала отсканируйте его на
-   «Складе» и вернитесь сюда — оба места работают с одной корзиной).
-2. Добавьте нужные товары, поправьте количество кнопками +/−.
-3. При желании впишите e-mail или телефон покупателя — тогда покупка попадёт
+1. «Салон» → впишите название, бренд или штрихкод в верхнее поле.
+2. У каждого найденного товара — по кнопке на объём: «40 мл · 8 €». Одно
+   нажатие кладёт этот объём в корзину справа. Кнопка серая — этого объёма
+   нет на складе, и при нажатии появится «Нет на складе».
+3. Можно и сканером: «Сканировать» вверху открывает тот же сканер в режиме
+   продажи — «Добавить в продажу» вернёт вас в корзину с уже добавленным
+   товаром.
+4. В корзине поправьте количество кнопками +/−, при необходимости впишите
+   скидку в процентах.
+5. При желании впишите почту или телефон покупателя — тогда покупка попадёт
    в его историю заказов в личном кабинете. Необязательно.
-4. Выберите «Наличные» или «Терминал», при необходимости — скидку в
-   процентах.
-5. «Оформить продажу» — всё, заказ сразу отмечен оплаченным, остатки
-   списались, и в «Заказах» он появится с меткой «Салон».
-6. «Чек для печати» открывает простой чек — распечатайте или сохраните как
-   PDF через диалог печати браузера.
+6. «Наличные» или «Терминал» — это и есть кнопка оформления. Появится
+   карточка с составом продажи и суммой; «Оформить» подтверждает.
+7. Дальше — экран чека: номер, сумма, «N поз. · терминал · остатки списаны».
+   Заказ сразу отмечен оплаченным, остатки списались, и в «Заказах» он
+   появится с меткой «Салон».
+8. «Чек для печати» открывает простой чек — распечатайте или сохраните как
+   PDF через диалог печати браузера. «Новая продажа» очищает экран.
 
 Эта продажа не трогает вашу обычную кассу в зале — это просто ещё один способ
 провести продажу и списать товар со склада заодно с сайтом.
@@ -282,8 +290,22 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   on the toast; «Править» opens the same form as before for the barcode, the
   «мало» threshold and an exact recount.
 - `admStockMovesHTML()` — the ledger sub-view (`S.stockMovesOpen`).
-- `admPosHTML()` / `admPosReceiptHTML()` — the quick-sale screen and its
-  post-sale card.
+- `admSalonHTML()` / `posSearchResultsHTML()` / `admPosReceiptHTML()` — the
+  register, redesigned in phase 2 into two columns: a 52-h ink-bordered search
+  on the left whose result rows carry **one 44-h chip per size** («40 мл ·
+  8 €», muted and refused with «Нет на складе» when that shelf is empty —
+  `data-posadd="<id>:<sizeIndex>"`, a bare id still meaning the first size),
+  and the «Корзина» card on the right with the ± steppers, Итого in Oswald 28,
+  the discount, the optional customer and the two buttons that finish the
+  sale. «Наличные»/«Терминал» (`data-possend="cash|terminal"`) are the method
+  **and** the send: they raise the confirm card (`pendingAction`
+  `type:"pos_sale"`, listing what is about to be charged) and `posSend()` runs
+  from «Оформить», because money goes through the card by rule. The receipt
+  state keeps the print link and adds «N поз. · терминал · остатки списаны».
+- The «Товар» editor writes to this module too — see docs/features.md
+  § «Товар»: the «Остаток» and «Штрихкод» columns of its «Размеры и цены» grid
+  are these rows, saved by the editor's own «Сохранить» (a relative
+  `stock_adjust` for the count, `PUT /api/admin/inventory/` for the barcode).
 - **The scanner is not part of the normal render tree.** A `<video>` element
   living inside the `bodySlot.innerHTML` string would be torn down (losing
   its camera stream) on every unrelated `render()` call. `scanMount()`
@@ -298,9 +320,9 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   keyboard-wedge `keydown` listener is attached there and not inside
   `scanPanelHTML()` (an element rebuilt on every panel update would silently
   drop it — this was a real bug caught in testing, not a hypothetical one).
-  The shell comes in two shapes — the overlay's floating ✕/torch circles, and
-  the standalone app's top bar (`scanTopBarHTML()`, `S.scanApp`) — chosen at
-  mount time; see "The scanner as its own app" below.
+  Since phase 2 both doors wear the SAME shell — `scanTopBarHTML()` header,
+  viewfinder, panel, manual field, footer — and `S.scanApp` only decides the
+  wordmark and where the × leads; see "The scanner as its own app" below.
 - **Engine selection**: `startScanEngine()` feature-detects
   `window.BarcodeDetector` — present, use it natively
   (`startNativeEngine()`, own `getUserMedia` + a ~280 ms poll loop, formats
@@ -312,10 +334,15 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   debounces the **same** code for 1.5 s (`SCAN.lastCode`/`SCAN.lastAt`) so a
   steady camera view does not re-fire on every frame, but accepts a
   **different** code immediately.
-- **The result card**: `scanPanelHTML()` — photo, name, size, remainder, a
-  quantity stepper (`data-scanqty`, `[data-scanqtyinput]`) and the two
-  confirms `data-scanmove="in"|"out"` (`scanCommitMove()`), or, for a code
-  nothing owns, the «Привязать к товару» search. Same markup in both shells.
+- **The result card**: `scanPanelHTML()` — «Найдено · EAN», the name, «объём ·
+  на складе N», the giant stepper (`data-scanqty`, `[data-scanqtyinput]`) and
+  the confirms `data-scanmove="in"|"out"` (`scanCommitMove()`) — or, in «Салон»
+  mode, the single `data-scanmove="cart"` (`scanToCart()`). For a code nothing
+  owns it is the «К какому товару?» search instead, whose candidate rows are
+  flat product×size (`data-scanbind="<id>|<variant>"`) so one tap binds. A
+  camera error is a LINE above whichever of those is on screen, never instead
+  of it — returning early on `S.scanErr` hid the card a manually typed code
+  brings up, which is the whole interface on a machine without a camera.
 - **Keyboard-wedge fallback**: the manual-entry input IS the wedge target —
   one small, low-emphasis field serves both a human typing a damaged code and
   a Bluetooth/USB scanner's rapid keystrokes-then-Enter. No separate hidden
@@ -400,20 +427,39 @@ its own icon, and opens straight into the camera.
   takes over the screen the moment the password is accepted, with no
   navigation. Strictly `SRV.admin === true` — unlike the panel there is no
   demo mode to fall back to, since every button here writes to the warehouse.
-- **One scanner, two shells.** `scanMount()`/`scanRenderPanel()`/the engines
-  are untouched and shared. `S.scanApp` (set by `scanRouteSync()` at the top of
-  `renderImpl()`) picks the shell: the «Склад» overlay keeps its floating ✕ and
-  torch circles; the app grows `scanTopBarHTML()` — «Rempire · Сканер», torch,
-  a keyboard button that focuses the manual field, and «В админку». The shell
-  is built once per mount, so a mode change is a remount, not a patch — hence
-  `SCANEL.dataset.scanapp`, checked by the mount hook.
+- **One scanner, one screen** (redesign phase 2). `scanMount()`/
+  `scanRenderPanel()`/the engines are untouched; what changed is the skin.
+  Both doors — the standalone route and the overlay «Склад»/«Салон» raise —
+  now show the same full-screen dark screen: `scanTopBarHTML()` header
+  («Rempire · Сканер» on the route, «Сканер» in the overlay) · the mode caption
+  · torch · a 44-px ×, a 320-px viewfinder with the warn scan line, the white
+  card, the manual field and the footer note. `S.scanApp` (set by
+  `scanRouteSync()`) decides only the wordmark and where the × leads
+  (`data-scanadmin` on the route, `data-scanclose` in the overlay). The shell
+  is still built once per mount, so a mode change is a remount, not a patch —
+  hence `SCANEL.dataset.scanapp`, checked by the mount hook. The dark CSS moved
+  out of `styles.css` into `public/shop2/admin.css`, next to the rest of the
+  panel's design system.
+- **Two jobs, one screen.** `S.scanFrom` («stock» or «pos», set by
+  `openScanner()` from the section that opened it) writes the caption
+  («Склад: приёмка и списание» / «Продажа: товар добавится в корзину») and the
+  buttons on the found card. In «Салон» mode there is one button, «Добавить в
+  продажу · N» — `scanToCart()` puts the line in `S.posCart` and goes straight
+  back to the register. It deliberately writes **no** stock move: the sale
+  itself decrements the shelf (`POST /api/admin/pos-orders/`), and writing it
+  here too would take the bottle off twice.
 - **No button to press.** `scanRouteSync()` opens the scanner as soon as the
   session is confirmed and closes it when the route (or the session) goes
   away. It runs inside `renderImpl()` and therefore never calls `render()`
   itself — the mount hook at the bottom of the same pass acts on the flag.
-- **The result card.** Photo, name, size, «Остаток: N» (or «не учтено»), a
-  stepper defaulting to 1, and two big buttons: «+ Приход» (`goods_in`) and
-  «− Списание» (`sale_pos`). One tap is the confirm — `scanCommitMove(sign)`
+- **The result card.** «Найдено · EAN» in ok green, the name at 600/17, «объём ·
+  на складе N» (or «не учтено»), a giant stepper (64-px buttons, the number in
+  Oswald 48) defaulting to 1, and two 56-h buttons carrying the number they
+  promise: «Принять +N» (`goods_in`) and «Списать −N» (`sale_pos`). The ±
+  patches those two labels in place (`scanPaintLabels()`) rather than
+  repainting the card, for the same reason the field itself is patched — a
+  repaint would fight the finger holding «+». One tap is the confirm —
+  `scanCommitMove(sign)`
   POSTs `delta = sign × qty` to `/api/admin/inventory/moves/`. It replaced the
   older `+1 / −1 / Приход по количеству` trio, which needed three different
   buttons to say the same thing. The number is read off the DOM

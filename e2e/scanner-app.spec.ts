@@ -14,7 +14,7 @@ import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./swe
  * runs through (`handleScanCode()`).
  *
  * Both jobs the icon exists for, end to end:
- *   1. an unknown code → «Привязать к товару» → search → product → size;
+ *   1. an unknown code → «К какому товару?» → search → one tap on product+size;
  *   2. that same code again → the product card → +3 приход → the warehouse
  *      holds three more than it did.
  *
@@ -70,18 +70,19 @@ test.describe("scanner app", () => {
     // ---- job 2: an unknown code, bound to a product and a size -------------
     await page.locator("[data-scanmanual]").fill(ean);
     await page.locator("[data-scanmanualsubmit]").click();
-    await expect(page.locator("#scanpanel")).toContainText("Код не найден");
-    await expect(page.locator("#scanpanel")).toContainText("Привязать к товару");
+    await expect(page.locator("#scanpanel")).toContainText("Код не привязан");
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
     await assertClean(page, w, "unknown code");
 
     // two or three letters is all it should take
     await page.locator("[data-scanassignq]").fill("tangled");
-    const assign = page.locator(`[data-scanassign="${PRODUCT_2.id}"]`);
+    /* One tap binds since the redesign: the candidate list is flat — one row
+       per product AND size — because a barcode belongs to one bottle, and
+       asking «какой объём?» after «какой товар?» was a second tap for a
+       decision the owner had already made (README § Сканер). */
+    const assign = page.locator(`[data-scanbind="${PRODUCT_2.id}|${VARIANT}"]`);
     await expect(assign).toBeVisible();
     await assign.click();
-    // PRODUCT_2 has two sizes, so the barcode has to be told which one it is
-    await expect(page.locator("#scanassignresults")).toContainText("Какой объём?");
-    await page.locator(`[data-scanbindsize="${VARIANT}"]`).click();
     expect(await toastText(page), "binding the code said nothing").toMatch(/привязан/i);
     await clearToast(page);
     // the binding re-looks the code up itself: the product card takes over
@@ -101,13 +102,17 @@ test.describe("scanner app", () => {
     await page.locator('[data-scanqty="1"]').click();
     await page.locator('[data-scanqty="1"]').click();
     await expect(page.locator("[data-scanqtyinput]")).toHaveValue("3");
+    // the two buttons carry the number they promise, so the stepper and the
+    // promise can never disagree
+    await expect(page.locator('[data-scanmove="in"]')).toHaveText("Принять +3");
+    await expect(page.locator('[data-scanmove="out"]')).toHaveText("Списать −3");
     await page.locator('[data-scanmove="in"]').click();
     expect(await toastText(page), "the goods-in confirm said nothing").toMatch(/Приход \+3/);
     await clearToast(page);
 
     // auto-resume: the card comes back with the new remainder, the stepper is
     // back at 1 and the scanner is ready for the next code with nothing to tap
-    await expect(page.locator("#scanpanel")).toContainText(`Остаток: ${before + 3}`);
+    await expect(page.locator("#scanpanel")).toContainText(`на складе ${before + 3}`);
     await expect(page.locator("#scanpanel")).toContainText("сканируйте следующий код");
     await expect(page.locator("[data-scanqtyinput]")).toHaveValue("1");
     expect(await stockQty(page, PRODUCT_2.id, VARIANT), "the move did not reach the warehouse").toBe(before + 3);

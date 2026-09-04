@@ -19,13 +19,26 @@ test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "admin sweep — desktop project only, see docs/testing.md");
 });
 
-/** Opens one product's editor from the «Товары» tab, the way the owner does. */
+/**
+ * The redesigned editor is five tabs over ONE form (docs/features.md § «Товар»):
+ * every pane is in the DOM at once and the inactive ones carry `hidden`, so a
+ * spec that types into a field has to open that field's tab first.
+ */
+type EdTab = "main" | "sizes" | "media" | "desc" | "seo";
+async function edTab(page: Page, key: EdTab): Promise<void> {
+  await page.locator(`[data-edtab="${key}"]`).click();
+  await expect(page.locator(`[data-edtab="${key}"][aria-current="true"]`)).toBeVisible();
+}
+
+/** Opens one product's editor from the «Товары» tab, the way the owner does,
+ *  and lands on «Размеры и цены» — where the money is. */
 async function openGoods(page: Page, id: string): Promise<void> {
   // Clicking the tab is also how the editor is closed (the handler clears
   // S.adminEdit), so this works whether or not one is already open.
   await tab(page, "goods");
   await page.locator("[data-goodsq]").fill(id);
   await page.locator(`[data-admgoods="${id}"]`).click();
+  await edTab(page, "sizes");
   await expect(page.locator("[data-edprice]")).toBeVisible();
 }
 
@@ -77,7 +90,9 @@ test.describe("sweep — goods editor", () => {
         const deep = i === 0;   // the whole matrix once; the money fields on all five
         await openGoods(page, id);
         const price = await page.locator("[data-edprice]").inputValue();
+        await edTab(page, "main");
         const stock = await page.locator("[data-edstock]").inputValue();
+        await edTab(page, "sizes");
         restore.push({ id, price, stock });
 
         // ---- retail price -------------------------------------------------
@@ -133,10 +148,12 @@ test.describe("sweep — goods editor", () => {
 
         // ---- stock ---------------------------------------------------------
         for (const value of ["out", "low", "in"]) {
+          await edTab(page, "main");
           await page.locator("[data-edstock]").selectOption(value);
           await saveGoods(page, id);
           await clearToast(page);
           await openGoods(page, id);
+          await edTab(page, "main");
           expect(await page.locator("[data-edstock]").inputValue(), `stock "${value}" did not stick`).toBe(value);
         }
         await assertClean(page, w, `goods "${id}" stock`);
@@ -146,6 +163,7 @@ test.describe("sweep — goods editor", () => {
       const subject = sample[0];
       await openGoods(page, subject);
 
+      await edTab(page, "main");
       const sub = page.locator("[data-edsubcat]");
       if (await sub.count()) {
         const values = await sub.locator("option").evaluateAll((o) => o.map((x) => (x as HTMLOptionElement).value));
@@ -155,6 +173,7 @@ test.describe("sweep — goods editor", () => {
           await saveGoods(page, subject);
           await clearToast(page);
           await openGoods(page, subject);
+          await edTab(page, "main");
           expect(await sub.inputValue()).toBe(nonEmpty[0]);
           await sub.selectOption("");
         }
@@ -162,6 +181,7 @@ test.describe("sweep — goods editor", () => {
 
       // SEO: a thousand characters, a script tag, an emoji — maxlength is the
       // only guard the form has, so check it actually holds.
+      await edTab(page, "seo");
       await page.locator("[data-edseot]").fill(LONG);
       expect((await page.locator("[data-edseot]").inputValue()).length).toBeLessThanOrEqual(70);
       await page.locator("[data-edseod]").fill(LONG);
@@ -170,12 +190,22 @@ test.describe("sweep — goods editor", () => {
       await page.locator("[data-edseod]").fill(`${EMOJI} описание`);
 
       // Descriptions: whatever is pasted here is printed on the product page.
+      // One language at a time — the segmented control is the only thing that
+      // decides which of the three boxes is on screen.
+      await edTab(page, "desc");
       await page.locator("[data-eddescru]").fill(`Описание ${HTML_BOMB}`);
+      await page.locator('[data-eddesclang="et"]').click();
       await page.locator("[data-eddescet]").fill(EMOJI);
+      await page.locator('[data-eddesclang="en"]').click();
       await page.locator("[data-eddescen]").fill(LONG);
+      await page.locator('[data-eddesclang="ru"]').click();
+      // the AI buttons the owner writes with are on this tab and reachable
+      await expect(page.locator(`[data-admdescgen="${subject}"]`)).toBeVisible();
+      await expect(page.locator(`[data-admtranslate="${subject}"]`)).toBeVisible();
 
       // A link that is not a video must be refused — the shop silently drops
       // anything it cannot turn into an embed, so «saved» would be a lie.
+      await edTab(page, "media");
       for (const badUrl of ["javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "not a url"]) {
         await page.locator("[data-edvideo]").fill(badUrl);
         await saveGoods(page, subject);
@@ -220,17 +250,25 @@ test.describe("sweep — goods editor", () => {
 
       // ---- put the text back through the same UI ---------------------------
       await openGoods(page, subject);
+      await edTab(page, "seo");
       await page.locator("[data-edseot]").fill("");
       await page.locator("[data-edseod]").fill("");
+      await edTab(page, "desc");
       await page.locator("[data-eddescru]").fill("");
+      await page.locator('[data-eddesclang="et"]').click();
       await page.locator("[data-eddescet]").fill("");
+      await page.locator('[data-eddesclang="en"]').click();
       await page.locator("[data-eddescen]").fill("");
+      await edTab(page, "media");
       await page.locator("[data-edvideo]").fill("");
       await saveGoods(page, subject);
       await clearToast(page);
       await openGoods(page, subject);
+      await edTab(page, "seo");
       expect(await page.locator("[data-edseot]").inputValue(), "an SEO override cannot be cleared from the editor").toBe("");
+      await edTab(page, "desc");
       expect(await page.locator("[data-eddescru]").inputValue()).toBe("");
+      await edTab(page, "media");
       expect(await page.locator("[data-edvideo]").inputValue()).toBe("");
       await assertClean(page, w, "goods overrides cleared");
     } finally {
@@ -240,6 +278,7 @@ test.describe("sweep — goods editor", () => {
         await openGoods(page, r.id);
         await page.locator("[data-edprice]").fill(r.price);
         await page.locator("[data-edproprice]").fill("");
+        await edTab(page, "main");
         await page.locator("[data-edstock]").selectOption(r.stock);
         await saveGoods(page, r.id);
         await clearToast(page);
@@ -470,6 +509,11 @@ test.describe("sweep — goods editor: Instagram video", () => {
 
     try {
       await openGoods(page, id);
+      await edTab(page, "media");
+      // the source chips are the design's door to the same one field: pick
+      // Instagram and the field's placeholder changes, the value does not
+      await page.locator('[data-edvidkind="ig"]').click();
+      await expect(page.locator('[data-edvidkind="ig"][aria-current="true"]')).toBeVisible();
 
       // An Instagram address that is not a reel or a post is still not a
       // video, and the refusal has to be readable.
@@ -521,6 +565,7 @@ test.describe("sweep — goods editor: Instagram video", () => {
       await shop.close();
     } finally {
       await openGoods(page, id);
+      await edTab(page, "media");
       await page.locator("[data-edvideo]").fill("");
       await saveGoods(page, id);
       await clearToast(page);
