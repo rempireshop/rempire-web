@@ -3653,9 +3653,9 @@
     videoOn: false,      // the product video is a click-to-play embed
     // ---- blog: posts live in their own table, not the demo/undo layer ----
     blogSlug: "",         // which post /blog/<slug>/ is open
-    blogList: null,       // {posts, total, page, perPage} once the listing loaded
-    blogListBusy: false,
-    blogPosts: {},         // slug -> post once fetched; null = not found, undefined = not asked yet
+    blogLists: {},        // lang -> {posts, total, page, perPage, at, failed?} — see blogSyncList()
+    blogListBusy: false,  // «Показать ещё» (page 2+) in flight
+    blogPosts: {},        // "LANG:slug" -> {post, at, failed?}; post null = no such post; undefined = not asked yet
     adminBlog: null,       // admin tab «Блог»: [post,...] once loaded
     adminBlogEdit: null,   // the post being created/edited (a draft object), or null for the list
     adminBlogEditBusy: false, // fetching the full post before the editor can open
@@ -4613,20 +4613,215 @@
   /* ---------- blog ----------------------------------------------------------
      Articles Renat writes (or the admin assistant drafts) in RU/ET/EN — a
      real table (db/migrations/070_blog.sql), not the demo/undo layer, so the
-     storefront simply fetches whatever the API answers, same shape as the
-     real-reviews block above: read once, cache in S, render what is there.
+     storefront simply shows whatever the API answers.
      GET /api/blog/?lang=&page=      → the list, 10 at a time
      GET /api/blog/<slug>/?lang=     → one published post, bodyHtml already
-                                        rendered server-side (@/lib/blog) */
+                                        rendered server-side (@/lib/blog)
+
+     The API sits on a database that cold-starts (one to three seconds), so
+     the shop never waits for it in front of the shopper. What is on screen
+     comes, in this order, from:
+       1. the page itself — every prerendered page carries the list for its
+          language in #blogdata (an article page carries the article in
+          #blogpost as well), adopted by hydrateBlog() before the first paint;
+       2. this tab's sessionStorage — what the API answered earlier in the
+          session, per language (blogStoreRead/blogStoreWrite);
+       3. the API — asked on idle right after boot for the current language
+          (blogPrefetchSoon), then for each listed article's body, one at a
+          time (blogPrefetchPosts), and again the moment a tile is hovered,
+          pressed or focused (blogPrefetchPost).
+     Whatever painted from 1 or 2 is checked against the API in the
+     background and repainted only when something really differs
+     (blogSyncList/blogSyncPost) — so an article published today shows up
+     today, with no «…» in between and without the screen being rebuilt
+     twice for the same content. Only a truly cold miss (nothing embedded,
+     nothing in the tab yet) shows the skeleton tiles. */
+  var BLOG_TTL = 60000;           // an answer younger than this is not asked for again (the API's own max-age)
+  var BLOG_STORE = "rmp-blog-";   // sessionStorage key prefix, + the language
+  var BLOG_INFLIGHT = {};         // "list:LANG" / "LANG:slug" -> Promise, so nothing is asked for twice at once
+  function blogKey(slug, lang) { return (lang || S.lang) + ":" + slug; }
+  function blogList(lang) { return S.blogLists[lang || S.lang] || null; }
+  function blogEntry(slug, lang) { return S.blogPosts[blogKey(slug, lang)]; }
+  function blogFresh(x) { return !!(x && x.at && Date.now() - x.at < BLOG_TTL); }
+  function blogListItem(slug, lang) {
+    var l = blogList(lang);
+    if (!l) return null;
+    for (var i = 0; i < l.posts.length; i++) if (l.posts[i].slug === slug) return l.posts[i];
+    return null;
+  }
+  /* "Did it change?" — keys sorted and empty values dropped, so the build's
+     snapshot, the tab's copy and the API's answer compare as content, not as
+     the order one serialiser happened to write the keys in. */
+  function blogSig(x) {
+    return JSON.stringify(x, function (k, v) {
+      if (!v || typeof v !== "object" || Array.isArray(v)) return v;
+      var o = {};
+      Object.keys(v).sort().forEach(function (kk) { if (v[kk] != null && v[kk] !== "") o[kk] = v[kk]; });
+      return o;
+    });
+  }
+  function blogStoreRead(lang) {
+    try {
+      var j = JSON.parse(sessionStorage.getItem(BLOG_STORE + lang) || "null");
+      return j && j.v === 1 && j.list && Array.isArray(j.list.posts) && Number(j.list.at) > 0 ? j : null;
+    } catch (e) { return null; }
+  }
+  function blogStoreWrite(lang) {
+    var l = S.blogLists[lang];
+    if (!l || l.failed || !l.at) return;
+    var posts = {};
+    l.posts.forEach(function (p) {
+      var en = S.blogPosts[blogKey(p.slug, lang)];
+      if (en && en.post && en.at) posts[p.slug] = en;
+    });
+    try {
+      sessionStorage.setItem(BLOG_STORE + lang, JSON.stringify({
+        v: 1,
+        list: { posts: l.posts.slice(0, l.perPage || 10), total: l.total, page: 1, perPage: l.perPage || 10, at: l.at },
+        posts: posts
+      }));
+    } catch (e) {}
+  }
+  function blogIdle(fn) {
+    if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 2500 });
+    else setTimeout(fn, 600);
+  }
+  function blogSaveData() {
+    var c = navigator.connection;
+    return !!(c && c.saveData);
+  }
+  /* The list for one language, page 1. Resolves once S holds the answer (or
+     the failure); the screen is repainted only if what it shows differs. */
+  function blogSyncList(lang) {
+    var key = "list:" + lang;
+    var have = S.blogLists[lang];
+    if (blogFresh(have)) return Promise.resolve(have);
+    if (BLOG_INFLIGHT[key]) return BLOG_INFLIGHT[key];
+    var p = fetch("/api/blog/?lang=" + lang + "&page=1")
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok || !Array.isArray(j.posts)) throw new Error("blog");
+        var was = S.blogLists[lang];
+        var next = { posts: j.posts, total: j.total, page: 1, perPage: j.perPage || 10, at: Date.now() };
+        // «Показать ещё» was pressed meanwhile: the longer list stays, only
+        // its first page is refreshed
+        if (was && !was.failed && was.page > 1) {
+          next = { posts: j.posts.concat(was.posts.slice(next.perPage)), total: j.total, page: was.page, perPage: next.perPage, at: next.at };
+        }
+        var changed = !was || was.failed || was.total !== next.total || blogSig(was.posts) !== blogSig(next.posts);
+        S.blogLists[lang] = next;
+        blogStoreWrite(lang);
+        if (changed && S.lang === lang && (S.screen === "blog" || S.screen === "blogpost")) render();
+        blogPrefetchPosts(lang);
+        return next;
+      })
+      .catch(function () {
+        /* An outage must look like one — but only when there is nothing
+           better to show: a list from the build or from earlier in the tab
+           beats «временно недоступен». Either way the stamp stops the next
+           render from asking a database that is down again at once. */
+        if (!S.blogLists[lang]) {
+          S.blogLists[lang] = { posts: [], total: 0, page: 1, perPage: 10, at: Date.now(), failed: true };
+          if (S.lang === lang && S.screen === "blog") render();
+        } else {
+          S.blogLists[lang].at = Date.now();
+        }
+        return S.blogLists[lang];
+      })
+      .then(function (l) { delete BLOG_INFLIGHT[key]; return l; });
+    BLOG_INFLIGHT[key] = p;
+    return p;
+  }
+  /* One article. Resolves once S knows it — the post, or that there is no
+     such post; the open article is repainted only when it differs. */
+  function blogSyncPost(lang, slug) {
+    var key = blogKey(slug, lang);
+    var have = S.blogPosts[key];
+    if (blogFresh(have)) return Promise.resolve(have);
+    if (BLOG_INFLIGHT[key]) return BLOG_INFLIGHT[key];
+    function onScreen() { return S.screen === "blogpost" && S.blogSlug === slug && S.lang === lang; }
+    var p = fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + lang)
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
+      .then(function (res) {
+        var was = S.blogPosts[key];
+        if (res.j && res.j.ok && res.j.post) {
+          var changed = !was || !was.post || blogSig(was.post) !== blogSig(res.j.post);
+          S.blogPosts[key] = { post: res.j.post, at: Date.now() };
+          blogStoreWrite(lang);
+          if (changed && onScreen()) render();
+        } else if (res.status === 404) {
+          S.blogPosts[key] = { post: null, at: Date.now() };
+          if ((!was || was.post) && onScreen()) render();
+        } else {
+          throw new Error("blog");
+        }
+        return S.blogPosts[key];
+      })
+      .catch(function () {
+        if (!S.blogPosts[key]) {
+          S.blogPosts[key] = { post: null, at: Date.now(), failed: true };
+          if (onScreen()) render();
+        } else {
+          S.blogPosts[key].at = Date.now();
+        }
+        return S.blogPosts[key];
+      })
+      .then(function (en) { delete BLOG_INFLIGHT[key]; return en; });
+    BLOG_INFLIGHT[key] = p;
+    return p;
+  }
+  /* The bodies of the listed articles, one at a time on idle, so the tile
+     the shopper eventually presses opens at once. Skipped on a metered
+     connection (Save-Data) — the bodies are small, but they are not asked for. */
+  function blogPrefetchPosts(lang) {
+    if (blogSaveData()) return;
+    var l = S.blogLists[lang];
+    if (!l || l.failed) return;
+    var queue = l.posts.map(function (p) { return p.slug; }).filter(function (slug) {
+      return !S.blogPosts[blogKey(slug, lang)] && !BLOG_INFLIGHT[blogKey(slug, lang)];
+    });
+    (function next() {
+      if (!queue.length || S.lang !== lang) return;
+      var slug = queue.shift();
+      blogIdle(function () {
+        if (S.lang !== lang) return;
+        blogSyncPost(lang, slug).then(next, next);
+      });
+    })();
+  }
+  /* A tile under the pointer, under a finger or carrying the focus ring is
+     about to be opened: its body is asked for now, not on the click. */
+  function blogPrefetchPost(slug) {
+    if (!slug || blogSaveData()) return;
+    blogSyncPost(S.lang, slug);
+  }
+  /* Right after boot, and after a language switch: the list for the current
+     language, on idle, then the articles behind it. Not in the admin — that
+     screen has its own list (loadAdminBlog) and its own things to do. */
+  function blogPrefetchSoon() {
+    var lang = S.lang;
+    if (S.screen === "admin" || S.screen === "scan") return;
+    blogIdle(function () {
+      if (S.lang !== lang) return;
+      blogSyncList(lang).then(function () { blogPrefetchPosts(lang); });
+    });
+  }
+
   function blogDate(iso) {
     var d = String(iso || "").slice(0, 10).split("-");
     return d.length === 3 ? d[2] + "." + d[1] + "." + d[0] : "";
   }
-  function blogUrl(slug) {
-    return location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/blog/" + encodeURIComponent(slug) + "/";
+  function blogPath(slug) {
+    return "/shop2" + SEG_OF_LANG[pathLang] + "/blog/" + encodeURIComponent(slug) + "/";
   }
+  function blogUrl(slug) {
+    return location.origin + blogPath(slug);
+  }
+  /* A real link (href), not a bare <a>: the pointer says «clickable», the
+     keyboard reaches it, Ctrl/⌘-click opens a tab — a plain click is caught
+     by the [data-go-blog] branch of the click handler and stays in the SPA. */
   function blogTileHTML(p) {
-    return '<li><a class="card blog__tile" data-go-blog="' + esc(p.slug) + '">' +
+    return '<li><a class="card blog__tile" href="' + esc(blogPath(p.slug)) + '" data-go-blog="' + esc(p.slug) + '">' +
       (p.coverUrl
         ? '<span class="blog__tileimg" style="background-image:url(\'' + esc(p.coverUrl) + '\')" role="img" aria-label="' + esc(p.coverAlt || p.title) + '"></span>'
         : '<span class="blog__tileimg blog__tileimg--none">' + tower("blog__mark") + "</span>") +
@@ -4637,37 +4832,63 @@
         (p.tags && p.tags.length ? '<span class="blog__tags">' + p.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</span>" : "") +
       "</span></a></li>";
   }
+  /* The shape of a tile while the real ones are on their way — grey blocks
+     where the cover, the date, the title and the excerpt will be. */
+  function blogSkTileHTML() {
+    return '<li class="blog__sk" aria-hidden="true"><span class="card">' +
+      '<span class="blog__skimg"></span>' +
+      '<span class="blog__skline" style="width:28%"></span>' +
+      '<span class="blog__skline blog__skline--t" style="width:82%"></span>' +
+      '<span class="blog__skline"></span>' +
+      '<span class="blog__skline" style="width:64%"></span>' +
+      "</span></li>";
+  }
+  function blogSkTilesHTML(n) {
+    var s = "";
+    for (var i = 0; i < n; i++) s += blogSkTileHTML();
+    return s;
+  }
+  /* «Показать ещё» — the next page, appended. Page 1 itself is never asked
+     for from here: blogSyncList() (from the render hook) owns it. */
   function loadBlogList(more) {
-    if (S.blogListBusy) return;
-    var page = more && S.blogList ? S.blogList.page + 1 : 1;
-    S.blogListBusy = true; if (!more) render();
-    fetch("/api/blog/?lang=" + S.lang + "&page=" + page)
+    var lang = S.lang, l = blogList(lang);
+    if (!more) { blogSyncList(lang); return; }
+    if (!l || l.failed || S.blogListBusy) return;
+    var page = l.page + 1;
+    S.blogListBusy = true; render();
+    fetch("/api/blog/?lang=" + lang + "&page=" + page)
       .then(function (r) { return r.json(); })
       .then(function (j) {
         S.blogListBusy = false;
-        if (!j || !j.ok) { if (!S.blogList) S.blogList = { posts: [], total: 0, page: 1, perPage: 10 }; S.blogList.failed = true; render(); return; }
-        if (more && S.blogList) S.blogList = { posts: S.blogList.posts.concat(j.posts), total: j.total, page: j.page, perPage: j.perPage };
-        else S.blogList = { posts: j.posts, total: j.total, page: j.page, perPage: j.perPage };
+        var cur = S.blogLists[lang];
+        if (!j || !j.ok || !cur) { render(); return; }
+        S.blogLists[lang] = { posts: cur.posts.concat(j.posts), total: j.total, page: j.page, perPage: j.perPage || cur.perPage, at: cur.at };
         render();
+        blogPrefetchPosts(lang);
       })
-      .catch(function () {
-        S.blogListBusy = false;
-        if (!S.blogList) S.blogList = { posts: [], total: 0, page: 1, perPage: 10 };
-        S.blogList.failed = true;
-        render();
-      });
+      .catch(function () { S.blogListBusy = false; render(); });
   }
   function screenBlog() {
-    var posts = S.blogList ? S.blogList.posts : [];
-    var canMore = S.blogList && posts.length < S.blogList.total;
-    var body = posts.length
-      ? '<ul class="grid blog__grid" style="list-style:none;padding:0">' + posts.map(blogTileHTML).join("") + "</ul>" +
+    var l = blogList();
+    var posts = l ? l.posts : [];
+    var canMore = l && !l.failed && posts.length < l.total;
+    var body;
+    if (!l) {
+      // a cold miss — nothing embedded in the page, nothing in this tab yet
+      body = '<ul class="grid blog__grid" style="list-style:none;padding:0" aria-busy="true">' + blogSkTilesHTML(3) + "</ul>";
+    } else if (posts.length) {
+      body = '<ul class="grid blog__grid" style="list-style:none;padding:0"' + (S.blogListBusy ? ' aria-busy="true"' : "") + ">" +
+          posts.map(blogTileHTML).join("") +
+          // the next page takes shape under the ones already there
+          (S.blogListBusy ? blogSkTilesHTML(3) : "") +
+        "</ul>" +
         (canMore
-          ? '<div class="blog__more"><button class="btn btn--ghost" data-blogmore' + (S.blogListBusy ? " disabled" : "") + ">" +
-            (S.blogListBusy ? "…" : "Показать ещё") + "</button></div>"
-          : "")
-      : '<p class="muted" style="margin:16px 0">' +
-        (S.blogList && S.blogList.failed ? "Блог временно недоступен — попробуйте позже." : "Статей пока нет — загляните позже.") + "</p>";
+          ? '<div class="blog__more"><button class="btn btn--ghost" data-blogmore' + (S.blogListBusy ? " disabled" : "") + ">Показать ещё</button></div>"
+          : "");
+    } else {
+      body = '<p class="muted" style="margin:16px 0">' +
+        (l.failed ? "Блог временно недоступен — попробуйте позже." : "Статей пока нет — загляните позже.") + "</p>";
+    }
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / Блог</div>' +
       '<section class="sec" style="padding-top:14px">' +
@@ -4676,58 +4897,83 @@
       "</section></div>";
   }
 
-  function loadBlogPost(slug) {
-    if (S.blogPosts[slug] !== undefined) return;
-    S.blogPosts[slug] = null; // in flight — never asked twice; null also reads as "not found" until it answers
-    fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + S.lang)
-      .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
-      .then(function (res) {
-        S.blogPosts[slug] = (res.j && res.j.ok) ? res.j.post : null;
-        if (S.screen === "blogpost" && S.blogSlug === slug) render();
-      })
-      .catch(function () {
-        S.blogPosts[slug] = null;
-        if (S.screen === "blogpost" && S.blogSlug === slug) render();
-      });
+  /* The top of an article — cover, title, date + share, tags. The same
+     markup whether `p` is the article or only its tile from the list: while
+     the body is on its way the page already wears the part the list knows,
+     and the body's arrival changes nothing above it. */
+  function blogHeadHTML(p) {
+    return (p.coverUrl
+        ? '<span class="blog__cover" style="background-image:url(\'' + esc(p.coverUrl) + '\')" role="img" aria-label="' + esc(p.coverAlt || p.title) + '"></span>'
+        : "") +
+      '<h1 class="display h1">' + esc(p.title) + "</h1>" +
+      '<div class="blog__meta">' +
+        (p.publishedAt ? '<span class="muted">' + blogDate(p.publishedAt) + "</span>" : "") +
+        '<button class="link" data-blogshare="' + esc(p.slug) + '">' + icon("share") + "<span>Поделиться</span></button>" +
+      "</div>" +
+      (p.tags && p.tags.length ? '<div class="blog__tags">' + p.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</div>" : "");
   }
+  function blogCrumbsHTML(title) {
+    return '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="blog">Блог</button>' +
+      (title ? " / " + esc(title) : "") + "</div>";
+  }
+  /* The article page. Breadcrumbs sit in the ordinary .wrap, where every
+     other page keeps them; the article itself is a reading column in the
+     middle (.blog__read); the products it names and the other articles get
+     the full width and the catalogue's own grid, so a card here is as wide
+     as on a category page and its foot row never runs out of room. */
   function screenBlogPost() {
-    var post = S.blogPosts[S.blogSlug];
-    if (post === undefined) return '<div class="wrap wrap--mid"><p class="muted" style="margin:16px 0">…</p></div>';
+    var slug = S.blogSlug;
+    var en = blogEntry(slug);
+    if (!en) {
+      // not known yet: the tile already tells the title, the cover and the
+      // date — those are painted now, and only the body takes shape below
+      var item = blogListItem(slug);
+      var lines = "";
+      for (var i = 0; i < 7; i++) {
+        lines += '<span class="blog__skline" style="width:' + [96, 88, 92, 60, 94, 84, 46][i] + '%"></span>';
+      }
+      return '<div class="wrap">' +
+        blogCrumbsHTML(item ? item.title : "") +
+        '<article class="sec blog__post blog__read" aria-busy="true">' +
+          (item
+            ? blogHeadHTML(item)
+            : '<span class="blog__skimg blog__skimg--cover" aria-hidden="true"></span><span class="blog__skline blog__skline--h" aria-hidden="true"></span>') +
+          '<div class="acc__rich blog__body blog__sk" aria-hidden="true">' + lines + "</div>" +
+        "</article></div>";
+    }
+    var post = en.post;
     if (!post) {
-      return '<div class="wrap wrap--mid">' +
-        '<section class="sec" style="padding-top:14px">' +
-          '<h1 class="display h1">Статья не найдена.</h1>' +
+      return '<div class="wrap">' +
+        blogCrumbsHTML("") +
+        '<section class="sec blog__read" style="padding-top:14px">' +
+          (en.failed
+            ? '<p class="muted" style="margin:16px 0">Блог временно недоступен — попробуйте позже.</p>'
+            : '<h1 class="display h1">Статья не найдена.</h1>') +
           '<p><button class="link" data-go="blog">Вернуться в блог</button></p>' +
         "</section></div>";
     }
     var featured = productsById(post.products).slice(0, 8);
-    var others = (S.blogList ? S.blogList.posts : []).filter(function (p) { return p.slug !== post.slug; }).slice(0, 3);
-    return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="blog">Блог</button> / ' + esc(post.title) + "</div>" +
-      '<article class="sec blog__post" style="padding-top:14px">' +
-        (post.coverUrl
-          ? '<span class="blog__cover" style="background-image:url(\'' + esc(post.coverUrl) + '\')" role="img" aria-label="' + esc(post.coverAlt || post.title) + '"></span>'
-          : "") +
-        '<h1 class="display h1">' + esc(post.title) + "</h1>" +
-        '<div class="blog__meta">' +
-          (post.publishedAt ? '<span class="muted">' + blogDate(post.publishedAt) + "</span>" : "") +
-          '<button class="link" data-blogshare="' + esc(post.slug) + '">' + icon("share") + "<span>Поделиться</span></button>" +
-        "</div>" +
-        (post.tags && post.tags.length ? '<div class="blog__tags">' + post.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</div>" : "") +
+    var l = blogList();
+    var others = (l ? l.posts : []).filter(function (p) { return p.slug !== post.slug; }).slice(0, 3);
+    return '<div class="wrap">' +
+      blogCrumbsHTML(post.title) +
+      '<article class="sec blog__post blog__read">' +
+        blogHeadHTML(post) +
         '<div class="acc__rich blog__body">' + blogBodyHTML(post.bodyHtml) + "</div>" +
       "</article>" +
       (featured.length
-        ? '<section class="sec"><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Товары из статьи</h2>' +
+        ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">Товары из статьи</h2>' +
           '<div class="grid">' + featured.map(cardHTML).join("") + "</div></section>"
         : "") +
       (others.length
-        ? '<section class="sec"><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Другие статьи</h2>' +
+        ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">Другие статьи</h2>' +
           '<ul class="grid blog__grid" style="list-style:none;padding:0">' + others.map(blogTileHTML).join("") + "</ul></section>"
         : "") +
       "</div>";
   }
   function shareBlogPost(slug) {
-    var post = S.blogPosts[slug];
+    var en = blogEntry(slug);
+    var post = (en && en.post) || blogListItem(slug);
     var url = blogUrl(slug);
     var title = (post && post.title) || url;
     if (navigator.share) {
@@ -13789,12 +14035,13 @@
         t = trText("Блог", S.lang, false) + " — REMPIRE";
         d = trText(BLOG_DESC, S.lang, false).slice(0, 158);
       } else if (S.screen === "blogpost") {
-        var post = S.blogPosts[S.blogSlug];
+        var pen = blogEntry(S.blogSlug);
+        var post = pen ? pen.post : blogListItem(S.blogSlug);   // the tile's title while the body is on its way
         if (post) {
           t = fitTitle(post.seoTitle || post.title, (post.seoTitle || post.title) + " — REMPIRE");
           d = (post.seoDesc || post.excerpt || "").slice(0, 158);
-        } else if (post === null) {
-          // fetched and confirmed missing — the loading instant (undefined)
+        } else if (pen && !pen.failed) {
+          // fetched and confirmed missing — the loading instant (no entry)
           // is left on the generic title rather than flashing this
           t = trText("Статья не найдена.", S.lang, false) + " — REMPIRE";
         }
@@ -13973,9 +14220,10 @@
     // features: real reviews and the moderation queue are fetched once each
     if (S.screen === "product") loadReviews(S.productId);
     if (S.screen === "admin" && S.adminTab === "reviews") loadAdminReviews(false);
-    // blog: the listing and one post are fetched once each, like reviews above
-    if (S.screen === "blog" && !S.blogList && !S.blogListBusy) loadBlogList();
-    if (S.screen === "blogpost" && S.blogSlug && S.blogPosts[S.blogSlug] === undefined) loadBlogPost(S.blogSlug);
+    // blog: what is on screen is checked against the API (and fetched, on a
+    // cold miss) — a fresh answer or one already in flight costs nothing
+    if (S.screen === "blog") blogSyncList(S.lang);
+    if (S.screen === "blogpost" && S.blogSlug) { blogSyncPost(S.lang, S.blogSlug); blogSyncList(S.lang); }
     if (S.screen === "admin" && S.adminTab === "blog" && !S.adminBlogEdit) loadAdminBlog(false);
     // UX fix 8: #pointmap is a brand-new node after every render() — (re)bind
     // Leaflet to it whenever the picker is open in map view
@@ -14739,7 +14987,9 @@
       pathLang = d.lang;
       try { history.replaceState(history.state || { y: window.scrollY, shown: S.shown }, "", pathFor()); } catch (e) {}
       hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
-      render(); return;
+      render();
+      blogPrefetchSoon();   // blog: the list in the new language, before it is asked for
+      return;
     }
     if (d.line !== undefined) {
       var li = Number(d.line);
@@ -15786,7 +16036,13 @@
     if (d.goBundle) {
       S.bundleId = d.goBundle; S.videoOn = false; go("bundle"); return;
     }
-    if (d.goBlog) { S.blogSlug = d.goBlog; go("blogpost"); return; }
+    if (d.goBlog) {
+      // a tile is a real link: a modified click (new tab, new window) is the
+      // browser's; a plain one stays in the SPA
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      S.blogSlug = d.goBlog; go("blogpost"); return;
+    }
     if (d.blogmore !== undefined) { loadBlogList(true); return; }
     if (d.blogshare) { shareBlogPost(d.blogshare); return; }
     if (d.addbundle) { e.stopPropagation(); addBundleToCart(d.addbundle); return; }
@@ -16253,6 +16509,19 @@
     if (S.adminBlogEdit) blogSelSave();
   });
 
+  /* blog: a tile the pointer has reached, a finger has landed on or the focus
+     ring has moved to is about to be opened — its body is asked for now
+     (blogPrefetchPost), so the click that follows paints from memory. A tile
+     already known, or already on its way, costs one closest() and nothing
+     else. */
+  function blogTileNear(e) {
+    var a = e.target && e.target.closest && e.target.closest("[data-go-blog]");
+    if (a) blogPrefetchPost(a.dataset.goBlog);
+  }
+  document.addEventListener("pointerover", blogTileNear, { passive: true });
+  document.addEventListener("pointerdown", blogTileNear, { passive: true });
+  document.addEventListener("focusin", blogTileNear, { passive: true });
+
   /* blog: pressing a toolbar button must not blur the box — mousedown is
      where the browser moves the focus, so it is stopped here and the caret
      stays exactly where the owner left it. */
@@ -16694,54 +16963,51 @@
     }
   });
 
-  /* The prerendered blog pages carry their data (tools/prerender-shop2.mjs
-     writes it into #blogdata / #blogpost): adopt it before the first render,
-     so the list and the article are on screen at once instead of an empty
-     state that a fetch fills a second later. The fetch still runs behind it
-     (loadBlogList/loadBlogPost see the data as already loaded, so it is
-     re-read only when the shopper asks for more or changes language) — a
-     post published after the last build shows up on the next visit either
-     way. Skipped when the page's language is not the one being shown. */
+  /* Every prerendered page carries the blog list for its language
+     (tools/prerender-shop2.mjs writes it into #blogdata — it is a few
+     hundred bytes; an article page carries the article in #blogpost too):
+     adopt it before the first render, so the list and the article are on
+     screen at once, whichever page the visit started on, instead of an empty
+     state that a fetch fills a second later. What the API answered earlier
+     in this tab (sessionStorage, blogStoreWrite) is adopted over the build's
+     snapshot when it is the newer of the two — newer than the last edit the
+     snapshot knows of (its `stamp`). Both are as old as they are: the render
+     hook checks the API behind them and repaints only if something differs
+     (blogSyncList/blogSyncPost), so an article Renat publishes today shows
+     on today's visits, not after a deploy. Skipped when the page's language
+     is not the one being shown. */
   (function hydrateBlog() {
+    var lang = S.lang;   // final by now: the URL segment or the saved choice set it above
+    var listStamp = 0, postStamp = 0, embeddedSlug = "";
     try {
-      var lang = S.lang;   // final by now: the URL segment or the saved choice set it above
       var listEl = document.getElementById("blogdata");
       if (listEl) {
         var j = JSON.parse(listEl.textContent || "null");
         if (j && j.lang === lang && Array.isArray(j.posts)) {
-          S.blogList = { posts: j.posts, total: j.total || j.posts.length, page: 1, perPage: j.perPage || 10, hydrated: true };
+          S.blogLists[lang] = { posts: j.posts, total: j.total || j.posts.length, page: 1, perPage: j.perPage || 10, at: 0 };
+          listStamp = Number(j.stamp) || 0;
         }
       }
       var postEl = document.getElementById("blogpost");
       if (postEl) {
         var q = JSON.parse(postEl.textContent || "null");
-        if (q && q.lang === lang && q.post && q.post.slug) { q.post.hydrated = true; S.blogPosts[q.post.slug] = q.post; }
+        if (q && q.lang === lang && q.post && q.post.slug) {
+          S.blogPosts[blogKey(q.post.slug, lang)] = { post: q.post, at: 0 };
+          embeddedSlug = q.post.slug;
+          postStamp = Number(q.stamp) || 0;
+        }
       }
     } catch (e) {}
+    var st = blogStoreRead(lang);
+    if (!st) return;
+    if (st.list.at > listStamp) S.blogLists[lang] = st.list;
+    Object.keys(st.posts || {}).forEach(function (slug) {
+      var en = st.posts[slug];
+      if (!en || !en.post || !(en.at > 0)) return;
+      if (slug === embeddedSlug && !(en.at > postStamp)) return;
+      S.blogPosts[blogKey(slug, lang)] = en;
+    });
   })();
-  /* The embedded data is as old as the last build; the API is asked once the
-     page is up and the screen is repainted only if something differs, so a
-     post Renat publishes today shows on today's visits, not after a deploy. */
-  function refreshBlog() {
-    if (S.screen === "blog" && S.blogList && S.blogList.hydrated) {
-      fetch("/api/blog/?lang=" + S.lang + "&page=1").then(function (r) { return r.json(); }).then(function (j) {
-        if (!j || !j.ok || !S.blogList || !S.blogList.hydrated) return;
-        var was = JSON.stringify(S.blogList.posts), now = JSON.stringify(j.posts);
-        S.blogList = { posts: j.posts, total: j.total, page: j.page, perPage: j.perPage };
-        if (was !== now && S.screen === "blog") render();
-      }).catch(noop);
-    }
-    if (S.screen === "blogpost" && S.blogSlug && S.blogPosts[S.blogSlug] && S.blogPosts[S.blogSlug].hydrated) {
-      var slug = S.blogSlug;
-      fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + S.lang).then(function (r) { return r.json(); }).then(function (j) {
-        if (!j || !j.ok || !j.post) return;
-        var was = JSON.stringify(S.blogPosts[slug]), now = JSON.stringify(j.post);
-        S.blogPosts[slug] = j.post;
-        if (was !== now && S.screen === "blogpost" && S.blogSlug === slug) render();
-      }).catch(noop);
-    }
-  }
-  setTimeout(refreshBlog, 1500);
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also
      try leaves it fighting a page that has not been rendered yet. */
@@ -16751,6 +17017,7 @@
   } catch (e) {}
   render();
   trackNav();   // analytics agent: the very first view of this tab's session
+  blogPrefetchSoon();   // blog: the list, then the articles, on idle — so «Блог» opens at once later
   /* The slots are filled now, so the static page underneath them has done its
      job. Still one synchronous task — the browser has not painted between the
      two, which is why the swap is invisible. */
@@ -16782,6 +17049,7 @@
         S.lang = want;
         hdrSlot.innerHTML = ""; navSlot.innerHTML = ""; ovlKey = "";
         render();
+        blogPrefetchSoon();
       }
     }).catch(function () {});
   }
