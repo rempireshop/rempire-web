@@ -12,8 +12,10 @@ import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@
 import { createOrder, getOrder, listAudit, setOrderStatus, type Order } from "@/lib/orders";
 import { verifyHs256 } from "@/lib/payments/jwt";
 import {
+  type MontonioPoint,
   MontonioShippingError,
   createMontonioShipment,
+  enrichCoordinates,
   estimateWeightKg,
   fetchMontonioPickupPoints,
   fetchMontonioRates,
@@ -25,7 +27,6 @@ import {
   resetMontonioPointsCache,
   shippingAuthToken,
   splitPhone,
-  type MontonioPoint,
 } from "@/lib/shipping/montonio";
 import { resetPointsCache } from "@/lib/parcel-points";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
@@ -322,6 +323,71 @@ describe("merging Montonio with the public feeds", () => {
     expect(office.type).toBe("post_office");
     expect(office.lat).toBe(59.4);
     expect(fromParcelPoint({ ...office, type: "machine", lat: NaN, lng: NaN }).lat).toBeNull();
+  });
+});
+
+describe("enrichCoordinates — Montonio's rows borrow lat/lng from the carrier feed", () => {
+  const feed = (over: Partial<MontonioPoint>): MontonioPoint => ({
+    id: "omniva-1",
+    carrier: "omniva",
+    name: "Tallinna Balti Jaama pakiautomaat",
+    address: "Toompuiestee 37",
+    city: "Tallinn",
+    zip: "10133",
+    country: "EE",
+    lat: 59.44,
+    lng: 24.737,
+    type: "parcel_machine",
+    ...over,
+  });
+  const montonio = (over: Partial<MontonioPoint>): MontonioPoint =>
+    feed({ id: "93ef56f2-12ff-4d81-9c5a-5b2ad5eec0bb", lat: null, lng: null, ...over });
+
+  it("matches by place name, ignoring the carrier word, case and punctuation", () => {
+    const { points, matched } = enrichCoordinates(
+      [montonio({ name: "Tallinna Balti jaama PAKIAUTOMAAT", zip: "10133" })],
+      [feed({ name: "Tallinna Balti Jaama pakiautomaat" })],
+    );
+    expect(matched).toBe(1);
+    expect(points[0].lat).toBe(59.44);
+    expect(points[0].lng).toBe(24.737);
+    expect(points[0].id).toBe("93ef56f2-12ff-4d81-9c5a-5b2ad5eec0bb"); // the Montonio id stays
+  });
+
+  it("falls back to zip + house number, then to a zip only one feed row has", () => {
+    const { points } = enrichCoordinates(
+      [
+        montonio({ id: "a", name: "Selver Torupilli", address: "Vesivärava tn 37", zip: "10126" }),
+        montonio({ id: "b", name: "Somewhere else", address: "", zip: "96332" }),
+      ],
+      [
+        feed({ id: "f1", name: "Torupilli Selveri pakiautomaat", address: "Vesivärava 37", zip: "10126", lat: 59.43, lng: 24.77 }),
+        feed({ id: "f2", name: "Torupilli teine", address: "Vesivärava 40", zip: "10126", lat: 1, lng: 1 }),
+        feed({ id: "f3", name: "Kareda teeninduskeskus", address: "Kesktee 11", zip: "96332", lat: 58.9, lng: 25.9 }),
+      ],
+    );
+    expect([points[0].lat, points[0].lng]).toEqual([59.43, 24.77]);
+    expect([points[1].lat, points[1].lng]).toEqual([58.9, 25.9]);
+  });
+
+  it("never invents a pin: no match, another carrier, or an ambiguous zip stays null; existing coordinates are kept", () => {
+    const keep = montonio({ id: "k", lat: 1.5, lng: 2.5 });
+    const { points, matched } = enrichCoordinates(
+      [
+        montonio({ id: "x", name: "Nowhere", address: "", zip: "99999" }),
+        montonio({ id: "y", name: "Ambiguous", address: "", zip: "10126" }),
+        montonio({ id: "z", name: "Tallinna Balti Jaama pakiautomaat", carrier: "smartpost" }),
+        keep,
+      ],
+      [
+        feed({ id: "f1", name: "One", address: "A 1", zip: "10126", lat: 1, lng: 1 }),
+        feed({ id: "f2", name: "Two", address: "A 2", zip: "10126", lat: 2, lng: 2 }),
+        feed({ id: "f3" }),
+      ],
+    );
+    expect(matched).toBe(0);
+    expect(points.slice(0, 3).every((p) => p.lat === null && p.lng === null)).toBe(true);
+    expect(points[3]).toEqual(keep);
   });
 });
 

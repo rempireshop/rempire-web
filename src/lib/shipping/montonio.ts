@@ -498,6 +498,66 @@ export function mergePoints(primary: MontonioPoint[], extra: MontonioPoint[]): M
   return out;
 }
 
+/* ---------- coordinates for Montonio's points ----------------------------- */
+
+const STOP_WORDS = /\b(pakiautomaat|pakomat|pakomāts|paštomatas|parcel|machine|locker|terminal|postipunkt|post office|postkontor|automaat)\b/g;
+
+/** "Tallinna Balti Jaama pakiautomaat" → "tallinna balti jaama" — the carrier
+    word and punctuation differ between Montonio and the carriers' own lists,
+    the place name does not. */
+function placeName(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(STOP_WORDS, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function digits(s: string): string {
+  return s.replace(/\D+/g, "");
+}
+
+/**
+ * Montonio's list is the one that can address a shipment, but it carries no
+ * coordinates (see MontonioPoint.lat), so on its own it cannot be drawn on
+ * the map. The carriers' public feeds carry coordinates but ids the shipment
+ * API cannot use. This copies lat/lng from a feed row onto the Montonio row
+ * that is the same locker: first by normalised place name, then by zip +
+ * street number, and as a last resort by a zip only one feed row has. A
+ * Montonio point that already has coordinates, or that matches nothing, is
+ * left as it is — a wrong pin would send someone to the wrong locker, a
+ * missing pin just leaves that locker to the list.
+ */
+export function enrichCoordinates(points: MontonioPoint[], feed: MontonioPoint[]): { points: MontonioPoint[]; matched: number } {
+  const byName = new Map<string, MontonioPoint>();
+  const byZip = new Map<string, MontonioPoint[]>();
+  for (const f of feed) {
+    if (f.lat === null || f.lng === null) continue;
+    const k = `${f.carrier}|${f.country}|${placeName(f.name)}`;
+    if (!byName.has(k)) byName.set(k, f);
+    const z = `${f.carrier}|${f.country}|${digits(f.zip)}`;
+    const list = byZip.get(z);
+    if (list) list.push(f);
+    else byZip.set(z, [f]);
+  }
+  let matched = 0;
+  const out = points.map((p) => {
+    if (p.lat !== null && p.lng !== null) return p;
+    let hit = byName.get(`${p.carrier}|${p.country}|${placeName(p.name)}`);
+    if (!hit) {
+      const sameZip = byZip.get(`${p.carrier}|${p.country}|${digits(p.zip)}`) ?? [];
+      const house = digits(p.address);
+      hit = sameZip.find((f) => house && digits(f.address) === house);
+      if (!hit && sameZip.length === 1) hit = sameZip[0];
+    }
+    if (!hit) return p;
+    matched += 1;
+    return { ...p, lat: hit.lat, lng: hit.lng };
+  });
+  return { points: out, matched };
+}
+
 /* ---------- shipments ---------------------------------------------------- */
 
 const PHONE_PREFIX: Record<string, string> = { EE: "372", LV: "371", LT: "370", FI: "358" };

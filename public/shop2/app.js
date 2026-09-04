@@ -922,6 +922,7 @@
         "Osa pakiautomaate on näha ainult nimekirjas — neil pole kaardi jaoks koordinaate.",
       "Карта не загрузилась — список пакоматов работает как обычно":
         "Kaart ei laadinud — pakiautomaatide nimekiri töötab tavapäraselt",
+      "На карте пока нет точек этого перевозчика — выберите пакомат из списка.": "Sellel vedajal pole kaardil veel punkte — valige pakiautomaat nimekirjast.",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
@@ -2052,6 +2053,7 @@
         "Some pickup points show only in the list — they have no map coordinates.",
       "Карта не загрузилась — список пакоматов работает как обычно":
         "The map failed to load — the pickup-point list still works as usual",
+      "На карте пока нет точек этого перевозчика — выберите пакомат из списка.": "No map pins for this carrier yet — pick a locker from the list.",
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop.",
@@ -7069,6 +7071,15 @@
       pmap.invalidateSize();
     }
     paintPointMarkers();
+    /* Montonio's own list carries no coordinates; the server borrows them
+       from the carrier's public feed (enrichCoordinates in
+       src/lib/shipping/montonio.ts). A carrier with no public feed — DPD
+       without credentials, Venipak — still ends up with an empty map, and an
+       empty map with no word about it reads as broken. */
+    var all = pointsMatching();
+    if (all.length && !all.map(pointGeo).filter(Boolean).length) {
+      toast("На карте пока нет точек этого перевозчика — выберите пакомат из списка.");
+    }
   }
   function openPointMap() { loadLeaflet(paintPointMap); }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { CARRIERS, getPoints, isCarrier, seedGeneratedAt } from "@/lib/parcel-points";
 import {
+  enrichCoordinates,
   fetchMontonioPickupPoints,
   fromParcelPoint,
   mergePoints,
@@ -91,7 +92,21 @@ export async function GET(req: Request) {
      Omniva download on every request once Montonio is live. */
   const feedCarriers = carrierParam === "all" ? CARRIERS : isCarrier(carrierParam) ? [carrierParam] : [];
   for (const carrier of feedCarriers) {
-    if (points.some((p) => p.carrier === carrier)) continue;
+    if (points.some((p) => p.carrier === carrier)) {
+      /* Montonio answered for this carrier, so its rows stay — but they have
+         no coordinates, and without coordinates the map in the checkout is
+         empty. The same feed lends them its lat/lng (enrichCoordinates), the
+         feed's own rows are not merged in. */
+      if (points.some((p) => p.carrier === carrier && p.lat === null)) {
+        const feed = await getPoints(carrier, country);
+        if (feed.points.length) {
+          const enriched = enrichCoordinates(points, feed.points.map(fromParcelPoint));
+          points = enriched.points;
+          if (enriched.matched && !sources.includes("geo:" + feed.source)) sources.push("geo:" + feed.source);
+        }
+      }
+      continue;
+    }
     const feed = await getPoints(carrier, country);
     if (!feed.points.length) continue;
     points = mergePoints(points, feed.points.map(fromParcelPoint));
