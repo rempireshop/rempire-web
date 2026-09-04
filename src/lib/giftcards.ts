@@ -25,6 +25,31 @@ export const GIFT_AMOUNTS = [25, 50, 100] as const;
 export type GiftAmount = (typeof GIFT_AMOUNTS)[number];
 
 /**
+ * How long a card lives — «Карта действует год со дня покупки», the sentence
+ * the gift page has always printed (public/shop2/app.js screenGift, and
+ * docs/features.md § «Что нужно знать»). It is a *derived* date, not a column:
+ * nothing in the shop refuses an old card yet, and the day that changes it must
+ * be one rule in one place rather than a value frozen into every row.
+ *
+ * The printable card (src/lib/giftcard-pdf.ts) states it as «Действует до …»,
+ * and so does the gift-card e-mail.
+ */
+export const GIFT_VALID_MONTHS = 12;
+
+/**
+ * The last day the card is good for, as `YYYY-MM-DD`. UTC throughout — a card
+ * bought at 23:30 in Tallinn must not print a date one day short in the PDF
+ * because the server renders it in another zone.
+ */
+export function giftValidUntil(createdAt: Date | string | null | undefined): string {
+  const from = createdAt ? new Date(createdAt) : new Date();
+  const base = Number.isNaN(from.getTime()) ? new Date() : from;
+  const d = new Date(base.getTime());
+  d.setUTCMonth(d.getUTCMonth() + GIFT_VALID_MONTHS);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
  * Unambiguous alphabet: no O/0, I/1/L, S/5, B/8, Z/2. Codes get read off a
  * phone screen and typed into a form — the pairs people confuse are gone.
  */
@@ -201,6 +226,45 @@ export async function issueGiftCards(order: OrderLike): Promise<GiftCard[]> {
     }
   }
   return made;
+}
+
+/**
+ * The cards one order bought, oldest first — [] for an order that bought none.
+ *
+ * Read-only, and it is what the three places that have to *show* a card after
+ * the fact are built on: the receipt screen's «Скачать подарочную карту (PDF)»
+ * link (via /api/payments/return), the admin order card, and the PDF route
+ * itself. issueGiftCards() above is the only thing that writes.
+ */
+export async function orderGiftCards(orderId: string): Promise<GiftCard[]> {
+  if (!orderId) return [];
+  const rows = await query<GiftRow>(
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+       from gift_cards where order_id = $1 order by created_at`,
+    [orderId],
+  );
+  return rows.map(toCard);
+}
+
+/**
+ * The same, for a page of orders at once: `{ <orderId>: cards }`. One query for
+ * the whole admin order list instead of one per row.
+ */
+export async function giftCardsByOrder(orderIds: string[]): Promise<Record<string, GiftCard[]>> {
+  const ids = [...new Set(orderIds.filter(Boolean))];
+  if (!ids.length) return {};
+  const rows = await query<GiftRow>(
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+       from gift_cards where order_id = any($1) order by created_at`,
+    [ids],
+  );
+  const out: Record<string, GiftCard[]> = {};
+  for (const row of rows) {
+    const card = toCard(row);
+    if (!card.orderId) continue;
+    (out[card.orderId] ??= []).push(card);
+  }
+  return out;
 }
 
 /* ---------- check / apply / redeem ------------------------------------ */

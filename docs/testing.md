@@ -177,6 +177,10 @@ have made the suite minutes slower for no new bugs caught. `visual.spec.ts`
 is the deliberate exception — screenshot comparison *is* about viewport size,
 so it is the one file that runs on all three projects, and it is scoped to
 ET only rather than trilingual to keep that from tripling again on top.
+`admin-shell.spec.ts` is the second: the panel's navigation is a *different
+control* on a phone (a sticky bottom bar and an «Ещё» sheet) than on a laptop
+(a foldable sidebar), and the owner's own machine is the phone — so that one
+runs on desktop and mobile, and only that one among the admin specs.
 
 ## Visual snapshots
 
@@ -378,9 +382,42 @@ in app.js). The checkout sweep waits for `0` before touching the delivery
 radios: every feed that lands re-patches the block, and on a slow runner that
 went on longer than Playwright's actionability wait.
 
+## The admin shell (`e2e/admin-shell.spec.ts`)
+
+The redesigned panel's own information architecture, and the only admin spec
+that runs on **both** projects — the point of the redesign is that Renat works
+from an iPhone, so the phone half is the half worth testing
+(docs/design/admin-handoff-README.md, docs/features.md § «Админка»).
+
+Six tests: the phone's sticky 64-px bottom bar and its «Ещё» sheet; the desktop
+sidebar folding 232 → 68 px; **all thirteen old tab keys still opening their
+section** (that matrix is the contract the assistant's «Открыть …» buttons and
+the rest of this suite depend on); the assistant opening from its floating
+button, answering and folding away; «Обзор» counting a real paid order into
+«Сделать сегодня» with the right plural; the «Заказы» chips plus the ship flow
+end to end (confirm card → toast with «Отменить» → a line in the journal); and
+the «Склад» ± stepper with its undo.
+
+Two things about locators, both consequences of the redesign:
+
+* **Both navs are always in the DOM** — the desktop sidebar and the phone
+  bottom bar — with one hidden in CSS. Every nav locator therefore ends in
+  `:visible`, including `loginAsAdmin` (`e2e/fixtures.ts`) and `tab()`
+  (`e2e/sweep-helpers.ts`).
+* **Seven old keys are sub-tabs now**, so reaching one is two clicks:
+  `tab()` knows the map (`SECTION_OF`) and does both, which is why every
+  existing `tab(page, "stock")` / `"reviews"` / `"mail"` call site still reads
+  the same.
+
+The stepper test leaves `PRODUCT_2` counted at 500 in a `finally`-shaped tail,
+for the same reason `sweep-admin-ops.spec.ts` does: the first ± is what makes a
+variant *counted* at all, and from then on every spec that buys it decrements
+the same number.
+
 ## The admin fuzz sweep
 
-`e2e/sweep-admin.spec.ts` (sign-in, the tab matrix, banner, content, settings,
+`e2e/sweep-admin.spec.ts` (sign-in, the tab matrix — the same thirteen keys,
+asserted through the new five-place IA — banner, content, settings,
 the change journal), `e2e/sweep-admin-goods.spec.ts` (goods editor, delivery
 prices, promo codes) and `e2e/sweep-admin-ops.spec.ts` (warehouse, register,
 customers, blog) are one exploratory sweep split three ways for runtime —
@@ -430,6 +467,55 @@ starts answering 404/500 for routes that are perfectly fine. If specs fail at
 `loginAsAdmin` or a route that passed a minute ago, check for a second
 `next` process before looking at the code.
 
+## The gift card: the digital checkout and the PDF (`e2e/giftcard.spec.ts`)
+
+Three per-language tests (buy a card, read its code back through the test-only
+lookup, redeem it on a second order) plus one Russian-only test for the shape of
+an all-gift-card checkout and the printable card:
+
+* step 2's header reads **«Получатель»**, and inside it there is no country
+  select, no `[data-dm]` method, no `[data-pointopen]` and no `[data-shipf="addr"]`
+  — the assertions are `toHaveCount(0)`, because "the field is not there" is the
+  feature, not "the field is empty";
+* «отправить мне на почту, а не получателю» (`[data-gifttome]`) is **checked** on
+  arrival; the test unchecks it and fills `[data-giftto="email"]`, which is the
+  path where the address is required;
+* the summary carries one delivery row saying «Электронная доставка» and *not*
+  «Доставка — …», and the total is the card's face value with nothing added;
+* the receipt shows `[data-giftpdf]` — «Скачать подарочную карту (PDF)». Its
+  `href` is fetched **with the page's own request context** (`page.request.get`),
+  which is the only way to assert on a response the browser would hand to a PDF
+  viewer: 200, `application/pdf`, and the bytes really start `%PDF-`. The same
+  URL with the token replaced answers 404;
+* then the owner's side, in a second browser context so the shopper's cookies
+  are untouched: the order card says «Электронная доставка» with the recipient's
+  address under it, has no delivery row in «Состав», and offers the card's PDF.
+
+`payOrder()` from `fixtures.ts` cannot drive this checkout — it fills a courier
+address, and here those fields do not exist — so the spec has its own
+`payDigitalOrder()`. That is also why the three per-language tests changed: an
+all-gift-card basket has taken the delivery step away from them too.
+
+Unit backstops, none of which need a browser: `tests/orders-digital.test.ts`
+(delivery priced 0, `not_digital` refused, a mixed basket unchanged),
+`tests/giftcard-pdf.test.ts` (the token, and the PDF read back — see below) and
+`tests/giftcard-mail-pdf.test.ts` (the letter's attachment, the e2e sink's
+record of it, and the download route's 200/404).
+
+**How «the text is really on the card» is tested.** `tests/giftcard-pdf.test.ts`
+carries about fifty lines of PDF reader: inflate every stream in the file, pair
+each embedded font with its `/ToUnicode` CMap through the font dictionaries, then
+decode the `<hex> Tj` runs of the page's content stream with the CMap of whatever
+`Tf` selected. That is a real extraction — it catches a wrong date, a lost code
+and a Cyrillic glyph that came out as `.notdef`, none of which an assertion on
+the file's length would. A second test reads every `Tm` baseline back and checks
+it sits inside the printable inset, in all three languages and with a message
+long enough to wrap: that is the guard against a layout that runs off the sheet.
+
+The mail sink (`src/lib/mail.ts`, read back through `GET /api/e2e/mail/`) records
+attachment **names** alongside the recipient, subject and template — never the
+bytes, same rule as the body.
+
 ## Files
 
 | Path | What |
@@ -444,7 +530,10 @@ starts answering 404/500 for routes that are perfectly fine. If specs fail at
 | `tools/e2e-build.mjs` | Cross-platform prebuild step for the suite — SEO prerender + generated-file packers, ahead of `next dev` (env vars via `child_process`, not shell syntax) |
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
 | `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts`, `src/app/api/e2e/mail/route.ts` | The three test-only routes — see above |
+| `e2e/giftcard.spec.ts` | The gift card: three languages of buy → issue → redeem, plus «Электронная доставка» and the printable PDF — see above |
+| `tests/giftcard-pdf.test.ts`, `tests/giftcard-mail-pdf.test.ts`, `tests/orders-digital.test.ts` | The card as a file, the letter that carries it, and the order that pays no delivery |
 | `e2e/sets.spec.ts`, `e2e/admin-bundles.spec.ts` | The sets: the shopper's side plus the «Наборы на сайте» switch, and the owner's «Товары → Наборы» CRUD — see above |
+| `e2e/admin-shell.spec.ts` | The redesigned panel's shell: five places, the phone bar and «Ещё» sheet, the sidebar fold, all thirteen old tab keys as deep links, the assistant FAB, the confirm card, the toast's undo — see above |
 | `e2e/admin-mail.spec.ts` | «Письма»: the owner edits an ET subject and intro, applies, and the same text comes back out of the preview **and** out of a real paid order's confirmation (docs/mail.md) |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
 | `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the e2e suite sharded into 3 parallel jobs (each with its own server and database); see its own comments |

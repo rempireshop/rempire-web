@@ -216,18 +216,38 @@ export async function openAdmin(page: Page): Promise<void> {
   let signedIn = false;
   for (let attempt = 0; attempt < 3 && !signedIn; attempt++) signedIn = await trySignIn(page);
   expect(signedIn, "openAdmin: the login card would not accept the test password").toBe(true);
-  await expect(page.locator('[data-admtab="orders"][aria-current]')).toBeVisible();
+  await expect(page.locator('[data-admtab="orders"][aria-current]:visible').first()).toBeVisible();
 }
 
 /**
- * Switches to one of ADM_NAV's tabs and waits for the nav to mark it current.
- * `[data-admtab=…]` alone is ambiguous — the "Все заказы" shortcut and the
- * assistant's own «Открыть …» buttons carry it too; only the nav button has
- * `aria-current` (see fixtures.ts loginAsAdmin's own comment).
+ * Which of the five places (ADM_SECTIONS / ADM_MORE in app.js) an old tab key
+ * now lives in. The redesign folded thirteen flat tabs into five, but kept
+ * every old key as the address of its section — «Склад» is a tab strip inside
+ * «Товары», «Отзывы» inside «Клиенты», «Письма» inside «Маркетинг» — so
+ * reaching one is two clicks now, not one. See docs/design/admin-handoff-README.md.
+ */
+const SECTION_OF: Record<string, string> = {
+  over: "over", orders: "orders", goods: "goods", stock: "goods", pos: "pos",
+  people: "people", reviews: "people", promos: "promos", mail: "promos",
+  blog: "blog", stats: "stats", apps: "apps", setup: "setup",
+};
+
+/**
+ * Opens the section an old tab key belongs to, then the sub-tab itself if the
+ * key is one of the merged ones.
+ *
+ * `[data-admtab=…]` alone is ambiguous — the «Обзор» shortcut rows and the
+ * assistant's «Открыть …» buttons carry it too; only a nav item or a tab has
+ * `aria-current`. `:visible` picks between the desktop sidebar and the phone
+ * bottom bar, which are both in the DOM (see fixtures.ts loginAsAdmin).
  */
 export async function tab(page: Page, key: string): Promise<void> {
-  await page.locator(`[data-admtab="${key}"][aria-current]`).first().click();
-  await expect(page.locator(`[data-admtab="${key}"][aria-current="true"]`).first()).toBeVisible();
+  const section = SECTION_OF[key] || key;
+  await page.locator(`[data-admtab="${section}"][aria-current]:visible`).first().click();
+  if (section !== key) {
+    await page.locator(`[data-admtab="${key}"][aria-current]:visible`).first().click();
+  }
+  await expect(page.locator(`[data-admtab="${key}"][aria-current="true"]:visible`).first()).toBeVisible();
 }
 
 /** Settings ("Настройки") — hero, content, shipping, pricing, reports, journal. */

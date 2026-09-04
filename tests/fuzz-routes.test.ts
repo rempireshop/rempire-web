@@ -90,6 +90,11 @@ function routes(): RouteCase[] {
     { name: "POST /api/carts/", path: "/api/carts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/carts/route"), body: { email: "fuzz@example.com", lang: "RU", items: [{ id: PRODUCT.id, qty: 2, size: 0 }] } },
     { deep: true, name: "POST /api/promos/check/", path: "/api/promos/check/", method: "POST", exports: ["POST"], load: () => import("@/app/api/promos/check/route"), body: { code: "FUZZ10", subtotal: 100, shipping: 5 } },
     { deep: true, name: "POST /api/giftcards/check/", path: "/api/giftcards/check/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/giftcards/check/route"), body: { code: "RMP-ACDE-FGHJ" } },
+    /* The printable card. Answers `application/pdf`, so no {ok,error} shape to
+       check; every case here is a 404, because the token never verifies —
+       which is exactly the property that matters (a guessed code buys nothing
+       without the HMAC). See tests/giftcard-mail-pdf.test.ts for the 200. */
+    { name: "GET /api/giftcards/[code]/pdf/", path: "/api/giftcards/x/pdf/", method: "GET", exports: ["GET"], load: () => import("@/app/api/giftcards/[code]/pdf/route"), params: { code: "RMP-ACDE-FGHJ" }, jsonBody: false, queries: ["", "?t=", "?t=junk", "?t=../../etc/passwd", "?t=" + "9".repeat(400), "?t=%00"] },
     { name: "GET /api/overrides/", path: "/api/overrides/", method: "GET", exports: ["GET"], load: () => import("@/app/api/overrides/route") },
     { name: "GET /api/bundles/", path: "/api/bundles/", method: "GET", exports: ["GET"], load: () => import("@/app/api/bundles/route") },
     { name: "GET /api/geo/", path: "/api/geo/", method: "GET", exports: ["GET"], load: () => import("@/app/api/geo/route"), req: { next: true } },

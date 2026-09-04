@@ -915,7 +915,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
  * shopper must not be able to lose an order to a stray character in a parcel
  * machine's name.
  */
-const SHIP_METHODS = ["parcel", "courier", "pickup"] as const;
+/* «digital» is the fourth: a cart that holds nothing but gift cards is not a
+   parcel at all — there is no country, no carrier and no address, and the
+   checkout's second step asks who the card is for instead of where it goes
+   (docs/features.md § «Только подарочные карты»). It is refused for any order
+   that also holds something physical (not_digital, below). */
+const SHIP_METHODS = ["parcel", "courier", "pickup", "digital"] as const;
 const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend"] as const;
 /** Address fields the checkout actually sends. Anything else is dropped. */
 const SHIP_ADDRESS_KEYS = ["addr", "street", "zip", "city", "house", "flat"] as const;
@@ -933,15 +938,19 @@ function shipText(v: unknown, max: number): string | null {
 }
 
 /**
- * "parcel" | "courier" | "pickup". Older clients (and the Estonian/Russian
- * labels the first checkout sent) are mapped rather than refused, so the stored
- * value is always one of three words — which is what the admin renders.
+ * "parcel" | "courier" | "pickup" | "digital". Older clients (and the
+ * Estonian/Russian labels the first checkout sent) are mapped rather than
+ * refused, so the stored value is always one of four words — which is what the
+ * admin renders.
  */
 export function shipMethodOf(v: unknown): (typeof SHIP_METHODS)[number] {
   const s = String(v ?? "").toLowerCase().trim();
   if ((SHIP_METHODS as readonly string[]).includes(s)) {
     return s as (typeof SHIP_METHODS)[number];
   }
+  /* Nothing is guessed into "digital": the other three are shapes a shopper
+     could describe in words, this one is a statement about what the order is,
+     and createOrder() refuses it for anything but an all-gift-card cart. */
   if (/pickup|самовыв|заберу|ise|tule|kohapeal|store|shop/.test(s)) return "pickup";
   if (/courier|kuller|курьер|door|uks|дверь/.test(s)) return "courier";
   return "parcel";
@@ -965,15 +974,22 @@ function shipAddress(v: unknown): Record<string, string> | null {
 }
 
 function cleanShipping(ship: CreateOrderInput["shipping"], price: number): OrderShipping {
+  const method = shipMethodOf(ship?.method);
+  /* A digital order has no parcel behind it, so it stores none of a parcel's
+     fields — a carrier or a pickup point left over from a client that changed
+     its mind mid-checkout would print in the admin card and in the letter as if
+     something were being shipped. The country is kept: it is the customer's,
+     not the parcel's, and the accountant export reads it. */
+  const parcel = method !== "digital";
   return {
-    method: shipMethodOf(ship?.method),
+    method,
     country: /^[A-Za-z]{2}$/.test(String(ship?.country ?? ""))
       ? String(ship.country).toUpperCase()
       : "EE",
-    carrier: shipCarrierOf(ship?.carrier),
-    pointId: shipText(ship?.pointId, 80),
-    pointName: shipText(ship?.pointName, 160),
-    address: shipAddress(ship?.address),
+    carrier: parcel ? shipCarrierOf(ship?.carrier) : null,
+    pointId: parcel ? shipText(ship?.pointId, 80) : null,
+    pointName: parcel ? shipText(ship?.pointName, 160) : null,
+    address: parcel ? shipAddress(ship?.address) : null,
     price,
   };
 }
@@ -1010,8 +1026,14 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   const shippingJson = cleanShipping(input?.shipping ?? {}, 0);
   const { method, country, carrier } = shippingJson;
   // Nothing physical ships when the whole order is gift cards.
-  const giftOnly = lines.every((l) => l.kind === "gift");
-  const shipPrice = giftOnly ? 0 : await shippingPrice(country, method, subtotal, carrier);
+  const giftOnly = lines.length > 0 && lines.every((l) => l.kind === "gift");
+  /* «Электронная доставка» is a promise about the whole order, and this is the
+     door that keeps it true: a body that asks for it while carrying a bottle of
+     shampoo (or a set) would otherwise get free delivery on a real parcel. The
+     browser never sends it for a mixed cart — but the browser is not what
+     decides here, exactly like every price in this file. */
+  if (method === "digital" && !giftOnly) throw new OrderError("not_digital");
+  const shipPrice = giftOnly || method === "digital" ? 0 : await shippingPrice(country, method, subtotal, carrier);
   shippingJson.price = shipPrice;
 
   /* inventory: POS has no promo/gift-card box — it has a percent the cashier

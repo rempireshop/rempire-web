@@ -199,6 +199,22 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   reactStrictMode: true,
   /**
+   * The printable gift card (src/lib/giftcard-pdf.ts) reads three TTFs and the
+   * brand's tower path off disk at run time. Everything under public/ is
+   * uploaded to Vercel's static layer, which a serverless function cannot read
+   * — the tracer has to be told, because the paths are built at run time and
+   * nothing in the source names the files literally.
+   *
+   * Listed per route family rather than globally: the two routes that make a
+   * PDF (the download and the payment callbacks, whose mail hook attaches one)
+   * plus the admin order screen's data. ~215 KB of fonts, once each.
+   */
+  outputFileTracingIncludes: {
+    "/api/giftcards/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    "/api/payments/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    "/api/admin/orders/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+  },
+  /**
    * The shop is one static page that now names its screen in the URL, so the
    * back button works and a category can be linked to. Those paths have no
    * files behind them — every one of them serves the same shell, which reads

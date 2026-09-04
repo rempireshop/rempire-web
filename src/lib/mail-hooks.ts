@@ -252,6 +252,42 @@ export async function issueOrderGiftCards(order: OrderLike): Promise<MailHookRes
   }
 }
 
+/**
+ * The printable card, made once per code on this same paid transition.
+ *
+ * Best effort by design: a PDF that cannot be rendered (fonts missing on a
+ * half-configured deployment) must cost the customer the *attachment*, not the
+ * letter — the code itself is in the body, and the link in the letter renders
+ * the card on demand anyway (src/app/api/giftcards/[code]/pdf/route.ts).
+ * The copy in R2 is a cache; storeGiftCardPdf() is a no-op without a bucket.
+ */
+async function giftCardAttachment(
+  card: GiftCardLike & { createdAt?: string | Date | null },
+  lang: string,
+): Promise<{ filename: string; content: Uint8Array; contentType: string } | null> {
+  if (!card.code) return null;
+  try {
+    const { buildGiftCardPdf, giftPdfFilename, storeGiftCardPdf } = await import("@/lib/giftcard-pdf");
+    const { giftValidUntil } = await import("@/lib/giftcards");
+    const bytes = await buildGiftCardPdf(
+      {
+        code: card.code,
+        amount: num(card.amount, 0),
+        lang: card.lang || lang,
+        createdAt: card.createdAt ?? null,
+        validUntil: giftValidUntil(card.createdAt ?? null),
+        recipient: card.recipient ?? null,
+      },
+      card.lang || lang,
+    );
+    await storeGiftCardPdf(card.code, bytes);
+    return { filename: giftPdfFilename(card.code), content: bytes, contentType: "application/pdf" };
+  } catch (err) {
+    console.error("[mail-hooks] gift-card PDF failed", err);
+    return null;
+  }
+}
+
 /** Issue + mail the gift cards of a paid order; a no-op when it holds none. */
 async function sendGiftCards(order: OrderLike): Promise<MailHookResult> {
   const items = Array.isArray(order.items) ? order.items : [];
@@ -259,7 +295,7 @@ async function sendGiftCards(order: OrderLike): Promise<MailHookResult> {
     return { ok: true, skipped: true, reason: "no_gift_items" };
   }
   const mod = (await import("@/lib/giftcards")) as {
-    issueGiftCards?: (o: unknown) => Promise<GiftCardLike[]>;
+    issueGiftCards?: (o: unknown) => Promise<Array<GiftCardLike & { createdAt?: string | null }>>;
   };
   if (!mod.issueGiftCards) return { ok: false, reason: "giftcards_unavailable" };
 
@@ -272,9 +308,11 @@ async function sendGiftCards(order: OrderLike): Promise<MailHookResult> {
     const to = pick(card.recipient?.email, buyerEmail);
     if (!to || !card.code) continue;
     const mail = renderGiftCard(card, card.lang || lang);
+    const pdf = await giftCardAttachment(card, lang);
     const res = await sendRendered(to, mail, {
       tags: { template: "gift-card", stage: "paid" },
       idempotencyKey: `gift:${card.code}`,
+      attachments: pdf ? [pdf] : undefined,
     });
     ok = ok && res.ok;
   }

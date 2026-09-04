@@ -6,6 +6,7 @@
  * letter opens the right order. Every status change lands in admin_audit.
  */
 import { requireAdmin } from "@/lib/auth";
+import { attachGiftCards } from "@/lib/giftcard-links";
 import {
   getOrder,
   getOrderByNumber,
@@ -34,7 +35,9 @@ export async function GET(req: Request, ctx: Ctx) {
   try {
     const order = await find(id);
     if (!order) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
-    return Response.json({ ok: true, order }, { headers: { "cache-control": "no-store" } });
+    // …plus `giftCards` (code + PDF link) when the order bought any.
+    const [withCards] = await attachGiftCards([order]);
+    return Response.json({ ok: true, order: withCards }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     console.error("[api/admin/orders/:id] read failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });

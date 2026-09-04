@@ -181,7 +181,10 @@ test.describe("sweep — warehouse", () => {
     // Headless Chromium has no camera. The overlay must still open, say so in
     // Russian, and leave the manual field usable — that is the keyboard-wedge
     // path a USB scanner uses anyway (docs/inventory.md).
-    await page.locator("[data-scanopen]").click();
+    /* Two controls open the scanner on «Склад» since the redesign — the
+       header's «Приёмка» and the screen's own «Сканировать» (README § Товары);
+       either does, so take the first. */
+    await page.locator("[data-scanopen]").first().click();
     await expect(page.locator("[data-scanmanual]")).toBeVisible();
     await assertClean(page, w, "scanner opened without a camera");
     await page.locator("[data-scanmanual]").fill("нет-такого-кода");
@@ -274,11 +277,17 @@ test.describe("sweep — the in-salon register", () => {
     expect(receipt.status(), "the printable receipt 404s").toBe(200);
     expect(receipt.headers()["content-type"]).toContain("text/html");
 
-    // The sale is an order like any other, tagged as a shop-floor one.
+    /* The sale is an order like any other, tagged as a shop-floor one — and
+       «Заказы» opens on «Новые» (paid web orders waiting to go out), so the
+       salon chip is what brings it into view. */
     await tab(page, "orders");
-    await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toBeVisible();
-    await page.locator(`[data-admorder]:has-text("${number}")`).click();
-    await expect(page.locator("h2", { hasText: number })).toBeVisible();
+    await page.locator('[data-admfilter="salon"]').click();
+    const salonRow = page.locator(`[data-admorder]:has-text("${number}")`).first();
+    await expect(salonRow).toBeVisible();
+    await expect(page.locator(".adm-badge--tint").first()).toHaveText("Салон");
+    await salonRow.click();
+    // the redesigned card: the order number is the mono kicker above the title
+    await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
     await assertClean(page, w, "register order in Заказы");
 
     // …and one unit left the shelf.
@@ -415,7 +424,7 @@ test.describe("sweep — customers", () => {
     await page.locator("[data-admcustq]").fill(email);
     await page.locator("[data-admcustopen]").first().click();
     await expect(page.locator("[data-admcustnotesf]")).toHaveValue(/Заметка <script>/);
-    expect(await page.locator(".adm__main script").count(), "the note ran as script in the panel").toBe(0);
+    expect(await page.locator(".adm-page script").count(), "the note ran as script in the panel").toBe(0);
     await assertClean(page, w, "customer note with HTML");
 
     // Leave the customer as a plain retail one again.

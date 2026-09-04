@@ -263,7 +263,7 @@ const INTENTIONAL = [
   // integration: stock_moves.ref free text — a fixed "who moved this" tag
   // shown only in the ledger's own history row, same "Russian by decision"
   // convention as every other free-text audit/note field in this file
-  [/^(помощник|сканер)$/, "stock_moves.ref tag (applyStockAction/scanner buttons) — shown in the moves history row, Russian by convention like a note field"],
+  [/^(помощник|сканер|панель)$/, "stock_moves.ref tag (applyStockAction/scanner buttons) — shown in the moves history row, Russian by convention like a note field"],
   [/^отмена начисления$/, "loyalty ledger note on an assistant-driven points undo — free-text note field, Russian by convention"],
   // integration: montonioSourceLabel()'s two branches — a ternary with no
   // "+" involved, so each string is its own fragment here; the rendered
@@ -307,7 +307,7 @@ const ASSEMBLED = [
   // an inline <svg>, a sibling element, not text; the hole here is that
   // element, not a runtime value glued into the same text node. «Сканировать»
   // on its own is already a real key (used since the storefront pass).
-  [/ Сканировать$/, "key «Сканировать» — the hole is icon(\"scan\")'s <svg>, a separate element, not text"],
+  [/^(Сканировать|Приёмка)$/, "keys «Сканировать» / «Приёмка» — the hole is the icon's <svg>, a separate element, not text"],
 ];
 function assembled(text) {
   if (!text.includes(HOLE)) return null;
@@ -332,6 +332,10 @@ function chatWhy(fr, fn) {
 /* Whole functions whose Russian output is deliberate. */
 const INTENTIONAL_FNS = {
   actionText: "change-log line in Renat's private admin journal — Russian by decision",
+  admCancelLine: "change-log line in Renat's private admin journal — Russian by decision",
+  // админка: the draft the assistant writes for «Написать клиенту» is a letter
+  // TO the customer, so it stays in the customer's language, not the panel's
+  admOrderDraft: "the draft letter to the customer — written in the customer's language, not the panel's",
   shipActionText: "change-log line in Renat's private admin journal — Russian by decision",
   contentActionText: "change-log line in Renat's private admin journal — Russian by decision",
   promoActionText: "change-log line in Renat's private admin journal — Russian by decision",

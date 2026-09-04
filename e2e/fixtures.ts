@@ -105,14 +105,26 @@ export async function loginAsAdmin(page: Page): Promise<void> {
   await page.goto(shopUrl("", "/admin/"));
   const pwField = page.locator("[data-admpw]");
   await expect(pwField).toBeVisible();
-  await pwField.fill(E2E_ADMIN_PASSWORD);
+  /* Re-check the value right before the click. app.js now carries the typed
+     password across a render (renderImpl's `pwKeep`), but a render landing
+     between `fill` and `click` still replaces the node the click was aimed
+     at, and a click that submits an empty box never even reaches the route —
+     the panel answers «Введите пароль» locally. Poll instead of assuming. */
+  await expect
+    .poll(async () => {
+      await pwField.fill(E2E_ADMIN_PASSWORD);
+      return pwField.inputValue();
+    }, { timeout: 10_000 })
+    .toBe(E2E_ADMIN_PASSWORD);
   await page.locator("[data-admlogin]").click();
   // Login replaces the card with the admin nav — [data-admpw] is gone.
   await expect(page.locator("[data-admpw]")).toHaveCount(0);
-  // [data-admtab="orders"] alone is ambiguous: the main nav tab AND a
-  // separate "Все заказы" shortcut link both carry it. [aria-current] is
-  // unique to the nav tab.
-  await expect(page.locator('[data-admtab="orders"][aria-current]')).toBeVisible();
+  /* [data-admtab="orders"] alone is ambiguous: the shortcut links on «Обзор»
+     and the assistant's «Открыть …» buttons carry it too; [aria-current] is
+     what only a nav item has. The redesigned shell renders BOTH navs — the
+     232-px sidebar and the 64-px phone bottom bar — and hides one of them in
+     CSS, so `:visible` is what picks the one this viewport actually uses. */
+  await expect(page.locator('[data-admtab="orders"][aria-current]:visible').first()).toBeVisible();
 }
 
 /**

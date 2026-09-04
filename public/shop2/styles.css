@@ -924,12 +924,6 @@ body:has(.stickybar) .ftr {
 .adm__ph--big { width: 64px; height: 64px; flex: 0 0 64px; position: relative; }
 .adm__ocols { display: grid; gap: 0 36px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .adm__ocols { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
-.adm__steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
-.adm__step {
-  font-family: Oswald, sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-  padding: 6px 10px; border: 1px solid var(--rule); color: var(--muted);
-}
-.adm__step.is-done { border-color: var(--ok, #2e5b45); color: var(--ok, #2e5b45); }
 .adm__acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .adm__vrow { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--rule); }
 .adm__vsz { font-family: var(--mono, monospace); font-size: 13px; min-width: 64px; }
@@ -1107,113 +1101,14 @@ body.is-locked .sbot { display: none; }
    button inside the summary read as two different actions. */
 @media (max-width: 767px) { .co__pay { display: none; } }
 
-/* ---------- admin (demo) ----------
-   Three panes on a desktop: sections left, work centre, assistant right.
-   One column on a phone, with the nav as a scrolling strip. */
-/* capped to the site column — full-bleed panes left the header aligned with
-   nothing and let the centre pane grow without limit on a wide monitor */
-.adm { display: grid; grid-template-columns: minmax(0, 1fr); max-width: 1400px; margin: 0 auto; width: 100%; }
-@media (min-width: 900px) {
-  /* align-items: start + sticky panes: the grid AREA stays row-tall so the
-     panes have travel, while each pane is viewport-tall with its own scroll.
-     That is what keeps the assistant's input box on screen instead of at the
-     bottom of a long page. */
-  .adm { grid-template-columns: 196px minmax(0, 1fr) 300px; align-items: start; min-height: calc(100vh - var(--cohdrh, 62px)); }
-  /* every tab at least a viewport tall: otherwise switching between a long
-     tab and a short one toggled the scrollbar and the whole layout jumped */
-  .adm__main { min-height: calc(100vh - var(--cohdrh, 62px)); }
-  .adm--navmin { grid-template-columns: 58px minmax(0, 1fr) 300px; }
-  .adm--aimin { grid-template-columns: 196px minmax(0, 1fr) 52px; }
-  .adm--navmin.adm--aimin { grid-template-columns: 58px minmax(0, 1fr) 52px; }
-  /* --cohdrh is measured from the real admin header: a hardcoded 62px made
-     sticky engage only on tabs tall enough to scroll, so the rails hopped
-     3px when switching between short and long tabs */
-  .adm__side, .adm__ai {
-    position: sticky; top: var(--cohdrh, 62px); height: calc(100vh - var(--cohdrh, 62px));
-  }
-}
-@media (min-width: 1280px) {
-  .adm { grid-template-columns: 220px minmax(0, 1fr) 340px; }
-  .adm--navmin { grid-template-columns: 58px minmax(0, 1fr) 340px; }
-  .adm--aimin { grid-template-columns: 220px minmax(0, 1fr) 52px; }
-  .adm--navmin.adm--aimin { grid-template-columns: 58px minmax(0, 1fr) 52px; }
-}
+/* ---------- admin: the sections phases 2 and 3 still have to redesign ----
+   The panel's own shell — sidebar, bottom bar, assistant, and every screen
+   phase 1 redesigned — lives in public/shop2/admin.css under `.adm2` /
+   `adm-*`. What is left here styles the legacy markup those older sections
+   still render inside `.adm-legacy`: the list rows, the tables, the KPI cells
+   and the confirm strip. Each block goes when its screen is redesigned. */
 
-/* collapse controls */
-.adm__toggle {
-  border: none; background: none; cursor: pointer; color: var(--muted);
-  min-width: 40px; min-height: 40px; font-size: 15px; line-height: 1;
-  flex: 0 0 auto; align-self: flex-end; margin: 6px 6px 0;
-  transition: background .18s var(--ease), color .18s var(--ease);
-}
-.adm__toggle:hover { background: var(--hover); color: var(--ink); }
-.adm__aihead .adm__toggle { align-self: center; margin: 0; }
-@media (max-width: 899px) { .adm__toggle { display: none; } }
-
-/* collapsed rails: icons only on the left, a lettered spine on the right */
-@media (min-width: 900px) {
-  .adm--navmin .adm__navlbl, .adm--navmin .adm__who { display: none; }
-  .adm--navmin .adm__nav button { justify-content: center; padding: 10px 0; }
-  .adm--navmin .adm__toggle { align-self: center; margin: 6px 0 0; }
-  /* the feedback bubble parks bottom-left on a desktop, which is exactly
-     where this block sits — leave it room rather than moving the bubble */
-  .adm__who { padding-bottom: 78px; }
-  .adm--aimin .adm__aibody, .adm--aimin .adm__aifoot { display: none; }
-  .adm--aimin .adm__ailbl {
-    writing-mode: vertical-rl; margin-top: 10px; font-size: 11px; letter-spacing: .18em;
-  }
-  .adm--aimin .adm__aihead { flex-direction: column; align-items: center; border-bottom: none; padding: 10px 4px; }
-}
-
-.adm__side { border-right: 1px solid var(--rule); display: flex; flex-direction: column; }
-.adm__nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding: 8px; }
-.adm__nav::-webkit-scrollbar { display: none; }
-.adm__nav button {
-  display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
-  border: none; background: none; cursor: pointer; padding: 10px 12px; min-height: 44px;
-  font-size: 13.5px; color: var(--muted); text-align: left;
-  transition: background .18s var(--ease), color .18s var(--ease);
-}
-.adm__nav button svg { width: 17px; height: 17px; flex-shrink: 0; }
-.adm__nav button:hover { background: var(--hover); color: var(--ink); }
-.adm__nav button[aria-current="true"] { background: var(--ink); color: var(--paper); }
-.adm__who { display: none; }
-@media (min-width: 900px) {
-  .adm__side { border-bottom: none; }
-  .adm__nav { flex-direction: column; gap: 1px; padding: 4px 10px 14px; overflow: visible; }
-  .adm__nav button { width: 100%; }
-  .adm__who {
-    display: flex; flex-direction: column; margin-top: auto;
-    padding: 14px; border-top: 1px solid var(--rule); font-size: 12.5px;
-  }
-  .adm__whoname { font-weight: 600; }
-}
-@media (max-width: 899px) { .adm__side { border-right: none; border-bottom: 1px solid var(--rule); } }
-
-.adm__main { padding: 0 var(--gutter) 40px; min-width: 0; }
-/* UX fix 3: the login/"checking…" screens render .adm__main as the ONLY
-   child of the 3-column .adm grid (no .adm__side, no .adm__ai) — without this
-   the grid auto-placed that lone child into column 1, which is 58px wide in
-   the collapsed nav state these screens use, and the card inside wrapped to
-   one word per line. Only bites when there is nothing else to place. */
-.adm__main:only-child { grid-column: 1 / -1; }
-
-.adm__ai {
-  border-left: 1px solid var(--rule); display: flex; flex-direction: column; min-width: 0;
-}
-@media (max-width: 899px) { .adm__ai { border-left: none; border-top: 1px solid var(--ink); } }
-.adm__aihead {
-  padding: 10px 10px 10px 12px; border-bottom: 1px solid var(--rule);
-  display: flex; align-items: center; gap: 8px;
-}
-.adm__aibody { flex: 1; padding: 16px; overflow: auto; }
-.adm__aiintro { margin: 0 0 14px; font-size: 13.5px; color: var(--muted); }
-.adm__aifoot { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--rule); }
-.adm__aifoot .input { flex: 1; min-height: 44px; font-size: 14px; }
-.adm__aifoot .btn { padding: 0 14px; }
 .adm__chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-.adm__q { font-weight: 600; font-size: 13.5px; margin-bottom: 8px; }
-.adm__a { font-size: 13.5px; line-height: 1.6; border-left: 2px solid var(--ink); padding-left: 11px; }
 
 .adm__note {
   margin: 18px 0 16px; padding: 10px 12px; font-size: 12.5px; color: var(--muted);
@@ -1718,6 +1613,11 @@ button, a, summary, label { touch-action: manipulation; }
 }
 .done__tick--bad { color: var(--error); }
 .done__tick--wait { color: var(--muted); }
+/* features: «Скачать подарочную карту (PDF)» under a paid receipt — one link
+   per card the order bought, stacked so several never crowd the row. */
+.done__gifts { display: flex; flex-direction: column; gap: 8px; margin: 0 0 18px; }
+.done__gift { display: inline-flex; justify-content: center; gap: 8px; align-items: baseline; }
+.done__gift .num { font-size: 13px; opacity: .7; }
 
 /* ==========================================================================
    FEATURES — наборы, подарочная карта, отзывы, видео

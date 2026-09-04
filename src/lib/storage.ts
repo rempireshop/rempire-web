@@ -27,8 +27,11 @@ export const R2_SERVICE = "s3";
 
 /** Where an uploaded file is allowed to land. Nothing else is ever written.
  *  `videos/` holds the product videos the owner uploads himself — see
- *  src/lib/video.ts and docs/media.md. */
-export const KEY_PREFIXES = ["products/", "hero/", "reviews/", "blog/", "videos/"] as const;
+ *  src/lib/video.ts and docs/media.md.
+ *  `giftcards/` holds one printable A5 PDF per issued gift-card code, written
+ *  by the shop itself on the paid transition (src/lib/giftcard-pdf.ts), never
+ *  by an upload form — mediaKey() below cannot produce that prefix. */
+export const KEY_PREFIXES = ["products/", "hero/", "reviews/", "blog/", "videos/", "giftcards/"] as const;
 export type MediaKind = "product" | "hero" | "review" | "blog" | "video";
 
 export class StorageError extends Error {
@@ -143,9 +146,10 @@ export function thumbKey(key: string): string {
 /**
  * True only for a key this shop wrote: one of the prefixes above, plain
  * characters, no traversal, no empty segment. Everything that deletes or
- * signs goes through here first. mp4/mov are here for `videos/` — this is a
- * coarse "is this one of ours" gate, not the place that decides which kind
- * may hold which extension; the upload route does that.
+ * signs goes through here first. mp4/mov are here for `videos/` and pdf for
+ * `giftcards/` — this is a coarse "is this one of ours" gate, not the place
+ * that decides which kind may hold which extension; the upload route does that
+ * (and it never offers `giftcards/` at all).
  */
 export function isAllowedKey(key: unknown): key is string {
   if (typeof key !== "string") return false;
@@ -154,7 +158,7 @@ export function isAllowedKey(key: unknown): key is string {
   if (!/^[a-z0-9][a-z0-9._/-]*$/.test(k)) return false;
   if (k.includes("//") || k.includes("..")) return false;
   if (!KEY_PREFIXES.some((p) => k.startsWith(p))) return false;
-  return /\.(webp|jpg|jpeg|png|mp4|mov)$/.test(k);
+  return /\.(webp|jpg|jpeg|png|mp4|mov|pdf)$/.test(k);
 }
 
 /** The key inside a public URL of ours, or null when the URL is someone else's. */

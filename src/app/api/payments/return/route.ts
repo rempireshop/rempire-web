@@ -29,12 +29,40 @@ export const dynamic = "force-dynamic";
  * applyPaymentResult → src/lib/events.ts recordPurchaseEvent — see
  * db/migrations/080_events.sql for the full "which is used where".
  */
-function done(base: string, number: string | null, state: string, total?: number) {
+function done(base: string, number: string | null, state: string, total?: number, gift?: string) {
   const params = new URLSearchParams();
   if (number) params.set("n", number);
   params.set("s", state);
   if (total != null && Number.isFinite(total)) params.set("t", total.toFixed(2));
+  /* `g` is how the receipt screen learns it can offer «Скачать подарочную
+     карту (PDF)». It carries `<code>~<token>` per card, because the token is an
+     HMAC the browser cannot compute (src/lib/giftcard-pdf.ts) and the receipt
+     is a static page with no order of its own to ask about. Only ever on the
+     buyer's own return from the bank, only for the order just paid. */
+  if (gift) params.set("g", gift);
   return NextResponse.redirect(`${base}/shop2/done/?${params.toString()}`, 303);
+}
+
+/**
+ * `RMP-ACDE-4679~<token>,…` for the cards this order bought — "" for an order
+ * with none, and "" for anything that goes wrong. The receipt must never fail
+ * to render because a gift-card lookup did.
+ */
+async function giftLinks(orderId: string): Promise<string> {
+  try {
+    const [{ orderGiftCards }, { giftPdfToken }] = await Promise.all([
+      import("@/lib/giftcards"),
+      import("@/lib/giftcard-pdf"),
+    ]);
+    const cards = await orderGiftCards(orderId);
+    return cards
+      .slice(0, 10)
+      .map((c) => `${c.code}~${giftPdfToken(c.code)}`)
+      .join(",");
+  } catch (err) {
+    console.error("payments/return: gift-card links unavailable", err);
+    return "";
+  }
 }
 
 export async function GET(req: Request) {
@@ -132,5 +160,8 @@ async function handle(req: Request, params: URLSearchParams) {
       : outcome.status === "failed"
         ? "failed"
         : result.status;
-  return done(base, order.number, state, state === "paid" ? Number(order.total) : undefined);
+  // The cards exist by now: issueOrderGiftCards / notifyOrderPaid above are
+  // awaited, and both mint before they mail.
+  const gift = state === "paid" ? await giftLinks(order.id) : "";
+  return done(base, order.number, state, state === "paid" ? Number(order.total) : undefined, gift);
 }

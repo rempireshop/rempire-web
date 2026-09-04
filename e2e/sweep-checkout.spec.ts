@@ -150,9 +150,13 @@ async function buyGiftCard(page: Page, browser: Browser): Promise<string> {
   await expectScreen(page, "checkout", { screen: "gift-card purchase", lang: "RU" });
   await page.locator("[data-email]").fill(freshEmail("sweep-gift"));
   await continueButton(page, 2).click();
-  await page.locator('input[data-dm="pickup"]').check();
+  /* A basket of nothing but gift cards is «Электронная доставка»: step 2 is
+     «Получатель», with no method to pick, no address and no phone — only the
+     buyer's own name, which signs the card. The recipient's address is left
+     blank on purpose, so «отправить мне на почту» (on by default) sends this
+     sweep's card to the buyer. See docs/features.md § «Только подарочные
+     карты» and the dedicated test in e2e/giftcard.spec.ts. */
   await page.locator('[data-shipf="name"]').fill("Sweep Buyer");
-  await page.locator('[data-shipf="phone"]').fill("+372 5550002");
   await continueButton(page, 3).click();
   await page.locator('input[data-paym="1"]').check();
   await page.locator(".co__pay[data-pay]").click();

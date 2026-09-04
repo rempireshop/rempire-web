@@ -102,6 +102,8 @@ export interface ReportOrderRow {
   customerEmail: string;
   country: string;
   channel: string;
+  /** orders.shipping.method — parcel | courier | pickup | digital | "". */
+  deliveryMethod: string;
   subtotal: number;
   shipping: number;
   discount: number;
@@ -183,7 +185,7 @@ function num(v: unknown): number {
 }
 
 function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
-  const shipping = jsonOf<{ country?: string }>(r.shipping, {});
+  const shipping = jsonOf<{ country?: string; method?: string }>(r.shipping, {});
   const payment = jsonOf<{ provider?: string; ref?: string }>(r.payment, {});
   const total = num(r.total);
   const { net, vat } = vatSplit(total, vatRate);
@@ -194,6 +196,11 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
     customerEmail: r.email ?? "",
     country: shipping.country ?? "",
     channel: r.channel || "web",
+    /* An all-gift-card order ships nothing and is billed no delivery
+       («Электронная доставка» in the panel) — without this column a 0 in
+       `Shipping` reads the same as free delivery on a real parcel, and the
+       accountant cannot tell a posted order from an e-mailed one. */
+    deliveryMethod: shipping.method ?? "",
     subtotal: num(r.subtotal),
     shipping: num(r.shipping_price),
     discount: num(r.discount),
@@ -243,6 +250,7 @@ export const REPORT_COLUMNS: Array<[key: keyof ReportOrderRow, header: string]> 
   ["customerEmail", "E-mail"],
   ["country", "Country"],
   ["channel", "Channel"],
+  ["deliveryMethod", "Delivery"],
   ["subtotal", "Subtotal"],
   ["shipping", "Shipping"],
   ["discount", "Discount"],

@@ -269,12 +269,18 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
 
 ## Admin UI (`public/shop2/app.js`)
 
-- `ADM_NAV` gained `stock` («Склад», icon `box`) and `pos` («Продажа в
-  салоне», icon `till`), between `goods` and `people`.
+- Since the redesign «Склад» is a **tab inside «Товары»** and the register is
+  the **«Салон»** section of its own — `data-admtab="stock"` and `"pos"` still
+  address them, which is what keeps the deep links and this suite working
+  (`ADM_SECTION_OF` in `app.js`, docs/features.md § «Админка: оболочка»).
 - `admStockHTML()` / `stockRows()` / `stockRowHTML()` / `stockEditFormHTML()`
-  — the table, filtered/searched **client-side** against `S.stockLevels`
-  (fetched once via `loadStockLevels()`, same pattern as `goodsRows()`
-  against the in-memory `CATALOGUE`).
+  — the list, filtered/searched **client-side** against `S.stockLevels`
+  (fetched once via `loadStockLevels()`, same pattern as `admCatalogRows()`
+  against the in-memory `CATALOGUE`). Rows are sorted by quantity ascending —
+  what is running out comes first — and carry a ± stepper
+  (`data-stockstep="<key>:±1"`) that posts a relative move and offers an undo
+  on the toast; «Править» opens the same form as before for the barcode, the
+  «мало» threshold and an exact recount.
 - `admStockMovesHTML()` — the ledger sub-view (`S.stockMovesOpen`).
 - `admPosHTML()` / `admPosReceiptHTML()` — the quick-sale screen and its
   post-sale card.

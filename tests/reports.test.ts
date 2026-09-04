@@ -91,6 +91,7 @@ function row(over: Partial<ReportOrderRow> = {}): ReportOrderRow {
     customerEmail: "test@example.com",
     country: "EE",
     channel: "web",
+    deliveryMethod: "courier",
     subtotal: 100,
     shipping: 3.49,
     discount: 0,

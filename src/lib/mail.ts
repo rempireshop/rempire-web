@@ -24,6 +24,22 @@ export interface MailTag {
   value: string;
 }
 
+/**
+ * One file riding along with the letter. Resend takes attachments inline as
+ * base64 (`{filename, content, content_type}`), so the bytes go in the same
+ * POST as the HTML — no second request, no signed URL to expire.
+ *
+ * The only user of this today is the gift card's own PDF
+ * (src/lib/giftcard-pdf.ts, attached in src/lib/mail-hooks.ts): a gift is
+ * handed over, and a card you have to fetch from a link is not.
+ */
+export interface MailAttachment {
+  filename: string;
+  /** Raw bytes, or an already-base64 string. */
+  content: Uint8Array | Buffer | string;
+  contentType?: string;
+}
+
 export interface SendMailInput {
   to: string | string[];
   subject: string;
@@ -37,6 +53,8 @@ export interface SendMailInput {
   from?: string;
   /** Resend de-duplicates retries carrying the same key for 24 h. */
   idempotencyKey?: string;
+  /** Files to send with the letter. Empty/oversized entries are dropped. */
+  attachments?: MailAttachment[];
 }
 
 export interface SendMailResult {
@@ -78,6 +96,38 @@ function normalizeTags(
     }))
     .filter((t) => t.name && t.value);
   return clean.length ? clean : undefined;
+}
+
+/* Resend caps a message (body + attachments, after base64) at 40 MB; a gift
+   card is ~25 KB, so anything anywhere near this is a bug upstream, not a big
+   present. Dropped rather than sent: a letter with the code in it is still
+   worth delivering. */
+const ATTACHMENT_MAX_BYTES = 8 * 1024 * 1024;
+
+function attachmentPayload(list: MailAttachment[] | undefined): Array<Record<string, string>> | undefined {
+  if (!list || !list.length) return undefined;
+  const out: Array<Record<string, string>> = [];
+  for (const a of list) {
+    const filename = String(a?.filename ?? "").replace(/[^\w.@ -]+/g, "_").slice(0, 120);
+    if (!filename || !a?.content) continue;
+    const content =
+      typeof a.content === "string" ? a.content : Buffer.from(a.content).toString("base64");
+    if (!content || content.length > ATTACHMENT_MAX_BYTES * 1.4) {
+      console.warn("[mail] attachment dropped (too large):", filename);
+      continue;
+    }
+    const entry: Record<string, string> = { filename, content };
+    if (a.contentType) entry.content_type = String(a.contentType).slice(0, 100);
+    out.push(entry);
+  }
+  return out.length ? out : undefined;
+}
+
+/** The names only — what the e2e sink records and what the tests assert. */
+function attachmentNames(list: MailAttachment[] | undefined): string[] {
+  return (list ?? [])
+    .map((a) => String(a?.filename ?? "").trim())
+    .filter(Boolean);
 }
 
 function retryDelay(): number {
@@ -138,6 +188,8 @@ export interface CapturedMail {
   to: string[];
   subject: string;
   template: string;
+  /** File names only — never the bytes. [] for a letter with no attachment. */
+  attachments: string[];
 }
 
 const CAPTURE_MAX = 50;
@@ -166,6 +218,9 @@ function capture(input: SendMailInput): void {
     to: recipients(input.to),
     subject: String(input.subject ?? "").trim(),
     template: templateTag(input.tags),
+    /* Names, not bytes — the same rule as the body: enough for a browser test
+       to prove «письмо с карточкой ушло с PDF», nothing a log could leak. */
+    attachments: attachmentNames(input.attachments),
   });
   if (list.length > CAPTURE_MAX) list.splice(0, list.length - CAPTURE_MAX);
 }
@@ -275,6 +330,9 @@ export async function sendMail(
 
   const tags = normalizeTags(input.tags);
   if (tags) payload.tags = tags;
+
+  const attachments = attachmentPayload(input.attachments);
+  if (attachments) payload.attachments = attachments;
 
   let res = await attempt(key, payload, input.idempotencyKey);
   let retried = false;

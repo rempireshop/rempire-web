@@ -407,6 +407,27 @@
         "Kaart kehtib aasta ostupäevast. Jääk säilib: seda saab kulutada mitme tellimusega.",
       "Подарочная карта в корзине ✓": "Kinkekaart on ostukorvis ✓",
       "Проверьте e-mail получателя": "Kontrolli saaja e-posti aadressi",
+      /* features: an all-gift-card checkout — step 2 is «Получатель», there is
+         no parcel and no delivery to pay for. */
+      "Электронная доставка": "Elektrooniline tarne",
+      "Письмом на почту": "E-kirjaga",
+      "Получатель": "Saaja",
+      "Мне на почту": "Minu e-postile",
+      "Далее — получатель": "Edasi — saaja",
+      "Подарочная карта приходит письмом — доставка не нужна и не считается.":
+        "Kinkekaart tuleb e-kirjaga — tarnet pole vaja ega arvestata.",
+      "Отправить мне на почту, а не получателю": "Saada minu e-postile, mitte saajale",
+      "E-mail получателя": "Saaja e-post",
+      "Проверьте адрес — на него уйдёт карта.": "Kontrolli aadressi — kaart läheb sellele.",
+      "Карту пришлём вам — подарите сами.": "Saadame kaardi sulle — kingid ise.",
+      "Карта уйдёт прямо получателю, в день оплаты.": "Kaart läheb otse saajale, maksmise päeval.",
+      "Имя получателя — не обязательно": "Saaja nimi — pole kohustuslik",
+      "Ваше имя — его увидит получатель": "Sinu nimi — saaja näeb seda",
+      "Скачать подарочную карту (PDF)": "Laadi kinkekaart alla (PDF)",
+      "Спасибо! Карта и код уже летят на почту — а распечатать её можно прямо отсюда.":
+        "Aitäh! Kaart ja kood on juba teel e-postile — välja printida saab ka siit.",
+      "Карта PDF ↗": "Kaart PDF ↗",
+      "Действует до": "Kehtib kuni",
       "Проверьте адрес — похоже, в нём опечатка.": "Kontrolli aadressi — tundub, et seal on trükiviga.",
       "Промокод или подарочная карта": "Sooduskood või kinkekaart",
       "Останется на карте": "Kaardile jääb",
@@ -1210,7 +1231,89 @@
       "Разрешить снижать текущие цены": "Luba praeguseid hindu alandada",
       "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
         "Vaikimisi ei lange hind juba salvestatust madalamale — tariif ainult tõstab selle tegeliku maksumuseni.",
-      "Заполнить по тарифам Montonio": "Täida Montonio tariifide järgi"
+      "Заполнить по тарифам Montonio": "Täida Montonio tariifide järgi",
+      /* админка, редизайн (этап 1): оболочка, «Обзор», «Заказы», «Товары» */
+      "Маркетинг": "Turundus",
+      "и отзывы": "ja arvustused",
+      "промокоды · письма": "sooduskoodid · kirjad",
+      "доставка · главная · компания · цены · языки · журнал": "tarne · avaleht · ettevõte · hinnad · keeled · logi",
+      "Ещё": "Veel",
+      "Открыть магазин ↗": "Ava pood ↗",
+      "Магазин ↗": "Pood ↗",
+      "Сделать сегодня": "Teha täna",
+      "Продажи": "Müük",
+      "Всё в порядке": "Kõik on korras",
+      "Отправлять нечего, остатки в норме, отзывы проверены": "Saata pole midagi, laoseis on korras, arvustused üle vaadatud",
+      "заказ ждёт отправки": "tellimus ootab saatmist",
+      "заказа ждут отправки": "tellimust ootab saatmist",
+      "заказов ждут отправки": "tellimust ootab saatmist",
+      "товар заканчивается": "toode saab otsa",
+      "товара заканчиваются": "toodet saab otsa",
+      "товаров заканчиваются": "toodet saab otsa",
+      "отзыв ждёт проверки": "arvustus ootab ülevaatamist",
+      "отзыва ждут проверки": "arvustust ootab ülevaatamist",
+      "отзывов ждут проверки": "arvustust ootab ülevaatamist",
+      "заявка на партнёрство": "partnerlustaotlus",
+      "заявки на партнёрство": "partnerlustaotlust",
+      "заявок на партнёрство": "partnerlustaotlust",
+      "Сводка не отвечает — цифры могут быть неполными.": "Kokkuvõte ei vasta — numbrid võivad olla puudulikud.",
+      "Повторить": "Proovi uuesti",
+      "Отправлены": "Saadetud",
+      "Ждут оплаты": "Ootavad makset",
+      "Ждёт оплаты": "Ootab makset",
+      "Отменён": "Tühistatud",
+      "Какие заказы": "Millised tellimused",
+      "Номер, имя, телефон": "Number, nimi, telefon",
+      "Поиск по заказам": "Tellimuste otsing",
+      "Таких заказов нет": "Selliseid tellimusi pole",
+      "Наклейка": "Silt",
+      "Наклейка ✓": "Silt ✓",
+      "Написать": "Kirjuta",
+      "← Заказы": "← Tellimused",
+      "Заказ не найден": "Tellimust ei leitud",
+      "Письмо клиенту": "Kiri kliendile",
+      "Печатаем…": "Prindime…",
+      "Отметить отправленным": "Märgi saadetuks",
+      "Отметить отправленным?": "Märkida saadetuks?",
+      "Написать клиенту": "Kirjuta kliendile",
+      "Отменить заказ": "Tühista tellimus",
+      "Отменить заказ?": "Tühistada tellimus?",
+      "Изменить статус вручную:": "Muuda staatust käsitsi:",
+      "бесплатно": "tasuta",
+      "Только для вас": "Ainult teile",
+      "Этикетка PDF ↗": "Silt PDF ↗",
+      "Отследить ↗": "Jälgi ↗",
+      "Сообщение клиенту": "Sõnum kliendile",
+      "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
+      "Черновик помощника": "Abilise mustand",
+      "Черновик подготовил помощник": "Mustandi kirjutas abiline",
+      "+ Набор": "+ Komplekt",
+      "+ Товар": "+ Toode",
+      "Приёмка": "Vastuvõtt",
+      "скоро": "varsti",
+      "Название, бренд, штрихкод": "Nimi, bränd, triipkood",
+      "Таких товаров нет": "Selliseid tooteid pole",
+      "Наборы выключены — в магазине их не видно нигде.": "Komplektid on välja lülitatud — poes neid kusagil ei näe.",
+      "Показан": "Näidatakse",
+      "Скрыт": "Peidetud",
+      "Наборов пока нет": "Komplekte veel pole",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение.":
+        "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega — muudatused panen ette kinnitamiseks.",
+      "Спросите обычными словами": "Küsi tavaliste sõnadega",
+      "Закрыть помощника": "Sulge abiline",
+      "Подтвердите изменение": "Kinnita muudatus",
+      "Все клиенты": "Kõik kliendid",
+      "кнопка «Помощник» в углу экрана — предлагает изменения, вы подтверждаете":
+        "nupp «Abiline» ekraani nurgas — pakub muudatusi, sina kinnitad",
+      "Войдите в панель, чтобы видеть склад": "Logi sisse, et ladu näha",
+      "Приёмка и привязка штрихкодов — через сканер. Здесь можно поправить остаток вручную.":
+        "Vastuvõtt ja triipkoodide sidumine käivad skanneri kaudu. Siin saab jääki käsitsi parandada.",
+      "Сканер отдельным приложением ↗": "Skanner eraldi rakendusena ↗",
+      "штрихкод не привязан": "triipkood pole seotud",
+      "Пока пусто": "Praegu tühi",
+      "Склад не принял правку": "Ladu ei võtnud muudatust vastu",
+      "Не удалось сохранить статус": "Staatust ei õnnestunud salvestada",
+      "Отменено": "Tagasi võetud"
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -1538,6 +1641,27 @@
         "The card is valid for a year from purchase. The balance is kept: it can be spent over several orders.",
       "Подарочная карта в корзине ✓": "Gift card added to your cart ✓",
       "Проверьте e-mail получателя": "Check the recipient's e-mail",
+      /* features: an all-gift-card checkout — step 2 is «Получатель», there is
+         no parcel and no delivery to pay for. */
+      "Электронная доставка": "Electronic delivery",
+      "Письмом на почту": "By e-mail",
+      "Получатель": "Recipient",
+      "Мне на почту": "To my e-mail",
+      "Далее — получатель": "Next — recipient",
+      "Подарочная карта приходит письмом — доставка не нужна и не считается.":
+        "A gift card arrives by e-mail — there is nothing to deliver and nothing to pay for.",
+      "Отправить мне на почту, а не получателю": "Send it to my e-mail, not to the recipient",
+      "E-mail получателя": "Recipient's e-mail",
+      "Проверьте адрес — на него уйдёт карта.": "Check the address — the card goes there.",
+      "Карту пришлём вам — подарите сами.": "We'll send the card to you to give in person.",
+      "Карта уйдёт прямо получателю, в день оплаты.": "The card goes straight to the recipient, on the day you pay.",
+      "Имя получателя — не обязательно": "Recipient's name — optional",
+      "Ваше имя — его увидит получатель": "Your name — the recipient will see it",
+      "Скачать подарочную карту (PDF)": "Download the gift card (PDF)",
+      "Спасибо! Карта и код уже летят на почту — а распечатать её можно прямо отсюда.":
+        "Thank you! The card and its code are on their way by e-mail — and you can print it right here.",
+      "Карта PDF ↗": "Card PDF ↗",
+      "Действует до": "Valid until",
       "Проверьте адрес — похоже, в нём опечатка.": "Check the address — it looks like a typo.",
       "Промокод или подарочная карта": "Promo code or gift card",
       "Останется на карте": "Left on the card",
@@ -2336,13 +2460,119 @@
       "Разрешить снижать текущие цены": "Allow lowering current prices",
       "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
         "By default the price never drops below what's already saved — the tariff only raises it to the real cost.",
-      "Заполнить по тарифам Montonio": "Fill from Montonio tariffs"
+      "Заполнить по тарифам Montonio": "Fill from Montonio tariffs",
+      /* админка, редизайн (этап 1): оболочка, «Обзор», «Заказы», «Товары» */
+      "Маркетинг": "Marketing",
+      "и отзывы": "and reviews",
+      "промокоды · письма": "promo codes · emails",
+      "доставка · главная · компания · цены · языки · журнал": "delivery · home page · company · prices · languages · log",
+      "Ещё": "More",
+      "Открыть магазин ↗": "Open the shop ↗",
+      "Магазин ↗": "Shop ↗",
+      "Сделать сегодня": "To do today",
+      "Продажи": "Sales",
+      "Всё в порядке": "All good",
+      "Отправлять нечего, остатки в норме, отзывы проверены": "Nothing to ship, stock is fine, reviews are checked",
+      "заказ ждёт отправки": "order waiting to ship",
+      "заказа ждут отправки": "orders waiting to ship",
+      "заказов ждут отправки": "orders waiting to ship",
+      "товар заканчивается": "product running out",
+      "товара заканчиваются": "products running out",
+      "товаров заканчиваются": "products running out",
+      "отзыв ждёт проверки": "review waiting to be checked",
+      "отзыва ждут проверки": "reviews waiting to be checked",
+      "отзывов ждут проверки": "reviews waiting to be checked",
+      "заявка на партнёрство": "partner request",
+      "заявки на партнёрство": "partner requests",
+      "заявок на партнёрство": "partner requests",
+      "Сводка не отвечает — цифры могут быть неполными.": "The summary is not answering — the figures may be incomplete.",
+      "Повторить": "Try again",
+      "Отправлены": "Shipped",
+      "Ждут оплаты": "Awaiting payment",
+      "Ждёт оплаты": "Awaiting payment",
+      "Отменён": "Cancelled",
+      "Какие заказы": "Which orders",
+      "Номер, имя, телефон": "Number, name, phone",
+      "Поиск по заказам": "Search orders",
+      "Таких заказов нет": "No orders like that",
+      "Наклейка": "Label",
+      "Наклейка ✓": "Label ✓",
+      "Написать": "Write",
+      "← Заказы": "← Orders",
+      "Заказ не найден": "Order not found",
+      "Письмо клиенту": "Letter to the customer",
+      "Печатаем…": "Printing…",
+      "Отметить отправленным": "Mark as shipped",
+      "Отметить отправленным?": "Mark as shipped?",
+      "Написать клиенту": "Write to the customer",
+      "Отменить заказ": "Cancel the order",
+      "Отменить заказ?": "Cancel the order?",
+      "Изменить статус вручную:": "Change the status by hand:",
+      "бесплатно": "free",
+      "Только для вас": "Only for you",
+      "Этикетка PDF ↗": "Label PDF ↗",
+      "Отследить ↗": "Track ↗",
+      "Сообщение клиенту": "Message to the customer",
+      "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
+      "Черновик помощника": "Assistant's draft",
+      "Черновик подготовил помощник": "The assistant wrote this draft",
+      "+ Набор": "+ Set",
+      "+ Товар": "+ Product",
+      "Приёмка": "Goods in",
+      "скоро": "soon",
+      "Название, бренд, штрихкод": "Name, brand, barcode",
+      "Таких товаров нет": "No products like that",
+      "Наборы выключены — в магазине их не видно нигде.": "Sets are switched off — they are nowhere in the shop.",
+      "Показан": "Shown",
+      "Скрыт": "Hidden",
+      "Наборов пока нет": "No sets yet",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение.":
+        "I can see your catalogue, orders and stock. Ask in plain words — any change I will put up for your approval.",
+      "Спросите обычными словами": "Ask in plain words",
+      "Закрыть помощника": "Close the assistant",
+      "Подтвердите изменение": "Confirm the change",
+      "Все клиенты": "All customers",
+      "кнопка «Помощник» в углу экрана — предлагает изменения, вы подтверждаете":
+        "the “Assistant” button in the corner — it proposes changes, you approve them",
+      "Войдите в панель, чтобы видеть склад": "Sign in to see the warehouse",
+      "Приёмка и привязка штрихкодов — через сканер. Здесь можно поправить остаток вручную.":
+        "Goods in and barcode linking go through the scanner. Here you can fix a count by hand.",
+      "Сканер отдельным приложением ↗": "The scanner as its own app ↗",
+      "штрихкод не привязан": "no barcode linked",
+      "Пока пусто": "Nothing yet",
+      "Склад не принял правку": "The warehouse did not accept the change",
+      "Не удалось сохранить статус": "Could not save the status",
+      "Отменено": "Undone"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* админка, редизайн: the lines that carry a number, a sum or an order
+       number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
+    [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
+    [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
+      { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
+    [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
+      { ET: "$1 tellimust · $2 päevas", EN: "$1 orders · $2 per day" }],
+    [/^(\d+) заказ(?:|а|ов)$/, { ET: "$1 tellimust", EN: "$1 orders" }],
+    [/^(\d+) в салоне$/, { ET: "$1 salongis", EN: "$1 in the salon" }],
+    [/^(.+) в день$/, { ET: "$1 päevas", EN: "$1 per day" }],
+    [/^Показаны первые 40 из (\d+)$/,
+      { ET: "Kuvatud esimesed 40 / $1", EN: "First 40 of $1 shown" }],
+    [/^(.+) отправлен · письмо ушло$/,
+      { ET: "$1 saadetud · kiri läks välja", EN: "$1 shipped · the letter has gone" }],
+    [/^(.+) отменён$/, { ET: "$1 tühistatud", EN: "$1 cancelled" }],
+    [/^(.+): (\d+) шт$/, { ET: "$1: $2 tk", EN: "$1: $2 pcs" }],
+    /* the confirm card before an order moves — one pre-line block, so the
+       whole thing is one text node */
+    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером\.$/,
+      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
+        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number." }],
+    [/^([^\n]+) · ([^\n]+)\nДеньги вернутся клиенту, письмо уйдёт автоматически\.$/,
+      { ET: "$1 · $2\nRaha läheb kliendile tagasi, kiri saadetakse automaatselt.",
+        EN: "$1 · $2\nThe money goes back to the customer and the letter is sent automatically." }],
     /* checkout trust line — the phone and the e-mail come from the content
        layer, so only the label around them is translated. The two-value rule
        has to come first: the one-value rule would swallow the «или». */
@@ -2928,7 +3158,23 @@
       return true;
     });
   }
+  /* ---- features: a basket of nothing but gift cards ----------------------
+     A gift card is an e-mail, not a parcel: there is no country to pick, no
+     carrier, no address and no delivery to pay for. The whole checkout follows
+     from this one question — step 2 becomes «Получатель», shipCost() is 0 and
+     the summary drops its delivery line. Mixed baskets (a bottle AND a card)
+     keep the ordinary flow: something still has to be posted.
+     The server decides the same thing again from the same rule, and refuses a
+     "digital" order that holds anything physical (not_digital,
+     src/lib/orders.ts createOrder). */
+  function giftOnlyCart() {
+    if (!S.cart.length) return false;
+    for (var i = 0; i < S.cart.length; i++) if (S.cart[i].type !== "gift") return false;
+    return true;
+  }
+  function isDigital() { return giftOnlyCart(); }
   function shipMethod() {
+    if (giftOnlyCart()) return "digital";
     var avail = deliveryFor(S.country);
     for (var i = 0; i < avail.length; i++) if (avail[i].k === S.ship.method) return S.ship.method;
     return avail.length ? avail[0].k : "courier";
@@ -2947,6 +3193,9 @@
   function isParcel() { return shipMethod() === "parcel"; }
   function shipMethodLabel() {
     var k = shipMethod();
+    // features: not in DELIVERY — it is never something to choose between,
+    // it is what an all-gift-card order simply is
+    if (k === "digital") return "Электронная доставка";
     for (var i = 0; i < DELIVERY.length; i++) if (DELIVERY[i].k === k) {
       return k === "parcel" && shipCarrier() ? DELIVERY[i].l + " " + CARRIER_NAMES[shipCarrier()] : DELIVERY[i].l;
     }
@@ -3142,6 +3391,7 @@
     acctMethod: 1,
     acctMachine: 0,
     toast: null,
+    toastUndo: null,   // the journal entry the admin toast's «Отменить» takes back
     coStep: 1,
     sumOpen: null,      // checkout summary; null = follow the breakpoint
     // method/carrier/point drive the real checkout; the rest is the address
@@ -3157,6 +3407,10 @@
     adminTab: "over",
     adminAsk: "",
     adminOrder: 0,   // opened order id (0 = list)
+    // ---- the redesigned admin shell (docs/design/admin-handoff-README.md) ----
+    admMore: false,        // the phone «Ещё» sheet
+    admOrderFilter: "new", // «Заказы» chips: new | shipped | unpaid | salon | all
+    admOrderQ: "",         // «Заказы» search: number, name, phone
     adminEdit: "",   // opened product id in goods
     goodsErr: "",    // why the goods editor refused the last «Сохранить»
     goodsQ: "",      // admin goods search
@@ -3174,8 +3428,10 @@
     mailLang: "",    // letter language; "" follows the panel language
     mailTo: "",      // address typed into «отправить тест на…»
     mailDraft: null, // unsaved subject/intro/signature edits, by letter+language
-    admNav: true,       // admin side panes collapse to rails
-    admAi: true,
+    admNav: true,       // the admin sidebar: 232 px expanded, 68 px folded
+    /* The assistant is a floating button now, not a permanent third column —
+       so it starts closed, and admPanesSave() remembers it per machine. */
+    admAi: false,
     size: 0,
     /* The size chosen in a product CARD's own picker (cardSizeHTML), by
        product id — NOT in the DOM, so it survives every render()/patchCatalog
@@ -3206,6 +3462,13 @@
     bundleQ: "",        // product search inside the set editor
     giftAmount: 50,     // chosen gift-card amount
     gift: { name: "", email: "", message: "" },
+    /* features: step 2 of a gift-cards-only checkout — «Получатель» instead of
+       «Доставка». null until that step is first drawn, when it is seeded from
+       the card already in the basket (seedGiftTo) so nobody retypes what they
+       typed on /gift/. `toMe` on = the letter and the PDF go to the buyer,
+       which is the default: most people want to hand the card over themselves. */
+    giftTo: null,       // { email, name, message, toMe } once the step is opened
+    giftToTouched: false,
     giftCard: null,     // {code, discount, remaining} once a card is applied at checkout
     giftErr: "",
     dbReviews: {},      // productId → [approved reviews from the database]
@@ -3495,7 +3758,9 @@
   function method() { return methods()[methodIdx()]; }
   /** Delivery price for any method, straight off the rules: carrier, then method. */
   function shipPriceFor(m, carrier) {
-    if (m === "pickup" || freeShip()) return 0;
+    // features: nothing is posted, so nothing is billed — createOrder() prices
+    // a digital order's delivery at 0 too, and that is the number charged
+    if (m === "digital" || m === "pickup" || freeShip()) return 0;
     var byCarrier = SHIP_RULES.carriers && SHIP_RULES.carriers[carrier];
     var v = byCarrier ? (byCarrier[S.country] !== undefined ? byCarrier[S.country] : byCarrier["default"]) : undefined;
     if (v === undefined || v === null) {
@@ -6882,6 +7147,10 @@
     // pickup included (src/lib/orders.ts) — so it must not be short-circuited
     // by the pickup check below the way phone and the address fields are.
     if (key === "name") return true;
+    /* features: an all-gift-card order has no parcel and no courier to call —
+       only the buyer's own name, which the server still demands (bad_name) and
+       which the card prints as «От кого». */
+    if (m === "digital") return false;
     if (m === "pickup") return false;   // phone offered there, just not demanded
     if (key === "phone") return true;
     return m === "courier";
@@ -6900,6 +7169,40 @@
     if (key === "phone" && S.ship.phone.trim()) return "Проверьте номер — похоже, в нём не хватает цифр.";
     return SHIP_MSG[key];
   }
+
+  /* ---- features: «Получатель» — step 2 of a gift-cards-only checkout -------
+     One recipient for the whole order: the shop sells three amounts, and a
+     basket with several cards in it is «две карты одному человеку» far more
+     often than «по карте каждому». What is typed here is written onto EVERY
+     gift line's meta in orderPayload(), which is what src/lib/giftcards.ts
+     issueGiftCards() reads when it mints the codes.
+     ------------------------------------------------------------------------ */
+  /** Seeded once from the card already in the basket, so nothing typed on
+      /gift/ has to be typed again here. */
+  function seedGiftTo() {
+    var m = null;
+    for (var i = 0; i < S.cart.length && !m; i++) {
+      if (S.cart[i].type === "gift" && S.cart[i].meta) m = S.cart[i].meta;
+    }
+    S.giftTo = {
+      email: (m && m.email) || "",
+      name: (m && m.name) || "",
+      message: (m && m.message) || "",
+      // on by default — «отправить мне на почту, а не получателю». Off only
+      // when the gift page already knew where the card should go.
+      toMe: !(m && m.email)
+    };
+    return S.giftTo;
+  }
+  function giftTo() { return S.giftTo || seedGiftTo(); }
+  /** Required and checked when the card goes to the recipient; when it comes to
+      the buyer the field is optional — but a typo in it is still a typo. */
+  function giftToEmailBad() {
+    var g = giftTo(), v = g.email.trim();
+    if (g.toMe && !v) return false;
+    return !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v);
+  }
+  function giftToBad() { return S.giftToTouched && giftToEmailBad(); }
 
   function shipField(key, label, ph, auto, mode) {
     var bad = shipBad(key);
@@ -7168,13 +7471,21 @@
      for it. `from` is the buyer's own name off the checkout form, so the card
      can say who sent it. */
   function lineMeta(l) {
-    if (l.type !== "gift" || !l.meta) return undefined;
+    if (l.type !== "gift") return undefined;
+    /* features: on an all-gift-card order step 2 IS the recipient form, and
+       what was typed there wins over whatever the /gift/ page put on the line
+       — it is the later, more deliberate answer, and it is the one the shopper
+       just looked at. «Отправить мне на почту» simply omits the address, which
+       is exactly what makes src/lib/mail-hooks.ts send the card to the buyer. */
+    var src = isDigital() ? giftTo() : l.meta;
+    if (!src) return undefined;
     var m = {};
     ["name", "email", "message"].forEach(function (k) {
-      var v = typeof l.meta[k] === "string" ? l.meta[k].trim() : "";
+      if (k === "email" && isDigital() && giftTo().toMe) return;
+      var v = typeof src[k] === "string" ? src[k].trim() : "";
       if (v) m[k] = v.slice(0, 300);
     });
-    var from = (l.meta.from || S.ship.name || "").trim();
+    var from = ((l.meta && l.meta.from) || S.ship.name || "").trim();
     if (from) m.from = from.slice(0, 300);
     return Object.keys(m).length ? m : undefined;
   }
@@ -7250,7 +7561,11 @@
   function clearOrderState() {
     S.cart = []; S.promo = ""; S.promoInfo = null; S.promoErr = ""; S.promoMin = 0; S.promoBusy = false; S.sumOpen = null;
     S.giftCard = null; S.giftErr = "";   // features: a card applied here is spent
+    // features: the recipient of THIS order's cards — the next order seeds its
+    // own from its own basket, and a stale address here would be the wrong one
+    S.giftTo = null; S.giftToTouched = false;
     S.loyaltyRedeem = false;   // wholesale/loyalty: points applied here are spent too
+    // the basket is empty by now, so shipMethod() no longer answers "digital"
     S.ship = { name: "", addr: "", zip: "", city: "", phone: "", method: shipMethod(), carrier: S.ship.carrier, point: null };
     S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
     persist();
@@ -7263,11 +7578,13 @@
     go("done");
   }
   function payNow() {
-    S.emailTouched = true; S.shipTouched = true;
+    S.emailTouched = true; S.shipTouched = true; S.giftToTouched = true;
     /* Send the shopper to the step that is short, with the fields marked,
        rather than refusing with a toast and leaving them to hunt. */
     if (emailBad()) { return failStep(1, "Проверьте e-mail — на него придёт подтверждение заказа"); }
     if (shipMissing().length) { return failStep(2, "Заполните данные доставки"); }
+    // features: the card has nowhere to go without an address for it
+    if (isDigital() && giftToEmailBad()) { return failStep(2, "Проверьте e-mail получателя"); }
     if (pointMissing()) { return failStep(2, "Выберите пакомат"); }
     if (S.pay === 3 && !S.invoiceCo.trim()) { return failStep(3, "Укажите фирму и регистрационный номер"); }
     if (!S.cart.length) { toast("Корзина пуста"); return; }
@@ -7329,10 +7646,37 @@
      patchDelivery() for why the two can drift apart and why that matters. */
   var coBodyMethod = "";
 
+  /* features: the recipient form — step 2 of a gift-cards-only order.
+     Deliberately NOT inside [data-co-delivery]: that container is rewritten
+     wholesale by patchDelivery() whenever a background probe lands, and these
+     are fields somebody is typing into. It sits next to the block, exactly
+     where the postal-address fields sit on an ordinary order and for exactly
+     the same reason — see patchDelivery()'s own comment. */
+  function giftToBlockHTML() {
+    var g = giftTo(), bad = giftToBad();
+    return '<label class="opt opt--plain"><input type="checkbox" data-gifttome' + (g.toMe ? " checked" : "") + '>' +
+        "<span>Отправить мне на почту, а не получателю</span></label>" +
+      '<label class="field"><span class="field__label">' +
+        (g.toMe ? "E-mail получателя — не обязательно" : "E-mail получателя") + "</span>" +
+        '<input class="input" type="email" inputmode="email" data-giftto="email" value="' + esc(g.email) +
+        '" aria-invalid="' + bad + '" placeholder="you@example.com"></label>' +
+      (bad ? '<div class="err" role="alert">Проверьте адрес — на него уйдёт карта.</div>'
+        : '<div class="hint">' + (g.toMe ? "Карту пришлём вам — подарите сами." : "Карта уйдёт прямо получателю, в день оплаты.") + "</div>") +
+      '<label class="field"><span class="field__label">Имя получателя — не обязательно</span>' +
+        '<input class="input" data-giftto="name" value="' + esc(g.name) + '" placeholder="Имя получателя"></label>' +
+      '<label class="field"><span class="field__label">Короткое поздравление</span>' +
+        '<textarea class="input" rows="3" maxlength="300" data-giftto="message" placeholder="С днём рождения!">' +
+        esc(g.message) + "</textarea></label>";
+  }
   function deliveryBlockHTML() {
-    var out = deliveryPicker() +
-      (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
-      '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>";
+    /* Nothing to choose on a digital order, so this block is one fixed
+       sentence — and being fixed is what makes every patchDelivery() a no-op
+       while the recipient form next to it is being typed into. */
+    var out = isDigital()
+      ? '<p class="hint">Подарочная карта приходит письмом — доставка не нужна и не считается.</p>'
+      : deliveryPicker() +
+        (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
+        '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>";
     coBlockHTML.delivery = out;
     return out;
   }
@@ -7402,8 +7746,19 @@
          half is looked up on its own: «Доставка» is a key, «Пакомат Omniva»
          matches its rule. (The rule stays — the admin still composes this
          line from a stored string.) */
-      '<div class="cosum__row cosum__row--rule"><span><span>Доставка</span> — <span>' + shipMethodLabel() +
-        '</span></span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
+      /* features: an all-gift-card order has no delivery line at all — not a
+         zero one. «Доставка — Электронная доставка · Бесплатно» would be three
+         words saying nothing; the receipt, the letter and the accountant export
+         all agree there is no parcel here. The one line below says what does
+         happen instead. */
+      (isDigital()
+        /* shipMethodLabel() answers for all four methods, so the words
+           «Электронная доставка» live in one place — its own text node, which
+           is what translateTree() rewrites on an ET/EN checkout. */
+        ? '<div class="cosum__row cosum__row--rule"><span>' + shipMethodLabel() + "</span>" +
+          '<span class="num">Письмом на почту</span></div>'
+        : '<div class="cosum__row cosum__row--rule"><span><span>Доставка</span> — <span>' + shipMethodLabel() +
+          '</span></span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>") +
       '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
       /* Both pay buttons wait for the payment step. Offered from step one
          they compete with «Далее» for the same tap and invite a shopper to
@@ -7452,7 +7807,7 @@
               '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
               (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
               '<label class="opt opt--plain"><input type="checkbox" data-news' + (S.newsletter ? " checked" : "") + '><span>Хочу получать новости и скидки</span></label>' +
-              '<button class="btn btn--wide" data-step="2">Далее — доставка</button></div>' : "") +
+              '<button class="btn btn--wide" data-step="2">' + (isDigital() ? "Далее — получатель" : "Далее — доставка") + "</button></div>" : "") +
           "</section>" +
 
           '<section class="costep' + (step === 2 ? " is-open" : "") + '">' +
@@ -7461,12 +7816,24 @@
                двери» is translated but «Курьер до двери · Иван Иванов» — one
                node, built by concatenation — matched nothing, and the
                collapsed step-2 header stayed Russian on an ET/EN checkout. */
-            coHead(2, "Доставка", "<span>" + shipMethodLabel() + "</span>" +
-              (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
+            /* features: the step is «Получатель», not «Доставка», when there
+               is nothing to post — and its collapsed value is where the card
+               is going rather than how a parcel travels. */
+            coHead(2, isDigital() ? "Получатель" : "Доставка",
+              isDigital()
+                ? "<span>" + (giftTo().toMe ? "Мне на почту" : esc(giftTo().email.trim() || "—")) + "</span>"
+                : "<span>" + shipMethodLabel() + "</span>" +
+                  (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
             (step === 2 ? '<div class="costep__body">' +
-              '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
-                COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
+              // no country on a digital order: nothing crosses a border, and
+              // the select is the one control that would re-price the parcel
+              (isDigital() ? ""
+                : '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
+                  COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>") +
               '<div data-co-delivery data-points-loading="' + pointsLoadingCount() + '">' + deliveryBlockHTML() + "</div>" +
+              // features: who the card is for — outside [data-co-delivery], see
+              // giftToBlockHTML()'s own comment
+              (isDigital() ? giftToBlockHTML() : "") +
               // every field is bound to S.ship — a render (promo, blur, resize)
               // used to wipe whatever the shopper had typed here
               // Contact block (name + phone, email lives in step 1) always
@@ -7475,14 +7842,17 @@
               // order, pickup included (bad_name, src/lib/orders.ts). Only
               // the postal address is delivery-method-specific, so it alone
               // stays gated — courier only, never pickup or a parcel machine.
-              shipField("name", "Имя и фамилия", "Имя Фамилия", "name", "") +
+              // A digital order keeps the name (it signs the card, «От кого»)
+              // and drops the phone: nobody is calling about an e-mail.
+              shipField("name", isDigital() ? "Ваше имя — его увидит получатель" : "Имя и фамилия", "Имя Фамилия", "name", "") +
               (shipMethod() === "courier" ? shipField("addr", "Адрес", "улица, дом", "street-address", "") +
                 '<div class="co__zip">' + shipField("zip", "Индекс", "12345", "postal-code", "numeric") +
                 shipField("city", "Город", "Город", "address-level2", "") + "</div>" : "") +
-              shipField("phone", "Телефон", "+372…", "tel", "tel") +
-              '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.' +
-              (S.country === "FI" ? " Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика." : "") +
-              (S.country === "EU" ? " Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD." : "") + "</p>" +
+              (isDigital() ? "" : shipField("phone", "Телефон", "+372…", "tel", "tel")) +
+              (isDigital() ? ""
+                : '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.' +
+                  (S.country === "FI" ? " Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика." : "") +
+                  (S.country === "EU" ? " Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD." : "") + "</p>") +
               '<button class="btn btn--wide" data-step="3">Далее — оплата</button></div>' : "") +
           "</section>" +
 
@@ -7567,21 +7937,65 @@
   }
   admPanesLoad();
 
-  var ADM_NAV = [
-    ["over", "Обзор", "grid"],
-    ["orders", "Заказы", "bag"],
-    ["goods", "Товары", "grid"],
-    ["stock", "Склад", "box"],           // inventory
-    ["pos", "Продажа в салоне", "till"], // inventory
-    ["people", "Клиенты", "user"],
-    ["reviews", "Отзывы", "check"],   // features
-    ["promos", "Промокоды", "tag"],   // checkout-gaps
-    ["blog", "Блог", "doc"],
-    ["stats", "Аналитика", "chart"],
-    ["mail", "Письма", "mail"],
-    ["apps", "Подключения", "plug"],
-    ["setup", "Настройки", "home"]
+  /* ---------- admin navigation: 13 sections → 5 places ---------------------
+     The redesign (docs/design/admin-handoff-README.md § IA) folds the thirteen
+     flat tabs into Обзор · Заказы · Товары · Салон · Ещё. What it does NOT do
+     is renumber the state: S.adminTab still holds the old key of whichever
+     section is open, because those keys are the panel's deep links — the
+     assistant's «Открыть …» buttons and the e2e suite both address sections as
+     `data-admtab="<old key>"`, and a section that moved into a sub-tab has to
+     stay reachable by the name it always had. ADM_SECTION_OF is the one place
+     that says which of the five places an old key now lives in. */
+  var ADM_SECTIONS = [
+    ["over", "Обзор", "overview"],
+    ["orders", "Заказы", "orders"],
+    ["goods", "Товары", "products"],
+    ["pos", "Салон", "salon"]
   ];
+  /* «Ещё»: a bottom sheet on a phone, an inline group under a rule in the
+     desktop sidebar. The fourth column is the one-line description the sheet
+     shows under the name. */
+  var ADM_MORE = [
+    ["people", "Клиенты", "customers", "и отзывы"],
+    ["promos", "Маркетинг", "marketing", "промокоды · письма"],
+    ["blog", "Блог", "blog", ""],
+    ["stats", "Аналитика", "analytics", ""],
+    ["apps", "Подключения", "integrations", ""],
+    ["setup", "Настройки", "settings", "доставка · главная · компания · цены · языки · журнал"]
+  ];
+  var ADM_SECTION_OF = {
+    over: "over", orders: "orders",
+    goods: "goods", stock: "goods",          // Товары → Каталог · Склад · Наборы
+    pos: "pos",
+    people: "people", reviews: "people",     // Клиенты → Все клиенты · Отзывы
+    promos: "promos", mail: "promos",        // Маркетинг → Промокоды · Письма
+    blog: "blog", stats: "stats", apps: "apps", setup: "setup"
+  };
+  /* 24-px line icons, stroke 1.5 (2.2 when the section is open), square caps —
+     the `ICONS` table of the prototype, verbatim. */
+  var ADM_ICON = {
+    overview: "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
+    orders: "M4 7h16v13H4zM4 7l2-4h12l2 4M9 11h6",
+    products: "M8 3h8l1 4H7zM7 7h10v14H7z",
+    salon: "M4 5h4M16 5h4M4 5v4M20 5v4M4 19v-4M20 19v-4M4 19h4M16 19h4M8 9v6M11 9v6M14 9v6M16 9v6",
+    more: "M4 12h.01M12 12h.01M20 12h.01",
+    customers: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1",
+    marketing: "M3 10v4h3l8 5V5L6 10zM17 9a4 4 0 0 1 0 6",
+    blog: "M5 3h14v18H5zM8 8h8M8 12h8M8 16h5",
+    analytics: "M4 20V10M10 20V4M16 20v-8M22 20H2",
+    integrations: "M9 7V3M15 7V3M6 7h12v5a6 6 0 0 1-12 0zM12 18v3",
+    settings: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1",
+    assistant: "M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1",
+    scan: "M4 8V5h3M20 8V5h-3M4 16v3h3M20 16v3h-3M8 8v8M11 8v8M14 8v8M16 8v8"
+  };
+  function admIcon(key, on, size) {
+    var s = size || 22;
+    return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="' + (on ? "2.2" : "1.5") + '" stroke-linecap="square" aria-hidden="true">' +
+      '<path d="' + ADM_ICON[key] + '"></path></svg>';
+  }
+  /** Which of the five places is on screen right now. */
+  function admSection() { return ADM_SECTION_OF[S.adminTab] || "over"; }
   function fakeCustomers() {
     var orders = fakeOrders(), by = {};
     orders.forEach(function (o) {
@@ -7613,21 +8027,22 @@
   }
   function admWaitScreen(title) {
     return admHeader(title) +
-      '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
-        '<p class="muted" style="margin:28px 0">Проверяем…</p></main></div>';
+      '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
+        '<div class="adm-gate"><div class="adm-skel"><i></i><i></i><i></i></div>' +
+        '<p class="adm-hint">Проверяем…</p></div></div></div></div></div>';
   }
   function admLoginScreen(title) {
     return admHeader(title) +
-      '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
-        '<div class="adm__list" style="max-width:420px;margin:28px auto;padding:18px 16px">' +
-          '<div class="sec__head sec__head--sub"><h2 class="sec__title">Вход в админку</h2></div>' +
-          '<p class="muted" style="margin:0 0 12px;font-size:13px">Пароль владельца. Магазин работает и без входа — здесь только управление.</p>' +
-          '<label class="field"><span class="field__label">Пароль</span>' +
-            '<input class="input" type="password" data-admpw autocomplete="current-password" aria-invalid="' + (SRV.err ? "true" : "false") + '"></label>' +
-          (SRV.err ? '<div class="err" role="alert">' + esc(SRV.err) + "</div>" : "") +
-          '<div class="adm__acts"><button class="btn btn--wide" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
-            (SRV.busy ? "Проверяем…" : "Войти") + "</button></div>" +
-        "</div></main></div>";
+      '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
+        '<div class="adm-gate">' +
+          '<h1 class="adm-h1">Вход в админку</h1>' +
+          '<p class="adm-hint">Пароль владельца. Магазин работает и без входа — здесь только управление.</p>' +
+          '<label class="adm-field">Пароль' +
+            '<input class="adm-input" type="password" data-admpw autocomplete="current-password" aria-invalid="' + (SRV.err ? "true" : "false") + '"></label>' +
+          (SRV.err ? '<div class="err adm-err" role="alert">' + esc(SRV.err) + "</div>" : "") +
+          '<button class="adm-btn" data-admlogin' + (SRV.busy ? " disabled" : "") + ">" +
+            (SRV.busy ? "Проверяем…" : "Войти") + "</button>" +
+        "</div></div></div></div></div>";
   }
 
   /* ---------- analytics agent: «Аналитика» ---------------------------------
@@ -7821,96 +8236,6 @@
       render();
     }).catch(function () { OVERVIEW.data = null; OVERVIEW.err = "offline"; render(); });
   }
-  /** The «Заканчиваются на складе» rows — one shape whether the list came from
-   *  the server (real stock) or from the catalogue (the demo panel). */
-  function overLowRow(p, state) {
-    return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-      '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-      '<span class="chip ' + (state === "out" ? "chip--out" : "chip--low") + '">' + (state === "out" ? "нет" : "мало") + "</span>" +
-      '<span class="num adm__pr">' + eur(p.price) + "</span></div>";
-  }
-  /* The four queues nobody but the owner can empty. Each row links to the tab
-     that empties it; a queue at zero still shows, because «0» is the answer to
-     "is there anything waiting?" and a row that disappears reads as a bug. */
-  var OVER_ATTENTION = [
-    ["ordersToShip", "Заказы ждут отправки", "оплачены, но ещё не отправлены", "orders"],
-    ["proRequests", "Заявки на партнёрство", "клиенты просят цены для салона", "people"],
-    ["reviewsPending", "Отзывы на проверке", "появятся на сайте после проверки", "reviews"],
-    ["stockAlerts", "Ждут, когда товар появится", "письмо уйдёт само, когда поставите наличие", "stock"]
-  ];
-  function overAttentionHTML(att) {
-    var total = OVER_ATTENTION.reduce(function (a, r) { return a + (att[r[0]] || 0); }, 0);
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Требует внимания</h2></div>' +
-      (total ? "" : '<p class="muted" style="margin:0 0 8px">Ничего не ждёт — всё разобрано.</p>') +
-      '<div class="adm__list">' + OVER_ATTENTION.map(function (r) {
-        var n = att[r[0]] || 0;
-        return '<div class="adm__row"><span class="adm__nm">' + r[1] + '<span class="adm__sub">' + r[2] + "</span></span>" +
-          '<span class="chip ' + (n ? "chip--low" : "chip--ok") + '">' + n + "</span>" +
-          '<button class="link" data-admtab="' + r[3] + '">Открыть</button></div>';
-      }).join("") + "</div>";
-  }
-  /**
-   * The «Обзор» tab. Layout is deliberately the one it has always had — KPI
-   * row, latest orders, what is running out — with «Требует внимания» added
-   * between the first two; a redesign is a separate job. What changed is that
-   * every figure is now either a real answer from the server or, in the demo
-   * panel with no backend behind it, openly the demo's own.
-   */
-  function admOverHTML(orders) {
-    if (SRV.admin === true) loadOverview();
-    var o = OVERVIEW.data;
-    var kpis, note, lowRows;
-
-    var catKpi = kpi("Товаров в каталоге", String(CATALOGUE.length),
-      CATS.length + " " + pl(CATS.length, "раздел", "раздела", "разделов"));
-
-    if (o) {
-      var low = o.lowStock;
-      kpis =
-        kpi("Заказы сегодня", String(o.orders.today), "вчера — " + o.orders.yesterday) +
-        kpi("Выручка за 7 дней", eur(o.revenue7d.total), "в среднем " + eur(o.revenue7d.perDay) + " в день") +
-        catKpi +
-        kpi("Заканчиваются", String(low.total), low.total ? "из них нет в наличии — " + low.out : "всё в наличии");
-      note = '<p class="muted" style="font-size:12.5px;margin:-6px 0 16px">Заказы и выручка — только оплаченные, по дате заказа.</p>';
-      // byId() can come back empty for an override on something the catalogue
-      // dropped since; the server filters those out too, this is the belt.
-      lowRows = low.items.slice(0, 6).map(function (it) {
-        var p = byId(it.id);
-        return p ? overLowRow(p, it.stock) : "";
-      }).join("");
-    } else if (SRV.admin === true && !OVERVIEW.err) {
-      /* Signed in, the answer is still on its way. The demo numbers must NOT
-         flash up here: the note above this block now says the figures are
-         real, and «3 заказа сегодня» appearing for half a second under that
-         sentence is exactly the lie this whole change is about. Empty cards
-         keep the layout and say nothing untrue. */
-      kpis =
-        kpi("Заказы сегодня", "…", "") + kpi("Выручка за 7 дней", "…", "") +
-        catKpi + kpi("Заканчиваются", "…", "");
-      note = '<p class="muted" style="margin:-6px 0 16px">Загружаем…</p>';
-      lowRows = "";
-    } else {
-      // No backend at all (the standalone prototype), or the call failed: the
-      // demo panel's own numbers, which the note says are a demo either way.
-      var week = orders.slice(0, 7).reduce(function (a, x) { return a + x.sum; }, 0);
-      kpis =
-        kpi("Заказы сегодня", "3", "вчера — 5") +
-        kpi("Выручка за 7 дней", eur(week), "в среднем " + eur(week / 7) + " в день") +
-        catKpi +
-        kpi("Заканчиваются", String(lowStock().length), "нужно дозаказать");
-      note = SRV.admin === true && OVERVIEW.err
-        ? '<div class="adm__note">Сводка сейчас не отвечает — цифры показаны демонстрационные.</div>'
-        : "";
-      lowRows = lowStock().slice(0, 6).map(function (p) { return overLowRow(p, p.stock); }).join("");
-    }
-
-    return '<div class="adm__kpis">' + kpis + "</div>" + note +
-      (o ? overAttentionHTML(o.attention) : "") +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Последние заказы</h2><button class="link" data-admtab="orders">Все заказы</button></div>' +
-      orderTable(orders.slice(0, 5)) +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заканчиваются на складе</h2></div>' +
-      '<div class="adm__list">' + lowRows + "</div>";
-  }
   function admStatsHTML() {
     if (SRV.admin !== true) return offlineStatsHTML();
     var range = statsRange();
@@ -7988,198 +8313,818 @@
     return body;
   }
 
+  /* ======================================================================
+     Админка, редизайн — этап 1: оболочка, «Обзор», «Заказы», карточка
+     заказа и «Товары».
+
+     The pixel spec is docs/design/admin-handoff-README.md; the copy below is
+     the prototype's, word for word. Everything here draws with `adm-` classes
+     from public/shop2/admin.css — the legacy `.adm__*` rules keep styling the
+     sections phases 2 and 3 still have to redesign, which is why the two
+     class families never meet.
+     ====================================================================== */
+
+  /** The list the panel works from: the shop's real orders once the owner is
+      signed in and the shop has taken some, the demo set otherwise — so the
+      panel is never an empty room on a machine with no backend. */
+  function admOrders() {
+    var live = SRV.admin === true && SRV.orders && SRV.orders.length ? SRV.orders : null;
+    return live || fakeOrders();
+  }
+  /** One shape for an order, whether it came from the server or from the demo
+      list, so the redesigned row and card can draw both without asking. */
+  function admOrderVM(o) {
+    var srv = o.srv || null;
+    var status = srv ? srv.status
+      : (o.state[0] === "sent" || o.state[0] === "done" ? "shipped" : "paid");
+    var mont = srv && srv.shipping && srv.shipping.montonio;
+    var pos = !!(srv && srv.channel === "pos");
+    return {
+      id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
+      items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
+      paid: status === "paid" && !pos,
+      unpaid: status === "new" || status === "failed",
+      shipped: status === "shipped",
+      labeled: !!(mont && mont.shipmentId),
+      tracking: (mont && mont.trackingCode) || ""
+    };
+  }
+  /** How many paid orders are waiting to go out. Real whenever there is a
+      server to ask: the demo list is an example of what the screen looks like
+      once orders arrive, never a number the owner could act on. */
+  function admWaitingCount() {
+    if (SRV.admin === true) {
+      if (OVERVIEW.data) return OVERVIEW.data.attention.ordersToShip;
+      return admLiveToShip().length;
+    }
+    return admOrders().map(admOrderVM).filter(function (v) { return v.paid; }).length;
+  }
+  /** The real orders waiting to go out — [] on a shop that has taken none. */
+  function admLiveToShip() {
+    return (SRV.admin === true ? (SRV.orders || []) : admOrders())
+      .map(admOrderVM).filter(function (v) { return v.paid; });
+  }
+  function admOrderBadge(v, big) {
+    var c = "adm-badge" + (big ? " adm-badge--big" : " ");
+    if (v.pos) return '<span class="' + c + ' adm-badge--tint">Салон</span>';
+    if (v.shipped) return '<span class="' + c + ' adm-badge--ok">Отправлен</span>';
+    if (v.status === "paid") return '<span class="' + c + ' adm-badge--ink">Оплачен</span>';
+    if (v.status === "cancelled") return '<span class="' + c + ' adm-badge--quiet">Отменён</span>';
+    if (v.status === "refunded") return '<span class="' + c + ' adm-badge--quiet">Возврат</span>';
+    return '<span class="' + c + '">Ждёт оплаты</span>';
+  }
+  function admItemsLabel(n) { return n + " " + pl(n, "товар", "товара", "товаров"); }
+  /** «2 заказа» — the same word the queue rows use, in one place. */
+  function admOrdersLabel(n) { return n + " " + pl(n, "заказ", "заказа", "заказов"); }
+  /** «Четверг, 4 сентября» — from the browser's own calendar in the panel's
+      language, so there is no Russian month table to translate. */
+  function admDateLine() {
+    var loc = { RU: "ru-RU", ET: "et-EE", EN: "en-GB" }[S.lang] || "ru-RU";
+    var d = "";
+    try { d = new Date().toLocaleDateString(loc, { weekday: "long", day: "numeric", month: "long" }); } catch (e) { d = ""; }
+    return d ? d.charAt(0).toUpperCase() + d.slice(1) : "";
+  }
+  /** The screen's own header: a muted kicker, the Oswald title, and whatever
+      one action belongs at the top right. */
+  function admHead(kicker, title, right, kickerMono) {
+    return '<div class="adm-head"><div>' +
+      (kicker ? '<div class="adm-head__kicker' + (kickerMono ? " adm-head__kicker--code" : "") + '">' + kicker + "</div>" : "") +
+      '<h1 class="adm-h1' + (kicker ? "" : " adm-h1--flat") + '">' + title + "</h1></div>" +
+      (right || "") + "</div>";
+  }
+
+  /* ---------- Обзор ------------------------------------------------------ */
+
+  function admTaskRow(n, label, detail, attrs, warn) {
+    return '<button class="adm-row adm-row--click" ' + attrs + '>' +
+      '<span class="adm-row__big' + (warn ? " adm-row__big--warn" : "") + '">' + n + "</span>" +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + label + "</span>" +
+      (detail ? '<span class="adm-row__sub">' + esc(detail) + "</span>" : "") + "</span>" +
+      '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+  }
+  /** «Последние заказы» and the queue rows both link into the same card. */
+  function admRecentRow(v) {
+    return '<button class="adm-row adm-row--click" data-admorder="' + esc(v.id) + '">' +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(v.who) + "</span>" +
+      '<span class="adm-row__sub"><span class="adm-mono">' + esc(v.number) + "</span> · " + esc(v.ship) + "</span></span>" +
+      admOrderBadge(v) +
+      '<span class="adm-row__amt">' + eur(v.sum) + "</span></button>";
+  }
+  function admOverviewHTML() {
+    if (SRV.admin === true) { loadOverview(); loadAnalytics("7d"); }
+    var o = OVERVIEW.data;
+    var vms = admOrders().map(admOrderVM);
+    var toShip = admLiveToShip();
+
+    var lowItems = o ? o.lowStock.items : lowStock();
+    var lowN = o ? o.lowStock.total : lowItems.length;
+    var shipN = admWaitingCount();
+    var revN = o ? o.attention.reviewsPending : 0;
+    var proN = o ? o.attention.proRequests : 0;
+    var taskN = shipN + lowN + revN + proN;
+
+    var names = function (list, get) { return list.slice(0, 4).map(get).filter(Boolean).join(" · "); };
+    var tasks = "";
+    if (shipN) tasks += admTaskRow(shipN,
+      pl(shipN, "заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"),
+      names(toShip, function (v) { return v.who; }),
+      'data-admtab="orders" data-admfilter="new"');
+    if (lowN) tasks += admTaskRow(lowN,
+      pl(lowN, "товар заканчивается", "товара заканчиваются", "товаров заканчиваются"),
+      names(lowItems, function (p) { return p.name; }),
+      'data-admtab="stock"', true);
+    if (revN) tasks += admTaskRow(revN,
+      pl(revN, "отзыв ждёт проверки", "отзыва ждут проверки", "отзывов ждут проверки"),
+      "", 'data-admtab="reviews"');
+    if (proN) tasks += admTaskRow(proN,
+      pl(proN, "заявка на партнёрство", "заявки на партнёрство", "заявок на партнёрство"),
+      "", 'data-admtab="people" data-admfilter="pending"');
+    if (!tasks) tasks = '<div class="adm-empty"><div class="adm-empty__t">Всё в порядке</div>' +
+      '<div class="adm-empty__s">Отправлять нечего, остатки в норме, отзывы проверены</div></div>';
+
+    /* «Продажи». Today's takings are summed from the orders the panel already
+       holds (the overview endpoint counts today's orders but does not price
+       them); the week and its seven bars come from the analytics range that
+       «Аналитика» itself reads, so the two screens can never disagree. */
+    var todaySum = 0, todayN = 0, todayPos = 0;
+    var day0 = new Date(); day0.setHours(0, 0, 0, 0);
+    vms.forEach(function (v) {
+      if (!v.srv) return;
+      var at = new Date(v.srv.createdAt);
+      if (isNaN(at.getTime()) || at < day0) return;
+      if (!(v.status === "paid" || v.status === "shipped")) return;
+      todaySum += Number(v.sum) || 0; todayN++; if (v.pos) todayPos++;
+    });
+    var week = o ? o.revenue7d : null;
+    var series = (ANALYTICS["7d"] && ANALYTICS["7d"].data && ANALYTICS["7d"].data.revenueByDay) || [];
+    var top = series.reduce(function (a, r) { return Math.max(a, r.revenue); }, 0) || 1;
+    var bars = series.slice(-7).map(function (r, i, all) {
+      return '<i class="' + (i === all.length - 1 ? "is-today" : "") + '" style="height:' +
+        Math.max(2, Math.round((r.revenue / top) * 100)) + '%"></i>';
+    }).join("");
+
+    return '<div class="adm-screen">' +
+      admHead(admDateLine(), "Обзор", shipN
+        ? '<button class="adm-btn adm-btn--head" data-admtab="orders" data-admfilter="new">Отправить ' + shipN + "</button>"
+        : "") +
+      (OVERVIEW.err && SRV.admin === true
+        ? '<div class="adm-error"><span>Сводка не отвечает — цифры могут быть неполными.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="overview">Повторить</button></div>'
+        : "") +
+      '<div class="adm-cols"><div class="adm-stack">' +
+        '<div><div class="adm-sec"><div class="adm-sec__t">Сделать сегодня</div>' +
+          '<div class="adm-sec__x">' + taskN + "</div></div>" +
+          '<div class="adm-list">' + tasks + "</div></div>" +
+        '<div><div class="adm-sec"><div class="adm-sec__t">Последние заказы</div>' +
+          '<button class="adm-link" data-admtab="orders" data-admfilter="all">Все заказы</button></div>' +
+          '<div class="adm-list">' + vms.slice(0, 4).map(admRecentRow).join("") + "</div></div>" +
+      "</div>" +
+      '<div><div class="adm-sec__t">Продажи</div><div class="adm-sales">' +
+        '<div class="adm-sales__cell"><div class="adm-sales__l">Сегодня</div>' +
+          '<div class="adm-sales__v">' + eur(todaySum) + "</div>" +
+          '<div class="adm-sales__l"><span>' + admOrdersLabel(todayN) + "</span> · <span>" +
+            todayPos + " в салоне</span></div></div>" +
+        '<div class="adm-sales__cell"><div class="adm-sales__l">7 дней</div>' +
+          '<div class="adm-sales__v">' + eur(week ? week.total : 0) + "</div>" +
+          '<div class="adm-sales__l"><span>' + admOrdersLabel(week ? week.orders : 0) +
+            "</span> · <span>" + eur(week ? week.perDay : 0) + " в день</span></div>" +
+          (bars ? '<div class="adm-bars">' + bars + "</div>" : "") + "</div>" +
+      "</div></div></div></div>";
+  }
+
+  /* ---------- Заказы ------------------------------------------------------ */
+
+  var ADM_ORDER_FILTERS = [
+    ["new", "Новые"], ["shipped", "Отправлены"], ["unpaid", "Ждут оплаты"],
+    ["salon", "Салон"], ["all", "Все"]
+  ];
+  function admOrderMatches(v, f) {
+    if (f === "all") return true;
+    if (f === "new") return v.paid;
+    if (f === "shipped") return v.shipped;
+    if (f === "unpaid") return v.unpaid;
+    if (f === "salon") return v.pos;
+    return true;
+  }
+  function admOrdersHTML() {
+    if (SRV.admin === true) loadSrvOrders(false);
+    var f = S.admOrderFilter || "new";
+    var waiting = admWaitingCount();
+    return '<div class="adm-screen adm-screen--tight">' +
+      admHead("", "Заказы", "") +
+      '<div class="adm-acts">' +
+        '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
+          return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
+            x[1] + (x[0] === "new" && waiting ? " " + waiting : "") + "</button>";
+        }).join("") + "</div>" +
+        '<input class="adm-input adm-input--row" data-admorderq value="' + esc(S.admOrderQ || "") +
+          '" placeholder="Номер, имя, телефон" aria-label="Поиск по заказам" style="flex:1;min-width:180px">' +
+      "</div>" +
+      (SRV.admin === true && SRV.ordersErr
+        ? '<div class="adm-error"><span>Сервер заказов не отвечает — показан демонстрационный список.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="orders">Повторить</button></div>'
+        : "") +
+      '<div class="adm-list adm-list--flat" id="orderlist">' + admOrderRows() + "</div>" +
+      "</div>";
+  }
+  /** The rows alone, so the search box can patch them in place. */
+  function admOrderRows() {
+    var f = S.admOrderFilter || "new";
+    var q = (S.admOrderQ || "").toLowerCase().trim();
+    var list = admOrders().map(admOrderVM)
+      .filter(function (v) { return admOrderMatches(v, f); })
+      .filter(function (v) {
+        if (!q) return true;
+        var phone = (v.srv && v.srv.phone) || "";
+        return (v.number + " " + v.who + " " + phone).toLowerCase().indexOf(q) >= 0;
+      });
+    return list.map(admOrderRowHTML).join("") +
+      (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
+  }
+  function admOrderRowHTML(v) {
+    var acts = "";
+    if (v.paid) acts =
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admlabel="' + esc(v.id) + '"' +
+        (SRV.shipBusy ? " disabled" : "") + ">" + (v.labeled ? "Наклейка ✓" : "Наклейка") + "</button>" +
+      '<button class="adm-btn adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    else if (v.unpaid) acts =
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
+    return '<div class="adm-row adm-row--stack">' +
+      '<button class="adm-row--click" data-admorder="' + esc(v.id) + '" ' +
+        'style="display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:0;text-align:left;width:100%">' +
+        '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
+          '<span style="font-weight:600">' + esc(v.who) + "</span>" +
+          '<span class="adm-row__amt">' + eur(v.sum) + "</span></span>" +
+        '<span class="adm-row__sub" style="width:100%"><span class="adm-mono">' + esc(v.number) + "</span> · " +
+          esc(v.date) + " · " + admItemsLabel(v.items) + "<br>" + esc(v.ship) + "</span>" +
+      "</button>" +
+      '<div class="adm-acts">' + admOrderBadge(v) + '<div style="flex:1"></div>' + acts + "</div>" +
+    "</div>";
+  }
+
+  /* ---------- Заказ (карточка) -------------------------------------------- */
+
+  /** The order the card is on, as a view model — or null. */
+  function admCurOrder() {
+    var list = admOrders();
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].id) === String(S.adminOrder)) return admOrderVM(list[i]);
+    }
+    return null;
+  }
+  /** One order by id, as a view model — the rows and the card both act by id. */
+  function admOrderById(id) {
+    var list = admOrders();
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].id) === String(id)) return admOrderVM(list[i]);
+    }
+    return null;
+  }
+  /** What the confirm card says before the shop or the money moves. */
+  function admShipConfirmText(v) {
+    return v.number + " · " + v.who + "\n" + v.ship +
+      "\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
+  }
+  function admCancelConfirmText(v) {
+    return v.number + " · " + v.who + "\nДеньги вернутся клиенту, письмо уйдёт автоматически.";
+  }
+  /** The message the assistant would write for this order, ready to send.
+      It is a letter TO the customer, so it stays in the customer's language,
+      not the panel's — which is why the i18n check exempts this function. */
+  function admOrderDraft(v) {
+    return v.unpaid
+      ? "Здравствуйте, " + v.who + "! Ваш заказ " + v.number + " ждёт оплаты — ссылка действует ещё сутки. " +
+        "Если что-то не сработало, напишите, помогу."
+      : "Здравствуйте, " + v.who + "! Заказ " + v.number + " собран и уходит сегодня. Трек-номер придёт отдельным письмом.";
+  }
+  function admOrderCardHTML() {
+    var v = admCurOrder();
+    if (!v) return '<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>' +
+      '<div class="adm-empty">Заказ не найден</div></div>';
+    var o = v.srv;
+    var showSteps = !v.pos && v.status !== "cancelled";
+    var stepIdx = v.shipped ? 4 : v.labeled ? 2 : v.status === "paid" ? 1 : 0;
+    var steps = ["Оплачен", "Наклейка", "Отправлен", "Письмо клиенту"].map(function (l, i) {
+      var cls = i < stepIdx ? " adm-step--done" : i === stepIdx ? " adm-step--now" : "";
+      return '<div class="adm-step' + cls + '"><div class="adm-step__n">' + (i + 1) + "</div>" +
+        '<div class="adm-step__l">' + l + "</div></div>";
+    }).join("");
+
+    var acts = "";
+    if (showSteps && (v.paid || v.shipped)) acts +=
+      '<button class="adm-btn ' + (v.labeled ? "adm-btn--ghost" : "") + '" data-admship' +
+        (SRV.shipBusy ? " disabled" : "") + ">" +
+        (SRV.shipBusy ? "Печатаем…" : v.labeled ? "Наклейка ✓" : "Напечатать наклейку") + "</button>";
+    if (showSteps && v.paid) acts +=
+      '<button class="adm-btn ' + (v.labeled ? "" : "adm-btn--ghost") + '" data-admshipnow="' + esc(v.id) +
+        '">Отметить отправленным</button>';
+    acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
+    if (showSteps && (v.paid || v.unpaid)) acts +=
+      '<button class="adm-del" data-admordercancel="' + esc(v.id) + '">Отменить заказ</button>';
+
+    /* Every status the panel could always set stays settable — the actions row
+       above is the everyday path, this line is the rest of them. */
+    var manual = o ? ["paid", "refunded"].filter(function (k) { return o.status !== k; }).map(function (k) {
+      return '<button class="adm-link adm-link--muted" data-admstatus="' + k + '">' + SRV_STATES[k][1] + "</button>";
+    }).join(" · ") : "";
+
+    var lines = o ? (o.items || []).map(function (l) {
+      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm"></span>' +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + (l.title || l.id)) + "</span>" +
+        '<span class="adm-row__sub">' + (l.variant ? esc(l.variant) + " · " : "") + admItemsLabel(l.qty) + "</span></span>" +
+        '<span class="adm-row__amt">' + eur(l.sum) + "</span></div>";
+    }).join("") : '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
+      admItemsLabel(v.items) + '</span></span><span class="adm-row__amt">' + eur(v.sum) + "</span></div>";
+
+    return '<div class="adm-screen adm-screen--card">' +
+      '<button class="adm-link" data-admorder="">← Заказы</button>' +
+      admHead(esc(v.number) + " · " + esc(v.date), esc(v.who), admOrderBadge(v, true), true) +
+      (showSteps ? '<div class="adm-steps">' + steps + "</div>" : "") +
+      (acts ? '<div class="adm-acts">' + acts + "</div>" : "") +
+      (manual ? '<div class="adm-hint"><span>Изменить статус вручную:</span> ' + manual + "</div>" : "") +
+      (S.orderReplyOpen ? admOrderMsgHTML(v) : "") +
+      '<div class="adm-cols"><div>' +
+        '<div class="adm-sec__t">Состав</div><div class="adm-list">' + lines +
+          /* features: no delivery line at all on an electronic order — there
+             is no parcel, so «бесплатно» would be an answer to a question
+             nobody asked. src/lib/orders.ts prices it 0 and the accountant
+             export carries the method in its own column. */
+          (o && !srvDigital(o) ? '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__sub" style="margin:0">' +
+            esc(v.ship) + "</span></span>" +
+            '<span class="adm-row__sub" style="margin:0">' + (o.shippingPrice ? eur(o.shippingPrice) : "бесплатно") + "</span></div>" : "") +
+          '<div class="adm-total"><span>Итого</span><span class="adm-total__v">' + eur(v.sum) + "</span></div>" +
+        "</div></div>" +
+      '<div class="adm-stack adm-stack--tight">' +
+        '<div><div class="adm-sec__t">Покупатель</div><div class="adm-kv">' + esc(v.who) + "<br>" +
+          "<span>" + esc((o && o.phone) || "") + (o && o.phone && o.email ? "<br>" : "") + esc((o && o.email) || "") + "</span></div></div>" +
+        '<div><div class="adm-sec__t">Доставка</div><div class="adm-kv">' + esc(v.ship) + "<br>" +
+          // features: an electronic order has no address — where the card
+          // went is an e-mail, and that is what belongs on this line
+          "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span>" +
+          (v.tracking ? '<br><span class="adm-mono">' + esc(v.tracking) + "</span>" : "") + "</div>" +
+          admShipLinksHTML(v) + admGiftCardsHTML(o) + "</div>" +
+        (o ? '<div><div class="adm-sec__t">Заметка</div>' +
+          '<textarea class="adm-input" rows="2" data-admnote placeholder="Только для вас" style="margin-top:10px">' +
+          esc(o.notes || "") + "</textarea>" +
+          '<div class="adm-acts" style="margin-top:8px">' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admnotesave>Сохранить заметку</button></div></div>' : "") +
+      "</div></div></div>";
+  }
+  /** features: an all-gift-card order — `shipping.method === "digital"`, set
+      by createOrder() and never by anything the browser sent. */
+  function srvDigital(o) {
+    return !!(o && o.shipping && String(o.shipping.method || "").toLowerCase() === "digital");
+  }
+  /** Where an electronic order's cards were sent: the recipient address typed
+      at checkout, or the buyer's own when «отправить мне на почту» was on. */
+  function srvGiftTo(o) {
+    var seen = [];
+    ((o && o.items) || []).forEach(function (l) {
+      var e = l && l.meta && typeof l.meta.email === "string" ? l.meta.email.trim() : "";
+      if (e && seen.indexOf(e) < 0) seen.push(e);
+    });
+    if (!seen.length && o && o.email) seen.push(o.email);
+    return seen.join(", ");
+  }
+  /** The cards this order bought, each with its printable PDF. `giftCards`
+      comes from GET /api/admin/orders (src/lib/giftcard-links.ts) and exists
+      only once the order is paid and the codes are minted. */
+  function admGiftCardsHTML(o) {
+    var cards = (o && o.giftCards) || [];
+    if (!cards.length) return "";
+    /* Each half in its own text node: the code is data, «Карта PDF ↗» is a
+       phrase the dictionary translates (translateTree rewrites whole nodes). */
+    return '<div class="adm-acts" style="margin-top:10px">' + cards.map(function (c) {
+      return '<a class="adm-link" href="' + esc(c.pdfUrl) + '" target="_blank" rel="noopener" data-giftpdf="' +
+        esc(c.code) + '"><span class="adm-mono">' + esc(c.code) + '</span> <span>Карта PDF ↗</span></a>';
+    }).join("") +
+      '<span class="adm-hint"><span>Действует до</span> <span>' +
+      esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
+  }
+  /** Once Montonio has the parcel: the printable label and the carrier's own
+      tracking page. Both come straight off the order the server sent —
+      docs/shipping.md § «Montonio Shipping». */
+  function admShipLinksHTML(v) {
+    var sh = v.srv && v.srv.shipping && v.srv.shipping.montonio;
+    if (!sh || !sh.shipmentId) return "";
+    return '<div class="adm-acts" style="margin-top:10px">' +
+      '<a class="adm-link" href="/api/admin/shipments/' + encodeURIComponent(v.id) +
+        '/label/" target="_blank" rel="noopener">Этикетка PDF ↗</a>' +
+      // http(s) only: an href is a place a "javascript:" string would run
+      (/^https?:\/\//i.test(String(sh.trackingUrl || ""))
+        ? '<a class="adm-link adm-link--muted" href="' + esc(sh.trackingUrl) +
+          '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
+      (sh.dropOffPin ? '<span class="adm-hint">Код сдачи посылки: ' + esc(sh.dropOffPin) + "</span>" : "") +
+      "</div>";
+  }
+  /** «Написать клиенту» — the inline card with the assistant's draft in it. */
+  function admOrderMsgHTML(v) {
+    var o = v.srv;
+    return '<div class="adm-card">' +
+      '<div class="adm-card__head"><div class="adm-sec__t">Сообщение клиенту</div>' +
+        '<div class="adm-hint">' + esc((o && o.email) || "") + "</div></div>" +
+      (o ? '<label class="adm-field">Сообщение клиента — если он написал первым' +
+        '<textarea class="adm-input" rows="2" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель"></textarea></label>' : "") +
+      '<textarea class="adm-input" rows="4" data-orderreplydraft>' +
+        esc(S.orderReplyDraft || admOrderDraft(v)) + "</textarea>" +
+      '<div class="adm-acts">' +
+        '<button class="adm-btn adm-btn--head" data-admordersend>Отправить</button>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--head" data-admorderreply>Отмена</button>' +
+        (o ? '<button class="adm-link adm-link--muted" data-admordercompose>Черновик помощника</button>' : "") +
+        '<div style="flex:1"></div>' +
+        '<span class="adm-hint">Черновик подготовил помощник</span>' +
+      "</div></div>";
+  }
+
+  /* ---------- Товары: Каталог · Склад · Наборы ---------------------------- */
+
+  /** Which of the three shelves is on screen. «Склад» is its own old tab key
+      (deep links and the e2e suite address it as `data-admtab="stock"`), the
+      other two are the goods tab the sets editor already used. */
+  function admProductTab() {
+    if (S.adminTab === "stock") return "stock";
+    return S.goodsTab === "bundles" ? "sets" : "catalog";
+  }
+  function admLowCount() {
+    var rows = S.stockLevels;
+    if (rows) {
+      var n = 0;
+      for (var i = 0; i < rows.length; i++) if (rows[i].tracked && (rows[i].state === "low" || rows[i].state === "out")) n++;
+      return n;
+    }
+    return lowStock().length;
+  }
+  function admProductsHTML() {
+    var tab = admProductTab();
+    var warn = admLowCount();
+    var tabs =
+      '<button class="adm-tab" data-admtab="goods" aria-current="' + (tab === "catalog") + '" title="Каталог">Каталог</button>' +
+      '<button class="adm-tab" data-admtab="stock" aria-current="' + (tab === "stock") + '" title="Склад">Склад ' +
+        '<span class="adm-tab__warn">' + (warn || "") + "</span></button>" +
+      '<button class="adm-tab" data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '" title="Наборы">Наборы</button>';
+    var add = tab === "sets"
+      ? '<button class="adm-btn adm-btn--head" data-bundlenew>+ Набор</button>'
+      : tab === "stock"
+        ? '<button class="adm-btn adm-btn--head" data-scanopen>Приёмка' + admIcon("scan", false, 20) + "</button>"
+        /* «+ Товар» waits for the goods editor's own redesign in phase 2: the
+           editor can only open a product the catalogue already has, so a
+           button that promised a blank one would lie. */
+        : '<button class="adm-btn adm-btn--head" title="скоро" disabled>+ Товар</button>';
+    return '<div class="adm-screen adm-screen--tight">' +
+      admHead("", 'Товары <small>' + CATALOGUE.length + "</small>", add) +
+      '<div class="adm-tabs" role="group" aria-label="Что показываем">' + tabs + "</div>" +
+      (tab === "stock" ? admStockHTML() : tab === "sets" ? admSetsHTML() : admCatalogHTML()) +
+      "</div>";
+  }
+  function admCatalogHTML() {
+    return '<input class="adm-input" data-goodsq value="' + esc(S.goodsQ || "") +
+        '" placeholder="Название, бренд, штрихкод" aria-label="Поиск по товарам">' +
+      '<div class="adm-list adm-list--flat" id="goodslist">' + admCatalogRows() + "</div>";
+  }
+  /** Its own function so typing in the search box can patch the list in place
+      instead of re-rendering the screen out from under the caret. */
+  function admCatalogRows() {
+    var q = (S.goodsQ || "").toLowerCase().trim();
+    var list = q
+      ? CATALOGUE.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
+      : CATALOGUE;
+    var shown = list.slice(0, 40);
+    return shown.map(admCatalogRow).join("") +
+      (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
+      '<p class="adm-hint" style="margin:10px 0 0">' +
+        (list.length > 40 ? "Показаны первые 40 из " + list.length : admItemsLabel(list.length)) + "</p>";
+  }
+  function admCatalogRow(p) {
+    var prices = p.prices && p.prices.length ? p.prices : [p.price];
+    var lo = Math.min.apply(null, prices), hi = Math.max.apply(null, prices);
+    // the low end keeps only its number, so «9–24 €» reads as one price range
+    var price = lo === hi ? eur(hi) : eur(lo).replace(/\s?€$/, "").replace(/^€/, "") + "–" + eur(hi);
+    var badge = p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
+      : p.stock === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
+    return '<button class="adm-row adm-row--tall adm-row--click" data-admgoods="' + esc(p.id) + '">' +
+      '<span class="adm-thumb">' + media(p, 0, "") + "</span>" +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+        '<span class="adm-row__sub">' + esc((p.sizes || []).join(" · ")) + "</span></span>" +
+      '<span class="adm-row__end"><span class="adm-row__amt">' + price + "</span>" +
+        '<span class="adm-badge adm-badge--sm ' + badge[1] + '">' + badge[0] + "</span></span></button>";
+  }
+
+  /* ---------- Товары → Наборы --------------------------------------------- */
+
+  function admSetsHTML() {
+    loadAdminBundles(false);
+    var list = S.admBundles || [];
+    return (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять наборы.</div>') +
+      (DEMO.bundles === false
+        ? '<div class="adm-note"><span>Наборы выключены — в магазине их не видно нигде.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admbundles>Включить</button></div>'
+        : "") +
+      (S.admBundleErr ? '<div class="adm-error"><span>' + esc(S.admBundleErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="bundles">Повторить</button></div>' : "") +
+      (S.bundleDel ? bundleDelConfirmHTML() : "") +
+      (S.bundleForm ? bundleFormHTML() : "") +
+      (list.length
+        ? '<div class="adm-list adm-list--flat">' + list.map(function (b, i) {
+            return '<div class="adm-row"><span class="adm-thumb">' + bundleStack(b, "bstack--line") + "</span>" +
+              '<span class="adm-row__body"><span class="adm-row__nm">' + esc((b.title && b.title.RU) || b.id) + "</span>" +
+              '<span class="adm-row__sub adm-row__sub--one">' + esc(b.items.map(function (it) {
+                var p = byIdOrNull(it.productId);
+                return p ? p.name : it.productId;
+              }).join(" + ")) + "</span></span>" +
+              '<span class="adm-badge adm-badge--sm ' + (b.active ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
+                (b.active ? "Показан" : "Скрыт") + "</span>" +
+              '<span class="adm-row__amt">' + eur(b.price) + "</span>" +
+              '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundleedit="' + esc(b.id) + '">Изменить</button>' +
+              '<button class="adm-link adm-link--muted" data-bundletoggle="' + esc(b.id) + '">' +
+                (b.active ? "Скрыть" : "Показать") + "</button>" +
+              '<span class="adm-acts"><button class="adm-link adm-link--muted" data-bundlemove="' + esc(b.id) + ':-1"' +
+                (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
+                '<button class="adm-link adm-link--muted" data-bundlemove="' + esc(b.id) + ':1"' +
+                (i === list.length - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button></span>' +
+            "</div>";
+          }).join("") + "</div>"
+        : (S.admBundles ? '<div class="adm-empty">Наборов пока нет</div>' : '<div class="adm-skel"><i></i><i></i><i></i></div>'));
+  }
+
+  /* ---------- the shell: sidebar, bottom bar, «Ещё», assistant ------------- */
+
+  function admNavBtn(t, badge) {
+    var on = admSection() === t[0];
+    return '<button class="adm-nav" data-admtab="' + t[0] + '" aria-current="' + on + '" title="' + t[1] + '">' +
+      admIcon(t[2], on) + '<span class="adm-nav__lbl">' + t[1] + "</span>" +
+      (badge ? '<span class="adm-nav__badge">' + badge + "</span>" : "") + "</button>";
+  }
+  function admLangsHTML() {
+    return '<div class="adm-langs" role="group" aria-label="Язык">' + LANGS.map(function (l) {
+      return '<button data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
+    }).join("") + "</div>";
+  }
+  function admSideHTML(waiting) {
+    var fold = S.admNav ? "Свернуть меню" : "Развернуть меню";
+    return '<aside class="adm-side">' +
+      '<div class="adm-side__top">' +
+        '<div class="adm-side__mark">REMPIRE <span>Админка</span></div>' +
+        '<button class="adm-side__fold" data-admnav aria-expanded="' + S.admNav + '" title="' + fold +
+          '" aria-label="' + fold + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" ' +
+          'stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
+      "</div>" +
+      '<nav class="adm-side__nav" aria-label="Разделы админки">' +
+        ADM_SECTIONS.map(function (t) { return admNavBtn(t, t[0] === "orders" ? waiting : 0); }).join("") +
+        '<div class="adm-side__rule"></div>' +
+        ADM_MORE.map(function (t) { return admNavBtn(t, 0); }).join("") +
+      "</nav>" +
+      '<div class="adm-side__foot">' + admLangsHTML() +
+        '<button class="adm-link" data-go="home">Открыть магазин ↗</button>' +
+        (SRV.admin === true ? '<button class="adm-link adm-link--muted" data-admlogout>Выйти</button>' : "") +
+      "</div></aside>";
+  }
+  function admBarHTML(waiting) {
+    var moreOn = !!S.admMore;
+    for (var i = 0; i < ADM_MORE.length; i++) if (ADM_MORE[i][0] === admSection()) moreOn = true;
+    return '<nav class="adm-bar" aria-label="Разделы админки">' +
+      ADM_SECTIONS.map(function (t) {
+        var on = admSection() === t[0];
+        return '<button class="adm-bar__i" data-admtab="' + t[0] + '" aria-current="' + on + '" title="' + t[1] + '">' +
+          admIcon(t[2], on, 24) + '<span>' + t[1] + "</span>" +
+          (t[0] === "orders" && waiting ? '<span class="adm-bar__b">' + waiting + "</span>" : "") + "</button>";
+      }).join("") +
+      '<button class="adm-bar__i" data-admmore aria-current="' + moreOn + '" title="Ещё">' +
+        admIcon("more", moreOn, 24) + "<span>Ещё</span></button></nav>";
+  }
+  function admMoreSheetHTML() {
+    return '<button class="adm-scrim adm-scrim--phone" data-admmoreclose aria-label="Закрыть"></button>' +
+      '<div class="adm-sheet adm-sheet--phone" role="dialog" aria-label="Ещё">' +
+        '<div class="adm-sheet__grab"><i></i></div>' +
+        '<div class="adm-sheet__body">' + ADM_MORE.map(function (t) {
+          // aria-current, like every other nav item: the sheet has to say
+          // which section you are already in, and it is what the suite reads
+          return '<button class="adm-sheet__row" data-admtab="' + t[0] + '" aria-current="' +
+            (admSection() === t[0]) + '" title="' + t[1] + '">' +
+            '<span><span class="adm-row__nm">' + t[1] + "</span>" +
+            (t[3] ? '<span class="adm-row__sub">' + t[3] + "</span>" : "") + "</span>" +
+            '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+        }).join("") + "</div>" +
+        '<div class="adm-sheet__foot">' + admLangsHTML() +
+          '<button class="adm-link" data-go="home">Магазин ↗</button>' +
+          (SRV.admin === true ? '<button class="adm-link adm-link--muted" data-admlogout>Выйти</button>' : "") +
+        "</div></div>";
+  }
+
+  /* The assistant: one FAB, then a 380-px pane on a desktop and a 75 %-tall
+     sheet on a phone. Both drive the panel's existing assistant — the same
+     question box, the same answers, the same proposal card that has to go
+     through «Применить» before anything changes. */
+  var ADM_ASK = [
+    "Что заканчивается и что дозаказать?",
+    "Какие заказы ждут отправки?",
+    "Покажи аналитику за неделю"
+  ];
+  function admAsstBodyHTML() {
+    return '<div class="adm-asst__body">' +
+      (S.adminAsk
+        ? '<div class="adm-msg adm-msg--me">' + esc(S.adminAsk) + "</div>" +
+          '<div class="adm-msg" data-aians>' + (admAI ? "…" : adminAnswer(S.adminAsk)) + "</div>"
+        : '<div class="adm-msg">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — ' +
+          'а изменения предложу на подтверждение.</div>') +
+      '<div class="adm-asst__chips">' + ADM_ASK.map(function (q) {
+        return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
+      }).join("") + "</div></div>" +
+      '<div class="adm-asst__foot">' +
+        '<input class="adm-input" data-admq value="' + esc(S.adminQ || "") +
+          '" placeholder="Спросите обычными словами" aria-label="Вопрос помощнику">' +
+        '<button class="adm-btn" data-admsend aria-label="Спросить">→</button></div>';
+  }
+  /* One assistant, two skins: a 380-px column beside the work on a desktop,
+     a 75 %-tall sheet over it on a phone (admin.css does the switching). One
+     markup rather than two, because `[data-aians]` — where askAdminAI() writes
+     the answer — has to be the only one of its kind on the page. */
+  function admAsstHTML() {
+    return '<button class="adm-scrim adm-scrim--phone" data-admai aria-label="Закрыть помощника"></button>' +
+      '<aside class="adm-asst" role="dialog" aria-label="Помощник">' +
+        '<div class="adm-asst__head"><span>Помощник</span>' +
+          '<button class="adm-asst__fold" data-admai aria-expanded="true" title="Свернуть помощника" ' +
+            'aria-label="Свернуть помощника"><svg class="adm-asst__chev" width="16" height="16" ' +
+            'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+            '<path d="M9 6l6 6-6 6"/></svg><span class="adm-asst__x" aria-hidden="true">×</span></button></div>' +
+        admAsstBodyHTML() + "</aside>";
+  }
+  function admFabHTML() {
+    return '<button class="adm-fab" data-admai aria-expanded="false" title="Помощник" aria-label="Помощник">' +
+      admIcon("assistant", true, 20) + '<span class="adm-fab__lbl">Помощник</span></button>';
+  }
+  /** The confirm card as an overlay — a card over the page on a desktop, a
+      sheet at the bottom on a phone. Actions that touch the shop or the money
+      go through this before anything happens. */
+  function admConfirmHTML(a) {
+    return '<div class="adm-confirm" role="dialog" aria-label="Подтвердите изменение">' +
+      '<div class="adm-confirm__card">' +
+        '<div class="adm-confirm__t">' + esc(a.title || "Подтвердите изменение") + "</div>" +
+        '<div class="adm-confirm__d">' + esc(a.detail || actionText(a)) + "</div>" +
+        '<div class="adm-confirm__acts">' +
+          '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
+            esc(a.ok || "Применить") + "</button>" +
+          '<button class="adm-btn adm-btn--ghost" data-admcancel>Отмена</button>' +
+        "</div></div></div>";
+  }
+
+  /* The panel, in one shell: sections down the left (a 232-px sidebar that
+     folds to icons on a desktop, a 64-px bottom bar plus an «Ещё» sheet on a
+     phone), the work in the middle, and the assistant behind a floating
+     button instead of a permanent third column.
+
+     Sections phase 1 has not redesigned yet keep their own screen function and
+     their own legacy markup — they sit inside `.adm-legacy` and are reachable
+     through the new navigation exactly as before, which is what keeps
+     `data-admtab="<old key>"` working as a deep link everywhere. */
   function screenAdmin() {
     probeAdmAI();
     probeAdmin();
     if (SRV.on && SRV.admin === null) return admWaitScreen();
     if (SRV.on && SRV.admin === false) return admLoginScreen();
-    // real orders when the owner is signed in and the shop has some; the demo
-    // set otherwise, so the panel is never an empty room
-    var live = SRV.admin === true && SRV.orders && SRV.orders.length ? SRV.orders : null;
-    var orders = live || fakeOrders();
     var tab = S.adminTab;
     // account-flows: the queue sizes under the three switches, once
     if (tab === "mail" && SRV.admin === true) loadFlowCounts();
-    // the admin header shares the full-width panes' column, not the 1020px
-    // checkout column — otherwise the logo aligns with nothing below it
-    return '<div class="cohdr cohdr--adm"><div class="cohdr__row">' +
-        '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
-        '<span class="cohdr__t">Админка</span>' +
-        '<span class="cohdr__langs" role="group" aria-label="Язык"> ' + LANGS.map(function (l) {
-          return '<button class="cohdr__lang" data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
-        }).join("") + "</span>" +
-        '<button class="link" data-go="home">← В магазин</button></div></div>' +
-      '<div class="adm' + (S.admNav ? "" : " adm--navmin") + (S.admAi ? "" : " adm--aimin") + '">' +
+    var waiting = admWaitingCount();
 
-      '<aside class="adm__side">' +
-        '<button class="adm__toggle" data-admnav aria-expanded="' + S.admNav + '" ' +
-          'aria-label="' + (S.admNav ? "Свернуть меню" : "Развернуть меню") + '" title="' +
-          (S.admNav ? "Свернуть меню" : "Развернуть меню") + '">' + (S.admNav ? "«" : "»") + "</button>" +
-        '<nav class="adm__nav" aria-label="Разделы админки">' +
-        ADM_NAV.map(function (t) {
-          return '<button data-admtab="' + t[0] + '" aria-current="' + (tab === t[0]) + '" title="' + t[1] + '">' +
-            icon(t[2]) + '<span class="adm__navlbl">' + t[1] + "</span></button>";
-        }).join("") + "</nav>" +
-        '<div class="adm__who"><span class="adm__whoname">Renat</span>' +
-          '<span class="adm__sub">Rempire Store OÜ · владелец</span>' +
-          (SRV.admin === true ? '<button class="link" data-admlogout>Выйти</button>' : "") +
-        "</div></aside>" +
+    var body;
+    if (tab === "over") body = admOverviewHTML();
+    else if (tab === "orders") body = S.adminOrder ? admOrderCardHTML() : admOrdersHTML();
+    // «Товары» owns the goods editor too, but the editor keeps the whole pane
+    // to itself: a tab strip above an unsaved edit is a way to lose it.
+    else if (tab === "goods" || tab === "stock") {
+      body = S.adminEdit
+        ? '<div class="adm-legacy">' + goodsEditor(byId(S.adminEdit)) + "</div>"
+        : admProductsHTML();
+    }
+    else body = '<div class="adm-legacy">' + admLegacyHTML(tab) + "</div>";
 
-      '<main class="adm__main">' +
-      /* analytics agent: the panel no longer calls the customers or the
-         numbers a demo — «Обзор» reads GET /api/admin/overview/, «Клиенты»
-         and «Аналитика» their own real endpoints. The only thing still
-         invented once the owner is signed in is the sample order list shown
-         while the shop has taken no orders at all, and that is what the
-         middle line says. */
-      '<div class="adm__note">' + (SRV.admin === true
-        ? (live
-          ? "Все цифры — настоящие, из вашего магазина."
-          : "Цифры настоящие. Заказов пока нет — в списке показан пример, как это будет выглядеть.")
-        : "Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.") + "</div>" +
-
-      (tab === "over" ? admOverHTML(orders) : "") +
-
-      (tab === "orders" ?
-        (S.adminOrder
-          ? admOrderDetail(orders)
-          : '<p class="muted" style="margin:16px 0">Нажмите на заказ — адрес, состав, оплата, наклейка на посылку и письмо клиенту, всё на одной странице.</p>' +
-            (SRV.admin === true && SRV.ordersErr ? '<div class="adm__note">Сервер заказов не отвечает — показан демонстрационный список.</div>' : "") +
-            orderTable(orders)) : "") +
-
-      /* «Товары» holds two shelves now: the catalogue itself and the sets
-         assembled from it. The goods editor keeps the whole pane to itself
-         when it is open — the tab strip would be a way to lose an unsaved
-         edit. */
-      (tab === "goods" ?
-        (S.adminEdit
-          ? goodsEditor(byId(S.adminEdit))
-          : goodsTabsHTML() +
-            (S.goodsTab === "bundles"
-              ? admBundlesHTML()
-              : '<p class="muted" style="margin:16px 0">Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.</p>' +
-                '<input class="input input--box" data-goodsq value="' + esc(S.goodsQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск по товарам" style="margin-bottom:12px;max-width:420px">' +
-                '<div class="adm__list" id="goodslist">' + goodsRows() + "</div>")) : "") +
-
-      // inventory: numeric stock, EAN scanner, moves ledger
-      (tab === "stock" ? admStockHTML() : "") +
-      // inventory: the in-salon quick sale
-      (tab === "pos" ? admPosHTML() : "") +
-
-      // wholesale/loyalty: real customers, search, tier filter, pro-request
-      // queue and CSV export once signed in; the old demo table otherwise
-      (tab === "people" ? admCustomersHTML() : "") +
-
-      // features: review moderation
-      (tab === "reviews" ? admReviewsHTML() : "") +
-
-      // blog
-      (tab === "blog" ? admBlogHTML() : "") +
-
-      // checkout-gaps: promo codes
-      (tab === "promos" ? admPromosHTML() : "") +
-
-      // analytics agent: real sales + traffic data, see admStatsHTML() above
-      (tab === "stats" ? admStatsHTML() : "") +
-
-      (tab === "mail" ?
-        '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.</p>' +
-        '<div class="adm__list">' +
-        [["Заказ принят", "сразу после оплаты — номер заказа и состав"],
-         ["Заказ отправлен", "трек-номер и кнопка отслеживания"]].map(function (f) {
-          return '<div class="adm__row"><span class="adm__nm">' + f[0] + '<span class="adm__sub">' + f[1] + "</span></span>" +
-            '<span class="chip chip--ok">всегда включено</span></div>';
-        }).join("") +
-        /* account-flows: these three switches now drive real senders
-           (src/lib/flows.ts), so the descriptions say what actually happens
-           and each row carries the size of its own queue. */
-        [["backstock", "Товар снова в наличии", "тем, кто оставил почту на странице товара", "alerts"],
-         ["abandoned", "Брошенная корзина", "напоминание через 3 часа, если заказ не завершён", "carts"],
-         ["birthday", "Скидка ко дню рождения", "личный промокод в день рождения, действует 14 дней", "birthdays"]].map(function (f) {
-          var on = !!DEMO.flows[f[0]];
-          return '<div class="adm__row"><span class="adm__nm">' + f[1] + '<span class="adm__sub">' + f[2] + "</span>" + flowCountHTML(f[3]) + "</span>" +
-            '<span class="chip ' + (on ? "chip--ok" : "chip--low") + '">' + (on ? "включено" : "выключено") + "</span>" +
-            '<button class="link" data-admflow="' + f[0] + '">' + (on ? "Выключить" : "Включить") + "</button></div>";
-        }).join("") + "</div>" +
-        mailCard() +
-        '<p style="margin-top:16px"><a class="link" href="/shop/emails/" target="_blank" rel="noopener">Открыть превью всех писем →</a></p>' : "") +
-
-      (tab === "apps" ?
-        '<p class="muted" style="margin:16px 0">Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.</p>' +
-        '<div class="adm__list">' + [
-          ["Приём оплат", "банковские ссылки, карты, Apple/Google Pay", "после выбора провайдера", false],
-          ["Доставка", "наклейки DPD / Omniva / SmartPosti и трекинг — через платёжного провайдера", "после выбора провайдера", false],
-          ["Письма клиентам", "info@rempireshop.com через Resend", "после переноса домена", false],
-          ["Google Search Console", "позиции в поиске и ошибки индексации", "настраивается", false],
-          ["Аналитика посещений", "откуда приходят и что покупают", "настраивается", false],
-          ["ИИ-помощник", "этот чат справа — умеет менять всё в магазине", "работает", true],
-          ["Касса в салоне", "работает отдельно от сайта — переезд её не трогает", "работает", true]
-        ].map(function (a) {
-          return '<div class="adm__row"><span class="adm__nm">' + a[0] + '<span class="adm__sub">' + a[1] + "</span></span>" +
-            '<span class="chip ' + (a[3] ? "chip--ok" : "chip--low") + '">' + a[2] + "</span></div>";
-        }).join("") + "</div>" : "") +
-
-      (tab === "setup" ?
-        '<p class="muted" style="margin:16px 0">Всё, что можно настроить без программиста.</p>' +
-        shipRulesCard() +
-        setupBlock("Оплата", PAYS.map(function (p) { return p.l; })) +
-        setupBlock("Языки магазина", ["Русский — основной", "Eesti", "English"]) +
-        setupBlock("Письма клиенту", [
-          "Заказ принят", "Заказ отправлен + трекинг", "Товар снова в наличии",
-          "Скидка ко дню рождения", "Брошенная корзина"
-        ]) +
-        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Магазин</h2></div>' +
-        '<div class="adm__list"><div class="adm__row"><span class="adm__nm">ИИ-чат для покупателей' +
-          '<span class="adm__sub">кружок-консультант в углу магазина — подбирает товары и собирает корзину</span></span>' +
-          '<span class="chip ' + (DEMO.chatbot ? "chip--ok" : "chip--low") + '">' + (DEMO.chatbot ? "включён" : "выключен") + "</span>" +
-          '<button class="link" data-admchatbot>' + (DEMO.chatbot ? "Выключить" : "Включить") + "</button></div>" +
-          '<div class="adm__row"><span class="adm__nm">Наборы на сайте' +
-          '<span class="adm__sub">готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»</span></span>' +
-          '<span class="chip ' + (DEMO.bundles !== false ? "chip--ok" : "chip--low") + '">' + (DEMO.bundles !== false ? "показаны" : "скрыты") + "</span>" +
-          '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
-        admHeroCard() +
-        admContentCard() +
-        admPricingCard() +
-        reportsCard() +
-        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Журнал изменений</h2></div>' +
-        (DEMO.log.length
-          ? '<div class="adm__list">' + DEMO.log.map(function (e, i) {
-              return '<div class="adm__row"><span class="adm__nm">' + esc(e.txt) +
-                '<span class="adm__sub">' + esc(e.t) + " · помощник/панель</span></span>" +
-                '<button class="link" data-admundo="' + i + '">Отменить</button></div>';
-            }).join("") + "</div>"
-          : '<p class="muted">Пока пусто. Изменения через помощника и кнопки панели попадут сюда — каждое можно отменить.</p>') : "") +
-      "</main>" +
-
-      '<aside class="adm__ai" aria-label="Помощник">' +
-        '<div class="adm__aihead">' +
-          '<button class="adm__toggle" data-admai aria-expanded="' + S.admAi + '" ' +
-            'aria-label="' + (S.admAi ? "Свернуть помощника" : "Открыть помощника") + '" title="' +
-            (S.admAi ? "Свернуть помощника" : "Открыть помощника") + '">' + (S.admAi ? "»" : "«") + "</button>" +
-          '<span class="sec__title adm__ailbl">Помощник</span></div>' +
-        '<div class="adm__aibody">' +
-          (S.adminAsk
-            ? '<div class="adm__q">' + esc(S.adminAsk) + "</div>" +
-              '<div class="adm__a" data-aians>' + (admAI ? "…" : adminAnswer(S.adminAsk)) + "</div>"
-            : '<p class="adm__aiintro">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами.</p>') +
-          '<div class="adm__chips">' + [
-            "Что заканчивается и что дозаказать?",
-            "Сколько заработали на Kevin.Murphy?",
-            "Добавь новый товар — вот фото",
-            "Покажи аналитику за неделю",
-            "Какие письма получают клиенты?",
-            "Какие заказы ждут отправки?"
-          ].map(function (q) { return '<button class="fchip" data-admask="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
+    return admHeader("Админка") +
+      '<div class="adm2' + (S.admNav ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") + '">' +
+        '<div class="adm2__frame">' +
+          admSideHTML(waiting) +
+          '<div class="adm-main"><div class="adm-page">' + body + "</div></div>" +
         "</div>" +
-        '<div class="adm__aifoot"><input class="input input--box" data-admq value="' + esc(S.adminQ || "") + '" placeholder="Спросить…" aria-label="Вопрос помощнику">' +
-          '<button class="btn btn--sm" data-admsend aria-label="Спросить">→</button></div>' +
-      "</aside></div>";
+        admBarHTML(waiting) +
+        (S.admMore ? admMoreSheetHTML() : "") +
+        (S.admAi ? admAsstHTML() : admFabHTML()) +
+        (pendingAction && pendingAction.overlay ? admConfirmHTML(pendingAction) : "") +
+      "</div>";
     // inventory: the scanner overlay is NOT part of this string — a <video>
     // element in here would be torn down and recreated (losing its camera
     // stream) on every render(). It is mounted as its own persistent DOM
     // node outside bodySlot instead; see scanMount()/scanRenderPanel() near
     // the bottom of the file, called from render() itself.
   }
+
+  /* ---------- the sections phases 2 and 3 still have to redesign ----------
+     Each one is its own old screen function, unchanged, reached through the
+     new navigation. «Клиенты» and «Маркетинг» gained a tab strip because the
+     new IA folded two and three old tabs into one place; everything below the
+     strip is the markup that was already there. */
+  function admLegacyTabs(items) {
+    return '<div class="adm-tabs" role="group" aria-label="Что показываем">' + items.map(function (t) {
+      return '<button class="adm-tab" data-admtab="' + t[0] + '" aria-current="' + (S.adminTab === t[0]) +
+        '" title="' + t[1] + '">' + t[1] + (t[2] ? ' <span class="adm-tab__warn">' + t[2] + "</span>" : "") + "</button>";
+    }).join("") + "</div>";
+  }
+  function admLegacyHTML(tab) {
+    if (tab === "pos") return admHead("", "Салон", "") + admPosHTML();
+    if (tab === "people" || tab === "reviews") {
+      var pend = (S.admReviews && S.admReviews.counts && S.admReviews.counts.pending) || 0;
+      return admHead("", "Клиенты", "") +
+        admLegacyTabs([["people", "Все клиенты", 0], ["reviews", "Отзывы", pend]]) +
+        (tab === "reviews" ? admReviewsHTML() : admCustomersHTML());
+    }
+    if (tab === "promos" || tab === "mail") {
+      return admHead("", "Маркетинг", "") +
+        admLegacyTabs([["promos", "Промокоды", 0], ["mail", "Письма", 0]]) +
+        (tab === "mail" ? admMailHTML() : admPromosHTML());
+    }
+    if (tab === "blog") return admHead("", "Блог", "") + admBlogHTML();
+    if (tab === "stats") return admHead("", "Аналитика", "") + admStatsHTML();
+    if (tab === "apps") return admHead("", "Подключения", "") + admAppsHTML();
+    if (tab === "setup") return admHead("", "Настройки", "") + admSetupHTML();
+    return "";
+  }
+
+  /* «Маркетинг → Письма» — the letters the shop sends by itself, unchanged
+     from before the redesign; phase 3 restyles it. */
+  function admMailHTML() {
+    return '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.</p>' +
+    '<div class="adm__list">' +
+    [["Заказ принят", "сразу после оплаты — номер заказа и состав"],
+     ["Заказ отправлен", "трек-номер и кнопка отслеживания"]].map(function (f) {
+      return '<div class="adm__row"><span class="adm__nm">' + f[0] + '<span class="adm__sub">' + f[1] + "</span></span>" +
+        '<span class="chip chip--ok">всегда включено</span></div>';
+    }).join("") +
+    /* account-flows: these three switches now drive real senders
+       (src/lib/flows.ts), so the descriptions say what actually happens
+       and each row carries the size of its own queue. */
+    [["backstock", "Товар снова в наличии", "тем, кто оставил почту на странице товара", "alerts"],
+     ["abandoned", "Брошенная корзина", "напоминание через 3 часа, если заказ не завершён", "carts"],
+     ["birthday", "Скидка ко дню рождения", "личный промокод в день рождения, действует 14 дней", "birthdays"]].map(function (f) {
+      var on = !!DEMO.flows[f[0]];
+      return '<div class="adm__row"><span class="adm__nm">' + f[1] + '<span class="adm__sub">' + f[2] + "</span>" + flowCountHTML(f[3]) + "</span>" +
+        '<span class="chip ' + (on ? "chip--ok" : "chip--low") + '">' + (on ? "включено" : "выключено") + "</span>" +
+        '<button class="link" data-admflow="' + f[0] + '">' + (on ? "Выключить" : "Включить") + "</button></div>";
+    }).join("") + "</div>" +
+    mailCard() +
+    '<p style="margin-top:16px"><a class="link" href="/shop/emails/" target="_blank" rel="noopener">Открыть превью всех писем →</a></p>';
+  }
+
+  /* «Подключения» — phase 3 turns these into actionable rows. */
+  function admAppsHTML() {
+    return '<p class="muted" style="margin:16px 0">Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.</p>' +
+    '<div class="adm__list">' + [
+      ["Приём оплат", "банковские ссылки, карты, Apple/Google Pay", "после выбора провайдера", false],
+      ["Доставка", "наклейки DPD / Omniva / SmartPosti и трекинг — через платёжного провайдера", "после выбора провайдера", false],
+      ["Письма клиентам", "info@rempireshop.com через Resend", "после переноса домена", false],
+      ["Google Search Console", "позиции в поиске и ошибки индексации", "настраивается", false],
+      ["Аналитика посещений", "откуда приходят и что покупают", "настраивается", false],
+      ["ИИ-помощник", "кнопка «Помощник» в углу экрана — предлагает изменения, вы подтверждаете", "работает", true],
+      ["Касса в салоне", "работает отдельно от сайта — переезд её не трогает", "работает", true]
+    ].map(function (a) {
+      return '<div class="adm__row"><span class="adm__nm">' + a[0] + '<span class="adm__sub">' + a[1] + "</span></span>" +
+        '<span class="chip ' + (a[3] ? "chip--ok" : "chip--low") + '">' + a[2] + "</span></div>";
+    }).join("") + "</div>";
+  }
+
+  /* «Настройки» — phase 3 splits this into an index and six sub-pages. */
+  function admSetupHTML() {
+    return '<p class="muted" style="margin:16px 0">Всё, что можно настроить без программиста.</p>' +
+    shipRulesCard() +
+    setupBlock("Оплата", PAYS.map(function (p) { return p.l; })) +
+    setupBlock("Языки магазина", ["Русский — основной", "Eesti", "English"]) +
+    setupBlock("Письма клиенту", [
+      "Заказ принят", "Заказ отправлен + трекинг", "Товар снова в наличии",
+      "Скидка ко дню рождения", "Брошенная корзина"
+    ]) +
+    '<div class="sec__head sec__head--sub"><h2 class="sec__title">Магазин</h2></div>' +
+    '<div class="adm__list"><div class="adm__row"><span class="adm__nm">ИИ-чат для покупателей' +
+      '<span class="adm__sub">кружок-консультант в углу магазина — подбирает товары и собирает корзину</span></span>' +
+      '<span class="chip ' + (DEMO.chatbot ? "chip--ok" : "chip--low") + '">' + (DEMO.chatbot ? "включён" : "выключен") + "</span>" +
+      '<button class="link" data-admchatbot>' + (DEMO.chatbot ? "Выключить" : "Включить") + "</button></div>" +
+      '<div class="adm__row"><span class="adm__nm">Наборы на сайте' +
+      '<span class="adm__sub">готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»</span></span>' +
+      '<span class="chip ' + (DEMO.bundles !== false ? "chip--ok" : "chip--low") + '">' + (DEMO.bundles !== false ? "показаны" : "скрыты") + "</span>" +
+      '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
+    admHeroCard() +
+    admContentCard() +
+    admPricingCard() +
+    reportsCard() +
+    '<div class="sec__head sec__head--sub"><h2 class="sec__title">Журнал изменений</h2></div>' +
+    (DEMO.log.length
+      ? '<div class="adm__list">' + DEMO.log.map(function (e, i) {
+          return '<div class="adm__row"><span class="adm__nm">' + esc(e.txt) +
+            '<span class="adm__sub">' + esc(e.t) + " · помощник/панель</span></span>" +
+            // an entry with nothing to put back (an undo's own «Отмена: …»
+            // line) gets no button — an «Отменить» that does nothing is
+            // worse than none at all
+            (e.prev ? '<button class="link" data-admundo="' + i + '">Отменить</button>' : "") + "</div>";
+        }).join("") + "</div>"
+      : '<p class="muted">Пока пусто. Изменения через помощника и кнопки панели попадут сюда — каждое можно отменить.</p>');
+  }
+
   /* ---------- «Письма»: preview + test send -----------------------------
      The five real templates live in src/emails and are rendered server-side;
      this card is the window onto them. The letter's language is its own
@@ -9376,17 +10321,10 @@
      The list and the editor both read S.admBundles, loaded from
      GET /api/admin/bundles/ (everything, hidden sets included — unlike the
      storefront's /api/bundles/). */
-  var GOODS_TABS = [["goods", "Товары"], ["bundles", "Наборы"]];
   var BUNDLE_CATS = [
     ["hair", "Волосы"], ["styling", "Стайлинг"], ["beard", "Борода"], ["face", "Лицо"],
     ["body", "Тело"], ["perfume", "Парфюм"], ["merch", "Мерч"]
   ];
-  function goodsTabsHTML() {
-    return '<div class="adm__chips" role="group" aria-label="Что показываем">' + GOODS_TABS.map(function (t) {
-      return '<button class="scchip" data-admgoodstab="' + t[0] + '" aria-current="' +
-        ((S.goodsTab || "goods") === t[0]) + '">' + t[1] + "</button>";
-    }).join("") + "</div>";
-  }
 
   function loadAdminBundles(force) {
     if (SRV.admin !== true) return;
@@ -9503,77 +10441,52 @@
   function bundleFormHTML() {
     var f = S.bundleForm;
     var lang = f.lang || "RU";
-    return '<div class="adm__confirm adm__promoform">' +
-      "<b>" + (f.editing ? "Изменить набор" : "Новый набор") + "</b>" +
-      '<label class="field"><span class="field__label">Адрес набора — латиницей, менять нельзя после первой продажи</span>' +
-        '<input class="input" data-bundlef="id" maxlength="64" value="' + esc(f.id) + '" placeholder="beard-start"' +
+    return '<div class="adm-card adm-card--pad">' +
+      '<div class="adm-confirm__t">' + (f.editing ? "Изменить набор" : "Новый набор") + "</div>" +
+      '<label class="adm-field">Адрес набора — латиницей, менять нельзя после первой продажи' +
+        '<input class="adm-input" data-bundlef="id" maxlength="64" value="' + esc(f.id) + '" placeholder="beard-start"' +
         (f.editing ? " readonly" : "") + "></label>" +
-      '<div class="field__label">Раздел магазина</div>' +
-      '<span class="sel"><select data-bundlecat>' + BUNDLE_CATS.map(function (c) {
-        return '<option value="' + c[0] + '"' + (f.cat === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
-      }).join("") + "</select></span>" +
-      '<div class="adm__chips" role="group" aria-label="Язык текста">' + LANGS.map(function (l) {
-        return '<button class="scchip" data-bundlelang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
+      '<label class="adm-field">Раздел магазина' +
+        '<select class="adm-input" data-bundlecat>' + BUNDLE_CATS.map(function (c) {
+          return '<option value="' + c[0] + '"' + (f.cat === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
+        }).join("") + "</select></label>" +
+      '<div class="adm-chips" role="group" aria-label="Язык текста">' + LANGS.map(function (l) {
+        return '<button class="adm-chip" data-bundlelang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
       }).join("") + "</div>" +
-      '<label class="field"><span class="field__label">' +
-        (lang === "RU" ? "Название — обязательно" : "Название — можно оставить пустым") + "</span>" +
-        '<input class="input" data-bundlef="title" maxlength="120" value="' + esc(f.title[lang] || "") +
+      '<label class="adm-field">' +
+        (lang === "RU" ? "Название — обязательно" : "Название — можно оставить пустым") +
+        '<input class="adm-input" data-bundlef="title" maxlength="120" value="' + esc(f.title[lang] || "") +
         '" placeholder="' + (lang === "RU" ? "Борода — стартовый набор" : esc(f.title.RU || "")) + '"></label>' +
-      '<label class="field"><span class="field__label">Описание — две-три простые фразы</span>' +
-        '<textarea class="input" rows="3" maxlength="1000" data-bundlef="desc" placeholder="' +
+      '<label class="adm-field">Описание — две-три простые фразы' +
+        '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" placeholder="' +
         (lang === "RU" ? "Масло, бальзам и мыло — всё, с чего начинается уход." : esc(f.desc.RU || "")) + '">' +
         esc(f.desc[lang] || "") + "</textarea></label>" +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Что внутри — минимум два товара</h2></div>' +
+      '<div class="adm-sec__t">Что внутри — минимум два товара</div>' +
       bundleItemRowsHTML() +
-      '<label class="field"><span class="field__label">Найти товар</span>' +
-        '<input class="input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
+      '<label class="adm-field">Найти товар' +
+        '<input class="adm-input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
       '<div class="admhero__picks" id="bundlepicks">' + bundlePickRows() + "</div>" +
-      '<label class="field"><span class="field__label">Цена набора, €</span>' +
-        '<input class="input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
-      '<p class="hint" data-bundlehint>' + esc(bundleHintHTML()) + "</p>" +
-      '<div class="field__label">Фото набора</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">' +
+        '<label class="adm-field">Цена набора, €' +
+          '<input class="adm-input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
+        '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p></div>" +
+      '<div class="adm-field">Фото набора</div>' +
       '<div class="admhero__picks">' + bundleImageRowHTML() + "</div>" +
-      (S.bundleFormErr ? '<div class="err" role="alert">' + esc(S.bundleFormErr) + "</div>" : "") +
-      '<div class="adm__acts"><button class="btn btn--sm" data-bundlesave>Сохранить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-bundlecancel>Отмена</button>' +
-        (f.editing ? ' <button class="link" data-bundledelete="' + esc(f.id) + '">Удалить набор</button>' : "") +
+      (S.bundleFormErr ? '<div class="err adm-err" role="alert">' + esc(S.bundleFormErr) + "</div>" : "") +
+      '<div class="adm-acts"><button class="adm-btn" data-bundlesave>Сохранить</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-bundlecancel>Отмена</button>' +
+        (f.editing ? '<button class="adm-del" data-bundledelete="' + esc(f.id) + '">Удалить набор</button>' : "") +
       "</div></div>";
   }
+
   /* «Удалить» is the one button here that cannot be undone, so it goes
      through the panel's own confirm-before-apply strip rather than a browser
      dialog — same shape as the blog's delete. */
   function bundleDelConfirmHTML() {
-    return '<div class="adm__confirm"><b>Удалить набор?</b>' +
-      '<p class="muted">Страница набора исчезнет, уже оформленные заказы не изменятся.</p>' +
-      '<div class="adm__acts"><button class="btn btn--sm" data-bundledelyes="' + esc(S.bundleDel) + '">Да, удалить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-bundledelno>Отмена</button></div></div>';
-  }
-  function admBundlesHTML() {
-    loadAdminBundles(false);
-    var list = S.admBundles || [];
-    return '<p class="muted" style="margin:16px 0">Наборы — готовые комплекты из тех же товаров, что стоят в магазине по отдельности. Цену вы назначаете сами; магазин показывает, сколько это стоило бы врозь. Скрытый набор пропадает из магазина, но его адрес остаётся рабочим.</p>' +
-      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы менять наборы.</div>') +
-      (DEMO.bundles === false ? '<div class="adm__note">Наборы сейчас выключены целиком в «Настройки → Магазин» — в магазине их не видно.</div>' : "") +
-      (S.admBundleErr ? '<div class="adm__note">' + esc(S.admBundleErr) + "</div>" : "") +
-      (S.bundleDel ? bundleDelConfirmHTML() : "") +
-      (S.bundleForm ? bundleFormHTML() :
-        '<div class="adm__acts"><button class="btn btn--sm" data-bundlenew>Новый набор</button></div>') +
-      (list.length
-        ? '<div class="adm__list">' + list.map(function (b, i) {
-            return '<div class="adm__row"><span class="adm__ph">' + bundleStack(b, "bstack--line") + "</span>" +
-              '<span class="adm__nm">' + esc((b.title && b.title.RU) || b.id) +
-                '<span class="adm__sub">' + b.items.length + " " + pl(b.items.length, "товар", "товара", "товаров") +
-                "</span></span>" +
-              '<span class="chip ' + (b.active ? "chip--ok" : "chip--low") + '">' + (b.active ? "показан" : "скрыт") + "</span>" +
-              '<span class="num adm__pr">' + eur(b.price) + ' <s class="bwas">' + eur(b.sum) + "</s></span>" +
-              '<span class="admhero__ops"><button class="iconbtn" data-bundlemove="' + esc(b.id) + ':-1"' +
-                (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
-                '<button class="iconbtn" data-bundlemove="' + esc(b.id) + ':1"' +
-                (i === list.length - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button></span>' +
-              '<span><button class="link" data-bundleedit="' + esc(b.id) + '">Изменить</button> ' +
-                '<button class="link" data-bundletoggle="' + esc(b.id) + '">' + (b.active ? "Скрыть" : "Показать") + "</button></span></div>";
-          }).join("") + "</div>"
-        : (S.admBundles ? '<p class="muted">Наборов пока нет.</p>' : '<p class="muted">Загружаем…</p>'));
+    return '<div class="adm-card"><div class="adm-confirm__t">Удалить набор?</div>' +
+      '<p class="adm-hint" style="margin:0">Страница набора исчезнет, уже оформленные заказы не изменятся.</p>' +
+      '<div class="adm-acts"><button class="adm-btn adm-btn--warn" data-bundledelyes="' + esc(S.bundleDel) + '">Да, удалить</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-bundledelno>Отмена</button></div></div>';
   }
   function bundleFormPayload() {
     var f = S.bundleForm;
@@ -9858,200 +10771,15 @@
      the order does not even have to be paid to be listed here. One unescaped
      column (`ship`) was enough to turn an anonymous order into script running
      in the owner's session, so nothing goes in raw any more. */
-  function orderTable(list) {
-    return '<div class="adm__table" role="table">' +
-      '<div class="adm__th" role="row"><span>Заказ</span><span>Клиент</span><span>Доставка</span><span>Сумма</span><span>Статус</span></div>' +
-      list.map(function (o) {
-        return '<button class="adm__tr adm__tr--link" role="row" data-admorder="' + esc(o.id) + '"><span class="num">' +
-          (o.number ? esc(o.number) : "#" + esc(o.id)) +
-          // inventory: an in-salon quick sale, told apart from a web order at a glance
-          (o.srv && o.srv.channel === "pos" ? ' <span class="chip" style="font-size:10px">Салон</span>' : "") +
-          '<span class="adm__sub">' + esc(o.date) + "</span></span>" +
-          "<span>" + esc(o.who) + '<span class="adm__sub">' + esc(o.items) + " " + plural(o.items) + "</span></span>" +
-          '<span class="adm__ship">' + esc(o.ship) + "</span>" +
-          '<span class="num">' + eur(o.sum) + "</span>" +
-          '<span><span class="chip" style="color:var(' + esc(o.state[2]) + ')">' + esc(o.state[1]) + "</span></span></button>";
-      }).join("") + "</div>";
-  }
 
   /* Demo rows and real rows share the table, so the drill-down picks the right
      renderer instead of the table having to know which it is holding. */
-  function admOrderDetail(list) {
-    var o = list.filter(function (x) { return String(x.id) === String(S.adminOrder); })[0] || list[0];
-    if (!o) return "";
-    return o.srv ? orderDetailSrv(o) : orderDetail(o);
-  }
   function srvAddrLine(s) {
     if (!s) return "";
     if (s.pointName) return s.pointName;
     var a = s.address || {};
     return [a.addr || a.street || "", a.zip || "", a.city || "", s.country || ""].filter(Boolean).join(", ");
   }
-  /* A real order, drawn from what the server actually stored: the lines it
-     priced itself, the address it was given, and the status the owner moves. */
-  function orderDetailSrv(row) {
-    var o = row.srv, s = o.shipping || {};
-    var paidish = o.status === "paid" || o.status === "shipped" || o.status === "refunded";
-    var steps = [["Оформлен", true], ["Оплачен", paidish], ["Отправлен", o.status === "shipped"]];
-    return '<button class="link" data-admorder="">← Все заказы</button>' +
-      '<div class="adm__ohead"><h2 class="sec__title" style="font-size:20px">Заказ ' + esc(o.number) + "</h2>" +
-        '<span class="chip" style="color:var(' + row.state[2] + ')">' + row.state[1] + "</span>" +
-        // integration: reuse the POS payment-method words as already
-        // capitalised in the dictionary ("Терминал"/"Наличные") instead of a
-        // lowercase mid-sentence copy — same words, one fewer pair of keys
-        (o.channel === "pos" ? '<span class="chip">Салон' + (o.payment && o.payment.method ? " · " + (o.payment.method === "terminal" ? "Терминал" : "Наличные") : "") + "</span>" : "") +
-        '<span class="muted">' + row.date + "</span></div>" +
-      '<div class="adm__ocols"><div>' +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Состав</h3></div>' +
-        '<div class="adm__list">' + (o.items || []).map(function (l) {
-          return '<div class="adm__row"><span class="adm__nm">' + esc((l.brand ? l.brand + " — " : "") + (l.title || l.id)) +
-            '<span class="adm__sub">' + (l.variant ? esc(l.variant) + " · " : "") + l.qty + " шт × " + eur(l.price) + "</span></span>" +
-            '<span class="num adm__pr">' + eur(l.sum) + "</span></div>";
-        }).join("") +
-        '<div class="adm__row"><span class="adm__nm">Доставка — ' + esc(row.ship) + '</span><span class="num adm__pr">' +
-          (o.shippingPrice ? eur(o.shippingPrice) : "0 €") + "</span></div>" +
-        (o.discount ? '<div class="adm__row"><span class="adm__nm">Скидка' + (o.discountCode ? " · " + esc(o.discountCode) : "") +
-          '</span><span class="num adm__pr">−' + eur(o.discount) + "</span></div>" : "") +
-        // wholesale/loyalty: what this order was actually priced at, and
-        // whatever points it spent — src/lib/orders.ts createOrder()
-        (o.loyaltyDiscount ? '<div class="adm__row"><span class="adm__nm">Баллы</span><span class="num adm__pr">−' + eur(o.loyaltyDiscount) + "</span></div>" : "") +
-        '<div class="adm__row"><span class="adm__nm"><b>Итого</b></span><span class="num adm__pr"><b>' + eur(o.total) + "</b></span></div>" +
-        (o.pricingTier === "pro" ? '<p class="muted" style="margin:8px 0 0">Цена для салонов</p>' : "") +
-        "</div>" +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Статус</h3></div>' +
-        '<div class="adm__steps">' + steps.map(function (st) {
-          return '<span class="adm__step' + (st[1] ? " is-done" : "") + '">' + (st[1] ? "✓ " : "") + st[0] + "</span>";
-        }).join("") + "</div>" +
-        '<div class="adm__acts">' + ["paid", "shipped", "cancelled", "refunded"].map(function (k) {
-          return '<button class="btn btn--ghost btn--sm" data-admstatus="' + k + '"' + (o.status === k ? " disabled" : "") +
-            ">" + SRV_STATES[k][1] + "</button>";
-        }).join("") + "</div>" +
-      "</div><div>" +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Покупатель</h3></div>' +
-        '<div class="adm__list">' +
-          '<div class="adm__row"><span class="adm__nm">' + esc(o.name || "—") +
-            '<span class="adm__sub">' + esc(o.email || "") + (o.phone ? " · " + esc(o.phone) : "") + "</span></span></div>" +
-          '<div class="adm__row"><span class="adm__nm">' + esc(row.ship) +
-            '<span class="adm__sub">' + esc(srvAddrLine(s)) + "</span></span></div></div>" +
-        srvShipmentBlock(o) +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Заметка</h3></div>' +
-        '<label class="field"><span class="field__label">Видна только вам</span>' +
-          '<textarea class="input" data-admnote rows="3">' + esc(o.notes || "") + "</textarea></label>" +
-        '<div class="adm__acts"><button class="btn btn--sm" data-admnotesave>Сохранить заметку</button></div>' +
-        /* assistant-work: the customer-reply thread — see orderReplyPanel()
-           and the admorderreply/admordercompose/admordersend click handlers. */
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Переписка с клиентом</h3></div>' +
-        '<div class="adm__acts"><button class="btn btn--ghost btn--sm" data-admorderreply>' +
-          (S.orderReplyOpen ? "Скрыть" : "Ответить клиенту") + "</button></div>" +
-        (S.orderReplyOpen ? orderReplyPanel(o) : "") +
-      "</div></div>";
-  }
-  function orderReplyPanel(o) {
-    var msgs = S.orderMsgs && S.orderMsgsFor === o.id ? S.orderMsgs : null;
-    return (msgs
-      ? (msgs.length
-        ? '<div class="adm__list">' + msgs.map(function (m) {
-            return '<div class="adm__row"><span class="adm__nm">' + (m.direction === "in" ? "Клиент" : "Магазин") +
-              '<span class="adm__sub">' + esc(m.body).replace(/\n/g, "<br>") + "</span></span>" +
-              '<span class="muted" style="font-size:11.5px;white-space:nowrap">' +
-                esc(String(m.createdAt || "").slice(0, 16).replace("T", " ")) + "</span></div>";
-          }).join("") + "</div>"
-        : '<p class="muted">Переписки пока нет.</p>')
-      : '<p class="muted">Загружаем…</p>') +
-      '<label class="field"><span class="field__label">Сообщение клиента</span>' +
-        '<textarea class="input" rows="3" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель"></textarea></label>' +
-      '<div class="adm__acts"><button class="btn btn--ghost btn--sm" data-admordercompose>Составить ответ</button></div>' +
-      '<label class="field"><span class="field__label">Ваш ответ клиенту</span>' +
-        '<textarea class="input" rows="5" data-orderreplydraft>' + esc(S.orderReplyDraft || "") + "</textarea></label>" +
-      // no disabled="" gated on S.orderReplyDraft here: «Составить ответ»
-      // fills the draft textarea via a direct DOM write, not a render() (see
-      // the click handler), so a disabled attribute set at render time would
-      // never turn itself back on — the handler's own empty-draft guard is
-      // the only check that has to stay correct.
-      '<div class="adm__acts"><button class="btn btn--sm" data-admordersend>Отправить</button></div>';
-  }
-
-  /* Montonio Shipping, in one block: a button that registers the parcel with
-     the carrier, and after that the tracking code and a link to the label PDF.
-     The button only appears where a parcel can actually be booked — a paid
-     order with a carrier delivery. Everything it needs is already in the order
-     the server sent; the shipment lands in orders.shipping.montonio.
-     See docs/shipping.md § «Montonio Shipping». */
-  function srvShipmentBlock(o) {
-    var s = o.shipping || {}, sh = s.montonio || null;
-    var head = '<div class="sec__head sec__head--sub"><h3 class="sec__title">Отправление</h3></div>';
-    if (sh && sh.shipmentId) {
-      return head + '<div class="adm__list">' +
-        '<div class="adm__row"><span class="adm__nm">' + esc(CARRIER_NAMES[sh.carrier] || sh.carrier || "Montonio") +
-          '<span class="adm__sub">' + (sh.trackingCode ? esc("Трек-номер: " + sh.trackingCode) : "Трек-номер") +
-          "</span></span></div>" +
-        (sh.dropOffPin
-          ? '<div class="adm__row"><span class="adm__nm">' + esc("Код сдачи посылки: " + sh.dropOffPin) + "</span></div>"
-          : "") + "</div>" +
-        '<div class="adm__acts">' +
-          '<a class="btn btn--sm" href="/api/admin/shipments/' + encodeURIComponent(o.id) +
-            '/label/" target="_blank" rel="noopener">Этикетка PDF</a>' +
-          // http(s) only: an href is a place a "javascript:" string would run
-          (/^https?:\/\//i.test(String(sh.trackingUrl || ""))
-            ? '<a class="btn btn--ghost btn--sm" href="' + esc(sh.trackingUrl) +
-              '" target="_blank" rel="noopener">Отследить</a>'
-            : "") + "</div>";
-    }
-    if (String(s.method || "").toLowerCase().indexOf("pickup") === 0 || /самовыв|kohapeal/i.test(String(s.method || ""))) {
-      return head + '<p class="muted" style="font-size:12.5px">Самовывоз — отправление не нужно.</p>';
-    }
-    if (o.status !== "paid" && o.status !== "shipped") {
-      return head + '<p class="muted" style="font-size:12.5px">Отправление создаётся после оплаты.</p>';
-    }
-    return head + '<div class="adm__acts"><button class="btn btn--sm" data-admship>' +
-      (SRV.shipBusy ? "Создаём отправление…" : "Создать отправление") + "</button></div>";
-  }
-
-  /* The rows above open. A demo where nothing opens reads as a mock-up;
-     one real drill-down («вот как выглядит заказ») sells the whole admin. */
-  function orderDetail(o) {
-    var p1 = CATALOGUE[(o.id * 7 + 3) % CATALOGUE.length];
-    var p2 = CATALOGUE[(o.id * 13 + 11) % CATALOGUE.length];
-    var lines = [[p1, (o.id % 3) + 1], [p2, 1]];
-    var goods = lines.reduce(function (s, l) { return s + l[0].price * l[1]; }, 0);
-    var shipCostD = Math.max(0, Math.round((o.sum - goods) * 100) / 100);
-    var steps = [["Оплачен", true], ["Собран", o.state[0] !== "new"],
-      ["Передан в доставку", o.state[0] === "sent" || o.state[0] === "done"],
-      ["Доставлен", o.state[0] === "done"]];
-    return '<button class="link" data-admorder="">← Все заказы</button>' +
-      '<div class="adm__ohead"><h2 class="sec__title" style="font-size:20px">Заказ #' + o.id + "</h2>" +
-        '<span class="chip" style="color:var(' + o.state[2] + ')">' + o.state[1] + "</span>" +
-        '<span class="muted">' + o.date + "</span></div>" +
-      '<div class="adm__ocols">' +
-      '<div>' +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Состав</h3></div>' +
-        '<div class="adm__list">' + lines.map(function (l) {
-          return '<div class="adm__row"><span class="adm__ph">' + media(l[0], 0, "ph") + "</span>" +
-            '<span class="adm__nm">' + esc(l[0].brand) + " — " + esc(l[0].name) +
-              '<span class="adm__sub">' + l[1] + " шт × " + eur(l[0].price) + "</span></span>" +
-            '<span class="num adm__pr">' + eur(l[0].price * l[1]) + "</span></div>";
-        }).join("") +
-        '<div class="adm__row"><span class="adm__nm">Доставка — ' + esc(o.ship) + '</span><span class="num adm__pr">' + (shipCostD ? eur(shipCostD) : "0 €") + "</span></div>" +
-        '<div class="adm__row"><span class="adm__nm"><b>Итого</b></span><span class="num adm__pr"><b>' + eur(o.sum) + "</b></span></div></div>" +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Статус</h3></div>' +
-        '<div class="adm__steps">' + steps.map(function (s) {
-          return '<span class="adm__step' + (s[1] ? " is-done" : "") + '">' + (s[1] ? "✓ " : "") + s[0] + "</span>";
-        }).join("") + "</div>" +
-      "</div>" +
-      '<div>' +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Покупатель</h3></div>' +
-        '<div class="adm__list">' +
-          '<div class="adm__row"><span class="adm__nm">' + esc(o.who) + '<span class="adm__sub">customer@example.com · +372 5• ••• •••</span></span></div>' +
-          '<div class="adm__row"><span class="adm__nm">' + esc(o.ship) + '<span class="adm__sub">' + (/Самовывоз/.test(o.ship) ? "Mardi 1, Таллинн" : "Пакомат: Kristiine keskus, Таллинн") + "</span></span></div></div>" +
-        '<div class="sec__head sec__head--sub"><h3 class="sec__title">Действия</h3></div>' +
-        '<div class="adm__acts">' +
-          '<button class="btn btn--sm" data-admedit>Напечатать наклейку</button>' +
-          '<button class="btn btn--ghost btn--sm" data-admedit>Письмо с трек-номером</button>' +
-          '<button class="btn btn--ghost btn--sm" data-admedit>Вернуть деньги</button></div>' +
-        '<p class="muted" style="font-size:12.5px;margin-top:14px">Демо: в рабочей версии наклейка печатается через платёжного провайдера, письмо уходит само при смене статуса.</p>' +
-      "</div></div>";
-  }
-
   /* ---------- media: the owner's own photos --------------------------------
      Photos go straight from the phone to POST /api/admin/upload/, which turns
      them into WebP in a Cloudflare R2 bucket and answers with two URLs — the
@@ -10348,25 +11076,6 @@
     return 0;
   }
 
-  function goodsRows() {
-    var q = (S.goodsQ || "").toLowerCase().trim();
-    var list = q
-      ? CATALOGUE.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
-      : CATALOGUE;
-    var shown = list.slice(0, 24);
-    return shown.map(function (p) {
-      return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-        '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) +
-          '<span class="adm__sub">' + CAT_NAMES[p.cat] + (p.sizes && p.sizes.length ? " · " + p.sizes.join(", ") : "") + "</span></span>" +
-        '<span class="chip ' + (p.stock === "out" ? "chip--out" : p.stock === "low" ? "chip--low" : "chip--ok") + '">' +
-          (p.stock === "out" ? "нет" : p.stock === "low" ? "мало" : "в наличии") + "</span>" +
-        '<span class="num adm__pr">' + eur(p.price) + "</span>" +
-        '<button class="link" data-admgoods="' + p.id + '">Править</button></div>';
-    }).join("") +
-    '<p class="muted" style="margin-top:16px;padding:0 2px">' +
-      (list.length > 24 ? "Показаны первые 24 из " + list.length : list.length + " " + plural(list.length)) +
-      (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
-  }
 
   /** wholesale/loyalty: the price a salon pays right now — the override if
       one is set, otherwise the base price minus the global discount, so the
@@ -10531,20 +11240,30 @@
      follows the old manual в наличии/мало/нет override; see getOverrides()
      in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
      that fallback matters. Levels are fetched once (like the catalogue) and
-     filtered/searched client-side, same pattern as goodsRows() below. ---- */
-  var STOCK = { asked: false };
+     filtered/searched client-side, same pattern as admCatalogRows(). ---- */
+  var STOCK = { asked: false, seq: 0 };
   function loadStockLevels(force) {
     if (SRV.admin !== true) return;
     if ((S.stockLevels || STOCK.asked) && !force) return;
     STOCK.asked = true;
     S.stockBusy = true;
+    /* Two reloads can be in the air at once — a ± on a row fires one, and its
+       undo a moment later fires another. Answers do not have to come back in
+       the order they were asked for, and a late answer to the OLDER question
+       would put the shelf count the owner just undid straight back on screen.
+       Only the newest ask is allowed to write. */
+    var mySeq = ++STOCK.seq;
     apiJson("/api/admin/inventory/?filter=all&limit=1000").then(function (r) {
+      if (mySeq !== STOCK.seq) return;
       S.stockBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) { S.stockLevels = r.body.levels; S.stockErr = ""; }
       else S.stockErr = "Склад не отвечает — попробуйте обновить страницу.";
       render();
-    }).catch(function () { S.stockBusy = false; S.stockErr = "Сервер не отвечает."; render(); });
+    }).catch(function () {
+      if (mySeq !== STOCK.seq) return;
+      S.stockBusy = false; S.stockErr = "Сервер не отвечает."; render();
+    });
   }
   function reloadStock() { STOCK.asked = false; loadStockLevels(true); }
 
@@ -10568,37 +11287,52 @@
     var cls = r.state === "out" ? "chip--out" : r.state === "low" ? "chip--low" : "chip--ok";
     return '<span class="chip ' + cls + '">' + label + "</span>";
   }
+  /* The row's own form, for what the ± stepper cannot say: the barcode, the
+     «мало» threshold, an exact recount and the reason that goes into the
+     history. The stepper above it is the everyday control; this is the one
+     that binds an EAN by hand when the scanner is not around. */
   function stockEditFormHTML(r) {
-    return '<div class="adm__row" style="flex-direction:column;align-items:stretch;background:var(--shell)">' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<label class="field" style="flex:1 1 160px"><span class="field__label">EAN / штрихкод</span>' +
-          '<input class="input" data-stockeaninput value="' + esc(S.stockEditEan || "") + '" placeholder="нет штрихкода" inputmode="numeric"></label>' +
-        '<label class="field" style="flex:0 1 130px"><span class="field__label">Порог «мало»</span>' +
-          '<input class="input" data-stocklowinput value="' + esc(S.stockEditLow || "") + '" inputmode="numeric"></label>' +
+    return '<div class="adm-card" style="margin:0 0 12px">' +
+      '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
+        '<label class="adm-field" style="flex:1 1 180px">EAN / штрихкод' +
+          '<input class="adm-input" data-stockeaninput value="' + esc(S.stockEditEan || "") + '" placeholder="нет штрихкода" inputmode="numeric"></label>' +
+        '<label class="adm-field" style="flex:0 1 140px">Порог «мало»' +
+          '<input class="adm-input" data-stocklowinput value="' + esc(S.stockEditLow || "") + '" inputmode="numeric"></label>' +
       "</div>" +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
-        '<label class="field" style="flex:0 1 130px"><span class="field__label">Остаток сейчас</span>' +
-          '<input class="input" data-stockqtyinput value="' + esc(S.stockEditQty || "") + '" inputmode="numeric" placeholder="' + (r.tracked ? r.qty : "0") + '"></label>' +
-        '<label class="field" style="flex:1 1 220px"><span class="field__label">Причина (видна в истории)</span>' +
-          '<input class="input" data-stockreasoninput value="' + esc(S.stockEditReason || "") + '" placeholder="например: пересчёт на полке"></label>' +
+      '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
+        '<label class="adm-field" style="flex:0 1 140px">Остаток сейчас' +
+          '<input class="adm-input" data-stockqtyinput value="' + esc(S.stockEditQty || "") + '" inputmode="numeric" placeholder="' + (r.tracked ? r.qty : "0") + '"></label>' +
+        '<label class="adm-field" style="flex:1 1 220px">Причина (видна в истории)' +
+          '<input class="adm-input" data-stockreasoninput value="' + esc(S.stockEditReason || "") + '" placeholder="например: пересчёт на полке"></label>' +
       "</div>" +
-      '<div class="adm__acts"><button class="btn btn--sm" data-stocksave="' + esc(stockKey(r.productId, r.variant)) + '">Сохранить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-stockedit="">Отмена</button></div>' +
+      '<div class="adm-acts"><button class="adm-btn adm-btn--row" data-stocksave="' + esc(stockKey(r.productId, r.variant)) + '">Сохранить</button>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-stockedit="">Отмена</button></div>' +
     "</div>";
   }
   function stockRowHTML(r) {
-    var p = byId(r.productId);
     var key = stockKey(r.productId, r.variant);
     var open = S.stockEdit === key;
-    return '<div class="adm__row"><span class="adm__ph">' + (p ? media(p, 0, "ph") : "") + "</span>" +
-      '<span class="adm__nm">' + esc(r.brand) + " — " + esc(r.name) +
-        (r.variant ? '<span class="adm__sub">' + esc(r.variant) + "</span>" : "") + "</span>" +
-      '<span class="muted num" style="min-width:100px">' + (r.ean ? esc(r.ean) : "—") + "</span>" +
-      '<span class="num" style="min-width:44px">' + (r.tracked ? r.qty : "—") + "</span>" +
-      "<span>" + stockStateChip(r) + "</span>" +
-      '<button class="link" data-stockedit="' + (open ? "" : esc(key)) + '">' + (open ? "Свернуть" : "Править") + "</button>" +
+    var qty = r.tracked ? r.qty : 0;
+    var low = r.tracked && qty <= 3;
+    return '<div class="adm-row adm-row--tall">' +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) + "</span>" +
+        '<span class="adm-row__sub' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
+          (r.variant ? esc(r.variant) + " · " : "") +
+          (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : "штрихкод не привязан") + "</span></span>" +
+      '<span class="adm-step-qty">' +
+        '<button data-stockstep="' + esc(key) + ':-1" aria-label="Меньше"' + (qty <= 0 ? " disabled" : "") + ">−</button>" +
+        '<span class="adm-step-qty__v' + (low ? " adm-step-qty__v--warn" : "") + '">' + (r.tracked ? qty : "—") + "</span>" +
+        '<button data-stockstep="' + esc(key) + ':1" aria-label="Больше">+</button></span>' +
+      '<button class="adm-link adm-link--muted" data-stockedit="' + (open ? "" : esc(key)) + '">' +
+        (open ? "Свернуть" : "Править") + "</button>" +
     "</div>" + (open ? stockEditFormHTML(r) : "");
   }
+  /** What one tap on ± says out loud, so the toast and the journal agree. */
+  function admStockToastText(r, qty) {
+    return r.name + (r.variant ? " " + r.variant : "") + ": " + qty + " шт";
+  }
+  /** Everything that is running out comes first — the shelf the owner has to
+      act on, not the alphabet. Variants nobody counts yet sort last. */
   function stockRows() {
     var q = (S.stockQ || "").toLowerCase().trim();
     var f = S.stockFilter || "all";
@@ -10608,13 +11342,19 @@
       if (f === "untracked" && r.tracked) return false;
       if (!q) return true;
       return (r.brand + " " + r.name + " " + r.productId + " " + (r.ean || "")).toLowerCase().indexOf(q) >= 0;
+    }).slice();
+    rows.sort(function (a, b) {
+      var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
+      return qa - qb;
     });
     var shown = rows.slice(0, 60);
     return shown.map(stockRowHTML).join("") +
-      '<p class="muted" style="margin:10px 2px">' +
+      (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
+      '<p class="adm-hint" style="margin:10px 0 0">' +
         (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
         (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
   }
+
   /* Three installable apps from one page: the shop (manifest.webmanifest,
      scope /shop2/) for everyone, the admin (admin.webmanifest, scope
      /shop2/admin/) that only exists while the admin route is on screen, and
@@ -10648,53 +11388,57 @@
       if (window.navigator && window.navigator.standalone) return "";
       if (localStorage.getItem("rmp-pwa-hint-dismissed") === "1") return "";
     } catch (e) {}
-    return '<div class="adm__note" data-pwahint>📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». ' +
-      '<button class="link" data-pwahintclose>Скрыть</button></div>';
+    return '<div class="adm-note" data-pwahint><span>📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».</span>' +
+      '<button class="adm-link adm-link--muted" data-pwahintclose>Скрыть</button></div>';
   }
   function admStockHTML() {
-    if (SRV.admin !== true) return '<p class="muted" style="margin:16px 0">Войдите в панель, чтобы видеть склад.</p>';
+    if (SRV.admin !== true) return '<div class="adm-empty">Войдите в панель, чтобы видеть склад</div>';
     loadStockLevels(false);
     if (S.stockMovesOpen) return admStockMovesHTML();
     var FILTERS = [["all", "Все"], ["low", "Мало"], ["out", "Нет"], ["untracked", "Не учтено"]];
-    return '<p class="muted" style="margin:16px 0">Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.</p>' +
+    return '<div class="adm-acts">' +
+        '<button class="adm-btn" data-scanopen>Сканировать' + admIcon("scan", false, 20) + "</button>" +
+        '<span class="adm-hint">Приёмка и привязка штрихкодов — через сканер. ' +
+          'Здесь можно поправить остаток вручную.</span>' +
+      "</div>" +
       pwaHintHTML() +
-      /* scanner app: the same scanner, standing on its own route so it can be
-         installed as a third icon — see screenScan() and docs/inventory.md. */
-      '<div class="adm__note">📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере. ' +
-        '<button class="link" data-scanapp>Открыть сканер</button></div>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">' +
-        '<button class="btn" data-scanopen>' + icon("scan") + " Сканировать</button>" +
-        '<input class="input input--box" data-stockq value="' + esc(S.stockQ || "") + '" placeholder="Найти товар, бренд, EAN…" aria-label="Поиск по складу" style="max-width:320px">' +
-        '<button class="link" data-stockmovesopen="1">История приёмок и продаж →</button>' +
+      '<div class="adm-acts">' +
+        '<div class="adm-chips" role="group" aria-label="Фильтр">' +
+          FILTERS.map(function (f) {
+            return '<button class="adm-chip" data-stockfilter="' + f[0] + '" aria-current="' + ((S.stockFilter || "all") === f[0]) + '">' + f[1] + "</button>";
+          }).join("") + "</div>" +
+        '<input class="adm-input adm-input--row" data-stockq value="' + esc(S.stockQ || "") +
+          '" placeholder="Найти товар, бренд, EAN…" aria-label="Поиск по складу" style="flex:1;min-width:180px">' +
       "</div>" +
-      '<div class="adm__chips" role="group" aria-label="Фильтр">' +
-        FILTERS.map(function (f) {
-          return '<button class="scchip" data-stockfilter="' + f[0] + '" aria-current="' + ((S.stockFilter || "all") === f[0]) + '">' + f[1] + "</button>";
-        }).join("") +
-      "</div>" +
-      (S.stockErr ? '<div class="adm__note">' + esc(S.stockErr) + "</div>" : "") +
-      (S.stockBusy && !S.stockLevels ? '<p class="muted">Загружаем…</p>' :
-        '<div class="adm__list" id="stocklist">' + stockRows() + "</div>");
+      '<div class="adm-acts"><button class="adm-link adm-link--muted" data-stockmovesopen="1">История приёмок и продаж →</button>' +
+        /* scanner app: the same scanner, standing on its own route so it can be
+           installed as a third icon — see screenScan() and docs/inventory.md. */
+        '<button class="adm-link adm-link--muted" data-scanapp>Сканер отдельным приложением ↗</button></div>' +
+      (S.stockErr ? '<div class="adm-error"><span>' + esc(S.stockErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="stock">Повторить</button></div>' : "") +
+      (S.stockBusy && !S.stockLevels ? '<div class="adm-skel"><i></i><i></i><i></i></div>' :
+        '<div class="adm-list adm-list--flat" id="stocklist">' + stockRows() + "</div>");
   }
   function admStockMovesHTML() {
     loadStockMoves(false);
     var moves = S.stockMoves || [];
     var REASONS = [["", "Все"], ["goods_in", "Приход"], ["sale_web", "Продажа на сайте"], ["sale_pos", "Продажа в салоне"], ["adjust", "Ручная правка"], ["return", "Возврат"]];
-    return '<button class="link" data-stockmovesopen="">← Склад</button>' +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">История приёмок и продаж</h2></div>' +
-      '<div class="adm__chips" role="group" aria-label="Тип движения">' +
+    return '<button class="adm-link" data-stockmovesopen="">← Склад</button>' +
+      '<div class="adm-sec__t" style="margin-top:12px">История приёмок и продаж</div>' +
+      '<div class="adm-chips" role="group" aria-label="Тип движения" style="margin:12px 0">' +
         REASONS.map(function (r) {
-          return '<button class="scchip" data-stockmovesreason="' + r[0] + '" aria-current="' + ((S.stockMovesReason || "") === r[0]) + '">' + r[1] + "</button>";
+          return '<button class="adm-chip" data-stockmovesreason="' + r[0] + '" aria-current="' + ((S.stockMovesReason || "") === r[0]) + '">' + r[1] + "</button>";
         }).join("") +
       "</div>" +
-      (S.stockMovesBusy && !S.stockMoves ? '<p class="muted">Загружаем…</p>' :
-        (moves.length ? '<div class="adm__list">' + moves.map(function (m) {
+      (S.stockMovesBusy && !S.stockMoves ? '<div class="adm-skel"><i></i><i></i><i></i></div>' :
+        (moves.length ? '<div class="adm-list adm-list--flat">' + moves.map(function (m) {
           var sign = m.delta > 0 ? "+" : "";
-          return '<div class="adm__row"><span class="adm__nm">' + esc(m.brand || m.productId) + (m.brand ? " — " + esc(m.name) : "") +
-              '<span class="adm__sub">' + (m.variant ? esc(m.variant) + " · " : "") + esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
-            '<span class="muted">' + esc(String(m.at).slice(0, 16).replace("T", " ")) + "</span>" +
-            '<span class="num">' + sign + m.delta + "</span></div>";
-        }).join("") + "</div>" : '<p class="muted">Пока пусто.</p>'));
+          return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
+              esc(m.brand || m.productId) + (m.brand ? " — " + esc(m.name) : "") + "</span>" +
+              '<span class="adm-row__sub">' + (m.variant ? esc(m.variant) + " · " : "") + esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
+            '<span class="adm-row__sub" style="margin:0">' + esc(String(m.at).slice(0, 16).replace("T", " ")) + "</span>" +
+            '<span class="adm-row__amt">' + sign + m.delta + "</span></div>";
+        }).join("") + "</div>" : '<div class="adm-empty">Пока пусто</div>'));
   }
 
   /* ---------- inventory: the scanner --------------------------------------
@@ -11091,11 +11835,11 @@
     probeAdmin();
     if (SRV.on && SRV.admin === null) return admWaitScreen("Сканер");
     if (SRV.admin !== true) return admLoginScreen("Сканер");
-    return '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
-      '<p class="muted" style="margin:28px 0">Сканер открывается…</p>' +
+    return '<div class="adm2"><div class="adm2__frame"><div class="adm-main"><div class="adm-page">' +
+      '<div class="adm-gate"><p class="adm-hint">Сканер открывается…</p>' +
       // plain data-go, not data-scanadmin: the top bar owns that attribute,
       // and two of them on one screen is one control too many to click
-      '<p class="muted"><button class="link" data-go="admin">В админку</button></p></main></div>';
+      '<button class="adm-link" data-go="admin">В админку</button></div></div></div></div></div>';
   }
 
   /* ---------- inventory: «Продажа в салоне» -------------------------------
@@ -11217,8 +11961,20 @@
   }
 
   /* ---------- inventory: writes — the ledger and the static fields -------- */
+  /* One move at a time, in the order they were asked for. A move is RELATIVE
+     and the shelf cannot go below zero (src/lib/inventory.ts blocks at 0), so
+     two of them in flight together can land the wrong way round and leave the
+     count where neither of them wanted it: a ± on a «Склад» row and the
+     «Отменить» right behind it is exactly that pair — the −1 arriving first is
+     clamped at zero and the +1 then sticks. */
+  var stockMoveChain = Promise.resolve();
   function stockMoveSend(body) {
-    return apiSend("/api/admin/inventory/moves/", "POST", body).then(function (r) { return r.status === 200 && r.body.ok; });
+    var run = stockMoveChain.then(function () {
+      return apiSend("/api/admin/inventory/moves/", "POST", body)
+        .then(function (r) { return r.status === 200 && r.body.ok; });
+    });
+    stockMoveChain = run.then(noop, noop);
+    return run;
   }
   /* The same wire the level save uses, but keeping the route's own error code
      — «Часть изменений не сохранилась» does not tell the owner that the
@@ -11506,6 +12262,22 @@
     // to base price × (1 − discount%), same PUT the retail price uses
     else if (a.type === "set_pro_price") apiSend(ov, "PUT", { id: a.id, proPrice: a.value }).catch(noop);
     else if (a.type === "set_stock") apiSend(ov, "PUT", { id: a.id, stock: a.value }).catch(noop);
+    /* inventory: a ± on the «Склад» row is a relative move, so undo is simply
+       the same call with the opposite sign — POST /api/admin/inventory/moves/
+       takes `delta` for exactly this (src/app/api/admin/inventory/moves). */
+    else if (a.type === "stock_adjust") {
+      stockMoveSend({ productId: a.product_id, variant: a.variant || "", delta: a.delta, reason: a.reason || "adjust", ref: "панель" })
+        .then(function (ok) { if (!ok) toast("Склад не принял правку"); reloadStock(); })
+        .catch(noop);
+    }
+    // «Заказы»: the status the card moved, and the status undo moves back
+    else if (a.type === "order_status") {
+      apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { status: a.value })
+        .then(function (r) {
+          if (!(r.status === 200 && r.body.ok)) toast("Не удалось сохранить статус");
+          loadSrvOrders(true);
+        }).catch(noop);
+    }
     else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seoTitle: a.title || "", seoDesc: a.description || "" }).catch(noop);
     else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
     else if (a.type === "set_varimg") apiSend(ov, "PUT", { id: a.id, varImg: a.map }).catch(noop);
@@ -11588,7 +12360,10 @@
     cancelled: ["cancelled", "отменён", "--muted"],
     refunded: ["refunded", "возврат", "--muted"]
   };
-  var SHIP_WORD = { parcel: "Пакомат", courier: "Курьер", pickup: "Самовывоз" };
+  /* features: `digital` is what an all-gift-card order stores as its shipping
+     method (src/lib/orders.ts) — nothing is packed, nothing is posted, and the
+     panel has to say so plainly rather than showing a blank «Пакомат». */
+  var SHIP_WORD = { parcel: "Пакомат", courier: "Курьер", pickup: "Самовывоз", digital: "Электронная доставка" };
   function srvShipLabel(s) {
     if (!s) return "—";
     var m = SHIP_WORD[String(s.method || "").toLowerCase()] || s.method || "Доставка";
@@ -11641,9 +12416,9 @@
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }
 
-  /* ---- assistant-work: «Ответить клиенту» — see orderDetailSrv() --------- */
+  /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() --------- */
   /** The full server order object for the order currently open, or null —
-   *  never falls back to "some other order" the way admOrderDetail()'s list
+   *  never falls back to "some other order" the way a list
    *  filter does, because sending mail to the wrong order would be worse
    *  than doing nothing. */
   function currentAdminOrderRow() {
@@ -11773,6 +12548,11 @@
       return a.type === "stock_adjust"
         ? "Склад «" + spName + "»: " + (a.delta > 0 ? "+" : "") + a.delta + " (" + (STOCK_MOVE_WORD[a.reason] || a.reason || "ручная правка") + ")"
         : "Склад «" + spName + "»: остаток → " + a.qty;
+    }
+    // «Заказы»: the one change the redesigned card makes to an order
+    if (a.type === "order_status") {
+      return "Заказ " + (a.number || a.id) + ": " +
+        ((SRV_STATES[a.value] && SRV_STATES[a.value][1]) || a.value);
     }
     if (a.type === "set_seo") return "SEO «" + (p ? p.name : a.id) + "»: «" + (a.title || "—") + "» / «" + (a.description || "—") + "»";
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
@@ -11960,6 +12740,16 @@
     // from the global discount" — same null-clears convention as set_seo/set_varimg
     else if (a.type === "set_pro_price") { entry.prev = { type: "set_pro_price", id: a.id, value: DEMO.proPrice[a.id] != null ? DEMO.proPrice[a.id] : null }; DEMO.proPrice[a.id] = a.value; }
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
+    /* inventory + orders: neither has a demo layer — the shelf and the order
+       row live on the server. What these two branches add is the JOURNAL entry
+       and, in `prev`, the action that puts the change back; srvPush() carries
+       both directions to the API. */
+    else if (a.type === "stock_adjust") {
+      entry.prev = { type: "stock_adjust", product_id: a.product_id, variant: a.variant, delta: -a.delta, reason: "adjust" };
+    }
+    else if (a.type === "order_status") {
+      entry.prev = { type: "order_status", id: a.id, number: a.number, value: a.prev, prev: a.value };
+    }
     // both fields empty = «снова как в каталоге», so the override is removed
     // rather than stored as a pair of empty strings that would hide it
     else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; if (a.title || a.description) DEMO.seo[a.id] = { t: a.title, d: a.description }; else delete DEMO.seo[a.id]; }
@@ -12046,6 +12836,7 @@
     demoSave();
     applyDemoOverrides();
     srvPush(a);   // and through to the server when the owner is signed in
+    return entry;   // so a toast can offer to take exactly this line back
   }
   function demoUndo(i) {
     var entry = DEMO.log[i];
@@ -12054,6 +12845,10 @@
     if (a.type === "set_price") DEMO.price[a.id] = a.value;
     else if (a.type === "set_pro_price") DEMO.proPrice[a.id] = a.value;
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
+    /* inventory + orders: srvPush() at the bottom of this function is the
+       whole undo — there is no demo copy of the shelf or the order to put
+       back, only the opposite call to make. */
+    else if (a.type === "stock_adjust" || a.type === "order_status") noop();
     else if (a.type === "set_seo") { if (a.title || a.description) DEMO.seo[a.id] = { t: a.title, d: a.description }; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
@@ -12095,10 +12890,19 @@
     srvPush(a);   // the previous value goes back to the server too
   }
   var pendingAction = null;
+  /* Confirm before apply, in one card. The legacy settings cards render it
+     inline where they stand and the assistant renders it inside the chat as
+     its proposal; a flow that touches the shop or the money sets
+     `overlay: true` and screenAdmin() lifts the very same card onto a scrim —
+     a card over the page on a desktop, a sheet at the bottom on a phone. */
   function confirmCard(a) {
-    return '<div class="adm__confirm"><b>Предпросмотр изменения</b>' + esc(actionText(a)) +
-      '<div class="adm__acts"><button class="btn btn--sm" data-admapply>Применить</button>' +
-      '<button class="btn btn--ghost btn--sm" data-admcancel>Отмена</button></div></div>';
+    return '<div class="adm-propose">' +
+      '<div class="adm-propose__t">' + esc(a.title || "Предпросмотр изменения") + "</div>" +
+      '<div class="adm-propose__d">' + esc(a.detail || actionText(a)) + "</div>" +
+      '<div class="adm-propose__acts">' +
+        '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
+          esc(a.ok || "Применить") + "</button>" +
+        '<button class="adm-btn adm-btn--ghost" data-admcancel>Отмена</button></div></div>';
   }
 
   /* When /api/assistant/ has a key, the owner's questions go to the real
@@ -12216,7 +13020,33 @@
       var total = parseFloat(String(q.t || "").replace(",", "."));
       track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
     }
-    return { status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n };
+    return { status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g) };
+  }
+  /* features: `g=RMP-ACDE-4679~<token>,…` on the redirect back from the bank
+     (src/app/api/payments/return/route.ts). The token is an HMAC of the code
+     under the server's session secret, so this page cannot make one up — it
+     can only pass on what it was handed. Anything that does not look like a
+     code and a token is dropped rather than turned into a broken link. */
+  function doneGiftCards(raw) {
+    var out = [];
+    String(raw || "").split(",").forEach(function (part) {
+      var bits = part.split("~");
+      if (bits.length !== 2) return;
+      if (!/^RMP-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(bits[0])) return;
+      if (!/^[A-Za-z0-9_-]{16,64}$/.test(bits[1])) return;
+      out.push({ code: bits[0], url: "/api/giftcards/" + bits[0] + "/pdf/?t=" + encodeURIComponent(bits[1]) });
+    });
+    return out.slice(0, 10);
+  }
+  /** The «Скачать подарочную карту (PDF)» button(s) under a paid receipt. */
+  function doneGiftHTML(cards) {
+    if (!cards || !cards.length) return "";
+    var many = cards.length > 1;
+    return '<div class="done__gifts">' + cards.map(function (c) {
+      return '<a class="btn btn--ghost done__gift" href="' + esc(c.url) + '" target="_blank" rel="noopener"' +
+        ' data-giftpdf="' + esc(c.code) + '"><span>Скачать подарочную карту (PDF)</span>' +
+        (many ? ' <span class="num">' + esc(c.code) + "</span>" : "") + "</a>";
+    }).join("") + "</div>";
   }
   function screenDone() {
     var d = doneState();
@@ -12241,9 +13071,14 @@
       '<h1 class="display h1">' + (d.status === "paid" ? "Заказ оплачен" : "Заказ оформлен") + "</h1>" + num +
       '<p class="muted" style="margin-bottom:22px">' +
         (d.status === "paid"
-          ? "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер."
+          ? (d.gift && d.gift.length
+            /* features: nothing is being posted, so the parcel sentence would
+               be a promise the shop is not making. */
+            ? "Спасибо! Карта и код уже летят на почту — а распечатать её можно прямо отсюда."
+            : "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.")
           : "Это демонстрация — настоящий заказ не создан. В рабочем магазине сюда придёт номер заказа, счёт на почту и трекинг посылки.") +
       "</p>" +
+      doneGiftHTML(d.gift) +
       '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
   }
 
@@ -12599,6 +13434,17 @@
        since; the next «Сохранить» then stored the old values back and said
        «Изменений нет». Carry what is on screen across the swap, but only when
        the same product is still open (data-admsavegoods carries its id). */
+    /* The login card has the same problem in miniature and a worse ending:
+       it is rebuilt by every render, its <input type="password"> deliberately
+       carries no value attribute (a password does not belong in the markup),
+       and the boot probes each end in a render — so a probe landing between
+       the typing and the click emptied the box and the panel answered
+       «Введите пароль» to someone who had just typed it. Carry it across. */
+    var pwKeep = null;
+    if (S.screen === "admin" || S.screen === "scan") {
+      var pwEl0 = bodySlot.querySelector("[data-admpw]");
+      if (pwEl0) pwKeep = pwEl0.value;
+    }
     var goodsKeep = null;
     if (S.screen === "admin" && S.adminEdit) {
       var openFor = bodySlot.querySelector("[data-admsavegoods]");
@@ -12613,6 +13459,11 @@
 
     bodySlot.innerHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
       (chromeless ? "" : footer());
+
+    if (pwKeep) {
+      var pwEl1 = bodySlot.querySelector("[data-admpw]");
+      if (pwEl1) pwEl1.value = pwKeep;
+    }
 
     if (goodsKeep) {
       for (var gk in goodsKeep) {
@@ -13096,20 +13947,70 @@
 
   /* The toast lives in its own slot and never triggers a full render — a
      toast after «В корзину» must not destroy the button under the finger. */
+  /* The admin wears its own toast: a 56-px ink bar with an «Отменить» when the
+     change that fired it is reversible (docs/design/admin-handoff-README.md
+     § «Toast / undo snackbar»). The ✕ stays on both — a bar that only goes
+     away on its own timer sits in front of the very row it is talking about.
+     `role="status"` is the same hook either way, so nothing that listens for a
+     toast has to know which screen it is on. */
+  /* What is on screen right now, so an unrelated render() does not rebuild a
+     toast that has not changed. It used to rewrite the slot every time; with
+     the admin bar's own .2 s entrance that meant the animation restarted on
+     every render — and while a screen renders often (the scanner does, on
+     every frame it decodes) the bar never stood still long enough to be
+     clicked. */
+  var toastPainted = "";
   function paintToast() {
-    toastSlot.innerHTML = S.toast
-      ? '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
-      : "";
+    var admin = S.screen === "admin" || S.screen === "scan";
+    var key = S.toast ? (admin ? "a" : "s") + (S.toastUndo ? "u" : "-") + "|" + S.toast : "";
+    if (key === toastPainted) return;
+    toastPainted = key;
+    toastSlot.innerHTML = !S.toast ? ""
+      : admin
+        ? '<div class="adm-toast" role="status"><span class="adm-toast__t">' + S.toast + "</span>" +
+          (S.toastUndo ? '<button class="adm-toast__undo" data-admtoastundo>Отменить</button>' : "") +
+          '<button class="adm-toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
+        : '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>';
+    // the assistant button steps aside while the bar is up — see admin.css
+    try { document.body.classList.toggle("adm-toasting", !!S.toast && admin); } catch (e) {}
     translateTree(toastSlot);
   }
   function refocus(sel) {
     var n = document.querySelector(sel);
     if (n) n.focus();
   }
-  function toast(msg) {
-    S.toast = msg; paintToast(); patchHeader(); patchNav();
+  /** `undo` is the journal entry this toast can take back — see admUndoToast().
+      An undoable admin toast stays up for six seconds, everything else for the
+      usual 2.6: an «Отменить» nobody has time to read is not an offer. */
+  function toast(msg, undo) {
+    S.toast = msg; S.toastUndo = undo || null;
+    paintToast(); patchHeader(); patchNav();
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { S.toast = null; paintToast(); }, 2600);
+    toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, undo ? 6000 : 2600);
+  }
+  /** «Отменить» on the toast: put the change back through the journal, and
+      leave a «Отмена: …» line behind so the journal tells the whole story. */
+  function admUndoToast() {
+    var entry = S.toastUndo;
+    S.toast = null; S.toastUndo = null; clearTimeout(toast._t); paintToast();
+    if (!entry) return;
+    var i = DEMO.log.indexOf(entry);
+    if (i < 0) return;
+    var txt = entry.txt;
+    demoUndo(i);
+    journalNote(admCancelLine(txt));
+    toast("Отменено");
+    render();
+  }
+  /** The journal line an undo leaves behind. Its own function so the i18n
+      check can see it for what it is: a line in Renat's private change log,
+      Russian by decision like every other line there. */
+  function admCancelLine(txt) { return "Отмена: " + txt; }
+  /** A journal line with nothing to put back — the record of an undo itself. */
+  function journalNote(txt) {
+    DEMO.log.unshift({ t: new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), txt: txt });
+    DEMO.log = DEMO.log.slice(0, 40);
+    demoSave();
   }
 
   function addToCart(id, sizeIdx) {
@@ -13284,7 +14185,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -13295,6 +14196,12 @@
     if (S.langOpen && d.langtoggle === undefined && d.lang === undefined) {
       S.langOpen = false; patchHeader();
     }
+
+    /* features: «Скачать подарочную карту (PDF)» on the receipt is a real
+       <a href> to /api/giftcards/<code>/pdf/ — it is in this selector list so
+       the language menu above still closes behind it, and then the browser is
+       left to open the link itself. */
+    if (d.giftpdf !== undefined) return;
 
     if (d.ident !== undefined) identLogo(t);
     if (d.go) { if (d.go !== "catalog") S.brand = ""; go(d.go); return; }
@@ -13458,11 +14365,36 @@
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) { S.admAi = !S.admAi; admPanesSave(); render(); refocus("[data-admai]"); return; }
+    // the phone «Ещё» sheet
+    if (d.admmore !== undefined) { S.admMore = true; render(); return; }
+    if (d.admmoreclose !== undefined) { S.admMore = false; render(); return; }
+    /* One door into every section, still addressed by the key it has always
+       had: `data-admtab="stock"` opens Товары on its «Склад» tab, `"mail"`
+       opens Маркетинг on «Письма», and so on (ADM_SECTION_OF). The assistant's
+       «Открыть …» buttons and the e2e suite both come through here. */
     if (d.admtab) {
       S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = "";
       S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
+      S.admMore = false;
+      // «Каталог» and «Наборы» are the same old tab key with a different shelf
+      if (d.admtab === "goods") S.goodsTab = "goods";
+      // a queue row on «Обзор» carries the filter its section should open on
+      if (d.admfilter && d.admtab === "orders") S.admOrderFilter = d.admfilter;
+      if (d.admfilter && d.admtab === "people") S.admCustTier = d.admfilter;
       window.scrollTo({ top: 0 }); render(); return;
     }
+    // the «Заказы» chips (a filter with no tab of its own next to it)
+    if (d.admfilter) { S.admOrderFilter = d.admfilter; render(); return; }
+    /* The «Повторить» button on every error state: drop the cache the screen
+       reads and ask again, so the owner never has to reload the page. */
+    if (d.admreload) {
+      if (d.admreload === "overview") loadOverview(true);
+      else if (d.admreload === "orders") loadSrvOrders(true);
+      else if (d.admreload === "stock") reloadStock();
+      else if (d.admreload === "bundles") loadAdminBundles(true);
+      render(); return;
+    }
+    if (d.admtoastundo !== undefined) { admUndoToast(); return; }
     if (d.statsrange) { S.statsRange = d.statsrange; render(); return; }   // analytics agent
     // demo orders are numbered, real ones carry a uuid — keep both as they came
     if (d.admorder !== undefined) {
@@ -13480,12 +14412,69 @@
     if (d.admlogout !== undefined) { admLogout(); return; }
     if (d.admstatus) { srvOrderPatch(S.adminOrder, { status: d.admstatus }); return; }
     if (d.admship !== undefined) { srvCreateShipment(S.adminOrder); return; }
+    /* ---- «Заказы»: the three things the redesigned rows and card do -------
+       «Наклейка» books the parcel with the carrier (Montonio), «Отправлен»
+       goes through the confirm card because it moves the money's status and
+       sends the customer a letter, «Написать» opens the order on its message
+       card. Everything reversible lands in the journal with an undo. */
+    if (d.admlabel) { S.adminOrder = d.admlabel; srvCreateShipment(d.admlabel); return; }
+    if (d.admwrite) {
+      S.adminOrder = d.admwrite; S.adminTab = "orders"; S.orderReplyOpen = true;
+      S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+      srvLoadOrderMessages(d.admwrite);
+      window.scrollTo({ top: 0 }); render(); return;
+    }
+    if (d.admshipnow) {
+      var shipRow = admOrderById(d.admshipnow);
+      if (!shipRow) return;
+      pendingAction = {
+        type: "order_status", overlay: true, id: shipRow.id, number: shipRow.number,
+        value: "shipped", prev: shipRow.status,
+        title: "Отметить отправленным?",
+        detail: admShipConfirmText(shipRow),
+        ok: "Отправлен"
+      };
+      render(); return;
+    }
+    if (d.admordercancel) {
+      var canRow = admOrderById(d.admordercancel);
+      if (!canRow) return;
+      pendingAction = {
+        type: "order_status", overlay: true, danger: true, id: canRow.id, number: canRow.number,
+        value: "cancelled", prev: canRow.status,
+        title: "Отменить заказ?",
+        detail: admCancelConfirmText(canRow),
+        ok: "Отменить заказ"
+      };
+      render(); return;
+    }
+    /* ---- «Товары → Склад»: ± one unit ------------------------------------
+       No confirm card: this is the reversible half of the rule (README
+       § State) — it applies at once and the toast's «Отменить» is the safety
+       net, with a journal line behind it either way. */
+    if (d.stockstep) {
+      var stParts = d.stockstep.split(":");
+      var stDelta = Number(stParts[1]);
+      var stRow = stockFindRow(stParts[0]);
+      if (!stRow) return;
+      var was = stRow.tracked ? stRow.qty : 0;
+      if (stDelta < 0 && was <= 0) return;
+      // paint the new number before the round trip; reloadStock() confirms it
+      stRow.qty = was + stDelta; stRow.tracked = true;
+      var stEntry = demoApply({
+        type: "stock_adjust", product_id: stRow.productId, variant: stRow.variant,
+        delta: stDelta, reason: "adjust"
+      });
+      render();
+      toast(admStockToastText(stRow, was + stDelta), stEntry);
+      return;
+    }
     if (d.admnotesave !== undefined) {
       var noteEl = document.querySelector("[data-admnote]");
       srvOrderPatch(S.adminOrder, { note: noteEl ? noteEl.value : "" });
       return;
     }
-    /* ---- assistant-work: «Ответить клиенту» — see orderDetailSrv() -------- */
+    /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() -------- */
     if (d.admorderreply !== undefined) {
       S.orderReplyOpen = !S.orderReplyOpen;
       if (S.orderReplyOpen) srvLoadOrderMessages(S.adminOrder);
@@ -13813,6 +14802,14 @@
         // inventory: real stock has no demo layer either — straight to
         // POST /api/admin/inventory/moves/, same story as the blog posts above
         else if (pa.type === "stock_adjust" || pa.type === "stock_set") applyStockAction(pa);
+        /* «Заказы»: the status moves, the letter goes out by itself, and the
+           journal keeps the way back — so the toast can offer «Отменить». */
+        else if (pa.type === "order_status") {
+          var oEntry = demoApply(pa);
+          toast(pa.value === "shipped"
+            ? pa.number + " отправлен · письмо ушло"
+            : pa.number + " отменён", oEntry);
+        }
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
         render();
       }
@@ -14110,6 +15107,7 @@
     /* ---- admin «Товары → Наборы» ---- */
     if (d.admgoodstab) {
       S.goodsTab = d.admgoodstab;
+      S.adminTab = "goods"; S.adminEdit = "";
       S.bundleForm = null; S.bundleFormErr = ""; S.bundleDel = "";
       render(); return;
     }
@@ -14478,6 +15476,13 @@
     }
     // features: the gift-card form and the review form keep their own state
     else if (t.matches("[data-giftf]")) { S.gift[t.dataset.giftf] = t.value; }
+    /* features: «Получатель», step 2 of an all-gift-card checkout. No render()
+       on the text fields — same reason as [data-shipf] above: a rebuild here
+       would take the caret with it. The switch does redraw: it changes the
+       e-mail field's label and whether it is required, and the collapsed step
+       header reads «Мне на почту» / the address. */
+    else if (t.matches("[data-giftto]")) { giftTo()[t.dataset.giftto] = t.value; }
+    else if (t.matches("[data-gifttome]")) { giftTo().toMe = t.checked; render(); }
     else if (t.matches("[data-revf]")) {
       S.revForm[t.dataset.revf] = t.type === "checkbox" ? t.checked : t.value;
       var send = document.querySelector("[data-revsend]");
@@ -14487,9 +15492,15 @@
       S.goodsQ = t.value;
       var list = document.getElementById("goodslist");
       if (list) {
-        list.innerHTML = goodsRows();
+        list.innerHTML = admCatalogRows();
         translateTree(list);
       }
+    }
+    // «Заказы»: the same targeted patch, so the search box keeps its caret
+    else if (t.matches("[data-admorderq]")) {
+      S.admOrderQ = t.value;
+      var ordList = document.getElementById("orderlist");
+      if (ordList) { ordList.innerHTML = admOrderRows(); translateTree(ordList); }
     }
     /* ---- inventory: «Склад», «Продажа в салоне», the scanner's assign search — targeted patches, same reasoning as data-goodsq above ---- */
     else if (t.matches("[data-stockq]")) {
@@ -14832,6 +15843,16 @@
       // only once they have tried to continue: marking fields red at someone
       // who is still working down the form is nagging, not helping
       patchShip(e.target);
+    } else if (e.target.matches('[data-giftto="email"]')) {
+      /* features: the recipient's address is the one field on «Получатель»
+         that can be wrong rather than merely empty, and a typo there sends the
+         present to nobody. Checked on the way out of the field — but only once
+         something has been typed, so leaving an untouched form does not go
+         red. A render() would take the caret to wherever focus went next, so
+         this repaints only when the verdict actually changed. */
+      var wasBad = S.giftToTouched && giftToEmailBad();
+      if (e.target.value.trim()) S.giftToTouched = true;
+      if ((S.giftToTouched && giftToEmailBad()) !== wasBad) render();
     }
   }, true);
 

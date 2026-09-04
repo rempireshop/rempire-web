@@ -338,7 +338,8 @@ Node-инструмент собрать TypeScript-модуль на лету �
   через `blogCleanHtml()` (защита в глубину) и с заменой `<a data-product>`
   на карточку `.blog__prod`. Карточка — `<button>`, а не `<div class="card">`:
   маркер стоит внутри абзаца, а `<div>` внутри `<p>` браузер разорвёт.
-* Админка: вкладка «Блог» в `ADM_NAV`, `admBlogHTML()`/`admBlogEditor()`,
+* Админка: раздел «Блог» (`data-admtab="blog"`, группа «Ещё» —
+  `ADM_MORE` в `app.js`), `admBlogHTML()`/`admBlogEditor()`,
   `loadAdminBlog()`, `saveBlogFields()`/`saveBlogDraft()`/`publishBlogPost()`/
   `unpublishBlogPost()`/`deleteBlogPost()`. Черновик статьи, которую
   открыли для правки, живёт в `S.adminBlogEdit` — обычном объекте, не в

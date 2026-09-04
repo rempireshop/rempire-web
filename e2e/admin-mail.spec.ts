@@ -29,7 +29,10 @@ const INTRO = "E2E sissejuhatus tellimusele {order}.";
 
 /** The letters card lives on «Письма»; the editor appears once its own feed lands. */
 async function openMailTab(page: Page): Promise<void> {
-  await page.locator('[data-admtab="mail"]').click();
+  /* «Письма» is a tab inside «Маркетинг» since the redesign — one click to
+     the section, one to the tab (docs/design/admin-handoff-README.md). */
+  await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
+  await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
   await expect(page.locator("[data-mailtpl]").first()).toBeVisible();
   await page.locator('[data-mailtpl="order-confirmed"]').click();
   await page.locator('[data-maillang="ET"]').click();

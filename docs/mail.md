@@ -287,6 +287,15 @@ including "does not throw on a garbage order".
   per order plus the three flows is nowhere near that at 3–5 orders a month.
 - Tags (`template`, `lang`, `stage`, `mode`) are attached to every send, so
   Resend's dashboard can be filtered by letter type.
+- **Attachments.** `sendMail({ attachments: [{ filename, content, contentType }] })`
+  sends files inline as base64 in the same POST as the HTML — Resend's own
+  shape, no signed URL to expire. One letter uses it: «Подарочная карта»
+  carries the printable A5 card (`src/lib/giftcard-pdf.ts`, ~25 KB, docs/features.md
+  § «Сама карта — PDF»). A file that cannot be produced costs the letter its
+  attachment and nothing else — the code is in the body, and the letter also
+  links a route that renders the card on demand. Oversized entries are dropped
+  with a warning rather than sent. The e2e sink records attachment **names**,
+  never the bytes — the same rule as the body.
 - No mail is logged to the database. If a delivery log is ever needed, that is
   a `040_*.sql` migration (the mail range is 040–049) and a `mail_log` table —
   deliberately not built yet.

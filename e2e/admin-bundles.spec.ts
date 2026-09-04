@@ -54,7 +54,11 @@ async function freshShop(browser: Browser): Promise<{ page: Page; close: () => P
 
 /** Admin → «Товары» → the «Наборы» tab. */
 async function openSets(page: Page): Promise<void> {
-  await page.locator('[data-admtab="goods"]').click();
+  /* «Товары», then its «Наборы» tab: the redesign folded the old flat tabs
+     into five sections, and the sets shelf is one tab inside «Товары» now
+     (docs/design/admin-handoff-README.md). [aria-current] + :visible picks the
+     nav item out of everything else carrying the same key. */
+  await page.locator('[data-admtab="goods"][aria-current]:visible').first().click();
   await page.locator('[data-admgoodstab="bundles"]').click();
   await expect(page.locator('[data-admgoodstab="bundles"][aria-current="true"]')).toBeVisible();
   // «Новый набор» renders only once GET /api/admin/bundles/ has answered and

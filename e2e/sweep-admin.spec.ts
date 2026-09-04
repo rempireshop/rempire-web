@@ -26,10 +26,18 @@ test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "admin sweep — desktop project only, see docs/testing.md");
 });
 
-/** ADM_NAV (app.js) — every section the owner can open, in the panel's order. */
+/**
+ * Every section the owner can open, addressed by the key it has always had
+ * (`data-admtab="<key>"` — still the panel's deep link after the redesign
+ * folded thirteen flat tabs into five places). The second column is the label
+ * on the control that ends up current: a nav item for a section of its own, a
+ * tab inside the section for the seven keys that moved into one — «Склад» and
+ * «Наборы» under Товары, «Отзывы» under Клиенты, «Письма» under Маркетинг.
+ * See ADM_SECTION_OF in app.js and docs/design/admin-handoff-README.md.
+ */
 const TABS: Array<[string, string]> = [
-  ["over", "Обзор"], ["orders", "Заказы"], ["goods", "Товары"], ["stock", "Склад"],
-  ["pos", "Продажа в салоне"], ["people", "Клиенты"], ["reviews", "Отзывы"],
+  ["over", "Обзор"], ["orders", "Заказы"], ["goods", "Каталог"], ["stock", "Склад"],
+  ["pos", "Салон"], ["people", "Все клиенты"], ["reviews", "Отзывы"],
   ["promos", "Промокоды"], ["blog", "Блог"], ["stats", "Аналитика"], ["mail", "Письма"],
   ["apps", "Подключения"], ["setup", "Настройки"],
 ];
@@ -122,29 +130,35 @@ test.describe("sweep — admin API is closed without a session", () => {
 test.describe("sweep — every tab", () => {
   test.use({ extraHTTPHeaders: ipHeaders(153) });
 
-  test("all thirteen sections render, the assistant folds, the sidebar stays folded", async ({ page }) => {
+  test("all thirteen sections render, the assistant opens, the sidebar stays folded", async ({ page }) => {
     test.setTimeout(90_000);
     const w = watch(page);
     await openAdmin(page);
 
     for (const [key, label] of TABS) {
       await tab(page, key);
-      // The section is actually on screen, not just marked current in the nav.
-      await expect(page.locator(`[data-admtab="${key}"][aria-current="true"]`).first()).toHaveAttribute("title", label);
-      await expect(page.locator(".adm__main")).toBeVisible();
+      /* The section is actually on screen, not just marked current in the nav.
+         `.last()` because a key that moved into a sub-tab marks TWO controls
+         current — the section's nav item and the tab itself; the tab is the
+         one that names the thing being asserted. */
+      await expect(page.locator(`[data-admtab="${key}"][aria-current="true"]:visible`).last())
+        .toHaveAttribute("title", label);
+      await expect(page.locator(".adm-page")).toBeVisible();
       await assertClean(page, w, `tab ${key} (${label})`);
     }
 
-    // The assistant pane folds and unfolds; `aria-expanded` is what a screen
-    // reader (and this assertion) reads, and .adm--aimin is the layout half.
-    const ai = page.locator("[data-admai]");
-    await expect(ai).toHaveAttribute("aria-expanded", "true");
-    await ai.click();
-    await expect(page.locator("[data-admai]")).toHaveAttribute("aria-expanded", "false");
-    await expect(page.locator(".adm--aimin")).toBeVisible();
-    await assertClean(page, w, "assistant folded");
-    await page.locator("[data-admai]").click();
-    await expect(page.locator("[data-admai]")).toHaveAttribute("aria-expanded", "true");
+    /* The assistant is a floating button now, not a permanent third column:
+       closed by default, a 380-px pane once opened, and folded away again by
+       the «›» in its own header. `aria-expanded` is what a screen reader (and
+       this assertion) reads. */
+    await expect(page.locator(".adm-fab")).toHaveAttribute("aria-expanded", "false");
+    await page.locator(".adm-fab").click();
+    await expect(page.locator(".adm-asst")).toBeVisible();
+    await expect(page.locator(".adm-asst [data-admai]")).toHaveAttribute("aria-expanded", "true");
+    await assertClean(page, w, "assistant open");
+    await page.locator(".adm-asst [data-admai]").click();
+    await expect(page.locator(".adm-asst")).toHaveCount(0);
+    await expect(page.locator(".adm-fab")).toBeVisible();
 
     // The sidebar collapse has to survive the next render — every tab click
     // rebuilds the whole panel from S, so a state key that is not read back
@@ -152,6 +166,7 @@ test.describe("sweep — every tab", () => {
     const nav = page.locator("[data-admnav]");
     await nav.click();
     await expect(page.locator("[data-admnav]")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator(".adm2--navmin")).toBeVisible();
     for (const key of ["orders", "goods", "setup"]) {
       await tab(page, key);
       await expect(page.locator("[data-admnav]"), `sidebar sprang open on tab ${key}`)
@@ -497,6 +512,9 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
     test.setTimeout(60_000);
     const w = watch(page);
     await openAdmin(page);
+    // the assistant is behind a floating button since the redesign — open it
+    await page.locator(".adm-fab").click();
+    await expect(page.locator(".adm-asst")).toBeVisible();
 
     // «{{7*7}}» deliberately not last: the pane keeps echoing whichever
     // question was asked most recently, and the journal check at the end of
