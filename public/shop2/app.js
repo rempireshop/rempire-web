@@ -7061,7 +7061,18 @@
     if (!box || typeof L === "undefined") return;
     if (pmap && pmap.getContainer() !== box) { pmap.remove(); pmap = null; }
     if (!pmap) {
-      pmap = L.map(box).setView(pointMapCenter(), 12);
+      /* Open on the whole carrier network, not on the average of its
+         coordinates: the centroid of Estonia's 400 lockers is a field in
+         Järvamaa, and zoom 12 there showed two pins. fitBounds shows every
+         pin at once; the shopper pinches into their own town or types it in
+         the search box above. */
+      pmap = L.map(box);
+      var geo = pointsMatching().map(pointGeo).filter(Boolean);
+      if (geo.length > 1) {
+        pmap.fitBounds(L.latLngBounds(geo.map(function (p) { return [p.lat, p.lng]; })), { padding: [16, 16], maxZoom: 13 });
+      } else {
+        pmap.setView(pointMapCenter(), 12);
+      }
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
