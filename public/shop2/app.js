@@ -2866,7 +2866,7 @@
     [/^тариф Montonio \(прайс-лист\): (.+)$/, { ET: "Montonio tariif (hinnakiri): $1", EN: "Montonio tariff (price list): $1" }],
     [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
       { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Läti, Leedu ja teiste riikide vaikehinnad on endiselt vedajate tariifidest madalamad — vt docs/shipping.md.",
-        EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }]
+        EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }],
     /* админка, редизайн (этап 2): «Товар», «Салон» и сканер — строки с числом
        или названием внутри. */
     [/^Цены и остатки — на вкладке «Размеры и цены»\. Салон платит на ([\d.,]+) % меньше, если для товара не задана своя цена\.$/,
