@@ -418,22 +418,16 @@ body:has(.stickybar) .ftr {
 .card__add:hover { border-bottom-color: var(--ink); }
 .card__add:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .card__add--notify { color: var(--muted); border-bottom-color: rgba(28, 26, 0, .25); flex: 0 1 auto !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-/* Narrow cards (two per row on a phone): the row «7,90 € · 75 мл · В корзину»
-   does not fit a 155px card once the size label is long or the fallback font
-   is wide. The link keeps its words — a bag icon on its own was not obvious
-   enough to the owner — and takes a second line of the foot, right-aligned,
-   under the price and the size. The icon in the markup stays unused. */
+/* One row, always: «7,90 € · 75 мл · В корзину». On a two-per-row phone card
+   (155–170 px) the row runs out of room once the size label is long or the
+   fallback font is wide — «Lisa ostukorvi» with «250 мл» was the case CI
+   caught. The owner wants the words, not a bag icon, and the price and the
+   link must never be cut, so the SIZE LABEL is the part that gives way: it
+   shrinks and ellipsises (the chevron stays, the listbox shows every size in
+   full). The bag icon in the markup is unused. */
 .card__bag { display: none; flex: none; }
-@media (max-width: 480px) {
-  .card__foot { flex-wrap: wrap; row-gap: 2px; }
-  .card__add { flex: 1 0 100% !important; text-align: right; }
-  /* the underline should sit under the words, not run the full row; the
-     «Сообщить о наличии» button has no inner span and keeps its own */
-  .card__add:not(.card__add--notify) { border-bottom: 0; }
-  .card__add:not(.card__add--notify) .card__addtxt { border-bottom: 1px solid rgba(28, 26, 0, .4); }
-  .card__add:not(.card__add--notify):hover .card__addtxt { border-bottom-color: var(--ink); }
-  .card__add--notify { overflow: hidden; text-overflow: ellipsis; }
-}
+.card__sizebtn { flex: 0 1 auto !important; min-width: 0; }
+.card__sizelbl { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* the listbox */
 .card__pop {
   position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 5;
