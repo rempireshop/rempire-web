@@ -437,6 +437,25 @@ const CATALOGUE = catalogueMin as MinProduct[];
 const BY_ID = new Map<string, MinProduct>(CATALOGUE.map((p) => [p.id, p]));
 const VARIANTS = variantData as Record<string, { sizes: string[]; prices: number[] }>;
 
+/* product creation: the owner's own rows (src/lib/custom-products.ts, ids
+   `c-…`, db/migrations/131_custom_products.sql) are not in the file above.
+   Loaded at call time, the way src/lib/orders.ts does it, so this module
+   and that one never import each other at the top — and only for ids the
+   file does not have, so a catalogue-only basket never pays for the query.
+   A hidden row comes back with s:"out". */
+type CustomMin = { min: MinProduct; variants: { sizes: string[]; prices: number[] } | null; img: string };
+async function customLookup(ids: unknown[]): Promise<Map<string, CustomMin>> {
+  const want = [...new Set(ids.filter((id): id is string => typeof id === "string" && id.startsWith("c-") && !BY_ID.has(id)))];
+  if (!want.length) return new Map();
+  try {
+    const { customMinByIds } = await import("@/lib/custom-products");
+    return await customMinByIds(want);
+  } catch (err) {
+    console.error("[customers] custom products not loaded:", err);
+    return new Map();
+  }
+}
+
 export interface CartLine {
   id: string;
   title: string;
@@ -466,11 +485,13 @@ function money(n: number): number {
  */
 export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
   const list = Array.isArray(rawItems) ? rawItems.slice(0, 50) : [];
+  // the owner's own products in the basket, priced from their rows like the file's are from the file
+  const custom = await customLookup(list.map((raw) => (raw as Record<string, unknown> | null)?.id));
   const ids = new Set<string>();
   for (const raw of list) {
     const it = raw as Record<string, unknown> | null;
     const id = typeof it?.id === "string" ? it.id.slice(0, 120) : "";
-    if (id && BY_ID.has(id)) ids.add(id);
+    if (id && (BY_ID.has(id) || custom.has(id))) ids.add(id);
   }
   let prices: Record<string, number | null> = {};
   if (ids.size) {
@@ -493,11 +514,14 @@ export async function cartSnapshot(rawItems: unknown): Promise<CartSnapshot> {
   for (const raw of list) {
     const it = raw as Record<string, unknown> | null;
     const id = typeof it?.id === "string" ? it.id.slice(0, 120) : "";
-    const p = BY_ID.get(id);
+    const own = custom.get(id);
+    const p = BY_ID.get(id) ?? own?.min;
     if (!p) continue;
+    // a custom product the owner took off sale is not something to remind anyone about
+    if (own && own.min.s !== "in") continue;
     const qty = Math.max(1, Math.min(99, Math.round(Number(it?.qty) || 1)));
     const rawSize = it?.size ?? it?.variant;
-    const v = VARIANTS[id];
+    const v = VARIANTS[id] ?? own?.variants ?? undefined;
     let size: number | null = null;
     let label: string | null = null;
     let sized: number | null = null;
@@ -583,11 +607,20 @@ export interface StockAlertRow {
   sent_at: string | Date | null;
 }
 
-/** «Сообщить о наличии». Asking twice is one subscription, not two letters. */
+/**
+ * «Сообщить о наличии». Asking twice is one subscription, not two letters.
+ * The product is the catalogue's or one of the owner's own rows — a hidden
+ * custom product is refused: it was taken off the shelf, it is not coming
+ * back «в наличии».
+ */
 export async function addStockAlert(input: { email: string; productId: unknown; lang?: unknown }): Promise<boolean> {
   const addr = normalizeEmail(input.email);
   const productId = typeof input.productId === "string" ? input.productId.slice(0, 120) : "";
-  if (!isEmail(addr) || !productId || !BY_ID.has(productId)) return false;
+  if (!isEmail(addr) || !productId) return false;
+  if (!BY_ID.has(productId)) {
+    const own = (await customLookup([productId])).get(productId);
+    if (!own || own.min.s !== "in") return false;
+  }
   await query(
     `insert into stock_alerts (email, product_id, lang) values ($1, $2, $3)
      on conflict (email, product_id) do update set lang = $3, sent_at = null, created_at = now()`,
@@ -610,8 +643,33 @@ export async function markStockAlertSent(id: string): Promise<void> {
   await query("update stock_alerts set sent_at = now() where id = $1", [id]);
 }
 
-/** What the catalogue knows about a product — the back-in-stock letter's data. */
-export function productForAlert(productId: string): { id: string; brand: string; name: string; price: number; stock: string } | null {
-  const p = BY_ID.get(productId);
-  return p ? { id: p.id, brand: p.b, name: p.n, price: p.p, stock: p.s } : null;
+/** What the shop knows about a product — the back-in-stock letter's data. */
+export interface AlertProduct {
+  id: string;
+  brand: string;
+  name: string;
+  price: number;
+  /** The catalogue's own in/low/out, or "in"/"out" for a custom row that is on sale / hidden. */
+  stock: string;
+  /** The first photo, for a custom product; the catalogue's rows do not carry one here. */
+  img: string | null;
+}
+
+/**
+ * The products behind these ids — the catalogue file first, the owner's own
+ * rows (src/lib/custom-products.ts) for the rest. An id neither knows is
+ * simply absent, and the caller treats its alert as spent.
+ */
+export async function productsForAlerts(ids: string[]): Promise<Map<string, AlertProduct>> {
+  const out = new Map<string, AlertProduct>();
+  const missing: string[] = [];
+  for (const id of new Set(ids)) {
+    const p = BY_ID.get(id);
+    if (p) out.set(id, { id: p.id, brand: p.b, name: p.n, price: p.p, stock: p.s, img: null });
+    else missing.push(id);
+  }
+  for (const [id, own] of await customLookup(missing)) {
+    out.set(id, { id, brand: own.min.b, name: own.min.n, price: own.min.p, stock: own.min.s, img: own.img });
+  }
+  return out;
 }

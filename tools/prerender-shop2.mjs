@@ -37,10 +37,17 @@
    used to advertise, renders no preview at all on Facebook, WhatsApp or
    LinkedIn.
 
-   Also writes public/sitemap.xml (with xhtml:link alternates) and the two
-   robots policies — public/robots.txt is written to match $PUBLIC_BASE_URL,
-   so staging and production cannot disagree. Base URL: $PUBLIC_BASE_URL,
-   default the live domain. See docs/seo.md. */
+   Also writes the sitemap — public/sitemap.xml, an index over
+   public/sitemap-N.xml (the pages above, with xhtml:link alternates) and
+   sitemap-custom.xml, which the app serves for the owner's own products —
+   and the two robots policies; public/robots.txt is written to match
+   $PUBLIC_BASE_URL, so staging and production cannot disagree. Base URL:
+   $PUBLIC_BASE_URL, default the live domain. See docs/seo.md.
+
+   The head builders themselves live in src/lib/seo-head.mjs: a product the
+   owner creates in the panel (custom_products) has no file here — its page
+   is written at request time by src/lib/product-page.ts from the same
+   functions, so the two never disagree. */
 
 import { readFile, writeFile, mkdir, readdir, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -49,6 +56,20 @@ import { fileURLToPath } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
+/* The head builders, the copy table and the sitemap row are shared with the
+   request-time page of a custom product (src/lib/product-page.ts, a row of
+   custom_products that did not exist when this ran) — one module, so the
+   page the owner created in the panel carries the head a catalogue product
+   does. This file keeps what is build-only: the catalogue, the content, the
+   OG cards, the writing. */
+import {
+  LANGS, esc, eur, stripTags, slugify, clip, fitTitle, langPath, T,
+  OG_W, OG_H, OG_DEFAULT, OG_FALLBACK,
+  headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
+  productSpec, patchShell, HEAD_MARK, PRE_MARK,
+  sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM,
+  baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED
+} from "../src/lib/seo-head.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -56,7 +77,7 @@ const SHOP2 = path.join(PUB, "shop2");
 const SHOP = path.join(PUB, "shop");
 
 const BASE_ENV = process.env.PUBLIC_BASE_URL;
-const BASE = String(BASE_ENV || "https://rempireshop.com").replace(/\/+$/, "");
+const BASE = baseFrom(BASE_ENV);
 
 /* Staging must not be indexed even if the X-Robots-Tag header is ever lost,
    so the robots meta and public/robots.txt both follow the base URL rather
@@ -71,43 +92,18 @@ const BASE = String(BASE_ENV || "https://rempireshop.com").replace(/\/+$/, "");
    tree somebody might commit. It happened during this very build wave. The
    fail-safe direction is closed, and the mismatch it leaves (live URLs,
    noindex) is not shippable by accident: check-prerender.mjs compares
-   robots.txt against the host in the sitemap and fails on exactly that. */
-const LIVE = !!BASE_ENV && /(^|\.)rempireshop\.com$/i.test(new URL(BASE).hostname);
-const ROBOTS = LIVE ? "index, follow, max-image-preview:large" : "noindex, nofollow";
+   robots.txt against the host in the sitemap and fails on exactly that.
+   isLiveBase() is the one place the rule is spelled out — the request-time
+   product page (src/lib/product-page.ts) asks it the same question. */
+const LIVE = isLiveBase(BASE_ENV);
+const ROBOTS = LIVE ? ROBOTS_OPEN : ROBOTS_CLOSED;
 if (!BASE_ENV) {
   console.warn("! PUBLIC_BASE_URL is not set — using " + BASE + " for absolute URLs but writing " +
     "noindex and the closed robots.txt. Set it explicitly, at the switch too.");
 }
 
-const LANGS = [
-  { code: "RU", seg: "", tag: "ru", htmlLang: "ru", ogLocale: "ru_RU" },
-  { code: "ET", seg: "et", tag: "et", htmlLang: "et", ogLocale: "et_EE" },
-  { code: "EN", seg: "en", tag: "en", htmlLang: "en", ogLocale: "en_US" }
-];
-
-const esc = s => String(s == null ? "" : s)
-  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const eur = n => (Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " €";
-/* Same rule as stripTags() in public/shop2/app.js: an inline tag vanishes, a
-   block tag becomes a space. Turning every tag into a space split words that
-   carry markup inside them — «s<b>trong</b>» came out as «s trong». */
-const INLINE_TAGS = /^(?:span|b|i|strong|em|a|u|sup|sub)$/i;
-const stripTags = h => String(h || "")
-  .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, (_, tag) => (INLINE_TAGS.test(tag) ? "" : " "))
-  .replace(/<[^>]+>/g, " ")
-  .replace(/\s+/g, " ")
-  .trim();
-const slugify = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-
-/* Cut at a word, not mid-word: a description that ends "…профессионал" reads
-   as a broken page in a result listing. */
-function clip(s, max) {
-  const t = String(s || "").trim();
-  if (t.length <= max) return t;
-  const cut = t.slice(0, max - 1);
-  const sp = cut.lastIndexOf(" ");
-  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s.,;:·—–-]+$/, "") + "…";
-}
+/* LANGS, esc, eur, stripTags, slugify, clip and fitTitle come from
+   src/lib/seo-head.mjs — see the import above. */
 
 /* ---------- catalogue + content ---------------------------------------- */
 
@@ -292,8 +288,8 @@ const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s)
 
 const SHELL_FILE = path.join(SHOP2, "index.html");
 const shell = (await readFile(SHELL_FILE, "utf8")).replace(/\r\n?/g, "\n");
-const HEAD_MARK = /<!-- seo:start -->[\s\S]*?<!-- seo:end -->/;
-const PRE_MARK = /<!-- prerender:start -->[\s\S]*?<!-- prerender:end -->/;
+// HEAD_MARK / PRE_MARK — the two marker pairs — are shared with the
+// request-time page, which patches the very same shell (src/lib/seo-head.mjs)
 const headAssets = (shell.match(/<link rel="icon"[\s\S]*?(?=<\/head>)/) || [])[0];
 // anchored on the marker, not on the first </div>: the block between them is
 // full of divs of its own once a run has happened
@@ -306,184 +302,24 @@ if (!headAssets || !bodyScripts || !HEAD_MARK.test(shell) || !PRE_MARK.test(shel
     "script tags. Restore those markers — do not let the tool guess.");
 }
 
-/* ---------- copy, one table per language -------------------------------- */
+/* ---------- copy, one table per language --------------------------------
 
-/* Mirrors the strings setHead() in app.js uses, so the tab title does not
-   change under the shopper when the script takes over. */
-const T = {
-  RU: {
-    base: "REMPIRE — магазин косметики в Таллинне",
-    buy: "купить в Rempire",
-    home: "Главная", catalogue: "Каталог", brands: "Бренды", all: "Все товары",
-    homeIntro: "Профессиональный уход, стайлинг, парфюмерия и мерч из салона Rempire в Таллинне. " +
-      "Доставка Omniva, SmartPosti и DPD по Эстонии, Латвии, Литве и Финляндии, самовывоз на Mardi 1.",
-    homeDesc: "Магазин Rempire: уход за волосами и бородой, стайлинг, парфюмерия и мерч. " +
-      "Доставка по Эстонии и Балтии, самовывоз в Таллинне на Mardi 1.",
-    catsTitle: "Разделы", brandsTitle: "Бренды",
-    sizes: "Размеры", description: "Описание",
-    inStock: "В наличии", low: "мало", out: "нет в наличии",
-    from: "от ",
-    tax: "Налоги включены. Доставка рассчитается при оформлении.",
-    lang: "Язык", loading: "Загружаем магазин…",
-    catDesc: c => `${c} в магазине Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
-    brandDesc: b => `${b} в наличии в Rempire, Таллинн — весь ассортимент бренда во всех разделах магазина.`,
-    prodDesc: (price, cat, stock) =>
-      `${price} · ${cat} · ${stock}. Магазин Rempire, Таллинн — доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
-    /* the four screens added 03.09 — sets, one set, the gift card, the policy pages */
-    save: "выгода", pieces: "товара в наборе",
-    setsDesc: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.",
-    setDesc: (price, save, n) => `${price} вместо розницы, ${save} — ${n} в наборе. Магазин Rempire, Таллинн: доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
-    giftDesc: "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.",
-    infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`,
-    blogDesc: "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.",
-    blogEmpty: "Статей пока нет — загляните позже.",
-    otherPosts: "Другие статьи"
-  },
-  ET: {
-    base: "REMPIRE — kosmeetikapood Tallinnas",
-    buy: "osta Rempire'ist",
-    home: "Avaleht", catalogue: "Kataloog", brands: "Brändid", all: "Kõik tooted",
-    homeIntro: "Professionaalne juukse- ja habemehooldus, viimistlus, parfüümid ja merch Rempire'i salongist Tallinnas. " +
-      "Tarne Omniva, SmartPosti ja DPD-ga Eestis, Lätis, Leedus ja Soomes, järeletulek Mardi 1.",
-    homeDesc: "Rempire'i pood: juukse- ja habemehooldus, viimistlus, parfüümid ja merch. " +
-      "Tarne üle Eesti ja Baltikumi, järeletulek Tallinnas Mardi 1.",
-    catsTitle: "Osakonnad", brandsTitle: "Brändid",
-    sizes: "Suurused", description: "Kirjeldus",
-    inStock: "Laos", low: "vähe", out: "pole saadaval",
-    from: "alates ",
-    tax: "Hinnad sisaldavad makse. Tarne arvutatakse vormistamisel.",
-    lang: "Keel", loading: "Laeme poodi…",
-    catDesc: c => `${c} Rempire'i poes Tallinnas. Tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
-    brandDesc: b => `${b} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.`,
-    prodDesc: (price, cat, stock) =>
-      `${price} · ${cat} · ${stock}. Rempire'i pood, Tallinn — tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
-    save: "sääst", pieces: "toodet komplektis",
-    setsDesc: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
-    setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
-    giftDesc: "Rempire'i kinkekaart 25, 50 või 100 € — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
-    infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`,
-    blogDesc: "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
-    blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
-    otherPosts: "Teised artiklid"
-  },
-  EN: {
-    base: "REMPIRE — grooming shop in Tallinn",
-    buy: "buy at Rempire",
-    home: "Home", catalogue: "Catalogue", brands: "Brands", all: "All products",
-    homeIntro: "Professional hair and beard care, styling, fragrance and merch from the Rempire salon in Tallinn. " +
-      "Omniva, SmartPosti and DPD delivery across Estonia, Latvia, Lithuania and Finland, pickup at Mardi 1.",
-    homeDesc: "Rempire shop: hair and beard care, styling, fragrance and merch. " +
-      "Delivery across Estonia and the Baltics, pickup in Tallinn at Mardi 1.",
-    catsTitle: "Sections", brandsTitle: "Brands",
-    sizes: "Sizes", description: "Description",
-    inStock: "In stock", low: "low stock", out: "out of stock",
-    from: "from ",
-    tax: "Taxes included. Shipping is calculated at checkout.",
-    lang: "Language", loading: "Loading the shop…",
-    catDesc: c => `${c} at Rempire, Tallinn. Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
-    brandDesc: b => `${b} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.`,
-    prodDesc: (price, cat, stock) =>
-      `${price} · ${cat} · ${stock}. Rempire shop, Tallinn — Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
-    save: "you save", pieces: "products in the set",
-    setsDesc: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
-    setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
-    giftDesc: "A Rempire gift card for €25, €50 or €100 — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
-    infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`,
-    blogDesc: "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
-    blogEmpty: "No articles yet — check back soon.",
-    otherPosts: "More articles"
-  }
-};
-
-/* A result listing shows about sixty characters of a title. Take the longest
-   version that fits — app.js's fitTitle() runs the same ladder. */
-function fitTitle(core, full) {
-  if (full && full.length <= 60) return full;
-  if (core.length + 10 <= 60) return core + " — REMPIRE";
-  if (core.length <= 60) return core;
-  return clip(core, 60);
-}
+   T — the strings setHead() in app.js uses, one table per language — lives
+   in src/lib/seo-head.mjs now, next to the head builder that prints them,
+   so the request-time product page says the same words. */
 
 /* ---------- URLs -------------------------------------------------------- */
 
 const abs = u => BASE + u;
-const langPath = (seg, rest) => "/shop2" + (seg ? "/" + seg : "") + rest;
-
-/* One page's whole hreflang cluster: the three languages plus x-default, which
-   is the unprefixed Russian path — the one every old link already points at.
-   data-seo marks them so app.js rewrites these tags on client navigation
-   instead of appending a second set. */
-function headLinks(seg, rest) {
-  const out = LANGS.map(l =>
-    `<link rel="alternate" hreflang="${l.tag}" href="${esc(abs(langPath(l.seg, rest)))}" data-seo="alt-${l.tag}">`);
-  out.push(`<link rel="alternate" hreflang="x-default" href="${esc(abs(langPath("", rest)))}" data-seo="alt-x">`);
-  out.unshift(`<link rel="canonical" href="${esc(abs(langPath(seg, rest)))}" data-seo="canonical">`);
-  return out.join("\n");
-}
 
 /* ---------- the page --------------------------------------------------- */
 
-/* Prerender-only styling. The block is thrown away the moment app.js has
-   painted, so these rules deliberately lean on styles.css (.wrap, .grid,
-   .card, .pdp, .display, .chip, .acc__rich) and only fill the few gaps a
-   script-less page has: a real <img> where the SPA paints a background, and
-   anchors where it draws buttons. */
-const PRE_CSS = `
-#prerender .pre__img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; background: var(--page); }
-#prerender .pre__crumbs { font-size: 12.5px; color: var(--muted); padding-top: 16px; }
-#prerender .pre__crumbs a:hover { text-decoration: underline; }
-#prerender .pre__brand { font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
-#prerender .pre__sizes { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 18px; }
-#prerender .pre__sizes li { border: 1px solid var(--rule); padding: 6px 12px; font-size: 13.5px; }
-#prerender .pre__langs { margin: 32px 0 8px; font-size: 12.5px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
-#prerender .pre__langs a { border-bottom: 1px solid var(--rule); }
-#prerender .pre__list { list-style: none; padding: 0; margin: 0 0 24px; display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 13.5px; }
-#prerender .pre__card { display: block; }
-#prerender .pre__card .pre__img { margin-bottom: 6px; }
-#prerender .blog__tile:hover .pre__nm { text-decoration: underline; text-underline-offset: 3px; }
-#prerender .pre__nm { display: block; font-size: 13.5px; }
-#prerender .pre__pr { display: block; font-size: 13.5px; font-weight: 600; }
-`.trim();
-
-/* Everything a crawler reads, in one block. It is written between the markers
-   in index.html and inlined verbatim into every generated page, so the Russian
-   home page and the other 764 are built by the same code. */
-function headBlock({ lang, seg, rest, title, desc, image, imageAlt, ogType, jsonld, ldMain }) {
-  const canonical = abs(langPath(seg, rest));
-  const ld = (Array.isArray(jsonld) ? jsonld : [jsonld]).filter(Boolean);
-  const isMain = o => !!ldMain && o["@type"] === "Product";
-  return `<title>${esc(title)}</title>
-<meta name="description" content="${esc(desc)}">
-<meta name="robots" content="${ROBOTS}">
-${headLinks(seg, rest)}
-<meta property="og:type" content="${ogType}">
-<meta property="og:site_name" content="REMPIRE">
-<meta property="og:locale" content="${lang.ogLocale}" data-seo="og:locale">
-<meta property="og:url" content="${esc(canonical)}" data-seo="og:url">
-<meta property="og:title" content="${esc(title)}" data-seo="og:title">
-<meta property="og:description" content="${esc(desc)}" data-seo="og:description">
-<meta property="og:image" content="${esc(image)}" data-seo="og:image">
-<meta property="og:image:alt" content="${esc(imageAlt)}">
-<meta property="og:image:type" content="${/\.png(\?|$)/i.test(image) ? "image/png" : "image/jpeg"}">
-<meta property="og:image:width" content="${OG_W}">
-<meta property="og:image:height" content="${OG_H}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${esc(title)}" data-seo="twitter:title">
-<meta name="twitter:description" content="${esc(desc)}" data-seo="twitter:description">
-<meta name="twitter:image" content="${esc(image)}" data-seo="twitter:image">
-<style id="prestyle">${PRE_CSS}</style>
-${ld.map(o => '<script type="application/ld+json"' +
-    /* On a catalogue product page app.js writes its own Product block into
-       #ldjson, so handing it this one means it rewrites it in place rather
-       than adding a second Product. Everywhere else the id would be a trap:
-       setHead() *removes* #ldjson on any screen that is not `product`, so a
-       set's Product block carrying that id would be deleted the moment the
-       script booted — and Googlebot reads the rendered DOM. The rest are
-       marked data-seo="ldjson-page": app.js drops those only once the shopper
-       navigates away from the path the page was loaded on. */
-    (isMain(o) ? ' id="ldjson"' : ' data-seo="ldjson-page"') +
-    ">" + JSON.stringify(o) + "</script>").join("\n")}`;
-}
+/* Everything a crawler reads, in one block — headBlock() in
+   src/lib/seo-head.mjs, bound here to this run's base URL and robots value.
+   It is written between the markers in index.html and inlined verbatim into
+   every generated page, so the Russian home page and the other 809 are
+   built by the same code as a custom product's page at request time. */
+const headBlock = spec => sharedHeadBlock({ base: BASE, robots: ROBOTS, ...spec });
 
 function fullPage(spec) {
   return `<!doctype html>
@@ -504,25 +340,20 @@ ${bodyScripts}</body>
 `;
 }
 
-/* Replacement functions, not strings: a description containing $& or $1 would
-   otherwise be spliced by String.replace's own substitution rules. */
+/* patchShell() replaces between the two marker pairs with replacement
+   functions, not strings — a description containing $& or $1 would otherwise
+   be spliced by String.replace's own substitution rules. The Russian home
+   page keeps its <html lang="ru"> (no fourth argument). */
 function patchedShell(spec) {
-  return shell
-    .replace(HEAD_MARK, () => "<!-- seo:start -->\n" + headBlock(spec) + "\n<!-- seo:end -->")
-    .replace(PRE_MARK, () =>
-      '<!-- prerender:start --><div id="prerender">' + spec.content + blogDataScript(spec.lang.code) + '</div><!-- prerender:end -->');
+  return patchShell(shell, headBlock(spec), spec.content + blogDataScript(spec.lang.code));
 }
 
-/* ---------- shared blocks ---------------------------------------------- */
+/* ---------- shared blocks ----------------------------------------------
+   href(), langNav(), crumbs() and breadcrumbLD() are the shared ones from
+   src/lib/seo-head.mjs — the request-time product page draws the same
+   breadcrumbs and the same three-language nav. */
 
-const href = (seg, rest) => esc(langPath(seg, rest));
-
-function langNav(seg, rest, t) {
-  return '<nav class="pre__langs" aria-label="' + esc(t.lang) + '">' +
-    LANGS.map(l => '<a href="' + href(l.seg, rest) + '" hreflang="' + l.tag + '"' +
-      (l.seg === seg ? ' aria-current="true"' : "") + ">" + l.code + "</a>").join("") +
-    "</nav>";
-}
+const breadcrumbLD = items => sharedBreadcrumbLD(BASE, items);
 
 function stockLabel(p, t) {
   return p.stock === "out" ? t.out : p.stock === "low" ? t.low : t.inStock;
@@ -546,21 +377,6 @@ function card(p, seg, code, t) {
 
 function grid(list, seg, code, t) {
   return '<ul class="grid" style="list-style:none;padding:0">' + list.map(p => card(p, seg, code, t)).join("") + "</ul>";
-}
-
-function crumbs(parts) {
-  return '<div class="pre__crumbs">' + parts.map(([label, url]) =>
-    url ? '<a href="' + url + '">' + esc(label) + "</a>" : esc(label)).join(" / ") + "</div>";
-}
-
-function breadcrumbLD(items) {
-  return {
-    "@context": "https://schema.org", "@type": "BreadcrumbList",
-    itemListElement: items.map((it, i) => ({
-      "@type": "ListItem", position: i + 1, name: it[0],
-      ...(it[1] ? { item: abs(it[1]) } : {})
-    }))
-  };
 }
 
 /* «Mardi 1, 10145 Tallinn» → the three fields schema.org wants. One address
@@ -619,10 +435,9 @@ const CATS = Object.keys(CAT_NAMES);
    promise `summary_large_image` and always state width and height. */
 
 const OGDIR = path.join(SHOP, "og");
-const OG_W = 1200, OG_H = 630;
+// OG_W × OG_H, OG_DEFAULT (tower on the ground, for pages with no product) and
+// OG_FALLBACK (shipped, 1200×630 — used when sharp is missing) are imported
 const OG_GROUND = { r: 0xed, g: 0xea, b: 0xe1 };
-const OG_DEFAULT = "/brand/og-default.png";   // tower on the ground, for pages with no product
-const OG_FALLBACK = "/og-shop.png";           // shipped, 1200×630 — used when sharp is missing
 
 let sharp = null;
 try { ({ default: sharp } = await import("sharp")); }
@@ -743,48 +558,28 @@ const blogCard1200 = post => (OG_CARDS.has("blog-" + post.slug + ".jpg") ? "/sho
 function productPage(p, lang) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
-  const rest = "/p/" + encodeURIComponent(p.id) + "/";
   const name = tr(p.name, code, true);
   const catName = tr(CAT_NAMES[p.cat] || "", code, false);
-  const core = p.brand + " " + name;
-  const price = priceLabel(p, t);
-  const full = core + " — " + t.buy + " · " + price;
-  let title = fitTitle(core, full);
-  if (code === "EN" && p.seo && p.seo.t) title = fitTitle(p.seo.t, "");
 
-  const body = stripTags(code === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p, code));
-  const desc = clip(body || t.prodDesc(price, catName, stockLabel(p, t)), 158);
-
-  /* Its own 1 200×630 card, drawn above if the old shop had not left one. The
-     square .webp cutout is never offered to a scraper: half of them refuse
-     the format outright and the rest crop it through the middle. */
-  const image = ogPick(productCard(p));
-
-  const crumbItems = [
-    [t.home, langPath(seg, "/")],
-    [catName, langPath(seg, "/c/" + p.cat + "/")],
-    [core, null]
-  ];
-
-  const productLD = {
-    "@context": "https://schema.org", "@type": "Product",
-    name: core,
-    brand: { "@type": "Brand", name: p.brand },
-    image: [imgUrl(p)],
-    description: clip(body, 500),
-    category: catName,
-    sku: p.id,
-    url: abs(langPath(seg, rest)),
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "EUR",
-      price: String(p.price),
-      availability: "https://schema.org/" + (p.stock === "out" ? "OutOfStock" : "InStock"),
-      itemCondition: "https://schema.org/NewCondition",
-      url: abs(langPath(seg, rest)),
-      seller: { "@type": "Organization", name: "REMPIRE" }
-    }
-  };
+  /* Title ladder, description, breadcrumb and the Product JSON-LD: the shared
+     productSpec() (src/lib/seo-head.mjs), which the request-time page of a
+     custom product calls with the owner's own texts. The catalogue's static
+     English pair — title and description exported from the old shop — is the
+     English page's when there is one. */
+  const spec = productSpec({
+    base: BASE, lang,
+    id: p.id, cat: p.cat, catName, brand: p.brand, name,
+    price: p.price, priceFrom: p.priceFrom, stock: p.stock,
+    seoTitle: code === "EN" && p.seo && p.seo.t ? p.seo.t : "",
+    seoDesc: "",
+    body: code === "EN" && p.seo && p.seo.d ? p.seo.d : descFor(p, code),
+    /* Its own 1 200×630 card, drawn above if the old shop had not left one. The
+       square .webp cutout is never offered to a scraper: half of them refuse
+       the format outright and the rest crop it through the middle. */
+    image: ogPick(productCard(p)),
+    imageUrls: [imgUrl(p)]
+  });
+  const { rest, core, priceText: price, crumbItems } = spec;
 
   const sizes = (p.sizes || []).length
     ? "<h2 class=\"display h1\" style=\"font-size:13px;letter-spacing:.18em\">" + esc(t.sizes) + "</h2>" +
@@ -824,12 +619,7 @@ function productPage(p, lang) {
 
   return {
     file: path.join(SHOP2, seg, "p", p.id, "index.html"),
-    spec: {
-      lang, seg, rest, title, desc, image, imageAlt: core,
-      ogType: "product", ldMain: true,
-      jsonld: [productLD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
-      content
-    }
+    spec: { ...spec, content }
   };
 }
 
@@ -1521,18 +1311,10 @@ const today = new Date().toISOString().slice(0, 10);
 
 /* Every language of a page is its own <url>, and each one lists the whole
    cluster — that is what the protocol asks for, and it is what lets Google
-   swap in the Estonian result for an Estonian searcher. */
-function urlEntry(rest, seg, priority) {
-  const alts = LANGS.map(l =>
-    `    <xhtml:link rel="alternate" hreflang="${l.tag}" href="${esc(abs(langPath(l.seg, rest)))}"/>`);
-  alts.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${esc(abs(langPath("", rest)))}"/>`);
-  return "  <url>\n" +
-    `    <loc>${esc(abs(langPath(seg, rest)))}</loc>\n` +
-    alts.join("\n") + "\n" +
-    `    <lastmod>${today}</lastmod>\n` +
-    `    <priority>${priority}</priority>\n` +
-    "  </url>";
-}
+   swap in the Estonian result for an Estonian searcher. sitemapUrlEntry()
+   in src/lib/seo-head.mjs is the row; the custom products' sitemap route
+   writes the same one. */
+const urlEntry = (rest, seg, priority) => sitemapUrlEntry(BASE, rest, seg, priority, today);
 
 /* The sitemap is exactly the set of pages written above — nothing that only
    exists client-side, and in particular nothing behind a basket. Asking
@@ -1567,32 +1349,33 @@ for (const e of entries) {
   if (NEVER.test(p)) throw new Error("sitemap would contain a screen that must never be indexed: " + p);
 }
 
-const OPEN = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
 const CHUNK = 1000;   // the protocol allows 50 000; small files are easier to read and to diff
 const sitemapFiles = [];
 
-if (entries.length <= CHUNK) {
-  await writeFile(path.join(PUB, "sitemap.xml"), OPEN + entries.join("\n") + "\n</urlset>\n", "utf8");
-  sitemapFiles.push("sitemap.xml");
-  // a leftover index from a larger catalogue would keep pointing at files we no longer write
-  for (let i = 1; i <= 20; i++) {
-    const f = path.join(PUB, `sitemap-${i}.xml`);
-    if (existsSync(f)) await rm(f);
-  }
-} else {
-  for (let i = 0; i * CHUNK < entries.length; i++) {
-    const name = `sitemap-${i + 1}.xml`;
-    await writeFile(path.join(PUB, name),
-      OPEN + entries.slice(i * CHUNK, (i + 1) * CHUNK).join("\n") + "\n</urlset>\n", "utf8");
-    sitemapFiles.push(name);
-  }
-  await writeFile(path.join(PUB, "sitemap.xml"),
-    '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    sitemapFiles.map(f => `  <sitemap><loc>${abs("/" + f)}</loc><lastmod>${today}</lastmod></sitemap>`).join("\n") +
-    "\n</sitemapindex>\n", "utf8");
+for (let i = 0; i * CHUNK < entries.length; i++) {
+  const name = `sitemap-${i + 1}.xml`;
+  await writeFile(path.join(PUB, name),
+    SITEMAP_OPEN + entries.slice(i * CHUNK, (i + 1) * CHUNK).join("\n") + "\n" + SITEMAP_CLOSE, "utf8");
+  sitemapFiles.push(name);
 }
+// a leftover chunk from a larger catalogue would keep pointing at pages we no longer write
+for (let i = sitemapFiles.length + 1; i <= 20; i++) {
+  const f = path.join(PUB, `sitemap-${i}.xml`);
+  if (existsSync(f)) await rm(f);
+}
+
+/* public/sitemap.xml is always a sitemapindex: the pages written above, in
+   sitemap-N.xml, plus sitemap-custom.xml — which is not a file at all but a
+   route (src/app/sitemap-custom.xml/route.ts) answering at request time with
+   the owner's own products (custom_products, ids `c-…`). Those rows do not
+   exist when this runs, and an index is the one shape that lets a static
+   file point at a dynamic one. It used to be a plain urlset below 1 000
+   URLs; robots.txt names only the index, so nothing else moved. */
+await writeFile(path.join(PUB, "sitemap.xml"),
+  '<?xml version="1.0" encoding="UTF-8"?>\n' +
+  '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+  [...sitemapFiles, SITEMAP_CUSTOM].map(f => `  <sitemap><loc>${abs("/" + f)}</loc><lastmod>${today}</lastmod></sitemap>`).join("\n") +
+  "\n</sitemapindex>\n", "utf8");
 
 /* ---------- robots ------------------------------------------------------
 
@@ -1671,5 +1454,5 @@ console.log(
     `${BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0} blog\n` +
   `           base ${BASE}  robots "${ROBOTS}"  robots.txt = ${LIVE ? "production" : "staging"}  assets ?v=${ASSET_V}\n` +
   `           og cards: ${OG_CARDS.size} on disk (${cardsMade} drawn this run)  every og:image ${OG_W}×${OG_H}\n` +
-  `           sitemap: ${entries.length} urls in ${sitemapFiles.length || 1} file(s)`
+  `           sitemap: ${entries.length} urls in ${sitemapFiles.length} file(s) + ${SITEMAP_CUSTOM} (the app's, custom products) behind the index`
 );

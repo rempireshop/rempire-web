@@ -28,7 +28,8 @@ import {
   markStockAlertSent,
   normalizeLangCode,
   pendingStockAlerts,
-  productForAlert,
+  productsForAlerts,
+  type AlertProduct,
   type CartLine,
   type LangCode,
   type StockAlertRow,
@@ -346,20 +347,25 @@ export async function sweepBackInStock(): Promise<FlowRun> {
     /* no overrides table — the catalogue's own stock is the answer */
   }
 
+  /* The catalogue file and the owner's own rows (`c-…`) in one map: a custom
+     product that is on sale reads "in" from its row and "out" from the
+     override the owner switched — exactly the one this sweep is waiting on. */
+  const products = await productsForAlerts(ids);
   const ready = alerts.filter((a) => {
-    const p = productForAlert(a.product_id);
+    const p = products.get(a.product_id);
     if (!p) return false;
     const stock = overrides.get(a.product_id) ?? p.stock;
     return stock === "in";
   });
-  return sendStockAlerts(ready);
+  return sendStockAlerts(ready, products);
 }
 
-async function sendStockAlerts(alerts: StockAlertRow[]): Promise<FlowRun> {
+async function sendStockAlerts(alerts: StockAlertRow[], known?: Map<string, AlertProduct>): Promise<FlowRun> {
+  const products = known ?? (await productsForAlerts(alerts.map((a) => a.product_id)));
   let sent = 0;
   let skipped = 0;
   for (const alert of alerts.slice(0, BATCH)) {
-    const p = productForAlert(alert.product_id);
+    const p = products.get(alert.product_id);
     if (!p) {
       await markStockAlertSent(alert.id);
       skipped += 1;

@@ -37,6 +37,39 @@ function productInfo(id: string): { id: string; name: string; brand: string } {
   return { id, name: p ? p.n : id, brand: p ? p.b : "" };
 }
 
+/* product creation: an id the file does not carry may be one of the owner's
+   own rows (src/lib/custom-products.ts, `c-…`, db/migrations/131). Looked up
+   at call time the way src/lib/orders.ts does it, once per summary, for the
+   handful of ids the lists actually name — never for a catalogue id. */
+type Named = { id: string; name: string; brand: string };
+async function customNames(ids: string[]): Promise<Map<string, { name: string; brand: string }>> {
+  const want = [...new Set(ids.filter((id) => id.startsWith("c-") && !BY_ID.has(id)))];
+  const out = new Map<string, { name: string; brand: string }>();
+  if (!want.length) return out;
+  try {
+    const { customMinByIds } = await import("@/lib/custom-products");
+    for (const [id, own] of await customMinByIds(want)) out.set(id, { name: own.min.n, brand: own.min.b });
+  } catch (err) {
+    console.error("[analytics] custom products not loaded:", err);
+  }
+  return out;
+}
+
+/** Fills in, in place, the name and brand productInfo() could not — the custom products. */
+async function nameCustom(...lists: Named[][]): Promise<void> {
+  const names = await customNames(lists.flatMap((l) => l.map((r) => r.id)));
+  if (!names.size) return;
+  for (const list of lists) {
+    for (const row of list) {
+      const n = names.get(row.id);
+      if (n) {
+        row.name = n.name;
+        row.brand = n.brand;
+      }
+    }
+  }
+}
+
 function money(n: unknown): number {
   const v = typeof n === "number" ? n : parseFloat(String(n ?? 0));
   return Number.isFinite(v) ? Math.round(v * 100) / 100 : 0;
@@ -387,6 +420,9 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
     qChatOpens(from, to),
   ]);
 
+  // the owner's own products: a name and a brand instead of a bare `c-…` id
+  await nameCustom(topProductsByRevenue, topProductsByViews, viewedNotBought, lowStock);
+
   const aov = ordersSummary.orders > 0 ? money(ordersSummary.revenue / ordersSummary.orders) : 0;
   const prevAov = ordersSummary.prevOrders > 0 ? money(ordersSummary.prevRevenue / ordersSummary.prevOrders) : 0;
   const conversion = funnel.sessions > 0 ? ordersSummary.orders / funnel.sessions : 0;
@@ -500,15 +536,24 @@ async function qRevenue7d(from: Date, to: Date) {
  * (tracked) variant's real quantity where there is one, the owner's manual
  * override everywhere else. getOverrides() does that merge already, so this
  * reads it rather than re-deriving it and drifting from the badge.
- * Ids the catalogue no longer carries are dropped — a leftover override row
- * for a discontinued product is not something to go and re-order.
+ * Ids neither the catalogue nor the owner's own rows carry are dropped — a
+ * leftover override row for a discontinued product is not something to go
+ * and re-order.
  */
 async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
   const overrides = await getOverrides();
-  const items: OverviewLowStockItem[] = [];
+  const short: Array<[string, "low" | "out"]> = [];
   for (const [id, o] of Object.entries(overrides)) {
-    if ((o.stock !== "low" && o.stock !== "out") || !BY_ID.has(id)) continue;
-    items.push({ ...productInfo(id), stock: o.stock });
+    if (o.stock === "low" || o.stock === "out") short.push([id, o.stock]);
+  }
+  const names = await customNames(short.map(([id]) => id));
+  const items: OverviewLowStockItem[] = [];
+  for (const [id, stock] of short) {
+    if (BY_ID.has(id)) items.push({ ...productInfo(id), stock });
+    else {
+      const n = names.get(id);
+      if (n) items.push({ id, name: n.name, brand: n.brand, stock });
+    }
   }
   items.sort((a, b) =>
     a.stock === b.stock ? a.name.localeCompare(b.name, "ru") : a.stock === "out" ? -1 : 1,
