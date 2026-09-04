@@ -414,6 +414,36 @@ for the same reason `sweep-admin-ops.spec.ts` does: the first ± is what makes a
 variant *counted* at all, and from then on every spec that buys it decrements
 the same number.
 
+## The product editor (`e2e/admin-editor.spec.ts`)
+
+The other spec that runs on both projects, for the same reason: the editor is
+five tabs over one form, and a phone is where the owner uses it.
+
+The shape it pins is the one the redesign changed. **Every pane is in the DOM
+at once and the inactive ones carry `hidden`** — so a spec that types into a
+field must open that field's tab first, which is what the local `edTab()`
+helper does (and why `openGoods()` in `sweep-admin-goods.spec.ts` now lands on
+«Размеры и цены» rather than assuming `[data-edprice]` is on screen). One
+assertion exists purely for that mechanism: type into «Google», look at
+«Основное», come back, and the text is still there. It is the reason the panes
+stay mounted — the form keeps no draft in `S` and reads every field off the
+DOM at save time — so a regression there is silent data loss, not a cosmetic
+bug.
+
+The end-to-end half saves a size price, a salon price, a stock count and a
+barcode with **one** press of «Сохранить», then reads all four back from three
+different places: `/api/overrides/` and the real product page for the price,
+`/api/admin/inventory/` and the «Склад» tab for the count and the code. The
+stock travels as a relative move, so the count is asserted as a delta — same
+rule as `scanner-app.spec.ts`, same `PRODUCT_2`, and the `finally` puts the
+price back and leaves the shelf at 500.
+
+The destructive slot is «Снять с продажи», not «Удалить»: a catalogue product
+has no DELETE route (docs/features.md § «Товар»). The test walks it through
+the confirm card both ways — «Отмена» leaves the editor open and changes
+nothing, «Снять» toasts with an «Отменить» that really puts the product back
+on sale.
+
 ## The admin fuzz sweep
 
 `e2e/sweep-admin.spec.ts` (sign-in, the tab matrix — the same thirteen keys,
@@ -534,6 +564,7 @@ bytes, same rule as the body.
 | `tests/giftcard-pdf.test.ts`, `tests/giftcard-mail-pdf.test.ts`, `tests/orders-digital.test.ts` | The card as a file, the letter that carries it, and the order that pays no delivery |
 | `e2e/sets.spec.ts`, `e2e/admin-bundles.spec.ts` | The sets: the shopper's side plus the «Наборы на сайте» switch, and the owner's «Товары → Наборы» CRUD — see above |
 | `e2e/admin-shell.spec.ts` | The redesigned panel's shell: five places, the phone bar and «Ещё» sheet, the sidebar fold, all thirteen old tab keys as deep links, the assistant FAB, the confirm card, the toast's undo — see above |
+| `e2e/admin-editor.spec.ts` | The redesigned «Товар»: five tabs, the sticky save bar, a size price + salon price + stock + barcode saved once and read back from the shop, «Склад» and the inventory route, and the destructive action through the confirm card — see below |
 | `e2e/admin-mail.spec.ts` | «Письма»: the owner edits an ET subject and intro, applies, and the same text comes back out of the preview **and** out of a real paid order's confirmation (docs/mail.md) |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
 | `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the e2e suite sharded into 3 parallel jobs (each with its own server and database); see its own comments |
@@ -628,12 +659,16 @@ there are three apps at all.
 
 One test, desktop **and** mobile — the route exists for a phone, so it is
 tested on one. It walks the two jobs the owner's «Сканер» icon exists for, in
-one pass: an unknown code → «Привязать к товару» → search «tangled» →
-`PRODUCT_2` → size «40 мл» → bound; then the same code again → the product
-card → «+» «+» → «+ Приход» → the toast says «Приход +3 ✓», the card comes
-back with the new remainder and the stepper back at 1, `/api/admin/inventory/`
+one pass: an unknown code → «К какому товару?» → search «tangled» → one tap on
+the flat `PRODUCT_2 | 40 мл` row (`data-scanbind`, the redesign's one-tap
+bind) → bound; then the same code again → the product card → «+» «+» →
+«Принять +3» → the toast says «Приход +3 ✓», the card comes back with the new
+remainder («на складе N») and the stepper back at 1, `/api/admin/inventory/`
 holds three more than it did, and the «Склад» tab — searched by the barcode
-itself, which also proves the binding stuck — shows the same number.
+itself, which also proves the binding stuck — shows the same number. The two
+action buttons are asserted to carry the stepper's number, because they are
+patched in place rather than repainted (`scanPaintLabels()`) and a label that
+drifted from the number would be a lie about what the tap is going to do.
 
 Headless Chromium has no camera, so it drives the manual-entry field. That is
 not a workaround for the test's benefit: it is the same door a bluetooth/USB

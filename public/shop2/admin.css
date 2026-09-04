@@ -514,13 +514,22 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 /* ---------- Товар: panes, fields, sticky save bar -------------------------- */
 
+/* The panes and the three description boxes are switched with `hidden`, and
+   an author `display` beats the UA sheet's `[hidden] { display: none }` every
+   time — without this rule all five tabs stood on the page at once. One rule
+   for the whole panel rather than one per component, because every future
+   `hidden` here would hit the same wall. */
+.adm2 [hidden] { display: none !important; }
 .adm-edpane { display: flex; flex-direction: column; gap: 16px; max-width: 760px; animation: adm-up .2s; }
 .adm-edcols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
 .adm-edcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .adm-edpair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 720px) { .adm-edcols, .adm-edpair { grid-template-columns: minmax(0, 1fr); } }
+/* «← Товары» is a link, and a link in a flex column stretches to the whole
+   width — which centres its text and puts a 1000-px hit area behind it. */
+.adm-link--back { align-self: flex-start; }
 .adm-field .adm-input { margin-top: 0; }
-.adm-input[readonly] { background: var(--a-tint); color: var(--a-muted); }
+.adm-input[readonly], .adm2 select.adm-input[disabled] { background: var(--a-tint); color: var(--a-muted); }
 .adm-area { height: auto; padding: 12px 14px; line-height: 22px; resize: vertical; }
 .adm-area--sm { min-height: 88px; }
 
@@ -559,6 +568,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-grid__sz { grid-column: 1 / -1; font-weight: 600; }
 }
 .adm-btn--dash { background: var(--a-paper); color: var(--a-ink); border: 1px dashed var(--a-ink); width: fit-content; }
+/* a disabled dashed button is still a dashed button — the outline is what
+   says «сюда что-то добавляют», and it survives the grey */
+.adm-btn--dash[disabled] { border-style: dashed; background: var(--a-paper); }
 .adm-btn--tall { height: 64px; width: 100%; }
 
 /* Фото: the tile grid, «главное» and the per-size tags. */
@@ -610,7 +622,16 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   padding: 12px 0; margin-top: 8px; background: var(--a-paper); border-top: 1px solid var(--a-rule);
 }
 .adm-savebar__sp { flex: 1; }
-@media (max-width: 899px) { .adm-savebar { bottom: var(--a-bar); } }
+/* On a phone the bar sits above the nav — and so does the assistant's
+   floating button, which was landing on top of «Снять с продажи». The button
+   is the one that moves: the save bar is the screen's own controls, and a
+   destructive action half-hidden under a FAB is exactly the kind of thing
+   that gets pressed by accident. Same idiom as `body:has(.stickybar) .ftr`
+   in styles.css and the same offset as the toast's. */
+@media (max-width: 899px) {
+  .adm-savebar { bottom: var(--a-bar); }
+  .adm2:has(.adm-savebar) .adm-fab { bottom: calc(var(--a-bar) + 88px); }
+}
 
 /* ---------- Салон (POS) ---------------------------------------------------- */
 
@@ -660,10 +681,13 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scanoverlay button { font-family: inherit; cursor: pointer; }
 .scanoverlay input { font-family: inherit; font-size: 15px; }
+/* same reason as `.adm2 [hidden]` above — the torch button is a flex box that
+   is only there when the camera has a torch to switch */
+.scanoverlay [hidden] { display: none !important; }
 
-.scan__head { flex: none; height: 64px; display: flex; align-items: center; gap: 10px; padding: 0 20px; }
+.scan__head { flex: none; min-height: 64px; display: flex; align-items: center; gap: 10px; padding: 8px 20px; }
 .scan__brand { font-weight: 600; font-size: 15px; white-space: nowrap; }
-.scan__mode { flex: 1; font-size: 13px; color: var(--a-dim); text-align: right; }
+.scan__mode { flex: 1; font-size: 12px; line-height: 16px; color: var(--a-dim); text-align: right; }
 .scan__hbtn {
   width: 44px; height: 44px; flex: none; border: 1px solid var(--a-muted);
   background: none; color: #fff; font-size: 20px; line-height: 1;
@@ -697,7 +721,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   background: #fff; color: var(--a-ink); padding: 20px;
   display: flex; flex-direction: column; gap: 14px; animation: adm-up .2s;
 }
-.scan__card--err { color: var(--a-warn); font-size: 14px; line-height: 20px; }
+/* the camera's own bad news: a line the owner has to read, not a card that
+   takes the screen away from the manual field it points at */
+.scan__card--err { color: var(--a-warn); font-size: 13px; line-height: 19px; padding: 12px 14px; }
 .scan__card--err p { margin: 0; }
 .scan__found { font-size: 13px; color: var(--a-ok); }
 .scan__warn { font-size: 13px; color: var(--a-warn); }

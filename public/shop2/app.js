@@ -11361,7 +11361,7 @@
             '" placeholder="' + edSalonOf(price) + '" aria-label="Салон, €">'
           : '<input class="adm-input adm-input--cell" value="' + edSalonOf(price) + '" readonly aria-label="Салон, €">') +
         '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
-          '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv ? "0" : "не учтено") + '" aria-label="Остаток">' +
+          '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">' +
         '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
           esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">' +
         '<button class="adm-grid__x" type="button" disabled title="скоро" aria-label="Убрать размер">×</button>' +
@@ -11487,7 +11487,7 @@
     loadAdminPricing(false);   // wholesale/loyalty: for the salon column below
     var t = edTab();
     return '<div class="adm-screen adm-screen--tight">' +
-      '<button class="adm-link" data-admclose>← Товары</button>' +
+      '<button class="adm-link adm-link--back" data-admclose>← Товары</button>' +
       '<div class="adm-head"><div>' +
         '<div class="adm-head__kicker">' + esc(p.brand) + " · " + esc(CAT_NAMES[p.cat] || p.cat) + "</div>" +
         '<h1 class="adm-h1 adm-h1--flat">' + esc(p.name) + "</h1></div>" +
