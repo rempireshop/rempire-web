@@ -219,10 +219,29 @@ const POINTS_LOADING = /Загружаем список|Laadime nimekirja|Loadin
  * the picker has a list, or the option is gone — before anything is chosen
  * from the menu for real.
  */
+/**
+ * app.js stamps the number of carrier feeds still in flight for the selected
+ * country on the delivery block (`data-points-loading`, see patchDelivery());
+ * "0" means the markup will not be rewritten from under the next click.
+ */
+async function waitForPointFeeds(page: Page): Promise<void> {
+  await expect
+    .poll(
+      async () => page.locator("[data-co-delivery]").getAttribute("data-points-loading").catch(() => null),
+      { timeout: 25_000, message: "parcel-point feeds never settled" },
+    )
+    .not.toMatch(/^[1-9]/);
+}
+
 async function settleDelivery(page: Page): Promise<string[]> {
   const parcel = page.locator('input[data-dm="parcel"]');
   if (await parcel.count()) {
-    await parcel.check();
+    /* The block is re-patched every time a carrier feed lands, and on a slow
+       runner that can go on for longer than an actionability wait — so the
+       already-checked default (EE opens on «Пакомат») is left alone rather
+       than re-checked, and a real switch waits for the feeds first. */
+    if (!(await parcel.isChecked().catch(() => true))) await parcel.check();
+    await waitForPointFeeds(page);
     await expect
       .poll(
         async () => {

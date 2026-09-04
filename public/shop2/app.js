@@ -2702,11 +2702,25 @@
     var all = CARRIERS_BY_COUNTRY[S.country] || [];
     for (var i = 0; i < all.length; i++) loadPointsFor(all[i]);
   }
+  /* How many carrier feeds for the selected country are still in flight —
+     stamped on [data-co-delivery] as data-points-loading so the e2e sweeps
+     (and anyone debugging) can tell "the block will be rewritten again in a
+     moment" from "this is the final delivery list". */
+  function pointsLoadingCount() {
+    var all = CARRIERS_BY_COUNTRY[S.country] || [], n = 0;
+    for (var i = 0; i < all.length; i++) if (POINTS.loading[all[i] + ":" + S.country]) n++;
+    return n;
+  }
+  function stampPointsLoading() {
+    var c = document.querySelector("[data-co-delivery]");
+    if (c) c.setAttribute("data-points-loading", String(pointsLoadingCount()));
+  }
   function loadPointsFor(carrier) {
     if (!carrier) return;
     var key = carrier + ":" + S.country;
     if (POINTS.by[key] || POINTS.loading[key]) return;
     POINTS.loading[key] = true;
+    stampPointsLoading();
     var done = function (list) {
       POINTS.loading[key] = false;
       POINTS.by[key] = list;
@@ -6323,7 +6337,7 @@
             (step === 2 ? '<div class="costep__body">' +
               '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
                 COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
-              '<div data-co-delivery>' + deliveryBlockHTML() + "</div>" +
+              '<div data-co-delivery data-points-loading="' + pointsLoadingCount() + '">' + deliveryBlockHTML() + "</div>" +
               // every field is bound to S.ship — a render (promo, blur, resize)
               // used to wipe whatever the shopper had typed here
               // Contact block (name + phone, email lives in step 1) always
@@ -10919,6 +10933,7 @@
        whose two carriers both answer empty without Montonio keys, always did. */
     if (S.coStep === 2 && shipMethod() !== coBodyMethod) { render(); return; }
     patchBlock("[data-co-delivery]", html, was);
+    stampPointsLoading();
   }
   function patchPayment() {
     var was = coBlockHTML.payment;

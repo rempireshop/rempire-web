@@ -309,6 +309,12 @@ screen was in flight. If a sweep run fails only on `/api/track/`,
 `/api/overrides/` or `/api/reviews/` with a 404/500, check for a second
 `next dev` before looking for a bug.
 
+`[data-co-delivery]` carries `data-points-loading="N"` — the number of
+carrier feeds still in flight for the selected country (`pointsLoadingCount()`
+in app.js). The checkout sweep waits for `0` before touching the delivery
+radios: every feed that lands re-patches the block, and on a slow runner that
+went on longer than Playwright's actionability wait.
+
 ## The admin fuzz sweep
 
 `e2e/sweep-admin.spec.ts` (sign-in, the tab matrix, banner, content, settings,
