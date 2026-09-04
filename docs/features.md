@@ -876,6 +876,26 @@ gallery, varImg, videoUrl, description — и всё). Поле, которое 
 `data-galcut` («Убрать фон» — только когда `GET /api/admin/upload` отвечает
 `cutout: true`), `data-goodsfresh`.
 
+Что свой товар получает на сервере, без участия app.js (`docs/seo.md`,
+«Custom products»): страница `/shop2/{,et/,en/}p/c-…/` собирается при
+запросе (`src/app/shop2/{,et/,en/}p/[id]/route.ts` → `src/lib/product-page.ts`)
+из строки — заголовок и описание из вкладки «Google» (язык страницы, иначе
+русская пара, иначе из названия и цены), canonical, hreflang, OpenGraph,
+JSON-LD `Product` с ценой и наличием (с учётом `product_overrides`),
+сам экран внутри `#prerender`; скрытый товар отвечает 404 с `noindex`.
+Общие сборщики шапки переехали из `tools/prerender-shop2.mjs` в
+`src/lib/seo-head.mjs`. Карта сайта: `public/sitemap.xml` теперь всегда
+индекс — `sitemap-1.xml` (каталог) плюс `sitemap-custom.xml`, который
+отдаёт приложение (`src/app/sitemap-custom.xml/route.ts`) со всеми
+активными своими товарами. «Сообщить о наличии» принимает `c-…`
+(`addStockAlert`), письмо «Снова в наличии» и брошенная корзина берут
+название, бренд, цену и фото из строки (`productsForAlerts()`,
+`cartSnapshot()` в `src/lib/customers.ts`, через `customMinByIds()`);
+«Аналитика» и «Обзор» показывают название и бренд вместо голого id
+(`nameCustom()` в `src/lib/analytics.ts`). Тесты:
+`tests/custom-product-page.test.ts`, третий сценарий в
+`e2e/admin-products.spec.ts`.
+
 ### «Салон» и сканер
 
 «Салон» — две колонки: поиск с чипами по объёмам слева, «Корзина» справа;

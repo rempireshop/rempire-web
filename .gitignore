@@ -43,10 +43,13 @@ public/vendor/leaflet/
 /test-results/
 /blob-report/
 
-# sitemap.xml and the three robots files are written by tools/prerender-shop2.mjs
-# on every build (Vercel prebuild) and by tools/e2e-build.mjs with the e2e
-# server's localhost base URL — generated output, never hand-edited.
+# sitemap.xml (the index), its sitemap-N.xml chunks and the three robots files
+# are written by tools/prerender-shop2.mjs on every build (Vercel prebuild) and
+# by tools/e2e-build.mjs with the e2e server's localhost base URL — generated
+# output, never hand-edited. sitemap-custom.xml is not a file: the app serves
+# it (src/app/sitemap-custom.xml/route.ts).
 public/sitemap.xml
+public/sitemap-*.xml
 public/robots.txt
 public/robots.production.txt
 public/robots.staging.txt

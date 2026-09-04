@@ -235,15 +235,20 @@ falls back to built-in constants.
 | `public/shop/og/<id>.jpg` | one 1 200×630 card per product — drawn once |
 | `public/shop/og/set-<id>.jpg` | one card per set — drawn once |
 | `public/brand/og-default.png` | the card for pages with no photograph |
-| `public/sitemap.xml` | 810 URLs with `xhtml:link` alternates |
+| `public/sitemap.xml` | a `sitemapindex`: `sitemap-1.xml` (…`-N.xml` above 1 000 URLs) **plus `sitemap-custom.xml`**, which is not a file but a route — see "Custom products" below |
+| `public/sitemap-1.xml` | the 810 URLs with `xhtml:link` alternates |
 | `public/robots.txt` | **the policy that matches `PUBLIC_BASE_URL`** |
 | `public/robots.production.txt` | the open policy, for reading and diffing |
 | `public/robots.staging.txt` | the closed policy, ditto |
 
 810 pages — 270 per language: 220 products, 8 categories + `all`, 26 brands,
-1 home, 5 policy pages, 8 sets + the landing, 1 gift card. Above 1 000 sitemap
-URLs the tool switches by itself to a `sitemapindex` at `public/sitemap.xml`
-plus `public/sitemap-N.xml` chunks, and the checker follows the index.
+1 home, 5 policy pages, 8 sets + the landing, 1 gift card. `public/sitemap.xml`
+is **always a `sitemapindex`**: the pages go into `public/sitemap-1.xml`
+(`-N.xml` chunks of 1 000 above that), and the index also names
+`sitemap-custom.xml` — the products the owner created in the panel, which do
+not exist at build time and are listed by a route at request time (see
+"Custom products" below). The checker follows the index and skips that one
+entry, since it is not on disk.
 
 The HTML pages are gitignored (`.gitignore`) because `prebuild` regenerates
 them. The OG cards are **not**: they are drawn once from images that are in the
@@ -372,6 +377,14 @@ the file:
   shell everywhere rather than 404ing.
 - **The config is read once**, at dev-server start and at build. Restart `next
   dev` after `npm run prerender` or the new pages will not be routed locally.
+- **Three rewrite phases, not one list.** The prerendered files are
+  `afterFiles` rewrites, the `/shop2/:path+` shell rewrite is a `fallback`
+  one, and between them Next's own dynamic routes get their turn — which is
+  where `src/app/shop2/{,et/,en/}p/[id]/route.ts` sits: a `/p/<id>/` that is
+  not on disk reaches it, and it answers a custom product from its row (see
+  "Custom products" below) and anything else with the shell. A plain array
+  would have been all-`afterFiles`, and the shell rewrite in it would have
+  swallowed those routes before they were ever consulted.
 - Legacy `/shop/...` paths still land on `/shop2/...`: `/shop`, `/shop/c/:cat`,
   `/shop/b/:brand`, `/shop/:screen`, and `/shop/info/:slug` (that last one used
   to 404). `/shop/p/<id>/` keeps its own prerendered pages — they carry the link
@@ -408,8 +421,9 @@ the file:
    nothing.
 5. **Google Search Console** — the domain property `rempireshop.com` is already
    verified, so nothing needs re-verifying:
-   - Sitemaps → submit `sitemap.xml`. One entry: it is a plain urlset of 810
-     URLs today and becomes a sitemapindex automatically above 1 000.
+   - Sitemaps → submit `sitemap.xml`. One entry: it is a sitemapindex that
+     names `sitemap-1.xml` (the 810 static URLs) and `sitemap-custom.xml`
+     (the owner's own products, served by the app).
    - URL Inspection → Request indexing for `/shop2/`, `/shop2/et/`,
      `/shop2/en/`, `/shop2/sets/`, a couple of top products and
      `/shop2/info/shipping/` — the policy pages are what a shopper checks
@@ -486,3 +500,56 @@ expose the result as `seo: {RU, ET, EN}`. At runtime `setHead()` picks the
 page language's pair, then the Russian one, then the catalogue's static pair.
 The prerender still writes the catalogue's static pair — the admin override
 applies in the rendered DOM, which is what Googlebot indexes.
+
+## Custom products — the page at request time
+
+A product the owner created in the panel («+ Товар», the assistant's
+`create_product`; `custom_products`, ids `c-…`, `src/lib/custom-products.ts`)
+does not exist when `npm run prerender` runs — the build has no database —
+so it has no static file. Its page is written **when the request arrives**
+instead: `src/app/shop2/{,et/,en/}p/[id]/route.ts` →
+`src/lib/product-page.ts`, which takes `public/shop2/index.html` and patches
+it between the same two marker pairs the prerender patches, through the same
+builders. Those builders — `headBlock()`, `productSpec()`, the copy table
+`T`, the sitemap row, `fitTitle()`/`clip()`/`esc()` — moved out of the
+prerender into **`src/lib/seo-head.mjs`** (plain ESM, so the bare-`node`
+prerender and the Next routes import one file); the prerender's output is
+byte-identical to before the move.
+
+What the served page carries, per language: `<html lang>`, `<title>` from the
+owner's Google pair for that language, else the Russian pair, else
+`brand + name — купить в Rempire · price` fitted the way `fitTitle()` fits
+it; the meta description from the pair, else the description text (own
+language, then Russian), else the price/section/stock sentence; canonical +
+the four `hreflang` links; OpenGraph/Twitter; `Product` JSON-LD with the
+offer (`id="ldjson"`, so `setHead()` rewrites it in place) and a
+`BreadcrumbList`; and inside `#prerender` the brand, `<h1>`, price, sizes,
+stock chip and description, which app.js drops after its first paint. The
+owner's stock/price override (`product_overrides`) is applied, so a product
+switched to «нет в наличии» says `OutOfStock`. `robots` follows
+`PUBLIC_BASE_URL` exactly like the static pages (`robotsFor()` — one rule).
+
+**Link previews:** uploads are WebP, which Facebook, WhatsApp and LinkedIn do
+not read, so `og:image` is `/brand/og-default.png` (the tower card) unless a
+photo happens to be a JPEG/PNG; the JSON-LD still lists the real photos. A
+per-product card drawn at request time is a follow-up.
+
+**Hidden (`active=false`) and unknown `c-…` ids answer 404** with the shell
+carrying `noindex, nofollow` — the address is dropped from the index and the
+SPA still boots and shows the home page. A catalogue id that reaches the
+route (a clone that has not prerendered) gets the plain shell, 200, as
+before.
+
+**Sitemap:** `public/sitemap.xml` is always a `sitemapindex` naming
+`sitemap-1.xml` (static) and `sitemap-custom.xml` — a route
+(`src/app/sitemap-custom.xml/route.ts`) that lists every active custom
+product in the three languages with its `xhtml:link` cluster, `lastmod` from
+`updated_at`. `trailingSlash` leaves paths with an extension alone, so it
+answers at `/sitemap-custom.xml` exactly; `check-prerender.mjs` expects the
+entry in the index and skips it.
+
+Pinned by `tests/custom-product-page.test.ts` (head per language, the
+fallbacks, overrides, 404s, the sitemap) and end to end by
+`e2e/admin-products.spec.ts` (created through the UI, the served head, the
+title after app.js takes over, «Сообщить о наличии», the sitemap, 404 once
+hidden).

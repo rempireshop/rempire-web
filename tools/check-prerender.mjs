@@ -299,18 +299,24 @@ const smFile = path.join(PUB, "sitemap.xml");
 if (!existsSync(smFile)) { failed++; console.error("FAIL public/sitemap.xml is missing"); }
 else {
   let sm = await readFile(smFile, "utf8");
-  /* Above 1 000 URLs the tool writes a sitemapindex and the pages move into
-     sitemap-N.xml, so follow it rather than counting the index's own rows. */
+  /* public/sitemap.xml is a sitemapindex: the pages live in sitemap-N.xml,
+     so follow it rather than counting the index's own rows. One entry is not
+     a file at all — sitemap-custom.xml is a route
+     (src/app/sitemap-custom.xml/route.ts) that lists the owner's own
+     products at request time; it is expected in the index and skipped here,
+     the same way the pages it names are not on disk either. */
   if (/<sitemapindex/.test(sm)) {
     const chunks = all(/<loc>([^<]+)<\/loc>/g, sm).map((u) => u.replace(/^https?:\/\/[^/]+\//, ""));
+    if (!chunks.includes("sitemap-custom.xml")) { failed++; console.error("FAIL sitemapindex does not name sitemap-custom.xml (the custom products' sitemap the app serves)"); }
     let joined = "";
     for (const c of chunks) {
+      if (c === "sitemap-custom.xml") continue;
       const f = path.join(PUB, c);
       if (!existsSync(f)) { failed++; console.error(`FAIL sitemapindex points at a missing ${c}`); continue; }
       joined += await readFile(f, "utf8");
     }
     sm = joined;
-  }
+  } else { failed++; console.error("FAIL public/sitemap.xml is not a sitemapindex — the prerender always writes one now"); }
   const locs = all(/<loc>([^<]+)<\/loc>/g, sm);
   SITE_BASE = (locs[0] || "").match(/^https?:\/\/[^/]+/)?.[0] || "";
   const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + CATALOGUE.length +

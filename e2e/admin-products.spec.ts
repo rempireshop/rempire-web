@@ -1,4 +1,5 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
+import { E2E_BASE_URL } from "./env.mjs";
 import { eur, ipHeaders, LANGS, shopUrl, waitForScreen } from "./fixtures";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
@@ -19,7 +20,11 @@ import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } 
  *   · a price change reaches the shop; «Снять с продажи» goes through the
  *     confirm card, the toast's undo puts it back, and hidden it really vanishes;
  *   · the assistant's create_product (the model stubbed at the network edge)
- *     lands in the same editor, on the same tab, as a real row.
+ *     lands in the same editor, on the same tab, as a real row;
+ *   · the product's page is a real page before app.js runs — the server
+ *     writes its head from the row (src/lib/product-page.ts), the app's own
+ *     sitemap names it, «Сообщить о наличии» takes it, and once hidden the
+ *     address answers 404 with noindex.
  *
  * Everything this spec makes is taken off sale at the end, so the specs that
  * count the catalogue never see it.
@@ -340,6 +345,119 @@ test.describe("admin — product creation", () => {
       await assertClean(page, w, "assistant-created product");
     } finally {
       if (id) await page.request.delete(`/api/admin/products/${id}/`);
+    }
+  });
+
+  test("the product's page is a real page for a crawler: head from the row, «Сообщить о наличии», the sitemap, 404 once hidden", async ({ page, browser }) => {
+    test.setTimeout(180_000);
+    const w = watch(page);
+    const stamp = Date.now().toString().slice(-6);
+    const BRAND = `E2E Seo ${stamp}`;
+    const NAME = `Tonic ${stamp} — тоник для бороды`;
+    const TITLE = `${BRAND} тоник — купить`;
+    await stubMedia(page, { cutout: false });
+    let id = "";
+
+    await openAdmin(page);
+    try {
+      // ---- created through the UI, the way the owner does it -----------------
+      await tab(page, "goods");
+      await page.locator("[data-admgoodsnew]").click();
+      await expect(page.locator("[data-edbrand]")).toBeVisible();
+      await page.locator("[data-edbrand]").fill(BRAND);
+      await page.locator("[data-edname]").fill(NAME);
+      await page.locator("[data-edcat]").selectOption("beard");
+      await edTab(page, "sizes");
+      await page.locator("[data-edprice]").fill("21,50");
+      await page.locator('[data-admsavegoods="new"]').click();
+      expect(await toastText(page)).toMatch(/Товар создан/);
+      await clearToast(page);
+      id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
+      expect(id).toMatch(/^c-e2e-seo-/);
+      await assertClean(page, w, "created");
+      // the texts the head is built from — an Estonian description and a
+      // Russian Google pair — through the same PUT the editor's «Сохранить» sends
+      const texts = await page.request.put(`/api/admin/products/${id}/`, {
+        data: { description: { RU: "Тоник для бороды.", ET: "Habemetoonik." }, seo: { RU: { title: TITLE, desc: "Тоник в Rempire." } } },
+      });
+      expect(texts.status()).toBe(200);
+
+      // ---- a fresh, logged-out visitor's Estonian page --------------------------
+      const shop = await freshShop(browser);
+      const res = await shop.page.goto(shopUrl("/et", `/p/${id}/`));
+      expect(res?.status()).toBe(200);
+      // what the server sent, before any script ran: the head from the row
+      const served = (await res!.text()).replace(/\r\n?/g, "\n");
+      expect(served).toMatch(/^<!doctype html>\n<html lang="et">/);
+      expect(served).toContain(`<title>${TITLE} — REMPIRE</title>`);
+      expect(served).toContain('<meta name="description" content="Тоник в Rempire.">');
+      expect(served).toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2/et/p/${id}/" data-seo="canonical">`);
+      expect(served).toContain(`<link rel="alternate" hreflang="x-default" href="${E2E_BASE_URL}/shop2/p/${id}/" data-seo="alt-x">`);
+      expect(served).toContain('<meta property="og:locale" content="et_EE"');
+      expect(served).toContain(`<h1 class="pdp__title">${NAME}</h1>`);
+      expect(served).toContain("Habemetoonik.");
+      // …and what the browser shows once app.js has taken over: the same head
+      await waitForScreen(shop.page, "product");
+      await expect(shop.page).toHaveTitle(`${TITLE} — REMPIRE`);
+      expect(await shop.page.locator('meta[name="description"]').getAttribute("content")).toBe("Тоник в Rempire.");
+      const ld = JSON.parse((await shop.page.locator("script#ldjson").textContent()) || "{}") as { name?: string; offers?: { price?: string } };
+      expect(ld.name).toBe(`${BRAND} ${NAME}`);
+      expect(ld.offers?.price).toBe("21.5");
+      await expect(shop.page.locator('link[rel="alternate"][hreflang]')).toHaveCount(4);
+      await expect(shop.page.locator("[data-price]")).toHaveText(eur(21.5, "ET"));
+      await assertClean(shop.page, shop.w, "custom product page, ET");
+      await shop.close();
+
+      // ---- the sitemap the app serves names it, in three languages ---------------
+      const sm = await page.request.get("/sitemap-custom.xml");
+      expect(sm.status()).toBe(200);
+      expect(sm.headers()["content-type"]).toContain("xml");
+      const xml = await sm.text();
+      for (const seg of ["", "/et", "/en"]) expect(xml, seg || "ru").toContain(`<loc>${E2E_BASE_URL}/shop2${seg}/p/${id}/</loc>`);
+      expect(await (await page.request.get("/sitemap.xml")).text()).toContain("/sitemap-custom.xml");
+
+      // ---- «Сообщить о наличии»: sold out by the owner, an address left by a shopper ----
+      const out = await page.request.put("/api/admin/overrides/", { data: { id, stock: "out" } });
+      expect(out.status()).toBe(200);
+      const waiting = await freshShop(browser);
+      await waiting.page.goto(shopUrl("", `/p/${id}/`));
+      await waitForScreen(waiting.page, "product");
+      await waiting.page.locator(`[data-notify="${id}"]`).click();
+      await waiting.page.locator("[data-notifyf]").fill(`e2e-seo-${stamp}@example.com`);
+      const [alert] = await Promise.all([
+        waiting.page.waitForResponse((r) => r.url().includes("/api/stock-alerts/") && r.request().method() === "POST"),
+        waiting.page.locator(`[data-notifysend="${id}"]`).click(),
+      ]);
+      expect(alert.status(), "the stock-alert route refused the custom id").toBe(200);
+      expect((await alert.json()).ok).toBe(true);
+      await expect(waiting.page.getByRole("status")).toContainText("Записали");
+      await assertClean(waiting.page, waiting.w, "stock alert on a custom product");
+      await waiting.close();
+      // the panel's «Маркетинг» counter sees the address waiting
+      const flows = await page.request.get("/api/admin/flows/");
+      expect((await flows.json()).counters.alerts).toBeGreaterThanOrEqual(1);
+      // …and the served page says sold out too
+      expect(await (await page.request.get(shopUrl("", `/p/${id}/`))).text()).toContain('"availability":"https://schema.org/OutOfStock"');
+      expect((await page.request.put("/api/admin/overrides/", { data: { id, stock: null } })).status()).toBe(200);
+
+      // ---- hidden: 404 with noindex, gone from the sitemap, the browser still lands home ----
+      expect((await page.request.delete(`/api/admin/products/${id}/`)).status()).toBe(200);
+      for (const seg of ["", "/et", "/en"]) {
+        const gone = await page.request.get(shopUrl(seg, `/p/${id}/`));
+        expect(gone.status(), seg || "ru").toBe(404);
+        expect(await gone.text()).toContain('<meta name="robots" content="noindex, nofollow">');
+      }
+      expect(await (await page.request.get("/sitemap-custom.xml")).text()).not.toContain(id);
+      const hidden = await freshShop(browser);
+      const r404 = await hidden.page.goto(shopUrl("/et", `/p/${id}/`));
+      expect(r404?.status()).toBe(404);
+      await waitForScreen(hidden.page, "home");
+      await hidden.close();
+    } finally {
+      if (id) {
+        await page.request.put("/api/admin/overrides/", { data: { id, stock: null } });
+        await page.request.delete(`/api/admin/products/${id}/`);
+      }
     }
   });
 });

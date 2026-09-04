@@ -213,6 +213,10 @@ const nextConfig: NextConfig = {
     "/api/giftcards/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
     "/api/payments/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
     "/api/admin/orders/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
+    /* A custom product's page is the shell patched at request time
+       (src/lib/product-page.ts, the /shop2/{,et/,en/}p/[id] routes) — the
+       function has to be able to read the file the static layer serves. */
+    "/shop2/**": ["./public/shop2/index.html"],
   },
   /**
    * The shop is one static page that now names its screen in the URL, so the
@@ -317,22 +321,34 @@ const nextConfig: NextConfig = {
       { source: "/shop2/ru/:path*", destination: "/shop2/:path*/", permanent: true },
     ];
   },
+  /* Three phases, not one list. A plain array is `afterFiles`, which Next
+     checks BEFORE its dynamic routes — and the shell rewrite in it would have
+     swallowed src/app/shop2/{,et/,en/}p/[id]/route.ts, the request-time page
+     of a product the owner created in the panel (src/lib/product-page.ts).
+     So: the prerendered files first (afterFiles — a file on disk beats
+     everything), the dynamic /p/[id] routes next (Next's own order), and the
+     shell for whatever is left (fallback). */
   async rewrites() {
-    return [
-      { source: "/shop/c/:cat", destination: "/shop/index.html" },
-      { source: "/shop/b/:brand", destination: "/shop/index.html" },
-      { source: "/shop/:screen(search|brands|account|checkout|done|admin)", destination: "/shop/index.html" },
-      /* Products, categories, brands and the three home pages are written out
-         per language for search engines — those win. */
-      ...prerenderedRewrites(),
+    return {
+      beforeFiles: [],
+      afterFiles: [
+        { source: "/shop/c/:cat", destination: "/shop/index.html" },
+        { source: "/shop/b/:brand", destination: "/shop/index.html" },
+        { source: "/shop/:screen(search|brands|account|checkout|done|admin)", destination: "/shop/index.html" },
+        /* Products, categories, brands and the three home pages are written out
+           per language for search engines — those win. */
+        ...prerenderedRewrites(),
+      ],
       /* Everything else under /shop2/ — search, the cart, the account, the
          checkout, the receipt, the admin — is still one shell that reads the
          path back into its state on boot. Those need state to mean anything,
          they are robots-disallowed, and none of them is prerendered or in the
          sitemap. index.html is both that shell and the Russian home page; see
-         the comment at the top of the file. */
-      { source: "/shop2/:path+", destination: "/shop2/index.html" },
-    ];
+         the comment at the top of the file. A /p/<id>/ that is neither on
+         disk nor a custom product never gets here: the [id] route answers it
+         with this same shell. */
+      fallback: [{ source: "/shop2/:path+", destination: "/shop2/index.html" }],
+    };
   },
 };
 

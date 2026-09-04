@@ -103,7 +103,8 @@ export type CatalogueProduct = {
 
 /** The {id,b,n,c,p,s} row src/lib/orders.ts and friends price from. */
 export type MinProduct = { id: string; b: string; n: string; c: string; p: number; s: string };
-export type MinWithVariants = { min: MinProduct; variants: { sizes: string[]; prices: number[] } | null };
+/** …plus the size ladder and the first photo (or the placeholder) — what a letter or a report shows beside the name. */
+export type MinWithVariants = { min: MinProduct; variants: { sizes: string[]; prices: number[] } | null; img: string };
 
 export type CustomProductErrorCode =
   | "brand_required"
@@ -464,7 +465,16 @@ export function toMin(p: CustomProduct): MinWithVariants {
   return {
     min: { id: p.id, b: p.brand, n: p.name, c: p.cat, p: p.prices[0], s: p.active ? "in" : "out" },
     variants: p.sizes.length ? { sizes: p.sizes.slice(), prices: p.prices.slice() } : null,
+    img: p.gallery?.[0]?.url ?? PLACEHOLDER_IMG,
   };
+}
+
+/** The active rows' ids and stamps, newest first — the sitemap the app serves (src/app/sitemap-custom.xml/route.ts). */
+export async function listCustomSitemapRows(): Promise<Array<{ id: string; updatedAt: string }>> {
+  const rows = await query<{ id: string; updated_at: string | Date }>(
+    "select id, updated_at from custom_products where active order by created_at desc, id",
+  );
+  return rows.map((r) => ({ id: r.id, updatedAt: iso(r.updated_at) }));
 }
 
 /**
