@@ -9840,6 +9840,14 @@
     return " · " + FLOW_COUNT_LABEL[key] + " " + Number(FLOW_COUNTS[key]);
   }
   function admMailEditorHTML() {
+    /* Nothing until the texts land. Drawn early the fields are empty, «Вернуть
+       стандартный текст» is missing (the owner has no own text yet, as far as
+       this render can tell) and the preview shows a letter with no words in
+       it — three lies for the sake of a hundred milliseconds. */
+    if (!MAIL_TEXTS) {
+      return admBackHTML("data-mailback", "Все письма") +
+        '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    }
     var tpl = mailTpl(), lang = mailLang();
     var pending = pendingAction && pendingAction.type === "set_mail_texts" ? confirmCard(pendingAction) : "";
     var left =

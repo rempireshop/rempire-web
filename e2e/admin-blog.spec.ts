@@ -222,7 +222,13 @@ test.describe("blog — the sample posts", () => {
     await waitForScreen(page, "blogpost");
 
     await expect(page.locator(".blog__cover")).toBeVisible();
-    const article = page.locator(".blog__body");
+    /* The real body, not the skeleton: since the blog paints from its cached
+       summary first, `.blog__body` matches the `aria-busy` placeholder too, and
+       `waitForScreen` + a visible cover are both true while that placeholder is
+       still what is on screen. `count()` does not auto-wait, so the first
+       assertion has to be one that does. */
+    const article = page.locator(".blog__body:not(.blog__sk)");
+    await expect(article.locator("h2").first(), "the sample article never painted").toBeVisible();
     expect(await article.locator("h2").count(), "the sample article has no sections").toBeGreaterThanOrEqual(3);
     expect(await article.locator("ul li").count()).toBeGreaterThanOrEqual(4);
     await expect(article.locator(".blog__prod").first(), "no inline product card").toBeVisible();
