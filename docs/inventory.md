@@ -119,7 +119,13 @@ as `src/lib/orders.ts` puts it on an order line (`"75 мл"`, from
 
 A `stock_levels` row existing is **not** the same as a product being publicly
 trusted. A variant only counts for the public in/low/out badge once it has at
-least one real `stock_moves` row (a scan, a manual adjust, a sale, a return).
+least one *counting* `stock_moves` row — `goods_in`, `adjust` or `return`
+(`TRACKING_REASONS` in `src/lib/inventory.ts`). A sale never makes a variant
+tracked: `move()` skips a `sale_web`/`sale_pos` on a variant nobody has counted
+yet (`MoveResult.skipped`, logged as `[inventory] sale on untracked …`), so the
+first paid web order can never flip an uncounted product to «нет в наличии» —
+which is also what keeps the e2e suite's fixed products (`e2e/fixtures.ts`)
+addable after every mock-paid order.
 `tools/seed-stock.mjs` creates a `stock_levels` row for every catalogue
 variant at qty 0 to hold its EAN — if a bare seeded row counted as tracked,
 running the seed script would flip the **entire catalogue** to "нет в
@@ -148,7 +154,9 @@ full reasoning — read it before changing any of the derivation logic.
   quantities change through. Atomic (`withTx`): row-if-missing, a locked
   read, then `qty = qty + delta` clamped at 0 (`clampedNegative: true` when
   clamped — callers log it, `move()` itself never throws for this), plus one
-  `stock_moves` row, in one transaction. Fires the existing back-in-stock
+  `stock_moves` row, in one transaction. A sale reason on an untracked variant
+  is skipped instead (`skipped: true`, nothing written — see "tracked" above).
+  Fires the existing back-in-stock
   mailer (`src/lib/flows.ts` `runBackInStock`) when a move takes qty from 0
   to positive — best effort, after the transaction commits.
 - `setQty(productId, variant, qty, {reason?, ref?, actor?})` — same atomicity,
@@ -193,7 +201,8 @@ full reasoning — read it before changing any of the derivation logic.
 - **`src/lib/payments/apply.ts`** — `ApplyDeps.decrementStock` (optional,
   same injection pattern as `recordPurchaseEvent`/`earnLoyaltyPoints`): on the
   single transition into `paid`, decrements every `kind:'product'` line with
-  reason `'sale_web'`. When the dep is not injected (production), a local
+  reason `'sale_web'` — tracked variants only; an uncounted one is skipped by
+  `move()` (see "tracked" above). When the dep is not injected (production), a local
   `decrementStock()` dynamically imports `@/lib/inventory` and loops the
   lines itself. `move()`'s own negative-clamp means a shortfall can never be
   the reason a confirmed payment fails to save — it clamps at 0 and the

@@ -29,7 +29,19 @@ export function shopUrl(seg: string, path: string): string {
 }
 
 /** A product with 3 differently-priced sizes (src/data/catalogue.variants.json),
- *  in stock — the fixed subject of the gallery/size/price/add-to-cart tests. */
+ *  in stock — the fixed subject of the gallery/size/price/add-to-cart tests.
+ *
+ *  Stock: this product must stay *untracked* in the inventory sense
+ *  (src/lib/inventory.ts — no goods_in/adjust/return move for any of its
+ *  sizes, ever, in this suite). Every spec that mock-pays for it (checkout,
+ *  account, giftcard, …) fires a `sale_web` move on the paid transition, and
+ *  move() skips a sale on an untracked variant — so PRODUCT reads «в наличии»
+ *  for the whole server run no matter how many orders the suite completes.
+ *  A spec that counted it (the admin «Склад» qty editor, a goods-in scan)
+ *  would turn every later purchase into a real decrement, and at 0 the
+ *  product page swaps .pdp__add for «нет в наличии» and every add-to-cart
+ *  after that fails. PRODUCT_2 is the one the warehouse/register sweep
+ *  (sweep-admin-ops.spec.ts) counts on purpose — it leaves it at 500. */
 export const PRODUCT = {
   id: "system-4-bio-botanical-shampoo",
   brand: "System 4",

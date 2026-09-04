@@ -5,11 +5,16 @@
  * A product nobody has scanned or counted yet has NO stock_levels row for any
  * of its variants and stays in "don't track" mode: its public in/low/out badge
  * keeps coming from the manual override, exactly as before this file existed.
- * The moment a variant gets its FIRST real stock_moves row — a приход scan, an
- * admin qty edit, a sale — that variant switches to numeric tracking and its
- * qty decides the badge from then on.
+ * The moment a variant gets its FIRST counting move — a приход scan, an admin
+ * qty edit, a return (TRACKING_REASONS below) — that variant switches to
+ * numeric tracking and its qty decides the badge from then on. A sale is NOT
+ * such a move: move() skips a sale_web/sale_pos on a variant nobody has
+ * counted yet (MoveResult.skipped) instead of creating a qty-0 row for it —
+ * otherwise the first paid web order would flip an uncounted product to
+ * «нет в наличии», which is exactly what it did to the e2e suite's fixed test
+ * product before that guard existed (e2e/fixtures.ts PRODUCT).
  *
- * That "first real move" test is deliberate and load-bearing: tools/seed-stock.mjs
+ * That "first counting move" test is deliberate and load-bearing: tools/seed-stock.mjs
  * creates a stock_levels row for every catalogue variant to hold its EAN, with
  * qty left at 0 (see setLevel() — it never touches qty and never writes a
  * ledger row). If a bare seeded row counted as "tracked", running the seed
