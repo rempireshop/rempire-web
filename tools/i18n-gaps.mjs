@@ -291,7 +291,7 @@ const ASSEMBLED = [
   [/^Тарифы — прайс-листы перевозчиков/, "the FI and EU variants are both full dictionary keys"],
   [/^Сейчас: пакомат Эстония /, "rule /^Сейчас: пакомат Эстония … docs\\/shipping\\.md\\.$/"],
   [/^\. За пределами Эстонии значения/, "tail of the same note — same rule"],
-  [/^Пришлите фото и цену/, "key — the hole is the aiGo() button markup"],
+  [/^Новый товар заводится в «Товарах»/, "key — the hole is the aiGo() button markup"],
   [/^За неделю 412 посетителей/, "key — the hole is the aiGo() button markup"],
   [/^Письма магазин шлёт сам/, "key — the hole is the aiGo() button markup"],
   [/^Вот что подключено к магазину/, "key — the hole is the aiGo() button markup"],
@@ -340,6 +340,8 @@ const INTENTIONAL_FNS = {
   shipActionText: "change-log line in Renat's private admin journal — Russian by decision",
   contentActionText: "change-log line in Renat's private admin journal — Russian by decision",
   promoActionText: "change-log line in Renat's private admin journal — Russian by decision",
+  // product creation: the line a new or changed custom product leaves behind
+  productJournalLine: "change-log line in Renat's private admin journal — Russian by decision",
   // integration: data tables, never rendered as their own text node — a
   // per-letter transliteration map (blogSlugify()) and a month-name array
   // whose only reader is monthLabelRu(), itself only ever called from the

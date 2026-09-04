@@ -796,8 +796,6 @@
       "Открыть": "Ava",
       "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».":
         "Valmis — mustand vene, eesti ja inglise keeles, koos koostise ja kasutusjuhisega. Google'i pealkiri ja kirjeldus on valitud automaatselt. Jääb üle läbi lugeda ja vajutada „Avalda“.",
-      "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите.":
-        "Saada foto ja hind — ülejäänu teen ise: eemaldan fotolt tausta, panen Rempire'i vesimärgi, kirjutan kirjelduse kolmes keeles koos SEO-pealkirjadega ja pakun jaotise. Sina ainult kontrollid ja kinnitad.",
       "За неделю 412 посетителей, из них 2,2% оформили заказ. Лучше всего находят по «kevin murphy tallinn». Открыть подробности?":
         "Nädalaga 412 külastajat, neist 2,2% vormistas tellimuse. Kõige paremini leitakse otsinguga „kevin murphy tallinn“. Kas avan üksikasjad?",
       "Письма магазин шлёт сам: «заказ принят», «отправлен» с трек-номером, «снова в наличии». Могу включить напоминание о брошенной корзине и поздравление со скидкой ко дню рождения.":
@@ -839,8 +837,6 @@
       "Описание (до 155 знаков)": "Kirjeldus (kuni 155 tähemärki)",
       "Сгенерировать с ИИ": "Loo AI-ga",
       "Русский — эстонский и английский пишутся сами": "Vene keeles — eesti ja inglise keel kirjutatakse ise",
-      "Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.":
-        "Hind, laoseis, alamkategooria, fotod, fotod mahtude kaupa ja SEO salvestuvad päriselt (näha ka poes, tagasivõtmine on logis). Üleslaetud foto vähendatakse ja teisendatakse kergesse vormingusse ise; tausta tuleb praegu veel eelnevalt eemaldada.",
       "Открыть обзор": "Ava ülevaade",
       "Открыть заказы": "Ava tellimused",
       "Открыть товары": "Ava tooted",
@@ -1313,6 +1309,51 @@
       "Не удалось сохранить статус": "Staatust ei õnnestunud salvestada",
       "Отменено": "Tagasi võetud",
       /* админка, редизайн (этап 2): «Товар», «Салон», сканер */
+      /* product creation: «+ Товар», the owner's own products */
+      "Новый товар": "Uus toode",
+      "· ваш товар": "· sinu toode",
+      "Что добавляем?": "Mida lisame?",
+      "Сохранить товар": "Salvesta toode",
+      "Не удалось сохранить товар": "Toodet ei õnnestunud salvestada",
+      "Например, Proraso": "Näiteks Proraso",
+      "Beard Balm — бальзам для бороды": "Beard Balm — habemepalsam",
+      "Бренд можно выбрать из списка или вписать новый. Название — как его увидит покупатель: линейка и что это, например «Beard Balm — бальзам для бороды».":
+        "Brändi saab valida nimekirjast või kirjutada uue. Nimetus — nii, nagu ostja seda näeb: sari ja mis see on, näiteks «Beard Balm — habemepalsam».",
+      "Товар появится в магазине сразу после сохранения. Фото добавите на вкладке «Фото и видео» — она откроется сама.":
+        "Toode ilmub poodi kohe pärast salvestamist. Fotod lisad vahekaardil «Fotod ja video» — see avaneb ise.",
+      "Цена — на вкладке «Размеры и цены»: одна на товар или своя для каждого объёма.":
+        "Hind on vahekaardil «Suurused ja hinnad»: üks tootele või igale mahule oma.",
+      "Товар снят с продажи — в магазине его нет.": "Toode on müügilt eemaldatud — poes seda ei ole.",
+      "Вернуть в продажу": "Pane tagasi müüki",
+      "Это ваш товар: название, бренд, раздел, объёмы и фото здесь меняете вы сами. Убрать его с полки — «Снять с продажи» внизу; вернуть можно из журнала.":
+        "See on sinu toode: nimetust, brändi, jaotist, mahtusid ja fotosid muudad siin ise. Riiulilt maha — «Eemalda müügilt» all; tagasi saab logist.",
+      "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Igal mahul on oma hind. Esimest mahtu näeb ostja esimesena.",
+      "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
+        "Üks hind kogu tootele. Kui mahtusid on mitu — vajuta «+ Suurus» ja kirjuta igale hind.",
+      "Фото — после первого сохранения": "Fotod — pärast esimest salvestamist",
+      "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
+        "Täida «Põhiline», kirjuta hind ja vajuta «Salvesta toode» — toode ilmub ja siia saab lisada fotod telefonist.",
+      "Убираем фон…": "Eemaldame tausta…",
+      "Убрать фон": "Eemalda taust",
+      "✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.":
+        "✂ eemaldab fotolt tausta — originaal jääb alles ja kui ei õnnestu, jääb foto lihtsalt samaks.",
+      "Впишите бренд — например, Proraso.": "Kirjuta bränd — näiteks Proraso.",
+      "Впишите название товара.": "Kirjuta toote nimetus.",
+      "Выберите раздел.": "Vali jaotis.",
+      "У каждого объёма должно быть название — например, 100 мл.": "Igal mahul peab olema nimetus — näiteks 100 ml.",
+      "Объёмы не должны повторяться.": "Mahud ei tohi korduda.",
+      "Больше 12 объёмов не нужно.": "Rohkem kui 12 mahtu pole vaja.",
+      "У каждого объёма должна быть своя цена.": "Igal mahul peab olema oma hind.",
+      "Не удалось сохранить товар — проверьте поля.": "Toodet ei õnnestunud salvestada — kontrolli välju.",
+      "Не удалось сохранить товар — попробуйте ещё раз": "Toodet ei õnnestunud salvestada — proovi uuesti",
+      "Товар создан ✓ — добавьте фото": "Toode on loodud ✓ — lisa fotod",
+      "Товар создан ✓ — теперь добавьте фото": "Toode on loodud ✓ — nüüd lisa fotod",
+      "Сервер не отвечает — попробуйте ещё раз": "Server ei vasta — proovi uuesti",
+      "Снова в продаже ✓": "Jälle müügil ✓",
+      "Фон убран ✓ — проверьте и нажмите «Сохранить»": "Taust eemaldatud ✓ — kontrolli ja vajuta «Salvesta»",
+      "Не получилось убрать фон — фото осталось как было": "Tausta ei õnnestunud eemaldada — foto jäi samaks",
+      "Новый товар заводится в «Товарах» — кнопка «+ Товар»: бренд, название, раздел и цена, потом фото с телефона. Фото показываются как есть, на белом фоне; описание и тексты для Google на трёх языках напишутся по кнопке в карточке — вы проверите и сохраните.":
+        "Uus toode luuakse «Toodetes» — nupp «+ Toode»: bränd, nimetus, jaotis ja hind, siis fotod telefonist. Fotod näidatakse nii, nagu need on, valgel taustal; kirjeldus ja Google'i tekstid kolmes keeles kirjutatakse kaardil oleva nupuga — sina kontrollid ja salvestad.",
       "Размеры и цены": "Suurused ja hinnad",
       "Фото и видео": "Fotod ja video",
       "главное": "peamine",
@@ -1336,7 +1377,7 @@
       "Правее": "Paremale",
       "Убрать фото": "Eemalda foto",
       "Фото с телефона": "Foto telefonist",
-      "Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Водяной знак ставится сам.": "Esimene foto on peamine: seda näeb kataloogis, otsingus ja kirjades. ← → muudavad järjekorda, ★ teeb foto peamiseks. Vesimärk lisandub ise.",
+      "Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Фото показываются как есть, на белом фоне.": "Esimene foto on peamine: seda näeb kataloogis, otsingus ja kirjades. ← → muudavad järjekorda, ★ teeb foto peamiseks. Fotod näidatakse nii, nagu need on, valgel taustal.",
       "Какое фото показывать для каждого объёма.": "Millist fotot iga mahu juures näidata.",
       "Откуда видео": "Kust video tuleb",
       "Загрузить": "Laadi üles",
@@ -2301,8 +2342,6 @@
       "Открыть": "Open",
       "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».":
         "Done — a draft in Russian, Estonian and English, with the ingredients and how to use it. The Google title and description were chosen automatically. All that is left is to read it and press “Publish”.",
-      "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите.":
-        "Send me a photo and a price — I will do the rest: cut out the background, add the Rempire watermark, write the description in three languages with SEO titles and suggest a section. You only check it and confirm.",
       "За неделю 412 посетителей, из них 2,2% оформили заказ. Лучше всего находят по «kevin murphy tallinn». Открыть подробности?":
         "412 visitors this week, 2.2% of them placed an order. The best-performing search is “kevin murphy tallinn”. Open the details?",
       "Письма магазин шлёт сам: «заказ принят», «отправлен» с трек-номером, «снова в наличии». Могу включить напоминание о брошенной корзине и поздравление со скидкой ко дню рождения.":
@@ -2344,8 +2383,6 @@
       "Описание (до 155 знаков)": "Description (up to 155 characters)",
       "Сгенерировать с ИИ": "Generate with AI",
       "Русский — эстонский и английский пишутся сами": "In Russian — Estonian and English write themselves",
-      "Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.":
-        "Price, stock, subcategory, photos, photos per size and SEO are saved for real (visible in the shop too; undo is in the log). An uploaded photo is resized and converted to a light format automatically; the background still has to be removed beforehand.",
       "Открыть обзор": "Open the overview",
       "Открыть заказы": "Open orders",
       "Открыть товары": "Open products",
@@ -2813,6 +2850,51 @@
       "Не удалось сохранить статус": "Could not save the status",
       "Отменено": "Undone",
       /* админка, редизайн (этап 2): «Товар», «Салон», сканер */
+      /* product creation: «+ Товар», the owner's own products */
+      "Новый товар": "New product",
+      "· ваш товар": "· your product",
+      "Что добавляем?": "What are we adding?",
+      "Сохранить товар": "Save the product",
+      "Не удалось сохранить товар": "Could not save the product",
+      "Например, Proraso": "For example, Proraso",
+      "Beard Balm — бальзам для бороды": "Beard Balm — beard balm",
+      "Бренд можно выбрать из списка или вписать новый. Название — как его увидит покупатель: линейка и что это, например «Beard Balm — бальзам для бороды».":
+        "Pick a brand from the list or type a new one. The name is what the customer sees: the line and what it is, e.g. «Beard Balm — beard balm».",
+      "Товар появится в магазине сразу после сохранения. Фото добавите на вкладке «Фото и видео» — она откроется сама.":
+        "The product appears in the shop as soon as it is saved. Add the photos on the «Photos and video» tab — it opens by itself.",
+      "Цена — на вкладке «Размеры и цены»: одна на товар или своя для каждого объёма.":
+        "The price is on the «Sizes and prices» tab: one for the product, or one per size.",
+      "Товар снят с продажи — в магазине его нет.": "The product is off sale — it is not in the shop.",
+      "Вернуть в продажу": "Put back on sale",
+      "Это ваш товар: название, бренд, раздел, объёмы и фото здесь меняете вы сами. Убрать его с полки — «Снять с продажи» внизу; вернуть можно из журнала.":
+        "This is your own product: you change the name, brand, section, sizes and photos here yourself. Take it off the shelf with «Take off sale» below; the log can put it back.",
+      "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Every size has its own price. The customer sees the first size first.",
+      "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
+        "One price for the whole product. If there are several sizes, press «+ Size» and give each one a price.",
+      "Фото — после первого сохранения": "Photos — after the first save",
+      "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
+        "Fill in «Basics», type the price and press «Save the product» — the product appears, and photos from the phone can be added here.",
+      "Убираем фон…": "Removing the background…",
+      "Убрать фон": "Remove the background",
+      "✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.":
+        "✂ removes the background from a photo — the original stays, and if it does not work out the photo simply stays as it is.",
+      "Впишите бренд — например, Proraso.": "Type the brand — for example, Proraso.",
+      "Впишите название товара.": "Type the product name.",
+      "Выберите раздел.": "Choose a section.",
+      "У каждого объёма должно быть название — например, 100 мл.": "Every size needs a name — for example, 100 ml.",
+      "Объёмы не должны повторяться.": "Sizes must not repeat.",
+      "Больше 12 объёмов не нужно.": "No more than 12 sizes are needed.",
+      "У каждого объёма должна быть своя цена.": "Every size needs its own price.",
+      "Не удалось сохранить товар — проверьте поля.": "Could not save the product — check the fields.",
+      "Не удалось сохранить товар — попробуйте ещё раз": "Could not save the product — try again",
+      "Товар создан ✓ — добавьте фото": "Product created ✓ — add the photos",
+      "Товар создан ✓ — теперь добавьте фото": "Product created ✓ — now add the photos",
+      "Сервер не отвечает — попробуйте ещё раз": "The server is not answering — try again",
+      "Снова в продаже ✓": "Back on sale ✓",
+      "Фон убран ✓ — проверьте и нажмите «Сохранить»": "Background removed ✓ — check it and press «Save»",
+      "Не получилось убрать фон — фото осталось как было": "Could not remove the background — the photo stays as it was",
+      "Новый товар заводится в «Товарах» — кнопка «+ Товар»: бренд, название, раздел и цена, потом фото с телефона. Фото показываются как есть, на белом фоне; описание и тексты для Google на трёх языках напишутся по кнопке в карточке — вы проверите и сохраните.":
+        "A new product is created in «Products» — the «+ Product» button: brand, name, section and price, then photos from the phone. Photos are shown as they are, on a white background; the description and the Google texts in three languages are written by a button on the card — you check and save.",
       "Размеры и цены": "Sizes and prices",
       "Фото и видео": "Photos and video",
       "главное": "main",
@@ -2836,7 +2918,7 @@
       "Правее": "Right",
       "Убрать фото": "Remove the photo",
       "Фото с телефона": "Photo from the phone",
-      "Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Водяной знак ставится сам.": "The first photo is the main one: it shows in the catalogue, in search and in letters. ← → change the order, ★ makes a photo the main one. The watermark is added by itself.",
+      "Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Фото показываются как есть, на белом фоне.": "The first photo is the main one: it shows in the catalogue, in search and in letters. ← → change the order, ★ makes a photo the main one. Photos are shown as they are, on a white background.",
       "Какое фото показывать для каждого объёма.": "Which photo to show for each size.",
       "Откуда видео": "Where the video comes from",
       "Загрузить": "Upload",
@@ -3276,6 +3358,12 @@
     [/^Добавить в продажу · (\d+)$/, { ET: "Lisa müüki · $1", EN: "Add to the sale · $1" }],
     [/^на складе (\d+)$/, { ET: "laos $1", EN: "in stock $1" }],
     [/^Снято с продажи · (.+)$/, { ET: "Eemaldatud müügilt · $1", EN: "Taken off sale · $1" }],
+    // product creation: the undo of the line above, and the confirm card
+    // before the owner's own product leaves the shelf (one pre-line block)
+    [/^Снова в продаже · (.+)$/, { ET: "Jälle müügil · $1", EN: "Back on sale · $1" }],
+    [/^(.+) — (.+)\nТовар исчезнет из магазина — из каталога, поиска и корзины\. Вернуть можно здесь же, в «Товарах», или из журнала\.$/,
+      { ET: "$1 — $2\nToode kaob poest — kataloogist, otsingust ja ostukorvist. Tagasi saab siinsamas «Toodetes» või logist.",
+        EN: "$1 — $2\nThe product disappears from the shop — the catalogue, search and the cart. Put it back right here in «Products» or from the log." }],
     [/^(\d+) поз\. · (.+) · остатки списаны$/,
       { ET: "$1 rida · $2 · jäägid maha kantud", EN: "$1 lines · $2 · stock written off" }],
     /* the confirm card before a salon sale — one pre-line block, so the whole
@@ -4548,11 +4636,15 @@
       { id: "oi", name: "Масла", re: /масло/i }
     ]
   };
+  /** Which subsection a product sits in: the owner's override first, then —
+      product creation — the subsection a custom row was saved with; "" means
+      «авто — по названию», the regex above decides. */
+  function subcatOf(p) { return DEMO.subcat[p.id] || p.subcatBase || ""; }
   function subcatsFor(list) {
     var defs = !S.brand && SUBCATS[S.cat];
     if (!defs) return [];
     return defs.map(function (d) {
-      return { id: d.id, name: d.name, n: list.filter(function (p) { return DEMO.subcat[p.id] ? DEMO.subcat[p.id] === d.id : d.re.test(p.name); }).length, re: d.re };
+      return { id: d.id, name: d.name, n: list.filter(function (p) { return subcatOf(p) ? subcatOf(p) === d.id : d.re.test(p.name); }).length, re: d.re };
     }).filter(function (d) { return d.n > 0; });
   }
 
@@ -4568,7 +4660,7 @@
     var list = S.cat === "all" ? CATALOGUE.slice() : CATALOGUE.filter(function (p) { return p.cat === S.cat; });
     if (S.subcat) {
       var sdef = (SUBCATS[S.cat] || []).filter(function (d) { return d.id === S.subcat; })[0];
-      if (sdef) list = list.filter(function (p) { return DEMO.subcat[p.id] ? DEMO.subcat[p.id] === sdef.id : sdef.re.test(p.name); });
+      if (sdef) list = list.filter(function (p) { return subcatOf(p) ? subcatOf(p) === sdef.id : sdef.re.test(p.name); });
     }
     if (S.onlyInStock) list = list.filter(function (p) { return p.stock !== "out"; });
     if (S.brandFilter.length) list = list.filter(function (p) { return S.brandFilter.indexOf(p.brand) >= 0; });
@@ -9350,10 +9442,10 @@
       ? '<button class="adm-btn adm-btn--head" data-bundlenew>+ Набор</button>'
       : tab === "stock"
         ? '<button class="adm-btn adm-btn--head" data-scanopen>Приёмка' + admIcon("scan", false, 20) + "</button>"
-        /* «+ Товар» waits for the goods editor's own redesign in phase 2: the
-           editor can only open a product the catalogue already has, so a
-           button that promised a blank one would lie. */
-        : '<button class="adm-btn adm-btn--head" title="скоро" disabled>+ Товар</button>';
+        /* product creation: a blank product the editor really can save —
+           custom_products on the server, CATALOGUE here (adoptCustom). */
+        : '<button class="adm-btn adm-btn--head" data-admgoodsnew>+ Товар</button>';
+    if (tab === "catalog") loadCustomAll(false);
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", 'Товары <small>' + CATALOGUE.length + "</small>", add) +
       '<div class="adm-tabs" role="group" aria-label="Что показываем">' + tabs + "</div>" +
@@ -9367,11 +9459,34 @@
   }
   /** Its own function so typing in the search box can patch the list in place
       instead of re-rendering the screen out from under the caret. */
+  /* product creation: the panel's own copy of every custom product, hidden
+     ones included — the list shows those with «скрыт», and the editor can
+     put one back on sale. The feed (DEMO.custom) only ever has the active
+     ones. Fetched once per session, again after every write. */
+  var CUSTOM_ALL = { asked: false };
+  function loadCustomAll(force) {
+    if (SRV.admin !== true) return;
+    if ((S.customAll || CUSTOM_ALL.asked) && !force) return;
+    CUSTOM_ALL.asked = true;
+    apiJson("/api/admin/products/").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok && Array.isArray(r.body.products)) { S.customAll = r.body.products; render(); }
+    }).catch(noop);
+  }
+  /** The rows the list shows: the owner's own products first (a fresh one is
+      what he came to check), then the catalogue, then the hidden ones. */
+  function admCatalogList() {
+    var own = CATALOGUE.filter(function (p) { return p.custom; });
+    var file = CATALOGUE.filter(function (p) { return !p.custom; });
+    var hidden = (S.customAll || []).filter(function (c) { return c && c.active === false && !byIdOrNull(c.id); }).map(customProduct);
+    return own.concat(file, hidden);
+  }
   function admCatalogRows() {
     var q = (S.goodsQ || "").toLowerCase().trim();
+    var all = admCatalogList();
     var list = q
-      ? CATALOGUE.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
-      : CATALOGUE;
+      ? all.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
+      : all;
     var shown = list.slice(0, 40);
     return shown.map(admCatalogRow).join("") +
       (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
@@ -9383,11 +9498,15 @@
     var lo = Math.min.apply(null, prices), hi = Math.max.apply(null, prices);
     // the low end keeps only its number, so «9–24 €» reads as one price range
     var price = lo === hi ? eur(hi) : eur(lo).replace(/\s?€$/, "").replace(/^€/, "") + "–" + eur(hi);
-    var badge = p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
+    // product creation: a hidden custom product says so instead of a stock badge
+    var badge = p.custom && p.active === false ? ["Скрыт", "adm-badge--quiet"]
+      : p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
       : p.stock === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
+    var fresh = p.custom && p.active !== false && (customFresh(p) || (S.goodsFresh && S.goodsFresh[p.id]));
     return '<button class="adm-row adm-row--tall adm-row--click" data-admgoods="' + esc(p.id) + '">' +
       '<span class="adm-thumb">' + media(p, 0, "") + "</span>" +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) +
+        (fresh ? ' <span class="adm-badge adm-badge--sm adm-badge--ink" data-goodsfresh>новый</span>' : "") + "</span>" +
         '<span class="adm-row__sub">' + esc((p.sizes || []).join(" · ")) + "</span></span>" +
       '<span class="adm-row__end"><span class="adm-row__amt">' + price + "</span>" +
         '<span class="adm-badge adm-badge--sm ' + badge[1] + '">' + badge[0] + "</span></span></button>";
@@ -9594,7 +9713,7 @@
     // «Товары» owns the goods editor too, but the editor keeps the whole pane
     // to itself: a tab strip above an unsaved edit is a way to lose it.
     else if (tab === "goods" || tab === "stock") {
-      body = S.adminEdit ? goodsEditor(byId(S.adminEdit)) : admProductsHTML();
+      body = S.adminEdit ? goodsEditor(admEditProduct(S.adminEdit)) : admProductsHTML();
     }
     else if (tab === "pos") body = admSalonHTML();
     // phase 3: the six «Ещё» sections, each redrawn on the loader it already had
@@ -12016,13 +12135,17 @@
      Without the bucket configured the server says so once, the button greys
      out with a plain sentence, and every other part of the panel is unchanged.
      The prototype with no backend behind it lands in the same place. */
-  var MEDIA = { on: null, busy: false };
+  var MEDIA = { on: null, busy: false, cutout: false };
   function mediaProbe() {
     if (MEDIA.on !== null || MEDIA.busy) return;
     MEDIA.busy = true;
     apiJson("/api/admin/upload/")
-      .then(function (r) { MEDIA.on = r.status === 200 && r.body.ok === true && r.body.configured === true; })
-      .catch(function () { MEDIA.on = false; })
+      .then(function (r) {
+        MEDIA.on = r.status === 200 && r.body.ok === true && r.body.configured === true;
+        // «Убрать фон» is offered only when the server says it can do it
+        MEDIA.cutout = MEDIA.on && r.body.cutout === true;
+      })
+      .catch(function () { MEDIA.on = false; MEDIA.cutout = false; })
       .then(function () { MEDIA.busy = false; render(); });
   }
   var MEDIA_ERR = {
@@ -12075,7 +12198,7 @@
      of those before saving really removes it from the bucket, while an older
      photo is only dropped from the list, because undo has to be able to put
      it back. */
-  var GAL = { id: "", list: [], fresh: {}, reset: false };
+  var GAL = { id: "", list: [], fresh: {}, reset: false, cutting: null };
   /* assistant-work: one snapshot of the description+SEO fields, taken the
      first time an AI button is pressed for the product currently open — so
      «Отменить» always restores what was on screen before any AI call this
@@ -12151,11 +12274,16 @@
         return { url: g.url, thumb: g.thumb || g.url, alt: g.alt || "" };
       });
     }
+    /* product creation: a custom product's photos are its row's, thumbnails
+       and all — and none at all is an empty list, not the placeholder tile */
+    if (p.custom) {
+      return (p.photos || []).map(function (g) { return { url: g.url, thumb: g.thumb || g.url, alt: g.alt || "" }; });
+    }
     return gal(p).map(function (u) { return { url: u, thumb: u, alt: "" }; });
   }
   function galDraft(p) {
     if (GAL.id !== p.id) {
-      GAL.id = p.id; GAL.list = galPhotos(p); GAL.fresh = {}; GAL.reset = false;
+      GAL.id = p.id; GAL.list = galPhotos(p); GAL.fresh = {}; GAL.reset = false; GAL.cutting = null;
       UP.busy = 0; UP.total = 0; UP.err = "";
     }
     return GAL.list;
@@ -12333,7 +12461,9 @@
       a render() the owner did not ask for. */
   var GOODS_FIELDS = ["[data-edprice]", "[data-edproprice]", "[data-edstock]", "[data-edsubcat]",
     "[data-edseot]", "[data-edseod]", "[data-edseotet]", "[data-edseodet]", "[data-edseoten]", "[data-edseoden]",
-    "[data-edvideo]", "[data-eddescru]", "[data-eddescet]", "[data-eddescen]"];
+    "[data-edvideo]", "[data-eddescru]", "[data-eddescet]", "[data-eddescen]",
+    // product creation: the boxes only a custom product has
+    "[data-edbrand]", "[data-edname]", "[data-edcat]"];
   /** «12,50» → 12.5; empty, not a number, or outside 1–500 € → null.
       Number(), not parseFloat(): parseFloat("12abc") is 12, which is exactly
       the kind of half-read value this box must not accept. */
@@ -12398,9 +12528,105 @@
     if (url && !/youtu|vimeo/i.test(url)) return "up";
     return "yt";
   }
+  /* ---- product creation: the editor's «new» mode and the custom rows -----
+     S.adminEdit === "new" opens the same five tabs over a product that does
+     not exist yet: brand, name, section and a price are the essentials on
+     «Основное» and «Размеры и цены»; photos wait for the first «Сохранить»,
+     because an upload is filed under the product's id and there is none
+     yet. An existing custom product (`p.custom`) opens the same boxes
+     editable — the row is his, not the file's — and saves back to
+     PUT /api/admin/products/<id>. */
+  function goodsNewDraft() {
+    var d = S.goodsNew || {};
+    var g = function (sel, fb) { var e = document.querySelector(sel); return e ? e.value : fb; };
+    var cat = g("[data-edcat]", d.cat || "hair");
+    return { id: "new", isNew: true, custom: true, active: true,
+      brand: g("[data-edbrand]", d.brand || ""), name: g("[data-edname]", d.name || ""),
+      cat: CAT_NAMES[cat] ? cat : "hair", subcatBase: g("[data-edsubcat]", d.subcat || ""),
+      price: d.price || 0, stock: "in", img: CUSTOM_PLACEHOLDER, photos: [], seoOv: null, descOv: null };
+  }
+  /** The product an editor id names: the draft for «new», a hidden custom
+      product from the panel's own list, else the catalogue's (byId — which
+      answers for an active custom product too, once adoptCustom() ran). */
+  function admEditProduct(id) {
+    if (id === "new") return goodsNewDraft();
+    var p = byIdOrNull(id);
+    if (p) return p;
+    var c = findCustom(id);
+    return c ? customProduct(c) : byId(id);
+  }
+  /** The size rows a custom product is edited with — {size, price} per row,
+      size "" for the single-price case. The list lives in S so «+ Размер»
+      and «×» can rebuild the grid; the values are read off the DOM first,
+      so a row added keeps what was typed in the others. */
+  function edSizeRows(p) {
+    if (S.goodsSizes && S.goodsSizes.id === p.id) return S.goodsSizes.rows;
+    var rows = (p.sizes && p.sizes.length)
+      ? p.sizes.map(function (sz, i) { return { size: sz, price: p.prices && p.prices[i] != null ? p.prices[i] : p.price }; })
+      : [{ size: "", price: p.isNew ? "" : p.price }];
+    S.goodsSizes = { id: p.id, rows: rows };
+    return rows;
+  }
+  function edSizeRowsRead(p) {
+    var rows = edSizeRows(p);
+    for (var i = 0; i < rows.length; i++) {
+      var sEl = document.querySelector('[data-edsz="' + i + '"]'), pEl = document.querySelector('[data-edpx="' + i + '"]');
+      if (sEl) rows[i].size = sEl.value;
+      if (pEl) rows[i].price = pEl.value;
+    }
+    return rows;
+  }
+  /** Every brand the shop sells — the file's and the owner's — for the datalist. */
+  function edBrandOptions() {
+    return brands().map(function (b) { return '<option value="' + esc(b.name) + '">'; }).join("");
+  }
+  function edSubcatField(cat, cur) {
+    var subs = SUBCATS[cat] || [];
+    return '<label class="adm-field">Подраздел<select class="adm-input" data-edsubcat' + (subs.length ? "" : " disabled") + ">" +
+      (subs.length
+        ? '<option value=""' + (cur ? "" : " selected") + '>Авто — по названию</option>' +
+          subs.map(function (s2) { return '<option value="' + esc(s2.id) + '"' + (cur === s2.id ? " selected" : "") + ">" + esc(s2.name) + "</option>"; }).join("")
+        : '<option value="">у этого раздела нет подразделов</option>') +
+      "</select></label>";
+  }
+  function edPaneMainOwn(p) {
+    var curSub = subcatOf(p);
+    return '<div class="adm-edpane" data-edpane="main"' + (edTab() === "main" ? "" : " hidden") + ">" +
+      '<div class="adm-edcols">' +
+        '<div class="adm-edcol">' +
+          '<label class="adm-field">Бренд <span class="adm-req" aria-hidden="true">*</span>' +
+            '<input class="adm-input" data-edbrand list="edbrands" value="' + esc(p.brand) + '" maxlength="60" placeholder="Например, Proraso" autocomplete="off"></label>' +
+          '<datalist id="edbrands">' + edBrandOptions() + "</datalist>" +
+          '<label class="adm-field">Название <span class="adm-req" aria-hidden="true">*</span>' +
+            '<input class="adm-input" data-edname value="' + esc(p.name) + '" maxlength="120" placeholder="Beard Balm — бальзам для бороды"></label>' +
+          '<div class="adm-edpair">' +
+            '<label class="adm-field">Раздел<select class="adm-input" data-edcat>' +
+              CATS.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") +
+            "</select></label>" +
+            '<span data-edsubslot>' + edSubcatField(p.cat, curSub) + "</span>" +
+          "</div>" +
+          '<p class="adm-hint">Бренд можно выбрать из списка или вписать новый. Название — как его увидит покупатель: линейка и что это, например «Beard Balm — бальзам для бороды».</p>' +
+        "</div>" +
+        '<div class="adm-edcol">' +
+          (p.isNew
+            ? '<p class="adm-hint">Товар появится в магазине сразу после сохранения. Фото добавите на вкладке «Фото и видео» — она откроется сама.</p>' +
+              '<p class="adm-hint">Цена — на вкладке «Размеры и цены»: одна на товар или своя для каждого объёма.</p>'
+            : '<label class="adm-field">Наличие<select class="adm-input" data-edstock>' +
+                [["in", "В наличии"], ["low", "Мало"], ["out", "Нет в наличии"]].map(function (o) {
+                  return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
+                }).join("") + "</select></label>" +
+              (p.active === false
+                ? '<p class="adm-hint adm-hint--warn">Товар снят с продажи — в магазине его нет.</p>' +
+                  '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admgoodsshow="' + esc(p.id) + '">Вернуть в продажу</button></div>'
+                : '<p class="adm-hint">Это ваш товар: название, бренд, раздел, объёмы и фото здесь меняете вы сами. Убрать его с полки — «Снять с продажи» внизу; вернуть можно из журнала.</p>') +
+              '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>') +
+        "</div>" +
+      "</div></div>";
+  }
   function edPaneMain(p) {
+    if (p.custom) return edPaneMainOwn(p);   // product creation
     var subs = SUBCATS[p.cat] || [];
-    var curSub = DEMO.subcat[p.id] || "";
+    var curSub = subcatOf(p);
     return '<div class="adm-edpane" data-edpane="main"' + (edTab() === "main" ? "" : " hidden") + ">" +
       '<div class="adm-edcols">' +
         '<div class="adm-edcol">' +
@@ -12437,7 +12663,55 @@
         "</div>" +
       "</div></div>";
   }
+  /* product creation: a custom product's own ladder — every size and every
+     price editable, «+ Размер» and «×» real. One row with no size label is
+     the single-price case (the catalogue's «один объём»); the first
+     «+ Размер» turns it into a labelled row and adds a second. Salon price,
+     stock and barcode keep their columns once the product has an id. */
+  function edPaneSizesOwn(p) {
+    if (!p.isNew) loadStockLevels(false);
+    var rows = edSizeRows(p), n = rows.length;
+    var multi = n > 1 || (n === 1 && !!rows[0].size);
+    var head = '<div class="adm-grid__head"><span>Размер</span><span>Цена, €</span>' +
+      (p.isNew ? "" : "<span>Салон, €</span><span>Остаток</span><span>Штрихкод</span>") + "<span></span></div>";
+    var body = rows.map(function (r, i) {
+      var variant = multi ? r.size : "";
+      var key = stockKey(p.id, variant);
+      var lv = p.isNew ? null : edStockFor(p, variant);
+      var qty = lv && lv.tracked ? String(lv.qty) : "";
+      var low = lv && lv.tracked && lv.qty <= 3;
+      var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
+      var salon = edSalonOf(goodsPrice(priceVal) || 0);
+      return '<div class="adm-grid__row">' +
+        (multi
+          ? '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) + '" maxlength="30" placeholder="100 мл" aria-label="Размер">'
+          : '<span class="adm-grid__sz">один объём</span>') +
+        '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
+          '" inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">' +
+        (p.isNew ? "" :
+          (i === 0
+            ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
+              '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
+            : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
+          '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
+            '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">' +
+          '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
+            esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">') +
+        '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
+          ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
+      "</div>";
+    }).join("");
+    return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
+      '<div class="adm-grid' + (p.isNew ? " adm-grid--new" : "") + '">' + head + body + "</div>" +
+      '<button class="adm-btn adm-btn--dash" type="button" data-edsizeadd>+ Размер</button>' +
+      '<p class="adm-hint">' + (multi
+        ? "У каждого объёма своя цена. Первый объём покупатель видит первым."
+        : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
+      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>') +
+      "</div>";
+  }
   function edPaneSizes(p) {
+    if (p.custom) return edPaneSizesOwn(p);   // product creation
     loadStockLevels(false);
     var sizes = (p.sizes && p.sizes.length) ? p.sizes : [""];
     var prices = (p.prices && p.prices.length) ? p.prices : [p.price];
@@ -12479,18 +12753,31 @@
       "</div>";
   }
   function edPaneMedia(p) {
+    /* product creation: no id yet, so nothing to file a photo under — the
+       tab says what to do instead of showing a button that cannot work */
+    if (p.isNew) {
+      return '<div class="adm-edpane" data-edpane="media"' + (edTab() === "media" ? "" : " hidden") + ">" +
+        '<div class="adm-sec"><span class="adm-sec__t">Фото</span></div>' +
+        '<div class="adm-empty" data-galwait><div class="adm-empty__t">Фото — после первого сохранения</div>' +
+          '<p class="adm-empty__s">Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.</p></div>' +
+        "</div>";
+    }
     var list = galDraft(p), n = list.length;
     var g = list.map(function (ph) { return ph.thumb || ph.url; });
     var vurl = vidValue(p), vk = edVideoKind(vurl);
     var tiles = list.map(function (ph, i) {
-      var tag = edPhotoTag(p, i);
+      var tag = GAL.cutting === i ? "Убираем фон…" : edPhotoTag(p, i);
       return '<div class="adm-photo' + (i === 0 ? " is-main" : "") + '">' +
         '<span class="adm-photo__img" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
-        (tag ? '<span class="adm-photo__tag' + (i === 0 ? " adm-photo__tag--ink" : "") + '">' + esc(tag) + "</span>" : "") +
+        (tag ? '<span class="adm-photo__tag' + (i === 0 && GAL.cutting !== i ? " adm-photo__tag--ink" : "") + '">' + esc(tag) + "</span>" : "") +
         '<span class="adm-photo__ops">' +
           '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее">←</button>' +
           '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее">→</button>' +
           (i === 0 ? "" : '<button class="adm-photo__op" data-galmain="' + i + '" aria-label="Сделать главным">★</button>') +
+          /* «Убрать фон» — only when the server said it can (MEDIA.cutout,
+             src/lib/photo-cutout.ts); the original photo stays, the cut-out
+             takes its place in this list until «Сохранить» */
+          (MEDIA.cutout ? '<button class="adm-photo__op" data-galcut="' + i + '"' + (GAL.cutting != null ? " disabled" : "") + ' aria-label="Убрать фон" title="Убрать фон">✂</button>' : "") +
           '<button class="adm-photo__op" data-galdel="' + i + '" aria-label="Убрать фото">×</button>' +
         "</span></div>";
     }).join("");
@@ -12502,10 +12789,11 @@
           (UP.busy ? esc(upBusyText()) : "Фото с телефона") + "</button>" +
         '<input class="adm-photo__file" type="file" accept="image/*" multiple data-galfile="' + esc(p.id) + '" aria-label="Загрузить фото">' +
       "</div>" +
-      '<p class="adm-hint">Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Водяной знак ставится сам.</p>' +
+      '<p class="adm-hint">Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Фото показываются как есть, на белом фоне.</p>' +
+      (MEDIA.cutout ? '<p class="adm-hint">✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.</p>' : "") +
       (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
       (UP.err ? '<p class="adm-hint adm-hint--warn">' + esc(UP.err) + "</p>" : "") +
-      (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset
+      (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset && !p.custom
         ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
         : "") +
       (galDirty(p) ? '<p class="adm-hint adm-hint--warn">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
@@ -12609,15 +12897,150 @@
       '<p class="adm-hint">Это то, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.</p>' +
       "</div>";
   }
+  /* ---- product creation: what «Сохранить» does for the owner's own row ---
+     The form is read straight off the DOM like the rest of the editor, and
+     what it refuses it refuses out loud (goodsFail), naming the box. The
+     server checks the same rules again (src/lib/custom-products.ts) and its
+     answer names the field too, so a refusal from either side lands in the
+     same place. */
+  var CUSTOM_ERR = {
+    brand_required: ["Впишите бренд — например, Proraso.", "[data-edbrand]"],
+    name_required: ["Впишите название товара.", "[data-edname]"],
+    bad_cat: ["Выберите раздел.", "[data-edcat]"],
+    bad_price: ["Цена — число от 1 до 500 €, например 12,50.", "[data-edprice]"],
+    bad_size: ["У каждого объёма должно быть название — например, 100 мл.", '[data-edsz="0"]'],
+    sizes_duplicate: ["Объёмы не должны повторяться.", '[data-edsz="0"]'],
+    too_many_sizes: ["Больше 12 объёмов не нужно.", '[data-edsz="0"]'],
+    sizes_prices_mismatch: ["У каждого объёма должна быть своя цена.", "[data-edprice]"]
+  };
+  function customFail(code, focusSel) {
+    var e = CUSTOM_ERR[code] || ["Не удалось сохранить товар — проверьте поля.", null];
+    goodsFail(e[0], focusSel || e[1]);
+  }
+  /** The row the form describes, or null after goodsFail() said why not. */
+  function customRowFromForm(p) {
+    var g = function (sel) { var e = document.querySelector(sel); return e ? e.value.trim() : ""; };
+    var brand = g("[data-edbrand]"), name = g("[data-edname]"), cat = g("[data-edcat]") || p.cat;
+    if (!brand) { customFail("brand_required"); return null; }
+    if (!name) { customFail("name_required"); return null; }
+    if (!CAT_NAMES[cat]) { customFail("bad_cat"); return null; }
+    var rows = edSizeRowsRead(p);
+    var multi = rows.length > 1 || (rows.length === 1 && !!String(rows[0].size || "").trim());
+    var sizes = [], prices = [], seen = {};
+    for (var i = 0; i < rows.length; i++) {
+      var price = goodsPrice(rows[i].price);
+      if (price === null) { customFail("bad_price", '[data-edpx="' + i + '"]'); return null; }
+      if (multi) {
+        var label = String(rows[i].size || "").trim();
+        if (!label) { customFail("bad_size", '[data-edsz="' + i + '"]'); return null; }
+        if (seen[label.toLowerCase()]) { customFail("sizes_duplicate", '[data-edsz="' + i + '"]'); return null; }
+        seen[label.toLowerCase()] = true;
+        sizes.push(label);
+      }
+      prices.push(price);
+    }
+    if (sizes.length > 12) { customFail("too_many_sizes"); return null; }
+    var desc = { RU: g("[data-eddescru]"), ET: g("[data-eddescet]"), EN: g("[data-eddescen]") };
+    var seo = seoToServer(seoNorm({
+      RU: { t: g("[data-edseot]"), d: g("[data-edseod]") }, ET: { t: g("[data-edseotet]"), d: g("[data-edseodet]") },
+      EN: { t: g("[data-edseoten]"), d: g("[data-edseoden]") }
+    }));
+    var out = { brand: brand, name: name, cat: cat, subcat: g("[data-edsubcat]"), sizes: sizes, prices: multi ? prices : [prices[0]],
+      description: (desc.RU || desc.ET || desc.EN) ? desc : null, seo: seo };
+    if (!p.isNew) out.gallery = GAL.id === p.id ? galSaveList() : (p.photos || []);
+    return out;
+  }
+  /** The answer's product becomes the shop's copy — the feed's list, the
+      panel's full list, CATALOGUE — with the overrides re-applied on top. */
+  function customAdopt(product) {
+    var replaced = false;
+    for (var i = 0; i < DEMO.custom.length; i++) if (DEMO.custom[i].id === product.id) { DEMO.custom[i] = product; replaced = true; }
+    if (!replaced) DEMO.custom.unshift(product);
+    if (S.customAll) {
+      var seenAll = false;
+      for (var k = 0; k < S.customAll.length; k++) if (S.customAll[k].id === product.id) { S.customAll[k] = product; seenAll = true; }
+      if (!seenAll) S.customAll.unshift(product);
+    }
+    adoptCustom(DEMO.custom);
+    demoSave();
+    applyDemoOverrides();
+  }
+  function customErrToast(r) {
+    if (r.status === 401) { SRV.admin = false; render(); return; }
+    if (r.status === 400 && r.body && r.body.error) { customFail(r.body.error); return; }
+    toast("Не удалось сохранить товар — попробуйте ещё раз");
+  }
+  function journalStamp() {
+    return new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+  /** The journal's line for a product made or changed here — Russian by
+      decision, like every other line in Renat's private change log. */
+  function productJournalLine(product, changed) {
+    var nm = "«" + product.brand + " — " + product.name + "»";
+    return changed ? "Товар " + nm + " изменён" : "Новый товар " + nm;
+  }
+  /** POST — a new row. `from` says who asked: the form or the assistant;
+      either way the editor opens on the product, on «Фото и видео», and a
+      journal line is left whose undo is «снять с продажи». */
+  function customCreate(patch, from) {
+    if (S.goodsBusy) return;
+    S.goodsBusy = true;
+    apiSend("/api/admin/products/", "POST", patch).then(function (r) {
+      S.goodsBusy = false;
+      if (!(r.status === 201 && r.body.ok && r.body.product)) { customErrToast(r); return; }
+      var product = r.body.product;
+      customAdopt(product);
+      S.goodsFresh = S.goodsFresh || {}; S.goodsFresh[product.id] = true;
+      var entry = { t: journalStamp(), txt: productJournalLine(product, false),
+        a: { type: "create_product", id: product.id }, prev: { type: "set_product_active", id: product.id, value: false, name: product.brand + " — " + product.name } };
+      DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+      S.adminTab = "goods"; S.adminEdit = product.id; S.goodsNew = null; S.goodsSizes = null; S.goodsErr = "";
+      GAL.id = ""; AI_UNDO = null; S.goodsEditTab = "media"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      pendingAction = null;
+      mediaProbe();
+      window.scrollTo({ top: 0 });
+      toast(from === "assistant" ? "Товар создан ✓ — добавьте фото" : "Товар создан ✓ — теперь добавьте фото", entry);
+      render();
+    }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
+  }
+  /** PUT — the row's own fields; the override-owned ones (stock, salon price,
+      video, counts, barcodes) went through demoApply() before this. */
+  function customUpdate(p, patch) {
+    if (S.goodsBusy) return;
+    S.goodsBusy = true;
+    apiSend("/api/admin/products/" + encodeURIComponent(p.id) + "/", "PUT", patch).then(function (r) {
+      S.goodsBusy = false;
+      if (!(r.status === 200 && r.body.ok && r.body.product)) { customErrToast(r); return; }
+      var product = r.body.product;
+      /* a price override the assistant wrote earlier would sit on top of the
+         new row price and hide it — the row is the truth now */
+      if (DEMO.price[p.id] != null && Number(product.price) !== Number(DEMO.price[p.id])) {
+        delete DEMO.price[p.id];
+        apiSend("/api/admin/overrides/", "PUT", { id: p.id, price: null }).catch(noop);
+      }
+      customAdopt(product);
+      journalNote(productJournalLine(product, true));
+      AI_UNDO = null; S.adminEdit = ""; S.goodsSizes = null; GAL.id = ""; UP.err = ""; vidReset();
+      toast("Сохранено ✓");
+      render();
+    }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
+  }
+  /** The assistant's create_product, once the owner pressed «Применить». */
+  function applyCreateProduct(a) {
+    customCreate({ brand: a.brand, name: a.name, cat: a.cat, subcat: "",
+      sizes: a.sizes || [], prices: a.prices && a.prices.length ? a.prices : [a.price], description: a.description || null }, "assistant");
+  }
   function goodsEditor(p) {
     loadAdminPricing(false);   // wholesale/loyalty: for the salon column below
     var t = edTab();
+    var isNew = !!p.isNew;   // product creation
     return '<div class="adm-screen adm-screen--tight">' +
       '<button class="adm-link adm-link--back" data-admclose>← Товары</button>' +
       '<div class="adm-head"><div>' +
-        '<div class="adm-head__kicker">' + esc(p.brand) + " · " + esc(CAT_NAMES[p.cat] || p.cat) + "</div>" +
-        '<h1 class="adm-h1 adm-h1--flat">' + esc(p.name) + "</h1></div>" +
-        '<button class="adm-link" data-go-product="' + esc(p.id) + '">Открыть в магазине ↗</button></div>' +
+        '<div class="adm-head__kicker">' + (isNew ? "Новый товар"
+          : esc(p.brand) + " · " + esc(CAT_NAMES[p.cat] || p.cat) + (p.custom ? " · ваш товар" : "")) + "</div>" +
+        '<h1 class="adm-h1 adm-h1--flat">' + (isNew ? "Что добавляем?" : esc(p.name)) + "</h1></div>" +
+        (isNew || p.active === false ? "" : '<button class="adm-link" data-go-product="' + esc(p.id) + '">Открыть в магазине ↗</button>') + "</div>" +
       '<div class="adm-tabs" role="group" aria-label="Что показываем">' +
         ED_TABS.map(function (x) {
           return '<button class="adm-tab" data-edtab="' + x[0] + '" aria-current="' + (t === x[0]) + '" title="' + x[1] + '">' + x[1] + "</button>";
@@ -12628,15 +13051,17 @@
       // it sits outside the panes so a refusal is readable from any tab.
       '<p class="adm-err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
       '<div class="adm-savebar">' +
-        '<button class="adm-btn" data-admsavegoods="' + esc(p.id) + '">Сохранить</button>' +
+        '<button class="adm-btn" data-admsavegoods="' + esc(p.id) + '">' + (isNew ? "Сохранить товар" : "Сохранить") + "</button>" +
         '<button class="adm-btn adm-btn--ghost" data-admclose>Отмена</button>' +
         '<span class="adm-savebar__sp"></span>' +
         /* The destructive slot of the design. There is no DELETE for a
            catalogue product — the catalogue is a file, not a table — so the
            button does the strongest thing the shop really has, says exactly
            that, and goes through the confirm card with an undo like every
-           other money-side change. */
-        '<button class="adm-del" data-admgoodspull="' + esc(p.id) + '">Снять с продажи</button>' +
+           other money-side change. For the owner's own product the same
+           button really takes it off the shelf (active=false), undo included;
+           a new product has nothing to take off yet. */
+        (isNew || p.active === false ? "" : '<button class="adm-del" data-admgoodspull="' + esc(p.id) + '">Снять с продажи</button>') +
       "</div></div>";
   }
   /** Tabs are a DOM patch, never a render(): the panes hold everything the
@@ -13648,6 +14073,10 @@
     // «Маркетинг → Подарочные карты»: which denominations are on sale. null =
     // the three the shop has always sold (GIFT_AMOUNTS_DEFAULT).
     giftAmounts: null,
+    // product creation: the owner's own products, as GET /api/overrides
+    // answers them (`custom`) — the offline copy, merged into CATALOGUE by
+    // adoptCustom() before the first render
+    custom: [],
     flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
@@ -13666,6 +14095,7 @@
       DEMO.flows = Object.assign(DEMO.flows, _dj.flows || {});
       // «Подарочные карты»: the denominations on sale, offline copy
       if (Array.isArray(_dj.giftAmounts)) DEMO.giftAmounts = _dj.giftAmounts;
+      if (Array.isArray(_dj.custom)) DEMO.custom = _dj.custom;   // product creation
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
     }
   } catch (e) {}
@@ -13728,12 +14158,96 @@
   /* The catalogue is patched in place, so its untouched values are kept aside
      once. Undoing a change — or losing an override the server no longer has —
      has to put the original price back, not merely stop overwriting it. */
-  var BASE = CATALOGUE.map(function (p) {
+  function baseOf(p) {
     return { price: p.price, prices: p.prices ? p.prices.slice() : null,
       stock: p.stock, seo: p.seo, varImg: p.varImg ? p.varImg.slice() : null,
       // media: the catalogue's own photos, so deleting an upload brings them back
-      img: p.img, gallery: p.gallery ? p.gallery.slice() : null };
-  });
+      img: p.img, gallery: p.gallery ? p.gallery.slice() : null,
+      // product creation: a custom row's own texts, which an override on the
+      // same id sits on top of (applyDemoOverrides) — null for the catalogue's
+      seoOv: p.seoOv || null, descOv: p.descOv || null };
+  }
+  var BASE = CATALOGUE.map(baseOf);
+
+  /* ---------- product creation: the owner's own products -------------------
+     The catalogue is a file (public/shop/catalogue2.js) and the panel cannot
+     write it. «+ Товар» and the assistant's create_product write rows to
+     custom_products instead (src/lib/custom-products.ts), and GET
+     /api/overrides answers with the active ones in the catalogue's own
+     product shape (`custom`). adoptCustom() below appends them to CATALOGUE
+     — and to BASE, so applyDemoOverrides() treats them like any product —
+     which is what makes /p/<id>/, the categories, search, the brand pages,
+     the cart and the checkout work for them with nothing else special-cased.
+     The id starts with «c-», and that prefix is how the editor tells a row it
+     may rewrite (name, brand, section, sizes, photos, texts) from a catalogue
+     product it may only override. Photos land on the white tile exactly as
+     uploaded; a product with none yet shows the shop's own mark. */
+  var CUSTOM_PLACEHOLDER = "/brand/rempire-tower.svg";
+  var CUSTOM_FRESH_MS = 24 * 3600 * 1000;   // «новый» in the panel's list for a day
+  function customProduct(c) {
+    var photos = Array.isArray(c.photos) ? c.photos.filter(function (ph) { return ph && ph.url; }) : [];
+    var urls = Array.isArray(c.gallery) && c.gallery.length ? c.gallery.slice() : photos.map(function (ph) { return ph.url; });
+    var desc = c.description && typeof c.description === "object" && (c.description.RU || c.description.ET || c.description.EN)
+      ? c.description : null;
+    var p = { id: String(c.id), brand: String(c.brand || ""), name: String(c.name || ""), cat: CAT_NAMES[c.cat] ? c.cat : "hair",
+      price: Number(c.price) || 0, stock: "in", custom: true, active: c.active !== false,
+      createdAt: c.createdAt || "", subcatBase: c.subcat || "", photos: photos,
+      img: urls[0] || CUSTOM_PLACEHOLDER, seoOv: seoNorm(c.seo), descOv: desc };
+    if (Array.isArray(c.sizes) && c.sizes.length) {
+      p.sizes = c.sizes.map(String);
+      p.prices = Array.isArray(c.prices) && c.prices.length === c.sizes.length ? c.prices.map(Number) : c.sizes.map(function () { return p.price; });
+      if (c.priceFrom) p.priceFrom = true;
+    }
+    if (urls.length) p.gallery = urls;
+    return p;
+  }
+  /** Created within the last day — the list says «новый» next to it. */
+  function customFresh(p) {
+    var t = p && p.createdAt ? Date.parse(p.createdAt) : NaN;
+    return isFinite(t) && Date.now() - t < CUSTOM_FRESH_MS;
+  }
+  /** The feed's rows (or the offline copy) become products: every custom entry
+      already in CATALOGUE is replaced, the hidden ones are left out, the
+      order of the file's own products is untouched. Idempotent. */
+  function adoptCustom(list) {
+    var keep = [], keepBase = [];
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      if (!CATALOGUE[i].custom) { keep.push(CATALOGUE[i]); keepBase.push(BASE[i]); }
+    }
+    CATALOGUE.length = 0; BASE.length = 0;
+    for (var k = 0; k < keep.length; k++) { CATALOGUE.push(keep[k]); BASE.push(keepBase[k]); }
+    (list || []).forEach(function (c) {
+      if (!c || !c.id || c.active === false) return;
+      var p = customProduct(c);
+      CATALOGUE.push(p); BASE.push(baseOf(p));
+      // BRAND_BY_SLUG is built further down at boot (and then covers these);
+      // an adoption after boot has to add a brand the file never had itself
+      if (typeof BRAND_BY_SLUG === "object" && BRAND_BY_SLUG) BRAND_BY_SLUG[slugify(p.brand)] = p.brand;
+    });
+  }
+  /** The row behind an id — from the feed's copy first, then from the panel's
+      full list (S.customAll, hidden products included). */
+  function findCustom(id) {
+    var lists = [DEMO.custom || [], S.customAll || []];
+    for (var l = 0; l < lists.length; l++) {
+      for (var i = 0; i < lists[l].length; i++) if (lists[l][i] && lists[l][i].id === id) return lists[l][i];
+    }
+    return null;
+  }
+  /** «Снять с продажи» and its undo, on the local copies — the server write is
+      srvPush()'s. A product shown again comes back from S.customAll when the
+      feed's copy no longer has it. */
+  function customSetActive(id, active) {
+    var c = findCustom(id);
+    if (!c) return;
+    c.active = active;
+    var inFeed = false;
+    for (var i = 0; i < DEMO.custom.length; i++) if (DEMO.custom[i].id === id) { DEMO.custom[i] = c; inFeed = true; }
+    if (!inFeed && active) DEMO.custom.unshift(c);
+    if (S.customAll) for (var k = 0; k < S.customAll.length; k++) if (S.customAll[k].id === id) S.customAll[k] = c;
+    adoptCustom(DEMO.custom);
+  }
+  adoptCustom(DEMO.custom);
   /* media: the owner's photos, as gal() wants them — a plain list of URLs.
      p.img follows the first one, because the bundle rows and the JSON-LD read
      that field directly instead of going through gal(). */
@@ -13767,10 +14281,10 @@
       if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
       // p.seo stays the catalogue's own (English) pair; the owner's per-language
       // pairs sit beside it and win in seoFor()
-      p.seoOv = DEMO.seo[p.id] || null;
+      p.seoOv = DEMO.seo[p.id] || b.seoOv || null;   // product creation: a custom row's own pairs underneath
       if (DEMO.varimg[p.id] && p.sizes && DEMO.varimg[p.id].length === p.sizes.length) p.varImg = DEMO.varimg[p.id].slice();
       if (DEMO.video && DEMO.video[p.id] != null) p.video = DEMO.video[p.id];   // features
-      p.descOv = (DEMO.desc && DEMO.desc[p.id]) || null;   // assistant-work: descFor() reads this first
+      p.descOv = (DEMO.desc && DEMO.desc[p.id]) || b.descOv || null;   // assistant-work: descFor() reads this first
       /* media: uploaded photos replace the catalogue's, and the per-size photo
          map points at positions in this list — a shorter list would otherwise
          leave «500 мл» pointing at a photo that no longer exists, so anything
@@ -13800,6 +14314,10 @@
      which re-sends the previous value. */
   var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false };
   function noop() {}
+  /* product creation: true while the very first paint waits for
+     /api/overrides/ — a direct visit to a product only the server knows
+     (see the boot at the end of the file). */
+  var bootHeld = false;
 
   function apiJson(url, opts) {
     return fetch(url, opts || {}).then(function (res) {
@@ -13818,6 +14336,8 @@
 
   function adoptServer(j) {
     var ov = j.overrides || {};
+    // product creation: the feed's own products replace the offline copy
+    if (Array.isArray(j.custom)) { DEMO.custom = j.custom; adoptCustom(DEMO.custom); }
     DEMO.price = {}; DEMO.stock = {}; DEMO.seo = {}; DEMO.subcat = {}; DEMO.varimg = {}; DEMO.video = {};
     DEMO.gallery = {};   // media
     DEMO.desc = {};   // assistant-work
@@ -13882,6 +14402,7 @@
       // Every other screen still gets the full rebuild: a new hero, a
       // catalogue price change, the chatbot toggle, etc. are not scoped to
       // any one container the way checkout's own blocks are.
+      if (bootHeld) return;   // the first paint is waiting for exactly this answer
       if (S.screen === "checkout") { patchDelivery(); patchSummary(); }
       else render();
     }).catch(noop);
@@ -13970,6 +14491,16 @@
     // the public /api/overrides one. adjust_points is a manual credit on one
     // customer's card, not a settings write.
     else if (a.type === "set_pricing") apiSend(st, "PUT", { pricing: S.pricingLoaded }).catch(noop);
+    /* product creation: off the shelf is DELETE (the row stays, active=false),
+       back on is PUT {active:true} — the undo of the one is the other */
+    else if (a.type === "set_product_active") {
+      var actUrl = "/api/admin/products/" + encodeURIComponent(a.id) + "/";
+      (a.value ? apiSend(actUrl, "PUT", { active: true }) : apiJson(actUrl, { method: "DELETE" }))
+        .then(function (r) {
+          if (!(r.status === 200 && r.body.ok)) toast("Не удалось сохранить товар");
+          loadCustomAll(true);
+        }).catch(noop);
+    }
     else if (a.type === "adjust_points") {
       // integration: the assistant may propose an e-mail instead of a uuid
       // (sanitizePointsAdjust) — the customers/[id] route resolves either
@@ -14126,7 +14657,8 @@
       render();
     });
   }
-  loadServerOverrides();
+  // kept: the boot at the end of the file may wait for this one answer
+  var OV_BOOT = loadServerOverrides();
   /* Its own fetch rather than a field on /api/overrides/: the sets are a
      list of documents, not a settings value, they are cached the same way,
      and the shop has a perfectly good static copy to draw until this lands
@@ -14293,6 +14825,19 @@
     }
     if (a.type === "adjust_points") {
       return "Баллы клиента: " + (a.delta > 0 ? "+" : "") + a.delta + (a.note ? " — " + a.note : "");
+    }
+    // product creation: the confirm card's summary of a new product, and the
+    // journal line of a product taken off the shelf or put back
+    if (a.type === "create_product") {
+      var cpPrices = a.sizes && a.sizes.length && a.prices
+        ? a.sizes.map(function (s, i) { return s + " — " + eur(a.prices[i]); }).join(" · ")
+        : eur(a.price || (a.prices && a.prices[0]) || 0);
+      var cpLangs = a.description ? ["RU", "ET", "EN"].filter(function (L) { return a.description[L]; }) : [];
+      return "Новый товар «" + a.brand + " — " + a.name + "» · " + (CAT_NAMES[a.cat] || a.cat) + " · " + cpPrices +
+        (cpLangs.length ? " · описание: " + cpLangs.join(", ") : "") + "\nФото добавите на вкладке «Фото и видео» — она откроется сама.";
+    }
+    if (a.type === "set_product_active") {
+      return "Товар «" + (a.name || (p && p.custom ? p.brand + " — " + p.name : a.id)) + "»: " + (a.value ? "снова в продаже" : "снят с продажи");
     }
     return "";
   }
@@ -14524,6 +15069,13 @@
       S.admCustomers = null;
       if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
     }
+    /* product creation: «снять с продажи» and its undo — the row's active
+       flag on the local copies here, DELETE/PUT on the server in srvPush() */
+    else if (a.type === "set_product_active") {
+      entry.prev = { type: "set_product_active", id: a.id, value: !a.value, name: a.name };
+      customSetActive(a.id, a.value);
+      if (!a.value && S.adminEdit === a.id) S.adminEdit = "";
+    }
     else return;
     DEMO.log.unshift(entry);
     DEMO.log = DEMO.log.slice(0, 40);
@@ -14581,6 +15133,8 @@
       S.admCustomers = null;
       if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
     }
+    // product creation: the row comes back on (or goes off) the shelf
+    else if (a.type === "set_product_active") { customSetActive(a.id, a.value); if (!a.value && S.adminEdit === a.id) S.adminEdit = ""; }
     DEMO.log.splice(i, 1);
     demoSave();
     applyDemoOverrides();
@@ -14676,7 +15230,7 @@
       return "Готово — черновик на русском, эстонском и английском, с составом и способом применения. Заголовок и описание для Google подобраны автоматически. Останется прочитать и нажать «Опубликовать».";
     }
     if (/добав|новый товар|фото|загруз/i.test(q)) {
-      return "Пришлите фото и цену — остальное сделаю сам: уберу фон с фотографии, поставлю фирменный водяной знак Rempire, напишу описание на трёх языках с SEO-заголовками и предложу раздел. Вы только проверите и подтвердите." + aiGo("goods", "Открыть товары");
+      return "Новый товар заводится в «Товарах» — кнопка «+ Товар»: бренд, название, раздел и цена, потом фото с телефона. Фото показываются как есть, на белом фоне; описание и тексты для Google на трёх языках напишутся по кнопке в карточке — вы проверите и сохраните." + aiGo("goods", "Открыть товары");
     }
     if (/аналитик|статист|посещ|сколько людей|конверси/i.test(q)) {
       return "За неделю 412 посетителей, из них 2,2% оформили заказ. Лучше всего находят по «kevin murphy tallinn». Открыть подробности?" + aiGo("stats", "Открыть аналитику");
@@ -15231,9 +15785,12 @@
         /* The «Размеры и цены» grid has one Остаток and one Штрихкод box per
            size, keyed by «productId variant» — a fixed selector list cannot
            name them, so they are collected by the key they carry. */
-        var gcells = bodySlot.querySelectorAll("[data-edqty],[data-edean]");
+        // product creation: the same for a custom product's own size rows
+        var gcells = bodySlot.querySelectorAll("[data-edqty],[data-edean],[data-edsz],[data-edpx]");
         for (var gc = 0; gc < gcells.length; gc++) {
-          var attr = gcells[gc].hasAttribute("data-edqty") ? "data-edqty" : "data-edean";
+          var attr = gcells[gc].hasAttribute("data-edqty") ? "data-edqty"
+            : gcells[gc].hasAttribute("data-edean") ? "data-edean"
+            : gcells[gc].hasAttribute("data-edsz") ? "data-edsz" : "data-edpx";
           goodsKeep['[' + attr + '="' + gcells[gc].getAttribute(attr) + '"]'] = gcells[gc].value;
         }
       }
@@ -15985,7 +16542,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -16348,6 +16905,7 @@
     }
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; mediaProbe();   // media
+      S.goodsSizes = null; S.goodsNew = null;   // product creation: the size rows start from what is saved
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
       // a fresh product opens on «Основное», in the language and the video
       // kind the design starts from — not on whatever the last one was left on
@@ -16356,6 +16914,7 @@
     }
     if (d.admclose !== undefined) {
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
+      S.goodsSizes = null; S.goodsNew = null;   // product creation
       S.goodsEditTab = "main"; S.goodsVidKind = ""; render(); return;
     }
     /* ---- Товар: the five tabs -------------------------------------------
@@ -16395,9 +16954,78 @@
       if (vidEl0) vidEl0.value = "";
       render(); return;
     }
+    /* product creation: «+ Товар» opens the editor over a product that does
+       not exist yet; «Вернуть в продажу» is the undo of the hide, applied at
+       once (nothing destructive about it) with the toast's own undo. */
+    if (d.admgoodsnew !== undefined) {
+      S.adminTab = "goods"; S.adminEdit = "new"; S.goodsNew = { brand: "", name: "", cat: "hair", subcat: "" };
+      S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); mediaProbe();
+      S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
+      window.scrollTo({ top: 0 }); render(); refocus("[data-edbrand]"); return;
+    }
+    if (d.admgoodsshow !== undefined) {
+      var showP = admEditProduct(d.admgoodsshow);
+      if (!showP || !showP.custom) return;
+      var showEntry = demoApply({ type: "set_product_active", id: showP.id, value: true, name: showP.brand + " — " + showP.name });
+      S.goodsSizes = null;
+      toast("Снова в продаже ✓", showEntry); render(); return;
+    }
+    if (d.edsizeadd !== undefined || d.edsizedel !== undefined) {
+      var szP = admEditProduct(S.adminEdit);
+      if (!szP.custom) return;
+      var szRows = edSizeRowsRead(szP);
+      if (d.edsizeadd !== undefined) {
+        if (szRows.length >= 12) { goodsFail("Больше 12 объёмов не нужно."); return; }
+        szRows.push({ size: "", price: szRows.length ? szRows[szRows.length - 1].price : "" });
+      } else {
+        szRows.splice(Number(d.edsizedel), 1);
+        if (!szRows.length) szRows.push({ size: "", price: "" });
+      }
+      goodsErrClear();
+      // the grid is rebuilt in place — a render() would put the saved values
+      // back over everything typed on the other four tabs
+      var szPane = document.querySelector('[data-edpane="sizes"]');
+      if (szPane) {
+        var szTpl = document.createElement("template");
+        szTpl.innerHTML = edPaneSizesOwn(szP);
+        var szFresh = szTpl.content.firstElementChild;
+        translateTree(szFresh);
+        szPane.replaceWith(szFresh);
+      }
+      if (d.edsizeadd !== undefined) refocus('[data-edsz="' + (szRows.length - 1) + '"]');
+      return;
+    }
+    /* «Убрать фон»: the cut-out replaces the photo in the draft list; the
+       original stays in the bucket, and «Сохранить» is what makes it so. */
+    if (d.galcut !== undefined) {
+      var cutP = admEditProduct(S.adminEdit);
+      var cutI = Number(d.galcut);
+      galDraft(cutP);
+      var cutPh = GAL.list[cutI];
+      if (!cutPh || GAL.cutting != null) return;
+      GAL.cutting = cutI; render();
+      apiSend("/api/admin/upload/cutout/", "POST", { url: cutPh.url }).then(function (r) {
+        GAL.cutting = null;
+        if (r.status === 200 && r.body.ok && r.body.url) {
+          GAL.list[cutI] = { url: r.body.url, thumb: r.body.thumbUrl || r.body.url, alt: cutPh.alt || "" };
+          if (r.body.key) GAL.fresh[r.body.url] = r.body.key;
+          toast("Фон убран ✓ — проверьте и нажмите «Сохранить»");
+        } else if (r.status === 401) { SRV.admin = false; }
+        else toast("Не получилось убрать фон — фото осталось как было");
+        render();
+      }).catch(function () { GAL.cutting = null; toast("Не получилось убрать фон — фото осталось как было"); render(); });
+      return;
+    }
     if (d.admgoodspull !== undefined) {
-      var pullP = byId(d.admgoodspull);
+      var pullP = admEditProduct(d.admgoodspull);
       if (!pullP) return;
+      // product creation: the owner's own product really leaves the shelf
+      if (pullP.custom) {
+        pendingAction = { type: "set_product_active", id: pullP.id, value: false, name: pullP.brand + " — " + pullP.name,
+          title: "Снять с продажи?", ok: "Снять", danger: true, overlay: true,
+          detail: pullP.brand + " — " + pullP.name + "\nТовар исчезнет из магазина — из каталога, поиска и корзины. Вернуть можно здесь же, в «Товарах», или из журнала." };
+        render(); return;
+      }
       pendingAction = { type: "goods_pull", id: pullP.id, name: pullP.brand + " — " + pullP.name,
         title: "Снять с продажи?", ok: "Снять", danger: true, overlay: true,
         detail: pullP.brand + " — " + pullP.name + "\nВ магазине останется страница товара, но купить его будет нельзя. Вернуть можно здесь же — «Наличие»." };
@@ -16473,13 +17101,13 @@
     // «Заполнить автоматически» writes the language the Google tab is on —
     // it used to send Russian whatever was shown; «все три языка» asks thrice
     if (d.admseogen !== undefined || d.admseoall !== undefined) {
-      var sp2 = byId(d.admseogen !== undefined ? d.admseogen : d.admseoall);
+      var sp2 = admEditProduct(d.admseogen !== undefined ? d.admseogen : d.admseoall);
       admDescSnapshot(sp2);
       admSeoFill(sp2, d.admseoall !== undefined ? ["RU", "ET", "EN"] : [(S.goodsSeoLang || "ru").toUpperCase()], t);
       return;
     }
     if (d.admdescgen !== undefined) {
-      var dp = byId(d.admdescgen);
+      var dp = admEditProduct(d.admdescgen);   // product creation: the draft's own brand/name/section for «new»
       admDescSnapshot(dp);
       var descBtn = t, descLabel = t.textContent; t.disabled = true; t.textContent = "…";
       apiSend("/api/admin/ai/text/", "POST", {
@@ -16500,7 +17128,7 @@
       return;
     }
     if (d.admtranslate !== undefined) {
-      var tp = byId(d.admtranslate);
+      var tp = admEditProduct(d.admtranslate);
       admDescSnapshot(tp);
       var trBtn = t, trLabel = t.textContent;
       var ruEl = document.querySelector("[data-eddescru]");
@@ -16538,7 +17166,14 @@
       return;
     }
     if (d.admsavegoods !== undefined) {
-      var gp = byId(d.admsavegoods);
+      var gp = admEditProduct(d.admsavegoods);
+      /* product creation: the owner's own row — brand, name, section, sizes,
+         photos and texts go to its own route (customRowFromForm → PUT/POST);
+         what is override-owned (stock, salon price, video, counts, barcodes)
+         keeps the path below, so the two never disagree about who owns what. */
+      var ownRow = gp.custom ? customRowFromForm(gp) : null;
+      if (gp.custom && !ownRow) return;
+      if (gp.isNew) { goodsErrClear(); customCreate(ownRow, "form"); return; }
       var priceEl = document.querySelector("[data-edprice]");
       var stockEl = document.querySelector("[data-edstock]");
       var priceProEl = document.querySelector("[data-edproprice]");
@@ -16587,7 +17222,7 @@
       goodsErrClear();
 
       var changed = false;
-      if (np !== null && Math.abs(np - gp.price) > 0.001) {
+      if (!gp.custom && np !== null && Math.abs(np - gp.price) > 0.001) {
         demoApply({ type: "set_price", id: gp.id, value: np }); changed = true;
       }
       // wholesale/loyalty: salon/pro price — empty field clears the override
@@ -16603,13 +17238,13 @@
         demoApply({ type: "set_stock", id: gp.id, value: stockEl.value }); changed = true;
       }
       var subEl = document.querySelector("[data-edsubcat]");
-      if (subEl && subEl.value !== (DEMO.subcat[gp.id] || "")) {
+      if (!gp.custom && subEl && subEl.value !== (DEMO.subcat[gp.id] || "")) {
         demoApply({ type: "set_subcat", id: gp.id, value: subEl.value }); changed = true;
       }
       /* ---- media: the photo list ----------------------------------------
          Before the per-size map, so the map is compared against the list that
          is about to be in force rather than the one being replaced. */
-      if (galDirty(gp)) {
+      if (!gp.custom && galDirty(gp)) {
         demoApply({ type: "set_gallery", id: gp.id, list: galSaveList() });
         changed = true;
       }
@@ -16635,7 +17270,7 @@
         return { t: te ? te.value.trim() : "", d: de2 ? de2.value.trim() : "" };
       };
       var seoNew = { RU: seoRead("[data-edseot]", "[data-edseod]"), ET: seoRead("[data-edseotet]", "[data-edseodet]"), EN: seoRead("[data-edseoten]", "[data-edseoden]") };
-      if (JSON.stringify(seoNorm(seoNew)) !== JSON.stringify(seoNorm(gp.seoOv))) {
+      if (!gp.custom && JSON.stringify(seoNorm(seoNew)) !== JSON.stringify(seoNorm(gp.seoOv))) {
         demoApply({ type: "set_seo", id: gp.id, value: seoNew, title: seoNew.RU.t, description: seoNew.RU.d }); changed = true;
       }
       /* ---- features: the video link -------------------------------------- */
@@ -16649,7 +17284,7 @@
       /* ---- /features ------------------------------------------------------ */
       /* ---- assistant-work: the trilingual description override ----------- */
       var druEl = document.querySelector("[data-eddescru]"), detEl = document.querySelector("[data-eddescet]"), denEl = document.querySelector("[data-eddescen]");
-      if (druEl || detEl || denEl) {
+      if (!gp.custom && (druEl || detEl || denEl)) {
         var ndesc = { RU: druEl ? druEl.value.trim() : "", ET: detEl ? detEl.value.trim() : "", EN: denEl ? denEl.value.trim() : "" };
         var curDesc = gp.descOv || {};
         if (ndesc.RU !== (curDesc.RU || "") || ndesc.ET !== (curDesc.ET || "") || ndesc.EN !== (curDesc.EN || "")) {
@@ -16694,6 +17329,8 @@
           reloadStock();
         });
       }
+      // product creation: the row itself goes last, and its answer closes the editor
+      if (gp.custom) { customUpdate(gp, ownRow); return; }
       AI_UNDO = null;
       S.adminEdit = "";
       toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
@@ -16702,6 +17339,17 @@
     if (d.admapply !== undefined) {
       if (pendingAction) {
         var pa = pendingAction; pendingAction = null;
+        /* product creation: the assistant's new product is a POST, and
+           «снять с продажи» on the owner's own product is the row's active
+           flag — journalled and undoable through demoApply() like a stock change */
+        if (pa.type === "create_product") { applyCreateProduct(pa); return; }
+        if (pa.type === "set_product_active") {
+          var actEntry = demoApply(pa);
+          S.adminEdit = ""; S.goodsSizes = null;
+          var actNm = pa.name || pa.id;
+          toast(pa.value ? "Снова в продаже · " + actNm : "Снято с продажи · " + actNm, actEntry);
+          render(); return;
+        }
         // blog: posts skip the demo/undo layer entirely — straight to the
         // real admin API, same as the owner's own «Сохранить»/«Опубликовать»
         if (pa.type === "draft_post" || pa.type === "publish_post") applyBlogAction(pa);
@@ -17731,6 +18379,12 @@
     }
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
+    // product creation: the subsection list follows the section — a DOM
+    // patch, like every other change on the goods editor's form
+    else if (t.matches("[data-edcat]")) {
+      var subSlot = document.querySelector("[data-edsubslot]");
+      if (subSlot) { subSlot.innerHTML = edSubcatField(t.value, ""); translateTree(subSlot); }
+    }
     // the card's size picker — state first, then patch the price in place
     /* checkout-gaps: the promo kind decides whether there is a «сколько»
        field at all, so this one does need a redraw. */
@@ -17781,7 +18435,7 @@
       if (!picked || !picked.length) return;
       if (where === "hero") heroUpload(picked);
       else if (where === "blog") blogCoverUpload(picked);   // blog
-      else galUpload(picked, byId(where));
+      else galUpload(picked, admEditProduct(where));   // product creation: a hidden custom product too
     }
     // blog: the «Картинка» button's own picker — the article body, not the cover
     else if (t.matches("[data-blogtoolfile]")) {
@@ -17795,7 +18449,7 @@
       var pickedV = t.files;
       var forId = t.dataset.vidfile;
       t.value = "";
-      if (pickedV && pickedV.length) videoUpload(pickedV, byId(forId));
+      if (pickedV && pickedV.length) videoUpload(pickedV, admEditProduct(forId));
     }
     // assistant-work: «Отчёты» — see reportsCard()
     else if (t.matches("[data-admreportsmonth]")) {
@@ -18170,6 +18824,7 @@
       S.blogPosts[blogKey(slug, lang)] = en;
     });
   })();
+  function firstPaint() {
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also
      try leaves it fighting a page that has not been rendered yet. */
@@ -18214,5 +18869,21 @@
         blogPrefetchSoon();
       }
     }).catch(function () {});
+  }
+  }
+  /* product creation: a direct visit to a product the file does not have
+     (/shop2/p/c-…/) that this browser has no copy of yet — the first paint
+     waits for /api/overrides/ (four seconds at most) instead of landing on
+     the home page and jumping to the product a moment later. Every other
+     page paints at once, exactly as it always has. */
+  var bootCustom = stripLangPrefix(location.pathname).match(/\/shop2\/p\/(c-[^/]+)\/?$/);
+  if (bootCustom && !byIdOrNull(decodeURIComponent(bootCustom[1])) && OV_BOOT) {
+    bootHeld = true;
+    var painted = false;
+    var paintOnce = function () { if (painted) return; painted = true; bootHeld = false; firstPaint(); };
+    OV_BOOT.then(paintOnce, paintOnce);
+    setTimeout(paintOnce, 4000);
+  } else {
+    firstPaint();
   }
 })();

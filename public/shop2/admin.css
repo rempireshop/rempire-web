@@ -603,6 +603,11 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-grid__row { grid-template-columns: 1fr 1fr 44px; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--a-rule); }
   .adm-grid__sz { grid-column: 1 / -1; font-weight: 600; }
 }
+/* product creation: a product that has no id yet has no salon, stock or
+   barcode column — three columns, the same rhythm */
+.adm-grid--new .adm-grid__head, .adm-grid--new .adm-grid__row { grid-template-columns: 1.2fr 1fr 44px; }
+/* the two boxes a new product cannot do without */
+.adm-req { color: var(--a-warn); font-weight: 600; }
 .adm-btn--dash { background: var(--a-paper); color: var(--a-ink); border: 1px dashed var(--a-ink); width: fit-content; }
 /* a disabled dashed button is still a dashed button — the outline is what
    says «сюда что-то добавляют», and it survives the grey */
