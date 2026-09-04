@@ -418,16 +418,25 @@ body:has(.stickybar) .ftr {
 .card__add:hover { border-bottom-color: var(--ink); }
 .card__add:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .card__add--notify { color: var(--muted); border-bottom-color: rgba(28, 26, 0, .25); flex: 0 1 auto !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-/* One row, always: «7,90 € · 75 мл · В корзину». On a two-per-row phone card
-   (155–170 px) the row runs out of room once the size label is long or the
-   fallback font is wide — «Lisa ostukorvi» with «250 мл» was the case CI
-   caught. The owner wants the words, not a bag icon, and the price and the
-   link must never be cut, so the SIZE LABEL is the part that gives way: it
-   shrinks and ellipsises (the chevron stays, the listbox shows every size in
-   full). The bag icon in the markup is unused. */
+/* Wide cards: one row, «7,90 € · 75 мл · В корзину». Should a size label ever
+   be too long for a wide card, it is the part that gives way (ellipsis; the
+   listbox shows every size in full) — the price and the link never are.
+   The bag icon in the markup is unused. */
 .card__bag { display: none; flex: none; }
 .card__sizebtn { flex: 0 1 auto !important; min-width: 0; }
 .card__sizelbl { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Phone cards (two per row, 155–190 px): the row stays, but Estonian gets its
+   shorter wording — the link carries two spans with the same Russian text,
+   and translateTree() gives the second one the dictionary's «|short» entry
+   («Lisa korvi» instead of «Lisa ostukorvi», owner's call 04.09). CSS shows
+   one span per viewport. A set's old price steps aside on the narrowest
+   phones — the «−13 %» flag on the picture says the same thing. */
+.card__addtxt--short { display: none; }
+@media (max-width: 480px) {
+  .card__add .card__addtxt { display: none; }
+  .card__add .card__addtxt--short { display: inline; }
+}
+@media (max-width: 360px) { .card__price .bwas { display: none; } }
 /* the listbox */
 .card__pop {
   position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 5;

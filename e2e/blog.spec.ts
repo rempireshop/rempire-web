@@ -91,7 +91,7 @@ for (const lang of LANGS) {
  * 2560 px the old 680 px column crammed the cards into two narrow tracks
  * and «Lisa ostukorvi» / «Anna teada, kui on laos» were cut off. Estonian
  * on purpose: its labels are the widest of the three. The text check is a
- * desktop concern — under 480 px the link is the bag icon, and a phone's
+ * desktop concern — under 480 px the link reads «Lisa korvi», and a phone's
  * 155 px card shows the notify text with the catalogue's own ellipsis. */
 test("every card under an article keeps its foot in the card and its add text whole (ET)", async ({ page }) => {
   await page.goto(shopUrl("/et", `/blog/${SLUGS[0]}/`));

@@ -159,7 +159,7 @@
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
       "После бритья": "Pärast raseerimist", "Тоники": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
-      "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
+      "В корзину": "Lisa ostukorvi", "В корзину|short": "Lisa korvi", "мало": "viimased", "нет в наличии": "otsas",
       "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsi", "Корзина": "Ostukorv",
       "Кабинет": "Konto", "Описание": "Kirjeldus", "Доставка и возврат": "Tarne ja tagastus",
       "Похожие товары": "Sarnased tooted", "Вместе лучше": "Sobivad kokku",
@@ -1705,7 +1705,7 @@
       "Пудры": "Powders", "Масла": "Oils", "Бальзамы": "Balms",
       "После бритья": "Aftershave", "Тоники": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
-      "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
+      "В корзину": "Add to cart", "В корзину|short": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
       "Главная": "Home", "Каталог": "Catalogue", "Поиск": "Search", "Корзина": "Cart",
       "Кабинет": "Account", "Описание": "Description", "Доставка и возврат": "Delivery & returns",
       "Похожие товары": "Similar products", "Вместе лучше": "Better together",
@@ -3391,6 +3391,7 @@
     "шампунь": ["šampoon", "shampoo"], "кондиционер": ["palsam", "conditioner"],
     "маска": ["mask", "mask"], "сыворотка": ["seerum", "serum"],
     "тоник": ["toonik", "toner"], "спрей": ["sprei", "spray"],
+    "футболка": ["T-särk", "T-shirt"], "худи": ["pusa", "hoodie"],
     "масло": ["õli", "oil"], "бальзам": ["palsam", "balm"],
     "паста": ["pasta", "paste"], "воск": ["vaha", "wax"],
     "пудра": ["puuder", "powder"], "гель": ["geel", "gel"],
@@ -3477,7 +3478,12 @@
          copy on an ET/EN panel and save the translation back as the article. */
       if (el && el.closest && el.closest("[data-blogbody]")) continue;
       var allowName = !!(el && el.closest && el.closest(NAME_CTX));
-      var tr = trText(t, lang, allowName);
+      /* data-i18n-alt="short" asks for the dictionary's shorter wording of the
+         same Russian text («В корзину|short» → «Lisa korvi»): the phone card
+         shows it where «Lisa ostukorvi» does not fit the row. Falls back to
+         the ordinary translation when no such entry exists. */
+      var alt = el && el.getAttribute ? el.getAttribute("data-i18n-alt") : null;
+      var tr = alt && UI[lang] && UI[lang][t + "|" + alt] ? UI[lang][t + "|" + alt] : trText(t, lang, allowName);
       if (tr !== t) node.nodeValue = raw.replace(t, tr);
     }
     var els = root.querySelectorAll ? root.querySelectorAll("[placeholder],[aria-label],[title]") : [];
@@ -4781,7 +4787,7 @@
         ? '<button type="button" class="card__add card__add--notify" data-go-product="' + p.id + '">Сообщить о наличии</button>'
         // the text on wide cards, the bag icon (spec variant 2b) on a phone's
         // 155px card — CSS picks; the text stays for screen readers
-        : '<button type="button" class="card__add" data-add="' + p.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
+        : '<button type="button" class="card__add" data-add="' + p.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
       cardPopHTML(p);
   }
 
@@ -4979,7 +4985,7 @@
         '<span class="card__sp"></span>' +
         (out
           ? '<button type="button" class="card__add card__add--notify" data-go-bundle="' + b.id + '">Смотреть</button>'
-          : '<button type="button" class="card__add" data-addbundle="' + b.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
+          : '<button type="button" class="card__add" data-addbundle="' + b.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
       "</div>" +
       "</div>";
   }

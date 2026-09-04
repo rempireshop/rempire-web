@@ -227,8 +227,9 @@ test.describe("card size picker — layout", () => {
           const s = sel.getBoundingClientRect();
           const c = card.getBoundingClientRect();
           // 1px of slack for sub-pixel layout rounding; the row must not wrap
-          // either (its height would then be two lines) — on a phone the size
-          // label is what gives way (styles.css .card__sizelbl), never the row.
+          // either (its height would then be two lines). On a phone the link
+          // reads «Lisa korvi» (styles.css .card__addtxt--short) and the size
+          // label is what gives way if anything must — never the row.
           if (s.right > c.right + 1 || s.left < c.left - 1 || sel.scrollWidth > sel.clientWidth + 1 || s.height > 40) {
             escaped.push(
               `${sel.dataset.cardfoot}: foot ${Math.round(s.left)}…${Math.round(s.right)} h${Math.round(s.height)} sw${sel.scrollWidth}` +
