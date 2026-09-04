@@ -1224,9 +1224,7 @@
       // integration: shipRulesCard's live-Montonio-rates fill controls
       "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
         "«Täida Montonio tariifide järgi» kirjutab ülaltoodud tariifid pluss juurdehindluse, ümardatud X,X9 € peale — aga ainult seal, kus tariif on teada: Venipak, Unisend, «Muu Euroopa» ja «Ülejäänud riigid» nuppu ei puuduta.",
-      "Наценка, %": "Juurdehindlus, %",
       "Наценка на тарифы Montonio, проценты": "Juurdehindlus Montonio tariifidele, protsentides",
-      "Наценка, €": "Juurdehindlus, €",
       "Наценка на тарифы Montonio, евро": "Juurdehindlus Montonio tariifidele, eurodes",
       "Разрешить снижать текущие цены": "Luba praeguseid hindu alandada",
       "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
@@ -1313,7 +1311,201 @@
       "Пока пусто": "Praegu tühi",
       "Склад не принял правку": "Ladu ei võtnud muudatust vastu",
       "Не удалось сохранить статус": "Staatust ei õnnestunud salvestada",
-      "Отменено": "Tagasi võetud"
+      "Отменено": "Tagasi võetud",
+      /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
+         «Подключения», «Настройки» ---- */
+      "Отзыв опубликован": "Arvustus avaldatud",
+      "Отзыв скрыт": "Arvustus peidetud",
+      "Какие отзывы": "Millised arvustused",
+      "Отзывов пока нет": "Arvustusi veel pole",
+      "Опубликован": "Avaldatud",
+      "Новый": "Uus",
+      "Не получилось сохранить отзыв": "Arvustust ei õnnestunud salvestada",
+      "Никого не нашлось": "Kedagi ei leitud",
+      "Заявка Pro": "Pro taotlus",
+      "Заявки Pro": "Pro taotlused",
+      "Одобрить Pro": "Kinnita Pro",
+      "Отказать": "Keeldu",
+      "Какие клиенты": "Millised kliendid",
+      "Имя, почта, телефон, компания": "Nimi, e-post, telefon, ettevõte",
+      "промокоды · подарочные карты · письма": "sooduskoodid · kinkekaardid · kirjad",
+      "+ Промокод": "+ Sooduskood",
+      "Подарочные карты": "Kinkekaardid",
+      "Номиналы карты": "Kaardi nimiväärtused",
+      "Номиналы в магазине": "Nimiväärtused poes",
+      "Нажмите, чтобы включить или скрыть номинал. Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».":
+        "Vajuta, et nimiväärtus sisse lülitada või peita. Kaarti müüakse poe menüüs eraldi punktina, mitte «Komplektide» all.",
+      "Оформление": "Kujundus",
+      "Одно оформление на все номиналы — тёмная карта с логотипом, её же покупатель получает в PDF.":
+        "Üks kujundus kõigile nimiväärtustele — tume logoga kaart, sama saab ostja PDF-ina.",
+      "Пока не куплено ни одной карты": "Ühtegi kaarti pole veel ostetud",
+      "Выпущенные карты": "Väljastatud kaardid",
+      "покупателю": "ostjale",
+      "Список карт не загрузился.": "Kaartide nimekiri ei laadinud.",
+      "сразу после оплаты": "kohe pärast tasumist",
+      "когда вы нажмёте «Отправлен»": "kui vajutad «Teele pandud»",
+      "тем, кто оставил почту": "neile, kes jätsid e-posti",
+      "через 3 часа": "3 tunni pärast",
+      "за 3 дня до даты": "3 päeva enne kuupäeva",
+      "когда покупатель входит в кабинет": "kui klient siseneb oma kontole",
+      "Выключить письмо": "Lülita kiri välja",
+      "Включить письмо": "Lülita kiri sisse",
+      "всегда": "alati",
+      "Номер заказа, состав и трек-номер подставляются сами — их править не нужно.":
+        "Tellimuse number, sisu ja jälgimisnumber lisanduvad ise — neid muutma ei pea.",
+      "Адрес для теста": "Testi aadress",
+      "Все письма": "Kõik kirjad",
+      "Письмо целиком": "Kogu kiri",
+      "Отправить мне тест": "Saada mulle test",
+      "Итого 28,84 €": "Kokku 28,84 €",
+      "+ Статья": "+ Artikkel",
+      "Пока нет ни одной статьи — нажмите «+ Статья»": "Ühtegi artiklit veel pole — vajuta «+ Artikkel»",
+      "черновик": "mustand",
+      "Опубликована": "Avaldatud",
+      "• Список": "• Loend",
+      "борода, зима": "habe, talv",
+      "Анонс — две строки в списке и в поиске": "Sissejuhatus — kaks rida nimekirjas ja otsingus",
+      "Подпись к обложке": "Kaanepildi allkiri",
+      "Теги — через запятую": "Sildid — komadega",
+      "Адрес, автор и текст для Google": "Aadress, autor ja tekst Google’i jaoks",
+      "Заголовок для Google ·": "Pealkiri Google’i jaoks ·",
+      "Описание для Google ·": "Kirjeldus Google’i jaoks ·",
+      "Адрес страницы": "Lehe aadress",
+      "Публикация": "Avaldamine",
+      "Опубликована. Изменения появятся в магазине сразу после сохранения.":
+        "Avaldatud. Muudatused ilmuvad poodi kohe pärast salvestamist.",
+      "Черновик. В магазине его пока не видно.": "Mustand. Poes seda veel ei näe.",
+      "Сохранить и обновить": "Salvesta ja uuenda",
+      "Точно удалить статью? Текст останется в черновиках, но в магазине её будет не увидеть.":
+        "Kas kustutada artikkel? Tekst jääb mustanditesse, aga poes seda enam ei näe.",
+      "Удалить статью": "Kustuta artikkel",
+      "уход за бородой зимой": "habemehooldus talvel",
+      "Написать черновик по теме": "Kirjuta teema põhjal mustand",
+      "Перевести на ET и EN": "Tõlgi ET ja EN keelde",
+      "Помощник пишет черновик — прочитайте и поправьте, публикуете вы.":
+        "Abiline kirjutab mustandi — loe läbi ja paranda, avaldad sina.",
+      "Заменить обложку": "Vaheta kaanepilt",
+      "+ Обложка": "+ Kaanepilt",
+      "Обложка статьи": "Artikli kaanepilt",
+      "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
+        "Foto telefonist või lõikelaualt, JPEG/PNG/WebP kuni 12 MB.",
+      "вс": "P", "пн": "E", "вт": "T", "ср": "K", "чт": "N", "пт": "R", "сб": "L",
+      "Аналитика считается на сервере из настоящих заходов и заказов — откроется, как только вы войдёте в панель":
+        "Analüütikat arvutab server päris külastustest ja tellimustest — avaneb kohe, kui paneeli sisse logid",
+      "Из корзины в заказ": "Ostukorvist tellimuseks",
+      "Пока нет данных": "Andmeid veel pole",
+      "Топ товаров": "Enimmüüdud tooted",
+      "Пока нет продаж": "Müüke veel pole",
+      "Искали, но не нашли": "Otsisid, aga ei leidnud",
+      "Таких запросов нет": "Selliseid otsinguid pole",
+      "Что искали чаще всего": "Mida otsiti kõige rohkem",
+      "Пока не искали": "Veel pole otsitud",
+      "Промокоды пока не использовали": "Sooduskoode pole veel kasutatud",
+      "Google: 28 дней": "Google: 28 päeva",
+      "Google Search Console ещё не подключён — см. «Подключения»":
+        "Google Search Console pole veel ühendatud — vaata «Liidestused»",
+      "Google Search Console сейчас не отвечает — попробуйте позже":
+        "Google Search Console ei vasta praegu — proovi hiljem",
+      "Средняя позиция": "Keskmine positsioon",
+      "Написать Дмитрию": "Kirjuta Dmitrile",
+      "Приём оплат · Montonio": "Maksete vastuvõtt · Montonio",
+      "Карты, банковские ссылки, Apple/Google Pay. Работает.":
+        "Kaardid, pangalingid, Apple/Google Pay. Töötab.",
+      "Список банков не пришёл — проверьте, открывается ли оплата у покупателя.":
+        "Pankade nimekiri ei tulnud — kontrolli, kas maksmine ostjal avaneb.",
+      "Доставка · Omniva, DPD, SmartPosti": "Tarne · Omniva, DPD, SmartPosti",
+      "Проверяем тарифы…": "Kontrollime tariife…",
+      "Наклейки печатаются из карточки заказа, тарифы перевозчиков подтягиваются сами.":
+        "Sildid trükitakse tellimuse kaardilt, vedajate tariifid tulevad ise.",
+      "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
+        "Vedajate tariife ei tulnud — «Seadetes» kehtivad sinu enda hinnad.",
+      "Письма клиентам · Resend": "Kirjad klientidele · Resend",
+      "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест».":
+        "Lähevad aadressilt info@rempireshop.com. Kontrolli — «Turundus → Kirjad → Saada mulle test».",
+      "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
+        "Kirjade saatmine pole seadistatud: test tuli veaga tagasi, kliendid kirju ei saa.",
+      "Google видит магазин, позиции — в разделе «Аналитика».":
+        "Google näeb poodi, positsioonid on jaotises «Analüütika».",
+      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.":
+        "Domeen pole kinnitatud — Google ei näe uusi lehti. Vaja on üht DNS-koodi, seda teeb Dmitri.",
+      "Откуда приходят и что ищут. Всё в разделе «Аналитика».":
+        "Kust tullakse ja mida otsitakse. Kõik on jaotises «Analüütika».",
+      "Считаем…": "Arvutame…",
+      "Отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
+        "Vastab küsimustele ja valmistab mustandeid. Ilma sinu «Kinnita» nuputa ei muuda midagi.",
+      "Работает на встроенных ответах — модель не подключена. Сам он по-прежнему ничего не меняет.":
+        "Töötab sisseehitatud vastustega — mudel pole ühendatud. Ise ta endiselt midagi ei muuda.",
+      "Сканер · камера телефона": "Skanner · telefoni kaamera",
+      "Камера доступна — сканер открывается из «Товары → Склад».":
+        "Kaamera on saadaval — skanner avaneb jaotisest «Tooted → Ladu».",
+      "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.":
+        "See brauser ei anna kaamerale ligipääsu. Luba lülitatakse sisse telefoni seadetes.",
+      "Как разрешить": "Kuidas lubada",
+      "Если что-то красное и непонятно — напишите Дмитрию. Ссылка на эту страницу уже в письме.":
+        "Kui midagi on punane ja arusaamatu — kirjuta Dmitrile. Link sellele lehele on kirjas juba olemas.",
+      "тарифы по странам · Montonio · способы оплаты": "tariifid riikide kaupa · Montonio · maksevõimalused",
+      "Главная страница": "Avaleht",
+      "баннер, полоска вверху, наборы и чат": "bänner, ülemine riba, komplektid ja vestlus",
+      "О компании": "Ettevõttest",
+      "реквизиты, часы, контакты, соцсети, отчёты": "rekvisiidid, lahtiolek, kontaktid, sotsiaalmeedia, aruanded",
+      "Цены и баллы": "Hinnad ja punktid",
+      "скидка салона, баллы лояльности, Pro-цены": "salongi soodustus, püsikliendipunktid, Pro hinnad",
+      "Языки": "Keeled",
+      "RU основной · ET · EN": "RU peamine · ET · EN",
+      "всё, что применялось, и кнопка «Вернуть»": "kõik, mis rakendati, ja nupp «Taasta»",
+      "Пакомат, €": "Pakiautomaat, €",
+      "Курьер, €": "Kuller, €",
+      "Бесплатно от, €": "Tasuta alates, €",
+      "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
+        "Nupp kirjutab sisse vedaja tariifid pluss juurdehindluse, ümardatuna X,X9 €-ni, ja ainult seal, kus tariif on teada. Kontrolli numbrid üle ja salvesta.",
+      "Самовывоз, перевозчики и наценка": "Järeletulek, vedajad ja juurdehindlus",
+      "Самовывоз, €": "Järeletulek, €",
+      "Самовывоз — Эстония": "Järeletulek — Eesti",
+      "Наценка, %": "Juurdehindlus, %",
+      "Наценка, €": "Juurdehindlus, €",
+      "Наценка, проценты": "Juurdehindlus, protsentides",
+      "Наценка, евро": "Juurdehindlus, eurodes",
+      "по умолчанию тариф только поднимает цену до реальной стоимости":
+        "vaikimisi tõstab tariif hinna ainult tegeliku maksumuseni",
+      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Дмитрию.":
+        "Maksevõimalused lülitab sisse makseteenuse pakkuja. Millegi eemaldamiseks või lisamiseks kirjuta Dmitrile.",
+      "Показывать наборы": "Näita komplekte",
+      "если выключено — их не видно нигде в магазине": "kui välja lülitatud — poes neid kusagil ei näe",
+      "Скрыть наборы": "Peida komplektid",
+      "Показать наборы": "Näita komplekte",
+      "кружок-консультант в углу магазина": "nõustaja-ring poe nurgas",
+      "Выключить чат": "Lülita vestlus välja",
+      "Включить чат": "Lülita vestlus sisse",
+      "Подарочная карта продаётся отдельным пунктом в меню — номиналы включаются в «Маркетинг → Подарочные карты».":
+        "Kinkekaarti müüakse menüüs eraldi punktina — nimiväärtused lülitatakse sisse jaotises «Turundus → Kinkekaardid».",
+      "основной язык — с него переводятся остальные": "peamine keel — sellest tõlgitakse ülejäänud",
+      "в меню магазина стоит «Blog», не «Ajaveeb»": "poe menüüs on «Blog», mitte «Ajaveeb»",
+      "полный перевод магазина и писем": "poe ja kirjade täielik tõlge",
+      "Язык панели переключается внизу меню — на магазин это не влияет.":
+        "Paneeli keelt vahetatakse menüü all — poodi see ei mõjuta.",
+      "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
+        "Selles seansis pole veel muudatusi. Kõik, mille kinnitad, ilmub siia — koos nupuga «Taasta».",
+      "Вернуть": "Taasta",
+      "Выключить промокод": "Lülita sooduskood välja",
+      "Включить промокод": "Lülita sooduskood sisse",
+      "Промокодов пока нет": "Sooduskoode veel pole",
+      "«Использован» считается только после оплаты — брошенная корзина код не тратит.":
+        "«Kasutatud» loetakse alles pärast tasumist — pooleli jäänud ostukorv koodi ei kuluta.",
+      "Что даёт промокод": "Mida sooduskood annab",
+      "Скидка не нужна — код просто делает доставку бесплатной.":
+        "Soodustust pole vaja — kood teeb tarne lihtsalt tasuta.",
+      "Скидка, € — до 200": "Soodustus, € — kuni 200",
+      "Скидка, % — от 1 до 90": "Soodustus, % — 1 kuni 90",
+      "Минимальный заказ, €": "Minimaalne tellimus, €",
+      "Срок, число использований и заметка": "Tähtaeg, kasutuskordade arv ja märkus",
+      "Сколько раз можно использовать": "Mitu korda tohib kasutada",
+      "Создать": "Loo",
+      "Изменить тарифы доставки?": "Kas muuta tarnetariife?",
+      "Новые цены покупатели увидят сразу при оформлении.":
+        "Uusi hindu näevad ostjad kohe tellimuse vormistamisel.",
+      "Хотя бы один номинал должен остаться": "Vähemalt üks nimiväärtus peab alles jääma",
+      "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
+        "iPhone: Seaded → Safari → Kaamera → Luba. Android: tabaluku ikoon aadressiribal → Kaamera"
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -2453,9 +2645,7 @@
       // integration: shipRulesCard's live-Montonio-rates fill controls
       "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
         "«Fill from Montonio tariffs» writes the tariffs above plus the markup, rounded to X.X9 €, but only where a tariff is known: the button doesn't touch Venipak, Unisend, «Other European countries» or «Other countries».",
-      "Наценка, %": "Markup, %",
       "Наценка на тарифы Montonio, проценты": "Markup on Montonio tariffs, percent",
-      "Наценка, €": "Markup, €",
       "Наценка на тарифы Montonio, евро": "Markup on Montonio tariffs, euros",
       "Разрешить снижать текущие цены": "Allow lowering current prices",
       "По умолчанию цена не опускается ниже уже сохранённой — тариф только поднимает её до реальной стоимости.":
@@ -2542,7 +2732,201 @@
       "Пока пусто": "Nothing yet",
       "Склад не принял правку": "The warehouse did not accept the change",
       "Не удалось сохранить статус": "Could not save the status",
-      "Отменено": "Undone"
+      "Отменено": "Undone",
+      /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
+         «Подключения», «Настройки» ---- */
+      "Отзыв опубликован": "Review published",
+      "Отзыв скрыт": "Review hidden",
+      "Какие отзывы": "Which reviews",
+      "Отзывов пока нет": "No reviews yet",
+      "Опубликован": "Published",
+      "Новый": "New",
+      "Не получилось сохранить отзыв": "Could not save the review",
+      "Никого не нашлось": "Nobody found",
+      "Заявка Pro": "Pro request",
+      "Заявки Pro": "Pro requests",
+      "Одобрить Pro": "Approve Pro",
+      "Отказать": "Decline",
+      "Какие клиенты": "Which customers",
+      "Имя, почта, телефон, компания": "Name, e-mail, phone, company",
+      "промокоды · подарочные карты · письма": "promo codes · gift cards · letters",
+      "+ Промокод": "+ Promo code",
+      "Подарочные карты": "Gift cards",
+      "Номиналы карты": "Card amounts",
+      "Номиналы в магазине": "Amounts on sale",
+      "Нажмите, чтобы включить или скрыть номинал. Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».":
+        "Tap to switch an amount on or hide it. The card is sold as its own entry in the shop menu, not under “Sets”.",
+      "Оформление": "Design",
+      "Одно оформление на все номиналы — тёмная карта с логотипом, её же покупатель получает в PDF.":
+        "One design for every amount — the dark card with the logo, the same one the buyer gets as a PDF.",
+      "Пока не куплено ни одной карты": "No card has been bought yet",
+      "Выпущенные карты": "Issued cards",
+      "покупателю": "to the buyer",
+      "Список карт не загрузился.": "The card list did not load.",
+      "сразу после оплаты": "right after payment",
+      "когда вы нажмёте «Отправлен»": "when you press “Shipped”",
+      "тем, кто оставил почту": "to everyone who left an e-mail",
+      "через 3 часа": "after 3 hours",
+      "за 3 дня до даты": "3 days before the date",
+      "когда покупатель входит в кабинет": "when the customer signs in",
+      "Выключить письмо": "Switch the letter off",
+      "Включить письмо": "Switch the letter on",
+      "всегда": "always",
+      "Номер заказа, состав и трек-номер подставляются сами — их править не нужно.":
+        "The order number, the items and the tracking number are filled in automatically — no need to edit them.",
+      "Адрес для теста": "Test address",
+      "Все письма": "All letters",
+      "Письмо целиком": "The whole letter",
+      "Отправить мне тест": "Send me a test",
+      "Итого 28,84 €": "Total €28.84",
+      "+ Статья": "+ Article",
+      "Пока нет ни одной статьи — нажмите «+ Статья»": "No articles yet — press “+ Article”",
+      "черновик": "draft",
+      "Опубликована": "Published",
+      "• Список": "• List",
+      "борода, зима": "beard, winter",
+      "Анонс — две строки в списке и в поиске": "Summary — two lines in the list and in search",
+      "Подпись к обложке": "Cover caption",
+      "Теги — через запятую": "Tags — comma separated",
+      "Адрес, автор и текст для Google": "Address, author and text for Google",
+      "Заголовок для Google ·": "Title for Google ·",
+      "Описание для Google ·": "Description for Google ·",
+      "Адрес страницы": "Page address",
+      "Публикация": "Publishing",
+      "Опубликована. Изменения появятся в магазине сразу после сохранения.":
+        "Published. Changes appear in the shop as soon as you save.",
+      "Черновик. В магазине его пока не видно.": "A draft. Not visible in the shop yet.",
+      "Сохранить и обновить": "Save and update",
+      "Точно удалить статью? Текст останется в черновиках, но в магазине её будет не увидеть.":
+        "Delete this article? The text stays in the drafts, but the shop will not show it.",
+      "Удалить статью": "Delete the article",
+      "уход за бородой зимой": "beard care in winter",
+      "Написать черновик по теме": "Draft one from a topic",
+      "Перевести на ET и EN": "Translate into ET and EN",
+      "Помощник пишет черновик — прочитайте и поправьте, публикуете вы.":
+        "The assistant writes a draft — read it, fix it, and you publish it.",
+      "Заменить обложку": "Replace the cover",
+      "+ Обложка": "+ Cover",
+      "Обложка статьи": "Article cover",
+      "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
+        "A photo from your phone or the clipboard, JPEG/PNG/WebP up to 12 MB.",
+      "вс": "Su", "пн": "Mo", "вт": "Tu", "ср": "We", "чт": "Th", "пт": "Fr", "сб": "Sa",
+      "Аналитика считается на сервере из настоящих заходов и заказов — откроется, как только вы войдёте в панель":
+        "Analytics is computed on the server from real visits and orders — it opens as soon as you sign in",
+      "Из корзины в заказ": "Cart to order",
+      "Пока нет данных": "No data yet",
+      "Топ товаров": "Top products",
+      "Пока нет продаж": "No sales yet",
+      "Искали, но не нашли": "Searched but not found",
+      "Таких запросов нет": "No such searches",
+      "Что искали чаще всего": "Most frequent searches",
+      "Пока не искали": "Nobody has searched yet",
+      "Промокоды пока не использовали": "No promo code has been used yet",
+      "Google: 28 дней": "Google: 28 days",
+      "Google Search Console ещё не подключён — см. «Подключения»":
+        "Google Search Console is not connected yet — see “Integrations”",
+      "Google Search Console сейчас не отвечает — попробуйте позже":
+        "Google Search Console is not answering right now — try later",
+      "Средняя позиция": "Average position",
+      "Написать Дмитрию": "Write to Dmitri",
+      "Приём оплат · Montonio": "Payments · Montonio",
+      "Карты, банковские ссылки, Apple/Google Pay. Работает.":
+        "Cards, bank links, Apple/Google Pay. Working.",
+      "Список банков не пришёл — проверьте, открывается ли оплата у покупателя.":
+        "The bank list did not arrive — check that payment opens for a customer.",
+      "Доставка · Omniva, DPD, SmartPosti": "Delivery · Omniva, DPD, SmartPosti",
+      "Проверяем тарифы…": "Checking the tariffs…",
+      "Наклейки печатаются из карточки заказа, тарифы перевозчиков подтягиваются сами.":
+        "Labels print from the order card, and the carriers' tariffs arrive by themselves.",
+      "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
+        "The carriers' tariffs did not arrive — your own prices in “Settings” apply.",
+      "Письма клиентам · Resend": "Customer letters · Resend",
+      "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест».":
+        "Sent from info@rempireshop.com. To check — “Marketing → Letters → Send me a test”.",
+      "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
+        "Sending letters is not set up: the test came back with an error and customers get nothing.",
+      "Google видит магазин, позиции — в разделе «Аналитика».":
+        "Google can see the shop; the positions are under “Analytics”.",
+      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.":
+        "The domain is not verified — Google cannot see new pages. One DNS record is needed; Dmitri does that.",
+      "Откуда приходят и что ищут. Всё в разделе «Аналитика».":
+        "Where visitors come from and what they search for. All under “Analytics”.",
+      "Считаем…": "Counting…",
+      "Отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
+        "Answers questions and prepares drafts. It changes nothing without your “Apply”.",
+      "Работает на встроенных ответах — модель не подключена. Сам он по-прежнему ничего не меняет.":
+        "Running on built-in answers — no model is connected. It still changes nothing by itself.",
+      "Сканер · камера телефона": "Scanner · phone camera",
+      "Камера доступна — сканер открывается из «Товары → Склад».":
+        "The camera is available — the scanner opens from “Products → Stock”.",
+      "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.":
+        "This browser gives no camera access. The permission is switched on in the phone settings.",
+      "Как разрешить": "How to allow it",
+      "Если что-то красное и непонятно — напишите Дмитрию. Ссылка на эту страницу уже в письме.":
+        "If something is red and unclear, write to Dmitri. The link to this page is already in the letter.",
+      "тарифы по странам · Montonio · способы оплаты": "tariffs by country · Montonio · payment methods",
+      "Главная страница": "Home page",
+      "баннер, полоска вверху, наборы и чат": "the banner, the top strip, sets and the chat",
+      "О компании": "About the company",
+      "реквизиты, часы, контакты, соцсети, отчёты": "details, opening hours, contacts, socials, reports",
+      "Цены и баллы": "Prices and points",
+      "скидка салона, баллы лояльности, Pro-цены": "the salon discount, loyalty points, Pro prices",
+      "Языки": "Languages",
+      "RU основной · ET · EN": "RU main · ET · EN",
+      "всё, что применялось, и кнопка «Вернуть»": "everything applied, with a “Restore” button",
+      "Пакомат, €": "Parcel locker, €",
+      "Курьер, €": "Courier, €",
+      "Бесплатно от, €": "Free from, €",
+      "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
+        "The button fills in the carrier tariffs plus your markup, rounded to €X.X9, and only where a tariff is known. Check the numbers and save.",
+      "Самовывоз, перевозчики и наценка": "Pickup, carriers and markup",
+      "Самовывоз, €": "Pickup, €",
+      "Самовывоз — Эстония": "Pickup — Estonia",
+      "Наценка, %": "Markup, %",
+      "Наценка, €": "Markup, €",
+      "Наценка, проценты": "Markup in percent",
+      "Наценка, евро": "Markup in euros",
+      "по умолчанию тариф только поднимает цену до реальной стоимости":
+        "by default a tariff only raises the price up to the real cost",
+      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Дмитрию.":
+        "Payment methods are switched on by the payment provider. To remove or add one, write to Dmitri.",
+      "Показывать наборы": "Show sets",
+      "если выключено — их не видно нигде в магазине": "when off, they are nowhere in the shop",
+      "Скрыть наборы": "Hide the sets",
+      "Показать наборы": "Show the sets",
+      "кружок-консультант в углу магазина": "the round adviser in the corner of the shop",
+      "Выключить чат": "Switch the chat off",
+      "Включить чат": "Switch the chat on",
+      "Подарочная карта продаётся отдельным пунктом в меню — номиналы включаются в «Маркетинг → Подарочные карты».":
+        "The gift card is sold as its own menu entry — the amounts are switched on under “Marketing → Gift cards”.",
+      "основной язык — с него переводятся остальные": "the source language — the others are translated from it",
+      "в меню магазина стоит «Blog», не «Ajaveeb»": "the shop menu says “Blog”, not “Ajaveeb”",
+      "полный перевод магазина и писем": "a full translation of the shop and the letters",
+      "Язык панели переключается внизу меню — на магазин это не влияет.":
+        "The panel language is switched at the bottom of the menu — it does not affect the shop.",
+      "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
+        "No changes in this session yet. Everything you apply appears here, with a “Restore” button.",
+      "Вернуть": "Restore",
+      "Выключить промокод": "Switch the code off",
+      "Включить промокод": "Switch the code on",
+      "Промокодов пока нет": "No promo codes yet",
+      "«Использован» считается только после оплаты — брошенная корзина код не тратит.":
+        "“Used” counts only after payment — an abandoned cart does not spend the code.",
+      "Что даёт промокод": "What the code gives",
+      "Скидка не нужна — код просто делает доставку бесплатной.":
+        "No discount needed — the code simply makes delivery free.",
+      "Скидка, € — до 200": "Discount, € — up to 200",
+      "Скидка, % — от 1 до 90": "Discount, % — 1 to 90",
+      "Минимальный заказ, €": "Minimum order, €",
+      "Срок, число использований и заметка": "Expiry, number of uses and a note",
+      "Сколько раз можно использовать": "How many times it may be used",
+      "Создать": "Create",
+      "Изменить тарифы доставки?": "Change the delivery tariffs?",
+      "Новые цены покупатели увидят сразу при оформлении.":
+        "Customers see the new prices at checkout straight away.",
+      "Хотя бы один номинал должен остаться": "At least one amount has to stay",
+      "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
+        "iPhone: Settings → Safari → Camera → Allow. Android: the padlock in the address bar → Camera"
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -2723,7 +3107,16 @@
     [/^тариф Montonio \(прайс-лист\): (.+)$/, { ET: "Montonio tariif (hinnakiri): $1", EN: "Montonio tariff (price list): $1" }],
     [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
       { ET: "Praegu: pakiautomaat Eesti $1 · kuller Eesti $2 · tasuta alates $3. Läti, Leedu ja teiste riikide vaikehinnad on endiselt vedajate tariifidest madalamad — vt docs/shipping.md.",
-        EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }]
+        EN: "Right now: parcel locker Estonia $1 · courier Estonia $2 · free from $3. The default prices for Latvia, Lithuania and other countries are still below the carriers' own tariffs — see docs/shipping.md." }],
+    /* админка, этап 3 — the six lines that carry a sum, a count, a language
+       name or a country, so they cannot be plain dictionary keys. */
+    [/^(.+) не потрачено$/, { ET: "$1 kasutamata", EN: "$1 unspent" }],
+    [/^Так увидит клиент · (.+)$/, { ET: "Nii näeb klient · $1", EN: "This is what the customer sees · $1" }],
+    [/^Курьер — (.+)$/, { ET: "Kuller — $1", EN: "Courier — $1" }],
+    [/^использован (\d+) из (\d+)$/, { ET: "kasutatud $1 / $2", EN: "used $1 of $2" }],
+    [/^использован (\d+)$/, { ET: "kasutatud $1", EN: "used $1" }],
+    [/^(\d+) € убрали из магазина$/, { ET: "$1 € eemaldati poest", EN: "€$1 taken off the shop" }],
+    [/^(\d+) € теперь в магазине$/, { ET: "$1 € on nüüd poes", EN: "€$1 is now on sale" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -9153,8 +9546,7 @@
     var side =
       '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Публикация</div>' +
         '<div class="adm-hint">' + (d.status === "published"
-          ? "Опубликована" + (d.publishedAt ? " " + blogDate(d.publishedAt) : "") +
-            ". Изменения появятся в магазине сразу после сохранения."
+          ? "Опубликована. Изменения появятся в магазине сразу после сохранения."
           : "Черновик. В магазине его пока не видно.") + "</div>" +
         (d.status === "published"
           ? '<button class="adm-btn" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
@@ -9342,9 +9734,10 @@
      browser can open a camera at all. Nothing here is a status somebody typed
      in — a green square the owner cannot trust is worse than no square. */
   var ADM_DEV_MAIL = "dmitri@diipsolutions.eu";
-  function admDevLink(label) {
-    return '<a class="adm-btn adm-btn--row" href="mailto:' + ADM_DEV_MAIL +
-      '?subject=Rempire' + "%20%E2%80%94%20" + encodeURIComponent(label) + '">Написать Дмитрию</a>';
+  /** The action on a red row: a plain mailto, not a button that pretends the
+      panel can fix a DNS record by itself. */
+  function admDevLink() {
+    return '<a class="adm-btn adm-btn--row" href="mailto:' + ADM_DEV_MAIL + '">Написать Дмитрию</a>';
   }
   function admIntegrationRows() {
     var rows = [];
@@ -9353,7 +9746,7 @@
       sub: payOk
         ? "Карты, банковские ссылки, Apple/Google Pay. Работает."
         : "Список банков не пришёл — проверьте, открывается ли оплата у покупателя.",
-      act: payOk ? "" : admDevLink("оплата") });
+      act: payOk ? "" : admDevLink() });
 
     var rates = S.shipLiveRates;
     var rateN = rates ? Object.keys(rates).reduce(function (a, k) { return a + rates[k].length; }, 0) : 0;
@@ -9368,14 +9761,14 @@
       sub: mailOk
         ? "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест»."
         : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
-      act: mailOk ? "" : admDevLink("письма") });
+      act: mailOk ? "" : admDevLink() });
 
     var gscOk = !GSC || GSC.ok === true;
     rows.push({ name: "Google Search Console", ok: gscOk,
       sub: !GSC ? "Проверяем…" : GSC.ok
         ? "Google видит магазин, позиции — в разделе «Аналитика»."
         : "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.",
-      act: gscOk ? "" : admDevLink("Google Search Console") });
+      act: gscOk ? "" : admDevLink() });
 
     var an = ANALYTICS["7d"] && ANALYTICS["7d"].data;
     rows.push({ name: "Аналитика посещений", ok: !ANALYTICS["7d"] || !!an,
@@ -9406,9 +9799,9 @@
             '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
           r.act + "</div>";
       }).join("") + "</div>" +
-      '<p class="adm-hint">Если что-то красное и непонятно — напишите Дмитрию: ' +
-        '<a href="mailto:' + ADM_DEV_MAIL + '">' + ADM_DEV_MAIL + "</a>. " +
+      '<p class="adm-hint">Если что-то красное и непонятно — напишите Дмитрию. ' +
         "Ссылка на эту страницу уже в письме.</p>" +
+      '<p class="adm-hint"><a href="mailto:' + ADM_DEV_MAIL + '">' + ADM_DEV_MAIL + "</a></p>" +
       "</div>";
   }
 
@@ -9435,9 +9828,8 @@
     if (!page) {
       return '<div class="adm-screen adm-screen--tight">' + admHead("", "Настройки", "") +
         '<div class="adm-idx">' + ADM_SET_PAGES.map(function (p) {
-          var sub = p[0] === "journal" && DEMO.log.length ? admLogLine(DEMO.log.length) : p[2];
           return '<button data-admsetpage="' + p[0] + '"><span><span class="adm-row__nm">' + p[1] + "</span>" +
-            '<span class="adm-row__sub">' + sub + "</span></span>" +
+            '<span class="adm-row__sub">' + p[2] + "</span></span>" +
             '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
         }).join("") + "</div></div>";
     }
@@ -9452,9 +9844,6 @@
         : admSetJournalHTML()) +
       "</div>";
   }
-  /** «3 записи в этой сессии» — its own function so the i18n check sees one
-      sentence rather than a bare plural fragment. */
-  function admLogLine(n) { return n + " " + pl(n, "запись", "записи", "записей") + " в этой сессии"; }
 
   /* Доставка и оплата: the tariff grid of the spec — country, parcel machine,
      courier, free-from — over the very same shipDraft()/[data-shiprule] state
@@ -9483,7 +9872,7 @@
         "округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.</p>" +
       '<details class="adm-embed" style="margin-top:16px">' +
         '<summary class="adm-link">Самовывоз, перевозчики и наценка</summary><div style="padding-top:12px">' +
-          '<label class="adm-field">Самовывоз, €' +
+          '<label class="adm-field"><span>Самовывоз, €</span>' +
             admShipCellHTML("m:pickup:EE", shipCell("pickup", "EE"), "Самовывоз — Эстония") + "</label>" +
           SHIP_CARRIER_ROWS.map(function (c) {
             return '<div style="margin-top:12px"><div class="adm-sec__t">' + c[1] + "</div>" +
@@ -9492,9 +9881,9 @@
                   admShipCellHTML("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) + "</label>";
               }).join("") + "</div>";
           }).join("") +
-          '<label class="adm-field" style="margin-top:12px">Наценка, %' +
+          '<label class="adm-field" style="margin-top:12px"><span>Наценка, %</span>' +
             admShipCellHTML("markup:percent", shipMarkupCell("percent"), "Наценка, проценты") + "</label>" +
-          '<label class="adm-field" style="margin-top:10px">Наценка, €' +
+          '<label class="adm-field" style="margin-top:10px"><span>Наценка, €</span>' +
             admShipCellHTML("markup:fixed", shipMarkupCell("fixed"), "Наценка, евро") + "</label>" +
           '<label class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
             '<span class="adm-row__sub">по умолчанию тариф только поднимает цену до реальной стоимости</span></span>' +
