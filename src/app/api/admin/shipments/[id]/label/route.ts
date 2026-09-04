@@ -12,6 +12,11 @@
  *
  * The URL is created on the first request and stored on the order, so pressing
  * «Этикетка PDF» twice does not make Montonio generate the file twice.
+ *
+ * `?size=A4` (the default) is one label on an A4 page — what an office printer
+ * prints as-is. `?size=A6` is the label alone, for a thermal label printer.
+ * The stored URL remembers which size it is; asking for the other one makes a
+ * new file.
  */
 import { requireAdmin } from "@/lib/auth";
 import { getOrder, getOrderByNumber } from "@/lib/orders";
@@ -46,7 +51,10 @@ export async function GET(req: Request, ctx: Ctx) {
   const shipment = shipmentOnOrder(order);
   if (!shipment) return Response.json({ ok: false, error: "no_shipment" }, { status: 404 });
 
-  let url = typeof shipment.labelUrl === "string" ? shipment.labelUrl : "";
+  const size: "A4" | "A6" = new URL(req.url).searchParams.get("size") === "A6" ? "A6" : "A4";
+  // a label stored before sizes were recorded was an A6 one
+  const storedSize = shipment.labelSize === "A4" || shipment.labelSize === "A6" ? shipment.labelSize : "A6";
+  let url = typeof shipment.labelUrl === "string" && storedSize === size ? shipment.labelUrl : "";
   let pdf: ArrayBuffer | null = null;
 
   try {
@@ -59,10 +67,10 @@ export async function GET(req: Request, ctx: Ctx) {
       }
     }
     if (!pdf) {
-      const label = await getMontonioLabel(shipment.shipmentId);
+      const label = await getMontonioLabel(shipment.shipmentId, { pageSize: size, labelsPerPage: 1 });
       url = label.url;
       pdf = await fetchLabelPdf(url);
-      await saveShipmentOnOrder(order.id, { labelUrl: url, labelFileId: label.labelFileId }).catch(
+      await saveShipmentOnOrder(order.id, { labelUrl: url, labelFileId: label.labelFileId, labelSize: size }).catch(
         (err) => console.error("[api/admin/shipments/:id/label] label url not stored:", err),
       );
     }

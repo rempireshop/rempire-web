@@ -15193,7 +15193,13 @@
       if (priceEl && np === null) {
         goodsFail("Цена — число от 1 до 500 €, например 12,50.", "[data-edprice]"); return;
       }
-      var rawPP = priceProEl ? priceProEl.value.trim() : "";
+      /* A salon price the field only *followed* (data-edauto="1" — nothing
+         typed by hand, the value is price × (1 − discount) painted by the
+         input handler) is not an override. Saving it as one would freeze the
+         salon price at this moment's 80 % and it would stop following the
+         retail price from then on — and leave a second journal line the owner
+         never asked for. */
+      var rawPP = priceProEl && priceProEl.getAttribute("data-edauto") === "0" ? priceProEl.value.trim() : "";
       var npp = rawPP ? goodsPrice(rawPP) : null;
       if (rawPP && npp === null) {
         goodsFail("Цена для салонов — число от 1 до 500 €.", "[data-edproprice]"); return;
