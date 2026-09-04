@@ -339,7 +339,7 @@ it changed, same discipline as `admin.spec.ts`. Run it with
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
 | `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts` | The two test-only routes — see above |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
-| `.github/workflows/ci.yml` | CI — see its own comments for the ~10 minute budget and what runs when |
+| `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the e2e suite sharded into 3 parallel jobs (each with its own server and database); see its own comments |
 
 ## Фаззинг API (`tests/fuzz-*.test.ts`)
 

@@ -2,7 +2,14 @@
 # unit tests (vitest, in-memory PGlite — no services to spin up), then the
 # Playwright e2e suite (Chromium only here; see docs/testing.md for the
 # tablet/mobile/webkit-local projects this same config also defines for local
-# use). Budgeted at roughly 10 minutes end to end.
+# use).
+#
+# The e2e suite is sharded three ways: each shard is its own job with its own
+# `next dev` and its own empty PGlite database, so `workers: 1` inside a shard
+# (playwright.config.ts — every test shares one database) still holds, while
+# the wall-clock time stays around 10 minutes. Since the 04.09 sweeps
+# (e2e/sweep-*.spec.ts) the whole suite takes ~15 minutes on one runner, which
+# is exactly what the old single 15-minute job died of.
 #
 # This workflow does NOT deploy anything. Vercel builds and deploys this repo
 # on its own trigger (a push to the connected branch), independently of
@@ -13,6 +20,9 @@ name: CI
 
 on:
   push:
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
   pull_request:
 
 concurrency:
@@ -23,8 +33,8 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
-  ci:
-    name: typecheck, unit tests, e2e
+  checks:
+    name: typecheck, unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -44,17 +54,38 @@ jobs:
       - name: Unit tests (vitest, PGlite)
         run: npm test
 
+  e2e:
+    name: e2e (shard ${{ matrix.shard }} of 3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Install Playwright's Chromium
         run: npx playwright install --with-deps chromium
 
+      # tools/e2e-build.mjs is what `npm run e2e` runs first (prerender +
+      # generated files); the shard flag then takes every third spec file.
       - name: End-to-end tests
-        run: npm run e2e
+        run: node tools/e2e-build.mjs && npx playwright test --shard=${{ matrix.shard }}/3
 
       - name: Upload Playwright report + screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-shard-${{ matrix.shard }}
           path: |
             playwright-report/
             test-results/
