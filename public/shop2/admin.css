@@ -31,6 +31,12 @@
 
 .adm2 {
   position: relative;
+  /* A stray pixel of overflow (a phone at 390 px with wider fallback fonts,
+     as on the Linux CI runner) must never turn into a sideways page scroll —
+     the bottom bar would drift off the thumb. clip, not hidden: no scroll
+     container, so the sticky sidebar keeps working. Wide content scrolls
+     inside its own box (tabs, the sizes grid). */
+  overflow-x: clip;
   background: var(--a-paper);
   color: var(--a-ink);
   font-family: "Golos Text", ui-sans-serif, system-ui, sans-serif;
