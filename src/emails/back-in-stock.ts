@@ -1,9 +1,13 @@
 /**
  * «Снова в наличии» — for the address left on a sold-out product page.
  * Design source: public/shop/emails/back-in-stock.html
+ *
+ * Subject, the paragraph under the greeting and the closing line are the
+ * owner's (settings.mail_texts, «Письма» in the admin) — see ./texts.ts.
  */
 
 import {
+  BRAND,
   COMMON,
   absUrl,
   esc,
@@ -20,60 +24,45 @@ import {
   textBody,
   textFooter,
 } from "./layout";
+import { mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, ProductLike, RenderedEmail } from "./types";
 
 interface Strings {
-  subject: (p: string) => string;
   preheader: string;
   title: string;
-  lead: string;
   label: string;
   restock: string;
   cta: string;
-  note: string;
   why: string;
-  unsubscribeAsk: string;
   fallbackName: string;
 }
 
 const T: Record<Lang, Strings> = {
   ru: {
-    subject: (p) => `${p} снова в наличии — Rempire`,
     preheader: "Вы просили сообщить, когда товар вернётся. Он на месте.",
     title: "Снова в наличии",
-    lead: "Здравствуйте! Вы просили сообщить, когда этот товар вернётся в магазин. Хорошая новость — он снова на полке.",
     label: "Товар",
     restock: "Мы привезли новую партию — прошлая разошлась быстро.",
     cta: "Перейти к товару",
-    note: "Наличие и цена актуальны на момент отправки письма. Мы не резервируем товар — кто первый, того и полка.",
     why: "Вы получили это письмо, потому что подписались на уведомление о наличии этого товара.",
-    unsubscribeAsk: "Не хотите получать такие уведомления?",
     fallbackName: "Товар из вашего списка ожидания",
   },
   et: {
-    subject: (p) => `${p} on taas laos — Rempire`,
     preheader: "Palusite teada anda, kui toode naaseb. Ta on kohal.",
     title: "Taas laos",
-    lead: "Tere! Palusite teada anda, kui see toode poodi naaseb. Hea uudis — ta on taas riiulil.",
     label: "Toode",
     restock: "Tõime uue partii — eelmine sai kiiresti otsa.",
     cta: "Vaata toodet",
-    note: "Saadavus ja hind kehtivad kirja saatmise hetkel. Me ei broneeri toodet — kes ees, see mees.",
     why: "Saite selle kirja, sest tellisite selle toote saadavuse teavituse.",
-    unsubscribeAsk: "Ei soovi selliseid teavitusi?",
     fallbackName: "Toode teie ootenimekirjast",
   },
   en: {
-    subject: (p) => `${p} is back in stock — Rempire`,
     preheader: "You asked to be told when it returned. It is on the shelf.",
     title: "Back in stock",
-    lead: "Hello! You asked us to write when this product came back. Good news — it is on the shelf again.",
     label: "Product",
     restock: "A new batch has arrived — the last one went quickly.",
     cta: "Go to the product",
-    note: "Availability and price are correct at the time this e-mail was sent. We do not reserve stock — first come, first served.",
     why: "You are getting this e-mail because you asked to be notified about this product.",
-    unsubscribeAsk: "Rather not get these notifications?",
     fallbackName: "The product from your waiting list",
   },
 };
@@ -115,12 +104,20 @@ export function renderBackInStock(
   );
   const unsubscribe = absUrl(product.unsubscribeUrl, "/shop2/account/");
 
+  const values: MailTextValues = {
+    product: subjectName,
+    total: Number.isFinite(num(product.price, NaN)) ? money(product.price) : "",
+    shop: BRAND.name,
+  };
+  const intro = mailText("back-in-stock", L, "intro", values);
+  const signature = mailText("back-in-stock", L, "signature", values);
+
   const body =
     rowTitle(t.title) +
-    rowLead(esc(t.lead)) +
+    rowLead(`${esc(c.hello)} ${mailTextHtml("back-in-stock", L, "intro", values)}`) +
     rowPanel(t.label, esc(title), esc(t.restock), true) +
     rowButton(url, t.cta) +
-    rowNote([esc(t.note)]);
+    rowNote([mailTextHtml("back-in-stock", L, "signature", values)]);
 
   const footerNote =
     `${esc(t.why)} <a href="${esc(unsubscribe)}" class="em-link" style="color:#6f6b57; text-decoration:underline;">${esc(c.unsubscribe)}</a>`;
@@ -136,16 +133,16 @@ export function renderBackInStock(
   const text = textBody([
     t.title.toUpperCase(),
     "",
-    t.lead,
+    `${c.hello} ${intro}`,
     "",
     `${t.label}: ${title}`,
     t.restock,
     "",
     `${t.cta}: ${url}`,
     "",
-    t.note,
+    signature,
     textFooter(L, `${t.why} ${c.unsubscribe}: ${unsubscribe}`),
   ]);
 
-  return { subject: t.subject(subjectName), html, text };
+  return { subject: mailText("back-in-stock", L, "subject", values), html, text };
 }

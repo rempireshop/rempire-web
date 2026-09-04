@@ -53,6 +53,10 @@ function upload(file: Buffer, name: string, fields: Record<string, string> = {},
   return new Request(`${ORIGIN}/api/admin/upload/`, { method: "POST", body: form, headers });
 }
 
+/** An ISO base media file header — `isom`/`mp42`/… is MP4, `qt  ` QuickTime. */
+const mp4 = (brand: string) =>
+  Buffer.concat([Buffer.from([0, 0, 0, 0x18]), Buffer.from("ftyp"), Buffer.from(brand), Buffer.alloc(64, 0)]);
+
 const png = (w: number, h: number, alpha = true) =>
   sharp({ create: { width: w, height: h, channels: alpha ? 4 : 3, background: { r: 210, g: 40, b: 40, alpha: 0.6 } } })
     .png()
@@ -220,6 +224,94 @@ describe("admin upload", () => {
     expect(body.key).toMatch(/^hero\/\d{13}-banner\.webp$/);
   });
 
+  /* ---------- media: video ------------------------------------------------- */
+
+  it("stores an MP4 under videos/ with its real content type and no thumbnail", async () => {
+    const { POST } = await import("@/app/api/admin/upload/route");
+    const calls = stubBucket();
+    const res = await POST(upload(mp4("isom"), "Reel Clip.MP4", { kind: "video" }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    expect(body.ok).toBe(true);
+    expect(body.key).toMatch(/^videos\/touchable\/\d{13}-reel-clip\.mp4$/);
+    expect(body.url).toBe(`${R2_ENV.R2_PUBLIC_BASE}/${body.key}`);
+    expect(body.contentType).toBe("video/mp4");
+    expect(body.bytes).toBeGreaterThan(0);
+    // one object, not two: a video has no thumbnail to make
+    expect(calls.map((c) => c.method)).toEqual(["PUT"]);
+    expect(body.thumbUrl).toBeUndefined();
+
+    const audit = await query<{ action: string; payload: { key: string; kind: string } }>(
+      "select action, payload from admin_audit order by id desc limit 1",
+    );
+    expect(audit[0].action).toBe("media.upload");
+    expect(audit[0].payload.kind).toBe("video");
+  });
+
+  it("keeps a QuickTime file as .mov — an iPhone records those", async () => {
+    const { POST } = await import("@/app/api/admin/upload/route");
+    stubBucket();
+    const res = await POST(upload(mp4("qt  "), "IMG_0421.mov", { kind: "video" }));
+    const body = await res.json();
+    expect(body.key).toMatch(/\.mov$/);
+    expect(body.contentType).toBe("video/quicktime");
+  });
+
+  /* The gate this whole branch exists for: the type is decided by the bytes,
+     not by the extension and not by the Content-Type the browser attached. */
+  it("refuses anything that is not an MP4 or a MOV, whatever it is called", async () => {
+    const { POST } = await import("@/app/api/admin/upload/route");
+    const calls = stubBucket();
+    for (const [name, bytes] of [
+      ["clip.mp4", Buffer.concat([Buffer.from("%PDF-1.7\n"), Buffer.alloc(64, 0x20)])],
+      ["clip.mp4", await png(20, 20)],                       // a real picture with a video name
+      ["clip.mp4", mp4("heic")],                             // a container we do not accept
+      ["clip.mp4", Buffer.concat([Buffer.from("RIFF"), Buffer.alloc(32, 0)])], // an AVI/WebM-ish header
+    ] as Array<[string, Buffer]>) {
+      const res = await POST(upload(bytes, name, { kind: "video" }));
+      expect(res.status, name).toBe(415);
+      expect(await res.json()).toMatchObject({ ok: false, error: "bad_video_type" });
+    }
+    expect(calls, "a refused video still reached the bucket").toHaveLength(0);
+  });
+
+  it("takes a video up to 60 MB where a photo stops at 12", async () => {
+    const { POST } = await import("@/app/api/admin/upload/route");
+    stubBucket();
+    // 20 MB: too big for a photo, fine for a video
+    const big = Buffer.concat([mp4("isom"), Buffer.alloc(20 * 1024 * 1024, 0)]);
+    expect((await POST(upload(big, "a.png"))).status).toBe(413);
+    expect((await POST(upload(big, "a.mp4", { kind: "video" }))).status).toBe(200);
+
+    const over = await POST(upload(Buffer.alloc(61 * 1024 * 1024, 1), "huge.mp4", { kind: "video" }));
+    expect(over.status).toBe(413);
+    expect(await over.json()).toMatchObject({ error: "too_large" });
+  });
+
+  it("needs a product id for a video, and says so once storage is missing", async () => {
+    const { POST } = await import("@/app/api/admin/upload/route");
+    stubBucket();
+    expect(await (await POST(upload(mp4("isom"), "a.mp4", { kind: "video", productId: "" }))).json()).toMatchObject({
+      error: "bad_product",
+    });
+    setStorage(false);
+    const res = await POST(upload(mp4("isom"), "a.mp4", { kind: "video" }));
+    expect(res.status).toBe(503);
+    expect(await res.json()).toMatchObject({ error: "storage_not_configured" });
+  });
+
+  it("tells the panel both limits so it can name the right one", async () => {
+    const { GET } = await import("@/app/api/admin/upload/route");
+    const probe = await GET(new Request(`${ORIGIN}/api/admin/upload/`, { headers: { cookie: admin } }));
+    expect(await probe.json()).toMatchObject({
+      ok: true,
+      configured: true,
+      maxBytes: 12 * 1024 * 1024,
+      maxVideoBytes: 60 * 1024 * 1024,
+    });
+  });
+
   /* ---------- delete ------------------------------------------------------- */
 
   it("deletes a key of ours, with its thumbnail, and refuses anything else", async () => {
@@ -328,5 +420,55 @@ describe("product gallery override", () => {
     expect(row.price).toBe(25.5);
     expect(row.varImg).toEqual([0, 1]);
     expect(row.gallery).toEqual([PHOTO]);
+  });
+
+  /**
+   * media: the same door for the video link. The panel refuses a bad one
+   * before it is sent (parseVideo() in app.js), but the route is what a
+   * script, a stale tab or a curl call reaches — so it refuses too, out loud,
+   * instead of storing something that renders nothing.
+   */
+  describe("product video override", () => {
+    beforeEach(() => setStorage(true));
+    afterEach(() => setStorage(false));
+
+    it("saves each shape the shop can play", async () => {
+      const admin_overrides = await import("@/app/api/admin/overrides/route");
+      for (const url of [
+        "https://youtu.be/dQw4w9WgXcQ",
+        "https://vimeo.com/123456789",
+        "https://www.instagram.com/reel/C8xYzAbCdEf/",
+        `${R2_ENV.R2_PUBLIC_BASE}/videos/touchable/1756900000000-clip.mp4`,
+      ]) {
+        const res = await admin_overrides.PUT(put({ id: "touchable", videoUrl: url }));
+        expect(res.status, url).toBe(200);
+        expect((await res.json()).overrides.touchable.videoUrl).toBe(url);
+      }
+    });
+
+    it("refuses a javascript: URL and anything else it cannot render", async () => {
+      const admin_overrides = await import("@/app/api/admin/overrides/route");
+      for (const url of [
+        "javascript:alert(1)",
+        "javascript:alert(1)#youtube.com/watch?v=dQw4w9WgXcQ",
+        "data:text/html,<script>alert(1)</script>",
+        "https://evil.example.com/?u=https://youtu.be/dQw4w9WgXcQ",
+        "https://media.example.com/videos/x.mp4",
+        "not a url",
+      ]) {
+        const res = await admin_overrides.PUT(put({ id: "touchable", videoUrl: url }));
+        expect(res.status, url).toBe(400);
+        expect(await res.json()).toMatchObject({ ok: false, error: "bad_video" });
+      }
+      const row = await query<{ video_url: string | null }>("select video_url from product_overrides where product_id = 'touchable'");
+      expect(row[0]?.video_url ?? null).toBeNull();
+    });
+
+    it("an empty value clears the link and takes the video block off the page", async () => {
+      const admin_overrides = await import("@/app/api/admin/overrides/route");
+      await admin_overrides.PUT(put({ id: "touchable", videoUrl: "https://youtu.be/dQw4w9WgXcQ" }));
+      const res = await admin_overrides.PUT(put({ id: "touchable", videoUrl: "" }));
+      expect((await res.json()).overrides.touchable.videoUrl).toBe(null);
+    });
   });
 });

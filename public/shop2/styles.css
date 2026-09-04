@@ -34,6 +34,7 @@
   --z-drawer: 60;
   --z-toast: 70;
   --z-intro: 90;
+  --z-scan: 95;
 }
 
 @media (min-width: 768px) { :root { --gutter: 32px; } }
@@ -378,6 +379,17 @@ body:has(.stickybar) .ftr {
 /* 18px tall was well under the 44px touch minimum; the padding makes the hit
    area comfortable without moving the underline. */
 .card__add { align-self: start; margin-top: 2px; padding: 12px 0; }
+/* The card's own size picker (cardSizeHTML in app.js). width:100% is the load
+   bearing part: a native <select> is as wide as its widest option, and
+   «white / XXL» at a 150px track on a 375px phone would hang out of the card
+   and give the whole page a sideways scroll — the same reason .card carries
+   min-width:0. Fixed width also means switching size never resizes the card,
+   so a row of cards cannot jump under the shopper's finger.
+   Smaller than the form selects (.sel select) because a card is not a form,
+   but still over the 44px touch minimum. */
+.card__sel { width: 100%; max-width: 100%; margin-top: 8px; }
+.card__sel select { font-size: 13px; min-height: 44px; padding: 10px 22px 10px 2px; }
+.card__sel::after { right: 3px; width: 6px; height: 6px; }
 
 .chip {
   display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
@@ -1737,6 +1749,13 @@ button, a, summary, label { touch-action: manipulation; }
 .gifttile__mark { width: 22px; height: 34px; color: var(--ink); }
 .gifttile__txt { flex: 1 1 220px; min-width: 0; }
 .gifttile__txt .muted { margin: 4px 0 0; }
+/* The home page's gift-card block: the tile already draws its own frame and
+   carries the gap to what follows, so the section only needs the rhythm above
+   it — .sec's own bottom padding would double that gap. */
+.sec--gift { padding-bottom: 0; }
+/* Same tile in the cabinet, between «Мои заказы» and «Мои данные» — it needs
+   the gap a .sec__head--sub heading would have given it. */
+.acct__gift { margin-top: 32px; }
 
 .gamts { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 20px; }
 .gamt {
@@ -1808,6 +1827,13 @@ button, a, summary, label { touch-action: manipulation; }
   transition: transform .2s var(--ease), background .2s var(--ease);
 }
 .pvideo__play:hover .pvideo__btn { transform: translate(-50%, -50%) scale(1.07); background: var(--ink); }
+/* media: an Instagram reel is a tall card, not a 16:9 player — the ratio here
+   is the embed page's own, so it neither letterboxes nor clips. */
+.pvideo--ig .pvideo__frame { aspect-ratio: 400 / 640; max-width: 420px; }
+.pvideo__alt { margin: 8px 0 0; font-size: 13px; }
+/* media: an uploaded file has whatever shape the phone recorded, so it keeps
+   its own — no fixed box to letterbox a portrait clip into. */
+.pvideo__file { display: block; width: 100%; max-height: 70vh; background: var(--shell); }
 @media (min-width: 900px) { .pvideo { max-width: 620px; } }
 
 /* The set page parks the same sticky buy bar as a product page. The chat
@@ -1993,8 +2019,25 @@ button, a, summary, label { touch-action: manipulation; }
 .blog__body blockquote {
   margin: 18px 0; padding: 2px 0 2px 16px; border-left: 3px solid var(--rule); color: var(--muted);
 }
+/* A product named inside the text: the «Товар» button leaves an <a
+   data-product> marker, and blogBodyHTML() in app.js swaps it for this. It
+   is a <button>, so it is valid where the marker stood — inside a sentence's
+   own <p> — which a full product card (a <div> of buttons) would not be. */
+.blog__prod {
+  display: flex; align-items: center; gap: 12px; width: fit-content; max-width: 100%;
+  margin: 16px 0; padding: 8px 16px 8px 8px; text-align: left;
+  border: 1px solid var(--rule); background: var(--page); color: inherit; cursor: pointer;
+}
+.blog__prod:hover { border-color: var(--ink); }
+/* .ph is absolute inside a sized frame everywhere else in the shop; here the
+   photo IS the frame, so it is put back in flow at a fixed size. */
+.blog__prodimg { position: relative; inset: auto; width: 46px; height: 46px; flex: none; background-size: contain; }
+.blog__prodtx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.blog__prodname { font-size: 13.5px; line-height: 1.35; overflow-wrap: anywhere; }
+.blog__prodprice { font-size: 13px; color: var(--muted); }
 @media (max-width: 767px) {
   .blog__tiletitle { font-size: 14px; }
+  .blog__prod { width: 100%; }
 }
 
 /* ---------- админка: «Блог» ------------------------------------------------
@@ -2002,13 +2045,35 @@ button, a, summary, label { touch-action: manipulation; }
    editor says that in plain words rather than leaving Renat to guess why
    there is no «Отменить» in the journal for a post. */
 .admblog__note { margin: 16px 0; }
-.admblog__hint { margin: -4px 0 12px; font-size: 12.5px; }
-.admblog__body { font-family: inherit; resize: vertical; }
-.admblog__preview {
-  border: 1px solid var(--rule); padding: 10px 14px; margin-bottom: 18px;
-  max-height: 260px; overflow: auto; background: var(--hover);
+/* The visual editor. The box carries .acc__rich as well, so a heading, a
+   list and a picture look inside it exactly as they will on the article
+   page — that is why there is no separate preview under it any more. */
+.admblog__tb { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+.admblog__tb .btn { min-height: 38px; padding: 0 11px; }
+.admblog__tool:empty { display: none; }
+.admblog__tool {
+  border: 1px solid var(--rule); padding: 10px 12px; margin-bottom: 8px; background: var(--hover);
 }
-.admblog__preview:empty::before { content: "…"; color: var(--muted); }
+.admblog__toolrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admblog__toolrow .input { flex: 1 1 200px; min-width: 0; }
+.admblog__rte {
+  border: 1px solid rgba(28, 26, 0, .35); padding: 12px 14px; min-height: 260px;
+  max-height: 60vh; overflow-y: auto; background: var(--page);
+  font-family: inherit; font-size: 14px; line-height: 1.6; white-space: normal;
+}
+.admblog__rte:focus { border: 1px solid var(--ink); box-shadow: inset 0 0 0 1px var(--ink); outline: none; }
+.admblog__rte:empty::before { content: attr(placeholder); color: var(--muted); }
+.admblog__rte img { display: block; max-width: 100%; height: auto; margin: 12px 0; }
+.admblog__rte figure { margin: 12px 0; }
+.admblog__rte a { text-decoration: underline; }
+.admblog__rte a[data-product] { text-decoration: none; border-bottom: 2px solid var(--rule); font-weight: 500; }
+/* 375 px: the seven buttons wrap into three short rows instead of scrolling
+   sideways — a toolbar you have to scroll to find «Отменить» in is not one. */
+@media (max-width: 480px) {
+  .admblog__tb { gap: 5px; }
+  .admblog__tb .btn { min-height: 36px; padding: 0 8px; font-size: 11px; }
+  .admblog__rte { min-height: 220px; padding: 10px 12px; }
+}
 .admblog__cover { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .admblog__coverimg {
   display: block; width: 96px; height: 50px; background: var(--page) center / cover no-repeat;
@@ -2024,14 +2089,20 @@ button, a, summary, label { touch-action: manipulation; }
 
 /* ---------- inventory: the barcode scanner ------------------------------
    A full-screen overlay mounted OUTSIDE #bodyslot (see scanMount() in
-   app.js) so its <video> survives every render(). z-index above the toast
-   (--z-toast: 70) and the intro (--z-intro: 90) — nothing should be able to
-   sit on top of a phone camera view. */
+   app.js) so its <video> survives every render(). --z-scan (95) is above the
+   intro (90) and everything below it — nothing should be able to sit on top
+   of a phone camera view. */
 .scanoverlay {
-  position: fixed; inset: 0; z-index: 95;
+  position: fixed; inset: 0; z-index: var(--z-scan);
   display: flex; flex-direction: column;
   background: #000; color: #fff;
 }
+/* …with exactly one exception, and it is the reason the scanner is worth
+   using: «Приход +3 ✓» is the receipt for the tap that just wrote to the
+   warehouse. Under the overlay it was invisible — the owner pressed a button
+   and nothing appeared to happen. The body class is set by the same render
+   hook that mounts the overlay (renderImpl()). */
+body.is-scanning .toast { z-index: calc(var(--z-scan) + 1); }
 .scan__box { position: relative; flex: 1 1 auto; min-height: 0; background: #000; }
 .scan__video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
 .scan__target {
@@ -2058,5 +2129,48 @@ button, a, summary, label { touch-action: manipulation; }
 .scan__card .adm__ph--big { width: 56px; height: 56px; flex: none; }
 .scan__actions { display: flex; gap: 10px; margin-bottom: 10px; }
 .scan__btn { flex: 1 1 0; min-height: 48px; font-size: 14px; }
-.scan__manual { display: flex; gap: 8px; margin: 12px 0; }
+/* The manual field is a sibling of #scanpanel, not part of it, so on the
+   overlay's own black ground its input text and its «Найти» button were black
+   on black — invisible exactly when they matter most, since this row IS the
+   interface whenever the camera is unavailable. It wears the panel's ground
+   instead and reads as the top of it. */
+.scan__manual {
+  display: flex; gap: 8px; margin: 0; flex: 0 0 auto;
+  background: var(--page); color: var(--ink); padding: 12px 16px 0;
+}
 .scan__manual .input { flex: 1 1 auto; }
+
+/* ---------- scanner app: /shop2/scan/ ------------------------------------
+   The same overlay, standing on its own route as a third installable icon
+   (screenScan()/scanRouteSync() in app.js). It grows a bar of its own —
+   there is no admin screen underneath it to go back to with a ✕ — and the
+   panel is given more of the phone, since here it is the whole interface,
+   not a sheet over the warehouse table. */
+.scanoverlay--app { padding-top: env(safe-area-inset-top, 0px); }
+.scan__top {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; background: #000; color: #fff;
+}
+.scan__brand { font-size: 13px; font-weight: 600; letter-spacing: .02em; margin-right: auto; }
+.scan__topbtn {
+  width: 40px; height: 40px; border-radius: 50%; flex: none;
+  background: rgba(255, 255, 255, .12); color: #fff; border: none; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.scan__topbtn[aria-pressed="true"] { background: rgba(255, 255, 255, .85); color: #000; }
+.scan__toplink { color: #fff; font-size: 13px; white-space: nowrap; }
+.scanoverlay--app .scan__panel { max-height: 64vh; }
+/* No camera (denied, absent, or a desktop): the viewfinder is dead space and
+   the manual field is the interface — see scanRenderPanel(). The «Склад»
+   overlay keeps a strip of it because its ✕ and torch live inside the box;
+   the app has those in its top bar, so there the box goes entirely. */
+.scanoverlay.is-nocam .scan__box { flex: 0 0 84px; }
+.scanoverlay.is-nocam .scan__target { display: none; }
+.scanoverlay--app.is-nocam .scan__box { display: none; }
+.scanoverlay.is-nocam .scan__panel { flex: 1 1 auto; max-height: none; }
+
+/* One line, one number, two thumbs: the quantity for the confirm below. */
+.scan__step { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.scan__stepbtn { width: 48px; min-height: 48px; flex: none; font-size: 20px; line-height: 1; padding: 0; }
+.scan__qty { width: 84px; text-align: center; font-size: 17px; }
+.scan__ready { margin: 0 0 4px; font-size: 12.5px; color: var(--muted); }

@@ -451,7 +451,13 @@ test.describe("sweep — blog", () => {
     const slug = await page.locator("[data-blogslug]").inputValue();
     expect(slug, "a slug kept characters that cannot be in a URL").toMatch(/^[a-z0-9-]*$/);
     await page.locator('[data-blogf="excerpt"]').fill(EMOJI);
-    await page.locator('[data-blogf="body"]').fill(`${HTML_BOMB}\n\nОбычный абзац.`);
+    /* The body is a contenteditable now (docs/blog.md — the visual editor),
+       so the bomb is TYPED into it, exactly as the owner would paste it in.
+       Typed markup is text: the box holds it escaped, and the shop below has
+       to print it rather than run it. */
+    await page.locator("[data-blogbody]").click();
+    await page.keyboard.type(`${HTML_BOMB} Обычный абзац.`);
+    expect(await page.locator("[data-blogbody] script").count(), "the editor ran the owner's paste").toBe(0);
     await page.locator('[data-blogf="seoTitle"]').fill(LONG);
     expect((await page.locator('[data-blogf="seoTitle"]').inputValue()).length).toBeLessThanOrEqual(70);
     await page.locator("[data-admblogq]").fill(PRODUCT_2.id);

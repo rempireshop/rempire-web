@@ -2,9 +2,10 @@
  * GET /api/blog/<slug>/?lang=RU — one published article.
  *
  * `{ ok, post: {slug,title,excerpt,bodyHtml,coverUrl,coverAlt,tags,products,
- *    seoTitle,seoDesc,author,publishedAt} }`. `bodyHtml` is the markdown
- * rendered to safe HTML server-side (@/lib/blog markdownToHtml) — the
- * storefront injects it directly, it never parses markdown itself.
+ *    seoTitle,seoDesc,author,publishedAt} }`. `bodyHtml` is the stored body
+ * rendered to safe HTML server-side (@/lib/blog renderPostBody — the visual
+ * editor's HTML through the allowlist, an older markdown body through
+ * markdownToHtml) — the storefront injects it, it never renders a body itself.
  *
  * A draft, or a slug nobody has, both answer `404 {ok:false,error:"not_found"}`
  * — the storefront must not be able to tell "does not exist" from "not
@@ -12,7 +13,7 @@
  *
  * NB: call with the trailing slash — next.config has trailingSlash: true.
  */
-import { getPublishedBySlug, markdownToHtml, pickLang } from "@/lib/blog";
+import { getPublishedBySlug, pickLang, renderPostBody } from "@/lib/blog";
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug: raw } = await params;
@@ -32,7 +33,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
           slug: post.slug,
           title: pickLang(post.title, lang),
           excerpt: pickLang(post.excerpt, lang),
-          bodyHtml: markdownToHtml(pickLang(post.body, lang)),
+          bodyHtml: renderPostBody(pickLang(post.body, lang)),
           coverUrl: post.coverUrl,
           coverAlt: pickLang(post.coverAlt, lang),
           tags: post.tags,

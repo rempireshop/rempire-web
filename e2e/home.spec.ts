@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { ipHeaders, LANGS, shopUrl, waitForScreen } from "./fixtures";
+import { ipHeaders, LANGS, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /**
- * Home: hero, rails, sets rail, footer company line, language switch.
+ * Home: hero, rails, sets rail, the gift-card block, the blog label, the
+ * footer company line, language switch.
  * Desktop only — see docs/testing.md "Why most specs run on desktop only".
  */
 test.beforeEach(async ({}, testInfo) => {
@@ -56,6 +57,61 @@ for (const lang of LANGS) {
       // Bottom signature line: "© 2026 " is a literal string, not a computed
       // year, so it is stable to assert on exactly.
       await expect(page.locator(".ftr__sig")).toContainText("© 2026 Rempire Store OÜ");
+    });
+
+    /* The gift card used to be reachable from «Наборы» and nowhere else —
+     * the last place someone shopping for a present looks. It now has three
+     * homes; two of them are on this screen. The home block deliberately does
+     * NOT hang off the sets rail: it is its own <section class="sec--gift">,
+     * so switching sets off (admin → Магазин) cannot take it with them. */
+    test("the gift card is reachable from the home page and from the footer", async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/"));
+      await waitForScreen(page, "home");
+
+      const tile = page.locator(".sec--gift .gifttile");
+      await expect(tile).toBeVisible();
+      await expect(tile.getByRole("heading")).toHaveText(tr("Подарочная карта", lang.code));
+      // Its own section, not a child of the sets rail.
+      await expect(page.locator(".sec--bundles .gifttile")).toHaveCount(0);
+
+      // The footer group «Покупателю» — sections are closed <details>.
+      const summaries = page.locator(".ftr .ftr__acc summary");
+      const n = await summaries.count();
+      for (let i = 0; i < n; i++) await summaries.nth(i).click();
+      const footerLink = page.locator('.ftr [data-go="gift"]');
+      await expect(footerLink).toHaveText(tr("Подарочная карта", lang.code));
+
+      await footerLink.click();
+      await waitForScreen(page, "gift");
+      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+
+      // …and the home block's own button reaches the same screen.
+      await page.goto(shopUrl(lang.seg, "/"));
+      await waitForScreen(page, "home");
+      await page.locator('.sec--gift [data-go="gift"]').click();
+      await waitForScreen(page, "gift");
+    });
+
+    /* «Ajaveeb» was the wrong word: the Estonian label for the section is
+     * «Blog», in the nav, the footer, the breadcrumbs and the page title
+     * alike — one dictionary entry in app.js drives all of them, and
+     * tools/prerender-shop2.mjs lifts that same table for the static pages. */
+    test("the blog is labelled with the right word for the language", async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/"));
+      await waitForScreen(page, "home");
+
+      const navBlog = page.locator("[data-nav-blog]");
+      await expect(navBlog).toHaveText(tr("Блог", lang.code));
+      await expect(page.locator('.ftr [data-go="blog"]')).toHaveText(tr("Блог", lang.code));
+
+      await navBlog.click();
+      await waitForScreen(page, "blog");
+      await expect(page.locator("h1.display")).toHaveText(tr("Блог", lang.code));
+      await expect(page.locator(".crumbs")).toContainText(tr("Блог", lang.code));
+
+      // The old word must not survive anywhere on the screen.
+      await expect(page.locator("body")).not.toContainText("Ajaveeb");
+      await expect(page.locator("body")).not.toContainText("ajaveeb");
     });
   });
 }

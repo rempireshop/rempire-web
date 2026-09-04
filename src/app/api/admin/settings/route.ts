@@ -13,6 +13,7 @@ import { requireAdmin } from "@/lib/auth";
 import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
 import { cleanPricing } from "@/lib/loyalty";
 import { parseShippingRules } from "@/lib/shipping";
+import { cleanMailTexts } from "@/emails/texts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -65,6 +66,12 @@ export async function PUT(req: Request) {
       // the same parser the checkout reads with — a rule the storefront would
       // ignore (NaN, 1e9, a negative) is normalised here instead of stored raw
       if (key === "shipping_rules") value = parseShippingRules(value);
+      /* «Письма»: the owner's subject / intro / signature per letter and
+         language. Unknown template or language keys are dropped, control
+         characters stripped and every string clamped (200/1500/300) before
+         anything is stored — src/emails/texts.ts cleanMailTexts(). The
+         letters escape it again at render time; this is the first door. */
+      if (key === "mail_texts") value = cleanMailTexts(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

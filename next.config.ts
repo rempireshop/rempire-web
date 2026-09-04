@@ -110,7 +110,15 @@ function prerenderedRewrites() {
  *   · styles    — app.js writes style="…" attributes on nearly every row, so
  *                 'unsafe-inline' is load-bearing here and cannot be dropped
  *                 without rewriting the renderer. Google Fonts is a stylesheet.
- *   · frames    — YouTube (nocookie) and Vimeo players on product pages.
+ *   · frames    — YouTube (nocookie), Vimeo and Instagram players on product
+ *                 pages. Instagram is here for the reel/post embed the goods
+ *                 editor now accepts (docs/media.md, «Видео»): the frame src
+ *                 is https://www.instagram.com/reel/<id>/embed/, built by
+ *                 parseVideo() from an id and never from the pasted string.
+ *                 Listed on the shared policy for the same reason the other
+ *                 two are — the product page exists both under /shop2/* and
+ *                 in the legacy /shop/p/ pages — and it grants nothing beyond
+ *                 "a frame may point at instagram.com".
  *   · connect   — only our own API. The Montonio hosts are listed because the
  *                 checkout hands the shopper over to them; the handover is a
  *                 navigation and a form post, not a fetch.
@@ -142,7 +150,8 @@ function csp(scriptSrc: string, frameAncestors = "'none'", connectExtra = ""): s
     "img-src 'self' data: https:",
     "media-src 'self' data: https:",
     "connect-src 'self' " + [MONTONIO, connectExtra].filter(Boolean).join(" "),
-    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com " +
+      "https://www.instagram.com https://instagram.com",
     "form-action 'self' " + MONTONIO,
     `frame-ancestors ${frameAncestors}`,
     "base-uri 'none'",

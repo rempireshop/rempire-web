@@ -2,6 +2,7 @@ import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
 import { renderDemo, isTemplateId, TEMPLATE_IDS } from "@/emails";
 import { normalizeLang } from "@/emails/layout";
 import { mailConfigured, sendMail } from "@/lib/mail";
+import { loadMailTexts } from "@/lib/mail-texts";
 
 /**
  * POST /api/admin/mail/test/  { template, to, lang }
@@ -74,6 +75,10 @@ export async function POST(req: Request): Promise<Response> {
       { status: 503 },
     );
   }
+
+  // The owner's own subject / intro / signature — the sample has to be the
+  // letter, not the factory default (src/lib/mail-texts.ts).
+  await loadMailTexts();
 
   let mail;
   try {

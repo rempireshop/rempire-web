@@ -29,6 +29,9 @@ import { customerTier, getPricingSettings, proUnitPrice, quoteLoyaltyRedeem } fr
 // cannot drift from it; the live computeShipping() call itself still goes
 // through the optional-neighbour door a few lines down.
 import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
+// media: what product_overrides.video_url is allowed to hold — a pure module
+// of this build, no side effects, see src/lib/video.ts.
+import { cleanVideoUrl } from "@/lib/video";
 
 /* ---------- types -------------------------------------------------------- */
 
@@ -225,11 +228,18 @@ function num(v: unknown, fallback = 0): number {
  */
 type AnyModule = Record<string, unknown>;
 
-async function optionalLib(name: "shipping" | "giftcards" | "promos" | "mail-hooks"): Promise<AnyModule | null> {
+async function optionalLib(
+  name: "shipping" | "giftcards" | "promos" | "mail-hooks" | "bundles",
+): Promise<AnyModule | null> {
   try {
     if (name === "shipping") return (await import("@/lib/shipping")) as unknown as AnyModule;
     if (name === "giftcards") return (await import("@/lib/giftcards")) as unknown as AnyModule;
     if (name === "promos") return (await import("@/lib/promos")) as unknown as AnyModule;
+    /* Sets live in the `bundles` table now (db/migrations/120_bundles.sql).
+       Imported at call time like every other neighbour — and, unlike them, it
+       imports THIS module back for getOverrides(), which is exactly why it
+       must not be a static import at the top of this file. */
+    if (name === "bundles") return (await import("@/lib/bundles")) as unknown as AnyModule;
     return (await import("@/lib/mail-hooks")) as unknown as AnyModule;
   } catch (err) {
     console.error(`[orders] optional module ${name} not loaded:`, err);
@@ -434,7 +444,18 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
   if ("seoDesc" in patch) cols.seo_desc = patch.seoDesc ?? null;
   if ("subcat" in patch) cols.subcat = patch.subcat ?? null;
   if ("varImg" in patch) cols.var_img = patch.varImg == null ? null : jsonbParam(patch.varImg);
-  if ("videoUrl" in patch) cols.video_url = patch.videoUrl ?? null;
+  /* media: only a link this shop can actually turn into a player — YouTube,
+     Vimeo, an Instagram reel/post, or an .mp4/.mov in our own bucket. Anything
+     else (a javascript: URL above all, but equally a link to a page that just
+     happens to have a video on it) is refused rather than stored: a stored
+     link that renders nothing looks identical to no link at all. */
+  if ("videoUrl" in patch) {
+    try {
+      cols.video_url = cleanVideoUrl(patch.videoUrl);
+    } catch {
+      throw new OrderError("bad_video", String(patch.videoUrl ?? "").slice(0, 120));
+    }
+  }
   if ("gallery" in patch) {
     const list = cleanGallery(patch.gallery);
     cols.gallery = list == null ? null : jsonbParam(list);
@@ -550,12 +571,42 @@ type BundleDef = {
   name?: string;
   price?: number;
   stock?: StockState;
-  items?: Array<{ id: string; variant?: string | number | null; size?: number | string | null; qty?: number }>;
+  items?: Array<{
+    /** `id` in src/data/bundles.json, `productId` in the `bundles` table. */
+    id?: string;
+    productId?: string;
+    variant?: string | number | null;
+    size?: number | string | null;
+    qty?: number;
+  }>;
   products?: string[];
   discount?: number;
 };
 
+/**
+ * Where a «bundle:<id>» line gets its definition — and therefore its price.
+ *
+ * The `bundles` table first (db/migrations/120_bundles.sql): that is what the
+ * owner edits in the admin, and a set the shop is showing at one price must
+ * never be charged at another. Hidden and switched-off sets are included on
+ * purpose — a customer who put a set in the cart an hour ago must be able to
+ * finish paying for it (see bundleDefsForOrders() in src/lib/bundles.ts).
+ *
+ * src/data/bundles.json stays behind it as the fallback for a deployment with
+ * no database, or one whose migration has not run yet: without it a shop that
+ * lost its database would reject every set line as `bundle_unknown` instead
+ * of simply pricing it from the file it shipped with.
+ */
 async function bundleDefs(): Promise<Record<string, BundleDef>> {
+  const fromDb = fn(await optionalLib("bundles"), "bundleDefsForOrders");
+  if (fromDb) {
+    try {
+      const rows = (await fromDb()) as Record<string, BundleDef>;
+      if (rows && Object.keys(rows).length) return rows;
+    } catch (err) {
+      console.error("[orders] bundles table unavailable, falling back to bundles.json:", err);
+    }
+  }
   const mod = await optionalData("bundles.json");
   if (!mod) return {};
   const raw = (mod.default ?? mod) as unknown;
@@ -570,7 +621,12 @@ async function bundleDefs(): Promise<Record<string, BundleDef>> {
 type BundlePart = { id: string; variant?: string | number | null; size?: number | string | null; qty?: number };
 
 function bundleParts(def: BundleDef): BundlePart[] {
-  return def.items ?? (def.products ?? []).map((id) => ({ id, qty: 1 }));
+  if (def.items) {
+    return def.items
+      .map((it) => ({ ...it, id: String(it.productId ?? it.id ?? "") }))
+      .filter((it) => !!it.id);
+  }
+  return (def.products ?? []).map((id) => ({ id, qty: 1 }));
 }
 
 /** bundles.json titles are trilingual objects; RU is the source of truth. */

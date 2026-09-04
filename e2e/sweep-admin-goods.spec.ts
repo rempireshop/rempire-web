@@ -443,3 +443,87 @@ test.describe("sweep — promo codes", () => {
     await assertClean(page, w, "promos left disabled");
   });
 });
+
+/**
+ * media: the two video shapes that are not a YouTube link.
+ *
+ * An Instagram reel has no poster address anyone can fetch without an API
+ * key, so — unlike YouTube and Vimeo — its frame is in the page from the
+ * start with loading="lazy" and a plain link underneath. That difference is
+ * what this test pins: the embed address is built from the id (never from the
+ * pasted string), and both the frame and the fallback are really there.
+ *
+ * PRODUCT_2 rather than one of the sweep's own five: the sample above
+ * excludes it on purpose, and the field is put back empty in `finally`.
+ */
+test.describe("sweep — goods editor: Instagram video", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(160) });
+
+  const REEL_ID = "C8xYzAbCdEf";
+  const REEL = `https://www.instagram.com/reel/${REEL_ID}/`;
+
+  test("an Instagram reel saved in the editor becomes a real embed on the product page", async ({ page, browser }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    await openAdmin(page);
+    const id = PRODUCT_2.id;
+
+    try {
+      await openGoods(page, id);
+
+      // An Instagram address that is not a reel or a post is still not a
+      // video, and the refusal has to be readable.
+      await page.locator("[data-edvideo]").fill("https://www.instagram.com/rempire.tallinn/");
+      await saveGoods(page, id);
+      await expect(goodsErr(page), "an Instagram profile link was accepted as a video").toBeVisible();
+      expect(isRussian((await goodsErr(page).textContent()) || "")).toBe(true);
+      await assertClean(page, w, "instagram profile link refused");
+
+      await page.locator("[data-edvideo]").fill(REEL);
+      await saveGoods(page, id);
+      expect(await toastText(page)).toMatch(/Сохранено/);
+      await clearToast(page);
+      await assertClean(page, w, "instagram reel saved");
+
+      // The editor writes through without waiting and the storefront reads
+      // /api/overrides/ once, on load — so wait for the feed to carry it
+      // rather than racing it.
+      await expect.poll(async () => {
+        const body = await (await page.request.get("/api/overrides/")).json();
+        return ((body.overrides || {})[id] || {}).videoUrl || "";
+      }, { timeout: 15_000, message: "the overrides feed never carried the video link" }).toBe(REEL);
+
+      const shop = await freshShop(browser);
+      // instagram.com is unreachable from a test machine, and Chromium logs
+      // the frame's failed navigation as a console error. The assertion that
+      // matters is the markup, checked right below.
+      shop.w.allow.push(/instagram\.com/i);
+      await shop.page.goto(shopUrl("", `/p/${id}/`));
+      await waitForScreen(shop.page, "product");
+
+      const frame = shop.page.locator(".pvideo--ig iframe");
+      await expect(frame).toHaveCount(1);
+      await expect(frame).toHaveAttribute("src", `https://www.instagram.com/reel/${REEL_ID}/embed/`);
+      await expect(frame).toHaveAttribute("loading", "lazy");
+      // and the fallback, for a browser or an extension that blocks the embed
+      await expect(shop.page.locator(`.pvideo--ig a[href="${REEL}"]`)).toBeVisible();
+      // nothing else on the page picked up a hostile scheme along the way
+      const hrefs = await shop.page.locator("a[href], iframe[src], video[src]").evaluateAll((els) =>
+        els.map((e) => e.getAttribute("href") || e.getAttribute("src") || ""));
+      expect(hrefs.filter((h) => /^\s*(javascript|data|vbscript):/i.test(h))).toEqual([]);
+      /* Instagram's own embed script throws inside its own frame on a machine
+         with no Instagram session («requireLazy is not defined»). That is
+         their code in their document, reported on our page object because a
+         frame's uncaught errors surface there — drop exactly those and hold
+         everything else on the page to the sweep's usual standard. */
+      shop.w.pageErrors = shop.w.pageErrors.filter((e) => !/instagram\.com/i.test(e));
+      await assertClean(shop.page, shop.w, "product page with an Instagram embed");
+      await shop.close();
+    } finally {
+      await openGoods(page, id);
+      await page.locator("[data-edvideo]").fill("");
+      await saveGoods(page, id);
+      await clearToast(page);
+    }
+  });
+});

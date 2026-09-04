@@ -20,11 +20,13 @@ log.
 | `src/emails/*.ts` | the five renderers → `{ subject, html, text }` |
 | `src/emails/layout.ts` | shared shell, palette, dark-mode CSS, money/URL helpers |
 | `src/emails/common.ts` | customer name, item table, delivery line, totals |
+| `src/emails/texts.ts` | the owner's own subject / intro / closing line — see below |
+| `src/lib/mail-texts.ts` | `loadMailTexts()` — `settings.mail_texts` → the renderers |
 | `src/emails/index.ts` | template registry + demo data for the preview |
-| `src/app/api/admin/mail/preview/route.ts` | `GET` — HTML for the admin iframe |
+| `src/app/api/admin/mail/preview/route.ts` | `GET` — HTML for the admin iframe, `?format=texts` for the editor |
 | `src/app/api/admin/mail/test/route.ts` | `POST` — send a sample (admin only) |
 | `public/shop/emails/*.html` | **design source of truth**, hand-made, keep |
-| `tests/emails.test.ts`, `tests/mail.test.ts`, `tests/mail-hooks.test.ts` | `npm test` |
+| `tests/emails.test.ts`, `tests/mail.test.ts`, `tests/mail-hooks.test.ts`, `tests/mail-texts.test.ts` | `npm test` |
 
 `public/shop/emails/` stays in the repo: it is the human-readable reference the
 design was signed off on, and `/shop/emails/` is still the static preview page
@@ -133,6 +135,104 @@ plain-text alternative. Images and links are absolute, built from
 (`prefers-color-scheme` plus Outlook's `[data-ogsc]` hooks), and every element
 that sets a text colour also sets its own background, so a client that
 force-inverts the letter cannot produce dark-on-dark.
+
+## What the owner may rewrite — `settings.mail_texts`
+
+Three strings per letter per language are the owner's, edited in the admin's
+«Письма» tab without touching HTML: **the subject line**, **the intro
+paragraph** (the text under the greeting) and **the closing line** at the
+bottom of the letter. Everything else — the greeting itself, the order table,
+the delivery panel, the buttons, the unsubscribe line, the footer and the legal
+line — stays as coded, because those are the parts a wrong edit breaks.
+
+| File | What it is |
+|---|---|
+| `src/emails/texts.ts` | the defaults, the placeholder list, `cleanMailTexts()`, `mailText()` / `mailTextHtml()` |
+| `src/lib/mail-texts.ts` | `loadMailTexts()` — the one door between the setting and the renderers |
+
+Storage is one settings row, written through the ordinary
+`PUT /api/admin/settings`:
+
+```json
+{ "mail_texts": { "order-confirmed": { "et": { "subject": "…", "intro": "…", "signature": "…" } } } }
+```
+
+Six letters are editable — `order-confirmed`, `order-shipped`,
+`abandoned-cart`, `back-in-stock`, `birthday`, `login-code` — in `ru`, `et`,
+`en`. `gift-card` is not: its wording is bound up with the amount and the
+giver's name. An absent key means "use the default", so the shop that never
+opens the tab is byte-for-byte the shop that existed before the editor did,
+and «Вернуть стандартный текст» is a *deletion*, not a copy of the default
+into the row.
+
+**Which line is which**, per letter:
+
+| Letter | subject | intro | signature |
+|---|---|---|---|
+| `order-confirmed` | «Заказ R-1 принят — Rempire» | the paragraph after «Здравствуйте, Имя!» | «Есть вопрос по заказу? …» |
+| `order-shipped` | «Заказ R-1 отправлен — Rempire» | same | «Трек-номер начинает отслеживаться…» |
+| `abandoned-cart` | «Вы забыли корзину — Rempire» | same | «Товары в корзине не резервируются…» |
+| `back-in-stock` | «X снова в наличии — Rempire» | the paragraph after «Здравствуйте!» | «Наличие и цена актуальны…» |
+| `birthday` | «С днём рождения! …» | the paragraph after «Имя, поздравляем! 🎂» | «Введите код при оформлении заказа…» |
+| `login-code` | «482915 — код для входа в Rempire» | the paragraph after «Здравствуйте!» | «Если вы не запрашивали код…» |
+
+### Placeholders
+
+Seven, offered as clickable chips next to each field. Anything else in curly
+braces is left exactly as typed — a token nobody defined is not silently eaten.
+
+| Token | Fills in | Empty when |
+|---|---|---|
+| `{name}` | the customer's first name | a guest checkout with no name |
+| `{order}` | `R-100042` | not an order letter |
+| `{total}` | `95 €` — the order or cart total | not an order/cart letter |
+| `{track}` | the tracking code | not `order-shipped`, or no code yet |
+| `{code}` | the promo code (`birthday`) or the sign-in code (`login-code`) | elsewhere |
+| `{product}` | the product's brand + name | not `back-in-stock` |
+| `{shop}` | `Rempire` | never |
+
+One more token, `{percent}`, is substituted but deliberately **not** offered as
+a chip: the birthday letter's *default* intro carries it, because the discount
+is a shop setting (`settings.flows.birthdayPercent`) and has to stay live. An
+owner who keeps it in his own wording keeps that; one who types `15` instead
+owns the number from then on.
+
+### Escaping and limits
+
+The owner types **text, never markup**. `<b>x</b>` in a subject is `<b>x</b>`
+in the inbox, and in the body it is escaped (`&lt;b&gt;`), never rendered. That
+is enforced at render time (`mailTextHtml()`), not only on save — the same
+"first door, not the only one" rule the other validated settings follow. A
+newline in the intro becomes a `<br>` in the HTML part and stays a newline in
+the plain-text one.
+
+`cleanMailTexts()` runs on every write through the settings route: unknown
+letters, unknown languages and unknown fields are dropped, control characters
+stripped, subjects and closing lines collapsed onto one line, and the strings
+clamped to **200 / 1500 / 300** characters. An empty string is dropped rather
+than stored.
+
+### One function, so the preview cannot lie
+
+Everything that renders a letter loads the setting first, through the same
+`loadMailTexts()`:
+
+- `src/lib/mail-hooks.ts` (`order-confirmed`, `order-shipped`) — inside the
+  `loadBrand()` it already ran, off the one settings query;
+- `src/lib/flows.ts` — at the top of each of the three flow runs;
+- `src/app/api/account/code/route.ts` — before the sign-in code goes out;
+- `src/app/api/admin/mail/preview/` and `…/test/` — the admin iframe and the
+  «отправить тест» sample.
+
+So the preview is not an approximation of the letter, it is the letter. The
+editor's own feed is `GET /api/admin/mail/preview/?format=texts` → defaults,
+placeholders, caps and whatever is saved, in one call.
+
+Two cosmetic differences from the pre-editor copy, both invisible in a mail
+client: the order number in the intro is no longer bold (owner copy is escaped,
+so no letter's text may carry markup), and the two `&nbsp;` that held
+«№ 100042» and «15 %» together are plain spaces — an invisible character in a
+field the owner types into is a trap worth more than the non-breaking space.
 
 ## Previewing and test-sending
 

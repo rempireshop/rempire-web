@@ -1,10 +1,14 @@
 /**
  * «Заказ отправлен» — tracking code and a button that opens the carrier.
  * Design source: public/shop/emails/order-shipped.html
+ *
+ * Subject, the paragraph under the greeting and the closing line are the
+ * owner's (settings.mail_texts, «Письма» in the admin) — see ./texts.ts.
  */
 
 import { customerName, deliveryLine, greeting, orderNumber } from "./common";
 import {
+  BRAND,
   COMMON,
   absUrl,
   esc,
@@ -16,65 +20,47 @@ import {
   rowNote,
   rowTitle,
   shell,
-  stripHtml,
   textBody,
   textFooter,
 } from "./layout";
+import { mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, OrderLike, RenderedEmail, Tracking } from "./types";
 
 interface Strings {
-  subject: (n: string) => string;
   preheader: string;
   title: string;
-  lead: (hello: string, n: string) => string;
   code: string;
   cta: string;
   noteLocker: string;
-  noteDelay: string;
   noCode: string;
 }
 
 const T: Record<Lang, Strings> = {
   ru: {
-    subject: (n) => `Заказ ${n} отправлен — Rempire`,
     preheader: "Посылка в пути. Внутри — трек-номер и ссылка для отслеживания.",
     title: "Заказ отправлен",
-    lead: (hello, n) =>
-      `${hello} Ваш заказ <strong>№&nbsp;${n}</strong> передан в службу доставки и уже в пути.`,
     code: "Трек-номер",
     cta: "Отследить посылку",
     noteLocker:
       "Если вы выбрали пакомат — когда посылка приедет, вам придёт SMS с кодом дверцы. Если доставка курьером — курьер свяжется с вами перед приездом.",
-    noteDelay:
-      "Трек-номер начинает отслеживаться в течение нескольких часов после отправки.",
     noCode: "будет добавлен",
   },
   et: {
-    subject: (n) => `Tellimus ${n} on teele saadetud — Rempire`,
     preheader: "Pakk on teel. Kirjas on jälgimisnumber ja jälgimise link.",
     title: "Tellimus teel",
-    lead: (hello, n) =>
-      `${hello} Teie tellimus <strong>nr&nbsp;${n}</strong> on antud üle vedajale ja on teel.`,
     code: "Jälgimisnumber",
     cta: "Jälgi pakki",
     noteLocker:
       "Kui valisite pakiautomaadi, saate paki saabudes SMS-i ukse koodiga. Kui valisite kulleri, võtab kuller enne saabumist ühendust.",
-    noteDelay:
-      "Jälgimisnumber hakkab tööle mõne tunni jooksul pärast üleandmist.",
     noCode: "lisandub",
   },
   en: {
-    subject: (n) => `Order ${n} has shipped — Rempire`,
     preheader: "Your parcel is on its way — tracking number and link inside.",
     title: "Order shipped",
-    lead: (hello, n) =>
-      `${hello} Your order <strong>no.&nbsp;${n}</strong> has been handed to the carrier and is on its way.`,
     code: "Tracking number",
     cta: "Track the parcel",
     noteLocker:
       "If you chose a parcel locker, you will get an SMS with the door code when the parcel arrives. If you chose a courier, the courier calls before delivery.",
-    noteDelay:
-      "Tracking usually starts working a few hours after the parcel is handed over.",
     noCode: "to follow",
   },
 };
@@ -135,16 +121,26 @@ export function renderOrderShipped(
   const c = COMMON[L];
 
   const number = orderNumber(order);
-  const hello = greeting(L, customerName(order));
+  const name = customerName(order);
+  const hello = greeting(L, name);
   const { code, url } = parseTracking(tracking, order, L);
   const delivery = deliveryLine(order.shipping, L);
 
+  const values: MailTextValues = {
+    name,
+    order: number,
+    track: code,
+    shop: BRAND.name,
+  };
+  const intro = mailText("order-shipped", L, "intro", values);
+  const signature = mailText("order-shipped", L, "signature", values);
+
   const body =
     rowTitle(t.title) +
-    rowLead(t.lead(esc(hello), esc(number))) +
+    rowLead(`${esc(hello)} ${mailTextHtml("order-shipped", L, "intro", values)}`) +
     rowCode(t.code, code || t.noCode, delivery) +
     rowButton(url, t.cta) +
-    rowNote([esc(t.noteLocker), esc(t.noteDelay)]);
+    rowNote([esc(t.noteLocker), mailTextHtml("order-shipped", L, "signature", values)]);
 
   const html = shell({
     lang: L,
@@ -157,7 +153,7 @@ export function renderOrderShipped(
   const text = textBody([
     t.title.toUpperCase(),
     "",
-    stripHtml(t.lead(hello, number)),
+    `${hello} ${intro}`,
     "",
     `${t.code}: ${code || t.noCode}`,
     delivery,
@@ -165,9 +161,9 @@ export function renderOrderShipped(
     `${t.cta}: ${url}`,
     "",
     t.noteLocker,
-    t.noteDelay,
+    signature,
     textFooter(L, c.serviceNote),
   ]);
 
-  return { subject: t.subject(number), html, text };
+  return { subject: mailText("order-shipped", L, "subject", values), html, text };
 }

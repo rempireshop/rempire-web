@@ -48,7 +48,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
-import { fetchPublishedPosts, markdownToHtml, pickLang } from "./lib/blog-export.mjs";
+import { fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -666,15 +666,23 @@ async function drawCard(file, sources) {
   cardsMade++;
 }
 
-/* blog: the cover is a photo the owner uploaded to R2 (docs/media.md), not a
-   local file, so there is nothing on disk to composite — it is downloaded
-   once and cropped to the card size instead. "attention" picks the most
-   detailed region rather than a plain centre crop, which matters for a
-   cover shot at an odd aspect ratio. */
+/* blog: the cover is usually a photo the owner uploaded to R2
+   (docs/media.md), not a local file, so there is nothing on disk to
+   composite — it is downloaded once and cropped to the card size instead.
+   A root-relative cover (the sample posts use a catalogue photo under
+   /shop/img/) is read off disk instead: fetch() has no origin to resolve it
+   against in a build script. "attention" picks the most detailed region
+   rather than a plain centre crop, which matters for a cover shot at an odd
+   aspect ratio. */
 async function drawBlogCard(file, coverUrl) {
-  const res = await fetch(coverUrl);
-  if (!res.ok) throw new Error("fetch " + res.status);
-  const buf = Buffer.from(await res.arrayBuffer());
+  let buf;
+  if (coverUrl.startsWith("/")) {
+    buf = await readFile(path.join(PUB, coverUrl.replace(/^\/+/, "").split("?")[0]));
+  } else {
+    const res = await fetch(coverUrl);
+    if (!res.ok) throw new Error("fetch " + res.status);
+    buf = Buffer.from(await res.arrayBuffer());
+  }
   await mkdir(path.dirname(file), { recursive: true });
   await sharp(buf).resize(OG_W, OG_H, { fit: "cover", position: "attention" }).jpeg({ quality: 84 }).toFile(file);
   cardsMade++;
@@ -1313,7 +1321,7 @@ function blogPostPage(post, lang) {
   const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
   const title = pickLang(post.title, code) || post.slug;
   const excerpt = pickLang(post.excerpt, code);
-  const bodyHtml = markdownToHtml(pickLang(post.body, code));
+  const bodyHtml = renderPostBody(pickLang(post.body, code));
   const bodyText = stripTags(bodyHtml);
   const desc = clip((code === "EN" && pickLang(post.seoDesc, code)) || excerpt || bodyText, 158);
   const seoTitleRaw = pickLang(post.seoTitle, code);
@@ -1511,7 +1519,7 @@ for (const lang of LANGS) {
 
 /* Belt and braces: if one of these ever appears in the list, a page was
    generated for a screen that must not be indexed. */
-const NEVER = /^\/shop2(?:\/(?:et|en))?\/(?:checkout|cart|account|admin|done|search)\/$/;
+const NEVER = /^\/shop2(?:\/(?:et|en))?\/(?:checkout|cart|account|admin|scan|done|search)\/$/;
 for (const e of entries) {
   const loc = (e.match(/<loc>([^<]+)<\/loc>/) || [])[1] || "";
   const p = loc.replace(/^https?:\/\/[^/]+/, "");
@@ -1564,9 +1572,12 @@ if (entries.length <= CHUNK) {
    allowed on staging, and keeping staging out of an index is left to the
    robots meta and the header, which those bots do not act on. */
 
+/* /shop2/scan/ is the admin's standalone barcode scanner (docs/inventory.md),
+   admin-only and useless without a session — it belongs on this list next to
+   /shop2/admin/ for exactly the same reason. */
 const NO_INDEX_PATHS = [
-  "/shop2/admin", "/shop2/checkout", "/shop2/cart", "/shop2/account", "/shop2/done", "/shop2/search",
-  "/shop2/*/admin", "/shop2/*/checkout", "/shop2/*/cart", "/shop2/*/account", "/shop2/*/done", "/shop2/*/search",
+  "/shop2/admin", "/shop2/scan", "/shop2/checkout", "/shop2/cart", "/shop2/account", "/shop2/done", "/shop2/search",
+  "/shop2/*/admin", "/shop2/*/scan", "/shop2/*/checkout", "/shop2/*/cart", "/shop2/*/account", "/shop2/*/done", "/shop2/*/search",
   "/api/"
 ];
 const CLOSED_BOTS = ["facebookexternalhit", "meta-externalagent", "WhatsApp", "Twitterbot", "LinkedInBot",

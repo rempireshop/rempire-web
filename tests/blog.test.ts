@@ -3,18 +3,23 @@
  * surfaces — public read-only and admin CRUD, both driven with plain
  * Requests exactly as Next would call them.
  */
+import { readFileSync } from "node:fs";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { exec } from "@/lib/db";
+import { exec, query } from "@/lib/db";
 import {
   deletePost,
   getPostById,
   getPostBySlug,
   getPublishedBySlug,
+  LANGS,
   listAllPosts,
   listPublished,
+  looksLikeHtmlBody,
   markdownToHtml,
   pickLang,
   publishPost,
+  renderPostBody,
+  sanitizeHtml,
   slugify,
   uniqueSlug,
   unpublishPost,
@@ -113,6 +118,135 @@ describe("markdownToHtml — the safe subset", () => {
   it("is empty for empty input", () => {
     expect(markdownToHtml("")).toBe("");
     expect(markdownToHtml("   \n\n  ")).toBe("");
+  });
+});
+
+/* ---------- sanitizeHtml — the visual editor's allowlist -------------------- */
+
+describe("sanitizeHtml — what a body written in the editor is allowed to be", () => {
+  it("keeps the tags the editor writes, and leaves them exactly as they were", () => {
+    const html =
+      "<p>Текст <strong>жирный</strong> и <em>курсив</em>.</p><h2>Раздел</h2>" +
+      "<ul><li>один</li><li>два</li></ul><blockquote>цитата</blockquote>";
+    expect(sanitizeHtml(html)).toBe(html);
+  });
+
+  it("drops a <script> together with everything inside it", () => {
+    const html = sanitizeHtml("<p>до</p><script>alert(document.cookie)</script><p>после</p>");
+    expect(html).toBe("<p>до</p><p>после</p>");
+    expect(html.toLowerCase()).not.toContain("script");
+    expect(html).not.toContain("alert");
+  });
+
+  it("drops <style> and <iframe> the same way — tag and contents both", () => {
+    expect(sanitizeHtml("<style>p{color:red}</style><iframe src='https://evil.example'></iframe><p>a</p>"))
+      .toBe("<p>a</p>");
+  });
+
+  it("drops every attribute that is not on the list — onerror included", () => {
+    const html = sanitizeHtml('<img src="https://media.example/a.webp" onerror="alert(1)" alt="кот" class="x" style="width:9px">');
+    expect(html).toBe('<img src="https://media.example/a.webp" alt="кот" loading="lazy">');
+  });
+
+  it("cannot be handed an on*= attribute on any tag at all", () => {
+    expect(sanitizeHtml('<p onclick="alert(1)" onmouseover=alert(2)>текст</p>')).toBe("<p>текст</p>");
+    expect(sanitizeHtml('<a href="https://example.com" onfocus="alert(1)">x</a>'))
+      .toBe('<a href="https://example.com" target="_blank" rel="noopener noreferrer">x</a>');
+  });
+
+  it("rejects a javascript:, data:, vbscript: or //host href — the text stays, the link goes", () => {
+    for (const url of [
+      "javascript:alert(1)",
+      "data:text/html,<script>alert(1)</script>",
+      "vbscript:msgbox(1)",
+      "//evil.example/x",
+    ]) {
+      expect(sanitizeHtml(`<p><a href="${url}">жми</a></p>`)).toBe("<p>жми</p>");
+    }
+  });
+
+  it("keeps an outside link with rel=noopener, and a same-site one without a target", () => {
+    expect(sanitizeHtml('<p><a href="https://example.com/a">x</a></p>'))
+      .toBe('<p><a href="https://example.com/a" target="_blank" rel="noopener noreferrer">x</a></p>');
+    expect(sanitizeHtml('<p><a href="/shop2/p/night-rider/">x</a></p>'))
+      .toBe('<p><a href="/shop2/p/night-rider/">x</a></p>');
+  });
+
+  it("takes an image only from https or from this shop's own path", () => {
+    expect(sanitizeHtml('<img src="http://example.com/a.png" alt="">')).toBe("");
+    expect(sanitizeHtml('<img src="javascript:alert(1)" alt="">')).toBe("");
+    expect(sanitizeHtml('<figure><img src="/shop/img/night-rider-0.webp" alt="паста"></figure>'))
+      .toBe('<figure><img src="/shop/img/night-rider-0.webp" alt="паста" loading="lazy"></figure>');
+  });
+
+  it("keeps the «Товар» marker, but only when its id could be a catalogue id", () => {
+    expect(sanitizeHtml('<p><a data-product="night-rider" href="/shop2/p/night-rider/">Night.Rider</a></p>'))
+      .toBe('<p><a data-product="night-rider" href="/shop2/p/night-rider/">Night.Rider</a></p>');
+    expect(sanitizeHtml('<p><a data-product="../../etc/passwd">x</a></p>')).toBe("<p>x</p>");
+    expect(sanitizeHtml('<p><a data-product="<script>">x</a></p>')).toBe("<p>x</p>");
+  });
+
+  it("cleans a paste from Word down to the text and the emphasis it carried", () => {
+    const word =
+      '<div class="WordSection1"><o:p></o:p><p class="MsoNormal">' +
+      '<span style="font-family:Calibri"><b>Заголовок</b></span></p>' +
+      "<table><tr><td>ячейка</td></tr></table></div>";
+    expect(sanitizeHtml(word)).toBe("<p><strong>Заголовок</strong></p>ячейка");
+  });
+
+  it("maps the headings a paste uses onto the two the shop has", () => {
+    expect(sanitizeHtml("<h1>раз</h1><h5>два</h5><i>три</i>"))
+      .toBe("<h2>раз</h2><h3>два</h3><em>три</em>");
+  });
+
+  it("balances what the input did not: a stray close tag, an unclosed open one", () => {
+    expect(sanitizeHtml("</p><p>текст")).toBe("<p>текст</p>");
+    expect(sanitizeHtml("<p>a<strong>b</p>c")).toBe("<p>a<strong>b</strong></p>c");
+  });
+
+  it("does not choke on nested garbage — it stops nesting instead", () => {
+    const deep = "<strong>".repeat(500) + "дно" + "</strong>".repeat(500);
+    const html = sanitizeHtml(`<p>${deep}</p>`);
+    expect(html).toContain("дно");
+    expect(html.split("<strong>").length - 1).toBeLessThanOrEqual(24);
+    expect(html.startsWith("<p>")).toBe(true);
+    expect(html.endsWith("</p>")).toBe(true);
+  });
+
+  it("escapes text, and leaves an entity that was already there alone", () => {
+    expect(sanitizeHtml("<p>5 &lt; 10 &amp; 10 &gt; 5</p>")).toBe("<p>5 &lt; 10 &amp; 10 &gt; 5</p>");
+    expect(sanitizeHtml("<p>A & B</p>")).toBe("<p>A &amp; B</p>");
+    expect(sanitizeHtml("<p>a < b</p>")).toBe("<p>a &lt; b</p>");
+  });
+
+  it("drops comments, doctypes and anything else that is not a tag", () => {
+    expect(sanitizeHtml("<!doctype html><!-- <script>alert(1)</script> --><p>a</p>")).toBe("<p>a</p>");
+  });
+
+  it("is empty for empty input", () => {
+    expect(sanitizeHtml("")).toBe("");
+    expect(sanitizeHtml("   ")).toBe("   ");
+  });
+});
+
+/* ---------- which renderer a stored body gets ------------------------------ */
+
+describe("renderPostBody", () => {
+  it("renders a body that opens with a block tag through the HTML allowlist", () => {
+    expect(looksLikeHtmlBody("<h2>Раздел</h2><p>x</p>")).toBe(true);
+    expect(renderPostBody('<p>текст</p><script>alert(1)</script>')).toBe("<p>текст</p>");
+  });
+
+  it("renders a body written before the editor changed as the markdown it is", () => {
+    expect(looksLikeHtmlBody("## Раздел\n\nАбзац.")).toBe(false);
+    expect(renderPostBody("## Раздел\n\nАбзац.")).toBe("<h2>Раздел</h2><p>Абзац.</p>");
+  });
+
+  it("a body that merely OPENS with a pasted tag is markdown — the tag is escaped, not run", () => {
+    const html = renderPostBody("<script>alert(1)</script>\n\nОбычный абзац.");
+    expect(html).toContain("&lt;script&gt;");
+    expect(html.toLowerCase()).not.toContain("<script");
+    expect(html).toContain("<p>Обычный абзац.</p>");
   });
 });
 
@@ -300,6 +434,49 @@ describe("blog storage", () => {
   it("getPostBySlug finds a post regardless of status (admin use)", async () => {
     const draft = await upsertPost({ title: { RU: "Черновик" } });
     expect((await getPostBySlug(draft.slug))?.id).toBe(draft.id);
+  });
+
+  /* The body is the one field where a line break is content. It used to be
+     cleaned like a title — `\s+` → " " — which turned every article into one
+     endless line: a «## Масло каждый день» ended up inside the paragraph
+     above it and the shop showed a wall of text. */
+  it("keeps the line breaks in a body, so its headings and lists survive the save", async () => {
+    const md = "Вступление.\n\n## Масло каждый день\n\nДве-три капли на ладонь.\n\n- один\n- два";
+    const post = await upsertPost({ title: { RU: "Заголовок" }, body: { RU: md } });
+    expect(post.body.RU).toBe(md);
+    expect(renderPostBody(post.body.RU)).toBe(
+      "<p>Вступление.</p><h2>Масло каждый день</h2><p>Две-три капли на ладонь.</p><ul><li>один</li><li>два</li></ul>",
+    );
+  });
+
+  it("still squeezes a body's spaces and tabs, and never keeps more than one blank line", async () => {
+    const post = await upsertPost({ title: { RU: "З" }, body: { RU: "а\t\tб   в\r\n\r\n\r\n\r\nг \n  д" } });
+    expect(post.body.RU).toBe("а б в\n\nг\nд");
+  });
+
+  it("strips control characters from a body without touching its newlines", async () => {
+    const post = await upsertPost({ title: { RU: "З" }, body: { RU: "а б​в\nг" } });
+    expect(post.body.RU).toBe("а б в\nг");
+  });
+
+  it("keeps every other field on one line — a title with a newline in it is still one line", async () => {
+    const post = await upsertPost({
+      title: { RU: "Один\nдва" },
+      excerpt: { RU: "анонс\nпродолжение" },
+      seoTitle: { RU: "seo\nзаголовок" },
+      coverAlt: { RU: "alt\nтекст" },
+    });
+    expect(post.title.RU).toBe("Один два");
+    expect(post.excerpt.RU).toBe("анонс продолжение");
+    expect(post.seoTitle.RU).toBe("seo заголовок");
+    expect(post.coverAlt.RU).toBe("alt текст");
+  });
+
+  it("keeps a cover that is one of the shop's own pictures, not only an R2 URL", async () => {
+    const post = await upsertPost({ title: { RU: "З" }, coverUrl: "/shop/img/night-rider-0.webp" });
+    expect(post.coverUrl).toBe("/shop/img/night-rider-0.webp");
+    const bad = await upsertPost({ title: { RU: "З2" }, coverUrl: "javascript:alert(1)" });
+    expect(bad.coverUrl).toBeNull();
   });
 
   it("caps the number of tags and products, and drops duplicate tags", async () => {
@@ -507,5 +684,87 @@ describe("admin blog API — CRUD", () => {
     const { DELETE } = await import("@/app/api/admin/blog/route");
     const res = await DELETE(new Request(`${ORIGIN}/api/admin/blog/`, { method: "DELETE", headers: { cookie: admin } }));
     expect(res.status).toBe(400);
+  });
+});
+
+/* ---------- the three sample posts (db/migrations/071_blog_samples.sql) ----- */
+
+describe("sample posts", () => {
+  const SLUGS = [
+    "uhod-za-borodoy-zimoy",
+    "kak-vybrat-shampun-po-tipu-kozhi-golovy",
+    "pasta-vosk-ili-glina",
+  ];
+
+  beforeAll(async () => {
+    const applied = await setupDb();
+    expect(applied).toContain("071_blog_samples.sql");
+  });
+  afterAll(teardownDb);
+
+  it("seeds three published posts, filled in in all three languages", async () => {
+    const { posts, total } = await listPublished(1, 10);
+    expect(total).toBe(3);
+    expect(posts.map((p) => p.slug).sort()).toEqual([...SLUGS].sort());
+
+    for (const slug of SLUGS) {
+      const post = await getPublishedBySlug(slug);
+      expect(post, `no sample post at ${slug}`).not.toBeNull();
+      expect(post!.coverUrl).toMatch(/^\/shop\/img\/[\w.-]+\.webp$/);
+      expect(post!.products).toHaveLength(2);
+      expect(post!.tags.length).toBeGreaterThan(0);
+      expect(post!.author).toBe("Rempire");
+      for (const l of LANGS) {
+        expect(post!.title[l], `${slug} has no ${l} title`).not.toBe("");
+        expect(post!.excerpt[l], `${slug} has no ${l} excerpt`).not.toBe("");
+        expect(post!.seoTitle[l].length).toBeLessThanOrEqual(70);
+        expect(post!.seoDesc[l].length).toBeLessThanOrEqual(170);
+        // 250–400 words of real text, not a placeholder
+        const words = post!.body[l].replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length;
+        expect(words, `${slug} ${l} is ${words} words`).toBeGreaterThanOrEqual(250);
+        expect(words, `${slug} ${l} is ${words} words`).toBeLessThanOrEqual(400);
+      }
+    }
+  });
+
+  it("stores every sample body as HTML the sanitiser passes through untouched", async () => {
+    for (const slug of SLUGS) {
+      const post = await getPublishedBySlug(slug);
+      for (const l of LANGS) {
+        const body = post!.body[l];
+        expect(looksLikeHtmlBody(body)).toBe(true);
+        expect(renderPostBody(body), `${slug} ${l} does not survive the allowlist`).toBe(body);
+        expect(body).toContain("<h2>");
+        expect(body).toContain("<ul>");
+        expect(body).toMatch(/<a data-product="[a-z0-9-]+"/);
+      }
+    }
+  });
+
+  it("points every sample at products and photos this shop really has", async () => {
+    const catalogue = readFileSync(new URL("../public/shop/catalogue.js", import.meta.url), "utf8");
+    for (const slug of SLUGS) {
+      const post = await getPublishedBySlug(slug);
+      for (const id of post!.products) expect(catalogue, `${slug} links a product that is gone: ${id}`).toContain(`"id": "${id}"`);
+      expect(catalogue, `${slug}'s cover is not a catalogue photo`).toContain(post!.coverUrl as string);
+      // and the product markers inside the bodies point at real ids too
+      for (const l of LANGS) {
+        const marked = post!.body[l].match(/data-product="([^"]+)"/g) || [];
+        for (const m of marked) expect(catalogue).toContain(`"id": "${m.slice(14, -1)}"`);
+      }
+    }
+  });
+
+  it("is idempotent: running the seed a second time adds nothing and keeps an edit", async () => {
+    const sql = readFileSync(new URL("../db/migrations/071_blog_samples.sql", import.meta.url), "utf8");
+    const before = await getPublishedBySlug(SLUGS[0]);
+    await upsertPost({ id: before!.id, title: { RU: "Ренат переписал заголовок", ET: "", EN: "" } });
+
+    await exec(sql);
+
+    const rows = await query<{ n: string | number }>("select count(*) as n from posts");
+    expect(Number(rows[0].n), "the seed inserted a second copy").toBe(3);
+    const after = await getPostById(before!.id);
+    expect(after!.title.RU, "the seed overwrote an edited post").toBe("Ренат переписал заголовок");
   });
 });

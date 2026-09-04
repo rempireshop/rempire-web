@@ -85,9 +85,71 @@
     ET: {
       "Включить": "Lülita sisse", "Выключить": "Lülita välja", "включён": "sees", "выключен": "väljas",
       "Наборы на сайте": "Komplektid poes",
-      "готовые комплекты со скидкой 12 % — в меню, на главной и в каталоге; пока не согласовано с владельцем": "valmis komplektid 12 % soodsamalt — menüüs, avalehel ja kataloogis; omanikuga veel kooskõlastamata",
+      "готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»": "valmiskomplektid sinu enda toodetest — menüüs, avalehel ja kataloogis. Komplekte ise pane kokku «Tooted → Komplektid»",
       "показаны": "näidatakse", "скрыты": "peidetud", "Скрыть": "Peida", "Показать": "Näita",
       "Наборы показаны ✓": "Komplektid näidatakse ✓", "Наборы скрыты ✓": "Komplektid peidetud ✓",
+      /* наборы: the admin's «Товары → Наборы» and the sets-off screens */
+      "Наборы сейчас недоступны": "Komplektid pole praegu saadaval",
+      "Мы временно не собираем наборы. Все товары из них есть в магазине по отдельности.": "Me ei pane praegu komplekte kokku. Kõik nende tooted on poes eraldi olemas.",
+      "Перейти в каталог": "Ava kataloog",
+      "Набор не найден": "Komplekti ei leitud",
+      "Возможно, его больше нет в продаже.": "Võimalik, et seda enam ei müüda.",
+      "Что показываем": "Mida näitame",
+      "Наборы — готовые комплекты из тех же товаров, что стоят в магазине по отдельности. Цену вы назначаете сами; магазин показывает, сколько это стоило бы врозь. Скрытый набор пропадает из магазина, но его адрес остаётся рабочим.": "Komplektid on valmispakid samadest toodetest, mis on poes ka eraldi. Hinna määrad ise; pood näitab, kui palju need eraldi maksaksid. Peidetud komplekt kaob poest, aga selle aadress jääb tööle.",
+      "Войдите как владелец, чтобы менять наборы.": "Komplektide muutmiseks logi sisse omanikuna.",
+      "Наборы сейчас выключены целиком в «Настройки → Магазин» — в магазине их не видно.": "Komplektid on praegu täielikult välja lülitatud jaotises «Seaded → Pood» — poes neid ei näe.",
+      "Наборов пока нет.": "Komplekte veel pole.",
+      "Новый набор": "Uus komplekt",
+      "Изменить набор": "Muuda komplekti",
+      "Список наборов не загрузился.": "Komplektide nimekiri ei laadinud.",
+      "Адрес набора — латиницей, менять нельзя после первой продажи": "Komplekti aadress — ladina tähtedega, pärast esimest müüki ei tohi muuta",
+      "Раздел магазина": "Poe osa",
+      "Язык текста": "Teksti keel",
+      "Название — обязательно": "Nimi — kohustuslik",
+      "Название — можно оставить пустым": "Nimi — võib tühjaks jätta",
+      "Борода — стартовый набор": "Habe — stardikomplekt",
+      "Описание — две-три простые фразы": "Kirjeldus — kaks-kolm lihtsat lauset",
+      "Масло, бальзам и мыло — всё, с чего начинается уход.": "Õli, palsam ja seep — kõik, millest hooldus algab.",
+      "Что внутри — минимум два товара": "Mis sees on — vähemalt kaks toodet",
+      "Пока пусто. Найдите товар ниже и нажмите на него.": "Praegu on tühi. Otsi allpool toode ja klõpsa sellel.",
+      "Название или бренд": "Nimi või bränd",
+      "Цена набора, €": "Komplekti hind, €",
+      "Фото набора": "Komplekti foto",
+      "Автоматически": "Automaatselt",
+      "Три фото товаров стопкой": "Kolm tootefotot virnas",
+      "Удалить набор": "Kustuta komplekt",
+      "Удалить набор?": "Kustutada komplekt?",
+      "Страница набора исчезнет, уже оформленные заказы не изменятся.": "Komplekti leht kaob, juba vormistatud tellimused ei muutu.",
+      "Этот товар уже в наборе": "See toode on juba komplektis",
+      "Добавьте хотя бы два товара — тогда посчитаем.": "Lisa vähemalt kaks toodet — siis arvutame.",
+      "Набор сохранён ✓": "Komplekt salvestatud ✓",
+      "Набор показан ✓": "Komplekt on näha ✓",
+      "Набор скрыт ✓": "Komplekt peidetud ✓",
+      "Набор удалён ✓": "Komplekt kustutatud ✓",
+      "Не получилось сохранить набор.": "Komplekti ei õnnestunud salvestada.",
+      "Не получилось изменить набор": "Komplekti ei õnnestunud muuta",
+      "Не получилось удалить набор": "Komplekti ei õnnestunud kustutada",
+      "Порядок не сохранился": "Järjekord ei salvestunud",
+      "Адрес набора — только латинские буквы, цифры и дефис, минимум два знака.": "Komplekti aadress — ainult ladina tähed, numbrid ja sidekriips, vähemalt kaks märki.",
+      "Выберите раздел магазина.": "Vali poe osa.",
+      "Русское название обязательно — по нему набор виден всем.": "Venekeelne nimi on kohustuslik — selle järgi on komplekt kõigile näha.",
+      "Опишите набор по-русски — эстонский и английский можно добавить позже.": "Kirjelda komplekti vene keeles — eesti ja inglise keele saab hiljem lisada.",
+      "В наборе должно быть минимум два товара.": "Komplektis peab olema vähemalt kaks toodet.",
+      "Больше восьми товаров в набор не поместится.": "Rohkem kui kaheksa toodet komplekti ei mahu.",
+      "Одного из товаров больше нет в каталоге — уберите его.": "Üht toodet pole enam kataloogis — eemalda see.",
+      "Один и тот же товар указан дважды.": "Sama toode on kirjas kaks korda.",
+      "У товара нет такого объёма.": "Tootel sellist mahtu pole.",
+      "Количество — целое число от 1 до 20.": "Kogus — täisarv 1 kuni 20.",
+      "Проверьте цену набора.": "Kontrolli komplekti hinda.",
+      "Набор должен стоить дешевле, чем те же товары по отдельности.": "Komplekt peab maksma vähem kui samad tooted eraldi.",
+      "Скидка — от 0 до 90 %.": "Soodustus — 0 kuni 90 %.",
+      "Фото набора — товар из каталога или ссылка на картинку.": "Komplekti foto — kataloogi toode või pildi link.",
+      "Проверьте порядок.": "Kontrolli järjekorda.",
+      "Не получилось разобрать форму — обновите страницу.": "Vormi ei õnnestunud lugeda — värskenda lehte.",
+      "Волосы": "Juuksed",
+      "Лицо": "Nägu",
+      "Тело": "Keha",
+      "Парфюм": "Parfüüm",
       "Все товары": "Kõik tooted", "Бренды": "Brändid", "Все": "Kõik",
       "Уход за волосами": "Juuksehooldus", "Стайлинг": "Viimistlus",
       "Уход за бородой": "Habemehooldus", "Уход за лицом": "Näohooldus",
@@ -210,8 +272,9 @@
         "Omaniku parool. Pood töötab ka ilma sisselogimiseta — siin on ainult haldus.",
       "Пароль ещё не настроен на сервере.": "Parool pole serveris veel seadistatud.",
       "Сервер не отвечает": "Server ei vasta",
-      "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные.":
-        "Tellimused on päris, serverist. Kliendid ja analüütika on veel näidisandmed.",
+      "Все цифры — настоящие, из вашего магазина.": "Kõik numbrid on päris, sinu enda poest.",
+      "Цифры настоящие. Заказов пока нет — в списке показан пример, как это будет выглядеть.":
+        "Numbrid on päris. Tellimusi veel pole — nimekirjas on näidis, kuidas see välja hakkab nägema.",
       "Сервер заказов не отвечает — показан демонстрационный список.":
         "Tellimuste server ei vasta — näidatakse näidisnimekirja.",
       "новый": "uus", "не оплачен": "maksmata",
@@ -270,6 +333,19 @@
       "Отправка писем ещё не подключена": "Kirjade saatmine pole veel ühendatud",
       "Слишком много писем — попробуйте позже": "Liiga palju kirju — proovi hiljem",
       "Введите e-mail — на него придёт образец": "Sisesta e-posti aadress — sellele saadame näidise",
+      /* «Письма» — свой текст письма: тема, вступление, подпись */
+      "Тему, вступление и подпись можно поменять. Всё остальное — состав заказа, кнопки, подвал — остаётся как есть.": "Teemat, sissejuhatust ja allkirja saab muuta. Kõik muu — tellimuse sisu, nupud, jalus — jääb samaks.",
+      "Войдите как владелец, чтобы менять тексты писем.": "Kirjade tekstide muutmiseks logi omanikuna sisse.",
+      "Тема письма": "Kirja teema",
+      "Её видно в списке писем — коротко и по делу.": "See on näha kirjade loendis — lühidalt ja asjalikult.",
+      "Вступление — абзац под приветствием": "Sissejuhatus — lõik tervituse all",
+      "Приветствие «Здравствуйте, Имя!» подставляется само — начинайте со следующего предложения.": "Tervitus «Tere, Nimi!» lisatakse ise — alusta järgmisest lausest.",
+      "Подпись — последняя строка письма": "Allkiri — kirja viimane rida",
+      "Стоит внизу письма, перед реквизитами магазина.": "See on kirja lõpus, enne poe rekvisiite.",
+      "Подстановки": "Kohatäited", "Вернуть стандартный текст": "Taasta standardtekst",
+      "Имя покупателя": "Kliendi nimi", "Номер заказа": "Tellimuse number",
+      "Сумма заказа": "Tellimuse summa", "Код — промокод или код для входа": "Kood — sooduskood või sisselogimiskood",
+      "Название товара": "Toote nimi", "Название магазина": "Poe nimi",
       /* toasts and filter chips — text nodes the dictionary used to miss */
       "Товара нет в наличии": "Toode on otsas", "Корзина пуста": "Ostukorv on tühi",
       "В наличии ✕": "Laos ✕", "Ссылка скопирована ✓": "Link kopeeritud ✓",
@@ -357,10 +433,21 @@
       "Слишком много отзывов подряд — попробуйте через час.": "Liiga palju arvustusi järjest — proovi tunni pärast.",
       "Сейчас не получилось сохранить. Попробуйте позже.": "Praegu ei õnnestunud salvestada. Proovi hiljem.",
       "Видео": "Video", "Смотреть видео": "Vaata videot",
-      "Видео (YouTube/Vimeo ссылка)": "Video (YouTube'i või Vimeo link)",
-      "https://youtu.be/… или https://vimeo.com/…": "https://youtu.be/… või https://vimeo.com/…",
-      "Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.":
-        "Kleebi link — toote lehele tekib video. Tühi väli — plokki ei ole.",
+      "Видео (ссылка YouTube, Vimeo или Instagram)": "Video (YouTube’i, Vimeo või Instagrami link)",
+      "https://youtu.be/… · https://vimeo.com/… · https://www.instagram.com/reel/…":
+        "https://youtu.be/… · https://vimeo.com/… · https://www.instagram.com/reel/…",
+      "Вставьте ссылку или загрузите свой файл — на странице товара появится видео. Пусто — блока нет.":
+        "Kleebi link või laadi oma fail — toote lehele tekib video. Tühi väli — plokki ei ole.",
+      "Загрузить видео": "Laadi video üles",
+      "Видео загружено ✓": "Video laaditud ✓",
+      "MP4 или MOV, до 60 МБ. Файл ложится в ваше хранилище — на сторонние сайты ничего не уходит.":
+        "MP4 või MOV, kuni 60 MB. Fail läheb sinu enda hoidlasse — võõrastele saitidele ei lähe midagi.",
+      "Загрузка видео пока не настроена — нужно подключить хранилище.":
+        "Video üleslaadimine pole veel seadistatud — tuleb hoidla ühendada.",
+      "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
+        "Fail on suurem kui 60 MB — tee lühem klipp või pakenda see kokku.",
+      "Такой файл не подходит: нужен MP4 или MOV.": "See fail ei sobi: vaja on MP4 või MOV.",
+      "Открыть в Instagram": "Ava Instagramis",
       "Отзывы": "Arvustused", "Новые": "Uued", "Опубликованные": "Avaldatud", "Отклонённые": "Tagasi lükatud",
       "Здесь пусто.": "Siin pole midagi.",
       "Опубликовать": "Avalda", "Отклонить": "Lükka tagasi",
@@ -565,11 +652,26 @@
       "Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.":
         "Demo. Tellimused, kliendid ja numbrid on välja mõeldud, tooted on päris — sinu enda kataloogist.",
       "Заказы сегодня": "Tellimusi täna",
-      "вчера — 5": "eile — 5",
       "Выручка за 7 дней": "Käive 7 päevaga",
       "Товаров в каталоге": "Tooteid kataloogis",
       "Заканчиваются": "Lõppemas",
       "нужно дозаказать": "vaja juurde tellida",
+      "всё в наличии": "kõik on laos",
+      /* «Обзор» с настоящими цифрами (analytics) */
+      "Заказы и выручка — только оплаченные, по дате заказа.":
+        "Tellimused ja käive — ainult makstud, tellimuse kuupäeva järgi.",
+      "Сводка сейчас не отвечает — цифры показаны демонстрационные.":
+        "Kokkuvõte ei vasta praegu — näidatakse näidisnumbreid.",
+      "Требует внимания": "Vajab tähelepanu",
+      "Ничего не ждёт — всё разобрано.": "Midagi ei oota — kõik on tehtud.",
+      "Заказы ждут отправки": "Tellimused ootavad saatmist",
+      "оплачены, но ещё не отправлены": "makstud, aga veel teele panemata",
+      "Заявки на партнёрство": "Partnerlustaotlused",
+      "клиенты просят цены для салона": "kliendid küsivad salongihindu",
+      "Отзывы на проверке": "Arvustused ootavad kinnitamist",
+      "появятся на сайте после проверки": "ilmuvad saidile pärast kinnitamist",
+      "Ждут, когда товар появится": "Ootavad toote laekumist",
+      "письмо уйдёт само, когда поставите наличие": "kiri läheb ise välja, kui märgid toote laos olevaks",
       "Последние заказы": "Viimased tellimused",
       "Заканчиваются на складе": "Laos lõppemas",
       "нет": "otsas",
@@ -613,8 +715,8 @@
       "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
         "Päris versioonis ühendatakse siia Google Search Console ja külastusstatistika — kõik seadistab Dmitri, sinul pole vaja midagi teha.",
       // i18n pass 2 — admin: e-mails and connections
-      "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Текст письма можно менять через помощника.":
-        "Kirjad, mida pood saadab ise. Nupud töötavad: seadistus salvestub (demo) ja läheb logisse. Kirja teksti saab muuta abilise kaudu.",
+      "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.":
+        "Kirjad, mida pood saadab ise. Nupud töötavad: seadistus salvestub (demo) ja läheb logisse. Iga kirja teemat, sissejuhatust ja allkirja saab allpool muuta.",
       "сразу после оплаты — номер заказа и состав": "kohe pärast maksmist — tellimuse number ja sisu",
       "трек-номер и кнопка отслеживания": "jälgimisnumber ja jälgimisnupp",
       "всегда включено": "alati sees",
@@ -723,7 +825,7 @@
       "Открыть товары": "Ava tooted",
       "Открыть клиентов": "Ava kliendid",
       "Открыть отзывы": "Ava arvustused",
-      "Открыть блог": "Ava ajaveeb",
+      "Открыть блог": "Ava Blog",
       "Открыть аналитику": "Ava statistika",
       "Открыть письма": "Ava kirjad",
       "Открыть подключения": "Ava ühendused",
@@ -824,7 +926,12 @@
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
       // blog
-      "Блог": "Ajaveeb",
+      /* «Blog», not «Ajaveeb» — the owner's own word for the section in
+         Estonian, and the one every ET surface has to carry: nav, footer,
+         breadcrumbs, the <h1>, the SEO title and the prerendered/sitemap
+         labels (tools/prerender-shop2.mjs lifts this very table out of this
+         file, so they all follow from this one line). */
+      "Блог": "Blog",
       "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
         "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
       "Статей пока нет — загляните позже.": "Artikleid veel pole — vaata varsti uuesti.",
@@ -832,7 +939,7 @@
       "Другие статьи": "Teised artiklid",
       "Товары из статьи": "Tooted artiklist",
       "Статья не найдена.": "Artiklit ei leitud.",
-      "Вернуться в блог": "Tagasi ajaveebi",
+      "Вернуться в блог": "Tagasi Blogisse",
       "Новая статья": "Uus artikkel",
       "Черновик": "Mustand",
       "Опубликовано": "Avaldatud",
@@ -840,9 +947,23 @@
       "Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.":
         "Artiklid ei kuulu demorežiimi: salvestamine, avaldamine ja kustutamine on päris ega ole tagasivõetavad.",
       "Анонс": "Lühitutvustus",
-      "Текст статьи (Markdown)": "Artikli tekst (Markdown)",
-      "Форматирование: **жирный**, *курсив*, [ссылка](https://…), ![картинка](https://…), «- » список, «> » цитата, «# » заголовок.":
-        "Vormindus: **paks**, *kaldkiri*, [link](https://…), ![pilt](https://…), «- » loend, «> » tsitaat, «# » pealkiri.",
+      // blog: the visual editor — toolbar, its three sheets and their refusals
+      "Текст статьи": "Artikli tekst",
+      "Оформление текста": "Teksti vormindus",
+      "Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.":
+        "Alusta kirjutamist — ülal olevad nupud lisavad pealkirja, loendi, lingi või pildi.",
+      "Жирный": "Paks",
+      "Ссылка": "Link",
+      "Вставить": "Lisa",
+      "Адрес ссылки": "Lingi aadress",
+      "Ссылка на картинку": "Pildi link",
+      "https://адрес-картинки": "https://pildi-aadress",
+      "Загрузить картинку": "Laadi pilt üles",
+      "Загрузка картинок пока не настроена — вставьте ссылку на картинку.":
+        "Piltide üleslaadimine pole veel seadistatud — lisa pildi link.",
+      "Ссылка должна начинаться с https://": "Link peab algama https://",
+      "Ссылка на картинку должна начинаться с https://": "Pildi link peab algama https://",
+      "Выделите текст, который станет ссылкой": "Vali tekst, millest saab link",
       "Обложка": "Kaanepilt",
       "Загрузить обложку": "Laadi üles kaanepilt",
       "Alt-текст обложки": "Kaanepildi alt-tekst",
@@ -993,9 +1114,11 @@
       "Ручная правка": "Käsitsi parandus", "Возврат": "Tagastus",
       "Движений пока нет.": "Liikumisi veel ei ole.",
       "Ничего не найдено.": "Midagi ei leitud.",
-      "Привязать": "Seo", "Код не привязан": "Kood pole seotud",
-      "+1 приход": "+1 vastuvõtt", "−1 продажа": "−1 müük",
-      "Приход по количеству": "Vastuvõtt koguse järgi", "Количество приёмки": "Vastuvõtu kogus",
+      "Привязать": "Seo", "Код не найден": "Koodi ei leitud",
+      // scanner app: the result card — one stepper, two confirms
+      "+ Приход": "+ Vastuvõtt", "− Списание": "− Mahakandmine",
+      "Готово — сканируйте следующий код.": "Valmis — skaneerige järgmine kood.",
+      "Привязать к товару": "Seo tootega",
       "Найти товар…": "Otsi toodet…", "Найти товар для привязки": "Otsi toodet sidumiseks",
       "Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.": "Suunake kaamera EAN-13/EAN-8/UPC-A triipkoodile.",
       "Закрыть сканер": "Sulge skanner", "Фонарик": "Taskulamp",
@@ -1058,7 +1181,7 @@
       "Цена — число от 1 до 500 €, например 12,50.": "Hind — arv 1 kuni 500 €, näiteks 12,50.",
       "Цена для салонов — число от 1 до 500 €.": "Salongihind — arv 1 kuni 500 €.",
       "Цена для салонов не может быть выше розничной.": "Salongihind ei saa olla jaehinnast kõrgem.",
-      "Ссылка на видео — только YouTube или Vimeo.": "Video link — ainult YouTube või Vimeo.",
+      "Ссылка на видео — YouTube, Vimeo, Instagram или загруженный файл.": "Video link — YouTube, Vimeo, Instagram või üleslaaditud fail.",
       "Скидка для салонов — от 0 до 90 %.": "Salongide soodustus — 0 kuni 90 %.",
       "Сумма корзины — от 0 до 100 000 €.": "Ostukorvi summa — 0 kuni 100 000 €.",
       "Начисление баллов — от 0 до 50 %.": "Punktide kogumine — 0 kuni 50 %.",
@@ -1070,7 +1193,12 @@
       "Порог «мало» — целое число от 0 до 100 000.": "«Vähe» lävi — täisarv 0 kuni 100 000.",
       "Тарифы Montonio применены ✓": "Montonio tariifid rakendatud ✓",
       "Приход +1 ✓": "Sissetulek +1 ✓",
-      "Продажа −1 ✓": "Müük −1 ✓",
+      // scanner app: the standalone /shop2/scan/ route
+      "Rempire · Сканер": "Rempire · Skanner", "Сканер": "Skanner",
+      "В админку": "Paneeli", "Сканер открывается…": "Skanner avaneb…",
+      "Открыть сканер": "Ava skanner",
+      "📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
+        "📷 Skanner eraldi rakendusena: avage telefonis /shop2/scan/ ja lisage avakuvale — tekib ikoon «Сканер», mis avaneb kohe kaameras.",
       // integration: shipRulesCard's live-Montonio-rates fill controls
       "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
         "«Täida Montonio tariifide järgi» kirjutab ülaltoodud tariifid pluss juurdehindluse, ümardatud X,X9 € peale — aga ainult seal, kus tariif on teada: Venipak, Unisend, «Muu Euroopa» ja «Ülejäänud riigid» nuppu ei puuduta.",
@@ -1086,9 +1214,71 @@
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
       "Наборы на сайте": "Sets on the site",
-      "готовые комплекты со скидкой 12 % — в меню, на главной и в каталоге; пока не согласовано с владельцем": "ready-made sets at 12 % off — in the menu, on the home page and in the catalogue; not yet approved by the owner",
+      "готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»": "ready-made sets from your own products — in the menu, on the home page and in the catalogue. The sets themselves are built in «Goods → Sets»",
       "показаны": "shown", "скрыты": "hidden", "Скрыть": "Hide", "Показать": "Show",
       "Наборы показаны ✓": "Sets shown ✓", "Наборы скрыты ✓": "Sets hidden ✓",
+      /* наборы: the admin's «Товары → Наборы» and the sets-off screens */
+      "Наборы сейчас недоступны": "Sets are not available right now",
+      "Мы временно не собираем наборы. Все товары из них есть в магазине по отдельности.": "We are not assembling sets at the moment. Every product from them is in the shop separately.",
+      "Перейти в каталог": "Go to the catalogue",
+      "Набор не найден": "Set not found",
+      "Возможно, его больше нет в продаже.": "It may no longer be on sale.",
+      "Что показываем": "What we show",
+      "Наборы — готовые комплекты из тех же товаров, что стоят в магазине по отдельности. Цену вы назначаете сами; магазин показывает, сколько это стоило бы врозь. Скрытый набор пропадает из магазина, но его адрес остаётся рабочим.": "Sets are ready-made bundles of the same products the shop sells separately. You set the price; the shop shows what they would cost apart. A hidden set disappears from the shop, but its address keeps working.",
+      "Войдите как владелец, чтобы менять наборы.": "Sign in as the owner to edit sets.",
+      "Наборы сейчас выключены целиком в «Настройки → Магазин» — в магазине их не видно.": "Sets are switched off entirely in «Settings → Shop» — they are not visible in the shop.",
+      "Наборов пока нет.": "No sets yet.",
+      "Новый набор": "New set",
+      "Изменить набор": "Edit set",
+      "Список наборов не загрузился.": "The list of sets did not load.",
+      "Адрес набора — латиницей, менять нельзя после первой продажи": "The set's address — latin letters, never change it after the first sale",
+      "Раздел магазина": "Shop section",
+      "Язык текста": "Text language",
+      "Название — обязательно": "Name — required",
+      "Название — можно оставить пустым": "Name — may be left empty",
+      "Борода — стартовый набор": "Beard starter kit",
+      "Описание — две-три простые фразы": "Description — two or three plain sentences",
+      "Масло, бальзам и мыло — всё, с чего начинается уход.": "Oil, balm and soap — everything care starts with.",
+      "Что внутри — минимум два товара": "What is inside — at least two products",
+      "Пока пусто. Найдите товар ниже и нажмите на него.": "Empty so far. Find a product below and click it.",
+      "Название или бренд": "Name or brand",
+      "Цена набора, €": "Set price, €",
+      "Фото набора": "Set photo",
+      "Автоматически": "Automatically",
+      "Три фото товаров стопкой": "Three product photos stacked",
+      "Удалить набор": "Delete set",
+      "Удалить набор?": "Delete this set?",
+      "Страница набора исчезнет, уже оформленные заказы не изменятся.": "The set's page will disappear; orders already placed do not change.",
+      "Этот товар уже в наборе": "That product is already in the set",
+      "Добавьте хотя бы два товара — тогда посчитаем.": "Add at least two products — then we can do the maths.",
+      "Набор сохранён ✓": "Set saved ✓",
+      "Набор показан ✓": "Set shown ✓",
+      "Набор скрыт ✓": "Set hidden ✓",
+      "Набор удалён ✓": "Set deleted ✓",
+      "Не получилось сохранить набор.": "Could not save the set.",
+      "Не получилось изменить набор": "Could not change the set",
+      "Не получилось удалить набор": "Could not delete the set",
+      "Порядок не сохранился": "The order was not saved",
+      "Адрес набора — только латинские буквы, цифры и дефис, минимум два знака.": "The set's address — latin letters, digits and hyphens only, at least two characters.",
+      "Выберите раздел магазина.": "Choose a shop section.",
+      "Русское название обязательно — по нему набор виден всем.": "The Russian name is required — the whole shop falls back to it.",
+      "Опишите набор по-русски — эстонский и английский можно добавить позже.": "Describe the set in Russian — Estonian and English can come later.",
+      "В наборе должно быть минимум два товара.": "A set needs at least two products.",
+      "Больше восьми товаров в набор не поместится.": "More than eight products will not fit in a set.",
+      "Одного из товаров больше нет в каталоге — уберите его.": "One of the products is no longer in the catalogue — remove it.",
+      "Один и тот же товар указан дважды.": "The same product is listed twice.",
+      "У товара нет такого объёма.": "The product has no such volume.",
+      "Количество — целое число от 1 до 20.": "Quantity — a whole number from 1 to 20.",
+      "Проверьте цену набора.": "Check the set price.",
+      "Набор должен стоить дешевле, чем те же товары по отдельности.": "A set must cost less than the same products bought separately.",
+      "Скидка — от 0 до 90 %.": "Discount — from 0 to 90 %.",
+      "Фото набора — товар из каталога или ссылка на картинку.": "The set photo — a catalogue product or a link to an image.",
+      "Проверьте порядок.": "Check the order.",
+      "Не получилось разобрать форму — обновите страницу.": "Could not read the form — reload the page.",
+      "Волосы": "Hair",
+      "Лицо": "Face",
+      "Тело": "Body",
+      "Парфюм": "Perfume",
       "Все товары": "All products", "Бренды": "Brands", "Все": "All",
       "Уход за волосами": "Hair care", "Стайлинг": "Styling",
       "Уход за бородой": "Beard care", "Уход за лицом": "Face care",
@@ -1211,8 +1401,9 @@
         "The owner's password. The shop runs without signing in — this is only the admin side.",
       "Пароль ещё не настроен на сервере.": "No admin password is set on the server yet.",
       "Сервер не отвечает": "The server is not responding",
-      "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные.":
-        "Orders are real, from the server. Customers and analytics are still demo data.",
+      "Все цифры — настоящие, из вашего магазина.": "Every figure here is real, from your own shop.",
+      "Цифры настоящие. Заказов пока нет — в списке показан пример, как это будет выглядеть.":
+        "The figures are real. There are no orders yet — the list below is a sample of how it will look.",
       "Сервер заказов не отвечает — показан демонстрационный список.":
         "The orders server is not responding — showing the demo list.",
       "новый": "new", "не оплачен": "unpaid",
@@ -1271,6 +1462,19 @@
       "Отправка писем ещё не подключена": "E-mail sending is not connected yet",
       "Слишком много писем — попробуйте позже": "Too many e-mails — try again later",
       "Введите e-mail — на него придёт образец": "Enter an e-mail — we'll send the sample there",
+      /* «Письма» — the owner's own subject, intro and closing line */
+      "Тему, вступление и подпись можно поменять. Всё остальное — состав заказа, кнопки, подвал — остаётся как есть.": "The subject, the intro and the closing line are yours to change. Everything else — the order table, the buttons, the footer — stays as it is.",
+      "Войдите как владелец, чтобы менять тексты писем.": "Sign in as the owner to change the letter texts.",
+      "Тема письма": "Subject line",
+      "Её видно в списке писем — коротко и по делу.": "This is what shows in the inbox list — keep it short.",
+      "Вступление — абзац под приветствием": "Intro — the paragraph under the greeting",
+      "Приветствие «Здравствуйте, Имя!» подставляется само — начинайте со следующего предложения.": "The greeting “Hello, Name!” is added for you — start from the next sentence.",
+      "Подпись — последняя строка письма": "Closing line — the last line of the letter",
+      "Стоит внизу письма, перед реквизитами магазина.": "It sits at the bottom, above the shop's details.",
+      "Подстановки": "Placeholders", "Вернуть стандартный текст": "Restore the standard text",
+      "Имя покупателя": "Customer's name", "Номер заказа": "Order number",
+      "Сумма заказа": "Order total", "Код — промокод или код для входа": "Code — promo code or sign-in code",
+      "Название товара": "Product name", "Название магазина": "Shop name",
       /* toasts and filter chips — text nodes the dictionary used to miss */
       "Товара нет в наличии": "This product is out of stock", "Корзина пуста": "Your cart is empty",
       "В наличии ✕": "In stock ✕", "Ссылка скопирована ✓": "Link copied ✓",
@@ -1359,10 +1563,21 @@
       "Слишком много отзывов подряд — попробуйте через час.": "Too many reviews in a row — try again in an hour.",
       "Сейчас не получилось сохранить. Попробуйте позже.": "We couldn't save it just now. Please try later.",
       "Видео": "Video", "Смотреть видео": "Watch the video",
-      "Видео (YouTube/Vimeo ссылка)": "Video (YouTube or Vimeo link)",
-      "https://youtu.be/… или https://vimeo.com/…": "https://youtu.be/… or https://vimeo.com/…",
-      "Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.":
-        "Paste a link and a video appears on the product page. Empty means no video block.",
+      "Видео (ссылка YouTube, Vimeo или Instagram)": "Video (YouTube, Vimeo or Instagram link)",
+      "https://youtu.be/… · https://vimeo.com/… · https://www.instagram.com/reel/…":
+        "https://youtu.be/… · https://vimeo.com/… · https://www.instagram.com/reel/…",
+      "Вставьте ссылку или загрузите свой файл — на странице товара появится видео. Пусто — блока нет.":
+        "Paste a link or upload your own file and a video appears on the product page. Empty means no video block.",
+      "Загрузить видео": "Upload a video",
+      "Видео загружено ✓": "Video uploaded ✓",
+      "MP4 или MOV, до 60 МБ. Файл ложится в ваше хранилище — на сторонние сайты ничего не уходит.":
+        "MP4 or MOV, up to 60 MB. The file goes into your own storage — nothing is sent to anyone else’s site.",
+      "Загрузка видео пока не настроена — нужно подключить хранилище.":
+        "Video upload is not set up yet — the storage has to be connected.",
+      "Файл больше 60 МБ — снимите ролик короче или сожмите его.":
+        "The file is over 60 MB — record a shorter clip or compress it.",
+      "Такой файл не подходит: нужен MP4 или MOV.": "That file will not do: MP4 or MOV, please.",
+      "Открыть в Instagram": "Open on Instagram",
       "Отзывы": "Reviews", "Новые": "New", "Опубликованные": "Published", "Отклонённые": "Rejected",
       "Здесь пусто.": "Nothing here.",
       "Опубликовать": "Publish", "Отклонить": "Reject",
@@ -1567,11 +1782,26 @@
       "Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.":
         "Demo. The orders, customers and figures are invented; the products are real, from your own catalogue.",
       "Заказы сегодня": "Orders today",
-      "вчера — 5": "yesterday — 5",
       "Выручка за 7 дней": "Revenue over 7 days",
       "Товаров в каталоге": "Products in the catalogue",
       "Заканчиваются": "Running low",
       "нужно дозаказать": "need reordering",
+      "всё в наличии": "everything is in stock",
+      /* «Обзор» with real figures (analytics) */
+      "Заказы и выручка — только оплаченные, по дате заказа.":
+        "Orders and revenue count paid orders only, by the date the order was placed.",
+      "Сводка сейчас не отвечает — цифры показаны демонстрационные.":
+        "The summary is not answering right now — these are the demo figures.",
+      "Требует внимания": "Needs your attention",
+      "Ничего не ждёт — всё разобрано.": "Nothing is waiting — you are all caught up.",
+      "Заказы ждут отправки": "Orders waiting to be shipped",
+      "оплачены, но ещё не отправлены": "paid, but not sent yet",
+      "Заявки на партнёрство": "Partner requests",
+      "клиенты просят цены для салона": "customers asking for salon prices",
+      "Отзывы на проверке": "Reviews awaiting moderation",
+      "появятся на сайте после проверки": "they appear on the site once you approve them",
+      "Ждут, когда товар появится": "Waiting for a product to come back",
+      "письмо уйдёт само, когда поставите наличие": "the e-mail goes out by itself once you mark it in stock",
       "Последние заказы": "Latest orders",
       "Заканчиваются на складе": "Running low in stock",
       "нет": "out",
@@ -1615,8 +1845,8 @@
       "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
         "In the live version Google Search Console and visitor analytics plug in here — Dmitri sets it all up, you do not have to do anything.",
       // i18n pass 2 — admin: e-mails and connections
-      "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Текст письма можно менять через помощника.":
-        "The e-mails the shop sends by itself. The buttons work: the setting is saved (demo) and lands in the log. The wording can be changed through the assistant.",
+      "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.":
+        "The e-mails the shop sends by itself. The buttons work: the setting is saved (demo) and lands in the log. Each letter's subject, intro and closing line can be changed below.",
       "сразу после оплаты — номер заказа и состав": "right after payment — order number and contents",
       "трек-номер и кнопка отслеживания": "the tracking number and a tracking button",
       "всегда включено": "always on",
@@ -1842,9 +2072,23 @@
       "Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.":
         "Posts are not part of the demo mode: saving, publishing and deleting are real and cannot be undone.",
       "Анонс": "Excerpt",
-      "Текст статьи (Markdown)": "Article body (Markdown)",
-      "Форматирование: **жирный**, *курсив*, [ссылка](https://…), ![картинка](https://…), «- » список, «> » цитата, «# » заголовок.":
-        "Formatting: **bold**, *italic*, [link](https://…), ![image](https://…), \"- \" list, \"> \" quote, \"# \" heading.",
+      // blog: the visual editor — toolbar, its three sheets and their refusals
+      "Текст статьи": "Article body",
+      "Оформление текста": "Text formatting",
+      "Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.":
+        "Start writing — the buttons above add a heading, a list, a link or a picture.",
+      "Жирный": "Bold",
+      "Ссылка": "Link",
+      "Вставить": "Insert",
+      "Адрес ссылки": "Link address",
+      "Ссылка на картинку": "Picture link",
+      "https://адрес-картинки": "https://picture-address",
+      "Загрузить картинку": "Upload a picture",
+      "Загрузка картинок пока не настроена — вставьте ссылку на картинку.":
+        "Picture uploads aren't set up yet — paste a link to a picture instead.",
+      "Ссылка должна начинаться с https://": "A link has to start with https://",
+      "Ссылка на картинку должна начинаться с https://": "A picture link has to start with https://",
+      "Выделите текст, который станет ссылкой": "Select the text that should become the link",
       "Обложка": "Cover",
       "Загрузить обложку": "Upload a cover",
       "Alt-текст обложки": "Cover alt text",
@@ -1995,9 +2239,11 @@
       "Ручная правка": "Manual correction", "Возврат": "Return",
       "Движений пока нет.": "No moves yet.",
       "Ничего не найдено.": "Nothing found.",
-      "Привязать": "Link", "Код не привязан": "Code not linked",
-      "+1 приход": "+1 goods in", "−1 продажа": "−1 sale",
-      "Приход по количеству": "Receive by quantity", "Количество приёмки": "Quantity received",
+      "Привязать": "Link", "Код не найден": "Code not found",
+      // scanner app: the result card — one stepper, two confirms
+      "+ Приход": "+ Goods in", "− Списание": "− Write off",
+      "Готово — сканируйте следующий код.": "Done — scan the next code.",
+      "Привязать к товару": "Link to a product",
       "Найти товар…": "Find a product…", "Найти товар для привязки": "Find a product to link",
       "Наведите камеру на штрихкод EAN-13/EAN-8/UPC-A.": "Point the camera at an EAN-13/EAN-8/UPC-A barcode.",
       "Закрыть сканер": "Close scanner", "Фонарик": "Flashlight",
@@ -2060,7 +2306,7 @@
       "Цена — число от 1 до 500 €, например 12,50.": "Price — a number from 1 to 500 €, for example 12.50.",
       "Цена для салонов — число от 1 до 500 €.": "Salon price — a number from 1 to 500 €.",
       "Цена для салонов не может быть выше розничной.": "The salon price cannot be higher than the retail price.",
-      "Ссылка на видео — только YouTube или Vimeo.": "Video link — YouTube or Vimeo only.",
+      "Ссылка на видео — YouTube, Vimeo, Instagram или загруженный файл.": "Video link — YouTube, Vimeo, Instagram or an uploaded file.",
       "Скидка для салонов — от 0 до 90 %.": "Salon discount — from 0 to 90 %.",
       "Сумма корзины — от 0 до 100 000 €.": "Basket total — from 0 to 100,000 €.",
       "Начисление баллов — от 0 до 50 %.": "Points earned — from 0 to 50 %.",
@@ -2072,7 +2318,12 @@
       "Порог «мало» — целое число от 0 до 100 000.": "The «low» threshold — a whole number from 0 to 100,000.",
       "Тарифы Montonio применены ✓": "Montonio tariffs applied ✓",
       "Приход +1 ✓": "Goods in +1 ✓",
-      "Продажа −1 ✓": "Sale −1 ✓",
+      // scanner app: the standalone /shop2/scan/ route
+      "Rempire · Сканер": "Rempire · Scanner", "Сканер": "Scanner",
+      "В админку": "To the panel", "Сканер открывается…": "The scanner is opening…",
+      "Открыть сканер": "Open the scanner",
+      "📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере.":
+        "📷 The scanner as its own app: open /shop2/scan/ on the phone and add it to the home screen — an icon «Сканер» appears that opens straight into the camera.",
       // integration: shipRulesCard's live-Montonio-rates fill controls
       "«Заполнить по тарифам Montonio» впишет тарифы выше плюс наценка, округлённые до X,X9 €, — но только там, где тариф известен: Venipak, Unisend, «Другие страны Европы» и «Остальные страны» кнопка не трогает.":
         "«Fill from Montonio tariffs» writes the tariffs above plus the markup, rounded to X.X9 €, but only where a tariff is known: the button doesn't touch Venipak, Unisend, «Other European countries» or «Other countries».",
@@ -2135,6 +2386,14 @@
     [/^(\d+(?:[.,]\d+)?) г$/, { ET: "$1 g", EN: "$1 g" }],
     [/^★ ([\d,\.]+) из 5$/, { ET: "★ $1 / 5", EN: "★ $1 out of 5" }],
     [/^Найдено: (\d+)$/, { ET: "Leitud: $1", EN: "Found: $1" }],
+    /* наборы: the set editor's live hint — the one line that answers while
+       the owner is typing a price, so it carries two or three numbers. */
+    [/^Сумма по отдельности — (.+)\. Впишите цену набора\.$/,
+      { ET: "Eraldi kokku — $1. Kirjuta komplekti hind.", EN: "Separately — $1. Type the set price." }],
+    [/^Сумма по отдельности — (.+), скидка (\d+) % · выгода (.+)$/,
+      { ET: "Eraldi kokku — $1, soodustus $2 % · sääst $3", EN: "Separately — $1, $2 % off · you save $3" }],
+    [/^Набор дороже, чем товары по отдельности \((.+)\) — так нельзя\.$/,
+      { ET: "Komplekt on kallim kui tooted eraldi ($1) — nii ei saa.", EN: "The set costs more than the products apart ($1) — that cannot be." }],
     // features
     [/^выгода (.+)$/, { ET: "sääst $1", EN: "you save $1" }],
     [/^В корзину — (.+)$/, { ET: "Lisa ostukorvi — $1", EN: "Add to cart — $1" }],
@@ -2175,6 +2434,9 @@
     // admin
     [/^Заказ #(\d+)$/, { ET: "Tellimus #$1", EN: "Order #$1" }],
     [/^в среднем (.+) в день$/, { ET: "keskmiselt $1 päevas", EN: "$1 a day on average" }],
+    // «Обзор»: both KPI captions carry a real count now, not a fixed number
+    [/^вчера — (\d+)$/, { ET: "eile — $1", EN: "yesterday — $1" }],
+    [/^из них нет в наличии — (\d+)$/, { ET: "neist otsas — $1", EN: "of them sold out — $1" }],
     [/^(.+) · помощник\/панель$/, { ET: "$1 · abiline/paneel", EN: "$1 · assistant/panel" }],
     [/^Загружаем… (\d+) из (\d+)$/, { ET: "Laadime… $1 / $2", EN: "Uploading… $1 of $2" }],
     [/^Больше (\d+) фотографий на товар не нужно$/,
@@ -2221,6 +2483,8 @@
       { ET: "Kaamera pole saadaval ($1). Kontrollige brauseri õigusi või kasutage allolevat otsingut/käsitsi sisestust.",
         EN: "No camera access ($1). Check the browser permissions or use the search/manual entry below." }],
     [/^Приход \+(\d+) ✓$/, { ET: "Sissetulek +$1 ✓", EN: "Goods in +$1 ✓" }],
+    // scanner app: the write-off half of the same confirm pair
+    [/^Списание −(\d+) ✓$/, { ET: "Mahakandmine −$1 ✓", EN: "Written off −$1 ✓" }],
     [/^тариф Montonio \(live\): (.+)$/, { ET: "Montonio tariif (live): $1", EN: "Montonio tariff (live): $1" }],
     [/^тариф Montonio \(прайс-лист\): (.+)$/, { ET: "Montonio tariif (hinnakiri): $1", EN: "Montonio tariff (price list): $1" }],
     [/^Сейчас: пакомат Эстония (.+) · курьер Эстония (.+) · бесплатно от (.+)\. Цены по умолчанию для Латвии, Литвы и остальных стран по-прежнему ниже тарифов перевозчиков — см\. docs\/shipping\.md\.$/,
@@ -2313,6 +2577,11 @@
          it handed the owner an English translation of his own Russian copy —
          and saved it back as the Russian when he touched the field. */
       if (el && el.tagName === "TEXTAREA") continue;
+      /* blog: and the visual editor's box is the same thing without being a
+         <textarea> — its text nodes are the article the owner is writing,
+         not labels of ours. Translating them would rewrite his own Russian
+         copy on an ET/EN panel and save the translation back as the article. */
+      if (el && el.closest && el.closest("[data-blogbody]")) continue;
       var allowName = !!(el && el.closest && el.closest(NAME_CTX));
       var tr = trText(t, lang, allowName);
       if (tr !== t) node.nodeValue = raw.replace(t, tr);
@@ -2397,7 +2666,10 @@
     if (g.indexOf("cat:") === 0) return 'data-go-cat="' + esc(g.slice(4)) + '"';
     if (g.indexOf("product:") === 0 && g.length > 8) return 'data-go-product="' + esc(g.slice(8)) + '"';
     if (g.indexOf("page:") === 0) return 'data-page="' + esc(g.slice(5)) + '"';
-    if (g === "bundles" || g === "gift" || g === "brands") return 'data-go="' + g + '"';
+    // a banner (or an assistant answer) pointing at sets while sets are off
+    // would be a link to «Наборы сейчас недоступны» — send it to the catalogue
+    if (g === "bundles") return setsOn() ? 'data-go="bundles"' : 'data-go-cat="all"';
+    if (g === "gift" || g === "brands") return 'data-go="' + g + '"';
     return 'data-go-cat="all"';
   }
   function heroProduct(image) {
@@ -2897,9 +3169,16 @@
     mailTpl: "order-confirmed", // «Письма»: which letter the preview shows
     mailLang: "",    // letter language; "" follows the panel language
     mailTo: "",      // address typed into «отправить тест на…»
+    mailDraft: null, // unsaved subject/intro/signature edits, by letter+language
     admNav: true,       // admin side panes collapse to rails
     admAi: true,
     size: 0,
+    /* The size chosen in a product CARD's own picker (cardSizeHTML), by
+       product id — NOT in the DOM, so it survives every render()/patchCatalog
+       rebuild of the list and stays the same when the product shows up in two
+       lists at once (both home rails, a rail and «с этим покупают»). Absent =
+       the smallest size, which is what a card added before this existed. */
+    cardSize: {},
     qty: 1,
     gallery: 0,
     sort: "hit",
@@ -2910,6 +3189,17 @@
     brandFilter: [],
     // ---- наборы, подарочная карта, отзывы, видео (features) ----
     bundleId: "",       // which set is open on the set page
+    /* The sets from GET /api/bundles/ — null until it answers (or for good,
+       if there is no server), which is what makes public/shop/bundles.js the
+       fallback rather than a second source. See allBundlesRaw(). */
+    bundles: null,
+    goodsTab: "goods",  // admin «Товары»: "goods" | "bundles"
+    admBundles: null,   // admin «Товары → Наборы»: [bundle] incl. hidden ones
+    admBundleErr: "",
+    bundleForm: null,   // the set editor's working copy, null = the list
+    bundleFormErr: "",
+    bundleDel: "",      // id awaiting the «Удалить набор?» confirmation
+    bundleQ: "",        // product search inside the set editor
     giftAmount: 50,     // chosen gift-card amount
     gift: { name: "", email: "", message: "" },
     giftCard: null,     // {code, discount, remaining} once a card is applied at checkout
@@ -2944,6 +3234,17 @@
     adminBlogBusy: false,  // a save/publish/delete request is in flight
     adminBlogErr: "",
     adminBlogConfirmDelete: false,
+    /* The editor's toolbar sheet: "" | "link" | "image" | "product". It is
+       drawn into its own slot by hand rather than by render(), because a
+       render() would rebuild the contenteditable and take the caret (and the
+       remembered selection) with it — see blogToolDraw(). */
+    adminBlogTool: "",
+    adminBlogToolQ: "",   // product search inside that sheet
+    /* …and what is typed in it. Both live in S rather than only in the DOM
+       for the same reason as every other admin draft: a background render()
+       rebuilds the sheet, and a half-typed link that vanished when the media
+       probe answered would look like the «Вставить» button doing nothing. */
+    adminBlogToolUrl: "",
     // ---- wholesale (salon/pro) pricing & loyalty points ----
     pro: null,          // {tier, proDiscountPct, proMinOrder, proPrices} — loadProPricing(), only once S.cust.tier === "pro"
     loyalty: null,      // {balance, history, settings:{enabled,earnPct,redeemMaxPct,minRedeem}} — from acctLoad()/acctVerify()
@@ -2993,7 +3294,10 @@
     scanAssignQ: "",       // product search when a scanned code matches nothing
     scanAssignPick: "",    // product id currently showing its size picker (multi-size assign)
     scanManual: "",
-    scanQty: 1,            // the number typed before «Приход: N»
+    scanQty: 1,            // the stepper's number, applied by «+ Приход» / «− Списание»
+    scanApp: false,        // the standalone /shop2/scan/ route, not the «Склад» overlay
+    scanBusy: false,       // a move is in flight — the two confirm buttons are disabled
+    scanReady: false,      // the last move went through: «сканируйте следующий код»
     scanToday: null,       // [move,...] today's moves, refreshed after each hit
     // ---- inventory: «Продажа в салоне» ----
     posCart: [],           // [{id, variant, qty}]
@@ -3055,9 +3359,17 @@
       // gets read even if this ever throws again.
       try {
         S.cart = saved.cart.filter(function (l) {
-          // sets and gift cards are not catalogue products: a set survives only
-          // while it is still curated, a gift card while the amount is still sold
-          if (l.type === "bundle") return !!bundleById(l.id);
+          /* Sets and gift cards are not catalogue products. A gift card
+             survives while its amount is still sold — that list is a
+             constant in this file, so it can be checked right here.
+             A set cannot: the real list arrives from /api/bundles/ a moment
+             later, and the static public/shop/bundles.js this page loaded
+             with does not know about anything Renat has made in the admin
+             since. Checking it here threw away the cart of every shopper who
+             had bought a set that was newer than the file. So a set line is
+             kept as it is and loadBundles() prunes it once the truth lands —
+             the only place that can honestly say a set no longer exists. */
+          if (l.type === "bundle") return true;
           if (l.type === "gift") return GIFT_AMOUNTS.indexOf(giftAmount(l.id)) >= 0;
           for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === l.id) return true;
           return false;
@@ -3441,9 +3753,56 @@
       '" style="background-image:url(\'' + src + '\')"></span>';
   }
 
+  /* ---------- size picker inside a product card ---------------------------
+     «В корзину» on a card used to add the smallest size, silently — the
+     shopper had to open the product to buy the 500 ml. Every card of a
+     multi-size product now carries its own picker, the price follows it, and
+     the add button puts THAT size in the cart (qty 1).
+
+     A native <select>, not a chip row, everywhere: a card is 150px wide on a
+     phone and merch runs to ten «colour / size» variants, which is a wrapped
+     three-line chip block on a 375px screen — the native control is one line
+     at any width, gets the system wheel on a phone, and is keyboard- and
+     screen-reader-operable for free. The label goes in aria-label rather than
+     a visible <span> so the card keeps its height (translateTree() rewrites
+     aria-label like any text, and «Объём»/«Размер» are both dictionary keys).
+
+     The option text is the raw size string: «75 мл» is covered by a UI_RX
+     rule (→ «75 ml»), and merch variants are Latin already — so nothing new
+     has to be translated, and no Cyrillic leaks into the ET/EN card. */
+  function cardSizes(p) {
+    return p.sizes && p.sizes.length > 1 ? p.sizes : [];
+  }
+  /** The card's chosen size index, clamped — an id whose product lost sizes
+   *  (an admin edit between two renders) must not index past the list. */
+  function cardSizeIdx(id) {
+    var p = byId(id), n = (p.sizes || []).length;
+    var i = Number(S.cardSize[id]);
+    return i > 0 && i < n ? i : 0;
+  }
+  /** Price text for a card at size `i`. «от » survives only where there is
+   *  nothing to pick: with a picker the price shown IS the chosen size's, so
+   *  «от 16 €» next to a selected 250 ml would simply be wrong. */
+  function cardPriceText(p, i) {
+    var multi = cardSizes(p).length > 0;
+    var idx = multi ? i : 0;
+    var pro = proPrice(p, idx);
+    return (!multi && p.priceFrom ? "от " : "") + eur(pro != null ? pro : (multi ? sizePrice(p, idx) : p.price));
+  }
+  function cardSizeHTML(p) {
+    var sizes = cardSizes(p);
+    if (!sizes.length) return "";       // single size: no control at all
+    var cur = cardSizeIdx(p.id);
+    return '<span class="sel card__sel"><select data-cardsize="' + p.id + '" aria-label="' +
+      (p.cat === "merch" ? "Размер" : "Объём") + '">' +
+      sizes.map(function (sz, i) {
+        return '<option value="' + i + '"' + (i === cur ? " selected" : "") + ">" + esc(sz) + "</option>";
+      }).join("") + "</select></span>";
+  }
+
   function cardHTML(p) {
-    var pro = proPrice(p, 0);
-    var price = (p.priceFrom ? "от " : "") + eur(pro != null ? pro : p.price);
+    var i = cardSizeIdx(p.id);
+    var pro = proPrice(p, i);
     var proTag = pro != null ? ' <span class="chip chip--ok">Цена для салонов</span>' : "";
     var stock = p.stock === "low" ? '<span class="chip chip--low">мало</span>'
       : p.stock === "out" ? '<span class="chip chip--out">нет в наличии</span>' : "";
@@ -3459,37 +3818,138 @@
         "</span>" +
         '<span class="card__brand">' + esc(p.brand) + "</span>" +
         '<span class="card__name">' + esc(p.name) + "</span>" +
-        '<span class="card__price num">' + price + proTag + " " + stock + "</span>" +
+        // the price is its own node so the picker can patch it in place
+        // without touching the chips beside it
+        '<span class="card__price num"><span data-cardpr>' + cardPriceText(p, i) + "</span>" + proTag + " " + stock + "</span>" +
       "</button>" +
-      (p.stock === "out" ? "" : '<button class="link card__add" data-add="' + p.id + '">В корзину</button>') +
+      // out of stock keeps neither control — there is nothing to choose or add
+      (p.stock === "out" ? "" : cardSizeHTML(p) +
+        '<button class="link card__add" data-add="' + p.id + '">В корзину</button>') +
       "</div>";
   }
 
   /* ---------- наборы (bundles) --------------------------------------------
-     Curated sets, generated by tools/build-bundles.mjs from
-     tools/bundles.config.mjs into public/shop/bundles.js. A set is NOT a
-     catalogue product: it has its own id space («bundle:<id>» in the cart and
-     in the order), one fixed price, and it carries the real products it is
-     made of, so the shopper — and later whoever packs the parcel — sees
-     exactly what is inside. Titles and descriptions arrive in three
-     languages, like the product texts, so they are picked by S.lang instead
-     of going through the interface dictionary.
+     Curated sets. A set is NOT a catalogue product: it has its own id space
+     («bundle:<id>» in the cart and in the order), one fixed price, and it
+     carries the real products it is made of, so the shopper — and later
+     whoever packs the parcel — sees exactly what is inside. Titles and
+     descriptions arrive in three languages, like the product texts, so they
+     are picked by S.lang instead of going through the interface dictionary.
 
-     The file is optional: if bundles.js fails to load the shop simply has no
-     sets, rather than a blank page. */
-  function allBundles() {
+     Where they come from, in order:
+       1. GET /api/bundles/ — the `bundles` table, what Renat edits in the
+          admin («Товары → Наборы»). Fetched at boot next to /api/overrides/;
+          S.bundles holds the answer.
+       2. public/shop/bundles.js — the generated static list, loaded by the
+          page itself. It is the offline fallback (a static export, a shop
+          with no database, the seconds before the fetch lands) and it is what
+          the table was seeded from, so the two agree until the first edit.
+     The file is optional either way: if neither is there the shop simply has
+     no sets, rather than a blank page.
+
+     THREE readers, and the difference between them is the whole «Наборы на
+     сайте» switch:
+       allBundlesRaw()  every set that exists, switch or no switch. Only the
+                        cart, the checkout and the order use it — a set line
+                        somebody already added must stay priceable and
+                        payable even after the owner hides sets.
+       allBundles()     what may be SHOWN: nothing at all when the switch is
+                        off, active sets otherwise. Every shelf, rail, nav
+                        entry, footer link and search path goes through it.
+       setsOn()         the switch itself, for the screens that have to say
+                        «сейчас недоступны» instead of rendering nothing. */
+  function setsOn() {
     // DEMO (var DEMO = {...}, ~4700 lines below) is only a name at this point
     // during the cart-restore try{} near the top of the file — `var` hoists
     // the binding but not the assignment. Guard rather than read .bundles off
     // undefined: no demo override could possibly be in effect yet anyway.
-    if (DEMO && DEMO.bundles === false) return [];   // owner switched sets off (admin → Магазин)
-    return typeof BUNDLES === "undefined" ? [] : BUNDLES;
+    return !(DEMO && DEMO.bundles === false);
   }
+  function allBundlesRaw() {
+    if (S.bundles) return S.bundles;                       // the API answered
+    return typeof BUNDLES === "undefined" ? [] : BUNDLES;  // the file it shipped with
+  }
+  function allBundles() {
+    if (!setsOn()) return [];   // owner switched sets off (admin → Настройки → Магазин)
+    return allBundlesRaw().filter(function (b) { return b.active !== false; });
+  }
+  /* Deliberately NOT filtered: see the note above. bundleById() answers for a
+     cart line whose set is hidden, switched off, or both. */
   function bundleById(id) {
     var key = String(id || "").replace(/^bundle:/, "");
-    var list = allBundles();
+    var list = allBundlesRaw();
     for (var i = 0; i < list.length; i++) if (list[i].id === key) return list[i];
     return null;
+  }
+  /** The one a shopper is allowed to open — used by the set page and the cards. */
+  function shownBundleById(id) {
+    var b = bundleById(id);
+    return b && setsOn() && b.active !== false ? b : null;
+  }
+  /* The API knows what a set costs; only the browser knows what it looks
+     like — photos live in the catalogue, not on the server. So every set that
+     arrives is topped up here with the fields the shop draws from: the photo
+     of each part and the stack of up to three the card and the page use.
+     Idempotent, and it leaves anything already filled in alone, so the static
+     public/shop/bundles.js (which carries them) goes through unchanged. */
+  function hydrateBundles(list) {
+    return (list || []).map(function (b) {
+      var items = (b.items || []).map(function (it) {
+        var p = bundleItemProduct(it);
+        if (it.img || !p) return it;
+        return Object.assign({}, it, { img: p.img, brand: it.brand || p.brand, name: it.name || p.name });
+      });
+      var images = b.images;
+      if (!images || !images.length) {
+        // one chosen photo — a product id or an uploaded URL — beats the stack
+        var chosen = b.image ? (/^(https?:)?\/\/|^\//.test(b.image) ? b.image : (byIdOrNull(b.image) || {}).img) : null;
+        images = chosen ? [chosen] : items.map(function (it) { return it.img; }).filter(Boolean).slice(0, 3);
+      }
+      return Object.assign({}, b, { items: items, images: images });
+    });
+  }
+  function byIdOrNull(id) {
+    for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i];
+    return null;
+  }
+  /* Read at boot beside /api/overrides/, so an edit in the admin reaches the
+     shop on the shopper's next load. A 503/404/offline answer leaves S.bundles
+     null and the static file in charge — never an empty «Наборы». */
+  function loadBundles() {
+    return apiJson("/api/bundles/").then(function (r) {
+      if (r.status !== 200 || r.body.ok !== true || !Array.isArray(r.body.bundles)) return;
+      var fresh = hydrateBundles(r.body.bundles);
+      /* The route answers with the sets ON SALE. A set missing from it — the
+         owner switched it off, or deleted it — can still be sitting in
+         somebody's cart, and a cart line whose set the shop cannot find
+         prices at 0 €. So any set the cart still points at is carried over
+         from the list we had, marked inactive: invisible everywhere
+         (allBundles() filters on `active`) and still priceable in the cart
+         the shopper is standing in. Only the cart's own sets are carried —
+         nothing else has a reason to outlive the answer. The server re-prices
+         every line from the same table when the order is placed, so this can
+         never become a discount the shop did not agree to. */
+      var have = {};
+      fresh.forEach(function (b) { have[b.id] = true; });
+      var kept = [];
+      S.cart.forEach(function (l) {
+        if (l.type !== "bundle") return;
+        var id = String(l.id).replace(/^bundle:/, "");
+        if (have[id]) return;
+        var old = bundleById(id);     // from the static file, or an earlier answer
+        if (old) { kept.push(Object.assign({}, old, { active: false })); have[id] = true; }
+      });
+      S.bundles = fresh.concat(kept);
+      /* And the other half of it: a set that is in nobody's list any more is
+         gone for good, and a line pointing at it can be neither priced here
+         nor ordered on the server. This is the one place that can say so —
+         the cart restore at boot deliberately does not. */
+      var before = S.cart.length;
+      S.cart = S.cart.filter(function (l) { return l.type !== "bundle" || !!bundleById(l.id); });
+      if (S.cart.length !== before) persist();
+      if (S.screen === "checkout") { patchSummary(); return; }
+      render();
+    }).catch(noop);
   }
   function bundleTitle(b) { return (b.title && (b.title[S.lang] || b.title.RU)) || b.id; }
   function bundleDesc(b) { return (b.desc && (b.desc[S.lang] || b.desc.RU)) || ""; }
@@ -3544,7 +4004,25 @@
       '<div class="grid">' + list.map(bundleCardHTML).join("") + "</div></section>";
   }
 
+  /* Sets switched off, but the address still exists — somebody's bookmark, a
+     link in an old letter, a page Google still has. A 404 there would be a
+     lie (the shop is fine, the sets are simply not on sale right now) and a
+     redirect home would look like a broken link, so both /shop2/sets/ and
+     /shop2/set/<id>/ answer with this and a way onwards into the catalogue.
+     The gift card is NOT a set and keeps its own page either way. */
+  function setsOffHTML(crumbTail) {
+    return '<div class="wrap">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / ' + (crumbTail || "Наборы") + "</div>" +
+      '<section class="sec" style="padding-top:14px">' +
+        '<h1 class="display h1">Наборы сейчас недоступны</h1>' +
+        '<p class="sec__intro">Мы временно не собираем наборы. Все товары из них есть в магазине по отдельности.</p>' +
+        '<div class="empty__cats"><button class="btn" data-go-cat="all">Перейти в каталог</button>' +
+        '<button class="btn btn--ghost" data-go="gift">Подарочная карта</button></div>' +
+      "</section></div>";
+  }
+
   function screenBundles() {
+    if (!setsOn()) return setsOffHTML();
     var list = allBundles();
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / Наборы</div>' +
@@ -3559,9 +4037,14 @@
   }
 
   function screenBundle() {
-    var b = bundleById(S.bundleId);
+    if (!setsOn()) return setsOffHTML();
+    /* shownBundleById(), not bundleById(): a set the owner switched off in
+       «Товары → Наборы» is off the shelf, and its old page says so instead of
+       selling it. The cart keeps its own line — see bundleById()'s note. */
+    var b = shownBundleById(S.bundleId);
     if (!b) {
-      return '<div class="wrap"><section class="sec"><h1 class="display h1">Страница не найдена</h1>' +
+      return '<div class="wrap"><section class="sec"><h1 class="display h1">Набор не найден</h1>' +
+        '<p class="muted">Возможно, его больше нет в продаже.</p>' +
         '<p><button class="link" data-go="bundles">Все наборы</button></p></section></div>';
     }
     var out = b.stock === "out";
@@ -3620,7 +4103,15 @@
   }
   function screenGift() {
     return '<div class="wrap wrap--mid">' +
-      '<div class="crumbs"><button data-go="home">Главная</button> / <button data-go="bundles">Наборы</button> / Подарочная карта</div>' +
+      /* The gift card is NOT a set — it only lives under «Наборы» in the
+         breadcrumb. With sets switched off that crumb is the last visible
+         trace of them anywhere in the shop, so it drops out and the card
+         hangs straight off the home page. Nothing else about this screen
+         changes. */
+      '<div class="crumbs"><button data-go="home">Главная</button>' +
+        (setsOn()
+          ? ' / <button data-go="bundles">Наборы</button> / Подарочная карта</div>'
+          : " / Подарочная карта</div>") +
       '<section class="sec" style="padding-top:14px">' +
         '<h1 class="display h1">Подарочная карта</h1>' +
         '<p class="sec__intro">Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.</p>' +
@@ -3745,7 +4236,7 @@
           '<button class="link" data-blogshare="' + esc(post.slug) + '">' + icon("share") + "<span>Поделиться</span></button>" +
         "</div>" +
         (post.tags && post.tags.length ? '<div class="blog__tags">' + post.tags.map(function (x) { return '<span class="chip">' + esc(x) + "</span>"; }).join("") + "</div>" : "") +
-        '<div class="acc__rich blog__body">' + post.bodyHtml + "</div>" +
+        '<div class="acc__rich blog__body">' + blogBodyHTML(post.bodyHtml) + "</div>" +
       "</article>" +
       (featured.length
         ? '<section class="sec"><h2 class="display h1" style="font-size:13px;letter-spacing:.18em">Товары из статьи</h2>' +
@@ -3773,6 +4264,119 @@
     }
     toast(url);
   }
+
+  /* ---------- the article body: one allowlist, used at both ends -----------
+     A post body is HTML now — the admin editor is a small visual box, not a
+     markdown field (docs/blog.md). The server already renders and sanitises
+     it (sanitizeHtml() in src/lib/blog.ts, which is the real security
+     boundary); this is the same allowlist a second time, in the browser,
+     for the two jobs only a browser can do:
+
+       * the editor — cleaning what the owner pastes out of Word or Google
+         Docs before it ever reaches the box, and cleaning the box again
+         before «Сохранить»;
+       * the storefront — a second pass over what the API answered, and
+         turning the «Товар» marker (<a data-product="…">) into a real
+         product card, which needs CATALOGUE and so cannot happen on the
+         server at all.
+
+     The parse is the browser's own, in an inert document with no browsing
+     context: DOMParser runs no script and loads no image out of it, and
+     nothing from the parsed tree is copied into the output — every tag and
+     attribute below is written fresh from this table. Anything not in it
+     loses its tag and keeps its text; script/style/iframe lose both. */
+  var BLOG_TAGS = {
+    P: 1, H2: 1, H3: 1, STRONG: 1, EM: 1, UL: 1, OL: 1, LI: 1,
+    BLOCKQUOTE: 1, FIGURE: 1, BR: 1, A: 1, IMG: 1
+  };
+  var BLOG_ALIAS = { B: "STRONG", I: "EM", H1: "H2", H4: "H3", H5: "H3", H6: "H3" };
+  var BLOG_TAGS_DROP = {
+    SCRIPT: 1, STYLE: 1, IFRAME: 1, OBJECT: 1, EMBED: 1, NOSCRIPT: 1,
+    TEMPLATE: 1, SVG: 1, MATH: 1, HEAD: 1, TITLE: 1
+  };
+  /* Blocks that are worth dropping when they came out empty — a Word paste
+     is full of <p>&nbsp;</p>. A <p><br></p> is NOT empty: that is the blank
+     line the owner made on purpose by pressing Enter. */
+  var BLOG_DROP_EMPTY = { p: 1, h2: 1, h3: 1, li: 1, blockquote: 1, figure: 1, ul: 1, ol: 1 };
+  var BLOG_PRODUCT_ID = /^[a-z0-9][a-z0-9._-]{0,79}$/i;
+  var BLOG_MAX_DEPTH = 24;
+
+  /** https, or a picture this shop already serves. Not http: — the shop is https. */
+  function blogImgUrl(raw) {
+    var v = String(raw || "").trim();
+    if (/^https:\/\/[^\s<>"']+$/i.test(v)) return v;
+    if (/^\/(?!\/)[^\s<>"']*$/.test(v)) return v;
+    return null;
+  }
+  /** The inline card the «Товар» button's marker turns into on the storefront. */
+  function blogProductHTML(id) {
+    var p = productsById([id])[0];
+    if (!p) return "";
+    var pro = proPrice(p, 0);
+    return '<button class="blog__prod" data-go-product="' + esc(p.id) + '">' +
+        media(p, 0, "ph blog__prodimg") +
+        '<span class="blog__prodtx">' +
+          '<span class="blog__prodname">' + esc(p.brand) + " " + esc(p.name) + "</span>" +
+          '<span class="blog__prodprice num">' + (p.priceFrom ? "от " : "") +
+            eur(pro != null ? pro : p.price) + "</span>" +
+        "</span></button>";
+  }
+  function blogCleanNodes(parent, depth, cards) {
+    var out = "", kids = parent.childNodes, i;
+    for (i = 0; i < kids.length; i++) out += blogCleanNode(kids[i], depth, cards);
+    return out;
+  }
+  function blogCleanNode(node, depth, cards) {
+    if (node.nodeType === 3) return esc(node.nodeValue);
+    if (node.nodeType !== 1) return "";                       // comments, CDATA, …
+    var raw = node.tagName;
+    if (BLOG_TAGS_DROP[raw]) return "";                       // tag and contents both
+    var name = BLOG_ALIAS[raw] || raw;
+    if (!BLOG_TAGS[name] || depth >= BLOG_MAX_DEPTH) return blogCleanNodes(node, depth, cards);
+    var tag = name.toLowerCase();
+
+    if (tag === "br") return "<br>";
+    if (tag === "img") {
+      var src = blogImgUrl(node.getAttribute("src"));
+      if (!src) return "";
+      var alt = String(node.getAttribute("alt") || "").replace(/\s+/g, " ").trim().slice(0, 160);
+      return '<img src="' + esc(src) + '" alt="' + esc(alt) + '" loading="lazy">';
+    }
+
+    var inner = blogCleanNodes(node, depth + 1, cards);
+    if (tag === "a") {
+      var pid = String(node.getAttribute("data-product") || "").trim();
+      var isProduct = BLOG_PRODUCT_ID.test(pid);
+      if (isProduct && cards) {
+        var card = blogProductHTML(pid);
+        if (card) return card;                                 // a product that is gone falls back to the link
+      }
+      var open = "<a";
+      if (isProduct) open += ' data-product="' + esc(pid) + '"';
+      var u = blogSafeUrl(node.getAttribute("href") || "");
+      if (u) {
+        open += ' href="' + esc(u) + '"';
+        if (/^https?:\/\//i.test(u)) open += ' target="_blank" rel="noopener noreferrer"';
+      }
+      return open === "<a" ? inner : open + ">" + inner + "</a>";
+    }
+    if (BLOG_DROP_EMPTY[tag] && !inner.replace(/<br>/g, "").trim()) return "";
+    return "<" + tag + ">" + inner + "</" + tag + ">";
+  }
+  /**
+   * `html` through the allowlist above. `cards` — only on the storefront —
+   * also swaps every <a data-product> for the real card.
+   */
+  function blogCleanHtml(html, cards) {
+    var src = String(html || "");
+    if (!src) return "";
+    var doc = null;
+    try { doc = new DOMParser().parseFromString("<body>" + src + "</body>", "text/html"); } catch (e) { doc = null; }
+    if (!doc || !doc.body) return "";
+    return blogCleanNodes(doc.body, 0, !!cards);
+  }
+  /** What the article page injects: cleaned again, with product markers live. */
+  function blogBodyHTML(html) { return blogCleanHtml(html, true); }
 
   /* ---------- cart lines of every kind ------------------------------------
      Three kinds share one list: a catalogue product, a set and a gift card.
@@ -4032,6 +4636,25 @@
       : "";
     var srch = h.querySelector("[data-search]");
     if (document.activeElement !== srch) srch.value = S.query;
+    /* The header is built ONCE (renderImpl only fills hdrSlot when it is
+       empty) and patched from here for ever after — so the «Наборы» entry has
+       to be added and removed here too. Everything else about the switch is
+       part of the body or the footer, which are rebuilt on every render; the
+       nav is not, and leaving it alone meant the entry stood there until the
+       next full page load, one click away from a shop with no sets in it. */
+    var nav = h.querySelector(".hdr__nav");
+    var navSets = nav && nav.querySelector("[data-nav-bundles]");
+    var wantSets = !!allBundles().length;
+    if (nav && wantSets && !navSets) {
+      var before = nav.querySelector("[data-nav-brands]");
+      var btn = document.createElement("button");
+      btn.setAttribute("data-go", "bundles");
+      btn.setAttribute("data-nav-bundles", "");
+      btn.textContent = "Наборы";
+      nav.insertBefore(btn, before || null);
+    } else if (navSets && !wantSets) {
+      navSets.remove();
+    }
     h.querySelectorAll(".hdr__nav button").forEach(function (b) {
       if (b.dataset.navBundles !== undefined) {
         b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle" || S.screen === "gift"));
@@ -4190,6 +4813,14 @@
 
         // features: sets sit between the two product rails and the categories
         bundleGridHTML(allBundles().filter(function (b) { return b.stock !== "out"; }).slice(0, 4), "Наборы") +
+
+        /* The gift card is not a set, and «Наборы» was the only place it was
+           reachable from — which is the last place someone shopping for a
+           present looks. It gets its own block here, after the sets rail and
+           deliberately independent of it: with sets switched off (admin →
+           Магазин) bundleGridHTML() above returns "" and this still renders.
+           Same tile as on the sets page, which keeps its own copy. */
+        '<section class="sec sec--gift">' + giftTileHTML() + "</section>" +
 
         '<section class="sec"><div class="sec__head"><h2 class="sec__title">Категории</h2></div>' +
         '<div class="cattiles">' + CATS.map(function (c) {
@@ -4663,26 +5294,67 @@
   }
 
   /* ---------- features: product video --------------------------------------
-     One optional link per product (admin → Товары → Видео). Nothing from
-     YouTube or Vimeo is loaded until the shopper taps: the poster is a plain
-     <img>, and only then does the iframe appear — privacy-enhanced domain,
-     so a page view is not a visit to Google. */
+     One optional video per product (admin → Товары → Видео). Four shapes, and
+     each is rendered the way that suits it:
+
+       yt · vimeo   nothing is loaded until the shopper taps — the poster is a
+                    plain <img>, and only then does the iframe appear, on the
+                    privacy-enhanced domain, so a page view is not a visit to
+                    Google.
+       ig           Instagram's own reel/post embed. No poster exists to gate
+                    it behind, so the frame is there from the start but
+                    loading="lazy", plus a fallback link.
+       file         an .mp4/.mov the owner uploaded — a plain <video>, ours,
+                    no third party involved at all.
+
+     The server keeps the same list (src/lib/video.ts) and is what actually
+     decides what may be stored; see docs/media.md. */
   /* One parser, two readers: the product page below, and the goods editor,
      which has to be able to REFUSE a link this function would return null
      for. Storing such a link used to say «Сохранено ✓» and then show no
      video at all — a lie the owner has no way to debug. */
   function parseVideo(raw0) {
     var raw = String(raw0 == null ? "" : raw0).trim();
-    if (!raw) return null;
+    /* One whole address and nothing else. The provider patterns below only
+       SEARCH inside the string, so without this anchor
+       «javascript:alert(1)#youtube.com/watch?v=xxxxxxx» would match the first
+       one. The server checks the same thing properly, with a URL parse
+       (src/lib/video.ts) — this is the half that keeps the owner's own
+       browser honest. */
+    if (!raw || raw.length > 500 || !/^https?:\/\/[^\s"'<>]+$/.test(raw)) return null;
     var m;
     if ((m = raw.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/))) {
       return { kind: "yt", id: m[1],
         poster: "https://i.ytimg.com/vi/" + m[1] + "/hqdefault.jpg",
+        page: "https://www.youtube.com/watch?v=" + m[1],
         src: "https://www.youtube-nocookie.com/embed/" + m[1] + "?autoplay=1&rel=0&modestbranding=1" };
     }
     if ((m = raw.match(/vimeo\.com\/(?:video\/)?(\d{6,12})/))) {
       return { kind: "vimeo", id: m[1], poster: "",
+        page: "https://vimeo.com/" + m[1],
         src: "https://player.vimeo.com/video/" + m[1] + "?autoplay=1&dnt=1" };
+    }
+    /* media: an Instagram reel or post. The embed is the same address with
+       «embed/» on the end — no token, no API key, no account. Both shapes the
+       app's own «Copy link» makes are accepted, with or without the account
+       name in front (instagram.com/reel/<id>/ · instagram.com/<кто>/p/<id>/);
+       `reels` is the plural the web app sometimes writes and embeds as
+       `reel`. Everything rendered is rebuilt from the id, so the pasted
+       string never reaches the page. */
+    if ((m = raw.match(/instagram\.com\/(?:[A-Za-z0-9_.]{1,40}\/)?(reels?|p|tv)\/([A-Za-z0-9_-]{5,24})/))) {
+      var seg = m[1] === "p" ? "p" : m[1] === "tv" ? "tv" : "reel";
+      var page = "https://www.instagram.com/" + seg + "/" + m[2] + "/";
+      return { kind: "ig", id: m[2], poster: "", page: page, src: page + "embed/" };
+    }
+    /* media: a file the owner uploaded himself — POST /api/admin/upload with
+       kind=video puts it under videos/… in our own bucket and hands back this
+       address. It is the one kind whose src IS the stored string rather than
+       something rebuilt from an id, so the pattern is strict: https, our kind
+       of extension, nothing that could break out of an attribute. The server
+       additionally pins it to R2_PUBLIC_BASE (src/lib/video.ts) — a shop's own
+       file, not any .mp4 on the internet. */
+    if (/^https:\/\/[^\s"'<>]+\.(mp4|mov|m4v)(\?[^\s"'<>]*)?$/i.test(raw)) {
+      return { kind: "file", id: "", poster: "", page: raw, src: raw };
     }
     return null;
   }
@@ -4692,14 +5364,36 @@
   function videoHTML(p) {
     var v = videoOf(p);
     if (!v) return "";
-    return '<div class="pvideo">' +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Видео</h2></div>' +
+    var head = '<div class="sec__head sec__head--sub"><h2 class="sec__title">Видео</h2></div>';
+    /* media: an uploaded file is ours and same-origin-ish — nobody to ask for
+       permission and nothing to gate, so it plays in the page itself.
+       preload="metadata" fetches the header, not the video: the controls know
+       the length without a phone downloading 40 MB nobody asked for. */
+    if (v.kind === "file") {
+      return '<div class="pvideo pvideo--file">' + head +
+        '<video class="pvideo__file" controls playsinline preload="metadata" src="' + esc(v.src) + '"></video>' +
+        "</div>";
+    }
+    /* media: Instagram gives out no poster address without an API key, so the
+       click-to-load gate the other two use would be a grey box with no hint
+       of what is behind it. The frame goes in as it is with loading="lazy" —
+       the browser fetches it only once it is nearly on screen — and a plain
+       link underneath for the shoppers whose browser, extension or network
+       blocks the embed outright. */
+    if (v.kind === "ig") {
+      return '<div class="pvideo pvideo--ig">' + head +
+        '<div class="pvideo__frame"><iframe src="' + esc(v.src) + '" loading="lazy" title="Видео о товаре" ' +
+        'allow="encrypted-media; picture-in-picture" allowfullscreen scrolling="no"></iframe></div>' +
+        '<p class="pvideo__alt"><a class="link" href="' + esc(v.page) + '" target="_blank" rel="noopener nofollow">Открыть в Instagram</a></p>' +
+        "</div>";
+    }
+    return '<div class="pvideo">' + head +
       (S.videoOn
-        ? '<div class="pvideo__frame"><iframe src="' + v.src + '" loading="lazy" title="Видео о товаре" ' +
+        ? '<div class="pvideo__frame"><iframe src="' + esc(v.src) + '" loading="lazy" title="Видео о товаре" ' +
           'allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>'
         : '<button class="pvideo__frame pvideo__play" data-playvideo aria-label="Смотреть видео">' +
           (v.poster
-            ? '<img src="' + v.poster + '" alt="" loading="lazy" decoding="async">'
+            ? '<img src="' + esc(v.poster) + '" alt="" loading="lazy" decoding="async">'
             : '<span class="pvideo__blank">' + tower("pvideo__mark") + "</span>") +
           '<span class="pvideo__btn" aria-hidden="true">▶</span></button>') +
       "</div>";
@@ -4907,12 +5601,22 @@
     return out || "post";
   }
 
-  /* A twin of markdownToHtml() in src/lib/blog.ts, for the editor's live
-     preview only — the published HTML the storefront actually shows always
-     comes from the server (GET /api/blog/…), which is the real safety
-     boundary. Kept in sync by hand; a drift here is a wrong preview, not a
-     hole, and tests/blog.test.ts exercises the real one. Reuses esc() —
-     identical escaping, one fewer copy to keep in step. */
+  /* A twin of markdownToHtml() in src/lib/blog.ts. The editor writes HTML
+     now, so this is no longer a live preview — it is the markdown ONE-WAY
+     DOOR, used in three places and nowhere else:
+
+       * opening a post written before the visual editor existed (its body is
+         markdown; the editor needs HTML, so it is converted once, on open,
+         and saved back as HTML);
+       * «Черновик из темы» and «Перевести», whose model answers with plain
+         text and markdown headings;
+       * a plain-text paste into the editor.
+
+     Its output goes straight through blogCleanHtml() afterwards, so the
+     allowlist — not this function — is what decides what survives. Reuses
+     esc() and blogSafeUrl(): identical escaping, one fewer copy to keep in
+     step. The published HTML a shopper sees always comes from the server
+     (GET /api/blog/…), which is the real safety boundary. */
   function blogSafeUrl(raw) {
     var v = String(raw || "").trim();
     if (!v) return null;
@@ -4943,7 +5647,7 @@
     var t = text.trim();
     return t ? "<p>" + blogInline(esc(t)) + "</p>" : "";
   }
-  function blogMdPreview(md) {
+  function blogMdToHtml(md) {
     var lines = String(md || "").replace(/\r\n?/g, "\n").split("\n");
     var blocks = [], i = 0;
     while (i < lines.length) {
@@ -4988,6 +5692,311 @@
     return html.replace(/<script[\s\S]*?<\/script\s*>/gi, "").replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "");
   }
 
+  /* ---------- the visual editor -------------------------------------------
+     A contenteditable box with seven buttons over it. No library: the six
+     formatting commands are document.execCommand, which every browser this
+     shop supports still implements, and the two that insert something
+     (a picture, a product) build their own HTML and hand it to insertHTML.
+
+     Two rules the rest of this block follows:
+
+       1. Typing never calls render(). The draft (S.adminBlogEdit.body[lang])
+          is written on every `input` event and the DOM is left alone — a
+          render() would rebuild the box and drop the caret, exactly as for
+          [data-blogf] and the banner editor above.
+       2. A toolbar button must not steal the selection. The mousedown
+          listener preventDefaults for [data-blogrt]/[data-blogtool*], and
+          the caret is remembered in BLOGSEL anyway, because the «Ссылка» /
+          «Картинка» / «Товар» sheets do take focus into their own input. */
+  var BLOGSEL = null;    // the live Range, while a toolbar sheet has the focus
+  /* …and the same place as a plain character offset. A Range points at DOM
+     nodes, and any render() that lands while the owner is writing — the media
+     probe's, the assistant's, a language pill — builds a NEW box and throws
+     the old nodes (and BLOGSEL with them) away. The text itself is safe
+     (blogSync() writes the draft on every keystroke), so all that is left to
+     put back is where the caret was, and a count of characters survives a
+     rebuild that a node reference cannot. */
+  var BLOGCARET = null;   // {start, end} in characters — a selection, not just a caret
+
+  function blogBox() { return document.querySelector("[data-blogbody]"); }
+  /** Where the selection is, counted in characters from the start of the box. */
+  function blogRangeGet(el) {
+    var s = window.getSelection();
+    if (!s || !s.rangeCount) return null;
+    var r = s.getRangeAt(0);
+    if (!el.contains(r.startContainer) || !el.contains(r.endContainer)) return null;
+    var a = document.createRange(), b = document.createRange();
+    a.selectNodeContents(el); b.selectNodeContents(el);
+    try { a.setEnd(r.startContainer, r.startOffset); b.setEnd(r.endContainer, r.endOffset); }
+    catch (e) { return null; }
+    return { start: a.toString().length, end: b.toString().length };
+  }
+  /** That many characters in → the text node and offset it lands on. */
+  function blogPointAt(el, offset) {
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    var left = offset, node;
+    while ((node = walker.nextNode())) {
+      var len = node.nodeValue.length;
+      if (left <= len) return { node: node, offset: left };
+      left -= len;
+    }
+    return null;
+  }
+  /** Put a {start,end} back — collapsed at the very end when it no longer fits. */
+  function blogRangeSet(el, at) {
+    var s = window.getSelection();
+    if (!s) return;
+    var r = document.createRange();
+    var a = at ? blogPointAt(el, at.start) : null;
+    var b = at ? blogPointAt(el, at.end) : null;
+    if (a && b) { r.setStart(a.node, a.offset); r.setEnd(b.node, b.offset); }
+    else { r.selectNodeContents(el); r.collapse(false); }
+    try { s.removeAllRanges(); s.addRange(r); } catch (e) {}
+  }
+  function blogSelSave() {
+    var el = blogBox();
+    if (!el) return;
+    var s = window.getSelection();
+    if (s && s.rangeCount && el.contains(s.getRangeAt(0).commonAncestorContainer)) {
+      BLOGSEL = s.getRangeAt(0).cloneRange();
+      BLOGCARET = blogRangeGet(el);
+    }
+  }
+  /** Focus the box and put the caret back where it was — at the end if unknown. */
+  function blogSelRestore() {
+    var el = blogBox();
+    if (!el) return null;
+    el.focus();
+    var s = window.getSelection();
+    if (!s) return el;
+    if (BLOGSEL && el.contains(BLOGSEL.commonAncestorContainer)) {
+      try { s.removeAllRanges(); s.addRange(BLOGSEL); return el; } catch (e) {}
+    }
+    blogRangeSet(el, BLOGCARET);   // the box was rebuilt under us — see BLOGCARET
+    return el;
+  }
+  /**
+   * Called while the editor's HTML is being built, i.e. BEFORE render()
+   * replaces the DOM: if the owner is typing right now, put the focus and the
+   * caret back as soon as the new box is on screen.
+   *
+   * A microtask, not setTimeout(0), and that is the whole point: render()
+   * writes the new DOM later in this same synchronous turn, so a promise
+   * callback queued here runs after the write — but still before the browser
+   * can deliver the next keystroke, which is a task. With a timeout the
+   * keystroke goes first, into a box whose caret is at the start, and the
+   * letter lands in the wrong place (or is lost).
+   */
+  function blogKeepCaret() {
+    var live = blogBox();
+    if (!live) return;
+    var at = blogRangeGet(live);
+    /* `at` is null only when the selection is somewhere else entirely — the
+       title field, another tab — and then this render is not interrupting
+       anything. Focus is deliberately NOT the test: a selection can be inside
+       the box while document.activeElement has briefly moved on, and that is
+       exactly the case where losing it hurts. */
+    if (at == null) return;
+    Promise.resolve().then(function () {
+      var el = blogBox();
+      if (!el || !S.adminBlogEdit) return;
+      el.focus();
+      blogRangeSet(el, at);
+      blogSelSave();
+    });
+  }
+  /** The box → the draft. Called after every keystroke and every insert. */
+  function blogSync() {
+    var el = blogBox();
+    if (!el || !S.adminBlogEdit) return;
+    S.adminBlogEdit.body[S.adminBlogLang || "RU"] = el.innerHTML;
+  }
+  function blogExec(cmd, arg) {
+    if (!blogSelRestore()) return;
+    try { document.execCommand("styleWithCSS", false, false); } catch (e) {}
+    try { document.execCommand(cmd, false, arg); } catch (e) {}
+    blogSelSave(); blogSync();
+  }
+  function blogInsertHtml(html) {
+    var el = blogSelRestore();
+    if (!el) return;
+    try { document.execCommand("insertHTML", false, html); }
+    catch (e) { el.innerHTML += html; }
+    blogSelSave(); blogSync();
+  }
+  /** Is the caret already inside an H2? — «Заголовок» is a toggle, not a one-way trip. */
+  function blogInHeading() {
+    var s = window.getSelection();
+    var n = s && s.rangeCount ? s.getRangeAt(0).startContainer : null;
+    var box = blogBox();
+    while (n && n !== box) {
+      if (n.nodeType === 1 && n.tagName === "H2") return true;
+      n = n.parentNode;
+    }
+    return false;
+  }
+
+  /* ---- the three sheets: «Ссылка», «Картинка», «Товар» -------------------
+     Drawn into their own slot with innerHTML, never through render(), so the
+     box above them keeps its caret and BLOGSEL stays a live Range. */
+  function blogToolSheet() {
+    var t = S.adminBlogTool;
+    if (t === "link") {
+      return '<div class="admblog__toolrow">' +
+        '<input class="input input--box" data-blogtoolurl value="' + esc(S.adminBlogToolUrl || "") +
+          '" placeholder="https://…" aria-label="Адрес ссылки">' +
+        '<button class="btn btn--sm" data-blogtoolok="link">Вставить</button>' +
+        '<button class="link" data-blogtoolcancel>Отмена</button></div>';
+    }
+    if (t === "image") {
+      return (MEDIA.on === true
+        ? '<div class="admblog__toolrow">' +
+            '<button class="btn btn--sm" data-blogtoolupload' + (UP.busy ? " disabled" : "") + ">" +
+              (UP.busy ? upBusyText() : "Загрузить картинку") + "</button>" +
+            '<input class="admphoto__file" type="file" accept="image/*" data-blogtoolfile aria-label="Загрузить картинку">' +
+            '<button class="link" data-blogtoolcancel>Отмена</button></div>'
+        : '<p class="admphoto__off">Загрузка картинок пока не настроена — вставьте ссылку на картинку.</p>') +
+        '<div class="admblog__toolrow">' +
+          '<input class="input input--box" data-blogtoolurl value="' + esc(S.adminBlogToolUrl || "") +
+            '" placeholder="https://адрес-картинки" aria-label="Ссылка на картинку">' +
+          '<button class="btn btn--sm" data-blogtoolok="image">Вставить</button>' +
+          (MEDIA.on === true ? "" : '<button class="link" data-blogtoolcancel>Отмена</button>') +
+        "</div>";
+    }
+    if (t === "product") {
+      return '<div class="admblog__toolrow">' +
+          '<input class="input input--box" data-blogtoolq value="' + esc(S.adminBlogToolQ || "") +
+            '" placeholder="Найти товар по названию" aria-label="Найти товар">' +
+          '<button class="link" data-blogtoolcancel>Отмена</button></div>' +
+        '<div data-blogtoollist>' + blogToolMatches() + "</div>";
+    }
+    return "";
+  }
+  /* The same catalogue search «Товары в статьи» uses, one list lower down. */
+  function blogToolMatches() {
+    var q = (S.adminBlogToolQ || "").trim().toLowerCase();
+    if (!q) return "";
+    var matches = CATALOGUE.filter(function (p) {
+      return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
+    }).slice(0, 8);
+    if (!matches.length) return "";
+    return '<div class="adm__list">' + matches.map(function (p) {
+      return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+        '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+        '<button class="link" data-blogtoolpick="' + esc(p.id) + '">Вставить</button></div>';
+    }).join("") + "</div>";
+  }
+  function blogToolDraw(focusIt) {
+    var slot = document.querySelector("[data-blogtool]");
+    if (!slot) return;
+    slot.innerHTML = blogToolSheet();
+    translateTree(slot);
+    if (focusIt) {
+      var f = slot.querySelector("[data-blogtoolurl],[data-blogtoolq]");
+      if (f) f.focus();
+    }
+  }
+  function blogToolOpen(which) {
+    blogSelSave();
+    S.adminBlogTool = which;
+    S.adminBlogToolQ = ""; S.adminBlogToolUrl = "";
+    blogToolDraw(true);
+  }
+  function blogToolClose() {
+    S.adminBlogTool = ""; S.adminBlogToolQ = ""; S.adminBlogToolUrl = "";
+    blogToolDraw(false);
+  }
+  /** <figure><img></figure> — a picture is a block, never inline in a sentence. */
+  function blogInsertImage(url) {
+    var u = blogImgUrl(url);
+    if (!u) { toast("Ссылка на картинку должна начинаться с https://"); return; }
+    blogToolClose();
+    blogInsertHtml('<figure><img src="' + esc(u) + '" alt="" loading="lazy"></figure><p><br></p>');
+  }
+  /** The «Товар» marker. blogBodyHTML() turns it into a real card in the shop. */
+  function blogInsertProduct(id) {
+    var p = productsById([id])[0];
+    if (!p) return;
+    var pro = proPrice(p, 0);
+    var price = (p.priceFrom ? "от " : "") + eur(pro != null ? pro : p.price);
+    var href = "/shop2" + SEG_OF_LANG[S.adminBlogLang || "RU"] + "/p/" + encodeURIComponent(p.id) + "/";
+    blogToolClose();
+    blogInsertHtml('<a data-product="' + esc(p.id) + '" href="' + esc(href) + '">' +
+      esc(p.brand + " " + p.name) + " — " + esc(price) + "</a>&nbsp;");
+  }
+  function blogUploadImage(files) {
+    if (!files || !files.length) return;
+    UP.err = ""; UP.total = 1; UP.busy = 1; blogToolDraw(false);
+    uploadPhoto(files[0], "blog").then(function (r) {
+      UP.busy = 0; UP.total = 0;
+      blogInsertImage(r.url);
+    }).catch(function (e) {
+      UP.busy = 0; UP.total = 0; UP.err = mediaErrText(e);
+      toast(UP.err); blogToolDraw(false);
+    });
+  }
+  /** One toolbar button. Everything a browser can do itself goes to execCommand. */
+  function blogToolbar(cmd) {
+    /* The selection is still live — mousedown was prevented, so pressing the
+       button did not blur the box — and it is the one the owner means. Take
+       it now: the sheets below move the focus into their own input, and from
+       there BLOGSEL is the only record of what was selected. */
+    blogSelSave();
+    if (cmd === "bold") { blogExec("bold"); return; }
+    if (cmd === "ul") { blogExec("insertUnorderedList"); return; }
+    if (cmd === "undo") { blogExec("undo"); return; }
+    if (cmd === "h2") { blogSelRestore(); blogExec("formatBlock", blogInHeading() ? "<p>" : "<h2>"); return; }
+    if (cmd === "link") {
+      var el = blogSelRestore();
+      var s = window.getSelection();
+      if (el && s && s.isCollapsed) { toast("Выделите текст, который станет ссылкой"); return; }
+      blogToolOpen("link"); return;
+    }
+    if (cmd === "image" || cmd === "product") { blogToolOpen(cmd); }
+  }
+
+  /* ---- what goes into the box, and what comes out of it -------------------
+     A body written before the visual editor is markdown, so it is converted
+     once when the post is opened and saved back as HTML — the reader sees
+     the same article either way (renderPostBody() in src/lib/blog.ts picks
+     the renderer per body), and nothing had to be migrated. */
+  function blogBodyToHtml(body) {
+    var s = String(body || "");
+    if (!s.trim()) return "";
+    return blogCleanHtml(/^\s*<(?:p|h2|h3|ul|ol|figure|blockquote)(?:\s[^>]*)?>/i.test(s) ? s : blogMdToHtml(s));
+  }
+  function blogBody3ToHtml(b) {
+    return { RU: blogBodyToHtml(b && b.RU), ET: blogBodyToHtml(b && b.ET), EN: blogBodyToHtml(b && b.EN) };
+  }
+  /** The other direction: the model's translate task wants text, not tags. */
+  function blogHtmlToText(html) {
+    var doc = null;
+    try { doc = new DOMParser().parseFromString("<body>" + String(html || "") + "</body>", "text/html"); } catch (e) { doc = null; }
+    if (!doc || !doc.body) return String(html || "");
+    var out = [];
+    var walk = function (parent) {
+      var kids = parent.childNodes, i;
+      for (i = 0; i < kids.length; i++) {
+        var n = kids[i];
+        if (n.nodeType !== 1) continue;
+        var tag = n.tagName;
+        if (tag === "UL" || tag === "OL") { walk(n); continue; }
+        var text = (n.textContent || "").replace(/\s+/g, " ").trim();
+        if (tag === "H1" || tag === "H2") { if (text) out.push("## " + text); continue; }
+        if (tag === "H3") { if (text) out.push("### " + text); continue; }
+        if (tag === "LI") { if (text) out.push("- " + text); continue; }
+        if (tag === "BLOCKQUOTE") { if (text) out.push("> " + text); continue; }
+        if (tag === "FIGURE") { walk(n); continue; }
+        if (tag === "IMG") { var src = n.getAttribute("src"); if (src) out.push("![](" + src + ")"); continue; }
+        if (text) out.push(text);
+      }
+    };
+    walk(doc.body);
+    return out.join("\n\n");
+  }
+  /** A plain-text paste: blank lines are paragraphs, «## » and «- » still work. */
+  function blogTextToHtml(text) { return blogCleanHtml(blogMdToHtml(text)); }
+
   var BLOG_EMPTY3 = { RU: "", ET: "", EN: "" };
   function blogNewDraft() {
     return {
@@ -5003,7 +6012,8 @@
     return {
       id: p.id, slug: p.slug, slugAuto: false, status: p.status,
       title: Object.assign({}, BLOG_EMPTY3, p.title), excerpt: Object.assign({}, BLOG_EMPTY3, p.excerpt),
-      body: Object.assign({}, BLOG_EMPTY3, p.body),
+      // the editor works in HTML; an older markdown body is converted here, once
+      body: blogBody3ToHtml(Object.assign({}, BLOG_EMPTY3, p.body)),
       coverUrl: p.coverUrl || "", coverAlt: Object.assign({}, BLOG_EMPTY3, p.coverAlt),
       tagsText: (p.tags || []).join(", "), products: (p.products || []).slice(),
       seoTitle: Object.assign({}, BLOG_EMPTY3, p.seoTitle), seoDesc: Object.assign({}, BLOG_EMPTY3, p.seoDesc),
@@ -5018,6 +6028,7 @@
       if (r.status === 200 && r.body.ok && r.body.post) {
         S.adminBlogEdit = blogDraftFromPost(r.body.post);
         S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+        S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
       } else toast("Не получилось сохранить — попробуйте ещё раз.");
       render();
     }).catch(function () {
@@ -5030,7 +6041,12 @@
   function blogFieldsPayload(d) {
     return {
       slug: d.slugAuto ? undefined : d.slug,
-      title: d.title, excerpt: d.excerpt, body: d.body,
+      title: d.title, excerpt: d.excerpt,
+      /* Through the allowlist on the way out too: the box holds whatever the
+         browser's own editing commands left behind, and the server sanitises
+         again on the way in — this is the same list, one step earlier, so
+         what is stored is what the shop will show. */
+      body: blogBody3ToHtml(d.body),
       coverUrl: d.coverUrl || null, coverAlt: d.coverAlt,
       tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
       products: d.products,
@@ -5181,6 +6197,7 @@
   function admBlogEditor(d) {
     var L = S.adminBlogLang || "RU";
     var busy = S.adminBlogBusy;
+    blogKeepCaret();   // this render is about to replace the box the owner is typing in
     var seoTLen = (d.seoTitle[L] || "").length;
     var seoDLen = (d.seoDesc[L] || "").length;
     var picked = productsById(d.products);
@@ -5216,11 +6233,29 @@
         '<input class="input" data-blogf="title" maxlength="200" value="' + esc(d.title[L]) + '"></label>' +
       '<label class="field"><span class="field__label">Анонс</span>' +
         '<textarea class="input" rows="2" maxlength="500" data-blogf="excerpt">' + esc(d.excerpt[L]) + "</textarea></label>" +
-      '<label class="field"><span class="field__label">Текст статьи (Markdown)</span>' +
-        '<textarea class="input admblog__body" rows="14" maxlength="20000" data-blogf="body">' + esc(d.body[L]) + "</textarea></label>" +
-      '<p class="muted admblog__hint">Форматирование: **жирный**, *курсив*, [ссылка](https://…), ![картинка](https://…), «- » список, «> » цитата, «# » заголовок.</p>' +
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Предпросмотр</h3></div>' +
-      '<div class="acc__rich admblog__preview" data-admblogpreview>' + (blogMdPreview(d.body[L]) || "") + "</div>" +
+      /* The body: a visual box, not a markdown field, and no separate
+         preview under it — what is in the box IS what the article looks
+         like, down to the same .acc__rich rules the shop uses. */
+      '<div class="field"><span class="field__label">Текст статьи</span>' +
+        '<div class="admblog__tb" role="toolbar" aria-label="Оформление текста">' +
+          '<button class="btn btn--ghost btn--sm" data-blogrt="h2">Заголовок</button>' +
+          '<button class="btn btn--ghost btn--sm" data-blogrt="bold">Жирный</button>' +
+          '<button class="btn btn--ghost btn--sm" data-blogrt="ul">Список</button>' +
+          '<button class="btn btn--ghost btn--sm" data-blogrt="link">Ссылка</button>' +
+          '<button class="btn btn--ghost btn--sm" data-blogrt="image">Картинка</button>' +
+          '<button class="btn btn--ghost btn--sm" data-blogrt="product">Товар</button>' +
+          '<button class="btn btn--ghost btn--sm" data-blogrt="undo">Отменить</button>' +
+        "</div>" +
+        // …and the open sheet, so a render() in the middle of «Товар» does not shut it
+        '<div class="admblog__tool" data-blogtool>' + blogToolSheet() + "</div>" +
+        /* `placeholder` on a div is not a real one — the CSS prints it with
+           content: attr(placeholder). It is written that way so translateTree()
+           rewrites it like any other placeholder in this panel. */
+        '<div class="input acc__rich admblog__rte" contenteditable="true" data-blogbody role="textbox" ' +
+          'aria-multiline="true" aria-label="Текст статьи" ' +
+          'placeholder="Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.">' +
+          (d.body[L] || "") + "</div>" +
+      "</div>" +
 
       '<div class="sec__head sec__head--sub"><h3 class="sec__title">Обложка</h3></div>' +
       (d.coverUrl
@@ -5453,6 +6488,13 @@
       (S.acctOrders.length
         ? S.acctOrders.map(acctOrderRow).join("")
         : '<p class="muted">Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.</p>') +
+
+      /* The gift card's third home, after the footer link and the home-page
+         block: the cabinet is where a returning customer looks for «what else
+         can I buy here», and until now the card was reachable only from
+         «Наборы». The same tile the home and sets pages render, so there is
+         nothing new to translate. */
+      '<div class="acct__gift">' + giftTileHTML() + "</div>" +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои данные</h2></div>' +
       '<label class="field"><span class="field__label">Имя</span><input class="input" data-acctf="name" value="' + esc(f.name) + '" placeholder="Имя" autocomplete="given-name"></label>' +
@@ -6470,22 +7512,25 @@
   /* The panel asks for the password as soon as there is a server to ask. On
      the static prototype — no API behind it — this never appears and the demo
      panel opens exactly as it always did. */
-  function admHeader() {
+  /* `title` names which of the admin-session screens this is — «Админка» by
+     default, «Сканер» on /shop2/scan/ (scanner app), which shares the very
+     same wait/login cards. */
+  function admHeader(title) {
     return '<div class="cohdr cohdr--adm"><div class="cohdr__row">' +
       '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — в магазин">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
-      '<span class="cohdr__t">Админка</span>' +
+      '<span class="cohdr__t">' + (title || "Админка") + "</span>" +
       '<span class="cohdr__langs" role="group" aria-label="Язык"> ' + LANGS.map(function (l) {
         return '<button class="cohdr__lang" data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
       }).join("") + "</span>" +
       '<button class="link" data-go="home">← В магазин</button></div></div>';
   }
-  function admWaitScreen() {
-    return admHeader() +
+  function admWaitScreen(title) {
+    return admHeader(title) +
       '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
         '<p class="muted" style="margin:28px 0">Проверяем…</p></main></div>';
   }
-  function admLoginScreen() {
-    return admHeader() +
+  function admLoginScreen(title) {
+    return admHeader(title) +
       '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
         '<div class="adm__list" style="max-width:420px;margin:28px auto;padding:18px 16px">' +
           '<div class="sec__head sec__head--sub"><h2 class="sec__title">Вход в админку</h2></div>' +
@@ -6665,6 +7710,120 @@
   function offlineStatsHTML() {
     return '<p class="muted" style="margin:16px 0">Аналитика считается на сервере из настоящих заходов и заказов — откроется здесь, как только вы войдёте в панель.</p>';
   }
+
+  /* ---------- analytics agent: «Обзор» -------------------------------------
+     Every number on the first screen of the panel comes from ONE call —
+     GET /api/admin/overview/ (src/lib/analytics.ts getOverviewSummary()).
+     Before this it was a mixture: a real catalogue count next to a hard-coded
+     «3 заказа сегодня» and a random «вчера — 5», which is worse than no number
+     at all — the owner cannot tell which half to believe.
+
+     Fetched once per visit to the panel, like loadStockLevels(): the Обзор is
+     a glance-at-it screen, not a live dashboard, and a poll would cost a query
+     a second for a shop with three orders a month. Signing out and back in, or
+     reloading, re-asks. */
+  var OVERVIEW = { data: null, err: null, asked: false };
+  function loadOverview(force) {
+    if (SRV.admin !== true) return;
+    if (OVERVIEW.asked && !force) return;
+    OVERVIEW.asked = true;
+    apiJson("/api/admin/overview/").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { OVERVIEW.data = r.body; OVERVIEW.err = null; }
+      else { OVERVIEW.data = null; OVERVIEW.err = (r.body && r.body.error) || "error"; }
+      render();
+    }).catch(function () { OVERVIEW.data = null; OVERVIEW.err = "offline"; render(); });
+  }
+  /** The «Заканчиваются на складе» rows — one shape whether the list came from
+   *  the server (real stock) or from the catalogue (the demo panel). */
+  function overLowRow(p, state) {
+    return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
+      '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
+      '<span class="chip ' + (state === "out" ? "chip--out" : "chip--low") + '">' + (state === "out" ? "нет" : "мало") + "</span>" +
+      '<span class="num adm__pr">' + eur(p.price) + "</span></div>";
+  }
+  /* The four queues nobody but the owner can empty. Each row links to the tab
+     that empties it; a queue at zero still shows, because «0» is the answer to
+     "is there anything waiting?" and a row that disappears reads as a bug. */
+  var OVER_ATTENTION = [
+    ["ordersToShip", "Заказы ждут отправки", "оплачены, но ещё не отправлены", "orders"],
+    ["proRequests", "Заявки на партнёрство", "клиенты просят цены для салона", "people"],
+    ["reviewsPending", "Отзывы на проверке", "появятся на сайте после проверки", "reviews"],
+    ["stockAlerts", "Ждут, когда товар появится", "письмо уйдёт само, когда поставите наличие", "stock"]
+  ];
+  function overAttentionHTML(att) {
+    var total = OVER_ATTENTION.reduce(function (a, r) { return a + (att[r[0]] || 0); }, 0);
+    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Требует внимания</h2></div>' +
+      (total ? "" : '<p class="muted" style="margin:0 0 8px">Ничего не ждёт — всё разобрано.</p>') +
+      '<div class="adm__list">' + OVER_ATTENTION.map(function (r) {
+        var n = att[r[0]] || 0;
+        return '<div class="adm__row"><span class="adm__nm">' + r[1] + '<span class="adm__sub">' + r[2] + "</span></span>" +
+          '<span class="chip ' + (n ? "chip--low" : "chip--ok") + '">' + n + "</span>" +
+          '<button class="link" data-admtab="' + r[3] + '">Открыть</button></div>';
+      }).join("") + "</div>";
+  }
+  /**
+   * The «Обзор» tab. Layout is deliberately the one it has always had — KPI
+   * row, latest orders, what is running out — with «Требует внимания» added
+   * between the first two; a redesign is a separate job. What changed is that
+   * every figure is now either a real answer from the server or, in the demo
+   * panel with no backend behind it, openly the demo's own.
+   */
+  function admOverHTML(orders) {
+    if (SRV.admin === true) loadOverview();
+    var o = OVERVIEW.data;
+    var kpis, note, lowRows;
+
+    var catKpi = kpi("Товаров в каталоге", String(CATALOGUE.length),
+      CATS.length + " " + pl(CATS.length, "раздел", "раздела", "разделов"));
+
+    if (o) {
+      var low = o.lowStock;
+      kpis =
+        kpi("Заказы сегодня", String(o.orders.today), "вчера — " + o.orders.yesterday) +
+        kpi("Выручка за 7 дней", eur(o.revenue7d.total), "в среднем " + eur(o.revenue7d.perDay) + " в день") +
+        catKpi +
+        kpi("Заканчиваются", String(low.total), low.total ? "из них нет в наличии — " + low.out : "всё в наличии");
+      note = '<p class="muted" style="font-size:12.5px;margin:-6px 0 16px">Заказы и выручка — только оплаченные, по дате заказа.</p>';
+      // byId() can come back empty for an override on something the catalogue
+      // dropped since; the server filters those out too, this is the belt.
+      lowRows = low.items.slice(0, 6).map(function (it) {
+        var p = byId(it.id);
+        return p ? overLowRow(p, it.stock) : "";
+      }).join("");
+    } else if (SRV.admin === true && !OVERVIEW.err) {
+      /* Signed in, the answer is still on its way. The demo numbers must NOT
+         flash up here: the note above this block now says the figures are
+         real, and «3 заказа сегодня» appearing for half a second under that
+         sentence is exactly the lie this whole change is about. Empty cards
+         keep the layout and say nothing untrue. */
+      kpis =
+        kpi("Заказы сегодня", "…", "") + kpi("Выручка за 7 дней", "…", "") +
+        catKpi + kpi("Заканчиваются", "…", "");
+      note = '<p class="muted" style="margin:-6px 0 16px">Загружаем…</p>';
+      lowRows = "";
+    } else {
+      // No backend at all (the standalone prototype), or the call failed: the
+      // demo panel's own numbers, which the note says are a demo either way.
+      var week = orders.slice(0, 7).reduce(function (a, x) { return a + x.sum; }, 0);
+      kpis =
+        kpi("Заказы сегодня", "3", "вчера — 5") +
+        kpi("Выручка за 7 дней", eur(week), "в среднем " + eur(week / 7) + " в день") +
+        catKpi +
+        kpi("Заканчиваются", String(lowStock().length), "нужно дозаказать");
+      note = SRV.admin === true && OVERVIEW.err
+        ? '<div class="adm__note">Сводка сейчас не отвечает — цифры показаны демонстрационные.</div>'
+        : "";
+      lowRows = lowStock().slice(0, 6).map(function (p) { return overLowRow(p, p.stock); }).join("");
+    }
+
+    return '<div class="adm__kpis">' + kpis + "</div>" + note +
+      (o ? overAttentionHTML(o.attention) : "") +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Последние заказы</h2><button class="link" data-admtab="orders">Все заказы</button></div>' +
+      orderTable(orders.slice(0, 5)) +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заканчиваются на складе</h2></div>' +
+      '<div class="adm__list">' + lowRows + "</div>";
+  }
   function admStatsHTML() {
     if (SRV.admin !== true) return offlineStatsHTML();
     var range = statsRange();
@@ -6751,7 +7910,6 @@
     // set otherwise, so the panel is never an empty room
     var live = SRV.admin === true && SRV.orders && SRV.orders.length ? SRV.orders : null;
     var orders = live || fakeOrders();
-    var week = orders.slice(0, 7).reduce(function (a, o) { return a + o.sum; }, 0);
     var tab = S.adminTab;
     // account-flows: the queue sizes under the three switches, once
     if (tab === "mail" && SRV.admin === true) loadFlowCounts();
@@ -6781,26 +7939,19 @@
         "</div></aside>" +
 
       '<main class="adm__main">' +
-      '<div class="adm__note">' + (live
-        ? "Заказы — настоящие, с сервера. Клиенты и аналитика пока демонстрационные."
+      /* analytics agent: the panel no longer calls the customers or the
+         numbers a demo — «Обзор» reads GET /api/admin/overview/, «Клиенты»
+         and «Аналитика» their own real endpoints. The only thing still
+         invented once the owner is signed in is the sample order list shown
+         while the shop has taken no orders at all, and that is what the
+         middle line says. */
+      '<div class="adm__note">' + (SRV.admin === true
+        ? (live
+          ? "Все цифры — настоящие, из вашего магазина."
+          : "Цифры настоящие. Заказов пока нет — в списке показан пример, как это будет выглядеть.")
         : "Демонстрация. Заказы, клиенты и цифры вымышленные, товары — настоящие, из вашего каталога.") + "</div>" +
 
-      (tab === "over" ?
-        '<div class="adm__kpis">' +
-          kpi("Заказы сегодня", "3", "вчера — 5") +
-          kpi("Выручка за 7 дней", eur(week), "в среднем " + eur(week / 7) + " в день") +
-          kpi("Товаров в каталоге", String(CATALOGUE.length), CATS.length + " " + pl(CATS.length, "раздел", "раздела", "разделов")) +
-          kpi("Заканчиваются", String(lowStock().length), "нужно дозаказать") +
-        "</div>" +
-        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Последние заказы</h2><button class="link" data-admtab="orders">Все заказы</button></div>' +
-        orderTable(orders.slice(0, 5)) +
-        '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заканчиваются на складе</h2></div>' +
-        '<div class="adm__list">' + lowStock().slice(0, 6).map(function (p) {
-          return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-            '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-            '<span class="chip ' + (p.stock === "out" ? "chip--out" : "chip--low") + '">' + (p.stock === "out" ? "нет" : "мало") + "</span>" +
-            '<span class="num adm__pr">' + eur(p.price) + "</span></div>";
-        }).join("") + "</div>" : "") +
+      (tab === "over" ? admOverHTML(orders) : "") +
 
       (tab === "orders" ?
         (S.adminOrder
@@ -6809,12 +7960,19 @@
             (SRV.admin === true && SRV.ordersErr ? '<div class="adm__note">Сервер заказов не отвечает — показан демонстрационный список.</div>' : "") +
             orderTable(orders)) : "") +
 
+      /* «Товары» holds two shelves now: the catalogue itself and the sets
+         assembled from it. The goods editor keeps the whole pane to itself
+         when it is open — the tab strip would be a way to lose an unsaved
+         edit. */
       (tab === "goods" ?
         (S.adminEdit
           ? goodsEditor(byId(S.adminEdit))
-          : '<p class="muted" style="margin:16px 0">Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.</p>' +
-            '<input class="input input--box" data-goodsq value="' + esc(S.goodsQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск по товарам" style="margin-bottom:12px;max-width:420px">' +
-            '<div class="adm__list" id="goodslist">' + goodsRows() + "</div>") : "") +
+          : goodsTabsHTML() +
+            (S.goodsTab === "bundles"
+              ? admBundlesHTML()
+              : '<p class="muted" style="margin:16px 0">Цены, остатки и тексты правятся прямо здесь. Штрихкод со сканера ищет товар за секунду — приход и списание без ручного ввода.</p>' +
+                '<input class="input input--box" data-goodsq value="' + esc(S.goodsQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск по товарам" style="margin-bottom:12px;max-width:420px">' +
+                '<div class="adm__list" id="goodslist">' + goodsRows() + "</div>")) : "") +
 
       // inventory: numeric stock, EAN scanner, moves ledger
       (tab === "stock" ? admStockHTML() : "") +
@@ -6838,7 +7996,7 @@
       (tab === "stats" ? admStatsHTML() : "") +
 
       (tab === "mail" ?
-        '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Текст письма можно менять через помощника.</p>' +
+        '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.</p>' +
         '<div class="adm__list">' +
         [["Заказ принят", "сразу после оплаты — номер заказа и состав"],
          ["Заказ отправлен", "трек-номер и кнопка отслеживания"]].map(function (f) {
@@ -6889,7 +8047,7 @@
           '<span class="chip ' + (DEMO.chatbot ? "chip--ok" : "chip--low") + '">' + (DEMO.chatbot ? "включён" : "выключен") + "</span>" +
           '<button class="link" data-admchatbot>' + (DEMO.chatbot ? "Выключить" : "Включить") + "</button></div>" +
           '<div class="adm__row"><span class="adm__nm">Наборы на сайте' +
-          '<span class="adm__sub">готовые комплекты со скидкой 12 % — в меню, на главной и в каталоге; пока не согласовано с владельцем</span></span>' +
+          '<span class="adm__sub">готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»</span></span>' +
           '<span class="chip ' + (DEMO.bundles !== false ? "chip--ok" : "chip--low") + '">' + (DEMO.bundles !== false ? "показаны" : "скрыты") + "</span>" +
           '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
         admHeroCard() +
@@ -6982,8 +8140,160 @@
     var el = document.querySelector("[data-mailto]");
     if (el) S.mailTo = el.value;
   }
+
+  /* ---- the owner's own subject / intro / signature ------------------------
+     Three strings per letter per language (settings.mail_texts, server side
+     src/emails/texts.ts). The defaults, the caps and whatever is already
+     saved all come down in one call from the same route the preview iframe
+     reads — so the field the owner edits and the letter he is looking at can
+     never be two different texts.
+
+     Everything is edited on a copy (S.mailDraft); nothing reaches a customer
+     until «Сохранить» → the confirm card, as one set_mail_texts action
+     carrying the whole map. Same door, same undo as the banner. */
+  var MAIL_TEXTS = null;          // { templates, placeholders, limits, defaults, texts }
+  var mailTextsAsked = false;
+  var mailPreviewV = 0;           // bumped on apply so the iframe refetches
+  var MAIL_LANGS = ["ru", "et", "en"];
+  var MAIL_LIMITS = { subject: 200, intro: 1500, signature: 300 };
+  var MAIL_FIELDS = [
+    ["subject", "Тема письма", "Её видно в списке писем — коротко и по делу."],
+    ["intro", "Вступление — абзац под приветствием", "Приветствие «Здравствуйте, Имя!» подставляется само — начинайте со следующего предложения."],
+    ["signature", "Подпись — последняя строка письма", "Стоит внизу письма, перед реквизитами магазина."]
+  ];
+  /* What each placeholder puts into the text. The chip itself shows the token,
+     which is the same in all three languages; the title explains it. */
+  var MAIL_PH = [
+    ["name", "Имя покупателя"], ["order", "Номер заказа"], ["total", "Сумма заказа"],
+    ["track", "Трек-номер"], ["code", "Код — промокод или код для входа"],
+    ["product", "Название товара"], ["shop", "Название магазина"]
+  ];
+  function loadMailTexts(force) {
+    if (mailTextsAsked && !force) return;
+    mailTextsAsked = true;
+    fetch("/api/admin/mail/preview/?format=texts")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && j.ok) { MAIL_TEXTS = j; render(); } })
+      .catch(noop);
+  }
+  function mailLangCode(lang) { return String(lang || "RU").toLowerCase(); }
+  function mailLimit(field) {
+    var lim = MAIL_TEXTS && MAIL_TEXTS.limits && Number(MAIL_TEXTS.limits[field]);
+    return lim > 0 ? lim : MAIL_LIMITS[field];
+  }
+  function mailSaved() {
+    try { return JSON.parse(JSON.stringify((MAIL_TEXTS && MAIL_TEXTS.texts) || {})); }
+    catch (e) { return {}; }
+  }
+  function mailDraft() {
+    if (!S.mailDraft) S.mailDraft = mailSaved();
+    return S.mailDraft;
+  }
+  function mailDefault(tpl, lang, field) {
+    var d = MAIL_TEXTS && MAIL_TEXTS.defaults && MAIL_TEXTS.defaults[tpl];
+    d = d && d[mailLangCode(lang)];
+    return d && typeof d[field] === "string" ? d[field] : "";
+  }
+  /** What the field shows: the owner's text, or the letter's own default. */
+  function mailValue(tpl, lang, field) {
+    var t = mailDraft()[tpl];
+    t = t && t[mailLangCode(lang)];
+    var own = t && t[field];
+    return typeof own === "string" && own ? own : mailDefault(tpl, lang, field);
+  }
+  /* An empty field, or one typed back to the default word for word, is stored
+     as nothing at all — that is what «Вернуть стандартный текст» does, and it
+     means a letter the owner never touched keeps following the default even
+     after the copy is rewritten. */
+  function setMailDraftField(tpl, lang, field, raw) {
+    var l = mailLangCode(lang), d = mailDraft();
+    var v = String(raw == null ? "" : raw).slice(0, mailLimit(field));
+    if (!d[tpl]) d[tpl] = {};
+    if (!d[tpl][l]) d[tpl][l] = {};
+    if (!v.trim() || v.trim() === mailDefault(tpl, lang, field).trim()) delete d[tpl][l][field];
+    else d[tpl][l][field] = v;
+    if (!objKeys(d[tpl][l]).length) delete d[tpl][l];
+    if (!objKeys(d[tpl]).length) delete d[tpl];
+  }
+  function objKeys(o) { return o ? Object.keys(o) : []; }
+  /** Order-independent fingerprint — «изменилось ли что-нибудь» must not
+      depend on the order two objects happened to gain their keys in. */
+  function mailSig(map) {
+    var out = [];
+    MAIL_TPL.forEach(function (m) {
+      MAIL_LANGS.forEach(function (l) {
+        MAIL_FIELDS.forEach(function (f) {
+          var v = map && map[m[0]] && map[m[0]][l] && map[m[0]][l][f[0]];
+          if (typeof v === "string" && v.trim()) out.push(m[0] + "/" + l + "/" + f[0] + "=" + v.trim());
+        });
+      });
+    });
+    return out.join("\n");
+  }
+  function mailDirty() { return mailSig(mailDraft()) !== mailSig(mailSaved()); }
+  /** What actually gets saved: trimmed, clamped, empties dropped. The server
+      sanitises again (cleanMailTexts) — this only keeps the blob tidy. */
+  function mailClean(map) {
+    var out = {};
+    MAIL_TPL.forEach(function (m) {
+      MAIL_LANGS.forEach(function (l) {
+        MAIL_FIELDS.forEach(function (f) {
+          var v = map && map[m[0]] && map[m[0]][l] && map[m[0]][l][f[0]];
+          if (typeof v !== "string" || !v.trim()) return;
+          if (!out[m[0]]) out[m[0]] = {};
+          if (!out[m[0]][l]) out[m[0]][l] = {};
+          out[m[0]][l][f[0]] = v.trim().slice(0, mailLimit(f[0]));
+        });
+      });
+    });
+    return out;
+  }
+  /** How many of the eighteen strings the owner has actually rewritten. */
+  function mailTextsCount(map) {
+    var sig = mailSig(map);
+    return sig ? sig.split("\n").length : 0;
+  }
+  function mailFieldHTML(tpl, lang, f) {
+    var field = f[0], lim = mailLimit(field), val = mailValue(tpl, lang, field);
+    var own = val !== mailDefault(tpl, lang, field);
+    var box = field === "intro"
+      ? '<textarea class="input" rows="4" maxlength="' + lim + '" data-mailtxt="' + field + '">' + esc(val) + "</textarea>"
+      : '<input class="input" maxlength="' + lim + '" data-mailtxt="' + field + '" value="' + esc(val) + '">';
+    return '<label class="field"><span class="field__label">' + f[1] + "</span>" + box + "</label>" +
+      '<p class="muted" style="margin:-6px 0 8px;font-size:12.5px">' + f[2] + "</p>" +
+      '<div class="adm__chips" role="group" aria-label="Подстановки">' +
+        MAIL_PH.map(function (p) {
+          return '<button class="fchip" data-mailph="' + field + ":" + p[0] + '" title="' + p[1] + '">{' + p[0] + "}</button>";
+        }).join("") +
+        (own ? '<button class="link" data-mailreset="' + field + '">Вернуть стандартный текст</button>' : "") +
+      "</div>";
+  }
+  function mailActsHTML() {
+    if (!mailDirty()) return "";
+    return '<button class="btn btn--sm" data-mailsave>Сохранить</button>' +
+      '<button class="btn btn--ghost btn--sm" data-mailrevert>Отменить правки</button>';
+  }
+  /* Typing must not cost the caret, so the two moving parts repaint on their
+     own instead of through render() — the same idiom as paintPricingState(). */
+  function paintMailState() {
+    var acts = document.getElementById("mailacts");
+    if (acts) { acts.innerHTML = mailActsHTML(); translateTree(acts); }
+    var dirty = document.querySelector("[data-maildirty]");
+    if (dirty) dirty.hidden = !mailDirty() || !!(pendingAction && pendingAction.type === "set_mail_texts");
+  }
+  function mailEditorHTML(tpl, lang) {
+    if (!MAIL_TEXTS) return "";
+    var pending = pendingAction && pendingAction.type === "set_mail_texts" ? confirmCard(pendingAction) : "";
+    return '<p class="muted" style="margin:14px 0 10px">Тему, вступление и подпись можно поменять. Всё остальное — состав заказа, кнопки, подвал — остаётся как есть.</p>' +
+      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы менять тексты писем.</div>') +
+      pending +
+      '<p class="admhero__dirty" data-maildirty' + (mailDirty() && !pending ? "" : " hidden") + ">Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      MAIL_FIELDS.map(function (f) { return mailFieldHTML(tpl, lang, f); }).join("") +
+      '<div class="adm__acts" id="mailacts">' + mailActsHTML() + "</div>";
+  }
   function mailCard() {
     var tpl = mailTpl(), lang = mailLang();
+    loadMailTexts(false);
     return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Письма — предпросмотр и тест</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Выберите письмо и язык — покажем его ровно таким, каким его получит покупатель. Ниже можно отправить образец себе на почту.</p>' +
       '<div class="adm__chips" role="group" aria-label="Письмо">' +
@@ -6994,8 +8304,10 @@
         LANGS.map(function (l) {
           return '<button class="scchip" data-maillang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
         }).join("") + "</div>" +
+      mailEditorHTML(tpl, lang) +
       '<iframe title="Предпросмотр письма" loading="lazy" ' +
-        'src="/api/admin/mail/preview/?template=' + encodeURIComponent(tpl) + "&amp;lang=" + encodeURIComponent(lang) + '" ' +
+        'src="/api/admin/mail/preview/?template=' + encodeURIComponent(tpl) + "&amp;lang=" + encodeURIComponent(lang) +
+          "&amp;v=" + mailPreviewV + '" ' +
         'style="display:block;width:100%;height:520px;margin-top:14px;border:1px solid var(--rule);background:#fff"></iframe>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px">' +
         '<input class="input input--box" type="email" data-mailto value="' + esc(S.mailTo || "") + '" ' +
@@ -7963,6 +9275,314 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
+  /* ---------- admin: «Товары → Наборы» ------------------------------------
+     Sets used to live in tools/bundles.config.mjs — a file, a text editor and
+     a redeploy. They are rows in `bundles` now (db/migrations/120_bundles.sql)
+     and this is where Renat edits them: a list with a switch and two arrows,
+     and one form for the set itself.
+
+     It sits inside «Товары» as a second tab rather than as a section of its
+     own, because a set IS the goods shelf seen from a different angle — and
+     because the redesign that is coming will move it anyway; a tab strip is
+     the cheapest thing to move.
+
+     The list and the editor both read S.admBundles, loaded from
+     GET /api/admin/bundles/ (everything, hidden sets included — unlike the
+     storefront's /api/bundles/). */
+  var GOODS_TABS = [["goods", "Товары"], ["bundles", "Наборы"]];
+  var BUNDLE_CATS = [
+    ["hair", "Волосы"], ["styling", "Стайлинг"], ["beard", "Борода"], ["face", "Лицо"],
+    ["body", "Тело"], ["perfume", "Парфюм"], ["merch", "Мерч"]
+  ];
+  function goodsTabsHTML() {
+    return '<div class="adm__chips" role="group" aria-label="Что показываем">' + GOODS_TABS.map(function (t) {
+      return '<button class="scchip" data-admgoodstab="' + t[0] + '" aria-current="' +
+        ((S.goodsTab || "goods") === t[0]) + '">' + t[1] + "</button>";
+    }).join("") + "</div>";
+  }
+
+  function loadAdminBundles(force) {
+    if (SRV.admin !== true) return;
+    if (S.admBundles && !force) return;
+    if (loadAdminBundles._busy) return;
+    loadAdminBundles._busy = true;
+    apiJson("/api/admin/bundles/").then(function (r) {
+      loadAdminBundles._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      S.admBundles = r.status === 200 && r.body.ok ? hydrateBundles(r.body.bundles || []) : [];
+      S.admBundleErr = r.status === 200 && r.body.ok ? "" : "Список наборов не загрузился.";
+      render();
+    }).catch(function () {
+      loadAdminBundles._busy = false;
+      S.admBundles = []; S.admBundleErr = "Сервер не отвечает."; render();
+    });
+  }
+
+  function blankBundle() {
+    return {
+      id: "", cat: "beard", editing: false,
+      title: { RU: "", ET: "", EN: "" }, desc: { RU: "", ET: "", EN: "" },
+      items: [], price: "", image: "", active: true, sort: 0, lang: "RU"
+    };
+  }
+  /** A saved set → the shape the form edits. */
+  function bundleToForm(b) {
+    return {
+      id: b.id, cat: b.cat || "beard", editing: true,
+      title: { RU: (b.title && b.title.RU) || "", ET: (b.title && b.title.ET) || "", EN: (b.title && b.title.EN) || "" },
+      desc: { RU: (b.desc && b.desc.RU) || "", ET: (b.desc && b.desc.ET) || "", EN: (b.desc && b.desc.EN) || "" },
+      items: (b.items || []).map(function (it) {
+        return { productId: it.productId || it.id, variant: it.variant || it.size || 0, qty: it.qty || 1 };
+      }),
+      price: b.price != null ? String(b.price) : "",
+      image: b.image || "", active: b.active !== false, sort: b.sort || 0, lang: "RU"
+    };
+  }
+  /** What the parts cost separately, at today's shop prices. */
+  function bundleFormSum() {
+    var f = S.bundleForm;
+    if (!f) return 0;
+    var s = 0;
+    f.items.forEach(function (it) {
+      var p = byIdOrNull(it.productId);
+      if (p) s += sizePrice(p, it.variant || 0) * (it.qty || 1);
+    });
+    return Math.round(s * 100) / 100;
+  }
+  function bundleFormPrice() {
+    var n = Number(String(S.bundleForm.price || "").replace(",", "."));
+    return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+  }
+  /* The one number the owner is really deciding. Patched in place on every
+     keystroke instead of rendered, so the caret stays in the price box. */
+  function bundleHintHTML() {
+    var sum = bundleFormSum(), price = bundleFormPrice();
+    if (!sum) return "Добавьте хотя бы два товара — тогда посчитаем.";
+    if (!price) return "Сумма по отдельности — " + eur(sum) + ". Впишите цену набора.";
+    if (price >= sum) return "Набор дороже, чем товары по отдельности (" + eur(sum) + ") — так нельзя.";
+    return "Сумма по отдельности — " + eur(sum) + ", скидка " +
+      Math.round(((sum - price) / sum) * 100) + " % · выгода " + eur(Math.round((sum - price) * 100) / 100);
+  }
+  function paintBundleHint() {
+    var box = document.querySelector("[data-bundlehint]");
+    if (!box) return;
+    box.textContent = bundleHintHTML();
+    translateTree(box);
+  }
+  function bundlePickRows() {
+    var list = heroFind(S.bundleQ);
+    if (!list.length) return HERO_NOHIT;
+    return list.map(function (p) {
+      return '<button class="admhero__pick" data-bundleadd="' + esc(p.id) + '" title="' +
+        esc(p.brand + " " + p.name) + '">' + media(p, 0, "ph admhero__pickimg") +
+        '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
+    }).join("");
+  }
+  /** The photos the set can wear: one per product inside it, plus «сами». */
+  function bundleImageRowHTML() {
+    var f = S.bundleForm;
+    var picks = '<button class="admhero__pick" data-bundleimg="" aria-current="' + (!f.image) +
+      '" title="Три фото товаров стопкой">' +
+      '<span class="admhero__pickn">Автоматически</span></button>';
+    f.items.forEach(function (it) {
+      var p = byIdOrNull(it.productId);
+      if (!p) return;
+      picks += '<button class="admhero__pick" data-bundleimg="' + esc(p.id) + '" aria-current="' +
+        (f.image === p.id) + '" title="' + esc(p.brand + " " + p.name) + '">' +
+        media(p, 0, "ph admhero__pickimg") + '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
+    });
+    return picks;
+  }
+  function bundleItemRowsHTML() {
+    var f = S.bundleForm;
+    if (!f.items.length) return '<p class="muted">Пока пусто. Найдите товар ниже и нажмите на него.</p>';
+    return '<div class="adm__list">' + f.items.map(function (it, i) {
+      var p = byIdOrNull(it.productId);
+      var sizes = p && p.sizes && p.sizes.length ? p.sizes : [];
+      return '<div class="adm__row">' + (p ? '<span class="adm__ph">' + media(p, it.variant || 0, "ph") + "</span>" : "") +
+        '<span class="adm__nm">' + esc(p ? p.brand + " — " + p.name : it.productId) +
+          '<span class="adm__sub">' + eur(p ? sizePrice(p, it.variant || 0) : 0) + "</span></span>" +
+        (sizes.length > 1
+          ? '<span class="sel"><select data-bundlesize="' + i + '" aria-label="Объём">' + sizes.map(function (sz, si) {
+              return '<option value="' + si + '"' + (si === (it.variant || 0) ? " selected" : "") + ">" + esc(sz) + "</option>";
+            }).join("") + "</select></span>"
+          : "") +
+        '<span class="stepper"><button data-bundleqty="' + i + ':-1" aria-label="Меньше">−</button>' +
+          '<span class="num">' + (it.qty || 1) + "</span>" +
+          '<button data-bundleqty="' + i + ':1" aria-label="Больше">+</button></span>' +
+        '<button class="link" data-bundledel="' + i + '">Убрать</button></div>';
+    }).join("") + "</div>";
+  }
+  function bundleFormHTML() {
+    var f = S.bundleForm;
+    var lang = f.lang || "RU";
+    return '<div class="adm__confirm adm__promoform">' +
+      "<b>" + (f.editing ? "Изменить набор" : "Новый набор") + "</b>" +
+      '<label class="field"><span class="field__label">Адрес набора — латиницей, менять нельзя после первой продажи</span>' +
+        '<input class="input" data-bundlef="id" maxlength="64" value="' + esc(f.id) + '" placeholder="beard-start"' +
+        (f.editing ? " readonly" : "") + "></label>" +
+      '<div class="field__label">Раздел магазина</div>' +
+      '<span class="sel"><select data-bundlecat>' + BUNDLE_CATS.map(function (c) {
+        return '<option value="' + c[0] + '"' + (f.cat === c[0] ? " selected" : "") + ">" + c[1] + "</option>";
+      }).join("") + "</select></span>" +
+      '<div class="adm__chips" role="group" aria-label="Язык текста">' + LANGS.map(function (l) {
+        return '<button class="scchip" data-bundlelang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
+      }).join("") + "</div>" +
+      '<label class="field"><span class="field__label">' +
+        (lang === "RU" ? "Название — обязательно" : "Название — можно оставить пустым") + "</span>" +
+        '<input class="input" data-bundlef="title" maxlength="120" value="' + esc(f.title[lang] || "") +
+        '" placeholder="' + (lang === "RU" ? "Борода — стартовый набор" : esc(f.title.RU || "")) + '"></label>' +
+      '<label class="field"><span class="field__label">Описание — две-три простые фразы</span>' +
+        '<textarea class="input" rows="3" maxlength="1000" data-bundlef="desc" placeholder="' +
+        (lang === "RU" ? "Масло, бальзам и мыло — всё, с чего начинается уход." : esc(f.desc.RU || "")) + '">' +
+        esc(f.desc[lang] || "") + "</textarea></label>" +
+      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Что внутри — минимум два товара</h2></div>' +
+      bundleItemRowsHTML() +
+      '<label class="field"><span class="field__label">Найти товар</span>' +
+        '<input class="input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
+      '<div class="admhero__picks" id="bundlepicks">' + bundlePickRows() + "</div>" +
+      '<label class="field"><span class="field__label">Цена набора, €</span>' +
+        '<input class="input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
+      '<p class="hint" data-bundlehint>' + esc(bundleHintHTML()) + "</p>" +
+      '<div class="field__label">Фото набора</div>' +
+      '<div class="admhero__picks">' + bundleImageRowHTML() + "</div>" +
+      (S.bundleFormErr ? '<div class="err" role="alert">' + esc(S.bundleFormErr) + "</div>" : "") +
+      '<div class="adm__acts"><button class="btn btn--sm" data-bundlesave>Сохранить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-bundlecancel>Отмена</button>' +
+        (f.editing ? ' <button class="link" data-bundledelete="' + esc(f.id) + '">Удалить набор</button>' : "") +
+      "</div></div>";
+  }
+  /* «Удалить» is the one button here that cannot be undone, so it goes
+     through the panel's own confirm-before-apply strip rather than a browser
+     dialog — same shape as the blog's delete. */
+  function bundleDelConfirmHTML() {
+    return '<div class="adm__confirm"><b>Удалить набор?</b>' +
+      '<p class="muted">Страница набора исчезнет, уже оформленные заказы не изменятся.</p>' +
+      '<div class="adm__acts"><button class="btn btn--sm" data-bundledelyes="' + esc(S.bundleDel) + '">Да, удалить</button>' +
+        '<button class="btn btn--ghost btn--sm" data-bundledelno>Отмена</button></div></div>';
+  }
+  function admBundlesHTML() {
+    loadAdminBundles(false);
+    var list = S.admBundles || [];
+    return '<p class="muted" style="margin:16px 0">Наборы — готовые комплекты из тех же товаров, что стоят в магазине по отдельности. Цену вы назначаете сами; магазин показывает, сколько это стоило бы врозь. Скрытый набор пропадает из магазина, но его адрес остаётся рабочим.</p>' +
+      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы менять наборы.</div>') +
+      (DEMO.bundles === false ? '<div class="adm__note">Наборы сейчас выключены целиком в «Настройки → Магазин» — в магазине их не видно.</div>' : "") +
+      (S.admBundleErr ? '<div class="adm__note">' + esc(S.admBundleErr) + "</div>" : "") +
+      (S.bundleDel ? bundleDelConfirmHTML() : "") +
+      (S.bundleForm ? bundleFormHTML() :
+        '<div class="adm__acts"><button class="btn btn--sm" data-bundlenew>Новый набор</button></div>') +
+      (list.length
+        ? '<div class="adm__list">' + list.map(function (b, i) {
+            return '<div class="adm__row"><span class="adm__ph">' + bundleStack(b, "bstack--line") + "</span>" +
+              '<span class="adm__nm">' + esc((b.title && b.title.RU) || b.id) +
+                '<span class="adm__sub">' + b.items.length + " " + pl(b.items.length, "товар", "товара", "товаров") +
+                "</span></span>" +
+              '<span class="chip ' + (b.active ? "chip--ok" : "chip--low") + '">' + (b.active ? "показан" : "скрыт") + "</span>" +
+              '<span class="num adm__pr">' + eur(b.price) + ' <s class="bwas">' + eur(b.sum) + "</s></span>" +
+              '<span class="admhero__ops"><button class="iconbtn" data-bundlemove="' + esc(b.id) + ':-1"' +
+                (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
+                '<button class="iconbtn" data-bundlemove="' + esc(b.id) + ':1"' +
+                (i === list.length - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button></span>' +
+              '<span><button class="link" data-bundleedit="' + esc(b.id) + '">Изменить</button> ' +
+                '<button class="link" data-bundletoggle="' + esc(b.id) + '">' + (b.active ? "Скрыть" : "Показать") + "</button></span></div>";
+          }).join("") + "</div>"
+        : (S.admBundles ? '<p class="muted">Наборов пока нет.</p>' : '<p class="muted">Загружаем…</p>'));
+  }
+  function bundleFormPayload() {
+    var f = S.bundleForm;
+    var price = String(f.price || "").trim().replace(",", ".");
+    return {
+      id: String(f.id || "").trim().toLowerCase(),
+      cat: f.cat,
+      title: { RU: f.title.RU, ET: f.title.ET, EN: f.title.EN },
+      desc: { RU: f.desc.RU, ET: f.desc.ET, EN: f.desc.EN },
+      items: f.items.map(function (it) {
+        return { productId: it.productId, variant: it.variant || 0, qty: it.qty || 1 };
+      }),
+      price: price ? Number(price) : null,
+      image: f.image || null,
+      active: f.active !== false,
+      sort: Number(f.sort) || 0
+    };
+  }
+  var BUNDLE_SAVE_ERRS = {
+    bad_id: "Адрес набора — только латинские буквы, цифры и дефис, минимум два знака.",
+    bad_cat: "Выберите раздел магазина.",
+    bad_name: "Русское название обязательно — по нему набор виден всем.",
+    bad_desc: "Опишите набор по-русски — эстонский и английский можно добавить позже.",
+    few_items: "В наборе должно быть минимум два товара.",
+    too_many_items: "Больше восьми товаров в набор не поместится.",
+    unknown_product: "Одного из товаров больше нет в каталоге — уберите его.",
+    dup_item: "Один и тот же товар указан дважды.",
+    bad_variant: "У товара нет такого объёма.",
+    bad_qty: "Количество — целое число от 1 до 20.",
+    bad_price: "Проверьте цену набора.",
+    price_too_high: "Набор должен стоить дешевле, чем те же товары по отдельности.",
+    bad_discount: "Скидка — от 0 до 90 %.",
+    bad_image: "Фото набора — товар из каталога или ссылка на картинку.",
+    bad_sort: "Проверьте порядок.",
+    bad_body: "Не получилось разобрать форму — обновите страницу.",
+    db_unavailable: "Сервер не отвечает — попробуйте позже."
+  };
+  function saveBundleForm() {
+    if (!S.bundleForm) return;
+    S.bundleFormErr = "";
+    apiSend("/api/admin/bundles/", "POST", bundleFormPayload()).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.bundleForm = null; S.bundleQ = "";
+        toast("Набор сохранён ✓");
+        loadAdminBundles(true); loadBundles();   // the shop follows the panel
+        return;
+      }
+      S.bundleFormErr = BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить набор.";
+      render();
+    }).catch(function () { S.bundleFormErr = "Сервер не отвечает."; render(); });
+  }
+  function toggleBundleActive(id, active) {
+    apiSend("/api/admin/bundles/", "PATCH", { id: id, active: active }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        toast(active ? "Набор показан ✓" : "Набор скрыт ✓");
+        loadAdminBundles(true); loadBundles();
+        return;
+      }
+      toast("Не получилось изменить набор");
+    }).catch(function () { toast("Сервер не отвечает"); });
+  }
+  /* The arrows send the whole order they want, not a delta: two clicks in a
+     row on a slow line can otherwise cross and swap a set back. */
+  function moveBundle(id, dir) {
+    var list = (S.admBundles || []).slice();
+    var i = -1;
+    for (var k = 0; k < list.length; k++) if (list[k].id === id) i = k;
+    var j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    S.admBundles = list;   // move it on screen at once, confirm with the server
+    render();
+    apiSend("/api/admin/bundles/", "PATCH", { order: list.map(function (b) { return b.id; }) }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) { loadAdminBundles(true); loadBundles(); return; }
+      toast("Порядок не сохранился");
+      loadAdminBundles(true);
+    }).catch(function () { toast("Сервер не отвечает"); loadAdminBundles(true); });
+  }
+  function deleteBundleById(id) {
+    apiJson("/api/admin/bundles/?id=" + encodeURIComponent(id), { method: "DELETE" }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      S.bundleDel = "";
+      if (r.status === 200 && r.body.ok) {
+        if (S.bundleForm && S.bundleForm.id === id) S.bundleForm = null;
+        toast("Набор удалён ✓");
+        loadAdminBundles(true); loadBundles();
+        return;
+      }
+      toast("Не получилось удалить набор");
+      render();
+    }).catch(function () { S.bundleDel = ""; toast("Сервер не отвечает"); render(); });
+  }
+
   /* ---------- wholesale/loyalty: admin «Клиенты» -------------------------
      List + search + tier filter + CSV once signed in (GET /api/admin/
      customers), the demo table otherwise — same "always something to look
@@ -8519,6 +10139,74 @@
       toast("Картинка загружена ✓");
     }).catch(upFail);
   }
+
+  /* ---------- media: the owner's own video ---------------------------------
+     Same door as a photo — POST /api/admin/upload/, one file, multipart — with
+     kind=video, which the server keys under videos/… and stores as it is (no
+     resize, no re-encode; see src/lib/video.ts). The answer is one address,
+     and that address goes straight into the «Видео» field: the editor keeps
+     ONE source of truth for what will be saved, so an uploaded file and a
+     pasted YouTube link are the same edit as far as «Сохранить» is concerned.
+
+     Same availability rule as the photo button: MEDIA.on (the GET probe) is
+     what decides whether it is offered at all, so a shop with no bucket says
+     so in one sentence instead of failing when it is pressed. */
+  var VID = { id: "", url: null };   // url null = no draft, show what is saved
+  function vidValue(p) {
+    if (VID.id !== p.id) { VID.id = p.id; VID.url = null; }
+    return VID.url !== null ? VID.url : ((DEMO.video && DEMO.video[p.id]) || p.video || "");
+  }
+  function vidReset() { VID.id = ""; VID.url = null; }
+  var VIDEO_ERR = {
+    too_large: "Файл больше 60 МБ — снимите ролик короче или сожмите его.",
+    bad_video_type: "Такой файл не подходит: нужен MP4 или MOV.",
+    storage_not_configured: "Загрузка видео пока не настроена — нужно подключить хранилище.",
+    not_configured: "Загрузка видео пока не настроена — нужно подключить хранилище."
+  };
+  function vidFail(e) {
+    UP.busy = 0; UP.total = 0;
+    UP.err = VIDEO_ERR[String((e && e.message) || e || "")] || mediaErrText(e);
+    toast(UP.err); render();
+  }
+  function uploadVideo(file, productId) {
+    var fd = new FormData();
+    fd.append("file", file);
+    fd.append("kind", "video");
+    fd.append("productId", productId || "");
+    return fetch("/api/admin/upload/", { method: "POST", body: fd }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (j) {
+        if (!res.ok || j.ok !== true) throw new Error(j.error || "upload_failed");
+        return j;
+      });
+    });
+  }
+  function videoUpload(files, p) {
+    if (!files || !files.length || !p) return;
+    UP.err = ""; UP.total = 1; UP.busy = 1; render();
+    uploadVideo(files[0], p.id).then(function (r) {
+      UP.busy = 0; UP.total = 0;
+      // Through the draft, not by poking the input: the render() below rebuilds
+      // the form, and a value written straight onto the element would be gone.
+      VID.id = p.id; VID.url = r.url;
+      render();
+      toast("Видео загружено ✓");
+    }).catch(vidFail);
+  }
+  /* No drag-and-drop here on purpose: the one drop zone in this editor belongs
+     to the photo list, and a 60 MB file dropped on it by accident should stay
+     a photo error rather than silently becoming a video. */
+  function vidUploadZone(p) {
+    return '<div class="admphoto__drop">' +
+      '<button class="btn btn--ghost btn--sm" data-vidup="' + esc(p.id) + '"' +
+        (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" + (UP.busy ? upBusyText() : "Загрузить видео") + "</button>" +
+      '<input class="admphoto__file" type="file" accept="video/mp4,video/quicktime"' +
+        ' data-vidfile="' + esc(p.id) + '" aria-label="Загрузить видео">' +
+      '<span class="muted admphoto__hint">MP4 или MOV, до 60 МБ. Файл ложится в ваше хранилище — на сторонние сайты ничего не уходит.</span>' +
+      "</div>" +
+      (MEDIA.on === false ? '<p class="admphoto__off">Загрузка видео пока не настроена — нужно подключить хранилище.</p>' : "") +
+      (UP.err ? '<p class="admphoto__err">' + esc(UP.err) + "</p>" : "");
+  }
+
   /* The drop zone doubles as the button row: `data-galdrop` carries the product
      id, or "hero" for the banner, so one pair of listeners serves both. */
   function galDropZone(target, label, hint) {
@@ -8711,12 +10399,16 @@
         '<label class="field"><span class="field__label">Описание (до 155 знаков)</span><textarea class="input" data-edseod rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(seoD) + "</textarea></label>" +
         '<button class="btn btn--ghost btn--sm" data-admseogen="' + p.id + '">SEO-тексты</button>' +
         /* features: one optional video per product. Stored in the demo layer
-           and sent to the server as product_overrides.video_url. */
+           and sent to the server as product_overrides.video_url.
+           media: the same field now also takes an Instagram reel/post and the
+           address of a file uploaded through the button below — one field,
+           because on the product page it is one video either way. */
         '<div class="sec__head sec__head--sub"><h3 class="sec__title">Видео</h3></div>' +
-        '<label class="field"><span class="field__label">Видео (YouTube/Vimeo ссылка)</span>' +
-        '<input class="input" data-edvideo value="' + esc((DEMO.video && DEMO.video[p.id]) || p.video || "") +
-        '" placeholder="https://youtu.be/… или https://vimeo.com/…"></label>' +
-        '<p class="muted" style="font-size:12.5px;margin:-4px 0 12px">Вставьте ссылку — на странице товара появится видео. Пусто — блока нет.</p>' +
+        '<label class="field"><span class="field__label">Видео (ссылка YouTube, Vimeo или Instagram)</span>' +
+        '<input class="input" data-edvideo value="' + esc(vidValue(p)) +
+        '" placeholder="https://youtu.be/… · https://vimeo.com/… · https://www.instagram.com/reel/…"></label>' +
+        vidUploadZone(p) +
+        '<p class="muted" style="font-size:12.5px;margin:-4px 0 12px">Вставьте ссылку или загрузите свой файл — на странице товара появится видео. Пусто — блока нет.</p>' +
         /* assistant-work: the trilingual description override — see the `dov`
            comment above. «Сгенерировать описание» writes the Russian field;
            «Перевести на ET/EN» reads whatever is in the Russian field (or the
@@ -8836,25 +10528,31 @@
         (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
         (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
   }
-  /* Two installable apps from one page: the shop (manifest.webmanifest,
-     scope /shop2/) for everyone, and the admin (admin.webmanifest, scope
-     /shop2/admin/) that only exists while the admin route is on screen — so
-     a customer's «Установить приложение» never offers something called
-     «Админка». index.html links the shop manifest; this swaps the link (and
-     the iOS home-screen title, which Safari reads from the DOM at the moment
-     of adding) whenever the screen changes. Chromium re-reads the manifest
-     when the link's href changes, so the swap takes effect before any
-     install prompt. */
+  /* Three installable apps from one page: the shop (manifest.webmanifest,
+     scope /shop2/) for everyone, the admin (admin.webmanifest, scope
+     /shop2/admin/) that only exists while the admin route is on screen, and
+     the scanner (scanner.webmanifest, scope /shop2/scan/) that only exists on
+     the scanner route — so a customer's «Установить приложение» never offers
+     something called «Админка» or «Сканер». index.html links the shop
+     manifest; this swaps the link (and the iOS home-screen title, which
+     Safari reads from the DOM at the moment of adding) whenever the screen
+     changes. Chromium re-reads the manifest when the link's href changes, so
+     the swap takes effect before any install prompt. */
+  var MANIFESTS = {
+    shop: ["/shop2/manifest.webmanifest", "Rempire"],
+    admin: ["/shop2/admin.webmanifest", "Админка"],
+    scan: ["/shop2/scanner.webmanifest", "Сканер"]
+  };
   var manifestMode = "";
   function syncAppManifest() {
-    var mode = S.screen === "admin" ? "admin" : "shop";
+    var mode = MANIFESTS[S.screen] ? S.screen : "shop";
     if (mode === manifestMode) return;
     manifestMode = mode;
     try {
       var link = document.querySelector('link[rel="manifest"]');
-      if (link) link.setAttribute("href", mode === "admin" ? "/shop2/admin.webmanifest" : "/shop2/manifest.webmanifest");
+      if (link) link.setAttribute("href", MANIFESTS[mode][0]);
       var title = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-      if (title) title.setAttribute("content", mode === "admin" ? "Админка" : "Rempire");
+      if (title) title.setAttribute("content", MANIFESTS[mode][1]);
     } catch (e) {}
   }
   function pwaHintHTML() {
@@ -8873,6 +10571,10 @@
     var FILTERS = [["all", "Все"], ["low", "Мало"], ["out", "Нет"], ["untracked", "Не учтено"]];
     return '<p class="muted" style="margin:16px 0">Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.</p>' +
       pwaHintHTML() +
+      /* scanner app: the same scanner, standing on its own route so it can be
+         installed as a third icon — see screenScan() and docs/inventory.md. */
+      '<div class="adm__note">📷 Сканер как отдельное приложение: откройте /shop2/scan/ на телефоне и добавьте на экран — появится иконка «Сканер», которая открывается сразу в камере. ' +
+        '<button class="link" data-scanapp>Открыть сканер</button></div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">' +
         '<button class="btn" data-scanopen>' + icon("scan") + " Сканировать</button>" +
         '<input class="input input--box" data-stockq value="' + esc(S.stockQ || "") + '" placeholder="Найти товар, бренд, EAN…" aria-label="Поиск по складу" style="max-width:320px">' +
@@ -8998,17 +10700,27 @@
       var h = S.scanHit, p = h.product ? byId(h.product.id) : null;
       parts += '<div class="scan__card">' +
         (p ? '<span class="adm__ph adm__ph--big">' + media(p, 0, "ph") + "</span>" : "") +
-        '<div><b>' + (p ? esc(p.brand + " — " + p.name) : "Код не привязан") + "</b>" +
+        '<div><b>' + (p ? esc(p.brand + " — " + p.name) : "Код не найден") + "</b>" +
           (h.variant ? '<span class="adm__sub">' + esc(h.variant) + "</span>" : "") +
           '<span class="adm__sub">' + (h.tracked === false ? "не учтено" : "Остаток: " + h.qty) + "</span></div></div>";
       if (p) {
-        parts += '<div class="scan__actions">' +
-          '<button class="btn scan__btn" data-scanplus>+1 приход</button>' +
-          '<button class="btn btn--ghost scan__btn" data-scanminus>−1 продажа</button></div>' +
-          '<div class="scan__actions"><input class="input" id="scanqtyinput" style="width:64px" value="1" inputmode="numeric" aria-label="Количество приёмки">' +
-          '<button class="btn scan__btn" data-scangoodsin>Приход по количеству</button></div>';
+        /* Three taps, at most: scan, set the number (it is already 1), press
+           one of the two. The stepper's value is read off the DOM at commit
+           time (scanQtyNow()), so a typed number counts exactly like a
+           stepped one and neither needs a re-render per keystroke. */
+        parts += '<div class="scan__step" role="group" aria-label="Количество">' +
+            '<button class="btn btn--ghost scan__stepbtn" type="button" data-scanqty="-1" aria-label="Меньше">−</button>' +
+            '<input class="input scan__qty" id="scanqtyinput" data-scanqtyinput value="' + esc(String(S.scanQty || 1)) +
+              '" inputmode="numeric" aria-label="Количество">' +
+            '<button class="btn btn--ghost scan__stepbtn" type="button" data-scanqty="1" aria-label="Больше">+</button>' +
+          "</div>" +
+          '<div class="scan__actions">' +
+            '<button class="btn scan__btn" data-scanmove="in"' + (S.scanBusy ? " disabled" : "") + ">+ Приход</button>" +
+            '<button class="btn btn--ghost scan__btn" data-scanmove="out"' + (S.scanBusy ? " disabled" : "") + ">− Списание</button></div>" +
+          (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "");
       } else {
         parts += '<p class="muted">Штрихкод «' + esc(h.code) + '» ни к чему не привязан. Найдите товар и привяжите код к нему.</p>' +
+          '<div class="sec__head sec__head--sub"><h3 class="sec__title">Привязать к товару</h3></div>' +
           '<input class="input input--box" data-scanassignq value="' + esc(S.scanAssignQ || "") + '" placeholder="Найти товар…" aria-label="Найти товар для привязки">' +
           '<div id="scanassignresults">' + scanAssignResultsHTML() + "</div>";
       }
@@ -9028,12 +10740,26 @@
     }
     return parts;
   }
+  /* scanner app: on /shop2/scan/ the overlay IS the whole screen, so it wears
+     a small bar of its own — who this is, the way back into the panel, and
+     the two controls that are otherwise circles floating on the video. In the
+     «Склад» overlay there is a panel underneath and a ✕ is all it needs. */
+  function scanTopBarHTML() {
+    return '<div class="scan__top">' +
+        '<span class="scan__brand">Rempire · Сканер</span>' +
+        '<button class="iconbtn scan__topbtn" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>' +
+        '<button class="iconbtn scan__topbtn" type="button" data-scanmanualfocus aria-label="Ввести код вручную">⌨</button>' +
+        '<button class="link scan__toplink" type="button" data-scanadmin>В админку</button>' +
+      "</div>";
+  }
   function scannerShellHTML() {
-    return '<div class="scan__box">' +
+    return (S.scanApp ? scanTopBarHTML() : "") +
+      '<div class="scan__box">' +
         '<video class="scan__video" data-scanvideo autoplay playsinline muted></video>' +
         '<div class="scan__target" aria-hidden="true"></div>' +
-        '<button class="iconbtn scan__close" type="button" data-scanclose aria-label="Закрыть сканер">✕</button>' +
-        '<button class="iconbtn scan__torch" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>' +
+        (S.scanApp ? "" :
+          '<button class="iconbtn scan__close" type="button" data-scanclose aria-label="Закрыть сканер">✕</button>' +
+          '<button class="iconbtn scan__torch" type="button" data-scantorch hidden aria-label="Фонарик">🔦</button>') +
       "</div>" +
       // The manual-entry field IS the keyboard-wedge target too (a bluetooth/
       // USB scanner just types digits + Enter into whatever is focused) — one
@@ -9050,6 +10776,9 @@
     if (panel) { panel.innerHTML = scanPanelHTML(); translateTree(panel); }
     var torchBtn = SCANEL.querySelector("[data-scantorch]");
     if (torchBtn) torchBtn.hidden = !S.scanTorchOk;
+    // scanner app: no camera (denied, absent, or a desktop) — the viewfinder
+    // is dead space, so it shrinks and the manual field gets the screen
+    SCANEL.classList.toggle("is-nocam", !!S.scanErr);
     // keyboard-wedge fallback: refocus the manual field, but never steal focus
     // from something the admin is actively typing into (assign search, qty)
     var active = document.activeElement;
@@ -9075,6 +10804,9 @@
     var now = Date.now();
     if (!code || (code === SCAN.lastCode && now - SCAN.lastAt < 1500)) return;
     SCAN.lastCode = code; SCAN.lastAt = now;
+    // a new code is a new job: the stepper starts at 1 again and the «готово»
+    // line from the previous confirm goes away
+    S.scanQty = 1; S.scanReady = false;
     scanLookup(code);
   }
   function scanLookup(code) {
@@ -9105,6 +10837,41 @@
     if (input) input.value = "";
     SCAN.lastCode = ""; // a manually re-typed code always counts, even if it is the last camera hit
     handleScanCode(code);
+  }
+  /** The stepper's number at commit time. Read off the DOM, not off S, so a
+      number typed straight into the field counts exactly like a stepped one
+      — and neither costs a panel repaint per keystroke. */
+  function scanQtyNow() {
+    var el = SCANEL && SCANEL.querySelector("[data-scanqtyinput]");
+    var n = Math.trunc(Number(String(el ? el.value : S.scanQty).replace(",", ".")));
+    if (!isFinite(n) || n < 1) n = 1;
+    return Math.min(999, n);
+  }
+  /* scanner app: ONE confirm per scan. The stepper's number, signed by which
+     of the two buttons was pressed, straight to the moves route — «приход» is
+     goods_in, «списание» is sale_pos, the same two reasons the old +1/−1 pair
+     wrote. The card is refreshed rather than dismissed (the new remainder is
+     the receipt), the stepper goes back to 1 and the same-code debounce is
+     cleared, so the next code — including this very one, scanned again — is
+     picked up immediately. That is the "auto-resume": nothing to tap to go
+     back to scanning. */
+  function scanCommitMove(sign) {
+    if (S.scanBusy || !S.scanHit || !S.scanHit.product) return;
+    var qty = scanQtyNow(), code = S.scanHit.code;
+    S.scanBusy = true; S.scanReady = false;
+    scanRenderPanel();
+    stockMoveSend({
+      productId: S.scanHit.productId, variant: S.scanHit.variant,
+      delta: sign * qty, reason: sign > 0 ? "goods_in" : "sale_pos", ref: "сканер"
+    }).then(function (ok) {
+      S.scanBusy = false;
+      if (!ok) { toast("Не удалось сохранить"); scanRenderPanel(); return; }
+      toast(sign > 0 ? "Приход +" + qty + " ✓" : "Списание −" + qty + " ✓");
+      S.scanQty = 1;
+      S.scanReady = true;
+      SCAN.lastCode = "";
+      scanLookup(code);
+    });
   }
   function setScanTorch(on) {
     S.scanTorchOn = on;
@@ -9174,7 +10941,10 @@
   function scanMount() {
     if (SCANEL) return SCANEL;
     SCANEL = document.createElement("div");
-    SCANEL.className = "scanoverlay";
+    SCANEL.className = "scanoverlay" + (S.scanApp ? " scanoverlay--app" : "");
+    // the shell is built once, so which shell it is has to be remembered —
+    // the render hook remounts when the route flips the mode (see renderImpl)
+    SCANEL.dataset.scanapp = S.scanApp ? "1" : "0";
     document.body.appendChild(SCANEL);
     SCANEL.innerHTML = scannerShellHTML();
     translateTree(SCANEL);
@@ -9193,14 +10963,52 @@
     stopScanEngine();
     if (SCANEL) { SCANEL.remove(); SCANEL = null; }
   }
-  function openScanner() {
+  /** Everything a fresh scanning session forgets — shared by the «Склад»
+      overlay and the /shop2/scan/ route, which differ only in their shell. */
+  function scanResetState() {
     S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = "";
     S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null;
+    S.scanQty = 1; S.scanBusy = false; S.scanReady = false;
+  }
+  function openScanner() {
+    scanResetState();
     render();
   }
   function closeScanner() {
     S.scanOpen = false;
     render();
+  }
+  /* scanner app: the /shop2/scan/ route IS the scanner — no button to press,
+     the viewfinder opens itself the moment the admin session is confirmed and
+     closes when the route (or the session) goes away. Called from the top of
+     renderImpl(), so it never calls render() itself: the mount/unmount hook
+     at the bottom of that same pass picks the flag up. */
+  function scanRouteSync() {
+    var onRoute = S.screen === "scan";
+    if (onRoute) {
+      if (SRV.admin === true && !S.scanOpen) scanResetState();
+      if (SRV.admin !== true && S.scanOpen) S.scanOpen = false;
+    } else if (S.scanApp && S.scanOpen) {
+      S.scanOpen = false;   // navigated away with the standalone scanner open
+    }
+    S.scanApp = onRoute;
+  }
+  /* The screen behind that overlay. Admin-only, and gated exactly the way
+     /shop2/admin/ is (screenAdmin() — same wait card, same login card, only
+     the word in the header differs), because this route writes to the same
+     inventory routes the panel does. Once the session is confirmed the
+     overlay covers all of this; what stays visible is the honest answer for
+     the second before the camera comes up, and a way back into the panel for
+     a browser that will not give one at all. */
+  function screenScan() {
+    probeAdmin();
+    if (SRV.on && SRV.admin === null) return admWaitScreen("Сканер");
+    if (SRV.admin !== true) return admLoginScreen("Сканер");
+    return '<div class="adm adm--navmin adm--aimin"><main class="adm__main">' +
+      '<p class="muted" style="margin:28px 0">Сканер открывается…</p>' +
+      // plain data-go, not data-scanadmin: the top bar owns that attribute,
+      // and two of them on one screen is one control too many to click
+      '<p class="muted"><button class="link" data-go="admin">В админку</button></p></main></div>';
   }
 
   /* ---------- inventory: «Продажа в салоне» -------------------------------
@@ -9623,6 +11431,9 @@
     else if (a.type === "toggle_chatbot") apiSend(st, "PUT", { chatbot: DEMO.chatbot }).catch(noop);
     else if (a.type === "toggle_bundles") apiSend(st, "PUT", { bundles: DEMO.bundles }).catch(noop);
     else if (a.type === "set_hero") apiSend(st, "PUT", { hero: DEMO.hero }).catch(noop);
+    // «Письма»: the whole map travels, so undo re-sends the previous one —
+    // same reasoning as the banner and the content document
+    else if (a.type === "set_mail_texts") apiSend(st, "PUT", { mail_texts: (MAIL_TEXTS && MAIL_TEXTS.texts) || {} }).catch(noop);
     // content: the whole document travels, so undo re-sends the previous one
     else if (a.type === "set_content") apiSend(st, "PUT", { content: DEMO.content }).catch(noop);
     /* checkout-gaps: the whole delivery table travels, because a merge cannot
@@ -9791,6 +11602,11 @@
     });
   }
   loadServerOverrides();
+  /* Its own fetch rather than a field on /api/overrides/: the sets are a
+     list of documents, not a settings value, they are cached the same way,
+     and the shop has a perfectly good static copy to draw until this lands
+     (see allBundlesRaw()). */
+  loadBundles();
 
   /* ---- features: mirror one editor change to the server ---------------------
      The demo layer is what the prototype shows; product_overrides is what the
@@ -9881,6 +11697,12 @@
       var h1 = hsl[0].title || {};
       return "Баннер: " + hsl.length + " " + pl(hsl.length, "слайд", "слайда", "слайдов") +
         ", первый — «" + (h1.RU || h1.ET || h1.EN || "—") + "»";
+    }
+    if (a.type === "set_mail_texts") {
+      var mtn = mailTextsCount(a.value);
+      return mtn
+        ? "Тексты писем: " + mtn + " " + pl(mtn, "свой текст", "своих текста", "своих текстов")
+        : "Тексты писем: стандартные";
     }
     if (a.type === "set_subcat") return "Подкатегория «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "авто");
     if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
@@ -10062,6 +11884,15 @@
       DEMO.hero = a.value && Array.isArray(a.value.slides) ? a.value : null;
       S.heroDraft = null; S.heroEdit = -1; S.slide = 0; restartHero();
     }
+    /* «Письма»: settings.mail_texts has no demo layer — MAIL_TEXTS.texts IS
+       the last known server value, and the whole map travels every time, so
+       undo can put back a text the owner had deleted. */
+    else if (a.type === "set_mail_texts") {
+      entry.prev = { type: "set_mail_texts", value: mailSaved() };
+      if (MAIL_TEXTS) MAIL_TEXTS.texts = a.value || {};
+      S.mailDraft = null;
+      mailPreviewV += 1;   // the preview iframe must refetch, not reuse
+    }
     else if (a.type === "set_subcat") { entry.prev = { type: "set_subcat", id: a.id, value: DEMO.subcat[a.id] || "" }; if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") { entry.prev = { type: "set_varimg", id: a.id, map: (DEMO.varimg[a.id] || (p.varImg || []).slice()) }; DEMO.varimg[a.id] = a.map.slice(); }
     // features
@@ -10143,6 +11974,11 @@
     else if (a.type === "set_hero") {
       DEMO.hero = a.value && Array.isArray(a.value.slides) ? a.value : null;
       S.heroDraft = null; S.heroEdit = -1; S.slide = 0; restartHero();
+    }
+    else if (a.type === "set_mail_texts") {
+      if (MAIL_TEXTS) MAIL_TEXTS.texts = a.value || {};
+      S.mailDraft = null;
+      mailPreviewV += 1;
     }
     else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") DEMO.varimg[a.id] = a.map.slice();
@@ -10567,15 +12403,20 @@
       }
       else if (S.screen === "brands") t = trText("Бренды", S.lang, false) + " — REMPIRE";
       // features
-      else if (S.screen === "bundles") {
-        t = trText("Наборы", S.lang, false) + " — REMPIRE";
-        d = trText(SETS_DESC, S.lang, false).slice(0, 158);
-      }
-      else if (S.screen === "bundle") {
-        var bb = bundleById(S.bundleId);
-        if (bb) {
-          t = bundleTitle(bb) + " — REMPIRE";
-          d = (bundleDesc(bb) || trText(SETS_DESC, S.lang, false)).slice(0, 158);
+      /* Sets off: the tab must not advertise them either. Both screens are
+         showing setsOffHTML() and say so in the title; the description stays
+         the shop's generic one rather than «готовые наборы со скидкой». */
+      else if (S.screen === "bundles" || S.screen === "bundle") {
+        if (!setsOn()) t = trText("Наборы сейчас недоступны", S.lang, false) + " — REMPIRE";
+        else if (S.screen === "bundles") {
+          t = trText("Наборы", S.lang, false) + " — REMPIRE";
+          d = trText(SETS_DESC, S.lang, false).slice(0, 158);
+        } else {
+          var bb = shownBundleById(S.bundleId);
+          if (bb) {
+            t = bundleTitle(bb) + " — REMPIRE";
+            d = (bundleDesc(bb) || trText(SETS_DESC, S.lang, false)).slice(0, 158);
+          } else t = trText("Набор не найден", S.lang, false) + " — REMPIRE";
         }
       } else if (S.screen === "gift") {
         t = trText("Подарочная карта", S.lang, false) + " — REMPIRE";
@@ -10612,6 +12453,9 @@
   function renderImpl() {
     var body;
     syncAppManifest();
+    // scanner app: decide (before the body is built) whether the standalone
+    // scanner should be up — the mount hook at the bottom acts on the flag
+    scanRouteSync();
     if (S.screen === "home") body = screenHome();
     else if (S.screen === "catalog") body = screenCatalog();
     else if (S.screen === "product") body = screenProduct();
@@ -10627,8 +12471,9 @@
     else if (S.screen === "blogpost") body = screenBlogPost(); // blog
     else if (S.screen === "info") body = screenInfo();
     else if (S.screen === "admin") body = screenAdmin();
+    else if (S.screen === "scan") body = screenScan();         // scanner app
 
-    var chromeless = S.screen === "checkout" || S.screen === "done" || S.screen === "admin";
+    var chromeless = S.screen === "checkout" || S.screen === "done" || S.screen === "admin" || S.screen === "scan";
     if (!hdrSlot.firstChild) hdrSlot.innerHTML = headerHTML();
     hdrSlot.hidden = chromeless;
     patchHeader();
@@ -10699,7 +12544,7 @@
     }
 
     if (!navSlot.firstChild) navSlot.innerHTML = botnavHTML();
-    navSlot.hidden = S.screen === "admin";
+    navSlot.hidden = S.screen === "admin" || S.screen === "scan";
     measureHdr();
     paintTint();
     patchNav();
@@ -10722,12 +12567,20 @@
     // inventory: the scanner lives outside bodySlot on purpose (module doc
     // above scanMount()) — mount/unmount here, once per render(), rather than
     // as part of the body string that just got replaced above.
-    if (S.scanOpen) { scanMount(); scanRenderPanel(); }
+    // scanner app: the shell (top bar or ✕) is built once per mount, so a
+    // change of mode — «Склад» overlay ⇄ /shop2/scan/ — is a remount, not a patch
+    if (S.scanOpen) {
+      if (SCANEL && SCANEL.dataset.scanapp !== (S.scanApp ? "1" : "0")) scanUnmount();
+      scanMount(); scanRenderPanel();
+    }
     else if (SCANEL) { scanUnmount(); }
+    // the toast has to clear the camera view — see .is-scanning in styles.css
+    document.body.classList.toggle("is-scanning", !!S.scanOpen);
     document.body.dataset.screen = S.screen; // chat.js hides itself in the admin
     translatePage();
     setHead();
-    if (S.screen === "admin") {
+    // the scanner route wears the same header on its wait/login cards
+    if (S.screen === "admin" || S.screen === "scan") {
       var coh = document.querySelector(".cohdr");
       if (coh) document.documentElement.style.setProperty("--cohdrh", coh.offsetHeight + "px");
     }
@@ -10802,6 +12655,25 @@
     });
     var cn = document.querySelector("[data-colourname]");
     if (cn && cur.length === 2) cn.textContent = colourRu(cur[0]);
+  }
+
+  /* A card's size picker, same reasoning as patchPdp(): a full render() would
+     destroy the <select> the shopper is standing on, and on a phone that
+     closes the system wheel mid-choice. Only the price text changes, so patch
+     it — across the whole page, because one product can sit in two lists at
+     once (both home rails, a rail and «с этим покупают») and both copies must
+     agree with the one value in S.cardSize. eur() reads S.lang itself, so the
+     patched text needs no translateTree() pass. */
+  function patchCardSize(id) {
+    var p = byId(id), i = cardSizeIdx(id);
+    var sels = document.querySelectorAll("[data-cardsize]");
+    for (var k = 0; k < sels.length; k++) {
+      if (sels[k].dataset.cardsize !== id) continue;
+      if (Number(sels[k].value) !== i) sels[k].value = String(i);
+      var card = sels[k].closest(".card");
+      var pr = card && card.querySelector("[data-cardpr]");
+      if (pr) pr.textContent = cardPriceText(p, i);
+    }
   }
 
   /* Quantity steppers patch the numbers in place. Rebuilding the drawer would
@@ -11130,7 +13002,14 @@
   function addToCart(id, sizeIdx) {
     // backstop: nothing out of stock enters the cart, whatever button sent it
     if (byId(id).stock === "out") { toast("Товара нет в наличии"); return; }
-    var si = sizeIdx === undefined ? (S.productId === id && S.screen === "product" ? S.size : 0) : sizeIdx;
+    /* Off the product page the size is the one the card's own picker holds
+       (S.cardSize, cardSizeIdx) — 0 for a single-size product and for anything
+       nobody has touched, so every existing caller behaves exactly as before.
+       This covers the card «В корзину», the drawer's free-shipping upsell and
+       «Купить через …» alike, none of which carry a size of their own. */
+    var si = sizeIdx === undefined
+      ? (S.productId === id && S.screen === "product" ? S.size : cardSizeIdx(id))
+      : sizeIdx;
     var qty = S.screen === "product" && S.productId === id ? S.qty : 1;
     var line = null;
     S.cart.forEach(function (l) { if (l.id === id && l.size === si) line = l; });
@@ -11152,7 +13031,10 @@
      it is made of, so the order — and the person packing it — has the list
      even if the set is retired later; the gift card carries its recipient. */
   function addBundleToCart(bid) {
-    var b = bundleById(bid);
+    // shownBundleById(): nothing can be ADDED while sets are off or the set
+    // itself is switched off, even from a stale button. What is already in the
+    // cart is a different question — see bundleById()'s note.
+    var b = shownBundleById(bid);
     if (!b) return;
     if (b.stock === "out") { toast("Набор сейчас не собрать — товар закончился"); return; }
     var id = "bundle:" + b.id, line = null;
@@ -11283,7 +13165,7 @@
 
   // ---------- events ----------
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanplus],[data-scanminus],[data-scangoodsin],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
+    var t = e.target.closest("[data-admnav],[data-admai],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsize],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -11307,6 +13189,10 @@
       S.videoOn = false; S.revOpen = false; S.revState = ""; S.revAccOpen = false;
       go("product"); return;
     }
+    /* The card's own size <select>: the change listener below owns it. This
+       branch only stops the click here — without it the select is in the
+       delegate's selector list for nothing and the event carries on down. */
+    if (d.cardsize) { e.stopPropagation(); return; }
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
     if (d.buynow) {
       if (byId(d.buynow).stock === "out") { toast("Товара нет в наличии"); return; }
@@ -11540,13 +13426,19 @@
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admclose !== undefined) { S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; render(); return; }
+    if (d.admclose !== undefined) { S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null; render(); return; }
     /* ---- media: the «Фото» block ----------------------------------------
        Everything here edits the draft list only; «Сохранить» is what turns it
        into a set_gallery action, so «Отмена» really cancels. */
     if (d.galup !== undefined) {
       var upIn = document.querySelector('[data-galfile="' + (d.galup || "").replace(/"/g, "") + '"]');
       if (upIn) upIn.click();
+      return;
+    }
+    // media: «Загрузить видео» — the same trick, one hidden file input away
+    if (d.vidup !== undefined) {
+      var vidIn = document.querySelector('[data-vidfile="' + (d.vidup || "").replace(/"/g, "") + '"]');
+      if (vidIn) vidIn.click();
       return;
     }
     if (d.galmove !== undefined) {
@@ -11705,7 +13597,7 @@
       }
       var nv = videoEl ? videoEl.value.trim() : "";
       if (nv && !parseVideo(nv)) {
-        goodsFail("Ссылка на видео — только YouTube или Vimeo.", "[data-edvideo]"); return;
+        goodsFail("Ссылка на видео — YouTube, Vimeo, Instagram или загруженный файл.", "[data-edvideo]"); return;
       }
       goodsErrClear();
 
@@ -11736,7 +13628,7 @@
         demoApply({ type: "set_gallery", id: gp.id, list: galSaveList() });
         changed = true;
       }
-      GAL.id = ""; UP.err = "";
+      GAL.id = ""; UP.err = ""; vidReset();
       /* ---- /media ---------------------------------------------------------- */
       var rowsV = [...document.querySelectorAll("[data-vrow]")];
       if (rowsV.length) {
@@ -11837,6 +13729,33 @@
         t.disabled = false; toast("Не получилось — попробуйте ещё раз");
       });
       return;
+    }
+    /* ---- «Письма»: the owner's own subject / intro / signature ----------- */
+    if (d.mailph) {
+      var phBits = d.mailph.split(":"), phField = phBits[0], phTok = "{" + phBits[1] + "}";
+      var phEl = document.querySelector('[data-mailtxt="' + phField + '"]');
+      if (phEl) {
+        // at the caret, not at the end: the owner is usually mid-sentence
+        var phFrom = typeof phEl.selectionStart === "number" ? phEl.selectionStart : phEl.value.length;
+        var phTo = typeof phEl.selectionEnd === "number" ? phEl.selectionEnd : phFrom;
+        phEl.value = phEl.value.slice(0, phFrom) + phTok + phEl.value.slice(phTo);
+        setMailDraftField(mailTpl(), mailLang(), phField, phEl.value);
+        phEl.focus();
+        try { phEl.setSelectionRange(phFrom + phTok.length, phFrom + phTok.length); } catch (e2) {}
+        paintMailState();
+      }
+      return;
+    }
+    if (d.mailreset) {
+      // "" means «нет своего текста» — the letter follows the default again
+      setMailDraftField(mailTpl(), mailLang(), d.mailreset, "");
+      render(); return;
+    }
+    if (d.mailrevert !== undefined) { S.mailDraft = null; render(); return; }
+    if (d.mailsave !== undefined) {
+      if (!mailDirty()) { toast("Изменений нет"); return; }
+      pendingAction = { type: "set_mail_texts", value: mailClean(mailDraft()) };
+      render(); refocus("[data-admapply]"); return;
     }
     if (d.admchatbot !== undefined) {
       demoApply({ type: "toggle_chatbot", value: !DEMO.chatbot });
@@ -11990,32 +13909,25 @@
     if (d.scanclose !== undefined) { closeScanner(); return; }
     if (d.scantorch !== undefined) { setScanTorch(!S.scanTorchOn); return; }
     if (d.scanmanualsubmit !== undefined) { submitManualScan(); return; }
-    if (d.scanplus !== undefined) {
-      if (S.scanHit && S.scanHit.product) {
-        stockMoveSend({ productId: S.scanHit.productId, variant: S.scanHit.variant, delta: 1, reason: "goods_in", ref: "сканер" }).then(function (ok) {
-          if (ok) { toast("Приход +1 ✓"); scanLookup(S.scanHit.code); } else toast("Не удалось сохранить");
-        });
-      }
+    /* scanner app: the standalone route, its way back, and the top bar's
+       keyboard button (the manual field is always there — this only puts the
+       caret in it, so «ввести код руками» is one tap on a phone). */
+    if (d.scanapp !== undefined) { go("scan"); return; }
+    if (d.scanadmin !== undefined) { go("admin"); return; }
+    if (d.scanmanualfocus !== undefined) {
+      var manualEl = SCANEL && SCANEL.querySelector("[data-scanmanual]");
+      if (manualEl) { manualEl.focus(); manualEl.select(); }
       return;
     }
-    if (d.scanminus !== undefined) {
-      if (S.scanHit && S.scanHit.product) {
-        stockMoveSend({ productId: S.scanHit.productId, variant: S.scanHit.variant, delta: -1, reason: "sale_pos", ref: "сканер" }).then(function (ok) {
-          if (ok) { toast("Продажа −1 ✓"); scanLookup(S.scanHit.code); } else toast("Не удалось сохранить");
-        });
-      }
+    if (d.scanqty) {
+      // the stepper never repaints the panel — it writes the field it steps,
+      // so a finger on «+» cannot lose the caret or the scroll position
+      S.scanQty = Math.max(1, Math.min(999, scanQtyNow() + Number(d.scanqty)));
+      var stepEl = SCANEL && SCANEL.querySelector("[data-scanqtyinput]");
+      if (stepEl) stepEl.value = String(S.scanQty);
       return;
     }
-    if (d.scangoodsin !== undefined) {
-      var scanQtyEl = SCANEL && SCANEL.querySelector("#scanqtyinput");
-      var scanQty = Math.max(1, Math.trunc(Number(scanQtyEl ? scanQtyEl.value : 1)) || 1);
-      if (S.scanHit && S.scanHit.product) {
-        stockMoveSend({ productId: S.scanHit.productId, variant: S.scanHit.variant, delta: scanQty, reason: "goods_in", ref: "сканер" }).then(function (ok) {
-          if (ok) { toast("Приход +" + scanQty + " ✓"); scanLookup(S.scanHit.code); } else toast("Не удалось сохранить");
-        });
-      }
-      return;
-    }
+    if (d.scanmove) { scanCommitMove(d.scanmove === "out" ? -1 : 1); return; }
     if (d.scanassign) {
       var assignP = byId(d.scanassign);
       var assignSizes = assignP && assignP.sizes && assignP.sizes.length ? assignP.sizes : [];
@@ -12067,6 +13979,69 @@
       var cur = (S.admPromos || []).filter(function (x) { return x.code === d.admpromotoggle; })[0];
       togglePromoActive(d.admpromotoggle, !(cur && cur.active));
       return;
+    }
+    /* ---- admin «Товары → Наборы» ---- */
+    if (d.admgoodstab) {
+      S.goodsTab = d.admgoodstab;
+      S.bundleForm = null; S.bundleFormErr = ""; S.bundleDel = "";
+      render(); return;
+    }
+    if (d.bundlenew !== undefined) {
+      S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = "";
+      render(); refocus('[data-bundlef="id"]'); return;
+    }
+    if (d.bundleedit) {
+      var bEd = (S.admBundles || []).filter(function (x) { return x.id === d.bundleedit; })[0];
+      if (bEd) { S.bundleForm = bundleToForm(bEd); S.bundleFormErr = ""; S.bundleQ = ""; render(); }
+      return;
+    }
+    if (d.bundletoggle) {
+      var bTg = (S.admBundles || []).filter(function (x) { return x.id === d.bundletoggle; })[0];
+      toggleBundleActive(d.bundletoggle, !(bTg && bTg.active));
+      return;
+    }
+    if (d.bundlemove) {
+      var mv = String(d.bundlemove).split(":");
+      moveBundle(mv[0], Number(mv[1]) || 0);
+      return;
+    }
+    if (d.bundlesave !== undefined) { saveBundleForm(); return; }
+    if (d.bundlecancel !== undefined) { S.bundleForm = null; S.bundleFormErr = ""; render(); return; }
+    if (d.bundledelete) { S.bundleDel = d.bundledelete; render(); return; }
+    if (d.bundledelyes) { deleteBundleById(d.bundledelyes); return; }
+    if (d.bundledelno !== undefined) { S.bundleDel = ""; render(); return; }
+    if (d.bundleadd) {
+      if (!S.bundleForm) return;
+      var already = S.bundleForm.items.filter(function (x) { return x.productId === d.bundleadd; })[0];
+      if (already) { toast("Этот товар уже в наборе"); return; }
+      S.bundleForm.items.push({ productId: d.bundleadd, variant: 0, qty: 1 });
+      render(); return;
+    }
+    if (d.bundledel !== undefined) {
+      if (!S.bundleForm) return;
+      S.bundleForm.items.splice(Number(d.bundledel), 1);
+      // the photo may have been the one we just removed
+      if (S.bundleForm.image && !S.bundleForm.items.filter(function (x) { return x.productId === S.bundleForm.image; })[0]) {
+        S.bundleForm.image = "";
+      }
+      render(); return;
+    }
+    if (d.bundleqty) {
+      if (!S.bundleForm) return;
+      var qParts = String(d.bundleqty).split(":");
+      var qIt = S.bundleForm.items[Number(qParts[0])];
+      if (qIt) qIt.qty = Math.min(20, Math.max(1, (qIt.qty || 1) + (Number(qParts[1]) || 0)));
+      render(); return;
+    }
+    if (d.bundleimg !== undefined) {
+      if (!S.bundleForm) return;
+      S.bundleForm.image = d.bundleimg || "";
+      render(); return;
+    }
+    if (d.bundlelang) {
+      if (!S.bundleForm) return;
+      S.bundleForm.lang = d.bundlelang;
+      render(); return;
     }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
@@ -12166,11 +14141,38 @@
     if (d.admblognew !== undefined) {
       S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
       S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+      S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
-    if (d.admblogback !== undefined) { S.adminBlogEdit = null; render(); return; }
-    if (d.admbloglang) { S.adminBlogLang = d.admbloglang; render(); return; }
+    if (d.admblogback !== undefined) { S.adminBlogEdit = null; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return; }
+    if (d.admbloglang) {
+      // another language is another box: the remembered caret belongs to the old one
+      S.adminBlogLang = d.admbloglang; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return;
+    }
+    /* ---- the visual editor's toolbar --------------------------------------
+       None of these call render(): the box and its remembered selection have
+       to survive, so the sheet under the toolbar is patched in place. */
+    if (d.blogrt) { blogToolbar(d.blogrt); return; }
+    if (d.blogtoolcancel !== undefined) { blogToolClose(); blogSelRestore(); return; }
+    if (d.blogtoolupload !== undefined) {
+      var upBlogIn = document.querySelector("[data-blogtoolfile]");
+      if (upBlogIn) upBlogIn.click();
+      return;
+    }
+    if (d.blogtoolpick) { blogInsertProduct(d.blogtoolpick); return; }
+    if (d.blogtoolok) {
+      var urlEl = document.querySelector("[data-blogtoolurl]");
+      // the field, or the draft behind it if a render() has just rebuilt it
+      var urlVal = String((urlEl && urlEl.value) || S.adminBlogToolUrl || "").trim();
+      if (!urlVal) { if (urlEl) urlEl.focus(); return; }
+      if (d.blogtoolok === "image") { blogInsertImage(urlVal); return; }
+      var linkUrl = blogSafeUrl(urlVal);
+      if (!linkUrl) { toast("Ссылка должна начинаться с https://"); if (urlEl) urlEl.focus(); return; }
+      blogToolClose();
+      blogExec("createLink", linkUrl);
+      return;
+    }
     /* ---- assistant-work: blog AI buttons ------------------------------------
        Unlike the goods editor, a render() here is safe: the draft
        (S.adminBlogEdit) is already the live source of truth for every field
@@ -12190,7 +14192,13 @@
         if (r.status === 200 && r.body.ok && r.body.text) {
           var tx = r.body.text;
           if (tx.title) bdOut.title[bl] = tx.title;
-          if (Array.isArray(tx.h2) && tx.h2.length) bdOut.body[bl] = tx.h2.map(function (h) { return "## " + h + "\n\n"; }).join("");
+          /* The model answers with headings, the box holds HTML — so the
+             skeleton is written as headings with an empty paragraph after
+             each one, which is a place to start typing rather than a line
+             of «## » the owner would have to know about. */
+          if (Array.isArray(tx.h2) && tx.h2.length) {
+            bdOut.body[bl] = tx.h2.map(function (h) { return "<h2>" + esc(String(h)) + "</h2><p><br></p>"; }).join("");
+          }
           if (tx.meta && tx.meta.title) bdOut.seoTitle[bl] = tx.meta.title;
           if (tx.meta && tx.meta.description) bdOut.seoDesc[bl] = tx.meta.description;
           if (bl === "RU" && bdOut.slugAuto && tx.title) bdOut.slug = blogSlugify(tx.title);
@@ -12209,10 +14217,14 @@
       var srcLang = bdTr.title.RU ? "RU" : bdTr.title.ET ? "ET" : bdTr.title.EN ? "EN" : "";
       if (!srcLang) { toast("Сначала напишите статью хотя бы на одном языке"); return; }
       var targets = ["RU", "ET", "EN"].filter(function (l) { return l !== srcLang; });
+      /* The body goes to the model as text, not as tags: a translation task
+         handed HTML comes back with the markup rearranged, and the answer
+         has to be parseable either way. blogHtmlToText() flattens it to
+         headings and «- » lines, blogTextToHtml() puts the tags back. */
       var jobs = [
         { field: "title", text: bdTr.title[srcLang] },
         { field: "excerpt", text: bdTr.excerpt[srcLang] },
-        { field: "body", text: bdTr.body[srcLang] },
+        { field: "body", text: blogHtmlToText(bdTr.body[srcLang]) },
       ].filter(function (j) { return j.text; });
       var tbtn = t, tlabel = t.textContent; t.disabled = true; t.textContent = "…";
       Promise.all(jobs.map(function (j) {
@@ -12229,7 +14241,7 @@
           if (res.r.status === 200 && res.r.body.ok && res.r.body.texts) {
             targets.forEach(function (l) {
               var v = res.r.body.texts[l];
-              if (v) { bdTr[res.field][l] = v; ok = true; }
+              if (v) { bdTr[res.field][l] = res.field === "body" ? blogTextToHtml(v) : v; ok = true; }
             });
           }
         });
@@ -12309,6 +14321,12 @@
       paintPricingState();   // no render(): see that function's own comment
     }
     else if (t.matches("[data-pricingtoggle]")) { pricingDraft().loyalty.enabled = t.checked; render(); }
+    /* «Письма»: the three owner-editable strings. No render() — the caret,
+       see paintMailState()'s own comment. */
+    else if (t.matches("[data-mailtxt]")) {
+      setMailDraftField(mailTpl(), mailLang(), t.dataset.mailtxt, t.value);
+      paintMailState();
+    }
     else if (t.matches("[data-admcustq]")) {
       S.admCustQ = t.value;
       var custList = document.getElementById("admcustlist");
@@ -12377,6 +14395,13 @@
       var posTot = document.getElementById("postotals");
       if (posTot) { posTot.innerHTML = posTotalsHTML(); translateTree(posTot); }
     }
+    /* scanner app: the stepper's field. Remembered, never repainted — the
+       panel rebuild would take the caret out of it mid-number, and
+       scanQtyNow() reads the field itself when the confirm is pressed. */
+    else if (t.matches("[data-scanqtyinput]")) {
+      var scanTyped = Math.trunc(Number(String(t.value).replace(",", ".")));
+      S.scanQty = isFinite(scanTyped) && scanTyped >= 1 ? Math.min(999, scanTyped) : 1;
+    }
     else if (t.matches("[data-scanassignq]")) {
       S.scanAssignQ = t.value;
       var assignResults = SCANEL && SCANEL.querySelector("#scanassignresults");
@@ -12413,6 +14438,21 @@
       else S.promoForm[pf] = t.value;
       if (pf === "code" && t.value !== S.promoForm.code) t.value = S.promoForm.code;
     }
+    /* The set editor, same rule as the promo form above: every field here is
+       one the owner is in the middle of typing in, so nothing renders. Only
+       the «сумма по отдельности» line is repainted, because that is the
+       number that has to answer while the price is being typed. */
+    else if (t.matches("[data-bundlef]")) {
+      if (!S.bundleForm) return;
+      var bf = t.dataset.bundlef;
+      var bl = S.bundleForm.lang || "RU";
+      if (bf === "id") {
+        S.bundleForm.id = t.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 64);
+        if (t.value !== S.bundleForm.id) t.value = S.bundleForm.id;
+      } else if (bf === "title" || bf === "desc") S.bundleForm[bf][bl] = t.value;
+      else if (bf === "price") { S.bundleForm.price = t.value; paintBundleHint(); }
+    }
+    else if (t.matches("[data-bundleq]")) { S.bundleQ = t.value; paintHeroPicks("bundlepicks", bundlePickRows()); }
     else if (t.matches("[data-heroq]")) { S.heroGoQ = t.value; paintHeroPicks("herogolist", heroGoRows()); }
     else if (t.matches("[data-heroimgq]")) { S.heroImgQ = t.value; paintHeroPicks("heroimglist", heroImgRows()); }
     /* content: «Контент» writes straight into the draft and does NOT render —
@@ -12430,8 +14470,15 @@
     }
     /* blog: the editor writes straight into the draft, like «Главный баннер»
        and «Контент» above — a full render on every keystroke would take the
-       caret out of the field, so only the live preview / counters / slug
-       mirror are patched in place. */
+       caret out of the field, so only the counters and the slug mirror are
+       patched in place. The body is its own box below. */
+    else if (t.matches("[data-blogbody]")) { blogSelSave(); blogSync(); }
+    else if (t.matches("[data-blogtoolurl]")) { S.adminBlogToolUrl = t.value; }
+    else if (t.matches("[data-blogtoolq]")) {
+      S.adminBlogToolQ = t.value;
+      var tlist = document.querySelector("[data-blogtoollist]");
+      if (tlist) { tlist.innerHTML = blogToolMatches(); translateTree(tlist); }
+    }
     else if (t.matches("[data-blogf]")) {
       var bd = S.adminBlogEdit;
       if (!bd) return;
@@ -12442,10 +14489,6 @@
         bd.slug = blogSlugify(t.value);
         var slugEl = document.querySelector("[data-blogslug]");
         if (slugEl) slugEl.value = bd.slug;
-      }
-      if (bf === "body") {
-        var prevEl = document.querySelector("[data-admblogpreview]");
-        if (prevEl) prevEl.innerHTML = blogMdPreview(t.value);
       }
       if (bf === "seoTitle" || bf === "seoDesc") {
         var cntEl = document.querySelector('[data-blogcount="' + bf + '"]');
@@ -12487,6 +14530,53 @@
     }
   });
 
+  /* blog: keep the remembered selection current. Typing fires `input` and
+     the toolbar saves before it acts, but a plain Shift+Home, a double-click
+     on a word or a drag across a paragraph fires neither — and those are
+     precisely the moments before «Жирный» or «Ссылка» is pressed. Without
+     this, a background render() landing in that gap would restore the caret
+     from the last keystroke instead of the selection, and the button would
+     apply to nothing. */
+  document.addEventListener("selectionchange", function () {
+    if (S.adminBlogEdit) blogSelSave();
+  });
+
+  /* blog: pressing a toolbar button must not blur the box — mousedown is
+     where the browser moves the focus, so it is stopped here and the caret
+     stays exactly where the owner left it. */
+  document.addEventListener("mousedown", function (e) {
+    var t = e.target;
+    if (t && t.closest && t.closest("[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolpick],[data-blogtoolupload]")) {
+      e.preventDefault();
+    }
+  });
+
+  /* blog: a paste into the editor. Word and Google Docs put a whole styled
+     document on the clipboard — <span style>, <o:p>, tables, a <style> block
+     — so nothing is inserted as it came: HTML goes through the allowlist,
+     plain text through the markdown door, and an image on the clipboard (a
+     screenshot, or «копировать изображение») is uploaded like any photo. */
+  document.addEventListener("paste", function (e) {
+    var box = e.target && e.target.closest ? e.target.closest("[data-blogbody]") : null;
+    if (!box) return;
+    var dt = e.clipboardData;
+    if (!dt) return;
+    var files = dt.files || [], img = null, i;
+    for (i = 0; i < files.length; i++) if (/^image\//.test(files[i].type)) { img = files[i]; break; }
+    e.preventDefault();
+    if (img) {
+      if (MEDIA.on !== true) { toast("Загрузка картинок пока не настроена — вставьте ссылку на картинку."); return; }
+      blogSelSave(); blogUploadImage([img]);
+      return;
+    }
+    var html = dt.getData("text/html");
+    var text = dt.getData("text/plain");
+    var clean = html ? blogCleanHtml(html) : blogTextToHtml(text);
+    if (!clean) return;
+    try { document.execCommand("insertHTML", false, clean); } catch (err) {}
+    blogSelSave(); blogSync();
+  });
+
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.matches("[data-country]")) {
@@ -12498,6 +14588,12 @@
     }
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
+    // the card's size picker — state first, then patch the price in place
+    else if (t.matches("[data-cardsize]")) {
+      var cid = t.dataset.cardsize;
+      S.cardSize[cid] = Number(t.value) || 0;
+      patchCardSize(cid);
+    }
     /* checkout-gaps: the promo kind decides whether there is a «сколько»
        field at all, so this one does need a redraw. */
     else if (t.matches('[data-promof="kind"]')) {
@@ -12507,6 +14603,15 @@
         if (t.value === "fixed" && !(Number(S.promoForm.value) > 0)) S.promoForm.value = 5;
         render();
       }
+    }
+    /* The set editor's two <select>s. The size decides the price of that
+       part, so both redraw — the «сумма по отдельности» hint has to follow. */
+    else if (t.matches("[data-bundlecat]")) { if (S.bundleForm) { S.bundleForm.cat = t.value; } }
+    else if (t.matches("[data-bundlesize]")) {
+      if (!S.bundleForm) return;
+      var bsIt = S.bundleForm.items[Number(t.dataset.bundlesize)];
+      if (bsIt) bsIt.variant = Number(t.value) || 0;
+      render();
     }
     else if (t.matches("[data-machine]")) { S.machine = t.selectedIndex; }
     else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
@@ -12539,6 +14644,20 @@
       if (where === "hero") heroUpload(picked);
       else if (where === "blog") blogCoverUpload(picked);   // blog
       else galUpload(picked, byId(where));
+    }
+    // blog: the «Картинка» button's own picker — the article body, not the cover
+    else if (t.matches("[data-blogtoolfile]")) {
+      var pickedBlog = t.files;
+      t.value = "";
+      if (pickedBlog && pickedBlog.length) blogUploadImage(pickedBlog);
+    }
+    // media: the video picker — its own input, so a 60 MB file can never end
+    // up in the photo queue by accident
+    else if (t.matches("[data-vidfile]")) {
+      var pickedV = t.files;
+      var forId = t.dataset.vidfile;
+      t.value = "";
+      if (pickedV && pickedV.length) videoUpload(pickedV, byId(forId));
     }
     // assistant-work: «Отчёты» — see reportsCard()
     else if (t.matches("[data-admreportsmonth]")) {
@@ -12706,8 +14825,16 @@
     if ((m = p.match(/\/shop2\/info\/([a-z]+)$/)) && typeof LEGAL !== "undefined" && LEGAL[m[1]]) {
       S.infoSlug = m[1]; S.screen = "info"; return true;
     }
-    // features: sets and the gift card
-    if ((m = p.match(/\/shop2\/set\/([^/]+)$/)) && bundleById(decodeURIComponent(m[1]))) {
+    /* features: sets and the gift card.
+       The id is NOT checked here any more. It used to be — an unknown set fell
+       through to the home page — but the list a set is looked up in is no
+       longer a file that is certainly loaded: it arrives from /api/bundles/ a
+       moment later, and it can be empty because the owner switched sets off.
+       Deciding the route from data that has not landed made an old link
+       silently become the home page. The address is accepted as what it is,
+       and screenBundle() answers honestly: the set, «Наборы сейчас
+       недоступны», or «Набор не найден» — never a 404, never a bounce home. */
+    if ((m = p.match(/\/shop2\/set\/([^/]+)$/))) {
       S.bundleId = decodeURIComponent(m[1]); S.screen = "bundle"; return true;
     }
     if (/\/shop2\/sets$/.test(p)) { S.screen = "bundles"; return true; }
@@ -12720,7 +14847,10 @@
       S.blogSlug = decodeURIComponent(m[1]); S.screen = "blogpost"; return true;
     }
     if (/\/shop2\/blog$/.test(p)) { S.screen = "blog"; return true; }
-    if ((m = p.match(/\/shop2\/(brands|account|admin)$/))) { S.screen = m[1]; return true; }
+    /* scanner app: /shop2/scan/ is the admin's third installable icon — the
+       barcode scanner on its own route, gated on the admin session by
+       screenScan() exactly the way /shop2/admin/ is (docs/inventory.md). */
+    if ((m = p.match(/\/shop2\/(brands|account|admin|scan)$/))) { S.screen = m[1]; return true; }
     /* The receipt IS a place to land cold — it is where the bank sends the
        shopper back to, with ?n=&s= naming the order and how it went. Without
        that query there is no order behind it, and home is the honest answer.

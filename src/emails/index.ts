@@ -33,6 +33,30 @@ export { renderGiftCard } from "./gift-card";
 export { renderLoginCode } from "./login-code";
 export type { GiftCardLike } from "./gift-card";
 export { normalizeLang, isLang, ALL_LANGS, baseUrl } from "./layout";
+/* Owner-editable subject / intro / signature — settings.mail_texts. */
+export {
+  MAIL_TEXT_TEMPLATES,
+  MAIL_TEXT_FIELDS,
+  MAIL_TEXT_LIMITS,
+  MAIL_TEXT_DEFAULTS,
+  MAIL_PLACEHOLDERS,
+  cleanMailTexts,
+  defaultMailText,
+  fillPlaceholders,
+  isMailTextTemplate,
+  mailText,
+  mailTextHtml,
+  mailTextsOverride,
+  setMailTextsOverride,
+} from "./texts";
+export type {
+  MailTextField,
+  MailTextSet,
+  MailTextTemplate,
+  MailTextValues,
+  MailTexts,
+  MailPlaceholder,
+} from "./texts";
 
 export const TEMPLATE_IDS = [
   "order-confirmed",

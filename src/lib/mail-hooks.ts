@@ -15,6 +15,7 @@ import { renderOrderConfirmed } from "@/emails/order-confirmed";
 import { renderOrderShipped } from "@/emails/order-shipped";
 import { renderGiftCard, type GiftCardLike } from "@/emails/gift-card";
 import { money, normalizeLang, num, pick, setBrandOverride } from "@/emails/layout";
+import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
 import {
   customerName,
   deliveryLine,
@@ -53,7 +54,10 @@ function truthy(v: string | undefined | null): boolean {
 
 /**
  * The company name, address and e-mail in every letter's footer are the
- * owner's to change (`settings.content`, edited in «Настройки → Контент»).
+ * owner's to change (`settings.content`, edited in «Настройки → Контент»), and
+ * so are each letter's subject, intro paragraph and closing line
+ * (`settings.mail_texts`, edited in «Письма» — src/emails/texts.ts). Both are
+ * read here, from the one settings query this function already made.
  *
  * Read once per send, at the top of each hook, and handed to the layout —
  * the renderers themselves stay pure functions of (order, lang). `@/lib/orders`
@@ -70,7 +74,12 @@ async function loadBrand(): Promise<void> {
       import("@/lib/orders"),
       import("@/lib/content"),
     ]);
-    const content = mergeContent((await getSettings()).content);
+    const settings = await getSettings();
+    /* «Письма»: the owner's own subject / intro / signature, read from the
+       same settings map and in the same best-effort way as the footer
+       details below — see src/lib/mail-texts.ts. */
+    setMailTextsOverride(cleanMailTexts(settings.mail_texts));
+    const content = mergeContent(settings.content);
     setBrandOverride({
       legal: content.company.legalName,
       address: content.company.address,
@@ -84,6 +93,7 @@ async function loadBrand(): Promise<void> {
   } catch (err) {
     console.warn("[mail-hooks] shop details unavailable, using defaults", err);
     setBrandOverride(null);
+    setMailTextsOverride(null);
   }
 }
 

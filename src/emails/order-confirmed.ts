@@ -1,6 +1,10 @@
 /**
  * «Заказ принят» — sent once the payment lands.
  * Design source: public/shop/emails/order-confirmed.html
+ *
+ * Subject, the paragraph under the greeting and the closing line are the
+ * owner's (settings.mail_texts, «Письма» in the admin) — see ./texts.ts.
+ * Everything else on this page is coded.
  */
 
 import {
@@ -14,8 +18,10 @@ import {
   totalsOf,
 } from "./common";
 import {
+  BRAND,
   COMMON,
   esc,
+  money,
   normalizeLang,
   num,
   rowLabel,
@@ -25,22 +31,19 @@ import {
   rowPanel,
   rowTitle,
   shell,
-  stripHtml,
   textBody,
   textFooter,
 } from "./layout";
+import { mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, OrderLike, RenderedEmail } from "./types";
 
 interface Strings {
-  subject: (n: string) => string;
   preheader: string;
   title: string;
-  lead: (hello: string, n: string) => string;
   items: string;
   method: string;
   waitPickup: string;
   waitShip: string;
-  reply: string;
   textIntro: string;
   /** wholesale/loyalty (100_tiers_loyalty) — one line, only when order.loyaltyEarned > 0. */
   points: (n: number) => string;
@@ -57,54 +60,41 @@ function ruPluralPoints(n: number): string {
 
 const T: Record<Lang, Strings> = {
   ru: {
-    subject: (n) => `Заказ ${n} принят — Rempire`,
     preheader:
       "Спасибо за заказ! Мы уже собираем его и напишем, когда он будет готов.",
     title: "Заказ принят",
-    lead: (hello, n) =>
-      `${hello} Спасибо за заказ <strong>№&nbsp;${n}</strong> — мы его получили и уже собираем.`,
     items: "Состав заказа",
     method: "Способ получения",
     waitPickup:
       "Мы напишем, когда заказ можно будет забрать — обычно в течение 1–2 рабочих дней.",
     waitShip:
       "Мы напишем, когда передадим посылку в доставку — обычно в течение 1–2 рабочих дней.",
-    reply: "Есть вопрос по заказу? Просто ответьте на это письмо — мы на связи.",
     textIntro: "Состав заказа:",
     points: (n) => `Вам начислено ${n} ${ruPluralPoints(n)} лояльности за этот заказ — уже доступны в личном кабинете.`,
   },
   et: {
-    subject: (n) => `Tellimus ${n} on vastu võetud — Rempire`,
     preheader:
       "Aitäh tellimuse eest! Paneme selle kokku ja anname teada, kui see on valmis.",
     title: "Tellimus vastu võetud",
-    lead: (hello, n) =>
-      `${hello} Aitäh tellimuse <strong>nr&nbsp;${n}</strong> eest — see on meieni jõudnud ja paneme selle kokku.`,
     items: "Tellimuse sisu",
     method: "Kättesaamise viis",
     waitPickup:
       "Anname teada, kui tellimusele saab järele tulla — tavaliselt 1–2 tööpäeva jooksul.",
     waitShip:
       "Anname teada, kui paki kullerile üle anname — tavaliselt 1–2 tööpäeva jooksul.",
-    reply:
-      "Küsimus tellimuse kohta? Vastake lihtsalt sellele kirjale — oleme olemas.",
     textIntro: "Tellimuse sisu:",
     points: (n) => `Selle ostuga kogusite ${n} boonuspunkti — need juba ootavad teie kontol.`,
   },
   en: {
-    subject: (n) => `Order ${n} confirmed — Rempire`,
     preheader:
       "Thanks for your order! We are packing it and will write when it is ready.",
     title: "Order confirmed",
-    lead: (hello, n) =>
-      `${hello} Thank you for order <strong>no.&nbsp;${n}</strong> — we have it and are packing it now.`,
     items: "Order summary",
     method: "Delivery method",
     waitPickup:
       "We will write as soon as the order is ready for pickup — usually within 1–2 business days.",
     waitShip:
       "We will write as soon as the parcel is handed to the carrier — usually within 1–2 business days.",
-    reply: "A question about the order? Just reply to this e-mail — we read it.",
     textIntro: "Order summary:",
     points: (n) => `You earned ${n} loyalty ${n === 1 ? "point" : "points"} on this order — already in your account.`,
   },
@@ -127,6 +117,15 @@ export function renderOrderConfirmed(
   const pickup = shipKind(order.shipping) === "pickup";
   const wait = pickup ? t.waitPickup : t.waitShip;
 
+  const values: MailTextValues = {
+    name,
+    order: number,
+    total: money(totals.total),
+    shop: BRAND.name,
+  };
+  const intro = mailText("order-confirmed", L, "intro", values);
+  const signature = mailText("order-confirmed", L, "signature", values);
+
   // The totals row wants the method only ("Пакомат Omniva"); the address
   // already has its own panel below.
   const rows = totalRows(totals, delivery.split(" — ")[0], L);
@@ -136,13 +135,14 @@ export function renderOrderConfirmed(
   const pointsEarned = Math.round(num(order.loyaltyEarned, 0));
   const pointsLine = pointsEarned > 0 ? t.points(pointsEarned) : "";
 
+  const signatureHtml = mailTextHtml("order-confirmed", L, "signature", values);
   const body =
     rowTitle(t.title) +
-    rowLead(t.lead(esc(hello), esc(number))) +
+    rowLead(`${esc(hello)} ${mailTextHtml("order-confirmed", L, "intro", values)}`) +
     rowLabel(t.items) +
     rowLines([...items.lines, ...rows.lines]) +
     rowPanel(t.method, esc(delivery), esc(wait)) +
-    rowNote(pointsLine ? [esc(pointsLine), esc(t.reply)] : [esc(t.reply)]);
+    rowNote(pointsLine ? [esc(pointsLine), signatureHtml] : [signatureHtml]);
 
   const html = shell({
     lang: L,
@@ -155,7 +155,7 @@ export function renderOrderConfirmed(
   const text = textBody([
     t.title.toUpperCase(),
     "",
-    stripHtml(t.lead(hello, number)),
+    `${hello} ${intro}`,
     "",
     t.textIntro,
     ...items.text,
@@ -165,9 +165,13 @@ export function renderOrderConfirmed(
     wait,
     "",
     ...(pointsLine ? [pointsLine, ""] : []),
-    t.reply,
+    signature,
     textFooter(L, c.serviceNote),
   ]);
 
-  return { subject: t.subject(number), html, text };
+  return {
+    subject: mailText("order-confirmed", L, "subject", values),
+    html,
+    text,
+  };
 }

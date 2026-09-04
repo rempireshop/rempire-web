@@ -162,6 +162,7 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   "Корзина": { ET: "Ostukorv", EN: "Cart" },
   "В корзину": { ET: "Lisa ostukorvi", EN: "Add to cart" },
   "Наборы": { ET: "Komplektid", EN: "Sets" },
+  "Наборы сейчас недоступны": { ET: "Komplektid pole praegu saadaval", EN: "Sets are not available right now" },
   "Оставить отзыв": { ET: "Jäta arvustus", EN: "Write a review" },
   "Отзывы": { ET: "Arvustused", EN: "Reviews" },
   "Все товары": { ET: "Kõik tooted", EN: "All products" },
@@ -177,7 +178,11 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   "Заказ оплачен": { ET: "Tellimus makstud", EN: "Order paid" },
   "Оплата не прошла": { ET: "Makse ebaõnnestus", EN: "Payment did not go through" },
   "Платёж обрабатывается": { ET: "Makset töödeldakse", EN: "Payment is being processed" },
-  "Блог": { ET: "Ajaveeb", EN: "Blog" },
+  // ET is «Blog», not «Ajaveeb» — the owner's own word for the section.
+  "Блог": { ET: "Blog", EN: "Blog" },
+  // the aria-label on a product card's size picker (cardSizeHTML in app.js)
+  "Объём": { ET: "Maht", EN: "Size" },
+  "Подарочная карта": { ET: "Kinkekaart", EN: "Gift card" },
   "Отзывов пока нет — станьте первым.": { ET: "Arvustusi veel pole — ole esimene.", EN: "No reviews yet — be the first." },
   "Спасибо! Отзыв отправлен — он появится на странице после проверки.": {
     ET: "Aitäh! Arvustus on saadetud — see ilmub lehele pärast ülevaatamist.",

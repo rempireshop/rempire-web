@@ -112,6 +112,69 @@ export function fromAddress(override?: string): string {
   );
 }
 
+/* ---------- the e2e sink ------------------------------------------------- */
+
+/**
+ * What sendMail() was *asked* to send, kept in memory for the e2e suite.
+ *
+ * The suite runs with `RESEND_API_KEY` empty on purpose, so every send is
+ * skipped and there is no mailbox to read (docs/testing.md). Without this
+ * there is no way for a browser test to prove that the letter the owner
+ * edited in «Письма» is the letter a real paid order produces — only that the
+ * *preview* changed, which is the half that could not regress.
+ *
+ * Double-gated exactly like `/api/e2e/gift-card/`: `NODE_ENV` must not be
+ * "production" **and** `E2E_BOOTSTRAP` must be "1". It records the subject and
+ * recipient, never the body. Reading it back is `GET /api/e2e/mail/`, which
+ * additionally needs the admin cookie.
+ *
+ * On globalThis, not a module variable: `next dev` re-evaluates modules per
+ * route on edit, and the writer (a payment route) and the reader (the e2e
+ * route) must see the same array — the same reasoning as the pool in
+ * src/lib/db.ts.
+ */
+export interface CapturedMail {
+  at: number;
+  to: string[];
+  subject: string;
+  template: string;
+}
+
+const CAPTURE_MAX = 50;
+const g = globalThis as unknown as { __rempireMailSink?: CapturedMail[] };
+
+function sinkOn(): boolean {
+  return (
+    process.env.NODE_ENV !== "production" && process.env.E2E_BOOTSTRAP === "1"
+  );
+}
+
+function templateTag(tags: SendMailInput["tags"]): string {
+  if (!tags) return "";
+  if (Array.isArray(tags)) {
+    const hit = tags.find((t) => t && t.name === "template");
+    return hit ? String(hit.value ?? "") : "";
+  }
+  return String(tags.template ?? "");
+}
+
+function capture(input: SendMailInput): void {
+  if (!sinkOn()) return;
+  const list = (g.__rempireMailSink ??= []);
+  list.push({
+    at: Date.now(),
+    to: recipients(input.to),
+    subject: String(input.subject ?? "").trim(),
+    template: templateTag(input.tags),
+  });
+  if (list.length > CAPTURE_MAX) list.splice(0, list.length - CAPTURE_MAX);
+}
+
+/** Newest last. Empty unless the two e2e gates above are both open. */
+export function capturedMail(): CapturedMail[] {
+  return sinkOn() ? (g.__rempireMailSink ?? []).slice() : [];
+}
+
 /* ---------- send -------------------------------------------------------- */
 
 interface Attempt {
@@ -174,6 +237,10 @@ async function attempt(
 export async function sendMail(
   input: SendMailInput,
 ): Promise<SendMailResult> {
+  // Before the key check: in the e2e suite there is no key, and "what would
+  // have gone out" is exactly what the suite needs to see.
+  capture(input);
+
   const key = (process.env.RESEND_API_KEY ?? "").trim();
   if (!key) {
     console.warn(

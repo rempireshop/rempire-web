@@ -25,9 +25,11 @@ export const ALGORITHM = "AWS4-HMAC-SHA256";
 export const R2_REGION = "auto";
 export const R2_SERVICE = "s3";
 
-/** Where an uploaded file is allowed to land. Nothing else is ever written. */
-export const KEY_PREFIXES = ["products/", "hero/", "reviews/", "blog/"] as const;
-export type MediaKind = "product" | "hero" | "review" | "blog";
+/** Where an uploaded file is allowed to land. Nothing else is ever written.
+ *  `videos/` holds the product videos the owner uploads himself — see
+ *  src/lib/video.ts and docs/media.md. */
+export const KEY_PREFIXES = ["products/", "hero/", "reviews/", "blog/", "videos/"] as const;
+export type MediaKind = "product" | "hero" | "review" | "blog" | "video";
 
 export class StorageError extends Error {
   code: string;
@@ -108,17 +110,28 @@ function safeId(id: string): string {
 
 /**
  * `products/<id>/<timestamp>-<slug>.webp`, `hero/<timestamp>-<slug>.webp`,
- * `reviews/<id>/<timestamp>-<slug>.webp`. The timestamp is what makes a
- * replacement a new URL, so no cache anywhere has to be persuaded to forget
- * the old picture.
+ * `reviews/<id>/<timestamp>-<slug>.webp`, `videos/<id>/<timestamp>-<slug>.mp4`.
+ * The timestamp is what makes a replacement a new URL, so no cache anywhere
+ * has to be persuaded to forget the old picture.
+ *
+ * `ext` exists for the one kind that is not a WebP: an uploaded video keeps
+ * mp4/mov, since nothing here transcodes it (src/lib/video.ts).
  */
-export function mediaKey(kind: MediaKind, filename: string, ownerId?: string | null, now = Date.now()): string {
+export function mediaKey(
+  kind: MediaKind,
+  filename: string,
+  ownerId?: string | null,
+  now = Date.now(),
+  ext = "webp",
+): string {
   const stamp = String(now);
   const slug = slugify(filename);
-  if (kind === "hero") return `hero/${stamp}-${slug}.webp`;
-  if (kind === "blog") return `blog/${stamp}-${slug}.webp`;
-  if (kind === "product") return `products/${safeId(String(ownerId || ""))}/${stamp}-${slug}.webp`;
-  if (kind === "review") return `reviews/${safeId(String(ownerId || ""))}/${stamp}-${slug}.webp`;
+  const safeExt = /^[a-z0-9]{2,5}$/.test(ext) ? ext : "webp";
+  if (kind === "hero") return `hero/${stamp}-${slug}.${safeExt}`;
+  if (kind === "blog") return `blog/${stamp}-${slug}.${safeExt}`;
+  if (kind === "product") return `products/${safeId(String(ownerId || ""))}/${stamp}-${slug}.${safeExt}`;
+  if (kind === "review") return `reviews/${safeId(String(ownerId || ""))}/${stamp}-${slug}.${safeExt}`;
+  if (kind === "video") return `videos/${safeId(String(ownerId || ""))}/${stamp}-${slug}.${safeExt}`;
   throw new StorageError("bad_kind", 400, String(kind));
 }
 
@@ -128,9 +141,11 @@ export function thumbKey(key: string): string {
 }
 
 /**
- * True only for a key this shop wrote: one of the three prefixes, plain
+ * True only for a key this shop wrote: one of the prefixes above, plain
  * characters, no traversal, no empty segment. Everything that deletes or
- * signs goes through here first.
+ * signs goes through here first. mp4/mov are here for `videos/` — this is a
+ * coarse "is this one of ours" gate, not the place that decides which kind
+ * may hold which extension; the upload route does that.
  */
 export function isAllowedKey(key: unknown): key is string {
   if (typeof key !== "string") return false;
@@ -139,7 +154,7 @@ export function isAllowedKey(key: unknown): key is string {
   if (!/^[a-z0-9][a-z0-9._/-]*$/.test(k)) return false;
   if (k.includes("//") || k.includes("..")) return false;
   if (!KEY_PREFIXES.some((p) => k.startsWith(p))) return false;
-  return /\.(webp|jpg|jpeg|png)$/.test(k);
+  return /\.(webp|jpg|jpeg|png|mp4|mov)$/.test(k);
 }
 
 /** The key inside a public URL of ours, or null when the URL is someone else's. */

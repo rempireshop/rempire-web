@@ -1,0 +1,16 @@
+{
+  "id": "/shop2/scan/",
+  "name": "Rempire — сканер",
+  "short_name": "Сканер",
+  "description": "Сканер штрихкодов Rempire: приход и списание в три касания, привязка новых кодов к товарам.",
+  "start_url": "/shop2/scan/",
+  "scope": "/shop2/scan/",
+  "display": "standalone",
+  "background_color": "#edeae1",
+  "theme_color": "#1c1a00",
+  "lang": "ru",
+  "icons": [
+    { "src": "/shop2/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/shop2/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

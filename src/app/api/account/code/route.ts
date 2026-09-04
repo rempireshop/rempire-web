@@ -84,10 +84,13 @@ export async function POST(req: Request) {
     // The letter must not be able to break the sign-in: a Resend outage means
     // the code exists and the shopper can ask again, not a 500.
     try {
-      const [{ renderLoginCode }, { sendRendered }] = await Promise.all([
+      const [{ renderLoginCode }, { sendRendered }, { loadMailTexts }] = await Promise.all([
         import("@/emails/login-code"),
         import("@/lib/mail"),
+        import("@/lib/mail-texts"),
       ]);
+      // «Письма»: the owner's own subject/intro/signature, if he wrote any
+      await loadMailTexts();
       const mail = renderLoginCode(code, lang.toLowerCase(), { minutes: Math.round(CODE_TTL_MS / 60_000) });
       await sendRendered(email, mail, {
         tags: { template: "login-code", lang: lang.toLowerCase() },

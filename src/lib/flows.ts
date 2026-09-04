@@ -21,6 +21,7 @@ import { renderAbandonedCart } from "@/emails/abandoned-cart";
 import { renderBackInStock } from "@/emails/back-in-stock";
 import { renderBirthday } from "@/emails/birthday";
 import { baseUrl, normalizeLang } from "@/emails/layout";
+import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
 import { query } from "@/lib/db";
 import { sendRendered } from "@/lib/mail";
 import {
@@ -97,6 +98,25 @@ export async function getFlows(): Promise<Flows> {
     birthdayCode: typeof f.birthdayCode === "string" ? f.birthdayCode.trim().toUpperCase().slice(0, 40) : "",
     birthdayPercent: Number.isFinite(percent) && percent > 0 && percent <= 90 ? Math.round(percent) : FLOW_DEFAULTS.birthdayPercent,
   };
+}
+
+/**
+ * «Письма»: the owner's own subject / intro / signature for these three
+ * letters (`settings.mail_texts`, src/emails/texts.ts). Loaded once at the
+ * top of each run — the same thing loadBrand() does before an order letter,
+ * and the reason the admin preview and the real send never disagree.
+ *
+ * Best effort: no row, no table, a malformed blob ⇒ the built-in defaults.
+ */
+async function loadTexts(): Promise<void> {
+  try {
+    const rows = await query<{ value: unknown }>(
+      "select value from settings where key = 'mail_texts'",
+    );
+    setMailTextsOverride(cleanMailTexts(rows.length ? rows[0].value : null));
+  } catch {
+    setMailTextsOverride(null);
+  }
 }
 
 /* ---------- the resume link ----------------------------------------------- */
@@ -204,6 +224,7 @@ const BATCH = 100;
 export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.abandoned) return { sent: 0, skipped: 0, reason: "disabled" };
+  await loadTexts();
 
   const cutoff = new Date(now - ABANDONED_AFTER_MS).toISOString();
   const rows = await query<{
@@ -307,6 +328,7 @@ export async function runBackInStock(productId: string): Promise<FlowRun> {
 export async function sweepBackInStock(): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.backstock) return { sent: 0, skipped: 0, reason: "disabled" };
+  await loadTexts();
 
   const alerts = await pendingStockAlerts();
   if (!alerts.length) return { sent: 0, skipped: 0 };
@@ -437,6 +459,7 @@ async function promoForBirthday(flows: Flows, now: number): Promise<{ code: stri
 export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.birthday) return { sent: 0, skipped: 0, reason: "disabled" };
+  await loadTexts();
 
   const today = new Date(now);
   const month = today.getUTCMonth() + 1;

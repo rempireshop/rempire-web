@@ -3,14 +3,16 @@
  *
  *   multipart/form-data
  *     file        the picture (JPEG / PNG / WebP / AVIF, up to 12 MB)
- *     kind        product | hero | review
- *     productId   required for kind=product
+ *                 or a product video (MP4 / MOV, up to 60 MB, kind=video)
+ *     kind        product | hero | review | blog | video
+ *     productId   required for kind=product and kind=video
  *     reviewId    required for kind=review
  *     alt         optional caption, echoed back
  *   → { ok, url, thumbUrl, key, width, height, bytes }
+ *     video:  { ok, url, key, bytes, contentType }
  *
  * DELETE /api/admin/upload/?key=products/… — removes one object, and only
- * under the three prefixes this shop writes.
+ * under the prefixes this shop writes.
  *
  * Both are behind requireAdmin. Without the R2 variables the answer is a clean
  * 503 `storage_not_configured`, which is what the admin turns into «Загрузка
@@ -31,6 +33,7 @@ import {
   thumbKey,
   type MediaKind,
 } from "@/lib/storage";
+import { MAX_VIDEO_BYTES, sniffVideo, VIDEO_EXT } from "@/lib/video";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,7 +43,7 @@ export const dynamic = "force-dynamic";
 const UPLOADS_PER_HOUR = 60;
 const HOUR = 60 * 60 * 1000;
 
-const KINDS: MediaKind[] = ["product", "hero", "review", "blog"];
+const KINDS: MediaKind[] = ["product", "hero", "review", "blog", "video"];
 
 function bad(error: string, status = 400, detail?: string) {
   return Response.json({ ok: false, error, ...(detail ? { detail } : {}) }, { status });
@@ -85,7 +88,35 @@ export async function POST(req: Request) {
   const upload = file as File;
   // The length is checked twice on purpose: once before the body is read into
   // memory, once after, because a browser may lie about size.
-  if (upload.size > MAX_UPLOAD_BYTES) return bad("too_large", 413);
+  const maxBytes = kind === "video" ? MAX_VIDEO_BYTES : MAX_UPLOAD_BYTES;
+  if (upload.size > maxBytes) return bad("too_large", 413);
+
+  /* media: a product video. Nothing is decoded, resized or re-encoded — a
+     phone's own H.264 already plays everywhere, and ffmpeg is not a
+     dependency this project is going to grow for one field. The one thing
+     that IS checked is the same thing as for a photo: the type comes from the
+     first bytes, never from the name or from the Content-Type the browser
+     attached. See src/lib/video.ts and docs/media.md. */
+  if (kind === "video") {
+    try {
+      const bytes = Buffer.from(await upload.arrayBuffer());
+      if (bytes.length > MAX_VIDEO_BYTES) return bad("too_large", 413);
+      if (!bytes.length) return bad("empty_file");
+      const mime = sniffVideo(bytes);
+      if (!mime) return bad("bad_video_type", 415);
+
+      const key = mediaKey("video", upload.name || "video", ownerId, Date.now(), VIDEO_EXT[mime]);
+      const put = await putObject({ key, body: bytes, contentType: mime });
+      await writeAuditSafe("admin", "media.upload", { key, kind, id: ownerId, bytes: put.bytes, from: mime });
+
+      return Response.json(
+        { ok: true, key, url: put.url, bytes: put.bytes, contentType: mime },
+        { headers: { "cache-control": "no-store" } },
+      );
+    } catch (err) {
+      return fail(err);
+    }
+  }
 
   try {
     const bytes = Buffer.from(await upload.arrayBuffer());
@@ -150,7 +181,7 @@ export async function GET(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
   return Response.json(
-    { ok: true, configured: storageConfigured(), maxBytes: MAX_UPLOAD_BYTES },
+    { ok: true, configured: storageConfigured(), maxBytes: MAX_UPLOAD_BYTES, maxVideoBytes: MAX_VIDEO_BYTES },
     { headers: { "cache-control": "no-store" } },
   );
 }

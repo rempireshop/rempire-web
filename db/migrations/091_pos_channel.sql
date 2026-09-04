@@ -1,7 +1,7 @@
 -- 091_pos_channel.sql — inventory agent (migration range 090–099)
 --
 -- Tags every order with where it was made. Additive to backend-core's orders
--- table (001_core.sql) the same way analytics' orders_paid_created_idx
+-- table (001_core.sql) the same way analytics' orders_sales_created_idx (081, formerly orders_paid_created_idx)
 -- (080_events.sql) is: one column/index added from another range's file,
 -- never a rewrite of the table backend-core owns.
 --

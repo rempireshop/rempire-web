@@ -17,6 +17,15 @@
  * row and its slug are never gone — an admin who deleted by mistake finds it
  * in the drafts list and can publish it again.
  *
+ * The body is HTML now. The admin editor is a small visual box (a
+ * contenteditable in `public/shop2/app.js`), so what it saves is a handful of
+ * tags, not markdown — `sanitizeHtml()` below is the allowlist that HTML is
+ * measured against, both when it is saved and again when it is read.
+ * Older posts (and anything the assistant drafts) are still markdown, and
+ * `markdownToHtml()` still renders those: `renderPostBody()` is the one place
+ * that decides which of the two a body is, so nothing that was written before
+ * the editor changed has to be migrated to keep rendering.
+ *
  * Markdown: `markdownToHtml()` is a small hand-written subset — headings,
  * paragraphs, bold/italic, links, lists, images, blockquotes — with no
  * external dependency. Everything else in the source is HTML-escaped, never
@@ -305,9 +314,230 @@ export function markdownToHtml(md: string): string {
   return stripDangerous(html);
 }
 
+/* ---------- HTML → safe HTML ----------------------------------------------
+ *
+ * What the visual editor saves. The admin box is a `contenteditable`, so its
+ * output is browser HTML — including whatever a paste from Word or Google
+ * Docs dragged in with it. This is the allowlist, and it is the real one:
+ * the editor cleans on paste and again on save, but `body` is a plain text
+ * column that an old post, an assistant draft or a hand-written API call all
+ * write into, so nothing may be trusted about its shape by the time it is
+ * read back.
+ *
+ *   kept, with attributes:  a[href, data-product]   img[src, alt]
+ *   kept, bare:             p h2 h3 strong em ul ol li blockquote figure br
+ *   unwrapped:              everything else — the tag goes, its text stays
+ *                           (a Word paste is mostly <span> and <div>)
+ *   dropped with contents:  script, style, iframe, object, embed, svg, …
+ *
+ * Why this cannot leak a tag or a handler:
+ *
+ *  1. Nothing is copied through. The output is rebuilt tag by tag from the
+ *     table above — an attribute that is not named there (every `on…=`,
+ *     `style`, `srcset`, `formaction`) has nowhere to be written.
+ *  2. Text between tags is escaped (`<` `>` and a bare `&`; an existing
+ *     `&amp;`/`&nbsp;` is left intact rather than doubled), so a `<` that was
+ *     text stays text.
+ *  3. `href`/`src` go through the same `safeUrl()` the markdown renderer
+ *     uses — `http(s)`, `mailto:` or a same-site `/path`, nothing else, so
+ *     `javascript:` and `data:` are rejected and the attribute is simply not
+ *     written. An `<img>` with no usable src is not written at all.
+ *  4. Tags are balanced by this function, not by the input: a close tag with
+ *     no matching open is dropped, anything still open at the end is closed
+ *     here, and nesting past MAX_DEPTH is unwrapped, so no input can hand the
+ *     browser a half-open tag to guess about.
+ *  5. `stripDangerous()` runs last, for the same reason it does on markdown.
+ */
+const HTML_ALLOWED: Record<string, true> = {
+  p: true, h2: true, h3: true, strong: true, em: true, ul: true, ol: true, li: true,
+  blockquote: true, figure: true, br: true, a: true, img: true,
+};
+const HTML_VOID = new Set(["br", "img"]);
+/** Tags whose contents are not text — dropped together with what is inside. */
+const HTML_DROP = new Set([
+  "script", "style", "iframe", "object", "embed", "noscript", "template",
+  "svg", "math", "head", "title", "xml",
+]);
+/** What a paste means when it uses a tag next to one we allow. */
+const HTML_ALIAS: Record<string, string> = {
+  b: "strong", i: "em", h1: "h2", h4: "h3", h5: "h3", h6: "h3",
+};
+const MAX_DEPTH = 24;
+
+/* A tag, with quoted attribute values allowed to contain ">" — a naive
+   /<[^>]*>/ would end `<img alt="a > b">` in the middle of the alt text. */
+const TAG_RE = /^<(\/?)([a-zA-Z][a-zA-Z0-9:-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/;
+const ATTR_RE = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*(?:=\s*("[^"]*"|'[^']*'|[^\s"'>]+))?/g;
+/** A catalogue id, as `<a data-product>` carries it. */
+const PRODUCT_ID_RE = /^[a-z0-9][a-z0-9._-]{0,79}$/i;
+/** `&` that does not already start an entity — the only one worth escaping. */
+const BARE_AMP = /&(?!#\d{1,7};|#[xX][0-9a-fA-F]{1,6};|[a-zA-Z][a-zA-Z0-9]{1,31};)/g;
+
+function escapeText(s: string): string {
+  return s.replace(BARE_AMP, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+/** A URL that already passed safeUrl(): it cannot hold `<`, `>`, a quote or a space. */
+function escapeUrlAttr(u: string): string {
+  return u.replace(BARE_AMP, "&amp;");
+}
+/** https, or a picture this shop already serves. Not http: — the shop is https. */
+function safeImageUrl(raw: string): string | null {
+  const v = String(raw || "").trim();
+  if (/^https:\/\/[^\s<>"']+$/i.test(v)) return v;
+  if (/^\/(?!\/)[^\s<>"']*$/.test(v)) return v;
+  return null;
+}
+
+function parseAttrs(raw: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  const s = raw.replace(/\/\s*$/, ""); // the slash of a self-closing <br/>
+  ATTR_RE.lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = ATTR_RE.exec(s))) {
+    const key = m[1].toLowerCase();
+    let v = m[2] || "";
+    if (v.length > 1 && ((v[0] === '"' && v.endsWith('"')) || (v[0] === "'" && v.endsWith("'")))) {
+      v = v.slice(1, -1);
+    }
+    if (!Object.prototype.hasOwnProperty.call(out, key)) out[key] = v;
+  }
+  return out;
+}
+
+/** The open tag to write, or null when there is nothing safe left to write. */
+function openTag(name: string, attrsRaw: string): string | null {
+  if (name !== "a" && name !== "img") return `<${name}>`;
+  const attrs = parseAttrs(attrsRaw);
+
+  if (name === "img") {
+    const src = safeImageUrl(attrs.src || "");
+    if (!src) return null;
+    const alt = escapeHtml(String(attrs.alt || "").replace(/\s+/g, " ").trim().slice(0, 160));
+    return `<img src="${escapeUrlAttr(src)}" alt="${alt}" loading="lazy">`;
+  }
+
+  /* An <a> is two different things here: an ordinary link, and the product
+     card the «Товар» button inserts — a marker the storefront swaps for a
+     real card, with a plain link to the product as what it degrades to in
+     the prerendered page and in a feed reader. */
+  let out = "<a";
+  const pid = String(attrs["data-product"] || "").trim();
+  if (PRODUCT_ID_RE.test(pid)) out += ` data-product="${pid}"`;
+  const href = attrs.href ? safeUrl(attrs.href) : null;
+  if (href) {
+    out += ` href="${escapeUrlAttr(href)}"`;
+    if (/^https?:\/\//i.test(href)) out += ' target="_blank" rel="noopener noreferrer"';
+  }
+  return out === "<a" ? null : `${out}>`;
+}
+
+/** Everything up to (and including) `</name>`, or the end of the input. */
+function skipElement(src: string, from: number, name: string): number {
+  const close = new RegExp(`</${name}\\s*>`, "i");
+  const rest = src.slice(from);
+  const m = close.exec(rest);
+  return m ? from + m.index + m[0].length : src.length;
+}
+
+export function sanitizeHtml(input: string): string {
+  const src = String(input || "");
+  const out: string[] = [];
+  const stack: string[] = [];
+  let i = 0;
+
+  while (i < src.length) {
+    const lt = src.indexOf("<", i);
+    if (lt < 0) { out.push(escapeText(src.slice(i))); break; }
+    if (lt > i) out.push(escapeText(src.slice(i, lt)));
+
+    if (src.startsWith("<!--", lt)) { const e = src.indexOf("-->", lt + 4); i = e < 0 ? src.length : e + 3; continue; }
+    if (src.startsWith("<!", lt) || src.startsWith("<?", lt)) { const e = src.indexOf(">", lt); i = e < 0 ? src.length : e + 1; continue; }
+
+    const m = TAG_RE.exec(src.slice(lt));
+    if (!m) { out.push("&lt;"); i = lt + 1; continue; } // a bare "<" in the text
+    i = lt + m[0].length;
+
+    const closing = m[1] === "/";
+    const raw = m[2].toLowerCase();
+    const name = HTML_ALIAS[raw] || raw;
+
+    if (HTML_DROP.has(raw)) {
+      if (!closing) i = skipElement(src, i, raw);
+      continue;
+    }
+    if (!HTML_ALLOWED[name]) continue; // unwrapped: the tag goes, its text stays
+
+    if (closing) {
+      const at = stack.lastIndexOf(name);
+      if (at < 0) continue; // a close with no open — nothing to close
+      while (stack.length > at) out.push(`</${stack.pop()}>`);
+      continue;
+    }
+    if (HTML_VOID.has(name)) {
+      const tag = openTag(name, m[3]);
+      if (tag) out.push(tag);
+      continue;
+    }
+    if (stack.length >= MAX_DEPTH) continue;
+    const tag = openTag(name, m[3]);
+    if (!tag) continue;
+    out.push(tag);
+    stack.push(name);
+  }
+  while (stack.length) out.push(`</${stack.pop()}>`);
+  return stripDangerous(out.join(""));
+}
+
+/**
+ * Is this body HTML from the visual editor, or markdown from before it?
+ *
+ * Only a body that OPENS with one of the block tags the editor itself writes
+ * counts as HTML. That is deliberately narrow: a markdown body starting with
+ * a pasted `<script>` must not be mistaken for HTML and handed to the
+ * sanitiser — it belongs in `markdownToHtml()`, which escapes it as the text
+ * it is. Getting this wrong either way is a wrong-looking article, never an
+ * unsafe one: both branches end in an allowlist.
+ */
+const HTML_BODY_RE = /^\s*<(?:p|h2|h3|ul|ol|figure|blockquote)(?:\s[^>]*)?>/i;
+export function looksLikeHtmlBody(body: string): boolean {
+  return HTML_BODY_RE.test(String(body || ""));
+}
+
+/** The one place a stored body becomes the HTML a reader sees. */
+export function renderPostBody(body: string): string {
+  const src = String(body || "");
+  return looksLikeHtmlBody(src) ? sanitizeHtml(src) : markdownToHtml(src);
+}
+
 /* ---------- validation ----------------------------------------------------- */
 
-function trilingual(raw: unknown, max: number): Trilingual {
+/** A title, an excerpt, an alt or an SEO line: one line, however it arrived. */
+function cleanLine(v: string): string {
+  return v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * The article body, which is the one field where a line break is content.
+ *
+ * This used to run `cleanLine()` too, and every body came out of it as a
+ * single endless line: a markdown `## Масло каждый день` on its own line
+ * ended up in the middle of the paragraph above it, both markers glued to
+ * their neighbours, and the article rendered as one wall of text. Runs of
+ * spaces and tabs still collapse, control and format characters still go,
+ * and three or more blank lines still become one — `\n` is simply not
+ * whitespace to be squeezed out here.
+ */
+function cleanBody(v: string): string {
+  return v
+    .replace(/\r\n?/g, "\n")                                     // CRLF, and a lone CR from an old paste
+    .replace(/[\p{Cc}\p{Cf}]/gu, (c) => (c === "\n" ? c : " "))  // tabs, NUL, bidi marks — but not the breaks
+    .replace(/[^\S\n]+/g, " ")                                   // runs of spaces (and NBSP) → one space
+    .replace(/ *\n */g, "\n")                                    // no space left dangling at a line end
+    .replace(/\n{3,}/g, "\n\n")                                  // at most one blank line between blocks
+    .trim();
+}
+
+function trilingual(raw: unknown, max: number, multiline = false): Trilingual {
   /* A bare string is the Russian text — the panel always sends {RU,ET,EN},
      but the assistant's draft and a hand-written API call may not, and a
      title that silently vanished used to publish a post with an empty <h1>
@@ -321,9 +551,7 @@ function trilingual(raw: unknown, max: number): Trilingual {
   const out = { ...EMPTY3 };
   for (const l of LANGS) {
     const v = src[l];
-    if (typeof v === "string") {
-      out[l] = v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max);
-    }
+    if (typeof v === "string") out[l] = (multiline ? cleanBody(v) : cleanLine(v)).slice(0, max);
   }
   return out;
 }
@@ -346,7 +574,13 @@ function cleanList(raw: unknown, maxItems: number, maxLen: number): string[] {
 function cleanUrl(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
   const v = raw.trim().slice(0, 500);
-  return /^https?:\/\/[^\s<>"']+$/i.test(v) ? v : null;
+  if (/^https?:\/\/[^\s<>"']+$/i.test(v)) return v;
+  /* …or a picture this shop already serves. The sample posts seeded by
+     071_blog_samples.sql use a product photo under /shop/img/ as their cover,
+     and opening one of them in the editor and pressing «Сохранить» must not
+     quietly blank the cover just because it is not on R2. */
+  if (/^\/(?!\/)[^\s<>"']*$/.test(v)) return v;
+  return null;
 }
 
 export interface PostInput {
@@ -429,7 +663,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 export async function upsertPost(input: PostInput): Promise<Post> {
   const title = trilingual(input.title, 200);
   const excerpt = trilingual(input.excerpt, 500);
-  const body = trilingual(input.body, 20_000);
+  const body = trilingual(input.body, 20_000, true); // the one field where "\n" is content
   const coverAlt = trilingual(input.coverAlt, 160);
   const seoTitle = trilingual(input.seoTitle, 70);
   const seoDesc = trilingual(input.seoDesc, 170);

@@ -22,22 +22,34 @@
   себе** — только когда его остаток на самом деле дойдёт до нуля через приём,
   продажу или ваше исправление.
 
+## Отдельная иконка «Сканер» на телефоне
+
+Чтобы не заходить каждый раз в админку: откройте на телефоне
+**/shop2/scan/** и добавьте страницу на экран «Домой» (в Safari —
+«Поделиться» → «На экран “Домой”»; в Chrome — меню ⋮ → «Установить
+приложение»). Появится третья иконка, **«Сканер»**, которая открывается
+сразу в камере. Пароль спросят один раз, как в админке. Из админки туда
+ведёт кнопка «Открыть сканер» на вкладке «Склад».
+
 ## Как принять товар (приход)
 
-1. Откройте «Склад» → «Сканировать».
+1. Откройте иконку «Сканер» (или «Склад» → «Сканировать» в админке).
 2. Разрешите доступ к камере (см. ниже про iPhone).
 3. Наведите камеру на штрихкод (EAN-13, EAN-8 или UPC-A — это почти все
    штрихкоды на упаковках).
 4. Как только код распознан, вы услышите/почувствуете сигнал, и на экране
    появится карточка товара с остатком.
-5. Нажмите «+1 приход» для одной штуки, или впишите число и нажмите «Приход по
-   количеству» для нескольких сразу.
-6. Если код ни к чему не привязан («Код не привязан») — найдите товар в поиске
-   под карточкой и нажмите «Привязать». Дальше этот же штрихкод будет находить
-   этот товар всегда.
+5. Число по умолчанию — 1. Нажмите «+» столько раз, сколько нужно (или
+   впишите число), потом «+ Приход». Всё, штуки на складе.
+6. После этого сканер сразу готов к следующему коду — ничего нажимать не
+   надо.
+7. Если код ни к чему не привязан («Код не найден») — «Привязать к товару»:
+   наберите 2–3 буквы названия, нажмите на товар, при необходимости выберите
+   объём. Дальше этот же штрихкод будет находить этот товар всегда.
 
 Если камера не видит код (плохое освещение, помятая упаковка) — впишите цифры
-штрихкода вручную в поле под камерой и нажмите «Найти».
+штрихкода вручную в поле под камерой и нажмите «Найти». Если камеры нет
+совсем, это поле открывается сразу и никакой ошибки не будет.
 
 Если в магазине есть отдельный сканер-пистолет (Bluetooth или USB) — он тоже
 работает: наведите и нажмите на нём кнопку, код сам появится там же, где и от
@@ -45,7 +57,7 @@
 
 ## Как списать продажу без сайта (сканером)
 
-Так же, как приход, только кнопка «−1 продажа» — для одной проданной штуки без
+Так же, как приход, только кнопка «− Списание» — для проданных штук без
 оформления полноценного чека. Для настоящей продажи с чеком используйте
 «Продажа в салоне» (ниже).
 
@@ -80,6 +92,10 @@
   “Домой”». После этого иконка Rempire появится рядом с другими приложениями.
 - **Android (Chrome)**: меню (три точки) → «Установить приложение» или
   «Добавить на главный экран».
+
+Иконок может быть три, и это три разных приложения: «Rempire» (магазин, со
+страницы `/shop2/`), «Админка» (`/shop2/admin/`) и «Сканер» (`/shop2/scan/`,
+см. выше). Ставьте те, что нужны.
 
 ### Про камеру на iPhone
 
@@ -276,6 +292,9 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   keyboard-wedge `keydown` listener is attached there and not inside
   `scanPanelHTML()` (an element rebuilt on every panel update would silently
   drop it — this was a real bug caught in testing, not a hypothetical one).
+  The shell comes in two shapes — the overlay's floating ✕/torch circles, and
+  the standalone app's top bar (`scanTopBarHTML()`, `S.scanApp`) — chosen at
+  mount time; see "The scanner as its own app" below.
 - **Engine selection**: `startScanEngine()` feature-detects
   `window.BarcodeDetector` — present, use it natively
   (`startNativeEngine()`, own `getUserMedia` + a ~280 ms poll loop, formats
@@ -287,6 +306,10 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   debounces the **same** code for 1.5 s (`SCAN.lastCode`/`SCAN.lastAt`) so a
   steady camera view does not re-fire on every frame, but accepts a
   **different** code immediately.
+- **The result card**: `scanPanelHTML()` — photo, name, size, remainder, a
+  quantity stepper (`data-scanqty`, `[data-scanqtyinput]`) and the two
+  confirms `data-scanmove="in"|"out"` (`scanCommitMove()`), or, for a code
+  nothing owns, the «Привязать к товару» search. Same markup in both shells.
 - **Keyboard-wedge fallback**: the manual-entry input IS the wedge target —
   one small, low-emphasis field serves both a human typing a damaged code and
   a Bluetooth/USB scanner's rapid keystrokes-then-Enter. No separate hidden
@@ -319,10 +342,10 @@ default. If the scanner ever reports "Нет доступа к камере" in 
 where a manual `getUserMedia` test in the browser console works, check this
 header first, not the JS.
 
-## PWA (`public/shop2/manifest.webmanifest`, `public/shop2/admin.webmanifest`, `public/shop2/icons/`)
+## PWA (`public/shop2/manifest.webmanifest`, `public/shop2/admin.webmanifest`, `public/shop2/scanner.webmanifest`, `public/shop2/icons/`)
 
-Two installable apps from the same page, so a customer is never offered an
-app called «Админка»:
+Three installable apps from the same page, so a customer is never offered an
+app called «Админка» or «Сканер»:
 
 - **Shop** — `manifest.webmanifest`: `id`/`scope`/`start_url` `/shop2/`,
   name «Rempire». Linked from `index.html` (and therefore from every
@@ -338,12 +361,81 @@ app called «Админка»:
   app; a different `id`/`start_url` makes it a separate app from the shop.
   The scope `/shop2/admin/` means «В магазин» from the installed admin opens
   in a browser tab — intended.
+- **Scanner** — `scanner.webmanifest`: `id`/`scope`/`start_url` `/shop2/scan/`,
+  name «Rempire — сканер», short name «Сканер». Same mechanism, same icons,
+  never linked in HTML either; `syncAppManifest()` swaps to it (and the apple
+  title to «Сканер») on the scan screen. Installed, it is a third icon on the
+  owner's phone that opens straight into the viewfinder — see below.
 
 Icons are shared, generated once via `node tools/gen-pwa-icons.mjs` from
 `public/brand/rempire-badge-dark.svg` (not part of `prebuild` — regenerate by
 hand only if the badge artwork changes). iOS Safari does not read the web
 manifest for its own "Add to Home Screen"; the `apple-*` tags in
 `index.html` are what it uses, and the title swap above covers the name.
+
+## The scanner as its own app (`/shop2/scan/`)
+
+The «Склад» overlay is the scanner for someone who is already in the panel.
+The owner's actual job is neither — he stands at a shelf with a phone and a
+box of bottles. So the same scanner also stands on its own route, installs as
+its own icon, and opens straight into the camera.
+
+- **Route.** `routeFromPath()` accepts `/shop2/scan/` alongside
+  `brands|account|admin`; `pathFor()`'s generic `/shop2/<screen>/` rule already
+  produces the path, so `go("scan")` and Back work with no special case. Not
+  prerendered, disallowed in `robots.txt` and refused by the sitemap's `NEVER`
+  guard (`tools/prerender-shop2.mjs`) exactly like `/shop2/admin/`; the
+  `noindex, nofollow` robots meta comes from `index.html`, which is the shell
+  every non-prerendered `/shop2/` path rewrites to.
+- **Admin-only.** `screenScan()` calls the same `probeAdmin()` and shows the
+  same «Проверяем…» / «Вход в админку» cards as `screenAdmin()` — `admHeader()`
+  now takes the word in the header as an argument («Сканер» here). Signing in
+  happens **in place**: `admLogin()` only flips `SRV.admin`, so the viewfinder
+  takes over the screen the moment the password is accepted, with no
+  navigation. Strictly `SRV.admin === true` — unlike the panel there is no
+  demo mode to fall back to, since every button here writes to the warehouse.
+- **One scanner, two shells.** `scanMount()`/`scanRenderPanel()`/the engines
+  are untouched and shared. `S.scanApp` (set by `scanRouteSync()` at the top of
+  `renderImpl()`) picks the shell: the «Склад» overlay keeps its floating ✕ and
+  torch circles; the app grows `scanTopBarHTML()` — «Rempire · Сканер», torch,
+  a keyboard button that focuses the manual field, and «В админку». The shell
+  is built once per mount, so a mode change is a remount, not a patch — hence
+  `SCANEL.dataset.scanapp`, checked by the mount hook.
+- **No button to press.** `scanRouteSync()` opens the scanner as soon as the
+  session is confirmed and closes it when the route (or the session) goes
+  away. It runs inside `renderImpl()` and therefore never calls `render()`
+  itself — the mount hook at the bottom of the same pass acts on the flag.
+- **The result card.** Photo, name, size, «Остаток: N» (or «не учтено»), a
+  stepper defaulting to 1, and two big buttons: «+ Приход» (`goods_in`) and
+  «− Списание» (`sale_pos`). One tap is the confirm — `scanCommitMove(sign)`
+  POSTs `delta = sign × qty` to `/api/admin/inventory/moves/`. It replaced the
+  older `+1 / −1 / Приход по количеству` trio, which needed three different
+  buttons to say the same thing. The number is read off the DOM
+  (`scanQtyNow()`), so typing into the field and stepping it are the same
+  path, and neither costs a repaint per keystroke.
+- **Auto-resume.** After a move the card is refreshed rather than dismissed
+  (the new remainder is the receipt), the stepper returns to 1, `SCAN.lastCode`
+  is cleared so the very same item can be scanned again immediately, and the
+  panel says «Готово — сканируйте следующий код.». Nothing to tap to go back
+  to scanning.
+- **Unknown code.** «Код не найден» → «Привязать к товару» → the live product
+  search (`scanAssignResultsHTML()`, `CATALOGUE`) → pick the product → pick the
+  size when there is more than one → `scanBindEan()` PUTs
+  `/api/admin/inventory/` and re-looks the code up, so the goods-in card takes
+  over straight away. Unchanged apart from the two headings.
+- **No camera is not an error.** Denied, absent or a desktop browser: the
+  existing Russian sentence is shown, the viewfinder shrinks
+  (`.scanoverlay.is-nocam`) and the manual field — which is also the
+  bluetooth/USB wedge target — gets the screen and the focus.
+- **The toast had to be raised.** `.scanoverlay` is `--z-scan: 95`, above the
+  toast's 70, so «Приход +3 ✓» used to be painted *underneath* the camera: the
+  owner pressed the one button that matters and nothing appeared to happen.
+  `body.is-scanning .toast` (the class is set by the same render hook that
+  mounts the overlay) lifts it back on top. This affects the «Склад» overlay
+  too, where it was equally invisible and equally wrong.
+- **Getting there.** «Склад» carries one line — «📷 Сканер как отдельное
+  приложение: откройте /shop2/scan/ на телефоне…» — and an «Открыть сканер»
+  button (`data-scanapp`).
 
 ## Assistant (`src/app/api/assistant/actions.ts`, `route.ts`)
 

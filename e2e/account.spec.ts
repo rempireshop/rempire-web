@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { freshEmail, ipHeaders, LANGS, payOrder, PRODUCT, shopUrl, waitForScreen } from "./fixtures";
+import { freshEmail, ipHeaders, LANGS, payOrder, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /**
  * Account: request code → login with the exposed code → order list shows the
@@ -48,6 +48,13 @@ for (const [i, lang] of LANGS.entries()) {
 
       // 3) The order just placed is in the list.
       await expect(page.getByText(orderNumber)).toBeVisible();
+
+      // 3a) The gift card's third home, after the footer link and the home
+      // page block: the cabinet is where a returning customer looks for
+      // "what else can I buy here", and it used to live only under «Наборы».
+      const giftTile = page.locator(".acct__gift .gifttile");
+      await expect(giftTile).toBeVisible();
+      await expect(giftTile.getByRole("heading")).toHaveText(tr("Подарочная карта", lang.code));
 
       // 4) Profile save.
       await page.locator('[data-acctf="name"]').fill("E2E Тестов");

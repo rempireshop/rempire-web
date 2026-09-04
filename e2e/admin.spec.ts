@@ -42,6 +42,21 @@ async function applyAndWaitForSettingsWrite(page: Page): Promise<void> {
   expect((await put).ok()).toBe(true);
 }
 
+/** A switch in Настройки applies locally and PUTs in the background. A test
+ *  that only waits for the toast then opens the storefront can read
+ *  `/api/overrides/` *before* that write lands and see the old value — and a
+ *  test that ends on the click has its context torn down with the request
+ *  still in flight, leaving the switch flipped for the next spec file. Both
+ *  were real: the sets toggle failed on the first and poisoned itself on the
+ *  second. Always wait for the write. */
+async function toggleAndWait(page: Page, selector: string): Promise<void> {
+  const put = page.waitForResponse(
+    (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT",
+  );
+  await page.locator(selector).click();
+  expect((await put).ok()).toBe(true);
+}
+
 /** Opens Settings ("Настройки") — hero, content, sets, chatbot all live there. */
 async function openSettings(page: Page): Promise<void> {
   await page.locator('[data-admtab="setup"]').click();
@@ -233,7 +248,7 @@ test.describe("admin", () => {
       await openSettings(page);
 
       try {
-        await page.locator("[data-admbundles]").click();
+        await toggleAndWait(page, "[data-admbundles]");
         await expect(page.getByRole("status")).toBeVisible();
 
         const home = await freshStorefrontPage(browser);
@@ -245,8 +260,14 @@ test.describe("admin", () => {
         await openSettings(page);
         // The label flips between "Скрыть" (on) and "Показать" (off) — click
         // whichever state it is currently in to make sure it ends up back on.
+        // And wait for the WRITE, not just the click: the panel applies the
+        // switch locally and PUTs it in the background, so a test that ends on
+        // the click has its context torn down with the request still in
+        // flight — the switch stayed off on the server and the next spec file
+        // found a shop with no sets in it (and this very test, run again,
+        // toggled sets back ON and then asserted the rail was gone).
         const toggle = page.locator("[data-admbundles]");
-        if ((await toggle.textContent())?.includes("Показать")) await toggle.click();
+        if ((await toggle.textContent())?.includes("Показать")) await toggleAndWait(page, "[data-admbundles]");
       }
     });
   });
@@ -258,7 +279,7 @@ test.describe("admin", () => {
       await openSettings(page);
 
       try {
-        await page.locator("[data-admchatbot]").click();
+        await toggleAndWait(page, "[data-admchatbot]");
         await expect(page.getByRole("status")).toBeVisible();
 
         const home = await freshStorefrontPage(browser);
@@ -269,7 +290,7 @@ test.describe("admin", () => {
       } finally {
         await openSettings(page);
         const toggle = page.locator("[data-admchatbot]");
-        if ((await toggle.textContent())?.includes("Включить")) await toggle.click();
+        if ((await toggle.textContent())?.includes("Включить")) await toggleAndWait(page, "[data-admchatbot]");
       }
     });
   });

@@ -25,7 +25,7 @@ packers that `next build`'s own `prebuild` hook would otherwise run, then
 `playwright test` starts the app itself via `webServer` in
 `playwright.config.ts` — `next dev`, deliberately, not `next build` + `next
 start`; both files' own comments have the full story, short version in "The
-three test-only doors" below. WebKit is not installed on this machine
+test-only doors" below. WebKit is not installed on this machine
 (`npx playwright install webkit` would add it); the config adds a
 `webkit-local` project automatically when it detects it is, so
 `npx playwright test --project=webkit-local` works the moment it exists —
@@ -35,10 +35,11 @@ Nothing is left running afterwards and nothing is written outside this repo:
 the database is in memory, the app runs on port 3417 (picked to stay clear of
 `npm run dev`'s 3300), and Playwright kills it when the run ends.
 
-## The three test-only doors, and why each is safe
+## The test-only doors, and why each is safe
 
-Three things exist in this codebase *only* for this suite, all named `e2e`
-or `E2E_*` so they are easy to find and easy to be suspicious of:
+Two environment variables and the routes they gate exist in this codebase
+*only* for this suite, all named `e2e` or `E2E_*` so they are easy to find and
+easy to be suspicious of:
 
 1. **`E2E_EXPOSE_LOGIN_CODE=1`** — `src/app/api/account/code/route.ts`. The
    customer login flow has no password, only a code mailed to the address
@@ -82,7 +83,7 @@ or `E2E_*` so they are easy to find and easy to be suspicious of:
    mistake (that test calls the route handler directly with `vi.stubEnv`, no
    bundling involved, so it is unaffected by any of the above).
 
-2. **`E2E_BOOTSTRAP=1`** gates two routes:
+2. **`E2E_BOOTSTRAP=1`** gates three routes:
    - `GET /api/e2e/bootstrap/` — applies pending migrations and is also what
      `playwright.config.ts` polls as the webServer's readiness URL. Why a
      route and not just running `npm run migrate` first: `DB_DRIVER=pglite`
@@ -103,6 +104,16 @@ or `E2E_*` so they are easy to find and easy to be suspicious of:
      (no Resend key), the receipt screen never shows a code, and no existing
      admin route joins `gift_cards` back onto an order — see the route's own
      comment for the full chain. `e2e/giftcard.spec.ts` is the only caller.
+   - `GET /api/e2e/mail/?template=…&to=…` — **is** behind `requireAdmin` too,
+     for the same reason (it hands back customers' addresses). It reads an
+     in-memory ring of the last 50 letters `sendMail()` was *asked* to send —
+     recipient, subject and template tag, never a body — filled in
+     `src/lib/mail.ts` behind the same two gates. It exists because the letters
+     are owner-editable now (`settings.mail_texts`, docs/mail.md) and the only
+     regression worth fearing is the preview and the real send drifting apart:
+     with no Resend key there is no mailbox to check, no `mail_log` table
+     (deliberately, docs/mail.md) and no screen that shows a subject line.
+     `e2e/admin-mail.spec.ts` is the only caller.
 
    `tools/e2e-bootstrap.mjs` is a related but separate thing: a manual CLI for
    a *human* running `npm run dev` locally who wants the running dev server's
@@ -110,10 +121,11 @@ or `E2E_*` so they are easy to find and easy to be suspicious of:
    above, solved by logging in as admin over HTTP and calling the real
    `POST /api/admin/migrate`). Playwright does not use it.
 
-None of the three ever appears outside `playwright.config.ts`'s `webServer.env`
+Neither variable ever appears outside `playwright.config.ts`'s `webServer.env`
 block. A production deploy sets none of them, and even a copy-paste mistake
 that did would still be caught by the `NODE_ENV`/`requireAdmin` half of each
-gate.
+gate. `tests/fuzz-routes.test.ts` asserts exactly that for all three routes
+("keeps all three e2e doors shut …").
 
 ## Fixed test credentials
 
@@ -240,6 +252,17 @@ coverage now instead of the workaround it briefly needed.
   being initialised yet, plus a `try`/`catch` around the restore filter so a
   throw there can never again wipe a saved cart. `e2e/sets.spec.ts` now adds
   a product and a set, reloads for real, and checks both lines survive.
+- **…and then it did not survive the sets moving into the database.** With the
+  sets in `bundles` (docs/features.md), the restore filter's `bundleById()`
+  check was worse than a throw: on a cold load the real list has not arrived
+  from `/api/bundles/` yet, and the static `public/shop/bundles.js` the page
+  ships with knows nothing about a set Renat made in the admin since the last
+  deploy — so every such line was quietly dropped and the shopper's cart
+  emptied. Fixed by not deciding at restore time at all: a bundle line is kept
+  as it is, and `loadBundles()` prunes it once the answer lands — the only
+  moment the shop can honestly say a set no longer exists. Caught by
+  `e2e/admin-bundles.spec.ts`, which buys a set that exists only in the
+  database.
 - **Home page brand-strip text failed WCAG AA color contrast** (`#b0afa6` on
   white, 2.2:1 against a 4.5:1 requirement). Fixed by switching
   `.brandstrip__it` to the design system's own muted-text token
@@ -310,6 +333,45 @@ screen was in flight. If a sweep run fails only on `/api/track/`,
 `/api/overrides/` or `/api/reviews/` with a 404/500, check for a second
 `next dev` before looking for a bug.
 
+## The blog editor (`e2e/admin-blog.spec.ts`)
+
+Desktop-only, four tests, ~25 s. The admin's article body is a
+`contenteditable` (docs/blog.md), so this spec drives it the way a person
+does — click into the box, type, press a toolbar button — and then reads the
+published article back off the storefront: a heading, bold, a list, a
+picture and the inline product card that `<a data-product>` becomes.
+
+Three things about it that are not obvious and are worth keeping:
+
+* **Order of the steps is deliberate.** «Картинка» and «Товар» go first, into
+  an empty box: both leave the caret in a fresh paragraph of their own. The
+  three formatting buttons follow, and the list is last. Browsers genuinely
+  disagree about what Enter does at the end of a heading and at the end of a
+  list item, and this order never has to care. The one place it cannot be
+  avoided — the line after the heading — toggles «Заголовок» back off if the
+  heading stuck, and asserts the count either way.
+* **`execCommand("bold")` writes `<b>` in Chromium**, not `<strong>`. That is
+  fine and expected: the allowlist maps it on save, so the box is asserted
+  for `strong, b` and the *stored* HTML for `<strong>`.
+* **The pasted picture URL is a local `/shop/img/…` path**, not an
+  `https://example/…` one. An unreachable host makes the browser log a
+  network error, and `assertClean()` fails on it — correctly. The https
+  branch (and the refusal of `http:` and `javascript:`) is unit-tested in
+  `tests/blog.test.ts` instead.
+
+The same file also covers the three sample articles seeded by
+`db/migrations/071_blog_samples.sql` — listed and readable in all three
+languages, and one of them read in full on desktop and at 375 px. **A new
+migration needs `npm run pack:migrations` before it exists for this suite:**
+the server applies migrations from the committed
+`src/db/migrations.generated.ts` (via `/api/e2e/bootstrap/`), and `next dev`
+never regenerates it. A sample-post test failing with "missing from the feed"
+almost always means that command was not run.
+
+The escaping half of the blog stays in `e2e/sweep-admin-ops.spec.ts` — it
+types the HTML bomb into the box rather than filling a textarea now, and
+asserts the shop prints it instead of running it.
+
 `[data-co-delivery]` carries `data-points-loading="N"` — the number of
 carrier feeds still in flight for the selected country (`pointsLoadingCount()`
 in app.js). The checkout sweep waits for `0` before touching the delivery
@@ -332,6 +394,42 @@ allowlist, on any 5xx, on a visible `undefined`/`NaN`/`[object Object]`/`null`/
 it changed, same discipline as `admin.spec.ts`. Run it with
 `npx playwright test e2e/sweep-admin*.spec.ts --project=desktop`.
 
+## Наборы: the two specs
+
+`e2e/sets.spec.ts` covers the shopper's side in all three languages (the sets
+landing, one set's page, add to cart, the checkout line breaking out the
+components) and then, in its own `test.describe`, the **switch**: with
+«Наборы на сайте» off, nothing about sets may be left anywhere — no nav entry,
+no footer link, no home rail, no catalogue rail, no `[data-go-bundle]` in
+«с этим покупают» or in the search, and no «Наборы» crumb on the gift-card page
+(the gift card itself stays reachable — it is not a set). Both `/shop2/sets/`
+and `/shop2/set/<id>/` must still answer, with «Наборы сейчас недоступны»
+rather than a 404 or a silent bounce home. The last part of that test seeds a
+saved cart into `localStorage` (`rempire-shop-proto`, the key app.js persists
+to) and pays for it: hiding the shelf must not take a basket away from
+somebody standing at the till. It flips a shop-wide switch, so it puts it back
+in a `finally`, same rule as `admin.spec.ts`.
+
+`e2e/admin-bundles.spec.ts` covers the owner's side: build a set from two
+products in «Товары → Наборы», see it on `/shop2/sets/`, buy it and check the
+total is the set's own price plus delivery; change the price and watch the
+storefront follow; be refused when the set is not cheaper than its parts; hide
+it (off the shelf, address still answering); delete it (with the confirm strip
+first). Serial, desktop only, and each test has its own fake IP through its own
+nested `describe` — the file signs in six times and admin login is 5/min per
+IP. The set it creates (`e2e-set`) is deleted by the fifth test, so the file
+leaves the shop with exactly the sets it started with.
+
+Run either with
+`E2E_PORT=3444 npx playwright test e2e/sets.spec.ts --project=desktop`.
+
+Note for whoever runs these locally: the suite's `next dev` writes to `.next`,
+so a second Next process started against the same checkout (another agent, a
+stray `next dev`, a `next build` running alongside) corrupts it and the server
+starts answering 404/500 for routes that are perfectly fine. If specs fail at
+`loginAsAdmin` or a route that passed a minute ago, check for a second
+`next` process before looking at the code.
+
 ## Files
 
 | Path | What |
@@ -340,11 +438,14 @@ it changed, same discipline as `admin.spec.ts`. Run it with
 | `e2e/env.mjs` | Port, base URL, fixed test admin password + its hash |
 | `e2e/fixtures.ts` | Shared constants/helpers every spec imports: `LANGS`, `PRODUCT`/`PRODUCT_2`/`BUNDLE`, `waitForScreen`, `loginAsAdmin`, `ipHeaders`, `tr()` (the RU→ET/EN dictionary lookups actually used, copied verbatim from `app.js`'s own `UI` table — see that file's own comment before adding to it) |
 | `e2e/*.spec.ts` | One file per area of the task brief — each has its own top-of-file comment for anything not obvious from this document |
+| `e2e/scanner-app.spec.ts` | The standalone scanner route `/shop2/scan/`, desktop + mobile — see below |
 | `e2e/sweep-helpers.ts` | The admin sweep's watchdog (`assertClean`), seeded PRNG and admin plumbing — not a spec file |
 | `e2e/__screenshots__/` | Visual baselines — see above |
 | `tools/e2e-build.mjs` | Cross-platform prebuild step for the suite — SEO prerender + generated-file packers, ahead of `next dev` (env vars via `child_process`, not shell syntax) |
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
-| `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts` | The two test-only routes — see above |
+| `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts`, `src/app/api/e2e/mail/route.ts` | The three test-only routes — see above |
+| `e2e/sets.spec.ts`, `e2e/admin-bundles.spec.ts` | The sets: the shopper's side plus the «Наборы на сайте» switch, and the owner's «Товары → Наборы» CRUD — see above |
+| `e2e/admin-mail.spec.ts` | «Письма»: the owner edits an ET subject and intro, applies, and the same text comes back out of the preview **and** out of a real paid order's confirmation (docs/mail.md) |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
 | `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the e2e suite sharded into 3 parallel jobs (each with its own server and database); see its own comments |
 
@@ -421,9 +522,44 @@ R2 и перевозчиков; неизвестный хост не набир�
 
 ## PWA manifests (`e2e/pwa.spec.ts`)
 
-Two tests, desktop only: the storefront links the shop manifest
-(`/shop2/manifest.webmanifest`, name «Rempire», scope `/shop2/`, no admin
-wording anywhere in it), and the admin route swaps the `<link rel="manifest">`
+Three tests: the storefront links the shop manifest
+(`/shop2/manifest.webmanifest`, name «Rempire», scope `/shop2/`, no admin or
+scanner wording anywhere in it) while all three manifests are fetched and
+checked for distinct ids; the admin route swaps the `<link rel="manifest">`
 to `/shop2/admin.webmanifest` («Админка», scope `/shop2/admin/`) and back when
-the owner returns to the shop — see `syncAppManifest()` in app.js and the PWA
-section of docs/inventory.md for why there are two apps at all.
+the owner returns to the shop; and `/shop2/scan/` swaps to
+`/shop2/scanner.webmanifest` («Сканер», scope `/shop2/scan/`) for a stranger
+too — the swap has to happen *before* the login, or the owner could not
+install the app and then sign in inside it — while the screen behind it is the
+admin login card, and signing in there raises the scanner in place. See
+`syncAppManifest()` in app.js and the PWA section of docs/inventory.md for why
+there are three apps at all.
+
+## The scanner app (`e2e/scanner-app.spec.ts`)
+
+One test, desktop **and** mobile — the route exists for a phone, so it is
+tested on one. It walks the two jobs the owner's «Сканер» icon exists for, in
+one pass: an unknown code → «Привязать к товару» → search «tangled» →
+`PRODUCT_2` → size «40 мл» → bound; then the same code again → the product
+card → «+» «+» → «+ Приход» → the toast says «Приход +3 ✓», the card comes
+back with the new remainder and the stepper back at 1, `/api/admin/inventory/`
+holds three more than it did, and the «Склад» tab — searched by the barcode
+itself, which also proves the binding stuck — shows the same number.
+
+Headless Chromium has no camera, so it drives the manual-entry field. That is
+not a workaround for the test's benefit: it is the same door a bluetooth/USB
+handheld scanner types into and the one the owner falls back to on a scuffed
+label, and everything downstream of "a code arrived" (`handleScanCode()`) is
+shared with the camera path.
+
+The count is asserted as a **delta**, never as an absolute: `PRODUCT_2` is the
+one fixture product the suite is allowed to count (fixtures.ts), and
+`sweep-admin-ops.spec.ts` sets absolute values on the same row. A fresh
+`Date.now()`-derived EAN per run keeps the two from ever colliding on
+`ean_taken`.
+
+Do not use `clearToast()` from `sweep-helpers.ts` while the scanner overlay is
+up unless the toast is above it — `.scanoverlay` is `--z-scan: 95` and the
+toast is 70. It *is* above it now (`body.is-scanning .toast`, added with this
+route because a confirmation the owner cannot see is not a confirmation), and
+that is worth knowing before someone lowers it again.

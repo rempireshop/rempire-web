@@ -22,6 +22,7 @@ import {
   CRON_SECRET,
   ORIGIN,
   PRODUCT,
+  PRODUCT_2,
   adminCookieHeader,
   checkResponse,
   customerCookieHeader,
@@ -90,6 +91,7 @@ function routes(): RouteCase[] {
     { deep: true, name: "POST /api/promos/check/", path: "/api/promos/check/", method: "POST", exports: ["POST"], load: () => import("@/app/api/promos/check/route"), body: { code: "FUZZ10", subtotal: 100, shipping: 5 } },
     { deep: true, name: "POST /api/giftcards/check/", path: "/api/giftcards/check/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/giftcards/check/route"), body: { code: "RMP-ACDE-FGHJ" } },
     { name: "GET /api/overrides/", path: "/api/overrides/", method: "GET", exports: ["GET"], load: () => import("@/app/api/overrides/route") },
+    { name: "GET /api/bundles/", path: "/api/bundles/", method: "GET", exports: ["GET"], load: () => import("@/app/api/bundles/route") },
     { name: "GET /api/geo/", path: "/api/geo/", method: "GET", exports: ["GET"], load: () => import("@/app/api/geo/route"), req: { next: true } },
     { name: "POST /api/track/", path: "/api/track/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/track/route"), body: { sid: "s1", type: "view", path: "/", productId: PRODUCT.id, value: 1, lang: "RU", ref: "google.com" } },
     { name: "POST /api/stock-alerts/", path: "/api/stock-alerts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/stock-alerts/route"), body: { email: "fuzz@example.com", productId: PRODUCT.id, lang: "RU" } },
@@ -132,6 +134,10 @@ function routes(): RouteCase[] {
     { deep: true, name: "PUT /api/admin/overrides/", path: "/api/admin/overrides/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/overrides/route"), auth: "admin", req: admin, body: { id: PRODUCT.id, price: 9.9, stock: "in", seoTitle: "t", seoDesc: "d", subcat: "s", varImg: [0], videoUrl: "https://x/y", gallery: [{ url: "/a.webp", thumb: "/a.webp", alt: "" }], proPrice: 5, description: { RU: "о" } } },
     { name: "GET /api/admin/settings/", path: "/api/admin/settings/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/settings/route"), auth: "admin", req: admin },
     { deep: true, name: "PUT /api/admin/settings/", path: "/api/admin/settings/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/settings/route"), auth: "admin", req: admin, body: { chatbot: true, bundles: false, hero: null, flows: { abandoned: true }, pricing: { proDiscountPct: 20 } } },
+    { name: "GET /api/admin/bundles/", path: "/api/admin/bundles/", method: "GET", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin },
+    { deep: true, name: "POST /api/admin/bundles/", path: "/api/admin/bundles/", method: "POST", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin, body: { id: "fuzz-set", cat: "beard", title: { RU: "Фазз", ET: "F", EN: "F" }, desc: { RU: "о" }, items: [{ productId: PRODUCT.id, variant: 0, qty: 1 }, { productId: PRODUCT_2.id, variant: 0, qty: 1 }], price: 1, image: null, active: true, sort: 10 } },
+    { name: "PATCH /api/admin/bundles/", path: "/api/admin/bundles/", method: "PATCH", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin, body: { id: "beard-start", active: false, order: ["beard-start"] } },
+    { name: "DELETE /api/admin/bundles/", path: "/api/admin/bundles/", method: "DELETE", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin, queries: ["?id=fuzz-set", "?id=", "?id=%00", "?id=%2e%2e%2f"] },
     { name: "GET /api/admin/promos/", path: "/api/admin/promos/", method: "GET", exports: ["GET", "POST", "PATCH"], load: () => import("@/app/api/admin/promos/route"), auth: "admin", req: admin },
     { name: "POST /api/admin/promos/", path: "/api/admin/promos/", method: "POST", exports: ["GET", "POST", "PATCH"], load: () => import("@/app/api/admin/promos/route"), auth: "admin", req: admin, body: { code: "FUZZ20", kind: "percent", value: 20, minSubtotal: 0, startsAt: null, endsAt: null, maxUses: 10, active: true, note: "n" } },
     { name: "PATCH /api/admin/promos/", path: "/api/admin/promos/", method: "PATCH", exports: ["GET", "POST", "PATCH"], load: () => import("@/app/api/admin/promos/route"), auth: "admin", req: admin, body: { code: "FUZZ10", active: false } },
@@ -151,6 +157,7 @@ function routes(): RouteCase[] {
     { deep: true, name: "POST /api/admin/inventory/moves/", path: "/api/admin/inventory/moves/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/admin/inventory/moves/route"), auth: "admin", req: admin, body: { productId: PRODUCT.id, variant: "", delta: 1, reason: "goods_in", ref: "r" } },
     { name: "GET /api/admin/analytics/", path: "/api/admin/analytics/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/analytics/route"), auth: "admin", req: admin, queries: ["?range=7d", "?range=nope", "?range="] },
     { name: "GET /api/admin/analytics/gsc/", path: "/api/admin/analytics/gsc/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/analytics/gsc/route"), auth: "admin", req: admin },
+    { name: "GET /api/admin/overview/", path: "/api/admin/overview/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/overview/route"), auth: "admin", req: admin },
     { name: "GET /api/admin/flows/", path: "/api/admin/flows/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/flows/route"), auth: "admin", req: admin },
     { name: "GET /api/admin/reports/orders/", path: "/api/admin/reports/orders/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/reports/orders/route"), auth: "admin", req: admin, jsonBody: false, queries: ["?month=2026-09", "?month=nope", "?from=2026-01-01&to=2026-12-31&format=csv", "?month=2026-09&format=xlsx", "?month=2026-09&format=exe", "?from=2026-12-31&to=2026-01-01", "?month=9999-12", "?month=0000-00", "?month=0000-01", "?month=1000-01", "?from=0000-01-01&to=9999-12-31", "?from=2026-02-30&to=2026-02-31"] },
     { name: "GET /api/admin/shipping/rates/", path: "/api/admin/shipping/rates/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/shipping/rates/route"), auth: "admin", req: admin, queries: ["?country=EE", "?country=zz", "?country="] },
@@ -171,6 +178,7 @@ function routes(): RouteCase[] {
     { name: "GET /api/cron/events-retention/", path: "/api/cron/events-retention/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/cron/events-retention/route"), auth: "cron", req: cron },
     { name: "GET /api/e2e/bootstrap/", path: "/api/e2e/bootstrap/", method: "GET", exports: ["GET"], load: () => import("@/app/api/e2e/bootstrap/route") },
     { name: "GET /api/e2e/gift-card/", path: "/api/e2e/gift-card/", method: "GET", exports: ["GET"], load: () => import("@/app/api/e2e/gift-card/route"), req: admin, queries: [`?order=${F.orderId}`, "?order=", "?order=%00"] },
+    { name: "GET /api/e2e/mail/", path: "/api/e2e/mail/", method: "GET", exports: ["GET"], load: () => import("@/app/api/e2e/mail/route"), req: admin, queries: ["?template=order-confirmed", "?to=fuzz@example.com", "?template=&to=", "?template=%00&to=%00"] },
   ];
 }
 
@@ -578,14 +586,16 @@ describe("API fuzzing", () => {
     expect([...unexpectedFetches]).toEqual([]);
   });
 
-  it("keeps both e2e doors shut unless E2E_BOOTSTRAP is on and NODE_ENV is not production", async () => {
+  it("keeps all three e2e doors shut unless E2E_BOOTSTRAP is on and NODE_ENV is not production", async () => {
     const bootstrap = await import("@/app/api/e2e/bootstrap/route");
     const gift = await import("@/app/api/e2e/gift-card/route");
+    const mail = await import("@/app/api/e2e/mail/route");
     const admin = adminCookieHeader();
 
     // default: the flag is not set at all
     expect((await bootstrap.GET()).status).toBe(404);
     expect((await gift.GET(makeRequest(`/api/e2e/gift-card/?order=${F.orderId}`, { cookie: admin }))).status).toBe(404);
+    expect((await mail.GET(makeRequest("/api/e2e/mail/", { cookie: admin }))).status).toBe(404);
 
     // the flag on, but production semantics: still shut
     const nodeEnv = process.env.NODE_ENV;
@@ -593,12 +603,15 @@ describe("API fuzzing", () => {
     setEnv("NODE_ENV", "production");
     expect((await bootstrap.GET()).status).toBe(404);
     expect((await gift.GET(makeRequest(`/api/e2e/gift-card/?order=${F.orderId}`, { cookie: admin }))).status).toBe(404);
+    expect((await mail.GET(makeRequest("/api/e2e/mail/", { cookie: admin }))).status).toBe(404);
 
-    // the flag on outside production: bootstrap opens, the gift card still needs the cookie
+    // the flag on outside production: bootstrap opens, the other two still need the cookie
     setEnv("NODE_ENV", "test");
     expect((await bootstrap.GET()).status).toBe(200);
     expect((await gift.GET(makeRequest(`/api/e2e/gift-card/?order=${F.orderId}`))).status).toBe(401);
     expect((await gift.GET(makeRequest(`/api/e2e/gift-card/?order=${F.orderId}`, { cookie: admin }))).status).toBe(200);
+    expect((await mail.GET(makeRequest("/api/e2e/mail/"))).status).toBe(401);
+    expect((await mail.GET(makeRequest("/api/e2e/mail/", { cookie: admin }))).status).toBe(200);
     setEnv("NODE_ENV", nodeEnv);
     setEnv("E2E_BOOTSTRAP", undefined);
   });

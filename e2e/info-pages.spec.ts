@@ -36,14 +36,16 @@ for (const lang of LANGS) {
   test(`blog listing route — ${lang.code}`, async ({ page }) => {
     // screenBlog() / S.screen === "blog", routed at /shop2[/<lang>]/blog/
     // (app.js router strips the language prefix before matching) and
-    // prerendered per next.config.ts's prerenderedRewrites(). A fresh
-    // database has no posts yet, so the empty state is what a passing run
-    // actually proves — the route resolving and rendering, not that there is
-    // content in it yet.
+    // prerendered per next.config.ts's prerenderedRewrites(). Migration
+    // 071_blog_samples.sql seeds three published posts, so a fresh database
+    // lists them in every language — the route resolving, the list rendering
+    // and the seed all at once. The empty-state copy must not be on screen.
     const res = await page.goto(shopUrl(lang.seg, "/blog/"));
     expect(res?.status()).toBe(200);
     await waitForScreen(page, "blog");
     await expect(page.locator("h1")).toHaveText(tr("Блог", lang.code));
-    await expect(page.getByText(tr("Статей пока нет — загляните позже.", lang.code))).toBeVisible();
+    await expect(page.locator(".blog__grid li").first()).toBeVisible();
+    expect(await page.locator(".blog__grid li").count()).toBeGreaterThanOrEqual(3);
+    await expect(page.getByText(tr("Статей пока нет — загляните позже.", lang.code))).toHaveCount(0);
   });
 }
