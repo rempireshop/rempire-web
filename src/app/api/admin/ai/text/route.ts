@@ -9,6 +9,12 @@
  *   → { ok: true, text: ... }              (describe, seo, reply, blog_outline)
  *   → { ok: true, texts: { RU?, ET?, EN? } } (translate)
  *
+ * "seo" takes two input shapes — `{kind:"product", name, brand, category}`
+ * from the goods editor and `{kind:"post", title, excerpt, body, tags,
+ * products}` from the blog editor (the article's own text, see SeoInput in
+ * src/lib/ai-prompts.ts) — and answers the same `{title, description}` for
+ * both, in `lang`, capped here at what the two editors store (70/170).
+ *
  * Same model/env as src/app/api/assistant/route.ts (OPENAI_MODEL, a plain
  * fetch to the chat-completions endpoint, `response_format: json_object`),
  * temperature 0.4, max_tokens 900 — fixed by the task brief, not per-task.

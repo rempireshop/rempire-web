@@ -134,6 +134,44 @@ describe("POST /api/admin/ai/text", () => {
     expect(body.text).toEqual({ title: "Touchable — Rempire", description: "Купите Touchable в Таллинне." });
   });
 
+  it("seo for a post: sends the article's own text, asks for the language wanted, shapes the same {text:{title,description}}", async () => {
+    const fetchMock = vi.fn(async () => fakeCompletion({ title: "Habeme talvine hooldus", description: "Kolm harjumust külmaks hooajaks." }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({
+      task: "seo", lang: "ET",
+      input: { kind: "post", title: "Уход за бородой зимой", excerpt: "Три привычки.", body: "Зимой борода сохнет.", tags: ["борода"], products: ["Proraso Beard Balm"] },
+    }, { cookie: admin }));
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.text).toEqual({ title: "Habeme talvine hooldus", description: "Kolm harjumust külmaks hooajaks." });
+
+    const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    const payload = JSON.parse(String((init as RequestInit).body));
+    expect(payload.messages[0].content).toMatch(/blog article, in Estonian/);
+    expect(payload.messages[1].content).toContain("Article title: Уход за бородой зимой");
+    expect(payload.messages[1].content).toContain("Excerpt: Три привычки.");
+    expect(payload.messages[1].content).toContain("Proraso Beard Balm");
+    expect(payload.messages[1].content).toContain("Зимой борода сохнет.");
+  });
+
+  it("seo for a post with no title is a 400 missing_title — OpenAI is never asked", async () => {
+    vi.stubGlobal("fetch", () => { throw new Error("must not call OpenAI for bad input"); });
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "seo", lang: "RU", input: { kind: "post", body: "текст" } }, { cookie: admin }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("missing_title");
+  });
+
+  it("seo: caps what the model wrote at what the editors store — 70 for the title, 170 for the description", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => fakeCompletion({ title: "T".repeat(100), description: "D".repeat(300) })));
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "seo", lang: "RU", input: { kind: "post", title: "Заголовок" } }, { cookie: admin }));
+    const body = await res.json();
+    expect(body.text.title).toHaveLength(70);
+    expect(body.text.description).toHaveLength(170);
+  });
+
   it("translate: shapes {texts:{...}}, one key per requested target language", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => fakeCompletion({ ET: "Eesti tekst", EN: "English text" })));
     const { POST } = await import("@/app/api/admin/ai/text/route");

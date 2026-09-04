@@ -1397,6 +1397,7 @@
       "все три языка": "kõik kolm keelt",
       "Заполнено для трёх языков — проверьте и сохраните": "Täidetud kolmes keeles — vaadake üle ja salvestage",
       "Это то, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.": "Seda näeb inimene Google'i otsingus — igas keeles oma. Tühi — võetakse venekeelne variant, ja kui sedagi pole, võtab Google teksti lehelt ise.",
+      "Это то, что человек видит в поиске Google — на каждом языке своё. Помощник пишет по тексту статьи на том языке, что выбран сверху. Пусто — берётся русский вариант, а если нет и его — заголовок и анонс статьи.": "Seda näeb inimene Google'i otsingus — igas keeles oma. Abiline kirjutab artikli teksti järgi selles keeles, mis on üleval valitud. Tühi — võetakse venekeelne variant, ja kui sedagi pole — artikli pealkiri ja sissejuhatus.",
       "Касса для покупателя, который стоит перед вами: находите товар, берёте наличные или терминал — остатки спишутся сами, а заказ с чеком появится в «Заказах». Партнёрам-салонам здесь ничего продавать не нужно: они заказывают сами по своим ценам — это «Клиенты → Партнёры».": "Kassa ostjale, kes seisab teie ees: leidke toode, võtke sularaha või terminal — jäägid kantakse maha ise ja tellimus koos tšekiga ilmub «Tellimuste» alla. Partnersalongidele pole siin midagi müüa vaja: nad tellivad ise oma hindadega — see on «Kliendid → Partnerid».",
       "Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».": "Leidke toode nime või triipkoodi järgi ja vajutage suurusele — see läheb ostukorvi. Edasi «Sularaha» või «Terminal»: jäägid kantakse maha, tšekk ilmub «Tellimuste» alla.",
       "Начните вводить название — товар найдётся.": "Hakake nime sisestama — toode leitakse.",
@@ -2938,6 +2939,7 @@
       "все три языка": "all three languages",
       "Заполнено для трёх языков — проверьте и сохраните": "Filled in for three languages — check and save",
       "Это то, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.": "This is what a person sees in Google search — each language has its own. Empty — the Russian one is used, and if there is none either, Google takes the text off the page itself.",
+      "Это то, что человек видит в поиске Google — на каждом языке своё. Помощник пишет по тексту статьи на том языке, что выбран сверху. Пусто — берётся русский вариант, а если нет и его — заголовок и анонс статьи.": "This is what a person sees in Google search — each language has its own. The assistant writes it from the article's text, in the language chosen above. Empty — the Russian one is used, and if there is none either, the article's title and excerpt.",
       "Касса для покупателя, который стоит перед вами: находите товар, берёте наличные или терминал — остатки спишутся сами, а заказ с чеком появится в «Заказах». Партнёрам-салонам здесь ничего продавать не нужно: они заказывают сами по своим ценам — это «Клиенты → Партнёры».": "The till for the customer standing in front of you: find the product, take cash or the terminal — the stock is written off by itself and the order with its receipt appears under «Orders». Partner salons buy nothing here: they order on their own at their own prices — that is «Customers → Partners».",
       "Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».": "Find the product by name or barcode and tap a size — it goes into the basket. Then «Cash» or «Terminal»: the stock is written off and the receipt appears under «Orders».",
       "Начните вводить название — товар найдётся.": "Start typing the name — the product will turn up.",
@@ -4163,6 +4165,7 @@
     adminBlogEdit: null,   // the post being created/edited (a draft object), or null for the list
     adminBlogEditBusy: false, // fetching the full post before the editor can open
     adminBlogLang: "RU",   // which language pill the editor shows
+    adminBlogMore: false,  // «Адрес, автор и текст для Google» open — kept across renders
     adminBlogQ: "",        // featured-products search inside the editor
     adminBlogBusy: false,  // a save/publish/delete request is in flight
     adminBlogErr: "",
@@ -7327,6 +7330,65 @@
       author: d.author
     };
   }
+
+  /* ---- the Google pair, written from the article ---------------------------
+     «Заполнить автоматически» in the editor's «Адрес, автор и текст для
+     Google» block, and «все три языка» next to it — the blog's own
+     admSeoFill(). What goes to the model is the article itself, in the
+     language asked for when the owner has written it and in Russian
+     otherwise: title, excerpt, tags, the names of the products it links and
+     the first 1500 characters of its text (POST /api/admin/ai/text/, task
+     "seo", kind "post" — src/lib/ai-prompts.ts). The answer lands in the
+     draft (S.adminBlogEdit, the source of truth for every field) and is
+     patched into the two boxes when they show that language — no render(),
+     so nothing the owner is mid-typing elsewhere is reset. */
+  function blogSeoInput(d, L) {
+    var pick = function (t) { return (t && (t[L] || t.RU || t.ET || t.EN)) || ""; };
+    return {
+      kind: "post",
+      title: pick(d.title),
+      excerpt: pick(d.excerpt),
+      body: stripTags(pick(d.body)).slice(0, 1500),
+      tags: String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean),
+      products: productsById(d.products).map(function (p) { return p.brand + " " + p.name; })
+    };
+  }
+  /** The two boxes and their counters, for the language on screen. */
+  function blogSeoPatch(d, L) {
+    var ti = document.querySelector('[data-blogf="seoTitle"]'), de = document.querySelector('[data-blogf="seoDesc"]');
+    var ct = document.querySelector('[data-blogcount="seoTitle"]'), cd = document.querySelector('[data-blogcount="seoDesc"]');
+    if (ti) ti.value = d.seoTitle[L] || "";
+    if (de) de.value = d.seoDesc[L] || "";
+    if (ct) ct.textContent = (d.seoTitle[L] || "").length + "/70";
+    if (cd) cd.textContent = (d.seoDesc[L] || "").length + "/170";
+  }
+  function admBlogSeoFill(d, langs, btn) {
+    if (btn.disabled) return;
+    if (!(d.title.RU || d.title.ET || d.title.EN)) {
+      toast("Сначала напишите статью хотя бы на одном языке"); refocus('[data-blogf="title"]'); return;
+    }
+    var label = btn.textContent; btn.disabled = true; btn.textContent = "…";
+    var left = langs.length, okN = 0, failed = "";
+    var done = function () {
+      if (--left) return;
+      btn.disabled = false; btn.textContent = label;
+      if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте и сохраните" : "Черновик готов — проверьте и сохраните");
+      else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      else toast("Не получилось — попробуйте ещё раз");
+    };
+    langs.forEach(function (L) {
+      apiSend("/api/admin/ai/text/", "POST", { task: "seo", lang: L, input: blogSeoInput(d, L) }).then(function (r) {
+        if (r.status === 200 && r.body.ok && r.body.text) {
+          if (r.body.text.title) d.seoTitle[L] = String(r.body.text.title).slice(0, 70);
+          if (r.body.text.description) d.seoDesc[L] = String(r.body.text.description).slice(0, 170);
+          if (S.adminBlogEdit === d && L === (S.adminBlogLang || "RU")) blogSeoPatch(d, L);
+          okN++;
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else failed = (r.body && r.body.error) || "error";
+        done();
+      }).catch(function () { failed = "error"; done(); });
+    });
+  }
   function saveBlogFields() {
     var d = S.adminBlogEdit;
     if (!d) return Promise.reject(new Error("no_draft"));
@@ -7434,7 +7496,10 @@
   function applyBlogAction(a) {
     if (a.type === "draft_post") {
       apiSend("/api/admin/blog/", "POST", {
-        title: a.title, excerpt: a.excerpt, body: a.body, tags: a.tags, products: a.products
+        title: a.title, excerpt: a.excerpt, body: a.body, tags: a.tags, products: a.products,
+        // the Google snippet the model wrote with the article — the post's
+        // own per-language pair, the same «Заполнить автоматически» fills
+        seoTitle: a.seo ? a.seo.title : undefined, seoDesc: a.seo ? a.seo.description : undefined
       }).then(function (r) {
         if (r.status === 200 && r.body.ok) {
           toast("Черновик сохранён ✓");
@@ -10137,14 +10202,28 @@
         }).join("") + "</div>" : "") +
         '<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию">' +
         '<div id="admblogproducts">' + admBlogPicksHTML(matches) + "</div></div>" +
-      '<details class="adm-embed"><summary class="adm-link" data-blogmore>Адрес, автор и текст для Google</summary>' +
+      /* `open` follows S.adminBlogMore (the toggle listener next to the input
+         handler): the language pill re-renders this whole screen, and the
+         block used to fold shut exactly when the owner had opened it to
+         compare the Google lines of the three languages. */
+      '<details class="adm-embed" data-blogseo' + (S.adminBlogMore ? " open" : "") + '>' +
+        '<summary class="adm-link" data-blogmore>Адрес, автор и текст для Google</summary>' +
         '<div style="padding-top:12px">' +
+          /* The pair below is the language the pill is on — so are the two
+             buttons: «Заполнить автоматически» writes that language from the
+             article's own text, «все три языка» asks thrice. The same pair
+             the goods editor's Google tab has; see admBlogSeoFill(). */
+          '<div class="adm-acts" style="margin-bottom:10px">' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogseogen>Заполнить автоматически</button>' +
+            '<button class="adm-link adm-link--muted" data-admblogseoall>все три языка</button>' +
+          "</div>" +
           '<label class="adm-field">Заголовок для Google · <span data-blogcount="seoTitle">' +
             (d.seoTitle[L] || "").length + "/70</span>" +
             '<input class="adm-input" data-blogf="seoTitle" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
           '<label class="adm-field" style="margin-top:10px">Описание для Google · <span data-blogcount="seoDesc">' +
             (d.seoDesc[L] || "").length + "/170</span>" +
             '<textarea class="adm-input" rows="3" maxlength="170" data-blogf="seoDesc">' + esc(d.seoDesc[L]) + "</textarea></label>" +
+          '<p class="adm-hint" style="margin:8px 0 0">Это то, что человек видит в поиске Google — на каждом языке своё. Помощник пишет по тексту статьи на том языке, что выбран сверху. Пусто — берётся русский вариант, а если нет и его — заголовок и анонс статьи.</p>' +
           '<label class="adm-field" style="margin-top:10px">Адрес страницы' +
             '<input class="adm-input" data-blogslug value="' + esc(d.slug) + '" placeholder="' +
             esc(blogSlugify(d.title.RU || d.title.ET || d.title.EN || "")) + '"></label>' +
@@ -14835,7 +14914,8 @@
     // shows — there is no undo entry to read it back from later
     if (a.type === "draft_post") {
       var bTitle = (a.title && (a.title.RU || a.title.ET || a.title.EN)) || "—";
-      return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "");
+      return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
+        (a.seo ? " · заголовок и описание для Google" : "");
     }
     if (a.type === "publish_post") {
       return "Статья «" + a.slug + "»: " + (a.publish ? "опубликовать" : "снять с публикации");
@@ -16580,7 +16660,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -18044,6 +18124,14 @@
       }).catch(function () { tbtn.disabled = false; tbtn.textContent = tlabel; toast("Не получилось — попробуйте ещё раз"); render(); });
       return;
     }
+    /* «Заполнить автоматически» / «все три языка» in the Google block: the
+       blog's own admSeoFill() — see admBlogSeoFill() next to the draft. */
+    if (d.admblogseogen !== undefined || d.admblogseoall !== undefined) {
+      if (S.adminBlogEdit) {
+        admBlogSeoFill(S.adminBlogEdit, d.admblogseoall !== undefined ? ["RU", "ET", "EN"] : [S.adminBlogLang || "RU"], t);
+      }
+      return;
+    }
     if (d.admblogproductadd) {
       if (S.adminBlogEdit && S.adminBlogEdit.products.indexOf(d.admblogproductadd) < 0) {
         S.adminBlogEdit.products.push(d.admblogproductadd);
@@ -18068,6 +18156,17 @@
     if (d.q) { S.query = d.q; scheduleSearchTrack(); go("search"); return; }   // analytics agent
     if (d.closetoast !== undefined) { S.toast = null; render(); return; }
   });
+
+  /* The blog editor's «Адрес, автор и текст для Google» is a native
+     <details>. A render() — the language pill, a filled-in field — rebuilds
+     it, and it used to come back shut exactly when the owner had opened it
+     to compare the three languages' Google lines; admBlogEditorScreen() puts
+     `open` back from what is remembered here. `toggle` does not bubble,
+     hence the capture flag. */
+  document.addEventListener("toggle", function (e) {
+    var det = e.target;
+    if (det && det.matches && det.matches("[data-blogseo]")) S.adminBlogMore = !!det.open;
+  }, true);
 
   /* The header is persistent, so typing there no longer loses the caret —
      the search screen is rendered underneath while the field keeps focus. */

@@ -16,6 +16,7 @@ import {
   buildTranslatePrompt,
   HOUSE_VOICE,
   isAiTask,
+  SEO_POST_BODY_MAX,
 } from "@/lib/ai-prompts";
 
 describe("HOUSE_VOICE — the shared house style every task inherits", () => {
@@ -120,6 +121,50 @@ describe("buildSeoPrompt", () => {
     const { system: blogSys } = buildSeoPrompt("RU", { name: "Зимний уход", kind: "blog" });
     expect(productSys).toMatch(/product/);
     expect(blogSys).toMatch(/blog article/);
+  });
+
+  /* kind:"post" — what the blog editor's «Заполнить автоматически» sends:
+     the article itself, so the snippet is written from what the owner
+     actually wrote and nothing else. */
+  it("a post: carries the article's own title, excerpt, tags, product names and text — and asks for the language wanted, not the one the text is in", () => {
+    const { system, user } = buildSeoPrompt("ET", {
+      kind: "post",
+      title: "Уход за бородой зимой",
+      excerpt: "Три привычки на холодный сезон.",
+      body: "Зимой борода сохнет. Масло вечером, бальзам утром.",
+      tags: ["борода", "зима"],
+      products: ["Proraso Beard Oil Wood & Spice"],
+    });
+    expect(system).toMatch(/blog article/);
+    expect(system).toMatch(/in Estonian/);
+    expect(system).toMatch(/may be written in another language/);
+    expect(system).toMatch(/60 characters/);
+    expect(system).toMatch(/155 characters/);
+    expect(user).toContain("Article title: Уход за бородой зимой");
+    expect(user).toContain("Excerpt: Три привычки на холодный сезон.");
+    expect(user).toContain("Tags: борода, зима");
+    expect(user).toContain("Proraso Beard Oil Wood & Spice");
+    expect(user).toContain("Масло вечером, бальзам утром.");
+    expect(user).not.toMatch(/Brand:|Category:/);
+  });
+  it("a post: only the beginning of the text goes to the model", () => {
+    const { user } = buildSeoPrompt("RU", { kind: "post", title: "Заголовок", body: "я".repeat(5000) });
+    const sent = user.split("do not add more:\n")[1];
+    expect(sent).toHaveLength(SEO_POST_BODY_MAX);
+  });
+  it("a post: leaves out what the article does not have — no empty Excerpt/Tags/Products lines", () => {
+    const { user } = buildSeoPrompt("RU", { kind: "post", title: "Заголовок" });
+    expect(user).toBe("INPUT:\nArticle title: Заголовок");
+  });
+  it("a post with no title is refused with its own code", () => {
+    expect(() => buildSeoPrompt("RU", { kind: "post", body: "текст" })).toThrow(/missing_title/);
+    expect(() => buildSeoPrompt("RU", { kind: "post", title: "   " })).toThrow(AiInputError);
+  });
+  it("still reads the older kind:\"blog\" spelling, with name/summary as the title/excerpt", () => {
+    const { system, user } = buildSeoPrompt("RU", { kind: "blog", name: "Зимний уход", summary: "Анонс" });
+    expect(system).toMatch(/blog article/);
+    expect(user).toContain("Article title: Зимний уход");
+    expect(user).toContain("Excerpt: Анонс");
   });
 });
 

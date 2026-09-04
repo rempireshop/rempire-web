@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { LANGS, PRODUCT, ipHeaders, shopUrl, waitForScreen } from "./fixtures";
-import { assertClean, clearToast, freshShop, openAdmin, tab, watch } from "./sweep-helpers";
+import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
  * The blog's visual editor, end to end: write one post with every toolbar
@@ -151,6 +151,136 @@ test.describe("blog — the visual editor", () => {
     await page.locator("[data-admblogunpublish]").click();
     await clearToast(page);
     await assertClean(page, w, "blog editor test cleaned up");
+  });
+
+  /* The Google pair — «Заполнить автоматически» and «все три языка» in the
+     «Адрес, автор и текст для Google» block (docs/blog.md). The AI route is
+     stubbed: this suite runs with no OPENAI_API_KEY (the real route would
+     answer 503), and what is under test is the editor — which language it
+     asks for, what it sends, where the answer lands, what the shopper's tab
+     then says — not the model. The stub answers in the language it was
+     asked for, so a fill in the wrong language cannot pass. */
+  test("«Заполнить автоматически» writes the Google pair for the language on the pill, all three on request, and the ET page carries them", async ({ page, browser }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    const marker = Date.now().toString().slice(-6);
+    const calls: Array<{ lang: string; input: Record<string, unknown> }> = [];
+    let failNext = false;
+    await page.route("**/api/admin/ai/text/", async (route) => {
+      const body = route.request().postDataJSON() as { task: string; lang: string; input: Record<string, unknown> };
+      calls.push({ lang: body.lang, input: body.input });
+      if (failNext) {
+        failNext = false;
+        return route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ ok: false, error: "bad_input" }) });
+      }
+      // the first answer takes a moment, so the «…» working state is on screen long enough to be seen
+      if (calls.length === 1) await new Promise((r) => setTimeout(r, 700));
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, text: { title: `${body.lang} Google pealkiri ${marker}`, description: `${body.lang} kirjeldus ${marker}` } }),
+      });
+    });
+
+    await openAdmin(page);
+    await tab(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    await page.locator('[data-blogf="title"]').fill(`Google ${marker}`);
+    await page.locator('[data-blogf="excerpt"]').fill("Анонс для сниппета.");
+    const box = page.locator("[data-blogbody]");
+    await box.click();
+    await page.keyboard.type("Зимой борода сохнет — масло вечером, бальзам утром.");
+    await page.locator("[data-blogtags]").fill("борода, зима");
+
+    /* Estonian on the pill and an Estonian title; the rest of the article
+       exists in Russian only — the request has to carry the Estonian title
+       and fall back to the Russian excerpt and text. */
+    await page.locator('[data-admbloglang="ET"]').click();
+    await page.locator('[data-blogf="title"]').fill(`Habe ${marker}`);
+    await page.locator("[data-blogmore]").click();
+    const seoTitle = page.locator('[data-blogf="seoTitle"]');
+    const seoDesc = page.locator('[data-blogf="seoDesc"]');
+    await expect(seoTitle).toBeVisible();
+    const gen = page.locator("[data-admblogseogen]");
+    await expect(gen).toHaveText("Заполнить автоматически");
+
+    await gen.click();
+    await expect(gen, "no working state while the model answers").toHaveText("…");
+    await expect(seoTitle).toHaveValue(`ET Google pealkiri ${marker}`);
+    await expect(seoDesc).toHaveValue(`ET kirjeldus ${marker}`);
+    await expect(page.locator('[data-blogcount="seoTitle"]')).toHaveText(`${`ET Google pealkiri ${marker}`.length}/70`);
+    await expect(page.locator('[data-blogcount="seoDesc"]')).toHaveText(`${`ET kirjeldus ${marker}`.length}/170`);
+    await expect(gen).toHaveText("Заполнить автоматически");
+    expect(calls, "one request for the one language on the pill").toHaveLength(1);
+    expect(calls[0].lang).toBe("ET");
+    expect(calls[0].input.kind).toBe("post");
+    expect(calls[0].input.title).toBe(`Habe ${marker}`);
+    expect(calls[0].input.excerpt).toBe("Анонс для сниппета.");
+    expect(String(calls[0].input.body)).toContain("масло вечером");
+    expect(calls[0].input.tags).toEqual(["борода", "зима"]);
+    await clearToast(page);
+
+    /* «все три языка»: three requests, one per language; the pill's own
+       pair stays on screen, the other two wait behind their pills — and the
+       block stays open across the switch. */
+    await page.locator("[data-admblogseoall]").click();
+    await expect.poll(() => calls.length, "three requests, one per language").toBe(4);
+    expect(calls.slice(1).map((c) => c.lang).sort()).toEqual(["EN", "ET", "RU"]);
+    for (const c of calls.slice(1)) expect(c.input.kind).toBe("post");
+    await expect(seoTitle).toHaveValue(`ET Google pealkiri ${marker}`);
+    await clearToast(page);
+    await page.locator('[data-admbloglang="RU"]').click();
+    await expect(seoTitle, "the Google block folded shut on the language switch").toBeVisible();
+    await expect(seoTitle).toHaveValue(`RU Google pealkiri ${marker}`);
+    await expect(seoDesc).toHaveValue(`RU kirjeldus ${marker}`);
+    await page.locator('[data-admbloglang="EN"]').click();
+    await expect(seoTitle).toHaveValue(`EN Google pealkiri ${marker}`);
+
+    /* A refusal is a plain-Russian toast; the boxes keep what they had and
+       the button gets its label back. Chromium logs the 400 as a console
+       error of its own — the toast is the assertion that matters. */
+    failNext = true;
+    w.allow.push(/\/api\/admin\/ai\/text\//);
+    await gen.click();
+    expect(await toastText(page)).toContain("Не получилось — попробуйте ещё раз");
+    await expect(seoTitle).toHaveValue(`EN Google pealkiri ${marker}`);
+    await expect(gen).toHaveText("Заполнить автоматически");
+    await clearToast(page);
+    await assertClean(page, w, "Google block filled in");
+
+    /* The save round trip: all three pairs reach the post, and come back
+       into the editor under their pills. */
+    await page.locator("[data-admblogpublish]").click();
+    await clearToast(page);
+    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+    const slug = await page.locator("[data-blogslug]").inputValue();
+    const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
+    expect(saved.status()).toBe(200);
+    const post = (await saved.json()).post as { id: string; seoTitle: Record<string, string>; seoDesc: Record<string, string> };
+    expect(post.seoTitle).toEqual({ RU: `RU Google pealkiri ${marker}`, ET: `ET Google pealkiri ${marker}`, EN: `EN Google pealkiri ${marker}` });
+    expect(post.seoDesc).toEqual({ RU: `RU kirjeldus ${marker}`, ET: `ET kirjeldus ${marker}`, EN: `EN kirjeldus ${marker}` });
+    await page.locator("[data-admblogback]").click();
+    await page.locator(`[data-admblogedit="${post.id}"]`).click();
+    await page.locator('[data-admbloglang="ET"]').click();
+    await expect(page.locator('[data-blogf="seoTitle"]')).toHaveValue(`ET Google pealkiri ${marker}`);
+    await expect(page.locator('[data-blogf="seoDesc"]')).toHaveValue(`ET kirjeldus ${marker}`);
+
+    /* What Google (and the tab) gets on the Estonian page, from a context of
+       its own: the ET pair, not the title and the excerpt. */
+    const shop = await freshShop(browser);
+    await shop.page.goto(shopUrl("/et", `/blog/${slug}/`));
+    await waitForScreen(shop.page, "blogpost");
+    await expect(shop.page.locator(".blog__body:not(.blog__sk)")).toBeVisible();
+    await expect(shop.page).toHaveTitle(`ET Google pealkiri ${marker} — REMPIRE`);
+    await expect(shop.page.locator('meta[name="description"]')).toHaveAttribute("content", `ET kirjeldus ${marker}`);
+    await expect(shop.page.locator('meta[property="og:title"]')).toHaveAttribute("content", `ET Google pealkiri ${marker} — REMPIRE`);
+    await assertClean(shop.page, shop.w, "the Estonian article page");
+    await shop.close();
+
+    // back to the drafts: this suite leaves the blog as it found it
+    await page.locator("[data-admblogunpublish]").click();
+    await clearToast(page);
+    await assertClean(page, w, "Google pair test cleaned up");
   });
 
   test("an older markdown post opens in the visual editor as real headings and lists", async ({ page }) => {
