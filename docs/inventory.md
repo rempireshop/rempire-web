@@ -400,11 +400,23 @@ app called «Админка» or «Сканер»:
   title to «Сканер») on the scan screen. Installed, it is a third icon on the
   owner's phone that opens straight into the viewfinder — see below.
 
-Icons are shared, generated once via `node tools/gen-pwa-icons.mjs` from
-`public/brand/rempire-badge-dark.svg` (not part of `prebuild` — regenerate by
-hand only if the badge artwork changes). iOS Safari does not read the web
-manifest for its own "Add to Home Screen"; the `apple-*` tags in
-`index.html` are what it uses, and the title swap above covers the name.
+Icons are shared by all three apps and are the header's own tower mark —
+`tower()` in app.js, ink `#1c1a00` on a white square, well padded — not the
+old round «est 2018» badge. `node tools/gen-pwa-icons.mjs` reads the path out
+of app.js and screenshots it with Playwright's Chromium into
+`public/shop2/icons/`: `icon-192.png` / `icon-512.png` (purpose `any`, tower
+62 % of the square), `icon-maskable-192.png` / `-512.png` (purpose
+`maskable`, tower 58 % so it stays inside the 80 % safe zone a launcher may
+mask to), `apple-touch-icon-180.png` for iOS, and the tab icon pair
+`favicon.svg` (transparent, white in a dark UI) + `favicon-32.png`. Not part
+of `prebuild` — rerun by hand only if the mark itself changes. Every manifest
+has `background_color` and `theme_color` `#ffffff`, so the splash and the
+status bar are white for the shop, the admin and the scanner alike, and
+`index.html` inlines `html{background:#fff}` before its stylesheet so the
+first paint is white too (the admin's `.adm2` paints its own paper once
+loaded). iOS Safari does not read the web manifest for its own "Add to Home
+Screen"; the `apple-*` tags in `index.html` are what it uses, and the title
+swap above covers the name.
 
 ## The scanner as its own app (`/shop2/scan/`)
 
