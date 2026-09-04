@@ -833,6 +833,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   background: var(--a-paper); color: var(--a-ink); white-space: nowrap;
 }
 .adm-seg button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+/* phone: a thumb-sized segment — after the base rule, same specificity, so it wins */
+@media (max-width: 899px) { .adm-seg button { height: 44px; } }
 
 /* ---------- switch (44 × 26, knob 20, .15 s) ------------------------------
    A <button aria-pressed>, not a checkbox: every other control in the panel

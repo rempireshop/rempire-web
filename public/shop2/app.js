@@ -15086,6 +15086,9 @@
     var i, a;
     for (i = from.attributes.length - 1; i >= 0; i--) {
       a = from.attributes[i];
+      // a <details> the owner opened by hand stays open across renders — the
+      // markup never carries `open`, so removing it here would snap it shut
+      if (a.name === "open" && from.tagName === "DETAILS") continue;
       if (!to.hasAttribute(a.name)) from.removeAttribute(a.name);
     }
     for (i = 0; i < to.attributes.length; i++) {
@@ -17205,7 +17208,10 @@
       e.preventDefault();
       S.blogSlug = d.goBlog; go("blogpost"); return;
     }
-    if (d.blogmore !== undefined) { loadBlogList(true); return; }
+    /* «Показать ещё» on the storefront blog list. In the admin the same hook
+       sits on a <details> summary (the blog editor’s «Адрес, автор и текст для
+       Google») — leave that click to the browser. */
+    if (d.blogmore !== undefined) { if (S.screen !== "admin") loadBlogList(true); return; }
     if (d.blogshare) { shareBlogPost(d.blogshare); return; }
     if (d.addbundle) { e.stopPropagation(); addBundleToCart(d.addbundle); return; }
     if (d.giftamt) { S.giftAmount = Number(d.giftamt); render(); refocus('[data-giftamt="' + d.giftamt + '"]'); return; }
