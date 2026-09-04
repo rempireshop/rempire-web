@@ -472,3 +472,17 @@ the file:
   `screenContact()`, instead of from the 2019 Shopify page in `legal.js` (which
   carried a stylesheet link to Shopify's CDN and a contact form that goes
   nowhere). The other four info slugs are still the policy texts.
+
+## Title and description per language (admin override)
+
+The product editor's «Google» tab holds a title/description pair for each
+storefront language (RU, ET, EN) — `data-edseolang` switches the pair, and
+«Заполнить автоматически» writes the language on screen (or all three).
+Storage: `product_overrides.seo_title` / `seo_desc` stay the Russian pair
+(older rows and the assistant's `set_seo` proposal keep working), and
+`seo_langs` (migration 130) carries the ET/EN pairs; `src/lib/product-seo.ts`
+merges them and both `/api/admin/overrides/` and the public `/api/overrides/`
+expose the result as `seo: {RU, ET, EN}`. At runtime `setHead()` picks the
+page language's pair, then the Russian one, then the catalogue's static pair.
+The prerender still writes the catalogue's static pair — the admin override
+applies in the rendered DOM, which is what Googlebot indexes.
