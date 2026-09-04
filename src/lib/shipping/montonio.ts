@@ -124,6 +124,9 @@ export interface MontonioShipment {
   /** parcels[0].dropOffPin — hand the parcel over without a printed label. */
   dropOffPin: string;
   labelUrl?: string;
+  /** The page the stored labelUrl was made for — a request for the other
+      size makes a new file rather than serving this one. */
+  labelSize?: "A4" | "A6";
   createdAt: string;
 }
 

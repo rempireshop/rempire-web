@@ -473,13 +473,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-propose__acts { display: flex; gap: 8px; }
 .adm-propose__acts .adm-btn { flex: 1; height: 44px; }
 
-/* ---------- the sections Phase 2/3 still restyle ---------------------------- */
-/* They keep their own markup and their own legacy CSS; this only re-seats them
-   in the new page column and softens the two things the redesign has already
-   banned everywhere else — the uppercase sub-heading and the info banner. */
-.adm-legacy { display: flex; flex-direction: column; animation: adm-up .25s; }
-.adm-legacy .sec__head--sub { margin-top: 22px; }
-.adm-legacy .sec__title { font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+/* `.adm-legacy` used to re-seat the sections the redesign had not reached yet.
+   Phases 1–3 between them reached all of them, so nothing renders inside it any
+   more; what a settings sub-page still embeds is `.adm-embed` below. */
 
 /* ---------- login / waiting card ------------------------------------------- */
 
@@ -518,6 +514,269 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 2 — «Товар» (editor), «Салон» (POS) and the scanner.
+   docs/design/admin-handoff-README.md § «Товар (editor)», § «Салон (POS)»,
+   § «Сканер». Same tokens, same geometry: radius 0, no shadows, 1 px rules.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ---------- Товар: panes, fields, sticky save bar -------------------------- */
+
+/* The panes and the three description boxes are switched with `hidden`, and
+   an author `display` beats the UA sheet's `[hidden] { display: none }` every
+   time — without this rule all five tabs stood on the page at once. One rule
+   for the whole panel rather than one per component, because every future
+   `hidden` here would hit the same wall. */
+.adm2 [hidden] { display: none !important; }
+.adm-edpane { display: flex; flex-direction: column; gap: 16px; max-width: 760px; animation: adm-up .2s; }
+.adm-edcols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
+.adm-edcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.adm-edpair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 720px) { .adm-edcols, .adm-edpair { grid-template-columns: minmax(0, 1fr); } }
+/* «← Товары» is a link, and a link in a flex column stretches to the whole
+   width — which centres its text and puts a 1000-px hit area behind it. */
+.adm-link--back { align-self: flex-start; }
+.adm-field .adm-input { margin-top: 0; }
+.adm-input[readonly], .adm2 select.adm-input[disabled] { background: var(--a-tint); color: var(--a-muted); }
+.adm-area { height: auto; padding: 12px 14px; line-height: 22px; resize: vertical; }
+.adm-area--sm { min-height: 88px; }
+
+/* the design's switch row — 44×26 with a 20-px knob. Disabled here because
+   the shop has no «скрыт» field to write (see goodsEditor's own comment); the
+   markup is the same one Phase 3 will reuse where a switch really switches. */
+.adm-switch {
+  height: 48px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 0 14px; border: 1px solid var(--a-rule); background: var(--a-paper);
+}
+.adm-switch[aria-disabled="true"] { color: var(--a-muted); }
+.adm-switch__t { width: 44px; height: 26px; border: 1px solid var(--a-ink); position: relative; flex: none; }
+.adm-switch__t i { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: var(--a-ink); transition: left .15s; }
+.adm-switch__t.is-on { background: var(--a-ink); }
+.adm-switch__t.is-on i { left: 20px; background: var(--a-paper); }
+
+/* Размер · Цена · Салон · Остаток · Штрихкод · × — the grid of the design. */
+.adm-grid { display: flex; flex-direction: column; gap: 8px; }
+.adm-grid__head, .adm-grid__row {
+  display: grid; grid-template-columns: 1.2fr 1fr 1fr .8fr 1.4fr 44px; gap: 8px; align-items: center;
+}
+.adm-grid__head { font-size: 12px; color: var(--a-muted); padding-bottom: 6px; border-bottom: 1px solid var(--a-ink); }
+.adm-grid__sz { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-input--cell { height: 44px; padding: 0 10px; }
+.adm-input--warn { color: var(--a-warn); }
+.adm-grid__x {
+  width: 44px; height: 44px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-muted); font-size: 18px; line-height: 1;
+}
+.adm-grid__x[disabled] { border-color: var(--a-rule); color: var(--a-rule); cursor: default; }
+/* the phone cannot hold six columns: the row becomes two lines of labels-in-
+   placeholders, which is why every cell carries an aria-label of its own */
+@media (max-width: 720px) {
+  .adm-grid__head { display: none; }
+  .adm-grid__row { grid-template-columns: 1fr 1fr 44px; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--a-rule); }
+  .adm-grid__sz { grid-column: 1 / -1; font-weight: 600; }
+}
+.adm-btn--dash { background: var(--a-paper); color: var(--a-ink); border: 1px dashed var(--a-ink); width: fit-content; }
+/* a disabled dashed button is still a dashed button — the outline is what
+   says «сюда что-то добавляют», and it survives the grey */
+.adm-btn--dash[disabled] { border-style: dashed; background: var(--a-paper); }
+.adm-btn--tall { height: 64px; width: 100%; }
+
+/* Фото: the tile grid, «главное» and the per-size tags. */
+.adm-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.adm-photo { position: relative; aspect-ratio: 1; background: var(--a-tint); border: 1px solid var(--a-rule); }
+.adm-photo__img { position: absolute; inset: 0; background-size: contain; background-position: center; background-repeat: no-repeat; }
+.adm-photo__tag {
+  position: absolute; top: 6px; left: 6px; font-size: 11px; padding: 2px 6px;
+  background: var(--a-paper); color: var(--a-muted); max-width: calc(100% - 12px);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.adm-photo__tag--ink { background: var(--a-ink); color: #fff; }
+.adm-photo__ops { position: absolute; right: 4px; bottom: 4px; display: flex; gap: 2px; }
+.adm-photo__op {
+  width: 30px; height: 30px; border: 0; background: var(--a-paper); color: var(--a-ink);
+  font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center;
+}
+.adm-photo__op[disabled] { color: var(--a-rule); cursor: default; }
+.adm-photo--add {
+  border: 1px dashed var(--a-ink); background: var(--a-paper); font-weight: 500; font-size: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+}
+.adm-photo--add[disabled] { border-color: var(--a-rule); color: var(--a-muted); cursor: default; }
+.adm-photo__plus { font-size: 24px; line-height: 1; }
+.adm-photo__file { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.adm-vrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-vrow__sz { flex: 0 0 92px; font-size: 13px; color: var(--a-muted); }
+.adm-vthumb {
+  width: 44px; height: 44px; border: 1px solid var(--a-rule); background-size: contain;
+  background-position: center; background-repeat: no-repeat; background-color: var(--a-tint);
+}
+.adm-vthumb[aria-current="true"] { border: 2px solid var(--a-ink); }
+
+.adm-vidrow { display: flex; align-items: center; gap: 12px; border: 1px solid var(--a-rule); padding: 10px 14px; font-size: 14px; }
+.adm-vidrow__play { width: 56px; height: 36px; background: var(--a-ink); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+.adm-vidrow__nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--a-muted); }
+.adm-vidrow__x { width: 36px; height: 36px; border: 0; background: none; color: var(--a-muted); font-size: 18px; }
+
+/* Описание: the language segmented control. */
+.adm-edbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.adm-seg { display: flex; border: 1px solid var(--a-rule); }
+.adm-seg__b { height: 40px; padding: 0 16px; font-size: 14px; border: 0; background: var(--a-paper); color: var(--a-ink); }
+.adm-seg__b[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+
+/* The save bar follows the page to the bottom of every tab. */
+.adm-savebar {
+  position: sticky; bottom: 0; z-index: 2; display: flex; gap: 8px; align-items: center;
+  padding: 12px 0; margin-top: 8px; background: var(--a-paper); border-top: 1px solid var(--a-rule);
+}
+.adm-savebar__sp { flex: 1; }
+/* On a phone the bar sits above the nav — and so does the assistant's
+   floating button, which was landing on top of «Снять с продажи». The button
+   is the one that moves: the save bar is the screen's own controls, and a
+   destructive action half-hidden under a FAB is exactly the kind of thing
+   that gets pressed by accident. Same idiom as `body:has(.stickybar) .ftr`
+   in styles.css and the same offset as the toast's. */
+@media (max-width: 899px) {
+  .adm-savebar { bottom: var(--a-bar); }
+  .adm2:has(.adm-savebar) .adm-fab { bottom: calc(var(--a-bar) + 88px); }
+}
+
+/* ---------- Салон (POS) ---------------------------------------------------- */
+
+/* The search box IS the screen's main action, so it wears the ink border the
+   README reserves for exactly that. */
+.adm-input--find { height: 52px; border-color: var(--a-ink); font-size: 16px; }
+.adm-row--chips { align-items: center; }
+.adm-poschips { display: flex; gap: 6px; flex-wrap: wrap; }
+.adm-poschip {
+  height: 44px; padding: 0 12px; font-size: 14px; white-space: nowrap;
+  border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
+}
+.adm-poschip.is-none { border-color: var(--a-rule); color: var(--a-muted); }
+.adm-posline { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--a-rule); padding-bottom: 10px; }
+.adm-posline__body { flex: 1; min-width: 0; }
+.adm-poskv { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--a-muted); }
+.adm-total__v--big { font-size: 28px; }
+.adm-pospay { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.adm-btn--pay { height: 52px; }
+
+.adm-receipt {
+  border: 1px solid var(--a-ink); padding: 32px 20px; text-align: center;
+  display: flex; flex-direction: column; gap: 12px; align-items: center; animation: adm-up .2s;
+}
+.adm-receipt__ok { font-size: 14px; color: var(--a-ok); }
+.adm-receipt__id { font-size: 13px; }
+.adm-receipt__sum { font-family: Oswald, sans-serif; font-size: 40px; line-height: 1; }
+.adm-acts--mid { justify-content: center; margin-top: 8px; }
+
+/* ---------- Сканер: full-screen dark --------------------------------------
+   Moved here from styles.css with the redesign: the overlay is admin-only, so
+   its rules belong to the admin sheet. It is NOT inside `.adm2` — the overlay
+   is mounted outside #bodyslot (scanMount()) so its <video> survives every
+   render() — which is why these selectors stand on their own class names. */
+
+.scanoverlay {
+  position: fixed; inset: 0; z-index: var(--z-scan, 95);
+  display: flex; flex-direction: column;
+  background: var(--a-ink); color: #fff;
+  font-family: "Golos Text", ui-sans-serif, system-ui, sans-serif;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+/* «Приход +3 ✓» is the receipt for the tap that just wrote to the warehouse.
+   Under the overlay it was invisible — the owner pressed a button and nothing
+   appeared to happen. The body class is set by the same render hook that
+   mounts the overlay (renderImpl()). */
+body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
+.scanoverlay button { font-family: inherit; cursor: pointer; }
+.scanoverlay input { font-family: inherit; font-size: 15px; }
+/* same reason as `.adm2 [hidden]` above — the torch button is a flex box that
+   is only there when the camera has a torch to switch */
+.scanoverlay [hidden] { display: none !important; }
+
+.scan__head { flex: none; min-height: 64px; display: flex; align-items: center; gap: 10px; padding: 8px 20px; }
+.scan__brand { font-weight: 600; font-size: 15px; white-space: nowrap; }
+.scan__mode { flex: 1; font-size: 12px; line-height: 16px; color: var(--a-dim); text-align: right; }
+.scan__hbtn {
+  width: 44px; height: 44px; flex: none; border: 1px solid var(--a-muted);
+  background: none; color: #fff; font-size: 20px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.scan__hbtn[aria-pressed="true"] { background: #fff; color: var(--a-ink); }
+
+.scan__stage {
+  flex: 1; min-height: 0; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 12px 20px 20px;
+}
+.scan__box {
+  position: relative; width: min(80vw, 320px); aspect-ratio: 1; flex: none;
+  border: 2px solid #fff; background: #000; overflow: hidden;
+}
+.scan__video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+.scan__target { position: absolute; inset: 12%; border: 1px solid rgba(255, 255, 255, .5); pointer-events: none; }
+.scan__line { position: absolute; left: 12px; right: 12px; top: 50%; height: 2px; background: var(--a-warn); pointer-events: none; }
+/* No camera (denied, absent, or a desktop): the viewfinder is dead space and
+   the manual field is the interface — see scanRenderPanel(). A card on screen
+   is the whole job, so the box steps aside for it too. */
+.scanoverlay.is-nocam .scan__box { display: none; }
+.scanoverlay.is-card .scan__box { width: min(46vw, 140px); }
+.scanoverlay.is-card .scan__line { display: none; }
+
+.scan__panel { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
+.scan__hint { margin: 0; text-align: center; font-size: 15px; line-height: 22px; color: var(--a-dim); }
+.scan__hint--sm { font-size: 13px; text-align: left; }
+
+.scan__card {
+  background: #fff; color: var(--a-ink); padding: 20px;
+  display: flex; flex-direction: column; gap: 14px; animation: adm-up .2s;
+}
+/* the camera's own bad news: a line the owner has to read, not a card that
+   takes the screen away from the manual field it points at */
+.scan__card--err { color: var(--a-warn); font-size: 13px; line-height: 19px; padding: 12px 14px; }
+.scan__card--err p { margin: 0; }
+.scan__found { font-size: 13px; color: var(--a-ok); }
+.scan__warn { font-size: 13px; color: var(--a-warn); }
+.scan__nm { font-size: 17px; font-weight: 600; line-height: 22px; }
+.scan__sub { font-size: 13px; color: var(--a-muted); margin-top: -8px; }
+
+/* The giant stepper: 64-px thumbs, an Oswald 48 number between them. */
+.scan__step { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.scan__stepbtn { width: 64px; height: 64px; flex: none; border: 1px solid var(--a-ink); background: #fff; color: var(--a-ink); font-size: 28px; line-height: 1; }
+.scan__qty {
+  width: 96px; height: 64px; text-align: center; border: 0; background: none; color: var(--a-ink);
+  font-family: Oswald, sans-serif; font-size: 48px; line-height: 1;
+}
+.scan__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.scan__acts--one { grid-template-columns: 1fr; }
+.scan__btn { height: 56px; border: 1px solid var(--a-ink); background: #fff; color: var(--a-ink); font-weight: 500; font-size: 15px; }
+.scan__btn--pri { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
+.scan__btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
+.scan__more { height: 44px; border: 0; background: none; color: var(--a-muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.scan__ready { margin: 0; font-size: 13px; color: var(--a-ok); text-align: center; }
+
+.scan__find { height: 48px; border: 1px solid var(--a-ink); padding: 0 14px; color: var(--a-ink); background: #fff; width: 100%; }
+.scan__cands { border-top: 1px solid var(--a-rule); max-height: 260px; overflow: auto; }
+.scan__cand {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 52px; border: 0; border-bottom: 1px solid var(--a-rule); background: #fff;
+  color: var(--a-ink); text-align: left; padding: 8px 0;
+}
+.scan__cand__nm { flex: 1; min-width: 0; }
+.scan__cand__sz { font-size: 13px; color: var(--a-muted); white-space: nowrap; }
+
+.scan__today { border-top: 1px solid var(--a-muted); padding-top: 10px; }
+.scan__today__t { font-size: 13px; color: var(--a-dim); margin-bottom: 6px; }
+.scan__today__r { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 4px 0; }
+
+/* The manual field IS the keyboard-wedge target, so it is on screen in every
+   state — and it has to read as white-on-dark, not black on black. */
+.scan__manual { width: 100%; max-width: 400px; display: flex; gap: 8px; }
+.scan__mfield {
+  flex: 1; height: 48px; border: 1px solid var(--a-muted); background: none; color: #fff;
+  padding: 0 14px; text-align: center; font-size: 13px;
+}
+.scan__mfield::placeholder { color: var(--a-dim); }
+.scan__mbtn { height: 48px; padding: 0 16px; border: 1px solid var(--a-muted); background: none; color: #fff; font-size: 14px; }
+.scan__foot { flex: none; padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px)); font-size: 13px; color: var(--a-dim); text-align: center; }
 /* ======================================================================
    Phase 3 — Клиенты · Маркетинг · Блог · Аналитика · Подключения ·
    Настройки · Помощник.
@@ -707,8 +966,8 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 /* A settings sub-page still hosts a legacy card or two — the banner editor,
    the content document, the loyalty form and the accountant's report all keep
    their own markup. This only re-seats them in the new column and quiets the
-   two things the redesign banned everywhere else, the same three rules
-   `.adm-legacy` uses above. */
+   two things the redesign banned everywhere else — the uppercase sub-heading
+   and the letter-spaced section title. */
 .adm-embed { display: flex; flex-direction: column; }
 .adm-embed .sec__head--sub { margin-top: 22px; }
 .adm-embed .sec__title { font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 600; }

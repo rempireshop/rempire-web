@@ -157,6 +157,8 @@ test.describe("admin", () => {
       await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
 
       try {
+        // The price lives on the editor's «Размеры и цены» tab (ED_TABS in app.js).
+        await page.locator('[data-edtab="sizes"]').click();
         await page.locator("[data-edprice]").fill(newPrice);
         await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
         await expect(page.getByRole("status")).toBeVisible();
@@ -177,6 +179,7 @@ test.describe("admin", () => {
         await goodsTab(page).click();
         await page.locator("[data-goodsq]").fill(PRODUCT_2.id);
         await page.locator(`[data-admgoods="${PRODUCT_2.id}"]`).click();
+        await page.locator('[data-edtab="sizes"]').click();
         await page.locator("[data-edprice]").fill(String(PRODUCT_2.price));
         await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
       }

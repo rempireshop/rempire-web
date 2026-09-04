@@ -336,6 +336,7 @@ const INTENTIONAL_FNS = {
   // админка: the draft the assistant writes for «Написать клиенту» is a letter
   // TO the customer, so it stays in the customer's language, not the panel's
   admOrderDraft: "the draft letter to the customer — written in the customer's language, not the panel's",
+  admPosJournalLine: "change-log line in Renat's private admin journal — Russian by decision",
   shipActionText: "change-log line in Renat's private admin journal — Russian by decision",
   contentActionText: "change-log line in Renat's private admin journal — Russian by decision",
   promoActionText: "change-log line in Renat's private admin journal — Russian by decision",

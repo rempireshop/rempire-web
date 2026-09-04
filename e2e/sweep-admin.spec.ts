@@ -576,6 +576,8 @@ test.describe("sweep — the change journal", () => {
 
     await page.locator("[data-goodsq]").fill(id);
     await page.locator(`[data-admgoods="${id}"]`).click();
+    // The price lives on the editor's «Размеры и цены» tab (ED_TABS in app.js).
+    await page.locator('[data-edtab="sizes"]').click();
     const original = await page.locator("[data-edprice]").inputValue();
     expect(Number(original)).toBeGreaterThan(0);
 

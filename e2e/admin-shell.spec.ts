@@ -1,6 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
 import { freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
 
+test.beforeEach(async ({}, testInfo) => {
+  // phone + desktop are the two designed layouts (docs/design/admin-handoff-README.md);
+  // the tablet project gets whichever breakpoint applies and is not asserted here
+  test.skip(testInfo.project.name === "tablet", "admin shell spec — desktop and mobile projects only");
+});
+
 /**
  * The redesigned admin shell — phase 1 of docs/design/admin-handoff-README.md.
  *
@@ -106,7 +112,8 @@ test.describe("admin shell — every old tab key is still a deep link", () => {
     ["orders", "orders", "Заказы"],
     ["goods", "goods", "Товары"],
     ["stock", "goods", "Товары"],
-    ["pos", "pos", "Салон"],
+    // the nav item is «Салон»; the screen it opens is titled «Продажа в салоне»
+    ["pos", "pos", "Продажа в салоне"],
     ["people", "people", "Клиенты"],
     ["reviews", "people", "Клиенты"],
     ["promos", "promos", "Маркетинг"],

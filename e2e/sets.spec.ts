@@ -120,8 +120,11 @@ test.describe("sets switched off", () => {
         (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT",
       );
       await toggle.click();
-      expect((await put).ok()).toBe(true);
+      // The toast fires with the click and leaves after 2.6 s (toast() in
+      // app.js); on a slow CI runner the PUT alone can take longer than that,
+      // so look for the toast first and for the response after.
       await expect(page.getByRole("status")).toBeVisible();
+      expect((await put).ok()).toBe(true);
 
       for (const lang of LANGS) {
         const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(76) });

@@ -206,20 +206,25 @@ test.describe("sweep — the in-salon register", () => {
     await openAdmin(page);
 
     await tab(page, "pos");
-    await expect(page.locator("[data-possend]"), "an empty sale could be submitted").toBeDisabled();
+    // «Наличные» / «Терминал» are the two ways to finish a sale since the
+    // redesign — an empty cart must leave both of them dead.
+    await expect(page.locator('[data-possend="cash"]'), "an empty sale could be submitted").toBeDisabled();
+    await expect(page.locator('[data-possend="terminal"]'), "an empty sale could be submitted").toBeDisabled();
     await assertClean(page, w, "register, empty cart");
 
+    // One 44-h chip per size — the chip IS the «add», and it carries the size
+    // index so the register never has to guess which bottle was meant.
     await page.locator("[data-posq]").fill(PRODUCT_2.id);
-    await page.locator(`[data-posadd="${PRODUCT_2.id}"]`).click();
-    await page.locator("[data-posq]").fill("");   // the search list out of the way
+    await page.locator(`[data-posadd^="${PRODUCT_2.id}:"]`).first().click();
 
-    // The line's own quantity cell — the first .num between the two ± buttons.
-    const line = page.locator(".adm__row", { has: page.locator('[data-posqty="0:-1"]') });
-    const qty = line.locator("span.num").first();
+    // The line's own quantity cell — the number between the two ± buttons.
+    const line = page.locator(".adm-posline", { has: page.locator('[data-posqty="0:-1"]') });
+    const qty = line.locator(".adm-step-qty__v").first();
 
-    // The register picks the product's first size; give THAT shelf a known
-    // count, so "the sale decremented it" is a fact and not an inference.
-    const variant = ((await line.locator(".adm__sub").first().textContent()) || "").trim();
+    // The chip that was tapped is the product's first size; give THAT shelf a
+    // known count, so "the sale decremented it" is a fact and not an inference.
+    const sub = ((await line.locator(".adm-row__sub").first().textContent()) || "").trim();
+    const variant = sub.split("·")[0].trim();
     const key = `${PRODUCT_2.id} ${variant}`;
     await openStockRow(page, key);
     await page.locator("[data-stockqtyinput]").fill("20");
@@ -249,26 +254,26 @@ test.describe("sweep — the in-salon register", () => {
 
     // Remove a line, then rebuild the sale.
     await page.locator("[data-posremove]").first().click();
-    await expect(page.locator("[data-possend]")).toBeDisabled();
+    await expect(page.locator('[data-possend="terminal"]')).toBeDisabled();
     await page.locator("[data-posq]").fill(PRODUCT_2.id);
-    await page.locator(`[data-posadd="${PRODUCT_2.id}"]`).click();
-    await page.locator("[data-posq]").fill("");
-
-    for (const method of ["terminal", "cash"]) {
-      await page.locator(`[data-pospayment="${method}"]`).click();
-      await expect(page.locator(`[data-pospayment="${method}"]`)).toHaveAttribute("aria-current", "true");
-    }
+    await page.locator(`[data-posadd^="${PRODUCT_2.id}:"]`).first().click();
     await page.locator("[data-posemail]").fill(freshEmail("sweep-pos"));
 
     // What the screen promises and what the receipt says have to agree — the
     // discount is applied twice over, once here and once on the server.
-    const shownTotal = ((await page.locator(".adm__row", { hasText: "Итого" }).locator(".num").last().textContent()) || "").trim();
-    await page.locator("[data-possend]").click();
+    const shownTotal = ((await page.locator(".adm-total__v").first().textContent()) || "").trim();
+    // money goes through the confirm card, and the card lists what is about
+    // to be charged before anything is charged
+    await page.locator('[data-possend="terminal"]').click();
+    await expect(page.locator(".adm-confirm__d")).toContainText(shownTotal);
+    await page.locator("[data-admapply]").click();
     await expect(page.locator("[data-posnew]"), "the sale never reached a receipt").toBeVisible();
-    const number = ((await page.locator("p.sec__title").first().textContent()) || "").trim();
+    const number = ((await page.locator(".adm-receipt__id").first().textContent()) || "").trim();
     expect(number, "the receipt has no order number").toMatch(/^R-/);
-    const receiptTotal = ((await page.locator("[data-posnew]").locator("xpath=../..").locator("p.num").first().textContent()) || "").trim();
+    const receiptTotal = ((await page.locator(".adm-receipt__sum").first().textContent()) || "").trim();
     expect(receiptTotal, "the receipt total is not the total that was on screen").toBe(shownTotal);
+    // «N поз. · терминал · остатки списаны» — the method the owner pressed
+    await expect(page.locator(".adm-receipt")).toContainText("терминал");
     await assertClean(page, w, "register receipt");
 
     // The printable receipt is a real document, not a dead link.
