@@ -971,6 +971,16 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-embed { display: flex; flex-direction: column; }
 .adm-embed .sec__head--sub { margin-top: 22px; }
 .adm-embed .sec__title { font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+/* …and their buttons and chips stop shouting. The storefront sets both in
+   uppercase Oswald with .14em of tracking, which is the panel's own «Сохранить»
+   in a different voice two rules further down the same page. */
+.adm-embed .btn, .adm-embed .chip {
+  font-family: "Golos Text", ui-sans-serif, system-ui, sans-serif;
+  text-transform: none; letter-spacing: 0;
+}
+.adm-embed .btn { font-size: 15px; font-weight: 500; }
+.adm-embed .btn--sm { font-size: 14px; }
+.adm-embed .chip { font-size: 12px; }
 
 /* ---------- phone --------------------------------------------------------- */
 
