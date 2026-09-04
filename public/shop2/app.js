@@ -4011,17 +4011,25 @@
   }
   function bundleCardHTML(b) {
     var out = b.stock === "out";
+    // the same foot row as a product card (cardFootInnerHTML): price with the
+    // crossed-out sum of the parts, a spacer, «В корзину» — so a grid that
+    // mixes sets and products keeps one rhythm
     return '<div class="card card--bundle">' +
       '<button class="card__go" data-go-bundle="' + b.id + '">' +
         '<span class="card__media">' + bundleStack(b, "bstack--card") +
-          '<span class="bbadge num">−' + b.pct + ' %</span></span>' +
+          '<span class="bbadge num">−' + b.pct + ' %</span>' +
+          (out ? '<span class="card__flags"><span class="chip chip--out card__flag">нет в наличии</span></span>' : "") +
+        "</span>" +
         '<span class="card__brand">Набор</span>' +
         '<span class="card__name">' + esc(bundleTitle(b)) + "</span>" +
-        '<span class="card__price num">' + eur(b.price) +
-          ' <s class="bwas">' + eur(b.sum) + "</s>" +
-          (out ? ' <span class="chip chip--out">нет в наличии</span>' : "") + "</span>" +
       "</button>" +
-      (out ? "" : '<button class="link card__add" data-addbundle="' + b.id + '">В корзину</button>') +
+      '<div class="card__foot">' +
+        '<span class="card__price num">' + eur(b.price) + ' <s class="bwas">' + eur(b.sum) + "</s></span>" +
+        '<span class="card__sp"></span>' +
+        (out
+          ? '<button type="button" class="card__add card__add--notify" data-go-bundle="' + b.id + '">Смотреть</button>'
+          : '<button type="button" class="card__add" data-addbundle="' + b.id + '">В корзину</button>') +
+      "</div>" +
       "</div>";
   }
   /* Sets belonging to the section being browsed, shown UNDER the grid: a
@@ -15091,6 +15099,54 @@
     }
   });
 
+  /* The prerendered blog pages carry their data (tools/prerender-shop2.mjs
+     writes it into #blogdata / #blogpost): adopt it before the first render,
+     so the list and the article are on screen at once instead of an empty
+     state that a fetch fills a second later. The fetch still runs behind it
+     (loadBlogList/loadBlogPost see the data as already loaded, so it is
+     re-read only when the shopper asks for more or changes language) — a
+     post published after the last build shows up on the next visit either
+     way. Skipped when the page's language is not the one being shown. */
+  (function hydrateBlog() {
+    try {
+      var lang = S.lang;   // final by now: the URL segment or the saved choice set it above
+      var listEl = document.getElementById("blogdata");
+      if (listEl) {
+        var j = JSON.parse(listEl.textContent || "null");
+        if (j && j.lang === lang && Array.isArray(j.posts)) {
+          S.blogList = { posts: j.posts, total: j.total || j.posts.length, page: 1, perPage: j.perPage || 10, hydrated: true };
+        }
+      }
+      var postEl = document.getElementById("blogpost");
+      if (postEl) {
+        var q = JSON.parse(postEl.textContent || "null");
+        if (q && q.lang === lang && q.post && q.post.slug) { q.post.hydrated = true; S.blogPosts[q.post.slug] = q.post; }
+      }
+    } catch (e) {}
+  })();
+  /* The embedded data is as old as the last build; the API is asked once the
+     page is up and the screen is repainted only if something differs, so a
+     post Renat publishes today shows on today's visits, not after a deploy. */
+  function refreshBlog() {
+    if (S.screen === "blog" && S.blogList && S.blogList.hydrated) {
+      fetch("/api/blog/?lang=" + S.lang + "&page=1").then(function (r) { return r.json(); }).then(function (j) {
+        if (!j || !j.ok || !S.blogList || !S.blogList.hydrated) return;
+        var was = JSON.stringify(S.blogList.posts), now = JSON.stringify(j.posts);
+        S.blogList = { posts: j.posts, total: j.total, page: j.page, perPage: j.perPage };
+        if (was !== now && S.screen === "blog") render();
+      }).catch(noop);
+    }
+    if (S.screen === "blogpost" && S.blogSlug && S.blogPosts[S.blogSlug] && S.blogPosts[S.blogSlug].hydrated) {
+      var slug = S.blogSlug;
+      fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + S.lang).then(function (r) { return r.json(); }).then(function (j) {
+        if (!j || !j.ok || !j.post) return;
+        var was = JSON.stringify(S.blogPosts[slug]), now = JSON.stringify(j.post);
+        S.blogPosts[slug] = j.post;
+        if (was !== now && S.screen === "blogpost" && S.blogSlug === slug) render();
+      }).catch(noop);
+    }
+  }
+  setTimeout(refreshBlog, 1500);
   routeFromPath();
   /* Scroll is restored from the entry's own record; letting the browser also
      try leaves it fighting a page that has not been rendered yet. */

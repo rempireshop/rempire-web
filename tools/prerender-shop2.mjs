@@ -1273,6 +1273,21 @@ function blogTile(post, seg, code, t) {
     "</a></li>";
 }
 
+/* The blog pages carry their own data for app.js (#blogdata on the list,
+   #blogpost on an article — see hydrateBlog() there): the first render then
+   shows the posts at once instead of an empty state that the API fills in a
+   second later. Same shapes as /api/blog/ and /api/blog/<slug>/. "</" is
+   escaped so a body containing "</script>" cannot end the block early. */
+function blogJsonScript(id, obj) {
+  return '<script type="application/json" id="' + id + '">' +
+    JSON.stringify(obj).replace(/<\//g, "<\\/") + "</script>";
+}
+function blogListItem(p, code) {
+  return {
+    slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
+    coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), tags: p.tags, publishedAt: p.publishedAt
+  };
+}
 function blogListPage(lang) {
   const { code, seg } = lang;
   const t = T[code];
@@ -1287,6 +1302,7 @@ function blogListPage(lang) {
         : '<p class="muted">' + esc(t.blogEmpty) + "</p>") +
     "</section>" +
     langNav(seg, rest, t) +
+    blogJsonScript("blogdata", { lang: code, posts: BLOG_POSTS.slice(0, 10).map(p => blogListItem(p, code)), total: BLOG_POSTS.length, perPage: 10 }) +
     "</div>";
 
   return {
@@ -1359,6 +1375,11 @@ function blogPostPage(post, lang) {
         '<ul class="grid blog__grid" style="list-style:none;padding:0">' + others.map(p => blogTile(p, seg, code, t)).join("") + "</ul></section>"
       : "") +
     langNav(seg, rest, t) +
+    blogJsonScript("blogpost", { lang: code, post: {
+      slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
+      tags: post.tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
+      author: post.author, publishedAt: post.publishedAt
+    } }) +
     "</div>";
 
   return {
