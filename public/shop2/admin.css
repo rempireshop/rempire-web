@@ -82,9 +82,11 @@
 .adm2--navmin .adm-side__fold svg { transform: rotate(180deg); }
 .adm-side__nav { flex: 1; overflow: auto; padding: 12px 0; display: flex; flex-direction: column; }
 .adm-side__rule { height: 1px; background: var(--a-rule); margin: 12px 20px; flex: none; }
+/* everything in the foot is centred on one axis — the language switch used to
+   sit flush left under two centred links */
 .adm-side__foot {
   padding: 16px 20px; border-top: 1px solid var(--a-rule);
-  display: flex; flex-direction: column; gap: 12px; white-space: nowrap; flex: none;
+  display: flex; flex-direction: column; align-items: center; gap: 12px; white-space: nowrap; flex: none;
 }
 .adm2--navmin .adm-side__foot { display: none; }
 
@@ -120,7 +122,16 @@
    width back so nothing hides behind it */
 @media (min-width: 900px) { .adm2--asst .adm-main { padding-right: var(--a-asst); } }
 .adm-page { max-width: 1000px; margin: 0 auto; padding: 32px 48px 140px; }
-.adm-screen { display: flex; flex-direction: column; gap: 28px; animation: adm-up .25s; }
+.adm-screen { display: flex; flex-direction: column; gap: 28px; }
+/* The fade-in plays ONCE, when the owner moves to another section: app.js
+   puts `adm-page--enter` on the page column only while the screen key has
+   just changed (screenAdmin()). Every other render — a background fetch
+   landing, a badge count moving — patches the DOM in place and must not
+   replay it; that replay was the «panel keeps blinking» the owner saw. */
+.adm-page--enter > .adm-screen, .adm-page--enter > .adm-legacy { animation: adm-up .25s; }
+@media (prefers-reduced-motion: reduce) {
+  .adm2 *, .adm-toast { animation-duration: 0s !important; transition-duration: 0s !important; }
+}
 .adm-screen--tight { gap: 20px; }
 .adm-screen--card { gap: 24px; }
 
@@ -178,6 +189,9 @@
 .adm-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--a-muted); min-width: 0; }
 .adm-hint { font-size: 13px; color: var(--a-muted); line-height: 18px; }
 .adm-hint--warn { color: var(--a-warn); }
+/* one or two sentences under a screen title that say what the screen is for —
+   the owner asked what «Салон» does; nothing else on the page could tell him */
+.adm-lead { font-size: 14px; color: var(--a-muted); line-height: 20px; max-width: 640px; margin: -8px 0 0; }
 .adm-err { font-size: 13px; color: var(--a-warn); line-height: 18px; }
 
 /* ---------- chips and tabs ------------------------------------------------ */
@@ -258,6 +272,9 @@
 }
 .adm-thumb--sm { width: 44px; height: 44px; }
 .adm-thumb img { width: 100%; height: 100%; object-fit: contain; }
+/* the tower stands in where there is no photo — a gift card, a product the
+   catalogue no longer has */
+.adm-thumb__mark { width: 46%; height: 60%; color: var(--a-dim); }
 .adm-mono { font-family: "PT Mono", ui-monospace, monospace; }
 
 /* ---------- empty / error / loading --------------------------------------- */
@@ -292,7 +309,10 @@
 
 /* ---------- Заказ: the 4-step strip --------------------------------------- */
 
-.adm-steps { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--a-ink); }
+/* minmax(0, 1fr), not 1fr: a plain 1fr track will not shrink below its
+   nowrap label, and «Письмо клиенту» pushed the strip 60 px past a phone's
+   right edge — the whole page scrolled sideways under the bottom bar */
+.adm-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--a-ink); }
 .adm-step { padding: 12px 14px; border-right: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-muted); }
 .adm-step:last-child { border-right: 0; }
 .adm-step__n { font-size: 11px; color: var(--a-muted); }
@@ -302,7 +322,7 @@
 .adm-step--now { background: var(--a-tint); color: var(--a-ink); }
 .adm-step--now .adm-step__l { font-weight: 600; }
 
-.adm-card { border: 1px solid var(--a-ink); padding: 16px; display: flex; flex-direction: column; gap: 12px; animation: adm-up .2s; }
+.adm-card { border: 1px solid var(--a-ink); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .adm-card--pad { padding: 20px; gap: 16px; }
 .adm-card__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .adm-note {
@@ -369,8 +389,8 @@
 .adm-sheet__grab i { width: 36px; height: 3px; background: var(--a-rule); }
 .adm-sheet__body { overflow: auto; padding: 8px 20px 0; }
 .adm-sheet__foot {
-  padding: 16px 20px 24px; display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; flex-wrap: wrap; flex: none;
+  padding: 16px 20px 24px; display: flex; align-items: center; justify-content: center;
+  gap: 12px 24px; flex-wrap: wrap; flex: none;
 }
 .adm-sheet--tall { height: 75%; }
 .adm-sheet__row {
@@ -465,7 +485,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 /* They keep their own markup and their own legacy CSS; this only re-seats them
    in the new page column and softens the two things the redesign has already
    banned everywhere else — the uppercase sub-heading and the info banner. */
-.adm-legacy { display: flex; flex-direction: column; animation: adm-up .25s; }
+.adm-legacy { display: flex; flex-direction: column; }
 .adm-legacy .sec__head--sub { margin-top: 22px; }
 .adm-legacy .sec__title { font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 600; }
 
@@ -504,6 +524,14 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-fab__lbl { display: none; }
   .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
+  /* A thumb, not a pointer: every control the phone shows is at least 44 px
+     tall (README § Constraints). The desktop keeps the tighter 40-px rows. */
+  .adm-chip, .adm-btn--row, .adm-input--row { height: 44px; }
+  .adm-langs button { height: 44px; min-width: 44px; padding: 0 12px; justify-content: center; }
+  .adm-tab { min-height: 44px; padding: 11px 0; }
+  .adm-link { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
+  .adm-asst__chips button { min-height: 44px; }
+  .adm-step { padding: 10px 10px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -520,7 +548,7 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
    for the whole panel rather than one per component, because every future
    `hidden` here would hit the same wall. */
 .adm2 [hidden] { display: none !important; }
-.adm-edpane { display: flex; flex-direction: column; gap: 16px; max-width: 760px; animation: adm-up .2s; }
+.adm-edpane { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
 .adm-edcols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
 .adm-edcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .adm-edpair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -610,8 +638,10 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-vidrow__nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--a-muted); }
 .adm-vidrow__x { width: 36px; height: 36px; border: 0; background: none; color: var(--a-muted); font-size: 18px; }
 
-/* Описание: the language segmented control. */
+/* Описание and Google: the language segmented control, and the pair of
+   fields one language shows on the Google tab */
 .adm-edbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.adm-edlang { display: flex; flex-direction: column; gap: 16px; }
 .adm-seg { display: flex; border: 1px solid var(--a-rule); }
 .adm-seg__b { height: 40px; padding: 0 16px; font-size: 14px; border: 0; background: var(--a-paper); color: var(--a-ink); }
 .adm-seg__b[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
@@ -654,12 +684,20 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 .adm-receipt {
   border: 1px solid var(--a-ink); padding: 32px 20px; text-align: center;
-  display: flex; flex-direction: column; gap: 12px; align-items: center; animation: adm-up .2s;
+  display: flex; flex-direction: column; gap: 12px; align-items: center;
 }
 .adm-receipt__ok { font-size: 14px; color: var(--a-ok); }
 .adm-receipt__id { font-size: 13px; }
 .adm-receipt__sum { font-family: Oswald, sans-serif; font-size: 40px; line-height: 1; }
 .adm-acts--mid { justify-content: center; margin-top: 8px; }
+
+/* The phase-2 controls' 44-px phone size — after their own rules, so it
+   wins on equal specificity (the shell's phone block above sits before
+   them in the cascade). */
+@media (max-width: 899px) {
+  .adm-seg__b { height: 44px; }
+  .adm-photo__op, .adm-vidrow__x { width: 44px; height: 44px; }
+}
 
 /* ---------- Сканер: full-screen dark --------------------------------------
    Moved here from styles.css with the redesign: the overlay is admin-only, so

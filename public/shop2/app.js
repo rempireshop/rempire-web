@@ -1354,7 +1354,12 @@
       "Заголовок для Google": "Pealkiri Google'i jaoks",
       "Описание для Google": "Kirjeldus Google'i jaoks",
       "Заполнить автоматически": "Täida automaatselt",
-      "Это то, что человек видит в поиске Google. Пусто — Google берёт текст со страницы сам.": "Seda näeb inimene Google'i otsingus. Tühi — Google võtab teksti lehelt ise.",
+      "Язык для Google": "Google'i keel",
+      "все три языка": "kõik kolm keelt",
+      "Заполнено для трёх языков — проверьте и сохраните": "Täidetud kolmes keeles — vaadake üle ja salvestage",
+      "Это то, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.": "Seda näeb inimene Google'i otsingus — igas keeles oma. Tühi — võetakse venekeelne variant, ja kui sedagi pole, võtab Google teksti lehelt ise.",
+      "Касса для покупателя, который стоит перед вами: находите товар, берёте наличные или терминал — остатки спишутся сами, а заказ с чеком появится в «Заказах». Партнёрам-салонам здесь ничего продавать не нужно: они заказывают сами по своим ценам — это «Клиенты → Партнёры».": "Kassa ostjale, kes seisab teie ees: leidke toode, võtke sularaha või terminal — jäägid kantakse maha ise ja tellimus koos tšekiga ilmub «Tellimuste» alla. Partnersalongidele pole siin midagi müüa vaja: nad tellivad ise oma hindadega — see on «Kliendid → Partnerid».",
+      "Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».": "Leidke toode nime või triipkoodi järgi ja vajutage suurusele — see läheb ostukorvi. Edasi «Sularaha» või «Terminal»: jäägid kantakse maha, tšekk ilmub «Tellimuste» alla.",
       "Начните вводить название — товар найдётся.": "Hakake nime sisestama — toode leitakse.",
       "· без кода": "· ilma koodita",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Suunake triipkoodile. Toode leitakse ise — jääb üle kogus märkida.",
@@ -2656,7 +2661,12 @@
       "Заголовок для Google": "Title for Google",
       "Описание для Google": "Description for Google",
       "Заполнить автоматически": "Fill in automatically",
-      "Это то, что человек видит в поиске Google. Пусто — Google берёт текст со страницы сам.": "This is what a person sees in Google search. Empty — Google takes the text off the page itself.",
+      "Язык для Google": "Language for Google",
+      "все три языка": "all three languages",
+      "Заполнено для трёх языков — проверьте и сохраните": "Filled in for three languages — check and save",
+      "Это то, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.": "This is what a person sees in Google search — each language has its own. Empty — the Russian one is used, and if there is none either, Google takes the text off the page itself.",
+      "Касса для покупателя, который стоит перед вами: находите товар, берёте наличные или терминал — остатки спишутся сами, а заказ с чеком появится в «Заказах». Партнёрам-салонам здесь ничего продавать не нужно: они заказывают сами по своим ценам — это «Клиенты → Партнёры».": "The till for the customer standing in front of you: find the product, take cash or the terminal — the stock is written off by itself and the order with its receipt appears under «Orders». Partner salons buy nothing here: they order on their own at their own prices — that is «Customers → Partners».",
+      "Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».": "Find the product by name or barcode and tap a size — it goes into the basket. Then «Cash» or «Terminal»: the stock is written off and the receipt appears under «Orders».",
       "Начните вводить название — товар найдётся.": "Start typing the name — the product will turn up.",
       "· без кода": "· no code",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Point at the barcode. The product finds itself — all that is left is the quantity.",
@@ -2698,6 +2708,8 @@
     /* админка, редизайн: the lines that carry a number, a sum or an order
        number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
+    // the «Новые 2» chip on «Заказы» — the label and its count are one text node
+    [/^Новые (\d+)$/, { ET: "Uued $1", EN: "New $1" }],
     [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
       { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
@@ -8519,8 +8531,13 @@
       once orders arrive, never a number the owner could act on. */
   function admWaitingCount() {
     if (SRV.admin === true) {
+      /* The loaded list is the truth the rows are drawn from; the overview's
+         count is a cached copy of the same number and stays behind for a
+         moment after an order is shipped — so it is only the fallback, for
+         the first paint before the list has arrived. */
+      if (SRV.orders) return admLiveToShip().length;
       if (OVERVIEW.data) return OVERVIEW.data.attention.ordersToShip;
-      return admLiveToShip().length;
+      return 0;
     }
     return admOrders().map(admOrderVM).filter(function (v) { return v.paid; }).length;
   }
@@ -8762,6 +8779,28 @@
         "Если что-то не сработало, напишите, помогу."
       : "Здравствуйте, " + v.who + "! Заказ " + v.number + " собран и уходит сегодня. Трек-номер придёт отдельным письмом.";
   }
+  /** The picture for one line of a real order — the product's own photo (the
+      size's photo where the catalogue keeps one per size), a set's three-photo
+      stack, and the tower mark for a gift card or a product the catalogue no
+      longer has. Same three kinds the cart draws (lineImageHTML). */
+  function admLineThumb(l) {
+    var mark = tower("adm-thumb__mark");
+    if (!l) return mark;
+    var id = String(l.id || "");
+    if (l.kind === "bundle" || /^bundle:/.test(id)) {
+      var b = bundleById(id);
+      return b && b.images && b.images.length ? bundleStack(b, "bstack--line") : mark;
+    }
+    if (l.kind === "gift" || /^gift:/.test(id)) return '<span class="ph giftph">' + tower("giftph__mark") + "</span>";
+    var p = byIdOrNull(id);
+    if (!p) return mark;
+    var gi = 0;
+    if (l.variant && p.sizes && p.varImg) {
+      var si = p.sizes.indexOf(l.variant);
+      if (si >= 0 && p.varImg[si] > 0) gi = p.varImg[si];
+    }
+    return media(p, gi, "");
+  }
   function admOrderCardHTML() {
     var v = admCurOrder();
     if (!v) return '<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>' +
@@ -8794,7 +8833,7 @@
     }).join(" · ") : "";
 
     var lines = o ? (o.items || []).map(function (l) {
-      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm"></span>' +
+      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + admLineThumb(l) + "</span>" +
         '<span class="adm-row__body"><span class="adm-row__nm">' + esc((l.brand ? l.brand + " — " : "") + (l.title || l.id)) + "</span>" +
         '<span class="adm-row__sub">' + (l.variant ? esc(l.variant) + " · " : "") + admItemsLabel(l.qty) + "</span></span>" +
         '<span class="adm-row__amt">' + eur(l.sum) + "</span></div>";
@@ -9141,6 +9180,22 @@
      their own legacy markup — they sit inside `.adm-legacy` and are reachable
      through the new navigation exactly as before, which is what keeps
      `data-admtab="<old key>"` working as a deep link everywhere. */
+  /* The entrance fade plays once per screen, not once per render. A render
+     lands after every fetch and every state change, and with the animation
+     on the screen root each one replayed the fade — the «blinking» the owner
+     reported. The key names the screen he is looking at; the class stays on
+     for the length of the animation, so a fetch landing mid-fade patches the
+     DOM without cutting it short. renderImpl() clears the key on the way out
+     of the panel, so coming back plays it again. */
+  var admShownKey = "", admShownAt = 0;
+  function admViewKey() {
+    return [S.adminTab, S.adminOrder || "", S.adminEdit || "", admProductTab(), S.posDone ? "receipt" : ""].join("|");
+  }
+  function admEnterClass() {
+    var key = admViewKey(), now = Date.now();
+    if (key !== admShownKey) { admShownKey = key; admShownAt = now; return true; }
+    return now - admShownAt < 400;
+  }
   function screenAdmin() {
     probeAdmAI();
     probeAdmin();
@@ -9166,7 +9221,7 @@
       '<div class="adm2' + (S.admNav ? "" : " adm2--navmin") + (S.admAi ? " adm2--asst" : "") + '">' +
         '<div class="adm2__frame">' +
           admSideHTML(waiting) +
-          '<div class="adm-main"><div class="adm-page">' + body + "</div></div>" +
+          '<div class="adm-main"><div class="adm-page' + (admEnterClass() ? " adm-page--enter" : "") + '">' + body + "</div></div>" +
         "</div>" +
         admBarHTML(waiting) +
         (S.admMore ? admMoreSheetHTML() : "") +
@@ -11027,10 +11082,49 @@
     var g = function (sel) { var e = document.querySelector(sel); return e ? e.value : ""; };
     AI_UNDO = {
       id: p.id, seoT: g("[data-edseot]"), seoD: g("[data-edseod]"),
+      seoTet: g("[data-edseotet]"), seoDet: g("[data-edseodet]"), seoTen: g("[data-edseoten]"), seoDen: g("[data-edseoden]"),
       descRU: g("[data-eddescru]"), descET: g("[data-eddescet]"), descEN: g("[data-eddescen]"),
     };
     var slot = document.querySelector("[data-descundoslot]");
     if (slot) slot.innerHTML = '<button class="link" data-admdescundo>Отменить</button>';
+  }
+  /** «Заполнить автоматически» on the Google tab — for the language the
+      segmented control is on, or for all three at once. Each answer lands in
+      its own pair of fields; nothing is saved until «Сохранить». A direct DOM
+      patch, like the other AI buttons: a render() would put the saved values
+      back over everything typed since. */
+  var SEO_HOOKS = {
+    RU: ["[data-edseot]", "[data-edseod]"],
+    ET: ["[data-edseotet]", "[data-edseodet]"],
+    EN: ["[data-edseoten]", "[data-edseoden]"]
+  };
+  function admSeoFill(p, langs, btn) {
+    if (btn.disabled) return;
+    var label = btn.textContent; btn.disabled = true; btn.textContent = "…";
+    var left = langs.length, okN = 0, failed = "";
+    var done = function () {
+      if (--left) return;
+      btn.disabled = false; btn.textContent = label;
+      if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте и сохраните" : "Черновик готов — проверьте и сохраните");
+      else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      else toast("Не получилось — попробуйте ещё раз");
+    };
+    langs.forEach(function (L) {
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "seo", lang: L,
+        input: { kind: "product", name: p.name, brand: p.brand, category: CAT_NAMES[p.cat] || p.cat },
+      }).then(function (r) {
+        if (r.status === 200 && r.body.ok && r.body.text) {
+          var hooks = SEO_HOOKS[L] || SEO_HOOKS.RU;
+          var ti = document.querySelector(hooks[0]), de = document.querySelector(hooks[1]);
+          if (ti && r.body.text.title) ti.value = r.body.text.title;
+          if (de && r.body.text.description) de.value = r.body.text.description;
+          okN++;
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else failed = (r.body && r.body.error) || "error";
+        done();
+      }).catch(function () { failed = "error"; done(); });
+    });
   }
   /** The photos that ship with the catalogue — what «Вернуть фото из каталога»
    *  goes back to, read from BASE so a saved override cannot hide them. */
@@ -11230,8 +11324,8 @@
       form shows them — read by renderImpl() to carry what is on screen across
       a render() the owner did not ask for. */
   var GOODS_FIELDS = ["[data-edprice]", "[data-edproprice]", "[data-edstock]", "[data-edsubcat]",
-    "[data-edseot]", "[data-edseod]", "[data-edvideo]",
-    "[data-eddescru]", "[data-eddescet]", "[data-eddescen]"];
+    "[data-edseot]", "[data-edseod]", "[data-edseotet]", "[data-edseodet]", "[data-edseoten]", "[data-edseoden]",
+    "[data-edvideo]", "[data-eddescru]", "[data-eddescet]", "[data-eddescen]"];
   /** «12,50» → 12.5; empty, not a number, or outside 1–500 € → null.
       Number(), not parseFloat(): parseFloat("12abc") is 12, which is exactly
       the kind of half-read value this box must not accept. */
@@ -11474,15 +11568,37 @@
       '<p class="adm-hint">Русский — основной. Эстонский и английский можно перевести одной кнопкой и поправить. Пусто — на странице товара показывается текст магазина (он виден в подсказке поля).</p>' +
       "</div>";
   }
-  function edPaneSeo(p) {
-    var seoT = (p.seo && p.seo.t) || "", seoD = (p.seo && p.seo.d) || "";
-    return '<div class="adm-edpane" data-edpane="seo"' + (edTab() === "seo" ? "" : " hidden") + ">" +
+  /* «Google»: one pair of fields per language behind the same segmented
+     control the description tab has. The Russian pair keeps the hooks the
+     panel always had (data-edseot / data-edseod — seo_title / seo_desc on the
+     server); Estonian and English are their own values, and a page whose
+     language has none falls back to the Russian pair (seoFor()). */
+  function edSeoPair(p, code, tHook, dHook, v, on) {
+    return '<div class="adm-edlang" data-edseopair="' + code + '"' + (on ? "" : " hidden") + ">" +
       '<label class="adm-field">Заголовок для Google' +
-        '<input class="adm-input" data-edseot maxlength="70" value="' + esc(seoT) + '" placeholder="' + esc(p.brand) + ' … купить в Таллинне | Rempire"></label>' +
+        '<input class="adm-input" ' + tHook + ' maxlength="70" value="' + esc(v.t || "") + '" placeholder="' + esc(p.brand) + ' … купить в Таллинне | Rempire"></label>' +
       '<label class="adm-field">Описание для Google' +
-        '<textarea class="adm-input adm-area adm-area--sm" data-edseod rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(seoD) + "</textarea></label>" +
-      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admseogen="' + esc(p.id) + '">Заполнить автоматически</button>' +
-      '<p class="adm-hint">Это то, что человек видит в поиске Google. Пусто — Google берёт текст со страницы сам.</p>' +
+        '<textarea class="adm-input adm-area adm-area--sm" ' + dHook + ' rows="3" maxlength="170" placeholder="Короткое продающее описание для сниппета Google">' + esc(v.d || "") + "</textarea></label>" +
+      "</div>";
+  }
+  function edPaneSeo(p) {
+    var ov = p.seoOv || {};
+    var lang = S.goodsSeoLang || "ru";
+    return '<div class="adm-edpane" data-edpane="seo"' + (edTab() === "seo" ? "" : " hidden") + ">" +
+      '<div class="adm-edbar">' +
+        '<div class="adm-seg" role="group" aria-label="Язык для Google">' +
+          [["ru", "Русский"], ["et", "Eesti"], ["en", "English"]].map(function (l) {
+            return '<button class="adm-seg__b" data-edseolang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
+          }).join("") + "</div>" +
+        '<div class="adm-acts">' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admseogen="' + esc(p.id) + '">Заполнить автоматически</button>' +
+          '<button class="adm-link adm-link--muted" data-admseoall="' + esc(p.id) + '">все три языка</button>' +
+        "</div>" +
+      "</div>" +
+      edSeoPair(p, "ru", "data-edseot", "data-edseod", ov.RU || {}, lang === "ru") +
+      edSeoPair(p, "et", "data-edseotet", "data-edseodet", ov.ET || {}, lang === "et") +
+      edSeoPair(p, "en", "data-edseoten", "data-edseoden", ov.EN || {}, lang === "en") +
+      '<p class="adm-hint">Это то, что человек видит в поиске Google — на каждом языке своё. Пусто — берётся русский вариант, а если нет и его, Google возьмёт текст со страницы сам.</p>' +
       "</div>";
   }
   function goodsEditor(p) {
@@ -12259,7 +12375,13 @@
     var list = q
       ? CATALOGUE.filter(function (p) { return p.stock !== "out" && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
       : [];
-    if (!q) return '<p class="adm-hint">Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».</p>';
+    if (!q) {
+      if (S.posCart.length) return '<p class="adm-hint">Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».</p>';
+      // an empty register: the three steps of a sale, where the results will be
+      return '<div class="adm-empty"><div class="adm-empty__t">Новая продажа</div>' +
+        '<div class="adm-empty__s">Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. ' +
+        'Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».</div></div>';
+    }
     if (!list.length) return '<div class="adm-empty">Ничего не найдено</div>';
     return '<div class="adm-list adm-list--flat">' + list.slice(0, 8).map(function (p) {
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
@@ -12330,6 +12452,12 @@
     var scan = '<button class="adm-btn adm-btn--head" data-scanopen>Сканировать' + admIcon("scan", false, 20) + "</button>";
     var head = admHead("", "Продажа в салоне", scan);
     if (S.posDone) return '<div class="adm-screen adm-screen--tight">' + head + admPosReceiptHTML() + "</div>";
+    /* What this screen is for, in two sentences — the owner asked. The second
+       one draws the line the name «Салон» blurs: the partner salons that buy
+       at pro prices are customers, not sales rung up here. */
+    var lead = '<p class="adm-lead">Касса для покупателя, который стоит перед вами: находите товар, берёте наличные или терминал — ' +
+      'остатки спишутся сами, а заказ с чеком появится в «Заказах». Партнёрам-салонам здесь ничего продавать не нужно: ' +
+      'они заказывают сами по своим ценам — это «Клиенты → Партнёры».</p>';
     var cart = S.posCart.map(function (l, i) {
       var p = byId(l.id), price = posVariantPrice(p, l.variant);
       return '<div class="adm-posline">' +
@@ -12341,7 +12469,7 @@
           '<button data-posqty="' + i + ':1" aria-label="Больше">+</button></span>' +
         '<button class="adm-link adm-link--muted" data-posremove="' + i + '">Убрать</button></div>';
     }).join("");
-    return '<div class="adm-screen adm-screen--tight">' + head +
+    return '<div class="adm-screen adm-screen--tight">' + head + lead +
       '<div class="adm-cols adm-cols--wide">' +
         '<div class="adm-stack adm-stack--tight">' +
           '<input class="adm-input adm-input--find" data-posq value="' + esc(S.posQ || "") +
@@ -12388,7 +12516,7 @@
         S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how };
         S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
         journalNote(admPosJournalLine(r.body.number, r.body.total));
-        loadSrvOrders(true);
+        admOrdersChanged();
       } else {
         S.posErr = r.body && r.body.error === "empty_order" ? "Добавьте хотя бы один товар."
           : r.body && r.body.error === "bad_payment_method" ? "Выберите способ оплаты."
@@ -12529,6 +12657,61 @@
     }
   } catch (e) {}
   function demoSave() { try { localStorage.setItem(ADM_LS, JSON.stringify(DEMO)); } catch (e) {} }
+  /* One shape for the Google title/description override, whatever wrote it:
+     {t, d} from the older panel (= Russian), {RU:{t,d}, ET:{…}, EN:{…}} from
+     this one, {RU:{title, desc}, …} from the server. Empty strings are
+     dropped; null when nothing is left. */
+  var SEO_LANGS = ["RU", "ET", "EN"];
+  function seoNorm(v) {
+    if (!v || typeof v !== "object") return null;
+    var src = !v.RU && !v.ET && !v.EN && ("t" in v || "d" in v) ? { RU: v } : v;
+    var out = null;
+    for (var i = 0; i < SEO_LANGS.length; i++) {
+      var L = SEO_LANGS[i], x = src[L];
+      if (!x || typeof x !== "object") continue;
+      var t = String(x.t != null ? x.t : (x.title || "")).trim();
+      var d = String(x.d != null ? x.d : (x.desc || "")).trim();
+      if (!t && !d) continue;
+      (out || (out = {}))[L] = { t: t, d: d };
+    }
+    return out;
+  }
+  /** The override an action carries: `value` from the editor (all three
+      languages), or the plain Russian title/description the assistant
+      proposes — which replaces the Russian pair only, so the owner's Estonian
+      and English pairs survive a proposal he applied. */
+  function seoOfAction(a) {
+    if (a.value !== undefined) return seoNorm(a.value);
+    var cur = DEMO.seo[a.id] || {};
+    return seoNorm({ RU: { t: a.title || "", d: a.description || "" }, ET: cur.ET, EN: cur.EN });
+  }
+  /** What the page in `lang` shows: its own pair, each half falling back to
+      the Russian one — or null when the owner wrote nothing at all. */
+  function seoFor(p, lang) {
+    var o = p && p.seoOv;
+    if (!o) return null;
+    var L = o[lang] || {}, R = o.RU || {};
+    var t = L.t || R.t || "", d = L.d || R.d || "";
+    return t || d ? { t: t, d: d } : null;
+  }
+  /** The server's spelling of the same object — every language travels, so a
+      pair the owner emptied is cleared on the server too. */
+  function seoToServer(v) {
+    var out = {};
+    for (var i = 0; i < SEO_LANGS.length; i++) {
+      var x = (v && v[SEO_LANGS[i]]) || {};
+      out[SEO_LANGS[i]] = { title: x.t || "", desc: x.d || "" };
+    }
+    return out;
+  }
+  /* Google title/description are per language now; a copy saved by the older
+     panel was one Russian pair, and it stays the Russian pair. Below the
+     helpers on purpose: SEO_LANGS is a `var`, and seoNorm() read it before
+     it was assigned when this loop sat above. */
+  Object.keys(DEMO.seo).forEach(function (id) {
+    var v = seoNorm(DEMO.seo[id]);
+    if (v) DEMO.seo[id] = v; else delete DEMO.seo[id];
+  });
   /* The catalogue is patched in place, so its untouched values are kept aside
      once. Undoing a change — or losing an override the server no longer has —
      has to put the original price back, not merely stop overwriting it. */
@@ -12569,7 +12752,9 @@
       // from the global discount", same convention as product_overrides.pro_price
       p.proPrice = (DEMO.proPrice && DEMO.proPrice[p.id] != null) ? DEMO.proPrice[p.id] : null;
       if (DEMO.stock[p.id]) p.stock = DEMO.stock[p.id];
-      if (DEMO.seo[p.id]) p.seo = { t: DEMO.seo[p.id].t || "", d: DEMO.seo[p.id].d || "" };
+      // p.seo stays the catalogue's own (English) pair; the owner's per-language
+      // pairs sit beside it and win in seoFor()
+      p.seoOv = DEMO.seo[p.id] || null;
       if (DEMO.varimg[p.id] && p.sizes && DEMO.varimg[p.id].length === p.sizes.length) p.varImg = DEMO.varimg[p.id].slice();
       if (DEMO.video && DEMO.video[p.id] != null) p.video = DEMO.video[p.id];   // features
       p.descOv = (DEMO.desc && DEMO.desc[p.id]) || null;   // assistant-work: descFor() reads this first
@@ -12630,7 +12815,10 @@
       if (o.proPrice != null) DEMO.proPrice[id] = o.proPrice;   // wholesale/loyalty
       if (o.stock) DEMO.stock[id] = o.stock;
       if (Array.isArray(o.gallery) && o.gallery.length) DEMO.gallery[id] = o.gallery;   // media
-      if (o.seoTitle || o.seoDesc) DEMO.seo[id] = { t: o.seoTitle || "", d: o.seoDesc || "" };
+      // per-language Google pairs (`seo`), or the one Russian pair an older
+      // server still answers with
+      var seoV = seoNorm(o.seo && typeof o.seo === "object" ? o.seo : { t: o.seoTitle || "", d: o.seoDesc || "" });
+      if (seoV) DEMO.seo[id] = seoV;
       if (o.subcat) DEMO.subcat[id] = o.subcat;
       if (o.varImg) DEMO.varimg[id] = o.varImg;
       if (o.videoUrl) DEMO.video[id] = o.videoUrl;
@@ -12713,10 +12901,11 @@
       apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { status: a.value })
         .then(function (r) {
           if (!(r.status === 200 && r.body.ok)) toast("Не удалось сохранить статус");
-          loadSrvOrders(true);
+          admOrdersChanged();
         }).catch(noop);
     }
-    else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seoTitle: a.title || "", seoDesc: a.description || "" }).catch(noop);
+    // all three languages travel every time, so an emptied pair clears too
+    else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }).catch(noop);
     else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
     else if (a.type === "set_varimg") apiSend(ov, "PUT", { id: a.id, varImg: a.map }).catch(noop);
     // media: the whole list travels every time — adding, reordering, choosing
@@ -12826,9 +13015,17 @@
       render();
     }).catch(function () { SRV.ordersErr = true; render(); });
   }
+  /** After anything that moves an order's status — shipped, cancelled, marked
+      paid, a salon sale, an undo — both copies of the count are refreshed:
+      the list the rows and the badge draw from, and the overview's cached
+      summary («Сделать сегодня»). */
+  function admOrdersChanged() {
+    loadSrvOrders(true);
+    loadOverview(true);
+  }
   function srvOrderPatch(id, patch) {
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", patch).then(function (r) {
-      if (r.status === 200 && r.body.ok) { toast("Сохранено ✓"); loadSrvOrders(true); }
+      if (r.status === 200 && r.body.ok) { toast("Сохранено ✓"); admOrdersChanged(); }
       else if (r.status === 401) { SRV.admin = false; render(); }
       else toast("Не удалось сохранить");
     }).catch(function () { toast("Сервер не отвечает"); });
@@ -12992,7 +13189,12 @@
       return "Заказ " + (a.number || a.id) + ": " +
         ((SRV_STATES[a.value] && SRV_STATES[a.value][1]) || a.value);
     }
-    if (a.type === "set_seo") return "SEO «" + (p ? p.name : a.id) + "»: «" + (a.title || "—") + "» / «" + (a.description || "—") + "»";
+    if (a.type === "set_seo") {
+      var sv = seoOfAction(a) || {}, sru = sv.RU || {};
+      var more = SEO_LANGS.filter(function (L) { return L !== "RU" && sv[L]; });
+      return "SEO «" + (p ? p.name : a.id) + "»: «" + (sru.t || "—") + "» / «" + (sru.d || "—") + "»" +
+        (more.length ? " · " + more.join(", ") : "");
+    }
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_bundles") return "Наборы на сайте: " + (a.value ? "показать" : "скрыть");
@@ -13190,7 +13392,12 @@
     }
     // both fields empty = «снова как в каталоге», so the override is removed
     // rather than stored as a pair of empty strings that would hide it
-    else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; if (a.title || a.description) DEMO.seo[a.id] = { t: a.title, d: a.description }; else delete DEMO.seo[a.id]; }
+    else if (a.type === "set_seo") {
+      var seoWas = DEMO.seo[a.id] || null, seoWasRu = (seoWas && seoWas.RU) || {};
+      entry.prev = { type: "set_seo", id: a.id, value: seoWas, title: seoWasRu.t || "", description: seoWasRu.d || "" };
+      var seoNew = seoOfAction(a);
+      if (seoNew) DEMO.seo[a.id] = seoNew; else delete DEMO.seo[a.id];
+    }
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
     else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
     else if (a.type === "toggle_bundles") { entry.prev = { type: "toggle_bundles", value: DEMO.bundles !== false }; DEMO.bundles = a.value; }
@@ -13287,7 +13494,7 @@
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
     else if (a.type === "stock_adjust" || a.type === "order_status") noop();
-    else if (a.type === "set_seo") { if (a.title || a.description) DEMO.seo[a.id] = { t: a.title, d: a.description }; else delete DEMO.seo[a.id]; }
+    else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
@@ -13719,8 +13926,14 @@
       var p = byId(S.productId);
       var core = p.brand + " " + trText(p.name, S.lang, true);
       t = fitTitle(core, core + " — " + buy + " · " + (p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price)));
-      if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
-      d = (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d : stripTags(descFor(p)).slice(0, 155);
+      /* The owner's pair for this language (Russian as the fallback) wins;
+         the catalogue's own English pair still serves the EN page when he
+         wrote nothing; everything else is built from the product. */
+      var so = seoFor(p, S.lang);
+      if (so && so.t) t = fitTitle(so.t, "");
+      else if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
+      d = so && so.d ? so.d
+        : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d : stripTags(descFor(p)).slice(0, 155);
       var pUrl = location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/p/" + encodeURIComponent(p.id) + "/";
       // same shape the prerendered pages carry, so taking over a static page
       // does not quietly thin out its structured data
@@ -13808,6 +14021,76 @@
     setAltTags();
     setMetaProp("og:title", t);
     if (d) setMetaProp("og:description", d);
+  }
+
+  /* ---------- admin: patch the DOM in place -------------------------------
+     A small tree diff, index-based: attributes are synced, text is compared,
+     a node of another kind is swapped for the new one, and a form control
+     keeps what the owner is typing unless the app itself changed its value.
+     Deliberately simple — the panel's lists are short and their order is
+     stable — and deliberately admin-only (see renderImpl). */
+  function admMorphAttrs(from, to) {
+    var i, a;
+    for (i = from.attributes.length - 1; i >= 0; i--) {
+      a = from.attributes[i];
+      if (!to.hasAttribute(a.name)) from.removeAttribute(a.name);
+    }
+    for (i = 0; i < to.attributes.length; i++) {
+      a = to.attributes[i];
+      if (from.getAttribute(a.name) !== a.value) from.setAttribute(a.name, a.value);
+    }
+  }
+  function admSelectedIdx(sel) {
+    var opts = sel.querySelectorAll("option");
+    for (var i = 0; i < opts.length; i++) if (opts[i].hasAttribute("selected")) return i;
+    return opts.length ? 0 : -1;
+  }
+  function admMorphNode(from, to) {
+    if (from.nodeType !== to.nodeType || (from.nodeType === 1 && from.tagName !== to.tagName)) {
+      from.parentNode.replaceChild(to, from);
+      return;
+    }
+    if (from.nodeType !== 1) {
+      if (from.nodeValue !== to.nodeValue) from.nodeValue = to.nodeValue;
+      return;
+    }
+    var tag = from.tagName;
+    // a value/checked/selected the app changed is applied; one the owner
+    // changed by hand survives the render, which a rebuild never let it do
+    var valWas = from.getAttribute("value"), chkWas = from.hasAttribute("checked");
+    admMorphAttrs(from, to);
+    if (tag === "INPUT") {
+      var valNow = to.getAttribute("value");
+      if (valNow !== valWas) from.value = valNow == null ? "" : valNow;
+      if (to.hasAttribute("checked") !== chkWas) from.checked = to.hasAttribute("checked");
+      return;
+    }
+    if (tag === "TEXTAREA") {
+      if (from.textContent !== to.textContent) { from.textContent = to.textContent; from.value = to.textContent; }
+      return;
+    }
+    if (tag === "SELECT") {
+      var selWas = admSelectedIdx(from);
+      admMorphChildren(from, to);
+      var selNow = admSelectedIdx(to);
+      if (selNow !== selWas) from.selectedIndex = selNow;
+      return;
+    }
+    if (tag === "IFRAME" || tag === "VIDEO" || tag === "CANVAS") return;
+    // the blog's visual editor: its text is the article, not our markup
+    if (from.isContentEditable) {
+      if (from.innerHTML !== to.innerHTML) from.innerHTML = to.innerHTML;
+      return;
+    }
+    admMorphChildren(from, to);
+  }
+  function admMorphChildren(from, to) {
+    // snapshots: replaceChild/appendChild move nodes out of `to` as we go
+    var fc = Array.prototype.slice.call(from.childNodes), tc = Array.prototype.slice.call(to.childNodes);
+    var n = Math.min(fc.length, tc.length), i;
+    for (i = 0; i < n; i++) admMorphNode(fc[i], tc[i]);
+    for (i = fc.length - 1; i >= n; i--) from.removeChild(fc[i]);
+    for (i = n; i < tc.length; i++) from.appendChild(tc[i]);
   }
 
   function renderImpl() {
@@ -13903,8 +14186,25 @@
       }
     }
 
-    bodySlot.innerHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
+    var bodyHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
       (chromeless ? "" : footer());
+    /* The admin panel is patched, not rebuilt: a render lands after every
+       fetch and every state change, and tearing the whole tree down each
+       time replayed the entrance fade, dropped the focus and re-decoded every
+       photo — the «blinking» the owner reported. The new markup is translated
+       first, so in ET/EN the patch compares like with like and an unchanged
+       screen is left exactly as it is — no DOM mutation at all, which is what
+       admin-shell.spec.ts measures. The storefront keeps the rebuild. */
+    if (S.screen === "admin" && bodySlot.dataset.painted === "admin") {
+      var tpl = document.createElement("template");
+      tpl.innerHTML = bodyHTML;
+      translateTree(tpl.content);
+      admMorphChildren(bodySlot, tpl.content);
+    } else {
+      bodySlot.innerHTML = bodyHTML;
+    }
+    if (S.screen !== "admin") admShownKey = "";   // the fade plays again on the way back in
+    bodySlot.dataset.painted = S.screen;
 
     if (pwKeep) {
       var pwEl1 = bodySlot.querySelector("[data-admpw]");
@@ -14631,7 +14931,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -14988,7 +15288,7 @@
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
       // a fresh product opens on «Основное», in the language and the video
       // kind the design starts from — not on whatever the last one was left on
-      S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsVidKind = "";
+      S.goodsEditTab = "main"; S.goodsDescLang = "ru"; S.goodsSeoLang = "ru"; S.goodsVidKind = "";
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admclose !== undefined) {
@@ -15000,17 +15300,22 @@
        precisely because this form keeps no draft in S, and rebuilding it
        would put the SAVED values back over whatever is being typed. */
     if (d.edtab !== undefined) { edShowTab(d.edtab); return; }
-    if (d.eddesclang !== undefined) {
-      S.goodsDescLang = d.eddesclang;
-      var boxes = { ru: "[data-eddescru]", et: "[data-eddescet]", en: "[data-eddescen]" };
+    // the same control on «Описание» and on «Google»: one language on screen
+    if (d.eddesclang !== undefined || d.edseolang !== undefined) {
+      var seoSeg = d.edseolang !== undefined, pickL = seoSeg ? d.edseolang : d.eddesclang;
+      if (seoSeg) S.goodsSeoLang = pickL; else S.goodsDescLang = pickL;
+      var boxes = seoSeg
+        ? { ru: '[data-edseopair="ru"]', et: '[data-edseopair="et"]', en: '[data-edseopair="en"]' }
+        : { ru: "[data-eddescru]", et: "[data-eddescet]", en: "[data-eddescen]" };
       for (var lk in boxes) {
         if (!Object.prototype.hasOwnProperty.call(boxes, lk)) continue;
         var bel = document.querySelector(boxes[lk]);
-        if (bel) bel.hidden = lk !== d.eddesclang;
+        if (bel) bel.hidden = lk !== pickL;
       }
-      var segs = document.querySelectorAll("[data-eddesclang]");
+      var segAttr = seoSeg ? "data-edseolang" : "data-eddesclang";
+      var segs = document.querySelectorAll("[" + segAttr + "]");
       for (var si2 = 0; si2 < segs.length; si2++) {
-        segs[si2].setAttribute("aria-current", String(segs[si2].getAttribute("data-eddesclang") === d.eddesclang));
+        segs[si2].setAttribute("aria-current", String(segs[si2].getAttribute(segAttr) === pickL));
       }
       return;
     }
@@ -15102,24 +15407,12 @@
        value, wiping whatever the owner was mid-typing. Every DOM change
        here — the busy label, the filled-in text, the «Отменить» button — is
        therefore a direct, targeted patch, same idiom as toast()/patchNav(). */
-    if (d.admseogen !== undefined) {
-      var sp2 = byId(d.admseogen);
+    // «Заполнить автоматически» writes the language the Google tab is on —
+    // it used to send Russian whatever was shown; «все три языка» asks thrice
+    if (d.admseogen !== undefined || d.admseoall !== undefined) {
+      var sp2 = byId(d.admseogen !== undefined ? d.admseogen : d.admseoall);
       admDescSnapshot(sp2);
-      var genBtn = t, genLabel = t.textContent; t.disabled = true; t.textContent = "…";
-      apiSend("/api/admin/ai/text/", "POST", {
-        task: "seo", lang: "RU",
-        input: { kind: "product", name: sp2.name, brand: sp2.brand, category: CAT_NAMES[sp2.cat] || sp2.cat },
-      }).then(function (r) {
-        genBtn.disabled = false; genBtn.textContent = genLabel;
-        if (r.status === 200 && r.body.ok && r.body.text) {
-          var ti = document.querySelector("[data-edseot]"), de = document.querySelector("[data-edseod]");
-          if (ti && r.body.text.title) ti.value = r.body.text.title;
-          if (de && r.body.text.description) de.value = r.body.text.description;
-          toast("Черновик готов — проверьте и сохраните");
-        } else if (r.status === 401) { SRV.admin = false; render(); }
-        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
-        else toast("Не получилось — попробуйте ещё раз");
-      }).catch(function () { genBtn.disabled = false; genBtn.textContent = genLabel; toast("Не получилось — попробуйте ещё раз"); });
+      admSeoFill(sp2, d.admseoall !== undefined ? ["RU", "ET", "EN"] : [(S.goodsSeoLang || "ru").toUpperCase()], t);
       return;
     }
     if (d.admdescgen !== undefined) {
@@ -15173,6 +15466,8 @@
       var setv = function (sel, v) { var e = document.querySelector(sel); if (e) e.value = v || ""; };
       setv("[data-eddescru]", AI_UNDO.descRU); setv("[data-eddescet]", AI_UNDO.descET); setv("[data-eddescen]", AI_UNDO.descEN);
       setv("[data-edseot]", AI_UNDO.seoT); setv("[data-edseod]", AI_UNDO.seoD);
+      setv("[data-edseotet]", AI_UNDO.seoTet); setv("[data-edseodet]", AI_UNDO.seoDet);
+      setv("[data-edseoten]", AI_UNDO.seoTen); setv("[data-edseoden]", AI_UNDO.seoDen);
       AI_UNDO = null;
       var slot2 = document.querySelector("[data-descundoslot]");
       if (slot2) slot2.innerHTML = "";
@@ -15268,14 +15563,17 @@
           demoApply({ type: "set_varimg", id: gp.id, map: map2 }); changed = true;
         }
       }
-      var tEl = document.querySelector("[data-edseot]"), dEl = document.querySelector("[data-edseod]");
-      var nt = tEl ? tEl.value.trim() : "", nd = dEl ? dEl.value.trim() : "";
-      /* No `(nt || nd) &&` guard any more: with it, emptying BOTH boxes was
-         the one edit the form could not make — the override stayed on the
-         product for good and the only way back was the database. Empty now
-         means «снова как в каталоге», which is what the boxes look like. */
-      if (nt !== ((gp.seo || {}).t || "") || nd !== ((gp.seo || {}).d || "")) {
-        demoApply({ type: "set_seo", id: gp.id, title: nt, description: nd }); changed = true;
+      /* Three languages, three pairs. Every pair empty means «снова как в
+         каталоге» and removes the override — with an «is anything typed»
+         guard, emptying the boxes was the one edit the form could not make,
+         and the only way back was the database. */
+      var seoRead = function (tSel, dSel) {
+        var te = document.querySelector(tSel), de2 = document.querySelector(dSel);
+        return { t: te ? te.value.trim() : "", d: de2 ? de2.value.trim() : "" };
+      };
+      var seoNew = { RU: seoRead("[data-edseot]", "[data-edseod]"), ET: seoRead("[data-edseotet]", "[data-edseodet]"), EN: seoRead("[data-edseoten]", "[data-edseoden]") };
+      if (JSON.stringify(seoNorm(seoNew)) !== JSON.stringify(seoNorm(gp.seoOv))) {
+        demoApply({ type: "set_seo", id: gp.id, value: seoNew, title: seoNew.RU.t, description: seoNew.RU.d }); changed = true;
       }
       /* ---- features: the video link -------------------------------------- */
       if (videoEl) {
