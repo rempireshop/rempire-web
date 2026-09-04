@@ -526,11 +526,17 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
  * trips — each is a count over an index this schema already carries
  * (orders_status_idx, customers_pro_pending_idx, reviews_status_idx,
  * stock_alerts_pending_idx).
+ *
+ * `to_ship` leaves out the salon channel: a sale rung up at the counter is
+ * created paid and handed over on the spot (POST /api/admin/pos-orders), so
+ * it stays «paid» for good and is never a parcel — counting it made the
+ * «Отправить N» badge grow with every salon sale, and disagree with the
+ * orders list, which has always filtered those out (admLiveToShip in app.js).
  */
 async function qAttention(): Promise<OverviewSummary["attention"]> {
   const rows = await query<{ to_ship: string; pro: string; reviews: string; alerts: string }>(
     `select
-       (select count(*) from orders where status = 'paid') as to_ship,
+       (select count(*) from orders where status = 'paid' and channel <> 'pos') as to_ship,
        (select count(*) from customers where pro_requested_at is not null and tier = 'retail') as pro,
        (select count(*) from reviews where status = 'pending') as reviews,
        (select count(*) from stock_alerts where sent_at is null) as alerts`,
