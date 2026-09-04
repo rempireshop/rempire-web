@@ -228,7 +228,7 @@ export async function openAdmin(page: Page): Promise<void> {
  */
 const SECTION_OF: Record<string, string> = {
   over: "over", orders: "orders", goods: "goods", stock: "goods", pos: "pos",
-  people: "people", reviews: "people", promos: "promos", mail: "promos",
+  people: "people", reviews: "people", promos: "promos", gift: "promos", mail: "promos",
   blog: "blog", stats: "stats", apps: "apps", setup: "setup",
 };
 
@@ -250,10 +250,25 @@ export async function tab(page: Page, key: string): Promise<void> {
   await expect(page.locator(`[data-admtab="${key}"][aria-current="true"]:visible`).first()).toBeVisible();
 }
 
-/** Settings ("Настройки") — hero, content, shipping, pricing, reports, journal. */
-export async function openSettings(page: Page): Promise<void> {
+/**
+ * Settings ("Настройки"). Since the phase-3 redesign this is an index of six
+ * sub-pages rather than one long scroll of cards (README fix #6), so reaching
+ * a card is two clicks: the section, then the page it lives on.
+ *
+ *   home     — the banner editor, the announcement bar, the sets/chat switches
+ *   company  — the shop's own details, opening hours, socials, the reports card
+ *   delivery — the tariff grid, the Montonio fill button, payment methods
+ *   prices   — the salon discount and the loyalty points form
+ *   langs    — RU/ET/EN
+ *   journal  — the change log with its «Вернуть» buttons
+ */
+export async function openSettings(page: Page, sub: string = "home"): Promise<void> {
   await tab(page, "setup");
-  await expect(page.getByText("Главный баннер")).toBeVisible();
+  // already inside a sub-page (a previous call in the same test) → back out first
+  const back = page.locator("[data-admsetback]");
+  if (await back.count()) await back.first().click();
+  await page.locator(`[data-admsetpage="${sub}"]`).click();
+  await expect(page.locator("[data-admsetback]")).toBeVisible();
 }
 
 /**

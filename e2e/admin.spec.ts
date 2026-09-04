@@ -57,10 +57,23 @@ async function toggleAndWait(page: Page, selector: string): Promise<void> {
   expect((await put).ok()).toBe(true);
 }
 
-/** Opens Settings ("Настройки") — hero, content, sets, chatbot all live there. */
-async function openSettings(page: Page): Promise<void> {
+/**
+ * Opens one page of Настройки. Since the phase-3 redesign the section is an
+ * index of six named sub-pages rather than one long scroll (README fix #6):
+ * «Главная страница» carries the banner and the two shop-wide switches,
+ * «О компании» the shop's own details.
+ */
+async function openSettings(page: Page, sub: "home" | "company" = "home"): Promise<void> {
   await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
-  await expect(page.getByText("Главный баннер")).toBeVisible();
+  const back = page.locator("[data-admsetback]");
+  if (await back.count()) await back.first().click();
+  await page.locator(`[data-admsetpage="${sub}"]`).click();
+  await expect(page.locator("[data-admsetback]")).toBeVisible();
+}
+
+/** A phase-3 switch is a <button aria-pressed>, not a link whose label flips. */
+async function isOn(page: Page, selector: string): Promise<boolean> {
+  return (await page.locator(selector).getAttribute("aria-pressed")) === "true";
 }
 
 /** [data-admtab="orders"] alone is ambiguous — see fixtures.ts loginAsAdmin's
@@ -202,13 +215,13 @@ test.describe("admin", () => {
     test.use({ extraHTTPHeaders: ipHeaders(94) });
     test("content card saves a change (footer phone), then resets to the default", async ({ page, browser }) => {
       await loginAsAdmin(page);
-      await openSettings(page);
+      await openSettings(page, "company");
 
       try {
-        // The content card, like the hero card, is always rendered on the
-        // Settings tab — no separate "open" step, just expand its "Реквизиты"
-        // sub-block (see fixtures/docs/testing.md on why nothing here waits on
-        // a "Контент" heading click).
+        // The content card is always rendered on its settings sub-page — no
+        // separate "open" step, just expand its "Реквизиты" sub-block (see
+        // fixtures/docs/testing.md on why nothing here waits on a "Контент"
+        // heading click).
         await page.locator('[data-contentblock="company"]').click();
         await page.locator('[data-contentf="company.phone"]').fill("+372 5000000");
         await page.locator("[data-contentsave]").click();
@@ -223,7 +236,7 @@ test.describe("admin", () => {
         await expect(home.page.getByText("+372 5000000")).toBeVisible();
         await home.close();
       } finally {
-        await openSettings(page);
+        await openSettings(page, "company");
         await page.locator('[data-contentblock="company"]').click();
         await page.locator("[data-contentreset]").click();
         await expect(page.locator("[data-admapply]")).toBeVisible();
@@ -240,7 +253,8 @@ test.describe("admin", () => {
       await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
       await page.locator("[data-admpromonew]").click();
       await page.locator('[data-promof="code"]').fill(code);
-      await page.locator('input[name="promokind"][value="percent"]').check();
+      // the kind is a chip row since the redesign, not a radio list
+      await page.locator('[data-promokind="percent"]').click();
       await page.locator('[data-promof="value"]').fill("10");
       await page.locator("[data-admpromosave]").click();
       await expect(page.getByText(code)).toBeVisible();
@@ -280,16 +294,14 @@ test.describe("admin", () => {
         await home.close();
       } finally {
         await openSettings(page);
-        // The label flips between "Скрыть" (on) and "Показать" (off) — click
-        // whichever state it is currently in to make sure it ends up back on.
-        // And wait for the WRITE, not just the click: the panel applies the
-        // switch locally and PUTs it in the background, so a test that ends on
-        // the click has its context torn down with the request still in
-        // flight — the switch stayed off on the server and the next spec file
-        // found a shop with no sets in it (and this very test, run again,
-        // toggled sets back ON and then asserted the rail was gone).
-        const toggle = page.locator("[data-admbundles]");
-        if ((await toggle.textContent())?.includes("Показать")) await toggleAndWait(page, "[data-admbundles]");
+        /* Put the switch back on if it is off, whatever happened above. And
+           wait for the WRITE, not just the click: the panel applies the switch
+           locally and PUTs it in the background, so a test that ends on the
+           click has its context torn down with the request still in flight —
+           the switch stayed off on the server and the next spec file found a
+           shop with no sets in it (and this very test, run again, toggled sets
+           back ON and then asserted the rail was gone). */
+        if (!(await isOn(page, "[data-admbundles]"))) await toggleAndWait(page, "[data-admbundles]");
       }
     });
   });
@@ -311,8 +323,7 @@ test.describe("admin", () => {
         await home.close();
       } finally {
         await openSettings(page);
-        const toggle = page.locator("[data-admchatbot]");
-        if ((await toggle.textContent())?.includes("Включить")) await toggleAndWait(page, "[data-admchatbot]");
+        if (!(await isOn(page, "[data-admchatbot]"))) await toggleAndWait(page, "[data-admchatbot]");
       }
     });
   });

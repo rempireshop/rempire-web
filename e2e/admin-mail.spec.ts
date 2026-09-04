@@ -27,14 +27,16 @@ test.beforeEach(async ({}, testInfo) => {
 const SUBJECT = "E2E teema {order} — Rempire";
 const INTRO = "E2E sissejuhatus tellimusele {order}.";
 
-/** The letters card lives on «Письма»; the editor appears once its own feed lands. */
+/** The letters list lives on «Письма»; opening one row opens its editor. */
 async function openMailTab(page: Page): Promise<void> {
   /* «Письма» is a tab inside «Маркетинг» since the redesign — one click to
-     the section, one to the tab (docs/design/admin-handoff-README.md). */
+     the section, one to the tab, then one to the letter itself: phase 3 turned
+     the template chips into a list of rows (docs/design/admin-handoff-README.md
+     § «Маркетинг»). */
   await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
   await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
   await expect(page.locator("[data-mailtpl]").first()).toBeVisible();
-  await page.locator('[data-mailtpl="order-confirmed"]').click();
+  await page.locator('[data-mailtpl="order-confirmed"]').first().click();
   await page.locator('[data-maillang="ET"]').click();
   await expect(page.locator('[data-mailtxt="subject"]')).toBeVisible();
 }

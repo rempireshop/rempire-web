@@ -101,9 +101,9 @@ test.describe("blog — the visual editor", () => {
     /* 375 px — Renat writes on his phone as often as not. All seven buttons
        have to be reachable without a sideways scroll: the row wraps. */
     await page.setViewportSize({ width: 375, height: 780 });
-    const bar = page.locator(".admblog__tb");
+    const bar = page.locator(".adm-tools");
     await expect(bar).toBeVisible();
-    for (const cmd of ["h2", "bold", "ul", "link", "image", "product", "undo"]) {
+    for (const cmd of ["h2", "bold", "italic", "ul", "link", "image", "product", "undo"]) {
       await expect(page.locator(`[data-blogrt="${cmd}"]`), `«${cmd}» is off screen at 375 px`).toBeInViewport();
     }
     const barOverflow = await bar.evaluate((el) => el.scrollWidth - el.clientWidth);
@@ -117,7 +117,7 @@ test.describe("blog — the visual editor", () => {
 
     await page.locator("[data-admblogpublish]").click();
     await clearToast(page);
-    await expect(page.locator(".chip", { hasText: "Опубликовано" }).first()).toBeVisible();
+    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
 
     /* ---- what the shopper gets ------------------------------------------ */
     const api = await page.request.get(`/api/blog/${slug}/?lang=RU`);

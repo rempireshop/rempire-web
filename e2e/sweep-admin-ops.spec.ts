@@ -449,13 +449,16 @@ test.describe("sweep — blog", () => {
     // No title at all is not a post — and the panel has to say why rather
     // than posting a blank row into the shop's blog.
     await page.locator("[data-admblogsave]").click();
-    const err = page.locator(".err[role=alert]");
+    // the editor is adm- markup since the phase-3 redesign
+    const err = page.locator(".adm-err[role=alert]");
     await expect(err, "an untitled post saved without complaint").toBeVisible();
     expect(isRussian((await err.textContent()) || "")).toBe(true);
     await assertClean(page, w, "blog, empty title");
 
     const marker = `Свип ${Date.now().toString().slice(-6)}`;
     await page.locator('[data-blogf="title"]').fill(`${marker} ${HTML_BOMB}`);
+    // the address, the author and the Google text sit in a fold-out now
+    await page.locator("[data-blogmore]").click();
     await page.locator("[data-blogslug]").fill("Привет Мир!!/../%2e%2e");
     const slug = await page.locator("[data-blogslug]").inputValue();
     expect(slug, "a slug kept characters that cannot be in a URL").toMatch(/^[a-z0-9-]*$/);
@@ -495,7 +498,8 @@ test.describe("sweep — blog", () => {
 
     await page.locator("[data-admblogpublish]").click();
     await clearToast(page);
-    await expect(page.locator(".chip", { hasText: "Опубликовано" }).first()).toBeVisible();
+    // the state is a sentence in the «Публикация» card now, not a chip
+    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
     await assertClean(page, w, "blog published");
     expect(await listed(), "a published post never reached the public blog").toBe(true);
 
@@ -514,7 +518,7 @@ test.describe("sweep — blog", () => {
 
     await page.locator("[data-admblogunpublish]").click();
     await clearToast(page);
-    await expect(page.locator(".chip", { hasText: "Черновик" }).first()).toBeVisible();
+    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
     expect(await listed(), "an unpublished post stayed on the public blog").toBe(false);
 
     // Delete asks first, and the answer is undoable only by re-publishing —

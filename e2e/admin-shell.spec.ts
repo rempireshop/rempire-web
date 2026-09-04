@@ -277,6 +277,8 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     await page.locator('[data-admfilter="shipped"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
     await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
+    // the journal is a page of its own since the phase-3 redesign (README fix #6)
+    await page.locator('[data-admsetpage="journal"]').click();
     await expect(page.getByText(`Заказ ${number}: отправлен`)).toBeVisible();
   });
 });
@@ -316,6 +318,8 @@ test.describe("admin shell — the Склад stepper and its undo", () => {
     // was ever undoable
     await page.locator("[data-closetoast]").click();
     await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
+    // the journal is a page of its own since the phase-3 redesign (README fix #6)
+    await page.locator('[data-admsetpage="journal"]').click();
     await expect(page.getByText(/^Отмена: /).first()).toBeVisible();
 
     /* Leave the shelf well stocked. The first ± is what makes a variant

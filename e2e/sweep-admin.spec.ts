@@ -38,7 +38,8 @@ test.beforeEach(async ({}, testInfo) => {
 const TABS: Array<[string, string]> = [
   ["over", "Обзор"], ["orders", "Заказы"], ["goods", "Каталог"], ["stock", "Склад"],
   ["pos", "Салон"], ["people", "Все клиенты"], ["reviews", "Отзывы"],
-  ["promos", "Промокоды"], ["blog", "Блог"], ["stats", "Аналитика"], ["mail", "Письма"],
+  ["promos", "Промокоды"], ["gift", "Подарочные карты"], ["blog", "Блог"],
+  ["stats", "Аналитика"], ["mail", "Письма"],
   ["apps", "Подключения"], ["setup", "Настройки"],
 ];
 
@@ -130,7 +131,7 @@ test.describe("sweep — admin API is closed without a session", () => {
 test.describe("sweep — every tab", () => {
   test.use({ extraHTTPHeaders: ipHeaders(153) });
 
-  test("all thirteen sections render, the assistant opens, the sidebar stays folded", async ({ page }) => {
+  test("every section renders, the assistant opens, the sidebar stays folded", async ({ page }) => {
     test.setTimeout(90_000);
     const w = watch(page);
     await openAdmin(page);
@@ -194,7 +195,7 @@ test.describe("sweep — the banner", () => {
     test.setTimeout(120_000);
     const w = watch(page);
     await openAdmin(page);
-    await openSettings(page);
+    await openSettings(page, "home");
 
     try {
       await page.locator('[data-heroedit="0"]').click();
@@ -265,7 +266,7 @@ test.describe("sweep — the banner", () => {
       await assertClean(shop.page, shop.w, "home page with the fuzzed banner");
       await shop.close();
     } finally {
-      await openSettings(page);
+      await openSettings(page, "home");
       await page.locator("[data-heroreset]").click();
       await expect(page.locator("[data-admapply]")).toBeVisible();
       const back = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
@@ -275,7 +276,7 @@ test.describe("sweep — the banner", () => {
 
     // A pending change that is cancelled must leave nothing behind — not on
     // screen, and not in settings.hero on the server.
-    await openSettings(page);
+    await openSettings(page, "home");
     await page.locator('[data-heroedit="0"]').click();
     await page.locator('[data-herof="title"]').fill("НЕ ДОЛЖНО СОХРАНИТЬСЯ");
     await page.locator("[data-heroclose]").click();
@@ -295,7 +296,7 @@ test.describe("sweep — the banner", () => {
 
     await page.reload();
     await waitForScreen(page, "admin");
-    await openSettings(page);
+    await openSettings(page, "home");
     await expect(page.getByText("НЕ ДОЛЖНО СОХРАНИТЬСЯ")).toHaveCount(0);
     await assertClean(page, w, "admin reloaded after cancel");
   });
@@ -308,7 +309,7 @@ test.describe("sweep — the content card", () => {
     test.setTimeout(120_000);
     const w = watch(page);
     await openAdmin(page);
-    await openSettings(page);
+    await openSettings(page, "company");
 
     try {
       await page.locator('[data-contentblock="company"]').click();
@@ -349,7 +350,7 @@ test.describe("sweep — the content card", () => {
       await assertClean(shop.page, shop.w, "footer with fuzzed company details");
       await shop.close();
     } finally {
-      await openSettings(page);
+      await openSettings(page, "company");
       await page.locator('[data-contentblock="company"]').click();
       await page.locator("[data-contentreset]").click();
       await expect(page.locator("[data-admapply]")).toBeVisible();
@@ -364,12 +365,17 @@ test.describe("sweep — the content card", () => {
     test.setTimeout(90_000);
     const w = watch(page);
     await openAdmin(page);
-    await openSettings(page);
+    await openSettings(page, "home");
 
     try {
+      /* The content card is split across two settings pages since the phase-3
+         redesign — the announcement bar belongs to «Главная страница» and the
+         socials to «О компании» — but the DRAFT is one, so both edits travel in
+         a single set_content action from whichever page saves. */
       await page.locator('[data-contentblock="announcement"]').click();
       await page.locator('[data-contentf="announcement.link"]').fill("javascript:alert(1)");
       await page.locator('[data-contentf="announcement.text.RU"]').fill("Тестовая полоска");
+      await openSettings(page, "company");
       await page.locator('[data-contentblock="social"]').click();
       await page.locator('[data-contentf="social.instagram"]').fill("javascript:alert(2)");
       await page.locator("[data-contentsave]").click();
@@ -391,7 +397,7 @@ test.describe("sweep — the content card", () => {
       await assertClean(shop.page, shop.w, "home with a script URL in settings");
       await shop.close();
     } finally {
-      await openSettings(page);
+      await openSettings(page, "company");
       await page.locator("[data-contentreset]").click();
       if (await page.locator("[data-admapply]").count()) {
         const back = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
@@ -409,7 +415,7 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
     test.setTimeout(90_000);
     const w = watch(page);
     await openAdmin(page);
-    await openSettings(page);
+    await openSettings(page, "prices");
 
     const before = await (await page.request.get("/api/admin/settings/")).json();
     const original = JSON.parse(JSON.stringify(before.settings.pricing || {}));
@@ -472,7 +478,7 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
     test.setTimeout(60_000);
     const w = watch(page);
     await openAdmin(page);
-    await openSettings(page);
+    await openSettings(page, "company");
 
     // A month nothing could possibly have happened in, and this month.
     const thisMonth = new Date().toISOString().slice(0, 7);
@@ -498,6 +504,9 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
     const w = watch(page);
     await openAdmin(page);
     await tab(page, "mail");
+    // «Отправить мне тест» lives inside one letter's editor since phase 3,
+    // not on the list — open a letter first.
+    await page.locator('[data-mailtpl="order-confirmed"]').first().click();
     await page.locator("[data-mailto]").fill("not-an-email");
     await page.locator("[data-mailtest]").click();
     const msg = await toastText(page);
@@ -543,7 +552,7 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
     // Nothing was applied: no confirm card is standing, and the journal is
     // still empty — an assistant action only ever lands through «Применить».
     await expect(page.locator("[data-admapply]")).toHaveCount(0);
-    await openSettings(page);
+    await openSettings(page, "journal");
     await expect(page.locator("[data-admundo]"), "the assistant changed something on its own").toHaveCount(0);
     await assertClean(page, w, "journal after the injected prompts");
   });
@@ -590,7 +599,7 @@ test.describe("sweep — the change journal", () => {
     await shop.close();
 
     // …and the journal can take it back.
-    await openSettings(page);
+    await openSettings(page, "journal");
     const entry = page.locator('[data-admundo="0"]');
     await expect(entry, "the change never reached the journal").toBeVisible();
     await entry.click();

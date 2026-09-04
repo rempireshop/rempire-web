@@ -1503,6 +1503,7 @@
       "Изменить тарифы доставки?": "Kas muuta tarnetariife?",
       "Новые цены покупатели увидят сразу при оформлении.":
         "Uusi hindu näevad ostjad kohe tellimuse vormistamisel.",
+      "Тарифы доставки сохранены": "Tarnetariifid salvestatud",
       "Хотя бы один номинал должен остаться": "Vähemalt üks nimiväärtus peab alles jääma",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
         "iPhone: Seaded → Safari → Kaamera → Luba. Android: tabaluku ikoon aadressiribal → Kaamera"
@@ -2924,6 +2925,7 @@
       "Изменить тарифы доставки?": "Change the delivery tariffs?",
       "Новые цены покупатели увидят сразу при оформлении.":
         "Customers see the new prices at checkout straight away.",
+      "Тарифы доставки сохранены": "Delivery tariffs saved",
       "Хотя бы один номинал должен остаться": "At least one amount has to stay",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
         "iPhone: Settings → Safari → Camera → Allow. Android: the padlock in the address bar → Camera"
@@ -9527,7 +9529,7 @@
         }).join("") + "</div>" : "") +
         '<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию">' +
         '<div id="admblogproducts">' + admBlogPicksHTML(matches) + "</div></div>" +
-      '<details class="adm-embed"><summary class="adm-link">Адрес, автор и текст для Google</summary>' +
+      '<details class="adm-embed"><summary class="adm-link" data-blogmore>Адрес, автор и текст для Google</summary>' +
         '<div style="padding-top:12px">' +
           '<label class="adm-field">Заголовок для Google · <span data-blogcount="seoTitle">' +
             (d.seoTitle[L] || "").length + "/70</span>" +
@@ -11032,7 +11034,7 @@
           '<input class="adm-input" data-promof="minSubtotal" inputmode="decimal" value="' +
           esc(String(f.minSubtotal)) + '"></label>' +
       "</div>" +
-      '<details class="adm-embed"><summary class="adm-link">Срок, число использований и заметка</summary>' +
+      '<details class="adm-embed"><summary class="adm-link" data-promomore>Срок, число использований и заметка</summary>' +
         '<div style="padding-top:12px">' +
           '<label class="adm-field">Действует до — пусто, если бессрочно' +
             '<input class="adm-input" type="date" data-promof="endsAt" value="' +
@@ -15675,6 +15677,13 @@
           toast(pa.value === "shipped"
             ? pa.number + " отправлен · письмо ушло"
             : pa.number + " отменён", oEntry);
+        }
+        /* «Настройки → Доставка и оплата»: the tariff table names itself in
+           the toast, and the journal entry it just wrote is what «Отменить»
+           takes back. */
+        else if (pa.type === "set_shipping_rules") {
+          var shEntry = demoApply(pa);
+          toast("Тарифы доставки сохранены", shEntry);
         }
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
         render();
