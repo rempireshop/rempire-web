@@ -154,25 +154,37 @@ test.describe("admin sections — Клиенты", () => {
     });
     expect(created.ok(), "the review could not be filed").toBe(true);
 
-    await page.reload();
-    await waitForScreen(page, "admin");
-    await section(page, "people", "reviews");
-    const row = page.locator(".adm-row", { hasText: reviewName }).first();
-    await expect(row, "the new review is not in the queue").toBeVisible();
-    await row.locator("[data-admrev]").first().click();
+    /* A published review on PRODUCT changes what the storefront shows — and
+       e2e/product.spec.ts expects that product's reviews block to start
+       empty. Whatever happens below, the review is taken down again. */
+    let reviewId = "";
+    try {
+      await page.reload();
+      await waitForScreen(page, "admin");
+      await section(page, "people", "reviews");
+      const row = page.locator(".adm-row", { hasText: reviewName }).first();
+      await expect(row, "the new review is not in the queue").toBeVisible();
+      await row.locator("[data-admrev]").first().click();
 
-    await expect(page.getByRole("status")).toContainText("Отзыв опубликован");
-    // reversible edits offer the way back on the toast itself (README § State)
-    await expect(page.locator(".adm-toast__undo")).toBeVisible();
-    await expect.poll(async () => {
-      const res = await page.request.get("/api/admin/reviews/?status=approved");
-      return ((await res.json()).reviews as Array<{ name: string }>).some((r) => r.name === reviewName);
-    }, { timeout: 10_000, message: "«Опубликовать» never reached the server" }).toBe(true);
+      await expect(page.getByRole("status")).toContainText("Отзыв опубликован");
+      // reversible edits offer the way back on the toast itself (README § State)
+      await expect(page.locator(".adm-toast__undo")).toBeVisible();
+      await expect.poll(async () => {
+        const res = await page.request.get("/api/admin/reviews/?status=approved");
+        const hit = ((await res.json()).reviews as Array<{ id: string; name: string }>).find((r) => r.name === reviewName);
+        if (hit) reviewId = hit.id;
+        return !!hit;
+      }, { timeout: 10_000, message: "«Опубликовать» never reached the server" }).toBe(true);
 
-    // …and the journal kept the way back
-    await section(page, "setup");
-    await page.locator('[data-admsetpage="journal"]').click();
-    await expect(page.locator('[data-admundo="0"]'), "publishing a review left no journal entry").toBeVisible();
+      // …and the journal kept the way back
+      await section(page, "setup");
+      await page.locator('[data-admsetpage="journal"]').click();
+      await expect(page.locator('[data-admundo="0"]'), "publishing a review left no journal entry").toBeVisible();
+    } finally {
+      if (reviewId) {
+        await page.request.patch("/api/admin/reviews/", { data: { id: reviewId, status: "rejected" } });
+      }
+    }
   });
 });
 
