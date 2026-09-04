@@ -155,12 +155,20 @@
 .adm-btn--wide { flex: 1; }
 .adm-btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
 .adm-btn--warn { background: var(--a-warn); border-color: var(--a-warn); color: #fff; }
+/* A button that is really a link — «Написать Дмитрию» is a mailto. `.adm2 a`
+   above paints every link ink, and ink on ink is a black rectangle. */
+.adm2 a.adm-btn { color: #fff; text-decoration: none; }
+.adm2 a.adm-btn--ghost { color: var(--a-ink); }
 .adm-link {
   border: 0; background: none; padding: 0; font-size: 14px; font-weight: 500; color: var(--a-ink);
   text-decoration: underline; text-underline-offset: 3px;
 }
 .adm-link--muted { color: var(--a-muted); font-weight: 400; }
 .adm-link--warn { color: var(--a-warn); }
+/* «← Заказы», «← Все письма», «← Настройки». `.adm-screen` is a flex column,
+   so a bare button stretches the width of the page and centres its own text;
+   a way back is a word, not a bar. */
+.adm-screen > .adm-link { align-self: flex-start; }
 .adm-del {
   height: 48px; padding: 0 16px; border: 0; background: none; color: var(--a-warn);
   font-weight: 500; font-size: 15px; text-decoration: underline; text-underline-offset: 3px;
@@ -189,6 +197,10 @@
   background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule);
 }
 .adm-chip[aria-current="true"] { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
+/* The placeholder chips under a letter's field: seven of them, three times
+   over, so they get the narrower padding and the mono of the token they
+   insert. Still 40 px tall — they are tapped on a phone like anything else. */
+.adm-chip--tok { padding: 0 10px; font-size: 13px; font-family: "PT Mono", ui-monospace, monospace; }
 
 .adm-tabs {
   display: flex; border-bottom: 1px solid var(--a-rule); gap: 24px;
@@ -586,7 +598,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 /* ---------- Блог: the editor --------------------------------------------- */
 
-.adm-title-in {
+/* `.adm2 input` above sets 15 px Golos on every field in the panel and beats a
+   single class, so the one input that is a screen title says so twice. */
+.adm2 input.adm-title-in {
   height: 56px; border: 0; border-bottom: 1px solid var(--a-ink); padding: 0; width: 100%;
   font-family: Oswald, sans-serif; font-size: 28px; font-weight: 500; background: var(--a-paper);
   color: var(--a-ink); border-radius: 0; -webkit-appearance: none; appearance: none;
@@ -660,7 +674,10 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 
 /* ---------- Подключения --------------------------------------------------- */
 
-.adm-dot { width: 10px; height: 10px; flex: none; background: var(--a-ok); }
+/* Beside the name, not beside the middle of the row: on a phone the status
+   line wraps to two lines and a centred square ends up pointing at the second
+   one. 7 px is the name's own first-line centre. */
+.adm-dot { width: 10px; height: 10px; flex: none; background: var(--a-ok); align-self: flex-start; margin-top: 7px; }
 .adm-dot--warn { background: var(--a-warn); }
 
 /* ---------- Настройки ----------------------------------------------------- */
@@ -703,6 +720,6 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-tariffs--head { display: none; }
   .adm-tariffs > span:first-child { grid-column: 1 / -1; font-weight: 600; }
   .adm-frame { height: 420px; }
-  .adm-title-in { font-size: 24px; height: 48px; }
+  .adm2 input.adm-title-in { font-size: 24px; height: 48px; }
   .adm-drop { height: auto; min-height: 120px; flex-wrap: wrap; }
 }

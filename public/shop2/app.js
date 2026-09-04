@@ -9412,7 +9412,8 @@
       : '<input class="adm-input" maxlength="' + lim + '" data-mailtxt="' + field + '" value="' + esc(val) + '">';
     return '<label class="adm-field">' + f[1] + box + "</label>" +
       '<div class="adm-acts" style="gap:6px;margin-top:-6px">' + MAIL_PH.map(function (p) {
-        return '<button class="adm-chip" data-mailph="' + field + ":" + p[0] + '" title="' + p[1] + '">{' + p[0] + "}</button>";
+        return '<button class="adm-chip adm-chip--tok" data-mailph="' + field + ":" + p[0] +
+          '" title="' + p[1] + '">{' + p[0] + "}</button>";
       }).join("") +
       (own ? '<button class="adm-link adm-link--muted" data-mailreset="' + field + '">Вернуть стандартный текст</button>' : "") +
       "</div>";
