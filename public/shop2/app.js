@@ -7061,23 +7061,31 @@
     if (!box || typeof L === "undefined") return;
     if (pmap && pmap.getContainer() !== box) { pmap.remove(); pmap = null; }
     if (!pmap) {
-      /* Open on the whole carrier network, not on the average of its
+      /* A valid view first (Leaflet refuses tiles on a map with no centre),
+         then open on the whole carrier network, not on the average of its
          coordinates: the centroid of Estonia's 400 lockers is a field in
-         Järvamaa, and zoom 12 there showed two pins. fitBounds shows every
-         pin at once; the shopper pinches into their own town or types it in
-         the search box above. */
-      pmap = L.map(box);
-      var geo = pointsMatching().map(pointGeo).filter(Boolean);
-      if (geo.length > 1) {
-        pmap.fitBounds(L.latLngBounds(geo.map(function (p) { return [p.lat, p.lng]; })), { padding: [16, 16], maxZoom: 13 });
-      } else {
-        pmap.setView(pointMapCenter(), 12);
-      }
+         Järvamaa, and zoom 12 there showed two pins. The fit waits until the
+         box has a size — the sheet is still animating in when this runs, and
+         fitBounds on a 0×0 container computes a zoom of -Infinity and leaves
+         the map blank. */
+      pmap = L.map(box).setView(pointMapCenter(), 8);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
       }).addTo(pmap);
       pmap.on("moveend", paintPointMarkers);
+      var geo = pointsMatching().map(pointGeo).filter(Boolean);
+      if (geo.length > 1) {
+        var bounds = L.latLngBounds(geo.map(function (p) { return [p.lat, p.lng]; }));
+        var tries = 0;
+        var fit = function () {
+          if (!pmap || pmap.getContainer() !== box) return;
+          if (!box.clientWidth || !box.clientHeight) { if (tries++ < 40) setTimeout(fit, 50); return; }
+          pmap.invalidateSize();
+          pmap.fitBounds(bounds, { padding: [16, 16], maxZoom: 13 });
+        };
+        fit();
+      }
     } else {
       pmap.invalidateSize();
     }
