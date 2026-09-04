@@ -189,6 +189,21 @@ you: {"reply":"Отлично — положил оба в корзину и о�
 `;
 }
 
+/* product creation: the owner's own products (src/lib/custom-products.ts)
+   are not in the file the CATALOGUE block is built from, so they are read
+   fresh for the admin prompt — otherwise «подними цену на новый бальзам»
+   would name an id sanitizeAction() has never heard of. Best effort, same
+   posture as stockSummaryForPrompt(): a missing table must never be the
+   reason the assistant stops answering. */
+async function customForPrompt(): Promise<CatRow[]> {
+  try {
+    const { listCustomMin } = await import("@/lib/custom-products");
+    return (await listCustomMin()).map((c) => c.min);
+  } catch {
+    return [];
+  }
+}
+
 function adminPrompt(
   lang: string,
   hero: ReturnType<typeof briefHero>,
@@ -196,9 +211,10 @@ function adminPrompt(
   analytics: ReturnType<typeof briefAnalytics>,
   stockSummary: string,
   customersSummary: string,
+  customRows: CatRow[] = [],
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock):
-${catalogueLines()}
+${catalogueLines()}${customRows.length ? "\n" + customRows.map(rowLine).join("\n") : ""}
 ${customersSummary ? `
 CUSTOMERS — up to 15 most recently created (name|e-mail|tier retail-or-pro|points balance). Use this ONLY to find the e-mail of a customer the owner named, for adjust_points below — never invent an e-mail not listed here, and never quote this list back to the owner as a report.
 ${customersSummary}
@@ -224,7 +240,7 @@ You are the admin assistant inside the REMPIRE shop's admin panel, talking to th
 
 Answer in ${LANG_NAME[lang] ?? "Russian"}, plainly, no jargon, 1-3 short sentences. When the owner asks where something is or wants an action, point to the right tab by ending your JSON with the "tab" field: over (обзор), orders (заказы), goods (товары), stock (склад), pos (продажа в салоне), people (клиенты), promos (промокоды), blog (блог), stats (аналитика), mail (письма), apps (подключения), setup (настройки).
 
-Your standing abilities (describe them when relevant, they run automatically): every uploaded photo gets background removal and the Rempire watermark; every text is written SEO-optimised in Russian, Estonian and English; destructive actions always ask for confirmation.
+What the panel really does (say so when relevant, and never promise more): photos are stored exactly as uploaded and shown on a white background — there is no automatic background removal and no watermark (a per-photo «Убрать фон» button exists only when the shop has switched it on); texts — product descriptions, Google titles, blog articles — can be written in Russian, Estonian and English, by you here or by the editor's own buttons; every destructive action asks for confirmation first.
 
 You can CHANGE things via the optional "action" field. The panel shows the owner a preview and asks to confirm before applying — so propose the action AND say what it does in the reply. Available actions (demo changes, applied in the panel):
   {"type":"set_price","id":"<catalogue id>","value":<number 1..500>} — change a product's price
@@ -245,6 +261,7 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"adjust_points","customerId":"<uuid>","delta":50,"note":"…"} OR {"type":"adjust_points","customerEmail":"<e-mail>","delta":50,"note":"…"} — credit or correct one customer's point balance by hand. Use customerId when the owner is looking at that customer's card in «Клиенты» and the id is visible in this conversation; otherwise use customerEmail, but ONLY an address copied from the CUSTOMERS list above — never guess or invent either one
   {"type":"stock_adjust","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","delta":6,"reason":"goods_in|adjust|return"} — a RELATIVE stock move, real numbers not the mало/нет badge («приход 6 штук масла Proraso» is delta:6, reason:"goods_in"; «спишите 2 штуки, разбились» is delta:-2, reason:"adjust"; «вернули 1 шампунь» is delta:1, reason:"return"). delta is the change, never the new total. reason defaults to "adjust" when the owner does not say why.
   {"type":"stock_set","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","qty":10} — an ABSOLUTE count after a physical recount («на полке на самом деле 10 штук» → qty:10), not a delta.
+  {"type":"create_product","brand":"Proraso","name":"Beard Balm Cypress & Vetyver — бальзам для бороды","cat":"beard","price":14.9,"sizes":[{"size":"100 мл","price":14.9}],"description":{"RU":"…","ET":"…","EN":"…"}} — add a NEW product the shop does not have yet («добавь товар», «заведи новый товар», «новый бальзам Proraso за 14,90»). Never for a product already in the CATALOGUE above — change that one with set_price/set_stock instead. brand and name as the owner said them; name = the line and the type, with the Russian type tail the catalogue uses («Beard Balm — бальзам для бороды»). cat is exactly one of hair|styling|beard|face|body|perfume|merch. price 1–500 €. sizes ONLY when the owner named volumes, each with its own price; otherwise leave sizes out and give one price. description: all three languages, short and honest, only what the owner said — or leave it out. Photos are NOT part of this action: after the owner confirms, the panel creates the product and opens it on its «Фото и видео» tab, so say in the reply that the photos are added there.
 Use exactly one action per reply, only when the owner asks for a change. If the owner asks to change several things, do the first and say you'll do the rest one by one.
 
 PROMO CODES (create_promo) in detail. code — LATIN capitals, digits and «-» only, up to 24 characters; invent a short readable one if the owner did not name it. kind: "percent" (value 1–90, per cent off the goods), "fixed" (value 1–200, euro off the goods) or "free_shipping" (value ignored — delivery becomes free). minSubtotal — the basket the code needs, 0 when the owner did not say. endsAt / startsAt — full ISO dates, omit when open-ended. maxUses — how many times it may be used in total, omit for unlimited. A promo is quoted at checkout and counted only when the order is paid, so say that in the reply if the owner asks how it is spent.
@@ -292,7 +309,11 @@ you: {"reply":"Ставлю цену 9 € для Kevin.Murphy PLUMPING.WASH —
 
 EXAMPLE — inventory
 owner: приход 6 штук масла Proraso Azur Lime
-you: {"reply":"Приход 6 штук Proraso Beard Oil Azur Lime на склад — подтвердите.","product_ids":[],"tab":"stock","action":{"type":"stock_adjust","product_id":"proraso-beard-oil-azur-lime-30ml","variant":"","delta":6,"reason":"goods_in"}}`;
+you: {"reply":"Приход 6 штук Proraso Beard Oil Azur Lime на склад — подтвердите.","product_ids":[],"tab":"stock","action":{"type":"stock_adjust","product_id":"proraso-beard-oil-azur-lime-30ml","variant":"","delta":6,"reason":"goods_in"}}
+
+EXAMPLE — a new product
+owner: добавь новый товар: Proraso бальзам для бороды Cypress & Vetyver, 100 мл, 14,90
+you: {"reply":"Завожу новый товар Proraso Beard Balm Cypress & Vetyver — бальзам для бороды, 100 мл за 14,90 €, в разделе «Уход за бородой», с описанием на трёх языках. Подтвердите — и добавьте фото на вкладке «Фото и видео», она откроется сама.","product_ids":[],"tab":"goods","action":{"type":"create_product","brand":"Proraso","name":"Beard Balm Cypress & Vetyver — бальзам для бороды","cat":"beard","price":14.9,"sizes":[{"size":"100 мл","price":14.9}],"description":{"RU":"Бальзам для бороды Proraso с ароматом кипариса и ветивера: смягчает волосы, ухаживает за кожей под бородой и держит форму в течение дня.","ET":"Proraso habemepalsam küpressi ja vetiveri lõhnaga: pehmendab habet, hoolitseb habemealuse naha eest ja hoiab vormi terve päeva.","EN":"Proraso beard balm with cypress and vetiver: softens the beard, cares for the skin underneath and holds its shape through the day."}}}`;
 }
 
 export async function GET() {
@@ -387,11 +408,14 @@ export async function POST(req: NextRequest) {
   // it — see CUSTOMERS_TRIGGER/customersSummaryForPrompt() above
   const customersSummary =
     isAdmin && !isMini && CUSTOMERS_TRIGGER.test(lastUser) ? await customersSummaryForPrompt() : "";
+  // product creation: the owner's own rows, so their ids are known to the
+  // prompt and to sanitizeAction() alike — see customForPrompt()
+  const customRows = isAdmin && !isMini ? await customForPrompt() : [];
   const system =
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(body.lang ?? "RU", briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary)
+        ? adminPrompt(body.lang ?? "RU", briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, customRows)
         : shopPrompt(body.lang ?? "RU", lastUser, blogLines);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -418,6 +442,7 @@ export async function POST(req: NextRequest) {
     parsed = { reply: data.choices?.[0]?.message?.content ?? "" };
   }
   const known = new Set((catalogue as Array<{ id: string }>).map((p) => p.id));
+  for (const c of customRows) known.add(c.id);
   const ids = (parsed.product_ids ?? []).filter((id) => known.has(id)).slice(0, 4);
   const TABS = new Set(["over", "orders", "goods", "stock", "pos", "people", "promos", "blog", "stats", "mail", "apps", "setup"]);
   const tab = parsed.tab && TABS.has(parsed.tab) ? parsed.tab : "";

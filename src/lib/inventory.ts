@@ -455,6 +455,29 @@ function catalogueUniverse(): Array<{ productId: string; variant: string }> {
   return out;
 }
 
+/* product creation: the owner's own rows (src/lib/custom-products.ts) join
+   the universe, so «Склад» and the editor's Остаток column can count them
+   like any catalogue product. Best effort — a missing table leaves the
+   catalogue exactly as it was. */
+type Universe = { rows: Array<{ productId: string; variant: string }>; byId: Map<string, MinProduct> };
+async function customUniverse(): Promise<Universe> {
+  const out: Universe = { rows: [], byId: new Map() };
+  try {
+    const { listCustomMin } = await import("@/lib/custom-products");
+    for (const { min, variants } of await listCustomMin()) {
+      out.byId.set(min.id, min);
+      if (variants && variants.sizes.length) {
+        for (const size of variants.sizes) out.rows.push({ productId: min.id, variant: size });
+      } else {
+        out.rows.push({ productId: min.id, variant: "" });
+      }
+    }
+  } catch (err) {
+    console.error("[inventory] custom products not loaded:", err);
+  }
+  return out;
+}
+
 async function trackedKeys(): Promise<Set<string>> {
   const rows = await query<{ product_id: string; variant: string }>(
     `select distinct product_id, variant from stock_moves where reason in ${TRACKING_SQL}`,
@@ -470,14 +493,18 @@ async function trackedKeys(): Promise<Set<string>> {
  * not tracked — so Renat can see it is missing, not just not query for it.
  */
 export async function getLevels(opts: { q?: string; filter?: LevelFilter; limit?: number } = {}): Promise<CatalogueLevelRow[]> {
-  const universe = catalogueUniverse();
-  const [dbRows, tracked] = await Promise.all([query<StockLevelRow>("select * from stock_levels"), trackedKeys()]);
+  const [dbRows, tracked, custom] = await Promise.all([
+    query<StockLevelRow>("select * from stock_levels"),
+    trackedKeys(),
+    customUniverse(),
+  ]);
+  const universe = catalogueUniverse().concat(custom.rows);
   const byKey = new Map(dbRows.map((r) => [r.product_id + "\u0000" + r.variant, r]));
 
   let rows: CatalogueLevelRow[] = universe.map(({ productId, variant }) => {
     const key = productId + "\u0000" + variant;
     const row = byKey.get(key);
-    const p = BY_ID.get(productId);
+    const p = BY_ID.get(productId) ?? custom.byId.get(productId);
     const qty = row ? Number(row.qty) || 0 : 0;
     const lowThreshold = row ? Number(row.low_threshold) || 0 : 2;
     return {

@@ -318,6 +318,70 @@ export function sanitizePublishPost(raw: unknown): object | null {
   return { slug, publish: x.publish };
 }
 
+/* ---- product creation (create_product) ----------------------------------
+ *
+ * The one action that makes a product the catalogue file does not have. The
+ * bounds mirror src/lib/custom-products.ts (PRODUCT_CATS, 1–500 €, twelve
+ * sizes) — duplicated on purpose, this file stays free of database imports;
+ * tests/custom-products.test.ts checks the two agree. The route behind
+ * «Применить» (POST /api/admin/products) validates again — this is the
+ * first door, not the only one.
+ */
+const PRODUCT_CATS = ["hair", "styling", "beard", "face", "body", "perfume", "merch"];
+const PRODUCT_PRICE = [1, 500] as const;
+const PRODUCT_MAX_SIZES = 12;
+
+function productPrice(raw: unknown): number | null {
+  const n = typeof raw === "number" ? raw : Number(String(raw ?? "").trim().replace(",", "."));
+  if (!Number.isFinite(n) || n < PRODUCT_PRICE[0] || n > PRODUCT_PRICE[1]) return null;
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * {brand, name, cat, price?, sizes?: [{size, price}] | [string], description?}
+ * → {brand, name, cat, price, sizes: string[], prices: number[], description}.
+ * Sizes without a price of their own take the product's; a product with
+ * neither a price nor priced sizes is not a product.
+ */
+export function sanitizeCreateProduct(raw: unknown): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const clean = (v: unknown, max: number) =>
+    typeof v === "string" ? v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
+  const brand = clean(x.brand, 60);
+  const name = clean(x.name, 120);
+  const cat = clean(x.cat ?? x.category, 20).toLowerCase();
+  if (!brand || !name || !PRODUCT_CATS.includes(cat)) return null;
+
+  const price = productPrice(x.price);
+  const sizes: string[] = [];
+  const prices: number[] = [];
+  const seen = new Set<string>();
+  for (const item of Array.isArray(x.sizes) ? x.sizes.slice(0, PRODUCT_MAX_SIZES) : []) {
+    const o = item && typeof item === "object" && !Array.isArray(item) ? (item as Record<string, unknown>) : null;
+    const label = clean(o ? (o.size ?? o.label ?? o.name) : item, 30);
+    if (!label || seen.has(label.toLowerCase())) continue;
+    const own = o && o.price !== undefined ? productPrice(o.price) : null;
+    const p = own ?? price;
+    if (p === null) continue; // a size nobody priced is dropped, not guessed
+    seen.add(label.toLowerCase());
+    sizes.push(label);
+    prices.push(p);
+  }
+  if (!sizes.length && price === null) return null;
+
+  const description = blogTrilingual(x.description, 4000);
+  return {
+    brand,
+    name,
+    cat,
+    price: sizes.length ? prices[0] : price,
+    sizes,
+    prices: sizes.length ? prices : [price as number],
+    description: Object.keys(description).length ? description : null,
+  };
+}
+
 /* ---- wholesale/loyalty (set_pricing, adjust_points) ---------------------
  *
  * Bounds are duplicated from src/lib/loyalty.ts PRICING_BOUNDS on purpose —
@@ -521,6 +585,14 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
     if (!Number.isFinite(qty) || qty < 0 || qty > 100_000) return null;
     const variant = typeof x.variant === "string" && x.variant.trim() ? x.variant.trim().slice(0, 120) : "";
     return { type: t, product_id: x.product_id, variant, qty };
+  }
+  /* product creation: a new row in custom_products — no demo layer, the
+     panel POSTs it to /api/admin/products once the owner confirms and opens
+     the editor on «Фото и видео» (applyCreateProduct() in app.js); the undo
+     is «снять с продажи». */
+  if (t === "create_product") {
+    const product = sanitizeCreateProduct(x);
+    return product ? { type: t, ...product } : null;
   }
   return null;
 }

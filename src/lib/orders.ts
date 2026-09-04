@@ -209,6 +209,24 @@ const VARIANTS = variantData as Record<string, { sizes: string[]; prices: number
 
 const BY_ID = new Map<string, MinProduct>(CATALOGUE.map((p) => [p.id, p]));
 
+/* product creation: the owner's own rows (src/lib/custom-products.ts, ids
+   `c-…`, db/migrations/131_custom_products.sql) are priced from the table,
+   never from the browser. Loaded at call time like every other optional
+   neighbour below — and only for ids the file does not have, so a basket of
+   catalogue products never pays for the query. */
+type CustomLookup = Map<string, { min: MinProduct; variants: { sizes: string[]; prices: number[] } | null }>;
+async function customLookup(ids: unknown[]): Promise<CustomLookup> {
+  const want = ids.filter((id): id is string => typeof id === "string" && id.startsWith("c-") && !BY_ID.has(id));
+  if (!want.length) return new Map();
+  try {
+    const { customMinByIds } = await import("@/lib/custom-products");
+    return await customMinByIds(want);
+  } catch (err) {
+    console.error("[orders] custom products not loaded:", err);
+    return new Map();
+  }
+}
+
 /** Money is kept honest in cents; floats only ever leave, never accumulate. */
 function money(n: number): number {
   return Math.round((Number(n) + Number.EPSILON) * 100) / 100;
@@ -552,8 +570,13 @@ export async function listAudit(limit = 100): Promise<AuditRow[]> {
 
 type PricedLine = OrderItem;
 
-function variantOf(productId: string, variant: unknown): { label: string | null; price: number | null } {
-  const v = VARIANTS[productId];
+function variantOf(
+  productId: string,
+  variant: unknown,
+  table?: { sizes: string[]; prices: number[] } | null,
+): { label: string | null; price: number | null } {
+  // a custom product carries its own size ladder (customLookup); the file's otherwise
+  const v = table ?? VARIANTS[productId];
   if (variant == null || variant === "") return { label: null, price: null };
   if (!v) return { label: String(variant), price: null };
 
@@ -681,6 +704,8 @@ export async function priceItems(
   const bundles = items.some((it) => typeof it?.id === "string" && it.id.startsWith("bundle:"))
     ? await bundleDefs()
     : {};
+  // product creation: the owner's own products, by id — empty for a catalogue-only basket
+  const custom = await customLookup(items.map((it) => it?.id));
 
   /* ---- wholesale: is this a customer the owner approved for pro pricing? ---
      Resolved once, up front — every product line below asks only "what does
@@ -753,14 +778,17 @@ export async function priceItems(
       continue;
     }
 
-    const p = BY_ID.get(raw.id);
+    const own = custom.get(raw.id);
+    const p = BY_ID.get(raw.id) ?? own?.min;
     if (!p) throw new OrderError("unknown_item", raw.id);
 
     const o = overrides[raw.id];
-    const stock: StockState = (o?.stock ?? (p.s as StockState)) || "in";
+    // a hidden custom product answers s:"out" from customLookup — «нет в
+    // наличии» is the honest refusal for something the owner took off sale
+    const stock: StockState = own && own.min.s === "out" ? "out" : (o?.stock ?? (p.s as StockState)) || "in";
     if (stock === "out") throw new OrderError("out_of_stock", raw.id);
 
-    const v = variantOf(raw.id, raw.variant);
+    const v = variantOf(raw.id, raw.variant, own?.variants);
     /* An override price replaces the base price; a size that costs more keeps
        its premium over the base, so «−1 € on the 75 ml» does not silently
        hand away 16 € on the 500 ml. */
