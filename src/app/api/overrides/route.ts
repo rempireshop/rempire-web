@@ -15,6 +15,7 @@ import { mergeContent } from "@/lib/content";
 import { getOverrides, getSettings } from "@/lib/orders";
 import { getDescriptionOverrides } from "@/lib/product-descriptions";
 import { cleanPricing, publicPricing } from "@/lib/loyalty";
+import { cleanGiftAmounts } from "@/lib/giftcards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,9 @@ const DEFAULT_SETTINGS: Record<string, unknown> = {
   // copy («зарабатывайте баллы») — proDiscountPct never leaves the server
   // this way, see publicPricing() in src/lib/loyalty.ts.
   pricing: publicPricing(cleanPricing(null)),
+  // the denominations the /gift/ page offers, owned by the panel's
+  // «Маркетинг → Подарочные карты». Public by nature: they are the buttons.
+  gift_amounts: cleanGiftAmounts(null),
 };
 
 /**
@@ -53,6 +57,8 @@ const PUBLIC_SETTINGS = [
   // announcement bar, the contact page. Public by nature: every one of these
   // strings is printed in the footer of every page.
   "content",
+  // which gift-card denominations are on sale — the buttons on /gift/
+  "gift_amounts",
 ] as const;
 
 /** The pro (salon) price is commercial information: never on the public feed.
@@ -97,8 +103,12 @@ export async function GET() {
        recomputes the redacted subset straight from the real settings row,
        after the generic `published` spread, so it always wins. */
     const pricing = publicPricing(cleanPricing(stored.pricing));
+    /* Same reasoning one line up: the storefront must never be handed a
+       denomination the checkout would refuse, so the stored row is sanitised
+       here rather than trusted through the generic spread. */
+    const giftAmounts = cleanGiftAmounts(stored.gift_amounts);
     return Response.json(
-      { ok: true, overrides: publicOverrides(overrides), settings: { ...DEFAULT_SETTINGS, ...published, content, pricing } },
+      { ok: true, overrides: publicOverrides(overrides), settings: { ...DEFAULT_SETTINGS, ...published, content, pricing, gift_amounts: giftAmounts } },
       { headers: { "cache-control": "public, s-maxage=30, stale-while-revalidate=120" } },
     );
   } catch (err) {

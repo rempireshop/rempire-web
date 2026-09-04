@@ -3334,11 +3334,19 @@
     if (real && real.length) return real[S.bank] ? real[S.bank].code : undefined;
     return BANK_CODES[BANKS[S.bank]];
   }
-  /* features: the three gift-card amounts. Declared HERE, not down with the
-     rest of the gift-card code — the saved-cart filter below runs at load and
-     needs it, and a `var` assigned further down is still undefined by then
-     (which silently emptied the cart on every reload). */
-  var GIFT_AMOUNTS = [25, 50, 100];
+  /* features: the gift-card amounts the shop is ALLOWED to sell — the same
+     four the server accepts (GIFT_AMOUNTS in src/lib/giftcards.ts). Which of
+     them are actually on sale is the owner's own setting (settings.gift_amounts,
+     «Маркетинг → Подарочные карты»); giftAmountsOn() below is that subset.
+     Validation stays on this list, so a card already in a cart survives the
+     owner hiding its denomination.
+
+     Declared HERE, not down with the rest of the gift-card code — the
+     saved-cart filter below runs at load and needs it, and a `var` assigned
+     further down is still undefined by then (which silently emptied the cart
+     on every reload). */
+  var GIFT_AMOUNTS = [25, 50, 75, 100];
+  var GIFT_AMOUNTS_DEFAULT = [25, 50, 100];
 
   // ---------- state ----------
   var S = {
@@ -3575,7 +3583,13 @@
     posDiscount: "",
     posBusy: false,
     posErr: "",
-    posDone: null          // {orderId, number, total} once a sale is completed — the receipt/"new sale" screen
+    posDone: null,         // {orderId, number, total} once a sale is completed — the receipt/"new sale" screen
+    // ---- админка, этап 3 ----
+    admSetPage: "",        // «Настройки»: "" is the index, else one of ADM_SET_PAGES
+    mailOpen: false,       // «Маркетинг → Письма»: false is the list, true the editor for S.mailTpl
+    admGiftCards: null,    // {cards, unspent} once GET /api/admin/giftcards/ answers
+    admGiftErr: "",
+    admMailKey: null       // «Подключения»: null unknown, false once a test letter came back with no key
   };
 
   var LS = "rempire-shop-proto";
@@ -4404,6 +4418,28 @@
     var m = /^gift:(\d+)$/.exec(String(id || ""));
     return m ? Number(m[1]) : 0;
   }
+  /** The denominations actually on sale: the owner's setting when the server
+      has one (settings.gift_amounts, adopted in adoptServer()), the three the
+      shop has always sold otherwise. Filtered through GIFT_AMOUNTS so a stray
+      value in the settings row can never put a price on the page that the
+      server would then refuse at checkout. */
+  function giftAmountsOn() {
+    var raw = DEMO.giftAmounts;
+    var out = (Array.isArray(raw) ? raw : GIFT_AMOUNTS_DEFAULT).filter(function (v) {
+      return GIFT_AMOUNTS.indexOf(Number(v)) >= 0;
+    }).map(Number);
+    return out.length ? out : GIFT_AMOUNTS_DEFAULT;
+  }
+  /** The amount the button is on right now — the saved one while it is still
+      for sale, else the smallest that is. */
+  function giftAmountPick() {
+    var on = giftAmountsOn();
+    return on.indexOf(S.giftAmount) >= 0 ? S.giftAmount : on[0];
+  }
+  /* The tile's own sentence names the three amounts the shop has always sold
+     and stays a fixed, translated string: the denominations the owner can
+     switch off are the buttons on /gift/ below, which is where a shopper
+     actually chooses one. */
   function giftTileHTML() {
     return '<div class="gifttile"><span class="gifttile__art" aria-hidden="true">' + tower("gifttile__mark") + "</span>" +
       '<div class="gifttile__txt"><h2 class="sec__title">Подарочная карта</h2>' +
@@ -4429,8 +4465,10 @@
         '<h1 class="display h1">Подарочная карта</h1>' +
         '<p class="sec__intro">Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.</p>' +
         '<div class="field__label">Сумма</div>' +
-        '<div class="gamts" role="group" aria-label="Сумма карты">' + GIFT_AMOUNTS.map(function (a) {
-          return '<button class="gamt" data-giftamt="' + a + '" aria-current="' + (S.giftAmount === a) + '">' + a + " €</button>";
+        /* Only the denominations the owner has switched on in
+           «Маркетинг → Подарочные карты» — settings.gift_amounts. */
+        '<div class="gamts" role="group" aria-label="Сумма карты">' + giftAmountsOn().map(function (a) {
+          return '<button class="gamt" data-giftamt="' + a + '" aria-current="' + (giftAmountPick() === a) + '">' + a + " €</button>";
         }).join("") + "</div>" +
         '<label class="field"><span class="field__label">Кому — имя</span>' +
           '<input class="input" data-giftf="name" value="' + esc(S.gift.name) + '" placeholder="Имя получателя"></label>' +
@@ -4440,7 +4478,7 @@
           : '<div class="hint">Оставьте пустым — пришлём карту вам, подарите сами.</div>') +
         '<label class="field"><span class="field__label">Короткое поздравление</span>' +
           '<textarea class="input" rows="3" maxlength="300" data-giftf="message" placeholder="С днём рождения!">' + esc(S.gift.message) + "</textarea></label>" +
-        '<button class="btn btn--wide" data-addgift="' + S.giftAmount + '">В корзину — ' + eur(S.giftAmount) + "</button>" +
+        '<button class="btn btn--wide" data-addgift="' + giftAmountPick() + '">В корзину — ' + eur(giftAmountPick()) + "</button>" +
         '<p class="muted" style="margin-top:14px">Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.</p>' +
       "</section></div>";
   }
@@ -5830,49 +5868,54 @@
         if (S.screen === "admin" && S.adminTab === "reviews") render();
       });
   }
+  /* Publishing or hiding a review is a quick, reversible edit: it applies at
+     once and the toast offers to take it back (README § State). That is why it
+     goes through demoApply() as a `moderate_review` action — the journal entry
+     IS the undo, and srvPush() makes the PATCH in both directions. */
   function moderateReview(id, status) {
-    fetch("/api/admin/reviews/", {
-      method: "PATCH", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id: id, status: status })
-    }).then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
-      .then(function (j) {
-        toast(j && j.ok ? (status === "approved" ? "Отзыв опубликован ✓" : "Отзыв отклонён ✓") : "Не получилось — попробуйте ещё раз");
-        loadAdminReviews(true);
-        render();
-      })
-      .catch(function () { toast("Не получилось — попробуйте ещё раз"); });
+    var list = (S.admReviews && S.admReviews.reviews) || [];
+    var r = null;
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) { r = list[i]; break; }
+    var entry = demoApply({
+      type: "moderate_review", id: id, name: r ? r.name : "",
+      value: status, prev: (r && r.status) || "pending"
+    });
+    toast(status === "approved" ? "Отзыв опубликован" : "Отзыв скрыт", entry);
+    render();
   }
   var REV_TABS = [["pending", "Новые"], ["approved", "Опубликованные"], ["rejected", "Отклонённые"]];
   function admReviewsHTML() {
     var data = S.admReviews;
-    var counts = (data && data.counts) || { pending: 0, approved: 0, rejected: 0 };
-    var head = '<p class="muted" style="margin:16px 0">Отзывы покупателей. Ничего не появляется в магазине само — сначала вы читаете, потом публикуете. Отклонённый отзыв просто не показывается.</p>' +
-      '<div class="fchips">' + REV_TABS.map(function (tt) {
-        return '<button class="fchip" data-admrevfilter="' + tt[0] + '" aria-current="' + (S.admRevFilter === tt[0]) + '">' +
-          tt[1] + ' <span class="num">' + (counts[tt[0]] || 0) + "</span></button>";
-      }).join("") + "</div>";
-    if (!data) return head + '<p class="muted" style="margin-top:16px">Загружаем…</p>';
-    if (data.error) {
-      return head + '<p class="muted" style="margin-top:16px">Отзывы пока недоступны — база подключается. ' +
-        "Как только она заработает, новые отзывы появятся здесь сами.</p>";
-    }
-    if (!data.reviews.length) {
-      return head + '<p class="muted" style="margin-top:16px">Здесь пусто.</p>';
-    }
-    return head + '<div class="adm__list">' + data.reviews.map(function (r) {
-      var p = null;
-      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === r.productId) { p = CATALOGUE[i]; break; }
-      return '<div class="adm__row adm__row--rev">' +
-        (p ? '<span class="adm__ph">' + media(p, 0, "ph") + "</span>" : "") +
-        '<span class="adm__nm">' + esc(r.name) + ' <span class="rev__stars">' + "★★★★★".slice(0, Number(r.rating) || 0) + "</span>" +
-          '<span class="adm__sub">' + (p ? esc(p.brand + " — " + p.name) : esc(r.productId)) +
-            " · " + esc(String(r.createdAt || "").slice(0, 10)) + " · " + esc(r.lang) + "</span>" +
-          '<span class="adm__revtext">' + esc(r.text) + "</span></span>" +
-        '<span class="adm__revacts">' +
-          (r.status === "approved" ? "" : '<button class="btn btn--sm" data-admrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
-          (r.status === "rejected" ? "" : '<button class="btn btn--ghost btn--sm" data-admrev="' + esc(r.id) + ':rejected">Отклонить</button>') +
-        "</span></div>";
+    var counts = admReviewCounts();
+    var chips = '<div class="adm-chips" role="group" aria-label="Какие отзывы">' + REV_TABS.map(function (tt) {
+      return '<button class="adm-chip" data-admrevfilter="' + tt[0] + '" aria-current="' + (S.admRevFilter === tt[0]) + '">' +
+        tt[1] + " " + (counts[tt[0]] || 0) + "</button>";
     }).join("") + "</div>";
+    if (!data) return chips + '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    if (data.error) {
+      return chips + '<div class="adm-empty">Отзывы пока недоступны — база подключается. ' +
+        "Как только она заработает, новые отзывы появятся здесь сами.</div>";
+    }
+    if (!data.reviews.length) return chips + '<div class="adm-empty">Отзывов пока нет</div>';
+    return chips + '<div class="adm-list">' + data.reviews.map(admReviewRowHTML).join("") + "</div>";
+  }
+  function admReviewRowHTML(r) {
+    var p = byIdOrNull(r.productId);
+    var st = r.status === "approved" ? ["Опубликован", "adm-badge--ok"]
+      : r.status === "rejected" ? ["Скрыт", "adm-badge--quiet"] : ["Новый", ""];
+    return '<div class="adm-row adm-row--stack">' +
+      '<span class="adm-sec"><span><b>' + esc(r.name) + '</b> <span class="adm-stars">' +
+        "★★★★★".slice(0, Number(r.rating) || 0) + "</span> · " +
+        esc(p ? p.brand + " — " + p.name : r.productId) + "</span>" +
+        '<span class="adm-badge ' + st[1] + '">' + st[0] + "</span></span>" +
+      '<span class="adm-revtext">' + esc(r.text) + "</span>" +
+      '<span class="adm-row__sub">' + esc(String(r.createdAt || "").slice(0, 10)) + " · " + esc(r.lang) + "</span>" +
+      '<span class="adm-acts">' +
+        (r.status === "approved" ? "" :
+          '<button class="adm-btn adm-btn--row" data-admrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
+        (r.status === "rejected" ? "" :
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admrev="' + esc(r.id) + ':rejected">Скрыть</button>') +
+      "</span></div>";
   }
 
   /* ---------- blog: the admin tab -------------------------------------------
@@ -6256,6 +6299,8 @@
        there BLOGSEL is the only record of what was selected. */
     blogSelSave();
     if (cmd === "bold") { blogExec("bold"); return; }
+    // phase 3: the toolbar the spec asks for has a «I» next to the «B»
+    if (cmd === "italic") { blogExec("italic"); return; }
     if (cmd === "ul") { blogExec("insertUnorderedList"); return; }
     if (cmd === "undo") { blogExec("undo"); return; }
     if (cmd === "h2") { blogSelRestore(); blogExec("formatBlock", blogInHeading() ? "<p>" : "<h2>"); return; }
@@ -6507,143 +6552,7 @@
     }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); render(); });
   }
 
-  function admBlogEditor(d) {
-    var L = S.adminBlogLang || "RU";
-    var busy = S.adminBlogBusy;
-    blogKeepCaret();   // this render is about to replace the box the owner is typing in
-    var seoTLen = (d.seoTitle[L] || "").length;
-    var seoDLen = (d.seoDesc[L] || "").length;
-    var picked = productsById(d.products);
-    var q = (S.adminBlogQ || "").trim().toLowerCase();
-    var matches = q ? CATALOGUE.filter(function (p) {
-      return d.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
-    }).slice(0, 8) : [];
-    var slugPlaceholder = blogSlugify(d.title.RU || d.title.ET || d.title.EN || "");
 
-    return '<button class="link" data-admblogback>← Все статьи</button>' +
-      '<div class="adm__ohead"><h2 class="sec__title" style="font-size:18px">' + esc(d.title.RU || d.slug || "Новая статья") + "</h2>" +
-        '<span class="chip ' + (d.status === "published" ? "chip--ok" : "chip--low") + '">' +
-          (d.status === "published" ? "Опубликовано" : "Черновик") + "</span></div>" +
-      '<p class="muted admblog__note">Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.</p>' +
-
-      '<div class="adm__chips" role="group" aria-label="Язык статьи">' + LANGS.map(function (l) {
-        return '<button class="scchip" data-admbloglang="' + l[0] + '" aria-current="' + (L === l[0]) + '">' + l[1] + "</button>";
-      }).join("") + "</div>" +
-
-      /* assistant-work: «Черновик из темы» fills title+body (as an H2
-         skeleton) + SEO for the language tab open right now; «Перевести»
-         reads whichever language already has a title and fills the other
-         two. Both write straight into the draft (S.adminBlogEdit), exactly
-         like typing — see the [data-blogf] input handler's own comment. */
-      '<label class="field"><span class="field__label">Тема статьи</span>' +
-        '<input class="input" data-admblogtopic placeholder="Например: уход за бородой зимой"></label>' +
-      '<div class="adm__acts" style="margin:-6px 0 14px">' +
-        '<button class="btn btn--ghost btn--sm" data-admblogoutline>Черновик из темы</button>' +
-        '<button class="btn btn--ghost btn--sm" data-admblogtranslate>Перевести</button>' +
-      "</div>" +
-
-      '<label class="field"><span class="field__label">Заголовок</span>' +
-        '<input class="input" data-blogf="title" maxlength="200" value="' + esc(d.title[L]) + '"></label>' +
-      '<label class="field"><span class="field__label">Анонс</span>' +
-        '<textarea class="input" rows="2" maxlength="500" data-blogf="excerpt">' + esc(d.excerpt[L]) + "</textarea></label>" +
-      /* The body: a visual box, not a markdown field, and no separate
-         preview under it — what is in the box IS what the article looks
-         like, down to the same .acc__rich rules the shop uses. */
-      '<div class="field"><span class="field__label">Текст статьи</span>' +
-        '<div class="admblog__tb" role="toolbar" aria-label="Оформление текста">' +
-          '<button class="btn btn--ghost btn--sm" data-blogrt="h2">Заголовок</button>' +
-          '<button class="btn btn--ghost btn--sm" data-blogrt="bold">Жирный</button>' +
-          '<button class="btn btn--ghost btn--sm" data-blogrt="ul">Список</button>' +
-          '<button class="btn btn--ghost btn--sm" data-blogrt="link">Ссылка</button>' +
-          '<button class="btn btn--ghost btn--sm" data-blogrt="image">Картинка</button>' +
-          '<button class="btn btn--ghost btn--sm" data-blogrt="product">Товар</button>' +
-          '<button class="btn btn--ghost btn--sm" data-blogrt="undo">Отменить</button>' +
-        "</div>" +
-        // …and the open sheet, so a render() in the middle of «Товар» does not shut it
-        '<div class="admblog__tool" data-blogtool>' + blogToolSheet() + "</div>" +
-        /* `placeholder` on a div is not a real one — the CSS prints it with
-           content: attr(placeholder). It is written that way so translateTree()
-           rewrites it like any other placeholder in this panel. */
-        '<div class="input acc__rich admblog__rte" contenteditable="true" data-blogbody role="textbox" ' +
-          'aria-multiline="true" aria-label="Текст статьи" ' +
-          'placeholder="Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.">' +
-          (d.body[L] || "") + "</div>" +
-      "</div>" +
-
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Обложка</h3></div>' +
-      (d.coverUrl
-        ? '<div class="admblog__cover"><span class="admblog__coverimg" style="background-image:url(\'' + esc(d.coverUrl) + '\')"></span>' +
-          '<button class="link" data-admblogcoverdel>Удалить</button></div>'
-        : "") +
-      galDropZone("blog", "Загрузить обложку", "JPEG, PNG или WebP, до 12 МБ.") +
-      '<label class="field"><span class="field__label">Alt-текст обложки</span>' +
-        '<input class="input" data-blogf="coverAlt" maxlength="160" value="' + esc(d.coverAlt[L]) + '"></label>' +
-
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Теги</h3></div>' +
-      '<label class="field"><input class="input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="Тег и запятая"></label>' +
-
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Товары в статье</h3></div>' +
-      (picked.length
-        ? '<div class="admblog__products">' + picked.map(function (p) {
-            return '<span class="chip">' + esc(p.brand + " " + p.name) + '<button data-admblogproductdel="' + esc(p.id) + '" aria-label="Убрать">✕</button></span>';
-          }).join("") + "</div>"
-        : "") +
-      '<input class="input input--box" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию" style="margin-bottom:8px;max-width:420px">' +
-      '<div id="admblogproducts">' + (matches.length
-        ? '<div class="adm__list">' + matches.map(function (p) {
-            return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-              '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-              '<button class="link" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
-          }).join("") + "</div>"
-        : "") + "</div>" +
-
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">SEO для Google</h3></div>' +
-      '<label class="field"><span class="field__label">SEO-заголовок · <span data-blogcount="seoTitle">' + seoTLen + "/70</span></span>" +
-        '<input class="input" data-blogf="seoTitle" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
-      '<label class="field"><span class="field__label">SEO-описание · <span data-blogcount="seoDesc">' + seoDLen + "/170</span></span>" +
-        '<textarea class="input" rows="3" maxlength="170" data-blogf="seoDesc">' + esc(d.seoDesc[L]) + "</textarea></label>" +
-
-      '<div class="sec__head sec__head--sub"><h3 class="sec__title">Прочее</h3></div>' +
-      '<label class="field"><span class="field__label">Адрес страницы (slug)</span>' +
-        '<input class="input" data-blogslug value="' + esc(d.slug) + '" placeholder="' + esc(slugPlaceholder) + '"></label>' +
-      '<label class="field"><span class="field__label">Автор</span>' +
-        '<input class="input" data-blogf="author" maxlength="60" value="' + esc(d.author) + '"></label>' +
-
-      (S.adminBlogErr ? '<div class="err" role="alert">' + esc(S.adminBlogErr) + "</div>" : "") +
-
-      '<div class="adm__acts admblog__acts">' +
-        '<button class="btn" data-admblogsave' + (busy ? " disabled" : "") + ">" +
-          (d.status === "published" ? "Сохранить" : "Сохранить черновик") + "</button>" +
-        (d.status === "published"
-          ? '<button class="btn btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
-          : '<button class="btn btn--ghost" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>") +
-        (d.id
-          ? (S.adminBlogConfirmDelete
-            ? '<span class="admblog__delconfirm">Точно удалить эту статью? Она перейдёт в черновики — текст останется, но в магазине его будет не увидеть. ' +
-              '<button class="btn btn--sm" data-admblogdelyes' + (busy ? " disabled" : "") + ">Да, удалить</button> " +
-              '<button class="link" data-admblogdelno>Отмена</button></span>'
-            : '<button class="btn btn--ghost btn--sm" data-admblogdel>Удалить</button>')
-          : "") +
-      "</div>";
-  }
-
-  function admBlogHTML() {
-    if (S.adminBlogEditBusy && !S.adminBlogEdit) return '<p class="muted" style="margin:16px 0">Загружаем…</p>';
-    if (S.adminBlogEdit) return admBlogEditor(S.adminBlogEdit);
-    var posts = S.adminBlog;
-    var head = '<p class="muted" style="margin:16px 0">Статьи не входят в демо-режим: сохранение, публикация и удаление работают по-настоящему и не отменяются.</p>' +
-      '<div class="adm__acts" style="margin-bottom:14px"><button class="btn" data-admblognew>Новая статья</button></div>';
-    if (!posts) return head + '<p class="muted">Загружаем…</p>';
-    if (!posts.length) return head + '<p class="muted">Пока нет ни одной статьи — нажмите «Новая статья».</p>';
-    return head + '<div class="adm__list">' + posts.map(function (p) {
-      var title = p.title.RU || p.title.ET || p.title.EN || p.slug;
-      return '<div class="adm__row"><span class="adm__nm">' + esc(title) +
-          '<span class="adm__sub">' + (p.publishedAt ? blogDate(p.publishedAt) : "—") + "</span></span>" +
-        '<span class="chip ' + (p.status === "published" ? "chip--ok" : "chip--low") + '">' +
-          (p.status === "published" ? "Опубликовано" : "Черновик") + "</span>" +
-        '<button class="link" data-admblogedit="' + esc(p.id) + '">Править</button></div>';
-    }).join("") + "</div>";
-  }
 
   function complementsFor(p) {
     var mine = nameTokens(p), myType = nameType(p), mates = TYPE_MATES[myType] || [];
@@ -7957,7 +7866,7 @@
      shows under the name. */
   var ADM_MORE = [
     ["people", "Клиенты", "customers", "и отзывы"],
-    ["promos", "Маркетинг", "marketing", "промокоды · письма"],
+    ["promos", "Маркетинг", "marketing", "промокоды · подарочные карты · письма"],
     ["blog", "Блог", "blog", ""],
     ["stats", "Аналитика", "analytics", ""],
     ["apps", "Подключения", "integrations", ""],
@@ -7968,7 +7877,9 @@
     goods: "goods", stock: "goods",          // Товары → Каталог · Склад · Наборы
     pos: "pos",
     people: "people", reviews: "people",     // Клиенты → Все клиенты · Отзывы
-    promos: "promos", mail: "promos",        // Маркетинг → Промокоды · Письма
+    // Маркетинг → Промокоды · Подарочные карты · Письма. `gift` is new in
+    // phase 3: gift cards had no place in the panel at all before it.
+    promos: "promos", gift: "promos", mail: "promos",
     blog: "blog", stats: "stats", apps: "apps", setup: "setup"
   };
   /* 24-px line icons, stroke 1.5 (2.2 when the section is open), square caps —
@@ -8100,118 +8011,22 @@
     for (var i = 0; i < STATS_RANGES.length; i++) if (STATS_RANGES[i][0] === r) return r;
     return "7d";
   }
-  function statsRangePills() {
-    var cur = statsRange();
-    return '<div class="adm__acts" role="group" aria-label="Период">' + STATS_RANGES.map(function (r) {
-      return '<button class="btn btn--sm' + (r[0] === cur ? "" : " btn--ghost") + '" data-statsrange="' + r[0] + '" aria-current="' + (r[0] === cur) + '">' + r[1] + "</button>";
-    }).join(" ") + "</div>";
-  }
   /* KPI card with a delta vs. the previous period of the same length — reuses
      .kpi/.kpi__l/.kpi__v/.kpi__s (kpi() above), just with a coloured third
      line. deltaPct null (no previous-period data at all, e.g. a brand-new
      shop) reads as a sentence rather than a misleading "+0%". */
-  function statKpi(label, value, deltaPct) {
-    var sub = deltaPct == null ? "нет данных за прошлый период" : (deltaPct >= 0 ? "+" : "") + num1(deltaPct) + "% к прошлому периоду";
-    var color = deltaPct == null ? "" : deltaPct > 0 ? "color:var(--ok)" : deltaPct < 0 ? "color:var(--error)" : "";
-    return '<div class="kpi"><span class="kpi__l">' + label + '</span><span class="kpi__v num">' + value + "</span>" +
-      '<span class="kpi__s"' + (color ? ' style="' + color + '"' : "") + ">" + sub + "</span></div>";
-  }
   /* No chart library: a plain inline SVG line + fill, scaled to the data's
      own min/max. Reads var(--ink)/var(--rule-soft) like the rest of the
      panel, so it is never a colour of its own. */
-  function revenueChartSVG(rows) {
-    var W = 600, H = 130, PAD = 4;
-    var vals = rows.map(function (r) { return r.revenue; });
-    var max = Math.max.apply(null, vals.concat([0.01]));
-    var stepX = rows.length > 1 ? (W - PAD * 2) / (rows.length - 1) : 0;
-    var pts = rows.map(function (r, i) {
-      return [PAD + i * stepX, H - PAD - (r.revenue / max) * (H - PAD * 2)];
-    });
-    var line = pts.map(function (p, i) { return (i === 0 ? "M" : "L") + p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
-    var area = line + " L" + pts[pts.length - 1][0].toFixed(1) + "," + (H - PAD) + " L" + pts[0][0].toFixed(1) + "," + (H - PAD) + " Z";
-    return '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="Выручка по дням" style="width:100%;height:130px;display:block">' +
-      '<path d="' + area + '" fill="var(--rule-soft)" stroke="none"></path>' +
-      '<path d="' + line + '" fill="none" stroke="var(--ink)" stroke-width="2"></path>' +
-      "</svg>";
-  }
   var FUNNEL_STAGES = [
     ["sessions", "Сессии"], ["product", "Смотрели товар"], ["addToCart", "Добавили в корзину"],
     ["checkout", "Открыли оформление"], ["purchase", "Купили"]
   ];
-  function funnelHTML(funnel) {
-    var max = Math.max(funnel.sessions, 1);
-    return '<div class="adm__list">' + FUNNEL_STAGES.map(function (s) {
-      var v = funnel[s[0]] || 0;
-      var pct = v ? Math.max(2, Math.round((v / max) * 100)) : 0;
-      return '<div class="adm__row" style="flex-direction:column;align-items:stretch;gap:5px">' +
-        '<span style="display:flex;justify-content:space-between"><span class="adm__nm">' + s[1] + '</span><span class="num adm__pr">' + v + "</span></span>" +
-        '<span style="display:block;height:8px;border-radius:4px;background:var(--rule-soft);overflow:hidden">' +
-          '<span style="display:block;height:100%;width:' + pct + '%;background:var(--ink)"></span></span>' +
-        "</div>";
-    }).join("") + "</div>";
-  }
   /* Generic two-column list — name + one number — reused across most tables
      below. rows is an array of [name, valueText]. */
-  function nameValueRows(rows, emptyMsg) {
-    if (!rows.length) return '<p class="muted">' + emptyMsg + "</p>";
-    return '<div class="adm__list">' + rows.map(function (r) {
-      return '<div class="adm__row"><span class="adm__nm">' + esc(String(r[0])) + '</span><span class="num adm__pr">' + esc(String(r[1])) + "</span></div>";
-    }).join("") + "</div>";
-  }
-  function brandRevenueTable(rows) {
-    if (!rows.length) return '<p class="muted">Пока нет продаж.</p>';
-    return '<div class="adm__list">' + rows.map(function (r) {
-      return '<div class="adm__row"><span class="adm__nm">' + esc(r.brand) + '</span>' +
-        '<span class="num adm__pr">' + eur(r.revenue) + '</span><span class="num">' + r.orders + "</span></div>";
-    }).join("") + "</div>";
-  }
-  function promoUsageTable(rows) {
-    if (!rows.length) return '<p class="muted">Промокоды пока не использовали.</p>';
-    return '<div class="adm__list">' + rows.map(function (r) {
-      return '<div class="adm__row"><span class="adm__nm">' + esc(r.code) + '</span>' +
-        '<span class="num adm__pr">' + eur(r.amount) + '</span><span class="num">' + r.uses + "</span></div>";
-    }).join("") + "</div>";
-  }
   /* Same list Renat already sees on the Overview tab (lowStock() over the
      live CATALOGUE + his own overrides), with an edit link on each row —
      data-admgoods jumps straight into the goods editor for that product. */
-  function lowStockEditableHTML() {
-    var list = lowStock();
-    if (!list.length) return '<p class="muted">Всё в наличии.</p>';
-    return '<div class="adm__list">' + list.map(function (p) {
-      return '<div class="adm__row"><span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-        '<span class="chip ' + (p.stock === "out" ? "chip--out" : "chip--low") + '">' + (p.stock === "out" ? "нет" : "мало") + "</span>" +
-        '<button class="link" data-admgoods="' + esc(p.id) + '">Править</button></div>';
-    }).join("") + "</div>";
-  }
-  function gscTable(rows, isQuery) {
-    if (!rows || !rows.length) return '<p class="muted">Пока нет данных.</p>';
-    return '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row"><span>' +
-      (isQuery ? "Запрос" : "Страница") + "</span><span>Место</span><span>Показы</span><span>Клики</span><span>CTR</span></div>" +
-      rows.map(function (r) {
-        return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + esc(isQuery ? r.query : r.page) + "</span>" +
-          '<span class="num">' + num1(r.position) + '</span><span class="num">' + r.impressions + '</span>' +
-          '<span class="num">' + r.clicks + '</span><span class="num">' + num1(r.ctr * 100) + "%</span></div>";
-      }).join("") + "</div>";
-  }
-  function gscSectionHTML() {
-    loadGsc();
-    if (!GSC) return '<p class="muted">Загружаем…</p>';
-    if (!GSC.ok) {
-      return GSC.error === "not_configured"
-        ? '<p class="muted">Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md</p>'
-        : '<p class="muted">Google Search Console сейчас не отвечает — попробуйте позже.</p>';
-    }
-    return '<div class="adm__kpis">' +
-        kpi("Клики", String(GSC.clicks), "") + kpi("Показы", String(GSC.impressions), "") +
-        kpi("CTR", num1(GSC.ctr * 100) + "%", "") + kpi("Позиция", num1(GSC.position), "") +
-      "</div>" +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ запросов</h2></div>' + gscTable(GSC.topQueries, true) +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ страниц</h2></div>' + gscTable(GSC.topPages, false);
-  }
-  function offlineStatsHTML() {
-    return '<p class="muted" style="margin:16px 0">Аналитика считается на сервере из настоящих заходов и заказов — откроется здесь, как только вы войдёте в панель.</p>';
-  }
 
   /* ---------- analytics agent: «Обзор» -------------------------------------
      Every number on the first screen of the panel comes from ONE call —
@@ -8235,82 +8050,6 @@
       else { OVERVIEW.data = null; OVERVIEW.err = (r.body && r.body.error) || "error"; }
       render();
     }).catch(function () { OVERVIEW.data = null; OVERVIEW.err = "offline"; render(); });
-  }
-  function admStatsHTML() {
-    if (SRV.admin !== true) return offlineStatsHTML();
-    var range = statsRange();
-    loadAnalytics(range);
-    var rec = ANALYTICS[range];
-    var a = rec && rec.data;
-
-    var body = '<p class="muted" style="margin:16px 0">Что происходит с магазином — простыми словами.</p>' + statsRangePills();
-    if (!a) {
-      return body + '<p class="muted" style="margin-top:16px">' + (rec && rec.err ? "Аналитика сейчас не отвечает — попробуйте позже." : "Загружаем…") + "</p>";
-    }
-
-    body += '<div class="adm__kpis" style="margin-top:16px">' +
-      statKpi("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct) +
-      statKpi("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct) +
-      statKpi("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct) +
-      statKpi("Конверсия", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct) +
-    "</div>";
-
-    if (!a.kpi.orders.value && !a.funnel.sessions) {
-      body += '<p class="muted" style="margin-top:16px">Данных пока нет — они появятся после первых заходов.</p>';
-    }
-
-    body +=
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Выручка по дням</h2></div>' +
-      (a.revenueByDay.length > 1 ? revenueChartSVG(a.revenueByDay) : '<p class="muted">Пока нет данных.</p>') +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Воронка</h2></div>' +
-      funnelHTML(a.funnel) +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ товаров по выручке</h2></div>' +
-      nameValueRows(a.topProductsByRevenue.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, eur(p.revenue)]; }), "Пока нет продаж.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Бренды: что приносит деньги</h2></div>' +
-      brandRevenueTable(a.brandRevenue) +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Топ товаров по просмотрам</h2></div>' +
-      nameValueRows(a.topProductsByViews.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)]; }), "Пока нет просмотров.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Смотрят, но не покупают</h2></div>' +
-      nameValueRows(a.viewedNotBought.map(function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)]; }), "Таких товаров нет.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Популярные запросы</h2></div>' +
-      nameValueRows(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Ищут, но не находят</h2></div>' +
-      nameValueRows(a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }), "Таких запросов нет.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Промокоды</h2></div>' +
-      promoUsageTable(a.promoUsage) +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Устройства</h2></div>' +
-      nameValueRows([["Мобильные", String(a.traffic.device.mobile)], ["Компьютеры", String(a.traffic.device.desktop)]], "Пока нет данных.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Страны</h2></div>' +
-      nameValueRows(a.traffic.countries.map(function (c) { return [c.country, String(c.sessions)]; }), "Пока нет данных.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Откуда приходят</h2></div>' +
-      nameValueRows(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; }), "Пока нет данных.") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Ещё цифры</h2></div>' +
-      nameValueRows([
-        ["Брошенные корзины", String(a.abandonedCarts)],
-        ["Открытий чата", String(a.chatOpens)],
-        ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount)],
-        ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount)]
-      ], "") +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заканчиваются на складе</h2></div>' +
-      lowStockEditableHTML() +
-
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Google Search Console — последние 28 дней</h2></div>' +
-      gscSectionHTML();
-
-    return body;
   }
 
   /* ======================================================================
@@ -8996,6 +8735,13 @@
         ? '<div class="adm-legacy">' + goodsEditor(byId(S.adminEdit)) + "</div>"
         : admProductsHTML();
     }
+    // phase 3: the six «Ещё» sections, each redrawn on the loader it already had
+    else if (tab === "people" || tab === "reviews") body = admCustomersScreen();
+    else if (tab === "promos" || tab === "gift" || tab === "mail") body = admMarketingScreen();
+    else if (tab === "blog") body = admBlogScreen();
+    else if (tab === "stats") body = admStatsScreen();
+    else if (tab === "apps") body = admAppsHTML();
+    else if (tab === "setup") body = admSetupHTML();
     else body = '<div class="adm-legacy">' + admLegacyHTML(tab) + "</div>";
 
     return admHeader("Админка") +
@@ -9016,128 +8762,833 @@
     // the bottom of the file, called from render() itself.
   }
 
-  /* ---------- the sections phases 2 and 3 still have to redesign ----------
-     Each one is its own old screen function, unchanged, reached through the
-     new navigation. «Клиенты» and «Маркетинг» gained a tab strip because the
-     new IA folded two and three old tabs into one place; everything below the
-     strip is the markup that was already there. */
-  function admLegacyTabs(items) {
-    return '<div class="adm-tabs" role="group" aria-label="Что показываем">' + items.map(function (t) {
-      return '<button class="adm-tab" data-admtab="' + t[0] + '" aria-current="' + (S.adminTab === t[0]) +
-        '" title="' + t[1] + '">' + t[1] + (t[2] ? ' <span class="adm-tab__warn">' + t[2] + "</span>" : "") + "</button>";
-    }).join("") + "</div>";
-  }
+  /* ---------- «Салон» — the one section phase 2 still has to redesign -------
+     It keeps its own screen function and its own legacy markup: it sits inside
+     `.adm-legacy` and is reached through the new navigation exactly as before,
+     which is what keeps `data-admtab="pos"` working as a deep link. Everything
+     else on this floor was redrawn in phase 3 and uses `adm-` classes. */
   function admLegacyHTML(tab) {
     if (tab === "pos") return admHead("", "Салон", "") + admPosHTML();
-    if (tab === "people" || tab === "reviews") {
-      var pend = (S.admReviews && S.admReviews.counts && S.admReviews.counts.pending) || 0;
-      return admHead("", "Клиенты", "") +
-        admLegacyTabs([["people", "Все клиенты", 0], ["reviews", "Отзывы", pend]]) +
-        (tab === "reviews" ? admReviewsHTML() : admCustomersHTML());
-    }
-    if (tab === "promos" || tab === "mail") {
-      return admHead("", "Маркетинг", "") +
-        admLegacyTabs([["promos", "Промокоды", 0], ["mail", "Письма", 0]]) +
-        (tab === "mail" ? admMailHTML() : admPromosHTML());
-    }
-    if (tab === "blog") return admHead("", "Блог", "") + admBlogHTML();
-    if (tab === "stats") return admHead("", "Аналитика", "") + admStatsHTML();
-    if (tab === "apps") return admHead("", "Подключения", "") + admAppsHTML();
-    if (tab === "setup") return admHead("", "Настройки", "") + admSetupHTML();
     return "";
   }
 
-  /* «Маркетинг → Письма» — the letters the shop sends by itself, unchanged
-     from before the redesign; phase 3 restyles it. */
-  function admMailHTML() {
-    return '<p class="muted" style="margin:16px 0">Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.</p>' +
-    '<div class="adm__list">' +
-    [["Заказ принят", "сразу после оплаты — номер заказа и состав"],
-     ["Заказ отправлен", "трек-номер и кнопка отслеживания"]].map(function (f) {
-      return '<div class="adm__row"><span class="adm__nm">' + f[0] + '<span class="adm__sub">' + f[1] + "</span></span>" +
-        '<span class="chip chip--ok">всегда включено</span></div>';
-    }).join("") +
-    /* account-flows: these three switches now drive real senders
-       (src/lib/flows.ts), so the descriptions say what actually happens
-       and each row carries the size of its own queue. */
-    [["backstock", "Товар снова в наличии", "тем, кто оставил почту на странице товара", "alerts"],
-     ["abandoned", "Брошенная корзина", "напоминание через 3 часа, если заказ не завершён", "carts"],
-     ["birthday", "Скидка ко дню рождения", "личный промокод в день рождения, действует 14 дней", "birthdays"]].map(function (f) {
-      var on = !!DEMO.flows[f[0]];
-      return '<div class="adm__row"><span class="adm__nm">' + f[1] + '<span class="adm__sub">' + f[2] + "</span>" + flowCountHTML(f[3]) + "</span>" +
-        '<span class="chip ' + (on ? "chip--ok" : "chip--low") + '">' + (on ? "включено" : "выключено") + "</span>" +
-        '<button class="link" data-admflow="' + f[0] + '">' + (on ? "Выключить" : "Включить") + "</button></div>";
-    }).join("") + "</div>" +
-    mailCard() +
-    '<p style="margin-top:16px"><a class="link" href="/shop/emails/" target="_blank" rel="noopener">Открыть превью всех писем →</a></p>';
+  /* ======================================================================
+     Админка, редизайн — этап 3: «Клиенты», «Маркетинг», «Блог»,
+     «Аналитика», «Подключения» и «Настройки».
+
+     Same rules as phase 1 above: the pixel spec is
+     docs/design/admin-handoff-README.md, the copy is the prototype's, and
+     every screen is a function returning a string of `adm-` markup. Nothing
+     here invents data — each screen sits on the loader and the API the old one
+     already used, so a redesign cannot change what the shop does.
+     ====================================================================== */
+
+  /** The 44×26 switch of § «Design tokens». A <button aria-pressed>, not a
+      checkbox: every other control in the panel is a button the delegated
+      click handler already sees, and a switch that only answered to `change`
+      would be the one exception in the file. */
+  function admSwitch(attrs, on, label) {
+    return '<button class="adm-sw" ' + attrs + ' aria-pressed="' + !!on +
+      '" title="' + label + '" aria-label="' + label + '"><i></i></button>';
+  }
+  /** A segmented control — RU · ET · EN above the letter and the article. */
+  function admSegHTML(attr, items, cur, aria) {
+    return '<div class="adm-seg" role="group" aria-label="' + aria + '">' + items.map(function (x) {
+      return "<button " + attr + '="' + esc(x[0]) + '" aria-current="' + (cur === x[0]) + '">' + x[1] + "</button>";
+    }).join("") + "</div>";
+  }
+  /** One tab in a section's own strip, still addressed by its old section key
+      — «Отзывы» is `data-admtab="reviews"`, «Письма» is `"mail"` — so the
+      assistant's «Открыть …» buttons and the e2e suite keep working. */
+  function admTabBtn(key, label, warn, on) {
+    return '<button class="adm-tab" data-admtab="' + key + '" aria-current="' + !!on +
+      '" title="' + label + '">' + label +
+      (warn ? ' <span class="adm-tab__warn">' + warn + "</span>" : "") + "</button>";
+  }
+  function admTabsHTML(inner) {
+    return '<div class="adm-tabs" role="group" aria-label="Что показываем">' + inner + "</div>";
+  }
+  /** «← Куда-то» — the one way back out of every sub-screen. */
+  function admBackHTML(attrs, label) {
+    return '<button class="adm-link" ' + attrs + ">← " + label + "</button>";
+  }
+  /** Two columns with a right rail, the pattern of § «Design tokens». */
+  function admColsHTML(main, side, wide) {
+    return '<div class="adm-cols' + (wide ? " adm-cols--wide" : "") + '">' +
+      '<div class="adm-stack adm-stack--tight">' + main + "</div><div>" + side + "</div></div>";
   }
 
-  /* «Подключения» — phase 3 turns these into actionable rows. */
+  /* ---------- Клиенты: «Все клиенты» и «Отзывы» ---------------------------
+     Two tabs over one screen, on the two loaders that were already there
+     (GET /api/admin/customers/, /api/admin/reviews/). What changed is the row:
+     a name, one grey line of facts, a tier badge and — for a partner request
+     still waiting — the two buttons that answer it on the spot instead of
+     three clicks deeper into the card. The card itself is unchanged: points,
+     the history and the private note still live there. */
+  function admReviewCounts() {
+    return (S.admReviews && S.admReviews.counts) || { pending: 0, approved: 0, rejected: 0 };
+  }
+  function admCustomersScreen() {
+    var onReviews = S.adminTab === "reviews";
+    if (onReviews) loadAdminReviews(false);
+    var pend = admReviewCounts().pending || 0;
+    return '<div class="adm-screen adm-screen--tight">' +
+      admHead("", "Клиенты", "") +
+      admTabsHTML(
+        admTabBtn("people", "Все клиенты", 0, !onReviews) +
+        admTabBtn("reviews", "Отзывы", pend, onReviews)) +
+      (onReviews ? admReviewsHTML() : admCustomersHTML()) +
+      "</div>";
+  }
+
+  /* ---------- Маркетинг: «Промокоды» · «Подарочные карты» · «Письма» ------
+     Three tabs over three old keys: `promos`, the new `gift`, and `mail`. Gift
+     cards get a home of their own here (README fix #11) — until now the shop
+     sold them from /gift/ and the panel could not see them at all. */
+  function admMarketingTab() {
+    if (S.adminTab === "gift") return "gift";
+    if (S.adminTab === "mail") return "mail";
+    return "promos";
+  }
+  function admMarketingScreen() {
+    var tab = admMarketingTab();
+    var add = tab === "promos" && !S.promoForm
+      ? '<button class="adm-btn adm-btn--head" data-admpromonew>+ Промокод</button>'
+      : "";
+    return '<div class="adm-screen adm-screen--tight">' +
+      admHead("", "Маркетинг", add) +
+      admTabsHTML(
+        admTabBtn("promos", "Промокоды", 0, tab === "promos") +
+        admTabBtn("gift", "Подарочные карты", 0, tab === "gift") +
+        admTabBtn("mail", "Письма", 0, tab === "mail")) +
+      (tab === "gift" ? admGiftScreenHTML() : tab === "mail" ? admMailHTML() : admPromosHTML()) +
+      "</div>";
+  }
+
+  /* ---------- Маркетинг → «Подарочные карты» ------------------------------
+     Two halves. On the left the denominations the shop offers — a real setting
+     (settings.gift_amounts, PUT /api/admin/settings, adopted by adoptServer()
+     like every other public one), so switching one off here takes the button
+     off the /gift/ page. On the right the cards that have actually been sold,
+     from the admin-only GET /api/admin/giftcards/.
+
+     One design, not three: the printable card (src/lib/giftcard-pdf.ts) knows
+     a single layout, and a thumbnail offering «светлое» or «своё» would be a
+     button that changes nothing. */
+  function admGiftScreenHTML() {
+    loadAdminGiftCards(false);
+    var on = giftAmountsOn();
+    var g = S.admGiftCards;
+    var left =
+      '<div><div class="adm-sec__t">Номиналы в магазине</div>' +
+        '<div class="adm-amts" role="group" aria-label="Номиналы карты" style="margin-top:10px">' +
+          GIFT_AMOUNTS.map(function (v) {
+            return '<button class="adm-amt" data-admgiftamt="' + v + '" aria-pressed="' +
+              (on.indexOf(v) >= 0) + '">' + v + " €</button>";
+          }).join("") + "</div>" +
+        '<p class="adm-hint" style="margin:8px 0 0">Нажмите, чтобы включить или скрыть номинал. ' +
+          "Карта продаётся отдельным пунктом в меню магазина, не в «Наборах».</p></div>" +
+      '<div><div class="adm-sec__t">Оформление</div>' +
+        '<div class="adm-gift" style="margin-top:10px" aria-hidden="true">REMPIRE</div>' +
+        '<p class="adm-hint" style="margin:8px 0 0">Одно оформление на все номиналы — ' +
+          "тёмная карта с логотипом, её же покупатель получает в PDF.</p></div>";
+    var rows = g && g.cards.length
+      ? '<div class="adm-list">' + g.cards.map(admGiftRowHTML).join("") + "</div>"
+      : g
+        ? '<div class="adm-empty">Пока не куплено ни одной карты</div>'
+        : '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    var side =
+      '<div class="adm-sec"><div class="adm-sec__t">Выпущенные карты</div>' +
+        '<div class="adm-sec__x">' + (g ? eur(g.unspent) + " не потрачено" : "") + "</div></div>" +
+      (S.admGiftErr
+        ? '<div class="adm-error"><span>' + esc(S.admGiftErr) + "</span>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="giftcards">Повторить</button></div>'
+        : rows);
+    return admColsHTML(left, side);
+  }
+  function admGiftRowHTML(c) {
+    var to = (c.recipient && (c.recipient.name || c.recipient.email)) || "покупателю";
+    return '<div class="adm-row"><span class="adm-row__body">' +
+      '<span class="adm-row__nm adm-mono">' + esc(c.code) + "</span>" +
+      '<span class="adm-row__sub">' + esc(to) + " · " + esc(shortDate(c.createdAt)) + "</span></span>" +
+      '<span class="adm-row__end"><span class="adm-row__amt">' + eur(c.balance) + "</span>" +
+      '<span class="adm-row__sub">из ' + eur(c.amount) + "</span></span></div>";
+  }
+  /* The issued cards, once per visit to the tab — a shop that sells three of
+     these a month does not need a poll, and «Повторить» re-asks. */
+  function loadAdminGiftCards(force) {
+    if (SRV.admin !== true) return;
+    if (S.admGiftCards && !force) return;
+    if (loadAdminGiftCards._busy) return;
+    loadAdminGiftCards._busy = true;
+    apiJson("/api/admin/giftcards/").then(function (r) {
+      loadAdminGiftCards._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      var ok = r.status === 200 && r.body.ok;
+      S.admGiftCards = { cards: ok ? (r.body.cards || []) : [], unspent: ok ? (r.body.unspent || 0) : 0 };
+      S.admGiftErr = ok ? "" : "Список карт не загрузился.";
+      render();
+    }).catch(function () {
+      loadAdminGiftCards._busy = false;
+      S.admGiftCards = { cards: [], unspent: 0 };
+      S.admGiftErr = "Сервер не отвечает.";
+      render();
+    });
+  }
+
+  /* ---------- Маркетинг → «Письма» ----------------------------------------
+     A list of the letters the shop sends by itself, then the editor for one of
+     them. The three switchable ones are the account flows (settings.flows,
+     `data-admflow`); the other three say «всегда» instead — a shop that could
+     switch off «Заказ принят» would be a shop that takes money silently.
+
+     The editor is the mail_texts flow that was already here: the same three
+     fields, the same placeholder chips, the same «Сохранить» → confirm card →
+     one set_mail_texts action. New is the layout — fields left, the letter
+     right, redrawn from the draft as it is typed. */
+  var ADM_MAIL_ROWS = [
+    ["order-confirmed", "Заказ принят", "сразу после оплаты", ""],
+    ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
+    ["back-in-stock", "Товар снова в наличии", "тем, кто оставил почту", "backstock"],
+    ["abandoned-cart", "Брошенная корзина", "через 3 часа", "abandoned"],
+    ["birthday", "Скидка ко дню рождения", "за 3 дня до даты", "birthday"],
+    ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""]
+  ];
+  function admMailName(tpl) {
+    for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
+    return tpl;
+  }
+  function admMailHTML() {
+    loadMailTexts(false);
+    if (SRV.admin === true) loadFlowCounts();
+    if (S.mailOpen) return admMailEditorHTML();
+    return '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
+      var flow = m[3];
+      var on = flow ? !!DEMO.flows[flow] : true;
+      return '<div class="adm-row adm-row--tall">' +
+        '<button class="adm-row__body" data-mailtpl="' + m[0] + '" style="border:0;background:none;padding:0;text-align:left">' +
+          '<span class="adm-row__nm">' + m[1] + "</span>" +
+          '<span class="adm-row__sub">' + m[2] + flowCountLine(flow) + "</span></button>" +
+        (flow
+          ? admSwitch('data-admflow="' + flow + '"', on, on ? "Выключить письмо" : "Включить письмо")
+          : '<span class="adm-badge adm-badge--ok">всегда</span>') +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
+        "</div>";
+    }).join("") + "</div>" +
+      '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
+        "их править не нужно.</p>";
+  }
+  /** « · Ждут письма: 3» — only when the server actually counted, never a zero
+      the panel cannot stand behind. Its own function so the i18n check sees
+      one string instead of a bare fragment. */
+  function flowCountLine(flow) {
+    var key = { backstock: "alerts", abandoned: "carts", birthday: "birthdays" }[flow];
+    if (!FLOW_COUNTS || !key || FLOW_COUNTS[key] === undefined) return "";
+    return " · " + FLOW_COUNT_LABEL[key] + " " + Number(FLOW_COUNTS[key]);
+  }
+  function admMailEditorHTML() {
+    var tpl = mailTpl(), lang = mailLang();
+    var pending = pendingAction && pendingAction.type === "set_mail_texts" ? confirmCard(pendingAction) : "";
+    var left =
+      '<div class="adm-sec__t">' + admMailName(tpl) + "</div>" +
+      admSegHTML("data-maillang", LANGS, lang, "Язык письма") +
+      (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять тексты писем.</div>') +
+      pending +
+      '<p class="adm-hint" data-maildirty' + (mailDirty() && !pending ? "" : " hidden") + ">" +
+        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      MAIL_FIELDS.map(function (f) { return admMailFieldHTML(tpl, lang, f); }).join("") +
+      '<p class="adm-hint">Номер заказа, состав и трек-номер подставляются сами — их править не нужно.</p>' +
+      '<label class="adm-field">Адрес для теста' +
+        '<input class="adm-input" type="email" data-mailto value="' + esc(S.mailTo || "") +
+        '" placeholder="renat@rempireshop.com"></label>' +
+      '<div class="adm-acts" id="mailacts">' + admMailActsHTML() + "</div>";
+    return admBackHTML("data-mailback", "Все письма") +
+      admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
+      '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
+        '<iframe class="adm-frame" title="Предпросмотр письма" loading="lazy" style="margin-top:10px" ' +
+          'src="/api/admin/mail/preview/?template=' + encodeURIComponent(tpl) + "&amp;lang=" +
+          encodeURIComponent(lang) + "&amp;v=" + mailPreviewV + '"></iframe></div>';
+  }
+  function admMailFieldHTML(tpl, lang, f) {
+    var field = f[0], lim = mailLimit(field), val = mailValue(tpl, lang, field);
+    var own = val !== mailDefault(tpl, lang, field);
+    var box = field === "intro"
+      ? '<textarea class="adm-input" rows="5" maxlength="' + lim + '" data-mailtxt="' + field + '">' + esc(val) + "</textarea>"
+      : '<input class="adm-input" maxlength="' + lim + '" data-mailtxt="' + field + '" value="' + esc(val) + '">';
+    return '<label class="adm-field">' + f[1] + box + "</label>" +
+      '<div class="adm-acts" style="gap:6px;margin-top:-6px">' + MAIL_PH.map(function (p) {
+        return '<button class="adm-chip" data-mailph="' + field + ":" + p[0] + '" title="' + p[1] + '">{' + p[0] + "}</button>";
+      }).join("") +
+      (own ? '<button class="adm-link adm-link--muted" data-mailreset="' + field + '">Вернуть стандартный текст</button>' : "") +
+      "</div>";
+  }
+  function admMailActsHTML() {
+    return '<button class="adm-btn" data-mailsave>Сохранить</button>' +
+      '<button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button>' +
+      (mailDirty() ? '<button class="adm-link adm-link--muted" data-mailrevert>Отменить правки</button>' : "");
+  }
+  /** The letter as the customer will see it, drawn from the draft — so the
+      owner watches it change while typing. The iframe below it is the real
+      render; this is the shape, and it is the one that answers instantly. */
+  function admMailPreviewHTML(tpl, lang) {
+    var langName = { RU: "русский", ET: "eesti", EN: "English" }[lang] || lang;
+    return '<div class="adm-prev"><div class="adm-prev__l">Так увидит клиент · ' + langName + "</div>" +
+      '<div class="adm-prev__card"><div class="adm-prev__mark">REMPIRE</div>' +
+        '<div class="adm-prev__s" data-mailprev="subject">' + esc(admMailPreviewText(tpl, lang, "subject")) + "</div>" +
+        '<div class="adm-prev__body" data-mailprev="intro">' + esc(admMailPreviewText(tpl, lang, "intro")) + "</div>" +
+        '<div class="adm-prev__ord">System 4 — Bio Botanical Shampoo · 250 мл × 2<br>Итого 28,84 €</div>' +
+        '<div class="adm-prev__sign" data-mailprev="signature">' + esc(admMailPreviewText(tpl, lang, "signature")) + "</div>" +
+      "</div></div>";
+  }
+  /** The field with its placeholders filled in the way the letter fills them,
+      so the preview reads as a letter and not as a template. */
+  function admMailPreviewText(tpl, lang, field) {
+    return mailValue(tpl, lang, field)
+      .replace(/\{order\}/g, "R-100042").replace(/\{name\}/g, "Mart")
+      .replace(/\{total\}/g, "28,84 €").replace(/\{track\}/g, "CC123456789EE")
+      .replace(/\{shop\}/g, "Rempire").replace(/\{code\}/g, "SUVI10")
+      .replace(/\{product\}/g, "Bio Botanical Shampoo");
+  }
+  /* Typing must not cost the caret, so the preview and the save button repaint
+     on their own instead of through render() — the same idiom the old card
+     used for `#mailacts` (paintMailState below is what calls this). */
+  function paintMailPreview() {
+    var tpl = mailTpl(), lang = mailLang();
+    ["subject", "intro", "signature"].forEach(function (f) {
+      var el = document.querySelector('[data-mailprev="' + f + '"]');
+      if (el) el.textContent = admMailPreviewText(tpl, lang, f);
+    });
+  }
+
+  /* ---------- Блог: список и редактор -------------------------------------
+     The block editor itself is untouched — the same contenteditable box, the
+     same toolbar commands, the same «Товар»/«Картинка» sheets and the same
+     save/publish/delete calls straight to /api/admin/blog/. What phase 3 does
+     is the layout the spec asks for: the article on the left under an Oswald
+     title and a cover zone, and two small cards on the right — «Публикация»
+     and «Помощник». */
+  function admBlogScreen() {
+    if (S.adminBlogEdit) return admBlogEditorScreen(S.adminBlogEdit);
+    if (S.adminBlogEditBusy) {
+      return '<div class="adm-screen adm-screen--tight">' + admHead("", "Блог", "") +
+        '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+    }
+    var posts = S.adminBlog;
+    var head = '<div class="adm-screen adm-screen--tight">' +
+      admHead("", "Блог", '<button class="adm-btn adm-btn--head" data-admblognew>+ Статья</button>');
+    if (!posts) return head + '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+    if (!posts.length) return head + '<div class="adm-empty">Пока нет ни одной статьи — нажмите «+ Статья»</div></div>';
+    return head + '<div class="adm-list">' + posts.map(admBlogRowHTML).join("") + "</div></div>";
+  }
+  function admBlogRowHTML(p) {
+    var title = p.title.RU || p.title.ET || p.title.EN || p.slug;
+    var ex = p.excerpt && (p.excerpt.RU || p.excerpt.ET || p.excerpt.EN) || "";
+    var date = p.publishedAt ? blogDate(p.publishedAt) : "черновик";
+    return '<button class="adm-row adm-row--tall adm-row--click" data-admblogedit="' + esc(p.id) + '">' +
+      '<span class="adm-thumb" style="width:72px;height:48px' +
+        (p.coverUrl ? ";background-image:url('" + esc(p.coverUrl) + "');background-size:cover;background-position:center" : "") +
+        '"></span>' +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(title) + "</span>" +
+        '<span class="adm-row__sub adm-row__sub--one">' + esc(date) + (ex ? " · " + esc(ex) : "") + "</span></span>" +
+      '<span class="adm-badge adm-badge--sm ' + (p.status === "published" ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
+        (p.status === "published" ? "Опубликована" : "Черновик") + "</span></button>";
+  }
+  var ADM_BLOG_TOOLS = [
+    ["h2", "Заголовок"], ["bold", "B"], ["italic", "I"], ["ul", "• Список"],
+    ["link", "Ссылка"], ["image", "Картинка"], ["product", "Товар"]
+  ];
+  function admBlogEditorScreen(d) {
+    var L = S.adminBlogLang || "RU";
+    var busy = S.adminBlogBusy;
+    blogKeepCaret();   // this render is about to replace the box being typed in
+    var picked = productsById(d.products);
+    var q = (S.adminBlogQ || "").trim().toLowerCase();
+    var matches = q ? CATALOGUE.filter(function (p) {
+      return d.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
+    }).slice(0, 8) : [];
+
+    var left =
+      admSegHTML("data-admbloglang", LANGS, L, "Язык статьи") +
+      '<input class="adm-title-in" data-blogf="title" maxlength="200" placeholder="Заголовок" value="' + esc(d.title[L]) + '">' +
+      admBlogCoverHTML(d) +
+      '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
+        return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
+      }).join("") + '<button data-blogrt="undo" title="Отменить">Отменить</button></div>' +
+      '<div class="admblog__tool" data-blogtool>' + blogToolSheet() + "</div>" +
+      /* `placeholder` on a div is not a real one — the CSS prints it with
+         content: attr(placeholder). Written that way so translateTree()
+         rewrites it like any other placeholder in this panel. */
+      '<div class="adm-canvas acc__rich" contenteditable="true" data-blogbody role="textbox" aria-multiline="true" ' +
+        'aria-label="Текст статьи" placeholder="Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.">' +
+        (d.body[L] || "") + "</div>" +
+      '<label class="adm-field">Анонс — две строки в списке и в поиске' +
+        '<textarea class="adm-input" rows="2" maxlength="500" data-blogf="excerpt">' + esc(d.excerpt[L]) + "</textarea></label>" +
+      '<label class="adm-field">Подпись к обложке' +
+        '<input class="adm-input" data-blogf="coverAlt" maxlength="160" value="' + esc(d.coverAlt[L]) + '"></label>' +
+      '<label class="adm-field">Теги — через запятую' +
+        '<input class="adm-input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="борода, зима"></label>' +
+      '<div><div class="adm-sec__t">Товары в статье</div>' +
+        (picked.length ? '<div class="adm-acts" style="margin:8px 0">' + picked.map(function (p) {
+          return '<span class="adm-badge">' + esc(p.brand + " " + p.name) +
+            ' <button class="adm-link" data-admblogproductdel="' + esc(p.id) + '" aria-label="Убрать">✕</button></span>';
+        }).join("") + "</div>" : "") +
+        '<input class="adm-input" data-admblogq value="' + esc(S.adminBlogQ || "") + '" placeholder="Найти товар по названию">' +
+        '<div id="admblogproducts">' + admBlogPicksHTML(matches) + "</div></div>" +
+      '<details class="adm-embed"><summary class="adm-link">Адрес, автор и текст для Google</summary>' +
+        '<div style="padding-top:12px">' +
+          '<label class="adm-field">Заголовок для Google · <span data-blogcount="seoTitle">' +
+            (d.seoTitle[L] || "").length + "/70</span>" +
+            '<input class="adm-input" data-blogf="seoTitle" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
+          '<label class="adm-field" style="margin-top:10px">Описание для Google · <span data-blogcount="seoDesc">' +
+            (d.seoDesc[L] || "").length + "/170</span>" +
+            '<textarea class="adm-input" rows="3" maxlength="170" data-blogf="seoDesc">' + esc(d.seoDesc[L]) + "</textarea></label>" +
+          '<label class="adm-field" style="margin-top:10px">Адрес страницы' +
+            '<input class="adm-input" data-blogslug value="' + esc(d.slug) + '" placeholder="' +
+            esc(blogSlugify(d.title.RU || d.title.ET || d.title.EN || "")) + '"></label>' +
+          '<label class="adm-field" style="margin-top:10px">Автор' +
+            '<input class="adm-input" data-blogf="author" maxlength="60" value="' + esc(d.author) + '"></label>' +
+        "</div></details>" +
+      (S.adminBlogErr ? '<div class="adm-err" role="alert">' + esc(S.adminBlogErr) + "</div>" : "");
+
+    var side =
+      '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Публикация</div>' +
+        '<div class="adm-hint">' + (d.status === "published"
+          ? "Опубликована" + (d.publishedAt ? " " + blogDate(d.publishedAt) : "") +
+            ". Изменения появятся в магазине сразу после сохранения."
+          : "Черновик. В магазине его пока не видно.") + "</div>" +
+        (d.status === "published"
+          ? '<button class="adm-btn" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
+            '<button class="adm-btn adm-btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
+          : '<button class="adm-btn" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>" +
+            '<button class="adm-btn adm-btn--ghost" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
+        (d.id
+          ? (S.adminBlogConfirmDelete
+            ? '<div class="adm-hint adm-hint--warn">Точно удалить статью? Текст останется в черновиках, ' +
+              "но в магазине её будет не увидеть.</div>" +
+              '<button class="adm-btn adm-btn--warn" data-admblogdelyes' + (busy ? " disabled" : "") + ">Да, удалить</button>" +
+              '<button class="adm-link adm-link--muted" data-admblogdelno>Отмена</button>'
+            : '<button class="adm-link adm-link--warn" data-admblogdel>Удалить статью</button>')
+          : "") +
+      "</div>" +
+      '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
+        '<label class="adm-field">Тема статьи' +
+          '<input class="adm-input" data-admblogtopic placeholder="уход за бородой зимой"></label>' +
+        '<button class="adm-btn adm-btn--ghost" data-admblogoutline>Написать черновик по теме</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-admblogtranslate>Перевести на ET и EN</button>' +
+        '<div class="adm-hint">Помощник пишет черновик — прочитайте и поправьте, публикуете вы.</div></div>';
+
+    return '<div class="adm-screen adm-screen--tight">' +
+      admBackHTML("data-admblogback", "Блог") +
+      admColsHTML(left, side) + "</div>";
+  }
+  function admBlogPicksHTML(matches) {
+    if (!matches.length) return "";
+    return '<div class="adm-list">' + matches.map(function (p) {
+      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "") + "</span>" +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
+    }).join("") + "</div>";
+  }
+  /** The 160-px cover zone: a drop target with the picture in it once there is
+      one, and the same [data-galdrop="blog"]/[data-galup="blog"] upload the
+      editor already used. */
+  function admBlogCoverHTML(d) {
+    return '<div class="adm-drop' + (d.coverUrl ? " adm-drop--set" : "") + '" data-galdrop="blog">' +
+      (d.coverUrl ? '<span class="adm-drop__img" style="background-image:url(&#39;' + esc(d.coverUrl) + '&#39;)"></span>' : "") +
+      '<span><button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' +
+        (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" +
+        (UP.busy ? upBusyText() : d.coverUrl ? "Заменить обложку" : "+ Обложка") + "</button>" +
+      '<input class="admphoto__file" type="file" accept="image/*" data-galfile="blog" aria-label="Обложка статьи">' +
+      (d.coverUrl ? ' <button class="adm-link adm-link--muted" data-admblogcoverdel>Удалить</button>' : "") +
+      '<span class="adm-hint" style="display:block;margin-top:6px">' +
+        (MEDIA.on === false ? "Загрузка фото пока не настроена — нужно подключить хранилище."
+          : "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.") + "</span></span>" +
+      (UP.err ? '<span class="adm-err">' + esc(UP.err) + "</span>" : "") +
+      "</div>";
+  }
+
+  /* ---------- Аналитика ---------------------------------------------------
+     Everything here comes from the endpoint the tab already read
+     (GET /api/admin/analytics/?range=…). The four KPI cells, the bars and the
+     two short lists are the screen the spec asks for; the deeper tables the
+     owner had before — the funnel, brands, devices, countries, Search Console
+     — stay under them, because a redesign that quietly drops numbers is a
+     redesign that loses the owner data. */
+  var ADM_WEEKDAYS = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+  function admKpiHTML(label, value, deltaPct) {
+    var cls = deltaPct == null ? "" : deltaPct > 0 ? " adm-kpi__d--up" : deltaPct < 0 ? " adm-kpi__d--down" : "";
+    var line = deltaPct == null
+      ? "нет данных за прошлый период"
+      : (deltaPct >= 0 ? "+" : "") + num1(deltaPct) + "% к прошлому периоду";
+    return '<div class="adm-kpi"><div class="adm-kpi__l">' + label + "</div>" +
+      '<div class="adm-kpi__v">' + value + "</div>" +
+      '<div class="adm-kpi__d' + cls + '">' + line + "</div></div>";
+  }
+  /** One bar per day, labelled with its weekday; the last one is today, so it
+      is the ink one. At most a fortnight — beyond that the labels stop being
+      readable and the shape stops being the point. */
+  function admBarsHTML(rows) {
+    var series = rows.slice(-14);
+    var top = series.reduce(function (a, r) { return Math.max(a, r.revenue); }, 0) || 1;
+    return '<div class="adm-wbars">' + series.map(function (r, i) {
+      var d = new Date(r.day);
+      var lbl = isNaN(d.getTime()) ? "" : ADM_WEEKDAYS[d.getDay()];
+      return '<div class="adm-wbar' + (i === series.length - 1 ? " adm-wbar--now" : "") +
+        '" style="height:' + Math.max(2, Math.round((r.revenue / top) * 100)) + '%" title="' +
+        eur(r.revenue) + '"><span>' + lbl + "</span></div>";
+    }).join("") + "</div>";
+  }
+  /** Name + one number, the shape most of this screen is made of. */
+  function admPairsHTML(rows, empty, plain) {
+    if (!rows.length) return '<div class="adm-empty">' + empty + "</div>";
+    return '<div class="adm-list">' + rows.map(function (r) {
+      return '<div class="adm-pair"><span class="adm-pair__n">' + esc(String(r[0])) + "</span>" +
+        '<span class="adm-pair__v' + (plain ? " adm-pair__v--plain" : "") + '">' + esc(String(r[1])) + "</span></div>";
+    }).join("") + "</div>";
+  }
+  function admStatsScreen() {
+    var range = statsRange();
+    var head = '<div class="adm-screen adm-screen--tight">' + admHead("", "Аналитика", "") +
+      '<div class="adm-chips" role="group" aria-label="Период">' + STATS_RANGES.map(function (r) {
+        return '<button class="adm-chip" data-statsrange="' + r[0] + '" aria-current="' + (r[0] === range) + '">' +
+          r[1] + "</button>";
+      }).join("") + "</div>";
+    if (SRV.admin !== true) {
+      return head + '<div class="adm-empty">Аналитика считается на сервере из настоящих заходов и заказов — ' +
+        "откроется, как только вы войдёте в панель</div></div>";
+    }
+    loadAnalytics(range);
+    var rec = ANALYTICS[range], a = rec && rec.data;
+    if (!a) {
+      return head + (rec && rec.err
+        ? '<div class="adm-error"><span>Аналитика сейчас не отвечает — попробуйте позже.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="stats">Повторить</button></div>'
+        : '<div class="adm-skel"><i></i><i></i><i></i></div>') + "</div>";
+    }
+    var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, eur(p.revenue)]; };
+    return head +
+      '<div class="adm-kpis">' +
+        admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct) +
+        admKpiHTML("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct) +
+        admKpiHTML("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct) +
+        admKpiHTML("Из корзины в заказ", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct) +
+      "</div>" +
+      admColsHTML(
+        '<div><div class="adm-sec__t">Выручка по дням</div>' +
+          (a.revenueByDay.length ? admBarsHTML(a.revenueByDay) : '<div class="adm-empty">Пока нет данных</div>') + "</div>",
+        '<div class="adm-sec__t">Топ товаров</div>' +
+        admPairsHTML(a.topProductsByRevenue.map(prod), "Пока нет продаж") +
+        '<div class="adm-sec__t" style="margin-top:24px">Искали, но не нашли</div>' +
+        admPairsHTML(a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }),
+          "Таких запросов нет", true)) +
+      admStatsMoreHTML(a) + "</div>";
+  }
+  /** The numbers that do not fit the four cells above but that the owner has
+      had all along: the funnel, brands, views, searches, promo codes, traffic
+      and Search Console. */
+  function admStatsMoreHTML(a) {
+    return '<div class="adm-stack adm-stack--tight">' +
+      '<div><div class="adm-sec__t">Воронка</div>' + admPairsHTML(FUNNEL_STAGES.map(function (s) {
+        return [s[1], String(a.funnel[s[0]] || 0)];
+      }), "Пока нет данных", true) + "</div>" +
+      '<div><div class="adm-sec__t">Бренды: что приносит деньги</div>' +
+        admPairsHTML(a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж") + "</div>" +
+      '<div><div class="adm-sec__t">Смотрят, но не покупают</div>' +
+        admPairsHTML(a.viewedNotBought.map(function (p) {
+          return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)];
+        }), "Таких товаров нет", true) + "</div>" +
+      '<div><div class="adm-sec__t">Что искали чаще всего</div>' +
+        admPairsHTML(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали", true) + "</div>" +
+      '<div><div class="adm-sec__t">Промокоды</div>' +
+        admPairsHTML(a.promoUsage.map(function (r) { return [r.code, eur(r.amount)]; }),
+          "Промокоды пока не использовали") + "</div>" +
+      '<div><div class="adm-sec__t">Откуда приходят</div>' +
+        admPairsHTML([["Мобильные", String(a.traffic.device.mobile)], ["Компьютеры", String(a.traffic.device.desktop)]]
+          .concat(a.traffic.countries.map(function (c) { return [c.country, String(c.sessions)]; }))
+          .concat(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; })),
+          "Пока нет данных", true) + "</div>" +
+      '<div><div class="adm-sec__t">Ещё цифры</div>' +
+        admPairsHTML([
+          ["Брошенные корзины", String(a.abandonedCarts)],
+          ["Открытий чата", String(a.chatOpens)],
+          ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount)],
+          ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount)]
+        ], "Пока нет данных", true) + "</div>" +
+      '<div><div class="adm-sec__t">Google: 28 дней</div>' + admGscHTML() + "</div>" +
+      "</div>";
+  }
+  function admGscHTML() {
+    loadGsc();
+    if (!GSC) return '<div class="adm-skel"><i></i><i></i></div>';
+    if (!GSC.ok) {
+      return '<div class="adm-empty">' + (GSC.error === "not_configured"
+        ? "Google Search Console ещё не подключён — см. «Подключения»"
+        : "Google Search Console сейчас не отвечает — попробуйте позже") + "</div>";
+    }
+    return admPairsHTML([
+      ["Клики", String(GSC.clicks)], ["Показы", String(GSC.impressions)],
+      ["Средняя позиция", num1(GSC.position)]
+    ].concat((GSC.topQueries || []).slice(0, 5).map(function (q) {
+      return [q.query, String(q.clicks)];
+    })), "Пока нет данных", true);
+  }
+
+  /* ---------- Подключения -------------------------------------------------
+     One row per thing the shop leans on, and every row's colour comes from
+     something the server actually reported: whether Montonio answered with a
+     bank list, whether the delivery tariffs loaded, what the last test letter
+     said about the mail key, what Search Console answered, whether analytics
+     has data, whether the assistant has a model behind it, and whether this
+     browser can open a camera at all. Nothing here is a status somebody typed
+     in — a green square the owner cannot trust is worse than no square. */
+  var ADM_DEV_MAIL = "dmitri@diipsolutions.eu";
+  function admDevLink(label) {
+    return '<a class="adm-btn adm-btn--row" href="mailto:' + ADM_DEV_MAIL +
+      '?subject=Rempire' + "%20%E2%80%94%20" + encodeURIComponent(label) + '">Написать Дмитрию</a>';
+  }
+  function admIntegrationRows() {
+    var rows = [];
+    var payOk = !!(PAYMETHODS.banks && PAYMETHODS.banks.length);
+    rows.push({ name: "Приём оплат · Montonio", ok: payOk,
+      sub: payOk
+        ? "Карты, банковские ссылки, Apple/Google Pay. Работает."
+        : "Список банков не пришёл — проверьте, открывается ли оплата у покупателя.",
+      act: payOk ? "" : admDevLink("оплата") });
+
+    var rates = S.shipLiveRates;
+    var rateN = rates ? Object.keys(rates).reduce(function (a, k) { return a + rates[k].length; }, 0) : 0;
+    rows.push({ name: "Доставка · Omniva, DPD, SmartPosti", ok: !rates || rateN > 0,
+      sub: !rates ? "Проверяем тарифы…" : rateN
+        ? "Наклейки печатаются из карточки заказа, тарифы перевозчиков подтягиваются сами."
+        : "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.",
+      act: "" });
+
+    var mailOk = S.admMailKey !== false;
+    rows.push({ name: "Письма клиентам · Resend", ok: mailOk,
+      sub: mailOk
+        ? "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест»."
+        : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
+      act: mailOk ? "" : admDevLink("письма") });
+
+    var gscOk = !GSC || GSC.ok === true;
+    rows.push({ name: "Google Search Console", ok: gscOk,
+      sub: !GSC ? "Проверяем…" : GSC.ok
+        ? "Google видит магазин, позиции — в разделе «Аналитика»."
+        : "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.",
+      act: gscOk ? "" : admDevLink("Google Search Console") });
+
+    var an = ANALYTICS["7d"] && ANALYTICS["7d"].data;
+    rows.push({ name: "Аналитика посещений", ok: !ANALYTICS["7d"] || !!an,
+      sub: an ? "Откуда приходят и что ищут. Всё в разделе «Аналитика»." : "Считаем…", act: "" });
+
+    rows.push({ name: "ИИ-помощник", ok: true,
+      sub: admAI
+        ? "Отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить»."
+        : "Работает на встроенных ответах — модель не подключена. Сам он по-прежнему ничего не меняет.",
+      act: "" });
+
+    var cam = scanSupportInfo().camera;
+    rows.push({ name: "Сканер · камера телефона", ok: cam,
+      sub: cam
+        ? "Камера доступна — сканер открывается из «Товары → Склад»."
+        : "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.",
+      act: cam ? "" : '<button class="adm-btn adm-btn--row" data-admcamerahelp>Как разрешить</button>' });
+    return rows;
+  }
   function admAppsHTML() {
-    return '<p class="muted" style="margin:16px 0">Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.</p>' +
-    '<div class="adm__list">' + [
-      ["Приём оплат", "банковские ссылки, карты, Apple/Google Pay", "после выбора провайдера", false],
-      ["Доставка", "наклейки DPD / Omniva / SmartPosti и трекинг — через платёжного провайдера", "после выбора провайдера", false],
-      ["Письма клиентам", "info@rempireshop.com через Resend", "после переноса домена", false],
-      ["Google Search Console", "позиции в поиске и ошибки индексации", "настраивается", false],
-      ["Аналитика посещений", "откуда приходят и что покупают", "настраивается", false],
-      ["ИИ-помощник", "кнопка «Помощник» в углу экрана — предлагает изменения, вы подтверждаете", "работает", true],
-      ["Касса в салоне", "работает отдельно от сайта — переезд её не трогает", "работает", true]
-    ].map(function (a) {
-      return '<div class="adm__row"><span class="adm__nm">' + a[0] + '<span class="adm__sub">' + a[1] + "</span></span>" +
-        '<span class="chip ' + (a[3] ? "chip--ok" : "chip--low") + '">' + a[2] + "</span></div>";
+    if (SRV.admin === true) { loadPayMethods(); loadShipLiveRates(); loadGsc(); loadAnalytics("7d"); }
+    return '<div class="adm-screen adm-screen--tight">' +
+      admHead("", "Подключения", "") +
+      '<div class="adm-list">' + admIntegrationRows().map(function (r) {
+        return '<div class="adm-row adm-row--tall">' +
+          '<span class="adm-dot' + (r.ok ? "" : " adm-dot--warn") + '" aria-hidden="true"></span>' +
+          '<span class="adm-row__body"><span class="adm-row__nm">' + r.name + "</span>" +
+            '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
+          r.act + "</div>";
+      }).join("") + "</div>" +
+      '<p class="adm-hint">Если что-то красное и непонятно — напишите Дмитрию: ' +
+        '<a href="mailto:' + ADM_DEV_MAIL + '">' + ADM_DEV_MAIL + "</a>. " +
+        "Ссылка на эту страницу уже в письме.</p>" +
+      "</div>";
+  }
+
+  /* ---------- Настройки: индекс и шесть страниц ---------------------------
+     One long scroll of cards became six named places (README fix #6). The
+     cards themselves are the ones that were already here — the banner editor,
+     the content document, the delivery table, the loyalty form, the
+     accountant's report — each on the page it belongs to and each still saving
+     through the confirm card into the journal. */
+  var ADM_SET_PAGES = [
+    ["delivery", "Доставка и оплата", "тарифы по странам · Montonio · способы оплаты"],
+    ["home", "Главная страница", "баннер, полоска вверху, наборы и чат"],
+    ["company", "О компании", "реквизиты, часы, контакты, соцсети, отчёты"],
+    ["prices", "Цены и баллы", "скидка салона, баллы лояльности, Pro-цены"],
+    ["langs", "Языки", "RU основной · ET · EN"],
+    ["journal", "Журнал изменений", "всё, что применялось, и кнопка «Вернуть»"]
+  ];
+  function admSetTitle(key) {
+    for (var i = 0; i < ADM_SET_PAGES.length; i++) if (ADM_SET_PAGES[i][0] === key) return ADM_SET_PAGES[i][1];
+    return "Настройки";
+  }
+  function admSetupHTML() {
+    var page = S.admSetPage || "";
+    if (!page) {
+      return '<div class="adm-screen adm-screen--tight">' + admHead("", "Настройки", "") +
+        '<div class="adm-idx">' + ADM_SET_PAGES.map(function (p) {
+          var sub = p[0] === "journal" && DEMO.log.length ? admLogLine(DEMO.log.length) : p[2];
+          return '<button data-admsetpage="' + p[0] + '"><span><span class="adm-row__nm">' + p[1] + "</span>" +
+            '<span class="adm-row__sub">' + sub + "</span></span>" +
+            '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
+        }).join("") + "</div></div>";
+    }
+    return '<div class="adm-screen adm-screen--tight">' +
+      admBackHTML('data-admsetback', "Настройки") +
+      admHead("", admSetTitle(page), "") +
+      (page === "delivery" ? admSetDeliveryHTML()
+        : page === "home" ? admSetHomeHTML()
+        : page === "company" ? admSetCompanyHTML()
+        : page === "prices" ? admSetPricesHTML()
+        : page === "langs" ? admSetLangsHTML()
+        : admSetJournalHTML()) +
+      "</div>";
+  }
+  /** «3 записи в этой сессии» — its own function so the i18n check sees one
+      sentence rather than a bare plural fragment. */
+  function admLogLine(n) { return n + " " + pl(n, "запись", "записи", "записей") + " в этой сессии"; }
+
+  /* Доставка и оплата: the tariff grid of the spec — country, parcel machine,
+     courier, free-from — over the very same shipDraft()/[data-shiprule] state
+     the old table used, plus the carrier prices in a fold-out and the Montonio
+     fill button. «Сохранить» goes through the confirm card: a delivery price
+     is money, and money asks first. */
+  function admSetDeliveryHTML() {
+    loadShipLiveRates();
+    // no inline confirm card here: a tariff save sets `overlay: true`, and
+    // screenAdmin() lifts that same card onto a scrim over the page
+    return '<div class="adm-narrow">' +
+      '<div class="adm-tariffs adm-tariffs--head"><span>Страна</span><span>Пакомат, €</span>' +
+        "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
+      SHIP_ROWS.map(function (r) {
+        return '<div class="adm-tariffs" style="margin-top:8px"><span>' + r[1] + "</span>" +
+          admShipCellHTML("m:parcel:" + r[0], shipCell("parcel", r[0]), "Пакомат — " + r[1]) +
+          admShipCellHTML("m:courier:" + r[0], shipCell("courier", r[0]), "Курьер — " + r[1]) +
+          admShipCellHTML("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1]) + "</div>";
+      }).join("") +
+      (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
+      '<div class="adm-acts" style="margin-top:16px">' +
+        '<button class="adm-btn" data-admshipsave>Сохранить</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-admshipfill>Заполнить по тарифам Montonio</button>' +
+      "</div>" +
+      '<p class="adm-hint" style="margin-top:8px">Кнопка впишет тарифы перевозчика плюс наценку, ' +
+        "округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.</p>" +
+      '<details class="adm-embed" style="margin-top:16px">' +
+        '<summary class="adm-link">Самовывоз, перевозчики и наценка</summary><div style="padding-top:12px">' +
+          '<label class="adm-field">Самовывоз, €' +
+            admShipCellHTML("m:pickup:EE", shipCell("pickup", "EE"), "Самовывоз — Эстония") + "</label>" +
+          SHIP_CARRIER_ROWS.map(function (c) {
+            return '<div style="margin-top:12px"><div class="adm-sec__t">' + c[1] + "</div>" +
+              c[2].map(function (cc) {
+                return '<label class="adm-field" style="margin-top:6px">' + cc +
+                  admShipCellHTML("c:" + c[0] + ":" + cc, shipCarrierCell(c[0], cc), c[1] + " " + cc) + "</label>";
+              }).join("") + "</div>";
+          }).join("") +
+          '<label class="adm-field" style="margin-top:12px">Наценка, %' +
+            admShipCellHTML("markup:percent", shipMarkupCell("percent"), "Наценка, проценты") + "</label>" +
+          '<label class="adm-field" style="margin-top:10px">Наценка, €' +
+            admShipCellHTML("markup:fixed", shipMarkupCell("fixed"), "Наценка, евро") + "</label>" +
+          '<label class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
+            '<span class="adm-row__sub">по умолчанию тариф только поднимает цену до реальной стоимости</span></span>' +
+            '<input type="checkbox" data-shipallowlower' + (S.shipAllowLower ? " checked" : "") + "></label>" +
+          '<div class="adm-acts" style="margin-top:12px">' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipreset>Вернуть значения по умолчанию</button>' +
+          "</div></div></details>" +
+      '<div class="adm-sec__t" style="margin-top:24px">Оплата</div>' +
+      '<div class="adm-list">' + PAYS.map(function (p) {
+        return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + p.l + "</span>" +
+          '<span class="adm-row__sub">' + p.h + "</span></span>" +
+          '<span class="adm-badge adm-badge--ok">включено</span></div>';
+      }).join("") + "</div>" +
+      '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
+        "Чтобы что-то убрать или добавить, напишите Дмитрию.</p>" +
+      "</div>";
+  }
+  function admShipCellHTML(key, value, label) {
+    return '<input class="adm-input" data-shiprule="' + key + '" value="' + esc(value) +
+      '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">';
+  }
+
+  /* Главная страница: the two switches that decide what the shop shows at all,
+     then the banner editor and the announcement bar — the two things the owner
+     changes when he wants the front page to say something else. */
+  function admSetHomeHTML() {
+    var sets = DEMO.bundles !== false;
+    var chat = !!DEMO.chatbot;
+    return '<div class="adm-narrow">' +
+      '<div class="adm-list adm-list--flat">' +
+        '<div class="adm-swrow"><span>Показывать наборы' +
+          '<span class="adm-row__sub">если выключено — их не видно нигде в магазине</span></span>' +
+          admSwitch("data-admbundles", sets, sets ? "Скрыть наборы" : "Показать наборы") + "</div>" +
+        '<div class="adm-swrow"><span>ИИ-чат для покупателей' +
+          '<span class="adm-row__sub">кружок-консультант в углу магазина</span></span>' +
+          admSwitch("data-admchatbot", chat, chat ? "Выключить чат" : "Включить чат") + "</div>" +
+      "</div>" +
+      '<p class="adm-hint" style="margin-top:10px">Подарочная карта продаётся отдельным пунктом в меню — ' +
+        "номиналы включаются в «Маркетинг → Подарочные карты».</p>" +
+      '<div class="adm-embed">' + admHeroCard() + "</div>" +
+      '<div class="adm-embed">' + admContentCard(["announcement"]) + "</div>" +
+      "</div>";
+  }
+  function admSetCompanyHTML() {
+    return '<div class="adm-narrow"><div class="adm-embed">' +
+      admContentCard(["company", "hours", "social", "contact", "emailfooter"]) + "</div>" +
+      '<div class="adm-embed">' + reportsCard() + "</div></div>";
+  }
+  function admSetPricesHTML() {
+    return '<div class="adm-narrow"><div class="adm-embed">' + admPricingCard() + "</div></div>";
+  }
+  /* Языки: three rows and no switches. Russian is the source; Estonian and
+     English are always on — a switch that turned one off would have to hide a
+     third of the shop's own URLs, which is a deploy, not a setting. The note
+     is the one thing the owner asked about (README «Copy»). */
+  function admSetLangsHTML() {
+    return '<div class="adm-narrow--form">' +
+      '<div class="adm-list">' + [
+        ["Русский", "основной язык — с него переводятся остальные"],
+        ["Eesti", "в меню магазина стоит «Blog», не «Ajaveeb»"],
+        ["English", "полный перевод магазина и писем"]
+      ].map(function (l) {
+        return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + l[0] + "</span>" +
+          '<span class="adm-row__sub">' + l[1] + "</span></span>" +
+          '<span class="adm-badge adm-badge--ok">включён</span></div>';
+      }).join("") + "</div>" +
+      '<p class="adm-hint" style="margin-top:10px">Язык панели переключается внизу меню — ' +
+        "на магазин это не влияет.</p></div>";
+  }
+  /* Журнал изменений: the same DEMO.log the undo toast writes into, as rows of
+     `time · text · «Вернуть»`. An entry with nothing to put back (an undo's own
+     «Отмена: …» line) gets no button — a «Вернуть» that does nothing is worse
+     than none at all. */
+  function admSetJournalHTML() {
+    if (!DEMO.log.length) {
+      return '<div class="adm-narrow"><div class="adm-empty">' +
+        "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».</div></div>";
+    }
+    return '<div class="adm-narrow">' + DEMO.log.map(function (e, i) {
+      return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(e.t) + "</span>" +
+        '<span class="adm-jrow__x">' + esc(e.txt) + "</span>" +
+        (e.prev ? '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admundo="' + i + '">Вернуть</button>' : "") +
+        "</div>";
     }).join("") + "</div>";
   }
 
-  /* «Настройки» — phase 3 splits this into an index and six sub-pages. */
-  function admSetupHTML() {
-    return '<p class="muted" style="margin:16px 0">Всё, что можно настроить без программиста.</p>' +
-    shipRulesCard() +
-    setupBlock("Оплата", PAYS.map(function (p) { return p.l; })) +
-    setupBlock("Языки магазина", ["Русский — основной", "Eesti", "English"]) +
-    setupBlock("Письма клиенту", [
-      "Заказ принят", "Заказ отправлен + трекинг", "Товар снова в наличии",
-      "Скидка ко дню рождения", "Брошенная корзина"
-    ]) +
-    '<div class="sec__head sec__head--sub"><h2 class="sec__title">Магазин</h2></div>' +
-    '<div class="adm__list"><div class="adm__row"><span class="adm__nm">ИИ-чат для покупателей' +
-      '<span class="adm__sub">кружок-консультант в углу магазина — подбирает товары и собирает корзину</span></span>' +
-      '<span class="chip ' + (DEMO.chatbot ? "chip--ok" : "chip--low") + '">' + (DEMO.chatbot ? "включён" : "выключен") + "</span>" +
-      '<button class="link" data-admchatbot>' + (DEMO.chatbot ? "Выключить" : "Включить") + "</button></div>" +
-      '<div class="adm__row"><span class="adm__nm">Наборы на сайте' +
-      '<span class="adm__sub">готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»</span></span>' +
-      '<span class="chip ' + (DEMO.bundles !== false ? "chip--ok" : "chip--low") + '">' + (DEMO.bundles !== false ? "показаны" : "скрыты") + "</span>" +
-      '<button class="link" data-admbundles>' + (DEMO.bundles !== false ? "Скрыть" : "Показать") + "</button></div></div>" +
-    admHeroCard() +
-    admContentCard() +
-    admPricingCard() +
-    reportsCard() +
-    '<div class="sec__head sec__head--sub"><h2 class="sec__title">Журнал изменений</h2></div>' +
-    (DEMO.log.length
-      ? '<div class="adm__list">' + DEMO.log.map(function (e, i) {
-          return '<div class="adm__row"><span class="adm__nm">' + esc(e.txt) +
-            '<span class="adm__sub">' + esc(e.t) + " · помощник/панель</span></span>" +
-            // an entry with nothing to put back (an undo's own «Отмена: …»
-            // line) gets no button — an «Отменить» that does nothing is
-            // worse than none at all
-            (e.prev ? '<button class="link" data-admundo="' + i + '">Отменить</button>' : "") + "</div>";
-        }).join("") + "</div>"
-      : '<p class="muted">Пока пусто. Изменения через помощника и кнопки панели попадут сюда — каждое можно отменить.</p>');
-  }
-
   /* ---------- «Письма»: preview + test send -----------------------------
-     The five real templates live in src/emails and are rendered server-side;
-     this card is the window onto them. The letter's language is its own
+     The six real templates live in src/emails and are rendered server-side;
+     the editor above is the window onto them. The letter's language is its own
      setting — Renat reads the panel in Russian but has to be able to check
-     what an Estonian customer receives. */
-  var MAIL_TPL = [
-    ["order-confirmed", "Заказ принят"],
-    ["order-shipped", "Заказ отправлен"],
-    ["abandoned-cart", "Брошенная корзина"],
-    ["back-in-stock", "Товар снова в наличии"],
-    ["birthday", "Скидка ко дню рождения"],
-    ["login-code", "Код для входа"]
-  ];
+     what an Estonian customer receives.
+
+     Which templates exist is ADM_MAIL_ROWS, the same table the list draws
+     from: one place to add a letter, not two that can drift apart. */
 
   /* ---- account-flows: how big each queue is right now --------------------
      One admin-only call, made when the «Письма» tab is first opened. Missing
@@ -9162,8 +9613,8 @@
     return '<span class="adm__sub">' + FLOW_COUNT_LABEL[key] + ' <span class="num">' + Number(FLOW_COUNTS[key]) + "</span></span>";
   }
   function mailTpl() {
-    for (var i = 0; i < MAIL_TPL.length; i++) if (MAIL_TPL[i][0] === S.mailTpl) return S.mailTpl;
-    return MAIL_TPL[0][0];
+    for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === S.mailTpl) return S.mailTpl;
+    return ADM_MAIL_ROWS[0][0];
   }
   function mailLang() { return S.mailLang || S.lang; }
   /* Keep whatever is half-typed in the address box: every chip re-renders the
@@ -9252,7 +9703,7 @@
       depend on the order two objects happened to gain their keys in. */
   function mailSig(map) {
     var out = [];
-    MAIL_TPL.forEach(function (m) {
+    ADM_MAIL_ROWS.forEach(function (m) {
       MAIL_LANGS.forEach(function (l) {
         MAIL_FIELDS.forEach(function (f) {
           var v = map && map[m[0]] && map[m[0]][l] && map[m[0]][l][f[0]];
@@ -9267,7 +9718,7 @@
       sanitises again (cleanMailTexts) — this only keeps the blob tidy. */
   function mailClean(map) {
     var out = {};
-    MAIL_TPL.forEach(function (m) {
+    ADM_MAIL_ROWS.forEach(function (m) {
       MAIL_LANGS.forEach(function (l) {
         MAIL_FIELDS.forEach(function (f) {
           var v = map && map[m[0]] && map[m[0]][l] && map[m[0]][l][f[0]];
@@ -9285,67 +9736,16 @@
     var sig = mailSig(map);
     return sig ? sig.split("\n").length : 0;
   }
-  function mailFieldHTML(tpl, lang, f) {
-    var field = f[0], lim = mailLimit(field), val = mailValue(tpl, lang, field);
-    var own = val !== mailDefault(tpl, lang, field);
-    var box = field === "intro"
-      ? '<textarea class="input" rows="4" maxlength="' + lim + '" data-mailtxt="' + field + '">' + esc(val) + "</textarea>"
-      : '<input class="input" maxlength="' + lim + '" data-mailtxt="' + field + '" value="' + esc(val) + '">';
-    return '<label class="field"><span class="field__label">' + f[1] + "</span>" + box + "</label>" +
-      '<p class="muted" style="margin:-6px 0 8px;font-size:12.5px">' + f[2] + "</p>" +
-      '<div class="adm__chips" role="group" aria-label="Подстановки">' +
-        MAIL_PH.map(function (p) {
-          return '<button class="fchip" data-mailph="' + field + ":" + p[0] + '" title="' + p[1] + '">{' + p[0] + "}</button>";
-        }).join("") +
-        (own ? '<button class="link" data-mailreset="' + field + '">Вернуть стандартный текст</button>' : "") +
-      "</div>";
-  }
-  function mailActsHTML() {
-    if (!mailDirty()) return "";
-    return '<button class="btn btn--sm" data-mailsave>Сохранить</button>' +
-      '<button class="btn btn--ghost btn--sm" data-mailrevert>Отменить правки</button>';
-  }
-  /* Typing must not cost the caret, so the two moving parts repaint on their
-     own instead of through render() — the same idiom as paintPricingState(). */
+  /* Typing must not cost the caret, so the moving parts repaint on their own
+     instead of through render() — the same idiom as paintPricingState(). Since
+     phase 3 that includes the preview card beside the fields: it is the whole
+     point of the layout that the letter changes as the words are typed. */
   function paintMailState() {
     var acts = document.getElementById("mailacts");
-    if (acts) { acts.innerHTML = mailActsHTML(); translateTree(acts); }
+    if (acts) { acts.innerHTML = admMailActsHTML(); translateTree(acts); }
     var dirty = document.querySelector("[data-maildirty]");
     if (dirty) dirty.hidden = !mailDirty() || !!(pendingAction && pendingAction.type === "set_mail_texts");
-  }
-  function mailEditorHTML(tpl, lang) {
-    if (!MAIL_TEXTS) return "";
-    var pending = pendingAction && pendingAction.type === "set_mail_texts" ? confirmCard(pendingAction) : "";
-    return '<p class="muted" style="margin:14px 0 10px">Тему, вступление и подпись можно поменять. Всё остальное — состав заказа, кнопки, подвал — остаётся как есть.</p>' +
-      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы менять тексты писем.</div>') +
-      pending +
-      '<p class="admhero__dirty" data-maildirty' + (mailDirty() && !pending ? "" : " hidden") + ">Есть несохранённые изменения — нажмите «Сохранить».</p>" +
-      MAIL_FIELDS.map(function (f) { return mailFieldHTML(tpl, lang, f); }).join("") +
-      '<div class="adm__acts" id="mailacts">' + mailActsHTML() + "</div>";
-  }
-  function mailCard() {
-    var tpl = mailTpl(), lang = mailLang();
-    loadMailTexts(false);
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Письма — предпросмотр и тест</h2></div>' +
-      '<p class="muted" style="margin:0 0 12px">Выберите письмо и язык — покажем его ровно таким, каким его получит покупатель. Ниже можно отправить образец себе на почту.</p>' +
-      '<div class="adm__chips" role="group" aria-label="Письмо">' +
-        MAIL_TPL.map(function (m) {
-          return '<button class="scchip" data-mailtpl="' + m[0] + '" aria-current="' + (tpl === m[0]) + '">' + m[1] + "</button>";
-        }).join("") + "</div>" +
-      '<div class="adm__chips" role="group" aria-label="Язык письма">' +
-        LANGS.map(function (l) {
-          return '<button class="scchip" data-maillang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
-        }).join("") + "</div>" +
-      mailEditorHTML(tpl, lang) +
-      '<iframe title="Предпросмотр письма" loading="lazy" ' +
-        'src="/api/admin/mail/preview/?template=' + encodeURIComponent(tpl) + "&amp;lang=" + encodeURIComponent(lang) +
-          "&amp;v=" + mailPreviewV + '" ' +
-        'style="display:block;width:100%;height:520px;margin-top:14px;border:1px solid var(--rule);background:#fff"></iframe>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px">' +
-        '<input class="input input--box" type="email" data-mailto value="' + esc(S.mailTo || "") + '" ' +
-          'placeholder="Отправить тест на…" aria-label="Отправить тест на…" style="max-width:320px">' +
-        '<button class="btn btn--sm" data-mailtest>Отправить тест</button></div>' +
-      '<p class="muted" style="margin:8px 0 0;font-size:12.5px">В письме будут вымышленный заказ и товары — это образец вёрстки, не настоящий заказ.</p>';
+    paintMailPreview();
   }
 
   /* ---------- «Главный баннер»: the owner's own banner editor --------------
@@ -9688,17 +10088,22 @@
       '<p class="muted admhero__note">Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.</p>' +
       cTri("hours.note", "Примечание под часами", "input", 300, "Например: в праздники — по записи.");
   }
-  function admContentCard() {
+  /* `only` — which of the six blocks this page wants. The settings redesign
+     split the card in two: the announcement bar belongs on «Главная страница»
+     and everything else on «О компании». The DRAFT is shared either way, so a
+     «Сохранить» from either page saves whatever the owner changed. */
+  function admContentCard(only) {
     var d = contentDraft();
     var pending = pendingAction && pendingAction.type === "set_content" ? confirmCard(pendingAction) : "";
     var annOn = d.announcement.on !== false;
+    var show = function (id) { return !only || only.indexOf(id) >= 0; };
     return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Контент</h2></div>' +
       '<p class="muted admhero__intro">Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.</p>' +
       pending +
       (contentDirty() && !pending ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
       cLangPills() +
       '<div class="adm__list">' +
-        cBlock("company", "Реквизиты",
+        (!show("company") ? "" : cBlock("company", "Реквизиты",
           esc([d.company.legalName, d.company.regCode ? "рег. " + d.company.regCode : "", d.company.address].filter(Boolean).join(" · ")),
           cInput("company.legalName", "Название компании", "Rempire Store OÜ", 120) +
           cInput("company.regCode", "Регистрационный номер", "12216136", 24, "Только цифры.") +
@@ -9706,19 +10111,19 @@
           cInput("company.address", "Адрес", "Mardi 1, 10145 Tallinn", 200) +
           cInput("company.email", "Электронная почта", "info@rempireshop.com", 190) +
           cInput("company.phone", "Телефон", "+372 5623 7237", 30) +
-          cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42)) +
-        cBlock("hours", "Часы работы",
+          cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42))) +
+        (!show("hours") ? "" : cBlock("hours", "Часы работы",
           (CONTENT_DAYS.filter(function (r) { return d.hours[r[0]]; }).length
             ? "показываем в подвале и на «Контактах»"
             : "не указаны — раздел не показывается"),
-          cHoursBody()) +
-        cBlock("social", "Соцсети",
+          cHoursBody())) +
+        (!show("social") ? "" : cBlock("social", "Соцсети",
           esc(CONTENT_SOCIALS.filter(function (r) { return d.social[r[0]]; }).map(function (r) { return r[1]; }).join(" · ") || "нет ссылок"),
           CONTENT_SOCIALS.map(function (r) {
             return cInput("social." + r[0], r[1], "https://…", 300);
           }).join("") +
-          '<p class="muted admhero__note">Пустая строка убирает значок из подвала.</p>') +
-        cBlock("announcement", "Верхняя полоска",
+          '<p class="muted admhero__note">Пустая строка убирает значок из подвала.</p>')) +
+        (!show("announcement") ? "" : cBlock("announcement", "Верхняя полоска",
           (annOn ? esc(cTokens(cText(d.announcement.text)) || "стандартный текст") : "выключена"),
           '<div class="adm__row"><span class="adm__nm">Показывать полоску' +
             '<span class="adm__sub">чёрная строка над шапкой магазина</span></span>' +
@@ -9727,14 +10132,14 @@
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
-          cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300)) +
-        cBlock("contact", "Страница «Контакты»",
+          cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300))) +
+        (!show("contact") ? "" : cBlock("contact", "Страница «Контакты»",
           "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
-          cTri("contactPage", "Текст страницы", "textarea", 1200)) +
-        cBlock("emailfooter", "Подпись в письмах",
+          cTri("contactPage", "Текст страницы", "textarea", 1200))) +
+        (!show("emailfooter") ? "" : cBlock("emailfooter", "Подпись в письмах",
           esc(cText(d.emailFooter) || "нет"),
           cTri("emailFooter", "Строка внизу письма", "input", 300,
-            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.")) +
+            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
       "</div>" +
       '<div class="adm__acts">' +
         '<button class="btn btn--sm" data-contentsave>Сохранить</button>' +
@@ -10214,56 +10619,71 @@
     if (p.endsAt) out.push("до " + String(p.endsAt).slice(0, 10).split("-").reverse().join("."));
     return out.join(" · ") || "без условий";
   }
+  /* The inline form of the spec: a mono uppercase code, three kind chips, the
+     value and the minimum order — with the three rarer conditions (until when,
+     how many times, a note to self) folded away, because a code Renat makes in
+     a hurry needs four fields and not seven. */
   function promoFormHTML() {
     var f = S.promoForm;
-    return '<div class="adm__confirm adm__promoform">' +
-      "<b>" + (f.editing ? "Изменить промокод" : "Новый промокод") + "</b>" +
-      '<label class="field"><span class="field__label">Код — латиница, цифры и дефис</span>' +
-        '<input class="input" data-promof="code" maxlength="24" value="' + esc(f.code) + '" placeholder="SUVI10"' +
-        (f.editing ? " readonly" : "") + "></label>" +
-      '<div class="field__label">Что даёт</div><div class="optlist">' +
-        PROMO_KIND_ROWS.map(function (k) {
-          return '<label class="opt opt--plain"><input type="radio" name="promokind" data-promof="kind" value="' + k[0] + '"' +
-            (f.kind === k[0] ? " checked" : "") + "><span>" + k[1] + "</span></label>";
-        }).join("") + "</div>" +
-      (f.kind === "free_shipping" ? "" :
-        '<label class="field"><span class="field__label">' + (f.kind === "fixed" ? "Скидка в евро — до 200" : "Скидка в процентах — от 1 до 90") + "</span>" +
-        '<input class="input" data-promof="value" inputmode="decimal" value="' + esc(String(f.value)) + '"></label>') +
-      '<label class="field"><span class="field__label">Минимальная сумма заказа, € — 0 если без условия</span>' +
-        '<input class="input" data-promof="minSubtotal" inputmode="decimal" value="' + esc(String(f.minSubtotal)) + '"></label>' +
-      '<label class="field"><span class="field__label">Действует до — пусто, если бессрочно</span>' +
-        '<input class="input" type="date" data-promof="endsAt" value="' + esc(String(f.endsAt || "").slice(0, 10)) + '"></label>' +
-      '<label class="field"><span class="field__label">Сколько раз можно использовать — пусто, если без ограничения</span>' +
-        '<input class="input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
-      '<label class="field"><span class="field__label">Заметка для себя</span>' +
-        '<input class="input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
-      (S.promoFormErr ? '<div class="err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
-      '<div class="adm__acts"><button class="btn btn--sm" data-admpromosave>Сохранить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-admpromocancel>Отмена</button></div></div>';
+    return '<div class="adm-card adm-card--pad" style="max-width:560px">' +
+      '<div class="adm-sec__t">' + (f.editing ? "Изменить промокод" : "Новый промокод") + "</div>" +
+      '<label class="adm-field">Код — латиница, цифры и дефис' +
+        '<input class="adm-input adm-mono" data-promof="code" maxlength="24" value="' + esc(f.code) +
+        '" placeholder="SUVI10" style="text-transform:uppercase"' + (f.editing ? " readonly" : "") + "></label>" +
+      '<div class="adm-chips" role="group" aria-label="Что даёт промокод">' + PROMO_KIND_ROWS.map(function (k) {
+        return '<button class="adm-chip" data-promokind="' + k[0] + '" aria-current="' + (f.kind === k[0]) + '">' +
+          k[1] + "</button>";
+      }).join("") + "</div>" +
+      '<div class="adm-cols" style="grid-template-columns:1fr 1fr;gap:12px">' +
+        (f.kind === "free_shipping"
+          ? '<div class="adm-hint">Скидка не нужна — код просто делает доставку бесплатной.</div>'
+          : '<label class="adm-field">' + (f.kind === "fixed" ? "Скидка, € — до 200" : "Скидка, % — от 1 до 90") +
+            '<input class="adm-input" data-promof="value" inputmode="decimal" value="' + esc(String(f.value)) + '"></label>') +
+        '<label class="adm-field">Минимальный заказ, €' +
+          '<input class="adm-input" data-promof="minSubtotal" inputmode="decimal" value="' +
+          esc(String(f.minSubtotal)) + '"></label>' +
+      "</div>" +
+      '<details class="adm-embed"><summary class="adm-link">Срок, число использований и заметка</summary>' +
+        '<div style="padding-top:12px">' +
+          '<label class="adm-field">Действует до — пусто, если бессрочно' +
+            '<input class="adm-input" type="date" data-promof="endsAt" value="' +
+            esc(String(f.endsAt || "").slice(0, 10)) + '"></label>' +
+          '<label class="adm-field" style="margin-top:10px">Сколько раз можно использовать' +
+            '<input class="adm-input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
+          '<label class="adm-field" style="margin-top:10px">Заметка для себя' +
+            '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
+        "</div></details>" +
+      (S.promoFormErr ? '<div class="adm-err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
+      '<div class="adm-acts"><button class="adm-btn" data-admpromosave>' +
+        (f.editing ? "Сохранить" : "Создать") + "</button>" +
+        '<button class="adm-btn adm-btn--ghost" data-admpromocancel>Отмена</button></div></div>';
   }
   function admPromosHTML() {
     loadAdminPromos(false);
     var list = S.admPromos || [];
-    return '<p class="muted" style="margin:16px 0">Промокоды для покупателей. Код проверяется на сервере при оформлении, а «использован» считается только после оплаты — брошенная корзина код не тратит.</p>' +
-      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы создавать промокоды.</div>') +
-      (S.admPromoErr ? '<div class="adm__note">' + esc(S.admPromoErr) + "</div>" : "") +
-      (S.promoForm ? promoFormHTML() :
-        '<div class="adm__acts"><button class="btn btn--sm" data-admpromonew>Новый промокод</button></div>') +
+    return (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы создавать промокоды.</div>') +
+      (S.admPromoErr ? '<div class="adm-error"><span>' + esc(S.admPromoErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="promos">Повторить</button></div>' : "") +
+      (S.promoForm ? promoFormHTML() : "") +
       (list.length
-        ? '<div class="adm__table" role="table"><div class="adm__th adm__th--promo" role="row">' +
-            "<span>Код</span><span>Скидка</span><span>Условия</span><span>Использован</span><span>Статус</span><span></span></div>" +
-          list.map(function (p) {
-            var used = p.used + (p.maxUses ? " из " + p.maxUses : "");
-            return '<div class="adm__tr adm__tr--promo" role="row"><span class="num">' + esc(p.code) +
-              (p.note ? '<span class="adm__sub">' + esc(p.note) + "</span>" : "") + "</span>" +
-              "<span>" + esc(promoKindLabel(p)) + "</span>" +
-              '<span class="muted">' + esc(promoWhen(p)) + "</span>" +
-              '<span class="num">' + used + "</span>" +
-              '<span class="chip ' + (p.active ? "chip--ok" : "chip--low") + '">' + (p.active ? "активен" : "выключен") + "</span>" +
-              '<span><button class="link" data-admpromoedit="' + esc(p.code) + '">Изменить</button> ' +
-                '<button class="link" data-admpromotoggle="' + esc(p.code) + '">' + (p.active ? "Выключить" : "Включить") + "</button></span></div>";
+        ? '<div class="adm-list">' + list.map(function (p) {
+            var meta = [promoKindLabel(p), promoWhen(p), admPromoUsedLine(p)].join(" · ");
+            return '<div class="adm-row adm-row--tall">' +
+              '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '" ' +
+                'style="border:0;background:none;padding:0;text-align:left">' +
+                '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
+                '<span class="adm-row__sub adm-row__sub--one">' + esc(meta) + (p.note ? " · " + esc(p.note) : "") + "</span></button>" +
+              admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active,
+                p.active ? "Выключить промокод" : "Включить промокод") +
+              "</div>";
           }).join("") + "</div>"
-        : (S.admPromos ? '<p class="muted">Промокодов пока нет.</p>' : '<p class="muted">Загружаем…</p>'));
+        : (S.admPromos ? '<div class="adm-empty">Промокодов пока нет</div>' : '<div class="adm-skel"><i></i><i></i></div>')) +
+      '<p class="adm-hint" style="margin-top:12px">«Использован» считается только после оплаты — ' +
+        "брошенная корзина код не тратит.</p>";
+  }
+  /** «использован 14» / «использован 14 из 50» — one string for the i18n check. */
+  function admPromoUsedLine(p) {
+    return "использован " + p.used + (p.maxUses ? " из " + p.maxUses : "");
   }
   function promoFormPayload() {
     var f = S.promoForm;
@@ -10623,23 +11043,37 @@
     }
     return list;
   }
+  /** One row: the name, one grey line of facts, the tier badge and — while a
+      partner request is still waiting — the two buttons that answer it here
+      instead of three clicks deeper into the card. */
   function admCustRowsHTML() {
     var list = filteredAdminCustomers();
-    if (!list.length) return '<p class="muted">' + (S.admCustomers ? "Никого не нашлось." : "Загружаем…") + "</p>";
-    return '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row">' +
-        "<span>Клиент</span><span>Статус</span><span>Заказов</span><span>Потратил</span><span>Баллы</span><span></span></div>" +
-      list.map(function (c) {
-        var st = admCustTierChip(c);
-        return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + esc(c.name || c.email) +
-            '<span class="adm__sub">' + esc(c.email) + "</span></span>" +
-          '<span><span class="chip ' + (st[1] || "chip--low") + '">' + st[0] + "</span></span>" +
-          '<span class="num">' + c.ordersCount + "</span>" +
-          '<span class="num">' + eur(c.revenue) + "</span>" +
-          '<span class="num">' + c.pointsBalance + "</span>" +
-          '<button class="link" data-admcustopen="' + c.id + '">Открыть</button></div>';
-      }).join("") + "</div>";
+    if (!list.length) {
+      return S.admCustomers
+        ? '<div class="adm-empty">Никого не нашлось</div>'
+        : '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    }
+    return '<div class="adm-list">' + list.map(function (c) {
+      var pending = c.tier !== "pro" && c.proRequestedAt;
+      var badge = c.tier === "pro" ? ["Pro", "adm-badge--ink"]
+        : pending ? ["Заявка Pro", "adm-badge--warn"] : ["Розница", "adm-badge--quiet"];
+      return '<div class="adm-row adm-row--tall">' +
+        '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '" ' +
+          'style="border:0;background:none;padding:0;text-align:left">' +
+          '<span class="adm-row__nm">' + esc(c.name || c.email) + "</span>" +
+          '<span class="adm-row__sub adm-row__sub--one">' + esc(c.email) + " · " +
+            admOrdersLabel(c.ordersCount) + " · " + eur(c.revenue) + "</span></button>" +
+        '<span class="adm-badge ' + badge[1] + '">' + badge[0] + "</span>" +
+        (pending
+          ? '<span class="adm-acts"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) +
+            '">Одобрить Pro</button>' +
+            '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustreject="' + esc(c.id) +
+            '">Отказать</button></span>'
+          : "") +
+        "</div>";
+    }).join("") + "</div>";
   }
-  var ADM_CUST_TIERS = [["", "Все"], ["pending", "На рассмотрении"], ["pro", "Партнёры"], ["retail", "Розница"]];
+  var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки Pro"], ["pro", "Партнёры"], ["retail", "Розница"]];
   function loadAdminCustomerDetail(id, force) {
     if (SRV.admin !== true) return;
     if (S.admCustDetail && S.admCustDetail.customer.id === id && !force) return;
@@ -10688,28 +11122,27 @@
   }
   function admCustomersHTML() {
     if (SRV.admin !== true) {
-      return '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — заявки на оптовые цены для салонов.</p>' +
-        '<div class="adm__note">Войдите как владелец, чтобы видеть настоящих клиентов.</div>' +
-        '<div class="adm__table" role="table"><div class="adm__th adm__th--ppl" role="row">' +
-          "<span>Клиент</span><span>Заказов</span><span>Потратил</span><span>Последний</span><span></span></div>" +
-        fakeCustomers().map(function (c) {
-          return '<div class="adm__tr adm__tr--ppl" role="row"><span>' + c.who + "</span>" +
-            '<span class="num">' + c.n + "</span>" +
-            '<span class="num">' + eur(c.sum) + "</span>" +
-            '<span class="muted">' + c.last + "</span><span></span></div>";
+      return '<div class="adm-note">Войдите как владелец, чтобы видеть настоящих клиентов.</div>' +
+        '<div class="adm-list">' + fakeCustomers().map(function (c) {
+          return '<div class="adm-row"><span class="adm-row__body">' +
+            '<span class="adm-row__nm">' + c.who + "</span>" +
+            '<span class="adm-row__sub">' + admOrdersLabel(c.n) + " · " + eur(c.sum) + " · " + c.last + "</span></span>" +
+            '<span class="adm-badge adm-badge--quiet">Розница</span></div>';
         }).join("") + "</div>";
     }
     loadAdminCustomers(false);
-    if (S.admCustOpen) return admCustomerCardHTML();
-    return '<p class="muted" style="margin:16px 0">Кто покупает, как часто и на сколько. Отсюда же — заявки на оптовые цены для салонов.</p>' +
-      (S.admCustErr ? '<div class="adm__note">' + esc(S.admCustErr) + "</div>" : "") +
-      '<div class="adm__acts" style="flex-wrap:wrap;gap:8px 12px">' +
-        '<input class="input input--box" data-admcustq value="' + esc(S.admCustQ || "") + '" placeholder="Имя, почта, телефон, компания…" aria-label="Поиск по клиентам" style="max-width:280px">' +
-        ADM_CUST_TIERS.map(function (f) {
-          return '<button class="chip ' + (S.admCustTier === f[0] ? "chip--ok" : "chip--low") + '" data-admcusttier="' + f[0] + '">' + f[1] + "</button>";
-        }).join(" ") +
-        '<a class="link" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
+    if (S.admCustOpen) return '<div class="adm-embed">' + admCustomerCardHTML() + "</div>";
+    var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
+    return (S.admCustErr ? '<div class="adm-note">' + esc(S.admCustErr) + "</div>" : "") +
+      '<div class="adm-acts">' +
+        '<div class="adm-chips" role="group" aria-label="Какие клиенты">' + ADM_CUST_TIERS.map(function (f) {
+          return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' +
+            (S.admCustTier === f[0]) + '">' + f[1] + (f[0] === "pending" && pendN ? " " + pendN : "") + "</button>";
+        }).join("") + "</div>" +
+        '<a class="adm-link" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
       "</div>" +
+      '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
+        '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам">' +
       '<div id="admcustlist">' + admCustRowsHTML() + "</div>";
   }
   function admCustPatch(id, body, okMsg) {
@@ -10757,13 +11190,6 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
-  function setupBlock(title, rows) {
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">' + title + "</h2></div>" +
-      '<div class="adm__list">' + rows.map(function (r) {
-        return '<div class="adm__row"><span class="adm__nm">' + r + "</span>" +
-          '<button class="link" data-admedit>Изменить</button></div>';
-      }).join("") + "</div>";
-  }
   function kpi(label, value, sub) {
     return '<div class="kpi"><span class="kpi__l">' + label + '</span><span class="kpi__v num">' + value + '</span><span class="kpi__s">' + sub + "</span></div>";
   }
@@ -12071,6 +12497,9 @@
     desc: {},     // assistant-work: product_overrides.description {RU,ET,EN}, per product id
     hero: null,   // null = the built-in banner (heroDefault())
     content: null,  // content: null = CONTENT_DEFAULT (the shop's own details)
+    // «Маркетинг → Подарочные карты»: which denominations are on sale. null =
+    // the three the shop has always sold (GIFT_AMOUNTS_DEFAULT).
+    giftAmounts: null,
     flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
@@ -12087,6 +12516,8 @@
       // content: the offline copy of the shop's own details
       if (_dj.content && typeof _dj.content === "object" && !Array.isArray(_dj.content)) DEMO.content = _dj.content;
       DEMO.flows = Object.assign(DEMO.flows, _dj.flows || {});
+      // «Подарочные карты»: the denominations on sale, offline copy
+      if (Array.isArray(_dj.giftAmounts)) DEMO.giftAmounts = _dj.giftAmounts;
       DEMO.log = Array.isArray(_dj.log) ? _dj.log.slice(0, 40) : [];
     }
   } catch (e) {}
@@ -12209,6 +12640,11 @@
     if (s.hero === null) DEMO.hero = null;
     else if (s.hero && typeof s.hero === "object" && Array.isArray(s.hero.slides)) DEMO.hero = s.hero;
     if (s.flows && typeof s.flows === "object") DEMO.flows = Object.assign(DEMO.flows, s.flows);
+    /* «Подарочные карты»: which denominations the /gift/ page offers. An
+       absent key means «как всегда» — giftAmountsOn() falls back to the three
+       the shop has always sold, and filters whatever arrives through
+       GIFT_AMOUNTS so a bad row cannot price a card the server would refuse. */
+    if (Array.isArray(s.gift_amounts)) DEMO.giftAmounts = s.gift_amounts;
     /* content: the server always answers with the merged document (defaults +
        whatever the owner wrote), so it replaces the local copy outright and
        the panel's draft is dropped — the same rule as the banner. */
@@ -12310,6 +12746,16 @@
         loadAdminPromos(true);
       }).catch(noop);
     }
+    /* «Клиенты → Отзывы»: the moderation call, and the same call with the
+       previous status when the toast's «Отменить» sends the entry back. */
+    else if (a.type === "moderate_review") {
+      apiSend("/api/admin/reviews/", "PATCH", { id: a.id, status: a.value }).then(function (r) {
+        if (!(r.status === 200 && r.body.ok)) toast("Не получилось сохранить отзыв");
+        loadAdminReviews(true);
+      }).catch(noop);
+    }
+    // «Подарочные карты»: the whole list of denominations, so undo re-sends it
+    else if (a.type === "set_gift_amounts") apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }).catch(noop);
     // wholesale/loyalty: the private half of settings.pricing (proDiscountPct,
     // proMinOrder) only ever travels through this admin-only route — never
     // the public /api/overrides one. adjust_points is a manual credit on one
@@ -12535,6 +12981,10 @@
           "</div>"
         : '<p class="muted" style="margin-top:10px">Загружаем…</p>');
   }
+  /* «Клиенты → Отзывы»: what the journal line calls each of the three states.
+     Its own table so the i18n check sees whole words, not fragments spliced
+     into a sentence. */
+  var REVIEW_STATE_WORD = { approved: "опубликован", rejected: "скрыт", pending: "вернулся в новые" };
   function actionText(a) {
     var p = a.id && byId(a.id);
     if (a.type === "set_price") return "Цена «" + (p ? p.brand + " " + p.name : a.id) + "»: " + eur(p ? p.price : 0) + " → " + eur(a.value);
@@ -12594,6 +13044,9 @@
       return "Промокод " + pr.code + ": " + what + (cond.length ? " · " + cond.join(" · ") : "");
     }
     if (a.type === "toggle_promo") return "Промокод " + a.code + ": " + (a.value ? "включить" : "выключить");
+    // «Клиенты → Отзывы» and «Маркетинг → Подарочные карты», both phase 3
+    if (a.type === "moderate_review") return "Отзыв " + (a.name || a.id) + ": " + (REVIEW_STATE_WORD[a.value] || a.value);
+    if (a.type === "set_gift_amounts") return "Номиналы подарочной карты: " + (a.value || []).join(" · ") + " €";
     if (a.type === "set_shipping_rules") return shipActionText(a);
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
     // blog: posts have no demo layer, so this text is all the confirm card
@@ -12804,6 +13257,20 @@
       entry.prev = { type: "toggle_promo", code: a.code, value: !a.value };
       S.admPromos = null;
     }
+    /* «Клиенты → Отзывы»: reviews are rows in their own table with no demo
+       layer, exactly like orders and the shelf — the journal entry and the
+       opposite call are the whole of it, and srvPush() carries both ways. */
+    else if (a.type === "moderate_review") {
+      entry.prev = { type: "moderate_review", id: a.id, name: a.name, value: a.prev, prev: a.value };
+      S.admReviews = null;
+    }
+    /* «Маркетинг → Подарочные карты»: the denominations on sale. The whole
+       list travels, so undo re-sends the previous one — same reasoning as the
+       banner and the content document. */
+    else if (a.type === "set_gift_amounts") {
+      entry.prev = { type: "set_gift_amounts", value: giftAmountsOn() };
+      DEMO.giftAmounts = a.value.slice();
+    }
     /* content: the action carries a PATCH («поменяй телефон» touches one
        field), but undo has to restore the whole document — the patch alone
        cannot say what a field looked like before it existed. */
@@ -12876,6 +13343,9 @@
     // checkout-gaps
     else if (a.type === "set_shipping_rules") { setShipRules(a.rules); S.shipDraft = null; }
     else if (a.type === "toggle_promo") { S.admPromos = null; }
+    // phase 3: a review has no demo copy either — srvPush() below is the undo
+    else if (a.type === "moderate_review") { S.admReviews = null; }
+    else if (a.type === "set_gift_amounts") { DEMO.giftAmounts = a.value.slice(); }
     // content: `whole` is the document as it was, null meaning «стандартный»
     else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }
     // wholesale/loyalty
@@ -14185,7 +14655,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanmanualfocus],[data-scanqty],[data-scanmove],[data-scanassign],[data-scanbindsize],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-pospayment],[data-possend],[data-posnew],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -14376,6 +14846,10 @@
       S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = "";
       S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
       S.admMore = false;
+      /* Every section opens at its own front door: «Настройки» on the index of
+         six, «Письма» on the list of letters, «Клиенты» on the list rather than
+         whichever card was left open last time. */
+      S.admSetPage = ""; S.mailOpen = false; S.admCustOpen = "";
       // «Каталог» and «Наборы» are the same old tab key with a different shelf
       if (d.admtab === "goods") S.goodsTab = "goods";
       // a queue row on «Обзор» carries the filter its section should open on
@@ -14392,6 +14866,9 @@
       else if (d.admreload === "orders") loadSrvOrders(true);
       else if (d.admreload === "stock") reloadStock();
       else if (d.admreload === "bundles") loadAdminBundles(true);
+      else if (d.admreload === "promos") loadAdminPromos(true);
+      else if (d.admreload === "giftcards") loadAdminGiftCards(true);
+      else if (d.admreload === "stats") { delete ANALYTICS[statsRange()]; loadAnalytics(statsRange()); }
       render(); return;
     }
     if (d.admtoastundo !== undefined) { admUndoToast(); return; }
@@ -14823,7 +15300,13 @@
     // assistant-work: «Отчёты» — the browser follows content-disposition:
     // attachment and downloads it; nothing here needs a fetch/promise.
     if (d.admreportdl !== undefined) { openReportLink(S.reportMonth, d.admreportdl); return; }
-    if (d.mailtpl !== undefined) { keepMailTo(); S.mailTpl = d.mailtpl; render(); return; }
+    /* A letter's row opens its editor; «← Все письма» closes it. Both keep the
+       half-typed test address — the panel rebuilds on every click. */
+    if (d.mailtpl !== undefined) {
+      keepMailTo(); S.mailTpl = d.mailtpl; S.mailOpen = true; S.adminTab = "mail";
+      window.scrollTo({ top: 0 }); render(); return;
+    }
+    if (d.mailback !== undefined) { keepMailTo(); S.mailOpen = false; render(); return; }
     if (d.maillang !== undefined) { keepMailTo(); S.mailLang = d.maillang; render(); return; }
     if (d.mailtest !== undefined) {
       keepMailTo();
@@ -14843,6 +15326,11 @@
       }).then(function (res) {
         t.disabled = false;
         var err = res.j && res.j.error;
+        /* «Подключения» reads this: the only honest signal the panel has about
+           whether letters can be sent at all is a letter it actually tried to
+           send. Anything but a missing key leaves the row alone. */
+        if (res.j && res.j.ok) S.admMailKey = true;
+        else if (err === "no_api_key") S.admMailKey = false;
         if (res.j && res.j.ok) toast("Тест отправлен ✓");
         else if (res.code === 401) toast("Нужен вход в админку");
         else if (err === "no_api_key") toast("Отправка писем ещё не подключена");
@@ -14979,9 +15467,16 @@
     if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
 
     /* ---------- checkout-gaps: delivery prices and promo codes ------------ */
+    /* A delivery price is money the shopper is charged, so since phase 3 it
+       goes through the confirm card like shipping an order or cancelling one
+       — README § State, «any change that affects the shop or money». */
     if (d.admshipsave !== undefined) {
-      demoApply({ type: "set_shipping_rules", rules: cloneRules(shipDraft()), full: true });
-      toast("Тарифы доставки сохранены ✓"); render(); return;
+      pendingAction = {
+        type: "set_shipping_rules", rules: cloneRules(shipDraft()), full: true, overlay: true,
+        title: "Изменить тарифы доставки?",
+        detail: "Новые цены покупатели увидят сразу при оформлении."
+      };
+      render(); refocus("[data-admapply]"); return;
     }
     if (d.admshipreset !== undefined) {
       demoApply({ type: "set_shipping_rules", rules: cloneRules(SHIP_RULES_DEFAULT), full: true });
@@ -15004,6 +15499,32 @@
     if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
     if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
     if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; render(); return; }
+
+    /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
+    // «Настройки»: the index of six and the way back out of a sub-page
+    if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admsetback !== undefined) { S.admSetPage = ""; window.scrollTo({ top: 0 }); render(); return; }
+    /* A denomination is a quick, reversible edit: it applies at once and the
+       toast offers to take it back (README § State). The last one on cannot be
+       switched off — a gift page with no amounts on it is a broken page. */
+    if (d.admgiftamt !== undefined) {
+      var gv = Number(d.admgiftamt), gOn = giftAmountsOn();
+      var gNext = gOn.indexOf(gv) >= 0 ? gOn.filter(function (x) { return x !== gv; }) : gOn.concat(gv);
+      if (!gNext.length) { toast("Хотя бы один номинал должен остаться"); return; }
+      gNext.sort(function (a, b) { return a - b; });
+      var gEntry = demoApply({ type: "set_gift_amounts", value: gNext });
+      toast(gOn.indexOf(gv) >= 0 ? gv + " € убрали из магазина" : gv + " € теперь в магазине", gEntry);
+      render(); return;
+    }
+    // the promo form's kind chips — the same three kinds the radio row had
+    if (d.promokind) {
+      if (S.promoForm) { S.promoForm.kind = d.promokind; render(); refocus('[data-promokind="' + d.promokind + '"]'); }
+      return;
+    }
+    if (d.admcamerahelp !== undefined) {
+      toast("iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера");
+      return;
+    }
 
     /* ---------- inventory: «Склад» — row edit form, filters, ledger, the PWA hint ---------- */
     if (d.stockedit !== undefined) {
