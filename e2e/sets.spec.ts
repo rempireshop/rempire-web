@@ -111,7 +111,10 @@ test.describe("sets switched off", () => {
 
   test("hides every trace of sets in all three languages and keeps a cart line alive", async ({ page, browser }) => {
     await loginAsAdmin(page);
+    /* «Настройки» is an index of six sub-pages since the phase-3 redesign;
+       the two shop-wide switches live on «Главная страница». */
     await page.locator('[data-admtab="setup"]').click();
+    await page.locator('[data-admsetpage="home"]').click();
     await expect(page.getByText("Главный баннер")).toBeVisible();
 
     const toggle = page.locator("[data-admbundles]");
@@ -205,8 +208,10 @@ test.describe("sets switched off", () => {
       await ctx.close();
     } finally {
       await page.locator('[data-admtab="setup"]').click();
+      await page.locator('[data-admsetpage="home"]').click();
       const back = page.locator("[data-admbundles]");
-      if ((await back.textContent())?.includes("Показать")) {
+      // a switch since the redesign: aria-pressed, not a label that flips
+      if ((await back.getAttribute("aria-pressed")) !== "true") {
         /* Waiting for the write, not just the click: the panel applies the
            switch locally and PUTs it in the background, and a test that ends
            on the click has its context torn down with the request still in
