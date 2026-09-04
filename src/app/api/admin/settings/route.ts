@@ -14,6 +14,7 @@ import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
 import { cleanPricing } from "@/lib/loyalty";
 import { parseShippingRules } from "@/lib/shipping";
 import { cleanMailTexts } from "@/emails/texts";
+import { cleanGiftAmounts } from "@/lib/giftcards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,6 +73,12 @@ export async function PUT(req: Request) {
          anything is stored — src/emails/texts.ts cleanMailTexts(). The
          letters escape it again at render time; this is the first door. */
       if (key === "mail_texts") value = cleanMailTexts(value);
+      /* «Подарочные карты»: which denominations the /gift/ page offers. Kept to
+         a subset of the amounts the checkout will actually accept
+         (GIFT_AMOUNTS), sorted and de-duplicated, and never empty — a gift page
+         with no button on it is a page that cannot sell. Same "first door, not
+         the only one" reasoning as pricing and shipping_rules above. */
+      if (key === "gift_amounts") value = cleanGiftAmounts(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

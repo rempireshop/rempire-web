@@ -444,14 +444,46 @@ the confirm card both ways — «Отмена» leaves the editor open and chang
 nothing, «Снять» toasts with an «Отменить» that really puts the product back
 on sale.
 
+## The «Ещё» sections (`e2e/admin-sections.spec.ts`)
+
+The third spec that runs on **both** projects, and for the plainest reason:
+the reviews queue, the letters and the change journal are what Renat opens on
+his phone. One test walks every one of the six sections on whichever viewport
+it is running, asserting three things per screen — the section's own content is
+on it, nothing spills sideways (`scrollWidth - clientWidth <= 1`, because a
+panel that scrolls horizontally is a panel whose bottom bar cannot be tapped),
+and no `pageerror` fired along the way.
+
+The other four tests are one real, server-verified action each, because a
+screen that draws but whose buttons do nothing is the failure this file exists
+to catch: a Pro request approved **from the row** (the point of the redesign) and
+read back off `/api/admin/customers/`; a review published, its undo offered on
+the toast and its line found in the journal; a promo code created; 75 €
+switched on and then found on `/gift/` **in a fresh browser context** (same
+cache reason as `admin.spec.ts`'s `freshStorefrontPage()`); a letter's subject
+saved through the confirm card and read back out of `settings.mail_texts`; a
+post published and withdrawn; a delivery tariff changed through the confirm
+card and taken back from the journal.
+
+Those four are desktop-only (`test.skip` on the mobile project): one write per
+action is enough, and every one of them mutates shop-wide state that other spec
+files read. Each `describe` has its own fake IP — admin login is 5/min.
+
+Its own local `section()` helper knows the one navigation difference between
+the viewports: all six of these live in the desktop sidebar but behind the
+phone's «Ещё» sheet, so on 375 px it opens the sheet first. It waits for
+whichever nav this viewport draws before counting — after a reload the shell is
+a frame or two behind, and an immediate count of zero sent a desktop run
+looking for a button that is not there.
+
 ## The admin fuzz sweep
 
-`e2e/sweep-admin.spec.ts` (sign-in, the tab matrix — the same thirteen keys,
-asserted through the new five-place IA — banner, content, settings,
-the change journal), `e2e/sweep-admin-goods.spec.ts` (goods editor, delivery
+`e2e/sweep-admin.spec.ts` (sign-in, the tab matrix — every old section key,
+`gift` included since phase 3, asserted through the new five-place IA —
+banner, content, settings, the change journal), `e2e/sweep-admin-goods.spec.ts` (goods editor, delivery
 prices, promo codes) and `e2e/sweep-admin-ops.spec.ts` (warehouse, register,
 customers, blog) are one exploratory sweep split three ways for runtime —
-18 tests, ~2.5 minutes, desktop only. They share `e2e/sweep-helpers.ts`, which
+19 tests, ~3 minutes, desktop only. They share `e2e/sweep-helpers.ts`, which
 is where the interesting part lives: every step ends in `assertClean()`, which
 fails on an uncaught page error, on any `console.error` outside a four-entry
 allowlist, on any 5xx, on a visible `undefined`/`NaN`/`[object Object]`/`null`/
@@ -460,6 +492,15 @@ allowlist, on any 5xx, on a visible `undefined`/`NaN`/`[object Object]`/`null`/
 `PRODUCT`/`PRODUCT_2` are excluded from that sample and every test reverts what
 it changed, same discipline as `admin.spec.ts`. Run it with
 `npx playwright test e2e/sweep-admin*.spec.ts --project=desktop`.
+
+**Where the settings cards live now.** Phase 3 turned «Настройки» into an
+index of six sub-pages, so `openSettings(page, sub)` in `sweep-helpers.ts`
+takes the page it wants: `home` (the banner, the announcement bar and the
+sets/chat switches), `company` (the shop's own details and the reports card),
+`delivery` (the tariff grid — and its «Сохранить» goes through the confirm
+card now), `prices`, `langs`, `journal`. The two shop-wide switches are
+`<button aria-pressed>` rather than links whose label flips, so a test that
+wants to know their state reads the attribute.
 
 ## Наборы: the two specs
 
@@ -566,6 +607,7 @@ bytes, same rule as the body.
 | `e2e/admin-shell.spec.ts` | The redesigned panel's shell: five places, the phone bar and «Ещё» sheet, the sidebar fold, all thirteen old tab keys as deep links, the assistant FAB, the confirm card, the toast's undo — see above |
 | `e2e/admin-editor.spec.ts` | The redesigned «Товар»: five tabs, the sticky save bar, a size price + salon price + stock + barcode saved once and read back from the shop, «Склад» and the inventory route, and the destructive action through the confirm card — see below |
 | `e2e/admin-mail.spec.ts` | «Письма»: the owner edits an ET subject and intro, applies, and the same text comes back out of the preview **and** out of a real paid order's confirmation (docs/mail.md) |
+| `e2e/admin-sections.spec.ts` | The six «Ещё» sections after the phase-3 redesign: every one drawing on desktop **and** on a phone with no page error and no sideways scroll, plus one real action each — approve a Pro request from the row, publish a review with its undo, create a promo code, switch a gift denomination on and see it on `/gift/`, save a letter's subject, publish a post, change a tariff through the confirm card and take it back from the journal — see above |
 | `e2e/blog.spec.ts` | The storefront blog, desktop **and** mobile: tiles show the pointer, an article's crumbs start where the listing's do and its product cards keep their foot row whole (ET), and home → Blog → article paints from the idle prefetch / sessionStorage while `/api/blog/` is held for 4 s (docs/blog.md «Откуда берутся данные») |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
 | `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the e2e suite sharded into 3 parallel jobs (each with its own server and database); see its own comments |

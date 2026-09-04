@@ -20,9 +20,35 @@ import { jsonbParam, query } from "@/lib/db";
  * to the database is rounded to cents first.
  */
 
-/** The three amounts the shop sells. Anything else is refused. */
-export const GIFT_AMOUNTS = [25, 50, 100] as const;
+/**
+ * The amounts a gift card is ALLOWED to carry. Anything else is refused at
+ * checkout, whatever the storefront happened to render.
+ *
+ * Which of them are actually on sale is the owner's own setting
+ * (`settings.gift_amounts`, «Маркетинг → Подарочные карты» in the panel;
+ * cleanGiftAmounts below is its sanitiser). This list is the ceiling, not the
+ * shop window: a card already in someone's cart survives the owner hiding its
+ * denomination, and a bad settings row can never price a card the checkout
+ * would then reject.
+ */
+export const GIFT_AMOUNTS = [25, 50, 75, 100] as const;
 export type GiftAmount = (typeof GIFT_AMOUNTS)[number];
+
+/** The three the shop sold before the denominations became a setting. */
+export const GIFT_AMOUNTS_DEFAULT: readonly number[] = [25, 50, 100];
+
+/**
+ * `settings.gift_amounts` → a clean, sorted, de-duplicated subset of
+ * GIFT_AMOUNTS. Anything unusable — not an array, empty, all-unknown values —
+ * falls back to the three the shop has always sold rather than leaving the
+ * /gift/ page with no button on it.
+ */
+export function cleanGiftAmounts(raw: unknown): number[] {
+  if (!Array.isArray(raw)) return [...GIFT_AMOUNTS_DEFAULT];
+  const allowed = GIFT_AMOUNTS as readonly number[];
+  const out = [...new Set(raw.map(Number).filter((n) => allowed.includes(n)))].sort((a, b) => a - b);
+  return out.length ? out : [...GIFT_AMOUNTS_DEFAULT];
+}
 
 /**
  * How long a card lives — «Карта действует год со дня покупки», the sentence
@@ -242,6 +268,23 @@ export async function orderGiftCards(orderId: string): Promise<GiftCard[]> {
     `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
        from gift_cards where order_id = $1 order by created_at`,
     [orderId],
+  );
+  return rows.map(toCard);
+}
+
+/**
+ * Every card the shop has ever issued, newest first — the admin panel's
+ * «Маркетинг → Подарочные карты → Выпущенные карты» (GET /api/admin/giftcards).
+ * Capped rather than paged: a shop that sells a handful of these a month will
+ * not reach 500 in years, and a list the owner scrolls is friendlier than a
+ * pager he has to learn.
+ */
+export async function listGiftCards(limit = 500): Promise<GiftCard[]> {
+  const n = Number.isFinite(limit) ? Math.min(Math.max(Math.trunc(limit), 1), 1000) : 500;
+  const rows = await query<GiftRow>(
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+       from gift_cards order by created_at desc limit $1`,
+    [n],
   );
   return rows.map(toCard);
 }

@@ -346,6 +346,8 @@ const INTENTIONAL_FNS = {
   // already-exempted actionText() above
   BLOG_TRANSLIT: "transliteration table (blogSlugify()) — object keys/values, never rendered",
   MONTH_RU: "month names for monthLabelRu(), consumed only by the exempted actionText() above",
+  // …and the word each review status gets in that same journal line
+  REVIEW_STATE_WORD: "the three status words actionText() splices into a journal line — same decision",
 };
 function intentional(text, fn) {
   if (INTENTIONAL_FNS[fn]) return INTENTIONAL_FNS[fn];

@@ -287,6 +287,17 @@ test.describe("sweep — goods editor", () => {
   });
 });
 
+/**
+ * «Сохранить» on the tariff grid. A delivery price is money a stranger is
+ * charged, so since the phase-3 redesign it goes through the confirm card like
+ * shipping an order does (README § State) — two clicks, not one.
+ */
+async function saveTariffs(page: Page): Promise<void> {
+  await page.locator("[data-admshipsave]").click();
+  await expect(page.locator("[data-admapply]")).toBeVisible();
+  await page.locator("[data-admapply]").click();
+}
+
 test.describe("sweep — delivery prices", () => {
   test.use({ extraHTTPHeaders: ipHeaders(158) });
 
@@ -294,7 +305,7 @@ test.describe("sweep — delivery prices", () => {
     test.setTimeout(180_000);
     const w = watch(page);
     await openAdmin(page);
-    await openSettings(page);
+    await openSettings(page, "delivery");
 
     const before = await (await page.request.get("/api/admin/settings/")).json();
     const originalRules = before.settings.shipping_rules ?? null;
@@ -308,7 +319,7 @@ test.describe("sweep — delivery prices", () => {
       // is charged at checkout.
       for (const bad of ["-5", "abc", "999999", "1e9"]) {
         await parcelEE.fill(bad);
-        await page.locator("[data-admshipsave]").click();
+        await saveTariffs(page);
         await clearToast(page);
         const now = await (await page.request.get("/api/admin/settings/")).json();
         const value = now.settings.shipping_rules?.methods?.parcel?.EE;
@@ -325,7 +336,7 @@ test.describe("sweep — delivery prices", () => {
       // a parcel price can be overridden per carrier (shipPriceFor()), a
       // courier price never is, so this is the number the shopper must see.
       await page.locator('[data-shiprule="m:courier:EE"]').fill("13,37");
-      await page.locator("[data-admshipsave]").click();
+      await saveTariffs(page);
       expect(await toastText(page)).toMatch(/[Тт]ариф/);
       await clearToast(page);
       let now = await (await page.request.get("/api/admin/settings/")).json();
@@ -353,7 +364,7 @@ test.describe("sweep — delivery prices", () => {
       // never quietly undercut a price the owner set above it on purpose.
       await page.locator("[data-admshipfill]").click();
       await clearToast(page);
-      await page.locator("[data-admshipsave]").click();
+      await saveTariffs(page);
       await clearToast(page);
       now = await (await page.request.get("/api/admin/settings/")).json();
       expect(Number(now.settings.shipping_rules.methods.parcel.EE),
@@ -364,7 +375,7 @@ test.describe("sweep — delivery prices", () => {
 
       // An emptied cell removes the override rather than storing a blank.
       await page.locator('[data-shiprule="m:courier:LV"]').fill("");
-      await page.locator("[data-admshipsave]").click();
+      await saveTariffs(page);
       await clearToast(page);
       await assertClean(page, w, "shipping cell emptied");
     } finally {
@@ -399,11 +410,13 @@ test.describe("sweep — promo codes", () => {
 
     // Percentages the server refuses (docs: 1–90). Every one must come back
     // as a sentence in the form, never as a saved code or a dead button.
-    await page.locator('input[name="promokind"][value="percent"]').check();
+    // the kind is a chip row since the phase-3 redesign, not a radio list
+    await page.locator('[data-promokind="percent"]').click();
     for (const bad of ["0", "100", "150", "-10", "abc"]) {
       await page.locator('[data-promof="value"]').fill(bad);
       await page.locator("[data-admpromosave]").click();
-      const err = page.locator(".adm__promoform .err");
+      // the form is adm- markup since the phase-3 redesign
+      const err = page.locator(".adm-err[role=alert]");
       await expect(err, `percent "${bad}" was accepted`).toBeVisible();
       expect(isRussian((await err.textContent()) || ""), `percent "${bad}" message is not Russian`).toBe(true);
       await assertClean(page, w, `promo percent "${bad}"`);
@@ -423,8 +436,11 @@ test.describe("sweep — promo codes", () => {
     const expired = `OLD${stamp}`;
     await page.locator("[data-admpromonew]").click();
     await page.locator('[data-promof="code"]').fill(expired);
-    await page.locator('input[name="promokind"][value="percent"]').check();
+    // the kind is a chip row since the phase-3 redesign, not a radio list
+    await page.locator('[data-promokind="percent"]').click();
     await page.locator('[data-promof="value"]').fill("50");
+    // the rarer conditions sit in a fold-out under the four fields the spec asks for
+    await page.locator("[data-promomore]").click();
     await page.locator('[data-promof="endsAt"]').fill("2020-01-01");
     await page.locator("[data-admpromosave]").click();
     await clearToast(page);
@@ -468,7 +484,8 @@ test.describe("sweep — promo codes", () => {
     // Switching a code off has to reach the checkout too.
     await page.locator(`[data-admpromotoggle="${good}"]`).click();
     await clearToast(page);
-    await expect(page.locator(`[data-admpromotoggle="${good}"]`)).toHaveText(/Включить/);
+    // the row carries a switch since the phase-3 redesign, not a link whose label flips
+    await expect(page.locator(`[data-admpromotoggle="${good}"]`)).toHaveAttribute("aria-pressed", "false");
     await shopper.locator("[data-promo]").fill(good);
     await shopper.locator("[data-applypromo]").click();
     await expect(shopper.locator("[data-promooff]"), "a disabled code still discounted the basket").toHaveCount(0);

@@ -128,7 +128,7 @@
    just changed (screenAdmin()). Every other render — a background fetch
    landing, a badge count moving — patches the DOM in place and must not
    replay it; that replay was the «panel keeps blinking» the owner saw. */
-.adm-page--enter > .adm-screen, .adm-page--enter > .adm-legacy { animation: adm-up .25s; }
+.adm-page--enter > .adm-screen { animation: adm-up .25s; }
 @media (prefers-reduced-motion: reduce) {
   .adm2 *, .adm-toast { animation-duration: 0s !important; transition-duration: 0s !important; }
 }
@@ -166,12 +166,20 @@
 .adm-btn--wide { flex: 1; }
 .adm-btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
 .adm-btn--warn { background: var(--a-warn); border-color: var(--a-warn); color: #fff; }
+/* A button that is really a link — «Написать Дмитрию» is a mailto. `.adm2 a`
+   above paints every link ink, and ink on ink is a black rectangle. */
+.adm2 a.adm-btn { color: #fff; text-decoration: none; }
+.adm2 a.adm-btn--ghost { color: var(--a-ink); }
 .adm-link {
   border: 0; background: none; padding: 0; font-size: 14px; font-weight: 500; color: var(--a-ink);
   text-decoration: underline; text-underline-offset: 3px;
 }
 .adm-link--muted { color: var(--a-muted); font-weight: 400; }
 .adm-link--warn { color: var(--a-warn); }
+/* «← Заказы», «← Все письма», «← Настройки». `.adm-screen` is a flex column,
+   so a bare button stretches the width of the page and centres its own text;
+   a way back is a word, not a bar. */
+.adm-screen > .adm-link { align-self: flex-start; }
 .adm-del {
   height: 48px; padding: 0 16px; border: 0; background: none; color: var(--a-warn);
   font-weight: 500; font-size: 15px; text-decoration: underline; text-underline-offset: 3px;
@@ -203,6 +211,10 @@
   background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule);
 }
 .adm-chip[aria-current="true"] { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
+/* The placeholder chips under a letter's field: seven of them, three times
+   over, so they get the narrower padding and the mono of the token they
+   insert. Still 40 px tall — they are tapped on a phone like anything else. */
+.adm-chip--tok { padding: 0 10px; font-size: 13px; font-family: "PT Mono", ui-monospace, monospace; }
 
 .adm-tabs {
   display: flex; border-bottom: 1px solid var(--a-rule); gap: 24px;
@@ -481,13 +493,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-propose__acts { display: flex; gap: 8px; }
 .adm-propose__acts .adm-btn { flex: 1; height: 44px; }
 
-/* ---------- the sections Phase 2/3 still restyle ---------------------------- */
-/* They keep their own markup and their own legacy CSS; this only re-seats them
-   in the new page column and softens the two things the redesign has already
-   banned everywhere else — the uppercase sub-heading and the info banner. */
-.adm-legacy { display: flex; flex-direction: column; }
-.adm-legacy .sec__head--sub { margin-top: 22px; }
-.adm-legacy .sec__title { font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+/* `.adm-legacy` used to re-seat the sections the redesign had not reached yet.
+   Phases 1–3 between them reached all of them, so nothing renders inside it any
+   more; what a settings sub-page still embeds is `.adm-embed` below. */
 
 /* ---------- login / waiting card ------------------------------------------- */
 
@@ -807,3 +815,218 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scan__mfield::placeholder { color: var(--a-dim); }
 .scan__mbtn { height: 48px; padding: 0 16px; border: 1px solid var(--a-muted); background: none; color: #fff; font-size: 14px; }
 .scan__foot { flex: none; padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px)); font-size: 13px; color: var(--a-dim); text-align: center; }
+/* ======================================================================
+   Phase 3 — Клиенты · Маркетинг · Блог · Аналитика · Подключения ·
+   Настройки · Помощник.
+
+   Same tokens, same geometry (radius 0, 1 px rules, Oswald only for titles
+   and big numbers). Everything below is either a shape phase 1 did not need
+   yet (a switch, a segmented control, a KPI cell, a bar chart, a settings
+   index row) or a screen-specific layout.
+   ====================================================================== */
+
+/* ---------- segmented control (RU · ET · EN) ------------------------------ */
+
+.adm-seg { display: flex; border: 1px solid var(--a-rule); width: fit-content; max-width: 100%; }
+.adm-seg button {
+  height: 40px; padding: 0 16px; font-size: 14px; font-weight: 400; border: 0;
+  background: var(--a-paper); color: var(--a-ink); white-space: nowrap;
+}
+.adm-seg button[aria-current="true"] { background: var(--a-ink); color: #fff; font-weight: 600; }
+
+/* ---------- switch (44 × 26, knob 20, .15 s) ------------------------------
+   A <button aria-pressed>, not a checkbox: every other control in the panel
+   is a button the delegated click handler already sees, and a switch that
+   only answered to `change` would be the one exception. */
+
+.adm-sw {
+  width: 44px; height: 26px; flex: none; border: 1px solid var(--a-ink); background: var(--a-paper);
+  position: relative; padding: 0;
+}
+.adm-sw i {
+  position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  background: var(--a-ink); transition: left .15s, background .15s;
+}
+.adm-sw[aria-pressed="true"] { background: var(--a-ink); }
+.adm-sw[aria-pressed="true"] i { left: 20px; background: #fff; }
+/* a switch is 26 px tall but has to be a 44-px target — the padding is the
+   hit area, drawn nowhere */
+.adm-sw::after { content: ""; position: absolute; inset: -9px 0; }
+
+.adm-swrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; min-height: 56px; padding: 8px 0; border: 0; border-bottom: 1px solid var(--a-rule);
+  background: var(--a-paper); color: var(--a-ink); text-align: left; font-size: 15px;
+}
+
+/* ---------- Клиенты ------------------------------------------------------- */
+
+.adm-stars { color: var(--a-warn); letter-spacing: 1px; }
+.adm-revtext { line-height: 22px; display: block; }
+
+/* ---------- Маркетинг: подарочные карты ----------------------------------- */
+
+.adm-amts { display: flex; gap: 6px; flex-wrap: wrap; }
+.adm-amt {
+  height: 48px; min-width: 72px; padding: 0 14px; font-family: Oswald, sans-serif; font-size: 18px;
+  background: var(--a-ink); color: #fff; border: 1px solid var(--a-ink);
+}
+.adm-amt[aria-pressed="false"] { background: var(--a-paper); color: var(--a-muted); border-color: var(--a-rule); }
+.adm-gift {
+  width: 100%; max-width: 260px; aspect-ratio: 1.6; border: 2px solid var(--a-ink); background: var(--a-ink);
+  color: #fff; display: flex; align-items: flex-end; padding: 8px;
+  font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .15em;
+}
+
+/* ---------- Маркетинг: письма — the live preview -------------------------- */
+
+.adm-prev { border: 1px solid var(--a-rule); background: var(--a-tint); padding: 16px; }
+.adm-prev__l { font-size: 12px; color: var(--a-muted); margin-bottom: 10px; }
+.adm-prev__card {
+  background: var(--a-paper); border: 1px solid var(--a-rule); padding: 24px;
+  display: flex; flex-direction: column; gap: 14px; font-size: 14px; line-height: 22px;
+}
+.adm-prev__mark { font-family: Oswald, sans-serif; letter-spacing: .18em; font-size: 13px; }
+.adm-prev__s { font-weight: 600; font-size: 17px; }
+.adm-prev__body { white-space: pre-line; }
+.adm-prev__ord { border: 1px solid var(--a-rule); padding: 10px 12px; color: var(--a-muted); font-size: 13px; }
+.adm-prev__sign { color: var(--a-muted); white-space: pre-line; }
+.adm-frame { display: block; width: 100%; height: 520px; border: 1px solid var(--a-rule); background: #fff; }
+
+/* ---------- Блог: the editor --------------------------------------------- */
+
+/* `.adm2 input` above sets 15 px Golos on every field in the panel and beats a
+   single class, so the one input that is a screen title says so twice. */
+.adm2 input.adm-title-in {
+  height: 56px; border: 0; border-bottom: 1px solid var(--a-ink); padding: 0; width: 100%;
+  font-family: Oswald, sans-serif; font-size: 28px; font-weight: 500; background: var(--a-paper);
+  color: var(--a-ink); border-radius: 0; -webkit-appearance: none; appearance: none;
+}
+.adm-drop {
+  height: 160px; width: 100%; border: 1px dashed var(--a-ink); background: var(--a-paper);
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  font-size: 14px; color: var(--a-muted); padding: 12px; text-align: center;
+}
+.adm-drop--set { background: var(--a-tint); }
+.adm-drop__img { width: 120px; height: 80px; flex: none; background-size: cover; background-position: center; }
+.adm-tools { display: flex; gap: 4px; flex-wrap: wrap; border: 1px solid var(--a-rule); padding: 6px; }
+.adm-tools button {
+  height: 40px; min-width: 40px; padding: 0 10px; border: 0; background: var(--a-paper);
+  font-size: 14px; color: var(--a-ink);
+}
+.adm-tools button:hover { background: var(--a-tint); }
+.adm-tools button[data-blogrt="bold"] { font-weight: 600; }
+.adm-tools button[data-blogrt="italic"] { font-style: italic; }
+.adm-canvas {
+  border: 1px solid var(--a-rule); padding: 16px; min-height: 280px;
+  line-height: 24px; font-size: 16px; background: var(--a-paper);
+}
+/* The article as the reader will see it, in the panel's own type — the shop's
+   `.acc__rich` sets headings in uppercase letter-spaced Oswald, which is
+   exactly what the redesign banned. Same shapes, none of that. */
+.adm-canvas h2, .adm-canvas h3 { font-weight: 600; font-size: 20px; line-height: 26px; margin: 0 0 8px; font-family: inherit; }
+.adm-canvas p { margin: 0 0 12px; }
+.adm-canvas ul, .adm-canvas ol { margin: 0 0 12px; padding-left: 20px; }
+.adm-canvas li { margin: 4px 0; }
+.adm-canvas img { max-width: 100%; height: auto; display: block; margin: 12px 0; }
+.adm-canvas figure { margin: 12px 0; }
+.adm-canvas a { text-decoration: underline; text-underline-offset: 3px; }
+/* the product marker the «Товар» button inserts — a card in the shop, a
+   quietly underlined name here, so the sentence around it stays readable */
+.adm-canvas a[data-product] { text-decoration: none; border-bottom: 2px solid var(--a-rule); font-weight: 500; }
+.adm-canvas:empty::before { content: attr(placeholder); color: var(--a-muted); }
+.adm-card--soft { border-color: var(--a-rule); }
+.adm-card--soft .adm-btn { width: 100%; }
+
+/* ---------- Аналитика ----------------------------------------------------- */
+
+.adm-kpis {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border-top: 1px solid var(--a-ink); border-left: 1px solid var(--a-rule);
+}
+.adm-kpi { padding: 16px; border-right: 1px solid var(--a-rule); border-bottom: 1px solid var(--a-rule); }
+.adm-kpi__l { font-size: 13px; color: var(--a-muted); }
+.adm-kpi__v { font-family: Oswald, sans-serif; font-size: 32px; line-height: 1.1; margin-top: 4px; }
+.adm-kpi__d { font-size: 13px; margin-top: 4px; color: var(--a-muted); }
+.adm-kpi__d--up { color: var(--a-ok); }
+.adm-kpi__d--down { color: var(--a-warn); }
+
+.adm-wbars {
+  display: flex; align-items: flex-end; gap: 6px; height: 160px;
+  border-top: 1px solid var(--a-ink); margin-top: 10px; padding: 12px 0 24px;
+}
+.adm-wbar { flex: 1; background: var(--a-rule); position: relative; min-height: 2px; }
+.adm-wbar--now { background: var(--a-ink); }
+.adm-wbar span {
+  position: absolute; bottom: -20px; left: 0; right: 0; text-align: center;
+  font-size: 11px; color: var(--a-muted);
+}
+.adm-pair {
+  display: flex; justify-content: space-between; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--a-rule); font-size: 14px;
+}
+.adm-pair__n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-pair__v { font-family: Oswald, sans-serif; white-space: nowrap; }
+.adm-pair__v--plain { font-family: inherit; color: var(--a-muted); }
+
+/* ---------- Подключения --------------------------------------------------- */
+
+/* Beside the name, not beside the middle of the row: on a phone the status
+   line wraps to two lines and a centred square ends up pointing at the second
+   one. 7 px is the name's own first-line centre. */
+.adm-dot { width: 10px; height: 10px; flex: none; background: var(--a-ok); align-self: flex-start; margin-top: 7px; }
+.adm-dot--warn { background: var(--a-warn); }
+
+/* ---------- Настройки ----------------------------------------------------- */
+
+.adm-idx { max-width: 640px; border-top: 1px solid var(--a-ink); }
+.adm-idx button {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 64px; border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper);
+  text-align: left; padding: 10px 0; color: var(--a-ink);
+}
+.adm-idx button:hover { background: var(--a-tint); }
+.adm-tariffs { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1fr; gap: 8px; align-items: center; }
+.adm-tariffs--head {
+  font-size: 12px; color: var(--a-muted); border-bottom: 1px solid var(--a-ink);
+  padding-bottom: 6px; align-items: end;
+}
+.adm-tariffs .adm-input { height: 44px; padding: 0 10px; min-width: 0; }
+.adm-jrow {
+  display: flex; align-items: center; gap: 12px; min-height: 56px;
+  border-bottom: 1px solid var(--a-rule); padding: 8px 0; flex-wrap: wrap;
+}
+.adm-jrow__t { font-family: "PT Mono", ui-monospace, monospace; font-size: 13px; color: var(--a-muted); white-space: nowrap; }
+.adm-jrow__x { flex: 1 1 200px; min-width: 0; }
+.adm-narrow { max-width: 720px; }
+.adm-narrow--form { max-width: 560px; }
+
+/* A settings sub-page still hosts a legacy card or two — the banner editor,
+   the content document, the loyalty form and the accountant's report all keep
+   their own markup. This only re-seats them in the new column and quiets the
+   two things the redesign banned everywhere else — the uppercase sub-heading
+   and the letter-spaced section title. */
+.adm-embed { display: flex; flex-direction: column; }
+.adm-embed .sec__head--sub { margin-top: 22px; }
+.adm-embed .sec__title { font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+/* …and their buttons and chips stop shouting. The storefront sets both in
+   uppercase Oswald with .14em of tracking, which is the panel's own «Сохранить»
+   in a different voice two rules further down the same page. */
+.adm-embed .btn, .adm-embed .chip {
+  font-family: "Golos Text", ui-sans-serif, system-ui, sans-serif;
+  text-transform: none; letter-spacing: 0;
+}
+.adm-embed .btn { font-size: 15px; font-weight: 500; }
+.adm-embed .btn--sm { font-size: 14px; }
+.adm-embed .chip { font-size: 12px; }
+
+/* ---------- phone --------------------------------------------------------- */
+
+@media (max-width: 899px) {
+  .adm-tariffs { grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .adm-tariffs--head { display: none; }
+  .adm-tariffs > span:first-child { grid-column: 1 / -1; font-weight: 600; }
+  .adm-frame { height: 420px; }
+  .adm2 input.adm-title-in { font-size: 24px; height: 48px; }
+  .adm-drop { height: auto; min-height: 120px; flex-wrap: wrap; }
+}

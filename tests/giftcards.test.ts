@@ -4,10 +4,13 @@ import { exec, query } from "@/lib/db";
 import {
   applyGiftCard,
   checkGiftCard,
+  cleanGiftAmounts,
   generateCode,
   getGiftCard,
   GIFT_AMOUNTS,
+  GIFT_AMOUNTS_DEFAULT,
   issueGiftCards,
+  listGiftCards,
   normaliseCode,
   parseGiftItemId,
   redeemGiftCard,
@@ -54,7 +57,30 @@ describe("gift cards", () => {
     expect(parseGiftItemId("gift:25")).toBe(25);
     expect(parseGiftItemId("gift:33")).toBe(null);   // not an amount we sell
     expect(parseGiftItemId("bundle:beard-start")).toBe(null);
-    expect(GIFT_AMOUNTS).toEqual([25, 50, 100]);
+    expect(GIFT_AMOUNTS).toEqual([25, 50, 75, 100]);
+  });
+
+  /* ---------- which denominations are on sale (settings.gift_amounts) ------
+     The panel writes this from «Маркетинг → Подарочные карты»; the /gift/ page
+     draws a button per value. What must hold is that the setting can never put
+     an amount on the page that parseGiftItemId would then refuse at checkout,
+     and can never leave the page with no button at all. */
+
+  it("cleans the denominations setting down to amounts the checkout accepts", () => {
+    expect(cleanGiftAmounts([25, 100])).toEqual([25, 100]);
+    expect(cleanGiftAmounts([100, 25, 75])).toEqual([25, 75, 100]);     // sorted
+    expect(cleanGiftAmounts([50, 50, 50])).toEqual([50]);               // de-duplicated
+    expect(cleanGiftAmounts(["25", "100"])).toEqual([25, 100]);         // strings from jsonb
+    expect(cleanGiftAmounts([25, 33, 1e9, -50])).toEqual([25]);         // unknown values dropped
+    for (const amount of cleanGiftAmounts([25, 50, 75, 100])) {
+      expect(parseGiftItemId(`gift:${amount}`)).toBe(amount);
+    }
+  });
+
+  it("never leaves the gift page without a button", () => {
+    for (const junk of [null, undefined, [], {}, "25,50", [33, 99], [{}, "x"]]) {
+      expect(cleanGiftAmounts(junk)).toEqual(GIFT_AMOUNTS_DEFAULT);
+    }
   });
 
   /* ---------- issuing ---------- */
@@ -86,6 +112,24 @@ describe("gift cards", () => {
     expect(fifty.recipient.message).toBe("Palju õnne!");
     // no recipient given → the buyer's own name is kept as the sender
     expect(cards.find((c) => c.amount === 25)!.recipient.from).toBe("Renat");
+  });
+
+  /* The admin panel's «Выпущенные карты» list (GET /api/admin/giftcards):
+     newest first, and the unspent total it prints has to be the money still
+     owed, not the money once taken. */
+  it("lists every issued card, newest first", async () => {
+    const older = randomUUID(), newer = randomUUID();
+    await issueGiftCards({ id: older, items: [{ id: "gift:25", qty: 1 }] });
+    await query("update gift_cards set created_at = now() - interval '2 days' where order_id = $1", [older]);
+    await issueGiftCards({ id: newer, items: [{ id: "gift:100", qty: 1 }] });
+
+    const cards = await listGiftCards();
+    expect(cards.map((c) => c.amount)).toEqual([100, 25]);
+    expect(cards.reduce((sum, c) => sum + c.balance, 0)).toBe(125);
+
+    await redeemGiftCard(cards[0].code, 40, newer);
+    const after = await listGiftCards();
+    expect(after.reduce((sum, c) => sum + c.balance, 0)).toBe(85);
   });
 
   it("is idempotent — a second onOrderPaid does not double-issue", async () => {

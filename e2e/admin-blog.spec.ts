@@ -101,9 +101,9 @@ test.describe("blog — the visual editor", () => {
     /* 375 px — Renat writes on his phone as often as not. All seven buttons
        have to be reachable without a sideways scroll: the row wraps. */
     await page.setViewportSize({ width: 375, height: 780 });
-    const bar = page.locator(".admblog__tb");
+    const bar = page.locator(".adm-tools");
     await expect(bar).toBeVisible();
-    for (const cmd of ["h2", "bold", "ul", "link", "image", "product", "undo"]) {
+    for (const cmd of ["h2", "bold", "italic", "ul", "link", "image", "product", "undo"]) {
       await expect(page.locator(`[data-blogrt="${cmd}"]`), `«${cmd}» is off screen at 375 px`).toBeInViewport();
     }
     const barOverflow = await bar.evaluate((el) => el.scrollWidth - el.clientWidth);
@@ -117,7 +117,7 @@ test.describe("blog — the visual editor", () => {
 
     await page.locator("[data-admblogpublish]").click();
     await clearToast(page);
-    await expect(page.locator(".chip", { hasText: "Опубликовано" }).first()).toBeVisible();
+    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
 
     /* ---- what the shopper gets ------------------------------------------ */
     const api = await page.request.get(`/api/blog/${slug}/?lang=RU`);
@@ -222,7 +222,13 @@ test.describe("blog — the sample posts", () => {
     await waitForScreen(page, "blogpost");
 
     await expect(page.locator(".blog__cover")).toBeVisible();
-    const article = page.locator(".blog__body");
+    /* The real body, not the skeleton: since the blog paints from its cached
+       summary first, `.blog__body` matches the `aria-busy` placeholder too, and
+       `waitForScreen` + a visible cover are both true while that placeholder is
+       still what is on screen. `count()` does not auto-wait, so the first
+       assertion has to be one that does. */
+    const article = page.locator(".blog__body:not(.blog__sk)");
+    await expect(article.locator("h2").first(), "the sample article never painted").toBeVisible();
     expect(await article.locator("h2").count(), "the sample article has no sections").toBeGreaterThanOrEqual(3);
     expect(await article.locator("ul li").count()).toBeGreaterThanOrEqual(4);
     await expect(article.locator(".blog__prod").first(), "no inline product card").toBeVisible();
