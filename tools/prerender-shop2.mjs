@@ -440,6 +440,7 @@ const PRE_CSS = `
 #prerender .pre__list { list-style: none; padding: 0; margin: 0 0 24px; display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 13.5px; }
 #prerender .pre__card { display: block; }
 #prerender .pre__card .pre__img { margin-bottom: 6px; }
+#prerender .blog__tile:hover .pre__nm { text-decoration: underline; text-underline-offset: 3px; }
 #prerender .pre__nm { display: block; font-size: 13.5px; }
 #prerender .pre__pr { display: block; font-size: 13.5px; font-weight: 600; }
 `.trim();
@@ -497,7 +498,7 @@ ${headBlock(spec)}
 <!-- seo:end -->
 ${headAssets}</head>
 <body>
-<div id="app"><!-- prerender:start --><div id="prerender">${spec.content}</div><!-- prerender:end --></div>
+<div id="app"><!-- prerender:start --><div id="prerender">${spec.content}${blogDataScript(spec.lang.code)}</div><!-- prerender:end --></div>
 ${bodyScripts}</body>
 </html>
 `;
@@ -509,7 +510,7 @@ function patchedShell(spec) {
   return shell
     .replace(HEAD_MARK, () => "<!-- seo:start -->\n" + headBlock(spec) + "\n<!-- seo:end -->")
     .replace(PRE_MARK, () =>
-      '<!-- prerender:start --><div id="prerender">' + spec.content + '</div><!-- prerender:end -->');
+      '<!-- prerender:start --><div id="prerender">' + spec.content + blogDataScript(spec.lang.code) + '</div><!-- prerender:end -->');
 }
 
 /* ---------- shared blocks ---------------------------------------------- */
@@ -1273,11 +1274,16 @@ function blogTile(post, seg, code, t) {
     "</a></li>";
 }
 
-/* The blog pages carry their own data for app.js (#blogdata on the list,
-   #blogpost on an article — see hydrateBlog() there): the first render then
-   shows the posts at once instead of an empty state that the API fills in a
-   second later. Same shapes as /api/blog/ and /api/blog/<slug>/. "</" is
-   escaped so a body containing "</script>" cannot end the block early. */
+/* Every page carries the blog list for its language (#blogdata — a few
+   hundred bytes: titles, excerpts and covers, never a body), and an article
+   page carries the article as well (#blogpost) — see hydrateBlog() in
+   app.js: the first render then shows the posts at once, whichever page
+   the visit started on and wherever it goes next, instead of an empty
+   state that the API fills in a second later. Same shapes as /api/blog/
+   and /api/blog/<slug>/, plus `stamp` — the newest edit the snapshot knows
+   of, so app.js can tell whether a copy the tab fetched itself is newer.
+   "</" is escaped so a body containing "</script>" cannot end the block
+   early. */
 function blogJsonScript(id, obj) {
   return '<script type="application/json" id="' + id + '">' +
     JSON.stringify(obj).replace(/<\//g, "<\\/") + "</script>";
@@ -1287,6 +1293,15 @@ function blogListItem(p, code) {
     slug: p.slug, title: pickLang(p.title, code), excerpt: pickLang(p.excerpt, code),
     coverUrl: p.coverUrl, coverAlt: pickLang(p.coverAlt, code), tags: p.tags, publishedAt: p.publishedAt
   };
+}
+const blogStamp = post => Date.parse(post.updatedAt || post.publishedAt || "") || 0;
+const BLOG_STAMP = BLOG_POSTS.reduce((m, p) => Math.max(m, blogStamp(p)), 0);
+function blogDataScript(code) {
+  if (!BLOG_POSTS.length) return "";
+  return blogJsonScript("blogdata", {
+    lang: code, stamp: BLOG_STAMP,
+    posts: BLOG_POSTS.slice(0, 10).map(p => blogListItem(p, code)), total: BLOG_POSTS.length, perPage: 10
+  });
 }
 function blogListPage(lang) {
   const { code, seg } = lang;
@@ -1302,8 +1317,7 @@ function blogListPage(lang) {
         : '<p class="muted">' + esc(t.blogEmpty) + "</p>") +
     "</section>" +
     langNav(seg, rest, t) +
-    blogJsonScript("blogdata", { lang: code, posts: BLOG_POSTS.slice(0, 10).map(p => blogListItem(p, code)), total: BLOG_POSTS.length, perPage: 10 }) +
-    "</div>";
+    "</div>";   // #blogdata rides on every page — fullPage()/patchedShell() add it
 
   return {
     file: path.join(SHOP2, seg, "blog", "index.html"),
@@ -1356,9 +1370,12 @@ function blogPostPage(post, lang) {
 
   const others = BLOG_POSTS.filter(p => p.slug !== post.slug).slice(0, 3);
 
-  const content = '<div class="wrap wrap--mid">' +
+  // the same shape screenBlogPost() in app.js paints, so the swap at boot
+  // moves nothing: crumbs in the ordinary .wrap, the article in a reading
+  // column (.blog__read), the products and the other articles at full width
+  const content = '<div class="wrap">' +
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
-    '<article class="sec blog__post">' +
+    '<article class="sec blog__post blog__read">' +
       (post.coverUrl
         ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630">'
         : "") +
@@ -1368,14 +1385,14 @@ function blogPostPage(post, lang) {
       '<div class="acc__rich blog__body">' + bodyHtml + "</div>" +
     "</article>" +
     (featured.length
-      ? '<section class="sec"><h2 class="display h1">' + esc(tr("Товары из статьи", code, false)) + "</h2>" + grid(featured, seg, code, t) + "</section>"
+      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(tr("Товары из статьи", code, false)) + "</h2>" + grid(featured, seg, code, t) + "</section>"
       : "") +
     (others.length
-      ? '<section class="sec"><h2 class="display h1">' + esc(t.otherPosts) + "</h2>" +
+      ? '<section class="sec blog__shelf"><h2 class="display h1 blog__h2">' + esc(t.otherPosts) + "</h2>" +
         '<ul class="grid blog__grid" style="list-style:none;padding:0">' + others.map(p => blogTile(p, seg, code, t)).join("") + "</ul></section>"
       : "") +
     langNav(seg, rest, t) +
-    blogJsonScript("blogpost", { lang: code, post: {
+    blogJsonScript("blogpost", { lang: code, stamp: blogStamp(post), post: {
       slug: post.slug, title, excerpt, bodyHtml, coverUrl: post.coverUrl, coverAlt: pickLang(post.coverAlt, code),
       tags: post.tags, products: post.products, seoTitle: seoTitleRaw, seoDesc: pickLang(post.seoDesc, code),
       author: post.author, publishedAt: post.publishedAt
