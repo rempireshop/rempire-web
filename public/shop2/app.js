@@ -385,7 +385,7 @@
       "личный промокод в день рождения, действует 14 дней":
         "isiklik sooduskood sünnipäeval, kehtib 14 päeva",
       /* ---- features: наборы, подарочная карта, отзывы, видео ---- */
-      "Наборы": "Komplektid", "Набор": "Komplekt", "Все наборы": "Kõik komplektid",
+      "Наборы": "Komplektid", "Набор": "Komplekt", "Все наборы": "Kõik komplektid", "Наборы из этого раздела": "Selle rubriigi komplektid",
       "Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.":
         "Valmis komplektid samadest toodetest, mis on poes ka eraldi. Koos on soodsam.",
       "Наборы скоро появятся.": "Komplektid tulevad varsti.",
@@ -1516,7 +1516,7 @@
       "личный промокод в день рождения, действует 14 дней":
         "a personal promo code on the day, valid 14 days",
       /* ---- features: sets, gift card, reviews, video ---- */
-      "Наборы": "Sets", "Набор": "Set", "Все наборы": "All sets",
+      "Наборы": "Sets", "Набор": "Set", "Все наборы": "All sets", "Наборы из этого раздела": "Sets from this section",
       "Готовые наборы из тех же товаров, что стоят в магазине по отдельности. Вместе — дешевле.":
         "Ready-made sets of the same products the shop sells separately. Together they cost less.",
       "Наборы скоро появятся.": "Sets are coming soon.",
@@ -4024,14 +4024,18 @@
       (out ? "" : '<button class="link card__add" data-addbundle="' + b.id + '">В корзину</button>') +
       "</div>";
   }
-  /* Sets belonging to the section being browsed, shown above the grid. Hidden
-     the moment the shopper narrows anything down — a set cannot honour a
-     brand filter or a subcategory chip, so offering one there would lie. */
+  /* Sets belonging to the section being browsed, shown UNDER the grid: a
+     shopper opening «Уход за волосами» came for a product, and a row of big
+     set cards on top pushed the products below the fold (one lone set in a
+     four-column rail left an empty band). Four at most — «Все наборы» leads
+     to the rest. Hidden the moment the shopper narrows anything down — a set
+     cannot honour a brand filter or a subcategory chip, so offering one
+     there would lie. */
   function bundlesForCatalog() {
     if (S.brand || S.subcat || S.brandFilter.length || S.onlyInStock) return [];
     return allBundles().filter(function (b) {
       return b.stock !== "out" && (S.cat === "all" || b.cat === S.cat);
-    });
+    }).slice(0, 4);
   }
   function bundleGridHTML(list, title) {
     if (!list.length) return "";
@@ -5024,17 +5028,17 @@
           "</select></span></label>" +
         "</div>" +
         activeChips() +
-        /* features: sets for this section, in their own grid ABOVE the
-           catalogue one. They deliberately do not live inside #catgrid —
-           patchCatalog() matches the already-rendered prefix by
-           [data-go-product], and a set card would break that match and make
-           every infinite-scroll batch rebuild the whole grid. */
-        bundleGridHTML(bundlesForCatalog(), "Наборы") +
         (list.length
           ? '<div class="grid" id="catgrid">' + visible.map(cardHTML).join("") + "</div>" +
             '<div id="catmore">' + moreHTML(visible.length, list.length) + "</div>"
           : '<div class="empty"><p>Под эти фильтры ничего не подошло.</p>' +
             '<button class="btn btn--ghost" data-clearfilter>Сбросить фильтры</button></div>') +
+        /* features: sets for this section, in their own grid BELOW the
+           catalogue one (see bundlesForCatalog). They deliberately do not
+           live inside #catgrid — patchCatalog() matches the already-rendered
+           prefix by [data-go-product], and a set card would break that match
+           and make every infinite-scroll batch rebuild the whole grid. */
+        bundleGridHTML(bundlesForCatalog(), S.cat === "all" ? "Наборы" : "Наборы из этого раздела") +
       "</section></div>";
   }
   /* Russian counts take three forms; "12 товаров / 22 товара / 21 товар". */
@@ -7056,7 +7060,18 @@
     return [sy / found.length, sx / found.length];
   }
   var pmap = null, pmapMarkers = [];
-  function pickPoint(p) { S.ship.point = p; S.pointOpen = false; render(); refocus("[data-pointopen]"); }
+  /* The picker lives inside [data-co-delivery]; opening, closing, switching
+     list/map and picking a point all used to render() the whole checkout —
+     the page flickered and Leaflet was torn down and rebuilt on every tap.
+     patchDelivery() rewrites only that block (and patchSummary() the totals
+     when the point changes). #pointmap is a fresh node after the patch, so
+     the map view re-binds Leaflet to it. */
+  function repaintPicker(focusSel) {
+    patchDelivery();
+    if (S.pointOpen && POINTS.view === "map") openPointMap();
+    if (focusSel) refocus(focusSel);
+  }
+  function pickPoint(p) { S.ship.point = p; S.pointOpen = false; patchDelivery(); patchSummary(); refocus("[data-pointopen]"); }
   /* Only the markers inside the current view, capped — a country's full list
      can run past 400 points and nobody can read that many pins at once
      anyway. Re-run on "moveend" so panning/zooming keeps the cap honest
@@ -13413,17 +13428,16 @@
       loadPoints(); render(); refocus('[data-carrier="' + d.carrier + '"]'); return;
     }
     if (d.pointopen !== undefined) {
-      loadPoints(); POINTS.q = ""; S.pointOpen = true; render();
-      refocus("[data-pointq]"); return;
+      loadPoints(); POINTS.q = ""; S.pointOpen = true; repaintPicker("[data-pointq]"); return;
     }
-    if (d.pointclose !== undefined) { S.pointOpen = false; render(); refocus("[data-pointopen]"); return; }
+    if (d.pointclose !== undefined) { S.pointOpen = false; repaintPicker("[data-pointopen]"); return; }
     if (d.pointview !== undefined) {
       POINTS.view = POINTS.view === "map" ? "list" : "map";
-      render(); refocus("[data-pointview]"); return;
+      repaintPicker("[data-pointview]"); return;
     }
     if (d.pointpick) {
       var picked = pointById(d.pointpick);
-      if (picked) pickPoint(picked); else { S.pointOpen = false; render(); refocus("[data-pointopen]"); }
+      if (picked) pickPoint(picked); else { S.pointOpen = false; repaintPicker("[data-pointopen]"); }
       return;
     }
     // checkout selections re-render the step, which destroys the clicked
@@ -14838,7 +14852,7 @@
       }
     }
     if (e.key === "Escape") {
-      if (S.pointOpen) { S.pointOpen = false; render(); refocus("[data-pointopen]"); }
+      if (S.pointOpen) { S.pointOpen = false; repaintPicker("[data-pointopen]"); }
       else if (S.cartOpen || S.filterOpen) { closeDrawers(); }
       else if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
