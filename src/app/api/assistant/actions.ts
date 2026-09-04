@@ -265,6 +265,11 @@ const BLOG_BODY_MAX = 6000;
 const BLOG_TAG_MAX = 30;
 const BLOG_TAGS_MAX = 12;
 const BLOG_PRODUCTS_MAX = 12;
+/* The Google snippet: what @/lib/blog stores per language (upsertPost caps
+   seoTitle at 70 and seoDesc at 170); the prompt asks the model for 60/155,
+   the same margin the editor's own boxes leave. */
+const BLOG_SEO_TITLE_MAX = 70;
+const BLOG_SEO_DESC_MAX = 170;
 
 function blogTrilingual(raw: unknown, max: number): Record<string, string> {
   const out: Record<string, string> = {};
@@ -300,12 +305,26 @@ export function sanitizeDraftPost(raw: unknown, known: Set<string>): object | nu
   const x = raw as Record<string, unknown>;
   const title = blogTrilingual(x.title, BLOG_TITLE_MAX);
   if (!title.RU) return null;
+  /* The Google snippet the model writes with the article —
+     {"title":{RU,ET,EN},"description":{RU,ET,EN}} — becomes the post's own
+     seoTitle/seoDesc when the owner applies the draft (applyBlogAction() in
+     public/shop2/app.js): the same per-language pair the blog editor's
+     «Заполнить автоматически» fills. Nothing sent, or nothing left after
+     cleaning → no `seo` key at all, and the post falls back to its title and
+     excerpt the way an untouched editor draft does. */
+  const seoRaw = (x.seo && typeof x.seo === "object" && !Array.isArray(x.seo) ? x.seo : {}) as Record<string, unknown>;
+  const seoTitle = blogTrilingual(seoRaw.title ?? x.seoTitle, BLOG_SEO_TITLE_MAX);
+  const seoDesc = blogTrilingual(seoRaw.description ?? x.seoDesc, BLOG_SEO_DESC_MAX);
+  const seo = Object.keys(seoTitle).length || Object.keys(seoDesc).length
+    ? { title: seoTitle, description: seoDesc }
+    : null;
   return {
     title,
     excerpt: blogTrilingual(x.excerpt, BLOG_EXCERPT_MAX),
     body: blogTrilingual(x.body, BLOG_BODY_MAX),
     tags: blogList(x.tags, BLOG_TAGS_MAX, BLOG_TAG_MAX),
     products: blogList(x.products, BLOG_PRODUCTS_MAX, 80).filter((id) => known.has(id)),
+    ...(seo ? { seo } : {}),
   };
 }
 

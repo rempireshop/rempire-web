@@ -1353,7 +1353,10 @@ function blogPostPage(post, lang) {
   const excerpt = pickLang(post.excerpt, code);
   const bodyHtml = renderPostBody(pickLang(post.body, code));
   const bodyText = stripTags(bodyHtml);
-  const desc = clip((code === "EN" && pickLang(post.seoDesc, code)) || excerpt || bodyText, 158);
+  // the Google pair is per language (pickLang: this language, else Russian),
+  // and the excerpt, then the text, stand in only when neither was written —
+  // the same ladder setHead() in app.js runs once the SPA takes the page over
+  const desc = clip(pickLang(post.seoDesc, code) || excerpt || bodyText, 158);
   const seoTitleRaw = pickLang(post.seoTitle, code);
   const pageTitle = fitTitle(title, (seoTitleRaw || title) + " — REMPIRE");
   const blogLabel = tr("Блог", code, false);

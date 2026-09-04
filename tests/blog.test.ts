@@ -333,6 +333,30 @@ describe("blog storage", () => {
     expect(edited.tags).toEqual(["a", "b"]);
   });
 
+  it("stores the Google title and description per language, capped, and picks them per language with the Russian fallback", async () => {
+    const post = await upsertPost({
+      title: { RU: "Уход за бородой зимой" },
+      seoTitle: { RU: "Уход за бородой зимой: три привычки", ET: "Habeme talvine hooldus: kolm harjumust", EN: "" },
+      seoDesc: { RU: "Мороз сушит бороду. " + "я".repeat(200), ET: "Külm kuivatab habet." },
+    });
+    expect(post.seoTitle).toEqual({ RU: "Уход за бородой зимой: три привычки", ET: "Habeme talvine hooldus: kolm harjumust", EN: "" });
+    expect(post.seoDesc.RU).toHaveLength(170);
+    expect(post.seoDesc.ET).toBe("Külm kuivatab habet.");
+    expect(post.seoDesc.EN).toBe("");
+
+    const back = await getPostById(post.id);
+    expect(back!.seoTitle.ET).toBe("Habeme talvine hooldus: kolm harjumust");
+    // the ladder every public reader runs: this language → Russian → anything
+    expect(pickLang(back!.seoTitle, "ET")).toBe("Habeme talvine hooldus: kolm harjumust");
+    expect(pickLang(back!.seoTitle, "EN")).toBe("Уход за бородой зимой: три привычки");
+    expect(pickLang(back!.seoDesc, "EN")).toBe(post.seoDesc.RU);
+
+    // an edit replaces the whole set it was given — an emptied language really goes away
+    const edited = await upsertPost({ id: post.id, title: { RU: "Уход за бородой зимой" }, seoTitle: { EN: "Winter beard care: three habits" } });
+    expect(edited.seoTitle).toEqual({ RU: "", ET: "", EN: "Winter beard care: three habits" });
+    expect(pickLang(edited.seoTitle, "ET")).toBe("Winter beard care: three habits");
+  });
+
   it("keeps the existing slug on an edit that does not name a new one — a published link must not move", async () => {
     const created = await upsertPost({ title: { RU: "Первый заголовок" } });
     const published = await publishPost(created.id);
@@ -569,6 +593,26 @@ describe("GET /api/blog/[slug]/", () => {
     expect(body.post.bodyHtml).toBe("<p><strong>жирный</strong></p>");
     expect(body.post.slug).toBe(post.slug);
   });
+
+  it("answers the Google title and description of the language asked for, and the Russian pair where that language has none", async () => {
+    const post = await upsertPost({
+      title: { RU: "Уход за бородой зимой", ET: "Habeme talvine hooldus" },
+      excerpt: { RU: "Три привычки." },
+      seoTitle: { RU: "Уход за бородой зимой: три привычки", ET: "Habeme talvine hooldus: kolm harjumust" },
+      seoDesc: { RU: "Мороз сушит бороду — три привычки против этого.", ET: "Külm kuivatab habet — kolm harjumust selle vastu." },
+    });
+    await publishPost(post.id);
+    const { GET } = await import("@/app/api/blog/[slug]/route");
+    const read = async (lang: string) =>
+      (await (await GET(new Request(`${ORIGIN}/api/blog/${post.slug}/?lang=${lang}`), { params: Promise.resolve({ slug: post.slug }) })).json()).post;
+
+    const et = await read("ET");
+    expect(et.seoTitle).toBe("Habeme talvine hooldus: kolm harjumust");
+    expect(et.seoDesc).toBe("Külm kuivatab habet — kolm harjumust selle vastu.");
+    const en = await read("EN");   // no English pair yet → the Russian one, never a blank
+    expect(en.seoTitle).toBe("Уход за бородой зимой: три привычки");
+    expect(en.seoDesc).toBe("Мороз сушит бороду — три привычки против этого.");
+  });
 });
 
 /* ---------- admin API -------------------------------------------------------- */
@@ -672,6 +716,33 @@ describe("admin blog API — CRUD", () => {
 
     const missing = await GET(new Request(`${ORIGIN}/api/admin/blog/?id=00000000-0000-0000-0000-000000000000`, { headers: { cookie: admin } }));
     expect(missing.status).toBe(404);
+  });
+
+  it("takes the Google title and description per language on POST and PATCH, and hands them back whole", async () => {
+    const { GET, POST, PATCH } = await import("@/app/api/admin/blog/route");
+    const created = await POST(send("POST", {
+      title: { RU: "Заголовок" },
+      seoTitle: { RU: "Заголовок для Google", ET: "Pealkiri Google'i jaoks" },
+      seoDesc: { RU: "Описание для Google" },
+    }));
+    expect(created.status).toBe(200);
+    const post = (await created.json()).post;
+    expect(post.seoTitle).toEqual({ RU: "Заголовок для Google", ET: "Pealkiri Google'i jaoks", EN: "" });
+    expect(post.seoDesc).toEqual({ RU: "Описание для Google", ET: "", EN: "" });
+
+    // the editor sends every field on a save (blogFieldsPayload in app.js) — the whole set, all three languages
+    const edited = await PATCH(send("PATCH", {
+      id: post.id, title: { RU: "Заголовок" },
+      seoTitle: { RU: "Заголовок для Google", ET: "Pealkiri Google'i jaoks", EN: "Title for Google" },
+      seoDesc: { RU: "Описание для Google", ET: "Kirjeldus Google'i jaoks", EN: "Description for Google" },
+    }));
+    expect(edited.status).toBe(200);
+    expect((await edited.json()).post.seoTitle.EN).toBe("Title for Google");
+
+    const back = await GET(new Request(`${ORIGIN}/api/admin/blog/?id=${post.id}`, { headers: { cookie: admin } }));
+    const stored = (await back.json()).post;
+    expect(stored.seoTitle).toEqual({ RU: "Заголовок для Google", ET: "Pealkiri Google'i jaoks", EN: "Title for Google" });
+    expect(stored.seoDesc).toEqual({ RU: "Описание для Google", ET: "Kirjeldus Google'i jaoks", EN: "Description for Google" });
   });
 
   it("PATCH with no id and no slug is rejected", async () => {

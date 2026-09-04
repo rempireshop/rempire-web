@@ -171,6 +171,27 @@ describe("draft_post", () => {
     expect(out.body.RU).toHaveLength(6000);
   });
 
+  it("carries the Google title and description per language, capped at what a post stores, and has no seo key when the model sent none", () => {
+    const seo = {
+      title: { RU: "Уход за бородой зимой: три привычки", ET: "Habeme talvine hooldus", EN: "T".repeat(100) },
+      description: { RU: "Мороз сушит бороду.", ET: "   ", EN: "D".repeat(300) },
+    };
+    const out = sanitizeAction({ type: "draft_post", ...goodPost, seo }, known, true) as {
+      seo: { title: Record<string, string>; description: Record<string, string> };
+    };
+    expect(out.seo.title.RU).toBe("Уход за бородой зимой: три привычки");
+    expect(out.seo.title.ET).toBe("Habeme talvine hooldus");
+    expect(out.seo.title.EN).toHaveLength(70);
+    expect(out.seo.description.RU).toBe("Мороз сушит бороду.");
+    expect(out.seo.description.EN).toHaveLength(170);
+    expect(out.seo.description).not.toHaveProperty("ET");   // blank is not a value
+
+    expect(sanitizeAction({ type: "draft_post", ...goodPost }, known, true)).not.toHaveProperty("seo");
+    expect(sanitizeAction({ type: "draft_post", ...goodPost, seo: { title: { RU: "  " } } }, known, true)).not.toHaveProperty("seo");
+    expect(sanitizeAction({ type: "draft_post", ...goodPost, seo: "not an object" }, known, true)).not.toHaveProperty("seo");
+    expect(sanitizeAction({ type: "draft_post", ...goodPost, seo: { title: ["a", "b"] } }, known, true)).not.toHaveProperty("seo");
+  });
+
   it("is admin-only", () => {
     expect(sanitizeAction({ type: "draft_post", ...goodPost }, known, false)).toBeNull();
   });

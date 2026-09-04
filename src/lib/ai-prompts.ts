@@ -169,35 +169,87 @@ Respond with exactly this JSON shape, one key per requested target language, not
 }
 
 /* ---------- seo -------------------------------------------------------------
- * title ≤ 60, description ≤ 155, for a product or a blog post, in `lang`. */
+ * title ≤ 60, description ≤ 155, for a product or a blog post, in `lang`.
+ *
+ * Two input shapes, told apart by `kind`:
+ *   product (default) — name, brand, category, an optional summary;
+ *   post — the article itself: title, excerpt, the beginning of its text
+ *          (plain, the first SEO_POST_BODY_MAX characters), tags and the
+ *          names of the products it links. That is what the blog editor's
+ *          «Заполнить автоматически» sends (admBlogSeoFill() in
+ *          public/shop2/app.js). "blog" is the older spelling of "post" and
+ *          still means the same thing; `name`/`summary` are read there as
+ *          the title/excerpt when `title`/`excerpt` are not given. */
 
 export interface SeoInput {
-  kind?: "product" | "blog";
-  name: string;
+  kind?: "product" | "post" | "blog";
+  /** Product name — or, for a post, its title (`title` is the key the editor sends). */
+  name?: string;
   brand?: string;
   category?: string;
+  /** A product's free summary; for a post the excerpt (`excerpt` is the key the editor sends). */
   summary?: string;
+  /* kind: "post" */
+  title?: string;
+  excerpt?: string;
+  /** The article's own text, plain — only the first SEO_POST_BODY_MAX characters are used. */
+  body?: string;
+  tags?: string[];
+  /** Names of the products the article links, so the snippet can name one if it fits. */
+  products?: string[];
 }
 
-function cleanSeoInput(raw: unknown): Required<Pick<SeoInput, "name">> & Omit<SeoInput, "name"> {
+/** How much of the article text goes to the model — enough for its topic, not the whole piece. */
+export const SEO_POST_BODY_MAX = 1500;
+
+interface SeoClean {
+  kind: "product" | "post";
+  name: string;
+  brand: string;
+  category: string;
+  summary: string;
+  body: string;
+  tags: string[];
+  products: string[];
+}
+
+function cleanSeoInput(raw: unknown): SeoClean {
   const src = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const kind = src.kind === "post" || src.kind === "blog" ? "post" : "product";
+  if (kind === "post") {
+    const name = line(src.title, 200) || line(src.name, 200);
+    if (!name) throw new AiInputError("missing_title");
+    return {
+      kind,
+      name,
+      brand: "",
+      category: "",
+      summary: line(src.excerpt, 500) || line(src.summary, 500),
+      body: para(src.body, SEO_POST_BODY_MAX),
+      tags: listOf(src.tags, 12, 30),
+      products: listOf(src.products, 12, 120),
+    };
+  }
   const name = line(src.name, 140);
   if (!name) throw new AiInputError("missing_name");
-  const kind = src.kind === "blog" ? "blog" : "product";
   return {
     kind,
     name,
     brand: line(src.brand, 60),
     category: line(src.category, 60),
     summary: para(src.summary, 800),
+    body: "",
+    tags: [],
+    products: [],
   };
 }
 
 export function buildSeoPrompt(lang: Lang3, rawInput: unknown): PromptResult {
   const input = cleanSeoInput(rawInput);
-  const what = input.kind === "blog" ? "blog article" : "product";
+  if (input.kind === "post") return buildPostSeoPrompt(lang, input);
+
   const facts = [
-    `${what === "blog article" ? "Article title" : "Product name"}: ${input.name}`,
+    `Product name: ${input.name}`,
     input.brand ? `Brand: ${input.brand}` : "",
     input.category ? `Category: ${input.category}` : "",
     input.summary ? `Summary to work from, use only this, do not add more:\n${input.summary}` : "",
@@ -205,9 +257,33 @@ export function buildSeoPrompt(lang: Lang3, rawInput: unknown): PromptResult {
 
   const system = `${HOUSE_VOICE}
 
-TASK: write a Google search snippet for this ${what}, in ${LANG_NAME[lang]}.
-- "title": an SEO title, at most 60 characters INCLUDING spaces — count them. Include the ${what === "blog article" ? "article topic" : "product type and brand"} naturally, no keyword stuffing, no trailing "| Rempire" (the site appends that itself).
+TASK: write a Google search snippet for this product, in ${LANG_NAME[lang]}.
+- "title": an SEO title, at most 60 characters INCLUDING spaces — count them. Include the product type and brand naturally, no keyword stuffing, no trailing "| Rempire" (the site appends that itself).
 - "description": an SEO meta description, at most 155 characters INCLUDING spaces — count them. A concrete, specific reason to click, not a repeat of the title.
+Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
+
+  return { system, user: `INPUT:\n${facts}` };
+}
+
+/* A post is trilingual, and the editor asks for the snippet of one language
+   at a time — with the article text in that language when the owner has
+   written it, and in Russian otherwise. So the model is told plainly that
+   the text under INPUT may be in another language than the one asked for:
+   the snippet is for that language's page of the same article. */
+function buildPostSeoPrompt(lang: Lang3, input: SeoClean): PromptResult {
+  const facts = [
+    `Article title: ${input.name}`,
+    input.summary ? `Excerpt: ${input.summary}` : "",
+    input.tags.length ? `Tags: ${input.tags.join(", ")}` : "",
+    input.products.length ? `Products the article recommends: ${input.products.join(", ")}` : "",
+    input.body ? `Article text (the beginning), use only this, do not add more:\n${input.body}` : "",
+  ].filter(Boolean).join("\n");
+
+  const system = `${HOUSE_VOICE}
+
+TASK: write a Google search snippet for this blog article, in ${LANG_NAME[lang]}. The article under INPUT may be written in another language — write the snippet in ${LANG_NAME[lang]} regardless: it is for the ${LANG_NAME[lang]} page of the same article.
+- "title": an SEO title, at most 60 characters INCLUDING spaces — count them. Name the article's topic the way a reader would search for it, no keyword stuffing, no trailing "| Rempire" (the site appends that itself).
+- "description": an SEO meta description, at most 155 characters INCLUDING spaces — count them. Say concretely what the reader will learn — a reason to click, not a repeat of the title.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
 
   return { system, user: `INPUT:\n${facts}` };
