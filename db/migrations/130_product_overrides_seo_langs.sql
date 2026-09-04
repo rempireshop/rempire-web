@@ -1,0 +1,16 @@
+-- 130_product_overrides_seo_langs.sql — admin polish (migration range 130–139)
+--
+-- The Google title/description an owner writes, per language. The pair the
+-- panel always wrote — seo_title / seo_desc (001_core.sql) — stays exactly
+-- what it was and is the RUSSIAN pair; this column carries the other two:
+--
+--   {"ET": {"title": "…", "desc": "…"}, "EN": {"title": "…", "desc": "…"}}
+--
+-- Any subset of the two keys, any subset of the two fields. Null (the
+-- default) means «no Estonian/English pair of its own», and the storefront
+-- falls back to the Russian pair for that page — see src/lib/product-seo.ts
+-- pickSeo() for the precedence the panel, the public feed and the page share.
+--
+-- Its own column rather than a rewrite of seo_title/seo_desc into jsonb so a
+-- row written by the older panel keeps working with nothing to migrate.
+alter table product_overrides add column if not exists seo_langs jsonb;

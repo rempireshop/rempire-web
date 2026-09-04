@@ -8,6 +8,12 @@
  *   { "id": "touchable", "stock": "low", "seoTitle": "…", "seoDesc": "…" }
  *   { "items": [ { "id": "a", "price": 9 }, { "id": "b", "stock": "out" } ] }
  *   { "id": "touchable", "gallery": [ { "url": "…", "thumb": "…", "alt": "" } ] }
+ *   { "id": "touchable", "seo": { "RU": { "title": "…", "desc": "…" }, "ET": { … }, "EN": { … } } }
+ *
+ * `seo` is the per-language Google pair (src/lib/product-seo.ts) and is
+ * replaced as a whole: a language left out is cleared. Its RU half lands in
+ * the legacy seo_title/seo_desc columns, which `seoTitle`/`seoDesc` still
+ * read and write on their own for anything that predates it.
  *
  * GET returns the same map as /api/overrides but uncached, for the panel.
  */
@@ -18,8 +24,9 @@ import {
   setDescriptionOverride,
   type DescriptionOverride,
 } from "@/lib/product-descriptions";
+import { getSeoOverrides, setSeoOverride, type SeoOverride } from "@/lib/product-seo";
 
-type OverrideOut = Override & { description?: DescriptionOverride | null };
+type OverrideOut = Override & { description?: DescriptionOverride | null; seo?: SeoOverride | null };
 
 function emptyOverride(): Override {
   return {
@@ -76,10 +83,15 @@ export async function GET(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
   try {
-    const [overrides, descriptions] = await Promise.all([getOverrides(), getDescriptionOverrides()]);
+    const [overrides, descriptions, seos] = await Promise.all([getOverrides(), getDescriptionOverrides(), getSeoOverrides()]);
     const out: Record<string, OverrideOut> = overrides;
     for (const [id, description] of Object.entries(descriptions)) {
       out[id] = { ...(out[id] ?? emptyOverride()), description };
+    }
+    // the per-language Google pairs — the RU half is the same seo_title /
+    // seo_desc the row already carries, ET/EN come from seo_langs
+    for (const [id, seo] of Object.entries(seos)) {
+      out[id] = { ...(out[id] ?? emptyOverride()), seo };
     }
     return Response.json({ ok: true, overrides: out }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
@@ -123,6 +135,15 @@ export async function PUT(req: Request) {
       if ("description" in raw || "descriptions" in raw) {
         row.description = await setDescriptionOverride(id, raw.description ?? raw.descriptions);
         await writeAuditSafe("admin", "override.description", { id });
+      }
+      /* The per-language Google pairs, written after the legacy pair so a
+         body carrying both (`seoTitle` and `seo`) ends with the per-language
+         set in charge — it is the one the editor sends. */
+      if ("seo" in raw) {
+        row.seo = await setSeoOverride(id, raw.seo);
+        row.seoTitle = row.seo?.RU?.title ?? null;
+        row.seoDesc = row.seo?.RU?.desc ?? null;
+        await writeAuditSafe("admin", "override.seo", { id });
       }
       saved[id] = row;
       await writeAuditSafe("admin", "override.set", { id, patch });
