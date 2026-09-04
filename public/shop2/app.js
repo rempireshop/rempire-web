@@ -4095,7 +4095,9 @@
         // grid — the link leads to the product page, where the «сообщить о
         // наличии» form lives
         ? '<button type="button" class="card__add card__add--notify" data-go-product="' + p.id + '">Сообщить о наличии</button>'
-        : '<button type="button" class="card__add" data-add="' + p.id + '">В корзину</button>') +
+        // the text on wide cards, the bag icon (spec variant 2b) on a phone's
+        // 155px card — CSS picks; the text stays for screen readers
+        : '<button type="button" class="card__add" data-add="' + p.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
       cardPopHTML(p);
   }
 
@@ -4293,7 +4295,7 @@
         '<span class="card__sp"></span>' +
         (out
           ? '<button type="button" class="card__add card__add--notify" data-go-bundle="' + b.id + '">Смотреть</button>'
-          : '<button type="button" class="card__add" data-addbundle="' + b.id + '">В корзину</button>') +
+          : '<button type="button" class="card__add" data-addbundle="' + b.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
       "</div>" +
       "</div>";
   }
