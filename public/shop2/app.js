@@ -11825,14 +11825,15 @@
   function scanDropLabel(n) { return "Списать −" + n; }
   function scanCartLabel(n) { return "Добавить в продажу · " + n; }
   function scanPanelHTML() {
-    if (S.scanErr) {
-      return '<div class="scan__card scan__card--err"><p>' + esc(S.scanErr) + "</p></div>";
-    }
+    /* «Нет доступа к камере» is a LINE above whatever else is on screen, never
+       instead of it: the manual field is the interface on a machine with no
+       camera, so a code typed into it must still bring its card up. */
+    var err = S.scanErr ? '<div class="scan__card scan__card--err"><p>' + esc(S.scanErr) + "</p></div>" : "";
     if (!S.scanHit) {
       /* «Сегодня» belongs to the idle state and only there: while a card is up
          the three taps are the whole job, but between codes this is the only
          place that answers «что я уже принял сегодня». */
-      return '<p class="scan__hint">Наведите на штрихкод. Товар найдётся сам — останется указать количество.</p>' +
+      return err + '<p class="scan__hint">Наведите на штрихкод. Товар найдётся сам — останется указать количество.</p>' +
         (S.scanToday && S.scanToday.length
           ? '<div class="scan__today"><div class="scan__today__t">Сегодня</div>' +
             S.scanToday.slice(0, 6).map(function (m) {
@@ -11848,7 +11849,7 @@
          one of the two. The stepper's value is read off the DOM at commit
          time (scanQtyNow()), so a typed number counts exactly like a stepped
          one and neither needs a re-render per keystroke. */
-      return '<div class="scan__card">' +
+      return err + '<div class="scan__card">' +
         '<div class="scan__found">Найдено · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
         '<div class="scan__nm">' + esc(p.brand + " — " + p.name) + "</div>" +
         '<div class="scan__sub">' + (h.variant ? esc(h.variant) + " · " : "") +
@@ -11874,7 +11875,7 @@
         (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "") +
       "</div>";
     }
-    return '<div class="scan__card">' +
+    return err + '<div class="scan__card">' +
       '<div class="scan__warn">Код не привязан · <span class="adm-mono">' + esc(h.code) + "</span></div>" +
       '<div class="scan__nm">К какому товару?</div>' +
       '<input class="scan__find" data-scanassignq value="' + esc(S.scanAssignQ || "") +
