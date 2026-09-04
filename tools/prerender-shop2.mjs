@@ -290,7 +290,13 @@ const SHELL_FILE = path.join(SHOP2, "index.html");
 const shell = (await readFile(SHELL_FILE, "utf8")).replace(/\r\n?/g, "\n");
 // HEAD_MARK / PRE_MARK — the two marker pairs — are shared with the
 // request-time page, which patches the very same shell (src/lib/seo-head.mjs)
-const headAssets = (shell.match(/<link rel="icon"[\s\S]*?(?=<\/head>)/) || [])[0];
+/* The copy starts at the first favicon <link>. It is matched on a copy of the
+   shell with its HTML comments removed: a comment that merely *mentions* the
+   tag once made the copy start inside the comment, and the orphaned comment
+   tail became visible text at the top of every ET/EN page (the browser closes
+   <head> at the first text node). The generated pages carry no comments. */
+const shellNoComments = shell.replace(/<!--[\s\S]*?-->/g, "");
+const headAssets = (shellNoComments.match(/<link rel="icon"[\s\S]*?(?=<\/head>)/) || [])[0];
 // anchored on the marker, not on the first </div>: the block between them is
 // full of divs of its own once a run has happened
 const bodyScripts = (shell.match(/<!-- prerender:end -->\s*<\/div>\s*([\s\S]*?)<\/body>/) || [])[1];

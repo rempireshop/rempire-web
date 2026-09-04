@@ -108,6 +108,21 @@ test.describe("pwa manifests", () => {
     expect(et).toContain('href="/shop2/icons/apple-touch-icon-180.png"');
     expect(et).toContain('href="/shop2/icons/favicon.svg"');
     expect(et).toContain("<style>html{background:#fff}</style>");
+
+    /* …and copy it INTACT. A stray text node in <head> (once: the tail of a
+       comment the copy had started inside) makes the browser close the head
+       there — the remaining links land in <body>, the text renders, and the
+       shop wears a white band above the announcement strip on every ET/EN
+       page. So: the first thing in the body is the app, the favicon link is
+       still in the head, and nothing sits above the app. */
+    await page.goto(shopUrl("/et", "/"));
+    await waitForScreen(page, "home");
+    const head = await page.evaluate(() => ({
+      firstInBody: document.body.firstElementChild?.id,
+      iconInHead: !!document.head.querySelector('link[rel="icon"]'),
+      appTop: Math.round(document.getElementById("app")!.getBoundingClientRect().top + window.scrollY),
+    }));
+    expect(head).toEqual({ firstInBody: "app", iconInHead: true, appTop: 0 });
   });
 
   test("the admin route swaps to the admin manifest and back", async ({ page }) => {
