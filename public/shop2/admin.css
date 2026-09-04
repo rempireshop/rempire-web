@@ -541,6 +541,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   /* A thumb, not a pointer: every control the phone shows is at least 44 px
      tall (README § Constraints). The desktop keeps the tighter 40-px rows. */
   .adm-chip, .adm-btn--row, .adm-input--row { height: 44px; }
+  /* a plain button's height comes from padding + line-height, which lands a
+     hair under 44 with the wider fallback fonts of the Linux CI runner */
+  .adm-btn { min-height: 44px; box-sizing: border-box; }
   .adm-langs button { height: 44px; min-width: 44px; padding: 0 12px; justify-content: center; }
   .adm-tab { min-height: 44px; padding: 11px 0; }
   .adm-link { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
