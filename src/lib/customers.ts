@@ -19,7 +19,7 @@
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
-import { query } from "@/lib/db";
+import { jsonbParam, query } from "@/lib/db";
 
 export const CUSTOMER_COOKIE = "rmp_cust";
 export const CUSTOMER_SESSION_DAYS = 90;
@@ -553,7 +553,7 @@ export async function saveCart(input: { email: string; lang?: unknown; items?: u
      values ($1, $2, $3::jsonb, $4, now(), null)
      on conflict (email) do update set
        lang = $2, items = $3::jsonb, total = $4, updated_at = now(), recovered_at = null`,
-    [addr, normalizeLangCode(input.lang), JSON.stringify(snap.items), snap.total],
+    [addr, normalizeLangCode(input.lang), jsonbParam(snap.items), snap.total],
   );
   return snap;
 }

@@ -72,10 +72,24 @@ export async function PATCH(req: Request, ctx: Ctx) {
     return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
   }
 
+  /* `null` is valid JSON and `typeof null === "object"`, so the parse above
+     lets it through and every field read below throws — a 500 from a
+     two-byte body. Same door for a bare number, string or array. */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+  }
+
   const action = typeof body.action === "string" ? body.action : "";
   const tier = body.tier === "retail" || body.tier === "pro" ? body.tier : null;
   const hasNotes = "notes" in body;
   const pointsDelta = body.pointsDelta != null ? Math.trunc(Number(body.pointsDelta)) : null;
+  /* Checked here, before the approve/tier/notes half of the same body is
+     written: adjustPoints() (src/lib/loyalty.ts) refuses the same values, but
+     by then the other changes had already been committed and the panel only
+     got a bare 400 to show. Same ceiling as the ledger's own. */
+  if (body.pointsDelta != null && (!Number.isFinite(pointsDelta as number) || Math.abs(pointsDelta as number) > 1_000_000)) {
+    return Response.json({ ok: false, error: "bad_points" }, { status: 400 });
+  }
   if (
     action !== "approve" &&
     action !== "reject" &&

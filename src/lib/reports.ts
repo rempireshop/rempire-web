@@ -55,10 +55,16 @@ function pad2(n: number): string {
 }
 
 /** "YYYY-MM" → the UTC half-open range [first of month, first of next month). */
+/* Years a shop's accounting export can plausibly ask for. Outside this the
+   value is a typo or a probe, and Postgres would refuse it anyway. */
+const MIN_YEAR = 1970;
+const MAX_YEAR = 2999;
+
 export function monthRange(month: string): { from: string; to: string } | null {
   const m = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(String(month ?? "").trim());
   if (!m) return null;
   const year = Number(m[1]);
+  if (year < MIN_YEAR || year > MAX_YEAR) return null;
   const mon = Number(m[2]); // 1-12
   const from = `${year}-${pad2(mon)}-01`;
   const nextYear = mon === 12 ? year + 1 : year;
@@ -76,6 +82,13 @@ export function explicitRange(fromRaw: string, toRaw: string): { from: string; t
   const fromD = new Date(`${from}T00:00:00.000Z`);
   const toD = new Date(`${to}T00:00:00.000Z`);
   if (Number.isNaN(fromD.getTime()) || Number.isNaN(toD.getTime()) || toD < fromD) return null;
+  /* `from` used to go into the SQL exactly as typed while only `to` was
+     rebuilt from its Date. "2026-02-30" parses in JS (it rolls into March)
+     but is "date/time field value out of range" to Postgres, and year 0000
+     does not exist there at all — both arrived as a 503 rather than a 400.
+     Round-tripping each date through its own Date is the check. */
+  if (fromD.toISOString().slice(0, 10) !== from || toD.toISOString().slice(0, 10) !== to) return null;
+  if (fromD.getUTCFullYear() < MIN_YEAR || toD.getUTCFullYear() > MAX_YEAR) return null;
   toD.setUTCDate(toD.getUTCDate() + 1);
   return { from, to: toD.toISOString().slice(0, 10) };
 }
@@ -247,8 +260,24 @@ const NUMERIC_COLUMNS = new Set<keyof ReportOrderRow>([
   "subtotal", "shipping", "discount", "total", "vatRate", "vatAmount", "totalExclVat",
 ]);
 
+/**
+ * Excel and LibreOffice treat a cell that opens with =, +, @, a tab or a CR as
+ * a formula, and a "-" that is not a number the same way. Both exports below
+ * carry text a customer typed (their own name, a company, an order note), so
+ * without this a shopper could call themselves =HYPERLINK(...) and have the
+ * owner's own spreadsheet run it on open. An apostrophe is the standard
+ * defusing: Excel shows the text and evaluates nothing.
+ */
+function defuseFormula(s: string): string {
+  if (!s) return s;
+  if (/^[=+@\t\r]/.test(s)) return "'" + s;
+  // a plain negative number is a number, not a formula
+  if (s.startsWith("-") && !/^-\d+(\.\d+)?$/.test(s)) return "'" + s;
+  return s;
+}
+
 function csvCell(v: string | number, delimiter: string): string {
-  const s = typeof v === "number" ? v.toFixed(2) : String(v ?? "");
+  const s = typeof v === "number" ? v.toFixed(2) : defuseFormula(String(v ?? ""));
   if (s.includes(delimiter) || s.includes('"') || s.includes("\n") || s.includes("\r")) {
     return `"${s.replace(/"/g, '""')}"`;
   }

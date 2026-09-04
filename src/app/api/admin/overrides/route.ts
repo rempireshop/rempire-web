@@ -105,6 +105,11 @@ export async function PUT(req: Request) {
       ? (body as Patch[])
       : [body as Patch];
   if (!list.length || list.length > 200) return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+  /* A body of `null`, `5` or `"x"` parses fine and lands here as a one-entry
+     list; normalise() then reads `.id` off it and throws (audit: fuzz). */
+  if (list.some((p) => !p || typeof p !== "object" || Array.isArray(p))) {
+    return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+  }
 
   const saved: Record<string, OverrideOut> = {};
   try {

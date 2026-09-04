@@ -276,6 +276,55 @@ coverage now instead of the workaround it briefly needed.
   not fully control the timing or content of. Generous but bounded timeouts
   are used there rather than a fixed sleep.
 
+## The storefront sweep
+
+`e2e/sweep-storefront.spec.ts` (the crawl) and `e2e/sweep-checkout.spec.ts`
+(the randomised cart/checkout) are a different shape from the rest of this
+suite: instead of asserting one behaviour each, they walk *every* customer
+screen in RU/ET/EN and hold each one to the same standing checks — no
+`pageerror`, no `console.error` outside a tiny commented allowlist, no
+`undefined`/`NaN`/`[object Object]`/`null`/`{{` visible anywhere, no
+horizontal scroll at 375px, no Cyrillic left in the ET/EN chrome, an `alt` on
+every `<img>`, no duplicate element ids, and every price in `eur()`'s exact
+format. Shared plumbing is `e2e/sweep-shop-helpers.ts` (not a `.spec.ts`, so
+Playwright never collects it); it also holds `SWEEP_SEED`, the one number that
+makes the product picks and the ten random orders reproducible — every
+assertion message ends with the screen, the language and that seed.
+
+Both run on `--project=desktop` **and** `--project=mobile` (the crawl fully,
+the checkout for its one layout test), which is the exception to
+"most specs run on desktop only" above: the horizontal-scroll rule only means
+anything on a phone. The crawl navigates client-side through the app's own
+`popstate` router rather than reloading for each of ~250 screens — a cold load
+re-parses 845 KB of `app.js` plus the catalogue — and still does a real
+`page.goto` for one screen of each kind per language, so the boot path stays
+covered.
+
+One environment note: `next dev` serves this suite, and every `next dev` in
+this checkout shares one `.next` directory. With a second dev server running
+(someone's `npm run dev`, or another agent's own Playwright run), a route
+manifest rebuild can make unrelated API routes answer 404 or 500 for a few
+seconds — which the sweep correctly reports as a console error on whichever
+screen was in flight. If a sweep run fails only on `/api/track/`,
+`/api/overrides/` or `/api/reviews/` with a 404/500, check for a second
+`next dev` before looking for a bug.
+
+## The admin fuzz sweep
+
+`e2e/sweep-admin.spec.ts` (sign-in, the tab matrix, banner, content, settings,
+the change journal), `e2e/sweep-admin-goods.spec.ts` (goods editor, delivery
+prices, promo codes) and `e2e/sweep-admin-ops.spec.ts` (warehouse, register,
+customers, blog) are one exploratory sweep split three ways for runtime —
+18 tests, ~2.5 minutes, desktop only. They share `e2e/sweep-helpers.ts`, which
+is where the interesting part lives: every step ends in `assertClean()`, which
+fails on an uncaught page error, on any `console.error` outside a four-entry
+allowlist, on any 5xx, on a visible `undefined`/`NaN`/`[object Object]`/`null`/
+`{{`, and on a duplicate element id. Product samples come from a seeded PRNG
+(`prng(20260904)`), so a failure names the same five products next time.
+`PRODUCT`/`PRODUCT_2` are excluded from that sample and every test reverts what
+it changed, same discipline as `admin.spec.ts`. Run it with
+`npx playwright test e2e/sweep-admin*.spec.ts --project=desktop`.
+
 ## Files
 
 | Path | What |
@@ -284,9 +333,90 @@ coverage now instead of the workaround it briefly needed.
 | `e2e/env.mjs` | Port, base URL, fixed test admin password + its hash |
 | `e2e/fixtures.ts` | Shared constants/helpers every spec imports: `LANGS`, `PRODUCT`/`PRODUCT_2`/`BUNDLE`, `waitForScreen`, `loginAsAdmin`, `ipHeaders`, `tr()` (the RU→ET/EN dictionary lookups actually used, copied verbatim from `app.js`'s own `UI` table — see that file's own comment before adding to it) |
 | `e2e/*.spec.ts` | One file per area of the task brief — each has its own top-of-file comment for anything not obvious from this document |
+| `e2e/sweep-helpers.ts` | The admin sweep's watchdog (`assertClean`), seeded PRNG and admin plumbing — not a spec file |
 | `e2e/__screenshots__/` | Visual baselines — see above |
 | `tools/e2e-build.mjs` | Cross-platform prebuild step for the suite — SEO prerender + generated-file packers, ahead of `next dev` (env vars via `child_process`, not shell syntax) |
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
 | `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts` | The two test-only routes — see above |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
 | `.github/workflows/ci.yml` | CI — see its own comments for the ~10 minute budget and what runs when |
+
+## Фаззинг API (`tests/fuzz-*.test.ts`)
+
+Отдельный слой поверх обычных unit-тестов: он не проверяет, что маршрут делает
+правильно, — он проверяет, что **никакой** запрос не может его сломать. Всё
+внутри `npm test`, PGlite, без сети, ~25 секунд.
+
+| Файл | Что делает |
+| --- | --- |
+| `tests/fuzz-harness.ts` | Общая оснастка: корпус «злых» значений, сборка запросов, проверки ответа, заглушка `fetch`, фикстуры (заказ, клиент, статья, отзыв, промокод, подарочная карта) |
+| `tests/fuzz-routes.test.ts` | Каждый маршрут `src/app/api/**/route.ts`, каждый экспортируемый метод |
+| `tests/fuzz-money.test.ts` | Инварианты денег и склада через настоящие маршруты |
+
+**Детерминированность.** Корпус фиксированный, а не случайный: те же значения в
+том же порядке на каждой машине, поэтому падение воспроизводится со второго
+запуска без ярлыка «мигает». Там, где полный корпус на каждое поле был бы
+слишком долгим, берётся окно из восьми значений, сдвинутое по номеру поля
+(`window()`), — маршруты про деньги (`deep: true`) всё равно видят корпус
+целиком.
+
+**Что бросается в каждый маршрут.** Пустое тело, пустая строка, битый JSON,
+`null`/число/строка/массив вместо объекта, тело на 2 МБ, объект глубиной 120,
+чужой `content-type`; каждое поле (и вложенное — `customer.name`,
+`items.0.qty`) по очереди заменяется на `null`, число вне диапазона `double`,
+пустую строку, строку в 10 000 знаков, эмодзи + RTL + zero-width + NUL,
+`<script>`, `'; DROP TABLE orders; --`, `../../etc/passwd`, `javascript:`,
+`=cmd|' /C calc'!A0`, почту-мусор; каждый `[id]` — на неизвестный,
+отрицательный, огромный, не-uuid, с URL-кодированными слэшами; параметры
+запроса — дублированные, огромные, `limit=0/-1/1e9`.
+
+**Что утверждается на каждом ответе** (`checkResponse`):
+
+- **нет 5xx.** База поднята, все внешние сервисы заглушены — значит
+  единственный законный 5xx это «в этом деплое нет ключа» (503
+  `not_configured` / `no_api_key` / `storage_not_configured`, 501
+  `not_implemented`). `db_unavailable` и `server_error` в этом наборе всегда
+  означают баг: запрос дошёл до Postgres в виде, который тот отказался
+  выполнить;
+- **нет стектрейса**: ни строки `at …`, ни `node_modules/`, ни абсолютного
+  пути в теле ответа;
+- **4xx — это `{ok:false, error:"код"}`**, а не текст для человека;
+- обработчик, который **бросил** исключение, — тоже нарушение: `call()` ловит
+  его и записывает как 599, чтобы один прогон нашёл все такие места сразу, а
+  не падал на первом.
+
+**Замки.** Отдельные тесты проходят по всем маршрутам с `auth` и требуют
+401/403 без куки, с мусорной кукой (`rmp_admin=%`), с подделанной подписью, с
+истёкшей сессией, с покупательской кукой на админском маршруте и наоборот
+(`rmp_cust` и `rmp_admin` подписаны под разными префиксами — см.
+`src/lib/customers.ts`); cron — без заголовка, с чужим секретом, без `Bearer`
+и при вовсе не настроенном `CRON_SECRET`. Две структурные проверки не дают
+набору отстать от кода: «фаззится каждый маршрут на диске» сверяет таблицу с
+`src/app/api/**`, а «заперт каждый маршрут под `/api/admin/`» читает файлы и
+требует `requireAdmin` везде, кроме `login`/`logout`/`me`/`mail/preview`.
+
+**Деньги и склад** (`fuzz-money`) проходят весь настоящий путь — `POST
+/api/orders/` → `POST /api/payments/create/` → `POST /api/payments/notify/` с
+настоящим подписанным билетом mock-провайдера — и утверждают: цену считает
+сервер, а не браузер; количество вне 1…99 отклоняется, а не обрезается; скидка
+может обнулить заказ, но не увести его в минус; подарочная карта списывается
+ровно один раз и никогда ниже нуля; промокод считается только на переходе в
+`paid`; баллы не превышают `redeemMaxPct`; повторный вебхук ничего не проводит
+второй раз, а поздний `failed` не снимает `paid`; склад не уходит в минус;
+`settings.pricing` зажимается; лимиты отвечают 429 и не задевают второй IP.
+
+**Заглушка сети.** `installFetchStub()` отвечает за OpenAI, Resend, Telegram,
+R2 и перевозчиков; неизвестный хост не набирается, а записывается — отдельный
+тест требует, чтобы список остался пустым. Переменные окружения ставятся на
+время файла и возвращаются в `afterAll` (`setFuzzEnv()` отдаёт функцию
+восстановления): vitest гоняет файлы последовательно в одном процессе, и
+оставленный `RESEND_API_KEY` поменял бы то, что видит следующий файл.
+
+## PWA manifests (`e2e/pwa.spec.ts`)
+
+Two tests, desktop only: the storefront links the shop manifest
+(`/shop2/manifest.webmanifest`, name «Rempire», scope `/shop2/`, no admin
+wording anywhere in it), and the admin route swaps the `<link rel="manifest">`
+to `/shop2/admin.webmanifest` («Админка», scope `/shop2/admin/`) and back when
+the owner returns to the shop — see `syncAppManifest()` in app.js and the PWA
+section of docs/inventory.md for why there are two apps at all.

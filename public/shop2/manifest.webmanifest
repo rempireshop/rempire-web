@@ -1,8 +1,9 @@
 {
-  "name": "Rempire админ",
+  "id": "/shop2/",
+  "name": "Rempire",
   "short_name": "Rempire",
-  "description": "Склад, сканер штрихкодов и продажа в салоне — админка Rempire.",
-  "start_url": "/shop2/admin/",
+  "description": "Салонная косметика для лица, тела и волос — магазин Rempire, Таллинн.",
+  "start_url": "/shop2/",
   "scope": "/shop2/",
   "display": "standalone",
   "background_color": "#edeae1",

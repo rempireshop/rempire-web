@@ -58,7 +58,14 @@ export async function POST(req: Request) {
   }
 
   try {
-    const order = await createOrder(body as Parameters<typeof createOrder>[0], { customerId });
+    /* `channel` and `posDiscountPercent` belong to the in-salon till
+       (POST /api/admin/pos-orders, behind requireAdmin) — createOrder() reads
+       both straight off its input, so passing this body through unchanged let
+       an anonymous shopper send {"channel":"pos","posDiscountPercent":90} and
+       price their own order at a tenth. This door is the web checkout: it
+       says so itself and never takes the till's percent from a browser. */
+    const input = { ...(body as Parameters<typeof createOrder>[0]), channel: "web" as const, posDiscountPercent: null };
+    const order = await createOrder(input, { customerId });
     return Response.json(
       { ok: true, orderId: order.id, number: order.number, total: order.total },
       { status: 201, headers: { "cache-control": "no-store" } },

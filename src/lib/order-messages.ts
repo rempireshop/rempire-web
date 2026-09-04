@@ -5,7 +5,7 @@
  * backend-core, docs/build-contracts.md — "others import, don't edit"); this
  * is its own small module, imported by the reply-thread routes.
  */
-import { query } from "@/lib/db";
+import { jsonbParam, query } from "@/lib/db";
 
 export type MessageDirection = "in" | "out";
 
@@ -76,7 +76,7 @@ export async function addMessage(
   const rows = await query<Row>(
     `insert into order_messages (order_id, direction, body, meta)
      values ($1, $2, $3, $4::jsonb) returning id, order_id, direction, body, meta, created_at`,
-    [orderId, direction, text, JSON.stringify(meta ?? {})],
+    [orderId, direction, text, jsonbParam(meta ?? {})],
   );
   return toMessage(rows[0]);
 }

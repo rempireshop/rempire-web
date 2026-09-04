@@ -26,7 +26,7 @@
  * `not_configured`; a dead API never takes the checkout or the admin down.
  */
 
-import { query } from "@/lib/db";
+import { jsonbParam, query } from "@/lib/db";
 import { signHs256 } from "@/lib/payments/jwt";
 import { montonioConfigFromEnv, type MontonioConfig } from "@/lib/payments/montonio";
 import { normalizeMethod, sniffCarrier } from "@/lib/shipping";
@@ -885,7 +885,7 @@ export async function saveShipmentOnOrder(
                             coalesce(shipping -> 'montonio', '{}'::jsonb) || $2::jsonb),
             updated_at = now()
       where id = $1`,
-    [orderId, JSON.stringify(patch)],
+    [orderId, jsonbParam(patch)],
   );
 }
 

@@ -343,7 +343,9 @@ export async function adjustLoyaltyPoints(
 ): Promise<LedgerWrite> {
   if (!UUID_RE.test(customerId)) return { ok: false, error: "bad_customer" };
   const d = Math.trunc(Number(delta) || 0);
-  if (!d) return { ok: false, error: "bad_delta" };
+  // loyalty_ledger.delta is an integer column: anything past its range is
+  // 22003 from Postgres, which the admin route reports as a 503.
+  if (!d || !Number.isFinite(d) || Math.abs(d) > 1_000_000) return { ok: false, error: "bad_delta" };
   await query(
     "insert into loyalty_ledger (customer_id, delta, reason, note) values ($1, $2, 'adjust', $3)",
     [customerId, d, note ? note.slice(0, 300) : null],
@@ -617,8 +619,24 @@ export async function setCustomerNotes(id: string, notes: string | null): Promis
 
 /* ---------- admin: CSV export ----------------------------------------------- */
 
+/**
+ * Excel and LibreOffice treat a cell that opens with =, +, @, a tab or a CR as
+ * a formula, and a "-" that is not a number the same way. Both exports below
+ * carry text a customer typed (their own name, a company, an order note), so
+ * without this a shopper could call themselves =HYPERLINK(...) and have the
+ * owner's own spreadsheet run it on open. An apostrophe is the standard
+ * defusing: Excel shows the text and evaluates nothing.
+ */
+function defuseFormula(s: string): string {
+  if (!s) return s;
+  if (/^[=+@\t\r]/.test(s)) return "'" + s;
+  // a plain negative number is a number, not a formula
+  if (s.startsWith("-") && !/^-\d+(\.\d+)?$/.test(s)) return "'" + s;
+  return s;
+}
+
 function csvCell(v: unknown): string {
-  const s = String(v ?? "");
+  const s = defuseFormula(String(v ?? ""));
   return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 

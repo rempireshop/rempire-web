@@ -1,0 +1,16 @@
+{
+  "id": "/shop2/admin/",
+  "name": "Rempire — админка",
+  "short_name": "Админка",
+  "description": "Заказы, склад, сканер штрихкодов и продажа в салоне — панель управления магазином Rempire.",
+  "start_url": "/shop2/admin/",
+  "scope": "/shop2/admin/",
+  "display": "standalone",
+  "background_color": "#edeae1",
+  "theme_color": "#1c1a00",
+  "lang": "ru",
+  "icons": [
+    { "src": "/shop2/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/shop2/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

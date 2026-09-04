@@ -49,6 +49,13 @@ export async function PATCH(req: Request) {
     return Response.json({ ok: false, error: "bad_request" }, { status: 400 });
   }
 
+  /* `null` is valid JSON and `typeof null === "object"`, so the parse above
+     lets it through and every field read below throws — a 500 from a
+     two-byte body. Same door for a bare number, string or array. */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, error: "bad_request" }, { status: 400 });
+  }
+
   const id = typeof body.id === "string" ? body.id.trim() : "";
   const status = typeof body.status === "string" ? body.status : "";
   if (!id) return Response.json({ ok: false, error: "no_id" }, { status: 400 });

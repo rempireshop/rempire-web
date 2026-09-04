@@ -49,6 +49,13 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
   }
 
+  /* `null` is valid JSON and `typeof null === "object"`, so the parse above
+     lets it through and every field read below throws — a 500 from a
+     two-byte body. Same door for a bare number, string or array. */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, error: "bad_body" }, { status: 400 });
+  }
+
   const productId = String(body.productId ?? body.product_id ?? "").trim();
   if (!productId) return Response.json({ ok: false, error: "bad_id" }, { status: 400 });
   const variant = body.variant == null ? "" : String(body.variant);
@@ -60,7 +67,13 @@ export async function POST(req: Request) {
         typeof body.reason === "string" && (MOVE_REASONS as readonly string[]).includes(body.reason)
           ? (body.reason as MoveReason)
           : "adjust";
-      const result = await setQty(productId, variant, Number(body.qty), { reason, ref, actor: "admin" });
+      /* null / "" / true all coerce to a number the shelf would obey — Number(null)
+         is 0 — so an emptied field used to wipe the count with «Сохранено ✓». */
+      const qty = Number(body.qty);
+      if (body.qty === null || body.qty === "" || typeof body.qty === "boolean" || !Number.isFinite(qty)) {
+        return Response.json({ ok: false, error: "bad_qty" }, { status: 400 });
+      }
+      const result = await setQty(productId, variant, qty, { reason, ref, actor: "admin" });
       return Response.json({ ok: true, result }, { headers: { "cache-control": "no-store" } });
     }
 
@@ -70,10 +83,14 @@ export async function POST(req: Request) {
     if (typeof body.reason !== "string" || !(MOVE_REASONS as readonly string[]).includes(body.reason)) {
       return Response.json({ ok: false, error: "bad_reason" }, { status: 400 });
     }
+    const delta = Number(body.delta);
+    if (body.delta === null || body.delta === "" || typeof body.delta === "boolean" || !Number.isFinite(delta)) {
+      return Response.json({ ok: false, error: "bad_delta" }, { status: 400 });
+    }
     const result = await move({
       productId,
       variant,
-      delta: Number(body.delta),
+      delta,
       reason: body.reason as MoveReason,
       ref,
       actor: "admin",

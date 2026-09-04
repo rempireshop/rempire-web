@@ -46,6 +46,11 @@ export async function POST(req: Request) {
   } catch {
     return Response.json({ ok: false, error: "bad_request" }, { status: 400, headers: NO_STORE });
   }
+  /* `null`, `5` and `[]` are all valid JSON and all crash on body.code — the
+     literal string "null" parses to null, which typeof still calls "object". */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, error: "bad_request" }, { status: 400, headers: NO_STORE });
+  }
 
   const code = normalisePromoCode(body.code);
   if (!code) {

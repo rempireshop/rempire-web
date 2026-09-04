@@ -18,6 +18,10 @@
  *
  * numeric: both drivers hand numerics back as strings (no silent precision
  * loss). Callers that want numbers convert — src/lib/orders.ts does.
+ *
+ * U+0000: Postgres cannot store it — not in `text` ("invalid byte sequence for
+ * encoding UTF8: 0x00") and in `jsonb` it is a JSON escape Postgres refuses
+ * to convert. It is stripped from every parameter on the way in — stripNul().
  */
 import type { Pool, PoolClient } from "pg";
 
@@ -41,6 +45,49 @@ const MISSING_URL =
    every edit, and in serverless each module instance would open its own pool.
    globalThis survives both. */
 const g = globalThis as unknown as { __rempireDb?: Promise<Raw> };
+
+/* ---------- U+0000 ------------------------------------------------------- */
+
+/**
+ * Removes U+0000 from strings, recursively.
+ *
+ * Postgres refuses it outright: a `text` parameter containing one is
+ * "invalid byte sequence for encoding UTF8: 0x00" and a jsonb one is
+ * refused as a JSON escape that cannot be converted to text. Both come back
+ * as a plain query error, which a route turns into a 500 or a misleading
+ * `db_unavailable` — so a NUL in an order's name, a promo note or a settings
+ * value was a way to make the shop answer 5xx from an ordinary POST.
+ *
+ * There is no shop data a NUL belongs in (the storefront never sends one, and
+ * the fields that do carry free text already strip control characters), so it
+ * is dropped rather than escaped or refused: the row saves, minus a character
+ * nothing could have stored anyway.
+ */
+const NUL_RE = new RegExp(String.fromCharCode(0), "g");
+
+export function stripNul<T>(value: T): T {
+  if (typeof value === "string") {
+    return value.replace(NUL_RE, "") as T;
+  }
+  if (Array.isArray(value)) return value.map(stripNul) as T;
+  if (value && typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[stripNul(k)] = stripNul(v);
+    return out as T;
+  }
+  return value;
+}
+
+/** JSON for a `$n::jsonb` parameter. Always this, never a bare JSON.stringify. */
+export function jsonbParam(value: unknown): string {
+  return JSON.stringify(stripNul(value) ?? null);
+}
+
+/** Applied to every parameter list, in query() and inside a transaction alike. */
+function cleanParams(params?: unknown[]): unknown[] | undefined {
+  // arrays too: blog tags/products travel as a `text[]` parameter, not JSON.
+  return params?.map((p) => (typeof p === "string" || Array.isArray(p) ? stripNul(p) : p));
+}
 
 /** TLS on unless the server is local; verified unless told otherwise. */
 function sslFor(url: string) {
@@ -70,7 +117,7 @@ async function makePg(): Promise<Raw> {
 
   return {
     kind: "pg",
-    query: (sql, params) => pool.query(sql, params as unknown[]),
+    query: (sql, params) => pool.query(sql, cleanParams(params) as unknown[]),
     batch: async (sql) => {
       await pool.query(sql); // simple query protocol: several statements at once
     },
@@ -79,7 +126,7 @@ async function makePg(): Promise<Raw> {
       try {
         await client.query("begin");
         const q: Querier = async <T2>(sql: string, params?: unknown[]) =>
-          (await client.query(sql, params as unknown[])).rows as T2[];
+          (await client.query(sql, cleanParams(params) as unknown[])).rows as T2[];
         const out = await fn(q);
         await client.query("commit");
         return out;
@@ -110,14 +157,14 @@ async function makePglite(): Promise<Raw> {
   const db = new mod.PGlite(process.env.PGLITE_PATH || undefined);
   return {
     kind: "pglite",
-    query: (sql, params) => db.query(sql, params as unknown[]),
+    query: (sql, params) => db.query(sql, cleanParams(params) as unknown[]),
     batch: async (sql) => {
       await db.exec(sql);
     },
     async tx<T>(fn: (q: Querier) => Promise<T>): Promise<T> {
       return db.transaction(async (tx) => {
         const q: Querier = async <T2>(sql: string, params?: unknown[]) =>
-          (await tx.query(sql, params as unknown[])).rows as T2[];
+          (await tx.query(sql, cleanParams(params) as unknown[])).rows as T2[];
         return fn(q);
       });
     },

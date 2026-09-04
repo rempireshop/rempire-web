@@ -33,10 +33,10 @@ export async function POST(req: Request) {
   try {
     raw = await req.text();
   } catch {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "bad_request" }, { status: 400 });
   }
   if (raw.length > MAX_BYTES) {
-    return NextResponse.json({ ok: false }, { status: 413 });
+    return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
   }
 
   let body: {
@@ -50,7 +50,13 @@ export async function POST(req: Request) {
   try {
     body = JSON.parse(raw);
   } catch {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "bad_json" }, { status: 400 });
+  }
+  /* `null` is valid JSON and `typeof null === "object"`, so the parse above
+     lets it through and body.website below throws — a 500 from a four-byte
+     body. Same door for a bare number, string or array. */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
   /* A bot that filled the hidden field is thanked and ignored: telling it what
      gave it away only helps it come back. Nothing is stored, nothing is sent. */
@@ -59,7 +65,7 @@ export async function POST(req: Request) {
   }
   const summary = typeof body.summary === "string" ? body.summary.trim() : "";
   if (!summary) {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
 
   // раунд опроса: только цифры/буквы, иначе не пускаем в имя файла
@@ -103,7 +109,7 @@ export async function POST(req: Request) {
 
   if (!stored && !telegram && !email) {
     // nothing durable happened — let the client fall back to share/copy
-    return NextResponse.json({ ok: false }, { status: 502 });
+    return NextResponse.json({ ok: false, error: "not_stored" }, { status: 502 });
   }
   return NextResponse.json({ ok: true, stored, telegram, email });
 }

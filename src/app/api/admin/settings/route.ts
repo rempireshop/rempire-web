@@ -12,6 +12,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { getSettings, setSetting, writeAuditSafe } from "@/lib/orders";
 import { cleanPricing } from "@/lib/loyalty";
+import { parseShippingRules } from "@/lib/shipping";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -61,6 +62,9 @@ export async function PUT(req: Request) {
       // set_pricing action) — the same "first door, not the only one"
       // reasoning as every other validated setting.
       if (key === "pricing") value = cleanPricing(value);
+      // the same parser the checkout reads with — a rule the storefront would
+      // ignore (NaN, 1e9, a negative) is normalised here instead of stored raw
+      if (key === "shipping_rules") value = parseShippingRules(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

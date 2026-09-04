@@ -39,6 +39,13 @@ export async function POST(req: Request) {
     return Response.json({ ok: false, error: "bad_request" }, { status: 400 });
   }
 
+  /* `null` is valid JSON and `typeof null === "object"`, so the parse above
+     lets it through and every field read below throws — a 500 from a
+     two-byte body. Same door for a bare number, string or array. */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return Response.json({ ok: false, error: "bad_request" }, { status: 400 });
+  }
+
   const code = typeof body.code === "string" ? body.code : "";
   if (!code) return Response.json({ ok: false, error: "bad_code" }, { status: 400 });
 

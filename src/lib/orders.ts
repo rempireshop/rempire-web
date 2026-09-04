@@ -20,7 +20,7 @@
  */
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
-import { query } from "@/lib/db";
+import { jsonbParam, query } from "@/lib/db";
 // Wholesale/pro pricing — src/lib/loyalty.ts (100_tiers_loyalty), a module of
 // this same build, unlike the optional neighbours below: no try/catch needed.
 import { customerTier, getPricingSettings, proUnitPrice, quoteLoyaltyRedeem } from "@/lib/loyalty";
@@ -433,11 +433,11 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
   if ("seoTitle" in patch) cols.seo_title = patch.seoTitle ?? null;
   if ("seoDesc" in patch) cols.seo_desc = patch.seoDesc ?? null;
   if ("subcat" in patch) cols.subcat = patch.subcat ?? null;
-  if ("varImg" in patch) cols.var_img = patch.varImg == null ? null : JSON.stringify(patch.varImg);
+  if ("varImg" in patch) cols.var_img = patch.varImg == null ? null : jsonbParam(patch.varImg);
   if ("videoUrl" in patch) cols.video_url = patch.videoUrl ?? null;
   if ("gallery" in patch) {
     const list = cleanGallery(patch.gallery);
-    cols.gallery = list == null ? null : JSON.stringify(list);
+    cols.gallery = list == null ? null : jsonbParam(list);
   }
   if ("proPrice" in patch) cols.pro_price = patch.proPrice == null ? null : money(num(patch.proPrice));
 
@@ -488,7 +488,7 @@ export async function setSetting(key: string, value: unknown): Promise<void> {
   await query(
     `insert into settings (key, value, updated_at) values ($1, $2::jsonb, now())
      on conflict (key) do update set value = $2::jsonb, updated_at = now()`,
-    [key, JSON.stringify(value ?? null)],
+    [key, jsonbParam(value)],
   );
 }
 
@@ -498,7 +498,7 @@ export async function writeAudit(actor: string, action: string, payload?: unknow
   await query("insert into admin_audit (actor, action, payload) values ($1, $2, $3::jsonb)", [
     actor,
     action,
-    JSON.stringify(payload ?? null),
+    jsonbParam(payload),
   ]);
 }
 
@@ -999,8 +999,8 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
       email,
       phone,
       name,
-      JSON.stringify(shippingJson),
-      JSON.stringify(lines),
+      jsonbParam(shippingJson),
+      jsonbParam(lines),
       subtotal,
       shipPrice,
       discount,
@@ -1086,7 +1086,7 @@ export async function setOrderPayment(id: string, payment: Record<string, unknow
   const rows = await query<OrderRow>(
     `update orders set payment = coalesce(payment, '{}'::jsonb) || $2::jsonb, updated_at = now()
      where id = $1 returning *`,
-    [id, JSON.stringify(payment ?? {})],
+    [id, jsonbParam(payment ?? {})],
   );
   return rows.length ? mapOrder(rows[0]) : null;
 }

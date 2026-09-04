@@ -66,4 +66,4 @@ Disallow: /shop2/*/done
 Disallow: /shop2/*/search
 Disallow: /api/
 
-Sitemap: https://rempireshop.com/sitemap.xml
+Sitemap: http://localhost:3417/sitemap.xml

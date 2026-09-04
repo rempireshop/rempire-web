@@ -719,7 +719,11 @@ body:has(.stickybar) .ftr {
 .allshown { text-align: center; color: var(--muted); font-size: 13px; margin-top: 28px; }
 #sentinel { height: 1px; }
 .empty { border: 1px solid var(--rule); padding: 24px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
-.empty p { margin: 0; }
+/* The empty state quotes the shopper's own query back, so it is the one
+   paragraph on the page whose content is arbitrary. A single long word has
+   nothing to break on and pushed the phone into a sideways scroll — app.js
+   clips the echo at 60 characters, and this wraps whatever is left of it. */
+.empty p { margin: 0; overflow-wrap: anywhere; }
 .empty__cats { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ---------- product page ---------- */

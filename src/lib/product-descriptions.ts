@@ -16,7 +16,7 @@
  * "Product descriptions" for the exact precedence the storefront and this
  * module both follow.
  */
-import { query } from "@/lib/db";
+import { jsonbParam, query } from "@/lib/db";
 
 export const DESC_LANGS = ["RU", "ET", "EN"] as const;
 export type DescLang = (typeof DESC_LANGS)[number];
@@ -109,7 +109,7 @@ export async function setDescriptionOverride(
     `insert into product_overrides (product_id, description, updated_at)
      values ($1, $2::jsonb, now())
      on conflict (product_id) do update set description = $2::jsonb, updated_at = now()`,
-    [id, clean ? JSON.stringify(clean) : null],
+    [id, clean ? jsonbParam(clean) : null],
   );
   return clean;
 }

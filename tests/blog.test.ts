@@ -347,13 +347,13 @@ describe("GET /api/blog/", () => {
     expect(body.posts[0].tags).toEqual(["борода"]);
   });
 
-  it("answers ok:true with an empty list rather than an error when the database is unreachable", async () => {
+  it("answers 503 ok:false (with an empty list) when the database is unreachable — an outage must look like one", async () => {
     await teardownDb();
     const { GET } = await import("@/app/api/blog/route");
     const res = await GET(new Request(`${ORIGIN}/api/blog/`));
     const body = await res.json();
-    expect(res.status).toBe(200);
-    expect(body).toMatchObject({ ok: true, posts: [], degraded: true });
+    expect(res.status).toBe(503);
+    expect(body).toMatchObject({ ok: false, error: "unavailable", posts: [] });
     await setupDb();
   });
 });

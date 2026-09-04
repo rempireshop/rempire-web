@@ -97,6 +97,7 @@ export async function POST(req: Request) {
     const post = await upsertPost(fieldsOf(body));
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
+    if (err instanceof BlogError) return bad(err.code, err.code === "not_found" ? 404 : 400);
     console.error("admin/blog POST failed", err);
     return bad("unavailable", 503);
   }
@@ -129,7 +130,7 @@ export async function PATCH(req: Request) {
     const post = await upsertPost({ ...fieldsOf(body), id });
     return Response.json({ ok: true, post }, { headers: NO_STORE });
   } catch (err) {
-    if (err instanceof BlogError && err.code === "not_found") return bad("not_found", 404);
+    if (err instanceof BlogError) return bad(err.code, err.code === "not_found" ? 404 : 400);
     console.error("admin/blog PATCH failed", err);
     return bad("unavailable", 503);
   }

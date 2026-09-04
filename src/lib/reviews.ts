@@ -201,11 +201,17 @@ export async function reviewCounts(): Promise<Record<ReviewStatus, number>> {
   return out;
 }
 
+/* reviews.id is a uuid column — an id that is not uuid-shaped is 22P02 from
+   Postgres, which the admin route reports as a 503 rather than "no such
+   review". Same guard as src/lib/orders.ts getOrder(). */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function setReviewStatus(
   id: string,
   status: ReviewStatus,
   actor = "admin",
 ): Promise<Review | null> {
+  if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<ReviewRow>(
     `update reviews
         set status = $2, reviewed_at = now(), reviewed_by = $3

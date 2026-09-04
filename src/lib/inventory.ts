@@ -55,10 +55,14 @@ function normVariant(v: unknown): string {
   return String(v).trim().slice(0, 120);
 }
 
-/** Barcodes are opaque strings to this module — just trimmed and length-capped. */
+/** A barcode is either a retail code — digits only, EAN-8/UPC-A/EAN-13/GTIN-14
+    (8–14 digits, what the phone scanner reads) — or an internal code the shop
+    prints itself: letters, digits and dashes, 4–32 characters. Anything else
+    ("abc", a lone digit, punctuation) is not a barcode and binds to nothing. */
 function normEan(v: unknown): string {
-  const s = String(v ?? "").replace(/\s+/g, "").trim();
-  return s.length >= 3 && s.length <= 32 ? s : "";
+  const s = String(v ?? "").replace(/\s+/g, "").trim().toUpperCase();
+  if (/^[0-9]+$/.test(s)) return s.length >= 8 && s.length <= 14 ? s : "";
+  return /^[A-Z0-9-]{4,32}$/.test(s) ? s : "";
 }
 
 function cleanRef(v: unknown): string | null {
@@ -200,6 +204,9 @@ export async function setLevel(
 
 /* ---------- move() — the one door quantities change through -------------- */
 
+/** Ceiling for a quantity or a move, well inside the `integer` column's range. */
+export const MAX_QTY = 1_000_000;
+
 export type MoveInput = {
   productId: string;
   variant?: string | null;
@@ -311,7 +318,11 @@ export async function move(input: MoveInput): Promise<MoveResult> {
   if (!productId) throw new InventoryError("bad_product");
   const variant = normVariant(input.variant);
   const delta = Math.trunc(Number(input.delta));
-  if (!Number.isFinite(delta) || delta === 0) throw new InventoryError("bad_delta");
+  // stock_levels.qty is an integer column: 1e308 is "finite" to JS and 22003
+  // ("value out of range") to Postgres. A shelf holds fewer than MAX_QTY.
+  if (!Number.isFinite(delta) || delta === 0 || Math.abs(delta) > MAX_QTY) {
+    throw new InventoryError("bad_delta");
+  }
   if (!MOVE_REASONS.includes(input.reason)) throw new InventoryError("bad_reason", String(input.reason));
   const ref = cleanRef(input.ref);
   const actor = cleanActor(input.actor);
@@ -356,7 +367,7 @@ export async function setQty(
   if (!pid) throw new InventoryError("bad_product");
   const v = normVariant(variant);
   const target = Math.trunc(Number(qty));
-  if (!Number.isFinite(target) || target < 0) throw new InventoryError("bad_qty");
+  if (!Number.isFinite(target) || target < 0 || target > MAX_QTY) throw new InventoryError("bad_qty");
   const reason = opts.reason && MOVE_REASONS.includes(opts.reason) ? opts.reason : "adjust";
   const ref = cleanRef(opts.ref);
   const actor = cleanActor(opts.actor);
@@ -529,8 +540,12 @@ export async function listMoves(
     params.push(opts.reason);
     where.push(`reason = $${params.length}`);
   }
-  if (opts.since) {
-    params.push(opts.since);
+  /* `at >= $n` casts the parameter to timestamptz: "?since=yesterday" is
+     22007 from Postgres and reads as a 503 to the admin. An unparseable
+     date is no filter at all, which is what the ledger shows anyway. */
+  const since = opts.since ? new Date(opts.since) : null;
+  if (since && !Number.isNaN(since.getTime())) {
+    params.push(since.toISOString());
     where.push(`at >= $${params.length}`);
   }
   params.push(Math.min(Math.max(Number(opts.limit) || 100, 1), 500));

@@ -24,7 +24,7 @@
  * reply) can smuggle through. See the comment above that function for the
  * exact safety argument.
  */
-import { query } from "@/lib/db";
+import { jsonbParam, query } from "@/lib/db";
 import type { Lang3, Trilingual } from "@/lib/content";
 
 export const LANGS: readonly Lang3[] = ["RU", "ET", "EN"];
@@ -308,7 +308,16 @@ export function markdownToHtml(md: string): string {
 /* ---------- validation ----------------------------------------------------- */
 
 function trilingual(raw: unknown, max: number): Trilingual {
-  const src = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  /* A bare string is the Russian text — the panel always sends {RU,ET,EN},
+     but the assistant's draft and a hand-written API call may not, and a
+     title that silently vanished used to publish a post with an empty <h1>
+     and the fallback slug "post". */
+  const src =
+    typeof raw === "string"
+      ? { RU: raw }
+      : raw && typeof raw === "object" && !Array.isArray(raw)
+        ? (raw as Record<string, unknown>)
+        : {};
   const out = { ...EMPTY3 };
   for (const l of LANGS) {
     const v = src[l];
@@ -397,7 +406,14 @@ export async function listAllPosts(limit = 200): Promise<PostSummary[]> {
   return rows.map(toSummary);
 }
 
+/* posts.id is a uuid column. Anything that is not uuid-shaped makes Postgres
+   raise 22P02 ("invalid input syntax for type uuid"), which every caller
+   reports as a 503 — so an unknown id reads as an outage. It is a 404: the
+   same guard src/lib/orders.ts and src/lib/loyalty.ts already use. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getPostById(id: string): Promise<Post | null> {
+  if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<PostRow>(`select ${FULL_COLS} from posts where id = $1`, [id]);
   return rows.length ? toPost(rows[0]) : null;
 }
@@ -430,6 +446,13 @@ export async function upsertPost(input: PostInput): Promise<Post> {
    * already-shared /shop2/blog/<slug>/ link would move out from under it the
    * next time someone just fixes a typo and saves.
    */
+  /* No title in any language is not a post — refused here rather than
+     published as an empty <h1> under the fallback slug "post". On an edit
+     the check runs only when a title was actually sent: a slug-only or
+     publish-only PATCH does not carry one and must keep working. */
+  const titleGiven = input.title !== undefined;
+  if ((!input.id || titleGiven) && !title.RU && !title.ET && !title.EN) throw new BlogError("title_required");
+
   let wantedSlug: string;
   if (input.id) {
     if (typeof input.slug === "string" && input.slug.trim()) {
@@ -446,15 +469,15 @@ export async function upsertPost(input: PostInput): Promise<Post> {
 
   const params = [
     slug,
-    JSON.stringify(title),
-    JSON.stringify(excerpt),
-    JSON.stringify(body),
+    jsonbParam(title),
+    jsonbParam(excerpt),
+    jsonbParam(body),
     coverUrl,
-    JSON.stringify(coverAlt),
+    jsonbParam(coverAlt),
     tags,
     products,
-    JSON.stringify(seoTitle),
-    JSON.stringify(seoDesc),
+    jsonbParam(seoTitle),
+    jsonbParam(seoDesc),
     author,
   ];
 
@@ -483,6 +506,7 @@ export async function upsertPost(input: PostInput): Promise<Post> {
 
 /** status → 'published'. Keeps the original publishedAt when republishing. */
 export async function publishPost(id: string): Promise<Post | null> {
+  if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<PostRow>(
     `update posts set status = 'published', published_at = coalesce(published_at, now()), updated_at = now()
      where id = $1 returning ${FULL_COLS}`,
@@ -493,6 +517,7 @@ export async function publishPost(id: string): Promise<Post | null> {
 
 /** status → 'draft'. publishedAt is kept — "was live until this was clicked", not erased. */
 export async function unpublishPost(id: string): Promise<Post | null> {
+  if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<PostRow>(
     `update posts set status = 'draft', updated_at = now() where id = $1 returning ${FULL_COLS}`,
     [id],
@@ -508,6 +533,7 @@ export async function unpublishPost(id: string): Promise<Post | null> {
  * away from being fixed, in the drafts list.
  */
 export async function deletePost(id: string): Promise<Post | null> {
+  if (!UUID_RE.test(String(id ?? ""))) return null;
   const rows = await query<PostRow>(
     `update posts set status = 'draft', published_at = null, updated_at = now() where id = $1 returning ${FULL_COLS}`,
     [id],
@@ -517,6 +543,6 @@ export async function deletePost(id: string): Promise<Post | null> {
 
 /** Resolves either an id (uuid-shaped) or a slug to a post, for admin routes that accept both. */
 export async function getPostByIdOrSlug(idOrSlug: string): Promise<Post | null> {
-  const looksLikeId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+  const looksLikeId = UUID_RE.test(idOrSlug);
   return looksLikeId ? getPostById(idOrSlug) : getPostBySlug(idOrSlug);
 }

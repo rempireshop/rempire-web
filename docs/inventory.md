@@ -138,6 +138,12 @@ full reasoning — read it before changing any of the derivation logic.
 - `setLevel(productId, variant, {ean?, lowThreshold?})` — upserts the STATIC
   fields only. Never touches qty, never writes a ledger row. Rejects a
   duplicate EAN (`InventoryError("ean_taken", otherProductId)`).
+  What counts as a barcode (`normEan()`): a retail code is digits only,
+  8–14 of them (EAN-8, UPC-A, EAN-13, GTIN-14 — what the phone scanner
+  reads); an internal code the shop prints itself is letters, digits and
+  dashes, 4–32 characters, upper-cased. Anything else ("abc", a lone digit)
+  is refused as `bad_ean` rather than stored as a barcode nothing will ever
+  scan.
 - `move({productId, variant?, delta, reason, ref?, actor?})` — the one door
   quantities change through. Atomic (`withTx`): row-if-missing, a locked
   read, then `qty = qty + delta` clamped at 0 (`clampedNegative: true` when
@@ -304,18 +310,31 @@ default. If the scanner ever reports "Нет доступа к камере" in 
 where a manual `getUserMedia` test in the browser console works, check this
 header first, not the JS.
 
-## PWA (`public/shop2/manifest.webmanifest`, `public/shop2/icons/`)
+## PWA (`public/shop2/manifest.webmanifest`, `public/shop2/admin.webmanifest`, `public/shop2/icons/`)
 
-`start_url: "/shop2/admin/"` — already a valid client-side route
-(`routeFromPath()`'s `/shop2\/(brands|account|admin)$/` match), nothing extra
-to wire up. Icons generated once via `node tools/gen-pwa-icons.mjs` from
+Two installable apps from the same page, so a customer is never offered an
+app called «Админка»:
+
+- **Shop** — `manifest.webmanifest`: `id`/`scope`/`start_url` `/shop2/`,
+  name «Rempire». Linked from `index.html` (and therefore from every
+  prerendered page's `<head>`). Anyone may install it; the owner reaches the
+  panel inside it via `/shop2/admin/` + login, like on the web.
+- **Admin** — `admin.webmanifest`: `id`/`scope`/`start_url` `/shop2/admin/`,
+  name «Rempire — админка», short name «Админка». Not linked in HTML at all:
+  `syncAppManifest()` in app.js (called from `renderImpl()`) swaps the
+  `<link rel="manifest">` href to it — and the `apple-mobile-web-app-title`
+  to «Админка» — whenever the admin screen is on, and back to the shop
+  manifest on any other screen. Chromium re-reads the manifest when the
+  link changes, so the install prompt on `/shop2/admin/` offers the admin
+  app; a different `id`/`start_url` makes it a separate app from the shop.
+  The scope `/shop2/admin/` means «В магазин» from the installed admin opens
+  in a browser tab — intended.
+
+Icons are shared, generated once via `node tools/gen-pwa-icons.mjs` from
 `public/brand/rempire-badge-dark.svg` (not part of `prebuild` — regenerate by
-hand only if the badge artwork itself changes). `index.html`'s `<link
-rel="manifest">` and Apple-specific tags (`apple-mobile-web-app-capable`,
-`apple-touch-icon`, …) sit right after `<link rel="icon">`, inside the range
-`tools/prerender-shop2.mjs` copies into every prerendered page's `<head>` — no
-changes needed there. iOS Safari does not read the web manifest for its own
-"Add to Home Screen"; the `apple-*` tags are what it actually uses.
+hand only if the badge artwork changes). iOS Safari does not read the web
+manifest for its own "Add to Home Screen"; the `apple-*` tags in
+`index.html` are what it uses, and the title swap above covers the name.
 
 ## Assistant (`src/app/api/assistant/actions.ts`, `route.ts`)
 

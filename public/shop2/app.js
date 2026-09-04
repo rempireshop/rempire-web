@@ -828,6 +828,7 @@
       "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
         "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
       "Статей пока нет — загляните позже.": "Artikleid veel pole — vaata varsti uuesti.",
+      "Блог временно недоступен — попробуйте позже.": "Blogi pole ajutiselt saadaval — proovige hiljem uuesti.",
       "Другие статьи": "Teised artiklid",
       "Товары из статьи": "Tooted artiklist",
       "Статья не найдена.": "Artiklit ei leitud.",
@@ -972,8 +973,8 @@
       "Салон": "Salong",
       "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
         "Tegelikud jäägid — mitu tükki on tegelikult laos. Skaneerige triipkood, et võtta kaup vastu või kanda maha müük.",
-      "📱 Откройте эту страницу на телефоне и добавьте на экран: в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». Быстрее, чем открывать сайт заново каждый раз.":
-        "📱 Avage see leht telefonis ja lisage avakuvale: Safaris — «Jaga» → «Lisa avakuvale»; Chrome'is — menüü (⋮) → «Paigalda rakendus». Kiirem kui iga kord saiti uuesti avada.",
+      "📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
+        "📱 Avage /shop2/admin/ telefonis ja lisage avakuvale — tekib eraldi ikoon «Админка» (pood paigaldub oma ikooniga «Rempire»): Safaris — «Jaga» → «Lisa avakuvale»; Chrome’is — menüü (⋮) → «Installi rakendus».",
       "Войдите в панель, чтобы видеть склад.": "Logige paneeli sisse, et näha laoseisu.",
       "Сканировать": "Skaneeri",
       "Найти товар, бренд, EAN…": "Otsi toodet, brändi, EAN…",
@@ -1053,6 +1054,20 @@
       "Войдите в панель.": "Logige paneeli sisse.",
       "Способ оплаты": "Makseviis",
       "Часть изменений не сохранилась": "Osa muudatusi ei salvestunud",
+      /* the panel saying no: every one of these used to be a silent drop */
+      "Цена — число от 1 до 500 €, например 12,50.": "Hind — arv 1 kuni 500 €, näiteks 12,50.",
+      "Цена для салонов — число от 1 до 500 €.": "Salongihind — arv 1 kuni 500 €.",
+      "Цена для салонов не может быть выше розничной.": "Salongihind ei saa olla jaehinnast kõrgem.",
+      "Ссылка на видео — только YouTube или Vimeo.": "Video link — ainult YouTube või Vimeo.",
+      "Скидка для салонов — от 0 до 90 %.": "Salongide soodustus — 0 kuni 90 %.",
+      "Сумма корзины — от 0 до 100 000 €.": "Ostukorvi summa — 0 kuni 100 000 €.",
+      "Начисление баллов — от 0 до 50 %.": "Punktide kogumine — 0 kuni 50 %.",
+      "Списание — от 0 до 100 % от корзины.": "Kasutamine — 0 kuni 100 % ostukorvist.",
+      "Порог списания — от 0 до 10 000 баллов.": "Kasutamise lävi — 0 kuni 10 000 punkti.",
+      "Остаток — целое число от 0 до 1 000 000.": "Jääk — täisarv 0 kuni 1 000 000.",
+      "Этот штрихкод уже привязан к другому товару.": "See triipkood on juba seotud teise tootega.",
+      "Штрихкод — это 8–14 цифр (EAN/UPC) или свой код из букв, цифр и дефиса, 4–32 знака.": "Vöötkood on 8–14 numbrit (EAN/UPC) või oma kood tähtedest, numbritest ja sidekriipsust, 4–32 märki.",
+      "Порог «мало» — целое число от 0 до 100 000.": "«Vähe» lävi — täisarv 0 kuni 100 000.",
       "Тарифы Montonio применены ✓": "Montonio tariifid rakendatud ✓",
       "Приход +1 ✓": "Sissetulek +1 ✓",
       "Продажа −1 ✓": "Müük −1 ✓",
@@ -1815,6 +1830,7 @@
       "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
         "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
       "Статей пока нет — загляните позже.": "No articles yet — check back soon.",
+      "Блог временно недоступен — попробуйте позже.": "The blog is temporarily unavailable — please try again later.",
       "Другие статьи": "More articles",
       "Товары из статьи": "Products from this article",
       "Статья не найдена.": "Article not found.",
@@ -1959,8 +1975,8 @@
       "Салон": "Salon",
       "Настоящие остатки — сколько штук на складе на самом деле. Отсканируйте штрихкод, чтобы принять товар или списать продажу.":
         "Real stock levels — how many units are actually on the shelf. Scan a barcode to receive goods or log a sale.",
-      "📱 Откройте эту страницу на телефоне и добавьте на экран: в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». Быстрее, чем открывать сайт заново каждый раз.":
-        "📱 Open this page on your phone and add it to the home screen: Safari — «Share» → «Add to Home Screen»; Chrome — menu (⋮) → «Install app». Faster than opening the site again each time.",
+      "📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».":
+        "📱 Open /shop2/admin/ on your phone and add it to the home screen — you get a separate «Админка» icon (the shop installs with its own «Rempire» icon): in Safari — Share → Add to Home Screen; in Chrome — menu (⋮) → Install app.",
       "Войдите в панель, чтобы видеть склад.": "Sign in to the panel to see the stock.",
       "Сканировать": "Scan",
       "Найти товар, бренд, EAN…": "Find a product, brand, EAN…",
@@ -2040,6 +2056,20 @@
       "Войдите в панель.": "Sign in to the panel.",
       "Способ оплаты": "Payment method",
       "Часть изменений не сохранилась": "Some changes weren't saved",
+      /* the panel saying no: every one of these used to be a silent drop */
+      "Цена — число от 1 до 500 €, например 12,50.": "Price — a number from 1 to 500 €, for example 12.50.",
+      "Цена для салонов — число от 1 до 500 €.": "Salon price — a number from 1 to 500 €.",
+      "Цена для салонов не может быть выше розничной.": "The salon price cannot be higher than the retail price.",
+      "Ссылка на видео — только YouTube или Vimeo.": "Video link — YouTube or Vimeo only.",
+      "Скидка для салонов — от 0 до 90 %.": "Salon discount — from 0 to 90 %.",
+      "Сумма корзины — от 0 до 100 000 €.": "Basket total — from 0 to 100,000 €.",
+      "Начисление баллов — от 0 до 50 %.": "Points earned — from 0 to 50 %.",
+      "Списание — от 0 до 100 % от корзины.": "Redemption — from 0 to 100 % of the basket.",
+      "Порог списания — от 0 до 10 000 баллов.": "Redemption threshold — from 0 to 10,000 points.",
+      "Остаток — целое число от 0 до 1 000 000.": "Stock — a whole number from 0 to 1,000,000.",
+      "Этот штрихкод уже привязан к другому товару.": "This barcode already belongs to another product.",
+      "Штрихкод — это 8–14 цифр (EAN/UPC) или свой код из букв, цифр и дефиса, 4–32 знака.": "A barcode is 8–14 digits (EAN/UPC) or your own code of letters, digits and dashes, 4–32 characters.",
+      "Порог «мало» — целое число от 0 до 100 000.": "The «low» threshold — a whole number from 0 to 100,000.",
       "Тарифы Montonio применены ✓": "Montonio tariffs applied ✓",
       "Приход +1 ✓": "Goods in +1 ✓",
       "Продажа −1 ✓": "Sale −1 ✓",
@@ -2838,6 +2868,7 @@
     adminAsk: "",
     adminOrder: 0,   // opened order id (0 = list)
     adminEdit: "",   // opened product id in goods
+    goodsErr: "",    // why the goods editor refused the last «Сохранить»
     goodsQ: "",      // admin goods search
     // ---- «Главный баннер» in the admin panel ----
     heroDraft: null, // working copy of the whole banner while it is being edited
@@ -2920,6 +2951,7 @@
     // ---- admin «Настройки» → «Цены и лояльность» ----
     pricingLoaded: null, // the full settings.pricing as last read from the server (admin-only)
     pricingDraft: null,  // working copy while the card is being edited
+    pricingErr: "",      // why the last value typed into the card was not stored
     // ---- inventory: «Склад» ----
     stockLevels: null,   // [level,...] once GET /api/admin/inventory/ answers
     stockBusy: false,
@@ -3630,7 +3662,7 @@
       .then(function (r) { return r.json(); })
       .then(function (j) {
         S.blogListBusy = false;
-        if (!j || !j.ok) { if (!S.blogList) S.blogList = { posts: [], total: 0, page: 1, perPage: 10 }; render(); return; }
+        if (!j || !j.ok) { if (!S.blogList) S.blogList = { posts: [], total: 0, page: 1, perPage: 10 }; S.blogList.failed = true; render(); return; }
         if (more && S.blogList) S.blogList = { posts: S.blogList.posts.concat(j.posts), total: j.total, page: j.page, perPage: j.perPage };
         else S.blogList = { posts: j.posts, total: j.total, page: j.page, perPage: j.perPage };
         render();
@@ -3638,6 +3670,7 @@
       .catch(function () {
         S.blogListBusy = false;
         if (!S.blogList) S.blogList = { posts: [], total: 0, page: 1, perPage: 10 };
+        S.blogList.failed = true;
         render();
       });
   }
@@ -3650,7 +3683,8 @@
           ? '<div class="blog__more"><button class="btn btn--ghost" data-blogmore' + (S.blogListBusy ? " disabled" : "") + ">" +
             (S.blogListBusy ? "…" : "Показать ещё") + "</button></div>"
           : "")
-      : '<p class="muted" style="margin:16px 0">Статей пока нет — загляните позже.</p>';
+      : '<p class="muted" style="margin:16px 0">' +
+        (S.blogList && S.blogList.failed ? "Блог временно недоступен — попробуйте позже." : "Статей пока нет — загляните позже.") + "</p>";
     return '<div class="wrap">' +
       '<div class="crumbs"><button data-go="home">Главная</button> / Блог</div>' +
       '<section class="sec" style="padding-top:14px">' +
@@ -4619,9 +4653,12 @@
      YouTube or Vimeo is loaded until the shopper taps: the poster is a plain
      <img>, and only then does the iframe appear — privacy-enhanced domain,
      so a page view is not a visit to Google. */
-  function videoOf(p) {
-    var raw = (DEMO.video && DEMO.video[p.id]) || p.video || "";
-    raw = String(raw).trim();
+  /* One parser, two readers: the product page below, and the goods editor,
+     which has to be able to REFUSE a link this function would return null
+     for. Storing such a link used to say «Сохранено ✓» and then show no
+     video at all — a lie the owner has no way to debug. */
+  function parseVideo(raw0) {
+    var raw = String(raw0 == null ? "" : raw0).trim();
     if (!raw) return null;
     var m;
     if ((m = raw.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,20})/))) {
@@ -4634,6 +4671,9 @@
         src: "https://player.vimeo.com/video/" + m[1] + "?autoplay=1&dnt=1" };
     }
     return null;
+  }
+  function videoOf(p) {
+    return parseVideo((DEMO.video && DEMO.video[p.id]) || p.video || "");
   }
   function videoHTML(p) {
     var v = videoOf(p);
@@ -5292,6 +5332,18 @@
       }).join("") + "</div></div>";
   }
 
+  /* The empty state quotes the shopper's own query back, and that is the one
+     string on the page whose length nobody controls. A pasted paragraph — or
+     one 2 000-character word, which has no space to break on — used to be
+     printed whole, and the phone gained a 25 000px sideways scroll. 60
+     characters is plenty to recognise what you typed; .empty p wraps
+     mid-word (styles.css) for whatever is still too long after that.
+     Kept as its own function rather than inlined so the sentence around it
+     stays one literal for tools/i18n-gaps.mjs to see as a single key. */
+  function clipQuery(q) {
+    q = String(q || "");
+    return q.length > 60 ? q.slice(0, 60) + "…" : q;
+  }
   function screenSearch() {
     var res = searchResults();
     return '<div class="wrap"><section class="sec">' +
@@ -5303,7 +5355,7 @@
         ? '<p class="muted">Популярные запросы: ' + ["шампунь", "борода", "Davines", "парфюм", "футболка"].map(function (q) { return '<button class="link" data-q="' + q + '">' + q + "</button>"; }).join(" · ") + "</p>"
         : res.length
           ? '<p class="muted num" style="margin-bottom:16px">' + res.length + " " + plural(res.length) + '</p><div class="grid">' + res.map(cardHTML).join("") + "</div>"
-          : '<div class="empty"><p>По запросу «' + esc(S.query) + '» ничего не нашлось.</p>' +
+          : '<div class="empty"><p>По запросу «' + esc(clipQuery(S.query)) + '» ничего не нашлось.</p>' +
             '<p class="muted">Проверьте написание или посмотрите категории:</p>' +
             '<div class="empty__cats">' + CATS.slice(0, 4).map(function (c) { return '<button class="btn btn--ghost btn--sm" data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") + "</div>" +
             // content: the contact line follows «Настройки → Контент» like the
@@ -6118,13 +6170,31 @@
      on step 1 therefore never touches the e-mail input: it lives outside
      all three containers, and none of the three is ever the whole
      bodySlot. */
+  /* Each of the three blocks remembers the markup it last produced, so its
+     patch function can tell a real change from a no-op.
+     Why not compare against box.innerHTML: translateTree() has already
+     rewritten that on an ET/EN checkout, so it never equals the freshly
+     built Russian markup and every patch would look like a change.
+     What this buys: five parcel-point feeds (one loadPointsFor() per
+     carrier) land back to back on the delivery block, and usually only one
+     of them changes anything. Rewriting innerHTML for the other four
+     detached the carrier chips and the «Выберите пакомат» button while the
+     shopper was reaching for them — a tap that landed inside that window
+     simply did nothing. */
+  var coBlockHTML = { delivery: "", payment: "", summary: "" };
+  /* Which delivery method step 2's body was last built for — see
+     patchDelivery() for why the two can drift apart and why that matters. */
+  var coBodyMethod = "";
+
   function deliveryBlockHTML() {
-    return deliveryPicker() +
+    var out = deliveryPicker() +
       (shipMethod() === "pickup" ? '<div class="hint">Забрать бесплатно на Mardi 1. Заказ ждёт 7 дней, дальше 1,50 € в день.</div>' : "") +
       '<div class="hint">' + (freeShip() ? "Бесплатная доставка применена ✓" : threshold() === Infinity ? "" : "Бесплатная доставка от " + threshold() + " € — не хватает " + eur(threshold() - cartSum())) + "</div>";
+    coBlockHTML.delivery = out;
+    return out;
   }
   function paymentBlockHTML() {
-    return '<div class="optlist">' + PAYS.map(function (o, i) {
+    var out = '<div class="optlist">' + PAYS.map(function (o, i) {
         return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
           '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
           '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
@@ -6135,9 +6205,11 @@
       // card element, so a static hint is all this needs
       (S.pay === 1 ? '<p class="hint">Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.</p>' : "") +
       (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" data-invoiceco value="' + esc(S.invoiceCo) + '" placeholder="OÜ Näidis · 12345678"></label>' : "");
+    coBlockHTML.payment = out;
+    return out;
   }
   function summaryBlockHTML() {
-    return '<summary class="cosum__head"><span class="sec__title">Ваш заказ</span>' +
+    var out = '<summary class="cosum__head"><span class="sec__title">Ваш заказ</span>' +
         '<span class="cosum__tot num">' + eur(total()) + "</span></summary>" +
       '<div class="cosum__body">' +
       (S.cart.length ? S.cart.map(function (l) {
@@ -6180,7 +6252,15 @@
             ? '<div class="cosum__row"><span>Баллы</span><span class="num">−' + eur(loyaltyDiscount()) + "</span></div>"
             : "")
         : "") +
-      '<div class="cosum__row cosum__row--rule"><span>Доставка — ' + shipMethodLabel() + '</span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
+      /* Two text nodes, not one. The UI_RX rule /^Доставка — (.+)$/ does
+         translate its own capture, but only against the flat dictionary —
+         and «Пакомат Omniva» is itself a rule, not a key, so a parcel order
+         read «Tarne — Пакомат Omniva» on the Estonian checkout. Split, each
+         half is looked up on its own: «Доставка» is a key, «Пакомат Omniva»
+         matches its rule. (The rule stays — the admin still composes this
+         line from a stored string.) */
+      '<div class="cosum__row cosum__row--rule"><span><span>Доставка</span> — <span>' + shipMethodLabel() +
+        '</span></span><span class="num">' + (shipCost() ? eur(shipCost()) : "Бесплатно") + "</span></div>" +
       '<div class="cosum__row cosum__row--tot"><span>Итого</span><span class="num">' + eur(total()) + "</span></div>" +
       /* Both pay buttons wait for the payment step. Offered from step one
          they compete with «Далее» for the same tap and invite a shopper to
@@ -6191,10 +6271,15 @@
           '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>'
         : "") +
       "</div>";
+    coBlockHTML.summary = out;
+    return out;
   }
 
   function screenCheckout() {
     var step = S.coStep;
+    // Remember what step 2's body is about to be built for — patchDelivery()
+    // compares against this to notice a method change it cannot patch alone.
+    coBodyMethod = step === 2 ? shipMethod() : "";
     // The rules and the machine list are wanted the moment the shopper lands
     // here; both are one-shot and both fail quietly.
     loadShipRules();
@@ -6228,7 +6313,13 @@
           "</section>" +
 
           '<section class="costep' + (step === 2 ? " is-open" : "") + '">' +
-            coHead(2, "Доставка", shipMethodLabel() + (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
+            /* The method name keeps a text node of its own. translateTree()
+               rewrites whole text nodes against the dictionary, so «Курьер до
+               двери» is translated but «Курьер до двери · Иван Иванов» — one
+               node, built by concatenation — matched nothing, and the
+               collapsed step-2 header stayed Russian on an ET/EN checkout. */
+            coHead(2, "Доставка", "<span>" + shipMethodLabel() + "</span>" +
+              (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
             (step === 2 ? '<div class="costep__body">' +
               '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
                 COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
@@ -6313,6 +6404,25 @@
   function lowStock() {
     return CATALOGUE.filter(function (p) { return p.stock !== "in"; });
   }
+
+  /* Which of the two side panes are folded, remembered across visits. The
+     panel is the owner's daily tool on one laptop — a preference that resets
+     on every reload is not a preference. Its own key, not persist()'s: that
+     one is the shopper's cart and language, saved on a different schedule. */
+  var ADM_PANES_LS = "rempire-admin-panes";
+  function admPanesLoad() {
+    try {
+      var p = JSON.parse(localStorage.getItem(ADM_PANES_LS));
+      if (p && typeof p === "object") {
+        if (typeof p.nav === "boolean") S.admNav = p.nav;
+        if (typeof p.ai === "boolean") S.admAi = p.ai;
+      }
+    } catch (e) {}
+  }
+  function admPanesSave() {
+    try { localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi })); } catch (e) {}
+  }
+  admPanesLoad();
 
   var ADM_NAV = [
     ["over", "Обзор", "grid"],
@@ -7331,18 +7441,53 @@
   function pricingDirty() {
     return JSON.stringify(pricingDraft()) !== JSON.stringify(S.pricingLoaded || normalisePricing(null));
   }
-  /** One field of the draft — out-of-range or non-numeric input is ignored, never stored. */
+  /* The same bounds cleanPricing() enforces on the server (src/lib/loyalty.ts
+     PRICING_BOUNDS), kept next to the sentence that explains each one so the
+     two cannot drift apart. */
+  var PRICING_FIELDS = {
+    proDiscountPct: [0, 90, "Скидка для салонов — от 0 до 90 %."],
+    proMinOrder: [0, 100000, "Сумма корзины — от 0 до 100 000 €."],
+    earnPct: [0, 50, "Начисление баллов — от 0 до 50 %."],
+    redeemMaxPct: [0, 100, "Списание — от 0 до 100 % от корзины."],
+    minRedeem: [0, 10000, "Порог списания — от 0 до 10 000 баллов."]
+  };
+  /** One field of the draft. Returns "" when the value was stored, or the
+      sentence to show when it was not — a number that is quietly dropped
+      looks exactly like one that was saved, and the owner then runs the shop
+      on a discount it never got. */
   function setPricingDraftField(key, raw) {
-    var d = pricingDraft();
-    var n = Number(String(raw).replace(",", "."));
-    if (!isFinite(n) || n < 0) return;
-    if (key === "proDiscountPct") d.proDiscountPct = Math.min(90, n);
-    else if (key === "proMinOrder") d.proMinOrder = Math.min(100000, Math.round(n * 100) / 100);
-    else if (key === "earnPct") d.loyalty.earnPct = Math.min(50, n);
-    else if (key === "redeemMaxPct") d.loyalty.redeemMaxPct = Math.min(100, n);
-    else if (key === "minRedeem") d.loyalty.minRedeem = Math.min(10000, Math.round(n * 100) / 100);
+    var lim = PRICING_FIELDS[key];
+    if (!lim) return "";
+    var s = String(raw == null ? "" : raw).trim().replace(",", ".");
+    var n = Number(s);
+    if (!s || !isFinite(n) || n < lim[0] || n > lim[1]) return lim[2];
+    var d = pricingDraft(), v = Math.round(n * 100) / 100;
+    if (key === "proDiscountPct") d.proDiscountPct = v;
+    else if (key === "proMinOrder") d.proMinOrder = v;
+    else if (key === "earnPct") d.loyalty.earnPct = v;
+    else if (key === "redeemMaxPct") d.loyalty.redeemMaxPct = v;
+    else if (key === "minRedeem") d.loyalty.minRedeem = v;
+    return "";
+  }
+  function pricingActsHTML() {
+    if (!pricingDirty()) return "";
+    return '<button class="btn btn--sm" data-admpricingsave>Сохранить</button>' +
+      '<button class="btn btn--ghost btn--sm" data-admpricingreset>Отменить правки</button>';
+  }
+  /* Typing must not cost the caret, so the two moving parts of this card are
+     repainted on their own instead of through render() — same idiom as
+     paintHeroPreview(). Without this the «Сохранить» button never appeared
+     at all: the card only draws it when the draft differs from what is
+     saved, and nothing re-rendered the card after a keystroke. */
+  function paintPricingState() {
+    var err = document.querySelector("[data-pricingerr]");
+    if (err) { err.textContent = S.pricingErr || ""; err.hidden = !S.pricingErr; translateTree(err); }
+    var acts = document.getElementById("pricingacts");
+    if (acts) { acts.innerHTML = pricingActsHTML(); translateTree(acts); }
   }
   function savePricing() {
+    if (!pricingDirty()) { toast("Изменений нет"); return; }
+    S.pricingErr = "";
     demoApply({ type: "set_pricing", value: pricingDraft() });
     S.pricingDraft = null;
     toast("Сохранено ✓");
@@ -7367,10 +7512,9 @@
         '<input class="input" data-pricingf="redeemMaxPct" inputmode="decimal" value="' + esc(String(d.loyalty.redeemMaxPct)) + '"></label>' +
       '<label class="field"><span class="field__label">Списание доступно от — сколько баллов на счету</span>' +
         '<input class="input" data-pricingf="minRedeem" inputmode="decimal" value="' + esc(String(d.loyalty.minRedeem)) + '"></label>' +
-      (pricingDirty()
-        ? '<div class="adm__acts"><button class="btn btn--sm" data-admpricingsave>Сохранить</button>' +
-          '<button class="btn btn--ghost btn--sm" data-admpricingreset>Отменить правки</button></div>'
-        : "");
+      // both filled in place by paintPricingState() as the owner types
+      '<p class="err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ">" + esc(S.pricingErr || "") + "</p>" +
+      '<div class="adm__acts" id="pricingacts">' + pricingActsHTML() + "</div>";
   }
 
   /* ---------- admin: delivery prices (settings.shipping_rules) -------------
@@ -8446,6 +8590,45 @@
     var eff = Math.round(p.price * (1 - S.pricingLoaded.proDiscountPct / 100) * 100) / 100;
     return "Сейчас для салонов: " + eur(eff) + " (скидка " + S.pricingLoaded.proDiscountPct + "%)";
   }
+  /* ---- the editor's own «нет» -------------------------------------------
+     A value the editor cannot use has to be refused OUT LOUD. It used to be
+     dropped in silence: «abc», «-5», «0» and «1e9» in the price box all left
+     the old price in place, closed the form and toasted «Сохранено ✓» if any
+     other field had changed — the owner walked away believing the new price
+     was live. The message is patched into the form rather than rendered,
+     because a render() here would rebuild the editor from what is SAVED and
+     throw away everything else the owner has typed. */
+  function goodsFail(msg, focusSel) {
+    // In S as well as in the DOM: a background render() would otherwise
+    // rebuild the form and take the reason for the refusal away with it,
+    // leaving an owner who pressed «Сохранить» with no idea why nothing
+    // happened.
+    S.goodsErr = msg;
+    var slot = document.querySelector("[data-goodserr]");
+    if (slot) { slot.textContent = msg; slot.hidden = false; translateTree(slot); }
+    if (focusSel) refocus(focusSel);
+  }
+  function goodsErrClear() {
+    S.goodsErr = "";
+    var slot = document.querySelector("[data-goodserr]");
+    if (slot) { slot.textContent = ""; slot.hidden = true; }
+  }
+  /** Every field of the goods editor that holds typed text, in the order the
+      form shows them — read by renderImpl() to carry what is on screen across
+      a render() the owner did not ask for. */
+  var GOODS_FIELDS = ["[data-edprice]", "[data-edproprice]", "[data-edstock]", "[data-edsubcat]",
+    "[data-edseot]", "[data-edseod]", "[data-edvideo]",
+    "[data-eddescru]", "[data-eddescet]", "[data-eddescen]"];
+  /** «12,50» → 12.5; empty, not a number, or outside 1–500 € → null.
+      Number(), not parseFloat(): parseFloat("12abc") is 12, which is exactly
+      the kind of half-read value this box must not accept. */
+  function goodsPrice(raw) {
+    var s = String(raw == null ? "" : raw).trim().replace(",", ".");
+    if (!s) return null;
+    var n = Number(s);
+    if (!isFinite(n) || n < 1 || n > 500) return null;
+    return Math.round(n * 100) / 100;
+  }
   function goodsEditor(p) {
     loadAdminPricing(false);   // wholesale/loyalty: for proPriceHint() above
     var subs = SUBCATS[p.cat] || [];
@@ -8540,6 +8723,9 @@
         '<textarea class="input" rows="4" maxlength="4000" data-eddescet placeholder="' + esc(descPhET) + '">' + esc(dov.ET || "") + "</textarea></label>" +
         '<label class="field"><span class="field__label">Описание на английском</span>' +
         '<textarea class="input" rows="4" maxlength="4000" data-eddescen placeholder="' + esc(descPhEN) + '">' + esc(dov.EN || "") + "</textarea></label>" +
+        // goodsFail() also fills this in place, so the message appears without
+        // a render() taking the caret out of whatever field is being fixed
+        '<p class="err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
         '<div class="adm__acts"><button class="btn" data-admsavegoods="' + p.id + '">Сохранить</button>' +
         '<button class="btn btn--ghost btn--sm" data-admclose>Отмена</button></div>' +
         '<p class="muted" style="font-size:12.5px;margin-top:12px">Цена, наличие, подкатегория, фото, фото по объёмам и SEO сохраняются по-настоящему (видно и в магазине, отмена — в журнале). Загруженная фотография уменьшается и переводится в лёгкий формат сама; фон снимать пока нужно заранее.</p>' +
@@ -8636,13 +8822,34 @@
         (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
         (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
   }
+  /* Two installable apps from one page: the shop (manifest.webmanifest,
+     scope /shop2/) for everyone, and the admin (admin.webmanifest, scope
+     /shop2/admin/) that only exists while the admin route is on screen — so
+     a customer's «Установить приложение» never offers something called
+     «Админка». index.html links the shop manifest; this swaps the link (and
+     the iOS home-screen title, which Safari reads from the DOM at the moment
+     of adding) whenever the screen changes. Chromium re-reads the manifest
+     when the link's href changes, so the swap takes effect before any
+     install prompt. */
+  var manifestMode = "";
+  function syncAppManifest() {
+    var mode = S.screen === "admin" ? "admin" : "shop";
+    if (mode === manifestMode) return;
+    manifestMode = mode;
+    try {
+      var link = document.querySelector('link[rel="manifest"]');
+      if (link) link.setAttribute("href", mode === "admin" ? "/shop2/admin.webmanifest" : "/shop2/manifest.webmanifest");
+      var title = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if (title) title.setAttribute("content", mode === "admin" ? "Админка" : "Rempire");
+    } catch (e) {}
+  }
   function pwaHintHTML() {
     try {
       if (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) return "";
       if (window.navigator && window.navigator.standalone) return "";
       if (localStorage.getItem("rmp-pwa-hint-dismissed") === "1") return "";
     } catch (e) {}
-    return '<div class="adm__note" data-pwahint>📱 Откройте эту страницу на телефоне и добавьте на экран: в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». Быстрее, чем открывать сайт заново каждый раз. ' +
+    return '<div class="adm__note" data-pwahint>📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение». ' +
       '<button class="link" data-pwahintclose>Скрыть</button></div>';
   }
   function admStockHTML() {
@@ -8764,9 +8971,10 @@
   function scanBindEan(productId, variant) {
     var assignCode = S.scanHit ? S.scanHit.code : "";
     if (!assignCode) return;
-    stockLevelSave({ productId: productId, variant: variant || "", ean: assignCode }).then(function (ok) {
-      if (ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); }
-      else toast("Не удалось привязать — возможно, код уже занят");
+    stockLevelSaveDetailed({ productId: productId, variant: variant || "", ean: assignCode }).then(function (res) {
+      if (res.ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); }
+      // «возможно, код уже занят» was a guess; the route knows, and says which
+      else toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать — возможно, код уже занят");
     });
   }
   function scanPanelHTML() {
@@ -9031,13 +9239,21 @@
         '<a class="btn" href="/api/admin/pos-orders/' + encodeURIComponent(d.orderId) + '/receipt/" target="_blank" rel="noopener">Чек для печати</a>' +
         '<button class="btn btn--ghost" data-posnew>Новая продажа</button></div></div>';
   }
-  function admPosHTML() {
-    if (SRV.admin !== true) return '<p class="muted" style="margin:16px 0">Войдите в панель.</p>';
-    if (S.posDone) return admPosReceiptHTML();
+  /** Сумма / Скидка / Итого — its own block so typing a discount can repaint
+      just these three rows instead of the whole register (see the
+      [data-posdiscount] input handler). */
+  function posTotalsHTML() {
     var subtotal = posSubtotal();
     var pct = Math.min(90, Math.max(0, Math.round(Number(S.posDiscount) || 0)));
     var discount = pct ? Math.round(subtotal * pct) / 100 : 0;
     var total = Math.max(0, Math.round((subtotal - discount) * 100) / 100);
+    return '<div class="adm__row" style="border:none;padding:8px 0 0"><span class="adm__nm">Сумма</span><span class="num">' + eur(subtotal) + "</span></div>" +
+      (discount ? '<div class="adm__row" style="border:none;padding:2px 0"><span class="adm__nm">Скидка</span><span class="num">−' + eur(discount) + "</span></div>" : "") +
+      '<div class="adm__row" style="border:none;padding:2px 0 8px"><span class="adm__nm"><b>Итого</b></span><span class="num"><b>' + eur(total) + "</b></span></div>";
+  }
+  function admPosHTML() {
+    if (SRV.admin !== true) return '<p class="muted" style="margin:16px 0">Войдите в панель.</p>';
+    if (S.posDone) return admPosReceiptHTML();
     return '<p class="muted" style="margin:16px 0">Соберите продажу — ищите товар здесь или отсканируйте штрихкод в «Складе», укажите оплату и оформите. Заказ сразу становится оплаченным и появится в «Заказах» с меткой «Салон».</p>' +
       '<input class="input input--box" data-posq value="' + esc(S.posQ || "") + '" placeholder="Найти товар: название, бренд…" aria-label="Поиск товара" style="margin-bottom:8px;max-width:420px">' +
       '<div id="poslist">' + posSearchResultsHTML() + "</div>" +
@@ -9063,9 +9279,7 @@
         '<button class="scchip" data-pospayment="terminal" aria-current="' + (S.posPayment === "terminal") + '">Терминал</button>' +
       "</div>" +
       '<label class="field" style="max-width:160px;margin-top:10px"><span class="field__label">Скидка, %</span><input class="input" data-posdiscount value="' + esc(S.posDiscount || "") + '" inputmode="numeric"></label>' +
-      '<div class="adm__row" style="border:none;padding:8px 0 0"><span class="adm__nm">Сумма</span><span class="num">' + eur(subtotal) + "</span></div>" +
-      (discount ? '<div class="adm__row" style="border:none;padding:2px 0"><span class="adm__nm">Скидка</span><span class="num">−' + eur(discount) + "</span></div>" : "") +
-      '<div class="adm__row" style="border:none;padding:2px 0 8px"><span class="adm__nm"><b>Итого</b></span><span class="num"><b>' + eur(total) + "</b></span></div>" +
+      '<div id="postotals">' + posTotalsHTML() + "</div>" +
       (S.posErr ? '<div class="adm__note">' + esc(S.posErr) + "</div>" : "") +
       '<div class="adm__acts"><button class="btn" data-possend' + (S.posBusy || !S.posCart.length ? " disabled" : "") + ">" + (S.posBusy ? "Оформляем…" : "Оформить продажу") + "</button></div>";
   }
@@ -9094,12 +9308,22 @@
   }
 
   /* ---------- inventory: writes — the ledger and the static fields -------- */
-  function stockLevelSave(body) {
-    return apiSend("/api/admin/inventory/", "PUT", body).then(function (r) { return r.status === 200 && r.body.ok; });
-  }
   function stockMoveSend(body) {
     return apiSend("/api/admin/inventory/moves/", "POST", body).then(function (r) { return r.status === 200 && r.body.ok; });
   }
+  /* The same wire the level save uses, but keeping the route's own error code
+     — «Часть изменений не сохранилась» does not tell the owner that the
+     barcode he just typed belongs to another product. */
+  function stockLevelSaveDetailed(body) {
+    return apiSend("/api/admin/inventory/", "PUT", body).then(function (r) {
+      return { ok: r.status === 200 && r.body.ok, error: (r.body && r.body.error) || "" };
+    }).catch(function () { return { ok: false, error: "offline" }; });
+  }
+  var STOCK_SAVE_ERRS = {
+    ean_taken: "Этот штрихкод уже привязан к другому товару.",
+    bad_ean: "Штрихкод — это 8–14 цифр (EAN/UPC) или свой код из букв, цифр и дефиса, 4–32 знака.",
+    bad_threshold: "Порог «мало» — целое число от 0 до 100 000."
+  };
   function loadStockMoves(force) {
     if (SRV.admin !== true) return;
     if (S.stockMoves && !force) return;
@@ -9111,6 +9335,18 @@
       render();
     }).catch(function () { S.stockMovesBusy = false; render(); });
   }
+  /** «Остаток сейчас» → a whole number 0…MAX, or null when it is not one.
+      This is a shelf count, so the old `Math.max(0, Math.trunc(Number(v)))`
+      was the dangerous shape: «abc» became NaN, JSON.stringify turned that
+      into null, and the moves route read null as 0 — the panel wiped the
+      shelf to zero and said «Сохранено ✓». «-1» took the same road. */
+  function stockQtyValue(raw) {
+    var s = String(raw == null ? "" : raw).trim().replace(",", ".");
+    if (!s) return null;
+    var n = Number(s);
+    if (!isFinite(n) || n < 0 || n > 1000000) return null;
+    return Math.trunc(n);
+  }
   /** One row's edit form → up to two calls (the static fields, then a qty move), then a fresh list. */
   function stockCommit(key) {
     var r = stockFindRow(key);
@@ -9118,24 +9354,30 @@
     var jobs = [];
     var eanChanged = (S.stockEditEan || "") !== (r.ean || "");
     var lowChanged = S.stockEditLow !== "" && Number(S.stockEditLow) !== r.lowThreshold;
+    var rawQty = S.stockEditQty;
+    var qty = null;
+    if (rawQty !== "") {
+      qty = stockQtyValue(rawQty);
+      if (qty === null) { toast("Остаток — целое число от 0 до 1 000 000."); refocus("[data-stockqtyinput]"); return; }
+    }
     if (eanChanged || lowChanged) {
       var patch = { productId: r.productId, variant: r.variant };
       if (eanChanged) patch.ean = S.stockEditEan || null;
       if (lowChanged) patch.lowThreshold = Number(S.stockEditLow);
-      jobs.push(stockLevelSave(patch));
+      jobs.push(stockLevelSaveDetailed(patch));
     }
-    var qtyChanged = S.stockEditQty !== "" && Number(S.stockEditQty) !== (r.tracked ? r.qty : 0);
-    if (qtyChanged) {
+    if (qty !== null && qty !== (r.tracked ? r.qty : 0)) {
       jobs.push(stockMoveSend({
-        productId: r.productId, variant: r.variant, qty: Math.max(0, Math.trunc(Number(S.stockEditQty))),
+        productId: r.productId, variant: r.variant, qty: qty,
         reason: "adjust", ref: S.stockEditReason || undefined
-      }));
+      }).then(function (ok) { return { ok: ok, error: ok ? "" : "move_failed" }; }));
     }
     if (!jobs.length) { S.stockEdit = ""; render(); return; }
     Promise.all(jobs).then(function (results) {
-      var ok = results.every(function (x) { return x; });
-      toast(ok ? "Сохранено ✓" : "Часть изменений не сохранилась");
-      S.stockEdit = "";
+      var failed = results.filter(function (x) { return !x.ok; })[0];
+      if (!failed) toast("Сохранено ✓");
+      else toast(STOCK_SAVE_ERRS[failed.error] || "Часть изменений не сохранилась");
+      S.stockEdit = failed ? key : "";
       reloadStock();
     });
   }
@@ -9795,7 +10037,9 @@
     // from the global discount" — same null-clears convention as set_seo/set_varimg
     else if (a.type === "set_pro_price") { entry.prev = { type: "set_pro_price", id: a.id, value: DEMO.proPrice[a.id] != null ? DEMO.proPrice[a.id] : null }; DEMO.proPrice[a.id] = a.value; }
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
-    else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; DEMO.seo[a.id] = { t: a.title, d: a.description }; }
+    // both fields empty = «снова как в каталоге», so the override is removed
+    // rather than stored as a pair of empty strings that would hide it
+    else if (a.type === "set_seo") { entry.prev = { type: "set_seo", id: a.id, title: (DEMO.seo[a.id] || {}).t || (p.seo || {}).t || "", description: (DEMO.seo[a.id] || {}).d || (p.seo || {}).d || "" }; if (a.title || a.description) DEMO.seo[a.id] = { t: a.title, d: a.description }; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
     else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
     else if (a.type === "toggle_bundles") { entry.prev = { type: "toggle_bundles", value: DEMO.bundles !== false }; DEMO.bundles = a.value; }
@@ -9878,7 +10122,7 @@
     if (a.type === "set_price") DEMO.price[a.id] = a.value;
     else if (a.type === "set_pro_price") DEMO.proPrice[a.id] = a.value;
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
-    else if (a.type === "set_seo") DEMO.seo[a.id] = { t: a.title, d: a.description };
+    else if (a.type === "set_seo") { if (a.title || a.description) DEMO.seo[a.id] = { t: a.title, d: a.description }; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
@@ -10353,6 +10597,7 @@
 
   function renderImpl() {
     var body;
+    syncAppManifest();
     if (S.screen === "home") body = screenHome();
     else if (S.screen === "catalog") body = screenCatalog();
     else if (S.screen === "product") body = screenProduct();
@@ -10399,8 +10644,37 @@
       try { refocusRange = [af.selectionStart, af.selectionEnd]; } catch (e) {}
     })();
 
+    /* Same problem, one screen over, with a worse ending. The goods editor is
+       the only admin form with no draft in S at all: every field is read
+       straight off the DOM when «Сохранить» is pressed. So a background probe
+       landing mid-edit — mediaProbe(), loadAdminPricing(), the analytics
+       warm-up in probeAdmin(), each of which ends in render() — rebuilt the
+       form from the SAVED product and silently threw away everything typed
+       since; the next «Сохранить» then stored the old values back and said
+       «Изменений нет». Carry what is on screen across the swap, but only when
+       the same product is still open (data-admsavegoods carries its id). */
+    var goodsKeep = null;
+    if (S.screen === "admin" && S.adminEdit) {
+      var openFor = bodySlot.querySelector("[data-admsavegoods]");
+      if (openFor && openFor.getAttribute("data-admsavegoods") === S.adminEdit) {
+        goodsKeep = {};
+        for (var gi = 0; gi < GOODS_FIELDS.length; gi++) {
+          var gel = bodySlot.querySelector(GOODS_FIELDS[gi]);
+          if (gel) goodsKeep[GOODS_FIELDS[gi]] = gel.value;
+        }
+      }
+    }
+
     bodySlot.innerHTML = '<main class="screen' + (chromeless ? " screen--co" : "") + '">' + body + "</main>" +
       (chromeless ? "" : footer());
+
+    if (goodsKeep) {
+      for (var gk in goodsKeep) {
+        if (!Object.prototype.hasOwnProperty.call(goodsKeep, gk)) continue;
+        var gn = bodySlot.querySelector(gk);
+        if (gn) gn.value = goodsKeep[gk];
+      }
+    }
 
     if (refocusSel) {
       var nf = bodySlot.querySelector(refocusSel);
@@ -10616,26 +10890,43 @@
      fallback — when its container is not currently mounted; the state
      (SHIP_RULES, POINTS, PAYMETHODS, S.pro, …) is already updated, so the
      next real render (a step change, say) picks it up fresh regardless. */
-  function patchDelivery() {
+  /* One shape for all three: build the markup, and write it only if it is
+     not what this block already shows. `coBlockHTML` (near the block
+     builders) is what makes "already shows" knowable — see its comment for
+     why box.innerHTML cannot answer that question on an ET/EN checkout, and
+     for the mid-tap rebuild this prevents. */
+  function patchBlock(selector, html, previous) {
     if (S.screen !== "checkout") return;
-    var box = document.querySelector("[data-co-delivery]");
-    if (!box) return;
-    box.innerHTML = deliveryBlockHTML();
+    var box = document.querySelector(selector);
+    if (!box || html === previous) return;
+    box.innerHTML = html;
     translateTree(box);
+  }
+  function patchDelivery() {
+    var was = coBlockHTML.delivery;
+    var html = deliveryBlockHTML();
+    /* The postal-address fields are NOT in this block — they live in step 2's
+       body, next to it, and are rendered from shipMethod() by
+       screenCheckout(). So a patch that changes which method is in force has
+       to go through the full render() that owns them.
+       How that happens: the parcel option is offered optimistically and each
+       carrier whose feed comes back empty is struck off (carriersFor). When
+       the last one goes, «Пакомат» is withdrawn and shipMethod() quietly
+       becomes «Курьер» — and patching only this block left the shopper on a
+       courier order with no street, index or city field on screen, and a
+       «Далее — оплата» that looked like it did nothing (it was failing on
+       fields that were not rendered). Estonia never showed it; Finland,
+       whose two carriers both answer empty without Montonio keys, always did. */
+    if (S.coStep === 2 && shipMethod() !== coBodyMethod) { render(); return; }
+    patchBlock("[data-co-delivery]", html, was);
   }
   function patchPayment() {
-    if (S.screen !== "checkout") return;
-    var box = document.querySelector("[data-co-payment]");
-    if (!box) return;
-    box.innerHTML = paymentBlockHTML();
-    translateTree(box);
+    var was = coBlockHTML.payment;
+    patchBlock("[data-co-payment]", paymentBlockHTML(), was);
   }
   function patchSummary() {
-    if (S.screen !== "checkout") return;
-    var box = document.querySelector("[data-co-summary]");
-    if (!box) return;
-    box.innerHTML = summaryBlockHTML();
-    translateTree(box);
+    var was = coBlockHTML.summary;
+    patchBlock("[data-co-summary]", summaryBlockHTML(), was);
   }
 
   function patchCatalog() {
@@ -11137,8 +11428,8 @@
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
-    if (d.admnav !== undefined) { S.admNav = !S.admNav; render(); refocus("[data-admnav]"); return; }
-    if (d.admai !== undefined) { S.admAi = !S.admAi; render(); refocus("[data-admai]"); return; }
+    if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
+    if (d.admai !== undefined) { S.admAi = !S.admAi; admPanesSave(); render(); refocus("[data-admai]"); return; }
     if (d.admtab) {
       S.adminTab = d.admtab; S.adminOrder = 0; S.adminEdit = "";
       S.adminBlogEdit = null; S.adminBlogConfirmDelete = false;   // blog
@@ -11230,11 +11521,11 @@
       return;
     }
     if (d.admgoods !== undefined) {
-      S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; mediaProbe();   // media
+      S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; mediaProbe();   // media
       AI_UNDO = null;   // assistant-work: a fresh product, a fresh undo snapshot
       window.scrollTo({ top: 0 }); render(); return;
     }
-    if (d.admclose !== undefined) { S.adminEdit = ""; GAL.id = ""; AI_UNDO = null; render(); return; }
+    if (d.admclose !== undefined) { S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; render(); return; }
     /* ---- media: the «Фото» block ----------------------------------------
        Everything here edits the draft list only; «Сохранить» is what turns it
        into a set_gallery action, so «Отмена» really cancels. */
@@ -11377,23 +11668,43 @@
       var gp = byId(d.admsavegoods);
       var priceEl = document.querySelector("[data-edprice]");
       var stockEl = document.querySelector("[data-edstock]");
-      var np = priceEl ? parseFloat(String(priceEl.value).replace(",", ".")) : NaN;
+      var priceProEl = document.querySelector("[data-edproprice]");
+      var videoEl = document.querySelector("[data-edvideo]");
+      /* Everything is checked BEFORE anything is written. A half-applied save
+         — new price stored, bad video quietly dropped — is the one outcome a
+         non-technical owner cannot untangle afterwards, and the journal would
+         show only the half that went through. */
+      var np = priceEl ? goodsPrice(priceEl.value) : gp.price;
+      if (priceEl && np === null) {
+        goodsFail("Цена — число от 1 до 500 €, например 12,50.", "[data-edprice]"); return;
+      }
+      var rawPP = priceProEl ? priceProEl.value.trim() : "";
+      var npp = rawPP ? goodsPrice(rawPP) : null;
+      if (rawPP && npp === null) {
+        goodsFail("Цена для салонов — число от 1 до 500 €.", "[data-edproprice]"); return;
+      }
+      // A salon paying more than the shelf price is a typo every single time,
+      // and a silent one costs money on every wholesale order.
+      if (npp !== null && np !== null && npp > np) {
+        goodsFail("Цена для салонов не может быть выше розничной.", "[data-edproprice]"); return;
+      }
+      var nv = videoEl ? videoEl.value.trim() : "";
+      if (nv && !parseVideo(nv)) {
+        goodsFail("Ссылка на видео — только YouTube или Vimeo.", "[data-edvideo]"); return;
+      }
+      goodsErrClear();
+
       var changed = false;
-      if (!isNaN(np) && np >= 1 && np <= 500 && Math.abs(np - gp.price) > 0.001) {
-        demoApply({ type: "set_price", id: gp.id, value: Math.round(np * 100) / 100 }); changed = true;
+      if (np !== null && Math.abs(np - gp.price) > 0.001) {
+        demoApply({ type: "set_price", id: gp.id, value: np }); changed = true;
       }
       // wholesale/loyalty: salon/pro price — empty field clears the override
-      var priceProEl = document.querySelector("[data-edproprice]");
       if (priceProEl) {
-        var rawPP = priceProEl.value.trim();
         var curPP = gp.proPrice != null ? gp.proPrice : null;
         if (!rawPP) {
           if (curPP != null) { demoApply({ type: "set_pro_price", id: gp.id, value: null }); changed = true; }
-        } else {
-          var npp = parseFloat(rawPP.replace(",", "."));
-          if (!isNaN(npp) && npp >= 1 && npp <= 500 && (curPP == null || Math.abs(npp - curPP) > 0.001)) {
-            demoApply({ type: "set_pro_price", id: gp.id, value: Math.round(npp * 100) / 100 }); changed = true;
-          }
+        } else if (curPP == null || Math.abs(npp - curPP) > 0.001) {
+          demoApply({ type: "set_pro_price", id: gp.id, value: npp }); changed = true;
         }
       }
       if (stockEl && stockEl.value !== gp.stock) {
@@ -11425,16 +11736,19 @@
       }
       var tEl = document.querySelector("[data-edseot]"), dEl = document.querySelector("[data-edseod]");
       var nt = tEl ? tEl.value.trim() : "", nd = dEl ? dEl.value.trim() : "";
-      if ((nt || nd) && (nt !== ((gp.seo || {}).t || "") || nd !== ((gp.seo || {}).d || ""))) {
+      /* No `(nt || nd) &&` guard any more: with it, emptying BOTH boxes was
+         the one edit the form could not make — the override stayed on the
+         product for good and the only way back was the database. Empty now
+         means «снова как в каталоге», which is what the boxes look like. */
+      if (nt !== ((gp.seo || {}).t || "") || nd !== ((gp.seo || {}).d || "")) {
         demoApply({ type: "set_seo", id: gp.id, title: nt, description: nd }); changed = true;
       }
       /* ---- features: the video link -------------------------------------- */
-      var vEl = document.querySelector("[data-edvideo]");
-      if (vEl) {
-        var nv = vEl.value.trim();
+      if (videoEl) {
         var curV = (DEMO.video && DEMO.video[gp.id]) || gp.video || "";
         // demoApply() writes the demo layer, the log and the server copy —
-        // srvPush() deliberately leaves set_video to us
+        // srvPush() deliberately leaves set_video to us. `nv` was validated
+        // against parseVideo() at the top of this handler.
         if (nv !== curV) { demoApply({ type: "set_video", id: gp.id, value: nv }); changed = true; }
       }
       /* ---- /features ------------------------------------------------------ */
@@ -11631,7 +11945,7 @@
     if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
     if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
     if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
-    if (d.admpricingreset !== undefined) { S.pricingDraft = null; render(); return; }
+    if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; render(); return; }
 
     /* ---------- inventory: «Склад» — row edit form, filters, ledger, the PWA hint ---------- */
     if (d.stockedit !== undefined) {
@@ -11975,7 +12289,10 @@
     // the checkbox drives totals shown in several places on screen — unlike
     // the plain text fields below, this one needs a real render()
     else if (t.matches("[data-loyaltyredeem]")) { S.loyaltyRedeem = t.checked; render(); }
-    else if (t.matches("[data-pricingf]")) { setPricingDraftField(t.dataset.pricingf, t.value); }
+    else if (t.matches("[data-pricingf]")) {
+      S.pricingErr = setPricingDraftField(t.dataset.pricingf, t.value);
+      paintPricingState();   // no render(): see that function's own comment
+    }
     else if (t.matches("[data-pricingtoggle]")) { pricingDraft().loyalty.enabled = t.checked; render(); }
     else if (t.matches("[data-admcustq]")) {
       S.admCustQ = t.value;
@@ -12031,7 +12348,20 @@
     }
     else if (t.matches("[data-posemail]")) { S.posEmail = t.value; }
     else if (t.matches("[data-posphone]")) { S.posPhone = t.value; }
-    else if (t.matches("[data-posdiscount]")) { S.posDiscount = t.value.replace(/[^\d]/g, "").slice(0, 2); }
+    else if (t.matches("[data-posdiscount]")) {
+      /* The box kept whatever was typed while the register used something
+         else: «abc» showed in the field and priced as 0 %, «99» showed as 99
+         and priced as 90. Write the value the register actually uses back
+         into the box (same idiom as the promo-code field below), and repaint
+         the three money rows — a full render() would take the caret out of
+         the field mid-keystroke. */
+      var pd = t.value.replace(/[^\d]/g, "").slice(0, 2);
+      if (Number(pd) > 90) pd = "90";
+      S.posDiscount = pd;
+      if (t.value !== pd) t.value = pd;
+      var posTot = document.getElementById("postotals");
+      if (posTot) { posTot.innerHTML = posTotalsHTML(); translateTree(posTot); }
+    }
     else if (t.matches("[data-scanassignq]")) {
       S.scanAssignQ = t.value;
       var assignResults = SCANEL && SCANEL.querySelector("#scanassignresults");
@@ -12105,8 +12435,13 @@
     }
     else if (t.matches("[data-blogslug]")) {
       if (S.adminBlogEdit) {
-        S.adminBlogEdit.slug = t.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+        var ns = t.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-");
+        S.adminBlogEdit.slug = ns;
         S.adminBlogEdit.slugAuto = false;
+        // …and show it. The box used to keep «Привет Мир!!» on screen while
+        // the post was actually filed under «-----» — the owner could not
+        // see the address he was publishing.
+        if (t.value !== ns) t.value = ns;
       }
     }
     else if (t.matches("[data-blogtags]")) {

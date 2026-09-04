@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { query } from "@/lib/db";
+import { jsonbParam, query } from "@/lib/db";
 
 /**
  * Gift cards — issue, check, apply, redeem.
@@ -191,7 +191,7 @@ export async function issueGiftCards(order: OrderLike): Promise<GiftCard[]> {
              values ($1, $2, $2, $3, $4::jsonb, $5)
            on conflict (code) do nothing
            returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at`,
-          [code, amount, order.id, JSON.stringify(recipient), order.lang || "RU"],
+          [code, amount, order.id, jsonbParam(recipient), order.lang || "RU"],
         );
         if (rows.length) {
           made.push(toCard(rows[0]));

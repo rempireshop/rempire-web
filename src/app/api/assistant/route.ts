@@ -327,6 +327,12 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "bad json" }, { status: 400 });
   }
+  /* `null` parses as an object, and `{"messages":"hi"}` type-checks nowhere:
+     both used to throw below — a 500 with the stack trace (audit: fuzz). */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ error: "bad json" }, { status: 400 });
+  }
+  const messages = Array.isArray(body.messages) ? body.messages : [];
 
   /* mode:"admin" used to be a word in the request body, and that was the whole
      check. It bought an anonymous caller the admin system prompt, the full
@@ -342,7 +348,7 @@ export async function POST(req: NextRequest) {
   }
   const isAdmin = wantsAdmin;
 
-  const history = (body.messages ?? [])
+  const history = messages
     .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
     .slice(-8)
     .map((m) => ({

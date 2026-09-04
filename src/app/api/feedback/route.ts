@@ -63,10 +63,10 @@ export async function POST(req: Request) {
   try {
     raw = await req.text();
   } catch {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "bad_request" }, { status: 400 });
   }
   if (raw.length > MAX_BYTES) {
-    return NextResponse.json({ ok: false }, { status: 413 });
+    return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
   }
 
   let body: {
@@ -81,7 +81,13 @@ export async function POST(req: Request) {
   try {
     body = JSON.parse(raw);
   } catch {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "bad_json" }, { status: 400 });
+  }
+  /* `null` is valid JSON and `typeof null === "object"`, so the parse above
+     lets it through and body.website below throws — a 500 from a four-byte
+     body. Same door for a bare number, string or array. */
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
   // honeypot: a filled hidden field is a bot. Say thank you, do nothing.
   if (typeof body.website === "string" && body.website.trim()) {
@@ -90,7 +96,7 @@ export async function POST(req: Request) {
 
   const text = typeof body.text === "string" ? body.text.trim() : "";
   if (!text || typeof body.page !== "string") {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "bad_body" }, { status: 400 });
   }
   const page = body.page;
   const direction = optionalString(body.direction);
@@ -147,11 +153,11 @@ export async function POST(req: Request) {
 
   if (!stored && !telegram && !email) {
     // nothing durable happened — let the client show the retry line
-    return NextResponse.json({ ok: false }, { status: 502 });
+    return NextResponse.json({ ok: false, error: "not_stored" }, { status: 502 });
   }
   return NextResponse.json({ ok: true, stored, telegram, email });
 }
 
 export function GET() {
-  return NextResponse.json({ ok: false }, { status: 405 });
+  return NextResponse.json({ ok: false, error: "method_not_allowed" }, { status: 405 });
 }

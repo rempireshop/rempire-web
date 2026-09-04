@@ -39,7 +39,9 @@ export async function GET(req: Request) {
     );
   } catch (err) {
     console.error("blog GET failed", err);
-    // the listing page must still render — an empty page is the honest answer
-    return Response.json({ ok: true, posts: [], total: 0, page, perPage: 10, degraded: true });
+    /* An outage must look like one — the storefront shows «Блог временно
+       недоступен» on ok:false (blog list loader in app.js) instead of an
+       empty blog, and a 503 is what monitoring can see. */
+    return Response.json({ ok: false, error: "unavailable", posts: [], total: 0, page, perPage: 10 }, { status: 503 });
   }
 }
