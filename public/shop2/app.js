@@ -15676,6 +15676,12 @@
     }
     for (i = 0; i < to.attributes.length; i++) {
       a = to.attributes[i];
+      /* data-edauto="0" is the owner's own doing — the input handler sets it
+         the moment a salon price is typed by hand, and the save handler reads
+         it. Fresh markup says "1" for a product without a stored salon price,
+         so a background render landing between the typing and the click would
+         hand the field back to «auto» and swallow what was typed. */
+      if (a.name === "data-edauto" && from.getAttribute("data-edauto") === "0") continue;
       if (from.getAttribute(a.name) !== a.value) from.setAttribute(a.name, a.value);
     }
   }

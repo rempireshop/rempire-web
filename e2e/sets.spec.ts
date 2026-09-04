@@ -128,6 +128,14 @@ test.describe("sets switched off", () => {
       // so look for the toast first and for the response after.
       await expect(page.getByRole("status")).toBeVisible();
       expect((await put).ok()).toBe(true);
+      // The storefront reads the switch from /api/overrides/ at boot. Make
+      // sure the server already answers with it off before any page is
+      // opened — a CI runner has shown the first storefront visit reading the
+      // old value otherwise.
+      await expect.poll(async () => {
+        const body = await (await page.request.get("/api/overrides/", { headers: { "cache-control": "no-cache" } })).json();
+        return body.settings ? body.settings.bundles : body.bundles;
+      }, { timeout: 10_000, message: "the overrides feed still says sets are on" }).toBe(false);
 
       for (const lang of LANGS) {
         const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(76) });
