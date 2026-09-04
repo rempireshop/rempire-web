@@ -3818,13 +3818,25 @@
         "</span>" +
         '<span class="card__brand">' + esc(p.brand) + "</span>" +
         '<span class="card__name">' + esc(p.name) + "</span>" +
-        // the price is its own node so the picker can patch it in place
-        // without touching the chips beside it
-        '<span class="card__price num"><span data-cardpr>' + cardPriceText(p, i) + "</span>" + proTag + " " + stock + "</span>" +
       "</button>" +
-      // out of stock keeps neither control — there is nothing to choose or add
-      (p.stock === "out" ? "" : cardSizeHTML(p) +
-        '<button class="link card__add" data-add="' + p.id + '">В корзину</button>') +
+      /* The foot is a sibling of the card button, not inside it: a <select>
+         inside a <button> is invalid markup and every tap on it would open
+         the product. Price and size picker share one row — the picker is a
+         compact pill on the right of the price, so it costs the card no
+         extra height (the full-width box it replaced ate a whole row on a
+         phone). The price is its own node so the picker can patch it in
+         place without touching the chips beside it. */
+      '<div class="card__foot">' +
+        '<span class="card__price num"><span data-cardpr>' + cardPriceText(p, i) + "</span>" + proTag + " " + stock + "</span>" +
+        // out of stock keeps neither control — there is nothing to choose or add
+        (p.stock === "out" ? "" : cardSizeHTML(p)) +
+      "</div>" +
+      // out of stock keeps the action row too, so prices and links sit at the
+      // same height across the grid — the link leads to the product page,
+      // where the «сообщить о наличии» form lives
+      (p.stock === "out"
+        ? '<button class="link card__add card__add--notify" data-go-product="' + p.id + '">Сообщить о наличии</button>'
+        : '<button class="link card__add" data-add="' + p.id + '">В корзину</button>') +
       "</div>";
   }
 
