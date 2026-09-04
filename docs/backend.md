@@ -125,9 +125,10 @@ then rebuilds every number from:
 3. the `product_overrides` row, if any — an override price replaces the base
    price and keeps the size premium, so "−1 € on the 75 ml" does not give away
    16 € on the 500 ml;
-4. `src/lib/shipping.ts` `computeShipping({country, method, subtotal, carrier})`
-   when it exists, otherwise a flat fallback: parcel machine EE 3.49, courier EE
-   5.99, anything else 9.90, free over 59 €;
+4. `src/lib/shipping.ts` `computeShipping({country, method, subtotal, carrier})`;
+   if that call throws, a flat fallback derived from its `DEFAULT_SHIPPING_RULES`
+   (so the two cannot drift): parcel machine EE 5.47, courier EE 10.84, anything
+   else 9.90, free over 59 € — sourcing in docs/shipping.md § «Тарифы Montonio»;
 5. `src/lib/giftcards.ts` `applyGiftCard(code, total)` when it exists — it only
    **quotes** the discount. The card is spent when the payment is confirmed
    (`src/lib/payments/apply.ts`), never at checkout;

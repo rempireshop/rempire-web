@@ -69,6 +69,9 @@ for (const lang of LANGS) {
       await expect(acc.getByText(tr("Отзывов пока нет — станьте первым.", lang.code))).toBeVisible();
 
       await acc.locator("[data-revopen]").click();
+      // refocus('[data-revf="name"]') in app.js only lands when the field sits
+      // inside a still-open <details>; a collapsed one made it a silent no-op.
+      await expect(acc.locator('[data-revf="name"]')).toBeFocused();
       const submit = acc.locator("[data-revsend]");
       await expect(submit).toBeDisabled();
 

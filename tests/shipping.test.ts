@@ -161,14 +161,17 @@ describe("against the database", () => {
     resetShippingRulesCache();
   });
 
-  it("migration 030 seeds a rules row the admin can edit", async () => {
-    const rows = await query<{ value: unknown }>(
+  it("migrations 030 + 031 seed a rules row the admin can edit, at the sourced EE tariffs", async () => {
+    // The raw row, not loadShippingRules(): that one merges over the code
+    // defaults, so a missing EE cell would read as 5.47 and hide a stale seed.
+    const rows = await query<{ value: { methods: Record<string, Record<string, number>> } }>(
       "select value from settings where key = 'shipping_rules'",
     );
     expect(rows).toHaveLength(1);
+    expect(rows[0].value.methods.parcel.EE).toBe(5.47);
+    expect(rows[0].value.methods.courier.EE).toBe(10.84);
     const loaded = await loadShippingRules();
     expect(loaded?.freeFrom).toBe(59);
-    expect(loaded?.methods.parcel.EE).toBe(3.49);
   });
 
   it("bills what the settings row says, not what the code says", async () => {

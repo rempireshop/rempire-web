@@ -172,6 +172,25 @@ describe("api routes", () => {
     expect(audit.audit.some((a: { action: string }) => a.action === "override.set")).toBe(true);
   });
 
+  it("the salon (pro) price never reaches the public overrides feed", async () => {
+    const { PUT, GET: adminGet } = await import("@/app/api/admin/overrides/route");
+    const { GET: publicGet } = await import("@/app/api/overrides/route");
+
+    const res = await PUT(put("/api/admin/overrides/", { id: product.id, price: 9, proPrice: 6.5 }, admin));
+    expect(res.status).toBe(200);
+
+    // the panel sees it …
+    const mine = await (await adminGet(get("/api/admin/overrides/", admin))).json();
+    expect(mine.overrides[product.id]).toMatchObject({ price: 9, proPrice: 6.5 });
+
+    // … an anonymous shopper does not — commercial information stays server-side
+    const pub = await (await publicGet()).json();
+    expect(pub.overrides[product.id]).toMatchObject({ price: 9 });
+    expect(pub.overrides[product.id]).not.toHaveProperty("proPrice");
+    expect(JSON.stringify(pub)).not.toContain("proPrice");
+    expect(JSON.stringify(pub.settings)).not.toContain("proDiscountPct");
+  });
+
   it("PUT /api/admin/overrides rejects a nonsense stock state", async () => {
     const { PUT } = await import("@/app/api/admin/overrides/route");
     const res = await PUT(put("/api/admin/overrides/", { id: product.id, stock: "maybe" }, admin));

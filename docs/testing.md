@@ -220,7 +220,8 @@ coverage now instead of the workaround it briefly needed.
   the native `toggle` event, same idiom as the order summary's own
   `S.sumOpen`, and set explicitly by the actions that trigger a render — and
   rendering `open` from it in `acc()`. `e2e/product.spec.ts`'s reviews test
-  now asserts `open` stays on `details.acc` throughout, with no
+  now asserts `open` stays on `details.acc` throughout — and that focus
+  lands in the name field right after «Оставить отзыв» — with no
   reopen-and-retry needed.
 - **Pickup checkout could not complete.** The order payload's `customer.name`
   came from `S.ship.name`, which the UI never collected for the "Самовывоз"
