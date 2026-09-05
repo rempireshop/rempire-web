@@ -12,6 +12,15 @@
 (function () {
   "use strict";
 
+  /* admin.css is linked with media="print" (index.html) so it never holds up
+     the storefront's first paint; it is switched on here — before the first
+     render, and for every route, since the toast slot and the scanner wear
+     its classes too. A stylesheet that is still on its way applies on load. */
+  try {
+    var admCss = document.querySelector("link[data-admin-css]");
+    if (admCss) admCss.media = "all";
+  } catch (e) {}
+
   var TOWER_D = "M541.42,377.53l-18.69,10.82s11.14,130.41,11.54,135.02c-.23,7.19-11.13,15.39-28.52,21.44-20.85,7.24-49.58,11.23-80.91,11.23s-59.98-3.98-80.82-11.21c-17.37-6.02-28.29-14.2-28.6-21.39.67-7.94,14-157.47,15.72-177.3,6.37-6.37,30.14-20.91,95.48-18.91,72.13,2.21,93.63,19.61,93.88,19.75l16.98-11.55-12.38-117.42c-.91-14.04-12.92-23.77-33.91-33.43h0c-1.28-.59-2.76-.48-3.94.28l-8.63,5.58c-1.17.76-1.88,2.05-1.88,3.45v22.14c-6.08-1.56-13.19-3.4-19.85-4.35l-.52-32.33c-.05-3.02-2.31-5.55-5.31-5.93l-3.33-.42c-15.83-1.78-31.85-1.73-47.62.16l-3.82.46c-3.02.36-5.31,2.9-5.35,5.94l-.52,32.29c-6.72.99-12.86,3.08-18.9,4.68v-22.4c0-1.25-.57-2.44-1.55-3.22l-7.71-6.16c-1.22-.97-2.88-1.18-4.29-.53h0c-1.16.53-2.3,1.07-3.4,1.62-19.74,9.8-30.84,19.65-31.12,33.52l-7.12,64.63,5.48,16.43s32.05-29.18,102.06-26.35c39.67.51,59.56,11.01,59.56,11.01l11.75-15.24s-31.68-13.66-73.8-13.66c-59.49,0-86.24,15.83-86.24,15.83,0,0,5.09-51.57,5.11-51.87,0,0-.58,6.05.01-.28.87-9.26,15.42-13.93,15.42-13.93l-1.08,34.17s28.19-12.25,53.12-12.25l.6-37.37c0-2.19,30.62-2.27,30.63-.09l.6,37.39c24.34,0,53.11,11.72,53.11,11.72v-31.59s15.68,5.68,16.2,14.85l9.32,102.14c-9.24-2.87-25.63-14.19-93.35-16.33-69.08-2.19-111.82,15.96-113.22,30.02l-.45,4.28c-18.92,186.41-18.92,181.8-18.92,182.08,0,16.85,15.11,31.77,42.54,42.03,24.21,9.05,56.19,14.04,90.05,14.04s65.84-4.99,90.05-14.04c27.43-10.26,42.54-25.18,42.54-42.03,0-.3-16.02-147.42-16.02-147.42Z";
   var VB = "292.24 171.22 265.18 409.8";
 
@@ -4772,8 +4781,13 @@
     var sizes = cardSizes(p);
     if (!sizes.length) return "";       // single size: no control at all
     var cur = cardSizeIdx(p.id), open = S.cardPop === p.id;
+    /* The name reads «Объём 75 мл»: the label is a visually hidden span (the
+       card keeps its height, translateTree() still finds the word) and the
+       size the shopper can see stays part of the name — an aria-label of
+       «Объём» alone hid the visible «75 мл» from voice control (WCAG 2.5.3). */
     return '<button type="button" class="card__sizebtn" data-cardsizeopen="' + p.id + '" aria-haspopup="listbox"' +
-      ' aria-expanded="' + open + '" aria-label="' + cardSizeLabel(p) + '">' +
+      ' aria-expanded="' + open + '">' +
+      '<span class="vh">' + cardSizeLabel(p) + "</span>" +
       '<span class="card__sizelbl">' + esc(sizes[cur]) + "</span>" + '<svg class="card__chev" width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>' + "</button>";
   }
   function cardPopHTML(p) {
@@ -4801,7 +4815,7 @@
         ? '<button type="button" class="card__add card__add--notify" data-go-product="' + p.id + '">Сообщить о наличии</button>'
         // the text on wide cards, the bag icon (spec variant 2b) on a phone's
         // 155px card — CSS picks; the text stays for screen readers
-        : '<button type="button" class="card__add" data-add="' + p.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
+        : '<button type="button" class="card__add" data-add="' + p.id + '"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
       cardPopHTML(p);
   }
 
@@ -4999,7 +5013,7 @@
         '<span class="card__sp"></span>' +
         (out
           ? '<button type="button" class="card__add card__add--notify" data-go-bundle="' + b.id + '">Смотреть</button>'
-          : '<button type="button" class="card__add" data-addbundle="' + b.id + '" aria-label="В корзину"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
+          : '<button type="button" class="card__add" data-addbundle="' + b.id + '"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
       "</div>" +
       "</div>";
   }
@@ -5885,7 +5899,10 @@
             '<span class="lang__flag" data-langflag></span><span class="lang__caret" aria-hidden="true">▾</span></button>' +
             '<div class="lang__menuslot"></div></span>' +
           '<button class="iconbtn" data-go="account" aria-label="Кабинет">' + icon("user") + "</button>" +
-          '<button class="iconbtn" data-cart aria-label="Корзина">' + icon("bag") + '<span data-cartbadge></span></button>' +
+          // the name is «Корзина» + the badge's count: the count is the one
+          // visible text on this button, so it has to be part of the name
+          // (WCAG 2.5.3) — an aria-label of «Корзина» alone contradicted it
+          '<button class="iconbtn" data-cart>' + icon("bag") + '<span class="vh">Корзина</span><span data-cartbadge></span></button>' +
         "</span>" +
       "</div>" +
       '<nav class="hdr__nav" aria-label="Категории">' +
@@ -6084,7 +6101,11 @@
   // ---------- screens ----------
   function screenHome() {
     var pop = spread(8, false), fresh = spread(8, true);
-    return heroHTML() +
+    /* The page's one <h1>, unseen: the hero's slide titles are <h2>s that
+       change under the shopper, and the prerendered home (the page a crawler
+       reads) says exactly this in a visible heading. */
+    return '<h1 class="vh">' + esc(siteTitle()) + "</h1>" +
+      heroHTML() +
       /* Brand strip in place of the dots' old neighbourhood: one scrollable
          line under the hero, D-urban style — every name clickable, logos
          where the brand has one (feedback #4). */
@@ -8222,7 +8243,7 @@
     var mapOn = POINTS.view === "map";
     var ungeo = mapOn ? pointsMatching().filter(function (p) { return !pointGeo(p); }).length : 0;
     return '<div class="scrim" data-pointclose></div>' +
-      '<aside class="psheet' + (mapOn ? " psheet--map" : "") + '" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
+      '<div class="psheet' + (mapOn ? " psheet--map" : "") + '" role="dialog" aria-modal="true" aria-label="Выбор пакомата">' +
         '<div class="psheet__head"><span class="display drawer__t">' + carrierLabel() + "</span>" +
           '<button class="iconbtn" data-pointclose aria-label="Закрыть">✕</button></div>' +
         '<div class="psheet__search"><input class="input input--box" data-pointq value="' + esc(POINTS.q) +
@@ -8233,7 +8254,7 @@
           ? '<div class="psheet__map" id="pointmap"></div>' +
             (ungeo ? '<p class="psheet__maphint muted">Часть пакоматов видна только в списке — у них нет координат для карты.</p>' : "")
           : '<div class="psheet__list" id="pointlist">' + pointRows() + "</div>") +
-      "</aside>";
+      "</div>";
   }
 
   /* ---------- parcel-machine map (UX fix 8) ----------
@@ -8290,6 +8311,7 @@
     patchDelivery();
     if (S.pointOpen && POINTS.view === "map") openPointMap();
     if (focusSel) refocus(focusSel);
+    settleModalFocus();   // the sheet is modal — focus in on open, back on close
   }
   function pickPoint(p) { S.ship.point = p; S.pointOpen = false; patchDelivery(); patchSummary(); refocus("[data-pointopen]"); }
   /* Only the markers inside the current view, capped — a country's full list
@@ -8701,7 +8723,7 @@
     var summaryOpen = S.sumOpen === null ? wide() : S.sumOpen;
     return '<div class="cohdr"><div class="wrap wrap--co">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — на главную">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
-        '<span class="cohdr__t">Оформление заказа</span>' +
+        '<h1 class="cohdr__t">Оформление заказа</h1>' +
         '<span class="cohdr__langs" role="group" aria-label="Язык интерфейса">' + LANGS.map(function (l) {
           return '<button class="cohdr__lang" data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
         }).join("") + "</span>" +
@@ -9686,7 +9708,7 @@
   }
   function admMoreSheetHTML() {
     return '<button class="adm-scrim adm-scrim--phone" data-admmoreclose aria-label="Закрыть"></button>' +
-      '<div class="adm-sheet adm-sheet--phone" role="dialog" aria-label="Ещё">' +
+      '<div class="adm-sheet adm-sheet--phone" role="dialog" aria-modal="true" aria-label="Ещё">' +
         '<div class="adm-sheet__grab"><i></i></div>' +
         '<div class="adm-sheet__body">' + ADM_MORE.map(function (t) {
           // aria-current, like every other nav item: the sheet has to say
@@ -9746,13 +9768,13 @@
      the answer — has to be the only one of its kind on the page. */
   function admAsstHTML() {
     return '<button class="adm-scrim adm-scrim--phone" data-admai aria-label="Закрыть помощника"></button>' +
-      '<aside class="adm-asst" role="dialog" aria-label="Помощник">' +
+      '<div class="adm-asst" role="dialog" aria-label="Помощник">' +
         '<div class="adm-asst__head"><span>Помощник</span>' +
           '<button class="adm-asst__fold" data-admai aria-expanded="true" title="Свернуть помощника" ' +
             'aria-label="Свернуть помощника"><svg class="adm-asst__chev" width="16" height="16" ' +
             'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
             '<path d="M9 6l6 6-6 6"/></svg><span class="adm-asst__x" aria-hidden="true">×</span></button></div>' +
-        admAsstBodyHTML() + "</aside>";
+        admAsstBodyHTML() + "</div>";
   }
   function admFabHTML() {
     return '<button class="adm-fab" data-admai aria-expanded="false" title="Помощник" aria-label="Помощник">' +
@@ -9762,7 +9784,9 @@
       sheet at the bottom on a phone. Actions that touch the shop or the money
       go through this before anything happens. */
   function admConfirmHTML(a) {
-    return '<div class="adm-confirm" role="dialog" aria-label="Подтвердите изменение">' +
+    // modal: Tab stays inside, Escape is «Отмена», focus lands on the card and
+    // goes back to the control that opened it (settleModalFocus / keydown)
+    return '<div class="adm-confirm" role="dialog" aria-modal="true" aria-label="Подтвердите изменение">' +
       '<div class="adm-confirm__card">' +
         '<div class="adm-confirm__t">' + esc(a.title || "Подтвердите изменение") + "</div>" +
         '<div class="adm-confirm__d">' + esc(a.detail || actionText(a)) + "</div>" +
@@ -15599,13 +15623,15 @@
       '<button class="link drawer__cont" data-closecart>Продолжить покупки</button>';
   }
   function cartDrawer() {
+    /* <div>, not <aside>: role="dialog" is not an allowed role on <aside>
+       (axe aria-allowed-role), and the drawer is a dialog, not a sidebar. */
     return '<div class="scrim" data-closecart></div>' +
-      '<aside class="drawer drawer--right" role="dialog" aria-modal="true" aria-label="Корзина">' +
+      '<div class="drawer drawer--right" role="dialog" aria-modal="true" aria-label="Корзина">' +
       '<div class="drawer__head"><span class="display drawer__t">Корзина (' + cartCount() + ')</span>' +
       '<button class="iconbtn" data-closecart aria-label="Закрыть">✕</button></div>' +
       '<div class="drawer__body">' + cartBody() + "</div>" +
       '<div class="drawer__foot"' + (S.cart.length ? "" : " hidden") + ">" + cartFoot() + "</div>" +
-      "</aside>";
+      "</div>";
   }
 
   function filterDrawer() {
@@ -15615,7 +15641,7 @@
     function count(b) { return CATALOGUE.filter(function (p) { return (S.cat === "all" || p.cat === S.cat) && p.brand === b; }).length; }
     var inStock = CATALOGUE.filter(function (p) { return (S.cat === "all" || p.cat === S.cat) && p.stock !== "out"; }).length;
     return '<div class="scrim" data-closefilter></div>' +
-      '<aside class="drawer drawer--left" role="dialog" aria-modal="true" aria-label="Фильтры">' +
+      '<div class="drawer drawer--left" role="dialog" aria-modal="true" aria-label="Фильтры">' +
       '<div class="drawer__head"><span class="display drawer__t">Фильтры</span><button class="iconbtn" data-closefilter aria-label="Закрыть">✕</button></div>' +
       '<div class="drawer__body">' +
         '<div class="field__label">Наличие</div><label class="opt"><input type="checkbox" data-instock ' + (S.onlyInStock ? "checked" : "") + '><span>В наличии</span><span class="opt__price num opt__n">' + inStock + "</span></label>" +
@@ -15625,7 +15651,7 @@
         }).join("") +
       "</div>" +
       '<div class="drawer__foot"><button class="btn btn--wide" data-closefilter data-showbtn>' + showLabel() + "</button>" +
-      '<button class="link drawer__cont" data-clearfilter="keep">Сбросить</button></div></aside>';
+      '<button class="link drawer__cont" data-clearfilter="keep">Сбросить</button></div></div>';
   }
   /* The whole label is patched, not just the number — «Показать 1 товаров» was
      what you got when only the count was swapped in place. */
@@ -15731,8 +15757,13 @@
   var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
   var GIFT_DESC = "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
   var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
+  /** The shop's own title in the current language — the <title> of every
+      screen that has no better one, and the home page's hidden <h1>. */
+  function siteTitle() {
+    return { RU: "REMPIRE — магазин косметики в Таллинне", ET: "REMPIRE — kosmeetikapood Tallinnas", EN: "REMPIRE — grooming shop in Tallinn" }[S.lang];
+  }
   function setHead() {
-    var base = { RU: "REMPIRE — магазин косметики в Таллинне", ET: "REMPIRE — kosmeetikapood Tallinnas", EN: "REMPIRE — grooming shop in Tallinn" }[S.lang];
+    var base = siteTitle();
     var buy = { RU: "купить в Rempire", ET: "osta Rempire'ist", EN: "buy at Rempire" }[S.lang];
     var t = base, d = "";
     /* A prerendered page ships JSON-LD describing itself — a breadcrumb, a
@@ -16114,6 +16145,8 @@
     // UX fix 8: #pointmap is a brand-new node after every render() — (re)bind
     // Leaflet to it whenever the picker is open in map view
     if (S.screen === "checkout" && S.pointOpen && POINTS.view === "map") openPointMap();
+    // a modal that this paint opened takes the focus; one it closed gives it back
+    settleModalFocus();
   }
 
   /* render() itself coalesces into at most one rebuild per animation frame.
@@ -18795,22 +18828,66 @@
     if (e.key === "Escape") {
       if (S.pointOpen) { S.pointOpen = false; repaintPicker("[data-pointopen]"); }
       else if (S.cartOpen || S.filterOpen) { closeDrawers(); }
+      // the admin confirm card: Escape is «Отмена» — nothing is applied
+      else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
+      // the phone's «Ещё» sheet
+      else if (S.admMore) { S.admMore = false; render(); }
       else if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
     }
-    // drawers declare aria-modal — keep Tab inside them
-    if (e.key === "Tab" && (S.cartOpen || S.filterOpen)) {
-      var drawer = ovl.querySelector(".drawer");
-      if (!drawer) return;
-      var focusables = drawer.querySelectorAll("button, input, select, a[href]");
+    // every open modal dialog — the drawers, the parcel-machine sheet, the
+    // admin confirm card, the phone's «Ещё» sheet — keeps Tab inside itself
+    if (e.key === "Tab") {
+      var modal = topModal();
+      if (!modal) return;
+      var focusables = modalFocusables(modal);
       if (!focusables.length) return;
       var first = focusables[0], last = focusables[focusables.length - 1];
-      var inside = drawer.contains(document.activeElement);
+      var inside = modal.contains(document.activeElement);
       if (!inside) { e.preventDefault(); first.focus(); }
       else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
   });
+
+  /* ---------- modal dialogs: focus in, focus back, Tab stays inside ----------
+     Anything rendered with role="dialog" aria-modal="true" is modal for real:
+     the drawers (their own slot), the parcel-machine sheet and the admin
+     confirm card (in the body), the phone's «Ещё» sheet. The topmost is the
+     last one in document order — the overlay slot comes after the body. */
+  function topModal() {
+    var all = document.querySelectorAll('[role="dialog"][aria-modal="true"]');
+    return all.length ? all[all.length - 1] : null;
+  }
+  function modalFocusables(modal) {
+    var list = modal.querySelectorAll("button, input, select, textarea, a[href], [tabindex]");
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var el = list[i];
+      if (el.disabled || el.getAttribute("tabindex") === "-1" || (el.closest && el.closest("[hidden]"))) continue;
+      if (!el.getClientRects().length) continue;   // display:none, or inside one
+      out.push(el);
+    }
+    return out;
+  }
+  var modalReturnFocus = null;
+  /** After a paint: a modal that has just appeared takes the focus (its first
+      control, unless something inside it is focused already — the drawers
+      place their own), and when the last one is gone the focus goes back to
+      the control it came from, if that is still on the page. */
+  function settleModalFocus() {
+    var modal = topModal();
+    if (modal) {
+      if (modal.contains(document.activeElement)) return;
+      if (!modalReturnFocus) modalReturnFocus = document.activeElement;
+      var target = modalFocusables(modal)[0];
+      if (target) target.focus();
+    } else if (modalReturnFocus) {
+      var back = modalReturnFocus;
+      modalReturnFocus = null;
+      if (back && back.focus && document.contains(back)) back.focus();
+    }
+  }
 
   // ---------- logo motion ----------
   /* The mark draws itself once per session, then answers taps. Kept short and
@@ -18942,8 +19019,11 @@
     var el = document.createElement("button");
     el.className = "intro";
     el.type = "button";
-    el.setAttribute("aria-label", "Пропустить заставку");
-    el.innerHTML = towerDraw() + '<div class="intro__word">Rempire</div>';
+    // the visible word opens the name (WCAG 2.5.3 — an aria-label used to
+    // replace it); what the tap does follows, unseen and translated
+    el.innerHTML = towerDraw() + '<div class="intro__word">Rempire</div>' +
+      '<span class="vh">Пропустить заставку</span>';
+    translateTree(el);
     document.body.appendChild(el);
     try { sessionStorage.setItem("rempire-intro", "1"); } catch (e) {}
     var kill = function () {

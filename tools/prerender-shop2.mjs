@@ -369,20 +369,40 @@ function priceLabel(p, t) {
 }
 function imgUrl(p) { return abs(String(p.img).split("?")[0]) + "?v=" + encodeURIComponent(String(p.img).split("?v=")[1] || "1"); }
 
+/* How the i-th picture of a list loads. A page's first row is on screen
+   before app.js has even arrived, and the shop's own render then paints the
+   very same files as CSS backgrounds — so the first four (two phone rows)
+   are asked for at once and only the rest lazily: `loading="lazy"` on the
+   first picture is what Lighthouse calls out as the LCP image being
+   lazy-loaded, and with every picture lazy Chrome's first paint of the
+   static page waited for the scripts (home FCP 5.2 s → 0.9 s, mobile
+   Lighthouse, once the first row loaded eagerly). No fetchpriority="high"
+   on them: the shop paints nothing until every script has arrived, so the
+   scripts are the ones that must not queue behind pictures — a hint on the
+   scripts themselves measured worse still. `i` undefined (a shelf under a
+   product or a post, below the fold) = lazy. The home grid's first row is
+   eager too, which the shell every other route falls back to pays for with
+   four small revalidated pictures on a cold load. */
+function imgLoad(i) {
+  return i < 4 ? "" : ' loading="lazy"';
+}
+
 /* One product tile. An <a>, not a button: this is the only path a crawler has
    from a category to the 220 product pages. */
-function card(p, seg, code, t) {
+function card(p, seg, code, t, i) {
   const name = tr(p.name, code, true);
   return '<li><a class="pre__card" href="' + href(seg, "/p/" + encodeURIComponent(p.id) + "/") + '">' +
-    '<img class="pre__img" src="' + esc(p.img) + '" alt="' + esc(p.brand + " " + name) + '" loading="lazy" width="400" height="400">' +
+    '<img class="pre__img" src="' + esc(p.img) + '" alt="' + esc(p.brand + " " + name) + '"' + imgLoad(i) + ' width="400" height="400">' +
     '<span class="pre__brand">' + esc(p.brand) + "</span>" +
     '<span class="pre__nm">' + esc(name) + "</span>" +
     '<span class="pre__pr num">' + esc(priceLabel(p, t)) + "</span>" +
     "</a></li>";
 }
 
-function grid(list, seg, code, t) {
-  return '<ul class="grid" style="list-style:none;padding:0">' + list.map(p => card(p, seg, code, t)).join("") + "</ul>";
+/* `eager`: this grid is the page's first screen (a category or brand page),
+   so its first row loads at once — see imgLoad(). */
+function grid(list, seg, code, t, eager) {
+  return '<ul class="grid" style="list-style:none;padding:0">' + list.map((p, i) => card(p, seg, code, t, eager ? i : undefined)).join("") + "</ul>";
 }
 
 /* «Mardi 1, 10145 Tallinn» → the three fields schema.org wants. One address
@@ -600,7 +620,8 @@ function productPage(p, lang) {
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<div class="pdp">' +
       "<div>" +
-        '<img class="pre__img" src="' + esc(p.img) + '" alt="' + esc(core) + '" width="800" height="800">' +
+        // the product photo is the page's LCP: asked for first, at high priority
+        '<img class="pre__img" src="' + esc(p.img) + '" alt="' + esc(core) + '" fetchpriority="high" width="800" height="800">' +
       "</div>" +
       "<div>" +
         '<a class="pre__brand" href="' + href(seg, "/b/" + BRAND_SLUG.get(p.brand) + "/") + '">' + esc(p.brand) + "</a>" +
@@ -643,7 +664,7 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
       '<p class="sec__intro">' + esc(desc) + "</p>" +
-      grid(list, seg, code, t) +
+      grid(list, seg, code, t, true) +
     "</section>" +
     langNav(seg, rest, t) +
     "</div>";
@@ -688,7 +709,7 @@ function homePage(lang) {
       '<h2 class="display h1" style="font-size:13px;letter-spacing:.18em">' + esc(t.brandsTitle) + "</h2>" +
       '<ul class="pre__list">' + BRANDS.map(b => '<li><a href="' + href(seg, "/b/" + BRAND_SLUG.get(b) + "/") + '">' +
         esc(b) + "</a></li>").join("") + "</ul>" +
-      grid(featured, seg, code, t) +
+      grid(featured, seg, code, t, true) +
     "</section>" +
     langNav(seg, rest, t) +
     "</div>";
@@ -857,7 +878,7 @@ function infoPage(slug, lang) {
 function setThumbs(b, alt) {
   return (b.images || []).slice(0, 3).map((src, i) =>
     '<img class="pre__img" src="' + esc(src) + '" alt="' + esc(alt) + '"' +
-      (i ? ' loading="lazy"' : "") + ' width="400" height="400" style="max-width:220px">').join("");
+      (i ? ' loading="lazy"' : ' fetchpriority="high"') + ' width="400" height="400" style="max-width:220px">').join("");
 }
 
 function setPrice(b, t) {
@@ -951,11 +972,11 @@ function setsPage(lang) {
   const heading = tr("Наборы", code, false);
   const crumbItems = [[t.home, langPath(seg, "/")], [heading, null]];
 
-  const cards = BUNDLES.map(b => {
+  const cards = BUNDLES.map((b, i) => {
     const title = bundleText(b, "title", code);
     return '<li><a class="pre__card" href="' + href(seg, "/set/" + encodeURIComponent(b.id) + "/") + '">' +
       '<img class="pre__img" src="' + esc((b.images || [])[0] || "") + '" alt="' + esc(title) +
-        '" loading="lazy" width="400" height="400">' +
+        '"' + imgLoad(i) + ' width="400" height="400">' +
       '<span class="pre__brand">' + esc(tr("Набор", code, false)) + " · −" + b.pct + " %</span>" +
       '<span class="pre__nm">' + esc(title) + "</span>" +
       '<span class="pre__pr num">' + esc(eur(b.price)) + ' <s class="bwas">' + esc(eur(b.sum)) + "</s></span>" +
@@ -1056,13 +1077,13 @@ function giftPage(lang) {
 
 const dmy = iso => String(iso || "").slice(0, 10).split("-").reverse().join(".");
 
-function blogTile(post, seg, code, t) {
+function blogTile(post, seg, code, t, i) {
   const title = pickLang(post.title, code) || post.slug;
   const excerpt = pickLang(post.excerpt, code);
   const rest = "/blog/" + encodeURIComponent(post.slug) + "/";
   return '<li><a class="pre__card blog__tile" href="' + href(seg, rest) + '">' +
     (post.coverUrl
-      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" loading="lazy" width="400" height="400">'
+      ? '<img class="pre__img" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '"' + imgLoad(i) + ' width="400" height="400">'
       : "") +
     '<span class="pre__nm">' + esc(title) + "</span>" +
     (post.publishedAt ? '<span class="muted blog__date">' + dmy(post.publishedAt) + "</span>" : "") +
@@ -1109,7 +1130,7 @@ function blogListPage(lang) {
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
       (BLOG_POSTS.length
-        ? '<ul class="grid blog__grid" style="list-style:none;padding:0">' + BLOG_POSTS.map(p => blogTile(p, seg, code, t)).join("") + "</ul>"
+        ? '<ul class="grid blog__grid" style="list-style:none;padding:0">' + BLOG_POSTS.map((p, i) => blogTile(p, seg, code, t, i)).join("") + "</ul>"
         : '<p class="muted">' + esc(t.blogEmpty) + "</p>") +
     "</section>" +
     langNav(seg, rest, t) +
@@ -1176,7 +1197,7 @@ function blogPostPage(post, lang) {
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
     '<article class="sec blog__post blog__read">' +
       (post.coverUrl
-        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" width="1200" height="630">'
+        ? '<img class="pre__img blog__cover" src="' + esc(post.coverUrl) + '" alt="' + esc(pickLang(post.coverAlt, code) || title) + '" fetchpriority="high" width="1200" height="630">'
         : "") +
       '<h1 class="display h1">' + esc(title) + "</h1>" +
       (post.publishedAt ? '<p class="muted blog__date">' + dmy(post.publishedAt) + "</p>" : "") +

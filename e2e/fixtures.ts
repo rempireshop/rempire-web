@@ -154,7 +154,9 @@ export async function payOrder(page: Page, email: string, outcome: "paid" | "fai
   // Card — the only payment method with no further sub-choice (bank links
   // show a chip row; card does not).
   await page.locator('input[data-paym="1"]').check();
-  await page.locator(".co__pay[data-pay]").click();
+  // `[data-pay]` twice in the markup: `.co__pay` in the summary column (hidden
+  // under 768px) and the phone's sticky bar — whichever this viewport shows.
+  await page.locator("[data-pay]:visible").first().click();
   await page.waitForURL(/\/api\/payments\/mock\//);
   await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Отменить" }).click();
   await page.waitForURL(new RegExp(`/shop2.*/done/\\?.*s=${outcome}`));
