@@ -1,6 +1,18 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
-import { continueButton, freshEmail, ipHeaders, LANGS, loginAsAdmin, PRODUCT, shopUrl, waitForScreen } from "./fixtures";
+import {
+  continueButton,
+  freshEmail,
+  functionalProject,
+  ipHeaders,
+  LANGS,
+  loginAsAdmin,
+  openSummary,
+  payButton,
+  PRODUCT,
+  shopUrl,
+  waitForScreen,
+} from "./fixtures";
 
 /** The e2e-only admin lookup (src/app/api/e2e/gift-card/route.ts), in its own
  *  throwaway browser context so it never touches the customer `page`'s
@@ -54,7 +66,7 @@ async function payDigitalOrder(page: Page, buyerEmail: string, recipientEmail: s
 
   await continueButton(page, 3).click();
   await page.locator('input[data-paym="1"]').check();
-  await page.locator(".co__pay[data-pay]").click();
+  await payButton(page).click();
   await page.waitForURL(/\/api\/payments\/mock\//);
   await page.getByRole("link", { name: "Оплатить" }).click();
   await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
@@ -70,7 +82,7 @@ async function payDigitalOrder(page: Page, buyerEmail: string, recipientEmail: s
  * discount. Desktop only — see docs/testing.md.
  */
 test.beforeEach(async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+  test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
 });
 
 for (const [i, lang] of LANGS.entries()) {
@@ -111,6 +123,7 @@ for (const [i, lang] of LANGS.entries()) {
       await page.locator("[data-email]").fill(freshEmail(`redeem-${lang.code}`));
       await continueButton(page, 2).click();
 
+      await openSummary(page); // folded on a phone
       await page.locator("[data-promo]").fill(giftCode);
       await page.locator("[data-applypromo]").click();
       await expect(page.locator("[data-giftoff]")).toBeVisible();

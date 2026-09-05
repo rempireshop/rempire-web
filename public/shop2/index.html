@@ -83,6 +83,16 @@
      the stylesheet rather than after it; the other weights and scripts come
      on demand from the same rules. Keep these four URLs in step with
      styles.css. -->
+<!-- Cloudflare Web Analytics — traffic overview beacon, docs/analytics.md.
+     CF_BEACON_TOKEN is a placeholder for the integrator: Cloudflare dashboard
+     → Web Analytics → Add site → rempireshop.com → copy the token → replace
+     CF_BEACON_TOKEN below with it. app.js (mountCfBeacon) reads this tag and
+     adds the beacon <script> only with a real token AND only on
+     rempireshop.com: with the placeholder, or on localhost / a preview host,
+     nothing is loaded at all — Cloudflare refuses a report from an
+     unregistered origin anyway, and Safari turns that refusal into a script
+     error on every page. Allowed by next.config.ts's CSP for /shop2/* only. -->
+<meta name="cf-beacon" content="CF_BEACON_TOKEN">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExN8hA.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExd8hLxR.woff2">
@@ -120,17 +130,6 @@
 <script src="/shop/legal.en.js?v=i18n63"></script>
 <script src="/shop2/app.js?v=i18n63"></script>
 <script src="/shop2/chat.js?v=i18n63" defer></script>
-<!-- Cloudflare Web Analytics — traffic overview beacon, docs/analytics.md.
-     Kept inside this comment until the site is registered: with the
-     CF_BEACON_TOKEN placeholder the script still loaded on every page and its
-     report was refused by cloudflareinsights.com (a CORS error in every
-     console, and a Lighthouse best-practices mark against it) while
-     collecting nothing. To turn it on: Cloudflare dashboard → Web Analytics →
-     Add site → rempireshop.com → copy the token → paste it over
-     CF_BEACON_TOKEN and move the tag out of this comment (the prerender
-     copies this whole block onto every generated page). Already allowed by
-     next.config.ts's CSP for /shop2/* only.
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "CF_BEACON_TOKEN"}'></script>
--->
+
 </body>
 </html>

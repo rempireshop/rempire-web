@@ -4674,6 +4674,32 @@
   // this closure any other way — one deliberate, narrow bridge.
   window.__rmpTrack = track;
 
+  /* Cloudflare Web Analytics (docs/analytics.md). The token sits in a <meta
+     name="cf-beacon"> in index.html — the integrator pastes it there — and
+     the beacon <script> is added from here rather than written into the
+     shell, because it must only run where Cloudflare will accept the report:
+     a real token, on rempireshop.com. The placeholder, localhost and a
+     preview host all stay silent. WebKit reports the CORS refusal of a
+     report from anywhere else as an uncaught error ("XMLHttpRequest cannot
+     load … due to access control checks") — a script error on every page
+     for every iPhone on staging, and one the e2e sweep's watchdog
+     (e2e/sweep-shop-helpers.ts) is right to fail on. */
+  function mountCfBeacon() {
+    try {
+      var meta = document.querySelector('meta[name="cf-beacon"]');
+      var token = meta ? String(meta.getAttribute("content") || "").trim() : "";
+      if (!token || token === "CF_BEACON_TOKEN") return;
+      if (!/(^|\.)rempireshop\.com$/.test(location.hostname)) return;
+      if (document.querySelector('script[src^="https://static.cloudflareinsights.com/"]')) return;
+      var s = document.createElement("script");
+      s.defer = true;
+      s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+      s.setAttribute("data-cf-beacon", JSON.stringify({ token: token }));
+      document.head.appendChild(s);
+    } catch (e) { /* analytics must never be why the shop failed to boot */ }
+  }
+  mountCfBeacon();
+
   /* "view" (whatever screen this is) plus "product" when it is a product
      page — called once per real navigation from go(), from the popstate
      handler and once at boot, never from render() itself (render() also
@@ -5352,9 +5378,24 @@
       }));
     } catch (e) {}
   }
+  /* Safari: a fetch issued while the browser is already leaving the page —
+     between the tap on a link (or a typed address) and the next document
+     taking over — is refused with «Fetch API cannot load … due to access
+     control checks» and logged as an uncaught error, even though the
+     promise's own catch runs. The blog prefetches run on idle or after a
+     delay, exactly the window in which a shopper taps away from a page that
+     has only just loaded, so they check this flag first. beforeunload (not
+     unload, which would cost Safari its back/forward cache) fires the moment
+     a navigation starts; pageshow clears it for a page restored from that
+     cache. Chromium never logs the refused fetch — the e2e sweep found it on
+     --project=mobile-safari only. */
+  var leaving = false;
+  window.addEventListener("beforeunload", function () { leaving = true; });
+  window.addEventListener("pageshow", function () { leaving = false; });
   function blogIdle(fn) {
-    if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 2500 });
-    else setTimeout(fn, 600);
+    var run = function () { if (!leaving) fn(); };
+    if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 2500 });
+    else setTimeout(run, 600);
   }
   function blogSaveData() {
     var c = navigator.connection;
@@ -5367,6 +5408,7 @@
     var have = S.blogLists[lang];
     if (blogFresh(have)) return Promise.resolve(have);
     if (BLOG_INFLIGHT[key]) return BLOG_INFLIGHT[key];
+    if (leaving) return Promise.resolve(have);   // see blogIdle()
     var p = fetch("/api/blog/?lang=" + lang + "&page=1")
       .then(function (r) { return r.json(); })
       .then(function (j) {
@@ -5409,6 +5451,7 @@
     var have = S.blogPosts[key];
     if (blogFresh(have)) return Promise.resolve(have);
     if (BLOG_INFLIGHT[key]) return BLOG_INFLIGHT[key];
+    if (leaving) return Promise.resolve(have);   // see blogIdle()
     function onScreen() { return S.screen === "blogpost" && S.blogSlug === slug && S.lang === lang; }
     var p = fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + lang)
       .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })

@@ -9,12 +9,13 @@ file for what moved there instead of into a browser test and why.
 ## Running it locally
 
 ```bash
-npx playwright install chromium   # once, or after a Playwright version bump
-npm run e2e                       # build, then run the whole suite (Chromium, 3 viewports)
+npx playwright install chromium webkit   # once, or after a Playwright version bump
+npm run e2e                       # build, then run the whole suite (Chromium, 3 viewports + mobile Safari)
 npm run e2e:ui                    # same, in Playwright's interactive UI mode
 npm run e2e:update                # same, and rewrite the visual baselines
 npx playwright test e2e/checkout.spec.ts        # one file
 npx playwright test --project=mobile            # one viewport
+npx playwright test --project=mobile-safari     # the storefront on WebKit, iPhone 13 profile
 npx playwright show-report                      # open the last HTML report
 ```
 
@@ -25,11 +26,12 @@ packers that `next build`'s own `prebuild` hook would otherwise run, then
 `playwright test` starts the app itself via `webServer` in
 `playwright.config.ts` — `next dev`, deliberately, not `next build` + `next
 start`; both files' own comments have the full story, short version in "The
-test-only doors" below. WebKit is not installed on this machine
-(`npx playwright install webkit` would add it); the config adds a
-`webkit-local` project automatically when it detects it is, so
-`npx playwright test --project=webkit-local` works the moment it exists —
-CI stays Chromium-only regardless (`.github/workflows/ci.yml`).
+test-only doors" below. WebKit is a one-time `npx playwright install
+webkit` away: the permanent `mobile-safari` project runs the storefront on
+it (see "Safari" below — and CI's `safari` job does the same on every
+push), and the config also adds a `webkit-local` project (Desktop Safari,
+every spec) whenever it finds the browser installed, for poking at
+something by hand.
 
 Nothing is left running afterwards and nothing is written outside this repo:
 the database is in memory, the app runs on port 3417 (picked to stay clear of
@@ -181,6 +183,69 @@ ET only rather than trilingual to keep that from tripling again on top.
 control* on a phone (a sticky bottom bar and an «Ещё» sheet) than on a laptop
 (a foldable sidebar), and the owner's own machine is the phone — so that one
 runs on desktop and mobile, and only that one among the admin specs.
+
+The guard is `functionalProject(testInfo)` in `e2e/fixtures.ts` now, not a
+literal `!== "desktop"`: it lets `desktop` and `mobile-safari` through.
+Safari is a different *engine*, not a fourth viewport, and the bugs it finds
+(next section) are exactly the kind that do not show on Chromium at any
+width — so the functional storefront specs run there too, once, on the
+iPhone profile.
+
+## Safari
+
+`--project=mobile-safari` (`playwright.config.ts`) is `devices["iPhone 13"]`
+left on its own `defaultBrowserType` — WebKit, 390×664, touch, the iOS user
+agent — scoped by `testMatch` to the customer-facing specs a phone matters
+for: catalogue, product, checkout, home, blog, sets, gift card, account, PWA,
+the storefront sweep and the checkout sweep's one phone-layout test. The
+admin stays Chromium-only. It is a permanent project, not gated on the
+browser being installed like `webkit-local`: a project that vanished when
+WebKit was missing would hide exactly the failures it exists to find. The
+three Chromium shards in CI therefore name their projects explicitly, and a
+separate `safari` job installs WebKit and runs this one project
+(`.github/workflows/ci.yml`). Locally it is ~17 minutes; run the file you are
+working on.
+
+Four things were wrong on WebKit and right on Chromium, all fixed in the
+app, none by loosening a test:
+
+- **`content-visibility: auto` on `.card`** (styles.css). WebKit renders
+  even on-screen cards lazily, so a tap right after a scroll landed on a row
+  still being swapped from its 340 px placeholder to its real ~280 px and hit
+  the section behind the card; and a card whose button had just lost focus
+  (WebKit blurs a focused button on the next mousedown) was skipped for one
+  frame, so the mouseup of that very tap found nothing — the size listbox
+  would not reopen, the product title beside it did not open the product.
+  The rule is now gated to engines other than WebKit (`@supports … and (not
+  (-webkit-nbsp-mode: space))`); Chrome keeps the optimisation.
+- **The returning header ate the tap** (styles.css). On a phone the header
+  slides away on scroll-down and back on scroll-up, over 220 ms. WebKit's
+  `scrollIntoView` aligns to the nearest edge (Chromium centres), so a button
+  scrolled into view sat at the very top — the mousedown hit it, the mouseup
+  hit the header arriving over it: «В корзину» did nothing. `html {
+  scroll-padding: … }` below 768 px keeps anything scrolled into view below
+  the header's landing zone and above the bottom nav.
+- **The Cloudflare beacon** (index.html, app.js, docs/analytics.md). The
+  placeholder-token `<script>` in the shell posted to cloudflareinsights.com
+  from every host, and WebKit reports that CORS refusal as an uncaught page
+  error — on every screen. The token now lives in `<meta name="cf-beacon">`
+  and `mountCfBeacon()` adds the script only with a real token, only on
+  rempireshop.com.
+- **A prefetch during navigation** (app.js). WebKit has no
+  `requestIdleCallback`, so the blog prefetch fired 600 ms after boot — and a
+  fetch issued while the browser is already leaving the page is logged as
+  «Fetch API cannot load … due to access control checks», an uncaught error
+  even though the promise is caught. A `leaving` flag set on `beforeunload`
+  now skips the delayed prefetches.
+
+Three specs also assumed the laptop layout, which is not a bug in either
+engine — the phone simply has different controls — so `e2e/fixtures.ts`
+grew three viewport-aware helpers: `searchFor()` (the header field on a
+laptop, the bottom nav's «Поиск» tab and the search screen's own box on a
+phone), `payButton()` (`.co__pay` in the summary vs. the sticky bar's twin)
+and `openSummary()` (the checkout summary is a `<details>` folded on a
+phone). The sets spec reaches «Настройки» through the phone's «Ещё» sheet the
+same way `admin-sections.spec.ts` does.
 
 ## Visual snapshots
 
@@ -593,7 +658,7 @@ bytes, same rule as the body.
 | --- | --- |
 | `playwright.config.ts` | Projects, `webServer`, screenshot config — read its own comments first |
 | `e2e/env.mjs` | Port, base URL, fixed test admin password + its hash |
-| `e2e/fixtures.ts` | Shared constants/helpers every spec imports: `LANGS`, `PRODUCT`/`PRODUCT_2`/`BUNDLE`, `waitForScreen`, `loginAsAdmin`, `ipHeaders`, `tr()` (the RU→ET/EN dictionary lookups actually used, copied verbatim from `app.js`'s own `UI` table — see that file's own comment before adding to it) |
+| `e2e/fixtures.ts` | Shared constants/helpers every spec imports: `LANGS`, `PRODUCT`/`PRODUCT_2`/`BUNDLE`, `waitForScreen`, `loginAsAdmin`, `ipHeaders`, `tr()` (the RU→ET/EN dictionary lookups actually used, copied verbatim from `app.js`'s own `UI` table — see that file's own comment before adding to it), `functionalProject()` and the viewport-aware `searchFor()` / `payButton()` / `openSummary()` (see "Safari") |
 | `e2e/*.spec.ts` | One file per area of the task brief — each has its own top-of-file comment for anything not obvious from this document |
 | `e2e/scanner-app.spec.ts` | The standalone scanner route `/shop2/scan/`, desktop + mobile — see below |
 | `e2e/sweep-helpers.ts` | The admin sweep's watchdog (`assertClean`), seeded PRNG and admin plumbing — not a spec file |
@@ -611,7 +676,7 @@ bytes, same rule as the body.
 | `e2e/admin-sections.spec.ts` | The six «Ещё» sections after the phase-3 redesign: every one drawing on desktop **and** on a phone with no page error and no sideways scroll, plus one real action each — approve a Pro request from the row, publish a review with its undo, create a promo code, switch a gift denomination on and see it on `/gift/`, save a letter's subject, publish a post, change a tariff through the confirm card and take it back from the journal — see above |
 | `e2e/blog.spec.ts` | The storefront blog, desktop **and** mobile: tiles show the pointer, an article's crumbs start where the listing's do and its product cards keep their foot row whole (ET), and home → Blog → article paints from the idle prefetch / sessionStorage while `/api/blog/` is held for 4 s (docs/blog.md «Откуда берутся данные») |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
-| `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the e2e suite sharded into 3 parallel jobs (each with its own server and database); see its own comments |
+| `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the Chromium e2e suite sharded into 3 parallel jobs (each with its own server and database), and the `safari` job running `--project=mobile-safari` on WebKit; see its own comments |
 
 ## Фаззинг API (`tests/fuzz-*.test.ts`)
 

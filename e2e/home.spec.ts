@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ipHeaders, LANGS, shopUrl, tr, waitForScreen } from "./fixtures";
+import { functionalProject, ipHeaders, LANGS, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /**
  * Home: hero, rails, sets rail, the gift-card block, the blog label, the
@@ -7,7 +7,7 @@ import { ipHeaders, LANGS, shopUrl, tr, waitForScreen } from "./fixtures";
  * Desktop only — see docs/testing.md "Why most specs run on desktop only".
  */
 test.beforeEach(async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+  test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
 });
 test.use({ extraHTTPHeaders: ipHeaders(10) });
 

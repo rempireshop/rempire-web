@@ -104,6 +104,8 @@ export function renderGiftCard(card: GiftCardLike, lang: Lang | string = "ru"): 
   const t = T[L];
 
   const amount = money(num(card.amount, 0));
+  // the HTML part keeps "50 €" on one line; the subject and text keep the plain gap
+  const amountHtml = money(num(card.amount, 0), true);
   const code = pick(card.code, "").toUpperCase();
   const r = card.recipient ?? {};
   const name = pick(r.name);
@@ -111,7 +113,7 @@ export function renderGiftCard(card: GiftCardLike, lang: Lang | string = "ru"): 
   const message = pick(r.message);
   const shopUrl = absUrl("/shop2/", "/shop2/");
 
-  const lead = from ? t.lead(esc(from), amount) : t.leadNoFrom(amount);
+  const lead = from ? t.lead(esc(from), amountHtml) : t.leadNoFrom(amountHtml);
 
   const body =
     rowTitle(t.title) +

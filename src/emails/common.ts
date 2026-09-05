@@ -103,7 +103,9 @@ export function itemsBlock(
     count += qty;
     const label = itemLabel(it, lang);
     lines.push({
-      label: esc(label).replace(/ · /g, "&nbsp;·&nbsp;"),
+      // the dots and the "2 шт" tail must not wrap on their own: the unit
+      // alone on the next line reads like a lost word at 360 px
+      label: esc(label).replace(/ · /g, "&nbsp;·&nbsp;").replace(/ (\S+)$/, "&nbsp;$1"),
       value: money(value, true),
     });
     text.push(`  ${label} — ${money(value)}`);

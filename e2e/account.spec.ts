@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { freshEmail, ipHeaders, LANGS, payOrder, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+import { freshEmail, functionalProject, ipHeaders, LANGS, payOrder, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /**
  * Account: request code → login with the exposed code → order list shows the
@@ -13,7 +13,7 @@ import { freshEmail, ipHeaders, LANGS, payOrder, PRODUCT, shopUrl, tr, waitForSc
  * via page.waitForResponse, and type it into the same field a person would.
  */
 test.beforeEach(async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+  test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
 });
 
 for (const [i, lang] of LANGS.entries()) {

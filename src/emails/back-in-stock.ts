@@ -115,7 +115,7 @@ export function renderBackInStock(
   const body =
     rowTitle(t.title) +
     rowLead(`${esc(c.hello)} ${mailTextHtml("back-in-stock", L, "intro", values)}`) +
-    rowPanel(t.label, esc(title), esc(t.restock), true) +
+    rowPanel(t.label, esc(title).replace(/ €/g, "&nbsp;€"), esc(t.restock), true) +
     rowButton(url, t.cta) +
     rowNote([mailTextHtml("back-in-stock", L, "signature", values)]);
 

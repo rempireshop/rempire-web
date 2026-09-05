@@ -1518,6 +1518,16 @@ body:has(.drawer) #rempire-feedback { display: none; }
   .hdr { transition: transform .22s var(--ease), background .25s var(--ease); will-change: transform; }
   html[data-hidenav] .hdr { transform: translateY(-100%); }
   html[data-hidenav] .subcats { top: 0; }
+
+  /* Anything the browser scrolls into view — focus(), an anchor, a script —
+     lands below the header's return path and above the bottom nav, never
+     under either. The header comes back on any scroll-up and slides over
+     the top edge for 220ms; a tap target parked exactly there (WebKit aligns
+     scrollIntoView to the nearest edge where Chromium centres) took the
+     mousedown and lost the mouseup to the arriving header — «В корзину»
+     silently did nothing on --project=mobile-safari. --hdrh is measured by
+     measureHdr() in app.js; the fallback is the header's usual height. */
+  html { scroll-padding: calc(var(--hdrh, 160px) + 8px) 0 calc(var(--bottomnav-h) + 8px); }
 }
 
 /* ---------- fluidity ---------- */
@@ -1527,9 +1537,19 @@ button, a, summary, label { touch-action: manipulation; }
    page (or to iOS's back-swipe) */
 .brandstrip__row, .subcats, .hdr__nav { overscroll-behavior-x: contain; }
 /* long grids: let the browser skip layout and paint of offscreen cards —
-   the single biggest win for scroll on a phone. Safari 18+/Chrome; older
-   engines simply ignore it. */
-@supports (content-visibility: auto) {
+   the single biggest win for scroll on a phone. Chrome/Firefox only; older
+   engines simply ignore it, and WebKit is kept out on purpose. Safari's
+   content-visibility (18 through 26, seen on Playwright's WebKit 26.5) is not
+   safe under a finger: it renders even on-screen cards lazily, so a tap that
+   lands right after a scroll sits on a row still being swapped from the 340px
+   placeholder to its real ~280px and ends up on the section behind the card;
+   and a card whose button just lost focus (WebKit blurs a focused button on
+   the next mousedown) is skipped for one frame, so the mouseup of that very
+   tap finds nothing — the size listbox would not reopen and a product title
+   next to it did not open the product. Both showed up in e2e/catalogue.spec.ts
+   and e2e/home.spec.ts on --project=mobile-safari. -webkit-nbsp-mode is a
+   WebKit-only property, i.e. the second clause is a Safari gate. */
+@supports (content-visibility: auto) and (not (-webkit-nbsp-mode: space)) {
   .card { content-visibility: auto; contain-intrinsic-size: auto 340px; }
 }
 

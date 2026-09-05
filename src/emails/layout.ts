@@ -15,7 +15,21 @@
  *  - EVERY element that sets a colour also sets a background colour, so a
  *    client that force-inverts the letter can never land dark-on-dark;
  *  - absolute URLs built from PUBLIC_BASE_URL — a relative src is a broken
- *    image in every mail client there is.
+ *    image in every mail client there is;
+ *  - the logo is the tower on an OPAQUE white tile (public/brand/
+ *    tower-email.png, 78×112 for a 39×56 slot): a dark-mode client paints
+ *    the card near-black and a transparent PNG of a dark tower vanishes;
+ *  - buttons are the hybrid kind: padding on the <a> (44 px+ of clickable
+ *    face everywhere that honours it) and mso-padding-alt on the cell for
+ *    Outlook, which ignores padding on an inline element;
+ *  - nothing that has to stay on one line — "2 шт", "34,90 €", the dots
+ *    between a title and its size — is allowed to wrap at 360 px (&nbsp;
+ *    joiners). The one thing left to the client is an order number inside
+ *    the owner's own intro sentence: that is his text, and it reaches the
+ *    letter verbatim (texts.ts) — no markup is ever woven into it.
+ *
+ * tests/emails-compat.test.ts holds every letter to these rules;
+ * tools/render-emails.mjs renders them to disk and screenshots them.
  */
 
 import type { Lang } from "./types";
@@ -309,6 +323,8 @@ function darkCss(): string {
     [".em-btn-a", `color:${D.btnInk} !important;`],
     [".em-hr", `border-color:${D.line} !important;`],
     [".em-link", `color:${D.muted} !important;`],
+    // the boxed code panel keeps its 2px frame visible on a dark card
+    [".em-box", `border-color:${D.ink} !important; background-color:${D.card} !important;`],
   ];
   const body = rules.map(([sel, css]) => `${sel}{${css}}`).join("\n    ");
   const ogsc = rules
@@ -335,9 +351,10 @@ export function shell(input: ShellInput): string {
   const site = baseUrl();
 
   return `<!DOCTYPE html>
-<html lang="${htmlLang(lang)}">
+<html lang="${htmlLang(lang)}" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
+<!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="x-apple-disable-message-reformatting">
@@ -350,6 +367,8 @@ export function shell(input: ShellInput): string {
   @media only screen and (max-width:620px){
     .em-container{width:100% !important;}
     .em-px{padding-left:24px !important;padding-right:24px !important;}
+    .em-btn-wrap{width:100% !important;}
+    .em-btn-a{padding-left:16px !important;padding-right:16px !important;}
   }
 ${darkCss()}</style>
 </head>
@@ -367,7 +386,7 @@ ${darkCss()}</style>
 
         <tr>
           <td align="center" class="em-card em-hr" style="padding:30px 40px; border-bottom:1px solid ${C.line}; background-color:${C.card};">
-            <img src="${esc(logo)}" width="31" height="48" alt="" style="display:block; margin:0 auto 10px auto; border:0; outline:none;">
+            <img src="${esc(logo)}" width="39" height="56" alt="Rempire" style="display:block; margin:0 auto 10px auto; border:0; outline:none;">
             <a href="${esc(site)}/" class="em-ink" style="font-family:${FONT_HEAD}; font-size:20px; font-weight:bold; letter-spacing:8px; text-transform:uppercase; color:${C.ink}; text-decoration:none;">REMPIRE</a>
           </td>
         </tr>
@@ -458,11 +477,11 @@ export function rowPanel(
   const align = center ? ' align="center"' : "";
   const border = boxed ? `border:2px solid ${C.ink}; ` : "";
   const bg = boxed ? C.card : C.panel;
-  const panelCls = boxed ? "em-card" : "em-panel";
+  const panelCls = boxed ? "em-box" : "em-panel";
   const inkCls = boxed ? "em-ink" : "em-panel-ink";
   const mutedCls = boxed ? "em-muted" : "em-panel-muted";
   return `        <tr>
-          <td class="em-px em-card" style="padding:0 48px 8px 48px; background-color:${C.card};">
+          <td class="em-px em-card" style="padding:16px 48px 8px 48px; background-color:${C.card};">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
               <tr>
                 <td${align} class="${panelCls}" bgcolor="${bg}" style="${border}background-color:${bg}; padding:22px 24px;">
@@ -489,7 +508,7 @@ export function rowCode(
 ): string {
   const bg = boxed ? C.card : C.panel;
   const border = boxed ? `border:2px solid ${C.ink}; ` : "";
-  const panelCls = boxed ? "em-card" : "em-panel";
+  const panelCls = boxed ? "em-box" : "em-panel";
   const inkCls = boxed ? "em-ink" : "em-panel-ink";
   const mutedCls = boxed ? "em-muted" : "em-panel-muted";
   return `        <tr>
@@ -511,14 +530,21 @@ ${
 `;
 }
 
-/** Bulletproof button. */
+/**
+ * Bulletproof button, the hybrid kind. The padding sits on the <a> as
+ * display:block, so the whole 46 px face is the link everywhere that honours
+ * it (Apple Mail, Gmail, iOS); Outlook ignores padding on an inline element
+ * and reads mso-padding-alt off the cell instead. On a phone the wrapper
+ * table goes full width and the side padding shrinks (the media block in
+ * shell()), so a long Estonian label stays on one line instead of two.
+ */
 export function rowButton(url: string, label: string): string {
   return `        <tr>
           <td class="em-px em-card" align="center" style="padding:24px 48px 8px 48px; background-color:${C.card};">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="em-btn-wrap" style="border-collapse:collapse;">
               <tr>
-                <td align="center" class="em-btn" bgcolor="${C.btnBg}" style="background-color:${C.btnBg}; border:1px solid ${C.btnBg}; padding:15px 38px;">
-                  <a href="${esc(url)}" class="em-btn-a" style="font-family:${FONT_HEAD}; font-size:13px; line-height:16px; font-weight:bold; letter-spacing:2px; text-transform:uppercase; color:${C.btnInk}; text-decoration:none; display:inline-block;">${esc(label)}</a>
+                <td align="center" class="em-btn" bgcolor="${C.btnBg}" style="background-color:${C.btnBg}; border:1px solid ${C.btnBg}; mso-padding-alt:15px 38px;">
+                  <a href="${esc(url)}" class="em-btn-a" style="display:block; padding:15px 38px; font-family:${FONT_HEAD}; font-size:13px; line-height:16px; font-weight:bold; letter-spacing:2px; text-transform:uppercase; color:${C.btnInk}; text-decoration:none;">${esc(label)}</a>
                 </td>
               </tr>
             </table>
