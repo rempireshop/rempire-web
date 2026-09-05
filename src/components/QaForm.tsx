@@ -15,7 +15,7 @@ interface Answer {
 
 type Answers = Record<string, Answer>;
 
-const MAIL_TO = "dim.novare@gmail.com";
+const MAIL_TO = "info@diipsolutions.eu";
 
 export interface QaFormProps {
   /** набор вопросов; по умолчанию — первый раунд */

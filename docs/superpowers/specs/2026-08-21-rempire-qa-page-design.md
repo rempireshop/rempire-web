@@ -1,6 +1,6 @@
 # REMPIRE Q&A page — design spec
 
-Date: 2026-08-21 · Status: approved (Dmitri, in-session) · Scope: sub-project 1 of the Rempire rebuild
+Date: 2026-08-21 · Status: approved (Dim, in-session) · Scope: sub-project 1 of the Rempire rebuild
 
 ## Goal
 
@@ -8,14 +8,14 @@ Get clear answers out of Renat (shop owner, not computer-friendly, Russian-speak
 before building the REMPIRE e-commerce platform. One shareable link he opens on
 his phone, answers in ~10 minutes, and returns answers with one tap.
 
-## Decisions (confirmed with Dmitri)
+## Decisions (confirmed with Dim)
 
 1. **Two repos**, not a monorepo: `rempire-web` (Next.js → Vercel) +
    `rempire-api` (ASP.NET Core → Railway, skeleton for now). Supersedes the
    monorepo preference in the master build prompt.
 2. **Russian only** — source questionnaire is already Russian.
 3. **Interactive form**: tap-choices + few textareas, localStorage autosave.
-   Amended same day (Dmitri asked for guaranteed delivery/storage): primary
+   Amended same day (Dim asked for guaranteed delivery/storage): primary
    «Отправить Диме» → `/api/submit` → private Vercel Blob store `rempire-qa`
    + env-gated Telegram/Resend forwarding; share sheet / clipboard / mailto
    demoted to manual fallbacks. Static export dropped for the API route.

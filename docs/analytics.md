@@ -35,11 +35,13 @@ three written down in the block comment above `getOverviewSummary()`:
   *orders placed today that have been paid*, never "orders whose payment
   landed today". The line under the cards says so: «Заказы и выручка — только
   оплаченные, по дате заказа.»
-- **Which statuses count as paid.** `paid` **and** `shipped`
-  (`PAID_STATUSES`, top of `src/lib/analytics.ts`). Pressing «Отправлен»
-  must not make today's count and today's revenue fall over in front of the
-  owner, which is what a strict `status = 'paid'` does in a shop that ships
-  the same day. `cancelled` and `refunded` stay out: that money left again.
+- **Which statuses count as paid.** `paid`, `shipped` **and** `delivered`
+  (`PAID_STATUSES`, top of `src/lib/analytics.ts`). Pressing «Отправлен» or
+  «Доставлен» must not make today's count and today's revenue fall over in
+  front of the owner, which is what a strict `status = 'paid'` does in a shop
+  that ships the same day. `cancelled` and `refunded` stay out: that money
+  left again. The partial index behind these queries was rebuilt with the
+  third status in `db/migrations/140_order_delivered.sql`.
   The «Аналитика» tab below reads the same constant for every money figure,
   so the two tabs agree by construction.
 - **Which stock.** Not a query of its own: `getOverrides()`
@@ -73,8 +75,8 @@ that.
 
 | Card / section | What it means for Renat |
 | --- | --- |
-| **Выручка** | Sum of `total` on orders placed in the window that were paid — `paid`, or `shipped` once the owner pressed «Отправлен» (`PAID_STATUSES`, the same rule as the Overview). Includes shipping and any promo/gift-card discount already taken off — it is the money that actually arrived and stayed; `cancelled` and `refunded` are out. |
-| **Заказы** | Count of the same paid-or-shipped orders placed in the window. |
+| **Выручка** | Sum of `total` on orders placed in the window that were paid — `paid`, or `shipped` / `delivered` once the owner pressed «Отправлен» and «Доставлен» (`PAID_STATUSES`, the same rule as the Overview). Includes shipping and any promo/gift-card discount already taken off — it is the money that actually arrived and stayed; `cancelled` and `refunded` are out. |
+| **Заказы** | Count of the same paid / shipped / delivered orders placed in the window. |
 | **Средний чек** | Выручка ÷ Заказы. |
 | **Из корзины в заказ** | Paid orders ÷ distinct visitor sessions that viewed at least one page — "out of every 100 people who opened the shop, this many bought something." Called «Конверсия» before the redesign; same number. |
 | **Выручка по дням** | One bar per calendar day of the window (at most a fortnight of them), labelled with its weekday; today's bar is the ink one. Same paid orders. |
@@ -176,7 +178,16 @@ assistant can talk about the numbers, not change anything here.
 
 The Search Console block needs a **service account** — a robot Google
 account that can read (never write) your Search Console data. One-time
-setup, about five minutes:
+setup, about five minutes.
+
+**Done on 05.09.2026** (under rempireshopinfo@gmail.com): Google Cloud
+project **«Rempire shop»** (`rempire-shop`), the «Google Search Console API»
+enabled in it, service account **gsc-reader@rempire-shop.iam.gserviceaccount.com**
+added to the `sc-domain:rempireshop.com` property as a *Restricted* user.
+What is left is step 2 (Dim creates the JSON key —
+[Keys tab](https://console.cloud.google.com/iam-admin/serviceaccounts/details/104247251027055176481/keys?project=rempire-shop)
+→ Add key → Create new key → JSON) and step 4 (the two variables on Vercel),
+then a redeploy.
 
 1. In the [Google Cloud console](https://console.cloud.google.com/), create
    (or reuse) a project, then **IAM & Admin → Service Accounts → Create

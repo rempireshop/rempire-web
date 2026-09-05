@@ -264,7 +264,7 @@ Neither route calls `rateLimit()`/`allow()`. Every accepted request:
    `feedback` up to 20 000);
 2. `await forwardTelegram(...)` — a message to Renat's chat;
 3. `await forwardEmail(...)` — a Resend send to `RESEND_TO`
-   (defaulting to `dim.novare@gmail.com`, `src/lib/notify.ts:55`).
+   (defaulting to `info@diipsolutions.eu`, `src/lib/notify.ts:55`).
 
 **Exploit** A `while true; do curl -d '{"summary":"x"}' …/api/submit/; done` from
 one laptop: unbounded Telegram flood, unbounded Resend sends against the shop's

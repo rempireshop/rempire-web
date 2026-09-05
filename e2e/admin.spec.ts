@@ -116,7 +116,8 @@ test.describe("admin", () => {
 
   test.describe("orders", () => {
     test.use({ extraHTTPHeaders: ipHeaders(91) });
-    test("orders tab lists a real order, and «Отправлен» ships it through the confirm card", async ({ page }) => {
+    test("the order card: label → shipped (with the letter) → delivered, and the journal walks every step back", async ({ page }) => {
+      test.setTimeout(120_000);
       const email = freshEmail("admin-orders");
       const number = await placeOrder(page, email);
 
@@ -130,20 +131,91 @@ test.describe("admin", () => {
       // the redesigned card: mono `id · time` kicker, the customer as the title
       await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
       await expect(page.locator("h1.adm-h1")).toContainText("E2E Buyer");
-      // the 4-step fulfilment strip, on step 1 («Оплачен» done)
+      // the 4-step fulfilment strip: «Оплачен» done, «Этикетка» is the step to do
       await expect(page.locator(".adm-step--done")).toHaveCount(1);
+      await expect(page.locator(".adm-step--now")).toContainText("Этикетка");
+      const status = async () =>
+        (await (await page.request.get(`/api/admin/orders/${number}/`)).json()).order.status as string;
 
-      /* Shipping moves money's status and sends the customer a letter, so it
-         goes through the confirm card — and lands in the journal with an undo
-         on the toast (see README § State). */
-      await page.locator("[data-admshipnow]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Отметить отправленным?");
-      await page.locator("[data-admapply]").click();
-      await expect(page.getByRole("status")).toContainText("отправлен");
+      /* «Создать этикетку» registers the parcel (SHIPPING_PROVIDER=mock stands
+         in for Montonio — src/lib/shipping/montonio-mock.ts) and changes
+         NOTHING else: the owner's complaint was a label button that flipped
+         the whole status. It lands in the journal with an undo on the toast. */
+      const post = page.waitForResponse((r) => r.url().includes("/api/admin/shipments/") && r.request().method() === "POST");
+      await page.locator(".adm-ordacts [data-admlabel]").click();
+      expect((await post).ok()).toBe(true);
+      await expect(page.getByRole("status")).toContainText("Этикетка готова");
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
+      await page.locator("[data-closetoast]").click();
 
-      // and the order really moved: the badge on the card says so
-      await expect(page.locator(".adm-badge--ok").first()).toHaveText("Отправлен");
+      await expect(page.locator(".adm-badge--big")).toHaveText("Этикетка готова");
+      await expect(page.locator(".adm-step--done")).toHaveCount(2);
+      await expect(page.locator(".adm-step--now")).toContainText("Отправлен");
+      expect(await status()).toBe("paid");
+      // the shipment box: a copyable tracking code, both label sizes — and the A4 one really is a PDF
+      const code = ((await page.locator("[data-trackingcode]").textContent()) || "").trim();
+      expect(code).toMatch(/^MK\d{9}EE$/);
+      await expect(page.locator(`[data-admcopy="${code}"]`)).toBeVisible();
+      await expect(page.locator('[data-labelpdf="A6"]')).toHaveAttribute("href", /size=A6/);
+      const pdf = await page.request.get((await page.locator('[data-labelpdf="A4"]').getAttribute("href"))!);
+      expect(pdf.status()).toBe(200);
+      expect(pdf.headers()["content-type"]).toContain("application/pdf");
+
+      /* «Отправлен» moves the status and sends the customer a letter, so it
+         goes through the confirm card — which names the letter and the
+         tracking number it will carry (see README § State). */
+      await page.locator(".adm-ordacts [data-admshipnow]").click();
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Отметить отправленным?");
+      await expect(page.locator(".adm-confirm__d")).toContainText(code);
+      await page.locator("[data-admapply]").click();
+      await expect(page.getByRole("status")).toContainText(`${number} отправлен`);
+      await expect(page.locator(".adm-toast__undo")).toBeVisible();
+      await page.locator("[data-closetoast]").click();
+      await expect(page.locator(".adm-badge--big")).toHaveText("Отправлен");
+      await expect.poll(status).toBe("shipped");
+
+      // the letter went out, with the carrier's tracking link in it (the e2e mail sink, src/lib/mail.ts)
+      const sink = async () =>
+        (await (await page.request.get(`/api/e2e/mail/?template=order-shipped&to=${encodeURIComponent(email)}`)).json())
+          .mails as Array<{ links: string[] }>;
+      await expect.poll(async () => (await sink()).length).toBe(1);
+      expect((await sink())[0].links.some((l) => l.endsWith(code))).toBe(true);
+
+      /* «Доставлен» — the owner's last step: applied at once, no letter, an
+         undo on the toast. */
+      await page.locator(".adm-ordacts [data-admdelivered]").click();
+      await expect(page.getByRole("status")).toContainText(`${number} доставлен`);
+      await page.locator("[data-closetoast]").click();
+      await expect(page.locator(".adm-badge--big")).toHaveText("Доставлен");
+      await expect(page.locator(".adm-step--done")).toHaveCount(4);
+      await expect.poll(status).toBe("delivered");
+      expect((await sink()).length).toBe(1);
+
+      /* The journal («Настройки → Журнал») walks it back a step at a time:
+         «Вернуть» on the delivered line → shipped, on the shipped line → paid,
+         and neither sends the customer anything. */
+      await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
+      await page.locator('[data-admsetpage="journal"]').click();
+      const undoRow = (text: string) => page.locator(".adm-jrow:has([data-admundo])", { hasText: text }).first();
+      await expect(undoRow(`Заказ ${number}: доставлен`)).toBeVisible();
+      await undoRow(`Заказ ${number}: доставлен`).locator("[data-admundo]").click();
+      await expect.poll(status).toBe("shipped");
+      await undoRow(`Заказ ${number}: отправлен`).locator("[data-admundo]").click();
+      await expect.poll(status).toBe("paid");
+      expect((await sink()).length).toBe(1);
+      // the label line is there too — its undo keeps the parcel (Montonio cannot cancel it) and returns the step
+      await undoRow(`Этикетка ${number}: создана`).locator("[data-admundo]").click();
+      await expect(page.getByRole("status")).toContainText("Отменено");
+      await expect(page.locator(".adm-jrow", { hasText: `Этикетка ${number}: создана` })).toHaveCount(0);
+
+      // …and the card agrees: paid again, the «Этикетка» step to do, the parcel set aside but not lost
+      await ordersTab(page).click();
+      await page.locator('[data-admfilter="new"]').click();
+      await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+      await expect(page.locator(".adm-badge--big")).toHaveText("Оплачен");
+      await expect(page.locator(".adm-step--now")).toContainText("Этикетка");
+      await expect(page.locator(".adm-ship--off")).toContainText("Отправление у Montonio остаётся");
+      await expect(page.locator(".adm-ordacts [data-admlabel]")).toHaveText("Создать этикетку");
     });
   });
 
