@@ -197,6 +197,17 @@ function routes(): RouteCase[] {
     { name: "GET /shop2/et/p/[id]/", path: "/shop2/et/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/p/[id]/route"), params: { id: "" }, jsonBody: false },
     { name: "GET /shop2/en/p/[id]/", path: "/shop2/en/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/p/[id]/route"), params: { id: "" }, jsonBody: false },
     { name: "GET /sitemap-custom.xml", path: "/sitemap-custom.xml", method: "GET", exports: ["GET"], load: () => import("@/app/sitemap-custom.xml/route"), jsonBody: false },
+    /* The request-time blog pages (src/lib/blog-page.ts) — the list and one
+       post, three languages — and the OG card drawn for a created product or a
+       post (src/lib/og-card.ts). Same rule: hostile slugs/file names are a 404
+       or a 400, never a 5xx or a file path. */
+    { name: "GET /shop2/blog/", path: "/shop2/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/blog/route"), jsonBody: false },
+    { name: "GET /shop2/et/blog/", path: "/shop2/et/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/blog/route"), jsonBody: false },
+    { name: "GET /shop2/en/blog/", path: "/shop2/en/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/blog/route"), jsonBody: false },
+    { name: "GET /shop2/blog/[slug]/", path: "/shop2/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /shop2/et/blog/[slug]/", path: "/shop2/et/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /shop2/en/blog/[slug]/", path: "/shop2/en/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
+    { name: "GET /shop2/og/[file]", path: "/shop2/og/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/og/[file]/route"), params: { file: "" }, jsonBody: false },
 
     /* ---- assistant, cron, e2e -------------------------------------------- */
     { name: "GET /api/assistant/", path: "/api/assistant/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true } },
