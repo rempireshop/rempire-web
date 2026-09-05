@@ -190,6 +190,14 @@ export interface CapturedMail {
   template: string;
   /** File names only — never the bytes. [] for a letter with no attachment. */
   attachments: string[];
+  /**
+   * The http(s) links the plain-text body carries, in order, capped — not
+   * the body. The order flow's spec has to prove that «Заказ отправлен» went
+   * out WITH the carrier's tracking link (the one thing that letter is for),
+   * and a link is the smallest thing that proves it. A letter with no plain
+   * text records [].
+   */
+  links: string[];
 }
 
 const CAPTURE_MAX = 50;
@@ -210,6 +218,19 @@ function templateTag(tags: SendMailInput["tags"]): string {
   return String(tags.template ?? "");
 }
 
+const LINK_RX = /https?:\/\/[^\s<>"')\]]+/g;
+const LINKS_MAX = 12;
+
+/** Every http(s) URL in the plain-text body, first LINKS_MAX, each capped. */
+function bodyLinks(text: string | undefined): string[] {
+  const out: string[] = [];
+  for (const m of String(text ?? "").matchAll(LINK_RX)) {
+    out.push(m[0].slice(0, 300));
+    if (out.length >= LINKS_MAX) break;
+  }
+  return out;
+}
+
 function capture(input: SendMailInput): void {
   if (!sinkOn()) return;
   const list = (g.__rempireMailSink ??= []);
@@ -221,6 +242,7 @@ function capture(input: SendMailInput): void {
     /* Names, not bytes — the same rule as the body: enough for a browser test
        to prove «письмо с карточкой ушло с PDF», nothing a log could leak. */
     attachments: attachmentNames(input.attachments),
+    links: bodyLinks(input.text),
   });
   if (list.length > CAPTURE_MAX) list.splice(0, list.length - CAPTURE_MAX);
 }

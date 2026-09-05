@@ -32,6 +32,8 @@ import { montonioConfigFromEnv, type MontonioConfig } from "@/lib/payments/monto
 import { normalizeMethod, sniffCarrier } from "@/lib/shipping";
 import type { ParcelPoint } from "@/lib/parcel-points";
 import type { Order } from "@/lib/orders";
+// SHIPPING_PROVIDER=mock — the e2e suite's carrier; see that file's header.
+import { MOCK_LABEL_PREFIX, mockLabel, mockLabelPdf, mockShipment, shippingMockOn } from "./montonio-mock";
 
 /* ---------- constants ---------------------------------------------------- */
 
@@ -127,6 +129,15 @@ export interface MontonioShipment {
   /** The page the stored labelUrl was made for — a request for the other
       size makes a new file rather than serving this one. */
   labelSize?: "A4" | "A6";
+  /**
+   * The journal's undo of «Создать этикетку». A registered parcel cannot be
+   * taken back at Montonio, so undo does not delete anything: it sets this
+   * flag, the card shows the «Этикетка» step as not done again, and the
+   * next «Создать этикетку» clears it and reuses this same shipment instead
+   * of booking a second one (POST /api/admin/shipments). Written by
+   * PATCH /api/admin/orders/<id> { labelStep }.
+   */
+  dismissed?: boolean;
   createdAt: string;
 }
 
@@ -737,8 +748,9 @@ export async function createMontonioShipment(
   order: Order,
   opts: CreateShipmentOptions = {},
 ): Promise<MontonioShipment> {
-  const config = montonioShippingConfig();
-  if (!config) throw new MontonioShippingError("not_configured");
+  const mock = shippingMockOn();
+  const config = mock ? null : montonioShippingConfig();
+  if (!mock && !config) throw new MontonioShippingError("not_configured");
 
   const ship = order.shipping ?? { method: "", country: "EE", price: 0 };
   const country = String(ship.country || "EE").toUpperCase();
@@ -749,6 +761,12 @@ export async function createMontonioShipment(
   }
 
   const hint = carrierHint(order, opts);
+  /* The e2e suite's carrier: the same refusals as above (a pickup order or a
+     gift-only one is not a parcel for the mock either), then a registered
+     parcel without a network in sight — src/lib/shipping/montonio-mock.ts. */
+  if (mock || !config) {
+    return mockShipment(order, { carrier: hint, method: method === "parcel" ? "pickupPoint" : "courier", country });
+  }
   let carrier = hint;
   let shippingMethod: { type: "pickupPoint" | "courier"; id: string };
   if (method === "parcel") {
@@ -876,6 +894,7 @@ export async function getMontonioLabel(
   shipmentId: string,
   opts: { pageSize?: "A4" | "A6"; labelsPerPage?: 1 | 4 | 6 | 8 } = {},
 ): Promise<MontonioLabelFile> {
+  if (shippingMockOn()) return mockLabel(shipmentId, opts.pageSize ?? "A6");
   const config = montonioShippingConfig();
   if (!config) throw new MontonioShippingError("not_configured");
 
@@ -919,6 +938,12 @@ export async function fetchMontonioLabelFile(labelFileId: string): Promise<Monto
 
 /** The PDF itself. The URL is a pre-signed S3 link — no Authorization header. */
 export async function fetchLabelPdf(url: string): Promise<ArrayBuffer> {
+  if (url.startsWith(MOCK_LABEL_PREFIX)) {
+    // a mock label can only have been stored by a mock run; outside one it is junk, not a fetch
+    if (!shippingMockOn()) throw new MontonioShippingError("rejected", "mock label outside SHIPPING_PROVIDER=mock");
+    const bytes = mockLabelPdf(url);
+    return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  }
   let res: Response;
   try {
     res = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS), cache: "no-store" });

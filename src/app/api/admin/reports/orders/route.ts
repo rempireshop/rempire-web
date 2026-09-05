@@ -5,9 +5,9 @@
  *   ?from=YYYY-MM-DD&to=YYYY-MM-DD       (either works; `to` is inclusive)
  *   &format=csv|xlsx|json                (default json — summary + rows, for the admin card)
  *
- * One row per order that reached payment (status paid/shipped/refunded —
- * "shipped" is a paid order that moved on, "refunded" is still worth a line
- * so the accountant sees the reversal). VAT is split out of the
+ * One row per order that reached payment (status paid/shipped/delivered/
+ * refunded — "shipped" and "delivered" are a paid order that moved on,
+ * "refunded" is still worth a line so the accountant sees the reversal). VAT is split out of the
  * VAT-inclusive `total` at settings.vat_rate (src/lib/reports.ts —
  * DEFAULT_VAT_RATE 24, Estonia's standard rate since 1 July 2025). `channel`
  * reads `orders.channel` when that column exists (checked once, cached —

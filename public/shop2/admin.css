@@ -339,6 +339,52 @@
 .adm-step--done .adm-step__n { color: var(--a-dim); }
 .adm-step--now { background: var(--a-tint); color: var(--a-ink); }
 .adm-step--now .adm-step__l { font-weight: 600; }
+/* order flow: a pickup order has two steps; a step that was never done and
+   never will be (an order that left without a Montonio label) stays paper
+   and says so in its second line, rather than being painted ink as if done */
+.adm-steps--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.adm-step--skip { color: var(--a-muted); }
+.adm-step__s { font-size: 12px; line-height: 16px; margin-top: 2px; color: var(--a-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-step--done .adm-step__s { color: var(--a-dim); }
+
+/* ---------- Заказ: actions and the shipment box ---------------------------- */
+
+/* the primary step, the quiet seconds and «Отменить заказ» on one line;
+   on a narrow phone they stack full-width (the media query at the bottom) */
+.adm-ordacts { gap: 8px 10px; }
+/* «Отправление» — the parcel as Montonio has it: carrier and point, the
+   tracking code in mono with its copy button, the PIN, the label as links.
+   Same geometry as .adm-card; a set-aside label keeps the box but goes quiet. */
+.adm-ship { border: 1px solid var(--a-ink); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.adm-ship--off { border-color: var(--a-rule); }
+.adm-ship__row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.adm-ship__code {
+  font-family: "PT Mono", ui-monospace, monospace; font-size: 18px; line-height: 24px; letter-spacing: .04em;
+  user-select: all; -webkit-user-select: all; overflow-wrap: anywhere;
+}
+.adm-ship__links { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; }
+.adm-copy {
+  height: 40px; padding: 0 14px; border: 1px solid var(--a-ink); background: var(--a-paper); color: var(--a-ink);
+  font-size: 14px; font-weight: 500; white-space: nowrap; flex: none;
+}
+.adm-copy:hover { background: var(--a-tint); }
+@media (max-width: 480px) {
+  /* four steps in two rows of two — «Отправлен» and «Доставлен» do not fit
+     four abreast in 335 px without an ellipsis, and a step cut short is a
+     step the owner cannot read */
+  .adm-steps--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adm-steps--4 .adm-step:nth-child(2) { border-right: 0; }
+  .adm-steps--4 .adm-step:nth-child(-n+2) { border-bottom: 1px solid var(--a-rule); }
+  .adm-steps--4 .adm-step--done:nth-child(-n+2) { border-bottom-color: var(--a-dim); }
+  /* everything stacks, every control a full-width thumb-sized bar */
+  .adm-ordacts { flex-direction: column; align-items: stretch; }
+  .adm-ordacts .adm-btn, .adm-ordacts .adm-del { width: 100%; min-height: 48px; }
+  .adm-ship__links { flex-direction: column; align-items: stretch; }
+  .adm-ship__links .adm-btn { width: 100%; min-height: 44px; }
+  .adm-ship__links .adm-link { align-self: flex-start; }
+  .adm-ship__row--code { flex-direction: column; align-items: stretch; }
+  .adm-copy { height: 44px; }
+}
 
 .adm-card { border: 1px solid var(--a-ink); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .adm-card--pad { padding: 20px; gap: 16px; }

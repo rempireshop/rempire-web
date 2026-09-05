@@ -29,6 +29,8 @@ import {
   splitPhone,
 } from "@/lib/shipping/montonio";
 import { resetPointsCache } from "@/lib/parcel-points";
+import { capturedMail } from "@/lib/mail";
+import { MOCK_TRACKING_HOST, mockLabelPdf, mockLabel, shippingMockOn } from "@/lib/shipping/montonio-mock";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const ACCESS = "test-access-key";
@@ -122,6 +124,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();   // SHIPPING_PROVIDER=mock and the e2e mail sink must not leak into the next test
   resetMontonioPointsCache();
   resetPointsCache();
   withoutKeys();
@@ -793,7 +796,7 @@ describe("the shipping routes", () => {
     expect((await getOrder(order.id))!.status).toBe("paid");
   });
 
-  it("creates the shipment, stores it, audits it and moves the order to shipped", async () => {
+  it("creates the shipment, stores it, audits it — and leaves the order's status alone", async () => {
     withKeys();
     stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
     const order = await paidOrder({
@@ -810,16 +813,24 @@ describe("the shipping routes", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.shipment.trackingCode).toBe("CC543167770EE");
+    // the answer carries the order as it is — still paid
+    expect(body.order.status).toBe("paid");
 
     const stored = await getOrder(order.id);
-    expect(stored!.status).toBe("shipped");
+    /* The owner's complaint, in one line: «нажимаю „этикетка“ — меняется весь
+       статус». A label is a sticker; «Отправлен» is its own step (the PATCH
+       test below). */
+    expect(stored!.status).toBe("paid");
     const ship = stored!.shipping as unknown as Record<string, Record<string, unknown>>;
     // merged, not replaced: the checkout's own fields survive
     expect(ship.pointName).toBe("Laagri Coop Maksimarketi pakiautomaat");
     expect(ship.montonio.shipmentId).toBe(SHIPMENT_BODY.id);
     expect(ship.montonio.trackingCode).toBe("CC543167770EE");
 
-    expect((await listAudit(10)).some((a) => a.action === "shipment.create")).toBe(true);
+    const audit = await listAudit(10);
+    expect(audit.some((a) => a.action === "shipment.create")).toBe(true);
+    // …and no status row past the test's own new→paid: nothing about the status happened
+    expect(audit.some((a) => a.action === "order.status" && (a.payload as { to: string }).to === "shipped")).toBe(false);
 
     // a second press books nothing and answers with what is already there
     const again = await POST(
@@ -828,6 +839,167 @@ describe("the shipping routes", () => {
     const againBody = await again.json();
     expect(againBody.reused).toBe(true);
     expect(againBody.shipment.shipmentId).toBe(SHIPMENT_BODY.id);
+    expect((await getOrder(order.id))!.status).toBe("paid");
+  });
+
+  it("«Отправлен» is the PATCH: shipped, the letter with the tracking link, and every step undoable", async () => {
+    withKeys();
+    stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
+    // the e2e mail sink, so the letter can be read back without a mailbox
+    vi.stubEnv("E2E_BOOTSTRAP", "1");
+    const order = await paidOrder({
+      method: "Пакомат Omniva",
+      country: "EE",
+      pointId: POINT_UUID,
+      pointName: "Laagri Coop Maksimarketi pakiautomaat",
+    });
+    const { POST } = await import("@/app/api/admin/shipments/route");
+    await POST(req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.id }) }, admin));
+
+    const { PATCH } = await import("@/app/api/admin/orders/[id]/route");
+    const patch = (body: Record<string, unknown>) =>
+      PATCH(req(`/api/admin/orders/${order.id}/`, { method: "PATCH", body: JSON.stringify(body) }, admin), {
+        params: Promise.resolve({ id: order.id }),
+      });
+    const mailsBefore = capturedMail().filter((m) => m.template === "order-shipped").length;
+
+    // shipped: the status moves, the customer's letter carries the carrier's link
+    const shipped = await patch({ status: "shipped" });
+    expect(shipped.status).toBe(200);
+    expect((await shipped.json()).order.status).toBe("shipped");
+    const letters = capturedMail().filter((m) => m.template === "order-shipped");
+    expect(letters.length).toBe(mailsBefore + 1);
+    expect(letters[letters.length - 1].to).toEqual(["test@example.com"]);
+    expect(letters[letters.length - 1].links).toContain(SHIPMENT_BODY.parcels[0].trackingLink);
+
+    // delivered: the last step, no letter
+    expect((await (await patch({ status: "delivered" })).json()).order.status).toBe("delivered");
+    expect(capturedMail().filter((m) => m.template === "order-shipped").length).toBe(mailsBefore + 1);
+
+    // the journal's undo of «Доставлен»: back to shipped, still no second letter
+    expect((await (await patch({ status: "shipped" })).json()).order.status).toBe("shipped");
+    expect(capturedMail().filter((m) => m.template === "order-shipped").length).toBe(mailsBefore + 1);
+
+    /* the undo of «Отправлен»: back to paid. This must NOT be the manual
+       «отметить оплаченным» path — applyPaymentResult() treats a shipped
+       order as already paid and would leave the status where it is. */
+    expect((await (await patch({ status: "paid" })).json()).order.status).toBe("paid");
+    expect((await getOrder(order.id))!.status).toBe("paid");
+    // the shipment is untouched by any of it
+    const ship = (await getOrder(order.id))!.shipping as unknown as Record<string, Record<string, unknown>>;
+    expect(ship.montonio.trackingCode).toBe("CC543167770EE");
+
+    // a courier order with no label: the letter still goes, without a link into the carrier
+    const plain = await paidOrder({
+      method: "courier",
+      country: "EE",
+      address: { addr: "Testitänav 1", zip: "10111", city: "Tallinn" },
+    });
+    const res = await PATCH(
+      req(`/api/admin/orders/${plain.id}/`, { method: "PATCH", body: JSON.stringify({ status: "shipped" }) }, admin),
+      { params: Promise.resolve({ id: plain.id }) },
+    );
+    expect((await res.json()).order.status).toBe("shipped");
+    const last = capturedMail().filter((m) => m.template === "order-shipped").pop()!;
+    expect(last.links.some((l) => /omniva|dpd|itella|venipak|tracking\.example/.test(l))).toBe(false);
+  });
+
+  it("labelStep:false sets the label aside — the parcel stays, the next press brings it back", async () => {
+    withKeys();
+    stubFetch([[/\/shipments$/, () => json(SHIPMENT_BODY)]]);
+    const order = await paidOrder({
+      method: "Пакомат Omniva",
+      country: "EE",
+      pointId: POINT_UUID,
+      pointName: "Laagri Coop Maksimarketi pakiautomaat",
+    });
+    const { POST } = await import("@/app/api/admin/shipments/route");
+    const { PATCH } = await import("@/app/api/admin/orders/[id]/route");
+    const ctx = { params: Promise.resolve({ id: order.id }) };
+
+    // nothing to set aside yet
+    const early = await PATCH(
+      req(`/api/admin/orders/${order.id}/`, { method: "PATCH", body: JSON.stringify({ labelStep: false }) }, admin),
+      ctx,
+    );
+    expect(early.status).toBe(409);
+    expect((await early.json()).error).toBe("no_shipment");
+
+    await POST(req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.id }) }, admin));
+    const aside = await PATCH(
+      req(`/api/admin/orders/${order.id}/`, { method: "PATCH", body: JSON.stringify({ labelStep: false }) }, admin),
+      ctx,
+    );
+    expect(aside.status).toBe(200);
+    let ship = (await getOrder(order.id))!.shipping as unknown as Record<string, Record<string, unknown>>;
+    // the record is still there, whole — Montonio cannot cancel a parcel
+    expect(ship.montonio.shipmentId).toBe(SHIPMENT_BODY.id);
+    expect(ship.montonio.trackingCode).toBe("CC543167770EE");
+    expect(ship.montonio.dismissed).toBe(true);
+    expect((await listAudit(10)).some((a) => a.action === "shipment.step")).toBe(true);
+
+    // «Создать этикетку» again: no second parcel, the same one comes back
+    const calls = stubFetch([[/\/shipments$/, () => json({ ...SHIPMENT_BODY, id: "must-not-be-booked" })]]);
+    const again = await (
+      await POST(req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.id }) }, admin))
+    ).json();
+    expect(again.reused).toBe(true);
+    expect(again.shipment.shipmentId).toBe(SHIPMENT_BODY.id);
+    expect(again.shipment.dismissed).toBe(false);
+    expect(calls).toHaveLength(0);
+    ship = (await getOrder(order.id))!.shipping as unknown as Record<string, Record<string, unknown>>;
+    expect(ship.montonio.dismissed).toBe(false);
+  });
+
+  it("SHIPPING_PROVIDER=mock registers a parcel and prints a PDF with no network at all — and never in production", async () => {
+    withoutKeys();
+    vi.stubEnv("SHIPPING_PROVIDER", "mock");
+    const calls = stubFetch([]); // any fetch would throw «unexpected fetch»
+    const order = await paidOrder({
+      method: "courier",
+      country: "EE",
+      address: { addr: "Testitänav 1", zip: "10111", city: "Tallinn" },
+    });
+
+    const { POST } = await import("@/app/api/admin/shipments/route");
+    const res = await POST(
+      req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: order.id }) }, admin),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.shipment.trackingCode).toMatch(/^MK\d{9}EE$/);
+    expect(body.shipment.trackingUrl.startsWith(MOCK_TRACKING_HOST)).toBe(true);
+    expect(body.shipment.carrier).toBe("dpd");
+    expect(body.order.status).toBe("paid");
+
+    const { GET } = await import("@/app/api/admin/shipments/[id]/label/route");
+    for (const size of ["A4", "A6"] as const) {
+      const pdf = await GET(req(`/api/admin/shipments/${order.number}/label/?size=${size}`, {}, admin), {
+        params: Promise.resolve({ id: order.number }),
+      });
+      expect(pdf.status).toBe(200);
+      expect(pdf.headers.get("content-type")).toBe("application/pdf");
+      const bytes = new Uint8Array(await pdf.arrayBuffer());
+      expect(String.fromCharCode(...bytes.slice(0, 5))).toBe("%PDF-");
+    }
+    expect(calls).toHaveLength(0);
+
+    // the same refusals as the real thing: a pickup order is not a parcel for the mock either
+    const pickup = await paidOrder({ method: "pickup", country: "EE" });
+    const refused = await POST(
+      req("/api/admin/shipments/", { method: "POST", body: JSON.stringify({ orderId: pickup.id }) }, admin),
+    );
+    expect(refused.status).toBe(400);
+    expect((await refused.json()).error).toBe("not_shippable");
+
+    // the switch is explicit and development-only
+    expect(shippingMockOn({ SHIPPING_PROVIDER: "mock", NODE_ENV: "production" } as NodeJS.ProcessEnv)).toBe(false);
+    expect(shippingMockOn({ NODE_ENV: "development" } as NodeJS.ProcessEnv)).toBe(false);
+    expect(shippingMockOn({ SHIPPING_PROVIDER: "mock", NODE_ENV: "test" } as NodeJS.ProcessEnv)).toBe(true);
+    // a mock label file is a valid one-page PDF in either size
+    const a6 = mockLabelPdf(mockLabel("mock-r-1", "A6").url);
+    expect(new TextDecoder().decode(a6)).toContain("/MediaBox [0 0 298 420]");
+    expect(new TextDecoder().decode(a6)).toContain("%%EOF");
   });
 
   it("proxies the label PDF and remembers its URL", async () => {

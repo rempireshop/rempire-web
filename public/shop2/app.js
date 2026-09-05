@@ -1265,6 +1265,27 @@
       "Только для вас": "Ainult teile",
       "Этикетка PDF ↗": "Silt PDF ↗",
       "Отследить ↗": "Jälgi ↗",
+      /* order flow: the four steps, the label box, the hints under the buttons */
+      "Этикетка готова": "Silt valmis", "Доставлены": "Kohale toimetatud",
+      "Создать этикетку": "Loo silt", "Создаём…": "Loome…",
+      "Выдан клиенту": "Kliendile üle antud", "Выдан": "Üle antud",
+      "Этикетка": "Silt", "готова": "valmis", "без этикетки": "ilma sildita", "Шаги заказа": "Tellimuse sammud",
+      "Этикетка отложена": "Silt kõrvale pandud",
+      "Отправление у Montonio остаётся — отменить его нельзя. Шаг «Этикетка» возвращён; чтобы снова пользоваться этой этикеткой, верните её.":
+        "Saadetis jääb Montoniosse — seda tühistada ei saa. Samm «Silt» on tagasi võetud; sama sildi uuesti kasutamiseks tooge see tagasi.",
+      "Вернуть этикетку": "Too silt tagasi", "Скопировать": "Kopeeri", "Скопировать трек-номер": "Kopeeri jälgimisnumber",
+      "Трек-номер появится, когда перевозчик примет посылку.": "Jälgimisnumber ilmub, kui vedaja paki vastu võtab.",
+      "Открыть PDF (A4) ↗": "Ava PDF (A4) ↗", "A6 для термопринтера ↗": "A6 termoprinterile ↗", "Чек ↗": "Tšekk ↗",
+      "Заказ ещё не оплачен — отправлять нечего.": "Tellimus pole veel makstud — saata pole midagi.",
+      "Клиент забирает заказ в салоне. Письмо не отправляется.": "Klient tuleb tellimusele salongi järele. Kirja ei saadeta.",
+      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "Silt on Montonio pakikleebis jälgimisnumbriga. Tellimuse staatust see ei muuda.",
+      "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Vajutate «Teele saadetud» — kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
+      "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Kohale toimetatud» on viimane samm, ilma kirjata. Tagasi saab võtta logist.",
+      "Этикетка готова ✓": "Silt valmis ✓", "Этикетка снова на месте ✓": "Silt on jälle olemas ✓",
+      "Не удалось создать этикетку": "Silti ei õnnestunud luua", "Не удалось вернуть шаг": "Sammu ei õnnestunud tagasi võtta",
+      "Трек-номер скопирован ✓": "Jälgimisnumber kopeeritud ✓",
+      "Для самовывоза и электронных заказов этикетка не нужна.": "Järeletuleku ja e-tellimuste puhul pole silti vaja.",
+      "Этикетка создаётся после оплаты.": "Silt luuakse pärast maksmist.",
       "Сообщение клиенту": "Sõnum kliendile",
       "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
       "Черновик помощника": "Abilise mustand",
@@ -2845,6 +2866,27 @@
       "Только для вас": "Only for you",
       "Этикетка PDF ↗": "Label PDF ↗",
       "Отследить ↗": "Track ↗",
+      /* order flow: the four steps, the label box, the hints under the buttons */
+      "Этикетка готова": "Label ready", "Доставлены": "Delivered",
+      "Создать этикетку": "Create the label", "Создаём…": "Creating…",
+      "Выдан клиенту": "Handed to the customer", "Выдан": "Handed over",
+      "Этикетка": "Label", "готова": "ready", "без этикетки": "no label", "Шаги заказа": "Order steps",
+      "Этикетка отложена": "Label set aside",
+      "Отправление у Montonio остаётся — отменить его нельзя. Шаг «Этикетка» возвращён; чтобы снова пользоваться этой этикеткой, верните её.":
+        "The shipment stays with Montonio — it cannot be cancelled. The «Label» step is back; to use this label again, bring it back.",
+      "Вернуть этикетку": "Bring the label back", "Скопировать": "Copy", "Скопировать трек-номер": "Copy the tracking number",
+      "Трек-номер появится, когда перевозчик примет посылку.": "The tracking number appears once the carrier accepts the parcel.",
+      "Открыть PDF (A4) ↗": "Open PDF (A4) ↗", "A6 для термопринтера ↗": "A6 for a thermal printer ↗", "Чек ↗": "Receipt ↗",
+      "Заказ ещё не оплачен — отправлять нечего.": "The order is not paid yet — nothing to ship.",
+      "Клиент забирает заказ в салоне. Письмо не отправляется.": "The customer collects the order at the salon. No letter is sent.",
+      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "The label is Montonio's sticker with the tracking number. It does not change the order's status.",
+      "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Press «Shipped» and the customer gets the “Order shipped” letter with the tracking number.",
+      "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Delivered» is the last step, no letter. It can be taken back from the journal.",
+      "Этикетка готова ✓": "Label ready ✓", "Этикетка снова на месте ✓": "The label is back ✓",
+      "Не удалось создать этикетку": "Could not create the label", "Не удалось вернуть шаг": "Could not take the step back",
+      "Трек-номер скопирован ✓": "Tracking number copied ✓",
+      "Для самовывоза и электронных заказов этикетка не нужна.": "Pickup and electronic orders need no label.",
+      "Этикетка создаётся после оплаты.": "The label is created after payment.",
       "Сообщение клиенту": "Message to the customer",
       "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
       "Черновик помощника": "Assistant's draft",
@@ -3265,6 +3307,19 @@
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
     [/^Новые (\d+)$/, { ET: "Uued $1", EN: "New $1" }],
+    [/^Этикетка готова (\d+)$/, { ET: "Silt valmis $1", EN: "Label ready $1" }],
+    // the toasts behind «Доставлен» / «Выдан клиенту» on the order card
+    [/^(.+) доставлен$/, { ET: "$1 kohale toimetatud", EN: "$1 delivered" }],
+    [/^(.+) выдан клиенту$/, { ET: "$1 kliendile üle antud", EN: "$1 handed to the customer" }],
+    /* the confirm card before «Отправлен» — one pre-line block, so the whole
+       thing is one text node; with the tracking number the letter will carry,
+       or the plain fact that there is none */
+    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером (.+)\.$/,
+      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga $4.",
+        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number $4." }],
+    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера\.$/,
+      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» — ilma jälgimisnumbrita.",
+        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter — without a tracking number." }],
     [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
       { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
@@ -4197,7 +4252,7 @@
     adminOrder: 0,   // opened order id (0 = list)
     // ---- the redesigned admin shell (docs/design/admin-handoff-README.md) ----
     admMore: false,        // the phone «Ещё» sheet
-    admOrderFilter: "new", // «Заказы» chips: new | shipped | unpaid | salon | all
+    admOrderFilter: "new", // «Заказы» chips: new | label | shipped | delivered | salon | all
     admOrderQ: "",         // «Заказы» search: number, name, phone
     adminEdit: "",   // opened product id in goods
     goodsErr: "",    // why the goods editor refused the last «Сохранить»
@@ -7801,6 +7856,7 @@
     "new": ["принят", "chip--low"],
     paid: ["оплачен", "chip--ok"],
     shipped: ["отправлен", "chip--ok"],
+    delivered: ["доставлен", "chip--ok"],
     failed: ["не оплачен", "chip--out"],
     cancelled: ["отменён", "chip--out"],
     refunded: ["возврат", "chip--low"]
@@ -9235,22 +9291,39 @@
   function admOrderVM(o) {
     var srv = o.srv || null;
     var status = srv ? srv.status
-      : (o.state[0] === "sent" || o.state[0] === "done" ? "shipped" : "paid");
+      : (o.state[0] === "done" ? "delivered" : o.state[0] === "sent" ? "shipped" : "paid");
     var mont = srv && srv.shipping && srv.shipping.montonio;
     var pos = !!(srv && srv.channel === "pos");
+    var method = srv && srv.shipping ? String(srv.shipping.method || "").toLowerCase() : "";
+    /* The Montonio record stays on the order for good (a registered parcel
+       cannot be cancelled there); `dismissed` is the journal's undo of the
+       label step — the sticker exists, the step is shown as not done. */
+    var hasShipment = !!(mont && mont.shipmentId);
+    var labeled = hasShipment && !mont.dismissed;
     return {
       id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
       items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
       paid: status === "paid" && !pos,
       unpaid: status === "new" || status === "failed",
       shipped: status === "shipped",
-      labeled: !!(mont && mont.shipmentId),
-      tracking: (mont && mont.trackingCode) || ""
+      delivered: status === "delivered",
+      /* A pickup order has no parcel to label and no «Отправлен» either — the
+         customer takes it from the salon counter, so its one step after
+         payment is «Выдан». An all-gift-card order has nothing to hand over. */
+      pickup: method === "pickup",
+      digital: method === "digital",
+      hasShipment: hasShipment,
+      labeled: labeled,
+      shipment: labeled ? mont : null,
+      tracking: (labeled && mont.trackingCode) || ""
     };
   }
-  /** How many paid orders are waiting to go out. Real whenever there is a
-      server to ask: the demo list is an example of what the screen looks like
-      once orders arrive, never a number the owner could act on. */
+  /** How many paid orders are waiting to go out — label or no label: a
+      sticker is not a hand-over, the parcel is on the shelf until «Отправлен»
+      (same rule as the overview's ordersToShip, src/lib/analytics.ts). Real
+      whenever there is a server to ask: the demo list is an example of what
+      the screen looks like once orders arrive, never a number the owner could
+      act on. */
   function admWaitingCount() {
     if (SRV.admin === true) {
       /* The loaded list is the truth the rows are drawn from; the overview's
@@ -9268,11 +9341,23 @@
     return (SRV.admin === true ? (SRV.orders || []) : admOrders())
       .map(admOrderVM).filter(function (v) { return v.paid; });
   }
+  /** The waiting orders split the way the chips split them: no label yet /
+      label ready. Their sum is admWaitingCount(). */
+  function admWaitingSplit() {
+    var out = { fresh: 0, labeled: 0 };
+    admLiveToShip().forEach(function (v) { if (v.labeled) out.labeled++; else out.fresh++; });
+    return out;
+  }
   function admOrderBadge(v, big) {
     var c = "adm-badge" + (big ? " adm-badge--big" : " ");
     if (v.pos) return '<span class="' + c + ' adm-badge--tint">Салон</span>';
+    if (v.delivered) return '<span class="' + c + ' adm-badge--ok">Доставлен</span>';
     if (v.shipped) return '<span class="' + c + ' adm-badge--ok">Отправлен</span>';
-    if (v.status === "paid") return '<span class="' + c + ' adm-badge--ink">Оплачен</span>';
+    if (v.status === "paid") {
+      return v.labeled
+        ? '<span class="' + c + ' adm-badge--ink">Этикетка готова</span>'
+        : '<span class="' + c + ' adm-badge--ink">Оплачен</span>';
+    }
     if (v.status === "cancelled") return '<span class="' + c + ' adm-badge--quiet">Отменён</span>';
     if (v.status === "refunded") return '<span class="' + c + ' adm-badge--quiet">Возврат</span>';
     return '<span class="' + c + '">Ждёт оплаты</span>';
@@ -9400,28 +9485,34 @@
 
   /* ---------- Заказы ------------------------------------------------------ */
 
+  /* The chips follow the fulfilment steps: a paid order is «Новые» until its
+     label exists, «Этикетка готова» until it leaves, then «Отправлены» and
+     «Доставлены». Unpaid orders (new / failed) live under «Все» with their
+     «Ждёт оплаты» badge — nothing about them is a step of the owner's. */
   var ADM_ORDER_FILTERS = [
-    ["new", "Новые"], ["shipped", "Отправлены"], ["unpaid", "Ждут оплаты"],
-    ["salon", "Салон"], ["all", "Все"]
+    ["new", "Новые"], ["label", "Этикетка готова"], ["shipped", "Отправлены"],
+    ["delivered", "Доставлены"], ["salon", "Салон"], ["all", "Все"]
   ];
   function admOrderMatches(v, f) {
     if (f === "all") return true;
-    if (f === "new") return v.paid;
+    if (f === "new") return v.paid && !v.labeled;
+    if (f === "label") return v.paid && v.labeled;
     if (f === "shipped") return v.shipped;
-    if (f === "unpaid") return v.unpaid;
+    if (f === "delivered") return v.delivered;
     if (f === "salon") return v.pos;
     return true;
   }
   function admOrdersHTML() {
     if (SRV.admin === true) loadSrvOrders(false);
     var f = S.admOrderFilter || "new";
-    var waiting = admWaitingCount();
+    var split = admWaitingSplit();
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
+          var n = x[0] === "new" ? split.fresh : x[0] === "label" ? split.labeled : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
-            x[1] + (x[0] === "new" && waiting ? " " + waiting : "") + "</button>";
+            x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
         '<input class="adm-input adm-input--row" data-admorderq value="' + esc(S.admOrderQ || "") +
           '" placeholder="Номер, имя, телефон" aria-label="Поиск по заказам" style="flex:1;min-width:180px">' +
@@ -9433,12 +9524,15 @@
       '<div class="adm-list adm-list--flat" id="orderlist">' + admOrderRows() + "</div>" +
       "</div>";
   }
-  /** The rows alone, so the search box can patch them in place. */
+  /** The rows alone, so the search box can patch them in place. A typed
+      search looks through every order whatever chip is on — the owner typing
+      a number from a customer's letter should not have to guess which step
+      that order is at. */
   function admOrderRows() {
     var f = S.admOrderFilter || "new";
     var q = (S.admOrderQ || "").toLowerCase().trim();
     var list = admOrders().map(admOrderVM)
-      .filter(function (v) { return admOrderMatches(v, f); })
+      .filter(function (v) { return q ? true : admOrderMatches(v, f); })
       .filter(function (v) {
         if (!q) return true;
         var phone = (v.srv && v.srv.phone) || "";
@@ -9451,12 +9545,34 @@
     return list.map(admOrderRowHTML).join("") +
       (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
   }
+  /** The one step an order is at, as a button — the same primary action the
+      card leads with, so the row can do it without opening the card. */
+  function admOrderStepBtn(v, row) {
+    var cls = "adm-btn" + (row ? " adm-btn--row" : "");
+    var busy = SRV.shipBusy ? " disabled" : "";
+    if (v.paid && v.pickup) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Выдан клиенту</button>';
+    if (v.paid && !v.labeled && !v.digital) {
+      return '<button class="' + cls + '" data-admlabel="' + esc(v.id) + '"' + busy + ">" +
+        (SRV.shipBusy ? "Создаём…" : "Создать этикетку") + "</button>";
+    }
+    if (v.paid) return '<button class="' + cls + '" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    if (v.shipped) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Доставлен</button>';
+    return "";
+  }
+  /** The printable receipt of a salon sale — the POS screen's own link,
+      repeated on the order so it can be found again a week later. */
+  function admReceiptLink(v, row) {
+    return '<a class="adm-btn adm-btn--ghost' + (row ? " adm-btn--row" : "") + '" href="/api/admin/pos-orders/' +
+      encodeURIComponent(v.id) + '/receipt/" target="_blank" rel="noopener">Чек ↗</a>';
+  }
   function admOrderRowHTML(v) {
     var acts = "";
-    if (v.paid) acts =
-      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admlabel="' + esc(v.id) + '"' +
-        (SRV.shipBusy ? " disabled" : "") + ">" + (v.labeled ? "Наклейка ✓" : "Наклейка") + "</button>" +
-      '<button class="adm-btn adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    if (v.pos) acts = admReceiptLink(v, true);
+    else if (v.paid && !v.labeled && !v.pickup && !v.digital) acts =
+      // no label yet: the label leads, «Отправлен» stays a quiet second (a courier collecting, a hand-over)
+      admOrderStepBtn(v, true) +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    else if (v.paid || v.shipped) acts = admOrderStepBtn(v, true);
     else if (v.unpaid) acts =
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
     return '<div class="adm-row adm-row--stack">' +
@@ -9490,10 +9606,18 @@
     }
     return null;
   }
-  /** What the confirm card says before the shop or the money moves. */
+  /** What the confirm card says before the shop or the money moves. The
+      letter is the reason «Отправлен» asks first, so the card names it — with
+      the tracking number it will carry, or the fact that there is none. */
   function admShipConfirmText(v) {
+    // two straight chains, not one with a branch in it: the i18n check joins
+    // the literals of a chain into the text node the browser will show
+    if (v.tracking) {
+      return v.number + " · " + v.who + "\n" + v.ship +
+        "\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером " + v.tracking + ".";
+    }
     return v.number + " · " + v.who + "\n" + v.ship +
-      "\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
+      "\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера.";
   }
   function admCancelConfirmText(v) {
     return v.number + " · " + v.who + "\nДеньги вернутся клиенту, письмо уйдёт автоматически.";
@@ -9529,30 +9653,115 @@
     }
     return media(p, gi, "");
   }
+  /* ---- the fulfilment strip ------------------------------------------------
+     Four steps for a parcel — Оплачен · Этикетка · Отправлен · Доставлен —
+     and two for a pickup order, whose only step after payment is the hand-over
+     at the counter. Each step has one of four looks: done (ink), now (tint,
+     bold — the one the primary button below does), todo (paper), or skipped
+     (an order that left without a Montonio label — the step was never done and
+     never will be, and drawing it as done would be a lie about the sticker). */
+  function admOrderSteps(v) {
+    var paidish = v.paid || v.shipped || v.delivered;
+    var steps;
+    if (v.pickup) {
+      steps = [
+        ["Оплачен", paidish ? "done" : "now", ""],
+        ["Выдан", v.delivered ? "done" : paidish ? "now" : "todo", ""]
+      ];
+    } else {
+      var left = v.shipped || v.delivered;
+      steps = [
+        ["Оплачен", paidish ? "done" : "now", ""],
+        ["Этикетка",
+          v.labeled ? "done" : left ? "skip" : v.paid ? "now" : "todo",
+          v.labeled ? "готова" : left ? "без этикетки" : ""],
+        ["Отправлен", left ? "done" : v.paid && v.labeled ? "now" : "todo", ""],
+        ["Доставлен", v.delivered ? "done" : v.shipped ? "now" : "todo", ""]
+      ];
+    }
+    return '<div class="adm-steps adm-steps--' + steps.length + '" aria-label="Шаги заказа">' + steps.map(function (s, i) {
+      return '<div class="adm-step adm-step--' + s[1] + '"><div class="adm-step__n">' + (i + 1) + "</div>" +
+        '<div class="adm-step__l">' + s[0] + "</div>" +
+        (s[2] ? '<div class="adm-step__s">' + s[2] + "</div>" : "") + "</div>";
+    }).join("") + "</div>";
+  }
+  /** The carrier's name as the owner knows it, from the code Montonio uses. */
+  var CARRIER_WORD = { omniva: "Omniva", smartpost: "SmartPosti", itella: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend" };
+  function carrierWord(code) {
+    var c = String(code || "").toLowerCase();
+    return CARRIER_WORD[c] || (c ? c.charAt(0).toUpperCase() + c.slice(1) : "");
+  }
+  /* ---- «Отправление»: the parcel as Montonio has it -----------------------
+     Drawn once the label exists: the carrier and the point, the tracking code
+     with a copy button (Renat pastes it into WhatsApp more often than into
+     anything else), the drop-off PIN where the carrier gave one, and the label
+     as two links — A4 for the office printer, A6 for a thermal one. A label the
+     journal's undo set aside keeps the box, in a quiet state, with the one
+     honest sentence about it: Montonio does not cancel parcels. */
+  function admShipmentBoxHTML(v) {
+    var o = v.srv;
+    var mont = o && o.shipping && o.shipping.montonio;
+    if (!mont || !mont.shipmentId) return "";
+    var base = "/api/admin/shipments/" + encodeURIComponent(v.id) + "/label/";
+    var who = carrierWord(mont.carrier || (o.shipping && o.shipping.carrier));
+    var where = o.shipping && o.shipping.pointName ? o.shipping.pointName : srvAddrLine(o.shipping);
+    if (mont.dismissed) {
+      return '<div class="adm-ship adm-ship--off">' +
+        '<div class="adm-ship__row"><span class="adm-sec__t">Отправление</span>' +
+          '<span class="adm-badge adm-badge--quiet">Этикетка отложена</span></div>' +
+        '<div class="adm-hint">Отправление у Montonio остаётся — отменить его нельзя. Шаг «Этикетка» возвращён; ' +
+          "чтобы снова пользоваться этой этикеткой, верните её.</div>" +
+        '<div class="adm-ship__links"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admlabel="' + esc(v.id) + '"' +
+          (SRV.shipBusy ? " disabled" : "") + ">Вернуть этикетку</button></div>" +
+        "</div>";
+    }
+    var code = String(mont.trackingCode || "");
+    return '<div class="adm-ship">' +
+      '<div class="adm-ship__row"><span class="adm-sec__t">Отправление</span>' +
+        '<span class="adm-hint">' + esc((who ? who + " · " : "") + (where || "")) + "</span></div>" +
+      (code
+        ? '<div class="adm-ship__row adm-ship__row--code"><span><span class="adm-hint">Трек-номер</span><br>' +
+            '<span class="adm-ship__code" data-trackingcode>' + esc(code) + "</span></span>" +
+            '<button class="adm-copy" data-admcopy="' + esc(code) + '" aria-label="Скопировать трек-номер">Скопировать</button></div>'
+        : '<div class="adm-hint">Трек-номер появится, когда перевозчик примет посылку.</div>') +
+      (mont.dropOffPin ? '<div class="adm-hint">Код сдачи посылки: ' + esc(mont.dropOffPin) + "</div>" : "") +
+      '<div class="adm-ship__links">' +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A4" target="_blank" rel="noopener" data-labelpdf="A4">Открыть PDF (A4) ↗</a>' +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A6" target="_blank" rel="noopener" data-labelpdf="A6">A6 для термопринтера ↗</a>' +
+        // http(s) only: an href is a place a "javascript:" string would run
+        (/^https?:\/\//i.test(String(mont.trackingUrl || ""))
+          ? '<a class="adm-link adm-link--muted" href="' + esc(mont.trackingUrl) + '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
+      "</div>" +
+      "</div>";
+  }
   function admOrderCardHTML() {
     var v = admCurOrder();
     if (!v) return '<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>' +
       '<div class="adm-empty">Заказ не найден</div></div>';
     var o = v.srv;
-    var showSteps = !v.pos && v.status !== "cancelled";
-    var stepIdx = v.shipped ? 4 : v.labeled ? 2 : v.status === "paid" ? 1 : 0;
-    var steps = ["Оплачен", "Наклейка", "Отправлен", "Письмо клиенту"].map(function (l, i) {
-      var cls = i < stepIdx ? " adm-step--done" : i === stepIdx ? " adm-step--now" : "";
-      return '<div class="adm-step' + cls + '"><div class="adm-step__n">' + (i + 1) + "</div>" +
-        '<div class="adm-step__l">' + l + "</div></div>";
-    }).join("");
+    var closed = v.status === "cancelled" || v.status === "refunded";
+    var showSteps = !v.pos && !v.digital && !closed;
 
-    var acts = "";
-    if (showSteps && (v.paid || v.shipped)) acts +=
-      '<button class="adm-btn ' + (v.labeled ? "adm-btn--ghost" : "") + '" data-admship' +
-        (SRV.shipBusy ? " disabled" : "") + ">" +
-        (SRV.shipBusy ? "Печатаем…" : v.labeled ? "Наклейка ✓" : "Напечатать наклейку") + "</button>";
-    if (showSteps && v.paid) acts +=
-      '<button class="adm-btn ' + (v.labeled ? "" : "adm-btn--ghost") + '" data-admshipnow="' + esc(v.id) +
-        '">Отметить отправленным</button>';
-    acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
-    if (showSteps && (v.paid || v.unpaid)) acts +=
+    /* One primary per state (admOrderStepBtn), everything else quiet: the
+       label as a ghost second when the parcel is leaving without one, the
+       letter, and «Отменить заказ» at the end in its warning ink. */
+    var primary = showSteps ? admOrderStepBtn(v, false) : "";
+    var acts = primary;
+    if (v.pos) acts += admReceiptLink(v, false);
+    if (showSteps && v.paid && !v.labeled && !v.pickup) acts +=
+      '<button class="adm-btn adm-btn--ghost" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    if (!v.pos || (o && o.email)) acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
+    if (!v.pos && (v.paid || v.unpaid)) acts +=
       '<button class="adm-del" data-admordercancel="' + esc(v.id) + '">Отменить заказ</button>';
+
+    /* One sentence under the buttons that says what the primary one does —
+       the owner's own complaint was a button that did more than it said. */
+    var hint = "";
+    if (showSteps && v.unpaid) hint = "Заказ ещё не оплачен — отправлять нечего.";
+    else if (showSteps && v.paid && v.pickup) hint = "Клиент забирает заказ в салоне. Письмо не отправляется.";
+    else if (showSteps && v.paid && !v.labeled) hint = "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.";
+    else if (showSteps && v.paid && v.labeled) hint = "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
+    else if (showSteps && v.shipped) hint = "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.";
 
     /* Every status the panel could always set stays settable — the actions row
        above is the everyday path, this line is the rest of them. */
@@ -9571,8 +9780,10 @@
     return '<div class="adm-screen adm-screen--card">' +
       '<button class="adm-link" data-admorder="">← Заказы</button>' +
       admHead(esc(v.number) + " · " + esc(v.date), esc(v.who), admOrderBadge(v, true), true) +
-      (showSteps ? '<div class="adm-steps">' + steps + "</div>" : "") +
-      (acts ? '<div class="adm-acts">' + acts + "</div>" : "") +
+      (showSteps ? admOrderSteps(v) : "") +
+      (acts ? '<div class="adm-acts adm-ordacts">' + acts + "</div>" : "") +
+      (hint ? '<div class="adm-hint">' + hint + "</div>" : "") +
+      (showSteps ? admShipmentBoxHTML(v) : "") +
       (manual ? '<div class="adm-hint"><span>Изменить статус вручную:</span> ' + manual + "</div>" : "") +
       (S.orderReplyOpen ? admOrderMsgHTML(v) : "") +
       '<div class="adm-cols"><div>' +
@@ -9592,9 +9803,8 @@
         '<div><div class="adm-sec__t">Доставка</div><div class="adm-kv">' + esc(v.ship) + "<br>" +
           // features: an electronic order has no address — where the card
           // went is an e-mail, and that is what belongs on this line
-          "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span>" +
-          (v.tracking ? '<br><span class="adm-mono">' + esc(v.tracking) + "</span>" : "") + "</div>" +
-          admShipLinksHTML(v) + admGiftCardsHTML(o) + "</div>" +
+          "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span></div>" +
+          admGiftCardsHTML(o) + "</div>" +
         (o ? '<div><div class="adm-sec__t">Заметка</div>' +
           '<textarea class="adm-input" rows="2" data-admnote placeholder="Только для вас" style="margin-top:10px">' +
           esc(o.notes || "") + "</textarea>" +
@@ -9632,22 +9842,6 @@
     }).join("") +
       '<span class="adm-hint"><span>Действует до</span> <span>' +
       esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
-  }
-  /** Once Montonio has the parcel: the printable label and the carrier's own
-      tracking page. Both come straight off the order the server sent —
-      docs/shipping.md § «Montonio Shipping». */
-  function admShipLinksHTML(v) {
-    var sh = v.srv && v.srv.shipping && v.srv.shipping.montonio;
-    if (!sh || !sh.shipmentId) return "";
-    return '<div class="adm-acts" style="margin-top:10px">' +
-      '<a class="adm-link" href="/api/admin/shipments/' + encodeURIComponent(v.id) +
-        '/label/" target="_blank" rel="noopener">Этикетка PDF ↗</a>' +
-      // http(s) only: an href is a place a "javascript:" string would run
-      (/^https?:\/\//i.test(String(sh.trackingUrl || ""))
-        ? '<a class="adm-link adm-link--muted" href="' + esc(sh.trackingUrl) +
-          '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
-      (sh.dropOffPin ? '<span class="adm-hint">Код сдачи посылки: ' + esc(sh.dropOffPin) + "</span>" : "") +
-      "</div>";
   }
   /** «Написать клиенту» — the inline card with the assistant's draft in it. */
   function admOrderMsgHTML(v) {
@@ -14879,6 +15073,20 @@
           admOrdersChanged();
         }).catch(noop);
     }
+    /* «Создать этикетку» and its undo. The forward line is written AFTER the
+       server registered the parcel (`done`, see srvCreateShipment), so there
+       is nothing left to send here; the undo sets the shipment aside with
+       labelStep:false (Montonio keeps the parcel), and «Вернуть этикетку» on a
+       set-aside one goes through the POST again, which brings it back. */
+    else if (a.type === "order_label") {
+      if (a.done) return;
+      if (a.value) { srvCreateShipment(a.id); return; }
+      apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { labelStep: false })
+        .then(function (r) {
+          if (!(r.status === 200 && r.body.ok)) toast("Не удалось вернуть шаг");
+          admOrdersChanged();
+        }).catch(noop);
+    }
     // all three languages travel every time, so an emptied pair clears too
     else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }).catch(noop);
     else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
@@ -14990,6 +15198,7 @@
     paid: ["paid", "оплачен", "--ok"],
     failed: ["failed", "не оплачен", "--error"],
     shipped: ["shipped", "отправлен", "--muted"],
+    delivered: ["delivered", "доставлен", "--ok"],
     cancelled: ["cancelled", "отменён", "--muted"],
     refunded: ["refunded", "возврат", "--muted"]
   };
@@ -15037,24 +15246,53 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
-  /* Book the parcel with the carrier through Montonio. The two failures worth
-     naming get their own sentence — «нет ключей» and «этого пакомата у Montonio
-     нет» need different actions from Renat; everything else is one line. */
+  /* «Создать этикетку»: book the parcel with the carrier through Montonio.
+     The status of the order does not move — that is «Отправлен», its own
+     button (docs/shipping.md § «Что видит Ренат в админке»). The failures
+     worth naming get their own sentence — «нет ключей», «этого пакомата у
+     Montonio нет» and «этому заказу этикетка не нужна» need different actions
+     from Renat; everything else is one line.
+     The server answers first and the journal line is written after: a label
+     that Montonio refused must not leave a «создана» line with an undo behind
+     it. The line's undo (order_label, value:false) sets the shipment aside
+     rather than deleting it — Montonio cannot cancel a registered parcel — and
+     the card says so in the shipment box. */
   var SHIP_ERR = {
     not_configured: "Доставка Montonio не подключена",
     point_unresolved: "Пакомат не найден у Montonio",
-    not_paid: "Отправление создаётся после оплаты."
+    not_shippable: "Для самовывоза и электронных заказов этикетка не нужна.",
+    not_paid: "Этикетка создаётся после оплаты."
   };
   function srvCreateShipment(id) {
     if (SRV.shipBusy) return;
+    var row = admOrderById(id);
     SRV.shipBusy = true; render();
     apiSend("/api/admin/shipments/", "POST", { orderId: id }).then(function (r) {
       SRV.shipBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) { toast("Отправление создано ✓"); loadSrvOrders(true); return; }
-      toast(SHIP_ERR[r.body && r.body.error] || "Не удалось создать отправление");
+      if (r.status === 200 && r.body.ok) {
+        var entry = demoApply({
+          type: "order_label", id: String(id), number: row ? row.number : String(id), value: true, done: true
+        });
+        toast(r.body.reused ? "Этикетка снова на месте ✓" : "Этикетка готова ✓", entry);
+        loadSrvOrders(true);
+        return;
+      }
+      toast(SHIP_ERR[r.body && r.body.error] || "Не удалось создать этикетку");
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
+  }
+  /** The tracking code into the clipboard — Renat pastes it into a chat
+      more often than anywhere else. Where the clipboard is not reachable
+      the toast shows the code itself, so it can still be read out. */
+  function admCopyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        toast("Трек-номер скопирован ✓");
+      }).catch(function () { toast(text); });
+      return;
+    }
+    toast(text);
   }
 
   /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() --------- */
@@ -15196,10 +15434,13 @@
         ? "Склад «" + spName + "»: " + (a.delta > 0 ? "+" : "") + a.delta + " (" + (STOCK_MOVE_WORD[a.reason] || a.reason || "ручная правка") + ")"
         : "Склад «" + spName + "»: остаток → " + a.qty;
     }
-    // «Заказы»: the one change the redesigned card makes to an order
+    // «Заказы»: a step on the card — the status it moved, or the label it made
     if (a.type === "order_status") {
       return "Заказ " + (a.number || a.id) + ": " +
         ((SRV_STATES[a.value] && SRV_STATES[a.value][1]) || a.value);
+    }
+    if (a.type === "order_label") {
+      return "Этикетка " + (a.number || a.id) + ": " + (a.value ? "создана" : "отложена — отправление у Montonio остаётся");
     }
     if (a.type === "set_seo") {
       var sv = seoOfAction(a) || {}, sru = sv.RU || {};
@@ -15443,6 +15684,12 @@
     else if (a.type === "order_status") {
       entry.prev = { type: "order_status", id: a.id, number: a.number, value: a.prev, prev: a.value };
     }
+    /* the label step: its undo does not delete the parcel (Montonio cannot),
+       it sets the shipment aside — the card shows the step as not done and
+       says why; see srvPush() for the two directions */
+    else if (a.type === "order_label") {
+      entry.prev = { type: "order_label", id: a.id, number: a.number, value: !a.value };
+    }
     // both fields empty = «снова как в каталоге», so the override is removed
     // rather than stored as a pair of empty strings that would hide it
     else if (a.type === "set_seo") {
@@ -15567,7 +15814,7 @@
     /* inventory + orders: srvPush() at the bottom of this function is the
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
-    else if (a.type === "stock_adjust" || a.type === "order_status") noop();
+    else if (a.type === "stock_adjust" || a.type === "order_status" || a.type === "order_label") noop();
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
@@ -17048,7 +17295,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admdelivered],[data-admcopy],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -17283,13 +17530,25 @@
     }
     if (d.admlogout !== undefined) { admLogout(); return; }
     if (d.admstatus) { srvOrderPatch(S.adminOrder, { status: d.admstatus }); return; }
-    if (d.admship !== undefined) { srvCreateShipment(S.adminOrder); return; }
-    /* ---- «Заказы»: the three things the redesigned rows and card do -------
-       «Наклейка» books the parcel with the carrier (Montonio), «Отправлен»
-       goes through the confirm card because it moves the money's status and
-       sends the customer a letter, «Написать» opens the order on its message
-       card. Everything reversible lands in the journal with an undo. */
+    /* ---- «Заказы»: the steps the rows and the card do ----------------------
+       «Создать этикетку» books the parcel with the carrier (Montonio) and
+       changes nothing else; «Отправлен» goes through the confirm card because
+       it moves the status and sends the customer a letter; «Доставлен» (and
+       «Выдан клиенту» for a pickup) is the last step, applied at once with an
+       undo on the toast; «Написать» opens the order on its message card.
+       Every step lands in the journal with a way back. */
     if (d.admlabel) { S.adminOrder = d.admlabel; srvCreateShipment(d.admlabel); return; }
+    if (d.admdelivered) {
+      var dRow = admOrderById(d.admdelivered);
+      if (!dRow) return;
+      var dEntry = demoApply({
+        type: "order_status", id: dRow.id, number: dRow.number, value: "delivered", prev: dRow.status
+      });
+      render();
+      toast(dRow.pickup ? dRow.number + " выдан клиенту" : dRow.number + " доставлен", dEntry);
+      return;
+    }
+    if (d.admcopy) { admCopyText(d.admcopy); return; }
     if (d.admwrite) {
       S.adminOrder = d.admwrite; S.adminTab = "orders"; S.orderReplyOpen = true;
       S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";

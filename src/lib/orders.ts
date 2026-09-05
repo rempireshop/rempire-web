@@ -35,8 +35,22 @@ import { cleanVideoUrl } from "@/lib/video";
 
 /* ---------- types -------------------------------------------------------- */
 
-export const ORDER_STATUSES = ["new", "paid", "failed", "shipped", "cancelled", "refunded"] as const;
+/*
+ * The fulfilment steps, in order: new → paid → shipped → delivered, with
+ * cancelled / refunded off to the side. `delivered` is the owner's own last
+ * step («Доставлен» on the order card): a hand-over the carrier's tracking
+ * page or the customer confirmed, no letter behind it, undoable back to
+ * shipped from the journal. The database's check constraint spells out the
+ * same list — db/migrations/140_order_delivered.sql; add a value there and
+ * here together, never in one place only.
+ */
+export const ORDER_STATUSES = ["new", "paid", "failed", "shipped", "delivered", "cancelled", "refunded"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+/** The statuses an order carries once its money arrived and stayed — the
+ *  three fulfilment steps after payment. src/lib/analytics.ts's
+ *  PAID_STATUSES is this same list under its own name. */
+export const PAID_ORDER_STATUSES = ["paid", "shipped", "delivered"] as const satisfies readonly OrderStatus[];
 
 export type StockState = "in" | "low" | "out";
 
@@ -1229,7 +1243,7 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
      product, so its parts are not resolved and returned individually here —
      out of scope for this pass, same boundary the decrement below draws.
      Best effort: a stock hiccup must never stop a refund from being recorded. */
-  const wasPaid = before.status === "paid" || before.status === "shipped";
+  const wasPaid = (PAID_ORDER_STATUSES as readonly string[]).includes(before.status);
   if (wasPaid && (status === "refunded" || status === "cancelled")) {
     try {
       const { move } = await import("@/lib/inventory");
