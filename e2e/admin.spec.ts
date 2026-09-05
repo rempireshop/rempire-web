@@ -203,7 +203,10 @@ test.describe("admin", () => {
       try {
         await page.locator('[data-heroedit="0"]').click();
         await page.locator('[data-herof="title"]').fill("E2E hero title");
+        // the banner is shop-wide, so «Сохранить» asks first — the overlay
+        // card, same as a tariff (README § State)
         await page.locator("[data-herosave]").click();
+        await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
         await expect(page.locator("[data-admapply]")).toBeVisible();
         await applyAndWaitForSettingsWrite(page);
         await expect(page.getByRole("status")).toBeVisible();
@@ -235,7 +238,10 @@ test.describe("admin", () => {
         // heading click).
         await page.locator('[data-contentblock="company"]').click();
         await page.locator('[data-contentf="company.phone"]').fill("+372 5000000");
+        // the details reach every page of the shop, so the save asks first
         await page.locator("[data-contentsave]").click();
+        await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить данные магазина?");
+        await expect(page.locator(".adm-confirm__d")).toContainText("+372 5000000");
         await expect(page.locator("[data-admapply]")).toBeVisible();
         await applyAndWaitForSettingsWrite(page);
         await expect(page.getByRole("status")).toBeVisible();

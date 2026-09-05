@@ -242,9 +242,10 @@ test.describe("sweep — the banner", () => {
       await assertClean(page, w, "every slide hidden");
       for (let i = total - 1; i >= 1; i--) await page.locator("[data-herodel]").nth(i).click();
       expect(await rows.count(), "delete left the wrong number of slides").toBe(1);
-      // Bring the one survivor back on so the home page has something to draw.
+      // Bring the one survivor back on so the home page has something to draw
+      // — the slide's on/off control is a switch since phase 4, so read its state.
       const onBtn = page.locator("[data-heroon]").first();
-      if ((await onBtn.textContent() || "").includes("Показать")) await onBtn.click();
+      if ((await onBtn.getAttribute("aria-pressed")) === "false") await onBtn.click();
       await assertClean(page, w, "hero after delete");
 
       // Save goes through the confirm card, never straight to the shop.
@@ -425,8 +426,12 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
       await page.locator('[data-pricingf="proDiscountPct"]').fill("25");
       await expect(page.locator("[data-admpricingsave]"), "typing a valid value never offered a «Сохранить» button")
         .toBeVisible();
+      /* A discount is money, so since phase 4 «Сохранить» proposes and the
+         confirm card applies — the same card as a tariff or a shipped order. */
       await page.locator("[data-admpricingsave]").click();
-      expect(await toastText(page)).toMatch(/Сохранено/);
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить цены и баллы?");
+      await page.locator("[data-admapply]").click();
+      expect(await toastText(page)).toMatch(/сохранен/i);
       await clearToast(page);
       await assertClean(page, w, "pricing saved");
 
@@ -454,6 +459,7 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
         expect(isRussian(errText), `${field}="${typed}" message is not Russian — "${errText}"`).toBe(true);
         if (await page.locator("[data-admpricingsave]").count()) {
           await page.locator("[data-admpricingsave]").click();
+          if (await page.locator("[data-admapply]").count()) await page.locator("[data-admapply]").click();
           await clearToast(page);
         }
         await assertClean(page, w, `pricing ${field}="${typed}"`);

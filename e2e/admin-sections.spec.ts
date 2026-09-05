@@ -353,6 +353,115 @@ test.describe("admin sections — Настройки", () => {
   });
 });
 
+/**
+ * The four cards the phase-4 sweep rebuilt in the panel's own markup — the
+ * banner editor, the shop's details, prices & points, the accountant's report.
+ * Each save is a shop-wide (or money) change, so it goes through the overlay
+ * confirm card and lands on the server; the report is a link, and the link is
+ * the one the API serves.
+ */
+test.describe("admin sections — Настройки: the rebuilt cards", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(185) });
+
+  test("banner, shop details and prices save through the confirm card; the report link points at the export", async ({ page }) => {
+    test.setTimeout(180_000);
+    test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
+    await loginAsAdmin(page);
+    const settingsPut = () =>
+      page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+    const before = await (await page.request.get("/api/admin/settings/")).json();
+
+    /* ---- Главная страница: the banner ------------------------------------ */
+    const title = `E2E баннер ${Date.now().toString().slice(-6)}`;
+    try {
+      await section(page, "setup");
+      await page.locator('[data-admsetpage="home"]').click();
+      // a slide is a row with its own switch, order buttons and «Изменить»
+      await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-pressed", "true");
+      await page.locator('[data-heroedit="0"]').click();
+      await page.locator('[data-herof="title"]').fill(title);
+      await page.locator("[data-heroclose]").click();
+      await expect(page.getByText("Есть несохранённые изменения — нажмите «Сохранить».").first()).toBeVisible();
+
+      await page.locator("[data-herosave]").click();
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
+      await expect(page.locator(".adm-confirm__d")).toContainText("Слайдов на сайте");
+      const put = settingsPut();
+      await page.locator("[data-admapply]").click();
+      expect((await put).ok()).toBe(true);
+      await expect(page.getByRole("status")).toContainText("Баннер сохранён");
+      const saved = await (await page.request.get("/api/admin/settings/")).json();
+      expect(saved.settings.hero.slides[0].title.RU, "the title never reached settings.hero").toBe(title);
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { hero: before.settings.hero ?? null } });
+    }
+
+    /* ---- О компании: the shop's own details ----------------------------- */
+    try {
+      await page.reload();
+      await waitForScreen(page, "admin");
+      await section(page, "setup");
+      await page.locator('[data-admsetpage="company"]').click();
+      await page.locator('[data-contentblock="company"]').click();
+      await page.locator('[data-contentf="company.phone"]').fill("+372 5000001");
+      await page.locator("[data-contentsave]").click();
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить данные магазина?");
+      await expect(page.locator(".adm-confirm__d")).toContainText("+372 5000001");
+      const put = settingsPut();
+      await page.locator("[data-admapply]").click();
+      expect((await put).ok()).toBe(true);
+      await expect(page.getByRole("status")).toContainText("Данные магазина сохранены");
+      const saved = await (await page.request.get("/api/admin/settings/")).json();
+      expect(saved.settings.content.company.phone, "the phone never reached settings.content").toBe("+372 5000001");
+    } finally {
+      // back to the standard details through the panel's own reset
+      await section(page, "setup");
+      const back = page.locator("[data-admsetback]");
+      if (await back.count()) await back.first().click();
+      await page.locator('[data-admsetpage="company"]').click();
+      await page.locator("[data-contentreset]").click();
+      if (await page.locator("[data-admapply]").count()) {
+        const put = settingsPut();
+        await page.locator("[data-admapply]").click();
+        await put;
+      }
+    }
+
+    /* ---- Цены и баллы ---------------------------------------------------- */
+    const originalPricing = JSON.parse(JSON.stringify(before.settings.pricing || {}));
+    try {
+      // the nav item always lands on the index of the six pages
+      await section(page, "setup");
+      await page.locator('[data-admsetpage="prices"]').click();
+      await page.locator('[data-pricingf="proDiscountPct"]').fill("22");
+      await page.locator("[data-admpricingsave]").click();
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить цены и баллы?");
+      await expect(page.locator(".adm-confirm__d")).toContainText("22%");
+      const put = settingsPut();
+      await page.locator("[data-admapply]").click();
+      expect((await put).ok()).toBe(true);
+      await expect(page.getByRole("status")).toContainText("Цены и баллы сохранены");
+      const saved = await (await page.request.get("/api/admin/settings/")).json();
+      expect(saved.settings.pricing.proDiscountPct, "the discount never reached settings.pricing").toBe(22);
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { pricing: originalPricing } });
+    }
+
+    /* ---- Отчёт для бухгалтера: the download link ------------------------- */
+    await section(page, "setup");
+    await page.locator('[data-admsetpage="company"]').click();
+    const month = await page.locator("[data-admreportsmonth]").inputValue();
+    expect(month).toMatch(/^\d{4}-\d{2}$/);
+    const opened = page.context().waitForEvent("request",
+      (r) => r.url().includes("/api/admin/reports/orders/"));
+    const popup = page.waitForEvent("popup");
+    await page.locator('[data-admreportdl="xlsx"]').click();
+    expect((await opened).url(), "the button opened something other than this month's export")
+      .toContain(`/api/admin/reports/orders/?month=${month}&format=xlsx`);
+    await (await popup).close();
+  });
+});
+
 /** Playwright has no first-class "is this the mobile project" flag. */
 function testProjectIsMobile(info: { project: { name: string } }): boolean {
   return info.project.name !== "desktop";
