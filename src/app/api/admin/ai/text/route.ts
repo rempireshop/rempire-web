@@ -45,6 +45,11 @@ const MAX_TOKENS = 900;
 const TEMPERATURE = 0.4;
 const RATE_MAX = 30;
 const RATE_WINDOW_MS = 3_600_000;
+/* The biggest honest body is a "translate" of 6 000 characters or a blog
+   article of which only the first 1 500 reach the model (src/lib/ai-prompts.ts
+   caps every field). Anything past this is read as text and refused before
+   it is parsed — the same door src/app/api/orders/route.ts uses. */
+const MAX_BYTES = 128_000;
 
 function isLang3(v: unknown): v is Lang3 {
   return typeof v === "string" && (LANGS3 as readonly string[]).includes(v);
@@ -112,9 +117,18 @@ export async function POST(req: NextRequest) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
 
+  let raw: string;
+  try {
+    raw = await req.text();
+  } catch {
+    return NextResponse.json({ ok: false, error: "bad_json" }, { status: 400 });
+  }
+  if (raw.length > MAX_BYTES) {
+    return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
+  }
   let body: { task?: unknown; lang?: unknown; input?: unknown };
   try {
-    body = await req.json();
+    body = JSON.parse(raw);
   } catch {
     return NextResponse.json({ ok: false, error: "bad_json" }, { status: 400 });
   }

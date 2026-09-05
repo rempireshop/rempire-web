@@ -789,6 +789,17 @@ export async function priceItems(
     if (stock === "out") throw new OrderError("out_of_stock", raw.id);
 
     const v = variantOf(raw.id, raw.variant, own?.variants);
+    /* A size the product does not have — «250 ml» against a «250 мл» ladder,
+       an index past the end — used to fall through to the base price with
+       the browser's label kept on the line: a tampered cart bought the big
+       bottle at the small bottle's price, and the owner shipped what the
+       label said. With a ladder to check against, an unknown size is refused
+       (security re-audit 04.09.2026). A product with no ladder keeps taking
+       whatever label the cart carries, priced at its one price, as before. */
+    const ladder = own?.variants ?? VARIANTS[raw.id];
+    if (ladder && ladder.sizes.length && raw.variant != null && raw.variant !== "" && v.price == null) {
+      throw new OrderError("bad_variant", raw.id);
+    }
     /* An override price replaces the base price; a size that costs more keeps
        its premium over the base, so «−1 € on the 75 ml» does not silently
        hand away 16 € on the 500 ml. */

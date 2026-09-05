@@ -234,6 +234,19 @@ export const PRE_CSS = `
 #prerender .pre__pr { display: block; font-size: 13.5px; font-weight: 600; }
 `.trim();
 
+/* JSON inside a <script> is "script data" to the HTML parser, which reads it
+   before any JSON parser does: the block ends at the first "</script" whatever
+   the JSON says, and "<!--" opens an escaped state that swallows the real
+   closing tag. JSON.stringify escapes neither, and a custom product's name
+   is typed by the owner (src/lib/product-page.ts). So the three characters
+   that mean something to that parser leave as \u-escapes — the same JSON to
+   every reader — and the two line separators go with them, for the day one
+   of these blocks is read by a JavaScript parser instead (security re-audit
+   04.09.2026). */
+export const ldJson = o => JSON.stringify(o)
+  .replace(/</g, "\\u003c").replace(/>/g, "\\u003e")
+  .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+
 /* Everything a crawler reads, in one block. The prerender writes it between
    the markers in index.html and inlines it verbatim into every generated
    page; the request-time product page writes the same block. `base` is the
@@ -272,7 +285,7 @@ ${ld.map(o => '<script type="application/ld+json"' +
        marked data-seo="ldjson-page": app.js drops those only once the shopper
        navigates away from the path the page was loaded on. */
     (isMain(o) ? ' id="ldjson"' : ' data-seo="ldjson-page"') +
-    ">" + JSON.stringify(o) + "</script>").join("\n")}`;
+    ">" + ldJson(o) + "</script>").join("\n")}`;
 }
 
 /* ---------- shared blocks ------------------------------------------------ */

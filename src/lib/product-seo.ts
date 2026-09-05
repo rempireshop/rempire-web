@@ -40,9 +40,9 @@ function parseJsonb(v: unknown): unknown {
   return v;
 }
 
-/** One line, collapsed whitespace, capped — a snippet, not an article. */
+/** One line, no control or format characters, collapsed whitespace, capped — a snippet, not an article. */
 function line(v: unknown, max: number): string {
-  return typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "";
+  return typeof v === "string" ? v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
 }
 
 function cleanPair(raw: unknown): SeoPair | null {

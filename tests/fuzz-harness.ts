@@ -382,6 +382,8 @@ export interface Fixtures {
   reviewId: string;
   promoCode: string;
   giftCode: string;
+  /** A product the owner created (custom_products, `c-…`) — the request-time product page has a row to answer from. */
+  customId: string;
 }
 
 /** One known row of every shape a route can be asked for, so "not_found" is a
@@ -393,6 +395,7 @@ export async function seedFixtures(): Promise<Fixtures> {
   const { upsertPromo } = await import("@/lib/promos");
   const { upsertPost } = await import("@/lib/blog");
   const { recordLogin } = await import("@/lib/customers");
+  const { createCustomProduct } = await import("@/lib/custom-products");
 
   const base = {
     lang: "RU",
@@ -408,6 +411,10 @@ export async function seedFixtures(): Promise<Fixtures> {
   const review = await addReview({ productId: PRODUCT.id, name: "Fuzz", rating: 5, text: "Хороший товар, беру ещё.", lang: "RU" }, null);
   const promo = await upsertPromo({ code: "FUZZ10", kind: "percent", value: 10, minSubtotal: 0, startsAt: null, endsAt: null, maxUses: null, active: true, note: null });
   const post = await upsertPost({ title: { RU: "Фазз" }, body: { RU: "Текст" }, slug: "fuzz-post" });
+  const custom = await createCustomProduct({
+    brand: "Фазз", name: "Balm — бальзам для бороды", cat: "beard", sizes: ["100 мл", "250 мл"], prices: [9.9, 19.9],
+    description: { RU: "Описание." }, seo: { RU: { title: "Фазз бальзам", desc: "Описание для Google." } },
+  });
   await query(
     "insert into gift_cards (code, amount, balance, lang) values ($1, $2, $3, 'RU') on conflict (code) do nothing",
     ["RMP-ACDE-FGHJ", 50, 50],
@@ -425,5 +432,6 @@ export async function seedFixtures(): Promise<Fixtures> {
     reviewId: review.id,
     promoCode: promo.code,
     giftCode: "RMP-ACDE-FGHJ",
+    customId: custom.id,
   };
 }

@@ -162,7 +162,12 @@ export async function DELETE(req: Request) {
   if (!storageConfigured()) return bad("storage_not_configured", 503);
 
   const key = new URL(req.url).searchParams.get("key") || "";
-  if (!isAllowedKey(key)) return bad("bad_key");
+  /* isAllowedKey() is the coarse "one of ours" gate and it knows giftcards/ —
+     the printable cards the shop writes for itself on the paid transition
+     (src/lib/giftcard-pdf.ts), which are linked from letters already sent.
+     Nothing in the panel ever names one, so this door stays shut for them:
+     only what an upload can create can be deleted here. */
+  if (!isAllowedKey(key) || key.startsWith("giftcards/")) return bad("bad_key");
 
   try {
     await deleteObject(key);

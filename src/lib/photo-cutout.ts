@@ -37,6 +37,21 @@ export function cutoutEnabled(env: Record<string, string | undefined> = process.
   return (env.PHOTO_CUTOUT || "").trim().toLowerCase() === "openai" && Boolean((env.OPENAI_API_KEY || "").trim());
 }
 
+/**
+ * How long one model call may take. The image edit endpoint answers in
+ * seconds; a hung socket would otherwise hold the function open until the
+ * platform killed it, with the owner looking at a spinner. Past this the
+ * call is given up as `cutout_failed` — the original is untouched, a second
+ * click asks again. The same deadline covers fetching the original from the
+ * bucket (the route). PHOTO_CUTOUT_TIMEOUT_MS overrides, in milliseconds,
+ * up to five minutes (the tests set it to a few).
+ */
+export const CUTOUT_TIMEOUT_MS = 90_000;
+export function cutoutTimeoutMs(env: Record<string, string | undefined> = process.env): number {
+  const n = Number(env.PHOTO_CUTOUT_TIMEOUT_MS);
+  return Number.isFinite(n) && n > 0 && n <= 300_000 ? Math.round(n) : CUTOUT_TIMEOUT_MS;
+}
+
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
 /** `products/<id>/<stamp>-<slug>.webp` → `products/<id>/<stamp>-<slug>-cutout.png`
@@ -70,13 +85,16 @@ export async function cutoutImage(bytes: Buffer): Promise<Buffer> {
       method: "POST",
       headers: { authorization: `Bearer ${(process.env.OPENAI_API_KEY || "").trim()}` },
       body: form,
+      signal: AbortSignal.timeout(cutoutTimeoutMs()),
     });
   } catch (err) {
     throw new CutoutError("cutout_failed", 502, err instanceof Error ? err.message : "network");
   }
   if (!res.ok) {
-    const detail = (await res.text().catch(() => "")).slice(0, 300);
-    throw new CutoutError("cutout_failed", 502, `${res.status} ${detail}`);
+    /* The status is the whole of what is kept: an error body from the model
+       host can quote the request back, and the route logs this message. */
+    await res.text().catch(() => "");
+    throw new CutoutError("cutout_failed", 502, `upstream ${res.status}`);
   }
   let data: { data?: Array<{ b64_json?: string }> };
   try {

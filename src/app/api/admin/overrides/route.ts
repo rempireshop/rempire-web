@@ -40,9 +40,35 @@ export const dynamic = "force-dynamic";
 
 type Patch = Partial<Override> & { id?: string; product_id?: string };
 
+/* Every row of this table is served to the world by GET /api/overrides and
+   cached at the edge, and nothing ever deletes a row — so what is stored
+   has to be bounded here, on the way in (audit L8; security re-audit
+   04.09.2026). Catalogue ids are slugs of at most 74 characters, custom ids
+   `c-…` of at most 80; the legacy Russian pair gets the same 70/170 the
+   per-language pair has in src/lib/product-seo.ts; a subsection is a short
+   code; varImg is one gallery index per size. */
+const MAX_ID = 120;
+const MAX_SUBCAT = 40;
+const MAX_VAR_IMG = 32;
+
+/** A string field: one line, capped; null clears; anything else is refused. */
+function textField(patch: Partial<Override>, key: "seoTitle" | "seoDesc" | "subcat", max: number): void {
+  if (!(key in patch)) return;
+  const v = patch[key];
+  if (v == null) {
+    patch[key] = null;
+    return;
+  }
+  if (typeof v !== "string") throw new OrderError("bad_body", key);
+  const clean = v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim();
+  if (key === "subcat" && clean.length > max) throw new OrderError("bad_body", key);
+  patch[key] = clean.slice(0, max);
+}
+
 /** Accepts both the camelCase the storefront sends and the column names. */
 function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<Override> } {
   const id = String(raw.id ?? raw.product_id ?? "").trim();
+  if (id.length > MAX_ID || /[\s\p{Cc}]/u.test(id)) throw new OrderError("bad_id", id.slice(0, 40));
   const patch: Partial<Override> = {};
   const pick = (from: string[], to: keyof Override) => {
     for (const key of from) {
@@ -55,7 +81,14 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
   pick(["price"], "price");
   pick(["stock"], "stock");
   pick(["seoTitle", "seo_title", "title"], "seoTitle");
-  pick(["seoDesc", "seo_desc", "description"], "seoDesc");
+  pick(["seoDesc", "seo_desc"], "seoDesc");
+  /* `description` is two different things on this body: the older panel's
+     alias for seoDesc (a string) and the trilingual {RU,ET,EN} product
+     description (an object, written below by setDescriptionOverride). Only
+     the string is the alias. The object used to land in seo_desc as JSON
+     text as well, where getSeoOverrides() read it back as the Russian
+     Google description (security re-audit 04.09.2026). */
+  if (!("seoDesc" in patch) && typeof raw.description === "string") patch.seoDesc = raw.description;
   pick(["subcat", "sub"], "subcat");
   pick(["varImg", "var_img"], "varImg");
   pick(["videoUrl", "video_url", "video"], "videoUrl");
@@ -75,6 +108,15 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
     const n = Number(patch.proPrice);
     if (!Number.isFinite(n) || n < 0 || n > 100000) throw new OrderError("bad_price", id);
     patch.proPrice = n;
+  }
+  textField(patch, "seoTitle", 70);
+  textField(patch, "seoDesc", 170);
+  textField(patch, "subcat", MAX_SUBCAT);
+  if ("varImg" in patch && patch.varImg != null) {
+    const v = patch.varImg as unknown;
+    const ok = Array.isArray(v) && v.length <= MAX_VAR_IMG &&
+      v.every((n) => typeof n === "number" && Number.isInteger(n) && n >= -1 && n <= 999);
+    if (!ok) throw new OrderError("bad_body", "varImg");
   }
   return { id, patch };
 }

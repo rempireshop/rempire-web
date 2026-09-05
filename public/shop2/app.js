@@ -16444,12 +16444,15 @@
     var key = S.toast ? (admin ? "a" : "s") + (S.toastUndo ? "u" : "-") + "|" + S.toast : "";
     if (key === toastPainted) return;
     toastPainted = key;
+    /* The message is text, never markup: «Добавлено: <name> · <size>» carries
+       a product's name, and a product the owner created carries whatever he
+       typed (security re-audit 04.09.2026). */
     toastSlot.innerHTML = !S.toast ? ""
       : admin
-        ? '<div class="adm-toast" role="status"><span class="adm-toast__t">' + S.toast + "</span>" +
+        ? '<div class="adm-toast" role="status"><span class="adm-toast__t">' + esc(S.toast) + "</span>" +
           (S.toastUndo ? '<button class="adm-toast__undo" data-admtoastundo>Отменить</button>' : "") +
           '<button class="adm-toast__x" data-closetoast aria-label="Закрыть">✕</button></div>'
-        : '<div class="toast" role="status"><span>' + S.toast + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>';
+        : '<div class="toast" role="status"><span>' + esc(S.toast) + '</span><button class="iconbtn toast__x" data-closetoast aria-label="Закрыть">✕</button></div>';
     // the assistant button steps aside while the bar is up — see admin.css
     try { document.body.classList.toggle("adm-toasting", !!S.toast && admin); } catch (e) {}
     translateTree(toastSlot);
