@@ -223,6 +223,62 @@ describe("publish_post", () => {
   });
 });
 
+// product creation: a change to a product the owner made himself
+describe("update_product", () => {
+  const customId = "c-proraso-beard-balm";
+  const withCustom = new Set([...known, customId]);
+
+  it("keeps the id and only the fields the model sent, rebuilt", () => {
+    expect(sanitizeAction({ type: "update_product", id: customId, name: "  Beard  Balm — бальзам ", price: "16,90", extra: "x" }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, name: "Beard Balm — бальзам", price: 16.9 });
+    expect(sanitizeAction({ type: "update_product", id: customId, brand: "Proraso", cat: "BEARD", subcat: "ba" }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, brand: "Proraso", cat: "beard", subcat: "ba" });
+    expect(sanitizeAction({ type: "update_product", id: customId, subcat: "nonsense" }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, subcat: "" });
+  });
+
+  it("takes the size ladder in every spelling, drops a size nobody priced, and turns [] into one price", () => {
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: [{ size: "100 мл", price: 14.9 }, { size: "250 мл", price: "24,9" }, { size: "" }] }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, sizes: ["100 мл", "250 мл"], prices: [14.9, 24.9] });
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: ["100 мл", "250 мл"], prices: [14.9, 24.9] }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, sizes: ["100 мл", "250 мл"], prices: [14.9, 24.9] });
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: ["100 мл", "250 мл"], price: 12 }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, sizes: ["100 мл", "250 мл"], prices: [12, 12] });
+    // a size without any price at all is dropped, not guessed; none left and no price → not an action
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: ["100 мл", { size: "250 мл", price: 24.9 }] }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, sizes: ["250 мл"], prices: [24.9] });
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: ["100 мл"] }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: [], price: 9 }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, sizes: [], prices: [9], price: 9 });
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: [{ size: "100 мл", price: 9 }, { size: "100 МЛ", price: 10 }] }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, sizes: ["100 мл"], prices: [9] });
+  });
+
+  it("description replaces all three languages; null clears", () => {
+    expect(sanitizeAction({ type: "update_product", id: customId, description: { RU: "Ру", ET: "Ee", EN: "En", FR: "non" } }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, description: { RU: "Ру", ET: "Ee", EN: "En" } });
+    expect(sanitizeAction({ type: "update_product", id: customId, description: null }, withCustom, true))
+      .toEqual({ type: "update_product", id: customId, description: null });
+  });
+
+  it("refuses an id that is not one of the owner's own listed products, an empty name, a bad section or price, and a patch that changes nothing", () => {
+    expect(sanitizeAction({ type: "update_product", id: someId, name: "x" }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: "c-unlisted", name: "x" }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: "C-PRORASO-BEARD-BALM", name: "x" }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId, name: "   " }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId, brand: "" }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId, cat: "all" }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId, price: 900 }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId, sizes: "100 мл" }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId }, withCustom, true)).toBeNull();
+    expect(sanitizeAction({ type: "update_product", id: customId, junk: 1 }, withCustom, true)).toBeNull();
+  });
+
+  it("is admin-only", () => {
+    expect(sanitizeAction({ type: "update_product", id: customId, name: "x" }, withCustom, false)).toBeNull();
+  });
+});
+
 describe("the banner handed to the model", () => {
   it("trims it and strips anything that could read as prompt structure", () => {
     const out = briefHero([
