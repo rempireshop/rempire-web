@@ -433,9 +433,12 @@ test.describe("sweep — customers", () => {
     expect(await page.locator(".adm-page script").count(), "the note ran as script in the panel").toBe(0);
     await assertClean(page, w, "customer note with HTML");
 
-    // Leave the customer as a plain retail one again.
-    await page.locator("[data-admcustdemote]").click();
-    await clearToast(page);
+    // Leave the customer as a plain retail one again — over the API, the way
+    // admin-sections.spec cleans up; the Розница ↔ Партнёр switch itself is
+    // walked end to end there.
+    expect(
+      (await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } })).ok(),
+    ).toBe(true);
     await shopCtx.close();
   });
 });
