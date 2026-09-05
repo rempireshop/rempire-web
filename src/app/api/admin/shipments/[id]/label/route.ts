@@ -20,6 +20,7 @@
  */
 import { requireAdmin } from "@/lib/auth";
 import { getOrder, getOrderByNumber } from "@/lib/orders";
+import { normaliseLabelPdf } from "@/lib/shipping/label-pdf";
 import {
   MontonioShippingError,
   fetchLabelPdf,
@@ -84,7 +85,18 @@ export async function GET(req: Request, ctx: Ctx) {
   }
   if (!pdf) return Response.json({ ok: false, error: "label_failed" }, { status: 502 });
 
-  return new Response(pdf, {
+  // Montonio's file draws the label twice-composed and cut in half (see
+  // label-pdf.ts); rewrite the page so the label alone is on the sheet. A file
+  // the repair does not recognise goes out as it came.
+  let body: ArrayBuffer | Uint8Array = pdf;
+  try {
+    const fixed = await normaliseLabelPdf(pdf, size);
+    if (fixed) body = fixed;
+  } catch (err) {
+    console.error("[api/admin/shipments/:id/label] label repair failed, serving the original:", err);
+  }
+
+  return new Response(body as BodyInit, {
     headers: {
       "content-type": "application/pdf",
       "content-disposition": `inline; filename="${order.number || "label"}.pdf"`,
