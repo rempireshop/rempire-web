@@ -23,6 +23,9 @@ log.
 | `src/emails/texts.ts` | the owner's own subject / intro / closing line — see below |
 | `src/lib/mail-texts.ts` | `loadMailTexts()` — `settings.mail_texts` → the renderers |
 | `src/emails/index.ts` | template registry + demo data for the preview |
+| `src/emails/samples.ts` | the *awkward* sample data — a set line, a parcel machine, a promo, points, a gift card with a message — for the renderer and the compatibility test |
+| `tools/render-emails.mjs` | every letter × RU/ET/EN to disk as HTML + text, `--png` for 600 px / 360 px / 360 px dark screenshots |
+| `tests/emails-compat.test.ts` | the mail-client rules, held against every one of those renders |
 | `src/app/api/admin/mail/preview/route.ts` | `GET` — HTML for the admin iframe, `?format=texts` for the editor |
 | `src/app/api/admin/mail/test/route.ts` | `POST` — send a sample (admin only) |
 | `public/shop/emails/*.html` | **design source of truth**, hand-made, keep |
@@ -135,6 +138,56 @@ plain-text alternative. Images and links are absolute, built from
 (`prefers-color-scheme` plus Outlook's `[data-ogsc]` hooks), and every element
 that sets a text colour also sets its own background, so a client that
 force-inverts the letter cannot produce dark-on-dark.
+
+### What every letter is held to (`tests/emails-compat.test.ts`)
+
+Mail clients disagree more than browsers do — Outlook on Windows lays out
+with Word, Gmail drops `<style>` on some paths and clips at ~102 KB, dark-mode
+clients repaint colours, image blockers show alt text, a phone shows a 360 px
+column — so the same rules are checked on every letter × RU/ET/EN, rendered
+from `src/emails/samples.ts` (the awkward order: two lines with a set, an
+Omniva parcel machine, a promo code, loyalty points, a long title, a gift
+card with a message, per-language names so a stray Cyrillic word can only be
+template copy):
+
+- one 600 px column of `role="presentation"` tables with `max-width:600px`;
+  no flex/grid/position/float, no background images, no script/link/form;
+- every styled element carries its style inline; the `<style>` block holds
+  only what cannot be inlined — the font `@import`, `:root`, the phone media
+  query, the dark-mode rules and their `[data-ogsc]` twins;
+- every `<img>` has a non-empty `alt`, a `width` and a `height`; every `src`
+  and `href` is absolute `https://` (or `mailto:`);
+- under 100 KB; a preheader as the first thing in `<body>`; a plain-text part
+  with no markup and the legal line; a subject in every language;
+- no Cyrillic anywhere in an ET/EN letter — subject, text or HTML;
+- `color-scheme` / `supported-color-schemes` meta, the dark block, and a logo
+  that survives a dark card: `public/brand/tower-email.png` is the tower on
+  an **opaque white tile** (78×112, drawn at 39×56) — a transparent PNG of a
+  dark tower vanished the moment Apple Mail went dark;
+- buttons are the hybrid kind: `display:block` padding on the `<a>` (46 px of
+  clickable face) plus `mso-padding-alt` on the cell for Outlook, and full
+  width below 620 px so a long Estonian label stays on one line;
+- nothing that must stay on one line wraps at 360 px: prices (`&nbsp;€`),
+  «2 шт», the dots between a title and its size.
+
+The rule that is deliberately *not* enforced: an order number inside the
+owner's own intro sentence may still break at its hyphen on a narrow phone.
+That sentence is his text and reaches the letter verbatim (`texts.ts`), and
+the admin's own tests look for it as a plain substring — no markup is woven
+into it.
+
+To *see* the letters rather than assert on them:
+
+```bash
+node tools/render-emails.mjs --out /tmp/emails --png
+```
+
+writes 21 HTML + 21 text files and 63 PNGs (600 px, 360 px, 360 px dark) with
+web fonts and every other request blocked, so what you look at is the Arial
+fallback a client without web fonts renders — the look the letters have to
+be right in. Node 22 runs the TypeScript templates directly
+(`tools/lib/ts-resolve.mjs` resolves their extensionless imports); nothing to
+build.
 
 ## What the owner may rewrite — `settings.mail_texts`
 
@@ -275,7 +328,7 @@ catch a client-specific rendering problem, and it takes five minutes.
 
 ```bash
 npm test                      # everything
-npx vitest run tests/emails.test.ts tests/mail.test.ts tests/mail-hooks.test.ts
+npx vitest run tests/emails.test.ts tests/emails-compat.test.ts tests/mail.test.ts tests/mail-hooks.test.ts
 ```
 
 Covered: all five templates × three languages (key strings, per-language
