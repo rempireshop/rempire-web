@@ -468,10 +468,13 @@ the file:
 - Product descriptions are AI translations pending a native proofread (see the
   header of `public/shop/content.ru.js`). They are what the meta descriptions
   are cut from.
-- The OG cards carry no text — no name, no price, no logotype beyond the tower.
-  That is deliberate (every platform sets the title and price itself, from the
-  OG text fields, in its own type), but a card with the product name burnt in
-  reads better in a WhatsApp thread. A follow-up, not a defect.
+- The catalogue's OG cards carry no text — no name, no price, no logotype
+  beyond the tower. That is deliberate (every platform sets the title and
+  price itself, from the OG text fields, in its own type), but a card with the
+  product name burnt in reads better in a WhatsApp thread. The cards drawn at
+  request time — a custom product's, a new post's (`src/lib/og-card.ts`) — do
+  carry the name and the price; giving the 220 build-time cards the same
+  treatment is a follow-up, not a defect.
 - ~~Social links still disagree.~~ **Closed 03.09.** The `Organization`
   `sameAs` used to name `instagram.com/rempireshop/` and
   `facebook.com/rempireshop/` while the shop links `rempire.shop` and
@@ -530,9 +533,22 @@ switched to «нет в наличии» says `OutOfStock`. `robots` follows
 `PUBLIC_BASE_URL` exactly like the static pages (`robotsFor()` — one rule).
 
 **Link previews:** uploads are WebP, which Facebook, WhatsApp and LinkedIn do
-not read, so `og:image` is `/brand/og-default.png` (the tower card) unless a
-photo happens to be a JPEG/PNG; the JSON-LD still lists the real photos. A
-per-product card drawn at request time is a follow-up.
+not read, so the card is drawn at request time from the row —
+`src/lib/og-card.ts` behind `/shop2/og/c-<id>.png`
+(`src/app/shop2/og/[file]/route.ts`): a white 1 200×630 PNG, the first photo
+decoded from WebP and fitted on the left, the brand, the name (up to three
+lines) and the price on the right, the tower mark and the wordmark in the
+corner. No photo yet → the mark stands in; a photo the bucket will not give
+→ the card is still drawn. The text is not SVG `<text>`: sharp rasterises
+through librsvg, which shapes text only with fonts fontconfig can see — none
+on a Vercel function, and `@font-face` is not honoured — so the glyphs are
+taken out of the committed OFL fonts (`public/fonts`, the same TTFs the gift
+card PDF embeds) with fontkit and written as `<path>`s, which need no font
+at raster time. `og:image` carries `?v=<updated_at>` and the route answers
+with an ETag from the same stamp plus a day of shared cache, so an edit is a
+new URL to every scraper and an unchanged card is served from the edge. A
+hidden product answers 404. The JSON-LD still lists the real photos, which
+Google does read. Pinned by `tests/og-card.test.ts`.
 
 **Hidden (`active=false`) and unknown `c-…` ids answer 404** with the shell
 carrying `noindex, nofollow` — the address is dropped from the index and the
@@ -553,3 +569,45 @@ fallbacks, overrides, 404s, the sitemap) and end to end by
 `e2e/admin-products.spec.ts` (created through the UI, the served head, the
 title after app.js takes over, «Сообщить о наличии», the sitemap, 404 once
 hidden).
+
+## Blog posts published after the build — the page at request time
+
+The prerender writes `/shop2/{,et/,en/}blog/<slug>/` for the posts that are
+published when `npm run build` runs (it reads them straight out of Postgres,
+`tools/lib/blog-export.mjs`). A post Renat publishes after that deploy had
+no page at all: the `/shop2/:path+` fallback handed a crawler — and a link
+scraper — the Russian home page, and the article existed only once app.js
+had fetched it (checked on staging: an unknown slug answered 200 with the
+home page's head). Now `src/app/shop2/{,et/,en/}blog/[slug]/route.ts` →
+`src/lib/blog-page.ts` writes the same page the prerender would have, from
+the row, when the request arrives: the per-language Google pair with the
+Russian fallback, canonical, hreflang, OpenGraph (`og:type: article`, the
+card `/shop2/og/blog-<slug>[.et|.en].png` drawn at request time from the
+cover — one per language, since the title on it is the post's), `BlogPosting`
+and `BreadcrumbList` JSON-LD, the article inside `#prerender` with «Товары из
+статьи» as links and «Другие статьи», plus the `#blogpost` / `#blogdata`
+snapshots `hydrateBlog()` paints from. A draft, an unpublished post and an
+unknown slug answer 404 with the noindex shell. `/shop2/{,et/,en/}blog/`
+(`…/blog/route.ts`) does the same for the listing when the build wrote none.
+
+**Served only when there is no static file** — by construction, not by
+choice: Vercel's static layer answers a prerendered `index.html` before any
+rewrite or route runs, and `next.config.ts`'s `afterFiles` rewrites do the
+same locally. So the prerendered copy of an older post keeps its build-time
+head until the next deploy (app.js re-syncs the body from the API either
+way). Making the request-time page win always would mean the prerender stops
+writing `/blog/` pages — a one-line change there, once that trade-off is
+wanted; the request-time page is byte-compatible.
+
+**Sitemap:** the prerender records the slugs it wrote pages for in
+`src/data/blog.prerendered.json` (bundled by the `next build` that follows;
+committed as `{"slugs":[]}` and restored before a commit like the other
+generated files), and `sitemap-custom.xml` names every published post NOT in
+that list — plus the `/blog/` listing when the build wrote none — so a new
+article is in a sitemap the minute it goes live and an old one is never named
+twice.
+
+Pinned by `tests/blog-page.test.ts` and, end to end, by the «a post
+published after the build» test in `e2e/admin-blog.spec.ts` (published
+through the admin API, the ET head as the server sent it, the tab after
+app.js takes over, the card, the sitemap, 404 once unpublished).

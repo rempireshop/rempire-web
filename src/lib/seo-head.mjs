@@ -115,7 +115,11 @@ export const T = {
     infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`,
     blogDesc: "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.",
     blogEmpty: "Статей пока нет — загляните позже.",
-    otherPosts: "Другие статьи"
+    otherPosts: "Другие статьи",
+    /* the request-time blog page (src/lib/blog-page.ts) — the prerender
+       lifts these three out of app.js's dictionary; they are copied here
+       for the same reason CAT_NAMES_I18N is. Keep them in step. */
+    blog: "Блог", postProducts: "Товары из статьи", postMissing: "Статья не найдена."
   },
   ET: {
     base: "REMPIRE — kosmeetikapood Tallinnas",
@@ -142,7 +146,9 @@ export const T = {
     infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`,
     blogDesc: "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
     blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
-    otherPosts: "Teised artiklid"
+    otherPosts: "Teised artiklid",
+    // «Blog», not «Ajaveeb» — the owner's own word for the section (app.js dictionary)
+    blog: "Blog", postProducts: "Tooted artiklist", postMissing: "Artiklit ei leitud."
   },
   EN: {
     base: "REMPIRE — grooming shop in Tallinn",
@@ -169,7 +175,8 @@ export const T = {
     infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`,
     blogDesc: "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
     blogEmpty: "No articles yet — check back soon.",
-    otherPosts: "More articles"
+    otherPosts: "More articles",
+    blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found."
   }
 };
 

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { E2E_BASE_URL } from "./env.mjs";
 import { LANGS, PRODUCT, ipHeaders, shopUrl, waitForScreen } from "./fixtures";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
@@ -281,6 +282,86 @@ test.describe("blog — the visual editor", () => {
     await page.locator("[data-admblogunpublish]").click();
     await clearToast(page);
     await assertClean(page, w, "Google pair test cleaned up");
+  });
+
+  /* A post published after the last build has no static page — until now the
+     /shop2/:path+ fallback handed a crawler the Russian home page. The page
+     is built from the row at request time (src/lib/blog-page.ts): what the
+     server sends before any script runs is what is asserted first, then what
+     the tab shows once app.js has taken over, the sitemap the app serves,
+     and the 404 once the post is taken down. The suite's own prerender runs
+     with no database, so every post here is «published after the build». */
+  test("a post published after the build is a real page for a crawler: the ET head from the row, the card, the sitemap, 404 once unpublished", async ({ page, browser }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const marker = Date.now().toString().slice(-6);
+    await openAdmin(page);
+    const created = await page.request.post("/api/admin/blog/", {
+      data: {
+        title: { RU: `Статья после сборки ${marker}`, ET: `Artikkel pärast ehitust ${marker}`, EN: "" },
+        excerpt: { RU: "Анонс.", ET: "Lühikokkuvõte." },
+        body: { RU: "## Раздел\n\nТекст **жирный**.", ET: "## Osa\n\nTekst **paks**." },
+        seoTitle: { RU: `Google RU ${marker}`, ET: `Google ET ${marker}` },
+        seoDesc: { RU: `Kirjeldus RU ${marker}`, ET: `Kirjeldus ET ${marker}` },
+        coverUrl: IMAGE_URL,
+        products: [PRODUCT.id],
+      },
+    });
+    expect(created.status()).toBe(200);
+    const post = (await created.json()).post as { id: string; slug: string };
+    try {
+      expect((await page.request.patch("/api/admin/blog/", { data: { id: post.id, publish: true } })).status()).toBe(200);
+
+      // ---- a fresh, logged-out visitor's Estonian page, as the server sent it ----
+      const shop = await freshShop(browser);
+      const res = await shop.page.goto(shopUrl("/et", `/blog/${post.slug}/`));
+      expect(res?.status()).toBe(200);
+      const served = (await res!.text()).replace(/\r\n?/g, "\n");
+      expect(served).toMatch(/^<!doctype html>\n<html lang="et">/);
+      expect(served).toContain(`<title>Google ET ${marker} — REMPIRE</title>`);
+      expect(served).toContain(`<meta name="description" content="Kirjeldus ET ${marker}">`);
+      expect(served).toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2/et/blog/${post.slug}/" data-seo="canonical">`);
+      expect(served).toContain(`<link rel="alternate" hreflang="x-default" href="${E2E_BASE_URL}/shop2/blog/${post.slug}/" data-seo="alt-x">`);
+      expect(served).toContain('<meta property="og:type" content="article">');
+      expect(served).toContain('<meta property="og:locale" content="et_EE"');
+      expect(served).toContain(`<meta property="og:image" content="${E2E_BASE_URL}/shop2/og/blog-${post.slug}.et.png?v=`);
+      expect(served).toContain('"@type":"BlogPosting"');
+      expect(served).toContain(`<h1 class="display h1">Artikkel pärast ehitust ${marker}</h1>`);
+      expect(served).toContain("<h2>Osa</h2><p>Tekst <strong>paks</strong>.</p>");
+      expect(served).toContain(`href="/shop2/et/p/${PRODUCT.id}/"`);
+      expect(served).toContain('<script type="application/json" id="blogpost">');
+      // …and what the tab shows once app.js has taken over: the same head, the real article
+      await waitForScreen(shop.page, "blogpost");
+      await expect(shop.page.locator(".blog__body:not(.blog__sk) h2")).toHaveText("Osa");
+      await expect(shop.page).toHaveTitle(`Google ET ${marker} — REMPIRE`);
+      await expect(shop.page.locator('meta[name="description"]')).toHaveAttribute("content", `Kirjeldus ET ${marker}`);
+      await expect(shop.page.locator('link[rel="alternate"][hreflang]')).toHaveCount(4);
+      await assertClean(shop.page, shop.w, "the Estonian page of a post published after the build");
+      await shop.close();
+
+      // the card the scrapers are pointed at is a real 1 200×630 PNG
+      const card = await page.request.get(`/shop2/og/blog-${post.slug}.et.png`);
+      expect(card.status(), "the blog card did not render").toBe(200);
+      expect(card.headers()["content-type"]).toBe("image/png");
+      expect((await card.body()).length).toBeGreaterThan(1000);
+
+      // the sitemap the app serves names it, in three languages
+      const xml = await (await page.request.get("/sitemap-custom.xml")).text();
+      for (const seg of ["", "/et", "/en"]) expect(xml, seg || "ru").toContain(`<loc>${E2E_BASE_URL}/shop2${seg}/blog/${post.slug}/</loc>`);
+
+      // taken down: 404 with noindex, gone from the sitemap, the browser still lands home
+      expect((await page.request.patch("/api/admin/blog/", { data: { id: post.id, publish: false } })).status()).toBe(200);
+      for (const seg of ["", "/et", "/en"]) {
+        const gone = await page.request.get(shopUrl(seg, `/blog/${post.slug}/`));
+        expect(gone.status(), seg || "ru").toBe(404);
+        expect(await gone.text()).toContain('<meta name="robots" content="noindex, nofollow">');
+      }
+      expect(await (await page.request.get("/sitemap-custom.xml")).text()).not.toContain(post.slug);
+      expect((await page.request.get(`/shop2/og/blog-${post.slug}.png`)).status()).toBe(404);
+      await assertClean(page, w, "post published after the build");
+    } finally {
+      await page.request.delete(`/api/admin/blog/?id=${post.id}`);
+    }
   });
 
   test("an older markdown post opens in the visual editor as real headings and lists", async ({ page }) => {

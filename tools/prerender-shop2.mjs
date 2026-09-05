@@ -1311,6 +1311,16 @@ async function sweep(dir) {
 }
 for (const d of OWNED) await sweep(path.join(SHOP2, d));
 
+/* blog: which posts got a static page this run — src/data/blog.prerendered.json,
+   bundled into the app by the `next build` that follows (prebuild). The
+   sitemap the app serves (src/app/sitemap-custom.xml/route.ts) lists the
+   published posts that are NOT in here, so a post published after this
+   build is in a sitemap the same minute, and one the build wrote is not
+   named twice. The request-time blog page (src/lib/blog-page.ts) needs no
+   such list: it only ever answers a slug the static layer has no file for. */
+await writeFile(path.join(ROOT, "src", "data", "blog.prerendered.json"),
+  JSON.stringify({ slugs: BLOG_POSTS.map(p => p.slug) }, null, 2) + "\n", "utf8");
+
 /* ---------- sitemap ----------------------------------------------------- */
 
 const today = new Date().toISOString().slice(0, 10);
