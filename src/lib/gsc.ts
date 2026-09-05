@@ -65,10 +65,49 @@ function escapeNewlinesInStrings(s: string): string {
  *  real line breaks inside the private key; with the `\n` doubled to `\\n`;
  *  or base64-encoded. Every shape is Google's file underneath — read them all
  *  rather than send the owner back to the form with «bad key». */
+/** A BOM from a Windows editor, the curly quotes a rich-text copy leaves
+ *  behind, a `.env`-style `NAME=` prefix pasted into the value box, and
+ *  HTML-escaped quotes are not the owner's mistake to fix by hand. */
+function normaliseKeyText(raw: string): string {
+  return raw
+    .replace(/^﻿/, "")
+    .replace(/^\s*(?:export\s+)?GSC_SERVICE_ACCOUNT_JSON\s*=\s*/, "")
+    .replace(/&quot;/g, '"')
+    .replace(/[“”„]/g, '"')
+    .trim();
+}
+
+/** Facts about a value that would not read — enough to say what to re-paste,
+ *  and nothing that could be used to reconstruct it. */
+export type KeyDetail = {
+  len: number;
+  first: string;
+  last: string;
+  hasClientEmail: boolean;
+  hasPrivateKey: boolean;
+  hasPem: boolean;
+  hasEscapedNewlines: boolean;
+  lines: number;
+  quotes: number;
+};
+
+export function keyDetail(raw: string): KeyDetail {
+  const t = raw.trim();
+  return {
+    len: t.length,
+    first: t.slice(0, 1),
+    last: t.slice(-1),
+    hasClientEmail: /client_email/.test(t),
+    hasPrivateKey: /private_key/.test(t),
+    hasPem: /BEGIN [A-Z ]*PRIVATE KEY/.test(t),
+    hasEscapedNewlines: /\\n/.test(t),
+    lines: t.split(/\r?\n/).length,
+    quotes: (t.match(/["“”„]/g) || []).length,
+  };
+}
+
 function parseServiceAccountJson(raw: string): Record<string, unknown> | null {
-  // a BOM from a Windows editor and the curly quotes a rich-text copy leaves
-  // behind are not the owner's mistake to fix by hand
-  const text = raw.replace(/^﻿/, "").replace(/[“”„]/g, '"').trim();
+  const text = normaliseKeyText(raw);
   const candidates: string[] = [text];
   const unquoted = text.replace(/^['"`]+/, "").replace(/['"`]+$/, "");
   if (unquoted !== text) candidates.push(unquoted);
@@ -198,14 +237,23 @@ export type GscSummary = {
  *  fetch_failed — Google did not answer or refused (service account not
  *  added to the property, API not enabled). The first two are settings
  *  states the panel explains; the third is the one it calls an error. */
-export type GscUnavailable = { ok: false; error: "not_configured" | "bad_key" | "fetch_failed"; shape?: KeyShape };
+export type GscUnavailable = {
+  ok: false;
+  error: "not_configured" | "bad_key" | "fetch_failed";
+  shape?: KeyShape;
+  detail?: KeyDetail;
+};
 
 /** What a bad_key value looks like — never the value itself. The panel turns
  *  each into one plain sentence so the owner knows what to re-paste. */
 export type KeyShape = "empty" | "pem_only" | "path" | "no_client_email" | "no_private_key" | "curly_quotes" | "not_json";
 
 export function keyShape(raw: string): KeyShape {
-  const t = raw.replace(/^﻿/, "").trim();
+  // the prefix and BOM go, the quotes stay as pasted — the curly check below reads them
+  const t = raw
+    .replace(/^﻿/, "")
+    .replace(/^\s*(?:export\s+)?GSC_SERVICE_ACCOUNT_JSON\s*=\s*/, "")
+    .trim();
   if (!t) return "empty";
   if (!t.startsWith("{") && /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(t)) return "pem_only";
   if (/^[A-Za-z]:[\\/]|^\/|^~\//.test(t) || /^[\w.-]+\.json$/i.test(t)) return "path";
@@ -248,7 +296,7 @@ export async function getSearchConsoleSummary(now: Date = new Date()): Promise<G
   const sa = serviceAccount();
   const siteUrl = (process.env.GSC_SITE_URL ?? "").trim();
   const rawKey = process.env.GSC_SERVICE_ACCOUNT_JSON ?? "";
-  if (!sa && rawKey.trim()) return { ok: false, error: "bad_key", shape: keyShape(rawKey) };
+  if (!sa && rawKey.trim()) return { ok: false, error: "bad_key", shape: keyShape(rawKey), detail: keyDetail(rawKey) };
   if (!sa || !siteUrl) return { ok: false, error: "not_configured" };
 
   try {

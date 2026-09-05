@@ -137,7 +137,7 @@ describe("src/lib/gsc.ts", () => {
       process.env.GSC_SERVICE_ACCOUNT_JSON = raw;
       expect(keyShape(raw), raw.slice(0, 30)).toBe(shape);
       const res = await getSearchConsoleSummary();
-      expect(res, raw.slice(0, 30)).toEqual({ ok: false, error: "bad_key", shape });
+      expect(res, raw.slice(0, 30)).toMatchObject({ ok: false, error: "bad_key", shape });
       expect(JSON.stringify(res)).not.toContain("MIIEvQ");
     }
     // curly quotes are read anyway — the shape is only reported when they still break the file
@@ -154,6 +154,10 @@ describe("src/lib/gsc.ts", () => {
       ["doubled backslash-n", SERVICE_ACCOUNT.replace(/\\n/g, "\\\\n")],
       ["base64 of the file", Buffer.from(SERVICE_ACCOUNT, "utf8").toString("base64")],
       ["trailing newline and spaces", SERVICE_ACCOUNT + "\n  \n"],
+      [".env line pasted into the value box", `GSC_SERVICE_ACCOUNT_JSON=${SERVICE_ACCOUNT}`],
+      ["export line", `export GSC_SERVICE_ACCOUNT_JSON='${SERVICE_ACCOUNT}'`],
+      ["HTML-escaped quotes", SERVICE_ACCOUNT.replace(/"/g, "&quot;")],
+      ["curly quotes", SERVICE_ACCOUNT.replace(/"/g, (_m, i: number) => (i % 2 ? "”" : "“"))],
     ];
     for (const [name, raw] of shapes) {
       process.env.GSC_SERVICE_ACCOUNT_JSON = raw;
@@ -257,7 +261,11 @@ describe("GET /api/admin/analytics/gsc", () => {
       const { GET } = await import("@/app/api/admin/analytics/gsc/route");
       const res = await GET(new Request("https://rempireshop.com/api/admin/analytics/gsc/", { headers: { cookie: adminCookie } }));
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ ok: false, error: "bad_key", shape: "not_json" });
+      const body = await res.json();
+      expect(body).toMatchObject({ ok: false, error: "bad_key", shape: "not_json" });
+      // the detail says what the value looks like, never what it is
+      expect(body.detail).toMatchObject({ len: 15, first: "n", last: "l", hasClientEmail: false, hasPrivateKey: false, hasPem: false, lines: 1, quotes: 0 });
+      expect(JSON.stringify(body)).not.toContain("not json at all");
     } finally {
       if (savedSA === undefined) delete process.env.GSC_SERVICE_ACCOUNT_JSON; else process.env.GSC_SERVICE_ACCOUNT_JSON = savedSA;
       if (savedSite === undefined) delete process.env.GSC_SITE_URL; else process.env.GSC_SITE_URL = savedSite;
