@@ -11,7 +11,7 @@
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
-import { exec } from "@/lib/db";
+import { exec, query } from "@/lib/db";
 import {
   baseCustomId,
   cleanCustomProductInput,
@@ -28,6 +28,7 @@ import {
   toCatalogueProduct,
   updateCustomProduct,
 } from "@/lib/custom-products";
+import { getLevel, getLevels, listMoves, move, setLevel, setQty, variantTransitions } from "@/lib/inventory";
 import { sanitizeAction } from "@/app/api/assistant/actions";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
@@ -132,6 +133,123 @@ describe("ids", () => {
     expect(sized).toMatchObject({ sizes: ["75 мл", "250 мл"], prices: [9, 16.5], price: 9, description: { RU: "Ру", ET: "Ee", EN: "En" } });
     // …and the library accepts what the sanitiser hands over, as the route will
     expect(cleanCustomProductInput(sized)).toMatchObject({ sizes: ["75 мл", "250 мл"], prices: [9, 16.5] });
+  });
+  it("the assistant's update_product hands over a patch updateCustomProduct() reads whole", () => {
+    const known = new Set(["c-proraso-balm"]);
+    const patch = sanitizeAction({
+      type: "update_product", id: "c-proraso-balm", name: "Balm 2",
+      sizes: [{ size: "75 мл", price: 9 }, { size: "250 мл", price: "16,5" }], description: { RU: "Ру" },
+    }, known, true) as Record<string, unknown>;
+    expect(patch).toEqual({ type: "update_product", id: "c-proraso-balm", name: "Balm 2", sizes: ["75 мл", "250 мл"], prices: [9, 16.5], description: { RU: "Ру" } });
+    // the merged row the route validates: brand and cat come from the row, the rest from the patch
+    expect(cleanCustomProductInput({ brand: "Proraso", cat: "beard", ...patch })).toMatchObject({ name: "Balm 2", sizes: ["75 мл", "250 мл"], prices: [9, 16.5], description: { RU: "Ру" } });
+  });
+});
+
+/* ---------- a size renamed or removed keeps the stock straight ------------- */
+
+describe("variantTransitions — pure", () => {
+  it("a label respelled at its position is a rename; one dropped is a deletion; a swap is nothing", () => {
+    expect(variantTransitions(["100 мл", "250 мл"], ["100 ml", "250 мл"])).toEqual({ renames: [["100 мл", "100 ml"]], deletes: [] });
+    expect(variantTransitions(["100 мл", "250 мл"], ["100 мл"])).toEqual({ renames: [], deletes: ["250 мл"] });
+    expect(variantTransitions(["100 мл", "250 мл"], ["250 мл", "100 мл"])).toEqual({ renames: [], deletes: [] });
+    expect(variantTransitions(["100 мл", "250 мл"], ["100 мл", "250 мл", "500 мл"])).toEqual({ renames: [], deletes: [] });
+    // a rename and a deletion at once, and a label that moved to another position is not renamed
+    expect(variantTransitions(["a", "b", "c"], ["a2", "c"])).toEqual({ renames: [["a", "a2"]], deletes: ["b"] });
+    expect(variantTransitions(["a", "b"], ["b", "x"])).toEqual({ renames: [], deletes: ["a"] });
+  });
+  it("one price ↔ sizes: the '' row follows the first size, and comes back", () => {
+    expect(variantTransitions([], ["100 мл", "250 мл"])).toEqual({ renames: [["", "100 мл"]], deletes: [] });
+    expect(variantTransitions(["100 мл", "250 мл"], [])).toEqual({ renames: [["100 мл", ""]], deletes: ["250 мл"] });
+    expect(variantTransitions([], [])).toEqual({ renames: [], deletes: [] });
+  });
+});
+
+describe("a size renamed or removed on a custom product (PGlite)", () => {
+  let admin = "";
+  beforeAll(async () => {
+    process.env.SESSION_SECRET = TEST_SECRET;
+    process.env.ADMIN_PASSWORD_HASH = hashPassword("a long enough password");
+    await setupDb();
+    admin = `${ADMIN_COOKIE}=${makeSessionToken()}`;
+  });
+  afterAll(teardownDb);
+  beforeEach(async () => {
+    resetRateLimits();
+    await truncateAll();
+    await exec("truncate custom_products");
+  });
+
+  const BALM = { brand: "Proraso", name: "Beard Balm", cat: "beard", sizes: ["100 мл", "250 мл"], prices: [14.9, 24.9] };
+
+  it("renaming a size at its position moves the count, the barcode and the ledger under the new label", async () => {
+    const a = await createCustomProduct(BALM);
+    await move({ productId: a.id, variant: "100 мл", delta: 7, reason: "goods_in", actor: "test" });
+    await setLevel(a.id, "100 мл", { ean: "4006381333931", lowThreshold: 3 });
+    await setQty(a.id, "250 мл", 2);
+
+    const row = await updateCustomProduct(a.id, { sizes: ["100 ml", "250 мл"], prices: [14.9, 24.9] });
+    expect(row).toMatchObject({ sizes: ["100 ml", "250 мл"], prices: [14.9, 24.9] });
+    expect(await getLevel(a.id, "100 мл")).toBeNull();
+    expect(await getLevel(a.id, "100 ml")).toMatchObject({ qty: 7, ean: "4006381333931", lowThreshold: 3, state: "in" });
+    expect(await getLevel(a.id, "250 мл")).toMatchObject({ qty: 2 });
+    // the ledger moved with it — so the size is still «tracked», with its history
+    const moves = await listMoves({ productId: a.id });
+    expect(moves.map((m) => [m.variant, m.delta]).sort()).toEqual([["100 ml", 7], ["250 мл", 2]]);
+    const levels = await getLevels({ q: a.id });
+    expect(levels.map((l) => [l.variant, l.qty, l.tracked]).sort()).toEqual([["100 ml", 7, true], ["250 мл", 2, true]]);
+    // nothing stranded under the old label
+    expect(await query("select variant from stock_levels where product_id = $1 order by variant", [a.id])).toEqual([{ variant: "100 ml" }, { variant: "250 мл" }]);
+  });
+
+  it("removing a size deletes its rows; a swap of two labels touches nothing", async () => {
+    const a = await createCustomProduct(BALM);
+    await setQty(a.id, "100 мл", 5);
+    await setQty(a.id, "250 мл", 9);
+    await updateCustomProduct(a.id, { sizes: ["250 мл", "100 мл"], prices: [24.9, 14.9] });
+    expect(await getLevel(a.id, "100 мл")).toMatchObject({ qty: 5 });
+    expect(await getLevel(a.id, "250 мл")).toMatchObject({ qty: 9 });
+
+    await updateCustomProduct(a.id, { sizes: ["250 мл"], prices: [24.9] });
+    expect(await getLevel(a.id, "100 мл")).toBeNull();
+    expect(await getLevel(a.id, "250 мл")).toMatchObject({ qty: 9 });
+    expect((await listMoves({ productId: a.id })).map((m) => m.variant)).toEqual(["250 мл"]);
+    // …and a size added back later starts untracked, not «tracked, 0»
+    await updateCustomProduct(a.id, { sizes: ["250 мл", "100 мл"], prices: [24.9, 14.9] });
+    expect((await getLevels({ q: a.id })).find((l) => l.variant === "100 мл")).toMatchObject({ qty: 0, tracked: false });
+  });
+
+  it("one price ↔ sizes: the product's own count becomes the first size's, and comes back", async () => {
+    const a = await createCustomProduct({ brand: "Acme", name: "Wax", cat: "styling", price: 9 });
+    await setQty(a.id, "", 4);
+    await updateCustomProduct(a.id, { sizes: ["50 мл", "100 мл"], prices: [9, 15] });
+    expect(await getLevel(a.id, "")).toBeNull();
+    expect(await getLevel(a.id, "50 мл")).toMatchObject({ qty: 4 });
+    await setQty(a.id, "100 мл", 6);
+    await updateCustomProduct(a.id, { price: 9 });
+    expect(await getLevel(a.id, "")).toMatchObject({ qty: 4 });
+    expect(await getLevel(a.id, "50 мл")).toBeNull();
+    expect(await getLevel(a.id, "100 мл")).toBeNull();
+  });
+
+  it("a refused edit changes nothing — rows included; the route does the same work as the library", async () => {
+    const a = await createCustomProduct(BALM);
+    await setQty(a.id, "100 мл", 3);
+    await expect(updateCustomProduct(a.id, { sizes: ["100 ml", "100 ml"], prices: [1, 2] })).rejects.toMatchObject({ code: "sizes_duplicate" });
+    expect(await getLevel(a.id, "100 мл")).toMatchObject({ qty: 3 });
+
+    const one = await import("@/app/api/admin/products/[id]/route");
+    const res = await one.PUT(
+      new Request(`${ORIGIN}/api/admin/products/${a.id}/`, {
+        method: "PUT", headers: { "content-type": "application/json", cookie: admin, "x-forwarded-for": "203.0.113.78" },
+        body: JSON.stringify({ sizes: ["100 ml", "250 мл"], prices: [14.9, 24.9] }),
+      }),
+      { params: Promise.resolve({ id: a.id }) },
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).product.sizes).toEqual(["100 ml", "250 мл"]);
+    expect(await getLevel(a.id, "100 ml")).toMatchObject({ qty: 3 });
+    expect(await getLevel(a.id, "100 мл")).toBeNull();
   });
 });
 

@@ -406,6 +406,84 @@ export function sanitizeCreateProduct(raw: unknown): object | null {
   };
 }
 
+/* ---- a custom product changed (update_product) --------------------------
+ *
+ * The PATCH PUT /api/admin/products/[id] takes, for a product the owner
+ * created himself: only an id with the `c-` prefix that the prompt listed
+ * (a catalogue product has set_price/set_stock/set_seo — its name and sizes
+ * are the file's), and only the keys the model actually sent. Sizes follow
+ * create_product's rules; a size the model did not price falls back to the
+ * product's price, and a size nobody priced at all is dropped rather than
+ * guessed. The server validates the merged row again — first door, not the
+ * only one.
+ */
+const CUSTOM_ID_RE = /^c-[a-z0-9][a-z0-9-]*$/;
+
+export function sanitizeUpdateProduct(raw: unknown, known: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const id = typeof x.id === "string" ? x.id.trim() : "";
+  if (!CUSTOM_ID_RE.test(id) || id.length > 80 || !known.has(id)) return null;
+  const clean = (v: unknown, max: number) =>
+    typeof v === "string" ? v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
+  const out: Record<string, unknown> = { id };
+
+  if (x.brand !== undefined) {
+    const brand = clean(x.brand, 60);
+    if (!brand) return null;
+    out.brand = brand;
+  }
+  if (x.name !== undefined) {
+    const name = clean(x.name, 120);
+    if (!name) return null;
+    out.name = name;
+  }
+  if (x.cat !== undefined || x.category !== undefined) {
+    const cat = clean(x.cat ?? x.category, 20).toLowerCase();
+    if (!PRODUCT_CATS.includes(cat)) return null;
+    out.cat = cat;
+  }
+  if (x.subcat !== undefined) {
+    const sub = clean(x.subcat, 10).toLowerCase();
+    // the server drops a subsection its section does not have to «авто» ("")
+    out.subcat = /^[a-z]{2}$/.test(sub) ? sub : "";
+  }
+
+  const price = x.price !== undefined ? productPrice(x.price) : null;
+  if (x.price !== undefined && price === null) return null;
+  if (x.sizes !== undefined) {
+    if (!Array.isArray(x.sizes)) return null;
+    const rawPrices = Array.isArray(x.prices) ? x.prices : null;
+    const sizes: string[] = [];
+    const prices: number[] = [];
+    const seen = new Set<string>();
+    x.sizes.slice(0, PRODUCT_MAX_SIZES).forEach((item, i) => {
+      const o = item && typeof item === "object" && !Array.isArray(item) ? (item as Record<string, unknown>) : null;
+      const label = clean(o ? (o.size ?? o.label ?? o.name) : item, 30);
+      if (!label || seen.has(label.toLowerCase())) return;
+      const own = o && o.price !== undefined ? productPrice(o.price) : rawPrices ? productPrice(rawPrices[i]) : null;
+      const p = own ?? price;
+      if (p === null) return; // a size nobody priced is dropped, not guessed
+      seen.add(label.toLowerCase());
+      sizes.push(label);
+      prices.push(p);
+    });
+    if (!sizes.length && price === null) return null;
+    out.sizes = sizes;
+    out.prices = sizes.length ? prices : [price as number];
+    if (!sizes.length) out.price = price;
+  } else if (price !== null) {
+    out.price = price;
+  }
+
+  if (x.description !== undefined) {
+    const description = blogTrilingual(x.description, 4000);
+    out.description = Object.keys(description).length ? description : null;
+  }
+
+  return Object.keys(out).length > 1 ? out : null;
+}
+
 /* ---- wholesale/loyalty (set_pricing, adjust_points) ---------------------
  *
  * Bounds are duplicated from src/lib/loyalty.ts PRICING_BOUNDS on purpose —
@@ -619,6 +697,13 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
   if (t === "create_product") {
     const product = sanitizeCreateProduct(x);
     return product ? { type: t, ...product } : null;
+  }
+  /* …and a change to one of those rows: the panel PUTs the patch once the
+     owner confirms (applyUpdateProduct() in app.js) and keeps the row as it
+     was in the journal, so «Вернуть» is the same PUT the other way. */
+  if (t === "update_product") {
+    const patch = sanitizeUpdateProduct(x, known);
+    return patch ? { type: t, ...patch } : null;
   }
   return null;
 }

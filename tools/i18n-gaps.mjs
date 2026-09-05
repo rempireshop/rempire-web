@@ -292,10 +292,10 @@ const ASSEMBLED = [
   [/^Сейчас: пакомат Эстония /, "rule /^Сейчас: пакомат Эстония … docs\\/shipping\\.md\\.$/"],
   [/^\. За пределами Эстонии значения/, "tail of the same note — same rule"],
   [/^Новый товар заводится в «Товарах»/, "key — the hole is the aiGo() button markup"],
-  [/^За неделю 412 посетителей/, "key — the hole is the aiGo() button markup"],
+  [/^Посетители, конверсия и поисковые запросы/, "key — the hole is the aiGo() button markup"],
   [/^Письма магазин шлёт сам/, "key — the hole is the aiGo() button markup"],
   [/^Вот что подключено к магазину/, "key — the hole is the aiGo() button markup"],
-  [/^Отправки ждут 2 заказа/, "key — the hole is the aiGo() button markup"],
+  [/^Что оплачено и ещё не отправлено/, "key — the hole is the aiGo() button markup"],
   [/^Напишите нам — поможем подобрать замену: $/, "key — the hole is the phone/e-mail link markup"],
   // integration: orderDetailSrv's POS-channel chip — the ternary literals
   // inside break the "+"-only glue heuristic, but the rendered node is

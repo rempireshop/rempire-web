@@ -1625,7 +1625,15 @@
       "Тарифы доставки сохранены": "Tarnetariifid salvestatud",
       "Хотя бы один номинал должен остаться": "Vähemalt üks nimiväärtus peab alles jääma",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
-        "iPhone: Seaded → Safari → Kaamera → Luba. Android: tabaluku ikoon aadressiribal → Kaamera"
+        "iPhone: Seaded → Safari → Kaamera → Luba. Android: tabaluku ikoon aadressiribal → Kaamera",
+      // q-leftovers: the assistant's update_product, and the offline fallback
+      // answers now that the panel runs on the real database
+      "Товар изменён ✓": "Toode muudetud ✓",
+      "Товар не найден — обновите список товаров": "Toodet ei leitud — värskendage toodete nimekirja",
+      "Посетители, конверсия и поисковые запросы за неделю — в «Аналитике», по настоящим данным магазина.":
+        "Külastajad, konversioon ja otsingud nädala lõikes — «Analüütikas», poe päris andmete järgi.",
+      "Что оплачено и ещё не отправлено — в «Заказах», там же печатаются наклейки.":
+        "Mis on makstud ja veel saatmata — «Tellimustes», seal trükitakse ka sildid."
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -3166,7 +3174,15 @@
       "Тарифы доставки сохранены": "Delivery tariffs saved",
       "Хотя бы один номинал должен остаться": "At least one amount has to stay",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
-        "iPhone: Settings → Safari → Camera → Allow. Android: the padlock in the address bar → Camera"
+        "iPhone: Settings → Safari → Camera → Allow. Android: the padlock in the address bar → Camera",
+      // q-leftovers: the assistant's update_product, and the offline fallback
+      // answers now that the panel runs on the real database
+      "Товар изменён ✓": "Product changed ✓",
+      "Товар не найден — обновите список товаров": "Product not found — refresh the product list",
+      "Посетители, конверсия и поисковые запросы за неделю — в «Аналитике», по настоящим данным магазина.":
+        "Visitors, conversion and search terms for the week are in “Analytics”, from the shop's real data.",
+      "Что оплачено и ещё не отправлено — в «Заказах», там же печатаются наклейки.":
+        "What is paid and not yet shipped is in “Orders” — the labels print from there too."
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -13133,6 +13149,53 @@
     customCreate({ brand: a.brand, name: a.name, cat: a.cat, subcat: "",
       sizes: a.sizes || [], prices: a.prices && a.prices.length ? a.prices : [a.price], description: a.description || null }, "assistant");
   }
+  /** The assistant's update_product: the PATCH the row takes, from the
+      sanitised action (src/app/api/assistant/actions.ts) or from a journal
+      entry's `prev` — the same shape either way. */
+  function updatePatchOf(a) {
+    var patch = {};
+    ["brand", "name", "cat", "subcat", "description"].forEach(function (k) { if (k in a) patch[k] = a[k]; });
+    if (a.sizes) {
+      patch.sizes = a.sizes;
+      if (a.prices) patch.prices = a.prices; else if (a.price != null) patch.price = a.price;
+    } else if (a.price != null) patch.price = a.price;
+    return patch;
+  }
+  /** The row's own fields as they are now — what the journal's «Вернуть» puts back. */
+  function productUndoOf(p) {
+    return { type: "update_product", id: p.id, brand: p.brand, name: p.name, cat: p.cat, subcat: p.subcat || "",
+      sizes: (p.sizes || []).slice(), prices: (p.prices || [p.price]).slice(), description: p.description || null };
+  }
+  /** The assistant's update_product, once the owner pressed «Применить»:
+      PUT the patch, adopt the answer, and leave a journal line whose undo
+      PUTs the row back as it was (srvPush's update_product branch). */
+  function applyUpdateProduct(a) {
+    var cur = findCustom(a.id);
+    if (!cur) { toast("Товар не найден — обновите список товаров"); return; }
+    if (S.goodsBusy) return;
+    S.goodsBusy = true;
+    var txt = actionText(a), prev = productUndoOf(cur);
+    apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", updatePatchOf(a)).then(function (r) {
+      S.goodsBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (!(r.status === 200 && r.body.ok && r.body.product)) {
+        toast(((r.body && CUSTOM_ERR[r.body.error]) || ["Не удалось сохранить товар"])[0]);
+        return;
+      }
+      var product = r.body.product;
+      // a price override the assistant wrote earlier would sit on top of
+      // the new row price and hide it — the row is the truth now
+      if (DEMO.price[a.id] != null && Number(product.price) !== Number(DEMO.price[a.id])) {
+        delete DEMO.price[a.id];
+        apiSend("/api/admin/overrides/", "PUT", { id: a.id, price: null }).catch(noop);
+      }
+      customAdopt(product);
+      var entry = { t: journalStamp(), txt: txt, a: a, prev: prev };
+      DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+      toast("Товар изменён ✓", entry);
+      render();
+    }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
+  }
   function goodsEditor(p) {
     loadAdminPricing(false);   // wholesale/loyalty: for the salon column below
     var t = edTab();
@@ -14612,6 +14675,17 @@
           loadCustomAll(true);
         }).catch(noop);
     }
+    /* the journal's «Вернуть» on the assistant's update_product: the row's
+       fields as they were go back through the same PUT (applyUpdateProduct
+       made the forward call itself), and the answer is the shop's copy */
+    else if (a.type === "update_product") {
+      apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", updatePatchOf(a))
+        .then(function (r) {
+          if (r.status === 200 && r.body.ok && r.body.product) customAdopt(r.body.product);
+          else toast("Не удалось сохранить товар");
+          render();
+        }).catch(noop);
+    }
     else if (a.type === "adjust_points") {
       // integration: the assistant may propose an e-mail instead of a uuid
       // (sanitizePointsAdjust) — the customers/[id] route resolves either
@@ -14950,6 +15024,30 @@
     }
     if (a.type === "set_product_active") {
       return "Товар «" + (a.name || (p && p.custom ? p.brand + " — " + p.name : a.id)) + "»: " + (a.value ? "снова в продаже" : "снят с продажи");
+    }
+    /* the assistant's update_product: the confirm card says what changes,
+       field by field, against the row as the panel has it now — and the
+       journal keeps that same line */
+    if (a.type === "update_product") {
+      var up = findCustom(a.id) || (p && p.custom ? p : null);
+      var upName = up ? up.brand + " — " + up.name : a.id;
+      var ch = [];
+      if (a.brand != null && (!up || a.brand !== up.brand)) ch.push("бренд: «" + (up ? up.brand : "—") + "» → «" + a.brand + "»");
+      if (a.name != null && (!up || a.name !== up.name)) ch.push("название: «" + (up ? up.name : "—") + "» → «" + a.name + "»");
+      if (a.cat != null && (!up || a.cat !== up.cat)) ch.push("раздел: " + (up && CAT_NAMES[up.cat] ? CAT_NAMES[up.cat] : "—") + " → " + (CAT_NAMES[a.cat] || a.cat));
+      if (a.subcat != null && (!up || (a.subcat || "") !== (up.subcat || ""))) ch.push("подраздел: " + (a.subcat || "авто"));
+      if (a.sizes) {
+        ch.push(a.sizes.length
+          ? "размеры и цены: " + a.sizes.map(function (s, i) { return s + " — " + (a.prices && a.prices[i] != null ? eur(a.prices[i]) : "как было"); }).join(" · ")
+          : "одна цена вместо размеров: " + eur(a.price != null ? a.price : (a.prices && a.prices[0]) || 0));
+      } else if (a.price != null) {
+        ch.push("цена: " + (up ? eur(up.price) : "—") + " → " + eur(a.price) + (up && up.sizes && up.sizes.length ? " (одна цена вместо размеров)" : ""));
+      }
+      if ("description" in a) {
+        var upL = a.description ? ["RU", "ET", "EN"].filter(function (L) { return a.description[L]; }) : [];
+        ch.push(upL.length ? "описание: " + upL.join(", ") : "описание: убрать");
+      }
+      return "Товар «" + upName + "»: " + (ch.length ? ch.join("; ") : "без изменений");
     }
     return "";
   }
@@ -15345,8 +15443,11 @@
     if (/добав|новый товар|фото|загруз/i.test(q)) {
       return "Новый товар заводится в «Товарах» — кнопка «+ Товар»: бренд, название, раздел и цена, потом фото с телефона. Фото показываются как есть, на белом фоне; описание и тексты для Google на трёх языках напишутся по кнопке в карточке — вы проверите и сохраните." + aiGo("goods", "Открыть товары");
     }
+    /* the panel runs on the real database now: the offline fallback points
+       at the tab that has the figures instead of quoting numbers it does
+       not have (the AI answer reads them from the SALES block of its prompt) */
     if (/аналитик|статист|посещ|сколько людей|конверси/i.test(q)) {
-      return "За неделю 412 посетителей, из них 2,2% оформили заказ. Лучше всего находят по «kevin murphy tallinn». Открыть подробности?" + aiGo("stats", "Открыть аналитику");
+      return "Посетители, конверсия и поисковые запросы за неделю — в «Аналитике», по настоящим данным магазина." + aiGo("stats", "Открыть аналитику");
     }
     if (/письм|почт|рассылк|email|мейл/i.test(q)) {
       return "Письма магазин шлёт сам: «заказ принят», «отправлен» с трек-номером, «снова в наличии». Могу включить напоминание о брошенной корзине и поздравление со скидкой ко дню рождения." + aiGo("mail", "Открыть письма");
@@ -15354,7 +15455,7 @@
     if (/подключ|интеграц|google|гугл/i.test(q)) {
       return "Вот что подключено к магазину и что появится на следующих шагах — всё настраивается без вас." + aiGo("apps", "Открыть подключения");
     }
-    return "Отправки ждут 2 заказа: #1043 и #1044. Наклейки уже готовы — распечатать?" + aiGo("orders", "Открыть заказы");
+    return "Что оплачено и ещё не отправлено — в «Заказах», там же печатаются наклейки." + aiGo("orders", "Открыть заказы");
   }
 
   /* The receipt. The payment provider sends the shopper back to
@@ -17468,6 +17569,8 @@
            «снять с продажи» on the owner's own product is the row's active
            flag — journalled and undoable through demoApply() like a stock change */
         if (pa.type === "create_product") { applyCreateProduct(pa); return; }
+        // …and a change to one of those rows: a PUT, journalled with the row as it was
+        if (pa.type === "update_product") { applyUpdateProduct(pa); return; }
         if (pa.type === "set_product_active") {
           var actEntry = demoApply(pa);
           S.adminEdit = ""; S.goodsSizes = null;

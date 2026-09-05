@@ -54,8 +54,9 @@ beforeEach(async () => {
   mockResend();
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
+  // posts too: the app's sitemap now names the posts the build did not write (tests/blog-page.test.ts)
   await exec(
-    "truncate custom_products, product_overrides, stock_alerts, orders, events, settings, carts, customers, admin_audit restart identity cascade",
+    "truncate custom_products, product_overrides, stock_alerts, orders, events, settings, carts, customers, admin_audit, posts restart identity cascade",
   );
 });
 afterEach(() => {
@@ -134,8 +135,10 @@ describe("a custom product's page at request time", () => {
     expect(meta(html, "og:locale")).toBe("et_EE");
     expect(meta(html, "og:url")).toBe(`${LIVE}/shop2/et/p/${p.id}/`);
     expect(meta(html, "og:title")).toBe(title(html));
-    // uploads are WebP, which no link scraper reads: the card is the shop's own 1 200×630 PNG
-    expect(meta(html, "og:image")).toBe(`${LIVE}/brand/og-default.png`);
+    // uploads are WebP, which no link scraper reads: the card is the shop's
+    // own 1 200×630 PNG drawn from the row at request time (tests/og-card.test.ts)
+    expect(meta(html, "og:image")).toBe(`${LIVE}/shop2/og/${p.id}.png?v=${Date.parse(p.updatedAt).toString(36)}`);
+    expect(meta(html, "twitter:image")).toBe(meta(html, "og:image"));
     expect(meta(html, "og:image:type")).toBe("image/png");
     expect(meta(html, "twitter:card")).toBe("summary_large_image");
 
@@ -221,7 +224,7 @@ describe("a custom product's page at request time", () => {
     const html = await (await pageFor("et", p.id)).text();
     expect(meta(html, "robots")).toBe("noindex, nofollow");
     expect(link(html, 'rel="canonical"')).toBe(`https://rempireshop.diipsolutions.eu/shop2/et/p/${p.id}/`);
-    expect(meta(html, "og:image")).toBe("https://rempireshop.diipsolutions.eu/brand/og-default.png");
+    expect(meta(html, "og:image")).toMatch(new RegExp(`^https://rempireshop\\.diipsolutions\\.eu/shop2/og/${p.id}\\.png\\?v=[0-9a-z]+$`));
   });
 
   it("hidden → 404 with the noindex shell; unknown `c-…` → 404; a catalogue id → the shell, 200", async () => {
