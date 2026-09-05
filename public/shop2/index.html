@@ -87,7 +87,7 @@
      CF_BEACON_TOKEN is a placeholder for the integrator: Cloudflare dashboard
      → Web Analytics → Add site → rempireshop.com → copy the token → replace
      CF_BEACON_TOKEN below with it. app.js (mountCfBeacon) reads this tag and
-     adds the beacon <script> only with a real token AND only on
+     adds the beacon script tag only with a real token AND only on
      rempireshop.com: with the placeholder, or on localhost / a preview host,
      nothing is loaded at all — Cloudflare refuses a report from an
      unregistered origin anyway, and Safari turns that refusal into a script
