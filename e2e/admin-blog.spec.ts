@@ -76,8 +76,15 @@ test.describe("blog — the visual editor", () => {
     await expect(box.locator("h2")).toHaveText("Подзаголовок раздела");
 
     /* ---- Жирный --------------------------------------------------------- */
+    /* On a slow run the toolbar click leaves the caret where Enter does not
+       split the heading and the next line lands inside it — put the caret
+       back at the end of the heading first, and check the line got its own
+       block before formatting it. */
+    await box.locator("h2").click();
+    await page.keyboard.press("End");
     await page.keyboard.press("Enter");
     await page.keyboard.type("Масло каждый день.");
+    await expect(box.locator("h2").first(), "the second line was typed into the heading").toHaveText("Подзаголовок раздела");
     /* Enter at the end of a heading keeps the heading in some browsers and
        starts a paragraph in others — «Заголовок» is a toggle, so one press
        puts the new line back to a paragraph wherever it did. */
