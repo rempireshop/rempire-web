@@ -2,6 +2,73 @@
    Ink on white, radius 0, no shadows, Oswald display + Golos Text body.
    Mobile-first; desktop is the enhancement. */
 
+/* ---------- web fonts ----------
+   The same Google Fonts files (fonts.gstatic.com, woff2, one file per script
+   subset — Oswald and Golos Text are variable, so one file serves every
+   weight) declared here instead of through the fonts.googleapis.com
+   stylesheet: that stylesheet was a render-blocking round trip to a third
+   origin on every page, before this file could even be parsed. Same faces,
+   same weights (400/500/600 of both, PT Mono for the admin's codes), same
+   font-display: swap. Regenerate from
+   https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Golos+Text:wght@400;500;600&family=PT+Mono&display=swap
+   (fetched with a current Chrome UA) if a family is ever added. */
+/* Golos Text 400 cyrillic-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx58hLxR.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }
+/* Golos Text 400 cyrillic */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExd8hLxR.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116 }
+/* Golos Text 400 latin-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx18hLxR.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF }
+/* Golos Text 400 latin */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExN8hA.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
+/* Golos Text 500 cyrillic-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx58hLxR.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }
+/* Golos Text 500 cyrillic */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExd8hLxR.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116 }
+/* Golos Text 500 latin-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx18hLxR.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF }
+/* Golos Text 500 latin */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExN8hA.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
+/* Golos Text 600 cyrillic-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx58hLxR.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }
+/* Golos Text 600 cyrillic */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExd8hLxR.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116 }
+/* Golos Text 600 latin-ext */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcEx18hLxR.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF }
+/* Golos Text 600 latin */
+@font-face { font-family: 'Golos Text'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/golostext/v7/q5uCsoe9Lv5t7Meb31EcExN8hA.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
+/* Oswald 400 cyrillic-ext */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlbHYjedg.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }
+/* Oswald 400 cyrillic */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlSHYjedg.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116 }
+/* Oswald 400 latin-ext */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlYHYjedg.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF }
+/* Oswald 400 latin */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlWHYg.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
+/* Oswald 500 cyrillic-ext */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlbHYjedg.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }
+/* Oswald 500 cyrillic */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlSHYjedg.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116 }
+/* Oswald 500 latin-ext */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlYHYjedg.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF }
+/* Oswald 500 latin */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 500; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlWHYg.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
+/* Oswald 600 cyrillic-ext */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlbHYjedg.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }
+/* Oswald 600 cyrillic */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlSHYjedg.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116 }
+/* Oswald 600 latin-ext */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlYHYjedg.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF }
+/* Oswald 600 latin */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 600; font-display: swap; src: url(https://fonts.gstatic.com/s/oswald/v57/TK3IWkUHHAIjg75cFRf3bXL8LICs1_Fv40pKlN4NNSeSASz7FmlWHYg.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
+/* PT Mono 400 cyrillic-ext */
+@font-face { font-family: 'PT Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/ptmono/v14/9oRONYoBnWILk-9AnCIzM-Py.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F }
+/* PT Mono 400 cyrillic */
+@font-face { font-family: 'PT Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/ptmono/v14/9oRONYoBnWILk-9AnCszM-Py.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116 }
+/* PT Mono 400 latin-ext */
+@font-face { font-family: 'PT Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/ptmono/v14/9oRONYoBnWILk-9AnCEzM-Py.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF }
+/* PT Mono 400 latin */
+@font-face { font-family: 'PT Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(https://fonts.gstatic.com/s/ptmono/v14/9oRONYoBnWILk-9AnC8zMw.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD }
+
 :root {
   --ink: #1c1a00;
   --page: #ffffff;
@@ -75,6 +142,15 @@ button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
 img { max-width: 100%; display: block; }
+
+/* Visually hidden, still read out: the label of a control whose visible text
+   is something else (a card's size picker), the home page's <h1>, the
+   checkout's title on a phone. Not display:none — that takes the text out
+   of the accessibility tree along with the screen. */
+.vh {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding-inline: var(--gutter); }
 .wrap--narrow { max-width: 560px; }
@@ -449,7 +525,10 @@ body:has(.stickybar) .ftr {
   padding: 9px 12px; border: 0; background: none; font: inherit; font-size: 12.5px;
   text-align: left; color: var(--ink); cursor: pointer;
 }
-.card__opt:hover, .card__opt:focus-visible { background: rgba(28, 26, 0, .06); outline: none; }
+.card__opt:hover, .card__opt:focus-visible { background: rgba(28, 26, 0, .06); }
+/* a 6 % tint alone is not a focus indicator anyone can see — the ring, kept
+   inside the popover so it never spills past its edge */
+.card__opt:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 .card__opt[aria-selected="true"] { font-weight: 600; background: rgba(28, 26, 0, .05); }
 .card__optpr { color: rgba(28, 26, 0, .7); font-weight: 400; }
 /* stock / salon-price flags live on the photo so the foot row never wraps */
@@ -894,8 +973,19 @@ body:has(.stickybar) .ftr {
 .cohdr__t {
   margin-left: auto; margin-right: auto;
   font-family: Oswald, sans-serif; font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase;
+  /* the checkout's is an <h1> now (the page's one heading) — drawn exactly
+     as the span it used to be, not with the heading defaults */
+  font-weight: 400; line-height: 1.55;
 }
-@media (max-width: 560px) { .cohdr__t { display: none; } .cohdr .wrap--co > .link { margin-left: auto; } }
+@media (max-width: 560px) {
+  /* off the phone's narrow row, but still the page's heading for a screen
+     reader — visually hidden, not display:none */
+  .cohdr__t {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .cohdr .wrap--co > .link { margin-left: auto; }
+}
 
 /* language pills in the checkout header — the shopper may realise mid-payment
    that the form is in the wrong language, and the full header is hidden here */

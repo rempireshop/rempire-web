@@ -123,8 +123,10 @@ for (const lang of LANGS) {
 
       const card = cardFor(page, PRODUCT.id);
       const picker = card.locator("[data-cardsizeopen]");
-      // The trigger's label — «Объём» / «Maht» / «Size» — and the listbox behind it.
-      await expect(picker).toHaveAttribute("aria-label", tr("Объём", lang.code));
+      // The trigger's name opens with its label — «Объём» / «Maht» / «Size» —
+      // and keeps the size the shopper can see («Объём 75 мл», WCAG 2.5.3);
+      // the listbox behind it carries the same label.
+      await expect(picker).toHaveAccessibleName(new RegExp("^" + tr("Объём", lang.code) + " "));
       await picker.click();
       await expect(card.locator("[data-cardsizepick]")).toHaveCount(PRODUCT.sizes.length);
       await page.keyboard.press("Escape");

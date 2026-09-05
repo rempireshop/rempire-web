@@ -219,7 +219,8 @@ different, unrelated request).
 
 The script tag is already in `public/shop2/index.html` (and, through it,
 every prerendered page — `tools/prerender-shop2.mjs` copies the same body
-scripts onto all of them), pointed at a **placeholder token**:
+scripts onto all of them), pointed at a **placeholder token** and kept
+inside an HTML comment until the site is registered:
 
 ```html
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "CF_BEACON_TOKEN"}'></script>
@@ -228,10 +229,13 @@ scripts onto all of them), pointed at a **placeholder token**:
 To turn it on: **Cloudflare dashboard → Web Analytics → Add a site** (needs
 no DNS change — "JavaScript snippet" mode, not the proxied kind), enter
 `rempireshop.com`, and Cloudflare hands back a token. Replace the literal
-text `CF_BEACON_TOKEN` in `public/shop2/index.html` with it. Until that
-replacement happens the tag still loads (harmless) but reports to no
-registered site, so nothing is collected — turning it on is purely additive,
-never a regression.
+text `CF_BEACON_TOKEN` in `public/shop2/index.html` with it and move the tag
+out of the comment around it, then `npm run prerender`. It sits in a comment
+rather than live because with the placeholder the script loaded on every
+page and its report was refused by `cloudflareinsights.com` — a CORS error
+in every console and a Lighthouse best-practices mark against the shop —
+while collecting nothing. Turning it on is purely additive, never a
+regression.
 
 `next.config.ts`'s Content-Security-Policy allows
 `static.cloudflareinsights.com` (the script) and `cloudflareinsights.com`
