@@ -24,6 +24,11 @@ export const INFO_PAGES = ["shipping", "returns", "terms", "contact", "privacy"]
    'sale_web'/'sale_pos' are written by a real sale, never by this action. */
 export const STOCK_ADJUST_REASONS = ["goods_in", "adjust", "return"] as const;
 
+/** One line the panel can print: no control or format characters, collapsed whitespace, capped. */
+function oneLine(v: unknown, max: number): string {
+  return typeof v === "string" ? v.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, max) : "";
+}
+
 /* ---- the home-page banner (set_hero) ----------------------------------- */
 
 const HERO_MAX_SLIDES = 5;
@@ -511,8 +516,10 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
     return { type: t, id: x.id, value: x.value };
   }
   if (t === "set_seo" && typeof x.id === "string" && known.has(x.id)) {
-    const title = typeof x.title === "string" ? x.title.slice(0, 70) : "";
-    const description = typeof x.description === "string" ? x.description.slice(0, 170) : "";
+    // the same one-line, 70/170 shape src/lib/product-seo.ts stores — a
+    // snippet, not a paragraph, and nothing a <title> cannot carry
+    const title = oneLine(x.title, 70);
+    const description = oneLine(x.description, 170);
     if (!title && !description) return null;
     return { type: t, id: x.id, title, description };
   }
@@ -596,13 +603,13 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
     const delta = Math.trunc(Number(x.delta));
     if (!Number.isFinite(delta) || delta === 0 || Math.abs(delta) > 10_000) return null;
     const reason = (STOCK_ADJUST_REASONS as readonly string[]).includes(String(x.reason)) ? String(x.reason) : "adjust";
-    const variant = typeof x.variant === "string" && x.variant.trim() ? x.variant.trim().slice(0, 120) : "";
+    const variant = oneLine(x.variant, 120);
     return { type: t, product_id: x.product_id, variant, delta, reason };
   }
   if (t === "stock_set" && typeof x.product_id === "string" && known.has(x.product_id)) {
     const qty = Math.trunc(Number(x.qty));
     if (!Number.isFinite(qty) || qty < 0 || qty > 100_000) return null;
-    const variant = typeof x.variant === "string" && x.variant.trim() ? x.variant.trim().slice(0, 120) : "";
+    const variant = oneLine(x.variant, 120);
     return { type: t, product_id: x.product_id, variant, qty };
   }
   /* product creation: a new row in custom_products — no demo layer, the

@@ -174,6 +174,8 @@ export function cleanCustomProductInput(raw: unknown): CustomProductInput {
   const sizes: string[] = [];
   const sizePrices: Array<number | null> = [];
   const rawSizes = Array.isArray(src.sizes) ? src.sizes : [];
+  // the count first, so a list of a hundred thousand labels is refused before one of them is read
+  if (rawSizes.length > MAX_SIZES) throw new CustomProductError("too_many_sizes", "sizes", String(rawSizes.length));
   for (const item of rawSizes) {
     const o = item && typeof item === "object" && !Array.isArray(item) ? (item as Record<string, unknown>) : null;
     const label = line(o ? (o.size ?? o.label ?? o.name) : item, MAX_SIZE_LABEL);

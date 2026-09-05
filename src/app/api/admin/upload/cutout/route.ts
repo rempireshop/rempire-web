@@ -15,7 +15,7 @@
 import { ADMIN_COOKIE, clientIp, rateLimit, readCookie, requireAdmin } from "@/lib/auth";
 import { ImageError, MAX_UPLOAD_BYTES, processImage } from "@/lib/images";
 import { writeAuditSafe } from "@/lib/orders";
-import { cutoutEnabled, CutoutError, cutoutImage, cutoutKey } from "@/lib/photo-cutout";
+import { cutoutEnabled, CutoutError, cutoutImage, cutoutKey, cutoutTimeoutMs } from "@/lib/photo-cutout";
 import { isAllowedKey, keyFromUrl, publicUrl, putObject, StorageError, storageConfigured } from "@/lib/storage";
 
 export const runtime = "nodejs";
@@ -54,7 +54,16 @@ export async function POST(req: Request) {
   if (rateLimit("admin_cutout", limiterKey(req), CUTOUTS_PER_HOUR, HOUR)) return bad("rate_limited", 429);
 
   try {
-    const src = await fetch(publicUrl(key));
+    /* The original comes from our own bucket's public host — the key was
+       checked above, so this is never a URL the caller wrote — with the same
+       deadline the model call gets: a bucket that stops answering is a plain
+       502, not a function held open (security re-audit 04.09.2026). */
+    let src: Response;
+    try {
+      src = await fetch(publicUrl(key), { signal: AbortSignal.timeout(cutoutTimeoutMs()) });
+    } catch {
+      return bad("source_unavailable", 502);
+    }
     if (!src.ok) return bad("source_unavailable", 502);
     const original = Buffer.from(await src.arrayBuffer());
     if (!original.length || original.length > MAX_UPLOAD_BYTES) return bad("source_unavailable", 502);
@@ -74,7 +83,11 @@ export async function POST(req: Request) {
       { headers: { "cache-control": "no-store" } },
     );
   } catch (err) {
-    if (err instanceof CutoutError) return bad(err.code, err.status);
+    if (err instanceof CutoutError) {
+      // the message names the failure (a timeout, an upstream status) and never the key or the request
+      console.error("[api/admin/upload/cutout]", err.message);
+      return bad(err.code, err.status);
+    }
     if (err instanceof ImageError || err instanceof StorageError) return bad(err.code, err.status);
     console.error("[api/admin/upload/cutout] failed:", err);
     return bad("cutout_failed", 502);

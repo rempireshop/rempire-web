@@ -187,6 +187,17 @@ function routes(): RouteCase[] {
     { deep: true, name: "PUT /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "PUT", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" }, body: { brand: "Фазз", name: "Balm", cat: "beard", price: 12, sizes: ["75 мл", "250 мл"], prices: [9, 16], active: true } },
     { name: "DELETE /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "DELETE", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" } },
 
+    /* ---- pages outside /api ------------------------------------------------
+       The request-time product page of a product the owner created, in its
+       three languages, and the sitemap the app serves for those products
+       (src/lib/product-page.ts, src/app/sitemap-custom.xml/route.ts). HTML
+       and XML, so no {ok,error} shape — what matters is that no id, however
+       hostile, is a 5xx, a file path, or a page for a hidden row. */
+    { name: "GET /shop2/p/[id]/", path: "/shop2/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/p/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /shop2/et/p/[id]/", path: "/shop2/et/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/p/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /shop2/en/p/[id]/", path: "/shop2/en/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/p/[id]/route"), params: { id: "" }, jsonBody: false },
+    { name: "GET /sitemap-custom.xml", path: "/sitemap-custom.xml", method: "GET", exports: ["GET"], load: () => import("@/app/sitemap-custom.xml/route"), jsonBody: false },
+
     /* ---- assistant, cron, e2e -------------------------------------------- */
     { name: "GET /api/assistant/", path: "/api/assistant/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true } },
     { name: "POST /api/assistant/", path: "/api/assistant/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true, headers: { origin: "https://rempireshop.com" } }, body: { messages: [{ role: "user", content: "привет" }], lang: "RU", mode: "shop" }, jsonBody: false },
@@ -260,6 +271,7 @@ function goodIdFor(name: string): string {
   if (name.includes("/customers/")) return F.customerId;
   if (name.includes("/blog/")) return F.postSlug;
   if (name.includes("/shipments/")) return F.paidOrderNumber;
+  if (name.includes("/shop2/") || name.includes("/products/")) return F.customId;
   return F.orderId;
 }
 
@@ -558,17 +570,20 @@ describe("API fuzzing", () => {
     const { readdirSync, statSync } = await import("node:fs");
     const { join, sep: SEP } = await import("node:path");
     const found: string[] = [];
+    /* The whole of src/app, not only /api: the product pages and the sitemap
+       are route handlers too (src/app/shop2/**, src/app/sitemap-custom.xml),
+       and a page added tomorrow must land in the table above the same day. */
     const walk = (dir: string) => {
       for (const entry of readdirSync(dir)) {
         const full = join(dir, entry);
         if (statSync(full).isDirectory()) walk(full);
         else if (entry === "route.ts") {
-          const rel = dir.split(SEP).join("/").replace(/^src\/app\/api\/?/, "");
-          found.push(rel ? `/api/${rel}/` : "/api/");
+          const rel = dir.split(SEP).join("/").replace(/^src\/app\/?/, "");
+          found.push(rel ? `/${rel}/` : "/");
         }
       }
     };
-    walk("src/app/api");
+    walk("src/app");
     /* One shape for both sides: a dynamic segment is "[id]" on disk and the
        placeholder "x" in the table above, and neither identifies the route. */
     const shape = (path: string) =>
