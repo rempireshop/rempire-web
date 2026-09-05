@@ -40,18 +40,68 @@ function base64url(input: Buffer | string): string {
     .replace(/=+$/, "");
 }
 
+/** Escapes the line breaks that sit INSIDE string literals — what you get
+ *  when the key file was pasted from a viewer that had already turned the
+ *  private key's `\n` into real lines. Breaks between members are ordinary
+ *  JSON whitespace and stay as they are. */
+function escapeNewlinesInStrings(s: string): string {
+  let out = "";
+  let inString = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inString) {
+      if (c === "\\") { out += c + (s[i + 1] ?? ""); i++; continue; }
+      if (c === '"') inString = false;
+      else if (c === "\n") { out += "\\n"; continue; }
+      else if (c === "\r") continue;
+    } else if (c === '"') inString = true;
+    out += c;
+  }
+  return out;
+}
+
+/** The variable is pasted by a person into a web form, so the same key file
+ *  arrives in a few shapes: as-is; wrapped in an extra pair of quotes; with
+ *  real line breaks inside the private key; with the `\n` doubled to `\\n`;
+ *  or base64-encoded. Every shape is Google's file underneath — read them all
+ *  rather than send the owner back to the form with «bad key». */
+function parseServiceAccountJson(raw: string): Record<string, unknown> | null {
+  const text = raw.trim();
+  const candidates: string[] = [text];
+  const unquoted = text.replace(/^['"`]+/, "").replace(/['"`]+$/, "");
+  if (unquoted !== text) candidates.push(unquoted);
+  candidates.push(escapeNewlinesInStrings(text), escapeNewlinesInStrings(unquoted));
+  if (/^[A-Za-z0-9+/=\s]+$/.test(text) && !text.startsWith("{")) {
+    try {
+      candidates.push(Buffer.from(text.replace(/\s+/g, ""), "base64").toString("utf8"));
+    } catch {
+      /* not base64 — nothing to add */
+    }
+  }
+  for (const c of candidates) {
+    try {
+      const j = JSON.parse(c) as unknown;
+      if (j && typeof j === "object" && !Array.isArray(j)) return j as Record<string, unknown>;
+    } catch {
+      /* try the next shape */
+    }
+  }
+  return null;
+}
+
 function serviceAccount(): ServiceAccount | null {
   const raw = process.env.GSC_SERVICE_ACCOUNT_JSON;
   if (!raw) return null;
-  try {
-    const j = JSON.parse(raw) as Record<string, unknown>;
-    if (typeof j.client_email !== "string" || typeof j.private_key !== "string" || !j.client_email || !j.private_key) {
-      return null;
-    }
-    return { client_email: j.client_email, private_key: j.private_key };
-  } catch {
+  const j = parseServiceAccountJson(raw);
+  if (!j) return null;
+  if (typeof j.client_email !== "string" || typeof j.private_key !== "string" || !j.client_email || !j.private_key) {
     return null;
   }
+  // a key whose `\n` arrived doubled would not sign; PEM needs real lines
+  const private_key = j.private_key.includes("\\n") && !j.private_key.includes("\n")
+    ? j.private_key.replace(/\\n/g, "\n")
+    : j.private_key;
+  return { client_email: j.client_email, private_key };
 }
 
 /** A short-lived (1 h) JWT asserting this service account, per RFC 7523. */

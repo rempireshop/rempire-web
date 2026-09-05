@@ -4247,6 +4247,10 @@
       '<p class="dlv__note">' + t("Заказ, оплаченный в рабочий день до 14:00, обычно отправляем в тот же день.") + " " +
         t("Сроки — оценка перевозчиков; трек-номер придёт письмом, когда посылку передадим в доставку.") + "</p>";
     function payRow(logo, title, hint) {
+      // The vendored logo SVGs keep their editors' ids (Layer_1, XMLID_…);
+      // two of them on one page would be duplicate ids. Nothing references
+      // them (no url(#…) in paylogos.js), so they go.
+      logo = String(logo || "").replace(new RegExp("\\s+id=\"[^\"]*\"", "g"), "");
       return '<li><span class="dlv__paylogo">' + logo + '</span><span class="dlv__paytxt"><b>' + tr(title) + "</b>" +
         (hint ? "<span>" + tr(hint) + "</span>" : "") + "</span></li>";
     }

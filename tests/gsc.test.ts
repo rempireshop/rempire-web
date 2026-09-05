@@ -120,6 +120,27 @@ describe("src/lib/gsc.ts", () => {
     expect(await getSearchConsoleSummary()).toEqual({ ok: false, error: "not_configured" });
   });
 
+  it("reads the key file in the shapes a paste into a web form produces — quoted, pretty-printed with real line breaks in the key, doubled \\n, base64", async () => {
+    process.env.GSC_SITE_URL = "sc-domain:rempireshop.com";
+    const pretty = JSON.stringify(JSON.parse(SERVICE_ACCOUNT), null, 2);
+    const shapes: Array<[string, string]> = [
+      ["wrapped in quotes", `"${SERVICE_ACCOUNT}"`],
+      ["real line breaks inside the private key", pretty.replace(/\\n/g, "\n")],
+      ["doubled backslash-n", SERVICE_ACCOUNT.replace(/\\n/g, "\\\\n")],
+      ["base64 of the file", Buffer.from(SERVICE_ACCOUNT, "utf8").toString("base64")],
+      ["trailing newline and spaces", SERVICE_ACCOUNT + "\n  \n"],
+    ];
+    for (const [name, raw] of shapes) {
+      process.env.GSC_SERVICE_ACCOUNT_JSON = raw;
+      vi.resetModules();
+      const { fn } = fakeFetch();
+      vi.stubGlobal("fetch", fn);
+      const { getSearchConsoleSummary } = await import("@/lib/gsc");
+      const res = await getSearchConsoleSummary(new Date("2026-06-15T12:00:00Z"));
+      expect(res.ok, `${name}: ${JSON.stringify(res)}`).toBe(true);
+    }
+  });
+
   it("signs a valid RS256 assertion, fetches totals + top 20 queries + top 20 pages, and caches the answer", async () => {
     process.env.GSC_SERVICE_ACCOUNT_JSON = SERVICE_ACCOUNT;
     process.env.GSC_SITE_URL = "sc-domain:rempireshop.com";
