@@ -1577,6 +1577,14 @@
         "Google Search Console pole veel ühendatud — vaata «Liidestused»",
       "Google Search Console сейчас не отвечает — попробуйте позже":
         "Google Search Console ei vasta praegu — proovi hiljem",
+      "Ключ Search Console не читается — см. «Подключения»":
+        "Search Console'i võtit ei saa lugeda — vaata «Liidestused»",
+      "Search Console не подключён: на сервере нужен ключ сервисного аккаунта, это делает Дим.":
+        "Search Console pole ühendatud: serveris on vaja teenusekonto võtit, seda teeb Dim.",
+      "Ключ Search Console не читается: в переменную нужно вставить весь скачанный файл целиком, это делает Дим.":
+        "Search Console'i võtit ei saa lugeda: muutujasse tuleb kleepida kogu allalaaditud fail tervikuna, seda teeb Dim.",
+      "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.":
+        "Google ei vasta või teenusekontol pole saidile ligipääsu — Dim kontrollib.",
       "Средняя позиция": "Keskmine positsioon",
       "Написать Диму": "Kirjuta Dimile",
       "Приём оплат · Montonio": "Maksete vastuvõtt · Montonio",
@@ -3276,6 +3284,14 @@
         "Google Search Console is not connected yet — see “Integrations”",
       "Google Search Console сейчас не отвечает — попробуйте позже":
         "Google Search Console is not answering right now — try later",
+      "Ключ Search Console не читается — см. «Подключения»":
+        "The Search Console key cannot be read — see “Integrations”",
+      "Search Console не подключён: на сервере нужен ключ сервисного аккаунта, это делает Дим.":
+        "Search Console is not connected: the server needs a service-account key; Dim does that.",
+      "Ключ Search Console не читается: в переменную нужно вставить весь скачанный файл целиком, это делает Дим.":
+        "The Search Console key cannot be read: the whole downloaded file has to go into the variable; Dim does that.",
+      "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.":
+        "Google is not answering, or the service account has no access to the site — Dim will check.",
       "Средняя позиция": "Average position",
       "Написать Диму": "Write to Dim",
       "Приём оплат · Montonio": "Payments · Montonio",
@@ -11361,7 +11377,9 @@
     if (!GSC.ok) {
       return '<div class="adm-empty">' + (GSC.error === "not_configured"
         ? "Google Search Console ещё не подключён — см. «Подключения»"
-        : "Google Search Console сейчас не отвечает — попробуйте позже") + "</div>";
+        : GSC.error === "bad_key"
+          ? "Ключ Search Console не читается — см. «Подключения»"
+          : "Google Search Console сейчас не отвечает — попробуйте позже") + "</div>";
     }
     return admPairsHTML([
       ["Клики", String(GSC.clicks)], ["Показы", String(GSC.impressions)],
@@ -11416,7 +11434,11 @@
     rows.push({ name: "Google Search Console", ok: gscOk,
       sub: !GSC ? "Проверяем…" : GSC.ok
         ? "Google видит магазин, позиции — в разделе «Аналитика»."
-        : "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дим.",
+        : GSC.error === "not_configured"
+          ? "Search Console не подключён: на сервере нужен ключ сервисного аккаунта, это делает Дим."
+          : GSC.error === "bad_key"
+            ? "Ключ Search Console не читается: в переменную нужно вставить весь скачанный файл целиком, это делает Дим."
+            : "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.",
       act: gscOk ? "" : admDevLink() });
 
     var an = ANALYTICS["7d"] && ANALYTICS["7d"].data;

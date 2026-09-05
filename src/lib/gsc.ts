@@ -140,7 +140,13 @@ export type GscSummary = {
   fetchedAt: string;
   cached: boolean;
 };
-export type GscUnavailable = { ok: false; error: "not_configured" | "fetch_failed" };
+/** not_configured — no key / no site url; bad_key — the key variable is set
+ *  but is not the JSON file Google hands out (a half-pasted file, a path
+ *  instead of the contents, a key without client_email/private_key);
+ *  fetch_failed — Google did not answer or refused (service account not
+ *  added to the property, API not enabled). The first two are settings
+ *  states the panel explains; the third is the one it calls an error. */
+export type GscUnavailable = { ok: false; error: "not_configured" | "bad_key" | "fetch_failed" };
 
 /** settings.value comes back already-parsed from most call sites, but
  *  src/lib/orders.ts has at least one spot that still guards a jsonb column
@@ -172,6 +178,7 @@ function freshCache(raw: unknown, now: Date): GscSummary | null {
 export async function getSearchConsoleSummary(now: Date = new Date()): Promise<GscSummary | GscUnavailable> {
   const sa = serviceAccount();
   const siteUrl = (process.env.GSC_SITE_URL ?? "").trim();
+  if (!sa && (process.env.GSC_SERVICE_ACCOUNT_JSON ?? "").trim()) return { ok: false, error: "bad_key" };
   if (!sa || !siteUrl) return { ok: false, error: "not_configured" };
 
   try {

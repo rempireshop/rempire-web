@@ -16,6 +16,6 @@ export async function GET(req: Request) {
   const summary = await getSearchConsoleSummary();
   // not_configured is an ordinary, expected state (nobody has set the env
   // yet) — not an error the admin screen should retry or alarm about.
-  const status = summary.ok || summary.error === "not_configured" ? 200 : 502;
+  const status = summary.ok || summary.error === "not_configured" || summary.error === "bad_key" ? 200 : 502;
   return Response.json(summary, { status, headers: { "cache-control": "no-store" } });
 }

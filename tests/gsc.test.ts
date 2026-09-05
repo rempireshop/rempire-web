@@ -106,6 +106,20 @@ describe("src/lib/gsc.ts", () => {
     expect(await getSearchConsoleSummary()).toEqual({ ok: false, error: "not_configured" });
   });
 
+  it("answers bad_key when the key variable is set but is not Google's JSON file — half a paste, a path, a key without private_key", async () => {
+    process.env.GSC_SITE_URL = "sc-domain:rempireshop.com";
+    vi.stubGlobal("fetch", () => { throw new Error("must not call out with a broken key"); });
+    const { getSearchConsoleSummary } = await import("@/lib/gsc");
+    for (const raw of ['{"type":"service_account","client_email":"a@b.iam', "C:/Users/dim/Downloads/rempire-shop-1234.json", '{"client_email":"a@b.iam.gserviceaccount.com"}']) {
+      process.env.GSC_SERVICE_ACCOUNT_JSON = raw;
+      expect(await getSearchConsoleSummary(), raw).toEqual({ ok: false, error: "bad_key" });
+    }
+    // a key alone, no site url, is still "not configured" — nothing to read yet
+    process.env.GSC_SERVICE_ACCOUNT_JSON = SERVICE_ACCOUNT;
+    delete process.env.GSC_SITE_URL;
+    expect(await getSearchConsoleSummary()).toEqual({ ok: false, error: "not_configured" });
+  });
+
   it("signs a valid RS256 assertion, fetches totals + top 20 queries + top 20 pages, and caches the answer", async () => {
     process.env.GSC_SERVICE_ACCOUNT_JSON = SERVICE_ACCOUNT;
     process.env.GSC_SITE_URL = "sc-domain:rempireshop.com";
@@ -186,5 +200,21 @@ describe("GET /api/admin/analytics/gsc", () => {
     const res = await GET(new Request("https://rempireshop.com/api/admin/analytics/gsc/", { headers: { cookie: adminCookie } }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: false, error: "not_configured" });
+  });
+
+  it("200s bad_key too — a settings state the panel explains, not an outage", async () => {
+    const savedSA = process.env.GSC_SERVICE_ACCOUNT_JSON;
+    const savedSite = process.env.GSC_SITE_URL;
+    process.env.GSC_SERVICE_ACCOUNT_JSON = "not json at all";
+    process.env.GSC_SITE_URL = "sc-domain:rempireshop.com";
+    try {
+      const { GET } = await import("@/app/api/admin/analytics/gsc/route");
+      const res = await GET(new Request("https://rempireshop.com/api/admin/analytics/gsc/", { headers: { cookie: adminCookie } }));
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: false, error: "bad_key" });
+    } finally {
+      if (savedSA === undefined) delete process.env.GSC_SERVICE_ACCOUNT_JSON; else process.env.GSC_SERVICE_ACCOUNT_JSON = savedSA;
+      if (savedSite === undefined) delete process.env.GSC_SITE_URL; else process.env.GSC_SITE_URL = savedSite;
+    }
   });
 });

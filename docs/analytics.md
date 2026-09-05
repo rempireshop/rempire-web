@@ -212,7 +212,13 @@ then a redeploy.
 
 Without those two variables the block shows one line: «Добавьте сервисный
 аккаунт как пользователя в Search Console → см. docs/analytics.md» — the
-rest of the tab works normally either way. Once both are set, the tab shows
+rest of the tab works normally either way. A key variable that is set but is
+not Google's JSON file (half a paste, the file's path instead of its
+contents, a key without `client_email`/`private_key`) answers `bad_key`, and
+both «Аналитика» and «Подключения» say the key cannot be read — so a bad
+paste is told apart from "nobody set it up yet". Vercel reads variables at
+build time: after adding or changing them, **redeploy** (Deployments →
+⋯ → Redeploy); a push with no file changes does not build. Once both are set, the tab shows
 the last 28 full days (Search Console itself lags 2–3 days, so the window
 ends 3 days back rather than yesterday): clicks, impressions, CTR, average
 position, and the top 20 queries and top 20 pages. The answer is cached in
