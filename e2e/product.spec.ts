@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { eur, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+import { eur, functionalProject, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /** Gallery, size switch → price, add to cart, cart drawer count, reviews.
  *  Desktop only — see docs/testing.md "Why most specs run on desktop only". */
 test.beforeEach(async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+  test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
 });
 test.use({ extraHTTPHeaders: ipHeaders(30) });
 
@@ -117,7 +117,12 @@ test.describe("cart drawer — quantity stepper", () => {
     // button focusable, and CSS (pointer-events: none) is what actually
     // blocks a pointer click; force bypasses Playwright's own actionability
     // wait so this proves the app.js guard itself, the same way a keyboard
-    // Enter on the focused button would reach it.
+    // Enter on the focused button would reach it. That same bypass skips the
+    // stability wait too, and the drawer is still sliding in at this point —
+    // a forced click dispatched mid-animation landed on «+» one run in four.
+    // Hovering «+» first waits for the row to stop moving (hover keeps the
+    // actionability checks) without pressing anything.
+    await plus.hover();
     await minus.click({ force: true });
     await expect(dialog.locator(".cline")).toHaveCount(1);
     await expect(qty).toHaveText("1");

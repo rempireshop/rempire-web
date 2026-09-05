@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { CATEGORY, eur, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+import { CATEGORY, eur, functionalProject, ipHeaders, LANGS, PRODUCT, searchFor, shopUrl, tr, waitForScreen } from "./fixtures";
 
 /** Category nav, brand page, search, infinite scroll, and the size picker
  *  that lives inside every product card.
@@ -13,7 +13,7 @@ import { CATEGORY, eur, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } 
  *  change with viewport width and still opts in to desktop only. */
 function desktopOnly(): void {
   test.beforeEach(async ({}, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+    test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
   });
 }
 test.use({ extraHTTPHeaders: ipHeaders(20) });
@@ -67,8 +67,9 @@ for (const lang of LANGS) {
 
       // Brand names are not translated (Latin, no Cyrillic — translateTree()
       // skips them), so one query string works in all three languages.
-      await page.locator("[data-search]").fill("System");
-      await waitForScreen(page, "search");
+      // searchFor() goes through the header field on a laptop and the
+      // bottom nav's «Поиск» tab on a phone — see fixtures.ts.
+      await searchFor(page, "System");
       await expect(page).toHaveURL(/\/search\/\?q=System/);
       await expect(page.locator(".grid .card").first()).toBeVisible();
 
@@ -192,8 +193,7 @@ for (const lang of LANGS) {
       await waitForScreen(page, "home");
       expect(await page.locator(".sec .grid [data-cardsizeopen]").count()).toBeGreaterThan(0);
 
-      await page.locator("[data-search]").fill("System");
-      await waitForScreen(page, "search");
+      await searchFor(page, "System");
       expect(await page.locator(".grid [data-cardsizeopen]").count()).toBeGreaterThan(0);
     });
   });

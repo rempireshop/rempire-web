@@ -4,9 +4,11 @@ import {
   CATEGORY,
   eur,
   freshEmail,
+  functionalProject,
   ipHeaders,
   LANGS,
   loginAsAdmin,
+  openSummary,
   payOrder,
   PRODUCT,
   shopUrl,
@@ -17,7 +19,7 @@ import {
 /** Sets: landing, single set page, add to cart, checkout line shows the
  *  components. Desktop only — see docs/testing.md. */
 test.beforeEach(async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+  test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
 });
 
 for (const [i, lang] of LANGS.entries()) {
@@ -79,6 +81,7 @@ for (const [i, lang] of LANGS.entries()) {
       // lineNoteHTML() (app.js) renders the same .cline__parts breakout both
       // in the cart drawer and in the checkout summary — this is the summary
       // instance, inside .cosum.
+      await openSummary(page); // folded on a phone
       const parts = page.locator(".cosum .cline__parts").first();
       await expect(parts).toBeVisible();
       for (const name of BUNDLE.componentNames) {
@@ -106,6 +109,23 @@ for (const [i, lang] of LANGS.entries()) {
    This test flips a shop-wide switch other spec files depend on, so it puts
    it back in a `finally` — same rule as e2e/admin.spec.ts.
 ------------------------------------------------------------------------ */
+/** Настройки → Главная страница. «Настройки» is in the desktop sidebar but
+ *  behind the phone's «Ещё» sheet (the mobile-safari project runs this file
+ *  on an iPhone profile) — the same two-way opener e2e/admin-sections.spec.ts
+ *  uses, waiting for whichever nav this viewport draws before deciding. */
+async function openSetupHome(page: import("@playwright/test").Page): Promise<void> {
+  const direct = page.locator('[data-admtab="setup"][aria-current]:visible');
+  const more = page.locator("[data-admmore]:visible");
+  await expect(direct.or(more).first()).toBeVisible();
+  if (await direct.count()) {
+    await direct.first().click();
+  } else {
+    await more.first().click();
+    await page.locator('.adm-sheet [data-admtab="setup"]').first().click();
+  }
+  await page.locator('[data-admsetpage="home"]').click();
+}
+
 test.describe("sets switched off", () => {
   test.use({ extraHTTPHeaders: ipHeaders(76) });
 
@@ -113,8 +133,7 @@ test.describe("sets switched off", () => {
     await loginAsAdmin(page);
     /* «Настройки» is an index of six sub-pages since the phase-3 redesign;
        the two shop-wide switches live on «Главная страница». */
-    await page.locator('[data-admtab="setup"]').click();
-    await page.locator('[data-admsetpage="home"]').click();
+    await openSetupHome(page);
     await expect(page.getByText("Главный баннер")).toBeVisible();
 
     const toggle = page.locator("[data-admbundles]");
@@ -215,8 +234,7 @@ test.describe("sets switched off", () => {
       expect(number).toMatch(/^R-\d+$/);
       await ctx.close();
     } finally {
-      await page.locator('[data-admtab="setup"]').click();
-      await page.locator('[data-admsetpage="home"]').click();
+      await openSetupHome(page);
       const back = page.locator("[data-admbundles]");
       // a switch since the redesign: aria-pressed, not a label that flips
       if ((await back.getAttribute("aria-pressed")) !== "true") {

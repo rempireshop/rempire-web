@@ -1,15 +1,27 @@
 # CI for rempire-web. Runs on every push and pull request: install, typecheck,
 # unit tests (vitest, in-memory PGlite — no services to spin up), then the
-# Playwright e2e suite (Chromium only here; see docs/testing.md for the
+# Playwright e2e suite — Chromium in three shards, and the storefront once
+# more on WebKit in its own `safari` job (see docs/testing.md for the
 # tablet/mobile/webkit-local projects this same config also defines for local
 # use).
 #
-# The e2e suite is sharded three ways: each shard is its own job with its own
-# `next dev` and its own empty PGlite database, so `workers: 1` inside a shard
-# (playwright.config.ts — every test shares one database) still holds, while
-# the wall-clock time stays around 10 minutes. Since the 04.09 sweeps
+# The Chromium suite is sharded three ways: each shard is its own job with its
+# own `next dev` and its own empty PGlite database, so `workers: 1` inside a
+# shard (playwright.config.ts — every test shares one database) still holds,
+# while the wall-clock time stays around 10 minutes. Since the 04.09 sweeps
 # (e2e/sweep-*.spec.ts) the whole suite takes ~15 minutes on one runner, which
-# is exactly what the old single 15-minute job died of.
+# is exactly what the old single 15-minute job died of. The shards name their
+# three Chromium projects explicitly: `mobile-safari` is a permanent project
+# now (playwright.config.ts) and a shard that never installed WebKit must not
+# try to launch it.
+#
+# The `safari` job is the reason the shop is tested on the engine every iPhone
+# runs: `--project=mobile-safari` is WebKit on an iPhone 13 profile, scoped by
+# the config's testMatch to the customer-facing specs — catalogue, product,
+# checkout, home, blog, sets, gift card, account, PWA and the storefront
+# sweep. The admin stays Chromium-only. Same prebuild, same PGlite database
+# (webServer.env in playwright.config.ts), same docs-only skip as the other
+# jobs — it is the e2e job shape with `webkit` where `chromium` was.
 #
 # This workflow does NOT deploy anything. Vercel builds and deploys this repo
 # on its own trigger (a push to the connected branch), independently of
@@ -78,14 +90,50 @@ jobs:
 
       # tools/e2e-build.mjs is what `npm run e2e` runs first (prerender +
       # generated files); the shard flag then takes every third spec file.
+      # The three Chromium projects are named so the permanent mobile-safari
+      # project (WebKit, not installed here) is left to the `safari` job.
       - name: End-to-end tests
-        run: node tools/e2e-build.mjs && npx playwright test --shard=${{ matrix.shard }}/3
+        run: node tools/e2e-build.mjs && npx playwright test --project=desktop --project=tablet --project=mobile --shard=${{ matrix.shard }}/3
 
       - name: Upload Playwright report + screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-shard-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  safari:
+    name: e2e (mobile Safari)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright's WebKit
+        run: npx playwright install --with-deps webkit
+
+      # The same prebuild as the shards; the project itself picks the specs
+      # (testMatch in playwright.config.ts) and the engine (devices["iPhone 13"]
+      # → webkit), so no shard flag and no spec list here.
+      - name: End-to-end tests on WebKit (iPhone 13 profile)
+        run: node tools/e2e-build.mjs && npx playwright test --project=mobile-safari
+
+      - name: Upload Playwright report + screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-safari
           path: |
             playwright-report/
             test-results/

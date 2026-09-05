@@ -11,7 +11,7 @@
  * nth-child position, which is exactly what could move out from under this
  * suite while app.js is still being edited.
  */
-import { expect, type Page } from "@playwright/test";
+import { expect, type Page, type TestInfo } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
 
 export type LangCode = "RU" | "ET" | "EN";
@@ -22,6 +22,16 @@ export const LANGS: Array<{ code: LangCode; seg: string; htmlLang: string }> = [
   { code: "ET", seg: "/et", htmlLang: "et" },
   { code: "EN", seg: "/en", htmlLang: "en" },
 ];
+
+/** The projects a functional storefront spec runs on. "desktop" is the
+ *  suite's Chromium default; "mobile-safari" (playwright.config.ts) is the
+ *  real WebKit engine on an iPhone 13 profile — a different browser, not a
+ *  third viewport, which is why it is not covered by the "desktop only" rule
+ *  in docs/testing.md. Everything else (tablet, mobile — Chromium at other
+ *  sizes) is still skipped for the reasons given there. */
+export function functionalProject(testInfo: TestInfo): boolean {
+  return testInfo.project.name === "desktop" || testInfo.project.name === "mobile-safari";
+}
 
 /** `/shop2<seg><path>` — path must start with "/" (or be "" for the home page). */
 export function shopUrl(seg: string, path: string): string {
@@ -73,6 +83,24 @@ export async function waitForScreen(page: Page, screen: string): Promise<void> {
   await expect(page.locator(`body[data-screen="${screen}"]`)).toBeAttached();
 }
 
+/** Types a query into whichever search field this viewport actually has.
+ *  The header's own input (`[data-search]`) is hidden below 768px
+ *  (styles.css, "v2 mobile: give the screen back": it duplicated the bottom
+ *  nav's «Поиск» tab), so on a phone the tab is the real path and the search
+ *  screen's own box (`[data-search2]`) takes the query — the same branch the
+ *  storefront sweep takes. Resolves once the search screen is on. */
+export async function searchFor(page: Page, query: string): Promise<void> {
+  const viewport = page.viewportSize();
+  if (viewport && viewport.width < 768) {
+    await page.locator('[data-nav="search"]').click();
+    await waitForScreen(page, "search");
+    await page.locator("[data-search2]").fill(query);
+  } else {
+    await page.locator("[data-search]").fill(query);
+  }
+  await waitForScreen(page, "search");
+}
+
 /** `data-step="N"` is ambiguous on its own: coHead() (app.js) puts the same
  *  attribute on each checkout step's clickable *header* (`.costep__head`,
  *  jumps straight to that step) as well as on the *continue* button at the
@@ -80,6 +108,28 @@ export async function waitForScreen(page: Page, screen: string): Promise<void> {
  *  scope to the latter, which is the one every spec means. */
 export function continueButton(page: Page, step: 2 | 3) {
   return page.locator(`button.btn--wide[data-step="${step}"]`);
+}
+
+/** The «Оплатить» button this viewport actually shows. `.co__pay` sits
+ *  inside the order summary on a laptop; below 768px styles.css hides it and
+ *  the sticky bottom bar carries a twin (`.stickybar [data-pay]`) — the same
+ *  data-pay handler either way, so a spec presses whichever one is visible
+ *  rather than assuming the laptop's. */
+export function payButton(page: Page) {
+  return page.locator("button[data-pay]:visible").first();
+}
+
+/** The checkout's order summary is a `<details data-sum>`: open on a laptop,
+ *  folded on a phone until the shopper taps it (`S.sumOpen` in app.js follows
+ *  the breakpoint until touched). Anything a spec fills or reads inside it —
+ *  the promo field, the lines, a set's breakout — needs it open first. */
+export async function openSummary(page: Page): Promise<void> {
+  const sum = page.locator("details[data-sum]");
+  await expect(sum).toBeAttached();
+  if (!(await sum.evaluate((d) => (d as HTMLDetailsElement).open))) {
+    await sum.locator("summary").click();
+    await expect(sum).toHaveAttribute("open", "");
+  }
 }
 
 /** RFC 5737 TEST-NET-3 — never a real address. Each spec file (and, where a
@@ -154,7 +204,7 @@ export async function payOrder(page: Page, email: string, outcome: "paid" | "fai
   // Card — the only payment method with no further sub-choice (bank links
   // show a chip row; card does not).
   await page.locator('input[data-paym="1"]').check();
-  await page.locator(".co__pay[data-pay]").click();
+  await payButton(page).click();
   await page.waitForURL(/\/api\/payments\/mock\//);
   await page.getByRole("link", { name: outcome === "paid" ? "Оплатить" : "Отменить" }).click();
   await page.waitForURL(new RegExp(`/shop2.*/done/\\?.*s=${outcome}`));

@@ -1,10 +1,23 @@
 import { expect, type Page, type Route, test } from "@playwright/test";
-import { continueButton, freshEmail, ipHeaders, type LangCode, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+import {
+  continueButton,
+  freshEmail,
+  functionalProject,
+  ipHeaders,
+  type LangCode,
+  LANGS,
+  openSummary,
+  payButton,
+  PRODUCT,
+  shopUrl,
+  tr,
+  waitForScreen,
+} from "./fixtures";
 
 /** Cart → checkout → mock payment → receipt (paid and failed). Desktop only
  *  — see docs/testing.md "Why most specs run on desktop only". */
 test.beforeEach(async ({}, testInfo) => {
-  test.skip(testInfo.project.name !== "desktop", "functional spec — desktop project only, see docs/testing.md");
+  test.skip(!functionalProject(testInfo), "functional spec — desktop and mobile-safari projects only, see docs/testing.md");
 });
 
 /** `eur()`'s inverse (fixtures.ts documents the forward direction). */
@@ -66,6 +79,8 @@ for (const [i, lang] of LANGS.entries()) {
       await addProductAndGoToCheckout(page, lang.seg);
       await fillContactStep(page, freshEmail(`promo-${lang.code}`));
 
+      // the promo field lives inside the summary, which a phone keeps folded
+      await openSummary(page);
       await page.locator('[data-promo]').fill("NOSUCHCODE");
       await page.locator("[data-applypromo]").click();
       await expect(page.locator('div.err[role="alert"]')).toBeVisible();
@@ -87,6 +102,7 @@ for (const [i, lang] of LANGS.entries()) {
       // links show a chip row; card does not).
       await page.locator('input[data-paym="1"]').check();
 
+      await openSummary(page);
       const subtotal = await page
         .locator(".cosum__line .cosum__pr")
         .allTextContents()
@@ -97,7 +113,7 @@ for (const [i, lang] of LANGS.entries()) {
       const total = parseEur(totalText || "", lang.code);
       expect(Math.round((subtotal + shipping) * 100)).toBe(Math.round(total * 100));
 
-      await page.locator(".co__pay[data-pay]").click();
+      await payButton(page).click();
       // Same-tab navigation to the mock bank (src/app/api/payments/mock/).
       await page.waitForURL(/\/api\/payments\/mock\//);
       await page.getByRole("link", { name: "Оплатить" }).click();
@@ -121,7 +137,7 @@ for (const [i, lang] of LANGS.entries()) {
       await continueButton(page, 3).click();
       await page.locator('input[data-paym="1"]').check();
 
-      await page.locator(".co__pay[data-pay]").click();
+      await payButton(page).click();
       await page.waitForURL(/\/api\/payments\/mock\//);
       await page.getByRole("link", { name: "Отменить" }).click();
 
@@ -153,7 +169,7 @@ test.describe("checkout — pickup", () => {
     await continueButton(page, 3).click();
 
     await page.locator('input[data-paym="1"]').check();
-    await page.locator(".co__pay[data-pay]").click();
+    await payButton(page).click();
     await page.waitForURL(/\/api\/payments\/mock\//);
     await page.getByRole("link", { name: "Оплатить" }).click();
 

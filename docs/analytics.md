@@ -217,21 +217,31 @@ outside this admin panel, useful as a sanity check against the numbers above
 (and it works even if a visitor's browser blocks `/api/track`, since it is a
 different, unrelated request).
 
-The script tag is already in `public/shop2/index.html` (and, through it,
-every prerendered page — `tools/prerender-shop2.mjs` copies the same body
-scripts onto all of them), pointed at a **placeholder token**:
+The token lives in a `<meta name="cf-beacon">` tag in the head of
+`public/shop2/index.html` (and, through it, every prerendered page —
+`tools/prerender-shop2.mjs` copies the same head assets onto all of them),
+holding a **placeholder**:
 
 ```html
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "CF_BEACON_TOKEN"}'></script>
+<meta name="cf-beacon" content="CF_BEACON_TOKEN">
 ```
+
+The beacon `<script>` itself is not in the shell any more: `mountCfBeacon()`
+in `public/shop2/app.js` reads the meta at boot and appends
+`https://static.cloudflareinsights.com/beacon.min.js` with that token — but
+**only with a real token and only on `rempireshop.com`** (or a subdomain).
+With the placeholder, on localhost or on a `*.vercel.app` preview nothing is
+loaded at all. That gate is what the old static tag lacked: Cloudflare refuses
+a report from an origin it has no site for, and Safari turns that CORS refusal
+into an uncaught script error on every page ("XMLHttpRequest cannot load …
+due to access control checks") — noise for every iPhone on staging and a
+red run for the e2e sweep on `--project=mobile-safari` (docs/testing.md).
 
 To turn it on: **Cloudflare dashboard → Web Analytics → Add a site** (needs
 no DNS change — "JavaScript snippet" mode, not the proxied kind), enter
 `rempireshop.com`, and Cloudflare hands back a token. Replace the literal
-text `CF_BEACON_TOKEN` in `public/shop2/index.html` with it. Until that
-replacement happens the tag still loads (harmless) but reports to no
-registered site, so nothing is collected — turning it on is purely additive,
-never a regression.
+text `CF_BEACON_TOKEN` in `public/shop2/index.html` with it and deploy.
+Turning it on is purely additive, never a regression.
 
 `next.config.ts`'s Content-Security-Policy allows
 `static.cloudflareinsights.com` (the script) and `cloudflareinsights.com`

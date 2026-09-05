@@ -145,6 +145,26 @@ export default defineConfig({
     // that runs on all three) tried to launch a webkit that isn't installed.
     { name: "tablet", use: { ...devices["iPad Mini"], browserName: "chromium" } }, // 768×1024
     { name: "mobile", use: { ...devices["iPhone X"], browserName: "chromium" } }, // 375×812
+    /* Safari, for real. devices["iPhone 13"] keeps its own defaultBrowserType
+       ("webkit"), so this is the one project that runs the storefront on the
+       engine every iPhone actually uses — 390×664, touch, iOS user agent —
+       rather than Chromium wearing a phone's viewport. Scoped by testMatch to
+       the customer-facing specs a phone matters for; the admin stays
+       Chromium-only (docs/testing.md "Safari"). Deliberately NOT gated on
+       webkitInstalled like webkit-local below: CI installs WebKit for its own
+       `safari` job (.github/workflows/ci.yml, the Chromium shards pass
+       --project explicitly), and locally `npx playwright install webkit` is
+       the one-time step — a project that silently vanished when the browser
+       was missing would hide exactly the failures it exists to find. */
+    {
+      name: "mobile-safari",
+      use: { ...devices["iPhone 13"] },
+      // anchored on the separator so admin-blog / admin-products stay out;
+      // sweep-checkout is in for its one phone-layout test (the rest of that
+      // file skips itself off the desktop project)
+      testMatch:
+        /[\\/](catalogue|product|checkout|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout)\.spec\.ts$/,
+    },
     ...(webkitInstalled
       ? [{ name: "webkit-local", use: { ...devices["Desktop Safari"] } }]
       : []),
