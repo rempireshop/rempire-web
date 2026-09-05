@@ -1489,6 +1489,48 @@
       "Удалить статью": "Kustuta artikkel",
       "уход за бородой зимой": "habemehooldus talvel",
       "Написать черновик по теме": "Kirjuta teema põhjal mustand",
+      /* ai-everywhere: the whole article, photos through the assistant, the «✨» fields */
+      "Пишу по-русски…": "Kirjutan vene keeles…",
+      "Перевожу на эстонский…": "Tõlgin eesti keelde…",
+      "Перевожу на английский…": "Tõlgin inglise keelde…",
+      "Сохраняю черновик…": "Salvestan mustandi…",
+      "Статья не дописалась до конца — попробуйте ещё раз": "Artikkel jäi lõpuni kirjutamata — proovi uuesti",
+      "Помощник не подключён — нужен ключ OpenAI на сервере.": "Abiline pole ühendatud — serveris on vaja OpenAI võtit.",
+      "Подождите — статья ещё пишется": "Oota — artikkel on veel kirjutamisel",
+      "Статья готова на трёх языках — проверьте и опубликуйте": "Artikkel on kolmes keeles valmis — vaata üle ja avalda",
+      "Спросить ещё раз": "Küsi uuesti",
+      "Прикреплённые фото": "Lisatud fotod",
+      "Загружаем фото…": "Laadime fotot…",
+      "Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».":
+        "Kirjuta, kuhu see panna: „see on foto Bio Botanical Shampoo jaoks, tee peamiseks“.",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
+        "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega — muudatused panen ette kinnitamiseks. Foto saab lisada kirjaklambriga või siia lohistada.",
+      "Прикрепить фото": "Lisa foto", "Фото для помощника": "Foto abilisele",
+      "Написать статью целиком": "Kirjuta kogu artikkel",
+      "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
+        "Pealkiri, sissejuhatus, tekst jaotistega, sildid, tooted ja Google'i tekst — vene keeles, seejärel eesti ja inglise keeles. Mustand salvestub ise; sina loed ja avaldad.",
+      "Только часть": "Ainult osa", "Только план по теме": "Ainult plaan teema põhjal",
+      "✨ Написать тексты слайда": "✨ Kirjuta slaidi tekstid",
+      "✨ Написать текст полоски": "✨ Kirjuta riba tekst",
+      "✨ Написать текст страницы": "✨ Kirjuta lehe tekst",
+      "✨ Написать строку": "✨ Kirjuta rida",
+      "✨ Написать заметку": "✨ Kirjuta märkus",
+      "✨ Подобрать название": "✨ Paku nimi",
+      "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…":
+        "Saba pärast « — » ei tõlgi ennast ise: võta sõna nimekirjast — шампунь, бальзам, масло, паста…",
+      "Не удалось сохранить фото товара": "Toote fotot ei õnnestunud salvestada",
+      "Не получилось сохранить обложку": "Kaanepilti ei õnnestunud salvestada",
+      "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.": "Abilise vastust ei õnnestunud lugeda — küsi uuesti, võib ka lühemalt.",
+      "Помощник не ответил — попробуйте ещё раз через минуту.": "Abiline ei vastanud — proovi minuti pärast uuesti.",
+      "Нужна фотография — JPEG, PNG или WebP.": "Vaja on fotot — JPEG, PNG või WebP.",
+      "Больше 6 фото за раз не нужно.": "Rohkem kui 6 fotot korraga pole vaja.",
+      "Фото не найдено — прикрепите его ещё раз": "Fotot ei leitud — lisa see uuesti",
+      "Не получилось убрать фон — ставлю фото как есть": "Tausta ei õnnestunud eemaldada — panen foto nii, nagu on",
+      "Статья не найдена — проверьте адрес в «Блоге»": "Artiklit ei leitud — kontrolli aadressi «Blogis»",
+      "Обложка поставлена ✓": "Kaanepilt pandud ✓",
+      "Сначала впишите, о чём полоска — хотя бы по-русски": "Kirjuta kõigepealt, millest riba räägib — kasvõi vene keeles",
+      "Сначала впишите код": "Kirjuta kõigepealt kood",
+      "Сначала впишите название — как на упаковке": "Kirjuta kõigepealt nimi — nagu pakendil",
       "Перевести на ET и EN": "Tõlgi ET ja EN keelde",
       "Помощник пишет черновик — прочитайте и поправьте, публикуете вы.":
         "Abiline kirjutab mustandi — loe läbi ja paranda, avaldad sina.",
@@ -3069,6 +3111,48 @@
       "Удалить статью": "Delete the article",
       "уход за бородой зимой": "beard care in winter",
       "Написать черновик по теме": "Draft one from a topic",
+      /* ai-everywhere: the whole article, photos through the assistant, the «✨» fields */
+      "Пишу по-русски…": "Writing in Russian…",
+      "Перевожу на эстонский…": "Translating into Estonian…",
+      "Перевожу на английский…": "Translating into English…",
+      "Сохраняю черновик…": "Saving the draft…",
+      "Статья не дописалась до конца — попробуйте ещё раз": "The article was cut short — try again",
+      "Помощник не подключён — нужен ключ OpenAI на сервере.": "The assistant is not connected — the server needs an OpenAI key.",
+      "Подождите — статья ещё пишется": "Hold on — the article is still being written",
+      "Статья готова на трёх языках — проверьте и опубликуйте": "The article is ready in three languages — check it and publish",
+      "Спросить ещё раз": "Ask again",
+      "Прикреплённые фото": "Attached photos",
+      "Загружаем фото…": "Uploading the photo…",
+      "Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».":
+        "Say where it goes: “this is a photo for Bio Botanical Shampoo, make it the main one”.",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
+        "I can see your catalogue, orders and stock. Ask in plain words — any change I will put up for your approval. Attach a photo with the clip or drop it here.",
+      "Прикрепить фото": "Attach a photo", "Фото для помощника": "Photo for the assistant",
+      "Написать статью целиком": "Write the whole article",
+      "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
+        "Title, excerpt, text with sections, tags, products and the Google text — in Russian, then in Estonian and English. The draft saves itself; you read and publish.",
+      "Только часть": "Only a part", "Только план по теме": "Only an outline for a topic",
+      "✨ Написать тексты слайда": "✨ Write the slide texts",
+      "✨ Написать текст полоски": "✨ Write the strip text",
+      "✨ Написать текст страницы": "✨ Write the page text",
+      "✨ Написать строку": "✨ Write the line",
+      "✨ Написать заметку": "✨ Write a note",
+      "✨ Подобрать название": "✨ Suggest a name",
+      "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…":
+        "The tail after « — » will not translate itself: pick a word from the list — шампунь, бальзам, масло, паста…",
+      "Не удалось сохранить фото товара": "Could not save the product photo",
+      "Не получилось сохранить обложку": "Could not save the cover",
+      "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.": "The assistant's answer could not be read — ask again, a shorter question is fine.",
+      "Помощник не ответил — попробуйте ещё раз через минуту.": "The assistant did not answer — try again in a minute.",
+      "Нужна фотография — JPEG, PNG или WebP.": "A photo is needed — JPEG, PNG or WebP.",
+      "Больше 6 фото за раз не нужно.": "No more than 6 photos at a time.",
+      "Фото не найдено — прикрепите его ещё раз": "Photo not found — attach it again",
+      "Не получилось убрать фон — ставлю фото как есть": "Could not remove the background — using the photo as it is",
+      "Статья не найдена — проверьте адрес в «Блоге»": "Article not found — check its address in “Blog”",
+      "Обложка поставлена ✓": "Cover set ✓",
+      "Сначала впишите, о чём полоска — хотя бы по-русски": "First write what the strip is about — in Russian at least",
+      "Сначала впишите код": "First type the code",
+      "Сначала впишите название — как на упаковке": "First type the name — as on the packaging",
       "Перевести на ET и EN": "Translate into ET and EN",
       "Помощник пишет черновик — прочитайте и поправьте, публикуете вы.":
         "The assistant writes a draft — read it, fix it, and you publish it.",
@@ -3260,6 +3344,10 @@
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
+    [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
+    [/^Фото добавлено · (.+)$/, { ET: "Foto lisatud · $1", EN: "Photo added · $1" }],
+    [/^По-эстонски: (.+) · по-английски: (.+)$/, { ET: "Eesti keeles: $1 · inglise keeles: $2", EN: "In Estonian: $1 · in English: $2" }],
     /* админка, редизайн: the lines that carry a number, a sum or an order
        number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
@@ -4194,6 +4282,7 @@
     bank: 0,
     adminTab: "over",
     adminAsk: "",
+    adminAtt: [],    // photos attached to the assistant's conversation: {key, url, thumb, name, busy, err}
     adminOrder: 0,   // opened order id (0 = list)
     // ---- the redesigned admin shell (docs/design/admin-handoff-README.md) ----
     admMore: false,        // the phone «Ещё» sheet
@@ -4289,6 +4378,8 @@
     adminBlogQ: "",        // featured-products search inside the editor
     adminBlogBusy: false,  // a save/publish/delete request is in flight
     adminBlogErr: "",
+    adminBlogTopic: "",    // «Тема статьи» in the editor's assistant card — prefilled from the title
+    adminBlogGen: null,    // the article generator's progress: {step, msg, err} while «Написать статью целиком» runs
     adminBlogConfirmDelete: false,
     /* The editor's toolbar sheet: "" | "link" | "image" | "product". It is
        drawn into its own slot by hand rather than by render(), because a
@@ -7479,6 +7570,7 @@
       if (r.status === 200 && r.body.ok && r.body.post) {
         S.adminBlogEdit = blogDraftFromPost(r.body.post);
         S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+        S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
         S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
       } else toast("Не получилось сохранить — попробуйте ещё раз.");
       render();
@@ -7564,8 +7656,115 @@
       }).catch(function () { failed = "error"; done(); });
     });
   }
-  function saveBlogFields() {
-    var d = S.adminBlogEdit;
+  /* ---- the whole article, in three languages -------------------------------
+     «Написать статью целиком» in the editor's assistant card, and the
+     assistant's «напиши статью…» (startArticleFromAssistant) — the same
+     three calls to POST /api/admin/ai/text/: post_full in Russian, then
+     post_translate into Estonian and into English (src/lib/ai-prompts.ts).
+     Each answer is written into the draft (the source of truth for every
+     field) and drawn by the next render(), so the owner watches the article
+     fill in; S.adminBlogGen is the progress line. At the end the draft is
+     saved as a draft post, so nothing written is lost to a closed tab — the
+     owner reads, fixes and publishes. A failure stops where it is, says so
+     in plain words under the button, and keeps what was already written. */
+  var BLOGGEN_STEPS = { ru: "Пишу по-русски…", et: "Перевожу на эстонский…", en: "Перевожу на английский…", save: "Сохраняю черновик…" };
+  function blogGenText(d) {
+    var g = S.adminBlogGen;
+    if (!g || (d && g.d !== d)) return "";
+    return g.err || BLOGGEN_STEPS[g.step] || "";
+  }
+  /** «Тема статьи»: what the owner typed, else the title — so one click writes the article the title names. */
+  function blogTopicValue(d) {
+    return S.adminBlogTopic || d.title.RU || d.title.ET || d.title.EN || "";
+  }
+  function blogTags(d) {
+    return String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+  function blogGenErrText(r) {
+    if (r.status === 401) { SRV.admin = false; return "Вы вышли из админки — войдите снова."; }
+    var code = (r.body && r.body.error) || "";
+    if (code === "rate_limited") return "Слишком много запросов — попробуйте позже";
+    if (code === "truncated") return "Статья не дописалась до конца — попробуйте ещё раз";
+    if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
+    return "Не получилось — попробуйте ещё раз";
+  }
+  /** The Russian article, field by field, into the draft. */
+  function blogGenApplyFull(d, tx) {
+    d.title.RU = String(tx.title || "").slice(0, 200);
+    d.excerpt.RU = String(tx.excerpt || "").slice(0, 500);
+    d.body.RU = blogCleanHtml(String(tx.body || ""));
+    if (Array.isArray(tx.tags) && tx.tags.length) d.tagsText = tx.tags.map(String).join(", ");
+    if (Array.isArray(tx.products)) {
+      tx.products.forEach(function (id) {
+        // only a product this panel knows — the route filtered against its slice, this is the second door
+        if (d.products.indexOf(id) < 0 && d.products.length < 12 && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
+      });
+    }
+    if (tx.seo && tx.seo.title) d.seoTitle.RU = String(tx.seo.title).slice(0, 70);
+    if (tx.seo && tx.seo.description) d.seoDesc.RU = String(tx.seo.description).slice(0, 170);
+    if (d.slugAuto && d.title.RU) d.slug = blogSlugify(d.title.RU);
+  }
+  /** One target language: the Russian article translated whole, tags kept as they are. */
+  function blogGenTranslate(d, L) {
+    var keep = productsById(d.products).map(function (p) { return p.brand + " " + p.name; });
+    return apiSend("/api/admin/ai/text/", "POST", {
+      task: "post_translate", lang: L,
+      input: {
+        sourceLang: "RU", title: d.title.RU, excerpt: d.excerpt.RU, body: d.body.RU,
+        tags: blogTags(d), seoTitle: d.seoTitle.RU, seoDescription: d.seoDesc.RU, keepNames: keep
+      }
+    }).then(function (r) {
+      var tx = r.status === 200 && r.body.ok && r.body.text;
+      if (!tx || !(tx.title || tx.body)) throw new Error(blogGenErrText(r));
+      if (tx.title) d.title[L] = String(tx.title).slice(0, 200);
+      if (tx.excerpt) d.excerpt[L] = String(tx.excerpt).slice(0, 500);
+      if (tx.body) d.body[L] = blogCleanHtml(String(tx.body));
+      if (tx.seo && tx.seo.title) d.seoTitle[L] = String(tx.seo.title).slice(0, 70);
+      if (tx.seo && tx.seo.description) d.seoDesc[L] = String(tx.seo.description).slice(0, 170);
+    });
+  }
+  function admBlogWriteFull(d, topic, hint) {
+    if (!d) return;
+    if (S.adminBlogGen && !S.adminBlogGen.err) { toast("Подождите — статья ещё пишется"); return; }
+    topic = String(topic || "").trim();
+    if (!topic) { toast("Введите тему статьи"); refocus("[data-admblogtopic]"); return; }
+    // a render() only while this draft is the one on screen — the owner may
+    // have walked off to another tab; the article is still finished and saved
+    var paint = function () { if (S.adminBlogEdit === d) render(); };
+    var step = function (s) { S.adminBlogGen = { d: d, step: s, err: "" }; paint(); };
+    S.adminBlogErr = "";
+    step("ru");
+    apiSend("/api/admin/ai/text/", "POST", {
+      task: "post_full", lang: "RU",
+      input: {
+        topic: topic, hint: hint || "",
+        products: productsById(d.products).map(function (p) { return { id: p.id, brand: p.brand, name: p.name, category: CAT_NAMES[p.cat] || p.cat }; })
+      }
+    }).then(function (r) {
+      var tx = r.status === 200 && r.body.ok && r.body.text;
+      if (!tx || !tx.title || !tx.body) throw new Error(blogGenErrText(r));
+      blogGenApplyFull(d, tx);
+      step("et");
+      return blogGenTranslate(d, "ET");
+    }).then(function () {
+      step("en");
+      return blogGenTranslate(d, "EN");
+    }).then(function () {
+      step("save");
+      return saveBlogFields(d).catch(function () { throw new Error(BLOG_SAVE_ERR); });
+    }).then(function () {
+      S.adminBlogGen = null;
+      toast("Статья готова на трёх языках — проверьте и опубликуйте");
+      paint();
+    }).catch(function (e) {
+      var msg = (e && e.message) || "Не получилось — попробуйте ещё раз";
+      S.adminBlogGen = { d: d, step: "error", err: msg };
+      toast(msg);
+      paint();
+    });
+  }
+  function saveBlogFields(draft) {
+    var d = draft || S.adminBlogEdit;
     if (!d) return Promise.reject(new Error("no_draft"));
     var body = blogFieldsPayload(d);
     var req = d.id
@@ -9890,7 +10089,31 @@
     if (a.fallback) return adminAnswer(a.q);
     return esc(a.reply || "") +
       (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
-      (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "");
+      (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "") +
+      /* the route could not read the model's answer (or the panel could not
+         read the route's): a sentence was shown instead of the raw text, and
+         this asks the same question again — never a retype */
+      (a.retry ? '<div class="adm-acts" style="margin-top:8px"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admretry>Спросить ещё раз</button></div>' : "");
+  }
+  /* The photos attached to the conversation, as a strip of thumbnails above
+     the question box — each one uploaded the moment it was attached (see
+     admAttachFiles), so the assistant can be told its key with the next
+     question. A photo that failed to upload says so and can be removed. */
+  function admAttHTML() {
+    var list = S.adminAtt || [];
+    if (!list.length) return "";
+    return '<div class="adm-att" data-admattlist aria-label="Прикреплённые фото">' + list.map(function (a, i) {
+      return '<span class="adm-att__i' + (a.err ? " adm-att__i--err" : "") + '" title="' + esc(a.name || "") + '">' +
+        (a.thumb ? '<span class="adm-att__img" style="background-image:url(\'' + esc(a.thumb).replace(/'/g, "%27") + '\')"></span>'
+          : '<span class="adm-att__img adm-att__img--wait">' + (a.busy ? "…" : "!") + "</span>") +
+        '<button class="adm-att__x" data-admattdel="' + i + '" aria-label="Убрать фото">×</button></span>';
+    }).join("") +
+      (list.some(function (a) { return a.err; })
+        ? '<span class="adm-hint adm-hint--warn">' + esc(list.filter(function (a) { return a.err; })[0].err) + "</span>"
+        : list.some(function (a) { return a.busy; })
+          ? '<span class="adm-hint">Загружаем фото…</span>'
+          : '<span class="adm-hint">Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».</span>') +
+      "</div>";
   }
   function admAsstBodyHTML() {
     return '<div class="adm-asst__body">' +
@@ -9898,11 +10121,17 @@
         ? '<div class="adm-msg adm-msg--me">' + esc(S.adminAsk) + "</div>" +
           '<div class="adm-msg" data-aians>' + (admAI ? admAnswerHTML() : adminAnswer(S.adminAsk)) + "</div>"
         : '<div class="adm-msg">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — ' +
-          'а изменения предложу на подтверждение.</div>') +
+          'а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.</div>') +
+      admAttHTML() +
       '<div class="adm-asst__chips">' + ADM_ASK.map(function (q) {
         return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
       }).join("") + "</div></div>" +
       '<div class="adm-asst__foot">' +
+        '<button class="adm-asst__clip" data-admattach' + (MEDIA.on === false ? " disabled" : "") +
+          ' aria-label="Прикрепить фото" title="Прикрепить фото">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+          'stroke-linecap="round" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg></button>' +
+        '<input class="adm-file" type="file" accept="image/*" multiple data-admfile aria-label="Фото для помощника">' +
         '<input class="adm-input" data-admq value="' + esc(S.adminQ || "") +
           '" placeholder="Спросите обычными словами" aria-label="Вопрос помощнику">' +
         '<button class="adm-btn" data-admsend aria-label="Спросить">→</button></div>';
@@ -9912,8 +10141,10 @@
      markup rather than two, because `[data-aians]` — where askAdminAI() writes
      the answer — has to be the only one of its kind on the page. */
   function admAsstHTML() {
+    // data-admdrop: a photo dragged onto the pane is attached (the drop
+    // listener next to the gallery's own, at the bottom of this file)
     return '<button class="adm-scrim adm-scrim--phone" data-admai aria-label="Закрыть помощника"></button>' +
-      '<div class="adm-asst" role="dialog" aria-label="Помощник">' +
+      '<div class="adm-asst" role="dialog" aria-label="Помощник" data-admdrop>' +
         '<div class="adm-asst__head"><span>Помощник</span>' +
           '<button class="adm-asst__fold" data-admai aria-expanded="true" title="Свернуть помощника" ' +
             'aria-label="Свернуть помощника"><svg class="adm-asst__chev" width="16" height="16" ' +
@@ -10357,6 +10588,7 @@
   function admBlogEditorScreen(d) {
     var L = S.adminBlogLang || "RU";
     var busy = S.adminBlogBusy;
+    var gen = S.adminBlogGen && S.adminBlogGen.d === d ? S.adminBlogGen : null, genBusy = !!(gen && !gen.err);
     blogKeepCaret();   // this render is about to replace the box being typed in
     var picked = productsById(d.products);
     var q = (S.adminBlogQ || "").trim().toLowerCase();
@@ -10444,12 +10676,23 @@
             : '<button class="adm-link adm-link--warn" data-admblogdel>Удалить статью</button>')
           : "") +
       "</div>" +
+      /* One primary action: the whole article, every field, all three
+         languages (admBlogWriteFull). The topic follows the title until the
+         owner types his own; the progress line says which language is being
+         written. The older helpers — a plan of headings, a translation of
+         what is already there — stay behind «Только часть». */
       '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
         '<label class="adm-field">Тема статьи' +
-          '<input class="adm-input" data-admblogtopic placeholder="уход за бородой зимой"></label>' +
-        '<button class="adm-btn adm-btn--ghost" data-admblogoutline>Написать черновик по теме</button>' +
-        '<button class="adm-btn adm-btn--ghost" data-admblogtranslate>Перевести на ET и EN</button>' +
-        '<div class="adm-hint">Помощник пишет черновик — прочитайте и поправьте, публикуете вы.</div></div>';
+          '<input class="adm-input" data-admblogtopic value="' + esc(blogTopicValue(d)) + '" placeholder="уход за бородой зимой"' +
+          (genBusy ? " disabled" : "") + "></label>" +
+        '<button class="adm-btn" data-admblogfull' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать статью целиком") + "</button>" +
+        '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-admblogprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(blogGenText(d)) + "</div>" +
+        '<div class="adm-hint">Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.</div>' +
+        '<details class="adm-fold"><summary class="adm-link adm-link--muted">Только часть</summary>' +
+          '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
+          '<button class="adm-link" data-admblogoutline' + (genBusy ? " disabled" : "") + ">Только план по теме</button>" +
+          '<button class="adm-link" data-admblogtranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
+        "</div></details></div>";
 
     return '<div class="adm-screen adm-screen--tight">' +
       admBackHTML("data-admblogback", "Блог") +
@@ -11180,6 +11423,9 @@
       heroFieldHTML(s, "title", "Заголовок", "input", 40) +
       heroFieldHTML(s, "sub", "Подзаголовок", "textarea", 90) +
       heroFieldHTML(s, "cta", "Надпись на кнопке", "input", 24) +
+      // the four texts written by the assistant — from the title (or the
+      // link) as a hint, for the language on the pill or all three
+      admSparkHTML('data-herospark="one"', "✨ Написать тексты слайда", 'data-herospark="all"') +
       '<label class="adm-field">Куда ведёт кнопка' +
         '<select class="adm-input" data-herogo>' +
           '<optgroup label="Разделы">' + opt("cat:all", "Все товары") +
@@ -11450,14 +11696,18 @@
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
+          // «✨»: the strip and its phone-width line, from what the owner typed as the gist
+          admSparkHTML('data-contentspark="announcement"', "✨ Написать текст полоски", 'data-contentspark="announcement:all"') +
           cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300))) +
         (!show("contact") ? "" : cBlock("contact", "Страница «Контакты»",
           "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
-          cTri("contactPage", "Текст страницы", "textarea", 1200))) +
+          cTri("contactPage", "Текст страницы", "textarea", 1200) +
+          admSparkHTML('data-contentspark="contact"', "✨ Написать текст страницы", 'data-contentspark="contact:all"'))) +
         (!show("emailfooter") ? "" : cBlock("emailfooter", "Подпись в письмах",
           esc(cText(d.emailFooter)) || "нет",
           cTri("emailFooter", "Строка внизу письма", "input", 300,
-            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
+            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.") +
+          admSparkHTML('data-contentspark="footer"', "✨ Написать строку", 'data-contentspark="footer:all"'))) +
       "</div>" +
       '<div class="adm-acts" style="margin-top:16px">' +
         '<button class="adm-btn" data-contentsave>Сохранить</button>' +
@@ -11934,6 +12184,8 @@
             '<input class="adm-input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
           '<label class="adm-field" style="margin-top:10px">Заметка для себя' +
             '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
+          // «✨»: one line from the code's own conditions — what it is for, where it is given out
+          admSparkHTML("data-promospark", "✨ Написать заметку") +
         "</div></details>" +
       (S.promoFormErr ? '<div class="adm-err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
       '<div class="adm-acts"><button class="adm-btn" data-admpromosave>' +
@@ -12635,6 +12887,62 @@
       }).catch(function () { failed = "error"; done(); });
     });
   }
+  /* ---- «✨» — the short texts the assistant writes in place ------------------
+     One helper for every field that got a spark: the banner slide, the
+     announcement strip, the «Контакты» paragraph, the letter footer, a promo
+     code's note, a new product's name. POST /api/admin/ai/text/ task "copy"
+     (src/lib/ai-prompts.ts buildCopyPrompt), one call per language; the
+     button shows «…» while it works and a plain-Russian toast says when it
+     did not. `apply(L, text)` writes the answer into the draft AND into the
+     field on screen — never a render(): every one of these forms is
+     mid-typing, and a render would put the saved values back. */
+  function admSparkHTML(attr, label, allAttr) {
+    return '<div class="adm-spark">' +
+      '<button class="adm-link" ' + attr + ">" + label + "</button>" +
+      (allAttr ? '<button class="adm-link adm-link--muted" ' + allAttr + ">все три языка</button>" : "") + "</div>";
+  }
+  function admSpark(btn, langs, kind, inputFor, apply) {
+    if (!btn || btn.disabled) return;
+    var label = btn.textContent; btn.disabled = true; btn.textContent = "…";
+    var left = langs.length, okN = 0, failed = "";
+    var done = function () {
+      if (--left) return;
+      btn.disabled = false; btn.textContent = label;
+      if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте и сохраните" : "Черновик готов — проверьте и сохраните");
+      else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      else if (failed === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+      else toast("Не получилось — попробуйте ещё раз");
+    };
+    langs.forEach(function (L) {
+      var input = inputFor(L);
+      input.kind = kind;
+      apiSend("/api/admin/ai/text/", "POST", { task: "copy", lang: L, input: input }).then(function (r) {
+        if (r.status === 200 && r.body.ok && r.body.text) { apply(L, r.body.text); okN++; }
+        else if (r.status === 401) { SRV.admin = false; render(); }
+        else failed = (r.body && r.body.error) || "error";
+        done();
+      }).catch(function () { failed = "error"; done(); });
+    });
+  }
+  /** A content-editor field on screen, patched to what the draft now holds. */
+  function cPatchField(path, value) {
+    var el = document.querySelector('[data-contentf="' + path + '"]');
+    if (el) el.value = value;
+  }
+  /** Under the name box of the owner's product: what the ET and EN shop will show for the tail the name has. */
+  function edNameHintText(name) {
+    var et = trName(name, "ET"), en = trName(name, "EN");
+    if (et !== name || en !== name) return "По-эстонски: " + et + " · по-английски: " + en;
+    return / — /.test(name)
+      ? "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…"
+      : "";
+  }
+  function edNameHintPaint(name) {
+    var el = document.querySelector("[data-ednamehint]");
+    if (!el) return;
+    el.textContent = edNameHintText(name);
+    translateTree(el);
+  }
   /** The photos that ship with the catalogue — what «Вернуть фото из каталога»
    *  goes back to, read from BASE so a saved override cannot hide them. */
   function baseGallery(id) {
@@ -12978,6 +13286,11 @@
           '<datalist id="edbrands">' + edBrandOptions() + "</datalist>" +
           '<label class="adm-field"><span>Название <span class="adm-req" aria-hidden="true">*</span></span>' +
             '<input class="adm-input" data-edname value="' + esc(p.name) + '" maxlength="120" placeholder="Beard Balm — бальзам для бороды"></label>' +
+          /* «✨»: the house pattern «Latin line name — русский хвост», with a
+             tail the storefront translates by itself; the line under it says
+             what the Estonian and English shop will show for it */
+          admSparkHTML("data-ednamespark", "✨ Подобрать название") +
+          '<p class="adm-hint" data-ednamehint>' + (p.name ? esc(edNameHintText(p.name)) : "") + "</p>" +
           '<div class="adm-edpair">' +
             '<label class="adm-field">Раздел<select class="adm-input" data-edcat>' +
               CATS.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") +
@@ -14677,6 +14990,16 @@
     if (S.customAll) for (var k = 0; k < S.customAll.length; k++) if (S.customAll[k].id === id) S.customAll[k] = c;
     adoptCustom(DEMO.custom);
   }
+  /** The owner's product's photo list on the local copies — the assistant's
+      add_product_photo and its undo; the row itself is srvPush()'s PUT. */
+  function customSetGallery(id, list) {
+    var c = findCustom(id);
+    if (!c) return;
+    c.photos = (list || []).map(function (g) { return { url: g.url, thumb: g.thumb || g.url, alt: g.alt || "" }; });
+    c.gallery = c.photos.map(function (g) { return g.url; });
+    if (S.customAll) for (var k = 0; k < S.customAll.length; k++) if (S.customAll[k].id === id) S.customAll[k] = c;
+    adoptCustom(DEMO.custom);
+  }
   adoptCustom(DEMO.custom);
   /* media: the owner's photos, as gal() wants them — a plain list of URLs.
      p.img follows the first one, because the bundle rows and the JSON-LD read
@@ -14886,6 +15209,21 @@
     // media: the whole list travels every time — adding, reordering, choosing
     // the main photo and deleting are all one write
     else if (a.type === "set_gallery") apiSend(ov, "PUT", { id: a.id, gallery: a.list }).catch(noop);
+    // …and the owner's own product keeps its photos in its row
+    else if (a.type === "set_product_gallery") {
+      apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", { gallery: a.list || [] })
+        .then(function (r) {
+          if (r.status === 200 && r.body.ok && r.body.product) customAdopt(r.body.product);
+          else toast("Не удалось сохранить фото товара");
+        }).catch(noop);
+    }
+    // a post's cover: read the post, write it back with the cover changed
+    else if (a.type === "set_post_cover") {
+      blogPatchCover(a.slug, a.url).then(function (r) {
+        if (!(r.status === 200 && r.body.ok)) toast("Не получилось сохранить обложку");
+        S.adminBlog = null;
+      }).catch(function () { toast("Не получилось сохранить обложку"); });
+    }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") apiSend(ov, "PUT", { id: a.id, description: a.value || null }).catch(noop);
     else if (a.type === "toggle_flow") apiSend(st, "PUT", { flows: DEMO.flows }).catch(noop);
@@ -15227,9 +15565,21 @@
     if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
     if (a.type === "set_video") return "Видео «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "убрано");   // features
     // media
-    if (a.type === "set_gallery") {
+    if (a.type === "set_gallery" || a.type === "set_product_gallery") {
       var gl = Array.isArray(a.list) ? a.list.length : 0;
-      return "Фото «" + (p ? p.name : a.id) + "»: " + (gl ? gl + " " + pl(gl, "фотография", "фотографии", "фотографий") : "как в каталоге");
+      var gp = p || findCustom(a.id);
+      return "Фото «" + (gp ? gp.name : a.id) + "»: " + (gl ? gl + " " + pl(gl, "фотография", "фотографии", "фотографий") : "как в каталоге");
+    }
+    /* the assistant's photo actions: the confirm card names the product (or
+       the post) and what happens — the journal line is the gallery's own */
+    if (a.type === "add_product_photo") {
+      var ap = admEditProduct(a.id);
+      var apName = ap ? ap.brand + " " + ap.name : a.id;
+      return (a.main ? "Главное фото «" + apName + "»" : "Ещё одно фото «" + apName + "»") +
+        "\nФото появится на странице товара" + (a.main ? ", в каталоге, в поиске и в письмах" : "") + ". Отменить можно в журнале.";
+    }
+    if (a.type === "set_post_cover") {
+      return "Обложка статьи «" + (a.title || a.slug) + "»" + (a.prevUrl ? " — заменить" : "") + "\nОтменить можно в журнале.";
     }
     // assistant-work
     if (a.type === "set_description") return "Описание «" + (p ? p.name : a.id) + "» обновлено";
@@ -15253,6 +15603,11 @@
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
     // blog: posts have no demo layer, so this text is all the confirm card
     // shows — there is no undo entry to read it back from later
+    // the short form — the model named a topic, the panel writes the article
+    if (a.type === "draft_post" && a.topic && !a.title) {
+      return "Статья целиком на тему «" + a.topic + "»" + (a.hint ? " · " + a.hint : "") +
+        "\nЗаголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.";
+    }
     if (a.type === "draft_post") {
       var bTitle = (a.title && (a.title.RU || a.title.ET || a.title.EN)) || "—";
       return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
@@ -15479,6 +15834,19 @@
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
     }
+    /* the owner's own product's photos are its row's, not an override — the
+       assistant's add_product_photo writes them here (PUT in srvPush) and
+       the journal keeps the list as it was */
+    else if (a.type === "set_product_gallery") {
+      var cRow = findCustom(a.id);
+      entry.prev = { type: "set_product_gallery", id: a.id, list: cRow ? (cRow.photos || []).slice() : [] };
+      customSetGallery(a.id, a.list || []);
+    }
+    // a blog post's cover, from a photo attached in the chat — the post has
+    // no demo layer, so prevUrl (read before the write) is the whole undo
+    else if (a.type === "set_post_cover") {
+      entry.prev = { type: "set_post_cover", slug: a.slug, url: a.prevUrl || "", title: a.title };
+    }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") {
       entry.prev = { type: "set_description", id: a.id, value: DEMO.desc[a.id] || null };
@@ -15588,6 +15956,8 @@
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
     }
+    else if (a.type === "set_product_gallery") { customSetGallery(a.id, a.list || []); }
+    else if (a.type === "set_post_cover") { if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = a.url || ""; }
     else if (a.type === "set_description") {   // assistant-work
       if (a.value && (a.value.RU || a.value.ET || a.value.EN)) DEMO.desc[a.id] = a.value;
       else delete DEMO.desc[a.id];
@@ -15623,6 +15993,12 @@
     return '<div class="adm-propose">' +
       '<div class="adm-propose__t">' + esc(a.title || "Предпросмотр изменения") + "</div>" +
       '<div class="adm-propose__d">' + esc(a.detail || actionText(a)) + "</div>" +
+      /* a photo going onto a product may have its background removed on the
+         way — offered only when the server said it can (MEDIA.cutout), the
+         same switch the editor's «✂» is behind */
+      (a.type === "add_product_photo" && MEDIA.cutout
+        ? '<label class="adm-propose__opt"><input type="checkbox" data-admcut> <span>Убрать фон</span></label>'
+        : "") +
       '<div class="adm-propose__acts">' +
         '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
           esc(a.ok || "Применить") + "</button>" +
@@ -15663,29 +16039,190 @@
       contactPage: c.contactPage, emailFooter: c.emailFooter
     };
   }
+  /* What the owner reads when the answer could not be read — a sentence and
+     a «Спросить ещё раз», never the raw text. The route has the same rule on
+     its side (src/lib/ai-json.ts); this is the panel's own, for a body that
+     is not even JSON or a reply that still looks like one. */
+  var AI_UNREADABLE = "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.";
+  var AI_SILENT = "Помощник не ответил — попробуйте ещё раз через минуту.";
+  function replyLooksLikeJson(s) {
+    var t = String(s || "").trim();
+    var c = t.charAt(0);
+    // \x22 is the double quote: a quote inside a regex literal trips tools/i18n-gaps.mjs's tokeniser
+    return c === "{" || c === "[" || t.indexOf("```") === 0 || /\x22(reply|action|product_ids|tab)\x22\s*:/.test(t);
+  }
+  /** The uploaded photos, as the route wants them told: key and file name. */
+  function attachmentsForAI() {
+    return (S.adminAtt || []).filter(function (a) { return a.key && !a.busy && !a.err; })
+      .map(function (a) { return { key: a.key, name: a.name || "" }; }).slice(0, 6);
+  }
+  function admPaintAnswer() {
+    var el = document.querySelector("[data-aians]");
+    if (el) { el.innerHTML = admAnswerHTML(); translateTree(el); }
+  }
   function askAdminAI(q) {
     admConvo.push({ role: "user", content: q });
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI() })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI() })
     })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error(String(r.status));
+        // a body that is not JSON at all (a cut answer relayed raw by a stale
+        // deployment) lands in the same place as any other unreadable reply
+        return r.json().catch(function () { throw new Error("unreadable"); });
+      })
       .then(function (j) {
-        admConvo.push({ role: "assistant", content: j.reply || "" });
+        var reply = typeof j.reply === "string" ? j.reply : "";
+        var retry = !!j.retry;
+        if (!reply || replyLooksLikeJson(reply)) { reply = AI_UNREADABLE; retry = !j.action; }
+        admConvo.push({ role: "assistant", content: reply });
         if (S.adminAsk !== q) return;
         pendingAction = j.action || null;
         // kept in S, drawn by admAnswerHTML() — here and on every later render
-        S.adminAns = { q: q, reply: j.reply || "", action: pendingAction, tab: j.tab || "" };
-        var el = document.querySelector("[data-aians]");
-        if (el) { el.innerHTML = admAnswerHTML(); translateTree(el); }
+        S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry };
+        admPaintAnswer();
       })
-      .catch(function () {
+      .catch(function (err) {
         if (S.adminAsk !== q) return;
-        S.adminAns = { q: q, fallback: true };
-        var el = document.querySelector("[data-aians]");
-        if (el) el.innerHTML = adminAnswer(q);
+        var unreadable = err && err.message === "unreadable";
+        S.adminAns = { q: q, reply: unreadable ? AI_UNREADABLE : AI_SILENT, action: null, tab: "", retry: true };
+        admPaintAnswer();
       });
+  }
+  /** «Спросить ещё раз»: the same question, asked again — the answer box goes back to «…». */
+  function askAdminAgain() {
+    var q = S.adminAsk;
+    if (!q || !admAI) return;
+    // the failed turn must not be repeated in the history the model sees
+    if (admConvo.length && admConvo[admConvo.length - 1].role === "user") admConvo.pop();
+    else if (admConvo.length >= 2 && admConvo[admConvo.length - 2].role === "user") admConvo.splice(-2, 2);
+    S.adminAns = null;
+    admPaintAnswer();
+    askAdminAI(q);
+  }
+
+  /* ---- photos through the assistant ----------------------------------------
+     A photo attached here (the clip, or a drop onto the pane) is uploaded at
+     once through the same POST /api/admin/upload/ the goods editor uses —
+     under products/inbox/… until the assistant files it — and shown as a
+     thumbnail. The next question carries its key (attachmentsForAI), and
+     the model may answer with add_product_photo / set_post_cover, which the
+     confirm card then applies through the panel's own gallery and cover
+     writes: journalled, undoable, nothing the chat does on its own. */
+  var ADM_ATT_MAX = 6;
+  function admAttachFiles(files) {
+    var list = S.adminAtt || (S.adminAtt = []);
+    var queue = [];
+    for (var i = 0; i < files.length; i++) if (files[i] && /^image\//.test(files[i].type || "")) queue.push(files[i]);
+    if (!queue.length) { toast("Нужна фотография — JPEG, PNG или WebP."); return; }
+    if (MEDIA.on === false) { toast(MEDIA_ERR.storage_not_configured); return; }
+    if (list.length + queue.length > ADM_ATT_MAX) { toast("Больше 6 фото за раз не нужно."); return; }
+    queue.forEach(function (f) {
+      var att = { key: "", url: "", thumb: "", name: String(f.name || "photo").slice(0, 80), busy: true, err: "" };
+      list.push(att);
+      uploadPhoto(f, "product", "inbox").then(function (r) {
+        att.busy = false; att.key = r.key || ""; att.url = r.url || ""; att.thumb = r.thumbUrl || r.url || "";
+        if (!att.key) att.err = "Не получилось загрузить — попробуйте ещё раз";
+        render();
+      }).catch(function (e) {
+        att.busy = false; att.err = mediaErrText(e);
+        render();
+      });
+    });
+    render();
+  }
+  function admAttByKey(key) {
+    var list = S.adminAtt || [];
+    for (var i = 0; i < list.length; i++) if (list[i].key === key) return list[i];
+    return null;
+  }
+  function admAttRemove(i) {
+    var list = S.adminAtt || [];
+    var gone = list.splice(i, 1)[0];
+    // an unfiled photo is the panel's to delete; a filed one lives in a gallery now
+    if (gone && gone.key && !gone.filed) galDrop(gone.key);
+  }
+  /** The attachment is in a gallery or on a cover now — off the strip, kept in the bucket. */
+  function admAttFiled(key) {
+    var list = S.adminAtt || [];
+    for (var i = list.length - 1; i >= 0; i--) if (list[i].key === key) { list[i].filed = true; list.splice(i, 1); }
+  }
+  /* A photo onto a product: the catalogue product's gallery override
+     (set_gallery — the editor's own write) or the owner's product's row
+     (set_product_gallery, PUT /api/admin/products/[id]); both journalled
+     with the list as it was, so «Отменить» puts it back. `cut` asks the
+     background-removal route first (src/lib/photo-cutout.ts) and files the
+     cut-out instead — the original stays in the bucket. */
+  function applyProductPhoto(a, cut) {
+    var att = admAttByKey(a.key);
+    if (!att || !att.url) { toast("Фото не найдено — прикрепите его ещё раз"); return; }
+    var p = admEditProduct(a.id);
+    if (!p || p.isNew) { toast("Товар не найден — обновите список товаров"); return; }
+    var place = function (photo) {
+      var list = galPhotos(p).slice();
+      if (list.length >= MAX_PHOTOS) list = list.slice(0, MAX_PHOTOS - 1);
+      if (a.main) list.unshift(photo); else list.push(photo);
+      var entry = demoApply(p.custom
+        ? { type: "set_product_gallery", id: p.id, list: list }
+        : { type: "set_gallery", id: p.id, list: list });
+      // the editor open on this very product shows the new list at once
+      if (GAL.id === p.id) { GAL.list = list.slice(); GAL.reset = false; }
+      admAttFiled(a.key);
+      // two whole strings, not one with a fork: each is a UI_RX rule of its own
+      toast(a.main ? "Главное фото поставлено · " + p.brand + " " + p.name : "Фото добавлено · " + p.brand + " " + p.name, entry);
+      render();
+    };
+    if (!cut) { place({ url: att.url, thumb: att.thumb || att.url, alt: "" }); return; }
+    toast("Убираем фон…");
+    apiSend("/api/admin/upload/cutout/", "POST", { url: att.url }).then(function (r) {
+      if (r.status === 200 && r.body.ok && r.body.url) place({ url: r.body.url, thumb: r.body.thumbUrl || r.body.url, alt: "" });
+      else { toast("Не получилось убрать фон — ставлю фото как есть"); place({ url: att.url, thumb: att.thumb || att.url, alt: "" }); }
+    }).catch(function () { toast("Не получилось убрать фон — ставлю фото как есть"); place({ url: att.url, thumb: att.thumb || att.url, alt: "" }); });
+  }
+  /* A photo onto a post's cover: the post is read first, so the journal can
+     keep the cover it had, then written back whole (the blog PATCH writes
+     every field it is given — see blogPatchCover). */
+  function applyPostCover(a) {
+    var att = admAttByKey(a.key);
+    if (!att || !att.url) { toast("Фото не найдено — прикрепите его ещё раз"); return; }
+    apiJson("/api/admin/blog/?slug=" + encodeURIComponent(a.slug)).then(function (r) {
+      if (!(r.status === 200 && r.body.ok && r.body.post)) { toast("Статья не найдена — проверьте адрес в «Блоге»"); return; }
+      var post = r.body.post;
+      var entry = demoApply({ type: "set_post_cover", slug: a.slug, url: att.url, prevUrl: post.coverUrl || "", title: post.title && (post.title.RU || post.title.ET || post.title.EN) });
+      admAttFiled(a.key);
+      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = att.url;
+      toast("Обложка поставлена ✓", entry);
+      render();
+    }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
+  }
+  /** The post read whole and written back with the one field changed — a PATCH here replaces every field it carries. */
+  function blogPatchCover(slug, url) {
+    return apiJson("/api/admin/blog/?slug=" + encodeURIComponent(slug)).then(function (r) {
+      if (!(r.status === 200 && r.body.ok && r.body.post)) throw new Error("not_found");
+      var p = r.body.post;
+      return apiSend("/api/admin/blog/", "PATCH", {
+        id: p.id, title: p.title, excerpt: p.excerpt, body: p.body, coverUrl: url || null, coverAlt: p.coverAlt,
+        tags: p.tags, products: p.products, seoTitle: p.seoTitle, seoDesc: p.seoDesc, author: p.author
+      });
+    });
+  }
+  /* The assistant's «напиши статью…»: the model only named the topic; the
+     article is written here, by the same generator the blog editor's
+     «Написать статью целиком» runs, and opens in that editor as it is
+     written — the owner watches it fill in, reads it and publishes. */
+  function startArticleFromAssistant(a) {
+    var topic = String(a.topic || "").trim();
+    if (!topic) return;
+    S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
+    S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
+    S.adminBlogConfirmDelete = false; S.adminBlogErr = ""; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;
+    S.adminBlogTopic = topic;
+    S.admMore = false;
+    window.scrollTo({ top: 0 });
+    render();
+    admBlogWriteFull(S.adminBlogEdit, topic, a.hint || "");
   }
   function adminAnswer(q) {
     var low = lowStock();
@@ -17048,7 +17585,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -17658,6 +18195,88 @@
       }).catch(function () { trBtn.disabled = false; trBtn.textContent = trLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
+    /* ---- «✨» — see admSpark(): each writes its draft and its field, no render() */
+    if (d.herospark !== undefined) {
+      var hs = heroDraft().slides[S.heroEdit];
+      if (!hs) return;
+      var hLangs = d.herospark === "all" ? ["RU", "ET", "EN"] : [S.heroLang || "RU"];
+      var goP = String(hs.go || "").indexOf("product:") === 0 ? heroProduct(String(hs.go).slice(8)) : null;
+      var imgP = heroProduct(hs.image);
+      var hintP = goP || imgP;
+      admSpark(t, hLangs, "hero", function () {
+        return {
+          hint: (hs.title && hs.title.RU) || (hs.sub && hs.sub.RU) || (hs.eyebrow && hs.eyebrow.RU) || "",
+          product: hintP ? hintP.brand + " " + hintP.name : "",
+          target: heroGoLabel(hs.go)
+        };
+      }, function (L, tx) {
+        ["eyebrow", "title", "sub", "cta"].forEach(function (f) {
+          if (!tx[f]) return;
+          if (!hs[f] || typeof hs[f] !== "object") hs[f] = {};
+          hs[f][L] = tx[f];
+          if (L === (S.heroLang || "RU")) { var hEl = document.querySelector('[data-herof="' + f + '"]'); if (hEl) hEl.value = tx[f]; }
+        });
+        paintHeroPreview();
+      });
+      return;
+    }
+    if (d.contentspark !== undefined) {
+      var csParts = d.contentspark.split(":"), csWhat = csParts[0];
+      var cLangs = csParts[1] === "all" ? ["RU", "ET", "EN"] : [S.contentLang || "RU"];
+      var cd = contentDraft(), cco = cd.company || {};
+      var companyIn = {
+        name: cco.legalName || "", address: cco.address || "", phone: cco.phone || "", email: cco.email || "",
+        hours: CONTENT_DAYS.filter(function (r) { return cd.hours[r[0]]; }).map(function (r) { return r[1] + " " + cd.hours[r[0]]; }).join(", ")
+      };
+      if (csWhat === "announcement") {
+        var annHint = cd.announcement.text[S.contentLang || "RU"] || cd.announcement.text.RU || cd.announcement.text.ET || cd.announcement.text.EN || "";
+        if (!annHint) { toast("Сначала впишите, о чём полоска — хотя бы по-русски"); refocus('[data-contentf="announcement.text.' + (S.contentLang || "RU") + '"]'); return; }
+        admSpark(t, cLangs, "announcement", function () { return { hint: annHint }; }, function (L, tx) {
+          if (tx.text) { cDraftSet("announcement.text." + L, tx.text); cPatchField("announcement.text." + L, tx.text); }
+          if (tx.short) { cDraftSet("announcement.short." + L, tx.short); cPatchField("announcement.short." + L, tx.short); }
+        });
+      } else if (csWhat === "contact") {
+        admSpark(t, cLangs, "contact_page", function (L) {
+          return { hint: cd.contactPage[L] || cd.contactPage.RU || "", company: companyIn };
+        }, function (L, tx) {
+          if (tx.text) { cDraftSet("contactPage." + L, tx.text); cPatchField("contactPage." + L, tx.text); }
+        });
+      } else {
+        admSpark(t, cLangs, "email_footer", function (L) {
+          return { hint: cd.emailFooter[L] || cd.emailFooter.RU || "", company: companyIn };
+        }, function (L, tx) {
+          if (tx.text) { cDraftSet("emailFooter." + L, tx.text); cPatchField("emailFooter." + L, tx.text); }
+        });
+      }
+      return;
+    }
+    if (d.promospark !== undefined) {
+      var pfs = S.promoForm;
+      if (!pfs) return;
+      if (!pfs.code) { toast("Сначала впишите код"); refocus('[data-promof="code"]'); return; }
+      admSpark(t, [S.lang === "ET" || S.lang === "EN" ? S.lang : "RU"], "promo_note", function () {
+        return { promo: { code: pfs.code, kind: pfs.kind, value: pfs.value, minSubtotal: pfs.minSubtotal, endsAt: pfs.endsAt, maxUses: pfs.maxUses }, hint: pfs.note || "" };
+      }, function (L, tx) {
+        if (!tx.text) return;
+        pfs.note = String(tx.text).slice(0, 200);
+        var noteEl2 = document.querySelector('[data-promof="note"]');
+        if (noteEl2) noteEl2.value = pfs.note;
+      });
+      return;
+    }
+    if (d.ednamespark !== undefined) {
+      var nbEl = document.querySelector("[data-edbrand]"), nnEl = document.querySelector("[data-edname]"), ncEl = document.querySelector("[data-edcat]");
+      var typedName = nnEl ? nnEl.value.trim() : "";
+      if (!typedName) { toast("Сначала впишите название — как на упаковке"); refocus("[data-edname]"); return; }
+      admSpark(t, ["RU"], "product_name", function () {
+        return { brand: nbEl ? nbEl.value.trim() : "", name: typedName, category: CAT_NAMES[ncEl ? ncEl.value : ""] || "" };
+      }, function (L, tx) {
+        if (!tx.name) return;
+        if (nnEl) nnEl.value = String(tx.name).slice(0, 120);
+        edNameHintPaint(String(tx.name));
+      });
+      return;
+    }
     if (d.admdescundo !== undefined) {
       if (!AI_UNDO) return;
       var setv = function (sel, v) { var e = document.querySelector(sel); if (e) e.value = v || ""; };
@@ -17858,6 +18477,16 @@
           toast(pa.value ? "Снова в продаже · " + actNm : "Снято с продажи · " + actNm, actEntry);
           render(); return;
         }
+        /* the assistant's photo actions: the checkbox on the card is read
+           before the card goes (the render below rebuilds the panel) */
+        if (pa.type === "add_product_photo") {
+          var cutBox = document.querySelector("[data-admcut]");
+          applyProductPhoto(pa, !!(cutBox && cutBox.checked)); return;
+        }
+        if (pa.type === "set_post_cover") { applyPostCover(pa); return; }
+        // the assistant named a topic: the article is written here, in the
+        // blog editor, by the same generator its own button runs
+        if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
         // blog: posts skip the demo/undo layer entirely — straight to the
         // real admin API, same as the owner's own «Сохранить»/«Опубликовать»
         if (pa.type === "draft_post" || pa.type === "publish_post") applyBlogAction(pa);
@@ -18331,6 +18960,14 @@
       if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
       return;
     }
+    if (d.admretry !== undefined) { askAdminAgain(); return; }
+    // photos through the assistant: the clip opens the picker, × removes one
+    if (d.admattach !== undefined) {
+      var attIn = document.querySelector("[data-admfile]");
+      if (attIn) attIn.click();
+      return;
+    }
+    if (d.admattdel !== undefined) { admAttRemove(Number(d.admattdel)); render(); return; }
     if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
     if (d.size !== undefined) {
       S.size = Number(d.size);
@@ -18431,6 +19068,7 @@
     if (d.admblognew !== undefined) {
       S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
       S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+      S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
       S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
       window.scrollTo({ top: 0 }); render(); return;
     }
@@ -18468,12 +19106,21 @@
        (S.adminBlogEdit) is already the live source of truth for every field
        (see the [data-blogf] input handler above), so filling it in and
        re-rendering just shows what was written, the same as typing would. */
+    // the whole article, all three languages — see admBlogWriteFull()
+    if (d.admblogfull !== undefined) {
+      if (t.disabled || !S.adminBlogEdit) return;
+      var topicElF = document.querySelector("[data-admblogtopic]");
+      var topicF = ((topicElF && topicElF.value) || blogTopicValue(S.adminBlogEdit) || "").trim();
+      S.adminBlogTopic = topicF;
+      admBlogWriteFull(S.adminBlogEdit, topicF, "");
+      return;
+    }
     if (d.admblogoutline !== undefined) {
       if (t.disabled) return;
       var bdOut = S.adminBlogEdit;
       if (!bdOut) return;
       var topicEl = document.querySelector("[data-admblogtopic]");
-      var topic = topicEl ? topicEl.value.trim() : "";
+      var topic = ((topicEl && topicEl.value) || blogTopicValue(bdOut) || "").trim();
       if (!topic) { toast("Введите тему статьи"); refocus("[data-admblogtopic]"); return; }
       var obtn = t, olabel = t.textContent; t.disabled = true; t.textContent = "…";
       var bl = S.adminBlogLang || "RU";
@@ -18710,6 +19357,8 @@
       if (salonEl) salonEl.placeholder = String(edSalonOf(np0 === null ? 0 : np0));
     }
     else if (t.matches("[data-edproprice]")) { t.setAttribute("data-edauto", "0"); }
+    // the owner's product: the line under the name follows what is typed
+    else if (t.matches("[data-edname]")) { edNameHintPaint(t.value.trim()); }
     else if (t.matches("[data-posq]")) {
       S.posQ = t.value;
       var posList = document.getElementById("poslist");
@@ -18805,6 +19454,8 @@
        caret out of the field, so only the counters and the slug mirror are
        patched in place. The body is its own box below. */
     else if (t.matches("[data-blogbody]")) { blogSelSave(); blogSync(); }
+    // «Тема статьи» lives in S so the generator's renders keep what was typed
+    else if (t.matches("[data-admblogtopic]")) { S.adminBlogTopic = t.value; }
     else if (t.matches("[data-blogtoolurl]")) { S.adminBlogToolUrl = t.value; }
     else if (t.matches("[data-blogtoolq]")) {
       S.adminBlogToolQ = t.value;
@@ -18994,6 +19645,12 @@
       else if (where === "blog") blogCoverUpload(picked);   // blog
       else galUpload(picked, admEditProduct(where));   // product creation: a hidden custom product too
     }
+    // photos through the assistant — the clip's own picker
+    else if (t.matches("[data-admfile]")) {
+      var pickedAtt = [].slice.call(t.files || []);   // a copy — see [data-galfile] above
+      t.value = "";
+      if (pickedAtt.length) admAttachFiles(pickedAtt);
+    }
     // blog: the «Картинка» button's own picker — the article body, not the cover
     else if (t.matches("[data-blogtoolfile]")) {
       var pickedBlog = [].slice.call(t.files || []);   // a copy — see [data-galfile] above
@@ -19020,21 +19677,23 @@
   /* media: drag-and-drop onto the same zone. Desktop only in practice — a
      phone has no drag — and it never swallows a drop outside the panel. */
   document.addEventListener("dragover", function (e) {
-    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop],[data-admdrop]");
     if (!z) return;
     e.preventDefault();
     z.classList.add("is-over");
   });
   document.addEventListener("dragleave", function (e) {
-    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop],[data-admdrop]");
     if (z) z.classList.remove("is-over");
   });
   document.addEventListener("drop", function (e) {
-    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop],[data-admdrop]");
     if (!z) return;
     e.preventDefault();
     z.classList.remove("is-over");
     var files = e.dataTransfer && e.dataTransfer.files;
+    // a photo dropped onto the assistant's pane is attached to the conversation
+    if (z.hasAttribute("data-admdrop")) { if (files && files.length) admAttachFiles(files); return; }
     if (!files || !files.length || UP.busy) return;
     var where = z.dataset.galdrop;
     if (where === "hero") heroUpload(files);

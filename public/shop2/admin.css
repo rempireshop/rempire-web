@@ -498,6 +498,33 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-propose__d { font-size: 14px; line-height: 20px; white-space: pre-line; }
 .adm-propose__acts { display: flex; gap: 8px; }
 .adm-propose__acts .adm-btn { flex: 1; height: 44px; }
+/* «Убрать фон» on a photo proposal — a plain checkbox row inside the card */
+.adm-propose__opt { display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 28px; }
+.adm-propose__opt input { width: 18px; height: 18px; margin: 0; accent-color: var(--a-ink); }
+
+/* photos attached to the conversation: the clip in the foot, the strip of
+   thumbnails above the chips, the pane lit up while a file is dragged over */
+.adm-asst__clip {
+  width: 44px; height: 48px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); padding: 0; display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-asst__clip:disabled { color: var(--a-dim); }
+.adm-asst.is-over { outline: 2px dashed var(--a-ink); outline-offset: -6px; }
+.adm-att { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.adm-att__i { position: relative; width: 64px; height: 64px; flex: none; border: 1px solid var(--a-rule); }
+.adm-att__i--err { border-color: var(--a-warn); }
+.adm-att__img { display: block; width: 100%; height: 100%; background: var(--a-tint) center / cover no-repeat; }
+.adm-att__img--wait { display: flex; align-items: center; justify-content: center; color: var(--a-muted); font-size: 18px; }
+.adm-att__x {
+  position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border: 1px solid var(--a-ink);
+  background: var(--a-paper); color: var(--a-ink); font-size: 14px; line-height: 1; padding: 0;
+}
+.adm-att .adm-hint { flex-basis: 100%; }
+
+/* «✨» under a text field: the assistant writes the field in place */
+.adm-spark { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; margin: -4px 0 4px; }
+.adm-spark .adm-link { font-size: 13px; }
+.adm-spark .adm-link:disabled { color: var(--a-muted); text-decoration: none; }
 
 /* ---------- login / waiting card ------------------------------------------- */
 
