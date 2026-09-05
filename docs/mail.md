@@ -126,6 +126,7 @@ variant and a jsonb address still renders a correct letter.
 | `back-in-stock` | `renderBackInStock(product, lang)` | marketing — unsubscribe link |
 | `birthday` | `renderBirthday(customer, lang, code)` | marketing — unsubscribe link |
 | `login-code` | `renderLoginCode(code, lang, {minutes})` | service — the account sign-in code (docs/flows.md) |
+| `partner-welcome` | `renderPartnerWelcome(customer, lang, {percent, company})` | service — «Цены для салонов включены», sent by `src/lib/partner-mail.ts` when the owner makes a customer a partner (docs/loyalty.md) |
 
 `lang` accepts anything the row carries — `"RU"`, `"et-EE"`, `"ee"`, `null` —
 and normalises to `ru` / `et` / `en`, Russian being the fallback. Subject,
@@ -210,8 +211,9 @@ Storage is one settings row, written through the ordinary
 { "mail_texts": { "order-confirmed": { "et": { "subject": "…", "intro": "…", "signature": "…" } } } }
 ```
 
-Six letters are editable — `order-confirmed`, `order-shipped`,
-`abandoned-cart`, `back-in-stock`, `birthday`, `login-code` — in `ru`, `et`,
+Seven letters are editable — `order-confirmed`, `order-shipped`,
+`abandoned-cart`, `back-in-stock`, `birthday`, `login-code`,
+`partner-welcome` — in `ru`, `et`,
 `en`. `gift-card` is not: its wording is bound up with the amount and the
 giver's name. An absent key means "use the default", so the shop that never
 opens the tab is byte-for-byte the shop that existed before the editor did,
@@ -228,6 +230,7 @@ into the row.
 | `back-in-stock` | «X снова в наличии — Rempire» | the paragraph after «Здравствуйте!» | «Наличие и цена актуальны…» |
 | `birthday` | «С днём рождения! …» | the paragraph after «Имя, поздравляем! 🎂» | «Введите код при оформлении заказа…» |
 | `login-code` | «482915 — код для входа в Rempire» | the paragraph after «Здравствуйте!» | «Если вы не запрашивали код…» |
+| `partner-welcome` | «Цены для салонов включены — Rempire» | the paragraph after «Здравствуйте, Имя!» (or the salon's name) — carries `{percent}`, the live salon discount | «Вопросы по ассортименту…» |
 
 ### Placeholders
 
@@ -364,3 +367,7 @@ including "does not throw on a garbage order".
 - A sixth renderer, `login-code`, was added with the customer account
   (docs/flows.md). It is a service letter — no unsubscribe link — and it shows
   up in the admin preview like the rest.
+- A seventh, `partner-welcome`, came with «+ Партнёр» in the admin
+  (docs/loyalty.md): a service letter too, sent once per customer per day at
+  most (the Resend idempotency key is the address plus the date), only when
+  the tier really flips retail → pro, in the customer's own language.

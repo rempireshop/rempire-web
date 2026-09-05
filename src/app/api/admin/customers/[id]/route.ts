@@ -14,10 +14,16 @@
  * docs/loyalty.md and src/app/api/assistant/actions.ts sanitizePointsAdjust).
  * Every write below runs against the resolved row's real uuid, never the raw
  * path segment, so an e-mail id behaves identically to a uuid one throughout.
+ *
+ * A tier that flips retail → pro here — «Одобрить» or `{tier:"pro"}` from the
+ * card's switch — sends the «Цены для салонов включены» letter, the same one
+ * «+ Партнёр» sends (src/lib/partner-mail.ts); the answer carries `mail`.
+ * Demotions and repeats send nothing.
  */
 import { isEmail } from "@/lib/customers";
 import { requireAdmin } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
+import { sendPartnerWelcome } from "@/lib/partner-mail";
 import {
   adjustLoyaltyPoints,
   approveProCustomer,
@@ -106,6 +112,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
     // every write below goes through the resolved real uuid, not the raw
     // path segment — the segment may have been an e-mail address
     const realId = customer.id;
+    const tierBefore = customer.tier;
 
     if (action === "approve") {
       customer = (await approveProCustomer(realId)) ?? customer;
@@ -131,7 +138,21 @@ export async function PATCH(req: Request, ctx: Ctx) {
       customer = (await getCustomerAdmin(realId)) ?? customer;
     }
 
-    return Response.json({ ok: true, customer }, { headers: { "cache-control": "no-store" } });
+    /* The welcome letter, once, on the flip itself: approve and the switch
+       both land here, a card that was pro already sends nothing. Best effort
+       — the tier is already written; a mail failure is reported, not raised. */
+    let mail: { sent: boolean; skipped?: boolean; reason?: string } | undefined;
+    if (tierBefore !== "pro" && customer.tier === "pro" && (action === "approve" || tier === "pro")) {
+      const res = await sendPartnerWelcome({
+        email: customer.email,
+        name: customer.name,
+        lang: customer.lang,
+        company: customer.company,
+      });
+      mail = { sent: res.ok, skipped: res.skipped, reason: res.reason };
+    }
+
+    return Response.json({ ok: true, customer, ...(mail ? { mail } : {}) }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     console.error("[api/admin/customers/:id] write failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });

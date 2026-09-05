@@ -462,6 +462,111 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
   });
 });
 
+/**
+ * Partners. The owner's question was «how and where do I manage requests,
+ * partners and retail?» — so «Клиенты» now says so in a lead, has a
+ * «+ Партнёр» button that adds a salon by e-mail, and the customer card has a
+ * Розница ↔ Партнёр switch. This test walks the button end to end: the
+ * confirm card, POST /api/admin/customers/, the «Партнёры» chip, the welcome
+ * letter (the e2e mail sink), the journal — and then the partner signs in on
+ * the storefront and sees the salon price on a product.
+ */
+test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(186) });
+
+  test("a partner added by e-mail lands under «Партнёры», gets the letter, and sees salon prices in the shop", async ({ page, browser }) => {
+    test.setTimeout(150_000);
+    test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
+    await loginAsAdmin(page);
+    await section(page, "people");
+
+    // the lead answers the question, and links to where the discount lives
+    const lead = page.locator(".adm-page .adm-lead");
+    await expect(lead).toContainText("Заявка на партнёрство");
+    await expect(lead.locator('[data-admgoset="prices"]')).toBeVisible();
+
+    /* ---- «+ Партнёр»: the form, the confirm card, the POST ---------------- */
+    const email = freshEmail("sections-partner");
+    await page.locator("[data-admpartnernew]").click();
+    await page.locator('[data-partnerf="email"]').fill(email);
+    await page.locator('[data-partnerf="company"]').fill("Salon E2E OÜ");
+    await page.locator("[data-admpartnersave]").click();
+    await expect(page.locator(".adm-confirm__t")).toHaveText("Добавить партнёра?");
+    await expect(page.locator(".adm-confirm__d")).toContainText(email);
+    const post = page.waitForResponse(
+      (r) => r.url().includes("/api/admin/customers/") && r.request().method() === "POST");
+    await page.locator("[data-admapply]").click();
+    const answer = await (await post).json();
+    expect(answer.ok, "POST /api/admin/customers/ refused the partner").toBe(true);
+    expect(answer.created).toBe(true);
+    expect(answer.promoted).toBe(true);
+    await expect(page.getByRole("status")).toContainText("Партнёр добавлен");
+    // reversible — «Отменить» on the toast (README § State)
+    await expect(page.locator(".adm-toast__undo")).toBeVisible();
+
+    try {
+      // the list jumped to «Партнёры», and the new row is there, badged Pro
+      await expect(page.locator('[data-admcusttier="pro"]')).toHaveAttribute("aria-current", "true");
+      const row = page.locator(".adm-row", { hasText: email }).first();
+      await expect(row, "the new partner is not under «Партнёры»").toBeVisible();
+      await expect(row.locator(".adm-badge")).toHaveText("Pro");
+      const listed = await (await page.request.get("/api/admin/customers/?tier=pro")).json();
+      expect((listed.customers as Array<{ email: string; company: string | null }>).find((c) => c.email === email)?.company).toBe("Salon E2E OÜ");
+
+      // the card shows the switch on «Партнёр»
+      await row.locator("[data-admcustopen]").click();
+      await expect(page.locator('[data-admcusttierset="pro"]')).toHaveAttribute("aria-current", "true");
+      await page.locator("[data-admcustclose]").click();
+
+      // the welcome letter went out — captured by the e2e mail sink, since
+      // this suite runs without RESEND_API_KEY (docs/testing.md)
+      const mails = await (await page.request.get(
+        `/api/e2e/mail/?template=partner-welcome&to=${encodeURIComponent(email)}`)).json();
+      expect(mails.mails, "no «Цены для салонов включены» letter for the new partner").toHaveLength(1);
+      expect(mails.mails[0].subject).toContain("Цены для салонов включены");
+
+      // …and the journal kept the way back
+      await section(page, "setup");
+      await page.locator('[data-admsetpage="journal"]').click();
+      await expect(page.locator(".adm-jrow", { hasText: `Новый партнёр: ${email}` })).toBeVisible();
+      await expect(page.locator('[data-admundo="0"]')).toBeVisible();
+
+      /* ---- the storefront: the partner signs in and sees salon prices ---- */
+      const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(188) });
+      const shopper = await ctx.newPage();
+      try {
+        await shopper.goto(shopUrl("", "/account/"));
+        await waitForScreen(shopper, "account");
+        await shopper.locator("[data-email]").fill(email);
+        const codeRes = shopper.waitForResponse((r) => r.url().includes("/api/account/code/"));
+        await shopper.locator("[data-login]").click();
+        const code = (await (await codeRes).json()).code as string;
+        await shopper.locator("[data-acctcode]").fill(code);
+        await shopper.locator("[data-logincode]").click();
+        await expect(shopper.locator("[data-logout]")).toBeVisible();
+        // the cabinet says «партнёр» — no request form, the status is already on
+        await expect(shopper.locator(".chip", { hasText: "партнёр" })).toBeVisible();
+        await expect(shopper.locator("[data-acctprosend]")).toHaveCount(0);
+
+        /* To the product inside the app (the header logo, then the card in the
+           «Популярные» rail — PRODUCT is its first tile): the session and the
+           partner prices it fetched stay with the page that way. */
+        await shopper.locator('.hdr [data-go="home"]').click();
+        await waitForScreen(shopper, "home");
+        await shopper.locator(`.card__go[data-go-product="${PRODUCT.id}"]`).first().click();
+        await waitForScreen(shopper, "product");
+        await expect(shopper.locator(".pdp .chip", { hasText: "Цена для салонов" }).first(),
+          "the partner does not see the salon price on the product page").toBeVisible();
+      } finally {
+        await ctx.close();
+      }
+    } finally {
+      // leave the shop as it was found
+      await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } });
+    }
+  });
+});
+
 /** Playwright has no first-class "is this the mobile project" flag. */
 function testProjectIsMobile(info: { project: { name: string } }): boolean {
   return info.project.name !== "desktop";

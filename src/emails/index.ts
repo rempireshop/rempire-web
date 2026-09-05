@@ -14,6 +14,7 @@ import { renderGiftCard, type GiftCardLike } from "./gift-card";
 import { renderLoginCode } from "./login-code";
 import { renderOrderConfirmed } from "./order-confirmed";
 import { renderOrderShipped } from "./order-shipped";
+import { renderPartnerWelcome } from "./partner-welcome";
 import type {
   CartLike,
   CustomerLike,
@@ -31,6 +32,8 @@ export { renderBackInStock } from "./back-in-stock";
 export { renderBirthday } from "./birthday";
 export { renderGiftCard } from "./gift-card";
 export { renderLoginCode } from "./login-code";
+export { renderPartnerWelcome } from "./partner-welcome";
+export type { PartnerWelcomeOptions } from "./partner-welcome";
 export type { GiftCardLike } from "./gift-card";
 export { normalizeLang, isLang, ALL_LANGS, baseUrl } from "./layout";
 /* Owner-editable subject / intro / signature — settings.mail_texts. */
@@ -66,6 +69,7 @@ export const TEMPLATE_IDS = [
   "gift-card",
   "birthday",
   "login-code",
+  "partner-welcome",
 ] as const;
 
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
@@ -83,6 +87,7 @@ export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "gift-card": "Подарочная карта",
   birthday: "Скидка ко дню рождения",
   "login-code": "Код для входа",
+  "partner-welcome": "Цены для салонов включены",
 };
 
 /* ---------- demo data --------------------------------------------------- */
@@ -257,6 +262,8 @@ export function renderDemo(
       });
     case "login-code":
       return renderLoginCode("482915", L);
+    case "partner-welcome":
+      return renderPartnerWelcome(demoCustomer(L), L, { percent: 20, company: "Salon Demo OÜ" });
     case "order-confirmed":
     default:
       return renderOrderConfirmed(demoOrder(L), L);

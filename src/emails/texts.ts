@@ -40,6 +40,7 @@ export const MAIL_TEXT_TEMPLATES = [
   "back-in-stock",
   "birthday",
   "login-code",
+  "partner-welcome",
 ] as const;
 
 export type MailTextTemplate = (typeof MAIL_TEXT_TEMPLATES)[number];
@@ -231,6 +232,29 @@ const D: Record<MailTextTemplate, Record<Lang, MailTextSet>> = {
       intro:
         "Here is the code for signing in to your Rempire account. Enter it on the page you asked for it from.",
       signature: "Did not ask for a code? Delete this e-mail: nobody can sign in without it.",
+    },
+  },
+  /* partners: sent once, the moment the owner adds a salon/master by e-mail
+     («+ Партнёр») or approves a request — src/lib/partner-mail.ts. {percent}
+     is settings.pricing.proDiscountPct, live like the birthday letter's. */
+  "partner-welcome": {
+    ru: {
+      subject: "Цены для салонов включены — Rempire",
+      intro:
+        "Мы включили для вас цены для салонов и мастеров: минус {percent} % на весь каталог. Скидка уже действует — войдите в кабинет по этой почте, и цены на карточках товаров, на странице товара и в корзине будут партнёрскими.",
+      signature: "Вопросы по ассортименту, наличию или заказу — просто ответьте на это письмо.",
+    },
+    et: {
+      subject: "Salongihinnad on teile sisse lülitatud — Rempire",
+      intro:
+        "Lülitasime teile sisse salongide ja meistrite hinnad: kogu kataloog {percent} % soodsamalt. Soodustus kehtib juba — logige selle e-posti aadressiga kontosse sisse ja tootekaartidel, tootelehel ja ostukorvis on partnerihinnad.",
+      signature: "Küsimused sortimendi, saadavuse või tellimuse kohta — vastake lihtsalt sellele kirjale.",
+    },
+    en: {
+      subject: "Salon prices are on for you — Rempire",
+      intro:
+        "We have switched on salon and stylist prices for you: {percent}% off the whole catalogue. The discount already applies — sign in to your account with this e-mail address and the prices on product cards, product pages and in the cart will be partner prices.",
+      signature: "Questions about the range, availability or an order — just reply to this e-mail.",
     },
   },
 };

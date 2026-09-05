@@ -22,6 +22,7 @@ import {
   renderLoginCode,
   renderOrderConfirmed,
   renderOrderShipped,
+  renderPartnerWelcome,
   TEMPLATE_IDS,
   type GiftCardLike,
   type TemplateId,
@@ -254,6 +255,13 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
         });
       case "login-code":
         return renderLoginCode("482915", lang, { minutes: 15 });
+      case "partner-welcome":
+        // a salon added by e-mail alone: no person's name yet, so the
+        // greeting falls back to the company the owner typed
+        return renderPartnerWelcome({ ...sampleCustomer(lang), customer_name: "" }, lang, {
+          percent: 20,
+          company: "Salon Näidis OÜ",
+        });
     }
     throw new Error(`unknown template ${String(template)}`);
   } finally {

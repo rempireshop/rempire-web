@@ -67,8 +67,12 @@ function truthy(v: string | undefined | null): boolean {
  * Everything about this is best effort: no database, an empty row or a
  * malformed one all end with the built-in Rempire details, never an
  * exception — a paid order must not fail because a settings query did.
+ *
+ * Exported for the one letter that is not about an order — the partner
+ * welcome (src/lib/partner-mail.ts) reads the same footer and the same
+ * owner texts through this same door.
  */
-async function loadBrand(): Promise<void> {
+export async function loadBrand(): Promise<void> {
   try {
     const [{ getSettings }, { mergeContent }] = await Promise.all([
       import("@/lib/orders"),

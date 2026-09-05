@@ -254,6 +254,9 @@ const DICT: Record<string, { ET: string; EN: string }> = {
     ET: "Artikleid veel pole — vaata varsti uuesti.",
     EN: "No articles yet — check back soon.",
   },
+  // the first row of the «Доставка и оплата» price table (deliveryPageHTML)
+  "Эстония": { ET: "Eesti", EN: "Estonia" },
+  "Бесплатно от": { ET: "Tasuta alates", EN: "Free from" },
 };
 
 /** RU source string → the text app.js actually renders for `lang` (identity

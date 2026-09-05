@@ -1674,6 +1674,62 @@
       "Все заказы за месяц одним файлом, с разбивкой НДС. Откроется в Excel или Google Таблицах.":
         "Kõik kuu tellimused ühes failis, koos käibemaksu jaotusega. Avaneb Excelis või Google'i arvutustabelites.",
       "За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.": "Sel kuul tellimusi ei olnud — fail jääb tühjaks. Valige teine kuu.",
+      /* «Доставка и оплата» — the customer page (deliveryPageHTML) */
+      "1–3 рабочих дня": "1–3 tööpäeva", "2–5 рабочих дней": "2–5 tööpäeva", "3–8 рабочих дней": "3–8 tööpäeva",
+      "не бывает": "ei ole", "Цены доставки по странам": "Tarnehinnad riikide kaupa",
+      "Самовывоз в салоне": "Järeletulek salongist",
+      "напишем, когда заказ можно забрать — обычно в день оплаты": "anname teada, kui tellimusele saab järele tulla — tavaliselt makse päeval",
+      "Заказ, оплаченный в рабочий день до 14:00, обычно отправляем в тот же день.": "Tööpäeval enne 14:00 makstud tellimuse saadame tavaliselt samal päeval.",
+      "Сроки — оценка перевозчиков; трек-номер придёт письмом, когда посылку передадим в доставку.":
+        "Tarneajad on vedajate hinnang; jälgimisnumber tuleb kirjaga, kui pakk on vedajale üle antud.",
+      "Код карты вводится в корзине — в поле «Промокод или подарочная карта».": "Kaardi kood sisestatakse ostukorvis — väljale „Sooduskood või kinkekaart“.",
+      "Оплата проходит на защищённой странице Montonio — данные карты магазин не видит.": "Makse toimub Montonio turvalisel lehel — pood kaardiandmeid ei näe.",
+      "У вас есть 14 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.":
+        "Teil on kättesaamisest 14 päeva, et tagastada kasutamata toode originaalpakendis — põhjust selgitamata.",
+      "Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.":
+        "Kirjutage meile e-kiri koos tellimuse numbriga — saadame juhised ja aadressi; raha tagastame samal viisil 10 tööpäeva jooksul pärast kontrolli.",
+      "Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
+      "Полные условия возврата": "Tagastamise täistingimused", "Все контакты": "Kõik kontaktid",
+      "Полные условия доставки": "Tarne täistingimused",
+      "Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.":
+        "Saadame Tallinnast üle Eesti, Lätti, Leetu, Soome ja mujale Euroopasse. Allpool on tarneviisid, tarneajad, hinnad ja makseviisid.",
+      "Способы и цены": "Viisid ja hinnad",
+      "Порог бесплатной доставки — по сумме товаров в корзине до скидок и промокодов.": "Tasuta tarne lävi arvestatakse ostukorvi kaupade summast enne soodustusi ja sooduskoode.",
+      "Сроки": "Tarneajad", "Вопросы": "Küsimused",
+      /* partners — «Клиенты»: the lead, «+ Партнёр», the card's switch, the toasts */
+      "+ Партнёр": "+ Partner", "Партнёр": "Partner", "Новый партнёр": "Uus partner",
+      "Цены для салонов включены": "Salongihinnad on sisse lülitatud",
+      "когда вы добавили или одобрили партнёра": "kui lisate või kinnitate partneri",
+      "Заявка на статус партнёра": "Partneristaatuse taotlus", "Компания": "Ettevõte", "Подана": "Esitatud",
+      "Статус клиента": "Kliendi staatus",
+      "Партнёр видит цены для салонов на карточках, в товаре и в корзине. Переключите на «Розница», чтобы выключить их.":
+        "Partner näeb salongihindu tootekaartidel, tootelehel ja ostukorvis. Lülitage „Jaemüük“ peale, et need välja lülitada.",
+      "Обычные цены. Переключите на «Партнёр», чтобы включить цены для салонов и отправить письмо.":
+        "Tavahinnad. Lülitage „Partner“ peale, et salongihinnad sisse lülitada ja kiri saata.",
+      "Розница — все, кто покупает по обычным ценам; партнёры — салоны и мастера, которым включены цены для салонов.":
+        "Jaemüük — kõik, kes ostavad tavahinnaga; partnerid — salongid ja meistrid, kellele on sisse lülitatud salongihinnad.",
+      "Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — одобрите её прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».":
+        "Partnerlustaotlus tuleb ostja kontost (nupp „Saa partneriks“) ja ilmub siia märkega „Pro taotlus“ — kinnitage see otse real või lisage partner ise nupuga „+ Partner“.",
+      "Размер скидки для салонов задаётся в": "Salongisoodustuse suurus määratakse lehel",
+      "Настройки → Цены и баллы": "Seaded → Hinnad ja punktid",
+      "E-mail партнёра": "Partneri e-post", "Название салона — необязательно": "Salongi nimi — valikuline",
+      "Телефон — необязательно": "Telefon — valikuline",
+      "Партнёру уйдёт письмо «Цены для салонов включены»; скидка действует с первого входа в кабинет по этой почте.":
+        "Partnerile läheb kiri „Salongihinnad on sisse lülitatud“; soodustus kehtib alates esimesest sisselogimisest selle e-posti aadressiga.",
+      "Добавить партнёра": "Lisa partner", "Добавить партнёра?": "Lisada partner?",
+      "Не получилось добавить — попробуйте ещё раз": "Lisamine ebaõnnestus — proovige uuesti",
+      "Не получилось изменить статус": "Staatuse muutmine ebaõnnestus",
+      "Партнёр добавлен · письмо ушло": "Partner lisatud · kiri saadetud", "Партнёр добавлен ✓": "Partner lisatud ✓",
+      "Партнёр одобрен · письмо ушло": "Partner kinnitatud · kiri saadetud",
+      "Сделать партнёром?": "Teha partneriks?", "Перевести в розницу?": "Viia jaemüüki?",
+      "Сделать партнёром": "Tee partneriks", "Перевести в розницу": "Vii jaemüüki",
+      /* the cabinet's «Стать партнёром» form — what happens next */
+      "Обычно это занимает один рабочий день. Как только включим цены для салонов, придёт письмо — а здесь появится пометка «партнёр».":
+        "Tavaliselt võtab see ühe tööpäeva. Niipea kui salongihinnad on sisse lülitatud, tuleb kiri — ja siia ilmub märge „partner“.",
+      "Что дальше: мы проверим данные — обычно в течение рабочего дня — и включим цены для салонов.":
+        "Mis edasi: kontrollime andmed — tavaliselt tööpäeva jooksul — ja lülitame sisse salongihinnad.",
+      "Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.":
+        "Saate kirja ja siia ilmub märge „partner“; soodustus on näha tootekaartidel, tootelehel ja ostukorvis.",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -3254,12 +3310,86 @@
       "Все заказы за месяц одним файлом, с разбивкой НДС. Откроется в Excel или Google Таблицах.":
         "Every order of the month in one file, VAT broken out. Opens in Excel or Google Sheets.",
       "За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.": "There were no orders this month — the file would be empty. Pick another month.",
+      /* «Доставка и оплата» — the customer page (deliveryPageHTML) */
+      "1–3 рабочих дня": "1–3 working days", "2–5 рабочих дней": "2–5 working days", "3–8 рабочих дней": "3–8 working days",
+      "не бывает": "never", "Цены доставки по странам": "Delivery prices by country",
+      "Самовывоз в салоне": "Pickup at the salon",
+      "напишем, когда заказ можно забрать — обычно в день оплаты": "we write when the order is ready to collect — usually on the day of payment",
+      "Заказ, оплаченный в рабочий день до 14:00, обычно отправляем в тот же день.": "An order paid on a working day before 14:00 usually ships the same day.",
+      "Сроки — оценка перевозчиков; трек-номер придёт письмом, когда посылку передадим в доставку.":
+        "Times are the carriers' estimates; the tracking number arrives by e-mail once the parcel is handed over.",
+      "Код карты вводится в корзине — в поле «Промокод или подарочная карта».": "Enter the card code in the cart — in the “Promo code or gift card” field.",
+      "Оплата проходит на защищённой странице Montonio — данные карты магазин не видит.": "Payment happens on Montonio's secure page — the shop never sees your card details.",
+      "У вас есть 14 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.":
+        "You have 14 days from receipt to return an unused item in its original packaging — no reason needed.",
+      "Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.":
+        "E-mail us with the order number — we send the instructions and the address; the refund goes back the same way within 10 working days after the check.",
+      "Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "Opened cosmetics cannot be returned, for reasons of hygiene.",
+      "Полные условия возврата": "Full returns policy", "Все контакты": "All contact details",
+      "Полные условия доставки": "Full terms of delivery",
+      "Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.":
+        "We ship from Tallinn across Estonia, to Latvia, Lithuania, Finland and the rest of Europe. Below: delivery methods, times, prices and ways to pay.",
+      "Способы и цены": "Methods and prices",
+      "Порог бесплатной доставки — по сумме товаров в корзине до скидок и промокодов.": "The free-delivery threshold is the basket's goods total before discounts and promo codes.",
+      "Сроки": "Delivery times", "Вопросы": "Questions",
+      /* partners — «Клиенты»: the lead, «+ Партнёр», the card's switch, the toasts */
+      "+ Партнёр": "+ Partner", "Партнёр": "Partner", "Новый партнёр": "New partner",
+      "Цены для салонов включены": "Salon prices are on",
+      "когда вы добавили или одобрили партнёра": "when you add or approve a partner",
+      "Заявка на статус партнёра": "Partner status request", "Компания": "Company", "Подана": "Filed",
+      "Статус клиента": "Customer status",
+      "Партнёр видит цены для салонов на карточках, в товаре и в корзине. Переключите на «Розница», чтобы выключить их.":
+        "A partner sees salon prices on product cards, the product page and in the cart. Switch to “Retail” to turn them off.",
+      "Обычные цены. Переключите на «Партнёр», чтобы включить цены для салонов и отправить письмо.":
+        "Regular prices. Switch to “Partner” to turn on salon prices and send the letter.",
+      "Розница — все, кто покупает по обычным ценам; партнёры — салоны и мастера, которым включены цены для салонов.":
+        "Retail is everyone buying at regular prices; partners are salons and stylists with salon prices switched on.",
+      "Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — одобрите её прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».":
+        "A partner request comes from the customer's account (the “Become a partner” button) and shows up here tagged “Pro request” — approve it right on the row, or add a partner yourself with “+ Partner”.",
+      "Размер скидки для салонов задаётся в": "The salon discount is set in",
+      "Настройки → Цены и баллы": "Settings → Prices and points",
+      "E-mail партнёра": "Partner's e-mail", "Название салона — необязательно": "Salon name — optional",
+      "Телефон — необязательно": "Phone — optional",
+      "Партнёру уйдёт письмо «Цены для салонов включены»; скидка действует с первого входа в кабинет по этой почте.":
+        "The partner gets the letter “Salon prices are on”; the discount applies from their first sign-in with this e-mail.",
+      "Добавить партнёра": "Add partner", "Добавить партнёра?": "Add a partner?",
+      "Не получилось добавить — попробуйте ещё раз": "Could not add — try again",
+      "Не получилось изменить статус": "Could not change the status",
+      "Партнёр добавлен · письмо ушло": "Partner added · letter sent", "Партнёр добавлен ✓": "Partner added ✓",
+      "Партнёр одобрен · письмо ушло": "Partner approved · letter sent",
+      "Сделать партнёром?": "Make a partner?", "Перевести в розницу?": "Move to retail?",
+      "Сделать партнёром": "Make a partner", "Перевести в розницу": "Move to retail",
+      /* the cabinet's «Стать партнёром» form — what happens next */
+      "Обычно это занимает один рабочий день. Как только включим цены для салонов, придёт письмо — а здесь появится пометка «партнёр».":
+        "It usually takes one working day. As soon as salon prices are on you get a letter — and the “partner” mark appears here.",
+      "Что дальше: мы проверим данные — обычно в течение рабочего дня — и включим цены для салонов.":
+        "What happens next: we check the details — usually within a working day — and switch on salon prices.",
+      "Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.":
+        "You get a letter and the “partner” mark appears here; the discount shows on product cards, the product page and in the cart.",
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* «Доставка и оплата» and «Клиенты → партнёры»: the lines built around a
+       number, an address or the confirm card's two-line text */
+    [/^от (€\d.*)$/, { ET: "alates $1", EN: "from $1" }],
+    [/^Начисляем (\d+(?:[.,]\d+)?) % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе\.$/,
+      { ET: "Kogume $1 % tasutud tellimuse summast; üks punkt on üks euro, kasutada saab järgmise tellimuse juures.",
+        EN: "$1% of every paid order comes back as points; one point is one euro, redeemable on your next order." }],
+    [/^Партнёр · (.+)$/, { ET: "Partner · $1", EN: "Partner · $1" }],
+    [/^Розница · (.+)$/, { ET: "Jaemüük · $1", EN: "Retail · $1" }],
+    [/^Уже партнёр · (.+)$/, { ET: "Juba partner · $1", EN: "Already a partner · $1" }],
+    [/^(.+)\nВключим цены для салонов и отправим письмо «Цены для салонов включены»\.$/,
+      { ET: "$1\nLülitame sisse salongihinnad ja saadame kirja „Salongihinnad on sisse lülitatud“.",
+        EN: "$1\nSalon prices go on and the letter “Salon prices are on” goes out." }],
+    [/^(.+)\nЦены для салонов выключатся со следующего заказа\. Письмо не отправляется\.$/,
+      { ET: "$1\nSalongihinnad lülituvad välja alates järgmisest tellimusest. Kirja ei saadeta.",
+        EN: "$1\nSalon prices switch off from the next order on. No letter is sent." }],
+    [/^(.+)\nВключим цены для салонов и отправим письмо на эту почту\.$/,
+      { ET: "$1\nLülitame sisse salongihinnad ja saadame sellele aadressile kirja.",
+        EN: "$1\nSalon prices go on and a letter goes to this address." }],
     /* админка, редизайн: the lines that carry a number, a sum or an order
        number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
@@ -3850,7 +3980,13 @@
     { k: "courier", l: "Курьер до двери" },
     { k: "pickup", l: "Самовывоз — Mardi 1, Таллинн" }
   ];
-  var CARRIER_NAMES = { omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend" };
+  /* One carrier per line on purpose: tools/prerender-shop2.mjs lifts this
+     declaration (with SHIP_RULES, CARRIERS_BY_COUNTRY, DELIVERY_ROWS and
+     deliveryPageHTML below) out of this file by its opening and closing
+     lines, exactly as it lifts the dictionary. */
+  var CARRIER_NAMES = {
+    omniva: "Omniva", smartpost: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend"
+  };
   /* Carriers worth *asking* about, per country — deliberately optimistic.
      /api/shipping/points answers for every one of them, and a carrier that
      comes back with nothing is struck off (POINTS.empty) before its chip is
@@ -3866,6 +4002,147 @@
     FI: ["smartpost", "dpd"],
     EU: []
   };
+
+  /* ---------- «Доставка и оплата» — the page a customer actually reads ------
+     One builder, two renderers. screenDelivery() draws it live from
+     SHIP_RULES and the content layer; tools/prerender-shop2.mjs lifts this
+     very function — with DELIVERY_ROWS, SHIP_RULES, CARRIER_NAMES and
+     CARRIERS_BY_COUNTRY above — out of this file the way it lifts the
+     dictionary, and writes the static /info/shipping/ pages with it. So it
+     is a pure function of `ctx` and of nothing else: no S, no DEMO, no helper
+     from the closure, and its first and last lines keep their exact shape
+     (the lifter reads `  function deliveryPageHTML(ctx) {` … `  }` by line).
+
+     Every translatable string is its own text node and goes through
+     ctx.tr(): the identity here (translateTree() rewrites whole nodes after
+     render) and the dictionary in the prerender — so the two outputs agree
+     word for word. The prices are the rules the checkout bills with
+     (settings.shipping_rules), never a second table; the transit times are
+     the ones the terms of delivery promise (public/shop/legal.en.js). */
+  var DELIVERY_ROWS = [
+    ["EE", "Эстония", "1–3 рабочих дня"],
+    ["LV", "Латвия", "2–5 рабочих дней"],
+    ["LT", "Литва", "2–5 рабочих дней"],
+    ["FI", "Финляндия", "2–5 рабочих дней"],
+    ["EU", "Другие страны Европы", "3–8 рабочих дней"]
+  ];
+  function deliveryPageHTML(ctx) {
+    var tr = ctx.tr, esc = ctx.esc, eur = ctx.eur, rules = ctx.rules || {};
+    var logos = ctx.logos || {}, carriers = ctx.carriers || {}, names = ctx.carrierNames || {};
+    function t(s) { return "<span>" + tr(s) + "</span>"; }
+    function h2(s) { return '<h2 class="sec__title dlv__h2">' + tr(s) + "</h2>"; }
+    function priceOf(table, c) {
+      if (!table) return null;
+      var v = Object.prototype.hasOwnProperty.call(table, c) ? table[c] : table["default"];
+      return typeof v === "number" && isFinite(v) ? v : null;
+    }
+    function money(v) { return v > 0 ? '<span class="num">' + eur(v) + "</span>" : t("бесплатно"); }
+    /* the parcel cell: the method price — or, where the owner priced a
+       carrier of this country on its own, «от» the cheapest of them; a
+       country with no parcel carrier at all gets a dash, not a price */
+    function parcelCell(c) {
+      var list = carriers[c] || [];
+      if (!list.length) return "—";
+      var base = priceOf(rules.methods && rules.methods.parcel, c);
+      var seen = [];
+      list.forEach(function (k) {
+        var p = priceOf(rules.carriers && rules.carriers[k], c);
+        if (p == null) p = base;
+        if (p != null && seen.indexOf(p) < 0) seen.push(p);
+      });
+      if (!seen.length) return "—";
+      var min = Math.min.apply(null, seen);
+      if (seen.length === 1) return money(min);
+      return '<span class="num">' + tr("от " + eur(min)) + "</span>";
+    }
+    function courierCell(c) {
+      var p = priceOf(rules.methods && rules.methods.courier, c);
+      return p == null ? "—" : money(p);
+    }
+    function freeCell(c) {
+      var by = rules.freeFromByCountry;
+      var v = by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : rules.freeFrom;
+      if (v === null || v === undefined) return t("не бывает");
+      return typeof v === "number" && isFinite(v) ? '<span class="num">' + eur(v) + "</span>" : "—";
+    }
+    function carriersLine(c) {
+      var list = (carriers[c] || []).map(function (k) { return names[k] || k; });
+      return list.length ? '<small class="dlv__carriers">' + esc(list.join(" · ")) + "</small>" : "";
+    }
+    var rows = ctx.rows || [];
+    var table = '<div class="dlv__scroll" role="region" tabindex="0" aria-label="' + tr("Цены доставки по странам") + '">' +
+      '<table class="dlv__table"><thead><tr><th scope="col">' + t("Страна") + '</th><th scope="col">' + t("Пакомат") +
+      '</th><th scope="col">' + t("Курьер") + '</th><th scope="col">' + t("Бесплатно от") + "</th></tr></thead><tbody>" +
+      rows.map(function (r) {
+        return '<tr><th scope="row">' + t(r[1]) + carriersLine(r[0]) + "</th>" +
+          "<td>" + parcelCell(r[0]) + "</td><td>" + courierCell(r[0]) + "</td><td>" + freeCell(r[0]) + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+    var pickup = '<div class="dlv__pickup">' +
+      "<p><b>" + t("Самовывоз в салоне") + "</b> — " + t("бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.") + "</p>" +
+      (ctx.address ? '<p class="dlv__addr">' + esc(ctx.address) + "</p>" : "") +
+      (ctx.hoursHTML ? '<p class="dlv__hours">' + ctx.hoursHTML + "</p>" : "") + "</div>";
+    var times = '<dl class="dlv__times">' + rows.map(function (r) {
+        return "<div><dt>" + t(r[1]) + "</dt><dd>" + t(r[2]) + "</dd></div>";
+      }).join("") +
+      "<div><dt>" + t("Самовывоз") + "</dt><dd>" + t("напишем, когда заказ можно забрать — обычно в день оплаты") + "</dd></div></dl>" +
+      '<p class="dlv__note">' + t("Заказ, оплаченный в рабочий день до 14:00, обычно отправляем в тот же день.") + " " +
+        t("Сроки — оценка перевозчиков; трек-номер придёт письмом, когда посылку передадим в доставку.") + "</p>";
+    function payRow(logo, title, hint) {
+      return '<li><span class="dlv__paylogo">' + logo + '</span><span class="dlv__paytxt"><b>' + tr(title) + "</b>" +
+        (hint ? "<span>" + tr(hint) + "</span>" : "") + "</span></li>";
+    }
+    var bankLogo = ctx.banks && ctx.banks.length
+      ? ctx.banks.slice(0, 5).map(function (b) {
+          return b && b.logoUrl ? '<img class="bank__logo" src="' + esc(b.logoUrl) + '" alt="' + esc(b.name || "") + '" height="20">' : "";
+        }).join("")
+      : "";
+    if (!bankLogo) bankLogo = logos.bank || "";
+    var ICON_INVOICE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg>';
+    var ICON_GIFT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 11h16v9H4zM3 7h18v4H3zM12 7v13M12 7c-2-4-6-3-6-1s3 1 6 1zm0 0c2-4 6-3 6-1s-3 1-6 1z"/></svg>';
+    var ICON_POINTS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l1.4 2.9 3.1.4-2.3 2.2.6 3.1-2.8-1.5-2.8 1.5.6-3.1-2.3-2.2 3.1-.4z"/></svg>';
+    var pay = '<ul class="dlv__pay">' +
+      payRow(bankLogo, "Банковская ссылка", "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке") +
+      payRow((logos.visa || "") + (logos.mastercard || ""), "Банковская карта", "Visa, Mastercard") +
+      payRow((logos.applepay || "") + (logos.gpay || ""), "Apple Pay / Google Pay", "Оплата в одно касание") +
+      payRow(ICON_INVOICE, "По счёту — для компаний", "Счёт на почту, оплата в течение 7 дней") +
+      payRow(ICON_GIFT, "Подарочная карта", "Код карты вводится в корзине — в поле «Промокод или подарочная карта».") +
+      (ctx.loyalty && ctx.loyalty.enabled
+        ? payRow(ICON_POINTS, "Баллы", "Начисляем " + ctx.loyalty.earnPct + " % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе.")
+        : "") +
+      "</ul>" +
+      '<p class="dlv__note">' + t("Оплата проходит на защищённой странице Montonio — данные карты магазин не видит.") + "</p>";
+    var returns = "<p>" + t("У вас есть 14 дней с момента получения, чтобы вернуть неиспользованный товар в оригинальной упаковке — без объяснения причин.") + " " +
+      t("Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.") + " " +
+      t("Вскрытая косметика возврату не подлежит по гигиеническим причинам.") + "</p>" +
+      "<p>" + ctx.link("returns", tr("Полные условия возврата")) + "</p>";
+    var contactRows = [];
+    if (ctx.phoneHTML) contactRows.push("<p><b>" + t("Телефон") + "</b><br>" + ctx.phoneHTML + "</p>");
+    if (ctx.mailHTML) contactRows.push("<p><b>" + t("Эл. почта") + "</b><br>" + ctx.mailHTML + "</p>");
+    if (ctx.address) contactRows.push("<p><b>" + t("Адрес") + "</b><br>" + esc(ctx.address) + "</p>");
+    if (ctx.hoursHTML) contactRows.push("<p><b>" + t("Часы работы") + "</b><br>" + ctx.hoursHTML + "</p>");
+    var contact = '<div class="dlv__contact">' + contactRows.join("") +
+      "<p>" + ctx.link("contact", tr("Все контакты")) + "</p></div>";
+    var legal = ctx.legalHtml
+      ? '<details class="dlv__legal"><summary>' + tr("Полные условия доставки") + "</summary>" +
+        '<div class="legal">' + ctx.legalHtml + "</div>" +
+        (ctx.legalNote ? '<p class="note">' + tr("Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.") + "</p>" : "") +
+        "</details>"
+      : "";
+    return '<h1 class="display h1">' + esc(ctx.title) + "</h1>" +
+      '<p class="sec__intro">' + tr("Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.") + "</p>" +
+      h2("Способы и цены") + table +
+      '<p class="dlv__note">' + t("Порог бесплатной доставки — по сумме товаров в корзине до скидок и промокодов.") + "</p>" +
+      pickup +
+      h2("Сроки") + times +
+      h2("Оплата") + pay +
+      h2("Возврат товара") + returns +
+      h2("Вопросы") + contact +
+      legal;
+  }
+  /* wholesale/loyalty: the public half of settings.pricing (enabled + earn
+     rate only — publicPricing() in src/lib/loyalty.ts), adopted from
+     /api/overrides at boot for the «Баллы» row of the delivery page. */
+  var LOYALTY_PUBLIC = { enabled: true, earnPct: 5 };
 
   /* Is there a server behind this page? null until the first call answers.
      false puts the checkout back into demo mode — the prototype is hosted
@@ -4090,6 +4367,8 @@
       // shopper had picked in the fallback list may no longer be that bank
       S.bank = 0;
       patchPayment();
+      // «Доставка и оплата» draws the same bank marks in its payment list
+      if (S.screen === "info") render();
     }).catch(function () { apiSeen(false); });
   }
   function bankChipsHTML() {
@@ -4319,6 +4598,9 @@
     admCustPoints: "",   // the +/− points field on an open card
     admCustNote: "",     // the points adjustment note field
     admCustNotesDraft: null, // working copy of the admin's own note about this customer; null = not editing
+    partnerForm: null,   // «+ Партнёр»: {email, company, phone} while the inline form is open
+    partnerErr: "",      // why the form was not sent (a bad address, a server refusal)
+    partnerBusy: false,
     // ---- admin «Настройки» → «Цены и лояльность» ----
     pricingLoaded: null, // the full settings.pricing as last read from the server (admin-only)
     pricingDraft: null,  // working copy while the card is being edited
@@ -6360,6 +6642,7 @@
      override in content.legal[slug] replaces the page's body outright. */
   function screenInfo() {
     if (S.infoSlug === "contact") return screenContact();
+    if (S.infoSlug === "shipping") return screenDelivery();
     var pg = legalFor(S.infoSlug);
     var own = (contentConf().legal || {})[S.infoSlug];
     var ownText = own ? cText(own) : "";
@@ -6373,6 +6656,40 @@
       '<section class="sec"><h1 class="display h1">' + esc(title) + "</h1>" +
       '<div class="legal">' + (ownText ? "<p>" + body + "</p>" : body) + "</div>" +
       (ownText ? "" : '<p class="note" style="margin-top:22px">Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.</p>') +
+      "</section></div>";
+  }
+
+  /* «Доставка и оплата» — /info/shipping/, the same slug and the same
+     address the legal page always had. The policy text is still here, folded
+     under «Полные условия доставки» at the bottom (an owner override in
+     content.legal.shipping replaces it, as on every other policy page); what
+     the customer reads first is built by deliveryPageHTML() from the live
+     rules, the shop's own details and the checkout's payment marks. */
+  function screenDelivery() {
+    var pg = legalFor("shipping");
+    var own = (contentConf().legal || {}).shipping;
+    var ownText = own ? cText(own) : "";
+    var title = pg ? pg.title : "Доставка и оплата";
+    // the policy carries an <h1> of its own — demoted, so the page has one
+    var legalHtml = ownText
+      ? "<p>" + esc(ownText).replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>") + "</p>"
+      : pg ? cResolve(String(pg.html || "")).replace(/<(\/?)h1(\s|>)/gi, "<$1h2$2") : "";
+    loadPayMethods();   // one-shot; the real bank marks land with a re-render
+    var c = contentConf();
+    return '<div class="wrap wrap--mid">' +
+      '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(title) + "</div>" +
+      '<section class="sec dlv">' +
+      deliveryPageHTML({
+        lang: S.lang,
+        tr: function (s) { return s; },   // translateTree() does it after render
+        esc: esc, eur: eur, title: title,
+        rules: SHIP_RULES, carriers: CARRIERS_BY_COUNTRY, carrierNames: CARRIER_NAMES, rows: DELIVERY_ROWS,
+        address: c.company.address, hoursHTML: cHoursRows(), phoneHTML: cPhoneHTML(), mailHTML: cMailHTML(),
+        logos: typeof PAYLOGOS !== "undefined" ? PAYLOGOS : {}, banks: PAYMETHODS.banks,
+        loyalty: LOYALTY_PUBLIC,
+        link: function (slug, label) { return '<button class="link" data-page="' + slug + '">' + label + "</button>"; },
+        legalHtml: legalHtml, legalNote: !ownText
+      }) +
       "</section></div>";
   }
 
@@ -7899,13 +8216,17 @@
       (S.cust && S.cust.tier === "pro"
         ? '<p><span class="chip chip--ok">партнёр</span></p><p class="muted" style="margin:8px 0 0">Вам доступны цены для салонов — на карточках товаров, в товаре и в корзине.</p>'
         : S.cust && S.cust.proRequestedAt
-          ? '<p><span class="chip chip--low">на рассмотрении</span></p><p class="muted" style="margin:8px 0 0">Заявку получили, скоро рассмотрим и напишем.</p>'
+          ? '<p><span class="chip chip--low">на рассмотрении</span></p><p class="muted" style="margin:8px 0 0">Заявку получили, скоро рассмотрим и напишем.</p>' +
+            '<p class="muted" style="margin:6px 0 0">Обычно это занимает один рабочий день. Как только включим цены для салонов, придёт письмо — а здесь появится пометка «партнёр».</p>'
           : '<p class="muted" style="margin:0 0 12px">Оптовые цены для салонов и мастеров — оставьте заявку, мы свяжемся и подтвердим.</p>' +
             '<label class="field"><span class="field__label">Название компании</span><input class="input" data-acctprof="company" value="' + esc(S.acctProForm.company) + '" placeholder="OÜ Näidis"></label>' +
             '<label class="field"><span class="field__label">Регистрационный номер</span><input class="input" data-acctprof="regCode" value="' + esc(S.acctProForm.regCode) + '" placeholder="12345678"></label>' +
             '<label class="field"><span class="field__label">Телефон</span><input class="input" type="tel" data-acctprof="phone" value="' + esc(S.acctProForm.phone) + '" placeholder="+372…"></label>' +
             (S.acctProErr ? '<div class="err" role="alert">' + esc(acctProErrText()) + "</div>" : "") +
-            '<button class="btn btn--ghost btn--sm" data-acctprosend' + (S.acctProBusy ? " disabled" : "") + ">" + (S.acctProBusy ? "Отправляем…" : "Отправить заявку") + "</button>") +
+            '<button class="btn btn--ghost btn--sm" data-acctprosend' + (S.acctProBusy ? " disabled" : "") + ">" + (S.acctProBusy ? "Отправляем…" : "Отправить заявку") + "</button>" +
+            /* what happens next — the one thing the old form never said */
+            '<p class="hint" style="margin:12px 0 0"><span>Что дальше: мы проверим данные — обычно в течение рабочего дня — и включим цены для салонов.</span> ' +
+              "<span>Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.</span></p>") +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
@@ -10078,8 +10399,13 @@
     var onReviews = S.adminTab === "reviews";
     if (onReviews) loadAdminReviews(false);
     var pend = admReviewCounts().pending || 0;
+    /* «+ Партнёр» — the same head slot «+ Промокод» uses: a salon the owner
+       already knows is added by e-mail, without waiting for a request. */
+    var add = !onReviews && !S.admCustOpen && !S.partnerForm && SRV.admin === true
+      ? '<button class="adm-btn adm-btn--head" data-admpartnernew>+ Партнёр</button>'
+      : "";
     return '<div class="adm-screen adm-screen--tight">' +
-      admHead("", "Клиенты", "") +
+      admHead("", "Клиенты", add) +
       admTabsHTML(
         admTabBtn("people", "Все клиенты", 0, !onReviews) +
         admTabBtn("reviews", "Отзывы", pend, onReviews)) +
@@ -10198,7 +10524,8 @@
     ["back-in-stock", "Товар снова в наличии", "тем, кто оставил почту", "backstock"],
     ["abandoned-cart", "Брошенная корзина", "через 3 часа", "abandoned"],
     ["birthday", "Скидка ко дню рождения", "за 3 дня до даты", "birthday"],
-    ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""]
+    ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
+    ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
   ];
   function admMailName(tpl) {
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
@@ -12379,12 +12706,29 @@
         admPlainKpi("Потратил", eur(c.revenue)) +
         admPlainKpi("Баллы", String(c.pointsBalance)) +
       "</div>" +
+      /* the request, as the customer filed it — company, reg. code and phone
+         were only ever in the grey line under the name, easy to miss */
       (c.tier !== "pro" && c.proRequestedAt
-        ? '<div class="adm-acts" style="margin-top:16px"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) + '">Одобрить Pro</button>' +
+        ? '<div class="adm-sec__t" style="margin-top:28px">Заявка на статус партнёра</div>' +
+          '<div class="adm-list adm-list--flat" style="margin-top:8px">' +
+            admCustFactRow("Компания", c.company) +
+            admCustFactRow("Рег. номер", c.regCode) +
+            admCustFactRow("Телефон", c.phone) +
+            admCustFactRow("Подана", shortDate(c.proRequestedAt)) +
+          "</div>" +
+          '<div class="adm-acts" style="margin-top:12px"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) + '">Одобрить Pro</button>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustreject="' + esc(c.id) + '">Отказать</button></div>'
-        : c.tier === "pro"
-          ? '<div class="adm-acts" style="margin-top:16px"><button class="adm-link adm-link--muted" data-admcustdemote="' + esc(c.id) + '">Убрать статус партнёра</button></div>'
-          : "") +
+        : "") +
+      /* the tier, as a switch the owner can read: which one is on now, and
+         what pressing the other does (askTierSwitch → confirm card) */
+      '<div class="adm-sec__t" style="margin-top:28px">Статус клиента</div>' +
+      '<div class="adm-seg" role="group" aria-label="Статус клиента" style="margin-top:10px">' +
+        '<button data-admcusttierset="retail" aria-current="' + (c.tier !== "pro") + '">Розница</button>' +
+        '<button data-admcusttierset="pro" aria-current="' + (c.tier === "pro") + '">Партнёр</button>' +
+      "</div>" +
+      '<p class="adm-hint" style="margin-top:8px">' + (c.tier === "pro"
+        ? "Партнёр видит цены для салонов на карточках, в товаре и в корзине. Переключите на «Розница», чтобы выключить их."
+        : "Обычные цены. Переключите на «Партнёр», чтобы включить цены для салонов и отправить письмо.") + "</p>" +
       '<div class="adm-sec__t" style="margin-top:28px">Начислить или списать баллы</div>' +
       '<div class="adm-form" style="margin-top:12px">' +
         '<div class="adm-edpair">' +
@@ -12406,6 +12750,13 @@
           '<input class="adm-input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
         '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-admcustsavenotes="' + esc(c.id) + '">Сохранить заметку</button></div>' +
       "</div>";
+  }
+  /** One fact of a partner request — the label its own node, the value
+      data; an empty value draws «—» rather than nothing, so the owner sees
+      the field was left blank rather than wondering whether it loaded. */
+  function admCustFactRow(label, value) {
+    return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__sub">' + label + "</span>" +
+      '<span class="adm-row__nm">' + (value ? esc(value) : "—") + "</span></span></div>";
   }
   /** A KPI cell with no comparison line — the customer card and the
       accountant's report have a number, not a trend. */
@@ -12434,6 +12785,8 @@
     if (S.admCustOpen) return admCustomerCardHTML();
     var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
     return (S.admCustErr ? '<div class="adm-note">' + esc(S.admCustErr) + "</div>" : "") +
+      admCustLeadHTML() +
+      (S.partnerForm ? admPartnerFormHTML() : "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие клиенты">' + ADM_CUST_TIERS.map(function (f) {
           return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' +
@@ -12444,6 +12797,90 @@
       '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
         '" placeholder="Имя, почта, телефон, компания" aria-label="Поиск по клиентам">' +
       '<div id="admcustlist">' + admCustRowsHTML() + "</div>";
+  }
+  /* The owner's question was «how and where do I manage requests, partners
+     and retail?» — answered on the screen itself, in three sentences, each
+     its own node for the dictionary. The link jumps straight to the page
+     where the discount lives (data-admgoset, see the click handler). */
+  function admCustLeadHTML() {
+    return '<p class="adm-lead" style="margin:0 0 14px">' +
+      "<span>Розница — все, кто покупает по обычным ценам; партнёры — салоны и мастера, которым включены цены для салонов.</span> " +
+      "<span>Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — одобрите её прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».</span> " +
+      "<span>Размер скидки для салонов задаётся в</span> " +
+      '<button class="adm-link" data-admgoset="prices">Настройки → Цены и баллы</button>.</p>';
+  }
+  /* «+ Партнёр»: an e-mail is enough — the row is created if this address has
+     never signed in (they land on salon prices at their first sign-in) and
+     promoted in place if it has. Company and phone are optional notes for
+     the card. The send goes through the confirm card, then POST
+     /api/admin/customers/ (applyAddPartner), and the toast offers «Отменить». */
+  function admPartnerFormHTML() {
+    var f = S.partnerForm;
+    return '<div class="adm-form adm-form--inline adm-narrow--form" data-partnerform>' +
+      '<div class="adm-sec__t">Новый партнёр</div>' +
+      '<label class="adm-field">E-mail партнёра' +
+        '<input class="adm-input" type="email" inputmode="email" autocomplete="off" data-partnerf="email" value="' + esc(f.email) + '" placeholder="salon@example.com"></label>' +
+      '<div class="adm-edpair">' +
+        '<label class="adm-field">Название салона — необязательно' +
+          '<input class="adm-input" data-partnerf="company" value="' + esc(f.company) + '" placeholder="Salon Näidis OÜ"></label>' +
+        '<label class="adm-field">Телефон — необязательно' +
+          '<input class="adm-input" type="tel" data-partnerf="phone" value="' + esc(f.phone) + '" placeholder="+372…"></label>' +
+      "</div>" +
+      (S.partnerErr ? '<div class="adm-err" role="alert">' + esc(S.partnerErr) + "</div>" : "") +
+      '<p class="adm-hint" style="margin:0">Партнёру уйдёт письмо «Цены для салонов включены»; скидка действует с первого входа в кабинет по этой почте.</p>' +
+      '<div class="adm-acts">' +
+        '<button class="adm-btn" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
+        '<button class="adm-btn adm-btn--ghost" data-admpartnercancel>Отмена</button>' +
+      "</div></div>";
+  }
+  var PARTNER_ERRS = {
+    bad_email: "Проверьте e-mail",
+    bad_tier: "Не получилось добавить — попробуйте ещё раз",
+    db_unavailable: "Сервер не отвечает",
+    error: "Не получилось добавить — попробуйте ещё раз"
+  };
+  /** The confirmed «+ Партнёр»: one POST, then a journal line whose undo is
+      the tier switch back to retail (srvPush's set_tier), and a toast that
+      says whether the letter went out. */
+  function applyAddPartner(a) {
+    if (S.partnerBusy) return;
+    S.partnerBusy = true; S.partnerErr = ""; render();
+    apiSend("/api/admin/customers/", "POST", { email: a.email, company: a.company || "", phone: a.phone || "", lang: S.lang }).then(function (r) {
+      S.partnerBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (!(r.status === 200 && r.body.ok)) {
+        S.partnerErr = PARTNER_ERRS[r.body && r.body.error] || PARTNER_ERRS.error;
+        render(); refocus('[data-partnerf="email"]'); return;
+      }
+      var c = r.body.customer || {};
+      var entry = demoApply({ type: "add_partner", id: c.id, email: c.email || a.email, created: !!r.body.created, promoted: !!r.body.promoted });
+      S.partnerForm = null; S.partnerErr = "";
+      // straight to the partners' chip, where the new row is
+      S.admCustTier = "pro"; S.admCustQ = "";
+      var mail = r.body.mail || {};
+      var who = c.email || a.email;
+      if (!r.body.promoted) toast("Уже партнёр · " + who, entry);
+      else if (mail.sent) toast("Партнёр добавлен · письмо ушло", entry);
+      else toast("Партнёр добавлен ✓", entry);
+      render();
+    }).catch(function () { S.partnerBusy = false; S.partnerErr = PARTNER_ERRS.db_unavailable; render(); });
+  }
+  /** The customer card's switch: Розница ↔ Партнёр. Every flip asks first
+      (a price a stranger is charged changes with it), then goes through the
+      journal like a tariff change — with «Отменить» on the toast. */
+  function askTierSwitch(c, value) {
+    if (!c || c.tier === value) return;
+    // one string per branch, so the dictionary rule sees the whole card text
+    var who = (c.name ? c.name + " · " : "") + c.email;
+    pendingAction = {
+      type: "set_tier", id: c.id, email: c.email, value: value, prev: c.tier, overlay: true,
+      title: value === "pro" ? "Сделать партнёром?" : "Перевести в розницу?",
+      detail: value === "pro"
+        ? who + "\nВключим цены для салонов и отправим письмо «Цены для салонов включены»."
+        : who + "\nЦены для салонов выключатся со следующего заказа. Письмо не отправляется.",
+      ok: value === "pro" ? "Сделать партнёром" : "Перевести в розницу"
+    };
+    render(); refocus("[data-admapply]");
   }
   function admCustPatch(id, body, okMsg) {
     apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", body).then(function (r) {
@@ -12461,9 +12898,8 @@
       render();
     }).catch(function () { S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
   }
-  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен ✓"); }
+  function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло"); }
   function rejectCustomer(id) { admCustPatch(id, { action: "reject" }, "Заявка отклонена"); }
-  function demoteCustomer(id) { admCustPatch(id, { tier: "retail" }, "Статус партнёра снят"); }
   function adjustCustomerPoints(id) {
     var delta = Math.trunc(Number(String(S.admCustPoints).replace(",", ".")));
     if (!delta) { toast("Введите число баллов, не 0"); return; }
@@ -14809,6 +15245,12 @@
        the shop has always sold, and filters whatever arrives through
        GIFT_AMOUNTS so a bad row cannot price a card the server would refuse. */
     if (Array.isArray(s.gift_amounts)) DEMO.giftAmounts = s.gift_amounts;
+    /* wholesale/loyalty: the public half of settings.pricing — whether points
+       are on and the earn rate — for the «Баллы» row of «Доставка и оплата». */
+    if (s.pricing && s.pricing.loyalty && typeof s.pricing.loyalty === "object") {
+      var lp = s.pricing.loyalty, lpPct = Number(lp.earnPct);
+      LOYALTY_PUBLIC = { enabled: lp.enabled !== false, earnPct: isFinite(lpPct) && lpPct >= 0 ? lpPct : LOYALTY_PUBLIC.earnPct };
+    }
     /* content: the server always answers with the merged document (defaults +
        whatever the owner wrote), so it replaces the local copy outright and
        the panel's draft is dropped — the same rule as the banner. */
@@ -14958,6 +15400,20 @@
           if (S.admCustOpen === adjId) loadAdminCustomerDetail(adjId, true);
         }).catch(noop);
     }
+    /* partners: the card's switch, and the undo of «+ Партнёр» — the route
+       sends the welcome letter itself when the tier flips to pro */
+    else if (a.type === "set_tier") {
+      var tierId = a.id || a.email;
+      apiSend("/api/admin/customers/" + encodeURIComponent(tierId) + "/", "PATCH", { tier: a.value })
+        .then(function (r) {
+          if (!(r.status === 200 && r.body.ok)) toast("Не получилось изменить статус");
+          loadAdminCustomers(true);
+          if (S.admCustOpen === tierId) loadAdminCustomerDetail(tierId, true);
+          render();
+        }).catch(noop);
+    }
+    // «+ Партнёр»: the POST already happened in applyAddPartner — nothing to push
+    else if (a.type === "add_partner") noop();
   }
 
   function admLogin(pw) {
@@ -15248,6 +15704,9 @@
     if (a.type === "toggle_promo") return "Промокод " + a.code + ": " + (a.value ? "включить" : "выключить");
     // «Клиенты → Отзывы» and «Маркетинг → Подарочные карты», both phase 3
     if (a.type === "moderate_review") return "Отзыв " + (a.name || a.id) + ": " + (REVIEW_STATE_WORD[a.value] || a.value);
+    // partners: the journal names the customer by e-mail — the one thing the owner recognises
+    if (a.type === "set_tier") return (a.value === "pro" ? "Партнёр: " : "Розница: ") + (a.email || a.id);
+    if (a.type === "add_partner") return "Новый партнёр: " + (a.email || a.id);
     if (a.type === "set_gift_amounts") return "Номиналы подарочной карты: " + (a.value || []).join(" · ") + " €";
     if (a.type === "set_shipping_rules") return shipActionText(a);
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
@@ -15542,6 +16001,18 @@
       S.admCustomers = null;
       if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
     }
+    /* partners: neither has a demo layer — the row lives on the server. The
+       tier switch is the PATCH (srvPush) plus the opposite switch as its undo;
+       «+ Партнёр» already made its POST (applyAddPartner), so it only leaves
+       the journal line, and its undo is the switch back to retail. */
+    else if (a.type === "set_tier") {
+      entry.prev = { type: "set_tier", id: a.id, email: a.email, value: a.prev, prev: a.value };
+      S.admCustomers = null; S.admCustDetail = null;
+    }
+    else if (a.type === "add_partner") {
+      entry.prev = a.promoted ? { type: "set_tier", id: a.id, email: a.email, value: "retail", prev: "pro" } : null;
+      S.admCustomers = null; S.admCustDetail = null;
+    }
     /* product creation: «снять с продажи» and its undo — the row's active
        flag on the local copies here, DELETE/PUT on the server in srvPush() */
     else if (a.type === "set_product_active") {
@@ -15606,6 +16077,8 @@
       S.admCustomers = null;
       if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
     }
+    // partners: srvPush() below is the undo — the opposite tier switch
+    else if (a.type === "set_tier") { S.admCustomers = null; S.admCustDetail = null; }
     // product creation: the row comes back on (or goes off) the shelf
     else if (a.type === "set_product_active") { customSetActive(a.id, a.value); if (!a.value && S.adminEdit === a.id) S.adminEdit = ""; }
     DEMO.log.splice(i, 1);
@@ -17048,7 +17521,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -17900,6 +18373,15 @@
         }
         else if (pa.type === "set_content") { toast("Данные магазина сохранены", demoApply(pa)); }
         else if (pa.type === "set_pricing") { toast("Цены и баллы сохранены", demoApply(pa)); }
+        /* «Клиенты»: the new partner is a POST of its own (applyAddPartner
+           writes the journal line once the server answered); the tier switch
+           is journalled like a tariff change, «Отменить» on the toast. */
+        else if (pa.type === "add_partner") { applyAddPartner(pa); return; }
+        else if (pa.type === "set_tier") {
+          var tierEntry = demoApply(pa);
+          if (pa.value === "pro") toast("Партнёр · " + pa.email, tierEntry);
+          else toast("Розница · " + pa.email, tierEntry);
+        }
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
         render();
       }
@@ -18126,7 +18608,35 @@
     if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
     if (d.admcustapprove) { approveCustomer(d.admcustapprove); return; }
     if (d.admcustreject) { rejectCustomer(d.admcustreject); return; }
-    if (d.admcustdemote) { demoteCustomer(d.admcustdemote); return; }
+    /* partners: «+ Партнёр», its form, the card's tier switch, and the lead's
+       jump to «Настройки → Цены и баллы» */
+    if (d.admpartnernew !== undefined) {
+      S.partnerForm = { email: "", company: "", phone: "" }; S.partnerErr = "";
+      render(); refocus('[data-partnerf="email"]'); return;
+    }
+    if (d.admpartnercancel !== undefined) { S.partnerForm = null; S.partnerErr = ""; render(); return; }
+    if (d.admpartnersave !== undefined) {
+      var pf = S.partnerForm || { email: "", company: "", phone: "" };
+      var pEmail = String(pf.email || "").trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(pEmail)) {
+        S.partnerErr = PARTNER_ERRS.bad_email; render(); refocus('[data-partnerf="email"]'); return;
+      }
+      var pWho = pEmail + (pf.company.trim() ? " · " + pf.company.trim() : "");
+      pendingAction = {
+        type: "add_partner", email: pEmail, company: pf.company.trim(), phone: pf.phone.trim(), overlay: true,
+        title: "Добавить партнёра?",
+        detail: pWho + "\nВключим цены для салонов и отправим письмо на эту почту.",
+        ok: "Добавить"
+      };
+      render(); refocus("[data-admapply]"); return;
+    }
+    if (d.admcusttierset !== undefined) {
+      askTierSwitch(S.admCustDetail && S.admCustDetail.customer, d.admcusttierset); return;
+    }
+    if (d.admgoset !== undefined) {
+      S.adminTab = "setup"; S.admSetPage = d.admgoset; S.admCustOpen = ""; S.admMore = false;
+      window.scrollTo({ top: 0 }); render(); return;
+    }
     if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
     if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
     if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
@@ -18622,6 +19132,8 @@
     else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; S.acctSaved = false; }
     /* ---- wholesale/loyalty ------------------------------------------------ */
     else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
+    // partners: the «+ Партнёр» form — no render(), the caret stays put
+    else if (t.matches("[data-partnerf]")) { if (S.partnerForm) S.partnerForm[t.dataset.partnerf] = t.value; S.partnerErr = ""; }
     // the checkbox drives totals shown in several places on screen — unlike
     // the plain text fields below, this one needs a real render()
     else if (t.matches("[data-loyaltyredeem]")) { S.loyaltyRedeem = t.checked; render(); }

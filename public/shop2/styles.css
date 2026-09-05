@@ -1564,6 +1564,69 @@ button, a, summary, label { touch-action: manipulation; }
 .legal table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
 .legal td, .legal th { border: 1px solid var(--rule); padding: 6px 9px; text-align: left; }
 .legal a { color: var(--ink); }
+
+/* ---------- «Доставка и оплата» — the customer page (deliveryPageHTML) ----
+   The same voice as the rest of the shop: Oswald section titles, Golos body,
+   hairlines instead of boxes. The price table is wider than a phone, so it
+   scrolls inside its own strip — edge to edge, the gutter pulled in — and
+   the page itself never scrolls sideways. Prerendered and live pages share
+   this markup, so the rules live here and nowhere else. */
+.dlv__h2 { display: block; margin: 30px 0 12px; }
+.dlv__scroll {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter);
+  scrollbar-width: thin;
+}
+.dlv__scroll:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.dlv__table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 14.5px; line-height: 1.4; }
+.dlv__table th, .dlv__table td {
+  padding: 11px 14px 11px 0; border-bottom: 1px solid var(--rule-soft); text-align: left; vertical-align: top;
+}
+.dlv__table th:last-child, .dlv__table td:last-child { padding-right: 0; }
+.dlv__table thead th {
+  font-family: Oswald, sans-serif; font-weight: 500; font-size: 11.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--muted); border-bottom-color: var(--rule); white-space: nowrap;
+}
+.dlv__table tbody th { font-weight: 500; }
+.dlv__carriers { display: block; font-size: 12.5px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.dlv__note { margin: 10px 0 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+.dlv__pickup { margin-top: 18px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--rule-soft); font-size: 14.5px; }
+.dlv__pickup p { margin: 0; }
+.dlv__pickup .dlv__addr { margin-top: 4px; }
+.dlv__pickup .dlv__hours { margin-top: 6px; font-size: 13.5px; color: var(--muted); }
+.dlv__times { margin: 0; }
+.dlv__times > div {
+  display: grid; grid-template-columns: minmax(120px, 1fr) 2fr; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--rule-soft); font-size: 14.5px;
+}
+.dlv__times dt { font-weight: 500; }
+.dlv__times dd { margin: 0; }
+.dlv__pay { list-style: none; margin: 0; padding: 0; }
+.dlv__pay li { display: flex; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule-soft); }
+.dlv__paylogo { flex: 0 0 76px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; color: var(--ink); }
+.dlv__paylogo svg { height: 22px; width: auto; max-width: 76px; }
+.dlv__paylogo svg[aria-label="Apple Pay"] { height: 15px; }
+.dlv__paylogo svg[aria-label="Google Pay"] { height: 13px; }
+.dlv__paylogo .bank__logo { height: 18px; }
+.dlv__paytxt { display: flex; flex-direction: column; gap: 2px; font-size: 14.5px; min-width: 0; }
+.dlv__paytxt span { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.dlv__contact p { margin: 0 0 10px; font-size: 14.5px; }
+.dlv__contact a { color: var(--ink); }
+.dlv__legal { margin-top: 32px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.dlv__legal summary {
+  cursor: pointer; list-style: none; position: relative; min-height: 48px; display: flex; align-items: center;
+  padding: 12px 26px 12px 0; font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+}
+.dlv__legal summary::-webkit-details-marker { display: none; }
+.dlv__legal summary::after {
+  content: "+"; position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; color: var(--muted);
+}
+.dlv__legal[open] summary::after { content: "−"; }
+.dlv__legal > .legal, .dlv__legal > .note { padding-bottom: 16px; }
+@media (min-width: 768px) {
+  .dlv__scroll { margin: 0; padding: 0; }
+}
 .ftr__acc .link { font-size: inherit; color: inherit; border-bottom-color: var(--rule); }
 .ftr__acc .link:hover { border-bottom-color: var(--ink); }
 

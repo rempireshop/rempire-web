@@ -1,5 +1,10 @@
 import { query, withTx } from "@/lib/db";
-import { normalizeEmail } from "@/lib/customers";
+import { normalizeEmail, normalizeLangCode } from "@/lib/customers";
+
+/* The same shape src/lib/customers.ts isEmail() checks — repeated rather than
+   imported so this file's only import from customers.ts stays the two
+   normalisers (customers.ts is backend-core's; see docs/build-contracts.md). */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 
 /**
  * Wholesale (salon/pro) pricing and the loyalty points programme.
@@ -454,6 +459,8 @@ export interface AdminCustomerRow {
   email: string;
   name: string;
   phone: string;
+  /** The language they signed in from — the language their letters are written in. */
+  lang: "RU" | "ET" | "EN";
   tier: "retail" | "pro";
   company: string | null;
   regCode: string | null;
@@ -472,6 +479,7 @@ interface AdminCustomerDbRow {
   email: string;
   name: string | null;
   phone: string | null;
+  lang: string | null;
   tier: string;
   company: string | null;
   reg_code: string | null;
@@ -497,6 +505,7 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
     email: r.email,
     name: r.name ?? "",
     phone: r.phone ?? "",
+    lang: normalizeLangCode(r.lang),
     tier: r.tier === "pro" ? "pro" : "retail",
     company: r.company,
     regCode: r.reg_code,
@@ -515,7 +524,7 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
    toward "ordersCount"/"revenue" on a customer card — a cancelled order is
    not revenue, and a guest order belongs to nobody's account. */
 const CUSTOMER_COLS = `
-  c.id, c.email, c.name, c.phone, c.tier, c.company, c.reg_code, c.notes,
+  c.id, c.email, c.name, c.phone, c.lang, c.tier, c.company, c.reg_code, c.notes,
   c.pro_requested_at, c.pro_approved_at, c.created_at, c.last_login_at,
   coalesce(agg.orders_count, 0) as orders_count,
   coalesce(agg.revenue, 0) as revenue,
@@ -615,6 +624,78 @@ export async function setCustomerNotes(id: string, notes: string | null): Promis
   if (!UUID_RE.test(id)) return null;
   await query("update customers set notes = $2 where id = $1", [id, notes ? String(notes).slice(0, 2000) : null]);
   return getCustomerAdmin(id);
+}
+
+/* ---------- admin: «+ Партнёр» — create or promote by e-mail ---------------- */
+
+export interface PartnerInput {
+  email: string;
+  name?: unknown;
+  company?: unknown;
+  regCode?: unknown;
+  phone?: unknown;
+  /** "RU" | "ET" | "EN" — the language the welcome letter is written in. */
+  lang?: unknown;
+  /** "pro" (default) makes a partner; "retail" only creates the row. */
+  tier?: "pro" | "retail";
+}
+
+export interface PartnerResult {
+  customer: AdminCustomerRow;
+  /** The row did not exist before this call. */
+  created: boolean;
+  /** The tier actually flipped retail → pro here (a letter is due). */
+  promoted: boolean;
+}
+
+/**
+ * «+ Партнёр» in the admin: a salon or a master the owner knows, added by
+ * e-mail before they ever signed in. The row is created if there is none —
+ * the same row recordLogin() would create at their first sign-in, so when
+ * they do sign in they land straight on partner prices — and an existing
+ * row (a shopper who already has orders, or a pending request) is promoted
+ * in place. What the owner typed wins (he is correcting the record on
+ * purpose); a field he left blank leaves the customer's own value alone,
+ * and the customer's language is never touched — the letter follows it. An
+ * open request is closed by the promotion itself.
+ */
+export async function upsertPartner(input: PartnerInput): Promise<PartnerResult | null> {
+  const email = normalizeEmail(input.email);
+  if (!EMAIL_RE.test(email)) return null;
+  const tier = input.tier === "retail" ? "retail" : "pro";
+  const name = text(input.name, 120);
+  const company = text(input.company, 160);
+  const regCode = text(input.regCode, 40);
+  const phone = text(input.phone, 40);
+  const lang = normalizeLangCode(input.lang);
+
+  const before = await getCustomerAdminByEmail(email);
+  if (!before) {
+    await query(
+      `insert into customers (email, lang, name, phone, company, reg_code, tier, pro_approved_at)
+       values ($1, $2, $3, $4, $5, $6, $7, case when $7 = 'pro' then now() else null end)
+       on conflict (email) do nothing`,
+      [email, lang, name, phone, company, regCode, tier],
+    );
+  } else {
+    await query(
+      `update customers set
+         name = coalesce($2, name), phone = coalesce($3, phone),
+         company = coalesce($4, company), reg_code = coalesce($5, reg_code),
+         tier = case when $6 = 'pro' then 'pro' else tier end,
+         pro_approved_at = case when $6 = 'pro' then coalesce(pro_approved_at, now()) else pro_approved_at end,
+         pro_requested_at = case when $6 = 'pro' then null else pro_requested_at end
+       where id = $1`,
+      [before.id, name, phone, company, regCode, tier],
+    );
+  }
+  const customer = await getCustomerAdminByEmail(email);
+  if (!customer) return null;
+  return {
+    customer,
+    created: !before,
+    promoted: tier === "pro" && (!before || before.tier !== "pro"),
+  };
 }
 
 /* ---------- admin: CSV export ----------------------------------------------- */

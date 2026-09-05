@@ -56,6 +56,7 @@ import { fileURLToPath } from "node:url";
 // blog: published posts come straight out of Postgres, when there is one to
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
+import { fetchSettings } from "./lib/settings-export.mjs";
 /* The head builders, the copy table and the sitemap row are shared with the
    request-time page of a custom product (src/lib/product-page.ts, a row of
    custom_products that did not exist when this ran) — one module, so the
@@ -144,6 +145,9 @@ const LEGAL_EN = await loadObj("legal.en.js", "LEGAL_EN");
 if (!Object.keys(LEGAL_EN).length) {
   console.log("  (no public/shop/legal.en.js — English policy pages fall back to LEGAL)");
 }
+/* the checkout's payment marks (Visa, Mastercard, Apple Pay, Google Pay, the
+   bank glyph) — «Доставка и оплата» prints the same ones */
+const PAYLOGOS = await loadObj("paylogos.js", "PAYLOGOS");
 
 /* The router in app.js gates on LEGAL[slug], so that is the list of slugs
    that can be reached — a page only in a translation would 404 on a cold
@@ -275,6 +279,74 @@ try {
   trText = s => s;
 }
 const tr = (s, code, allowName) => (code === "RU" ? String(s) : trText(String(s), code, !!allowName));
+
+/* ---------- «Доставка и оплата»: the builder, lifted the same way ---------
+
+   deliveryPageHTML() and the four declarations it reads — SHIP_RULES (the
+   defaults the checkout bills with), CARRIER_NAMES, CARRIERS_BY_COUNTRY and
+   DELIVERY_ROWS — live in app.js and only there, next to the checkout that
+   uses them. Lifted here, so the static /info/shipping/ page and the one the
+   shop draws live are the same function over the same tables; the builder
+   is written as a pure function of its `ctx` for exactly this reason (see
+   its comment in app.js). If the slices stop coming out, the page falls back
+   to the policy text and the tool says so. */
+let DELIVERY = null;
+try {
+  const pieces = [
+    sliceFrom(/^ {2}var SHIP_RULES = \{$/, DECL_END),
+    sliceFrom(/^ {2}var CARRIER_NAMES = \{$/, DECL_END),
+    sliceFrom(/^ {2}var CARRIERS_BY_COUNTRY = \{$/, DECL_END),
+    sliceFrom(/^ {2}var DELIVERY_ROWS = \[$/, DECL_END),
+    sliceFrom(/^ {2}function deliveryPageHTML\(ctx\) \{$/, FN_END)
+  ];
+  if (pieces.some(p => !p)) throw new Error("could not lift the delivery page (deliveryPageHTML & co) out of app.js");
+  DELIVERY = new Function(pieces.join("\n") +
+    "\nreturn { rules: SHIP_RULES, carrierNames: CARRIER_NAMES, carriers: CARRIERS_BY_COUNTRY, rows: DELIVERY_ROWS, page: deliveryPageHTML };")();
+  if (typeof DELIVERY.page !== "function" || !DELIVERY.rules.methods) throw new Error("the lifted delivery page has the wrong shape");
+} catch (e) {
+  console.warn("! " + e.message + "\n! /info/shipping/ is written from the policy text alone");
+  DELIVERY = null;
+}
+
+/* The live rules, when the database is there — the same merge over the
+   defaults that app.js applyShipRules() does (key by key, a bad number
+   ignored), so the page prints what the checkout will bill. Without
+   DATABASE_URL these are the defaults src/lib/shipping.ts carries too. */
+const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing"]);
+function mergeShipRules(defaults, raw) {
+  const out = JSON.parse(JSON.stringify(defaults));
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+  if (raw.freeFrom === null || typeof raw.freeFrom === "number") out.freeFrom = raw.freeFrom;
+  if (raw.freeFromByCountry && typeof raw.freeFromByCountry === "object") out.freeFromByCountry = raw.freeFromByCountry;
+  if (raw.methods && typeof raw.methods === "object") {
+    for (const m of ["parcel", "courier", "pickup"]) {
+      if (!raw.methods[m] || typeof raw.methods[m] !== "object") continue;
+      for (const c of Object.keys(raw.methods[m])) {
+        const v = Number(raw.methods[m][c]);
+        if (Number.isFinite(v) && v >= 0) out.methods[m][c] = v;
+      }
+    }
+  }
+  if (raw.carriers && typeof raw.carriers === "object") out.carriers = raw.carriers;
+  return out;
+}
+const SHIP_RULES_LIVE = DELIVERY ? mergeShipRules(DELIVERY.rules, LIVE_SETTINGS.shipping_rules) : null;
+const LOYALTY_LIVE = (() => {
+  const l = LIVE_SETTINGS.pricing && LIVE_SETTINGS.pricing.loyalty;
+  if (!l || typeof l !== "object") return { enabled: true, earnPct: 5 };
+  const pct = Number(l.earnPct);
+  return { enabled: l.enabled !== false, earnPct: Number.isFinite(pct) && pct >= 0 ? pct : 5 };
+})();
+if (DELIVERY) {
+  console.log("  delivery page: " + (LIVE_SETTINGS.shipping_rules ? "live tariffs from settings.shipping_rules" : "built-in tariff defaults") +
+    " · EE parcel " + SHIP_RULES_LIVE.methods.parcel.EE + " € · free from " + SHIP_RULES_LIVE.freeFrom + " €");
+}
+/* app.js eur(): «12,90 €» for RU/ET, «€12.90» for EN, whole euros without
+   decimals — so the static English page prints the price the live one does. */
+function eurFor(n, code) {
+  const v = (Math.round(n * 100) / 100).toFixed(2);
+  return code === "EN" ? "€" + v.replace(".00", "") : v.replace(".", ",").replace(",00", "") + " €";
+}
 
 /* ---------- shell: the exact asset tags index.html uses ------------------
 
@@ -847,6 +919,43 @@ function infoPage(slug, lang) {
     const label = o ? (oNative ? o.title : tr((LEGAL[s] || o).title, code, false)) : s;
     return '<li><a href="' + href(seg, infoRest(s)) + '">' + esc(label) + "</a></li>";
   }).join("");
+
+  /* «Доставка и оплата» is not a policy text first: the page a customer
+     reads — prices from the rules, times, payment marks, the returns
+     summary, the contacts — with the policy folded under «Полные условия
+     доставки» at the bottom. The same builder app.js's screenDelivery()
+     calls, over the same rules, with the same words. */
+  if (slug === "shipping" && DELIVERY) {
+    const c = IDENTITY;
+    const phoneHTML = c.phone ? '<a href="tel:' + esc(c.phone.replace(/[^\d+]/g, "")) + '">' + esc(c.phone) + "</a>" : "";
+    const mailHTML = c.email ? '<a href="mailto:' + esc(c.email) + '">' + esc(c.email) + "</a>" : "";
+    const pageHtml = DELIVERY.page({
+      lang: code,
+      tr: s => tr(s, code, false),
+      esc, eur: n => eurFor(n, code), title: heading,
+      rules: SHIP_RULES_LIVE, carriers: DELIVERY.carriers, carrierNames: DELIVERY.carrierNames, rows: DELIVERY.rows,
+      address: c.address, hoursHTML: contactHours(code), phoneHTML, mailHTML,
+      logos: PAYLOGOS, banks: null, loyalty: LOYALTY_LIVE,
+      link: (s, label) => '<a href="' + href(seg, infoRest(s)) + '">' + esc(label) + "</a>",
+      legalHtml: body, legalNote: true
+    });
+    return {
+      file: path.join(SHOP2, seg, "info", slug, "index.html"),
+      spec: {
+        lang, seg, rest,
+        title: fitTitle(heading, heading + " — REMPIRE"),
+        desc: clip(t.infoDesc(heading), 158),
+        image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "article",
+        jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
+        content: '<div class="wrap wrap--mid">' +
+          crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
+          '<section class="sec dlv">' + pageHtml + "</section>" +
+          '<ul class="pre__list">' + others + "</ul>" +
+          langNav(seg, rest, t) +
+          "</div>"
+      }
+    };
+  }
 
   const content = '<div class="wrap wrap--mid">' +
     crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
