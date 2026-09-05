@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { E2E_BASE_URL } from "./env.mjs";
 import { LANGS, PRODUCT, ipHeaders, shopUrl, waitForScreen } from "./fixtures";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
@@ -393,6 +393,220 @@ test.describe("blog — the visual editor", () => {
     await assertClean(page, w, "a markdown post in the visual editor");
 
     await page.request.delete(`/api/admin/blog/?id=${post.id}`);
+  });
+});
+
+/* ---- the whole article ------------------------------------------------------
+   «Написать статью целиком» in the editor's assistant card, and the same job
+   started from the floating assistant's «напиши статью…». The article
+   generator (POST /api/admin/ai/text/, tasks post_full and post_translate)
+   is stubbed — this suite has no OPENAI_API_KEY — and answers in the
+   language it was asked for, so a field filled in the wrong language cannot
+   pass. What is under test is the editor: three calls in order, every field
+   of every language filled, the draft saved by itself, the failure line, and
+   the published Estonian page carrying the Estonian article. */
+type AiCall = { task: string; lang: string; input: Record<string, unknown> };
+
+function articleFor(lang: string, marker: string) {
+  if (lang === "ET") {
+    return {
+      title: `Habeme talvine hooldus ${marker}`, excerpt: "Kolm harjumust külmaks hooajaks.",
+      body: `<p>Talvel habe kuivab.</p><h2>Õli igal õhtul ${marker}</h2><p>Tilk pärast pesu.</p><ul><li>tilk</li><li>kaks</li></ul>`,
+      tags: ["habe", "talv"], seo: { title: `ET Google ${marker}`, description: `ET kirjeldus ${marker}` },
+    };
+  }
+  if (lang === "EN") {
+    return {
+      title: `Winter beard care ${marker}`, excerpt: "Three habits for the cold season.",
+      body: `<p>A beard dries out in winter.</p><h2>Oil every evening ${marker}</h2><p>A drop after washing.</p><ul><li>one drop</li><li>two</li></ul>`,
+      tags: ["beard", "winter"], seo: { title: `EN Google ${marker}`, description: `EN description ${marker}` },
+    };
+  }
+  return {
+    title: `Уход за бородой зимой ${marker}`, excerpt: "Три привычки на холодный сезон.",
+    body: `<p>Зимой борода сохнет.</p><h2>Масло каждый вечер ${marker}</h2><p>Капля после умывания.</p><ul><li>капля</li><li>две</li></ul>`,
+    tags: ["борода", "зима", "уход"], seo: { title: `RU Google ${marker}`, description: `RU описание ${marker}` },
+    products: [PRODUCT.id],
+  };
+}
+
+/** The generator, stubbed per task. `failFirst` makes the first call answer 429 — the editor's failure path. */
+async function stubArticle(page: Page, marker: string, opts: { failFirst?: boolean } = {}): Promise<AiCall[]> {
+  const calls: AiCall[] = [];
+  let fail = !!opts.failFirst;
+  await page.route("**/api/admin/ai/text/", async (route) => {
+    const body = route.request().postDataJSON() as AiCall;
+    calls.push({ task: body.task, lang: body.lang, input: body.input });
+    if (fail) {
+      fail = false;
+      return route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ ok: false, error: "rate_limited" }) });
+    }
+    // the first call takes a moment, so the «…» / «Пишу по-русски…» state is on screen long enough to be seen
+    if (body.task === "post_full") await new Promise((r) => setTimeout(r, 600));
+    const lang = body.task === "post_full" ? "RU" : body.lang;
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, text: articleFor(lang, marker) }) });
+  });
+  return calls;
+}
+
+test.describe("blog — the whole article", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(175) });
+
+  test("«Написать статью целиком» fills every field in three languages, saves the draft, and the ET page carries the ET article", async ({ page, browser }) => {
+    test.setTimeout(180_000);
+    const w = watch(page);
+    const marker = Date.now().toString().slice(-6);
+    const calls = await stubArticle(page, marker, { failFirst: true });
+    let postId = "";
+
+    await openAdmin(page);
+    await tab(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    const full = page.locator("[data-admblogfull]");
+    await expect(full).toHaveText("Написать статью целиком");
+    await page.locator("[data-admblogtopic]").fill("уход за бородой зимой");
+
+    /* ---- the failure path first: a plain sentence under the button, nothing half-filled ---- */
+    w.allow.push(/\/api\/admin\/ai\/text\//);   // Chromium logs the 429 as a console error of its own
+    await full.click();
+    const progress = page.locator("[data-admblogprogress]");
+    await expect(progress).toHaveText("Слишком много запросов — попробуйте позже");
+    await expect(full).toHaveText("Написать статью целиком");
+    await expect(page.locator('[data-blogf="title"]')).toHaveValue("");
+    await clearToast(page);
+    expect(calls).toHaveLength(1);
+
+    /* ---- the whole job: Russian, then Estonian, then English, then saved ---- */
+    await full.click();
+    await expect(full, "no working state while the article is written").toHaveText("…");
+    await expect(progress).toHaveText("Пишу по-русски…");
+    await expect(page.getByRole("status").first()).toContainText("Статья готова на трёх языках", { timeout: 30_000 });
+    await clearToast(page);
+    await expect(progress).toBeHidden();
+    await expect(full).toHaveText("Написать статью целиком");
+
+    // three calls, in order, each in its own language — the translations carry the Russian article and the product names
+    expect(calls.slice(1).map((c) => `${c.task}:${c.lang}`)).toEqual(["post_full:RU", "post_translate:ET", "post_translate:EN"]);
+    expect(calls[1].input.topic).toBe("уход за бородой зимой");
+    expect(String(calls[2].input.body)).toContain(`<h2>Масло каждый вечер ${marker}</h2>`);
+    expect(calls[2].input.sourceLang).toBe("RU");
+    expect(calls[2].input.keepNames).toEqual([`${PRODUCT.brand} Bio Botanical Shampoo — шампунь`]);
+    expect(calls[2].input.seoTitle).toBe(`RU Google ${marker}`);
+
+    // every field, every language
+    const box = page.locator("[data-blogbody]");
+    await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Уход за бородой зимой ${marker}`);
+    await expect(page.locator('[data-blogf="excerpt"]')).toHaveValue("Три привычки на холодный сезон.");
+    await expect(box.locator("h2")).toHaveText(`Масло каждый вечер ${marker}`);
+    await expect(box.locator("ul li")).toHaveCount(2);
+    await expect(page.locator("[data-blogtags]")).toHaveValue("борода, зима, уход");
+    await expect(page.locator(`[data-admblogproductdel="${PRODUCT.id}"]`), "the product the article mentions is not picked").toBeVisible();
+    const slug = await page.locator("[data-blogslug]").inputValue();
+    expect(slug).toMatch(new RegExp(`^uhod-za-borodoy-zimoy-${marker}`));
+    await page.locator("[data-blogmore]").click();
+    await expect(page.locator('[data-blogf="seoTitle"]')).toHaveValue(`RU Google ${marker}`);
+    await expect(page.locator('[data-blogf="seoDesc"]')).toHaveValue(`RU описание ${marker}`);
+    await page.locator('[data-admbloglang="ET"]').click();
+    await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Habeme talvine hooldus ${marker}`);
+    await expect(box.locator("h2")).toHaveText(`Õli igal õhtul ${marker}`);
+    await expect(page.locator('[data-blogf="seoTitle"]')).toHaveValue(`ET Google ${marker}`);
+    await page.locator('[data-admbloglang="EN"]').click();
+    await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Winter beard care ${marker}`);
+    await expect(box.locator("h2")).toHaveText(`Oil every evening ${marker}`);
+    await expect(page.locator('[data-blogf="seoDesc"]')).toHaveValue(`EN description ${marker}`);
+    await assertClean(page, w, "the whole article in the editor");
+
+    // saved by itself, as a draft — the owner has not pressed anything yet
+    const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
+    expect(saved.status(), "the article was not saved as a draft").toBe(200);
+    const post = (await saved.json()).post as { id: string; status: string; title: Record<string, string>; body: Record<string, string>; tags: string[]; products: string[]; seoTitle: Record<string, string> };
+    postId = post.id;
+    try {
+      expect(post.status).toBe("draft");
+      expect(post.title).toEqual({ RU: `Уход за бородой зимой ${marker}`, ET: `Habeme talvine hooldus ${marker}`, EN: `Winter beard care ${marker}` });
+      expect(post.body.ET).toContain(`<h2>Õli igal õhtul ${marker}</h2>`);
+      expect(post.tags).toEqual(["борода", "зима", "уход"]);
+      expect(post.products).toEqual([PRODUCT.id]);
+      expect(post.seoTitle.EN).toBe(`EN Google ${marker}`);
+
+      /* ---- the owner reads and publishes; the Estonian page is the Estonian article ---- */
+      await page.locator("[data-admblogpublish]").click();
+      await clearToast(page);
+      await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+      const shop = await freshShop(browser);
+      await shop.page.goto(shopUrl("/et", `/blog/${slug}/`));
+      await waitForScreen(shop.page, "blogpost");
+      const article = shop.page.locator(".blog__body:not(.blog__sk)");
+      await expect(article.locator("h2")).toHaveText(`Õli igal õhtul ${marker}`);
+      await expect(article.locator("ul li")).toHaveCount(2);
+      await expect(shop.page.locator("h1")).toContainText(`Habeme talvine hooldus ${marker}`);
+      await expect(shop.page).toHaveTitle(`ET Google ${marker} — REMPIRE`);
+      await expect(shop.page.locator('meta[name="description"]')).toHaveAttribute("content", `ET kirjeldus ${marker}`);
+      // «Товары из статьи»: the product the generator named is under the article
+      await expect(shop.page.locator(`.card__go[data-go-product="${PRODUCT.id}"], [data-go-product="${PRODUCT.id}"]`).first()).toBeVisible();
+      await assertClean(shop.page, shop.w, "the Estonian page of the generated article");
+      await shop.close();
+    } finally {
+      // this suite leaves the blog as it found it
+      if (postId) await page.request.delete(`/api/admin/blog/?id=${postId}`);
+    }
+  });
+
+  test("the floating assistant's «напиши статью…» names a topic, and the same generator writes it in the editor", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    const marker = Date.now().toString().slice(-6);
+    const calls = await stubArticle(page, marker);
+    const asked: Array<Record<string, unknown>> = [];
+    await page.route("**/api/assistant/**", async (route) => {
+      if (route.request().method() === "GET") {
+        return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+      }
+      asked.push(route.request().postDataJSON() as Record<string, unknown>);
+      // what the route answers now: a topic, never the article (src/app/api/assistant/route.ts)
+      await route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({
+          reply: "Напишу статью целиком про уход за бородой зимой — подтвердите, она откроется в редакторе блога.",
+          product_ids: [], tab: "blog",
+          action: { type: "draft_post", topic: "уход за бородой зимой", lang: "RU", hint: "" },
+        }),
+      });
+    });
+    let slug = "";
+    await openAdmin(page);
+    try {
+      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator("[data-admq]").fill("у меня новый пост в блоге, напиши мне текст на тему уход за бородой зимой");
+      await page.locator("[data-admsend]").click();
+      const answer = page.locator("[data-aians]");
+      await expect(answer).toContainText("Напишу статью целиком");
+      expect((await answer.textContent()) || "", "the panel printed JSON").not.toMatch(/[{}]/);
+      const card = answer.locator(".adm-propose");
+      await expect(card).toContainText("уход за бородой зимой");
+      await card.locator("[data-admapply]").click();
+
+      // the editor opens on a new draft with the topic in the box, and the article fills in
+      await expect(page.locator("[data-blogbody]")).toBeVisible();
+      await expect(page.locator("[data-admblogtopic]")).toHaveValue("уход за бородой зимой");
+      await expect(page.locator("[data-admblogfull]")).toHaveText("…");
+      await expect(page.getByRole("status").first()).toContainText("Статья готова на трёх языках", { timeout: 30_000 });
+      await clearToast(page);
+      await expect(page.locator('[data-blogf="title"]')).toHaveValue(`Уход за бородой зимой ${marker}`);
+      await expect(page.locator("[data-blogbody] h2")).toHaveText(`Масло каждый вечер ${marker}`);
+      slug = await page.locator("[data-blogslug]").inputValue();
+      expect(calls.map((c) => `${c.task}:${c.lang}`)).toEqual(["post_full:RU", "post_translate:ET", "post_translate:EN"]);
+      expect(asked[0].mode).toBe("admin");
+      const saved = await page.request.get(`/api/admin/blog/?slug=${slug}`);
+      expect(saved.status(), "the assistant's article was not saved as a draft").toBe(200);
+      expect(((await saved.json()).post as { status: string }).status).toBe("draft");
+      await assertClean(page, w, "the assistant's article in the editor");
+    } finally {
+      if (slug) {
+        const row = await page.request.get(`/api/admin/blog/?slug=${slug}`);
+        if (row.status() === 200) await page.request.delete(`/api/admin/blog/?id=${((await row.json()).post as { id: string }).id}`);
+      }
+    }
   });
 });
 

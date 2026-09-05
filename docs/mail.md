@@ -3,7 +3,7 @@
 Everything the shop sends to a customer goes through one function
 (`sendMail`) and one renderer per letter. No SDK: Resend's REST API over
 `fetch`, the same way `src/lib/notify.ts` already forwards to Telegram and to
-Dmitri.
+Dim.
 
 The rule the whole module is built around: **a letter must never be able to
 break an order**. Every entry point returns a result object and swallows its
@@ -51,7 +51,7 @@ Railway, into the project's environment settings.
 | `MAIL_RETRY_DELAY_MS` | the 5xx retry pause | default `400`. Tests set `0`. |
 | `RESEND_TO`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | the *shop's own* ping on a paid order | owned by `src/lib/notify.ts`, documented here because `onOrderPaid` uses it. |
 
-## Creating the Resend API key (Dmitri)
+## Creating the Resend API key (Dim)
 
 The Resend account is the shop's (`rempireshopinfo@`, see `docs/accounts.md`),
 region Ireland / `eu-west-1`, domain `rempireshop.com` added 03.09.2026 with

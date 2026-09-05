@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import catalogue from "@/data/catalogue.min.json";
 import { requireAdmin } from "@/lib/auth";
 import { briefContent, mergeContent } from "@/lib/content";
-import { listPublished } from "@/lib/blog";
-import { briefAnalytics, briefHero, sanitizeAction } from "./actions";
+import { listAllPosts, listPublished } from "@/lib/blog";
+import { extractJsonObject, looksLikeJson } from "@/lib/ai-json";
+import { catalogueLines, relevantLines, rowLine, type CatRow } from "@/lib/catalogue-slice";
+import { briefAnalytics, briefAttachments, briefHero, sanitizeAction, type AttachmentBrief } from "./actions";
 
 /* The shop chat's brain. Rule-based fallback lives in the client
    (public/shop2/chat.js); when OPENAI_API_KEY is set on Vercel this route
@@ -21,7 +23,31 @@ import { briefAnalytics, briefHero, sanitizeAction } from "./actions";
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 17; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 18; // echoed in responses so a stale deployment is visible from outside
+
+/* Output room. 350 was enough for a sentence and a price — and exactly what
+   cut a set_hero with five trilingual slides, a set_content patch or the
+   old all-in-one draft_post mid-JSON, which the panel then printed raw. The
+   admin gets room for its longest honest action (a banner, a product with
+   three descriptions); the long-form ones (an article) no longer travel in
+   the chat completion at all — see draft_post in adminPrompt(). The shop
+   chat answers in a sentence and a few ids and keeps a small cap. */
+const MAX_TOKENS_ADMIN = 1500;
+const MAX_TOKENS_SHOP = 400;
+
+/* What the owner reads when the model's answer could not be read — never
+   the raw text, never JSON. `retry: true` in the response puts a «Спросить
+   ещё раз» button under it in the panel. */
+const FALLBACK_REPLY: Record<string, string> = {
+  RU: "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.",
+  ET: "Abilise vastust ei õnnestunud lugeda — küsi uuesti, võib ka lühemalt.",
+  EN: "The assistant's answer could not be read — ask again, a shorter question is fine.",
+};
+const CUT_REPLY: Record<string, string> = {
+  RU: "Ответ получился слишком длинным и оборвался. Спросите ещё раз — или разбейте просьбу на две.",
+  ET: "Vastus tuli liiga pikk ja jäi pooleli. Küsi uuesti — või jaga palve kaheks.",
+  EN: "The answer ran too long and was cut off. Ask again — or split the request in two.",
+};
 
 const ALLOWED_HOSTS = new Set([
   "rempireshop.diipsolutions.eu",
@@ -48,48 +74,25 @@ function limited(ip: string): boolean {
   return rec.n > 10; // 10 messages per minute per IP
 }
 
-type CatRow = { id: string; b: string; n: string; c: string; p: number; s: string };
-const CAT = catalogue as CatRow[];
+/* The catalogue file, its prompt lines and the relevant slice for a question
+   live in src/lib/catalogue-slice.ts — shared with the article generator
+   (POST /api/admin/ai/text, task post_full), which offers the model the
+   same few products that fit a topic. */
 
-function rowLine(p: CatRow) {
-  return `${p.id}|${p.b}|${p.n}|${p.c}|${p.p}€|${p.s}`;
-}
-function catalogueLines(): string {
-  return CAT.map(rowLine).join("\n");
-}
-
-/* The full catalogue is ~9k tokens of noise for a single question — the mini
-   model follows instructions far better on a short, relevant slice. Cheap
-   keyword scoring against the question; generous fallback keeps variety. */
-const CAT_KW: Array<[RegExp, string]> = [
-  [/бород|habe|beard|усы|moustache|брить|raseer|shav/i, "beard"],
-  [/волос|шампун|кондиционер|маск|juuks|šampoon|palsam|hair|shampoo|conditioner|scalp|перхот/i, "hair"],
-  [/стайлинг|уклад|паст|воск|гел|пудр|лак|viimistl|soeng|styling|wax|paste|clay|pomade|gel/i, "styling"],
-  [/лиц|кож[аеиу]|тоник|крем|сыворот|nägu|näo|nahk|face|skin|toner|serum|patch/i, "face"],
-  [/тел|мыл|keha|seep|body|soap|лосьон/i, "body"],
-  [/парфюм|аромат|духи|parfüüm|lõhn|perfume|fragrance|cologne|edp|edt/i, "perfume"],
-  [/футболк|мерч|särk|merch|shirt|tee|декор|decor/i, "merch"],
-];
-function relevantLines(question: string): string {
-  const q = question.toLowerCase();
-  const cats = new Set(CAT_KW.filter(([re]) => re.test(q)).map(([, c]) => c));
-  const toks = q.split(/[^a-zа-яёõäöüšž0-9.]+/i).filter((w) => w.length > 2);
-  const scored = CAT.map((p) => {
-    let s = 0;
-    if (cats.has(p.c)) s += 2;
-    const hay = (p.b + " " + p.n + " " + p.id).toLowerCase();
-    for (const t of toks) if (hay.includes(t)) s += 3;
-    if (p.s !== "out") s += 1;
-    return [s, p] as const;
-  }).sort((a, b) => b[0] - a[0]);
-  const top = scored.filter(([s]) => s > 1).slice(0, 60).map(([, p]) => p);
-  if (top.length < 12) {
-    for (const [, p] of scored) {
-      if (top.length >= 24) break;
-      if (!top.includes(p)) top.push(p);
-    }
+/* blog, for the owner: every post, drafts included (slug|status|Russian
+   title, newest edited first, up to 20) — what publish_post and
+   set_post_cover need a slug from. Fetched only when the owner's message is
+   about the blog or a photo was attached (BLOG_TRIGGER below), same posture
+   as customersSummaryForPrompt(): most admin calls never pay for it, and a
+   database hiccup here must never be the reason the assistant stops. */
+const BLOG_TRIGGER = /стать|блог|пост|обложк|опублик|artikl|blog|post|cover|publish/i;
+async function adminBlogLinesForPrompt(): Promise<string> {
+  try {
+    const posts = await listAllPosts(20);
+    return posts.map((p) => `${p.slug}|${p.status}|${p.title.RU || p.title.ET || p.title.EN || p.slug}`).join("\n");
+  } catch {
+    return "";
   }
-  return top.map(rowLine).join("\n");
 }
 
 /* blog: up to 20 published titles+slugs, so the customer assistant can point
@@ -222,12 +225,20 @@ function adminPrompt(
   stockSummary: string,
   customersSummary: string,
   customLines: string[] = [],
+  blogLines = "",
+  attachments: AttachmentBrief[] = [],
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
 ${customersSummary ? `
 CUSTOMERS — up to 15 most recently created (name|e-mail|tier retail-or-pro|points balance). Use this ONLY to find the e-mail of a customer the owner named, for adjust_points below — never invent an e-mail not listed here, and never quote this list back to the owner as a report.
 ${customersSummary}
+` : ""}${blogLines ? `
+BLOG POSTS as they are right now (slug|draft-or-published|Russian title) — the slugs publish_post and set_post_cover take; never invent a slug not listed here:
+${blogLines}
+` : ""}${attachments.length ? `
+PHOTOS the owner attached to this conversation, already uploaded (key | file name). Refer to them by key, exactly as written:
+${attachments.map((a) => `${a.key} | ${a.name}`).join("\n")}
 ` : ""}
 
 HOME-PAGE BANNER as it is right now (slide id | Russian title | link | picture | shown):
@@ -264,8 +275,11 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"toggle_promo","code":"SUVI10","value":false} — switch an existing promo code off (or back on)
   {"type":"set_shipping_rules","rules":{"methods":{"parcel":{"LV":6.90}},"freeFrom":59}} — change delivery prices («сделай доставку в Латвию 6,90», «бесплатная доставка от 79 евро»)
   {"type":"set_content","value":{…}} — the shop's own details: company, opening hours, social links, the black announcement strip above the header, the contact page, the extra line in the footer of every letter («поменяй телефон на …», «напиши в баннере: скидка 15 % на наборы до воскресенья», «мы теперь работаем до 20:00»)
-  {"type":"draft_post","title":{…},"excerpt":{…},"body":{…},"tags":[…],"products":[…],"seo":{"title":{…},"description":{…}}} — write a new blog article as a draft, with its Google title and description («напиши статью о том, как ухаживать за бородой зимой»)
-  {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»)
+  {"type":"draft_post","topic":"<the article's topic, in Russian, one line>","lang":"RU"} — have a new blog article written: «напиши статью о том, как ухаживать за бородой зимой», «сделай пост про выбор шампуня». Send ONLY the topic (and an optional "hint" — the owner's angle, who it is for); NEVER write the article inside this JSON. Once the owner confirms, the panel writes the whole article itself — title, excerpt, 600–900 words, tags, products from the catalogue, the Google snippet — in Russian first and then in Estonian and English, and opens it in the blog editor for him to read and publish. Say exactly that in the reply.
+  {"type":"publish_post","slug":"<post slug>","publish":true|false} — publish an existing draft, or take a published post down («опубликуй статью про бороду», «сними с публикации статью про …»). The slug comes from the BLOG POSTS list above.${attachments.length ? `
+  {"type":"add_product_photo","id":"<catalogue id>","key":"<a key from PHOTOS above>","main":true|false} — put one of the attached PHOTOS onto a product's page («вот фото для Bio Botanical Shampoo, сделай главным» → main:true; «добавь это фото к маслу Proraso» → main:false). One photo per action; several photos are several replies.
+  {"type":"set_post_cover","slug":"<post slug from BLOG POSTS>","key":"<a key from PHOTOS above>"} — make one of the attached PHOTOS a blog post's cover («это обложка для статьи про бороду»).` : `
+  (When the owner talks about a photo but none is attached to this conversation, ask him to attach it with the «Фото» button next to the question box — there is no photo action without one.)`}
   {"type":"export_report","month":"YYYY-MM"} — accountant order report for one calendar month, CSV/XLSX with VAT split (current month if the owner did not name one) («выгрузи отчёт за август», «отчёт для бухгалтера», «сколько НДС за месяц»)
   {"type":"set_pricing","value":{"proDiscountPct":25,"proMinOrder":0,"loyalty":{"enabled":true,"earnPct":5,"redeemMaxPct":30,"minRedeem":5}}} — wholesale pricing and the loyalty programme. Send ONLY the fields that change — this is a patch, merged over the current settings, so «подними скидку для салонов до 25 %» is {"proDiscountPct":25} and nothing else («выключи баллы», «баллы начисляем 8 %», «сделай оптовую скидку 30 % от 200 евро»)
   {"type":"adjust_points","customerId":"<uuid>","delta":50,"note":"…"} OR {"type":"adjust_points","customerEmail":"<e-mail>","delta":50,"note":"…"} — credit or correct one customer's point balance by hand. Use customerId when the owner is looking at that customer's card in «Клиенты» and the id is visible in this conversation; otherwise use customerEmail, but ONLY an address copied from the CUSTOMERS list above — never guess or invent either one
@@ -302,9 +316,11 @@ THE BANNER (set_hero) in detail. Always send the WHOLE banner — every slide, i
 EXAMPLE — owner: «оставь на главной один баннер — скидка 20 % на бороду»
 {"reply":"Собрал баннер про скидку на уход за бородой — один слайд, остальные убрал. Посмотрите и подтвердите.","product_ids":[],"tab":"setup","action":{"type":"set_hero","value":{"slides":[{"id":"s1","eyebrow":{"RU":"Только сейчас","ET":"Ainult praegu","EN":"Right now"},"title":{"RU":"−20 % на бороду","ET":"−20 % habemele","EN":"−20 % on beard care"},"sub":{"RU":"Масла, бальзамы и воски — до конца месяца.","ET":"Õlid, palsamid ja vahad — kuu lõpuni.","EN":"Oils, balms and waxes — until the end of the month."},"cta":{"RU":"Смотреть","ET":"Vaata","EN":"Shop now"},"go":"cat:beard","image":"proraso-wood-spice-beard-balm-100ml","on":true}],"interval":6000}}}
 
-BLOG POSTS (draft_post, publish_post) in detail. The shop has a blog — articles in "Блог" in the admin, shown to customers at /shop2/blog/. draft_post always creates a new DRAFT, never publishes: title/excerpt/body are each {"RU":…,"ET":…,"EN":…} — YOU write all three languages yourself, well-formed Markdown in body (headings, short paragraphs, **bold**, lists), never leaving a language out. body up to 6000 characters per language — a real article, not a stub, but do not pad it. tags: a few short lowercase words. products: catalogue ids from the list above that the article is genuinely about, so the post can show them under it — omit if none fit. seo: the article's Google snippet, {"title":{"RU":…,"ET":…,"EN":…},"description":{"RU":…,"ET":…,"EN":…}} — YOU write all three languages: title at most 60 characters and description at most 155 (count them), specific to this article, what the reader will learn, no trailing "| Rempire" (the site appends it); the panel saves it as the post's own Google title and description, the same fields the editor's «Заполнить автоматически» fills. There is no size/price/availability decision here, so nothing needs owner-specific data to write; still confirm before applying, same as every other action. publish_post takes the slug the panel shows once a draft exists (you will see it named back to you after draft_post is applied) and flips it live, or takes it down again — nothing else about the post changes.
+BLOG POSTS (draft_post, publish_post) in detail. The shop has a blog — articles in "Блог" in the admin, shown to customers at /shop2/blog/. draft_post is a REQUEST for an article, not the article: {"type":"draft_post","topic":"…","lang":"RU","hint":"…"} — topic is one plain Russian line (what the article is about), hint is optional (the owner's angle: who it is for, what to stress, a product he named). The article itself — title, excerpt, a 600–900-word text with sections, tags, products from the catalogue, the Google title and description, in Russian and then translated into Estonian and English — is written by the panel's own article generator after the owner confirms, and opens in the blog editor as a draft for him to read and publish. Never publish, never write the body, the translations or the snippet inside this JSON. publish_post takes a slug from the BLOG POSTS list above and flips it live, or takes it down again — nothing else about the post changes.
 EXAMPLE — owner: «напиши статью о том, как ухаживать за бородой зимой»
-{"reply":"Написал черновик статьи об уходе за бородой зимой на трёх языках — с маслом и бальзамом из каталога. Посмотрите в «Блоге» и опубликуйте, когда будете готовы.","product_ids":[],"tab":"blog","action":{"type":"draft_post","title":{"RU":"Как ухаживать за бородой зимой","ET":"Kuidas hooldada habet talvel","EN":"How to care for your beard in winter"},"excerpt":{"RU":"Морозный воздух и отопление сушат бороду и кожу под ней — три привычки, которые это исправляют.","ET":"Külm õhk ja kütteperiood kuivatavad habet ja nahka selle all — kolm harjumust, mis selle parandavad.","EN":"Cold air and indoor heating dry out a beard and the skin under it — three habits that fix that."},"body":{"RU":"# Зимний уход за бородой\n\nЗимой борода становится суше — виновата не только погода, но и отопление в помещении.\n\n## Три привычки\n\n- Масло для бороды каждый вечер после умывания\n- Бальзам по утрам, чтобы держать форму\n- Тёплая, не горячая вода при мытье\n\nЭтого достаточно, чтобы борода пережила зиму мягкой и без раздражения кожи.","ET":"# Habeme talvine hooldus\n\nTalvel muutub habe kuivemaks — süüdi pole ainult ilm, vaid ka sisekütte.\n\n## Kolm harjumust\n\n- Habemeõli iga õhtu pärast pesu\n- Palsam hommikul kuju hoidmiseks\n- Pesemisel leige, mitte kuum vesi\n\nSellest piisab, et habe püsiks talve üle pehme ja nahaärrituseta.","EN":"# Winter beard care\n\nIn winter a beard dries out faster — it's not just the weather, indoor heating plays its part too.\n\n## Three habits\n\n- Beard oil every evening after washing\n- Balm in the morning to hold its shape\n- Warm, not hot, water when you wash it\n\nThat's enough to get a beard through winter soft and without skin irritation."},"tags":["борода","зима","уход"],"products":["proraso-beard-oil-wood-spice-cedar-wood-citrus-fragrance-30ml","proraso-wood-spice-beard-balm-100ml"],"seo":{"title":{"RU":"Уход за бородой зимой: три привычки","ET":"Habeme talvine hooldus: kolm harjumust","EN":"Winter beard care: three habits"},"description":{"RU":"Мороз и отопление сушат бороду и кожу под ней. Масло вечером, бальзам утром и тёплая вода — три привычки, с которыми борода доживёт до весны мягкой.","ET":"Külm õhk ja küte kuivatavad habet ja nahka selle all. Õli õhtul, palsam hommikul ja leige vesi — kolm harjumust, mis hoiavad habeme kevadeni pehme.","EN":"Cold air and heating dry out a beard and the skin under it. Oil at night, balm in the morning and warm water — three habits that keep it soft until spring."}}}}
+{"reply":"Напишу статью целиком — про уход за бородой зимой: заголовок, текст с разделами, теги, товары из каталога и текст для Google, по-русски, а потом на эстонском и английском. Подтвердите — она откроется в редакторе блога черновиком, вы прочитаете и опубликуете.","product_ids":[],"tab":"blog","action":{"type":"draft_post","topic":"Как ухаживать за бородой зимой","lang":"RU"}}${attachments.length ? `
+EXAMPLE — owner: «вот фото для Bio Botanical Shampoo, сделай главным» (with a photo attached)
+{"reply":"Ставлю это фото главным у System 4 Bio Botanical Shampoo — оно появится в каталоге, в поиске и в письмах. Подтвердите; отменить можно в журнале.","product_ids":[],"tab":"goods","action":{"type":"add_product_photo","id":"system-4-bio-botanical-shampoo","key":"${attachments[0].key}","main":true}}` : ""}
 
 FIGURES: revenue, orders, average order, conversion and search terms come ONLY from the SALES block above, stock ONLY from the STOCK block — real numbers, never a placeholder. If SALES says it is not loaded, say the figures are not available right now and point to «Аналитика». Traffic sources and the orders waiting to be shipped are not in this prompt: for «откуда приходят» point to «Аналитика», for «что отправить» point to «Заказы» — without inventing counts, order numbers or percentages.
 
@@ -357,7 +373,7 @@ export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "?";
   if (limited(ip)) return NextResponse.json({ error: "rate" }, { status: 429 });
 
-  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown };
+  let body: { messages?: Msg[]; lang?: string; mode?: string; hero?: unknown; content?: unknown; analytics?: unknown; attachments?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -426,19 +442,25 @@ export async function POST(req: NextRequest) {
   // product creation: the owner's own rows, so their ids are known to the
   // prompt and to sanitizeAction() alike — see customForPrompt()
   const custom: CustomForPrompt = isAdmin && !isMini ? await customForPrompt() : { rows: [], lines: [] };
+  // photos attached in the panel (keys the upload route answered with), and
+  // the blog list when the message is about the blog or a photo is here
+  const attachments = isAdmin ? briefAttachments(body.attachments) : [];
+  const adminBlogLines =
+    isAdmin && !isMini && (attachments.length || BLOG_TRIGGER.test(lastUser)) ? await adminBlogLinesForPrompt() : "";
+  const lang = body.lang === "ET" || body.lang === "EN" ? body.lang : "RU";
   const system =
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(body.lang ?? "RU", briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines)
-        : shopPrompt(body.lang ?? "RU", lastUser, blogLines);
+        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments)
+        : shopPrompt(lang, lastUser, blogLines);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 350,
+      max_tokens: isAdmin ? MAX_TOKENS_ADMIN : MAX_TOKENS_SHOP,
       temperature: 0.4,
       response_format: { type: "json_object" },
       messages: [{ role: "system", content: system }, ...history],
@@ -450,20 +472,47 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "upstream" }, { status: 502 });
   }
   const data = await r.json();
-  let parsed: { reply?: string; product_ids?: string[]; tab?: string } = {};
-  try {
-    parsed = JSON.parse(data.choices?.[0]?.message?.content ?? "{}");
-  } catch {
-    parsed = { reply: data.choices?.[0]?.message?.content ?? "" };
-  }
+  const choice = data.choices?.[0] ?? {};
+  /* Read tolerantly (src/lib/ai-json.ts): a fenced object, a sentence before
+     the brace and a document cut by max_tokens all still yield what can be
+     salvaged. What is NEVER returned is the raw text: a reply that is not a
+     sentence becomes the fallback sentence, and `retry` tells the panel to
+     offer «Спросить ещё раз». */
+  const extracted = extractJsonObject(choice.message?.content, { finishReason: choice.finish_reason });
+  const parsed = (extracted.value ?? {}) as { reply?: unknown; product_ids?: unknown; tab?: unknown; action?: unknown };
   const known = new Set((catalogue as Array<{ id: string }>).map((p) => p.id));
   for (const c of custom.rows) known.add(c.id);
-  const ids = (parsed.product_ids ?? []).filter((id) => known.has(id)).slice(0, 4);
+  const ids = (Array.isArray(parsed.product_ids) ? parsed.product_ids : [])
+    .filter((id): id is string => typeof id === "string" && known.has(id)).slice(0, 4);
   const TABS = new Set(["over", "orders", "goods", "stock", "pos", "people", "promos", "blog", "stats", "mail", "apps", "setup"]);
-  const tab = parsed.tab && TABS.has(parsed.tab) ? parsed.tab : "";
+  const tab = typeof parsed.tab === "string" && TABS.has(parsed.tab) ? parsed.tab : "";
+
+  let rawAction = parsed.action;
+  /* A full article that got cut is not a draft — but its Russian title is a
+     topic, and the panel's own generator writes the rest. The old all-in-one
+     shape is still accepted whole when it arrived whole. */
+  if (extracted.truncated && rawAction && typeof rawAction === "object" && (rawAction as { type?: unknown }).type === "draft_post") {
+    const a = rawAction as { topic?: unknown; title?: unknown };
+    const title = a.title && typeof a.title === "object" ? (a.title as { RU?: unknown }).RU : undefined;
+    const topic = typeof a.topic === "string" ? a.topic : typeof title === "string" ? title : "";
+    rawAction = topic ? { type: "draft_post", topic, lang: "RU" } : null;
+  }
+  const action = sanitizeAction(rawAction, known, isAdmin, { attachedKeys: new Set(attachments.map((a) => a.key)) });
+
+  let reply = typeof parsed.reply === "string" ? parsed.reply.trim().slice(0, 1200) : "";
+  let retry = false;
+  if (!reply || looksLikeJson(reply)) {
+    reply = extracted.truncated ? CUT_REPLY[lang] : FALLBACK_REPLY[lang];
+    retry = !action;
+  } else if (extracted.truncated && !action && !/[.!?…»)]$/.test(reply)) {
+    // the sentence itself was the thing cut — say so instead of trailing off
+    reply += "… " + CUT_REPLY[lang];
+    retry = true;
+  }
   return NextResponse.json({
-    reply: String(parsed.reply ?? "").slice(0, 1200), product_ids: ids, tab,
-    action: sanitizeAction((parsed as { action?: unknown }).action, known, isAdmin),
+    reply, product_ids: ids, tab, action,
+    ...(retry ? { retry: true } : {}),
+    ...(extracted.truncated ? { truncated: true } : {}),
     v: PROMPT_V, model: data.model ?? MODEL,
   });
 }

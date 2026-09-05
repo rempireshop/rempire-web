@@ -736,8 +736,8 @@
       "Google (поиск)": "Google (otsing)",
       "Напрямую / закладки": "Otse / järjehoidjad",
       "Рассылка": "Uudiskiri",
-      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
-        "Päris versioonis ühendatakse siia Google Search Console ja külastusstatistika — kõik seadistab Dmitri, sinul pole vaja midagi teha.",
+      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дим, вам ничего делать не нужно.":
+        "Päris versioonis ühendatakse siia Google Search Console ja külastusstatistika — kõik seadistab Dim, sinul pole vaja midagi teha.",
       // i18n pass 2 — admin: e-mails and connections
       "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.":
         "Kirjad, mida pood saadab ise. Nupud töötavad: seadistus salvestub (demo) ja läheb logisse. Iga kirja teemat, sissejuhatust ja allkirja saab allpool muuta.",
@@ -751,8 +751,8 @@
         "meeldetuletus 24 tunni pärast, kui tellimus jäi lõpetamata",
       "личный промокод за 3 дня до даты": "isiklik sooduskood 3 päeva enne tähtpäeva",
       "Открыть превью всех писем →": "Ava kõigi kirjade eelvaade →",
-      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.":
-        "Mis on poega ühendatud. Roheline töötab ise; hall lisandub järgmiste sammudega — kõik seadistab Dmitri.",
+      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дим.":
+        "Mis on poega ühendatud. Roheline töötab ise; hall lisandub järgmiste sammudega — kõik seadistab Dim.",
       "Приём оплат": "Maksete vastuvõtt",
       "банковские ссылки, карты, Apple/Google Pay": "pangalingid, kaardid, Apple/Google Pay",
       "после выбора провайдера": "pärast teenusepakkuja valikut",
@@ -1265,6 +1265,27 @@
       "Только для вас": "Ainult teile",
       "Этикетка PDF ↗": "Silt PDF ↗",
       "Отследить ↗": "Jälgi ↗",
+      /* order flow: the four steps, the label box, the hints under the buttons */
+      "Этикетка готова": "Silt valmis", "Доставлены": "Kohale toimetatud",
+      "Создать этикетку": "Loo silt", "Создаём…": "Loome…",
+      "Выдан клиенту": "Kliendile üle antud", "Выдан": "Üle antud",
+      "Этикетка": "Silt", "готова": "valmis", "без этикетки": "ilma sildita", "Шаги заказа": "Tellimuse sammud",
+      "Этикетка отложена": "Silt kõrvale pandud",
+      "Отправление у Montonio остаётся — отменить его нельзя. Шаг «Этикетка» возвращён; чтобы снова пользоваться этой этикеткой, верните её.":
+        "Saadetis jääb Montoniosse — seda tühistada ei saa. Samm «Silt» on tagasi võetud; sama sildi uuesti kasutamiseks tooge see tagasi.",
+      "Вернуть этикетку": "Too silt tagasi", "Скопировать": "Kopeeri", "Скопировать трек-номер": "Kopeeri jälgimisnumber",
+      "Трек-номер появится, когда перевозчик примет посылку.": "Jälgimisnumber ilmub, kui vedaja paki vastu võtab.",
+      "Открыть PDF (A4) ↗": "Ava PDF (A4) ↗", "A6 для термопринтера ↗": "A6 termoprinterile ↗", "Чек ↗": "Tšekk ↗",
+      "Заказ ещё не оплачен — отправлять нечего.": "Tellimus pole veel makstud — saata pole midagi.",
+      "Клиент забирает заказ в салоне. Письмо не отправляется.": "Klient tuleb tellimusele salongi järele. Kirja ei saadeta.",
+      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "Silt on Montonio pakikleebis jälgimisnumbriga. Tellimuse staatust see ei muuda.",
+      "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Vajutate «Teele saadetud» — kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
+      "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Kohale toimetatud» on viimane samm, ilma kirjata. Tagasi saab võtta logist.",
+      "Этикетка готова ✓": "Silt valmis ✓", "Этикетка снова на месте ✓": "Silt on jälle olemas ✓",
+      "Не удалось создать этикетку": "Silti ei õnnestunud luua", "Не удалось вернуть шаг": "Sammu ei õnnestunud tagasi võtta",
+      "Трек-номер скопирован ✓": "Jälgimisnumber kopeeritud ✓",
+      "Для самовывоза и электронных заказов этикетка не нужна.": "Järeletuleku ja e-tellimuste puhul pole silti vaja.",
+      "Этикетка создаётся после оплаты.": "Silt luuakse pärast maksmist.",
       "Сообщение клиенту": "Sõnum kliendile",
       "Сообщение клиента — если он написал первым": "Kliendi sõnum — kui ta kirjutas esimesena",
       "Черновик помощника": "Abilise mustand",
@@ -1348,10 +1369,10 @@
       "Название": "Nimetus",
       "Подраздел": "Alajaotus",
       "у этого раздела нет подразделов": "sellel jaotusel pole alajaotusi",
-      "Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dmitri. Kõike muud sellel lehel muudate ise.",
+      "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dim. Kõike muud sellel lehel muudate ise.",
       "Нет в наличии": "Pole laos",
       "Показывать в магазине": "Näidata poes",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Kõik kataloogi tooted on poes näha. Toote päriselt eemaldamiseks kirjutage Dmitrile; müügi peatamiseks valige «Pole laos».",
+      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Kõik kataloogi tooted on poes näha. Toote päriselt eemaldamiseks kirjutage Dimile; müügi peatamiseks valige «Pole laos».",
       "Салон, €": "Salong, €",
       "Остаток": "Jääk",
       "Штрихкод": "Triipkood",
@@ -1359,7 +1380,7 @@
       "сканер ›": "skanner ›",
       "Убрать размер": "Eemalda suurus",
       "+ Размер": "+ Suurus",
-      "Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dmitri. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
+      "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui seda on 3 või vähem. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Левее": "Vasakule",
       "Правее": "Paremale",
@@ -1489,6 +1510,48 @@
       "Удалить статью": "Kustuta artikkel",
       "уход за бородой зимой": "habemehooldus talvel",
       "Написать черновик по теме": "Kirjuta teema põhjal mustand",
+      /* ai-everywhere: the whole article, photos through the assistant, the «✨» fields */
+      "Пишу по-русски…": "Kirjutan vene keeles…",
+      "Перевожу на эстонский…": "Tõlgin eesti keelde…",
+      "Перевожу на английский…": "Tõlgin inglise keelde…",
+      "Сохраняю черновик…": "Salvestan mustandi…",
+      "Статья не дописалась до конца — попробуйте ещё раз": "Artikkel jäi lõpuni kirjutamata — proovi uuesti",
+      "Помощник не подключён — нужен ключ OpenAI на сервере.": "Abiline pole ühendatud — serveris on vaja OpenAI võtit.",
+      "Подождите — статья ещё пишется": "Oota — artikkel on veel kirjutamisel",
+      "Статья готова на трёх языках — проверьте и опубликуйте": "Artikkel on kolmes keeles valmis — vaata üle ja avalda",
+      "Спросить ещё раз": "Küsi uuesti",
+      "Прикреплённые фото": "Lisatud fotod",
+      "Загружаем фото…": "Laadime fotot…",
+      "Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».":
+        "Kirjuta, kuhu see panna: „see on foto Bio Botanical Shampoo jaoks, tee peamiseks“.",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
+        "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega — muudatused panen ette kinnitamiseks. Foto saab lisada kirjaklambriga või siia lohistada.",
+      "Прикрепить фото": "Lisa foto", "Фото для помощника": "Foto abilisele",
+      "Написать статью целиком": "Kirjuta kogu artikkel",
+      "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
+        "Pealkiri, sissejuhatus, tekst jaotistega, sildid, tooted ja Google'i tekst — vene keeles, seejärel eesti ja inglise keeles. Mustand salvestub ise; sina loed ja avaldad.",
+      "Только часть": "Ainult osa", "Только план по теме": "Ainult plaan teema põhjal",
+      "✨ Написать тексты слайда": "✨ Kirjuta slaidi tekstid",
+      "✨ Написать текст полоски": "✨ Kirjuta riba tekst",
+      "✨ Написать текст страницы": "✨ Kirjuta lehe tekst",
+      "✨ Написать строку": "✨ Kirjuta rida",
+      "✨ Написать заметку": "✨ Kirjuta märkus",
+      "✨ Подобрать название": "✨ Paku nimi",
+      "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…":
+        "Saba pärast « — » ei tõlgi ennast ise: võta sõna nimekirjast — шампунь, бальзам, масло, паста…",
+      "Не удалось сохранить фото товара": "Toote fotot ei õnnestunud salvestada",
+      "Не получилось сохранить обложку": "Kaanepilti ei õnnestunud salvestada",
+      "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.": "Abilise vastust ei õnnestunud lugeda — küsi uuesti, võib ka lühemalt.",
+      "Помощник не ответил — попробуйте ещё раз через минуту.": "Abiline ei vastanud — proovi minuti pärast uuesti.",
+      "Нужна фотография — JPEG, PNG или WebP.": "Vaja on fotot — JPEG, PNG või WebP.",
+      "Больше 6 фото за раз не нужно.": "Rohkem kui 6 fotot korraga pole vaja.",
+      "Фото не найдено — прикрепите его ещё раз": "Fotot ei leitud — lisa see uuesti",
+      "Не получилось убрать фон — ставлю фото как есть": "Tausta ei õnnestunud eemaldada — panen foto nii, nagu on",
+      "Статья не найдена — проверьте адрес в «Блоге»": "Artiklit ei leitud — kontrolli aadressi «Blogis»",
+      "Обложка поставлена ✓": "Kaanepilt pandud ✓",
+      "Сначала впишите, о чём полоска — хотя бы по-русски": "Kirjuta kõigepealt, millest riba räägib — kasvõi vene keeles",
+      "Сначала впишите код": "Kirjuta kõigepealt kood",
+      "Сначала впишите название — как на упаковке": "Kirjuta kõigepealt nimi — nagu pakendil",
       "Перевести на ET и EN": "Tõlgi ET ja EN keelde",
       "Помощник пишет черновик — прочитайте и поправьте, публикуете вы.":
         "Abiline kirjutab mustandi — loe läbi ja paranda, avaldad sina.",
@@ -1515,7 +1578,7 @@
       "Google Search Console сейчас не отвечает — попробуйте позже":
         "Google Search Console ei vasta praegu — proovi hiljem",
       "Средняя позиция": "Keskmine positsioon",
-      "Написать Дмитрию": "Kirjuta Dmitrile",
+      "Написать Диму": "Kirjuta Dimile",
       "Приём оплат · Montonio": "Maksete vastuvõtt · Montonio",
       "Карты, банковские ссылки, Apple/Google Pay. Работает.":
         "Kaardid, pangalingid, Apple/Google Pay. Töötab.",
@@ -1534,8 +1597,8 @@
         "Kirjade saatmine pole seadistatud: test tuli veaga tagasi, kliendid kirju ei saa.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
         "Google näeb poodi, positsioonid on jaotises «Analüütika».",
-      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.":
-        "Domeen pole kinnitatud — Google ei näe uusi lehti. Vaja on üht DNS-koodi, seda teeb Dmitri.",
+      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дим.":
+        "Domeen pole kinnitatud — Google ei näe uusi lehti. Vaja on üht DNS-koodi, seda teeb Dim.",
       "Откуда приходят и что ищут. Всё в разделе «Аналитика».":
         "Kust tullakse ja mida otsitakse. Kõik on jaotises «Analüütika».",
       "Считаем…": "Arvutame…",
@@ -1549,8 +1612,8 @@
       "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.":
         "See brauser ei anna kaamerale ligipääsu. Luba lülitatakse sisse telefoni seadetes.",
       "Как разрешить": "Kuidas lubada",
-      "Если что-то красное и непонятно — напишите Дмитрию. Ссылка на эту страницу уже в письме.":
-        "Kui midagi on punane ja arusaamatu — kirjuta Dmitrile. Link sellele lehele on kirjas juba olemas.",
+      "Если что-то красное и непонятно — напишите Диму. Ссылка на эту страницу уже в письме.":
+        "Kui midagi on punane ja arusaamatu — kirjuta Dimile. Link sellele lehele on kirjas juba olemas.",
       "тарифы по странам · Montonio · способы оплаты": "tariifid riikide kaupa · Montonio · maksevõimalused",
       "Главная страница": "Avaleht",
       "баннер, полоска вверху, наборы и чат": "bänner, ülemine riba, komplektid ja vestlus",
@@ -1575,8 +1638,8 @@
       "Наценка, евро": "Juurdehindlus, eurodes",
       "по умолчанию тариф только поднимает цену до реальной стоимости":
         "vaikimisi tõstab tariif hinna ainult tegeliku maksumuseni",
-      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Дмитрию.":
-        "Maksevõimalused lülitab sisse makseteenuse pakkuja. Millegi eemaldamiseks või lisamiseks kirjuta Dmitrile.",
+      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
+        "Maksevõimalused lülitab sisse makseteenuse pakkuja. Millegi eemaldamiseks või lisamiseks kirjuta Dimile.",
       "Показывать наборы": "Näita komplekte",
       "если выключено — их не видно нигде в магазине": "kui välja lülitatud — poes neid kusagil ei näe",
       "Скрыть наборы": "Peida komplektid",
@@ -1624,13 +1687,13 @@
          confirm cards in front of them, and «Языки» */
       "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
         "Pood töötab korraga kolmes keeles — vene, eesti ja inglise keeles. Ostja valib keele ise, lipukesega poe päises, ja pood jätab selle meelde.",
-      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.":
-        "Liides, tootenimede venekeelsed lõpud ja abilise kirjutatud kirjeldused tõlgitakse automaatselt. Kui kuskil on vaja sõnastust parandada — kirjutage Dmitrile.",
+      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.":
+        "Liides, tootenimede venekeelsed lõpud ja abilise kirjutatud kirjeldused tõlgitakse automaatselt. Kui kuskil on vaja sõnastust parandada — kirjutage Dimile.",
       "Ссылки на магазин": "Poe lingid",
       "Язык самой админки переключается внизу меню — на магазин это не влияет.": "Paneeli enda keelt vahetatakse menüü all — poodi see ei mõjuta.",
       "Скрыть слайд": "Peida slaid", "Показать слайд": "Näita slaidi",
       "Запретить снижать цены": "Keela hindade alandamine", "Разрешить снижать цены": "Luba hindade alandamine",
-      "три фото стопкой": "kolm fotot virnas", "Объёмы заводит Дмитрий": "Mahud lisab Dmitri",
+      "три фото стопкой": "kolm fotot virnas", "Объёмы заводит Дим": "Mahud lisab Dim",
       "ваш товар": "teie toode",
       "Заказов пока нет — первый появится здесь сразу после оплаты.": "Tellimusi veel pole — esimene ilmub siia kohe pärast maksmist.",
       "Сервер заказов не отвечает — попробуйте ещё раз.": "Tellimuste server ei vasta — proovige uuesti.",
@@ -2377,8 +2440,8 @@
       "Google (поиск)": "Google (search)",
       "Напрямую / закладки": "Direct / bookmarks",
       "Рассылка": "Newsletter",
-      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
-        "In the live version Google Search Console and visitor analytics plug in here — Dmitri sets it all up, you do not have to do anything.",
+      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дим, вам ничего делать не нужно.":
+        "In the live version Google Search Console and visitor analytics plug in here — Dim sets it all up, you do not have to do anything.",
       // i18n pass 2 — admin: e-mails and connections
       "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.":
         "The e-mails the shop sends by itself. The buttons work: the setting is saved (demo) and lands in the log. Each letter's subject, intro and closing line can be changed below.",
@@ -2391,8 +2454,8 @@
       "напоминание через 24 часа, если заказ не завершён": "a reminder after 24 hours if the order was not finished",
       "личный промокод за 3 дня до даты": "a personal promo code 3 days before the date",
       "Открыть превью всех писем →": "Open the preview of every e-mail →",
-      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.":
-        "What is connected to the shop. Green works on its own; grey arrives in the next steps — Dmitri sets it all up.",
+      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дим.":
+        "What is connected to the shop. Green works on its own; grey arrives in the next steps — Dim sets it all up.",
       "Приём оплат": "Taking payments",
       "банковские ссылки, карты, Apple/Google Pay": "bank links, cards, Apple/Google Pay",
       "после выбора провайдера": "once a provider is chosen",
@@ -2901,6 +2964,27 @@
       "Только для вас": "Only for you",
       "Этикетка PDF ↗": "Label PDF ↗",
       "Отследить ↗": "Track ↗",
+      /* order flow: the four steps, the label box, the hints under the buttons */
+      "Этикетка готова": "Label ready", "Доставлены": "Delivered",
+      "Создать этикетку": "Create the label", "Создаём…": "Creating…",
+      "Выдан клиенту": "Handed to the customer", "Выдан": "Handed over",
+      "Этикетка": "Label", "готова": "ready", "без этикетки": "no label", "Шаги заказа": "Order steps",
+      "Этикетка отложена": "Label set aside",
+      "Отправление у Montonio остаётся — отменить его нельзя. Шаг «Этикетка» возвращён; чтобы снова пользоваться этой этикеткой, верните её.":
+        "The shipment stays with Montonio — it cannot be cancelled. The «Label» step is back; to use this label again, bring it back.",
+      "Вернуть этикетку": "Bring the label back", "Скопировать": "Copy", "Скопировать трек-номер": "Copy the tracking number",
+      "Трек-номер появится, когда перевозчик примет посылку.": "The tracking number appears once the carrier accepts the parcel.",
+      "Открыть PDF (A4) ↗": "Open PDF (A4) ↗", "A6 для термопринтера ↗": "A6 for a thermal printer ↗", "Чек ↗": "Receipt ↗",
+      "Заказ ещё не оплачен — отправлять нечего.": "The order is not paid yet — nothing to ship.",
+      "Клиент забирает заказ в салоне. Письмо не отправляется.": "The customer collects the order at the salon. No letter is sent.",
+      "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "The label is Montonio's sticker with the tracking number. It does not change the order's status.",
+      "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Press «Shipped» and the customer gets the “Order shipped” letter with the tracking number.",
+      "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Delivered» is the last step, no letter. It can be taken back from the journal.",
+      "Этикетка готова ✓": "Label ready ✓", "Этикетка снова на месте ✓": "The label is back ✓",
+      "Не удалось создать этикетку": "Could not create the label", "Не удалось вернуть шаг": "Could not take the step back",
+      "Трек-номер скопирован ✓": "Tracking number copied ✓",
+      "Для самовывоза и электронных заказов этикетка не нужна.": "Pickup and electronic orders need no label.",
+      "Этикетка создаётся после оплаты.": "The label is created after payment.",
       "Сообщение клиенту": "Message to the customer",
       "Сообщение клиента — если он написал первым": "The customer's message — if they wrote first",
       "Черновик помощника": "Assistant's draft",
@@ -2984,10 +3068,10 @@
       "Название": "Name",
       "Подраздел": "Subsection",
       "у этого раздела нет подразделов": "this section has no subsections",
-      "Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dmitri changes those. Everything else on this page is yours to edit.",
+      "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dim changes those. Everything else on this page is yours to edit.",
       "Нет в наличии": "Out of stock",
       "Показывать в магазине": "Show in the shop",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Every catalogue product is visible in the shop. To remove one for good, write to Dmitri; to simply stop selling it, choose «Out of stock».",
+      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Every catalogue product is visible in the shop. To remove one for good, write to Dim; to simply stop selling it, choose «Out of stock».",
       "Салон, €": "Salon, €",
       "Остаток": "Stock",
       "Штрихкод": "Barcode",
@@ -2995,7 +3079,7 @@
       "сканер ›": "scanner ›",
       "Убрать размер": "Remove the size",
       "+ Размер": "+ Size",
-      "Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dmitri adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
+      "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red at 3 or fewer. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Левее": "Left",
       "Правее": "Right",
@@ -3125,6 +3209,48 @@
       "Удалить статью": "Delete the article",
       "уход за бородой зимой": "beard care in winter",
       "Написать черновик по теме": "Draft one from a topic",
+      /* ai-everywhere: the whole article, photos through the assistant, the «✨» fields */
+      "Пишу по-русски…": "Writing in Russian…",
+      "Перевожу на эстонский…": "Translating into Estonian…",
+      "Перевожу на английский…": "Translating into English…",
+      "Сохраняю черновик…": "Saving the draft…",
+      "Статья не дописалась до конца — попробуйте ещё раз": "The article was cut short — try again",
+      "Помощник не подключён — нужен ключ OpenAI на сервере.": "The assistant is not connected — the server needs an OpenAI key.",
+      "Подождите — статья ещё пишется": "Hold on — the article is still being written",
+      "Статья готова на трёх языках — проверьте и опубликуйте": "The article is ready in three languages — check it and publish",
+      "Спросить ещё раз": "Ask again",
+      "Прикреплённые фото": "Attached photos",
+      "Загружаем фото…": "Uploading the photo…",
+      "Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».":
+        "Say where it goes: “this is a photo for Bio Botanical Shampoo, make it the main one”.",
+      "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
+        "I can see your catalogue, orders and stock. Ask in plain words — any change I will put up for your approval. Attach a photo with the clip or drop it here.",
+      "Прикрепить фото": "Attach a photo", "Фото для помощника": "Photo for the assistant",
+      "Написать статью целиком": "Write the whole article",
+      "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
+        "Title, excerpt, text with sections, tags, products and the Google text — in Russian, then in Estonian and English. The draft saves itself; you read and publish.",
+      "Только часть": "Only a part", "Только план по теме": "Only an outline for a topic",
+      "✨ Написать тексты слайда": "✨ Write the slide texts",
+      "✨ Написать текст полоски": "✨ Write the strip text",
+      "✨ Написать текст страницы": "✨ Write the page text",
+      "✨ Написать строку": "✨ Write the line",
+      "✨ Написать заметку": "✨ Write a note",
+      "✨ Подобрать название": "✨ Suggest a name",
+      "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…":
+        "The tail after « — » will not translate itself: pick a word from the list — шампунь, бальзам, масло, паста…",
+      "Не удалось сохранить фото товара": "Could not save the product photo",
+      "Не получилось сохранить обложку": "Could not save the cover",
+      "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.": "The assistant's answer could not be read — ask again, a shorter question is fine.",
+      "Помощник не ответил — попробуйте ещё раз через минуту.": "The assistant did not answer — try again in a minute.",
+      "Нужна фотография — JPEG, PNG или WebP.": "A photo is needed — JPEG, PNG or WebP.",
+      "Больше 6 фото за раз не нужно.": "No more than 6 photos at a time.",
+      "Фото не найдено — прикрепите его ещё раз": "Photo not found — attach it again",
+      "Не получилось убрать фон — ставлю фото как есть": "Could not remove the background — using the photo as it is",
+      "Статья не найдена — проверьте адрес в «Блоге»": "Article not found — check its address in “Blog”",
+      "Обложка поставлена ✓": "Cover set ✓",
+      "Сначала впишите, о чём полоска — хотя бы по-русски": "First write what the strip is about — in Russian at least",
+      "Сначала впишите код": "First type the code",
+      "Сначала впишите название — как на упаковке": "First type the name — as on the packaging",
       "Перевести на ET и EN": "Translate into ET and EN",
       "Помощник пишет черновик — прочитайте и поправьте, публикуете вы.":
         "The assistant writes a draft — read it, fix it, and you publish it.",
@@ -3151,7 +3277,7 @@
       "Google Search Console сейчас не отвечает — попробуйте позже":
         "Google Search Console is not answering right now — try later",
       "Средняя позиция": "Average position",
-      "Написать Дмитрию": "Write to Dmitri",
+      "Написать Диму": "Write to Dim",
       "Приём оплат · Montonio": "Payments · Montonio",
       "Карты, банковские ссылки, Apple/Google Pay. Работает.":
         "Cards, bank links, Apple/Google Pay. Working.",
@@ -3170,8 +3296,8 @@
         "Sending letters is not set up: the test came back with an error and customers get nothing.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
         "Google can see the shop; the positions are under “Analytics”.",
-      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.":
-        "The domain is not verified — Google cannot see new pages. One DNS record is needed; Dmitri does that.",
+      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дим.":
+        "The domain is not verified — Google cannot see new pages. One DNS record is needed; Dim does that.",
       "Откуда приходят и что ищут. Всё в разделе «Аналитика».":
         "Where visitors come from and what they search for. All under “Analytics”.",
       "Считаем…": "Counting…",
@@ -3185,8 +3311,8 @@
       "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.":
         "This browser gives no camera access. The permission is switched on in the phone settings.",
       "Как разрешить": "How to allow it",
-      "Если что-то красное и непонятно — напишите Дмитрию. Ссылка на эту страницу уже в письме.":
-        "If something is red and unclear, write to Dmitri. The link to this page is already in the letter.",
+      "Если что-то красное и непонятно — напишите Диму. Ссылка на эту страницу уже в письме.":
+        "If something is red and unclear, write to Dim. The link to this page is already in the letter.",
       "тарифы по странам · Montonio · способы оплаты": "tariffs by country · Montonio · payment methods",
       "Главная страница": "Home page",
       "баннер, полоска вверху, наборы и чат": "the banner, the top strip, sets and the chat",
@@ -3211,8 +3337,8 @@
       "Наценка, евро": "Markup in euros",
       "по умолчанию тариф только поднимает цену до реальной стоимости":
         "by default a tariff only raises the price up to the real cost",
-      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Дмитрию.":
-        "Payment methods are switched on by the payment provider. To remove or add one, write to Dmitri.",
+      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
+        "Payment methods are switched on by the payment provider. To remove or add one, write to Dim.",
       "Показывать наборы": "Show sets",
       "если выключено — их не видно нигде в магазине": "when off, they are nowhere in the shop",
       "Скрыть наборы": "Hide the sets",
@@ -3260,13 +3386,13 @@
          confirm cards in front of them, and «Языки» */
       "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
         "The shop runs in three languages at once — Russian, Estonian and English. The visitor picks the language with the flag in the shop's header, and the shop remembers it.",
-      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.":
-        "The interface, the Russian tails of product names and the descriptions the assistant writes are translated automatically. If a wording needs fixing somewhere, write to Dmitri.",
+      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.":
+        "The interface, the Russian tails of product names and the descriptions the assistant writes are translated automatically. If a wording needs fixing somewhere, write to Dim.",
       "Ссылки на магазин": "Shop links",
       "Язык самой админки переключается внизу меню — на магазин это не влияет.": "The panel's own language is switched at the bottom of the menu — it does not affect the shop.",
       "Скрыть слайд": "Hide the slide", "Показать слайд": "Show the slide",
       "Запретить снижать цены": "Do not lower prices", "Разрешить снижать цены": "Allow lowering prices",
-      "три фото стопкой": "three photos stacked", "Объёмы заводит Дмитрий": "Sizes are added by Dmitri",
+      "три фото стопкой": "three photos stacked", "Объёмы заводит Дим": "Sizes are added by Dim",
       "ваш товар": "your product",
       "Заказов пока нет — первый появится здесь сразу после оплаты.": "No orders yet — the first one appears here as soon as it is paid.",
       "Сервер заказов не отвечает — попробуйте ещё раз.": "The orders server is not answering — try again.",
@@ -3390,11 +3516,28 @@
     [/^(.+)\nВключим цены для салонов и отправим письмо на эту почту\.$/,
       { ET: "$1\nLülitame sisse salongihinnad ja saadame sellele aadressile kirja.",
         EN: "$1\nSalon prices go on and a letter goes to this address." }],
+    /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
+    [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
+    [/^Фото добавлено · (.+)$/, { ET: "Foto lisatud · $1", EN: "Photo added · $1" }],
+    [/^По-эстонски: (.+) · по-английски: (.+)$/, { ET: "Eesti keeles: $1 · inglise keeles: $2", EN: "In Estonian: $1 · in English: $2" }],
     /* админка, редизайн: the lines that carry a number, a sum or an order
        number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
     // the «Новые 2» chip on «Заказы» — the label and its count are one text node
     [/^Новые (\d+)$/, { ET: "Uued $1", EN: "New $1" }],
+    [/^Этикетка готова (\d+)$/, { ET: "Silt valmis $1", EN: "Label ready $1" }],
+    // the toasts behind «Доставлен» / «Выдан клиенту» on the order card
+    [/^(.+) доставлен$/, { ET: "$1 kohale toimetatud", EN: "$1 delivered" }],
+    [/^(.+) выдан клиенту$/, { ET: "$1 kliendile üle antud", EN: "$1 handed to the customer" }],
+    /* the confirm card before «Отправлен» — one pre-line block, so the whole
+       thing is one text node; with the tracking number the letter will carry,
+       or the plain fact that there is none */
+    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером (.+)\.$/,
+      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga $4.",
+        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number $4." }],
+    [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера\.$/,
+      { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» — ilma jälgimisnumbrita.",
+        EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter — without a tracking number." }],
     [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
       { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
@@ -4473,10 +4616,11 @@
     bank: 0,
     adminTab: "over",
     adminAsk: "",
+    adminAtt: [],    // photos attached to the assistant's conversation: {key, url, thumb, name, busy, err}
     adminOrder: 0,   // opened order id (0 = list)
     // ---- the redesigned admin shell (docs/design/admin-handoff-README.md) ----
     admMore: false,        // the phone «Ещё» sheet
-    admOrderFilter: "new", // «Заказы» chips: new | shipped | unpaid | salon | all
+    admOrderFilter: "new", // «Заказы» chips: new | label | shipped | delivered | salon | all
     admOrderQ: "",         // «Заказы» search: number, name, phone
     adminEdit: "",   // opened product id in goods
     goodsErr: "",    // why the goods editor refused the last «Сохранить»
@@ -4568,6 +4712,8 @@
     adminBlogQ: "",        // featured-products search inside the editor
     adminBlogBusy: false,  // a save/publish/delete request is in flight
     adminBlogErr: "",
+    adminBlogTopic: "",    // «Тема статьи» in the editor's assistant card — prefilled from the title
+    adminBlogGen: null,    // the article generator's progress: {step, msg, err} while «Написать статью целиком» runs
     adminBlogConfirmDelete: false,
     /* The editor's toolbar sheet: "" | "link" | "image" | "product". It is
        drawn into its own slot by hand rather than by render(), because a
@@ -7796,6 +7942,7 @@
       if (r.status === 200 && r.body.ok && r.body.post) {
         S.adminBlogEdit = blogDraftFromPost(r.body.post);
         S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+        S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
         S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
       } else toast("Не получилось сохранить — попробуйте ещё раз.");
       render();
@@ -7881,8 +8028,115 @@
       }).catch(function () { failed = "error"; done(); });
     });
   }
-  function saveBlogFields() {
-    var d = S.adminBlogEdit;
+  /* ---- the whole article, in three languages -------------------------------
+     «Написать статью целиком» in the editor's assistant card, and the
+     assistant's «напиши статью…» (startArticleFromAssistant) — the same
+     three calls to POST /api/admin/ai/text/: post_full in Russian, then
+     post_translate into Estonian and into English (src/lib/ai-prompts.ts).
+     Each answer is written into the draft (the source of truth for every
+     field) and drawn by the next render(), so the owner watches the article
+     fill in; S.adminBlogGen is the progress line. At the end the draft is
+     saved as a draft post, so nothing written is lost to a closed tab — the
+     owner reads, fixes and publishes. A failure stops where it is, says so
+     in plain words under the button, and keeps what was already written. */
+  var BLOGGEN_STEPS = { ru: "Пишу по-русски…", et: "Перевожу на эстонский…", en: "Перевожу на английский…", save: "Сохраняю черновик…" };
+  function blogGenText(d) {
+    var g = S.adminBlogGen;
+    if (!g || (d && g.d !== d)) return "";
+    return g.err || BLOGGEN_STEPS[g.step] || "";
+  }
+  /** «Тема статьи»: what the owner typed, else the title — so one click writes the article the title names. */
+  function blogTopicValue(d) {
+    return S.adminBlogTopic || d.title.RU || d.title.ET || d.title.EN || "";
+  }
+  function blogTags(d) {
+    return String(d.tagsText || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+  function blogGenErrText(r) {
+    if (r.status === 401) { SRV.admin = false; return "Вы вышли из админки — войдите снова."; }
+    var code = (r.body && r.body.error) || "";
+    if (code === "rate_limited") return "Слишком много запросов — попробуйте позже";
+    if (code === "truncated") return "Статья не дописалась до конца — попробуйте ещё раз";
+    if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
+    return "Не получилось — попробуйте ещё раз";
+  }
+  /** The Russian article, field by field, into the draft. */
+  function blogGenApplyFull(d, tx) {
+    d.title.RU = String(tx.title || "").slice(0, 200);
+    d.excerpt.RU = String(tx.excerpt || "").slice(0, 500);
+    d.body.RU = blogCleanHtml(String(tx.body || ""));
+    if (Array.isArray(tx.tags) && tx.tags.length) d.tagsText = tx.tags.map(String).join(", ");
+    if (Array.isArray(tx.products)) {
+      tx.products.forEach(function (id) {
+        // only a product this panel knows — the route filtered against its slice, this is the second door
+        if (d.products.indexOf(id) < 0 && d.products.length < 12 && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
+      });
+    }
+    if (tx.seo && tx.seo.title) d.seoTitle.RU = String(tx.seo.title).slice(0, 70);
+    if (tx.seo && tx.seo.description) d.seoDesc.RU = String(tx.seo.description).slice(0, 170);
+    if (d.slugAuto && d.title.RU) d.slug = blogSlugify(d.title.RU);
+  }
+  /** One target language: the Russian article translated whole, tags kept as they are. */
+  function blogGenTranslate(d, L) {
+    var keep = productsById(d.products).map(function (p) { return p.brand + " " + p.name; });
+    return apiSend("/api/admin/ai/text/", "POST", {
+      task: "post_translate", lang: L,
+      input: {
+        sourceLang: "RU", title: d.title.RU, excerpt: d.excerpt.RU, body: d.body.RU,
+        tags: blogTags(d), seoTitle: d.seoTitle.RU, seoDescription: d.seoDesc.RU, keepNames: keep
+      }
+    }).then(function (r) {
+      var tx = r.status === 200 && r.body.ok && r.body.text;
+      if (!tx || !(tx.title || tx.body)) throw new Error(blogGenErrText(r));
+      if (tx.title) d.title[L] = String(tx.title).slice(0, 200);
+      if (tx.excerpt) d.excerpt[L] = String(tx.excerpt).slice(0, 500);
+      if (tx.body) d.body[L] = blogCleanHtml(String(tx.body));
+      if (tx.seo && tx.seo.title) d.seoTitle[L] = String(tx.seo.title).slice(0, 70);
+      if (tx.seo && tx.seo.description) d.seoDesc[L] = String(tx.seo.description).slice(0, 170);
+    });
+  }
+  function admBlogWriteFull(d, topic, hint) {
+    if (!d) return;
+    if (S.adminBlogGen && !S.adminBlogGen.err) { toast("Подождите — статья ещё пишется"); return; }
+    topic = String(topic || "").trim();
+    if (!topic) { toast("Введите тему статьи"); refocus("[data-admblogtopic]"); return; }
+    // a render() only while this draft is the one on screen — the owner may
+    // have walked off to another tab; the article is still finished and saved
+    var paint = function () { if (S.adminBlogEdit === d) render(); };
+    var step = function (s) { S.adminBlogGen = { d: d, step: s, err: "" }; paint(); };
+    S.adminBlogErr = "";
+    step("ru");
+    apiSend("/api/admin/ai/text/", "POST", {
+      task: "post_full", lang: "RU",
+      input: {
+        topic: topic, hint: hint || "",
+        products: productsById(d.products).map(function (p) { return { id: p.id, brand: p.brand, name: p.name, category: CAT_NAMES[p.cat] || p.cat }; })
+      }
+    }).then(function (r) {
+      var tx = r.status === 200 && r.body.ok && r.body.text;
+      if (!tx || !tx.title || !tx.body) throw new Error(blogGenErrText(r));
+      blogGenApplyFull(d, tx);
+      step("et");
+      return blogGenTranslate(d, "ET");
+    }).then(function () {
+      step("en");
+      return blogGenTranslate(d, "EN");
+    }).then(function () {
+      step("save");
+      return saveBlogFields(d).catch(function () { throw new Error(BLOG_SAVE_ERR); });
+    }).then(function () {
+      S.adminBlogGen = null;
+      toast("Статья готова на трёх языках — проверьте и опубликуйте");
+      paint();
+    }).catch(function (e) {
+      var msg = (e && e.message) || "Не получилось — попробуйте ещё раз";
+      S.adminBlogGen = { d: d, step: "error", err: msg };
+      toast(msg);
+      paint();
+    });
+  }
+  function saveBlogFields(draft) {
+    var d = draft || S.adminBlogEdit;
     if (!d) return Promise.reject(new Error("no_draft"));
     var body = blogFieldsPayload(d);
     var req = d.id
@@ -8118,6 +8372,7 @@
     "new": ["принят", "chip--low"],
     paid: ["оплачен", "chip--ok"],
     shipped: ["отправлен", "chip--ok"],
+    delivered: ["доставлен", "chip--ok"],
     failed: ["не оплачен", "chip--out"],
     cancelled: ["отменён", "chip--out"],
     refunded: ["возврат", "chip--low"]
@@ -9556,22 +9811,39 @@
   function admOrderVM(o) {
     var srv = o.srv || null;
     var status = srv ? srv.status
-      : (o.state[0] === "sent" || o.state[0] === "done" ? "shipped" : "paid");
+      : (o.state[0] === "done" ? "delivered" : o.state[0] === "sent" ? "shipped" : "paid");
     var mont = srv && srv.shipping && srv.shipping.montonio;
     var pos = !!(srv && srv.channel === "pos");
+    var method = srv && srv.shipping ? String(srv.shipping.method || "").toLowerCase() : "";
+    /* The Montonio record stays on the order for good (a registered parcel
+       cannot be cancelled there); `dismissed` is the journal's undo of the
+       label step — the sticker exists, the step is shown as not done. */
+    var hasShipment = !!(mont && mont.shipmentId);
+    var labeled = hasShipment && !mont.dismissed;
     return {
       id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
       items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
       paid: status === "paid" && !pos,
       unpaid: status === "new" || status === "failed",
       shipped: status === "shipped",
-      labeled: !!(mont && mont.shipmentId),
-      tracking: (mont && mont.trackingCode) || ""
+      delivered: status === "delivered",
+      /* A pickup order has no parcel to label and no «Отправлен» either — the
+         customer takes it from the salon counter, so its one step after
+         payment is «Выдан». An all-gift-card order has nothing to hand over. */
+      pickup: method === "pickup",
+      digital: method === "digital",
+      hasShipment: hasShipment,
+      labeled: labeled,
+      shipment: labeled ? mont : null,
+      tracking: (labeled && mont.trackingCode) || ""
     };
   }
-  /** How many paid orders are waiting to go out. Real whenever there is a
-      server to ask: the demo list is an example of what the screen looks like
-      once orders arrive, never a number the owner could act on. */
+  /** How many paid orders are waiting to go out — label or no label: a
+      sticker is not a hand-over, the parcel is on the shelf until «Отправлен»
+      (same rule as the overview's ordersToShip, src/lib/analytics.ts). Real
+      whenever there is a server to ask: the demo list is an example of what
+      the screen looks like once orders arrive, never a number the owner could
+      act on. */
   function admWaitingCount() {
     if (SRV.admin === true) {
       /* The loaded list is the truth the rows are drawn from; the overview's
@@ -9589,11 +9861,23 @@
     return (SRV.admin === true ? (SRV.orders || []) : admOrders())
       .map(admOrderVM).filter(function (v) { return v.paid; });
   }
+  /** The waiting orders split the way the chips split them: no label yet /
+      label ready. Their sum is admWaitingCount(). */
+  function admWaitingSplit() {
+    var out = { fresh: 0, labeled: 0 };
+    admLiveToShip().forEach(function (v) { if (v.labeled) out.labeled++; else out.fresh++; });
+    return out;
+  }
   function admOrderBadge(v, big) {
     var c = "adm-badge" + (big ? " adm-badge--big" : " ");
     if (v.pos) return '<span class="' + c + ' adm-badge--tint">Салон</span>';
+    if (v.delivered) return '<span class="' + c + ' adm-badge--ok">Доставлен</span>';
     if (v.shipped) return '<span class="' + c + ' adm-badge--ok">Отправлен</span>';
-    if (v.status === "paid") return '<span class="' + c + ' adm-badge--ink">Оплачен</span>';
+    if (v.status === "paid") {
+      return v.labeled
+        ? '<span class="' + c + ' adm-badge--ink">Этикетка готова</span>'
+        : '<span class="' + c + ' adm-badge--ink">Оплачен</span>';
+    }
     if (v.status === "cancelled") return '<span class="' + c + ' adm-badge--quiet">Отменён</span>';
     if (v.status === "refunded") return '<span class="' + c + ' adm-badge--quiet">Возврат</span>';
     return '<span class="' + c + '">Ждёт оплаты</span>';
@@ -9721,28 +10005,34 @@
 
   /* ---------- Заказы ------------------------------------------------------ */
 
+  /* The chips follow the fulfilment steps: a paid order is «Новые» until its
+     label exists, «Этикетка готова» until it leaves, then «Отправлены» and
+     «Доставлены». Unpaid orders (new / failed) live under «Все» with their
+     «Ждёт оплаты» badge — nothing about them is a step of the owner's. */
   var ADM_ORDER_FILTERS = [
-    ["new", "Новые"], ["shipped", "Отправлены"], ["unpaid", "Ждут оплаты"],
-    ["salon", "Салон"], ["all", "Все"]
+    ["new", "Новые"], ["label", "Этикетка готова"], ["shipped", "Отправлены"],
+    ["delivered", "Доставлены"], ["salon", "Салон"], ["all", "Все"]
   ];
   function admOrderMatches(v, f) {
     if (f === "all") return true;
-    if (f === "new") return v.paid;
+    if (f === "new") return v.paid && !v.labeled;
+    if (f === "label") return v.paid && v.labeled;
     if (f === "shipped") return v.shipped;
-    if (f === "unpaid") return v.unpaid;
+    if (f === "delivered") return v.delivered;
     if (f === "salon") return v.pos;
     return true;
   }
   function admOrdersHTML() {
     if (SRV.admin === true) loadSrvOrders(false);
     var f = S.admOrderFilter || "new";
-    var waiting = admWaitingCount();
+    var split = admWaitingSplit();
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
+          var n = x[0] === "new" ? split.fresh : x[0] === "label" ? split.labeled : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
-            x[1] + (x[0] === "new" && waiting ? " " + waiting : "") + "</button>";
+            x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
         '<input class="adm-input adm-input--row" data-admorderq value="' + esc(S.admOrderQ || "") +
           '" placeholder="Номер, имя, телефон" aria-label="Поиск по заказам" style="flex:1;min-width:180px">' +
@@ -9754,12 +10044,15 @@
       '<div class="adm-list adm-list--flat" id="orderlist">' + admOrderRows() + "</div>" +
       "</div>";
   }
-  /** The rows alone, so the search box can patch them in place. */
+  /** The rows alone, so the search box can patch them in place. A typed
+      search looks through every order whatever chip is on — the owner typing
+      a number from a customer's letter should not have to guess which step
+      that order is at. */
   function admOrderRows() {
     var f = S.admOrderFilter || "new";
     var q = (S.admOrderQ || "").toLowerCase().trim();
     var list = admOrders().map(admOrderVM)
-      .filter(function (v) { return admOrderMatches(v, f); })
+      .filter(function (v) { return q ? true : admOrderMatches(v, f); })
       .filter(function (v) {
         if (!q) return true;
         var phone = (v.srv && v.srv.phone) || "";
@@ -9772,12 +10065,34 @@
     return list.map(admOrderRowHTML).join("") +
       (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
   }
+  /** The one step an order is at, as a button — the same primary action the
+      card leads with, so the row can do it without opening the card. */
+  function admOrderStepBtn(v, row) {
+    var cls = "adm-btn" + (row ? " adm-btn--row" : "");
+    var busy = SRV.shipBusy ? " disabled" : "";
+    if (v.paid && v.pickup) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Выдан клиенту</button>';
+    if (v.paid && !v.labeled && !v.digital) {
+      return '<button class="' + cls + '" data-admlabel="' + esc(v.id) + '"' + busy + ">" +
+        (SRV.shipBusy ? "Создаём…" : "Создать этикетку") + "</button>";
+    }
+    if (v.paid) return '<button class="' + cls + '" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    if (v.shipped) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Доставлен</button>';
+    return "";
+  }
+  /** The printable receipt of a salon sale — the POS screen's own link,
+      repeated on the order so it can be found again a week later. */
+  function admReceiptLink(v, row) {
+    return '<a class="adm-btn adm-btn--ghost' + (row ? " adm-btn--row" : "") + '" href="/api/admin/pos-orders/' +
+      encodeURIComponent(v.id) + '/receipt/" target="_blank" rel="noopener">Чек ↗</a>';
+  }
   function admOrderRowHTML(v) {
     var acts = "";
-    if (v.paid) acts =
-      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admlabel="' + esc(v.id) + '"' +
-        (SRV.shipBusy ? " disabled" : "") + ">" + (v.labeled ? "Наклейка ✓" : "Наклейка") + "</button>" +
-      '<button class="adm-btn adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    if (v.pos) acts = admReceiptLink(v, true);
+    else if (v.paid && !v.labeled && !v.pickup && !v.digital) acts =
+      // no label yet: the label leads, «Отправлен» stays a quiet second (a courier collecting, a hand-over)
+      admOrderStepBtn(v, true) +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    else if (v.paid || v.shipped) acts = admOrderStepBtn(v, true);
     else if (v.unpaid) acts =
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
     return '<div class="adm-row adm-row--stack">' +
@@ -9811,10 +10126,18 @@
     }
     return null;
   }
-  /** What the confirm card says before the shop or the money moves. */
+  /** What the confirm card says before the shop or the money moves. The
+      letter is the reason «Отправлен» asks first, so the card names it — with
+      the tracking number it will carry, or the fact that there is none. */
   function admShipConfirmText(v) {
+    // two straight chains, not one with a branch in it: the i18n check joins
+    // the literals of a chain into the text node the browser will show
+    if (v.tracking) {
+      return v.number + " · " + v.who + "\n" + v.ship +
+        "\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером " + v.tracking + ".";
+    }
     return v.number + " · " + v.who + "\n" + v.ship +
-      "\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
+      "\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера.";
   }
   function admCancelConfirmText(v) {
     return v.number + " · " + v.who + "\nДеньги вернутся клиенту, письмо уйдёт автоматически.";
@@ -9850,30 +10173,115 @@
     }
     return media(p, gi, "");
   }
+  /* ---- the fulfilment strip ------------------------------------------------
+     Four steps for a parcel — Оплачен · Этикетка · Отправлен · Доставлен —
+     and two for a pickup order, whose only step after payment is the hand-over
+     at the counter. Each step has one of four looks: done (ink), now (tint,
+     bold — the one the primary button below does), todo (paper), or skipped
+     (an order that left without a Montonio label — the step was never done and
+     never will be, and drawing it as done would be a lie about the sticker). */
+  function admOrderSteps(v) {
+    var paidish = v.paid || v.shipped || v.delivered;
+    var steps;
+    if (v.pickup) {
+      steps = [
+        ["Оплачен", paidish ? "done" : "now", ""],
+        ["Выдан", v.delivered ? "done" : paidish ? "now" : "todo", ""]
+      ];
+    } else {
+      var left = v.shipped || v.delivered;
+      steps = [
+        ["Оплачен", paidish ? "done" : "now", ""],
+        ["Этикетка",
+          v.labeled ? "done" : left ? "skip" : v.paid ? "now" : "todo",
+          v.labeled ? "готова" : left ? "без этикетки" : ""],
+        ["Отправлен", left ? "done" : v.paid && v.labeled ? "now" : "todo", ""],
+        ["Доставлен", v.delivered ? "done" : v.shipped ? "now" : "todo", ""]
+      ];
+    }
+    return '<div class="adm-steps adm-steps--' + steps.length + '" aria-label="Шаги заказа">' + steps.map(function (s, i) {
+      return '<div class="adm-step adm-step--' + s[1] + '"><div class="adm-step__n">' + (i + 1) + "</div>" +
+        '<div class="adm-step__l">' + s[0] + "</div>" +
+        (s[2] ? '<div class="adm-step__s">' + s[2] + "</div>" : "") + "</div>";
+    }).join("") + "</div>";
+  }
+  /** The carrier's name as the owner knows it, from the code Montonio uses. */
+  var CARRIER_WORD = { omniva: "Omniva", smartpost: "SmartPosti", itella: "SmartPosti", dpd: "DPD", venipak: "Venipak", unisend: "Unisend" };
+  function carrierWord(code) {
+    var c = String(code || "").toLowerCase();
+    return CARRIER_WORD[c] || (c ? c.charAt(0).toUpperCase() + c.slice(1) : "");
+  }
+  /* ---- «Отправление»: the parcel as Montonio has it -----------------------
+     Drawn once the label exists: the carrier and the point, the tracking code
+     with a copy button (Renat pastes it into WhatsApp more often than into
+     anything else), the drop-off PIN where the carrier gave one, and the label
+     as two links — A4 for the office printer, A6 for a thermal one. A label the
+     journal's undo set aside keeps the box, in a quiet state, with the one
+     honest sentence about it: Montonio does not cancel parcels. */
+  function admShipmentBoxHTML(v) {
+    var o = v.srv;
+    var mont = o && o.shipping && o.shipping.montonio;
+    if (!mont || !mont.shipmentId) return "";
+    var base = "/api/admin/shipments/" + encodeURIComponent(v.id) + "/label/";
+    var who = carrierWord(mont.carrier || (o.shipping && o.shipping.carrier));
+    var where = o.shipping && o.shipping.pointName ? o.shipping.pointName : srvAddrLine(o.shipping);
+    if (mont.dismissed) {
+      return '<div class="adm-ship adm-ship--off">' +
+        '<div class="adm-ship__row"><span class="adm-sec__t">Отправление</span>' +
+          '<span class="adm-badge adm-badge--quiet">Этикетка отложена</span></div>' +
+        '<div class="adm-hint">Отправление у Montonio остаётся — отменить его нельзя. Шаг «Этикетка» возвращён; ' +
+          "чтобы снова пользоваться этой этикеткой, верните её.</div>" +
+        '<div class="adm-ship__links"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admlabel="' + esc(v.id) + '"' +
+          (SRV.shipBusy ? " disabled" : "") + ">Вернуть этикетку</button></div>" +
+        "</div>";
+    }
+    var code = String(mont.trackingCode || "");
+    return '<div class="adm-ship">' +
+      '<div class="adm-ship__row"><span class="adm-sec__t">Отправление</span>' +
+        '<span class="adm-hint">' + esc((who ? who + " · " : "") + (where || "")) + "</span></div>" +
+      (code
+        ? '<div class="adm-ship__row adm-ship__row--code"><span><span class="adm-hint">Трек-номер</span><br>' +
+            '<span class="adm-ship__code" data-trackingcode>' + esc(code) + "</span></span>" +
+            '<button class="adm-copy" data-admcopy="' + esc(code) + '" aria-label="Скопировать трек-номер">Скопировать</button></div>'
+        : '<div class="adm-hint">Трек-номер появится, когда перевозчик примет посылку.</div>') +
+      (mont.dropOffPin ? '<div class="adm-hint">Код сдачи посылки: ' + esc(mont.dropOffPin) + "</div>" : "") +
+      '<div class="adm-ship__links">' +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A4" target="_blank" rel="noopener" data-labelpdf="A4">Открыть PDF (A4) ↗</a>' +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A6" target="_blank" rel="noopener" data-labelpdf="A6">A6 для термопринтера ↗</a>' +
+        // http(s) only: an href is a place a "javascript:" string would run
+        (/^https?:\/\//i.test(String(mont.trackingUrl || ""))
+          ? '<a class="adm-link adm-link--muted" href="' + esc(mont.trackingUrl) + '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
+      "</div>" +
+      "</div>";
+  }
   function admOrderCardHTML() {
     var v = admCurOrder();
     if (!v) return '<div class="adm-screen"><button class="adm-link" data-admorder="">← Заказы</button>' +
       '<div class="adm-empty">Заказ не найден</div></div>';
     var o = v.srv;
-    var showSteps = !v.pos && v.status !== "cancelled";
-    var stepIdx = v.shipped ? 4 : v.labeled ? 2 : v.status === "paid" ? 1 : 0;
-    var steps = ["Оплачен", "Наклейка", "Отправлен", "Письмо клиенту"].map(function (l, i) {
-      var cls = i < stepIdx ? " adm-step--done" : i === stepIdx ? " adm-step--now" : "";
-      return '<div class="adm-step' + cls + '"><div class="adm-step__n">' + (i + 1) + "</div>" +
-        '<div class="adm-step__l">' + l + "</div></div>";
-    }).join("");
+    var closed = v.status === "cancelled" || v.status === "refunded";
+    var showSteps = !v.pos && !v.digital && !closed;
 
-    var acts = "";
-    if (showSteps && (v.paid || v.shipped)) acts +=
-      '<button class="adm-btn ' + (v.labeled ? "adm-btn--ghost" : "") + '" data-admship' +
-        (SRV.shipBusy ? " disabled" : "") + ">" +
-        (SRV.shipBusy ? "Печатаем…" : v.labeled ? "Наклейка ✓" : "Напечатать наклейку") + "</button>";
-    if (showSteps && v.paid) acts +=
-      '<button class="adm-btn ' + (v.labeled ? "" : "adm-btn--ghost") + '" data-admshipnow="' + esc(v.id) +
-        '">Отметить отправленным</button>';
-    acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
-    if (showSteps && (v.paid || v.unpaid)) acts +=
+    /* One primary per state (admOrderStepBtn), everything else quiet: the
+       label as a ghost second when the parcel is leaving without one, the
+       letter, and «Отменить заказ» at the end in its warning ink. */
+    var primary = showSteps ? admOrderStepBtn(v, false) : "";
+    var acts = primary;
+    if (v.pos) acts += admReceiptLink(v, false);
+    if (showSteps && v.paid && !v.labeled && !v.pickup) acts +=
+      '<button class="adm-btn adm-btn--ghost" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
+    if (!v.pos || (o && o.email)) acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
+    if (!v.pos && (v.paid || v.unpaid)) acts +=
       '<button class="adm-del" data-admordercancel="' + esc(v.id) + '">Отменить заказ</button>';
+
+    /* One sentence under the buttons that says what the primary one does —
+       the owner's own complaint was a button that did more than it said. */
+    var hint = "";
+    if (showSteps && v.unpaid) hint = "Заказ ещё не оплачен — отправлять нечего.";
+    else if (showSteps && v.paid && v.pickup) hint = "Клиент забирает заказ в салоне. Письмо не отправляется.";
+    else if (showSteps && v.paid && !v.labeled) hint = "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.";
+    else if (showSteps && v.paid && v.labeled) hint = "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
+    else if (showSteps && v.shipped) hint = "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.";
 
     /* Every status the panel could always set stays settable — the actions row
        above is the everyday path, this line is the rest of them. */
@@ -9892,8 +10300,10 @@
     return '<div class="adm-screen adm-screen--card">' +
       '<button class="adm-link" data-admorder="">← Заказы</button>' +
       admHead(esc(v.number) + " · " + esc(v.date), esc(v.who), admOrderBadge(v, true), true) +
-      (showSteps ? '<div class="adm-steps">' + steps + "</div>" : "") +
-      (acts ? '<div class="adm-acts">' + acts + "</div>" : "") +
+      (showSteps ? admOrderSteps(v) : "") +
+      (acts ? '<div class="adm-acts adm-ordacts">' + acts + "</div>" : "") +
+      (hint ? '<div class="adm-hint">' + hint + "</div>" : "") +
+      (showSteps ? admShipmentBoxHTML(v) : "") +
       (manual ? '<div class="adm-hint"><span>Изменить статус вручную:</span> ' + manual + "</div>" : "") +
       (S.orderReplyOpen ? admOrderMsgHTML(v) : "") +
       '<div class="adm-cols"><div>' +
@@ -9913,9 +10323,8 @@
         '<div><div class="adm-sec__t">Доставка</div><div class="adm-kv">' + esc(v.ship) + "<br>" +
           // features: an electronic order has no address — where the card
           // went is an e-mail, and that is what belongs on this line
-          "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span>" +
-          (v.tracking ? '<br><span class="adm-mono">' + esc(v.tracking) + "</span>" : "") + "</div>" +
-          admShipLinksHTML(v) + admGiftCardsHTML(o) + "</div>" +
+          "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span></div>" +
+          admGiftCardsHTML(o) + "</div>" +
         (o ? '<div><div class="adm-sec__t">Заметка</div>' +
           '<textarea class="adm-input" rows="2" data-admnote placeholder="Только для вас" style="margin-top:10px">' +
           esc(o.notes || "") + "</textarea>" +
@@ -9953,22 +10362,6 @@
     }).join("") +
       '<span class="adm-hint"><span>Действует до</span> <span>' +
       esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
-  }
-  /** Once Montonio has the parcel: the printable label and the carrier's own
-      tracking page. Both come straight off the order the server sent —
-      docs/shipping.md § «Montonio Shipping». */
-  function admShipLinksHTML(v) {
-    var sh = v.srv && v.srv.shipping && v.srv.shipping.montonio;
-    if (!sh || !sh.shipmentId) return "";
-    return '<div class="adm-acts" style="margin-top:10px">' +
-      '<a class="adm-link" href="/api/admin/shipments/' + encodeURIComponent(v.id) +
-        '/label/" target="_blank" rel="noopener">Этикетка PDF ↗</a>' +
-      // http(s) only: an href is a place a "javascript:" string would run
-      (/^https?:\/\//i.test(String(sh.trackingUrl || ""))
-        ? '<a class="adm-link adm-link--muted" href="' + esc(sh.trackingUrl) +
-          '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
-      (sh.dropOffPin ? '<span class="adm-hint">Код сдачи посылки: ' + esc(sh.dropOffPin) + "</span>" : "") +
-      "</div>";
   }
   /** «Написать клиенту» — the inline card with the assistant's draft in it. */
   function admOrderMsgHTML(v) {
@@ -10211,7 +10604,31 @@
     if (a.fallback) return adminAnswer(a.q);
     return esc(a.reply || "") +
       (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
-      (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "");
+      (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "") +
+      /* the route could not read the model's answer (or the panel could not
+         read the route's): a sentence was shown instead of the raw text, and
+         this asks the same question again — never a retype */
+      (a.retry ? '<div class="adm-acts" style="margin-top:8px"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admretry>Спросить ещё раз</button></div>' : "");
+  }
+  /* The photos attached to the conversation, as a strip of thumbnails above
+     the question box — each one uploaded the moment it was attached (see
+     admAttachFiles), so the assistant can be told its key with the next
+     question. A photo that failed to upload says so and can be removed. */
+  function admAttHTML() {
+    var list = S.adminAtt || [];
+    if (!list.length) return "";
+    return '<div class="adm-att" data-admattlist aria-label="Прикреплённые фото">' + list.map(function (a, i) {
+      return '<span class="adm-att__i' + (a.err ? " adm-att__i--err" : "") + '" title="' + esc(a.name || "") + '">' +
+        (a.thumb ? '<span class="adm-att__img" style="background-image:url(\'' + esc(a.thumb).replace(/'/g, "%27") + '\')"></span>'
+          : '<span class="adm-att__img adm-att__img--wait">' + (a.busy ? "…" : "!") + "</span>") +
+        '<button class="adm-att__x" data-admattdel="' + i + '" aria-label="Убрать фото">×</button></span>';
+    }).join("") +
+      (list.some(function (a) { return a.err; })
+        ? '<span class="adm-hint adm-hint--warn">' + esc(list.filter(function (a) { return a.err; })[0].err) + "</span>"
+        : list.some(function (a) { return a.busy; })
+          ? '<span class="adm-hint">Загружаем фото…</span>'
+          : '<span class="adm-hint">Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».</span>') +
+      "</div>";
   }
   function admAsstBodyHTML() {
     return '<div class="adm-asst__body">' +
@@ -10219,11 +10636,17 @@
         ? '<div class="adm-msg adm-msg--me">' + esc(S.adminAsk) + "</div>" +
           '<div class="adm-msg" data-aians>' + (admAI ? admAnswerHTML() : adminAnswer(S.adminAsk)) + "</div>"
         : '<div class="adm-msg">Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — ' +
-          'а изменения предложу на подтверждение.</div>') +
+          'а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.</div>') +
+      admAttHTML() +
       '<div class="adm-asst__chips">' + ADM_ASK.map(function (q) {
         return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
       }).join("") + "</div></div>" +
       '<div class="adm-asst__foot">' +
+        '<button class="adm-asst__clip" data-admattach' + (MEDIA.on === false ? " disabled" : "") +
+          ' aria-label="Прикрепить фото" title="Прикрепить фото">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+          'stroke-linecap="round" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg></button>' +
+        '<input class="adm-file" type="file" accept="image/*" multiple data-admfile aria-label="Фото для помощника">' +
         '<input class="adm-input" data-admq value="' + esc(S.adminQ || "") +
           '" placeholder="Спросите обычными словами" aria-label="Вопрос помощнику">' +
         '<button class="adm-btn" data-admsend aria-label="Спросить">→</button></div>';
@@ -10233,8 +10656,10 @@
      markup rather than two, because `[data-aians]` — where askAdminAI() writes
      the answer — has to be the only one of its kind on the page. */
   function admAsstHTML() {
+    // data-admdrop: a photo dragged onto the pane is attached (the drop
+    // listener next to the gallery's own, at the bottom of this file)
     return '<button class="adm-scrim adm-scrim--phone" data-admai aria-label="Закрыть помощника"></button>' +
-      '<div class="adm-asst" role="dialog" aria-label="Помощник">' +
+      '<div class="adm-asst" role="dialog" aria-label="Помощник" data-admdrop>' +
         '<div class="adm-asst__head"><span>Помощник</span>' +
           '<button class="adm-asst__fold" data-admai aria-expanded="true" title="Свернуть помощника" ' +
             'aria-label="Свернуть помощника"><svg class="adm-asst__chev" width="16" height="16" ' +
@@ -10684,6 +11109,7 @@
   function admBlogEditorScreen(d) {
     var L = S.adminBlogLang || "RU";
     var busy = S.adminBlogBusy;
+    var gen = S.adminBlogGen && S.adminBlogGen.d === d ? S.adminBlogGen : null, genBusy = !!(gen && !gen.err);
     blogKeepCaret();   // this render is about to replace the box being typed in
     var picked = productsById(d.products);
     var q = (S.adminBlogQ || "").trim().toLowerCase();
@@ -10771,12 +11197,23 @@
             : '<button class="adm-link adm-link--warn" data-admblogdel>Удалить статью</button>')
           : "") +
       "</div>" +
+      /* One primary action: the whole article, every field, all three
+         languages (admBlogWriteFull). The topic follows the title until the
+         owner types his own; the progress line says which language is being
+         written. The older helpers — a plan of headings, a translation of
+         what is already there — stay behind «Только часть». */
       '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
         '<label class="adm-field">Тема статьи' +
-          '<input class="adm-input" data-admblogtopic placeholder="уход за бородой зимой"></label>' +
-        '<button class="adm-btn adm-btn--ghost" data-admblogoutline>Написать черновик по теме</button>' +
-        '<button class="adm-btn adm-btn--ghost" data-admblogtranslate>Перевести на ET и EN</button>' +
-        '<div class="adm-hint">Помощник пишет черновик — прочитайте и поправьте, публикуете вы.</div></div>';
+          '<input class="adm-input" data-admblogtopic value="' + esc(blogTopicValue(d)) + '" placeholder="уход за бородой зимой"' +
+          (genBusy ? " disabled" : "") + "></label>" +
+        '<button class="adm-btn" data-admblogfull' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать статью целиком") + "</button>" +
+        '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-admblogprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(blogGenText(d)) + "</div>" +
+        '<div class="adm-hint">Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.</div>' +
+        '<details class="adm-fold"><summary class="adm-link adm-link--muted">Только часть</summary>' +
+          '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
+          '<button class="adm-link" data-admblogoutline' + (genBusy ? " disabled" : "") + ">Только план по теме</button>" +
+          '<button class="adm-link" data-admblogtranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
+        "</div></details></div>";
 
     return '<div class="adm-screen adm-screen--tight">' +
       admBackHTML("data-admblogback", "Блог") +
@@ -10942,14 +11379,14 @@
      has data, whether the assistant has a model behind it, and whether this
      browser can open a camera at all. Nothing here is a status somebody typed
      in — a green square the owner cannot trust is worse than no square. */
-  var ADM_DEV_MAIL = "dmitri@diipsolutions.eu";
+  var ADM_DEV_MAIL = "info@diipsolutions.eu";
   /** The action on a red row: a plain mailto, not a button that pretends the
       panel can fix a DNS record by itself. */
   function admDevLink() {
     // the page's address rides in the body, so «ссылка уже в письме» is true
     var href = "mailto:" + ADM_DEV_MAIL + "?subject=" + encodeURIComponent("Rempire — вопрос из админки") +
       "&body=" + encodeURIComponent("Страница: " + location.href + "\n\n");
-    return '<a class="adm-btn adm-btn--row" href="' + esc(href) + '">Написать Дмитрию</a>';
+    return '<a class="adm-btn adm-btn--row" href="' + esc(href) + '">Написать Диму</a>';
   }
   function admIntegrationRows() {
     var rows = [];
@@ -10979,7 +11416,7 @@
     rows.push({ name: "Google Search Console", ok: gscOk,
       sub: !GSC ? "Проверяем…" : GSC.ok
         ? "Google видит магазин, позиции — в разделе «Аналитика»."
-        : "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.",
+        : "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дим.",
       act: gscOk ? "" : admDevLink() });
 
     var an = ANALYTICS["7d"] && ANALYTICS["7d"].data;
@@ -11011,7 +11448,7 @@
             '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
           r.act + "</div>";
       }).join("") + "</div>" +
-      '<p class="adm-hint">Если что-то красное и непонятно — напишите Дмитрию. ' +
+      '<p class="adm-hint">Если что-то красное и непонятно — напишите Диму. ' +
         "Ссылка на эту страницу уже в письме.</p>" +
       '<div class="adm-acts">' + admDevLink() + '<span class="adm-hint adm-mono">' + ADM_DEV_MAIL + "</span></div>" +
       "</div>";
@@ -11114,7 +11551,7 @@
           '<span class="adm-badge adm-badge--ok">включено</span></div>';
       }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
-        "Чтобы что-то убрать или добавить, напишите Дмитрию.</p>" +
+        "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
       "</div>";
   }
   /* `col` is the column's own name, drawn only on a phone: the header row of
@@ -11169,7 +11606,7 @@
       '<p class="adm-lead" style="margin:0">Магазин работает сразу на трёх языках — русском, эстонском и английском. ' +
         "Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.</p>" +
       '<p class="adm-lead" style="margin:0">Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, ' +
-        "переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.</p>" +
+        "переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.</p>" +
       '<div><div class="adm-sec__t">Ссылки на магазин</div>' +
       '<div class="adm-list">' + ADM_LANG_ROWS.map(function (l) {
         var url = origin + "/shop2" + l[2] + "/";
@@ -11507,6 +11944,9 @@
       heroFieldHTML(s, "title", "Заголовок", "input", 40) +
       heroFieldHTML(s, "sub", "Подзаголовок", "textarea", 90) +
       heroFieldHTML(s, "cta", "Надпись на кнопке", "input", 24) +
+      // the four texts written by the assistant — from the title (or the
+      // link) as a hint, for the language on the pill or all three
+      admSparkHTML('data-herospark="one"', "✨ Написать тексты слайда", 'data-herospark="all"') +
       '<label class="adm-field">Куда ведёт кнопка' +
         '<select class="adm-input" data-herogo>' +
           '<optgroup label="Разделы">' + opt("cat:all", "Все товары") +
@@ -11777,14 +12217,18 @@
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
+          // «✨»: the strip and its phone-width line, from what the owner typed as the gist
+          admSparkHTML('data-contentspark="announcement"', "✨ Написать текст полоски", 'data-contentspark="announcement:all"') +
           cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300))) +
         (!show("contact") ? "" : cBlock("contact", "Страница «Контакты»",
           "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
-          cTri("contactPage", "Текст страницы", "textarea", 1200))) +
+          cTri("contactPage", "Текст страницы", "textarea", 1200) +
+          admSparkHTML('data-contentspark="contact"', "✨ Написать текст страницы", 'data-contentspark="contact:all"'))) +
         (!show("emailfooter") ? "" : cBlock("emailfooter", "Подпись в письмах",
           esc(cText(d.emailFooter)) || "нет",
           cTri("emailFooter", "Строка внизу письма", "input", 300,
-            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
+            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.") +
+          admSparkHTML('data-contentspark="footer"', "✨ Написать строку", 'data-contentspark="footer:all"'))) +
       "</div>" +
       '<div class="adm-acts" style="margin-top:16px">' +
         '<button class="adm-btn" data-contentsave>Сохранить</button>' +
@@ -12261,6 +12705,8 @@
             '<input class="adm-input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
           '<label class="adm-field" style="margin-top:10px">Заметка для себя' +
             '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
+          // «✨»: one line from the code's own conditions — what it is for, where it is given out
+          admSparkHTML("data-promospark", "✨ Написать заметку") +
         "</div></details>" +
       (S.promoFormErr ? '<div class="adm-err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
       '<div class="adm-acts"><button class="adm-btn" data-admpromosave>' +
@@ -13071,6 +13517,62 @@
       }).catch(function () { failed = "error"; done(); });
     });
   }
+  /* ---- «✨» — the short texts the assistant writes in place ------------------
+     One helper for every field that got a spark: the banner slide, the
+     announcement strip, the «Контакты» paragraph, the letter footer, a promo
+     code's note, a new product's name. POST /api/admin/ai/text/ task "copy"
+     (src/lib/ai-prompts.ts buildCopyPrompt), one call per language; the
+     button shows «…» while it works and a plain-Russian toast says when it
+     did not. `apply(L, text)` writes the answer into the draft AND into the
+     field on screen — never a render(): every one of these forms is
+     mid-typing, and a render would put the saved values back. */
+  function admSparkHTML(attr, label, allAttr) {
+    return '<div class="adm-spark">' +
+      '<button class="adm-link" ' + attr + ">" + label + "</button>" +
+      (allAttr ? '<button class="adm-link adm-link--muted" ' + allAttr + ">все три языка</button>" : "") + "</div>";
+  }
+  function admSpark(btn, langs, kind, inputFor, apply) {
+    if (!btn || btn.disabled) return;
+    var label = btn.textContent; btn.disabled = true; btn.textContent = "…";
+    var left = langs.length, okN = 0, failed = "";
+    var done = function () {
+      if (--left) return;
+      btn.disabled = false; btn.textContent = label;
+      if (okN === langs.length) toast(langs.length > 1 ? "Заполнено для трёх языков — проверьте и сохраните" : "Черновик готов — проверьте и сохраните");
+      else if (failed === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+      else if (failed === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+      else toast("Не получилось — попробуйте ещё раз");
+    };
+    langs.forEach(function (L) {
+      var input = inputFor(L);
+      input.kind = kind;
+      apiSend("/api/admin/ai/text/", "POST", { task: "copy", lang: L, input: input }).then(function (r) {
+        if (r.status === 200 && r.body.ok && r.body.text) { apply(L, r.body.text); okN++; }
+        else if (r.status === 401) { SRV.admin = false; render(); }
+        else failed = (r.body && r.body.error) || "error";
+        done();
+      }).catch(function () { failed = "error"; done(); });
+    });
+  }
+  /** A content-editor field on screen, patched to what the draft now holds. */
+  function cPatchField(path, value) {
+    var el = document.querySelector('[data-contentf="' + path + '"]');
+    if (el) el.value = value;
+  }
+  /** Under the name box of the owner's product: what the ET and EN shop will show for the tail the name has. */
+  function edNameHintText(name) {
+    var et = trName(name, "ET"), en = trName(name, "EN");
+    if (et !== name || en !== name) return "По-эстонски: " + et + " · по-английски: " + en;
+    return / — /.test(name)
+      ? "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…"
+      : "";
+  }
+  function edNameHintPaint(name) {
+    var el = document.querySelector("[data-ednamehint]");
+    if (!el) return;
+    el.textContent = edNameHintText(name);
+    translateTree(el);
+  }
   /** The photos that ship with the catalogue — what «Вернуть фото из каталога»
    *  goes back to, read from BASE so a saved override cannot hide them. */
   function baseGallery(id) {
@@ -13414,6 +13916,11 @@
           '<datalist id="edbrands">' + edBrandOptions() + "</datalist>" +
           '<label class="adm-field"><span>Название <span class="adm-req" aria-hidden="true">*</span></span>' +
             '<input class="adm-input" data-edname value="' + esc(p.name) + '" maxlength="120" placeholder="Beard Balm — бальзам для бороды"></label>' +
+          /* «✨»: the house pattern «Latin line name — русский хвост», with a
+             tail the storefront translates by itself; the line under it says
+             what the Estonian and English shop will show for it */
+          admSparkHTML("data-ednamespark", "✨ Подобрать название") +
+          '<p class="adm-hint" data-ednamehint>' + (p.name ? esc(edNameHintText(p.name)) : "") + "</p>" +
           '<div class="adm-edpair">' +
             '<label class="adm-field">Раздел<select class="adm-input" data-edcat>' +
               CATS.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + "</option>"; }).join("") +
@@ -13460,7 +13967,7 @@
                 "</select></label>"
               : '<label class="adm-field">Подраздел<input class="adm-input" value="" readonly placeholder="у этого раздела нет подразделов"></label>') +
           "</div>" +
-          '<p class="adm-hint">Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.</p>' +
+          '<p class="adm-hint">Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.</p>' +
         "</div>" +
         '<div class="adm-edcol">' +
           '<label class="adm-field">Наличие<select class="adm-input" data-edstock>' +
@@ -13473,7 +13980,7 @@
              catalogue product is in the shop — and says who can change that. */
           '<span class="adm-switch" aria-disabled="true"><span>Показывать в магазине</span>' +
             '<span class="adm-switch__t is-on" aria-hidden="true"><i></i></span></span>' +
-          '<p class="adm-hint">Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».</p>' +
+          '<p class="adm-hint">Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».</p>' +
           '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>' +
         "</div>" +
       "</div></div>";
@@ -13563,13 +14070,13 @@
           '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
         edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
           esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">') +
-        '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дмитрий" aria-label="Убрать размер">×</button>' +
+        '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дим" aria-label="Убрать размер">×</button>' +
       "</div>";
     }).join("");
     return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
       '<div class="adm-grid">' + head + rows + "</div>" +
       '<button class="adm-btn adm-btn--dash" type="button" disabled title="скоро">+ Размер</button>' +
-      '<p class="adm-hint">Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
+      '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
       '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       "</div>";
   }
@@ -15113,6 +15620,16 @@
     if (S.customAll) for (var k = 0; k < S.customAll.length; k++) if (S.customAll[k].id === id) S.customAll[k] = c;
     adoptCustom(DEMO.custom);
   }
+  /** The owner's product's photo list on the local copies — the assistant's
+      add_product_photo and its undo; the row itself is srvPush()'s PUT. */
+  function customSetGallery(id, list) {
+    var c = findCustom(id);
+    if (!c) return;
+    c.photos = (list || []).map(function (g) { return { url: g.url, thumb: g.thumb || g.url, alt: g.alt || "" }; });
+    c.gallery = c.photos.map(function (g) { return g.url; });
+    if (S.customAll) for (var k = 0; k < S.customAll.length; k++) if (S.customAll[k].id === id) S.customAll[k] = c;
+    adoptCustom(DEMO.custom);
+  }
   adoptCustom(DEMO.custom);
   /* media: the owner's photos, as gal() wants them — a plain list of URLs.
      p.img follows the first one, because the bundle rows and the JSON-LD read
@@ -15321,6 +15838,20 @@
           admOrdersChanged();
         }).catch(noop);
     }
+    /* «Создать этикетку» and its undo. The forward line is written AFTER the
+       server registered the parcel (`done`, see srvCreateShipment), so there
+       is nothing left to send here; the undo sets the shipment aside with
+       labelStep:false (Montonio keeps the parcel), and «Вернуть этикетку» on a
+       set-aside one goes through the POST again, which brings it back. */
+    else if (a.type === "order_label") {
+      if (a.done) return;
+      if (a.value) { srvCreateShipment(a.id); return; }
+      apiSend("/api/admin/orders/" + encodeURIComponent(a.id) + "/", "PATCH", { labelStep: false })
+        .then(function (r) {
+          if (!(r.status === 200 && r.body.ok)) toast("Не удалось вернуть шаг");
+          admOrdersChanged();
+        }).catch(noop);
+    }
     // all three languages travel every time, so an emptied pair clears too
     else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }).catch(noop);
     else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
@@ -15328,6 +15859,21 @@
     // media: the whole list travels every time — adding, reordering, choosing
     // the main photo and deleting are all one write
     else if (a.type === "set_gallery") apiSend(ov, "PUT", { id: a.id, gallery: a.list }).catch(noop);
+    // …and the owner's own product keeps its photos in its row
+    else if (a.type === "set_product_gallery") {
+      apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", { gallery: a.list || [] })
+        .then(function (r) {
+          if (r.status === 200 && r.body.ok && r.body.product) customAdopt(r.body.product);
+          else toast("Не удалось сохранить фото товара");
+        }).catch(noop);
+    }
+    // a post's cover: read the post, write it back with the cover changed
+    else if (a.type === "set_post_cover") {
+      blogPatchCover(a.slug, a.url).then(function (r) {
+        if (!(r.status === 200 && r.body.ok)) toast("Не получилось сохранить обложку");
+        S.adminBlog = null;
+      }).catch(function () { toast("Не получилось сохранить обложку"); });
+    }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") apiSend(ov, "PUT", { id: a.id, description: a.value || null }).catch(noop);
     else if (a.type === "toggle_flow") apiSend(st, "PUT", { flows: DEMO.flows }).catch(noop);
@@ -15446,6 +15992,7 @@
     paid: ["paid", "оплачен", "--ok"],
     failed: ["failed", "не оплачен", "--error"],
     shipped: ["shipped", "отправлен", "--muted"],
+    delivered: ["delivered", "доставлен", "--ok"],
     cancelled: ["cancelled", "отменён", "--muted"],
     refunded: ["refunded", "возврат", "--muted"]
   };
@@ -15493,24 +16040,53 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
-  /* Book the parcel with the carrier through Montonio. The two failures worth
-     naming get their own sentence — «нет ключей» and «этого пакомата у Montonio
-     нет» need different actions from Renat; everything else is one line. */
+  /* «Создать этикетку»: book the parcel with the carrier through Montonio.
+     The status of the order does not move — that is «Отправлен», its own
+     button (docs/shipping.md § «Что видит Ренат в админке»). The failures
+     worth naming get their own sentence — «нет ключей», «этого пакомата у
+     Montonio нет» and «этому заказу этикетка не нужна» need different actions
+     from Renat; everything else is one line.
+     The server answers first and the journal line is written after: a label
+     that Montonio refused must not leave a «создана» line with an undo behind
+     it. The line's undo (order_label, value:false) sets the shipment aside
+     rather than deleting it — Montonio cannot cancel a registered parcel — and
+     the card says so in the shipment box. */
   var SHIP_ERR = {
     not_configured: "Доставка Montonio не подключена",
     point_unresolved: "Пакомат не найден у Montonio",
-    not_paid: "Отправление создаётся после оплаты."
+    not_shippable: "Для самовывоза и электронных заказов этикетка не нужна.",
+    not_paid: "Этикетка создаётся после оплаты."
   };
   function srvCreateShipment(id) {
     if (SRV.shipBusy) return;
+    var row = admOrderById(id);
     SRV.shipBusy = true; render();
     apiSend("/api/admin/shipments/", "POST", { orderId: id }).then(function (r) {
       SRV.shipBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) { toast("Отправление создано ✓"); loadSrvOrders(true); return; }
-      toast(SHIP_ERR[r.body && r.body.error] || "Не удалось создать отправление");
+      if (r.status === 200 && r.body.ok) {
+        var entry = demoApply({
+          type: "order_label", id: String(id), number: row ? row.number : String(id), value: true, done: true
+        });
+        toast(r.body.reused ? "Этикетка снова на месте ✓" : "Этикетка готова ✓", entry);
+        loadSrvOrders(true);
+        return;
+      }
+      toast(SHIP_ERR[r.body && r.body.error] || "Не удалось создать этикетку");
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
+  }
+  /** The tracking code into the clipboard — Renat pastes it into a chat
+      more often than anywhere else. Where the clipboard is not reachable
+      the toast shows the code itself, so it can still be read out. */
+  function admCopyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        toast("Трек-номер скопирован ✓");
+      }).catch(function () { toast(text); });
+      return;
+    }
+    toast(text);
   }
 
   /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() --------- */
@@ -15652,10 +16228,13 @@
         ? "Склад «" + spName + "»: " + (a.delta > 0 ? "+" : "") + a.delta + " (" + (STOCK_MOVE_WORD[a.reason] || a.reason || "ручная правка") + ")"
         : "Склад «" + spName + "»: остаток → " + a.qty;
     }
-    // «Заказы»: the one change the redesigned card makes to an order
+    // «Заказы»: a step on the card — the status it moved, or the label it made
     if (a.type === "order_status") {
       return "Заказ " + (a.number || a.id) + ": " +
         ((SRV_STATES[a.value] && SRV_STATES[a.value][1]) || a.value);
+    }
+    if (a.type === "order_label") {
+      return "Этикетка " + (a.number || a.id) + ": " + (a.value ? "создана" : "отложена — отправление у Montonio остаётся");
     }
     if (a.type === "set_seo") {
       var sv = seoOfAction(a) || {}, sru = sv.RU || {};
@@ -15683,9 +16262,21 @@
     if (a.type === "set_varimg") return "Фото по объёмам «" + (p ? p.name : a.id) + "»: " + a.map.map(function (x) { return x + 1; }).join(" / ");
     if (a.type === "set_video") return "Видео «" + (p ? p.name : a.id) + "»: " + (a.value ? a.value : "убрано");   // features
     // media
-    if (a.type === "set_gallery") {
+    if (a.type === "set_gallery" || a.type === "set_product_gallery") {
       var gl = Array.isArray(a.list) ? a.list.length : 0;
-      return "Фото «" + (p ? p.name : a.id) + "»: " + (gl ? gl + " " + pl(gl, "фотография", "фотографии", "фотографий") : "как в каталоге");
+      var gp = p || findCustom(a.id);
+      return "Фото «" + (gp ? gp.name : a.id) + "»: " + (gl ? gl + " " + pl(gl, "фотография", "фотографии", "фотографий") : "как в каталоге");
+    }
+    /* the assistant's photo actions: the confirm card names the product (or
+       the post) and what happens — the journal line is the gallery's own */
+    if (a.type === "add_product_photo") {
+      var ap = admEditProduct(a.id);
+      var apName = ap ? ap.brand + " " + ap.name : a.id;
+      return (a.main ? "Главное фото «" + apName + "»" : "Ещё одно фото «" + apName + "»") +
+        "\nФото появится на странице товара" + (a.main ? ", в каталоге, в поиске и в письмах" : "") + ". Отменить можно в журнале.";
+    }
+    if (a.type === "set_post_cover") {
+      return "Обложка статьи «" + (a.title || a.slug) + "»" + (a.prevUrl ? " — заменить" : "") + "\nОтменить можно в журнале.";
     }
     // assistant-work
     if (a.type === "set_description") return "Описание «" + (p ? p.name : a.id) + "» обновлено";
@@ -15712,6 +16303,11 @@
     if (a.type === "set_content") return "Контент: " + contentActionText(a.value);
     // blog: posts have no demo layer, so this text is all the confirm card
     // shows — there is no undo entry to read it back from later
+    // the short form — the model named a topic, the panel writes the article
+    if (a.type === "draft_post" && a.topic && !a.title) {
+      return "Статья целиком на тему «" + a.topic + "»" + (a.hint ? " · " + a.hint : "") +
+        "\nЗаголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Откроется в редакторе блога черновиком: прочитаете и опубликуете.";
+    }
     if (a.type === "draft_post") {
       var bTitle = (a.title && (a.title.RU || a.title.ET || a.title.EN)) || "—";
       return "Черновик статьи «" + bTitle + "»" + (a.tags && a.tags.length ? " · " + a.tags.join(", ") : "") +
@@ -15902,6 +16498,12 @@
     else if (a.type === "order_status") {
       entry.prev = { type: "order_status", id: a.id, number: a.number, value: a.prev, prev: a.value };
     }
+    /* the label step: its undo does not delete the parcel (Montonio cannot),
+       it sets the shipment aside — the card shows the step as not done and
+       says why; see srvPush() for the two directions */
+    else if (a.type === "order_label") {
+      entry.prev = { type: "order_label", id: a.id, number: a.number, value: !a.value };
+    }
     // both fields empty = «снова как в каталоге», so the override is removed
     // rather than stored as a pair of empty strings that would hide it
     else if (a.type === "set_seo") {
@@ -15937,6 +16539,19 @@
       entry.prev = { type: "set_gallery", id: a.id, list: (DEMO.gallery[a.id] || []).slice() };
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
+    }
+    /* the owner's own product's photos are its row's, not an override — the
+       assistant's add_product_photo writes them here (PUT in srvPush) and
+       the journal keeps the list as it was */
+    else if (a.type === "set_product_gallery") {
+      var cRow = findCustom(a.id);
+      entry.prev = { type: "set_product_gallery", id: a.id, list: cRow ? (cRow.photos || []).slice() : [] };
+      customSetGallery(a.id, a.list || []);
+    }
+    // a blog post's cover, from a photo attached in the chat — the post has
+    // no demo layer, so prevUrl (read before the write) is the whole undo
+    else if (a.type === "set_post_cover") {
+      entry.prev = { type: "set_post_cover", slug: a.slug, url: a.prevUrl || "", title: a.title };
     }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") {
@@ -16038,7 +16653,7 @@
     /* inventory + orders: srvPush() at the bottom of this function is the
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
-    else if (a.type === "stock_adjust" || a.type === "order_status") noop();
+    else if (a.type === "stock_adjust" || a.type === "order_status" || a.type === "order_label") noop();
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
@@ -16059,6 +16674,8 @@
       if (a.list && a.list.length) DEMO.gallery[a.id] = a.list.slice();
       else delete DEMO.gallery[a.id];
     }
+    else if (a.type === "set_product_gallery") { customSetGallery(a.id, a.list || []); }
+    else if (a.type === "set_post_cover") { if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = a.url || ""; }
     else if (a.type === "set_description") {   // assistant-work
       if (a.value && (a.value.RU || a.value.ET || a.value.EN)) DEMO.desc[a.id] = a.value;
       else delete DEMO.desc[a.id];
@@ -16096,6 +16713,12 @@
     return '<div class="adm-propose">' +
       '<div class="adm-propose__t">' + esc(a.title || "Предпросмотр изменения") + "</div>" +
       '<div class="adm-propose__d">' + esc(a.detail || actionText(a)) + "</div>" +
+      /* a photo going onto a product may have its background removed on the
+         way — offered only when the server said it can (MEDIA.cutout), the
+         same switch the editor's «✂» is behind */
+      (a.type === "add_product_photo" && MEDIA.cutout
+        ? '<label class="adm-propose__opt"><input type="checkbox" data-admcut> <span>Убрать фон</span></label>'
+        : "") +
       '<div class="adm-propose__acts">' +
         '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
           esc(a.ok || "Применить") + "</button>" +
@@ -16136,29 +16759,190 @@
       contactPage: c.contactPage, emailFooter: c.emailFooter
     };
   }
+  /* What the owner reads when the answer could not be read — a sentence and
+     a «Спросить ещё раз», never the raw text. The route has the same rule on
+     its side (src/lib/ai-json.ts); this is the panel's own, for a body that
+     is not even JSON or a reply that still looks like one. */
+  var AI_UNREADABLE = "Не получилось разобрать ответ помощника — спросите ещё раз, можно короче.";
+  var AI_SILENT = "Помощник не ответил — попробуйте ещё раз через минуту.";
+  function replyLooksLikeJson(s) {
+    var t = String(s || "").trim();
+    var c = t.charAt(0);
+    // \x22 is the double quote: a quote inside a regex literal trips tools/i18n-gaps.mjs's tokeniser
+    return c === "{" || c === "[" || t.indexOf("```") === 0 || /\x22(reply|action|product_ids|tab)\x22\s*:/.test(t);
+  }
+  /** The uploaded photos, as the route wants them told: key and file name. */
+  function attachmentsForAI() {
+    return (S.adminAtt || []).filter(function (a) { return a.key && !a.busy && !a.err; })
+      .map(function (a) { return { key: a.key, name: a.name || "" }; }).slice(0, 6);
+  }
+  function admPaintAnswer() {
+    var el = document.querySelector("[data-aians]");
+    if (el) { el.innerHTML = admAnswerHTML(); translateTree(el); }
+  }
   function askAdminAI(q) {
     admConvo.push({ role: "user", content: q });
     fetch("/api/assistant/", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI() })
+      body: JSON.stringify({ messages: admConvo.slice(-8), lang: S.lang, mode: "admin", hero: heroForAI(), content: contentForAI(), analytics: analyticsForAI(), attachments: attachmentsForAI() })
     })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error(String(r.status));
+        // a body that is not JSON at all (a cut answer relayed raw by a stale
+        // deployment) lands in the same place as any other unreadable reply
+        return r.json().catch(function () { throw new Error("unreadable"); });
+      })
       .then(function (j) {
-        admConvo.push({ role: "assistant", content: j.reply || "" });
+        var reply = typeof j.reply === "string" ? j.reply : "";
+        var retry = !!j.retry;
+        if (!reply || replyLooksLikeJson(reply)) { reply = AI_UNREADABLE; retry = !j.action; }
+        admConvo.push({ role: "assistant", content: reply });
         if (S.adminAsk !== q) return;
         pendingAction = j.action || null;
         // kept in S, drawn by admAnswerHTML() — here and on every later render
-        S.adminAns = { q: q, reply: j.reply || "", action: pendingAction, tab: j.tab || "" };
-        var el = document.querySelector("[data-aians]");
-        if (el) { el.innerHTML = admAnswerHTML(); translateTree(el); }
+        S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry };
+        admPaintAnswer();
       })
-      .catch(function () {
+      .catch(function (err) {
         if (S.adminAsk !== q) return;
-        S.adminAns = { q: q, fallback: true };
-        var el = document.querySelector("[data-aians]");
-        if (el) el.innerHTML = adminAnswer(q);
+        var unreadable = err && err.message === "unreadable";
+        S.adminAns = { q: q, reply: unreadable ? AI_UNREADABLE : AI_SILENT, action: null, tab: "", retry: true };
+        admPaintAnswer();
       });
+  }
+  /** «Спросить ещё раз»: the same question, asked again — the answer box goes back to «…». */
+  function askAdminAgain() {
+    var q = S.adminAsk;
+    if (!q || !admAI) return;
+    // the failed turn must not be repeated in the history the model sees
+    if (admConvo.length && admConvo[admConvo.length - 1].role === "user") admConvo.pop();
+    else if (admConvo.length >= 2 && admConvo[admConvo.length - 2].role === "user") admConvo.splice(-2, 2);
+    S.adminAns = null;
+    admPaintAnswer();
+    askAdminAI(q);
+  }
+
+  /* ---- photos through the assistant ----------------------------------------
+     A photo attached here (the clip, or a drop onto the pane) is uploaded at
+     once through the same POST /api/admin/upload/ the goods editor uses —
+     under products/inbox/… until the assistant files it — and shown as a
+     thumbnail. The next question carries its key (attachmentsForAI), and
+     the model may answer with add_product_photo / set_post_cover, which the
+     confirm card then applies through the panel's own gallery and cover
+     writes: journalled, undoable, nothing the chat does on its own. */
+  var ADM_ATT_MAX = 6;
+  function admAttachFiles(files) {
+    var list = S.adminAtt || (S.adminAtt = []);
+    var queue = [];
+    for (var i = 0; i < files.length; i++) if (files[i] && /^image\//.test(files[i].type || "")) queue.push(files[i]);
+    if (!queue.length) { toast("Нужна фотография — JPEG, PNG или WebP."); return; }
+    if (MEDIA.on === false) { toast(MEDIA_ERR.storage_not_configured); return; }
+    if (list.length + queue.length > ADM_ATT_MAX) { toast("Больше 6 фото за раз не нужно."); return; }
+    queue.forEach(function (f) {
+      var att = { key: "", url: "", thumb: "", name: String(f.name || "photo").slice(0, 80), busy: true, err: "" };
+      list.push(att);
+      uploadPhoto(f, "product", "inbox").then(function (r) {
+        att.busy = false; att.key = r.key || ""; att.url = r.url || ""; att.thumb = r.thumbUrl || r.url || "";
+        if (!att.key) att.err = "Не получилось загрузить — попробуйте ещё раз";
+        render();
+      }).catch(function (e) {
+        att.busy = false; att.err = mediaErrText(e);
+        render();
+      });
+    });
+    render();
+  }
+  function admAttByKey(key) {
+    var list = S.adminAtt || [];
+    for (var i = 0; i < list.length; i++) if (list[i].key === key) return list[i];
+    return null;
+  }
+  function admAttRemove(i) {
+    var list = S.adminAtt || [];
+    var gone = list.splice(i, 1)[0];
+    // an unfiled photo is the panel's to delete; a filed one lives in a gallery now
+    if (gone && gone.key && !gone.filed) galDrop(gone.key);
+  }
+  /** The attachment is in a gallery or on a cover now — off the strip, kept in the bucket. */
+  function admAttFiled(key) {
+    var list = S.adminAtt || [];
+    for (var i = list.length - 1; i >= 0; i--) if (list[i].key === key) { list[i].filed = true; list.splice(i, 1); }
+  }
+  /* A photo onto a product: the catalogue product's gallery override
+     (set_gallery — the editor's own write) or the owner's product's row
+     (set_product_gallery, PUT /api/admin/products/[id]); both journalled
+     with the list as it was, so «Отменить» puts it back. `cut` asks the
+     background-removal route first (src/lib/photo-cutout.ts) and files the
+     cut-out instead — the original stays in the bucket. */
+  function applyProductPhoto(a, cut) {
+    var att = admAttByKey(a.key);
+    if (!att || !att.url) { toast("Фото не найдено — прикрепите его ещё раз"); return; }
+    var p = admEditProduct(a.id);
+    if (!p || p.isNew) { toast("Товар не найден — обновите список товаров"); return; }
+    var place = function (photo) {
+      var list = galPhotos(p).slice();
+      if (list.length >= MAX_PHOTOS) list = list.slice(0, MAX_PHOTOS - 1);
+      if (a.main) list.unshift(photo); else list.push(photo);
+      var entry = demoApply(p.custom
+        ? { type: "set_product_gallery", id: p.id, list: list }
+        : { type: "set_gallery", id: p.id, list: list });
+      // the editor open on this very product shows the new list at once
+      if (GAL.id === p.id) { GAL.list = list.slice(); GAL.reset = false; }
+      admAttFiled(a.key);
+      // two whole strings, not one with a fork: each is a UI_RX rule of its own
+      toast(a.main ? "Главное фото поставлено · " + p.brand + " " + p.name : "Фото добавлено · " + p.brand + " " + p.name, entry);
+      render();
+    };
+    if (!cut) { place({ url: att.url, thumb: att.thumb || att.url, alt: "" }); return; }
+    toast("Убираем фон…");
+    apiSend("/api/admin/upload/cutout/", "POST", { url: att.url }).then(function (r) {
+      if (r.status === 200 && r.body.ok && r.body.url) place({ url: r.body.url, thumb: r.body.thumbUrl || r.body.url, alt: "" });
+      else { toast("Не получилось убрать фон — ставлю фото как есть"); place({ url: att.url, thumb: att.thumb || att.url, alt: "" }); }
+    }).catch(function () { toast("Не получилось убрать фон — ставлю фото как есть"); place({ url: att.url, thumb: att.thumb || att.url, alt: "" }); });
+  }
+  /* A photo onto a post's cover: the post is read first, so the journal can
+     keep the cover it had, then written back whole (the blog PATCH writes
+     every field it is given — see blogPatchCover). */
+  function applyPostCover(a) {
+    var att = admAttByKey(a.key);
+    if (!att || !att.url) { toast("Фото не найдено — прикрепите его ещё раз"); return; }
+    apiJson("/api/admin/blog/?slug=" + encodeURIComponent(a.slug)).then(function (r) {
+      if (!(r.status === 200 && r.body.ok && r.body.post)) { toast("Статья не найдена — проверьте адрес в «Блоге»"); return; }
+      var post = r.body.post;
+      var entry = demoApply({ type: "set_post_cover", slug: a.slug, url: att.url, prevUrl: post.coverUrl || "", title: post.title && (post.title.RU || post.title.ET || post.title.EN) });
+      admAttFiled(a.key);
+      if (S.adminBlogEdit && S.adminBlogEdit.slug === a.slug) S.adminBlogEdit.coverUrl = att.url;
+      toast("Обложка поставлена ✓", entry);
+      render();
+    }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); });
+  }
+  /** The post read whole and written back with the one field changed — a PATCH here replaces every field it carries. */
+  function blogPatchCover(slug, url) {
+    return apiJson("/api/admin/blog/?slug=" + encodeURIComponent(slug)).then(function (r) {
+      if (!(r.status === 200 && r.body.ok && r.body.post)) throw new Error("not_found");
+      var p = r.body.post;
+      return apiSend("/api/admin/blog/", "PATCH", {
+        id: p.id, title: p.title, excerpt: p.excerpt, body: p.body, coverUrl: url || null, coverAlt: p.coverAlt,
+        tags: p.tags, products: p.products, seoTitle: p.seoTitle, seoDesc: p.seoDesc, author: p.author
+      });
+    });
+  }
+  /* The assistant's «напиши статью…»: the model only named the topic; the
+     article is written here, by the same generator the blog editor's
+     «Написать статью целиком» runs, and opens in that editor as it is
+     written — the owner watches it fill in, reads it and publishes. */
+  function startArticleFromAssistant(a) {
+    var topic = String(a.topic || "").trim();
+    if (!topic) return;
+    S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
+    S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
+    S.adminBlogConfirmDelete = false; S.adminBlogErr = ""; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;
+    S.adminBlogTopic = topic;
+    S.admMore = false;
+    window.scrollTo({ top: 0 });
+    render();
+    admBlogWriteFull(S.adminBlogEdit, topic, a.hint || "");
   }
   function adminAnswer(q) {
     var low = lowStock();
@@ -17521,7 +18305,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -17756,13 +18540,25 @@
     }
     if (d.admlogout !== undefined) { admLogout(); return; }
     if (d.admstatus) { srvOrderPatch(S.adminOrder, { status: d.admstatus }); return; }
-    if (d.admship !== undefined) { srvCreateShipment(S.adminOrder); return; }
-    /* ---- «Заказы»: the three things the redesigned rows and card do -------
-       «Наклейка» books the parcel with the carrier (Montonio), «Отправлен»
-       goes through the confirm card because it moves the money's status and
-       sends the customer a letter, «Написать» opens the order on its message
-       card. Everything reversible lands in the journal with an undo. */
+    /* ---- «Заказы»: the steps the rows and the card do ----------------------
+       «Создать этикетку» books the parcel with the carrier (Montonio) and
+       changes nothing else; «Отправлен» goes through the confirm card because
+       it moves the status and sends the customer a letter; «Доставлен» (and
+       «Выдан клиенту» for a pickup) is the last step, applied at once with an
+       undo on the toast; «Написать» opens the order on its message card.
+       Every step lands in the journal with a way back. */
     if (d.admlabel) { S.adminOrder = d.admlabel; srvCreateShipment(d.admlabel); return; }
+    if (d.admdelivered) {
+      var dRow = admOrderById(d.admdelivered);
+      if (!dRow) return;
+      var dEntry = demoApply({
+        type: "order_status", id: dRow.id, number: dRow.number, value: "delivered", prev: dRow.status
+      });
+      render();
+      toast(dRow.pickup ? dRow.number + " выдан клиенту" : dRow.number + " доставлен", dEntry);
+      return;
+    }
+    if (d.admcopy) { admCopyText(d.admcopy); return; }
     if (d.admwrite) {
       S.adminOrder = d.admwrite; S.adminTab = "orders"; S.orderReplyOpen = true;
       S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
@@ -18131,6 +18927,88 @@
       }).catch(function () { trBtn.disabled = false; trBtn.textContent = trLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
+    /* ---- «✨» — see admSpark(): each writes its draft and its field, no render() */
+    if (d.herospark !== undefined) {
+      var hs = heroDraft().slides[S.heroEdit];
+      if (!hs) return;
+      var hLangs = d.herospark === "all" ? ["RU", "ET", "EN"] : [S.heroLang || "RU"];
+      var goP = String(hs.go || "").indexOf("product:") === 0 ? heroProduct(String(hs.go).slice(8)) : null;
+      var imgP = heroProduct(hs.image);
+      var hintP = goP || imgP;
+      admSpark(t, hLangs, "hero", function () {
+        return {
+          hint: (hs.title && hs.title.RU) || (hs.sub && hs.sub.RU) || (hs.eyebrow && hs.eyebrow.RU) || "",
+          product: hintP ? hintP.brand + " " + hintP.name : "",
+          target: heroGoLabel(hs.go)
+        };
+      }, function (L, tx) {
+        ["eyebrow", "title", "sub", "cta"].forEach(function (f) {
+          if (!tx[f]) return;
+          if (!hs[f] || typeof hs[f] !== "object") hs[f] = {};
+          hs[f][L] = tx[f];
+          if (L === (S.heroLang || "RU")) { var hEl = document.querySelector('[data-herof="' + f + '"]'); if (hEl) hEl.value = tx[f]; }
+        });
+        paintHeroPreview();
+      });
+      return;
+    }
+    if (d.contentspark !== undefined) {
+      var csParts = d.contentspark.split(":"), csWhat = csParts[0];
+      var cLangs = csParts[1] === "all" ? ["RU", "ET", "EN"] : [S.contentLang || "RU"];
+      var cd = contentDraft(), cco = cd.company || {};
+      var companyIn = {
+        name: cco.legalName || "", address: cco.address || "", phone: cco.phone || "", email: cco.email || "",
+        hours: CONTENT_DAYS.filter(function (r) { return cd.hours[r[0]]; }).map(function (r) { return r[1] + " " + cd.hours[r[0]]; }).join(", ")
+      };
+      if (csWhat === "announcement") {
+        var annHint = cd.announcement.text[S.contentLang || "RU"] || cd.announcement.text.RU || cd.announcement.text.ET || cd.announcement.text.EN || "";
+        if (!annHint) { toast("Сначала впишите, о чём полоска — хотя бы по-русски"); refocus('[data-contentf="announcement.text.' + (S.contentLang || "RU") + '"]'); return; }
+        admSpark(t, cLangs, "announcement", function () { return { hint: annHint }; }, function (L, tx) {
+          if (tx.text) { cDraftSet("announcement.text." + L, tx.text); cPatchField("announcement.text." + L, tx.text); }
+          if (tx.short) { cDraftSet("announcement.short." + L, tx.short); cPatchField("announcement.short." + L, tx.short); }
+        });
+      } else if (csWhat === "contact") {
+        admSpark(t, cLangs, "contact_page", function (L) {
+          return { hint: cd.contactPage[L] || cd.contactPage.RU || "", company: companyIn };
+        }, function (L, tx) {
+          if (tx.text) { cDraftSet("contactPage." + L, tx.text); cPatchField("contactPage." + L, tx.text); }
+        });
+      } else {
+        admSpark(t, cLangs, "email_footer", function (L) {
+          return { hint: cd.emailFooter[L] || cd.emailFooter.RU || "", company: companyIn };
+        }, function (L, tx) {
+          if (tx.text) { cDraftSet("emailFooter." + L, tx.text); cPatchField("emailFooter." + L, tx.text); }
+        });
+      }
+      return;
+    }
+    if (d.promospark !== undefined) {
+      var pfs = S.promoForm;
+      if (!pfs) return;
+      if (!pfs.code) { toast("Сначала впишите код"); refocus('[data-promof="code"]'); return; }
+      admSpark(t, [S.lang === "ET" || S.lang === "EN" ? S.lang : "RU"], "promo_note", function () {
+        return { promo: { code: pfs.code, kind: pfs.kind, value: pfs.value, minSubtotal: pfs.minSubtotal, endsAt: pfs.endsAt, maxUses: pfs.maxUses }, hint: pfs.note || "" };
+      }, function (L, tx) {
+        if (!tx.text) return;
+        pfs.note = String(tx.text).slice(0, 200);
+        var noteEl2 = document.querySelector('[data-promof="note"]');
+        if (noteEl2) noteEl2.value = pfs.note;
+      });
+      return;
+    }
+    if (d.ednamespark !== undefined) {
+      var nbEl = document.querySelector("[data-edbrand]"), nnEl = document.querySelector("[data-edname]"), ncEl = document.querySelector("[data-edcat]");
+      var typedName = nnEl ? nnEl.value.trim() : "";
+      if (!typedName) { toast("Сначала впишите название — как на упаковке"); refocus("[data-edname]"); return; }
+      admSpark(t, ["RU"], "product_name", function () {
+        return { brand: nbEl ? nbEl.value.trim() : "", name: typedName, category: CAT_NAMES[ncEl ? ncEl.value : ""] || "" };
+      }, function (L, tx) {
+        if (!tx.name) return;
+        if (nnEl) nnEl.value = String(tx.name).slice(0, 120);
+        edNameHintPaint(String(tx.name));
+      });
+      return;
+    }
     if (d.admdescundo !== undefined) {
       if (!AI_UNDO) return;
       var setv = function (sel, v) { var e = document.querySelector(sel); if (e) e.value = v || ""; };
@@ -18331,6 +19209,16 @@
           toast(pa.value ? "Снова в продаже · " + actNm : "Снято с продажи · " + actNm, actEntry);
           render(); return;
         }
+        /* the assistant's photo actions: the checkbox on the card is read
+           before the card goes (the render below rebuilds the panel) */
+        if (pa.type === "add_product_photo") {
+          var cutBox = document.querySelector("[data-admcut]");
+          applyProductPhoto(pa, !!(cutBox && cutBox.checked)); return;
+        }
+        if (pa.type === "set_post_cover") { applyPostCover(pa); return; }
+        // the assistant named a topic: the article is written here, in the
+        // blog editor, by the same generator its own button runs
+        if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
         // blog: posts skip the demo/undo layer entirely — straight to the
         // real admin API, same as the owner's own «Сохранить»/«Опубликовать»
         if (pa.type === "draft_post" || pa.type === "publish_post") applyBlogAction(pa);
@@ -18841,6 +19729,14 @@
       if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
       return;
     }
+    if (d.admretry !== undefined) { askAdminAgain(); return; }
+    // photos through the assistant: the clip opens the picker, × removes one
+    if (d.admattach !== undefined) {
+      var attIn = document.querySelector("[data-admfile]");
+      if (attIn) attIn.click();
+      return;
+    }
+    if (d.admattdel !== undefined) { admAttRemove(Number(d.admattdel)); render(); return; }
     if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
     if (d.size !== undefined) {
       S.size = Number(d.size);
@@ -18941,6 +19837,7 @@
     if (d.admblognew !== undefined) {
       S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
       S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
+      S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
       S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
       window.scrollTo({ top: 0 }); render(); return;
     }
@@ -18978,12 +19875,21 @@
        (S.adminBlogEdit) is already the live source of truth for every field
        (see the [data-blogf] input handler above), so filling it in and
        re-rendering just shows what was written, the same as typing would. */
+    // the whole article, all three languages — see admBlogWriteFull()
+    if (d.admblogfull !== undefined) {
+      if (t.disabled || !S.adminBlogEdit) return;
+      var topicElF = document.querySelector("[data-admblogtopic]");
+      var topicF = ((topicElF && topicElF.value) || blogTopicValue(S.adminBlogEdit) || "").trim();
+      S.adminBlogTopic = topicF;
+      admBlogWriteFull(S.adminBlogEdit, topicF, "");
+      return;
+    }
     if (d.admblogoutline !== undefined) {
       if (t.disabled) return;
       var bdOut = S.adminBlogEdit;
       if (!bdOut) return;
       var topicEl = document.querySelector("[data-admblogtopic]");
-      var topic = topicEl ? topicEl.value.trim() : "";
+      var topic = ((topicEl && topicEl.value) || blogTopicValue(bdOut) || "").trim();
       if (!topic) { toast("Введите тему статьи"); refocus("[data-admblogtopic]"); return; }
       var obtn = t, olabel = t.textContent; t.disabled = true; t.textContent = "…";
       var bl = S.adminBlogLang || "RU";
@@ -19222,6 +20128,8 @@
       if (salonEl) salonEl.placeholder = String(edSalonOf(np0 === null ? 0 : np0));
     }
     else if (t.matches("[data-edproprice]")) { t.setAttribute("data-edauto", "0"); }
+    // the owner's product: the line under the name follows what is typed
+    else if (t.matches("[data-edname]")) { edNameHintPaint(t.value.trim()); }
     else if (t.matches("[data-posq]")) {
       S.posQ = t.value;
       var posList = document.getElementById("poslist");
@@ -19317,6 +20225,8 @@
        caret out of the field, so only the counters and the slug mirror are
        patched in place. The body is its own box below. */
     else if (t.matches("[data-blogbody]")) { blogSelSave(); blogSync(); }
+    // «Тема статьи» lives in S so the generator's renders keep what was typed
+    else if (t.matches("[data-admblogtopic]")) { S.adminBlogTopic = t.value; }
     else if (t.matches("[data-blogtoolurl]")) { S.adminBlogToolUrl = t.value; }
     else if (t.matches("[data-blogtoolq]")) {
       S.adminBlogToolQ = t.value;
@@ -19506,6 +20416,12 @@
       else if (where === "blog") blogCoverUpload(picked);   // blog
       else galUpload(picked, admEditProduct(where));   // product creation: a hidden custom product too
     }
+    // photos through the assistant — the clip's own picker
+    else if (t.matches("[data-admfile]")) {
+      var pickedAtt = [].slice.call(t.files || []);   // a copy — see [data-galfile] above
+      t.value = "";
+      if (pickedAtt.length) admAttachFiles(pickedAtt);
+    }
     // blog: the «Картинка» button's own picker — the article body, not the cover
     else if (t.matches("[data-blogtoolfile]")) {
       var pickedBlog = [].slice.call(t.files || []);   // a copy — see [data-galfile] above
@@ -19532,21 +20448,23 @@
   /* media: drag-and-drop onto the same zone. Desktop only in practice — a
      phone has no drag — and it never swallows a drop outside the panel. */
   document.addEventListener("dragover", function (e) {
-    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop],[data-admdrop]");
     if (!z) return;
     e.preventDefault();
     z.classList.add("is-over");
   });
   document.addEventListener("dragleave", function (e) {
-    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop],[data-admdrop]");
     if (z) z.classList.remove("is-over");
   });
   document.addEventListener("drop", function (e) {
-    var z = e.target && e.target.closest && e.target.closest("[data-galdrop]");
+    var z = e.target && e.target.closest && e.target.closest("[data-galdrop],[data-admdrop]");
     if (!z) return;
     e.preventDefault();
     z.classList.remove("is-over");
     var files = e.dataTransfer && e.dataTransfer.files;
+    // a photo dropped onto the assistant's pane is attached to the conversation
+    if (z.hasAttribute("data-admdrop")) { if (files && files.length) admAttachFiles(files); return; }
     if (!files || !files.length || UP.busy) return;
     var where = z.dataset.galdrop;
     if (where === "hero") heroUpload(files);

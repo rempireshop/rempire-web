@@ -1,5 +1,5 @@
 /* bundles.config.mjs — the curated sets («Наборы»).
-   THIS is the file Renat (or Dmitri on his word) edits. Nothing else about a
+   THIS is the file Renat (or Dim on his word) edits. Nothing else about a
    set is written by hand: prices, photos and availability are computed from
    the catalogue by tools/build-bundles.mjs.
 

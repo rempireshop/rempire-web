@@ -197,6 +197,128 @@ test.describe("admin shell — the assistant", () => {
   });
 });
 
+/* The assistant's two new promises (docs/assistant-work.md): what the owner
+   reads is always a sentence — never the raw JSON of a cut answer — and a
+   photo attached to the conversation is filed where he says. Both routes
+   are stubbed at the network edge: the suite has no OpenAI key and no
+   bucket, and what is under test is the panel — how it reads a bad answer,
+   what it uploads, what it sends, what the confirm card applies. */
+test.describe("admin shell — the assistant never shows JSON, and files a photo", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(128) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "one viewport is enough — the panel's logic is viewport-independent");
+  });
+
+  /** A 1×1 PNG — the upload route is stubbed, so only the picker's contract matters. */
+  const PNG = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+    "base64",
+  );
+  const PHOTO_URL = "/shop/img/system-4-bio-botanical-shampoo-0.webp?v=5";
+  const KEY = "products/inbox/1-e2e.webp";
+
+  test("a cut or JSON-looking answer is a sentence with «Спросить ещё раз», never the raw text", async ({ page }) => {
+    let n = 0;
+    await page.route("**/api/assistant/**", async (route) => {
+      if (route.request().method() === "GET") {
+        return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+      }
+      n++;
+      // 1: the body itself is a JSON document cut mid-way — what a stale deployment relayed raw
+      if (n === 1) return route.fulfill({ status: 200, contentType: "application/json", body: '{"reply":"Написал черновик статьи об уходе за бородой","action":{"type":"draft_post","title":{"RU":"Как ух' });
+      // 2: valid JSON whose reply is itself JSON text
+      if (n === 2) return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ reply: '{"reply":"вложенный","action":{}}', product_ids: [], tab: "" }) });
+      // 3: a proper answer
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ reply: "Всё в порядке — заказов на отправку нет.", product_ids: [], tab: "orders" }) });
+    });
+
+    await loginAsAdmin(page);
+    await page.locator(".adm-fab").click();
+    await page.locator("[data-admq]").fill("у меня новый пост в блоге, напиши мне текст");
+    await page.locator("[data-admsend]").click();
+    const answer = page.locator("[data-aians]");
+    await expect(answer).toContainText("спросите ещё раз");
+    expect((await answer.textContent()) || "", "the panel printed the raw JSON").not.toMatch(/[{}]/);
+    const retry = answer.locator("[data-admretry]");
+    await expect(retry).toBeVisible();
+
+    await retry.click();
+    await expect(answer).toContainText("спросите ещё раз");
+    expect((await answer.textContent()) || "", "a JSON-looking reply reached the screen").not.toMatch(/[{}]/);
+    await expect(answer.locator("[data-admretry]")).toBeVisible();
+
+    await answer.locator("[data-admretry]").click();
+    await expect(answer).toContainText("Всё в порядке — заказов на отправку нет.");
+    await expect(answer.locator("[data-admretry]")).toHaveCount(0);
+    expect(n).toBe(3);
+  });
+
+  test("an attached photo is uploaded, told to the assistant, and its confirm card makes it the product's main photo", async ({ page }) => {
+    test.setTimeout(90_000);
+    const uploads: string[] = [];
+    await page.route("**/api/admin/upload/**", async (route) => {
+      const req = route.request();
+      if (req.method() === "GET") {
+        return route.fulfill({ status: 200, contentType: "application/json",
+          body: JSON.stringify({ ok: true, configured: true, cutout: false, maxBytes: 12 * 1024 * 1024, maxVideoBytes: 60 * 1024 * 1024 }) });
+      }
+      if (req.method() === "DELETE") return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+      uploads.push(req.headers()["content-type"] || "");
+      await route.fulfill({ status: 200, contentType: "application/json",
+        body: JSON.stringify({ ok: true, key: KEY, url: PHOTO_URL, thumbUrl: PHOTO_URL, width: 1, height: 1, bytes: 10, alt: "" }) });
+    });
+    const asked: Array<{ attachments?: Array<{ key: string; name: string }>; messages?: Array<{ content: string }> }> = [];
+    await page.route("**/api/assistant/**", async (route) => {
+      if (route.request().method() === "GET") {
+        return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+      }
+      const body = route.request().postDataJSON() as (typeof asked)[number];
+      asked.push(body);
+      const att = body.attachments && body.attachments[0];
+      await route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify(att
+          ? { reply: "Ставлю это фото главным у Kevin.Murphy Un.Tangled Spray — подтвердите; отменить можно в журнале.", product_ids: [], tab: "goods",
+              action: { type: "add_product_photo", id: PRODUCT_2.id, key: att.key, main: true } }
+          : { reply: "Прикрепите фото скрепкой рядом с вопросом.", product_ids: [], tab: "goods" }),
+      });
+    });
+
+    await loginAsAdmin(page);
+    try {
+      await page.locator(".adm-fab").click();
+      await page.locator("[data-admfile]").setInputFiles({ name: "e2e.png", mimeType: "image/png", buffer: PNG });
+      const strip = page.locator("[data-admattlist]");
+      await expect(strip.locator(".adm-att__i")).toHaveCount(1);
+      await expect.poll(() => uploads.length, "the photo was not uploaded on attach").toBe(1);
+      expect(uploads[0]).toContain("multipart/form-data");
+      await expect(strip.locator(".adm-att__img")).toHaveAttribute("style", new RegExp(PHOTO_URL.replace(/[.?]/g, "\\$&")));
+
+      await page.locator("[data-admq]").fill("вот фото для Un.Tangled Spray, сделай главным");
+      await page.locator("[data-admsend]").click();
+      const answer = page.locator("[data-aians]");
+      await expect(answer).toContainText("Ставлю это фото главным");
+      expect(asked[0].attachments, "the assistant was not told the uploaded key").toEqual([{ key: KEY, name: "e2e.png" }]);
+
+      const card = answer.locator(".adm-propose");
+      await expect(card).toContainText("Главное фото");
+      await expect(card).toContainText("Un.Tangled Spray");
+      await card.locator("[data-admapply]").click();
+      await expect(page.getByRole("status").first()).toContainText("Главное фото поставлено");
+      // the photo left the strip — it lives in the product's gallery now
+      await expect(strip).toHaveCount(0);
+      await expect.poll(async () => {
+        const body = await (await page.request.get("/api/overrides/")).json();
+        const g = ((body.overrides || {})[PRODUCT_2.id] || {}).gallery as Array<{ url: string }> | null;
+        return g && g[0] ? g[0].url : null;
+      }, { timeout: 15_000, message: "the overrides feed never carried the new main photo" }).toBe(PHOTO_URL);
+    } finally {
+      // back to the catalogue photos: this suite leaves the product as it found it
+      await page.request.put("/api/admin/overrides/", { data: { id: PRODUCT_2.id, gallery: [] } });
+    }
+  });
+});
+
 test.describe("admin shell — Обзор counts a paid order", () => {
   test.use({ extraHTTPHeaders: ipHeaders(123) });
 
@@ -262,12 +384,17 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     await expect(chip).toHaveText(/^Новые \d+$/);
     const waiting = Number(((await chip.textContent()) || "").replace(/\D+/g, ""));
     expect(waiting, "the chip did not count the paid order").toBeGreaterThan(0);
-    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(waiting));
+    /* The badge counts everything waiting to go out: «Новые» (no label yet)
+       plus «Этикетка готова» (labelled, not yet handed over — an earlier spec
+       may have left one). Same rule as the overview's ordersToShip. */
+    const labelChip = page.locator('[data-admfilter="label"]');
+    const labeled = Number(((await labelChip.textContent()) || "").replace(/\D+/g, "")) || 0;
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(waiting + labeled));
     await page.locator('.adm-side [data-lang="ET"]').click();
     await expect(chip).toHaveText(`Uued ${waiting}`);
     await page.locator('.adm-side [data-lang="RU"]').click();
     await expect(chip).toHaveText(`Новые ${waiting}`);
-    await page.locator('[data-admfilter="unpaid"]').click();
+    await page.locator('[data-admfilter="delivered"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
     await page.locator('[data-admfilter="salon"]').click();
     await expect(page.locator(".adm-empty")).toHaveText("Таких заказов нет");
@@ -298,8 +425,9 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     // …and the chip and the badge follow the shipped order down at once
     const left = waiting - 1;
     await expect(chip).toHaveText(left ? `Новые ${left}` : "Новые");
-    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveCount(left ? 1 : 0);
-    if (left) await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(left));
+    const badgeLeft = left + labeled;
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveCount(badgeLeft ? 1 : 0);
+    if (badgeLeft) await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(badgeLeft));
 
     // the list agrees, and so does the journal in «Настройки»
     await page.locator('[data-admfilter="shipped"]').click();
@@ -412,6 +540,19 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
   test("no sideways scroll, 44-px targets, centred footers", async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     const mobile = testInfo.project.name === "mobile";
+
+    if (mobile) {
+      /* An order of this test's own, so «Заказы» has a row to open whatever
+         ran before it — on a mobile-only run (`--project=mobile`) no desktop
+         spec has placed one, and the list under «Новые» is honestly empty. */
+      await page.goto(shopUrl("", `/p/${PRODUCT_2.id}/`));
+      await waitForScreen(page, "product");
+      await page.locator(`.pdp__add[data-add="${PRODUCT_2.id}"]`).click();
+      await expect(page.getByRole("status")).toBeVisible();
+      await page.goto(shopUrl("", "/checkout/"));
+      await waitForScreen(page, "checkout");
+      await payOrder(page, freshEmail("shell-phone"), "paid");
+    }
     await loginAsAdmin(page);
 
     if (!mobile) {
@@ -426,6 +567,8 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
     await fitsThePhone(page, "Заказы");
     await page.locator("[data-admorder]").first().click();
     await expect(page.locator('[data-admorder=""]')).toBeVisible();
+    // the card with its four-step strip, the primary button and the hint
+    await expect(page.locator(".adm-steps--4")).toBeVisible();
     await fitsThePhone(page, "Заказ");
     await page.locator('[data-admorder=""]').click();
 

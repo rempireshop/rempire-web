@@ -58,7 +58,7 @@ export async function POST(req: Request) {
   if (!row) return bad("not_found", 404);
 
   const status = (row as { status?: unknown }).status;
-  if (status === "paid" || status === "shipped") return bad("already_paid", 409);
+  if (status === "paid" || status === "shipped" || status === "delivered") return bad("already_paid", 409);
   if (status === "cancelled" || status === "refunded") return bad("order_closed", 409);
 
   const order = toPaymentOrder(row);

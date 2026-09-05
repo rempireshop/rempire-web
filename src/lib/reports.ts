@@ -133,8 +133,10 @@ type RawRow = {
   channel?: string | null;
 };
 
-/** "Paid" for accounting purposes: reached payment, whatever happened after. */
-const REPORTABLE_STATUSES = ["paid", "shipped", "refunded"];
+/** "Paid" for accounting purposes: reached payment, whatever happened after
+ *  (shipped, delivered — the two fulfilment steps of src/lib/orders.ts — or
+ *  refunded, which is still worth a line so the accountant sees the reversal). */
+const REPORTABLE_STATUSES = ["paid", "shipped", "delivered", "refunded"];
 
 let channelColCache: { at: number; has: boolean } | null = null;
 const CHANNEL_CACHE_MS = 5 * 60_000;

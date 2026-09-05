@@ -103,9 +103,9 @@ DPD already invoices monthly) — the API changes workflow, not pricing.
 | **Omniva** | Parcel API (XML/JSON): registration, label PDF, manifest; public tracking endpoint | Business client contract → klienditugi issues partner code + API password |
 | **SmartPosti (Itella EE)** | SmartShip / Posti API: shipments, labels, parcel-machine list, tracking | Account manager issues API key on the business account |
 
-**Dmitri contacts the carriers himself** (decided 31.08). Carriers only act
+**Dim contacts the carriers himself** (decided 31.08). Carriers only act
 on the contract holder's word, so the message goes out with Renat CC'd, or
-after a one-line authorization from him («volitan Diip Solutions / Dmitri
+after a one-line authorization from him («volitan Diip Solutions / Dim
 suhtlema meie lepingu teemal»). DPD first — contract exists, address = the
 account manager on his DPD invoice; general lines otherwise: DPD
 `myyk@dpd.ee`, Omniva `info@omniva.ee`, SmartPosti `info@smartposti.ee`
@@ -127,9 +127,9 @@ one file, so this is a data swap, not a rebuild.
 > 2) API kasutajatunnused meie lepingu jaoks,
 > 3) kinnitus, et API kasutamine ei muuda meie lepingu hinnakirja.
 >
-> Tehniline kontakt: Dmitri (Diip Solutions), dim.novare@gmail.com.
+> Tehniline kontakt: Dim (Diip Solutions), info@diipsolutions.eu.
 >
-> Lugupidamisega, Dmitri (Diip Solutions) · Rempire Store OÜ nimel · CC: Renat
+> Lugupidamisega, Dim (Diip Solutions) · Rempire Store OÜ nimel · CC: Renat
 
 The APIs themselves are free; label prices stay whatever his contract says.
 
@@ -165,7 +165,7 @@ screen-share and he clicks). With that we do #9, #10, #11 ourselves.
 
 ## 10. Email @rempireshop.com — decided: Resend + Gmail «send as»
 
-Same setup as Dmitri's own pages. Runs entirely on DNS records, so it works
+Same setup as Dim's own pages. Runs entirely on DNS records, so it works
 in parallel with the old shop (see #9 for where records get edited).
 
 **Outgoing (send as info@rempireshop.com from his Gmail):**
@@ -269,7 +269,7 @@ the card in Shopify POS and it processes through it. Which means:
 
 | | **Montonio** | **MakeCommerce** | **Stripe** |
 |---|---|---|---|
-| What it is | Estonian PSP, payments + shipping platform | Estonian PSP (Maksekeskus AS, running since 2012, Finantsinspektsioon-licensed) — the local veteran Dmitri hasn't used yet | Global processor, US-based |
+| What it is | Estonian PSP, payments + shipping platform | Estonian PSP (Maksekeskus AS, running since 2012, Finantsinspektsioon-licensed) — the local veteran Dim hasn't used yet | Global processor, US-based |
 | Home coverage | EE LV LT FI (+PL) | EE LV LT FI, one agreement | 45+ countries |
 | Baltic bank links | ✅ | ✅ all EE/LV/LT/FI banks | ❌ **none** |
 | Cards worldwide | ✅ 1,49 % + 0,20 € (Standard) | ✅ rate on their price page / contract — confirm | ✅ ~1,5 % + 0,25 € EEA (intl higher) |
@@ -356,7 +356,7 @@ is still open).**
    Domains + Payments permissions). This unblocks everything below.
 5. Look at Settings → Domains → is the domain Shopify-managed or
    third-party (#9) → pick the DNS route.
-6. GSC Domain property via DNS TXT (#11) + add Dmitri as owner.
+6. GSC Domain property via DNS TXT (#11) + add Dim as owner.
 7. Resend domain verification + Gmail send-as (#10); free MX forwarder for
    incoming.
 8. Renat sends the carrier API email (#8), DPD first.

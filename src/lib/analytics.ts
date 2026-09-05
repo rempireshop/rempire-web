@@ -81,26 +81,29 @@ function int(n: unknown): number {
 
 /* ---------- which orders are money ---------------------------------------
  * One rule for both tabs («Аналитика» here, «Обзор» at the bottom of this
- * file): an order counts once its money arrived and stayed — `paid`, and
- * `shipped`, which is only `paid` after the owner pressed «Отправлен»
- * (setOrderStatus in src/lib/orders.ts). A strict `status = 'paid'` made
- * every figure on «Аналитика» drop the moment an order went out, which in a
- * shop that ships the same day meant under-reporting nearly everything.
- * `new`/`failed` never had the money; `cancelled`/`refunded` had it and gave
- * it back. (src/lib/reports.ts's REPORTABLE_STATUSES keeps `refunded` in on
- * purpose — an accounting export wants the refund visible; a sales figure
- * does not.)
- * The partial index these queries lean on, orders_sales_created_idx
- * (db/migrations/081_orders_sales_idx.sql), spells out the same two statuses
- * in its `where` — Postgres only uses a partial index whose predicate the
- * query's implies, which is why 080's `status = 'paid'` one had to go. Widen
- * this constant and the index must follow, in a new 080–089 migration;
- * tests/analytics.test.ts pins the two together.
+ * file): an order counts once its money arrived and stayed — `paid`, then
+ * `shipped` and `delivered`, which are only `paid` after the owner pressed
+ * «Отправлен» and «Доставлен» on the order card (setOrderStatus in
+ * src/lib/orders.ts). A strict `status = 'paid'` made every figure on
+ * «Аналитика» drop the moment an order went out, which in a shop that ships
+ * the same day meant under-reporting nearly everything. `new`/`failed` never
+ * had the money; `cancelled`/`refunded` had it and gave it back.
+ * (src/lib/reports.ts's REPORTABLE_STATUSES keeps `refunded` in on purpose —
+ * an accounting export wants the refund visible; a sales figure does not.)
+ * The partial index these queries lean on, orders_sales_created_idx (made in
+ * db/migrations/081_orders_sales_idx.sql, rebuilt with the third status in
+ * 140_order_delivered.sql), spells out the same statuses in its `where` —
+ * Postgres only uses a partial index whose predicate the query's implies,
+ * which is why 080's `status = 'paid'` one had to go. Widen this constant and
+ * the index must follow, in a new migration; tests/analytics.test.ts pins the
+ * two together.
  * ------------------------------------------------------------------------ */
 
 /** Money arrived and stayed. Exported for the overview, the tests, and anyone
- *  else who needs "which orders are sales" to mean one thing. */
-export const PAID_STATUSES = ["paid", "shipped"] as const satisfies readonly OrderStatus[];
+ *  else who needs "which orders are sales" to mean one thing. The same list
+ *  as PAID_ORDER_STATUSES in src/lib/orders.ts, kept here under the name the
+ *  analytics have always used. */
+export const PAID_STATUSES = ["paid", "shipped", "delivered"] as const satisfies readonly OrderStatus[];
 /** Interpolated, never parameterised — the values are compile-time constants. */
 const PAID_SQL = PAID_STATUSES.map((s) => `'${s}'`).join(", ");
 
@@ -479,9 +482,10 @@ export async function getAnalyticsSummary(range: AnalyticsRange, now: Date = new
  *   been paid, never "orders whose payment landed today". The card says so
  *   rather than leaving the owner to guess: «оплаченные, по дате заказа».
  * · **Which statuses count as paid.** PAID_STATUSES (top of this file):
- *   `paid` AND `shipped`. Pressing «Отправлен» must not make today's count
- *   and today's revenue drop in front of the owner, which is exactly what a
- *   strict `status = 'paid'` does in a shop that ships the same day.
+ *   `paid`, `shipped` AND `delivered`. Pressing «Отправлен» or «Доставлен»
+ *   must not make today's count and today's revenue drop in front of the
+ *   owner, which is exactly what a strict `status = 'paid'` does in a shop
+ *   that ships the same day.
  *   `cancelled`/`refunded` stay out — that money left again. «Аналитика»
  *   above reads the same constant, so the two tabs agree by construction.
  * · **Which stock.** Not a separate query: getOverrides() already merges the
@@ -577,6 +581,15 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
  * it stays «paid» for good and is never a parcel — counting it made the
  * «Отправить N» badge grow with every salon sale, and disagree with the
  * orders list, which has always filtered those out (admLiveToShip in app.js).
+ *
+ * «To ship» = every paid web order, label or no label. Since the order-flow
+ * rework a Montonio label («Создать этикетку») no longer moves the status —
+ * the parcel is registered, but it is still on the shelf until the owner
+ * presses «Отправлен» — so a paid order with a label ready is as much
+ * waiting to go out as one without, and both stay in this count. The list's
+ * «Новые» / «Этикетка готова» chips split the same set in two; their sum is
+ * this number (admWaitingCount in app.js reads the loaded list and lands on
+ * the same total).
  */
 async function qAttention(): Promise<OverviewSummary["attention"]> {
   const rows = await query<{ to_ship: string; pro: string; reviews: string; alerts: string }>(

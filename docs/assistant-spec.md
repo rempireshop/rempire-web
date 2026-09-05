@@ -44,7 +44,7 @@ A new product or edited text is not "done" until RU + EN + ET all exist. The ass
 
 ## Architecture (thin now, real later)
 
-- **Model**: OpenAI API, **Dmitri's own account initially** (per 02.09 agreement); later a shop account — with all other logins ending up with Renat. Key lives server-side only, never in the browser.
+- **Model**: OpenAI API, **Dim's own account initially** (per 02.09 agreement); later a shop account — with all other logins ending up with Renat. Key lives server-side only, never in the browser.
 - **Backend**: the same API the admin uses — assistant gets no private side-doors, so its permissions are exactly the admin's permissions.
 - **Image ops**: server-side ImageMagick workers (cutout → watermark → resize), queue with per-image status shown in chat.
 - **Translations**: same model call, glossary pinned (brand names stay Latin, units per language) — the glossary starts from the rules used for the catalogue translation fleet of 02.09.2026.

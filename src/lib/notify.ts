@@ -1,5 +1,5 @@
 /**
- * Shared forwarding to Dmitri — Telegram + Resend email.
+ * Shared forwarding to Dim — Telegram + Resend email.
  *
  * Extracted from /api/submit so every route that stores something can
  * notify the same way. Each channel is gated on env config:
@@ -52,7 +52,7 @@ export async function forwardEmail(
       },
       body: JSON.stringify({
         from: process.env.RESEND_FROM ?? "REMPIRE QA <onboarding@resend.dev>",
-        to: [process.env.RESEND_TO ?? "dim.novare@gmail.com"],
+        to: [process.env.RESEND_TO ?? "info@diipsolutions.eu"],
         subject,
         text,
       }),

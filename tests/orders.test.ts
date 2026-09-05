@@ -188,6 +188,25 @@ describe("createOrder", () => {
     expect(audit.some((a) => a.action === "order.status" && a.payload.to === "paid")).toBe(true);
   });
 
+  it("knows the owner's last step, «delivered», and walks it back like any other", async () => {
+    const o = await createOrder(order());
+    await setOrderStatus(o.id, "paid", "admin");
+    await setOrderStatus(o.id, "shipped", "admin");
+    expect((await setOrderStatus(o.id, "delivered", "admin"))?.status).toBe("delivered");
+    // the database's check constraint carries the value too (db/migrations/140_order_delivered.sql)
+    expect((await getOrder(o.id))?.status).toBe("delivered");
+    expect((await listOrders({ status: "delivered" })).map((x) => x.id)).toEqual([o.id]);
+    // the journal's undo: back to shipped, then to paid
+    expect((await setOrderStatus(o.id, "shipped", "admin"))?.status).toBe("shipped");
+    expect((await setOrderStatus(o.id, "paid", "admin"))?.status).toBe("paid");
+    const audit = await query<{ payload: { from: string; to: string } }>(
+      "select payload from admin_audit where action = 'order.status' order by id",
+    );
+    expect(audit.map((a) => `${a.payload.from}>${a.payload.to}`)).toEqual([
+      "new>paid", "paid>shipped", "shipped>delivered", "delivered>shipped", "shipped>paid",
+    ]);
+  });
+
   it("filters the admin list by status and search", async () => {
     const a = await createOrder(order({ customer: { ...customer, name: "Ааа Ааа" } }));
     await createOrder(order({ customer: { ...customer, name: "Ббб Ббб", email: "bbb@example.com" } }));

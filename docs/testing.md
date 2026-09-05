@@ -361,6 +361,16 @@ coverage now instead of the workaround it briefly needed.
   both the paid and the failed branch. There is no sandbox Montonio account
   wired into this suite, so the *real* provider integration
   (`docs/payments.md` §5, "как проверить песочницу") stays a manual check.
+- **Montonio Shipping (labels).** Same answer, same shape:
+  `SHIPPING_PROVIDER=mock` in `playwright.config.ts` makes
+  `src/lib/shipping/montonio-mock.ts` stand in for the three carrier calls
+  the order card makes (register the parcel, make the label file, fetch the
+  PDF), so `admin.spec.ts` drives the whole fulfilment flow — «Создать
+  этикетку» → «Отправлен» (the letter, read back from `/api/e2e/mail/` with
+  its tracking link in `links`) → «Доставлен» → the journal's undo of every
+  step — with no keys and no real parcel. Pickup points, carriers and tariffs
+  are not mocked and behave as with no keys. The switch is explicit and dead
+  under `NODE_ENV=production` (`tests/shipping-montonio.test.ts`).
 - **Parcel-machine picker uses a live carrier feed.** With no Montonio keys
   configured, `GET /api/shipping/points/` falls through to Omniva's own public
   API live (`src/lib/parcel-points.ts`), bounded by an `AbortSignal.timeout`
@@ -650,7 +660,10 @@ long enough to wrap: that is the guard against a layout that runs off the sheet.
 
 The mail sink (`src/lib/mail.ts`, read back through `GET /api/e2e/mail/`) records
 attachment **names** alongside the recipient, subject and template — never the
-bytes, same rule as the body.
+bytes, same rule as the body — and, since the order-flow rework, the http(s)
+**links** the plain-text body carries (first twelve, each capped): that is how
+`e2e/admin.spec.ts` proves «Заказ отправлен» went out with the carrier's
+tracking link in it, which is the one thing that letter is for.
 
 ## Files
 

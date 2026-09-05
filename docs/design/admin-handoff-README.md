@@ -137,7 +137,7 @@ List: 72×48 cover thumb · title · «date · excerpt» · badge Опублик
 Period chips Сегодня · 7 дней · 30 дней · 90 дней; KPI grid `minmax(150px,1fr)` bordered cells (label 13 muted, Oswald 32 value, delta line ok/warn/muted): Выручка · Заказы · Средний чек · Из корзины в заказ; bars by weekday (today ink, labels below); Топ товаров list; «Искали, но не нашли» list.
 
 ### Подключения — fix #13
-Rows: 10-px status square (ok / warn) · name · one-line plain-Russian status or what to do next (warn colour when action needed) · action button (primary when action is required, e.g. «Написать Дмитрию»). Footer line with the developer contact. Seed rows: Montonio, Omniva/DPD/SmartPosti, Resend, Google Search Console (warn, domain not verified), Аналитика посещений, ИИ-помощник, Сканер/камера (warn if no camera permission).
+Rows: 10-px status square (ok / warn) · name · one-line plain-Russian status or what to do next (warn colour when action needed) · action button (primary when action is required, e.g. «Написать Диму»). Footer line with the developer contact. Seed rows: Montonio, Omniva/DPD/SmartPosti, Resend, Google Search Console (warn, domain not verified), Аналитика посещений, ИИ-помощник, Сканер/камера (warn if no camera permission).
 
 ### Настройки — fix #6
 Index list (max 640): 6 rows 64 h with label + muted description + chevron. Sub-pages have «← Настройки» + title:

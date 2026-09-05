@@ -384,7 +384,8 @@ function toNumber(v: unknown): number | null {
 }
 
 function alreadyPaid(order: OrderLike): boolean {
-  if (order.status === "paid" || order.status === "shipped") return true;
+  // paid, and the two fulfilment steps after it (src/lib/orders.ts ORDER_STATUSES)
+  if (order.status === "paid" || order.status === "shipped" || order.status === "delivered") return true;
   const p = order.payment;
   return (
     typeof p === "object" &&
