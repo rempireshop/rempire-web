@@ -394,6 +394,14 @@ test.describe("admin — product creation", () => {
       expect(served).toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2/et/p/${id}/" data-seo="canonical">`);
       expect(served).toContain(`<link rel="alternate" hreflang="x-default" href="${E2E_BASE_URL}/shop2/p/${id}/" data-seo="alt-x">`);
       expect(served).toContain('<meta property="og:locale" content="et_EE"');
+      // the link preview: the shop's own card, drawn from the row at request time (src/lib/og-card.ts)
+      expect(served).toContain(`<meta property="og:image" content="${E2E_BASE_URL}/shop2/og/${id}.png?v=`);
+      expect(served).toContain('<meta property="og:image:type" content="image/png">');
+      const card = await page.request.get(`/shop2/og/${id}.png`);
+      expect(card.status(), "the product card did not render").toBe(200);
+      expect(card.headers()["content-type"]).toBe("image/png");
+      expect(card.headers()["etag"]).toMatch(/^"og-/);
+      expect((await card.body()).length).toBeGreaterThan(1000);
       expect(served).toContain(`<h1 class="pdp__title">${NAME}</h1>`);
       expect(served).toContain("Habemetoonik.");
       // …and what the browser shows once app.js has taken over: the same head

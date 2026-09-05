@@ -32,6 +32,7 @@ import {
   toCatalogueProduct,
   type CustomProduct,
 } from "@/lib/custom-products";
+import { ogStamp } from "@/lib/og-card";
 import { getOverrides } from "@/lib/orders";
 import { pickDescription } from "@/lib/product-descriptions";
 import { pickSeo } from "@/lib/product-seo";
@@ -104,13 +105,15 @@ function absUrl(base: string, u: string): string {
 /**
  * A link preview is a 1 200×630 JPEG or PNG or it is nothing (docs/seo.md,
  * "Link previews"). Uploads are WebP (POST /api/admin/upload), which
- * Facebook, WhatsApp and LinkedIn will not read, so a custom product's card
- * is the shop's own tower card unless a photo happens to be a JPEG/PNG —
- * the JSON-LD still carries the real photos, which Google does read.
+ * Facebook, WhatsApp and LinkedIn will not read, so the card is the shop's
+ * own, drawn at request time from the first photo with the brand, the name
+ * and the price on it — src/lib/og-card.ts behind /shop2/og/c-<id>.png.
+ * `?v=` moves with every edit, so a scraper's cache never outlives a rename
+ * or a new price. The JSON-LD still carries the real photos, which Google
+ * does read.
  */
-function ogImage(base: string, photos: string[]): string {
-  const card = photos.find((u) => /\.(?:jpe?g|png)(?:\?|$)/i.test(u));
-  return absUrl(base, card || OG_DEFAULT);
+function ogImage(base: string, row: CustomProduct): string {
+  return `${base}/shop2/og/${encodeURIComponent(row.id)}.png?v=${ogStamp(row.updatedAt)}`;
 }
 
 type Stock = "in" | "low" | "out";
@@ -145,7 +148,7 @@ export function renderCustomProductPage(
     price, priceFrom: !!cp.priceFrom, stock,
     seoTitle: seo?.title ?? "", seoDesc: seo?.desc ?? "",
     body,
-    image: ogImage(base, photos),
+    image: ogImage(base, row),
     imageUrls: photos.length ? photos.map((u) => absUrl(base, u)) : [absUrl(base, OG_DEFAULT)],
   });
   const { seg, rest, core, priceText, stockText, crumbItems } = spec as unknown as {

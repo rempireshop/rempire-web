@@ -215,8 +215,14 @@ const nextConfig: NextConfig = {
     "/api/admin/orders/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
     /* A custom product's page is the shell patched at request time
        (src/lib/product-page.ts, the /shop2/{,et/,en/}p/[id] routes) — the
-       function has to be able to read the file the static layer serves. */
+       function has to be able to read the file the static layer serves. The
+       blog pages a build did not write (src/lib/blog-page.ts) patch the same
+       shell. */
     "/shop2/**": ["./public/shop2/index.html"],
+    /* The link-preview card drawn at request time (src/lib/og-card.ts):
+       the glyphs come out of the committed fonts and the mark out of the
+       brand SVG, none of which the source names literally. */
+    "/shop2/og/**": ["./public/fonts/*.ttf", "./public/brand/rempire-tower.svg"],
   },
   /**
    * The shop is one static page that now names its screen in the URL, so the
