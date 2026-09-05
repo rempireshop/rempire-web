@@ -181,6 +181,9 @@ setup, about five minutes:
 1. In the [Google Cloud console](https://console.cloud.google.com/), create
    (or reuse) a project, then **IAM & Admin → Service Accounts → Create
    service account**. Any name (e.g. "rempire-analytics") is fine.
+   Then **APIs & Services → Library → «Google Search Console API» → Enable**
+   in that same project — without it every call answers 403 «API … has not
+   been used in project … or it is disabled».
 2. Open the new service account → **Keys → Add key → Create new key → JSON**.
    A `.json` file downloads — this is the only copy Google gives you.
 3. In [Search Console](https://search.google.com/search-console), open the
