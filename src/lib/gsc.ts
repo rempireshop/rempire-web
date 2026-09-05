@@ -246,7 +246,7 @@ export type GscUnavailable = {
 
 /** What a bad_key value looks like — never the value itself. The panel turns
  *  each into one plain sentence so the owner knows what to re-paste. */
-export type KeyShape = "empty" | "pem_only" | "path" | "no_client_email" | "no_private_key" | "curly_quotes" | "not_json";
+export type KeyShape = "empty" | "key_id" | "pem_only" | "path" | "no_client_email" | "no_private_key" | "curly_quotes" | "not_json";
 
 export function keyShape(raw: string): KeyShape {
   // the prefix and BOM go, the quotes stay as pasted — the curly check below reads them
@@ -255,6 +255,8 @@ export function keyShape(raw: string): KeyShape {
     .replace(/^\s*(?:export\s+)?GSC_SERVICE_ACCOUNT_JSON\s*=\s*/, "")
     .trim();
   if (!t) return "empty";
+  // the 40-hex "Key ID" column of the Keys table — the thing next to the file, not the file
+  if (/^[0-9a-f]{40}$/i.test(t)) return "key_id";
   if (!t.startsWith("{") && /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(t)) return "pem_only";
   if (/^[A-Za-z]:[\\/]|^\/|^~\//.test(t) || /^[\w.-]+\.json$/i.test(t)) return "path";
   if (/[“”„«»]/.test(t)) return "curly_quotes";

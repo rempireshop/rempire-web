@@ -1586,6 +1586,8 @@
       "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.":
         "Google ei vasta või teenusekontol pole saidile ligipääsu — Dim kontrollib.",
       "Сейчас переменная пустая.": "Praegu on muutuja tühi.",
+      "Сейчас там идентификатор ключа (40 знаков из таблицы Keys), а не содержимое скачанного файла .json.":
+        "Praegu on seal võtme ID (40 märki Keys-tabelist), mitte allalaaditud .json-faili sisu.",
       "Сейчас там только сам ключ (BEGIN PRIVATE KEY) — нужен весь файл .json с client_email.":
         "Praegu on seal ainult võti ise (BEGIN PRIVATE KEY) — vaja on kogu .json-faili koos client_email-iga.",
       "Сейчас там путь к файлу, а не его содержимое.": "Praegu on seal faili asukoht, mitte selle sisu.",
@@ -3303,6 +3305,8 @@
       "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.":
         "Google is not answering, or the service account has no access to the site — Dim will check.",
       "Сейчас переменная пустая.": "Right now the variable is empty.",
+      "Сейчас там идентификатор ключа (40 знаков из таблицы Keys), а не содержимое скачанного файла .json.":
+        "Right now it holds the key's ID (40 characters from the Keys table), not the contents of the downloaded .json file.",
       "Сейчас там только сам ключ (BEGIN PRIVATE KEY) — нужен весь файл .json с client_email.":
         "Right now it holds only the key itself (BEGIN PRIVATE KEY) — the whole .json file with client_email is needed.",
       "Сейчас там путь к файлу, а не его содержимое.": "Right now it holds the file's path, not its contents.",
@@ -9771,6 +9775,7 @@
      text node (a <span>) so the translator finds it by key. */
   var GSC_KEY_SHAPES = {
     empty: "Сейчас переменная пустая.",
+    key_id: "Сейчас там идентификатор ключа (40 знаков из таблицы Keys), а не содержимое скачанного файла .json.",
     pem_only: "Сейчас там только сам ключ (BEGIN PRIVATE KEY) — нужен весь файл .json с client_email.",
     path: "Сейчас там путь к файлу, а не его содержимое.",
     no_client_email: "В файле нет поля client_email.",

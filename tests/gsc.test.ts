@@ -126,6 +126,7 @@ describe("src/lib/gsc.ts", () => {
     const { getSearchConsoleSummary, keyShape } = await import("@/lib/gsc");
     const pem = "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg\n-----END PRIVATE KEY-----\n";
     const cases: Array<[string, string]> = [
+      ["e3f1a9c0d2b4e6f8a0c2e4a6c8e0a2c4e6a8c0e4", "key_id"],
       [pem, "pem_only"],
       ["C:\\Users\\dim\\Downloads\\rempire-shop-1234.json", "path"],
       ["rempire-shop-1234.json", "path"],

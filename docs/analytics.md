@@ -214,9 +214,14 @@ Without those two variables the block shows one line: «Добавьте сер�
 аккаунт как пользователя в Search Console → см. docs/analytics.md» — the
 rest of the tab works normally either way. A key variable that is set but is
 not Google's JSON file (half a paste, the file's path instead of its
-contents, a key without `client_email`/`private_key`) answers `bad_key`, and
-both «Аналитика» and «Подключения» say the key cannot be read — so a bad
-paste is told apart from "nobody set it up yet". Vercel reads variables at
+contents, the 40-character *Key ID* from the Keys table instead of the file,
+a key without `client_email`/`private_key`) answers `bad_key` with a `shape`
+and a secret-free `detail` (length, first/last character, which fields are
+present), and both «Аналитика» and «Подключения» say the key cannot be read
+and what the value looks like — so a bad paste is told apart from "nobody set
+it up yet". The file itself is read in every shape a paste produces: wrapped
+in quotes, with real line breaks inside the private key, with `\n` doubled,
+base64-encoded, with a `NAME=` prefix, with HTML-escaped or curly quotes. Vercel reads variables at
 build time: after adding or changing them, **redeploy** (Deployments →
 ⋯ → Redeploy); a push with no file changes does not build. Once both are set, the tab shows
 the last 28 full days (Search Console itself lags 2–3 days, so the window
