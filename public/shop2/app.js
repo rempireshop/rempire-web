@@ -1619,7 +1619,7 @@
       "Посетители, конверсия и поисковые запросы за неделю — в «Аналитике», по настоящим данным магазина.":
         "Külastajad, konversioon ja otsingud nädala lõikes — «Analüütikas», poe päris andmete järgi.",
       "Что оплачено и ещё не отправлено — в «Заказах», там же печатаются наклейки.":
-        "Mis on makstud ja veel saatmata — «Tellimustes», seal trükitakse ka sildid."
+        "Mis on makstud ja veel saatmata — «Tellimustes», seal trükitakse ka sildid.",
       /* phase 4 — the settings cards rebuilt in the panel's own markup, the
          confirm cards in front of them, and «Языки» */
       "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
@@ -3199,7 +3199,7 @@
       "Посетители, конверсия и поисковые запросы за неделю — в «Аналитике», по настоящим данным магазина.":
         "Visitors, conversion and search terms for the week are in “Analytics”, from the shop's real data.",
       "Что оплачено и ещё не отправлено — в «Заказах», там же печатаются наклейки.":
-        "What is paid and not yet shipped is in “Orders” — the labels print from there too."
+        "What is paid and not yet shipped is in “Orders” — the labels print from there too.",
       /* phase 4 — the settings cards rebuilt in the panel's own markup, the
          confirm cards in front of them, and «Языки» */
       "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
