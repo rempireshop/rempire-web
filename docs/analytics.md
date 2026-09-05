@@ -176,7 +176,16 @@ assistant can talk about the numbers, not change anything here.
 
 The Search Console block needs a **service account** — a robot Google
 account that can read (never write) your Search Console data. One-time
-setup, about five minutes:
+setup, about five minutes.
+
+**Done on 05.09.2026** (under rempireshopinfo@gmail.com): Google Cloud
+project **«Rempire shop»** (`rempire-shop`), the «Google Search Console API»
+enabled in it, service account **gsc-reader@rempire-shop.iam.gserviceaccount.com**
+added to the `sc-domain:rempireshop.com` property as a *Restricted* user.
+What is left is step 2 (Dim creates the JSON key —
+[Keys tab](https://console.cloud.google.com/iam-admin/serviceaccounts/details/104247251027055176481/keys?project=rempire-shop)
+→ Add key → Create new key → JSON) and step 4 (the two variables on Vercel),
+then a redeploy.
 
 1. In the [Google Cloud console](https://console.cloud.google.com/), create
    (or reuse) a project, then **IAM & Admin → Service Accounts → Create
