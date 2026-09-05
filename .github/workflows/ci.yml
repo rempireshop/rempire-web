@@ -69,11 +69,11 @@ jobs:
   e2e:
     name: e2e (shard ${{ matrix.shard }} of 3)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
 
@@ -93,7 +93,7 @@ jobs:
       # The three Chromium projects are named so the permanent mobile-safari
       # project (WebKit, not installed here) is left to the `safari` job.
       - name: End-to-end tests
-        run: node tools/e2e-build.mjs && npx playwright test --project=desktop --project=tablet --project=mobile --shard=${{ matrix.shard }}/3
+        run: node tools/e2e-build.mjs && npx playwright test --project=desktop --project=tablet --project=mobile --shard=${{ matrix.shard }}/4
 
       - name: Upload Playwright report + screenshots
         if: failure()
@@ -108,7 +108,7 @@ jobs:
   safari:
     name: e2e (mobile Safari)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
