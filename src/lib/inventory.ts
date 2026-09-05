@@ -382,6 +382,75 @@ export async function setQty(
   return r;
 }
 
+/* ---------- a size renamed or removed in the editor -----------------------
+
+   The rows here are keyed by the size LABEL, so an owner who fixes «100 мл»
+   to «100 ml» on his own product (PUT /api/admin/products/[id]) would
+   otherwise leave the counted stock, the barcode and the ledger stranded
+   under a label nothing lists any more, and the shop would read the renamed
+   size as «never counted». updateCustomProduct() (src/lib/custom-products.ts)
+   calls syncVariantRows() inside the same transaction as the row update. */
+
+/**
+ * What the size list's change means for the stock rows — pure, so it can be
+ * pinned: a label that changed at the same position, where neither the old
+ * label survives elsewhere nor the new one existed before, is a rename (the
+ * rows move); an old label absent from the new list is a deletion. A swap or
+ * a reorder (both labels still present) touches nothing. A single-price
+ * product is the '' variant, so going from one price to sizes moves its
+ * count to the first size, and back again.
+ */
+export function variantTransitions(
+  oldSizes: string[],
+  newSizes: string[],
+): { renames: Array<[from: string, to: string]>; deletes: string[] } {
+  const before = oldSizes.length ? oldSizes : [""];
+  const after = newSizes.length ? newSizes : [""];
+  const beforeSet = new Set(before);
+  const afterSet = new Set(after);
+  const renames: Array<[string, string]> = [];
+  const moved = new Set<string>();
+  for (let i = 0; i < Math.min(before.length, after.length); i++) {
+    const a = before[i];
+    const b = after[i];
+    if (a === b || afterSet.has(a) || beforeSet.has(b)) continue;
+    renames.push([a, b]);
+    moved.add(a);
+  }
+  const deletes = before.filter((a) => !afterSet.has(a) && !moved.has(a));
+  return { renames, deletes };
+}
+
+/**
+ * Applies variantTransitions() to stock_levels AND stock_moves — the ledger
+ * moves with the level, or `tracked` (which is read off the ledger) would
+ * flip to false for a size that was merely respelled. A deleted size loses
+ * its level and its ledger lines: the size is gone, and a row left behind
+ * would make the label read «tracked, 0 — нет в наличии» the day it is
+ * added again. Runs inside the caller's transaction.
+ */
+export async function syncVariantRows(
+  q: Querier,
+  productId: string,
+  oldSizes: string[],
+  newSizes: string[],
+): Promise<{ renames: Array<[string, string]>; deletes: string[] }> {
+  const t = variantTransitions(oldSizes, newSizes);
+  for (const [from, to] of t.renames) {
+    // a stale row under the new label (a size deleted and re-added) is an
+    // orphan by construction — it would collide with the primary key
+    await q("delete from stock_levels where product_id = $1 and variant = $2", [productId, to]);
+    await q("delete from stock_moves where product_id = $1 and variant = $2", [productId, to]);
+    await q("update stock_levels set variant = $3, updated_at = now() where product_id = $1 and variant = $2", [productId, from, to]);
+    await q("update stock_moves set variant = $3 where product_id = $1 and variant = $2", [productId, from, to]);
+  }
+  for (const v of t.deletes) {
+    await q("delete from stock_levels where product_id = $1 and variant = $2", [productId, v]);
+    await q("delete from stock_moves where product_id = $1 and variant = $2", [productId, v]);
+  }
+  return t;
+}
+
 /* ---------- product-level state for the public overrides feed ------------ */
 
 /**

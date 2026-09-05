@@ -21,7 +21,8 @@
  * cleanCustomProductInput() and store what comes back. Rebuilt field by
  * field, same discipline as every other sanitiser in this repo.
  */
-import { jsonbParam, query } from "@/lib/db";
+import { jsonbParam, query, withTx } from "@/lib/db";
+import { syncVariantRows } from "@/lib/inventory";
 import { cleanGallery, type GalleryPhoto } from "@/lib/orders";
 import { cleanDescriptionPatch, type DescriptionOverride } from "@/lib/product-descriptions";
 import { cleanSeoPatch, type SeoOverride } from "@/lib/product-seo";
@@ -375,6 +376,10 @@ export async function createCustomProduct(raw: unknown): Promise<CustomProduct> 
  * whole. `sizes` and `prices` travel together — sending one without the other
  * is taken as «this list, and the prices I already have» and checked for
  * alignment like any other input. Null when there is no such product.
+ *
+ * The stock rows follow the sizes, in the same transaction: a size respelled
+ * at its position keeps its count, its barcode and its ledger under the new
+ * label; a size removed loses its rows (syncVariantRows in src/lib/inventory.ts).
  */
 export async function updateCustomProduct(id: string, raw: unknown): Promise<CustomProduct | null> {
   const cur = await getCustomProduct(id);
@@ -402,20 +407,24 @@ export async function updateCustomProduct(id: string, raw: unknown): Promise<Cus
     }
   }
   const input = cleanCustomProductInput(merged);
-  const rows = await query<Row>(
-    `update custom_products
-        set brand = $2, name = $3, cat = $4, subcat = $5, sizes = $6::jsonb, prices = $7::jsonb,
-            description = $8::jsonb, gallery = $9::jsonb, seo = $10::jsonb, updated_at = now()
-      where id = $1
-      returning ${COLS}`,
-    [
-      id, input.brand, input.name, input.cat, input.subcat || null,
-      jsonbParam(input.sizes), jsonbParam(input.prices),
-      input.description ? jsonbParam(input.description) : null,
-      input.gallery ? jsonbParam(input.gallery) : null,
-      input.seo ? jsonbParam(input.seo) : null,
-    ],
-  );
+  const rows = await withTx(async (q) => {
+    const updated = await q<Row>(
+      `update custom_products
+          set brand = $2, name = $3, cat = $4, subcat = $5, sizes = $6::jsonb, prices = $7::jsonb,
+              description = $8::jsonb, gallery = $9::jsonb, seo = $10::jsonb, updated_at = now()
+        where id = $1
+        returning ${COLS}`,
+      [
+        id, input.brand, input.name, input.cat, input.subcat || null,
+        jsonbParam(input.sizes), jsonbParam(input.prices),
+        input.description ? jsonbParam(input.description) : null,
+        input.gallery ? jsonbParam(input.gallery) : null,
+        input.seo ? jsonbParam(input.seo) : null,
+      ],
+    );
+    if (updated.length) await syncVariantRows(q, id, cur.sizes, input.sizes);
+    return updated;
+  });
   return rows.length ? fromRow(rows[0]) : null;
 }
 
