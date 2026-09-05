@@ -275,8 +275,6 @@
       "Все цифры — настоящие, из вашего магазина.": "Kõik numbrid on päris, sinu enda poest.",
       "Цифры настоящие. Заказов пока нет — в списке показан пример, как это будет выглядеть.":
         "Numbrid on päris. Tellimusi veel pole — nimekirjas on näidis, kuidas see välja hakkab nägema.",
-      "Сервер заказов не отвечает — показан демонстрационный список.":
-        "Tellimuste server ei vasta — näidatakse näidisnimekirja.",
       "новый": "uus", "не оплачен": "maksmata",
       "Оформлен": "Vormistatud", "Оплачен": "Makstud", "Отправлен": "Teele saadetud",
       "Состав": "Koosseis", "Покупатель": "Ostja",
@@ -482,9 +480,6 @@
       "Баннеры": "Bännerid", "Выбрать баннер": "Vali bänner",
       "Предыдущий баннер": "Eelmine bänner", "Следующий баннер": "Järgmine bänner",
       "Главный баннер": "Avalehe bänner",
-      "Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Тексты — на трёх языках: пустой эстонский или английский заменяем русским.":
-        "Suur pilt avalehel. Slaidid vahetuvad ringiratast; üks slaid on lihtsalt pilt, ilma nooolteta. Tekstid on kolmes keeles: tühja eesti- või ingliskeelse teksti asendame venekeelsega.",
-      "Слайдов нет — баннер на главной не показывается.": "Slaide pole — avalehel bännerit ei näidata.",
       "Без заголовка": "Pealkirjata", "показан": "näidatakse", "скрыт": "peidetud",
       "Выше": "Kõrgemale", "Ниже": "Madalamale",
       "Изменить": "Muuda", "Удалить": "Kustuta", "Готово": "Valmis",
@@ -883,8 +878,6 @@
 
       // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
       "Контент": "Sisu",
-      "Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
-        "Kõik, mida pood enda kohta ütleb: ettevõtte andmed, lahtiolekuajad, sotsiaalmeedia, must riba päise kohal, leht „Kontakt“ ja allkiri kirjades. Muuda siin üks kord — ja muutub kõikjal: jaluses, lehel „Kontakt“, õigustekstides ja kirjades.",
       "Название компании": "Ettevõtte nimi",
       "Только цифры.": "Ainult numbrid.",
       "Номер KMKR": "KMKR-number",
@@ -919,8 +912,6 @@
       "Язык текстов": "Tekstide keel",
       "Рабочий день": "Tööpäev",
       "Выходной": "Suletud",
-      "Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.":
-        "Kellaaeg kujul 10:00–19:00. Tühi rida — päeva ei näidata; „Suletud“ kirjuta sõnaga.",
       "Примечание под часами": "Märkus lahtiolekuaegade all",
       "Например: в праздники — по записи.": "Näiteks: pühade ajal ainult ette registreerides.",
       "Ничего не изменилось": "Midagi ei muutunud",
@@ -1051,7 +1042,6 @@
       "Отчёты": "Aruanded", "Месяц": "Kuu", "Скачать CSV": "Laadi alla CSV", "Скачать XLSX": "Laadi alla XLSX",
       "НДС": "KM",
       "Вставьте сюда, что написал покупатель": "Kleebi siia, mida klient kirjutas",
-      "Выгрузка заказов для бухгалтера за один месяц — с разбивкой НДС.": "Tellimuste eksport raamatupidajale ühe kuu kohta — koos käibemaksu jaotusega.",
       "Вставьте сообщение клиента": "Kleebi kliendi sõnum",
       "У заказа нет e-mail покупателя": "Tellimusel pole kliendi e-posti",
       "Сначала напишите или сгенерируйте русское описание": "Kirjuta või genereeri esmalt venekeelne kirjeldus",
@@ -1090,16 +1080,6 @@
       "Начислений ещё не было.": "Kogumisi pole veel olnud.",
       "Одобрить": "Kinnita", "Убрать статус партнёра": "Eemalda partneri staatus",
       "Цены и лояльность": "Hinnad ja lojaalsus",
-      "Скидка для салонов и то, как покупатели зарабатывают и тратят баллы.":
-        "Salongisoodustus ning see, kuidas kliendid punkte koguvad ja kasutavad.",
-      "Войдите как владелец, чтобы менять цены и лояльность.": "Logige omanikuna sisse, et muuta hindu ja lojaalsusprogrammi.",
-      "Скидка для салонов, % — 0, если сейчас нет оптовых цен": "Salongisoodustus, % — 0, kui hulgihindu praegu ei ole",
-      "Скидка действует от суммы корзины, € — 0, если без условия":
-        "Soodustus kehtib alates ostukorvi summast, € — 0, kui tingimust ei ole",
-      "Баллы за покупки включены": "Ostude eest punktide kogumine on sees",
-      "Начисляем баллов — % от суммы оплаченного заказа": "Kogume punkte — % tasutud tellimuse summast",
-      "Списать можно не больше — % от суммы корзины": "Kasutada saab kuni — % ostukorvi summast",
-      "Списание доступно от — сколько баллов на счету": "Kasutamine on võimalik alates — mitu punkti kontol",
       "Отменить правки": "Loobu muudatustest",
       "Не получилось сохранить": "Ei õnnestunud salvestada",
       "Не получилось изменить баллы": "Punktide muutmine ei õnnestunud",
@@ -1598,9 +1578,6 @@
       "Включить чат": "Lülita vestlus sisse",
       "Подарочная карта продаётся отдельным пунктом в меню — номиналы включаются в «Маркетинг → Подарочные карты».":
         "Kinkekaarti müüakse menüüs eraldi punktina — nimiväärtused lülitatakse sisse jaotises «Turundus → Kinkekaardid».",
-      "основной язык — с него переводятся остальные": "peamine keel — sellest tõlgitakse ülejäänud",
-      "в меню магазина стоит «Blog», не «Ajaveeb»": "poe menüüs on «Blog», mitte «Ajaveeb»",
-      "полный перевод магазина и писем": "poe ja kirjade täielik tõlge",
       "Язык панели переключается внизу меню — на магазин это не влияет.":
         "Paneeli keelt vahetatakse menüü all — poodi see ei mõjuta.",
       "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
@@ -1626,7 +1603,61 @@
       "Тарифы доставки сохранены": "Tarnetariifid salvestatud",
       "Хотя бы один номинал должен остаться": "Vähemalt üks nimiväärtus peab alles jääma",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
-        "iPhone: Seaded → Safari → Kaamera → Luba. Android: tabaluku ikoon aadressiribal → Kaamera"
+        "iPhone: Seaded → Safari → Kaamera → Luba. Android: tabaluku ikoon aadressiribal → Kaamera",
+      /* phase 4 — the settings cards rebuilt in the panel's own markup, the
+         confirm cards in front of them, and «Языки» */
+      "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
+        "Pood töötab korraga kolmes keeles — vene, eesti ja inglise keeles. Ostja valib keele ise, lipukesega poe päises, ja pood jätab selle meelde.",
+      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.":
+        "Liides, tootenimede venekeelsed lõpud ja abilise kirjutatud kirjeldused tõlgitakse automaatselt. Kui kuskil on vaja sõnastust parandada — kirjutage Dmitrile.",
+      "Ссылки на магазин": "Poe lingid",
+      "Язык самой админки переключается внизу меню — на магазин это не влияет.": "Paneeli enda keelt vahetatakse menüü all — poodi see ei mõjuta.",
+      "Скрыть слайд": "Peida slaid", "Показать слайд": "Näita slaidi",
+      "Запретить снижать цены": "Keela hindade alandamine", "Разрешить снижать цены": "Luba hindade alandamine",
+      "три фото стопкой": "kolm fotot virnas", "Объёмы заводит Дмитрий": "Mahud lisab Dmitri",
+      "ваш товар": "teie toode",
+      "Заказов пока нет — первый появится здесь сразу после оплаты.": "Tellimusi veel pole — esimene ilmub siia kohe pärast maksmist.",
+      "Сервер заказов не отвечает — попробуйте ещё раз.": "Tellimuste server ei vasta — proovige uuesti.",
+      "Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.":
+        "Suur pilt avalehel. Slaidid vahetuvad ringiratast; üks slaid on lihtsalt pilt, ilma noolteta. Tühja eesti- või ingliskeelse teksti asendame venekeelsega.",
+      "Слайдов нет — баннер на главной не показывается. Нажмите «Добавить слайд».": "Slaide pole — avalehel bännerit ei näidata. Vajutage «Lisa slaid».",
+      "Все слайды скрыты — баннер на главной не показывается.\nПокупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.":
+        "Kõik slaidid on peidetud — avalehel bännerit ei näidata.\nOstjad näevad muudatust kohe. Endise bänneri saab tagasi muudatuste päevikust.",
+      "Изменить баннер на главной?": "Muuta avalehe bännerit?",
+      "Вернуть стандартный баннер?": "Taastada tavaline bänner?",
+      "Ваши слайды заменятся пятью стандартными. Это можно отменить из журнала изменений.": "Teie slaidid asenduvad viie tavalisega. Seda saab muudatuste päevikust tagasi võtta.",
+      "Баннер сохранён": "Bänner salvestatud", "Баннер снова стандартный": "Bänner on taas tavaline",
+      "Всё, что магазин говорит о себе. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
+        "Kõik, mida pood enda kohta ütleb. Muuda siin üks kord — ja muutub kõikjal: jaluses, lehel „Kontakt“, õigustekstides ja kirjades.",
+      "Эти данные подставляются в подвал магазина, на страницу «Контакты» и в правовые тексты — условия продажи, возврат, конфиденциальность.":
+        "Need andmed lähevad poe jalusesse, lehele „Kontakt“ ja õigustekstidesse — müügitingimused, tagastus, privaatsus.",
+      "Текст и ссылка": "Tekst ja link",
+      "Скрыть полоску": "Peida riba", "Показать полоску": "Näita riba",
+      "Время в виде 10:00–19:00. Пустая строка — день не показываем; выходной отмечается кнопкой.":
+        "Aeg kujul 10:00–19:00. Tühi rida — päeva ei näidata; puhkepäev märgitakse nupuga.",
+      "Изменить данные магазина?": "Muuta poe andmeid?", "Вернуть стандартные данные?": "Taastada tavalised andmed?",
+      "Данные магазина сохранены": "Poe andmed salvestatud",
+      "Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.":
+        "Soodustus salongidele ja meistritele — ning see, kuidas ostjad punkte koguvad ja kasutavad.",
+      "Войдите как владелец, чтобы менять цены и баллы.": "Logige omanikuna sisse, et muuta hindu ja punkte.",
+      "Салоны и мастера": "Salongid ja meistrid",
+      "Скидка для салонов, %": "Salongisoodustus, %",
+      "0 — если оптовых цен сейчас нет.": "0 — kui hulgihindu praegu ei ole.",
+      "Действует от суммы корзины, €": "Kehtib alates ostukorvi summast, €",
+      "0 — без условия.": "0 — ilma tingimuseta.",
+      "Баллы за покупки": "Punktid ostude eest", "Начислять баллы": "Koguda punkte",
+      "один балл — одно евро при списании": "üks punkt — üks euro kasutamisel",
+      "Выключить баллы": "Lülita punktid välja", "Включить баллы": "Lülita punktid sisse",
+      "Начисляем, % от суммы оплаченного заказа": "Kogume, % tasutud tellimuse summast",
+      "Списать можно не больше, % от корзины": "Kasutada saab kuni, % ostukorvist",
+      "Списание доступно от, баллов на счету": "Kasutamine alates, punkti kontol",
+      "Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.":
+        "Punktid on välja lülitatud: ostude eest neid ei koguta ja kassas kasutada ei saa.",
+      "Изменить цены и баллы?": "Muuta hindu ja punkte?", "Цены и баллы сохранены": "Hinnad ja punktid salvestatud",
+      "Отчёт для бухгалтера": "Aruanne raamatupidajale",
+      "Все заказы за месяц одним файлом, с разбивкой НДС. Откроется в Excel или Google Таблицах.":
+        "Kõik kuu tellimused ühes failis, koos käibemaksu jaotusega. Avaneb Excelis või Google'i arvutustabelites.",
+      "За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.": "Sel kuul tellimusi ei olnud — fail jääb tühjaks. Valige teine kuu.",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -1821,8 +1852,6 @@
       "Все цифры — настоящие, из вашего магазина.": "Every figure here is real, from your own shop.",
       "Цифры настоящие. Заказов пока нет — в списке показан пример, как это будет выглядеть.":
         "The figures are real. There are no orders yet — the list below is a sample of how it will look.",
-      "Сервер заказов не отвечает — показан демонстрационный список.":
-        "The orders server is not responding — showing the demo list.",
       "новый": "new", "не оплачен": "unpaid",
       "Оформлен": "Placed", "Оплачен": "Paid", "Отправлен": "Shipped",
       "Состав": "Items", "Покупатель": "Customer",
@@ -2029,9 +2058,6 @@
       "Баннеры": "Banners", "Выбрать баннер": "Choose a banner",
       "Предыдущий баннер": "Previous banner", "Следующий баннер": "Next banner",
       "Главный баннер": "Home banner",
-      "Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Тексты — на трёх языках: пустой эстонский или английский заменяем русским.":
-        "The big picture on the home page. Slides rotate; a single slide is just a picture, with no arrows. Texts come in three languages: an empty Estonian or English one falls back to the Russian.",
-      "Слайдов нет — баннер на главной не показывается.": "No slides — the home page shows no banner.",
       "Без заголовка": "No title", "показан": "shown", "скрыт": "hidden",
       "Выше": "Move up", "Ниже": "Move down",
       "Изменить": "Edit", "Удалить": "Delete", "Готово": "Done",
@@ -2430,8 +2456,6 @@
 
       // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
       "Контент": "Content",
-      "Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
-        "Everything the shop says about itself: company details, opening hours, social media, the black bar above the header, the “Contact” page and the e-mail signature. Change it here once and it changes everywhere: in the footer, on “Contact”, in the legal texts and in the e-mails.",
       "Название компании": "Company name",
       "Только цифры.": "Digits only.",
       "Номер KMKR": "VAT number",
@@ -2466,8 +2490,6 @@
       "Язык текстов": "Text language",
       "Рабочий день": "Open",
       "Выходной": "Closed",
-      "Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.":
-        "Times as 10:00–19:00. An empty line hides that day; write “Closed” as a word.",
       "Примечание под часами": "A note under the hours",
       "Например: в праздники — по записи.": "For example: on public holidays, by appointment.",
       "Ничего не изменилось": "Nothing changed",
@@ -2593,7 +2615,6 @@
       "Отчёты": "Reports", "Месяц": "Month", "Скачать CSV": "Download CSV", "Скачать XLSX": "Download XLSX",
       "НДС": "VAT",
       "Вставьте сюда, что написал покупатель": "Paste in what the customer wrote",
-      "Выгрузка заказов для бухгалтера за один месяц — с разбивкой НДС.": "Order export for the accountant for one month — with a VAT breakdown.",
       "Вставьте сообщение клиента": "Paste in the customer's message",
       "У заказа нет e-mail покупателя": "This order has no customer e-mail",
       "Сначала напишите или сгенерируйте русское описание": "First write or generate the Russian description",
@@ -2632,16 +2653,6 @@
       "Начислений ещё не было.": "No points earned yet.",
       "Одобрить": "Approve", "Убрать статус партнёра": "Remove partner status",
       "Цены и лояльность": "Pricing and loyalty",
-      "Скидка для салонов и то, как покупатели зарабатывают и тратят баллы.":
-        "The salon discount, and how customers earn and spend points.",
-      "Войдите как владелец, чтобы менять цены и лояльность.": "Sign in as the owner to change pricing and loyalty.",
-      "Скидка для салонов, % — 0, если сейчас нет оптовых цен": "Salon discount, % — 0 if there is no wholesale pricing right now",
-      "Скидка действует от суммы корзины, € — 0, если без условия":
-        "Discount applies from this cart total, € — 0 for no minimum",
-      "Баллы за покупки включены": "Points for purchases are on",
-      "Начисляем баллов — % от суммы оплаченного заказа": "We credit points — % of the paid order total",
-      "Списать можно не больше — % от суммы корзины": "The most that can be redeemed — % of the cart total",
-      "Списание доступно от — сколько баллов на счету": "Redeeming is available from — how many points on the balance",
       "Отменить правки": "Discard changes",
       "Не получилось сохранить": "Could not save",
       "Не получилось изменить баллы": "Could not change the points",
@@ -3140,9 +3151,6 @@
       "Включить чат": "Switch the chat on",
       "Подарочная карта продаётся отдельным пунктом в меню — номиналы включаются в «Маркетинг → Подарочные карты».":
         "The gift card is sold as its own menu entry — the amounts are switched on under “Marketing → Gift cards”.",
-      "основной язык — с него переводятся остальные": "the source language — the others are translated from it",
-      "в меню магазина стоит «Blog», не «Ajaveeb»": "the shop menu says “Blog”, not “Ajaveeb”",
-      "полный перевод магазина и писем": "a full translation of the shop and the letters",
       "Язык панели переключается внизу меню — на магазин это не влияет.":
         "The panel language is switched at the bottom of the menu — it does not affect the shop.",
       "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
@@ -3168,7 +3176,61 @@
       "Тарифы доставки сохранены": "Delivery tariffs saved",
       "Хотя бы один номинал должен остаться": "At least one amount has to stay",
       "iPhone: Настройки → Safari → Камера → Разрешить. Android: значок замка в адресной строке → Камера":
-        "iPhone: Settings → Safari → Camera → Allow. Android: the padlock in the address bar → Camera"
+        "iPhone: Settings → Safari → Camera → Allow. Android: the padlock in the address bar → Camera",
+      /* phase 4 — the settings cards rebuilt in the panel's own markup, the
+         confirm cards in front of them, and «Языки» */
+      "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
+        "The shop runs in three languages at once — Russian, Estonian and English. The visitor picks the language with the flag in the shop's header, and the shop remembers it.",
+      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.":
+        "The interface, the Russian tails of product names and the descriptions the assistant writes are translated automatically. If a wording needs fixing somewhere, write to Dmitri.",
+      "Ссылки на магазин": "Shop links",
+      "Язык самой админки переключается внизу меню — на магазин это не влияет.": "The panel's own language is switched at the bottom of the menu — it does not affect the shop.",
+      "Скрыть слайд": "Hide the slide", "Показать слайд": "Show the slide",
+      "Запретить снижать цены": "Do not lower prices", "Разрешить снижать цены": "Allow lowering prices",
+      "три фото стопкой": "three photos stacked", "Объёмы заводит Дмитрий": "Sizes are added by Dmitri",
+      "ваш товар": "your product",
+      "Заказов пока нет — первый появится здесь сразу после оплаты.": "No orders yet — the first one appears here as soon as it is paid.",
+      "Сервер заказов не отвечает — попробуйте ещё раз.": "The orders server is not answering — try again.",
+      "Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.":
+        "The big picture on the home page. Slides rotate in a loop; a single slide is just a picture, no arrows. An empty Estonian or English text is replaced by the Russian one.",
+      "Слайдов нет — баннер на главной не показывается. Нажмите «Добавить слайд».": "No slides — the home page shows no banner. Press “Add slide”.",
+      "Все слайды скрыты — баннер на главной не показывается.\nПокупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.":
+        "All slides are hidden — the home page shows no banner.\nCustomers see the change at once. The previous banner can be brought back from the change journal.",
+      "Изменить баннер на главной?": "Change the home page banner?",
+      "Вернуть стандартный баннер?": "Restore the default banner?",
+      "Ваши слайды заменятся пятью стандартными. Это можно отменить из журнала изменений.": "Your slides will be replaced by the five default ones. This can be undone from the change journal.",
+      "Баннер сохранён": "Banner saved", "Баннер снова стандартный": "Banner back to default",
+      "Всё, что магазин говорит о себе. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.":
+        "Everything the shop says about itself. Change it here once — and it changes everywhere: in the footer, on the Contact page, in the legal texts and in the letters.",
+      "Эти данные подставляются в подвал магазина, на страницу «Контакты» и в правовые тексты — условия продажи, возврат, конфиденциальность.":
+        "These details go into the shop footer, the Contact page and the legal texts — terms of sale, returns, privacy.",
+      "Текст и ссылка": "Text and link",
+      "Скрыть полоску": "Hide the bar", "Показать полоску": "Show the bar",
+      "Время в виде 10:00–19:00. Пустая строка — день не показываем; выходной отмечается кнопкой.":
+        "Time as 10:00–19:00. An empty line — the day is not shown; a day off is marked with the button.",
+      "Изменить данные магазина?": "Change the shop details?", "Вернуть стандартные данные?": "Restore the default details?",
+      "Данные магазина сохранены": "Shop details saved",
+      "Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.":
+        "The discount for salons and stylists — and how customers earn and spend points.",
+      "Войдите как владелец, чтобы менять цены и баллы.": "Sign in as the owner to change prices and points.",
+      "Салоны и мастера": "Salons and stylists",
+      "Скидка для салонов, %": "Salon discount, %",
+      "0 — если оптовых цен сейчас нет.": "0 — if there is no wholesale pricing right now.",
+      "Действует от суммы корзины, €": "Applies from a basket total of, €",
+      "0 — без условия.": "0 — no condition.",
+      "Баллы за покупки": "Points for purchases", "Начислять баллы": "Award points",
+      "один балл — одно евро при списании": "one point — one euro when redeemed",
+      "Выключить баллы": "Switch points off", "Включить баллы": "Switch points on",
+      "Начисляем, % от суммы оплаченного заказа": "Awarded, % of the paid order total",
+      "Списать можно не больше, % от корзины": "Redeem at most, % of the basket",
+      "Списание доступно от, баллов на счету": "Redeeming available from, points on the account",
+      "Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.":
+        "Points are off: purchases earn none, and none can be redeemed at checkout.",
+      "Изменить цены и баллы?": "Change prices and points?", "Цены и баллы сохранены": "Prices and points saved",
+      "Отчёт для бухгалтера": "Report for the accountant",
+      "Все заказы за месяц одним файлом, с разбивкой НДС. Откроется в Excel или Google Таблицах.":
+        "Every order of the month in one file, VAT broken out. Opens in Excel or Google Sheets.",
+      "За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.": "There were no orders this month — the file would be empty. Pick another month.",
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -3263,6 +3325,27 @@
     [/^(\d) из 5$/, { ET: "$1 / 5", EN: "$1 out of 5" }],
     // главный баннер
     [/^Баннер (\d+)$/, { ET: "Bänner $1", EN: "Banner $1" }],
+    // phase 4: the reviews tabs carry their counts, the tariff cells their
+    // country in the aria-label
+    [/^Опубликованные (\d+)$/, { ET: "Avaldatud $1", EN: "Published $1" }],
+    [/^Отклонённые (\d+)$/, { ET: "Tagasi lükatud $1", EN: "Rejected $1" }],
+    [/^Пакомат — (.+)$/, { ET: "Pakiautomaat — $1", EN: "Parcel locker — $1" }],
+    [/^Курьер — (.+)$/, { ET: "Kuller — $1", EN: "Courier — $1" }],
+    [/^Бесплатно от — (.+)$/, { ET: "Tasuta alates — $1", EN: "Free from — $1" }],
+    [/^Самовывоз — (.+)$/, { ET: "Järeletulek — $1", EN: "Pickup — $1" }],
+    // phase 4: the slide count beside «Главный баннер», and the three confirm
+    // cards in front of the rebuilt settings cards (one pre-line block each)
+    [/^(\d+) слайд$/, { ET: "$1 slaid", EN: "$1 slide" }],
+    [/^(\d+) слайд(?:а|ов)$/, { ET: "$1 slaidi", EN: "$1 slides" }],
+    [/^Слайдов на сайте: (\d+)\.\nПокупатели увидят изменение сразу\. Вернуть прежний баннер можно из журнала изменений\.$/,
+      { ET: "Slaide saidil: $1.\nOstjad näevad muudatust kohe. Endise bänneri saab tagasi muudatuste päevikust.",
+        EN: "Slides on the site: $1.\nCustomers see the change at once. The previous banner can be brought back from the change journal." }],
+    [/^(.+)\nИзменится везде: в подвале магазина, на «Контактах», в правовых текстах и в письмах\.$/,
+      { ET: "$1\nMuutub kõikjal: poe jaluses, lehel „Kontakt“, õigustekstides ja kirjades.",
+        EN: "$1\nChanges everywhere: in the shop footer, on the Contact page, in the legal texts and in the letters." }],
+    [/^(.+)\nНовые условия начнут действовать сразу — для всех покупателей и партнёров\.$/,
+      { ET: "$1\nUued tingimused hakkavad kehtima kohe — kõigile ostjatele ja partneritele.",
+        EN: "$1\nThe new terms apply at once — to every customer and partner." }],
     [/^Кнопка ведёт на: (.+)$/, { ET: "Nupp viib: $1", EN: "The button goes to: $1" }],
     /* checkout-gaps: the applied promo code carries the code and the number
        inside the same line, so it cannot be a plain dictionary key. */
@@ -3396,7 +3479,8 @@
     "паста": ["pasta", "paste"], "воск": ["vaha", "wax"],
     "пудра": ["puuder", "powder"], "гель": ["geel", "gel"],
     "крем": ["kreem", "cream"], "пенка": ["vaht", "foam"],
-    "лосьон": ["losjoon", "lotion"], "патчи": ["plaastrid", "patches"]
+    "лосьон": ["losjoon", "lotion"], "патчи": ["plaastrid", "patches"],
+    "глазурь": ["glasuur", "glaze"], "эссенция": ["essents", "essence"]
   };
   var NAME_FRAGS = [
     [/ для волос/g, { ET: " juustele", EN: " for hair" }],
@@ -3409,7 +3493,9 @@
   ];
   var TAIL_EXACT = {
     "футболка оверсайз": ["oversize T-särk", "oversized tee"],
-    "парфюм": ["parfüüm", "perfume"]
+    "парфюм": ["parfüüm", "perfume"],
+    "гидрофильное масло": ["hüdrofiilne õli", "cleansing oil"],
+    "ручная работа": ["käsitöö", "handmade"]
   };
   /* Product names only — the fragment rules would turn an ordinary sentence
      into franglais, so this never runs outside name-bearing elements. */
@@ -3457,7 +3543,10 @@
   var TR_ATTRS = ["placeholder", "aria-label", "title", "label"];
   // .cline__parts and .bitem__nm (features) list product names inside a set —
   // without them the Russian type tail survived into the Estonian cart
-  var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm";
+  // …and the panel's own rows and picker tiles (phase 4): a product listed in
+  // «Товары» or picked for a banner keeps its Russian tail otherwise
+  var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm," +
+    ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2";
   function translateTree(root) {
     if (S.lang === "RU" || !root) return;
     var lang = S.lang;
@@ -3491,7 +3580,9 @@
       for (var a = 0; a < TR_ATTRS.length; a++) {
         var v = els[i].getAttribute(TR_ATTRS[a]);
         if (v && /[А-Яа-яЁё]/.test(v)) {
-          var tv = trText(v, S.lang, false);
+          // a product name in a tooltip (the picker tiles) keeps its type tail
+          // translated the way its text does
+          var tv = trText(v, S.lang, !!(els[i].closest && els[i].closest(NAME_CTX)));
           if (tv !== v) els[i].setAttribute(TR_ATTRS[a], tv);
         }
       }
@@ -7122,30 +7213,30 @@
   function blogToolSheet() {
     var t = S.adminBlogTool;
     if (t === "link") {
-      return '<div class="admblog__toolrow">' +
-        '<input class="input input--box" data-blogtoolurl value="' + esc(S.adminBlogToolUrl || "") +
+      return '<div class="adm-toolrow">' +
+        '<input class="adm-input adm-input--row adm-toolrow__in" data-blogtoolurl value="' + esc(S.adminBlogToolUrl || "") +
           '" placeholder="https://…" aria-label="Адрес ссылки">' +
-        '<button class="btn btn--sm" data-blogtoolok="link">Вставить</button>' +
+        '<button class="adm-btn adm-btn--row" data-blogtoolok="link">Вставить</button>' +
         '<button class="link" data-blogtoolcancel>Отмена</button></div>';
     }
     if (t === "image") {
       return (MEDIA.on === true
-        ? '<div class="admblog__toolrow">' +
-            '<button class="btn btn--sm" data-blogtoolupload' + (UP.busy ? " disabled" : "") + ">" +
+        ? '<div class="adm-toolrow">' +
+            '<button class="adm-btn adm-btn--row" data-blogtoolupload' + (UP.busy ? " disabled" : "") + ">" +
               (UP.busy ? upBusyText() : "Загрузить картинку") + "</button>" +
-            '<input class="admphoto__file" type="file" accept="image/*" data-blogtoolfile aria-label="Загрузить картинку">' +
+            '<input class="adm-file" type="file" accept="image/*" data-blogtoolfile aria-label="Загрузить картинку">' +
             '<button class="link" data-blogtoolcancel>Отмена</button></div>'
-        : '<p class="admphoto__off">Загрузка картинок пока не настроена — вставьте ссылку на картинку.</p>') +
-        '<div class="admblog__toolrow">' +
-          '<input class="input input--box" data-blogtoolurl value="' + esc(S.adminBlogToolUrl || "") +
+        : '<p class="adm-hint" style="margin:8px 0 0">Загрузка картинок пока не настроена — вставьте ссылку на картинку.</p>') +
+        '<div class="adm-toolrow">' +
+          '<input class="adm-input adm-input--row adm-toolrow__in" data-blogtoolurl value="' + esc(S.adminBlogToolUrl || "") +
             '" placeholder="https://адрес-картинки" aria-label="Ссылка на картинку">' +
-          '<button class="btn btn--sm" data-blogtoolok="image">Вставить</button>' +
-          (MEDIA.on === true ? "" : '<button class="link" data-blogtoolcancel>Отмена</button>') +
+          '<button class="adm-btn adm-btn--row" data-blogtoolok="image">Вставить</button>' +
+          (MEDIA.on === true ? "" : '<button class="adm-link adm-link--muted" data-blogtoolcancel>Отмена</button>') +
         "</div>";
     }
     if (t === "product") {
-      return '<div class="admblog__toolrow">' +
-          '<input class="input input--box" data-blogtoolq value="' + esc(S.adminBlogToolQ || "") +
+      return '<div class="adm-toolrow">' +
+          '<input class="adm-input adm-input--row adm-toolrow__in" data-blogtoolq value="' + esc(S.adminBlogToolQ || "") +
             '" placeholder="Найти товар по названию" aria-label="Найти товар">' +
           '<button class="link" data-blogtoolcancel>Отмена</button></div>' +
         '<div data-blogtoollist>' + blogToolMatches() + "</div>";
@@ -7160,10 +7251,10 @@
       return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
     }).slice(0, 8);
     if (!matches.length) return "";
-    return '<div class="adm__list">' + matches.map(function (p) {
-      return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-        '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-        '<button class="link" data-blogtoolpick="' + esc(p.id) + '">Вставить</button></div>';
+    return '<div class="adm-list adm-list--flat">' + matches.map(function (p) {
+      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-blogtoolpick="' + esc(p.id) + '">Вставить</button></div>';
     }).join("") + "</div>";
   }
   function blogToolDraw(focusIt) {
@@ -8998,7 +9089,7 @@
     return "7d";
   }
   /* KPI card with a delta vs. the previous period of the same length — reuses
-     .kpi/.kpi__l/.kpi__v/.kpi__s (kpi() above), just with a coloured third
+     .adm-kpi/.adm-kpi__l/.adm-kpi__v (admPlainKpi() below), just with a coloured third
      line. deltaPct null (no previous-period data at all, e.g. a brand-new
      shop) reads as a sentence rather than a misleading "+0%". */
   /* No chart library: a plain inline SVG line + fill, scaled to the data's
@@ -9044,17 +9135,21 @@
 
      The pixel spec is docs/design/admin-handoff-README.md; the copy below is
      the prototype's, word for word. Everything here draws with `adm-` classes
-     from public/shop2/admin.css — the legacy `.adm__*` rules keep styling the
-     sections phases 2 and 3 still have to redesign, which is why the two
-     class families never meet.
+     from public/shop2/admin.css. Since phase 4 every screen, card and row of
+     the panel draws with them; the `.adm__*` rules left in styles.css style
+     only the cabinet's points ledger, so the two class families never meet.
      ====================================================================== */
 
   /** The list the panel works from: the shop's real orders once the owner is
       signed in and the shop has taken some, the demo set otherwise — so the
       panel is never an empty room on a machine with no backend. */
   function admOrders() {
-    var live = SRV.admin === true && SRV.orders && SRV.orders.length ? SRV.orders : null;
-    return live || fakeOrders();
+    // A signed-in owner sees his own orders and nothing else: a shop that has
+    // taken none yet shows an honest empty list, not fourteen invented
+    // customers beside real counts (README fix #1). The demo set is only for
+    // a build with no backend at all.
+    if (SRV.admin === true) return SRV.orders || [];
+    return fakeOrders();
   }
   /** One shape for an order, whether it came from the server or from the demo
       list, so the redesigned row and card can draw both without asking. */
@@ -9136,7 +9231,7 @@
   function admRecentRow(v) {
     return '<button class="adm-row adm-row--click" data-admorder="' + esc(v.id) + '">' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(v.who) + "</span>" +
-      '<span class="adm-row__sub"><span class="adm-mono">' + esc(v.number) + "</span> · " + esc(v.ship) + "</span></span>" +
+      '<span class="adm-row__sub"><span class="adm-mono">' + esc(v.number) + "</span> · <span>" + esc(v.ship) + "</span></span></span>" +
       admOrderBadge(v) +
       '<span class="adm-row__amt">' + eur(v.sum) + "</span></button>";
   }
@@ -9207,7 +9302,9 @@
           '<div class="adm-list">' + tasks + "</div></div>" +
         '<div><div class="adm-sec"><div class="adm-sec__t">Последние заказы</div>' +
           '<button class="adm-link" data-admtab="orders" data-admfilter="all">Все заказы</button></div>' +
-          '<div class="adm-list">' + vms.slice(0, 4).map(admRecentRow).join("") + "</div></div>" +
+          (vms.length
+            ? '<div class="adm-list">' + vms.slice(0, 4).map(admRecentRow).join("") + "</div>"
+            : '<div class="adm-empty">Заказов пока нет — первый появится здесь сразу после оплаты.</div>') + "</div>" +
       "</div>" +
       '<div><div class="adm-sec__t">Продажи</div><div class="adm-sales">' +
         '<div class="adm-sales__cell"><div class="adm-sales__l">Сегодня</div>' +
@@ -9251,7 +9348,7 @@
           '" placeholder="Номер, имя, телефон" aria-label="Поиск по заказам" style="flex:1;min-width:180px">' +
       "</div>" +
       (SRV.admin === true && SRV.ordersErr
-        ? '<div class="adm-error"><span>Сервер заказов не отвечает — показан демонстрационный список.</span>' +
+        ? '<div class="adm-error"><span>Сервер заказов не отвечает — попробуйте ещё раз.</span>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="orders">Повторить</button></div>'
         : "") +
       '<div class="adm-list adm-list--flat" id="orderlist">' + admOrderRows() + "</div>" +
@@ -9268,6 +9365,10 @@
         var phone = (v.srv && v.srv.phone) || "";
         return (v.number + " " + v.who + " " + phone).toLowerCase().indexOf(q) >= 0;
       });
+    // still loading: bars, not «Таких заказов нет» over a list that has not arrived
+    if (!list.length && SRV.admin === true && !SRV.orders && !SRV.ordersErr) {
+      return '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    }
     return list.map(admOrderRowHTML).join("") +
       (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
   }
@@ -9286,7 +9387,7 @@
           '<span style="font-weight:600">' + esc(v.who) + "</span>" +
           '<span class="adm-row__amt">' + eur(v.sum) + "</span></span>" +
         '<span class="adm-row__sub" style="width:100%"><span class="adm-mono">' + esc(v.number) + "</span> · " +
-          esc(v.date) + " · " + admItemsLabel(v.items) + "<br>" + esc(v.ship) + "</span>" +
+          esc(v.date) + " · <span>" + admItemsLabel(v.items) + "</span><br><span>" + esc(v.ship) + "</span></span>" +
       "</button>" +
       '<div class="adm-acts">' + admOrderBadge(v) + '<div style="flex:1"></div>' + acts + "</div>" +
     "</div>";
@@ -9583,7 +9684,7 @@
       '<span class="adm-thumb">' + media(p, 0, "") + "</span>" +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) +
         (fresh ? ' <span class="adm-badge adm-badge--sm adm-badge--ink" data-goodsfresh>новый</span>' : "") + "</span>" +
-        '<span class="adm-row__sub">' + esc((p.sizes || []).join(" · ")) + "</span></span>" +
+        '<span class="adm-row__sub">' + (p.sizes || []).map(function (s) { return "<span>" + esc(s) + "</span>"; }).join(" · ") + "</span></span>" +
       '<span class="adm-row__end"><span class="adm-row__amt">' + price + "</span>" +
         '<span class="adm-badge adm-badge--sm ' + badge[1] + '">' + badge[0] + "</span></span></button>";
   }
@@ -9605,11 +9706,12 @@
       (list.length
         ? '<div class="adm-list adm-list--flat">' + list.map(function (b, i) {
             return '<div class="adm-row"><span class="adm-thumb">' + bundleStack(b, "bstack--line") + "</span>" +
-              '<span class="adm-row__body"><span class="adm-row__nm">' + esc((b.title && b.title.RU) || b.id) + "</span>" +
-              '<span class="adm-row__sub adm-row__sub--one">' + esc(b.items.map(function (it) {
+              '<span class="adm-row__body"><span class="adm-row__nm">' + esc((b.title && (b.title[S.lang] || b.title.RU)) || b.id) + "</span>" +
+              // each name its own node, so the Russian type tail is translated per product
+              '<span class="adm-row__sub adm-row__sub--one">' + b.items.map(function (it) {
                 var p = byIdOrNull(it.productId);
-                return p ? p.name : it.productId;
-              }).join(" + ")) + "</span></span>" +
+                return "<span>" + esc(p ? p.name : it.productId) + "</span>";
+              }).join(" + ") + "</span></span>" +
               '<span class="adm-badge adm-badge--sm ' + (b.active ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
                 (b.active ? "Показан" : "Скрыт") + "</span>" +
               '<span class="adm-row__amt">' + eur(b.price) + "</span>" +
@@ -9871,7 +9973,9 @@
   }
   /** «← Куда-то» — the one way back out of every sub-screen. */
   function admBackHTML(attrs, label) {
-    return '<button class="adm-link" ' + attrs + ">← " + label + "</button>";
+    // the arrow outside the label's own node — «← Настройки» as one string
+    // was the one word on every sub-page the Estonian panel never translated
+    return '<button class="adm-link" ' + attrs + ">← <span>" + label + "</span></button>";
   }
   /** Two columns with a right rail, the pattern of § «Design tokens». */
   function admColsHTML(main, side, wide) {
@@ -10029,7 +10133,7 @@
       return '<div class="adm-row adm-row--tall">' +
         '<button class="adm-row__body" data-mailtpl="' + m[0] + '" style="border:0;background:none;padding:0;text-align:left">' +
           '<span class="adm-row__nm">' + m[1] + "</span>" +
-          '<span class="adm-row__sub">' + m[2] + flowCountLine(flow) + "</span></button>" +
+          '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
         (flow
           ? admSwitch('data-admflow="' + flow + '"', on, on ? "Выключить письмо" : "Включить письмо")
           : '<span class="adm-badge adm-badge--ok">всегда</span>') +
@@ -10045,7 +10149,8 @@
   function flowCountLine(flow) {
     var key = { backstock: "alerts", abandoned: "carts", birthday: "birthdays" }[flow];
     if (!FLOW_COUNTS || !key || FLOW_COUNTS[key] === undefined) return "";
-    return " · " + FLOW_COUNT_LABEL[key] + " " + Number(FLOW_COUNTS[key]);
+    // the label is its own node: glued to the count it was one Russian string
+    return " · <span>" + FLOW_COUNT_LABEL[key] + "</span> " + Number(FLOW_COUNTS[key]);
   }
   function admMailEditorHTML() {
     /* Nothing until the texts land. Drawn early the fields are empty, «Вернуть
@@ -10151,8 +10256,9 @@
     return head + '<div class="adm-list">' + posts.map(admBlogRowHTML).join("") + "</div></div>";
   }
   function admBlogRowHTML(p) {
-    var title = p.title.RU || p.title.ET || p.title.EN || p.slug;
-    var ex = p.excerpt && (p.excerpt.RU || p.excerpt.ET || p.excerpt.EN) || "";
+    // the panel's own language first — an Estonian panel lists the Estonian titles
+    var title = p.title[S.lang] || p.title.RU || p.title.ET || p.title.EN || p.slug;
+    var ex = p.excerpt && (p.excerpt[S.lang] || p.excerpt.RU || p.excerpt.ET || p.excerpt.EN) || "";
     var date = p.publishedAt ? blogDate(p.publishedAt) : "черновик";
     return '<button class="adm-row adm-row--tall adm-row--click" data-admblogedit="' + esc(p.id) + '">' +
       '<span class="adm-thumb" style="width:72px;height:48px' +
@@ -10184,7 +10290,7 @@
       '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
         return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
       }).join("") + '<button data-blogrt="undo" title="Отменить">Отменить</button></div>' +
-      '<div class="admblog__tool" data-blogtool>' + blogToolSheet() + "</div>" +
+      '<div class="adm-tool" data-blogtool>' + blogToolSheet() + "</div>" +
       /* `placeholder` on a div is not a real one — the CSS prints it with
          content: attr(placeholder). Written that way so translateTree()
          rewrites it like any other placeholder in this panel. */
@@ -10212,7 +10318,7 @@
          handler): the language pill re-renders this whole screen, and the
          block used to fold shut exactly when the owner had opened it to
          compare the Google lines of the three languages. */
-      '<details class="adm-embed" data-blogseo' + (S.adminBlogMore ? " open" : "") + '>' +
+      '<details class="adm-fold" data-blogseo' + (S.adminBlogMore ? " open" : "") + '>' +
         '<summary class="adm-link" data-blogmore>Адрес, автор и текст для Google</summary>' +
         '<div style="padding-top:12px">' +
           /* The pair below is the language the pill is on — so are the two
@@ -10285,7 +10391,7 @@
       '<span><button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' +
         (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" +
         (UP.busy ? upBusyText() : d.coverUrl ? "Заменить обложку" : "+ Обложка") + "</button>" +
-      '<input class="admphoto__file" type="file" accept="image/*" data-galfile="blog" aria-label="Обложка статьи">' +
+      '<input class="adm-file" type="file" accept="image/*" data-galfile="blog" aria-label="Обложка статьи">' +
       (d.coverUrl ? ' <button class="adm-link adm-link--muted" data-admblogcoverdel>Удалить</button>' : "") +
       '<span class="adm-hint" style="display:block;margin-top:6px">' +
         (MEDIA.on === false ? "Загрузка фото пока не настроена — нужно подключить хранилище."
@@ -10432,7 +10538,10 @@
   /** The action on a red row: a plain mailto, not a button that pretends the
       panel can fix a DNS record by itself. */
   function admDevLink() {
-    return '<a class="adm-btn adm-btn--row" href="mailto:' + ADM_DEV_MAIL + '">Написать Дмитрию</a>';
+    // the page's address rides in the body, so «ссылка уже в письме» is true
+    var href = "mailto:" + ADM_DEV_MAIL + "?subject=" + encodeURIComponent("Rempire — вопрос из админки") +
+      "&body=" + encodeURIComponent("Страница: " + location.href + "\n\n");
+    return '<a class="adm-btn adm-btn--row" href="' + esc(href) + '">Написать Дмитрию</a>';
   }
   function admIntegrationRows() {
     var rows = [];
@@ -10496,7 +10605,7 @@
       }).join("") + "</div>" +
       '<p class="adm-hint">Если что-то красное и непонятно — напишите Дмитрию. ' +
         "Ссылка на эту страницу уже в письме.</p>" +
-      '<p class="adm-hint"><a href="mailto:' + ADM_DEV_MAIL + '">' + ADM_DEV_MAIL + "</a></p>" +
+      '<div class="adm-acts">' + admDevLink() + '<span class="adm-hint adm-mono">' + ADM_DEV_MAIL + "</span></div>" +
       "</div>";
   }
 
@@ -10554,11 +10663,11 @@
         "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
       SHIP_ROWS.map(function (r) {
         return '<div class="adm-tariffs" style="margin-top:8px"><span>' + r[1] + "</span>" +
-          '<span>' + admShipCellHTML("m:parcel:" + r[0], shipCell("parcel", r[0]), "Пакомат — " + r[1]) +
+          '<span>' + admShipCellHTML("m:parcel:" + r[0], shipCell("parcel", r[0]), "Пакомат — " + r[1], "Пакомат, €") +
             montonioHint("parcel", r[0]) + "</span>" +
-          '<span>' + admShipCellHTML("m:courier:" + r[0], shipCell("courier", r[0]), "Курьер — " + r[1]) +
+          '<span>' + admShipCellHTML("m:courier:" + r[0], shipCell("courier", r[0]), "Курьер — " + r[1], "Курьер, €") +
             montonioHint("courier", r[0]) + "</span>" +
-          '<span>' + admShipCellHTML("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1]) + "</span></div>";
+          '<span>' + admShipCellHTML("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1], "Бесплатно от, €") + "</span></div>";
       }).join("") +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       '<div class="adm-acts" style="margin-top:16px">' +
@@ -10567,7 +10676,7 @@
       "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Кнопка впишет тарифы перевозчика плюс наценку, ' +
         "округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.</p>" +
-      '<details class="adm-embed" style="margin-top:16px">' +
+      '<details class="adm-fold" style="margin-top:16px">' +
         '<summary class="adm-link">Самовывоз, перевозчики и наценка</summary><div style="padding-top:12px">' +
           '<label class="adm-field"><span>Самовывоз, €</span>' +
             admShipCellHTML("m:pickup:EE", shipCell("pickup", "EE"), "Самовывоз — Эстония") + "</label>" +
@@ -10583,9 +10692,10 @@
             admShipCellHTML("markup:percent", shipMarkupCell("percent"), "Наценка, проценты") + "</label>" +
           '<label class="adm-field" style="margin-top:10px"><span>Наценка, €</span>' +
             admShipCellHTML("markup:fixed", shipMarkupCell("fixed"), "Наценка, евро") + "</label>" +
-          '<label class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
+          '<div class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
             '<span class="adm-row__sub">по умолчанию тариф только поднимает цену до реальной стоимости</span></span>' +
-            '<input type="checkbox" data-shipallowlower' + (S.shipAllowLower ? " checked" : "") + "></label>" +
+            admSwitch("data-shipallowlower", !!S.shipAllowLower,
+              S.shipAllowLower ? "Запретить снижать цены" : "Разрешить снижать цены") + "</div>" +
           '<div class="adm-acts" style="margin-top:12px">' +
             '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipreset>Вернуть значения по умолчанию</button>' +
           "</div></div></details>" +
@@ -10599,14 +10709,20 @@
         "Чтобы что-то убрать или добавить, напишите Дмитрию.</p>" +
       "</div>";
   }
-  function admShipCellHTML(key, value, label) {
-    return '<input class="adm-input" data-shiprule="' + key + '" value="' + esc(value) +
+  /* `col` is the column's own name, drawn only on a phone: the header row of
+     the grid is hidden there, and three bare boxes under «Эстония» gave the
+     owner no way to tell the parcel machine from the courier. */
+  function admShipCellHTML(key, value, label, col) {
+    return (col ? '<span class="adm-tariffs__l">' + col + "</span>" : "") +
+      '<input class="adm-input" data-shiprule="' + key + '" value="' + esc(value) +
       '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">';
   }
 
   /* Главная страница: the two switches that decide what the shop shows at all,
      then the banner editor and the announcement bar — the two things the owner
-     changes when he wants the front page to say something else. */
+     changes when he wants the front page to say something else. Since phase 4
+     both cards are the panel's own `adm-` markup: no storefront classes, no
+     `.adm-embed` wrapper to re-seat them. */
   function admSetHomeHTML() {
     var sets = DEMO.bundles !== false;
     var chat = !!DEMO.chatbot;
@@ -10621,35 +10737,42 @@
       "</div>" +
       '<p class="adm-hint" style="margin-top:10px">Подарочная карта продаётся отдельным пунктом в меню — ' +
         "номиналы включаются в «Маркетинг → Подарочные карты».</p>" +
-      '<div class="adm-embed">' + admHeroCard() + "</div>" +
-      '<div class="adm-embed">' + admContentCard(["announcement"]) + "</div>" +
+      admHeroCard() +
+      admContentCard(["announcement"], "Верхняя полоска") +
       "</div>";
   }
   function admSetCompanyHTML() {
-    return '<div class="adm-narrow"><div class="adm-embed">' +
-      admContentCard(["company", "hours", "social", "contact", "emailfooter"]) + "</div>" +
-      '<div class="adm-embed">' + reportsCard() + "</div></div>";
+    return '<div class="adm-narrow">' +
+      admContentCard(["company", "hours", "social", "contact", "emailfooter"], "") +
+      reportsCard() + "</div>";
   }
   function admSetPricesHTML() {
-    return '<div class="adm-narrow"><div class="adm-embed">' + admPricingCard() + "</div></div>";
+    return '<div class="adm-narrow--form">' + admPricingCard() + "</div>";
   }
-  /* Языки: three rows and no switches. Russian is the source; Estonian and
-     English are always on — a switch that turned one off would have to hide a
-     third of the shop's own URLs, which is a deploy, not a setting. The note
-     is the one thing the owner asked about (README «Copy»). */
+  /* Языки: no switches. All three languages are live and the visitor picks his
+     own; a switch that turned one off would have to hide a third of the shop's
+     own URLs, which is a deploy, not a setting. So the page says, in two plain
+     sentences, what is translated by itself and where to write when a wording
+     is off — and lists the three storefront addresses to send to people. */
+  var ADM_LANG_ROWS = [["RU", "Русский", ""], ["ET", "Eesti", "/et"], ["EN", "English", "/en"]];
   function admSetLangsHTML() {
-    return '<div class="adm-narrow--form">' +
-      '<div class="adm-list">' + [
-        ["Русский", "основной язык — с него переводятся остальные"],
-        ["Eesti", "в меню магазина стоит «Blog», не «Ajaveeb»"],
-        ["English", "полный перевод магазина и писем"]
-      ].map(function (l) {
-        return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + l[0] + "</span>" +
-          '<span class="adm-row__sub">' + l[1] + "</span></span>" +
-          '<span class="adm-badge adm-badge--ok">включён</span></div>';
-      }).join("") + "</div>" +
-      '<p class="adm-hint" style="margin-top:10px">Язык панели переключается внизу меню — ' +
-        "на магазин это не влияет.</p></div>";
+    var origin = String(location.origin || "").replace(/\/$/, "");
+    return '<div class="adm-narrow--form adm-form">' +
+      '<p class="adm-lead" style="margin:0">Магазин работает сразу на трёх языках — русском, эстонском и английском. ' +
+        "Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.</p>" +
+      '<p class="adm-lead" style="margin:0">Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, ' +
+        "переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.</p>" +
+      '<div><div class="adm-sec__t">Ссылки на магазин</div>' +
+      '<div class="adm-list">' + ADM_LANG_ROWS.map(function (l) {
+        var url = origin + "/shop2" + l[2] + "/";
+        return '<a class="adm-row" href="' + esc(url) + '" target="_blank" rel="noopener">' +
+          '<span class="adm-row__body"><span class="adm-row__nm">' + l[1] + "</span>" +
+          '<span class="adm-row__sub adm-mono">' + esc(url) + "</span></span>" +
+          '<span class="adm-row__chev" aria-hidden="true">↗</span></a>';
+      }).join("") + "</div></div>" +
+      '<p class="adm-hint" style="margin:0">Язык самой админки переключается внизу меню — на магазин это не влияет.</p>' +
+      '<div class="adm-acts">' + admDevLink() + "</div>" +
+      "</div>";
   }
   /* Журнал изменений: the same DEMO.log the undo toast writes into, as rows of
      `time · text · «Вернуть»`. An entry with nothing to put back (an undo's own
@@ -10903,52 +11026,62 @@
       return (p.brand + " " + p.name).toLowerCase().indexOf(s) >= 0;
     }).slice(0, 8);
   }
-  var HERO_NOHIT = '<p class="muted admhero__none">Ничего не нашлось — попробуйте другое слово.</p>';
+  var HERO_NOHIT = '<p class="adm-hint adm-picks__none">Ничего не нашлось — попробуйте другое слово.</p>';
+  /** One product tile in a picker grid — the banner's picture and link pickers
+      and the set editor's «что внутри» all draw the same one. */
+  function admPickTile(attr, id, p, current) {
+    return '<button class="adm-pick-tile" ' + attr + '="' + esc(id) + '" aria-current="' + !!current +
+      '" title="' + esc(p.brand + " " + p.name) + '">' +
+      '<span class="adm-pick-tile__img">' + media(p, 0, "ph") + "</span>" +
+      '<span class="adm-pick-tile__nm">' + esc(p.name) + "</span></button>";
+  }
   function heroImgRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
     var list = heroFind(S.heroImgQ);
     if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) {
-      return '<button class="admhero__pick" data-heroimg="' + esc(p.id) + '" aria-current="' + (cur.image === p.id) +
-        '" title="' + esc(p.brand + " " + p.name) + '">' + media(p, 0, "ph admhero__pickimg") +
-        '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
-    }).join("");
+    return list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
   }
   function heroGoRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
     var list = heroFind(S.heroGoQ);
     if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) {
-      return '<button class="admhero__pick" data-herogopick="' + esc(p.id) + '" aria-current="' +
-        (cur.go === "product:" + p.id) + '" title="' + esc(p.brand + " " + p.name) + '">' +
-        media(p, 0, "ph admhero__pickimg") + '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
-    }).join("");
+    return list.map(function (p) { return admPickTile("data-herogopick", p.id, p, cur.go === "product:" + p.id); }).join("");
   }
+  /* One slide as a row: the picture, the title, where the button goes, then
+     the controls — order, the on/off switch, «Изменить», «Удалить». Every one
+     of them edits the draft; nothing reaches the shop before «Сохранить». */
   function heroRowHTML(s, i, n) {
-    var off = s.on === false;
-    return '<div class="adm__row"><span class="adm__ph">' + heroArt(s.image, "ph") + "</span>" +
-      '<span class="adm__nm">' + (esc(heroT(s.title)) || "Без заголовка") +
-        '<span class="adm__sub">' + esc(heroGoLabel(s.go)) + "</span></span>" +
-      '<span class="chip ' + (off ? "chip--low" : "chip--ok") + '">' + (off ? "скрыт" : "показан") + "</span>" +
-      '<span class="admhero__ops">' +
-        '<button class="iconbtn" data-heromove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
-        '<button class="iconbtn" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button>' +
-        '<button class="link" data-heroon="' + i + '">' + (off ? "Показать" : "Скрыть") + "</button>" +
-        '<button class="link" data-heroedit="' + i + '">Изменить</button>' +
-        '<button class="link" data-herodel="' + i + '">Удалить</button>' +
+    var on = s.on !== false;
+    return '<div class="adm-row adm-row--tall">' +
+      '<span class="adm-thumb">' + heroArt(s.image, "ph") + "</span>" +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + (esc(heroT(s.title)) || "Без заголовка") +
+        (on ? "" : ' <span class="adm-badge adm-badge--sm adm-badge--quiet">скрыт</span>') + "</span>" +
+        '<span class="adm-row__sub">' + esc(heroGoLabel(s.go)) + "</span></span>" +
+      '<span class="adm-ops">' +
+        '<button class="adm-iconbtn" data-heromove="' + i + ':-1"' + (i === 0 ? " disabled" : "") +
+          ' aria-label="Выше" title="Выше">↑</button>' +
+        '<button class="adm-iconbtn" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") +
+          ' aria-label="Ниже" title="Ниже">↓</button>' +
+        admSwitch('data-heroon="' + i + '"', on, on ? "Скрыть слайд" : "Показать слайд") +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-heroedit="' + i + '">Изменить</button>' +
+        '<button class="adm-link adm-link--warn" data-herodel="' + i + '">Удалить</button>' +
       "</span></div>";
   }
   function heroFieldHTML(s, key, label, tag, max) {
     var L = S.heroLang || "RU";
     var val = (s[key] && s[key][L]) || "";
     var ru = (s[key] && s[key].RU) || "";
-    var hint = L !== "RU" && !val && ru ? '<span class="admhero__hint">Пусто — покажем русский текст.</span>' : "";
-    return '<label class="field"><span class="field__label">' + label + "</span>" +
+    var hint = L !== "RU" && !val && ru ? '<span class="adm-hint">Пусто — покажем русский текст.</span>' : "";
+    return '<label class="adm-field">' + label +
       (tag === "textarea"
-        ? '<textarea class="input" rows="3" maxlength="' + max + '" data-herof="' + key + '">' + esc(val) + "</textarea>"
-        : '<input class="input" maxlength="' + max + '" data-herof="' + key + '" value="' + esc(val) + '">') +
+        ? '<textarea class="adm-input" rows="3" maxlength="' + max + '" data-herof="' + key + '">' + esc(val) + "</textarea>"
+        : '<input class="adm-input" maxlength="' + max + '" data-herof="' + key + '" value="' + esc(val) + '">') +
       hint + "</label>";
   }
+  /* The slide's own form, opened under the list by «Изменить»: the texts in
+     the language of the segmented control, the link, the picture, and the
+     storefront's own hero as a live preview. «Готово» only folds it away —
+     the draft keeps everything typed until «Сохранить». */
   function heroFormHTML(i) {
     var s = heroDraft().slides[i];
     if (!s) return "";
@@ -10959,17 +11092,15 @@
     var opt = function (v, label) {
       return '<option value="' + esc(v) + '"' + (sel === v ? " selected" : "") + ">" + esc(label) + "</option>";
     };
-    return '<div class="admhero__form">' +
-      '<div class="adm__chips" role="group" aria-label="Язык баннера">' + LANGS.map(function (l) {
-        return '<button class="scchip" data-herolang="' + l[0] + '" aria-current="' + (L === l[0]) + '">' + l[1] + "</button>";
-      }).join("") + "</div>" +
+    return '<div class="adm-card adm-card--pad adm-form adm-form--inline">' +
+      '<div class="adm-edbar"><span class="adm-sec__t">' + "Баннер " + (i + 1) + "</span>" +
+        admSegHTML("data-herolang", LANGS, L, "Язык баннера") + "</div>" +
       heroFieldHTML(s, "eyebrow", "Строка сверху", "input", 40) +
       heroFieldHTML(s, "title", "Заголовок", "input", 40) +
       heroFieldHTML(s, "sub", "Подзаголовок", "textarea", 90) +
       heroFieldHTML(s, "cta", "Надпись на кнопке", "input", 24) +
-
-      '<label class="field"><span class="field__label">Куда ведёт кнопка</span>' +
-        '<select class="input" data-herogo>' +
+      '<label class="adm-field">Куда ведёт кнопка' +
+        '<select class="adm-input" data-herogo>' +
           '<optgroup label="Разделы">' + opt("cat:all", "Все товары") +
             CATS.map(function (c) { return opt("cat:" + c.id, c.name); }).join("") + "</optgroup>" +
           '<optgroup label="Страницы магазина">' + opt("bundles", "Наборы") + opt("gift", "Подарочная карта") +
@@ -10978,44 +11109,56 @@
           '<optgroup label="Один товар">' + opt("product", "Товар — выберите ниже") + "</optgroup>" +
         "</select></label>" +
       (isProduct
-        ? '<p class="muted admhero__note">Кнопка ведёт на: ' + esc(heroGoLabel(go)) + "</p>" +
-          '<input class="input input--box" data-heroq value="' + esc(S.heroGoQ || "") +
+        ? '<p class="adm-hint" style="margin:-8px 0 0">Кнопка ведёт на: ' + esc(heroGoLabel(go)) + "</p>" +
+          '<input class="adm-input" data-heroq value="' + esc(S.heroGoQ || "") +
             '" placeholder="Найти товар: название, бренд…" aria-label="Найти товар">' +
-          '<div class="admhero__picks" id="herogolist">' + heroGoRows() + "</div>"
+          '<div class="adm-picks" id="herogolist">' + heroGoRows() + "</div>"
         : "") +
-
-      '<div class="field__label admhero__lbl">Картинка</div>' +
-      '<label class="field"><span class="field__label">Ссылка на картинку — или выберите фото товара ниже</span>' +
-        '<input class="input" data-heroimgurl value="' + esc(heroUrl(s.image)) +
+      '<div class="adm-sec__t">Картинка</div>' +
+      '<label class="adm-field">Ссылка на картинку — или выберите фото товара ниже' +
+        '<input class="adm-input" data-heroimgurl value="' + esc(heroUrl(s.image)) +
         '" placeholder="https://… или /shop/img/…"></label>' +
       /* media: a picture of the owner's own, straight into the field above */
       galDropZone("hero", "Загрузить свою картинку", "Широкая фотография — JPEG, PNG или WebP, до 12 МБ.") +
-      '<input class="input input--box" data-heroimgq value="' + esc(S.heroImgQ || "") +
+      '<input class="adm-input" data-heroimgq value="' + esc(S.heroImgQ || "") +
         '" placeholder="Найти товар: название, бренд…" aria-label="Найти фото товара">' +
-      '<div class="admhero__picks" id="heroimglist">' + heroImgRows() + "</div>" +
-
-      '<div class="field__label admhero__lbl">Предпросмотр</div>' +
-      '<div class="admhero__prev" id="heroprev"><section class="hero">' + heroSlideHTML(s, 0, 0, true) + "</section></div>" +
-      '<div class="adm__acts"><button class="btn btn--sm" data-heroclose>Готово</button></div>' +
+      '<div class="adm-picks" id="heroimglist">' + heroImgRows() + "</div>" +
+      '<div class="adm-sec__t">Предпросмотр</div>' +
+      '<div class="adm-heroprev" id="heroprev"><section class="hero">' + heroSlideHTML(s, 0, 0, true) + "</section></div>" +
+      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-heroclose>Готово</button></div>' +
     "</div>";
   }
+  function heroCountLabel(n) { return n + " " + pl(n, "слайд", "слайда", "слайдов"); }
   function admHeroCard() {
     var d = heroDraft(), n = d.slides.length;
-    var pending = pendingAction && pendingAction.type === "set_hero" ? confirmCard(pendingAction) : "";
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Главный баннер</h2></div>' +
-      '<p class="muted admhero__intro">Большая картинка на главной. Слайды показываются по кругу; один слайд — просто картинка без стрелок. Тексты — на трёх языках: пустой эстонский или английский заменяем русским.</p>' +
-      pending +
-      (heroDirty() && !pending ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
-      (n ? '<div class="adm__list">' + d.slides.map(function (s, i) { return heroRowHTML(s, i, n); }).join("") + "</div>"
-         : '<p class="muted">Слайдов нет — баннер на главной не показывается.</p>') +
+    // the draft's own timing, not the saved one — a number typed a moment ago
+    // must survive the render that opening a slide causes
+    var tick = Number(d.interval);
+    tick = tick >= 2000 && tick <= 30000 ? tick : HERO_TICK;
+    return '<div class="adm-sec" style="margin-top:28px"><div class="adm-sec__t">Главный баннер</div>' +
+        '<div class="adm-sec__x">' + heroCountLabel(n) + "</div></div>" +
+      '<p class="adm-hint" style="margin-top:6px">Большая картинка на главной. Слайды показываются по кругу; ' +
+        "один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.</p>" +
+      (heroDirty() ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      (n ? '<div class="adm-list">' + d.slides.map(function (s, i) { return heroRowHTML(s, i, n); }).join("") + "</div>"
+         : '<div class="adm-empty">Слайдов нет — баннер на главной не показывается. Нажмите «Добавить слайд».</div>') +
       (S.heroEdit >= 0 && S.heroEdit < n ? heroFormHTML(S.heroEdit) : "") +
-      '<label class="field admhero__tick"><span class="field__label">Смена слайдов, секунд</span>' +
-        '<input class="input" type="number" min="2" max="30" step="1" data-herotick value="' +
-        Math.round(heroInterval() / 1000) + '"></label>' +
-      '<div class="adm__acts">' +
-        '<button class="btn btn--ghost btn--sm" data-heroadd' + (n >= 5 ? " disabled" : "") + ">Добавить слайд</button>" +
-        '<button class="btn btn--sm" data-herosave>Сохранить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-heroreset>Сбросить к стандартному</button></div>';
+      '<label class="adm-field" style="max-width:220px;margin-top:16px">Смена слайдов, секунд' +
+        '<input class="adm-input" type="number" min="2" max="30" step="1" data-herotick value="' +
+        Math.round(tick / 1000) + '"></label>' +
+      '<div class="adm-acts" style="margin-top:16px">' +
+        '<button class="adm-btn" data-herosave>Сохранить</button>' +
+        '<button class="adm-btn adm-btn--ghost" data-heroadd' + (n >= 5 ? " disabled" : "") + ">Добавить слайд</button>" +
+        '<button class="adm-link adm-link--muted" data-heroreset>Сбросить к стандартному</button></div>';
+  }
+  /** The confirm card's detail line for a banner save — the shop-wide thing
+      the owner is about to do, in one sentence he can read in his language. */
+  function heroConfirmDetail(value) {
+    var on = value && value.slides ? value.slides.filter(function (s) { return s.on !== false; }).length : 0;
+    // two whole sentences rather than one with a fork in it: each is one text
+    // node on the card, and the dictionary pass needs to see each whole
+    if (on) return "Слайдов на сайте: " + on + ".\nПокупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.";
+    return "Все слайды скрыты — баннер на главной не показывается.\nПокупатели увидят изменение сразу. Вернуть прежний баннер можно из журнала изменений.";
   }
   /* Typing must not cost the caret, so the two moving parts of the form are
      repainted on their own instead of through render(). */
@@ -11124,94 +11267,105 @@
     catch (e) { return false; }
   }
   function cInput(path, label, ph, max, hint) {
-    return '<label class="field"><span class="field__label">' + label + "</span>" +
-      '<input class="input" maxlength="' + max + '" data-contentf="' + path + '" value="' +
+    return '<label class="adm-field">' + label +
+      '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" value="' +
       esc(cDraftGet(path)) + '" placeholder="' + esc(ph || "") + '">' +
-      (hint ? '<span class="admhero__hint">' + hint + "</span>" : "") + "</label>";
+      (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + "</label>";
   }
-  /* A trilingual field follows the language pills at the top of the card; an
-     empty ET/EN says out loud that the Russian will be shown instead. */
+  /* A trilingual field follows the language control at the top of the card;
+     an empty ET/EN says out loud that the Russian will be shown instead. */
   function cTri(base, label, tag, max, hint) {
     var L = S.contentLang || "RU";
     var path = base + "." + L;
     var val = String(cDraftGet(path) || "");
     var ru = String(cDraftGet(base + ".RU") || "");
-    var fell = L !== "RU" && !val && ru ? '<span class="admhero__hint">Пусто — покажем русский текст.</span>' : "";
-    return '<label class="field"><span class="field__label">' + label + "</span>" +
+    var fell = L !== "RU" && !val && ru ? '<span class="adm-hint">Пусто — покажем русский текст.</span>' : "";
+    return '<label class="adm-field">' + label +
       (tag === "textarea"
-        ? '<textarea class="input" rows="4" maxlength="' + max + '" data-contentf="' + path + '">' + esc(val) + "</textarea>"
-        : '<input class="input" maxlength="' + max + '" data-contentf="' + path + '" value="' + esc(val) + '">') +
-      (hint ? '<span class="admhero__hint">' + hint + "</span>" : "") + fell + "</label>";
+        ? '<textarea class="adm-input" rows="4" maxlength="' + max + '" data-contentf="' + path + '">' + esc(val) + "</textarea>"
+        : '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" value="' + esc(val) + '">') +
+      (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + fell + "</label>";
   }
   function cLangPills() {
-    var L = S.contentLang || "RU";
-    return '<div class="adm__chips" role="group" aria-label="Язык текстов">' + LANGS.map(function (l) {
-      return '<button class="scchip" data-contentlang="' + l[0] + '" aria-current="' + (L === l[0]) + '">' + l[1] + "</button>";
-    }).join("") + "</div>";
+    return admSegHTML("data-contentlang", LANGS, S.contentLang || "RU", "Язык текстов");
   }
-  /** One collapsible sub-block — the card is long, a phone screen is not. */
+  /** One block of the document as a row; «Изменить» opens its fields right
+      under the row — the document is long, a phone screen is not. */
   function cBlock(id, title, sub, body) {
     var open = S.contentOpen === id;
-    return '<div class="adm__row"><span class="adm__nm">' + title +
-        '<span class="adm__sub">' + sub + "</span></span>" +
-        '<button class="link" data-contentblock="' + id + '">' + (open ? "Свернуть" : "Изменить") + "</button></div>" +
-      (open ? '<div class="admhero__form">' + body + "</div>" : "");
+    return '<div class="adm-row adm-row--tall">' +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + title + "</span>" +
+        '<span class="adm-row__sub">' + sub + "</span></span>" +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-contentblock="' + id + '" aria-expanded="' + open + '">' +
+        (open ? "Свернуть" : "Изменить") + "</button></div>" +
+      (open ? '<div class="adm-card adm-card--pad adm-form adm-form--inline">' + body + "</div>" : "");
   }
+  /* A closed day keeps its box, read-only and saying «выходной» in its
+     placeholder — the word is a dictionary key, so the Estonian panel reads
+     «suletud» where a value attribute would have stayed Russian. */
   function cHoursBody() {
     var d = contentDraft();
-    return CONTENT_DAYS.map(function (row) {
-      var v = String(d.hours[row[0]] || "");
-      return '<div class="field">' +
-        '<label class="field__label" for="ch-' + row[0] + '">' + row[1] + "</label>" +
-        '<input class="input" id="ch-' + row[0] + '" maxlength="20" data-contenthours="' + row[0] +
-        '" value="' + esc(v) + '" placeholder="10:00–19:00">' +
-        '<button class="link" data-contentclosed="' + row[0] + '">' +
-        (v === "closed" ? "Рабочий день" : "Выходной") + "</button></div>";
-    }).join("") +
-      '<p class="muted admhero__note">Время в виде 10:00–19:00. Пустая строка — день не показываем; «Выходной» пишем словом.</p>' +
+    return '<div class="adm-hours">' + CONTENT_DAYS.map(function (row) {
+      var v = String(d.hours[row[0]] || ""), closed = v === "closed";
+      return '<div class="adm-hours__row">' +
+        '<label class="adm-hours__d" for="ch-' + row[0] + '">' + row[1] + "</label>" +
+        '<input class="adm-input" id="ch-' + row[0] + '" maxlength="20" data-contenthours="' + row[0] +
+          '" value="' + (closed ? "" : esc(v)) + '" placeholder="' + (closed ? "выходной" : "10:00–19:00") + '"' +
+          (closed ? " readonly" : "") + ">" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-contentclosed="' + row[0] + '">' +
+          (closed ? "Рабочий день" : "Выходной") + "</button></div>";
+    }).join("") + "</div>" +
+      '<p class="adm-hint" style="margin:0">Время в виде 10:00–19:00. Пустая строка — день не показываем; выходной отмечается кнопкой.</p>' +
       cTri("hours.note", "Примечание под часами", "input", 300, "Например: в праздники — по записи.");
   }
-  /* `only` — which of the six blocks this page wants. The settings redesign
-     split the card in two: the announcement bar belongs on «Главная страница»
-     and everything else on «О компании». The DRAFT is shared either way, so a
+  /* `only` — which of the six blocks this page wants; `title` — a section
+     heading when the card sits under other things (the home page), none when
+     the page title already says it (О компании). The settings redesign split
+     the card in two: the announcement bar belongs on «Главная страница» and
+     everything else on «О компании». The DRAFT is shared either way, so a
      «Сохранить» from either page saves whatever the owner changed. */
-  function admContentCard(only) {
+  function admContentCard(only, title) {
     var d = contentDraft();
-    var pending = pendingAction && pendingAction.type === "set_content" ? confirmCard(pendingAction) : "";
     var annOn = d.announcement.on !== false;
     var show = function (id) { return !only || only.indexOf(id) >= 0; };
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Контент</h2></div>' +
-      '<p class="muted admhero__intro">Всё, что магазин говорит о себе: реквизиты, часы работы, соцсети, чёрная полоска над шапкой, страница «Контакты» и подпись в письмах. Меняется здесь один раз — и меняется везде: в подвале, на «Контактах», в правовых текстах и в письмах.</p>' +
-      pending +
-      (contentDirty() && !pending ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
-      cLangPills() +
-      '<div class="adm__list">' +
+    var co = d.company;
+    return (title ? '<div class="adm-sec" style="margin-top:28px"><div class="adm-sec__t">' + title + "</div></div>" : "") +
+      (show("company")
+        ? '<p class="adm-lead" style="margin:0">Всё, что магазин говорит о себе. Меняется здесь один раз — и меняется везде: ' +
+          "в подвале, на «Контактах», в правовых текстах и в письмах.</p>"
+        : "") +
+      (contentDirty() ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      '<div style="margin-top:12px">' + cLangPills() + "</div>" +
+      '<div class="adm-list">' +
         (!show("company") ? "" : cBlock("company", "Реквизиты",
-          esc([d.company.legalName, d.company.regCode ? "рег. " + d.company.regCode : "", d.company.address].filter(Boolean).join(" · ")),
+          esc(co.legalName) + (co.regCode ? " · <span>рег. " + esc(co.regCode) + "</span>" : "") + (co.address ? " · " + esc(co.address) : ""),
           cInput("company.legalName", "Название компании", "Rempire Store OÜ", 120) +
-          cInput("company.regCode", "Регистрационный номер", "12216136", 24, "Только цифры.") +
-          cInput("company.vatNumber", "Номер KMKR", "EE102723858", 24) +
+          '<div class="adm-edpair">' +
+            cInput("company.regCode", "Регистрационный номер", "12216136", 24, "Только цифры.") +
+            cInput("company.vatNumber", "Номер KMKR", "EE102723858", 24) + "</div>" +
           cInput("company.address", "Адрес", "Mardi 1, 10145 Tallinn", 200) +
-          cInput("company.email", "Электронная почта", "info@rempireshop.com", 190) +
-          cInput("company.phone", "Телефон", "+372 5623 7237", 30) +
-          cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42))) +
+          '<div class="adm-edpair">' +
+            cInput("company.email", "Электронная почта", "info@rempireshop.com", 190) +
+            cInput("company.phone", "Телефон", "+372 5623 7237", 30) + "</div>" +
+          cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42) +
+          '<p class="adm-hint" style="margin:0">Эти данные подставляются в подвал магазина, на страницу «Контакты» и в правовые тексты — ' +
+            "условия продажи, возврат, конфиденциальность.</p>")) +
         (!show("hours") ? "" : cBlock("hours", "Часы работы",
           (CONTENT_DAYS.filter(function (r) { return d.hours[r[0]]; }).length
             ? "показываем в подвале и на «Контактах»"
             : "не указаны — раздел не показывается"),
           cHoursBody())) +
         (!show("social") ? "" : cBlock("social", "Соцсети",
-          esc(CONTENT_SOCIALS.filter(function (r) { return d.social[r[0]]; }).map(function (r) { return r[1]; }).join(" · ") || "нет ссылок"),
-          CONTENT_SOCIALS.map(function (r) {
+          esc(CONTENT_SOCIALS.filter(function (r) { return d.social[r[0]]; }).map(function (r) { return r[1]; }).join(" · ")) || "нет ссылок",
+          '<div class="adm-edpair">' + CONTENT_SOCIALS.map(function (r) {
             return cInput("social." + r[0], r[1], "https://…", 300);
-          }).join("") +
-          '<p class="muted admhero__note">Пустая строка убирает значок из подвала.</p>')) +
-        (!show("announcement") ? "" : cBlock("announcement", "Верхняя полоска",
+          }).join("") + "</div>" +
+          '<p class="adm-hint" style="margin:0">Пустая строка убирает значок из подвала.</p>')) +
+        (!show("announcement") ? "" : cBlock("announcement", title ? "Текст и ссылка" : "Верхняя полоска",
           (annOn ? esc(cTokens(cText(d.announcement.text)) || "стандартный текст") : "выключена"),
-          '<div class="adm__row"><span class="adm__nm">Показывать полоску' +
-            '<span class="adm__sub">чёрная строка над шапкой магазина</span></span>' +
-            '<span class="chip ' + (annOn ? "chip--ok" : "chip--low") + '">' + (annOn ? "показана" : "скрыта") + "</span>" +
-            '<button class="link" data-contentannon>' + (annOn ? "Скрыть" : "Показать") + "</button></div>" +
+          '<div class="adm-swrow"><span>Показывать полоску' +
+            '<span class="adm-row__sub">чёрная строка над шапкой магазина</span></span>' +
+            admSwitch("data-contentannon", annOn, annOn ? "Скрыть полоску" : "Показать полоску") + "</div>" +
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
@@ -11220,13 +11374,19 @@
           "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
           cTri("contactPage", "Текст страницы", "textarea", 1200))) +
         (!show("emailfooter") ? "" : cBlock("emailfooter", "Подпись в письмах",
-          esc(cText(d.emailFooter) || "нет"),
+          esc(cText(d.emailFooter)) || "нет",
           cTri("emailFooter", "Строка внизу письма", "input", 300,
             "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
       "</div>" +
-      '<div class="adm__acts">' +
-        '<button class="btn btn--sm" data-contentsave>Сохранить</button>' +
-        '<button class="btn btn--ghost btn--sm" data-contentreset>Сбросить к стандартному</button></div>';
+      '<div class="adm-acts" style="margin-top:16px">' +
+        '<button class="adm-btn" data-contentsave>Сохранить</button>' +
+        '<button class="adm-link adm-link--muted" data-contentreset>Сбросить к стандартному</button></div>';
+  }
+  /** The confirm card's detail for a content save: what changes, then where
+      it shows up — the owner is about to edit every page of the shop at once. */
+  function contentConfirmDetail(patch) {
+    return contentActionText(patch) +
+      "\nИзменится везде: в подвале магазина, на «Контактах», в правовых текстах и в письмах.";
   }
 
   /* ---------- wholesale/loyalty: «Цены и лояльность» ------------------------
@@ -11317,50 +11477,69 @@
   }
   function pricingActsHTML() {
     if (!pricingDirty()) return "";
-    return '<button class="btn btn--sm" data-admpricingsave>Сохранить</button>' +
-      '<button class="btn btn--ghost btn--sm" data-admpricingreset>Отменить правки</button>';
+    return '<button class="adm-btn" data-admpricingsave>Сохранить</button>' +
+      '<button class="adm-link adm-link--muted" data-admpricingreset>Отменить правки</button>';
   }
-  /* Typing must not cost the caret, so the two moving parts of this card are
+  /* Typing must not cost the caret, so the moving parts of this card are
      repainted on their own instead of through render() — same idiom as
-     paintHeroPreview(). Without this the «Сохранить» button never appeared
-     at all: the card only draws it when the draft differs from what is
-     saved, and nothing re-rendered the card after a keystroke. */
+     paintHeroPreview(). The refused field is marked as well as the sentence
+     under the fields: the message says what is wrong, the border says where. */
   function paintPricingState() {
     var err = document.querySelector("[data-pricingerr]");
     if (err) { err.textContent = S.pricingErr || ""; err.hidden = !S.pricingErr; translateTree(err); }
+    var fields = document.querySelectorAll("[data-pricingf]");
+    for (var i = 0; i < fields.length; i++) {
+      fields[i].setAttribute("aria-invalid", String(!!S.pricingErr && fields[i].getAttribute("data-pricingf") === S.pricingErrField));
+    }
     var acts = document.getElementById("pricingacts");
     if (acts) { acts.innerHTML = pricingActsHTML(); translateTree(acts); }
   }
+  /* «Сохранить» proposes and the confirm card applies: a discount is money,
+     and it lands on every partner's next basket the moment it is saved. */
   function savePricing() {
     if (!pricingDirty()) { toast("Изменений нет"); return; }
-    S.pricingErr = "";
-    demoApply({ type: "set_pricing", value: pricingDraft() });
-    S.pricingDraft = null;
-    toast("Сохранено ✓");
+    S.pricingErr = ""; S.pricingErrField = "";
+    var value = cloneRules(pricingDraft());
+    pendingAction = {
+      type: "set_pricing", value: value, overlay: true,
+      title: "Изменить цены и баллы?",
+      detail: actionText({ type: "set_pricing", value: value }) +
+        "\nНовые условия начнут действовать сразу — для всех покупателей и партнёров."
+    };
+    render(); refocus("[data-admapply]");
+  }
+  function admPricingField(key, label, hint, val) {
+    return '<label class="adm-field">' + label +
+      '<input class="adm-input" data-pricingf="' + key + '" inputmode="decimal" value="' + esc(String(val)) +
+        '" aria-invalid="' + (!!S.pricingErr && S.pricingErrField === key) + '">' +
+      (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + "</label>";
   }
   function admPricingCard() {
     loadAdminPricing(false);
-    var d = pricingDraft();
-    var pending = pendingAction && pendingAction.type === "set_pricing" ? confirmCard(pendingAction) : "";
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Цены и лояльность</h2></div>' +
-      '<p class="muted" style="margin:0 0 12px">Скидка для салонов и то, как покупатели зарабатывают и тратят баллы.</p>' +
-      (SRV.admin === true ? "" : '<div class="adm__note">Войдите как владелец, чтобы менять цены и лояльность.</div>') +
-      pending +
-      (pricingDirty() && !pending ? '<p class="admhero__dirty">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
-      '<label class="field"><span class="field__label">Скидка для салонов, % — 0, если сейчас нет оптовых цен</span>' +
-        '<input class="input" data-pricingf="proDiscountPct" inputmode="decimal" value="' + esc(String(d.proDiscountPct)) + '"></label>' +
-      '<label class="field"><span class="field__label">Скидка действует от суммы корзины, € — 0, если без условия</span>' +
-        '<input class="input" data-pricingf="proMinOrder" inputmode="decimal" value="' + esc(String(d.proMinOrder)) + '"></label>' +
-      '<label class="opt opt--plain"><input type="checkbox" data-pricingtoggle' + (d.loyalty.enabled ? " checked" : "") + '><span>Баллы за покупки включены</span></label>' +
-      '<label class="field"><span class="field__label">Начисляем баллов — % от суммы оплаченного заказа</span>' +
-        '<input class="input" data-pricingf="earnPct" inputmode="decimal" value="' + esc(String(d.loyalty.earnPct)) + '"></label>' +
-      '<label class="field"><span class="field__label">Списать можно не больше — % от суммы корзины</span>' +
-        '<input class="input" data-pricingf="redeemMaxPct" inputmode="decimal" value="' + esc(String(d.loyalty.redeemMaxPct)) + '"></label>' +
-      '<label class="field"><span class="field__label">Списание доступно от — сколько баллов на счету</span>' +
-        '<input class="input" data-pricingf="minRedeem" inputmode="decimal" value="' + esc(String(d.loyalty.minRedeem)) + '"></label>' +
-      // both filled in place by paintPricingState() as the owner types
-      '<p class="err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ">" + esc(S.pricingErr || "") + "</p>" +
-      '<div class="adm__acts" id="pricingacts">' + pricingActsHTML() + "</div>";
+    var d = pricingDraft(), lo = d.loyalty.enabled;
+    return '<div class="adm-form">' +
+      '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
+      (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять цены и баллы.</div>') +
+      (pricingDirty() ? '<p class="adm-hint adm-hint--warn" style="margin:0">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      '<div class="adm-sec__t">Салоны и мастера</div>' +
+      '<div class="adm-edpair">' +
+        admPricingField("proDiscountPct", "Скидка для салонов, %", "0 — если оптовых цен сейчас нет.", d.proDiscountPct) +
+        admPricingField("proMinOrder", "Действует от суммы корзины, €", "0 — без условия.", d.proMinOrder) +
+      "</div>" +
+      '<div class="adm-sec__t">Баллы за покупки</div>' +
+      '<div class="adm-swrow"><span>Начислять баллы' +
+        '<span class="adm-row__sub">один балл — одно евро при списании</span></span>' +
+        admSwitch("data-pricingtoggle", lo, lo ? "Выключить баллы" : "Включить баллы") + "</div>" +
+      (lo
+        ? admPricingField("earnPct", "Начисляем, % от суммы оплаченного заказа", "", d.loyalty.earnPct) +
+          '<div class="adm-edpair">' +
+            admPricingField("redeemMaxPct", "Списать можно не больше, % от корзины", "", d.loyalty.redeemMaxPct) +
+            admPricingField("minRedeem", "Списание доступно от, баллов на счету", "", d.loyalty.minRedeem) + "</div>"
+        : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
+      // filled in place by paintPricingState() as the owner types
+      '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>" +
+      '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>" +
+      "</div>";
   }
 
   /* ---------- admin: delivery prices (settings.shipping_rules) -------------
@@ -11481,14 +11660,14 @@
   function montonioHint(method, country) {
     var t = montonioCeiling(method, country);
     if (t == null) return "";
-    return '<span class="muted adm__shiphint" style="display:block;font-size:11px;margin-top:2px">' +
+    return '<span class="adm-hint adm-hint--cell">' +
       montonioSourceLabel(t.source) + eur(t.price) + "</span>";
   }
   /** Same hint, for one carrier's own cell in «Цены по перевозчикам» (parcel tariffs only — see below). */
   function montonioCarrierHint(carrier, country) {
     var r = tariffRowsFor(country).filter(function (x) { return x.carrier === carrier && x.method === "parcel"; })[0];
     if (!r) return "";
-    return '<span class="muted adm__shiphint" style="display:block;font-size:11px;margin-top:2px">' +
+    return '<span class="adm-hint adm-hint--cell">' +
       montonioSourceLabel(r.source) + eur(r.price) + "</span>";
   }
   /**
@@ -11665,7 +11844,7 @@
           '<input class="adm-input" data-promof="minSubtotal" inputmode="decimal" value="' +
           esc(String(f.minSubtotal)) + '"></label>' +
       "</div>" +
-      '<details class="adm-embed"><summary class="adm-link" data-promomore>Срок, число использований и заметка</summary>' +
+      '<details class="adm-fold"><summary class="adm-link" data-promomore>Срок, число использований и заметка</summary>' +
         '<div style="padding-top:12px">' +
           '<label class="adm-field">Действует до — пусто, если бессрочно' +
             '<input class="adm-input" type="date" data-promof="endsAt" value="' +
@@ -11839,45 +12018,38 @@
   function bundlePickRows() {
     var list = heroFind(S.bundleQ);
     if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) {
-      return '<button class="admhero__pick" data-bundleadd="' + esc(p.id) + '" title="' +
-        esc(p.brand + " " + p.name) + '">' + media(p, 0, "ph admhero__pickimg") +
-        '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
-    }).join("");
+    return list.map(function (p) { return admPickTile("data-bundleadd", p.id, p, false); }).join("");
   }
   /** The photos the set can wear: one per product inside it, plus «сами». */
   function bundleImageRowHTML() {
     var f = S.bundleForm;
-    var picks = '<button class="admhero__pick" data-bundleimg="" aria-current="' + (!f.image) +
-      '" title="Три фото товаров стопкой">' +
-      '<span class="admhero__pickn">Автоматически</span></button>';
+    var picks = '<button class="adm-pick-tile adm-pick-tile--text" data-bundleimg="" aria-current="' + (!f.image) +
+      '" title="Три фото товаров стопкой">Автоматически<span class="adm-pick-tile__nm">три фото стопкой</span></button>';
     f.items.forEach(function (it) {
       var p = byIdOrNull(it.productId);
       if (!p) return;
-      picks += '<button class="admhero__pick" data-bundleimg="' + esc(p.id) + '" aria-current="' +
-        (f.image === p.id) + '" title="' + esc(p.brand + " " + p.name) + '">' +
-        media(p, 0, "ph admhero__pickimg") + '<span class="admhero__pickn">' + esc(p.name) + "</span></button>";
+      picks += admPickTile("data-bundleimg", p.id, p, f.image === p.id);
     });
     return picks;
   }
   function bundleItemRowsHTML() {
     var f = S.bundleForm;
-    if (!f.items.length) return '<p class="muted">Пока пусто. Найдите товар ниже и нажмите на него.</p>';
-    return '<div class="adm__list">' + f.items.map(function (it, i) {
+    if (!f.items.length) return '<p class="adm-hint" style="margin:0">Пока пусто. Найдите товар ниже и нажмите на него.</p>';
+    return '<div class="adm-list adm-list--flat">' + f.items.map(function (it, i) {
       var p = byIdOrNull(it.productId);
       var sizes = p && p.sizes && p.sizes.length ? p.sizes : [];
-      return '<div class="adm__row">' + (p ? '<span class="adm__ph">' + media(p, it.variant || 0, "ph") + "</span>" : "") +
-        '<span class="adm__nm">' + esc(p ? p.brand + " — " + p.name : it.productId) +
-          '<span class="adm__sub">' + eur(p ? sizePrice(p, it.variant || 0) : 0) + "</span></span>" +
+      return '<div class="adm-row">' + (p ? '<span class="adm-thumb adm-thumb--sm">' + media(p, it.variant || 0, "ph") + "</span>" : "") +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p ? p.brand + " — " + p.name : it.productId) + "</span>" +
+          '<span class="adm-row__sub">' + eur(p ? sizePrice(p, it.variant || 0) : 0) + "</span></span>" +
         (sizes.length > 1
-          ? '<span class="sel"><select data-bundlesize="' + i + '" aria-label="Объём">' + sizes.map(function (sz, si) {
+          ? '<select class="adm-input adm-input--row" style="width:auto" data-bundlesize="' + i + '" aria-label="Объём">' + sizes.map(function (sz, si) {
               return '<option value="' + si + '"' + (si === (it.variant || 0) ? " selected" : "") + ">" + esc(sz) + "</option>";
-            }).join("") + "</select></span>"
+            }).join("") + "</select>"
           : "") +
-        '<span class="stepper"><button data-bundleqty="' + i + ':-1" aria-label="Меньше">−</button>' +
-          '<span class="num">' + (it.qty || 1) + "</span>" +
+        '<span class="adm-step-qty"><button data-bundleqty="' + i + ':-1" aria-label="Меньше">−</button>' +
+          '<span class="adm-step-qty__v">' + (it.qty || 1) + "</span>" +
           '<button data-bundleqty="' + i + ':1" aria-label="Больше">+</button></span>' +
-        '<button class="link" data-bundledel="' + i + '">Убрать</button></div>';
+        '<button class="adm-link adm-link--muted" data-bundledel="' + i + '">Убрать</button></div>';
     }).join("") + "</div>";
   }
   function bundleFormHTML() {
@@ -11907,13 +12079,13 @@
       bundleItemRowsHTML() +
       '<label class="adm-field">Найти товар' +
         '<input class="adm-input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
-      '<div class="admhero__picks" id="bundlepicks">' + bundlePickRows() + "</div>" +
+      '<div class="adm-picks" id="bundlepicks">' + bundlePickRows() + "</div>" +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">' +
         '<label class="adm-field">Цена набора, €' +
           '<input class="adm-input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
         '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p></div>" +
       '<div class="adm-field">Фото набора</div>' +
-      '<div class="admhero__picks">' + bundleImageRowHTML() + "</div>" +
+      '<div class="adm-picks">' + bundleImageRowHTML() + "</div>" +
       (S.bundleFormErr ? '<div class="err adm-err" role="alert">' + esc(S.bundleFormErr) + "</div>" : "") +
       '<div class="adm-acts"><button class="adm-btn" data-bundlesave>Сохранить</button>' +
         '<button class="adm-btn adm-btn--ghost" data-bundlecancel>Отмена</button>' +
@@ -12047,10 +12219,11 @@
       S.admCustomers = []; S.admCustErr = "Сервер не отвечает."; render();
     });
   }
-  function admCustTierChip(c) {
-    if (c.tier === "pro") return ["партнёр", "chip--ok"];
-    if (c.proRequestedAt) return ["на рассмотрении", "chip--low"];
-    return ["розница", ""];
+  /** The tier as a badge — the same words on the row and on the card. */
+  function admCustBadge(c) {
+    if (c.tier === "pro") return ["Pro", "adm-badge--ink"];
+    if (c.proRequestedAt) return ["Заявка Pro", "adm-badge--warn"];
+    return ["Розница", "adm-badge--quiet"];
   }
   function filteredAdminCustomers() {
     var list = S.admCustomers || [];
@@ -12077,8 +12250,7 @@
     }
     return '<div class="adm-list">' + list.map(function (c) {
       var pending = c.tier !== "pro" && c.proRequestedAt;
-      var badge = c.tier === "pro" ? ["Pro", "adm-badge--ink"]
-        : pending ? ["Заявка Pro", "adm-badge--warn"] : ["Розница", "adm-badge--quiet"];
+      var badge = admCustBadge(c);
       return '<div class="adm-row adm-row--tall">' +
         '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '" ' +
           'style="border:0;background:none;padding:0;text-align:left">' +
@@ -12107,40 +12279,65 @@
   function admCustomerCardHTML() {
     loadAdminCustomerDetail(S.admCustOpen, false);
     var d = S.admCustDetail;
+    var back = admBackHTML("data-admcustclose", "Все клиенты");
     if (!d || d.customer.id !== S.admCustOpen) {
-      return '<button class="link" data-admcustclose>← Ко всем клиентам</button><p class="muted" style="margin:16px 0">Загружаем…</p>';
+      return back + '<div class="adm-skel"><i></i><i></i><i></i></div>';
     }
     var c = d.customer;
     if (S.admCustNotesDraft === null) S.admCustNotesDraft = c.notes || "";
-    var st = admCustTierChip(c);
-    return '<button class="link" data-admcustclose>← Ко всем клиентам</button>' +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">' + esc(c.name || c.email) + "</h2>" +
-        '<span class="chip ' + (st[1] || "chip--low") + '">' + st[0] + "</span></div>" +
-      '<p class="muted">' + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") + "</p>" +
-      (c.company ? '<p class="muted">' + esc(c.company) + (c.regCode ? " · рег. " + esc(c.regCode) : "") + "</p>" : "") +
-      '<div class="adm__kpis">' +
-        kpi("Заказов", String(c.ordersCount), "") +
-        kpi("Потратил", eur(c.revenue), "") +
-        kpi("Баллы", String(c.pointsBalance), "") +
+    var badge = admCustBadge(c);
+    return back +
+      '<div class="adm-head" style="margin-top:12px"><div>' +
+        '<h2 class="adm-h2">' + esc(c.name || c.email) + "</h2>" +
+        '<div class="adm-hint">' + esc(c.email) + (c.phone ? " · " + esc(c.phone) : "") +
+          (c.company ? "<br>" + esc(c.company) + (c.regCode ? " · <span>рег. " + esc(c.regCode) + "</span>" : "") : "") +
+        "</div></div>" +
+        '<span class="adm-badge adm-badge--big ' + badge[1] + '">' + badge[0] + "</span></div>" +
+      '<div class="adm-kpis" style="margin-top:16px">' +
+        admPlainKpi("Заказов", String(c.ordersCount)) +
+        admPlainKpi("Потратил", eur(c.revenue)) +
+        admPlainKpi("Баллы", String(c.pointsBalance)) +
       "</div>" +
       (c.tier !== "pro" && c.proRequestedAt
-        ? '<div class="adm__acts"><button class="btn btn--sm" data-admcustapprove="' + c.id + '">Одобрить</button>' +
-          '<button class="btn btn--ghost btn--sm" data-admcustreject="' + c.id + '">Отклонить</button></div>'
+        ? '<div class="adm-acts" style="margin-top:16px"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) + '">Одобрить Pro</button>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustreject="' + esc(c.id) + '">Отказать</button></div>'
         : c.tier === "pro"
-          ? '<div class="adm__acts"><button class="link" data-admcustdemote="' + c.id + '">Убрать статус партнёра</button></div>'
+          ? '<div class="adm-acts" style="margin-top:16px"><button class="adm-link adm-link--muted" data-admcustdemote="' + esc(c.id) + '">Убрать статус партнёра</button></div>'
           : "") +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Начислить или списать баллы</h2></div>' +
-      '<label class="field"><span class="field__label">Баллы — можно отрицательное число</span>' +
-        '<input class="input" data-admcustpoints value="' + esc(S.admCustPoints) + '" inputmode="numeric" placeholder="10"></label>' +
-      '<label class="field"><span class="field__label">Заметка — за что</span>' +
-        '<input class="input" data-admcustnote value="' + esc(S.admCustNote) + '" placeholder="например, извинение за задержку"></label>' +
-      '<button class="btn btn--ghost btn--sm" data-admcustadjust="' + c.id + '"' + (S.admCustBusy ? " disabled" : "") + ">Применить</button>" +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">История баллов</h2></div>' +
-      (d.history.length ? '<div class="adm__list">' + d.history.map(loyaltyRowHTML).join("") + "</div>" : '<p class="muted">Начислений ещё не было.</p>') +
-      '<div class="sec__head sec__head--sub"><h2 class="sec__title">Заметка о клиенте</h2></div>' +
-      '<label class="field"><span class="field__label">Видна только вам</span>' +
-        '<input class="input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
-      '<button class="btn btn--ghost btn--sm" data-admcustsavenotes="' + c.id + '">Сохранить заметку</button>';
+      '<div class="adm-sec__t" style="margin-top:28px">Начислить или списать баллы</div>' +
+      '<div class="adm-form" style="margin-top:12px">' +
+        '<div class="adm-edpair">' +
+          '<label class="adm-field">Баллы — можно отрицательное число' +
+            '<input class="adm-input" data-admcustpoints value="' + esc(S.admCustPoints) + '" inputmode="numeric" placeholder="10"></label>' +
+          '<label class="adm-field">Заметка — за что' +
+            '<input class="adm-input" data-admcustnote value="' + esc(S.admCustNote) + '" placeholder="например, извинение за задержку"></label>' +
+        "</div>" +
+        '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-admcustadjust="' + esc(c.id) + '"' +
+          (S.admCustBusy ? " disabled" : "") + ">Применить</button></div>" +
+      "</div>" +
+      '<div class="adm-sec__t" style="margin-top:28px">История баллов</div>' +
+      (d.history.length
+        ? '<div class="adm-list">' + d.history.map(admLoyaltyRowHTML).join("") + "</div>"
+        : '<div class="adm-empty">Начислений ещё не было.</div>') +
+      '<div class="adm-sec__t" style="margin-top:28px">Заметка о клиенте</div>' +
+      '<div class="adm-form" style="margin-top:12px">' +
+        '<label class="adm-field">Видна только вам' +
+          '<input class="adm-input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
+        '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-admcustsavenotes="' + esc(c.id) + '">Сохранить заметку</button></div>' +
+      "</div>";
+  }
+  /** A KPI cell with no comparison line — the customer card and the
+      accountant's report have a number, not a trend. */
+  function admPlainKpi(label, value) {
+    return '<div class="adm-kpi"><div class="adm-kpi__l">' + label + '</div><div class="adm-kpi__v">' + value + "</div></div>";
+  }
+  /** The points ledger as panel rows — the cabinet draws its own copy of the
+      same history in the storefront's voice (loyaltyRowHTML). */
+  function admLoyaltyRowHTML(e) {
+    var sign = e.delta > 0 ? "+" : "";
+    return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' + (LOYALTY_REASON[e.reason] || e.reason) + "</span>" +
+      '<span class="adm-row__sub">' + shortDate(e.at) + (e.note ? " · " + esc(e.note) : "") + "</span></span>" +
+      '<span class="adm-row__amt">' + sign + e.delta + "</span></div>";
   }
   function admCustomersHTML() {
     if (SRV.admin !== true) {
@@ -12153,7 +12350,7 @@
         }).join("") + "</div>";
     }
     loadAdminCustomers(false);
-    if (S.admCustOpen) return '<div class="adm-embed">' + admCustomerCardHTML() + "</div>";
+    if (S.admCustOpen) return admCustomerCardHTML();
     var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
     return (S.admCustErr ? '<div class="adm-note">' + esc(S.admCustErr) + "</div>" : "") +
       '<div class="adm-acts">' +
@@ -12212,9 +12409,6 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
-  function kpi(label, value, sub) {
-    return '<div class="kpi"><span class="kpi__l">' + label + '</span><span class="kpi__v num">' + value + '</span><span class="kpi__s">' + sub + "</span></div>";
-  }
   /* Every string in this table came from a stranger filling in a checkout form —
      the order does not even have to be paid to be listed here. One unescaped
      column (`ship`) was enough to turn an anonymous order into script running
@@ -12320,7 +12514,7 @@
       descRU: g("[data-eddescru]"), descET: g("[data-eddescet]"), descEN: g("[data-eddescen]"),
     };
     var slot = document.querySelector("[data-descundoslot]");
-    if (slot) slot.innerHTML = '<button class="link" data-admdescundo>Отменить</button>';
+    if (slot) slot.innerHTML = '<button class="adm-link adm-link--muted" data-admdescundo>Отменить</button>';
   }
   /** «Заполнить автоматически» on the Google tab — for the language the
       segmented control is on, or for all three at once. Each answer lands in
@@ -12507,15 +12701,14 @@
   /* The drop zone doubles as the button row: `data-galdrop` carries the product
      id, or "hero" for the banner, so one pair of listeners serves both. */
   function galDropZone(target, label, hint) {
-    return '<div class="admphoto__drop" data-galdrop="' + esc(target) + '">' +
-      '<button class="btn btn--ghost btn--sm" data-galup="' + esc(target) + '"' +
+    return '<div class="adm-upload" data-galdrop="' + esc(target) + '">' +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="' + esc(target) + '"' +
         (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" + (UP.busy ? upBusyText() : label) + "</button>" +
-      '<input class="admphoto__file" type="file" accept="image/*"' + (target === "hero" ? "" : " multiple") +
+      '<input class="adm-file" type="file" accept="image/*"' + (target === "hero" ? "" : " multiple") +
         ' data-galfile="' + esc(target) + '" aria-label="' + esc(label) + '">' +
-      '<span class="muted admphoto__hint">' + hint + "</span>" +
-      "</div>" +
-      (MEDIA.on === false ? '<p class="admphoto__off">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
-      (UP.err ? '<p class="admphoto__err">' + esc(UP.err) + "</p>" : "");
+      '<span class="adm-hint">' + (MEDIA.on === false ? "Загрузка фото пока не настроена — нужно подключить хранилище." : hint) + "</span>" +
+      (UP.err ? '<span class="adm-err adm-upload__err">' + esc(UP.err) + "</span>" : "") +
+      "</div>";
   }
   /**
    * Which draft photo «Фото по объёмам» should have ticked for one size.
@@ -12773,6 +12966,12 @@
      the single-price case (the catalogue's «один объём»); the first
      «+ Размер» turns it into a labelled row and adds a second. Salon price,
      stock and barcode keep their columns once the product has an id. */
+  /** One cell of the sizes grid. The column's name inside it is drawn only on
+      a phone, where the header row is hidden and three bare boxes in a row
+      gave the owner no way to tell the price from the salon price. */
+  function edCell(cls, label, html) {
+    return '<span class="adm-grid__c' + (cls ? " adm-grid__c--" + cls : "") + '"><span class="adm-grid__l">' + label + "</span>" + html + "</span>";
+  }
   function edPaneSizesOwn(p) {
     if (!p.isNew) loadStockLevels(false);
     var rows = edSizeRows(p), n = rows.length;
@@ -12789,19 +12988,19 @@
       var salon = edSalonOf(goodsPrice(priceVal) || 0);
       return '<div class="adm-grid__row">' +
         (multi
-          ? '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) + '" maxlength="30" placeholder="100 мл" aria-label="Размер">'
+          ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) + '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
           : '<span class="adm-grid__sz">один объём</span>') +
-        '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
-          '" inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">' +
+        edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
+          '" inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">') +
         (p.isNew ? "" :
-          (i === 0
+          edCell("", "Салон, €", i === 0
             ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
               '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
             : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
-          '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
-            '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">' +
-          '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
-            esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">') +
+          edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
+            '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
+          edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
+            esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">')) +
         '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
           ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
       "</div>";
@@ -12835,19 +13034,19 @@
          and quietly dropped. */
       return '<div class="adm-grid__row">' +
         '<span class="adm-grid__sz">' + (sz ? esc(sz) : "один объём") + "</span>" +
-        (i === 0
+        edCell("", "Цена, €", i === 0
           ? '<input class="adm-input adm-input--cell" data-edprice inputmode="decimal" value="' + price + '" aria-label="Цена, €">'
           : '<input class="adm-input adm-input--cell" value="' + price + '" readonly aria-label="Цена, €">') +
-        (i === 0
+        edCell("", "Салон, €", i === 0
           ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
             '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
             '" placeholder="' + edSalonOf(price) + '" aria-label="Салон, €">'
           : '<input class="adm-input adm-input--cell" value="' + edSalonOf(price) + '" readonly aria-label="Салон, €">') +
-        '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
-          '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">' +
-        '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
-          esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">' +
-        '<button class="adm-grid__x" type="button" disabled title="скоро" aria-label="Убрать размер">×</button>' +
+        edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
+          '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
+        edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
+          esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">') +
+        '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дмитрий" aria-label="Убрать размер">×</button>' +
       "</div>";
     }).join("");
     return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
@@ -12944,10 +13143,12 @@
     var dov = p.descOv || {};
     var lang = S.goodsDescLang || "ru";
     var hint = "Текста пока нет — можно написать вручную или сгенерировать с ИИ";
+    // unentity: the static texts are HTML, and a stripped placeholder still
+    // carried «&amp;» — the box for Pasta&Love showed it as five characters
     var ph = {
-      ru: (stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "") || hint).slice(0, 300),
-      et: (stripTags(typeof CONTENT_ET !== "undefined" ? CONTENT_ET[p.id] : "") || hint).slice(0, 300),
-      en: (stripTags(typeof CONTENT !== "undefined" ? CONTENT[p.id] : "") || hint).slice(0, 300)
+      ru: (unentity(stripTags((typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) || (typeof CONTENT !== "undefined" && CONTENT[p.id]) || "")) || hint).slice(0, 300),
+      et: (unentity(stripTags(typeof CONTENT_ET !== "undefined" ? CONTENT_ET[p.id] : "")) || hint).slice(0, 300),
+      en: (unentity(stripTags(typeof CONTENT !== "undefined" ? CONTENT[p.id] : "")) || hint).slice(0, 300)
     };
     var box = function (code, hook, value) {
       return '<textarea class="adm-input adm-area" rows="8" maxlength="4000" ' + hook +
@@ -13143,7 +13344,7 @@
       '<button class="adm-link adm-link--back" data-admclose>← Товары</button>' +
       '<div class="adm-head"><div>' +
         '<div class="adm-head__kicker">' + (isNew ? "Новый товар"
-          : esc(p.brand) + " · " + esc(CAT_NAMES[p.cat] || p.cat) + (p.custom ? " · ваш товар" : "")) + "</div>" +
+          : esc(p.brand) + " · <span>" + esc(CAT_NAMES[p.cat] || p.cat) + "</span>" + (p.custom ? " · <span>ваш товар</span>" : "")) + "</div>" +
         '<h1 class="adm-h1 adm-h1--flat">' + (isNew ? "Что добавляем?" : esc(p.name)) + "</h1></div>" +
         (isNew || p.active === false ? "" : '<button class="adm-link" data-go-product="' + esc(p.id) + '">Открыть в магазине ↗</button>') + "</div>" +
       '<div class="adm-tabs" role="group" aria-label="Что показываем">' +
@@ -13230,12 +13431,6 @@
     for (var i = 0; i < rows.length; i++) if (stockKey(rows[i].productId, rows[i].variant) === key) return rows[i];
     return null;
   }
-  function stockStateChip(r) {
-    if (!r.tracked) return '<span class="chip">не учтено</span>';
-    var label = r.state === "out" ? "нет" : r.state === "low" ? "мало" : "в наличии";
-    var cls = r.state === "out" ? "chip--out" : r.state === "low" ? "chip--low" : "chip--ok";
-    return '<span class="chip ' + cls + '">' + label + "</span>";
-  }
   /* The row's own form, for what the ± stepper cannot say: the barcode, the
      «мало» threshold, an exact recount and the reason that goes into the
      history. The stepper above it is the everyday control; this is the one
@@ -13266,8 +13461,8 @@
     return '<div class="adm-row adm-row--tall">' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) + "</span>" +
         '<span class="adm-row__sub' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
-          (r.variant ? esc(r.variant) + " · " : "") +
-          (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : "штрихкод не привязан") + "</span></span>" +
+          (r.variant ? "<span>" + esc(r.variant) + "</span> · " : "") +
+          (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : "<span>штрихкод не привязан</span>") + "</span></span>" +
       '<span class="adm-step-qty">' +
         '<button data-stockstep="' + esc(key) + ':-1" aria-label="Меньше"' + (qty <= 0 ? " disabled" : "") + ">−</button>" +
         '<span class="adm-step-qty__v' + (low ? " adm-step-qty__v--warn" : "") + '">' + (r.tracked ? qty : "—") + "</span>" +
@@ -14156,7 +14351,7 @@
   // the assistant's answers end with a button that OPENS the right tab —
   // «где это?» answered by taking the owner there, not by describing a path
   function aiGo(tab, label) {
-    return '<div style="margin-top:10px"><button class="btn btn--ghost btn--sm" data-admtab="' + tab + '">' + label + " →</button></div>";
+    return '<div style="margin-top:10px"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admtab="' + tab + '">' + label + " →</button></div>";
   }
   var TAB_LABEL = { over: "Открыть обзор", orders: "Открыть заказы", goods: "Открыть товары",
     stock: "Открыть склад", pos: "Открыть продажу в салоне",
@@ -14827,21 +15022,22 @@
   function reportsCard() {
     loadReportSummaryOnce();
     var month = S.reportMonth || reportMonthOr();
-    return '<div class="sec__head sec__head--sub"><h2 class="sec__title">Отчёты</h2></div>' +
-      '<p class="muted" style="margin:0 0 12px">Выгрузка заказов для бухгалтера за один месяц — с разбивкой НДС.</p>' +
-      '<label class="field"><span class="field__label">Месяц</span>' +
-        '<input class="input input--box" type="month" data-admreportsmonth value="' + esc(month) + '" style="max-width:200px"></label>' +
-      '<div class="adm__acts">' +
-        '<button class="btn btn--sm" data-admreportdl="csv">Скачать CSV</button>' +
-        '<button class="btn btn--ghost btn--sm" data-admreportdl="xlsx">Скачать XLSX</button>' +
-      "</div>" +
-      (S.reportSummary && S.reportSummaryFor === month
-        ? '<div class="adm__kpis" style="margin-top:14px">' +
-            kpi("Заказы", String(S.reportSummary.orders), "") +
-            kpi("Выручка", eur(S.reportSummary.revenue), "") +
-            kpi("НДС", eur(S.reportSummary.vat), "") +
-          "</div>"
-        : '<p class="muted" style="margin-top:10px">Загружаем…</p>');
+    var sum = S.reportSummary && S.reportSummaryFor === month ? S.reportSummary : null;
+    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Отчёт для бухгалтера</div></div>' +
+      '<div class="adm-form" style="margin-top:8px">' +
+        '<p class="adm-hint" style="margin:0">Все заказы за месяц одним файлом, с разбивкой НДС. Откроется в Excel или Google Таблицах.</p>' +
+        '<label class="adm-field" style="max-width:240px">Месяц' +
+          '<input class="adm-input" type="month" data-admreportsmonth value="' + esc(month) + '"></label>' +
+        (sum
+          ? (sum.orders
+              ? '<div class="adm-kpis">' + admPlainKpi("Заказы", String(sum.orders)) +
+                admPlainKpi("Выручка", eur(sum.revenue)) + admPlainKpi("НДС", eur(sum.vat)) + "</div>"
+              : '<div class="adm-empty" style="margin:0">За этот месяц заказов не было — файл будет пустым. Выберите другой месяц.</div>')
+          : SRV.admin === true ? '<div class="adm-skel" style="margin:0"><i></i><i></i></div>' : "") +
+        '<div class="adm-acts">' +
+          '<button class="adm-btn" data-admreportdl="csv">Скачать CSV</button>' +
+          '<button class="adm-btn adm-btn--ghost" data-admreportdl="xlsx">Скачать XLSX</button></div>' +
+      "</div>";
   }
   /* «Клиенты → Отзывы»: what the journal line calls each of the three states.
      Its own table so the i18n check sees whole words, not fragments spliced
@@ -15565,6 +15761,14 @@
      was fine, but «s<b>trong</b>» came out as «s trong» in the meta
      description and in the JSON-LD. */
   var INLINE_TAGS = /^(?:span|b|i|strong|em|a|u|sup|sub)$/i;
+  /** The five named entities the product texts actually use, plus numeric
+      ones — for text that goes into a placeholder or a box, never into HTML. */
+  function unentity(s) {
+    var named = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " };
+    return String(s || "")
+      .replace(/&(amp|lt|gt|quot|#39|nbsp);/g, function (m, e) { return named[e]; })
+      .replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(Number(n)); });
+  }
   function stripTags(h) {
     return String(h || "")
       .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, function (_, tag) { return INLINE_TAGS.test(tag) ? "" : " "; })
@@ -16666,7 +16870,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustdemote],[data-admcustadjust],[data-admcustsavenotes],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -17509,6 +17713,13 @@
           var shEntry = demoApply(pa);
           toast("Тарифы доставки сохранены", shEntry);
         }
+        /* «Настройки»: the three cards rebuilt in phase 4 name themselves the
+           same way, and the toast's «Отменить» takes back the line they wrote. */
+        else if (pa.type === "set_hero") {
+          toast(pa.value ? "Баннер сохранён" : "Баннер снова стандартный", demoApply(pa));
+        }
+        else if (pa.type === "set_content") { toast("Данные магазина сохранены", demoApply(pa)); }
+        else if (pa.type === "set_pricing") { toast("Цены и баллы сохранены", demoApply(pa)); }
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
         render();
       }
@@ -17649,12 +17860,22 @@
       if (hGo) hGo.go = "product:" + d.herogopick;
       render(); return;
     }
+    /* The banner is the first thing every visitor sees, so a save asks first
+       — the same overlay card as a tariff or a shipped order (README § State). */
     if (d.herosave !== undefined) {
-      pendingAction = { type: "set_hero", value: heroClean(heroDraft()) };
+      var hSave = heroClean(heroDraft());
+      pendingAction = {
+        type: "set_hero", value: hSave, overlay: true,
+        title: "Изменить баннер на главной?", detail: heroConfirmDetail(hSave)
+      };
       render(); refocus("[data-admapply]"); return;
     }
     if (d.heroreset !== undefined) {
-      pendingAction = { type: "set_hero", value: null };
+      pendingAction = {
+        type: "set_hero", value: null, overlay: true,
+        title: "Вернуть стандартный баннер?",
+        detail: "Ваши слайды заменятся пятью стандартными. Это можно отменить из журнала изменений."
+      };
       render(); refocus("[data-admapply]"); return;
     }
     /* ---- content: «Контент». Every button edits the draft; the shop changes
@@ -17677,13 +17898,19 @@
     if (d.contentsave !== undefined) {
       var cPatch = contentDiff(contentConf(), contentDraft());
       if (!Object.keys(cPatch).length) { toast("Ничего не изменилось"); return; }
-      pendingAction = { type: "set_content", value: cPatch };
+      pendingAction = {
+        type: "set_content", value: cPatch, overlay: true,
+        title: "Изменить данные магазина?", detail: contentConfirmDetail(cPatch)
+      };
       render(); refocus("[data-admapply]"); return;
     }
     if (d.contentreset !== undefined) {
       var cBack = contentDiff(contentConf(), CONTENT_DEFAULT);
       if (!Object.keys(cBack).length) { toast("Уже стандартные значения"); return; }
-      pendingAction = { type: "set_content", value: cBack };
+      pendingAction = {
+        type: "set_content", value: cBack, overlay: true,
+        title: "Вернуть стандартные данные?", detail: contentConfirmDetail(cBack)
+      };
       render(); refocus("[data-admapply]"); return;
     }
     if (d.admundo !== undefined) { demoUndo(Number(d.admundo)); toast("Отменено ✓"); render(); return; }
@@ -17700,6 +17927,9 @@
       };
       render(); refocus("[data-admapply]"); return;
     }
+    // «Разрешить снижать текущие цены» — computeMontonioFillPatch() clamps at
+    // the current price unless this is on; a switch like every other one here
+    if (d.shipallowlower !== undefined) { S.shipAllowLower = !S.shipAllowLower; render(); return; }
     if (d.admshipreset !== undefined) {
       demoApply({ type: "set_shipping_rules", rules: cloneRules(SHIP_RULES_DEFAULT), full: true });
       toast("Вернули значения по умолчанию ✓"); render(); return;
@@ -17720,7 +17950,9 @@
     if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
     if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
     if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
-    if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; render(); return; }
+    if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; S.pricingErrField = ""; render(); return; }
+    // the loyalty switch: a <button aria-pressed> like every other switch in the panel
+    if (d.pricingtoggle !== undefined) { var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled; render(); return; }
 
     /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
     // «Настройки»: the index of six and the way back out of a sub-page
@@ -18215,9 +18447,9 @@
     else if (t.matches("[data-loyaltyredeem]")) { S.loyaltyRedeem = t.checked; render(); }
     else if (t.matches("[data-pricingf]")) {
       S.pricingErr = setPricingDraftField(t.dataset.pricingf, t.value);
+      S.pricingErrField = S.pricingErr ? t.dataset.pricingf : "";
       paintPricingState();   // no render(): see that function's own comment
     }
-    else if (t.matches("[data-pricingtoggle]")) { pricingDraft().loyalty.enabled = t.checked; render(); }
     /* «Письма»: the three owner-editable strings. No render() — the caret,
        see paintMailState()'s own comment. */
     else if (t.matches("[data-mailtxt]")) {
@@ -18351,10 +18583,6 @@
        draft holds only values that parse; garbage is ignored and the field
        snaps back on the next render. */
     else if (t.matches("[data-shiprule]")) { setShipDraftField(t.dataset.shiprule, t.value); }
-    // integration: «Разрешить снижать текущие цены» — computeMontonioFillPatch()
-    // clamps at the current price unless this is checked, so it just needs to
-    // be readable when the fill button is clicked; no render() needed
-    else if (t.matches("[data-shipallowlower]")) { S.shipAllowLower = t.checked; }
     else if (t.matches("[data-promof]")) {
       if (!S.promoForm) return;
       var pf = t.dataset.promof;
@@ -18443,10 +18671,10 @@
           return pd.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(pq) >= 0;
         }).slice(0, 8) : [];
         plist.innerHTML = pmatches.length
-          ? '<div class="adm__list">' + pmatches.map(function (p) {
-              return '<div class="adm__row"><span class="adm__ph">' + media(p, 0, "ph") + "</span>" +
-                '<span class="adm__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-                '<button class="link" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
+          ? '<div class="adm-list adm-list--flat">' + pmatches.map(function (p) {
+              return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
+                '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
+                '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
             }).join("") + "</div>"
           : "";
         translateTree(plist);

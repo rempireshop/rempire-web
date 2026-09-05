@@ -255,11 +255,12 @@ const INTENTIONAL = [
   [/^(Русский|Eesti|English)$/, "language menu — each language names itself"],
   [/^(шампунь|кондиционер|маска|паста|спрей|воск|гель|пудра|масло|бальзам|сыворотка|тоник|крем|пенка|лосьон|патчи)$/,
     "product-type key used for matching (TYPE_MATES / NAME_TAILS), never rendered"],
-  [/^(товар|товара|товаров|точка|точки|точек|раздел|раздела|разделов|заказ|заказа|заказов|балл|балла|баллов)$/,
+  [/^(товар|товара|товаров|точка|точки|точек|раздел|раздела|разделов|заказ|заказа|заказов|балл|балла|баллов|слайд|слайда|слайдов)$/,
     "plural word form — pl() glues it to a number, the composed string is translated"],
   [/^[А-ЯЁ]\. [А-ЯЁ][а-яё]+$/, "demo customer name in the admin — names are not translated"],
   [/^от$/, "price prefix — glued to the amount, «от 12,90 €» is covered by a UI_RX rule"],
   [/^Напиши SEO title/, "prompt text sent to the model, never shown to anyone"],
+  [/^(Rempire — вопрос из админки$|Страница: )/, "subject and body of the mailto to the developer (admDevLink) — he reads Russian"],
   // integration: stock_moves.ref free text — a fixed "who moved this" tag
   // shown only in the ledger's own history row, same "Russian by decision"
   // convention as every other free-text audit/note field in this file

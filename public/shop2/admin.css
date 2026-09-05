@@ -1,8 +1,8 @@
 /* REMPIRE — админка, дизайн-система (Phase 1 of the admin redesign).
    Loaded after styles.css; every rule here is scoped to `.adm2` (the new admin
-   shell) or to `adm-` prefixed classes, so it can never touch the storefront
-   and never collides with the legacy `.adm__*` rules that still style the
-   sections Phase 2/3 will redesign.
+   shell) or to `adm-` prefixed classes, so it can never touch the storefront.
+   Since phase 4 the panel borrows nothing from styles.css: the `.adm__*` rules
+   left there style only the cabinet's points ledger.
 
    Source of truth: docs/design/admin-handoff-README.md § «Design tokens» and
    § «Components». Corner radius 0, no shadows, 1 px rules, Oswald only for
@@ -499,10 +499,6 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-propose__acts { display: flex; gap: 8px; }
 .adm-propose__acts .adm-btn { flex: 1; height: 44px; }
 
-/* `.adm-legacy` used to re-seat the sections the redesign had not reached yet.
-   Phases 1–3 between them reached all of them, so nothing renders inside it any
-   more; what a settings sub-page still embeds is `.adm-embed` below. */
-
 /* ---------- login / waiting card ------------------------------------------- */
 
 .adm-gate { max-width: 420px; margin: 48px auto; display: flex; flex-direction: column; gap: 14px; }
@@ -545,7 +541,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
      hair under 44 with the wider fallback fonts of the Linux CI runner */
   .adm-btn { min-height: 44px; box-sizing: border-box; }
   .adm-langs button { height: 44px; min-width: 44px; padding: 0 12px; justify-content: center; }
-  .adm-tab { min-height: 44px; padding: 11px 0; }
+  /* flex: none — an explicit min-width lets a flex item shrink under its own
+     text, and the five editor tabs then drew on top of each other */
+  .adm-tab { flex: none; min-height: 44px; min-width: 44px; padding: 11px 0; text-align: left; }
   .adm-link { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
   .adm-asst__chips button { min-height: 44px; }
   .adm-step { padding: 10px 10px; }
@@ -607,10 +605,23 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-grid__x[disabled] { border-color: var(--a-rule); color: var(--a-rule); cursor: default; }
 /* the phone cannot hold six columns: the row becomes two lines of labels-in-
    placeholders, which is why every cell carries an aria-label of its own */
+/* each cell is a span around its box; the column's name inside it (edCell)
+   is drawn only where the header row is not */
+.adm-grid__c { min-width: 0; }
+.adm-grid__l { display: none; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-bottom: 4px; }
 @media (max-width: 720px) {
   .adm-grid__head { display: none; }
-  .adm-grid__row { grid-template-columns: 1fr 1fr 44px; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--a-rule); }
-  .adm-grid__sz { grid-column: 1 / -1; font-weight: 600; }
+  /* three equal boxes — price · salon · stock — then the barcode across two
+     of them with «×» at the end; the 44-px column used to squeeze the stock */
+  .adm-grid__row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 6px; align-items: end;
+    padding-bottom: 12px; border-bottom: 1px solid var(--a-rule);
+  }
+  .adm-grid__sz, .adm-grid__c--sz { grid-column: 1 / -1; font-weight: 600; }
+  .adm-grid__c--ean { grid-column: 1 / 3; }
+  .adm-grid__x { grid-column: 3; justify-self: end; }
+  .adm-grid__l { display: block; }
+  .adm-grid--new .adm-grid__row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 /* product creation: a product that has no id yet has no salon, stock or
    barcode column — three columns, the same rhythm */
@@ -1011,6 +1022,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   padding-bottom: 6px; align-items: end;
 }
 .adm-tariffs .adm-input { height: 44px; padding: 0 10px; min-width: 0; }
+/* the column name inside each cell — shown only where the header row is not */
+.adm-tariffs__l { display: none; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-bottom: 4px; }
 .adm-jrow {
   display: flex; align-items: center; gap: 12px; min-height: 56px;
   border-bottom: 1px solid var(--a-rule); padding: 8px 0; flex-wrap: wrap;
@@ -1020,24 +1033,124 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-narrow { max-width: 720px; }
 .adm-narrow--form { max-width: 560px; }
 
-/* A settings sub-page still hosts a legacy card or two — the banner editor,
-   the content document, the loyalty form and the accountant's report all keep
-   their own markup. This only re-seats them in the new column and quiets the
-   two things the redesign banned everywhere else — the uppercase sub-heading
-   and the letter-spaced section title. */
-.adm-embed { display: flex; flex-direction: column; }
-.adm-embed .sec__head--sub { margin-top: 22px; }
-.adm-embed .sec__title { font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 600; }
-/* …and their buttons and chips stop shouting. The storefront sets both in
-   uppercase Oswald with .14em of tracking, which is the panel's own «Сохранить»
-   in a different voice two rules further down the same page. */
-.adm-embed .btn, .adm-embed .chip {
-  font-family: "Golos Text", ui-sans-serif, system-ui, sans-serif;
-  text-transform: none; letter-spacing: 0;
+/* ======================================================================
+   Phase 4 — Настройки rebuilt, legacy gone.
+
+   The four cards a settings sub-page used to embed as storefront markup —
+   the banner editor, the content document, the loyalty form, the
+   accountant's report — and the customer card behind «Клиенты» are `adm-`
+   markup now, so the `.adm-embed` re-seating rules and the `.admhero__*` /
+   `.admphoto__*` / `.adm__*` blocks of styles.css went with them. Below are
+   the few shapes those cards needed that phases 1–3 had not drawn yet.
+   ====================================================================== */
+
+/* ---------- forms ---------------------------------------------------------- */
+
+.adm-form { display: flex; flex-direction: column; gap: 16px; }
+/* an editor opened under its own list row — a slide's form, a content block */
+.adm-form--inline { margin: 12px 0 4px; }
+.adm-h2 { font-family: inherit; font-weight: 600; font-size: 20px; line-height: 26px; margin: 0; }
+/* the refused field says so at its border, the sentence under the fields
+   says why (paintPricingState) */
+.adm-input[aria-invalid="true"] { border-color: var(--a-warn); }
+/* the tariff grid's «тариф Montonio: 5,46 €» under each price box */
+.adm-hint--cell { display: block; font-size: 11px; line-height: 14px; margin-top: 2px; }
+/* appearance:none takes the native arrow away with the native chrome — a
+   select with no arrow reads as a text box the owner cannot type into */
+.adm2 select.adm-input {
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231c1a00' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat; background-position: right 12px center;
 }
-.adm-embed .btn { font-size: 15px; font-weight: 500; }
-.adm-embed .btn--sm { font-size: 14px; }
-.adm-embed .chip { font-size: 12px; }
+/* the file input behind an upload button — visually hidden rather than
+   display:none, so the button can still open it and it keeps its name */
+.adm-file {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+/* the banner's upload zone: a button, a hint and a drop target in one box */
+.adm-upload {
+  position: relative; border: 1px dashed var(--a-ink); padding: 12px 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+}
+.adm-upload.is-over, .adm-drop.is-over { background: var(--a-tint); }
+.adm-upload .adm-hint { flex: 1 1 200px; }
+.adm-upload__err { flex-basis: 100%; }
+
+/* ---------- fold-outs: «Самовывоз, перевозчики и наценка», the promo extras */
+
+.adm-fold { display: flex; flex-direction: column; }
+.adm-fold > summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  min-height: 44px; font-size: 14px; font-weight: 500; color: var(--a-ink);
+}
+.adm-fold > summary::-webkit-details-marker { display: none; }
+.adm-fold > summary::before {
+  content: "›"; font-size: 20px; line-height: 1; color: var(--a-muted);
+  width: 14px; text-align: center; flex: none; transition: transform .15s;
+}
+.adm-fold[open] > summary::before { transform: rotate(90deg); }
+
+/* ---------- rows: the controls on the right, and picker grids ------------ */
+
+.adm-ops { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.adm-iconbtn {
+  width: 44px; height: 44px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); font-size: 18px; line-height: 1; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.adm-iconbtn:hover { background: var(--a-tint); }
+.adm-iconbtn[disabled] { color: var(--a-rule); background: var(--a-paper); cursor: default; }
+.adm-row__nm .adm-badge { margin-left: 6px; vertical-align: 2px; }
+.adm2 a.adm-row { text-decoration: none; }
+/* the blog toolbar's own line: a box and a button or two under the tools */
+.adm-toolrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+.adm-toolrow__in { flex: 1 1 200px; width: auto; }
+
+.adm-picks { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+.adm-picks__none { grid-column: 1 / -1; margin: 0; }
+.adm-pick-tile {
+  border: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-ink);
+  padding: 6px; min-height: 44px; display: flex; flex-direction: column; gap: 6px; text-align: left;
+}
+.adm-pick-tile:hover { border-color: var(--a-ink); }
+/* the chosen tile: a 2-px ink frame, the padding shrunk by the same pixel so
+   nothing in the grid moves */
+.adm-pick-tile[aria-current="true"] { border: 2px solid var(--a-ink); padding: 5px; }
+.adm-pick-tile__img { position: relative; display: block; width: 100%; height: 64px; background: var(--a-tint); }
+.adm-pick-tile__nm {
+  font-size: 11px; line-height: 14px; color: var(--a-muted);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* the wordy tile («Автоматически · три фото стопкой») takes two columns */
+.adm-pick-tile--text {
+  grid-column: span 2; min-height: 92px; align-items: center; justify-content: center;
+  text-align: center; font-size: 13px; gap: 2px;
+}
+
+/* The banner preview is the storefront's own .hero, shrunk: nothing in it is
+   clickable (the button is drawn as a span) and it must not run away with the
+   panel's height. */
+.adm-heroprev { border: 1px solid var(--a-rule); overflow: hidden; }
+.adm-heroprev .hero__box { min-height: 0; padding: 20px 18px; }
+.adm-heroprev .hero__title { font-size: clamp(20px, 3vw, 28px); }
+.adm-heroprev .hero__art { min-height: 120px; }
+
+/* ---------- О компании: the opening-hours grid ----------------------------- */
+
+.adm-hours { display: flex; flex-direction: column; gap: 8px; }
+.adm-hours__row { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.adm-hours__d { font-size: 13px; color: var(--a-muted); }
+
+@media (max-width: 899px) {
+  .adm-heroprev .hero__art { height: 34vw; max-height: 160px; min-height: 110px; }
+  .adm-hours__row { grid-template-columns: minmax(0, 1fr) auto; }
+  .adm-hours__d { grid-column: 1 / -1; }
+  /* a row whose body is the button (a letter, a customer): a thumb's height,
+     and the blog toolbar's buttons likewise */
+  .adm2 button.adm-row__body { min-height: 44px; }
+  .adm-tools button { height: 44px; min-width: 44px; }
+}
 
 /* ---------- phone --------------------------------------------------------- */
 
@@ -1045,6 +1158,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm-tariffs { grid-template-columns: 1fr 1fr; gap: 8px 10px; }
   .adm-tariffs--head { display: none; }
   .adm-tariffs > span:first-child { grid-column: 1 / -1; font-weight: 600; }
+  .adm-tariffs__l { display: block; }
   .adm-frame { height: 420px; }
   .adm2 input.adm-title-in { font-size: 24px; height: 48px; }
   .adm-drop { height: auto; min-height: 120px; flex-wrap: wrap; }

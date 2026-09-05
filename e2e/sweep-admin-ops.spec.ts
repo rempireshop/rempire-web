@@ -375,7 +375,8 @@ test.describe("sweep — customers", () => {
     await page.locator("[data-admcustapprove]").click();
     expect(await toastText(page)).toMatch(/[Оо]добрен/);
     await clearToast(page);
-    await expect(page.locator(".chip", { hasText: "партнёр" }).first()).toBeVisible();
+    // the card's tier badge is the panel's own since phase 4 — «Pro», like the row's
+    await expect(page.locator(".adm-badge", { hasText: "Pro" }).first()).toBeVisible();
     await assertClean(page, w, "partner approved");
 
     // ---- points ------------------------------------------------------------
