@@ -66,7 +66,9 @@ function escapeNewlinesInStrings(s: string): string {
  *  or base64-encoded. Every shape is Google's file underneath — read them all
  *  rather than send the owner back to the form with «bad key». */
 function parseServiceAccountJson(raw: string): Record<string, unknown> | null {
-  const text = raw.trim();
+  // a BOM from a Windows editor and the curly quotes a rich-text copy leaves
+  // behind are not the owner's mistake to fix by hand
+  const text = raw.replace(/^﻿/, "").replace(/[“”„]/g, '"').trim();
   const candidates: string[] = [text];
   const unquoted = text.replace(/^['"`]+/, "").replace(/['"`]+$/, "");
   if (unquoted !== text) candidates.push(unquoted);
@@ -196,7 +198,24 @@ export type GscSummary = {
  *  fetch_failed — Google did not answer or refused (service account not
  *  added to the property, API not enabled). The first two are settings
  *  states the panel explains; the third is the one it calls an error. */
-export type GscUnavailable = { ok: false; error: "not_configured" | "bad_key" | "fetch_failed" };
+export type GscUnavailable = { ok: false; error: "not_configured" | "bad_key" | "fetch_failed"; shape?: KeyShape };
+
+/** What a bad_key value looks like — never the value itself. The panel turns
+ *  each into one plain sentence so the owner knows what to re-paste. */
+export type KeyShape = "empty" | "pem_only" | "path" | "no_client_email" | "no_private_key" | "curly_quotes" | "not_json";
+
+export function keyShape(raw: string): KeyShape {
+  const t = raw.replace(/^﻿/, "").trim();
+  if (!t) return "empty";
+  if (!t.startsWith("{") && /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(t)) return "pem_only";
+  if (/^[A-Za-z]:[\\/]|^\/|^~\//.test(t) || /^[\w.-]+\.json$/i.test(t)) return "path";
+  if (/[“”„«»]/.test(t)) return "curly_quotes";
+  const j = parseServiceAccountJson(t);
+  if (!j) return "not_json";
+  if (typeof j.client_email !== "string" || !j.client_email) return "no_client_email";
+  if (typeof j.private_key !== "string" || !j.private_key) return "no_private_key";
+  return "not_json";
+}
 
 /** settings.value comes back already-parsed from most call sites, but
  *  src/lib/orders.ts has at least one spot that still guards a jsonb column
@@ -228,7 +247,8 @@ function freshCache(raw: unknown, now: Date): GscSummary | null {
 export async function getSearchConsoleSummary(now: Date = new Date()): Promise<GscSummary | GscUnavailable> {
   const sa = serviceAccount();
   const siteUrl = (process.env.GSC_SITE_URL ?? "").trim();
-  if (!sa && (process.env.GSC_SERVICE_ACCOUNT_JSON ?? "").trim()) return { ok: false, error: "bad_key" };
+  const rawKey = process.env.GSC_SERVICE_ACCOUNT_JSON ?? "";
+  if (!sa && rawKey.trim()) return { ok: false, error: "bad_key", shape: keyShape(rawKey) };
   if (!sa || !siteUrl) return { ok: false, error: "not_configured" };
 
   try {

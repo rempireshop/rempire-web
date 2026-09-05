@@ -1585,6 +1585,16 @@
         "Search Console'i võtit ei saa lugeda: muutujasse tuleb kleepida kogu allalaaditud fail tervikuna, seda teeb Dim.",
       "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.":
         "Google ei vasta või teenusekontol pole saidile ligipääsu — Dim kontrollib.",
+      "Сейчас переменная пустая.": "Praegu on muutuja tühi.",
+      "Сейчас там только сам ключ (BEGIN PRIVATE KEY) — нужен весь файл .json с client_email.":
+        "Praegu on seal ainult võti ise (BEGIN PRIVATE KEY) — vaja on kogu .json-faili koos client_email-iga.",
+      "Сейчас там путь к файлу, а не его содержимое.": "Praegu on seal faili asukoht, mitte selle sisu.",
+      "В файле нет поля client_email.": "Failis puudub väli client_email.",
+      "В файле нет поля private_key.": "Failis puudub väli private_key.",
+      "Кавычки в файле заменены на «умные» — вставьте из простого текстового редактора.":
+        "Faili jutumärgid on asendatud «tarkade» jutumärkidega — kleebi lihtsast tekstiredaktorist.",
+      "Это не файл .json от Google — скорее всего вставлена только часть.":
+        "See pole Google'i .json-fail — tõenäoliselt on kleebitud ainult osa.",
       "Средняя позиция": "Keskmine positsioon",
       "Написать Диму": "Kirjuta Dimile",
       "Приём оплат · Montonio": "Maksete vastuvõtt · Montonio",
@@ -3292,6 +3302,16 @@
         "The Search Console key cannot be read: the whole downloaded file has to go into the variable; Dim does that.",
       "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.":
         "Google is not answering, or the service account has no access to the site — Dim will check.",
+      "Сейчас переменная пустая.": "Right now the variable is empty.",
+      "Сейчас там только сам ключ (BEGIN PRIVATE KEY) — нужен весь файл .json с client_email.":
+        "Right now it holds only the key itself (BEGIN PRIVATE KEY) — the whole .json file with client_email is needed.",
+      "Сейчас там путь к файлу, а не его содержимое.": "Right now it holds the file's path, not its contents.",
+      "В файле нет поля client_email.": "The file has no client_email field.",
+      "В файле нет поля private_key.": "The file has no private_key field.",
+      "Кавычки в файле заменены на «умные» — вставьте из простого текстового редактора.":
+        "The file's quotes were turned into “smart” quotes — paste from a plain text editor.",
+      "Это не файл .json от Google — скорее всего вставлена только часть.":
+        "This is not Google's .json file — most likely only a part was pasted.",
       "Средняя позиция": "Average position",
       "Написать Диму": "Write to Dim",
       "Приём оплат · Montonio": "Payments · Montonio",
@@ -9746,6 +9766,23 @@
     };
   }
   var GSC = null;
+  /* What the server saw in the key variable — its shape, never its contents
+     — so «Подключения» can say what to re-paste. Each sentence is its own
+     text node (a <span>) so the translator finds it by key. */
+  var GSC_KEY_SHAPES = {
+    empty: "Сейчас переменная пустая.",
+    pem_only: "Сейчас там только сам ключ (BEGIN PRIVATE KEY) — нужен весь файл .json с client_email.",
+    path: "Сейчас там путь к файлу, а не его содержимое.",
+    no_client_email: "В файле нет поля client_email.",
+    no_private_key: "В файле нет поля private_key.",
+    curly_quotes: "Кавычки в файле заменены на «умные» — вставьте из простого текстового редактора.",
+    not_json: "Это не файл .json от Google — скорее всего вставлена только часть."
+  };
+  function gscBadKeyLine(shape) {
+    var main = "Ключ Search Console не читается: в переменную нужно вставить весь скачанный файл целиком, это делает Дим.";
+    var why = GSC_KEY_SHAPES[shape];
+    return why ? "<span>" + main + "</span> <span>" + why + "</span>" : main;
+  }
   function loadGsc() {
     if (SRV.admin !== true || GSC || loadGsc._busy) return;
     loadGsc._busy = true;
@@ -11441,7 +11478,7 @@
         : GSC.error === "not_configured"
           ? "Search Console не подключён: на сервере нужен ключ сервисного аккаунта, это делает Дим."
           : GSC.error === "bad_key"
-            ? "Ключ Search Console не читается: в переменную нужно вставить весь скачанный файл целиком, это делает Дим."
+            ? gscBadKeyLine(GSC.shape)
             : "Google не отвечает или у сервисного аккаунта нет доступа к сайту — Дим проверит.",
       act: gscOk ? "" : admDevLink() });
 

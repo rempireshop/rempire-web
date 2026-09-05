@@ -112,12 +112,37 @@ describe("src/lib/gsc.ts", () => {
     const { getSearchConsoleSummary } = await import("@/lib/gsc");
     for (const raw of ['{"type":"service_account","client_email":"a@b.iam', "C:/Users/dim/Downloads/rempire-shop-1234.json", '{"client_email":"a@b.iam.gserviceaccount.com"}']) {
       process.env.GSC_SERVICE_ACCOUNT_JSON = raw;
-      expect(await getSearchConsoleSummary(), raw).toEqual({ ok: false, error: "bad_key" });
+      expect(await getSearchConsoleSummary(), raw).toMatchObject({ ok: false, error: "bad_key" });
     }
     // a key alone, no site url, is still "not configured" — nothing to read yet
     process.env.GSC_SERVICE_ACCOUNT_JSON = SERVICE_ACCOUNT;
     delete process.env.GSC_SITE_URL;
     expect(await getSearchConsoleSummary()).toEqual({ ok: false, error: "not_configured" });
+  });
+
+  it("names the shape of a bad key without repeating any of it", async () => {
+    process.env.GSC_SITE_URL = "sc-domain:rempireshop.com";
+    vi.stubGlobal("fetch", () => { throw new Error("must not call out with a broken key"); });
+    const { getSearchConsoleSummary, keyShape } = await import("@/lib/gsc");
+    const pem = "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg\n-----END PRIVATE KEY-----\n";
+    const cases: Array<[string, string]> = [
+      [pem, "pem_only"],
+      ["C:\\Users\\dim\\Downloads\\rempire-shop-1234.json", "path"],
+      ["rempire-shop-1234.json", "path"],
+      ['{"client_email":"a@b.iam.gserviceaccount.com"}', "no_private_key"],
+      [`{"private_key":"${pem.replace(/\n/g, "\\n")}"}`, "no_client_email"],
+      ['{"type":"service_account","client_email":"a@b.iam', "not_json"],
+    ];
+    for (const [raw, shape] of cases) {
+      process.env.GSC_SERVICE_ACCOUNT_JSON = raw;
+      expect(keyShape(raw), raw.slice(0, 30)).toBe(shape);
+      const res = await getSearchConsoleSummary();
+      expect(res, raw.slice(0, 30)).toEqual({ ok: false, error: "bad_key", shape });
+      expect(JSON.stringify(res)).not.toContain("MIIEvQ");
+    }
+    // curly quotes are read anyway — the shape is only reported when they still break the file
+    process.env.GSC_SERVICE_ACCOUNT_JSON = SERVICE_ACCOUNT.replace(/"/g, (_m, i: number) => (i % 2 ? "”" : "“"));
+    expect(keyShape(process.env.GSC_SERVICE_ACCOUNT_JSON)).toBe("curly_quotes");
   });
 
   it("reads the key file in the shapes a paste into a web form produces — quoted, pretty-printed with real line breaks in the key, doubled \\n, base64", async () => {
@@ -232,7 +257,7 @@ describe("GET /api/admin/analytics/gsc", () => {
       const { GET } = await import("@/app/api/admin/analytics/gsc/route");
       const res = await GET(new Request("https://rempireshop.com/api/admin/analytics/gsc/", { headers: { cookie: adminCookie } }));
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ ok: false, error: "bad_key" });
+      expect(await res.json()).toEqual({ ok: false, error: "bad_key", shape: "not_json" });
     } finally {
       if (savedSA === undefined) delete process.env.GSC_SERVICE_ACCOUNT_JSON; else process.env.GSC_SERVICE_ACCOUNT_JSON = savedSA;
       if (savedSite === undefined) delete process.env.GSC_SITE_URL; else process.env.GSC_SITE_URL = savedSite;
