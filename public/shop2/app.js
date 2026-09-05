@@ -228,7 +228,6 @@
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Pangalink (Swedbank, SEB, LHV, Luminor, Coop), kaart, Apple Pay / Google Pay, arve ettevõtetele.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · tasuta · tellimus ootab 7 päeva, seejärel 1,50 € päevas.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
-      "Админка — демо": "Admin — demo",
       "Банковская ссылка": "Pangalink", "Банковская карта": "Pangakaart",
       "По счёту — для компаний": "Arvega — ettevõtetele",
       "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — maksa oma pangas",
@@ -577,7 +576,7 @@
 
       // i18n pass 2: search
       "Популярные запросы:": "Populaarsed otsingud:",
-      "шампунь": "šampoon", "борода": "habe", "парфюм": "parfüüm", "футболка": "T-särk",
+      "шампунь": "šampoon", "борода": "habe", "стайлинг": "viimistlus", "укладка": "soeng", "волосы": "juuksed", "кожа головы": "peanahk", "зима": "talv", "уход": "hooldus", "парфюм": "parfüüm", "футболка": "T-särk",
       "Проверьте написание или посмотрите категории:": "Kontrolli kirjapilti või vaata kategooriaid:",
       "Напишите нам — поможем подобрать замену:": "Kirjuta meile — aitame asenduse leida:",
 
@@ -1774,7 +1773,6 @@
       "Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.": "Bank link (Swedbank, SEB, LHV, Luminor, Coop), card, Apple Pay / Google Pay, invoice for companies.",
       "Mardi 1, Таллинн · бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.": "Mardi 1, Tallinn · free · your order waits 7 days, then €1.50 per day.",
       "Mardi 1, 10145 Таллинн": "Mardi 1, 10145 Tallinn",
-      "Админка — демо": "Admin — demo",
       "Банковская ссылка": "Bank link", "Банковская карта": "Bank card",
       "По счёту — для компаний": "By invoice — for companies",
       "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — pay via your own bank",
@@ -2124,7 +2122,7 @@
 
       // i18n pass 2: search
       "Популярные запросы:": "Popular searches:",
-      "шампунь": "shampoo", "борода": "beard", "парфюм": "perfume", "футболка": "T-shirt",
+      "шампунь": "shampoo", "борода": "beard", "стайлинг": "styling", "укладка": "hair styling", "волосы": "hair", "кожа головы": "scalp", "зима": "winter", "уход": "care", "парфюм": "perfume", "футболка": "T-shirt",
       "Проверьте написание или посмотрите категории:": "Check the spelling, or browse the categories:",
       "Напишите нам — поможем подобрать замену:": "Write to us — we will help you find an alternative:",
 
@@ -6063,7 +6061,7 @@
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 " + esc(contentConf().company.legalName) + "</span>" +
         cSocialsHTML("socials--bottom") +
-        '<button class="link ftr__admin" data-go="admin">Админка — демо</button></div>' +
+        '<button class="link ftr__admin" data-go="admin">Админка</button></div>' +
     "</div></footer>";
   }
 
