@@ -119,6 +119,10 @@ export default defineConfig({
       SESSION_SECRET: E2E_SESSION_SECRET,
       ADMIN_PASSWORD_HASH: adminPasswordHash(),
       PAYMENT_PROVIDER: "mock",
+      // the same idea for the carrier: «Создать этикетку» registers a parcel
+      // with src/lib/shipping/montonio-mock.ts instead of Montonio, so the
+      // order card's whole flow can be driven — no keys, no real parcels
+      SHIPPING_PROVIDER: "mock",
       PUBLIC_BASE_URL: E2E_BASE_URL,
       E2E_EXPOSE_LOGIN_CODE: "1",
       E2E_BOOTSTRAP: "1",

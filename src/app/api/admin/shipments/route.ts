@@ -1,23 +1,32 @@
 /**
  * POST /api/admin/shipments/  — { orderId } → register the parcel with a carrier
  *
- * The button behind «Создать отправление» in the admin. It hands the order's
- * shipping jsonb (parcel-machine id, or the courier address) to Montonio, which
- * registers it with Omniva / DPD / SmartPosti / Venipak and hands back a
- * tracking code; the result is merged into `orders.shipping.montonio` so the
- * label route and the storefront can find it again.
+ * The button behind «Создать этикетку» on the admin's order card. It hands the
+ * order's shipping jsonb (parcel-machine id, or the courier address) to
+ * Montonio, which registers it with Omniva / DPD / SmartPosti / Venipak and
+ * hands back a tracking code; the result is merged into
+ * `orders.shipping.montonio` so the label route and the panel can find it.
+ *
+ * **It registers, and nothing else.** The order's status stays exactly where
+ * it was — a label is a sticker, not a hand-over: the parcel is still on the
+ * shelf until the owner presses «Отправлен», which is its own explicit step
+ * (PATCH /api/admin/orders/<id> { status: "shipped" } — that is where the
+ * status moves and the customer's «Заказ отправлен» letter, tracking link
+ * included, goes out). This route used to flip the order to `shipped` and
+ * send the letter by itself, and the owner's complaint was exactly that:
+ * «нажимаю „этикетка“ — меняется весь статус».
  *
  * Order of work, deliberately:
  *   1. Montonio first — nothing is written until the carrier accepted the parcel.
- *   2. then the order row, then admin_audit, then the status.
- *   3. the customer's tracking letter last, and its failure is swallowed: a
- *      registered parcel must not be lost because Resend was down.
+ *   2. then the order row, then admin_audit.
  *
  * Idempotent: a second press returns the shipment already stored rather than
- * booking (and paying for) a second parcel.
+ * booking (and paying for) a second parcel. A shipment the journal's undo had
+ * set aside (`dismissed`, see MontonioShipment) is brought back the same way —
+ * the parcel at the carrier is the same parcel.
  */
 import { requireAdmin } from "@/lib/auth";
-import { getOrder, getOrderByNumber, setOrderStatus, writeAuditSafe } from "@/lib/orders";
+import { getOrder, getOrderByNumber, writeAuditSafe } from "@/lib/orders";
 import {
   MontonioShippingError,
   createMontonioShipment,
@@ -63,8 +72,17 @@ export async function POST(req: Request) {
 
   const existing = shipmentOnOrder(order);
   if (existing) {
+    if (existing.dismissed) {
+      try {
+        await saveShipmentOnOrder(order.id, { dismissed: false });
+      } catch (err) {
+        console.error("[api/admin/shipments] could not bring the shipment back:", err);
+        return Response.json({ ok: false, error: "store_failed", shipment: existing }, { status: 500 });
+      }
+      await writeAuditSafe("admin", "shipment.step", { orderId: order.id, number: order.number, labelStep: true });
+    }
     return Response.json(
-      { ok: true, reused: true, shipment: existing },
+      { ok: true, reused: true, shipment: { ...existing, dismissed: false }, order },
       { headers: { "cache-control": "no-store" } },
     );
   }
@@ -108,29 +126,9 @@ export async function POST(req: Request) {
     trackingCode: shipment.trackingCode,
   });
 
-  let updated = order;
-  try {
-    updated = (await setOrderStatus(order.id, "shipped", "admin")) ?? order;
-  } catch (err) {
-    console.error("[api/admin/shipments] status not moved to shipped:", err);
-  }
-
-  /* The mail agent owns this. Loaded lazily by a literal specifier (so the
-     bundler traces it into the function) and never allowed to throw: a parcel
-     that is already at the carrier must not fail because Resend had a bad day. */
-  try {
-    const { onOrderShipped } = await import("@/lib/mail-hooks");
-    await onOrderShipped(updated, {
-      carrier: shipment.carrier,
-      code: shipment.trackingCode,
-      url: shipment.trackingUrl,
-    });
-  } catch (err) {
-    console.error("[api/admin/shipments] onOrderShipped failed:", err);
-  }
-
+  // The status is the order's own: still `paid` (or whatever it was) — see the header.
   return Response.json(
-    { ok: true, shipment, order: { ...updated, status: "shipped" } },
+    { ok: true, shipment, order },
     { headers: { "cache-control": "no-store" } },
   );
 }

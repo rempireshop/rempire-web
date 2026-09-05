@@ -312,6 +312,7 @@ const ORDER_STATUS_WORD: Record<string, string> = {
   paid: "paid, being prepared",
   failed: "payment failed",
   shipped: "shipped",
+  delivered: "delivered",
   cancelled: "cancelled",
   refunded: "refunded",
 };

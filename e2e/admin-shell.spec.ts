@@ -262,12 +262,17 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     await expect(chip).toHaveText(/^Новые \d+$/);
     const waiting = Number(((await chip.textContent()) || "").replace(/\D+/g, ""));
     expect(waiting, "the chip did not count the paid order").toBeGreaterThan(0);
-    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(waiting));
+    /* The badge counts everything waiting to go out: «Новые» (no label yet)
+       plus «Этикетка готова» (labelled, not yet handed over — an earlier spec
+       may have left one). Same rule as the overview's ordersToShip. */
+    const labelChip = page.locator('[data-admfilter="label"]');
+    const labeled = Number(((await labelChip.textContent()) || "").replace(/\D+/g, "")) || 0;
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(waiting + labeled));
     await page.locator('.adm-side [data-lang="ET"]').click();
     await expect(chip).toHaveText(`Uued ${waiting}`);
     await page.locator('.adm-side [data-lang="RU"]').click();
     await expect(chip).toHaveText(`Новые ${waiting}`);
-    await page.locator('[data-admfilter="unpaid"]').click();
+    await page.locator('[data-admfilter="delivered"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
     await page.locator('[data-admfilter="salon"]').click();
     await expect(page.locator(".adm-empty")).toHaveText("Таких заказов нет");
@@ -298,8 +303,9 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     // …and the chip and the badge follow the shipped order down at once
     const left = waiting - 1;
     await expect(chip).toHaveText(left ? `Новые ${left}` : "Новые");
-    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveCount(left ? 1 : 0);
-    if (left) await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(left));
+    const badgeLeft = left + labeled;
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveCount(badgeLeft ? 1 : 0);
+    if (badgeLeft) await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(badgeLeft));
 
     // the list agrees, and so does the journal in «Настройки»
     await page.locator('[data-admfilter="shipped"]').click();
@@ -412,6 +418,19 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
   test("no sideways scroll, 44-px targets, centred footers", async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     const mobile = testInfo.project.name === "mobile";
+
+    if (mobile) {
+      /* An order of this test's own, so «Заказы» has a row to open whatever
+         ran before it — on a mobile-only run (`--project=mobile`) no desktop
+         spec has placed one, and the list under «Новые» is honestly empty. */
+      await page.goto(shopUrl("", `/p/${PRODUCT_2.id}/`));
+      await waitForScreen(page, "product");
+      await page.locator(`.pdp__add[data-add="${PRODUCT_2.id}"]`).click();
+      await expect(page.getByRole("status")).toBeVisible();
+      await page.goto(shopUrl("", "/checkout/"));
+      await waitForScreen(page, "checkout");
+      await payOrder(page, freshEmail("shell-phone"), "paid");
+    }
     await loginAsAdmin(page);
 
     if (!mobile) {
@@ -426,6 +445,8 @@ test.describe("admin shell — the phone fits, and the footers are centred", () 
     await fitsThePhone(page, "Заказы");
     await page.locator("[data-admorder]").first().click();
     await expect(page.locator('[data-admorder=""]')).toBeVisible();
+    // the card with its four-step strip, the primary button and the hint
+    await expect(page.locator(".adm-steps--4")).toBeVisible();
     await fitsThePhone(page, "Заказ");
     await page.locator('[data-admorder=""]').click();
 
