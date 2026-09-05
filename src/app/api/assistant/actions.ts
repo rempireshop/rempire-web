@@ -304,12 +304,32 @@ function blogList(raw: unknown, maxItems: number, maxLen: number): string[] {
   return out;
 }
 
+/* The short form of draft_post — what the prompt asks for now. The model
+   names the topic; the panel writes the article itself, with the article
+   generator (POST /api/admin/ai/text, task post_full + post_translate), and
+   opens it in the editor. A whole trilingual article inside one chat
+   completion was the thing that got cut by max_tokens and reached the owner
+   as raw JSON; a topic never is. */
+const BLOG_TOPIC_MAX = 200;
+export function sanitizeDraftTopic(raw: unknown): { topic: string; lang: string; hint: string } | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const topic = oneLine(x.topic, BLOG_TOPIC_MAX);
+  if (topic.length < 3) return null;
+  const lang = x.lang === "ET" || x.lang === "EN" ? x.lang : "RU";
+  return { topic, lang, hint: oneLine(x.hint, 400) };
+}
+
 /** A post the assistant cannot even name in Russian is not a draft. */
 export function sanitizeDraftPost(raw: unknown, known: Set<string>): object | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const x = raw as Record<string, unknown>;
   const title = blogTrilingual(x.title, BLOG_TITLE_MAX);
-  if (!title.RU) return null;
+  if (!title.RU) {
+    // no article in the action at all — but a topic is enough: the panel writes the rest
+    const short = sanitizeDraftTopic(x);
+    return short ? { ...short } : null;
+  }
   /* The Google snippet the model writes with the article —
      {"title":{RU,ET,EN},"description":{RU,ET,EN}} — becomes the post's own
      seoTitle/seoDesc when the owner applies the draft (applyBlogAction() in
@@ -340,6 +360,65 @@ export function sanitizePublishPost(raw: unknown): object | null {
   const slug = typeof x.slug === "string" ? x.slug.trim().toLowerCase() : "";
   if (!BLOG_SLUG_RE.test(slug) || typeof x.publish !== "boolean") return null;
   return { slug, publish: x.publish };
+}
+
+/* ---- photos the owner attached in the chat (add_product_photo, set_post_cover)
+ *
+ * The panel uploads a photo through POST /api/admin/upload the moment it is
+ * attached, and sends the resulting keys along with the question
+ * (`attachments` in the request body, see briefAttachments below). The model
+ * may then point one of those keys at a product or a post — and ONLY one of
+ * those: a key it did not get from this very conversation is refused, so a
+ * prompt-injected action can never file somebody else's object, and the
+ * key's shape is checked again against what the storage layer writes
+ * (src/lib/storage.ts mediaKey/isAllowedKey — duplicated here on purpose,
+ * this file stays free of that import).
+ */
+export const ATTACHMENTS_MAX = 6;
+const ATTACH_KEY_RE = /^(products|blog|hero)\/[a-z0-9][a-z0-9._/-]*\.(webp|png|jpe?g)$/;
+
+function attachKey(raw: unknown): string {
+  const k = typeof raw === "string" ? raw.trim() : "";
+  if (!k || k.length > 200 || k.includes("//") || k.includes("..") || !ATTACH_KEY_RE.test(k)) return "";
+  return k;
+}
+
+export type AttachmentBrief = { key: string; name: string };
+
+/** The photos the panel says it uploaded for this conversation — keys checked, names one-lined. */
+export function briefAttachments(raw: unknown): AttachmentBrief[] {
+  if (!Array.isArray(raw)) return [];
+  const out: AttachmentBrief[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    const o = (item && typeof item === "object" ? item : {}) as Record<string, unknown>;
+    const key = attachKey(o.key);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push({ key, name: oneLine(o.name, 80).replace(/[`|]/g, " ").trim() || "фото" });
+    if (out.length >= ATTACHMENTS_MAX) break;
+  }
+  return out;
+}
+
+export function sanitizeAddProductPhoto(raw: unknown, known: Set<string>, attached: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const id = typeof x.id === "string" ? x.id.trim() : "";
+  if (!id || id.length > 80 || !known.has(id)) return null;
+  const key = attachKey(x.key);
+  if (!key || !attached.has(key)) return null;
+  return { id, key, main: x.main === true };
+}
+
+export function sanitizeSetPostCover(raw: unknown, attached: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const slug = typeof x.slug === "string" ? x.slug.trim().toLowerCase() : "";
+  if (!BLOG_SLUG_RE.test(slug)) return null;
+  const key = attachKey(x.key);
+  if (!key || !attached.has(key)) return null;
+  return { slug, key };
 }
 
 /* ---- product creation (create_product) ----------------------------------
@@ -571,10 +650,16 @@ export function sanitizePointsAdjust(raw: unknown): object | null {
 
 /* ---- everything the assistant may propose ------------------------------- */
 
-export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean): object | null {
+export interface SanitizeOptions {
+  /** The photo keys the panel uploaded for this conversation — the only ones a photo action may name. */
+  attachedKeys?: Set<string>;
+}
+
+export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean, opts: SanitizeOptions = {}): object | null {
   if (!a || typeof a !== "object") return null;
   const x = a as Record<string, unknown>;
   const t = x.type;
+  const attached = opts.attachedKeys ?? new Set<string>();
   if (!isAdmin) {
     if (t === "add_to_cart") {
       const ids2 = Array.isArray(x.ids) ? x.ids.filter((i): i is string => typeof i === "string" && known.has(i)).slice(0, 5) : [];
@@ -648,6 +733,17 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean)
   if (t === "publish_post") {
     const pub = sanitizePublishPost(x);
     return pub ? { type: t, ...pub } : null;
+  }
+  /* photos attached in the chat: filed onto a product's gallery (the
+     panel's own set_gallery write, journalled and undoable) or onto a
+     post's cover — only a key this conversation uploaded, see above */
+  if (t === "add_product_photo") {
+    const photo = sanitizeAddProductPhoto(x, known, attached);
+    return photo ? { type: t, ...photo } : null;
+  }
+  if (t === "set_post_cover") {
+    const cover = sanitizeSetPostCover(x, attached);
+    return cover ? { type: t, ...cover } : null;
   }
   // assistant-work: the accountant export — «выгрузи отчёт за август» hands
   // back a month, the panel turns it into a download link

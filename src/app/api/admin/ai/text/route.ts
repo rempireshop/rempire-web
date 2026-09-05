@@ -4,9 +4,9 @@
  * idiom as POST /api/admin/mail/test — this shop has exactly one admin
  * session at a time, so per-IP is per-session here).
  *
- *   { task: "describe"|"translate"|"seo"|"reply"|"blog_outline",
+ *   { task: "describe"|"translate"|"seo"|"reply"|"blog_outline"|"post_full"|"post_translate"|"copy",
  *     lang: "RU"|"ET"|"EN", input: {...} }
- *   → { ok: true, text: ... }              (describe, seo, reply, blog_outline)
+ *   → { ok: true, text: ... }              (describe, seo, reply, blog_outline, post_full, post_translate, copy)
  *   → { ok: true, texts: { RU?, ET?, EN? } } (translate)
  *
  * "seo" takes two input shapes — `{kind:"product", name, brand, category}`
@@ -15,12 +15,26 @@
  * src/lib/ai-prompts.ts) — and answers the same `{title, description}` for
  * both, in `lang`, capped here at what the two editors store (70/170).
  *
+ * "post_full" writes a whole article for a topic — title, excerpt, 600–900
+ * words of HTML, tags, the Google pair, the products it mentions — offered
+ * the slice of the catalogue that fits the topic (src/lib/catalogue-slice.ts)
+ * and allowed to name nothing else; the body comes back through the blog's
+ * own sanitizeHtml(), so what is stored is what the shop can show.
+ * "post_translate" carries that article (or the owner's own) into another
+ * language, tags kept in place. "copy" is the short text behind every «✨»
+ * button in the panel (banner slide, announcement strip, contact page,
+ * letter footer, promo note, product name) — one task, one `kind`.
+ *
  * Same model/env as src/app/api/assistant/route.ts (OPENAI_MODEL, a plain
  * fetch to the chat-completions endpoint, `response_format: json_object`),
- * temperature 0.4, max_tokens 900 — fixed by the task brief, not per-task.
- * The prompt itself (house voice, the "never invent a fact" rule, per-task
- * JSON contract) lives in src/lib/ai-prompts.ts and is unit-tested there
- * without touching the network.
+ * temperature 0.4. max_tokens is per task (MAX_TOKENS below): 900 for the
+ * short ones, enough for a whole article for post_full/post_translate. The
+ * answer is read through src/lib/ai-json.ts, so a fenced or a cut document
+ * is still an answer — a cut article, though, is refused as `truncated`
+ * rather than saved half-written. The prompt itself (house voice, the
+ * "never invent a fact" rule, per-task JSON contract) lives in
+ * src/lib/ai-prompts.ts and is unit-tested there without touching the
+ * network.
  *
  * "reply" is the one task whose output is not purely the model's own words:
  * the shop signature is appended here, deterministically, from
@@ -35,13 +49,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
 import { getSettings, writeAuditSafe } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
-import { AiInputError, buildPrompt, isAiTask, LANGS3, type Lang3 } from "@/lib/ai-prompts";
+import { AiInputError, buildPrompt, isAiTask, LANGS3, POST_PRODUCTS_MAX, type AiTask, type Lang3 } from "@/lib/ai-prompts";
+import { extractJsonObject } from "@/lib/ai-json";
+import { relevantProducts } from "@/lib/catalogue-slice";
+import { sanitizeHtml } from "@/lib/blog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const MAX_TOKENS = 900;
+/* Per task: 900 was the one number every task shared, and it is still what
+   the short ones get. A whole article is 600–900 words of HTML in Russian —
+   about 2 500 tokens as gpt-4.1-mini counts them — so post_full and its
+   translation get room for that plus the fields around it, and are refused
+   as `truncated` (never saved half-written) if they still run out. */
+const MAX_TOKENS: Record<AiTask, number> = {
+  describe: 900, translate: 900, seo: 900, reply: 900, blog_outline: 900,
+  post_full: 4500, post_translate: 4500, copy: 400,
+};
 const TEMPERATURE = 0.4;
 const RATE_MAX = 30;
 const RATE_WINDOW_MS = 3_600_000;
@@ -102,8 +127,69 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
     for (const l of LANGS3) if (typeof p[l] === "string") texts[l] = str(p[l], 6000);
     return { texts };
   }
+  if (task === "post_full" || task === "post_translate") {
+    const tags = Array.isArray(p.tags)
+      ? p.tags.map((t) => str(t, 30).toLowerCase()).filter(Boolean).slice(0, 5)
+      : [];
+    const out: Record<string, unknown> = {
+      title: str(p.title, 200),
+      excerpt: str(p.excerpt, 500),
+      // the blog's own allowlist (p h2 h3 strong em ul ol li …) — the model
+      // was told the tags it may use, and this is what makes that true
+      body: sanitizeHtml(str(p.body, 20_000)),
+      tags,
+      seo: { title: str(p.seoTitle, 70), description: str(p.seoDescription ?? p.seoDesc, 170) },
+    };
+    if (task === "post_full") {
+      out.products = Array.isArray(p.products)
+        ? p.products.map((id) => str(id, 80)).filter((id) => /^[a-z0-9][a-z0-9-]*$/.test(id)).slice(0, POST_PRODUCTS_MAX)
+        : [];
+    }
+    return { text: out };
+  }
+  if (task === "copy") {
+    return {
+      text: {
+        text: str(p.text, 1200),
+        short: str(p.short, 120),
+        eyebrow: str(p.eyebrow, 40),
+        title: str(p.title, 40),
+        sub: str(p.sub, 90),
+        cta: str(p.cta, 24),
+        name: str(p.name, 120),
+      },
+    };
+  }
   void lang;
   return {};
+}
+
+/* post_full: the products the article may mention. The panel may name a
+   few itself (the editor's own «Товары в статье»); the rest of the slice
+   comes from the catalogue file by topic, so the model always has a short,
+   relevant list — and its answer's `products` is filtered against exactly
+   that list, never anything it made up. */
+function postFullInput(raw: unknown): { input: Record<string, unknown>; allowed: Set<string> } {
+  const src = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  const topic = typeof src.topic === "string" ? src.topic : "";
+  const given = Array.isArray(src.products) ? src.products : [];
+  const refs: Array<{ id: string; brand: string; name: string; category: string }> = [];
+  const seen = new Set<string>();
+  for (const item of given) {
+    const o = (item && typeof item === "object" ? item : {}) as Record<string, unknown>;
+    const id = typeof o.id === "string" ? o.id.trim() : "";
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    refs.push({ id, brand: str(o.brand, 60), name: str(o.name, 140), category: str(o.category, 40) });
+    if (refs.length >= POST_PRODUCTS_MAX) break;
+  }
+  for (const p of relevantProducts(topic, { limit: POST_PRODUCTS_MAX, fill: 8 })) {
+    if (refs.length >= POST_PRODUCTS_MAX) break;
+    if (seen.has(p.id) || p.s === "out") continue;
+    seen.add(p.id);
+    refs.push({ id: p.id, brand: p.b, name: p.n, category: p.c });
+  }
+  return { input: { ...src, products: refs }, allowed: seen };
 }
 
 export async function POST(req: NextRequest) {
@@ -146,9 +232,13 @@ export async function POST(req: NextRequest) {
   const task = body.task;
   const lang: Lang3 = isLang3(body.lang) ? body.lang : "RU";
 
+  // post_full: the catalogue slice rides in with the topic — see postFullInput()
+  const post = task === "post_full" ? postFullInput(body.input) : null;
+  const input = post ? post.input : body.input;
+
   let prompt: { system: string; user: string };
   try {
-    prompt = buildPrompt(task, lang, body.input);
+    prompt = buildPrompt(task, lang, input);
   } catch (err) {
     const code = err instanceof AiInputError ? err.code : "bad_input";
     return NextResponse.json({ ok: false, error: code }, { status: 400 });
@@ -161,7 +251,7 @@ export async function POST(req: NextRequest) {
       headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: MAX_TOKENS,
+        max_tokens: MAX_TOKENS[task],
         temperature: TEMPERATURE,
         response_format: { type: "json_object" },
         messages: [
@@ -182,11 +272,16 @@ export async function POST(req: NextRequest) {
   }
 
   const data = await r.json();
-  let parsed: unknown = {};
-  try {
-    parsed = JSON.parse(data.choices?.[0]?.message?.content ?? "{}");
-  } catch {
-    console.error("[admin/ai/text] model did not return valid JSON", task);
+  const choice = data.choices?.[0] ?? {};
+  const extracted = extractJsonObject(choice.message?.content, { finishReason: choice.finish_reason });
+  const parsed: unknown = extracted.value ?? {};
+  if (!extracted.value) console.error("[admin/ai/text] model did not return valid JSON", task);
+  /* A cut article is not an article: the editor would show a piece that
+     stops mid-sentence and the owner would publish it. Refused here, with
+     its own code, so the panel can say «попробуйте ещё раз» and mean it. */
+  if ((task === "post_full" || task === "post_translate") && (extracted.truncated || !extracted.value)) {
+    console.error("[admin/ai/text] article cut or unreadable", task, choice.finish_reason);
+    return NextResponse.json({ ok: false, error: "truncated" }, { status: 502 });
   }
 
   let result: { text?: unknown; texts?: unknown };
@@ -203,6 +298,10 @@ export async function POST(req: NextRequest) {
     result = { text: signature ? `${replyText}\n\n${signature}` : replyText };
   } else {
     result = shapeNonReply(task, lang, parsed);
+    if (post && result.text && typeof result.text === "object") {
+      const t = result.text as Record<string, unknown>;
+      t.products = (t.products as string[]).filter((id) => post.allowed.has(id));
+    }
   }
 
   const usage = (data.usage ?? {}) as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
