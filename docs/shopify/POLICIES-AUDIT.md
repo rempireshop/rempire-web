@@ -30,7 +30,7 @@ improvement over the current shop.
 
 ## Shipping — current state
 
-- Checkout reportedly offers **DPD only** (Dmitri's observation; policy names
+- Checkout reportedly offers **DPD only** (Dim's observation; policy names
   no carrier at all — just "Seller or its authorized representative").
 - Pickup points free; home delivery paid; price shown at checkout.
 - **Free shipping: от 50 € EE/LV/LT/FI, от 200 € rest of EU.** Import these
@@ -67,7 +67,7 @@ consent-gated tracking setup.
 - **No newsletter signup exists** (q11 asks if wanted).
 - No physical-store presentation on site despite Mardi 1 address (q20).
 
-## Payment/shipping implementation take (for Dmitri)
+## Payment/shipping implementation take (for Dim)
 
 **Montonio first, alone, is enough for v1:**
 

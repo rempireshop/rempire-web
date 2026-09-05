@@ -736,8 +736,8 @@
       "Google (поиск)": "Google (otsing)",
       "Напрямую / закладки": "Otse / järjehoidjad",
       "Рассылка": "Uudiskiri",
-      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
-        "Päris versioonis ühendatakse siia Google Search Console ja külastusstatistika — kõik seadistab Dmitri, sinul pole vaja midagi teha.",
+      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дим, вам ничего делать не нужно.":
+        "Päris versioonis ühendatakse siia Google Search Console ja külastusstatistika — kõik seadistab Dim, sinul pole vaja midagi teha.",
       // i18n pass 2 — admin: e-mails and connections
       "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.":
         "Kirjad, mida pood saadab ise. Nupud töötavad: seadistus salvestub (demo) ja läheb logisse. Iga kirja teemat, sissejuhatust ja allkirja saab allpool muuta.",
@@ -751,8 +751,8 @@
         "meeldetuletus 24 tunni pärast, kui tellimus jäi lõpetamata",
       "личный промокод за 3 дня до даты": "isiklik sooduskood 3 päeva enne tähtpäeva",
       "Открыть превью всех писем →": "Ava kõigi kirjade eelvaade →",
-      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.":
-        "Mis on poega ühendatud. Roheline töötab ise; hall lisandub järgmiste sammudega — kõik seadistab Dmitri.",
+      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дим.":
+        "Mis on poega ühendatud. Roheline töötab ise; hall lisandub järgmiste sammudega — kõik seadistab Dim.",
       "Приём оплат": "Maksete vastuvõtt",
       "банковские ссылки, карты, Apple/Google Pay": "pangalingid, kaardid, Apple/Google Pay",
       "после выбора провайдера": "pärast teenusepakkuja valikut",
@@ -1348,10 +1348,10 @@
       "Название": "Nimetus",
       "Подраздел": "Alajaotus",
       "у этого раздела нет подразделов": "sellel jaotusel pole alajaotusi",
-      "Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dmitri. Kõike muud sellel lehel muudate ise.",
+      "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dim. Kõike muud sellel lehel muudate ise.",
       "Нет в наличии": "Pole laos",
       "Показывать в магазине": "Näidata poes",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Kõik kataloogi tooted on poes näha. Toote päriselt eemaldamiseks kirjutage Dmitrile; müügi peatamiseks valige «Pole laos».",
+      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Kõik kataloogi tooted on poes näha. Toote päriselt eemaldamiseks kirjutage Dimile; müügi peatamiseks valige «Pole laos».",
       "Салон, €": "Salong, €",
       "Остаток": "Jääk",
       "Штрихкод": "Triipkood",
@@ -1359,7 +1359,7 @@
       "сканер ›": "skanner ›",
       "Убрать размер": "Eemalda suurus",
       "+ Размер": "+ Suurus",
-      "Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dmitri. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
+      "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui seda on 3 või vähem. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Левее": "Vasakule",
       "Правее": "Paremale",
@@ -1515,7 +1515,7 @@
       "Google Search Console сейчас не отвечает — попробуйте позже":
         "Google Search Console ei vasta praegu — proovi hiljem",
       "Средняя позиция": "Keskmine positsioon",
-      "Написать Дмитрию": "Kirjuta Dmitrile",
+      "Написать Диму": "Kirjuta Dimile",
       "Приём оплат · Montonio": "Maksete vastuvõtt · Montonio",
       "Карты, банковские ссылки, Apple/Google Pay. Работает.":
         "Kaardid, pangalingid, Apple/Google Pay. Töötab.",
@@ -1534,8 +1534,8 @@
         "Kirjade saatmine pole seadistatud: test tuli veaga tagasi, kliendid kirju ei saa.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
         "Google näeb poodi, positsioonid on jaotises «Analüütika».",
-      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.":
-        "Domeen pole kinnitatud — Google ei näe uusi lehti. Vaja on üht DNS-koodi, seda teeb Dmitri.",
+      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дим.":
+        "Domeen pole kinnitatud — Google ei näe uusi lehti. Vaja on üht DNS-koodi, seda teeb Dim.",
       "Откуда приходят и что ищут. Всё в разделе «Аналитика».":
         "Kust tullakse ja mida otsitakse. Kõik on jaotises «Analüütika».",
       "Считаем…": "Arvutame…",
@@ -1549,8 +1549,8 @@
       "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.":
         "See brauser ei anna kaamerale ligipääsu. Luba lülitatakse sisse telefoni seadetes.",
       "Как разрешить": "Kuidas lubada",
-      "Если что-то красное и непонятно — напишите Дмитрию. Ссылка на эту страницу уже в письме.":
-        "Kui midagi on punane ja arusaamatu — kirjuta Dmitrile. Link sellele lehele on kirjas juba olemas.",
+      "Если что-то красное и непонятно — напишите Диму. Ссылка на эту страницу уже в письме.":
+        "Kui midagi on punane ja arusaamatu — kirjuta Dimile. Link sellele lehele on kirjas juba olemas.",
       "тарифы по странам · Montonio · способы оплаты": "tariifid riikide kaupa · Montonio · maksevõimalused",
       "Главная страница": "Avaleht",
       "баннер, полоска вверху, наборы и чат": "bänner, ülemine riba, komplektid ja vestlus",
@@ -1575,8 +1575,8 @@
       "Наценка, евро": "Juurdehindlus, eurodes",
       "по умолчанию тариф только поднимает цену до реальной стоимости":
         "vaikimisi tõstab tariif hinna ainult tegeliku maksumuseni",
-      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Дмитрию.":
-        "Maksevõimalused lülitab sisse makseteenuse pakkuja. Millegi eemaldamiseks või lisamiseks kirjuta Dmitrile.",
+      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
+        "Maksevõimalused lülitab sisse makseteenuse pakkuja. Millegi eemaldamiseks või lisamiseks kirjuta Dimile.",
       "Показывать наборы": "Näita komplekte",
       "если выключено — их не видно нигде в магазине": "kui välja lülitatud — poes neid kusagil ei näe",
       "Скрыть наборы": "Peida komplektid",
@@ -1624,13 +1624,13 @@
          confirm cards in front of them, and «Языки» */
       "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
         "Pood töötab korraga kolmes keeles — vene, eesti ja inglise keeles. Ostja valib keele ise, lipukesega poe päises, ja pood jätab selle meelde.",
-      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.":
-        "Liides, tootenimede venekeelsed lõpud ja abilise kirjutatud kirjeldused tõlgitakse automaatselt. Kui kuskil on vaja sõnastust parandada — kirjutage Dmitrile.",
+      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.":
+        "Liides, tootenimede venekeelsed lõpud ja abilise kirjutatud kirjeldused tõlgitakse automaatselt. Kui kuskil on vaja sõnastust parandada — kirjutage Dimile.",
       "Ссылки на магазин": "Poe lingid",
       "Язык самой админки переключается внизу меню — на магазин это не влияет.": "Paneeli enda keelt vahetatakse menüü all — poodi see ei mõjuta.",
       "Скрыть слайд": "Peida slaid", "Показать слайд": "Näita slaidi",
       "Запретить снижать цены": "Keela hindade alandamine", "Разрешить снижать цены": "Luba hindade alandamine",
-      "три фото стопкой": "kolm fotot virnas", "Объёмы заводит Дмитрий": "Mahud lisab Dmitri",
+      "три фото стопкой": "kolm fotot virnas", "Объёмы заводит Дим": "Mahud lisab Dim",
       "ваш товар": "teie toode",
       "Заказов пока нет — первый появится здесь сразу после оплаты.": "Tellimusi veel pole — esimene ilmub siia kohe pärast maksmist.",
       "Сервер заказов не отвечает — попробуйте ещё раз.": "Tellimuste server ei vasta — proovige uuesti.",
@@ -2321,8 +2321,8 @@
       "Google (поиск)": "Google (search)",
       "Напрямую / закладки": "Direct / bookmarks",
       "Рассылка": "Newsletter",
-      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дмитрий, вам ничего делать не нужно.":
-        "In the live version Google Search Console and visitor analytics plug in here — Dmitri sets it all up, you do not have to do anything.",
+      "В рабочей версии сюда подключаются Google Search Console и аналитика посещений — всё настраивает Дим, вам ничего делать не нужно.":
+        "In the live version Google Search Console and visitor analytics plug in here — Dim sets it all up, you do not have to do anything.",
       // i18n pass 2 — admin: e-mails and connections
       "Письма, которые магазин шлёт сам. Кнопки работают: настройка сохраняется (демо) и попадает в журнал. Тему, вступление и подпись каждого письма можно поменять ниже.":
         "The e-mails the shop sends by itself. The buttons work: the setting is saved (demo) and lands in the log. Each letter's subject, intro and closing line can be changed below.",
@@ -2335,8 +2335,8 @@
       "напоминание через 24 часа, если заказ не завершён": "a reminder after 24 hours if the order was not finished",
       "личный промокод за 3 дня до даты": "a personal promo code 3 days before the date",
       "Открыть превью всех писем →": "Open the preview of every e-mail →",
-      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дмитрий.":
-        "What is connected to the shop. Green works on its own; grey arrives in the next steps — Dmitri sets it all up.",
+      "Что к магазину подключено. Зелёное работает само; серое появится на следующих шагах — всё настраивает Дим.":
+        "What is connected to the shop. Green works on its own; grey arrives in the next steps — Dim sets it all up.",
       "Приём оплат": "Taking payments",
       "банковские ссылки, карты, Apple/Google Pay": "bank links, cards, Apple/Google Pay",
       "после выбора провайдера": "once a provider is chosen",
@@ -2928,10 +2928,10 @@
       "Название": "Name",
       "Подраздел": "Subsection",
       "у этого раздела нет подразделов": "this section has no subsections",
-      "Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dmitri changes those. Everything else on this page is yours to edit.",
+      "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dim changes those. Everything else on this page is yours to edit.",
       "Нет в наличии": "Out of stock",
       "Показывать в магазине": "Show in the shop",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Every catalogue product is visible in the shop. To remove one for good, write to Dmitri; to simply stop selling it, choose «Out of stock».",
+      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Every catalogue product is visible in the shop. To remove one for good, write to Dim; to simply stop selling it, choose «Out of stock».",
       "Салон, €": "Salon, €",
       "Остаток": "Stock",
       "Штрихкод": "Barcode",
@@ -2939,7 +2939,7 @@
       "сканер ›": "scanner ›",
       "Убрать размер": "Remove the size",
       "+ Размер": "+ Size",
-      "Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dmitri adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
+      "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red at 3 or fewer. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Левее": "Left",
       "Правее": "Right",
@@ -3095,7 +3095,7 @@
       "Google Search Console сейчас не отвечает — попробуйте позже":
         "Google Search Console is not answering right now — try later",
       "Средняя позиция": "Average position",
-      "Написать Дмитрию": "Write to Dmitri",
+      "Написать Диму": "Write to Dim",
       "Приём оплат · Montonio": "Payments · Montonio",
       "Карты, банковские ссылки, Apple/Google Pay. Работает.":
         "Cards, bank links, Apple/Google Pay. Working.",
@@ -3114,8 +3114,8 @@
         "Sending letters is not set up: the test came back with an error and customers get nothing.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
         "Google can see the shop; the positions are under “Analytics”.",
-      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.":
-        "The domain is not verified — Google cannot see new pages. One DNS record is needed; Dmitri does that.",
+      "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дим.":
+        "The domain is not verified — Google cannot see new pages. One DNS record is needed; Dim does that.",
       "Откуда приходят и что ищут. Всё в разделе «Аналитика».":
         "Where visitors come from and what they search for. All under “Analytics”.",
       "Считаем…": "Counting…",
@@ -3129,8 +3129,8 @@
       "Этот браузер не даёт доступ к камере. Разрешение включается в настройках телефона.":
         "This browser gives no camera access. The permission is switched on in the phone settings.",
       "Как разрешить": "How to allow it",
-      "Если что-то красное и непонятно — напишите Дмитрию. Ссылка на эту страницу уже в письме.":
-        "If something is red and unclear, write to Dmitri. The link to this page is already in the letter.",
+      "Если что-то красное и непонятно — напишите Диму. Ссылка на эту страницу уже в письме.":
+        "If something is red and unclear, write to Dim. The link to this page is already in the letter.",
       "тарифы по странам · Montonio · способы оплаты": "tariffs by country · Montonio · payment methods",
       "Главная страница": "Home page",
       "баннер, полоска вверху, наборы и чат": "the banner, the top strip, sets and the chat",
@@ -3155,8 +3155,8 @@
       "Наценка, евро": "Markup in euros",
       "по умолчанию тариф только поднимает цену до реальной стоимости":
         "by default a tariff only raises the price up to the real cost",
-      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Дмитрию.":
-        "Payment methods are switched on by the payment provider. To remove or add one, write to Dmitri.",
+      "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
+        "Payment methods are switched on by the payment provider. To remove or add one, write to Dim.",
       "Показывать наборы": "Show sets",
       "если выключено — их не видно нигде в магазине": "when off, they are nowhere in the shop",
       "Скрыть наборы": "Hide the sets",
@@ -3204,13 +3204,13 @@
          confirm cards in front of them, and «Языки» */
       "Магазин работает сразу на трёх языках — русском, эстонском и английском. Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.":
         "The shop runs in three languages at once — Russian, Estonian and English. The visitor picks the language with the flag in the shop's header, and the shop remembers it.",
-      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.":
-        "The interface, the Russian tails of product names and the descriptions the assistant writes are translated automatically. If a wording needs fixing somewhere, write to Dmitri.",
+      "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.":
+        "The interface, the Russian tails of product names and the descriptions the assistant writes are translated automatically. If a wording needs fixing somewhere, write to Dim.",
       "Ссылки на магазин": "Shop links",
       "Язык самой админки переключается внизу меню — на магазин это не влияет.": "The panel's own language is switched at the bottom of the menu — it does not affect the shop.",
       "Скрыть слайд": "Hide the slide", "Показать слайд": "Show the slide",
       "Запретить снижать цены": "Do not lower prices", "Разрешить снижать цены": "Allow lowering prices",
-      "три фото стопкой": "three photos stacked", "Объёмы заводит Дмитрий": "Sizes are added by Dmitri",
+      "три фото стопкой": "three photos stacked", "Объёмы заводит Дим": "Sizes are added by Dim",
       "ваш товар": "your product",
       "Заказов пока нет — первый появится здесь сразу после оплаты.": "No orders yet — the first one appears here as soon as it is paid.",
       "Сервер заказов не отвечает — попробуйте ещё раз.": "The orders server is not answering — try again.",
@@ -10615,14 +10615,14 @@
      has data, whether the assistant has a model behind it, and whether this
      browser can open a camera at all. Nothing here is a status somebody typed
      in — a green square the owner cannot trust is worse than no square. */
-  var ADM_DEV_MAIL = "dmitri@diipsolutions.eu";
+  var ADM_DEV_MAIL = "info@diipsolutions.eu";
   /** The action on a red row: a plain mailto, not a button that pretends the
       panel can fix a DNS record by itself. */
   function admDevLink() {
     // the page's address rides in the body, so «ссылка уже в письме» is true
     var href = "mailto:" + ADM_DEV_MAIL + "?subject=" + encodeURIComponent("Rempire — вопрос из админки") +
       "&body=" + encodeURIComponent("Страница: " + location.href + "\n\n");
-    return '<a class="adm-btn adm-btn--row" href="' + esc(href) + '">Написать Дмитрию</a>';
+    return '<a class="adm-btn adm-btn--row" href="' + esc(href) + '">Написать Диму</a>';
   }
   function admIntegrationRows() {
     var rows = [];
@@ -10652,7 +10652,7 @@
     rows.push({ name: "Google Search Console", ok: gscOk,
       sub: !GSC ? "Проверяем…" : GSC.ok
         ? "Google видит магазин, позиции — в разделе «Аналитика»."
-        : "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дмитрий.",
+        : "Домен не подтверждён — Google не видит новые страницы. Нужен один DNS-код, это делает Дим.",
       act: gscOk ? "" : admDevLink() });
 
     var an = ANALYTICS["7d"] && ANALYTICS["7d"].data;
@@ -10684,7 +10684,7 @@
             '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
           r.act + "</div>";
       }).join("") + "</div>" +
-      '<p class="adm-hint">Если что-то красное и непонятно — напишите Дмитрию. ' +
+      '<p class="adm-hint">Если что-то красное и непонятно — напишите Диму. ' +
         "Ссылка на эту страницу уже в письме.</p>" +
       '<div class="adm-acts">' + admDevLink() + '<span class="adm-hint adm-mono">' + ADM_DEV_MAIL + "</span></div>" +
       "</div>";
@@ -10787,7 +10787,7 @@
           '<span class="adm-badge adm-badge--ok">включено</span></div>';
       }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
-        "Чтобы что-то убрать или добавить, напишите Дмитрию.</p>" +
+        "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
       "</div>";
   }
   /* `col` is the column's own name, drawn only on a phone: the header row of
@@ -10842,7 +10842,7 @@
       '<p class="adm-lead" style="margin:0">Магазин работает сразу на трёх языках — русском, эстонском и английском. ' +
         "Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.</p>" +
       '<p class="adm-lead" style="margin:0">Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, ' +
-        "переводятся автоматически. Если где-то нужно поправить формулировку — напишите Дмитрию.</p>" +
+        "переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.</p>" +
       '<div><div class="adm-sec__t">Ссылки на магазин</div>' +
       '<div class="adm-list">' + ADM_LANG_ROWS.map(function (l) {
         var url = origin + "/shop2" + l[2] + "/";
@@ -13024,7 +13024,7 @@
                 "</select></label>"
               : '<label class="adm-field">Подраздел<input class="adm-input" value="" readonly placeholder="у этого раздела нет подразделов"></label>') +
           "</div>" +
-          '<p class="adm-hint">Название, бренд и раздел приходят из каталога — их меняет Дмитрий. Всё остальное на этой странице вы правите сами.</p>' +
+          '<p class="adm-hint">Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.</p>' +
         "</div>" +
         '<div class="adm-edcol">' +
           '<label class="adm-field">Наличие<select class="adm-input" data-edstock>' +
@@ -13037,7 +13037,7 @@
              catalogue product is in the shop — and says who can change that. */
           '<span class="adm-switch" aria-disabled="true"><span>Показывать в магазине</span>' +
             '<span class="adm-switch__t is-on" aria-hidden="true"><i></i></span></span>' +
-          '<p class="adm-hint">Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Дмитрию; чтобы просто перестать продавать, поставьте «Нет в наличии».</p>' +
+          '<p class="adm-hint">Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».</p>' +
           '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>' +
         "</div>" +
       "</div></div>";
@@ -13127,13 +13127,13 @@
           '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
         edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
           esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">') +
-        '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дмитрий" aria-label="Убрать размер">×</button>' +
+        '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дим" aria-label="Убрать размер">×</button>' +
       "</div>";
     }).join("");
     return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
       '<div class="adm-grid">' + head + rows + "</div>" +
       '<button class="adm-btn adm-btn--dash" type="button" disabled title="скоро">+ Размер</button>' +
-      '<p class="adm-hint">Объёмы товара заводит Дмитрий. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
+      '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
       '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       "</div>";
   }

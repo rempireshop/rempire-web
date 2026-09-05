@@ -34,7 +34,7 @@ export interface MailHookResult {
   reason?: string;
   /** Resend message id when a customer letter went out. */
   id?: string;
-  /** Whether Renat/Dmitri were pinged. */
+  /** Whether Renat/Dim were pinged. */
   notified?: boolean;
 }
 

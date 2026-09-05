@@ -172,7 +172,7 @@
 .adm-btn--wide { flex: 1; }
 .adm-btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
 .adm-btn--warn { background: var(--a-warn); border-color: var(--a-warn); color: #fff; }
-/* A button that is really a link — «Написать Дмитрию» is a mailto. `.adm2 a`
+/* A button that is really a link — «Написать Диму» is a mailto. `.adm2 a`
    above paints every link ink, and ink on ink is a black rectangle. */
 .adm2 a.adm-btn { color: #fff; text-decoration: none; }
 .adm2 a.adm-btn--ghost { color: var(--a-ink); }
