@@ -54,7 +54,8 @@ const ALLOWED_HOSTS = new Set([
   "www.rempireshop.diipsolutions.eu",
   "rempireshop.com",
   "www.rempireshop.com",
-  "localhost:3000",
+  // the port `npm run dev` and `npm start` actually listen on (package.json)
+  "localhost:3300",
 ]);
 
 type Msg = { role: "user" | "assistant"; content: string };

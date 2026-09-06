@@ -39,13 +39,37 @@ function bad(error: string, status = 400) {
   return Response.json({ ok: false, error }, { status });
 }
 
+/** A post is at most a few pages of text in three languages; anything past
+    this is not an article, and `body` here is written straight into the row. */
+const MAX_BYTES = 200_000;
+
 async function readJson(req: Request): Promise<Record<string, unknown> | null> {
+  let raw: string;
   try {
-    return JSON.parse((await req.text()) || "{}");
+    raw = (await req.text()) || "{}";
   } catch {
     return null;
   }
+  if (raw.length > MAX_BYTES) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  /* `null` is valid JSON and `typeof null === "object"`; so are `5`, `"x"`
+     and `[]`. Every field read below would then be `undefined` — today that
+     lands on «title_required», but it is one `body.a.b` away from a 500, and
+     every other admin route already refuses these four shapes here. */
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+  return parsed as Record<string, unknown>;
 }
+
+/** Postgres `posts.id` is a uuid: a `where id = 'abc'` raises 22P02, which is
+    not a BlogError, so the edit path answered 503 «unavailable» for what is
+    simply an id that does not exist. Every sibling (publish, unpublish,
+    delete, getPostById) already gates on this and answers 404. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Everything POST/PATCH accept as content fields, lifted off the body as-is — @/lib/blog does the cleaning. */
 function fieldsOf(body: Record<string, unknown>): PostInput {
@@ -113,6 +137,7 @@ export async function PATCH(req: Request) {
   const idRaw = typeof body.id === "string" ? body.id.trim() : "";
   const slugRaw = typeof body.slug === "string" ? body.slug.trim() : "";
   if (!idRaw && !slugRaw) return bad("no_id");
+  if (idRaw && !UUID_RE.test(idRaw)) return bad("not_found", 404);
 
   try {
     // publish / unpublish: a status transition, nothing else changes

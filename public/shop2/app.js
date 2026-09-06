@@ -1471,7 +1471,7 @@
       "Заявка Pro": "Pro taotlus",
       "Заявки Pro": "Pro taotlused",
       "Одобрить Pro": "Kinnita Pro",
-      "Отказать": "Keeldu",
+      "Отказать": "Keeldu", "Отказать в заявке?": "Kas keelduda taotlusest?",
       "Какие клиенты": "Millised kliendid",
       "Имя, почта, телефон, компания": "Nimi, e-post, telefon, ettevõte",
       "промокоды · подарочные карты · письма": "sooduskoodid · kinkekaardid · kirjad",
@@ -3209,7 +3209,7 @@
       "Заявка Pro": "Pro request",
       "Заявки Pro": "Pro requests",
       "Одобрить Pro": "Approve Pro",
-      "Отказать": "Decline",
+      "Отказать": "Decline", "Отказать в заявке?": "Decline the request?",
       "Какие клиенты": "Which customers",
       "Имя, почта, телефон, компания": "Name, e-mail, phone, company",
       "промокоды · подарочные карты · письма": "promo codes · gift cards · letters",
@@ -3594,6 +3594,10 @@
     [/^(.+)\nВключим цены для салонов и отправим письмо на эту почту\.$/,
       { ET: "$1\nLülitame sisse salongihinnad ja saadame sellele aadressile kirja.",
         EN: "$1\nSalon prices go on and a letter goes to this address." }],
+    // «Отказать» on a partner request — the other half of the same card
+    [/^(.+)\nЗаявка закроется, цены для салонов не включатся\. Письмо не отправляется\.$/,
+      { ET: "$1\nTaotlus suletakse, salongihindu sisse ei lülitata. Kirja ei saadeta.",
+        EN: "$1\nThe request is closed and salon prices stay off. No letter is sent." }],
     /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
     [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
     [/^Фото добавлено · (.+)$/, { ET: "Foto lisatud · $1", EN: "Photo added · $1" }],
@@ -13577,6 +13581,37 @@
     };
     render(); refocus("[data-admapply]");
   }
+  /** «Одобрить Pro» / «Отказать» on the customer card. The same weight as the
+      switch above it — an approval turns salon prices on for that company for
+      good and posts «Цены для салонов включены» — so it asks in the same card.
+      It used to be the one Pro decision on the screen that fired on the first
+      tap, next to a segmented control that asked about the very same thing. */
+  /** One customer by id — the card's own, or the row the list is showing.
+      Both places carry «Одобрить Pro», so both have to be able to name who. */
+  function admCustById(id) {
+    var open = S.admCustDetail && S.admCustDetail.customer;
+    if (open && String(open.id) === String(id)) return open;
+    var list = S.admCustomers || [];
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i];
+    return null;
+  }
+  function askCustDecision(c, action) {
+    if (!c) return;
+    // one string per branch, so the dictionary rule sees the whole card text
+    var who = (c.name ? c.name + " · " : "") + c.email;
+    if (action === "approve") {
+      pendingAction = { type: "cust_decide", overlay: true, id: c.id, action: "approve",
+        title: "Сделать партнёром?",
+        detail: who + "\nВключим цены для салонов и отправим письмо «Цены для салонов включены».",
+        ok: "Сделать партнёром" };
+    } else {
+      pendingAction = { type: "cust_decide", overlay: true, danger: true, id: c.id, action: "reject",
+        title: "Отказать в заявке?",
+        detail: who + "\nЗаявка закроется, цены для салонов не включатся. Письмо не отправляется.",
+        ok: "Отказать" };
+    }
+    render(); refocus("[data-admapply]");
+  }
   function admCustPatch(id, body, okMsg) {
     if (admCustPatch._busy) return;   // «Одобрить Pro» tapped twice is one approval
     admCustPatch._busy = true;
@@ -19612,6 +19647,12 @@
            writes the journal line once the server answered); the tier switch
            is journalled like a tariff change, «Отменить» on the toast. */
         else if (pa.type === "add_partner") { applyAddPartner(pa); return; }
+        /* «Одобрить Pro» / «Отказать» — a real PATCH, not a journal entry:
+           the approval posts the partner letter and there is no un-sending it,
+           so the card is the safety and there is no «Отменить» on the toast. */
+        else if (pa.type === "cust_decide") {
+          if (pa.action === "approve") approveCustomer(pa.id); else rejectCustomer(pa.id);
+        }
         else if (pa.type === "set_tier") {
           var tierEntry = demoApply(pa);
           if (pa.value === "pro") toast("Партнёр · " + pa.email, tierEntry);
@@ -19858,8 +19899,8 @@
     if (d.admcusttier !== undefined) { S.admCustTier = d.admcusttier; render(); return; }
     if (d.admcustopen) { S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
     if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
-    if (d.admcustapprove) { approveCustomer(d.admcustapprove); return; }
-    if (d.admcustreject) { rejectCustomer(d.admcustreject); return; }
+    if (d.admcustapprove) { askCustDecision(admCustById(d.admcustapprove), "approve"); return; }
+    if (d.admcustreject) { askCustDecision(admCustById(d.admcustreject), "reject"); return; }
     /* partners: «+ Партнёр», its form, the card's tier switch, and the lead's
        jump to «Настройки → Цены и баллы» */
     if (d.admpartnernew !== undefined) {

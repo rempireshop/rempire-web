@@ -36,9 +36,24 @@ export async function PUT(req: Request) {
   const denied = await requireAdmin(req);
   if (denied) return denied;
 
+  /* The biggest thing this route ever legitimately carries is the shop's own
+     content document (hero slides, the contact page, the mail texts in three
+     languages) — tens of kilobytes. Nothing capped the request, and a key
+     outside the five validated ones is stored as raw jsonb AND written a
+     second time into admin_audit, so one request could persist twice its own
+     size for good. Same cap and the same code as the other admin writers. */
+  const MAX_BYTES = 256_000;
+  let raw: string;
+  try {
+    raw = await req.text();
+  } catch {
+    return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
+  }
+  if (raw.length > MAX_BYTES) return Response.json({ ok: false, error: "too_large" }, { status: 413 });
+
   let body: Record<string, unknown>;
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    body = JSON.parse(raw) as Record<string, unknown>;
   } catch {
     return Response.json({ ok: false, error: "bad_json" }, { status: 400 });
   }
