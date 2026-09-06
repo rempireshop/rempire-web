@@ -17466,6 +17466,8 @@
   var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
   var GIFT_DESC = "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
   var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
+  // the sentence screenBrands() opens with, reused as that page's description
+  var BRANDS_DESC = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -17534,7 +17536,18 @@
           d = (pgTitle + " — " + trText(INFO_DESC_TAIL, S.lang, false)).slice(0, 158);
         }
       }
-      else if (S.screen === "brands") t = trText("Бренды", S.lang, false) + " — REMPIRE";
+      /* «Бренды» is the one shopper-facing page tools/prerender-shop2.mjs
+         never writes, so there is no static head under it: every language
+         lands on the Russian shell (the fallback rewrite in next.config.ts
+         sends /shop2/{et,en}/brands/ at /shop2/index.html), and with no
+         description set here the ET and EN pages carried the Russian home
+         one — the shop's own summary, in the wrong language, in the tab
+         preview and in every link card. The page's own opening sentence is
+         the description, and it is already in the dictionary. */
+      else if (S.screen === "brands") {
+        t = trText("Бренды", S.lang, false) + " — REMPIRE";
+        d = trText(BRANDS_DESC, S.lang, false).slice(0, 158);
+      }
       // features
       /* Sets off: the tab must not advertise them either. Both screens are
          showing setsOffHTML() and say so in the title; the description stays
