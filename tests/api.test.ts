@@ -116,6 +116,21 @@ describe("api routes", () => {
     expect(body.settings.hero).toBeNull();
   });
 
+  /* The default the panel draws its three switches from has to be the default
+     the sender reads. «Товар снова в наличии» used to come down true here
+     while runBackInStock() read it as false: the switch said «включено» and
+     no letter ever left, so the only way to turn the flow on was to switch it
+     off and on again. */
+  it("the flow defaults it publishes are the ones the sender reads", async () => {
+    const { GET } = await import("@/app/api/overrides/route");
+    const { FLOW_DEFAULTS } = await import("@/lib/flows");
+    const body = await (await GET()).json();
+    for (const key of ["abandoned", "birthday", "backstock"] as const) {
+      expect(body.settings.flows[key], `flows.${key}`).toBe(FLOW_DEFAULTS[key]);
+    }
+    expect(body.settings.flows.backstock).toBe(false);
+  });
+
   it("PUT /api/admin/settings stores the home banner and hands it back publicly", async () => {
     const { PUT } = await import("@/app/api/admin/settings/route");
     const { GET: publicGet } = await import("@/app/api/overrides/route");
@@ -132,6 +147,35 @@ describe("api routes", () => {
     await PUT(put("/api/admin/settings/", { hero: null }, admin));
     const back = await (await publicGet()).json();
     expect(back.settings.hero).toBeNull();
+  });
+
+  /* Nothing capped this route's body, and a key outside the five validated
+     ones is stored as raw jsonb AND written a second time into admin_audit —
+     so one request could persist twice its own size for good. Same cap and
+     the same code («too_large», 413) as the other admin writers. */
+  it("PUT /api/admin/settings refuses a body far larger than the content document", async () => {
+    const { PUT, GET } = await import("@/app/api/admin/settings/route");
+    const res = await PUT(put("/api/admin/settings/", { note_to_self: "я".repeat(300_000) }, admin));
+    expect(res.status).toBe(413);
+    expect((await res.json()).error).toBe("too_large");
+    // nothing was stored on the way out
+    const back = await (await GET(get("/api/admin/settings/", admin))).json();
+    expect(back.settings.note_to_self).toBeUndefined();
+
+    // …and a normal-sized write still goes through
+    const ok = await PUT(put("/api/admin/settings/", { note_to_self: "коротко" }, admin));
+    expect(ok.status).toBe(200);
+  });
+
+  it("PUT /api/admin/settings still refuses a body that is not a JSON object", async () => {
+    const { PUT } = await import("@/app/api/admin/settings/route");
+    for (const body of ["null", "5", "[]", '"x"', "не json"]) {
+      const res = await PUT(new Request(`${ORIGIN}/api/admin/settings/`, {
+        method: "PUT", headers: { "content-type": "application/json", cookie: admin }, body,
+      }));
+      expect(res.status, `body ${body}`).toBe(400);
+      expect(["bad_body", "bad_json"]).toContain((await res.json()).error);
+    }
   });
 
   it("admin routes refuse anonymous and forged callers", async () => {

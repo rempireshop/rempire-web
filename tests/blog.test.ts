@@ -756,6 +756,49 @@ describe("admin blog API — CRUD", () => {
     const res = await DELETE(new Request(`${ORIGIN}/api/admin/blog/`, { method: "DELETE", headers: { cookie: admin } }));
     expect(res.status).toBe(400);
   });
+
+  /* An id that is not a uuid used to reach `where id = 'abc'`, which Postgres
+     answers with 22P02 — not a BlogError, so the catch turned it into 503
+     «unavailable»: the panel told the owner the server was down when all he
+     had was a stale link. Every sibling (publish, unpublish, delete, GET)
+     already gated on the shape and answered 404. */
+  it("PATCH with an id that is not a uuid is «not found», not a 503", async () => {
+    const { PATCH } = await import("@/app/api/admin/blog/route");
+    for (const id of ["abc", "1", "../../etc/passwd", "00000000-0000-0000-0000"]) {
+      const res = await PATCH(send("PATCH", { id, title: { RU: "x" } }));
+      expect(res.status, `id ${JSON.stringify(id)}`).toBe(404);
+      expect((await res.json()).error).toBe("not_found");
+    }
+    // …and a well-shaped id that simply is not there is still a 404
+    const gone = await PATCH(send("PATCH", { id: "00000000-0000-0000-0000-000000000000", title: { RU: "x" } }));
+    expect([400, 404]).toContain(gone.status);
+  });
+
+  it("a body that is not a JSON object is refused, not read field by field", async () => {
+    const { POST, PATCH } = await import("@/app/api/admin/blog/route");
+    for (const body of ["null", "5", '"x"', "[]", "true", "not json at all"]) {
+      const req = (method: string) =>
+        new Request(`${ORIGIN}/api/admin/blog/`, {
+          method, headers: { "content-type": "application/json", cookie: admin }, body,
+        });
+      const post = await POST(req("POST"));
+      expect(post.status, `POST ${body}`).toBe(400);
+      expect((await post.json()).error).toBe("bad_request");
+      const patch = await PATCH(req("PATCH"));
+      expect(patch.status, `PATCH ${body}`).toBe(400);
+    }
+  });
+
+  it("a body far larger than any article is refused before it is parsed", async () => {
+    const { POST } = await import("@/app/api/admin/blog/route");
+    const res = await POST(new Request(`${ORIGIN}/api/admin/blog/`, {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: admin },
+      body: JSON.stringify({ title: { RU: "x" }, body: { RU: "я".repeat(300_000) } }),
+    }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("bad_request");
+  });
 });
 
 /* ---------- the three sample posts (db/migrations/071_blog_samples.sql) ----- */
