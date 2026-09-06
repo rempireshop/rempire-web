@@ -14862,13 +14862,24 @@
     if (!rows.length) return '<p class="scan__hint scan__hint--sm">Ничего не найдено.</p>';
     return '<div class="scan__cands">' + rows.join("") + "</div>";
   }
+  /* The scanner writes straight to the warehouse, and the «Склад» list and
+     the editor's «Размеры и цены» grid read a copy fetched once
+     (loadStockLevels). Closing the overlay after a bind and a «Принять +2»
+     used to show the row exactly as before — «штрихкод не привязан», the old
+     count — which the owner read as «nothing got added». Only a copy that
+     exists is refreshed; the ledger's own copy is dropped so «История»
+     re-reads it the next time it opens. */
+  function scanStockChanged() {
+    S.stockMoves = null;
+    if (S.stockLevels || STOCK.asked) reloadStock();
+  }
   /** inventory: binds the last scanned code to productId+variant, then
       re-looks it up so the goods-in card takes over. */
   function scanBindEan(productId, variant) {
     var assignCode = S.scanHit ? S.scanHit.code : "";
     if (!assignCode) return;
     stockLevelSaveDetailed({ productId: productId, variant: variant || "", ean: assignCode }).then(function (res) {
-      if (res.ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); }
+      if (res.ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); scanStockChanged(); }
       // «возможно, код уже занят» was a guess; the route knows, and says which
       else toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать — возможно, код уже занят");
     });
@@ -15126,6 +15137,7 @@
       S.scanReady = true;
       SCAN.lastCode = "";
       scanLookup(code);
+      scanStockChanged();
     });
   }
   function setScanTorch(on) {

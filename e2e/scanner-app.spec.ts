@@ -141,4 +141,49 @@ test.describe("scanner app", () => {
     await expect(row).toContainText(String(before + 3));
     await assertClean(page, w, "«Склад» shows what the scanner wrote");
   });
+
+  /* The other door: «Склад» → «Сканировать» raises the same scanner as an
+     overlay OVER the list. The list was fetched once (loadStockLevels) and
+     the scanner wrote straight to the warehouse, so closing the overlay used
+     to show the row exactly as it was — «штрихкод не привязан», the old
+     count — until a reload. The owner read that as «nothing got added». */
+  test("«Склад» overlay: the code bound and the +2 taken show on the list behind it, no reload", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const ean = `27${Date.now().toString().slice(-10)}`;
+    const variant = "150 мл";   // PRODUCT_2's other size — the first test owns «40 мл»
+
+    await openAdmin(page);
+    await tab(page, "stock");
+    await expect(page.locator("#stocklist")).toBeVisible();
+    await page.locator("[data-stockq]").fill(PRODUCT_2.id);
+    const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${variant}"]`).locator("xpath=..");
+    await expect(row).toBeVisible();
+    await expect(row).not.toContainText(ean);
+    const before = (await stockQty(page, PRODUCT_2.id, variant)) ?? 0;
+
+    await page.locator("[data-scanopen]").first().click();
+    await expect(page.locator(".scanoverlay")).toBeVisible();
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await page.locator("[data-scanassignq]").fill("tangled");
+    await page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`).click();
+    expect(await toastText(page)).toMatch(/привязан/i);
+    await clearToast(page);
+    await expect(page.locator('[data-scanmove="in"]')).toBeVisible();
+    await page.locator('[data-scanqty="1"]').click();
+    await expect(page.locator('[data-scanmove="in"]')).toHaveText("Принять +2");
+    await page.locator('[data-scanmove="in"]').click();
+    expect(await toastText(page)).toMatch(/Приход \+2/);
+    await clearToast(page);
+    await expect(page.locator("#scanpanel")).toContainText(`на складе ${before + 2}`);
+
+    // back to the list: what the scanner just wrote is on the row already
+    await page.locator("[data-scanclose]").click();
+    await expect(page.locator(".scanoverlay")).toHaveCount(0);
+    await expect(row, "the list behind the overlay still shows the row as unbound").toContainText(ean);
+    await expect(row, "the list behind the overlay still shows the old count").toContainText(String(before + 2));
+    await assertClean(page, w, "«Склад» list after the overlay");
+  });
 });
