@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { ipHeaders, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
-import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
+import { assertClean, clearToast, isRussian, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
  * The scanner app — /shop2/scan/, the owner's third home-screen icon
@@ -240,5 +240,39 @@ test.describe("scanner app", () => {
     await expect(page.locator("#scanpanel"), "the handheld scanner's code went nowhere").toContainText(ean2);
     await assertClean(page, w, "background render and the keyboard wedge");
     await page.unroute("**/api/admin/inventory/?filter=all&limit=1000");
+  });
+
+  /* A lookup that fails — the shop's connection dropping in the stockroom —
+     used to be swallowed: the code was read, nothing appeared, and the same
+     code was not even retried for 1.5 s. It has to say so, and the next
+     attempt has to count. */
+  test("a lookup that fails says so in Russian, and the next attempt works", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const ean = `24${Date.now().toString().slice(-10)}`;
+
+    await openAdmin(page);
+    await page.goto(shopUrl("", "/scan/"));
+    await waitForScreen(page, "scan");
+    await expect(page.locator("[data-scanmanual]")).toBeVisible();
+
+    // this step provokes a 503 on purpose; what counts is the sentence below
+    w.allow.push(/\/api\/admin\/inventory\/lookup\//);
+    await page.route("**/api/admin/inventory/lookup/**", (route) =>
+      route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ ok: false, error: "db_unavailable" }) }));
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    const msg = await toastText(page);
+    expect(msg, "a failed lookup said nothing").not.toBe("");
+    expect(isRussian(msg), `the failure is not in Russian — "${msg}"`).toBe(true);
+    await clearToast(page);
+    await page.unroute("**/api/admin/inventory/lookup/**");
+
+    // the very same code, straight away: the failure must not be cached
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    w.serverErrors.length = 0;   // the mocked 503 above, forgiven
+    await assertClean(page, w, "lookup after a failure");
   });
 });

@@ -1183,6 +1183,7 @@
       "Фильтр": "Filter",
       "ошибка": "viga",
       "Код привязан ✓": "Kood seotud ✓",
+      "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Koodi ei õnnestunud kontrollida — server ei vasta. Proovige uuesti.",
       "Не удалось привязать — возможно, код уже занят": "Ei õnnestunud siduda — võib-olla on kood juba kasutusel",
       "Войдите в панель.": "Logige paneeli sisse.",
       "Способ оплаты": "Makseviis",
@@ -2907,6 +2908,7 @@
       "Фильтр": "Filter",
       "ошибка": "error",
       "Код привязан ✓": "Code linked ✓",
+      "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Could not check the code — the server is not responding. Try again.",
       "Не удалось привязать — возможно, код уже занят": "Couldn't link it — the code may already be taken",
       "Войдите в панель.": "Sign in to the panel.",
       "Способ оплаты": "Payment method",
@@ -15143,10 +15145,17 @@
     S.scanQty = 1; S.scanReady = false;
     scanLookup(code);
   }
+  /* A lookup that fails — the connection dropping in the stockroom — used to
+     be swallowed: the code was read, nothing appeared, and the same code was
+     not even retried for 1.5 s. Say so, and let the very next read count. */
+  function scanLookupFailed() {
+    SCAN.lastCode = "";
+    toast("Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.");
+  }
   function scanLookup(code) {
     apiJson("/api/admin/inventory/lookup/?ean=" + encodeURIComponent(code)).then(function (r) {
       if (r.status === 401) { SRV.admin = false; closeScanner(); render(); return; }
-      if (r.status !== 200 || !r.body.ok) return;
+      if (r.status !== 200 || !r.body.ok) { scanLookupFailed(); return; }
       var hit = r.body.hit;
       S.scanHit = hit
         ? { code: code, productId: hit.productId, variant: hit.variant, qty: hit.qty, lowThreshold: hit.lowThreshold, ean: hit.ean, state: hit.state, tracked: true, product: hit.product }
@@ -15156,7 +15165,7 @@
       scanBeep();
       loadScanToday();
       scanRenderPanel();
-    }).catch(noop);
+    }).catch(scanLookupFailed);
   }
   function loadScanToday() {
     var d = new Date(); d.setUTCHours(0, 0, 0, 0);
