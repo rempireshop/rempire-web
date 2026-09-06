@@ -319,6 +319,11 @@
       "Платёж обрабатывается": "Makset töödeldakse",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "Pank ei ole makset veel kinnitanud. Niipea kui ta vastab, saadame kirja — tavaliselt võtab see paar minutit.",
       "Вернуться в магазин": "Tagasi poodi",
+      "Оплатить ещё раз": "Maksa uuesti",
+      "Этот заказ уже оплачен": "See tellimus on juba makstud",
+      "Этот заказ уже закрыт": "See tellimus on juba suletud",
+      "Банк не отвечает — попробуйте через минуту": "Pank ei vasta — proovi minuti pärast uuesti",
+      "Подарочная карта или баллы уже потрачены — проверьте корзину и попробуйте ещё раз": "Kinkekaart või punktid on juba kasutatud — vaata ostukorv üle ja proovi uuesti",
       "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
@@ -1283,6 +1288,11 @@
       "Заказ ещё не оплачен — отправлять нечего.": "Tellimus pole veel makstud — saata pole midagi.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "Klient tuleb tellimusele salongi järele. Kirja ei saadeta.",
       "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "Silt on Montonio pakikleebis jälgimisnumbriga. Tellimuse staatust see ei muuda.",
+      /* the order card's «Оплата» block (admPaymentHTML) */
+      "По счёту": "Arvega", "тестовый банк": "testpank", "отмечено вручную": "märgitud käsitsi",
+      "без оплаты — к оплате было 0 €": "makseta — maksta oli 0 €", "ждёт оплаты": "ootab makset",
+      "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
+        "⚠ Hiljem saatis pank «maksmata» — tellimus jäi makstuks, kontrolli Montonios",
       "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Vajutate «Teele saadetud» — kliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Kohale toimetatud» on viimane samm, ilma kirjata. Tagasi saab võtta logist.",
       "Этикетка готова ✓": "Silt valmis ✓", "Этикетка снова на месте ✓": "Silt on jälle olemas ✓",
@@ -2047,6 +2057,11 @@
       "Платёж обрабатывается": "Payment is being processed",
       "Банк ещё не подтвердил оплату. Как только он ответит, мы пришлём письмо — обычно это занимает пару минут.": "The bank has not confirmed the payment yet. We will e-mail you as soon as it does — usually a couple of minutes.",
       "Вернуться в магазин": "Back to the shop",
+      "Оплатить ещё раз": "Pay again",
+      "Этот заказ уже оплачен": "This order is already paid",
+      "Этот заказ уже закрыт": "This order is already closed",
+      "Банк не отвечает — попробуйте через минуту": "The bank is not responding — try again in a minute",
+      "Подарочная карта или баллы уже потрачены — проверьте корзину и попробуйте ещё раз": "The gift card or points have already been spent — check the basket and try again",
       "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
@@ -3007,6 +3022,11 @@
       "Заказ ещё не оплачен — отправлять нечего.": "The order is not paid yet — nothing to ship.",
       "Клиент забирает заказ в салоне. Письмо не отправляется.": "The customer collects the order at the salon. No letter is sent.",
       "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "The label is Montonio's sticker with the tracking number. It does not change the order's status.",
+      /* the order card's «Оплата» block (admPaymentHTML) */
+      "По счёту": "By invoice", "тестовый банк": "test bank", "отмечено вручную": "marked by hand",
+      "без оплаты — к оплате было 0 €": "no payment — there was 0 € to pay", "ждёт оплаты": "awaiting payment",
+      "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
+        "⚠ The bank later sent «not paid» — the order stayed paid, check in Montonio",
       "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.": "Press «Shipped» and the customer gets the “Order shipped” letter with the tracking number.",
       "«Доставлен» — последний шаг, без письма. Вернуть можно из журнала.": "«Delivered» is the last step, no letter. It can be taken back from the journal.",
       "Этикетка готова ✓": "Label ready ✓", "Этикетка снова на месте ✓": "The label is back ✓",
@@ -3622,6 +3642,9 @@
     [/^Курьер · (.+)$/, { ET: "Kuller · $1", EN: "Courier · $1" }],
     [/^Курьера Montonio в (.+) нет — отправьте другим способом\.$/,
       { ET: "Montonio kullerit riiki $1 ei ole — saada muul viisil.", EN: "Montonio has no courier for $1 — ship another way." }],
+    // the order card's «Оплата» block: the provider paid a different amount
+    [/^⚠ Пришло (.+) вместо (.+) — проверьте в Montonio$/,
+      { ET: "⚠ Laekus $1, mitte $2 — kontrolli Montonios", EN: "⚠ $1 arrived instead of $2 — check in Montonio" }],
     [/^Скидка · (.+)$/, { ET: "Soodustus · $1", EN: "Discount · $1" }],
     [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
@@ -5126,7 +5149,12 @@
     var st = S.loyalty.settings;
     if (S.loyalty.balance < st.minRedeem) return 0;
     var cap = Math.round(cartSum() * st.redeemMaxPct / 100);
-    return Math.max(0, Math.min(S.loyalty.balance, cap));
+    /* …and never more than the promo or gift card left to pay — one point is
+       one euro, so whole euros only. createOrder() (src/lib/orders.ts) draws
+       the same two lines, so the total here is the total the server bills,
+       and a card that covers the basket costs no points at all. */
+    var left = Math.floor(Math.max(0, cartSum() - discount() + shipCost() - giftDiscount()));
+    return Math.max(0, Math.min(S.loyalty.balance, cap, left));
   }
   function loyaltyDiscount() { return S.loyaltyRedeem ? loyaltyMaxRedeem() : 0; }
   function total() { return cartSum() - discount() + shipCost() - giftDiscount() - loyaltyDiscount(); }
@@ -9281,6 +9309,38 @@
   function orderErrText(code) {
     return ORDER_ERRS[code] || "Не получилось оформить заказ — попробуйте ещё раз";
   }
+  /* POST /api/payments/create/ codes a shopper can act on (docs/payments.md
+     §8); everything else — no keys, provider refused — is the one sentence
+     below, because there is nothing the shopper can do about it. */
+  var PAY_ERRS = {
+    rate_limited: ORDER_ERRS.rate_limited,
+    already_paid: "Этот заказ уже оплачен",
+    order_closed: "Этот заказ уже закрыт",
+    not_found: "Заказ не найден",
+    not_covered: "Подарочная карта или баллы уже потрачены — проверьте корзину и попробуйте ещё раз",
+    provider_unreachable: "Банк не отвечает — попробуйте через минуту"
+  };
+  function payErrText(code) {
+    return PAY_ERRS[code] || "Оплата пока недоступна — попробуйте позже";
+  }
+  /* «Оплатить ещё раз» on the failed receipt. The basket is gone (payNow()
+     empties it before leaving for the bank), but the order is still there:
+     the payment is re-created for it — the server reuses the method chosen
+     the first time when the body carries nothing but the id — and the shopper
+     goes back to the bank. Same lock as payNow(): one tap, one payment. */
+  function payAgain(orderId) {
+    if (S.paying || !orderId) return;
+    S.paying = true; render();
+    postJSON("/api/payments/create/", { orderId: orderId, lang: S.lang }).then(function (pay) {
+      if (pay.offline || !pay.body || !pay.body.ok || !pay.body.redirectUrl) {
+        throw new Error(payErrText(pay.body && pay.body.error));
+      }
+      location.href = pay.body.redirectUrl;
+    }).catch(function (err) {
+      S.paying = false; render();
+      toast(err && err.message ? err.message : "Оплата пока недоступна — попробуйте позже");
+    });
+  }
   /** A finished order must leave nothing behind for the next one. */
   function clearOrderState() {
     S.cart = []; S.promo = ""; S.promoInfo = null; S.promoErr = ""; S.promoMin = 0; S.promoBusy = false; S.sumOpen = null;
@@ -9325,13 +9385,15 @@
       }
       return postJSON("/api/payments/create/", {
         orderId: res.body.orderId,
-        method: PAYS[S.pay] && PAYS[S.pay].k === "card" ? "card" : "bank",
+        // the radio's own key — a wallet is "wallet", never the bank list it
+        // used to be folded into (the server asks Montonio for its card page)
+        method: PAYS[S.pay] && (PAYS[S.pay].k === "card" || PAYS[S.pay].k === "wallet") ? PAYS[S.pay].k : "bank",
         bank: S.pay === 0 ? selectedBankCode() : undefined,
         lang: S.lang
       }).then(function (pay) {
         if (pay.offline) return finishDemo();
         if (!pay.body || !pay.body.ok || !pay.body.redirectUrl) {
-          throw new Error("Оплата пока недоступна — попробуйте позже");
+          throw new Error(payErrText(pay.body && pay.body.error));
         }
         // the basket is cleared before leaving: coming back from the bank must
         // not find the same order still sitting in the cart
@@ -10432,12 +10494,49 @@
           // went is an e-mail, and that is what belongs on this line
           "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span></div>" +
           admGiftCardsHTML(o) + "</div>" +
+        admPaymentHTML(o) +
         (o ? '<div><div class="adm-sec__t">Заметка</div>' +
           '<textarea class="adm-input" rows="2" data-admnote placeholder="Только для вас" style="margin-top:10px">' +
           esc(o.notes || "") + "</textarea>" +
           '<div class="adm-acts" style="margin-top:8px">' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admnotesave>Сохранить заметку</button></div></div>' : "") +
       "</div></div></div>";
+  }
+  /* «Оплата» on the order card — how the shopper meant to pay, through what,
+     and where the money stands. Read off orders.payment: the choice is written
+     by POST /api/payments/create/, the outcome by the provider's ticket, and
+     an order a gift card (or points, or a promo) covered entirely says so
+     with provider "none" (src/lib/payments/settle.ts). Nothing here is a
+     button: the money is settled by the provider, never from this card. */
+  var PAY_METHOD_NAMES = {
+    bank: "Банковская ссылка", card: "Банковская карта", wallet: "Apple Pay / Google Pay",
+    giftcard: "Подарочная карта", points: "Баллы", promo: "Промокод", invoice: "По счёту"
+  };
+  var PAY_PROVIDER_NAMES = { montonio: "Montonio", mock: "тестовый банк", manual: "отмечено вручную", none: "без оплаты — к оплате было 0 €" };
+  /** The bank behind a BIC: the live Montonio list when it loaded, else ours. */
+  function bankNameOf(code) {
+    var real = PAYMETHODS.banks || [];
+    for (var i = 0; i < real.length; i++) if (real[i].code === code) return real[i].name || code;
+    for (var k in BANK_CODES) if (BANK_CODES[k] === code) return k;
+    return code;
+  }
+  function admPaymentHTML(o) {
+    var p = o && o.payment;
+    if (!p || typeof p !== "object") return "";
+    var method = PAY_METHOD_NAMES[p.method] || (p.method ? String(p.method) : "");
+    if (p.method === "bank" && p.bank) method += " · " + bankNameOf(String(p.bank));
+    var state = p.status === "paid" ? "оплачен" : p.status === "failed" ? "не оплачен" : p.status === "pending" ? "ждёт оплаты" : "";
+    var sub = [PAY_PROVIDER_NAMES[p.provider] || (p.provider ? String(p.provider) : ""), state].filter(Boolean).join(" · ");
+    if (!method && !sub) return "";
+    /* Two things a human must look at: the bank paid a different amount, or
+       said «не оплачен» after the order was already paid — both kept on the
+       order by src/lib/payments/apply.ts, never acted on automatically. */
+    var notes = "";
+    if (p.amountMismatch) notes += '<br><span class="adm-err">⚠ Пришло ' + eur(p.amountMismatch.got) + " вместо " + eur(p.amountMismatch.expected) + " — проверьте в Montonio</span>";
+    if (p.rejected) notes += '<br><span class="adm-err">⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio</span>';
+    return '<div><div class="adm-sec__t">Оплата</div><div class="adm-kv">' + esc(method || "—") + "<br>" +
+      "<span>" + esc(sub) + (p.ref ? (sub ? " · " : "") + '<span class="adm-mono">' + esc(String(p.ref)) + "</span>" : "") + "</span>" +
+      notes + "</div></div>";
   }
   /** features: an all-gift-card order — `shipping.method === "digital"`, set
       by createOrder() and never by anything the browser sent. */
@@ -17155,7 +17254,14 @@
       var total = parseFloat(String(q.t || "").replace(",", "."));
       track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
     }
-    return { status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g) };
+    return {
+      status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g),
+      /* `o` — the order's id, only on a failed receipt (src/lib/payments/
+         receipt.ts): what «Оплатить ещё раз» sends back to re-create the
+         payment. The basket is empty by now (payNow() clears it before the
+         bank), so the order is the only thing a second try can be about. */
+      order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : ""
+    };
   }
   /* features: `g=RMP-ACDE-4679~<token>,…` on the redirect back from the bank
      (src/app/api/payments/return/route.ts). The token is an HMAC of the code
@@ -17192,7 +17298,15 @@
         '<div class="done__tick done__tick--bad">✕</div>' +
         '<h1 class="display h1">Оплата не прошла</h1>' + num +
         '<p class="muted" style="margin-bottom:22px">Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.</p>' +
-        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+        /* The sentence above promises a second try; this is it. The same
+           order goes back to the bank (payAgain), the way the shopper chose
+           the first time — the server remembers the method. */
+        (d.order
+          ? '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
+              (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
+              '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
+          : '<button class="btn" data-go="home">Вернуться в магазин</button>') +
+        "</section></div>";
     }
     if (d.status === "pending") {
       return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
@@ -18481,7 +18595,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -18498,6 +18612,7 @@
        the language menu above still closes behind it, and then the browser is
        left to open the link itself. */
     if (d.giftpdf !== undefined) return;
+    if (d.payagain !== undefined) { payAgain(d.payagain); return; }
 
     if (d.ident !== undefined) identLogo(t);
     if (d.go) { if (d.go !== "catalog") S.brand = ""; go(d.go); return; }
@@ -18518,6 +18633,14 @@
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
     if (d.buynow) {
       if (byId(d.buynow).stock === "out") { toast("Товара нет в наличии"); return; }
+      /* «Купить через G Pay» promises the wallet, so the checkout opens with
+         Apple Pay / Google Pay already chosen — it used to land on the bank
+         list, and the shopper who did not notice paid through a bank link.
+         «Другие способы оплаты» shares the attribute and leaves the choice
+         alone. Looked up by key: the radio's position is not a contract. */
+      if (t.classList.contains("btn--express")) {
+        for (var wi = 0; wi < PAYS.length; wi++) if (PAYS[wi].k === "wallet") S.pay = wi;
+      }
       addToCart(d.buynow); go("checkout"); return;
     }
     if (d.cart !== undefined) { openDrawer("cart"); return; }
