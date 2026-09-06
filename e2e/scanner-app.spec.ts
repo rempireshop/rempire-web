@@ -76,6 +76,16 @@ test.describe("scanner app", () => {
 
     // two or three letters is all it should take
     await page.locator("[data-scanassignq]").fill("tangled");
+    /* The camera keeps reading the code that is already on screen for as long
+       as the bottle stays in view. A re-read of THAT code must leave the
+       search alone — it used to rebuild the panel every 1.5 s, wiping the
+       query, closing the keyboard and pulling the list from under the finger.
+       The manual field stands in for the camera here. */
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator("[data-scanassignq]"), "a re-read of the code on screen wiped the search").toHaveValue("tangled");
+    // the rows carry a price so two same-named bottles can be told apart
+    await expect(page.locator(".scan__cand .num").first()).toContainText("€");
     /* One tap binds since the redesign: the candidate list is flat — one row
        per product AND size — because a barcode belongs to one bottle, and
        asking «какой объём?» after «какой товар?» was a second tap for a

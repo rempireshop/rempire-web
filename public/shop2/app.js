@@ -1411,6 +1411,7 @@
       "Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».": "Leidke toode nime või triipkoodi järgi ja vajutage suurusele — see läheb ostukorvi. Edasi «Sularaha» või «Terminal»: jäägid kantakse maha, tšekk ilmub «Tellimuste» alla.",
       "Начните вводить название — товар найдётся.": "Hakake nime sisestama — toode leitakse.",
       "· без кода": "· ilma koodita",
+      "без кода": "ilma koodita",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Suunake triipkoodile. Toode leitakse ise — jääb üle kogus märkida.",
       "Найдено ·": "Leitud ·",
       "Сканировать дальше": "Skaneeri edasi",
@@ -3130,6 +3131,7 @@
       "Найдите товар по названию или штрихкоду и нажмите на размер — он попадёт в корзину. Дальше «Наличные» или «Терминал»: остатки спишутся, чек появится в «Заказах».": "Find the product by name or barcode and tap a size — it goes into the basket. Then «Cash» or «Terminal»: the stock is written off and the receipt appears under «Orders».",
       "Начните вводить название — товар найдётся.": "Start typing the name — the product will turn up.",
       "· без кода": "· no code",
+      "без кода": "no code",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Point at the barcode. The product finds itself — all that is left is the quantity.",
       "Найдено ·": "Found ·",
       "Сканировать дальше": "Keep scanning",
@@ -3882,7 +3884,7 @@
   // …and the panel's own rows and picker tiles (phase 4): a product listed in
   // «Товары» or picked for a banner keeps its Russian tail otherwise
   var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm," +
-    ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2";
+    ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2,.scan__cand__nm,.scan__nm,.scan__today__r";
   function translateTree(root) {
     if (S.lang === "RU" || !root) return;
     var lang = S.lang;
@@ -14790,10 +14792,17 @@
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
       for (var j = 0; j < sizes.length && rows.length < 8; j++) {
         var lv = edStockFor(p, sizes[j]);
+        /* Each fact in its own <span>: the translator matches a text node by
+           its exact wording, so «один объём · без кода» in one node would
+           never turn into Estonian. The price tells two same-named bottles
+           apart (Awapuhi Shampoo 20 € vs 36 €) when the catalogue has no
+           volume on them. */
+        var szPrice = p.sizes && p.sizes.length ? sizePrice(p, j) : p.price;
         rows.push('<button class="scan__cand" data-scanbind="' + esc(p.id) + "|" + esc(sizes[j]) + '">' +
           '<span class="scan__cand__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
-          '<span class="scan__cand__sz">' + (sizes[j] ? esc(sizes[j]) : "один объём") +
-            (lv && lv.ean ? "" : " · без кода") + "</span></button>");
+          '<span class="scan__cand__sz"><span>' + (sizes[j] ? esc(sizes[j]) : "один объём") + "</span>" +
+            (szPrice ? ' · <span class="num">' + eur(szPrice) + "</span>" : "") +
+            (lv && lv.ean ? "" : " · <span>без кода</span>") + "</span></button>");
       }
     }
     if (!rows.length) return '<p class="scan__hint scan__hint--sm">Ничего не найдено.</p>';
@@ -14985,7 +14994,14 @@
   }
   function handleScanCode(code) {
     var now = Date.now();
-    if (!code || (code === SCAN.lastCode && now - SCAN.lastAt < 1500)) return;
+    if (!code) return;
+    /* The bottle that is already on screen. The camera reads it again every
+       frame for as long as it is in view, and each re-read used to rebuild the
+       panel — wiping the product search, closing the keyboard and pulling the
+       list from under the finger about to tap it. A code whose card is up is
+       not a new scan; «Сканировать дальше» or a different code is. */
+    if (S.scanHit && S.scanHit.code === code) return;
+    if (code === SCAN.lastCode && now - SCAN.lastAt < 1500) return;
     SCAN.lastCode = code; SCAN.lastAt = now;
     // a new code is a new job: the stepper starts at 1 again and the «готово»
     // line from the previous confirm goes away
@@ -15010,7 +15026,9 @@
   function loadScanToday() {
     var d = new Date(); d.setUTCHours(0, 0, 0, 0);
     apiJson("/api/admin/inventory/moves/?limit=20&since=" + encodeURIComponent(d.toISOString())).then(function (r) {
-      if (r.status === 200 && r.body.ok) { S.scanToday = r.body.moves; scanRenderPanel(); }
+      // «Сегодня» is only drawn between codes — repainting while a card is up
+      // would rebuild the product search the owner is typing into
+      if (r.status === 200 && r.body.ok) { S.scanToday = r.body.moves; if (!S.scanHit) scanRenderPanel(); }
     }).catch(noop);
   }
   function submitManualScan() {
