@@ -132,4 +132,44 @@ describe("PUT /api/admin/inventory + GET lookup — binding a barcode", () => {
     }
     expect((await GET(lookup("   ", admin))).status).toBe(400);
   });
+
+  /* «Порог «мало»» in the «Склад» row form. The panel checks the box itself
+     now (stockCommit), but it used to send Number("abc") — NaN, which
+     JSON.stringify writes as `null` — so what the route does with rubbish is
+     the rule that decides whether a typo can quietly clear a warning level. */
+  it("refuses a threshold that is not a whole number, and keeps the one already stored", async () => {
+    await PUT(put({ productId: plain.id, ean: null, lowThreshold: 4 }, admin));
+    for (const bad of [null, "abc", -1, 100001]) {
+      const res = await PUT(put({ productId: plain.id, lowThreshold: bad }, admin));
+      expect(res.status, `lowThreshold ${JSON.stringify(bad)}`).toBe(400);
+      expect((await res.json()).error).toBe("bad_threshold");
+    }
+    const kept = await PUT(put({ productId: plain.id, lowThreshold: 4 }, admin));
+    expect((await kept.json()).level.lowThreshold).toBe(4);
+  });
+
+  /* What the scanner's card and «Склад»'s red number are drawn from. The
+     panel used to colour a row at a flat «3 or fewer» of its own; both now
+     read `state`, so the route has to derive it from the row's OWN
+     threshold. */
+  it("the lookup carries the state the panel colours by, against the row's own threshold", async () => {
+    const { move } = await import("@/lib/inventory");
+    await PUT(put({ productId: sized.id, variant: SIZE_A, ean: "4006381333931", lowThreshold: 5 }, admin));
+    await move({ productId: sized.id, variant: SIZE_A, delta: 4, reason: "goods_in" });
+
+    let hit = (await (await GET(lookup("4006381333931", admin))).json()).hit;
+    expect(hit.qty).toBe(4);
+    // four left against a threshold of five is «мало», not «in» — a flat
+    // three would have called this row fine
+    expect(hit.state).toBe("low");
+
+    await PUT(put({ productId: sized.id, variant: SIZE_A, lowThreshold: 2 }, admin));
+    hit = (await (await GET(lookup("4006381333931", admin))).json()).hit;
+    expect(hit.state).toBe("in");
+
+    await move({ productId: sized.id, variant: SIZE_A, delta: -4, reason: "sale_pos" });
+    hit = (await (await GET(lookup("4006381333931", admin))).json()).hit;
+    expect(hit.qty).toBe(0);
+    expect(hit.state).toBe("out");
+  });
 });

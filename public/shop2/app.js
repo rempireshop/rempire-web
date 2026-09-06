@@ -1115,7 +1115,6 @@
       "Мало": "Vähe", "Нет": "Otsas", "Не учтено": "Arvestamata", "не учтено": "arvestamata",
       "Склад не отвечает — попробуйте обновить страницу.": "Ladu ei vasta — proovige lehte värskendada.",
       "История не отвечает — попробуйте ещё раз.": "Ajalugu ei vasta — proovige uuesti.",
-      "Порог «мало» — целое число от 0.": "«Vähe» lävi — täisarv alates 0-st.",
       "EAN / штрихкод": "EAN / triipkood", "нет штрихкода": "triipkoodi pole",
       "Порог «мало»": "Läve «vähe»", "Остаток сейчас": "Jääk praegu",
       "Причина (видна в истории)": "Põhjus (nähtav ajaloos)",
@@ -2850,7 +2849,6 @@
       "Мало": "Low", "Нет": "Out", "Не учтено": "Untracked", "не учтено": "untracked",
       "Склад не отвечает — попробуйте обновить страницу.": "The stock isn't responding — try refreshing the page.",
       "История не отвечает — попробуйте ещё раз.": "The history isn't responding — try again.",
-      "Порог «мало» — целое число от 0.": "The «low» threshold is a whole number from 0.",
       "EAN / штрихкод": "EAN / barcode", "нет штрихкода": "no barcode",
       "Порог «мало»": "«Low» threshold", "Остаток сейчас": "Current stock",
       "Причина (видна в истории)": "Reason (shown in the history)",
@@ -14632,7 +14630,7 @@
      in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
-  var STOCK = { asked: false, seq: 0 };
+  var STOCK = { asked: false, seq: 0, movesAsked: false };
   function loadStockLevels(force) {
     if (SRV.admin !== true) return;
     if ((S.stockLevels || STOCK.asked) && !force) return;
@@ -14657,6 +14655,7 @@
     });
   }
   function reloadStock() { STOCK.asked = false; loadStockLevels(true); }
+  function reloadStockMoves() { STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; loadStockMoves(true); }
 
   var STOCK_MOVE_WORD = {
     sale_web: "продажа на сайте", sale_pos: "продажа в салоне",
@@ -16057,7 +16056,12 @@
   }
   function loadStockMoves(force) {
     if (SRV.admin !== true) return;
-    if (S.stockMoves && !force) return;
+    /* Asked, not answered, is still asked. admStockMovesHTML() calls this on
+       every render, and with only «is the list there?» to go on a history
+       that failed was re-requested by every render that followed — a request
+       per repaint, for as long as the screen was open. */
+    if ((S.stockMoves || STOCK.movesAsked) && !force) return;
+    STOCK.movesAsked = true;
     S.stockMovesBusy = true;
     var qs = "?limit=200" + (S.stockMovesReason ? "&reason=" + encodeURIComponent(S.stockMovesReason) : "");
     apiJson("/api/admin/inventory/moves/" + qs).then(function (r) {
@@ -16094,8 +16098,11 @@
        quietly gone, under a «Сохранено ✓». */
     var rawLow = String(S.stockEditLow == null ? "" : S.stockEditLow).trim();
     var lowWant = rawLow === "" ? null : stockQtyValue(rawLow);
+    // the route's own ceiling (setLevel, src/lib/inventory.ts), in the route's
+    // own words — one wording for the refusal, whichever side catches it
+    if (lowWant !== null && lowWant > 100000) lowWant = null;
     if (rawLow !== "" && lowWant === null) {
-      toast("Порог «мало» — целое число от 0."); refocus("[data-stocklowinput]"); return;
+      toast(STOCK_SAVE_ERRS.bad_threshold); refocus("[data-stocklowinput]"); return;
     }
     var lowChanged = lowWant !== null && lowWant !== r.lowThreshold;
     var rawQty = S.stockEditQty;
@@ -19270,7 +19277,7 @@
       if (d.admreload === "overview") loadOverview(true);
       else if (d.admreload === "orders") loadSrvOrders(true);
       else if (d.admreload === "stock") reloadStock();
-      else if (d.admreload === "moves") { S.stockMoves = null; S.stockMovesErr = ""; loadStockMoves(true); }
+      else if (d.admreload === "moves") reloadStockMoves();
       else if (d.admreload === "bundles") loadAdminBundles(true);
       else if (d.admreload === "promos") loadAdminPromos(true);
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
@@ -20342,8 +20349,14 @@
     }
     if (d.stocksave) { stockCommit(d.stocksave); return; }
     if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; render(); return; }
-    if (d.stockmovesopen !== undefined) { S.stockMovesOpen = !!d.stockmovesopen; render(); return; }
-    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; S.stockMoves = null; S.stockMovesErr = ""; render(); return; }
+    if (d.stockmovesopen !== undefined) {
+      S.stockMovesOpen = !!d.stockmovesopen;
+      // coming back to a history that failed asks again, rather than showing
+      // the old refusal for as long as the panel stays open
+      if (S.stockMovesOpen && S.stockMovesErr) { STOCK.movesAsked = false; S.stockMovesErr = ""; }
+      render(); return;
+    }
+    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; render(); return; }
     if (d.pwahintclose !== undefined) {
       try { localStorage.setItem("rmp-pwa-hint-dismissed", "1"); } catch (e) {}
       render(); return;
