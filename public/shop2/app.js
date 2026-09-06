@@ -4690,7 +4690,15 @@
      invoice needs the buyer's legal address, not only the name and the
      registry code (VAT Act §37) — so step 3 asks for it, taking the courier
      address when there is one and the box «совпадает» is left on. */
-  function isInvoice() { return !!(PAYS[S.pay] && PAYS[S.pay].k === "invoice"); }
+  /* An invoice needs something to invoice. A basket a gift card or the points
+     already cover in full is settled without a payment page at all, and a
+     счёт for 0 € is not a document anybody can pay or book — so the method is
+     dropped from the list (paymentBlockHTML below) and never sent, whatever
+     the shopper had picked before the card was applied. createOrder() refuses
+     the same order server-side (`invoice_zero_total`), so a stale tab cannot
+     talk its way past this either. */
+  function invoiceOffered() { return total() > 0.004; }
+  function isInvoice() { return !!(PAYS[S.pay] && PAYS[S.pay].k === "invoice") && invoiceOffered(); }
   /** The payment term the server prints on the invoice (settings.invoice.dueDays, 7 by default). */
   function invoiceDueDays() {
     var n = DEMO.invoice && Number(DEMO.invoice.dueDays);
@@ -9638,7 +9646,14 @@
     return out;
   }
   function paymentBlockHTML() {
+    /* The pick can go stale under the shopper's hands: the gift-card box sits
+       in the summary right below this list, and a card that covers the whole
+       order takes «По счёту» away (invoiceOffered()). Clamped here — the one
+       place the list is built — so the radio that looks checked is the method
+       payNow() actually sends. */
+    if (!invoiceOffered() && PAYS[S.pay] && PAYS[S.pay].k === "invoice") S.pay = 0;
     var out = '<div class="optlist">' + PAYS.map(function (o, i) {
+        if (o.k === "invoice" && !invoiceOffered()) return "";
         return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
           '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + (o.k === "invoice" ? invoiceHint() : o.h) + "</span></span>" +
           '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
