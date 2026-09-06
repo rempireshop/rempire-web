@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { getOrderByNumber, setOrderPayment, setOrderStatus } from "@/lib/orders";
+import { getOrderByNumber } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
-import { applyPaymentResult } from "@/lib/payments/apply";
-import { issueOrderGiftCards, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
+import { settlePayment } from "@/lib/payments/settle";
 
 /**
  * POST /api/payments/notify/ — the provider's webhook. This, not the shopper's
@@ -67,29 +66,19 @@ export async function POST(req: Request) {
 
   let outcome;
   try {
-    outcome = await applyPaymentResult(order, result, provider.name, {
-      setOrderPayment,
-      setOrderStatus,
-    });
+    // Only the transition into paid sends mail. A replayed webhook — Montonio's
+    // 48-hour retry, or someone re-posting the same body — must not ping Renat
+    // or write to the customer again (audit H4). The gift cards bought in the
+    // order are the exception: issuing them is idempotent, and if the first
+    // pass died between the status write and the hook, this retry is the only
+    // thing that will ever mint them. settlePayment() is that rule, shared
+    // with the shopper's return and with a 0 € order.
+    outcome = await settlePayment(order, result, provider.name);
   } catch (err) {
     console.error("payments/notify: apply failed", err);
     return NextResponse.json({ ok: false, error: "apply_failed" }, { status: 503 });
   }
 
-  // Only the transition into paid sends mail. A replayed webhook — Montonio's
-  // 48-hour retry, or someone re-posting the same body — must not ping Renat
-  // or write to the customer again (audit H4). The gift cards bought in the
-  // order are the exception: issuing them is idempotent, and if the first pass
-  // died between the status write and the hook, this retry is the only thing
-  // that will ever mint them.
-  if (outcome.status === "paid") {
-    // wholesale/loyalty: loyaltyEarned rides along only on the first arrival
-    // (undefined on a retry — settleLoyalty() in apply.ts only ever runs once
-    // per order) so the confirmation e-mail can mention points earned.
-    const paid = { ...order, status: "paid", payment: outcome.payment, loyaltyEarned: outcome.pointsEarned };
-    if (outcome.alreadyPaid) await issueOrderGiftCards(paid);
-    else await notifyOrderPaid(paid);
-  }
   if (outcome.keptPaid) {
     console.error(
       `payments/notify: refused to downgrade paid order ${order.number} to ${result.status}`,

@@ -1115,7 +1115,15 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
     const pricing = await getPricingSettings();
     if (pricing.loyalty.enabled) {
       const quote = await quoteLoyaltyRedeem(ctx.customerId, subtotal, pricing.loyalty);
-      if (quote.balance >= quote.minRedeem) loyaltyDiscount = money(quote.maxRedeemable);
+      /* Never more than what the promo or gift card left to pay: a 50 € card
+         on a 30 € basket used to leave the points quoted against the full
+         basket, so the order came to 0 and the customer still lost the
+         points on the paid transition (src/lib/payments/apply.ts takes what
+         was quoted). One point is one euro, so whole euros only — the
+         checkout's loyaltyMaxRedeem() in public/shop2/app.js draws the same
+         two lines, and the summary and the bill stay the same arithmetic. */
+      const left = Math.floor(Math.max(0, subtotal + shipPrice - discount));
+      if (quote.balance >= quote.minRedeem) loyaltyDiscount = money(Math.min(quote.maxRedeemable, left));
     }
   }
 

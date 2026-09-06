@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { publicBaseUrl } from "@/lib/payments";
-import { mockSecret, readMockTicket, signMockTicket } from "@/lib/payments/mock";
+import { mockMethodLabel, mockSecret, readMockTicket, signMockTicket } from "@/lib/payments/mock";
 
 /**
  * The stand-in bank page.
@@ -83,6 +83,18 @@ export async function GET(req: Request) {
   const payHref = `?t=${encodeURIComponent(token)}&do=paid`;
   const failHref = `?t=${encodeURIComponent(token)}&do=failed`;
 
+  /* Which of Montonio's two pages this stands in for: the bank list for a
+     bank link, the card form — with Apple Pay / Google Pay as its express
+     buttons — for a card or a wallet. Said on the page and stamped as
+     `data-mock-page`, so the e2e suite can see a wallet that was wrongly
+     routed to the bank list (the bug of 06.09.2026). */
+  const page = ticket.method === "card" || ticket.method === "wallet" ? "card" : "bank";
+  const how = mockMethodLabel(ticket.method, ticket.bank);
+  const where =
+    page === "card"
+      ? "Здесь Montonio показал бы форму карты с кнопками Apple Pay и Google Pay."
+      : "Здесь Montonio показал бы список банков.";
+
   const html = `<!doctype html>
 <html lang="ru"><head>
 <meta charset="utf-8">
@@ -108,14 +120,15 @@ export async function GET(req: Request) {
   .note { margin:20px 0 0; font-size:13px; color:#8a8177 }
 </style></head>
 <body>
-  <main class="card">
+  <main class="card" data-mock-page="${page}">
     <div class="tag">Тестовый платёж</div>
     <div class="sum">${esc(eur(ticket.amount))}</div>
     <div class="ref">Заказ ${esc(ticket.orderRef)}</div>
+    <div class="ref" data-mock-method>${esc(how)}</div>
     <a class="btn pay" href="${esc(payHref)}">Оплатить</a>
     <a class="btn cancel" href="${esc(failHref)}">Отменить</a>
-    <p class="note">Настоящие деньги не списываются. Эта страница заменяет банк,
-      пока магазин не подключён к Montonio.</p>
+    <p class="note">${esc(where)} Настоящие деньги не списываются. Эта страница
+      заменяет банк, пока магазин не подключён к Montonio.</p>
   </main>
 </body></html>`;
 

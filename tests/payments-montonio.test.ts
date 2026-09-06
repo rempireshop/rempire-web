@@ -217,6 +217,23 @@ describe("createPayment", () => {
     expect(claims.locale).toBe("et");
   });
 
+  it("asks for the card page for Apple Pay / Google Pay too — the wallets live on it, never on the bank list", async () => {
+    const fetchMock = stubFetch({ uuid: "u", paymentUrl: "https://gateway/x" });
+    await provider.createPayment(order, {
+      returnUrl: "https://rempire.ee/api/payments/return/",
+      notificationUrl: "https://rempire.ee/api/payments/notify/",
+      lang: "RU",
+      method: "wallet",
+      // a bank chip that happened to be highlighted must not travel with a wallet
+      bank: "LHVBEE22",
+    });
+    const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    const claims = verifyHs256<Record<string, unknown>>(body.data, SECRET);
+    const payment = claims.payment as Record<string, unknown>;
+    expect(payment.method).toBe("cardPayments");
+    expect((payment.methodOptions as Record<string, unknown>).preferredProvider).toBeUndefined();
+  });
+
   it("rounds money to two decimals", async () => {
     const fetchMock = stubFetch({ uuid: "u", paymentUrl: "https://gateway/x" });
     await provider.createPayment(

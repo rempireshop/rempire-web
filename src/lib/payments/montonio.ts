@@ -136,7 +136,11 @@ export class MontonioProvider implements PaymentProvider {
     if (!order.number) throw new PaymentError("bad_order");
 
     const locale = LOCALES[opts.lang] ?? "et";
-    const method = opts.method === "card" ? "cardPayments" : "paymentInitiation";
+    /* Apple Pay and Google Pay are not a Montonio method of their own: they
+       are the express buttons on its card page (docs/payments.md §9), so a
+       wallet is asked for as cardPayments — never as a bank link, which is
+       where `opts.method === "card" ? … : paymentInitiation` used to send it. */
+    const method = opts.method === "card" || opts.method === "wallet" ? "cardPayments" : "paymentInitiation";
     const country = String(opts.country ?? order.address?.country ?? "").toUpperCase();
 
     const methodOptions: Record<string, unknown> =
