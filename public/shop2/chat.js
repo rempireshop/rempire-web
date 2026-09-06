@@ -9,7 +9,15 @@
   if (typeof CATALOGUE === "undefined") return;
 
   var LS = "rempire-shop-proto";
+  /* The language on screen, not the saved preference: app.js writes <html
+     lang> on every render (setHead), and the observer below already watches
+     it. The saved choice is only ever the fallback before the first paint —
+     reading it first greeted a first visit to /shop2/et/ in Russian, and a
+     link into /shop2/en/ in whatever the shopper had once picked. */
+  var LANG_OF = { ru: "RU", et: "ET", en: "EN" };
   function lang() {
+    var shown = LANG_OF[String(document.documentElement.lang || "").toLowerCase()];
+    if (shown) return shown;
     try { return (JSON.parse(localStorage.getItem(LS)) || {}).lang || "RU"; } catch (e) { return "RU"; }
   }
 
@@ -176,7 +184,12 @@
   }
   paintLabels();
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
-  function eur(n) { return (Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " €"; }
+  // the shop's own eur(): «12,90 €» in RU/ET, «€12.90» on the English shop
+  function eur(n) {
+    var v = (Math.round(n * 100) / 100).toFixed(2);
+    if (lang() === "EN") return "€" + v.replace(".00", "");
+    return v.replace(".", ",").replace(",00", "") + " €";
+  }
 
   function bubble(cls, html) {
     var d = document.createElement("div");

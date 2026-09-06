@@ -28,6 +28,41 @@ async function cursorOf(page: Page, selector: string): Promise<string> {
   return el.evaluate((node) => getComputedStyle(node).cursor);
 }
 
+/** The breadcrumbs' left edge and the left edge of the column they must line
+ *  up with, read in ONE layout pass inside the page.
+ *
+ *  Two boot-time answers — /api/overrides/ and /api/bundles/ — each end in a
+ *  full render() within ~100 ms of the tiles landing, and each replaces
+ *  <main>. A node measured across that swap is a detached one, which is how
+ *  this first showed up: boundingBox() answering null on the ET listing,
+ *  where the timing happens to line up. Reading the two numbers in separate
+ *  round trips had a quieter version of the same problem — a box from before
+ *  the swap compared against an edge from after it. So both are read
+ *  together, and retried until they come back from a moment when a render is
+ *  not in flight. The geometry is the assertion; the moment it is read is
+ *  not, so this waits for a real answer instead of sleeping a fixed time. */
+type CrumbEdges = { crumbs: number; wrap: number };
+async function crumbEdges(page: Page, what: string): Promise<CrumbEdges> {
+  const seen: { at: CrumbEdges | null } = { at: null };
+  await expect
+    .poll(
+      async () => {
+        seen.at = await page.evaluate(() => {
+          const c = document.querySelector("main .crumbs");
+          const w = document.querySelector("main .wrap");
+          if (!c || !w) return null;
+          const box = c.getBoundingClientRect();
+          if (!box.width) return null;
+          return { crumbs: box.left, wrap: w.getBoundingClientRect().left + parseFloat(getComputedStyle(w).paddingLeft) };
+        });
+        return seen.at !== null;
+      },
+      { message: `no breadcrumbs on ${what}` },
+    )
+    .toBe(true);
+  return seen.at!;
+}
+
 test.describe("blog — tiles read as links", () => {
   test("a listing tile, an inline product row and an «other articles» tile all show the pointer", async ({ page }) => {
     await page.goto(shopUrl("", "/blog/"));
@@ -56,12 +91,8 @@ for (const lang of LANGS) {
     // repaint replaces <main>, and a node measured across that swap is a
     // detached one (NaN geometry)
     await expect(page.locator(".blog__tile").first()).toBeVisible();
-    const listCrumbs = await page.locator("main .crumbs").boundingBox();
-    const wrapEdge = await page.locator("main .wrap").first().evaluate((el) => {
-      return el.getBoundingClientRect().left + parseFloat(getComputedStyle(el).paddingLeft);
-    });
-    expect(listCrumbs, "no breadcrumbs on the listing").not.toBeNull();
-    expect(Math.abs(listCrumbs!.x - wrapEdge)).toBeLessThanOrEqual(1);
+    const list = await crumbEdges(page, "the listing");
+    expect(Math.abs(list.crumbs - list.wrap)).toBeLessThanOrEqual(1);
 
     await page.locator(`.blog__tile[data-go-blog="${SLUGS[0]}"]`).click();
     await waitForScreen(page, "blogpost");
@@ -69,20 +100,18 @@ for (const lang of LANGS) {
     // thing that can still repaint the page (the list landing after the post)
     await expect(page.locator(".blog__body:not(.blog__sk) h2").first()).toBeVisible();
     await expect(page.locator(".blog__shelf .blog__tile").first()).toBeVisible();
-    const postCrumbs = page.locator("main .crumbs");
     // not squeezed into the reading column any more
-    expect(await postCrumbs.evaluate((el) => !!el.closest(".wrap--mid, .blog__read"))).toBe(false);
-    const box = await postCrumbs.boundingBox();
-    expect(box, "no breadcrumbs on the article").not.toBeNull();
-    expect(Math.abs(box!.x - listCrumbs!.x), "the article's crumbs sit elsewhere than the listing's").toBeLessThanOrEqual(1);
-    expect(Math.abs(box!.x - wrapEdge)).toBeLessThanOrEqual(1);
+    expect(await page.locator("main .crumbs").evaluate((el) => !!el.closest(".wrap--mid, .blog__read"))).toBe(false);
+    const post = await crumbEdges(page, "the article");
+    expect(Math.abs(post.crumbs - list.crumbs), "the article's crumbs sit elsewhere than the listing's").toBeLessThanOrEqual(1);
+    expect(Math.abs(post.crumbs - list.wrap)).toBeLessThanOrEqual(1);
     // the article itself is a centred reading column, the shelves under it are not
     const read = await page.locator(".blog__read").boundingBox();
     const shelf = await page.locator(".blog__shelf").first().boundingBox();
     expect(read).not.toBeNull();
     expect(shelf).not.toBeNull();
     expect(shelf!.width).toBeGreaterThanOrEqual(read!.width - 1);
-    expect(Math.abs(shelf!.x - listCrumbs!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(shelf!.x - list.crumbs)).toBeLessThanOrEqual(1);
   });
 }
 

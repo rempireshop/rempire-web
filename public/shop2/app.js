@@ -4974,8 +4974,6 @@
     loading: false,
     country: "EE",
     countryIso: "",        // the real country behind «Другая страна Европы» (checkout)
-    method: 0,
-    machine: 0,
     promo: "",
     /* The code the SERVER accepted, as a rule rather than a number:
        {code, kind, value, minSubtotal}. The euro figure is recomputed from it
@@ -5237,6 +5235,16 @@
   function stripLangPrefix(p) {
     return String(p || "").replace(/^\/shop2\/(et|en|ru)(?=\/|$)/i, "/shop2");
   }
+  /* decodeURIComponent throws on a malformed escape — «/p/%E0/», a share
+     link a messenger mangled, a crawler's guess — and it used to throw out of
+     the router during boot: nothing was painted over the prerendered page,
+     and every navigation from then on found the static home still lying
+     under the app. The raw text is returned instead: it matches no product,
+     and the screen it routes to answers honestly (home, «Набор не найден»,
+     an empty search). */
+  function safeDecode(s) {
+    try { return decodeURIComponent(s); } catch (e) { return String(s); }
+  }
   /* What the URL itself declares, which is not always what is on screen: an
      unprefixed path stays Russian for the canonical and the hreflang cluster
      even when the visitor's browser has us rendering English. Getting that
@@ -5389,18 +5397,28 @@
   // deliberately pre-discount: the industry norm is that a promo code does
   // not revoke free shipping the cart already earned
   function freeShip() { return cartSum() >= threshold(); }
+  /* The old demo delivery table. The checkout has run on the live rules
+     (SHIP_RULES) and the live parcel-point API for a while now; what is left
+     of SHIP is the row LABELS the account's «Доставка по умолчанию» draws —
+     the prices beside them come from the rules, like everywhere else. */
   function methods() { return SHIP[S.country]; }
   /* Clamp the stored index rather than clamping only on read: the radio
-     markup compares `i === S.method` exactly, so an out-of-range index left
-     every radio unchecked while the summary still billed a method. */
-  function methodIdx() { S.method = Math.min(S.method, methods().length - 1); return S.method; }
+     markup compares `i === S.acctMethod` exactly, so an out-of-range index
+     left every radio unchecked. */
   function acctIdx() { S.acctMethod = Math.min(S.acctMethod, methods().length - 1); return S.acctMethod; }
-  function method() { return methods()[methodIdx()]; }
   /** Delivery price for any method, straight off the rules: carrier, then method. */
   function shipPriceFor(m, carrier) {
     // features: nothing is posted, so nothing is billed — createOrder() prices
     // a digital order's delivery at 0 too, and that is the number charged
     if (m === "digital" || m === "pickup" || freeShip()) return 0;
+    return shipRulePrice(m, carrier);
+  }
+  /* The same number with no basket in it: what a method costs by the rules,
+     whether or not the cart that happens to be open has earned free delivery.
+     The account screen's «Доставка по умолчанию» is a standing preference,
+     not a quote for today's basket, so that is the one that prices it. */
+  function shipRulePrice(m, carrier) {
+    if (m === "digital" || m === "pickup") return 0;
     var byCarrier = SHIP_RULES.carriers && SHIP_RULES.carriers[carrier];
     var v = byCarrier ? (byCarrier[S.country] !== undefined ? byCarrier[S.country] : byCarrier["default"]) : undefined;
     if (v === undefined || v === null) {
@@ -5408,6 +5426,17 @@
       v = table[S.country] !== undefined ? table[S.country] : table["default"];
     }
     return typeof v === "number" && isFinite(v) ? Math.round(v * 100) / 100 : 0;
+  }
+  /* The price beside a row of «Доставка по умолчанию». The row's LABEL still
+     comes from the old SHIP table (that table is all this screen has left of
+     it), but its price must be the one the checkout bills: SHIP is a frozen
+     demo tariff, and against the live rules it promised «Курьер до двери 9 €»
+     where the checkout charged 10,84 € and «Пакомат Omniva 5,50 €» against
+     5,47 €. A shopper who reads a price in their own account is entitled to
+     see it again at the till. */
+  function acctShipPrice(x) {
+    if (x.pickup) return 0;
+    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || "");
   }
   function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
   /* What the applied promo code takes off. The RULE comes from the server
@@ -8909,8 +8938,9 @@
         COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
       "</select></span></label>" +
       '<div class="optlist">' + m.map(function (x, i) {
+        var xp = acctShipPrice(x);
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
-          '<span class="opt__price num">' + (x.p ? eur(x.p) : "Бесплатно") + "</span></label>";
+          '<span class="opt__price num">' + (xp ? eur(xp) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
       (machinesFor(m[ai]).length
         ? '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(machinesFor(m[ai]).length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
@@ -8993,7 +9023,23 @@
         // in the summary — S.ship.name/phone prefill (acctApply, only into
         // still-empty fields) is picked up fresh whenever step 2 actually
         // renders, with no patch needed since the shopper starts on step 1.
-        if (acctApply(j)) { if (S.screen === "checkout") patchSummary(); else render(); }
+        if (acctApply(j)) {
+          if (S.screen === "checkout") {
+            patchSummary();
+            /* Step 1 was painted before the profile arrived, so the address
+               acctApply() just put in S.email is not in the box the shopper is
+               looking at: «Далее» pressed a moment too early answered «Введите
+               e-mail», a moment later it silently went through on a box that
+               looked empty. The box is the truth — what is typed in it stays
+               (and is what the order carries), an empty one takes the account's
+               address. Never a render(): that would rebuild the field. */
+            var emBox = document.querySelector("[data-email]");
+            if (emBox) {
+              if (emBox.value) S.email = emBox.value;
+              else if (S.email && document.activeElement !== emBox) emBox.value = S.email;
+            }
+          } else render();
+        }
       })
       .catch(noop);
   }
@@ -18499,12 +18545,16 @@
        The euro figure that actually counts as revenue is written
        server-side, on the paid transition, in src/lib/payments/apply.ts —
        see db/migrations/080_events.sql for the full split. `t` rides on the
-       redirect from /api/payments/return only when s=paid. */
-    if (s === "paid") {
-      var total = parseFloat(String(q.t || "").replace(",", "."));
-      track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
-    }
-    return {
+       redirect from /api/payments/return only when s=paid.
+
+       That cache only ever held the demo receipt (finishDemo), so on the one
+       path this paragraph is about — a real return from the bank — nothing
+       was cached and every later render() sent «purchase» again: the two
+       boot answers (/api/overrides/, /api/bundles/) alone made it three per
+       paid order, and a language switch on the receipt made a fourth. The
+       receipt is filled in below and kept; go() still drops it when the
+       shopper leaves, so the next one reads its own query. */
+    S.done = {
       status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g),
       /* `o` — the order's id, only on a failed receipt (src/lib/payments/
          receipt.ts): what «Оплатить ещё раз» sends back to re-create the
@@ -18512,6 +18562,11 @@
          bank), so the order is the only thing a second try can be about. */
       order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : ""
     };
+    if (s === "paid") {
+      var total = parseFloat(String(q.t || "").replace(",", "."));
+      track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
+    }
+    return S.done;
   }
   /* features: `g=RMP-ACDE-4679~<token>,…` on the redirect back from the bank
      (src/app/api/payments/return/route.ts). The token is an HMAC of the code
@@ -18791,6 +18846,8 @@
   var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
   var GIFT_DESC = "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
   var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
+  // the sentence screenBrands() opens with, reused as that page's description
+  var BRANDS_DESC = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -18859,7 +18916,18 @@
           d = (pgTitle + " — " + trText(INFO_DESC_TAIL, S.lang, false)).slice(0, 158);
         }
       }
-      else if (S.screen === "brands") t = trText("Бренды", S.lang, false) + " — REMPIRE";
+      /* «Бренды» is the one shopper-facing page tools/prerender-shop2.mjs
+         never writes, so there is no static head under it: every language
+         lands on the Russian shell (the fallback rewrite in next.config.ts
+         sends /shop2/{et,en}/brands/ at /shop2/index.html), and with no
+         description set here the ET and EN pages carried the Russian home
+         one — the shop's own summary, in the wrong language, in the tab
+         preview and in every link card. The page's own opening sentence is
+         the description, and it is already in the dictionary. */
+      else if (S.screen === "brands") {
+        t = trText("Бренды", S.lang, false) + " — REMPIRE";
+        d = trText(BRANDS_DESC, S.lang, false).slice(0, 158);
+      }
       // features
       /* Sets off: the tab must not advertise them either. Both screens are
          showing setsOffHTML() and say so in the title; the description stays
@@ -19333,7 +19401,11 @@
       var row = d.querySelector('[data-cline="' + i + '"]');
       if (!row) return;
       row.querySelector("[data-qtyval]").textContent = l.qty;
-      row.querySelector("[data-linepr]").textContent = eur(sizePrice(byId(l.id), l.size || 0) * l.qty);
+      /* lineUnit(), the same price cartBody() drew the line with: a set, a
+         gift card and a salon-priced line all have a unit of their own, and
+         sizePrice(byId(l.id)) priced a «bundle:…» line at the first catalogue
+         product's price — «×2 = 18 €» on a 34,90 € set — until the next rebuild. */
+      row.querySelector("[data-linepr]").textContent = eur(lineUnit(l) * l.qty);
       var minus = row.querySelector('[data-d="-1"]');
       if (minus) {
         if (l.qty <= 1) minus.setAttribute("aria-disabled", "true");
@@ -19374,6 +19446,26 @@
      on is not a click — so the shopper had to press twice. Only two things
      ever change here, so change those and leave the rest of the DOM, and the
      button being pressed, where they are. */
+  /* A note that goes away on blur keeps its box. The blur is usually the
+     mousedown of the very button being pressed, and removing the note moved
+     everything below it up before the mouseup — «Получить код» on the account
+     screen climbed 29 px out from under the finger and the first tap did
+     nothing. So the note is blanked (invisible, no role, hidden from readers)
+     and the next render() rebuilds the form without it. The two notes are
+     written in Russian and translated here: they used to skip the dictionary,
+     so a keyboard user tabbing through an Estonian checkout read Russian. */
+  function noteHide(el) {
+    el.style.visibility = "hidden";
+    el.removeAttribute("role");
+    el.setAttribute("aria-hidden", "true");
+  }
+  function noteShow(el, html) {
+    el.innerHTML = html;
+    el.style.visibility = "";
+    el.setAttribute("role", "alert");
+    el.removeAttribute("aria-hidden");
+    translateTree(el);
+  }
   function patchEmail(input) {
     // the account screen's plain e-mail row carries no aria-invalid and takes
     // no note; that attribute is what marks the two validated fields
@@ -19388,8 +19480,13 @@
         : "";
     var next = field.nextElementSibling;
     var isNote = next && (next.classList.contains("err") || next.classList.contains("hint"));
-    if (isNote) { if (note) next.outerHTML = note; else next.remove(); }
-    else if (note) field.insertAdjacentHTML("afterend", note);
+    if (isNote) {
+      if (note) { next.outerHTML = note; translateTree(field.nextElementSibling); }
+      else noteHide(next);
+    } else if (note) {
+      field.insertAdjacentHTML("afterend", note);
+      translateTree(field.nextElementSibling);
+    }
   }
 
   /* Same rule as the e-mail field: change the two things that change and
@@ -19400,9 +19497,12 @@
     input.setAttribute("aria-invalid", String(bad));
     var err = input.parentNode.querySelector(".err");
     if (bad) {
-      if (err) err.innerHTML = shipMsg(key);
-      else input.insertAdjacentHTML("afterend", '<div class="err" role="alert">' + shipMsg(key) + "</div>");
-    } else if (err) err.remove();
+      if (err) noteShow(err, shipMsg(key));
+      else {
+        input.insertAdjacentHTML("afterend", '<div class="err" role="alert">' + shipMsg(key) + "</div>");
+        translateTree(input.parentNode.querySelector(".err"));
+      }
+    } else if (err) noteHide(err);
   }
 
   /* The checkout screen's async probes — shipping rules, one loadPointsFor()
@@ -19466,7 +19566,9 @@
     // The drawer footer must update on every path, including the ones that
     // fall through to a full render — otherwise it freezes at a stale count.
     var showBtn = ovl.querySelector("[data-showbtn]");
-    if (showBtn) showBtn.textContent = showLabel();
+    // through the dictionary: the drawer was built translated, and a bare
+    // showLabel() put «Показать 2 товара» back on an Estonian catalogue
+    if (showBtn) showBtn.textContent = trText(showLabel(), S.lang);
 
     var list = filtered();
     var grid = S.screen === "catalog" ? document.getElementById("catgrid") : null;
@@ -19817,9 +19919,6 @@
       s.setAttribute("data-on", i === S.slide ? "1" : "0");
       s.setAttribute("aria-hidden", String(i !== S.slide));
     });
-    document.querySelectorAll(".hero__dots button").forEach(function (b, i) {
-      b.setAttribute("aria-current", String(i === S.slide));
-    });
     return true;
   }
   function setSlide(n, manual) {
@@ -19871,7 +19970,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-admcustdemote]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -19902,10 +20001,6 @@
       S.videoOn = false; S.revOpen = false; S.revState = ""; S.revAccOpen = false;
       go("product"); return;
     }
-    /* The card's own size <select>: the change listener below owns it. This
-       branch only stops the click here — without it the select is in the
-       delegate's selector list for nothing and the event carries on down. */
-    if (d.cardsize) { e.stopPropagation(); return; }
     if (d.add) { e.stopPropagation(); addToCart(d.add); return; }
     if (d.buynow) {
       if (byId(d.buynow).stock === "out") { toast("Товара нет в наличии"); return; }
@@ -19963,7 +20058,6 @@
     }
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
-    if (d.dot !== undefined) { setSlide(Number(d.dot), true); return; }
     if (d.cardsizeopen !== undefined) {
       if (S.cardPop === d.cardsizeopen) closeCardPop(true); else openCardPop(d.cardsizeopen);
       return;
@@ -20022,10 +20116,25 @@
         if (S.coStep === 1) { S.emailTouched = true; if (emailBad()) { return failStep(1); } }
         if (S.coStep === 2) {
           S.shipTouched = true;
-          if (shipMissing().length || pointMissing()) { return failStep(2); }
+          /* features: on an all-gift-card order the recipient's address is
+             the step's one required field once «отправить мне» is off — and a
+             typo in it is a typo either way. payNow() already refuses it; the
+             step button let it through, so the shopper reached «Оплата» only
+             to be sent back here by the pay button. Same check, same place. */
+          S.giftToTouched = true;
+          if (shipMissing().length || pointMissing() || (isDigital() && giftToEmailBad())) { return failStep(2); }
         }
       }
-      S.coStep = n; render(); return;
+      /* Same rule as every other checkout control: the render that opens the
+         step destroys the button that was pressed, so put focus on its
+         replacement — the heading of the step now open, which announces
+         itself and its state. Without it a keyboard or screen-reader shopper
+         was dropped on <body> by «Далее» and had to tab past the whole
+         announce bar and header again, three times, to finish an order. The
+         refusal path already did this (failStep → the first bad field). */
+      S.coStep = n; render();
+      refocus('.costep__head[data-step="' + n + '"]');
+      return;
     }
     /* ---------- delivery picker ---------- */
     if (d.dm) {
@@ -20054,7 +20163,6 @@
     }
     // checkout selections re-render the step, which destroys the clicked
     // control — put keyboard focus back on its replacement
-    if (d.method !== undefined) { S.method = Number(d.method); S.machine = 0; render(); refocus('[data-method="' + d.method + '"]'); return; }
     if (d.paym !== undefined) { S.pay = Number(d.paym); render(); refocus('[data-paym="' + d.paym + '"]'); return; }
     if (d.bank !== undefined) { S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return; }
     // machine index must reset too — carriers have different-length lists, so
@@ -22011,7 +22119,7 @@
     var t = e.target;
     if (t.matches("[data-countryiso]")) { S.countryIso = t.value; render(); }
     else if (t.matches("[data-country]")) {
-      S.country = t.value; S.method = 0; S.machine = 0;
+      S.country = t.value;
       // another country is another carrier and another set of machines
       S.ship.carrier = ""; S.ship.point = null; POINTS.q = "";
       if (isParcel()) loadPoints();
@@ -22045,7 +22153,6 @@
       if (bsIt) bsIt.variant = Number(t.value) || 0;
       render();
     }
-    else if (t.matches("[data-machine]")) { S.machine = t.selectedIndex; }
     else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
     // «Главный баннер»: the link target, the picture URL and the timing —
     // on change, so a half-typed URL never becomes the banner's picture
@@ -22309,7 +22416,7 @@
     var p = stripLangPrefix(location.pathname).replace(/\/+$/, "");
     var m;
     if ((m = p.match(/\/shop2\/p\/([^/]+)$/))) {
-      var id = decodeURIComponent(m[1]), found = null;
+      var id = safeDecode(m[1]), found = null;
       CATALOGUE.forEach(function (x) { if (x.id === id) found = x; });
       if (found) {
         S.productId = found.id;
@@ -22324,13 +22431,13 @@
       S.brand = ""; S.cat = m[1]; S.shown = 12; S.screen = "catalog";
       return true;
     }
-    if ((m = p.match(/\/shop2\/b\/([^/]+)$/)) && BRAND_BY_SLUG[decodeURIComponent(m[1])]) {
-      S.brand = BRAND_BY_SLUG[decodeURIComponent(m[1])]; S.shown = 12; S.screen = "catalog";
+    if ((m = p.match(/\/shop2\/b\/([^/]+)$/)) && BRAND_BY_SLUG[safeDecode(m[1])]) {
+      S.brand = BRAND_BY_SLUG[safeDecode(m[1])]; S.shown = 12; S.screen = "catalog";
       return true;
     }
     if (/\/shop2\/search$/.test(p)) {
       var q = location.search.match(/[?&]q=([^&]*)/);
-      S.query = q ? decodeURIComponent(q[1].replace(/\+/g, " ")) : "";
+      S.query = q ? safeDecode(q[1].replace(/\+/g, " ")) : "";
       S.screen = "search";
       return true;
     }
@@ -22347,7 +22454,7 @@
        and screenBundle() answers honestly: the set, «Наборы сейчас
        недоступны», or «Набор не найден» — never a 404, never a bounce home. */
     if ((m = p.match(/\/shop2\/set\/([^/]+)$/))) {
-      S.bundleId = decodeURIComponent(m[1]); S.screen = "bundle"; return true;
+      S.bundleId = safeDecode(m[1]); S.screen = "bundle"; return true;
     }
     if (/\/shop2\/sets$/.test(p)) { S.screen = "bundles"; return true; }
     if (/\/shop2\/gift$/.test(p)) { S.screen = "gift"; return true; }
@@ -22356,7 +22463,7 @@
        — the slug is accepted optimistically and screenBlogPost() resolves it
        (found / not found / still loading) once its fetch answers. */
     if ((m = p.match(/\/shop2\/blog\/([^/]+)$/))) {
-      S.blogSlug = decodeURIComponent(m[1]); S.screen = "blogpost"; return true;
+      S.blogSlug = safeDecode(m[1]); S.screen = "blogpost"; return true;
     }
     if (/\/shop2\/blog$/.test(p)) { S.screen = "blog"; return true; }
     /* scanner app: /shop2/scan/ is the admin's third installable icon — the
