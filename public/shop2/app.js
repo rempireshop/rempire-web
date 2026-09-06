@@ -1456,7 +1456,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "Nuppudel olevad hinnad lähevad tšekile. Salongi allahindlus märgitakse ostukorvis protsendina.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Praegu tühi — leidke toode vasakult või skaneerige triipkood.",
       "Почта клиента": "Kliendi e-post",
-      "Покупатель не обязателен. С почтой клиент получит чек письмом.": "Ostja pole kohustuslik. E-postiga saab klient tšeki kirjaga.",
+      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
+        "Ostja pole kohustuslik. Tšeki avab tellimuses link «Tšekk ↗» — kirjaga seda ei saadeta.",
       "Ничего не найдено": "Midagi ei leitud",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -1492,7 +1493,7 @@
       "когда вы нажмёте «Отправлен»": "kui vajutad «Teele pandud»",
       "тем, кто оставил почту": "neile, kes jätsid e-posti",
       "через 3 часа": "3 tunni pärast",
-      "за 3 дня до даты": "3 päeva enne kuupäeva",
+      "в день рождения": "sünnipäeval",
       "когда покупатель входит в кабинет": "kui klient siseneb oma kontole",
       "Выключить письмо": "Lülita kiri välja",
       "Включить письмо": "Lülita kiri sisse",
@@ -3192,7 +3193,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "The prices on the chips are the ones that reach the receipt. The salon discount is set as a percentage in the cart.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Empty for now — find a product on the left or scan a barcode.",
       "Почта клиента": "Customer e-mail",
-      "Покупатель не обязателен. С почтой клиент получит чек письмом.": "The customer is optional. With an e-mail the customer gets the receipt by letter.",
+      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
+        "The customer is optional. The receipt opens from the “Receipt ↗” link on the order — it is not e-mailed.",
       "Ничего не найдено": "Nothing found",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -3228,7 +3230,7 @@
       "когда вы нажмёте «Отправлен»": "when you press “Shipped”",
       "тем, кто оставил почту": "to everyone who left an e-mail",
       "через 3 часа": "after 3 hours",
-      "за 3 дня до даты": "3 days before the date",
+      "в день рождения": "on the birthday",
       "когда покупатель входит в кабинет": "when the customer signs in",
       "Выключить письмо": "Switch the letter off",
       "Включить письмо": "Switch the letter on",
@@ -3630,9 +3632,13 @@
     [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером\.$/,
       { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
         EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number." }],
-    [/^([^\n]+) · ([^\n]+)\nДеньги вернутся клиенту, письмо уйдёт автоматически\.$/,
-      { ET: "$1 · $2\nRaha läheb kliendile tagasi, kiri saadetakse automaatselt.",
-        EN: "$1 · $2\nThe money goes back to the customer and the letter is sent automatically." }],
+    /* «Отменить заказ» — paid, then not yet paid */
+    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «отменён», товары вернутся на склад\. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда\. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту»\.$/,
+      { ET: "$1 · $2\nTellimus saab staatuse «tühistatud», kaubad lähevad lattu tagasi. Raha kantakse kliendile eraldi — pangas või Montonios, mitte siit. Kirja ei saadeta: kirjutage kliendile ise nupuga «Kirjuta kliendile».",
+        EN: "$1 · $2\nThe order gets the status “cancelled” and the goods go back to stock. The money is returned separately — in the bank or in Montonio, not from here. No letter is sent: write to the customer yourself with “Write to the customer”." }],
+    [/^([^\n]+) · ([^\n]+)\nЗаказ ещё не оплачен — возвращать нечего\. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту»\.$/,
+      { ET: "$1 · $2\nTellimus ei ole veel makstud — tagastada pole midagi. Kirja ei saadeta: kirjutage kliendile ise nupuga «Kirjuta kliendile».",
+        EN: "$1 · $2\nThe order has not been paid — there is nothing to return. No letter is sent: write to the customer yourself with “Write to the customer”." }],
     /* «Изменить статус вручную» — the confirm card's two-line text before a
        refund, and before «оплачен» by hand (money already in / not yet) */
     [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «возврат», товары вернутся на склад\. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда\.$/,
@@ -10285,8 +10291,20 @@
     return v.number + " · " + v.who + "\n" + v.ship +
       "\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера.";
   }
+  /* «Отменить заказ» — what actually happens, not what would be nice. The
+     server (setOrderStatus in src/lib/orders.ts) moves the status and puts a
+     counted shelf back; it sends no letter and it refunds nothing — there is
+     no cancellation template in src/emails/ and no call to the provider. The
+     card used to promise both, so the owner closed it believing the customer
+     had been told and paid back. Two straight chains, same reason as
+     admShipConfirmText(): the i18n check joins each into one text node. */
   function admCancelConfirmText(v) {
-    return v.number + " · " + v.who + "\nДеньги вернутся клиенту, письмо уйдёт автоматически.";
+    if (v.unpaid) {
+      return v.number + " · " + v.who +
+        "\nЗаказ ещё не оплачен — возвращать нечего. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту».";
+    }
+    return v.number + " · " + v.who +
+      "\nЗаказ получит статус «отменён», товары вернутся на склад. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту».";
   }
   /* «Изменить статус вручную» — the two statuses the card's own steps never
      reach. «возврат» is money going back to the customer and «оплачен» by
@@ -11131,7 +11149,10 @@
     ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
     ["back-in-stock", "Товар снова в наличии", "тем, кто оставил почту", "backstock"],
     ["abandoned-cart", "Брошенная корзина", "через 3 часа", "abandoned"],
-    ["birthday", "Скидка ко дню рождения", "за 3 дня до даты", "birthday"],
+    // «в день рождения», because that is what runBirthdays() does: it matches
+    // today's month and day (src/lib/flows.ts). The row used to promise three
+    // days of warning the sender never gave.
+    ["birthday", "Скидка ко дню рождения", "в день рождения", "birthday"],
     ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
     ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
   ];
@@ -15510,7 +15531,10 @@
             '<label class="adm-field">Почта клиента<input class="adm-input adm-input--row" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
             '<label class="adm-field">Телефон<input class="adm-input adm-input--row" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
           "</div>" +
-          '<p class="adm-hint">Покупатель не обязателен. С почтой клиент получит чек письмом.</p>' +
+          /* The e-mail box is worth filling in — it ties the sale to a customer
+             card — but nothing is posted from here: POST /api/admin/pos-orders/
+             creates, pays and stocks the order and sends no letter at all. */
+          '<p class="adm-hint">Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.</p>' +
           (S.posErr ? '<p class="adm-err">' + esc(S.posErr) + "</p>" : "") +
           '<div class="adm-pospay">' +
             '<button class="adm-btn adm-btn--ghost adm-btn--pay" data-possend="cash"' +
@@ -15667,7 +15691,11 @@
     // answers them (`custom`) — the offline copy, merged into CATALOGUE by
     // adoptCustom() before the first render
     custom: [],
-    flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
+    /* All three off, exactly like FLOW_DEFAULTS in src/lib/flows.ts. «Товар
+       снова в наличии» used to start on here and in GET /api/overrides while
+       the sender read it as off, so the switch said «включено» and no letter
+       ever left — the owner had to toggle it off and on to turn it on. */
+    flows: { abandoned: false, birthday: false, backstock: false }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
