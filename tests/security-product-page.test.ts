@@ -279,9 +279,16 @@ describe("the security headers over /shop2/*", () => {
     const inlineScript = rules
       .filter((r) => (directives(r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "")["script-src"] ?? []).includes("'unsafe-inline'"))
       .map((r) => r.source);
-    expect(inlineScript).toEqual(["/:path*", "/api/admin/mail/preview/:path*"]);
+    expect(inlineScript).toEqual(["/:path*", "/prototypes/:path*", "/api/admin/mail/preview/:path*"]);
+    // 'unsafe-eval' exists for exactly one path: the design archive under
+    // /prototypes/, whose pages compile their own JSX in the browser. Nothing
+    // the shop, the admin or the API serve may ever carry it.
     for (const r of rules) {
       const csp = r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "";
+      if (r.source === "/prototypes/:path*") {
+        expect(directives(csp)["script-src"]).toEqual(["'self'", "'unsafe-inline'", "'unsafe-eval'"]);
+        continue;
+      }
       expect(csp, r.source).not.toMatch(/unsafe-eval|unsafe-hashes|strict-dynamic/);
     }
   });

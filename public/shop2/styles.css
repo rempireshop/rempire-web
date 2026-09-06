@@ -457,14 +457,22 @@ body:has(.stickybar) .ftr {
    trigger is text with a chevron — no border, no background — and its
    listbox opens under the row, spanning the card. */
 .card__name { margin: 4px 0 9px; }
-/* No hairline above the price row (06.09, Renat): with nothing framing the
-   cards, a line across the card read as the divider between products, so the
-   price and «В корзину» looked like the NEXT product's. The row sits right
-   under its own name and sizes; the grid gap alone separates products. */
+/* The price row is a plinth (06.09, Renat's note): with nothing framing the
+   cards, a bare row — and before it a hairline — read as belonging to the
+   NEXT product, the «В корзину» at the right edge most of all. The row now
+   sits on a shell-tinted strip exactly as wide as the card: a closed shape
+   under the product's own photo and name (Gestalt: common region), so the
+   price, the size and the button cannot be read as the neighbour's. Still
+   one row, still no box around the card; the strip is the only surface, and
+   it is the same tint the announcement strip and the panels use. 36 px tall,
+   which also makes the tap area honest on a phone. */
 .card__foot {
   position: relative; display: flex; align-items: center; gap: 6px;
-  margin-top: auto; padding-top: 8px; min-height: 30px; white-space: nowrap;
+  margin-top: auto; min-height: 36px; padding: 0 10px; box-sizing: border-box;
+  background: var(--shell); white-space: nowrap;
 }
+.card:hover .card__foot, .card:focus-within .card__foot { background: var(--shell-dark); }
+@media (max-width: 480px) { .card__foot { padding: 0 8px; } }
 .card__foot > * { flex: none; }
 .card__sp { flex: 1 1 0 !important; min-width: 0; }
 .card__price { font-size: 13px; font-weight: 600; }

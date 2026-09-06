@@ -254,6 +254,20 @@ const nextConfig: NextConfig = {
           ...baseSecurityHeaders(),
         ],
       },
+      /* The design archive — the eight directions, the motion study, the
+         Opus page — is written in JSX that Babel compiles in the browser and
+         runs through new Function, so it is the one place that needs
+         'unsafe-eval'. It renders only its own files (React and Babel are
+         vendored under /vendor/react/ — the CDN they used to load from is
+         not on the policy), takes no input, and is noindex; the shop, the
+         admin and the API keep the strict policy above. */
+      {
+        source: "/prototypes/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline' 'unsafe-eval'") },
+          ...baseSecurityHeaders(),
+        ],
+      },
       /* Keep search engines out of everything that is not the shop's own
          domain. This used to be a global `X-Robots-Tag: noindex, nofollow,
          noarchive` on `/(.*)` in vercel.json, from the days when the whole
