@@ -162,9 +162,12 @@ template copy):
   with no markup and the legal line; a subject in every language;
 - no Cyrillic anywhere in an ET/EN letter — subject, text or HTML;
 - `color-scheme` / `supported-color-schemes` meta, the dark block, and a logo
-  that survives a dark card: `public/brand/tower-email.png` is the tower on
-  an **opaque white tile** (78×112, drawn at 39×56) — a transparent PNG of a
-  dark tower vanished the moment Apple Mail went dark;
+  that survives a dark card: two transparent PNGs of the tower alone —
+  `public/brand/tower-email-ink.png` on the light card and
+  `tower-email-white.png` swapped in by the same dark-mode hooks the palette
+  uses (`prefers-color-scheme: dark` and `[data-ogsc]`). No tile: the owner
+  asked for a logo without a box; a client that darkens the card while
+  ignoring both hooks keeps the ink tower;
 - buttons are the hybrid kind: `display:block` padding on the `<a>` (46 px of
   clickable face) plus `mso-padding-alt` on the cell for Outlook, and full
   width below 620 px so a long Estonian label stays on one line;

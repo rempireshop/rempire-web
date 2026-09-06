@@ -69,7 +69,7 @@ describe("all templates render in all three languages", () => {
         expect(mail.text).toContain("Rempire Store OÜ, Tallinn");
 
         // assets and links are absolute, built from PUBLIC_BASE_URL
-        expect(mail.html).toContain(`${BASE}/brand/tower-email.png`);
+        expect(mail.html).toContain(`${BASE}/brand/tower-email-ink.png`);
         expect(mail.html).not.toMatch(/(src|href)="\//);
 
         // dark-mode-safe: the overrides are present and the body has a ground

@@ -16,9 +16,9 @@
  *    client that force-inverts the letter can never land dark-on-dark;
  *  - absolute URLs built from PUBLIC_BASE_URL — a relative src is a broken
  *    image in every mail client there is;
- *  - the logo is the tower on an OPAQUE white tile (public/brand/
- *    tower-email.png, 78×112 for a 39×56 slot): a dark-mode client paints
- *    the card near-black and a transparent PNG of a dark tower vanishes;
+ *  - the logo is the tower alone on a transparent ground, twice: ink for the
+ *    light card, white for the dark one, swapped by the same dark-mode hooks
+ *    the palette uses (no tile — the owner asked for a logo without a box);
  *  - buttons are the hybrid kind: padding on the <a> (44 px+ of clickable
  *    face everywhere that honours it) and mso-padding-alt on the cell for
  *    Outlook, which ignores padding on an inline element;
@@ -325,6 +325,9 @@ function darkCss(): string {
     [".em-link", `color:${D.muted} !important;`],
     // the boxed code panel keeps its 2px frame visible on a dark card
     [".em-box", `border-color:${D.ink} !important; background-color:${D.card} !important;`],
+    // the white tower replaces the ink one on a dark card
+    [".em-logo-light", "display:none !important;"],
+    [".em-logo-dark", "display:block !important;"],
   ];
   const body = rules.map(([sel, css]) => `${sel}{${css}}`).join("\n    ");
   const ogsc = rules
@@ -347,7 +350,13 @@ export interface ShellInput {
 
 export function shell(input: ShellInput): string {
   const { lang, title, preheader, body, footerNote } = input;
-  const logo = assetUrl("/brand/tower-email.png");
+  /* Two towers, no tile: the ink one on the light card, the white one when
+     the client shows the letter dark (the same media query and [data-ogsc]
+     hook the palette below uses). A client that darkens the card without
+     honouring either keeps the ink tower — the one case the old white tile
+     was guarding against; the owner would rather have no box. */
+  const logo = assetUrl("/brand/tower-email-ink.png");
+  const logoDark = assetUrl("/brand/tower-email-white.png");
   const site = baseUrl();
 
   return `<!DOCTYPE html>
@@ -386,7 +395,8 @@ ${darkCss()}</style>
 
         <tr>
           <td align="center" class="em-card em-hr" style="padding:30px 40px; border-bottom:1px solid ${C.line}; background-color:${C.card};">
-            <img src="${esc(logo)}" width="39" height="56" alt="Rempire" style="display:block; margin:0 auto 10px auto; border:0; outline:none;">
+            <img src="${esc(logo)}" width="39" height="56" alt="Rempire" class="em-logo-light" style="display:block; margin:0 auto 10px auto; border:0; outline:none;">
+            <!--[if !mso]><!--><img src="${esc(logoDark)}" width="39" height="56" alt="Rempire" class="em-logo-dark" style="display:none; margin:0 auto 10px auto; border:0; outline:none; mso-hide:all;"><!--<![endif]-->
             <a href="${esc(site)}/" class="em-ink" style="font-family:${FONT_HEAD}; font-size:20px; font-weight:bold; letter-spacing:8px; text-transform:uppercase; color:${C.ink}; text-decoration:none;">REMPIRE</a>
           </td>
         </tr>

@@ -544,7 +544,7 @@ catch { console.warn("! sharp did not load — no OG cards generated this run");
 let cardsMade = 0;
 
 /* currentColor rasterises as black; the brand ink is #1c1a00. The vector is
-   the source rather than brand/tower-email.png, which is 78×112 (the tower on an opaque white tile, for dark-mode mail clients) and would be
+   the source rather than brand/tower-email-ink.png, which is 72×112 (the tower alone, for the letters) and would be
    a smear at card size. */
 async function towerPng(height) {
   const svg = (await readFile(path.join(PUB, "brand", "rempire-tower.svg"), "utf8"))

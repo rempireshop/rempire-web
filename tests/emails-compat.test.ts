@@ -268,20 +268,44 @@ describe("colour scheme: declared for light and dark, with a logo that survives 
     expect(html).toContain("[data-ogsc]");
     // the body has its own ground, so a force-inverting client never lands on transparent
     expect(html).toMatch(/<body class="em-bg" style="[^"]*background-color:#[0-9a-f]{6}/i);
-    const logo = tags(html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/tower-email.png"));
-    expect(logo, "the header logo is /brand/tower-email.png").toBeTruthy();
+    /* Two towers, no tile: the ink one shows on the light card, the white one
+       takes over under the same dark-mode hooks the palette uses — so the
+       logo never sits in a box and never vanishes on a dark card either. */
+    const light = tags(html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/tower-email-ink.png"));
+    const dark = tags(html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/tower-email-white.png"));
+    expect(light, "the light-card logo is /brand/tower-email-ink.png").toBeTruthy();
+    expect(dark, "the dark-card logo is /brand/tower-email-white.png").toBeTruthy();
+    expect(attr(light!, "class")).toContain("em-logo-light");
+    expect(attr(dark!, "class")).toContain("em-logo-dark");
+    expect(attr(dark!, "style"), "the white tower is hidden until the card goes dark").toMatch(/display\s*:\s*none/);
+    expect(attr(dark!, "style"), "Outlook must not draw the hidden one").toContain("mso-hide:all");
+    const css = allCss(html);
+    expect(css).toMatch(/\.em-logo-light\{display:none !important;\}/);
+    expect(css).toMatch(/\.em-logo-dark\{display:block !important;\}/);
+    expect(css).toMatch(/\[data-ogsc\] \.em-logo-dark\{display:block !important;\}/);
   });
 
-  it("the logo file is the tower on an opaque white tile, drawn at its own proportions", async () => {
-    const file = path.join(process.cwd(), "public", "brand", "tower-email.png");
-    const meta = await sharp(readFileSync(file)).metadata();
-    expect(meta.format).toBe("png");
-    expect(meta.hasAlpha, "a transparent tower vanishes on a dark card").toBe(false);
-    const { data } = await sharp(file).raw().toBuffer({ resolveWithObject: true });
-    expect([data[0], data[1], data[2]], "the top-left pixel is white").toEqual([255, 255, 255]);
-    const logo = tags(samples()[0].html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/tower-email.png"))!;
-    const ratio = Number(attr(logo, "width")) / Number(attr(logo, "height"));
-    expect(Math.abs(ratio - meta.width! / meta.height!)).toBeLessThan(0.01);
+  it("both logo files are the tower alone on a transparent ground, drawn at their own proportions", async () => {
+    for (const [name, ink] of [["tower-email-ink.png", true], ["tower-email-white.png", false]] as const) {
+      const file = path.join(process.cwd(), "public", "brand", name);
+      const meta = await sharp(readFileSync(file)).metadata();
+      expect(meta.format, name).toBe("png");
+      expect(meta.hasAlpha, `${name}: the tower must sit on a transparent ground, not a tile`).toBe(true);
+      const { data, info } = await sharp(file).raw().toBuffer({ resolveWithObject: true });
+      expect(data[3], `${name}: the top-left pixel is transparent`).toBe(0);
+      // the tower's own pixels are ink on one file and white on the other
+      let dark = 0, bright = 0;
+      for (let i = 0; i < data.length; i += info.channels) {
+        if (data[i + 3] < 200) continue;
+        if (data[i] < 80 && data[i + 1] < 80 && data[i + 2] < 80) dark++;
+        else if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) bright++;
+      }
+      expect(ink ? dark : bright, `${name}: the tower is the wrong colour`).toBeGreaterThan(500);
+      expect(ink ? bright : dark, `${name}: the tower is the wrong colour`).toBe(0);
+      const logo = tags(samples()[0].html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/" + name))!;
+      const ratio = Number(attr(logo, "width")) / Number(attr(logo, "height"));
+      expect(Math.abs(ratio - meta.width! / meta.height!), `${name}: drawn at its own proportions`).toBeLessThan(0.06);
+    }
   });
 });
 

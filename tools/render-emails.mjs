@@ -69,7 +69,8 @@ console.log(`\n${index.length} letters → ${OUT}`);
 
 if (PNG) {
   const { chromium } = await import("playwright");
-  const logo = readFileSync(path.join(ROOT, "public", "brand", "tower-email.png"));
+  const logoInk = readFileSync(path.join(ROOT, "public", "brand", "tower-email-ink.png"));
+  const logoWhite = readFileSync(path.join(ROOT, "public", "brand", "tower-email-white.png"));
   const browser = await chromium.launch();
   const shots = [
     { width: 600, scheme: "light", tag: "600" },
@@ -84,7 +85,8 @@ if (PNG) {
     });
     await ctx.route("**/*", (route) => {
       const url = route.request().url();
-      if (url.endsWith("/brand/tower-email.png")) return route.fulfill({ body: logo, contentType: "image/png" });
+      if (url.endsWith("/brand/tower-email-ink.png")) return route.fulfill({ body: logoInk, contentType: "image/png" });
+      if (url.endsWith("/brand/tower-email-white.png")) return route.fulfill({ body: logoWhite, contentType: "image/png" });
       return route.abort();
     });
     const page = await ctx.newPage();
