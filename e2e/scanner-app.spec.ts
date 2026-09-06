@@ -46,6 +46,14 @@ async function stockQty(page: Page, productId: string, variant: string): Promise
   return row && row.tracked ? row.qty : null;
 }
 
+/** Takes the code off a size — the state a fresh database has. A size that
+ *  already carries a code asks for a second tap before it is replaced
+ *  (scanAssignResultsHTML), so a spec that binds must start from none. */
+async function unbind(page: Page, productId: string, variant: string): Promise<void> {
+  const res = await page.request.put("/api/admin/inventory/", { data: { productId, variant, ean: null } });
+  expect(res.ok(), `could not clear the code on ${productId} ${variant}`).toBe(true);
+}
+
 test.describe("scanner app", () => {
   test("unknown code → bound to a product and size → scanned again → +3 приход lands in «Склад»", async ({ page }) => {
     test.setTimeout(120_000);
@@ -56,6 +64,7 @@ test.describe("scanner app", () => {
     const ean = `29${Date.now().toString().slice(-10)}`;
 
     await openAdmin(page);
+    await unbind(page, PRODUCT_2.id, VARIANT);
     await page.goto(shopUrl("", "/scan/"));
     await waitForScreen(page, "scan");
 
@@ -154,12 +163,13 @@ test.describe("scanner app", () => {
     const variant = "150 мл";   // PRODUCT_2's other size — the first test owns «40 мл»
 
     await openAdmin(page);
+    await unbind(page, PRODUCT_2.id, variant);
     await tab(page, "stock");
     await expect(page.locator("#stocklist")).toBeVisible();
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
     const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${variant}"]`).locator("xpath=..");
     await expect(row).toBeVisible();
-    await expect(row).not.toContainText(ean);
+    await expect(row).toContainText("штрихкод не привязан");
     const before = (await stockQty(page, PRODUCT_2.id, variant)) ?? 0;
 
     await page.locator("[data-scanopen]").first().click();
@@ -274,5 +284,63 @@ test.describe("scanner app", () => {
     await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
     w.serverErrors.length = 0;   // the mocked 503 above, forgiven
     await assertClean(page, w, "lookup after a failure");
+  });
+
+  /* Dim scanned a 300 ml bottle, typed what was on it and got nowhere: the
+     search was one substring over «brand name id», so «kevin murphy» (no
+     dot), «un tangled 150», «300 ml» (Latin) or «спрей 150» found nothing —
+     and a size that already had a code took a second one silently, the old
+     binding gone with no warning. */
+  test("the search takes words in any order, dots or not, «ml» for «мл» and a size; a size with a code asks twice", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const codeA = `23${Date.now().toString().slice(-10)}`;
+    const codeB = `22${Date.now().toString().slice(-10)}`;
+    const variant = "150 мл";
+
+    await openAdmin(page);
+    // «150 мл» already carries a code — bound the way the «Править» form does
+    const put = await page.request.put("/api/admin/inventory/", { data: { productId: PRODUCT_2.id, variant, ean: codeA } });
+    expect(put.ok(), "could not bind the first code").toBe(true);
+
+    await page.goto(shopUrl("", "/scan/"));
+    await waitForScreen(page, "scan");
+    await page.locator("[data-scanmanual]").fill(codeB);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    const search = page.locator("[data-scanassignq]");
+    const cands = page.locator(".scan__cand");
+
+    // words in any order, the brand without its dot, the size in Latin
+    await search.fill("murphy kevin tangled 150 ml");
+    await expect(cands).toHaveCount(1);
+    await expect(cands.first()).toHaveAttribute("data-scanbind", `${PRODUCT_2.id}|${variant}`);
+    // …and that row says it already has a code, by its last digits
+    await expect(cands.first()).toContainText(`есть код ···${codeA.slice(-4)}`);
+
+    // the size in Cyrillic, the Russian half of the name («— спрей для волос»)
+    await search.fill("un tangled спрей 150 мл");
+    await expect(cands).toHaveCount(1);
+    await expect(cands.first()).toHaveAttribute("data-scanbind", `${PRODUCT_2.id}|${variant}`);
+    // the name without its dot, no size: every size of the product
+    await search.fill("un tangled");
+    await expect(page.locator(`[data-scanbind="${PRODUCT_2.id}|40 мл"]`)).toBeVisible();
+    await expect(page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`)).toBeVisible();
+    await assertClean(page, w, "candidate search");
+
+    // a size that already has a code: the first tap asks, the second binds
+    const row = page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`);
+    await row.click();
+    await expect(row).toContainText("Заменить код?");
+    await expect(page.locator("#scanpanel"), "one tap replaced a bound code").toContainText("К какому товару?");
+    await row.click();
+    expect(await toastText(page)).toMatch(/привязан/i);
+    await clearToast(page);
+    await expect(page.locator("#scanpanel")).toContainText("Un.Tangled");
+    await expect(page.locator("#scanpanel")).toContainText(variant);
+    // the old code is gone, the new one is the row's
+    const res = await page.request.get(`/api/admin/inventory/lookup/?ean=${codeA}`);
+    expect((await res.json()).hit, "the replaced code still finds the product").toBeNull();
+    await assertClean(page, w, "code replaced after a second tap");
   });
 });

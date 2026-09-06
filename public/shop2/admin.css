@@ -906,6 +906,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .scan__cand__nm { flex: 1; min-width: 0; }
 .scan__cand__sz { font-size: 13px; color: var(--a-muted); white-space: nowrap; }
+/* the row that asks «Заменить код?» after the first tap — the same warn as the unknown-code line */
+.scan__cand.is-ask .scan__cand__sz { color: var(--a-warn); }
 
 .scan__today { border-top: 1px solid var(--a-muted); padding-top: 10px; }
 .scan__today__t { font-size: 13px; color: var(--a-dim); margin-bottom: 6px; }

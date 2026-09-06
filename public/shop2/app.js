@@ -1417,6 +1417,7 @@
       "Начните вводить название — товар найдётся.": "Hakake nime sisestama — toode leitakse.",
       "· без кода": "· ilma koodita",
       "без кода": "ilma koodita",
+      "Заменить код? Нажмите ещё раз": "Asendada kood? Vajutage veel kord",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Suunake triipkoodile. Toode leitakse ise — jääb üle kogus märkida.",
       "Найдено ·": "Leitud ·",
       "Сканировать дальше": "Skaneeri edasi",
@@ -3142,6 +3143,7 @@
       "Начните вводить название — товар найдётся.": "Start typing the name — the product will turn up.",
       "· без кода": "· no code",
       "без кода": "no code",
+      "Заменить код? Нажмите ещё раз": "Replace the code? Tap again",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Point at the barcode. The product finds itself — all that is left is the quantity.",
       "Найдено ·": "Found ·",
       "Сканировать дальше": "Keep scanning",
@@ -3790,6 +3792,8 @@
     [/^(.+) … купить в Таллинне \| Rempire$/, { ET: "$1 … osta Tallinnas | Rempire", EN: "$1 … buy in Tallinn | Rempire" }],
     [/^Принять \+(\d+)$/, { ET: "Võta vastu +$1", EN: "Take in +$1" }],
     [/^Списать −(\d+)$/, { ET: "Kanna maha −$1", EN: "Write off −$1" }],
+    // scanner: a candidate size that already carries a code, by its last four characters
+    [/^есть код ···(.+)$/, { ET: "kood olemas ···$1", EN: "has a code ···$1" }],
     [/^Добавить в продажу · (\d+)$/, { ET: "Lisa müüki · $1", EN: "Add to the sale · $1" }],
     [/^на складе (\d+)$/, { ET: "laos $1", EN: "in stock $1" }],
     [/^Снято с продажи · (.+)$/, { ET: "Eemaldatud müügilt · $1", EN: "Taken off sale · $1" }],
@@ -14841,31 +14845,78 @@
      a barcode belongs to one bottle, not to a product: asking «какой объём?»
      after «какой товар?» was two taps for a decision the owner had already
      made when they picked the row (README § Сканер, «Three taps max»). */
+  /* What the owner types against what the bottle says: words in any order,
+     «Kevin.Murphy» and «kevin murphy» the same, «ml» for «мл», «ё» for «е»,
+     «150мл» for «150 мл». One substring over «brand name id» found nothing
+     for «kevin murphy», «un tangled 150» or «300 ml» (Dim). */
+  function scanFold(s) {
+    return String(s || "").toLowerCase().replace(/ё/g, "е").replace(/\bml\b/g, "мл")
+      // the quotes in the class are written as escapes so tools/i18n-gaps.mjs's
+      // tokeniser does not read them as a string literal opening
+      .replace(/[.\-_,\/()«»\u0022\u0027\u2019]+/g, " ").replace(/(\d)([a-zа-я])/g, "$1 $2").replace(/\s+/g, " ").trim();
+  }
+  /** A word against one size label: «40» is the 40 мл bottle, not the 140. */
+  function scanSizeHas(sizeHay, w) {
+    return /^\d+$/.test(w) ? sizeHay.split(" ").indexOf(w) >= 0 : sizeHay.indexOf(w) >= 0;
+  }
+  /** «···1234» — the code a size already carries, by its last four characters. */
+  function scanCodeTail(ean) { return "есть код ···" + String(ean).slice(-4); }
   function scanAssignResultsHTML() {
-    var q = (S.scanAssignQ || "").toLowerCase().trim();
+    var q = scanFold(S.scanAssignQ);
     if (!q) return '<p class="scan__hint scan__hint--sm">Начните вводить название — товар найдётся.</p>';
+    var words = q.split(" ");
+    var code = S.scanHit ? S.scanHit.code : "";
     var rows = [];
     for (var i = 0; i < CATALOGUE.length && rows.length < 8; i++) {
       var p = CATALOGUE[i];
-      if ((p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) < 0) continue;
+      var hay = scanFold(p.brand + " " + p.name + " " + p.id);
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+      var sizeHays = sizes.map(scanFold);
+      /* every word has to be somewhere on the bottle — in the name, or on a
+         size label; the size words then pick the rows («awapuhi 300» is the
+         one bottle in the hand, not the three the product comes in) */
+      var sizeWords = [], ok = true;
+      for (var wi = 0; wi < words.length && ok; wi++) {
+        var w = words[wi];
+        if (hay.indexOf(w) >= 0) continue;
+        var onSize = false;
+        for (var si = 0; si < sizeHays.length && !onSize; si++) onSize = scanSizeHas(sizeHays[si], w);
+        if (onSize) sizeWords.push(w); else ok = false;
+      }
+      if (!ok) continue;
       for (var j = 0; j < sizes.length && rows.length < 8; j++) {
+        var fits = true;
+        for (var sw = 0; sw < sizeWords.length && fits; sw++) fits = scanSizeHas(sizeHays[j], sizeWords[sw]);
+        if (!fits) continue;
         var lv = edStockFor(p, sizes[j]);
+        var key = p.id + "|" + sizes[j];
+        var taken = !!(lv && lv.ean && lv.ean !== code);
+        var ask = taken && S.scanBindConfirm === key;
         /* Each fact in its own <span>: the translator matches a text node by
            its exact wording, so «один объём · без кода» in one node would
            never turn into Estonian. The price tells two same-named bottles
            apart (Awapuhi Shampoo 20 € vs 36 €) when the catalogue has no
-           volume on them. */
+           volume on them. A size that already carries a code says so — a
+           second code would replace the first, silently, and that is a
+           second tap's decision (the click handler asks). */
         var szPrice = p.sizes && p.sizes.length ? sizePrice(p, j) : p.price;
-        rows.push('<button class="scan__cand" data-scanbind="' + esc(p.id) + "|" + esc(sizes[j]) + '">' +
+        rows.push('<button class="scan__cand' + (ask ? " is-ask" : "") + '" data-scanbind="' + esc(key) + '">' +
           '<span class="scan__cand__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
           '<span class="scan__cand__sz"><span>' + (sizes[j] ? esc(sizes[j]) : "один объём") + "</span>" +
             (szPrice ? ' · <span class="num">' + eur(szPrice) + "</span>" : "") +
-            (lv && lv.ean ? "" : " · <span>без кода</span>") + "</span></button>");
+            (ask ? " · <span>Заменить код? Нажмите ещё раз</span>"
+              : taken ? " · <span>" + esc(scanCodeTail(lv.ean)) + "</span>"
+              : lv && lv.ean ? "" : " · <span>без кода</span>") + "</span></button>");
       }
     }
     if (!rows.length) return '<p class="scan__hint scan__hint--sm">Ничего не найдено.</p>';
     return '<div class="scan__cands">' + rows.join("") + "</div>";
+  }
+  /** The candidate list alone, patched in place — the search box above it
+      keeps its caret and the keyboard stays where it is. */
+  function scanPaintAssignResults() {
+    var box = SCANEL && SCANEL.querySelector("#scanassignresults");
+    if (box) { box.innerHTML = scanAssignResultsHTML(); translateTree(box); }
   }
   /* The scanner writes straight to the warehouse, and the «Склад» list and
      the editor's «Размеры и цены» grid read a copy fetched once
@@ -15161,7 +15212,7 @@
         ? { code: code, productId: hit.productId, variant: hit.variant, qty: hit.qty, lowThreshold: hit.lowThreshold, ean: hit.ean, state: hit.state, tracked: true, product: hit.product }
         : { code: code, product: null, tracked: false };
       S.scanAssignQ = "";
-      S.scanAssignPick = "";
+      S.scanAssignPick = ""; S.scanBindConfirm = "";
       scanBeep();
       loadScanToday();
       scanRenderPanel();
@@ -15332,7 +15383,7 @@
   /** Everything a fresh scanning session forgets — shared by the «Склад»
       overlay and the /shop2/scan/ route, which differ only in their shell. */
   function scanResetState() {
-    S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = "";
+    S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = "";
     S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null;
     S.scanQty = 1; S.scanBusy = false; S.scanReady = false;
   }
@@ -19896,11 +19947,24 @@
     // «productId|variant» — one tap, one bottle (scanAssignResultsHTML)
     if (d.scanbind) {
       var bindAt = d.scanbind.indexOf("|");
-      scanBindEan(d.scanbind.slice(0, bindAt), d.scanbind.slice(bindAt + 1));
+      var bindId = d.scanbind.slice(0, bindAt), bindVar = d.scanbind.slice(bindAt + 1);
+      /* A size that already carries a different code: the first tap asks
+         (the row itself says «Заменить код?»), the second replaces — the
+         old code stops finding anything, and that must not happen by a
+         finger landing on the wrong row. */
+      var bindLv = edStockFor({ id: bindId }, bindVar);
+      var bindCode = S.scanHit ? S.scanHit.code : "";
+      if (bindLv && bindLv.ean && bindLv.ean !== bindCode && S.scanBindConfirm !== d.scanbind) {
+        S.scanBindConfirm = d.scanbind;
+        scanPaintAssignResults();
+        return;
+      }
+      S.scanBindConfirm = "";
+      scanBindEan(bindId, bindVar);
       return;
     }
     if (d.scanreset !== undefined) {
-      S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanQty = 1; S.scanReady = false;
+      S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = ""; S.scanQty = 1; S.scanReady = false;
       SCAN.lastCode = "";   // the same code, scanned again, has to count
       scanRenderPanel(); return;
     }
@@ -20450,8 +20514,8 @@
     }
     else if (t.matches("[data-scanassignq]")) {
       S.scanAssignQ = t.value;
-      var assignResults = SCANEL && SCANEL.querySelector("#scanassignresults");
-      if (assignResults) { assignResults.innerHTML = scanAssignResultsHTML(); translateTree(assignResults); }
+      S.scanBindConfirm = "";   // a new query is a new list; the «Заменить?» ask does not carry over
+      scanPaintAssignResults();
     }
     /* «Главный баннер»: a full render would take the caret out of the field,
        so only the live preview (or the picker list) is repainted. */

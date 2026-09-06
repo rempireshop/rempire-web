@@ -266,6 +266,9 @@ const INTENTIONAL = [
   // convention as every other free-text audit/note field in this file
   [/^(помощник|сканер|панель)$/, "stock_moves.ref tag (applyStockAction/scanner buttons) — shown in the moves history row, Russian by convention like a note field"],
   [/^отмена начисления$/, "loyalty ledger note on an assistant-driven points undo — free-text note field, Russian by convention"],
+  // scanner: scanFold() folds a typed «ml» into the catalogue's own «мл» so
+  // «150 ml» finds the «150 мл» bottle — a matching key, never rendered
+  [/^мл$/, "scanFold()'s fold target for a Latin «ml» in the scanner's product search — matching only, never shown"],
   // integration: montonioSourceLabel()'s two branches — a ternary with no
   // "+" involved, so each string is its own fragment here; the rendered
   // sentence is always this label plus a price, covered by the UI_RX rules
