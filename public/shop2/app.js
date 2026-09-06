@@ -258,6 +258,27 @@
       "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "Tellimus on juba täielikult kaetud kinkekaardi või punktidega — valige teine makseviis",
       "Заполните данные фирмы для счёта": "Täitke ettevõtte andmed arve jaoks",
       "Счёт отправлен на": "Arve on saadetud aadressile", "Счёт отправлен на почту.": "Arve on saadetud e-postile.",
+      /* …and the owner's side of it: «Заказы», the card, «Настройки → О компании» */
+      "Счёт просрочен": "Arve on üle tähtaja", "Ждёт оплаты по счёту": "Ootab arve tasumist",
+      "счёт просрочен": "arve on üle tähtaja", "счёта просрочены": "arvet on üle tähtaja", "счетов просрочены": "arvet on üle tähtaja",
+      "По счёту": "Arvega", "Отметить оплаченным": "Märgi makstuks", "Отметить оплаченным?": "Märkida makstuks?",
+      "Скачать счёт": "Laadi arve alla", "Отправить счёт ещё раз": "Saada arve uuesti",
+      "Заказ ждёт оплаты по счёту — отправлять пока нечего. Когда деньги придут на счёт, нажмите «Отметить оплаченным»: клиенту уйдёт письмо «Заказ принят», а заказ встанет в очередь на отправку.": "Tellimus ootab arve tasumist — saata pole veel midagi. Kui raha on kontole laekunud, vajutage «Märgi makstuks»: kliendile läheb kiri «Tellimus vastu võetud» ja tellimus läheb saatmisjärjekorda.",
+      "Заказ отменён — оплату не отметить": "Tellimus on tühistatud — makset ei saa märkida",
+      "Не удалось отметить оплату": "Makset ei õnnestunud märkida",
+      "Счёт отправлен ещё раз ✓": "Arve saadetud uuesti ✓",
+      "Почта не подключена — письмо не ушло": "E-post pole ühendatud — kiri ei läinud välja",
+      "Письмо не ушло — попробуйте позже": "Kiri ei läinud välja — proovige hiljem",
+      "Не удалось отправить счёт": "Arvet ei õnnestunud saata",
+      "Счета для компаний": "Ettevõtete arved", "Счета для компаний: сохранено ✓": "Ettevõtete arved: salvestatud ✓",
+      "Срок оплаты — от 1 до 60 дней": "Maksetähtaeg — 1 kuni 60 päeva",
+      "Компания в кассе выбирает «По счёту» — счёт с номером и PDF уходит ей на почту сам, а заказ ждёт перевода. Когда деньги придут, в карточке заказа нажмите «Отметить оплаченным».": "Ettevõte valib kassas «Arvega» — numbriga arve ja PDF lähevad talle ise e-postile ja tellimus ootab ülekannet. Kui raha on laekunud, vajutage tellimuse kaardil «Märgi makstuks».",
+      "В блоке «Реквизиты» выше не заполнено:": "Plokis «Ettevõtte andmed» ülal on täitmata:",
+      "Без IBAN и банка в счёте не будет реквизитов для оплаты.": "Ilma IBAN-i ja pangata pole arvel makserekvisiite.",
+      "Префикс номера": "Numbri prefiks", "Срок оплаты, дней": "Maksetähtaeg, päeva",
+      "От 1 до 60. Столько дней касса обещает компании на перевод.": "1 kuni 60. Nii mitu päeva lubab kassa ettevõttele ülekandeks.",
+      "Банк": "Pank", "банк": "pank", "Печатается в счёте рядом с IBAN.": "Trükitakse arvele IBAN-i kõrvale.",
+      "Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — условия продажи, возврат, конфиденциальность — и в счета для компаний.": "Need andmed lähevad poe jalusesse, lehele «Kontakt», õigustekstidesse — müügitingimused, tagastamine, privaatsus — ja ettevõtete arvetele.",
       "Самовывоз — Mardi 1, Таллинн": "Järeletulek — Mardi 1, Tallinn",
       "Курьер до двери (DPD)": "Kuller uksele (DPD)", "Курьер DPD": "DPD kuller",
       "Курьер SmartPosti": "SmartPosti kuller", "Курьер Omniva": "Omniva kuller",
@@ -2002,6 +2023,27 @@
       "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "The order is already fully covered by a gift card or points — choose another payment method",
       "Заполните данные фирмы для счёта": "Fill in the company details for the invoice",
       "Счёт отправлен на": "The invoice has been sent to", "Счёт отправлен на почту.": "The invoice has been sent by e-mail.",
+      /* …and the owner's side of it: «Заказы», the card, «Настройки → О компании» */
+      "Счёт просрочен": "Invoice overdue", "Ждёт оплаты по счёту": "Awaiting invoice payment",
+      "счёт просрочен": "invoice overdue", "счёта просрочены": "invoices overdue", "счетов просрочены": "invoices overdue",
+      "По счёту": "By invoice", "Отметить оплаченным": "Mark as paid", "Отметить оплаченным?": "Mark as paid?",
+      "Скачать счёт": "Download the invoice", "Отправить счёт ещё раз": "Send the invoice again",
+      "Заказ ждёт оплаты по счёту — отправлять пока нечего. Когда деньги придут на счёт, нажмите «Отметить оплаченным»: клиенту уйдёт письмо «Заказ принят», а заказ встанет в очередь на отправку.": "The order is waiting for the invoice to be paid — nothing to ship yet. When the money is on the account, press “Mark as paid”: the customer gets the “Order confirmed” letter and the order joins the shipping queue.",
+      "Заказ отменён — оплату не отметить": "The order is cancelled — the payment cannot be recorded",
+      "Не удалось отметить оплату": "Could not record the payment",
+      "Счёт отправлен ещё раз ✓": "Invoice sent again ✓",
+      "Почта не подключена — письмо не ушло": "Mail is not connected — the letter did not go out",
+      "Письмо не ушло — попробуйте позже": "The letter did not go out — try again later",
+      "Не удалось отправить счёт": "Could not send the invoice",
+      "Счета для компаний": "Company invoices", "Счета для компаний: сохранено ✓": "Company invoices: saved ✓",
+      "Срок оплаты — от 1 до 60 дней": "Payment term — 1 to 60 days",
+      "Компания в кассе выбирает «По счёту» — счёт с номером и PDF уходит ей на почту сам, а заказ ждёт перевода. Когда деньги придут, в карточке заказа нажмите «Отметить оплаченным».": "A company picks “By invoice” at the checkout — the numbered invoice with its PDF goes to their e-mail by itself and the order waits for the transfer. When the money arrives, press “Mark as paid” on the order card.",
+      "В блоке «Реквизиты» выше не заполнено:": "Still blank in the “Company details” block above:",
+      "Без IBAN и банка в счёте не будет реквизитов для оплаты.": "Without the IBAN and the bank the invoice has no payment details on it.",
+      "Префикс номера": "Number prefix", "Срок оплаты, дней": "Payment term, days",
+      "От 1 до 60. Столько дней касса обещает компании на перевод.": "1 to 60. How many days the checkout promises a company for the transfer.",
+      "Банк": "Bank", "банк": "bank", "Печатается в счёте рядом с IBAN.": "Printed on the invoice next to the IBAN.",
+      "Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — условия продажи, возврат, конфиденциальность — и в счета для компаний.": "These details go into the shop's footer, the “Contacts” page, the legal texts — terms of sale, returns, privacy — and the company invoices.",
       "Самовывоз — Mardi 1, Таллинн": "Pickup — Mardi 1, Tallinn",
       "Курьер до двери (DPD)": "Courier to the door (DPD)", "Курьер DPD": "DPD courier",
       "Курьер SmartPosti": "SmartPost courier", "Курьер Omniva": "Omniva courier",
@@ -3857,7 +3899,27 @@
         EN: "The invoice arrives by e-mail right after checkout. Payment by bank transfer within $1 days; we ship the order once the payment arrives." }],
     [/^Оплатите в течение (\d+) (?:дня|дней) — после оплаты отправим заказ\.$/,
       { ET: "Tasuge $1 päeva jooksul — pärast makse laekumist saadame tellimuse teele.",
-        EN: "Please pay within $1 days — we ship the order as soon as the payment arrives." }]
+        EN: "Please pay within $1 days — we ship the order as soon as the payment arrives." }],
+    /* …and the admin's side: the «По счёту» chip with its count, the card's
+       state line, the confirm card, the toasts and the journal lines. */
+    [/^По счёту (\d+)$/, { ET: "Arvega $1", EN: "By invoice $1" }],
+    [/^Ожидает оплаты по счёту №(.+) · до (.+)$/, { ET: "Ootab arve nr $1 tasumist · tähtaeg $2", EN: "Awaiting payment of invoice $1 · due $2" }],
+    [/^Оплачен по счёту №(.+) · (.+)$/, { ET: "Makstud arve nr $1 alusel · $2", EN: "Paid by invoice $1 · $2" }],
+    [/^Счёт №(.+)$/, { ET: "Arve nr $1", EN: "Invoice $1" }],
+    [/^Письмо ушло (.+)$/, { ET: "Kiri läks välja $1", EN: "Letter sent $1" }],
+    [/^Письмо со счётом не ушло \((.+)\) — нажмите «Отправить счёт ещё раз»\.$/,
+      { ET: "Arvega kiri ei läinud välja ($1) — vajutage «Saada arve uuesti».", EN: "The invoice letter did not go out ($1) — press “Send the invoice again”." }],
+    [/^Просрочен на (\d+) (?:день|дня|дней)\.$/, { ET: "Üle tähtaja $1 päeva.", EN: "$1 days overdue." }],
+    [/^([^\n]+) · ([^\n]+)\nДеньги по счёту №(.+) пришли на счёт\? Заказ станет оплаченным, клиенту уйдёт письмо «Заказ принят»\.$/,
+      { ET: "$1 · $2\nKas raha arve nr $3 eest on kontole laekunud? Tellimus märgitakse makstuks, kliendile läheb kiri «Tellimus vastu võetud».",
+        EN: "$1 · $2\nHas the money for invoice $3 arrived? The order becomes paid and the customer gets the “Order confirmed” letter." }],
+    [/^(.+) уже был оплачен$/, { ET: "$1 oli juba makstud", EN: "$1 was already paid" }],
+    [/^(.+) оплачен по счёту · письмо ушло$/, { ET: "$1 makstud arve alusel · kiri läks välja", EN: "$1 paid by invoice · the letter has gone" }],
+    [/^Заказ (.+): оплачен по счёту (.+)$/, { ET: "Tellimus $1: makstud arve $2 alusel", EN: "Order $1: paid by invoice $2" }],
+    [/^Счёт (.+) \((.+)\): отправлен ещё раз$/, { ET: "Arve $1 ($2): saadetud uuesti", EN: "Invoice $1 ($2): sent again" }],
+    [/^Счета для компаний: префикс «(.*)», срок оплаты (\d+) (?:день|дня|дней)$/,
+      { ET: "Ettevõtete arved: prefiks «$1», maksetähtaeg $2 päeva", EN: "Company invoices: prefix “$1”, payment term $2 days" }],
+    [/^Например: (.+)-0001$/, { ET: "Näiteks: $1-0001", EN: "For example: $1-0001" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -6548,7 +6610,7 @@
     company: {
       legalName: "Rempire Store OÜ", regCode: "12216136", vatNumber: "EE102723858",
       address: "Mardi 1, 10145 Tallinn", email: "info@rempireshop.com",
-      phone: "+372 5623 7237", iban: ""
+      phone: "+372 5623 7237", iban: "", bankName: ""
     },
     // "" = не указано (раздел не показывается), "closed" = выходной
     hours: { mon: "", tue: "", wed: "", thu: "", fri: "", sat: "", sun: "", note: { RU: "", ET: "", EN: "" } },
@@ -6640,7 +6702,7 @@
   }
   /* {{legalName}} & co in the legal texts (public/shop/legal*.js) — the pages
      carry placeholders instead of a frozen company identity. */
-  var CONTENT_PH = ["legalName", "regCode", "vatNumber", "address", "email", "phone", "iban"];
+  var CONTENT_PH = ["legalName", "regCode", "vatNumber", "address", "email", "phone", "iban", "bankName"];
   function cResolve(html) {
     if (!html || String(html).indexOf("{{") < 0) return html;
     var co = contentConf().company;
@@ -10097,11 +10159,19 @@
        label step — the sticker exists, the step is shown as not done. */
     var hasShipment = !!(mont && mont.shipmentId);
     var labeled = hasShipment && !mont.dismissed;
+    /* «По счёту — для компаний»: the invoice record the server put on the
+       order (src/lib/invoices.ts) and the company it is made out to. An
+       unpaid order with an invoice is waiting for a bank transfer, not for
+       the shopper to come back from a bank page — the card says so. */
+    var invoice = srv && srv.invoice && srv.invoice.number ? srv.invoice : null;
     return {
       id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
       items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
       paid: status === "paid" && !pos,
       unpaid: status === "new" || status === "failed",
+      invoice: invoice,
+      company: srv && srv.company && srv.company.name ? srv.company : null,
+      overdue: invoice && (status === "new" || status === "failed") ? admInvoiceOverdue(invoice) : 0,
       shipped: status === "shipped",
       delivered: status === "delivered",
       /* A pickup order has no parcel to label and no «Отправлен» either — the
@@ -10145,9 +10215,27 @@
     admLiveToShip().forEach(function (v) { if (v.labeled) out.labeled++; else out.fresh++; });
     return out;
   }
+  /** Whole days past the invoice's due date, 0 while it is not yet due — the
+      same calendar arithmetic as invoiceOverdueDays() on the server. */
+  function admInvoiceOverdue(inv) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(inv && inv.dueAt || ""));
+    if (!m) return 0;
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var due = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    var diff = Math.round((today - due) / 86400000);
+    return diff > 0 ? diff : 0;
+  }
+  /** «13.09.2026» out of a `YYYY-MM-DD` — the date as the invoice prints it. */
+  function admInvoiceDate(ymd) {
+    return String(ymd || "").slice(0, 10).split("-").reverse().join(".");
+  }
   function admOrderBadge(v, big) {
     var c = "adm-badge" + (big ? " adm-badge--big" : " ");
     if (v.pos) return '<span class="' + c + ' adm-badge--tint">Салон</span>';
+    // an invoice order waits for a transfer; past its due date the badge turns to the warning ink
+    if (v.invoice && v.unpaid) {
+      return '<span class="' + c + (v.overdue ? " adm-badge--warn" : "") + '">' + (v.overdue ? "Счёт просрочен" : "Ждёт оплаты по счёту") + "</span>";
+    }
     if (v.delivered) return '<span class="' + c + ' adm-badge--ok">Доставлен</span>';
     if (v.shipped) return '<span class="' + c + ' adm-badge--ok">Отправлен</span>';
     if (v.status === "paid") {
@@ -10207,7 +10295,10 @@
     var shipN = admWaitingCount();
     var revN = o ? o.attention.reviewsPending : 0;
     var proN = o ? o.attention.proRequests : 0;
-    var taskN = shipN + lowN + revN + proN;
+    // «По счёту»: invoices past their due date are the owner's to chase
+    var overdue = admInvoicesWaiting().filter(function (v) { return v.overdue; });
+    var overN = overdue.length;
+    var taskN = shipN + lowN + revN + proN + overN;
 
     var names = function (list, get) { return list.slice(0, 4).map(get).filter(Boolean).join(" · "); };
     var tasks = "";
@@ -10215,6 +10306,10 @@
       pl(shipN, "заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"),
       names(toShip, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="new"');
+    if (overN) tasks += admTaskRow(overN,
+      pl(overN, "счёт просрочен", "счёта просрочены", "счетов просрочены"),
+      names(overdue, function (v) { return v.who; }),
+      'data-admtab="orders" data-admfilter="invoice"', true);
     if (lowN) tasks += admTaskRow(lowN,
       pl(lowN, "товар заканчивается", "товара заканчиваются", "товаров заканчиваются"),
       names(lowItems, function (p) { return p.name; }),
@@ -10288,7 +10383,7 @@
      «Ждёт оплаты» badge — nothing about them is a step of the owner's. */
   var ADM_ORDER_FILTERS = [
     ["new", "Новые"], ["label", "Этикетка готова"], ["shipped", "Отправлены"],
-    ["delivered", "Доставлены"], ["salon", "Салон"], ["all", "Все"]
+    ["delivered", "Доставлены"], ["invoice", "По счёту"], ["salon", "Салон"], ["all", "Все"]
   ];
   function admOrderMatches(v, f) {
     if (f === "all") return true;
@@ -10296,8 +10391,14 @@
     if (f === "label") return v.paid && v.labeled;
     if (f === "shipped") return v.shipped;
     if (f === "delivered") return v.delivered;
+    // «По счёту»: the invoices still waiting for their transfer
+    if (f === "invoice") return !!v.invoice && v.unpaid;
     if (f === "salon") return v.pos;
     return true;
+  }
+  /** The invoice orders waiting for a transfer — the chip's count and the overview's row. */
+  function admInvoicesWaiting() {
+    return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM).filter(function (v) { return v.invoice && v.unpaid; });
   }
   function admOrdersHTML() {
     if (SRV.admin === true) loadSrvOrders(false);
@@ -10307,7 +10408,7 @@
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
-          var n = x[0] === "new" ? split.fresh : x[0] === "label" ? split.labeled : 0;
+          var n = x[0] === "new" ? split.fresh : x[0] === "label" ? split.labeled : x[0] === "invoice" ? admInvoicesWaiting().length : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
             x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
@@ -10370,6 +10471,9 @@
       admOrderStepBtn(v, true) +
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
     else if (v.paid || v.shipped) acts = admOrderStepBtn(v, true);
+    // an invoice order's one step is the transfer arriving — the row can record it without opening the card
+    else if (v.unpaid && v.invoice) acts =
+      '<button class="adm-btn adm-btn--row" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
     else if (v.unpaid) acts =
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
     return '<div class="adm-row adm-row--stack">' +
@@ -10545,6 +10649,16 @@
     var primary = showSteps ? admOrderStepBtn(v, false) : "";
     var acts = primary;
     if (v.pos) acts += admReceiptLink(v, false);
+    /* «По счёту»: while the transfer is awaited the primary is «Отметить
+       оплаченным»; the invoice itself stays downloadable for as long as the
+       order exists, and can be sent again while it is unpaid. */
+    if (v.invoice && v.unpaid) acts +=
+      '<button class="adm-btn" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
+    if (v.invoice) acts +=
+      '<a class="adm-btn adm-btn--ghost" href="/api/admin/orders/' + encodeURIComponent(v.id) + '/invoice/" target="_blank" rel="noopener" data-adminvpdf="' + esc(v.invoice.number) + '">Скачать счёт</a>';
+    if (v.invoice && v.unpaid) acts +=
+      '<button class="adm-btn adm-btn--ghost" data-adminvresend="' + esc(v.id) + '"' + (SRV.invoiceBusy ? " disabled" : "") + ">" +
+        (SRV.invoiceBusy ? "Отправляем…" : "Отправить счёт ещё раз") + "</button>";
     if (showSteps && v.paid && !v.labeled && !v.pickup) acts +=
       '<button class="adm-btn adm-btn--ghost" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
     if (!v.pos || (o && o.email)) acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
@@ -10554,7 +10668,8 @@
     /* One sentence under the buttons that says what the primary one does —
        the owner's own complaint was a button that did more than it said. */
     var hint = "";
-    if (showSteps && v.unpaid) hint = "Заказ ещё не оплачен — отправлять нечего.";
+    if (showSteps && v.unpaid && v.invoice) hint = "Заказ ждёт оплаты по счёту — отправлять пока нечего. Когда деньги придут на счёт, нажмите «Отметить оплаченным»: клиенту уйдёт письмо «Заказ принят», а заказ встанет в очередь на отправку.";
+    else if (showSteps && v.unpaid) hint = "Заказ ещё не оплачен — отправлять нечего.";
     else if (showSteps && v.paid && v.pickup) hint = "Клиент забирает заказ в салоне. Письмо не отправляется.";
     else if (showSteps && v.paid && !v.labeled) hint = "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.";
     else if (showSteps && v.paid && v.labeled) hint = "Нажмёте «Отправлен» — клиенту уйдёт письмо «Заказ отправлен» с трек-номером.";
@@ -10562,7 +10677,10 @@
 
     /* Every status the panel could always set stays settable — the actions row
        above is the everyday path, this line is the rest of them. */
-    var manual = o ? ["paid", "refunded"].filter(function (k) { return o.status !== k; }).map(function (k) {
+    var manual = o ? ["paid", "refunded"].filter(function (k) {
+      // an awaited invoice has its own «Отметить оплаченным» above — one door for the money, not two
+      return o.status !== k && !(k === "paid" && v.invoice && v.unpaid);
+    }).map(function (k) {
       return '<button class="adm-link adm-link--muted" data-admstatus="' + k + '">' + SRV_STATES[k][1] + "</button>";
     }).join(" · ") : "";
 
@@ -10578,6 +10696,7 @@
       '<button class="adm-link" data-admorder="">← Заказы</button>' +
       admHead(esc(v.number) + " · " + esc(v.date), esc(v.who), admOrderBadge(v, true), true) +
       (showSteps ? admOrderSteps(v) : "") +
+      admInvoiceStateHTML(v) +
       (acts ? '<div class="adm-acts adm-ordacts">' + acts + "</div>" : "") +
       (hint ? '<div class="adm-hint">' + hint + "</div>" : "") +
       (showSteps ? admShipmentBoxHTML(v) : "") +
@@ -10596,7 +10715,8 @@
         "</div></div>" +
       '<div class="adm-stack adm-stack--tight">' +
         '<div><div class="adm-sec__t">Покупатель</div><div class="adm-kv">' + esc(v.who) + "<br>" +
-          "<span>" + esc((o && o.phone) || "") + (o && o.phone && o.email ? "<br>" : "") + esc((o && o.email) || "") + "</span></div></div>" +
+          "<span>" + esc((o && o.phone) || "") + (o && o.phone && o.email ? "<br>" : "") + esc((o && o.email) || "") + "</span></div>" +
+          admCompanyHTML(v.company) + "</div>" +
         '<div><div class="adm-sec__t">Доставка</div><div class="adm-kv">' + esc(v.ship) + "<br>" +
           // features: an electronic order has no address — where the card
           // went is an e-mail, and that is what belongs on this line
@@ -10608,6 +10728,38 @@
           '<div class="adm-acts" style="margin-top:8px">' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admnotesave>Сохранить заметку</button></div></div>' : "") +
       "</div></div></div>";
+  }
+  /* ---------- «По счёту — для компаний» on the card ------------------------
+     One line that says what the invoice is waiting for: the number, the due
+     date, «Просрочен на N дн.» past it, a paid date once the transfer came,
+     and — the case the owner would otherwise never notice — a letter that did
+     not go out, with the reason and the button that sends it again. */
+  function admInvoiceStateHTML(v) {
+    var inv = v.invoice;
+    if (!inv) return "";
+    var out = "";
+    if (v.unpaid) {
+      out += '<span>Ожидает оплаты по счёту №' + esc(inv.number) + " · до " + esc(admInvoiceDate(inv.dueAt)) + "</span>";
+      if (v.overdue) out += ' <span class="adm-hint--warn">' + admOverdueText(v.overdue) + "</span>";
+    } else if (inv.paidAt) {
+      out += "<span>Оплачен по счёту №" + esc(inv.number) + " · " + esc(admInvoiceDate(inv.paidAt)) + "</span>";
+    } else {
+      out += "<span>Счёт №" + esc(inv.number) + "</span>";
+    }
+    if (inv.sentAt) out += " · <span>Письмо ушло " + esc(admInvoiceDate(inv.sentAt)) + "</span>";
+    else if (inv.sendError) out += '<br><span class="adm-hint--warn">Письмо со счётом не ушло (' + esc(inv.sendError) + ") — нажмите «Отправить счёт ещё раз».</span>";
+    return '<div class="adm-hint" data-adminvstate>' + out + "</div>";
+  }
+  function admOverdueText(n) {
+    // one literal per plural form, the number inside — see invoiceHint()
+    return pl(n, "Просрочен на " + n + " день.", "Просрочен на " + n + " дня.", "Просрочен на " + n + " дней.");
+  }
+  /** The company an invoice order was placed by — under the buyer's own lines. */
+  function admCompanyHTML(c) {
+    if (!c) return "";
+    return '<div class="adm-kv" style="margin-top:8px" data-admcompany>' + esc(c.name) + "<br><span>" +
+      [c.regCode ? "рег. " + c.regCode : "", c.vatNumber ? "KMKR " + c.vatNumber : ""].filter(Boolean).map(esc).join(" · ") +
+      (c.address ? "<br>" + esc(c.address) : "") + (c.email ? "<br>" + esc(c.email) : "") + "</span></div>";
   }
   /** features: an all-gift-card order — `shipping.method === "digital"`, set
       by createOrder() and never by anything the browser sent. */
@@ -11881,7 +12033,70 @@
   function admSetCompanyHTML() {
     return '<div class="adm-narrow">' +
       admContentCard(["company", "hours", "social", "contact", "emailfooter"], "") +
+      invoiceSettingsCard() +
       reportsCard() + "</div>";
+  }
+
+  /* ---------- «Счета для компаний» ------------------------------------------
+     settings.invoice: the number prefix («A-» → A-2026-0001) and the payment
+     term. Two fields and a save — not money, so no confirm card, but a
+     journal line like every other setting. The card also says plainly when
+     the bank details the invoice prints are still blank in «Реквизиты»
+     above: an invoice with no IBAN on it is a letter the customer cannot act
+     on, and nobody but the owner can fill that in. */
+  function invoiceDraft() {
+    if (!S.invDraft) S.invDraft = { prefix: DEMO.invoice && DEMO.invoice.prefix != null ? String(DEMO.invoice.prefix) : "A-", dueDays: String(invoiceDueDays()) };
+    return S.invDraft;
+  }
+  function invoiceSettingsCard() {
+    var d = invoiceDraft();
+    var co = contentConf().company;
+    var year = new Date().getFullYear();
+    var gaps = [];
+    if (!co.iban) gaps.push("IBAN");
+    if (!co.bankName) gaps.push("банк");
+    if (!co.regCode) gaps.push("рег. номер");
+    if (!co.vatNumber) gaps.push("номер KMKR");
+    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Счета для компаний</div></div>' +
+      '<div class="adm-form" style="margin-top:8px" data-adminvsettings>' +
+        '<p class="adm-hint" style="margin:0">Компания в кассе выбирает «По счёту» — счёт с номером и PDF уходит ей на почту сам, а заказ ждёт перевода. ' +
+          "Когда деньги придут, в карточке заказа нажмите «Отметить оплаченным».</p>" +
+        (gaps.length
+          ? '<p class="adm-hint adm-hint--warn" style="margin:8px 0 0">' +
+              "<span>В блоке «Реквизиты» выше не заполнено:</span> " + gaps.map(function (g) { return "<span>" + esc(g) + "</span>"; }).join(", ") + ". " +
+              "<span>Без IBAN и банка в счёте не будет реквизитов для оплаты.</span></p>"
+          : "") +
+        '<div class="adm-edpair" style="margin-top:12px">' +
+          '<label class="adm-field">Префикс номера' +
+            '<input class="adm-input" maxlength="8" data-invsetf="prefix" value="' + esc(d.prefix) + '" placeholder="A-">' +
+            '<span class="adm-hint">Например: ' + esc(d.prefix) + year + "-0001</span></label>" +
+          '<label class="adm-field">Срок оплаты, дней' +
+            '<input class="adm-input" type="number" min="1" max="60" inputmode="numeric" data-invsetf="dueDays" value="' + esc(d.dueDays) + '">' +
+            '<span class="adm-hint">От 1 до 60. Столько дней касса обещает компании на перевод.</span></label>' +
+        "</div>" +
+        '<div class="adm-acts"><button class="adm-btn" data-adminvsave>Сохранить</button></div>' +
+      "</div>";
+  }
+  function srvInvoiceSettingsSave() {
+    var d = invoiceDraft();
+    var days = Math.round(Number(d.dueDays));
+    if (!isFinite(days) || days < 1 || days > 60) { toast("Срок оплаты — от 1 до 60 дней"); return; }
+    var prefix = String(d.prefix || "").trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8);
+    var value = { prefix: prefix, dueDays: days };
+    apiSend("/api/admin/settings/", "PUT", { invoice: value }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        DEMO.invoice = value; S.invDraft = null;
+        var setLine = pl(days,
+          "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " день",
+          "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дня",
+          "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дней");
+        journalNote(setLine);
+        toast("Счета для компаний: сохранено ✓"); render();
+        return;
+      }
+      toast("Не удалось сохранить");
+    }).catch(function () { toast("Сервер не отвечает"); });
   }
   function admSetPricesHTML() {
     return '<div class="adm-narrow--form">' + admPricingCard() + "</div>";
@@ -12487,9 +12702,11 @@
           '<div class="adm-edpair">' +
             cInput("company.email", "Электронная почта", "info@rempireshop.com", 190) +
             cInput("company.phone", "Телефон", "+372 5623 7237", 30) + "</div>" +
-          cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42) +
-          '<p class="adm-hint" style="margin:0">Эти данные подставляются в подвал магазина, на страницу «Контакты» и в правовые тексты — ' +
-            "условия продажи, возврат, конфиденциальность.</p>")) +
+          '<div class="adm-edpair">' +
+            cInput("company.iban", "IBAN (если нужен счёт для компаний)", "EE00 0000 0000 0000 0000", 42) +
+            cInput("company.bankName", "Банк", "Swedbank", 60, "Печатается в счёте рядом с IBAN.") + "</div>" +
+          '<p class="adm-hint" style="margin:0">Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — ' +
+            "условия продажи, возврат, конфиденциальность — и в счета для компаний.</p>")) +
         (!show("hours") ? "" : cBlock("hours", "Часы работы",
           (CONTENT_DAYS.filter(function (r) { return d.hours[r[0]]; }).length
             ? "показываем в подвале и на «Контактах»"
@@ -16354,6 +16571,45 @@
     }).catch(function () { toast("Сервер не отвечает"); });
   }
 
+  /* ---------- «По счёту — для компаний»: the card's two server calls ------
+     POST /api/admin/orders/<id>/invoice/ — «paid» settles the order the way a
+     bank's ticket would (the letter «Заказ принят», the stock, the points, the
+     gift card, once), «resend» mails the same invoice again. Neither has an
+     undo: money that came is not taken back from a toast, and a letter that
+     went out is out. Both leave a line in the journal. */
+  function admInvoiceConfirmText(v) {
+    return v.number + " · " + eur(v.sum) + "\nДеньги по счёту №" + v.invoice.number + " пришли на счёт? Заказ станет оплаченным, клиенту уйдёт письмо «Заказ принят».";
+  }
+  function srvInvoicePaid(id, number, invoiceNumber) {
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/invoice/", "POST", { action: "paid" }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        var paidLine = "Заказ " + number + ": оплачен по счёту " + invoiceNumber;
+        journalNote(paidLine);
+        toast(r.body.alreadyPaid ? number + " уже был оплачен" : number + " оплачен по счёту · письмо ушло");
+        admOrdersChanged();
+        return;
+      }
+      toast(r.body && r.body.error === "order_closed" ? "Заказ отменён — оплату не отметить" : "Не удалось отметить оплату");
+    }).catch(function () { toast("Сервер не отвечает"); });
+  }
+  function srvInvoiceResend(id) {
+    if (SRV.invoiceBusy) return;
+    var row = admOrderById(id);
+    SRV.invoiceBusy = true; render();
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/invoice/", "POST", { action: "resend" }).then(function (r) {
+      SRV.invoiceBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        if (row && row.invoice) journalNote("Счёт " + row.invoice.number + " (" + row.number + "): отправлен ещё раз");
+        toast(r.body.sent ? "Счёт отправлен ещё раз ✓" : r.body.skipped ? "Почта не подключена — письмо не ушло" : "Письмо не ушло — попробуйте позже");
+        admOrdersChanged();
+        return;
+      }
+      toast("Не удалось отправить счёт"); render();
+    }).catch(function () { SRV.invoiceBusy = false; toast("Сервер не отвечает"); render(); });
+  }
+
   /* «Создать этикетку»: book the parcel with the carrier through Montonio.
      The status of the order does not move — that is «Отправлен», its own
      button (docs/shipping.md § «Что видит Ренат в админке»). The failures
@@ -16699,7 +16955,7 @@
      value; several are listed by name. */
   var CONTENT_FIELD_WORD = {
     legalName: "название компании", regCode: "рег. номер", vatNumber: "номер KMKR",
-    address: "адрес", email: "почта", phone: "телефон", iban: "IBAN"
+    address: "адрес", email: "почта", phone: "телефон", iban: "IBAN", bankName: "банк"
   };
   var CONTENT_BLOCK_WORD = {
     company: "реквизиты", hours: "часы работы", social: "соцсети",
@@ -18671,7 +18927,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -18943,6 +19199,21 @@
       };
       render(); return;
     }
+    /* «По счёту»: the transfer arrived — money, so the confirm card asks
+       first; «ещё раз» sends the same letter again and asks nothing. */
+    if (d.adminvpaid) {
+      var invRow = admOrderById(d.adminvpaid);
+      if (!invRow || !invRow.invoice) return;
+      pendingAction = {
+        type: "invoice_paid", overlay: true, id: invRow.id, number: invRow.number, invoice: invRow.invoice.number,
+        title: "Отметить оплаченным?",
+        detail: admInvoiceConfirmText(invRow),
+        ok: "Оплачен"
+      };
+      render(); refocus("[data-admapply]"); return;
+    }
+    if (d.adminvresend) { srvInvoiceResend(d.adminvresend); return; }
+    if (d.adminvsave !== undefined) { srvInvoiceSettingsSave(); return; }
     if (d.admordercancel) {
       var canRow = admOrderById(d.admordercancel);
       if (!canRow) return;
@@ -19615,6 +19886,8 @@
             ? pa.number + " отправлен · письмо ушло"
             : pa.number + " отменён", oEntry);
         }
+        // «По счёту»: the server settles the payment (src/lib/invoices.ts markInvoicePaid) — no undo, money came
+        else if (pa.type === "invoice_paid") { srvInvoicePaid(pa.id, pa.number, pa.invoice); return; }
         /* «Настройки → Доставка и оплата»: the tariff table names itself in
            the toast, and the journal entry it just wrote is what «Отменить»
            takes back. */
@@ -20585,6 +20858,7 @@
        and a render would take the caret with it. The card redraws when a
        button is pressed, and «Сохранить» reads the draft, not the DOM. */
     else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); }
+    else if (t.matches("[data-invsetf]")) { invoiceDraft()[t.dataset.invsetf] = t.value; }
     else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
