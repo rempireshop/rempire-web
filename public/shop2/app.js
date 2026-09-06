@@ -14792,7 +14792,10 @@
      camera stream) on every unrelated state change. See scanMount() and the
      hook near the top-level render(). */
   var SCANEL = null;
-  var SCAN = { stream: null, controls: null, engine: "", timer: null, lastCode: "", lastAt: 0, video: null };
+  var SCAN = { stream: null, controls: null, engine: "", timer: null, lastCode: "", lastAt: 0, video: null,
+    // what the panel was last drawn from (scanPanelKey), which unknown code
+    // already got the search box focused, the handheld scanner's burst
+    panelKey: "", assignFocused: "", wedge: "", wedgeAt: 0 };
 
   function scanSupportInfo() {
     return {
@@ -15022,10 +15025,35 @@
       "</div>" +
       '<div class="scan__foot">Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.</div>';
   }
+  /** Everything scanPanelHTML() draws from, as one string — the panel is
+      redrawn only when this changes. What is patched in place (the stepper's
+      number, the search text and its list) is deliberately not in it. */
+  function scanPanelKey() {
+    var h = S.scanHit;
+    return [
+      h ? [h.code, h.productId || "", h.variant || "", h.qty, h.tracked, h.product ? h.product.id : ""].join("|") : "",
+      S.scanErr || "", S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "", S.scanHint || "",
+      // «Сегодня» is drawn between codes only — while a card is up the list
+      // landing must not count as a change
+      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-"
+    ].join("|");
+  }
   function scanRenderPanel() {
     if (!SCANEL) return;
     var panel = SCANEL.querySelector("#scanpanel");
-    if (panel) { panel.innerHTML = scanPanelHTML(); translateTree(panel); }
+    /* Every render() reaches here — the panel's own fetches landing, the
+       stock list refreshing behind the overlay — and each one used to redraw
+       #scanpanel from scratch: the search box the owner was typing into was
+       replaced under the finger, the keyboard closed and re-opened («keyboard
+       jumps out too often», Dim). A redraw now costs only when the panel's
+       own state changed. */
+    var key = scanPanelKey();
+    var redrawn = false;
+    if (panel && key !== SCAN.panelKey) {
+      SCAN.panelKey = key;
+      panel.innerHTML = scanPanelHTML(); translateTree(panel);
+      redrawn = true;
+    }
     var torchBtn = SCANEL.querySelector("[data-scantorch]");
     if (torchBtn) torchBtn.hidden = !S.scanTorchOk;
     var modeEl = SCANEL.querySelector(".scan__mode");
@@ -15036,18 +15064,60 @@
     // a card is up: the viewfinder steps back so the card owns the screen,
     // exactly as the design's found/unknown states show it
     SCANEL.classList.toggle("is-card", !!S.scanHit);
-    // keyboard-wedge fallback: refocus the manual field, but never steal focus
-    // from something the admin is actively typing into (assign search, qty)
+    if (!redrawn) return;
     var active = document.activeElement;
     var manual = SCANEL.querySelector("[data-scanmanual]");
+    var idle = !active || active === document.body || active === manual;
     // inventory: an unmatched code needs the product search next, not another
-    // scan — focus that field instead so binding a barcode stays fast
+    // scan — focus that field so binding a barcode stays fast. Once per code:
+    // a redraw after the owner closed the keyboard must not reopen it.
     var assignQ = SCANEL.querySelector("[data-scanassignq]");
     if (assignQ) {
-      if (!active || active === document.body || active === manual) assignQ.focus();
+      if (idle && SCAN.assignFocused !== S.scanHit.code) { SCAN.assignFocused = S.scanHit.code; assignQ.focus(); }
       return;
     }
-    if (manual && (!active || active === document.body || active === manual)) manual.focus();
+    /* The manual field is the keyboard-wedge target, but focusing it while
+       the camera runs put the phone's keyboard over the viewfinder. With a
+       camera, a handheld scanner's keystrokes are caught on the document
+       instead (scanWedgeKey); without one, the field IS the interface and
+       takes the focus as before. */
+    if (manual && idle && !scanCameraLive()) manual.focus();
+  }
+  /** True while a camera engine is up or still being started — the manual
+      field must not pull the keyboard over the viewfinder then. */
+  function scanCameraLive() {
+    return !S.scanErr && !!(S.scanSupport && S.scanSupport.camera);
+  }
+  /* A bluetooth/USB scanner is a keyboard: digits in a burst, then Enter. With
+     the manual field no longer holding the focus while the camera runs, the
+     burst is caught here — only when nothing editable has the focus, so the
+     search box and the stepper's field keep every keystroke of their own. */
+  function scanWedgeKey(e) {
+    if (!S.scanOpen || !SCANEL) return;
+    var t = e.target;
+    if (t && t.matches && t !== document.body && t !== document.documentElement &&
+        (t.matches("input,textarea,select,[contenteditable]") || t.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var now = Date.now();
+    if (now - SCAN.wedgeAt > 400) SCAN.wedge = "";
+    SCAN.wedgeAt = now;
+    if (e.key === "Enter") {
+      var code = SCAN.wedge.trim();
+      SCAN.wedge = "";
+      if (code.length >= 4) { e.preventDefault(); SCAN.lastCode = ""; handleScanCode(code); }
+      return;
+    }
+    if (e.key && e.key.length === 1 && SCAN.wedge.length < 64) SCAN.wedge += e.key;
+  }
+  /* The phone's keyboard covers the bottom of a fixed overlay — Chrome on
+     Android keeps the layout viewport as it is and only the visual one
+     shrinks — so the candidate list under the search box could sit under
+     the keys. The overlay follows the visual viewport instead. */
+  function scanFitViewport() {
+    if (!SCANEL || !window.visualViewport) return;
+    var vv = window.visualViewport;
+    SCANEL.style.height = Math.round(vv.height) + "px";
+    SCANEL.style.top = Math.round(vv.offsetTop) + "px";
   }
   function stopScanEngine() {
     if (SCAN.timer) { clearTimeout(SCAN.timer); SCAN.timer = null; }
@@ -15216,18 +15286,38 @@
     SCANEL.innerHTML = scannerShellHTML();
     translateTree(SCANEL);
     SCAN.video = SCANEL.querySelector("[data-scanvideo]");
+    SCAN.panelKey = ""; SCAN.assignFocused = ""; SCAN.wedge = "";
     var manual = SCANEL.querySelector("[data-scanmanual]");
     if (manual) {
       manual.addEventListener("keydown", function (e) {
         if (e.key === "Enter") { e.preventDefault(); submitManualScan(); }
       });
-      manual.focus();
     }
+    // the handheld-scanner burst and the keyboard-shrunk viewport, for as
+    // long as the shell stands (scanUnmount takes both off again)
+    document.addEventListener("keydown", scanWedgeKey);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", scanFitViewport);
+      window.visualViewport.addEventListener("scroll", scanFitViewport);
+    }
+    /* The candidate rows say «без кода» / «есть код» from the stock copy, and
+       the list behind the overlay is what the scanner is about to write to —
+       a fresh read on every open, not the one from the last visit. */
+    if (S.stockLevels || STOCK.asked) reloadStock(); else loadStockLevels(false);
     startScanEngine();
+    // no camera at all (a desktop): the manual field is the interface and
+    // takes the focus now, the way the shell always did; with a camera the
+    // keyboard would cover the viewfinder — see scanRenderPanel()
+    if (manual && !scanCameraLive()) manual.focus();
     return SCANEL;
   }
   function scanUnmount() {
     stopScanEngine();
+    document.removeEventListener("keydown", scanWedgeKey);
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener("resize", scanFitViewport);
+      window.visualViewport.removeEventListener("scroll", scanFitViewport);
+    }
     if (SCANEL) { SCANEL.remove(); SCANEL = null; }
   }
   /** Everything a fresh scanning session forgets — shared by the «Склад»

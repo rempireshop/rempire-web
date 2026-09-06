@@ -186,4 +186,59 @@ test.describe("scanner app", () => {
     await expect(row, "the list behind the overlay still shows the old count").toContainText(String(before + 2));
     await assertClean(page, w, "«Склад» list after the overlay");
   });
+
+  /* Dim: «keyboard jumps out too often when scanning». Every render() — the
+     panel's own fetches landing, the stock list refreshing — re-drew
+     #scanpanel from scratch, and with it the search box the owner was typing
+     into: the node was replaced under the finger, the keyboard closed and
+     re-opened. The panel must only be redrawn when its own state changes.
+     And a bluetooth/USB scanner types into whatever is focused — with nothing
+     focused (the owner closed the keyboard), its digits went to the page and
+     nothing happened. */
+  test("the search box survives a background render; a handheld scanner's keystrokes count with nothing focused", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const ean = `26${Date.now().toString().slice(-10)}`;
+    const ean2 = `25${Date.now().toString().slice(-10)}`;
+
+    await openAdmin(page);
+    await tab(page, "stock");
+    await expect(page.locator("#stocklist")).toBeVisible();
+    /* The stock list re-reads when the scanner opens (the «без кода» marks
+       on the candidate rows must be current). Held back for a second here,
+       so it lands squarely while the owner is typing — the fetch that used to
+       redraw the panel. */
+    let held = 0;
+    await page.route("**/api/admin/inventory/?filter=all&limit=1000", async (route) => {
+      held++;
+      await new Promise((r) => setTimeout(r, 1000));
+      await route.continue();
+    });
+
+    await page.locator("[data-scanopen]").first().click();
+    await expect(page.locator(".scanoverlay")).toBeVisible();
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    const search = page.locator("[data-scanassignq]");
+    await search.fill("tangled");
+    await search.evaluate((el) => { (el as HTMLElement).dataset.mark = "kept"; });
+    await expect(page.locator(".scan__cand").first()).toBeVisible();
+    await expect.poll(() => held, { timeout: 15_000 }).toBeGreaterThan(0);
+    // the held-back answer lands now: render() runs, the panel must not
+    await page.waitForResponse((r) => r.url().includes("/api/admin/inventory/?filter=all&limit=1000"));
+    await page.waitForTimeout(300);
+    await expect(search, "the search box was rebuilt under the finger").toHaveAttribute("data-mark", "kept");
+    await expect(search).toHaveValue("tangled");
+    await expect(search).toBeFocused();
+    await expect(page.locator(".scan__cand").first()).toBeVisible();
+
+    // a handheld scanner: digits + Enter, keyboard closed, nothing focused
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.type(ean2, { delay: 15 });
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#scanpanel"), "the handheld scanner's code went nowhere").toContainText(ean2);
+    await assertClean(page, w, "background render and the keyboard wedge");
+    await page.unroute("**/api/admin/inventory/?filter=all&limit=1000");
+  });
 });
