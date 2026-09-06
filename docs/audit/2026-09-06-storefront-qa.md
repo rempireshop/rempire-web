@@ -183,8 +183,15 @@ untranslated** and ET/EN key parity is exact after every change in this branch.
 
 ## 4. Bugs fixed
 
-Twelve, across fourteen commits, plus the dead-code sweep. Every one has a test
-that fails on the commit before it — verified by stashing the fix and re-running, not assumed.
+Twelve, across fourteen commits, plus the dead-code sweep. Every one carries a
+test. For 9–12 the test was **proven** to fail on the code before the fix — the
+fix stashed, the spec re-run, the failure message read (`«purchase» sent 3×`,
+`Expected "5,47 €" / Received "5,50 €"`, the Russian description in the ET tab,
+`«Далее — доставка» dropped focus`) — then the fix restored. For 1–8, which
+arrived as the previous session's uncommitted work, the evidence is the diff
+read line by line, the affected specs run green, `node --check` and
+`node tools/i18n-gaps.mjs` clean, and a test that exercises exactly the code
+path each hunk changed; they were not re-broken to watch them fail.
 
 **Carried over from the previous session, verified and committed here** (the
 work existed uncommitted in the worktree; each piece was read, checked and
@@ -196,7 +203,7 @@ proven before it was committed):
 | 2 | «+» in the cart drawer priced a set or a gift-card line through the first catalogue product — «×2 = 18 €» on a 34,90 € set — until the next full rebuild. | `9e5d795` |
 | 3 | The filter drawer's «Показать N товаров» was repainted in Russian on an ET/EN catalogue the moment a checkbox was ticked. | `9e5d795` |
 | 4 | The field notes drawn on blur skipped the dictionary, so a keyboard user tabbing through an Estonian checkout read Russian. | `9e5d795` |
-| 5 | On the account screen the blur that removed the e-mail error moved «Получить код» 29 px out from under the finger, and the first tap did nothing. | `9e5d795` |
+| 5 | On the account screen the blur that removed the e-mail error moved «Получить код» out from under the finger, and the first tap did nothing (the fix's own note measures the jump at 29 px). | `9e5d795` |
 | 6 | A signed-in shopper's own address was not in the box on a cold checkout: «Далее» a moment too early said «Введите e-mail», a moment later went through on a box that looked empty. | `80fd305` |
 | 7 | An all-gift-card order let «Далее — оплата» through without the recipient's address, then the pay button sent the shopper back a step. | `80fd305` |
 | 8 | The chat bubble greeted a first visit to `/shop2/et/` in Russian and printed «9 €» on the English shop that says «€9». | `2ca2aef` |
@@ -382,6 +389,17 @@ think a shopper would feel first.
 ---
 
 ## 8. How to re-run this
+
+The state of the branch as it stands, all foreground runs, all green:
+
+| Command | Result |
+|---|---|
+| `npx vitest run` | 74 files, **1491 passed** |
+| `sweep-storefront` + `sweep-checkout`, desktop + tablet + mobile | **77 passed**, 31 skipped |
+| home, product, catalogue, checkout, account, sets, giftcard, blog, info-pages, chatbot, seo, pwa, a11y, accessibility, security — desktop + mobile-safari | **219 passed**, 1 skipped |
+| `storefront-sweep-2`, desktop + mobile + mobile-safari | **46 passed**, 2 skipped (the beacon pair on WebKit) |
+| `node tools/i18n-gaps.mjs` | 0 untranslated, ET/EN key parity exact |
+| `node --check public/shop2/app.js` | clean after every edit |
 
 ```bash
 node tools/e2e-build.mjs
