@@ -395,3 +395,58 @@ for (const lang of LANGS) {
     });
   });
 }
+
+test.describe("checkout — a keyboard shopper", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(204) });
+
+  test("moving between the steps never drops focus on <body>", async ({ page }) => {
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+
+    /** Where focus landed: on <body> is the failure this pins. */
+    const focus = () =>
+      page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        return {
+          tag: el ? el.tagName : "none",
+          inOpenStep: !!(el && el.closest(".costep.is-open")),
+        };
+      });
+
+    /* Reaching the e-mail box from the top of the page: a keyboard shopper
+       starts at the address bar, not inside the form. */
+    let tabs = 0;
+    for (; tabs < 40; tabs++) {
+      if (await page.evaluate(() => document.activeElement?.hasAttribute("data-email") === true)) break;
+      await page.keyboard.press("Tab");
+    }
+    expect(tabs, "the e-mail box is not reachable with Tab").toBeLessThan(40);
+    await page.keyboard.type(`kbd-${Date.now()}@example.com`);
+
+    // …and every step move keeps focus inside the step that just opened
+    await page.locator('button.btn--wide[data-step="2"]').click();
+    await expect(page.locator('input[data-dm="parcel"]')).toBeVisible();
+    expect(await focus(), "«Далее — доставка» dropped focus").toMatchObject({ inOpenStep: true });
+
+    await page.locator('input[data-dm="pickup"]').check();
+    await page.locator('[data-shipf="name"]').fill("Kbd Shopper");
+    await page.locator('[data-shipf="phone"]').fill("+372 5550001");
+    await page.locator('button.btn--wide[data-step="3"]').click();
+    await expect(page.locator('input[data-paym="1"]')).toBeVisible();
+    expect(await focus(), "«Далее — оплата» dropped focus").toMatchObject({ inOpenStep: true });
+
+    // going back to change something is a step move too
+    await page.locator('.costep__head[data-step="1"]').click();
+    await expect(page.locator("[data-email]")).toBeVisible();
+    expect(await focus(), "reopening step 1 dropped focus").toMatchObject({ inOpenStep: true });
+
+    // and a refusal still puts the shopper on the field it is about
+    await page.locator("[data-email]").fill("nope");
+    await page.locator('button.btn--wide[data-step="2"]').click();
+    expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-invalid"))).toBe("true");
+  });
+});

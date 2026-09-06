@@ -18726,7 +18726,16 @@
           if (shipMissing().length || pointMissing() || (isDigital() && giftToEmailBad())) { return failStep(2); }
         }
       }
-      S.coStep = n; render(); return;
+      /* Same rule as every other checkout control: the render that opens the
+         step destroys the button that was pressed, so put focus on its
+         replacement — the heading of the step now open, which announces
+         itself and its state. Without it a keyboard or screen-reader shopper
+         was dropped on <body> by «Далее» and had to tab past the whole
+         announce bar and header again, three times, to finish an order. The
+         refusal path already did this (failStep → the first bad field). */
+      S.coStep = n; render();
+      refocus('.costep__head[data-step="' + n + '"]');
+      return;
     }
     /* ---------- delivery picker ---------- */
     if (d.dm) {
