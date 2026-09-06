@@ -5082,6 +5082,14 @@
     // features: nothing is posted, so nothing is billed — createOrder() prices
     // a digital order's delivery at 0 too, and that is the number charged
     if (m === "digital" || m === "pickup" || freeShip()) return 0;
+    return shipRulePrice(m, carrier);
+  }
+  /* The same number with no basket in it: what a method costs by the rules,
+     whether or not the cart that happens to be open has earned free delivery.
+     The account screen's «Доставка по умолчанию» is a standing preference,
+     not a quote for today's basket, so that is the one that prices it. */
+  function shipRulePrice(m, carrier) {
+    if (m === "digital" || m === "pickup") return 0;
     var byCarrier = SHIP_RULES.carriers && SHIP_RULES.carriers[carrier];
     var v = byCarrier ? (byCarrier[S.country] !== undefined ? byCarrier[S.country] : byCarrier["default"]) : undefined;
     if (v === undefined || v === null) {
@@ -5089,6 +5097,17 @@
       v = table[S.country] !== undefined ? table[S.country] : table["default"];
     }
     return typeof v === "number" && isFinite(v) ? Math.round(v * 100) / 100 : 0;
+  }
+  /* The price beside a row of «Доставка по умолчанию». The row's LABEL still
+     comes from the old SHIP table (that table is all this screen has left of
+     it), but its price must be the one the checkout bills: SHIP is a frozen
+     demo tariff, and against the live rules it promised «Курьер до двери 9 €»
+     where the checkout charged 10,84 € and «Пакомат Omniva 5,50 €» against
+     5,47 €. A shopper who reads a price in their own account is entitled to
+     see it again at the till. */
+  function acctShipPrice(x) {
+    if (x.pickup) return 0;
+    return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || "");
   }
   function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
   /* What the applied promo code takes off. The RULE comes from the server
@@ -8582,8 +8601,9 @@
         COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
       "</select></span></label>" +
       '<div class="optlist">' + m.map(function (x, i) {
+        var xp = acctShipPrice(x);
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
-          '<span class="opt__price num">' + (x.p ? eur(x.p) : "Бесплатно") + "</span></label>";
+          '<span class="opt__price num">' + (xp ? eur(xp) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
       (machinesFor(m[ai]).length
         ? '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(machinesFor(m[ai]).length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
