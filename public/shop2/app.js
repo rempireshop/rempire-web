@@ -8666,7 +8666,23 @@
         // in the summary — S.ship.name/phone prefill (acctApply, only into
         // still-empty fields) is picked up fresh whenever step 2 actually
         // renders, with no patch needed since the shopper starts on step 1.
-        if (acctApply(j)) { if (S.screen === "checkout") patchSummary(); else render(); }
+        if (acctApply(j)) {
+          if (S.screen === "checkout") {
+            patchSummary();
+            /* Step 1 was painted before the profile arrived, so the address
+               acctApply() just put in S.email is not in the box the shopper is
+               looking at: «Далее» pressed a moment too early answered «Введите
+               e-mail», a moment later it silently went through on a box that
+               looked empty. The box is the truth — what is typed in it stays
+               (and is what the order carries), an empty one takes the account's
+               address. Never a render(): that would rebuild the field. */
+            var emBox = document.querySelector("[data-email]");
+            if (emBox) {
+              if (emBox.value) S.email = emBox.value;
+              else if (S.email && document.activeElement !== emBox) emBox.value = S.email;
+            }
+          } else render();
+        }
       })
       .catch(noop);
   }
@@ -18667,7 +18683,13 @@
         if (S.coStep === 1) { S.emailTouched = true; if (emailBad()) { return failStep(1); } }
         if (S.coStep === 2) {
           S.shipTouched = true;
-          if (shipMissing().length || pointMissing()) { return failStep(2); }
+          /* features: on an all-gift-card order the recipient's address is
+             the step's one required field once «отправить мне» is off — and a
+             typo in it is a typo either way. payNow() already refuses it; the
+             step button let it through, so the shopper reached «Оплата» only
+             to be sent back here by the pay button. Same check, same place. */
+          S.giftToTouched = true;
+          if (shipMissing().length || pointMissing() || (isDigital() && giftToEmailBad())) { return failStep(2); }
         }
       }
       S.coStep = n; render(); return;
