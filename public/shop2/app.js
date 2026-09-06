@@ -886,7 +886,6 @@
       "Чат включён ✓": "Vestlus on sees ✓",
       "Чат выключен ✓": "Vestlus on väljas ✓",
       "Отменено ✓": "Tagasi võetud ✓",
-      "В демо правка не сохраняется": "Demos muudatust ei salvestata",
 
       // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
       "Контент": "Sisu",
@@ -1491,6 +1490,8 @@
       "Список карт не загрузился.": "Kaartide nimekiri ei laadinud.",
       "сразу после оплаты": "kohe pärast tasumist",
       "когда вы нажмёте «Отправлен»": "kui vajutad «Teele pandud»",
+      "Ищем по всем заказам — фильтр сейчас не действует.":
+        "Otsime kõigist tellimustest — filter praegu ei kehti.",
       "тем, кто оставил почту": "neile, kes jätsid e-posti",
       "через 3 часа": "3 tunni pärast",
       "в день рождения": "sünnipäeval",
@@ -2628,7 +2629,6 @@
       "Чат включён ✓": "Chat switched on ✓",
       "Чат выключен ✓": "Chat switched off ✓",
       "Отменено ✓": "Undone ✓",
-      "В демо правка не сохраняется": "In the demo this change is not saved",
 
       // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
       "Контент": "Content",
@@ -3228,6 +3228,8 @@
       "Список карт не загрузился.": "The card list did not load.",
       "сразу после оплаты": "right after payment",
       "когда вы нажмёте «Отправлен»": "when you press “Shipped”",
+      "Ищем по всем заказам — фильтр сейчас не действует.":
+        "Searching every order — the filter is off right now.",
       "тем, кто оставил почту": "to everyone who left an e-mail",
       "через 3 часа": "after 3 hours",
       "в день рождения": "on the birthday",
@@ -10214,7 +10216,14 @@
     if (!list.length && SRV.admin === true && !SRV.orders && !SRV.ordersErr) {
       return '<div class="adm-skel"><i></i><i></i><i></i></div>';
     }
-    return list.map(admOrderRowHTML).join("") +
+    /* The chip stays lit while a search is typed — it is the filter the owner
+       will come back to — but the search really does look through every order,
+       so the list says so. Without this line the screen was one chip saying
+       «Новые» over a list of shipped orders, with nothing to explain it. */
+    var over = q && f !== "all"
+      ? '<div class="adm-hint" style="margin:0 0 8px">Ищем по всем заказам — фильтр сейчас не действует.</div>'
+      : "";
+    return over + list.map(admOrderRowHTML).join("") +
       (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
   }
   /** The one step an order is at, as a button — the same primary action the
@@ -10222,6 +10231,12 @@
   function admOrderStepBtn(v, row) {
     var cls = "adm-btn" + (row ? " adm-btn--row" : "");
     var busy = SRV.shipBusy ? " disabled" : "";
+    /* An all-gift-card order has no parcel and no hand-over: the card is in
+       the customer's inbox the moment the payment lands. The card already
+       hides every step for it (showSteps below); the row did not, so a paid
+       digital order offered «Отправлен» — one tap and the shop mailed «Заказ
+       отправлен», with a tracking number it does not have, about nothing. */
+    if (v.digital) return "";
     if (v.paid && v.pickup) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Выдан клиенту</button>';
     if (v.paid && !v.labeled && !v.digital) {
       return '<button class="' + cls + '" data-admlabel="' + esc(v.id) + '"' + busy + ">" +
@@ -10583,6 +10598,12 @@
     if (S.adminTab === "stock") return "stock";
     return S.goodsTab === "bundles" ? "sets" : "catalog";
   }
+  /** The number on the «Склад» tab: counted shelves that are low or out.
+      That is the only thing it is ever allowed to mean. It used to fall back
+      to lowStock() — the manual «мало / нет» flag on the static catalogue —
+      so the same badge said one thing before the shelf list arrived and a
+      different one after, and neither said which. On a real panel there is
+      no number until the list is here (the same rule as «Ждут письма»). */
   function admLowCount() {
     var rows = S.stockLevels;
     if (rows) {
@@ -10590,10 +10611,13 @@
       for (var i = 0; i < rows.length; i++) if (rows[i].tracked && (rows[i].state === "low" || rows[i].state === "out")) n++;
       return n;
     }
-    return lowStock().length;
+    return SRV.admin === true ? 0 : lowStock().length;
   }
   function admProductsHTML() {
     var tab = admProductTab();
+    // the badge is drawn on every tab, so the shelf list is asked for on every
+    // tab — «Каталог» used to show the badge without ever asking
+    loadStockLevels(false);
     var warn = admLowCount();
     var tabs =
       '<button class="adm-tab" data-admtab="goods" aria-current="' + (tab === "catalog") + '" title="Каталог">Каталог</button>' +
@@ -11860,10 +11884,18 @@
      numbers simply do not draw — an unconfigured shop must not show zeros it
      cannot stand behind. */
   var FLOW_COUNTS = null;
-  var flowCountsAsked = false;
-  function loadFlowCounts() {
-    if (flowCountsAsked) return;
-    flowCountsAsked = true;
+  /* When the answer last came back. Asked once per session, «Ждут письма: 3»
+     was this morning's three all day: the panel is a tab Renat leaves open,
+     and the number is the reason he opens the screen. One request per minute
+     of looking at it, and one straight away after anything moved an order —
+     the stamp is set before the fetch, so the render() inside it cannot loop
+     and a burst of renders is still one call. */
+  var flowCountsAt = 0;
+  var FLOW_COUNTS_TTL = 60000;
+  function loadFlowCounts(force) {
+    var now = Date.now();
+    if (!force && flowCountsAt && now - flowCountsAt < FLOW_COUNTS_TTL) return;
+    flowCountsAt = now;
     fetch("/api/admin/flows/").then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { if (j && j.ok && j.counters) { FLOW_COUNTS = j.counters; render(); } })
       .catch(noop);
@@ -16292,6 +16324,12 @@
   function admOrdersChanged() {
     loadSrvOrders(true);
     loadOverview(true);
+    /* Everything else that counts orders is now a stale copy: «Ждут письма»
+       on «Письма» and the accountant's month on «Отчёты». Marked old rather
+       than fetched — the next render of those screens asks, a screen nobody
+       is looking at costs nothing. */
+    flowCountsAt = 0;
+    reportSummaryAt = 0;
   }
   function srvOrderPatch(id, patch) {
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", patch).then(function (r) {
@@ -16381,8 +16419,11 @@
   }
 
   /* ---- assistant-work: «Отчёты» — see reportsCard() ---------------------- */
+  var reportSummaryAt = 0;
   function srvLoadReportSummary(month) {
     if (!SRV.admin) return;
+    // stamped before the call, so the render() below cannot ask again
+    reportSummaryAt = Date.now();
     apiJson("/api/admin/reports/orders/?month=" + encodeURIComponent(reportMonthOr(month)) + "&format=json").then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -16451,10 +16492,13 @@
      "fetch once, cache in S" idiom as loadFlowCounts() above the «Письма»
      card — the first render of this card kicks the summary off, later
      renders just read what landed. */
-  var reportSummaryAsked = false;
+  /* Same staleness rule as the flow counts above: the accountant's three
+     numbers are re-asked a minute after they were last read, and at once
+     after an order moved — a sale made while the screen was open used to
+     leave «Заказы 4» sitting there until the tab was reloaded. */
   function loadReportSummaryOnce() {
-    if (reportSummaryAsked) return;
-    reportSummaryAsked = true;
+    var now = Date.now();
+    if (reportSummaryAt && now - reportSummaryAt < FLOW_COUNTS_TTL) return;
     srvLoadReportSummary(S.reportMonth);
   }
   function reportsCard() {
@@ -18598,7 +18642,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -20057,7 +20101,6 @@
       return;
     }
     if (d.admattdel !== undefined) { admAttRemove(Number(d.admattdel)); render(); return; }
-    if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
     if (d.size !== undefined) {
       S.size = Number(d.size);
       var sp = byId(S.productId);
