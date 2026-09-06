@@ -17820,11 +17820,36 @@
     if (renderQueued) { renderPending = true; return; }
     renderQueued = true;
     renderImpl();
+    markLastRows();
     requestAnimationFrame(function () {
       renderQueued = false;
-      if (renderPending) { renderPending = false; renderImpl(); }
+      if (renderPending) { renderPending = false; renderImpl(); markLastRows(); }
     });
   }
+
+  /* The hairline under a card closes the product off (styles.css, .card::after).
+     The last row of a grid has nothing below it to close off, so its cards get
+     .card--last and lose the line. Rows are found by measuring — the column
+     count follows the viewport — after every paint and on resize. */
+  function markLastRows() {
+    var grids = document.querySelectorAll(".grid");
+    for (var g = 0; g < grids.length; g++) {
+      var cards = grids[g].querySelectorAll(".card");
+      if (!cards.length) continue;
+      var tops = [], maxTop = -Infinity;
+      for (var i = 0; i < cards.length; i++) {
+        var t = Math.round(cards[i].getBoundingClientRect().top);
+        tops.push(t);
+        if (t > maxTop) maxTop = t;
+      }
+      for (var j = 0; j < cards.length; j++) cards[j].classList.toggle("card--last", tops[j] >= maxTop - 1);
+    }
+  }
+  var markLastRowsTimer = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(markLastRowsTimer);
+    markLastRowsTimer = setTimeout(markLastRows, 120);
+  }, { passive: true });
 
   /* Size, colour, gallery and quantity clicks on the product page patch in
      place — a full render destroyed the focused button, so a keyboard user
@@ -18093,6 +18118,7 @@
     if (chips) chips.outerHTML = activeChips();
     translateTree(bodySlot);
     observeSentinel();
+    markLastRows();
   }
 
   /* ---------- history ----------

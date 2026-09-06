@@ -456,25 +456,34 @@ body:has(.stickybar) .ftr {
    margin-top:auto so rows align across one- and two-line titles. The size
    trigger is text with a chevron — no border, no background — and its
    listbox opens under the row, spanning the card. */
-.card__name { margin: 4px 0 9px; }
-/* The price row is a plinth (06.09, Renat's note): with nothing framing the
-   cards, a bare row — and before it a hairline — read as belonging to the
-   NEXT product, the «В корзину» at the right edge most of all. The row now
-   sits on a shell-tinted strip exactly as wide as the card: a closed shape
-   under the product's own photo and name (Gestalt: common region), so the
-   price, the size and the button cannot be read as the neighbour's. Still
-   one row, still no box around the card; the strip is the only surface, and
-   it is the same tint the announcement strip and the panels use. 36 px tall,
-   which also makes the tap area honest on a phone. */
+.card__name { margin: 4px 0 4px; }
+/* a rail is one row — nothing under it to close off */
+.rail .card::after { display: none; }
+/* The row (06.09, owner's call after Renat's note): price on the left,
+   «В корзину» on the right as before, but pulled up close under the name,
+   and CLOSED by a hairline under it rather than opened by one above — the
+   line under the row says «this product ends here», where a line above it
+   read as «the next one starts here». The last row of a grid has no line:
+   app.js marks those cards .card--last after every render and on resize,
+   because the column count changes with the viewport. */
+/* The line lives INSIDE the card's box (padding-bottom, line at bottom:0):
+   cards carry content-visibility:auto, whose paint containment clips anything
+   drawn outside the box — a line hung 10 px below the card never painted. */
+.card { position: relative; padding-bottom: 6px; box-sizing: border-box; }
+.card::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  border-top: 1px solid rgba(28, 26, 0, .13); pointer-events: none;
+}
+.card--last::after { display: none; }
+/* The row is pinned to the card's bottom (margin-top:auto), so every price
+   and «В корзину» in a grid row sit on one height whatever the name's line
+   count, and the line runs 6 px under them as one straight rule. */
 .card__foot {
   position: relative; display: flex; align-items: center; gap: 6px;
-  margin-top: auto; min-height: 36px; padding: 0 10px; box-sizing: border-box;
-  background: var(--shell); white-space: nowrap;
+  margin-top: auto; padding-top: 4px; min-height: 30px; white-space: nowrap;
 }
-.card:hover .card__foot, .card:focus-within .card__foot { background: var(--shell-dark); }
-@media (max-width: 480px) { .card__foot { padding: 0 8px; } }
-.card__foot > * { flex: none; }
 .card__sp { flex: 1 1 0 !important; min-width: 0; }
+.card__foot > * { flex: none; }
 .card__price { font-size: 13px; font-weight: 600; }
 .card__sizebtn {
   display: inline-flex; align-items: center; gap: 4px; padding: 0; margin: 0;
