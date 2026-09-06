@@ -547,6 +547,25 @@ async function customUniverse(): Promise<Universe> {
   return out;
 }
 
+/**
+ * Whether ONE product×variant is tracked — the same ledger test trackedKeys()
+ * below makes for the whole table, for a caller about to write a counting
+ * move on behalf of a sale that never touched the shelf (the return of a
+ * cancelled or refunded order, src/lib/orders.ts setOrderStatus). A sale on
+ * an uncounted variant is skipped by move(); its return has to be skipped
+ * the same way, or the shelf gains a bottle nobody took, the variant turns
+ * tracked at 1 and the shop starts saying «мало».
+ */
+export async function isTracked(productId: string, variant?: string | null): Promise<boolean> {
+  const pid = String(productId ?? "").trim();
+  if (!pid) return false;
+  const rows = await query<{ n: string }>(
+    `select count(*)::text as n from stock_moves where product_id = $1 and variant = $2 and reason in ${TRACKING_SQL}`,
+    [pid, normVariant(variant)],
+  );
+  return rows.length > 0 && Number(rows[0].n) > 0;
+}
+
 async function trackedKeys(): Promise<Set<string>> {
   const rows = await query<{ product_id: string; variant: string }>(
     `select distinct product_id, variant from stock_moves where reason in ${TRACKING_SQL}`,
