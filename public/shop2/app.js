@@ -10531,7 +10531,10 @@
     var prices = p.prices && p.prices.length ? p.prices : [p.price];
     var lo = Math.min.apply(null, prices), hi = Math.max.apply(null, prices);
     // the low end keeps only its number, so «9–24 €» reads as one price range
-    var price = lo === hi ? eur(hi) : eur(lo).replace(/\s?€$/, "").replace(/^€/, "") + "–" + eur(hi);
+    // «9–25 €» in RU/ET, «€9–25» in EN — the sign once, on the side its language puts it
+    var price = lo === hi ? eur(hi)
+      : S.lang === "EN" ? eur(lo) + "–" + eur(hi).replace(/^€/, "")
+      : eur(lo).replace(/\s?€$/, "") + "–" + eur(hi);
     // product creation: a hidden custom product says so instead of a stock badge
     var badge = p.custom && p.active === false ? ["Скрыт", "adm-badge--quiet"]
       : p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
@@ -14599,7 +14602,7 @@
     var open = S.stockEdit === key;
     var qty = r.tracked ? r.qty : 0;
     var low = r.tracked && qty <= 3;
-    return '<div class="adm-row adm-row--tall">' +
+    return '<div class="adm-row adm-row--tall adm-row--stock">' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) + "</span>" +
         '<span class="adm-row__sub' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
           (r.variant ? "<span>" + esc(r.variant) + "</span> · " : "") +

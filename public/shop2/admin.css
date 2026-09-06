@@ -386,9 +386,9 @@
   .adm-copy { height: 44px; }
   /* «Склад» rows: the name takes the first line, the stepper and «Править»
      share the second — instead of the link wrapping alone under a gap */
-  .adm-row--tall { row-gap: 6px; }
-  .adm-row--tall > .adm-row__body { flex: 1 1 100%; }
-  .adm-row--tall > .adm-link { margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; }
+  .adm-row--stock { row-gap: 6px; }
+  .adm-row--stock > .adm-row__body { flex: 1 1 100%; }
+  .adm-row--stock > .adm-link { margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; }
 }
 
 .adm-card { border: 1px solid var(--a-ink); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
