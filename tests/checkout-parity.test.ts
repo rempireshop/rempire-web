@@ -46,6 +46,7 @@ function client(promoInfo: PromoInfo, cartSum: number, rules: ShippingRules, cou
     ${slice("discount")}
     ${slice("promoLive")}
     ${slice("shipPriceFor")}
+    ${slice("shipRulePrice")}
     function cartSum() { return CART_SUM; }
     function threshold() {
       var by = SHIP_RULES.freeFromByCountry;
