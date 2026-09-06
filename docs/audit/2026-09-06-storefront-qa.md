@@ -16,7 +16,8 @@ not right about is a short list of things that only show up when you drive the
 screens rather than read them: a purchase counted three times, an account
 quoting a delivery price the till does not charge, a keyboard shopper dropped
 on `<body>` at every checkout step, and one page with no head of its own.
-Eleven bugs are fixed here, each with a test that fails without the fix.
+Twelve bugs are fixed here, each with a test that fails without the fix, plus one
+dead-code sweep.
 
 ---
 
@@ -24,7 +25,7 @@ Eleven bugs are fixed here, each with a test that fails without the fix.
 
 ### 1.1 Screens and the URLs that reach them
 
-`routeFromPath()` (`public/shop2/app.js` ~20890) turns a path into `S.screen`;
+`routeFromPath()` (`public/shop2/app.js:20917`) turns a path into `S.screen`;
 `pathFor()` turns state back into a path. Every route exists three times — no
 prefix = Russian (and the `x-default`), `/shop2/et/…`, `/shop2/en/…`.
 
@@ -50,7 +51,7 @@ Two things that are *not* screens:
   page that does not exist.
 * **Order tracking has no `/track` page.** «Отследить» in the account's order
   row is an `<a href>` straight to the carrier's own tracking URL
-  (`app.js:8493`), and the «отправлен» e-mail carries the same link. There is
+  (`app.js:8512`), and the «отправлен» e-mail carries the same link. There is
   nothing of ours to QA there beyond the link being present and `rel=noopener`,
   which it is.
 
@@ -82,7 +83,7 @@ the account; `/api/assistant/` from the chat bubble.
 
 ### 1.3 SEO heads and sitemaps
 
-`setHead()` (`app.js` ~17470) rewrites `<title>`, the description, the
+`setHead()` (`app.js:17476`) rewrites `<title>`, the description, the
 canonical, the four hreflang links, `og:*` and `<html lang>` on every
 client-side render, and injects a `Product` JSON-LD on a product page only.
 The static head (title, description, robots, canonical, hreflang×4, OG×8,
@@ -108,10 +109,10 @@ payment and shipping providers) on this branch's own port.
 | Area | Viewports | Languages | Evidence |
 |---|---|---|---|
 | Home, all 8 categories, all subcategories, all 26 brand pages, 25 seeded product pages (sizes, gallery, video, reviews, notify-me), sets, set, gift, blog, 5 info pages, search (empty / blank / hit / miss / huge / emoji / markup / RTL), cart drawer, checkout, account, unknown URLs | 1280, 768, 375 | RU, ET, EN | `e2e/sweep-storefront.spec.ts` — 60 tests, all green |
-| Cart arithmetic, promo codes (garbage, case, whitespace, expired, below minimum), gift cards (garbage, real, over-value), 5 randomised product × delivery × contact × outcome orders, contact validation, the free-shipping threshold, a whole checkout at phone width | 1280 + 375 for the phone-layout case | RU, ET, EN | `e2e/sweep-checkout.spec.ts` — 77 passed / 31 skipped with the crawl |
+| Cart arithmetic, promo codes (garbage, case, whitespace, expired, below minimum), gift cards (garbage, real, over-value), 5 randomised product × delivery × contact × outcome orders, contact validation, the free-shipping threshold, a whole checkout at phone width | 1280 + 375 for the phone-layout case | RU, ET, EN | `e2e/sweep-checkout.spec.ts` — run together with the crawl across the three Chromium projects: 77 passed, 31 skipped |
 | Home, product, catalogue, checkout, account, sets, gift card, blog, info pages, chat, SEO heads, PWA manifests, axe accessibility, security headers | 1280 desktop + 390 iPhone 13 on **WebKit** | RU, ET, EN | the named specs, all green |
 | **360 px** — home, catalogue, brand, brands, product, sets, gift, blog, all 5 info pages, account, search | 360×640 | RU, ET, EN | no horizontal overflow on any of the 45 views (scratch pass, not kept as a spec: `sweep-storefront` already guards ≤480 px at 375) |
-| The 11 regressions fixed here | 1280, 375, 390 WebKit | RU, ET, EN | `e2e/storefront-sweep-2.spec.ts` — 16 tests × 3 projects |
+| The 12 bugs fixed here | 1280, 375, 390 WebKit | RU, ET, EN | `e2e/storefront-sweep-2.spec.ts` — 16 tests × 3 projects |
 
 **Dumb-user paths walked by hand.** Empty and invalid e-mail, phone and name;
 five wrong login codes in a row then the right one; removing the last cart
@@ -182,8 +183,8 @@ untranslated** and ET/EN key parity is exact after every change in this branch.
 
 ## 4. Bugs fixed
 
-Eleven, in fourteen commits. Every one has a test that fails on the commit
-before it — verified by stashing the fix and re-running, not assumed.
+Twelve, across fourteen commits, plus the dead-code sweep. Every one has a test
+that fails on the commit before it — verified by stashing the fix and re-running, not assumed.
 
 **Carried over from the previous session, verified and committed here** (the
 work existed uncommitted in the worktree; each piece was read, checked and
