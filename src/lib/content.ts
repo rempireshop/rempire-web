@@ -49,6 +49,9 @@ export interface Company {
   phone: string;
   /** "" when the owner has not published a bank account. */
   iban: string;
+  /** The bank behind the IBAN («Swedbank») — printed on company invoices next
+   *  to it (src/lib/invoice-pdf.ts). "" until the owner fills it in. */
+  bankName: string;
 }
 
 /** Per weekday: "" (not set), "closed", or "HH:MM–HH:MM". */
@@ -106,6 +109,7 @@ export const DEFAULT_CONTENT: ShopContent = {
     email: "info@rempireshop.com",
     phone: "+372 5623 7237",
     iban: "",
+    bankName: "",
   },
   hours: {
     // Nobody has told us the salon's hours yet (docs/OPEN-QUESTIONS.md).
@@ -296,6 +300,7 @@ export function sanitizeContentPatch(raw: unknown): ContentPatch | null {
     if ("email" in c) co.email = email(c.email);
     if ("phone" in c) co.phone = phone(c.phone);
     if ("iban" in c) co.iban = iban(c.iban);
+    if ("bankName" in c) co.bankName = line(c.bankName, 60);
     // a blank company name would erase the shop's identity from every page
     if (co.legalName === "") delete co.legalName;
     if (Object.keys(co).length) out.company = co;
@@ -440,6 +445,7 @@ const PLACEHOLDERS = [
   "email",
   "phone",
   "iban",
+  "bankName",
 ] as const;
 
 /**

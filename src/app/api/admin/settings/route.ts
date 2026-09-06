@@ -15,6 +15,7 @@ import { cleanPricing } from "@/lib/loyalty";
 import { parseShippingRules } from "@/lib/shipping";
 import { cleanMailTexts } from "@/emails/texts";
 import { cleanGiftAmounts } from "@/lib/giftcards";
+import { cleanInvoiceSettings } from "@/lib/invoices";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,6 +80,9 @@ export async function PUT(req: Request) {
          with no button on it is a page that cannot sell. Same "first door, not
          the only one" reasoning as pricing and shipping_rules above. */
       if (key === "gift_amounts") value = cleanGiftAmounts(value);
+      /* «Счета для компаний»: the number prefix (letters, digits, dashes) and
+         the payment term (1–60 days) — src/lib/invoices.ts. Same first door. */
+      if (key === "invoice") value = cleanInvoiceSettings(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

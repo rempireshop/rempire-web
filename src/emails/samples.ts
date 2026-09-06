@@ -15,10 +15,12 @@
  */
 
 import {
+  demoInvoice,
   renderAbandonedCart,
   renderBackInStock,
   renderBirthday,
   renderGiftCard,
+  renderInvoice,
   renderLoginCode,
   renderOrderConfirmed,
   renderOrderShipped,
@@ -262,6 +264,12 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
           percent: 20,
           company: "Salon Näidis OÜ",
         });
+      case "invoice": {
+        // the awkward order, unpaid, invoiced for its own total
+        const order = sampleOrder(lang);
+        const total = Number(order.total) || 0;
+        return renderInvoice({ ...order, status: "new" }, demoInvoice(total), lang);
+      }
     }
     throw new Error(`unknown template ${String(template)}`);
   } finally {

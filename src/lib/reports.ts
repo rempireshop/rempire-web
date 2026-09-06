@@ -115,6 +115,15 @@ export interface ReportOrderRow {
   paymentProvider: string;
   paymentRef: string;
   status: string;
+  /* «По счёту — для компаний» (migration 141): the invoice number and the
+     buyer's company, so the accountant can match the transfer to the order.
+     Optional in the type — a row from before the column existed, or a test
+     fixture, simply has none — and "" in the export. */
+  invoiceNumber?: string;
+  invoiceDue?: string;
+  company?: string;
+  companyRegCode?: string;
+  companyVatNumber?: string;
 }
 
 type RawRow = {
@@ -131,6 +140,8 @@ type RawRow = {
   payment: unknown;
   status: string;
   channel?: string | null;
+  company?: unknown;
+  invoice?: unknown;
 };
 
 /** "Paid" for accounting purposes: reached payment, whatever happened after
@@ -189,6 +200,8 @@ function num(v: unknown): number {
 function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
   const shipping = jsonOf<{ country?: string; method?: string }>(r.shipping, {});
   const payment = jsonOf<{ provider?: string; ref?: string }>(r.payment, {});
+  const company = jsonOf<{ name?: string; regCode?: string; vatNumber?: string } | null>(r.company, null) ?? {};
+  const invoice = jsonOf<{ number?: string; dueAt?: string } | null>(r.invoice, null) ?? {};
   const total = num(r.total);
   const { net, vat } = vatSplit(total, vatRate);
   return {
@@ -214,6 +227,11 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
     paymentProvider: payment.provider ?? "",
     paymentRef: payment.ref ?? "",
     status: r.status,
+    invoiceNumber: typeof invoice.number === "string" ? invoice.number : "",
+    invoiceDue: typeof invoice.dueAt === "string" ? invoice.dueAt : "",
+    company: typeof company.name === "string" ? company.name : "",
+    companyRegCode: typeof company.regCode === "string" ? company.regCode : "",
+    companyVatNumber: typeof company.vatNumber === "string" ? company.vatNumber : "",
   };
 }
 
@@ -222,7 +240,7 @@ function toReportRow(r: RawRow, vatRate: number): ReportOrderRow {
  *  test (tests/reports.test.ts) rather than one that has to drop a column
  *  `orders.ts`'s own createOrder() now hard-depends on existing. */
 export function reportOrderColumns(hasChannel: boolean): string {
-  return `number, created_at, name, email, shipping, subtotal, shipping_price, discount, discount_code, total, payment, status${hasChannel ? ", channel" : ""}`;
+  return `number, created_at, name, email, shipping, subtotal, shipping_price, discount, discount_code, total, payment, status, company, invoice${hasChannel ? ", channel" : ""}`;
 }
 
 /** `to` is an exclusive upper bound (YYYY-MM-DD) — see monthRange/explicitRange. */
@@ -264,6 +282,11 @@ export const REPORT_COLUMNS: Array<[key: keyof ReportOrderRow, header: string]> 
   ["paymentProvider", "Payment provider"],
   ["paymentRef", "Payment ref"],
   ["status", "Status"],
+  ["invoiceNumber", "Invoice"],
+  ["invoiceDue", "Invoice due"],
+  ["company", "Company"],
+  ["companyRegCode", "Company reg. code"],
+  ["companyVatNumber", "Company VAT no"],
 ];
 
 const NUMERIC_COLUMNS = new Set<keyof ReportOrderRow>([

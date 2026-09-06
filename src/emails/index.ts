@@ -11,6 +11,7 @@ import { renderAbandonedCart } from "./abandoned-cart";
 import { renderBackInStock } from "./back-in-stock";
 import { renderBirthday } from "./birthday";
 import { renderGiftCard, type GiftCardLike } from "./gift-card";
+import { renderInvoice, type InvoiceMailData } from "./invoice";
 import { renderLoginCode } from "./login-code";
 import { renderOrderConfirmed } from "./order-confirmed";
 import { renderOrderShipped } from "./order-shipped";
@@ -31,6 +32,8 @@ export { renderAbandonedCart } from "./abandoned-cart";
 export { renderBackInStock } from "./back-in-stock";
 export { renderBirthday } from "./birthday";
 export { renderGiftCard } from "./gift-card";
+export { renderInvoice } from "./invoice";
+export type { InvoiceMailData } from "./invoice";
 export { renderLoginCode } from "./login-code";
 export { renderPartnerWelcome } from "./partner-welcome";
 export type { PartnerWelcomeOptions } from "./partner-welcome";
@@ -70,6 +73,7 @@ export const TEMPLATE_IDS = [
   "birthday",
   "login-code",
   "partner-welcome",
+  "invoice",
 ] as const;
 
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
@@ -88,6 +92,7 @@ export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   birthday: "Скидка ко дню рождения",
   "login-code": "Код для входа",
   "partner-welcome": "Цены для салонов включены",
+  invoice: "Счёт на оплату",
 };
 
 /* ---------- demo data --------------------------------------------------- */
@@ -233,6 +238,16 @@ export function demoGiftCard(lang: Lang): GiftCardLike {
   };
 }
 
+/** The invoice half of the «Счёт на оплату» preview: a demo number, a week to pay, demo bank details. */
+export function demoInvoice(total = 95): InvoiceMailData {
+  const net = Math.round((total / 1.24) * 100) / 100;
+  return {
+    invoice: { number: "A-2026-0042", dueAt: "2026-09-13", dueDays: 7 },
+    seller: { name: "Rempire Store OÜ", iban: "EE00 0000 0000 0000 0000", bankName: "Swedbank", regCode: "12216136", vatNumber: "EE102723858" },
+    totals: { net, vat: Math.round((total - net) * 100) / 100, total, vatRate: 24 },
+  };
+}
+
 /* ---------- demo render ------------------------------------------------- */
 
 /**
@@ -264,6 +279,8 @@ export function renderDemo(
       return renderLoginCode("482915", L);
     case "partner-welcome":
       return renderPartnerWelcome(demoCustomer(L), L, { percent: 20, company: "Salon Demo OÜ" });
+    case "invoice":
+      return renderInvoice({ ...demoOrder(L), status: "new" }, demoInvoice(95), L);
     case "order-confirmed":
     default:
       return renderOrderConfirmed(demoOrder(L), L);
