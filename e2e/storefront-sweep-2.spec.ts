@@ -18,7 +18,14 @@
  *    prerendered page under the app;
  *  - the chat bubble took its language from the saved preference, not from
  *    the page — a first visit to /shop2/et/ was greeted in Russian — and
- *    printed «9 €» on the English shop that says «€9».
+ *    printed «9 €» on the English shop that says «€9»;
+ *  - the receipt sent one «purchase» beacon per render() instead of one per
+ *    order — the two boot answers alone made it three;
+ *  - «Доставка по умолчанию» in the account priced the shopper's standing
+ *    choice off the frozen demo tariff, promising a courier at 9 € where the
+ *    checkout charged 10,84 €;
+ *  - «Бренды» is the one shopper page with no prerendered head, so its ET and
+ *    EN versions carried the Russian description of the home page.
  *
  * Desktop + mobile-safari like the other functional specs; the lost-tap
  * test also runs on the Chromium phone project, because it is about a
@@ -250,3 +257,141 @@ test.describe("chat — the language on screen", () => {
     await expect(page.locator(".sbot__pp").first()).toHaveText(/^(from )?€\d/);
   });
 });
+
+test.describe("receipt — the purchase beacon", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(199) });
+
+  test("one «purchase» per paid order, however many times the receipt repaints", async ({ page }) => {
+    const beacons: Array<{ type: string; value?: number }> = [];
+    await page.route("**/api/track/", async (route) => {
+      try {
+        beacons.push(JSON.parse(route.request().postData() || "{}"));
+      } catch {
+        beacons.push({ type: "unparsed" });
+      }
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+    });
+
+    /* The bank's own redirect back. Two boot answers land a full render()
+       each within a moment of it, and doneState() used to recompute — and
+       re-send — on every one of them. Both waiters are armed before the
+       navigation: either answer can beat the first paint. */
+    const boot = Promise.all([
+      page.waitForResponse((r) => r.url().includes("/api/bundles/")),
+      page.waitForResponse((r) => r.url().includes("/api/overrides/")),
+    ]);
+    await page.goto("/shop2/done/?n=R-100042&s=paid&t=41.90");
+    await waitForScreen(page, "done");
+    await expect(page.locator(".done__num")).toHaveText("Заказ R-100042");
+    await boot;
+    /* Both answers end in a render() that is coalesced into the next frame,
+       so wait for two of them before counting — the receipt is chromeless
+       (renderImpl's `chromeless`), so those two are the whole exposure: there
+       is no header on this screen for the shopper to repaint it from. */
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))),
+    );
+    await expect(page.locator(".done__num")).toHaveText("Заказ R-100042");
+
+    const purchases = beacons.filter((b) => b.type === "purchase");
+    expect(purchases, `«purchase» sent ${purchases.length}×: ${JSON.stringify(beacons)}`).toHaveLength(1);
+    expect(purchases[0].value).toBe(41.9);
+  });
+
+  test("a failed payment is not a purchase", async ({ page }) => {
+    const types: string[] = [];
+    await page.route("**/api/track/", async (route) => {
+      try {
+        types.push(JSON.parse(route.request().postData() || "{}").type);
+      } catch {
+        types.push("unparsed");
+      }
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+    });
+    const boot = page.waitForResponse((r) => r.url().includes("/api/bundles/"));
+    await page.goto("/shop2/done/?n=R-100043&s=failed");
+    await waitForScreen(page, "done");
+    await expect(page.locator(".done__tick--bad")).toBeVisible();
+    await boot;
+    expect(types).not.toContain("purchase");
+  });
+});
+
+test.describe("account — «Доставка по умолчанию»", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(200) });
+
+  /** The euro figure beside an option row, whichever screen drew it. */
+  async function priceOf(page: import("@playwright/test").Page, label: string): Promise<string> {
+    const row = page.locator(".optlist .opt").filter({ hasText: label }).first();
+    await expect(row, `no «${label}» row`).toBeVisible();
+    return (await row.locator(".opt__price").innerText()).trim();
+  }
+
+  test("the standing choice is priced by the rules the checkout bills on", async ({ page }) => {
+    const email = `acct-ship-${Date.now()}@example.com`;
+    await page.goto(shopUrl("", "/account/"));
+    await waitForScreen(page, "account");
+    await page.locator("[data-email]").fill(email);
+    const codeResponse = page.waitForResponse((r) => r.url().includes("/api/account/code/"));
+    await page.locator("[data-login]").click();
+    const res = await codeResponse;
+    const body = (await res.json()) as { code?: string; error?: string };
+    expect(body.code, `POST /api/account/code/ → ${res.status()} ${JSON.stringify(body)}`).toMatch(/^\d{6}$/);
+    await page.locator("[data-acctcode]").fill(body.code!);
+    await page.locator("[data-logincode]").click();
+    await expect(page.locator("[data-logout]")).toBeVisible();
+
+    // the account's own list: the labels are the old ones, the prices must not be
+    const acctParcel = await priceOf(page, "Пакомат Omniva");
+    const acctCourier = await priceOf(page, "Курьер до двери");
+    const acctPickup = await priceOf(page, "Самовывоз");
+
+    // …against the same three at the till, on a basket below the free-shipping floor
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+    await page.locator("[data-email]").fill(email);
+    await page.locator('button.btn--wide[data-step="2"]').click();
+    await expect(page.locator('input[data-dm="parcel"]')).toBeVisible();
+
+    expect(acctParcel, "the account quotes another parcel price than the checkout").toBe(
+      await priceOf(page, "Пакомат"),
+    );
+    expect(acctCourier, "the account quotes another courier price than the checkout").toBe(
+      await priceOf(page, "Курьер до двери"),
+    );
+    expect(acctPickup).toBe(await priceOf(page, "Самовывоз"));
+    expect(acctCourier).not.toBe(acctParcel);   // both really read, neither a stray «Бесплатно»
+  });
+});
+
+for (const lang of LANGS) {
+  if (lang.code === "RU") continue;
+
+  test.describe(`«Бренды» — the head of the one page with no prerender (${lang.code})`, () => {
+    test.use({ extraHTTPHeaders: ipHeaders(201 + LANGS.indexOf(lang)) });
+
+    test("title and description are the page's own language, not the Russian shell's", async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/brands/"));
+      await waitForScreen(page, "brands");
+      const head = await page.evaluate(() => ({
+        title: document.title,
+        desc: document.querySelector('meta[name="description"]')?.getAttribute("content") || "",
+        intro: (document.querySelector(".sec__intro")?.textContent || "").trim(),
+        htmlLang: document.documentElement.lang,
+        canonical: document.querySelector('link[rel="canonical"]')?.getAttribute("href") || "",
+      }));
+      expect(head.htmlLang).toBe(lang.htmlLang);
+      expect(head.canonical, "the canonical still points at the shell it was served from").toContain(
+        `/shop2${lang.seg}/brands/`,
+      );
+      expect(head.title, `Cyrillic left in the ${lang.code} tab title: ${head.title}`).not.toMatch(/[Ѐ-ӿ]/);
+      expect(head.desc, `Cyrillic left in the ${lang.code} description: ${head.desc}`).not.toMatch(/[Ѐ-ӿ]/);
+      // the description IS the sentence the page opens with — one string, one translation
+      expect(head.desc.slice(0, 60)).toBe(head.intro.slice(0, 60));
+    });
+  });
+}
