@@ -1094,7 +1094,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   text-align: left; padding: 10px 0; color: var(--a-ink);
 }
 .adm-idx button:hover { background: var(--a-tint); }
-.adm-tariffs { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1fr; gap: 8px; align-items: center; }
+/* cells align to the top, not the middle: a cell with a Montonio hint under
+   its box is taller, and a centred «Бесплатно от» box sat half a line below
+   the other two; the country name lines up with the boxes by its line-height */
+.adm-tariffs { display: grid; grid-template-columns: 1.1fr 1fr 1fr 1fr; gap: 8px; align-items: start; }
+.adm-tariffs:not(.adm-tariffs--head) > span:first-child { line-height: 44px; }
 .adm-tariffs--head {
   font-size: 12px; color: var(--a-muted); border-bottom: 1px solid var(--a-ink);
   padding-bottom: 6px; align-items: end;
@@ -1236,6 +1240,7 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm-tariffs { grid-template-columns: 1fr 1fr; gap: 8px 10px; }
   .adm-tariffs--head { display: none; }
   .adm-tariffs > span:first-child { grid-column: 1 / -1; font-weight: 600; }
+  .adm-tariffs:not(.adm-tariffs--head) > span:first-child { line-height: 24px; }
   .adm-tariffs__l { display: block; }
   .adm-frame { height: 420px; }
   .adm2 input.adm-title-in { font-size: 24px; height: 48px; }
