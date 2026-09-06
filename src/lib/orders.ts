@@ -110,6 +110,12 @@ export type Order = {
   total: number;
   payment: Record<string, unknown> | null;
   notes: string | null;
+  /* ---- «По счёту — для компаний»: db/migrations/141_invoices.sql ---------- */
+  /** The buyer's company as typed at checkout ({name, regCode, vatNumber, address, email}), null on a private order.
+   *  Optional in the type (mapOrder always sets it) so an Order literal written before migration 141 still compiles. */
+  company?: Record<string, unknown> | null;
+  /** The invoice issued for the order ({number, issueDate, dueAt, …} — src/lib/invoices.ts InvoiceRecord), null when paid another way. */
+  invoice?: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -135,6 +141,11 @@ export type CreateOrderInput = {
   /* ---- wholesale/loyalty: db/migrations/100_tiers_loyalty.sql ------------ */
   /** «Использовать баллы» toggle at checkout — the amount is quoted server-side, never sent by the client. */
   redeemPoints?: boolean;
+  /* ---- «По счёту — для компаний» (src/lib/invoices.ts) -------------------- */
+  /** `{ method: "invoice" }` asks for an invoice instead of a payment page; anything else is ignored here. */
+  payment?: { method?: string } | null;
+  /** The company the invoice is made out to — required with `payment.method: "invoice"`, cleaned by cleanCompany(). */
+  company?: unknown;
 };
 
 /** Every failure the caller can report to the shopper by code. */
@@ -905,6 +916,8 @@ type OrderRow = {
   total: string | number;
   payment: unknown;
   notes: string | null;
+  company?: unknown;
+  invoice?: unknown;
   created_at: string | Date;
   updated_at: string | Date;
 };
@@ -944,6 +957,8 @@ export function mapOrder(r: OrderRow): Order {
     total: money(num(r.total)),
     payment: jsonOf<Record<string, unknown> | null>(r.payment, null),
     notes: r.notes ?? null,
+    company: jsonOf<Record<string, unknown> | null>(r.company, null),
+    invoice: jsonOf<Record<string, unknown> | null>(r.invoice, null),
     createdAt: new Date(r.created_at as string).toISOString(),
     updatedAt: new Date(r.updated_at as string).toISOString(),
   };
@@ -1073,6 +1088,20 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   }
 
   const lang = String(input.lang ?? "RU").toUpperCase().slice(0, 5);
+
+  /* «По счёту — для компаний» (src/lib/invoices.ts, migration 141): the web
+     checkout's fourth payment method. The company block is rebuilt from a
+     whitelist before anything is priced — an invoice without a name, a
+     registry code and an address is not an invoice — and the order is
+     numbered and mailed right after the row is written, below. The till never
+     sends `payment`, so a POS sale is untouched. */
+  const invoiceMethod = channel === "web" && !!input.payment && typeof input.payment === "object" && input.payment.method === "invoice";
+  let company: Record<string, unknown> | null = null;
+  if (invoiceMethod) {
+    const { cleanCompany } = await import("@/lib/invoices");
+    company = cleanCompany(input.company, email);
+  }
+
   const { lines, subtotal, pricingTier } = await priceItems(input.items, lang, ctx);
 
   // Rebuilt from a whitelist before anything is priced or stored (audit C2/M2).
@@ -1128,10 +1157,14 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   }
 
   const total = money(Math.max(0, subtotal + shipPrice - discount - loyaltyDiscount));
+  /* Nothing to invoice when a gift card or the points already cover the whole
+     order — the shopper is told to pick another way (the zero-total path
+     belongs to the payment routes, not to an invoice for 0 €). */
+  if (invoiceMethod && !(total > 0)) throw new OrderError("invoice_zero_total");
 
   const rows = await query<OrderRow>(
-    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, channel, customer_id, pricing_tier, loyalty_discount, total, notes)
-     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+    `insert into orders (lang, email, phone, name, shipping, items, subtotal, shipping_price, discount, discount_code, channel, customer_id, pricing_tier, loyalty_discount, total, notes, company)
+     values ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17::jsonb)
      returning *`,
     [
       lang,
@@ -1150,9 +1183,18 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
       loyaltyDiscount,
       total,
       typeof input.notes === "string" ? input.notes.replace(/\s+$/, "").slice(0, 2000) || null : null,
+      company ? jsonbParam(company) : null,
     ],
   );
-  const order = mapOrder(rows[0]);
+  let order = mapOrder(rows[0]);
+
+  /* The invoice: a serial number, the record on the row, the letter with the
+     PDF. Only the number is fatal — an order the owner cannot invoice is worse
+     than a shopper who has to try again; the letter is best effort inside. */
+  if (invoiceMethod) {
+    const { issueInvoice } = await import("@/lib/invoices");
+    order = await issueInvoice(order);
+  }
 
   /* Neither the gift card nor the promo code is spent here (audit H3). The
      discount and the code are quoted onto the order; the card's balance and
@@ -1171,16 +1213,19 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   }
 
   // The mail agent's hook must never be able to lose an order that is already
-  // in the database.
-  try {
-    const hook = fn(await optionalLib("mail-hooks"), "onOrderCreated");
-    /* `sendPending` used to be missing entirely, so the "order received,
-       awaiting payment" letter could never fire whatever the setting said
-       (audit top-15 #3). The owner's switch is `settings.flows.pending`; with
-       no row, MAIL_PENDING_PAYMENT still decides inside the hook. */
-    if (hook) await hook(order, await pendingMailOptions());
-  } catch (err) {
-    console.error("[orders] onOrderCreated failed:", err);
+  // in the database. An invoice order already got its letter — the invoice
+  // itself is the «order received, awaiting payment» message for a company.
+  if (!invoiceMethod) {
+    try {
+      const hook = fn(await optionalLib("mail-hooks"), "onOrderCreated");
+      /* `sendPending` used to be missing entirely, so the "order received,
+         awaiting payment" letter could never fire whatever the setting said
+         (audit top-15 #3). The owner's switch is `settings.flows.pending`; with
+         no row, MAIL_PENDING_PAYMENT still decides inside the hook. */
+      if (hook) await hook(order, await pendingMailOptions());
+    } catch (err) {
+      console.error("[orders] onOrderCreated failed:", err);
+    }
   }
 
   return order;

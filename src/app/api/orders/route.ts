@@ -66,8 +66,16 @@ export async function POST(req: Request) {
        says so itself and never takes the till's percent from a browser. */
     const input = { ...(body as Parameters<typeof createOrder>[0]), channel: "web" as const, posDiscountPercent: null };
     const order = await createOrder(input, { customerId });
+    /* «По счёту — для компаний»: the order was numbered and the invoice
+       mailed inside createOrder() (src/lib/invoices.ts); the checkout shows
+       the number, the due date and where the letter went, and calls no
+       payment page. Absent on every other order. */
+    const inv = order.invoice;
+    const invoice = inv && typeof inv.number === "string"
+      ? { number: inv.number, dueAt: String(inv.dueAt ?? ""), dueDays: Number(inv.dueDays) || 7, email: String(inv.email ?? order.email) }
+      : undefined;
     return Response.json(
-      { ok: true, orderId: order.id, number: order.number, total: order.total },
+      { ok: true, orderId: order.id, number: order.number, total: order.total, ...(invoice ? { invoice } : {}) },
       { status: 201, headers: { "cache-control": "no-store" } },
     );
   } catch (err) {

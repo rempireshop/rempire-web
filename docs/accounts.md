@@ -82,3 +82,30 @@ Values are never written here. Names only, grouped by what stops working without
 
 Zone `rempireshop.com` created on the Free plan; records replicated 1:1 from Zone (A + www → Shopify as **DNS only**, Resend DKIM/CNAMEs, Google TXT, DMARC). Nameservers `albert.ns.cloudflare.com` / `april.ns.cloudflare.com` — switched at Zone 03.09 evening, resolvers confirmed, live shop unchanged. Email Routing: destination rempireshopinfo@gmail.com verified; rules info@ / shop@ → that mailbox; MX ×3 + SPF + DKIM records written by Cloudflare 03.09 (status Syncing → Enabled). Gmail «Send as» info@rempireshop.com via smtp.resend.com done + verified by Gmail (03.09). R2: subscription added, bucket `rempire-media` (WEUR), public dev URL https://pub-cb5b2acfd95a42a89fe5b418936afeea.r2.dev (= R2_PUBLIC_BASE; later custom media.rempireshop.com), API token created by Dim (Object Read & Write, bucket-scoped).
 
+
+## Company invoices — what has to be filled in, and where (06.09.2026)
+
+«По счёту — для компаний» (docs/payments.md § 10) adds **no environment
+variable and no external service**: the invoice PDF is rendered by the app
+itself and sent through the Resend key that is already set. What it does need
+is data the owner types in the admin, so it belongs in this registry as a
+checklist rather than as a row in the table above.
+
+| Setting (admin) | Stored as | Needed for | Status |
+|---|---|---|---|
+| «Настройки → О компании → Реквизиты»: **IBAN** and **Банк** | `settings.content.company.iban` / `.bankName` (`bankName` is new) | An invoice without them has no payment details — the admin card and the PDF both say so out loud | ⬜ blank; Renat's business account at ??? — the same IBAN Montonio KYC needs |
+| «Настройки → О компании → Счета для компаний»: number prefix, payment term | `settings.invoice` (`{prefix:"A-", dueDays:7}` by default) | Invoice numbers `A-2026-0001` and the «оплатите в течение N дней» promise | ✅ defaults work out of the box |
+| «Настройки → О компании → Реквизиты»: legal name, reg. code, KMKR, address | `settings.content.company` | Printed as the seller on every invoice | ✅ Rempire Store OÜ · 12216136 · EE102723858 · Mardi 1, 10145 Tallinn |
+
+Two things for Renat, both money-shaped:
+
+- **Which address goes on the invoices.** The business register has
+  Pärnu mk, Paikuse alev, Käärasoo tee 43, 86604; the site and the invoices
+  print Mardi 1, 10145 Tallinn. In round 2 (23.08.2026) Renat chose
+  Mardi 1 for documents (`docs/RENAT-ANSWERS.md`), and the code takes whatever
+  is in the settings — nothing is hard-coded. Worth one confirmation from his
+  accountant before the first invoice goes out.
+- **The bank account.** Company invoices are paid by transfer, not through
+  Montonio, so the IBAN in «Реквизиты» is the account the money actually lands
+  on. It is the only field of the whole flow that cannot be guessed and cannot
+  be wrong.
