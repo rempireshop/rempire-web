@@ -536,4 +536,69 @@ test.describe("scanner app", () => {
       "the grid never says where a barcode comes from").toContainText("Штрихкод привязывается сканером на складе");
     await assertClean(page, w, "editor: a size with no code");
   });
+
+  /* «Склад» itself — the list the owner searches on to fix a shelf. Its
+     search was one literal substring, so «kevin murphy» found nothing (the
+     catalogue writes «Kevin.Murphy»); «Порог «мало»» took «abc» as a number
+     and saved it as «no threshold» under a «Сохранено ✓»; and the history
+     answered a 500 with «Пока пусто». */
+  scenario(197, "«Склад»: the search takes the owner's spelling, a bad «Порог «мало»» is refused, and a history that fails says so", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const key = `${PRODUCT_2.id} ${VARIANT}`;
+    const row = page.locator(`[data-stockedit="${key}"]`).locator("xpath=..");
+
+    await openAdmin(page);
+    await tab(page, "stock");
+    await expect(page.locator("#stocklist")).toBeVisible();
+
+    // the phone: nothing may push the page sideways (the mobile project is
+    // 375 px, narrower than the owner's 390)
+    const overflows = async () => page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(await overflows(), "«Склад» scrolls sideways on a phone").toBeLessThanOrEqual(1);
+
+    // …the way the owner types it: no dot, words in the order he says them
+    await page.locator("[data-stockq]").fill("murphy kevin");
+    await expect(row, "«Склад» cannot find «Kevin.Murphy» typed as «murphy kevin»").toBeVisible();
+    // …and a size word narrows it to the one bottle
+    await page.locator("[data-stockq]").fill("kevin murphy 40");
+    await expect(row, "a size word threw the row away").toBeVisible();
+    await expect(page.locator("#stocklist"), "the count line lost what was typed").toContainText("murphy");
+    await assertClean(page, w, "«Склад» search");
+
+    // «Порог «мало»» is a number or nothing — «abc» must not travel as null
+    const lowWas = await page.request.get(`/api/admin/inventory/?filter=all&q=${encodeURIComponent(PRODUCT_2.id)}`)
+      .then(async (r) => ((await r.json()).levels as Array<{ productId: string; variant: string; lowThreshold: number }>)
+        .find((l) => l.productId === PRODUCT_2.id && (l.variant || "") === VARIANT)?.lowThreshold);
+    await page.locator(`[data-stockedit="${key}"]`).click();
+    await page.locator("[data-stocklowinput]").fill("abc");
+    await page.locator(`[data-stocksave="${key}"]`).click();
+    expect(await toastText(page), "«abc» was taken as a threshold").toMatch(/Порог/);
+    await clearToast(page);
+    await expect(page.locator("[data-stocklowinput]"), "the form closed on a refusal").toBeVisible();
+    const lowNow = await page.request.get(`/api/admin/inventory/?filter=all&q=${encodeURIComponent(PRODUCT_2.id)}`)
+      .then(async (r) => ((await r.json()).levels as Array<{ productId: string; variant: string; lowThreshold: number }>)
+        .find((l) => l.productId === PRODUCT_2.id && (l.variant || "") === VARIANT)?.lowThreshold);
+    expect(lowNow, "«abc» reached the warehouse as a threshold").toBe(lowWas);
+    await page.locator('[data-stockedit=""]').first().click();   // Отмена
+    await assertClean(page, w, "«Склад» refused a bad threshold");
+
+    // the history: a route that fails says so and offers another go
+    w.allow.push(/\/api\/admin\/inventory\/moves\//);
+    await page.route("**/api/admin/inventory/moves/**", (route) =>
+      route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ ok: false, error: "db_unavailable" }) }));
+    await page.locator('[data-stockmovesopen="1"]').click();
+    await expect(page.locator(".adm-error"), "a history that failed said nothing").toBeVisible();
+    await expect(page.locator('[data-admreload="moves"]')).toBeVisible();
+    await expect(page.locator(".adm-empty"), "a failed history still claims to be empty").toHaveCount(0);
+    await page.unroute("**/api/admin/inventory/moves/**");
+
+    // …and «Повторить» actually asks again
+    await page.locator('[data-admreload="moves"]').click();
+    await expect(page.locator(".adm-error"), "«Повторить» left the error on screen").toHaveCount(0);
+    expect(await overflows(), "the history scrolls sideways on a phone").toBeLessThanOrEqual(1);
+    w.serverErrors.length = 0;   // the mocked 503 above, forgiven
+    await assertClean(page, w, "«Склад» history after a failure");
+  });
 });

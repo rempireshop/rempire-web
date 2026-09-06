@@ -1114,6 +1114,8 @@
       "История приёмок и продаж": "Vastuvõttude ja müükide ajalugu",
       "Мало": "Vähe", "Нет": "Otsas", "Не учтено": "Arvestamata", "не учтено": "arvestamata",
       "Склад не отвечает — попробуйте обновить страницу.": "Ladu ei vasta — proovige lehte värskendada.",
+      "История не отвечает — попробуйте ещё раз.": "Ajalugu ei vasta — proovige uuesti.",
+      "Порог «мало» — целое число от 0.": "«Vähe» lävi — täisarv alates 0-st.",
       "EAN / штрихкод": "EAN / triipkood", "нет штрихкода": "triipkoodi pole",
       "Порог «мало»": "Läve «vähe»", "Остаток сейчас": "Jääk praegu",
       "Причина (видна в истории)": "Põhjus (nähtav ajaloos)",
@@ -2847,6 +2849,8 @@
       "История приёмок и продаж": "Goods-in and sales history",
       "Мало": "Low", "Нет": "Out", "Не учтено": "Untracked", "не учтено": "untracked",
       "Склад не отвечает — попробуйте обновить страницу.": "The stock isn't responding — try refreshing the page.",
+      "История не отвечает — попробуйте ещё раз.": "The history isn't responding — try again.",
+      "Порог «мало» — целое число от 0.": "The «low» threshold is a whole number from 0.",
       "EAN / штрихкод": "EAN / barcode", "нет штрихкода": "no barcode",
       "Порог «мало»": "«Low» threshold", "Остаток сейчас": "Current stock",
       "Причина (видна в истории)": "Reason (shown in the history)",
@@ -4871,6 +4875,7 @@
     stockMovesOpen: false, // the ledger sub-view
     stockMoves: null,
     stockMovesBusy: false,
+    stockMovesErr: "",
     stockMovesReason: "",
     // ---- inventory: the scanner (camera primary, keyboard-wedge hidden fallback) ----
     scanOpen: false,
@@ -14693,7 +14698,12 @@
     var key = stockKey(r.productId, r.variant);
     var open = S.stockEdit === key;
     var qty = r.tracked ? r.qty : 0;
-    var low = r.tracked && qty <= 3;
+    /* The row's OWN threshold — «Порог «мало»» in the form one tap below,
+       and the same answer the «Мало»/«Нет» chips filter on (deriveState,
+       src/lib/inventory.ts). A flat «3 или меньше» here meant a row the
+       «Мало» chip listed was not red, and a row set to warn at 5 stayed
+       black at 4. */
+    var low = r.tracked && r.state !== "in";
     return '<div class="adm-row adm-row--tall adm-row--stock">' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) + "</span>" +
         '<span class="adm-row__sub' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
@@ -14714,14 +14724,24 @@
   /** Everything that is running out comes first — the shelf the owner has to
       act on, not the alphabet. Variants nobody counts yet sort last. */
   function stockRows() {
-    var q = (S.stockQ || "").toLowerCase().trim();
+    /* The same folding the scanner's own search got: one literal substring
+       over «бренд название id» found nothing for «kevin murphy» (the
+       catalogue writes «Kevin.Murphy»), «un tangled» or «300 ml», which is
+       exactly how the owner types — and «Склад» is the screen he searches on
+       to fix a shelf. The size is in the haystack now too, so «awapuhi 300»
+       narrows to the one bottle. */
+    var q = scanFold(S.stockQ);
+    var words = q ? q.split(" ") : [];
     var f = S.stockFilter || "all";
     var rows = (S.stockLevels || []).filter(function (r) {
       if (f === "low" && !(r.tracked && r.state === "low")) return false;
       if (f === "out" && !(r.tracked && r.state === "out")) return false;
       if (f === "untracked" && r.tracked) return false;
-      if (!q) return true;
-      return (r.brand + " " + r.name + " " + r.productId + " " + (r.ean || "")).toLowerCase().indexOf(q) >= 0;
+      if (!words.length) return true;
+      var hay = scanFold(r.brand + " " + r.name + " " + r.productId + " " + (r.variant || "") + " " + (r.ean || ""));
+      var hayWords = hay.split(" ");
+      for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
+      return true;
     }).slice();
     rows.sort(function (a, b) {
       var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
@@ -14732,7 +14752,8 @@
       (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
       '<p class="adm-hint" style="margin:10px 0 0">' +
         (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
-        (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
+        // what the owner typed, not the folded copy the matching runs on
+        (q ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "") + "</p>";
   }
 
   /* Three installable apps from one page: the shop (manifest.webmanifest,
@@ -14810,6 +14831,8 @@
           return '<button class="adm-chip" data-stockmovesreason="' + r[0] + '" aria-current="' + ((S.stockMovesReason || "") === r[0]) + '">' + r[1] + "</button>";
         }).join("") +
       "</div>" +
+      (S.stockMovesErr ? '<div class="adm-error"><span>' + esc(S.stockMovesErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="moves">Повторить</button></div>' : "") +
       (S.stockMovesBusy && !S.stockMoves ? '<div class="adm-skel"><i></i><i></i><i></i></div>' :
         (moves.length ? '<div class="adm-list adm-list--flat">' + moves.map(function (m) {
           var sign = m.delta > 0 ? "+" : "";
@@ -14818,7 +14841,7 @@
               '<span class="adm-row__sub">' + (m.variant ? esc(m.variant) + " · " : "") + esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
             '<span class="adm-row__sub" style="margin:0">' + esc(String(m.at).slice(0, 16).replace("T", " ")) + "</span>" +
             '<span class="adm-row__amt">' + sign + m.delta + "</span></div>";
-        }).join("") + "</div>" : '<div class="adm-empty">Пока пусто</div>'));
+        }).join("") + "</div>" : (S.stockMovesErr ? "" : '<div class="adm-empty">Пока пусто</div>')));
   }
 
   /* ---------- inventory: the scanner --------------------------------------
@@ -14904,6 +14927,18 @@
   /** A word against one size label: «40» is the 40 мл bottle, not the 140. */
   function scanSizeHas(sizeHay, w) {
     return /^\d+$/.test(w) ? sizeHay.split(" ").indexOf(w) >= 0 : sizeHay.indexOf(w) >= 0;
+  }
+  /** One typed word against a whole folded row («Склад»'s search). A number
+      is a whole word — «40» is the 40 мл bottle, not the 140 — or the start
+      of something longer than a size, which is how half a barcode still
+      finds its bottle. Anything else is a plain substring. */
+  function scanWordHas(hay, hayWords, w) {
+    if (!/^\d+$/.test(w)) return hay.indexOf(w) >= 0;
+    for (var i = 0; i < hayWords.length; i++) {
+      if (hayWords[i] === w) return true;
+      if (hayWords[i].length > 4 && hayWords[i].indexOf(w) === 0) return true;
+    }
+    return false;
   }
   /** «···1234» — the code a size already carries, by its last four characters. */
   function scanCodeTail(ean) { return "есть код ···" + String(ean).slice(-4); }
@@ -16027,9 +16062,13 @@
     var qs = "?limit=200" + (S.stockMovesReason ? "&reason=" + encodeURIComponent(S.stockMovesReason) : "");
     apiJson("/api/admin/inventory/moves/" + qs).then(function (r) {
       S.stockMovesBusy = false;
-      if (r.status === 200 && r.body.ok) S.stockMoves = r.body.moves;
+      /* A history that did not answer used to look exactly like a history
+         with nothing in it — «Пока пусто» over a 500, and no way to ask
+         again short of a reload. */
+      if (r.status === 200 && r.body.ok) { S.stockMoves = r.body.moves; S.stockMovesErr = ""; }
+      else S.stockMovesErr = "История не отвечает — попробуйте ещё раз.";
       render();
-    }).catch(function () { S.stockMovesBusy = false; render(); });
+    }).catch(function () { S.stockMovesBusy = false; S.stockMovesErr = "Сервер не отвечает."; render(); });
   }
   /** «Остаток сейчас» → a whole number 0…MAX, or null when it is not one.
       This is a shelf count, so the old `Math.max(0, Math.trunc(Number(v)))`
@@ -16049,7 +16088,16 @@
     if (!r) return;
     var jobs = [];
     var eanChanged = (S.stockEditEan || "") !== (r.ean || "");
-    var lowChanged = S.stockEditLow !== "" && Number(S.stockEditLow) !== r.lowThreshold;
+    /* «Порог «мало»» took the same road «Остаток сейчас» used to (see
+       stockQtyValue): «abc» became NaN, JSON.stringify wrote it as null and
+       the route read that as «no threshold» — the owner's own warning level
+       quietly gone, under a «Сохранено ✓». */
+    var rawLow = String(S.stockEditLow == null ? "" : S.stockEditLow).trim();
+    var lowWant = rawLow === "" ? null : stockQtyValue(rawLow);
+    if (rawLow !== "" && lowWant === null) {
+      toast("Порог «мало» — целое число от 0."); refocus("[data-stocklowinput]"); return;
+    }
+    var lowChanged = lowWant !== null && lowWant !== r.lowThreshold;
     var rawQty = S.stockEditQty;
     var qty = null;
     if (rawQty !== "") {
@@ -16059,7 +16107,7 @@
     if (eanChanged || lowChanged) {
       var patch = { productId: r.productId, variant: r.variant };
       if (eanChanged) patch.ean = S.stockEditEan || null;
-      if (lowChanged) patch.lowThreshold = Number(S.stockEditLow);
+      if (lowChanged) patch.lowThreshold = lowWant;
       jobs.push(stockLevelSaveDetailed(patch));
     }
     if (qty !== null && qty !== (r.tracked ? r.qty : 0)) {
@@ -19222,6 +19270,7 @@
       if (d.admreload === "overview") loadOverview(true);
       else if (d.admreload === "orders") loadSrvOrders(true);
       else if (d.admreload === "stock") reloadStock();
+      else if (d.admreload === "moves") { S.stockMoves = null; S.stockMovesErr = ""; loadStockMoves(true); }
       else if (d.admreload === "bundles") loadAdminBundles(true);
       else if (d.admreload === "promos") loadAdminPromos(true);
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
@@ -20294,7 +20343,7 @@
     if (d.stocksave) { stockCommit(d.stocksave); return; }
     if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; render(); return; }
     if (d.stockmovesopen !== undefined) { S.stockMovesOpen = !!d.stockmovesopen; render(); return; }
-    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; S.stockMoves = null; render(); return; }
+    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; S.stockMoves = null; S.stockMovesErr = ""; render(); return; }
     if (d.pwahintclose !== undefined) {
       try { localStorage.setItem("rmp-pwa-hint-dismissed", "1"); } catch (e) {}
       render(); return;
