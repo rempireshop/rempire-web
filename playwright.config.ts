@@ -167,7 +167,7 @@ export default defineConfig({
       // sweep-checkout is in for its one phone-layout test (the rest of that
       // file skips itself off the desktop project)
       testMatch:
-        /[\\/](catalogue|product|checkout|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout)\.spec\.ts$/,
+        /[\\/](catalogue|product|checkout|invoice|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout)\.spec\.ts$/,
     },
     ...(webkitInstalled
       ? [{ name: "webkit-local", use: { ...devices["Desktop Safari"] } }]
