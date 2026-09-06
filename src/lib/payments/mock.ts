@@ -2,8 +2,10 @@ import { createHmac } from "node:crypto";
 import { signHs256, verifyHs256 } from "./jwt";
 import {
   PaymentError,
+  paymentMethodKind,
   type CreatePaymentOptions,
   type CreatePaymentResult,
+  type PaymentMethodKind,
   type PaymentOrder,
   type PaymentProvider,
   type PaymentStatus,
@@ -49,6 +51,14 @@ export interface MockTicket {
   returnUrl: string;
   amount: number;
   status?: PaymentStatus;
+  /**
+   * What the shop asked for, so the stand-in bank page can show the page
+   * Montonio would have (the bank list or the card form with its wallet
+   * buttons) and a test can tell a wallet routed to the bank list from one
+   * routed to the card page — the bug of 06.09.2026.
+   */
+  method?: PaymentMethodKind;
+  bank?: string;
   [k: string]: unknown;
 }
 
@@ -63,13 +73,24 @@ export function readMockTicket(token: string, secret: string): MockTicket {
   if (typeof orderRef !== "string" || typeof returnUrl !== "string") {
     throw new PaymentError("token_payload");
   }
+  const method = paymentMethodKind(claims.method);
+  const bank = typeof claims.bank === "string" && claims.bank.trim() ? claims.bank.trim() : undefined;
   return {
     orderRef,
     returnUrl,
     ref: typeof claims.ref === "string" ? claims.ref : orderRef,
     amount: typeof claims.amount === "number" ? claims.amount : 0,
     status: claims.status === "paid" || claims.status === "failed" ? claims.status : undefined,
+    ...(method ? { method } : {}),
+    ...(bank ? { bank } : {}),
   };
+}
+
+/** The one-line label the stand-in bank page and the order journal use. */
+export function mockMethodLabel(method: PaymentMethodKind | undefined, bank?: string): string {
+  if (method === "card") return "банковская карта";
+  if (method === "wallet") return "Apple Pay / Google Pay";
+  return bank ? `банковская ссылка · ${bank}` : "банковская ссылка";
 }
 
 export class MockProvider implements PaymentProvider {
@@ -82,12 +103,18 @@ export class MockProvider implements PaymentProvider {
     opts: CreatePaymentOptions,
   ): Promise<CreatePaymentResult> {
     const ref = `mock_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    /* Parity with Montonio: the same options travel — the method decides
+       which page the shopper sees and the bank only rides along with a bank
+       link, exactly as `preferredProvider` does there. */
+    const method: PaymentMethodKind = opts.method ?? "bank";
     const token = signMockTicket(
       {
         orderRef: order.number,
         ref,
         returnUrl: opts.returnUrl,
         amount: Math.round(order.total * 100) / 100,
+        method,
+        ...(method === "bank" && opts.bank ? { bank: opts.bank } : {}),
       },
       this.secret,
     );
@@ -128,7 +155,8 @@ export class MockProvider implements PaymentProvider {
       providerRef: ticket.ref,
       amount: ticket.amount,
       currency: "EUR",
-      detail: "тестовая оплата",
+      // what Montonio's token says in paymentMethod · paymentProviderName
+      detail: `тестовая оплата · ${mockMethodLabel(ticket.method, ticket.bank)}`,
     };
   }
 }

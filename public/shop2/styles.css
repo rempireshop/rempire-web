@@ -1770,6 +1770,8 @@ button, a, summary, label { touch-action: manipulation; }
 /* features: «Скачать подарочную карту (PDF)» under a paid receipt — one link
    per card the order bought, stacked so several never crowd the row. */
 .done__gifts { display: flex; flex-direction: column; gap: 8px; margin: 0 0 18px; }
+/* the failed receipt's two buttons: «Оплатить ещё раз» over «Вернуться в магазин» */
+.done__acts { display: flex; flex-direction: column; gap: 8px; }
 .done__gift { display: inline-flex; justify-content: center; gap: 8px; align-items: baseline; }
 .done__gift .num { font-size: 13px; opacity: .7; }
 

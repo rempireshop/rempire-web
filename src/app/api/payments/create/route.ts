@@ -3,16 +3,37 @@ import { getOrder, setOrderPayment } from "@/lib/orders";
 import { getProvider, publicBaseUrl } from "@/lib/payments";
 import { toPaymentOrder, orderLang } from "@/lib/payments/order";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
-import { PaymentError, type PaymentLang, type PaymentMethodKind } from "@/lib/payments/types";
+import { giftLinks, receiptUrl } from "@/lib/payments/receipt";
+import { settleWithoutPayment } from "@/lib/payments/settle";
+import {
+  PaymentError,
+  paymentMethodKind,
+  type PaymentLang,
+  type PaymentMethodKind,
+} from "@/lib/payments/types";
 
 /**
  * POST /api/payments/create/  { orderId, method?, bank?, lang? }
  *   → { ok: true, redirectUrl, provider, ref }
+ *   → { ok: true, redirectUrl, provider: "none", ref: "", paid: true }
+ *     when there was nothing left to pay (see below)
  *
  * The order already exists (POST /api/orders made it); this turns it into a
  * payment and hands back somewhere to send the shopper. Note the trailing
  * slash — next.config has trailingSlash: true, and a POST to the bare path
  * 308s.
+ *
+ * `method` is the checkout's radio: bank | card | wallet (Apple Pay / Google
+ * Pay — asked of the provider as a card payment, docs/payments.md). `bank`
+ * is the chosen bank's code and only means anything with a bank link. Both
+ * are optional: a body with nothing but the order id — «Оплатить ещё раз» on
+ * the failed receipt — reuses what the order remembers from the first try.
+ *
+ * An order whose total is 0 — a gift card, points or a promo covered all of
+ * it — is not sent anywhere: it is settled here and now, without a provider,
+ * through the same paid transition a provider's ticket would take
+ * (src/lib/payments/settle.ts), and the shopper goes straight to the paid
+ * receipt. This does not need PAYMENT_PROVIDER or any keys.
  */
 
 export const runtime = "nodejs";
@@ -45,9 +66,6 @@ export async function POST(req: Request) {
   const orderId = typeof body.orderId === "string" ? body.orderId.trim() : "";
   if (!orderId) return bad("missing_order");
 
-  const method: PaymentMethodKind = body.method === "card" ? "card" : "bank";
-  const bank = typeof body.bank === "string" && body.bank.trim() ? body.bank.trim() : undefined;
-
   let row: unknown;
   try {
     row = await getOrder(orderId);
@@ -63,7 +81,23 @@ export async function POST(req: Request) {
 
   const order = toPaymentOrder(row);
   if (!order) return bad("bad_order", 422);
-  if (!(order.total > 0)) return bad("bad_amount", 422);
+
+  /* The method: the body's, else the one this order was first sent out with
+     (a retry from the failed receipt sends only the id), else a bank link —
+     the Baltic norm and what the checkout preselects. A word this route has
+     not been taught ("bitcoin") is a bank link too, as it always was. The
+     bank code travels with a bank link alone: a wallet or a card must never
+     carry the chip that happened to be highlighted, and the provider would
+     not know what to do with it. */
+  const stored = ((row as { payment?: Record<string, unknown> | null }).payment ?? {}) as Record<string, unknown>;
+  const method: PaymentMethodKind =
+    paymentMethodKind(body.method) ??
+    (body.method === undefined ? paymentMethodKind(stored.method) : undefined) ??
+    "bank";
+  const bodyBank = typeof body.bank === "string" && body.bank.trim() ? body.bank.trim() : undefined;
+  const storedBank = typeof stored.bank === "string" && stored.bank.trim() ? stored.bank.trim() : undefined;
+  const bank =
+    method !== "bank" ? undefined : (bodyBank ?? (body.method === undefined && body.bank === undefined ? storedBank : undefined));
 
   const lang: PaymentLang =
     body.lang === "RU" || body.lang === "ET" || body.lang === "EN"
@@ -72,6 +106,31 @@ export async function POST(req: Request) {
 
   const base = publicBaseUrl(req);
   if (!base) return bad("no_base_url", 500);
+
+  if (!(order.total > 0)) {
+    /* Nothing left to pay. Settled here — before any provider is even
+       looked for: a 0 € order needs none, and must complete on a shop whose
+       keys are not in yet. The receipt is the same one a provider's return
+       lands on, gift-card download links included. */
+    try {
+      await settleWithoutPayment(row as Parameters<typeof settleWithoutPayment>[0]);
+    } catch (err) {
+      /* not_covered: the card or the points quoted at checkout are no longer
+         there (spent by another order in between). The order stays open and
+         untouched; the checkout tells the shopper to look at the basket. */
+      if (err instanceof PaymentError && err.code === "not_covered") return bad("not_covered", 409);
+      console.error("payments/create: settling a zero-total order failed", err);
+      return bad("db_unavailable", 503);
+    }
+    const gift = await giftLinks(order.id);
+    return NextResponse.json({
+      ok: true,
+      paid: true,
+      provider: "none",
+      ref: "",
+      redirectUrl: receiptUrl(base, { number: order.number, state: "paid", total: 0, gift }),
+    });
+  }
 
   let provider;
   try {
@@ -98,14 +157,16 @@ export async function POST(req: Request) {
     });
 
     // Recorded before the redirect: if the shopper never comes back, the admin
-    // still sees which provider holds this order and under what reference.
+    // still sees which provider holds this order, under what reference and
+    // how the shopper meant to pay. `bank: null` on purpose — a retry that
+    // switched from a bank link to a card must not keep the old bank around.
     try {
       await setOrderPayment(order.id, {
         provider: provider.name,
         ref: result.ref,
         status: "pending",
         method,
-        bank,
+        bank: bank ?? null,
         at: new Date().toISOString(),
       });
     } catch (err) {

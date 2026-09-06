@@ -196,8 +196,9 @@ iPhone profile.
 `--project=mobile-safari` (`playwright.config.ts`) is `devices["iPhone 13"]`
 left on its own `defaultBrowserType` — WebKit, 390×664, touch, the iOS user
 agent — scoped by `testMatch` to the customer-facing specs a phone matters
-for: catalogue, product, checkout, home, blog, sets, gift card, account, PWA,
-the storefront sweep and the checkout sweep's one phone-layout test. The
+for: catalogue, product, checkout, payments, home, blog, sets, gift card,
+account, PWA, the storefront sweep and the checkout sweep's one phone-layout
+test. The
 admin stays Chromium-only. It is a permanent project, not gated on the
 browser being installed like `webkit-local`: a project that vanished when
 WebKit was missing would hide exactly the failures it exists to find. The
@@ -680,6 +681,8 @@ tracking link in it, which is the one thing that letter is for.
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
 | `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts`, `src/app/api/e2e/mail/route.ts` | The three test-only routes — see above |
 | `e2e/giftcard.spec.ts` | The gift card: three languages of buy → issue → redeem, plus «Электронная доставка» and the printable PDF — see above |
+| `e2e/payments.spec.ts` | The payment step, desktop **and** mobile-safari: Apple Pay / Google Pay lands on the mock **card** page (`data-mock-page`) and the order remembers `method: wallet` (the admin card shows it); «Купить через G Pay» preselects the wallet; a gift card bigger than the basket skips the bank and is charged once; a card covering the goods but not the delivery sends the rest to the bank; cancel at the bank → «Оплатить ещё раз» → the same order paid (docs/payments.md §8b–8d, docs/audit/2026-09-06-payments.md) |
+| `tests/payments-create.test.ts`, `tests/checkout-banks.test.ts` | `POST /api/payments/create/` through the real routes: the method mapping, the 0 € order (card, points, promo, the one-cent remainder, a card spent in between → `not_covered`, no provider at all), the retry with a bare id, the refund webhook, a doubled webhook; and the checkout's bank chips following the delivery country (sliced out of app.js like `checkout-parity`) |
 | `tests/giftcard-pdf.test.ts`, `tests/giftcard-mail-pdf.test.ts`, `tests/orders-digital.test.ts` | The card as a file, the letter that carries it, and the order that pays no delivery |
 | `e2e/sets.spec.ts`, `e2e/admin-bundles.spec.ts` | The sets: the shopper's side plus the «Наборы на сайте» switch, and the owner's «Товары → Наборы» CRUD — see above |
 | `e2e/admin-shell.spec.ts` | The redesigned panel's shell: five places, the phone bar and «Ещё» sheet, the sidebar fold, all thirteen old tab keys as deep links, the assistant FAB, the confirm card, the toast's undo — see above |

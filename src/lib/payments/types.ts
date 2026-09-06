@@ -13,8 +13,27 @@ export type PaymentStatus = "paid" | "failed" | "pending";
 /** Customer-facing languages of the shop, mapped to provider locales. */
 export type PaymentLang = "RU" | "ET" | "EN";
 
-/** How the shopper chose to pay. `bank` = bank link, `card` = card/wallet. */
-export type PaymentMethodKind = "bank" | "card";
+/**
+ * How the shopper chose to pay, as the checkout's radio has it: `bank` = a
+ * bank link, `card` = Visa/Mastercard, `wallet` = Apple Pay / Google Pay.
+ *
+ * `wallet` is its own value even though Montonio has no separate method for
+ * it — the wallets are express buttons on its card page (cardPayments), so
+ * the provider is asked for a card payment either way. Kept apart so the
+ * order remembers what the shopper actually tapped (the admin order card
+ * shows it) and so a wallet can never be mistaken for the bank list, which
+ * is exactly what happened when this type had two values.
+ */
+export type PaymentMethodKind = "bank" | "card" | "wallet";
+
+export const PAYMENT_METHOD_KINDS: readonly PaymentMethodKind[] = ["bank", "card", "wallet"];
+
+/** Narrow whatever the body or a stored payment blob carries, or nothing. */
+export function paymentMethodKind(v: unknown): PaymentMethodKind | undefined {
+  return typeof v === "string" && (PAYMENT_METHOD_KINDS as readonly string[]).includes(v)
+    ? (v as PaymentMethodKind)
+    : undefined;
+}
 
 export interface PaymentLineItem {
   name: string;
@@ -60,7 +79,7 @@ export interface CreatePaymentOptions {
   /** Absolute URL the provider POSTs the webhook to. */
   notificationUrl: string;
   lang: PaymentLang;
-  /** Bank link or card. Defaults to a bank link — the Baltic norm. */
+  /** Bank link, card or wallet. Defaults to a bank link — the Baltic norm. */
   method?: PaymentMethodKind;
   /**
    * Provider code of the bank picked in our checkout (Montonio:

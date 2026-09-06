@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
-import { getOrderByNumber, setOrderPayment, setOrderStatus } from "@/lib/orders";
+import { getOrderByNumber } from "@/lib/orders";
 import { getProvider, publicBaseUrl } from "@/lib/payments";
-import { applyPaymentResult } from "@/lib/payments/apply";
-import { issueOrderGiftCards, notifyOrderPaid } from "@/lib/payments/mail-hook";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
+import { giftLinks, receiptUrl, type ReceiptState } from "@/lib/payments/receipt";
+import { settlePayment } from "@/lib/payments/settle";
 
 /**
  * GET /api/payments/return/ — where the provider sends the shopper back.
  *
  * Verifies the signed token, moves the order, and lands the shopper on the
- * receipt: /shop2/done/?n=<number>&s=paid|failed|pending.
+ * receipt: /shop2/done/?n=<number>&s=paid|failed|pending — built by
+ * src/lib/payments/receipt.ts, which also says what `t`, `g` and `o` are.
  *
  * This is a redirect endpoint, never an error page: whatever goes wrong, the
  * shopper ends up on a screen that tells them where they stand. The webhook is
@@ -20,49 +21,8 @@ import { allow, clientIp } from "@/lib/payments/ratelimit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/**
- * `total` (analytics agent) rides along only on a paid receipt — it is what
- * lets the done screen's client-side `track("purchase", …)` beacon report a
- * total without app.js having to remember anything across the redirect to
- * the bank and back. It is a funnel signal only: the euro amount that
- * actually counts as revenue is written server-side, here, by
- * applyPaymentResult → src/lib/events.ts recordPurchaseEvent — see
- * db/migrations/080_events.sql for the full "which is used where".
- */
-function done(base: string, number: string | null, state: string, total?: number, gift?: string) {
-  const params = new URLSearchParams();
-  if (number) params.set("n", number);
-  params.set("s", state);
-  if (total != null && Number.isFinite(total)) params.set("t", total.toFixed(2));
-  /* `g` is how the receipt screen learns it can offer «Скачать подарочную
-     карту (PDF)». It carries `<code>~<token>` per card, because the token is an
-     HMAC the browser cannot compute (src/lib/giftcard-pdf.ts) and the receipt
-     is a static page with no order of its own to ask about. Only ever on the
-     buyer's own return from the bank, only for the order just paid. */
-  if (gift) params.set("g", gift);
-  return NextResponse.redirect(`${base}/shop2/done/?${params.toString()}`, 303);
-}
-
-/**
- * `RMP-ACDE-4679~<token>,…` for the cards this order bought — "" for an order
- * with none, and "" for anything that goes wrong. The receipt must never fail
- * to render because a gift-card lookup did.
- */
-async function giftLinks(orderId: string): Promise<string> {
-  try {
-    const [{ orderGiftCards }, { giftPdfToken }] = await Promise.all([
-      import("@/lib/giftcards"),
-      import("@/lib/giftcard-pdf"),
-    ]);
-    const cards = await orderGiftCards(orderId);
-    return cards
-      .slice(0, 10)
-      .map((c) => `${c.code}~${giftPdfToken(c.code)}`)
-      .join(",");
-  } catch (err) {
-    console.error("payments/return: gift-card links unavailable", err);
-    return "";
-  }
+function done(base: string, number: string | null, state: ReceiptState, extra: { total?: number; gift?: string; orderId?: string } = {}) {
+  return NextResponse.redirect(receiptUrl(base, { number, state, ...extra }), 303);
 }
 
 export async function GET(req: Request) {
@@ -130,38 +90,31 @@ async function handle(req: Request, params: URLSearchParams) {
 
   let outcome;
   try {
-    outcome = await applyPaymentResult(order, result, provider.name, {
-      setOrderPayment,
-      setOrderStatus,
-    });
-  } catch (err) {
-    console.error("payments/return: apply failed", err);
-    return done(base, order.number, result.status);
-  }
-
-  if (outcome.status === "paid") {
     // The confirmation e-mail must not hold up the redirect, and must not be
     // able to break it either. Only the first arrival sends it: this route and
     // the webhook race by design, and refreshing it is free (audit H4). The
     // gift cards bought in the order are made sure of on every arrival —
     // issuing is idempotent, and a paid order whose first pass died before the
-    // hook has no other way of getting them.
-    // wholesale/loyalty: loyaltyEarned rides along only on the first arrival
-    // (undefined on a retry — settleLoyalty() in apply.ts only ever runs once
-    // per order) so the confirmation e-mail can mention points earned.
-    const paid = { ...order, status: "paid", payment: outcome.payment, loyaltyEarned: outcome.pointsEarned };
-    if (outcome.alreadyPaid) await issueOrderGiftCards(paid);
-    else await notifyOrderPaid(paid);
+    // hook has no other way of getting them. All of that is settlePayment().
+    outcome = await settlePayment(order, result, provider.name);
+  } catch (err) {
+    console.error("payments/return: apply failed", err);
+    return done(base, order.number, result.status, { orderId: order.id });
   }
 
-  const state =
+  const state: ReceiptState =
     outcome.keptPaid || outcome.status === "paid"
       ? "paid"
       : outcome.status === "failed"
         ? "failed"
         : result.status;
-  // The cards exist by now: issueOrderGiftCards / notifyOrderPaid above are
-  // awaited, and both mint before they mail.
+  // The cards exist by now: settlePayment() awaited the hook, and it mints
+  // before it mails.
   const gift = state === "paid" ? await giftLinks(order.id) : "";
-  return done(base, order.number, state, state === "paid" ? Number(order.total) : undefined, gift);
+  return done(base, order.number, state, {
+    total: state === "paid" ? Number(order.total) : undefined,
+    gift,
+    // a cancelled payment keeps the order: «Оплатить ещё раз» posts this id back
+    orderId: order.id,
+  });
 }
