@@ -17176,12 +17176,21 @@
        The euro figure that actually counts as revenue is written
        server-side, on the paid transition, in src/lib/payments/apply.ts —
        see db/migrations/080_events.sql for the full split. `t` rides on the
-       redirect from /api/payments/return only when s=paid. */
+       redirect from /api/payments/return only when s=paid.
+
+       That cache only ever held the demo receipt (finishDemo), so on the one
+       path this paragraph is about — a real return from the bank — nothing
+       was cached and every later render() sent «purchase» again: the two
+       boot answers (/api/overrides/, /api/bundles/) alone made it three per
+       paid order, and a language switch on the receipt made a fourth. The
+       receipt is filled in below and kept; go() still drops it when the
+       shopper leaves, so the next one reads its own query. */
+    S.done = { status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g) };
     if (s === "paid") {
       var total = parseFloat(String(q.t || "").replace(",", "."));
       track("purchase", isFinite(total) && total >= 0 ? { value: total } : {});
     }
-    return { status: s, number: /^R-[0-9]+$/.test(q.n || "") ? q.n : "", demo: !s && !q.n, gift: doneGiftCards(q.g) };
+    return S.done;
   }
   /* features: `g=RMP-ACDE-4679~<token>,…` on the redirect back from the bank
      (src/app/api/payments/return/route.ts). The token is an HMAC of the code
