@@ -457,10 +457,13 @@ body:has(.stickybar) .ftr {
    trigger is text with a chevron — no border, no background — and its
    listbox opens under the row, spanning the card. */
 .card__name { margin: 4px 0 9px; }
+/* No hairline above the price row (06.09, Renat): with nothing framing the
+   cards, a line across the card read as the divider between products, so the
+   price and «В корзину» looked like the NEXT product's. The row sits right
+   under its own name and sizes; the grid gap alone separates products. */
 .card__foot {
   position: relative; display: flex; align-items: center; gap: 6px;
-  margin-top: auto; padding-top: 9px; min-height: 30px;
-  border-top: 1px solid rgba(28, 26, 0, .13); white-space: nowrap;
+  margin-top: auto; padding-top: 8px; min-height: 30px; white-space: nowrap;
 }
 .card__foot > * { flex: none; }
 .card__sp { flex: 1 1 0 !important; min-width: 0; }
