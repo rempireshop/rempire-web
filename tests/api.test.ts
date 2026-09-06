@@ -246,4 +246,39 @@ describe("api routes", () => {
     });
     expect(missing.status).toBe(404);
   });
+
+  /* The journal's «Вернуть» after «Отменить заказ» (and after «возврат») is
+     PATCH {status:"paid"} on an order whose money already arrived. That used
+     to fall into the mark-paid-by-hand branch: applyPaymentResult() saw the
+     order as already paid, rewrote the payment record as a "manual" one and
+     changed nothing else — the card said the cancellation was undone, the
+     order stayed cancelled. A settled order stepping back to paid is a status
+     move and nothing more. */
+  it("PATCH status=paid on a cancelled or refunded order is the step back, not a second payment", async () => {
+    const { POST } = await import("@/app/api/orders/route");
+    const one = await import("@/app/api/admin/orders/[id]/route");
+    for (const away of ["cancelled", "refunded"] as const) {
+      const created = await (await POST(post("/api/orders/", goodOrder))).json();
+      const ctx = () => ({ params: Promise.resolve({ id: created.orderId }) });
+      const patch = (body: unknown) => one.PATCH(put(`/api/admin/orders/${created.orderId}/`, body, admin), ctx());
+
+      // the money arrives (by hand here — the same door a provider's ticket uses)
+      const paid = await (await patch({ status: "paid" })).json();
+      expect(paid.order.status).toBe("paid");
+      expect(paid.order.payment.status).toBe("paid");
+      const settledAt = paid.order.payment.at;
+
+      await patch({ status: away });
+      const undone = await (await patch({ status: "paid" })).json();
+      expect(undone.ok).toBe(true);
+      expect(undone.order.status, `undo of «${away}» did not put the status back`).toBe("paid");
+      // the payment record is the one the money arrived with, not a fresh "manual" one
+      expect(undone.order.payment.at).toBe(settledAt);
+
+      // and a second «оплачен» on an order that is paid already changes nothing
+      const again = await (await patch({ status: "paid" })).json();
+      expect(again.order.status).toBe("paid");
+      expect(again.order.payment.at).toBe(settledAt);
+    }
+  });
 });
