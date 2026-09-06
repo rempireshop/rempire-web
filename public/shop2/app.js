@@ -1184,6 +1184,7 @@
       "ошибка": "viga",
       "Код привязан ✓": "Kood seotud ✓",
       "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Koodi ei õnnestunud kontrollida — server ei vasta. Proovige uuesti.",
+      "Камера читает через запасной декодер — держите код ближе и ровнее.": "Kaamera loeb varudekoodriga — hoidke koodi lähemal ja otse.",
       "Не удалось привязать — возможно, код уже занят": "Ei õnnestunud siduda — võib-olla on kood juba kasutusel",
       "Войдите в панель.": "Logige paneeli sisse.",
       "Способ оплаты": "Makseviis",
@@ -2911,6 +2912,7 @@
       "ошибка": "error",
       "Код привязан ✓": "Code linked ✓",
       "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Could not check the code — the server is not responding. Try again.",
+      "Камера читает через запасной декодер — держите код ближе и ровнее.": "The camera is reading through the backup decoder — hold the code closer and straight.",
       "Не удалось привязать — возможно, код уже занят": "Couldn't link it — the code may already be taken",
       "Войдите в панель.": "Sign in to the panel.",
       "Способ оплаты": "Payment method",
@@ -14806,7 +14808,11 @@
   var SCAN = { stream: null, controls: null, engine: "", timer: null, lastCode: "", lastAt: 0, video: null,
     // what the panel was last drawn from (scanPanelKey), which unknown code
     // already got the search box focused, the handheld scanner's burst
-    panelKey: "", assignFocused: "", wedge: "", wedgeAt: 0 };
+    panelKey: "", assignFocused: "", wedge: "", wedgeAt: 0,
+    // the camera engine: the two-pass confirmation, the native detector's
+    // record, the zxing script's load, the two capture canvases
+    pendingCode: "", pendingN: 0, pendingAt: 0, nativeSince: 0, nativeHit: false, nativeErrs: 0,
+    nativeFormats: [], zxingLoad: null, zxingFailed: false, crop: null, full: null };
 
   function scanSupportInfo() {
     return {
@@ -14823,13 +14829,20 @@
       var existing = document.querySelector('script[src="' + src + '"]');
       if (existing) {
         if (existing.dataset.loaded === "1") resolve();
-        else existing.addEventListener("load", function () { resolve(); });
+        else {
+          existing.addEventListener("load", function () { resolve(); });
+          existing.addEventListener("error", function () { reject(new Error("load_failed")); });
+        }
         return;
       }
       var s = document.createElement("script");
       s.src = src;
       s.onload = function () { s.dataset.loaded = "1"; resolve(); };
-      s.onerror = function () { reject(new Error("load_failed")); };
+      /* Taken off the page again when it fails: left where it is, every later
+         loadScript() of the same src finds it and waits on a "load" that has
+         already not happened — the scanner's fallback decoder could never be
+         fetched a second time after one dropped connection. */
+      s.onerror = function () { if (s.parentNode) s.parentNode.removeChild(s); reject(new Error("load_failed")); };
       document.head.appendChild(s);
     });
   }
@@ -15090,6 +15103,9 @@
           '<div class="scan__target" aria-hidden="true"></div>' +
           '<div class="scan__line" aria-hidden="true"></div>' +
         "</div>" +
+        // the engine's one line («запасной декодер») — in the shell, so it
+        // shows under a card too and costs no panel redraw (scanSetHint)
+        '<p class="scan__note" data-scannote hidden></p>' +
         '<div id="scanpanel" class="scan__panel"></div>' +
         // The manual-entry field IS the keyboard-wedge target too (a bluetooth/
         // USB scanner just types digits + Enter into whatever is focused) — one
@@ -15109,7 +15125,7 @@
     var h = S.scanHit;
     return [
       h ? [h.code, h.productId || "", h.variant || "", h.qty, h.tracked, h.product ? h.product.id : ""].join("|") : "",
-      S.scanErr || "", S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "", S.scanHint || "",
+      S.scanErr || "", S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "",
       // «Сегодня» is drawn between codes only — while a card is up the list
       // landing must not count as a change
       !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-"
@@ -15200,9 +15216,12 @@
     if (SCAN.timer) { clearTimeout(SCAN.timer); SCAN.timer = null; }
     if (SCAN.controls && SCAN.controls.stop) { try { SCAN.controls.stop(); } catch (e) {} }
     SCAN.controls = null;
-    if (SCAN.stream) { try { SCAN.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
+    var track = scanTrack();
+    if (track && track.removeEventListener) track.removeEventListener("ended", scanStreamEnded);
+    if (SCAN.stream) stopTracks(SCAN.stream);
     SCAN.stream = null;
-    SCAN.engine = "";
+    SCAN.pendingCode = ""; SCAN.pendingN = 0;
+    scanSetEngine("");
   }
   function handleScanCode(code) {
     var now = Date.now();
@@ -15296,68 +15315,337 @@
   }
   function setScanTorch(on) {
     S.scanTorchOn = on;
-    if (SCAN.engine === "zxing" && SCAN.controls && SCAN.controls.switchTorch) SCAN.controls.switchTorch(on).catch(noop);
-    else if (SCAN.engine === "native" && SCAN.stream) {
-      var track = SCAN.stream.getVideoTracks()[0];
-      if (track && track.applyConstraints) track.applyConstraints({ advanced: [{ torch: on }] }).catch(noop);
-    }
+    var track = scanTrack();
+    if (track && track.applyConstraints) track.applyConstraints({ advanced: [{ torch: on }] }).catch(noop);
     var btn = SCANEL && SCANEL.querySelector("[data-scantorch]");
     if (btn) btn.setAttribute("aria-pressed", String(on));
   }
-  function startNativeEngine() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false }).then(function (stream) {
-      if (!S.scanOpen) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
-      SCAN.stream = stream; SCAN.engine = "native";
-      var video = SCAN.video;
-      if (!video) return;
-      video.srcObject = stream;
-      video.play().catch(noop);
-      var track = stream.getVideoTracks()[0];
-      var caps = {};
-      try { caps = track && track.getCapabilities ? track.getCapabilities() : {}; } catch (e) {}
-      S.scanTorchOk = !!(caps && caps.torch);
-      scanRenderPanel();
-      var detector = new window.BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] });
-      var loop = function () {
-        if (!S.scanOpen || SCAN.engine !== "native") return;
-        detector.detect(video).then(function (codes) {
-          if (codes && codes.length) handleScanCode(codes[0].rawValue);
-        }).catch(noop).then(function () { SCAN.timer = setTimeout(loop, 280); });
-      };
-      loop();
-    }).catch(function (err) {
-      S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
-      scanRenderPanel();
+
+  /* ---------- the camera engine ---------------------------------------------
+     One camera stream (scanOpenCamera), two decoders on top of it: the
+     browser's own BarcodeDetector where it exists (Chrome on Android — but
+     its detection lives in Google Play Services, and on a phone without that
+     module it answers nothing, or throws), and the vendored zxing, fetched
+     from the first second so the hand-over costs no wait. Both feed
+     scanCameraRead(): a code has to be read on two consecutive passes before
+     it counts — one frame's misread on a curved label is no bottle. What was
+     here before (Dim, S21 FE: «scanning was hard and almost impossible»)
+     asked for `facingMode: environment` and took whatever lens came, polled
+     the native detector every 280 ms on the whole frame, and waited on it
+     forever when it had nothing to say. */
+  var SCAN_NATIVE_FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "itf", "qr_code"];
+  var SCAN_FALLBACK_MS = 6000;   // a native detector silent this long hands over to zxing
+  var SCAN_TICK_MS = 120;        // a decode pass every ~8 frames
+  var SCAN_ZXING_SRC = "/vendor/zxing/zxing-browser.min.js";
+  var SCAN_BAD_LENS = /wide|ultra|tele|macro|depth|bokeh|zoom/i;
+  var SCAN_BACK_LENS = /back|rear|environment|задн|tagumi/i;
+  var SCAN_LENS_KEY = "rmp-scan-camera";
+
+  function scanSetEngine(name) {
+    SCAN.engine = name;
+    if (SCANEL) SCANEL.dataset.scanengine = name;
+  }
+  /** The one line under the viewfinder — the engine's own news («запасной
+      декодер»), patched in the shell so no card is redrawn for it. */
+  function scanSetHint(text) {
+    S.scanHint = text || "";
+    var el = SCANEL && SCANEL.querySelector("[data-scannote]");
+    if (!el) return;
+    el.textContent = S.scanHint;
+    el.hidden = !S.scanHint;
+    translateTree(el);
+  }
+  function scanTrack() { return SCAN.stream ? SCAN.stream.getVideoTracks()[0] : null; }
+  function scanTrackWidth(track) {
+    try { var st = track && track.getSettings ? track.getSettings() : {}; return Number(st.width) || 0; } catch (e) { return 0; }
+  }
+  function scanTrackId(track) {
+    try { return (track && track.getSettings && track.getSettings().deviceId) || ""; } catch (e) { return ""; }
+  }
+  function stopTracks(stream) { try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
+  function scanGum(video) { return navigator.mediaDevices.getUserMedia({ video: video, audio: false }); }
+
+  /* `facingMode: environment` on a phone with three back lenses is whichever
+     lens Android lists first — on Samsungs often the wide one, low-res and
+     soft up close, which is exactly where a 13-digit code on a 100 ml bottle
+     is read. Once the permission is in, the lenses can be told apart by
+     label: prefer a back one that does not say wide/ultra/tele/macro, and
+     among those the lowest in Android's own numbering (scanLensRank). The
+     winner is remembered (localStorage) so the next open asks for it
+     straight away. */
+  function scanOpenCamera() {
+    var want = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+    var saved = "";
+    try { saved = localStorage.getItem(SCAN_LENS_KEY) || ""; } catch (e) {}
+    var fresh = function () {
+      return scanGum(Object.assign({ facingMode: { ideal: "environment" } }, want)).then(function (stream) {
+        return scanPickLens(stream, want);
+      });
+    };
+    if (!saved) return fresh();
+    return scanGum(Object.assign({ deviceId: { exact: saved } }, want)).catch(function () {
+      // the remembered lens is gone (site data cleared, another phone): choose again
+      try { localStorage.removeItem(SCAN_LENS_KEY); } catch (e) {}
+      return fresh();
     });
   }
-  function startZxingEngine() {
-    loadScript("/vendor/zxing/zxing-browser.min.js").then(function () {
-      if (!S.scanOpen) return;
-      if (!window.ZXingBrowser) throw new Error("no_global");
-      SCAN.engine = "zxing";
-      var reader = new window.ZXingBrowser.BrowserMultiFormatOneDReader();
-      reader.decodeFromVideoDevice(undefined, SCAN.video, function (result, err, controls) {
-        SCAN.controls = controls;
-        if (!S.scanTorchOk && controls && controls.switchTorch) { S.scanTorchOk = true; scanRenderPanel(); }
-        if (result) handleScanCode(result.getText());
-      }).catch(function (err) {
-        S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
-        scanRenderPanel();
+  /** Where a lens stands in Android's own numbering. Chrome labels them
+      «camera2 0, facing back», «camera2 2, facing back» … — no «wide» in the
+      words, but the numbering is Camera2's, where the primary rear camera is
+      0 and the ultra-wide, tele and macro ones come after it. An unnumbered
+      label sorts last. */
+  function scanLensRank(dev) {
+    var m = String((dev && dev.label) || "").match(/camera2?\s+(\d+)/i);
+    return m ? Number(m[1]) : 50;
+  }
+  function scanPickLens(stream, want) {
+    if (!navigator.mediaDevices.enumerateDevices) return Promise.resolve(stream);
+    var byFacing = function () { return scanGum(Object.assign({ facingMode: { ideal: "environment" } }, want)); };
+    return navigator.mediaDevices.enumerateDevices().catch(function () { return []; }).then(function (devs) {
+      var track = stream.getVideoTracks()[0], curId = scanTrackId(track), curW = scanTrackWidth(track), best = null;
+      try {
+        var backs = (devs || []).filter(function (d) { return d.kind === "videoinput" && SCAN_BACK_LENS.test(d.label || ""); });
+        // one back camera, or a browser that keeps the labels to itself:
+        // facingMode already gave the only answer there is
+        if (backs.length > 1) {
+          // Samsung Internet and the desktop browsers do name the lenses, so
+          // an explicit wide/ultra/tele/macro is dropped before the numbering
+          var good = backs.filter(function (d) { return !SCAN_BAD_LENS.test(d.label || ""); });
+          if (!good.length) good = backs;
+          best = good[0];
+          for (var i = 1; i < good.length; i++) if (scanLensRank(good[i]) < scanLensRank(best)) best = good[i];
+        }
+      } catch (e) { best = null; }
+      if (!best || !best.deviceId || best.deviceId === curId) { scanRememberLens(curId); return stream; }
+      var id = best.deviceId;
+      /* The camera is handed over, never doubled: many Android phones refuse
+         a second stream while the first is live, and some drop the first one
+         to grant it — a black viewfinder either way. */
+      stopTracks(stream);
+      return scanGum(Object.assign({ deviceId: { exact: id } }, want)).then(function (s2) {
+        var w2 = scanTrackWidth(s2.getVideoTracks()[0]);
+        // it turned out to be the soft low-res one after all: back to
+        // whatever facingMode hands out
+        if (curW >= 1280 && w2 && w2 < 1280) { stopTracks(s2); return byFacing(); }
+        scanRememberLens(id);
+        return s2;
+      }, byFacing);
+    });
+  }
+  function scanRememberLens(id) { try { if (id) localStorage.setItem(SCAN_LENS_KEY, id); } catch (e) {} }
+
+  /* Focus and a modest zoom: continuous autofocus where the lens offers it,
+     and 1.5× so the small code fills more of the frame — the owner holds a
+     bottle at arm's length, not a poster. Each constraint on its own, so one
+     the lens refuses does not sink the other. The torch is re-read after the
+     stream settles: Samsung reports it late. */
+  function scanTuneTrack(track) {
+    if (!track || !track.getCapabilities) return;
+    var caps = {};
+    try { caps = track.getCapabilities() || {}; } catch (e) {}
+    var adv = [];
+    if (caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf("continuous") >= 0) adv.push({ focusMode: "continuous" });
+    if (caps.zoom && typeof caps.zoom.max === "number" && caps.zoom.max > 1) {
+      adv.push({ zoom: Math.min(caps.zoom.max, Math.max(Number(caps.zoom.min) || 1, 1.5)) });
+    }
+    for (var i = 0; i < adv.length; i++) {
+      try { track.applyConstraints({ advanced: [adv[i]] }).catch(noop); } catch (e) {}
+    }
+    scanCheckTorch(track);
+    setTimeout(function () { scanCheckTorch(track); }, 500);
+    setTimeout(function () { scanCheckTorch(track); }, 1500);
+  }
+  function scanCheckTorch(track) {
+    if (!S.scanOpen || scanTrack() !== track) return;
+    var caps = {};
+    try { caps = track.getCapabilities ? track.getCapabilities() || {} : {}; } catch (e) {}
+    var ok = !!caps.torch;
+    if (ok !== !!S.scanTorchOk) { S.scanTorchOk = ok; scanRenderPanel(); }
+  }
+
+  /* Two views of every frame: the whole of it (capped at 1280 wide), and the
+     band under the scan line drawn twice as large. A 13-digit EAN on a 100 ml
+     bottle is a few dozen pixels tall in a 1080p frame; enlarged it is what
+     both decoders read best. The viewfinder is a square showing the centre of
+     the frame (object-fit: cover), so the band is cut from that square. */
+  function scanCropCanvas() {
+    var video = SCAN.video;
+    if (!video || !video.videoWidth || !video.videoHeight) return null;
+    var vw = video.videoWidth, vh = video.videoHeight, side = Math.min(vw, vh);
+    var cw = Math.round(side * 0.76), ch = Math.round(side * 0.44);
+    var sx = Math.round((vw - cw) / 2), sy = Math.round((vh - ch) / 2);
+    var c = SCAN.crop || (SCAN.crop = document.createElement("canvas"));
+    var scale = cw < 900 ? 2 : 1;
+    if (c.width !== cw * scale || c.height !== ch * scale) { c.width = cw * scale; c.height = ch * scale; }
+    c.getContext("2d", { willReadFrequently: true }).drawImage(video, sx, sy, cw, ch, 0, 0, c.width, c.height);
+    return c;
+  }
+  function scanFullCanvas() {
+    var video = SCAN.video;
+    if (!video || !video.videoWidth || !video.videoHeight) return null;
+    var vw = video.videoWidth, vh = video.videoHeight, scale = vw > 1280 ? 1280 / vw : 1;
+    var c = SCAN.full || (SCAN.full = document.createElement("canvas"));
+    var w = Math.round(vw * scale), h = Math.round(vh * scale);
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+    c.getContext("2d", { willReadFrequently: true }).drawImage(video, 0, 0, w, h);
+    return c;
+  }
+  /* A code counts once two consecutive passes (within a second) agree on it.
+     The manual field and a handheld scanner skip this: a typed code is
+     already a decision. */
+  function scanCameraRead(code) {
+    code = String(code || "").trim();
+    if (!code) return;
+    var now = Date.now();
+    if (SCAN.pendingCode === code && now - SCAN.pendingAt < 1000) SCAN.pendingN++;
+    else { SCAN.pendingCode = code; SCAN.pendingN = 1; }
+    SCAN.pendingAt = now;
+    if (SCAN.pendingN < 2) return;
+    SCAN.pendingN = 0; SCAN.pendingCode = "";
+    handleScanCode(code);
+  }
+
+  function startNativeLoop() {
+    var video = SCAN.video, detector;
+    try { detector = new window.BarcodeDetector({ formats: SCAN.nativeFormats }); }
+    catch (e) { scanNativeGaveUp("error"); return; }
+    scanSetEngine("native");
+    SCAN.nativeSince = 0; SCAN.nativeHit = false; SCAN.nativeErrs = 0;
+    var tick = 0;
+    var loop = function () {
+      if (!S.scanOpen || SCAN.engine !== "native") return;
+      var t0 = Date.now();
+      // no frame yet (the stream is still starting): nothing to detect on, and
+      // nothing to hold against the detector either — its six seconds are
+      // counted from the first frame it actually got to look at
+      if (!video || video.readyState < 2) { SCAN.timer = setTimeout(loop, SCAN_TICK_MS); return; }
+      if (!SCAN.nativeSince) SCAN.nativeSince = t0;
+      var src = (tick++ % 2) ? (scanCropCanvas() || video) : video;
+      detector.detect(src).then(function (codes) {
+        SCAN.nativeErrs = 0;
+        if (codes && codes.length) { SCAN.nativeHit = true; scanCameraRead(codes[0].rawValue); }
+      }, function (err) {
+        /* «Barcode detection service unavailable» (NotSupportedError) is Chrome
+           on a phone without Play Services' barcode module — final. Anything
+           else is given three chances. */
+        SCAN.nativeErrs += err && err.name === "NotSupportedError" ? 3 : 1;
+      }).then(function () {
+        if (!S.scanOpen || SCAN.engine !== "native") return;
+        if (SCAN.nativeErrs >= 3) { scanNativeGaveUp("error"); return; }
+        if (!SCAN.nativeHit && !SCAN.zxingFailed && Date.now() - SCAN.nativeSince > SCAN_FALLBACK_MS) { scanNativeGaveUp("silent"); return; }
+        SCAN.timer = setTimeout(loop, Math.max(0, SCAN_TICK_MS - (Date.now() - t0)));
       });
-    }).catch(function () {
+    };
+    loop();
+  }
+  /** The native detector is mute, broken or not there: zxing takes the same
+      stream. Told to the owner only when it is a hand-over — on a browser
+      with no detector of its own (Safari, Samsung Internet) zxing simply is
+      the scanner. */
+  function scanNativeGaveUp(reason) {
+    if (SCAN.timer) { clearTimeout(SCAN.timer); SCAN.timer = null; }
+    scanSetEngine("");
+    startZxingLoop().then(function () {
+      if (reason !== "absent") scanSetHint("Камера читает через запасной декодер — держите код ближе и ровнее.");
+    }, function () {
+      SCAN.zxingFailed = true;
+      if (!S.scanOpen || !SCAN.stream) return;
+      /* zxing did not load — the stockroom's wifi dropped. A detector that is
+         merely mute may still come good, so it goes back on with the
+         hand-over disarmed (SCAN.zxingFailed). One that threw, or that is not
+         there at all, leaves nothing to run: say so, rather than restart a
+         detector that will throw again three ticks later, for ever. */
+      if (reason === "silent") { startNativeLoop(); return; }
       S.scanErr = "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.";
       scanRenderPanel();
     });
   }
+  function startZxingLoop() {
+    if (!SCAN.zxingLoad) SCAN.zxingLoad = loadScript(SCAN_ZXING_SRC);
+    return SCAN.zxingLoad.then(function () {
+      if (!S.scanOpen || !SCAN.stream) return;
+      var Z = window.ZXingBrowser;
+      if (!Z || !Z.BrowserMultiFormatReader) throw new Error("no_global");
+      var F = Z.BarcodeFormat || {};
+      // no ITF here: zxing's ITF reader is the one that reads a code into a
+      // striped label; the native detector validates its own
+      var formats = [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128, F.CODE_39, F.QR_CODE]
+        .filter(function (x) { return x !== undefined; });
+      // @zxing/library's DecodeHintType — 2 is POSSIBLE_FORMATS, 3 is TRY_HARDER;
+      // the enum itself is not on the UMD bundle's global
+      var hints = new Map();
+      if (formats.length) hints.set(2, formats);
+      hints.set(3, true);
+      var reader = new Z.BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: SCAN_TICK_MS, delayBetweenScanSuccess: 300 });
+      scanSetEngine("zxing");
+      var tick = 0;
+      var loop = function () {
+        if (!S.scanOpen || SCAN.engine !== "zxing") return;
+        var t0 = Date.now(), video = SCAN.video;
+        if (video && video.readyState >= 2) {
+          var c = (tick++ % 2) ? scanCropCanvas() : scanFullCanvas();
+          if (c) {
+            try { var r = reader.decodeFromCanvas(c); if (r) scanCameraRead(r.getText()); }
+            catch (e) { /* NotFoundException: no code in this frame */ }
+          }
+        }
+        SCAN.timer = setTimeout(loop, Math.max(20, SCAN_TICK_MS - (Date.now() - t0)));
+      };
+      loop();
+    });
+  }
+  /* The stream died under us — the screen locked, another app took the
+     camera — or the tab went to the background: let go of the camera, and
+     open it again when the scanner is looked at. */
+  function scanStreamEnded() {
+    if (!S.scanOpen || document.hidden) return;
+    stopScanEngine();
+    setTimeout(function () { if (S.scanOpen && !SCAN.stream && !document.hidden) startScanEngine(); }, 800);
+  }
+  function scanVisibility() {
+    if (!S.scanOpen) return;
+    if (document.hidden) stopScanEngine();
+    else if (!SCAN.stream && !S.scanErr) startScanEngine();
+  }
   function startScanEngine() {
     var supp = scanSupportInfo();
     S.scanSupport = supp;
+    scanSetHint("");
     if (!supp.camera) {
       S.scanErr = "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.";
       scanRenderPanel();
       return;
     }
-    if (supp.native) startNativeEngine(); else startZxingEngine();
+    // zxing is fetched from the first second either way: a native detector
+    // that turns out mute hands over with nothing to wait for, and a browser
+    // without one needs it anyway. Cached by the browser after the first open;
+    // a fetch that failed once (no signal in the stockroom) is tried again.
+    if (SCAN.zxingFailed) { SCAN.zxingFailed = false; SCAN.zxingLoad = null; }
+    if (!SCAN.zxingLoad) { SCAN.zxingLoad = loadScript(SCAN_ZXING_SRC); SCAN.zxingLoad.catch(noop); }
+    // Chrome answers an empty list here on a phone whose Play Services lack
+    // the barcode module — the honest signal to skip the native path at once
+    var formatsP = supp.native && window.BarcodeDetector.getSupportedFormats
+      ? window.BarcodeDetector.getSupportedFormats().catch(function () { return []; })
+      : Promise.resolve(supp.native ? SCAN_NATIVE_FORMATS : []);
+    Promise.all([scanOpenCamera(), formatsP]).then(function (res) {
+      var stream = res[0], supported = res[1] || [];
+      if (!S.scanOpen || SCAN.stream) { stopTracks(stream); return; }
+      var video = SCAN.video;
+      if (!video) { stopTracks(stream); return; }
+      SCAN.stream = stream;
+      video.srcObject = stream;
+      video.play().catch(noop);
+      var track = stream.getVideoTracks()[0];
+      scanTuneTrack(track);
+      if (track && track.addEventListener) track.addEventListener("ended", scanStreamEnded);
+      SCAN.nativeFormats = SCAN_NATIVE_FORMATS.filter(function (f) { return supported.indexOf(f) >= 0; });
+      if (supp.native && SCAN.nativeFormats.length) startNativeLoop();
+      else scanNativeGaveUp(supp.native ? "error" : "absent");
+      scanRenderPanel();
+    }).catch(function (err) {
+      S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
+      scanRenderPanel();
+    });
   }
   function scanMount() {
     if (SCANEL) return SCANEL;
@@ -15377,9 +15665,12 @@
         if (e.key === "Enter") { e.preventDefault(); submitManualScan(); }
       });
     }
-    // the handheld-scanner burst and the keyboard-shrunk viewport, for as
-    // long as the shell stands (scanUnmount takes both off again)
+    SCANEL.dataset.scanengine = SCAN.engine || "";
+    // the handheld-scanner burst, the keyboard-shrunk viewport and the tab
+    // going to the background, for as long as the shell stands (scanUnmount
+    // takes them off again)
     document.addEventListener("keydown", scanWedgeKey);
+    document.addEventListener("visibilitychange", scanVisibility);
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", scanFitViewport);
       window.visualViewport.addEventListener("scroll", scanFitViewport);
@@ -15398,6 +15689,7 @@
   function scanUnmount() {
     stopScanEngine();
     document.removeEventListener("keydown", scanWedgeKey);
+    document.removeEventListener("visibilitychange", scanVisibility);
     if (window.visualViewport) {
       window.visualViewport.removeEventListener("resize", scanFitViewport);
       window.visualViewport.removeEventListener("scroll", scanFitViewport);
@@ -15408,7 +15700,7 @@
       overlay and the /shop2/scan/ route, which differ only in their shell. */
   function scanResetState() {
     S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = "";
-    S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null;
+    S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null; S.scanHint = "";
     S.scanQty = 1; S.scanBusy = false; S.scanReady = false;
   }
   /* Which door the scanner was opened through — «Склад» counts a shelf,

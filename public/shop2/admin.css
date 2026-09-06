@@ -865,6 +865,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scanoverlay.is-card .scan__box { width: min(46vw, 140px); }
 .scanoverlay.is-card .scan__line { display: none; }
 
+/* the engine's own line under the viewfinder — «запасной декодер» */
+.scan__note { margin: -8px 0 0; max-width: 400px; font-size: 13px; line-height: 18px; color: var(--a-dim); text-align: center; }
 .scan__panel { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
 .scan__hint { margin: 0; text-align: center; font-size: 15px; line-height: 22px; color: var(--a-dim); }
 .scan__hint--sm { font-size: 13px; text-align: left; }
