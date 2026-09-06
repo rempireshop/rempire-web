@@ -483,6 +483,28 @@ describe("POST /api/payments/create", () => {
       expect((await row(o.orderId)).status).toBe("paid");
     });
 
+    it("a refund webhook from Montonio is understood and answered 200, so it is not retried for 48 hours", async () => {
+      const saved = { provider: process.env.PAYMENT_PROVIDER, access: process.env.MONTONIO_ACCESS_KEY, secret: process.env.MONTONIO_SECRET_KEY };
+      process.env.PAYMENT_PROVIDER = "montonio";
+      process.env.MONTONIO_ACCESS_KEY = "test-access-key";
+      process.env.MONTONIO_SECRET_KEY = "test-secret-key-long-enough";
+      try {
+        const { POST } = await import("@/app/api/payments/notify/route");
+        const refund = await POST(makeRequest("/api/payments/notify/", { method: "POST", body: { refundToken: "x.y.z" } }));
+        expect(refund.status).toBe(200);
+        expect(((await refund.json()) as { ignored?: string }).ignored).toBe("refund_webhook");
+        // …while a token nobody can verify is still refused
+        const junk = await POST(makeRequest("/api/payments/notify/", { method: "POST", body: { orderToken: "x.y.z" } }));
+        expect(junk.status).toBe(400);
+      } finally {
+        process.env.PAYMENT_PROVIDER = saved.provider;
+        if (saved.access === undefined) delete process.env.MONTONIO_ACCESS_KEY;
+        else process.env.MONTONIO_ACCESS_KEY = saved.access;
+        if (saved.secret === undefined) delete process.env.MONTONIO_SECRET_KEY;
+        else process.env.MONTONIO_SECRET_KEY = saved.secret;
+      }
+    });
+
     it("a webhook delivered twice settles once: one letter, one gift-card charge", async () => {
       await card(5);
       const o = await place({ ...PICKUP, discountCode: CODE });

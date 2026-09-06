@@ -4619,9 +4619,25 @@
       if (S.screen === "info") render();
     }).catch(function () { apiSeen(false); });
   }
-  function bankChipsHTML() {
+  /* The banks to offer: Montonio's list comes for every country the store
+     has switched on (EE, LV, LT, FI, PL — src/lib/payments/methods.ts), and
+     an Estonian shopper must not be handed twenty chips with Latvian banks
+     among them. The delivery country picks its own banks; a country with
+     none in the list (Germany) sees the whole list, as before, and Montonio
+     asks again on its own page anyway. Null when the real list never came —
+     the caller falls back to the five built-in names. */
+  function banksForCountry() {
     var real = PAYMETHODS.banks;
+    if (!real || !real.length) return null;
+    var c = String(orderCountry() || "").toUpperCase();
+    var own = real.filter(function (b) { return String(b.country || "").toUpperCase() === c; });
+    return own.length ? own : real;
+  }
+  function bankChipsHTML() {
+    var real = banksForCountry();
     if (real && real.length) {
+      // a list for another country can be shorter than the index picked in this one
+      if (S.bank >= real.length) S.bank = 0;
       return real.map(function (b, i) {
         return '<button class="bank" data-bank="' + i + '" aria-current="' + (i === S.bank) + '">' +
           (b.logoUrl
@@ -4637,8 +4653,8 @@
   /** The BIC `preferredProvider` Montonio wants, from whichever bank list is
       currently on screen — the real one when it loaded, BANK_CODES otherwise. */
   function selectedBankCode() {
-    var real = PAYMETHODS.banks;
-    if (real && real.length) return real[S.bank] ? real[S.bank].code : undefined;
+    var real = banksForCountry();
+    if (real && real.length) return real[S.bank] ? real[S.bank].code : real[0].code;
     return BANK_CODES[BANKS[S.bank]];
   }
   /* features: the gift-card amounts the shop is ALLOWED to sell — the same

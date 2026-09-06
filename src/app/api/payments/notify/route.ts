@@ -3,6 +3,7 @@ import { getOrderByNumber } from "@/lib/orders";
 import { getProvider } from "@/lib/payments";
 import { allow, clientIp } from "@/lib/payments/ratelimit";
 import { settlePayment } from "@/lib/payments/settle";
+import { PaymentError } from "@/lib/payments/types";
 
 /**
  * POST /api/payments/notify/ — the provider's webhook. This, not the shopper's
@@ -45,6 +46,13 @@ export async function POST(req: Request) {
   try {
     result = await provider.verifyNotification(req);
   } catch (err) {
+    /* Montonio sends refund webhooks (`refundToken`) to the same URL. They
+       are understood — and not ours to act on: a refund is recorded by hand
+       in the admin, never from a webhook — so they get the 200 that stops
+       the 48-hour retry, not the 400 that would earn it. */
+    if (err instanceof PaymentError && err.code === "not_order_webhook") {
+      return NextResponse.json({ ok: true, ignored: "refund_webhook" });
+    }
     console.error("payments/notify: token rejected", err);
     // Never retryable, and never something to act on: refuse it and say so.
     return NextResponse.json({ ok: false, error: "bad_token" }, { status: 400 });
