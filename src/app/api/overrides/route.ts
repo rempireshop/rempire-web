@@ -28,7 +28,9 @@ const DEFAULT_SETTINGS: Record<string, unknown> = {
   // the home-page banner: null means «стандартный» — app.js draws its built-in
   // slides. An object is { slides: [...], interval } written by the owner.
   hero: null,
-  flows: { abandoned: false, birthday: false, backstock: true },
+  // the same three defaults as FLOW_DEFAULTS in src/lib/flows.ts — a shop with
+  // no settings row must not claim it is mailing people it is not mailing
+  flows: { abandoned: false, birthday: false, backstock: false },
   shipping: {},
   // wholesale/loyalty: enabled + earn rate only, for the storefront's own
   // copy («зарабатывайте баллы») — proDiscountPct never leaves the server

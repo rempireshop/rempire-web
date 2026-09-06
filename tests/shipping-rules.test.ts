@@ -67,6 +67,20 @@ describe("what the assistant may do to the delivery prices", () => {
       .toEqual({ methods: { courier: { default: 9.9 } } });
   });
 
+  /* Every carrier an order may actually carry (SHIP_CARRIERS in
+     src/lib/orders.ts). «unisend» was missing from the assistant's own list,
+     so a Unisend price the owner asked for was dropped without a word — the
+     confirm card still said «Применить» and the tariff never moved. */
+  it("takes a price for every carrier the shop ships with, Unisend included", () => {
+    for (const carrier of ["omniva", "smartpost", "dpd", "venipak", "unisend"]) {
+      expect(sanitizeShippingRules({ carriers: { [carrier]: { EE: 4.5 } } }), carrier)
+        .toEqual({ carriers: { [carrier]: { EE: 4.5 } } });
+    }
+    // …and the name as the model is likeliest to write it
+    expect(sanitizeShippingRules({ carriers: { Unisend: { LV: 5.2 } } }))
+      .toEqual({ carriers: { unisend: { LV: 5.2 } } });
+  });
+
   it("handles the free-shipping floor, null included", () => {
     expect(sanitizeShippingRules({ freeFrom: 79 })).toEqual({ freeFrom: 79 });
     expect(sanitizeShippingRules({ freeFrom: null })).toEqual({ freeFrom: null });

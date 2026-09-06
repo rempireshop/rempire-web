@@ -55,6 +55,20 @@ function handedOver(status: string): boolean {
 }
 
 /**
+ * Whether the order's money has already arrived and stayed — its payment
+ * record says so, whatever the status column says now. A cancelled or
+ * refunded order stepping back to «оплачен» (the journal's undo) is such an
+ * order: settling it again would rewrite the provider's record as a "manual"
+ * one and, since applyPaymentResult() treats paid as a floor, leave the
+ * status exactly where it was — which is what used to happen.
+ */
+function settled(order: Order): boolean {
+  if ((["paid", "shipped", "delivered"] as string[]).includes(order.status)) return true;
+  const p = order.payment as { status?: unknown } | null | undefined;
+  return !!p && typeof p === "object" && p.status === "paid";
+}
+
+/**
  * «Заказ отправлен», with the carrier's tracking code and link when the order
  * carries a Montonio shipment (src/lib/shipping/montonio.ts) — without one the
  * letter still goes, saying the number will follow. Loaded lazily by a
@@ -139,7 +153,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
       order = (await getOrder(found.id)) ?? order;
     }
 
-    if (status === "paid" && !handedOver(found.status)) {
+    if (status === "paid" && !handedOver(found.status) && !settled(found)) {
       /* Marking an order paid by hand (a bank transfer that arrived, a cash
          sale that was keyed in later) is the same event as a provider's
          "paid" ticket, and it must settle the same things exactly once: the
@@ -148,8 +162,10 @@ export async function PATCH(req: Request, ctx: Ctx) {
          decrement, the order's own gift cards, and the confirmation mail.
          applyPaymentResult() is the one door for that — a bare
          setOrderStatus() here left the order "paid" with the gift card
-         unredeemed and the shelf count untouched. Already-paid orders are a
-         no-op inside it (paid is a floor), so a second click changes nothing. */
+         unredeemed and the shelf count untouched. An order whose money is
+         already in (settled) never comes through here: a second «оплачен» on
+         a paid order changes nothing, and the journal's undo of a
+         cancellation or a refund is the plain status move below. */
       const outcome = await applyPaymentResult(
         order,
         {

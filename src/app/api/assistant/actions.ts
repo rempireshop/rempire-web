@@ -178,7 +178,11 @@ export function sanitizePromo(raw: unknown): object | null {
 /** The countries the checkout offers, plus "default" for everything else. */
 const SHIP_COUNTRIES = ["EE", "LV", "LT", "FI", "EU"];
 const SHIP_METHODS = ["parcel", "courier", "pickup"] as const;
-const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak"];
+/* The same five the order validator accepts (SHIP_CARRIERS in
+   src/lib/orders.ts). «unisend» was missing here, so a tariff the owner asked
+   the assistant to set for Unisend was dropped without a word — the card said
+   «Применено ✓» and the price stayed what it was. */
+const SHIP_CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend"];
 
 /** 0–99 €, two decimals. A price outside that is a typo, not a tariff. */
 function shipPrice(raw: unknown): number | null {

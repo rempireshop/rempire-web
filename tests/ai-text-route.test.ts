@@ -236,6 +236,29 @@ describe("POST /api/admin/ai/text", () => {
     expect(res.status).toBe(502);
   });
 
+  /* A 200 whose body is not JSON — a proxy's HTML error page, a truncated
+     stream. `await r.json()` had no catch, so the SyntaxError escaped the
+     handler and Next answered with an opaque 500 the panel could only call
+     «не получилось». It is the same thing as the case above: an upstream
+     that did not answer properly. */
+  it("502s when OpenAI answers 200 with a body that is not JSON", async () => {
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    for (const body of ["<html>502 Bad Gateway</html>", "", '{"choices":['] ) {
+      vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status: 200, headers: { "content-type": "application/json" } })));
+      const res = await POST(req({ task: "describe", lang: "RU", input: { name: "x" } }, { cookie: admin }));
+      expect(res.status, `body ${JSON.stringify(body)}`).toBe(502);
+      expect((await res.json()).error).toBe("upstream");
+    }
+  });
+
+  it("502s when OpenAI answers 200 with valid JSON that is not an object", async () => {
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("null", { status: 200, headers: { "content-type": "application/json" } })));
+    const res = await POST(req({ task: "describe", lang: "RU", input: { name: "x" } }, { cookie: admin }));
+    expect(res.status).toBe(502);
+    expect((await res.json()).error).toBe("upstream");
+  });
+
   it("rate-limits at 30 calls/hour per admin session", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => fakeCompletion({ description: "d", bullets: [] })));
     const { POST } = await import("@/app/api/admin/ai/text/route");

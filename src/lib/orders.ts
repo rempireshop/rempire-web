@@ -1299,9 +1299,14 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
   const wasPaid = (PAID_ORDER_STATUSES as readonly string[]).includes(before.status);
   if (wasPaid && (status === "refunded" || status === "cancelled")) {
     try {
-      const { move } = await import("@/lib/inventory");
+      const { move, isTracked } = await import("@/lib/inventory");
       for (const item of before.items) {
         if (item.kind !== "product" || !item.qty) continue;
+        /* Only a counted shelf gets the bottle back. The sale of an uncounted
+           variant was skipped (move() — "tracked"), so there is nothing to
+           return; a +N here made the variant tracked at N and the shop said
+           «мало» about a product the owner never counted. */
+        if (!(await isTracked(item.id, item.variant ?? ""))) continue;
         await move({
           productId: item.id,
           variant: item.variant ?? "",

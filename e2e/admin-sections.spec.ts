@@ -130,10 +130,18 @@ test.describe("admin sections — Клиенты", () => {
     await section(page, "people");
     await page.locator("[data-admcustq]").fill(email);
     /* «Одобрить Pro» sits on the row itself now — the whole point of the
-       redesign is that a waiting request is answered without opening a card. */
+       redesign is that a waiting request is answered without opening a card.
+       It still asks first: the approval turns salon prices on for that company
+       and posts «Цены для салонов включены», and there is no un-sending a
+       letter — the same confirm card the tier switch on the customer's own
+       card has always shown. */
     const approve = page.locator(`[data-admcustapprove]`).first();
     await expect(approve, "the pending request has no «Одобрить Pro» on its row").toBeVisible();
     await approve.click();
+    const proCard = page.locator(".adm-confirm");
+    await expect(proCard.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
+    await expect(proCard.locator(".adm-confirm__d")).toContainText(email);
+    await page.locator("[data-admapply]").click();
     await expect(page.getByRole("status")).toBeVisible();
     await expect.poll(async () => {
       const res = await page.request.get(`/api/admin/customers/${encodeURIComponent(email)}/`);

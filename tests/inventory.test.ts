@@ -252,19 +252,38 @@ describe("inventory", () => {
     }
 
     it("refunded after paid puts the quantity back with a 'return' move", async () => {
+      await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });   // counted
       const order = await payOrder();
       await setOrderStatus(order.id, "refunded", "test");
       const level = await getLevel(plain.id, "");
-      expect(level?.qty).toBe(3);
+      expect(level?.qty).toBe(13);
       const moves = await listMoves({ productId: plain.id, reason: "return" });
       expect(moves).toHaveLength(1);
       expect(moves[0].ref).toBe(order.number);
     });
 
     it("cancelled after paid also returns stock", async () => {
+      await move({ productId: plain.id, delta: 10, reason: "goods_in", actor: "test" });
       const order = await payOrder();
       await setOrderStatus(order.id, "cancelled", "test");
-      expect((await getLevel(plain.id, ""))?.qty).toBe(3);
+      expect((await getLevel(plain.id, ""))?.qty).toBe(13);
+    });
+
+    /* The sale of an uncounted variant is skipped (move() — "tracked"), so its
+       return has to be skipped too: a +1 'return' on a shelf nobody has
+       counted made the variant tracked at 1, and the shop started saying
+       «мало» — then «нет в наличии» after the next sale — about a product the
+       owner has a box of. Symmetric with the sale: nothing was taken, nothing
+       comes back, and the variant stays uncounted. */
+    it("refunding or cancelling an order of an UNCOUNTED variant returns nothing and leaves it uncounted", async () => {
+      for (const away of ["refunded", "cancelled"] as const) {
+        const order = await payOrder();
+        await setOrderStatus(order.id, away, "test");
+        expect(await getLevel(plain.id, ""), `«${away}» wrote a shelf row for an uncounted variant`).toBeNull();
+        expect(await listMoves({ productId: plain.id, reason: "return" })).toHaveLength(0);
+        const untracked = await getLevels({ filter: "untracked" });
+        expect(untracked.some((r) => r.productId === plain.id)).toBe(true);
+      }
     });
 
     it("cancelling a NEW order (never paid) returns nothing — it never took stock", async () => {

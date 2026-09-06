@@ -67,6 +67,7 @@ Values are never written here. Names only, grouped by what stops working without
 | OPENAI_MODEL | model choice, default `gpt-4.1-mini` when unset | Dim | optional |
 | RESEND_API_KEY | all customer e-mails + order pings | Dim (Resend → API keys) | ✅ set |
 | RESEND_FROM / MAIL_REPLY_TO | sender «Rempire <shop@rempireshop.com>», reply-to info@rempireshop.com (forwards to the shop Gmail via Cloudflare Email Routing) | Dim | ✅ MAIL_REPLY_TO=info@rempireshop.com (03.09) |
+| RESEND_TO | **where the owner's own pings go** — «new order», the contact form, the sample request (src/lib/notify.ts). Unset it defaults to `info@diipsolutions.eu` (Dim's address, with the `onboarding@resend.dev` sender), so until this is set Renat gets none of them. Nothing else in the shop reads it: customer letters go to the customer, from RESEND_FROM | Dim → Renat's address | ⬜ **not set** — pings currently reach Dim, not the shop |
 | TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID | «new order» pings to a Telegram chat (optional; e-mail ping works without) | Dim, later a bot on the shop account | ⬜ optional |
 | DATABASE_URL | orders, admin login, overrides, reviews, gift cards (without it the shop runs in demo/localStorage mode) | Dim, from Railway Postgres (`DATABASE_PUBLIC_URL`, project «rempire», EU West) | ✅ 03.09, migrations applied |
 | SESSION_SECRET | admin cookie + mock-payment tickets (32+ random chars) | Dim | ✅ |

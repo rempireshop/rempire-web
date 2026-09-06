@@ -271,7 +271,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "upstream" }, { status: 502 });
   }
 
-  const data = await r.json();
+  /* A 200 whose body is not JSON — a proxy's HTML error page, a truncated
+     stream — used to throw out of the handler and leave Next to answer with
+     an opaque 500 that the panel could only call «не получилось». Same door
+     as the !r.ok branch above: an upstream that did not answer properly. */
+  const data = await r.json().catch(() => null);
+  if (!data || typeof data !== "object") {
+    console.error("[admin/ai/text] openai returned a body that is not JSON", task);
+    return NextResponse.json({ ok: false, error: "upstream" }, { status: 502 });
+  }
   const choice = data.choices?.[0] ?? {};
   const extracted = extractJsonObject(choice.message?.content, { finishReason: choice.finish_reason });
   const parsed: unknown = extracted.value ?? {};

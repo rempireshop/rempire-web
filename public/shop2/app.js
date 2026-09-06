@@ -928,7 +928,6 @@
       "Чат включён ✓": "Vestlus on sees ✓",
       "Чат выключен ✓": "Vestlus on väljas ✓",
       "Отменено ✓": "Tagasi võetud ✓",
-      "В демо правка не сохраняется": "Demos muudatust ei salvestata",
 
       // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
       "Контент": "Sisu",
@@ -1310,6 +1309,18 @@
       "Отменить заказ": "Tühista tellimus",
       "Отменить заказ?": "Tühistada tellimus?",
       "Изменить статус вручную:": "Muuda staatust käsitsi:",
+      "Оформить возврат?": "Vormistada tagastus?",
+      "Отметить оплаченным?": "Märkida makstuks?",
+      "Номер, имя, телефон, почта": "Number, nimi, telefon, e-post",
+      "Текст письма клиенту": "Kliendile saadetava kirja tekst",
+      "Нужен вход в админку — изменение не сохранилось": "Vaja on uuesti sisse logida — muudatus ei salvestunud",
+      "Не удалось сохранить на сервере — попробуйте ещё раз": "Serverisse salvestamine ebaõnnestus — proovige uuesti",
+      "Сервер не отвечает — изменение не сохранилось": "Server ei vasta — muudatus ei salvestunud",
+      "Тарифы снова стандартные": "Tariifid on taas standardsed",
+      "Вернуть тарифы по умолчанию?": "Taastada vaiketariifid?",
+      "Все цены доставки станут стандартными, покупатели увидят их сразу. Свои цены можно вернуть из журнала изменений.":
+        "Kõik tarnehinnad muutuvad standardseteks ja ostjad näevad neid kohe. Oma hinnad saab tagasi muudatuste logist.",
+      "Тарифы Montonio вписаны — проверьте цифры и нажмите «Сохранить»": "Montonio tariifid on sisse kirjutatud — kontrollige numbrid ja vajutage «Salvesta»",
       "бесплатно": "tasuta",
       "Только для вас": "Ainult teile",
       "Этикетка PDF ↗": "Silt PDF ↗",
@@ -1438,6 +1449,7 @@
       "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
         "Triipkoodi seob skanner laos: avage «Ladu», vajutage «Skaneeri» ja suunake kaamera pakendile. «Eemalda» võtab koodi mahult — see vabaneb pärast «Salvesta».",
       "Убрать размер": "Eemalda suurus",
+      "Добавить размер — объёмы заводит Дим": "Lisa suurus — mahud lisab Dim",
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui seda on 3 või vähem. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
@@ -1501,7 +1513,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "Nuppudel olevad hinnad lähevad tšekile. Salongi allahindlus märgitakse ostukorvis protsendina.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Praegu tühi — leidke toode vasakult või skaneerige triipkood.",
       "Почта клиента": "Kliendi e-post",
-      "Покупатель не обязателен. С почтой клиент получит чек письмом.": "Ostja pole kohustuslik. E-postiga saab klient tšeki kirjaga.",
+      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
+        "Ostja pole kohustuslik. Tšeki avab tellimuses link «Tšekk ↗» — kirjaga seda ei saadeta.",
       "Ничего не найдено": "Midagi ei leitud",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -1516,7 +1529,7 @@
       "Заявка Pro": "Pro taotlus",
       "Заявки Pro": "Pro taotlused",
       "Одобрить Pro": "Kinnita Pro",
-      "Отказать": "Keeldu",
+      "Отказать": "Keeldu", "Отказать в заявке?": "Kas keelduda taotlusest?",
       "Какие клиенты": "Millised kliendid",
       "Имя, почта, телефон, компания": "Nimi, e-post, telefon, ettevõte",
       "промокоды · подарочные карты · письма": "sooduskoodid · kinkekaardid · kirjad",
@@ -1535,9 +1548,11 @@
       "Список карт не загрузился.": "Kaartide nimekiri ei laadinud.",
       "сразу после оплаты": "kohe pärast tasumist",
       "когда вы нажмёте «Отправлен»": "kui vajutad «Teele pandud»",
+      "Ищем по всем заказам — фильтр сейчас не действует.":
+        "Otsime kõigist tellimustest — filter praegu ei kehti.",
       "тем, кто оставил почту": "neile, kes jätsid e-posti",
       "через 3 часа": "3 tunni pärast",
-      "за 3 дня до даты": "3 päeva enne kuupäeva",
+      "в день рождения": "sünnipäeval",
       "когда покупатель входит в кабинет": "kui klient siseneb oma kontole",
       "Выключить письмо": "Lülita kiri välja",
       "Включить письмо": "Lülita kiri sisse",
@@ -1673,8 +1688,10 @@
       "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
         "Vedajate tariife ei tulnud — «Seadetes» kehtivad sinu enda hinnad.",
       "Письма клиентам · Resend": "Kirjad klientidele · Resend",
-      "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест».":
-        "Lähevad aadressilt info@rempireshop.com. Kontrolli — «Turundus → Kirjad → Saada mulle test».",
+      "Тест дошёл — письма уходят с info@rempireshop.com.":
+        "Test jõudis kohale — kirjad lähevad aadressilt info@rempireshop.com.",
+      "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
+        "Saatja on info@rempireshop.com. Kontrollida saab ainult testiga: «Turundus → Kirjad → Saada mulle test».",
       "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
         "Kirjade saatmine pole seadistatud: test tuli veaga tagasi, kliendid kirju ei saa.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
@@ -1705,7 +1722,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "salongi soodustus, püsikliendipunktid, Pro hinnad",
       "Языки": "Keeled",
       "RU основной · ET · EN": "RU peamine · ET · EN",
-      "всё, что применялось, и кнопка «Вернуть»": "kõik, mis rakendati, ja nupp «Taasta»",
+      "что вы меняли в этом браузере, и кнопка «Вернуть»": "mida selles brauseris muutsite, ja nupp «Taasta»",
       "Пакомат, €": "Pakiautomaat, €",
       "Курьер, €": "Kuller, €",
       "Бесплатно от, €": "Tasuta alates, €",
@@ -2714,7 +2731,6 @@
       "Чат включён ✓": "Chat switched on ✓",
       "Чат выключен ✓": "Chat switched off ✓",
       "Отменено ✓": "Undone ✓",
-      "В демо правка не сохраняется": "In the demo this change is not saved",
 
       // i18n pass 2 — admin: the content editor (identity, hours, socials, top bar)
       "Контент": "Content",
@@ -3091,6 +3107,18 @@
       "Отменить заказ": "Cancel the order",
       "Отменить заказ?": "Cancel the order?",
       "Изменить статус вручную:": "Change the status by hand:",
+      "Оформить возврат?": "Refund the order?",
+      "Отметить оплаченным?": "Mark as paid?",
+      "Номер, имя, телефон, почта": "Number, name, phone, e-mail",
+      "Текст письма клиенту": "Text of the letter to the customer",
+      "Нужен вход в админку — изменение не сохранилось": "Sign in again — the change was not saved",
+      "Не удалось сохранить на сервере — попробуйте ещё раз": "Could not save on the server — try again",
+      "Сервер не отвечает — изменение не сохранилось": "The server is not responding — the change was not saved",
+      "Тарифы снова стандартные": "Tariffs are back to the defaults",
+      "Вернуть тарифы по умолчанию?": "Restore the default tariffs?",
+      "Все цены доставки станут стандартными, покупатели увидят их сразу. Свои цены можно вернуть из журнала изменений.":
+        "Every delivery price goes back to the default and customers see it at once. Your own prices can be brought back from the change log.",
+      "Тарифы Montonio вписаны — проверьте цифры и нажмите «Сохранить»": "Montonio tariffs filled in — check the numbers and press “Save”",
       "бесплатно": "free",
       "Только для вас": "Only for you",
       "Этикетка PDF ↗": "Label PDF ↗",
@@ -3219,6 +3247,7 @@
       "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
         "The scanner links a barcode in the warehouse: open «Warehouse», press «Scan» and point the camera at the bottle. «Unlink» takes the code off a size — it is freed once you press «Save».",
       "Убрать размер": "Remove the size",
+      "Добавить размер — объёмы заводит Дим": "Add a size — sizes are added by Dim",
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red at 3 or fewer. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
@@ -3282,7 +3311,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "The prices on the chips are the ones that reach the receipt. The salon discount is set as a percentage in the cart.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Empty for now — find a product on the left or scan a barcode.",
       "Почта клиента": "Customer e-mail",
-      "Покупатель не обязателен. С почтой клиент получит чек письмом.": "The customer is optional. With an e-mail the customer gets the receipt by letter.",
+      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
+        "The customer is optional. The receipt opens from the “Receipt ↗” link on the order — it is not e-mailed.",
       "Ничего не найдено": "Nothing found",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -3297,7 +3327,7 @@
       "Заявка Pro": "Pro request",
       "Заявки Pro": "Pro requests",
       "Одобрить Pro": "Approve Pro",
-      "Отказать": "Decline",
+      "Отказать": "Decline", "Отказать в заявке?": "Decline the request?",
       "Какие клиенты": "Which customers",
       "Имя, почта, телефон, компания": "Name, e-mail, phone, company",
       "промокоды · подарочные карты · письма": "promo codes · gift cards · letters",
@@ -3316,9 +3346,11 @@
       "Список карт не загрузился.": "The card list did not load.",
       "сразу после оплаты": "right after payment",
       "когда вы нажмёте «Отправлен»": "when you press “Shipped”",
+      "Ищем по всем заказам — фильтр сейчас не действует.":
+        "Searching every order — the filter is off right now.",
       "тем, кто оставил почту": "to everyone who left an e-mail",
       "через 3 часа": "after 3 hours",
-      "за 3 дня до даты": "3 days before the date",
+      "в день рождения": "on the birthday",
       "когда покупатель входит в кабинет": "when the customer signs in",
       "Выключить письмо": "Switch the letter off",
       "Включить письмо": "Switch the letter on",
@@ -3454,8 +3486,10 @@
       "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
         "The carriers' tariffs did not arrive — your own prices in “Settings” apply.",
       "Письма клиентам · Resend": "Customer letters · Resend",
-      "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест».":
-        "Sent from info@rempireshop.com. To check — “Marketing → Letters → Send me a test”.",
+      "Тест дошёл — письма уходят с info@rempireshop.com.":
+        "The test arrived — letters go out from info@rempireshop.com.",
+      "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
+        "The sender is info@rempireshop.com. The only way to check is a test: “Marketing → Letters → Send me a test”.",
       "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
         "Sending letters is not set up: the test came back with an error and customers get nothing.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
@@ -3486,7 +3520,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "the salon discount, loyalty points, Pro prices",
       "Языки": "Languages",
       "RU основной · ET · EN": "RU main · ET · EN",
-      "всё, что применялось, и кнопка «Вернуть»": "everything applied, with a “Restore” button",
+      "что вы меняли в этом браузере, и кнопка «Вернуть»": "what you changed in this browser, with a “Restore” button",
       "Пакомат, €": "Parcel locker, €",
       "Курьер, €": "Courier, €",
       "Бесплатно от, €": "Free from, €",
@@ -3680,6 +3714,10 @@
     [/^(.+)\nВключим цены для салонов и отправим письмо на эту почту\.$/,
       { ET: "$1\nLülitame sisse salongihinnad ja saadame sellele aadressile kirja.",
         EN: "$1\nSalon prices go on and a letter goes to this address." }],
+    // «Отказать» on a partner request — the other half of the same card
+    [/^(.+)\nЗаявка закроется, цены для салонов не включатся\. Письмо не отправляется\.$/,
+      { ET: "$1\nTaotlus suletakse, salongihindu sisse ei lülitata. Kirja ei saadeta.",
+        EN: "$1\nThe request is closed and salon prices stay off. No letter is sent." }],
     /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
     [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
     [/^Фото добавлено · (.+)$/, { ET: "Foto lisatud · $1", EN: "Photo added · $1" }],
@@ -3720,9 +3758,24 @@
     [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером\.$/,
       { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
         EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number." }],
-    [/^([^\n]+) · ([^\n]+)\nДеньги вернутся клиенту, письмо уйдёт автоматически\.$/,
-      { ET: "$1 · $2\nRaha läheb kliendile tagasi, kiri saadetakse automaatselt.",
-        EN: "$1 · $2\nThe money goes back to the customer and the letter is sent automatically." }],
+    /* «Отменить заказ» — paid, then not yet paid */
+    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «отменён», товары вернутся на склад\. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда\. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту»\.$/,
+      { ET: "$1 · $2\nTellimus saab staatuse «tühistatud», kaubad lähevad lattu tagasi. Raha kantakse kliendile eraldi — pangas või Montonios, mitte siit. Kirja ei saadeta: kirjutage kliendile ise nupuga «Kirjuta kliendile».",
+        EN: "$1 · $2\nThe order gets the status “cancelled” and the goods go back to stock. The money is returned separately — in the bank or in Montonio, not from here. No letter is sent: write to the customer yourself with “Write to the customer”." }],
+    [/^([^\n]+) · ([^\n]+)\nЗаказ ещё не оплачен — возвращать нечего\. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту»\.$/,
+      { ET: "$1 · $2\nTellimus ei ole veel makstud — tagastada pole midagi. Kirja ei saadeta: kirjutage kliendile ise nupuga «Kirjuta kliendile».",
+        EN: "$1 · $2\nThe order has not been paid — there is nothing to return. No letter is sent: write to the customer yourself with “Write to the customer”." }],
+    /* «Изменить статус вручную» — the confirm card's two-line text before a
+       refund, and before «оплачен» by hand (money already in / not yet) */
+    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «возврат», товары вернутся на склад\. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда\.$/,
+      { ET: "$1 · $2\nTellimus saab staatuse «tagastus», kaubad lähevad lattu tagasi. Raha kantakse kliendile eraldi — pangas või Montonios, mitte siit.",
+        EN: "$1 · $2\nThe order gets the status “refunded” and the goods go back to stock. The money is returned separately — in the bank or in Montonio, not from here." }],
+    [/^([^\n]+) · ([^\n]+)\nСтатус вернётся на «оплачен»\. Деньги и склад не трогаем — они уже учтены\.$/,
+      { ET: "$1 · $2\nStaatus läheb tagasi «makstud». Raha ja ladu jäävad puutumata — need on juba arvesse võetud.",
+        EN: "$1 · $2\nThe status goes back to “paid”. Money and stock are left alone — they are already accounted for." }],
+    [/^([^\n]+) · ([^\n]+)\nТак же, как при обычной оплате: товары спишутся со склада, клиенту уйдёт письмо «Заказ принят»\. Отмечайте, только если деньги действительно пришли\.$/,
+      { ET: "$1 · $2\nSama mis tavalise makse puhul: kaubad kantakse laost maha, kliendile läheb kiri «Tellimus vastu võetud». Märkige ainult siis, kui raha on tõesti laekunud.",
+        EN: "$1 · $2\nThe same as a normal payment: the goods leave the stock and the customer gets the “Order received” letter. Mark it only when the money has really arrived." }],
     /* checkout trust line — the phone and the e-mail come from the content
        layer, so only the label around them is translated. The two-value rule
        has to come first: the one-value rule would swallow the «или». */
@@ -7796,6 +7849,9 @@
     var list = (S.admReviews && S.admReviews.reviews) || [];
     var r = null;
     for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) { r = list[i]; break; }
+    // the list is dropped the moment the first tap is applied (demoApply
+    // below) — a second tap before it is back would journal the same review twice
+    if (!r) return;
     var entry = demoApply({
       type: "moderate_review", id: id, name: r ? r.name : "",
       value: status, prev: (r && r.status) || "pending"
@@ -10532,7 +10588,7 @@
             x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
         '<input class="adm-input adm-input--row" data-admorderq value="' + esc(S.admOrderQ || "") +
-          '" placeholder="Номер, имя, телефон" aria-label="Поиск по заказам" style="flex:1;min-width:180px">' +
+          '" placeholder="Номер, имя, телефон, почта" aria-label="Поиск по заказам" style="flex:1;min-width:180px">' +
       "</div>" +
       (SRV.admin === true && SRV.ordersErr
         ? '<div class="adm-error"><span>Сервер заказов не отвечает — попробуйте ещё раз.</span>' +
@@ -10552,14 +10608,22 @@
       .filter(function (v) { return q ? true : admOrderMatches(v, f); })
       .filter(function (v) {
         if (!q) return true;
-        var phone = (v.srv && v.srv.phone) || "";
-        return (v.number + " " + v.who + " " + phone).toLowerCase().indexOf(q) >= 0;
+        // the e-mail too: a customer's letter carries it more often than a phone
+        var phone = (v.srv && v.srv.phone) || "", mail = (v.srv && v.srv.email) || "";
+        return (v.number + " " + v.who + " " + phone + " " + mail).toLowerCase().indexOf(q) >= 0;
       });
     // still loading: bars, not «Таких заказов нет» over a list that has not arrived
     if (!list.length && SRV.admin === true && !SRV.orders && !SRV.ordersErr) {
       return '<div class="adm-skel"><i></i><i></i><i></i></div>';
     }
-    return list.map(admOrderRowHTML).join("") +
+    /* The chip stays lit while a search is typed — it is the filter the owner
+       will come back to — but the search really does look through every order,
+       so the list says so. Without this line the screen was one chip saying
+       «Новые» over a list of shipped orders, with nothing to explain it. */
+    var over = q && f !== "all"
+      ? '<div class="adm-hint" style="margin:0 0 8px">Ищем по всем заказам — фильтр сейчас не действует.</div>'
+      : "";
+    return over + list.map(admOrderRowHTML).join("") +
       (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
   }
   /** The one step an order is at, as a button — the same primary action the
@@ -10567,6 +10631,12 @@
   function admOrderStepBtn(v, row) {
     var cls = "adm-btn" + (row ? " adm-btn--row" : "");
     var busy = SRV.shipBusy ? " disabled" : "";
+    /* An all-gift-card order has no parcel and no hand-over: the card is in
+       the customer's inbox the moment the payment lands. The card already
+       hides every step for it (showSteps below); the row did not, so a paid
+       digital order offered «Отправлен» — one tap and the shop mailed «Заказ
+       отправлен», with a tracking number it does not have, about nothing. */
+    if (v.digital) return "";
     if (v.paid && v.pickup) return '<button class="' + cls + '" data-admdelivered="' + esc(v.id) + '">Выдан клиенту</button>';
     if (v.paid && !v.labeled && !v.digital) {
       return '<button class="' + cls + '" data-admlabel="' + esc(v.id) + '"' + busy + ">" +
@@ -10639,8 +10709,48 @@
     return v.number + " · " + v.who + "\n" + v.ship +
       "\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера.";
   }
+  /* «Отменить заказ» — what actually happens, not what would be nice. The
+     server (setOrderStatus in src/lib/orders.ts) moves the status and puts a
+     counted shelf back; it sends no letter and it refunds nothing — there is
+     no cancellation template in src/emails/ and no call to the provider. The
+     card used to promise both, so the owner closed it believing the customer
+     had been told and paid back. Two straight chains, same reason as
+     admShipConfirmText(): the i18n check joins each into one text node. */
   function admCancelConfirmText(v) {
-    return v.number + " · " + v.who + "\nДеньги вернутся клиенту, письмо уйдёт автоматически.";
+    if (v.unpaid) {
+      return v.number + " · " + v.who +
+        "\nЗаказ ещё не оплачен — возвращать нечего. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту».";
+    }
+    return v.number + " · " + v.who +
+      "\nЗаказ получит статус «отменён», товары вернутся на склад. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту».";
+  }
+  /* «Изменить статус вручную» — the two statuses the card's own steps never
+     reach. «возврат» is money going back to the customer and «оплачен» by
+     hand is money the shop says arrived another way (a transfer, cash), so
+     both ask first, in the same card as «Отправлен» (README § State), and
+     say what follows. Neither leaves a journal line: a mark-paid settles the
+     gift card, the points and the shelf on the server, and a PATCH back
+     cannot un-settle them — the card is the safety, not an undo. */
+  function admManualStatusAction(v, status) {
+    // three straight chains, not one with a variable in it — same reason as
+    // admShipConfirmText(): the i18n check joins each chain into the text
+    // node the card will show, and the UI_RX rule matches that node whole
+    if (status === "refunded") {
+      return { type: "order_manual", overlay: true, danger: true, id: v.id, number: v.number, value: "refunded",
+        title: "Оформить возврат?", ok: "Возврат",
+        detail: v.number + " · " + v.who + "\nЗаказ получит статус «возврат», товары вернутся на склад. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда." };
+    }
+    // the money is already in (a cancelled or shipped order stepping back):
+    // only the status moves — no letter, no second write-off from the shelf
+    var settledNow = v.shipped || v.delivered || !!(v.srv && v.srv.payment && v.srv.payment.status === "paid");
+    if (settledNow) {
+      return { type: "order_manual", overlay: true, id: v.id, number: v.number, value: "paid",
+        title: "Отметить оплаченным?", ok: "Оплачен",
+        detail: v.number + " · " + v.who + "\nСтатус вернётся на «оплачен». Деньги и склад не трогаем — они уже учтены." };
+    }
+    return { type: "order_manual", overlay: true, id: v.id, number: v.number, value: "paid",
+      title: "Отметить оплаченным?", ok: "Оплачен",
+      detail: v.number + " · " + v.who + "\nТак же, как при обычной оплате: товары спишутся со склада, клиенту уйдёт письмо «Заказ принят». Отмечайте, только если деньги действительно пришли." };
   }
   /** The message the assistant would write for this order, ready to send.
       It is a letter TO the customer, so it stays in the customer's language,
@@ -10956,7 +11066,7 @@
         '<div class="adm-hint">' + esc((o && o.email) || "") + "</div></div>" +
       (o ? '<label class="adm-field">Сообщение клиента — если он написал первым' +
         '<textarea class="adm-input" rows="2" data-ordercustmsg placeholder="Вставьте сюда, что написал покупатель"></textarea></label>' : "") +
-      '<textarea class="adm-input" rows="4" data-orderreplydraft>' +
+      '<textarea class="adm-input" rows="4" data-orderreplydraft aria-label="Текст письма клиенту">' +
         esc(S.orderReplyDraft || admOrderDraft(v)) + "</textarea>" +
       '<div class="adm-acts">' +
         '<button class="adm-btn adm-btn--head" data-admordersend>Отправить</button>' +
@@ -10976,6 +11086,12 @@
     if (S.adminTab === "stock") return "stock";
     return S.goodsTab === "bundles" ? "sets" : "catalog";
   }
+  /** The number on the «Склад» tab: counted shelves that are low or out.
+      That is the only thing it is ever allowed to mean. It used to fall back
+      to lowStock() — the manual «мало / нет» flag on the static catalogue —
+      so the same badge said one thing before the shelf list arrived and a
+      different one after, and neither said which. On a real panel there is
+      no number until the list is here (the same rule as «Ждут письма»). */
   function admLowCount() {
     var rows = S.stockLevels;
     if (rows) {
@@ -10983,10 +11099,13 @@
       for (var i = 0; i < rows.length; i++) if (rows[i].tracked && (rows[i].state === "low" || rows[i].state === "out")) n++;
       return n;
     }
-    return lowStock().length;
+    return SRV.admin === true ? 0 : lowStock().length;
   }
   function admProductsHTML() {
     var tab = admProductTab();
+    // the badge is drawn on every tab, so the shelf list is asked for on every
+    // tab — «Каталог» used to show the badge without ever asking
+    loadStockLevels(false);
     var warn = admLowCount();
     var tabs =
       '<button class="adm-tab" data-admtab="goods" aria-current="' + (tab === "catalog") + '" title="Каталог">Каталог</button>' +
@@ -11542,7 +11661,10 @@
     ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
     ["back-in-stock", "Товар снова в наличии", "тем, кто оставил почту", "backstock"],
     ["abandoned-cart", "Брошенная корзина", "через 3 часа", "abandoned"],
-    ["birthday", "Скидка ко дню рождения", "за 3 дня до даты", "birthday"],
+    // «в день рождения», because that is what runBirthdays() does: it matches
+    // today's month and day (src/lib/flows.ts). The row used to promise three
+    // days of warning the sender never gave.
+    ["birthday", "Скидка ко дню рождения", "в день рождения", "birthday"],
     ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
     ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
   ];
@@ -12001,11 +12123,18 @@
         : "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.",
       act: "" });
 
+    /* Three states, not two. The panel has no way to ask whether Resend has a
+       key — the only probe is a real test letter — so before one has been sent
+       it says so instead of stating as fact that letters are going out. The
+       dot stays quiet while nothing is known to be wrong; it only turns when a
+       test came back «no_api_key». */
     var mailOk = S.admMailKey !== false;
     rows.push({ name: "Письма клиентам · Resend", ok: mailOk,
-      sub: mailOk
-        ? "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест»."
-        : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
+      sub: S.admMailKey === true
+        ? "Тест дошёл — письма уходят с info@rempireshop.com."
+        : mailOk
+          ? "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест»."
+          : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
       act: mailOk ? "" : admDevLink() });
 
     var gscOk = !GSC || GSC.ok === true;
@@ -12066,7 +12195,11 @@
     ["company", "О компании", "реквизиты, часы, контакты, соцсети, отчёты"],
     ["prices", "Цены и баллы", "скидка салона, баллы лояльности, Pro-цены"],
     ["langs", "Языки", "RU основной · ET · EN"],
-    ["journal", "Журнал изменений", "всё, что применялось, и кнопка «Вернуть»"]
+    /* «в этом браузере», because that is where it lives: DEMO.log is a
+       localStorage list (ADM_LS), not the server's admin_audit. What was
+       changed from the phone is not in the laptop's journal — the row used to
+       say «всё, что применялось» and read like a shop-wide history. */
+    ["journal", "Журнал изменений", "что вы меняли в этом браузере, и кнопка «Вернуть»"]
   ];
   function admSetTitle(key) {
     for (var i = 0; i < ADM_SET_PAGES.length; i++) if (ADM_SET_PAGES[i][0] === key) return ADM_SET_PAGES[i][1];
@@ -12313,10 +12446,18 @@
      numbers simply do not draw — an unconfigured shop must not show zeros it
      cannot stand behind. */
   var FLOW_COUNTS = null;
-  var flowCountsAsked = false;
-  function loadFlowCounts() {
-    if (flowCountsAsked) return;
-    flowCountsAsked = true;
+  /* When the answer last came back. Asked once per session, «Ждут письма: 3»
+     was this morning's three all day: the panel is a tab Renat leaves open,
+     and the number is the reason he opens the screen. One request per minute
+     of looking at it, and one straight away after anything moved an order —
+     the stamp is set before the fetch, so the render() inside it cannot loop
+     and a burst of renders is still one call. */
+  var flowCountsAt = 0;
+  var FLOW_COUNTS_TTL = 60000;
+  function loadFlowCounts(force) {
+    var now = Date.now();
+    if (!force && flowCountsAt && now - flowCountsAt < FLOW_COUNTS_TTL) return;
+    flowCountsAt = now;
     fetch("/api/admin/flows/").then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { if (j && j.ok && j.counters) { FLOW_COUNTS = j.counters; render(); } })
       .catch(noop);
@@ -13428,16 +13569,18 @@
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
   function savePromo() {
-    if (!S.promoForm) return;
+    if (!S.promoForm || savePromo._busy) return;   // a second tap while the first is on its way
+    savePromo._busy = true;
     S.promoFormErr = "";
     apiSend("/api/admin/promos/", "POST", promoFormPayload()).then(function (r) {
+      savePromo._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         S.promoForm = null; toast("Промокод сохранён ✓"); loadAdminPromos(true); return;
       }
       S.promoFormErr = PROMO_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить промокод.";
       render();
-    }).catch(function () { S.promoFormErr = "Сервер не отвечает."; render(); });
+    }).catch(function () { savePromo._busy = false; S.promoFormErr = "Сервер не отвечает."; render(); });
   }
   function togglePromoActive(code, active) {
     apiSend("/api/admin/promos/", "PATCH", { code: code, active: active }).then(function (r) {
@@ -13658,9 +13801,11 @@
     db_unavailable: "Сервер не отвечает — попробуйте позже."
   };
   function saveBundleForm() {
-    if (!S.bundleForm) return;
+    if (!S.bundleForm || saveBundleForm._busy) return;   // a second tap while the first is on its way
+    saveBundleForm._busy = true;
     S.bundleFormErr = "";
     apiSend("/api/admin/bundles/", "POST", bundleFormPayload()).then(function (r) {
+      saveBundleForm._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         S.bundleForm = null; S.bundleQ = "";
@@ -13670,7 +13815,7 @@
       }
       S.bundleFormErr = BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить набор.";
       render();
-    }).catch(function () { S.bundleFormErr = "Сервер не отвечает."; render(); });
+    }).catch(function () { saveBundleForm._busy = false; S.bundleFormErr = "Сервер не отвечает."; render(); });
   }
   function toggleBundleActive(id, active) {
     apiSend("/api/admin/bundles/", "PATCH", { id: id, active: active }).then(function (r) {
@@ -13702,7 +13847,10 @@
     }).catch(function () { toast("Сервер не отвечает"); loadAdminBundles(true); });
   }
   function deleteBundleById(id) {
+    if (deleteBundleById._busy) return;   // «Да, удалить» twice is one deletion
+    deleteBundleById._busy = true;
     apiJson("/api/admin/bundles/?id=" + encodeURIComponent(id), { method: "DELETE" }).then(function (r) {
+      deleteBundleById._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       S.bundleDel = "";
       if (r.status === 200 && r.body.ok) {
@@ -13713,7 +13861,7 @@
       }
       toast("Не получилось удалить набор");
       render();
-    }).catch(function () { S.bundleDel = ""; toast("Сервер не отвечает"); render(); });
+    }).catch(function () { deleteBundleById._busy = false; S.bundleDel = ""; toast("Сервер не отвечает"); render(); });
   }
 
   /* ---------- wholesale/loyalty: admin «Клиенты» -------------------------
@@ -13993,8 +14141,42 @@
     };
     render(); refocus("[data-admapply]");
   }
+  /** «Одобрить Pro» / «Отказать» on the customer card. The same weight as the
+      switch above it — an approval turns salon prices on for that company for
+      good and posts «Цены для салонов включены» — so it asks in the same card.
+      It used to be the one Pro decision on the screen that fired on the first
+      tap, next to a segmented control that asked about the very same thing. */
+  /** One customer by id — the card's own, or the row the list is showing.
+      Both places carry «Одобрить Pro», so both have to be able to name who. */
+  function admCustById(id) {
+    var open = S.admCustDetail && S.admCustDetail.customer;
+    if (open && String(open.id) === String(id)) return open;
+    var list = S.admCustomers || [];
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i];
+    return null;
+  }
+  function askCustDecision(c, action) {
+    if (!c) return;
+    // one string per branch, so the dictionary rule sees the whole card text
+    var who = (c.name ? c.name + " · " : "") + c.email;
+    if (action === "approve") {
+      pendingAction = { type: "cust_decide", overlay: true, id: c.id, action: "approve",
+        title: "Сделать партнёром?",
+        detail: who + "\nВключим цены для салонов и отправим письмо «Цены для салонов включены».",
+        ok: "Сделать партнёром" };
+    } else {
+      pendingAction = { type: "cust_decide", overlay: true, danger: true, id: c.id, action: "reject",
+        title: "Отказать в заявке?",
+        detail: who + "\nЗаявка закроется, цены для салонов не включатся. Письмо не отправляется.",
+        ok: "Отказать" };
+    }
+    render(); refocus("[data-admapply]");
+  }
   function admCustPatch(id, body, okMsg) {
+    if (admCustPatch._busy) return;   // «Одобрить Pro» tapped twice is one approval
+    admCustPatch._busy = true;
     apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", body).then(function (r) {
+      admCustPatch._busy = false;
       S.admCustBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -14007,7 +14189,7 @@
       }
       toast("Не получилось сохранить");
       render();
-    }).catch(function () { S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
+    }).catch(function () { admCustPatch._busy = false; S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
   }
   function approveCustomer(id) { admCustPatch(id, { action: "approve" }, "Партнёр одобрен · письмо ушло"); }
   function rejectCustomer(id) { admCustPatch(id, { action: "reject" }, "Заявка отклонена"); }
@@ -14759,7 +14941,9 @@
     }).join("");
     return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
       '<div class="adm-grid">' + head + rows + "</div>" +
-      '<button class="adm-btn adm-btn--dash" type="button" disabled title="скоро">+ Размер</button>' +
+      // the same reason as the «×» above and the hint below it — «скоро» said
+      // a third thing, and a title is invisible on the phone anyway
+      '<button class="adm-btn adm-btn--dash" type="button" disabled title="Объёмы заводит Дим" aria-label="Добавить размер — объёмы заводит Дим">+ Размер</button>' +
       '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
       '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       edEanHint() +
@@ -16490,7 +16674,10 @@
             '<label class="adm-field">Почта клиента<input class="adm-input adm-input--row" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
             '<label class="adm-field">Телефон<input class="adm-input adm-input--row" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
           "</div>" +
-          '<p class="adm-hint">Покупатель не обязателен. С почтой клиент получит чек письмом.</p>' +
+          /* The e-mail box is worth filling in — it ties the sale to a customer
+             card — but nothing is posted from here: POST /api/admin/pos-orders/
+             creates, pays and stocks the order and sends no letter at all. */
+          '<p class="adm-hint">Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.</p>' +
           (S.posErr ? '<p class="adm-err">' + esc(S.posErr) + "</p>" : "") +
           '<div class="adm-pospay">' +
             '<button class="adm-btn adm-btn--ghost adm-btn--pay" data-possend="cash"' +
@@ -16681,7 +16868,11 @@
     // answers them (`custom`) — the offline copy, merged into CATALOGUE by
     // adoptCustom() before the first render
     custom: [],
-    flows: { abandoned: false, birthday: false, backstock: true }, log: [] };
+    /* All three off, exactly like FLOW_DEFAULTS in src/lib/flows.ts. «Товар
+       снова в наличии» used to start on here and in GET /api/overrides while
+       the sender read it as off, so the switch said «включено» and no letter
+       ever left — the owner had to toggle it off and on to turn it on. */
+    flows: { abandoned: false, birthday: false, backstock: false }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
@@ -17049,14 +17240,27 @@
   /* One place where an applied change becomes a server write. Undo passes the
      previous action through the same door, so the server ends up holding what
      the panel shows. set_video is written by the features layer itself. */
+  /* The writes below are fire-and-forget by design — the demo layer already
+     shows the change and the toast already said «Сохранено ✓» — but a write
+     that never landed used to look exactly like one that did, and the owner
+     found out on another phone. One answer for all of them: a session that
+     ran out puts the login card back and says the change is not on the
+     server; anything else says so on the toast. */
+  function srvSaved(p) {
+    return p.then(function (r) {
+      if (r.status === 401) { SRV.admin = false; toast("Нужен вход в админку — изменение не сохранилось"); render(); return r; }
+      if (!(r.status === 200 && r.body && r.body.ok)) toast("Не удалось сохранить на сервере — попробуйте ещё раз");
+      return r;
+    }, function () { toast("Сервер не отвечает — изменение не сохранилось"); });
+  }
   function srvPush(a) {
     if (!SRV.admin || !a) return;
     var ov = "/api/admin/overrides/", st = "/api/admin/settings/";
-    if (a.type === "set_price") apiSend(ov, "PUT", { id: a.id, price: a.value }).catch(noop);
+    if (a.type === "set_price") srvSaved(apiSend(ov, "PUT", { id: a.id, price: a.value }));
     // wholesale/loyalty: the salon/pro price override — null clears it back
     // to base price × (1 − discount%), same PUT the retail price uses
-    else if (a.type === "set_pro_price") apiSend(ov, "PUT", { id: a.id, proPrice: a.value }).catch(noop);
-    else if (a.type === "set_stock") apiSend(ov, "PUT", { id: a.id, stock: a.value }).catch(noop);
+    else if (a.type === "set_pro_price") srvSaved(apiSend(ov, "PUT", { id: a.id, proPrice: a.value }));
+    else if (a.type === "set_stock") srvSaved(apiSend(ov, "PUT", { id: a.id, stock: a.value }));
     /* inventory: a ± on the «Склад» row is a relative move, so undo is simply
        the same call with the opposite sign — POST /api/admin/inventory/moves/
        takes `delta` for exactly this (src/app/api/admin/inventory/moves). */
@@ -17088,12 +17292,12 @@
         }).catch(noop);
     }
     // all three languages travel every time, so an emptied pair clears too
-    else if (a.type === "set_seo") apiSend(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }).catch(noop);
-    else if (a.type === "set_subcat") apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }).catch(noop);
-    else if (a.type === "set_varimg") apiSend(ov, "PUT", { id: a.id, varImg: a.map }).catch(noop);
+    else if (a.type === "set_seo") srvSaved(apiSend(ov, "PUT", { id: a.id, seo: seoToServer(seoOfAction(a)) }));
+    else if (a.type === "set_subcat") srvSaved(apiSend(ov, "PUT", { id: a.id, subcat: a.value || null }));
+    else if (a.type === "set_varimg") srvSaved(apiSend(ov, "PUT", { id: a.id, varImg: a.map }));
     // media: the whole list travels every time — adding, reordering, choosing
     // the main photo and deleting are all one write
-    else if (a.type === "set_gallery") apiSend(ov, "PUT", { id: a.id, gallery: a.list }).catch(noop);
+    else if (a.type === "set_gallery") srvSaved(apiSend(ov, "PUT", { id: a.id, gallery: a.list }));
     // …and the owner's own product keeps its photos in its row
     else if (a.type === "set_product_gallery") {
       apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", { gallery: a.list || [] })
@@ -17110,20 +17314,20 @@
       }).catch(function () { toast("Не получилось сохранить обложку"); });
     }
     // assistant-work: {RU,ET,EN} product-page description override
-    else if (a.type === "set_description") apiSend(ov, "PUT", { id: a.id, description: a.value || null }).catch(noop);
-    else if (a.type === "toggle_flow") apiSend(st, "PUT", { flows: DEMO.flows }).catch(noop);
-    else if (a.type === "toggle_chatbot") apiSend(st, "PUT", { chatbot: DEMO.chatbot }).catch(noop);
-    else if (a.type === "toggle_bundles") apiSend(st, "PUT", { bundles: DEMO.bundles }).catch(noop);
-    else if (a.type === "set_hero") apiSend(st, "PUT", { hero: DEMO.hero }).catch(noop);
+    else if (a.type === "set_description") srvSaved(apiSend(ov, "PUT", { id: a.id, description: a.value || null }));
+    else if (a.type === "toggle_flow") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
+    else if (a.type === "toggle_chatbot") srvSaved(apiSend(st, "PUT", { chatbot: DEMO.chatbot }));
+    else if (a.type === "toggle_bundles") srvSaved(apiSend(st, "PUT", { bundles: DEMO.bundles }));
+    else if (a.type === "set_hero") srvSaved(apiSend(st, "PUT", { hero: DEMO.hero }));
     // «Письма»: the whole map travels, so undo re-sends the previous one —
     // same reasoning as the banner and the content document
-    else if (a.type === "set_mail_texts") apiSend(st, "PUT", { mail_texts: (MAIL_TEXTS && MAIL_TEXTS.texts) || {} }).catch(noop);
+    else if (a.type === "set_mail_texts") srvSaved(apiSend(st, "PUT", { mail_texts: (MAIL_TEXTS && MAIL_TEXTS.texts) || {} }));
     // content: the whole document travels, so undo re-sends the previous one
-    else if (a.type === "set_content") apiSend(st, "PUT", { content: DEMO.content }).catch(noop);
+    else if (a.type === "set_content") srvSaved(apiSend(st, "PUT", { content: DEMO.content }));
     /* checkout-gaps: the whole delivery table travels, because a merge cannot
        express a price the owner deleted. Promo codes have their own routes —
        they are rows in promo_codes, not a settings blob. */
-    else if (a.type === "set_shipping_rules") apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_RULES) }).catch(noop);
+    else if (a.type === "set_shipping_rules") srvSaved(apiSend(st, "PUT", { shipping_rules: cloneRules(SHIP_RULES) }));
     else if (a.type === "create_promo") {
       apiSend("/api/admin/promos/", "POST", a.promo).then(function (r) {
         if (!(r.status === 200 && r.body.ok)) toast("Промокод не сохранился — проверьте условия");
@@ -17144,12 +17348,12 @@
       }).catch(noop);
     }
     // «Подарочные карты»: the whole list of denominations, so undo re-sends it
-    else if (a.type === "set_gift_amounts") apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }).catch(noop);
+    else if (a.type === "set_gift_amounts") srvSaved(apiSend(st, "PUT", { gift_amounts: giftAmountsOn() }));
     // wholesale/loyalty: the private half of settings.pricing (proDiscountPct,
     // proMinOrder) only ever travels through this admin-only route — never
     // the public /api/overrides one. adjust_points is a manual credit on one
     // customer's card, not a settings write.
-    else if (a.type === "set_pricing") apiSend(st, "PUT", { pricing: S.pricingLoaded }).catch(noop);
+    else if (a.type === "set_pricing") srvSaved(apiSend(st, "PUT", { pricing: S.pricingLoaded }));
     /* product creation: off the shelf is DELETE (the row stays, active=false),
        back on is PUT {active:true} — the undo of the one is the other */
     else if (a.type === "set_product_active") {
@@ -17198,6 +17402,9 @@
   }
 
   function admLogin(pw) {
+    // Enter and «Войти» both land here; a second press while the first is
+    // still on its way used to be a second login request against a 5/min limit
+    if (SRV.busy) return;
     if (!pw) { SRV.err = "Введите пароль"; render(); return; }
     SRV.busy = true; SRV.err = ""; render();
     apiSend("/api/admin/login/", "POST", { password: pw }).then(function (r) {
@@ -17266,6 +17473,12 @@
   function admOrdersChanged() {
     loadSrvOrders(true);
     loadOverview(true);
+    /* Everything else that counts orders is now a stale copy: «Ждут письма»
+       on «Письма» and the accountant's month on «Отчёты». Marked old rather
+       than fetched — the next render of those screens asks, a screen nobody
+       is looking at costs nothing. */
+    flowCountsAt = 0;
+    reportSummaryAt = 0;
   }
   function srvOrderPatch(id, patch) {
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", patch).then(function (r) {
@@ -17394,8 +17607,11 @@
   }
 
   /* ---- assistant-work: «Отчёты» — see reportsCard() ---------------------- */
+  var reportSummaryAt = 0;
   function srvLoadReportSummary(month) {
     if (!SRV.admin) return;
+    // stamped before the call, so the render() below cannot ask again
+    reportSummaryAt = Date.now();
     apiJson("/api/admin/reports/orders/?month=" + encodeURIComponent(reportMonthOr(month)) + "&format=json").then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -17438,12 +17654,8 @@
     if (typeof SRV === "undefined" || !SRV || SRV.admin !== true) return;
     var body = { product_id: id };
     for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) body[k] = patch[k];
-    try {
-      fetch("/api/admin/overrides/", {
-        method: "PUT", headers: { "content-type": "application/json" },
-        body: JSON.stringify(body)
-      }).catch(function () {});
-    } catch (e) {}
+    // the same «did it land» answer every other override write gives (srvSaved)
+    try { srvSaved(apiSend("/api/admin/overrides/", "PUT", body)); } catch (e) {}
   }
 
   var FLOW_NAMES = { abandoned: "Брошенная корзина", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии" };
@@ -17468,10 +17680,13 @@
      "fetch once, cache in S" idiom as loadFlowCounts() above the «Письма»
      card — the first render of this card kicks the summary off, later
      renders just read what landed. */
-  var reportSummaryAsked = false;
+  /* Same staleness rule as the flow counts above: the accountant's three
+     numbers are re-asked a minute after they were last read, and at once
+     after an order moved — a sale made while the screen was open used to
+     leave «Заказы 4» sitting there until the tab was reloaded. */
   function loadReportSummaryOnce() {
-    if (reportSummaryAsked) return;
-    reportSummaryAsked = true;
+    var now = Date.now();
+    if (reportSummaryAt && now - reportSummaryAt < FLOW_COUNTS_TTL) return;
     srvLoadReportSummary(S.reportMonth);
   }
   function reportsCard() {
@@ -19656,7 +19871,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -19900,7 +20115,13 @@
       return;
     }
     if (d.admlogout !== undefined) { admLogout(); return; }
-    if (d.admstatus) { srvOrderPatch(S.adminOrder, { status: d.admstatus }); return; }
+    // «Изменить статус вручную» asks first — see admManualStatusAction()
+    if (d.admstatus) {
+      var manRow = admOrderById(S.adminOrder);
+      if (!manRow) return;
+      pendingAction = admManualStatusAction(manRow, d.admstatus);
+      render(); refocus("[data-admapply]"); return;
+    }
     /* ---- «Заказы»: the steps the rows and the card do ----------------------
        «Создать этикетку» books the parcel with the carrier (Montonio) and
        changes nothing else; «Отправлен» goes through the confirm card because
@@ -20644,8 +20865,10 @@
            takes back. */
         else if (pa.type === "set_shipping_rules") {
           var shEntry = demoApply(pa);
-          toast("Тарифы доставки сохранены", shEntry);
+          toast(pa.reset ? "Тарифы снова стандартные" : "Тарифы доставки сохранены", shEntry);
         }
+        // «Изменить статус вручную»: confirmed — one PATCH, no journal line
+        else if (pa.type === "order_manual") { srvOrderPatch(pa.id, { status: pa.value }); }
         /* «Настройки»: the three cards rebuilt in phase 4 name themselves the
            same way, and the toast's «Отменить» takes back the line they wrote. */
         else if (pa.type === "set_hero") {
@@ -20657,6 +20880,12 @@
            writes the journal line once the server answered); the tier switch
            is journalled like a tariff change, «Отменить» on the toast. */
         else if (pa.type === "add_partner") { applyAddPartner(pa); return; }
+        /* «Одобрить Pro» / «Отказать» — a real PATCH, not a journal entry:
+           the approval posts the partner letter and there is no un-sending it,
+           so the card is the safety and there is no «Отменить» on the toast. */
+        else if (pa.type === "cust_decide") {
+          if (pa.action === "approve") approveCustomer(pa.id); else rejectCustomer(pa.id);
+        }
         else if (pa.type === "set_tier") {
           var tierEntry = demoApply(pa);
           if (pa.value === "pro") toast("Партнёр · " + pa.email, tierEntry);
@@ -20805,6 +21034,8 @@
     /* The banner is the first thing every visitor sees, so a save asks first
        — the same overlay card as a tariff or a shipped order (README § State). */
     if (d.herosave !== undefined) {
+      // nothing typed since the last save — no card, no journal line
+      if (!heroDirty()) { toast("Изменений нет"); return; }
       var hSave = heroClean(heroDraft());
       pendingAction = {
         type: "set_hero", value: hSave, overlay: true,
@@ -20872,22 +21103,37 @@
     // «Разрешить снижать текущие цены» — computeMontonioFillPatch() clamps at
     // the current price unless this is on; a switch like every other one here
     if (d.shipallowlower !== undefined) { S.shipAllowLower = !S.shipAllowLower; render(); return; }
+    // the defaults are prices too — the same card as «Сохранить»
     if (d.admshipreset !== undefined) {
-      demoApply({ type: "set_shipping_rules", rules: cloneRules(SHIP_RULES_DEFAULT), full: true });
-      toast("Вернули значения по умолчанию ✓"); render(); return;
+      pendingAction = {
+        type: "set_shipping_rules", rules: cloneRules(SHIP_RULES_DEFAULT), full: true, reset: true, overlay: true,
+        title: "Вернуть тарифы по умолчанию?",
+        detail: "Все цены доставки станут стандартными, покупатели увидят их сразу. Свои цены можно вернуть из журнала изменений."
+      };
+      render(); refocus("[data-admapply]"); return;
     }
+    /* Into the draft, not the shop. The sentence under the button promises
+       «проверьте цифры и сохраните», so the fill writes the boxes and only
+       «Сохранить» → the confirm card changes what a stranger is charged. A
+       partial merge — Venipak, Unisend, EU and default stay as they were,
+       the way applyShipRules() would have merged the same patch. */
     if (d.admshipfill !== undefined) {
-      // partial merge (full:false) — Venipak, Unisend, EU and default stay whatever they were
-      demoApply({ type: "set_shipping_rules", rules: computeMontonioFillPatch(!!S.shipAllowLower), full: false });
-      toast("Тарифы Montonio применены ✓"); render(); return;
+      var fillPatch = computeMontonioFillPatch(!!S.shipAllowLower);
+      var fillDraft = shipDraft();
+      Object.keys(fillPatch.methods).forEach(function (fm) {
+        if (!fillDraft.methods[fm]) fillDraft.methods[fm] = {};
+        Object.keys(fillPatch.methods[fm]).forEach(function (fc) { fillDraft.methods[fm][fc] = fillPatch.methods[fm][fc]; });
+      });
+      fillDraft.carriers = fillPatch.carriers;
+      toast("Тарифы Montonio вписаны — проверьте цифры и нажмите «Сохранить»"); render(); return;
     }
     /* ---- wholesale/loyalty ------------------------------------------------ */
     if (d.acctprosend !== undefined) { acctProSubmit(); return; }
     if (d.admcusttier !== undefined) { S.admCustTier = d.admcusttier; render(); return; }
     if (d.admcustopen) { S.admCustOpen = d.admcustopen; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
     if (d.admcustclose !== undefined) { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; render(); return; }
-    if (d.admcustapprove) { approveCustomer(d.admcustapprove); return; }
-    if (d.admcustreject) { rejectCustomer(d.admcustreject); return; }
+    if (d.admcustapprove) { askCustDecision(admCustById(d.admcustapprove), "approve"); return; }
+    if (d.admcustreject) { askCustDecision(admCustById(d.admcustreject), "reject"); return; }
     /* partners: «+ Партнёр», its form, the card's tier switch, and the lead's
        jump to «Настройки → Цены и баллы» */
     if (d.admpartnernew !== undefined) {
@@ -21149,7 +21395,6 @@
       return;
     }
     if (d.admattdel !== undefined) { admAttRemove(Number(d.admattdel)); render(); return; }
-    if (d.admedit !== undefined) { toast("В демо правка не сохраняется"); return; }
     if (d.size !== undefined) {
       S.size = Number(d.size);
       var sp = byId(S.productId);
@@ -22206,6 +22451,28 @@
     requestAnimationFrame(function () { tickQueued = false; paintTint(); });
   }, { passive: true });
   window.addEventListener("resize", measureHdr, { passive: true });
+  /* Enter in a one-line box of the panel's small forms presses that form's
+     own button. None of them is a <form>, so Enter used to do nothing — which
+     on a phone keyboard reads as «не сохранилось». Each row: the boxes, and
+     the button that belongs to them, looked up inside the same card. */
+  var ADM_ENTER_FORMS = [
+    ["[data-partnerf]", "[data-admpartnersave]"],
+    ["[data-promof]", "[data-admpromosave]"],
+    ["[data-stockeaninput],[data-stocklowinput],[data-stockqtyinput],[data-stockreasoninput]", "[data-stocksave]"],
+    ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
+    ["[data-admcustnotesf]", "[data-admcustsavenotes]"],
+    ["[data-bundlef]", "[data-bundlesave]"],
+    ["[data-mailto]", "[data-mailtest]"]
+  ];
+  function admEnterTarget(input) {
+    for (var i = 0; i < ADM_ENTER_FORMS.length; i++) {
+      if (!input.matches(ADM_ENTER_FORMS[i][0])) continue;
+      var scope = input.closest(".adm-card, .adm-form, .adm-page") || document;
+      var btn = scope.querySelector(ADM_ENTER_FORMS[i][1]);
+      return btn && !btn.disabled ? btn : null;
+    }
+    return null;
+  }
   // Enter in the admin assistant's input asks, same as the → button
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Enter") return;
@@ -22214,6 +22481,10 @@
       e.preventDefault();
       var q = (t.value || S.adminQ || "").trim();
       if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+    }
+    if (t && t.matches && t.tagName === "INPUT" && S.screen === "admin") {
+      var enterBtn = admEnterTarget(t);
+      if (enterBtn) { e.preventDefault(); enterBtn.click(); return; }
     }
     // Enter in the password field signs in, same as «Войти»
     if (t && t.matches && t.matches("[data-admpw]")) {

@@ -358,8 +358,12 @@ test.describe("sweep — customers", () => {
     await expect(page.getByRole("heading", { name: email })).toBeVisible();
     await assertClean(page, w, "customer card");
 
-    // Reject, then let them ask again, then approve — both halves of the queue.
+    /* Reject, then let them ask again, then approve — both halves of the
+       queue. Both ask first, in the same card the tier switch below them uses:
+       an approval posts the partner letter and cannot be taken back. */
     await page.locator("[data-admcustreject]").click();
+    await expect(page.locator(".adm-confirm__t")).toHaveText("Отказать в заявке?");
+    await page.locator("[data-admapply]").click();
     expect(await toastText(page)).toMatch(/[Оо]тклон/);
     await clearToast(page);
     await assertClean(page, w, "partner request rejected");
@@ -373,6 +377,12 @@ test.describe("sweep — customers", () => {
     await page.locator("[data-admcustq]").fill(email);
     await page.locator("[data-admcustopen]").first().click();
     await page.locator("[data-admcustapprove]").click();
+    await expect(page.locator(".adm-confirm__t")).toHaveText("Сделать партнёром?");
+    // «Отмена» first: a card that asks has to be answerable with "no"
+    await page.locator("[data-admcancel]").click();
+    await expect(page.locator(".adm-confirm")).toHaveCount(0);
+    await page.locator("[data-admcustapprove]").click();
+    await page.locator("[data-admapply]").click();
     expect(await toastText(page)).toMatch(/[Оо]добрен/);
     await clearToast(page);
     // the card's tier badge is the panel's own since phase 4 — «Pro», like the row's
