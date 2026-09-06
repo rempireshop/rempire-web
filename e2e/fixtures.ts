@@ -257,6 +257,16 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   // the first row of the «Доставка и оплата» price table (deliveryPageHTML)
   "Эстония": { ET: "Eesti", EN: "Estonia" },
   "Бесплатно от": { ET: "Tasuta alates", EN: "Free from" },
+  // the field notes patchEmail()/patchShip() draw on blur (storefront-sweep-2)
+  "В адресе не хватает знака @.": { ET: "Aadressist puudub @-märk.", EN: "The address is missing the @ sign." },
+  "Проверьте номер — похоже, в нём не хватает цифр.": {
+    ET: "Kontrolli numbrit — tundub, et mõni number on puudu.",
+    EN: "Check the number — it looks like a digit is missing.",
+  },
+  "Впишите имя и фамилию — их напечатают на посылке.": {
+    ET: "Kirjuta ees- ja perekonnanimi — need trükitakse pakile.",
+    EN: "Enter your first and last name — they are printed on the parcel.",
+  },
 };
 
 /** RU source string → the text app.js actually renders for `lang` (identity

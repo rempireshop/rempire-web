@@ -17953,7 +17953,11 @@
       var row = d.querySelector('[data-cline="' + i + '"]');
       if (!row) return;
       row.querySelector("[data-qtyval]").textContent = l.qty;
-      row.querySelector("[data-linepr]").textContent = eur(sizePrice(byId(l.id), l.size || 0) * l.qty);
+      /* lineUnit(), the same price cartBody() drew the line with: a set, a
+         gift card and a salon-priced line all have a unit of their own, and
+         sizePrice(byId(l.id)) priced a «bundle:…» line at the first catalogue
+         product's price — «×2 = 18 €» on a 34,90 € set — until the next rebuild. */
+      row.querySelector("[data-linepr]").textContent = eur(lineUnit(l) * l.qty);
       var minus = row.querySelector('[data-d="-1"]');
       if (minus) {
         if (l.qty <= 1) minus.setAttribute("aria-disabled", "true");
@@ -17994,6 +17998,26 @@
      on is not a click — so the shopper had to press twice. Only two things
      ever change here, so change those and leave the rest of the DOM, and the
      button being pressed, where they are. */
+  /* A note that goes away on blur keeps its box. The blur is usually the
+     mousedown of the very button being pressed, and removing the note moved
+     everything below it up before the mouseup — «Получить код» on the account
+     screen climbed 29 px out from under the finger and the first tap did
+     nothing. So the note is blanked (invisible, no role, hidden from readers)
+     and the next render() rebuilds the form without it. The two notes are
+     written in Russian and translated here: they used to skip the dictionary,
+     so a keyboard user tabbing through an Estonian checkout read Russian. */
+  function noteHide(el) {
+    el.style.visibility = "hidden";
+    el.removeAttribute("role");
+    el.setAttribute("aria-hidden", "true");
+  }
+  function noteShow(el, html) {
+    el.innerHTML = html;
+    el.style.visibility = "";
+    el.setAttribute("role", "alert");
+    el.removeAttribute("aria-hidden");
+    translateTree(el);
+  }
   function patchEmail(input) {
     // the account screen's plain e-mail row carries no aria-invalid and takes
     // no note; that attribute is what marks the two validated fields
@@ -18008,8 +18032,13 @@
         : "";
     var next = field.nextElementSibling;
     var isNote = next && (next.classList.contains("err") || next.classList.contains("hint"));
-    if (isNote) { if (note) next.outerHTML = note; else next.remove(); }
-    else if (note) field.insertAdjacentHTML("afterend", note);
+    if (isNote) {
+      if (note) { next.outerHTML = note; translateTree(field.nextElementSibling); }
+      else noteHide(next);
+    } else if (note) {
+      field.insertAdjacentHTML("afterend", note);
+      translateTree(field.nextElementSibling);
+    }
   }
 
   /* Same rule as the e-mail field: change the two things that change and
@@ -18020,9 +18049,12 @@
     input.setAttribute("aria-invalid", String(bad));
     var err = input.parentNode.querySelector(".err");
     if (bad) {
-      if (err) err.innerHTML = shipMsg(key);
-      else input.insertAdjacentHTML("afterend", '<div class="err" role="alert">' + shipMsg(key) + "</div>");
-    } else if (err) err.remove();
+      if (err) noteShow(err, shipMsg(key));
+      else {
+        input.insertAdjacentHTML("afterend", '<div class="err" role="alert">' + shipMsg(key) + "</div>");
+        translateTree(input.parentNode.querySelector(".err"));
+      }
+    } else if (err) noteHide(err);
   }
 
   /* The checkout screen's async probes — shipping rules, one loadPointsFor()
@@ -18086,7 +18118,9 @@
     // The drawer footer must update on every path, including the ones that
     // fall through to a full render — otherwise it freezes at a stale count.
     var showBtn = ovl.querySelector("[data-showbtn]");
-    if (showBtn) showBtn.textContent = showLabel();
+    // through the dictionary: the drawer was built translated, and a bare
+    // showLabel() put «Показать 2 товара» back on an Estonian catalogue
+    if (showBtn) showBtn.textContent = trText(showLabel(), S.lang);
 
     var list = filtered();
     var grid = S.screen === "catalog" ? document.getElementById("catgrid") : null;
