@@ -4908,6 +4908,16 @@
   function stripLangPrefix(p) {
     return String(p || "").replace(/^\/shop2\/(et|en|ru)(?=\/|$)/i, "/shop2");
   }
+  /* decodeURIComponent throws on a malformed escape — «/p/%E0/», a share
+     link a messenger mangled, a crawler's guess — and it used to throw out of
+     the router during boot: nothing was painted over the prerendered page,
+     and every navigation from then on found the static home still lying
+     under the app. The raw text is returned instead: it matches no product,
+     and the screen it routes to answers honestly (home, «Набор не найден»,
+     an empty search). */
+  function safeDecode(s) {
+    try { return decodeURIComponent(s); } catch (e) { return String(s); }
+  }
   /* What the URL itself declares, which is not always what is on screen: an
      unprefixed path stays Russian for the canonical and the hreflang cluster
      even when the visitor's browser has us rendering English. Getting that
@@ -20825,7 +20835,7 @@
     var p = stripLangPrefix(location.pathname).replace(/\/+$/, "");
     var m;
     if ((m = p.match(/\/shop2\/p\/([^/]+)$/))) {
-      var id = decodeURIComponent(m[1]), found = null;
+      var id = safeDecode(m[1]), found = null;
       CATALOGUE.forEach(function (x) { if (x.id === id) found = x; });
       if (found) {
         S.productId = found.id;
@@ -20840,13 +20850,13 @@
       S.brand = ""; S.cat = m[1]; S.shown = 12; S.screen = "catalog";
       return true;
     }
-    if ((m = p.match(/\/shop2\/b\/([^/]+)$/)) && BRAND_BY_SLUG[decodeURIComponent(m[1])]) {
-      S.brand = BRAND_BY_SLUG[decodeURIComponent(m[1])]; S.shown = 12; S.screen = "catalog";
+    if ((m = p.match(/\/shop2\/b\/([^/]+)$/)) && BRAND_BY_SLUG[safeDecode(m[1])]) {
+      S.brand = BRAND_BY_SLUG[safeDecode(m[1])]; S.shown = 12; S.screen = "catalog";
       return true;
     }
     if (/\/shop2\/search$/.test(p)) {
       var q = location.search.match(/[?&]q=([^&]*)/);
-      S.query = q ? decodeURIComponent(q[1].replace(/\+/g, " ")) : "";
+      S.query = q ? safeDecode(q[1].replace(/\+/g, " ")) : "";
       S.screen = "search";
       return true;
     }
@@ -20863,7 +20873,7 @@
        and screenBundle() answers honestly: the set, «Наборы сейчас
        недоступны», or «Набор не найден» — never a 404, never a bounce home. */
     if ((m = p.match(/\/shop2\/set\/([^/]+)$/))) {
-      S.bundleId = decodeURIComponent(m[1]); S.screen = "bundle"; return true;
+      S.bundleId = safeDecode(m[1]); S.screen = "bundle"; return true;
     }
     if (/\/shop2\/sets$/.test(p)) { S.screen = "bundles"; return true; }
     if (/\/shop2\/gift$/.test(p)) { S.screen = "gift"; return true; }
@@ -20872,7 +20882,7 @@
        — the slug is accepted optimistically and screenBlogPost() resolves it
        (found / not found / still loading) once its fetch answers. */
     if ((m = p.match(/\/shop2\/blog\/([^/]+)$/))) {
-      S.blogSlug = decodeURIComponent(m[1]); S.screen = "blogpost"; return true;
+      S.blogSlug = safeDecode(m[1]); S.screen = "blogpost"; return true;
     }
     if (/\/shop2\/blog$/.test(p)) { S.screen = "blog"; return true; }
     /* scanner app: /shop2/scan/ is the admin's third installable icon — the
