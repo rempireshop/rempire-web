@@ -506,6 +506,8 @@ for (let scenario = 0; scenario < 10; scenario++) {
 
       // Step 2 — country, then whichever methods that country offers.
       await page.locator("[data-country]").selectOption(country);
+      // «Другая страна Европы» asks which one — the carrier needs a real country
+      if (country === "EU") await page.locator("[data-countryiso]").selectOption("DE");
       await expect(page.locator("input[data-dm]").first(), `${label(ctx)} no delivery method offered for ${country}`)
         .toBeAttached();
       const available = await settleDelivery(page);

@@ -8,9 +8,41 @@ import {
   parseShippingRules,
   quoteFromRules,
   resetShippingRulesCache,
+  shippingZone,
   sniffCarrier,
   type ShippingRules,
 } from "@/lib/shipping";
+
+describe("zones: an order carries a real country, the rules price it by row", () => {
+  it("maps the four named countries to themselves, Europe to the EU row, the rest to default", () => {
+    for (const c of ["EE", "LV", "LT", "FI"]) expect(shippingZone(c)).toBe(c);
+    for (const c of ["DE", "de", "IT", "NL", "SE", "NO", "CH", "GB", "IS"]) expect(shippingZone(c), c).toBe("EU");
+    for (const c of ["US", "UA", "TR", "JP", "", "XX"]) expect(shippingZone(c), c).toBe("default");
+    // orders placed before the checkout asked for the country still say "EU"
+    expect(shippingZone("EU")).toBe("EU");
+  });
+
+  it("prices a German courier order from the EU row and a US one from the default cell", () => {
+    const rules: ShippingRules = {
+      ...DEFAULT_SHIPPING_RULES,
+      methods: {
+        parcel: { default: 4.99, EE: 5.47, EU: 8.5 },
+        courier: { default: 9.9, EE: 10.84, EU: 16.29 },
+        pickup: { default: 0 },
+      },
+      freeFromByCountry: { EU: 120, default: null },
+    };
+    const de = quoteFromRules(rules, { country: "DE", method: "courier", subtotal: 40 });
+    expect(de.price).toBe(16.29);
+    expect(de.freeFrom).toBe(120);
+    expect(de.country, "the quote keeps the real country").toBe("DE");
+    const us = quoteFromRules(rules, { country: "US", method: "courier", subtotal: 40 });
+    expect(us.price).toBe(9.9);
+    expect(us.freeFrom).toBeNull();
+    const legacy = quoteFromRules(rules, { country: "EU", method: "parcel", subtotal: 40 });
+    expect(legacy.price).toBe(8.5);
+  });
+});
 import { setupDb, teardownDb } from "./helpers";
 
 const rules = DEFAULT_SHIPPING_RULES;

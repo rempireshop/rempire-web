@@ -600,6 +600,10 @@
       "Rempire в TikTok": "Rempire TikTokis", "Пропустить заставку": "Jäta sissejuhatus vahele",
       "Подкатегории": "Alamkategooriad", "Сумма карты": "Kinkekaardi summa",
       "Курьер DPD по Европе": "DPD kuller Euroopas", "Другая страна Европы": "Muu Euroopa riik",
+      "Какая страна": "Milline riik", "— выберите страну —": "— vali riik —", "Страна доставки": "Tarneriik",
+      "Выберите страну доставки": "Vali tarneriik",
+      "В заказе не указана страна — покупатель выбрал «Другая страна Европы». Уточните страну у покупателя и отправьте вручную.":
+        "Tellimusel pole riiki — ostja valis «Muu Euroopa riik». Täpsusta riik ostjalt ja saada käsitsi.",
       "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.":
         "Brändid, millega Rempire’i salong töötab. Vajuta brändile — näitame kõike, mis laos on.",
       /* ---- checkout-gaps: real reviews, real promo codes, delivery prices --- */
@@ -2325,6 +2329,10 @@
       "Rempire в TikTok": "Rempire on TikTok", "Пропустить заставку": "Skip the intro",
       "Подкатегории": "Subcategories", "Сумма карты": "Gift card amount",
       "Курьер DPD по Европе": "DPD courier across Europe", "Другая страна Европы": "Another European country",
+      "Какая страна": "Which country", "— выберите страну —": "— choose a country —", "Страна доставки": "Delivery country",
+      "Выберите страну доставки": "Choose the delivery country",
+      "В заказе не указана страна — покупатель выбрал «Другая страна Европы». Уточните страну у покупателя и отправьте вручную.":
+        "The order has no country — the customer chose «Another European country». Ask the customer for the country and ship by hand.",
       "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.":
         "The brands the Rempire salon works with. Tap a brand and we will show everything in stock.",
       /* ---- checkout-gaps: real reviews, real promo codes, delivery prices --- */
@@ -3612,6 +3620,8 @@
     [/^Добавлено: (.+)$/, { ET: "Lisatud: $1", EN: "Added: $1" }],
     [/^Пакомат · (.+)$/, { ET: "Pakiautomaat · $1", EN: "Parcel locker · $1" }],
     [/^Курьер · (.+)$/, { ET: "Kuller · $1", EN: "Courier · $1" }],
+    [/^Курьера Montonio в (.+) нет — отправьте другим способом\.$/,
+      { ET: "Montonio kullerit riiki $1 ei ole — saada muul viisil.", EN: "Montonio has no courier for $1 — ship another way." }],
     [/^Скидка · (.+)$/, { ET: "Soodustus · $1", EN: "Discount · $1" }],
     [/^Показаны все (\d+) товар(?:|а|ов)$/, { ET: "Kuvatud kõik $1 toodet", EN: "All $1 products shown" }],
     [/^(\d+) товар(?:|а|ов)$/, { ET: "$1 toodet", EN: "$1 products" }],
@@ -4132,6 +4142,32 @@
     return [];
   }
   var COUNTRIES = [["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"], ["EU", "Другая страна Европы"]];
+  /* «Другая страна Европы» prices the parcel (the EU row of the rules), but a
+     parcel cannot be registered to «Europe»: the carrier needs the country.
+     So behind that choice sits a second select with the real country, and
+     THAT is what the order carries — src/lib/shipping.ts maps it back onto
+     the EU row for the price. The names come from the browser (every
+     language the shop speaks), the codes are the rules' own. */
+  var EUROPE_ISO = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "FR", "DE", "GR", "HU", "IE", "IT", "LU", "MT", "NL", "PL",
+    "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO", "CH", "GB"];
+  function countryName(code) {
+    code = String(code || "").toUpperCase();
+    // the pre-country orders' bare «EU» has no name in any browser
+    if (code === "EU") return S.lang === "RU" ? "Другая страна Европы" : trText("Другая страна Европы", S.lang);
+    if (S.lang === "RU") for (var i = 0; i < COUNTRIES.length; i++) if (COUNTRIES[i][0] === code) return COUNTRIES[i][1];
+    try {
+      var dn = new Intl.DisplayNames([S.lang === "ET" ? "et" : S.lang === "EN" ? "en" : "ru"], { type: "region" });
+      return dn.of(code) || code;
+    } catch (e) { return code; }
+  }
+  function europeOptionsHTML(selected) {
+    var rows = EUROPE_ISO.map(function (c) { return [c, countryName(c)]; })
+      .sort(function (a, b) { return a[1].localeCompare(b[1]); });
+    return '<option value=""' + (selected ? "" : " selected") + ">— выберите страну —</option>" +
+      rows.map(function (r) { return '<option value="' + r[0] + '"' + (selected === r[0] ? " selected" : "") + ">" + esc(r[1]) + "</option>"; }).join("");
+  }
+  /** The country the order is placed to: the real one behind «Другая страна Европы». */
+  function orderCountry() { return S.country === "EU" ? (S.countryIso || "EU") : S.country; }
 
   /* ---------- checkout delivery: rules, carriers, parcel points ------------
      The SHIP table above still prices the account screen and the admin's
@@ -4611,6 +4647,7 @@
     shown: 12,          // catalog infinite scroll
     loading: false,
     country: "EE",
+    countryIso: "",        // the real country behind «Другая страна Европы» (checkout)
     method: 0,
     machine: 0,
     promo: "",
@@ -9188,7 +9225,7 @@
       customer: { name: S.ship.name, email: S.email, phone: S.ship.phone },
       shipping: {
         method: shipMethod(),
-        country: S.country,
+        country: orderCountry(),
         carrier: isParcel() ? shipCarrier() : "",
         pointId: S.ship.point ? S.ship.point.id : null,
         pointName: S.ship.point ? S.ship.point.name : null,
@@ -9269,6 +9306,7 @@
     /* Send the shopper to the step that is short, with the fields marked,
        rather than refusing with a toast and leaving them to hunt. */
     if (emailBad()) { return failStep(1, "Проверьте e-mail — на него придёт подтверждение заказа"); }
+    if (!isDigital() && S.country === "EU" && !S.countryIso) { return failStep(2, "Выберите страну доставки"); }
     if (shipMissing().length) { return failStep(2, "Заполните данные доставки"); }
     // features: the card has nowhere to go without an address for it
     if (isDigital() && giftToEmailBad()) { return failStep(2, "Проверьте e-mail получателя"); }
@@ -9516,7 +9554,12 @@
               // the select is the one control that would re-price the parcel
               (isDigital() ? ""
                 : '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-country>' +
-                  COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>") +
+                  COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") + "</select></span></label>" +
+                  // the real country behind «Другая страна Европы» — the carrier needs it
+                  (S.country === "EU"
+                    ? '<label class="field"><span class="field__label">Какая страна</span><span class="sel sel--box"><select data-countryiso aria-label="Страна доставки">' +
+                      europeOptionsHTML(S.countryIso || "") + "</select></span></label>"
+                    : "")) +
               '<div data-co-delivery data-points-loading="' + pointsLoadingCount() + '">' + deliveryBlockHTML() + "</div>" +
               // features: who the card is for — outside [data-co-delivery], see
               // giftToBlockHTML()'s own comment
@@ -13462,7 +13505,9 @@
     if (!s) return "";
     if (s.pointName) return s.pointName;
     var a = s.address || {};
-    return [a.addr || a.street || "", a.zip || "", a.city || "", s.country || ""].filter(Boolean).join(", ");
+    // the country by name: «Германия» / «Saksamaa» / «Germany», and the
+    // pre-country orders' bare «EU» as «Другая страна Европы»
+    return [a.addr || a.street || "", a.zip || "", a.city || "", s.country ? countryName(s.country) : ""].filter(Boolean).join(", ");
   }
   /* ---------- media: the owner's own photos --------------------------------
      Photos go straight from the phone to POST /api/admin/upload/, which turns
@@ -16152,6 +16197,15 @@
     not_shippable: "Для самовывоза и электронных заказов этикетка не нужна.",
     not_paid: "Этикетка создаётся после оплаты."
   };
+  /* Montonio found no courier for the order's country. Two different
+     stories: an order placed before the checkout asked for the real country
+     (it says «EU» — nobody can drive to «Europe»), and a country Montonio's
+     couriers do not serve at all. */
+  function shipCourierErr(detail) {
+    var c = String(detail || "").split("/").pop().toUpperCase();
+    if (!c || c === "EU") return "В заказе не указана страна — покупатель выбрал «Другая страна Европы». Уточните страну у покупателя и отправьте вручную.";
+    return "Курьера Montonio в " + countryName(c) + " нет — отправьте другим способом.";
+  }
   function srvCreateShipment(id) {
     if (SRV.shipBusy) return;
     var row = admOrderById(id);
@@ -16167,7 +16221,8 @@
         loadSrvOrders(true);
         return;
       }
-      toast(SHIP_ERR[r.body && r.body.error] || "Не удалось создать этикетку");
+      var shipErr = r.body && r.body.error;
+      toast(shipErr === "no_courier_service" ? shipCourierErr(r.body.detail) : SHIP_ERR[shipErr] || "Не удалось создать этикетку");
       render();
     }).catch(function () { SRV.shipBusy = false; toast("Сервер не отвечает"); render(); });
   }
@@ -20444,7 +20499,8 @@
 
   document.addEventListener("change", function (e) {
     var t = e.target;
-    if (t.matches("[data-country]")) {
+    if (t.matches("[data-countryiso]")) { S.countryIso = t.value; render(); }
+    else if (t.matches("[data-country]")) {
       S.country = t.value; S.method = 0; S.machine = 0;
       // another country is another carrier and another set of machines
       S.ship.carrier = ""; S.ship.point = null; POINTS.q = "";

@@ -247,6 +247,28 @@ export function resetShippingRulesCache(): void {
   cache = null;
 }
 
+/**
+ * The countries the «Другие страны Европы» row prices: the EU without the
+ * four that have rows of their own, plus the EEA, Switzerland and the UK.
+ * Anything else is «Остальные страны» (the `default` cell).
+ */
+const EUROPE = new Set([
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "FR", "DE", "GR", "HU", "IE", "IT", "LU", "MT", "NL", "PL",
+  "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO", "CH", "GB",
+]);
+
+/**
+ * The rules are keyed by zone — EE, LV, LT, FI, EU, default — but an order
+ * carries the customer's real country (DE, IT…), because a parcel cannot be
+ * registered to «Europe». This maps one onto the other; a bare "EU" (orders
+ * placed before the checkout asked for the country) prices as Europe.
+ */
+export function shippingZone(country: string): string {
+  const c = String(country || "").toUpperCase();
+  if (c === "EE" || c === "LV" || c === "LT" || c === "FI" || c === "EU") return c;
+  return EUROPE.has(c) ? "EU" : "default";
+}
+
 /** The pure half: rules in, price out. No I/O, so it is trivially testable. */
 export function quoteFromRules(
   rules: ShippingRules,
@@ -254,6 +276,7 @@ export function quoteFromRules(
   source: ShippingQuote["source"] = "settings",
 ): ShippingQuote {
   const country = String(input.country || "").toUpperCase();
+  const zone = shippingZone(country);
   const method = normalizeMethod(input.method);
   const carrier = input.carrier?.toLowerCase() || sniffCarrier(input.method);
   const subtotal = toNumber(input.subtotal) ?? 0;
@@ -261,15 +284,15 @@ export function quoteFromRules(
   const table = rules.methods[method] ?? {};
   const carrierTable = carrier ? rules.carriers?.[carrier] : undefined;
   const base =
-    carrierTable?.[country] ??
+    carrierTable?.[zone] ??
     carrierTable?.default ??
-    table[country] ??
+    table[zone] ??
     table.default ??
     0;
 
   const freeFrom =
-    rules.freeFromByCountry && country in rules.freeFromByCountry
-      ? rules.freeFromByCountry[country]
+    rules.freeFromByCountry && zone in rules.freeFromByCountry
+      ? rules.freeFromByCountry[zone]
       : rules.freeFrom;
 
   // Pickup is free because it is pickup, not because the basket was big enough
