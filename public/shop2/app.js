@@ -1156,6 +1156,7 @@
       "История приёмок и продаж": "Vastuvõttude ja müükide ajalugu",
       "Мало": "Vähe", "Нет": "Otsas", "Не учтено": "Arvestamata", "не учтено": "arvestamata",
       "Склад не отвечает — попробуйте обновить страницу.": "Ladu ei vasta — proovige lehte värskendada.",
+      "История не отвечает — попробуйте ещё раз.": "Ajalugu ei vasta — proovige uuesti.",
       "EAN / штрихкод": "EAN / triipkood", "нет штрихкода": "triipkoodi pole",
       "Порог «мало»": "Läve «vähe»", "Остаток сейчас": "Jääk praegu",
       "Причина (видна в истории)": "Põhjus (nähtav ajaloos)",
@@ -1225,6 +1226,8 @@
       "Фильтр": "Filter",
       "ошибка": "viga",
       "Код привязан ✓": "Kood seotud ✓",
+      "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Koodi ei õnnestunud kontrollida — server ei vasta. Proovige uuesti.",
+      "Камера читает через запасной декодер — держите код ближе и ровнее.": "Kaamera loeb varudekoodriga — hoidke koodi lähemal ja otse.",
       "Не удалось привязать — возможно, код уже занят": "Ei õnnestunud siduda — võib-olla on kood juba kasutusel",
       "Войдите в панель.": "Logige paneeli sisse.",
       "Способ оплаты": "Makseviis",
@@ -1429,6 +1432,11 @@
       "Штрихкод": "Triipkood",
       "один объём": "üks maht",
       "сканер ›": "skanner ›",
+      "не привязан · сканер ›": "pole seotud · skanner ›",
+      "Отвязать": "Eemalda",
+      "Штрихкод убран — нажмите «Сохранить»": "Triipkood eemaldatud — vajutage «Salvesta»",
+      "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
+        "Triipkoodi seob skanner laos: avage «Ladu», vajutage «Skaneeri» ja suunake kaamera pakendile. «Eemalda» võtab koodi mahult — see vabaneb pärast «Salvesta».",
       "Убрать размер": "Eemalda suurus",
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
@@ -1463,9 +1471,11 @@
       "Начните вводить название — товар найдётся.": "Hakake nime sisestama — toode leitakse.",
       "· без кода": "· ilma koodita",
       "без кода": "ilma koodita",
+      "Заменить код? Нажмите ещё раз": "Asendada kood? Vajutage veel kord",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Suunake triipkoodile. Toode leitakse ise — jääb üle kogus märkida.",
       "Найдено ·": "Leitud ·",
       "Сканировать дальше": "Skaneeri edasi",
+      "Отвязать код": "Eemalda kood", "Код отвязан ✓": "Kood eemaldatud ✓", "Не удалось отвязать код": "Koodi ei õnnestunud eemaldada",
       "Код не привязан ·": "Kood pole seotud ·",
       "К какому товару?": "Millise tootega?",
       "Начните вводить название": "Hakake nime sisestama",
@@ -2927,6 +2937,7 @@
       "История приёмок и продаж": "Goods-in and sales history",
       "Мало": "Low", "Нет": "Out", "Не учтено": "Untracked", "не учтено": "untracked",
       "Склад не отвечает — попробуйте обновить страницу.": "The stock isn't responding — try refreshing the page.",
+      "История не отвечает — попробуйте ещё раз.": "The history isn't responding — try again.",
       "EAN / штрихкод": "EAN / barcode", "нет штрихкода": "no barcode",
       "Порог «мало»": "«Low» threshold", "Остаток сейчас": "Current stock",
       "Причина (видна в истории)": "Reason (shown in the history)",
@@ -2996,6 +3007,8 @@
       "Фильтр": "Filter",
       "ошибка": "error",
       "Код привязан ✓": "Code linked ✓",
+      "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Could not check the code — the server is not responding. Try again.",
+      "Камера читает через запасной декодер — держите код ближе и ровнее.": "The camera is reading through the backup decoder — hold the code closer and straight.",
       "Не удалось привязать — возможно, код уже занят": "Couldn't link it — the code may already be taken",
       "Войдите в панель.": "Sign in to the panel.",
       "Способ оплаты": "Payment method",
@@ -3200,6 +3213,11 @@
       "Штрихкод": "Barcode",
       "один объём": "one size",
       "сканер ›": "scanner ›",
+      "не привязан · сканер ›": "not linked · scanner ›",
+      "Отвязать": "Unlink",
+      "Штрихкод убран — нажмите «Сохранить»": "The barcode is off — press «Save»",
+      "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
+        "The scanner links a barcode in the warehouse: open «Warehouse», press «Scan» and point the camera at the bottle. «Unlink» takes the code off a size — it is freed once you press «Save».",
       "Убрать размер": "Remove the size",
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
@@ -3234,9 +3252,11 @@
       "Начните вводить название — товар найдётся.": "Start typing the name — the product will turn up.",
       "· без кода": "· no code",
       "без кода": "no code",
+      "Заменить код? Нажмите ещё раз": "Replace the code? Tap again",
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Point at the barcode. The product finds itself — all that is left is the quantity.",
       "Найдено ·": "Found ·",
       "Сканировать дальше": "Keep scanning",
+      "Отвязать код": "Unlink the code", "Код отвязан ✓": "Code unlinked ✓", "Не удалось отвязать код": "Could not unlink the code",
       "Код не привязан ·": "Code not linked ·",
       "К какому товару?": "To which product?",
       "Начните вводить название": "Start typing the name",
@@ -3885,6 +3905,11 @@
     [/^(.+) … купить в Таллинне \| Rempire$/, { ET: "$1 … osta Tallinnas | Rempire", EN: "$1 … buy in Tallinn | Rempire" }],
     [/^Принять \+(\d+)$/, { ET: "Võta vastu +$1", EN: "Take in +$1" }],
     [/^Списать −(\d+)$/, { ET: "Kanna maha −$1", EN: "Write off −$1" }],
+    // scanner: a candidate size that already carries a code, by its last four characters
+    [/^есть код ···(.+)$/, { ET: "kood olemas ···$1", EN: "has a code ···$1" }],
+    // a taken code, naming the bottle that has it (stockSaveErrText)
+    [/^Этот штрихкод уже привязан к другому товару: (.+)$/,
+      { ET: "See triipkood on juba seotud teise tootega: $1", EN: "This barcode is already linked to another product: $1" }],
     [/^Добавить в продажу · (\d+)$/, { ET: "Lisa müüki · $1", EN: "Add to the sale · $1" }],
     [/^на складе (\d+)$/, { ET: "laos $1", EN: "in stock $1" }],
     [/^Снято с продажи · (.+)$/, { ET: "Eemaldatud müügilt · $1", EN: "Taken off sale · $1" }],
@@ -5098,6 +5123,7 @@
     stockMovesOpen: false, // the ledger sub-view
     stockMoves: null,
     stockMovesBusy: false,
+    stockMovesErr: "",
     stockMovesReason: "",
     // ---- inventory: the scanner (camera primary, keyboard-wedge hidden fallback) ----
     scanOpen: false,
@@ -14637,6 +14663,25 @@
   function edCell(cls, label, html) {
     return '<span class="adm-grid__c' + (cls ? " adm-grid__c--" + cls : "") + '"><span class="adm-grid__l">' + label + "</span>" + html + "</span>";
   }
+  /* inventory: the «Штрихкод» column of the sizes grid. An empty box said
+     nothing — the owner could not tell a size no code has ever been bound to
+     from one whose code simply had not loaded yet, which is half of «it
+     seemed to be impossible for existing products to scan the code» (Dim).
+     A bound size now shows its code with «Отвязать» beside it; one without
+     says so in the box. «Отвязать» only empties the box — the code is freed
+     by «Сохранить», like every other change in this form, so a mis-tap on a
+     phone costs nothing. */
+  function edEanCell(key, ean) {
+    return edCell("ean", "Штрихкод",
+      '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' + esc(ean || "") +
+        '" placeholder="не привязан · сканер ›" aria-label="Штрихкод">' +
+      (ean ? '<button class="adm-grid__unbind" type="button" data-edunbind="' + esc(key) + '">Отвязать</button>' : ""));
+  }
+  /** The one line under the grid that says where a barcode comes from. */
+  function edEanHint() {
+    return '<p class="adm-hint">Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. ' +
+      "«Отвязать» убирает код с объёма — он освободится после «Сохранить».</p>";
+  }
   function edPaneSizesOwn(p) {
     if (!p.isNew) loadStockLevels(false);
     var rows = edSizeRows(p), n = rows.length;
@@ -14664,8 +14709,7 @@
             : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
           edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
             '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
-          edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
-            esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">')) +
+          edEanCell(key, lv && lv.ean)) +
         '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
           ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
       "</div>";
@@ -14676,7 +14720,7 @@
       '<p class="adm-hint">' + (multi
         ? "У каждого объёма своя цена. Первый объём покупатель видит первым."
         : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>') +
+      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
       "</div>";
   }
   function edPaneSizes(p) {
@@ -14709,8 +14753,7 @@
           : '<input class="adm-input adm-input--cell" value="' + edSalonOf(price) + '" readonly aria-label="Салон, €">') +
         edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
           '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
-        edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
-          esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">') +
+        edEanCell(key, lv && lv.ean) +
         '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дим" aria-label="Убрать размер">×</button>' +
       "</div>";
     }).join("");
@@ -14719,6 +14762,7 @@
       '<button class="adm-btn adm-btn--dash" type="button" disabled title="скоро">+ Размер</button>' +
       '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
       '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
+      edEanHint() +
       "</div>";
   }
   function edPaneMedia(p) {
@@ -15103,7 +15147,7 @@
      in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
-  var STOCK = { asked: false, seq: 0 };
+  var STOCK = { asked: false, seq: 0, movesAsked: false };
   function loadStockLevels(force) {
     if (SRV.admin !== true) return;
     if ((S.stockLevels || STOCK.asked) && !force) return;
@@ -15128,6 +15172,7 @@
     });
   }
   function reloadStock() { STOCK.asked = false; loadStockLevels(true); }
+  function reloadStockMoves() { STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; loadStockMoves(true); }
 
   var STOCK_MOVE_WORD = {
     sale_web: "продажа на сайте", sale_pos: "продажа в салоне",
@@ -15169,7 +15214,12 @@
     var key = stockKey(r.productId, r.variant);
     var open = S.stockEdit === key;
     var qty = r.tracked ? r.qty : 0;
-    var low = r.tracked && qty <= 3;
+    /* The row's OWN threshold — «Порог «мало»» in the form one tap below,
+       and the same answer the «Мало»/«Нет» chips filter on (deriveState,
+       src/lib/inventory.ts). A flat «3 или меньше» here meant a row the
+       «Мало» chip listed was not red, and a row set to warn at 5 stayed
+       black at 4. */
+    var low = r.tracked && r.state !== "in";
     return '<div class="adm-row adm-row--tall adm-row--stock">' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) + "</span>" +
         '<span class="adm-row__sub' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
@@ -15190,14 +15240,24 @@
   /** Everything that is running out comes first — the shelf the owner has to
       act on, not the alphabet. Variants nobody counts yet sort last. */
   function stockRows() {
-    var q = (S.stockQ || "").toLowerCase().trim();
+    /* The same folding the scanner's own search got: one literal substring
+       over «бренд название id» found nothing for «kevin murphy» (the
+       catalogue writes «Kevin.Murphy»), «un tangled» or «300 ml», which is
+       exactly how the owner types — and «Склад» is the screen he searches on
+       to fix a shelf. The size is in the haystack now too, so «awapuhi 300»
+       narrows to the one bottle. */
+    var q = scanFold(S.stockQ);
+    var words = q ? q.split(" ") : [];
     var f = S.stockFilter || "all";
     var rows = (S.stockLevels || []).filter(function (r) {
       if (f === "low" && !(r.tracked && r.state === "low")) return false;
       if (f === "out" && !(r.tracked && r.state === "out")) return false;
       if (f === "untracked" && r.tracked) return false;
-      if (!q) return true;
-      return (r.brand + " " + r.name + " " + r.productId + " " + (r.ean || "")).toLowerCase().indexOf(q) >= 0;
+      if (!words.length) return true;
+      var hay = scanFold(r.brand + " " + r.name + " " + r.productId + " " + (r.variant || "") + " " + (r.ean || ""));
+      var hayWords = hay.split(" ");
+      for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
+      return true;
     }).slice();
     rows.sort(function (a, b) {
       var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
@@ -15208,7 +15268,8 @@
       (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
       '<p class="adm-hint" style="margin:10px 0 0">' +
         (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
-        (q ? " по запросу «" + esc(q) + "»" : "") + "</p>";
+        // what the owner typed, not the folded copy the matching runs on
+        (q ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "") + "</p>";
   }
 
   /* Three installable apps from one page: the shop (manifest.webmanifest,
@@ -15286,6 +15347,8 @@
           return '<button class="adm-chip" data-stockmovesreason="' + r[0] + '" aria-current="' + ((S.stockMovesReason || "") === r[0]) + '">' + r[1] + "</button>";
         }).join("") +
       "</div>" +
+      (S.stockMovesErr ? '<div class="adm-error"><span>' + esc(S.stockMovesErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="moves">Повторить</button></div>' : "") +
       (S.stockMovesBusy && !S.stockMoves ? '<div class="adm-skel"><i></i><i></i><i></i></div>' :
         (moves.length ? '<div class="adm-list adm-list--flat">' + moves.map(function (m) {
           var sign = m.delta > 0 ? "+" : "";
@@ -15294,7 +15357,7 @@
               '<span class="adm-row__sub">' + (m.variant ? esc(m.variant) + " · " : "") + esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
             '<span class="adm-row__sub" style="margin:0">' + esc(String(m.at).slice(0, 16).replace("T", " ")) + "</span>" +
             '<span class="adm-row__amt">' + sign + m.delta + "</span></div>";
-        }).join("") + "</div>" : '<div class="adm-empty">Пока пусто</div>'));
+        }).join("") + "</div>" : (S.stockMovesErr ? "" : '<div class="adm-empty">Пока пусто</div>')));
   }
 
   /* ---------- inventory: the scanner --------------------------------------
@@ -15309,7 +15372,14 @@
      camera stream) on every unrelated state change. See scanMount() and the
      hook near the top-level render(). */
   var SCANEL = null;
-  var SCAN = { stream: null, controls: null, engine: "", timer: null, lastCode: "", lastAt: 0, video: null };
+  var SCAN = { stream: null, controls: null, engine: "", timer: null, lastCode: "", lastAt: 0, video: null,
+    // what the panel was last drawn from (scanPanelKey), which unknown code
+    // already got the search box focused, the handheld scanner's burst
+    panelKey: "", assignFocused: "", wedge: "", wedgeAt: 0,
+    // the camera engine: the two-pass confirmation, the native detector's
+    // record, the zxing script's load, the two capture canvases
+    pendingCode: "", pendingN: 0, pendingAt: 0, nativeSince: 0, nativeHit: false, nativeErrs: 0,
+    nativeFormats: [], zxingLoad: null, zxingFailed: false, crop: null, full: null };
 
   function scanSupportInfo() {
     return {
@@ -15326,13 +15396,20 @@
       var existing = document.querySelector('script[src="' + src + '"]');
       if (existing) {
         if (existing.dataset.loaded === "1") resolve();
-        else existing.addEventListener("load", function () { resolve(); });
+        else {
+          existing.addEventListener("load", function () { resolve(); });
+          existing.addEventListener("error", function () { reject(new Error("load_failed")); });
+        }
         return;
       }
       var s = document.createElement("script");
       s.src = src;
       s.onload = function () { s.dataset.loaded = "1"; resolve(); };
-      s.onerror = function () { reject(new Error("load_failed")); };
+      /* Taken off the page again when it fails: left where it is, every later
+         loadScript() of the same src finds it and waits on a "load" that has
+         already not happened — the scanner's fallback decoder could never be
+         fetched a second time after one dropped connection. */
+      s.onerror = function () { if (s.parentNode) s.parentNode.removeChild(s); reject(new Error("load_failed")); };
       document.head.appendChild(s);
     });
   }
@@ -15353,31 +15430,101 @@
      a barcode belongs to one bottle, not to a product: asking «какой объём?»
      after «какой товар?» was two taps for a decision the owner had already
      made when they picked the row (README § Сканер, «Three taps max»). */
+  /* What the owner types against what the bottle says: words in any order,
+     «Kevin.Murphy» and «kevin murphy» the same, «ml» for «мл», «ё» for «е»,
+     «150мл» for «150 мл». One substring over «brand name id» found nothing
+     for «kevin murphy», «un tangled 150» or «300 ml» (Dim). */
+  function scanFold(s) {
+    return String(s || "").toLowerCase().replace(/ё/g, "е").replace(/\bml\b/g, "мл")
+      // the quotes in the class are written as escapes so tools/i18n-gaps.mjs's
+      // tokeniser does not read them as a string literal opening
+      .replace(/[.\-_,\/()«»\u0022\u0027\u2019]+/g, " ").replace(/(\d)([a-zа-я])/g, "$1 $2").replace(/\s+/g, " ").trim();
+  }
+  /** A word against one size label: «40» is the 40 мл bottle, not the 140. */
+  function scanSizeHas(sizeHay, w) {
+    return /^\d+$/.test(w) ? sizeHay.split(" ").indexOf(w) >= 0 : sizeHay.indexOf(w) >= 0;
+  }
+  /** One typed word against a whole folded row («Склад»'s search). A number
+      is a whole word — «40» is the 40 мл bottle, not the 140 — or the start
+      of something longer than a size, which is how half a barcode still
+      finds its bottle. Anything else is a plain substring. */
+  function scanWordHas(hay, hayWords, w) {
+    if (!/^\d+$/.test(w)) return hay.indexOf(w) >= 0;
+    for (var i = 0; i < hayWords.length; i++) {
+      if (hayWords[i] === w) return true;
+      if (hayWords[i].length > 4 && hayWords[i].indexOf(w) === 0) return true;
+    }
+    return false;
+  }
+  /** «···1234» — the code a size already carries, by its last four characters. */
+  function scanCodeTail(ean) { return "есть код ···" + String(ean).slice(-4); }
   function scanAssignResultsHTML() {
-    var q = (S.scanAssignQ || "").toLowerCase().trim();
+    var q = scanFold(S.scanAssignQ);
     if (!q) return '<p class="scan__hint scan__hint--sm">Начните вводить название — товар найдётся.</p>';
+    var words = q.split(" ");
+    var code = S.scanHit ? S.scanHit.code : "";
     var rows = [];
     for (var i = 0; i < CATALOGUE.length && rows.length < 8; i++) {
       var p = CATALOGUE[i];
-      if ((p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) < 0) continue;
+      var hay = scanFold(p.brand + " " + p.name + " " + p.id);
       var sizes = p.sizes && p.sizes.length ? p.sizes : [""];
+      var sizeHays = sizes.map(scanFold);
+      /* every word has to be somewhere on the bottle — in the name, or on a
+         size label; the size words then pick the rows («awapuhi 300» is the
+         one bottle in the hand, not the three the product comes in) */
+      var sizeWords = [], ok = true;
+      for (var wi = 0; wi < words.length && ok; wi++) {
+        var w = words[wi];
+        if (hay.indexOf(w) >= 0) continue;
+        var onSize = false;
+        for (var si = 0; si < sizeHays.length && !onSize; si++) onSize = scanSizeHas(sizeHays[si], w);
+        if (onSize) sizeWords.push(w); else ok = false;
+      }
+      if (!ok) continue;
       for (var j = 0; j < sizes.length && rows.length < 8; j++) {
+        var fits = true;
+        for (var sw = 0; sw < sizeWords.length && fits; sw++) fits = scanSizeHas(sizeHays[j], sizeWords[sw]);
+        if (!fits) continue;
         var lv = edStockFor(p, sizes[j]);
+        var key = p.id + "|" + sizes[j];
+        var taken = !!(lv && lv.ean && lv.ean !== code);
+        var ask = taken && S.scanBindConfirm === key;
         /* Each fact in its own <span>: the translator matches a text node by
            its exact wording, so «один объём · без кода» in one node would
            never turn into Estonian. The price tells two same-named bottles
            apart (Awapuhi Shampoo 20 € vs 36 €) when the catalogue has no
-           volume on them. */
+           volume on them. A size that already carries a code says so — a
+           second code would replace the first, silently, and that is a
+           second tap's decision (the click handler asks). */
         var szPrice = p.sizes && p.sizes.length ? sizePrice(p, j) : p.price;
-        rows.push('<button class="scan__cand" data-scanbind="' + esc(p.id) + "|" + esc(sizes[j]) + '">' +
+        rows.push('<button class="scan__cand' + (ask ? " is-ask" : "") + '" data-scanbind="' + esc(key) + '">' +
           '<span class="scan__cand__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span>" +
           '<span class="scan__cand__sz"><span>' + (sizes[j] ? esc(sizes[j]) : "один объём") + "</span>" +
             (szPrice ? ' · <span class="num">' + eur(szPrice) + "</span>" : "") +
-            (lv && lv.ean ? "" : " · <span>без кода</span>") + "</span></button>");
+            (ask ? " · <span>Заменить код? Нажмите ещё раз</span>"
+              : taken ? " · <span>" + esc(scanCodeTail(lv.ean)) + "</span>"
+              : lv && lv.ean ? "" : " · <span>без кода</span>") + "</span></button>");
       }
     }
     if (!rows.length) return '<p class="scan__hint scan__hint--sm">Ничего не найдено.</p>';
     return '<div class="scan__cands">' + rows.join("") + "</div>";
+  }
+  /** The candidate list alone, patched in place — the search box above it
+      keeps its caret and the keyboard stays where it is. */
+  function scanPaintAssignResults() {
+    var box = SCANEL && SCANEL.querySelector("#scanassignresults");
+    if (box) { box.innerHTML = scanAssignResultsHTML(); translateTree(box); }
+  }
+  /* The scanner writes straight to the warehouse, and the «Склад» list and
+     the editor's «Размеры и цены» grid read a copy fetched once
+     (loadStockLevels). Closing the overlay after a bind and a «Принять +2»
+     used to show the row exactly as before — «штрихкод не привязан», the old
+     count — which the owner read as «nothing got added». Only a copy that
+     exists is refreshed; the ledger's own copy is dropped so «История»
+     re-reads it the next time it opens. */
+  function scanStockChanged() {
+    S.stockMoves = null;
+    if (S.stockLevels || STOCK.asked) reloadStock();
   }
   /** inventory: binds the last scanned code to productId+variant, then
       re-looks it up so the goods-in card takes over. */
@@ -15385,9 +15532,24 @@
     var assignCode = S.scanHit ? S.scanHit.code : "";
     if (!assignCode) return;
     stockLevelSaveDetailed({ productId: productId, variant: variant || "", ean: assignCode }).then(function (res) {
-      if (res.ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); }
+      if (res.ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); scanStockChanged(); }
       // «возможно, код уже занят» was a guess; the route knows, and says which
-      else toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать — возможно, код уже занят");
+      else toast(stockSaveErrText(res) || "Не удалось привязать — возможно, код уже занят");
+    });
+  }
+  /* «Отвязать код» on the found card: the code stops finding this bottle and
+     the «К какому товару?» card follows straight away — a wrong binding is
+     fixed where it was noticed, and a mis-tap is one search from where it was. */
+  function scanUnbindEan() {
+    var h = S.scanHit;
+    if (!h || !h.product || S.scanBusy) return;
+    S.scanBusy = true; scanRenderPanel();
+    stockLevelSaveDetailed({ productId: h.productId, variant: h.variant || "", ean: null }).then(function (res) {
+      S.scanBusy = false;
+      if (!res.ok) { toast(stockSaveErrText(res) || "Не удалось отвязать код"); scanRenderPanel(); return; }
+      toast("Код отвязан ✓");
+      scanLookup(h.code);
+      scanStockChanged();
     });
   }
   /** «Принять +3» / «Списать −3» — the number is on the buttons, so the
@@ -15443,7 +15605,11 @@
                 ' data-scanlabel="in">' + scanTakeLabel(n) + "</button>" +
               '<button class="scan__btn" data-scanmove="out"' + (S.scanBusy ? " disabled" : "") +
                 ' data-scanlabel="out">' + scanDropLabel(n) + "</button></div>") +
-        '<button class="scan__more" type="button" data-scanreset>Сканировать дальше</button>' +
+        '<div class="scan__links">' +
+          '<button class="scan__more" type="button" data-scanreset>Сканировать дальше</button>' +
+          // a wrong binding is undone right here, and the search card follows
+          '<button class="scan__more" type="button" data-scanunbind' + (S.scanBusy ? " disabled" : "") + '>Отвязать код</button>' +
+        "</div>" +
         (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "") +
       "</div>";
     }
@@ -15516,6 +15682,9 @@
           '<div class="scan__target" aria-hidden="true"></div>' +
           '<div class="scan__line" aria-hidden="true"></div>' +
         "</div>" +
+        // the engine's one line («запасной декодер») — in the shell, so it
+        // shows under a card too and costs no panel redraw (scanSetHint)
+        '<p class="scan__note" data-scannote hidden></p>' +
         '<div id="scanpanel" class="scan__panel"></div>' +
         // The manual-entry field IS the keyboard-wedge target too (a bluetooth/
         // USB scanner just types digits + Enter into whatever is focused) — one
@@ -15528,10 +15697,35 @@
       "</div>" +
       '<div class="scan__foot">Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.</div>';
   }
+  /** Everything scanPanelHTML() draws from, as one string — the panel is
+      redrawn only when this changes. What is patched in place (the stepper's
+      number, the search text and its list) is deliberately not in it. */
+  function scanPanelKey() {
+    var h = S.scanHit;
+    return [
+      h ? [h.code, h.productId || "", h.variant || "", h.qty, h.tracked, h.product ? h.product.id : ""].join("|") : "",
+      S.scanErr || "", S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "",
+      // «Сегодня» is drawn between codes only — while a card is up the list
+      // landing must not count as a change
+      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-"
+    ].join("|");
+  }
   function scanRenderPanel() {
     if (!SCANEL) return;
     var panel = SCANEL.querySelector("#scanpanel");
-    if (panel) { panel.innerHTML = scanPanelHTML(); translateTree(panel); }
+    /* Every render() reaches here — the panel's own fetches landing, the
+       stock list refreshing behind the overlay — and each one used to redraw
+       #scanpanel from scratch: the search box the owner was typing into was
+       replaced under the finger, the keyboard closed and re-opened («keyboard
+       jumps out too often», Dim). A redraw now costs only when the panel's
+       own state changed. */
+    var key = scanPanelKey();
+    var redrawn = false;
+    if (panel && key !== SCAN.panelKey) {
+      SCAN.panelKey = key;
+      panel.innerHTML = scanPanelHTML(); translateTree(panel);
+      redrawn = true;
+    }
     var torchBtn = SCANEL.querySelector("[data-scantorch]");
     if (torchBtn) torchBtn.hidden = !S.scanTorchOk;
     var modeEl = SCANEL.querySelector(".scan__mode");
@@ -15542,26 +15736,71 @@
     // a card is up: the viewfinder steps back so the card owns the screen,
     // exactly as the design's found/unknown states show it
     SCANEL.classList.toggle("is-card", !!S.scanHit);
-    // keyboard-wedge fallback: refocus the manual field, but never steal focus
-    // from something the admin is actively typing into (assign search, qty)
+    if (!redrawn) return;
     var active = document.activeElement;
     var manual = SCANEL.querySelector("[data-scanmanual]");
+    var idle = !active || active === document.body || active === manual;
     // inventory: an unmatched code needs the product search next, not another
-    // scan — focus that field instead so binding a barcode stays fast
+    // scan — focus that field so binding a barcode stays fast. Once per code:
+    // a redraw after the owner closed the keyboard must not reopen it.
     var assignQ = SCANEL.querySelector("[data-scanassignq]");
     if (assignQ) {
-      if (!active || active === document.body || active === manual) assignQ.focus();
+      if (idle && SCAN.assignFocused !== S.scanHit.code) { SCAN.assignFocused = S.scanHit.code; assignQ.focus(); }
       return;
     }
-    if (manual && (!active || active === document.body || active === manual)) manual.focus();
+    /* The manual field is the keyboard-wedge target, but focusing it while
+       the camera runs put the phone's keyboard over the viewfinder. With a
+       camera, a handheld scanner's keystrokes are caught on the document
+       instead (scanWedgeKey); without one, the field IS the interface and
+       takes the focus as before. */
+    if (manual && idle && !scanCameraLive()) manual.focus();
+  }
+  /** True while a camera engine is up or still being started — the manual
+      field must not pull the keyboard over the viewfinder then. */
+  function scanCameraLive() {
+    return !S.scanErr && !!(S.scanSupport && S.scanSupport.camera);
+  }
+  /* A bluetooth/USB scanner is a keyboard: digits in a burst, then Enter. With
+     the manual field no longer holding the focus while the camera runs, the
+     burst is caught here — only when nothing editable has the focus, so the
+     search box and the stepper's field keep every keystroke of their own. */
+  function scanWedgeKey(e) {
+    if (!S.scanOpen || !SCANEL) return;
+    var t = e.target;
+    if (t && t.matches && t !== document.body && t !== document.documentElement &&
+        (t.matches("input,textarea,select,[contenteditable]") || t.isContentEditable)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var now = Date.now();
+    if (now - SCAN.wedgeAt > 400) SCAN.wedge = "";
+    SCAN.wedgeAt = now;
+    if (e.key === "Enter") {
+      var code = SCAN.wedge.trim();
+      SCAN.wedge = "";
+      if (code.length >= 4) { e.preventDefault(); SCAN.lastCode = ""; handleScanCode(code); }
+      return;
+    }
+    if (e.key && e.key.length === 1 && SCAN.wedge.length < 64) SCAN.wedge += e.key;
+  }
+  /* The phone's keyboard covers the bottom of a fixed overlay — Chrome on
+     Android keeps the layout viewport as it is and only the visual one
+     shrinks — so the candidate list under the search box could sit under
+     the keys. The overlay follows the visual viewport instead. */
+  function scanFitViewport() {
+    if (!SCANEL || !window.visualViewport) return;
+    var vv = window.visualViewport;
+    SCANEL.style.height = Math.round(vv.height) + "px";
+    SCANEL.style.top = Math.round(vv.offsetTop) + "px";
   }
   function stopScanEngine() {
     if (SCAN.timer) { clearTimeout(SCAN.timer); SCAN.timer = null; }
     if (SCAN.controls && SCAN.controls.stop) { try { SCAN.controls.stop(); } catch (e) {} }
     SCAN.controls = null;
-    if (SCAN.stream) { try { SCAN.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
+    var track = scanTrack();
+    if (track && track.removeEventListener) track.removeEventListener("ended", scanStreamEnded);
+    if (SCAN.stream) stopTracks(SCAN.stream);
     SCAN.stream = null;
-    SCAN.engine = "";
+    SCAN.pendingCode = ""; SCAN.pendingN = 0;
+    scanSetEngine("");
   }
   function handleScanCode(code) {
     var now = Date.now();
@@ -15579,20 +15818,27 @@
     S.scanQty = 1; S.scanReady = false;
     scanLookup(code);
   }
+  /* A lookup that fails — the connection dropping in the stockroom — used to
+     be swallowed: the code was read, nothing appeared, and the same code was
+     not even retried for 1.5 s. Say so, and let the very next read count. */
+  function scanLookupFailed() {
+    SCAN.lastCode = "";
+    toast("Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.");
+  }
   function scanLookup(code) {
     apiJson("/api/admin/inventory/lookup/?ean=" + encodeURIComponent(code)).then(function (r) {
       if (r.status === 401) { SRV.admin = false; closeScanner(); render(); return; }
-      if (r.status !== 200 || !r.body.ok) return;
+      if (r.status !== 200 || !r.body.ok) { scanLookupFailed(); return; }
       var hit = r.body.hit;
       S.scanHit = hit
         ? { code: code, productId: hit.productId, variant: hit.variant, qty: hit.qty, lowThreshold: hit.lowThreshold, ean: hit.ean, state: hit.state, tracked: true, product: hit.product }
         : { code: code, product: null, tracked: false };
       S.scanAssignQ = "";
-      S.scanAssignPick = "";
+      S.scanAssignPick = ""; S.scanBindConfirm = "";
       scanBeep();
       loadScanToday();
       scanRenderPanel();
-    }).catch(noop);
+    }).catch(scanLookupFailed);
   }
   function loadScanToday() {
     var d = new Date(); d.setUTCHours(0, 0, 0, 0);
@@ -15643,72 +15889,342 @@
       S.scanReady = true;
       SCAN.lastCode = "";
       scanLookup(code);
+      scanStockChanged();
     });
   }
   function setScanTorch(on) {
     S.scanTorchOn = on;
-    if (SCAN.engine === "zxing" && SCAN.controls && SCAN.controls.switchTorch) SCAN.controls.switchTorch(on).catch(noop);
-    else if (SCAN.engine === "native" && SCAN.stream) {
-      var track = SCAN.stream.getVideoTracks()[0];
-      if (track && track.applyConstraints) track.applyConstraints({ advanced: [{ torch: on }] }).catch(noop);
-    }
+    var track = scanTrack();
+    if (track && track.applyConstraints) track.applyConstraints({ advanced: [{ torch: on }] }).catch(noop);
     var btn = SCANEL && SCANEL.querySelector("[data-scantorch]");
     if (btn) btn.setAttribute("aria-pressed", String(on));
   }
-  function startNativeEngine() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false }).then(function (stream) {
-      if (!S.scanOpen) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
-      SCAN.stream = stream; SCAN.engine = "native";
-      var video = SCAN.video;
-      if (!video) return;
-      video.srcObject = stream;
-      video.play().catch(noop);
-      var track = stream.getVideoTracks()[0];
-      var caps = {};
-      try { caps = track && track.getCapabilities ? track.getCapabilities() : {}; } catch (e) {}
-      S.scanTorchOk = !!(caps && caps.torch);
-      scanRenderPanel();
-      var detector = new window.BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] });
-      var loop = function () {
-        if (!S.scanOpen || SCAN.engine !== "native") return;
-        detector.detect(video).then(function (codes) {
-          if (codes && codes.length) handleScanCode(codes[0].rawValue);
-        }).catch(noop).then(function () { SCAN.timer = setTimeout(loop, 280); });
-      };
-      loop();
-    }).catch(function (err) {
-      S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
-      scanRenderPanel();
+
+  /* ---------- the camera engine ---------------------------------------------
+     One camera stream (scanOpenCamera), two decoders on top of it: the
+     browser's own BarcodeDetector where it exists (Chrome on Android — but
+     its detection lives in Google Play Services, and on a phone without that
+     module it answers nothing, or throws), and the vendored zxing, fetched
+     from the first second so the hand-over costs no wait. Both feed
+     scanCameraRead(): a code has to be read on two consecutive passes before
+     it counts — one frame's misread on a curved label is no bottle. What was
+     here before (Dim, S21 FE: «scanning was hard and almost impossible»)
+     asked for `facingMode: environment` and took whatever lens came, polled
+     the native detector every 280 ms on the whole frame, and waited on it
+     forever when it had nothing to say. */
+  var SCAN_NATIVE_FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "itf", "qr_code"];
+  var SCAN_FALLBACK_MS = 6000;   // a native detector silent this long hands over to zxing
+  var SCAN_TICK_MS = 120;        // a decode pass every ~8 frames
+  var SCAN_ZXING_SRC = "/vendor/zxing/zxing-browser.min.js";
+  var SCAN_BAD_LENS = /wide|ultra|tele|macro|depth|bokeh|zoom/i;
+  var SCAN_BACK_LENS = /back|rear|environment|задн|tagumi/i;
+  var SCAN_LENS_KEY = "rmp-scan-camera";
+
+  function scanSetEngine(name) {
+    SCAN.engine = name;
+    if (SCANEL) SCANEL.dataset.scanengine = name;
+  }
+  /** The one line under the viewfinder — the engine's own news («запасной
+      декодер»), patched in the shell so no card is redrawn for it. */
+  function scanSetHint(text) {
+    S.scanHint = text || "";
+    var el = SCANEL && SCANEL.querySelector("[data-scannote]");
+    if (!el) return;
+    el.textContent = S.scanHint;
+    el.hidden = !S.scanHint;
+    translateTree(el);
+  }
+  function scanTrack() { return SCAN.stream ? SCAN.stream.getVideoTracks()[0] : null; }
+  function scanTrackWidth(track) {
+    try { var st = track && track.getSettings ? track.getSettings() : {}; return Number(st.width) || 0; } catch (e) { return 0; }
+  }
+  function scanTrackId(track) {
+    try { return (track && track.getSettings && track.getSettings().deviceId) || ""; } catch (e) { return ""; }
+  }
+  function stopTracks(stream) { try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} }
+  function scanGum(video) { return navigator.mediaDevices.getUserMedia({ video: video, audio: false }); }
+
+  /* `facingMode: environment` on a phone with three back lenses is whichever
+     lens Android lists first — on Samsungs often the wide one, low-res and
+     soft up close, which is exactly where a 13-digit code on a 100 ml bottle
+     is read. Once the permission is in, the lenses can be told apart by
+     label: prefer a back one that does not say wide/ultra/tele/macro, and
+     among those the lowest in Android's own numbering (scanLensRank). The
+     winner is remembered (localStorage) so the next open asks for it
+     straight away. */
+  function scanOpenCamera() {
+    var want = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+    var saved = "";
+    try { saved = localStorage.getItem(SCAN_LENS_KEY) || ""; } catch (e) {}
+    var fresh = function () {
+      return scanGum(Object.assign({ facingMode: { ideal: "environment" } }, want)).then(function (stream) {
+        return scanPickLens(stream, want);
+      });
+    };
+    if (!saved) return fresh();
+    return scanGum(Object.assign({ deviceId: { exact: saved } }, want)).catch(function () {
+      // the remembered lens is gone (site data cleared, another phone): choose again
+      try { localStorage.removeItem(SCAN_LENS_KEY); } catch (e) {}
+      return fresh();
     });
   }
-  function startZxingEngine() {
-    loadScript("/vendor/zxing/zxing-browser.min.js").then(function () {
-      if (!S.scanOpen) return;
-      if (!window.ZXingBrowser) throw new Error("no_global");
-      SCAN.engine = "zxing";
-      var reader = new window.ZXingBrowser.BrowserMultiFormatOneDReader();
-      reader.decodeFromVideoDevice(undefined, SCAN.video, function (result, err, controls) {
-        SCAN.controls = controls;
-        if (!S.scanTorchOk && controls && controls.switchTorch) { S.scanTorchOk = true; scanRenderPanel(); }
-        if (result) handleScanCode(result.getText());
-      }).catch(function (err) {
-        S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
-        scanRenderPanel();
+  /** Where a lens stands in Android's own numbering. Chrome labels them
+      «camera2 0, facing back», «camera2 2, facing back» … — no «wide» in the
+      words, but the numbering is Camera2's, where the primary rear camera is
+      0 and the ultra-wide, tele and macro ones come after it. An unnumbered
+      label sorts last. */
+  function scanLensRank(dev) {
+    var m = String((dev && dev.label) || "").match(/camera2?\s+(\d+)/i);
+    return m ? Number(m[1]) : 50;
+  }
+  function scanPickLens(stream, want) {
+    if (!navigator.mediaDevices.enumerateDevices) return Promise.resolve(stream);
+    var byFacing = function () { return scanGum(Object.assign({ facingMode: { ideal: "environment" } }, want)); };
+    return navigator.mediaDevices.enumerateDevices().catch(function () { return []; }).then(function (devs) {
+      var track = stream.getVideoTracks()[0], curId = scanTrackId(track), curW = scanTrackWidth(track), best = null;
+      try {
+        var backs = (devs || []).filter(function (d) { return d.kind === "videoinput" && SCAN_BACK_LENS.test(d.label || ""); });
+        // one back camera, or a browser that keeps the labels to itself:
+        // facingMode already gave the only answer there is
+        if (backs.length > 1) {
+          // Samsung Internet and the desktop browsers do name the lenses, so
+          // an explicit wide/ultra/tele/macro is dropped before the numbering
+          var good = backs.filter(function (d) { return !SCAN_BAD_LENS.test(d.label || ""); });
+          if (!good.length) good = backs;
+          best = good[0];
+          for (var i = 1; i < good.length; i++) if (scanLensRank(good[i]) < scanLensRank(best)) best = good[i];
+        }
+      } catch (e) { best = null; }
+      if (!best || !best.deviceId || best.deviceId === curId) { scanRememberLens(curId); return stream; }
+      var id = best.deviceId;
+      /* The camera is handed over, never doubled: many Android phones refuse
+         a second stream while the first is live, and some drop the first one
+         to grant it — a black viewfinder either way. */
+      stopTracks(stream);
+      return scanGum(Object.assign({ deviceId: { exact: id } }, want)).then(function (s2) {
+        var w2 = scanTrackWidth(s2.getVideoTracks()[0]);
+        // it turned out to be the soft low-res one after all: back to
+        // whatever facingMode hands out
+        if (curW >= 1280 && w2 && w2 < 1280) { stopTracks(s2); return byFacing(); }
+        scanRememberLens(id);
+        return s2;
+      }, byFacing);
+    });
+  }
+  function scanRememberLens(id) { try { if (id) localStorage.setItem(SCAN_LENS_KEY, id); } catch (e) {} }
+
+  /* Focus and a modest zoom: continuous autofocus where the lens offers it,
+     and 1.5× so the small code fills more of the frame — the owner holds a
+     bottle at arm's length, not a poster. Each constraint on its own, so one
+     the lens refuses does not sink the other. The torch is re-read after the
+     stream settles: Samsung reports it late. */
+  function scanTuneTrack(track) {
+    if (!track || !track.getCapabilities) return;
+    var caps = {};
+    try { caps = track.getCapabilities() || {}; } catch (e) {}
+    var adv = [];
+    if (caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf("continuous") >= 0) adv.push({ focusMode: "continuous" });
+    if (caps.zoom && typeof caps.zoom.max === "number" && caps.zoom.max > 1) {
+      adv.push({ zoom: Math.min(caps.zoom.max, Math.max(Number(caps.zoom.min) || 1, 1.5)) });
+    }
+    for (var i = 0; i < adv.length; i++) {
+      try { track.applyConstraints({ advanced: [adv[i]] }).catch(noop); } catch (e) {}
+    }
+    scanCheckTorch(track);
+    setTimeout(function () { scanCheckTorch(track); }, 500);
+    setTimeout(function () { scanCheckTorch(track); }, 1500);
+  }
+  function scanCheckTorch(track) {
+    if (!S.scanOpen || scanTrack() !== track) return;
+    var caps = {};
+    try { caps = track.getCapabilities ? track.getCapabilities() || {} : {}; } catch (e) {}
+    var ok = !!caps.torch;
+    if (ok !== !!S.scanTorchOk) { S.scanTorchOk = ok; scanRenderPanel(); }
+  }
+
+  /* Two views of every frame: the whole of it (capped at 1280 wide), and the
+     band under the scan line drawn twice as large. A 13-digit EAN on a 100 ml
+     bottle is a few dozen pixels tall in a 1080p frame; enlarged it is what
+     both decoders read best. The viewfinder is a square showing the centre of
+     the frame (object-fit: cover), so the band is cut from that square. */
+  function scanCropCanvas() {
+    var video = SCAN.video;
+    if (!video || !video.videoWidth || !video.videoHeight) return null;
+    var vw = video.videoWidth, vh = video.videoHeight, side = Math.min(vw, vh);
+    var cw = Math.round(side * 0.76), ch = Math.round(side * 0.44);
+    var sx = Math.round((vw - cw) / 2), sy = Math.round((vh - ch) / 2);
+    var c = SCAN.crop || (SCAN.crop = document.createElement("canvas"));
+    var scale = cw < 900 ? 2 : 1;
+    if (c.width !== cw * scale || c.height !== ch * scale) { c.width = cw * scale; c.height = ch * scale; }
+    c.getContext("2d", { willReadFrequently: true }).drawImage(video, sx, sy, cw, ch, 0, 0, c.width, c.height);
+    return c;
+  }
+  function scanFullCanvas() {
+    var video = SCAN.video;
+    if (!video || !video.videoWidth || !video.videoHeight) return null;
+    var vw = video.videoWidth, vh = video.videoHeight, scale = vw > 1280 ? 1280 / vw : 1;
+    var c = SCAN.full || (SCAN.full = document.createElement("canvas"));
+    var w = Math.round(vw * scale), h = Math.round(vh * scale);
+    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+    c.getContext("2d", { willReadFrequently: true }).drawImage(video, 0, 0, w, h);
+    return c;
+  }
+  /* A code counts once two consecutive passes (within a second) agree on it.
+     The manual field and a handheld scanner skip this: a typed code is
+     already a decision. */
+  function scanCameraRead(code) {
+    code = String(code || "").trim();
+    if (!code) return;
+    var now = Date.now();
+    if (SCAN.pendingCode === code && now - SCAN.pendingAt < 1000) SCAN.pendingN++;
+    else { SCAN.pendingCode = code; SCAN.pendingN = 1; }
+    SCAN.pendingAt = now;
+    if (SCAN.pendingN < 2) return;
+    SCAN.pendingN = 0; SCAN.pendingCode = "";
+    handleScanCode(code);
+  }
+
+  function startNativeLoop() {
+    var video = SCAN.video, detector;
+    try { detector = new window.BarcodeDetector({ formats: SCAN.nativeFormats }); }
+    catch (e) { scanNativeGaveUp("error"); return; }
+    scanSetEngine("native");
+    SCAN.nativeSince = 0; SCAN.nativeHit = false; SCAN.nativeErrs = 0;
+    var tick = 0;
+    var loop = function () {
+      if (!S.scanOpen || SCAN.engine !== "native") return;
+      var t0 = Date.now();
+      // no frame yet (the stream is still starting): nothing to detect on, and
+      // nothing to hold against the detector either — its six seconds are
+      // counted from the first frame it actually got to look at
+      if (!video || video.readyState < 2) { SCAN.timer = setTimeout(loop, SCAN_TICK_MS); return; }
+      if (!SCAN.nativeSince) SCAN.nativeSince = t0;
+      var src = (tick++ % 2) ? (scanCropCanvas() || video) : video;
+      detector.detect(src).then(function (codes) {
+        SCAN.nativeErrs = 0;
+        if (codes && codes.length) { SCAN.nativeHit = true; scanCameraRead(codes[0].rawValue); }
+      }, function (err) {
+        /* «Barcode detection service unavailable» (NotSupportedError) is Chrome
+           on a phone without Play Services' barcode module — final. Anything
+           else is given three chances. */
+        SCAN.nativeErrs += err && err.name === "NotSupportedError" ? 3 : 1;
+      }).then(function () {
+        if (!S.scanOpen || SCAN.engine !== "native") return;
+        if (SCAN.nativeErrs >= 3) { scanNativeGaveUp("error"); return; }
+        if (!SCAN.nativeHit && !SCAN.zxingFailed && Date.now() - SCAN.nativeSince > SCAN_FALLBACK_MS) { scanNativeGaveUp("silent"); return; }
+        SCAN.timer = setTimeout(loop, Math.max(0, SCAN_TICK_MS - (Date.now() - t0)));
       });
-    }).catch(function () {
+    };
+    loop();
+  }
+  /** The native detector is mute, broken or not there: zxing takes the same
+      stream. Told to the owner only when it is a hand-over — on a browser
+      with no detector of its own (Safari, Samsung Internet) zxing simply is
+      the scanner. */
+  function scanNativeGaveUp(reason) {
+    if (SCAN.timer) { clearTimeout(SCAN.timer); SCAN.timer = null; }
+    scanSetEngine("");
+    startZxingLoop().then(function () {
+      if (reason !== "absent") scanSetHint("Камера читает через запасной декодер — держите код ближе и ровнее.");
+    }, function () {
+      SCAN.zxingFailed = true;
+      if (!S.scanOpen || !SCAN.stream) return;
+      /* zxing did not load — the stockroom's wifi dropped. A detector that is
+         merely mute may still come good, so it goes back on with the
+         hand-over disarmed (SCAN.zxingFailed). One that threw, or that is not
+         there at all, leaves nothing to run: say so, rather than restart a
+         detector that will throw again three ticks later, for ever. */
+      if (reason === "silent") { startNativeLoop(); return; }
       S.scanErr = "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.";
       scanRenderPanel();
     });
   }
+  function startZxingLoop() {
+    if (!SCAN.zxingLoad) SCAN.zxingLoad = loadScript(SCAN_ZXING_SRC);
+    return SCAN.zxingLoad.then(function () {
+      if (!S.scanOpen || !SCAN.stream) return;
+      var Z = window.ZXingBrowser;
+      if (!Z || !Z.BrowserMultiFormatReader) throw new Error("no_global");
+      var F = Z.BarcodeFormat || {};
+      // no ITF here: zxing's ITF reader is the one that reads a code into a
+      // striped label; the native detector validates its own
+      var formats = [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128, F.CODE_39, F.QR_CODE]
+        .filter(function (x) { return x !== undefined; });
+      // @zxing/library's DecodeHintType — 2 is POSSIBLE_FORMATS, 3 is TRY_HARDER;
+      // the enum itself is not on the UMD bundle's global
+      var hints = new Map();
+      if (formats.length) hints.set(2, formats);
+      hints.set(3, true);
+      var reader = new Z.BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: SCAN_TICK_MS, delayBetweenScanSuccess: 300 });
+      scanSetEngine("zxing");
+      var tick = 0;
+      var loop = function () {
+        if (!S.scanOpen || SCAN.engine !== "zxing") return;
+        var t0 = Date.now(), video = SCAN.video;
+        if (video && video.readyState >= 2) {
+          var c = (tick++ % 2) ? scanCropCanvas() : scanFullCanvas();
+          if (c) {
+            try { var r = reader.decodeFromCanvas(c); if (r) scanCameraRead(r.getText()); }
+            catch (e) { /* NotFoundException: no code in this frame */ }
+          }
+        }
+        SCAN.timer = setTimeout(loop, Math.max(20, SCAN_TICK_MS - (Date.now() - t0)));
+      };
+      loop();
+    });
+  }
+  /* The stream died under us — the screen locked, another app took the
+     camera — or the tab went to the background: let go of the camera, and
+     open it again when the scanner is looked at. */
+  function scanStreamEnded() {
+    if (!S.scanOpen || document.hidden) return;
+    stopScanEngine();
+    setTimeout(function () { if (S.scanOpen && !SCAN.stream && !document.hidden) startScanEngine(); }, 800);
+  }
+  function scanVisibility() {
+    if (!S.scanOpen) return;
+    if (document.hidden) stopScanEngine();
+    else if (!SCAN.stream && !S.scanErr) startScanEngine();
+  }
   function startScanEngine() {
     var supp = scanSupportInfo();
     S.scanSupport = supp;
+    scanSetHint("");
     if (!supp.camera) {
       S.scanErr = "Камера недоступна в этом браузере. Используйте поиск или ручной ввод кода ниже.";
       scanRenderPanel();
       return;
     }
-    if (supp.native) startNativeEngine(); else startZxingEngine();
+    // zxing is fetched from the first second either way: a native detector
+    // that turns out mute hands over with nothing to wait for, and a browser
+    // without one needs it anyway. Cached by the browser after the first open;
+    // a fetch that failed once (no signal in the stockroom) is tried again.
+    if (SCAN.zxingFailed) { SCAN.zxingFailed = false; SCAN.zxingLoad = null; }
+    if (!SCAN.zxingLoad) { SCAN.zxingLoad = loadScript(SCAN_ZXING_SRC); SCAN.zxingLoad.catch(noop); }
+    // Chrome answers an empty list here on a phone whose Play Services lack
+    // the barcode module — the honest signal to skip the native path at once
+    var formatsP = supp.native && window.BarcodeDetector.getSupportedFormats
+      ? window.BarcodeDetector.getSupportedFormats().catch(function () { return []; })
+      : Promise.resolve(supp.native ? SCAN_NATIVE_FORMATS : []);
+    Promise.all([scanOpenCamera(), formatsP]).then(function (res) {
+      var stream = res[0], supported = res[1] || [];
+      if (!S.scanOpen || SCAN.stream) { stopTracks(stream); return; }
+      var video = SCAN.video;
+      if (!video) { stopTracks(stream); return; }
+      SCAN.stream = stream;
+      video.srcObject = stream;
+      video.play().catch(noop);
+      var track = stream.getVideoTracks()[0];
+      scanTuneTrack(track);
+      if (track && track.addEventListener) track.addEventListener("ended", scanStreamEnded);
+      SCAN.nativeFormats = SCAN_NATIVE_FORMATS.filter(function (f) { return supported.indexOf(f) >= 0; });
+      if (supp.native && SCAN.nativeFormats.length) startNativeLoop();
+      else scanNativeGaveUp(supp.native ? "error" : "absent");
+      scanRenderPanel();
+    }).catch(function (err) {
+      S.scanErr = "Нет доступа к камере (" + cameraErrName(err) + "). Проверьте разрешения браузера или используйте поиск/ручной ввод ниже.";
+      scanRenderPanel();
+    });
   }
   function scanMount() {
     if (SCANEL) return SCANEL;
@@ -15721,25 +16237,49 @@
     SCANEL.innerHTML = scannerShellHTML();
     translateTree(SCANEL);
     SCAN.video = SCANEL.querySelector("[data-scanvideo]");
+    SCAN.panelKey = ""; SCAN.assignFocused = ""; SCAN.wedge = "";
     var manual = SCANEL.querySelector("[data-scanmanual]");
     if (manual) {
       manual.addEventListener("keydown", function (e) {
         if (e.key === "Enter") { e.preventDefault(); submitManualScan(); }
       });
-      manual.focus();
     }
+    SCANEL.dataset.scanengine = SCAN.engine || "";
+    // the handheld-scanner burst, the keyboard-shrunk viewport and the tab
+    // going to the background, for as long as the shell stands (scanUnmount
+    // takes them off again)
+    document.addEventListener("keydown", scanWedgeKey);
+    document.addEventListener("visibilitychange", scanVisibility);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", scanFitViewport);
+      window.visualViewport.addEventListener("scroll", scanFitViewport);
+    }
+    /* The candidate rows say «без кода» / «есть код» from the stock copy, and
+       the list behind the overlay is what the scanner is about to write to —
+       a fresh read on every open, not the one from the last visit. */
+    if (S.stockLevels || STOCK.asked) reloadStock(); else loadStockLevels(false);
     startScanEngine();
+    // no camera at all (a desktop): the manual field is the interface and
+    // takes the focus now, the way the shell always did; with a camera the
+    // keyboard would cover the viewfinder — see scanRenderPanel()
+    if (manual && !scanCameraLive()) manual.focus();
     return SCANEL;
   }
   function scanUnmount() {
     stopScanEngine();
+    document.removeEventListener("keydown", scanWedgeKey);
+    document.removeEventListener("visibilitychange", scanVisibility);
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener("resize", scanFitViewport);
+      window.visualViewport.removeEventListener("scroll", scanFitViewport);
+    }
     if (SCANEL) { SCANEL.remove(); SCANEL = null; }
   }
   /** Everything a fresh scanning session forgets — shared by the «Склад»
       overlay and the /shop2/scan/ route, which differ only in their shell. */
   function scanResetState() {
-    S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = "";
-    S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null;
+    S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = "";
+    S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null; S.scanHint = "";
     S.scanQty = 1; S.scanBusy = false; S.scanReady = false;
   }
   /* Which door the scanner was opened through — «Склад» counts a shelf,
@@ -16010,7 +16550,7 @@
      barcode he just typed belongs to another product. */
   function stockLevelSaveDetailed(body) {
     return apiSend("/api/admin/inventory/", "PUT", body).then(function (r) {
-      return { ok: r.status === 200 && r.body.ok, error: (r.body && r.body.error) || "" };
+      return { ok: r.status === 200 && r.body.ok, error: (r.body && r.body.error) || "", takenBy: (r.body && r.body.takenBy) || null };
     }).catch(function () { return { ok: false, error: "offline" }; });
   }
   var STOCK_SAVE_ERRS = {
@@ -16018,16 +16558,38 @@
     bad_ean: "Штрихкод — это 8–14 цифр (EAN/UPC) или свой код из букв, цифр и дефиса, 4–32 знака.",
     bad_threshold: "Порог «мало» — целое число от 0 до 100 000."
   };
+  /** A refusal in words — and for a taken code, WHICH bottle has it: the
+      route names the product and the size, so the owner knows where to look
+      instead of guessing which of two hundred rows to open. */
+  function stockSaveErrText(res) {
+    var t = res && res.takenBy;
+    if (res && res.error === "ean_taken" && t) {
+      var owner = null;
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === t.productId) { owner = CATALOGUE[i]; break; }
+      var who = (owner ? owner.brand + " — " + owner.name : t.productId) + (t.variant ? " · " + t.variant : "");
+      return "Этот штрихкод уже привязан к другому товару: " + who;
+    }
+    return (res && STOCK_SAVE_ERRS[res.error]) || "";
+  }
   function loadStockMoves(force) {
     if (SRV.admin !== true) return;
-    if (S.stockMoves && !force) return;
+    /* Asked, not answered, is still asked. admStockMovesHTML() calls this on
+       every render, and with only «is the list there?» to go on a history
+       that failed was re-requested by every render that followed — a request
+       per repaint, for as long as the screen was open. */
+    if ((S.stockMoves || STOCK.movesAsked) && !force) return;
+    STOCK.movesAsked = true;
     S.stockMovesBusy = true;
     var qs = "?limit=200" + (S.stockMovesReason ? "&reason=" + encodeURIComponent(S.stockMovesReason) : "");
     apiJson("/api/admin/inventory/moves/" + qs).then(function (r) {
       S.stockMovesBusy = false;
-      if (r.status === 200 && r.body.ok) S.stockMoves = r.body.moves;
+      /* A history that did not answer used to look exactly like a history
+         with nothing in it — «Пока пусто» over a 500, and no way to ask
+         again short of a reload. */
+      if (r.status === 200 && r.body.ok) { S.stockMoves = r.body.moves; S.stockMovesErr = ""; }
+      else S.stockMovesErr = "История не отвечает — попробуйте ещё раз.";
       render();
-    }).catch(function () { S.stockMovesBusy = false; render(); });
+    }).catch(function () { S.stockMovesBusy = false; S.stockMovesErr = "Сервер не отвечает."; render(); });
   }
   /** «Остаток сейчас» → a whole number 0…MAX, or null when it is not one.
       This is a shelf count, so the old `Math.max(0, Math.trunc(Number(v)))`
@@ -16047,7 +16609,19 @@
     if (!r) return;
     var jobs = [];
     var eanChanged = (S.stockEditEan || "") !== (r.ean || "");
-    var lowChanged = S.stockEditLow !== "" && Number(S.stockEditLow) !== r.lowThreshold;
+    /* «Порог «мало»» took the same road «Остаток сейчас» used to (see
+       stockQtyValue): «abc» became NaN, JSON.stringify wrote it as null and
+       the route read that as «no threshold» — the owner's own warning level
+       quietly gone, under a «Сохранено ✓». */
+    var rawLow = String(S.stockEditLow == null ? "" : S.stockEditLow).trim();
+    var lowWant = rawLow === "" ? null : stockQtyValue(rawLow);
+    // the route's own ceiling (setLevel, src/lib/inventory.ts), in the route's
+    // own words — one wording for the refusal, whichever side catches it
+    if (lowWant !== null && lowWant > 100000) lowWant = null;
+    if (rawLow !== "" && lowWant === null) {
+      toast(STOCK_SAVE_ERRS.bad_threshold); refocus("[data-stocklowinput]"); return;
+    }
+    var lowChanged = lowWant !== null && lowWant !== r.lowThreshold;
     var rawQty = S.stockEditQty;
     var qty = null;
     if (rawQty !== "") {
@@ -16057,7 +16631,7 @@
     if (eanChanged || lowChanged) {
       var patch = { productId: r.productId, variant: r.variant };
       if (eanChanged) patch.ean = S.stockEditEan || null;
-      if (lowChanged) patch.lowThreshold = Number(S.stockEditLow);
+      if (lowChanged) patch.lowThreshold = lowWant;
       jobs.push(stockLevelSaveDetailed(patch));
     }
     if (qty !== null && qty !== (r.tracked ? r.qty : 0)) {
@@ -16070,7 +16644,7 @@
     Promise.all(jobs).then(function (results) {
       var failed = results.filter(function (x) { return !x.ok; })[0];
       if (!failed) toast("Сохранено ✓");
-      else toast(STOCK_SAVE_ERRS[failed.error] || "Часть изменений не сохранилась");
+      else toast(stockSaveErrText(failed) || "Часть изменений не сохранилась");
       S.stockEdit = failed ? key : "";
       reloadStock();
     });
@@ -18290,6 +18864,16 @@
           var attr = gcells[gc].hasAttribute("data-edqty") ? "data-edqty"
             : gcells[gc].hasAttribute("data-edean") ? "data-edean"
             : gcells[gc].hasAttribute("data-edsz") ? "data-edsz" : "data-edpx";
+          /* inventory: …but only where the owner has actually typed. The
+             warehouse list lands AFTER the editor opens (loadStockLevels
+             fires from the pane itself), and carrying an untouched empty box
+             across that render pinned «Остаток» and «Штрихкод» empty for good
+             — a size with a code looked exactly like a size with none, until
+             the editor was closed and opened again. A box still holding
+             exactly what the last render wrote into it (its value attribute)
+             has not been touched. */
+          var gwas = gcells[gc].getAttribute("value");
+          if (gwas !== null && gcells[gc].value === gwas) continue;
           goodsKeep['[' + attr + '="' + gcells[gc].getAttribute(attr) + '"]'] = gcells[gc].value;
         }
       }
@@ -19072,7 +19656,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -19293,6 +19877,7 @@
       if (d.admreload === "overview") loadOverview(true);
       else if (d.admreload === "orders") loadSrvOrders(true);
       else if (d.admreload === "stock") reloadStock();
+      else if (d.admreload === "moves") reloadStockMoves();
       else if (d.admreload === "bundles") loadAdminBundles(true);
       else if (d.admreload === "promos") loadAdminPromos(true);
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
@@ -19519,6 +20104,18 @@
       var vidEl0 = document.querySelector("[data-edvideo]");
       if (vidEl0) vidEl0.value = "";
       render(); return;
+    }
+    /* inventory: «Отвязать» in the «Размеры и цены» grid. The box is emptied
+       here and nothing else — the code is actually freed by «Сохранить»
+       (the same PUT the column has always made), so a mis-tap on a phone is
+       undone by simply not saving. No render(): the row would be redrawn
+       from the warehouse copy, which still carries the code. */
+    if (d.edunbind !== undefined) {
+      var unEl = document.querySelector('[data-edean="' + d.edunbind + '"]');
+      if (unEl) { unEl.value = ""; unEl.focus(); }
+      t.hidden = true;
+      toast("Штрихкод убран — нажмите «Сохранить»");
+      return;
     }
     /* product creation: «+ Товар» opens the editor over a product that does
        not exist yet; «Вернуть в продажу» is the undo of the hide, applied at
@@ -19975,7 +20572,7 @@
           productId: gp.id, variant: eRow ? eRow.variant : eKey.slice(gp.id.length + 1),
           ean: eVal || null
         }).then(function (res) {
-          if (!res.ok) toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать штрихкод");
+          if (!res.ok) toast(stockSaveErrText(res) || "Не удалось привязать штрихкод");
           reloadStock();
         });
       }
@@ -20369,8 +20966,14 @@
     }
     if (d.stocksave) { stockCommit(d.stocksave); return; }
     if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; render(); return; }
-    if (d.stockmovesopen !== undefined) { S.stockMovesOpen = !!d.stockmovesopen; render(); return; }
-    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; S.stockMoves = null; render(); return; }
+    if (d.stockmovesopen !== undefined) {
+      S.stockMovesOpen = !!d.stockmovesopen;
+      // coming back to a history that failed asks again, rather than showing
+      // the old refusal for as long as the panel stays open
+      if (S.stockMovesOpen && S.stockMovesErr) { STOCK.movesAsked = false; S.stockMovesErr = ""; }
+      render(); return;
+    }
+    if (d.stockmovesreason !== undefined) { S.stockMovesReason = d.stockmovesreason; STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; render(); return; }
     if (d.pwahintclose !== undefined) {
       try { localStorage.setItem("rmp-pwa-hint-dismissed", "1"); } catch (e) {}
       render(); return;
@@ -20402,11 +21005,25 @@
     // «productId|variant» — one tap, one bottle (scanAssignResultsHTML)
     if (d.scanbind) {
       var bindAt = d.scanbind.indexOf("|");
-      scanBindEan(d.scanbind.slice(0, bindAt), d.scanbind.slice(bindAt + 1));
+      var bindId = d.scanbind.slice(0, bindAt), bindVar = d.scanbind.slice(bindAt + 1);
+      /* A size that already carries a different code: the first tap asks
+         (the row itself says «Заменить код?»), the second replaces — the
+         old code stops finding anything, and that must not happen by a
+         finger landing on the wrong row. */
+      var bindLv = edStockFor({ id: bindId }, bindVar);
+      var bindCode = S.scanHit ? S.scanHit.code : "";
+      if (bindLv && bindLv.ean && bindLv.ean !== bindCode && S.scanBindConfirm !== d.scanbind) {
+        S.scanBindConfirm = d.scanbind;
+        scanPaintAssignResults();
+        return;
+      }
+      S.scanBindConfirm = "";
+      scanBindEan(bindId, bindVar);
       return;
     }
+    if (d.scanunbind !== undefined) { scanUnbindEan(); return; }
     if (d.scanreset !== undefined) {
-      S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanQty = 1; S.scanReady = false;
+      S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = ""; S.scanQty = 1; S.scanReady = false;
       SCAN.lastCode = "";   // the same code, scanned again, has to count
       scanRenderPanel(); return;
     }
@@ -20960,8 +21577,8 @@
     }
     else if (t.matches("[data-scanassignq]")) {
       S.scanAssignQ = t.value;
-      var assignResults = SCANEL && SCANEL.querySelector("#scanassignresults");
-      if (assignResults) { assignResults.innerHTML = scanAssignResultsHTML(); translateTree(assignResults); }
+      S.scanBindConfirm = "";   // a new query is a new list; the «Заменить?» ask does not carry over
+      scanPaintAssignResults();
     }
     /* «Главный баннер»: a full render would take the caret out of the field,
        so only the live preview (or the picker list) is repainted. */

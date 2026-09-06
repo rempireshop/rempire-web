@@ -687,6 +687,15 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
    is drawn only where the header row is not */
 .adm-grid__c { min-width: 0; }
 .adm-grid__l { display: none; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-bottom: 4px; }
+/* the barcode cell carries «Отвязать» beside the code when a size has one;
+   the button drops to its own line where the column is too narrow for both */
+.adm-grid__c--ean { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.adm-grid__c--ean .adm-grid__l { flex: 1 0 100%; margin-bottom: 0; }
+.adm-grid__c--ean .adm-input { flex: 1 1 96px; }
+.adm-grid__unbind {
+  flex: none; height: 44px; padding: 0 10px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-muted); font-size: 13px; line-height: 1; white-space: nowrap;
+}
 @media (max-width: 720px) {
   .adm-grid__head { display: none; }
   /* three equal boxes — price · salon · stock — then the barcode across two
@@ -865,6 +874,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scanoverlay.is-card .scan__box { width: min(46vw, 140px); }
 .scanoverlay.is-card .scan__line { display: none; }
 
+/* the engine's own line under the viewfinder — «запасной декодер» */
+.scan__note { margin: -8px 0 0; max-width: 400px; font-size: 13px; line-height: 18px; color: var(--a-dim); text-align: center; }
 .scan__panel { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
 .scan__hint { margin: 0; text-align: center; font-size: 15px; line-height: 22px; color: var(--a-dim); }
 .scan__hint--sm { font-size: 13px; text-align: left; }
@@ -895,6 +906,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scan__btn--pri { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
 .scan__btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
 .scan__more { height: 44px; border: 0; background: none; color: var(--a-muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+/* «Сканировать дальше» and «Отвязать код» share the found card's last line */
+.scan__links { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+.scan__more[disabled] { color: var(--a-rule); cursor: default; }
 .scan__ready { margin: 0; font-size: 13px; color: var(--a-ok); text-align: center; }
 
 .scan__find { height: 48px; border: 1px solid var(--a-ink); padding: 0 14px; color: var(--a-ink); background: #fff; width: 100%; }
@@ -906,6 +920,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .scan__cand__nm { flex: 1; min-width: 0; }
 .scan__cand__sz { font-size: 13px; color: var(--a-muted); white-space: nowrap; }
+/* the row that asks «Заменить код?» after the first tap — the same warn as the unknown-code line */
+.scan__cand.is-ask .scan__cand__sz { color: var(--a-warn); }
 
 .scan__today { border-top: 1px solid var(--a-muted); padding-top: 10px; }
 .scan__today__t { font-size: 13px; color: var(--a-dim); margin-bottom: 6px; }
