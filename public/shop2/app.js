@@ -1384,6 +1384,11 @@
       "Штрихкод": "Triipkood",
       "один объём": "üks maht",
       "сканер ›": "skanner ›",
+      "не привязан · сканер ›": "pole seotud · skanner ›",
+      "Отвязать": "Eemalda",
+      "Штрихкод убран — нажмите «Сохранить»": "Triipkood eemaldatud — vajutage «Salvesta»",
+      "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
+        "Triipkoodi seob skanner laos: avage «Ladu», vajutage «Skaneeri» ja suunake kaamera pakendile. «Eemalda» võtab koodi mahult — see vabaneb pärast «Salvesta».",
       "Убрать размер": "Eemalda suurus",
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
@@ -3112,6 +3117,11 @@
       "Штрихкод": "Barcode",
       "один объём": "one size",
       "сканер ›": "scanner ›",
+      "не привязан · сканер ›": "not linked · scanner ›",
+      "Отвязать": "Unlink",
+      "Штрихкод убран — нажмите «Сохранить»": "The barcode is off — press «Save»",
+      "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
+        "The scanner links a barcode in the warehouse: open «Warehouse», press «Scan» and point the camera at the bottle. «Unlink» takes the code off a size — it is freed once you press «Save».",
       "Убрать размер": "Remove the size",
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
@@ -14133,6 +14143,25 @@
   function edCell(cls, label, html) {
     return '<span class="adm-grid__c' + (cls ? " adm-grid__c--" + cls : "") + '"><span class="adm-grid__l">' + label + "</span>" + html + "</span>";
   }
+  /* inventory: the «Штрихкод» column of the sizes grid. An empty box said
+     nothing — the owner could not tell a size no code has ever been bound to
+     from one whose code simply had not loaded yet, which is half of «it
+     seemed to be impossible for existing products to scan the code» (Dim).
+     A bound size now shows its code with «Отвязать» beside it; one without
+     says so in the box. «Отвязать» only empties the box — the code is freed
+     by «Сохранить», like every other change in this form, so a mis-tap on a
+     phone costs nothing. */
+  function edEanCell(key, ean) {
+    return edCell("ean", "Штрихкод",
+      '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' + esc(ean || "") +
+        '" placeholder="не привязан · сканер ›" aria-label="Штрихкод">' +
+      (ean ? '<button class="adm-grid__unbind" type="button" data-edunbind="' + esc(key) + '">Отвязать</button>' : ""));
+  }
+  /** The one line under the grid that says where a barcode comes from. */
+  function edEanHint() {
+    return '<p class="adm-hint">Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. ' +
+      "«Отвязать» убирает код с объёма — он освободится после «Сохранить».</p>";
+  }
   function edPaneSizesOwn(p) {
     if (!p.isNew) loadStockLevels(false);
     var rows = edSizeRows(p), n = rows.length;
@@ -14160,8 +14189,7 @@
             : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
           edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
             '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
-          edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
-            esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">')) +
+          edEanCell(key, lv && lv.ean)) +
         '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
           ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
       "</div>";
@@ -14172,7 +14200,7 @@
       '<p class="adm-hint">' + (multi
         ? "У каждого объёма своя цена. Первый объём покупатель видит первым."
         : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>') +
+      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
       "</div>";
   }
   function edPaneSizes(p) {
@@ -14205,8 +14233,7 @@
           : '<input class="adm-input adm-input--cell" value="' + edSalonOf(price) + '" readonly aria-label="Салон, €">') +
         edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
           '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
-        edCell("ean", "Штрихкод", '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' +
-          esc((lv && lv.ean) || "") + '" placeholder="сканер ›" aria-label="Штрихкод">') +
+        edEanCell(key, lv && lv.ean) +
         '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дим" aria-label="Убрать размер">×</button>' +
       "</div>";
     }).join("");
@@ -14215,6 +14242,7 @@
       '<button class="adm-btn adm-btn--dash" type="button" disabled title="скоро">+ Размер</button>' +
       '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
       '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
+      edEanHint() +
       "</div>";
   }
   function edPaneMedia(p) {
@@ -18190,6 +18218,16 @@
           var attr = gcells[gc].hasAttribute("data-edqty") ? "data-edqty"
             : gcells[gc].hasAttribute("data-edean") ? "data-edean"
             : gcells[gc].hasAttribute("data-edsz") ? "data-edsz" : "data-edpx";
+          /* inventory: …but only where the owner has actually typed. The
+             warehouse list lands AFTER the editor opens (loadStockLevels
+             fires from the pane itself), and carrying an untouched empty box
+             across that render pinned «Остаток» and «Штрихкод» empty for good
+             — a size with a code looked exactly like a size with none, until
+             the editor was closed and opened again. A box still holding
+             exactly what the last render wrote into it (its value attribute)
+             has not been touched. */
+          var gwas = gcells[gc].getAttribute("value");
+          if (gwas !== null && gcells[gc].value === gwas) continue;
           goodsKeep['[' + attr + '="' + gcells[gc].getAttribute(attr) + '"]'] = gcells[gc].value;
         }
       }
@@ -18972,7 +19010,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-scanunbind],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-edunbind],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-scanunbind],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -19395,6 +19433,18 @@
       var vidEl0 = document.querySelector("[data-edvideo]");
       if (vidEl0) vidEl0.value = "";
       render(); return;
+    }
+    /* inventory: «Отвязать» in the «Размеры и цены» grid. The box is emptied
+       here and nothing else — the code is actually freed by «Сохранить»
+       (the same PUT the column has always made), so a mis-tap on a phone is
+       undone by simply not saving. No render(): the row would be redrawn
+       from the warehouse copy, which still carries the code. */
+    if (d.edunbind !== undefined) {
+      var unEl = document.querySelector('[data-edean="' + d.edunbind + '"]');
+      if (unEl) { unEl.value = ""; unEl.focus(); }
+      t.hidden = true;
+      toast("Штрихкод убран — нажмите «Сохранить»");
+      return;
     }
     /* product creation: «+ Товар» opens the editor over a product that does
        not exist yet; «Вернуть в продажу» is the undo of the hide, applied at

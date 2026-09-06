@@ -687,6 +687,15 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
    is drawn only where the header row is not */
 .adm-grid__c { min-width: 0; }
 .adm-grid__l { display: none; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-bottom: 4px; }
+/* the barcode cell carries «Отвязать» beside the code when a size has one;
+   the button drops to its own line where the column is too narrow for both */
+.adm-grid__c--ean { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.adm-grid__c--ean .adm-grid__l { flex: 1 0 100%; margin-bottom: 0; }
+.adm-grid__c--ean .adm-input { flex: 1 1 96px; }
+.adm-grid__unbind {
+  flex: none; height: 44px; padding: 0 10px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-muted); font-size: 13px; line-height: 1; white-space: nowrap;
+}
 @media (max-width: 720px) {
   .adm-grid__head { display: none; }
   /* three equal boxes — price · salon · stock — then the barcode across two

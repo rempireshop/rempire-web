@@ -25,7 +25,7 @@ import { assertClean, clearToast, isRussian, openAdmin, tab, toastText, watch } 
  *  a minute per address (src/lib/auth.ts rateLimit) — six tests in a row
  *  from one address would trip it on the sixth. So each test is its own
  *  describe with its own address (docs/testing.md, "Rate limits"). */
-function scenario(octet: number, title: string, fn: Parameters<typeof test>[1]): void {
+function scenario(octet: number, title: string, fn: (args: { page: Page }) => Promise<void>): void {
   test.describe(`ip .${octet}`, () => {
     test.use({ extraHTTPHeaders: ipHeaders(octet) });
     test(title, fn);
@@ -62,6 +62,32 @@ async function stockQty(page: Page, productId: string, variant: string): Promise
 async function unbind(page: Page, productId: string, variant: string): Promise<void> {
   const res = await page.request.put("/api/admin/inventory/", { data: { productId, variant, ean: null } });
   expect(res.ok(), `could not clear the code on ${productId} ${variant}`).toBe(true);
+}
+
+/** …and the other way round, for the specs that need a size to arrive with a
+ *  code already on it. */
+async function bind(page: Page, productId: string, variant: string, ean: string): Promise<void> {
+  const res = await page.request.put("/api/admin/inventory/", { data: { productId, variant, ean } });
+  expect(res.ok(), `could not put ${ean} on ${productId} ${variant}`).toBe(true);
+}
+
+/** The code the warehouse holds for a size — "" while there is none. */
+async function stockEan(page: Page, productId: string, variant: string): Promise<string> {
+  const res = await page.request.get(`/api/admin/inventory/?filter=all&q=${encodeURIComponent(productId)}`);
+  const rows = (await res.json()).levels as Array<{ productId: string; variant: string; ean: string | null }>;
+  const row = rows.find((r) => r.productId === productId && (r.variant || "") === variant);
+  return (row && row.ean) || "";
+}
+
+/** «Товары» → the product → «Размеры и цены» (admin-editor.spec.ts's own two
+ *  helpers, kept local so the two specs do not share a fixture). */
+async function openSizes(page: Page, id: string): Promise<void> {
+  await tab(page, "goods");
+  await page.locator("[data-goodsq]").fill(id);
+  await page.locator(`[data-admgoods="${id}"]`).click();
+  await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+  await page.locator('[data-edtab="sizes"]').click();
+  await expect(page.locator('[data-edtab="sizes"][aria-current="true"]')).toBeVisible();
 }
 
 test.describe("scanner app", () => {
@@ -465,5 +491,49 @@ test.describe("scanner app", () => {
     await expect(overlay).toHaveAttribute("data-scanengine", "zxing", { timeout: 15_000 });
     await expect(page.locator(".scanoverlay")).toContainText("запасной");
     await assertClean(page, w, "zxing after a silent detector");
+  });
+
+  /* «Товар» → «Размеры и цены»: the barcode column. An empty box said nothing
+     at all — a size no code was ever bound to looked exactly like one whose
+     code had not loaded yet, which is the other half of «it seemed to be
+     impossible for existing products to scan the code» (Dim). */
+  scenario(196, "the editor names the code a size carries, «Отвязать» frees it on save, and a size without one says so", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const ean = `22${Date.now().toString().slice(-10)}`;
+    const cell = page.locator(`[data-edean="${PRODUCT_2.id} ${VARIANT}"]`);
+    const unbindBtn = page.locator(`[data-edunbind="${PRODUCT_2.id} ${VARIANT}"]`);
+
+    await openAdmin(page);
+    await bind(page, PRODUCT_2.id, VARIANT, ean);
+
+    // the size carries a code: the box names it and «Отвязать» is beside it
+    await openSizes(page, PRODUCT_2.id);
+    await expect(cell, "the editor does not show the code the size carries").toHaveValue(ean);
+    await expect(unbindBtn, "a bound size has no «Отвязать»").toBeVisible();
+    await assertClean(page, w, "editor: a size with a code");
+
+    // «Отвязать» only empties the box — nothing is freed until «Сохранить»
+    await unbindBtn.click();
+    await expect(cell).toHaveValue("");
+    expect(await toastText(page), "«Отвязать» said nothing about saving").toMatch(/Сохранить/);
+    await clearToast(page);
+    expect(await stockEan(page, PRODUCT_2.id, VARIANT),
+      "«Отвязать» freed the code before «Сохранить» was pressed").toBe(ean);
+
+    await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
+    expect(await toastText(page)).toMatch(/Сохранено/);
+    await clearToast(page);
+    await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
+      { timeout: 15_000, message: "«Сохранить» after «Отвязать» left the code on the size" }).toBe("");
+
+    // …and now it says so, instead of sitting empty and mute
+    await openSizes(page, PRODUCT_2.id);
+    await expect(cell).toHaveValue("");
+    await expect(cell).toHaveAttribute("placeholder", /не привязан/);
+    await expect(unbindBtn, "a size with no code still offers «Отвязать»").toHaveCount(0);
+    await expect(page.locator('[data-edpane="sizes"]'),
+      "the grid never says where a barcode comes from").toContainText("Штрихкод привязывается сканером на складе");
+    await assertClean(page, w, "editor: a size with no code");
   });
 });
