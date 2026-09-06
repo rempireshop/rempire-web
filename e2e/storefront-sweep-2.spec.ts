@@ -261,6 +261,18 @@ test.describe("chat — the language on screen", () => {
 test.describe("receipt — the purchase beacon", () => {
   test.use({ extraHTTPHeaders: ipHeaders(199) });
 
+  /* track() sends through navigator.sendBeacon, and WebKit hands Playwright
+     an intercepted beacon with no body at all — postData() and
+     postDataBuffer() are both null, so there is nothing to read the event
+     type out of (verified, not assumed). What is under test is app.js's own
+     bookkeeping, which no engine changes; the Chromium projects carry it. */
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(
+      testInfo.project.name === "mobile-safari" || testInfo.project.name === "webkit-local",
+      "WebKit does not expose a sendBeacon body to route interception",
+    );
+  });
+
   test("one «purchase» per paid order, however many times the receipt repaints", async ({ page }) => {
     const beacons: Array<{ type: string; value?: number }> = [];
     await page.route("**/api/track/", async (route) => {

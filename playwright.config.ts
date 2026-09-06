@@ -165,9 +165,10 @@ export default defineConfig({
       use: { ...devices["iPhone 13"] },
       // anchored on the separator so admin-blog / admin-products stay out;
       // sweep-checkout is in for its one phone-layout test (the rest of that
-      // file skips itself off the desktop project)
+      // file skips itself off the desktop project), and storefront-sweep-2
+      // because its own beforeEach already asks for this project by name
       testMatch:
-        /[\\/](catalogue|product|checkout|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout)\.spec\.ts$/,
+        /[\\/](catalogue|product|checkout|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout|storefront-sweep-2)\.spec\.ts$/,
     },
     ...(webkitInstalled
       ? [{ name: "webkit-local", use: { ...devices["Desktop Safari"] } }]
