@@ -1394,6 +1394,7 @@
       "один объём": "üks maht",
       "сканер ›": "skanner ›",
       "Убрать размер": "Eemalda suurus",
+      "Добавить размер — объёмы заводит Дим": "Lisa suurus — mahud lisab Dim",
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui seda on 3 või vähem. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
@@ -1630,8 +1631,10 @@
       "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
         "Vedajate tariife ei tulnud — «Seadetes» kehtivad sinu enda hinnad.",
       "Письма клиентам · Resend": "Kirjad klientidele · Resend",
-      "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест».":
-        "Lähevad aadressilt info@rempireshop.com. Kontrolli — «Turundus → Kirjad → Saada mulle test».",
+      "Тест дошёл — письма уходят с info@rempireshop.com.":
+        "Test jõudis kohale — kirjad lähevad aadressilt info@rempireshop.com.",
+      "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
+        "Saatja on info@rempireshop.com. Kontrollida saab ainult testiga: «Turundus → Kirjad → Saada mulle test».",
       "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
         "Kirjade saatmine pole seadistatud: test tuli veaga tagasi, kliendid kirju ei saa.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
@@ -1662,7 +1665,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "salongi soodustus, püsikliendipunktid, Pro hinnad",
       "Языки": "Keeled",
       "RU основной · ET · EN": "RU peamine · ET · EN",
-      "всё, что применялось, и кнопка «Вернуть»": "kõik, mis rakendati, ja nupp «Taasta»",
+      "что вы меняли в этом браузере, и кнопка «Вернуть»": "mida selles brauseris muutsite, ja nupp «Taasta»",
       "Пакомат, €": "Pakiautomaat, €",
       "Курьер, €": "Kuller, €",
       "Бесплатно от, €": "Tasuta alates, €",
@@ -3132,6 +3135,7 @@
       "один объём": "one size",
       "сканер ›": "scanner ›",
       "Убрать размер": "Remove the size",
+      "Добавить размер — объёмы заводит Дим": "Add a size — sizes are added by Dim",
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
       "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red at 3 or fewer. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
@@ -3368,8 +3372,10 @@
       "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
         "The carriers' tariffs did not arrive — your own prices in “Settings” apply.",
       "Письма клиентам · Resend": "Customer letters · Resend",
-      "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест».":
-        "Sent from info@rempireshop.com. To check — “Marketing → Letters → Send me a test”.",
+      "Тест дошёл — письма уходят с info@rempireshop.com.":
+        "The test arrived — letters go out from info@rempireshop.com.",
+      "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
+        "The sender is info@rempireshop.com. The only way to check is a test: “Marketing → Letters → Send me a test”.",
       "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
         "Sending letters is not set up: the test came back with an error and customers get nothing.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
@@ -3400,7 +3406,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "the salon discount, loyalty points, Pro prices",
       "Языки": "Languages",
       "RU основной · ET · EN": "RU main · ET · EN",
-      "всё, что применялось, и кнопка «Вернуть»": "everything applied, with a “Restore” button",
+      "что вы меняли в этом браузере, и кнопка «Вернуть»": "what you changed in this browser, with a “Restore” button",
       "Пакомат, €": "Parcel locker, €",
       "Курьер, €": "Courier, €",
       "Бесплатно от, €": "Free from, €",
@@ -11639,11 +11645,18 @@
         : "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.",
       act: "" });
 
+    /* Three states, not two. The panel has no way to ask whether Resend has a
+       key — the only probe is a real test letter — so before one has been sent
+       it says so instead of stating as fact that letters are going out. The
+       dot stays quiet while nothing is known to be wrong; it only turns when a
+       test came back «no_api_key». */
     var mailOk = S.admMailKey !== false;
     rows.push({ name: "Письма клиентам · Resend", ok: mailOk,
-      sub: mailOk
-        ? "Уходят с info@rempireshop.com. Проверить — «Маркетинг → Письма → Отправить мне тест»."
-        : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
+      sub: S.admMailKey === true
+        ? "Тест дошёл — письма уходят с info@rempireshop.com."
+        : mailOk
+          ? "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест»."
+          : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
       act: mailOk ? "" : admDevLink() });
 
     var gscOk = !GSC || GSC.ok === true;
@@ -11704,7 +11717,11 @@
     ["company", "О компании", "реквизиты, часы, контакты, соцсети, отчёты"],
     ["prices", "Цены и баллы", "скидка салона, баллы лояльности, Pro-цены"],
     ["langs", "Языки", "RU основной · ET · EN"],
-    ["journal", "Журнал изменений", "всё, что применялось, и кнопка «Вернуть»"]
+    /* «в этом браузере», because that is where it lives: DEMO.log is a
+       localStorage list (ADM_LS), not the server's admin_audit. What was
+       changed from the phone is not in the laptop's journal — the row used to
+       say «всё, что применялось» and read like a shop-wide history. */
+    ["journal", "Журнал изменений", "что вы меняли в этом браузере, и кнопка «Вернуть»"]
   ];
   function admSetTitle(key) {
     for (var i = 0; i < ADM_SET_PAGES.length; i++) if (ADM_SET_PAGES[i][0] === key) return ADM_SET_PAGES[i][1];
@@ -14364,7 +14381,9 @@
     }).join("");
     return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
       '<div class="adm-grid">' + head + rows + "</div>" +
-      '<button class="adm-btn adm-btn--dash" type="button" disabled title="скоро">+ Размер</button>' +
+      // the same reason as the «×» above and the hint below it — «скоро» said
+      // a third thing, and a title is invisible on the phone anyway
+      '<button class="adm-btn adm-btn--dash" type="button" disabled title="Объёмы заводит Дим" aria-label="Добавить размер — объёмы заводит Дим">+ Размер</button>' +
       '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
       '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       "</div>";
