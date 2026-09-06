@@ -9,7 +9,7 @@
  * row, never a silent UPDATE.
  */
 import { requireAdmin } from "@/lib/auth";
-import { getLevels, InventoryError, setLevel, type LevelFilter } from "@/lib/inventory";
+import { byEan, getLevels, InventoryError, setLevel, type LevelFilter } from "@/lib/inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -70,7 +70,15 @@ export async function PUT(req: Request) {
     return Response.json({ ok: true, level }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     if (err instanceof InventoryError) {
-      return Response.json({ ok: false, error: err.code, detail: err.detail }, { status: 400 });
+      /* `detail` is the other product's id (src/lib/inventory.ts); the panel's
+         toast wants to name the bottle — «Un.Tangled Spray · 40 мл» — so the
+         refusal also carries the product AND the size that own the code. */
+      let takenBy: { productId: string; variant: string } | undefined;
+      if (err.code === "ean_taken" && patch.ean) {
+        const owner = await byEan(patch.ean).catch(() => null);
+        if (owner) takenBy = { productId: owner.productId, variant: owner.variant };
+      }
+      return Response.json({ ok: false, error: err.code, detail: err.detail, takenBy }, { status: 400 });
     }
     console.error("[api/admin/inventory] write failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });

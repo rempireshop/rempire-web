@@ -195,6 +195,22 @@ test.describe("scanner app", () => {
     await expect(row, "the list behind the overlay still shows the row as unbound").toContainText(ean);
     await expect(row, "the list behind the overlay still shows the old count").toContainText(String(before + 2));
     await assertClean(page, w, "«Склад» list after the overlay");
+
+    // ---- a wrong binding is undone on the card itself -----------------------
+    await page.locator("[data-scanopen]").first().click();
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator('[data-scanmove="in"]')).toBeVisible();
+    await page.locator("[data-scanunbind]").click();
+    expect(await toastText(page), "unlinking said nothing").toMatch(/отвязан/i);
+    await clearToast(page);
+    // the code is free again, and the search card follows so it can be re-bound at once
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await page.locator("[data-scanclose]").click();
+    await expect(page.locator(".scanoverlay")).toHaveCount(0);
+    await expect(row).toContainText("штрихкод не привязан");
+    await expect(row, "unlinking touched the count").toContainText(String(before + 2));
+    await assertClean(page, w, "code unlinked from the card");
   });
 
   /* Dim: «keyboard jumps out too often when scanning». Every render() — the

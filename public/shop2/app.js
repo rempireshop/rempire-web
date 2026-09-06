@@ -1421,6 +1421,7 @@
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Suunake triipkoodile. Toode leitakse ise — jääb üle kogus märkida.",
       "Найдено ·": "Leitud ·",
       "Сканировать дальше": "Skaneeri edasi",
+      "Отвязать код": "Eemalda kood", "Код отвязан ✓": "Kood eemaldatud ✓", "Не удалось отвязать код": "Koodi ei õnnestunud eemaldada",
       "Код не привязан ·": "Kood pole seotud ·",
       "К какому товару?": "Millise tootega?",
       "Начните вводить название": "Hakake nime sisestama",
@@ -3147,6 +3148,7 @@
       "Наведите на штрихкод. Товар найдётся сам — останется указать количество.": "Point at the barcode. The product finds itself — all that is left is the quantity.",
       "Найдено ·": "Found ·",
       "Сканировать дальше": "Keep scanning",
+      "Отвязать код": "Unlink the code", "Код отвязан ✓": "Code unlinked ✓", "Не удалось отвязать код": "Could not unlink the code",
       "Код не привязан ·": "Code not linked ·",
       "К какому товару?": "To which product?",
       "Начните вводить название": "Start typing the name",
@@ -3794,6 +3796,9 @@
     [/^Списать −(\d+)$/, { ET: "Kanna maha −$1", EN: "Write off −$1" }],
     // scanner: a candidate size that already carries a code, by its last four characters
     [/^есть код ···(.+)$/, { ET: "kood olemas ···$1", EN: "has a code ···$1" }],
+    // a taken code, naming the bottle that has it (stockSaveErrText)
+    [/^Этот штрихкод уже привязан к другому товару: (.+)$/,
+      { ET: "See triipkood on juba seotud teise tootega: $1", EN: "This barcode is already linked to another product: $1" }],
     [/^Добавить в продажу · (\d+)$/, { ET: "Lisa müüki · $1", EN: "Add to the sale · $1" }],
     [/^на складе (\d+)$/, { ET: "laos $1", EN: "in stock $1" }],
     [/^Снято с продажи · (.+)$/, { ET: "Eemaldatud müügilt · $1", EN: "Taken off sale · $1" }],
@@ -14937,7 +14942,22 @@
     stockLevelSaveDetailed({ productId: productId, variant: variant || "", ean: assignCode }).then(function (res) {
       if (res.ok) { S.scanAssignPick = ""; toast("Код привязан ✓"); scanLookup(assignCode); scanStockChanged(); }
       // «возможно, код уже занят» was a guess; the route knows, and says which
-      else toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать — возможно, код уже занят");
+      else toast(stockSaveErrText(res) || "Не удалось привязать — возможно, код уже занят");
+    });
+  }
+  /* «Отвязать код» on the found card: the code stops finding this bottle and
+     the «К какому товару?» card follows straight away — a wrong binding is
+     fixed where it was noticed, and a mis-tap is one search from where it was. */
+  function scanUnbindEan() {
+    var h = S.scanHit;
+    if (!h || !h.product || S.scanBusy) return;
+    S.scanBusy = true; scanRenderPanel();
+    stockLevelSaveDetailed({ productId: h.productId, variant: h.variant || "", ean: null }).then(function (res) {
+      S.scanBusy = false;
+      if (!res.ok) { toast(stockSaveErrText(res) || "Не удалось отвязать код"); scanRenderPanel(); return; }
+      toast("Код отвязан ✓");
+      scanLookup(h.code);
+      scanStockChanged();
     });
   }
   /** «Принять +3» / «Списать −3» — the number is on the buttons, so the
@@ -14993,7 +15013,11 @@
                 ' data-scanlabel="in">' + scanTakeLabel(n) + "</button>" +
               '<button class="scan__btn" data-scanmove="out"' + (S.scanBusy ? " disabled" : "") +
                 ' data-scanlabel="out">' + scanDropLabel(n) + "</button></div>") +
-        '<button class="scan__more" type="button" data-scanreset>Сканировать дальше</button>' +
+        '<div class="scan__links">' +
+          '<button class="scan__more" type="button" data-scanreset>Сканировать дальше</button>' +
+          // a wrong binding is undone right here, and the search card follows
+          '<button class="scan__more" type="button" data-scanunbind' + (S.scanBusy ? " disabled" : "") + '>Отвязать код</button>' +
+        "</div>" +
         (S.scanReady ? '<p class="scan__ready">Готово — сканируйте следующий код.</p>' : "") +
       "</div>";
     }
@@ -15655,7 +15679,7 @@
      barcode he just typed belongs to another product. */
   function stockLevelSaveDetailed(body) {
     return apiSend("/api/admin/inventory/", "PUT", body).then(function (r) {
-      return { ok: r.status === 200 && r.body.ok, error: (r.body && r.body.error) || "" };
+      return { ok: r.status === 200 && r.body.ok, error: (r.body && r.body.error) || "", takenBy: (r.body && r.body.takenBy) || null };
     }).catch(function () { return { ok: false, error: "offline" }; });
   }
   var STOCK_SAVE_ERRS = {
@@ -15663,6 +15687,19 @@
     bad_ean: "Штрихкод — это 8–14 цифр (EAN/UPC) или свой код из букв, цифр и дефиса, 4–32 знака.",
     bad_threshold: "Порог «мало» — целое число от 0 до 100 000."
   };
+  /** A refusal in words — and for a taken code, WHICH bottle has it: the
+      route names the product and the size, so the owner knows where to look
+      instead of guessing which of two hundred rows to open. */
+  function stockSaveErrText(res) {
+    var t = res && res.takenBy;
+    if (res && res.error === "ean_taken" && t) {
+      var owner = null;
+      for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === t.productId) { owner = CATALOGUE[i]; break; }
+      var who = (owner ? owner.brand + " — " + owner.name : t.productId) + (t.variant ? " · " + t.variant : "");
+      return "Этот штрихкод уже привязан к другому товару: " + who;
+    }
+    return (res && STOCK_SAVE_ERRS[res.error]) || "";
+  }
   function loadStockMoves(force) {
     if (SRV.admin !== true) return;
     if (S.stockMoves && !force) return;
@@ -15715,7 +15752,7 @@
     Promise.all(jobs).then(function (results) {
       var failed = results.filter(function (x) { return !x.ok; })[0];
       if (!failed) toast("Сохранено ✓");
-      else toast(STOCK_SAVE_ERRS[failed.error] || "Часть изменений не сохранилась");
+      else toast(stockSaveErrText(failed) || "Часть изменений не сохранилась");
       S.stockEdit = failed ? key : "";
       reloadStock();
     });
@@ -18643,7 +18680,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
+    var t = e.target.closest("[data-giftpdf],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-dot],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-method],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-repeat],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-admedit],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-admship],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-scanunbind],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admcustdemote],[data-admdelivered],[data-admcopy]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -19522,7 +19559,7 @@
           productId: gp.id, variant: eRow ? eRow.variant : eKey.slice(gp.id.length + 1),
           ean: eVal || null
         }).then(function (res) {
-          if (!res.ok) toast(STOCK_SAVE_ERRS[res.error] || "Не удалось привязать штрихкод");
+          if (!res.ok) toast(stockSaveErrText(res) || "Не удалось привязать штрихкод");
           reloadStock();
         });
       }
@@ -19963,6 +20000,7 @@
       scanBindEan(bindId, bindVar);
       return;
     }
+    if (d.scanunbind !== undefined) { scanUnbindEan(); return; }
     if (d.scanreset !== undefined) {
       S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = ""; S.scanQty = 1; S.scanReady = false;
       SCAN.lastCode = "";   // the same code, scanned again, has to count

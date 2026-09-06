@@ -895,6 +895,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scan__btn--pri { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
 .scan__btn[disabled] { background: var(--a-tint); color: var(--a-muted); border-color: var(--a-rule); cursor: default; }
 .scan__more { height: 44px; border: 0; background: none; color: var(--a-muted); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+/* «Сканировать дальше» and «Отвязать код» share the found card's last line */
+.scan__links { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+.scan__more[disabled] { color: var(--a-rule); cursor: default; }
 .scan__ready { margin: 0; font-size: 13px; color: var(--a-ok); text-align: center; }
 
 .scan__find { height: 48px; border: 1px solid var(--a-ink); padding: 0 14px; color: var(--a-ink); background: #fff; width: 100%; }
