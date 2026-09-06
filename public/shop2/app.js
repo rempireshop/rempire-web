@@ -242,6 +242,22 @@
       "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — maksa oma pangas",
       "Оплата в одно касание": "Makse ühe puudutusega",
       "Счёт на почту, оплата в течение 7 дней": "Arve e-postile, maksmine 7 päeva jooksul",
+      /* «По счёту — для компаний»: step 3's company form, its errors and the receipt */
+      "Фирма": "Ettevõte", "Адрес фирмы": "Ettevõtte aadress", "E-mail для счёта": "E-post arve jaoks",
+      "KMKR / номер НДС — не обязательно": "KMKR / käibemaksukohustuslase number — pole kohustuslik",
+      "Юридический адрес совпадает с адресом доставки": "Juriidiline aadress on sama mis tarneaadress",
+      "Заполните адрес доставки на шаге 2 — он попадёт в счёт.": "Täitke tarneaadress 2. sammul — see läheb arvele.",
+      "Укажите название фирмы": "Sisestage ettevõtte nimi",
+      "Регистрационный номер — от 8 до 12 цифр": "Registrikood — 8 kuni 12 numbrit",
+      "Номер НДС выглядит как EE123456789": "KMKR number näeb välja nagu EE123456789",
+      "Укажите адрес фирмы — он печатается в счёте": "Sisestage ettevõtte aadress — see trükitakse arvele",
+      "Проверьте e-mail — на него придёт счёт": "Kontrollige e-posti aadressi — sellele tuleb arve",
+      "Проверьте регистрационный номер фирмы": "Kontrollige ettevõtte registrikoodi",
+      "Проверьте номер НДС": "Kontrollige KMKR numbrit", "Укажите адрес фирмы": "Sisestage ettevõtte aadress",
+      "Проверьте e-mail для счёта": "Kontrollige arve e-posti aadressi",
+      "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "Tellimus on juba täielikult kaetud kinkekaardi või punktidega — valige teine makseviis",
+      "Заполните данные фирмы для счёта": "Täitke ettevõtte andmed arve jaoks",
+      "Счёт отправлен на": "Arve on saadetud aadressile", "Счёт отправлен на почту.": "Arve on saadetud e-postile.",
       "Самовывоз — Mardi 1, Таллинн": "Järeletulek — Mardi 1, Tallinn",
       "Курьер до двери (DPD)": "Kuller uksele (DPD)", "Курьер DPD": "DPD kuller",
       "Курьер SmartPosti": "SmartPosti kuller", "Курьер Omniva": "Omniva kuller",
@@ -1970,6 +1986,22 @@
       "Swedbank, SEB, LHV, Luminor, Coop — оплата в своём банке": "Swedbank, SEB, LHV, Luminor, Coop — pay via your own bank",
       "Оплата в одно касание": "One-tap payment",
       "Счёт на почту, оплата в течение 7 дней": "Invoice by e-mail, payment within 7 days",
+      /* «По счёту — для компаний»: step 3's company form, its errors and the receipt */
+      "Фирма": "Company", "Адрес фирмы": "Company address", "E-mail для счёта": "E-mail for the invoice",
+      "KMKR / номер НДС — не обязательно": "VAT number (KMKR) — optional",
+      "Юридический адрес совпадает с адресом доставки": "The registered address is the same as the delivery address",
+      "Заполните адрес доставки на шаге 2 — он попадёт в счёт.": "Fill in the delivery address in step 2 — it goes on the invoice.",
+      "Укажите название фирмы": "Enter the company name",
+      "Регистрационный номер — от 8 до 12 цифр": "Registry code — 8 to 12 digits",
+      "Номер НДС выглядит как EE123456789": "A VAT number looks like EE123456789",
+      "Укажите адрес фирмы — он печатается в счёте": "Enter the company address — it is printed on the invoice",
+      "Проверьте e-mail — на него придёт счёт": "Check the e-mail — the invoice goes there",
+      "Проверьте регистрационный номер фирмы": "Check the company's registry code",
+      "Проверьте номер НДС": "Check the VAT number", "Укажите адрес фирмы": "Enter the company address",
+      "Проверьте e-mail для счёта": "Check the invoice e-mail",
+      "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "The order is already fully covered by a gift card or points — choose another payment method",
+      "Заполните данные фирмы для счёта": "Fill in the company details for the invoice",
+      "Счёт отправлен на": "The invoice has been sent to", "Счёт отправлен на почту.": "The invoice has been sent by e-mail.",
       "Самовывоз — Mardi 1, Таллинн": "Pickup — Mardi 1, Tallinn",
       "Курьер до двери (DPD)": "Courier to the door (DPD)", "Курьер DPD": "DPD courier",
       "Курьер SmartPosti": "SmartPost courier", "Курьер Omniva": "Omniva courier",
@@ -3814,7 +3846,18 @@
     [/^использован (\d+) из (\d+)$/, { ET: "kasutatud $1 / $2", EN: "used $1 of $2" }],
     [/^использован (\d+)$/, { ET: "kasutatud $1", EN: "used $1" }],
     [/^(\d+) € убрали из магазина$/, { ET: "$1 € eemaldati poest", EN: "€$1 taken off the shop" }],
-    [/^(\d+) € теперь в магазине$/, { ET: "$1 € on nüüd poes", EN: "€$1 is now on sale" }]
+    [/^(\d+) € теперь в магазине$/, { ET: "$1 € on nüüd poes", EN: "€$1 is now on sale" }],
+    /* «По счёту — для компаний»: the three sentences that carry the payment
+       term (settings.invoice.dueDays) — the method's hint, the note under the
+       company form, and the receipt. */
+    [/^Счёт на почту, оплата в течение (\d+) (?:дня|дней)$/,
+      { ET: "Arve e-postile, maksmine $1 päeva jooksul", EN: "Invoice by e-mail, payment within $1 days" }],
+    [/^Счёт придёт на почту сразу после оформления\. Оплата — переводом в течение (\d+) (?:дня|дней); заказ отправим после поступления денег\.$/,
+      { ET: "Arve tuleb e-postile kohe pärast tellimuse vormistamist. Maksmine ülekandega $1 päeva jooksul; tellimuse saadame teele pärast makse laekumist.",
+        EN: "The invoice arrives by e-mail right after checkout. Payment by bank transfer within $1 days; we ship the order once the payment arrives." }],
+    [/^Оплатите в течение (\d+) (?:дня|дней) — после оплаты отправим заказ\.$/,
+      { ET: "Tasuge $1 päeva jooksul — pärast makse laekumist saadame tellimuse teele.",
+        EN: "Please pay within $1 days — we ship the order as soon as the payment arrives." }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -4576,6 +4619,102 @@
     { l: "По счёту — для компаний", h: "Счёт на почту, оплата в течение 7 дней", k: "invoice" }
   ];
   var BANKS = ["Swedbank", "SEB", "LHV", "Luminor", "Coop"];
+
+  /* ---------- «По счёту — для компаний» ----------
+     The fourth payment method has no bank page. The company's details travel
+     with the order (POST /api/orders/, payment.method = "invoice"); the server
+     numbers the invoice, mails it with the PDF (src/lib/invoices.ts) and the
+     shopper lands on the receipt with «Счёт отправлен на …». An Estonian
+     invoice needs the buyer's legal address, not only the name and the
+     registry code (VAT Act §37) — so step 3 asks for it, taking the courier
+     address when there is one and the box «совпадает» is left on. */
+  function isInvoice() { return !!(PAYS[S.pay] && PAYS[S.pay].k === "invoice"); }
+  /** The payment term the server prints on the invoice (settings.invoice.dueDays, 7 by default). */
+  function invoiceDueDays() {
+    var n = DEMO.invoice && Number(DEMO.invoice.dueDays);
+    return isFinite(n) && n >= 1 ? Math.round(n) : 7;
+  }
+  /* Each plural form is a whole literal with the number inside it — the i18n
+     check (tools/i18n-gaps.mjs) probes a hole with a sample count and needs
+     the word next to it to match the UI_RX rule, so «дня» / «дней» are never
+     glued on as separate fragments. */
+  function invoiceHint() {
+    var n = invoiceDueDays();
+    return pl(n, "Счёт на почту, оплата в течение " + n + " дня", "Счёт на почту, оплата в течение " + n + " дня", "Счёт на почту, оплата в течение " + n + " дней");
+  }
+  /** The address the invoice is made out to: the courier address while «совпадает» is on, else the typed one. */
+  function invoiceAddress() {
+    if (S.inv.sameAddr && shipMethod() === "courier") {
+      var cc = orderCountry();
+      return [S.ship.addr, [S.ship.zip, S.ship.city].filter(function (s) { return String(s || "").trim(); }).join(" ")]
+        .filter(function (s) { return String(s || "").trim(); }).join(", ") + (cc && cc !== "EE" ? ", " + cc : "");
+    }
+    return S.inv.address.trim();
+  }
+  function invoiceEmail() { return (S.inv.email || S.email || "").trim(); }
+  /** The fields step 3 is short of, in the order they are drawn. */
+  function invoiceMissing() {
+    var out = [];
+    if (S.inv.name.trim().length < 2) out.push("name");
+    if (!/^\d{8,12}$/.test(S.inv.regCode.replace(/[\s-]/g, ""))) out.push("regCode");
+    var vat = S.inv.vatNumber.replace(/[\s-]/g, "").toUpperCase();
+    if (vat && !/^[A-Z]{2}[0-9A-Z]{2,14}$/.test(vat)) out.push("vatNumber");
+    if (invoiceAddress().replace(/[,\s]/g, "").length < 5) out.push("address");
+    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(invoiceEmail())) out.push("email");
+    return out;
+  }
+  function invoicePayload() {
+    return { name: S.inv.name.trim(), regCode: S.inv.regCode.trim(), vatNumber: S.inv.vatNumber.trim(), address: invoiceAddress(), email: invoiceEmail() };
+  }
+  var INV_MSG = {
+    name: "Укажите название фирмы",
+    regCode: "Регистрационный номер — от 8 до 12 цифр",
+    vatNumber: "Номер НДС выглядит как EE123456789",
+    address: "Укажите адрес фирмы — он печатается в счёте",
+    email: "Проверьте e-mail — на него придёт счёт"
+  };
+  function invField(key, label, ph, opts) {
+    opts = opts || {};
+    var bad = S.invTouched && invoiceMissing().indexOf(key) >= 0;
+    return '<label class="field"><span class="field__label">' + label + "</span>" +
+      '<input class="input" data-invf="' + key + '" value="' + esc(key === "email" ? invoiceEmail() : S.inv[key]) + '" placeholder="' + esc(ph) + '"' +
+      (opts.mode ? ' inputmode="' + opts.mode + '"' : "") + (opts.auto ? ' autocomplete="' + opts.auto + '"' : "") +
+      ' aria-invalid="' + bad + '">' +
+      (bad ? '<div class="err" role="alert">' + INV_MSG[key] + "</div>" : "") + "</label>";
+  }
+  /** Step 3's company form — drawn under the method list while «По счёту» is the pick. */
+  function invoiceBlockHTML() {
+    var courier = shipMethod() === "courier";
+    var same = courier && S.inv.sameAddr;
+    return '<div data-invoice style="margin-top:14px">' +
+      invField("name", "Фирма", "Salong Näidis OÜ", { auto: "organization" }) +
+      invField("regCode", "Рег. номер", "12345678", { mode: "numeric" }) +
+      invField("vatNumber", "KMKR / номер НДС — не обязательно", "EE123456789") +
+      (courier
+        ? '<label class="opt opt--plain"><input type="checkbox" data-invsame' + (S.inv.sameAddr ? " checked" : "") + ">" +
+          "<span>Юридический адрес совпадает с адресом доставки</span></label>"
+        : "") +
+      (same
+        ? '<div class="hint">' + (invoiceAddress() ? esc(invoiceAddress()) : "Заполните адрес доставки на шаге 2 — он попадёт в счёт.") + "</div>"
+        : invField("address", "Адрес фирмы", "Pärnu mnt 10, 10148 Tallinn", { auto: "off" })) +
+      invField("email", "E-mail для счёта", "raamatupidaja@firma.ee", { mode: "email", auto: "email" }) +
+      '<div class="hint">' + invoiceCheckoutNote() + "</div>" +
+    "</div>";
+  }
+  function invoiceCheckoutNote() {
+    var n = invoiceDueDays();
+    return pl(n,
+      "Счёт придёт на почту сразу после оформления. Оплата — переводом в течение " + n + " дня; заказ отправим после поступления денег.",
+      "Счёт придёт на почту сразу после оформления. Оплата — переводом в течение " + n + " дня; заказ отправим после поступления денег.",
+      "Счёт придёт на почту сразу после оформления. Оплата — переводом в течение " + n + " дней; заказ отправим после поступления денег.");
+  }
+  /** The receipt's second sentence — same literal-per-form rule as invoiceHint(). */
+  function invoiceDoneNote(n) {
+    return pl(n,
+      "Оплатите в течение " + n + " дня — после оплаты отправим заказ.",
+      "Оплатите в течение " + n + " дня — после оплаты отправим заказ.",
+      "Оплатите в течение " + n + " дней — после оплаты отправим заказ.");
+  }
   /* UX fix 9: real bank logos from GET /api/payments/methods (server route:
      src/app/api/payments/methods/route.ts, 6h cache, only answers when
      Montonio is configured). Until it answers — or if it never does — the
@@ -4693,7 +4832,9 @@
     paying: false,      // «Оплатить» is in flight — the button locks
     done: null,         // receipt state when we got here without a redirect
     newsletter: false,
-    invoiceCo: "",
+    // «По счёту — для компаний»: the company the invoice is made out to (step 3)
+    inv: { name: "", regCode: "", vatNumber: "", sameAddr: true, address: "", email: "" },
+    invTouched: false,
     acctName: "",
     pay: 0,
     bank: 0,
@@ -9214,7 +9355,7 @@
     return Object.keys(m).length ? m : undefined;
   }
   function orderPayload() {
-    return {
+    var p = {
       lang: S.lang,
       items: S.cart.map(function (l) {
         var line = { id: l.id, variant: lineVariant(l), qty: l.qty };
@@ -9245,6 +9386,11 @@
          never a number the browser proposes. */
       redeemPoints: !!S.loyaltyRedeem
     };
+    /* «По счёту»: the method and the company go with the order itself — the
+       server issues the invoice while it writes the row (src/lib/invoices.ts),
+       and no payment page is ever asked for. Absent on every other method. */
+    if (isInvoice()) { p.payment = { method: "invoice" }; p.company = invoicePayload(); }
+    return p;
   }
   /* Bank codes for Montonio's `preferredProvider`. ASSUMPTION: these are the
      banks' BICs, which is what the codes look like in Montonio's docs — the
@@ -9276,7 +9422,14 @@
     rate_limited: "Слишком много попыток — подождите минуту",
     bad_email: "Проверьте e-mail",
     out_of_stock: "Товара не хватает на складе",
-    db_unavailable: "Магазин временно недоступен — попробуйте позже"
+    db_unavailable: "Магазин временно недоступен — попробуйте позже",
+    // «По счёту»: what src/lib/invoices.ts cleanCompany() refuses, by field
+    bad_company: "Укажите название фирмы",
+    bad_reg_code: "Проверьте регистрационный номер фирмы",
+    bad_vat_number: "Проверьте номер НДС",
+    bad_company_address: "Укажите адрес фирмы",
+    bad_invoice_email: "Проверьте e-mail для счёта",
+    invoice_zero_total: "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты"
   };
   function orderErrText(code) {
     return ORDER_ERRS[code] || "Не получилось оформить заказ — попробуйте ещё раз";
@@ -9291,6 +9444,8 @@
     S.loyaltyRedeem = false;   // wholesale/loyalty: points applied here are spent too
     // the basket is empty by now, so shipMethod() no longer answers "digital"
     S.ship = { name: "", addr: "", zip: "", city: "", phone: "", method: shipMethod(), carrier: S.ship.carrier, point: null };
+    // «По счёту»: the company was this order's; the next one starts blank
+    S.inv = { name: "", regCode: "", vatNumber: "", sameAddr: true, address: "", email: "" }; S.invTouched = false;
     S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
     persist();
   }
@@ -9311,7 +9466,7 @@
     // features: the card has nowhere to go without an address for it
     if (isDigital() && giftToEmailBad()) { return failStep(2, "Проверьте e-mail получателя"); }
     if (pointMissing()) { return failStep(2, "Выберите пакомат"); }
-    if (S.pay === 3 && !S.invoiceCo.trim()) { return failStep(3, "Укажите фирму и регистрационный номер"); }
+    if (isInvoice()) { S.invTouched = true; if (invoiceMissing().length) { return failStep(3, "Заполните данные фирмы для счёта"); } }
     if (!S.cart.length) { toast("Корзина пуста"); return; }
     if (S.paying) return;
     if (API.ok === false) return finishDemo();
@@ -9322,6 +9477,21 @@
       apiSeen(true);
       if (!res.body || !res.body.ok || !res.body.orderId) {
         throw new Error(orderErrText(res.body && res.body.error));
+      }
+      /* «По счёту — для компаний»: the server has already numbered the
+         invoice and mailed it with the PDF (src/lib/invoices.ts) — there is
+         no payment page to go to. Straight to the receipt, which says where
+         the invoice went and by when it is due. */
+      if (isInvoice()) {
+        var inv = res.body.invoice || {};
+        var invEmail = inv.email || invoiceEmail();
+        clearOrderState();
+        S.paying = false;
+        S.done = { status: "invoice", number: res.body.number || "", email: invEmail, dueDays: Number(inv.dueDays) || invoiceDueDays(), invoice: inv.number || "" };
+        go("done");
+        // a reload of the receipt keeps the order number and the state, like a bank's return
+        try { history.replaceState(history.state, "", pathFor() + "?n=" + encodeURIComponent(S.done.number) + "&s=invoice"); } catch (e) {}
+        return;
       }
       return postJSON("/api/payments/create/", {
         orderId: res.body.orderId,
@@ -9408,7 +9578,7 @@
   function paymentBlockHTML() {
     var out = '<div class="optlist">' + PAYS.map(function (o, i) {
         return '<label class="opt opt--pay"><input type="radio" name="pay" ' + (i === S.pay ? "checked" : "") + ' data-paym="' + i + '">' +
-          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
+          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + (o.k === "invoice" ? invoiceHint() : o.h) + "</span></span>" +
           '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
       }).join("") + "</div>" +
       (S.pay === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
@@ -9416,7 +9586,7 @@
       // not their own option in the checkout, they ride on Montonio's own
       // card element, so a static hint is all this needs
       (S.pay === 1 ? '<p class="hint">Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.</p>' : "") +
-      (S.pay === 3 ? '<label class="field" style="margin-top:14px"><span class="field__label">Название фирмы и рег. номер</span><input class="input" data-invoiceco value="' + esc(S.invoiceCo) + '" placeholder="OÜ Näidis · 12345678"></label>' : "");
+      (isInvoice() ? invoiceBlockHTML() : "");
     coBlockHTML.payment = out;
     return out;
   }
@@ -15902,6 +16072,10 @@
        the shop has always sold, and filters whatever arrives through
        GIFT_AMOUNTS so a bad row cannot price a card the server would refuse. */
     if (Array.isArray(s.gift_amounts)) DEMO.giftAmounts = s.gift_amounts;
+    /* «По счёту»: the payment term the server prints on the invoice, so the
+       checkout's «в течение N дней» says the same number (settings.invoice,
+       «Настройки → О компании → Счета для компаний»). */
+    if (s.invoice && typeof s.invoice === "object") DEMO.invoice = { dueDays: Number(s.invoice.dueDays) || 7, prefix: String(s.invoice.prefix == null ? "A-" : s.invoice.prefix) };
     /* wholesale/loyalty: the public half of settings.pricing — whether points
        are on and the earn rate — for the «Баллы» row of «Доставка и оплата». */
     if (s.pricing && s.pricing.loyalty && typeof s.pricing.loyalty === "object") {
@@ -17142,7 +17316,7 @@
         q[decodeURIComponent(i < 0 ? kv : kv.slice(0, i))] = i < 0 ? "" : decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " "));
       });
     } catch (e) {}
-    var s = q.s === "paid" || q.s === "failed" || q.s === "pending" ? q.s : "";
+    var s = q.s === "paid" || q.s === "failed" || q.s === "pending" || q.s === "invoice" ? q.s : "";
     /* analytics agent: funnel-only purchase beacon, fired exactly once (the
        S.done cache above means everything past this point in doneState()
        runs a single time per page load, even across later re-renders — a
@@ -17192,6 +17366,22 @@
         '<div class="done__tick done__tick--bad">✕</div>' +
         '<h1 class="display h1">Оплата не прошла</h1>' + num +
         '<p class="muted" style="margin-bottom:22px">Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.</p>' +
+        '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
+    }
+    /* «По счёту — для компаний»: the order is placed, the invoice is in the
+       mail, nothing is paid yet. The address is its own text node so the two
+       sentences around it stay dictionary keys; a reload of the receipt has
+       the number but not the address, and says so more plainly. */
+    if (d.status === "invoice") {
+      var dn = Number(d.dueDays) || invoiceDueDays();
+      return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
+        '<div class="done__tick">' + icon("check") + "</div>" +
+        '<h1 class="display h1">Заказ оформлен</h1>' + num +
+        '<p class="muted" style="margin-bottom:22px" data-invoicedone>' +
+          (d.email
+            ? "<span>Счёт отправлен на</span> <b>" + esc(d.email) + "</b>. "
+            : "<span>Счёт отправлен на почту.</span> ") +
+          "<span>" + invoiceDoneNote(dn) + "</span></p>" +
         '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
     }
     if (d.status === "pending") {
@@ -17654,7 +17844,7 @@
       if (!af || !bodySlot.contains(af) || (af.tagName !== "INPUT" && af.tagName !== "TEXTAREA")) return;
       var sel = af.hasAttribute("data-email") ? "[data-email]"
         : af.hasAttribute("data-shipf") ? '[data-shipf="' + af.getAttribute("data-shipf") + '"]'
-        : af.hasAttribute("data-invoiceco") ? "[data-invoiceco]"
+        : af.hasAttribute("data-invf") ? '[data-invf="' + af.getAttribute("data-invf") + '"]'
         : null;
       if (!sel) return;
       refocusSel = sel;
@@ -20244,7 +20434,11 @@
     else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
     else if (t.matches("[data-shipf]")) { S.ship[t.dataset.shipf] = t.value; }
     else if (t.matches("[data-news]")) { S.newsletter = t.checked; }
-    else if (t.matches("[data-invoiceco]")) { S.invoiceCo = t.value; }
+    /* «По счёту»: the company fields keep their own state, no render() while
+       typing — same reason as [data-shipf]. The checkbox redraws the block:
+       it swaps the address line for a field, and nobody is typing in it. */
+    else if (t.matches("[data-invf]")) { S.inv[t.dataset.invf] = t.value; }
+    else if (t.matches("[data-invsame]")) { S.inv.sameAddr = t.checked; patchPayment(); }
     // editing the code must drop the applied discount, not just the error
     else if (t.matches("[data-promo]")) { S.promo = t.value; S.promoErr = ""; S.promoInfo = null; S.giftErr = ""; }
     /* Only the list (or, in map view, the pins) is redrawn — a full render
@@ -20883,7 +21077,7 @@
        shopper back to, with ?n=&s= naming the order and how it went. Without
        that query there is no order behind it, and home is the honest answer.
        A payment form with an empty basket bounces straight back out anyway. */
-    if (/\/shop2\/done$/.test(p) && /[?&]s=(paid|failed|pending)\b/.test(location.search)) {
+    if (/\/shop2\/done$/.test(p) && /[?&]s=(paid|failed|pending|invoice)\b/.test(location.search)) {
       S.screen = "done"; return true;
     }
     if (/\/shop2\/checkout$/.test(p) && S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }

@@ -61,6 +61,9 @@ const PUBLIC_SETTINGS = [
   "content",
   // which gift-card denominations are on sale — the buttons on /gift/
   "gift_amounts",
+  // «По счёту — для компаний»: the number prefix and the payment term the
+  // checkout quotes («оплата в течение N дней») — src/lib/invoices.ts
+  "invoice",
 ] as const;
 
 /** The pro (salon) price is commercial information: never on the public feed.
