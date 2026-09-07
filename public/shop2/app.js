@@ -1833,6 +1833,7 @@
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
       "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa «vähe» läve — vaikimisi 2; igal mahul on oma lävi, seda muudab laos nupp «Muuda». «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa selle mahu «vähe» läve. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Левее": "Vasakule",
       "Правее": "Paremale",
       "Убрать фото": "Eemalda foto",
@@ -4020,6 +4021,7 @@
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
       "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below the «low» threshold — 2 by default; every size has its own, changed in the warehouse with «Edit». «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below this size's «low» threshold. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Левее": "Left",
       "Правее": "Right",
       "Убрать фото": "Remove the photo",
@@ -6844,6 +6846,12 @@
   function trackNav() {
     track("view", { path: pathFor() });
     if (S.screen === "product" && S.productId) track("product", { productId: S.productId });
+    /* search: a reload, a shared link or the Back button lands on the search
+       screen with a query already in the address — nobody typed, so the input
+       handler never ran and neither the search event nor the assistant's pass
+       would ever happen for it. Debounced and idempotent, like every other
+       caller. */
+    if (S.screen === "search" && String(S.query || "").trim()) scheduleSearchTrack();
   }
   /* Search fires once per pause in typing, not once per keystroke — a
      700 ms debounce shared by the header search box, the search screen's
@@ -6854,8 +6862,71 @@
     searchTrackTimer = setTimeout(function () {
       var q = String(S.query || "").trim();
       if (!q) return;
-      track("search", { path: q, value: searchResults().length });
+      /* The model is asked only for a phrase the shop's own three passes
+         could not answer, and the search event WAITS for its answer: the
+         number that lands in the events table has to be the number the
+         shopper really ended up seeing, or a query the assistant rescued
+         would sit in «Искали, но не нашли» for ever. */
+      if (searchResults().length >= SRCH_WIDEN) { trackSearch(q, false); return; }
+      askSearchAI(q, function (rescued) { trackSearch(q, rescued); });
     }, 700);
+  }
+  /** One search row: the query, how many products it ended up showing, and —
+      when the model is what found them — the marker «ai» in `product_id`.
+      db/migrations/080_events.sql leaves that column free on a search row,
+      and the owner's «Искали, но не нашли» is `value = 0`, so a query that
+      now succeeds drops out of that report by itself while the rescues stay
+      countable (docs/audit/2026-09-07-search.md). */
+  function trackSearch(q, rescued) {
+    if (String(S.query || "").trim() !== q) return;   // typed on: a later run reports
+    var body = { path: q, value: searchResults().length };
+    if (rescued) body.productId = "ai";
+    track("search", body);
+  }
+  /* ---------- search, pass four: the model ---------------------------------
+     POST /api/search turns a phrase the catalogue has no words for into words
+     it does have (src/lib/search-terms.ts). It is asked at most ONCE per
+     phrase per session, only after the free passes came back nearly empty,
+     and never while the shopper is still typing — the 700 ms debounce above
+     is the same one the analytics beacon waits for.
+
+     Every failure is the same failure: remember nothing new, keep the results
+     already on the screen, say nothing. No key (503), another origin (403),
+     no such route at all (404, a static copy of the shop with no server) also
+     switch the whole thing off for the session, because none of those will
+     start working on the next keystroke. A rate limit or a hiccup is recorded
+     as «nothing to add» for THAT phrase only: the shop must not sit in a
+     retry loop over somebody's search box. */
+  var AI_SEARCH_OFF = false;
+  var aiSearchAsking = null;
+  function askSearchAI(q, done) {
+    var k = srchNorm(q);
+    if (Object.prototype.hasOwnProperty.call(AI_TERMS, k)) { done(AI_TERMS[k].length > 0); return; }
+    if (AI_SEARCH_OFF || aiSearchAsking === k || typeof fetch !== "function") { done(false); return; }
+    aiSearchAsking = k;
+    function settle(terms, off) {
+      if (off) AI_SEARCH_OFF = true;
+      aiSearchAsking = null;
+      AI_TERMS[k] = terms && terms.length ? terms : [];
+      // the page is showing an empty (or nearly empty) result list right now
+      if (AI_TERMS[k].length && S.screen === "search") render();
+      done(AI_TERMS[k].length > 0);
+    }
+    try {
+      // the trailing slash is not optional: `trailingSlash: true` in
+      // next.config.ts turns a POST without it into a 308 redirect
+      fetch("/api/search/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ q: q.slice(0, 80), lang: S.lang })
+      }).then(function (r) {
+        if (r.status === 503 || r.status === 403 || r.status === 404) { settle([], true); return null; }
+        if (!r.ok) { settle([]); return null; }
+        return r.json().then(function (b) {
+          settle(b && b.ok && Array.isArray(b.terms) ? b.terms.slice(0, 8) : []);
+        });
+      }).catch(function () { settle([]); });
+    } catch (e) { settle([]); }
   }
 
   function emailBad() { return S.emailTouched && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email); }
@@ -6966,15 +7037,451 @@
   function stem(w) {
     return w.length > 5 ? w.slice(0, w.length - 2) : w.length > 4 ? w.slice(0, w.length - 1) : w;
   }
-  function searchResults() {
-    var q = S.query.trim().toLowerCase();
-    if (!q) return [];
-    var words = q.split(/\s+/).map(stem);
+  /** Pass 1, and the whole of the search this shop had until 07.09.2026:
+      every word of the query, stemmed, somewhere in the product's name, brand
+      or section. Untouched on purpose — it is what «Davines», «шампунь» and
+      «un.tangled» want, it answers off data already in memory, and keeping it
+      word for word is what makes «nothing that used to be found stops being
+      found» a fact rather than a hope (tools/search-bench.mjs). */
+  function searchNames(q) {
+    var words = String(q).split(/\s+/).map(stem);
     return CATALOGUE.filter(function (p) {
       var hay = (p.name + " " + p.brand + " " + CAT_NAMES[p.cat]).toLowerCase();
       for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
       return true;
     });
+  }
+
+  /* ---------- search: what the shopper means, not only what they typed -----
+     «rasvased juuksed» — Estonian for oily hair — used to find nothing. No
+     product is called that; the products that solve it are shampoos whose
+     DESCRIPTIONS say «жирные волосы», «oily», «rasustele juustele» and
+     «себорегулирующий». Same for «перхоть», «выпадение волос», «сухая кожа
+     головы», «секущиеся кончики» — and for «система 4», which is the brand
+     «System 4» written in the alphabet the customer types in.
+
+     Three passes, cheapest first, and only as far as the query needs:
+
+       1. NAMES  — searchNames() above.
+       2. TEXT   — the same words, plus their bridges («шампунь» → shampoo,
+                   «систем» → system), looked up in the product's own
+                   description, its Google pair and its volumes, in all three
+                   languages at once. Free: those texts are already in the
+                   page (public/shop/content*.js), so this costs no request
+                   and works with no server at all.
+       3. CONCERNS — a curated table from the phrase a person types about
+                   themselves to the words the catalogue really uses.
+
+     Passes 2 and 3 run ONLY when pass 1 came back with fewer than SRCH_WIDEN
+     products, and their finds are appended after pass 1's. So «шампунь» and
+     «Davines» look exactly as they did, and the widening is spent where the
+     page was otherwise empty. The model (askSearchAI) is a fourth pass on top
+     of these, and only for what all three could not reach.
+
+     EVERY TABLE BELOW IS WRITTEN THE WAY srchNorm() LEAVES TEXT: lower case,
+     ё → е, and õäöüšž folded to oaousz — «koom», not «kõõm». Both the query
+     and the product text go through it, so the two always meet in the same
+     spelling, and a shopper who types Estonian without the diacritics is not
+     punished for it. Cyrillic lives in regex literals rather than in strings
+     on purpose: these are matching keys, never shown to anyone, and
+     tools/i18n-gaps.mjs is right to demand a translation for every Russian
+     string that CAN reach the screen. */
+
+  /** Fewer than this from pass 1 and the search widens. Six is what a phone
+      shows above the fold — below it the shopper is looking at an empty page
+      and would rather have near misses than nothing. */
+  var SRCH_WIDEN = 6;
+  /** And at most this many widened finds: a concern like «сухие волосы» is
+      honestly true of half the shelf, and half a shelf is not an answer. */
+  var SRCH_WIDE_MAX = 48;
+
+  /** Word endings, stripped once — so «жирные», «жирный» and «жирным» all
+      become «жирн», and «rasvased»/«rasvastele» both become something the
+      other's written form starts with. Everything is matched as a word
+      PREFIX afterwards, which is what lets one cut serve three languages: a
+      letter too few costs a word form, a letter too many costs precision.
+
+      Two tables, two floors, because the two alphabets are not alike. A
+      Russian root is short and its endings are many, so three letters is
+      enough to keep («сухая» → «сух», and «гель» is left whole). A Latin word
+      here is usually a brand or an English noun with almost nothing to strip,
+      and three letters was actively wrong: «creed» came out as «cre» and
+      found every «cream» in the shop. Four is the floor there, which leaves
+      «creed», «care» and «cure» exactly as typed.
+
+      Both regexes are anchored at the end and unanchored at the start, so the
+      engine's earliest match is the longest ending. */
+  var SRCH_SUFFIX_RU = /(ами|ями|ого|его|ому|ему|ыми|ими|ей|ой|ый|ий|ая|яя|ое|ее|ые|ие|ов|ев|ах|ях|ам|ям|ом|ем|ым|им|ую|юю|ся|сь|ь|й|ы|и|а|о|у|е|я|ю|м|х)$/;
+  var SRCH_SUFFIX_LAT = /(idega|itega|dega|tega|isse|asse|esse|itel|idel|iste|este|dele|tele|sele|ides|ites|tes|des|sed|ted|ded|ele|ega|eks|ile|ilt|ist|ing|ies|ks|le|lt|st|ga|de|te|id|ed|ne|se|es|d|t|s|l|e|a|i|u)$/;
+
+  /** Words that say nothing about which product is wanted. «купить» and
+      «hind» are in here for the same reason «для» is: they are how a person
+      talks to a shop, not what they are shopping for. */
+  var SRCH_STOP = /^(и|в|во|на|с|со|для|от|из|по|у|о|об|к|ко|за|при|не|же|ли|бы|это|мне|мой|моя|как|что|где|или|the|a|an|of|for|and|or|to|in|on|at|with|my|me|is|it|do|how|what|best|top|nr|no|number|номер|ja|ning|voi|kui|see|ei|mu|ma|mis|kas|ka|kuidas|купить|куплю|цена|цены|стоимость|заказать|заказ|отзыв[а-я]*|обзор[а-я]*|официальн[а-я]*|сайт[а-я]*|магазин[а-я]*|osta|hind|hinnad|pood|ametlik|buy|price|prices|shop|store|website|official|reviews|review|online)$/;
+
+  /** One query word → the other spellings this catalogue uses for it. The
+      product names carry a Russian tail («… — шампунь»), the brands are
+      Latin, and the descriptions are Russian, Estonian and English at once,
+      so the same thing is written three ways in three places. Each rule only
+      ADDS a spelling — the word itself is always tried too, so a bridge can
+      find more and never less. The brand half is the Search Console export
+      of 07.09.2026 talking: «система 4», «систем 4», «наксос», «крид
+      авентус» and «биоботаническая» are real queries this shop was found
+      by, and none of them is spelled the way the catalogue spells it. */
+  var SRCH_BRIDGE = [
+    [/^sampoon/, ["shampoo"]], [/^шампун/, ["shampoo"]],
+    [/^кондиционер/, ["conditioner"]], [/^palsam/, ["conditioner", "balm"]],
+    [/^бальзам/, ["balm", "conditioner"]],
+    [/^сыворотк/, ["serum"]], [/^seerum/, ["serum"]],
+    [/^тоник|^тонер/, ["tonic", "toner"]],
+    [/^масл/, ["oil"]], [/^oli$|^olid/, ["oil"]],
+    [/^воск/, ["wax"]], [/^vaha/, ["wax"]],
+    [/^паст/, ["paste"]], [/^глин/, ["clay"]],
+    [/^крем/, ["cream"]], [/^kreem/, ["cream"]],
+    [/^спрей/, ["spray"]], [/^sprei/, ["spray"]],
+    [/^гел/, ["gel"]], [/^geel/, ["gel"]],
+    [/^лосьон/, ["lotion", "aftershave"]],
+    [/^пудр/, ["powder"]], [/^puuder/, ["powder"]],
+    [/^мыл/, ["soap"]], [/^seep/, ["soap"]],
+    [/^маск/, ["mask"]], [/^скраб/, ["scrub"]],
+    [/^пенк|^пена/, ["foam"]], [/^помад/, ["pomade"]],
+    [/^лак/, ["hairspray", "spray"]], [/^патч/, ["patch"]],
+    [/^гребен|^расческ/, ["comb"]], [/^бритв|^станок/, ["razor"]],
+    [/^футболк|^майк/, ["shirt", "tee"]],
+    [/^парфюм|^духи|^аромат|^туалетн/, ["parfum", "perfume", "eau", "fragrance"]],
+    [/^parfuum|^lohn/, ["parfum", "perfume", "fragrance"]],
+    [/^дезодорант/, ["deodorant"]],
+    [/^волос/, ["hair"]], [/^juuk|^juus/, ["hair"]],
+    [/^бород|^усы/, ["beard", "moustache"]], [/^habe/, ["beard"]],
+    [/^кож/, ["skin"]], [/^nahk|^naha/, ["skin"]],
+    [/^лиц/, ["face", "facial"]], [/^nagu$|^nao/, ["face"]],
+    [/^голов/, ["scalp", "head"]], [/^peanah/, ["scalp"]],
+    [/^тел/, ["body"]], [/^keha/, ["body"]],
+    [/^увлажн/, ["hydrating", "moisturising", "moisturizing"]],
+    [/^питат/, ["nourishing"]], [/^восстанавлив|^восстановл/, ["repair", "restoring"]],
+    [/^защит/, ["protect", "protection"]], [/^блеск/, ["shine", "gloss"]],
+    [/^объем/, ["volume", "thickening", "plumping"]], [/^укладк/, ["styling"]],
+    [/^матов/, ["matte"]], [/^фиксац/, ["hold"]],
+    [/^перхот/, ["dandruff"]], [/^koom/, ["dandruff"]],
+    [/^зуд/, ["itch", "itching"]], [/^сух/, ["dry"]], [/^kuiv/, ["dry"]],
+    [/^жирн|^сальн/, ["oily", "greasy"]], [/^rasu|^rasvas|^rasune/, ["oily", "greasy"]],
+    [/^окраш/, ["colour", "color", "coloured"]], [/^varvit/, ["colour", "color"]],
+    [/^кудр|^вьющ|^локон/, ["curl", "curly"]], [/^lokk/, ["curl", "curly"]],
+    [/^тонк/, ["fine", "thin"]], [/^чувствительн/, ["sensitive"]], [/^tundlik/, ["sensitive"]],
+    [/^рост/, ["growth"]], [/^подарок|^подароч/, ["gift"]], [/^kingitus|^kinke/, ["gift"]],
+    [/^систем|^sistem|^sustem/, ["system"]], [/^наксос/, ["naxos"]], [/^ксерджоф|^ксерж/, ["xerjoff"]],
+    [/^крид/, ["creed"]], [/^авентус/, ["aventus"]], [/^байредо|^биредо/, ["byredo"]],
+    [/^давинес|^давинс/, ["davines"]], [/^кевин/, ["kevin"]], [/^мерфи|^мерф/, ["murphy"]],
+    [/^пол$|^поль$/, ["paul"]], [/^митчел/, ["mitchell"]], [/^гэтсби|^гетсби/, ["gatsby"]],
+    [/^прорасо/, ["proraso"]], [/^люмин/, ["lumin"]], [/^ануа/, ["anua"]],
+    [/^косрикс|^косрх/, ["cosrx"]], [/^ланейж|^ланеж/, ["laneige"]],
+    [/^версач/, ["versace"]], [/^диор/, ["dior"]], [/^герлен/, ["guerlain"]],
+    [/^килиан/, ["kilian"]], [/^роджа/, ["roja"]], [/^том$/, ["tom"]], [/^форд$/, ["ford"]],
+    [/^биоботанич|^био$/, ["bio", "botanical"]], [/^капитан|^фосет|^фавсет/, ["captain", "fawcett"]],
+    [/^ремпайр|^ремпаир/, ["rempire"]]
+  ];
+
+  /** The concern table: what a person says about themselves → what the shop
+      wrote about the products that answer it.
+
+        q  the phrase, tested against the whole normalised query
+        n  and what rules that reading out — «жирная кожа ГОЛОВЫ» is a scalp,
+           not a face
+        t  the words the catalogue itself uses (global: a product that says
+           it four times outranks one that says it once)
+        c  the sections it can be in at all; absent means any
+
+      Every entry was checked against the shop's own descriptions with
+      `node tools/search-bench.mjs "<phrase>"` — a rule that matches nothing
+      is worse than no rule, and one that matches the whole shelf is worse
+      still. Renat's real answer to most of these is a better product text;
+      until then this is what stands between a shopper and an empty page. */
+  var SRCH_CONCERNS = [
+    { q: /(жирн|сальн)[а-я]*([ ][а-я]+){0,2}[ ](волос|голов)|(rasvas|rasus|rasune|olis)[a-z]*([ ][a-z]+){0,2}[ ](juu|pea)|(oily|greasy)([ ][a-z]+){0,2}[ ](hair|scalp|roots)|себорегул|жирност/,
+      t: /жирн|сальн|себорегул|себум|излишк|oily|greasy|sebum|oil control|excess oil|rasu|rasvas|olisus/g,
+      c: ["hair", "styling"] },
+    { q: /(жирн|сальн)[а-я]*([ ][а-я]+){0,2}[ ](кож|лиц)|(rasu|rasus|rasune|olis)[a-z]*([ ][a-z]+){0,2}(nahk|nagu|nao)|oily([ ][a-z]+){0,2}[ ](skin|face)|блеск[ ]кож|t[ ]zone/,
+      n: /голов|волос|peanah|juus|scalp|hair/,
+      t: /жирн|сальн|себум|поры|матир|oily|sebum|shine|pore|mattif|rasu|rasus|poor/g,
+      c: ["face"] },
+    { q: /перхот|koom|dandruff|шелуш[а-я]*[ ]кож|flak/,
+      t: /перхот|шелуш|dandruff|flak|koom|seborr|себоре/g, c: ["hair"] },
+    { q: /выпаден[а-я]*[ ]волос|выпадают[ ]волос|облыс|редеющ|тонк[а-я]*[ ]волос|густот|vaijalang|valjalang|ohenev|horen|juuste[ ]kadu|hair[ ](loss|fall)|thinning|balding/,
+      t: /выпаден|редеющ|истонч|густот|плотност|рост волос|hair loss|thinning|thicken|densit|fuller|valjalang|ohenev|tihed/g,
+      c: ["hair", "styling"] },
+    { q: /сух[а-я]*([ ][а-я]+){0,2}[ ]голов|стянут|kuiv([ ][a-z]+){0,2}[ ]peanah|dry([ ][a-z]+){0,2}[ ]scalp/,
+      t: /сух[а-я]* кож|сухост|увлажн|успокаива|раздражен|dry scalp|dryness|soothing|hydrat|kuiv|niisut|rahustav/g,
+      c: ["hair"] },
+    { q: /сух[а-я]*([ ][а-я]+){0,2}[ ]волос|ломк|поврежденн|секущ|тускл|пушат|kuiv([ ][a-z]+){0,2}[ ]juu|kahjustatud|dry([ ][a-z]+){0,2}[ ]hair|damaged|brittle|frizz/,
+      t: /сух|ломк|поврежд|секущ|восстанавлива|восстановл|питат|увлажн|damaged|brittle|repair|restor|nourish|hydrat|kuiv|kahjustatud|taastav|toitev/g,
+      c: ["hair", "styling"] },
+    { q: /объем|прикорнев|пышн|kohev|mahtu|volume|volumis|thicken/,
+      t: /объем|прикорнев|пышн|плотност|густот|volume|volumis|body|thicken|plump|lift|fuller|kohev|maht/g,
+      c: ["hair", "styling"] },
+    { q: /секущ|кончик|otste[ ]lohen|lohenev|split[ ]end/,
+      t: /секущ|кончик|split end|otste|lohenev/g, c: ["hair", "styling"] },
+    { q: /зуд|чешет|раздражен[а-я]*[ ]кож|sugele|arritunud|itch|irritated[ ]scalp/,
+      t: /зуд|раздражен|успокаива|чувствительн|itch|irritat|soothing|sensitive|sugele|rahustav|tundlik/g,
+      c: ["hair", "face", "beard"] },
+    { q: /окраш|краш[её]н|varvit|colou?r[ ](treated|protect)|colou?red[ ]hair|блонд|blond|осветл/,
+      t: /окраш|цвет волос|блонд|осветл|varvitud|varv|colour|color|blonde|toning/g,
+      c: ["hair", "styling"] },
+    { q: /кудр|вьющ|локон|завит|lokki|curl|wavy/,
+      t: /кудр|вьющ|локон|завит|curl|wave|wavy|coil|lokk/g, c: ["hair", "styling"] },
+    { q: /прыщ|акне|высыпан|воспален|(черн|чёрн)[а-я]*[ ]точк|vistrik|akne|acne|breakout|blemish|pimple/,
+      t: /прыщ|акне|высыпан|воспален|салицил|acne|breakout|blemish|blackhead|salicylic|bha|vistrik|akne/g,
+      c: ["face"] },
+    { q: /морщин|старен|возрастн|антивозраст|упруг|kortsu|vananemis|wrinkl|anti[ ]?age|ageing|aging|firmness/,
+      t: /морщин|старен|антивозраст|упруг|коллаген|ретинол|wrinkl|anti age|anti-age|ageing|firm|collagen|retinol|peptide|kortsu|vananemis/g,
+      c: ["face"] },
+    { q: /поры|расширенн[а-я]*[ ]пор|poor|pore|blackhead/,
+      t: /поры|пор[ыа]|сужа|pore|blackhead|clarify|deep clean|poor/g, c: ["face"] },
+    { q: /сух[а-я]*([ ][а-я]+){0,2}[ ](кож|лиц)|обезвож|kuiv([ ][a-z]+){0,2}[ ](nahk|nagu|nao)|dry([ ][a-z]+){0,2}[ ](skin|face)|dehydrat/,
+      n: /голов|волос|peanah|juus|scalp|hair/,
+      t: /сух|обезвож|увлажн|питат|барьер|гиалурон|dry|dehydrat|hydrat|moistur|nourish|barrier|hyaluron|ceramide|kuiv|niisut/g,
+      c: ["face", "body"] },
+    { q: /чувствительн[а-я]*([ ][а-я]+){0,2}[ ](кож|лиц)|краснот|купероз|tundlik|sensitive[ ]skin|redness|rosacea/,
+      t: /чувствительн|краснот|успокаива|раздражен|sensitive|redness|soothing|calm|centella|cica|tundlik|rahustav/g,
+      c: ["face", "body"] },
+    { q: /(рост|густ|мягк)[а-я]*[ ]бород|уход[ ]за[ ]бород|habemekasv|pehme[ ]habe|habeme[ ]hooldus|beard[ ](growth|care|softener)|softer[ ]beard/,
+      t: /бород|усы|habe|beard|moustache/g, c: ["beard"] },
+    { q: /раздражен[а-я]*([ ][а-я]+){0,2}[ ]брить|после[ ]брить|порез|врос[а-я]*[ ]волос|raseerimis|parast[ ]raseer|after[ ]?shave|shaving[ ](irritation|rash|burn)|razor[ ]burn|ingrown/,
+      t: /после брить|раздражен|успокаива|порез|врос|aftershave|after shave|shaving|razor|ingrown|soothing|raseer/g,
+      c: ["beard", "face"] },
+    { q: /(сильн|стойк)[а-я]*[ ]фиксац|матов|tugev[ ]fiksatsioon|matt[ ]viimistlus|strong[ ]hold|matte[ ]finish|firm[ ]hold/,
+      t: /фиксац|матов|текстур|укладк|hold|matte|texture|styling|finish|matt/g, c: ["styling"] }
+  ];
+
+  /** The one spelling everything in this block is compared in: lower case,
+      ё → е, õäöüšž → oaousz, every other non-letter a space, a digit and a
+      letter always parted («100ml» → «100 ml», «4system» → «4 system» — both
+      real Search Console queries), and a space at each end — so
+      `blob.indexOf(" " + word)` is a word-START test and «murphy» finds
+      «Kevin.Murphy» while «ampoo» finds nothing. */
+  function srchNorm(s) {
+    var t = String(s == null ? "" : s).toLowerCase();
+    /* One line instead of a table of letters: NFD splits every accented
+       letter into a plain one plus a combining mark, and dropping the marks
+       leaves ё → е, õäöü → oaou and šž → sz at once. It also keeps this file
+       free of one-letter Russian string literals, which tools/i18n-gaps.mjs
+       would be right to read as text somebody forgot to translate.
+       The one mark kept is the breve (U+0306): stripping it would fold й
+       into и, and «мой» and «мои» are two words, not one word twice. */
+    if (t.normalize) t = t.normalize("NFD").replace(/[\u0300-\u0305\u0307-\u036f]/g, "").normalize("NFC");
+    return " " + t.replace(/[^0-9a-zа-я]+/g, " ")
+      .replace(/([0-9])([a-zа-я])/g, "$1 $2").replace(/([a-zа-я])([0-9])/g, "$1 $2")
+      .replace(/^ +| +$/g, "") + " ";
+  }
+  /** One ending off, and only when enough of the word survives — the floor is
+      three letters in Russian and four in the Latin alphabet (SRCH_SUFFIX_*). */
+  function srchStem(w) {
+    if (/[а-я]$/.test(w)) {
+      var r = w.replace(SRCH_SUFFIX_RU, "");
+      return r.length >= 3 ? r : w;
+    }
+    var s = w.replace(SRCH_SUFFIX_LAT, "");
+    return s.length >= 4 ? s : w;
+  }
+  /** The words of a query that say something: the small talk dropped, a bare
+      digit kept («система 4»), at most eight of them. If small talk is all
+      there is, the small talk is the query. */
+  function srchWords(q) {
+    var all = srchNorm(q).split(" ").filter(function (w) { return w; });
+    var keep = all.filter(function (w) {
+      return (w.length > 1 || /[0-9]/.test(w)) && !SRCH_STOP.test(w);
+    });
+    return (keep.length ? keep : all).slice(0, 8);
+  }
+  /** Each word as the set of spellings worth looking for — its own stem
+      first, then whatever SRCH_BRIDGE adds. */
+  function srchGroups(q) {
+    var words = srchWords(q), out = [];
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i], alts = [srchStem(w)];
+      for (var b = 0; b < SRCH_BRIDGE.length; b++) {
+        if (!SRCH_BRIDGE[b][0].test(w)) continue;
+        var add = SRCH_BRIDGE[b][1];
+        for (var k = 0; k < add.length; k++) if (alts.indexOf(add[k]) < 0) alts.push(add[k]);
+      }
+      out.push(alts);
+    }
+    return out;
+  }
+  /** The concerns this phrase is about. */
+  function srchConcerns(q) {
+    var qn = srchNorm(q), out = [];
+    for (var i = 0; i < SRCH_CONCERNS.length; i++) {
+      var c = SRCH_CONCERNS[i];
+      if (c.q.test(qn) && !(c.n && c.n.test(qn))) out.push(c);
+    }
+    return out;
+  }
+  /** Everything the shop has ever written about a product, all three
+      languages at once — the name, brand, section and volumes, the
+      description the page shows (the owner's override first, the shop's own
+      static text after) and the Google pair. */
+  function srchText(p) {
+    // the volumes twice: the catalogue writes «75 мл», Google Search Console
+    // says people type «75 ml» — and the second spelling costs one replace
+    var sizes = " " + (p.sizes || []).join(" ") + " ";
+    var t = [p.name, p.brand, CAT_NAMES[p.cat] || "", sizes, sizes.replace(/мл/g, " ml ").replace(/ г /g, " g ")];
+    var ov = p.descOv || {}, so = p.seoOv || {}, langs = ["RU", "ET", "EN"];
+    for (var i = 0; i < langs.length; i++) {
+      var L = langs[i];
+      if (ov[L]) t.push(ov[L]);
+      if (so[L]) t.push(so[L].t || "", so[L].d || "");
+    }
+    if (p.seo) t.push(p.seo.t || "", p.seo.d || "");
+    if (typeof CONTENT !== "undefined" && CONTENT[p.id]) t.push(CONTENT[p.id]);
+    if (typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) t.push(CONTENT_RU[p.id]);
+    if (typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) t.push(CONTENT_ET[p.id]);
+    return t.join(" ");
+  }
+  /* The index is two normalised strings per product, built on the first
+     widened search of the session and kept until something changes the
+     catalogue — applyDemoOverrides() and rebuildCatalogue() bump SRCH_GEN and
+     empty SRCH_IX, which is the whole invalidation story. Nothing is built at
+     boot: a shopper who never searches never pays for this.
+
+     Beside the products rather than on them, on purpose: a product row is
+     handed around this file freely, and half a megabyte of search text bolted
+     onto it would eventually find its way into an order body or into
+     localStorage. Keyed by id, which is unique across the file's rows and the
+     owner's own («c-…»). */
+  var SRCH_GEN = 0, SRCH_IX = {};
+  function srchIndex(p) {
+    var ix = SRCH_IX[p.id];
+    if (!ix) {
+      ix = SRCH_IX[p.id] = {
+        name: srchNorm(p.name + " " + p.brand + " " + (CAT_NAMES[p.cat] || "")),
+        all: srchNorm(srchText(p).replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " "))
+      };
+    }
+    return ix;
+  }
+  function srchNameBlob(p) { return srchIndex(p).name; }
+  function srchBlob(p) { return srchIndex(p).all; }
+  /** The model's answer as plain stems (askSearchAI) — same shape the shop's
+      own words end up in, so it is scored by the very same loop. */
+  function srchExtra(list) {
+    var out = [];
+    for (var i = 0; list && i < list.length && out.length < 12; i++) {
+      var w = srchWords(list[i]);
+      for (var k = 0; k < w.length; k++) {
+        var s = srchStem(w[k]);
+        if (out.indexOf(s) < 0) out.push(s);
+      }
+    }
+    return out;
+  }
+  /** Passes 2–4 over the products pass 1 did not already return, best first.
+      A product qualifies when EVERY word of the query is somewhere in its
+      text, or when a concern it belongs to recognised it, or on the model's
+      terms — two of them, or one that is in the product's own name, so a
+      single loose word like «hair» cannot drag the whole shelf in.
+
+      «Every word» is the rule for a short query and too hard a rule for a
+      long one: Search Console says people paste whole product titles («system
+      4 nr. 2 climbazole shampoo 500 ml», «how to apply kevin murphy plumping
+      wash»), and one word the shop happens not to use — «nr», «grey»,
+      «freehold» written without its dot — used to be enough to answer nothing
+      at all. From three words up, one word in every three may be missing,
+      provided at least one of the rest is in the product's own name; and the
+      full matches sort above the partial ones anyway.
+
+      A bare number is never one of the words that has to be found. «creed
+      aventus 50ml» is a person asking for Creed Aventus, and the shop's row
+      for it may simply not carry a 50 ml rung — demanding the 50 handed the
+      page to every OTHER 50 ml bottle instead. It still scores, so «шампунь
+      номер 1» still puts Special Shampoo 1 first. */
+  function searchWide(query, have, aiTerms) {
+    var groups = srchGroups(query), cons = srchConcerns(query), extra = srchExtra(aiTerms);
+    if (!groups.length && !cons.length && !extra.length) return [];
+    var words = 0;
+    for (var q = 0; q < groups.length; q++) if (!/^[0-9]+$/.test(groups[q][0])) words++;
+    var need = words - Math.floor(words / 3);
+    /* A recognised concern also says which shelf the shopper is standing at,
+       and that binds the plain word matching too: «объём волосам» is about
+       hair, so a beard oil whose text happens to say «volume» and «hair» is
+       not an answer to it. Only when every concern that fired names its
+       sections — one that does not (a gift, say) leaves the shop open. */
+    var only = null;
+    for (var k = 0; k < cons.length; k++) {
+      if (!cons[k].c) { only = null; break; }
+      only = (only || []).concat(cons[k].c);
+    }
+    var out = [];
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      var p = CATALOGUE[i];
+      if (have && have.indexOf(p) >= 0) continue;
+      if (only && only.indexOf(p.cat) < 0) continue;
+      var name = srchNameBlob(p), all = srchBlob(p), score = 0, hit = 0, named = 0, ok = false;
+      for (var g = 0; g < groups.length; g++) {
+        var best = 0;
+        for (var a = 0; a < groups[g].length; a++) {
+          var w = " " + groups[g][a];
+          if (name.indexOf(w) >= 0) { best = 4; break; }
+          if (all.indexOf(w) >= 0) best = 2;
+        }
+        if (best) {
+          score += best;
+          if (!/^[0-9]+$/.test(groups[g][0])) { hit++; if (best === 4) named++; }
+        }
+        else if (groups[g][0].length > 4) {
+          /* A word the shop writes with a dot inside it, or one the shopper
+             glued to the next: «freehold» is «FREE.HOLD», «luminskin» is
+             «Lumin Skin». Its first four letters are enough to put the right
+             product at the top of a shelf full of near-equal ones — they
+             score, and they never qualify a product on their own. */
+          var pre = " " + groups[g][0].slice(0, 4);
+          if (name.indexOf(pre) >= 0) score += 2;
+          else if (all.indexOf(pre) >= 0) score += 1;
+        }
+      }
+      if (words && (hit === words || (hit >= need && named))) ok = true;
+      for (var c = 0; c < cons.length; c++) {
+        if (cons[c].c && cons[c].c.indexOf(p.cat) < 0) continue;
+        var n = (all.match(cons[c].t) || []).length;
+        if (!n) continue;
+        ok = true;
+        score += 3 + (n > 4 ? 4 : n) + ((name.match(cons[c].t) || []).length ? 4 : 0);
+      }
+      var eHit = 0, eName = 0;
+      for (var e = 0; e < extra.length; e++) {
+        var x = " " + extra[e];
+        if (name.indexOf(x) >= 0) { eName++; eHit++; score += 4; }
+        else if (all.indexOf(x) >= 0) { eHit++; score += 2; }
+      }
+      if (eName || eHit >= 2) ok = true;
+      if (ok) out.push([score, i, p]);
+    }
+    out.sort(function (x, y) { return y[0] - x[0] || x[1] - y[1]; });
+    return out.slice(0, SRCH_WIDE_MAX).map(function (r) { return r[2]; });
+  }
+
+  /* The model's extra terms for a query, once it has been asked and answered
+     — see askSearchAI() further down. Empty until then, and empty for the
+     whole session when the shop has no key: the three passes above are the
+     entire search on their own, and they are what runs first anyway. */
+  var AI_TERMS = {};
+  function aiTermsFor(q) {
+    var k = srchNorm(q);
+    return Object.prototype.hasOwnProperty.call(AI_TERMS, k) ? AI_TERMS[k] : [];
+  }
+
+  /* One query's answer, remembered — searchResults() is called by every
+     render, and a render happens on every keystroke. */
+  var SRCH_LAST = { key: "", res: null };
+  function searchResults() {
+    var q = S.query.trim().toLowerCase();
+    if (!q) return [];
+    var ai = aiTermsFor(S.query);
+    var key = SRCH_GEN + "|" + q + "|" + ai.join(",");
+    if (SRCH_LAST.key === key) return SRCH_LAST.res;
+    var res = searchNames(q);
+    if (res.length < SRCH_WIDEN || ai.length) res = res.concat(searchWide(S.query, res, ai));
+    SRCH_LAST = { key: key, res: res };
+    return res;
   }
 
   // ---------- components ----------
@@ -20398,6 +20905,7 @@
       // an adoption after boot has to add a brand the file never had itself
       if (typeof BRAND_BY_SLUG === "object" && BRAND_BY_SLUG) BRAND_BY_SLUG[slugify(p.brand)] = p.brand;
     });
+    SRCH_GEN++; SRCH_IX = {};   // search: the shelf changed, every blob is stale
   }
   /** The row behind an id — from the feed's copy first, then from the panel's
       full list (S.customAll, hidden products included). */
@@ -20506,6 +21014,9 @@
         }
       }
     }
+    // search: a description or a Google pair the owner just saved has to be
+    // findable — the whole invalidation of the search index is these two lines
+    SRCH_GEN++; SRCH_IX = {};
   }
   applyDemoOverrides();
 
