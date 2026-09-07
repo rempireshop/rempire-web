@@ -6412,6 +6412,12 @@
   function trackNav() {
     track("view", { path: pathFor() });
     if (S.screen === "product" && S.productId) track("product", { productId: S.productId });
+    /* search: a reload, a shared link or the Back button lands on the search
+       screen with a query already in the address — nobody typed, so the input
+       handler never ran and neither the search event nor the assistant's pass
+       would ever happen for it. Debounced and idempotent, like every other
+       caller. */
+    if (S.screen === "search" && String(S.query || "").trim()) scheduleSearchTrack();
   }
   /* Search fires once per pause in typing, not once per keystroke — a
      700 ms debounce shared by the header search box, the search screen's
@@ -6473,7 +6479,9 @@
       done(AI_TERMS[k].length > 0);
     }
     try {
-      fetch("/api/search", {
+      // the trailing slash is not optional: `trailingSlash: true` in
+      // next.config.ts turns a POST without it into a 308 redirect
+      fetch("/api/search/", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ q: q.slice(0, 80), lang: S.lang })

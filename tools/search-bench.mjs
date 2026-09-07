@@ -64,7 +64,7 @@ vm.runInContext(LEGACY, ctx);
 
 /* ---------- AFTER: the real functions, cut out of app.js ----------------- */
 /** `function <name>(…) { … }` by brace matching — the idiom in tests/checkout-parity.test.ts. */
-function slice(name) {
+export function slice(name) {
   const start = src.indexOf(`function ${name}(`);
   if (start < 0) throw new Error(`public/shop2/app.js no longer has function ${name}()`);
   let depth = 0;
@@ -75,7 +75,7 @@ function slice(name) {
   throw new Error(`unbalanced braces around ${name}() in app.js`);
 }
 /** `var <NAME> = …;` up to the semicolon that closes it, by bracket matching. */
-function sliceVar(name) {
+export function sliceVar(name) {
   const start = src.indexOf(`var ${name} = `);
   if (start < 0) throw new Error(`public/shop2/app.js no longer has var ${name}`);
   let depth = 0;
