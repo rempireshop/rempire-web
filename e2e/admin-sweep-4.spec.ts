@@ -433,7 +433,7 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
 
     const sw = page.locator("[data-partnerson]");
     await expect(sw, "there is no «Партнёры и баллы» switch").toBeVisible();
-    await expect(sw, "the suite's shop does not have the programme on").toHaveAttribute("aria-pressed", "true");
+    await expect(sw, "the suite's shop does not have the programme on").toHaveAttribute("aria-checked", "true");
 
     // ---- off ---------------------------------------------------------------
     await sw.click();
@@ -493,7 +493,7 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
       // the suite's shop has the programme on — leave it exactly as found
       await settings(page, "prices");
       const back = page.locator("[data-partnerson]");
-      if ((await back.getAttribute("aria-pressed")) !== "true") {
+      if ((await back.getAttribute("aria-checked")) !== "true") {
         await back.click();
         await page.locator("[data-admpricingsave]").click();
         await page.locator("[data-admapply]").click();
@@ -523,7 +523,7 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
     await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
 
     // all three switchable letters start off, exactly as the sender reads them
-    await expect(page.locator('[data-admflow="birthday"]')).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator('[data-admflow="birthday"]')).toHaveAttribute("aria-checked", "false");
     await expect(page.locator("[data-flowbdays]"), "the days setting shows while the letter is off").toHaveCount(0);
 
     try {

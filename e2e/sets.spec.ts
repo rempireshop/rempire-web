@@ -247,8 +247,8 @@ test.describe("sets switched off", () => {
     } finally {
       await openSetupHome(page);
       const back = page.locator("[data-admbundles]");
-      // a switch since the redesign: aria-pressed, not a label that flips
-      if ((await back.getAttribute("aria-pressed")) !== "true") {
+      // a switch since the redesign: aria-checked, not a label that flips
+      if ((await back.getAttribute("aria-checked")) !== "true") {
         /* Waiting for the write, not just the click: the panel applies the
            switch locally and PUTs it in the background, and a test that ends
            on the click has its context torn down with the request still in

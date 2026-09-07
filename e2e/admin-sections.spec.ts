@@ -385,7 +385,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       await section(page, "setup");
       await page.locator('[data-admsetpage="home"]').click();
       // a slide is a row with its own switch, order buttons and «Изменить»
-      await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-pressed", "true");
+      await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-checked", "true");
       await page.locator('[data-heroedit="0"]').click();
       await page.locator('[data-herof="title"]').fill(title);
       await page.locator("[data-heroclose]").click();

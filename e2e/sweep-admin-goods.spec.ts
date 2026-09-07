@@ -485,7 +485,7 @@ test.describe("sweep — promo codes", () => {
     await page.locator(`[data-admpromotoggle="${good}"]`).click();
     await clearToast(page);
     // the row carries a switch since the phase-3 redesign, not a link whose label flips
-    await expect(page.locator(`[data-admpromotoggle="${good}"]`)).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator(`[data-admpromotoggle="${good}"]`)).toHaveAttribute("aria-checked", "false");
     await shopper.locator("[data-promo]").fill(good);
     await shopper.locator("[data-applypromo]").click();
     await expect(shopper.locator("[data-promooff]"), "a disabled code still discounted the basket").toHaveCount(0);

@@ -71,9 +71,10 @@ async function openSettings(page: Page, sub: "home" | "company" = "home"): Promi
   await expect(page.locator("[data-admsetback]")).toBeVisible();
 }
 
-/** A phase-3 switch is a <button aria-pressed>, not a link whose label flips. */
+/** A switch is a <button role="switch" aria-checked>, not a link whose label
+ *  flips — and since 07.09.2026 it also wears the word «Вкл» / «Выкл». */
 async function isOn(page: Page, selector: string): Promise<boolean> {
-  return (await page.locator(selector).getAttribute("aria-pressed")) === "true";
+  return (await page.locator(selector).getAttribute("aria-checked")) === "true";
 }
 
 /** [data-admtab="orders"] alone is ambiguous — see fixtures.ts loginAsAdmin's

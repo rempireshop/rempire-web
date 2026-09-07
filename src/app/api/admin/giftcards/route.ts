@@ -18,7 +18,8 @@
  * NB: trailing slash (next.config has trailingSlash: true).
  */
 import { requireAdmin } from "@/lib/auth";
-import { listGiftCards } from "@/lib/giftcards";
+import { giftPdfPath } from "@/lib/giftcard-pdf";
+import { giftValidUntil, listGiftCards } from "@/lib/giftcards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,7 +33,16 @@ export async function GET(req: Request) {
     const cards = await listGiftCards();
     const unspent = Math.round(cards.reduce((sum, c) => sum + c.balance, 0) * 100) / 100;
     const issued = Math.round(cards.reduce((sum, c) => sum + c.amount, 0) * 100) / 100;
-    return Response.json({ ok: true, cards, unspent, issued }, { headers: NO_STORE });
+    /* Dim, 07.09.2026: the panel showed a code and no way to get the card
+       itself, so the owner asked for the buyer's PDF from an order card
+       instead. Both derived, not stored — the same two the order card already
+       gets (src/lib/giftcard-links.ts), so the two lists cannot disagree. */
+    const view = cards.map((c) => ({
+      ...c,
+      validUntil: giftValidUntil(c.createdAt),
+      pdfUrl: giftPdfPath(c.code),
+    }));
+    return Response.json({ ok: true, cards: view, unspent, issued }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/giftcards] read failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503, headers: NO_STORE });
