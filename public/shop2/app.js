@@ -4797,8 +4797,21 @@
     return /^[A-Za-z0-9._~:/?#[\]@!$&*+,=%-]+$/.test(v) ? v : "";
   }
   /* A picture is either a catalogue photo (by product id, drawn by the same
-     media() as everywhere else) or a plain URL the owner pasted. */
+     media() as everywhere else), the gift card's own mark, or a plain URL the
+     owner pasted.
+
+     `image: "gift"` exists because the gift card is the one thing a slide can
+     point at that has no product photo behind it: without it a gift-card
+     banner fell through to CATALOGUE[0] and advertised a present with a
+     picture of a shampoo. The mark is the same tower on the same shell panel
+     the gift tile already uses on the home page, so the slide looks like the
+     page it opens. */
+  var HERO_GIFT_IMG = "gift";
   function heroArt(image, cls) {
+    if (String(image || "") === HERO_GIFT_IMG) {
+      return '<span class="' + (cls || "hero__art") + ' hero__art--gift" aria-hidden="true">' +
+        tower("hero__giftmark") + "</span>";
+    }
     var u = heroUrl(image);
     if (u) {
       return '<span class="' + (cls || "hero__art") + '" style="background-image:url(\'' +
@@ -14223,11 +14236,22 @@
       '<span class="adm-pick-tile__img">' + media(p, 0, "ph") + "</span>" +
       '<span class="adm-pick-tile__nm">' + esc(p.name) + "</span></button>";
   }
+  /* The gift card as a picture, first in the grid and only while the search
+     box is empty — it is not a product, so a search for «шампунь» must not
+     turn it up. Same tile shape as the product ones, the mark instead of a
+     photo. */
+  function heroGiftTile(current) {
+    return '<button class="adm-pick-tile" data-heroimg="' + HERO_GIFT_IMG + '" aria-current="' + !!current +
+      '" title="Подарочная карта">' +
+      '<span class="adm-pick-tile__img adm-pick-tile__img--gift">' + tower("adm-pick-tile__mark") + "</span>" +
+      '<span class="adm-pick-tile__nm">Подарочная карта</span></button>';
+  }
   function heroImgRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
+    var gift = String(S.heroImgQ || "").trim() ? "" : heroGiftTile(cur.image === HERO_GIFT_IMG);
     var list = heroFind(S.heroImgQ);
-    if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
+    if (!list.length) return gift || HERO_NOHIT;
+    return gift + list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
   }
   function heroGoRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
