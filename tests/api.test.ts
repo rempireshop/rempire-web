@@ -167,6 +167,24 @@ describe("api routes", () => {
     expect(ok.status).toBe(200);
   });
 
+  /* «Настройки → Доставка и оплата → Какие банки показывать»: the codes go
+     through cleanBankFilter() on the way in, like pricing and gift_amounts —
+     the first door, not the only one. */
+  it("PUT /api/admin/settings cleans the bank list before storing it", async () => {
+    const { PUT, GET } = await import("@/app/api/admin/settings/route");
+    const res = await PUT(
+      put("/api/admin/settings/", { payment_banks: ["lhvbee22", "LHVBEE22", "", 7, "a code"] }, admin),
+    );
+    expect(res.status).toBe(200);
+    const back = await (await GET(get("/api/admin/settings/", admin))).json();
+    expect(back.settings.payment_banks).toEqual(["LHVBEE22"]);
+
+    // «показывать все» is an empty list, and it must survive the round trip
+    await PUT(put("/api/admin/settings/", { payment_banks: [] }, admin));
+    const all = await (await GET(get("/api/admin/settings/", admin))).json();
+    expect(all.settings.payment_banks).toEqual([]);
+  });
+
   it("PUT /api/admin/settings still refuses a body that is not a JSON object", async () => {
     const { PUT } = await import("@/app/api/admin/settings/route");
     for (const body of ["null", "5", "[]", '"x"', "не json"]) {
