@@ -8164,7 +8164,18 @@
      cache. Chromium never logs the refused fetch — the e2e sweep found it on
      --project=mobile-safari only. */
   var leaving = false;
-  window.addEventListener("beforeunload", function () { leaving = true; });
+  window.addEventListener("beforeunload", function () {
+    leaving = true;
+    /* The abandoned-cart snapshot is the one request that can still be in the
+       air here — it is sent 900 ms after the last keystroke, which on a slow
+       phone is exactly when the shopper presses «Оплатить». Aborted, it is a
+       handled AbortError; left alone, the browser cancels it and WebKit files
+       that as an uncaught error. Nothing is lost: the server never answered
+       it, and the basket is filed again from the next screen. */
+    if (!cartPush) return;                       // `var`, so hoisted but unset
+    clearTimeout(cartPush.t);
+    if (cartPush.ctl) { try { cartPush.ctl.abort(); } catch (e) {} cartPush.ctl = null; }
+  });
   window.addEventListener("pageshow", function () { leaving = false; });
   function blogIdle(fn) {
     var run = function () { if (!leaving) fn(); };
@@ -11220,7 +11231,7 @@
      Sent as ids and quantities only — the server rebuilds names and prices,
      the same rule the order endpoint follows. Debounced, because the checkout
      e-mail field fires this on every keystroke. */
-  var cartPush = { t: 0, last: "", off: false };
+  var cartPush = { t: 0, last: "", off: false, ctl: null };
   function cartLines() {
     return S.cart.filter(function (l) { return !l.type; })
       .map(function (l) { return { id: l.id, size: l.size, qty: l.qty }; });
@@ -11247,10 +11258,19 @@
     if (key === cartPush.last) return;
     clearTimeout(cartPush.t);
     cartPush.t = setTimeout(function () {
-      if (cartPush.off) return;
+      /* `leaving` is the same flag the blog prefetch reads (see its comment
+         above): a request started while the browser is already on its way
+         somewhere else is cancelled under us, and WebKit reports a cancelled
+         fetch as an uncaught «Fetch API cannot load … due to access control
+         checks» — an error in the shopper's console about nothing. */
+      if (cartPush.off || leaving) return;
       cartPush.last = key;
-      postJSON("/api/carts/", { email: email, lang: S.lang, items: lines }).then(function (res) {
-        if (res.offline) { apiSeen(false); cartPush.last = ""; }
+      var ctl = typeof AbortController === "function" ? new AbortController() : null;
+      cartPush.ctl = ctl;
+      postJSON("/api/carts/", { email: email, lang: S.lang, items: lines }, ctl && ctl.signal).then(function (res) {
+        cartPush.ctl = null;
+        // an abort on the way out of the page is not «there is no server here»
+        if (res.offline && !leaving) { apiSeen(false); cartPush.last = ""; }
       }).catch(noop);
     }, now ? 0 : 900);
   }
@@ -11759,11 +11779,12 @@
    * `offline` means "no server here" (a static host answers 404/HTML); a real
    * error from a real API comes back as a body with ok:false.
    */
-  function postJSON(url, body) {
+  function postJSON(url, body, signal) {
     return fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      signal: signal || undefined
     }).then(function (r) {
       if (r.status === 404 || r.status === 405 || r.status === 501) return { offline: true };
       return r.json().then(function (j) { return { body: j, status: r.status }; },
