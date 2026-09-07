@@ -52,9 +52,15 @@ import { getOrder, getSettings, mapOrder, setOrderStatus, writeAuditSafe, type O
    the shared file already hands mapOrder() is the shape this file asks for. */
 type OrderRow = Parameters<typeof mapOrder>[0];
 
-/** The same shape src/lib/flows.ts reports for its own three letters. */
+/**
+ * What one pass did. Both counters count **the step taken on the order**, not
+ * the letter: the letter is best effort (a shop with no Resend key still
+ * cancels correctly), and whether it really left is on the audit row. That is
+ * also what makes the numbers idempotent — a second run the same day reports
+ * zero of both, because the stamps say the work is done.
+ */
 export interface DunningRun {
-  /** Reminder letters that really went out. */
+  /** Invoices reminded — stamped `remindedAt`, letter attempted. */
   reminded: number;
   /** Orders cancelled by this run. */
   cancelled: number;
@@ -104,7 +110,7 @@ async function openInvoices(): Promise<Order[]> {
  * than the interval would otherwise turn the invoice into two letters in one
  * morning.
  */
-async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceSettings, now: Date): Promise<boolean> {
+async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceSettings, now: Date): Promise<void> {
   const stamped: InvoiceRecord = { ...invoice, remindedAt: now.toISOString() };
   await saveInvoiceRecord(order.id, stamped);
 
@@ -162,7 +168,6 @@ async function sendReminder(order: Order, invoice: InvoiceRecord, conf: InvoiceS
     dueAt: invoice.dueAt,
     sent,
   });
-  return sent;
 }
 
 /**
@@ -253,8 +258,8 @@ export async function runInvoiceDunning(now: number = Date.now()): Promise<Dunni
       const left = invoiceDaysLeft(invoice, at);
       const dueSoon = Number.isFinite(left) && left <= conf.remindBeforeDays;
       if (conf.remindBeforeDays > 0 && dueSoon && !invoice.remindedAt && invoice.issueDate !== today) {
-        if (await sendReminder(order, invoice, conf, at)) out.reminded += 1;
-        else out.skipped += 1;
+        await sendReminder(order, invoice, conf, at);
+        out.reminded += 1;
         continue;
       }
       out.skipped += 1;

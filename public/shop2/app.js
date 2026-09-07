@@ -1513,8 +1513,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "Nuppudel olevad hinnad lähevad tšekile. Salongi allahindlus märgitakse ostukorvis protsendina.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Praegu tühi — leidke toode vasakult või skaneerige triipkood.",
       "Почта клиента": "Kliendi e-post",
-      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
-        "Ostja pole kohustuslik. Tšeki avab tellimuses link «Tšekk ↗» — kirjaga seda ei saadeta.",
+      "Покупатель не обязателен. Укажете почту — на неё уйдёт письмо о покупке, а баллы лягут на карточку клиента. Чек для печати открывается ссылкой «Чек ↗» в заказе.":
+        "Ostja pole kohustuslik. Kui märgite e-posti, läheb sellele ostukiri ja punktid lähevad kliendikaardile. Prinditava tšeki avab tellimuses link «Tšekk ↗».",
       "Ничего не найдено": "Midagi ei leitud",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -3311,8 +3311,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "The prices on the chips are the ones that reach the receipt. The salon discount is set as a percentage in the cart.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Empty for now — find a product on the left or scan a barcode.",
       "Почта клиента": "Customer e-mail",
-      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
-        "The customer is optional. The receipt opens from the “Receipt ↗” link on the order — it is not e-mailed.",
+      "Покупатель не обязателен. Укажете почту — на неё уйдёт письмо о покупке, а баллы лягут на карточку клиента. Чек для печати открывается ссылкой «Чек ↗» в заказе.":
+        "The customer is optional. Give an e-mail and the purchase letter goes there, and the points land on the customer's card. The printable receipt opens from the “Receipt ↗” link on the order.",
       "Ничего не найдено": "Nothing found",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -3974,6 +3974,10 @@
         EN: "$1 — $2\nThe product disappears from the shop — the catalogue, search and the cart. Put it back right here in «Products» or from the log." }],
     [/^(\d+) поз\. · (.+) · остатки списаны$/,
       { ET: "$1 rida · $2 · jäägid maha kantud", EN: "$1 lines · $2 · stock written off" }],
+    // the same line when the sale carried an e-mail and the letter really went
+    [/^(\d+) поз\. · (.+) · остатки списаны · чек ушёл на почту$/,
+      { ET: "$1 rida · $2 · jäägid maha kantud · tšekk läks e-postile",
+        EN: "$1 lines · $2 · stock written off · the receipt went by e-mail" }],
     /* the confirm card before a salon sale — one pre-line block, so the whole
        thing is one text node (same shape as the shipping confirm above) */
     [/^([\s\S]+)\n\nИтого (.+) · (.+)$/, { ET: "$1\n\nKokku $2 · $3", EN: "$1\n\nTotal $2 · $3" }],
@@ -16668,8 +16672,13 @@
         '<button class="adm-btn" data-posnew>Новая продажа</button></div></div>';
   }
   /** «3 поз. · терминал · остатки списаны» — its own function so the i18n
-      checker sees one sentence with two holes rather than three fragments. */
+      checker sees one sentence with two holes rather than three fragments.
+      With an e-mail on the sale the letter is the fourth fact: the server
+      really did send it (POST /api/admin/pos-orders/ answers `mailed`), and a
+      receipt that stayed silent about it is how the old screen managed to
+      promise a letter nobody ever got. */
   function admPosDoneMeta(d) {
+    if (d.mailed) return d.items + " поз. · " + POS_HOW[d.how] + " · остатки списаны · чек ушёл на почту";
     return d.items + " поз. · " + POS_HOW[d.how] + " · остатки списаны";
   }
   /** The line the sale leaves in Renat's change journal. Nothing to undo — a
@@ -16720,10 +16729,12 @@
             '<label class="adm-field">Почта клиента<input class="adm-input adm-input--row" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
             '<label class="adm-field">Телефон<input class="adm-input adm-input--row" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
           "</div>" +
-          /* The e-mail box is worth filling in — it ties the sale to a customer
-             card — but nothing is posted from here: POST /api/admin/pos-orders/
-             creates, pays and stocks the order and sends no letter at all. */
-          '<p class="adm-hint">Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.</p>' +
+          /* The e-mail box is what turns a walk-in into a customer: since
+             07.09.2026 the sale goes through the same settlement a card
+             payment does (POST /api/admin/pos-orders/ → settlePayment), so a
+             typed address gets the «Заказ принят» letter and the customer
+             card gets its points. Blank is still fine — it is a walk-in. */
+          '<p class="adm-hint">Покупатель не обязателен. Укажете почту — на неё уйдёт письмо о покупке, а баллы лягут на карточку клиента. Чек для печати открывается ссылкой «Чек ↗» в заказе.</p>' +
           (S.posErr ? '<p class="adm-err">' + esc(S.posErr) + "</p>" : "") +
           '<div class="adm-pospay">' +
             '<button class="adm-btn adm-btn--ghost adm-btn--pay" data-possend="cash"' +
@@ -16749,7 +16760,7 @@
       S.posBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 201 && r.body.ok) {
-        S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how };
+        S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how, mailed: !!r.body.mailed };
         S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
         journalNote(admPosJournalLine(r.body.number, r.body.total));
         admOrdersChanged();

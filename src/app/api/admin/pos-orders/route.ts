@@ -6,21 +6,96 @@
  *
  * Unlike POST /api/orders/ (the storefront checkout) this never touches
  * Montonio: the till already has the money the moment this call is made, so
- * the order is created and marked paid in the same request — createOrder()
- * with channel:'pos' (see src/lib/orders.ts), then setOrderPayment/
- * setOrderStatus, exactly the shape a verified web payment would leave
- * behind. Stock is decremented per product line with reason 'sale_pos'
- * (src/lib/inventory.ts), best effort: the sale is already done in the room,
- * a stock hiccup must not make the register screen show a failure.
+ * the order is created and settled in the same request — createOrder() with
+ * channel:'pos' (see src/lib/orders.ts), then **the same door a confirmed
+ * bank payment goes through**, settlePayment() (src/lib/payments/settle.ts).
+ *
+ * That door is the point. Until 07.09.2026 this route wrote the payment blob
+ * and the status by hand, which looked identical and was not: everything that
+ * hangs off the single transition into paid was skipped. A sale rung up in
+ * the room earned no loyalty points, wrote no `purchase` event (so the salon's
+ * takings were missing from «Аналитика» — the one screen that is supposed to
+ * say what the shop sold), and sent the customer nothing, while the register
+ * screen offered a printable receipt and an e-mail box next to each other.
+ * Now the salon sale is a paid order like any other — points, the revenue row,
+ * the «Заказ принят» letter when an address was typed — and the only thing
+ * kept from the old path is the stock reason: 'sale_pos', not 'sale_web', so
+ * «Склад → Продажа в салоне» still tells the two apart (that is what the
+ * `decrementStock` dependency below is for). Best effort as before: the sale
+ * already happened in the room, and a stock hiccup, a mail outage or a
+ * missing points programme must never make the register screen show a
+ * failure.
  */
 import { requireAdmin } from "@/lib/auth";
-import { createOrder, OrderError, setOrderPayment, setOrderStatus } from "@/lib/orders";
+import { getCustomer, isEmail, normalizeEmail } from "@/lib/customers";
+import { query } from "@/lib/db";
+import { createOrder, OrderError, setOrderPayment, type Order } from "@/lib/orders";
+import { settlePayment } from "@/lib/payments/settle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const MAX_BYTES = 16_000;
 const METHODS = new Set(["cash", "terminal"]);
+/** What the order journal says about a till sale — the method in words. */
+const METHOD_WORD: Record<string, string> = { cash: "наличные", terminal: "терминал" };
+
+/**
+ * The shelf, the salon way: reason 'sale_pos', so the ledger and its
+ * «Продажа в салоне» filter keep telling a till sale from a web one. Handed
+ * to settlePayment() as a dependency instead of running after it, because
+ * stock belongs to the paid transition and must happen exactly once with it.
+ * Per line, best effort: one product's hiccup must not cost the rest.
+ */
+async function decrementPosStock(order: {
+  number: string;
+  items: Array<{ id: string; kind?: string; variant?: string | null; qty: number }>;
+}): Promise<void> {
+  const { move } = await import("@/lib/inventory");
+  for (const line of order.items) {
+    if (line.kind !== "product" || !line.qty) continue;
+    try {
+      await move({
+        productId: line.id,
+        variant: line.variant ?? "",
+        delta: -Math.abs(Number(line.qty) || 0),
+        reason: "sale_pos",
+        ref: order.number,
+        actor: "admin",
+      });
+    } catch (err) {
+      console.error(`[api/admin/pos-orders] stock decrement failed on ${line.id}:`, err);
+    }
+  }
+}
+
+/**
+ * Tie the sale to the customer card the typed address already belongs to, so
+ * the points land somewhere and the sale shows up in «Клиенты».
+ *
+ * Deliberately NOT done by handing `customerId` to createOrder(): that would
+ * also switch the basket to pro pricing, and the register charges what its
+ * chips say — the screen and the receipt would stop agreeing the first time a
+ * partner salon's own owner bought a bottle for himself. `pricing_tier` is
+ * therefore stamped 'retail', which is the honest record of what was charged.
+ * Never creates a customer: an address typed at the till is not a sign-up.
+ */
+async function attachCustomer(order: Order): Promise<Order> {
+  const email = normalizeEmail(order.email);
+  if (!email || !isEmail(email)) return order;
+  try {
+    const customer = await getCustomer(email);
+    if (!customer) return order;
+    await query("update orders set customer_id = $2, pricing_tier = 'retail' where id = $1 and customer_id is null", [
+      order.id,
+      customer.id,
+    ]);
+    return { ...order, customerId: customer.id, pricingTier: "retail" };
+  } catch (err) {
+    console.error("[api/admin/pos-orders] customer lookup failed, settling as a walk-in:", err);
+    return order;
+  }
+}
 
 type Body = {
   items?: Array<{ id?: unknown; variant?: unknown; qty?: unknown }>;
@@ -84,31 +159,39 @@ export async function POST(req: Request) {
       posDiscountPercent: discountPercent,
     });
 
+    /* The method is written first and settlePayment()'s blob merges on top of
+       it (setOrderPayment() is `||`, not `=`) — the same order the zero-total
+       path uses in src/lib/payments/settle.ts, and the reason the order card
+       goes on saying «наличные» rather than only «pos». */
     const paidAt = new Date().toISOString();
-    await setOrderPayment(order.id, { provider: "pos", method, status: "paid", at: paidAt });
-    const paid = (await setOrderStatus(order.id, "paid", "admin:pos")) ?? order;
+    await setOrderPayment(order.id, { provider: "pos", method, bank: null, at: paidAt });
 
-    // Best effort — the sale already happened; a stock hiccup must not turn
-    // into a failure on the register screen.
+    const settled = await attachCustomer(order);
+    let mailed = false;
     try {
-      const { move } = await import("@/lib/inventory");
-      for (const line of paid.items) {
-        if (line.kind !== "product" || !line.qty) continue;
-        await move({
-          productId: line.id,
-          variant: line.variant ?? "",
-          delta: -Math.abs(line.qty),
-          reason: "sale_pos",
-          ref: paid.number,
-          actor: "admin",
-        });
-      }
+      await settlePayment(
+        settled,
+        {
+          orderRef: settled.number,
+          status: "paid",
+          providerRef: "",
+          amount: Number(settled.total) || 0,
+          currency: settled.currency || "EUR",
+          detail: `продажа в салоне, ${METHOD_WORD[method] ?? method}`,
+        },
+        "pos",
+        { decrementStock: decrementPosStock },
+      );
+      mailed = !!settled.email;
     } catch (err) {
-      console.error("[api/admin/pos-orders] stock decrement failed:", err);
+      /* The money is in the till and the order row exists; a settlement that
+         threw is something to fix on the order card, not a failure to show on
+         the register screen while a customer is standing there. */
+      console.error("[api/admin/pos-orders] settle failed:", err);
     }
 
     return Response.json(
-      { ok: true, orderId: paid.id, number: paid.number, total: paid.total },
+      { ok: true, orderId: order.id, number: order.number, total: order.total, mailed },
       { status: 201, headers: { "cache-control": "no-store" } },
     );
   } catch (err) {
