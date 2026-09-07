@@ -121,7 +121,14 @@ const cases: Array<[string, Promo | null, number]> = [
    much to keep in step by eye, and a single wrong cent is a shopper shown one
    price and billed another. */
 describe("the storefront's copy of the default rules is the server's", () => {
-  const mirror = literal<ShippingRules & { freeFromByCountry: null; carriers: null }>("SHIP_RULES");
+  /* Omit, not intersect: `ShippingRules` declares both of these optional with
+     an object type, so `& { freeFromByCountry: null }` has no inhabitant and
+     TypeScript collapses the whole thing to `never` — every property read then
+     fails. The storefront's mirror really does carry an explicit null in both
+     places, which is what this states. */
+  const mirror = literal<
+    Omit<ShippingRules, "freeFromByCountry" | "carriers"> & { freeFromByCountry: null; carriers: null }
+  >("SHIP_RULES");
 
   it("has the same price in every cell", () => {
     expect(mirror.methods).toEqual(DEFAULT_SHIPPING_RULES.methods);
