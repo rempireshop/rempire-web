@@ -20,12 +20,15 @@ import { DEFAULT_SHIPPING_RULES } from "@/lib/shipping";
 import { setupDb, teardownDb } from "./helpers";
 
 const MIGRATION = "031_shipping_rules_ee_tariffs.sql";
+/** 032 puts the per-country table into the row 030 seeded. */
+const MIGRATION_032 = "032_shipping_rules_eu_countries.sql";
 
 type Rules = {
   freeFrom?: number | null;
   freeFromByCountry?: Record<string, number | null>;
   methods: Record<string, Record<string, number>>;
   carriers?: Record<string, Record<string, number>>;
+  countriesOff?: string[];
   markup?: { percent: number; fixed: number };
 };
 type Row = { value: Rules; updated_at: string | Date };
@@ -50,8 +53,8 @@ async function rulesRow(): Promise<Row> {
   return rows[0];
 }
 
-/** Put `value` in the row (or drop it), forget 031 ran, run the migrations again. */
-async function replay(value: Rules | null): Promise<string[]> {
+/** Put `value` in the row (or drop it), forget `which` ran, run the migrations again. */
+async function replay(value: Rules | null, which: string = MIGRATION): Promise<string[]> {
   if (value === null) {
     await query("delete from settings where key = 'shipping_rules'");
   } else {
@@ -61,7 +64,7 @@ async function replay(value: Rules | null): Promise<string[]> {
       [JSON.stringify(value)],
     );
   }
-  await query("delete from _migrations where name = $1", [MIGRATION]);
+  await query("delete from _migrations where name = $1", [which]);
   return setupDb();
 }
 
@@ -82,6 +85,96 @@ describe("a fresh database", () => {
     const { value } = await rulesRow();
     expect(value.freeFrom).toBe(DEFAULT_SHIPPING_RULES.freeFrom);
     expect(value.methods).toEqual(DEFAULT_SHIPPING_RULES.methods);
+  });
+
+  it("switches off the seven countries Montonio cannot reach", async () => {
+    const { value } = await rulesRow();
+    expect([...(value.countriesOff ?? [])].sort()).toEqual(
+      [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])].sort(),
+    );
+  });
+});
+
+/*
+ * 032 is the migration that actually changes what the live shop charges: the
+ * row 030 seeded wins over DEFAULT_SHIPPING_RULES in computeShipping(), so a
+ * database that ran 030 keeps billing 9.90 € to Greece however the code
+ * defaults move. It fills only the cells that are missing.
+ */
+describe("replaying 032 over a row 030 already seeded", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+
+  it("gives every country Montonio serves a price of its own", async () => {
+    const applied = await replay(SEED_030, MIGRATION_032);
+    expect(applied).toEqual([MIGRATION_032]);
+
+    const { value } = await rulesRow();
+    expect(value.methods.courier.GR).toBe(43.19);
+    expect(value.methods.courier.DE).toBe(22.29);
+    expect(value.methods.parcel.HR).toBe(59.59);
+    // and the fallback cells are still the fallback cells
+    expect(value.methods.courier.default).toBe(9.9);
+    expect(value.methods.parcel.default).toBe(4.99);
+    expect(value.methods.pickup).toEqual({ default: 0 });
+  });
+
+  it("leaves a price the owner has already set alone", async () => {
+    await replay(
+      {
+        ...SEED_030,
+        methods: {
+          ...SEED_030.methods,
+          courier: { ...SEED_030.methods.courier, DE: 14.9, GR: 9.9 },
+        },
+      },
+      MIGRATION_032,
+    );
+    const { value } = await rulesRow();
+    expect(value.methods.courier.DE).toBe(14.9);
+    expect(value.methods.courier.GR).toBe(9.9);
+    // …and still fills the countries he never touched
+    expect(value.methods.courier.SE).toBe(21.59);
+  });
+
+  it("never moves the free-delivery threshold — that is the owner's decision", async () => {
+    const owners: Rules = {
+      ...SEED_030,
+      freeFrom: 79,
+      freeFromByCountry: { EU: 150, GR: null },
+      carriers: { omniva: { EE: 3.29 } },
+      markup: { percent: 10, fixed: 0.5 },
+    };
+    await replay(owners, MIGRATION_032);
+    const { value } = await rulesRow();
+    expect(value.freeFrom).toBe(79);
+    expect(value.freeFromByCountry).toEqual({ EU: 150, GR: null });
+    expect(value.carriers).toEqual({ omniva: { EE: 3.29 } });
+    expect(value.markup).toEqual({ percent: 10, fixed: 0.5 });
+  });
+
+  it("takes the owner's answer about switched-off countries, empty included", async () => {
+    await replay({ ...SEED_030, countriesOff: [] }, MIGRATION_032);
+    expect((await rulesRow()).value.countriesOff).toEqual([]);
+
+    await replay({ ...SEED_030, countriesOff: ["GB"] }, MIGRATION_032);
+    expect((await rulesRow()).value.countriesOff).toEqual(["GB"]);
+  });
+
+  it("is idempotent — running its SQL again changes no price", async () => {
+    await replay(SEED_030, MIGRATION_032);
+    const before = await rulesRow();
+
+    const sql = readFileSync(new URL(`../db/migrations/${MIGRATION_032}`, import.meta.url), "utf8");
+    await exec(sql);
+
+    expect((await rulesRow()).value).toEqual(before.value);
+  });
+
+  it("does not invent a row where there is none", async () => {
+    const applied = await replay(null, MIGRATION_032);
+    expect(applied).toEqual([MIGRATION_032]);
+    expect(await rulesRows()).toHaveLength(0);
   });
 });
 
