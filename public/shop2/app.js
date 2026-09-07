@@ -185,6 +185,8 @@
       "Условия продажи": "Müügitingimused", "Конфиденциальность": "Privaatsus",
       "Правовая информация": "Õigusinfo", "Споры онлайн (ODR)": "Vaidlused veebis (ODR)",
       "Оформление заказа": "Tellimuse vormistamine",
+      // the checkout’s skip link — hidden until it takes focus
+      "Перейти к оформлению": "Otse tellimuse vormi juurde",
       "Контакт": "Kontaktandmed", "Оплата": "Maksmine",
       "Далее — доставка": "Edasi — tarne", "Далее — оплата": "Edasi — maksmine",
       "Имя": "Nimi",
@@ -1993,6 +1995,7 @@
       "Условия продажи": "Terms of sale", "Конфиденциальность": "Privacy",
       "Правовая информация": "Legal information", "Споры онлайн (ODR)": "Online dispute resolution (ODR)",
       "Оформление заказа": "Checkout",
+      "Перейти к оформлению": "Skip to the order form",
       "Контакт": "Contact", "Оплата": "Payment",
       "Далее — доставка": "Next — delivery", "Далее — оплата": "Next — payment",
       "Имя": "Name",
@@ -9996,7 +9999,16 @@
     // The summary follows the breakpoint until the shopper touches it; after
     // that their choice wins, so applying a promo can't slam it shut.
     var summaryOpen = S.sumOpen === null ? wide() : S.sumOpen;
-    return '<div class="cohdr"><div class="wrap wrap--co">' +
+    /* Seven Tab presses used to separate the top of this page from the
+       e-mail box — the logo, the three language buttons, «← В магазин» and
+       the step headings all come first (QA sweep 06.09, question 6; Dim said
+       add one). This is the standard skip link: off-screen until it takes
+       focus, then the first thing a keyboard shopper sees, and its target is
+       the open step's body, which carries tabindex="-1" so the jump moves the
+       caret and not merely the scroll. No script behind it — an anchor to an
+       id works with the keyboard alone. */
+    return '<a class="skip" href="#coform">Перейти к оформлению</a>' +
+      '<div class="cohdr"><div class="wrap wrap--co">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — на главную">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<h1 class="cohdr__t">Оформление заказа</h1>' +
         '<span class="cohdr__langs" role="group" aria-label="Язык интерфейса">' + LANGS.map(function (l) {
@@ -10008,7 +10020,7 @@
         '<div class="co__steps">' +
           '<section class="costep' + (step === 1 ? " is-open" : "") + '">' +
             coHead(1, "Контакт", esc(S.email || "—")) +
-            (step === 1 ? '<div class="costep__body">' +
+            (step === 1 ? '<div class="costep__body" id="coform" tabindex="-1">' +
               '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
               '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
               (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
@@ -10030,7 +10042,7 @@
                 ? "<span>" + (giftTo().toMe ? "Мне на почту" : esc(giftTo().email.trim() || "—")) + "</span>"
                 : "<span>" + shipMethodLabel() + "</span>" +
                   (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
-            (step === 2 ? '<div class="costep__body">' +
+            (step === 2 ? '<div class="costep__body" id="coform" tabindex="-1">' +
               // no country on a digital order: nothing crosses a border, and
               // the select is the one control that would re-price the parcel
               (isDigital() ? ""
@@ -10069,7 +10081,7 @@
 
           '<section class="costep' + (step === 3 ? " is-open" : "") + '">' +
             coHead(3, "Оплата", "") +
-            (step === 3 ? '<div class="costep__body" data-co-payment>' + paymentBlockHTML() + "</div>" : "") +
+            (step === 3 ? '<div class="costep__body" id="coform" tabindex="-1" data-co-payment>' + paymentBlockHTML() + "</div>" : "") +
           "</section>" +
           '<ul class="cotrust">' +
             "<li>Оплата через банк — данные карты магазин не видит</li>" +
