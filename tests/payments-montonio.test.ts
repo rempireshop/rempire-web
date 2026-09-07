@@ -214,7 +214,27 @@ describe("createPayment", () => {
     const claims = verifyHs256<Record<string, unknown>>(body.data, SECRET);
     const payment = claims.payment as Record<string, unknown>;
     expect(payment.method).toBe("cardPayments");
+    // the card half of the card page, not the wallet buttons Montonio opens on
+    // by default (methodOptions.preferredMethod defaults to "wallet")
+    expect((payment.methodOptions as Record<string, unknown>).preferredMethod).toBe("card");
     expect(claims.locale).toBe("et");
+  });
+
+  it("opens the card page on its wallet half when the shopper tapped Apple Pay / Google Pay", async () => {
+    const fetchMock = stubFetch({ uuid: "u", paymentUrl: "https://gateway/x" });
+    await provider.createPayment(order, {
+      returnUrl: "https://rempire.ee/api/payments/return/",
+      notificationUrl: "https://rempire.ee/api/payments/notify/",
+      lang: "RU",
+      method: "wallet",
+    });
+    const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    const claims = verifyHs256<Record<string, unknown>>(body.data, SECRET);
+    const payment = claims.payment as Record<string, unknown>;
+    /* One page, two halves: `preferredMethod` says which one the shopper
+       lands on. "card" for a wallet meant the card form first — the whole
+       point of tapping Apple Pay lost a step down the page. */
+    expect((payment.methodOptions as Record<string, unknown>).preferredMethod).toBe("wallet");
   });
 
   it("asks for the card page for Apple Pay / Google Pay too — the wallets live on it, never on the bank list", async () => {
