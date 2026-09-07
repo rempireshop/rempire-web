@@ -71,6 +71,8 @@ if (PNG) {
   const { chromium } = await import("playwright");
   const logoInk = readFileSync(path.join(ROOT, "public", "brand", "tower-email-ink.png"));
   const logoWhite = readFileSync(path.join(ROOT, "public", "brand", "tower-email-white.png"));
+  // the letters draw one outlined tower now; the other two are kept for the previews that predate it
+  const logoDuo = readFileSync(path.join(ROOT, "public", "brand", "tower-email-duo.png"));
   const browser = await chromium.launch();
   const shots = [
     { width: 600, scheme: "light", tag: "600" },
@@ -87,6 +89,7 @@ if (PNG) {
       const url = route.request().url();
       if (url.endsWith("/brand/tower-email-ink.png")) return route.fulfill({ body: logoInk, contentType: "image/png" });
       if (url.endsWith("/brand/tower-email-white.png")) return route.fulfill({ body: logoWhite, contentType: "image/png" });
+      if (url.endsWith("/brand/tower-email-duo.png")) return route.fulfill({ body: logoDuo, contentType: "image/png" });
       return route.abort();
     });
     const page = await ctx.newPage();

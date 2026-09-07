@@ -325,9 +325,8 @@ function darkCss(): string {
     [".em-link", `color:${D.muted} !important;`],
     // the boxed code panel keeps its 2px frame visible on a dark card
     [".em-box", `border-color:${D.ink} !important; background-color:${D.card} !important;`],
-    // the white tower replaces the ink one on a dark card
-    [".em-logo-light", "display:none !important;"],
-    [".em-logo-dark", "display:block !important;"],
+    /* No logo rule any more: the tower carries its own outline and reads on
+       either card, so nothing has to be swapped — see the note by logoDuo. */
   ];
   const body = rules.map(([sel, css]) => `${sel}{${css}}`).join("\n    ");
   const ogsc = rules
@@ -350,13 +349,18 @@ export interface ShellInput {
 
 export function shell(input: ShellInput): string {
   const { lang, title, preheader, body, footerNote } = input;
-  /* Two towers, no tile: the ink one on the light card, the white one when
-     the client shows the letter dark (the same media query and [data-ogsc]
-     hook the palette below uses). A client that darkens the card without
-     honouring either keeps the ink tower — the one case the old white tile
-     was guarding against; the owner would rather have no box. */
-  const logo = assetUrl("/brand/tower-email-ink.png");
-  const logoDark = assetUrl("/brand/tower-email-white.png");
+  /* One tower, no tile, no swap.
+     It used to be two — ink on a light card, white when the client reported a
+     dark one — chosen by `prefers-color-scheme` and Outlook's [data-ogsc].
+     Gmail on Android honours neither: it themes the message itself, darkening
+     the card and lightening the text, and leaves images untouched. So the ink
+     tower stayed ink on a black card and vanished (Dim, 07.09.2026, order
+     R-100014). A swap some clients cannot perform is the wrong mechanism, so
+     the tower now carries a white outline and is legible either way, with the
+     background still transparent — the owner's «no box» rule stands.
+     tower-email-{ink,white}.png remain: the outline is composited from them
+     (scratchpad/make-duo-logo.mjs) and the shop's own pages still use them. */
+  const logoDuo = assetUrl("/brand/tower-email-duo.png");
   const site = baseUrl();
 
   return `<!DOCTYPE html>
@@ -395,8 +399,7 @@ ${darkCss()}</style>
 
         <tr>
           <td align="center" class="em-card em-hr" style="padding:30px 40px; border-bottom:1px solid ${C.line}; background-color:${C.card};">
-            <img src="${esc(logo)}" width="39" height="56" alt="Rempire" class="em-logo-light" style="display:block; margin:0 auto 10px auto; border:0; outline:none;">
-            <!--[if !mso]><!--><img src="${esc(logoDark)}" width="39" height="56" alt="Rempire" class="em-logo-dark" style="display:none; margin:0 auto 10px auto; border:0; outline:none; mso-hide:all;"><!--<![endif]-->
+            <img src="${esc(logoDuo)}" width="39" height="59" alt="Rempire" style="display:block; margin:0 auto 10px auto; border:0; outline:none;">
             <a href="${esc(site)}/" class="em-ink" style="font-family:${FONT_HEAD}; font-size:20px; font-weight:bold; letter-spacing:8px; text-transform:uppercase; color:${C.ink}; text-decoration:none;">REMPIRE</a>
           </td>
         </tr>

@@ -268,44 +268,42 @@ describe("colour scheme: declared for light and dark, with a logo that survives 
     expect(html).toContain("[data-ogsc]");
     // the body has its own ground, so a force-inverting client never lands on transparent
     expect(html).toMatch(/<body class="em-bg" style="[^"]*background-color:#[0-9a-f]{6}/i);
-    /* Two towers, no tile: the ink one shows on the light card, the white one
-       takes over under the same dark-mode hooks the palette uses — so the
-       logo never sits in a box and never vanishes on a dark card either. */
-    const light = tags(html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/tower-email-ink.png"));
-    const dark = tags(html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/tower-email-white.png"));
-    expect(light, "the light-card logo is /brand/tower-email-ink.png").toBeTruthy();
-    expect(dark, "the dark-card logo is /brand/tower-email-white.png").toBeTruthy();
-    expect(attr(light!, "class")).toContain("em-logo-light");
-    expect(attr(dark!, "class")).toContain("em-logo-dark");
-    expect(attr(dark!, "style"), "the white tower is hidden until the card goes dark").toMatch(/display\s*:\s*none/);
-    expect(attr(dark!, "style"), "Outlook must not draw the hidden one").toContain("mso-hide:all");
+    /* ONE tower, outlined, on every card. It used to be two swapped by the
+       dark-mode hooks; Gmail on Android honours neither hook, themes the card
+       itself and leaves images alone, so the ink tower vanished on black
+       (Dim, 07.09.2026). Nothing may reintroduce a swap that some clients
+       cannot perform. */
+    const logos = tags(html, "img").filter((t) => /\/brand\/tower-email-/.test(attr(t, "src") ?? ""));
+    expect(logos.length, "exactly one tower in the letter").toBe(1);
+    expect(attr(logos[0], "src"), "the outlined tower").toContain("/brand/tower-email-duo.png");
+    expect(attr(logos[0], "style") ?? "", "the one tower is never hidden").not.toMatch(/display\s*:\s*none/);
+    expect(html, "no light/dark logo swap survives").not.toContain("em-logo-light");
+    expect(html, "no light/dark logo swap survives").not.toContain("em-logo-dark");
     const css = allCss(html);
-    expect(css).toMatch(/\.em-logo-light\{display:none !important;\}/);
-    expect(css).toMatch(/\.em-logo-dark\{display:block !important;\}/);
-    expect(css).toMatch(/\[data-ogsc\] \.em-logo-dark\{display:block !important;\}/);
+    expect(css).not.toMatch(/em-logo/);
   });
 
-  it("both logo files are the tower alone on a transparent ground, drawn at their own proportions", async () => {
-    for (const [name, ink] of [["tower-email-ink.png", true], ["tower-email-white.png", false]] as const) {
-      const file = path.join(process.cwd(), "public", "brand", name);
-      const meta = await sharp(readFileSync(file)).metadata();
-      expect(meta.format, name).toBe("png");
-      expect(meta.hasAlpha, `${name}: the tower must sit on a transparent ground, not a tile`).toBe(true);
-      const { data, info } = await sharp(file).raw().toBuffer({ resolveWithObject: true });
-      expect(data[3], `${name}: the top-left pixel is transparent`).toBe(0);
-      // the tower's own pixels are ink on one file and white on the other
-      let dark = 0, bright = 0;
-      for (let i = 0; i < data.length; i += info.channels) {
-        if (data[i + 3] < 200) continue;
-        if (data[i] < 80 && data[i + 1] < 80 && data[i + 2] < 80) dark++;
-        else if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) bright++;
-      }
-      expect(ink ? dark : bright, `${name}: the tower is the wrong colour`).toBeGreaterThan(500);
-      expect(ink ? bright : dark, `${name}: the tower is the wrong colour`).toBe(0);
-      const logo = tags(samples()[0].html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/" + name))!;
-      const ratio = Number(attr(logo, "width")) / Number(attr(logo, "height"));
-      expect(Math.abs(ratio - meta.width! / meta.height!), `${name}: drawn at its own proportions`).toBeLessThan(0.06);
+  it("the tower is drawn alone on a transparent ground, and carries an outline so it reads on either card", async () => {
+    const file = path.join(process.cwd(), "public", "brand", "tower-email-duo.png");
+    const meta = await sharp(readFileSync(file)).metadata();
+    expect(meta.format).toBe("png");
+    expect(meta.hasAlpha, "the tower must sit on a transparent ground, not a tile").toBe(true);
+    const { data, info } = await sharp(file).raw().toBuffer({ resolveWithObject: true });
+    expect(data[3], "the top-left pixel is transparent").toBe(0);
+    /* Both colours have to be present and substantial: the ink body is what
+       reads on a light card, the white halo is what reads on a dark one. A
+       file with only one of them is the bug this replaced. */
+    let dark = 0, bright = 0;
+    for (let i = 0; i < data.length; i += info.channels) {
+      if (data[i + 3] < 200) continue;
+      if (data[i] < 80 && data[i + 1] < 80 && data[i + 2] < 80) dark++;
+      else if (data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240) bright++;
     }
+    expect(dark, "the ink tower is missing").toBeGreaterThan(500);
+    expect(bright, "the white outline is missing — the tower would vanish on a dark card").toBeGreaterThan(200);
+    const logo = tags(samples()[0].html, "img").find((t) => (attr(t, "src") ?? "").endsWith("/brand/tower-email-duo.png"))!;
+    const ratio = Number(attr(logo, "width")) / Number(attr(logo, "height"));
+    expect(Math.abs(ratio - meta.width! / meta.height!), "drawn at its own proportions").toBeLessThan(0.06);
   });
 });
 
