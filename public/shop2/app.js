@@ -15317,7 +15317,7 @@
   function bundleFormPctText() {
     var sum = bundleFormSum(), price = bundleFormPrice();
     if (!sum || !price || price >= sum) return "";
-    var pct = Math.round(((sum - price) / sum) * 10) / 10;
+    var pct = Math.round(((sum - price) / sum) * 1000) / 10;
     return String(pct).replace(".", ",");
   }
   /** …and a percentage typed in becomes the euro price it means, "" when it cannot. */
