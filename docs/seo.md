@@ -270,9 +270,20 @@ Each page carries: `<html lang>`, a title of at most 60 characters, a
 description of at most 160, `canonical`, `hreflang` ru/et/en/x-default,
 OpenGraph and Twitter cards, and JSON-LD:
 
+**A product's two lines** (`productSpec()` / `descFrom()` in
+`src/lib/seo-head.mjs`, mirrored in `setHead()` in `public/shop2/app.js`, and
+reworked 07.09.2026 — `docs/audit/2026-09-07-seo.md`). The title takes the
+longest rung that fits in sixty characters: `brand name — купить в Rempire ·
+price`, else `brand name · price`, else `brand name — REMPIRE`, else the name
+alone. The description, when nobody has written a Google pair for the product,
+is the product's own copy with a shouted opening heading dropped, then
+`price · stock · delivery` — and the tail is budgeted **first**, so the price is
+never the half that gets cut off. A pair the owner or the assistant wrote is
+used exactly as written, with nothing appended.
+
 | page | JSON-LD |
 |---|---|
-| home | `Organization` + `WebSite` |
+| home | `Organization` (also typed `Store`, with `alternateName`, `legalName`, `email`, `telephone`, `vatID`, `taxID`, `areaServed`, `sameAs` and an `@id`) + `WebSite` (`alternateName`, `publisher` → that `@id`) |
 | category, brand | `BreadcrumbList` + `ItemList` |
 | product | `Product` with `offers` (price, `EUR`, availability) + `BreadcrumbList` |
 | set | `Product` with `offers` and `isRelatedTo` (the items) + `Organization` + `BreadcrumbList` |
@@ -498,15 +509,65 @@ one segment — and the more specific routes beside it (`p/[id]`, `blog`,
    - Re-share a couple of product links in a Facebook/WhatsApp chat and in the
      Sharing Debugger to confirm the new cards render; the 125 products that
      used to share as a bare URL now have one.
-6. Redirects from the old Shopify URLs: **`docs/redirect-map.csv`** — 1 638
-   rows, `old_url, new_path, kind, note`. It maps the live
-   `https://rempireshop.com/...` URLs onto `/shop/...` paths, which the
-   `/shop/...` → `/shop2/...` redirects above then carry the rest of the way.
-   Implementing it (a redirects table or middleware) is separate work; the map
-   is the source of truth for it.
+6. Redirects from the old Shopify URLs: **done, 07.09.2026** — see below and
+   `docs/audit/2026-09-07-seo.md`. Nothing to do at the switch beyond the
+   `curl` sweep in that document's last section.
+
+## The old Shopify addresses
+
+Every URL Google holds of rempireshop.com today is a Shopify one, and the
+Search Console export of 07.09.2026 has **473 of them with impressions in a
+single week** (`docs/audit/2026-09-07-seo.md`). They are answered by
+**`src/middleware.ts` → `src/lib/legacy-redirects.ts`**, with a 301 each:
+
+| old shape | where it lands |
+|---|---|
+| `/products/<handle>` | `/shop2/p/<id>/` when the handle is a catalogue id; else an alias, else `/b/<brand>/` when the handle starts with a brand slug, else `/c/all/` |
+| `/collections/<handle>` | `/b/<brand>/` when the collection is a brand, else one of the seven sections, else `/c/all/`. 105 handles are mapped by hand |
+| `/collections/<x>/products/<handle>` | the same as `/products/<handle>` |
+| `/pages/<slug>`, `/policies/<slug>` | `/info/<slug>/`; an unknown one → `/info/contact/` |
+| `/blogs/…` | `/blog/` |
+| `/search?q=…` | `/search/?q=…` — the only query parameter that survives |
+| `/cart`, `/checkout` | `/c/all/` (the basket is a drawer, the checkout is robots-disallowed) |
+| `/account`, `/apps/…` | `/account/`, the home page |
+| `/ru`, `/et`, `/en-lv`, `/en-lt`, `/en-fi` in front of any of the above | the same target with the language kept: `/ru` → unprefixed, `/et` → `/shop2/et/…`, the three English storefronts → `/shop2/en/…` |
+
+**The query string is dropped.** 121 of the 473 ranking URLs carry Shopify's
+product-feed query (`?variant=…&country=AE&currency=EUR&utm_source=google&
+utm_medium=product_sync&…`) and 61 paths are indexed under more than one address
+because of it; one target for all of them is the point.
+
+Middleware rather than `next.config.ts`, because it is a lookup rather than a
+pattern, because 1 639 config rules would be matched in order on every request
+to the site, and because dropping the query needs a decision per shape. It runs
+only for the paths in its `matcher` — none of which the new shop uses.
+
+`docs/redirect-map.csv` is kept as the **test fixture**, not as run-time data:
+1 447 of its 1 639 rows point at the home page, including every
+`/ru/products/…` and `/et/products/…` row. `tests/legacy-redirects.test.ts`
+walks all of them and asserts this code does better;
+`e2e/seo.spec.ts` walks the twelve best-earning addresses through a real server.
+
+**One caveat:** `trailingSlash: true` means Next 308s `/products/x` to
+`/products/x/` before any middleware runs, so an old link is a 308 → 301 chain.
+Every `/shop/…` redirect in `next.config.ts` has always behaved this way.
 
 ## Known gaps
 
+- **Two fields are missing from every `Offer` on purpose**, and both would put
+  an extra line under a search result. `hasMerchantReturnPolicy` («Free 30-day
+  returns») cannot be published while the refund text promises a 30-day window
+  and then excludes "personal care goods (such as beauty products)", which is
+  most of the catalogue — structured data must not contradict the policy page
+  it points at. `shippingDetails` («Free delivery») needs one number per
+  carrier per country and a wrong one is a Merchant Center suspension. Both are
+  questions 5 and 6 of `docs/audit/2026-09-07-seo.md`. `priceValidUntil` is left
+  off too: it is a promise with a date on it, and a past one reads as an expired
+  offer.
+- **The shop is shown almost entirely outside the countries it delivers to.**
+  2 667 of 3 002 impressions in the week of 29.08–05.09.2026 were in countries
+  the checkout cannot ship to. Where it *can* sell, its CTR is 5.7 %. That is a
+  Merchant Center targeting decision, not a code one — question 3 of the audit.
 - ~~`brands` is still shell-only.~~ **Closed 07.09.** It has its own
   prerendered page in all three languages — see "URL scheme" above.
 - ~~Three things in app.js do not agree with the prerendered pages.~~ **Closed
