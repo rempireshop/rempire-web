@@ -23,7 +23,7 @@ import variantData from "@/data/catalogue.variants.json";
 import { jsonbParam, query } from "@/lib/db";
 // Wholesale/pro pricing — src/lib/loyalty.ts (100_tiers_loyalty), a module of
 // this same build, unlike the optional neighbours below: no try/catch needed.
-import { customerTier, getPricingSettings, proUnitPrice, quoteLoyaltyRedeem } from "@/lib/loyalty";
+import { customerTier, getPricingSettings, loyaltyOn, proUnitPrice, quoteLoyaltyRedeem } from "@/lib/loyalty";
 // Shipping defaults — src/lib/shipping.ts is a module of this build too (see
 // docs/shipping.md), imported only for its constant so FALLBACK_SHIPPING below
 // cannot drift from it; the live computeShipping() call itself still goes
@@ -820,8 +820,15 @@ export async function priceItems(
     pricingTier = tier ?? "retail";
     if (tier === "pro") {
       const pricing = await getPricingSettings();
-      proDiscountPct = pricing.proDiscountPct;
-      proMinOrder = pricing.proMinOrder;
+      /* «Партнёры и баллы» off (settings.pricing.partnersOn, Dim 07.09.2026):
+         the shop has no wholesale tier at all, so an approved partner is
+         billed retail like everybody else. His row keeps its `pro`, so the
+         switch back on restores exactly what was there. */
+      if (!pricing.partnersOn) pricingTier = "retail";
+      else {
+        proDiscountPct = pricing.proDiscountPct;
+        proMinOrder = pricing.proMinOrder;
+      }
     }
   }
   // the pro unit price for each line pushed below, in the same order —
@@ -1235,7 +1242,8 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   let loyaltyDiscount = 0;
   if (input.redeemPoints && ctx.customerId) {
     const pricing = await getPricingSettings();
-    if (pricing.loyalty.enabled) {
+    // both switches: «Партнёры и баллы» above and «Начислять баллы» inside it
+    if (loyaltyOn(pricing)) {
       const quote = await quoteLoyaltyRedeem(ctx.customerId, subtotal, pricing.loyalty);
       /* Never more than what the promo or gift card left to pay: a 50 € card
          on a 30 € basket used to leave the points quoted against the full

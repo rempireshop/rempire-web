@@ -32,10 +32,42 @@
  * AND E2E_BOOTSTRAP must be exactly "1". Both are set only in the Playwright
  * webServer env, never in a real deploy.
  */
+import { query } from "@/lib/db";
 import { migratePending } from "@/lib/migrate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/**
+ * The one setting this route seeds, and why.
+ *
+ * «Партнёры и баллы» (`settings.pricing.partnersOn`) is OFF on a fresh shop
+ * since 07.09.2026 — Dim's answer, docs/loyalty.md. Most of this suite is
+ * about a shop that HAS the programme: salon prices in the editor and on the
+ * product page, «Одобрить Pro» in «Клиенты», the points row on «Доставка и
+ * оплата», «Использовать баллы» at checkout. Rather than have every one of
+ * those specs turn the switch on for itself (and race the others doing the
+ * same), the suite's shop is simply a shop where the owner switched it on —
+ * which is what those specs have always been describing.
+ *
+ * The DEFAULT is covered where it belongs: tests/partners-switch.test.ts and
+ * tests/loyalty.test.ts (vitest, no bootstrap) prove the off state end to end,
+ * and e2e/admin-sweep-4.spec.ts turns the switch off and back on in the panel.
+ *
+ * `on conflict do nothing`: a spec that has changed `pricing` keeps its own
+ * row, and a re-poll of this readiness URL never undoes it.
+ */
+async function seedE2ESettings(): Promise<void> {
+  try {
+    await query(
+      `insert into settings (key, value) values ('pricing', $1::jsonb)
+       on conflict (key) do nothing`,
+      [JSON.stringify({ partnersOn: true })],
+    );
+  } catch (err) {
+    console.error("[api/e2e/bootstrap] seed failed:", err);
+  }
+}
 
 export async function GET() {
   if (process.env.NODE_ENV === "production" || process.env.E2E_BOOTSTRAP !== "1") {
@@ -43,6 +75,7 @@ export async function GET() {
   }
   try {
     const result = await migratePending();
+    await seedE2ESettings();
     return Response.json({ ok: true, ...result }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     console.error("[api/e2e/bootstrap] migrate failed:", err);

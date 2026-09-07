@@ -307,6 +307,22 @@
       "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
       "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Liidestused", "Настройки": "Seaded",
       "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
+      "Партнёры и баллы":
+        "Partnerid ja punktid",
+      "салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара":
+        "salongihinnad ja ostupunktid — korraga kõikjal: poes, kabinetis, «Klientides» ja toote kaardil",
+      "Выключить партнёров и баллы":
+        "Lülita partnerid ja punktid välja",
+      "Включить партнёров и баллы":
+        "Lülita partnerid ja punktid sisse",
+      "Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.":
+        "Praegu välja lülitatud: kõigil ostjatel on tavahinnad, punkte ei koguta ega kasutata. Allolevad seaded säilivad — lülitage sisse ja kõik tuleb tagasi nii, nagu oli.",
+      "Здесь все, кто у вас покупал: имя, почта, сколько заказов и на какую сумму.":
+        "Siin on kõik, kes on teilt ostnud: nimi, e-post, mitu tellimust ja mis summas.",
+      "Партнёрские цены и баллы сейчас выключены — включаются в":
+        "Partnerihinnad ja punktid on praegu välja lülitatud — sisse lülitatakse",
+      "Цены и остатки — на вкладке «Размеры и цены».":
+        "Hinnad ja jäägid on vahekaardil «Mahud ja hinnad».",
       "Набор открыт — впишите цену и сохраните":
         "Komplekt on avatud — sisestage hind ja salvestage",
       "когда вы вернёте товар в наличие — всем, кто оставил почту":
@@ -2263,6 +2279,22 @@
       "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
       "Аналитика": "Analytics", "Письма": "E-mails", "Подключения": "Integrations", "Настройки": "Settings",
       "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
+      "Партнёры и баллы":
+        "Partners and points",
+      "салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара":
+        "salon prices and points for purchases — everywhere at once: the shop, the account, «Customers» and the product card",
+      "Выключить партнёров и баллы":
+        "Switch partners and points off",
+      "Включить партнёров и баллы":
+        "Switch partners and points on",
+      "Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.":
+        "Off right now: every shopper pays the ordinary price, and no points are earned or spent. The settings below are kept — switch it on and everything comes back as it was.",
+      "Здесь все, кто у вас покупал: имя, почта, сколько заказов и на какую сумму.":
+        "Everyone who has bought from you: the name, the address, how many orders and for how much.",
+      "Партнёрские цены и баллы сейчас выключены — включаются в":
+        "Partner prices and points are off right now — they are switched on in",
+      "Цены и остатки — на вкладке «Размеры и цены».":
+        "Prices and stock are on the «Sizes and prices» tab.",
       "Набор открыт — впишите цену и сохраните":
         "The set is open — type the price and save it",
       "когда вы вернёте товар в наличие — всем, кто оставил почту":
@@ -4890,7 +4922,33 @@
   /* wholesale/loyalty: the public half of settings.pricing (enabled + earn
      rate only — publicPricing() in src/lib/loyalty.ts), adopted from
      /api/overrides at boot for the «Баллы» row of the delivery page. */
-  var LOYALTY_PUBLIC = { enabled: true, earnPct: 5 };
+  /* «Партнёры и баллы» (settings.pricing.partnersOn, Dim 07.09.2026): the one
+     switch above both programmes, OFF by default — Renat said «later», and
+     until he says otherwise the shop has no wholesale tier and no points at
+     all. `partnersOn` false hides the points block and «Стать партнёром» in
+     the cabinet, «Использовать баллы» at checkout, the tier chips in
+     «Клиенты», the editor's «Салон, €» column and the salon line under it.
+     Nothing is deleted: every number keeps its stored value, and the switch
+     back on puts all five screens back exactly as they were. */
+  var LOYALTY_PUBLIC = { partnersOn: false, enabled: false, earnPct: 5 };
+  /** Is the whole «Партнёры и баллы» programme on right now? */
+  function partnersOn() { return !!LOYALTY_PUBLIC.partnersOn; }
+  /** …and points specifically — the inner switch inside the outer one. */
+  function pointsOn() { return partnersOn() && LOYALTY_PUBLIC.enabled !== false; }
+  /* The panel must not wait for the public feed to see its own switch:
+     /api/overrides is cached at the edge for half a minute, and «Партнёры и
+     баллы» decides what five screens draw. The owner's own save (and its
+     undo) copies the answer across at once — the same «the demo layer shows
+     the change, the server confirms it» rule the rest of the panel follows. */
+  function adoptPricingLocally() {
+    var p = S.pricingLoaded;
+    if (!p) return;
+    LOYALTY_PUBLIC = {
+      partnersOn: p.partnersOn === true,
+      enabled: p.partnersOn === true && p.loyalty && p.loyalty.enabled !== false,
+      earnPct: (p.loyalty && isFinite(Number(p.loyalty.earnPct))) ? Number(p.loyalty.earnPct) : LOYALTY_PUBLIC.earnPct
+    };
+  }
 
   /* Is there a server behind this page? null until the first call answers.
      false puts the checkout back into demo mode — the prototype is hosted
@@ -5797,6 +5855,7 @@
      other. createOrder() quotes the real amount from the real balance — this
      browser never decides what a point is worth. */
   function loyaltyMaxRedeem() {
+    if (!pointsOn()) return 0;   // «Партнёры и баллы» off
     if (!S.loyalty || !S.loyalty.settings || !S.loyalty.settings.enabled) return 0;
     var st = S.loyalty.settings;
     if (S.loyalty.balance < st.minRedeem) return 0;
@@ -9220,7 +9279,13 @@
       (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
       '<button class="btn btn--ghost btn--sm" data-save' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctSaved ? "Сохранено ✓" : "Сохранить") + "</button>" +
 
-      /* ---- wholesale/loyalty: points balance/history ---------------------- */
+      /* ---- wholesale/loyalty: points balance/history ----------------------
+         Both blocks below hang off «Партнёры и баллы» (settings.pricing.
+         partnersOn, Dim 07.09.2026). Off — and this is a shop with no points
+         and no wholesale tier, so neither block is drawn at all: a balance of
+         0 with an explanation of a programme that is not running is worse
+         than nothing. Every stored balance survives the switch. */
+      (!partnersOn() ? "" :
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Баллы лояльности</h2></div>' +
       (S.loyalty
         ? '<p class="num" style="font-size:20px;margin:0 0 6px">' + S.loyalty.balance + " " + pl(S.loyalty.balance, "балл", "балла", "баллов") + "</p>" +
@@ -9247,7 +9312,7 @@
             '<button class="btn btn--ghost btn--sm" data-acctprosend' + (S.acctProBusy ? " disabled" : "") + ">" + (S.acctProBusy ? "Отправляем…" : "Отправить заявку") + "</button>" +
             /* what happens next — the one thing the old form never said */
             '<p class="hint" style="margin:12px 0 0"><span>Что дальше: мы проверим данные — обычно в течение рабочего дня — и включим цены для салонов.</span> ' +
-              "<span>Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.</span></p>") +
+              "<span>Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.</span></p>")) +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
@@ -10227,7 +10292,8 @@
          Independent of the promo/gift box above — a checkbox, not a code,
          so it stacks with either. Shown only once signed in with a real,
          usable balance; loyaltyMaxRedeem() already checks minRedeem. */
-      (S.loggedIn && S.loyalty && loyaltyMaxRedeem() > 0
+      // «Партнёры и баллы» off — no points anywhere, so no box to tick either
+      (pointsOn() && S.loggedIn && S.loyalty && loyaltyMaxRedeem() > 0
         ? '<label class="opt opt--plain cosum__loyalty"><input type="checkbox" data-loyaltyredeem' + (S.loyaltyRedeem ? " checked" : "") + '>' +
             '<span>Использовать баллы — доступно ' + S.loyalty.balance + "</span></label>" +
           (S.loyaltyRedeem
@@ -11944,7 +12010,8 @@
     var pend = admReviewCounts().pending || 0;
     /* «+ Партнёр» — the same head slot «+ Промокод» uses: a salon the owner
        already knows is added by e-mail, without waiting for a request. */
-    var add = !onReviews && !S.admCustOpen && !S.partnerForm && SRV.admin === true
+    // «Партнёры и баллы» off: no partners to add (Dim, 07.09.2026)
+    var add = partnersOn() && !onReviews && !S.admCustOpen && !S.partnerForm && SRV.admin === true
       ? '<button class="adm-btn adm-btn--head" data-admpartnernew>+ Партнёр</button>'
       : "";
     return '<div class="adm-screen adm-screen--tight">' +
@@ -13628,7 +13695,9 @@
      GET /api/admin/settings instead, the same door shipRulesCard() and
      admContentCard() write through (PUT /api/admin/settings), so a save here
      lands in the change log with an undo like everything else. */
-  var PRICING_DEFAULT = { proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } };
+  // partnersOn false = «Партнёры и баллы» off, the same default cleanPricing()
+  // has on the server (src/lib/loyalty.ts) — Renat said «later» (Dim, 07.09.2026)
+  var PRICING_DEFAULT = { partnersOn: false, proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } };
   /** settings.delivery, in the shape cleanDelivery() enforces on the server. */
   function normaliseDelivery(raw) {
     var r = raw && typeof raw === "object" ? raw : {};
@@ -13642,6 +13711,9 @@
     var r = raw && typeof raw === "object" ? raw : {};
     var l = r.loyalty && typeof r.loyalty === "object" ? r.loyalty : {};
     return {
+      // «Партнёры и баллы» — the one switch above both, off unless the server
+      // says on (settings.pricing.partnersOn, Dim 07.09.2026)
+      partnersOn: r.partnersOn === true,
       proDiscountPct: isFinite(Number(r.proDiscountPct)) ? Number(r.proDiscountPct) : PRICING_DEFAULT.proDiscountPct,
       proMinOrder: isFinite(Number(r.proMinOrder)) ? Number(r.proMinOrder) : PRICING_DEFAULT.proMinOrder,
       loyalty: {
@@ -13656,6 +13728,7 @@
   function mergePricing(base, patch) {
     var b = normalisePricing(base), p = patch || {}, pl2 = p.loyalty || {};
     return {
+      partnersOn: p.partnersOn != null ? p.partnersOn === true : b.partnersOn,
       proDiscountPct: p.proDiscountPct != null ? p.proDiscountPct : b.proDiscountPct,
       proMinOrder: p.proMinOrder != null ? p.proMinOrder : b.proMinOrder,
       loyalty: {
@@ -13676,7 +13749,17 @@
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         var st0 = r.body.settings || {};
+        /* The form's own draft is seeded from S.pricingLoaded, and the first
+           paint happens before this answer lands — so a draft made from the
+           empty defaults has to go, or the card would keep drawing «Партнёры
+           и баллы» off after the server said otherwise. Only ever on the very
+           first load: after that the draft is what the owner has typed. */
+        var firstLoad = !S.pricingLoaded;
         S.pricingLoaded = normalisePricing(st0.pricing);
+        if (firstLoad) S.pricingDraft = null;
+        // the admin's own copy is the authoritative one for the panel: the
+        // public feed it would otherwise wait for is edge-cached for 30 s
+        adoptPricingLocally();
         // «Доставлен» без кнопки: the same admin-only settings map, read once
         S.deliveryLoaded = normaliseDelivery(st0.delivery);
         render();
@@ -13759,11 +13842,24 @@
   }
   function admPricingCard() {
     loadAdminPricing(false);
-    var d = pricingDraft(), lo = d.loyalty.enabled;
+    var d = pricingDraft(), lo = d.loyalty.enabled, on = d.partnersOn === true;
     return '<div class="adm-form">' +
       '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять цены и баллы.</div>') +
       (pricingDirty() ? '<p class="adm-hint adm-hint--warn" style="margin:0">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      /* «Партнёры и баллы» — the one switch Dim asked for (07.09.2026), off by
+         default because Renat said «later». Off, the shop has no wholesale
+         tier and no points: nothing is shown about either, on any screen, and
+         nothing is earned, spent or discounted. The numbers below keep their
+         values, so switching it on puts everything back as it was. */
+      '<div class="adm-swrow"><span>Партнёры и баллы' +
+        '<span class="adm-row__sub">салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара</span></span>' +
+        admSwitch("data-partnerson", on, on ? "Выключить партнёров и баллы" : "Включить партнёров и баллы") + "</div>" +
+      (!on
+        ? '<p class="adm-hint" style="margin:0">Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.</p>' +
+          '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div></div>"
+        : "") +
+      (!on ? "" :
       '<div class="adm-sec__t">Салоны и мастера</div>' +
       '<div class="adm-edpair">' +
         admPricingField("proDiscountPct", "Скидка для салонов, %", "0 — если оптовых цен сейчас нет.", d.proDiscountPct) +
@@ -13781,7 +13877,7 @@
         : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
       // filled in place by paintPricingState() as the owner types
       '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>" +
-      '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>" +
+      '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>") +
       "</div>";
   }
 
@@ -14529,12 +14625,17 @@
   }
   /** The tier as a badge — the same words on the row and on the card. */
   function admCustBadge(c) {
+    // «Партнёры и баллы» off: every customer is simply a customer
+    if (!partnersOn()) return ["Клиент", "adm-badge--quiet"];
     if (c.tier === "pro") return ["Pro", "adm-badge--ink"];
     if (c.proRequestedAt) return ["Заявка Pro", "adm-badge--warn"];
     return ["Розница", "adm-badge--quiet"];
   }
   function filteredAdminCustomers() {
     var list = S.admCustomers || [];
+    // «Партнёры и баллы» off: there are no tiers to filter by, and a chip the
+    // screen no longer draws must not go on quietly hiding half the list
+    if (!partnersOn()) S.admCustTier = "";
     if (S.admCustTier === "pro") list = list.filter(function (c) { return c.tier === "pro"; });
     else if (S.admCustTier === "retail") list = list.filter(function (c) { return c.tier !== "pro"; });
     else if (S.admCustTier === "pending") list = list.filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; });
@@ -14557,7 +14658,7 @@
         : '<div class="adm-skel"><i></i><i></i><i></i></div>';
     }
     return '<div class="adm-list">' + list.map(function (c) {
-      var pending = c.tier !== "pro" && c.proRequestedAt;
+      var pending = partnersOn() && c.tier !== "pro" && c.proRequestedAt;
       var badge = admCustBadge(c);
       return '<div class="adm-row adm-row--tall">' +
         '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '" ' +
@@ -14604,11 +14705,13 @@
       '<div class="adm-kpis" style="margin-top:16px">' +
         admPlainKpi("Заказов", String(c.ordersCount)) +
         admPlainKpi("Потратил", eur(c.revenue)) +
-        admPlainKpi("Баллы", String(c.pointsBalance)) +
+        // «Партнёры и баллы» off: a balance nobody can earn or spend is not a
+        // number worth a tile of its own (Dim, 07.09.2026)
+        (partnersOn() ? admPlainKpi("Баллы", String(c.pointsBalance)) : "") +
       "</div>" +
       /* the request, as the customer filed it — company, reg. code and phone
          were only ever in the grey line under the name, easy to miss */
-      (c.tier !== "pro" && c.proRequestedAt
+      (partnersOn() && c.tier !== "pro" && c.proRequestedAt
         ? '<div class="adm-sec__t" style="margin-top:28px">Заявка на статус партнёра</div>' +
           '<div class="adm-list adm-list--flat" style="margin-top:8px">' +
             admCustFactRow("Компания", c.company) +
@@ -14621,6 +14724,11 @@
         : "") +
       /* the tier, as a switch the owner can read: which one is on now, and
          what pressing the other does (askTierSwitch → confirm card) */
+      /* Everything from here to the private note belongs to «Партнёры и
+         баллы» (Dim, 07.09.2026): the tier switch, the points form and the
+         points history. Off — and the card is the customer's name, what he
+         bought and your own note about him. Nothing is deleted. */
+      (!partnersOn() ? "" :
       '<div class="adm-sec__t" style="margin-top:28px">Статус клиента</div>' +
       '<div class="adm-seg" role="group" aria-label="Статус клиента" style="margin-top:10px">' +
         '<button data-admcusttierset="retail" aria-current="' + (c.tier !== "pro") + '">Розница</button>' +
@@ -14643,7 +14751,7 @@
       '<div class="adm-sec__t" style="margin-top:28px">История баллов</div>' +
       (d.history.length
         ? '<div class="adm-list">' + d.history.map(admLoyaltyRowHTML).join("") + "</div>"
-        : '<div class="adm-empty">Начислений ещё не было.</div>') +
+        : '<div class="adm-empty">Начислений ещё не было.</div>')) +
       '<div class="adm-sec__t" style="margin-top:28px">Заметка о клиенте</div>' +
       '<div class="adm-form" style="margin-top:12px">' +
         '<label class="adm-field">Видна только вам' +
@@ -14686,12 +14794,17 @@
     var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
     return (S.admCustErr ? '<div class="adm-note">' + esc(S.admCustErr) + "</div>" : "") +
       admCustLeadHTML() +
-      (S.partnerForm ? admPartnerFormHTML() : "") +
+      (partnersOn() && S.partnerForm ? admPartnerFormHTML() : "") +
       '<div class="adm-acts">' +
-        '<div class="adm-chips" role="group" aria-label="Какие клиенты">' + ADM_CUST_TIERS.map(function (f) {
-          return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' +
-            (S.admCustTier === f[0]) + '">' + f[1] + (f[0] === "pending" && pendN ? " " + pendN : "") + "</button>";
-        }).join("") + "</div>" +
+        /* «Партнёры и баллы» off: «Все клиенты» is the only answer there is,
+           so the four chips that sort them into tiers are not drawn — and the
+           filter itself falls back to «Все» (admCustRowsHTML). */
+        (partnersOn()
+          ? '<div class="adm-chips" role="group" aria-label="Какие клиенты">' + ADM_CUST_TIERS.map(function (f) {
+              return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' +
+                (S.admCustTier === f[0]) + '">' + f[1] + (f[0] === "pending" && pendN ? " " + pendN : "") + "</button>";
+            }).join("") + "</div>"
+          : "") +
         '<a class="adm-link" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
       "</div>" +
       '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
@@ -14703,6 +14816,14 @@
      its own node for the dictionary. The link jumps straight to the page
      where the discount lives (data-admgoset, see the click handler). */
   function admCustLeadHTML() {
+    // «Партнёры и баллы» off: the three sentences below describe a programme
+    // the shop is not running, so it says the one true thing instead
+    if (!partnersOn()) {
+      return '<p class="adm-lead" style="margin:0 0 14px">' +
+        "<span>Здесь все, кто у вас покупал: имя, почта, сколько заказов и на какую сумму.</span> " +
+        "<span>Партнёрские цены и баллы сейчас выключены — включаются в</span> " +
+        '<button class="adm-link" data-admgoset="prices">Настройки → Цены и баллы</button>.</p>';
+    }
     return '<p class="adm-lead" style="margin:0 0 14px">' +
       "<span>Розница — все, кто покупает по обычным ценам; партнёры — салоны и мастера, которым включены цены для салонов.</span> " +
       "<span>Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — одобрите её прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».</span> " +
@@ -15436,7 +15557,9 @@
                 ? '<p class="adm-hint adm-hint--warn">Товар снят с продажи — в магазине его нет.</p>' +
                   '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admgoodsshow="' + esc(p.id) + '">Вернуть в продажу</button></div>'
                 : '<p class="adm-hint">Это ваш товар: название, бренд, раздел, объёмы и фото здесь меняете вы сами. Убрать его с полки — «Снять с продажи» внизу; вернуть можно из журнала.</p>') +
-              '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>') +
+              '<p class="adm-hint">' + (partnersOn()
+                ? "Цены и остатки — на вкладке «Размеры и цены». Салон платит на " + edSalonPct() + " % меньше, если для товара не задана своя цена."
+                : "Цены и остатки — на вкладке «Размеры и цены».") + "</p>") +
         "</div>" +
       "</div></div>";
   }
@@ -15478,7 +15601,9 @@
           '<p class="adm-hint">' + (shopHidden(p.id)
             ? "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть."
             : "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.") + "</p>" +
-          '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>' +
+          '<p class="adm-hint">' + (partnersOn()
+            ? "Цены и остатки — на вкладке «Размеры и цены». Салон платит на " + edSalonPct() + " % меньше, если для товара не задана своя цена."
+            : "Цены и остатки — на вкладке «Размеры и цены».") + "</p>" +
         "</div>" +
       "</div></div>";
   }
@@ -15516,8 +15641,12 @@
     if (!p.isNew) loadStockLevels(false);
     var rows = edSizeRows(p), n = rows.length;
     var multi = n > 1 || (n === 1 && !!rows[0].size);
-    var head = '<div class="adm-grid__head"><span>Размер</span><span>Цена, €</span>' +
-      (p.isNew ? "" : "<span>Салон, €</span><span>Остаток</span><span>Штрихкод</span>") + "<span></span></div>";
+    /* «Партнёры и баллы» off (Dim, 07.09.2026): no «Салон, €» column at all —
+       a price for a tier the shop does not have is a box that cannot be
+       right. The stored pro price survives; the column comes back with it. */
+    var salonCol = partnersOn();
+    var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Размер</span><span>Цена, €</span>' +
+      (p.isNew ? "" : (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span>") + "<span></span></div>";
     var body = rows.map(function (r, i) {
       var variant = multi ? r.size : "";
       var key = stockKey(p.id, variant);
@@ -15526,17 +15655,19 @@
       var low = lv && lv.tracked && lv.qty <= 3;
       var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
       var salon = edSalonOf(goodsPrice(priceVal) || 0);
-      return '<div class="adm-grid__row">' +
+      return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
         (multi
           ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) + '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
           : '<span class="adm-grid__sz">один объём</span>') +
         edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
           '" inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">') +
         (p.isNew ? "" :
-          edCell("", "Салон, €", i === 0
-            ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
-              '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
-            : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
+          (salonCol
+            ? edCell("", "Салон, €", i === 0
+              ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
+                '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
+              : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
+            : "") +
           edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
             '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
           edEanCell(key, lv && lv.ean)) +
@@ -15567,8 +15698,9 @@
     loadStockLevels(false);
     var rows0 = edSizeRows(p), n = rows0.length;
     var multi = n > 1 || (n === 1 && !!rows0[0].size);
-    var head = '<div class="adm-grid__head"><span>Размер</span><span>Цена, €</span><span>Салон, €</span>' +
-      "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
+    var salonCol = partnersOn();   // «Партнёры и баллы» — see edPaneSizesOwn
+    var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Размер</span><span>Цена, €</span>' +
+      (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
     var rows = rows0.map(function (r, i) {
       var sz = multi ? r.size : "";
       var lv = edStockFor(p, sz);
@@ -15577,18 +15709,20 @@
       var qty = lv && lv.tracked ? String(lv.qty) : "";
       var low = lv && lv.tracked && lv.qty <= 3;
       var salon = edSalonOf(goodsPrice(price) || 0);
-      return '<div class="adm-grid__row">' +
+      return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
         (multi
           ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) +
             '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
           : '<span class="adm-grid__sz">один объём</span>') +
         edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
           '" inputmode="decimal" value="' + esc(price) + '" placeholder="12,50" aria-label="Цена, €">') +
-        edCell("", "Салон, €", i === 0
-          ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
-            '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
-            '" placeholder="' + salon + '" aria-label="Салон, €">'
-          : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
+        (salonCol
+          ? edCell("", "Салон, €", i === 0
+            ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
+              '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
+              '" placeholder="' + salon + '" aria-label="Салон, €">'
+            : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
+          : "") +
         edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
           '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
         edEanCell(key, lv && lv.ean) +
@@ -17972,9 +18106,15 @@
     if (s.invoice && typeof s.invoice === "object") DEMO.invoice = { dueDays: Number(s.invoice.dueDays) || 7, prefix: String(s.invoice.prefix == null ? "A-" : s.invoice.prefix) };
     /* wholesale/loyalty: the public half of settings.pricing — whether points
        are on and the earn rate — for the «Баллы» row of «Доставка и оплата». */
-    if (s.pricing && s.pricing.loyalty && typeof s.pricing.loyalty === "object") {
-      var lp = s.pricing.loyalty, lpPct = Number(lp.earnPct);
-      LOYALTY_PUBLIC = { enabled: lp.enabled !== false, earnPct: isFinite(lpPct) && lpPct >= 0 ? lpPct : LOYALTY_PUBLIC.earnPct };
+    if (s.pricing && typeof s.pricing === "object") {
+      var lp = (s.pricing.loyalty && typeof s.pricing.loyalty === "object") ? s.pricing.loyalty : {};
+      var lpPct = Number(lp.earnPct);
+      LOYALTY_PUBLIC = {
+        // «Партнёры и баллы»: the outer switch, off unless the server says on
+        partnersOn: s.pricing.partnersOn === true,
+        enabled: lp.enabled !== false,
+        earnPct: isFinite(lpPct) && lpPct >= 0 ? lpPct : LOYALTY_PUBLIC.earnPct
+      };
     }
     /* content: the server always answers with the merged document (defaults +
        whatever the owner wrote), so it replaces the local copy outright and
@@ -18679,6 +18819,8 @@
     // wholesale/loyalty
     if (a.type === "set_pricing") {
       var pv = a.value || {}, plo = pv.loyalty || {}, bits = [];
+      // the one switch above both — first, because it decides the rest
+      if (pv.partnersOn != null) bits.push(pv.partnersOn ? "партнёры и баллы включены" : "партнёры и баллы выключены");
       if (pv.proDiscountPct != null) bits.push("скидка для салонов " + pv.proDiscountPct + "%");
       if (pv.proMinOrder != null) bits.push("от " + eur(pv.proMinOrder));
       if (plo.enabled != null) bits.push("баллы " + (plo.enabled ? "включены" : "выключены"));
@@ -18999,6 +19141,7 @@
       entry.prev = { type: "set_pricing", value: cloneRules(S.pricingLoaded || normalisePricing(null)) };
       S.pricingLoaded = mergePricing(S.pricingLoaded, a.value);
       S.pricingDraft = null;
+      adoptPricingLocally();
     }
     // a manual points credit/correction — nothing to keep "in sync" locally,
     // just force whichever customer views are open to reload after the write
@@ -19089,7 +19232,7 @@
     // content: `whole` is the document as it was, null meaning «стандартный»
     else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }
     // wholesale/loyalty
-    else if (a.type === "set_pricing") { S.pricingLoaded = mergePricing(S.pricingLoaded, a.value); S.pricingDraft = null; }
+    else if (a.type === "set_pricing") { S.pricingLoaded = mergePricing(S.pricingLoaded, a.value); S.pricingDraft = null; adoptPricingLocally(); }
     else if (a.type === "adjust_points") {
       S.admCustomers = null;
       if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
@@ -20916,7 +21059,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-edhidden]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-partnerson],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-edhidden]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -22240,6 +22383,10 @@
     if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; S.pricingErrField = ""; render(); return; }
     // the loyalty switch: a <button aria-pressed> like every other switch in the panel
     if (d.pricingtoggle !== undefined) { var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled; render(); return; }
+    /* «Партнёры и баллы»: the outer switch. A draft change like every other
+       field on this form — «Сохранить» is what puts it through the confirm
+       card and into the journal, so one mis-tap costs nothing. */
+    if (d.partnerson !== undefined) { var pd = pricingDraft(); pd.partnersOn = !pd.partnersOn; render(); return; }
 
     /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
     // «Настройки»: the index of six and the way back out of a sub-page

@@ -680,6 +680,9 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   display: grid; grid-template-columns: 1.2fr 1fr 1fr .8fr 1.4fr 44px; gap: 8px; align-items: center;
 }
 .adm-grid__head { font-size: 12px; color: var(--a-muted); padding-bottom: 6px; border-bottom: 1px solid var(--a-ink); }
+/* «Партнёры и баллы» off: the «Салон, €» column is not drawn at all, so the
+   remaining five share the width instead of leaving a gap where it was */
+.adm-grid__head--nosalon, .adm-grid__row--nosalon { grid-template-columns: 1.2fr 1fr .8fr 1.4fr 44px; }
 .adm-grid__sz { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adm-input--cell { height: 44px; padding: 0 10px; }
 .adm-input--warn { color: var(--a-warn); }

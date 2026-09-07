@@ -18,8 +18,10 @@ import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./swe
  *     reachable through one of them;
  *   · «Отправлен» applies at once when a label exists and asks when it does not;
  *   · one label button — «Открыть PDF (A4)» — with A6 as a quiet link;
- *   · «Партнёры и баллы» off by default hides points and salon pricing
- *     everywhere, and putting it back restores them.
+ *   · «Партнёры и баллы» — the one switch: off takes points and salon
+ *     pricing off all five screens, on puts them back (the DEFAULT is off;
+ *     this suite is a shop where the owner switched it on, see
+ *     src/app/api/e2e/bootstrap).
  *
  * Desktop and mobile: the phone is the owner's machine. Own fake IP — admin
  * login is 5/min (docs/testing.md).
@@ -407,6 +409,88 @@ test.describe("admin — «Доставлен» can close itself", () => {
       await settings(page, "delivery");
       await page.locator("[data-delivdays]").selectOption("0");
       await clearToast(page);
+    }
+  });
+});
+
+test.describe("admin — «Партнёры и баллы» is one switch above both programmes", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(186) });
+
+  /* The DEFAULT (off on a fresh shop) is proved where it belongs, in vitest:
+     tests/partners-switch.test.ts and tests/loyalty.test.ts. This suite's own
+     shop has the programme on — it is what almost every other admin spec is
+     describing (src/app/api/e2e/bootstrap) — so what is checked here is the
+     switch itself: off takes all five screens away, on puts them back. */
+  test("off hides points and salon pricing everywhere; on puts all of it back", async ({ page }) => {
+    test.setTimeout(180_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await settings(page, "prices");
+
+    const sw = page.locator("[data-partnerson]");
+    await expect(sw, "there is no «Партнёры и баллы» switch").toBeVisible();
+    await expect(sw, "the suite's shop does not have the programme on").toHaveAttribute("aria-pressed", "true");
+
+    // ---- off ---------------------------------------------------------------
+    await sw.click();
+    // the form under it stops asking about a programme that is off
+    await expect(page.locator('[data-pricingf="proDiscountPct"]'),
+      "the salon discount field is shown while the programme is off").toHaveCount(0);
+    await expect(page.locator(".adm-form")).toContainText("Сейчас выключено");
+    await page.locator("[data-admpricingsave]").click();
+    await page.locator("[data-admapply]").click();
+    await clearToast(page);
+
+    // ---- off: the five screens Dim named ----------------------------------
+    await tab(page, "people");
+    await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(0);
+    await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
+
+    await tab(page, "goods");
+    const first = page.locator("[data-admgoods]").first();
+    await first.click();
+    await page.locator('[data-edtab="sizes"]').click();
+    await expect(page.locator("[data-edproprice]"), "the «Салон, €» column survived the off switch").toHaveCount(0);
+    await page.locator("[data-admclose]").first().click();
+
+    const feed = async () => (await (await page.request.get("/api/overrides/")).json()).settings.pricing;
+    await expect.poll(async () => (await feed()).partnersOn,
+      { timeout: 15_000, message: "the storefront was still told the programme is on" }).toBe(false);
+    expect((await feed()).loyalty.enabled, "points are on in the feed with the programme off").toBe(false);
+
+    try {
+      // ---- on: everything comes back --------------------------------------
+      await settings(page, "prices");
+      await page.locator("[data-partnerson]").click();
+      await expect(page.locator('[data-pricingf="proDiscountPct"]'),
+        "switching it on did not open the settings under it").toBeVisible();
+      await page.locator("[data-admpricingsave]").click();
+      await page.locator("[data-admapply]").click();
+      await clearToast(page);
+      await expect.poll(async () => (await feed()).partnersOn,
+        { timeout: 15_000, message: "the switch never reached the storefront" }).toBe(true);
+
+      await tab(page, "people");
+      await expect(page.locator("[data-admcusttier]"), "the tier chips did not come back").toHaveCount(4);
+      await expect(page.locator("[data-admpartnernew]")).toBeVisible();
+
+      await tab(page, "goods");
+      await page.locator("[data-admgoods]").first().click();
+      await page.locator('[data-edtab="sizes"]').click();
+      await expect(page.locator("[data-edproprice]"), "the «Салон, €» column did not come back").toBeVisible();
+      await page.locator("[data-admclose]").first().click();
+      await assertClean(page, w, "«Партнёры и баллы» on");
+    } finally {
+      // the suite's shop has the programme on — leave it exactly as found
+      await settings(page, "prices");
+      const back = page.locator("[data-partnerson]");
+      if ((await back.getAttribute("aria-pressed")) !== "true") {
+        await back.click();
+        await page.locator("[data-admpricingsave]").click();
+        await page.locator("[data-admapply]").click();
+        await clearToast(page);
+      }
+      await expect.poll(async () => (await feed()).partnersOn, { timeout: 15_000 }).toBe(true);
     }
   });
 });

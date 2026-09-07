@@ -710,6 +710,12 @@ export function sanitizePricing(raw: unknown): object | null {
   const x = raw as Record<string, unknown>;
   const out: Record<string, unknown> = {};
 
+  /* «Партнёры и баллы» — the one switch above both programmes (Dim,
+     07.09.2026). «Включи партнёров и баллы» is a thing the owner will
+     plausibly say out loud, so the assistant may propose it; the panel still
+     shows the confirm card first, like every other change. */
+  if (typeof x.partnersOn === "boolean") out.partnersOn = x.partnersOn;
+
   const pct = inRange(x.proDiscountPct, PRICING_BOUNDS.proDiscountPct);
   if (pct !== null) out.proDiscountPct = pct;
   const min = inRange(x.proMinOrder, PRICING_BOUNDS.proMinOrder);

@@ -58,6 +58,18 @@ export interface LoyaltySettings {
 }
 
 export interface PricingSettings {
+  /**
+   * «Партнёры и баллы» — the one switch above both programmes (Dim,
+   * 07.09.2026: default OFF, «Renat said later»).
+   *
+   * Off means the shop has no wholesale tier and no points at all: no salon
+   * price anywhere, no «Стать партнёром» in the cabinet, no points earned or
+   * spent, and none of the five screens that showed them. It is not the same
+   * as `loyalty.enabled` — that one is «points off, partners still on», which
+   * is a shop that has partners. Everything keeps its stored value while the
+   * switch is off, so turning it back on restores exactly what was there.
+   */
+  partnersOn: boolean;
   proDiscountPct: number;
   /** Goods subtotal (retail prices) a basket needs before pro pricing applies. 0 = always. */
   proMinOrder: number;
@@ -65,7 +77,7 @@ export interface PricingSettings {
 }
 
 export const DEFAULT_LOYALTY: LoyaltySettings = { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 };
-export const DEFAULT_PRICING: PricingSettings = { proDiscountPct: 20, proMinOrder: 0, loyalty: DEFAULT_LOYALTY };
+export const DEFAULT_PRICING: PricingSettings = { partnersOn: false, proDiscountPct: 20, proMinOrder: 0, loyalty: DEFAULT_LOYALTY };
 
 /**
  * Bounds for every number in `settings.pricing`. Mirrored — not imported —
@@ -106,10 +118,18 @@ function cleanLoyalty(raw: unknown): LoyaltySettings {
 export function cleanPricing(raw: unknown): PricingSettings {
   const x = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
   return {
+    // absent means off: a shop that has never been asked has no partners
+    partnersOn: x.partnersOn === true,
     proDiscountPct: clamp(num(x.proDiscountPct, DEFAULT_PRICING.proDiscountPct), PRICING_BOUNDS.proDiscountPct),
     proMinOrder: money(clamp(num(x.proMinOrder, DEFAULT_PRICING.proMinOrder), PRICING_BOUNDS.proMinOrder)),
     loyalty: cleanLoyalty(x.loyalty),
   };
+}
+
+/** Are points on right now? Both switches have to be — «Партнёры и баллы»
+    above and «Начислять баллы» inside it. One question, one place to ask it. */
+export function loyaltyOn(p: PricingSettings): boolean {
+  return p.partnersOn && p.loyalty.enabled;
 }
 
 /**
@@ -124,9 +144,12 @@ export async function getPricingSettings(): Promise<PricingSettings> {
   return cleanPricing(rows.length ? rows[0].value : null);
 }
 
-/** The subset the anonymous storefront may see — never the pro discount (docs/loyalty.md). */
-export function publicPricing(p: PricingSettings): { loyalty: { enabled: boolean; earnPct: number } } {
-  return { loyalty: { enabled: p.loyalty.enabled, earnPct: p.loyalty.earnPct } };
+/** The subset the anonymous storefront may see — never the pro discount
+    (docs/loyalty.md). `partnersOn` is public because the storefront has to
+    know whether to draw «Стать партнёром» and the points block at all; the
+    SIZE of the discount still never leaves the server. */
+export function publicPricing(p: PricingSettings): { partnersOn: boolean; loyalty: { enabled: boolean; earnPct: number } } {
+  return { partnersOn: p.partnersOn, loyalty: { enabled: loyaltyOn(p), earnPct: p.loyalty.earnPct } };
 }
 
 /* ---------- pro pricing: the maths ----------------------------------------- */
@@ -258,7 +281,9 @@ export async function earnLoyaltyPoints(
 ): Promise<LedgerWrite> {
   if (!UUID_RE.test(customerId)) return { ok: false, error: "bad_customer" };
   const pricing = await getPricingSettings();
-  if (!pricing.loyalty.enabled) return { ok: true, points: 0 };
+  // «Партнёры и баллы» off = nothing is earned at all, whatever wrote the sale
+  // (the web checkout, the salon till, a manual «оплачен» in the panel)
+  if (!loyaltyOn(pricing)) return { ok: true, points: 0 };
   const points = eurosToPoints((Math.max(0, num(paidSubtotalExclShipping)) * pricing.loyalty.earnPct) / 100);
   if (!(points > 0)) return { ok: true, points: 0 };
 
@@ -402,7 +427,9 @@ export async function accountLoyaltySummary(customerId: string | null): Promise<
     balance,
     history,
     settings: {
-      enabled: settings.loyalty.enabled,
+      // «Партнёры и баллы» off means points are off, whatever the inner
+      // switch says — one answer for the cabinet and the checkout alike
+      enabled: loyaltyOn(settings),
       earnPct: settings.loyalty.earnPct,
       redeemMaxPct: settings.loyalty.redeemMaxPct,
       minRedeem: settings.loyalty.minRedeem,

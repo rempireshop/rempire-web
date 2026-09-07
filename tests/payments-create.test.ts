@@ -320,6 +320,15 @@ describe("POST /api/payments/create", () => {
     });
 
     it("points stop at what the gift card left to pay, and both settle once", async () => {
+      /* «Партнёры и баллы» is OFF by default since 07.09.2026 (Dim: «Renat
+         said later» — settings.pricing.partnersOn, docs/loyalty.md), so a
+         shop with a points programme is a shop where the owner switched it
+         on. Everything below is unchanged. */
+      await query(
+        `insert into settings (key, value) values ('pricing', $1::jsonb)
+         on conflict (key) do update set value = $1::jsonb`,
+        [JSON.stringify({ partnersOn: true })],
+      );
       const { recordLogin } = await import("@/lib/customers");
       const { adjustLoyaltyPoints, getLoyaltyBalance, getPricingSettings } = await import("@/lib/loyalty");
       const customer = await recordLogin(CUSTOMER.email, "RU");

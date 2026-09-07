@@ -768,8 +768,19 @@ retail customers who pay (1 point = 1 €).
 **How it works.** `100_tiers_loyalty.sql` (customers `tier|company|reg_code|
 pro_requested_at|pro_approved_at|notes`, `product_overrides.pro_price`, orders
 `customer_id|pricing_tier|loyalty_discount`, `loyalty_ledger` with earn/redeem
-once per order); `src/lib/loyalty.ts` (`settings.pricing` = `proDiscountPct 20,
-proMinOrder 0, loyalty {enabled true, earnPct 5, redeemMaxPct 30, minRedeem 5}`
+once per order); `src/lib/loyalty.ts` (`settings.pricing` = **`partnersOn
+false`** + `proDiscountPct 20, proMinOrder 0, loyalty {enabled true, earnPct 5,
+redeemMaxPct 30, minRedeem 5}`
+
+**`partnersOn` is the one switch above both programmes** (07.09.2026, Dim:
+default OFF, «Renat said later»). Off, `loyaltyOn()` is false everywhere —
+nothing earned, nothing redeemed, an approved partner priced and recorded as
+`retail`, `/api/account/pricing` answering retail — and the panel and the
+storefront draw none of it: no tier chips or «+ Партнёр» in «Клиенты», no
+points block or «Стать партнёром» in the cabinet, no «Использовать баллы» at
+checkout, no «Салон, €» column in the editor. Nothing is deleted, so the
+switch back on restores all five screens exactly. `publicPricing()` publishes
+`partnersOn` (the storefront has to know what to draw) but never the discount
 with bounds; `proUnitPrice`, `earn/redeemLoyaltyPoints`, `upsertPartner`, CSV).
 Routes: `GET /api/account/pricing/`, `POST /api/account/pro-request/`,
 `GET|POST /api/admin/customers/` (`?tier=`, `?format=csv`, «+ Партнёр»),
@@ -923,12 +934,18 @@ Dim pays the OpenAI bill.
   requires the admin cookie **and** an `Origin` header, `max_tokens` 1500, the
   whole catalogue + custom products + low stock + (on keywords) customers and
   posts + attached photo keys. `src/app/api/assistant/actions.ts`
-  `sanitizeAction()` whitelists 28 types, admin ones: `set_price`, `set_stock`,
+  `sanitizeAction()` whitelists 30 types, admin ones: `set_price`, `set_stock`,
   `set_seo`, `toggle_flow`, `toggle_chatbot`, `toggle_bundles`, `set_hero`,
   `create_promo`, `toggle_promo`, `set_shipping_rules`, `set_content`,
   `set_pricing`, `adjust_points`, `stock_adjust`, `stock_set`, `draft_post`,
   `publish_post`, `set_post_cover`, `add_product_photo`, `create_product`,
-  `update_product`, `export_report`. Every action is *proposed* as a card and
+  `update_product`, `export_report`, and — 07.09.2026, Dim: «assistant needs
+  to be able to help there as well» — `propose_bundle` (products and a name
+  for a set that does not exist; NO price and no id, applying it opens the
+  set editor filled in) and `set_bundle` (an existing set changed, straight to
+  `POST /api/admin/bundles` so `validateBundle()` still decides whether it is
+  cheaper than its parts; the ids come from `bundleLinesForPrompt()`, read
+  only when the message is about sets). Every action is *proposed* as a card and
   applied by the panel through the normal routes after «Применить»
   (`askAdminAI` :16933, `confirmCard` :16862, `applyBlogAction` :8327,
   `applyProductPhoto` :17028…). Replies that are not a sentence are replaced

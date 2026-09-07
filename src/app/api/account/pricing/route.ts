@@ -55,6 +55,16 @@ export async function GET(req: Request) {
       );
     }
     const pricing = await getPricingSettings();
+    /* «Партнёры и баллы» off (settings.pricing.partnersOn, Dim 07.09.2026):
+       there is no wholesale tier while the switch is off, so an approved
+       partner is quoted retail — the same answer createOrder() will bill him
+       at, which is the point. The row keeps its `pro`, so nothing is lost. */
+    if (!pricing.partnersOn) {
+      return Response.json(
+        { ok: true, tier: "retail", proDiscountPct: 0, proMinOrder: 0, proPrices: {} },
+        { headers: NO_STORE },
+      );
+    }
     const proPrices = await proPricesFor(pricing);
     return Response.json(
       { ok: true, tier: "pro", proDiscountPct: pricing.proDiscountPct, proMinOrder: pricing.proMinOrder, proPrices },
