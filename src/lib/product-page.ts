@@ -26,6 +26,7 @@
  */
 import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import catalogueMin from "@/data/catalogue.min.json";
 import {
   getCustomProduct,
   isCustomId,
@@ -205,10 +206,25 @@ function html(body: string, status: number, cacheControl: string): Response {
  * A `c-…` id is answered from its row; every other id gets the shell the
  * /shop2/:path+ fallback would have served.
  */
+/* Every id the catalogue ships. A product page for one of these is normally
+   a static file the rewrites answer before this route is reached; the route
+   sees one only in a tree that has not run `npm run prerender` yet, and it
+   must serve it rather than claim it does not exist. */
+const CATALOGUE_IDS = new Set((catalogueMin as Array<{ id: string }>).map((p) => p.id));
+
 export async function productPageResponse(id: string, seg: string): Promise<Response> {
   const shell = readShell();
   const lang = langBySeg(seg) as Lang | null;
-  if (!lang || !isCustomId(id)) return html(shell, 200, "public, max-age=0, must-revalidate");
+  if (!lang) return html(shell, 200, "public, max-age=0, must-revalidate");
+  if (!isCustomId(id)) {
+    /* A real catalogue id gets the shell, as it always has. Anything else is
+       a product that does not exist — and since 07.09.2026 the shop says so
+       with a status instead of quietly serving the home page at 200 (a soft
+       404; docs/audit/2026-09-07-storefront.md). app.js's router lands on its
+       own «Страница не найдена» screen on the same address. */
+    if (CATALOGUE_IDS.has(id)) return html(shell, 200, "public, max-age=0, must-revalidate");
+    return html(noindexShell(shell), 404, NO_STORE);
+  }
 
   let row: CustomProduct | null;
   try {
