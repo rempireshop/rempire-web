@@ -121,11 +121,15 @@ export function renderInvoiceCancelled(
   const due = humanDate(data.invoice.dueAt);
   const hello = greeting(L, customerName(order));
   const total = money(data.totals.total);
+  /* The HTML half keeps the price on one line (money(…, true) puts &nbsp;
+     before the sign), so the sentence is escaped around a placeholder rather
+     than escaped whole — the same trick the invoice letter's VAT line uses. */
+  const amountHtml = esc(t.amountLine("{AMOUNT}")).replace("{AMOUNT}", money(data.totals.total, true));
 
   const body =
     rowTitle(t.title) +
     rowLead(`${esc(hello)}<br>${esc(t.lead(number, inv, due))}`) +
-    rowNote([esc(t.amountLine(total)), esc(t.stock), esc(t.crossed), esc(t.again)]) +
+    rowNote([amountHtml, esc(t.stock), esc(t.crossed), esc(t.again)]) +
     rowButton(shopUrl(L), t.shop);
 
   const html = shell({

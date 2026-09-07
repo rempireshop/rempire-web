@@ -186,8 +186,10 @@ export function renderInvoiceReminder(
 
   const html = shell({
     lang: L,
+    // the shell escapes the preheader, so the joiner is a real U+00A0: a price
+    // never breaks between the number and the sign (tests/emails-compat.test.ts)
+    preheader: t.preheader(total.replace(" €", " €"), due),
     title: `${t.title} — ${inv}`,
-    preheader: t.preheader(total, due),
     body,
     footerNote: esc(t.service),
   });
