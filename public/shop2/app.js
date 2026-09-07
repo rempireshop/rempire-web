@@ -307,6 +307,60 @@
       "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
       "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Liidestused", "Настройки": "Seaded",
       "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
+      "Набор открыт — впишите цену и сохраните":
+        "Komplekt on avatud — sisestage hind ja salvestage",
+      "когда вы вернёте товар в наличие — всем, кто оставил почту":
+        "kui panete toote taas laost saadavaks — kõigile, kes jätsid e-posti",
+      "раз в сутки: корзинам старше 3 часов, если заказа так и не было":
+        "kord ööpäevas: üle 3 tunni vanadele korvidele, kui tellimust nii ei tulnudki",
+      "раз в сутки, с промокодом на две недели":
+        "kord ööpäevas, kahenädalase sooduskoodiga",
+      "Когда поздравлять":
+        "Millal õnnitleda",
+      "За сколько дней поздравлять":
+        "Mitu päeva varem õnnitleda",
+      "промокод действует две недели, так что запас в пару дней ему не мешает":
+        "sooduskood kehtib kaks nädalat, nii et paari päeva varu talle ei sega",
+      "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
+        "Kolm lülitiga kirja saadab pood ise, üks kord ööpäevas. Kuni lüliti on väljas, ei lähe kiri kellelegi.",
+      "Когда заказ считается доставленным":
+        "Millal tellimus loetakse kohale toimetatuks",
+      "Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.":
+        "Nupp «Kohale toimetatud» jääb tellimuse kaardile alles — see on selleks, et te ei peaks seda iga paki puhul käsitsi vajutama.",
+      "Спрашивать перевозчика":
+        "Küsida vedajalt",
+      "Не спрашивать перевозчика":
+        "Mitte küsida vedajalt",
+      "раз в сутки магазин спрашивает Montonio, дошла ли посылка":
+        "kord ööpäevas küsib pood Montoniolt, kas pakk on kohale jõudnud",
+      "Закрывать заказ через":
+        "Sulgeda tellimus",
+      "Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».":
+        "Kirju seejuures ei saadeta — «Kohale toimetatud» ei ole neid kunagi saatnud. Tellimus lihtsalt ei ripu enam «Teel» all.",
+      "за 1 день до даты":
+        "1 päev enne kuupäeva",
+      "за 2 дня до даты":
+        "2 päeva enne kuupäeva",
+      "за 3 дня до даты":
+        "3 päeva enne kuupäeva",
+      "за 5 дней до даты":
+        "5 päeva enne kuupäeva",
+      "за 7 дней до даты":
+        "7 päeva enne kuupäeva",
+      "за 14 дней до даты":
+        "14 päeva enne kuupäeva",
+      "никогда — только вручную":
+        "mitte kunagi — ainult käsitsi",
+      "через 3 дня после отправки":
+        "3 päeva pärast saatmist",
+      "через 5 дней после отправки":
+        "5 päeva pärast saatmist",
+      "через 7 дней после отправки":
+        "7 päeva pärast saatmist",
+      "через 10 дней после отправки":
+        "10 päeva pärast saatmist",
+      "через 14 дней после отправки":
+        "14 päeva pärast saatmist",
       "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
         "Mudel on ühendatud: vastab küsimustele ja valmistab mustandeid. Ilma teie «Rakenda» nuputa ei muuda ta midagi.",
       "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.":
@@ -1420,7 +1474,7 @@
       "Этикетка PDF ↗": "Silt PDF ↗",
       "Отследить ↗": "Jälgi ↗",
       /* order flow: the four steps, the label box, the hints under the buttons */
-      "Этикетка готова": "Silt valmis", "Доставлены": "Kohale toimetatud",
+      "Этикетка готова": "Silt valmis", "Доставлены": "Kohale toimetatud", "В пути": "Teel",
       "Создать этикетку": "Loo silt", "Создаём…": "Loome…",
       "Выдан клиенту": "Kliendile üle antud", "Выдан": "Üle antud",
       "Этикетка": "Silt", "готова": "valmis", "без этикетки": "ilma sildita", "Шаги заказа": "Tellimuse sammud",
@@ -2209,6 +2263,60 @@
       "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
       "Аналитика": "Analytics", "Письма": "E-mails", "Подключения": "Integrations", "Настройки": "Settings",
       "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
+      "Набор открыт — впишите цену и сохраните":
+        "The set is open — type the price and save it",
+      "когда вы вернёте товар в наличие — всем, кто оставил почту":
+        "when you put the product back in stock — to everyone who left an address",
+      "раз в сутки: корзинам старше 3 часов, если заказа так и не было":
+        "once a day: to carts older than 3 hours, when no order ever came",
+      "раз в сутки, с промокодом на две недели":
+        "once a day, with a promo code good for two weeks",
+      "Когда поздравлять":
+        "When to send it",
+      "За сколько дней поздравлять":
+        "How many days early to send it",
+      "промокод действует две недели, так что запас в пару дней ему не мешает":
+        "the promo code is good for two weeks, so a couple of days' head start does it no harm",
+      "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
+        "The shop sends the three switchable letters itself, once a day. While a switch is off, that letter goes to nobody.",
+      "Когда заказ считается доставленным":
+        "When an order counts as delivered",
+      "Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.":
+        "The «Delivered» button stays on the order card — this is about not having to press it by hand for every parcel.",
+      "Спрашивать перевозчика":
+        "Ask the carrier",
+      "Не спрашивать перевозчика":
+        "Do not ask the carrier",
+      "раз в сутки магазин спрашивает Montonio, дошла ли посылка":
+        "once a day the shop asks Montonio whether the parcel has arrived",
+      "Закрывать заказ через":
+        "Close the order after",
+      "Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».":
+        "No letters go out for this — «Delivered» never sent any. The order simply stops sitting in «On the way».",
+      "за 1 день до даты":
+        "1 day before the date",
+      "за 2 дня до даты":
+        "2 days before the date",
+      "за 3 дня до даты":
+        "3 days before the date",
+      "за 5 дней до даты":
+        "5 days before the date",
+      "за 7 дней до даты":
+        "7 days before the date",
+      "за 14 дней до даты":
+        "14 days before the date",
+      "никогда — только вручную":
+        "never — by hand only",
+      "через 3 дня после отправки":
+        "3 days after it was shipped",
+      "через 5 дней после отправки":
+        "5 days after it was shipped",
+      "через 7 дней после отправки":
+        "7 days after it was shipped",
+      "через 10 дней после отправки":
+        "10 days after it was shipped",
+      "через 14 дней после отправки":
+        "14 days after it was shipped",
       "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
         "The model is connected: it answers questions and prepares drafts. It changes nothing without your «Apply».",
       "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.":
@@ -3318,7 +3426,7 @@
       "Этикетка PDF ↗": "Label PDF ↗",
       "Отследить ↗": "Track ↗",
       /* order flow: the four steps, the label box, the hints under the buttons */
-      "Этикетка готова": "Label ready", "Доставлены": "Delivered",
+      "Этикетка готова": "Label ready", "Доставлены": "Delivered", "В пути": "On the way",
       "Создать этикетку": "Create the label", "Создаём…": "Creating…",
       "Выдан клиенту": "Handed to the customer", "Выдан": "Handed over",
       "Этикетка": "Label", "готова": "ready", "без этикетки": "no label", "Шаги заказа": "Order steps",
@@ -10807,20 +10915,31 @@
 
   /* ---------- Заказы ------------------------------------------------------ */
 
-  /* The chips follow the fulfilment steps: a paid order is «Новые» until its
-     label exists, «Этикетка готова» until it leaves, then «Отправлены» and
-     «Доставлены». Unpaid orders (new / failed) live under «Все» with their
-     «Ждёт оплаты» badge — nothing about them is a step of the owner's. */
+  /* Six chips down to three (Dim, 07.09.2026). «Новые · Этикетка готова ·
+     Отправлены · Доставлены · Салон · Все» asked Renat to know which of six
+     boxes an order was in before he could find it; what he actually does is
+     two things — send what has not gone yet, and look at what is already on
+     its way. So: «Отправить N» (paid, still on the shelf, label or no label),
+     «В пути» (gone: shipped and delivered together) and «Все». «По счёту»
+     stays beside them because it is not a step of the same journey — it is an
+     invoice waiting for a bank transfer, and it belongs to the invoice flow.
+     Salon sales, unpaid and cancelled orders are all under «Все», which is
+     why «Все» is a chip and not a link.
+
+     The KEYS are the old ones on purpose: `data-admfilter="new"` is what the
+     overview's «Отправить N» button, the assistant's «Открыть заказы» and the
+     e2e suite have always pressed. Only the labels and what each key MATCHES
+     changed. */
   var ADM_ORDER_FILTERS = [
-    ["new", "Новые"], ["label", "Этикетка готова"], ["shipped", "Отправлены"],
-    ["delivered", "Доставлены"], ["invoice", "По счёту"], ["salon", "Салон"], ["all", "Все"]
+    ["new", "Отправить"], ["shipped", "В пути"], ["invoice", "По счёту"], ["all", "Все"]
   ];
   function admOrderMatches(v, f) {
     if (f === "all") return true;
-    if (f === "new") return v.paid && !v.labeled;
-    if (f === "label") return v.paid && v.labeled;
-    if (f === "shipped") return v.shipped;
-    if (f === "delivered") return v.delivered;
+    // everything paid that has not left yet — a sticker is not a hand-over
+    if (f === "new" || f === "label") return v.paid;
+    // …and everything that has: «Отправлен» and «Доставлен» are one answer to
+    // «где посылка» — the row itself says which of the two it is
+    if (f === "shipped" || f === "delivered") return v.shipped || v.delivered;
     // «По счёту»: the invoices still waiting for their transfer
     if (f === "invoice") return !!v.invoice && v.unpaid;
     if (f === "salon") return v.pos;
@@ -10838,7 +10957,8 @@
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
-          var n = x[0] === "new" ? split.fresh : x[0] === "label" ? split.labeled : x[0] === "invoice" ? admInvoicesWaiting().length : 0;
+          // «Отправить N» counts everything still on the shelf, labelled or not
+          var n = x[0] === "new" ? split.fresh + split.labeled : x[0] === "invoice" ? admInvoicesWaiting().length : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
             x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
@@ -11123,8 +11243,12 @@
         : '<div class="adm-hint">Трек-номер появится, когда перевозчик примет посылку.</div>') +
       (mont.dropOffPin ? '<div class="adm-hint">Код сдачи посылки: ' + esc(mont.dropOffPin) + "</div>" : "") +
       '<div class="adm-ship__links">' +
+        /* One label button, A4 (Dim, 07.09.2026): two equal buttons made Renat
+           choose a paper size before he could print, and the office printer is
+           the one he has. A6 stays reachable — a quiet link beside it, for the
+           day a thermal printer appears — rather than removed. */
         '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A4" target="_blank" rel="noopener" data-labelpdf="A4">Открыть PDF (A4) ↗</a>' +
-        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A6" target="_blank" rel="noopener" data-labelpdf="A6">A6 для термопринтера ↗</a>' +
+        '<a class="adm-link adm-link--muted" href="' + base + '?size=A6" target="_blank" rel="noopener" data-labelpdf="A6">A6 для термопринтера ↗</a>' +
         // http(s) only: an href is a place a "javascript:" string would run
         (/^https?:\/\//i.test(String(mont.trackingUrl || ""))
           ? '<a class="adm-link adm-link--muted" href="' + esc(mont.trackingUrl) + '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
@@ -11937,18 +12061,43 @@
      fields, the same placeholder chips, the same «Сохранить» → confirm card →
      one set_mail_texts action. New is the layout — fields left, the letter
      right, redrawn from the draft as it is typed. */
+  /* Each row says what the letter really does AND when it really fires (Dim,
+     07.09.2026: «keep and make them work … need a switch and be manageble»).
+     The three switchable ones all start off — the same FLOW_DEFAULTS the
+     sender reads (src/lib/flows.ts) — and all three are sent by one job that
+     runs ONCE A DAY on the free plan, which is why every «когда» below is
+     written in days rather than in hours. */
   var ADM_MAIL_ROWS = [
     ["order-confirmed", "Заказ принят", "сразу после оплаты", ""],
     ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
-    ["back-in-stock", "Товар снова в наличии", "тем, кто оставил почту", "backstock"],
-    ["abandoned-cart", "Брошенная корзина", "через 3 часа", "abandoned"],
-    // «в день рождения», because that is what runBirthdays() does: it matches
-    // today's month and day (src/lib/flows.ts). The row used to promise three
-    // days of warning the sender never gave.
-    ["birthday", "Скидка ко дню рождения", "в день рождения", "birthday"],
+    ["back-in-stock", "Товар снова в наличии", "когда вы вернёте товар в наличие — всем, кто оставил почту", "backstock"],
+    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше 3 часов, если заказа так и не было", "abandoned"],
+    ["birthday", "Скидка ко дню рождения", "раз в сутки, с промокодом на две недели", "birthday"],
     ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
     ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
   ];
+  /* «за N дней» (Dim: «the days before need to be a setting»). A select, not
+     a number box: on a phone it is one tap, and the values are the ones a
+     birthday promo is worth sending on. 0 is the day itself — what
+     runBirthdays() has always done. */
+  /* Whole sentences, not «за » + n + a plural word: each option is one string
+     the dictionary can hold, which is what keeps the panel trilingual without
+     a rule per number (the same reason ADM_MAIL_ROWS spells its «когда» out). */
+  var BIRTHDAY_DAY_CHOICES = [
+    [0, "в день рождения"], [1, "за 1 день до даты"], [2, "за 2 дня до даты"],
+    [3, "за 3 дня до даты"], [5, "за 5 дней до даты"], [7, "за 7 дней до даты"],
+    [14, "за 14 дней до даты"]
+  ];
+  function birthdayDays() { return Number(DEMO.flows.birthdayDays) || 0; }
+  function admBirthdayDaysHTML() {
+    var n = birthdayDays();
+    return '<div class="adm-swrow"><span>Когда поздравлять' +
+        '<span class="adm-row__sub">промокод действует две недели, так что запас в пару дней ему не мешает</span></span>' +
+      '<span class="sel sel--box"><select class="adm-input" data-flowbdays aria-label="За сколько дней поздравлять">' +
+      BIRTHDAY_DAY_CHOICES.map(function (x) {
+        return '<option value="' + x[0] + '"' + (x[0] === n ? " selected" : "") + ">" + x[1] + "</option>";
+      }).join("") + "</select></span></div>";
+  }
   function admMailName(tpl) {
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
     return tpl;
@@ -11968,10 +12117,13 @@
           ? admSwitch('data-admflow="' + flow + '"', on, on ? "Выключить письмо" : "Включить письмо")
           : '<span class="adm-badge adm-badge--ok">всегда</span>') +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
-        "</div>";
+        "</div>" +
+        // the one letter with a setting of its own, right under its own row
+        (flow === "birthday" && on ? admBirthdayDaysHTML() : "");
     }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
-        "их править не нужно.</p>";
+        "их править не нужно.</p>" +
+      '<p class="adm-hint">Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.</p>';
   }
   /** « · Ждут письма: 3» — only when the server actually counted, never a zero
       the panel cannot stand behind. Its own function so the i18n check sees
@@ -12576,7 +12728,42 @@
       }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
         "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
+      admDeliveryCloseHTML() +
       "</div>";
+  }
+  /* ---- «Доставлен» без вашей кнопки (settings.delivery) -------------------
+     Dim: «we need to improve this». The last step of an order was manual and
+     sent nothing, so marking it meant tracking every parcel by hand. Two
+     honest ways, both here, both off-able:
+
+       · the carrier's own answer — Montonio's shipping API really does carry
+         a status (GET /shipments/<id>, docs/shipping.md), asked once a day;
+       · time — «через N дней после отправки», 0 meaning never, for a parcel
+         with no Montonio record at all and for a status the shop cannot read.
+
+     Off by default (0 days): a shop that has not decided must not be closing
+     orders on its own. The manual button stays exactly where it was. */
+  var DELIVERY_DAY_CHOICES = [
+    [0, "никогда — только вручную"], [3, "через 3 дня после отправки"], [5, "через 5 дней после отправки"],
+    [7, "через 7 дней после отправки"], [10, "через 10 дней после отправки"], [14, "через 14 дней после отправки"]
+  ];
+  function deliveryConf() {
+    return S.deliveryLoaded || { autoDays: 0, useCarrier: true };
+  }
+  function admDeliveryCloseHTML() {
+    loadAdminPricing(false);   // the same GET /api/admin/settings the prices card makes
+    var d = deliveryConf();
+    return '<div class="adm-sec__t" style="margin-top:24px">Когда заказ считается доставленным</div>' +
+      '<p class="adm-hint" style="margin:0 0 10px">Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.</p>' +
+      '<div class="adm-swrow"><span>Спрашивать перевозчика' +
+        '<span class="adm-row__sub">раз в сутки магазин спрашивает Montonio, дошла ли посылка</span></span>' +
+        admSwitch("data-delivcarrier", d.useCarrier, d.useCarrier ? "Не спрашивать перевозчика" : "Спрашивать перевозчика") + "</div>" +
+      '<label class="adm-field" style="margin-top:12px"><span>Закрывать заказ через</span>' +
+        '<span class="sel sel--box"><select class="adm-input" data-delivdays>' +
+        DELIVERY_DAY_CHOICES.map(function (n) {
+          return '<option value="' + n[0] + '"' + (n[0] === d.autoDays ? " selected" : "") + ">" + n[1] + "</option>";
+        }).join("") + "</select></span></label>" +
+      '<p class="adm-hint" style="margin-top:8px">Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».</p>';
   }
   /* `col` is the column's own name, drawn only on a phone: the header row of
      the grid is hidden there, and three bare boxes under «Эстония» gave the
@@ -13407,18 +13594,20 @@
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
-          // «✨»: the strip and its phone-width line, from what the owner typed as the gist
-          admSparkHTML('data-contentspark="announcement"', "✨ Написать текст полоски", 'data-contentspark="announcement:all"') +
+          /* No «✨» here any more (Dim, 07.09.2026: «fewer sparkle buttons»).
+             Six one-off writers were six different ways to ask the same
+             assistant for a sentence; the two that stayed are the two the
+             owner cannot easily write himself — a banner slide and a product
+             name. Everything else he asks the assistant for in its own words,
+             where it can also show him what it is about to change. */
           cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300))) +
         (!show("contact") ? "" : cBlock("contact", "Страница «Контакты»",
           "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
-          cTri("contactPage", "Текст страницы", "textarea", 1200) +
-          admSparkHTML('data-contentspark="contact"', "✨ Написать текст страницы", 'data-contentspark="contact:all"'))) +
+          cTri("contactPage", "Текст страницы", "textarea", 1200))) +
         (!show("emailfooter") ? "" : cBlock("emailfooter", "Подпись в письмах",
           esc(cText(d.emailFooter)) || "нет",
           cTri("emailFooter", "Строка внизу письма", "input", 300,
-            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.") +
-          admSparkHTML('data-contentspark="footer"', "✨ Написать строку", 'data-contentspark="footer:all"'))) +
+            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
       "</div>" +
       '<div class="adm-acts" style="margin-top:16px">' +
         '<button class="adm-btn" data-contentsave>Сохранить</button>' +
@@ -13440,6 +13629,15 @@
      admContentCard() write through (PUT /api/admin/settings), so a save here
      lands in the change log with an undo like everything else. */
   var PRICING_DEFAULT = { proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } };
+  /** settings.delivery, in the shape cleanDelivery() enforces on the server. */
+  function normaliseDelivery(raw) {
+    var r = raw && typeof raw === "object" ? raw : {};
+    var days = Math.trunc(Number(r.autoDays));
+    return {
+      autoDays: isFinite(days) && days > 0 ? Math.min(days, 60) : 0,
+      useCarrier: r.useCarrier === undefined ? true : r.useCarrier !== false
+    };
+  }
   function normalisePricing(raw) {
     var r = raw && typeof raw === "object" ? raw : {};
     var l = r.loyalty && typeof r.loyalty === "object" ? r.loyalty : {};
@@ -13477,7 +13675,10 @@
       loadAdminPricing._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        S.pricingLoaded = normalisePricing(r.body.settings && r.body.settings.pricing);
+        var st0 = r.body.settings || {};
+        S.pricingLoaded = normalisePricing(st0.pricing);
+        // «Доставлен» без кнопки: the same admin-only settings map, read once
+        S.deliveryLoaded = normaliseDelivery(st0.delivery);
         render();
       }
     }).catch(function () { loadAdminPricing._busy = false; });
@@ -13895,8 +14096,6 @@
             '<input class="adm-input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
           '<label class="adm-field" style="margin-top:10px">Заметка для себя' +
             '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
-          // «✨»: one line from the code's own conditions — what it is for, where it is given out
-          admSparkHTML("data-promospark", "✨ Написать заметку") +
         "</div></details>" +
       (S.promoFormErr ? '<div class="adm-err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
       '<div class="adm-acts"><button class="adm-btn" data-admpromosave>' +
@@ -14010,6 +14209,64 @@
     });
   }
 
+  /** «Шампунь + кондиционер ×2» — what a set's item list says out loud. */
+  function bundlePartsText(items) {
+    return (items || []).map(function (it) {
+      var p = byIdOrNull(it.productId || it.id);
+      var nm = p ? p.name : String(it.productId || it.id || "");
+      return nm + (Number(it.qty) > 1 ? " ×" + it.qty : "");
+    }).join(" + ");
+  }
+  /* «Наборы»: the assistant's proposal, applied. A set is a price the shop
+     will charge, so nothing is saved here — the editor opens with the
+     products and the name already in it, and the owner names the price and
+     presses «Сохранить» himself (see sanitizeProposeBundle's own comment). */
+  function applyProposeBundle(a) {
+    var form = blankBundle();
+    form.cat = a.cat || form.cat;
+    form.title = { RU: (a.title && a.title.RU) || "", ET: (a.title && a.title.ET) || "", EN: (a.title && a.title.EN) || "" };
+    form.desc = { RU: (a.desc && a.desc.RU) || "", ET: (a.desc && a.desc.ET) || "", EN: (a.desc && a.desc.EN) || "" };
+    form.items = (a.items || []).map(function (it) {
+      return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
+    });
+    // «Наборы» is the third tab of «Товары» (admProductTab), not a section
+    S.adminTab = "goods"; S.goodsTab = "bundles"; S.adminEdit = "";
+    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = "";
+    window.scrollTo({ top: 0 }); render();
+    toast("Набор открыт — впишите цену и сохраните");
+  }
+  /* …and a change to a set that exists: the same POST the editor's own
+     «Сохранить» makes, so validateBundle() on the server has the last word
+     about whether the set is still cheaper than its parts. */
+  function applySetBundle(a) {
+    var was = (S.admBundles || []).filter(function (b) { return b.id === a.id; })[0];
+    var body = {
+      id: a.id,
+      cat: a.cat || (was && was.cat) || "beard",
+      title: a.title || (was && was.title) || {},
+      desc: a.desc || (was && was.desc) || {},
+      items: (a.items || []).map(function (it) {
+        return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
+      }),
+      image: (was && was.image) || "",
+      sort: (was && was.sort) || 0,
+      active: a.active != null ? a.active : !(was && was.active === false)
+    };
+    if (a.price != null) body.price = a.price;
+    else if (a.discountPct != null) body.discountPct = a.discountPct;
+    else if (was && was.price != null) body.price = was.price;
+    apiSend("/api/admin/bundles/", "POST", body).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        journalNote(actionText(a));
+        toast("Набор сохранён ✓");
+        loadAdminBundles(true); loadBundles();
+        render(); return;
+      }
+      toast(BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить набор.");
+      render();
+    }).catch(function () { toast("Сервер не отвечает"); render(); });
+  }
   function blankBundle() {
     return {
       id: "", cat: "beard", editing: false,
@@ -17320,7 +17577,7 @@
        снова в наличии» used to start on here and in GET /api/overrides while
        the sender read it as off, so the switch said «включено» and no letter
        ever left — the owner had to toggle it off and on to turn it on. */
-    flows: { abandoned: false, birthday: false, backstock: false }, log: [] };
+    flows: { abandoned: false, birthday: false, backstock: false, birthdayDays: 0 }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
@@ -17864,7 +18121,9 @@
     }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") srvSaved(apiSend(ov, "PUT", { id: a.id, description: a.value || null }));
-    else if (a.type === "toggle_flow") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
+    else if (a.type === "toggle_flow" || a.type === "set_flow_days") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
+    // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
+    else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
     else if (a.type === "toggle_chatbot") srvSaved(apiSend(st, "PUT", { chatbot: DEMO.chatbot }));
     else if (a.type === "toggle_bundles") srvSaved(apiSend(st, "PUT", { bundles: DEMO.bundles }));
     else if (a.type === "set_hero") srvSaved(apiSend(st, "PUT", { hero: DEMO.hero }));
@@ -18324,8 +18583,28 @@
         (more.length ? " · " + more.join(", ") : "");
     }
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
+    if (a.type === "set_flow_days") {
+      return "Поздравление: " + (a.value ? "за " + a.value + " " + pl(a.value, "день", "дня", "дней") + " до дня рождения" : "в день рождения");
+    }
+    if (a.type === "set_delivery") {
+      var dv = normaliseDelivery(a.value);
+      return "Доставлен сам: " + (dv.useCarrier ? "спрашивать перевозчика" : "не спрашивать перевозчика") + " · " +
+        (dv.autoDays ? "через " + dv.autoDays + " " + pl(dv.autoDays, "день", "дня", "дней") : "по времени не закрывать");
+    }
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_bundles") return "Наборы на сайте: " + (a.value ? "показать" : "скрыть");
+    /* «Наборы»: the assistant's two set actions (Dim, 07.09.2026). A proposal
+       names the products and opens the editor; a change names the set. Both
+       lines list what is in the set, because that is the whole of what the
+       owner is being asked to look at. */
+    if (a.type === "propose_bundle") {
+      return "Набор «" + ((a.title && a.title.RU) || "") + "»: " + bundlePartsText(a.items);
+    }
+    if (a.type === "set_bundle") {
+      var sbName = (a.title && a.title.RU) || a.id;
+      return "Набор «" + sbName + "»: " + bundlePartsText(a.items) +
+        (a.price != null ? " · " + eur(a.price) : "");
+    }
     if (a.type === "set_hero") {
       var hsl = a.value && Array.isArray(a.value.slides) ? a.value.slides : null;
       if (!hsl || !hsl.length) return "Баннер: стандартный";
@@ -18614,6 +18893,19 @@
       if (seoNew) DEMO.seo[a.id] = seoNew; else delete DEMO.seo[a.id];
     }
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
+    /* «за N дней до дня рождения» (Dim, 07.09.2026). Same settings.flows row
+       the switch writes, so the whole map travels and undo re-sends it. */
+    else if (a.type === "set_flow_days") {
+      entry.prev = { type: "set_flow_days", id: a.id, value: Number(DEMO.flows.birthdayDays) || 0 };
+      DEMO.flows.birthdayDays = a.value;
+    }
+    /* «Доставлен» без кнопки: settings.delivery has no demo layer either —
+       S.deliveryLoaded IS the last known server value, and the whole object
+       travels, so undo puts the previous pair back. */
+    else if (a.type === "set_delivery") {
+      entry.prev = { type: "set_delivery", value: normaliseDelivery(S.deliveryLoaded) };
+      S.deliveryLoaded = normaliseDelivery(a.value);
+    }
     else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
     else if (a.type === "toggle_bundles") { entry.prev = { type: "toggle_bundles", value: DEMO.bundles !== false }; DEMO.bundles = a.value; }
     else if (a.type === "set_hero") {
@@ -18762,6 +19054,8 @@
     else if (a.type === "stock_adjust" || a.type === "order_status" || a.type === "order_label") noop();
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
+    else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
+    else if (a.type === "set_delivery") S.deliveryLoaded = normaliseDelivery(a.value);
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
     else if (a.type === "set_hero") {
@@ -20622,7 +20916,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-edhidden]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-edhidden]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -20911,6 +21205,20 @@
     if (d.admshipnow) {
       var shipRow = admOrderById(d.admshipnow);
       if (!shipRow) return;
+      /* With a label the parcel is already registered, the tracking number is
+         known and the letter is predictable to the word — so the step applies
+         at once with the toast's undo behind it, like every other reversible
+         action in this panel (Dim, 07.09.2026). Without a label the letter
+         goes out with no tracking number at all, which is worth one question. */
+      if (shipRow.labeled) {
+        var shipEntry = demoApply({
+          type: "order_status", id: shipRow.id, number: shipRow.number,
+          value: "shipped", prev: shipRow.status
+        });
+        render();
+        toast(shipRow.number + " отправлен · письмо ушло", shipEntry);
+        return;
+      }
       pendingAction = {
         type: "order_status", overlay: true, id: shipRow.id, number: shipRow.number,
         value: "shipped", prev: shipRow.status,
@@ -21335,50 +21643,11 @@
       });
       return;
     }
-    if (d.contentspark !== undefined) {
-      var csParts = d.contentspark.split(":"), csWhat = csParts[0];
-      var cLangs = csParts[1] === "all" ? ["RU", "ET", "EN"] : [S.contentLang || "RU"];
-      var cd = contentDraft(), cco = cd.company || {};
-      var companyIn = {
-        name: cco.legalName || "", address: cco.address || "", phone: cco.phone || "", email: cco.email || "",
-        hours: CONTENT_DAYS.filter(function (r) { return cd.hours[r[0]]; }).map(function (r) { return r[1] + " " + cd.hours[r[0]]; }).join(", ")
-      };
-      if (csWhat === "announcement") {
-        var annHint = cd.announcement.text[S.contentLang || "RU"] || cd.announcement.text.RU || cd.announcement.text.ET || cd.announcement.text.EN || "";
-        if (!annHint) { toast("Сначала впишите, о чём полоска — хотя бы по-русски"); refocus('[data-contentf="announcement.text.' + (S.contentLang || "RU") + '"]'); return; }
-        admSpark(t, cLangs, "announcement", function () { return { hint: annHint }; }, function (L, tx) {
-          if (tx.text) { cDraftSet("announcement.text." + L, tx.text); cPatchField("announcement.text." + L, tx.text); }
-          if (tx.short) { cDraftSet("announcement.short." + L, tx.short); cPatchField("announcement.short." + L, tx.short); }
-        });
-      } else if (csWhat === "contact") {
-        admSpark(t, cLangs, "contact_page", function (L) {
-          return { hint: cd.contactPage[L] || cd.contactPage.RU || "", company: companyIn };
-        }, function (L, tx) {
-          if (tx.text) { cDraftSet("contactPage." + L, tx.text); cPatchField("contactPage." + L, tx.text); }
-        });
-      } else {
-        admSpark(t, cLangs, "email_footer", function (L) {
-          return { hint: cd.emailFooter[L] || cd.emailFooter.RU || "", company: companyIn };
-        }, function (L, tx) {
-          if (tx.text) { cDraftSet("emailFooter." + L, tx.text); cPatchField("emailFooter." + L, tx.text); }
-        });
-      }
-      return;
-    }
-    if (d.promospark !== undefined) {
-      var pfs = S.promoForm;
-      if (!pfs) return;
-      if (!pfs.code) { toast("Сначала впишите код"); refocus('[data-promof="code"]'); return; }
-      admSpark(t, [S.lang === "ET" || S.lang === "EN" ? S.lang : "RU"], "promo_note", function () {
-        return { promo: { code: pfs.code, kind: pfs.kind, value: pfs.value, minSubtotal: pfs.minSubtotal, endsAt: pfs.endsAt, maxUses: pfs.maxUses }, hint: pfs.note || "" };
-      }, function (L, tx) {
-        if (!tx.text) return;
-        pfs.note = String(tx.text).slice(0, 200);
-        var noteEl2 = document.querySelector('[data-promof="note"]');
-        if (noteEl2) noteEl2.value = pfs.note;
-      });
-      return;
-    }
+    /* «✨» on the strip, the contact page, the letter signature and the promo
+       note is gone (Dim, 07.09.2026) — with its handler and its prompt kind.
+       The assistant itself lost nothing: it still writes all four through its
+       own set_content / create_promo actions, where the owner sees what is
+       about to change before he applies it. */
     if (d.ednamespark !== undefined) {
       var nbEl = document.querySelector("[data-edbrand]"), nnEl = document.querySelector("[data-edname]"), ncEl = document.querySelector("[data-edcat]");
       var typedName = nnEl ? nnEl.value.trim() : "";
@@ -21615,6 +21884,10 @@
           applyProductPhoto(pa, !!(cutBox && cutBox.checked)); return;
         }
         if (pa.type === "set_post_cover") { applyPostCover(pa); return; }
+        /* «Наборы»: the proposal opens the editor (no price is set for the
+           owner), the change goes straight to POST /api/admin/bundles */
+        if (pa.type === "propose_bundle") { applyProposeBundle(pa); return; }
+        if (pa.type === "set_bundle") { applySetBundle(pa); return; }
         // the assistant named a topic: the article is written here, in the
         // blog editor, by the same generator its own button runs
         if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
@@ -21691,6 +21964,13 @@
     if (d.admflow !== undefined) {
       demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
       toast("Сохранено ✓"); render(); return;
+    }
+    /* «Доставлен» без кнопки: both halves of settings.delivery apply at once
+       with the toast's undo — nothing here sends anything or moves money. */
+    if (d.delivcarrier !== undefined) {
+      var dc = deliveryConf();
+      var dcEntry = demoApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } });
+      render(); toast("Сохранено ✓", dcEntry); return;
     }
     // assistant-work: «Отчёты» — the browser follows content-disposition:
     // attachment and downloads it; nothing here needs a fetch/promise.
@@ -22809,6 +23089,17 @@
       render();
     }
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
+    /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
+    else if (t.matches("[data-delivdays]")) {
+      var dvc = deliveryConf();
+      var dvEntry = demoApply({ type: "set_delivery", value: { autoDays: Number(t.value) || 0, useCarrier: dvc.useCarrier } });
+      render(); toast("Сохранено ✓", dvEntry);
+    }
+    /* «за N дней до дня рождения» — settings.flows, the same row the switch writes */
+    else if (t.matches("[data-flowbdays]")) {
+      var bdEntry = demoApply({ type: "set_flow_days", id: "birthday", value: Number(t.value) || 0 });
+      render(); toast("Сохранено ✓", bdEntry);
+    }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     // product creation: the subsection list follows the section — a DOM
     // patch, like every other change on the goods editor's form

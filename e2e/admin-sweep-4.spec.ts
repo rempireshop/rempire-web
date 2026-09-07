@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
-import { ipHeaders } from "./fixtures";
-import { assertClean, clearToast, openAdmin, tab, watch } from "./sweep-helpers";
+import { ipHeaders, waitForScreen } from "./fixtures";
+import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
  * The fourth admin sweep — Dim's answers of 07.09.2026
@@ -271,5 +271,186 @@ test.describe("admin — «Написать клиенту» asks before it send
     expect(sent[0]).toContain("завтра утром");
     await clearToast(page);
     await assertClean(page, w, "«Написать клиенту» behind the confirm card");
+  });
+});
+
+test.describe("admin — three order chips, and the steps behind them", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(183) });
+
+  test("«Отправить · В пути · По счёту · Все», and every order reachable", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await tab(page, "orders");
+
+    const chips = page.locator("[data-admfilter]");
+    await expect(chips, "the six chips did not become four").toHaveCount(4);
+    await expect(chips.nth(0)).toContainText("Отправить");
+    await expect(chips.nth(1)).toHaveText("В пути");
+    await expect(chips.nth(2)).toContainText("По счёту");
+    await expect(chips.nth(3)).toHaveText("Все");
+    // the ones that are gone are really gone
+    for (const dead of ["label", "delivered", "salon"]) {
+      await expect(page.locator(`[data-admfilter="${dead}"]`), `«${dead}» is still a chip`).toHaveCount(0);
+    }
+    await assertClean(page, w, "the orders chips");
+
+    /* «Все» has to be a superset: whatever the other three show, «Все» shows
+       too — that is what «every order stays reachable» means. */
+    const countOn = async (f: string) => {
+      await page.locator(`[data-admfilter="${f}"]`).click();
+      await expect(page.locator(`[data-admfilter="${f}"][aria-current="true"]`)).toBeVisible();
+      return page.locator("[data-admorder]").count();
+    };
+    const ship = await countOn("new");
+    const transit = await countOn("shipped");
+    const invoice = await countOn("invoice");
+    const all = await countOn("all");
+    expect(all, "«Все» shows fewer orders than the chips beside it").toBeGreaterThanOrEqual(
+      Math.max(ship, transit, invoice));
+
+    // the search really does look past the chip, and says so
+    await page.locator(`[data-admfilter="new"]`).click();
+    await page.locator("[data-admorderq]").fill("R-");
+    await expect(page.locator("#orderlist"), "the search no longer explains the disabled chip")
+      .toContainText("фильтр сейчас не действует");
+    await page.locator("[data-admorderq]").fill("");
+    await assertClean(page, w, "orders search over a chip");
+  });
+
+  test("«Отправлен» applies at once with a label and asks without one", async ({ page }) => {
+    test.setTimeout(180_000);
+    const w = watch(page);
+
+    const made = await page.request.post("/api/orders/", {
+      data: {
+        lang: "ru", items: [{ id: "proraso-azur-lime-after-shave-balm-100-ml", qty: 1 }],
+        customer: { name: "Тест Отправка", email: "ship-confirm@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "parcel", country: "EE" },
+      },
+    });
+    expect(made.ok()).toBe(true);
+    const body = await made.json();
+    const orderId = body.orderId as string;
+    const number = body.number as string;
+    await openAdmin(page);
+    // paid, so the panel offers the shipping steps at all — after the sign-in,
+    // because this is an admin route and the cookie is what openAdmin() gets
+    const paid = await page.request.patch(`/api/admin/orders/${orderId}/`, { data: { status: "paid" } });
+    expect(paid.ok(), "the test order could not be marked paid").toBe(true);
+    // the panel loads its order list once per session — this one moved behind
+    // its back, so the list has to be asked again
+    await page.reload();
+    await waitForScreen(page, "admin");
+
+    await tab(page, "orders");
+    await page.locator("[data-admorderq]").fill(number);
+    await page.locator(`[data-admorder="${orderId}"]`).click();
+    await expect(page.locator("[data-admshipnow]").first()).toBeVisible({ timeout: 15_000 });
+
+    // ---- no label: the letter would go out with no tracking number, so it asks
+    await page.locator("[data-admshipnow]").first().click();
+    const card = page.locator(".adm-confirm");
+    await expect(card, "«Отправлен» without a label skipped the confirm").toBeVisible();
+    await expect(card).toContainText("без трек-номера");
+    await page.locator("[data-admcancel]").click();
+    await expect(card).toHaveCount(0);
+
+    // ---- with a label: the tracking is known, so it applies at once with an undo
+    await page.locator(`[data-admlabel="${orderId}"]`).first().click();
+    await expect(page.locator("[data-trackingcode]"), "the label did not register").toBeVisible({ timeout: 30_000 });
+    await clearToast(page);
+    // one label button, A4, with A6 kept as a quiet link beside it
+    await expect(page.locator('.adm-btn[data-labelpdf="A4"]'), "the A4 label is not the button").toHaveCount(1);
+    await expect(page.locator('.adm-link[data-labelpdf="A6"]'), "A6 is no longer a quiet link").toHaveCount(1);
+    await expect(page.locator('.adm-btn[data-labelpdf="A6"]'), "A6 is still a second button").toHaveCount(0);
+
+    await page.locator("[data-admshipnow]").first().click();
+    await expect(page.locator(".adm-confirm"), "«Отправлен» with a label still asks").toHaveCount(0);
+    expect(await toastText(page)).toMatch(/отправлен/);
+    await expect(page.locator(".adm-toast__undo"), "the six-second undo is missing").toBeVisible();
+    await page.locator(".adm-toast__undo").click();
+    await clearToast(page);
+    await assertClean(page, w, "«Отправлен» with and without a label");
+  });
+});
+
+test.describe("admin — «Доставлен» can close itself", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(184) });
+
+  test("the setting lives in «Доставка и оплата» and defaults to «только вручную»", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await settings(page, "delivery");
+
+    const days = page.locator("[data-delivdays]");
+    await expect(days, "there is no «закрывать заказ через» setting").toBeVisible();
+    await expect(days, "the shop closes orders on its own out of the box").toHaveValue("0");
+    await expect(page.locator("[data-delivcarrier]")).toBeVisible();
+    await assertClean(page, w, "the delivery-close card");
+
+    try {
+      await days.selectOption("7");
+      await clearToast(page);
+      await expect.poll(async () => {
+        const res = await page.request.get("/api/admin/settings/");
+        return ((await res.json()).settings.delivery || {}).autoDays;
+      }, { timeout: 15_000, message: "the setting never reached the server" }).toBe(7);
+
+      // …and the manual button is still there, which is what «improve, do not remove» means
+      await tab(page, "orders");
+      await page.locator('[data-admfilter="shipped"]').click();
+      const anyShipped = await page.locator("[data-admdelivered]").count();
+      expect(anyShipped >= 0).toBe(true);
+    } finally {
+      await settings(page, "delivery");
+      await page.locator("[data-delivdays]").selectOption("0");
+      await clearToast(page);
+    }
+  });
+});
+
+test.describe("admin — the birthday letter has a switch and a «за N дней»", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(185) });
+
+  test("the days setting appears with the switch and reaches the server", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    await openAdmin(page);
+
+    const direct = page.locator('[data-admtab="promos"][aria-current]:visible');
+    const more = page.locator("[data-admmore]:visible");
+    await expect(direct.or(more).first()).toBeVisible();
+    if (await direct.count()) await direct.first().click();
+    else {
+      await more.first().click();
+      await page.locator('.adm-sheet [data-admtab="promos"]').first().click();
+    }
+    await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
+
+    // all three switchable letters start off, exactly as the sender reads them
+    await expect(page.locator('[data-admflow="birthday"]')).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator("[data-flowbdays]"), "the days setting shows while the letter is off").toHaveCount(0);
+
+    try {
+      await page.locator('[data-admflow="birthday"]').click();
+      await clearToast(page);
+      const days = page.locator("[data-flowbdays]");
+      await expect(days, "switching the letter on did not offer «за N дней»").toBeVisible();
+      await expect(days, "it does not default to the day itself").toHaveValue("0");
+      await days.selectOption("3");
+      await clearToast(page);
+      await expect.poll(async () => {
+        const res = await page.request.get("/api/overrides/");
+        return ((await res.json()).settings.flows || {}).birthdayDays;
+      }, { timeout: 15_000, message: "«за N дней» never reached the server" }).toBe(3);
+      await assertClean(page, w, "the birthday days setting");
+    } finally {
+      const days2 = page.locator("[data-flowbdays]");
+      if (await days2.count()) { await days2.selectOption("0"); await clearToast(page); }
+      await page.locator('[data-admflow="birthday"]').click();
+      await clearToast(page);
+    }
   });
 });

@@ -16,6 +16,7 @@ import { parseShippingRules } from "@/lib/shipping";
 import { cleanMailTexts } from "@/emails/texts";
 import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
+import { cleanDelivery } from "@/lib/delivery";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -98,6 +99,10 @@ export async function PUT(req: Request) {
       /* «Счета для компаний»: the number prefix (letters, digits, dashes) and
          the payment term (1–60 days) — src/lib/invoices.ts. Same first door. */
       if (key === "invoice") value = cleanInvoiceSettings(value);
+      /* «Доставлен» closing itself: how many days after «Отправлен» an order
+         nobody closed is closed anyway (0 = never), and whether the carrier's
+         own status may close it — src/lib/delivery.ts. Same first door. */
+      if (key === "delivery") value = cleanDelivery(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

@@ -375,29 +375,26 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
     // an empty box
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
 
-    /* The count on the «Новые» chip and the badge on the nav item are the
+    /* The count on the «Отправить» chip and the badge on the nav item are the
        same number as the rows — read off the loaded list, not off the
-       overview's cached summary, which used to lag a shipped order. The chip
-       is one text node («Новые 2»), which is why it needs its own rule to be
-       translated: on the Estonian panel it reads «Uued 2», not «Новые 2». */
+       overview's cached summary, which used to lag a shipped order. Since
+       07.09.2026 that chip counts EVERYTHING still on the shelf, labelled or
+       not: a sticker is not a hand-over, and Renat asked for three chips
+       rather than six. It is one text node («Отправить 2»), which is why it
+       needs its own rule to be translated. */
     const chip = page.locator('[data-admfilter="new"]');
-    await expect(chip).toHaveText(/^Новые \d+$/);
+    await expect(chip).toHaveText(/^Отправить \d+$/);
     const waiting = Number(((await chip.textContent()) || "").replace(/\D+/g, ""));
     expect(waiting, "the chip did not count the paid order").toBeGreaterThan(0);
-    /* The badge counts everything waiting to go out: «Новые» (no label yet)
-       plus «Этикетка готова» (labelled, not yet handed over — an earlier spec
-       may have left one). Same rule as the overview's ordersToShip. */
-    const labelChip = page.locator('[data-admfilter="label"]');
-    const labeled = Number(((await labelChip.textContent()) || "").replace(/\D+/g, "")) || 0;
-    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(waiting + labeled));
+    // the badge is the same number: one queue, one count
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(waiting));
     await page.locator('.adm-side [data-lang="ET"]').click();
-    await expect(chip).toHaveText(`Uued ${waiting}`);
+    await expect(chip).toHaveText(`Saada ${waiting}`);
     await page.locator('.adm-side [data-lang="RU"]').click();
-    await expect(chip).toHaveText(`Новые ${waiting}`);
-    await page.locator('[data-admfilter="delivered"]').click();
+    await expect(chip).toHaveText(`Отправить ${waiting}`);
+    // «В пути» is what has already gone — this one has not
+    await page.locator('[data-admfilter="shipped"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
-    await page.locator('[data-admfilter="salon"]').click();
-    await expect(page.locator(".adm-empty")).toHaveText("Таких заказов нет");
     await page.locator('[data-admfilter="all"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
 
@@ -424,10 +421,9 @@ test.describe("admin shell — Заказы filters and the ship flow", () => {
 
     // …and the chip and the badge follow the shipped order down at once
     const left = waiting - 1;
-    await expect(chip).toHaveText(left ? `Новые ${left}` : "Новые");
-    const badgeLeft = left + labeled;
-    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveCount(badgeLeft ? 1 : 0);
-    if (badgeLeft) await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(badgeLeft));
+    await expect(chip).toHaveText(left ? `Отправить ${left}` : "Отправить");
+    await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveCount(left ? 1 : 0);
+    if (left) await expect(page.locator('.adm-nav[data-admtab="orders"] .adm-nav__badge')).toHaveText(String(left));
 
     // the list agrees, and so does the journal in «Настройки»
     await page.locator('[data-admfilter="shipped"]').click();

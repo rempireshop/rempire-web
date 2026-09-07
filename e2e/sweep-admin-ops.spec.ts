@@ -283,10 +283,12 @@ test.describe("sweep — the in-salon register", () => {
     expect(receipt.headers()["content-type"]).toContain("text/html");
 
     /* The sale is an order like any other, tagged as a shop-floor one — and
-       «Заказы» opens on «Новые» (paid web orders waiting to go out), so the
-       salon chip is what brings it into view. */
+       «Заказы» opens on «Отправить» (paid web orders waiting to go out), so
+       «Все» is what brings it into view: the salon chip went away when the six
+       chips became three (07.09.2026) and salon sales moved under «Все». */
     await tab(page, "orders");
-    await page.locator('[data-admfilter="salon"]').click();
+    await page.locator('[data-admfilter="all"]').click();
+    await page.locator("[data-admorderq]").fill(number);
     const salonRow = page.locator(`[data-admorder]:has-text("${number}")`).first();
     await expect(salonRow).toBeVisible();
     await expect(page.locator(".adm-badge--tint").first()).toHaveText("Салон");

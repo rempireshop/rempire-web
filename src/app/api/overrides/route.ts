@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS: Record<string, unknown> = {
   hero: null,
   // the same three defaults as FLOW_DEFAULTS in src/lib/flows.ts — a shop with
   // no settings row must not claim it is mailing people it is not mailing
-  flows: { abandoned: false, birthday: false, backstock: false },
+  flows: { abandoned: false, birthday: false, backstock: false, birthdayDays: 0 },
   shipping: {},
   // wholesale/loyalty: enabled + earn rate only, for the storefront's own
   // copy («зарабатывайте баллы») — proDiscountPct never leaves the server

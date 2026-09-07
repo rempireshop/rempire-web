@@ -125,6 +125,117 @@ function promoDate(raw: unknown): string | null {
   return d.toISOString();
 }
 
+/* ---- «Наборы»: the assistant proposes one and builds it ------------------
+   Dim, 07.09.2026: «he has sets. He will make the sets himself but assistant
+   needs to be able to help there as well proposing items and adding them to
+   sets.» Two actions, both confirm-first like every other one here:
+
+     · `propose_bundle` — a suggestion and nothing else. It carries products
+       and a name; applying it OPENS the set editor filled in, so the owner
+       still presses «Сохранить» himself. That is deliberate: a set is a price
+       the shop will charge, and the assistant may not set one on its own.
+     · `set_bundle` — an existing set changed (a product added or removed, a
+       price moved). It goes to POST /api/admin/bundles, the same door the
+       editor's own «Сохранить» uses, so `validateBundle()` on the server has
+       the last word about whether the set is cheaper than its parts.
+
+   The bounds below mirror src/lib/bundles.ts (BUNDLE_MIN_ITEMS / MAX_ITEMS /
+   MAX_QTY / CATS, the slug and the name cap) rather than importing it: this
+   file must stay free of database imports, the same rule STOCK_ADJUST_REASONS
+   and PROMO_MAX_* already follow. tests/assistant-actions.test.ts checks the
+   two copies agree. */
+export const BUNDLE_MIN_ITEMS = 2;
+export const BUNDLE_MAX_ITEMS = 8;
+export const BUNDLE_MAX_QTY = 20;
+export const BUNDLE_CATS = ["hair", "styling", "beard", "face", "body", "perfume", "merch"] as const;
+const BUNDLE_SLUG = /^[a-z0-9][a-z0-9-]{1,63}$/;
+const BUNDLE_MAX_NAME = 120;
+const BUNDLE_MAX_DESC = 1000;
+
+type Tri = Partial<Record<"RU" | "ET" | "EN", string>>;
+function triText(raw: unknown, max: number): Tri {
+  const out: Tri = {};
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+  const src = raw as Record<string, unknown>;
+  for (const lang of ["RU", "ET", "EN"] as const) {
+    const v = oneLine(src[lang], max);
+    if (v) out[lang] = v;
+  }
+  return out;
+}
+
+/** The products of a set: known ids, a volume index and a quantity. */
+function bundleItems(raw: unknown, known: Set<string>): Array<{ productId: string; variant: number; qty: number }> | null {
+  if (!Array.isArray(raw)) return null;
+  const out: Array<{ productId: string; variant: number; qty: number }> = [];
+  const seen = new Set<string>();
+  for (const item of raw.slice(0, BUNDLE_MAX_ITEMS)) {
+    const it = (item && typeof item === "object" ? item : { id: item }) as Record<string, unknown>;
+    const productId = String(it.productId ?? it.id ?? "").trim();
+    if (!productId || !known.has(productId)) return null;
+    const variantRaw = it.variant ?? it.size;
+    const variant = Math.trunc(variantRaw == null || variantRaw === "" ? 0 : Number(variantRaw));
+    if (!Number.isFinite(variant) || variant < 0 || variant > 40) return null;
+    const qtyRaw = it.qty == null || it.qty === "" ? 1 : Number(it.qty);
+    const qty = Math.trunc(qtyRaw);
+    if (!Number.isFinite(qty) || qty < 1 || qty > BUNDLE_MAX_QTY) return null;
+    const key = `${productId}:${variant}`;
+    if (seen.has(key)) continue;      // the same volume twice is one line, not two
+    seen.add(key);
+    out.push({ productId, variant, qty });
+  }
+  return out.length >= BUNDLE_MIN_ITEMS ? out : null;
+}
+
+/**
+ * «Предложи набор из …» — products and a name, nothing that could be charged.
+ * No price and no id: applying this opens the editor with the products in it,
+ * and the owner names the price and presses «Сохранить».
+ */
+export function sanitizeProposeBundle(raw: unknown, known: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const items = bundleItems(x.items ?? x.products ?? x.ids, known);
+  if (!items) return null;
+  const title = triText(x.title ?? x.name, BUNDLE_MAX_NAME);
+  if (!title.RU) return null;   // Russian is the source language of every set
+  const desc = triText(x.desc ?? x.description, BUNDLE_MAX_DESC);
+  const cat = (BUNDLE_CATS as readonly string[]).includes(String(x.cat)) ? String(x.cat) : "";
+  return { items, title, ...(Object.keys(desc).length ? { desc } : {}), ...(cat ? { cat } : {}) };
+}
+
+/**
+ * «Добавь X в набор Y» / «сделай набор Y за 39 €» — a set that already exists,
+ * changed. The id must look like a set's id; everything else is the same
+ * bounded shape the editor sends, and the server prices it and refuses a set
+ * that is not cheaper than its parts.
+ */
+export function sanitizeSetBundle(raw: unknown, known: Set<string>): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const id = String(x.id ?? "").trim().toLowerCase();
+  if (!BUNDLE_SLUG.test(id)) return null;
+  const items = bundleItems(x.items ?? x.products, known);
+  if (!items) return null;
+  const out: Record<string, unknown> = { id, items };
+  const title = triText(x.title ?? x.name, BUNDLE_MAX_NAME);
+  if (Object.keys(title).length) out.title = title;
+  const desc = triText(x.desc ?? x.description, BUNDLE_MAX_DESC);
+  if (Object.keys(desc).length) out.desc = desc;
+  if ((BUNDLE_CATS as readonly string[]).includes(String(x.cat))) out.cat = String(x.cat);
+  if (x.price != null && String(x.price).trim() !== "") {
+    const n = Math.round(Number(x.price) * 100) / 100;
+    if (!Number.isFinite(n) || n <= 0 || n > 100_000) return null;
+    out.price = n;
+  } else if (x.discountPct != null && String(x.discountPct).trim() !== "") {
+    const n = Math.round(Number(x.discountPct) * 100) / 100;
+    if (!Number.isFinite(n) || n <= 0 || n > 90) return null;
+    out.discountPct = n;
+  }
+  if (typeof x.active === "boolean") out.active = x.active;
+  return out;
+}
+
 export function sanitizePromo(raw: unknown): object | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const x = raw as Record<string, unknown>;
@@ -698,6 +809,18 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   }
   if (t === "toggle_bundles" && typeof x.value === "boolean") {
     return { type: t, value: x.value };
+  }
+  /* «Наборы»: propose one, or change one that exists. Dim keeps building the
+     sets himself — this is the assistant helping, and both go through the
+     confirm card first (see the two sanitisers above for why the proposal
+     carries no price). */
+  if (t === "propose_bundle") {
+    const proposal = sanitizeProposeBundle(x, known);
+    return proposal ? { type: t, ...proposal } : null;
+  }
+  if (t === "set_bundle") {
+    const bundle = sanitizeSetBundle(x.bundle ?? x, known);
+    return bundle ? { type: t, ...bundle } : null;
   }
   if (t === "set_hero") {
     // null is «вернуть стандартный баннер» — a real thing the owner asks for

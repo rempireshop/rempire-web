@@ -87,6 +87,26 @@ function limited(ip: string): boolean {
    as customersSummaryForPrompt(): most admin calls never pay for it, and a
    database hiccup here must never be the reason the assistant stops. */
 const BLOG_TRIGGER = /стать|блог|пост|обложк|опублик|artikl|blog|post|cover|publish/i;
+
+/* «Наборы» (Dim, 07.09.2026: the assistant helps build sets). The sets the
+   shop has right now — id, Russian title, price, and the products inside —
+   so `set_bundle` has an id it did not invent and knows what it is changing.
+   Fetched only when the message is about sets, same posture as the blog and
+   the customers above; [] on any trouble. */
+const BUNDLE_TRIGGER = /набор|комплект|komplekt|bundle|\bset\b|\bсет\b/i;
+async function bundleLinesForPrompt(): Promise<string> {
+  try {
+    const { listBundles } = await import("@/lib/bundles");
+    const sets = await listBundles();
+    return sets.slice(0, 20).map((b) => {
+      const title = b.title.RU || b.title.ET || b.title.EN || b.id;
+      const parts = b.items.map((i) => `${i.productId}${i.variant ? ":" + i.variant : ""}${i.qty > 1 ? "×" + i.qty : ""}`).join(" + ");
+      return `${b.id}|${title}|${b.price} €|${b.active ? "shown" : "hidden"}|${parts}`;
+    }).join("\n");
+  } catch {
+    return "";
+  }
+}
 async function adminBlogLinesForPrompt(): Promise<string> {
   try {
     const posts = await listAllPosts(20);
@@ -228,6 +248,7 @@ function adminPrompt(
   customLines: string[] = [],
   blogLines = "",
   attachments: AttachmentBrief[] = [],
+  bundleLines = "",
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
@@ -237,6 +258,9 @@ ${customersSummary}
 ` : ""}${blogLines ? `
 BLOG POSTS as they are right now (slug|draft-or-published|Russian title) — the slugs publish_post and set_post_cover take; never invent a slug not listed here:
 ${blogLines}
+` : ""}${bundleLines ? `
+SETS («наборы») as they are right now (id|Russian title|price|shown-or-hidden|the products inside). set_bundle may only use an id from this list; propose_bundle is for a set that does not exist yet:
+${bundleLines}
 ` : ""}${attachments.length ? `
 PHOTOS the owner attached to this conversation, already uploaded (key | file name). Refer to them by key, exactly as written:
 ${attachments.map((a) => `${a.key} | ${a.name}`).join("\n")}
@@ -271,6 +295,8 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"toggle_flow","id":"abandoned|birthday|backstock","value":true|false} — switch a customer e-mail flow on or off
   {"type":"toggle_chatbot","value":true|false} — switch the storefront AI chat widget on or off («выключи чат на сайте»)
   {"type":"toggle_bundles","value":true|false} — show or hide the curated sets («наборы») on the storefront («скрой наборы»)
+  {"type":"propose_bundle","title":{"RU":"…","ET":"…","EN":"…"},"cat":"beard","items":[{"id":"<catalogue id>","variant":0,"qty":1},…]} — SUGGEST a new set the shop does not have («предложи набор для бороды», «собери набор из шампуня и кондиционера»). 2 to 8 products, ids from the CATALOGUE above, variant is the index of the volume (0 = the first), qty 1–20. Give NO price: applying this opens the set editor filled in, and the owner names the price and saves it himself — say exactly that in the reply.
+  {"type":"set_bundle","id":"<id from SETS above>","items":[{"id":"<catalogue id>","variant":0,"qty":1},…],"price":39.90} — change a set that EXISTS («добавь масло в набор для бороды», «сделай набор Борода за 39,90»). Send the WHOLE list of products the set keeps — a product left out is removed. price (or discountPct 1–90) only when the owner named one; a set must stay cheaper than its parts or the shop refuses it, and the reply should say so if it is close.
   {"type":"set_hero","value":{"slides":[…],"interval":6000}} — rewrite the home-page banner («поменяй баннер на скидку 20 % на бороду», «сделай баннер про наборы»). {"type":"set_hero","value":null} puts the built-in banner back.
   {"type":"create_promo","promo":{"code":"SUVI10","kind":"percent|fixed|free_shipping","value":10,"minSubtotal":0,"endsAt":"2026-09-30T23:59:59Z","maxUses":100,"note":"…"}} — make or edit a promo code («сделай промокод на 10 %», «код на бесплатную доставку до конца месяца»)
   {"type":"toggle_promo","code":"SUVI10","value":false} — switch an existing promo code off (or back on)
@@ -448,12 +474,15 @@ export async function POST(req: NextRequest) {
   const attachments = isAdmin ? briefAttachments(body.attachments) : [];
   const adminBlogLines =
     isAdmin && !isMini && (attachments.length || BLOG_TRIGGER.test(lastUser)) ? await adminBlogLinesForPrompt() : "";
+  // «Наборы»: only when the owner is talking about them (bundleLinesForPrompt)
+  const adminBundleLines =
+    isAdmin && !isMini && BUNDLE_TRIGGER.test(lastUser) ? await bundleLinesForPrompt() : "";
   const lang = body.lang === "ET" || body.lang === "EN" ? body.lang : "RU";
   const system =
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments)
+        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines)
         : shopPrompt(lang, lastUser, blogLines);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {

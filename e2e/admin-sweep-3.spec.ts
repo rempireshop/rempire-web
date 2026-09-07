@@ -166,8 +166,9 @@ test.describe("admin sweep 3 — the orders search says the filter is off", () =
     await loginAsAdmin(page);
     await ordersTab(page).click();
 
-    // a chip that cannot contain a freshly paid order
-    await page.locator('[data-admfilter="delivered"]').click();
+    // a chip that cannot contain a freshly paid order («В пути» is what has
+    // already left; the chips became three on 07.09.2026)
+    await page.locator('[data-admfilter="shipped"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
     const hint = page.locator("#orderlist .adm-hint");
     await expect(hint).toHaveCount(0);
@@ -177,7 +178,7 @@ test.describe("admin sweep 3 — the orders search says the filter is off", () =
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
     await expect(hint).toHaveText("Ищем по всем заказам — фильтр сейчас не действует.");
     // the chip is still the one the owner will come back to
-    await expect(page.locator('[data-admfilter="delivered"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "true");
 
     // clearing the box puts the filter back, and takes the line away with it
     await page.locator("[data-admorderq]").fill("");
@@ -211,10 +212,13 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
     const flows = await (await page.request.get("/api/overrides/")).json();
     expect(flows.settings.flows.backstock, "the shop's own default disagrees with the switch").toBe(false);
 
-    // …and the birthday row names the day runBirthdays() actually sends on
+    /* …and the birthday row names what really happens: the daily job, and a
+       code good for two weeks. Since 07.09.2026 «когда» is a setting of its
+       own («за N дней», admin-sweep-4.spec.ts), so the row says the schedule
+       rather than a day it might not be sending on. */
     const birthday = page.locator(".adm-row", { hasText: "Скидка ко дню рождения" }).first();
-    await expect(birthday).toContainText("в день рождения");
-    await expect(birthday).not.toContainText("за 3 дня");
+    await expect(birthday).toContainText("раз в сутки");
+    await expect(birthday).not.toContainText("за 3 дня до даты");
     await assertClean(page, w, "the mail list");
 
     /* «Салон»: the receipt is a link on the order, not a letter — POST

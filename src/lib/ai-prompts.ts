@@ -530,13 +530,21 @@ Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt
 }
 
 /* ---------- copy ---------------------------------------------------------------
- * The short texts behind the «✨» buttons: a banner slide, the announcement
- * strip, the «Контакты» paragraph, the letter footer line, a promo code's
- * note to self, a new product's name. One task, one `kind`, so the route
- * and its tests have one door; each kind carries its own facts and its
- * own JSON shape. */
+ * The short texts behind the «✨» buttons: a banner slide and a new product's
+ * name. One task, one `kind`, so the route and its tests have one door; each
+ * kind carries its own facts and its own JSON shape.
+ *
+ * There were six (07.09.2026, Dim: «fewer sparkle buttons»). The four that
+ * went — the announcement strip, the «Контакты» paragraph, the letter footer
+ * line and a promo code's note to self — were four different one-off ways to
+ * ask the assistant for one sentence, each with a button of its own in a
+ * corner of a form. The assistant itself lost nothing: it writes all four
+ * through `set_content` / `create_promo`, in its own words, showing the owner
+ * what is about to change before he applies it. These two stayed because they
+ * are the two the owner genuinely cannot dash off himself — a banner in three
+ * languages, and a catalogue name in the house pattern. */
 
-export const COPY_KINDS = ["hero", "announcement", "contact_page", "email_footer", "promo_note", "product_name"] as const;
+export const COPY_KINDS = ["hero", "product_name"] as const;
 export type CopyKind = (typeof COPY_KINDS)[number];
 
 export interface CopyInput {
@@ -546,10 +554,6 @@ export interface CopyInput {
   /** hero: the product the slide points at, if any; where the button leads. */
   product?: string;
   target?: string;
-  /** contact_page / email_footer: the company as the content layer has it. */
-  company?: { name?: string; address?: string; phone?: string; email?: string; hours?: string };
-  /** promo_note: the code as the form has it. */
-  promo?: { code?: string; kind?: string; value?: number | string; minSubtotal?: number | string; endsAt?: string; maxUses?: number | string };
   /** product_name: what the owner typed. */
   brand?: string;
   name?: string;
@@ -571,15 +575,11 @@ export function isCopyKind(v: unknown): v is CopyKind {
 function cleanCopyInput(raw: unknown) {
   const src = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   if (!isCopyKind(src.kind)) throw new AiInputError("bad_kind");
-  const co = (src.company && typeof src.company === "object" ? src.company : {}) as Record<string, unknown>;
-  const pr = (src.promo && typeof src.promo === "object" ? src.promo : {}) as Record<string, unknown>;
   return {
     kind: src.kind,
     hint: para(src.hint, 600),
     product: line(src.product, 160),
     target: line(src.target, 80),
-    company: { name: line(co.name, 120), address: line(co.address, 200), phone: line(co.phone, 40), email: line(co.email, 190), hours: line(co.hours, 300) },
-    promo: { code: line(pr.code, 24), kind: line(pr.kind, 20), value: line(String(pr.value ?? ""), 12), minSubtotal: line(String(pr.minSubtotal ?? ""), 12), endsAt: line(pr.endsAt, 30), maxUses: line(String(pr.maxUses ?? ""), 12) },
     brand: line(src.brand, 60),
     name: line(src.name, 120),
     category: line(src.category, 60),
@@ -604,40 +604,6 @@ Respond with exactly this JSON shape and nothing else: {"eyebrow": "...", "title
       input.hint ? `What the slide is about: ${input.hint}` : "",
       input.product ? `The product the slide points at: ${input.product}` : "",
       input.target ? `Where the button leads: ${input.target}` : "",
-    ];
-  } else if (input.kind === "announcement") {
-    if (!input.hint) throw new AiInputError("missing_hint");
-    task = `TASK: write the black announcement strip above the shop's header, in ${L}. One line, no exclamation marks, nothing INPUT does not say (no invented dates, percentages or conditions). You may keep the placeholders {EE} {LV} {FI} {EU} exactly as written — the shop replaces them with its free-delivery thresholds.
-- "text": at most 90 characters INCLUDING spaces — count them.
-- "short": the phone-width version of the same line, at most 40 characters INCLUDING spaces.
-Respond with exactly this JSON shape and nothing else: {"text": "...", "short": "..."}`;
-    facts = [`What it should say: ${input.hint}`];
-  } else if (input.kind === "contact_page") {
-    task = `TASK: write the opening paragraph of the shop's «Contacts» page, in ${L}: who we are (the Rempire barbershop's own shop of men's grooming products, Tallinn), how to reach us and what to expect — warm, plain, 2 to 4 sentences, at most 600 characters. The phone, e-mail, address and opening hours are printed under it automatically — do NOT repeat them in the text. No invented facts beyond INPUT.
-Respond with exactly this JSON shape and nothing else: {"text": "..."}`;
-    facts = [
-      input.hint ? `The owner's note: ${input.hint}` : "",
-      input.company.name ? `Company: ${input.company.name}` : "",
-      input.company.address ? `Address (for context only, not to be repeated): ${input.company.address}` : "",
-      input.company.hours ? `Opening hours (context only): ${input.company.hours}` : "",
-    ];
-  } else if (input.kind === "email_footer") {
-    task = `TASK: write one extra line for the bottom of every letter the shop sends, in ${L} — under the legal line, above nothing. A warm one-liner (a thank-you, an invitation to write back, a barbershop greeting), at most 110 characters INCLUDING spaces, no exclamation marks, no invented offers or facts.
-Respond with exactly this JSON shape and nothing else: {"text": "..."}`;
-    facts = [input.hint ? `The owner's note: ${input.hint}` : "", input.company.name ? `Company: ${input.company.name}` : ""];
-  } else if (input.kind === "promo_note") {
-    if (!input.promo.code) throw new AiInputError("missing_code");
-    const p = input.promo;
-    const what = p.kind === "free_shipping" ? "free delivery" : p.kind === "fixed" ? `${p.value} € off` : `${p.value} % off`;
-    task = `TASK: write the owner's private note-to-self for a promo code, in ${L}: one line, at most 110 characters INCLUDING spaces, saying in plain words what the code is for and where it is meant to be given out (inferred from INPUT only — a hint from the owner, or the code's own conditions; never invent a channel or a date that is not there).
-Respond with exactly this JSON shape and nothing else: {"text": "..."}`;
-    facts = [
-      `Code: ${p.code}`,
-      `What it gives: ${what}`,
-      p.minSubtotal && p.minSubtotal !== "0" ? `Minimum order: ${p.minSubtotal} €` : "",
-      p.endsAt ? `Valid until: ${p.endsAt}` : "",
-      p.maxUses ? `Uses allowed: ${p.maxUses}` : "",
-      input.hint ? `The owner's note: ${input.hint}` : "",
     ];
   } else {
     if (!input.name && !input.hint) throw new AiInputError("missing_name");

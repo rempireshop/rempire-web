@@ -161,13 +161,14 @@ test.describe("admin", () => {
       expect(pdf.status()).toBe(200);
       expect(pdf.headers()["content-type"]).toContain("application/pdf");
 
-      /* «Отправлен» moves the status and sends the customer a letter, so it
-         goes through the confirm card — which names the letter and the
-         tracking number it will carry (see README § State). */
+      /* «Отправлен» moves the status and sends the customer a letter. With a
+         label the tracking number is already known and the letter is
+         predictable to the word, so since 07.09.2026 (Dim) this applies at
+         once with the six-second undo instead of asking — the question stays
+         for an order with no label, where the letter would go out with no
+         tracking number at all (admin-sweep-4.spec.ts pins both halves). */
       await page.locator(".adm-ordacts [data-admshipnow]").click();
-      await expect(page.locator(".adm-confirm__t")).toHaveText("Отметить отправленным?");
-      await expect(page.locator(".adm-confirm__d")).toContainText(code);
-      await page.locator("[data-admapply]").click();
+      await expect(page.locator(".adm-confirm__t"), "«Отправлен» still asks when the label exists").toHaveCount(0);
       await expect(page.getByRole("status")).toContainText(`${number} отправлен`);
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
       await page.locator("[data-closetoast]").click();
