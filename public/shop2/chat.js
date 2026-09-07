@@ -142,14 +142,32 @@
   }
 
   // ---------- UI ----------
-  /* The chat lives in the SHOP: hidden inside the admin, and the owner can
-     switch it off entirely from Настройки (the admin demo store). */
+  /* The chat lives in the SHOP, on a wide screen, outside the checkout.
+     Dim, 07.09.2026: «checkoutis pole assistenti vaja ja mobiilis ei kasuta
+     üldse poes assistenti, adminis võib jääda» — no assistant at the till,
+     none anywhere in the shop on a phone; the admin keeps its own.
+
+     app.js (mountChat) already refuses to fetch this file on a phone, so on
+     a real phone none of this runs at all. The rule is repeated here because
+     loading is one-way: a desktop window dragged down to phone width, or a
+     shopper walking from the catalogue into the checkout, has the widget
+     already in the page and it has to leave the screen by itself.
+
+     The owner can also switch it off entirely from Настройки (the admin
+     demo store). */
+  var WIDE = "(min-width: 768px)";   // the shop's own phone/desktop line
+  function wideEnough() {
+    try { return !!(window.matchMedia && window.matchMedia(WIDE).matches); }
+    catch (e) { return true; }
+  }
   function chatAllowed() {
     try {
       var adm = JSON.parse(localStorage.getItem("rempire-admin-demo"));
       if (adm && adm.chatbot === false) return false;
     } catch (e) {}
-    return document.body.dataset.screen !== "admin";
+    if (!wideEnough()) return false;
+    var screen = document.body.dataset.screen;
+    return screen !== "admin" && screen !== "checkout";
   }
 
   var root = document.createElement("div");
@@ -305,6 +323,15 @@
   refreshVisibility();
   new MutationObserver(refreshVisibility)
     .observe(document.body, { attributes: true, attributeFilter: ["data-screen"] });
+  // the same gate on a resize: a desktop window dragged to phone width, or a
+  // tablet turned on its side, must take the widget away with it
+  try {
+    if (window.matchMedia) {
+      var mq = window.matchMedia(WIDE);
+      if (mq.addEventListener) mq.addEventListener("change", refreshVisibility);
+      else if (mq.addListener) mq.addListener(refreshVisibility);
+    }
+  } catch (e) {}
 
   /* The language switch sits in the header, which stays clickable while the
      chat is open — and the chat root is outside translateTree(), so nothing

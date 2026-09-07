@@ -6370,9 +6370,65 @@
       }
     } catch (e) { /* a tracking call must never be why a click failed */ }
   }
-  // chat.js runs after app.js (see index.html) and cannot reach an id inside
-  // this closure any other way — one deliberate, narrow bridge.
+  // chat.js runs after app.js (see mountChat below) and cannot reach an id
+  // inside this closure any other way — one deliberate, narrow bridge.
   window.__rmpTrack = track;
+
+  /* ---------- the shop assistant's <script>, on demand -------------------
+     Dim, 07.09.2026: «checkoutis pole assistenti vaja ja mobiilis ei kasuta
+     üldse poes assistenti, adminis võib jääda». So the widget is wanted on a
+     wide screen, in the shop, anywhere except the checkout — and on a phone
+     it is wanted nowhere at all.
+
+     "Nowhere at all" has to mean the file is never fetched either, which is
+     why the <script> tag left index.html and is added from here instead: a
+     phone that will never see the chat now downloads, parses and runs none
+     of it (chat.js also builds its whole catalogue index at load). Same
+     pattern as mountCfBeacon() above, and for the same reason it cannot be
+     an inline gate in the shell: /shop2/* runs under `script-src 'self'`
+     with no 'unsafe-inline' (next.config.ts).
+
+     The version token is lifted off app.js's own tag rather than written
+     here, so the two assets can never fall out of step and nothing in this
+     file has to be touched when the token moves.
+
+     chat.js keeps its own copy of the same rule (chatAllowed()) because the
+     script may already be loaded when the shopper walks into the checkout or
+     drags a desktop window down to phone width — mounting is one-way, hiding
+     is not. */
+  var CHAT_WIDE = "(min-width: 768px)";   // the shop's own phone/desktop line
+  function chatWide() {
+    try { return !!(window.matchMedia && window.matchMedia(CHAT_WIDE).matches); }
+    catch (e) { return true; }
+  }
+  function chatWanted() {
+    if (!chatWide()) return false;
+    if (S.screen === "checkout" || S.screen === "admin" || S.screen === "scan") return false;
+    return DEMO.chatbot !== false;
+  }
+  function mountChat() {
+    try {
+      if (!chatWanted()) return;
+      if (document.querySelector('script[data-shopchat]')) return;
+      var app = document.querySelector('script[src*="/shop2/app.js"]');
+      var v = ((app && app.getAttribute("src")) || "").split("?")[1];
+      var s = document.createElement("script");
+      s.defer = true;
+      s.setAttribute("data-shopchat", "");
+      s.src = "/shop2/chat.js" + (v ? "?" + v : "");
+      document.body.appendChild(s);
+    } catch (e) { /* the assistant must never be why the shop failed to boot */ }
+  }
+  // a desktop window dragged narrow and back again, or an orientation change
+  // on a tablet: the first time it is wide enough, the script arrives
+  try {
+    if (window.matchMedia) {
+      var chatMq = window.matchMedia(CHAT_WIDE);
+      var onChatMq = function () { mountChat(); };
+      if (chatMq.addEventListener) chatMq.addEventListener("change", onChatMq);
+      else if (chatMq.addListener) chatMq.addListener(onChatMq);
+    }
+  } catch (e) {}
 
   /* Cloudflare Web Analytics (docs/analytics.md). The token sits in a <meta
      name="cf-beacon"> in index.html — the integrator pastes it there — and
@@ -21603,7 +21659,10 @@
     else if (SCANEL) { scanUnmount(); }
     // the toast has to clear the camera view — see .is-scanning in styles.css
     document.body.classList.toggle("is-scanning", !!S.scanOpen);
-    document.body.dataset.screen = S.screen; // chat.js hides itself in the admin
+    document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
+    // …and, if this is the first screen that wants the assistant at all, the
+    // widget's <script> is fetched now rather than at boot (mountChat above)
+    mountChat();
     translatePage();
     setHead();
     // the scanner route wears the same header on its wait/login cards
