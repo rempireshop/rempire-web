@@ -1,6 +1,7 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
 import {
+  CATEGORY,
   continueButton,
   freshEmail,
   functionalProject,
@@ -11,6 +12,7 @@ import {
   payButton,
   PRODUCT,
   shopUrl,
+  tr,
   waitForScreen,
 } from "./fixtures";
 
@@ -301,4 +303,51 @@ test.describe("the gift card as a banner slide", () => {
       await page.request.put("/api/admin/settings/", { data: { hero: before.settings.hero ?? null } });
     }
   });
+});
+
+/* Dim, 07.09.2026: «Also in "all products" the gift card option should be
+ * somewhere.» It is — as the tile the home page and the cabinet already use,
+ * under the grid rather than in it.
+ *
+ * The distinction this test defends is the honest one: a card in #catgrid
+ * promises a price, a size and «В корзину», and a gift card has none of those
+ * — the amount is chosen on its own page. So the tile must be OUTSIDE the
+ * grid, carry no add-to-cart button, and be counted by nothing: the toolbar's
+ * «N товаров» still counts products only. And it belongs to «Все товары»
+ * alone — a gift card is not part of «Уход за бородой».
+ */
+test.describe("the gift card in «Все товары»", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(65) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(!functionalProject(testInfo), "functional spec — see docs/testing.md");
+  });
+
+  for (const lang of LANGS) {
+    test(`a tile under the grid, never a product card — ${lang.code}`, async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/c/all/"));
+      await waitForScreen(page, "catalog");
+
+      const tile = page.locator(".sec--gift .gifttile");
+      await expect(tile).toBeVisible();
+      await expect(tile.getByRole("heading")).toHaveText(tr("Подарочная карта", lang.code));
+
+      // not a product: outside #catgrid, no add-to-cart, no stock chip
+      await expect(page.locator("#catgrid .gifttile")).toHaveCount(0);
+      await expect(tile.locator("[data-add]")).toHaveCount(0);
+      await expect(tile.locator(".chip")).toHaveCount(0);
+      // …and it did not join the count in the toolbar
+      const counted = Number((await page.locator("[data-count]").innerText()).replace(/\D+/g, ""));
+      const cards = await page.locator("#catgrid [data-go-product]").count();
+      expect(counted, "the gift card was counted as a product").toBeGreaterThanOrEqual(cards);
+
+      await tile.locator('[data-go="gift"]').click();
+      await waitForScreen(page, "gift");
+      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+
+      // one shelf only — a category page does not carry it
+      await page.goto(shopUrl(lang.seg, `/c/${CATEGORY.id}/`));
+      await waitForScreen(page, "catalog");
+      await expect(page.locator(".sec--gift")).toHaveCount(0);
+    });
+  }
 });

@@ -8308,6 +8308,17 @@
            prefix by [data-go-product], and a set card would break that match
            and make every infinite-scroll batch rebuild the whole grid. */
         bundleGridHTML(bundlesForCatalog(), S.cat === "all" ? "Наборы" : "Наборы из этого раздела") +
+        /* Dim, 07.09.2026: «in "all products" the gift card option should be
+           somewhere». It is the same block as on the home page and in the
+           cabinet — deliberately NOT a card in #catgrid: the card layout
+           promises a price, a size and «В корзину», and a gift card has an
+           amount the shopper chooses on its own page, no stock and no size.
+           A tile under the grid says «this exists» without pretending to be
+           a product, and it sits outside #catgrid so infinite scroll's
+           prefix match (patchCatalog) never sees it.
+           «Все товары» only: this is the one shelf that claims to hold
+           everything, and a gift card is not part of «Уход за бородой». */
+        (S.cat === "all" && !S.brand ? '<section class="sec sec--gift">' + giftTileHTML() + "</section>" : "") +
       "</section></div>";
   }
   /* Russian counts take three forms; "12 товаров / 22 товара / 21 товар". */
