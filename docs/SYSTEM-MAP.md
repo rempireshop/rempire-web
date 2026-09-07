@@ -928,7 +928,7 @@ Dim pays the OpenAI bill.
   10–15 k tokens (≈ cents); every text call is logged to `admin_audit` as
   `ai.text` with token counts — visible only in the database.
 - **Assistant** `POST /api/assistant/` (`src/app/api/assistant/route.ts`,
-  `PROMPT_V 18`): shop mode public (same-origin, 10 msg/min/IP, `max_tokens`
+  `PROMPT_V 19`): shop mode public (same-origin, 10 msg/min/IP, `max_tokens`
   400, catalogue slice `src/lib/catalogue-slice.ts`, blog links, actions
   `add_to_cart|open_product|open_category|open_cart|checkout`); admin mode
   requires the admin cookie **and** an `Origin` header, `max_tokens` 1500, the
