@@ -7,10 +7,14 @@
  *      fetchMontonioRates), cached 24 hours per country. Needs
  *      MONTONIO_ACCESS_KEY/SECRET_KEY and carriers activated in the Montonio
  *      partner portal; without either it answers null rather than throwing.
- *   2. static — src/data/montonio-tariffs.json, the carriers' own published
- *      business list prices (sourced, dated, with a URL per row). Montonio
- *      itself publishes no per-carrier/country price list on montonio.com —
- *      see docs/shipping.md § «Тарифы Montonio» for the research trail.
+ *      This is the only source that knows what *this* store pays.
+ *   2. static — src/data/montonio-tariffs.json: Montonio's own published
+ *      standard contract prices, every route it will quote out of Estonia,
+ *      rebuilt by tools/fetch-montonio-tariffs.mjs from the public endpoint
+ *      behind Montonio's shipping calculator. Until 07.09.2026 this table
+ *      held the carriers' own business list prices instead, on the belief
+ *      that Montonio published none — see docs/shipping.md § «Тарифы
+ *      Montonio» and docs/audit/2026-09-07-shipping-returns.md.
  *
  * Neither source is wired into checkout pricing: `computeShipping()` in
  * src/lib/shipping.ts still prices strictly from `settings.shipping_rules`,
@@ -22,7 +26,12 @@
  */
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 import type { ShipMethod } from "@/lib/shipping";
-import { fetchMontonioRates, isMontonioShippingConfigured, type MontonioRate } from "./montonio";
+import {
+  fetchMontonioRates,
+  isMontonioShippingConfigured,
+  MONTONIO_CARRIERS,
+  type MontonioRate,
+} from "./montonio";
 
 /**
  * The parcel every quote — live or static — is priced for: ~5 kg, 30×30×30 cm,
@@ -51,6 +60,16 @@ export interface TariffQuote {
   effectiveDate?: string;
   /** Set when the source data itself flagged the number as unverified (see the JSON). */
   uncertain?: boolean;
+  /**
+   * What Montonio charges the merchant when the customer sends this parcel
+   * back — «Same pricing applies to return parcels», Omniva by Montonio,
+   * help.montonio.com/en/articles/143643. `null` where Montonio prices no
+   * return on that route (every Nova Post row, every SmartPosti row, and some
+   * DPD ones), `undefined` on a live quote, which does not carry the field.
+   * Nothing prices a basket from this — it is what the admin and the docs
+   * quote when someone asks what a return costs.
+   */
+  returnPrice?: number | null;
 }
 
 /* ---------- static table --------------------------------------------------- */
@@ -63,12 +82,40 @@ interface StaticRateRow {
   currency: string;
   effectiveDate?: string;
   uncertain?: boolean;
+  returnPrice?: number | null;
 }
 
 const STATIC_RATES: StaticRateRow[] = (montonioTariffsData as { rates: StaticRateRow[] }).rates;
 
+/**
+ * The destinations the checkout offers that Montonio will not quote at all —
+ * it answers HTTP 400 `contract_prices_no_applicable_tier` for every carrier
+ * and both methods. Rebuilt with the table by tools/fetch-montonio-tariffs.mjs.
+ */
+export const MONTONIO_NOT_SERVED: readonly string[] =
+  (montonioTariffsData as { notServed?: string[] }).notServed ?? [];
+
+/** False for a country Montonio has no route to — nothing here can ship there. */
+export function montonioServes(country: string): boolean {
+  return !MONTONIO_NOT_SERVED.includes(String(country || "").toUpperCase());
+}
+
 function methodOf(m: string): ShipMethod | null {
   return m === "parcel" || m === "courier" || m === "pickup" ? m : null;
+}
+
+function quoteOf(row: StaticRateRow, method: ShipMethod): TariffQuote {
+  return {
+    carrier: row.carrier,
+    country: row.country.toUpperCase(),
+    method,
+    price: row.price,
+    currency: row.currency,
+    source: "static",
+    effectiveDate: row.effectiveDate,
+    uncertain: row.uncertain,
+    returnPrice: row.returnPrice ?? null,
+  };
 }
 
 /** One row of the static fallback table, or null when nothing was sourced for that combination. */
@@ -76,17 +123,7 @@ export function staticTariff(carrier: string, country: string, method: ShipMetho
   const c = String(carrier || "").toLowerCase();
   const cc = String(country || "").toUpperCase();
   const row = STATIC_RATES.find((r) => r.carrier === c && r.country === cc && r.method === method);
-  if (!row) return null;
-  return {
-    carrier: c,
-    country: cc,
-    method,
-    price: row.price,
-    currency: row.currency,
-    source: "static",
-    effectiveDate: row.effectiveDate,
-    uncertain: row.uncertain,
-  };
+  return row ? quoteOf(row, method) : null;
 }
 
 /** Every static row for a country, e.g. to fill the admin table in one pass. */
@@ -97,16 +134,7 @@ export function staticTariffsForCountry(country: string): TariffQuote[] {
     if (row.country !== cc) continue;
     const method = methodOf(row.method);
     if (!method) continue;
-    out.push({
-      carrier: row.carrier,
-      country: cc,
-      method,
-      price: row.price,
-      currency: row.currency,
-      source: "static",
-      effectiveDate: row.effectiveDate,
-      uncertain: row.uncertain,
-    });
+    out.push(quoteOf(row, method));
   }
   return out;
 }
@@ -265,7 +293,23 @@ export interface ShippingRulesPatch {
   carriers: Record<string, Record<string, number>>;
 }
 
-const TARIFF_COUNTRIES = ["EE", "LV", "LT", "FI"] as const;
+/**
+ * The four countries the checkout names, and the only ones where it lets the
+ * shopper pick a carrier — so the only ones that get carrier-specific rows.
+ */
+const CARRIER_COUNTRIES = ["EE", "LV", "LT", "FI"] as const;
+
+/**
+ * Every destination the static table has a price for — the four above plus
+ * the twenty-one other European countries Montonio quotes out of Estonia.
+ * `methods.parcel`/`methods.courier` get a row for each, which
+ * quoteFromRules() (src/lib/shipping.ts) prefers over the «EU» zone cell:
+ * one price for «Другая страна Европы» cannot be right when Poland costs
+ * 17.86 and Croatia 52.08 for the same box.
+ */
+export function tariffCountries(): string[] {
+  return [...new Set(STATIC_RATES.map((r) => r.country.toUpperCase()))].sort();
+}
 
 /**
  * The generic (carrier-unaware) price for a method+country: the highest
@@ -286,15 +330,35 @@ function methodCeiling(rows: TariffQuote[], method: ShipMethod): TariffQuote | n
 /**
  * Suggested settings.shipping_rules.methods/carriers from the best tariffs
  * available (live where configured, static otherwise), plus `markup`, rounded
- * to .x9. Only touches countries/carriers/methods this module actually has a
- * sourced tariff for — Venipak, Unisend, "EU" and "default" are left alone,
- * exactly like the admin hint that has nothing to show for them.
+ * to .x9.
+ *
+ * Only touches countries/carriers/methods this module actually has a sourced
+ * tariff for. That is now every European destination Montonio quotes out of
+ * Estonia, not just the four the checkout names — so «Другая страна Европы»
+ * stops being one number for twenty-four countries whose real cost runs from
+ * 17.86 € (Poland, parcel machine) to 52.08 € (Croatia, same box).
+ *
+ * Still left alone, and deliberately: the "EU" and "default" cells themselves,
+ * and Venipak (Montonio quotes no contract price for it from Estonia — direct
+ * contract only). "EU" now only prices the seven European countries the
+ * checkout offers and Montonio serves not at all — CH, CY, GB, IS, LI, MT, NO
+ * (MONTONIO_NOT_SERVED) — and no tariff can be invented for a parcel that
+ * cannot be sent; see docs/audit/2026-09-07-shipping-returns.md, question 3.
+ *
+ * A note on the ceiling: `methodCeiling` takes the dearest carrier, so the
+ * price cannot fall below cost whichever carrier Montonio assigns. Against
+ * the static table that means the dearest carrier Montonio *offers*, which
+ * for Germany is DPD at 29.76 € even if Nova Post would do it for 12.56 €.
+ * With MONTONIO_ACCESS_KEY/SECRET_KEY set, the live quote only returns the
+ * carriers this store has actually activated, and the ceiling narrows to
+ * them — which is the real fix, not a cleverer rule here.
  */
 export async function suggestShippingRulesFromTariffs(
   markup: Partial<ShippingMarkup> = {},
 ): Promise<ShippingRulesPatch> {
   const patch: ShippingRulesPatch = { methods: {}, carriers: {} };
-  for (const country of TARIFF_COUNTRIES) {
+  const carrierCountries = new Set<string>(CARRIER_COUNTRIES);
+  for (const country of tariffCountries()) {
     const rows = await getMontonioTariffsForCountry(country);
     for (const method of ["parcel", "courier"] as const) {
       const ceiling = methodCeiling(rows, method);
@@ -302,8 +366,14 @@ export async function suggestShippingRulesFromTariffs(
       patch.methods[method] = patch.methods[method] ?? {};
       (patch.methods[method] as Record<string, number>)[country] = customerPrice(ceiling.price, markup);
     }
+    if (!carrierCountries.has(country)) continue;
     for (const row of rows) {
       if (row.method !== "parcel") continue; // checkout only ever tags a carrier for the parcel method
+      // …and only for a carrier the checkout can actually name. Nova Post is
+      // Montonio International Shipping, a product with no carrier row in the
+      // admin's table and no `carrier` the storefront ever sends, so a price
+      // under it would be a cell nobody can see and nobody can reach.
+      if (!(MONTONIO_CARRIERS as readonly string[]).includes(row.carrier)) continue;
       patch.carriers[row.carrier] = patch.carriers[row.carrier] ?? {};
       patch.carriers[row.carrier][country] = customerPrice(row.price, markup);
     }

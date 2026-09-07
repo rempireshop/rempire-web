@@ -42,6 +42,40 @@ describe("zones: an order carries a real country, the rules price it by row", ()
     const legacy = quoteFromRules(rules, { country: "EU", method: "parcel", subtotal: 40 });
     expect(legacy.price).toBe(8.5);
   });
+
+  it("prefers a country's own cell over its zone, so Europe need not be one price", () => {
+    // Montonio's own contract rates run from 17.86 € (Poland) to 52.08 €
+    // (Croatia) for the same box; the «EU» cell cannot be right for both.
+    // «Заполнить по тарифам Montonio» writes country cells like these.
+    const rules: ShippingRules = {
+      ...DEFAULT_SHIPPING_RULES,
+      methods: {
+        parcel: { default: 4.99, EU: 29.99, PL: 17.89, HR: 59.59 },
+        courier: { default: 9.9, EU: 39.99 },
+        pickup: { default: 0 },
+      },
+      freeFromByCountry: { EU: 200, PL: 90 },
+    };
+    expect(quoteFromRules(rules, { country: "PL", method: "parcel", subtotal: 40 }).price).toBe(17.89);
+    expect(quoteFromRules(rules, { country: "HR", method: "parcel", subtotal: 40 }).price).toBe(59.59);
+    // a European country with no cell of its own still falls to the EU row
+    expect(quoteFromRules(rules, { country: "DE", method: "parcel", subtotal: 40 }).price).toBe(29.99);
+    // and the method with no country cell at all still falls to the EU row
+    expect(quoteFromRules(rules, { country: "PL", method: "courier", subtotal: 40 }).price).toBe(39.99);
+    // the free-from threshold resolves the same way: country, then zone
+    expect(quoteFromRules(rules, { country: "PL", method: "parcel", subtotal: 40 }).freeFrom).toBe(90);
+    expect(quoteFromRules(rules, { country: "DE", method: "parcel", subtotal: 40 }).freeFrom).toBe(200);
+  });
+
+  it("lets a carrier's country cell beat the same carrier's zone cell", () => {
+    const rules: ShippingRules = {
+      ...DEFAULT_SHIPPING_RULES,
+      methods: { parcel: { default: 4.99, EU: 29.99 }, courier: { default: 9.9 }, pickup: { default: 0 } },
+      carriers: { dpd: { EU: 24.99, PL: 14.99 } },
+    };
+    expect(quoteFromRules(rules, { country: "PL", method: "parcel", subtotal: 10, carrier: "dpd" }).price).toBe(14.99);
+    expect(quoteFromRules(rules, { country: "DE", method: "parcel", subtotal: 10, carrier: "dpd" }).price).toBe(24.99);
+  });
 });
 import { setupDb, teardownDb } from "./helpers";
 
