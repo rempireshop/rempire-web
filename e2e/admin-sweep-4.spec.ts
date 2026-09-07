@@ -1,6 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { ipHeaders } from "./fixtures";
-import { assertClean, clearToast, openAdmin, openSettings, tab, toastText, watch } from "./sweep-helpers";
+import { assertClean, clearToast, openAdmin, watch } from "./sweep-helpers";
 
 /**
  * The fourth admin sweep — Dim's answers of 07.09.2026
@@ -29,6 +29,25 @@ test.beforeEach(async ({}, testInfo) => {
     "admin sweep — desktop and mobile projects only");
 });
 
+/** «Настройки» → one of its six pages. Its own helper rather than
+    sweep-helpers' openSettings(), because «Настройки» sits in the desktop
+    sidebar but behind the phone's «Ещё» sheet — the one navigation difference
+    between the two viewports (same shape as admin-sections.spec.ts). */
+async function settings(page: Page, sub: string): Promise<void> {
+  const direct = page.locator('[data-admtab="setup"][aria-current]:visible');
+  const more = page.locator("[data-admmore]:visible");
+  await expect(direct.or(more).first()).toBeVisible();
+  if (await direct.count()) await direct.first().click();
+  else {
+    await more.first().click();
+    await page.locator('.adm-sheet [data-admtab="setup"]').first().click();
+  }
+  const back = page.locator("[data-admsetback]");
+  if (await back.count()) await back.first().click();
+  await page.locator(`[data-admsetpage="${sub}"]`).click();
+  await expect(page.locator("[data-admsetback]")).toBeVisible();
+}
+
 test.describe("admin — «Журнал изменений» shows the shop's own log", () => {
   test.use({ extraHTTPHeaders: ipHeaders(177) });
 
@@ -38,7 +57,7 @@ test.describe("admin — «Журнал изменений» shows the shop's ow
     await openAdmin(page);
 
     // something that only the server records — a sign-in, which just happened
-    await openSettings(page, "journal");
+    await settings(page, "journal");
 
     // the two headings, and the sentence that explains the difference
     await expect(page.locator(".adm-sec__t").filter({ hasText: "Ваши изменения в этом браузере" })).toBeVisible();
@@ -68,14 +87,13 @@ test.describe("admin — «Журнал изменений» shows the shop's ow
     await openAdmin(page);
 
     // the chat-bot switch: shop-wide, reversible, and audited by the server
-    await tab(page, "setup");
-    await page.locator('[data-admsetpage="home"]').click();
+    await settings(page, "home");
     await page.locator("[data-admchatbot]").click();
     const card = page.locator(".adm-propose");
     if (await card.count()) await page.locator("[data-admapply]").click();
     await clearToast(page);
 
-    await openSettings(page, "journal");
+    await settings(page, "journal");
     await expect(page.locator('[data-admundo="0"]'), "the local list lost its «Вернуть»").toBeVisible();
     await expect.poll(async () => {
       const res = await page.request.get("/api/admin/audit/?limit=20");
