@@ -373,6 +373,15 @@ export interface CustomerOrder {
   items: Array<{ title: string; variant: string | null; qty: number }>;
   tracking: string | null;
   trackingUrl: string | null;
+  /* The printable gift cards this order bought, if any — code plus the signed
+     link to /api/giftcards/<code>/pdf/. Until 07.09.2026 that link existed
+     only on the receipt screen, so closing the tab left the buyer with the
+     code in an e-mail and no card to print. Dim: «If possible also add it for
+     download through the account page.» The token is the same HMAC the
+     receipt and the letter carry, and it is only ever handed to a request
+     that already proved it owns this mailbox (the signed rmp_cust cookie in
+     /api/account/me), so nothing new is exposed. */
+  giftCards: Array<{ code: string; amount: number; pdfUrl: string }>;
 }
 
 /**
@@ -383,6 +392,7 @@ export interface CustomerOrder {
  */
 export async function listCustomerOrders(email: string, limit = 20): Promise<CustomerOrder[]> {
   const rows = await query<{
+    id: string;
     number: string;
     status: string;
     total: string | number;
@@ -391,10 +401,18 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
     items: unknown;
     payment: unknown;
   }>(
-    `select number, status, total, currency, created_at, items, payment
+    `select id, number, status, total, currency, created_at, items, payment
        from orders where lower(email) = $1 order by created_at desc limit $2`,
     [normalizeEmail(email), Math.min(Math.max(Number(limit) || 20, 1), 50)],
   );
+
+  /* The cards these orders issued, in one query rather than one per order.
+     Loaded through a dynamic import for the same reason src/lib/orders.ts
+     loads its neighbours that way: a deployment without the PDF fonts, or a
+     gift_cards table an older migration has not created yet, must cost the
+     account screen its cards and not its orders. */
+  const cardsByOrder = await giftCardsForOrders(rows.map((r) => r.id));
+
   return rows.map((r) => {
     const items = parseJson<Array<Record<string, unknown>>>(r.items, []);
     const payment = parseJson<Record<string, unknown>>(r.payment, {});
@@ -414,8 +432,41 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       })),
       tracking: code || null,
       trackingUrl: url || null,
+      giftCards: cardsByOrder.get(r.id) ?? [],
     };
   });
+}
+
+/**
+ * `order_id → [{code, amount, pdfUrl}]` for a batch of orders. Empty for every
+ * order when anything at all goes wrong — a customer's order list must not
+ * fail because a card could not be looked up.
+ */
+async function giftCardsForOrders(
+  orderIds: string[],
+): Promise<Map<string, Array<{ code: string; amount: number; pdfUrl: string }>>> {
+  const out = new Map<string, Array<{ code: string; amount: number; pdfUrl: string }>>();
+  const ids = orderIds.filter((id) => typeof id === "string" && id);
+  if (!ids.length) return out;
+  try {
+    const { giftPdfPath } = await import("@/lib/giftcard-pdf");
+    const rows = await query<{ code: string; amount: string | number; order_id: string }>(
+      `select code, amount, order_id from gift_cards
+        where order_id = any($1::uuid[]) order by created_at asc`,
+      [ids],
+    );
+    for (const row of rows) {
+      const url = giftPdfPath(row.code);
+      // no SESSION_SECRET, no token, no honest link — better none than a 404
+      if (!/[?&]t=[^&]+$/.test(url)) continue;
+      const list = out.get(row.order_id) ?? [];
+      list.push({ code: row.code, amount: Math.round(Number(row.amount) * 100) / 100 || 0, pdfUrl: url });
+      out.set(row.order_id, list);
+    }
+  } catch (err) {
+    console.error("[customers] gift cards for the account's orders unavailable:", err);
+  }
+  return out;
 }
 
 function parseJson<T>(v: unknown, fallback: T): T {

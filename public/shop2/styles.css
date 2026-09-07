@@ -977,6 +977,11 @@ body:has(.stickybar) .ftr {
 .rowcard__id { font-weight: 600; }
 .rowcard__code { font-size: 13px; letter-spacing: .08em; }
 .rowcard__act { margin-left: auto; }
+/* features: «Скачать подарочную карту (PDF)» on the order that bought one.
+   Its own full-width line under the order's facts — a card is a thing to do,
+   not another fact, and several cards on one order stack rather than fighting
+   the row for space. */
+.rowcard__gifts { flex-basis: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 
 /* ---------- checkout ---------- */
 .cohdr {

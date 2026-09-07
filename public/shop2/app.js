@@ -8995,10 +8995,25 @@
       ? ' <a class="link rowcard__act" href="' + esc(o.trackingUrl) + '" target="_blank" rel="noopener">Отследить</a>'
       : o.tracking ? ' <span class="muted num">' + esc(o.tracking) + "</span>" : "";
     var what = (o.items || []).map(function (i) { return i.title + (i.qty > 1 ? " ×" + i.qty : ""); }).join(", ");
+    /* features: the printable card, a second time. It was on the receipt and
+       nowhere else, so closing that tab left the buyer with the code in an
+       e-mail and no card to print (QA sweep 06.09, question 10; Dim said yes).
+       The link and its token come from the server with the order — the browser
+       cannot make one up — and it is in the delegate's [data-giftpdf] list
+       already, which lets the <a> do its own work and only records the
+       download. Several cards on one order get a row each, named by code. */
+    var cards = Array.isArray(o.giftCards) ? o.giftCards : [];
+    var pdfs = cards.length
+      ? '<span class="rowcard__gifts">' + cards.map(function (c) {
+          return '<a class="link" href="' + esc(c.pdfUrl) + '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">' +
+            "<span>Скачать подарочную карту (PDF)</span>" +
+            (cards.length > 1 ? ' <span class="num">' + esc(c.code) + "</span>" : "") + "</a>";
+        }).join("") + "</span>"
+      : "";
     return '<div class="rowcard"><span class="num rowcard__id">' + esc(o.number) + "</span>" +
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
       '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + track +
-      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + "</div>";
+      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pdfs + "</div>";
   }
   function screenAccount() {
     acctLoad();
