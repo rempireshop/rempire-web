@@ -163,6 +163,37 @@ serial execution just means "revert before the next file starts" is enough
 on its own, with no cross-file locking to get wrong. If this suite ever grows
 enough to need real parallelism, that revert discipline is the thing to keep.
 
+## The consent banner, and why every test is already past it
+
+`playwright.config.ts` seeds one `localStorage` key for every project:
+
+```ts
+storageState: { cookies: [], origins: [{ origin: E2E_BASE_URL,
+  localStorage: [{ name: "rempire-consent", value: '{"v":1,"analytics":true,"at":0}' }] }] }
+```
+
+So every test starts as a visitor who has already answered the banner
+(07.09.2026, `docs/features.md` § «Полоска про данные и cookie»): analytics
+allowed, bar gone. Two reasons, both about measuring the right thing:
+
+* Without it the bar is on screen in all ~90 screens of the storefront crawl
+  and in every visual baseline, and a spec clicking something near the bottom
+  of the page would be fighting it rather than testing the shop.
+* The purchase-beacon tests in `storefront-sweep-2.spec.ts` would otherwise be
+  measuring a shopper who never agreed to be measured — `track()` returns
+  before it reads anything until the banner is answered. A test that passes
+  because nothing was sent is not the test that was written.
+
+The banner's **own** tests clear that key for themselves
+(`test.use({ storageState: { cookies: [], origins: [] } })`) and drive a
+genuine first visit: the bar in three languages, «Только необходимое»
+silencing `/api/track/`, the choice surviving a navigation, «Данные и cookie»
+in the footer reopening it, and the bar never being drawn on the checkout or
+the receipt.
+
+If a storefront spec ever fails with a click "intercepted" by something at the
+bottom of the page, this key is the first thing to check.
+
 ## Why most specs run on desktop only
 
 `playwright.config.ts` defines three projects — desktop 1280×800, tablet

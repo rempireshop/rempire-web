@@ -5774,7 +5774,10 @@
   }
   var consentPainted = "";
   function paintConsent() {
-    var key = consentShown() ? (consentRead() ? "open-again" : "first") : "";
+    /* The language is part of the key: the bar can sit there for as long as
+       the shopper leaves it, and translateTree() only runs on a repaint —
+       without this, switching language left it in the language before. */
+    var key = consentShown() ? (consentRead() ? "open-again" : "first") + "|" + S.lang : "";
     if (key === consentPainted) return;
     consentPainted = key;
     cbSlot.innerHTML = key ? consentHTML() : "";
@@ -20052,8 +20055,13 @@
   function pathFor() {
     var b = "/shop2" + SEG_OF_LANG[pathLang];
     /* A 404 keeps the address the shopper asked for — that is the whole point
-       of it. Nothing pushes /shop2/notfound/ into the history. */
-    if (S.screen === "notfound") return location.pathname + location.search;
+       of it. Nothing pushes /shop2/notfound/ into the history. The language
+       prefix still follows the switcher, so «EN» on a missing page moves to
+       the English shop's version of the same missing address rather than
+       silently leaving a Russian prefix over English words. */
+    if (S.screen === "notfound") {
+      return b + stripLangPrefix(location.pathname).replace(/^\/shop2/, "") + location.search;
+    }
     if (S.screen === "product" && S.productId) return b + "/p/" + encodeURIComponent(S.productId) + "/";
     if (S.screen === "catalog") return S.brand ? b + "/b/" + slugify(S.brand) + "/" : b + "/c/" + S.cat + "/";
     if (S.screen === "search") return b + "/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
