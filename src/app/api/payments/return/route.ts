@@ -25,7 +25,7 @@ function done(
   base: string,
   number: string | null,
   state: ReceiptState,
-  extra: { total?: number; gift?: string; orderId?: string; method?: string } = {},
+  extra: { total?: number; gift?: string; orderId?: string; method?: string; bank?: string } = {},
 ) {
   return NextResponse.redirect(receiptUrl(base, { number, state, ...extra }), 303);
 }
@@ -104,7 +104,7 @@ async function handle(req: Request, params: URLSearchParams) {
     outcome = await settlePayment(order, result, provider.name);
   } catch (err) {
     console.error("payments/return: apply failed", err);
-    return done(base, order.number, result.status, { orderId: order.id, method: methodOf(order) });
+    return done(base, order.number, result.status, { orderId: order.id, method: methodOf(order), bank: bankOf(order) });
   }
 
   const state: ReceiptState =
@@ -124,6 +124,7 @@ async function handle(req: Request, params: URLSearchParams) {
     // …and the method it was sent out with, so the retry screen starts on the
     // way the shopper already chose rather than proposing a different one
     method: methodOf(order),
+    bank: bankOf(order),
   });
 }
 
@@ -132,4 +133,11 @@ function methodOf(order: { payment?: unknown }): string | undefined {
   const p = order.payment as { method?: unknown } | null | undefined;
   const m = p && typeof p === "object" ? p.method : undefined;
   return typeof m === "string" ? m : undefined;
+}
+
+/** The BIC of the bank the shopper picked, so the retry screen highlights it. */
+function bankOf(order: { payment?: unknown }): string | undefined {
+  const p = order.payment as { bank?: unknown } | null | undefined;
+  const b = p && typeof p === "object" ? p.bank : undefined;
+  return typeof b === "string" && b ? b : undefined;
 }

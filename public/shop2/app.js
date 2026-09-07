@@ -5140,10 +5140,13 @@
     acctName: "",
     pay: 0,
     bank: 0,
-    // «Оплата не прошла» → which of the three ways the second try uses.
-    // null until the screen seeds it from the receipt's own `m` — see
-    // donePayIndex(): the shopper's first choice, not a new proposal.
+    // «Оплата не прошла» → which of the three ways the second try uses, and
+    // whether the shopper has overruled the bank the order was sent to. Both
+    // start empty: the screen seeds them from the receipt's own `m` and `b`
+    // (donePayIndex / doneBankSeed) — the shopper's first choice, not a new
+    // proposal.
     donePay: null,
+    doneBankPicked: false,
     adminTab: "over",
     adminAsk: "",
     adminAtt: [],    // photos attached to the assistant's conversation: {key, url, thumb, name, busy, err}
@@ -18923,10 +18926,12 @@
          payment. The basket is empty by now (payNow() clears it before the
          bank), so the order is the only thing a second try can be about. */
       order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : "",
-      /* `m` — the method the order went out with (src/lib/payments/receipt.ts).
-         The retry screen offers all three, and this is which one starts
-         selected: the shopper's own choice, not one the shop proposes. */
-      method: s === "failed" && /^(bank|card|wallet)$/.test(q.m || "") ? q.m : ""
+      /* `m` — the method the order went out with, `b` — the BIC of the bank
+         it was sent to (src/lib/payments/receipt.ts). The retry screen offers
+         all three methods and all the chips, and these two are which of them
+         start selected: the shopper's own choice, not one the shop proposes. */
+      method: s === "failed" && /^(bank|card|wallet)$/.test(q.m || "") ? q.m : "",
+      bank: s === "failed" && /^[A-Z0-9]{8,11}$/.test(q.b || "") ? q.b : ""
     };
     if (s === "paid") {
       var total = parseFloat(String(q.t || "").replace(",", "."));
@@ -18962,8 +18967,23 @@
     }
     return S.donePay;
   }
+  /* The chip the shopper picked the first time, kept highlighted. Recomputed
+     from the BIC on every render until they touch a chip themselves: the real
+     bank list arrives from Montonio a moment after this screen first draws
+     (loadPayMethods), and the index that means «SEB» is different in the two
+     lists. Touching a chip is the shopper's own answer and wins from then on. */
+  function doneBankSeed(d) {
+    if (S.doneBankPicked || !d || !d.bank) return;
+    var list = banksForCountry();
+    if (list && list.length) {
+      for (var i = 0; i < list.length; i++) if (list[i].code === d.bank) { S.bank = i; return; }
+      return;
+    }
+    for (var j = 0; j < BANKS.length; j++) if (BANK_CODES[BANKS[j]] === d.bank) { S.bank = j; return; }
+  }
   function donePayPickerHTML(d) {
     var pick = donePayIndex(d);
+    if (pick === 0) doneBankSeed(d);
     return '<div class="done__pay"><div class="optlist">' + PAYS.slice(0, 3).map(function (o, i) {
         return '<label class="opt opt--pay"><input type="radio" name="donepay" ' + (i === pick ? "checked" : "") + ' data-donepay="' + i + '">' +
           '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
@@ -20101,9 +20121,10 @@
     if (screen === "catalog") S.shown = 12;
     if (screen === "checkout") { S.coStep = 1; S.pointOpen = false; }
     // leaving the receipt drops the receipt: the next one reads its own query
-    // the receipt goes, and with it the method its retry picker was set to —
-    // the next failed receipt seeds itself from its own order (donePayIndex)
-    if (screen !== "done") { S.done = null; S.donePay = null; }
+    // the receipt goes, and with it the method and the bank its retry picker
+    // was set to — the next failed receipt seeds itself from its own order
+    // (donePayIndex / doneBankSeed)
+    if (screen !== "done") { S.done = null; S.donePay = null; S.doneBankPicked = false; }
     // the receipt replaces the checkout it came from: Back from it belongs on
     // the shop, not on a payment form for an order already placed
     navTo(screen === "done");
@@ -20562,7 +20583,12 @@
     if (d.paym !== undefined) { S.pay = Number(d.paym); render(); refocus('[data-paym="' + d.paym + '"]'); return; }
     // the same three on the failed receipt — «или выберите другой способ»
     if (d.donepay !== undefined) { S.donePay = Number(d.donepay); render(); refocus('[data-donepay="' + d.donepay + '"]'); return; }
-    if (d.bank !== undefined) { S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return; }
+    if (d.bank !== undefined) {
+      // on the failed receipt this is the shopper overruling the bank their
+      // order was sent to, and from here on doneBankSeed() leaves it alone
+      if (S.screen === "done") S.doneBankPicked = true;
+      S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return;
+    }
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
