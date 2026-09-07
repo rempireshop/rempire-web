@@ -37,7 +37,8 @@ import {
   type OrderStatus,
 } from "@/lib/orders";
 import { applyPaymentResult } from "@/lib/payments/apply";
-import { notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { notifyOrderClosed, notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { refundedTotal } from "@/lib/payments/refund";
 import { saveShipmentOnOrder, shipmentOnOrder } from "@/lib/shipping/montonio";
 
 export const runtime = "nodejs";
@@ -192,6 +193,20 @@ export async function PATCH(req: Request, ctx: Ctx) {
       order = (await setOrderStatus(found.id, status as OrderStatus, "admin")) ?? order;
       // the letter goes with the first hand-over only — not when «Доставлен» is undone back to shipped
       if (status === "shipped" && !handedOver(found.status)) await sendShippedLetter(order);
+      /* «Отменить заказ» and «Изменить статус вручную → возврат» say something
+         to the customer now (Dim, 07.09.2026 — before this the card had to
+         admit «Письмо не уходит»). The refund letter names what has actually
+         gone back through the provider when a refund was recorded, and the
+         order's total when the money moved outside this shop, which is what a
+         hand-set «возврат» means. Never fatal: a status that already moved
+         must not fail because Resend had a bad day. */
+      if (status === "cancelled" || status === "refunded") {
+        const already = refundedTotal(order.payment);
+        await notifyOrderClosed(order, {
+          kind: status === "refunded" ? "refunded" : "cancelled",
+          amount: status === "refunded" ? (already > 0 ? already : Number(order.total) || 0) : undefined,
+        });
+      }
     }
 
     return Response.json({ ok: true, order }, { headers: { "cache-control": "no-store" } });

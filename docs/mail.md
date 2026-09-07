@@ -18,6 +18,8 @@ log.
 | `src/lib/mail.ts` | `sendMail()` — Resend REST, one retry on 5xx, never throws |
 | `src/lib/mail-hooks.ts` | `onOrderCreated` / `onOrderPaid` / `onOrderShipped` |
 | `src/emails/*.ts` | one renderer per letter → `{ subject, html, text }` |
+| `src/lib/mail-hooks.ts` | `onOrderCreated` / `onOrderPaid` / `onOrderShipped` / `onOrderClosed` / `onOrderUnpaid` |
+| `src/emails/*.ts` | the five renderers → `{ subject, html, text }` |
 | `src/emails/layout.ts` | shared shell, palette, dark-mode CSS, money/URL helpers |
 | `src/emails/common.ts` | customer name, item table, delivery line, totals |
 | `src/emails/texts.ts` | the owner's own subject / intro / closing line — see below |
@@ -106,6 +108,8 @@ await onOrderPaid(order);           // returns, never throws
 | `onOrderPaid(order)` | payment confirmed | «Заказ принят» to the customer, in the order's own language, plus the shop's own Telegram + e-mail ping through `notify.ts`, plus the gift cards bought in the order (below). |
 | `issueOrderGiftCards(order)` | the payment routes see "paid" for an order that is already paid — a webhook retry, the shopper's return after the webhook | the gift-card half of `onOrderPaid` on its own: mint the cards bought in the order (idempotent — existing cards win) and mail each to its recipient, Resend key `gift:<code>`. No customer letter, no ping. Exists so a crash between the status write and the hook cannot leave a paid order without its cards. |
 | `onOrderShipped(order, tracking)` | parcel handed to the carrier | «Заказ отправлен» with the tracking code and a carrier link. `tracking` is a bare code string, or `{ code, url?, carrier? }`. |
+| `onOrderClosed(order, { kind, amount? })` | the order is cancelled, or money went back | «Заказ отменён» (`kind: "cancelled"`) or «Деньги возвращены» (`kind: "refunded"`, `amount` = what actually left). One renderer, two openings. Called from «Отменить заказ» and «Изменить статус вручную» in the admin (`PATCH /api/admin/orders/<id>`), from «Вернуть деньги» and the refund webhook (`settleRefund()`), and from the cron when an unpaid order runs out of time. Until 07.09.2026 none of those said anything at all to the customer. |
+| `onOrderUnpaid(order, { daysLeft, payUrl })` | an unpaid order is a few days old | «Заказ ждёт оплаты», with a button back to that order's own failed receipt — the screen that carries «Оплатить ещё раз» and the choice of another method. Only the daily cron sends it (`runUnpaidOrders()`, docs/flows.md). |
 
 Each returns `{ ok, skipped?, reason?, id?, notified? }`. Callers may ignore it.
 Sends carry an idempotency key derived from the order number, so a payment
@@ -125,11 +129,15 @@ are accepted, and every field is optional: a guest checkout with no name, no
 variant and a jsonb address still renders a correct letter.
 
 ## The letters
+## The ten letters
 
 | id | Renderer | Kind |
 |---|---|---|
 | `order-confirmed` | `renderOrderConfirmed(order, lang)` | service |
 | `order-shipped` | `renderOrderShipped(order, lang, tracking)` | service |
+| `order-unpaid` | `renderOrderUnpaid(order, lang, {daysLeft, payUrl})` | service — the reminder before an unpaid order is let go |
+| `order-cancelled` | `renderOrderCancelled(order, lang, {kind:"cancelled"})` | service |
+| `order-refunded` | `renderOrderCancelled(order, lang, {kind:"refunded", amount})` | service — same renderer, the other opening |
 | `abandoned-cart` | `renderAbandonedCart(cart, lang, resumeUrl)` | marketing — unsubscribe link |
 | `back-in-stock` | `renderBackInStock(product, lang)` | marketing — unsubscribe link |
 | `birthday` | `renderBirthday(customer, lang, code)` | marketing — unsubscribe link |
@@ -257,8 +265,9 @@ Storage is one settings row, written through the ordinary
 { "mail_texts": { "order-confirmed": { "et": { "subject": "…", "intro": "…", "signature": "…" } } } }
 ```
 
-Seven letters are editable — `order-confirmed`, `order-shipped`,
-`abandoned-cart`, `back-in-stock`, `birthday`, `login-code`,
+Ten letters are editable — `order-confirmed`, `order-shipped`,
+`order-unpaid`, `order-cancelled`, `order-refunded`, `abandoned-cart`,
+`back-in-stock`, `birthday`, `login-code`,
 `partner-welcome` — in `ru`, `et`,
 `en`. `gift-card` is not: its wording is bound up with the amount and the
 giver's name. An absent key means "use the default", so the shop that never
@@ -272,6 +281,9 @@ into the row.
 |---|---|---|---|
 | `order-confirmed` | «Заказ R-1 принят — Rempire» | the paragraph after «Здравствуйте, Имя!» | «Есть вопрос по заказу? …» |
 | `order-shipped` | «Заказ R-1 отправлен — Rempire» | same | «Трек-номер начинает отслеживаться…» |
+| `order-unpaid` | «Заказ R-1 ждёт оплаты — Rempire» | same | «Что-то пошло не так при оплате? …» |
+| `order-cancelled` | «Заказ R-1 отменён — Rempire» | same | «Если это ошибка или вы хотите оформить заказ заново…» |
+| `order-refunded` | «Возврат по заказу R-1 — Rempire» | same | «Если деньги не придут в течение пяти рабочих дней…» |
 | `abandoned-cart` | «Вы забыли корзину — Rempire» | same | «Товары в корзине не резервируются…» |
 | `back-in-stock` | «X снова в наличии — Rempire» | the paragraph after «Здравствуйте!» | «Наличие и цена актуальны…» |
 | `birthday` | «С днём рождения! …» | the paragraph after «Имя, поздравляем! 🎂» | «Введите код при оформлении заказа…» |
@@ -287,7 +299,7 @@ braces is left exactly as typed — a token nobody defined is not silently eaten
 |---|---|---|
 | `{name}` | the customer's first name | a guest checkout with no name |
 | `{order}` | `R-100042` | not an order letter |
-| `{total}` | `95 €` — the order or cart total | not an order/cart letter |
+| `{total}` | `95 €` — the order or cart total; in `order-refunded` it is **what actually went back**, which on a partial refund is not the order's total | not an order/cart letter |
 | `{track}` | the tracking code | not `order-shipped`, or no code yet |
 | `{code}` | the promo code (`birthday`) or the sign-in code (`login-code`) | elsewhere |
 | `{product}` | the product's brand + name | not `back-in-stock` |
@@ -413,6 +425,17 @@ including "does not throw on a garbage order".
 - A sixth renderer, `login-code`, was added with the customer account
   (docs/flows.md). It is a service letter — no unsubscribe link — and it shows
   up in the admin preview like the rest.
+- Three more came with the refund work of 07.09.2026: `order-unpaid`,
+  `order-cancelled` and `order-refunded`. The last two are one renderer
+  (`src/emails/order-cancelled.ts`) with two openings and two editable
+  texts, because to the customer they are two different pieces of news.
+  All three are service letters — no unsubscribe link — and all three show
+  in «Письма» with their own preview. `order-unpaid` is the only one
+  behind a switch (`settings.flows.unpaid`), because it is the only one
+  the shop sends on a timer rather than because something happened; the
+  same switch also turns on the automatic cancellation that follows it,
+  and its two intervals live in «Письма → Неоплаченные заказы»
+  (`unpaidRemindDays` / `unpaidCancelDays`, docs/flows.md).
 - A seventh, `partner-welcome`, came with «+ Партнёр» in the admin
   (docs/loyalty.md): a service letter too, sent once per customer per day at
   most (the Resend idempotency key is the address plus the date), only when

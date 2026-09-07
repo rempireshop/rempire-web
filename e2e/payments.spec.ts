@@ -200,6 +200,11 @@ test.describe("payments — Apple Pay / Google Pay", () => {
     await expect(page.locator(".banks [data-bank]").first()).toBeVisible();
     await page.locator('input[data-paym="2"]').check();
     await expect(page.locator(".banks")).toHaveCount(0);
+    /* The wallet is offered on every browser, so its hint must not promise a
+       button this one may not have: it says where the wallets live and what
+       is there instead (Dim, 07.09.2026). */
+    await expect(page.locator(".costep__body .hint")).toContainText("Apple Pay");
+    await expect(page.locator(".costep__body .hint")).toContainText("картой");
 
     await payButton(page).click();
     await page.waitForURL(/\/api\/payments\/mock\//);
@@ -283,6 +288,15 @@ test.describe("payments — a gift card at checkout", () => {
     // the remainder is shown, not swallowed
     await expect(page.locator(".cosum__row--note .num")).toHaveText(new RegExp(String(before - goods).replace(".", ",")));
 
+    /* Nothing is being paid, so nothing is asked about how: the radios and
+       the bank list are gone and the button no longer says «Оплатить 0 €»
+       (Dim, 07.09.2026). The server does not go to a provider for such an
+       order either — docs/payments.md § 8b. */
+    await expect(page.locator("[data-co-payment] .optlist")).toHaveCount(0);
+    await expect(page.locator(".banks")).toHaveCount(0);
+    await expect(page.locator("[data-co-payment] .hint")).toContainText(tr("Платить нечего — заказ полностью покрыт подарочной картой, баллами или промокодом.", "RU"));
+    await expect(payButton(page)).toHaveText(tr("Оформить заказ", "RU"));
+
     await payButton(page).click();
     // no bank page in between — the receipt straight away, paid
     await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
@@ -340,7 +354,54 @@ test.describe("payments — a gift card at checkout", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* 3. Cancelling at the bank, and trying again                          */
+/* 3. «Вернуть деньги» on the order card                                */
+/* ------------------------------------------------------------------ */
+
+test.describe("payments — the money goes back", () => {
+  /* The admin panel is Chromium-only in this suite (docs/testing.md
+     «Safari»), so this one walks the owner's side on desktop alone. */
+  test("«Вернуть деньги» sends the whole amount back and turns the order into «возврат»", async ({ page, browser }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "admin panel — desktop project only");
+
+    await addProduct(page);
+    await toPaymentStep(page, freshEmail("pay-refund"), "pickup");
+    await page.locator('input[data-paym="1"]').check();
+    await payButton(page).click();
+    await page.waitForURL(/\/api\/payments\/mock\//);
+    await page.getByRole("link", { name: "Оплатить" }).click();
+    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await waitForScreen(page, "done");
+    const number = receiptNumber(page);
+    const paid = await adminOrder(browser, number);
+    expect(paid.status).toBe("paid");
+
+    await loginAsAdmin(page);
+    await page.locator('[data-admtab="orders"][aria-current]:visible').first().click();
+    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+    await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
+
+    // the confirm card is the only one with a field in it: the whole remainder
+    await page.locator("[data-admrefund]").click();
+    const card = page.locator(".adm-confirm");
+    await expect(card.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
+    const amount = card.locator("[data-admrefundamt]");
+    await expect(amount).toHaveValue(paid.total.toFixed(2));
+    await card.locator("[data-admapply]").click();
+
+    await expect(page.getByRole("status")).toContainText("возврат");
+    // the order card says where the money went…
+    await expect(page.locator(".adm-kv", { hasText: "Возвращено" })).toBeVisible();
+    // …and the button is gone, because there is nothing left to send back
+    await expect(page.locator("[data-admrefund]")).toHaveCount(0);
+
+    const after = await adminOrder(browser, number);
+    expect(after.status).toBe("refunded");
+    expect((after.payment as { refundedTotal?: number }).refundedTotal).toBe(paid.total);
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* 4. Cancelling at the bank, and trying again                          */
 /* ------------------------------------------------------------------ */
 
 test.describe("payments — cancelled at the bank", () => {
@@ -390,5 +451,49 @@ test.describe("payments — cancelled at the bank", () => {
     const again = await page.request.post("/api/payments/create/", { data: { orderId } });
     expect(again.status()).toBe(409);
     expect(((await again.json()) as { error: string }).error).toBe("already_paid");
+  });
+
+  /* «…или выберите другой способ» has been on that screen all along, and until
+     07.09.2026 it was not true: «Оплатить ещё раз» sent the body with nothing
+     but the order id, so the server reused the method the order went out with
+     and a refused card went straight back to the same card. */
+  test("the failed receipt offers the other two ways to pay, and the retry uses the one chosen there", async ({ page, browser }) => {
+    await addProduct(page);
+    await toPaymentStep(page, freshEmail("pay-switch"), "pickup");
+    await page.locator('input[data-paym="0"]').check();
+    await payButton(page).click();
+    await page.waitForURL(/\/api\/payments\/mock\//);
+    await expect(page.locator("[data-mock-page]")).toHaveAttribute("data-mock-page", "bank");
+    await page.getByRole("link", { name: "Отменить" }).click();
+    await page.waitForURL(/\/shop2.*\/done\/\?.*s=failed/);
+    await waitForScreen(page, "done");
+    const number = receiptNumber(page);
+
+    // the screen opens on the way the shopper already chose — the bank link,
+    // with that bank's own chip still highlighted
+    expect(new URL(page.url()).searchParams.get("m")).toBe("bank");
+    expect(new URL(page.url()).searchParams.get("b")).toMatch(/^[A-Z0-9]{8,11}$/);
+    await expect(page.locator('input[data-donepay="0"]')).toBeChecked();
+    await expect(page.locator(".done__pay .banks [data-bank]").first()).toBeVisible();
+
+    // switch to the card: the chips go, and so does the bank the order remembers
+    await page.locator('input[data-donepay="1"]').check();
+    await expect(page.locator(".done__pay .banks")).toHaveCount(0);
+
+    await page.locator("[data-payagain]").click();
+    await page.waitForURL(/\/api\/payments\/mock\//);
+    await expect(page.locator("[data-mock-page]")).toHaveAttribute("data-mock-page", "card");
+    await expect(page.locator("[data-mock-method]")).toContainText("банковская карта");
+
+    await page.getByRole("link", { name: "Оплатить" }).click();
+    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await waitForScreen(page, "done");
+    expect(receiptNumber(page)).toBe(number);
+
+    const order = await adminOrder(browser, number);
+    expect(order.status).toBe("paid");
+    // the order remembers the second choice, and the first try's bank is gone
+    expect(order.payment?.method).toBe("card");
+    expect(order.payment?.bank ?? null).toBeNull();
   });
 });

@@ -483,7 +483,13 @@ describe("POST /api/payments/create", () => {
       expect((await row(o.orderId)).status).toBe("paid");
     });
 
-    it("a refund webhook from Montonio is understood and answered 200, so it is not retried for 48 hours", async () => {
+    /* Refund webhooks are no longer thrown away (07.09.2026): they are read
+       and applied — tests/payments-refund.test.ts walks the whole path. What
+       is pinned HERE is the door between the two kinds of token at the one
+       URL: a refund token that cannot be verified is refused exactly like an
+       order token that cannot be verified, rather than being waved through as
+       «understood, not ours». */
+    it("an unverifiable refund token is refused, like any other token nobody can check", async () => {
       const saved = { provider: process.env.PAYMENT_PROVIDER, access: process.env.MONTONIO_ACCESS_KEY, secret: process.env.MONTONIO_SECRET_KEY };
       process.env.PAYMENT_PROVIDER = "montonio";
       process.env.MONTONIO_ACCESS_KEY = "test-access-key";
@@ -491,9 +497,9 @@ describe("POST /api/payments/create", () => {
       try {
         const { POST } = await import("@/app/api/payments/notify/route");
         const refund = await POST(makeRequest("/api/payments/notify/", { method: "POST", body: { refundToken: "x.y.z" } }));
-        expect(refund.status).toBe(200);
-        expect(((await refund.json()) as { ignored?: string }).ignored).toBe("refund_webhook");
-        // …while a token nobody can verify is still refused
+        expect(refund.status).toBe(400);
+        expect(((await refund.json()) as { error?: string }).error).toBe("bad_token");
+        // …and so is an order token nobody can verify
         const junk = await POST(makeRequest("/api/payments/notify/", { method: "POST", body: { orderToken: "x.y.z" } }));
         expect(junk.status).toBe(400);
       } finally {

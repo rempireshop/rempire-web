@@ -10,14 +10,18 @@
  * production, which is the one failure mode this file must not have.
  */
 
-type OrderHook = (order: unknown) => unknown | Promise<unknown>;
+type OrderHook = (order: unknown, opts?: unknown) => unknown | Promise<unknown>;
 
-async function call(name: "onOrderPaid" | "issueOrderGiftCards", order: unknown): Promise<boolean> {
+async function call(
+  name: "onOrderPaid" | "issueOrderGiftCards" | "onOrderClosed",
+  order: unknown,
+  opts?: unknown,
+): Promise<boolean> {
   try {
     const mod: Record<string, unknown> = await import("@/lib/mail-hooks");
     const hook = mod?.[name] as OrderHook | undefined;
     if (typeof hook !== "function") return false;
-    await hook(order);
+    await hook(order, opts);
     return true;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -42,4 +46,20 @@ export async function notifyOrderPaid(order: unknown): Promise<boolean> {
  */
 export async function issueOrderGiftCards(order: unknown): Promise<boolean> {
   return call("issueOrderGiftCards", order);
+}
+
+/**
+ * The order is closed — cancelled, or the money sent back.
+ *
+ * Until 07.09.2026 neither said anything to the customer: setOrderStatus()
+ * returned the stock and stopped, and the confirm card in the admin had to
+ * admit as much («Письмо не уходит: напишите клиенту сами»). Two openings, one
+ * letter (src/emails/order-cancelled.ts); `kind` picks which, and `amount` is
+ * what actually went back on a refund.
+ */
+export async function notifyOrderClosed(
+  order: unknown,
+  opts: { kind: "cancelled" | "refunded"; amount?: number; reason?: string },
+): Promise<boolean> {
+  return call("onOrderClosed", order, opts);
 }

@@ -39,7 +39,28 @@ export interface ReceiptParams {
    * paid or pending receipt has no use for it and does not carry it.
    */
   orderId?: string;
+  /**
+   * `m` — bank | card | wallet, the method this order was last sent out with,
+   * and only on a failed receipt beside `o`. The screen offers all three so a
+   * customer whose card was refused can switch to a bank link without going
+   * back through the basket (Dim, 07.09.2026); this is what makes the one they
+   * already chose the one that starts selected, rather than the shop quietly
+   * proposing a different way to pay.
+   */
+  method?: string;
+  /**
+   * `b` — the BIC of the bank the shopper picked, beside `m=bank`. The retry
+   * screen draws the same chips the checkout does, and this is what keeps the
+   * one they chose highlighted; without it a shopper who picked SEB came back
+   * to a screen offering Swedbank.
+   */
+  bank?: string;
 }
+
+/** The three the checkout's radio has, and the only values `m` may carry. */
+const METHODS: readonly string[] = ["bank", "card", "wallet"];
+/** A bank code is a BIC — 8 or 11 of A–Z and 0–9, and nothing else in a URL. */
+const BIC_RE = /^[A-Z0-9]{8,11}$/;
 
 export function receiptUrl(base: string, p: ReceiptParams): string {
   const params = new URLSearchParams();
@@ -48,6 +69,8 @@ export function receiptUrl(base: string, p: ReceiptParams): string {
   if (p.state === "paid" && p.total != null && Number.isFinite(p.total)) params.set("t", p.total.toFixed(2));
   if (p.state === "paid" && p.gift) params.set("g", p.gift);
   if (p.state === "failed" && p.orderId) params.set("o", p.orderId);
+  if (p.state === "failed" && p.method && METHODS.includes(p.method)) params.set("m", p.method);
+  if (p.state === "failed" && p.method === "bank" && p.bank && BIC_RE.test(p.bank)) params.set("b", p.bank);
   return `${base}/shop2/done/?${params.toString()}`;
 }
 

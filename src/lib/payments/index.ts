@@ -3,7 +3,8 @@ import { createMontonioProvider } from "./montonio";
 import { PaymentError, type PaymentProvider } from "./types";
 
 export * from "./types";
-export { MontonioProvider, mapMontonioStatus } from "./montonio";
+export * from "./refund";
+export { MontonioProvider, mapMontonioStatus, mapMontonioRefundStatus } from "./montonio";
 export { MockProvider } from "./mock";
 
 /**

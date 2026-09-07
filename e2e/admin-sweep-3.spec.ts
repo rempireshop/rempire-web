@@ -92,7 +92,14 @@ async function openMailList(page: Page): Promise<void> {
 test.describe("admin sweep 3 — «Отменить заказ» says what really happens", () => {
   test.use({ extraHTTPHeaders: ipHeaders(196) });
 
-  test("the card names the stock and admits no letter goes out", async ({ page }) => {
+  /* The card was corrected twice. First (06.09.2026) it stopped promising a
+     letter and a refund that nothing sent: cancelling only moved the status
+     and put the shelf back. Then (07.09.2026) the letter was actually built,
+     so the card says it goes — and the money moved to its own button,
+     «Вернуть деньги», which is the only thing on this screen that sends any.
+     The rule the test is really holding is the one that has not changed: the
+     card describes what happens, not what would be nice. */
+  test("the card names the stock and the letter, and sends nobody to Montonio for the money", async ({ page }) => {
     test.setTimeout(120_000);
     const number = await placeOrder(page, freshEmail("sweep3-cancel"));
     await loginAsAdmin(page);
@@ -105,13 +112,18 @@ test.describe("admin sweep 3 — «Отменить заказ» says what reall
     await expect(card.locator(".adm-confirm__t")).toHaveText("Отменить заказ?");
     const detail = card.locator(".adm-confirm__d");
     await expect(detail).toContainText(number);
-    // what the server really does: the shelf comes back
+    // what the server really does: the shelf comes back and the customer is told
     await expect(detail).toContainText("товары вернутся на склад");
-    // …and what it does not do — the two promises the card used to make
-    await expect(detail).toContainText("Деньги клиенту переводятся отдельно");
-    await expect(detail).toContainText("Письмо не уходит");
+    await expect(detail).toContainText("клиенту уйдёт письмо «Заказ отменён»");
+    // …and what it does not do: cancelling moves no money, and the card names
+    // the button that does rather than sending Renat off to Montonio
+    await expect(detail).toContainText("Деньги отмена не возвращает");
+    await expect(detail).toContainText("«Вернуть деньги»");
+    await expect(detail).not.toContainText("Письмо не уходит");
     await expect(detail).not.toContainText("Деньги вернутся клиенту");
-    await expect(detail).not.toContainText("письмо уйдёт автоматически");
+
+    // and that button is really there, on a paid order with money left to send back
+    await expect(page.locator("[data-admrefund]")).toBeVisible();
 
     // «Отмена» leaves the order where it was
     await page.locator("[data-admcancel]").click();

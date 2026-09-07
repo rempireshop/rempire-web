@@ -11,8 +11,10 @@
  * return value, never raised. Callers may ignore the result entirely.
  */
 
+import { renderOrderCancelled, type ClosedKind } from "@/emails/order-cancelled";
 import { renderOrderConfirmed } from "@/emails/order-confirmed";
 import { renderOrderShipped } from "@/emails/order-shipped";
+import { renderOrderUnpaid } from "@/emails/order-unpaid";
 import { renderGiftCard, type GiftCardLike } from "@/emails/gift-card";
 import { money, normalizeLang, num, pick, setBrandOverride } from "@/emails/layout";
 import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
@@ -321,6 +323,71 @@ async function sendGiftCards(order: OrderLike): Promise<MailHookResult> {
     ok = ok && res.ok;
   }
   return ok ? { ok } : { ok, reason: "send_failed" };
+}
+
+/**
+ * The order is closed without a parcel: cancelled, or the money sent back.
+ *
+ * Until 07.09.2026 neither said anything to anybody. «Отменить заказ» in the
+ * admin moved the status and put a counted shelf back, and its confirm card
+ * had to be corrected to admit that no letter went out at all; a refund
+ * happened in Montonio's portal and never reached this shop. Both letters come
+ * from one renderer with two openings (src/emails/order-cancelled.ts).
+ *
+ * The idempotency key carries the kind and the refund's own amount, so the
+ * second refund on one order is a second letter (it is a different sum going
+ * back) while a webhook retry about the same refund is not.
+ */
+export async function onOrderClosed(
+  order: OrderLike,
+  options: { kind: ClosedKind; amount?: number } = { kind: "cancelled" },
+): Promise<MailHookResult> {
+  try {
+    const to = customerEmail(order);
+    if (!to) return { ok: true, skipped: true, reason: "no_customer_email" };
+
+    await loadBrand();
+    const lang = langOf(order);
+    const kind: ClosedKind = options.kind === "refunded" ? "refunded" : "cancelled";
+    const amount = kind === "refunded" ? num(options.amount, num(order.total, 0)) : 0;
+    const mail = renderOrderCancelled(order, lang, { kind, amount });
+    const res = await sendRendered(to, mail, {
+      tags: { template: kind === "refunded" ? "order-refunded" : "order-cancelled" },
+      idempotencyKey: `${kind}:${orderNumber(order)}:${amount.toFixed(2)}`,
+    });
+    return { ok: res.ok, skipped: res.skipped, reason: res.error, id: res.id };
+  } catch (err) {
+    console.error("[mail-hooks] onOrderClosed failed", err);
+    return { ok: false, reason: "exception" };
+  }
+}
+
+/**
+ * «Заказ ждёт оплаты» — the reminder the daily cron sends before an unpaid
+ * order is let go (src/lib/flows.ts, `runUnpaidOrders`). The stamp that stops
+ * a second copy lives on the order, not here; the idempotency key is the belt
+ * to that pair of braces.
+ */
+export async function onOrderUnpaid(
+  order: OrderLike,
+  options: { daysLeft: number; payUrl: string },
+): Promise<MailHookResult> {
+  try {
+    const to = customerEmail(order);
+    if (!to) return { ok: true, skipped: true, reason: "no_customer_email" };
+
+    await loadBrand();
+    const lang = langOf(order);
+    const mail = renderOrderUnpaid(order, lang, options);
+    const res = await sendRendered(to, mail, {
+      tags: { template: "order-unpaid" },
+      idempotencyKey: `unpaid:${orderNumber(order)}`,
+    });
+    return { ok: res.ok, skipped: res.skipped, reason: res.error, id: res.id };
+  } catch (err) {
+    console.error("[mail-hooks] onOrderUnpaid failed", err);
+    return { ok: false, reason: "exception" };
+  }
 }
 
 /** Parcel handed to the carrier — tracking code goes out to the customer. */

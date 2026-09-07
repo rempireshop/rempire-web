@@ -24,8 +24,10 @@ import {
   renderInvoiceCancelled,
   renderInvoiceReminder,
   renderLoginCode,
+  renderOrderCancelled,
   renderOrderConfirmed,
   renderOrderShipped,
+  renderOrderUnpaid,
   renderPartnerWelcome,
   TEMPLATE_IDS,
   type GiftCardLike,
@@ -245,6 +247,24 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
         return renderOrderShipped({ ...sampleOrder(lang), status: "shipped" }, lang, {
           code: "CE123456789EE",
           carrier: "omniva",
+        });
+      /* The three letters an order gets when it never becomes a parcel. The
+         unpaid reminder points at the same failed receipt the real one does;
+         the refund names a partial sum on purpose, because that is the case
+         where «сумма возврата» and «итого» differ and a sample must show it. */
+      case "order-unpaid":
+        return renderOrderUnpaid({ ...sampleOrder(lang), status: "new" }, lang, {
+          daysLeft: 4,
+          payUrl: "/shop2/done/?n=R-100042&s=failed",
+        });
+      case "order-cancelled":
+        return renderOrderCancelled({ ...sampleOrder(lang), status: "cancelled" }, lang, {
+          kind: "cancelled",
+        });
+      case "order-refunded":
+        return renderOrderCancelled({ ...sampleOrder(lang), status: "refunded" }, lang, {
+          kind: "refunded",
+          amount: 42,
         });
       case "abandoned-cart":
         return renderAbandonedCart(sampleCart(lang), lang, "/shop2/checkout/?resume=cart-7");

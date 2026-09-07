@@ -1012,6 +1012,16 @@
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
+      /* The wallet is offered on every browser (Dim, 07.09.2026), so its hint
+         says where the buttons live and what is there instead of promising
+         them; and a basket a card or points already cover has no payment to
+         choose at all — one sentence in place of the whole block. */
+      "Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.":
+        "Apple Pay ja Google Pay nupud avanevad Montonio lehel — kui teie brauser neid ei toeta, saab samas maksta kaardiga.",
+      "Платить нечего — заказ полностью покрыт подарочной картой, баллами или промокодом.":
+        "Maksta pole midagi — tellimuse katavad täielikult kinkekaart, punktid või sooduskood.",
+      "Нажимая «Оформить заказ», вы соглашаетесь с условиями и политикой возврата.":
+        "Nupule „Vormista tellimus“ vajutades nõustute tingimuste ja tagastuspoliitikaga.",
       // blog
       /* «Blog», not «Ajaveeb» — the owner's own word for the section in
          Estonian, and the one every ET surface has to carry: nav, footer,
@@ -1365,6 +1375,45 @@
       "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "Silt on Montonio pakikleebis jälgimisnumbriga. Tellimuse staatust see ei muuda.",
       /* the order card's «Оплата» block (admPaymentHTML) */
       "По счёту": "Arvega", "тестовый банк": "testpank", "отмечено вручную": "märgitud käsitsi",
+      /* «Вернуть деньги» — the button, the card with the amount in it, and
+         the ledger the order card shows underneath (docs/payments.md § 11) */
+      "Возвращаем…": "Tagastame…", "Сумма возврата, €": "Tagastatav summa, €",
+      "Вернуть деньги?": "Kas tagastada raha?",
+      "Не удалось оформить возврат": "Tagasimakset ei õnnestunud vormistada",
+      "Возврат через Montonio не подключён — верните деньги в его панели.":
+        "Montonio kaudu tagasimakse pole ühendatud — tagastage raha tema töölaual.",
+      "Деньги по этому заказу ещё не пришли — возвращать нечего.":
+        "Selle tellimuse raha pole veel laekunud — tagastada pole midagi.",
+      "У заказа нет платежа в Montonio — верните деньги тем же путём, каким они пришли.":
+        "Tellimusel pole Montonio makset — tagastage raha sama teed, kust see tuli.",
+      "По этому заказу уже всё возвращено.": "Selle tellimuse eest on juba kõik tagastatud.",
+      "Проверьте сумму — вернуть можно не больше остатка.":
+        "Kontrollige summat — tagastada saab kuni jäägi ulatuses.",
+      "Заказ закрыт — возврат не оформить.": "Tellimus on suletud — tagasimakset ei saa vormistada.",
+      "Montonio не отвечает — попробуйте через минуту.": "Montonio ei vasta — proovige minuti pärast.",
+      "Montonio отказал в возврате — проверьте баланс в его панели.":
+        "Montonio keeldus tagasimaksest — kontrollige tema töölaual saldot.",
+      "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.":
+        "Raha läks välja, aga kirje ei salvestunud — avage tellimus uuesti ja kontrollige.",
+      /* «Письма»: the three new rows and the two intervals behind them */
+      "Заказ ждёт оплаты": "Tellimus ootab tasumist",
+      "через несколько дней без оплаты": "mõne päeva pärast ilma makseta",
+      "Деньги возвращены": "Raha tagastatud",
+      "когда заказ отменён — вами или по сроку": "kui tellimus tühistatakse — teie poolt või tähtaja tõttu",
+      "когда вы вернули деньги": "kui olete raha tagastanud",
+      "Ждут оплаты:": "Ootavad tasumist:",
+      "Неоплаченные заказы": "Maksmata tellimused",
+      "Неоплаченные заказы: сохранено ✓": "Maksmata tellimused: salvestatud ✓",
+      "Покупатель оформил заказ и не оплатил. Сначала магазин напомнит письмом, потом отменит заказ сам и сообщит об этом — оба письма выше. Проверка раз в сутки.":
+        "Ostja vormistas tellimuse ja jättis maksmata. Kõigepealt tuletab pood kirjaga meelde, seejärel tühistab tellimuse ise ja annab sellest teada — mõlemad kirjad on ülal. Kontroll kord ööpäevas.",
+      "Напомнить через, дней": "Meeldetuletus, päeva pärast",
+      "Через столько дней после заказа уйдёт письмо «Заказ ждёт оплаты».":
+        "Nii mitme päeva pärast läheb välja kiri «Tellimus ootab tasumist».",
+      "Отменить через, дней": "Tühistada, päeva pärast",
+      "Через столько дней заказ отменится сам, товары останутся в магазине.":
+        "Nii mitme päeva pärast tühistub tellimus ise ja kaubad jäävad poodi.",
+      "Отмена — от 2 до 60 дней": "Tühistamine — 2 kuni 60 päeva",
+      "Напоминание должно быть раньше отмены": "Meeldetuletus peab tulema enne tühistamist",
       "без оплаты — к оплате было 0 €": "makseta — maksta oli 0 €", "ждёт оплаты": "ootab makset",
       "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
         "⚠ Hiljem saatis pank «maksmata» — tellimus jäi makstuks, kontrolli Montonios",
@@ -2831,6 +2880,13 @@
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop.",
+      // see the ET table above for why these three exist
+      "Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.":
+        "The Apple Pay and Google Pay buttons open on Montonio's page — if your browser does not support them, you can pay by card there instead.",
+      "Платить нечего — заказ полностью покрыт подарочной картой, баллами или промокодом.":
+        "There is nothing to pay — a gift card, points or a promo code cover the whole order.",
+      "Нажимая «Оформить заказ», вы соглашаетесь с условиями и политикой возврата.":
+        "By pressing “Place the order” you agree to the terms and the returns policy.",
       // blog
       "Блог": "Blog",
       "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
@@ -3179,6 +3235,43 @@
       "Этикетка — наклейка Montonio с трек-номером. Статус заказа она не меняет.": "The label is Montonio's sticker with the tracking number. It does not change the order's status.",
       /* the order card's «Оплата» block (admPaymentHTML) */
       "По счёту": "By invoice", "тестовый банк": "test bank", "отмечено вручную": "marked by hand",
+      // see the ET table above for what these belong to
+      "Возвращаем…": "Refunding…", "Сумма возврата, €": "Refund amount, €",
+      "Вернуть деньги?": "Refund the money?",
+      "Не удалось оформить возврат": "Could not make the refund",
+      "Возврат через Montonio не подключён — верните деньги в его панели.":
+        "Refunds through Montonio are not connected — return the money from its own panel.",
+      "Деньги по этому заказу ещё не пришли — возвращать нечего.":
+        "The money for this order has not arrived — there is nothing to return.",
+      "У заказа нет платежа в Montonio — верните деньги тем же путём, каким они пришли.":
+        "This order has no Montonio payment — return the money the way it came.",
+      "По этому заказу уже всё возвращено.": "Everything on this order has already been refunded.",
+      "Проверьте сумму — вернуть можно не больше остатка.":
+        "Check the amount — you can refund at most what is left.",
+      "Заказ закрыт — возврат не оформить.": "The order is closed — no refund can be made.",
+      "Montonio не отвечает — попробуйте через минуту.": "Montonio is not answering — try again in a minute.",
+      "Montonio отказал в возврате — проверьте баланс в его панели.":
+        "Montonio refused the refund — check the balance in its panel.",
+      "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.":
+        "The money left, but the record did not save — open the order again and check.",
+      "Заказ ждёт оплаты": "Order awaiting payment",
+      "через несколько дней без оплаты": "a few days after an order goes unpaid",
+      "Деньги возвращены": "Money refunded",
+      "когда заказ отменён — вами или по сроку": "when an order is cancelled — by you or by the clock",
+      "когда вы вернули деньги": "when you have refunded the money",
+      "Ждут оплаты:": "Awaiting payment:",
+      "Неоплаченные заказы": "Unpaid orders",
+      "Неоплаченные заказы: сохранено ✓": "Unpaid orders: saved ✓",
+      "Покупатель оформил заказ и не оплатил. Сначала магазин напомнит письмом, потом отменит заказ сам и сообщит об этом — оба письма выше. Проверка раз в сутки.":
+        "A customer placed an order and never paid. First the shop sends a reminder, then it cancels the order by itself and says so — both letters are above. Checked once a day.",
+      "Напомнить через, дней": "Remind after, days",
+      "Через столько дней после заказа уйдёт письмо «Заказ ждёт оплаты».":
+        "That many days after the order, the “Order awaiting payment” letter goes out.",
+      "Отменить через, дней": "Cancel after, days",
+      "Через столько дней заказ отменится сам, товары останутся в магазине.":
+        "That many days on, the order cancels itself and the goods stay in the shop.",
+      "Отмена — от 2 до 60 дней": "Cancellation — 2 to 60 days",
+      "Напоминание должно быть раньше отмены": "The reminder has to come before the cancellation",
       "без оплаты — к оплате было 0 €": "no payment — there was 0 € to pay", "ждёт оплаты": "awaiting payment",
       "⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio":
         "⚠ The bank later sent «not paid» — the order stayed paid, check in Montonio",
@@ -3798,18 +3891,40 @@
     [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» с трек-номером\.$/,
       { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» koos jälgimisnumbriga.",
         EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter with the tracking number." }],
-    /* «Отменить заказ» — paid, then not yet paid */
-    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «отменён», товары вернутся на склад\. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда\. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту»\.$/,
-      { ET: "$1 · $2\nTellimus saab staatuse «tühistatud», kaubad lähevad lattu tagasi. Raha kantakse kliendile eraldi — pangas või Montonios, mitte siit. Kirja ei saadeta: kirjutage kliendile ise nupuga «Kirjuta kliendile».",
-        EN: "$1 · $2\nThe order gets the status “cancelled” and the goods go back to stock. The money is returned separately — in the bank or in Montonio, not from here. No letter is sent: write to the customer yourself with “Write to the customer”." }],
-    [/^([^\n]+) · ([^\n]+)\nЗаказ ещё не оплачен — возвращать нечего\. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту»\.$/,
-      { ET: "$1 · $2\nTellimus ei ole veel makstud — tagastada pole midagi. Kirja ei saadeta: kirjutage kliendile ise nupuga «Kirjuta kliendile».",
-        EN: "$1 · $2\nThe order has not been paid — there is nothing to return. No letter is sent: write to the customer yourself with “Write to the customer”." }],
+    /* «Отменить заказ» and «возврат» say what they do now: the letter that
+       did not exist before 07.09.2026 goes out, and moving money is the
+       card's own «Вернуть деньги» button rather than a trip to Montonio. */
+    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «отменён», товары вернутся на склад, клиенту уйдёт письмо «Заказ отменён»\. Деньги отмена не возвращает — для этого есть кнопка «Вернуть деньги»\.$/,
+      { ET: "$1 · $2\nTellimus saab staatuse «tühistatud», kaubad lähevad lattu tagasi, kliendile läheb kiri «Tellimus tühistatud». Tühistamine raha ei tagasta — selleks on nupp «Tagasta raha».",
+        EN: "$1 · $2\nThe order gets the status “cancelled”, the goods go back to stock and the customer gets the “Order cancelled” letter. Cancelling returns no money — the “Refund” button does that." }],
+    [/^([^\n]+) · ([^\n]+)\nЗаказ ещё не оплачен — возвращать нечего\. Клиенту уйдёт письмо «Заказ отменён»\.$/,
+      { ET: "$1 · $2\nTellimus ei ole veel makstud — tagastada pole midagi. Kliendile läheb kiri «Tellimus tühistatud».",
+        EN: "$1 · $2\nThe order has not been paid — there is nothing to return. The customer gets the “Order cancelled” letter." }],
+    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены»\. Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги»\.$/,
+      { ET: "$1 · $2\nTellimus saab staatuse «tagastus», kaubad lähevad lattu tagasi, kliendile läheb kiri «Raha tagastatud». Raha ise siit ei liigu — selleks on nupp «Tagasta raha».",
+        EN: "$1 · $2\nThe order gets the status “refunded”, the goods go back to stock and the customer gets the “Money refunded” letter. No money moves from here — the “Refund” button does that." }],
+    /* the «Вернуть деньги» card, first refund and second */
+    [/^([^\n]+) · ([^\n]+)\nВернём (.+) через Montonio — тем же путём, каким деньги пришли\. Клиенту уйдёт письмо, товары вернутся на склад, заказ станет «возврат»\. Можно вернуть часть — измените сумму\.$/,
+      { ET: "$1 · $2\nTagastame $3 Montonio kaudu — sama teed, kust raha tuli. Kliendile läheb kiri, kaubad lähevad lattu tagasi ja tellimus saab staatuse «tagastus». Tagastada saab ka osa — muutke summat.",
+        EN: "$1 · $2\nWe will send $3 back through Montonio, the way the money came. The customer gets a letter, the goods go back to stock and the order becomes “refunded”. You can refund part of it — change the amount." }],
+    [/^([^\n]+) · ([^\n]+)\nПо заказу уже возвращено (.+)\. Осталось (.+) — деньги уйдут через Montonio тем же путём, каким пришли, и клиент получит письмо\.$/,
+      { ET: "$1 · $2\nTellimuse eest on juba tagastatud $3. Jäänud on $4 — raha läheb Montonio kaudu sama teed, kust tuli, ja klient saab kirja.",
+        EN: "$1 · $2\n$3 has already been refunded on this order. $4 is left — the money goes back through Montonio the way it came, and the customer gets a letter." }],
+    /* the refund ledger on the order card, and the two toasts behind it */
+    [/^Возвращено (.+) из (.+)$/, { ET: "Tagastatud $1 / $2", EN: "Refunded $1 of $2" }],
+    [/^⚠ Возврат (.+) не прошёл — проверьте в Montonio$/,
+      { ET: "⚠ Tagasimakse $1 ei õnnestunud — kontrollige Montonios",
+        EN: "⚠ The $1 refund did not go through — check in Montonio" }],
+    [/^Возврат (.+) в обработке у Montonio$/,
+      { ET: "Tagasimakse $1 on Montonios töötlemisel", EN: "The $1 refund is being processed by Montonio" }],
+    [/^(.+) · возврат (.+) — письмо ушло$/,
+      { ET: "$1 · tagasimakse $2 — kiri läks välja", EN: "$1 · refunded $2 — the letter is out" }],
+    [/^(.+) · вернули часть, (.+)$/, { ET: "$1 · tagastasime osa, $2", EN: "$1 · partly refunded, $2" }],
+    [/^Неоплаченные заказы: напоминание через (\d+), отмена через (\d+)$/,
+      { ET: "Maksmata tellimused: meeldetuletus $1 päeva pärast, tühistamine $2 päeva pärast",
+        EN: "Unpaid orders: reminder after $1 days, cancellation after $2 days" }],
     /* «Изменить статус вручную» — the confirm card's two-line text before a
        refund, and before «оплачен» by hand (money already in / not yet) */
-    [/^([^\n]+) · ([^\n]+)\nЗаказ получит статус «возврат», товары вернутся на склад\. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда\.$/,
-      { ET: "$1 · $2\nTellimus saab staatuse «tagastus», kaubad lähevad lattu tagasi. Raha kantakse kliendile eraldi — pangas või Montonios, mitte siit.",
-        EN: "$1 · $2\nThe order gets the status “refunded” and the goods go back to stock. The money is returned separately — in the bank or in Montonio, not from here." }],
     [/^([^\n]+) · ([^\n]+)\nСтатус вернётся на «оплачен»\. Деньги и склад не трогаем — они уже учтены\.$/,
       { ET: "$1 · $2\nStaatus läheb tagasi «makstud». Raha ja ladu jäävad puutumata — need on juba arvesse võetud.",
         EN: "$1 · $2\nThe status goes back to “paid”. Money and stock are left alone — they are already accounted for." }],
@@ -5076,9 +5191,18 @@
     // «По счёту — для компаний»: the company the invoice is made out to (step 3)
     inv: { name: "", regCode: "", vatNumber: "", sameAddr: true, address: "", email: "" },
     invTouched: false,
+    // «Письма → Неоплаченные заказы»: the two day counts being typed
+    unpaidDraft: null,
     acctName: "",
     pay: 0,
     bank: 0,
+    // «Оплата не прошла» → which of the three ways the second try uses, and
+    // whether the shopper has overruled the bank the order was sent to. Both
+    // start empty: the screen seeds them from the receipt's own `m` and `b`
+    // (donePayIndex / doneBankSeed) — the shopper's first choice, not a new
+    // proposal.
+    donePay: null,
+    doneBankPicked: false,
     adminTab: "over",
     adminAsk: "",
     adminAtt: [],    // photos attached to the assistant's conversation: {key, url, thumb, name, busy, err}
@@ -9750,13 +9874,24 @@
   }
   /* «Оплатить ещё раз» on the failed receipt. The basket is gone (payNow()
      empties it before leaving for the bank), but the order is still there:
-     the payment is re-created for it — the server reuses the method chosen
-     the first time when the body carries nothing but the id — and the shopper
-     goes back to the bank. Same lock as payNow(): one tap, one payment. */
+     the payment is re-created for it and the shopper goes back to the bank.
+     Same lock as payNow(): one tap, one payment.
+
+     The method travels with it now. The screen's own sentence has always
+     said «или выберите другой способ», and until 07.09.2026 it was not
+     true — the body carried nothing but the id, so the server reused what
+     the order was sent out with and a refused card went back to the same
+     card. The picker on that screen (donePayPickerHTML) is what this reads. */
   function payAgain(orderId) {
     if (S.paying || !orderId) return;
     S.paying = true; render();
-    postJSON("/api/payments/create/", { orderId: orderId, lang: S.lang }).then(function (pay) {
+    var pick = donePayIndex(doneState());
+    postJSON("/api/payments/create/", {
+      orderId: orderId,
+      method: PAYS[pick] ? PAYS[pick].k : "bank",
+      bank: pick === 0 ? selectedBankCode() : undefined,
+      lang: S.lang
+    }).then(function (pay) {
       if (pay.offline || !pay.body || !pay.body.ok || !pay.body.redirectUrl) {
         throw new Error(payErrText(pay.body && pay.body.error));
       }
@@ -9766,8 +9901,24 @@
       toast(err && err.message ? err.message : "Оплата пока недоступна — попробуйте позже");
     });
   }
+  /* ---------- the order this checkout has already made ----------------------
+     POST /api/orders/ succeeds, POST /api/payments/create/ does not (the bank
+     was unreachable, the keys are not in yet) — and the second tap of
+     «Оплатить» used to place a SECOND order for the same basket, leaving the
+     shop with two rows for one customer (Dim, 07.09.2026). The order is
+     remembered here instead, with a signature of the body it was made from:
+     the same basket, address and method reuse it and go straight to the
+     payment; anything the shopper changed makes a new one, because it is a
+     different order. In memory only — a reload is a new visit, and the first
+     order is then the cron's to let go (src/lib/flows.ts).
+
+     Cleared by clearOrderState() (the order left for the bank), and whenever
+     the server says the remembered order can no longer be paid. */
+  var pendingOrder = null;   // { id, number, sig }
+
   /** A finished order must leave nothing behind for the next one. */
   function clearOrderState() {
+    pendingOrder = null;
     S.cart = []; S.promo = ""; S.promoInfo = null; S.promoErr = ""; S.promoMin = 0; S.promoBusy = false; S.sumOpen = null;
     S.giftCard = null; S.giftErr = "";   // features: a card applied here is spent
     // features: the recipient of THIS order's cards — the next order seeds its
@@ -9804,7 +9955,15 @@
     if (API.ok === false) return finishDemo();
 
     S.paying = true; render();
-    postJSON("/api/orders/", orderPayload()).then(function (res) {
+    /* The body decides whether the order this checkout already made is the
+       same order: identical body, same order. `sig` is that body, verbatim. */
+    var payload = orderPayload();
+    var sig = JSON.stringify(payload);
+    var known = pendingOrder && pendingOrder.sig === sig ? pendingOrder : null;
+    (known
+      ? Promise.resolve({ body: { ok: true, orderId: known.id, number: known.number } })
+      : postJSON("/api/orders/", payload)
+    ).then(function (res) {
       if (res.offline) return finishDemo();
       apiSeen(true);
       if (!res.body || !res.body.ok || !res.body.orderId) {
@@ -9825,6 +9984,9 @@
         try { history.replaceState(history.state, "", pathFor() + "?n=" + encodeURIComponent(S.done.number) + "&s=invoice"); } catch (e) {}
         return;
       }
+      // remembered from here on: everything below can fail, and a second tap
+      // must pay for THIS order rather than make another one
+      pendingOrder = { id: res.body.orderId, number: res.body.number || "", sig: sig };
       return postJSON("/api/payments/create/", {
         orderId: res.body.orderId,
         // the radio's own key — a wallet is "wallet", never the bank list it
@@ -9835,7 +9997,12 @@
       }).then(function (pay) {
         if (pay.offline) return finishDemo();
         if (!pay.body || !pay.body.ok || !pay.body.redirectUrl) {
-          throw new Error(payErrText(pay.body && pay.body.error));
+          /* The remembered order cannot be paid any more — it was settled, it
+             was closed, or it is gone. Forget it, so the next tap starts a
+             fresh one instead of asking about this one for ever. */
+          var code = pay.body && pay.body.error;
+          if (code === "already_paid" || code === "order_closed" || code === "not_found") pendingOrder = null;
+          throw new Error(payErrText(code));
         }
         // the basket is cleared before leaving: coming back from the bank must
         // not find the same order still sitting in the cart
@@ -9909,7 +10076,20 @@
     coBlockHTML.delivery = out;
     return out;
   }
+  /** Nothing left to pay — a gift card, points or a promo cover the basket. */
+  function nothingToPay() { return !(total() > 0.004); }
   function paymentBlockHTML() {
+    /* A basket a card, points or a promo already cover has no payment to
+       choose. Showing the radios, the bank list and «Оплатить 0 €» asked the
+       shopper to pick a bank for nothing and looked broken (Dim, 07.09.2026);
+       the server does not go to a provider for such an order either
+       (settleWithoutPayment(), docs/payments.md §8b). One sentence instead,
+       and the button below says «Оформить заказ». */
+    if (nothingToPay()) {
+      var free = '<p class="hint">Платить нечего — заказ полностью покрыт подарочной картой, баллами или промокодом.</p>';
+      coBlockHTML.payment = free;
+      return free;
+    }
     /* The pick can go stale under the shopper's hands: the gift-card box sits
        in the summary right below this list, and a card that covers the whole
        order takes «По счёту» away (invoiceOffered()). Clamped here — the one
@@ -9927,6 +10107,11 @@
       // not their own option in the checkout, they ride on Montonio's own
       // card element, so a static hint is all this needs
       (S.pay === 1 ? '<p class="hint">Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.</p>' : "") +
+      /* The wallet option is shown to everybody, on every browser (Dim,
+         07.09.2026: «нужно показывать независимо от браузера») — so its hint
+         must not promise a button the shopper's browser may not have. It says
+         where the wallets live and what is there instead when they are not. */
+      (S.pay === 2 ? '<p class="hint">Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.</p>' : "") +
       (isInvoice() ? invoiceBlockHTML() : "");
     coBlockHTML.payment = out;
     return out;
@@ -10001,8 +10186,13 @@
          pay before choosing how the parcel travels or how they are paying. */
       (S.coStep === 3
         ? '<button class="btn btn--wide co__pay" data-pay' + (S.paying ? " disabled" : "") + ">" +
-            (S.paying ? "Готовим оплату…" : "Оплатить " + eur(total())) + "</button>" +
-          '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>'
+            (S.paying ? "Готовим оплату…" : nothingToPay() ? "Оформить заказ" : "Оплатить " + eur(total())) + "</button>" +
+          /* Two straight chains rather than one with the button's name in a
+             hole: the i18n check joins the literals of a chain into the text
+             node the browser shows, and each of these is a dictionary key. */
+          (nothingToPay()
+            ? '<p class="cosum__legal">Нажимая «Оформить заказ», вы соглашаетесь с условиями и политикой возврата.</p>'
+            : '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>')
         : "") +
       "</div>";
     coBlockHTML.summary = out;
@@ -10115,7 +10305,8 @@
       "</div></div>" +
       (step === 3
         ? '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span>' +
-          '<button class="btn" data-pay' + (S.paying ? " disabled" : "") + ">" + (S.paying ? "Готовим…" : "Оплатить") + "</button></div>"
+          '<button class="btn" data-pay' + (S.paying ? " disabled" : "") + ">" +
+          (S.paying ? "Готовим…" : nothingToPay() ? "Оформить заказ" : "Оплатить") + "</button></div>"
         : "");
   }
   function payMark(k) {
@@ -10426,6 +10617,23 @@
   }
   /** One shape for an order, whether it came from the server or from the demo
       list, so the redesigned row and card can draw both without asking. */
+  /* ---------- «Вернуть деньги»: the ledger the server keeps ------------------
+     `orders.payment.refunds` — one entry per refund, identified by Montonio's
+     own id, and `refundedTotal` beside it (src/lib/payments/refund.ts). A
+     rejected refund is money that never left, so it does not count; the card
+     shows it as a warning instead, because a refund Montonio refused is
+     something Renat has to do something about. */
+  function admRefunds(pay) {
+    var list = pay && pay.refunds;
+    return Array.isArray(list) ? list : [];
+  }
+  function admRefundedTotal(pay) {
+    var sum = 0;
+    admRefunds(pay).forEach(function (r) {
+      if (r && r.status !== "failed") sum += Number(r.amount) || 0;
+    });
+    return Math.round(sum * 100) / 100;
+  }
   function admOrderVM(o) {
     var srv = o.srv || null;
     var status = srv ? srv.status
@@ -10443,11 +10651,21 @@
        unpaid order with an invoice is waiting for a bank transfer, not for
        the shopper to come back from a bank page — the card says so. */
     var invoice = srv && srv.invoice && srv.invoice.number ? srv.invoice : null;
+    /* Money that has already gone back, and what is left of the order to send
+       back — the ledger POST /api/admin/orders/<id>/refund/ keeps on
+       `orders.payment` (src/lib/payments/refund.ts). `refundable` is what the
+       «Вернуть деньги» card offers and what the server will accept; it is 0
+       for an order the shop never actually took money for. */
+    var pay = (srv && srv.payment) || null;
+    var back = admRefundedTotal(pay);
+    var canRefund = !!(pay && pay.ref && pay.status === "paid" && (pay.provider === "montonio" || pay.provider === "mock"));
     return {
       id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
       items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
       paid: status === "paid" && !pos,
       unpaid: status === "new" || status === "failed",
+      refunded: back,
+      refundable: canRefund ? Math.max(0, Math.round((Number(o.sum) - back) * 100) / 100) : 0,
       invoice: invoice,
       company: srv && srv.company && srv.company.name ? srv.company : null,
       overdue: invoice && (status === "new" || status === "failed") ? admInvoiceOverdue(invoice) : 0,
@@ -10825,18 +11043,18 @@
   }
   /* «Отменить заказ» — what actually happens, not what would be nice. The
      server (setOrderStatus in src/lib/orders.ts) moves the status and puts a
-     counted shelf back; it sends no letter and it refunds nothing — there is
-     no cancellation template in src/emails/ and no call to the provider. The
-     card used to promise both, so the owner closed it believing the customer
-     had been told and paid back. Two straight chains, same reason as
-     admShipConfirmText(): the i18n check joins each into one text node. */
+     counted shelf back; since 07.09.2026 it also writes to the customer
+     («Заказ отменён», src/emails/order-cancelled.ts). What it still does NOT
+     do is move money: that is «Вернуть деньги», its own button beside this
+     one. Two straight chains, same reason as admShipConfirmText(): the i18n
+     check joins each into one text node. */
   function admCancelConfirmText(v) {
     if (v.unpaid) {
       return v.number + " · " + v.who +
-        "\nЗаказ ещё не оплачен — возвращать нечего. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту».";
+        "\nЗаказ ещё не оплачен — возвращать нечего. Клиенту уйдёт письмо «Заказ отменён».";
     }
     return v.number + " · " + v.who +
-      "\nЗаказ получит статус «отменён», товары вернутся на склад. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда. Письмо не уходит: напишите клиенту сами кнопкой «Написать клиенту».";
+      "\nЗаказ получит статус «отменён», товары вернутся на склад, клиенту уйдёт письмо «Заказ отменён». Деньги отмена не возвращает — для этого есть кнопка «Вернуть деньги».";
   }
   /* «Изменить статус вручную» — the two statuses the card's own steps never
      reach. «возврат» is money going back to the customer and «оплачен» by
@@ -10852,7 +11070,11 @@
     if (status === "refunded") {
       return { type: "order_manual", overlay: true, danger: true, id: v.id, number: v.number, value: "refunded",
         title: "Оформить возврат?", ok: "Возврат",
-        detail: v.number + " · " + v.who + "\nЗаказ получит статус «возврат», товары вернутся на склад. Деньги клиенту переводятся отдельно — в банке или в Montonio, не отсюда." };
+        /* This is the label alone: the status moves, the shelf fills, the
+           customer is told — and no money goes anywhere. It is for a refund
+           that already happened outside the shop. To actually send money back,
+           the card's own «Вернуть деньги» button does it through Montonio. */
+        detail: v.number + " · " + v.who + "\nЗаказ получит статус «возврат», товары вернутся на склад, клиенту уйдёт письмо «Деньги возвращены». Сами деньги отсюда не уходят — для этого есть кнопка «Вернуть деньги»." };
     }
     // the money is already in (a cancelled or shipped order stepping back):
     // only the status moves — no letter, no second write-off from the shelf
@@ -11005,6 +11227,14 @@
     if (showSteps && v.paid && !v.labeled && !v.pickup) acts +=
       '<button class="adm-btn adm-btn--ghost" data-admshipnow="' + esc(v.id) + '">Отправлен</button>';
     if (!v.pos || (o && o.email)) acts += '<button class="adm-btn adm-btn--ghost" data-admorderreply>Написать клиенту</button>';
+    /* «Вернуть деньги» — the money goes back through the same provider that
+       took it (POST /api/admin/orders/<id>/refund/). Offered only while there
+       is something left to send back, and only on an order a provider is
+       actually holding: an order marked paid by hand, or one a gift card
+       covered, has no payment to reverse and the server would say so. */
+    if (v.refundable > 0.004) acts +=
+      '<button class="adm-btn adm-btn--ghost" data-admrefund="' + esc(v.id) + '"' + (SRV.refundBusy ? " disabled" : "") + ">" +
+        (SRV.refundBusy ? "Возвращаем…" : "Вернуть деньги") + "</button>";
     if (!v.pos && (v.paid || v.unpaid)) acts +=
       '<button class="adm-del" data-admordercancel="' + esc(v.id) + '">Отменить заказ</button>';
 
@@ -11105,6 +11335,19 @@
     var notes = "";
     if (p.amountMismatch) notes += '<br><span class="adm-err">⚠ Пришло ' + eur(p.amountMismatch.got) + " вместо " + eur(p.amountMismatch.expected) + " — проверьте в Montonio</span>";
     if (p.rejected) notes += '<br><span class="adm-err">⚠ Позже банк прислал «не оплачен» — заказ остался оплаченным, проверьте в Montonio</span>';
+    /* Money that went back — «Вернуть деньги» here, or a refund Renat made in
+       Montonio's own portal, which reaches the order through the refund
+       webhook (src/lib/payments/refund.ts). A refund the provider is still
+       working on and one it refused each get their own word, because the two
+       mean different things to the shop. */
+    var back = admRefundedTotal(p);
+    if (back > 0.004) {
+      notes += '<br><span>Возвращено ' + eur(back) + " из " + eur(o.total) + "</span>";
+    }
+    admRefunds(p).forEach(function (r) {
+      if (r.status === "failed") notes += '<br><span class="adm-err">⚠ Возврат ' + eur(r.amount) + " не прошёл — проверьте в Montonio</span>";
+      else if (r.status === "pending") notes += '<br><span>Возврат ' + eur(r.amount) + " в обработке у Montonio</span>";
+    });
     return '<div><div class="adm-sec__t">Оплата</div><div class="adm-kv">' + esc(method || "—") + "<br>" +
       "<span>" + esc(sub) + (p.ref ? (sub ? " · " : "") + '<span class="adm-mono">' + esc(String(p.ref)) + "</span>" : "") + "</span>" +
       notes + "</div></div>";
@@ -11520,6 +11763,14 @@
       '<div class="adm-confirm__card">' +
         '<div class="adm-confirm__t">' + esc(a.title || "Подтвердите изменение") + "</div>" +
         '<div class="adm-confirm__d">' + esc(a.detail || actionText(a)) + "</div>" +
+        /* One action needs a number before it happens: «Вернуть деньги» may
+           send back part of the order. The field is prefilled with everything
+           that is left, so the common case is still one tap. */
+        (a.amount !== undefined
+          ? '<label class="adm-field" style="margin-top:12px">Сумма возврата, €' +
+              '<input class="adm-input" type="number" step="0.01" min="0.01" max="' + esc(a.amount) +
+              '" inputmode="decimal" data-admrefundamt value="' + esc(a.amount) + '"></label>'
+          : "") +
         '<div class="adm-confirm__acts">' +
           '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
             esc(a.ok || "Применить") + "</button>" +
@@ -11785,6 +12036,15 @@
   var ADM_MAIL_ROWS = [
     ["order-confirmed", "Заказ принят", "сразу после оплаты", ""],
     ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
+    /* The three letters an order gets when it never becomes a parcel. The
+       reminder and the cancellation share one switch: reminding without ever
+       letting the order go, or letting it go with no warning, is neither of
+       the two things Dim asked for (07.09.2026). The other two are «всегда» —
+       a shop that could switch off «Заказ отменён» would be a shop that
+       cancels people's orders in silence. */
+    ["order-unpaid", "Заказ ждёт оплаты", "через несколько дней без оплаты", "unpaid"],
+    ["order-cancelled", "Заказ отменён", "когда заказ отменён — вами или по сроку", ""],
+    ["order-refunded", "Деньги возвращены", "когда вы вернули деньги", ""],
     ["back-in-stock", "Товар снова в наличии", "тем, кто оставил почту", "backstock"],
     ["abandoned-cart", "Брошенная корзина", "через 3 часа", "abandoned"],
     // «в день рождения», because that is what runBirthdays() does: it matches
@@ -11816,13 +12076,68 @@
         "</div>";
     }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
-        "их править не нужно.</p>";
+        "их править не нужно.</p>" +
+      unpaidSettingsCard();
+  }
+  /* ---------- «Заказ ждёт оплаты»: the two numbers behind it -----------------
+     Dim, 07.09.2026: «нужны напоминания, а через семь дней отменяем и
+     сообщаем.» Seven days is his answer today, not a law — so both intervals
+     are settings (`settings.flows.unpaidRemindDays` / `unpaidCancelDays`)
+     rather than constants, and they live here, next to the letter they send.
+     The cron runs once a day on Vercel's free plan, so whole days are the
+     only unit that means anything. */
+  function unpaidDraft() {
+    if (!S.unpaidDraft) {
+      S.unpaidDraft = {
+        remind: Number(DEMO.flows.unpaidRemindDays) || 3,
+        cancel: Number(DEMO.flows.unpaidCancelDays) || 7
+      };
+    }
+    return S.unpaidDraft;
+  }
+  function unpaidSettingsCard() {
+    var d = unpaidDraft();
+    return '<div class="adm-sec" style="margin-top:36px"><div class="adm-sec__t">Неоплаченные заказы</div></div>' +
+      '<div class="adm-form" style="margin-top:8px" data-admunpaidsettings>' +
+        '<p class="adm-hint" style="margin:0">Покупатель оформил заказ и не оплатил. Сначала магазин напомнит письмом, ' +
+          "потом отменит заказ сам и сообщит об этом — оба письма выше. Проверка раз в сутки.</p>" +
+        '<div class="adm-edpair" style="margin-top:12px">' +
+          '<label class="adm-field">Напомнить через, дней' +
+            '<input class="adm-input" type="number" min="1" max="60" inputmode="numeric" data-unpaidf="remind" value="' + esc(d.remind) + '">' +
+            '<span class="adm-hint">Через столько дней после заказа уйдёт письмо «Заказ ждёт оплаты».</span></label>' +
+          '<label class="adm-field">Отменить через, дней' +
+            '<input class="adm-input" type="number" min="2" max="60" inputmode="numeric" data-unpaidf="cancel" value="' + esc(d.cancel) + '">' +
+            '<span class="adm-hint">Через столько дней заказ отменится сам, товары останутся в магазине.</span></label>' +
+        "</div>" +
+        '<div class="adm-acts"><button class="adm-btn" data-admunpaidsave>Сохранить</button></div>' +
+      "</div>";
+  }
+  function srvUnpaidSettingsSave() {
+    var d = unpaidDraft();
+    var remind = Math.round(Number(d.remind));
+    var cancel = Math.round(Number(d.cancel));
+    if (!isFinite(cancel) || cancel < 2 || cancel > 60) { toast("Отмена — от 2 до 60 дней"); return; }
+    if (!isFinite(remind) || remind < 1 || remind >= cancel) { toast("Напоминание должно быть раньше отмены"); return; }
+    var flows = {};
+    for (var k in DEMO.flows) flows[k] = DEMO.flows[k];
+    flows.unpaidRemindDays = remind;
+    flows.unpaidCancelDays = cancel;
+    apiSend("/api/admin/settings/", "PUT", { flows: flows }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        DEMO.flows = flows; demoSave(); S.unpaidDraft = null;
+        journalNote("Неоплаченные заказы: напоминание через " + remind + ", отмена через " + cancel);
+        toast("Неоплаченные заказы: сохранено ✓"); render();
+        return;
+      }
+      toast("Не удалось сохранить");
+    }).catch(function () { toast("Сервер не отвечает"); });
   }
   /** « · Ждут письма: 3» — only when the server actually counted, never a zero
       the panel cannot stand behind. Its own function so the i18n check sees
       one string instead of a bare fragment. */
   function flowCountLine(flow) {
-    var key = { backstock: "alerts", abandoned: "carts", birthday: "birthdays" }[flow];
+    var key = { backstock: "alerts", abandoned: "carts", birthday: "birthdays", unpaid: "unpaid" }[flow];
     if (!FLOW_COUNTS || !key || FLOW_COUNTS[key] === undefined) return "";
     // the label is its own node: glued to the count it was one Russian string
     return " · <span>" + FLOW_COUNT_LABEL[key] + "</span> " + Number(FLOW_COUNTS[key]);
@@ -12637,7 +12952,8 @@
   var FLOW_COUNT_LABEL = {
     carts: "Ждут письма:",
     alerts: "Ждут письма:",
-    birthdays: "Дней рождения за неделю:"
+    birthdays: "Дней рождения за неделю:",
+    unpaid: "Ждут оплаты:"
   };
   function mailTpl() {
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === S.mailTpl) return S.mailTpl;
@@ -17410,7 +17726,10 @@
        снова в наличии» used to start on here and in GET /api/overrides while
        the sender read it as off, so the switch said «включено» and no letter
        ever left — the owner had to toggle it off and on to turn it on. */
-    flows: { abandoned: false, birthday: false, backstock: false }, log: [] };
+    /* «Заказ ждёт оплаты»: the switch and its two intervals, mirroring
+       FLOW_DEFAULTS in src/lib/flows.ts — the panel must show the same
+       numbers the cron would use before the server has answered. */
+    flows: { abandoned: false, birthday: false, backstock: false, unpaid: false, unpaidRemindDays: 3, unpaidCancelDays: 7 }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
@@ -17655,7 +17974,7 @@
      as an offline cache. And when the owner is signed in, every change the
      panel applies is written through to the server as well — including undo,
      which re-sends the previous value. */
-  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false };
+  var SRV = { on: false, admin: null, err: "", busy: false, orders: null, ordersErr: false, shipBusy: false, refundBusy: false };
   function noop() {}
   /* product creation: true while the very first paint waits for
      /api/overrides/ — a direct visit to a product only the server knows
@@ -18057,6 +18376,52 @@
       toast(r.body && r.body.error === "order_closed" ? "Заказ отменён — оплату не отметить" : "Не удалось отметить оплату");
     }).catch(function () { toast("Сервер не отвечает"); });
   }
+  /* ---------- «Вернуть деньги» — the card's own server call -----------------
+     POST /api/admin/orders/<id>/refund/ sends the money back through the
+     provider that took it and records what it said (docs/payments.md § 11).
+     No undo: money that has left Montonio does not come back from a toast.
+     Every refusal the owner can act on gets its own sentence — «нет ключей»,
+     «этому заказу нечего возвращать» and «банк не ответил» need different
+     things from Renat; everything else is one line. */
+  var REFUND_ERR = {
+    not_configured: "Возврат через Montonio не подключён — верните деньги в его панели.",
+    not_paid: "Деньги по этому заказу ещё не пришли — возвращать нечего.",
+    no_provider_ref: "У заказа нет платежа в Montonio — верните деньги тем же путём, каким они пришли.",
+    already_refunded: "По этому заказу уже всё возвращено.",
+    bad_amount: "Проверьте сумму — вернуть можно не больше остатка.",
+    order_closed: "Заказ закрыт — возврат не оформить.",
+    provider_unreachable: "Montonio не отвечает — попробуйте через минуту.",
+    provider_rejected: "Montonio отказал в возврате — проверьте баланс в его панели.",
+    recorded_failed: "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте."
+  };
+  function admRefundConfirmText(v) {
+    if (v.refunded > 0.004) {
+      return v.number + " · " + v.who +
+        "\nПо заказу уже возвращено " + eur(v.refunded) + ". Осталось " + eur(v.refundable) +
+        " — деньги уйдут через Montonio тем же путём, каким пришли, и клиент получит письмо.";
+    }
+    return v.number + " · " + v.who +
+      "\nВернём " + eur(v.refundable) + " через Montonio — тем же путём, каким деньги пришли. Клиенту уйдёт письмо, товары вернутся на склад, заказ станет «возврат». Можно вернуть часть — измените сумму.";
+  }
+  function srvOrderRefund(id, number, typed, max) {
+    if (SRV.refundBusy) return;
+    var amount = Math.round(Number(String(typed).replace(",", ".")) * 100) / 100;
+    if (!isFinite(amount) || amount < 0.01 || amount > max + 0.005) { toast(REFUND_ERR.bad_amount); return; }
+    SRV.refundBusy = true; render();
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/refund/", "POST", { amount: amount }).then(function (r) {
+      SRV.refundBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        journalNote("Заказ " + number + ": возврат " + eur(r.body.amount));
+        toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " — письмо ушло"
+          : number + " · вернули часть, " + eur(r.body.amount));
+        admOrdersChanged();
+        return;
+      }
+      toast(REFUND_ERR[r.body && r.body.error] || "Не удалось оформить возврат");
+      render();
+    }).catch(function () { SRV.refundBusy = false; toast("Сервер не отвечает"); render(); });
+  }
   function srvInvoiceResend(id) {
     if (SRV.invoiceBusy) return;
     var row = admOrderById(id);
@@ -18205,7 +18570,7 @@
     try { srvSaved(apiSend("/api/admin/overrides/", "PUT", body)); } catch (e) {}
   }
 
-  var FLOW_NAMES = { abandoned: "Брошенная корзина", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии" };
+  var FLOW_NAMES = { abandoned: "Брошенная корзина", birthday: "Скидка ко дню рождения", backstock: "Товар снова в наличии", unpaid: "Заказ ждёт оплаты" };
   // assistant-work: "2026-08" → "август 2026", for the confirm card and the log
   var MONTH_RU = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
   function monthLabelRu(m) {
@@ -19061,7 +19426,13 @@
          receipt.ts): what «Оплатить ещё раз» sends back to re-create the
          payment. The basket is empty by now (payNow() clears it before the
          bank), so the order is the only thing a second try can be about. */
-      order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : ""
+      order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : "",
+      /* `m` — the method the order went out with, `b` — the BIC of the bank
+         it was sent to (src/lib/payments/receipt.ts). The retry screen offers
+         all three methods and all the chips, and these two are which of them
+         start selected: the shopper's own choice, not one the shop proposes. */
+      method: s === "failed" && /^(bank|card|wallet)$/.test(q.m || "") ? q.m : "",
+      bank: s === "failed" && /^[A-Z0-9]{8,11}$/.test(q.b || "") ? q.b : ""
     };
     if (s === "paid") {
       var total = parseFloat(String(q.t || "").replace(",", "."));
@@ -19085,6 +19456,44 @@
     });
     return out.slice(0, 10);
   }
+  /* ---------- «Оплата не прошла»: how to pay this time -----------------------
+     The first three of PAYS — «По счёту» is not a second try, it is a
+     different kind of order, and it is made in the checkout with the company's
+     details. The index is remembered in S.donePay; the first render seeds it
+     from `m` on the receipt URL, which is the way the shopper already chose. */
+  function donePayIndex(d) {
+    if (S.donePay === null || S.donePay === undefined) {
+      var was = d && d.method;
+      S.donePay = was === "card" ? 1 : was === "wallet" ? 2 : 0;
+    }
+    return S.donePay;
+  }
+  /* The chip the shopper picked the first time, kept highlighted. Recomputed
+     from the BIC on every render until they touch a chip themselves: the real
+     bank list arrives from Montonio a moment after this screen first draws
+     (loadPayMethods), and the index that means «SEB» is different in the two
+     lists. Touching a chip is the shopper's own answer and wins from then on. */
+  function doneBankSeed(d) {
+    if (S.doneBankPicked || !d || !d.bank) return;
+    var list = banksForCountry();
+    if (list && list.length) {
+      for (var i = 0; i < list.length; i++) if (list[i].code === d.bank) { S.bank = i; return; }
+      return;
+    }
+    for (var j = 0; j < BANKS.length; j++) if (BANK_CODES[BANKS[j]] === d.bank) { S.bank = j; return; }
+  }
+  function donePayPickerHTML(d) {
+    var pick = donePayIndex(d);
+    if (pick === 0) doneBankSeed(d);
+    return '<div class="done__pay"><div class="optlist">' + PAYS.slice(0, 3).map(function (o, i) {
+        return '<label class="opt opt--pay"><input type="radio" name="donepay" ' + (i === pick ? "checked" : "") + ' data-donepay="' + i + '">' +
+          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
+          '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
+      }).join("") + "</div>" +
+      (pick === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
+      (pick === 2 ? '<p class="hint">Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.</p>' : "") +
+      "</div>";
+  }
   /** The «Скачать подарочную карту (PDF)» button(s) under a paid receipt. */
   function doneGiftHTML(cards) {
     if (!cards || !cards.length) return "";
@@ -19100,15 +19509,20 @@
     // one text node, so the «Заказ R-100042» dictionary rule can rewrite it
     var num = d.number ? '<p class="done__num">Заказ ' + esc(d.number) + "</p>" : "";
     if (d.status === "failed") {
+      // the real bank logos, if Montonio's list is reachable — one-shot and
+      // silent, exactly as the checkout asks for them
+      if (d.order) loadPayMethods();
       return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
         '<div class="done__tick done__tick--bad">✕</div>' +
         '<h1 class="display h1">Оплата не прошла</h1>' + num +
         '<p class="muted" style="margin-bottom:22px">Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.</p>' +
-        /* The sentence above promises a second try; this is it. The same
-           order goes back to the bank (payAgain), the way the shopper chose
-           the first time — the server remembers the method. */
+        /* The sentence above promises another way to pay; until 07.09.2026 it
+           did not exist — «Оплатить ещё раз» sent the order back to the same
+           method every time. The picker below is that promise kept: the same
+           order, a different way. */
         (d.order
-          ? '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
+          ? donePayPickerHTML(d) +
+            '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
               (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
               '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
           : '<button class="btn" data-go="home">Вернуться в магазин</button>') +
@@ -20218,7 +20632,10 @@
     if (screen === "catalog") S.shown = 12;
     if (screen === "checkout") { S.coStep = 1; S.pointOpen = false; }
     // leaving the receipt drops the receipt: the next one reads its own query
-    if (screen !== "done") S.done = null;
+    // the receipt goes, and with it the method and the bank its retry picker
+    // was set to — the next failed receipt seeds itself from its own order
+    // (donePayIndex / doneBankSeed)
+    if (screen !== "done") { S.done = null; S.donePay = null; S.doneBankPicked = false; }
     // the receipt replaces the checkout it came from: Back from it belongs on
     // the shop, not on a payment form for an order already placed
     navTo(screen === "done");
@@ -20482,6 +20899,7 @@
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
     var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-donepay],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-admrefund],[data-admunpaidsave],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -20675,7 +21093,14 @@
     // checkout selections re-render the step, which destroys the clicked
     // control — put keyboard focus back on its replacement
     if (d.paym !== undefined) { S.pay = Number(d.paym); render(); refocus('[data-paym="' + d.paym + '"]'); return; }
-    if (d.bank !== undefined) { S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return; }
+    // the same three on the failed receipt — «или выберите другой способ»
+    if (d.donepay !== undefined) { S.donePay = Number(d.donepay); render(); refocus('[data-donepay="' + d.donepay + '"]'); return; }
+    if (d.bank !== undefined) {
+      // on the failed receipt this is the shopper overruling the bank their
+      // order was sent to, and from here on doneBankSeed() leaves it alone
+      if (S.screen === "done") S.doneBankPicked = true;
+      S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return;
+    }
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose
     if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
@@ -20793,8 +21218,24 @@
       };
       render(); refocus("[data-admapply]"); return;
     }
+    /* «Вернуть деньги» — money leaving the shop, so the confirm card asks
+       first, and it is the one card with a field in it: the sum is prefilled
+       with everything that is left and may be typed down for a partial. */
+    if (d.admrefund) {
+      var refRow = admOrderById(d.admrefund);
+      if (!refRow || !(refRow.refundable > 0.004)) return;
+      pendingAction = {
+        type: "order_refund", overlay: true, danger: true, id: refRow.id, number: refRow.number,
+        amount: refRow.refundable.toFixed(2),
+        title: "Вернуть деньги?",
+        detail: admRefundConfirmText(refRow),
+        ok: "Вернуть деньги"
+      };
+      render(); refocus("[data-admrefundamt]"); return;
+    }
     if (d.adminvresend) { srvInvoiceResend(d.adminvresend); return; }
     if (d.adminvsave !== undefined) { srvInvoiceSettingsSave(); return; }
+    if (d.admunpaidsave !== undefined) { srvUnpaidSettingsSave(); return; }
     if (d.admordercancel) {
       var canRow = admOrderById(d.admordercancel);
       if (!canRow) return;
@@ -21481,6 +21922,14 @@
         }
         // «По счёту»: the server settles the payment (src/lib/invoices.ts markInvoicePaid) — no undo, money came
         else if (pa.type === "invoice_paid") { srvInvoicePaid(pa.id, pa.number, pa.invoice); return; }
+        /* «Вернуть деньги»: the sum is read off the card before the render
+           below takes it away. No undo — money that left Montonio does not
+           come back from a toast. */
+        else if (pa.type === "order_refund") {
+          var amtEl = document.querySelector("[data-admrefundamt]");
+          srvOrderRefund(pa.id, pa.number, amtEl ? amtEl.value : pa.amount, Number(pa.amount));
+          return;
+        }
         /* «Настройки → Доставка и оплата»: the tariff table names itself in
            the toast, and the journal entry it just wrote is what «Отменить»
            takes back. */
@@ -22501,6 +22950,7 @@
        button is pressed, and «Сохранить» reads the draft, not the DOM. */
     else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); }
     else if (t.matches("[data-invsetf]")) { invoiceDraft()[t.dataset.invsetf] = t.value; }
+    else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; }
     else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {

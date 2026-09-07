@@ -6,7 +6,7 @@
  * preview in the admin looks like the design files Renat already signed off.
  */
 
-import { normalizeLang } from "./layout";
+import { baseUrl, normalizeLang } from "./layout";
 import { renderAbandonedCart } from "./abandoned-cart";
 import { renderBackInStock } from "./back-in-stock";
 import { renderBirthday } from "./birthday";
@@ -15,8 +15,10 @@ import { renderInvoice, type InvoiceMailData } from "./invoice";
 import { renderInvoiceCancelled, type InvoiceCancelledData } from "./invoice-cancelled";
 import { renderInvoiceReminder, type InvoiceReminderData } from "./invoice-reminder";
 import { renderLoginCode } from "./login-code";
+import { renderOrderCancelled } from "./order-cancelled";
 import { renderOrderConfirmed } from "./order-confirmed";
 import { renderOrderShipped } from "./order-shipped";
+import { renderOrderUnpaid } from "./order-unpaid";
 import { renderPartnerWelcome } from "./partner-welcome";
 import type {
   CartLike,
@@ -30,6 +32,10 @@ import type {
 export * from "./types";
 export { renderOrderConfirmed } from "./order-confirmed";
 export { renderOrderShipped } from "./order-shipped";
+export { renderOrderCancelled } from "./order-cancelled";
+export type { ClosedKind, ClosedOptions } from "./order-cancelled";
+export { renderOrderUnpaid } from "./order-unpaid";
+export type { UnpaidOptions } from "./order-unpaid";
 export { renderAbandonedCart } from "./abandoned-cart";
 export { renderBackInStock } from "./back-in-stock";
 export { renderBirthday } from "./birthday";
@@ -73,6 +79,9 @@ export type {
 export const TEMPLATE_IDS = [
   "order-confirmed",
   "order-shipped",
+  "order-unpaid",
+  "order-cancelled",
+  "order-refunded",
   "abandoned-cart",
   "back-in-stock",
   "gift-card",
@@ -94,6 +103,9 @@ export function isTemplateId(v: unknown): v is TemplateId {
 export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "order-confirmed": "Заказ принят",
   "order-shipped": "Заказ отправлен",
+  "order-unpaid": "Заказ ждёт оплаты",
+  "order-cancelled": "Заказ отменён",
+  "order-refunded": "Деньги возвращены",
   "abandoned-cart": "Брошенная корзина",
   "back-in-stock": "Товар снова в наличии",
   "gift-card": "Подарочная карта",
@@ -292,6 +304,18 @@ export function renderDemo(
       return renderOrderShipped(demoShippedOrder(L), L, {
         code: "CE123456789EE",
         carrier: "Omniva",
+      });
+    case "order-unpaid":
+      return renderOrderUnpaid({ ...demoOrder(L), status: "new" }, L, {
+        daysLeft: 4,
+        payUrl: `${baseUrl()}/shop2/done/?n=R-100042&s=failed`,
+      });
+    case "order-cancelled":
+      return renderOrderCancelled({ ...demoOrder(L), status: "cancelled" }, L, { kind: "cancelled" });
+    case "order-refunded":
+      return renderOrderCancelled({ ...demoOrder(L), status: "refunded" }, L, {
+        kind: "refunded",
+        amount: 95,
       });
     case "abandoned-cart":
       return renderAbandonedCart(demoCart(L), L, "/shop2/checkout/");

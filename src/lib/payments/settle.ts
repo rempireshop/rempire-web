@@ -1,6 +1,13 @@
-import { setOrderPayment, setOrderStatus, type Order } from "@/lib/orders";
+import {
+  PAID_ORDER_STATUSES,
+  setOrderPayment,
+  setOrderStatus,
+  writeAuditSafe,
+  type Order,
+} from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type ApplyOutcome, type OrderLike } from "./apply";
-import { issueOrderGiftCards, notifyOrderPaid } from "./mail-hook";
+import { issueOrderGiftCards, notifyOrderClosed, notifyOrderPaid } from "./mail-hook";
+import { foldRefund, fullyRefunded, type RefundEntry } from "./refund";
 import { PaymentError, type VerifyResult } from "./types";
 
 /**
@@ -36,6 +43,74 @@ export async function settlePayment(
     else await notifyOrderPaid(paid);
   }
   return outcome;
+}
+
+/* ---------- money going back --------------------------------------------- */
+
+export interface SettleRefundOutcome {
+  /** False when this refund id had already been recorded — a webhook retry. */
+  applied: boolean;
+  /** Everything sent back on this order, after folding this refund in. */
+  refundedTotal: number;
+  /** True once the refunds cover the order and it moved to «возврат». */
+  fully: boolean;
+  /** The order's status after this call. */
+  status: string;
+}
+
+/**
+ * One refund → the order, and everything that hangs off it.
+ *
+ * The single door for both ways money goes back — «Вернуть деньги» in the
+ * admin and the provider's refund webhook (which is how a refund made inside
+ * Montonio's own portal reaches this shop at all). Written to be safe when run
+ * twice, in either order, exactly like settlePayment() above:
+ *
+ *   · the same refund id folds into the existing entry rather than adding a
+ *     second one (foldRefund), so Montonio's 48-hour retry costs nothing;
+ *   · the customer's letter goes out on the first arrival only — a PENDING
+ *     that later turns SUCCESSFUL updates the ledger and writes no second
+ *     letter, the same rule `alreadyPaid` draws for the confirmation;
+ *   · the order becomes «возврат» only once the refunds cover its total, and
+ *     that move is what puts a counted shelf back (setOrderStatus).
+ */
+export async function settleRefund(
+  order: OrderLike,
+  entry: RefundEntry,
+  opts: { notify?: boolean } = {},
+): Promise<SettleRefundOutcome> {
+  const folded = foldRefund(order.payment, entry);
+  await setOrderPayment(order.id, {
+    refunds: folded.refunds,
+    refundedTotal: folded.refundedTotal,
+  });
+  await writeAuditSafe(entry.by || "system", "order.refund", {
+    orderId: order.id,
+    number: order.number,
+    ref: entry.ref,
+    amount: entry.amount,
+    status: entry.status,
+    refundedTotal: folded.refundedTotal,
+    repeat: !folded.applied,
+  });
+
+  const total = Number(order.total) || 0;
+  const fully = entry.status !== "failed" && fullyRefunded(total, folded.refundedTotal);
+  let status = String(order.status ?? "");
+  if (fully && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
+    const moved = await setOrderStatus(order.id, "refunded", entry.by || "system");
+    status = moved?.status ?? "refunded";
+  }
+
+  /* The letter says what actually left the shop, so it waits for a refund that
+     is not a failure — a rejected one is a warning for Renat, not news for the
+     customer. `notify: false` is for the caller that sends its own (the admin
+     route, which knows the language and the amount before this returns). */
+  if (opts.notify !== false && folded.applied && entry.status !== "failed") {
+    await notifyOrderClosed({ ...order, status }, { kind: "refunded", amount: entry.amount });
+  }
+
+  return { applied: folded.applied, refundedTotal: folded.refundedTotal, fully, status };
 }
 
 /** What paid for an order whose total came to 0 — for the order card. */
