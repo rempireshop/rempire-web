@@ -17,6 +17,7 @@ import { cleanMailTexts } from "@/emails/texts";
 import { cleanGiftAmounts } from "@/lib/giftcards";
 import { cleanInvoiceSettings } from "@/lib/invoices";
 import { cleanDelivery } from "@/lib/delivery";
+import { cleanBankFilter } from "@/lib/payments/methods";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -103,6 +104,13 @@ export async function PUT(req: Request) {
          nobody closed is closed anyway (0 = never), and whether the carrier's
          own status may close it — src/lib/delivery.ts. Same first door. */
       if (key === "delivery") value = cleanDelivery(value);
+      /* «Какие банки показывать»: the bank codes the checkout may draw as
+         chips. Montonio offers no way to shorten its own list, so the list is
+         shortened here — an array of its codes, uppercased, de-duplicated and
+         capped (src/lib/payments/methods.ts cleanBankFilter). Empty means
+         «показывать все», which is what a shop that never opened this setting
+         has. Same first door as pricing and gift_amounts above. */
+      if (key === "payment_banks") value = cleanBankFilter(value);
       await setSetting(key, value);
       await writeAuditSafe("admin", "setting.set", { key, value });
       /* src/lib/shipping.ts caches the tariff row for a minute. Without this

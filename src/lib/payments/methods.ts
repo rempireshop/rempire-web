@@ -88,6 +88,73 @@ function normalize(raw: RawResponse): PaymentMethods {
   return { banks: mapBanks(raw), card: !!raw.paymentMethods?.cardPayments, wallets };
 }
 
+/* ---------- «слишком много банков» — settings.payment_banks --------------- */
+
+/**
+ * Which of Montonio's banks the checkout may show.
+ *
+ * Dim, 07.09.2026: «There are too many banks to choose from — can we edit it
+ * somehow?» Montonio has no answer to that. `GET /stores/payment-methods`
+ * returns every bank the store has enabled, keyed by country, and its guide
+ * documents no way to hide one — the only lever on its side is which
+ * *countries* the store is signed up for. `preferredProvider` picks the bank a
+ * shopper is sent to; it does not shorten the list. So the list is ours to
+ * shorten, and this is the setting that does it:
+ *
+ *   settings.payment_banks = ["HABAEE2X", "EEUHEE2X", "LHVBEE22", …]
+ *
+ * Empty (the default) means "show them all" — a shop that has not chosen must
+ * not silently lose a bank when Montonio adds one.
+ *
+ * Codes are stored as Montonio returns them and compared case-insensitively;
+ * a code Montonio does not have is simply never matched, so a bank that
+ * disappears from the store cannot empty the checkout.
+ */
+export function cleanBankFilter(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of v) {
+    const code = str(raw).toUpperCase();
+    if (!code || code.length > 32 || !/^[A-Z0-9_.-]+$/.test(code) || seen.has(code)) continue;
+    seen.add(code);
+    out.push(code);
+    if (out.length >= 40) break;
+  }
+  return out;
+}
+
+/**
+ * The list minus the banks the owner switched off — **per country**.
+ *
+ * A country none of whose banks are named is left exactly as it was. Without
+ * that rule an owner trimming the Estonian list to five would take every
+ * Latvian bank away from a Latvian shopper too: the checkout falls back to the
+ * whole array when the delivery country has no banks of its own
+ * (`banksForCountry()` in public/shop2/app.js), and he would have been offered
+ * Estonian banks for a parcel to Riga.
+ *
+ * An empty filter, or one that names nothing Montonio actually has, returns
+ * the list untouched. The checkout must never end up with no chip at all.
+ */
+export function filterBanks(banks: PaymentBank[], allowed: string[]): PaymentBank[] {
+  if (!allowed.length || !banks.length) return banks;
+  const keep = new Set(allowed);
+  const byCountry = new Map<string, PaymentBank[]>();
+  for (const b of banks) {
+    const c = b.country.toUpperCase();
+    const group = byCountry.get(c);
+    if (group) group.push(b);
+    else byCountry.set(c, [b]);
+  }
+  const out: PaymentBank[] = [];
+  for (const group of byCountry.values()) {
+    const chosen = group.filter((b) => keep.has(b.code.toUpperCase()));
+    out.push(...(chosen.length ? chosen : group));
+  }
+  return out;
+}
+
 type CacheEntry = { at: number; data: PaymentMethods };
 /* On globalThis like shipping/montonio.ts's point cache: a warm serverless
    instance (or Next's dev reload) keeps the list instead of re-signing a JWT
