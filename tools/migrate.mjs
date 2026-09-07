@@ -66,17 +66,22 @@ export async function migrate(db, opts = {}) {
 
 /**
  * TLS everywhere except a local server, and the certificate is verified.
- * DATABASE_SSL_NO_VERIFY=1 is the escape hatch for a provider whose CA is not
- * in Node's trust store — it disables verification, so use it only knowingly.
+ * DATABASE_SSL_NO_VERIFY=1 is the one escape hatch, for a provider whose
+ * certificate Node cannot verify — it disables verification, so it is set
+ * knowingly or not at all.
+ *
+ * Same rule, same words as src/lib/db.ts — keep the two in step. The host
+ * substring that used to switch verification off by itself was removed on
+ * 07.09.2026; docs/audit/2026-09-07-cleanup.md says why, and what to do if a
+ * deploy's postbuild migrate suddenly cannot verify the certificate.
+ *
+ * @param {string} url
+ * @param {Record<string, string | undefined>} [env]
  */
-export function sslFor(url) {
+export function sslFor(url, env = process.env) {
   if (/localhost|127\.0\.0\.1|\[::1\]/.test(url)) return undefined;
   if (/[?&]sslmode=disable/.test(url)) return undefined;
-  // Railway's Postgres (TCP proxy *.rlwy.net / *.railway.app) presents a
-  // self-signed certificate, so verification is off for those hosts only;
-  // every other provider is verified unless DATABASE_SSL_NO_VERIFY=1.
-  const selfSigned = /@[^/?#]*\.(rlwy\.net|railway\.app)(:\d+)?(\/|$)/i.test(url);
-  return { rejectUnauthorized: !selfSigned && process.env.DATABASE_SSL_NO_VERIFY !== "1" };
+  return { rejectUnauthorized: env.DATABASE_SSL_NO_VERIFY !== "1" };
 }
 
 async function main() {

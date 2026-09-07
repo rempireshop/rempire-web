@@ -61,3 +61,50 @@ describe("migrations", () => {
     ).rejects.toBeTruthy();
   });
 });
+
+/* Cleanup 07.09.2026 — audit M9. TLS verification used to be switched off by a
+   substring of DATABASE_URL: a host ending .rlwy.net or .railway.app was
+   exempted silently, so renaming the database host changed whether the shop
+   checked who it was talking to, and no review of the environment variables
+   could see it. One variable decides now, in both the app and the migrator,
+   and these two must never drift apart again. */
+describe("who decides whether the database certificate is verified", () => {
+  const cases: Array<[string, string]> = [
+    ["postgres://u:p@containers-us-west-1.rlwy.net:5432/railway", "the old auto-exempt host"],
+    ["postgres://u:p@monorail.proxy.railway.app:1234/railway", "the other old auto-exempt host"],
+    ["postgres://u:p@db.example.com:5432/shop?sslmode=require", "any other provider"],
+  ];
+
+  it("only DATABASE_SSL_NO_VERIFY does — never the host name", async () => {
+    const { sslFor } = await import("@/lib/db");
+    for (const [url, what] of cases) {
+      expect(sslFor(url, {}), what).toEqual({ rejectUnauthorized: true });
+      expect(sslFor(url, { DATABASE_SSL_NO_VERIFY: "1" }), what)
+        .toEqual({ rejectUnauthorized: false });
+      // anything but exactly "1" is not the flag
+      for (const v of ["", "0", "true", "yes"]) {
+        expect(sslFor(url, { DATABASE_SSL_NO_VERIFY: v }), `${what} / ${v}`)
+          .toEqual({ rejectUnauthorized: true });
+      }
+    }
+  });
+
+  it("a local server and an explicit sslmode=disable stay plaintext", async () => {
+    const { sslFor } = await import("@/lib/db");
+    for (const url of ["postgres://u:p@localhost:5432/shop", "postgres://u:p@127.0.0.1/shop", "postgres://u:p@[::1]/shop"]) {
+      expect(sslFor(url, {}), url).toBeUndefined();
+    }
+    expect(sslFor("postgres://u:p@db.example.com/shop?sslmode=disable", {})).toBeUndefined();
+  });
+
+  it("tools/migrate.mjs answers exactly the same — the build must not use a looser rule than the app", async () => {
+    const { sslFor } = await import("@/lib/db");
+    const { sslFor: migratorSslFor } = await import("../tools/migrate.mjs");
+    const envs: Array<Record<string, string | undefined>> = [{}, { DATABASE_SSL_NO_VERIFY: "1" }, { DATABASE_SSL_NO_VERIFY: "0" }];
+    for (const [url] of [...cases, ["postgres://u:p@localhost/shop", ""] as [string, string]]) {
+      for (const env of envs) {
+        expect(migratorSslFor(url, env), url).toEqual(sslFor(url, env));
+      }
+    }
+  });
+});

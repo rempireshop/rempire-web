@@ -89,25 +89,56 @@ function cleanParams(params?: unknown[]): unknown[] | undefined {
   return params?.map((p) => (typeof p === "string" || Array.isArray(p) ? stripNul(p) : p));
 }
 
-/** TLS on unless the server is local; verified unless told otherwise. */
-function sslFor(url: string) {
+/**
+ * TLS on unless the server is local; the certificate is verified unless
+ * `DATABASE_SSL_NO_VERIFY=1` says otherwise. **That variable is the only
+ * switch** (docs/backend.md, docs/accounts.md).
+ *
+ * Until 07.09.2026 it was not: a host whose name contained `.rlwy.net` or
+ * `.railway.app` had verification silently turned off, because Railway's
+ * Postgres proxy served a self-signed certificate. A substring of a
+ * connection string is a bad place to keep a security decision — rename the
+ * database host and the shop quietly stops checking who it is talking to,
+ * and nobody reviewing the env vars can see that it did (audit M9,
+ * docs/audit/security-api.md; docs/audit/2026-09-07-cleanup.md).
+ *
+ * If a deploy now fails to reach the database with SELF_SIGNED_CERT_IN_CHAIN
+ * or UNABLE_TO_VERIFY_LEAF_SIGNATURE, that is this change telling the truth
+ * about the connection: set DATABASE_SSL_NO_VERIFY=1 in Vercel, knowingly.
+ * If it does not fail, the exemption was not needed and TLS is now genuinely
+ * verified in production.
+ */
+export function sslFor(url: string, env: Record<string, string | undefined> = process.env) {
   if (/localhost|127\.0\.0\.1|\[::1\]/.test(url)) return undefined;
   if (/[?&]sslmode=disable/.test(url)) return undefined;
-  // Railway's Postgres (TCP proxy *.rlwy.net / *.railway.app) presents a
-  // self-signed certificate, so verification is off for those hosts only;
-  // every other provider is verified unless DATABASE_SSL_NO_VERIFY=1.
-  const selfSigned = /@[^/?#]*\.(rlwy\.net|railway\.app)(:\d+)?(\/|$)/i.test(url);
-  return { rejectUnauthorized: !selfSigned && process.env.DATABASE_SSL_NO_VERIFY !== "1" };
+  return { rejectUnauthorized: env.DATABASE_SSL_NO_VERIFY !== "1" };
 }
+
+/** Hosts that have served a self-signed certificate — a hint for the log line
+ *  below, never a decision. */
+const SELF_SIGNED_HINT = /@[^/?#]*\.(rlwy\.net|railway\.app)(:\d+)?(\/|$)/i;
 
 async function makePg(): Promise<Raw> {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error(MISSING_URL);
 
+  const ssl = sslFor(url);
+  /* Said once per instance, so neither state can be a surprise later: either
+     the certificate is not being checked, or it is and this host has a
+     history of failing that check. Neither line prints the URL. */
+  if (ssl && ssl.rejectUnauthorized === false) {
+    console.warn("[db] DATABASE_SSL_NO_VERIFY=1 — the database certificate is NOT verified.");
+  } else if (ssl && SELF_SIGNED_HINT.test(url)) {
+    console.warn(
+      "[db] verifying the database certificate; this provider has served a self-signed one. " +
+        "If the connection fails with SELF_SIGNED_CERT_IN_CHAIN, set DATABASE_SSL_NO_VERIFY=1.",
+    );
+  }
+
   const pg = (await import("pg")).default;
   const pool: Pool = new pg.Pool({
     connectionString: url,
-    ssl: sslFor(url),
+    ssl,
     // Serverless: a handful of sockets per instance, dropped when idle.
     max: Number(process.env.DATABASE_POOL_MAX || 5),
     idleTimeoutMillis: 10_000,

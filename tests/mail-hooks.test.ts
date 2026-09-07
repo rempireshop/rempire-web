@@ -126,6 +126,7 @@ describe("onOrderCreated", () => {
 
 describe("onOrderPaid", () => {
   it("writes to the customer and pings the shop", async () => {
+    process.env.RESEND_TO = "shop@rempireshop.com";
     process.env.TELEGRAM_BOT_TOKEN = "tg_token";
     process.env.TELEGRAM_CHAT_ID = "42";
     const { fn, calls } = makeFetch();
@@ -159,6 +160,7 @@ describe("onOrderPaid", () => {
   });
 
   it("still pings the shop when the order has no customer address", async () => {
+    process.env.RESEND_TO = "shop@rempireshop.com";
     const { fn, calls } = makeFetch();
     vi.stubGlobal("fetch", fn);
 
@@ -168,6 +170,50 @@ describe("onOrderPaid", () => {
     expect(res.reason).toBe("no_customer_email");
     // only the owner notification went out
     expect(calls.resend).toHaveLength(1);
+    expect(payloadOf(calls.resend[0]).to).toEqual(["shop@rempireshop.com"]);
+  });
+
+  /* Appendix B 10 / docs/audit/2026-09-07-cleanup.md. The owner's ping used
+     to fall back to the developer's own address with Resend's onboarding
+     sender, so a shop nobody had finished configuring mailed a third party
+     every order it took — and looked configured. */
+  describe("the owner's ping has no default recipient", () => {
+    it("sends nothing and says why when RESEND_TO is unset", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { fn, calls } = makeFetch();
+      vi.stubGlobal("fetch", fn);
+
+      const res = await onOrderPaid(ORDER);
+
+      // the customer still gets their letter; the owner's ping is simply off
+      expect(res.ok).toBe(true);
+      expect(calls.resend).toHaveLength(1);
+      expect(payloadOf(calls.resend[0]).to).toEqual(["klient@example.com"]);
+      expect(warn.mock.calls.flat().join(" ")).toContain("RESEND_TO");
+    });
+
+    it("never mails an address the code chose", async () => {
+      for (const to of ["", "   "]) {
+        process.env.RESEND_TO = to;
+        const { fn, calls } = makeFetch();
+        vi.stubGlobal("fetch", fn);
+        await onOrderPaid({ ...ORDER, email: null });
+        expect(calls.resend, JSON.stringify(to)).toHaveLength(0);
+      }
+    });
+
+    it("uses the shop's own verified sender, not Resend's onboarding address", async () => {
+      process.env.RESEND_TO = "shop@rempireshop.com";
+      const { fn, calls } = makeFetch();
+      vi.stubGlobal("fetch", fn);
+
+      await onOrderPaid({ ...ORDER, email: null });
+
+      const from = String(payloadOf(calls.resend[0]).from);
+      expect(from).toContain("@rempireshop.com");
+      expect(from).not.toContain("resend.dev");
+      expect(from).not.toContain("diipsolutions");
+    });
   });
 
   it("does not throw when Resend is down", async () => {

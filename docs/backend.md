@@ -11,13 +11,42 @@ into the project's environment settings.
 
 | Name | Needed for | Notes |
 | --- | --- | --- |
-| `DATABASE_URL` | everything that stores data | `postgres://user:pass@host/db?sslmode=require`. TLS is on and the certificate is verified for any non-local host. |
+| `DATABASE_URL` | everything that stores data | `postgres://user:pass@host/db?sslmode=require`. TLS is on and the certificate is verified for any non-local host — see "TLS to the database" below. |
 | `SESSION_SECRET` | admin sign-in | Random, at least 16 characters. Changing it signs everyone out. `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` |
 | `ADMIN_PASSWORD_HASH` | admin sign-in | scrypt digest, see below. The password itself is never stored. |
 | `DB_DRIVER` | tests, local runs | `pglite` runs an in-memory Postgres instead of connecting to a server. Never set this in production. |
 | `PGLITE_PATH` | optional | A folder for the PGlite driver to persist to; unset means memory only. |
 | `DATABASE_POOL_MAX` | optional | Connections per serverless instance, default 5. |
-| `DATABASE_SSL_NO_VERIFY` | optional | `1` turns off certificate verification — only for a provider whose CA is not in Node's trust store. |
+| `DATABASE_SSL_NO_VERIFY` | optional | `1` — and only the exact string `1` — turns off certificate verification. See below. |
+
+### TLS to the database
+
+Three rules, in order, and nothing else decides (`sslFor()` in `src/lib/db.ts`
+and in `tools/migrate.mjs` — the same rule twice, pinned by
+`tests/migrations.test.ts`):
+
+1. a local host (`localhost`, `127.0.0.1`, `[::1]`) → no TLS;
+2. `?sslmode=disable` in the URL → no TLS;
+3. everything else → TLS, and the certificate **is verified** unless
+   `DATABASE_SSL_NO_VERIFY=1`.
+
+`DATABASE_SSL_NO_VERIFY=1` means "connect even though I cannot prove this is
+the right server". It is for a provider whose certificate Node cannot verify
+— a self-signed one on a TCP proxy, typically — and it is set deliberately or
+not at all. When it is on, `src/lib/db.ts` says so once per instance in the
+log; when it is off on a host known for self-signed certificates, it says that
+too, with the name of this variable, so a failure to connect explains itself.
+
+Until 07.09.2026 rule 3 had a fourth clause nobody could see in the
+environment: a host ending `.rlwy.net` or `.railway.app` had verification
+turned off automatically, because Railway's Postgres proxy served a
+self-signed certificate. Renaming the database host therefore changed whether
+the shop checked who it was talking to. That clause is gone
+(`docs/audit/2026-09-07-cleanup.md`). **If a deploy's `postbuild` migrate now
+fails with `SELF_SIGNED_CERT_IN_CHAIN` or
+`UNABLE_TO_VERIFY_LEAF_SIGNATURE`, that is the exemption being missed: set
+`DATABASE_SSL_NO_VERIFY=1` in Vercel.** If it does not fail, the exemption was
+not needed and production TLS is now genuinely verified.
 
 Other agents own `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_REPLY_TO`,
 `PAYMENT_PROVIDER`, `MONTONIO_*`, `OPENAI_API_KEY`, `PUBLIC_BASE_URL`, and the
