@@ -80,20 +80,46 @@ that.
 | **Средний чек** | Выручка ÷ Заказы. |
 | **Из корзины в заказ** | Paid orders ÷ distinct visitor sessions that viewed at least one page — "out of every 100 people who opened the shop, this many bought something." Called «Конверсия» before the redesign; same number. |
 | **Выручка по дням** | One bar per calendar day of the window (at most a fortnight of them), labelled with its weekday; today's bar is the ink one. Same paid orders. |
-| **Воронка** | How many *sessions* (not page views) reached each step: opened the shop → looked at a product → added to cart → opened checkout → finished a purchase. Each bar is a hard floor under the next — normal, since not everyone who looks buys. |
+| **Путь до покупки** | How many *sessions* (not page views) reached each step: opened the shop → looked at a product → added to cart → opened checkout → finished a purchase. Each bar is a hard floor under the next — normal, since not everyone who looks buys. Called «Воронка» until 07.09.2026, and its first step «Сессии»; both were words only a developer reads, so the section is «Путь до покупки» and the step is «Зашли в магазин». |
 | **Топ товаров по выручке / по просмотрам** | Which products earned the most money, and separately which were looked at the most — the two lists are often different. |
 | **Бренды: что приносит деньги** | Same idea, rolled up by brand. |
 | **Смотрят, но не покупают** | Products someone opened in the window but nobody added to a cart or bought — candidates for a better photo, a lower price or a rewritten description. |
 | **Популярные запросы / Ищут, но не находят** | What people typed into the shop's own search box, and separately the terms that came back with zero results — a request for a product page, a redirect, or a spelling variant to catch. |
 | **Промокоды** | Each code's uses and the euro it took off, from the same table the promo-codes tab manages. |
-| **Устройства / Страны / Откуда приходят** | Phone vs. computer, which country the visitor's IP resolved to, and which outside site sent them (Google, Instagram, a direct visit shows as nothing). |
-| **Ещё цифры** | Brошенные корзины (a cart with an e-mail that never became an order), chat opens, and gift cards sold/redeemed in the window. |
+| **С чего заходят / Из каких стран / С каких сайтов приходят** | Phone vs. computer, which country the visitor's IP resolved to, and which outside site sent them (Google, Instagram, a direct visit shows as nothing). One list of «Мобильные · EE · google.com» until 07.09.2026 — three unrelated questions stacked in one column, with the country as a bare ISO code; three named lists now, and `countryName()` prints «Эстония». |
+| **Ещё цифры** | Brошенные корзины (a cart with an e-mail that never became an order), chat opens, and gift cards sold/redeemed in the window — each row with the sentence that says what it counts. |
 | **Заканчиваются на складе** | The same low/out-of-stock list as the Overview tab, with a straight link into the goods editor for each one. |
-| **Google Search Console** | See below — needs a one-time setup step. |
+| **Магазин в поиске Google** | See below — needs a one-time setup step. Titled «Google: 28 дней» until 07.09.2026. |
 
 Loading and empty states: while a range is being fetched the tab shows
 «Загружаем…»; a shop with no visits yet in the chosen window shows «Данных
 пока нет — они появятся после первых заходов.» instead of a wall of zeros.
+
+### Every number carries the sentence that reads it
+
+Dim, 07.09.2026: «In admin analytics the Google — there is "average position"
+and below it actually search words — hard to understand if you're not a
+developer and not using GSC actually.» The same objection holds for the whole
+screen, and the answer is the same everywhere — and it is never a tooltip: a
+tooltip is a thing the owner has to know to open, and he does not.
+
+- Each of the four KPI cells prints one plain line under its figure
+  (`admKpiHTML`'s fourth argument — «Сколько человек из каждых 100 зашедших в
+  магазин что-то купили» under «Из корзины в заказ»), and one lead sentence
+  above them says the two things that change what every figure on the screen
+  means: money is paid orders only, and a «+12%» is against the same length of
+  time immediately before this one.
+- Every section below has one sentence under its title saying what its numbers
+  are and, where there is one, what to do about them — «Смотрят, но не
+  покупают» ends «обычно помогает другое фото, честная цена или понятное
+  описание».
+- `admPairsHTML()` takes an optional third element per row: the sentence,
+  drawn under the name rather than beside the number. «Ещё цифры» is the block
+  that needed it most — «Брошенные корзины» means nothing until it says
+  «человек оставил почту и собрал корзину, но заказ так и не оформил».
+
+Nothing was taken off the screen: Dim answered «Keep everything» when asked
+about simplifying it.
 
 ## Where the numbers come from — the short version
 
@@ -234,6 +260,44 @@ often, and it keeps the shop well inside Google's API quota.
 No dependency was added for this — the OAuth token is a JWT signed by hand
 with Node's built-in `node:crypto` (`RS256`), exactly the way
 `src/lib/payments/jwt.ts` signs Montonio's tokens with `HS256`.
+
+### What the block actually prints (07.09.2026)
+
+Until this date it was three rows — «Клики 47», «Показы 2900», «Средняя
+позиция 13,0» — and under them the top five queries with a click count beside
+each. Every word of that is Search Console's own vocabulary, and Renat has
+never opened Search Console. `admGscHTML()` now prints, in this order:
+
+1. **The sentence the numbers add up to.** «В среднем ваш магазин показывается
+   в Google на 13-м месте.» plus which page of Google that is —
+   `gscPageLine()`: ≤ 10 is the first page, ≤ 20 «это вторая страница Google,
+   а до неё доходят единицы», beyond that the third or further. Off the first
+   page the rule beside the sentence turns warm brown (`.adm-read--warn`) —
+   but the sentence says it too, because a colour is not a sentence.
+2. **Four figures, each with what the word means and what today's value of it
+   means** (`admDefHTML()`): показы («магазин попал в список Google по
+   чьему-то запросу: человек его увидел, но мог и не заметить»), переходы
+   («человек увидел магазин в Google и нажал на ссылку» — plus «Из 2 900
+   показов перешли 47»), доля переходов/CTR («какая часть показов
+   превратилась в переход» — plus «из каждых 100 показов переходов —
+   примерно 2»), and среднее место («первая строка забирает больше половины
+   всех переходов, десятая — единицы»), which is the answer to "why does
+   position matter".
+3. **«Что люди искали — и что они увидели»** — the word on its own line and
+   the outcome under it («Показов: 340 · переходов: 0 · место в Google: 28»),
+   instead of a word in the left column and a lone number in the right. A word
+   Google showed that nobody clicked says so in its own line, in the same warm
+   brown: «По этому слову в магазин не зашёл никто.»
+
+`topPages` is still fetched and still unused on screen — the pages of this
+shop are its product pages, and the owner already has «Топ товаров».
+
+The trilingual half of this is four `UI_RX` rules at the head of the list
+(the sentences that carry a live figure); everything else in the block is a
+plain dictionary key. They sit first on purpose: the promo-code rule
+`/^([A-Z0-9-]+) — скидка (.+)$/` further down reads a bare leading «0» as a
+code, which is also why the settings card's zero-value hints all start
+«Сейчас 0 — …».
 
 ## The Cloudflare traffic beacon
 
