@@ -782,8 +782,12 @@ there are three apps at all.
 
 ## The scanner app (`e2e/scanner-app.spec.ts`)
 
-One test, desktop **and** mobile — the route exists for a phone, so it is
-tested on one. It walks the two jobs the owner's «Сканер» icon exists for, in
+Ten scenarios, desktop **and** mobile — the route exists for a phone, so it is
+tested on one. Each is its own `describe` with its own client IP
+(`scenario(octet, …)`), because the login route allows five sign-ins a minute
+per address and ten tests from one address would trip it.
+
+The first walks the two jobs the owner's «Сканер» icon exists for, in
 one pass: an unknown code → «К какому товару?» → search «tangled» → one tap on
 the flat `PRODUCT_2 | 40 мл` row (`data-scanbind`, the redesign's one-tap
 bind) → bound; then the same code again → the product card → «+» «+» →
@@ -800,6 +804,31 @@ not a workaround for the test's benefit: it is the same door a bluetooth/USB
 handheld scanner types into and the one the owner falls back to on a scuffed
 label, and everything downstream of "a code arrived" (`handleScanCode()`) is
 shared with the camera path.
+
+**The camera scenario** builds one anyway: `addInitScript` installs a fake
+`BarcodeDetector` and a fake `getUserMedia` that models the Samsung problem
+exactly (three devices; `facingMode: environment` hands out the 640×480 "wide"
+lens while the 1920×1080 main one is only reachable by `deviceId`), plus a
+track with real capabilities — `focusMode`, `zoom: {min 1, max 8}`, `torch` —
+and an `applyConstraints` that records everything it is told. That is what
+lets the spec assert the tuning rather than only the decoding: continuous
+autofocus asked for, a starting zoom, a **synthesised two-finger pinch**
+(`pinch()` dispatches real `TouchEvent`s — `page.touchscreen` does one finger
+at a time, and a pinch is by definition two) moving the lens and stopping at
+its limit, a **double tap** doing the same one-handed, and the torch lighting
+itself on a dark frame (the fake camera paints a near-black picture, which is
+below `SCAN_DARK_LUMA`). It also pins the hand-over to zxing as
+`data-scanengine` + `data-scanfallback` and asserts the word «запасной» is
+**not** on screen — Dim asked for that line to stop being the owner's problem,
+so its absence is now a test rather than a memory.
+
+**«Склад» paging** (`scenario(198)`) marks the first row before pressing
+«Показать ещё» and asserts the mark survives. That is not decoration: the
+first version of the list rebuilt itself on every page, which took the button
+out of the DOM in the middle of Playwright's click — the test failed, and the
+fix (append rather than rebuild) is also what keeps the scroll position and an
+open «Править» form alive on a phone. It then scrolls to the end until all
+~320 rows are on screen.
 
 The count is asserted as a **delta**, never as an absolute: `PRODUCT_2` is the
 one fixture product the suite is allowed to count (fixtures.ts), and
