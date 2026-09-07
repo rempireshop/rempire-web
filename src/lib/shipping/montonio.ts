@@ -852,31 +852,11 @@ export async function createMontonioShipment(
   };
 }
 
-/** One shipment as Montonio currently has it — used to pick up a late tracking code. */
-export async function getMontonioShipment(shipmentId: string): Promise<MontonioShipment> {
-  const config = montonioShippingConfig();
-  if (!config) throw new MontonioShippingError("not_configured");
-  const body = await call<{
-    id?: string;
-    status?: string;
-    createdAt?: string;
-    shippingMethod?: { type?: string; carrierCode?: string; countryCode?: string };
-    parcels?: Array<{ carrierParcelId?: string | null; trackingLink?: string | null; dropOffPin?: string | null }>;
-  }>(config, `/shipments/${encodeURIComponent(shipmentId)}`);
-  const first = body.parcels?.[0];
-  return {
-    provider: "montonio",
-    shipmentId: str(body.id) || shipmentId,
-    status: str(body.status),
-    carrier: str(body.shippingMethod?.carrierCode),
-    country: str(body.shippingMethod?.countryCode).toUpperCase(),
-    method: str(body.shippingMethod?.type) === "courier" ? "courier" : "pickupPoint",
-    trackingCode: str(first?.carrierParcelId),
-    trackingUrl: str(first?.trackingLink),
-    dropOffPin: str(first?.dropOffPin),
-    createdAt: str(body.createdAt),
-  };
-}
+/* `GET /shipments/<id>` — re-reading one shipment to pick up a late tracking
+   code — was written and never called: nothing in the panel refreshes a
+   shipment, and `shipmentOnOrder()` below reads what createMontonioShipment()
+   stored. Removed 07.09.2026 (docs/audit/2026-09-07-cleanup.md); in git at
+   448cbd7 if a refresh button is ever built. */
 
 /* ---------- labels ------------------------------------------------------- */
 
@@ -921,20 +901,10 @@ export async function getMontonioLabel(
   return { labelFileId, status: "ready", url };
 }
 
-/** A label file that was created earlier, by id. */
-export async function fetchMontonioLabelFile(labelFileId: string): Promise<MontonioLabelFile> {
-  const config = montonioShippingConfig();
-  if (!config) throw new MontonioShippingError("not_configured");
-  const body = await call<{ id?: string; status?: string; labelFileUrl?: string | null }>(
-    config,
-    `/label-files/${encodeURIComponent(labelFileId)}`,
-  );
-  const url = str(body.labelFileUrl);
-  if (str(body.status) !== "ready" || !url) {
-    throw new MontonioShippingError("label_not_ready", labelFileId);
-  }
-  return { labelFileId: str(body.id) || labelFileId, status: "ready", url };
-}
+/* `GET /label-files/<id>` — fetching a label file made earlier — was the
+   retry half of `label_not_ready` above and was never wired up: the panel
+   simply asks for the label again. Removed 07.09.2026
+   (docs/audit/2026-09-07-cleanup.md); in git at 448cbd7. */
 
 /** The PDF itself. The URL is a pre-signed S3 link — no Authorization header. */
 export async function fetchLabelPdf(url: string): Promise<ArrayBuffer> {

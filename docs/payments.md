@@ -45,7 +45,7 @@ Montonio — <https://docs.montonio.com/api/stargate/guides/orders> (свере�
 
 | Переменная | Что это | Обязательна |
 | --- | --- | --- |
-| `PAYMENT_PROVIDER` | `montonio`, `mock` или `makecommerce`. Не задана — Montonio, если есть ключи; ключей тоже нет — оплата отключена (503 `not_configured`), тестовый «банк» сам собой **не** включается. | нет |
+| `PAYMENT_PROVIDER` | `montonio` или `mock`. Не задана (или задана незнакомым значением) — Montonio, если есть ключи; ключей тоже нет — оплата отключена (503 `not_configured`), тестовый «банк» сам собой **не** включается. | нет |
 | `MONTONIO_ACCESS_KEY` | Access Key из партнёрской системы | для Montonio |
 | `MONTONIO_SECRET_KEY` | Secret Key, им подписывается JWT | для Montonio |
 | `MONTONIO_ENV` | `sandbox` (по умолчанию) или `live` | нет |
@@ -199,15 +199,24 @@ Google Pay — это экспресс-кнопки на его карточно
    Montonio при этом пишет письмо владельцу магазина. Если такое случится —
    заказ правится в админке руками.
 
-## 7. MakeCommerce
+## 7. MakeCommerce — удалён 07.09.2026
 
-`src/lib/payments/makecommerce.ts` — заглушка: все методы кидают
-`not_implemented`, и сам по себе этот провайдер не включается никогда (только
-явным `PAYMENT_PROVIDER=makecommerce`). Он существует, чтобы выбор между
-Montonio и MakeCommerce остался правкой одного файла: интерфейс
-(`createPayment` / `verifyReturn` / `verifyNotification`) у них одинаковый,
+Заглушки `src/lib/payments/makecommerce.ts` больше нет. Она существовала,
+пока выбор между Montonio и MakeCommerce был открыт: все её методы кидали
+`not_implemented`, и включалась она только явным
+`PAYMENT_PROVIDER=makecommerce`. Montonio подключён и работает в песочнице,
+так что заглушка удалена (`docs/audit/2026-09-07-cleanup.md`); файл остался в
+истории git на коммите `448cbd7`.
+
+Смена провайдера по-прежнему — правка одного файла: интерфейс
+(`createPayment` / `verifyReturn` / `verifyNotification`) один на всех,
 отличается только конверт — у MakeCommerce Basic-авторизация вместо JWT и
 подпись `mac` (SHA-512) вместо токена.
+
+**Важно:** `PAYMENT_PROVIDER=makecommerce` теперь не значит ничего. Такое
+значение (как и любое незнакомое) ведёт себя как незаданное: Montonio, если
+есть ключи, иначе 503 `not_configured`. Тестовый «банк» так не включается
+никогда.
 
 ## 8. Коды ошибок API
 

@@ -775,8 +775,7 @@ export async function deletePost(id: string): Promise<Post | null> {
   return rows.length ? toPost(rows[0]) : null;
 }
 
-/** Resolves either an id (uuid-shaped) or a slug to a post, for admin routes that accept both. */
-export async function getPostByIdOrSlug(idOrSlug: string): Promise<Post | null> {
-  const looksLikeId = UUID_RE.test(idOrSlug);
-  return looksLikeId ? getPostById(idOrSlug) : getPostBySlug(idOrSlug);
-}
+/* `getPostByIdOrSlug()` was written for admin routes that accept either; no
+   route ever did — they take one or the other and call getPostById() or
+   getPostBySlug() directly. Removed 07.09.2026
+   (docs/audit/2026-09-07-cleanup.md); in git at 448cbd7. */

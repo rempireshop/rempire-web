@@ -249,16 +249,15 @@ describe("the keyless provider", () => {
   });
 });
 
-describe("MakeCommerce", () => {
-  it("is a stub and says so", async () => {
-    const provider = getProvider({ PAYMENT_PROVIDER: "makecommerce" } as unknown as NodeJS.ProcessEnv);
-    expect(provider.name).toBe("makecommerce");
-    await expect(
-      provider.createPayment(
-        { id: "x", number: "R-1", total: 1 },
-        { returnUrl: "https://x/", notificationUrl: "https://x/", lang: "RU" },
-      ),
-    ).rejects.toMatchObject({ code: "not_implemented" });
+describe("a PAYMENT_PROVIDER this build does not know", () => {
+  /* `makecommerce` used to name a stub whose every method threw; it was
+     deleted 07.09.2026 (docs/audit/2026-09-07-cleanup.md). What must hold now
+     is what held then — a name the code cannot honour never becomes the mock. */
+  it("never falls back to the mock: with no Montonio keys it refuses", () => {
+    for (const name of ["makecommerce", "stripe", "  MakeCommerce  ", "x"]) {
+      expect(() => getProvider({ PAYMENT_PROVIDER: name } as unknown as NodeJS.ProcessEnv))
+        .toThrowError(expect.objectContaining({ code: "not_configured" }));
+    }
   });
 });
 

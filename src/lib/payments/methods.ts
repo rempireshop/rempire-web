@@ -94,9 +94,10 @@ type CacheEntry = { at: number; data: PaymentMethods };
    and calling Montonio on every checkout that reaches the payment step. */
 const g = globalThis as unknown as { __rempirePayMethods?: CacheEntry };
 
-export function resetPaymentMethodsCache(): void {
-  g.__rempirePayMethods = undefined;
-}
+/* `resetPaymentMethodsCache()` existed so a test could clear the entry above;
+   no test ever called it (they set the clock or a fresh env instead). Removed
+   07.09.2026 (docs/audit/2026-09-07-cleanup.md) — it was one assignment to
+   `g.__rempirePayMethods`, and is in git at 448cbd7. */
 
 /**
  * `null` — never a throw — when there are no keys or Montonio would not

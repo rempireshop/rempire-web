@@ -214,24 +214,16 @@ export async function withTx<T>(fn: (q: Querier) => Promise<T>): Promise<T> {
   return db.tx(fn);
 }
 
-/** Which driver is live — handy in health checks and tests. */
-export async function driverKind(): Promise<"pg" | "pglite"> {
-  return (await driver()).kind;
-}
+/* Two helpers written for a health check that was never built —
+   `driverKind()` (`(await driver()).kind`) and `dbReady()` (a `select 1`
+   swallowed into a boolean). Nothing called either: routes that must survive
+   an outage catch their own query and answer with the shell or a 503, which
+   is one round trip rather than two. Removed 07.09.2026
+   (docs/audit/2026-09-07-cleanup.md); both are in git at 448cbd7. */
 
 /** Close the pool (tests, scripts). Next never calls this. */
 export async function closeDb(): Promise<void> {
   const pending = g.__rempireDb;
   g.__rempireDb = undefined;
   if (pending) await (await pending).close();
-}
-
-/** True when a database is reachable — routes use it to degrade politely. */
-export async function dbReady(): Promise<boolean> {
-  try {
-    await query("select 1");
-    return true;
-  } catch {
-    return false;
-  }
 }

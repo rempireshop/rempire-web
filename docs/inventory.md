@@ -197,8 +197,9 @@ full reasoning — read it before changing any of the derivation logic.
   *tracked* variants only: `'out'` only if every tracked variant is out,
   `'low'` if any tracked variant is low, `'in'` otherwise. This is what
   `getOverrides()` (`src/lib/orders.ts`) merges onto the manual override.
-- `listMoves({productId?, reason?, since?, limit?})`, `todaysMoves(limit)` —
-  the ledger.
+- `listMoves({productId?, reason?, since?, limit?})` — the ledger. (There was
+  a `todaysMoves(limit)` wrapper that passed `since` = UTC midnight; nothing
+  called it and it was removed 07.09.2026, `docs/audit/2026-09-07-cleanup.md`.)
 - `lowStockSummary(limit)` — tracked and not `'in'`; used by the admin table's
   own low/out counts and the assistant's context (see below).
 

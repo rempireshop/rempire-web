@@ -702,9 +702,7 @@ export async function listMoves(
   });
 }
 
-/** UTC-midnight "today" — good enough for a running list, see docs/inventory.md. */
-export async function todaysMoves(limit = 50): Promise<MoveRow[]> {
-  const start = new Date();
-  start.setUTCHours(0, 0, 0, 0);
-  return listMoves({ since: start.toISOString(), limit });
-}
+/* `todaysMoves(limit)` — listMoves() with `since` set to UTC midnight — had no
+   caller: the panel's «Движения» list asks for the last N moves, not today's.
+   Removed 07.09.2026 (docs/audit/2026-09-07-cleanup.md); it was one call to
+   listMoves() and is in git at 448cbd7. */

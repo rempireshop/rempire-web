@@ -1,10 +1,10 @@
 /**
  * The shop's payment port.
  *
- * One interface, three implementations: Montonio (real), MakeCommerce (a stub
- * until that decision is made) and a mock that lets the whole checkout be
- * walked through with no keys at all. Routes talk to this and never to a
- * provider directly, so swapping providers is an env var, not a rewrite.
+ * One interface, two implementations: Montonio (real) and a mock that lets the
+ * whole checkout be walked through with no keys at all. Routes talk to this
+ * and never to a provider directly, so swapping providers is an env var, not
+ * a rewrite.
  */
 
 /** What the shop does with a payment, boiled down to three outcomes. */
