@@ -5517,13 +5517,41 @@
   function acctShipPref() {
     var m = methods(), x = m[acctIdx()];
     if (!x) return null;
-    var mach = machinesFor(x);
     return {
       country: S.country,
       method: x.pickup ? "pickup" : x.pm ? "parcel" : "courier",
       carrier: x.pm || "",
-      machine: mach.length ? mach[Math.min(S.acctMachine, mach.length - 1)] : ""
+      machine: acctMachineName()
     };
+  }
+  /* The machines the account offers. They used to be the static names in
+     public/shop/shipping-data.js while the checkout showed the live
+     /api/shipping/points/ list — two lists that can name different machines
+     in the same town (QA sweep 06.09, polish item 7), and a default saved
+     from one of them could never be found in the other. It is the same feed
+     now, per carrier, with the static names as the stand-in while it is in
+     flight or if it fails — which is exactly what demoPoints() does for the
+     checkout. Names only: the account stores a preference, and a preference
+     that survives a redeploy has to be something a human recognises rather
+     than a carrier's internal id. */
+  function acctMachines() {
+    var m = methods(), x = m[acctIdx()];
+    if (!x || !x.pm) return [];
+    loadPointsFor(x.pm);
+    var live = POINTS.by[x.pm + ":" + S.country];
+    return live && live.length ? live.map(function (pt) { return pt.name; }) : machinesFor(x);
+  }
+  /** The machine «Доставка по умолчанию» is on right now: the saved one while
+      it is still in the list, else whatever the index points at. A name and
+      not an index, because the list is the carrier's live one — it changes
+      under a stored index, and «the machine round the corner» is the thing
+      the shopper actually chose. */
+  function acctMachineName() {
+    var mach = acctMachines();
+    if (!mach.length) return "";
+    var p = acctPrefLoad();
+    if (p && p.machine && mach.indexOf(p.machine) >= 0) return p.machine;
+    return mach[Math.min(S.acctMachine, mach.length - 1)];
   }
   function acctPrefSave() {
     if (!S.loggedIn) return;
@@ -5559,9 +5587,31 @@
     if (!p) return;
     var known = { pickup: 1, parcel: 1, courier: 1 };
     if (p.country && SHIP[p.country]) S.country = p.country;
+    /* …and «Доставка по умолчанию» itself, which otherwise showed the
+       built-in default on every fresh load while quietly remembering
+       something else. The row is found by what it means — pickup, this
+       carrier's parcel, the courier — never by a stored index, because the
+       table differs per country. */
+    var rows = methods();
+    for (var i = 0; i < rows.length; i++) {
+      var kind = rows[i].pickup ? "pickup" : rows[i].pm ? "parcel" : "courier";
+      if (kind === p.method && (rows[i].pm || "") === (p.carrier || "")) { S.acctMethod = i; break; }
+    }
     if (p.method && known[p.method]) S.ship.method = p.method;
     S.ship.carrier = p.method === "parcel" && p.carrier ? p.carrier : "";
     if (isParcel()) loadPoints();
+    /* The carrier's list is usually already here by now — the checkout asks
+       for every carrier of the country at its first paint, and the profile
+       answers after that — so the saved machine is matched right away;
+       pointsArrived() catches the other order. */
+    matchAcctPoint();
+    /* The profile lands after the checkout has already painted — acctLoad()
+       is one shot and its answer arrives whenever it arrives — so the block
+       that draws the method, the carrier chips and the chosen machine has to
+       be told. Without this the preference was in S and nowhere on screen
+       unless a parcel feed happened to come back afterwards and repaint it by
+       accident. */
+    if (S.screen === "checkout") { patchDelivery(); patchSummary(); }
   }
   /** The saved machine, once the carrier's real list has answered. */
   function matchAcctPoint() {
@@ -9208,10 +9258,15 @@
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
           '<span class="opt__price num">' + (xp ? eur(xp) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
-      (machinesFor(m[ai]).length
-        ? '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(machinesFor(m[ai]).length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
-          machinesFor(m[ai]).map(function (n, i) { return "<option" + (i === Math.min(S.acctMachine, machinesFor(m[ai]).length - 1) ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>"
-        : "") +
+      (function () {
+        // the live list, so the machine saved here is one the checkout can
+        // find again by name — acctMachines()
+        var mach = acctMachines();
+        if (!mach.length) return "";
+        var sel = acctMachineName();
+        return '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(mach.length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
+          mach.map(function (n) { return "<option" + (n === sel ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>";
+      })() +
 
       "</section></div>";
   }
@@ -9675,6 +9730,19 @@
     translateTree(box);
   }
   function pointsArrived() {
+    /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
+       asks for it from inside a render — so the answer has to bring a repaint
+       with it or the select stays on the static stand-in until something else
+       redraws the screen. */
+    if (S.screen === "account") {
+      render();
+      /* …and write the preference back from the list that has just landed:
+         a machine saved off the static stand-in is a name the checkout could
+         never find again. acctMachineName() keeps the saved one when it is
+         really there, so this only ever replaces a stale name. */
+      acctPrefSave();
+      return;
+    }
     if (S.screen !== "checkout") return;
     /* The account's saved parcel machine is a NAME from the static list; the
        real one only exists once this carrier's feed has answered. Matched
@@ -10264,11 +10332,17 @@
        e-mail box — the logo, the three language buttons, «← В магазин» and
        the step headings all come first (QA sweep 06.09, question 6; Dim said
        add one). This is the standard skip link: off-screen until it takes
-       focus, then the first thing a keyboard shopper sees, and its target is
-       the open step's body, which carries tabindex="-1" so the jump moves the
-       caret and not merely the scroll. No script behind it — an anchor to an
-       id works with the keyboard alone. */
-    return '<a class="skip" href="#coform">Перейти к оформлению</a>' +
+       focus, then the first thing a keyboard shopper sees, and it puts the
+       caret straight into the first control of whichever step is open.
+
+       A button and not an anchor to an id, which is the more usual shape:
+       Safari does not move Tab focus to links unless the shopper has turned
+       on full keyboard access, so on the one browser every iPhone runs an
+       <a class="skip"> is not reachable by the very keyboard it exists for
+       (measured, not assumed — the mobile-safari project fails on it). The
+       page is drawn by this script anyway, so a skip link that needs the
+       script costs nothing. */
+    return '<button class="skip" type="button" data-coskip>Перейти к оформлению</button>' +
       '<div class="cohdr"><div class="wrap wrap--co">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — на главную">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<h1 class="cohdr__t">Оформление заказа</h1>' +
@@ -10281,7 +10355,7 @@
         '<div class="co__steps">' +
           '<section class="costep' + (step === 1 ? " is-open" : "") + '">' +
             coHead(1, "Контакт", esc(S.email || "—")) +
-            (step === 1 ? '<div class="costep__body" id="coform" tabindex="-1">' +
+            (step === 1 ? '<div class="costep__body">' +
               '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
               '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
               (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
@@ -10303,7 +10377,7 @@
                 ? "<span>" + (giftTo().toMe ? "Мне на почту" : esc(giftTo().email.trim() || "—")) + "</span>"
                 : "<span>" + shipMethodLabel() + "</span>" +
                   (S.ship.point ? " · " + esc(S.ship.point.name) : S.ship.name ? " · " + esc(S.ship.name) : "")) +
-            (step === 2 ? '<div class="costep__body" id="coform" tabindex="-1">' +
+            (step === 2 ? '<div class="costep__body">' +
               // no country on a digital order: nothing crosses a border, and
               // the select is the one control that would re-price the parcel
               (isDigital() ? ""
@@ -10342,7 +10416,7 @@
 
           '<section class="costep' + (step === 3 ? " is-open" : "") + '">' +
             coHead(3, "Оплата", "") +
-            (step === 3 ? '<div class="costep__body" id="coform" tabindex="-1" data-co-payment>' + paymentBlockHTML() + "</div>" : "") +
+            (step === 3 ? '<div class="costep__body" data-co-payment>' + paymentBlockHTML() + "</div>" : "") +
           "</section>" +
           '<ul class="cotrust">' +
             "<li>Оплата через банк — данные карты магазин не видит</li>" +
@@ -20346,7 +20420,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-consent],[data-cookies],[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-coskip],[data-consent],[data-cookies],[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -22133,6 +22207,15 @@
     /* ---------- /blog ------------------------------------------------------ */
 
     if (d.q) { S.query = d.q; scheduleSearchTrack(); go("search"); return; }   // analytics agent
+    /* The skip link: into the first control of the step that is open, which
+       is the e-mail box on step 1, the country on step 2 and the first
+       payment method on step 3. The step's own heading is a `data-step`
+       button and would be found first, so the search starts inside the body. */
+    if (d.coskip !== undefined) {
+      refocus(".costep.is-open .costep__body input, .costep.is-open .costep__body select, " +
+        ".costep.is-open .costep__body textarea, .costep.is-open .costep__body button");
+      return;
+    }
     if (d.consent !== undefined) {
       consentSave(d.consent === "all");
       // the footer link is where this came from and where it goes back to

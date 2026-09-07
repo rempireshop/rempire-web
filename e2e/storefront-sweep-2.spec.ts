@@ -235,19 +235,40 @@ test.describe("router — malformed addresses", () => {
   test("a bad percent-encoding is not a page error and the shop still boots", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(String(e)));
-    const cases: Array<[string, string]> = [
-      ["/search/?q=%E0", "search"],
-      ["/b/%E0/", "home"],
-      ["/set/%E0/", "bundle"],
-      ["/et/search/?q=%E0%E0", "search"],
-    ];
-    for (const [path, screen] of cases) {
+    /* The share link a messenger mangled — the bug this test was written for
+       (`6933a0c`): the QUERY is what came back mangled, and it used to throw
+       URIError out of the router during boot, leaving the prerendered page
+       lying under an app that never painted. */
+    for (const path of ["/search/?q=%E0", "/et/search/?q=%E0%E0"]) {
       await page.goto(`/shop2${path}`);
-      await waitForScreen(page, screen);
-      // the static page under the app is dropped once the first render lands
+      await waitForScreen(page, "search");
       await expect(page.locator("#prerender"), `${path}: the prerendered page stayed under the app`).toHaveCount(0);
       expect(errors, `${path}: uncaught page error`).toEqual([]);
     }
+
+    /* A mangled PATH is not an address at all, and Next refuses to decode one
+       into a route parameter: /shop2/p/%E0/ has answered 400 ever since the
+       request-time product page existed, and since 07.09.2026 every /shop2/
+       path is a route, so they all answer the same way. What matters here is
+       that it is a clean refusal with a status — never a 5xx, never a stack.
+       (Question 4 in docs/audit/2026-09-07-storefront.md: whether that 400
+       should be dressed as the shop's own 404 is Dim's call.) */
+    for (const path of ["/p/%E0/", "/b/%E0/", "/set/%E0/"]) {
+      const res = await page.request.get(`/shop2${path}`);
+      expect(res.status(), path).toBe(400);
+    }
+
+    /* …and the router's own safeDecode() still holds for a mangled id the SPA
+       reaches by navigating rather than by a cold load, which is the code
+       path the fix was actually about. */
+    await page.goto(shopUrl("", "/sets/"));
+    await waitForScreen(page, "bundles");
+    await page.evaluate(() => {
+      history.pushState({}, "", "/shop2/set/%E0/");
+      window.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
+    });
+    await waitForScreen(page, "bundle");
+    expect(errors, "a mangled set id threw out of the router").toEqual([]);
   });
 });
 
@@ -580,14 +601,24 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await page.locator("[data-logincode]").click();
     await expect(page.locator("[data-logout]")).toBeVisible();
 
-    /* «Пакомат DPD» is deliberately not the checkout's own first choice, so
-       finding it selected there can only mean the preference travelled.
-       The block promised «Подставим это при следующем заказе» and did
-       nothing at all until 07.09.2026. */
-    const dpd = page.locator(".optlist .opt").filter({ hasText: "Пакомат DPD" }).first();
-    await expect(dpd).toBeVisible();
-    await dpd.locator("input[data-acctm]").check();
-    await expect(page.locator("[data-acctmachine]")).toBeVisible();
+    /* «Пакомат SmartPosti» is neither the account's default row (that is
+       «Пакомат DPD», S.acctMethod = 1) nor the checkout's first carrier
+       chip (that is Omniva), so finding it selected at the till can only
+       mean the preference travelled. The block promised «Подставим это при
+       следующем заказе» and did nothing at all until 07.09.2026. */
+    const row = page.locator(".optlist .opt").filter({ hasText: "Пакомат SmartPosti" }).first();
+    await expect(row).toBeVisible();
+    /* The machine list is the checkout's own live feed now, not the static
+       copy the account used to keep — so the name saved here is one the till
+       can find again. Wait for that carrier's feed before reading it. */
+    const feed = page.waitForResponse((r) => r.url().includes("/api/shipping/points/") && r.url().includes("carrier=smartpost"));
+    await row.locator("input[data-acctm]").check();
+    await feed;
+    const machines = page.locator("[data-acctmachine]");
+    await expect(machines).toBeVisible();
+    await expect.poll(async () => (await machines.locator("option").count())).toBeGreaterThan(1);
+    const machine = (await machines.inputValue()).trim();
+    expect(machine.length, "no parcel machine offered in the account").toBeGreaterThan(0);
 
     await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
     await waitForScreen(page, "product");
@@ -599,17 +630,20 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await continueButton(page, 2).click();
 
     await expect(page.locator('input[data-dm="parcel"]')).toBeChecked();
-    await expect(page.locator('[data-carrier="dpd"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-carrier="smartpost"]')).toHaveAttribute("aria-current", "true");
+    // …and the machine itself, matched by name against the live list
+    await expect(page.locator("[data-pointopen]")).toContainText(machine);
 
-    // …and the shopper's own choice still wins over it
+    // …and the shopper's own choice still wins over it, in this session
     await page.locator('input[data-dm="pickup"]').check();
     await expect(page.locator('input[data-dm="pickup"]')).toBeChecked();
+
+    // a reload is a new session, so the standing preference is back
     await page.reload();
     await waitForScreen(page, "checkout");
     await page.locator("[data-email]").fill(email);
     await continueButton(page, 2).click();
-    // a reload is a new session, so the preference is back — that is the promise
-    await expect(page.locator('input[data-dm="parcel"]')).toBeChecked();
+    await expect(page.locator('[data-carrier="smartpost"]')).toHaveAttribute("aria-current", "true");
   });
 });
 
@@ -631,13 +665,24 @@ test.describe("checkout — the skip link", () => {
     await page.keyboard.press("Tab");
     expect(await page.evaluate(() => document.activeElement?.className)).toContain("skip");
     // it is genuinely visible once focused — a skip link nobody can see is not one
-    await expect(page.locator("a.skip")).toBeInViewport();
+    await expect(page.locator("button.skip")).toBeInViewport();
 
     await page.keyboard.press("Enter");
-    await page.keyboard.press("Tab");
     expect(
       await page.evaluate(() => document.activeElement?.hasAttribute("data-email")),
-      "the skip link did not land next to the first field of the open step",
+      "the skip link did not land on the first field of the open step",
+    ).toBe(true);
+
+    // …and it follows the step that is open, not a fixed field
+    await page.keyboard.type(`kbd-skip-${Date.now()}@example.com`);
+    await continueButton(page, 2).click();
+    await expect(page.locator('input[data-dm="parcel"]')).toBeVisible();
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    expect(
+      await page.evaluate(() => !!document.activeElement?.closest(".costep.is-open .costep__body")),
+      "on step 2 the skip link left the open step",
     ).toBe(true);
   });
 });

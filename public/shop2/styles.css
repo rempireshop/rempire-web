@@ -2104,8 +2104,6 @@ button, a, summary, label { touch-action: manipulation; }
 }
 .skip:focus { transform: none; }
 .skip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-/* the step body is only a focus target, never a focus ring of its own */
-.costep__body:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) { .skip { transition: none; } }
 
 /* ---------- the consent banner ----------
