@@ -5038,6 +5038,11 @@
     sumOpen: null,      // checkout summary; null = follow the breakpoint
     // method/carrier/point drive the real checkout; the rest is the address
     ship: { name: "", addr: "", zip: "", city: "", phone: "", method: "parcel", carrier: "", point: null },
+    /* Has the shopper chosen a delivery in THIS session? Only while this is
+       false may the account's «Доставка по умолчанию» fill the checkout in —
+       a saved preference is a starting point, never something that reaches
+       over the shopper's own hand. See acctShipPref()/applyAcctShipPref(). */
+    shipPicked: false,
     pointOpen: false,   // the parcel-machine picker sheet
     paying: false,      // «Оплатить» is in flight — the button locks
     done: null,         // receipt state when we got here without a redirect
@@ -5462,6 +5467,90 @@
   function acctShipPrice(x) {
     if (x.pickup) return 0;
     return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || "");
+  }
+
+  /* ---------- «Доставка по умолчанию»: the account → the checkout ----------
+
+     The block promised «Подставим это при следующем заказе» and never did:
+     the row and the machine were written to S.acctMethod/S.acctMachine, read
+     by nothing, and gone on the next reload (QA sweep 06.09, question 7).
+     Dim, 07.09.2026: «It should reach checkout.» So it does — and it is kept
+     across visits, because a preference that resets is not a preference.
+
+     Stored in the browser, next to the cart, not on the customer's row: there
+     is no column for it and the value is a convenience, not a fact about the
+     order (which carries its own method, carrier and point). It is stamped
+     with the address that saved it, so a shared computer never hands one
+     person's parcel machine to the next one who signs in.
+
+     The account's rows are the old SHIP table's — one shape, three
+     translations — and the checkout's are the live rules; the mapping is the
+     one thing that has to be right, and it is exactly what the rows carry:
+     `pickup` is pickup, `pm` is a parcel with that carrier, anything else is
+     the courier. */
+  var ACCT_SHIP_LS = "rempire-ship-pref";
+  /** The account's current choice, in the checkout's own words. */
+  function acctShipPref() {
+    var m = methods(), x = m[acctIdx()];
+    if (!x) return null;
+    var mach = machinesFor(x);
+    return {
+      country: S.country,
+      method: x.pickup ? "pickup" : x.pm ? "parcel" : "courier",
+      carrier: x.pm || "",
+      machine: mach.length ? mach[Math.min(S.acctMachine, mach.length - 1)] : ""
+    };
+  }
+  function acctPrefSave() {
+    if (!S.loggedIn) return;
+    var p = acctShipPref();
+    if (!p) return;
+    p.email = (S.cust && S.cust.email) || S.email || "";
+    try { localStorage.setItem(ACCT_SHIP_LS, JSON.stringify(p)); } catch (e) {}
+    /* …and into the checkout right away, so «Подставим это при следующем
+       заказе» holds for an order placed in this same visit and not only for
+       one after a reload. */
+    applyAcctShipPref();
+  }
+  /** The saved preference, only for the address that is signed in now. */
+  function acctPrefLoad() {
+    try {
+      var p = JSON.parse(localStorage.getItem(ACCT_SHIP_LS));
+      if (!p || typeof p !== "object") return null;
+      var who = (S.cust && S.cust.email) || S.email || "";
+      if (!who || String(p.email || "").toLowerCase() !== who.toLowerCase()) return null;
+      return p;
+    } catch (e) { return null; }
+  }
+  /* Put the preference into the checkout — country, method and carrier —
+     unless the shopper has already chosen a delivery in this session. The
+     parcel machine itself waits for the live list: the account's names come
+     from the static shipping-data table and the checkout's come from
+     /api/shipping/points/, so the saved one is matched by name when the list
+     lands and simply left unchosen when the machine is no longer there
+     (matchAcctPoint below). */
+  function applyAcctShipPref() {
+    if (S.shipPicked) return;
+    var p = acctPrefLoad();
+    if (!p) return;
+    var known = { pickup: 1, parcel: 1, courier: 1 };
+    if (p.country && SHIP[p.country]) S.country = p.country;
+    if (p.method && known[p.method]) S.ship.method = p.method;
+    S.ship.carrier = p.method === "parcel" && p.carrier ? p.carrier : "";
+    if (isParcel()) loadPoints();
+  }
+  /** The saved machine, once the carrier's real list has answered. */
+  function matchAcctPoint() {
+    if (S.shipPicked || S.ship.point || !isParcel()) return false;
+    var p = acctPrefLoad();
+    if (!p || !p.machine) return false;
+    var list = pointsList();
+    if (!list) return false;
+    var want = String(p.machine).toLowerCase();
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].name || "").toLowerCase() === want) { S.ship.point = list[i]; return true; }
+    }
+    return false;
   }
   function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
   /* What the applied promo code takes off. The RULE comes from the server
@@ -9031,6 +9120,9 @@
          way through typing another address is never overwritten. */
       if (!S.ship.name && S.cust.name) S.ship.name = S.cust.name;
       if (!S.ship.phone && S.cust.phone) S.ship.phone = S.cust.phone;
+      /* …and the delivery they told us to remember. Same rule as the two
+         lines above — only where the shopper has not already chosen. */
+      applyAcctShipPref();
       // pro pricing only exists for an approved salon/pro account, and only
       // needs fetching once — S.pro stays put across re-renders until logout.
       if (S.cust.tier === "pro" && !S.pro) loadProPricing();
@@ -9038,6 +9130,10 @@
     return true;
   }
   function acctForget() {
+    /* «Выйти» leaves nothing behind, the saved delivery preference included —
+       it is keyed to this address, and a shared machine should not offer the
+       next person the parcel machine round the corner from the last one. */
+    try { localStorage.removeItem(ACCT_SHIP_LS); } catch (e) {}
     S.cust = null; S.loggedIn = false; S.acctOrders = []; S.acctStage = "email";
     S.acctCode = ""; S.acctSaved = false; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
     S.acctForm = { name: "", phone: "", birthday: "", marketing: false };
@@ -9460,6 +9556,11 @@
   }
   function pointsArrived() {
     if (S.screen !== "checkout") return;
+    /* The account's saved parcel machine is a NAME from the static list; the
+       real one only exists once this carrier's feed has answered. Matched
+       here, so the shopper who set a default finds it already chosen — and
+       simply left unchosen when the machine has closed since. */
+    matchAcctPoint();
     if (S.pointOpen && POINTS.view === "map") { paintPointMarkers(); return; }
     if (S.pointOpen) patchPointList();
     // The picker is closed: refresh the carrier chips (an empty carrier can
@@ -9546,7 +9647,10 @@
     if (focusSel) refocus(focusSel);
     settleModalFocus();   // the sheet is modal — focus in on open, back on close
   }
-  function pickPoint(p) { S.ship.point = p; S.pointOpen = false; patchDelivery(); patchSummary(); refocus("[data-pointopen]"); }
+  function pickPoint(p) {
+    S.ship.point = p; S.pointOpen = false; S.shipPicked = true;
+    patchDelivery(); patchSummary(); refocus("[data-pointopen]");
+  }
   /* Only the markers inside the current view, capped — a country's full list
      can run past 400 points and nobody can read that many pins at once
      anyway. Re-run on "moveend" so panning/zooming keeps the cap honest
@@ -9777,6 +9881,8 @@
     S.loyaltyRedeem = false;   // wholesale/loyalty: points applied here are spent too
     // the basket is empty by now, so shipMethod() no longer answers "digital"
     S.ship = { name: "", addr: "", zip: "", city: "", phone: "", method: shipMethod(), carrier: S.ship.carrier, point: null };
+    // the next order starts from the account's default again, not from this one
+    S.shipPicked = false;
     // «По счёту»: the company was this order's; the next one starts blank
     S.inv = { name: "", regCode: "", vatNumber: "", sameAddr: true, address: "", email: "" }; S.invTouched = false;
     S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
@@ -20269,6 +20375,9 @@
     /* ---------- delivery picker ---------- */
     if (d.dm) {
       S.ship.method = d.dm;
+      // from here on this order's delivery is the shopper's own — the
+      // account's «Доставка по умолчанию» stops filling anything in
+      S.shipPicked = true;
       if (d.dm !== "parcel") S.ship.point = null;
       else loadPoints();
       render(); refocus('[data-dm="' + d.dm + '"]'); return;
@@ -20276,6 +20385,7 @@
     if (d.carrier) {
       // another carrier is another set of machines — the old choice is not one
       S.ship.carrier = d.carrier; S.ship.point = null; POINTS.q = "";
+      S.shipPicked = true;
       loadPoints(); render(); refocus('[data-carrier="' + d.carrier + '"]'); return;
     }
     if (d.pointopen !== undefined) {
@@ -20297,7 +20407,7 @@
     if (d.bank !== undefined) { S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return; }
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose
-    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
+    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; acctPrefSave(); render(); return; }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) { S.admAi = !S.admAi; admPanesSave(); render(); refocus("[data-admai]"); return; }
     // the phone «Ещё» sheet
@@ -22252,10 +22362,11 @@
       S.country = t.value;
       // another country is another carrier and another set of machines
       S.ship.carrier = ""; S.ship.point = null; POINTS.q = "";
+      S.shipPicked = true;
       if (isParcel()) loadPoints();
       render();
     }
-    else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
+    else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; acctPrefSave(); render(); }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     // product creation: the subsection list follows the section — a DOM
     // patch, like every other change on the goods editor's form
@@ -22283,7 +22394,7 @@
       if (bsIt) bsIt.variant = Number(t.value) || 0;
       render();
     }
-    else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
+    else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; acctPrefSave(); }
     // «Главный баннер»: the link target, the picture URL and the timing —
     // on change, so a half-typed URL never becomes the banner's picture
     else if (t.matches("[data-herogo]")) {
