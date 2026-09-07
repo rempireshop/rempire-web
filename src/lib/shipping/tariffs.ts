@@ -26,7 +26,12 @@
  */
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 import type { ShipMethod } from "@/lib/shipping";
-import { fetchMontonioRates, isMontonioShippingConfigured, type MontonioRate } from "./montonio";
+import {
+  fetchMontonioRates,
+  isMontonioShippingConfigured,
+  MONTONIO_CARRIERS,
+  type MontonioRate,
+} from "./montonio";
 
 /**
  * The parcel every quote — live or static — is priced for: ~5 kg, 30×30×30 cm,
@@ -364,6 +369,11 @@ export async function suggestShippingRulesFromTariffs(
     if (!carrierCountries.has(country)) continue;
     for (const row of rows) {
       if (row.method !== "parcel") continue; // checkout only ever tags a carrier for the parcel method
+      // …and only for a carrier the checkout can actually name. Nova Post is
+      // Montonio International Shipping, a product with no carrier row in the
+      // admin's table and no `carrier` the storefront ever sends, so a price
+      // under it would be a cell nobody can see and nobody can reach.
+      if (!(MONTONIO_CARRIERS as readonly string[]).includes(row.carrier)) continue;
       patch.carriers[row.carrier] = patch.carriers[row.carrier] ?? {};
       patch.carriers[row.carrier][country] = customerPrice(row.price, markup);
     }

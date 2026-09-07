@@ -14728,19 +14728,38 @@
      of this same math, plus a live Montonio quote this static mirror cannot
      make (that needs MONTONIO_SECRET_KEY, which must never reach a browser).
      Keep the two files in sync by hand; see docs/shipping.md § «Тарифы
-     Montonio» for the sources and dates behind every number. Carriers with no
-     researched price (Venipak, Unisend) are simply absent — no invented
-     number takes their place. */
+     Montonio» for the sources and dates behind every number.
+
+     07.09.2026: these are now **Montonio's own contract prices** (incl. 24 %
+     VAT), not the carriers' business list prices they used to be — Montonio
+     publishes them after all, and they are less than half the list price at
+     home. Unisend has real numbers for the first time; Venipak still has
+     none, because Montonio quotes none for it (direct contract only), and no
+     invented number takes its place.
+
+     Two deliberate differences from the server table, both to keep this panel
+     honest about what it shows: Nova Post is left out (Montonio
+     International Shipping — the admin has no carrier row for it, and it is
+     never the ceiling in these four countries anyway), and so is every
+     country outside EE/LV/LT/FI. tariffs.ts prices all twenty-five
+     destinations Montonio serves and quoteFromRules() reads a country cell in
+     preference to its zone, but this table has six rows, and a fill that
+     wrote twenty-one cells nobody can see here would be hidden state. See
+     docs/audit/2026-09-07-shipping-returns.md, question 2. */
   var MONTONIO_TARIFFS = {
-    omniva: { EE: { parcel: 5.46 }, LV: { parcel: 10.61 }, LT: { parcel: 11.79 } },
+    omniva: {
+      EE: { parcel: 3.10, courier: 6.82 }, LV: { parcel: 4.96, courier: 11.16 },
+      LT: { parcel: 4.96, courier: 11.16 }
+    },
     smartpost: {
-      EE: { parcel: 5.47, courier: 10.84 }, LV: { parcel: 9.94 }, LT: { parcel: 11.17 },
-      FI: { parcel: 15.65, courier: 23.47 }
+      EE: { parcel: 2.54, courier: 7.38 }, LV: { parcel: 4.90, courier: 8.00 },
+      LT: { parcel: 4.90, courier: 8.00 }, FI: { parcel: 9.30, courier: 15.62 }
     },
     dpd: {
-      EE: { parcel: 4.50, courier: 10.78 }, LV: { parcel: 8.06, courier: 16.28 },
-      LT: { parcel: 8.62, courier: 17.74 }, FI: { parcel: 18.60, courier: 26.04 }
-    }
+      EE: { parcel: 2.59, courier: 6.82 }, LV: { parcel: 5.58, courier: 9.67 },
+      LT: { parcel: 5.58, courier: 10.42 }, FI: { parcel: 12.39, courier: 20.09 }
+    },
+    unisend: { EE: { parcel: 2.47 }, LV: { parcel: 3.72 }, LT: { parcel: 3.72 } }
   };
   /** Smallest price ending in 9 cents at or above `n` — never rounds down.
       Mirrors src/lib/shipping/tariffs.ts roundUpToX9() exactly. */
@@ -14865,6 +14884,12 @@
       });
       tariffRowsFor(cc).forEach(function (row) {
         if (row.method !== "parcel") return;
+        // …and only for a carrier «Цены по перевозчикам» actually has a row
+        // for. Once the live rates land, tariffRowsFor() also carries Nova
+        // Post (Montonio International Shipping), which has no row here and
+        // which the storefront never names — a price under it would be a cell
+        // nobody can see. Same guard as suggestShippingRulesFromTariffs().
+        if (!SHIP_CARRIER_ROWS.some(function (r) { return r[0] === row.carrier; })) return;
         var price = montonioPrice(row.price, markup);
         var current = draft.carriers && draft.carriers[row.carrier] && draft.carriers[row.carrier][cc];
         carriers[row.carrier] = carriers[row.carrier] || {};
