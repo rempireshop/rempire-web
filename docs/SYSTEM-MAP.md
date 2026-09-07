@@ -48,8 +48,8 @@ custom sitemap; 57 files in `src/lib`; 21 SQL migrations; 74 vitest files
 
 | Service | Used for | Env var names |
 |---|---|---|
-| Vercel (Hobby, project `rempire-web`, team Rempire) | hosting, cron, deploy on push to `main` | — |
-| Railway Postgres | the database | `DATABASE_URL`, `DATABASE_POOL_MAX`, `DATABASE_SSL_NO_VERIFY` |
+| Vercel (Hobby, project `rempire-web`, team Rempire — Hobby forbids commercial use, see `docs/HOSTING.md`) | hosting, cron, deploy on push to `main` | — |
+| Railway Postgres | the database | `DATABASE_URL`, `DATABASE_POOL_MAX`, `DATABASE_SSL_CA`, `DATABASE_SSL_NO_VERIFY` |
 | Montonio Stargate (sandbox now) | bank links, cards, wallets; **and** shipping labels, pickup points, tariffs | `PAYMENT_PROVIDER`, `MONTONIO_ACCESS_KEY`, `MONTONIO_SECRET_KEY`, `MONTONIO_ENV`, `PUBLIC_BASE_URL` |
 | Resend | every e-mail | `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_REPLY_TO`, `RESEND_TO`, `MAIL_PENDING_PAYMENT`, `MAIL_RETRY_DELAY_MS` |
 | OpenAI | shop chat, admin assistant, text generation, photo cut-out | `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-4.1-mini`), `PHOTO_CUTOUT`, `PHOTO_CUTOUT_TIMEOUT_MS` |
@@ -81,7 +81,7 @@ Other env names: `SESSION_SECRET`, `ADMIN_PASSWORD_HASH`, `CRON_SECRET`,
 | SQL | `db/migrations/NNN_name.sql` → packed into `src/db/migrations.generated.ts` |
 | build & data tools | `tools/*.mjs`, `tools/lib/*.mjs`, `tools/harvest/` |
 | tests | `tests/*.test.ts` (vitest, PGlite), `e2e/*.spec.ts` (Playwright), `playwright.config.ts`, `.github/workflows/ci.yml` |
-| prototype leftovers | `src/app/{page,qa,qa2,demo}.tsx`, `src/components/*`, `public/prototypes/`, `public/shop/` (old SPA), `design/` |
+| legacy | `public/shop/` (old SPA + 95 share-link pages), `design/` (brand originals). The prototype surfaces — `src/app/{page,qa,qa2,demo}`, `src/components/*`, `public/prototypes/` — were deleted 07.09, §25 |
 
 **Index of systems.** 1 Admin panel shell · 2 Storefront, prerender, SEO ·
 3 Catalogue · 4 Cart, checkout, orders · 5 Payments · 6 Shipping ·
@@ -1280,9 +1280,11 @@ server). Number ranges per area in `docs/build-contracts.md`.
 test.ts`, `tests/bundles-db.test.ts`, every other test (migrations run on
 PGlite first); manual `DB_DRIVER=pglite npm run migrate`.
 
-**State today.** Works; production database migrated 03.09. Caveat:
-`DATABASE_SSL_NO_VERIFY` and the Railway host match disable TLS verification
-by substring (audit M9 open); pool default 5 per instance.
+**State today.** Works; production database migrated 03.09. The Railway host
+match that disabled TLS verification by substring is gone (audit M9 closed
+07.09) — `DATABASE_SSL_CA` / `DATABASE_SSL_NO_VERIFY` decide now, and Railway
+needs one of them because it signs its Postgres certificate with a private CA.
+Pool default 5 per instance.
 
 **Simplification candidates.** none (keep).
 
@@ -1394,11 +1396,17 @@ index.html`, `app.js`, 95 `p/<id>` pages) is reached only through redirects;
 **How to test it.** `tests/fuzz-routes.test.ts` covers the two routes; nothing
 else.
 
-**State today.** Deployed, noindexed, unused. Carries a Blob store to migrate,
-two mail/Telegram forwarders, an `'unsafe-eval'` CSP carve-out and a root
-redirect to a review hub.
+**State today (07.09.2026): gone.** Q31 was answered yes and everything above
+was deleted — the two questionnaires, the hub, the prototypes, the vendored
+React/Babel, the feedback widget, `POST /api/submit/` and `POST /api/feedback/`,
+the five OG cards and all of `src/components/`. `/` is now a 307 to `/shop2/`,
+the `'unsafe-eval'` carve-out is gone and `tests/security-product-page.test.ts`
+forbids its return, and `README.md` has been rewritten. What was kept: the 95
+legacy `/shop/p/` pages, because `docs/redirect-map.csv` and the shared link
+previews point at them. Everything else is in git at `448cbd7`. Full record:
+`docs/audit/2026-09-07-cleanup.md`.
 
-**Simplification candidates.** Q31.
+**Simplification candidates.** Q31 — done.
 
 ---
 
@@ -1461,6 +1469,9 @@ phone's own dialogs are named separately.
     `src/lib/notify.ts:54–55` (`RESEND_TO` → `info@diipsolutions.eu`,
     `RESEND_FROM` → `REMPIRE QA <onboarding@resend.dev>`); `RESEND_TO` is not in
     `docs/accounts.md`. `src/lib/mail.ts` uses a different `RESEND_FROM` fallback.
+    **Fixed 07.09:** no default recipient at all — no `RESEND_TO`, no ping, and a
+    log line saying so; the sender falls back to the shop's own verified
+    address. `docs/audit/2026-09-07-cleanup.md`.
 11. **`admin_audit` is written but never shown; `GET /api/admin/audit/` has no
     caller** (`app.js` grep). The panel's journal is `localStorage` per browser.
 12. **`track("purchase")` can double-fire on a real receipt.** `doneState()`
@@ -1479,6 +1490,11 @@ phone's own dialogs are named separately.
     `fetchMontonioLabelFile`, `inventory.todaysMoves`, `db.dbReady/driverKind`,
     `blog.getPostByIdOrSlug`, `payments/methods.resetPaymentMethodsCache`,
     `tariffs.suggestShippingRulesFromTariffs` (only its browser mirror runs).
+    **Fixed 07.09:** every dead export above removed, plus the MakeCommerce
+    stub. `suggestShippingRulesFromTariffs` was **kept** — it is the checked
+    twin of `computeMontonioFillPatch()` in `app.js` and its only test, so it
+    is not dead. The dead click hooks are still open.
+    `docs/audit/2026-09-07-cleanup.md`.
 16. **«Подключения» squares that cannot be trusted.** «Письма клиентам ·
     Resend» is green until a test send fails (`app.js:11527`); «ИИ-помощник» is
     green while saying the model is not connected (`:11548`).
@@ -1492,10 +1508,15 @@ phone's own dialogs are named separately.
 20. **Search box silently overrides the order chips** (`app.js:10162`).
 21. **Two labels, one action, one screen:** «Приёмка» (`:10521`) and
     «Сканировать» (`:14739`) both `data-scanopen` on «Товары → Склад».
-22. **`ALLOWED_HOSTS` still lists `localhost:3000`** while dev runs on 3300
-    (`src/app/api/assistant/route.ts:57`).
-23. **TLS verification toggled by substring match on `DATABASE_URL`**
-    (`src/lib/db.ts:99–100`).
+22. ~~**`ALLOWED_HOSTS` still lists `localhost:3000`**~~ — **stale row, not a
+    bug.** It reads `localhost:3300`; fixed in `cdb6327`, recorded in
+    `docs/audit/2026-09-06-admin-qa.md:156`. Re-checked 07.09.
+23. ~~**TLS verification toggled by substring match on `DATABASE_URL`**~~ —
+    **fixed 07.09.** The host match is gone; `DATABASE_SSL_CA` (verify against
+    the provider's own CA) and `DATABASE_SSL_NO_VERIFY` (give up, loudly) are
+    the only switches, in the app and the migrator alike, pinned against each
+    other by `tests/migrations.test.ts`. `docs/backend.md`,
+    `docs/audit/2026-09-07-cleanup.md`.
 24. **Reply sending and Pro approval skip the confirm card** while cheaper
     actions require it (`app.js:18833`, `:13469`) — an inconsistency, not a bug.
 25. **Docs promise things the code does not do** — see Appendix C.
@@ -1505,12 +1526,12 @@ phone's own dialogs are named separately.
 | Doc says | Code does |
 |---|---|
 | `docs/FOR-RENAT-2026-08-23.md`: invoice PDF by e-mail, «Заказ ждёт в пакомате» letter, review request after a week, newsletters from the admin, roles per helper, birthday letter «за 3 дня до» | none of these exist; birthday is on the day |
-| `docs/assistant-work.md`: buttons «Сгенерировать описание», «Перевести на ET/EN», «SEO-тексты», «Составить ответ» | UI labels are «Написать черновик», «Перевести с русского», «Заполнить автоматически», «Черновик помощника» |
-| `docs/inventory.md`: «Открыть сканер» button on «Склад» | «Сканировать», header «Приёмка», link «Сканер отдельным приложением ↗» |
+| ~~`docs/assistant-work.md`: buttons «Сгенерировать описание», «Перевести на ET/EN», «SEO-тексты», «Составить ответ»~~ | **doc corrected 07.09** to the UI's «Написать черновик», «Перевести с русского», «Заполнить автоматически», «Черновик помощника» |
+| ~~`docs/inventory.md`: «Открыть сканер» button on «Склад»~~ | **doc corrected 07.09** to «Приёмка» / «Сканировать» and «Сканер отдельным приложением ↗» |
 | `docs/features.md` §2: amounts 25/50/100 | `GIFT_AMOUNTS` 25/50/75/100, default 25/50/100, setting `gift_amounts` |
-| `docs/accounts.md`: Railway = production hosting | everything (crons, deploy identity, body limits) assumes Vercel Hobby |
-| `docs/accounts.md` env table | `RESEND_TO`, `PHOTO_CUTOUT`, `SHIPPING_PROVIDER`, `MAIL_PENDING_PAYMENT`, `DPD_API_*` missing |
+| ~~`docs/accounts.md`: Railway = production hosting~~ | **corrected 07.09**: Vercel = production, Railway = the database. And Vercel Hobby forbids commercial use — `docs/HOSTING.md` |
+| `docs/accounts.md` env table | `RESEND_TO`, `DATABASE_SSL_CA`, `DATABASE_SSL_NO_VERIFY` added 07.09; `PHOTO_CUTOUT`, `SHIPPING_PROVIDER`, `MAIL_PENDING_PAYMENT`, `DPD_API_*` still missing |
 | `docs/mail.md` "five templates" | eight renderers (`gift-card`, `login-code`, `partner-welcome` added) |
-| `docs/design/admin-handoff-README.md`: «Наклейка», «Отметить отправленным», 4th step «Письмо клиенту», gift-card designs dark/light/own, payment switches | code: «Этикетка», «Отправлен», 4th step «Доставлен», one PDF design, payment list read-only |
-| `README.md` | describes the questionnaire phase, `bun`, static export — stale since 21.08 |
+| `docs/design/admin-handoff-README.md`: gift-card designs dark/light/own, payment switches | code: one PDF design, payment list read-only. (The three label rows — «Наклейка», «Отметить отправленным», 4th step — were corrected in the doc 07.09; `docs/GLOSSARY.md` is the list) |
+| ~~`README.md`~~ | **rewritten 07.09** |
 | `docs/OPEN-QUESTIONS.md` A5 "pickup default off" | pickup is live and free in EE |

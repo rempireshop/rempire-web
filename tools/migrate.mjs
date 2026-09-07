@@ -65,15 +65,16 @@ export async function migrate(db, opts = {}) {
 }
 
 /**
- * TLS everywhere except a local server, and the certificate is verified.
- * DATABASE_SSL_NO_VERIFY=1 is the one escape hatch, for a provider whose
- * certificate Node cannot verify — it disables verification, so it is set
- * knowingly or not at all.
+ * TLS everywhere except a local server, and the certificate is verified —
+ * against DATABASE_SSL_CA when the provider signs its own, otherwise against
+ * Node's trust store. DATABASE_SSL_NO_VERIFY=1 is the last resort: encrypted
+ * but unauthenticated, set knowingly or not at all.
  *
- * Same rule, same words as src/lib/db.ts — keep the two in step. The host
- * substring that used to switch verification off by itself was removed on
- * 07.09.2026; docs/audit/2026-09-07-cleanup.md says why, and what to do if a
- * deploy's postbuild migrate suddenly cannot verify the certificate.
+ * Same rule, same words as src/lib/db.ts — keep the two in step;
+ * tests/migrations.test.ts fails if they drift. The host substring that used
+ * to switch verification off by itself was removed on 07.09.2026;
+ * docs/audit/2026-09-07-cleanup.md says why, and docs/backend.md says what to
+ * do if a deploy's postbuild migrate cannot verify the certificate.
  *
  * @param {string} url
  * @param {Record<string, string | undefined>} [env]
@@ -81,7 +82,9 @@ export async function migrate(db, opts = {}) {
 export function sslFor(url, env = process.env) {
   if (/localhost|127\.0\.0\.1|\[::1\]/.test(url)) return undefined;
   if (/[?&]sslmode=disable/.test(url)) return undefined;
-  return { rejectUnauthorized: env.DATABASE_SSL_NO_VERIFY !== "1" };
+  const ca = (env.DATABASE_SSL_CA ?? "").trim();
+  if (env.DATABASE_SSL_NO_VERIFY === "1") return { rejectUnauthorized: false };
+  return ca ? { rejectUnauthorized: true, ca } : { rejectUnauthorized: true };
 }
 
 async function main() {

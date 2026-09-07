@@ -90,48 +90,60 @@ function cleanParams(params?: unknown[]): unknown[] | undefined {
 }
 
 /**
- * TLS on unless the server is local; the certificate is verified unless
- * `DATABASE_SSL_NO_VERIFY=1` says otherwise. **That variable is the only
- * switch** (docs/backend.md, docs/accounts.md).
+ * TLS to the database. Three env vars decide, and **nothing else** —
+ * docs/backend.md, "TLS to the database".
  *
- * Until 07.09.2026 it was not: a host whose name contained `.rlwy.net` or
- * `.railway.app` had verification silently turned off, because Railway's
- * Postgres proxy served a self-signed certificate. A substring of a
- * connection string is a bad place to keep a security decision — rename the
- * database host and the shop quietly stops checking who it is talking to,
- * and nobody reviewing the env vars can see that it did (audit M9,
+ *   DATABASE_URL            a local host or `?sslmode=disable` ⇒ no TLS
+ *   DATABASE_SSL_CA         the provider's CA certificate, PEM ⇒ verified against it
+ *   DATABASE_SSL_NO_VERIFY  `1` ⇒ encrypted but NOT verified
+ *
+ * Until 07.09.2026 there was a fourth, invisible one: a host whose name
+ * contained `.rlwy.net` or `.railway.app` had verification silently turned
+ * off, because Railway's Postgres serves a certificate signed by a private CA
+ * it generates per database. A substring of a connection string is a bad
+ * place to keep a security decision — rename the database host and the shop
+ * quietly stops checking who it is talking to, and nobody reading the
+ * environment variables can see that it did (audit M9,
  * docs/audit/security-api.md; docs/audit/2026-09-07-cleanup.md).
  *
- * If a deploy now fails to reach the database with SELF_SIGNED_CERT_IN_CHAIN
- * or UNABLE_TO_VERIFY_LEAF_SIGNATURE, that is this change telling the truth
- * about the connection: set DATABASE_SSL_NO_VERIFY=1 in Vercel, knowingly.
- * If it does not fail, the exemption was not needed and TLS is now genuinely
- * verified in production.
+ * Removing it leaves Railway failing to verify, which is the truth about that
+ * connection — so DATABASE_SSL_CA exists to make it verifiable rather than
+ * merely honest. Railway documents the export
+ * (`railway ssh … -- export-ssl-ca`); paste what comes back into the variable
+ * and the connection is genuinely authenticated. DATABASE_SSL_NO_VERIFY=1 is
+ * the fallback for when that is not possible, and it says so in the log.
  */
 export function sslFor(url: string, env: Record<string, string | undefined> = process.env) {
   if (/localhost|127\.0\.0\.1|\[::1\]/.test(url)) return undefined;
   if (/[?&]sslmode=disable/.test(url)) return undefined;
-  return { rejectUnauthorized: env.DATABASE_SSL_NO_VERIFY !== "1" };
+  const ca = (env.DATABASE_SSL_CA ?? "").trim();
+  /* A CA is only meaningful while we are actually verifying, so the two are
+     never both in play: NO_VERIFY=1 wins and the log says the certificate is
+     unchecked. */
+  if (env.DATABASE_SSL_NO_VERIFY === "1") return { rejectUnauthorized: false };
+  return ca ? { rejectUnauthorized: true, ca } : { rejectUnauthorized: true };
 }
 
-/** Hosts that have served a self-signed certificate — a hint for the log line
- *  below, never a decision. */
-const SELF_SIGNED_HINT = /@[^/?#]*\.(rlwy\.net|railway\.app)(:\d+)?(\/|$)/i;
+/** Providers known to sign their Postgres certificate with a private CA — a
+ *  hint for the log line below, never a decision. */
+const PRIVATE_CA_HINT = /@[^/?#]*\.(rlwy\.net|railway\.app)(:\d+)?(\/|$)/i;
 
 async function makePg(): Promise<Raw> {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error(MISSING_URL);
 
   const ssl = sslFor(url);
-  /* Said once per instance, so neither state can be a surprise later: either
-     the certificate is not being checked, or it is and this host has a
-     history of failing that check. Neither line prints the URL. */
+  /* Said once per instance, so no state here can be a surprise later. Neither
+     line prints the URL, and the CA is a public certificate, never a key. */
   if (ssl && ssl.rejectUnauthorized === false) {
     console.warn("[db] DATABASE_SSL_NO_VERIFY=1 — the database certificate is NOT verified.");
-  } else if (ssl && SELF_SIGNED_HINT.test(url)) {
+  } else if (ssl && "ca" in ssl) {
+    console.log("[db] verifying the database certificate against DATABASE_SSL_CA.");
+  } else if (ssl && PRIVATE_CA_HINT.test(url)) {
     console.warn(
-      "[db] verifying the database certificate; this provider has served a self-signed one. " +
-        "If the connection fails with SELF_SIGNED_CERT_IN_CHAIN, set DATABASE_SSL_NO_VERIFY=1.",
+      "[db] verifying the database certificate against the public trust store; this provider " +
+        "signs its own. If the connection fails with SELF_SIGNED_CERT_IN_CHAIN, either put the " +
+        "provider's CA in DATABASE_SSL_CA (preferred) or set DATABASE_SSL_NO_VERIFY=1.",
     );
   }
 

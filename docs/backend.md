@@ -17,36 +17,53 @@ into the project's environment settings.
 | `DB_DRIVER` | tests, local runs | `pglite` runs an in-memory Postgres instead of connecting to a server. Never set this in production. |
 | `PGLITE_PATH` | optional | A folder for the PGlite driver to persist to; unset means memory only. |
 | `DATABASE_POOL_MAX` | optional | Connections per serverless instance, default 5. |
-| `DATABASE_SSL_NO_VERIFY` | optional | `1` — and only the exact string `1` — turns off certificate verification. See below. |
+| `DATABASE_SSL_CA` | Railway, and any provider that signs its own certificate | The provider's CA certificate, PEM text. With it the connection is genuinely authenticated. See below. |
+| `DATABASE_SSL_NO_VERIFY` | last resort | `1` — and only the exact string `1` — turns off certificate verification. See below. |
 
 ### TLS to the database
 
-Three rules, in order, and nothing else decides (`sslFor()` in `src/lib/db.ts`
-and in `tools/migrate.mjs` — the same rule twice, pinned by
+Four rules, in order, and nothing else decides (`sslFor()` in `src/lib/db.ts`
+and in `tools/migrate.mjs` — the same rule twice, pinned against each other by
 `tests/migrations.test.ts`):
 
 1. a local host (`localhost`, `127.0.0.1`, `[::1]`) → no TLS;
 2. `?sslmode=disable` in the URL → no TLS;
-3. everything else → TLS, and the certificate **is verified** unless
-   `DATABASE_SSL_NO_VERIFY=1`.
+3. `DATABASE_SSL_NO_VERIFY=1` → TLS, certificate **not** checked;
+4. everything else → TLS, certificate **verified** — against `DATABASE_SSL_CA`
+   when that is set, otherwise against Node's public trust store.
 
-`DATABASE_SSL_NO_VERIFY=1` means "connect even though I cannot prove this is
-the right server". It is for a provider whose certificate Node cannot verify
-— a self-signed one on a TCP proxy, typically — and it is set deliberately or
-not at all. When it is on, `src/lib/db.ts` says so once per instance in the
-log; when it is off on a host known for self-signed certificates, it says that
-too, with the name of this variable, so a failure to connect explains itself.
+Until 07.09.2026 there was a fifth rule nobody could see in the environment: a
+host ending `.rlwy.net` or `.railway.app` had verification turned off
+automatically. Renaming the database host therefore changed whether the shop
+checked who it was talking to, and no review of the variables could show it.
+That clause is gone (`docs/audit/2026-09-07-cleanup.md`).
 
-Until 07.09.2026 rule 3 had a fourth clause nobody could see in the
-environment: a host ending `.rlwy.net` or `.railway.app` had verification
-turned off automatically, because Railway's Postgres proxy served a
-self-signed certificate. Renaming the database host therefore changed whether
-the shop checked who it was talking to. That clause is gone
-(`docs/audit/2026-09-07-cleanup.md`). **If a deploy's `postbuild` migrate now
-fails with `SELF_SIGNED_CERT_IN_CHAIN` or
-`UNABLE_TO_VERIFY_LEAF_SIGNATURE`, that is the exemption being missed: set
-`DATABASE_SSL_NO_VERIFY=1` in Vercel.** If it does not fail, the exemption was
-not needed and production TLS is now genuinely verified.
+**Railway needs one of the two variables.** Railway's Postgres image "creates
+a private Certificate Authority (CA) and a CA-signed server certificate" on
+first startup ([railway.com/deploy/postgresql--postgresql](https://railway.com/deploy/postgresql--postgresql)),
+so Node's public trust store cannot verify it and a connection with rule 4
+alone fails with `SELF_SIGNED_CERT_IN_CHAIN`. Two ways out, in order of
+preference:
+
+1. **Export the CA and verify against it** — Railway documents the command:
+
+   ```bash
+   railway ssh --project <p> --service <s> --environment <e> -- export-ssl-ca > postgres-root.crt
+   ```
+
+   Paste the contents of that file into `DATABASE_SSL_CA` in Vercel. The
+   connection is then authenticated, not merely encrypted. The file is a
+   public certificate — it is safe to hold in an environment variable. Never
+   copy `root.key` or `server.key` out of the database.
+2. **`DATABASE_SSL_NO_VERIFY=1`** — "connect even though I cannot prove this is
+   the right server". Encrypted, unauthenticated. Set it knowingly, or not at
+   all.
+
+`src/lib/db.ts` says which of the three states it is in, once per instance, in
+the log: the certificate is unchecked, it is being checked against
+`DATABASE_SSL_CA`, or it is being checked against the public store on a
+provider known to sign its own — the last of those naming both variables, so a
+failure to connect explains its own fix. No line ever prints the URL.
 
 Other agents own `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_REPLY_TO`,
 `PAYMENT_PROVIDER`, `MONTONIO_*`, `OPENAI_API_KEY`, `PUBLIC_BASE_URL`, and the
