@@ -1,6 +1,6 @@
 # Счёт, который никто не оплатил — и продажа в салоне, которая теперь считается покупкой
 
-07.09.2026, branch `r2-inv2` (six commits on top of `448cbd7`). Two pieces of
+07.09.2026, branch `r2-inv2` (eight commits on top of `448cbd7`). Two pieces of
 work, joined by one idea: **the shop must not quietly do nothing.** An unpaid
 invoice used to hang for ever with no letter and no ending; a sale rung up at
 the till used to look paid and skip everything that makes a payment a payment.
@@ -36,7 +36,9 @@ Two things were **checked and found wanting**, and fixed — see § 3 and § 4.
 | `924f471` | The admin's two new fields, the «Заполните IBAN» row on «Сделать сегодня», the honest receipt |
 | `4921348` | Tests: `tests/invoice-dunning.test.ts`, the POS settlement suite, `e2e/salon-sale.spec.ts`, the blank-IBAN case |
 | `fd1af04` | docs/payments.md § 10, docs/mail.md, docs/inventory.md |
-| `<this>` | docs/flows.md and this report |
+| `521d3aa` | docs/flows.md and this report |
+| `83cca54` | one comment: what «чек ушёл на почту» is a claim about |
+| `<this>` | the shas above, and the neighbourhood e2e run |
 
 ## 3. Напоминание и автоотмена
 
@@ -331,10 +333,15 @@ npx tsc --noEmit                                       clean
 node --check public/shop2/app.js                       clean
 node tools/i18n-gaps.mjs        0 untranslated · ET/EN parity ok · no duplicate keys
 node tools/e2e-build.mjs
-E2E_PORT=3717 npx playwright test e2e/salon-sale.spec.ts --project=mobile     2 passed
-E2E_PORT=3717 npx playwright test e2e/invoice.spec.ts  --project=mobile       1 passed
-E2E_PORT=3717 npx playwright test e2e/invoice.spec.ts  --project=desktop      1 passed
+E2E_PORT=3717 npx playwright test e2e/{salon-sale,invoice}.spec.ts
+             --project=mobile                                          3 passed
+E2E_PORT=3717 npx playwright test e2e/{invoice,salon-sale,checkout,
+             sweep-admin-ops}.spec.ts --project=desktop               21 passed
 ```
+
+The last line is the neighbourhood, not just the new work: the till's own fuzz
+sweep and the whole checkout still pass, so nothing about the settlement change
+moved a price, a stock count or a receipt.
 
 `e2e/invoice.spec.ts` now sets the shop's IBAN through the admin API before the
 shopper checks out — merged into whatever content the run already holds, never
