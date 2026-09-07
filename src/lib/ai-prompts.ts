@@ -290,7 +290,7 @@ ${SEO_RULES}
 
 ${SEO_PRODUCT_RULES}
 
-TASK: write the Google search snippet for this product, in ${LANG_NAME[lang]}.
+TASK: write a Google search snippet for this product, in ${LANG_NAME[lang]}.
 - "title": at most ${TITLE_MAX} characters INCLUDING spaces — count them. Brand, then the maker's name for the product, then what it is, in ${LANG_NAME[lang]}: "System 4 Bio Botanical Shampoo — шампунь", "Kevin.Murphy ANTI.GRAVITY.SPRAY — спрей для объёма".
 - "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. One sentence on what it is and whom it suits, one on the thing about it that decides the purchase. Nothing that is not in INPUT.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
@@ -316,7 +316,7 @@ function buildPostSeoPrompt(lang: Lang3, input: SeoClean): PromptResult {
 
 ${SEO_RULES}
 
-TASK: write the Google search snippet for this blog article, in ${LANG_NAME[lang]}. The article under INPUT may be written in another language — write the snippet in ${LANG_NAME[lang]} regardless: it is for the ${LANG_NAME[lang]} page of the same article.
+TASK: write a Google search snippet for this blog article, in ${LANG_NAME[lang]}. The article under INPUT may be written in another language — write the snippet in ${LANG_NAME[lang]} regardless: it is for the ${LANG_NAME[lang]} page of the same article.
 - "title": at most ${TITLE_MAX} characters INCLUDING spaces — count them. Name the article's subject in the reader's own words, the way they would type the question into the search box. A product or brand name belongs in it only when the article really is about that one thing.
 - "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. Say concretely what the reader will know after reading it — the answer the article gives, not a promise that it gives one.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
