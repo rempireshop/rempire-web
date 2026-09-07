@@ -132,6 +132,7 @@
       "Этот товар уже в наборе": "See toode on juba komplektis",
       "Добавьте хотя бы два товара — тогда посчитаем.": "Lisa vähemalt kaks toodet — siis arvutame.",
       "…или скидка от суммы, %": "…või soodustus summast, %",
+      "Набор с таким адресом уже есть — придумайте другой адрес.": "Selle aadressiga komplekt on juba olemas — mõtle välja teine aadress.",
       "Сначала добавьте в набор хотя бы два товара": "Lisa komplekti esmalt vähemalt kaks toodet",
       "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
         "Mustand kirjutatakse komplekti toodete järgi. Kirjelduse esimesi ridu näitab pood Google'is.",
@@ -2214,6 +2215,7 @@
       "Этот товар уже в наборе": "That product is already in the set",
       "Добавьте хотя бы два товара — тогда посчитаем.": "Add at least two products — then we can do the maths.",
       "…или скидка от суммы, %": "…or a discount off the total, %",
+      "Набор с таким адресом уже есть — придумайте другой адрес.": "A set already has that address — think of another one.",
       "Сначала добавьте в набор хотя бы два товара": "Add at least two products to the set first",
       "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
         "The draft is written from the products in the set. The first lines of the description are what the shop shows in Google.",
@@ -15160,6 +15162,20 @@
     });
   }
 
+  /* The assistant may not invent a set's address — propose_bundle carries no
+     id on purpose — and Renat should not have to invent a latin slug either.
+     So the Russian name becomes one here, through the same transliteration
+     the blog uses, with a number appended when a set already owns it. He can
+     still change it: the box is read-only only once the set has been saved. */
+  function bundleSuggestId(titleRu) {
+    var base = blogSlugify(String(titleRu || "")).slice(0, 48).replace(/-+$/, "");
+    if (base.length < 2 || base === "post") return "";
+    var taken = {};
+    (S.admBundles || []).forEach(function (b) { taken[b.id] = true; });
+    if (!taken[base]) return base;
+    for (var n = 2; n < 50; n++) if (!taken[base + "-" + n]) return base + "-" + n;
+    return "";
+  }
   /** «Шампунь + кондиционер ×2» — what a set's item list says out loud. */
   function bundlePartsText(items) {
     return (items || []).map(function (it) {
@@ -15173,6 +15189,18 @@
      products and the name already in it, and the owner names the price and
      presses «Сохранить» himself (see sanitizeProposeBundle's own comment). */
   function applyProposeBundle(a) {
+    /* The list first, for the same reason applySetBundle wants it: the
+       address suggested below has to be one no set already owns. The tab this
+       opens loads it anyway — this only makes sure it is here before the form
+       is built rather than a moment after. */
+    if (!S.admBundles) {
+      apiJson("/api/admin/bundles/").then(function (r) {
+        if (r.status === 401) { SRV.admin = false; render(); return; }
+        S.admBundles = r.status === 200 && r.body.ok ? hydrateBundles(r.body.bundles || []) : [];
+        applyProposeBundle(a);
+      }).catch(function () { S.admBundles = []; applyProposeBundle(a); });
+      return;
+    }
     var form = blankBundle();
     form.cat = a.cat || form.cat;
     form.title = { RU: (a.title && a.title.RU) || "", ET: (a.title && a.title.ET) || "", EN: (a.title && a.title.EN) || "" };
@@ -15180,6 +15208,7 @@
     form.items = (a.items || []).map(function (it) {
       return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
     });
+    form.id = bundleSuggestId(form.title.RU);
     // «Наборы» is the third tab of «Товары» (admProductTab), not a section
     S.adminTab = "goods"; S.goodsTab = "bundles"; S.adminEdit = "";
     S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
@@ -15498,6 +15527,19 @@
   };
   function saveBundleForm() {
     if (!S.bundleForm || saveBundleForm._busy) return;   // a second tap while the first is on its way
+    /* POST /api/admin/bundles/ is an upsert, so a NEW set typed onto the
+       address of one that exists would quietly replace it — its name, its
+       products and its price, with no warning and no way back. The server
+       cannot tell the two apart (both are "save this set"), so the panel,
+       which knows the owner pressed «Новый набор», says so here. */
+    if (!S.bundleForm.editing) {
+      var wantId = String(S.bundleForm.id || "").trim().toLowerCase();
+      var clash = (S.admBundles || []).filter(function (b) { return b.id === wantId; })[0];
+      if (clash) {
+        S.bundleFormErr = "Набор с таким адресом уже есть — придумайте другой адрес.";
+        render(); return;
+      }
+    }
     saveBundleForm._busy = true;
     S.bundleFormErr = "";
     apiSend("/api/admin/bundles/", "POST", bundleFormPayload()).then(function (r) {

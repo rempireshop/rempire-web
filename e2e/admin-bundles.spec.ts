@@ -207,6 +207,18 @@ test.describe("admin — наборы", () => {
       // the form stays open on the refused value — nothing was saved
       await expect(page.locator("[data-bundlesave]")).toBeVisible();
       await page.locator("[data-bundlecancel]").click();
+
+      /* …and a NEW set typed onto an address that already belongs to one:
+         POST /api/admin/bundles/ is an upsert, so this used to replace that
+         set — its name, its products and its price — without a word. */
+      await page.locator("[data-bundlenew]").click();
+      await page.locator('[data-bundlef="id"]').fill(SET_ID);
+      await page.locator('[data-bundlef="title"]').fill("Другой набор");
+      await page.locator("[data-bundlesave]").click();
+      await expect(page.locator('.err[role="alert"]')).toContainText("уже есть");
+      await page.locator("[data-bundlecancel]").click();
+      // the set that was there is untouched
+      await expect(page.locator(`[data-bundleedit="${SET_ID}"]`)).toBeVisible();
     });
   });
 
