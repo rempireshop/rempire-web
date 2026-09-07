@@ -15494,7 +15494,7 @@
   }
   /** Everything that is running out comes first — the shelf the owner has to
       act on, not the alphabet. Variants nobody counts yet sort last. */
-  function stockRows() {
+  function stockFiltered() {
     /* The same folding the scanner's own search got: one literal substring
        over «бренд название id» found nothing for «kevin murphy» (the
        catalogue writes «Kevin.Murphy»), «un tangled» or «300 ml», which is
@@ -15518,39 +15518,70 @@
       var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
       return qa - qb;
     });
-    /* «We need all» (Dim). The list used to stop dead at 60 of ~350 rows, so
-       the tail of the warehouse was reachable only by guessing a search term.
-       Now it pages the way «Каталог» does — and stockScrollMore() turns the
-       page over by itself when the owner scrolls to the end, so on a phone
-       there is nothing to press at all. Paging rather than all 350 at once
-       because this list is re-drawn on every keystroke of the search box. */
+    return rows;
+  }
+  /** «60 из 322», or «322 товаров» once they are all here — plus what the
+      owner typed, not the folded copy the matching runs on. */
+  function stockCountText(shown, total) {
+    return (total > shown ? "Показаны первые " + shown + " из " + total : total + " " + plural(total)) +
+      (scanFold(S.stockQ) ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "");
+  }
+  /* «We need all» (Dim). The list used to stop dead at 60 of the ~320 rows
+     the catalogue makes, so the tail of the warehouse was reachable only by
+     guessing a search term. It pages now — and stockGrow() turns the page
+     over by itself as the owner scrolls, so on a phone there is nothing to
+     press at all. Paging rather than all 320 at once because this list is
+     re-drawn on every keystroke of the search box.
+
+     The three parts are separate elements on purpose: growing the list
+     APPENDS rows to [data-stockrows] and repaints only the count, so the
+     scroll position, the open «Править» form and the button node itself all
+     survive — and 60 more rows cost 60 rows of work, not 320. */
+  function stockRows() {
+    var rows = stockFiltered();
     var cap = S.stockShown || STOCK_PAGE;
     var shown = rows.slice(0, cap);
-    return shown.map(stockRowHTML).join("") +
+    return '<div data-stockrows>' + shown.map(stockRowHTML).join("") + "</div>" +
       (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
-      '<p class="adm-hint" style="margin:10px 0 0">' +
-        (rows.length > cap ? "Показаны первые " + cap + " из " + rows.length : rows.length + " " + plural(rows.length)) +
-        // what the owner typed, not the folded copy the matching runs on
-        (q ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "") + "</p>" +
+      '<p class="adm-hint" data-stockcount style="margin:10px 0 0">' + stockCountText(shown.length, rows.length) + "</p>" +
       (rows.length > cap
         ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-stockmore style="margin-top:10px">Показать ещё</button>'
         : "");
   }
-  /** The «Склад» list turns its own page: the owner scrolling to the last row
-      is the same intent as pressing «Показать ещё», and on a phone with ~350
-      rows it is the only one that does not need six taps. Patched in place,
-      never render()ed — a repaint would jump the scroll back to the top. */
+  /** One more page, appended. Returns false when there is nothing left to
+      add — which is also when «Показать ещё» takes itself off the screen. */
+  function stockGrow() {
+    var list = document.getElementById("stocklist");
+    var box = list && list.querySelector("[data-stockrows]");
+    var count = list && list.querySelector("[data-stockcount]");
+    if (!box || !count) return false;
+    var rows = stockFiltered();
+    var from = Math.min(S.stockShown || STOCK_PAGE, rows.length);
+    if (from >= rows.length) return false;
+    S.stockShown = from + STOCK_PAGE;
+    var frag = document.createElement("div");
+    frag.innerHTML = rows.slice(from, S.stockShown).map(stockRowHTML).join("");
+    translateTree(frag);
+    while (frag.firstChild) box.appendChild(frag.firstChild);
+    var shown = Math.min(S.stockShown, rows.length);
+    count.textContent = stockCountText(shown, rows.length);
+    translateTree(count);
+    if (shown >= rows.length) {
+      var more = list.querySelector("[data-stockmore]");
+      if (more && more.parentNode) more.parentNode.removeChild(more);
+    }
+    return true;
+  }
+  /** The list turns its own page: the owner scrolling towards the last row is
+      the same intent as pressing «Показать ещё», and on a phone with ~320
+      rows it is the only one that does not need six taps. */
   function stockScrollMore() {
     if (!S.stockLevels || S.screen !== "admin" || S.scanOpen) return;
     var list = document.getElementById("stocklist");
-    if (!list) return;
-    var more = list.querySelector("[data-stockmore]");
+    var more = list && list.querySelector("[data-stockmore]");
     if (!more) return;
-    var box = more.getBoundingClientRect();
-    if (box.top > (window.innerHeight || 0) + 400) return;
-    S.stockShown = (S.stockShown || STOCK_PAGE) + STOCK_PAGE;
-    list.innerHTML = stockRows();
-    translateTree(list);
+    if (more.getBoundingClientRect().top > (window.innerHeight || 0) + 400) return;
+    stockGrow();
   }
 
   /* Three installable apps from one page: the shop (manifest.webmanifest,
@@ -21649,15 +21680,10 @@
       render(); return;
     }
     if (d.stocksave) { stockCommit(d.stocksave); return; }
-    /* «Показать ещё» — the next page of the warehouse. Patched into the list
-       rather than render()ed, so the page the owner just read does not jump
-       out from under him; stockScrollMore() does the same thing unasked. */
-    if (d.stockmore !== undefined) {
-      S.stockShown = (S.stockShown || STOCK_PAGE) + STOCK_PAGE;
-      var moreList = document.getElementById("stocklist");
-      if (moreList) { moreList.innerHTML = stockRows(); translateTree(moreList); } else render();
-      return;
-    }
+    /* «Показать ещё» — the next page of the warehouse, appended rather than
+       render()ed so the page the owner just read does not jump out from under
+       him. stockScrollMore() does exactly the same thing unasked. */
+    if (d.stockmore !== undefined) { if (!stockGrow()) render(); return; }
     if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; S.stockShown = STOCK_PAGE; render(); return; }
     if (d.stockmovesopen !== undefined) {
       S.stockMovesOpen = !!d.stockmovesopen;

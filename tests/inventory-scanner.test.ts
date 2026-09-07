@@ -243,6 +243,8 @@ function stockList(rows: Row[], state: Record<string, unknown> = {}) {
     function stockRowHTML(r) { return "<i data-row=\\"" + r.productId + "\\"></i>"; }
     ${slice("scanFold")}
     ${slice("scanWordHas")}
+    ${slice("stockFiltered")}
+    ${slice("stockCountText")}
     ${slice("stockRows")}
     var html = stockRows();
     return {
@@ -286,6 +288,20 @@ describe("«Склад» reaches every row", () => {
     expect(out.rows).toBe(1);
     expect(out.html).toContain('data-row="p349"');
     expect(out.more).toBe(false);
+  });
+
+  /* The rows, the count and the button are three separate elements so that a
+     page can be APPENDED. The e2e caught why that matters: rebuilding the
+     whole list took the «Показать ещё» button out of the DOM in the middle of
+     the press that asked for it — and on a phone it would have taken the
+     scroll position and any open «Править» form with it. */
+  it("the list is built as rows + count + button, so a page can be added to it", () => {
+    const out = stockList(many, { stockShown: 60 });
+    expect(out.html, "the rows have no container to append to").toContain("data-stockrows");
+    expect(out.html, "the count line cannot be repainted on its own").toContain("data-stockcount");
+    // the rows come first, then the count, then the button
+    expect(out.html.indexOf("data-stockrows")).toBeLessThan(out.html.indexOf("data-stockcount"));
+    expect(out.html.indexOf("data-stockcount")).toBeLessThan(out.html.indexOf("data-stockmore"));
   });
 });
 

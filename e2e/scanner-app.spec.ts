@@ -79,6 +79,58 @@ async function stockEan(page: Page, productId: string, variant: string): Promise
   return (row && row.ean) || "";
 }
 
+/** How many pixels the page pushes past its own width. The mobile project is
+ *  375 px, narrower than the owner's 390, so anything above ~1 here is a
+ *  sideways scroll on his phone. */
+async function sidewaysOverflow(page: Page): Promise<number> {
+  return page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+}
+
+/** The zoom the lens was last told to hold, out of everything the fake track
+ *  had applyConstraints() called with. */
+function lastZoom(applied: Array<Record<string, unknown>>): number {
+  let z = 0;
+  for (const a of applied) if (typeof a.zoom === "number") z = a.zoom as number;
+  return z;
+}
+
+/** Two fingers on the viewfinder, moving from `from` px apart to `to`.
+ *  Synthesised rather than driven through page.touchscreen, which does one
+ *  finger at a time — a pinch is by definition two. */
+async function pinch(page: Page, from: number, to: number): Promise<void> {
+  await page.evaluate(({ from, to }) => {
+    const box = document.querySelector("[data-scanzoombox]") as HTMLElement | null;
+    if (!box) throw new Error("the viewfinder has no pinch target");
+    const r = box.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const pair = (half: number) => [
+      new Touch({ identifier: 1, target: box, clientX: cx - half, clientY: cy }),
+      new Touch({ identifier: 2, target: box, clientX: cx + half, clientY: cy }),
+    ];
+    const fire = (type: string, touches: Touch[]) => box.dispatchEvent(
+      new TouchEvent(type, { touches, targetTouches: touches, changedTouches: touches, bubbles: true, cancelable: true }));
+    fire("touchstart", pair(from / 2));
+    fire("touchmove", pair(to / 2));
+    fire("touchend", []);
+  }, { from, to });
+}
+
+/** …and the one-handed version of the same control. */
+async function doubleTap(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const box = document.querySelector("[data-scanzoombox]") as HTMLElement | null;
+    if (!box) throw new Error("the viewfinder has no pinch target");
+    const r = box.getBoundingClientRect();
+    const one = () => [new Touch({ identifier: 9, target: box, clientX: r.left + 20, clientY: r.top + 20 })];
+    const tap = () => {
+      const t = one();
+      box.dispatchEvent(new TouchEvent("touchstart", { touches: t, targetTouches: t, changedTouches: t, bubbles: true, cancelable: true }));
+      box.dispatchEvent(new TouchEvent("touchend", { touches: [], targetTouches: [], changedTouches: t, bubbles: true, cancelable: true }));
+    };
+    tap(); tap();
+  });
+}
+
 /** «Товары» → the product → «Размеры и цены» (admin-editor.spec.ts's own two
  *  helpers, kept local so the two specs do not share a fixture). */
 async function openSizes(page: Page, id: string): Promise<void> {
@@ -407,7 +459,8 @@ test.describe("scanner app", () => {
     test.setTimeout(150_000);
     const w = watch(page);
     await page.addInitScript(() => {
-      const fake = { next: "", detects: 0, mode: "empty", gum: [] as unknown[], vibrated: 0, formats: [] as string[] };
+      const fake = { next: "", detects: 0, mode: "empty", gum: [] as unknown[], vibrated: 0,
+        formats: [] as string[], applied: [] as Array<Record<string, unknown>> };
       (window as unknown as { __scanFake: typeof fake }).__scanFake = fake;
       class FakeDetector {
         constructor(o?: { formats?: string[] }) { fake.formats = (o && o.formats) || []; }
@@ -427,6 +480,9 @@ test.describe("scanner app", () => {
         return c;
       };
       const cams: Record<string, HTMLCanvasElement> = { wide: mk(640, 480), main: mk(1920, 1080) };
+      // …and a lens that can focus, zoom and light up, so the tuning the
+      // scanner does on a real Samsung is exercised rather than skipped
+      const caps = { focusMode: ["continuous", "manual"], zoom: { min: 1, max: 8, step: 0.1 }, torch: true };
       const devices = [
         { kind: "videoinput", deviceId: "front", label: "camera2 1, facing front", groupId: "g" },
         { kind: "videoinput", deviceId: "wide", label: "camera2 2, facing back", groupId: "g" },
@@ -444,11 +500,18 @@ test.describe("scanner app", () => {
         const tr = s.getVideoTracks()[0];
         const settings = tr.getSettings.bind(tr);
         tr.getSettings = () => Object.assign({}, settings(), { deviceId: which, width: cams[which].width, height: cams[which].height });
+        tr.getCapabilities = () => caps as MediaTrackCapabilities;
+        tr.applyConstraints = (c?: MediaTrackConstraints) => {
+          const adv = (c && (c as { advanced?: Array<Record<string, unknown>> }).advanced) || [];
+          adv.forEach((a) => fake.applied.push(a));
+          return Promise.resolve();
+        };
         return Promise.resolve(s);
       };
       navigator.vibrate = () => { fake.vibrated++; return true; };
     });
-    type FakeWin = Window & { __scanFake: { next: string; detects: number; mode: string; gum: unknown[]; vibrated: number; formats: string[] } };
+    type Applied = Record<string, unknown>;
+    type FakeWin = Window & { __scanFake: { next: string; detects: number; mode: string; gum: unknown[]; vibrated: number; formats: string[]; applied: Applied[] } };
     const fake = () => page.evaluate(() => (window as unknown as FakeWin).__scanFake);
     const overlay = page.locator(".scanoverlay");
 
@@ -469,7 +532,42 @@ test.describe("scanner app", () => {
     await expect(page.locator("[data-scanmanual]")).not.toBeFocused();
     await expect(page.locator("[data-scanassignq]")).toHaveCount(0);
 
-    // a code in front of the lens — read on consecutive frames — is a hit
+    // the lens is told to focus continuously and to start at the zoom the
+    // pinch takes over from
+    await expect.poll(async () => (await fake()).applied.some((a) => a.focusMode === "continuous"),
+      { timeout: 10_000, message: "continuous autofocus was never asked for" }).toBe(true);
+    expect(lastZoom((await fake()).applied), "the camera did not start at a usable zoom").toBeGreaterThan(1);
+
+    /* Dim asked for a pinch, and it has to work with one hand. Two fingers
+       on the viewfinder is the ordinary camera gesture; a double tap on it is
+       the same thing for a thumb, which is what the owner has spare while the
+       other hand holds the bottle. Neither may reach the page: only the
+       viewfinder is bound, and it is `touch-action: none`. */
+    const zoomBefore = lastZoom((await fake()).applied);
+    await pinch(page, 80, 240);
+    await expect.poll(async () => lastZoom((await fake()).applied),
+      { timeout: 10_000, message: "a pinch on the viewfinder did not zoom the lens" }).toBeGreaterThan(zoomBefore);
+    await expect(page.locator("[data-scanzoom]"), "the pinch said nothing on screen").toBeVisible();
+    await expect(page.locator("[data-scanzoom]")).toContainText("×");
+    // …and it stays inside what the lens can actually do (max 8× here)
+    await pinch(page, 40, 4000);
+    expect(lastZoom((await fake()).applied), "the pinch went past the lens's limit").toBeLessThanOrEqual(8);
+
+    const zoomWide = lastZoom((await fake()).applied);
+    await doubleTap(page);
+    await expect.poll(async () => lastZoom((await fake()).applied),
+      { timeout: 10_000, message: "a double tap on the viewfinder did nothing" }).not.toBe(zoomWide);
+
+    /* A dark stockroom is where this was reported failing, and darkness is
+       measurable: the fake camera paints a near-black frame, so the torch has
+       to come on by itself — once, leaving the owner's own 🔦 the last word. */
+    await expect(page.locator("[data-scantorch]"), "the torch button never appeared").toBeVisible();
+    await expect.poll(async () => (await fake()).applied.some((a) => a.torch === true),
+      { timeout: 15_000, message: "a dark frame did not light the torch" }).toBe(true);
+    await expect(page.locator("[data-scantorch]")).toHaveAttribute("aria-pressed", "true");
+
+    // a code in front of the lens is a hit — an EAN-13 checks out by itself,
+    // so it counts on the first frame it is read on
     const ean = `21${Date.now().toString().slice(-10)}`;
     await page.evaluate((code) => { (window as unknown as FakeWin).__scanFake.next = code; }, ean);
     await expect(page.locator("#scanpanel")).toContainText(ean, { timeout: 10_000 });
@@ -478,10 +576,15 @@ test.describe("scanner app", () => {
     await page.evaluate(() => { (window as unknown as FakeWin).__scanFake.next = ""; });
     await assertClean(page, w, "camera hit");
 
-    // the native detector breaks (Play Services missing): zxing takes over at once, and says so
+    /* The native detector breaks (Play Services missing): zxing takes over at
+       once. It used to say so on screen — «Камера читает через запасной
+       декодер» — and Dim said no: that is a fact about the phone, not about
+       the bottle. It is recorded where we can find it instead. */
     await page.evaluate(() => { (window as unknown as FakeWin).__scanFake.mode = "throw"; });
     await expect(overlay).toHaveAttribute("data-scanengine", "zxing", { timeout: 15_000 });
-    await expect(page.locator(".scanoverlay")).toContainText("запасной");
+    await expect(overlay).toHaveAttribute("data-scanfallback", "error", { timeout: 10_000 });
+    await expect(page.locator(".scanoverlay"), "the owner is still shown the decoder's news").not.toContainText("запасной");
+    await expect(page.locator("[data-scannote]")).toBeHidden();
     await assertClean(page, w, "zxing after a broken detector");
 
     // …and a detector that merely stays silent for six seconds is not waited on either
@@ -489,7 +592,8 @@ test.describe("scanner app", () => {
     await waitForScreen(page, "scan");
     await expect(overlay).toHaveAttribute("data-scanengine", "native", { timeout: 15_000 });
     await expect(overlay).toHaveAttribute("data-scanengine", "zxing", { timeout: 15_000 });
-    await expect(page.locator(".scanoverlay")).toContainText("запасной");
+    await expect(overlay).toHaveAttribute("data-scanfallback", "silent", { timeout: 10_000 });
+    await expect(page.locator(".scanoverlay")).not.toContainText("запасной");
     await assertClean(page, w, "zxing after a silent detector");
   });
 
@@ -535,6 +639,139 @@ test.describe("scanner app", () => {
     await expect(page.locator('[data-edpane="sizes"]'),
       "the grid never says where a barcode comes from").toContainText("Штрихкод привязывается сканером на складе");
     await assertClean(page, w, "editor: a size with no code");
+
+    /* Dim was asked whether this cell should go read-only now that the
+       scanner binds codes properly, and said no: it stays hand-typable. A
+       code read off a bottle with the naked eye, on a phone whose camera has
+       given up, is the last way in — so it has to actually save. */
+    const typed = `28${Date.now().toString().slice(-10)}`;
+    await cell.fill(typed);
+    await page.locator(`[data-admsavegoods="${PRODUCT_2.id}"]`).click();
+    expect(await toastText(page)).toMatch(/Сохранено/);
+    await clearToast(page);
+    await expect.poll(async () => stockEan(page, PRODUCT_2.id, VARIANT),
+      { timeout: 15_000, message: "a barcode typed into the editor by hand never reached the warehouse" }).toBe(typed);
+    // …and the scanner finds the bottle by it, which is the whole point
+    const found = await page.request.get(`/api/admin/inventory/lookup/?ean=${typed}`);
+    expect((await found.json()).hit?.productId, "a hand-typed code does not find its bottle").toBe(PRODUCT_2.id);
+    await assertClean(page, w, "editor: a code typed by hand");
+  });
+
+  /* «We need all» (Dim). The list stopped dead at 60 of the ~320 rows the
+     catalogue makes, and the tail was reachable only by guessing a search
+     term — which is no way to walk a shelf. */
+  scenario(198, "«Склад» reaches every row: a page at a time, by button and by scrolling to the end", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+
+    await openAdmin(page);
+    await tab(page, "stock");
+    await expect(page.locator("#stocklist")).toBeVisible();
+
+    const all = await page.request.get("/api/admin/inventory/?filter=all&limit=1000")
+      .then(async (r) => ((await r.json()).levels as unknown[]).length);
+    expect(all, "the e2e catalogue is too small to page — this test would prove nothing").toBeGreaterThan(60);
+
+    const rows = page.locator("#stocklist .adm-row--stock");
+    await expect(rows).toHaveCount(60);
+    await expect(page.locator("[data-stockcount]")).toHaveText(new RegExp(`Показаны первые 60 из ${all}`));
+    const more = page.locator("[data-stockmore]");
+    await expect(more, "the list stops at 60 with no way to see the rest").toBeVisible();
+
+    /* A page is APPENDED, never re-rendered. Marking the first row proves it:
+       a rebuild would replace that node, take the scroll position with it and
+       — as this test caught the first time round — pull the very button out
+       of the DOM in the middle of the press that asked for more. */
+    await rows.first().evaluate((el) => { (el as HTMLElement).dataset.mark = "kept"; });
+    await more.click();
+    await expect.poll(() => rows.count(), { timeout: 15_000, message: "«Показать ещё» added nothing" }).toBeGreaterThan(60);
+    await expect(rows.first(), "the list was rebuilt from the top instead of grown").toHaveAttribute("data-mark", "kept");
+    expect(await page.locator("[data-stockcount]").textContent(),
+      "the count line does not agree with the rows on screen").toContain(`Показаны первые ${await rows.count()} из ${all}`);
+
+    /* …and the same thing unasked, because on a phone six taps to reach the
+       end of a shelf list is five too many. */
+    const grown = await rows.count();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect.poll(() => rows.count(), { timeout: 15_000, message: "scrolling to the end did not load more rows" })
+      .toBeGreaterThan(grown);
+    await expect(rows.first(), "scrolling for more rebuilt the list").toHaveAttribute("data-mark", "kept");
+
+    // every row is reachable in the end, and then the list says so plainly
+    for (let i = 0; i < 12 && (await more.count()); i++) {
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(120);
+    }
+    await expect(rows).toHaveCount(all);
+    await expect(page.locator("[data-stockcount]"), "the finished list still talks about a first page")
+      .not.toContainText("Показаны первые");
+    await expect(page.locator("[data-stockmore]"), "the list is complete and still asks for more").toHaveCount(0);
+
+    // a search starts from the first page again rather than 320 rows in
+    await page.locator("[data-stockq]").fill("murphy");
+    await expect(page.locator("#stocklist")).toContainText("murphy");
+    expect(await rows.count(), "a search after paging kept the whole list").toBeLessThan(all);
+    expect(await sidewaysOverflow(page), "«Склад» scrolls sideways once the whole warehouse is on screen").toBeLessThanOrEqual(1);
+    await assertClean(page, w, "«Склад» paged to the end");
+  });
+
+  /* Nothing in the catalogue has a barcode, so the first pass over the
+     shelves is ~220 bottles one at a time, across several evenings. Dim asked
+     for a plain «привязано N из M» so Renat can see where he stopped. */
+  scenario(199, "«привязано N из M» counts the bound sizes, on «Склад» and on the scanner, and goes up after a bind", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const ean = `20${Date.now().toString().slice(-10)}`;
+    // the last scenario in the file, so it is free to take «150 мл» back off
+    // whatever the ones before it left on it
+    const variant = "150 мл";
+
+    await openAdmin(page);
+    await unbind(page, PRODUCT_2.id, variant);
+    await tab(page, "stock");
+    await expect(page.locator("#stocklist")).toBeVisible();
+
+    const line = page.locator("[data-stockbound]");
+    await expect(line).toBeVisible();
+    const read = async (): Promise<[number, number]> => {
+      const m = /(\d+)\D+(\d+)/.exec((await line.textContent()) || "");
+      expect(m, `«привязано N из M» does not read as two numbers: ${await line.textContent()}`).toBeTruthy();
+      return [Number(m![1]), Number(m![2])];
+    };
+    const [boundWas, totalWas] = await read();
+    expect(totalWas, "the counter's total is not the whole warehouse").toBeGreaterThan(60);
+    expect(boundWas).toBeLessThanOrEqual(totalWas);
+
+    // the same count is on the scanner itself, which is the screen he is
+    // holding while he does it
+    await page.locator("[data-scanopen]").first().click();
+    await expect(page.locator(".scanoverlay")).toBeVisible();
+    await expect(page.locator("#scanpanel"), "the scanner does not say how far the binding has got")
+      .toContainText(`привязано ${boundWas} из ${totalWas}`);
+
+    // bind one code: one more bottle done
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator("#scanpanel")).toContainText("К какому товару?");
+    await page.locator("[data-scanassignq]").fill("tangled");
+    await page.locator(`[data-scanbind="${PRODUCT_2.id}|${variant}"]`).click();
+    expect(await toastText(page)).toMatch(/привязан/i);
+    await clearToast(page);
+    await page.locator("[data-scanclose]").click();
+    await expect(page.locator(".scanoverlay")).toHaveCount(0);
+
+    await expect.poll(async () => (await read())[0],
+      { timeout: 15_000, message: "binding a code did not move the counter" }).toBe(boundWas + 1);
+    expect((await read())[1], "the total moved when only a binding changed").toBe(totalWas);
+
+    // …and freeing the code takes it back down again
+    await unbind(page, PRODUCT_2.id, variant);
+    await page.reload();
+    await waitForScreen(page, "admin");
+    await tab(page, "stock");
+    await expect.poll(async () => (await read())[0],
+      { timeout: 20_000, message: "freeing a code did not move the counter back" }).toBe(boundWas);
+    await assertClean(page, w, "«привязано N из M»");
   });
 
   /* «Склад» itself — the list the owner searches on to fix a shelf. Its
@@ -552,11 +789,8 @@ test.describe("scanner app", () => {
     await tab(page, "stock");
     await expect(page.locator("#stocklist")).toBeVisible();
 
-    // the phone: nothing may push the page sideways (the mobile project is
-    // 375 px, narrower than the owner's 390)
-    const overflows = async () => page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(await overflows(), "«Склад» scrolls sideways on a phone").toBeLessThanOrEqual(1);
+    // the phone: nothing may push the page sideways
+    expect(await sidewaysOverflow(page), "«Склад» scrolls sideways on a phone").toBeLessThanOrEqual(1);
 
     // …the way the owner types it: no dot, words in the order he says them
     await page.locator("[data-stockq]").fill("murphy kevin");
@@ -597,7 +831,7 @@ test.describe("scanner app", () => {
     // …and «Повторить» actually asks again
     await page.locator('[data-admreload="moves"]').click();
     await expect(page.locator(".adm-error"), "«Повторить» left the error on screen").toHaveCount(0);
-    expect(await overflows(), "the history scrolls sideways on a phone").toBeLessThanOrEqual(1);
+    expect(await sidewaysOverflow(page), "the history scrolls sideways on a phone").toBeLessThanOrEqual(1);
     w.serverErrors.length = 0;   // the mocked 503 above, forgiven
     await assertClean(page, w, "«Склад» history after a failure");
   });
