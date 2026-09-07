@@ -68,7 +68,13 @@ test.describe("the salon till", () => {
        finds it, the card says «Оплачен», and the payment blob still carries
        the method the cashier pressed rather than only the provider. */
     await tab(page, "orders");
-    await page.locator('[data-admfilter="salon"]').click();
+    /* Found by its number, not by a «Салон» chip: the six order chips became
+       four on 07.09.2026 («Отправить · В пути · По счёту · Все», Dim's answer),
+       and the till's own chip went with them. The `salon` filter still exists
+       behind admOrderMatches() for the assistant's deep links; nothing in the
+       panel draws it any more. Searching is what the owner would do anyway, and
+       the search deliberately looks past whichever chip is lit. */
+    await page.locator("[data-admorderq]").fill(number);
     const row = page.locator(`[data-admorder]:has-text("${number}")`).first();
     await expect(row).toBeVisible();
     await row.click();
