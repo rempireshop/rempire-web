@@ -7,6 +7,7 @@ import {
   functionalProject,
   ipHeaders,
   LANGS,
+  adminSection,
   loginAsAdmin,
   openSummary,
   payOrder,
@@ -114,15 +115,7 @@ for (const [i, lang] of LANGS.entries()) {
  *  on an iPhone profile) — the same two-way opener e2e/admin-sections.spec.ts
  *  uses, waiting for whichever nav this viewport draws before deciding. */
 async function openSetupHome(page: import("@playwright/test").Page): Promise<void> {
-  const direct = page.locator('[data-admtab="setup"][aria-current]:visible');
-  const more = page.locator("[data-admmore]:visible");
-  await expect(direct.or(more).first()).toBeVisible();
-  if (await direct.count()) {
-    await direct.first().click();
-  } else {
-    await more.first().click();
-    await page.locator('.adm-sheet [data-admtab="setup"]').first().click();
-  }
+  await adminSection(page, "setup");
   await page.locator('[data-admsetpage="home"]').click();
 }
 

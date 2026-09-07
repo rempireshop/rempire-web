@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
-import { freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import {
+  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen,
+} from "./fixtures";
 import { ceilingCost, customerPrice } from "@/lib/shipping/country-prices";
 
 /* What «Заполнить по тарифам Montonio» must write into the Latvian
@@ -57,12 +59,7 @@ function ordersTab(page: Page) {
 
 /** Opens one page of «Настройки» on either viewport (the section sits behind «Ещё» on a phone). */
 async function openSettings(page: Page, sub: string): Promise<void> {
-  const direct = page.locator('[data-admtab="setup"][aria-current]:visible');
-  if (await direct.count()) await direct.first().click();
-  else {
-    await page.locator("[data-admmore]:visible").click();
-    await page.locator('.adm-sheet [data-admtab="setup"]').click();
-  }
+  await adminSection(page, "setup");
   const back = page.locator("[data-admsetback]");
   if (await back.count()) await back.first().click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
@@ -70,12 +67,7 @@ async function openSettings(page: Page, sub: string): Promise<void> {
 }
 
 async function openCustomers(page: Page): Promise<void> {
-  const direct = page.locator('[data-admtab="people"][aria-current]:visible');
-  if (await direct.count()) await direct.first().click();
-  else {
-    await page.locator("[data-admmore]:visible").click();
-    await page.locator('.adm-sheet [data-admtab="people"]').click();
-  }
+  await adminSection(page, "people");
   await expect(page.locator("h1.adm-h1")).toHaveText("Клиенты");
 }
 

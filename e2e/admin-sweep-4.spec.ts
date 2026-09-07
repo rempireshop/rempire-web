@@ -159,14 +159,7 @@ test.describe("admin — «Подключения» tells the truth about the mo
     });
     await openAdmin(page);
 
-    const direct = page.locator('[data-admtab="apps"][aria-current]:visible');
-    const more = page.locator("[data-admmore]:visible");
-    await expect(direct.or(more).first()).toBeVisible();
-    if (await direct.count()) await direct.first().click();
-    else {
-      await more.first().click();
-      await page.locator('.adm-sheet [data-admtab="apps"]').first().click();
-    }
+    await adminSection(page, "apps");
 
     const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
     await expect(row).toBeVisible();
@@ -184,14 +177,7 @@ test.describe("admin — «Подключения» tells the truth about the mo
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true }) });
     });
     await openAdmin(page);
-    const direct = page.locator('[data-admtab="apps"][aria-current]:visible');
-    const more = page.locator("[data-admmore]:visible");
-    await expect(direct.or(more).first()).toBeVisible();
-    if (await direct.count()) await direct.first().click();
-    else {
-      await more.first().click();
-      await page.locator('.adm-sheet [data-admtab="apps"]').first().click();
-    }
+    await adminSection(page, "apps");
     const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
     await expect(row).toContainText("Модель подключена");
     await expect(row.locator(".adm-dot--off"), "a working model still shows the grey square").toHaveCount(0);
@@ -498,15 +484,7 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
     const w = watch(page);
     await openAdmin(page);
 
-    const direct = page.locator('[data-admtab="promos"][aria-current]:visible');
-    const more = page.locator("[data-admmore]:visible");
-    await expect(direct.or(more).first()).toBeVisible();
-    if (await direct.count()) await direct.first().click();
-    else {
-      await more.first().click();
-      await page.locator('.adm-sheet [data-admtab="promos"]').first().click();
-    }
-    await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
+    await adminSection(page, "promos", "mail");
 
     // all three switchable letters start off, exactly as the sender reads them
     await expect(page.locator('[data-admflow="birthday"]')).toHaveAttribute("aria-checked", "false");
@@ -520,10 +498,15 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
       await expect(days, "it does not default to the day itself").toHaveValue("0");
       await days.selectOption("3");
       await clearToast(page);
+      /* A fresh URL each time: /api/overrides/ is served
+         `s-maxage=30, stale-while-revalidate=120`, and the context's own HTTP
+         cache handed back the answer from before the write — the shard read
+         «0» for fifteen seconds and gave up. Same reasoning as
+         admin-sections.spec.ts's second browser context. */
       await expect.poll(async () => {
-        const res = await page.request.get("/api/overrides/");
+        const res = await page.request.get(`/api/overrides/?t=${Date.now()}`);
         return ((await res.json()).settings.flows || {}).birthdayDays;
-      }, { timeout: 15_000, message: "«за N дней» never reached the server" }).toBe(3);
+      }, { timeout: 30_000, message: "«за N дней» never reached the server" }).toBe(3);
       await assertClean(page, w, "the birthday days setting");
     } finally {
       const days2 = page.locator("[data-flowbdays]");
