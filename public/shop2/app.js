@@ -5170,7 +5170,7 @@
     stockBusy: false,
     stockErr: "",
     stockQ: "",
-    stockShown: 60,      // how many rows of the (~350-row) list are on screen — «Показать ещё», or scrolling to the end
+    stockShown: 60,      // how many rows of the (~320-row) list are on screen — «Показать ещё», or scrolling to the end
     stockFilter: "all",  // "all" | "low" | "out" | "untracked"
     stockEdit: "",        // "<productId> <variant>" (space-joined) of the row whose qty/EAN/threshold form is open
     stockEditQty: "",
@@ -15399,7 +15399,7 @@
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
   var STOCK = { asked: false, seq: 0, movesAsked: false };
   /** How many «Склад» rows one page of the list holds. The whole warehouse is
-      ~350 rows and every one of them has to be reachable (Dim: «We need
+      ~320 rows and every one of them has to be reachable (Dim: «We need
       all»), but the list is re-drawn on every keystroke of the search box, so
       it arrives a page at a time — pressed, or scrolled to. */
   var STOCK_PAGE = 60;
