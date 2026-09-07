@@ -1130,6 +1130,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .adm-jrow__t { font-family: "PT Mono", ui-monospace, monospace; font-size: 13px; color: var(--a-muted); white-space: nowrap; }
 .adm-jrow__x { flex: 1 1 200px; min-width: 0; }
+/* who the server recorded — the second list of «Журнал изменений» */
+.adm-jrow__who { font-size: 13px; color: var(--a-muted); white-space: nowrap; }
 .adm-narrow { max-width: 720px; }
 .adm-narrow--form { max-width: 560px; }
 

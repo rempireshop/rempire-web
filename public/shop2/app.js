@@ -307,6 +307,94 @@
       "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
       "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Liidestused", "Настройки": "Seaded",
       "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
+      "Журнал магазина не загрузился.":
+        "Poe logi ei laadinud.",
+      "владелец":
+        "omanik",
+      "магазин сам":
+        "pood ise",
+      "вход с адреса":
+        "sisselogimine aadressilt",
+      "Товар изменён":
+        "Toodet muudetud",
+      "Тексты для Google изменены":
+        "Google'i tekste muudetud",
+      "Описание товара изменено":
+        "Toote kirjeldust muudetud",
+      "Свой товар изменён":
+        "Oma toodet muudetud",
+      "Товар снят с продажи":
+        "Toode müügilt maha võetud",
+      "Товар снова в продаже":
+        "Toode on jälle müügil",
+      "Статус заказа":
+        "Tellimuse staatus",
+      "Заметка к заказу":
+        "Märkus tellimuse juurde",
+      "Этикетка создана":
+        "Silt on loodud",
+      "Шаг «этикетка» изменён":
+        "Sammu «silt» muudetud",
+      "Счёт выписан":
+        "Arve on väljastatud",
+      "Счёт отправлен":
+        "Arve on saadetud",
+      "Письмо клиенту отправлено":
+        "Kiri kliendile on saadetud",
+      "Настройка изменена":
+        "Seadet muudetud",
+      "Промокод сохранён":
+        "Sooduskood salvestatud",
+      "Промокод включён или выключен":
+        "Sooduskood sisse või välja lülitatud",
+      "Набор сохранён":
+        "Komplekt salvestatud",
+      "Набор показан или скрыт":
+        "Komplekt näidatud või peidetud",
+      "Набор удалён":
+        "Komplekt kustutatud",
+      "Порядок наборов изменён":
+        "Komplektide järjekorda muudetud",
+      "Новый клиент":
+        "Uus klient",
+      "Добавлен партнёр":
+        "Lisatud partner",
+      "Партнёр одобрен":
+        "Partner on kinnitatud",
+      "Заявке партнёра отказано":
+        "Partneri taotlus tagasi lükatud",
+      "Клиент переведён между «Розница» и «Партнёр»":
+        "Klient viidud «Jaemüügi» ja «Partneri» vahel",
+      "Баллы клиента изменены":
+        "Kliendi punkte muudetud",
+      "Загружен файл":
+        "Fail on üles laaditud",
+      "Файл удалён":
+        "Fail kustutatud",
+      "У фото убран фон":
+        "Fotolt on taust eemaldatud",
+      "Черновик у ИИ запрошен":
+        "Mustand küsitud tehisintellektilt",
+      "Неудачный вход":
+        "Ebaõnnestunud sisselogimine",
+      "Выход из админки":
+        "Admini paneelist väljalogimine",
+      "Обновление базы":
+        "Andmebaasi uuendus",
+      "Изменений в этом браузере пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
+        "Selles brauseris pole veel muudatusi. Kõik, mille rakendate, ilmub siia — koos nupuga «Taasta».",
+      "Войдите как владелец, чтобы увидеть журнал магазина.":
+        "Poe logi nägemiseks logige sisse omanikuna.",
+      "Сервер пока ничего не записал.":
+        "Server pole veel midagi kirja pannud.",
+      "Ваши изменения в этом браузере":
+        "Teie muudatused selles brauseris",
+      "«Вернуть» работает только здесь: чтобы отменить изменение, браузеру нужно помнить, что было до него. То, что вы поменяли с телефона, отменить с ноутбука нельзя — но увидеть это можно ниже.":
+        "«Taasta» toimib ainult siin: muudatuse tagasivõtmiseks peab brauser mäletama, mis oli enne seda. Seda, mida muutsite telefonis, ei saa sülearvutis tagasi võtta — aga näha saab seda allpool.",
+      "Журнал магазина":
+        "Poe logi",
+      "Всё, что записал сервер: с любого устройства и из любого входа, последние 100 записей. Только для чтения.":
+        "Kõik, mille server kirja pani: igast seadmest ja igast sisselogimisest, viimased 100 kirjet. Ainult lugemiseks.",
       "Все заказы": "Kõik tellimused", "Отменить": "Võta tagasi",
       "Применить": "Rakenda", "Отмена": "Tühista", "Сохранить": "Salvesta",
       "Найти товар: название, бренд…": "Otsi toodet: nimi, bränd…",
@@ -1728,7 +1816,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "salongi soodustus, püsikliendipunktid, Pro hinnad",
       "Языки": "Keeled",
       "RU основной · ET · EN": "RU peamine · ET · EN",
-      "что вы меняли в этом браузере, и кнопка «Вернуть»": "mida selles brauseris muutsite, ja nupp «Taasta»",
+      "ваши изменения с «Вернуть» и журнал сервера": "teie muudatused koos «Taasta» nupuga ja serveri logi",
       "Пакомат, €": "Pakiautomaat, €",
       "Курьер, €": "Kuller, €",
       "Бесплатно от, €": "Tasuta alates, €",
@@ -2115,6 +2203,94 @@
       "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
       "Аналитика": "Analytics", "Письма": "E-mails", "Подключения": "Integrations", "Настройки": "Settings",
       "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
+      "Журнал магазина не загрузился.":
+        "The shop's log did not load.",
+      "владелец":
+        "the owner",
+      "магазин сам":
+        "the shop itself",
+      "вход с адреса":
+        "a sign-in from",
+      "Товар изменён":
+        "Product changed",
+      "Тексты для Google изменены":
+        "Google texts changed",
+      "Описание товара изменено":
+        "Product description changed",
+      "Свой товар изменён":
+        "Your own product changed",
+      "Товар снят с продажи":
+        "Product taken off sale",
+      "Товар снова в продаже":
+        "Product back on sale",
+      "Статус заказа":
+        "Order status",
+      "Заметка к заказу":
+        "Order note",
+      "Этикетка создана":
+        "Label created",
+      "Шаг «этикетка» изменён":
+        "The label step changed",
+      "Счёт выписан":
+        "Invoice issued",
+      "Счёт отправлен":
+        "Invoice sent",
+      "Письмо клиенту отправлено":
+        "Letter to the customer sent",
+      "Настройка изменена":
+        "A setting changed",
+      "Промокод сохранён":
+        "Promo code saved",
+      "Промокод включён или выключен":
+        "Promo code switched on or off",
+      "Набор сохранён":
+        "Set saved",
+      "Набор показан или скрыт":
+        "Set shown or hidden",
+      "Набор удалён":
+        "Set deleted",
+      "Порядок наборов изменён":
+        "The order of the sets changed",
+      "Новый клиент":
+        "New customer",
+      "Добавлен партнёр":
+        "Partner added",
+      "Партнёр одобрен":
+        "Partner approved",
+      "Заявке партнёра отказано":
+        "Partner request refused",
+      "Клиент переведён между «Розница» и «Партнёр»":
+        "Customer moved between «Retail» and «Partner»",
+      "Баллы клиента изменены":
+        "Customer points changed",
+      "Загружен файл":
+        "File uploaded",
+      "Файл удалён":
+        "File deleted",
+      "У фото убран фон":
+        "The photo's background was removed",
+      "Черновик у ИИ запрошен":
+        "A draft was asked of the AI",
+      "Неудачный вход":
+        "A failed sign-in",
+      "Выход из админки":
+        "Signed out of the panel",
+      "Обновление базы":
+        "Database update",
+      "Изменений в этом браузере пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
+        "No changes in this browser yet. Everything you apply appears here — with a «Restore» button.",
+      "Войдите как владелец, чтобы увидеть журнал магазина.":
+        "Sign in as the owner to see the shop's log.",
+      "Сервер пока ничего не записал.":
+        "The server has recorded nothing yet.",
+      "Ваши изменения в этом браузере":
+        "Your changes in this browser",
+      "«Вернуть» работает только здесь: чтобы отменить изменение, браузеру нужно помнить, что было до него. То, что вы поменяли с телефона, отменить с ноутбука нельзя — но увидеть это можно ниже.":
+        "«Restore» only works here: to undo a change the browser has to remember what came before it. What you changed on the phone cannot be undone from the laptop — but it can be seen below.",
+      "Журнал магазина":
+        "The shop's log",
+      "Всё, что записал сервер: с любого устройства и из любого входа, последние 100 записей. Только для чтения.":
+        "Everything the server recorded: from any device and any sign-in, the last 100 entries. Read-only.",
       "Все заказы": "All orders", "Отменить": "Undo",
       "Применить": "Apply", "Отмена": "Cancel", "Сохранить": "Save",
       "Найти товар: название, бренд…": "Find a product: name, brand…",
@@ -3532,7 +3708,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "the salon discount, loyalty points, Pro prices",
       "Языки": "Languages",
       "RU основной · ET · EN": "RU main · ET · EN",
-      "что вы меняли в этом браузере, и кнопка «Вернуть»": "what you changed in this browser, with a “Restore” button",
+      "ваши изменения с «Вернуть» и журнал сервера": "your own changes with «Restore», plus the server's log",
       "Пакомат, €": "Parcel locker, €",
       "Курьер, €": "Courier, €",
       "Бесплатно от, €": "Free from, €",
@@ -12268,7 +12444,7 @@
        localStorage list (ADM_LS), not the server's admin_audit. What was
        changed from the phone is not in the laptop's journal — the row used to
        say «всё, что применялось» and read like a shop-wide history. */
-    ["journal", "Журнал изменений", "что вы меняли в этом браузере, и кнопка «Вернуть»"]
+    ["journal", "Журнал изменений", "ваши изменения с «Вернуть» и журнал сервера"]
   ];
   function admSetTitle(key) {
     for (var i = 0; i < ADM_SET_PAGES.length; i++) if (ADM_SET_PAGES[i][0] === key) return ADM_SET_PAGES[i][1];
@@ -12484,21 +12660,114 @@
       '<div class="adm-acts">' + admDevLink() + "</div>" +
       "</div>";
   }
-  /* Журнал изменений: the same DEMO.log the undo toast writes into, as rows of
-     `time · text · «Вернуть»`. An entry with nothing to put back (an undo's own
-     «Отмена: …» line) gets no button — a «Вернуть» that does nothing is worse
-     than none at all. */
+  /* ---------- Журнал изменений --------------------------------------------
+     Two lists, because there really are two (audit 06.09.2026, question 5;
+     Dim's answer: «show the server log»).
+
+     · «Ваши изменения в этом браузере» — DEMO.log, the same list the undo
+       toast writes into, and the only one «Вернуть» can act on: putting a
+       change back means knowing what it was before, and only the browser that
+       made it holds that. Said in one plain sentence instead of hiding the
+       button, which is what was asked for.
+     · «Журнал магазина» — admin_audit, written by the server from ~25 places
+       (GET /api/admin/audit), every device and every session. Read-only, and
+       labelled as such: this is the history of the shop, not of this laptop.
+
+     An entry with nothing to put back (an undo's own «Отмена: …» line) gets no
+     button — a «Вернуть» that does nothing is worse than none at all. */
+  var AUDIT = { rows: null, err: "", asked: false };
+  function loadAudit(force) {
+    if (SRV.admin !== true) return;
+    if (AUDIT.asked && !force) return;
+    AUDIT.asked = true;
+    apiJson("/api/admin/audit/?limit=100").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      var ok = r.status === 200 && r.body.ok && Array.isArray(r.body.audit);
+      AUDIT.rows = ok ? r.body.audit : [];
+      AUDIT.err = ok ? "" : "Журнал магазина не загрузился.";
+      render();
+    }).catch(function () { AUDIT.rows = []; AUDIT.err = "Сервер не отвечает."; render(); });
+  }
+  /** «13.09, 14:05» out of the ISO stamp the route answers with. */
+  function auditWhen(at) {
+    var d = new Date(at);
+    return isNaN(d.getTime()) ? String(at || "") : d.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+  /** Who did it, in words the owner uses: himself, the shop, or a sign-in from
+      an address. HTML, not text: the address is its own node so the label
+      beside it is one translatable string rather than a Russian fragment
+      glued to a number (same shape as flowCountLine). */
+  function auditWhoHTML(actor) {
+    var a = String(actor || "");
+    if (a === "admin") return "владелец";
+    if (a === "system") return "магазин сам";
+    if (a.indexOf("ip:") === 0) return "<span>вход с адреса</span> " + esc(a.slice(3));
+    return esc(a) || "—";
+  }
+  /* One Russian line per server action. The payload shapes are the ones the
+     writeAudit() calls in src/** actually pass; anything this table does not
+     know falls back to its own name plus whatever id it carries, which is
+     still more useful than an empty row. */
+  var AUDIT_WORDS = {
+    "override.set": "Товар изменён", "override.seo": "Тексты для Google изменены",
+    "override.description": "Описание товара изменено",
+    "product.create": "Новый товар", "product.update": "Свой товар изменён",
+    "product.hide": "Товар снят с продажи", "product.show": "Товар снова в продаже",
+    "order.status": "Статус заказа", "order.note": "Заметка к заказу",
+    "shipment.create": "Этикетка создана", "shipment.step": "Шаг «этикетка» изменён",
+    "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
+    "mail.send": "Письмо клиенту отправлено",
+    "setting.set": "Настройка изменена",
+    "promo.set": "Промокод сохранён", "promo.active": "Промокод включён или выключен",
+    "bundle.set": "Набор сохранён", "bundle.active": "Набор показан или скрыт",
+    "bundle.delete": "Набор удалён", "bundle.reorder": "Порядок наборов изменён",
+    "customer.created": "Новый клиент", "customer.partner_added": "Добавлен партнёр",
+    "customer.pro_approved": "Партнёр одобрен", "customer.pro_rejected": "Заявке партнёра отказано",
+    "customer.tier_set": "Клиент переведён между «Розница» и «Партнёр»",
+    "customer.points_adjust": "Баллы клиента изменены",
+    "media.upload": "Загружен файл", "media.delete": "Файл удалён", "media.cutout": "У фото убран фон",
+    "ai.text": "Черновик у ИИ запрошен",
+    "admin.login": "Вход в админку", "admin.login.failed": "Неудачный вход",
+    "admin.logout": "Выход из админки", "db.migrate": "Обновление базы"
+  };
+  function auditText(row) {
+    var p = row && row.payload && typeof row.payload === "object" ? row.payload : {};
+    var word = AUDIT_WORDS[row.action] || row.action;
+    var what = p.number || p.code || p.key || p.email || p.id || p.orderId || "";
+    return word + (what ? ": " + what : "");
+  }
   function admSetJournalHTML() {
-    if (!DEMO.log.length) {
-      return '<div class="adm-narrow"><div class="adm-empty">' +
-        "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».</div></div>";
+    loadAudit(false);
+    var mine = DEMO.log.length
+      ? DEMO.log.map(function (e, i) {
+          return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(e.t) + "</span>" +
+            '<span class="adm-jrow__x">' + esc(e.txt) + "</span>" +
+            (e.prev ? '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admundo="' + i + '">Вернуть</button>' : "") +
+            "</div>";
+        }).join("")
+      : '<div class="adm-empty">Изменений в этом браузере пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».</div>';
+    var srv;
+    if (SRV.admin !== true) srv = '<div class="adm-note">Войдите как владелец, чтобы увидеть журнал магазина.</div>';
+    else if (AUDIT.err) {
+      srv = '<div class="adm-error"><span>' + esc(AUDIT.err) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="audit">Повторить</button></div>';
+    } else if (!AUDIT.rows) srv = '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    else if (!AUDIT.rows.length) srv = '<div class="adm-empty">Сервер пока ничего не записал.</div>';
+    else {
+      srv = AUDIT.rows.map(function (r) {
+        return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(auditWhen(r.at)) + "</span>" +
+          '<span class="adm-jrow__x">' + esc(auditText(r)) + "</span>" +
+          '<span class="adm-jrow__who">' + auditWhoHTML(r.actor) + "</span></div>";
+      }).join("");
     }
-    return '<div class="adm-narrow">' + DEMO.log.map(function (e, i) {
-      return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(e.t) + "</span>" +
-        '<span class="adm-jrow__x">' + esc(e.txt) + "</span>" +
-        (e.prev ? '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admundo="' + i + '">Вернуть</button>' : "") +
-        "</div>";
-    }).join("") + "</div>";
+    return '<div class="adm-narrow">' +
+      '<div class="adm-sec"><span class="adm-sec__t">Ваши изменения в этом браузере</span></div>' +
+      '<p class="adm-hint">«Вернуть» работает только здесь: чтобы отменить изменение, браузеру нужно помнить, что было до него. То, что вы поменяли с телефона, отменить с ноутбука нельзя — но увидеть это можно ниже.</p>' +
+      mine +
+      '<div class="adm-sec" style="margin-top:24px"><span class="adm-sec__t">Журнал магазина</span></div>' +
+      '<p class="adm-hint">Всё, что записал сервер: с любого устройства и из любого входа, последние 100 записей. Только для чтения.</p>' +
+      srv +
+      "</div>";
   }
 
   /* ---------- «Письма»: preview + test send -----------------------------
@@ -20408,6 +20677,7 @@
       else if (d.admreload === "promos") loadAdminPromos(true);
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
       else if (d.admreload === "stats") { delete ANALYTICS[statsRange()]; loadAnalytics(statsRange()); }
+      else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
       render(); return;
     }
     if (d.admtoastundo !== undefined) { admUndoToast(); return; }
