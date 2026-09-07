@@ -93,6 +93,8 @@
   var UI = {
     ET: {
       "Включить": "Lülita sisse", "Выключить": "Lülita välja", "включён": "sees", "выключен": "väljas",
+      /* the word every admin switch now wears beside its knob (admSwitchFace) */
+      "Вкл": "Sees", "Выкл": "Väljas",
       "Наборы на сайте": "Komplektid poes",
       "готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»": "valmiskomplektid sinu enda toodetest — menüüs, avalehel ja kataloogis. Komplekte ise pane kokku «Tooted → Komplektid»",
       "показаны": "näidatakse", "скрыты": "peidetud", "Скрыть": "Peida", "Показать": "Näita",
@@ -1670,6 +1672,8 @@
       "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Igal mahul on oma hind. Esimest mahtu näeb ostja esimesena.",
       "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
         "Üks hind kogu tootele. Kui mahtusid on mitu — vajuta «+ Suurus» ja kirjuta igale hind.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».":
+        "Jääk on punane, kui see ei ületa selle mahu «vähe» piiri. «pole arvestatud» — seda mahtu pole kordagi loetud; kirjuta number ja see ilmub «Laos».",
       "Фото — после первого сохранения": "Fotod — pärast esimest salvestamist",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Täida «Põhiline», kirjuta hind ja vajuta «Salvesta toode» — toode ilmub ja siia saab lisada fotod telefonist.",
@@ -2167,6 +2171,8 @@
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
+      /* the word every admin switch now wears beside its knob (admSwitchFace) */
+      "Вкл": "On", "Выкл": "Off",
       "Наборы на сайте": "Sets on the site",
       "готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»": "ready-made sets from your own products — in the menu, on the home page and in the catalogue. The sets themselves are built in «Goods → Sets»",
       "показаны": "shown", "скрыты": "hidden", "Скрыть": "Hide", "Показать": "Show",
@@ -3715,6 +3721,8 @@
       "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Every size has its own price. The customer sees the first size first.",
       "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
         "One price for the whole product. If there are several sizes, press «+ Size» and give each one a price.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».":
+        "The count turns red once it is at or below this size's «low» threshold. «not counted» means this size has never been counted; type a number and it appears in «Stock».",
       "Фото — после первого сохранения": "Photos — after the first save",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Fill in «Basics», type the price and press «Save the product» — the product appears, and photos from the phone can be added here.",
@@ -4221,6 +4229,8 @@
     [/^Начисляем (\d+(?:[.,]\d+)?) % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе\.$/,
       { ET: "Kogume $1 % tasutud tellimuse summast; üks punkt on üks euro, kasutada saab järgmise tellimuse juures.",
         EN: "$1% of every paid order comes back as points; one point is one euro, redeemable on your next order." }],
+    /* the switch on a promo-code row is named after the code it belongs to */
+    [/^Промокод (.+)$/, { ET: "Sooduskood $1", EN: "Promo code $1" }],
     [/^Партнёр · (.+)$/, { ET: "Partner · $1", EN: "Partner · $1" }],
     [/^Розница · (.+)$/, { ET: "Jaemüük · $1", EN: "Retail · $1" }],
     [/^Уже партнёр · (.+)$/, { ET: "Juba partner · $1", EN: "Already a partner · $1" }],
@@ -12658,21 +12668,65 @@
      already used, so a redesign cannot change what the shop does.
      ====================================================================== */
 
-  /** The 44×26 switch of § «Design tokens». A <button aria-pressed>, not a
-      checkbox: every other control in the panel is a button the delegated
-      click handler already sees, and a switch that only answered to `change`
-      would be the one exception in the file. */
-  function admSwitch(attrs, on, label) {
-    return '<button class="adm-sw" ' + attrs + ' aria-pressed="' + !!on +
-      '" title="' + label + '" aria-label="' + label + '"><i></i></button>';
+  /* ---------- the switch --------------------------------------------------
+     Dim, 07.09.2026: «в маркетинге — промокоды — переключатель трудно понять,
+     включён он или выключен; все переключатели надо сделать проще и понятнее.»
+
+     The old control was a 44×26 track whose only difference between the two
+     states was which end of it was filled with ink — on a monochrome panel, in
+     sunlight, on a phone, that is one cue and it is a colour one. It now
+     carries four, and only the last of them is colour:
+
+       · POSITION — the knob is left when off, right when on (kept);
+       · a WORD — «Вкл» / «Выкл», read without decoding anything;
+       · a CHECK — drawn inside the knob, and only when the switch is on;
+       · the fill of the track.
+
+     It is still ONE component, so every screen that draws a switch — promo
+     codes, the four letters, «Партнёры и баллы», наборы, чат-бот, слайды,
+     верхняя полоска, «Показывать в магазине» — improves at once.
+
+     `role="switch"` + `aria-checked`, not `aria-pressed`: a screen reader then
+     says «включено / выключено» rather than «нажата», which is the same
+     sentence the eye now reads off the control. The accessible name is the
+     thing being switched and never changes with the state (the state is
+     `aria-checked`'s job) — an `aria-label` that flipped between «Включить…»
+     and «Выключить…» was announcing an instruction where a state belongs.
+
+     Still a <button>, not a checkbox: every other control in the panel is a
+     button the delegated click handler already sees, and a switch that only
+     answered to `change` would be the one exception in the file. */
+  var ADM_SW_TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" ' +
+    'stroke-linecap="square" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+  /** The visible half of a switch: the word, then the track with its knob.
+      `aria-hidden` throughout — the state a reader announces is `aria-checked`
+      on the button, and hearing «Вкл» after it would be the same fact twice. */
+  function admSwitchFace(on) {
+    return '<span class="adm-sw__w" aria-hidden="true">' + (on ? "Вкл" : "Выкл") + "</span>" +
+      '<span class="adm-sw__t" aria-hidden="true"><i>' + (on ? ADM_SW_TICK : "") + "</i></span>";
   }
-  /** The same switch where the label belongs INSIDE the control rather than in
+  /** `name` is WHAT is being switched («Промокод SUMMER», «Брошенная
+      корзина»), not what pressing it would do.
+
+      Carried as clipped text inside the button rather than as an `aria-label`:
+      WCAG 2.5.3 «Label in Name» (and the axe rule the a11y sweep runs with it
+      switched on) wants everything the eye reads on a control to be part of
+      what a voice user can say — an `aria-label` naming only the row would
+      have hidden the visible «Вкл» from the name. Reading the name off the
+      contents puts both in it, in the order they are on screen. */
+  function admSwitch(attrs, on, name) {
+    return '<button class="adm-sw" type="button" role="switch" ' + attrs +
+      ' aria-checked="' + !!on + '"><span class="vh">' + name + "</span>" +
+      admSwitchFace(on) + "</button>";
+  }
+  /** The same switch where the name belongs INSIDE the control rather than in
       a row beside it — the editor's «Показывать в магазине» box, which the
       design draws as one bordered line of «name … toggle». */
   function admLabelledSwitch(attrs, label, on) {
-    return '<button class="adm-switch" type="button" ' + attrs + ' aria-pressed="' + !!on + '">' +
+    return '<button class="adm-switch" type="button" role="switch" ' + attrs +
+      ' aria-checked="' + !!on + '">' +
       "<span>" + label + "</span>" +
-      '<span class="adm-switch__t' + (on ? " is-on" : "") + '" aria-hidden="true"><i></i></span></button>';
+      '<span class="adm-switch__st">' + admSwitchFace(on) + "</span></button>";
   }
   /** A segmented control — RU · ET · EN above the letter and the article. */
   function admSegHTML(attr, items, cur, aria) {
@@ -12899,7 +12953,7 @@
           '<span class="adm-row__nm">' + m[1] + "</span>" +
           '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
         (flow
-          ? admSwitch('data-admflow="' + flow + '"', on, on ? "Выключить письмо" : "Включить письмо")
+          ? admSwitch('data-admflow="' + flow + '"', on, m[1])
           : '<span class="adm-badge adm-badge--ok">всегда</span>') +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
         "</div>" +
@@ -13555,8 +13609,7 @@
             admShipCellHTML("markup:fixed", shipMarkupCell("fixed"), "Наценка, евро") + "</label>" +
           '<div class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
             '<span class="adm-row__sub">по умолчанию тариф только поднимает цену до реальной стоимости</span></span>' +
-            admSwitch("data-shipallowlower", !!S.shipAllowLower,
-              S.shipAllowLower ? "Запретить снижать цены" : "Разрешить снижать цены") + "</div>" +
+            admSwitch("data-shipallowlower", !!S.shipAllowLower, "Разрешить снижать текущие цены") + "</div>" +
           '<div class="adm-acts" style="margin-top:12px">' +
             '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipreset>Вернуть значения по умолчанию</button>' +
           "</div></div></details>" +
@@ -13597,7 +13650,7 @@
       '<p class="adm-hint" style="margin:0 0 10px">Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.</p>' +
       '<div class="adm-swrow"><span>Спрашивать перевозчика' +
         '<span class="adm-row__sub">раз в сутки магазин спрашивает Montonio, дошла ли посылка</span></span>' +
-        admSwitch("data-delivcarrier", d.useCarrier, d.useCarrier ? "Не спрашивать перевозчика" : "Спрашивать перевозчика") + "</div>" +
+        admSwitch("data-delivcarrier", d.useCarrier, "Спрашивать перевозчика") + "</div>" +
       '<label class="adm-field" style="margin-top:12px"><span>Закрывать заказ через</span>' +
         '<span class="sel sel--box"><select class="adm-input" data-delivdays>' +
         DELIVERY_DAY_CHOICES.map(function (n) {
@@ -13626,10 +13679,10 @@
       '<div class="adm-list adm-list--flat">' +
         '<div class="adm-swrow"><span>Показывать наборы' +
           '<span class="adm-row__sub">если выключено — их не видно нигде в магазине</span></span>' +
-          admSwitch("data-admbundles", sets, sets ? "Скрыть наборы" : "Показать наборы") + "</div>" +
+          admSwitch("data-admbundles", sets, "Показывать наборы") + "</div>" +
         '<div class="adm-swrow"><span>ИИ-чат для покупателей' +
           '<span class="adm-row__sub">кружок-консультант в углу магазина</span></span>' +
-          admSwitch("data-admchatbot", chat, chat ? "Выключить чат" : "Включить чат") + "</div>" +
+          admSwitch("data-admchatbot", chat, "ИИ-чат для покупателей") + "</div>" +
       "</div>" +
       '<p class="adm-hint" style="margin-top:10px">Подарочная карта продаётся отдельным пунктом в меню — ' +
         "номиналы включаются в «Маркетинг → Подарочные карты».</p>" +
@@ -14169,7 +14222,7 @@
           ' aria-label="Выше" title="Выше">↑</button>' +
         '<button class="adm-iconbtn" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") +
           ' aria-label="Ниже" title="Ниже">↓</button>' +
-        admSwitch('data-heroon="' + i + '"', on, on ? "Скрыть слайд" : "Показать слайд") +
+        admSwitch('data-heroon="' + i + '"', on, esc(heroT(s.title)) || "Без заголовка") +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-heroedit="' + i + '">Изменить</button>' +
         '<button class="adm-link adm-link--warn" data-herodel="' + i + '">Удалить</button>' +
       "</span></div>";
@@ -14477,7 +14530,7 @@
           (annOn ? esc(cTokens(cText(d.announcement.text)) || "стандартный текст") : "выключена"),
           '<div class="adm-swrow"><span>Показывать полоску' +
             '<span class="adm-row__sub">чёрная строка над шапкой магазина</span></span>' +
-            admSwitch("data-contentannon", annOn, annOn ? "Скрыть полоску" : "Показать полоску") + "</div>" +
+            admSwitch("data-contentannon", annOn, "Показывать полоску") + "</div>" +
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
@@ -14674,7 +14727,7 @@
          values, so switching it on puts everything back as it was. */
       '<div class="adm-swrow"><span>Партнёры и баллы' +
         '<span class="adm-row__sub">салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара</span></span>' +
-        admSwitch("data-partnerson", on, on ? "Выключить партнёров и баллы" : "Включить партнёров и баллы") + "</div>" +
+        admSwitch("data-partnerson", on, "Партнёры и баллы") + "</div>" +
       (!on
         ? '<p class="adm-hint" style="margin:0">Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.</p>' +
           '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div></div>"
@@ -14688,7 +14741,7 @@
       '<div class="adm-sec__t">Баллы за покупки</div>' +
       '<div class="adm-swrow"><span>Начислять баллы' +
         '<span class="adm-row__sub">один балл — одно евро при списании</span></span>' +
-        admSwitch("data-pricingtoggle", lo, lo ? "Выключить баллы" : "Включить баллы") + "</div>" +
+        admSwitch("data-pricingtoggle", lo, "Начислять баллы") + "</div>" +
       (lo
         ? admPricingField("earnPct", "Начисляем, % от суммы оплаченного заказа", "", d.loyalty.earnPct) +
           '<div class="adm-edpair">' +
@@ -15033,8 +15086,7 @@
                 'style="border:0;background:none;padding:0;text-align:left">' +
                 '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
                 '<span class="adm-row__sub adm-row__sub--one">' + esc(meta) + (p.note ? " · " + esc(p.note) : "") + "</span></button>" +
-              admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active,
-                p.active ? "Выключить промокод" : "Включить промокод") +
+              admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
               "</div>";
           }).join("") + "</div>"
         : (S.admPromos ? '<div class="adm-empty">Промокодов пока нет</div>' : '<div class="adm-skel"><i></i><i></i></div>')) +

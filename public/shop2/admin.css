@@ -659,20 +659,18 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-area { height: auto; padding: 12px 14px; line-height: 22px; resize: vertical; }
 .adm-area--sm { min-height: 88px; }
 
-/* the design's switch row — 44×26 with a 20-px knob. Disabled here because
-   the shop has no «скрыт» field to write (see goodsEditor's own comment); the
-   markup is the same one Phase 3 will reuse where a switch really switches. */
+/* The switch with its name INSIDE the box — «Показывать в магазине» in the
+   product editor. Its right-hand half is the very same face as `.adm-sw`
+   (word · knob · tick), so the panel has one switch, not two that look alike;
+   only the frame around it differs. */
 .adm-switch {
-  height: 48px; display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; padding: 0 14px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  min-height: 48px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 8px 14px; border: 1px solid var(--a-rule); background: var(--a-paper);
 }
 .adm-switch[aria-disabled="true"] { color: var(--a-muted); }
 /* the same box as a real control — «Показывать в магазине» in the editor */
 button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left; }
-.adm-switch__t { width: 44px; height: 26px; border: 1px solid var(--a-ink); position: relative; flex: none; }
-.adm-switch__t i { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: var(--a-ink); transition: left .15s; }
-.adm-switch__t.is-on { background: var(--a-ink); }
-.adm-switch__t.is-on i { left: 20px; background: var(--a-paper); }
+.adm-switch__st { display: inline-flex; align-items: center; gap: 8px; flex: none; }
 
 /* Размер · Цена · Салон · Остаток · Штрихкод · × — the grid of the design. */
 .adm-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -982,24 +980,53 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* phone: a thumb-sized segment — after the base rule, same specificity, so it wins */
 @media (max-width: 899px) { .adm-seg button { height: 44px; } }
 
-/* ---------- switch (44 × 26, knob 20, .15 s) ------------------------------
-   A <button aria-pressed>, not a checkbox: every other control in the panel
-   is a button the delegated click handler already sees, and a switch that
-   only answered to `change` would be the one exception. */
+/* ---------- switch: a word, a knob and a tick -----------------------------
+   07.09.2026, Dim: «переключатель трудно понять, включён он или выключен».
+   The 44×26 track of § «Design tokens» is still here, and still the thing the
+   thumb aims at — but it no longer carries the state on its own. Four cues,
+   only the last of them colour:
+
+     · the WORD «Вкл» / «Выкл», left of the track, upper-case, in ink;
+     · the knob's POSITION, left or right;
+     · a TICK drawn inside the knob, and only when the switch is on;
+     · the track's fill.
+
+   The whole control is the button, so the word is part of the target: 86 × 44
+   instead of 44 × 26 with an invisible 9-px skirt. `role="switch"` +
+   `aria-checked` (app.js admSwitch) is what a reader announces; everything
+   drawn here is aria-hidden, so nothing is said twice. */
 
 .adm-sw {
-  width: 44px; height: 26px; flex: none; border: 1px solid var(--a-ink); background: var(--a-paper);
-  position: relative; padding: 0;
+  display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px;
+  min-height: 44px; flex: none; padding: 0; border: 0; background: none;
+  color: var(--a-ink); font: inherit;
 }
-.adm-sw i {
+.adm-sw__w {
+  font-size: 13px; line-height: 1; letter-spacing: .06em; text-transform: uppercase;
+  min-width: 38px; text-align: right; white-space: nowrap;
+}
+/* Keyed on the ROLE, not on `.adm-sw`: the boxed variant («Показывать в
+   магазине») wears the same face inside a different frame, and one set of
+   state rules is what keeps the two from drifting apart. */
+/* off is quieter than on — but it is still a word, at 5.4:1 on paper */
+[role="switch"][aria-checked="false"] .adm-sw__w { color: var(--a-muted); }
+[role="switch"][aria-checked="true"] .adm-sw__w { font-weight: 600; }
+.adm-sw__t {
+  width: 44px; height: 26px; flex: none; border: 1px solid var(--a-ink);
+  background: var(--a-paper); position: relative; display: block;
+}
+.adm-sw__t i {
   position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
-  background: var(--a-ink); transition: left .15s, background .15s;
+  background: var(--a-ink); color: var(--a-ink);
+  display: flex; align-items: center; justify-content: center;
+  transition: left .18s ease-out, background .18s ease-out;
 }
-.adm-sw[aria-pressed="true"] { background: var(--a-ink); }
-.adm-sw[aria-pressed="true"] i { left: 20px; background: #fff; }
-/* a switch is 26 px tall but has to be a 44-px target — the padding is the
-   hit area, drawn nowhere */
-.adm-sw::after { content: ""; position: absolute; inset: -9px 0; }
+.adm-sw__t i svg { width: 13px; height: 13px; display: block; }
+[role="switch"][aria-checked="true"] .adm-sw__t { background: var(--a-ink); }
+[role="switch"][aria-checked="true"] .adm-sw__t i { left: 20px; background: #fff; }
+.adm-sw:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
+/* the knob slides only for people who asked for motion */
+@media (prefers-reduced-motion: reduce) { .adm-sw__t i { transition: none; } }
 
 .adm-swrow {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
