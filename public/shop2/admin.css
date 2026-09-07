@@ -1166,6 +1166,23 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-q__q { display: block; font-size: 14px; }
 .adm-q__s { display: block; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-top: 2px; }
 
+/* ---------- «Цены и баллы»: one basket, both price lists ------------------
+   The card's six numbers only mean something together, so the foot of the
+   form works a real 40 € order through twice — once as an ordinary shopper,
+   once as a partner — and moves as the owner types. Two columns on a desk,
+   one under the other on a phone; the ink rule over each column is the same
+   1 px the rest of the panel is built from. */
+.adm-calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 32px; }
+.adm-calc__c { border-top: 1px solid var(--a-ink); padding-top: 8px; min-width: 0; }
+.adm-calc__t { font-weight: 600; font-size: 14px; padding-bottom: 6px; }
+.adm-calc__r {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: 7px 0; border-top: 1px solid var(--a-rule); font-size: 14px;
+}
+.adm-calc__r b { font-family: Oswald, sans-serif; font-weight: 400; white-space: nowrap; }
+/* why a figure above is not what the owner expected — «скидка не сработала» */
+.adm-calc__n { font-size: 12px; line-height: 16px; color: var(--a-warn); padding: 2px 0 4px; }
+
 /* ---------- Подключения --------------------------------------------------- */
 
 /* Beside the name, not beside the middle of the row: on a phone the status

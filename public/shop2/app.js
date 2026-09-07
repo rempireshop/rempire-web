@@ -2158,11 +2158,37 @@
       "Войдите как владелец, чтобы менять цены и баллы.": "Logige omanikuna sisse, et muuta hindu ja punkte.",
       "Салоны и мастера": "Salongid ja meistrid",
       "Скидка для салонов, %": "Salongisoodustus, %",
-      "0 — если оптовых цен сейчас нет.": "0 — kui hulgihindu praegu ei ole.",
       "Действует от суммы корзины, €": "Kehtib alates ostukorvi summast, €",
-      "0 — без условия.": "0 — ilma tingimuseta.",
       "Баллы за покупки": "Punktid ostude eest", "Начислять баллы": "Koguda punkte",
-      "один балл — одно евро при списании": "üks punkt — üks euro kasutamisel",
+      /* prices/points: who a partner is, what each of the six numbers does, and
+         the 40 € basket at the foot of the card (Dim, 07.09.2026) */
+      "Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.":
+        "Partner on salong või meister, kes ostab teie käest töö jaoks, mitte endale.",
+      "Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».":
+        "Ta läheb «Kabinetti», vajutab «Saada partneriks» ning jätab ettevõtte nime ja registrikoodi; teie kinnitate ta jaotises «Kliendid».",
+      "После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».":
+        "Pärast seda näeb ta kõigil kaupadel oma soodsamat hinda ja talle läheb kiri «Salongihinnad on sisse lülitatud».",
+      "Всё остальное у него как у обычного покупателя: та же корзина, та же доставка, та же оплата.":
+        "Kõik muu on tal nagu tavalisel ostjal: sama ostukorv, sama tarne, sama maksmine.",
+      "Сейчас 0 — у партнёров те же цены, что у всех. Впишите, например, 20, и они станут платить на пятую часть меньше.":
+        "Praegu on 0 — partneritel on samad hinnad mis kõigil. Kirjutage näiteks 20, ja nad hakkavad maksma viiendiku võrra vähem.",
+      "Сейчас 0 — скидка действует на любой заказ партнёра, хоть на один тюбик.":
+        "Praegu on 0 — soodustus kehtib partneri igale tellimusele, kas või ühele tuubile.",
+      "Сейчас 0 — баллы не начисляются ни за одну покупку.": "Praegu on 0 — ühegi ostu eest punkte ei koguta.",
+      "Сейчас 0 — баллами нельзя оплатить ничего, они просто копятся.":
+        "Praegu on 0 — punktidega ei saa midagi maksta, need lihtsalt kogunevad.",
+      "Сейчас 0 — платить баллами можно с первого же начисленного балла.":
+        "Praegu on 0 — punktidega saab maksta juba esimesest kogutud punktist.",
+      "часть оплаченного заказа возвращается покупателю баллами; один балл — одно евро":
+        "osa tasutud tellimusest tuleb ostjale punktidena tagasi; üks punkt on üks euro",
+      "Обычный покупатель": "Tavaline ostja", "Партнёр — салон или мастер": "Partner — salong või meister",
+      "Платит": "Maksab", "Вернётся баллами": "Tuleb tagasi punktidena", "Баллами закроет до": "Punktidega katab kuni",
+      "Баллы получает и партнёр — с той суммы, которую заплатил он.":
+        "Punkte saab ka partner — sellelt summalt, mille tema maksis.",
+      "«Баллами закроет до» — это про следующий заказ: сначала баллы надо накопить.":
+        "«Punktidega katab kuni» käib järgmise tellimuse kohta: kõigepealt tuleb punktid koguda.",
+      "Баллы сейчас выключены, поэтому в примере их нет — оба платят деньгами.":
+        "Punktid on praegu välja lülitatud, seepärast neid näites ei ole — mõlemad maksavad rahaga.",
       "Выключить баллы": "Lülita punktid välja", "Включить баллы": "Lülita punktid sisse",
       "Начисляем, % от суммы оплаченного заказа": "Kogume, % tasutud tellimuse summast",
       "Списать можно не больше, % от корзины": "Kasutada saab kuni, % ostukorvist",
@@ -4269,11 +4295,37 @@
       "Войдите как владелец, чтобы менять цены и баллы.": "Sign in as the owner to change prices and points.",
       "Салоны и мастера": "Salons and stylists",
       "Скидка для салонов, %": "Salon discount, %",
-      "0 — если оптовых цен сейчас нет.": "0 — if there is no wholesale pricing right now.",
       "Действует от суммы корзины, €": "Applies from a basket total of, €",
-      "0 — без условия.": "0 — no condition.",
       "Баллы за покупки": "Points for purchases", "Начислять баллы": "Award points",
-      "один балл — одно евро при списании": "one point — one euro when redeemed",
+      /* prices/points: who a partner is, what each of the six numbers does, and
+         the 40 € basket at the foot of the card (Dim, 07.09.2026) */
+      "Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.":
+        "A partner is a salon or a stylist who buys from you for their work, not for themselves.",
+      "Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».":
+        "They open “My account”, press “Become a partner” and leave the company name and registry code; you approve them under “Customers”.",
+      "После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».":
+        "From then on they see their own, lower price on every product, and the letter “Salon prices are on” goes out to them.",
+      "Всё остальное у него как у обычного покупателя: та же корзина, та же доставка, та же оплата.":
+        "Everything else works as it does for any shopper: the same basket, the same delivery, the same payment.",
+      "Сейчас 0 — у партнёров те же цены, что у всех. Впишите, например, 20, и они станут платить на пятую часть меньше.":
+        "It is 0 right now — partners pay the same as everybody else. Put in 20, say, and they start paying a fifth less.",
+      "Сейчас 0 — скидка действует на любой заказ партнёра, хоть на один тюбик.":
+        "It is 0 right now — the discount applies to any partner order, down to a single tube.",
+      "Сейчас 0 — баллы не начисляются ни за одну покупку.": "It is 0 right now — no purchase earns any points.",
+      "Сейчас 0 — баллами нельзя оплатить ничего, они просто копятся.":
+        "It is 0 right now — points cannot pay for anything, they just pile up.",
+      "Сейчас 0 — платить баллами можно с первого же начисленного балла.":
+        "It is 0 right now — points can be spent from the very first one earned.",
+      "часть оплаченного заказа возвращается покупателю баллами; один балл — одно евро":
+        "part of every paid order comes back to the shopper as points; one point is one euro",
+      "Обычный покупатель": "An ordinary shopper", "Партнёр — салон или мастер": "A partner — a salon or a stylist",
+      "Платит": "Pays", "Вернётся баллами": "Comes back as points", "Баллами закроет до": "Points will cover up to",
+      "Баллы получает и партнёр — с той суммы, которую заплатил он.":
+        "A partner earns points too — on the sum they actually paid.",
+      "«Баллами закроет до» — это про следующий заказ: сначала баллы надо накопить.":
+        "“Points will cover up to” is about the next order: the points have to be earned first.",
+      "Баллы сейчас выключены, поэтому в примере их нет — оба платят деньгами.":
+        "Points are off right now, so they are not in the example — both pay with money.",
       "Выключить баллы": "Switch points off", "Включить баллы": "Switch points on",
       "Начисляем, % от суммы оплаченного заказа": "Awarded, % of the paid order total",
       "Списать можно не больше, % от корзины": "Redeem at most, % of the basket",
@@ -4361,6 +4413,36 @@
     [/^Показов: (.+) · переходов: (.+) · место в Google: (\d+)$/,
       { ET: "Näitamisi: $1 · üleminekuid: $2 · koht Google'is: $3",
         EN: "Impressions: $1 · clicks: $2 · place in Google: $3" }],
+    /* «Настройки → Цены и баллы»: the worked example under each field and the
+       40 € basket at the foot of the card. They have to be rules and not keys
+       because every one of them is the owner's own number done as arithmetic —
+       which is the whole point of them (Dim, 07.09.2026). First in this list,
+       ahead of the promo-code and «от …» rules, which would otherwise catch
+       some of these lines by their leading figure. */
+    [/^Партнёр платит на (.+) % меньше: товар за (.+) обойдётся ему в (.+)\.$/,
+      { ET: "Partner maksab $1 % vähem: kaup hinnaga $2 läheb talle maksma $3.",
+        EN: "A partner pays $1% less: an item at $2 costs them $3." }],
+    [/^Скидка включится, только если партнёр набрал корзину на (.+) по обычным ценам\. Меньше — он платит как все\.$/,
+      { ET: "Soodustus rakendub ainult siis, kui partneri ostukorv on tavahindades vähemalt $1. Vähem — ta maksab nagu kõik.",
+        EN: "The discount only starts once the partner's basket reaches $1 at ordinary prices. Below that they pay like everybody else." }],
+    [/^Начисляем (.+) %: с заказа на (.+) вернётся (.+) баллами\. Один балл — одно евро\.$/,
+      { ET: "Kogume $1 %: tellimuselt summas $2 tuleb tagasi $3 punktidena. Üks punkt on üks euro.",
+        EN: "We give back $1%: an order of $2 returns $3 in points. One point is one euro." }],
+    [/^Из корзины на (.+) баллами можно закрыть не больше (.+), остальное — деньгами\.$/,
+      { ET: "Ostukorvist summas $1 saab punktidega katta kuni $2, ülejäänu tuleb maksta rahaga.",
+        EN: "Of a $1 basket, points can cover at most $2 — the rest is paid with money." }],
+    [/^Пока баллов меньше (.+), покупатель вообще не увидит галочку «оплатить баллами»\.$/,
+      { ET: "Kuni punkte on vähem kui $1, ei näe ostja linnukest «maksa punktidega» üldse.",
+        EN: "Until they have $1 points, the shopper does not see the “pay with points” tick box at all." }],
+    [/^Столько накопится с покупок примерно на (.+)\.$/,
+      { ET: "Nii palju koguneb umbes $1 eest ostmisest.",
+        EN: "That many pile up from roughly $1 worth of shopping." }],
+    [/^Скидка не сработала: корзина не набрала (.+)\.$/,
+      { ET: "Soodustus ei rakendunud: ostukorv ei ulatunud summani $1.",
+        EN: "The discount did not apply: the basket did not reach $1." }],
+    [/^Как это посчитается на заказе в (.+)$/,
+      { ET: "Kuidas see arvutatakse $1 suuruse tellimuse pealt",
+        EN: "How this works out on an order of $1" }],
     /* «Доставка и оплата» and «Клиенты → партнёры»: the lines built around a
        number, an address or the confirm card's two-line text */
     [/^от (€\d.*)$/, { ET: "alates $1", EN: "from $1" }],
@@ -14917,6 +14999,19 @@
     for (var i = 0; i < fields.length; i++) {
       fields[i].setAttribute("aria-invalid", String(!!S.pricingErr && fields[i].getAttribute("data-pricingf") === S.pricingErrField));
     }
+    /* The worked example under each field, and the basket at the foot of the
+       card, are the point of this screen (Dim, 07.09.2026): they have to move
+       with the digit the owner is typing, or he is reading last minute's
+       arithmetic while changing this minute's number. Repainted here rather
+       than through render() for the same reason as everything else in this
+       function — the caret. */
+    var ex = document.querySelectorAll("[data-pricingex]");
+    for (var j = 0; j < ex.length; j++) {
+      ex[j].innerHTML = pricingHintHTML(ex[j].getAttribute("data-pricingex"));
+      translateTree(ex[j]);
+    }
+    var calc = document.getElementById("pricingcalc");
+    if (calc) { calc.innerHTML = admPricingCalcHTML(); translateTree(calc); }
     var acts = document.getElementById("pricingacts");
     if (acts) { acts.innerHTML = pricingActsHTML(); translateTree(acts); }
   }
@@ -14934,11 +15029,110 @@
     };
     render(); refocus("[data-admapply]");
   }
-  function admPricingField(key, label, hint, val) {
+  /* ---------- what each of these six numbers actually does -----------------
+     Renat has never run a loyalty scheme, and «Списать не больше, % от
+     корзины» is not a sentence anybody can act on (Dim, 07.09.2026: «prices
+     and points need better explanations»). So every field carries the same
+     thing a price tag carries — the arithmetic done on a real basket, in
+     euros, with the number he is looking at — and the card ends with the
+     whole order worked through from both sides at once.
+
+     40 € is the sample basket: about what one order at this shop is. It is
+     only ever used to explain — nothing here is charged to anybody. */
+  var PRICING_EX_BASKET = 40;
+  /** A percentage the way the owner typed it: «20», not «20,0» — but «7,5»
+      when he really did type a half. */
+  function numPc(n) { return n % 1 ? num1(n) : String(Math.round(n)); }
+  /** Points a paid subtotal earns, exactly as earnLoyaltyPoints() computes it
+      on the server (src/lib/loyalty.ts): earnPct of the goods, rounded to a
+      whole point, and one point is one euro. */
+  function exPoints(sum, earnPct) { return Math.round((sum * earnPct) / 100); }
+  /** What a partner really pays for a `sum` basket: the discount, but only
+      once the basket has reached proMinOrder AT RETAIL — the same gate
+      priceItems() applies (docs/loyalty.md § «Ценообразование pro»). */
+  function exProPays(sum, d) {
+    if (d.proMinOrder > sum) return sum;
+    return Math.round(sum * (1 - d.proDiscountPct / 100) * 100) / 100;
+  }
+  /** The sentence under one field: what the number does, done on 40 €. Each
+      sentence is its own text node so the translator finds it by key or rule. */
+  function pricingHintHTML(key) {
+    var d = pricingDraft(), b = PRICING_EX_BASKET, s = function (t) { return "<span>" + t + "</span>"; };
+    if (key === "proDiscountPct") {
+      return d.proDiscountPct > 0
+        ? s("Партнёр платит на " + numPc(d.proDiscountPct) + " % меньше: товар за " + eur(b) +
+            " обойдётся ему в " + eur(Math.round(b * (1 - d.proDiscountPct / 100) * 100) / 100) + ".")
+        : s("Сейчас 0 — у партнёров те же цены, что у всех. Впишите, например, 20, и они станут платить на пятую часть меньше.");
+    }
+    if (key === "proMinOrder") {
+      return d.proMinOrder > 0
+        ? s("Скидка включится, только если партнёр набрал корзину на " + eur(d.proMinOrder) +
+            " по обычным ценам. Меньше — он платит как все.")
+        // «0 — …» on its own would be eaten by the promo-code rule
+        // /^([A-Z0-9-]+) — скидка (.+)$/ two hundred lines below, which reads
+        // a bare «0» as a code; «Сейчас 0» cannot be a code.
+        : s("Сейчас 0 — скидка действует на любой заказ партнёра, хоть на один тюбик.");
+    }
+    if (key === "earnPct") {
+      return d.loyalty.earnPct > 0
+        ? s("Начисляем " + numPc(d.loyalty.earnPct) + " %: с заказа на " + eur(b) + " вернётся " +
+            eur(exPoints(b, d.loyalty.earnPct)) + " баллами. Один балл — одно евро.")
+        : s("Сейчас 0 — баллы не начисляются ни за одну покупку.");
+    }
+    if (key === "redeemMaxPct") {
+      return d.loyalty.redeemMaxPct > 0
+        ? s("Из корзины на " + eur(b) + " баллами можно закрыть не больше " +
+            eur(exPoints(b, d.loyalty.redeemMaxPct)) + ", остальное — деньгами.")
+        : s("Сейчас 0 — баллами нельзя оплатить ничего, они просто копятся.");
+    }
+    if (key === "minRedeem") {
+      if (!(d.loyalty.minRedeem > 0)) return s("Сейчас 0 — платить баллами можно с первого же начисленного балла.");
+      var line = s("Пока баллов меньше " + numGrp(d.loyalty.minRedeem) +
+        ", покупатель вообще не увидит галочку «оплатить баллами».");
+      // …and what that threshold costs him in purchases, at today's earn rate
+      if (d.loyalty.earnPct > 0) {
+        line += " " + s("Столько накопится с покупок примерно на " +
+          eur(Math.round((d.loyalty.minRedeem * 100) / d.loyalty.earnPct)) + ".");
+      }
+      return line;
+    }
+    return "";
+  }
+  /** One 40 € order taken through both price lists at once — the whole thing
+      on one screen, which is what «покажи арифметику настоящей корзины»
+      asked for. Every figure is computed with the numbers currently in the
+      form, so it answers before the owner presses «Сохранить». */
+  function admPricingCalcHTML() {
+    var d = pricingDraft(), b = PRICING_EX_BASKET, lo = d.loyalty.enabled;
+    var pro = exProPays(b, d), blocked = d.proMinOrder > b;
+    var row = function (name, val) {
+      return '<div class="adm-calc__r"><span>' + name + "</span><b>" + val + "</b></div>";
+    };
+    var col = function (title, pays, note) {
+      return '<div class="adm-calc__c"><div class="adm-calc__t">' + title + "</div>" +
+        row("Платит", eur(pays)) +
+        (note ? '<div class="adm-calc__n">' + note + "</div>" : "") +
+        (lo ? row("Вернётся баллами", eur(exPoints(pays, d.loyalty.earnPct))) : "") +
+        (lo ? row("Баллами закроет до", eur(exPoints(pays, d.loyalty.redeemMaxPct))) : "") +
+        "</div>";
+    };
+    return '<div class="adm-calc">' +
+      col("Обычный покупатель", b, "") +
+      col("Партнёр — салон или мастер", pro,
+        blocked ? "Скидка не сработала: корзина не набрала " + eur(d.proMinOrder) + "." : "") +
+      "</div>" +
+      '<p class="adm-hint adm-hint--lead">' +
+        (lo
+          ? "<span>Баллы получает и партнёр — с той суммы, которую заплатил он.</span> " +
+            "<span>«Баллами закроет до» — это про следующий заказ: сначала баллы надо накопить.</span>"
+          : "<span>Баллы сейчас выключены, поэтому в примере их нет — оба платят деньгами.</span>") +
+      "</p>";
+  }
+  function admPricingField(key, label, val) {
     return '<label class="adm-field">' + label +
       '<input class="adm-input" data-pricingf="' + key + '" inputmode="decimal" value="' + esc(String(val)) +
         '" aria-invalid="' + (!!S.pricingErr && S.pricingErrField === key) + '">' +
-      (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + "</label>";
+      '<span class="adm-hint" data-pricingex="' + key + '">' + pricingHintHTML(key) + "</span></label>";
   }
   function admPricingCard() {
     loadAdminPricing(false);
@@ -14961,20 +15155,30 @@
         : "") +
       (!on ? "" :
       '<div class="adm-sec__t">Салоны и мастера</div>' +
+      /* Who a «партнёр» even is: the word runs through five screens of this
+         panel and nothing anywhere said it out loud (Dim, 07.09.2026). */
+      '<div class="adm-note"><span>Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.</span> ' +
+        "<span>Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».</span> " +
+        "<span>После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».</span> " +
+        "<span>Всё остальное у него как у обычного покупателя: та же корзина, та же доставка, та же оплата.</span></div>" +
       '<div class="adm-edpair">' +
-        admPricingField("proDiscountPct", "Скидка для салонов, %", "0 — если оптовых цен сейчас нет.", d.proDiscountPct) +
-        admPricingField("proMinOrder", "Действует от суммы корзины, €", "0 — без условия.", d.proMinOrder) +
+        admPricingField("proDiscountPct", "Скидка для салонов, %", d.proDiscountPct) +
+        admPricingField("proMinOrder", "Действует от суммы корзины, €", d.proMinOrder) +
       "</div>" +
       '<div class="adm-sec__t">Баллы за покупки</div>' +
       '<div class="adm-swrow"><span>Начислять баллы' +
-        '<span class="adm-row__sub">один балл — одно евро при списании</span></span>' +
+        '<span class="adm-row__sub">часть оплаченного заказа возвращается покупателю баллами; один балл — одно евро</span></span>' +
         admSwitch("data-pricingtoggle", lo, lo ? "Выключить баллы" : "Включить баллы") + "</div>" +
       (lo
-        ? admPricingField("earnPct", "Начисляем, % от суммы оплаченного заказа", "", d.loyalty.earnPct) +
+        ? admPricingField("earnPct", "Начисляем, % от суммы оплаченного заказа", d.loyalty.earnPct) +
           '<div class="adm-edpair">' +
-            admPricingField("redeemMaxPct", "Списать можно не больше, % от корзины", "", d.loyalty.redeemMaxPct) +
-            admPricingField("minRedeem", "Списание доступно от, баллов на счету", "", d.loyalty.minRedeem) + "</div>"
+            admPricingField("redeemMaxPct", "Списать можно не больше, % от корзины", d.loyalty.redeemMaxPct) +
+            admPricingField("minRedeem", "Списание доступно от, баллов на счету", d.loyalty.minRedeem) + "</div>"
         : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
+      /* The whole thing on one basket, both price lists side by side — and it
+         answers while he types, before anything is saved. */
+      '<div class="adm-sec__t">Как это посчитается на заказе в ' + eur(PRICING_EX_BASKET) + "</div>" +
+      '<div id="pricingcalc">' + admPricingCalcHTML() + "</div>" +
       // filled in place by paintPricingState() as the owner types
       '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>" +
       '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>") +
