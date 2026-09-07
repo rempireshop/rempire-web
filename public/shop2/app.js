@@ -18559,8 +18559,14 @@
     S.scanFrom = S.adminTab === "pos" ? "pos" : "stock";
     render();
   }
-  function closeScanner() {
+  /** The flag alone — «Назад» closes the scanner through admCloseTop(), whose
+      caller does the render, and a second one from in here would be a second
+      full repaint of the screen underneath. */
+  function closeScannerState() {
     S.scanOpen = false;
+  }
+  function closeScanner() {
+    closeScannerState();
     render();
   }
   /* scanner app: the /shop2/scan/ route IS the scanner — no button to press,
@@ -22132,7 +22138,12 @@
      layer. Closing with a button («← Заказы», «Отмена») spends the parked
      entry itself, so the next Back is never a press that does nothing. */
   var ADM_HIST = false, ADM_POP = false;
-  /** What is open over the panel right now, bottom layer first. */
+  /** What is open over the panel right now, bottom layer first.
+
+      The order is what the eye sees stacked, because Back closes the top one:
+      a card first, then the phone's «Ещё» sheet, then a confirm card — and the
+      scanner last of all, since its viewfinder is mounted outside the panel
+      (scanMount) and covers every one of them. */
   function admLayers() {
     if (S.screen !== "admin") return [];
     var l = [];
@@ -22141,16 +22152,28 @@
     else if (S.admCustOpen) l.push("customer");
     else if (S.mailOpen) l.push("mail");
     else if (S.admSetPage) l.push("setpage");
+    /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
+       question 6 was about cards, not about which section they belong to. */
+    else if (S.adminBlogEdit) l.push("blog");
     if (S.admMore) l.push("more");
     if (pendingAction) l.push("confirm");
+    /* The scanner: an overlay the owner opens with a phone in one hand and a
+       bottle in the other — the one screen in the panel where Back is the
+       gesture that comes first. It was missing here, so Back left the admin
+       for the shop with the camera still running. Not the standalone
+       /shop2/scan/ route, which IS the screen: there Back belongs to the
+       browser, and there is nothing underneath to go back to. */
+    if (S.scanOpen && !S.scanApp) l.push("scan");
     return l;
   }
   /** Closes the topmost layer. False when there was nothing to close. */
   function admCloseTop() {
     var top = admLayers().pop();
     if (!top) return false;
-    if (top === "confirm") pendingAction = null;
+    if (top === "scan") closeScannerState();
+    else if (top === "confirm") pendingAction = null;
     else if (top === "more") S.admMore = false;
+    else if (top === "blog") { S.adminBlogEdit = null; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; }
     else if (top === "edit") {
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
@@ -24925,7 +24948,11 @@
       }
     }
     if (e.key === "Escape") {
-      if (S.pointOpen) { S.pointOpen = false; repaintPicker("[data-pointopen]"); }
+      /* the scanner's viewfinder covers the whole panel, so it answers first —
+       * except on /shop2/scan/, where the scanner IS the screen and Escape has
+       * nothing to uncover */
+      if (S.scanOpen && !S.scanApp) { closeScanner(); }
+      else if (S.pointOpen) { S.pointOpen = false; repaintPicker("[data-pointopen]"); }
       else if (S.cartOpen || S.filterOpen) { closeDrawers(); }
       // the admin confirm card: Escape is «Отмена» — nothing is applied
       else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
