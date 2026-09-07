@@ -39,7 +39,19 @@ export interface ReceiptParams {
    * paid or pending receipt has no use for it and does not carry it.
    */
   orderId?: string;
+  /**
+   * `m` — bank | card | wallet, the method this order was last sent out with,
+   * and only on a failed receipt beside `o`. The screen offers all three so a
+   * customer whose card was refused can switch to a bank link without going
+   * back through the basket (Dim, 07.09.2026); this is what makes the one they
+   * already chose the one that starts selected, rather than the shop quietly
+   * proposing a different way to pay.
+   */
+  method?: string;
 }
+
+/** The three the checkout's radio has, and the only values `m` may carry. */
+const METHODS: readonly string[] = ["bank", "card", "wallet"];
 
 export function receiptUrl(base: string, p: ReceiptParams): string {
   const params = new URLSearchParams();
@@ -48,6 +60,7 @@ export function receiptUrl(base: string, p: ReceiptParams): string {
   if (p.state === "paid" && p.total != null && Number.isFinite(p.total)) params.set("t", p.total.toFixed(2));
   if (p.state === "paid" && p.gift) params.set("g", p.gift);
   if (p.state === "failed" && p.orderId) params.set("o", p.orderId);
+  if (p.state === "failed" && p.method && METHODS.includes(p.method)) params.set("m", p.method);
   return `${base}/shop2/done/?${params.toString()}`;
 }
 

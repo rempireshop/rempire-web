@@ -987,6 +987,16 @@
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
+      /* The wallet is offered on every browser (Dim, 07.09.2026), so its hint
+         says where the buttons live and what is there instead of promising
+         them; and a basket a card or points already cover has no payment to
+         choose at all — one sentence in place of the whole block. */
+      "Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.":
+        "Apple Pay ja Google Pay nupud avanevad Montonio lehel — kui teie brauser neid ei toeta, saab samas maksta kaardiga.",
+      "Платить нечего — заказ полностью покрыт подарочной картой, баллами или промокодом.":
+        "Maksta pole midagi — tellimuse katavad täielikult kinkekaart, punktid või sooduskood.",
+      "Нажимая «Оформить заказ», вы соглашаетесь с условиями и политикой возврата.":
+        "Nupule „Vormista tellimus“ vajutades nõustute tingimuste ja tagastuspoliitikaga.",
       // blog
       /* «Blog», not «Ajaveeb» — the owner's own word for the section in
          Estonian, and the one every ET surface has to carry: nav, footer,
@@ -2790,6 +2800,13 @@
       // UX fix 10: card / Apple Pay / Google Pay hint
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Pay by card, Apple Pay or Google Pay — on Montonio's secure page, then back to the shop.",
+      // see the ET table above for why these three exist
+      "Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.":
+        "The Apple Pay and Google Pay buttons open on Montonio's page — if your browser does not support them, you can pay by card there instead.",
+      "Платить нечего — заказ полностью покрыт подарочной картой, баллами или промокодом.":
+        "There is nothing to pay — a gift card, points or a promo code cover the whole order.",
+      "Нажимая «Оформить заказ», вы соглашаетесь с условиями и политикой возврата.":
+        "By pressing “Place the order” you agree to the terms and the returns policy.",
       // blog
       "Блог": "Blog",
       "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
@@ -5023,6 +5040,10 @@
     acctName: "",
     pay: 0,
     bank: 0,
+    // «Оплата не прошла» → which of the three ways the second try uses.
+    // null until the screen seeds it from the receipt's own `m` — see
+    // donePayIndex(): the shopper's first choice, not a new proposal.
+    donePay: null,
     adminTab: "over",
     adminAsk: "",
     adminAtt: [],    // photos attached to the assistant's conversation: {key, url, thumb, name, busy, err}
@@ -9692,13 +9713,24 @@
   }
   /* «Оплатить ещё раз» on the failed receipt. The basket is gone (payNow()
      empties it before leaving for the bank), but the order is still there:
-     the payment is re-created for it — the server reuses the method chosen
-     the first time when the body carries nothing but the id — and the shopper
-     goes back to the bank. Same lock as payNow(): one tap, one payment. */
+     the payment is re-created for it and the shopper goes back to the bank.
+     Same lock as payNow(): one tap, one payment.
+
+     The method travels with it now. The screen's own sentence has always
+     said «или выберите другой способ», and until 07.09.2026 it was not
+     true — the body carried nothing but the id, so the server reused what
+     the order was sent out with and a refused card went back to the same
+     card. The picker on that screen (donePayPickerHTML) is what this reads. */
   function payAgain(orderId) {
     if (S.paying || !orderId) return;
     S.paying = true; render();
-    postJSON("/api/payments/create/", { orderId: orderId, lang: S.lang }).then(function (pay) {
+    var pick = donePayIndex(doneState());
+    postJSON("/api/payments/create/", {
+      orderId: orderId,
+      method: PAYS[pick] ? PAYS[pick].k : "bank",
+      bank: pick === 0 ? selectedBankCode() : undefined,
+      lang: S.lang
+    }).then(function (pay) {
       if (pay.offline || !pay.body || !pay.body.ok || !pay.body.redirectUrl) {
         throw new Error(payErrText(pay.body && pay.body.error));
       }
@@ -9708,8 +9740,24 @@
       toast(err && err.message ? err.message : "Оплата пока недоступна — попробуйте позже");
     });
   }
+  /* ---------- the order this checkout has already made ----------------------
+     POST /api/orders/ succeeds, POST /api/payments/create/ does not (the bank
+     was unreachable, the keys are not in yet) — and the second tap of
+     «Оплатить» used to place a SECOND order for the same basket, leaving the
+     shop with two rows for one customer (Dim, 07.09.2026). The order is
+     remembered here instead, with a signature of the body it was made from:
+     the same basket, address and method reuse it and go straight to the
+     payment; anything the shopper changed makes a new one, because it is a
+     different order. In memory only — a reload is a new visit, and the first
+     order is then the cron's to let go (src/lib/flows.ts).
+
+     Cleared by clearOrderState() (the order left for the bank), and whenever
+     the server says the remembered order can no longer be paid. */
+  var pendingOrder = null;   // { id, number, sig }
+
   /** A finished order must leave nothing behind for the next one. */
   function clearOrderState() {
+    pendingOrder = null;
     S.cart = []; S.promo = ""; S.promoInfo = null; S.promoErr = ""; S.promoMin = 0; S.promoBusy = false; S.sumOpen = null;
     S.giftCard = null; S.giftErr = "";   // features: a card applied here is spent
     // features: the recipient of THIS order's cards — the next order seeds its
@@ -9746,7 +9794,15 @@
     if (API.ok === false) return finishDemo();
 
     S.paying = true; render();
-    postJSON("/api/orders/", orderPayload()).then(function (res) {
+    /* The body decides whether the order this checkout already made is the
+       same order: identical body, same order. `sig` is that body, verbatim. */
+    var payload = orderPayload();
+    var sig = JSON.stringify(payload);
+    var known = pendingOrder && pendingOrder.sig === sig ? pendingOrder : null;
+    (known
+      ? Promise.resolve({ body: { ok: true, orderId: known.id, number: known.number } })
+      : postJSON("/api/orders/", payload)
+    ).then(function (res) {
       if (res.offline) return finishDemo();
       apiSeen(true);
       if (!res.body || !res.body.ok || !res.body.orderId) {
@@ -9767,6 +9823,9 @@
         try { history.replaceState(history.state, "", pathFor() + "?n=" + encodeURIComponent(S.done.number) + "&s=invoice"); } catch (e) {}
         return;
       }
+      // remembered from here on: everything below can fail, and a second tap
+      // must pay for THIS order rather than make another one
+      pendingOrder = { id: res.body.orderId, number: res.body.number || "", sig: sig };
       return postJSON("/api/payments/create/", {
         orderId: res.body.orderId,
         // the radio's own key — a wallet is "wallet", never the bank list it
@@ -9777,7 +9836,12 @@
       }).then(function (pay) {
         if (pay.offline) return finishDemo();
         if (!pay.body || !pay.body.ok || !pay.body.redirectUrl) {
-          throw new Error(payErrText(pay.body && pay.body.error));
+          /* The remembered order cannot be paid any more — it was settled, it
+             was closed, or it is gone. Forget it, so the next tap starts a
+             fresh one instead of asking about this one for ever. */
+          var code = pay.body && pay.body.error;
+          if (code === "already_paid" || code === "order_closed" || code === "not_found") pendingOrder = null;
+          throw new Error(payErrText(code));
         }
         // the basket is cleared before leaving: coming back from the bank must
         // not find the same order still sitting in the cart
@@ -9851,7 +9915,20 @@
     coBlockHTML.delivery = out;
     return out;
   }
+  /** Nothing left to pay — a gift card, points or a promo cover the basket. */
+  function nothingToPay() { return !(total() > 0.004); }
   function paymentBlockHTML() {
+    /* A basket a card, points or a promo already cover has no payment to
+       choose. Showing the radios, the bank list and «Оплатить 0 €» asked the
+       shopper to pick a bank for nothing and looked broken (Dim, 07.09.2026);
+       the server does not go to a provider for such an order either
+       (settleWithoutPayment(), docs/payments.md §8b). One sentence instead,
+       and the button below says «Оформить заказ». */
+    if (nothingToPay()) {
+      var free = '<p class="hint">Платить нечего — заказ полностью покрыт подарочной картой, баллами или промокодом.</p>';
+      coBlockHTML.payment = free;
+      return free;
+    }
     /* The pick can go stale under the shopper's hands: the gift-card box sits
        in the summary right below this list, and a card that covers the whole
        order takes «По счёту» away (invoiceOffered()). Clamped here — the one
@@ -9869,6 +9946,11 @@
       // not their own option in the checkout, they ride on Montonio's own
       // card element, so a static hint is all this needs
       (S.pay === 1 ? '<p class="hint">Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.</p>' : "") +
+      /* The wallet option is shown to everybody, on every browser (Dim,
+         07.09.2026: «нужно показывать независимо от браузера») — so its hint
+         must not promise a button the shopper's browser may not have. It says
+         where the wallets live and what is there instead when they are not. */
+      (S.pay === 2 ? '<p class="hint">Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.</p>' : "") +
       (isInvoice() ? invoiceBlockHTML() : "");
     coBlockHTML.payment = out;
     return out;
@@ -9943,8 +10025,13 @@
          pay before choosing how the parcel travels or how they are paying. */
       (S.coStep === 3
         ? '<button class="btn btn--wide co__pay" data-pay' + (S.paying ? " disabled" : "") + ">" +
-            (S.paying ? "Готовим оплату…" : "Оплатить " + eur(total())) + "</button>" +
-          '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>'
+            (S.paying ? "Готовим оплату…" : nothingToPay() ? "Оформить заказ" : "Оплатить " + eur(total())) + "</button>" +
+          /* Two straight chains rather than one with the button's name in a
+             hole: the i18n check joins the literals of a chain into the text
+             node the browser shows, and each of these is a dictionary key. */
+          (nothingToPay()
+            ? '<p class="cosum__legal">Нажимая «Оформить заказ», вы соглашаетесь с условиями и политикой возврата.</p>'
+            : '<p class="cosum__legal">Нажимая «Оплатить», вы соглашаетесь с условиями и политикой возврата.</p>')
         : "") +
       "</div>";
     coBlockHTML.summary = out;
@@ -10057,7 +10144,8 @@
       "</div></div>" +
       (step === 3
         ? '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span>' +
-          '<button class="btn" data-pay' + (S.paying ? " disabled" : "") + ">" + (S.paying ? "Готовим…" : "Оплатить") + "</button></div>"
+          '<button class="btn" data-pay' + (S.paying ? " disabled" : "") + ">" +
+          (S.paying ? "Готовим…" : nothingToPay() ? "Оформить заказ" : "Оплатить") + "</button></div>"
         : "");
   }
   function payMark(k) {
@@ -18560,7 +18648,11 @@
          receipt.ts): what «Оплатить ещё раз» sends back to re-create the
          payment. The basket is empty by now (payNow() clears it before the
          bank), so the order is the only thing a second try can be about. */
-      order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : ""
+      order: s === "failed" && /^[0-9a-f-]{36}$/i.test(q.o || "") ? q.o : "",
+      /* `m` — the method the order went out with (src/lib/payments/receipt.ts).
+         The retry screen offers all three, and this is which one starts
+         selected: the shopper's own choice, not one the shop proposes. */
+      method: s === "failed" && /^(bank|card|wallet)$/.test(q.m || "") ? q.m : ""
     };
     if (s === "paid") {
       var total = parseFloat(String(q.t || "").replace(",", "."));
@@ -18584,6 +18676,29 @@
     });
     return out.slice(0, 10);
   }
+  /* ---------- «Оплата не прошла»: how to pay this time -----------------------
+     The first three of PAYS — «По счёту» is not a second try, it is a
+     different kind of order, and it is made in the checkout with the company's
+     details. The index is remembered in S.donePay; the first render seeds it
+     from `m` on the receipt URL, which is the way the shopper already chose. */
+  function donePayIndex(d) {
+    if (S.donePay === null || S.donePay === undefined) {
+      var was = d && d.method;
+      S.donePay = was === "card" ? 1 : was === "wallet" ? 2 : 0;
+    }
+    return S.donePay;
+  }
+  function donePayPickerHTML(d) {
+    var pick = donePayIndex(d);
+    return '<div class="done__pay"><div class="optlist">' + PAYS.slice(0, 3).map(function (o, i) {
+        return '<label class="opt opt--pay"><input type="radio" name="donepay" ' + (i === pick ? "checked" : "") + ' data-donepay="' + i + '">' +
+          '<span class="opt__txt"><span>' + o.l + "</span><span class=\"opt__hint\">" + o.h + "</span></span>" +
+          '<span class="opt__logos">' + payMark(o.k) + "</span></label>";
+      }).join("") + "</div>" +
+      (pick === 0 ? '<div class="banks">' + bankChipsHTML() + "</div>" : "") +
+      (pick === 2 ? '<p class="hint">Кнопки Apple Pay и Google Pay открываются на странице Montonio — если браузер их не поддерживает, там же можно оплатить картой.</p>' : "") +
+      "</div>";
+  }
   /** The «Скачать подарочную карту (PDF)» button(s) under a paid receipt. */
   function doneGiftHTML(cards) {
     if (!cards || !cards.length) return "";
@@ -18599,15 +18714,20 @@
     // one text node, so the «Заказ R-100042» dictionary rule can rewrite it
     var num = d.number ? '<p class="done__num">Заказ ' + esc(d.number) + "</p>" : "";
     if (d.status === "failed") {
+      // the real bank logos, if Montonio's list is reachable — one-shot and
+      // silent, exactly as the checkout asks for them
+      if (d.order) loadPayMethods();
       return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
         '<div class="done__tick done__tick--bad">✕</div>' +
         '<h1 class="display h1">Оплата не прошла</h1>' + num +
         '<p class="muted" style="margin-bottom:22px">Деньги не списаны. Заказ сохранён — попробуйте оплатить ещё раз или выберите другой способ.</p>' +
-        /* The sentence above promises a second try; this is it. The same
-           order goes back to the bank (payAgain), the way the shopper chose
-           the first time — the server remembers the method. */
+        /* The sentence above promises another way to pay; until 07.09.2026 it
+           did not exist — «Оплатить ещё раз» sent the order back to the same
+           method every time. The picker below is that promise kept: the same
+           order, a different way. */
         (d.order
-          ? '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
+          ? donePayPickerHTML(d) +
+            '<div class="done__acts"><button class="btn" data-payagain="' + esc(d.order) + '"' + (S.paying ? " disabled" : "") + ">" +
               (S.paying ? "Готовим оплату…" : "Оплатить ещё раз") + "</button>" +
               '<button class="btn btn--ghost" data-go="home">Вернуться в магазин</button></div>'
           : '<button class="btn" data-go="home">Вернуться в магазин</button>') +
@@ -19707,7 +19827,9 @@
     if (screen === "catalog") S.shown = 12;
     if (screen === "checkout") { S.coStep = 1; S.pointOpen = false; }
     // leaving the receipt drops the receipt: the next one reads its own query
-    if (screen !== "done") S.done = null;
+    // the receipt goes, and with it the method its retry picker was set to —
+    // the next failed receipt seeds itself from its own order (donePayIndex)
+    if (screen !== "done") { S.done = null; S.donePay = null; }
     // the receipt replaces the checkout it came from: Back from it belongs on
     // the shop, not on a payment form for an order already placed
     navTo(screen === "done");
@@ -19970,7 +20092,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-donepay],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -20164,6 +20286,8 @@
     // checkout selections re-render the step, which destroys the clicked
     // control — put keyboard focus back on its replacement
     if (d.paym !== undefined) { S.pay = Number(d.paym); render(); refocus('[data-paym="' + d.paym + '"]'); return; }
+    // the same three on the failed receipt — «или выберите другой способ»
+    if (d.donepay !== undefined) { S.donePay = Number(d.donepay); render(); refocus('[data-donepay="' + d.donepay + '"]'); return; }
     if (d.bank !== undefined) { S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return; }
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose

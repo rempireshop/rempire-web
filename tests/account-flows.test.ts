@@ -517,7 +517,7 @@ describe("settings.flows", () => {
 });
 
 describe("admin counters", () => {
-  it("counts the three queues", async () => {
+  it("counts the four queues", async () => {
     await saveCart({ email: EMAIL, items: [{ id: PRODUCT, qty: 1 }] });
     await query("update carts set updated_at = $1 where email = $2", [
       new Date(Date.now() - 5 * HOUR).toISOString(),
@@ -531,7 +531,8 @@ describe("admin counters", () => {
       birthday: `1988-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`,
     });
 
-    expect(await flowCounters()).toEqual({ carts: 1, alerts: 1, birthdays: 1 });
+    // «Заказ ждёт оплаты» has its own queue now; no unpaid order was made here
+    expect(await flowCounters()).toEqual({ carts: 1, alerts: 1, birthdays: 1, unpaid: 0 });
   });
 });
 

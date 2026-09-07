@@ -47,6 +47,18 @@ export interface Flows {
   backstock: boolean;
   /** «Заказ принят, ждём оплату» — off by default, see docs/mail.md. */
   pending: boolean;
+  /**
+   * «Заказ ждёт оплаты» — the reminder, and the automatic cancellation that
+   * follows it (Dim, 07.09.2026: «нужны напоминания, а через семь дней
+   * отменяем и сообщаем»). One switch for the pair: a shop that reminds but
+   * never lets go, or lets go without warning, is neither of the two things
+   * he asked for.
+   */
+  unpaid: boolean;
+  /** Days after an unpaid order before the reminder. */
+  unpaidRemindDays: number;
+  /** Days after an unpaid order before it cancels itself. */
+  unpaidCancelDays: number;
   /** Static promo code for the birthday letter when there is no promo module. */
   birthdayCode: string;
   /** Percent shown in the birthday letter. */
@@ -58,9 +70,18 @@ export const FLOW_DEFAULTS: Flows = {
   birthday: false,
   backstock: false,
   pending: false,
+  unpaid: false,
+  unpaidRemindDays: 3,
+  unpaidCancelDays: 7,
   birthdayCode: "",
   birthdayPercent: 10,
 };
+
+/** 1–60 whole days, or the default. The panel clamps too; this is the door. */
+function days(v: unknown, fallback: number): number {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 1 && n <= 60 ? Math.round(n) : fallback;
+}
 
 function bool(v: unknown, fallback: boolean): boolean {
   if (typeof v === "boolean") return v;
@@ -91,11 +112,21 @@ export async function getFlows(): Promise<Flows> {
   }
   const f = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const percent = Number(f.birthdayPercent);
+  const cancelDays = days(f.unpaidCancelDays, FLOW_DEFAULTS.unpaidCancelDays);
+  /* The reminder must come BEFORE the cancellation, whatever the two numbers
+     say. A remind-after that is not shorter than the cancel-after would mean a
+     letter warning about something that already happened, so it is pulled back
+     to the day before rather than refused — the panel refuses it too, and this
+     is the door that cannot be walked round. */
+  const remindDays = Math.min(days(f.unpaidRemindDays, FLOW_DEFAULTS.unpaidRemindDays), Math.max(1, cancelDays - 1));
   return {
     abandoned: bool(f.abandoned, FLOW_DEFAULTS.abandoned),
     birthday: bool(f.birthday, FLOW_DEFAULTS.birthday),
     backstock: bool(f.backstock, FLOW_DEFAULTS.backstock),
     pending: bool(f.pending, FLOW_DEFAULTS.pending),
+    unpaid: bool(f.unpaid, FLOW_DEFAULTS.unpaid),
+    unpaidRemindDays: remindDays,
+    unpaidCancelDays: cancelDays,
     birthdayCode: typeof f.birthdayCode === "string" ? f.birthdayCode.trim().toUpperCase().slice(0, 40) : "",
     birthdayPercent: Number.isFinite(percent) && percent > 0 && percent <= 90 ? Math.round(percent) : FLOW_DEFAULTS.birthdayPercent,
   };
@@ -516,12 +547,185 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   return { sent, skipped, reason };
 }
 
+/* ---------- «Заказ ждёт оплаты» → отмена ---------------------------------- */
+
+/**
+ * The unpaid order's own clock.
+ *
+ * An order that reached the bank page and was never paid used to sit in
+ * «новый» for ever: nobody wrote to the customer, and nobody let the order go.
+ * Dim, 07.09.2026: «нужны напоминания, а через семь дней отменяем и
+ * сообщаем.» Both numbers are settings, not constants
+ * (`settings.flows.unpaidRemindDays` / `unpaidCancelDays`, «Письма» in the
+ * admin), because seven days is his answer today and not a law.
+ *
+ * Vercel's free plan runs the cron once a day, so everything here is designed
+ * for one pass a day: whole days, one reminder per order, and a cancellation
+ * that is its own stamp. A missed day catches up on the next run; two runs in
+ * one day change nothing, because the reminder stamps the order before the
+ * letter leaves (the rule runAbandonedCarts() already follows) and a cancelled
+ * order no longer matches the query.
+ *
+ * What it will NOT touch: an order taken at the till («Салон», channel `pos`
+ * — the money was in the drawer before the row existed), and an order whose
+ * payment blob says paid whatever its status column says.
+ */
+export interface UnpaidRun extends FlowRun {
+  /** Orders cancelled on this pass. */
+  cancelled: number;
+}
+
+/** The row the two queries below share — enough to render either letter. */
+interface UnpaidRow {
+  id: string;
+  number: string;
+  email: string | null;
+  name: string | null;
+  lang: string | null;
+  items: unknown;
+  shipping: unknown;
+  subtotal: string | number | null;
+  shipping_price: string | number | null;
+  discount: string | number | null;
+  total: string | number | null;
+  currency: string | null;
+  status: string;
+  invoice: unknown;
+}
+
+const UNPAID_COLUMNS =
+  "id, number, email, name, lang, items, shipping, subtotal, shipping_price, discount, total, currency, status, invoice";
+
+/* The two statuses an order carries while its money has not arrived: «новый»
+   (never left for the bank, or left and never came back) and «не оплачен»
+   (the shopper pressed «Отменить» at the bank). Both are orders the customer
+   may still want — which is the whole point of writing to them first. */
+const UNPAID_STATUSES = "('new','failed')";
+const NOT_PAID = "coalesce(payment->>'status','') <> 'paid'";
+
+function unpaidOrderLike(row: UnpaidRow): Record<string, unknown> {
+  return {
+    id: row.id,
+    number: row.number,
+    email: row.email,
+    customer_name: row.name,
+    lang: row.lang,
+    items: Array.isArray(row.items) ? row.items : safeJson(String(row.items ?? "[]")),
+    shipping: row.shipping,
+    subtotal: row.subtotal,
+    shipping_price: row.shipping_price,
+    discount: row.discount,
+    total: row.total,
+    currency: row.currency,
+    status: row.status,
+  };
+}
+
+/** `/shop2/et/done/?n=R-…&s=failed&o=<id>` — the screen with «Оплатить ещё раз». */
+function payAgainUrl(lang: LangCode, row: UnpaidRow): string {
+  const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
+  const q = new URLSearchParams({ n: row.number, s: "failed", o: row.id });
+  return `${baseUrl()}/shop2${seg}/done/?${q.toString()}`;
+}
+
+export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidRun> {
+  const flows = await getFlows();
+  if (!flows.unpaid) return { sent: 0, skipped: 0, cancelled: 0, reason: "disabled" };
+  await loadTexts();
+
+  const day = 24 * 60 * 60 * 1000;
+  const remindBefore = new Date(now - flows.unpaidRemindDays * day).toISOString();
+  const cancelBefore = new Date(now - flows.unpaidCancelDays * day).toISOString();
+
+  const { onOrderClosed, onOrderUnpaid } = await import("@/lib/mail-hooks");
+  const { setOrderStatus } = await import("@/lib/orders");
+
+  let sent = 0;
+  let skipped = 0;
+  let cancelled = 0;
+
+  /* ---- 1. the reminder ------------------------------------------------- */
+  /* Old enough for the reminder, not yet old enough to be let go, and never
+     reminded before. `payment.unpaidRemindedAt` is the stamp: it is written
+     BEFORE the letter leaves, because a missed reminder costs one letter and
+     a repeated one costs the customer's patience every single day. */
+  const waiting = await query<UnpaidRow>(
+    `select ${UNPAID_COLUMNS} from orders
+      where status in ${UNPAID_STATUSES}
+        and coalesce(channel,'web') = 'web'
+        and ${NOT_PAID}
+        and created_at <= $1
+        and created_at > $2
+        and (payment->>'unpaidRemindedAt') is null
+      order by created_at
+      limit ${BATCH}`,
+    [remindBefore, cancelBefore],
+  );
+
+  for (const row of waiting) {
+    await query(
+      `update orders set payment = coalesce(payment,'{}'::jsonb) || jsonb_build_object('unpaidRemindedAt', $2::text),
+              updated_at = now()
+        where id = $1`,
+      [row.id, new Date(now).toISOString()],
+    );
+    if (!row.email) {
+      skipped += 1;
+      continue;
+    }
+    const lang = normalizeLangCode(row.lang);
+    const daysLeft = Math.max(
+      0,
+      flows.unpaidCancelDays - flows.unpaidRemindDays,
+    );
+    const res = await onOrderUnpaid(unpaidOrderLike(row), {
+      daysLeft,
+      payUrl: payAgainUrl(lang, row),
+    });
+    if (res.ok && !res.skipped) sent += 1;
+    else skipped += 1;
+  }
+
+  /* ---- 2. the cancellation --------------------------------------------- */
+  /* Old enough to be let go. setOrderStatus() writes the journal line and puts
+     a counted shelf back where the order had taken any (it had not — an unpaid
+     order never decremented stock), and the letter tells the customer, which
+     is the half that did not exist before 07.09.2026. */
+  const stale = await query<UnpaidRow>(
+    `select ${UNPAID_COLUMNS} from orders
+      where status in ${UNPAID_STATUSES}
+        and coalesce(channel,'web') = 'web'
+        and ${NOT_PAID}
+        and created_at <= $1
+      order by created_at
+      limit ${BATCH}`,
+    [cancelBefore],
+  );
+
+  for (const row of stale) {
+    try {
+      await setOrderStatus(row.id, "cancelled", "system:unpaid");
+    } catch (err) {
+      console.error(`[flows] unpaid cancel failed on ${row.number}:`, err);
+      skipped += 1;
+      continue;
+    }
+    cancelled += 1;
+    if (!row.email) continue;
+    const res = await onOrderClosed({ ...unpaidOrderLike(row), status: "cancelled" }, { kind: "cancelled" });
+    if (res.ok && !res.skipped) sent += 1;
+  }
+
+  return { sent, skipped, cancelled };
+}
+
 /* ---------- the scheduler ------------------------------------------------- */
 
 export interface FlowsReport {
   abandoned: FlowRun;
   backstock: FlowRun;
   birthday: FlowRun;
+  unpaid: UnpaidRun;
   ms: number;
 }
 
@@ -532,6 +736,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     abandoned: { sent: 0, skipped: 0, reason: "error" },
     backstock: { sent: 0, skipped: 0, reason: "error" },
     birthday: { sent: 0, skipped: 0, reason: "error" },
+    unpaid: { sent: 0, skipped: 0, cancelled: 0, reason: "error" },
     ms: 0,
   };
   for (const [key, fn] of [
@@ -546,6 +751,14 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
       out[key] = { sent: 0, skipped: 0, reason: "error" };
     }
   }
+  /* Its own loop because its report carries one more number — how many orders
+     were let go — and because it is the only branch that changes an order. */
+  try {
+    out.unpaid = await runUnpaidOrders(now);
+  } catch (err) {
+    console.error("[flows] unpaid failed:", err);
+    out.unpaid = { sent: 0, skipped: 0, cancelled: 0, reason: "error" };
+  }
   out.ms = Date.now() - started;
   return out;
 }
@@ -559,10 +772,12 @@ export interface FlowCounters {
   alerts: number;
   /** Birthdays in the next seven days, marketing consent given. */
   birthdays: number;
+  /** Unpaid orders old enough for the reminder and not reminded yet. */
+  unpaid: number;
 }
 
 export async function flowCounters(now: number = Date.now()): Promise<FlowCounters> {
-  const out: FlowCounters = { carts: 0, alerts: 0, birthdays: 0 };
+  const out: FlowCounters = { carts: 0, alerts: 0, birthdays: 0, unpaid: 0 };
   try {
     const cutoff = new Date(now - ABANDONED_AFTER_MS).toISOString();
     const [carts] = await query<{ n: string | number }>(
@@ -601,6 +816,22 @@ export async function flowCounters(now: number = Date.now()): Promise<FlowCounte
       days,
     );
     out.birthdays = Number(bd?.n) || 0;
+  } catch {
+    /* ignored */
+  }
+  try {
+    const flows = await getFlows();
+    const day = 24 * 60 * 60 * 1000;
+    const [unpaid] = await query<{ n: string | number }>(
+      `select count(*)::int as n from orders
+        where status in ${UNPAID_STATUSES}
+          and coalesce(channel,'web') = 'web'
+          and ${NOT_PAID}
+          and created_at <= $1
+          and (payment->>'unpaidRemindedAt') is null`,
+      [new Date(now - flows.unpaidRemindDays * day).toISOString()],
+    );
+    out.unpaid = Number(unpaid?.n) || 0;
   } catch {
     /* ignored */
   }
