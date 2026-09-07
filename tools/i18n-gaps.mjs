@@ -283,9 +283,10 @@ const ASSEMBLED = [
   [/^из $/, "half of «5 из 100» — rule /^(\\d+) из (\\d+)$/"],
   [/^Скидка$/, "«Скидка» on its own is a key; with a code it is rule /^Скидка · (.+)$/"],
   [/^Показаны первые 24 из /, "rules /^Показаны первые 24 из (\\d+)( по запросу «(.+)»)?$/"],
-  // integration: admin «Склад» search — same two-hole chunking artifact as
-  // the catalogue's own "24" case just above, only the shown-count differs
-  [/^Показаны первые 60 из /, "rules /^Показаны первые 60 из (\\d+)( по запросу «(.+)»)?$/, plus the shared /^(\\d+) товар… по запросу «(.+)»$/"],
+  // integration: admin «Склад» search — same chunking artifact as the
+  // catalogue's own "24" case just above. Its page size is a variable now
+  // (the list pages the whole warehouse), so the hole is where 60 used to be
+  [/^Показаны первые $/, "rules /^Показаны первые (\\d+) из (\\d+)( по запросу «(.+)»)?$/, plus the shared /^(\\d+) товар… по запросу «(.+)»$/"],
   [/^по запросу «$/, "tail of the goods-list count — same two rules"],
   [/^Заканчиваются .* Срочно: /, "rule /^Заканчиваются (\\d+) товар… Могу собрать заказ…$/"],
   [/^\. Могу собрать заказ поставщику/, "tail of the same assistant answer — same rule"],
@@ -311,7 +312,7 @@ const ASSEMBLED = [
   // an inline <svg>, a sibling element, not text; the hole here is that
   // element, not a runtime value glued into the same text node. «Сканировать»
   // on its own is already a real key (used since the storefront pass).
-  [/^(Сканировать|Приёмка)$/, "keys «Сканировать» / «Приёмка» — the hole is the icon's <svg>, a separate element, not text"],
+  [/^Сканировать$/, "key «Сканировать» — the hole is the icon's <svg>, a separate element, not text"],
 ];
 function assembled(text) {
   if (!text.includes(HOLE)) return null;

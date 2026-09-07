@@ -29,8 +29,12 @@
 «Поделиться» → «На экран “Домой”»; в Chrome — меню ⋮ → «Установить
 приложение»). Появится третья иконка, **«Сканер»**, которая открывается
 сразу в камере. Пароль спросят один раз, как в админке. Из админки туда
-ведёт кнопка «Приёмка» в шапке вкладки «Склад» (она же «Сканировать» там,
-где на неё ссылаются подсказки).
+ведёт ссылка «Сканер отдельным приложением ↗» на вкладке «Склад».
+
+Кнопка, которая открывает сканер, называется **«Сканировать»** — и на
+«Складе», и в «Салоне». Раньше в шапке «Товаров» была вторая кнопка
+«Приёмка», которая делала ровно то же самое; её убрали, чтобы одно действие
+называлось одним словом.
 
 ## Как принять товар (приход)
 
@@ -39,9 +43,13 @@
 3. Наведите камеру на штрихкод (EAN-13, EAN-8 или UPC-A — это почти все
    штрихкоды на упаковках).
 4. Как только код распознан, вы услышите/почувствуете сигнал, и на экране
-   появится карточка товара с остатком.
+   появится карточка товара с остатком. Обычный магазинный штрихкод
+   (EAN-13, EAN-8, UPC) читается **с первого кадра** — держать флакон
+   неподвижно полсекунды больше не нужно; в самом коде есть контрольная
+   цифра, по которой сканер проверяет, что прочитал правильно, и цифры вы
+   всё равно видите на карточке до того, как что-то сохраните.
 5. Число по умолчанию — 1. Нажмите «+» столько раз, сколько нужно (или
-   впишите число), потом «+ Приход». Всё, штуки на складе.
+   впишите число), потом «Принять +N». Всё, штуки на складе.
 6. После этого сканер сразу готов к следующему коду — ничего нажимать не
    надо.
 7. Если код ни к чему не привязан — экран спросит «К какому товару?»: наберите
@@ -57,6 +65,35 @@
 работает: наведите и нажмите на нём кнопку, код сам появится там же, где и от
 камеры телефона.
 
+### Приблизить картинку
+
+Маленький код на маленьком флаконе читается лучше, если его приблизить.
+**Разведите два пальца прямо на картинке** — камера приблизится, справа внизу
+на секунду появится «2,4×». Свести пальцы — отдалит. Если руки заняты
+флаконом, **два быстрых касания** по картинке делают то же самое одним
+пальцем: приблизить и обратно. Приближение запоминается — в следующий раз
+сканер откроется там же, где вы его оставили. На некоторых телефонах камера
+приближать не умеет — тогда пальцы ничего не делают и «×» не появляется.
+
+Страница под камерой при этом не двигается: жест работает только на самой
+картинке.
+
+### Фонарик
+
+Кнопка 🔦 вверху включает и выключает подсветку (на некоторых Samsung она
+появляется через секунду-две после запуска камеры — это нормально).
+**В темноте фонарик включается сам**, один раз за сеанс: если в кладовке
+темно и код ещё ни разу не прочитался, сканер зажигает подсветку. Выключили
+руками — больше сам не включится, пока не закроете и не откроете сканер.
+
+### Сколько штрихкодов уже привязано
+
+На «Складе» под кнопкой «Сканировать» и на самом экране сканера (между
+кодами) есть строка **«Штрихкоды: привязано 12 из 322»**. Это вся работа по
+первой привязке: в каталоге штрихкодов не было ни одного, поэтому каждый код
+— это флакон, который кто-то отсканировал и привязал руками. Делать всё за
+один вечер не нужно: строка показывает, где вы остановились.
+
 ## Как списать продажу без сайта (сканером)
 
 Так же, как приход, только кнопка «− Списание» — для проданных штук без
@@ -68,6 +105,23 @@
 На вкладке «Склад» у любого товара — кнопка «Править»: там можно вписать
 настоящий остаток после пересчёта на полке, порог «мало» и штрихкод, и
 написать причину (видно потом в истории).
+
+Штрихкод можно вписать и в «Товаре» → «Размеры и цены», в колонке
+«Штрихкод»: это тот же самый склад. «Отвязать» рядом с кодом только очищает
+поле — код освободится после «Сохранить», так что случайное нажатие на
+телефоне ничего не стоит.
+
+## Весь список склада
+
+Список показывает **все** товары, а не первые несколько десятков: он
+подгружает следующие 60 строк сам, как только вы долистали до конца, а кнопка
+«Показать ещё» внизу делает то же самое нажатием. Когда список кончился, внизу
+написано, сколько всего строк («322 товаров»). Поиск и фильтры («Мало»,
+«Нет», «Не учтено») ищут по всему складу, а не по тому, что уже на экране.
+
+**Красное число остатка** значит «не больше порога «мало»» — своего у каждого
+объёма, по умолчанию 2. Порог меняется кнопкой «Править» в той же строке.
+Такое же правило теперь и в «Товаре» → «Размеры и цены».
 
 ## Как продать в салоне
 
@@ -283,7 +337,8 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   the **«Салон»** section of its own — `data-admtab="stock"` and `"pos"` still
   address them, which is what keeps the deep links and this suite working
   (`ADM_SECTION_OF` in `app.js`, docs/features.md § «Админка: оболочка»).
-- `admStockHTML()` / `stockRows()` / `stockRowHTML()` / `stockEditFormHTML()`
+- `admStockHTML()` / `stockFiltered()` / `stockRows()` / `stockRowHTML()` /
+  `stockEditFormHTML()`
   — the list, filtered/searched **client-side** against `S.stockLevels`
   (fetched once via `loadStockLevels()`, same pattern as `admCatalogRows()`
   against the in-memory `CATALOGUE`). Rows are sorted by quantity ascending —
@@ -291,6 +346,30 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   (`data-stockstep="<key>:±1"`) that posts a relative move and offers an undo
   on the toast; «Править» opens the same form as before for the barcode, the
   «мало» threshold and an exact recount.
+- **The list reaches every row** (Dim: «We need all»). It is drawn a page at
+  a time — `S.stockShown`, `STOCK_PAGE` = 60 — and `stockGrow()` adds the
+  next page. Two things trigger it: the `[data-stockmore]` button, and
+  `stockScrollMore()` from the shared window `scroll` listener when the
+  button comes within 400 px of the viewport. `stockGrow()` **appends**: the
+  rows live in their own `[data-stockrows]` container, the count line is
+  `[data-stockcount]`, and only those two are touched. That is not a
+  micro-optimisation — rebuilding the list took the button out of the DOM in
+  the middle of the press that asked for it (caught by
+  `e2e/scanner-app.spec.ts`), and would take the scroll position and any open
+  «Править» form with it every time. A new search or filter resets
+  `S.stockShown`.
+- `stockBoundCount()` / `stockBoundLine()` — «Штрихкоды: привязано 12 из 322»,
+  drawn on «Склад» (`[data-stockbound]`) and on the scanner's idle panel.
+  Counted over the WHOLE warehouse, never over the filtered list: it is a
+  total, and a total that moved with the search box would answer a different
+  question every time it was read. The first bind pass is ~220 bottles one at
+  a time over several evenings, so this is the only thing that says where it
+  got to.
+- A row's remainder is red when the SERVER says the row is not `in` — its own
+  `low_threshold`, default 2 (`deriveState`, `src/lib/inventory.ts`). The
+  product editor's grid uses the same rule now (`edStockLow()`); it used to
+  redden at a flat «3 or fewer», in the code and in its own hint, which
+  disagreed with the «Мало» chip one screen away.
 - `admStockMovesHTML()` — the ledger sub-view (`S.stockMovesOpen`).
 - `admSalonHTML()` / `posSearchResultsHTML()` / `admPosReceiptHTML()` — the
   register, redesigned in phase 2 into two columns: a 52-h ink-bordered search
@@ -325,17 +404,65 @@ DB_DRIVER=pglite npm run seed:stock  # against an in-memory PGlite
   Since phase 2 both doors wear the SAME shell — `scanTopBarHTML()` header,
   viewfinder, panel, manual field, footer — and `S.scanApp` only decides the
   wordmark and where the × leads; see "The scanner as its own app" below.
-- **Engine selection**: `startScanEngine()` feature-detects
-  `window.BarcodeDetector` — present, use it natively
-  (`startNativeEngine()`, own `getUserMedia` + a ~280 ms poll loop, formats
-  `ean_13`/`ean_8`/`upc_a`/`upc_e`); absent (iOS Safari), lazy-load the
-  vendored zxing UMD bundle (`startZxingEngine()`,
-  `public/vendor/zxing/zxing-browser.min.js`, global `ZXingBrowser`,
-  `BrowserMultiFormatOneDReader` — restricted to 1D formats by construction,
-  no hints needed). Both paths funnel into `handleScanCode()`, which
-  debounces the **same** code for 1.5 s (`SCAN.lastCode`/`SCAN.lastAt`) so a
-  steady camera view does not re-fire on every frame, but accepts a
-  **different** code immediately.
+- **The camera engine.** One stream, two decoders on top of it. Read
+  `docs/audit/2026-09-07-scanner.md` before changing any number here: every
+  one of them was chosen from `tools/scan-bench.mjs`, and the numbers it
+  measured are in that report.
+
+  ```
+  startScanEngine()
+   ├─ zxing script fetched from the first second (cached; a failed fetch is retried on the next open)
+   ├─ BarcodeDetector.getSupportedFormats()   ← an empty list = skip the native path at once
+   ├─ scanOpenCamera() → remembered lens, else facingMode:environment → scanPickLens()
+   │     └─ enumerateDevices → back lenses → drop wide/ultra/tele/macro → lowest camera2 index
+   ├─ scanTuneTrack(): focusMode:continuous · the remembered pinch zoom · torch re-checked at 0/0.5/1.5 s
+   └─ startNativeLoop()  ── throws, or six mute seconds ──▶ scanNativeGaveUp() ──▶ startZxingLoop()
+          every SCAN_TICK_MS (60), one view per pass — scanViewCanvas():
+            ticks 0,1,2,3 → the band, turned back [0, +13, 0, −13]°
+            every 9th    → the whole frame, capped at 1280 (insurance, ~1 point)
+          every 8th pass also measures the light and may switch the torch on
+  ```
+
+  - `scanCropCanvas(tilt)` — the band the decoder reads: `0.92 × 0.60` of the
+    short side, cut from the centre of the frame (which is what the square
+    viewfinder shows, `object-fit: cover`), **at the sensor's own resolution**
+    and optionally rotated. It used to be `0.76 × 0.44` drawn at 2×; the
+    upscale added no information and cost the pass ~40 ms, which measured as
+    7 expected reads per second of decoding against the current 20.
+  - `scanCameraRead(code, format)` — when a read counts. A format that
+    carries its own check digit (`SCAN_SELF_CHECKED`: EAN-8/13, UPC-A/E,
+    CODE-128, QR) counts on the **first** frame; anything else (ITF, CODE-39)
+    still needs two consecutive agreeing passes. Measured: one frame reads
+    inside a second 99 % of the time, two frames 46 %.
+  - zxing runs with plain hints and switches its **thorough** reader
+    (`TRY_HARDER`) in on every other pass after `SCAN_HARD_AFTER_MS` (2.2 s)
+    with nothing read. TRY_HARDER buys ~9 points of a single frame and costs
+    8–10× the time, which is a losing trade until the owner is visibly stuck.
+  - Both paths funnel into `handleScanCode()`, which debounces the **same**
+    code for 1.5 s (`SCAN.lastCode`/`SCAN.lastAt`) so a steady camera view
+    does not re-fire on every frame, but accepts a **different** code
+    immediately.
+- **Pinch-to-zoom** (`scanZoomStart/Move/End`, `scanApplyZoom`) — bound to
+  `[data-scanzoombox]` (the viewfinder) only, which is `touch-action: none`
+  in `admin.css`, so the panel underneath keeps every gesture it had. Two
+  fingers scale the track's `zoom` constraint; a double tap toggles between
+  `SCAN_ZOOM_START` and the far end, for the hand that is not holding a
+  bottle. Clamped to `getCapabilities().zoom`, remembered in `localStorage`
+  (`rmp-scan-zoom`), and simply absent on a lens with no zoom capability.
+  `[data-scanzoom]` is the «2,4×» readout, shown while it moves.
+- **The torch can light itself.** `scanFrameLuma()` measures the band's mean
+  luminance off a 32-px thumbnail every eighth pass; below `SCAN_DARK_LUMA`
+  (80), with a torch available and nothing read yet, `scanAutoTorch()` fires
+  **once** per session. Measured: a lit shelf reads at ~50 % and a dark
+  stockroom (dim + sensor-gain noise + longer exposure) at 0–20 %, at mean
+  luminance 140 against 62.
+- **The fallback is logged, not displayed.** When the native detector gives
+  up, `scanNativeGaveUp()` writes `console.info` and sets
+  `data-scanfallback="error|silent"` on the overlay. It used to put «Камера
+  читает через запасной декодер…» under the viewfinder; Dim asked for that to
+  go — it is a fact about the phone's Play Services, not about the bottle in
+  the owner's hand. `data-scanengine` still says which decoder is running, and
+  both attributes are what the e2e suite asserts on.
 - **The result card**: `scanPanelHTML()` — «Найдено · EAN», the name, «объём ·
   на складе N», the giant stepper (`data-scanqty`, `[data-scanqtyinput]`) and
   the confirms `data-scanmove="in"|"out"` (`scanCommitMove()`) — or, in «Салон»
@@ -499,9 +626,37 @@ its own icon, and opens straight into the camera.
   `body.is-scanning .toast` (the class is set by the same render hook that
   mounts the overlay) lifts it back on top. This affects the «Склад» overlay
   too, where it was equally invisible and equally wrong.
-- **Getting there.** «Склад» carries one line — «📷 Сканер как отдельное
-  приложение: откройте /shop2/scan/ на телефоне…» — and an «Сканер отдельным приложением ↗»
-  button (`data-scanapp`).
+- **Getting there.** «Склад» has ONE button that opens the scanner —
+  «Сканировать» (`data-scanopen`), in the body of the screen, the same word
+  «Салон» uses in its own header — and ONE link to the standalone route,
+  «Сканер отдельным приложением ↗» (`data-scanapp`). The «Приёмка» button
+  that used to sit in the «Товары» header opened the same screen under a
+  different name and is gone: «one name for the scanner everywhere» (Dim).
+
+### Measuring the camera (`tools/scan-bench.mjs`)
+
+Not a test — CI does not run it. It paints real EAN-13 barcodes (encoded from
+the specification, check digit and all) into camera-sized frames across a
+sweep of distances, tilts, blurs, light levels and glare, and runs the
+**vendored zxing decoder** over each candidate framing, reporting read rate,
+cost per pass and — the number that actually matters — `P(read within one
+second of aiming)`.
+
+```
+node tools/scan-bench.mjs                 # the full sweep, ~11 min, 13 824 decodes
+node tools/scan-bench.mjs --quick         # a third of the images
+node tools/scan-bench.mjs --focus         # the low-light and rotation questions only
+node tools/scan-bench.mjs --json out.json # every cell
+```
+
+Run it before changing `SCAN_TICK_MS`, `SCAN_TILTS`, `SCAN_FULL_EVERY`,
+`SCAN_SELF_CHECKED`, `SCAN_DARK_LUMA`, `SCAN_HARD_AFTER_MS` or the crop
+geometry, and put the numbers in the audit note — that is how the current
+values were chosen (`docs/audit/2026-09-07-scanner.md`). It measures the zxing
+half only (headless Chromium has no camera and no `BarcodeDetector`), which is
+the floor under every phone; the native detector is strictly better where it
+works, and both paths share one schedule (`scanViewCanvas()`) so they cannot
+drift apart.
 
 ## Assistant (`src/app/api/assistant/actions.ts`, `route.ts`)
 
@@ -533,6 +688,24 @@ its own icon, and opens straight into the camera.
   back; a never-paid cancel returns nothing), and `applyPaymentResult()`'s
   real (non-injected) paid-transition decrement — including that gift/bundle
   lines never trigger a lookup and a webhook retry never decrements twice.
+  Also the sentence the product editor now says out loud: a size nobody has
+  set a threshold on warns at 2, so 3 is `in` and 2 is `low`.
+- `tests/inventory-bind-route.test.ts` — the bind/lookup HTTP contract: both
+  doors' 401, the bind + lookup round-trip, `ean_taken` naming the bottle that
+  holds the code, `ean: null` freeing it, `bad_ean`/`bad_threshold`, and
+  `state` following the row's own threshold.
+- `tests/inventory-scanner.test.ts` — the **browser** half, sliced out of
+  `public/shop2/app.js` by source text and run against stubs (the technique
+  `tests/checkout-parity.test.ts` established, so this tests the shop's own
+  code rather than a retyped copy). What it pins: which formats count on one
+  frame and which still need two; the band's geometry (994×648 out of a
+  1920×1080 frame, drawn 1:1, cut from the middle) and its rotation; the view
+  schedule and why 9 and 4 are coprime; «Склад»'s paging, its search and the
+  rows/count/button split that lets a page be appended; «привязано N из M»;
+  the editor's red following `state`; the pinch clamp; and that the «запасной
+  декодер» sentence is gone from the file while the console line is not.
+- `e2e/scanner-app.spec.ts` — ten scenarios end to end on a phone viewport;
+  see docs/testing.md § "The scanner app".
 - `tests/pos-orders.test.ts` — the POS route (admin auth, `channel:'pos'`,
   no-e-mail order, stock decrement, discount-percent-as-discount-code) and
   the receipt route (auth, content, 404 on an unknown order).

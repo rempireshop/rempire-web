@@ -164,6 +164,20 @@ describe("inventory", () => {
     it("rejects a garbage EAN", async () => {
       await expect(setLevel(plain.id, "", { ean: "x" })).rejects.toBeInstanceOf(InventoryError);
     });
+
+    /* The number the product editor now says out loud. Its «Размеры и цены»
+       grid used to redden a remainder at a flat «3 или меньше» in the code
+       and in words, while «Склад» next door filtered on the row's own
+       threshold — one warehouse, two ideas of «мало». Dim settled it: the
+       per-row threshold, default 2. That default lives in this column, so it
+       is worth one test that says the whole sentence rather than only the
+       number (`db/migrations/090_inventory.sql`, `deriveState` above). */
+    it("a size nobody has set a threshold on warns at 2, so 3 is «in» and 2 is «low»", async () => {
+      const row = await setLevel(plain.id, "", { ean: "77778888" });
+      expect(row.lowThreshold).toBe(2);
+      expect(deriveState(3, row.lowThreshold)).toBe("in");
+      expect(deriveState(2, row.lowThreshold)).toBe("low");
+    });
   });
 
   describe("productStockStates — the /api/overrides merge", () => {

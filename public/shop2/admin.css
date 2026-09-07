@@ -863,10 +863,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scan__box {
   position: relative; width: min(80vw, 320px); aspect-ratio: 1; flex: none;
   border: 2px solid #fff; background: #000; overflow: hidden;
+  /* the viewfinder owns every touch that lands on it — pinch and double tap
+     zoom the lens (scanZoomStart in app.js), and the browser must not read
+     the same two fingers as a page pinch. Only here: the card and the list
+     under it scroll exactly as they did. */
+  touch-action: none; user-select: none; -webkit-user-select: none;
 }
 .scan__video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
 .scan__target { position: absolute; inset: 12%; border: 1px solid rgba(255, 255, 255, .5); pointer-events: none; }
 .scan__line { position: absolute; left: 12px; right: 12px; top: 50%; height: 2px; background: var(--a-warn); pointer-events: none; }
+/* «2,4×» while the pinch is moving, then gone */
+.scan__zoom {
+  position: absolute; right: 8px; bottom: 8px; pointer-events: none;
+  padding: 3px 8px; background: rgba(0, 0, 0, .6); color: #fff;
+  font-family: var(--a-num, inherit); font-size: 13px; line-height: 18px; letter-spacing: .02em;
+}
 /* No camera (denied, absent, or a desktop): the viewfinder is dead space and
    the manual field is the interface — see scanRenderPanel(). A card on screen
    is the whole job, so the box steps aside for it too. */
@@ -874,11 +885,14 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scanoverlay.is-card .scan__box { width: min(46vw, 140px); }
 .scanoverlay.is-card .scan__line { display: none; }
 
-/* the engine's own line under the viewfinder — «запасной декодер» */
+/* one line under the viewfinder, for something the owner needs to know */
 .scan__note { margin: -8px 0 0; max-width: 400px; font-size: 13px; line-height: 18px; color: var(--a-dim); text-align: center; }
 .scan__panel { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
 .scan__hint { margin: 0; text-align: center; font-size: 15px; line-height: 22px; color: var(--a-dim); }
 .scan__hint--sm { font-size: 13px; text-align: left; }
+/* «Штрихкоды: привязано 12 из 322» — how far the first pass over the shelves
+   has got, between codes. Quiet: it is a bearing, not an instruction. */
+.scan__count { margin: -6px 0 0; text-align: center; font-size: 13px; line-height: 18px; color: var(--a-dim); }
 
 .scan__card {
   background: #fff; color: var(--a-ink); padding: 20px;

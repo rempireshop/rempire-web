@@ -1226,7 +1226,6 @@
       "ошибка": "viga",
       "Код привязан ✓": "Kood seotud ✓",
       "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Koodi ei õnnestunud kontrollida — server ei vasta. Proovige uuesti.",
-      "Камера читает через запасной декодер — держите код ближе и ровнее.": "Kaamera loeb varudekoodriga — hoidke koodi lähemal ja otse.",
       "Не удалось привязать — возможно, код уже занят": "Ei õnnestunud siduda — võib-olla on kood juba kasutusel",
       "Войдите в панель.": "Logige paneeli sisse.",
       "Способ оплаты": "Makseviis",
@@ -1452,7 +1451,7 @@
       "Добавить размер — объёмы заводит Дим": "Lisa suurus — mahud lisab Dim",
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
-      "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui seda on 3 või vähem. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
+      "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa «vähe» läve — vaikimisi 2; igal mahul on oma lävi, seda muudab laos nupp «Muuda». «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Левее": "Vasakule",
       "Правее": "Paremale",
       "Убрать фото": "Eemalda foto",
@@ -3024,7 +3023,6 @@
       "ошибка": "error",
       "Код привязан ✓": "Code linked ✓",
       "Не удалось проверить код — сервер не отвечает. Попробуйте ещё раз.": "Could not check the code — the server is not responding. Try again.",
-      "Камера читает через запасной декодер — держите код ближе и ровнее.": "The camera is reading through the backup decoder — hold the code closer and straight.",
       "Не удалось привязать — возможно, код уже занят": "Couldn't link it — the code may already be taken",
       "Войдите в панель.": "Sign in to the panel.",
       "Способ оплаты": "Payment method",
@@ -3250,7 +3248,7 @@
       "Добавить размер — объёмы заводит Дим": "Add a size — sizes are added by Dim",
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
-      "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red at 3 or fewer. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
+      "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below the «low» threshold — 2 by default; every size has its own, changed in the warehouse with «Edit». «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Левее": "Left",
       "Правее": "Right",
       "Убрать фото": "Remove the photo",
@@ -3931,8 +3929,15 @@
         EN: "One point is one euro. We credit $1% of every paid purchase. Redeem it at checkout — up to $2% of the cart total." }],
     // integration: admin «Склад» search count — mirrors the catalogue's own
     // "первые 24" rules just above, only the shown-count differs (60 rows)
-    [/^Показаны первые 60 из (\d+) по запросу «(.+)»$/, { ET: "Kuvatud esimesed 60, kokku $1 · otsing „$2“", EN: "First 60 shown, $1 in total · search “$2”" }],
-    [/^Показаны первые 60 из (\d+)$/, { ET: "Kuvatud esimesed 60, kokku $1", EN: "First 60 shown, $1 in total" }],
+    /* «Склад» pages the whole warehouse now (60 at a time, «Показать ещё» or
+       a scroll to the end), so the number in this line is no longer the
+       constant 60 the rule used to spell out. */
+    [/^Показаны первые (\d+) из (\d+) по запросу «(.+)»$/,
+      { ET: "Kuvatud esimesed $1, kokku $2 · otsing „$3“", EN: "First $1 shown, $2 in total · search “$3”" }],
+    /* «Штрихкоды: привязано 12 из 348» — how far the first pass over the
+       shelves has got, on «Склад» and on the scanner's idle screen. */
+    [/^Штрихкоды: привязано (\d+) из (\d+)$/,
+      { ET: "Triipkoodid: seotud $1 / $2", EN: "Barcodes: $1 of $2 linked" }],
     [/^· рег\. (.+)$/, { ET: "· reg. $1", EN: "· reg. $1" }],
     [/^([+-]?[\d.,]+)% к прошлому периоду$/, { ET: "$1% eelmise perioodiga võrreldes", EN: "$1% vs. previous period" }],
     [/^Остаток: (.+)$/, { ET: "Jääk: $1", EN: "Stock: $1" }],
@@ -5165,6 +5170,7 @@
     stockBusy: false,
     stockErr: "",
     stockQ: "",
+    stockShown: 60,      // how many rows of the (~320-row) list are on screen — «Показать ещё», or scrolling to the end
     stockFilter: "all",  // "all" | "low" | "out" | "untracked"
     stockEdit: "",        // "<productId> <variant>" (space-joined) of the row whose qty/EAN/threshold form is open
     stockEditQty: "",
@@ -5190,6 +5196,7 @@
     scanManual: "",
     scanQty: 1,            // the stepper's number, applied by «+ Приход» / «− Списание»
     scanApp: false,        // the standalone /shop2/scan/ route, not the «Склад» overlay
+    scanZoom: 0,           // where the pinch has the lens (0 = the lens has no zoom)
     scanBusy: false,       // a move is in flight — the two confirm buttons are disabled
     scanReady: false,      // the last move went through: «сканируйте следующий код»
     scanToday: null,       // [move,...] today's moves, refreshed after each hit
@@ -11160,8 +11167,14 @@
       '<button class="adm-tab" data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '" title="Наборы">Наборы</button>';
     var add = tab === "sets"
       ? '<button class="adm-btn adm-btn--head" data-bundlenew>+ Набор</button>'
+      /* One action, one name. This header used to carry «Приёмка» over a
+         «Склад» whose own first button says «Сканировать» and whose «Салон»
+         neighbour says it a third time — three words for the one thing the
+         owner does with a phone and a bottle (Dim: "one name everywhere").
+         The word that won is «Сканировать», and it lives in the screen's
+         body, one line below where this button was. */
       : tab === "stock"
-        ? '<button class="adm-btn adm-btn--head" data-scanopen>Приёмка' + admIcon("scan", false, 20) + "</button>"
+        ? ""
         /* product creation: a blank product the editor really can save —
            custom_products on the server, CATALOGUE here (adoptCustom). */
         : '<button class="adm-btn adm-btn--head" data-admgoodsnew>+ Товар</button>';
@@ -14714,6 +14727,13 @@
     }
     return null;
   }
+  /** Is this size's remainder low enough to draw red? The row's OWN «Порог
+      «мало»» (`state`, from deriveState() in src/lib/inventory.ts — server
+      default 2), never a number written into this screen. The grid used to
+      say a flat «3 или меньше», so a size the «Мало» chip on «Склад» listed
+      was black here, and a size set to warn at 5 stayed black at 4: one
+      warehouse, two different ideas of «мало» (Dim: «We should use 2»). */
+  function edStockLow(lv) { return !!(lv && lv.tracked && lv.state !== "in"); }
   /** wholesale/loyalty: the discount a salon gets when the product has no
       price of its own — the real setting, not the prototype's flat 20 %. */
   function edSalonPct() {
@@ -14921,7 +14941,7 @@
       var key = stockKey(p.id, variant);
       var lv = p.isNew ? null : edStockFor(p, variant);
       var qty = lv && lv.tracked ? String(lv.qty) : "";
-      var low = lv && lv.tracked && lv.qty <= 3;
+      var low = edStockLow(lv);
       var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
       var salon = edSalonOf(goodsPrice(priceVal) || 0);
       return '<div class="adm-grid__row">' +
@@ -14948,7 +14968,7 @@
       '<p class="adm-hint">' + (multi
         ? "У каждого объёма своя цена. Первый объём покупатель видит первым."
         : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
+      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
       "</div>";
   }
   function edPaneSizes(p) {
@@ -14963,7 +14983,7 @@
       var price = prices[Math.min(i, prices.length - 1)];
       var key = stockKey(p.id, sz);
       var qty = lv && lv.tracked ? String(lv.qty) : "";
-      var low = lv && lv.tracked && lv.qty <= 3;
+      var low = edStockLow(lv);
       /* Only the first size has a price of its own here, because that is the
          only one the shop stores: product_overrides.price patches p.price and
          p.prices[0] (applyDemoOverrides). The rest are the catalogue's, shown
@@ -14991,7 +15011,7 @@
       // a third thing, and a title is invisible on the phone anyway
       '<button class="adm-btn adm-btn--dash" type="button" disabled title="Объёмы заводит Дим" aria-label="Добавить размер — объёмы заводит Дим">+ Размер</button>' +
       '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
-      '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
+      '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       edEanHint() +
       "</div>";
   }
@@ -15378,6 +15398,11 @@
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
   var STOCK = { asked: false, seq: 0, movesAsked: false };
+  /** How many «Склад» rows one page of the list holds. The whole warehouse is
+      ~320 rows and every one of them has to be reachable (Dim: «We need
+      all»), but the list is re-drawn on every keystroke of the search box, so
+      it arrives a page at a time — pressed, or scrolled to. */
+  var STOCK_PAGE = 60;
   function loadStockLevels(force) {
     if (SRV.admin !== true) return;
     if ((S.stockLevels || STOCK.asked) && !force) return;
@@ -15469,7 +15494,7 @@
   }
   /** Everything that is running out comes first — the shelf the owner has to
       act on, not the alphabet. Variants nobody counts yet sort last. */
-  function stockRows() {
+  function stockFiltered() {
     /* The same folding the scanner's own search got: one literal substring
        over «бренд название id» found nothing for «kevin murphy» (the
        catalogue writes «Kevin.Murphy»), «un tangled» or «300 ml», which is
@@ -15493,13 +15518,70 @@
       var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
       return qa - qb;
     });
-    var shown = rows.slice(0, 60);
-    return shown.map(stockRowHTML).join("") +
+    return rows;
+  }
+  /** «60 из 322», or «322 товаров» once they are all here — plus what the
+      owner typed, not the folded copy the matching runs on. */
+  function stockCountText(shown, total) {
+    return (total > shown ? "Показаны первые " + shown + " из " + total : total + " " + plural(total)) +
+      (scanFold(S.stockQ) ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "");
+  }
+  /* «We need all» (Dim). The list used to stop dead at 60 of the ~320 rows
+     the catalogue makes, so the tail of the warehouse was reachable only by
+     guessing a search term. It pages now — and stockGrow() turns the page
+     over by itself as the owner scrolls, so on a phone there is nothing to
+     press at all. Paging rather than all 320 at once because this list is
+     re-drawn on every keystroke of the search box.
+
+     The three parts are separate elements on purpose: growing the list
+     APPENDS rows to [data-stockrows] and repaints only the count, so the
+     scroll position, the open «Править» form and the button node itself all
+     survive — and 60 more rows cost 60 rows of work, not 320. */
+  function stockRows() {
+    var rows = stockFiltered();
+    var cap = S.stockShown || STOCK_PAGE;
+    var shown = rows.slice(0, cap);
+    return '<div data-stockrows>' + shown.map(stockRowHTML).join("") + "</div>" +
       (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
-      '<p class="adm-hint" style="margin:10px 0 0">' +
-        (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
-        // what the owner typed, not the folded copy the matching runs on
-        (q ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "") + "</p>";
+      '<p class="adm-hint" data-stockcount style="margin:10px 0 0">' + stockCountText(shown.length, rows.length) + "</p>" +
+      (rows.length > cap
+        ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-stockmore style="margin-top:10px">Показать ещё</button>'
+        : "");
+  }
+  /** One more page, appended. Returns false when there is nothing left to
+      add — which is also when «Показать ещё» takes itself off the screen. */
+  function stockGrow() {
+    var list = document.getElementById("stocklist");
+    var box = list && list.querySelector("[data-stockrows]");
+    var count = list && list.querySelector("[data-stockcount]");
+    if (!box || !count) return false;
+    var rows = stockFiltered();
+    var from = Math.min(S.stockShown || STOCK_PAGE, rows.length);
+    if (from >= rows.length) return false;
+    S.stockShown = from + STOCK_PAGE;
+    var frag = document.createElement("div");
+    frag.innerHTML = rows.slice(from, S.stockShown).map(stockRowHTML).join("");
+    translateTree(frag);
+    while (frag.firstChild) box.appendChild(frag.firstChild);
+    var shown = Math.min(S.stockShown, rows.length);
+    count.textContent = stockCountText(shown, rows.length);
+    translateTree(count);
+    if (shown >= rows.length) {
+      var more = list.querySelector("[data-stockmore]");
+      if (more && more.parentNode) more.parentNode.removeChild(more);
+    }
+    return true;
+  }
+  /** The list turns its own page: the owner scrolling towards the last row is
+      the same intent as pressing «Показать ещё», and on a phone with ~320
+      rows it is the only one that does not need six taps. */
+  function stockScrollMore() {
+    if (!S.stockLevels || S.screen !== "admin" || S.scanOpen) return;
+    var list = document.getElementById("stocklist");
+    var more = list && list.querySelector("[data-stockmore]");
+    if (!more) return;
+    if (more.getBoundingClientRect().top > (window.innerHeight || 0) + 400) return;
+    stockGrow();
   }
 
   /* Three installable apps from one page: the shop (manifest.webmanifest,
@@ -15538,6 +15620,24 @@
     return '<div class="adm-note" data-pwahint><span>📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».</span>' +
       '<button class="adm-link adm-link--muted" data-pwahintclose>Скрыть</button></div>';
   }
+  /* «привязано 12 из 348» — where the first pass over the shelves has got to.
+     Nothing in the catalogue carries a barcode (the Shopify export's every
+     filled `Variant Barcode` cell reads «NA»), so every code in the database
+     is one Renat scanned and tapped, roughly 220 bottles across several
+     evenings — «he will do it soon, but not all at once» (Dim). Counted over
+     the whole warehouse, never over the filtered list: it is a total, and a
+     total that moved with the search box would answer a different question
+     every time it was read. */
+  function stockBoundCount() {
+    var rows = S.stockLevels || [];
+    var n = 0;
+    for (var i = 0; i < rows.length; i++) if (rows[i].ean) n++;
+    return { bound: n, total: rows.length };
+  }
+  function stockBoundLine() {
+    var c = stockBoundCount();
+    return "Штрихкоды: привязано " + c.bound + " из " + c.total;
+  }
   function admStockHTML() {
     if (SRV.admin !== true) return '<div class="adm-empty">Войдите в панель, чтобы видеть склад</div>';
     loadStockLevels(false);
@@ -15548,6 +15648,8 @@
         '<span class="adm-hint">Приёмка и привязка штрихкодов — через сканер. ' +
           'Здесь можно поправить остаток вручную.</span>' +
       "</div>" +
+      // the progress of the first bind pass, next to the button that does it
+      (S.stockLevels ? '<p class="adm-hint" data-stockbound style="margin:0 0 12px">' + esc(stockBoundLine()) + "</p>" : "") +
       pwaHintHTML() +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Фильтр">' +
@@ -15606,10 +15708,14 @@
     // what the panel was last drawn from (scanPanelKey), which unknown code
     // already got the search box focused, the handheld scanner's burst
     panelKey: "", assignFocused: "", wedge: "", wedgeAt: 0,
-    // the camera engine: the two-pass confirmation, the native detector's
-    // record, the zxing script's load, the two capture canvases
+    // the camera engine: the confirmation buffer, the native detector's
+    // record, the zxing script's load, the three capture canvases
     pendingCode: "", pendingN: 0, pendingAt: 0, nativeSince: 0, nativeHit: false, nativeErrs: 0,
-    nativeFormats: [], zxingLoad: null, zxingFailed: false, crop: null, full: null };
+    nativeFormats: [], zxingLoad: null, zxingFailed: false, crop: null, full: null, luma: null,
+    // whether anything has read at all yet (the automatic torch's one
+    // question), whether that torch has already fired, and the pinch
+    everRead: false, autoTorched: false,
+    zoomCaps: null, pinchFrom: 0, pinchZoom: 0, tapAt: 0, zoomHide: null };
 
   function scanSupportInfo() {
     return {
@@ -15798,6 +15904,12 @@
          the three taps are the whole job, but between codes this is the only
          place that answers «что я уже принял сегодня». */
       return err + '<p class="scan__hint">Наведите на штрихкод. Товар найдётся сам — останется указать количество.</p>' +
+        /* The first pass over the shelves is one scan and one tap per bottle,
+           and it takes more evenings than one — so between codes the scanner
+           says where it has got to, on the screen the owner is actually
+           holding while he does it. Between codes only: while a card is up
+           the three taps are the whole job. */
+        (S.stockLevels ? '<p class="scan__count">' + esc(stockBoundLine()) + "</p>" : "") +
         (S.scanToday && S.scanToday.length
           ? '<div class="scan__today"><div class="scan__today__t">Сегодня</div>' +
             S.scanToday.slice(0, 6).map(function (m) {
@@ -15907,13 +16019,17 @@
   function scannerShellHTML() {
     return scanTopBarHTML() +
       '<div class="scan__stage">' +
-        '<div class="scan__box">' +
+        '<div class="scan__box" data-scanzoombox>' +
           '<video class="scan__video" data-scanvideo autoplay playsinline muted></video>' +
           '<div class="scan__target" aria-hidden="true"></div>' +
           '<div class="scan__line" aria-hidden="true"></div>' +
+          // what the pinch is doing, while it is doing it — a lens that has
+          // no zoom at all never shows it (scanZoomShow)
+          '<span class="scan__zoom" data-scanzoom hidden aria-hidden="true"></span>' +
         "</div>" +
-        // the engine's one line («запасной декодер») — in the shell, so it
-        // shows under a card too and costs no panel redraw (scanSetHint)
+        // one line under the viewfinder, for something the OWNER needs to
+        // know. The engine's own news does not go here any more — it is
+        // console + data-scanfallback now (see scanNativeGaveUp).
         '<p class="scan__note" data-scannote hidden></p>' +
         '<div id="scanpanel" class="scan__panel"></div>' +
         // The manual-entry field IS the keyboard-wedge target too (a bluetooth/
@@ -15937,7 +16053,10 @@
       S.scanErr || "", S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "",
       // «Сегодня» is drawn between codes only — while a card is up the list
       // landing must not count as a change
-      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-"
+      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-",
+      // …and «привязано N из M» beside it, by the same rule: the warehouse
+      // list landing behind a card must not rebuild the card
+      !h && S.stockLevels ? stockBoundLine() : "-"
     ].join("|");
   }
   function scanRenderPanel() {
@@ -16030,6 +16149,9 @@
     if (SCAN.stream) stopTracks(SCAN.stream);
     SCAN.stream = null;
     SCAN.pendingCode = ""; SCAN.pendingN = 0;
+    // the zoom belongs to the track that just went away; the remembered
+    // value in localStorage is what carries across to the next one
+    SCAN.zoomCaps = null; SCAN.pinchFrom = 0;
     scanSetEngine("");
   }
   function handleScanCode(code) {
@@ -16144,7 +16266,42 @@
      forever when it had nothing to say. */
   var SCAN_NATIVE_FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "itf", "qr_code"];
   var SCAN_FALLBACK_MS = 6000;   // a native detector silent this long hands over to zxing
-  var SCAN_TICK_MS = 120;        // a decode pass every ~8 frames
+  /* The floor under one decode pass, not a wait. A pass costs ~10 ms with
+     plain hints and ~90 ms with zxing's TRY_HARDER on this hardware
+     (tools/scan-bench.mjs), so the old 120 ms threw away most of every
+     second the owner spent holding the phone still: at ~20 % per pass, 8
+     chances a second is 83 % inside a second and 16 is 97 %. */
+  var SCAN_TICK_MS = 60;
+  /* Turned back before decoding. zxing's one-dimensional reader walks
+     horizontal rows and TRY_HARDER only retries at 90°, so a bottle held at
+     25° reads at 0 % — measured, every framing, both decoders. The same band
+     turned back 13° reads it at 33 %. Both directions, because a hand tilts
+     either way; every other pass stays straight, which is still the common
+     case. (tools/scan-bench.mjs, «a pre-rotated pass».) */
+  var SCAN_TILTS = [0, 13, 0, -13];
+  /* …and one look at the whole frame every ninth pass, for a code that ended
+     up outside the band. Measured worth: about one point of read rate on the
+     same frame — insurance, not the main event, which is why it is ninth and
+     not every other pass the way it used to be. Nine because it is coprime
+     with the four tilts, so it does not always steal the same one. */
+  var SCAN_FULL_EVERY = 9;
+  /* Formats that carry their own check digit: the decoder has already proved
+     the code is self-consistent before it hands it over, so a second
+     agreeing frame buys no safety and costs the wait. Measured: confirming
+     on one frame reads inside a second 99 % of the time, on two frames 46 %
+     — which is what «scanning was hard and almost impossible» is made of.
+     Anything else (ITF, a CODE_39 without its optional check digit) is
+     still read twice. */
+  var SCAN_SELF_CHECKED = /^(ean_13|ean_8|upc_a|upc_e|code_128|qr_code)$/;
+  /* Mean luminance of the middle of the frame under which reading collapses:
+     bright frames measured 140 and read at ~50 %, a dark stockroom measured
+     62 and read at 0–20 % (the gain a dark sensor applies is noise, and
+     noise is what stops a binariser finding an edge). 80 sits between them. */
+  var SCAN_DARK_LUMA = 80;
+  var SCAN_LUMA_EVERY = 8;       // …sampled every eighth pass, off a 32-px thumbnail
+  var SCAN_HARD_AFTER_MS = 2200; // nothing read for this long: zxing's thorough reader joins in
+  var SCAN_ZOOM_KEY = "rmp-scan-zoom";
+  var SCAN_ZOOM_START = 1.5;     // where the pinch starts on a lens that has zoom
   var SCAN_ZXING_SRC = "/vendor/zxing/zxing-browser.min.js";
   var SCAN_BAD_LENS = /wide|ultra|tele|macro|depth|bokeh|zoom/i;
   var SCAN_BACK_LENS = /back|rear|environment|задн|tagumi/i;
@@ -16243,26 +16400,118 @@
   }
   function scanRememberLens(id) { try { if (id) localStorage.setItem(SCAN_LENS_KEY, id); } catch (e) {} }
 
-  /* Focus and a modest zoom: continuous autofocus where the lens offers it,
-     and 1.5× so the small code fills more of the frame — the owner holds a
-     bottle at arm's length, not a poster. Each constraint on its own, so one
-     the lens refuses does not sink the other. The torch is re-read after the
+  /* Focus and zoom: continuous autofocus where the lens offers it, and a
+     starting zoom that puts more of the sensor on a small code — the owner
+     holds a bottle at arm's length, not a poster. Each constraint on its
+     own, so one the lens refuses does not sink the other. The zoom is no
+     longer a fixed 1.5×: it is where the pinch starts, and where the pinch
+     was left last time (scanApplyZoom). The torch is re-read after the
      stream settles: Samsung reports it late. */
   function scanTuneTrack(track) {
     if (!track || !track.getCapabilities) return;
     var caps = {};
     try { caps = track.getCapabilities() || {}; } catch (e) {}
-    var adv = [];
-    if (caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf("continuous") >= 0) adv.push({ focusMode: "continuous" });
-    if (caps.zoom && typeof caps.zoom.max === "number" && caps.zoom.max > 1) {
-      adv.push({ zoom: Math.min(caps.zoom.max, Math.max(Number(caps.zoom.min) || 1, 1.5)) });
+    if (caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf("continuous") >= 0) {
+      try { track.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(noop); } catch (e) {}
     }
-    for (var i = 0; i < adv.length; i++) {
-      try { track.applyConstraints({ advanced: [adv[i]] }).catch(noop); } catch (e) {}
-    }
+    SCAN.zoomCaps = (caps.zoom && typeof caps.zoom.max === "number" && caps.zoom.max > 1)
+      ? { min: Number(caps.zoom.min) || 1, max: Number(caps.zoom.max) } : null;
+    if (SCAN.zoomCaps) scanApplyZoom(scanZoomRemembered(), false);
     scanCheckTorch(track);
     setTimeout(function () { scanCheckTorch(track); }, 500);
     setTimeout(function () { scanCheckTorch(track); }, 1500);
+  }
+  /* ---- pinch-to-zoom on the viewfinder ------------------------------------
+     Dim asked for it in so many words: the fixed 1.5× was a guess that suits
+     a 100 ml bottle at arm's length and is wrong for a carton on a shelf.
+     Two ways in, because one hand is holding a bottle:
+       - two fingers on the picture, the ordinary camera pinch;
+       - a double tap on the picture, which is the same gesture every phone
+         camera has and the only one a thumb can do alone.
+     Neither fights the page: the gesture is bound to the viewfinder only,
+     which is `touch-action: none` (admin.css), so the panel underneath
+     scrolls exactly as it did. Where the lens has no zoom capability at all
+     nothing is bound and nothing is shown — a control that did nothing would
+     be worse than none. */
+  function scanZoomRemembered() {
+    var z = 0;
+    try { z = Number(localStorage.getItem(SCAN_ZOOM_KEY)) || 0; } catch (e) {}
+    return z > 0 ? z : SCAN_ZOOM_START;
+  }
+  function scanZoomClamp(z) {
+    var c = SCAN.zoomCaps;
+    if (!c) return 1;
+    return Math.min(c.max, Math.max(c.min, z));
+  }
+  /** Sets the lens, the readout and (for a gesture the owner meant) the
+      remembered value. `show` is false for the automatic one at start-up:
+      nobody pinched, so nothing flashes. */
+  function scanApplyZoom(z, show) {
+    if (!SCAN.zoomCaps) return;
+    var track = scanTrack();
+    if (!track || !track.applyConstraints) return;
+    var next = scanZoomClamp(z);
+    /* A pinch fires a touchmove per frame, and applyConstraints() on a camera
+       track is a real round trip to the driver — sixty of them a second, most
+       asking for a change smaller than the lens can make, is how a smooth
+       gesture turns into a stuttering one. A hundredth of the range is the
+       smallest step worth sending. */
+    var step = (SCAN.zoomCaps.max - SCAN.zoomCaps.min) / 100;
+    if (S.scanZoom && Math.abs(next - S.scanZoom) < step) return;
+    S.scanZoom = next;
+    try { track.applyConstraints({ advanced: [{ zoom: next }] }).catch(noop); } catch (e) {}
+    if (show) {
+      try { localStorage.setItem(SCAN_ZOOM_KEY, String(Math.round(next * 100) / 100)); } catch (e) {}
+      scanZoomShow(next);
+    }
+  }
+  /** «2,4×» over the picture for a moment. A number, so no dictionary key. */
+  function scanZoomShow(z) {
+    var el = SCANEL && SCANEL.querySelector("[data-scanzoom]");
+    if (!el) return;
+    el.textContent = (Math.round(z * 10) / 10).toFixed(1).replace(".", ",") + "×";
+    el.hidden = false;
+    clearTimeout(SCAN.zoomHide);
+    SCAN.zoomHide = setTimeout(function () { if (el) el.hidden = true; }, 1200);
+  }
+  function scanTouchDist(t) {
+    var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  function scanZoomStart(e) {
+    if (!SCAN.zoomCaps) return;
+    if (e.touches && e.touches.length === 2) {
+      SCAN.pinchFrom = scanTouchDist(e.touches);
+      SCAN.pinchZoom = S.scanZoom || scanZoomClamp(SCAN_ZOOM_START);
+      /* The first finger of a pinch arrives as a one-touch touchstart and was
+         counted as half a double tap; the next single tap, moments later,
+         then zoomed on its own. A second finger cancels that reading. */
+      SCAN.tapAt = 0;
+      e.preventDefault();
+      return;
+    }
+    if (!e.touches || e.touches.length !== 1) return;
+    /* Double tap: out to the far end of what the lens can do, and back to
+       where the pinch had it. 400 ms is the window every phone camera uses. */
+    var now = Date.now();
+    if (now - (SCAN.tapAt || 0) < 400) {
+      SCAN.tapAt = 0;
+      var far = scanZoomClamp(Math.max(SCAN_ZOOM_START * 2, SCAN.zoomCaps.max * 0.6));
+      scanApplyZoom((S.scanZoom || 1) >= far - 0.01 ? SCAN_ZOOM_START : far, true);
+      e.preventDefault();
+      return;
+    }
+    SCAN.tapAt = now;
+  }
+  function scanZoomMove(e) {
+    if (!SCAN.zoomCaps || !SCAN.pinchFrom || !e.touches || e.touches.length !== 2) return;
+    e.preventDefault();
+    var ratio = scanTouchDist(e.touches) / SCAN.pinchFrom;
+    if (!isFinite(ratio) || ratio <= 0) return;
+    scanApplyZoom(SCAN.pinchZoom * ratio, true);
+  }
+  function scanZoomEnd(e) {
+    if (e.touches && e.touches.length < 2) SCAN.pinchFrom = 0;
   }
   function scanCheckTorch(track) {
     if (!S.scanOpen || scanTrack() !== track) return;
@@ -16272,21 +16521,40 @@
     if (ok !== !!S.scanTorchOk) { S.scanTorchOk = ok; scanRenderPanel(); }
   }
 
-  /* Two views of every frame: the whole of it (capped at 1280 wide), and the
-     band under the scan line drawn twice as large. A 13-digit EAN on a 100 ml
-     bottle is a few dozen pixels tall in a 1080p frame; enlarged it is what
-     both decoders read best. The viewfinder is a square showing the centre of
-     the frame (object-fit: cover), so the band is cut from that square. */
-  function scanCropCanvas() {
+  /* The band under the scan line, cut out of the centre square the viewfinder
+     shows (object-fit: cover), at the sensor's own resolution and optionally
+     turned back a few degrees.
+
+     What changed here, and why (tools/scan-bench.mjs, 768 painted frames):
+     - it used to be drawn at 2× on the theory that an enlarged code reads
+       better. It does not: upscaling adds no information and costs the pass
+       ~40 ms, and the same band at 1× went from 7 to 19 expected reads per
+       second of decoding. The 2× is gone.
+     - 0.76 × 0.44 of the short side became 0.92 × 0.60 — measured to read
+       about as well per frame and cheaper per pass, and it forgives a code
+       the owner has not centred. Wider than the drawn reticle on purpose: a
+       code inside the box always reads, one just outside it often does too.
+     - it stays a BAND rather than the whole square: the decoder spreads a
+       fixed number of scan lines over whatever height it is given, so a
+       taller image puts fewer of them across the code (the full square
+       measured 23 % against the band's 29 %). */
+  function scanCropCanvas(tilt) {
     var video = SCAN.video;
     if (!video || !video.videoWidth || !video.videoHeight) return null;
     var vw = video.videoWidth, vh = video.videoHeight, side = Math.min(vw, vh);
-    var cw = Math.round(side * 0.76), ch = Math.round(side * 0.44);
+    var cw = Math.round(side * 0.92), ch = Math.round(side * 0.60);
     var sx = Math.round((vw - cw) / 2), sy = Math.round((vh - ch) / 2);
     var c = SCAN.crop || (SCAN.crop = document.createElement("canvas"));
-    var scale = cw < 900 ? 2 : 1;
-    if (c.width !== cw * scale || c.height !== ch * scale) { c.width = cw * scale; c.height = ch * scale; }
-    c.getContext("2d", { willReadFrequently: true }).drawImage(video, sx, sy, cw, ch, 0, 0, c.width, c.height);
+    if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+    var ctx = c.getContext("2d", { willReadFrequently: true });
+    if (!tilt) { ctx.drawImage(video, sx, sy, cw, ch, 0, 0, cw, ch); return c; }
+    // turned back around the middle of the band; the corners it leaves empty
+    // are outside the code by construction, so nothing readable is lost
+    ctx.save();
+    ctx.translate(cw / 2, ch / 2);
+    ctx.rotate((-tilt * Math.PI) / 180);
+    ctx.drawImage(video, sx, sy, cw, ch, -cw / 2, -ch / 2, cw, ch);
+    ctx.restore();
     return c;
   }
   function scanFullCanvas() {
@@ -16299,12 +16567,59 @@
     c.getContext("2d", { willReadFrequently: true }).drawImage(video, 0, 0, w, h);
     return c;
   }
-  /* A code counts once two consecutive passes (within a second) agree on it.
-     The manual field and a handheld scanner skip this: a typed code is
-     already a decision. */
-  function scanCameraRead(code) {
+  /** How light it is in front of the lens, 0–255, off a 32-px thumbnail of
+      the band. The one number an automatic torch can be honest about. */
+  function scanFrameLuma(src) {
+    try {
+      var t = SCAN.luma || (SCAN.luma = document.createElement("canvas"));
+      if (t.width !== 32) { t.width = 32; t.height = 32; }
+      var tc = t.getContext("2d", { willReadFrequently: true });
+      tc.drawImage(src, 0, 0, 32, 32);
+      var d = tc.getImageData(0, 0, 32, 32).data, sum = 0;
+      for (var i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      return sum / (d.length / 4);
+    } catch (e) { return 255; }
+  }
+  /* A dark stockroom is not a dim picture, it is a noisy one — the sensor
+     gains up and the binariser stops finding edges. Measured: a frame at
+     luma 62 read at 0–20 %, the same code at luma 140 at ~50 %. So the torch
+     comes on by itself once, when it is that dark and nothing has read yet.
+     Once: the owner's own 🔦 stays the last word, and a torch that switched
+     itself back on after being turned off would be a light nobody asked for. */
+  function scanAutoTorch(src) {
+    if (!S.scanTorchOk || S.scanTorchOn || SCAN.autoTorched || SCAN.everRead) return;
+    if (scanFrameLuma(src) >= SCAN_DARK_LUMA) return;
+    SCAN.autoTorched = true;
+    setScanTorch(true);
+  }
+  /* When a read counts.
+
+     Until this pass EVERY code had to be read on two consecutive frames
+     before it was believed. That is a real safeguard against a curved label
+     misread — but it is also, measured, most of what made the scanner feel
+     broken: at the rate a phone actually decodes, one frame is right inside a
+     second about 99 % of the time and two agreeing frames 46 %
+     (tools/scan-bench.mjs). Dim asked for first-time success, so the rule now
+     asks what kind of code it is.
+
+     An EAN-8/13, a UPC-A/E, a CODE_128 or a QR code carries its own check
+     digit and the decoder refuses one that does not add up — the code on the
+     card is already checked arithmetic, not a guess, and the owner sees it
+     before anything is bound. Those count on the first frame. A format with
+     no check of its own (ITF, CODE_39 without its optional digit) still has
+     to be read twice.
+
+     The manual field and a handheld scanner skip all of this: a typed code
+     is already a decision. */
+  function scanCameraRead(code, format) {
     code = String(code || "").trim();
     if (!code) return;
+    SCAN.everRead = true;
+    if (SCAN_SELF_CHECKED.test(String(format || "").toLowerCase())) {
+      SCAN.pendingN = 0; SCAN.pendingCode = "";
+      handleScanCode(code);
+      return;
+    }
     var now = Date.now();
     if (SCAN.pendingCode === code && now - SCAN.pendingAt < 1000) SCAN.pendingN++;
     else { SCAN.pendingCode = code; SCAN.pendingN = 1; }
@@ -16314,6 +16629,14 @@
     handleScanCode(code);
   }
 
+  /** Which view of the frame this pass looks at: the band under the scan
+      line, straight or turned back, and every ninth pass the whole frame.
+      One function, so the native detector and zxing look at exactly the same
+      sequence and a change here cannot land on only one of them. */
+  function scanViewCanvas(tick) {
+    if (tick % SCAN_FULL_EVERY === SCAN_FULL_EVERY - 1) return scanFullCanvas();
+    return scanCropCanvas(SCAN_TILTS[tick % SCAN_TILTS.length]);
+  }
   function startNativeLoop() {
     var video = SCAN.video, detector;
     try { detector = new window.BarcodeDetector({ formats: SCAN.nativeFormats }); }
@@ -16329,10 +16652,12 @@
       // counted from the first frame it actually got to look at
       if (!video || video.readyState < 2) { SCAN.timer = setTimeout(loop, SCAN_TICK_MS); return; }
       if (!SCAN.nativeSince) SCAN.nativeSince = t0;
-      var src = (tick++ % 2) ? (scanCropCanvas() || video) : video;
+      var n = tick++;
+      var src = scanViewCanvas(n) || video;
+      if (n % SCAN_LUMA_EVERY === 0) scanAutoTorch(src);
       detector.detect(src).then(function (codes) {
         SCAN.nativeErrs = 0;
-        if (codes && codes.length) { SCAN.nativeHit = true; scanCameraRead(codes[0].rawValue); }
+        if (codes && codes.length) { SCAN.nativeHit = true; scanCameraRead(codes[0].rawValue, codes[0].format); }
       }, function (err) {
         /* «Barcode detection service unavailable» (NotSupportedError) is Chrome
            on a phone without Play Services' barcode module — final. Anything
@@ -16347,15 +16672,26 @@
     };
     loop();
   }
-  /** The native detector is mute, broken or not there: zxing takes the same
-      stream. Told to the owner only when it is a hand-over — on a browser
-      with no detector of its own (Safari, Samsung Internet) zxing simply is
-      the scanner. */
+  /* The native detector is mute, broken or not there: zxing takes the same
+     stream. This used to put a line under the viewfinder — «Камера читает
+     через запасной декодер…» — which is true, useful to us, and no business
+     of the owner's: he is holding a bottle, not diagnosing Play Services
+     (Dim: do not keep it on screen). It is recorded instead, in the two
+     places that cost him nothing: the console, and a data attribute on the
+     overlay that a support person can read off the DOM. `data-scanengine`
+     already says WHICH decoder is running; `data-scanfallback` says the
+     native one was tried first and failed, and how. */
   function scanNativeGaveUp(reason) {
     if (SCAN.timer) { clearTimeout(SCAN.timer); SCAN.timer = null; }
     scanSetEngine("");
     startZxingLoop().then(function () {
-      if (reason !== "absent") scanSetHint("Камера читает через запасной декодер — держите код ближе и ровнее.");
+      if (reason === "absent") return;
+      if (SCANEL) SCANEL.dataset.scanfallback = reason;
+      try {
+        console.info("[scan] the browser's own barcode detector gave up (" + reason +
+          ") — decoding with the bundled zxing instead. On Chrome for Android this means" +
+          " the Play Services barcode module is missing or broken on this phone.");
+      } catch (e) {}
     }, function () {
       SCAN.zxingFailed = true;
       if (!S.scanOpen || !SCAN.stream) return;
@@ -16368,6 +16704,11 @@
       S.scanErr = "Камера не поддерживается этим браузером — распознавание штрихкодов работает в Chrome/Edge на Android и в Safari 17+ на iPhone. Используйте поиск или ручной ввод ниже.";
       scanRenderPanel();
     });
+  }
+  /** zxing answers a numeric format; the confirmation rule reads names. The
+      library's enum is bidirectional, so the number indexes its own name. */
+  function zxingFormatName(F, result) {
+    try { return String(F[result.getBarcodeFormat()] || "").toLowerCase(); } catch (e) { return ""; }
   }
   function startZxingLoop() {
     if (!SCAN.zxingLoad) SCAN.zxingLoad = loadScript(SCAN_ZXING_SRC);
@@ -16384,21 +16725,39 @@
       // the enum itself is not on the UMD bundle's global
       var hints = new Map();
       if (formats.length) hints.set(2, formats);
-      hints.set(3, true);
-      var reader = new Z.BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: SCAN_TICK_MS, delayBetweenScanSuccess: 300 });
+      /* TRY_HARDER used to be on for every pass. Measured, it reads about 9
+         points more of a single frame — and costs eight to ten times as long
+         (~90 ms against ~10 ms), which on a phone is the difference between
+         three chances a second and twenty. Twenty ordinary chances beat three
+         thorough ones by a wide margin, so the thorough reader is kept for
+         the case it is actually for: the owner has been holding the phone at
+         a label for a couple of seconds and nothing has read. Then it joins
+         in, every other pass. (tools/scan-bench.mjs.) */
+      var hard = new Map(hints);
+      hard.set(3, true);
+      var reader = new Z.BrowserMultiFormatReader(hints);
+      var readerHard = new Z.BrowserMultiFormatReader(hard);
       scanSetEngine("zxing");
-      var tick = 0;
+      var tick = 0, quietSince = Date.now();
       var loop = function () {
         if (!S.scanOpen || SCAN.engine !== "zxing") return;
         var t0 = Date.now(), video = SCAN.video;
         if (video && video.readyState >= 2) {
-          var c = (tick++ % 2) ? scanCropCanvas() : scanFullCanvas();
+          var n = tick++;
+          var c = scanViewCanvas(n);
+          if (n % SCAN_LUMA_EVERY === 0 && c) scanAutoTorch(c);
           if (c) {
-            try { var r = reader.decodeFromCanvas(c); if (r) scanCameraRead(r.getText()); }
-            catch (e) { /* NotFoundException: no code in this frame */ }
+            var thorough = t0 - quietSince > SCAN_HARD_AFTER_MS && n % 2 === 1;
+            try {
+              var r = (thorough ? readerHard : reader).decodeFromCanvas(c);
+              if (r) {
+                quietSince = Date.now();
+                scanCameraRead(r.getText(), zxingFormatName(F, r));
+              }
+            } catch (e) { /* NotFoundException: no code in this frame */ }
           }
         }
-        SCAN.timer = setTimeout(loop, Math.max(20, SCAN_TICK_MS - (Date.now() - t0)));
+        SCAN.timer = setTimeout(loop, Math.max(0, SCAN_TICK_MS - (Date.now() - t0)));
       };
       loop();
     });
@@ -16475,6 +16834,17 @@
       });
     }
     SCANEL.dataset.scanengine = SCAN.engine || "";
+    /* Pinch and double tap, bound to the viewfinder and nothing else — the
+       card and the list below it keep every gesture they had. Not passive:
+       a two-finger move on the picture is a zoom, and the browser must not
+       also read it as a page pinch. */
+    var box = SCANEL.querySelector("[data-scanzoombox]");
+    if (box) {
+      box.addEventListener("touchstart", scanZoomStart, { passive: false });
+      box.addEventListener("touchmove", scanZoomMove, { passive: false });
+      box.addEventListener("touchend", scanZoomEnd);
+      box.addEventListener("touchcancel", scanZoomEnd);
+    }
     // the handheld-scanner burst, the keyboard-shrunk viewport and the tab
     // going to the background, for as long as the shell stands (scanUnmount
     // takes them off again)
@@ -16511,6 +16881,8 @@
     S.scanOpen = true; S.scanErr = ""; S.scanHit = null; S.scanAssignQ = ""; S.scanAssignPick = ""; S.scanBindConfirm = "";
     S.scanTorchOk = false; S.scanTorchOn = false; S.scanToday = null; S.scanHint = "";
     S.scanQty = 1; S.scanBusy = false; S.scanReady = false;
+    // a fresh session asks the dark-room question again, and has read nothing
+    SCAN.everRead = false; SCAN.autoTorched = false;
   }
   /* Which door the scanner was opened through — «Склад» counts a shelf,
      «Салон» fills a basket. It changes the caption in the header and the
@@ -19970,7 +20342,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -21319,7 +21691,11 @@
       render(); return;
     }
     if (d.stocksave) { stockCommit(d.stocksave); return; }
-    if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; render(); return; }
+    /* «Показать ещё» — the next page of the warehouse, appended rather than
+       render()ed so the page the owner just read does not jump out from under
+       him. stockScrollMore() does exactly the same thing unasked. */
+    if (d.stockmore !== undefined) { if (!stockGrow()) render(); return; }
+    if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; S.stockShown = STOCK_PAGE; render(); return; }
     if (d.stockmovesopen !== undefined) {
       S.stockMovesOpen = !!d.stockmovesopen;
       // coming back to a history that failed asks again, rather than showing
@@ -21877,6 +22253,7 @@
     /* ---- inventory: «Склад», «Продажа в салоне», the scanner's assign search — targeted patches, same reasoning as data-goodsq above ---- */
     else if (t.matches("[data-stockq]")) {
       S.stockQ = t.value;
+      S.stockShown = STOCK_PAGE;   // a new search starts from its first page again
       var stockList = document.getElementById("stocklist");
       if (stockList) { stockList.innerHTML = stockRows(); translateTree(stockList); }
     }
@@ -22555,7 +22932,11 @@
   window.addEventListener("scroll", function () {
     if (tickQueued) return;
     tickQueued = true;
-    requestAnimationFrame(function () { tickQueued = false; paintTint(); });
+    requestAnimationFrame(function () {
+      tickQueued = false; paintTint();
+      // inventory: «Склад» turns its own page when the last row comes up
+      stockScrollMore();
+    });
   }, { passive: true });
   window.addEventListener("resize", measureHdr, { passive: true });
   /* Enter in a one-line box of the panel's small forms presses that form's
