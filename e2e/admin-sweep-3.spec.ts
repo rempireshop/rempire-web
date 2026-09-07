@@ -1,5 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
-import { continueButton, freshEmail, ipHeaders, loginAsAdmin, payButton, PRODUCT_2, payOrder, shopUrl, waitForScreen } from "./fixtures";
+import {
+  adminSection, continueButton, freshEmail, ipHeaders, loginAsAdmin, payButton, PRODUCT_2,
+  payOrder, shopUrl, waitForScreen,
+} from "./fixtures";
 import { assertClean, watch } from "./sweep-helpers";
 
 /**
@@ -71,20 +74,9 @@ function ordersTab(page: Page) {
   return page.locator('[data-admtab="orders"][aria-current]:visible').first();
 }
 
-/** Opens one of the five places on either viewport (on a phone the last six
-    sit behind «Ещё» — the same helper admin-sweep-2.spec.ts uses). */
-async function section(page: Page, key: string): Promise<void> {
-  const direct = page.locator(`[data-admtab="${key}"][aria-current]:visible`);
-  if (await direct.count()) await direct.first().click();
-  else {
-    await page.locator("[data-admmore]:visible").click();
-    await page.locator(`.adm-sheet [data-admtab="${key}"]`).click();
-  }
-}
-
 /** «Письма» is a tab inside «Маркетинг» — section, then tab (admin-mail.spec.ts). */
 async function openMailList(page: Page): Promise<void> {
-  await section(page, "promos");
+  await adminSection(page, "promos");
   await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
   await expect(page.locator("[data-mailtpl]").first()).toBeVisible();
 }
@@ -245,7 +237,7 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
        earn points (Dim: salon sales must count as purchases). The printable
        receipt is still a link on the order, which is the part that never
        changed. */
-    await section(page, "pos");
+    await adminSection(page, "pos");
     const salonHint = page.locator(".adm-hint", { hasText: "Покупатель не обязателен" }).first();
     await expect(salonHint).toContainText("уйдёт письмо");
     await expect(salonHint).toContainText("Чек ↗");
@@ -278,7 +270,7 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await q.fill("");
 
     /* ---- «Товары»: a 400-character name and emoji in the search ---------- */
-    await section(page, "goods");
+    await adminSection(page, "goods");
     const goodsQ = page.locator("[data-goodsq]");
     await goodsQ.fill("ш".repeat(400));
     await expect(page.locator(".adm-empty")).toBeVisible();
@@ -288,7 +280,7 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await goodsQ.fill("");
 
     /* ---- «Клиенты»: the same, plus a filter chip ------------------------- */
-    await section(page, "people");
+    await adminSection(page, "people");
     const custQ = page.locator("[data-admcustq]");
     await custQ.fill("  \t  ");
     await assertClean(page, w, "customers: a whitespace search");
@@ -303,7 +295,7 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
        editor and stays in «Товары»; the second really does leave. What has to
        hold either way is that nothing breaks and that the half-typed price
        never reached the shop. */
-    await section(page, "goods");
+    await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
     // «Сохранить» carries the open product's id — it is on both editors, the
     // catalogue one and the owner's own (edPaneMain / edPaneMainOwn)

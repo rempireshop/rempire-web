@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
-import { freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen } from "./fixtures";
+import {
+  adminSection, freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen,
+} from "./fixtures";
 
 /**
  * The six «Ещё» sections after the phase-3 redesign — «Клиенты», «Маркетинг»,
@@ -19,29 +21,6 @@ import { freshEmail, ipHeaders, loginAsAdmin, PRODUCT, shopUrl, waitForScreen } 
  * Rate limits: admin login is 5/min per IP (src/lib/auth.ts), so each describe
  * gets its own fake address, exactly as admin.spec.ts does.
  */
-
-/**
- * Opens a section by the old key it has always had, then its sub-tab if the
- * screen has one. All six of these live in the desktop sidebar but behind the
- * phone's «Ещё» sheet, so on a 375-px viewport the nav item simply is not on
- * screen until the sheet is open — which is the one navigation difference
- * between the two viewports this file has to know about.
- */
-async function section(page: Page, key: string, sub?: string): Promise<void> {
-  const direct = page.locator(`[data-admtab="${key}"][aria-current]:visible`);
-  const more = page.locator("[data-admmore]:visible");
-  /* Wait for whichever navigation this viewport draws before counting: after a
-     reload the shell is a frame or two behind, and an immediate count of zero
-     would send a desktop run looking for the phone's «Ещё» button. */
-  await expect(direct.or(more).first()).toBeVisible();
-  if (await direct.count()) {
-    await direct.first().click();
-  } else {
-    await more.first().click();
-    await page.locator(`.adm-sheet [data-admtab="${key}"]`).first().click();
-  }
-  if (sub) await page.locator(`[data-admtab="${sub}"][aria-current]:visible`).first().click();
-}
 
 /** No uncaught error and no failed request while the section was on screen. */
 function watchErrors(page: Page): string[] {
@@ -74,7 +53,7 @@ test.describe("admin sections — every screen draws on both viewports", () => {
     ];
 
     for (const [key, sub, phrase] of screens) {
-      await section(page, key, sub);
+      await adminSection(page, key, sub);
       const work = page.locator(".adm-page");
       await expect(work, `${key}/${sub ?? "-"} drew nothing`).toBeVisible();
       // inside the work column, not anywhere on the page: the storefront's own
@@ -90,7 +69,7 @@ test.describe("admin sections — every screen draws on both viewports", () => {
     }
 
     // the settings index and one sub-page of it
-    await section(page, "setup");
+    await adminSection(page, "setup");
     await page.locator('[data-admsetpage="journal"]').click();
     await expect(page.locator("[data-admsetback]")).toBeVisible();
     await page.locator("[data-admsetback]").click();
@@ -127,7 +106,7 @@ test.describe("admin sections — Клиенты", () => {
 
     await page.reload();
     await waitForScreen(page, "admin");
-    await section(page, "people");
+    await adminSection(page, "people");
     await page.locator("[data-admcustq]").fill(email);
     /* «Одобрить Pro» sits on the row itself now — the whole point of the
        redesign is that a waiting request is answered without opening a card.
@@ -169,7 +148,7 @@ test.describe("admin sections — Клиенты", () => {
     try {
       await page.reload();
       await waitForScreen(page, "admin");
-      await section(page, "people", "reviews");
+      await adminSection(page, "people", "reviews");
       const row = page.locator(".adm-row", { hasText: reviewName }).first();
       await expect(row, "the new review is not in the queue").toBeVisible();
       await row.locator("[data-admrev]").first().click();
@@ -185,7 +164,7 @@ test.describe("admin sections — Клиенты", () => {
       }, { timeout: 10_000, message: "«Опубликовать» never reached the server" }).toBe(true);
 
       // …and the journal kept the way back
-      await section(page, "setup");
+      await adminSection(page, "setup");
       await page.locator('[data-admsetpage="journal"]').click();
       await expect(page.locator('[data-admundo="0"]'), "publishing a review left no journal entry").toBeVisible();
     } finally {
@@ -206,19 +185,22 @@ test.describe("admin sections — Маркетинг", () => {
 
     /* ---- Промокоды: the inline form ------------------------------------- */
     const code = "E2ESEC" + Date.now().toString().slice(-6);
-    await section(page, "promos");
+    await adminSection(page, "promos");
     await page.locator("[data-admpromonew]").click();
     await page.locator('[data-promof="code"]').fill(code);
     await page.locator('[data-promokind="percent"]').click();
     await page.locator('[data-promof="value"]').fill("15");
     await page.locator("[data-admpromosave]").click();
-    await expect(page.getByText(code)).toBeVisible();
+    /* Scoped to the row's own name, not the page: since the switches say «Вкл»
+       / «Выкл», each one also carries its clipped accessible name («Промокод
+       SUMMER»), so a bare getByText(code) now matches two nodes. */
+    await expect(page.locator(`[data-admpromoedit="${code}"] .adm-row__nm`)).toHaveText(code);
     const promos = await (await page.request.get("/api/admin/promos/")).json();
     expect((promos.promos as Array<{ code: string }>).some((p) => p.code === code),
       "the new code never reached the server").toBe(true);
 
     /* ---- Подарочные карты: a denomination the /gift/ page reads ---------- */
-    await section(page, "promos", "gift");
+    await adminSection(page, "promos", "gift");
     const seventyFive = page.locator('[data-admgiftamt="75"]');
     await expect(seventyFive, "75 € is not offered as a denomination").toBeVisible();
     expect(await seventyFive.getAttribute("aria-pressed"), "75 € starts switched on").toBe("false");
@@ -247,7 +229,7 @@ test.describe("admin sections — Маркетинг", () => {
     }
 
     /* ---- Письма: the list, one letter, one saved subject ----------------- */
-    await section(page, "promos", "mail");
+    await adminSection(page, "promos", "mail");
     await page.locator('[data-mailtpl="order-shipped"]').first().click();
     await expect(page.locator('[data-mailtxt="subject"]')).toBeVisible();
     const subject = `E2E тема ${Date.now().toString().slice(-6)} {order}`;
@@ -278,7 +260,7 @@ test.describe("admin sections — Блог", () => {
     test.setTimeout(150_000);
     test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
     await loginAsAdmin(page);
-    await section(page, "blog");
+    await adminSection(page, "blog");
 
     await page.locator("[data-admblognew]").click();
     const title = `E2E раздел ${Date.now().toString().slice(-6)}`;
@@ -321,7 +303,7 @@ test.describe("admin sections — Настройки", () => {
     const originalRules = before.settings.shipping_rules ?? null;
 
     try {
-      await section(page, "setup");
+      await adminSection(page, "setup");
       await page.locator('[data-admsetpage="delivery"]').click();
       const courierEE = page.locator('[data-shiprule="m:courier:EE"]');
       await expect(courierEE, "the tariff grid did not draw").toBeVisible();
@@ -382,7 +364,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
     /* ---- Главная страница: the banner ------------------------------------ */
     const title = `E2E баннер ${Date.now().toString().slice(-6)}`;
     try {
-      await section(page, "setup");
+      await adminSection(page, "setup");
       await page.locator('[data-admsetpage="home"]').click();
       // a slide is a row with its own switch, order buttons and «Изменить»
       await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-checked", "true");
@@ -408,7 +390,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
     try {
       await page.reload();
       await waitForScreen(page, "admin");
-      await section(page, "setup");
+      await adminSection(page, "setup");
       await page.locator('[data-admsetpage="company"]').click();
       await page.locator('[data-contentblock="company"]').click();
       await page.locator('[data-contentf="company.phone"]').fill("+372 5000001");
@@ -423,7 +405,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       expect(saved.settings.content.company.phone, "the phone never reached settings.content").toBe("+372 5000001");
     } finally {
       // back to the standard details through the panel's own reset
-      await section(page, "setup");
+      await adminSection(page, "setup");
       const back = page.locator("[data-admsetback]");
       if (await back.count()) await back.first().click();
       await page.locator('[data-admsetpage="company"]').click();
@@ -439,7 +421,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
     const originalPricing = JSON.parse(JSON.stringify(before.settings.pricing || {}));
     try {
       // the nav item always lands on the index of the six pages
-      await section(page, "setup");
+      await adminSection(page, "setup");
       await page.locator('[data-admsetpage="prices"]').click();
       await page.locator('[data-pricingf="proDiscountPct"]').fill("22");
       await page.locator("[data-admpricingsave]").click();
@@ -456,7 +438,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
     }
 
     /* ---- Отчёт для бухгалтера: the download link ------------------------- */
-    await section(page, "setup");
+    await adminSection(page, "setup");
     await page.locator('[data-admsetpage="company"]').click();
     const month = await page.locator("[data-admreportsmonth]").inputValue();
     expect(month).toMatch(/^\d{4}-\d{2}$/);
@@ -486,7 +468,7 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
     test.setTimeout(150_000);
     test.skip(testProjectIsMobile(test.info()), "one write per action is enough — desktop runs it");
     await loginAsAdmin(page);
-    await section(page, "people");
+    await adminSection(page, "people");
 
     // the lead answers the question, and links to where the discount lives
     const lead = page.locator(".adm-page .adm-lead");
@@ -534,7 +516,7 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
       expect(mails.mails[0].subject).toContain("Цены для салонов включены");
 
       // …and the journal kept the way back
-      await section(page, "setup");
+      await adminSection(page, "setup");
       await page.locator('[data-admsetpage="journal"]').click();
       await expect(page.locator(".adm-jrow", { hasText: `Новый партнёр: ${email}` })).toBeVisible();
       await expect(page.locator('[data-admundo="0"]')).toBeVisible();
@@ -594,14 +576,15 @@ test.describe("admin sections — the numbers explain themselves", () => {
      into the specs that run after it. */
   test("«Цены и баллы» works the example out in euros while the owner types", async ({ page }) => {
     await loginAsAdmin(page);
-    await section(page, "setup");
+    await adminSection(page, "setup");
     await page.locator('[data-admsetpage="prices"]').click();
     /* «Партнёры и баллы» is off by default (Renat said «later»), and with it
        off the five fields are not drawn at all — so the switch comes first.
-       admSwitch() writes aria-pressed, not aria-checked. */
+       admSwitch() is `role="switch"` + `aria-checked` — a reader then says
+       «включено», not «нажата» — so `aria-pressed` is not on it at all. */
     const partners = page.locator("[data-partnerson]");
-    if ((await partners.getAttribute("aria-pressed")) !== "true") await partners.click();
-    await expect(partners).toHaveAttribute("aria-pressed", "true");
+    if ((await partners.getAttribute("aria-checked")) !== "true") await partners.click();
+    await expect(partners).toHaveAttribute("aria-checked", "true");
 
     const hint = (key: string) => page.locator(`[data-pricingex="${key}"]`);
     const calc = page.locator(".adm-calc__c", { hasText: "Партнёр — салон или мастер" });
@@ -648,7 +631,7 @@ test.describe("admin sections — the numbers explain themselves", () => {
       }),
     }));
     await loginAsAdmin(page);
-    await section(page, "stats");
+    await adminSection(page, "stats");
 
     const work = page.locator(".adm-page");
     await expect(work.locator(".adm-read"), "the position is still only a number")

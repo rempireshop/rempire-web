@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { ipHeaders, waitForScreen } from "./fixtures";
+import { adminSection, ipHeaders, waitForScreen } from "./fixtures";
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
@@ -31,23 +31,9 @@ test.beforeEach(async ({}, testInfo) => {
     "admin sweep — desktop and mobile projects only");
 });
 
-/** One of the panel's sections on either viewport: five sit in the phone's
-    bottom bar, the last six behind its «Ещё» sheet, and all eleven in the
-    desktop sidebar — the one navigation difference between the two (same
-    shape as admin-sections.spec.ts). */
-async function section(page: Page, key: string): Promise<void> {
-  const direct = page.locator(`[data-admtab="${key}"][aria-current]:visible`);
-  const more = page.locator("[data-admmore]:visible");
-  await expect(direct.or(more).first()).toBeVisible();
-  if (await direct.count()) await direct.first().click();
-  else {
-    await more.first().click();
-    await page.locator(`.adm-sheet [data-admtab="${key}"]`).first().click();
-  }
-}
 /** «Настройки» → one of its six pages. */
 async function settings(page: Page, sub: string): Promise<void> {
-  await section(page, "setup");
+  await adminSection(page, "setup");
   const back = page.locator("[data-admsetback]");
   if (await back.count()) await back.first().click();
   await page.locator(`[data-admsetpage="${sub}"]`).click();
@@ -446,7 +432,7 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
     await clearToast(page);
 
     // ---- off: the five screens Dim named ----------------------------------
-    await section(page, "people");
+    await adminSection(page, "people");
     /* Off, the row keeps the two chips that are not about tiers at all — «Все»
            and «Подписаны», who agreed to hear from the shop. The three tier chips
            («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
@@ -455,7 +441,7 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
         await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
     await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
 
-    await section(page, "goods");
+    await adminSection(page, "goods");
     const first = page.locator("[data-admgoods]").first();
     await first.click();
     await page.locator('[data-edtab="sizes"]').click();
@@ -479,11 +465,11 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
       await expect.poll(async () => (await feed()).partnersOn,
         { timeout: 15_000, message: "the switch never reached the storefront" }).toBe(true);
 
-      await section(page, "people");
+      await adminSection(page, "people");
       await expect(page.locator("[data-admcusttier]"), "the tier chips did not come back").toHaveCount(5);
       await expect(page.locator("[data-admpartnernew]")).toBeVisible();
 
-      await section(page, "goods");
+      await adminSection(page, "goods");
       await page.locator("[data-admgoods]").first().click();
       await page.locator('[data-edtab="sizes"]').click();
       await expect(page.locator("[data-edproprice]"), "the «Салон, €» column did not come back").toBeVisible();

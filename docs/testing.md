@@ -588,12 +588,19 @@ Those four are desktop-only (`test.skip` on the mobile project): one write per
 action is enough, and every one of them mutates shop-wide state that other spec
 files read. Each `describe` has its own fake IP — admin login is 5/min.
 
-Its own local `section()` helper knows the one navigation difference between
-the viewports: all six of these live in the desktop sidebar but behind the
-phone's «Ещё» sheet, so on 375 px it opens the sheet first. It waits for
-whichever nav this viewport draws before counting — after a reload the shell is
-a frame or two behind, and an immediate count of zero sent a desktop run
-looking for a button that is not there.
+`adminSection(page, key, sub?)` in `e2e/fixtures.ts` knows the one navigation
+difference between the viewports: all six of these live in the desktop sidebar
+but behind the phone's «Ещё» sheet, so on 375 px it opens the sheet first. It
+waits for whichever nav this viewport draws before counting — after a reload
+the shell is a frame or two behind, and an immediate count of zero sent a
+desktop run looking for a button that is not there.
+
+It lives in `fixtures.ts` rather than in each spec because four files had
+grown their own copy and a fifth (`admin-giftcards.spec.ts`) reached straight
+for `[data-admtab="promos"]`, which passes on a desktop and times out on a
+phone. That was one of the seven red shards on 07.09.2026. `adminLang(page,
+code)` beside it does the same for the RU · ET · EN strip, which is also drawn
+twice and is inside the sheet on a phone.
 
 ## The admin fuzz sweep
 
@@ -715,7 +722,7 @@ tracking link in it, which is the one thing that letter is for.
 | --- | --- |
 | `playwright.config.ts` | Projects, `webServer`, screenshot config — read its own comments first |
 | `e2e/env.mjs` | Port, base URL, fixed test admin password + its hash |
-| `e2e/fixtures.ts` | Shared constants/helpers every spec imports: `LANGS`, `PRODUCT`/`PRODUCT_2`/`BUNDLE`, `waitForScreen`, `loginAsAdmin`, `ipHeaders`, `tr()` (the RU→ET/EN dictionary lookups actually used, copied verbatim from `app.js`'s own `UI` table — see that file's own comment before adding to it), `functionalProject()` and the viewport-aware `searchFor()` / `payButton()` / `openSummary()` (see "Safari") |
+| `e2e/fixtures.ts` | Shared constants/helpers every spec imports: `LANGS`, `PRODUCT`/`PRODUCT_2`/`BUNDLE`, `waitForScreen`, `loginAsAdmin`, `adminSection()`/`adminLang()` (the panel's navigation and language strip, both of which are drawn twice and sit behind «Ещё» on a phone), `ipHeaders`, `tr()` (the RU→ET/EN dictionary lookups actually used, copied verbatim from `app.js`'s own `UI` table — see that file's own comment before adding to it), `functionalProject()` and the viewport-aware `searchFor()` / `payButton()` / `openSummary()` (see "Safari") |
 | `e2e/*.spec.ts` | One file per area of the task brief — each has its own top-of-file comment for anything not obvious from this document |
 | `e2e/scanner-app.spec.ts` | The standalone scanner route `/shop2/scan/`, desktop + mobile — see below |
 | `e2e/sweep-helpers.ts` | The admin sweep's watchdog (`assertClean`), seeded PRNG and admin plumbing — not a spec file |

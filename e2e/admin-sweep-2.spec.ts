@@ -1,5 +1,16 @@
 import { expect, type Page, test } from "@playwright/test";
 import { freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import { ceilingCost, customerPrice } from "@/lib/shipping/country-prices";
+
+/* What «Заполнить по тарифам Montonio» must write into the Latvian
+   parcel-machine box: for the four countries whose checkout lets the shopper
+   choose the carrier, the fill takes the DEAREST carrier the shop can post
+   with, so one price covers whichever machine is picked, and Nova Post — a
+   quote the shop cannot use — is left out. Read from the shop's own tariff
+   table, never typed here: the price list is re-cut every season, and a
+   number written into a test goes stale silently, which is what happened to
+   the one this replaces. */
+const LV_PARCEL_FILL = customerPrice(ceilingCost("LV", "parcel")!.price);
 
 /**
  * The second admin sweep (docs/audit/2026-09-06-admin-qa.md): the corners the
@@ -162,8 +173,8 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await expect(page.getByRole("status")).toContainText("вписаны");
       await page.locator("[data-closetoast]").click();
       expect(JSON.stringify(await rules()), "the fill changed the shop before «Сохранить»").toBe(before);
-      // …but the box did follow the tariff (Omniva LV parcel is 10.61 on the price list, rounded up to x.x9)
-      expect(Number((await lv.inputValue()).replace(",", "."))).toBeGreaterThanOrEqual(10.61);
+      // …but the box did follow the tariff, rounded up to x.x9
+      expect(Number((await lv.inputValue()).replace(",", "."))).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
 
       // «Сохранить» → the card → now the shop follows
       await page.locator("[data-admshipsave]").click();
@@ -171,20 +182,24 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
       await page.locator("[data-closetoast]").click();
-      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(10.61);
+      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
 
       /* «Вернуть значения по умолчанию» — a delivery price too, so it asks; «Отмена» changes nothing. */
-      await page.locator(".adm-page details > summary").first().click();
+      /* The one that HOLDS the reset button — «Самовывоз, перевозчики и
+         наценка». Since 07.09.2026 the page has a second fold above it (the
+         twenty-one European countries), so `.first()` opened the wrong one. */
+      await page.locator("details", { has: page.locator("[data-admshipreset]") })
+        .locator("summary").first().click();
       await page.locator("[data-admshipreset]").click();
       await expect(page.locator(".adm-confirm__t")).toHaveText("Вернуть тарифы по умолчанию?");
       await page.locator("[data-admcancel]").click();
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
-      expect(Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(10.61);
+      expect(Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
       await page.locator("[data-admshipreset]").click();
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные");
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
-      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeLessThan(10.61);
+      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeLessThan(LV_PARCEL_FILL);
     } finally {
       await page.request.put("/api/admin/settings/", { data: { shipping_rules: original ?? {} } });
     }

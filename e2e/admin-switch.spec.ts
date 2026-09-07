@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { ipHeaders, loginAsAdmin } from "./fixtures";
+import { adminLang, adminSection, ipHeaders, loginAsAdmin } from "./fixtures";
 
 /**
  * The admin's one switch — «Маркетинг → Промокоды» and everywhere else.
@@ -50,7 +50,7 @@ async function expectOff(sw: Locator, why: string): Promise<void> {
 }
 
 async function marketing(page: Page): Promise<void> {
-  await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
+  await adminSection(page, "promos");
   await expect(page.locator("[data-admpromonew]")).toBeVisible();
 }
 
@@ -101,7 +101,7 @@ test.describe("admin — the switch says which way it is", () => {
     await loginAsAdmin(page);
 
     // «Настройки → Главная» — two switches, each with its own sentence under it
-    await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
+    await adminSection(page, "setup");
     await page.locator('[data-admsetpage="home"]').click();
     for (const attr of ["data-admbundles", "data-admchatbot"]) {
       const sw = page.locator(`[${attr}]`);
@@ -116,14 +116,13 @@ test.describe("admin — the switch says which way it is", () => {
     await page.locator("[data-admsetback]").click();
 
     // «Маркетинг → Письма» — a switch per letter, named after the letter
-    await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
-    await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
+    await adminSection(page, "promos", "mail");
     const backstock = page.locator('[data-admflow="backstock"]');
     await expect(backstock).toHaveAttribute("role", "switch");
     await expect(backstock.locator(".vh")).toHaveText("Товар снова в наличии");
 
     // the product editor's boxed variant wears the same face inside its frame
-    await page.locator('[data-admtab="goods"][aria-current]:visible').first().click();
+    await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
     const hidden = page.locator("[data-edhidden]");
     await expect(hidden).toHaveAttribute("role", "switch");
@@ -133,7 +132,7 @@ test.describe("admin — the switch says which way it is", () => {
 
   test("keyboard and screen reader: Space flips it, and axe is happy", async ({ page }) => {
     await loginAsAdmin(page);
-    await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
+    await adminSection(page, "setup");
     await page.locator('[data-admsetpage="home"]').click();
 
     const sw = page.locator("[data-admchatbot]");
@@ -157,14 +156,14 @@ test.describe("admin — the switch says which way it is", () => {
 
   test("ET: the word is translated, the state is not lost in translation", async ({ page }) => {
     await loginAsAdmin(page);
-    await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
+    await adminSection(page, "setup");
     await page.locator('[data-admsetpage="home"]').click();
 
     const sw = page.locator("[data-admbundles]");
     const on = (await sw.getAttribute("aria-checked")) === "true";
-    await page.locator('.adm-langs button[data-lang="ET"]').first().click();
+    await adminLang(page, "ET");
     await expect(page.locator("[data-admbundles] .adm-sw__w")).toHaveText(on ? "Sees" : "Väljas");
-    await page.locator('.adm-langs button[data-lang="RU"]').first().click();
+    await adminLang(page, "RU");
     await expect(page.locator("[data-admbundles] .adm-sw__w")).toHaveText(on ? "Вкл" : "Выкл");
   });
 });

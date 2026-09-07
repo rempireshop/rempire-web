@@ -245,3 +245,37 @@ test.describe("checkout — e-mail field stability", () => {
     expect(await page.evaluate(() => (window as unknown as Record<string, unknown>).__coMutations)).toBe(0);
   });
 });
+
+test.describe("checkout — the step says when it is finished", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(46) });
+
+  /* Dim, 07.09.2026, after paying with a gift card: «after I entered where
+     items should be shipped, maybe the button for "checkout" should make a
+     short animation … for the user to understand where to click». Typing in
+     an address field deliberately does not re-render the step — a rebuild
+     would take the caret with it — so filling the last field changed nothing
+     on screen. It now pulses «Далее — оплата», once, on the way out of the
+     field that completed the step. */
+  test("«Далее — оплата» pulses once, and only when the address is complete", async ({ page }) => {
+    // the first hit on /checkout/ compiles the route on a cold dev server
+    test.setTimeout(90_000);
+    await addProductAndGoToCheckout(page, "");
+    await fillContactStep(page, freshEmail("nudge"));
+
+    await page.locator('input[data-dm="courier"]').check();
+    const next = continueButton(page, 3);
+    await expect(next, "the button is drawn before the address is filled").toBeVisible();
+    await expect(next, "an empty address must not be told it is finished").not.toHaveClass(/btn--nudge/);
+
+    await page.locator('[data-shipf="name"]').fill("E2E Buyer");
+    await page.locator('[data-shipf="addr"]').fill("Testitänav 1");
+    await page.locator('[data-shipf="zip"]').fill("10111");
+    await page.locator('[data-shipf="city"]').fill("Tallinn");
+    // the phone is required for a courier too — shipMissing() lists five
+    await page.locator('[data-shipf="phone"]').fill("+372 5000000");
+    // the class arrives on the way OUT of the last field, not on the keystroke
+    await page.locator('[data-shipf="phone"]').blur();
+
+    await expect(next, "the finished step never pointed at the way on").toHaveClass(/btn--nudge/);
+  });
+});

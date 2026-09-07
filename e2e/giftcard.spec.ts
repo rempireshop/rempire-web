@@ -201,6 +201,11 @@ test.describe("gift card — digital checkout and the printable card", () => {
     // [data-admtab="orders"] is on the sidebar tab AND the phone bar — see
     // fixtures.ts loginAsAdmin's own comment; :visible + .first() picks one
     await admin.locator('[data-admtab="orders"][aria-current]:visible').first().click();
+    /* «Все»: an all-gift-card order has nothing to post, so since 07.09.2026 it
+       is not in the «Отправить» list the tab opens on — that was the whole of
+       Dim's «в админке подарочная карта всё ещё ждёт отправки». It is a real
+       order all the same, and this is where it lives now. */
+    await admin.locator('[data-admfilter="all"]').click();
     const row = admin.locator(`[data-admorder]:has-text("${number}")`).first();
     await expect(row).toBeVisible();
     await row.click();

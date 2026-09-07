@@ -74,6 +74,11 @@ function rig(answers: Answer[]): Rig {
       country: "EE", countryIso: "", coStep: 3, done: null
     };
     var API = { ok: true };
+    /* The abandoned-cart snapshot, which payNow() switches off before it makes
+       the order and back on if the order failed — a basket that is becoming an
+       order is not an abandoned one, and the request must not still be in
+       flight when the browser leaves for the bank. */
+    var cartPush = { t: 0, last: "", off: false };
     var PAYS = [
       { l: "Банковская ссылка", h: "", k: "bank" },
       { l: "Банковская карта", h: "", k: "card" },

@@ -429,7 +429,10 @@ test.describe("sweep — promo codes", () => {
     await page.locator("[data-admpromosave]").click();
     expect(await toastText(page)).toMatch(/[Пп]ромокод/);
     await clearToast(page);
-    await expect(page.getByText(good, { exact: false })).toBeVisible();
+    /* Scoped to the row's own name, not the page: since the switches say «Вкл»
+       / «Выкл», each one also carries its clipped accessible name («Промокод
+       SUMMER»), so a bare getByText(code) now matches two nodes. */
+    await expect(page.locator(`[data-admpromoedit="${good}"] .adm-row__nm`)).toHaveText(good);
     await assertClean(page, w, "promo created");
 
     // An expired code saves (a shop keeps its history) but must not discount.

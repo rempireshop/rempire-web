@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  continueButton, freshEmail, ipHeaders, loginAsAdmin, payButton, shopUrl, waitForScreen,
+  adminSection, continueButton, freshEmail, ipHeaders, loginAsAdmin, payButton, shopUrl,
+  waitForScreen,
 } from "./fixtures";
 
 /**
@@ -79,8 +80,10 @@ test.describe("admin — the gift-card blocks read as lines, not as one", () => 
     expect(Math.round(box.height), "«Карта PDF ↗» is not a 44-px target").toBeGreaterThanOrEqual(40);
 
     // ---- «Маркетинг → Подарочные карты» ------------------------------------
-    await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
-    await page.locator('[data-admtab="gift"][aria-current]:visible').first().click();
+    /* «Маркетинг» is one of the six behind «Ещё» on a phone, so the section is
+       opened through the helper both viewports share, not by a selector that
+       only exists on a desktop. */
+    await adminSection(page, "promos", "gift");
     const row = page.locator(".adm-row--stack", { has: page.locator("[data-giftpdf]") }).first();
     await expect(row, "the issued card has no «Карта PDF ↗» of its own").toBeVisible();
     const code = row.locator(".adm-mono").first();

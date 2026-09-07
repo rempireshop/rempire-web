@@ -127,8 +127,16 @@ test.beforeAll(async ({ browser }) => {
     }
     expect(made.ok(), `sweep: create the blog fixture post (${await made.text()})`).toBe(true);
     const created = (await made.json()) as { ok: boolean; post: { id: string; slug: string } };
-    const pub = await req.patch("/api/admin/blog/", { data: { id: created.post.id, publish: true } });
-    expect(pub.ok(), "sweep: publish the blog fixture post").toBe(true);
+    /* Retried for the same reason as the POST above, and it has to be: the
+       PATCH is a different route file, so it gets its own first-hit compile
+       and its own chance to answer Next's HTML instead of JSON. It did, once,
+       on the WebKit shard. */
+    let pub = await req.patch("/api/admin/blog/", { data: { id: created.post.id, publish: true } });
+    for (let attempt = 0; attempt < 12 && !pub.ok(); attempt++) {
+      await new Promise((r) => setTimeout(r, 3000));
+      pub = await req.patch("/api/admin/blog/", { data: { id: created.post.id, publish: true } });
+    }
+    expect(pub.ok(), `sweep: publish the blog fixture post (${await pub.text()})`).toBe(true);
     blogSlug = created.post.slug;
   }
   await ctx.close();

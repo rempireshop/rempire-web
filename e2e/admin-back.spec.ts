@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
-import { freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen } from "./fixtures";
+import {
+  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, shopUrl, waitForScreen,
+} from "./fixtures";
 
 /**
  * «Назад» inside the panel — every card and every sheet.
@@ -23,10 +25,6 @@ async function back(page: Page): Promise<void> {
     "Back left the admin altogether").toBeAttached();
 }
 
-async function section(page: Page, key: string): Promise<void> {
-  await page.locator(`[data-admtab="${key}"][aria-current]:visible`).first().click();
-}
-
 test.describe("admin — «Назад» closes what is open", () => {
   test.use({ extraHTTPHeaders: ipHeaders(154) });
 
@@ -46,7 +44,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     await loginAsAdmin(page);
 
     // ---- the order card ----------------------------------------------------
-    await section(page, "orders");
+    await adminSection(page, "orders");
     await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
     await expect(page.locator('[data-admorder=""]')).toBeVisible();
     await back(page);
@@ -65,7 +63,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     await expect(page.locator('[data-admorder=""]'), "the second Back did not close the card").toHaveCount(0);
 
     // ---- the product editor ------------------------------------------------
-    await section(page, "goods");
+    await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
     await expect(page.locator("[data-admsavegoods]")).toBeVisible();
     await back(page);
@@ -73,7 +71,7 @@ test.describe("admin — «Назад» closes what is open", () => {
 
     // ---- the customer card -------------------------------------------------
     // a guest checkout leaves no customer row, so make one to open
-    await section(page, "people");
+    await adminSection(page, "people");
     if ((await page.locator("[data-admcustopen]").count()) === 0) {
       await page.locator("[data-admpartnernew]").click();
       await page.locator('[data-partnerf="email"]').fill(freshEmail("back-partner"));
@@ -88,7 +86,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     await expect(page.locator("[data-admcustclose]"), "Back did not close the customer card").toHaveCount(0);
 
     // ---- a settings page ---------------------------------------------------
-    await section(page, "setup");
+    await adminSection(page, "setup");
     await page.locator('[data-admsetpage="home"]').click();
     await expect(page.locator("[data-admsetback]")).toBeVisible();
     await back(page);
@@ -96,7 +94,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     await expect(page.locator('[data-admsetpage="home"]'), "the settings index did not come back").toBeVisible();
 
     // ---- the blog editor ---------------------------------------------------
-    await section(page, "blog");
+    await adminSection(page, "blog");
     await page.locator("[data-admblognew]").click();
     await expect(page.locator("[data-admblogback]")).toBeVisible();
     await back(page);
@@ -106,7 +104,7 @@ test.describe("admin — «Назад» closes what is open", () => {
   test("desktop: the scanner overlay — Back closes it instead of leaving the panel", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "one run is enough; the overlay is the same on both");
     await loginAsAdmin(page);
-    await section(page, "goods");
+    await adminSection(page, "goods");
     await page.locator('.adm-tab[data-admtab="stock"]').click();
 
     // no camera in headless Chromium — the overlay says so in Russian and
@@ -150,7 +148,7 @@ test.describe("admin — «Назад» closes what is open", () => {
     await page.goto(shopUrl("", "/"));
     await waitForScreen(page, "home");
     await loginAsAdmin(page);
-    await section(page, "goods");
+    await adminSection(page, "goods");
     await page.locator("[data-admgoods]").first().click();
     await expect(page.locator("[data-admsavegoods]")).toBeVisible();
 

@@ -1,5 +1,8 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
-import { continueButton, eur, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2, shopUrl, waitForScreen } from "./fixtures";
+import {
+  adminSection, continueButton, eur, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT_2,
+  shopUrl, waitForScreen,
+} from "./fixtures";
 
 /**
  * Admin panel. Desktop only, single run (RU) — see docs/testing.md "Why most
@@ -341,14 +344,17 @@ test.describe("admin", () => {
     test("promo tab: a new code works at checkout", async ({ page, context }) => {
       const code = "E2EPROMO" + Date.now().toString().slice(-6);
       await loginAsAdmin(page);
-      await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
+      await adminSection(page, "promos");
       await page.locator("[data-admpromonew]").click();
       await page.locator('[data-promof="code"]').fill(code);
       // the kind is a chip row since the redesign, not a radio list
       await page.locator('[data-promokind="percent"]').click();
       await page.locator('[data-promof="value"]').fill("10");
       await page.locator("[data-admpromosave]").click();
-      await expect(page.getByText(code)).toBeVisible();
+      /* Scoped to the row's own name, not the page: since the switches say «Вкл»
+         / «Выкл», each one also carries its clipped accessible name («Промокод
+         SUMMER»), so a bare getByText(code) now matches two nodes. */
+      await expect(page.locator(`[data-admpromoedit="${code}"] .adm-row__nm`)).toHaveText(code);
 
       const shopper = await context.newPage();
       await shopper.goto(shopUrl("", `/p/${PRODUCT_2.id}/`));

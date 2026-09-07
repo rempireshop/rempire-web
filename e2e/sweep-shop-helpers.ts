@@ -103,6 +103,15 @@ const CONSOLE_ALLOW: RegExp[] = [
   // red line in their console. Server-side inconsistency, listed in the
   // sweep's report — app.js already treats the two identically.
   /400 \(Bad Request\).*\/api\/promos\/check\//i,
+  /* The fourth pass of search asks a model (POST /api/search/) only when the
+     catalogue's own three passes found almost nothing. The e2e environment has
+     no OPENAI_API_KEY, so the route answers 503 {enabled:false} — the same
+     posture as the assistant route, and security.spec.ts pins it: an
+     unconfigured AI route never answers 200. app.js reads the 503 and switches
+     the pass off for the session, so the shopper sees the local results and no
+     message at all. WebKit prints a console line for every failed resource
+     where Chromium prints none, which is why only the iPhone shard saw this. */
+  /503 \(Service Unavailable\).*\/api\/search\//i,
   /* A page that does not exist is served with a 404 since 07.09.2026 — the
      whole point of it — and Chromium logs the status of the document it just
      loaded as a console error. Scoped to a /shop2/ document so a 404 on a

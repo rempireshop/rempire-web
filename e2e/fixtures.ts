@@ -178,6 +178,53 @@ export async function loginAsAdmin(page: Page): Promise<void> {
 }
 
 /**
+ * Opens one of the panel's sections by the key it has always had, then its
+ * sub-tab if the screen has one.
+ *
+ * The eleven sections sit in the desktop sidebar, but on a 375-px viewport
+ * only five are in the bottom bar and the other six live behind «Ещё» — so a
+ * spec that reaches straight for `[data-admtab="promos"]` passes on a desktop
+ * and times out on a phone, which is exactly how «Маркетинг» broke the mobile
+ * shard. One helper, so a spec cannot get this right on one viewport only.
+ */
+export async function adminSection(page: Page, key: string, sub?: string): Promise<void> {
+  const direct = page.locator(`[data-admtab="${key}"][aria-current]:visible`);
+  const more = page.locator("[data-admmore]:visible");
+  /* Wait for whichever navigation this viewport draws before counting: after a
+     reload the shell is a frame or two behind, and an immediate count of zero
+     would send a desktop run looking for the phone's «Ещё» button. */
+  await expect(direct.or(more).first()).toBeVisible();
+  if (await direct.count()) {
+    await direct.first().click();
+  } else {
+    await more.first().click();
+    await page.locator(`.adm-sheet [data-admtab="${key}"]`).first().click();
+  }
+  if (sub) await page.locator(`[data-admtab="${sub}"][aria-current]:visible`).first().click();
+}
+
+/**
+ * Switches the panel's own language (RU · ET · EN).
+ *
+ * The strip is drawn twice, like the navigation: once in the desktop sidebar
+ * and once in the phone's «Ещё» sheet, which is not in the document at all
+ * until the sheet is open. So a phone has to open the sheet, pick, and close
+ * it again — the caller is looking at the screen underneath.
+ */
+export async function adminLang(page: Page, code: "RU" | "ET" | "EN"): Promise<void> {
+  const button = page.locator(`.adm-langs button[data-lang="${code}"]:visible`);
+  if (await button.count()) { await button.first().click(); return; }
+  await page.locator("[data-admmore]:visible").first().click();
+  await page.locator(`.adm-sheet .adm-langs button[data-lang="${code}"]`).first().click();
+  /* Near the top-left corner, not the middle: the scrim is the whole screen
+     and the sheet is stacked on top of its lower half, so a click aimed at
+     the scrim's centre lands on the sheet. The dark strip above the sheet is
+     where a thumb taps, and it is the only part of the scrim that is clear. */
+  await page.locator("[data-admmoreclose]").first().click({ position: { x: 8, y: 8 } });
+  await expect(page.locator(".adm-sheet")).toHaveCount(0);
+}
+
+/**
  * Fills contact + courier delivery + card payment on an already-open
  * checkout screen, clicks Pay, and follows the mock bank
  * (src/app/api/payments/mock/route.ts) through to a paid or failed receipt.

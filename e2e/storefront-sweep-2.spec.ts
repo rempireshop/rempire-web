@@ -274,6 +274,18 @@ test.describe("router — malformed addresses", () => {
 
 test.describe("chat — the language on screen", () => {
   test.use({ extraHTTPHeaders: ipHeaders(196) });
+  /* Dim, 07.09.2026: «mobiilis ei kasuta üldse poes assistenti.» The shop's
+     chat is not merely hidden on a phone — app.js never fetches chat.js below
+     768 px — so there is no FAB here to click. The rule itself is tested from
+     the phone side in chatbot.spec.ts («the assistant on a phone»); what this
+     test is about, the language the bubble greets in, only exists where the
+     bubble does. */
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(
+      testInfo.project.name === "mobile" || testInfo.project.name === "mobile-safari",
+      "the shop's assistant is not drawn on a phone at all",
+    );
+  });
 
   test("a first visit to /et/ is greeted in Estonian; the English shop prices like the shop", async ({ page }) => {
     await page.goto(shopUrl("/et", "/"));

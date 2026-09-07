@@ -564,6 +564,7 @@
       "Город, улица или название": "Linn, tänav või nimi",
       "Поиск пакомата": "Pakiautomaadi otsing",
       "Готовим оплату…": "Valmistame makset…", "Готовим…": "Valmistame…",
+      "Оформляем заказ…": "Vormistame tellimust…",
       "Заказ оплачен": "Tellimus makstud",
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Aitäh! Kinnitus ja arve on juba teel e-postile. Kui pakk läheb vedajale, saadame jälgimisnumbri.",
       "Оплата не прошла": "Makse ebaõnnestus",
@@ -2783,6 +2784,7 @@
       "Город, улица или название": "Town, street or name",
       "Поиск пакомата": "Search parcel lockers",
       "Готовим оплату…": "Preparing payment…", "Готовим…": "Preparing…",
+      "Оформляем заказ…": "Placing your order…",
       "Заказ оплачен": "Order paid",
       "Спасибо! Подтверждение и чек уже летят на почту. Когда посылку передадут перевозчику, пришлём трек-номер.": "Thank you. The confirmation and receipt are on their way to your inbox; you will get a tracking number when the parcel is handed to the carrier.",
       "Оплата не прошла": "Payment did not go through",
@@ -11218,7 +11220,7 @@
      Sent as ids and quantities only — the server rebuilds names and prices,
      the same rule the order endpoint follows. Debounced, because the checkout
      e-mail field fires this on every keystroke. */
-  var cartPush = { t: 0, last: "" };
+  var cartPush = { t: 0, last: "", off: false };
   function cartLines() {
     return S.cart.filter(function (l) { return !l.type; })
       .map(function (l) { return { id: l.id, size: l.size, qty: l.qty }; });
@@ -11228,8 +11230,16 @@
     var e = String(S.email || "").trim();
     return /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(e) ? e : "";
   }
+  /* `cartPush.off` is set the moment the order is submitted. Two reasons, and
+     the first is the shopper's: a basket filed a second before it is paid for
+     is not an abandoned cart, and the letter must never go out about an order
+     that exists. The second is that the debounce below lands, on a slow
+     machine, exactly while the browser is leaving for the bank — the request
+     is then cancelled mid-flight, and WebKit reports a cancelled fetch as an
+     uncaught «Fetch API cannot load … due to access control checks», which is
+     an error in the shopper's console about nothing at all. */
   function pushCart(now) {
-    if (API.ok === false) return;
+    if (API.ok === false || cartPush.off) return;
     var email = cartEmail();
     var lines = cartLines();
     if (!email || !lines.length) return;
@@ -11237,6 +11247,7 @@
     if (key === cartPush.last) return;
     clearTimeout(cartPush.t);
     cartPush.t = setTimeout(function () {
+      if (cartPush.off) return;
       cartPush.last = key;
       postJSON("/api/carts/", { email: email, lang: S.lang, items: lines }).then(function (res) {
         if (res.offline) { apiSeen(false); cartPush.last = ""; }
@@ -11877,6 +11888,9 @@
     if (API.ok === false) return finishDemo();
 
     S.paying = true; render();
+    // no abandoned-cart snapshot from here on: this basket is becoming an order
+    cartPush.off = true;
+    clearTimeout(cartPush.t);
     /* The body decides whether the order this checkout already made is the
        same order: identical body, same order. `sig` is that body, verbatim. */
     var payload = orderPayload();
@@ -11933,6 +11947,9 @@
       });
     }).catch(function (err) {
       S.paying = false; render();
+      /* The order did not happen, so this basket can be abandoned after all —
+         a card declined at the bank is exactly when the letter earns its keep. */
+      cartPush.off = false;
       toast(err && err.message ? err.message : "Не получилось оформить заказ");
     });
   }
@@ -11959,6 +11976,34 @@
      detached the carrier chips and the «Выберите пакомат» button while the
      shopper was reaching for them — a tap that landed inside that window
      simply did nothing. */
+  /* Dim, 07.09.2026: «after I entered where items should be shipped, maybe
+     the button for "checkout" should make a short animation … for the user to
+     understand where to click». The delivery step can be four fields or ten,
+     and when the last one is filled nothing on screen moves — so the button
+     that is now the only thing left to do says so, once, with one short
+     pulse. `coNextReady` remembers that it has already played: patchDelivery()
+     rebuilds this block on every keystroke, and a class in the fresh markup
+     would restart the animation on each one. Falling back out of «ready»
+     (a field cleared again) re-arms it. */
+  var coNextReady = false;
+  function coNextPulse() {
+    var ready = !shipMissing().length && !pointMissing() && !(S.country === "EU" && !S.countryIso);
+    if (!ready) { coNextReady = false; return ""; }
+    if (coNextReady) return "";
+    coNextReady = true;
+    return " btn--nudge";
+  }
+  /* The same thing when nothing is being re-rendered. Typing in an address
+     field deliberately does not render — a rebuild would take the caret with
+     it — so the last field being filled would otherwise change nothing on
+     screen at all. Called on the way out of a field; the class goes straight
+     on to the button that is already there. */
+  function coNextNudge() {
+    if (S.screen !== "checkout" || S.coStep !== 2) return;
+    if (!coNextPulse()) return;
+    var btn = document.querySelector('.costep__body [data-step="3"]');
+    if (btn) btn.classList.add("btn--nudge");
+  }
   var coBlockHTML = { delivery: "", payment: "", summary: "" };
   /* Which delivery method step 2's body was last built for — see
      patchDelivery() for why the two can drift apart and why that matters. */
@@ -12109,7 +12154,8 @@
          pay before choosing how the parcel travels or how they are paying. */
       (S.coStep === 3
         ? '<button class="btn btn--wide co__pay" data-pay' + (S.paying ? " disabled" : "") + ">" +
-            (S.paying ? "Готовим оплату…" : nothingToPay() ? "Оформить заказ" : "Оплатить " + eur(total())) + "</button>" +
+            (S.paying ? (nothingToPay() ? "Оформляем заказ…" : "Готовим оплату…")
+              : nothingToPay() ? "Оформить заказ" : "Оплатить " + eur(total())) + "</button>" +
           /* Two straight chains rather than one with the button's name in a
              hole: the i18n check joins the literals of a chain into the text
              node the browser shows, and each of these is a dictionary key. */
@@ -12230,7 +12276,7 @@
                 : '<p class="cosrc"><span>Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.</span>' +
                   (S.country === "FI" ? " <span>Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.</span>" : "") +
                   (S.country === "EU" ? " <span>Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.</span>" : "") + "</p>") +
-              '<button class="btn btn--wide" data-step="3">Далее — оплата</button></div>' : "") +
+              '<button class="btn btn--wide' + coNextPulse() + '" data-step="3">Далее — оплата</button></div>' : "") +
           "</section>" +
 
           '<section class="costep' + (step === 3 ? " is-open" : "") + '">' +
@@ -12252,7 +12298,8 @@
       (step === 3
         ? '<div class="stickybar"><span class="stickybar__tot"><span>Итого</span><span class="num">' + eur(total()) + '</span></span>' +
           '<button class="btn" data-pay' + (S.paying ? " disabled" : "") + ">" +
-          (S.paying ? "Готовим…" : nothingToPay() ? "Оформить заказ" : "Оплатить") + "</button></div>"
+          (S.paying ? (nothingToPay() ? "Оформляем…" : "Готовим…")
+            : nothingToPay() ? "Оформить заказ" : "Оплатить") + "</button></div>"
         : "");
   }
   function payMark(k) {
@@ -16252,7 +16299,13 @@
         S.banksLoaded = Array.isArray(st0.payment_banks) ? st0.payment_banks.slice() : [];
         render();
       }
-    }).catch(function () { loadAdminPricing._busy = false; });
+      else if (!S.pricingLoaded) { S.pricingLoaded = normalisePricing(null); render(); }
+    }).catch(function () {
+      loadAdminPricing._busy = false;
+      // never leave «Цены и баллы» on its skeleton: the defaults are what the
+      // card drew before this screen learned to wait, and they draw again here
+      if (!S.pricingLoaded) { S.pricingLoaded = normalisePricing(null); render(); }
+    });
   }
   function pricingDraft() {
     if (!S.pricingDraft) S.pricingDraft = cloneRules(S.pricingLoaded || normalisePricing(null));
@@ -16445,6 +16498,16 @@
   }
   function admPricingCard() {
     loadAdminPricing(false);
+    /* Nothing honest to draw until the shop's own numbers are here: the
+       built-in defaults are not what Renat saved, and a switch pressed while
+       the answer was still on its way had its tap thrown away — the first
+       load drops the draft (see loadAdminPricing), so the control flipped
+       back by itself and the owner was left wondering what he had done. */
+    if (SRV.admin === true && !S.pricingLoaded) {
+      return '<div class="adm-form">' +
+        '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
+        '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+    }
     var d = pricingDraft(), lo = d.loyalty.enabled, on = d.partnersOn === true;
     return '<div class="adm-form">' +
       '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
@@ -24510,6 +24573,11 @@
     if (line) line.qty = Math.min(9, line.qty + qty);
     else S.cart.push({ id: id, size: si, qty: Math.min(9, qty) });
     persist();
+    /* A new basket after a placed order is a new basket: payNow() switched the
+       snapshot off for the order it was making, and an invoice order never
+       leaves the page, so without this the letter would stay off for the rest
+       of the visit. */
+    cartPush.off = false;
     // account-flows: a signed-in shopper's basket is filed for the
     // abandoned-cart letter as it is built, not only at the checkout
     pushCart();
@@ -27137,10 +27205,12 @@
     if (e.target.matches("[data-email]")) {
       S.emailTouched = true;
       if (S.screen === "checkout" || S.screen === "account") patchEmail(e.target);
-    } else if (e.target.matches("[data-shipf]") && S.shipTouched) {
+    } else if (e.target.matches("[data-shipf]")) {
       // only once they have tried to continue: marking fields red at someone
       // who is still working down the form is nagging, not helping
-      patchShip(e.target);
+      if (S.shipTouched) patchShip(e.target);
+      // …but the moment the step is complete, «Далее — оплата» says so
+      coNextNudge();
     } else if (e.target.matches('[data-giftto="email"]')) {
       /* features: the recipient's address is the one field on «Получатель»
          that can be wrong rather than merely empty, and a typo there sends the
