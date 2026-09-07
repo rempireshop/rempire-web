@@ -835,6 +835,10 @@ export async function priceItems(
   // null for bundle/gift lines and for any line priced before a pro rate
   // could be resolved (i.e. this customer is not pro at all)
   const proUnits: Array<number | null> = [];
+  /* The gift-card denominations on sale — read on the first gift line and
+     kept, so a basket of five cards asks the settings table once and a
+     basket with none never asks at all. */
+  let onSale: number[] | null = null;
 
   const lines: PricedLine[] = [];
   for (const raw of items) {
@@ -872,6 +876,20 @@ export async function priceItems(
       const parse = fn(await optionalLib("giftcards"), "parseGiftItemId");
       const amount = parse ? num(await parse(raw.id), NaN) : NaN;
       if (!Number.isFinite(amount) || amount <= 0) throw new OrderError("gift_unknown", raw.id);
+      /* …and the owner decides which of them are on sale today. Checked
+         against settings.gift_amounts, not against the four the module
+         allows: a denomination switched off in «Маркетинг → Подарочные
+         карты» used to be sellable anyway, out of a basket that still held
+         one or from a hand-posted item id (Dim, 07.09.2026 — the tile, the
+         page and the till all read the one setting now). Resolved once per
+         order, and only for a basket that actually holds a card. */
+      if (onSale === null) {
+        const list = fn(await optionalLib("giftcards"), "giftAmountsOnSale");
+        onSale = list ? ((await list()) as number[]) : [];
+      }
+      // an empty list means the module or the database could not answer —
+      // refusing every card because a settings read failed would be worse
+      if (onSale.length && !onSale.includes(amount)) throw new OrderError("gift_unavailable", raw.id);
       const meta = raw.meta && typeof raw.meta === "object" ? giftMeta(raw.meta) : null;
       lines.push({
         id: raw.id,

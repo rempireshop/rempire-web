@@ -32,7 +32,20 @@
  * finger on a 360-px screen.
  */
 import { expect, test } from "@playwright/test";
-import { BUNDLE, eur, functionalProject, ipHeaders, LANGS, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+import {
+  BUNDLE,
+  continueButton,
+  eur,
+  freshEmail,
+  functionalProject,
+  ipHeaders,
+  LANGS,
+  payOrder,
+  PRODUCT,
+  shopUrl,
+  tr,
+  waitForScreen,
+} from "./fixtures";
 
 test.beforeEach(async ({}, testInfo) => {
   test.skip(
@@ -222,19 +235,40 @@ test.describe("router — malformed addresses", () => {
   test("a bad percent-encoding is not a page error and the shop still boots", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(String(e)));
-    const cases: Array<[string, string]> = [
-      ["/search/?q=%E0", "search"],
-      ["/b/%E0/", "home"],
-      ["/set/%E0/", "bundle"],
-      ["/et/search/?q=%E0%E0", "search"],
-    ];
-    for (const [path, screen] of cases) {
+    /* The share link a messenger mangled — the bug this test was written for
+       (`6933a0c`): the QUERY is what came back mangled, and it used to throw
+       URIError out of the router during boot, leaving the prerendered page
+       lying under an app that never painted. */
+    for (const path of ["/search/?q=%E0", "/et/search/?q=%E0%E0"]) {
       await page.goto(`/shop2${path}`);
-      await waitForScreen(page, screen);
-      // the static page under the app is dropped once the first render lands
+      await waitForScreen(page, "search");
       await expect(page.locator("#prerender"), `${path}: the prerendered page stayed under the app`).toHaveCount(0);
       expect(errors, `${path}: uncaught page error`).toEqual([]);
     }
+
+    /* A mangled PATH is not an address at all, and Next refuses to decode one
+       into a route parameter: /shop2/p/%E0/ has answered 400 ever since the
+       request-time product page existed, and since 07.09.2026 every /shop2/
+       path is a route, so they all answer the same way. What matters here is
+       that it is a clean refusal with a status — never a 5xx, never a stack.
+       (Question 4 in docs/audit/2026-09-07-storefront.md: whether that 400
+       should be dressed as the shop's own 404 is Dim's call.) */
+    for (const path of ["/p/%E0/", "/b/%E0/", "/set/%E0/"]) {
+      const res = await page.request.get(`/shop2${path}`);
+      expect(res.status(), path).toBe(400);
+    }
+
+    /* …and the router's own safeDecode() still holds for a mangled id the SPA
+       reaches by navigating rather than by a cold load, which is the code
+       path the fix was actually about. */
+    await page.goto(shopUrl("", "/sets/"));
+    await waitForScreen(page, "bundles");
+    await page.evaluate(() => {
+      history.pushState({}, "", "/shop2/set/%E0/");
+      window.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
+    });
+    await waitForScreen(page, "bundle");
+    expect(errors, "a mangled set id threw out of the router").toEqual([]);
   });
 });
 
@@ -460,5 +494,386 @@ test.describe("checkout — a keyboard shopper", () => {
     await page.locator("[data-email]").fill("nope");
     await page.locator('button.btn--wide[data-step="2"]').click();
     expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-invalid"))).toBe("true");
+  });
+});
+
+/* =========================================================================
+   07.09.2026 — the eleven things Dim decided after the 06.09 sweep
+   (docs/audit/2026-09-07-storefront.md). One describe per decision, in the
+   order he answered them.
+   ========================================================================= */
+
+test.describe("404 — an address the shop has no page for", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(205) });
+
+  for (const lang of LANGS) {
+    test(`«${lang.code}» — 404 from the server, the 404 screen from the script, the address kept`, async ({ page }) => {
+      const path = shopUrl(lang.seg, "/no-such-page-07092026/");
+      const res = await page.goto(path);
+      /* The status is the half a crawler reads. It used to be 200 with the
+         home page under it — a soft 404, which is what Google de-indexes. */
+      expect(res?.status(), "an unknown shop path must answer 404").toBe(404);
+
+      await waitForScreen(page, "notfound");
+      // …and the script agrees, on the address the shopper actually asked for
+      expect(new URL(page.url()).pathname).toBe(path);
+      await expect(page.locator("h1")).toHaveText(tr("Страница не найдена", lang.code));
+      expect(await page.title()).toBe(`${tr("Страница не найдена", lang.code)} — REMPIRE`);
+      expect(
+        await page.evaluate(() => document.querySelector('meta[name="robots"]')?.getAttribute("content")),
+        "a page that does not exist must not be indexable",
+      ).toBe("noindex, nofollow");
+      expect(await page.evaluate(() => document.documentElement.lang)).toBe(lang.htmlLang);
+
+      // the two ways out are real
+      await page.locator('.nf__acts [data-go-cat="all"]').click();
+      await waitForScreen(page, "catalog");
+    });
+  }
+
+  test("the screens that live only in the browser still answer 200", async ({ page }) => {
+    for (const path of ["/brands/", "/search/", "/account/", "/sets/", "/gift/"]) {
+      const res = await page.request.get(shopUrl("", path));
+      expect(res.status(), `${path} must not have become a 404`).toBe(200);
+    }
+    // …and a category or a brand that does not exist is a 404 like anything else
+    for (const path of ["/c/not-a-category/", "/b/not-a-brand/", "/info/not-a-page/"]) {
+      const res = await page.request.get(shopUrl("", path));
+      expect(res.status(), `${path} should not resolve`).toBe(404);
+    }
+  });
+});
+
+test.describe("checkout — an empty basket", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(206) });
+
+  for (const lang of LANGS) {
+    test(`«${lang.code}» — the address follows the screen home`, async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/checkout/"));
+      await waitForScreen(page, "home");
+      /* It drew the home page and left /checkout/ in the address bar, so a
+         reload, the tab title and the canonical all described a page the
+         shopper was not on. */
+      expect(new URL(page.url()).pathname).toBe(shopUrl(lang.seg, "/"));
+      expect(await page.evaluate(() =>
+        document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
+      )).toMatch(new RegExp(`${shopUrl(lang.seg, "/")}$`));
+    });
+  }
+});
+
+test.describe("the gift tile names what is on sale", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(207) });
+
+  for (const lang of LANGS) {
+    test(`«${lang.code}» — the tile and the /gift/ buttons are one list`, async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/gift/"));
+      await waitForScreen(page, "gift");
+      const offered = (await page.locator(".gamts .gamt").allInnerTexts()).map((t) => t.trim());
+      expect(offered.length, "the gift page offers no amount at all").toBeGreaterThan(0);
+
+      await page.goto(shopUrl(lang.seg, "/"));
+      await waitForScreen(page, "home");
+      const tile = (await page.locator(".gifttile .num").first().innerText()).trim();
+      /* The tile used to say «25, 50 или 100 €» in fixed text whatever the
+         owner had switched on. It is the setting's own list now — the same
+         amounts the buttons carry, in the same order, formatted for this
+         language (eur()). */
+      const wanted = offered.map((a) => eur(Number(a.replace(/[^\d]/g, "")), lang.code)).join(", ");
+      expect(tile).toBe(wanted);
+    });
+  }
+});
+
+test.describe("account — the default delivery reaches the checkout", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(208) });
+
+  test("a parcel machine chosen in the account is the one the checkout starts on", async ({ page }) => {
+    const email = freshEmail("acct-pref");
+    await page.goto(shopUrl("", "/account/"));
+    await waitForScreen(page, "account");
+    await page.locator("[data-email]").fill(email);
+    const codeResponse = page.waitForResponse((r) => r.url().includes("/api/account/code/"));
+    await page.locator("[data-login]").click();
+    const body = (await (await codeResponse).json()) as { code?: string };
+    expect(body.code, "the e2e login-code hook did not answer").toMatch(/^\d{6}$/);
+    await page.locator("[data-acctcode]").fill(body.code!);
+    await page.locator("[data-logincode]").click();
+    await expect(page.locator("[data-logout]")).toBeVisible();
+
+    /* «Пакомат SmartPosti» is neither the account's default row (that is
+       «Пакомат DPD», S.acctMethod = 1) nor the checkout's first carrier
+       chip (that is Omniva), so finding it selected at the till can only
+       mean the preference travelled. The block promised «Подставим это при
+       следующем заказе» and did nothing at all until 07.09.2026. */
+    const row = page.locator(".optlist .opt").filter({ hasText: "Пакомат SmartPosti" }).first();
+    await expect(row).toBeVisible();
+    /* The machine list is the checkout's own live feed now, not the static
+       copy the account used to keep — so the name saved here is one the till
+       can find again. Wait for that carrier's feed before reading it. */
+    const feed = page.waitForResponse((r) => r.url().includes("/api/shipping/points/") && r.url().includes("carrier=smartpost"));
+    await row.locator("input[data-acctm]").check();
+    await feed;
+    const machines = page.locator("[data-acctmachine]");
+    await expect(machines).toBeVisible();
+    await expect.poll(async () => (await machines.locator("option").count())).toBeGreaterThan(1);
+    const machine = (await machines.inputValue()).trim();
+    expect(machine.length, "no parcel machine offered in the account").toBeGreaterThan(0);
+
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+    await page.locator("[data-email]").fill(email);
+    await continueButton(page, 2).click();
+
+    await expect(page.locator('input[data-dm="parcel"]')).toBeChecked();
+    await expect(page.locator('[data-carrier="smartpost"]')).toHaveAttribute("aria-current", "true");
+    // …and the machine itself, matched by name against the live list
+    await expect(page.locator("[data-pointopen]")).toContainText(machine);
+
+    // …and the shopper's own choice still wins over it, in this session
+    await page.locator('input[data-dm="pickup"]').check();
+    await expect(page.locator('input[data-dm="pickup"]')).toBeChecked();
+
+    // a reload is a new session, so the standing preference is back
+    await page.reload();
+    await waitForScreen(page, "checkout");
+    await page.locator("[data-email]").fill(email);
+    await continueButton(page, 2).click();
+    await expect(page.locator('[data-carrier="smartpost"]')).toHaveAttribute("aria-current", "true");
+  });
+});
+
+test.describe("checkout — the skip link", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(209) });
+
+  test("one Tab reaches it and it lands in the open step", async ({ page }) => {
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+
+    /* Seven Tab presses used to separate the top of the page from the e-mail
+       box (QA sweep 06.09, question 6). The link is the first thing in the
+       page's tab order and is off-screen until it takes focus. */
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press("Tab");
+    expect(await page.evaluate(() => document.activeElement?.className)).toContain("skip");
+    // it is genuinely visible once focused — a skip link nobody can see is not one
+    await expect(page.locator("button.skip")).toBeInViewport();
+
+    await page.keyboard.press("Enter");
+    expect(
+      await page.evaluate(() => document.activeElement?.hasAttribute("data-email")),
+      "the skip link did not land on the first field of the open step",
+    ).toBe(true);
+
+    // …and it follows the step that is open, not a fixed field
+    await page.keyboard.type(`kbd-skip-${Date.now()}@example.com`);
+    await continueButton(page, 2).click();
+    await expect(page.locator('input[data-dm="parcel"]')).toBeVisible();
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    expect(
+      await page.evaluate(() => !!document.activeElement?.closest(".costep.is-open .costep__body")),
+      "on step 2 the skip link left the open step",
+    ).toBe(true);
+  });
+});
+
+test.describe("account — a fresh error clears the standing toast", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(210) });
+
+  test("«Код отправлен ✓» does not sit under «Код не подошёл»", async ({ page }) => {
+    await page.goto(shopUrl("", "/account/"));
+    await waitForScreen(page, "account");
+    await page.locator("[data-email]").fill(freshEmail("toast"));
+    const codeResponse = page.waitForResponse((r) => r.url().includes("/api/account/code/"));
+    await page.locator("[data-login]").click();
+    await codeResponse;
+
+    // the success toast is up…
+    const toast = page.getByRole("status");
+    await expect(toast).toBeVisible();
+    await expect(toast).toContainText("Код отправлен");
+
+    // …and a wrong code must replace it, not appear underneath it
+    await page.locator("[data-acctcode]").fill("000000");
+    await page.locator("[data-logincode]").click();
+    await expect(page.locator('.err[role="alert"]')).toBeVisible();
+    await expect(toast, "two contradicting messages on screen at once").toHaveCount(0);
+  });
+});
+
+test.describe("the Estonian blog is «Blogi»", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(211) });
+
+  /* home.spec.ts already walks the nav, the footer, the crumbs and the <h1>
+     through tr("Блог", …); what it does not read is the tab, which is
+     setHead()'s own string and the one a shopper sees in their history. */
+  test("the tab and the breadcrumb say «Blogi» too", async ({ page }) => {
+    await page.goto(shopUrl("/et", "/blog/"));
+    await waitForScreen(page, "blog");
+    expect(await page.title()).toBe("Blogi — REMPIRE");
+    await expect(page.locator("[data-nav-blog]")).toHaveText("Blogi");
+    // the old label must not survive anywhere on the page
+    expect(await page.evaluate(() => document.body.innerText)).not.toMatch(/\bBlog\b(?!i)/);
+  });
+});
+
+test.describe("«Бренды» — a page of its own, before any script runs", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(212) });
+
+  for (const lang of LANGS) {
+    test(`«${lang.code}» — the served HTML is the brands page, not the Russian shell`, async ({ page }) => {
+      /* The crawler's view: the bytes off the wire, no JavaScript. Until
+         07.09.2026 this was the home page's head at every prefix, with a
+         canonical pointing at /shop2/. */
+      const res = await page.request.get(shopUrl(lang.seg, "/brands/"));
+      expect(res.status()).toBe(200);
+      const html = await res.text();
+      const pick = (re: RegExp) => (html.match(re) || [])[1] || "";
+
+      expect(pick(/<html lang="([^"]*)"/)).toBe(lang.htmlLang);
+      expect(pick(/<title>([^<]*)<\/title>/)).toContain(
+        lang.code === "RU" ? "Бренды" : lang.code === "ET" ? "Brändid" : "Brands",
+      );
+      expect(pick(/<link rel="canonical" href="([^"]*)"/)).toContain(shopUrl(lang.seg, "/brands/"));
+      const desc = pick(/<meta name="description" content="([^"]*)"/);
+      expect(desc, "the brands page still carries the home page's description").not.toContain(
+        "уход за волосами и бородой, стайлинг",
+      );
+      // every brand is a real link out of it — the second crawlable path to the 26
+      expect((html.match(/href="\/shop2[^"]*\/b\/[^"]+\/"/g) || []).length).toBeGreaterThan(20);
+
+      // …and it is in the sitemap now that it is a page
+      const sm = await page.request.get("/sitemap-1.xml");
+      expect((await sm.text()).includes(`${shopUrl(lang.seg, "/brands/")}<`)).toBe(true);
+    });
+  }
+});
+
+test.describe("the newsletter tick travels with the order", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(213) });
+
+  test("«Хочу получать новости и скидки» reaches POST /api/orders", async ({ page }) => {
+    const email = freshEmail("news");
+    let sent: Record<string, unknown> | null = null;
+    page.on("request", (req) => {
+      if (req.method() === "POST" && req.url().includes("/api/orders")) {
+        try {
+          sent = JSON.parse(req.postData() || "{}");
+        } catch {
+          sent = { unparsed: true };
+        }
+      }
+    });
+
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+
+    await page.locator("[data-email]").fill(email);
+    /* The box was collected into S.newsletter and read by nothing — a shopper
+       ticked a consent box and the shop recorded nothing at all. */
+    await page.locator("[data-news]").check();
+    await payOrder(page, email, "paid");
+
+    expect(sent, "no order was posted").not.toBeNull();
+    expect((sent as unknown as { newsletter?: boolean }).newsletter).toBe(true);
+  });
+});
+
+test.describe("the consent banner", () => {
+  // a visitor who has never answered it — the suite's own storageState says
+  // otherwise for every other test (playwright.config.ts)
+  test.use({ extraHTTPHeaders: ipHeaders(214), storageState: { cookies: [], origins: [] } });
+
+  for (const lang of LANGS) {
+    test(`«${lang.code}» — a first visit is asked, in its own language`, async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/"));
+      await waitForScreen(page, "home");
+      const box = page.locator(".cbanner__box");
+      await expect(box).toBeVisible();
+      await expect(box).toContainText(
+        lang.code === "RU" ? "Что мы храним" : lang.code === "ET" ? "Mida me salvestame" : "What we store",
+      );
+      await expect(page.locator('[data-consent="all"]')).toBeVisible();
+      await expect(page.locator('[data-consent="need"]')).toBeVisible();
+    });
+  }
+
+  test("«Только необходимое» stops the visit statistics and is remembered", async ({ page }) => {
+    const beacons: string[] = [];
+    await page.route("**/api/track/", async (route) => {
+      beacons.push(route.request().url());
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+    });
+
+    await page.goto(shopUrl("", "/"));
+    await waitForScreen(page, "home");
+    /* Nothing is measured before the shopper has answered — the whole point
+       of asking. */
+    expect(beacons, "a beacon went out before the visitor answered").toHaveLength(0);
+
+    await page.locator('[data-consent="need"]').click();
+    await expect(page.locator(".cbanner__box")).toHaveCount(0);
+    expect(await page.evaluate(() => localStorage.getItem("rempire-consent"))).toContain('"analytics":false');
+
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    // the choice survives the navigation, and the beacon stays silent
+    await expect(page.locator(".cbanner__box")).toHaveCount(0);
+    expect(beacons, "statistics were sent after the visitor declined").toHaveLength(0);
+  });
+
+  test("«Принять всё» starts them, and the footer link opens the choice again", async ({ page }) => {
+    const beacons: string[] = [];
+    await page.route("**/api/track/", async (route) => {
+      beacons.push(route.request().url());
+      await route.fulfill({ status: 200, contentType: "application/json", body: '{"ok":true}' });
+    });
+    await page.goto(shopUrl("", "/"));
+    await waitForScreen(page, "home");
+    await page.locator('[data-consent="all"]').click();
+    await expect(page.locator(".cbanner__box")).toHaveCount(0);
+
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await expect.poll(() => beacons.length, { message: "no statistics after «Принять всё»" }).toBeGreaterThan(0);
+
+    /* A choice made once has to be changeable — «Данные и cookie» in the
+       footer is the way back to it. The footer is rebuilt by every render
+       (the hero rotates), so this clicks it in the page rather than fighting
+       Playwright's stability check for a node that is replaced under it. */
+    await page.evaluate(() => (document.querySelector("[data-cookies]") as HTMLElement | null)?.click());
+    await expect(page.locator(".cbanner__box")).toBeVisible();
+  });
+
+  test("it is never drawn over the checkout or the receipt", async ({ page }) => {
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await expect(page.locator(".cbanner__box")).toBeVisible();
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+    // a shopper mid-payment is the last person who should be reading this,
+    // and on a phone the bar would sit over «Оплатить»
+    await expect(page.locator(".cbanner__box")).toHaveCount(0);
+
+    await page.goto("/shop2/done/?n=R-100099&s=paid&t=9.00");
+    await waitForScreen(page, "done");
+    await expect(page.locator(".cbanner__box")).toHaveCount(0);
   });
 });

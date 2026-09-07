@@ -213,6 +213,12 @@ function routes(): RouteCase[] {
     { name: "GET /shop2/et/blog/[slug]/", path: "/shop2/et/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
     { name: "GET /shop2/en/blog/[slug]/", path: "/shop2/en/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/blog/[slug]/route"), params: { slug: "" }, jsonBody: false },
     { name: "GET /shop2/og/[file]", path: "/shop2/og/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/og/[file]/route"), params: { file: "" }, jsonBody: false },
+    /* The catch-all under /shop2/ (src/lib/notfound-page.ts): everything the
+       rewrites and the routes above did not claim. It reads nothing but the
+       request path, so the hostile shapes it has to survive are addresses —
+       an unfinished escape, a very long segment, a traversal attempt — none
+       of which may become a 5xx or reach a file. */
+    { name: "GET /shop2/[...path]/", path: "/shop2/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/[...path]/route"), jsonBody: false },
 
     /* ---- assistant, cron, e2e -------------------------------------------- */
     { name: "GET /api/assistant/", path: "/api/assistant/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/assistant/route"), req: { next: true } },

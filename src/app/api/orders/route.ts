@@ -8,7 +8,7 @@
  * for 1 €; every shipping field is rebuilt there from a whitelist.
  */
 import { clientIp, rateLimit } from "@/lib/auth";
-import { getCustomer, sessionEmail } from "@/lib/customers";
+import { getCustomer, recordMarketingConsent, sessionEmail } from "@/lib/customers";
 import { createOrder, OrderError } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -70,6 +70,16 @@ export async function POST(req: Request) {
        mailed inside createOrder() (src/lib/invoices.ts); the checkout shows
        the number, the due date and where the letter went, and calls no
        payment page. Absent on every other order. */
+    /* «Хочу получать новости и скидки» — stored against the address the
+       order was placed from, after the order exists and never before: a
+       consent recorded for a checkout that then failed would be a subscriber
+       who never bought anything. Awaited but never fatal (the helper swallows
+       its own errors), and it only ever switches the consent ON — see
+       recordMarketingConsent(). */
+    if ((body as { newsletter?: unknown }).newsletter === true) {
+      await recordMarketingConsent(order.email, (body as { lang?: unknown }).lang);
+    }
+
     const inv = order.invoice;
     const invoice = inv && typeof inv.number === "string"
       ? {

@@ -92,10 +92,14 @@ for (const lang of LANGS) {
       await waitForScreen(page, "gift");
     });
 
-    /* «Ajaveeb» was the wrong word: the Estonian label for the section is
-     * «Blog», in the nav, the footer, the breadcrumbs and the page title
-     * alike — one dictionary entry in app.js drives all of them, and
-     * tools/prerender-shop2.mjs lifts that same table for the static pages. */
+    /* «Ajaveeb» was the wrong word, and so was the bare «Blog»: the Estonian
+     * label for the section is «Blogi» (Dim, 07.09.2026), which is how the
+     * shop's own sentences already decline it — «Blogi pole ajutiselt
+     * saadaval», «Tagasi Blogisse». It is the nav, the footer, the
+     * breadcrumbs and the page title alike: one dictionary entry in app.js
+     * drives all of them, tools/prerender-shop2.mjs lifts that same table for
+     * the static pages, and src/lib/seo-head.mjs carries it for the
+     * request-time blog page. */
     test("the blog is labelled with the right word for the language", async ({ page }) => {
       await page.goto(shopUrl(lang.seg, "/"));
       await waitForScreen(page, "home");

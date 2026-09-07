@@ -489,6 +489,12 @@ export interface AdminCustomerRow {
   /** The language they signed in from — the language their letters are written in. */
   lang: "RU" | "ET" | "EN";
   tier: "retail" | "pro";
+  /* «Хочу получать новости и скидки» — customers.marketing. Ticked in the
+     account screen, and, since 07.09.2026, at the checkout as well (the tick
+     used to be collected and thrown away — QA sweep 06.09 §5.3). Carried here
+     so «Клиенты» can show who consented and the CSV can be the subscriber
+     list until there is a newsletter to send from. */
+  marketing: boolean;
   company: string | null;
   regCode: string | null;
   notes: string | null;
@@ -508,6 +514,7 @@ interface AdminCustomerDbRow {
   phone: string | null;
   lang: string | null;
   tier: string;
+  marketing: boolean | null;
   company: string | null;
   reg_code: string | null;
   notes: string | null;
@@ -534,6 +541,7 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
     phone: r.phone ?? "",
     lang: normalizeLangCode(r.lang),
     tier: r.tier === "pro" ? "pro" : "retail",
+    marketing: r.marketing === true,
     company: r.company,
     regCode: r.reg_code,
     notes: r.notes,
@@ -551,7 +559,7 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
    toward "ordersCount"/"revenue" on a customer card — a cancelled order is
    not revenue, and a guest order belongs to nobody's account. */
 const CUSTOMER_COLS = `
-  c.id, c.email, c.name, c.phone, c.lang, c.tier, c.company, c.reg_code, c.notes,
+  c.id, c.email, c.name, c.phone, c.lang, c.tier, c.marketing, c.company, c.reg_code, c.notes,
   c.pro_requested_at, c.pro_approved_at, c.created_at, c.last_login_at,
   coalesce(agg.orders_count, 0) as orders_count,
   coalesce(agg.revenue, 0) as revenue,
@@ -753,6 +761,8 @@ const CSV_HEAD = [
   "name",
   "phone",
   "tier",
+  // who may be written to — the list Renat exports until there is a sender
+  "marketing",
   "company",
   "regCode",
   "ordersCount",
@@ -772,6 +782,7 @@ export function customersToCsv(rows: AdminCustomerRow[]): string {
         r.name,
         r.phone,
         r.tier,
+        r.marketing ? "yes" : "no",
         r.company ?? "",
         r.regCode ?? "",
         r.ordersCount,

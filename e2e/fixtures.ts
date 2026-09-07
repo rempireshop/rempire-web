@@ -240,11 +240,14 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   "Заказ оплачен": { ET: "Tellimus makstud", EN: "Order paid" },
   "Оплата не прошла": { ET: "Makse ebaõnnestus", EN: "Payment did not go through" },
   "Платёж обрабатывается": { ET: "Makset töödeldakse", EN: "Payment is being processed" },
-  // ET is «Blog», not «Ajaveeb» — the owner's own word for the section.
-  "Блог": { ET: "Blog", EN: "Blog" },
+  // ET is «Blogi», not «Ajaveeb» — the owner's own word for the section,
+  // settled 07.09.2026 so the label matches the sentences that decline it.
+  "Блог": { ET: "Blogi", EN: "Blog" },
   // the aria-label on a product card's size picker (cardSizeHTML in app.js)
   "Объём": { ET: "Maht", EN: "Size" },
   "Подарочная карта": { ET: "Kinkekaart", EN: "Gift card" },
+  // the 404 screen (screenNotFound in app.js, 07.09.2026)
+  "Страница не найдена": { ET: "Lehte ei leitud", EN: "Page not found" },
   "Отзывов пока нет — станьте первым.": { ET: "Arvustusi veel pole — ole esimene.", EN: "No reviews yet — be the first." },
   "Спасибо! Отзыв отправлен — он появится на странице после проверки.": {
     ET: "Aitäh! Arvustus on saadetud — see ilmub lehele pärast ülevaatamist.",

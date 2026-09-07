@@ -312,7 +312,7 @@ try {
    defaults that app.js applyShipRules() does (key by key, a bad number
    ignored), so the page prints what the checkout will bill. Without
    DATABASE_URL these are the defaults src/lib/shipping.ts carries too. */
-const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing"]);
+const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts"]);
 function mergeShipRules(defaults, raw) {
   const out = JSON.parse(JSON.stringify(defaults));
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
@@ -763,6 +763,73 @@ function listingPage({ lang, kind, id, heading, list, rest, desc, title }) {
   };
 }
 
+/* ---------- /brands/ -----------------------------------------------------
+
+   The one shopper-facing screen that had no page of its own. Every language
+   fell through to the Russian shell, so /shop2/et/brands/ and
+   /shop2/en/brands/ were served the home page's title, the home page's
+   description and a canonical pointing at /shop2/ — and it was absent from
+   the sitemap while being perfectly crawlable. `f8a3926` taught setHead() to
+   fix the head once the script runs, which is half the fix; this is the other
+   half, the one a crawler that does not run JS reads. Dim, 07.09.2026: give
+   it a real page.
+
+   Mirrors screenBrands() in public/shop2/app.js — the same crumb, the same
+   <h1>, the same opening sentence (which is also the description, from the
+   same dictionary), and the brand list as real links, which is a second
+   crawlable path from here to all 26 brand pages. */
+
+const BRANDS_INTRO = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
+const BRAND_COUNT = new Map(BRANDS.map(b => [b, CATALOGUE.filter(p => p.brand === b).length]));
+
+function brandsPage(lang) {
+  const { code, seg } = lang;
+  const t = T[code];
+  const rest = "/brands/";
+  const heading = t.brands;
+  const crumbItems = [[t.home, langPath(seg, "/")], [heading, null]];
+  const desc = tr(BRANDS_INTRO, code, false);
+
+  const content = '<div class="wrap">' +
+    crumbs(crumbItems.map(([l, u]) => [l, u ? esc(u) : null])) +
+    '<section class="sec">' +
+      '<h1 class="display h1">' + esc(heading) + "</h1>" +
+      '<p class="sec__intro">' + esc(desc) + "</p>" +
+      /* The count is a bare number on purpose: «12 товаров» would need a
+         plural rule per language for a figure app.js repaints a moment
+         later anyway. */
+      '<ul class="pre__list">' + BRANDS.map(b =>
+        '<li><a href="' + href(seg, "/b/" + BRAND_SLUG.get(b) + "/") + '">' + esc(b) +
+        ' <span class="num">' + BRAND_COUNT.get(b) + "</span></a></li>").join("") + "</ul>" +
+    "</section>" +
+    langNav(seg, rest, t) +
+    "</div>";
+
+  return {
+    file: path.join(SHOP2, seg, "brands", "index.html"),
+    spec: {
+      lang, seg, rest,
+      title: fitTitle(heading, heading + " — REMPIRE"),
+      desc: clip(desc, 158),
+      image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "website",
+      jsonld: [
+        ORG_LD,
+        breadcrumbLD(crumbItems.map(([l, u]) => [l, u])),
+        {
+          "@context": "https://schema.org", "@type": "ItemList",
+          name: heading, numberOfItems: BRANDS.length,
+          itemListElement: BRANDS.map((b, i) => ({
+            "@type": "ListItem", position: i + 1,
+            url: abs(langPath(seg, "/b/" + BRAND_SLUG.get(b) + "/")),
+            name: b
+          }))
+        }
+      ],
+      content
+    }
+  };
+}
+
 function homePage(lang) {
   const { code, seg } = { code: lang.code, seg: lang.seg };
   const t = T[code];
@@ -1130,7 +1197,24 @@ function setsPage(lang) {
   };
 }
 
-const GIFT_AMOUNTS = [25, 50, 100];
+/* The gift-card denominations actually on sale. It used to be a fixed three
+   here (and, worse, the four the SERVER accepts a few lines down), while
+   «Маркетинг → Подарочные карты» decided what the /gift/ page really offered
+   — so a build after the owner switched 25 off wrote a page naming a card
+   nobody could buy. Dim, 07.09.2026: the page comes from the setting.
+   Same sanitiser as cleanGiftAmounts() in src/lib/giftcards.ts — the four the
+   server will accept, sorted, de-duplicated, falling back to the three the
+   shop has always sold rather than leaving the page with no amount on it. */
+const GIFT_AMOUNTS_ALLOWED = [25, 50, 75, 100];
+const GIFT_AMOUNTS_DEFAULT = [25, 50, 100];
+const GIFT_AMOUNTS = (() => {
+  const raw = LIVE_SETTINGS.gift_amounts;
+  if (!Array.isArray(raw)) return [...GIFT_AMOUNTS_DEFAULT];
+  const out = [...new Set(raw.map(Number).filter(n => GIFT_AMOUNTS_ALLOWED.includes(n)))].sort((x, y) => x - y);
+  return out.length ? out : [...GIFT_AMOUNTS_DEFAULT];
+})();
+/** «25 €, 50 €, 100 €» / «€25, €50, €100» — giftAmountsPhrase() in app.js. */
+const giftAmountsPhrase = code => GIFT_AMOUNTS.map(a => eurFor(a, code)).join(", ");
 
 function giftPage(lang) {
   const { code, seg } = lang;
@@ -1154,7 +1238,7 @@ function giftPage(lang) {
         code, false)) + "</p>" +
       '<h2 class="display h1" style="font-size:13px;letter-spacing:.18em">' +
         esc(tr("Сумма", code, false)) + "</h2>" +
-      '<ul class="pre__sizes">' + GIFT_AMOUNTS.map(a => "<li><span class=\"num\">" + esc(eur(a)) + "</span></li>").join("") + "</ul>" +
+      '<ul class="pre__sizes">' + GIFT_AMOUNTS.map(a => "<li><span class=\"num\">" + esc(eurFor(a, code)) + "</span></li>").join("") + "</ul>" +
       "<p>" + esc(tr(
         "Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.",
         code, false)) + "</p>" +
@@ -1169,7 +1253,7 @@ function giftPage(lang) {
     spec: {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — REMPIRE"),
-      desc: clip(t.giftDesc, 158),
+      desc: clip(t.giftDesc(giftAmountsPhrase(code)), 158),
       image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "website",
       jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
       content
@@ -1395,6 +1479,7 @@ for (const lang of LANGS) {
     pages.push(setsPage(lang));
     for (const b of BUNDLES) pages.push(setPage(b, lang));
   }
+  pages.push(brandsPage(lang));
   pages.push(giftPage(lang));
   // blog: [] when there is no database at build time — no /blog/ pages then,
   // same as an empty BUNDLES writing no /sets/ pages
@@ -1479,6 +1564,10 @@ for (const lang of LANGS) {
     entries.push(urlEntry("/sets/", lang.seg, "0.8"));
     for (const b of BUNDLES) entries.push(urlEntry("/set/" + encodeURIComponent(b.id) + "/", lang.seg, "0.7"));
   }
+  /* /brands/ is in the sitemap now that it is a page rather than the shell.
+     It is a hub, not a leaf: 0.5, below the category and brand pages it
+     links to. */
+  entries.push(urlEntry("/brands/", lang.seg, "0.5"));
   entries.push(urlEntry("/gift/", lang.seg, "0.6"));
   if (BLOG_POSTS.length) {
     entries.push(urlEntry("/blog/", lang.seg, "0.7"));
@@ -1590,13 +1679,13 @@ await writeFile(path.join(PUB, "robots.staging.txt"), robotsStaging, "utf8");
 await writeFile(path.join(PUB, "robots.txt"), LIVE ? robotsProduction : robotsStaging, "utf8");
 
 const perLang = CATALOGUE.length + CATS.length + 1 + BRANDS.length + 1 +
-  LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 +
+  LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 + 1 +
   (BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0);
 
 console.log(
   `prerender: ${pages.length} pages (${written} written, ${same} unchanged, ${removed} stale removed)\n` +
   `           ${LANGS.length} languages × ${perLang}: ${CATALOGUE.length} products + ${CATS.length + 1} categories + ` +
-    `${BRANDS.length} brands + 1 home + ${LEGAL_SLUGS.length} info + ${BUNDLES.length ? BUNDLES.length + 1 : 0} sets + 1 gift + ` +
+    `${BRANDS.length} brands + 1 brands landing + 1 home + ${LEGAL_SLUGS.length} info + ${BUNDLES.length ? BUNDLES.length + 1 : 0} sets + 1 gift + ` +
     `${BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0} blog\n` +
   `           base ${BASE}  robots "${ROBOTS}"  robots.txt = ${LIVE ? "production" : "staging"}  assets ?v=${ASSET_V}\n` +
   `           og cards: ${OG_CARDS.size} on disk (${cardsMade} drawn this run)  every og:image ${OG_W}×${OG_H}\n` +

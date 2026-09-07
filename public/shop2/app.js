@@ -185,6 +185,8 @@
       "Условия продажи": "Müügitingimused", "Конфиденциальность": "Privaatsus",
       "Правовая информация": "Õigusinfo", "Споры онлайн (ODR)": "Vaidlused veebis (ODR)",
       "Оформление заказа": "Tellimuse vormistamine",
+      // the checkout’s skip link — hidden until it takes focus
+      "Перейти к оформлению": "Otse tellimuse vormi juurde",
       "Контакт": "Kontaktandmed", "Оплата": "Maksmine",
       "Далее — доставка": "Edasi — tarne", "Далее — оплата": "Edasi — maksmine",
       "Имя": "Nimi",
@@ -197,6 +199,18 @@
       "Мои заказы": "Minu tellimused", "Мои данные": "Minu andmed", "Мои промокоды": "Minu sooduskoodid",
       "Повторить заказ": "Korda tellimust",
       "Страница не найдена": "Lehte ei leitud",
+      /* Данные и cookie — the consent banner (consentHTML). Plain, factual
+         wording; a lawyer reviews the final copy before the shop opens. */
+      "Данные и cookie": "Andmed ja küpsised",
+      "Что мы храним": "Mida me salvestame",
+      "Корзина и язык — в вашем браузере: без них магазин не работает. При входе в кабинет добавится защищённый cookie.":
+        "Ostukorv ja keel on teie brauseris: ilma nendeta pood ei tööta. Kontole sisse logides lisandub turvaline küpsis.",
+      "Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.":
+        "Külastusstatistika on teie valik: juhuslik külastusnumber, ilma nimeta, kaob koos vahekaardiga.",
+      "Принять всё": "Nõustun kõigega",
+      "Только необходимое": "Ainult vajalik",
+      "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
+        "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga.",
       "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormista tellimus külalisena.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
       "Каталог, товары и инфостраницы — на трёх языках.": "Kataloog, tooted ja infolehed on kolmes keeles.",
@@ -553,6 +567,8 @@
       "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
+      "Такой подарочной карты сейчас нет — выберите другую сумму":
+        "Sellist kinkekaarti praegu ei müüda — vali teine summa",
       "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
       "Не получилось оформить заказ — попробуйте ещё раз": "Tellimuse vormistamine ebaõnnestus — proovi uuesti",
       "Не получилось оформить заказ": "Tellimuse vormistamine ebaõnnestus",
@@ -632,8 +648,15 @@
       "Набор сейчас не собрать — товар закончился": "Komplekti ei saa praegu kokku panna — toode on otsas",
       "Набор в корзине ✓": "Komplekt on ostukorvis ✓",
       "Подарочная карта": "Kinkekaart", "Выбрать сумму": "Vali summa", "Сумма": "Summa",
-      "25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
-        "25, 50 või 100 € — saadame kirjaga saajale. Kui ei tea, mida valida, sobib see alati.",
+      /* The amounts are their own node now (giftAmountsPhrase) — they come
+         from settings.gift_amounts, so the sentence around them is the only
+         part a dictionary can hold. Same two halves build the /gift/ meta
+         description (giftDescText). */
+      "— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
+        "— saadame kirjaga saajale. Kui ei tea, mida valida, sobib see alati.",
+      "Подарочная карта Rempire на": "Rempire'i kinkekaart",
+      "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
+        "— tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
       "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
         "Kehtib kogu poes ega aegu kohe. Pärast maksmist tuleb kirjaga kood — sulle või kohe saajale.",
       "Кому — имя": "Kellele — nimi", "Имя получателя": "Saaja nimi",
@@ -1187,12 +1210,16 @@
       "Нажимая «Оформить заказ», вы соглашаетесь с условиями и политикой возврата.":
         "Nupule „Vormista tellimus“ vajutades nõustute tingimuste ja tagastuspoliitikaga.",
       // blog
-      /* «Blog», not «Ajaveeb» — the owner's own word for the section in
-         Estonian, and the one every ET surface has to carry: nav, footer,
-         breadcrumbs, the <h1>, the SEO title and the prerendered/sitemap
-         labels (tools/prerender-shop2.mjs lifts this very table out of this
-         file, so they all follow from this one line). */
-      "Блог": "Blog",
+      /* «Blogi», not «Ajaveeb» and not the bare «Blog» — the owner's own word,
+         settled 07.09.2026: the shop's own sentences already decline it
+         («Blogi pole ajutiselt saadaval», «Tagasi Blogisse», «kontrolli
+         aadressi Blogis»), so the label follows them and the section has one
+         name. Every ET surface carries it: nav, footer, breadcrumbs, the
+         <h1>, the SEO title and the prerendered/sitemap labels
+         (tools/prerender-shop2.mjs lifts this very table out of this file, so
+         they all follow from this one line — src/lib/seo-head.mjs carries the
+         same word for the request-time blog page). */
+      "Блог": "Blogi",
       "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
         "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
       "Статей пока нет — загляните позже.": "Artikleid veel pole — vaata varsti uuesti.",
@@ -1323,6 +1350,8 @@
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Logige omanikuna sisse, et näha päris kliente.",
       "Никого не нашлось.": "Kedagi ei leitud.",
       "На рассмотрении": "Läbivaatamisel", "Партнёры": "Partnerid", "Розница": "Jaemüük", "розница": "jaemüük",
+      // «Клиенты»: who agreed to the newsletter — the chip and the row badge
+      "Подписаны": "Tellinud uudiskirja", "Подписан": "Uudiskiri",
       "Заявка отклонена": "Taotlus lükati tagasi", "Партнёр одобрен ✓": "Partner kinnitatud ✓",
       "Статус партнёра снят": "Partneri staatus eemaldatud",
       "Начислить или списать баллы": "Lisa või vähenda punkte",
@@ -2230,6 +2259,7 @@
       "Условия продажи": "Terms of sale", "Конфиденциальность": "Privacy",
       "Правовая информация": "Legal information", "Споры онлайн (ODR)": "Online dispute resolution (ODR)",
       "Оформление заказа": "Checkout",
+      "Перейти к оформлению": "Skip to the order form",
       "Контакт": "Contact", "Оплата": "Payment",
       "Далее — доставка": "Next — delivery", "Далее — оплата": "Next — payment",
       "Имя": "Name",
@@ -2242,6 +2272,16 @@
       "Мои заказы": "My orders", "Мои данные": "My details", "Мои промокоды": "My promo codes",
       "Повторить заказ": "Repeat order",
       "Страница не найдена": "Page not found",
+      "Данные и cookie": "Data and cookies",
+      "Что мы храним": "What we store",
+      "Корзина и язык — в вашем браузере: без них магазин не работает. При входе в кабинет добавится защищённый cookie.":
+        "Your basket and language live in your browser: the shop cannot work without them. Signing in adds a secure session cookie.",
+      "Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.":
+        "Visit statistics are up to you: a random visit number, no name attached, gone when the tab closes.",
+      "Принять всё": "Accept all",
+      "Только необходимое": "Only what is needed",
+      "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
+        "There is no such page — the link may be out of date, or the address has a typo.",
       "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Taxes included. Delivery is calculated at checkout.",
       "Каталог, товары и инфостраницы — на трёх языках.": "The catalogue, products and info pages are in three languages.",
@@ -2590,6 +2630,8 @@
       "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
+      "Такой подарочной карты сейчас нет — выберите другую сумму":
+        "That gift card is not on sale right now — pick another amount",
       "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
       "Не получилось оформить заказ — попробуйте ещё раз": "Could not place the order — please try again",
       "Не получилось оформить заказ": "Could not place the order",
@@ -2670,8 +2712,11 @@
       "Набор сейчас не собрать — товар закончился": "The set can't be made up right now — a product is out of stock",
       "Набор в корзине ✓": "Set added to your cart ✓",
       "Подарочная карта": "Gift card", "Выбрать сумму": "Choose an amount", "Сумма": "Amount",
-      "25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
-        "€25, €50 or €100 — sent to the recipient by e-mail. When you don't know what to pick, this always works.",
+      "— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
+        "— sent to the recipient by e-mail. When you don't know what to pick, this always works.",
+      "Подарочная карта Rempire на": "A Rempire gift card for",
+      "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
+        "— e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
       "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
         "Valid across the whole shop and it doesn't expire on you. After payment the code arrives by e-mail — to you or straight to the recipient.",
       "Кому — имя": "To — name", "Имя получателя": "Recipient's name",
@@ -3353,6 +3398,7 @@
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Sign in as the owner to see real customers.",
       "Никого не нашлось.": "Nobody found.",
       "На рассмотрении": "Under review", "Партнёры": "Partners", "Розница": "Retail", "розница": "retail",
+      "Подписаны": "Subscribed", "Подписан": "Newsletter",
       "Заявка отклонена": "Request rejected", "Партнёр одобрен ✓": "Partner approved ✓",
       "Статус партнёра снят": "Partner status removed",
       "Начислить или списать баллы": "Credit or deduct points",
@@ -5559,6 +5605,14 @@
     sumOpen: null,      // checkout summary; null = follow the breakpoint
     // method/carrier/point drive the real checkout; the rest is the address
     ship: { name: "", addr: "", zip: "", city: "", phone: "", method: "parcel", carrier: "", point: null },
+    /* The consent banner, reopened from «Данные и cookie» in the footer. It
+       shows itself on a first visit whatever this says — see consentShown(). */
+    consentOpen: false,
+    /* Has the shopper chosen a delivery in THIS session? Only while this is
+       false may the account's «Доставка по умолчанию» fill the checkout in —
+       a saved preference is a starting point, never something that reaches
+       over the shopper's own hand. See acctShipPref()/applyAcctShipPref(). */
+    shipPicked: false,
     pointOpen: false,   // the parcel-machine picker sheet
     paying: false,      // «Оплатить» is in flight — the button locks
     done: null,         // receipt state when we got here without a redirect
@@ -5995,6 +6049,140 @@
     if (x.pickup) return 0;
     return shipRulePrice(x.pm ? "parcel" : "courier", x.pm || "");
   }
+
+  /* ---------- «Доставка по умолчанию»: the account → the checkout ----------
+
+     The block promised «Подставим это при следующем заказе» and never did:
+     the row and the machine were written to S.acctMethod/S.acctMachine, read
+     by nothing, and gone on the next reload (QA sweep 06.09, question 7).
+     Dim, 07.09.2026: «It should reach checkout.» So it does — and it is kept
+     across visits, because a preference that resets is not a preference.
+
+     Stored in the browser, next to the cart, not on the customer's row: there
+     is no column for it and the value is a convenience, not a fact about the
+     order (which carries its own method, carrier and point). It is stamped
+     with the address that saved it, so a shared computer never hands one
+     person's parcel machine to the next one who signs in.
+
+     The account's rows are the old SHIP table's — one shape, three
+     translations — and the checkout's are the live rules; the mapping is the
+     one thing that has to be right, and it is exactly what the rows carry:
+     `pickup` is pickup, `pm` is a parcel with that carrier, anything else is
+     the courier. */
+  var ACCT_SHIP_LS = "rempire-ship-pref";
+  /** The account's current choice, in the checkout's own words. */
+  function acctShipPref() {
+    var m = methods(), x = m[acctIdx()];
+    if (!x) return null;
+    return {
+      country: S.country,
+      method: x.pickup ? "pickup" : x.pm ? "parcel" : "courier",
+      carrier: x.pm || "",
+      machine: acctMachineName()
+    };
+  }
+  /* The machines the account offers. They used to be the static names in
+     public/shop/shipping-data.js while the checkout showed the live
+     /api/shipping/points/ list — two lists that can name different machines
+     in the same town (QA sweep 06.09, polish item 7), and a default saved
+     from one of them could never be found in the other. It is the same feed
+     now, per carrier, with the static names as the stand-in while it is in
+     flight or if it fails — which is exactly what demoPoints() does for the
+     checkout. Names only: the account stores a preference, and a preference
+     that survives a redeploy has to be something a human recognises rather
+     than a carrier's internal id. */
+  function acctMachines() {
+    var m = methods(), x = m[acctIdx()];
+    if (!x || !x.pm) return [];
+    loadPointsFor(x.pm);
+    var live = POINTS.by[x.pm + ":" + S.country];
+    return live && live.length ? live.map(function (pt) { return pt.name; }) : machinesFor(x);
+  }
+  /** The machine «Доставка по умолчанию» is on right now: the saved one while
+      it is still in the list, else whatever the index points at. A name and
+      not an index, because the list is the carrier's live one — it changes
+      under a stored index, and «the machine round the corner» is the thing
+      the shopper actually chose. */
+  function acctMachineName() {
+    var mach = acctMachines();
+    if (!mach.length) return "";
+    var p = acctPrefLoad();
+    if (p && p.machine && mach.indexOf(p.machine) >= 0) return p.machine;
+    return mach[Math.min(S.acctMachine, mach.length - 1)];
+  }
+  function acctPrefSave() {
+    if (!S.loggedIn) return;
+    var p = acctShipPref();
+    if (!p) return;
+    p.email = (S.cust && S.cust.email) || S.email || "";
+    try { localStorage.setItem(ACCT_SHIP_LS, JSON.stringify(p)); } catch (e) {}
+    /* …and into the checkout right away, so «Подставим это при следующем
+       заказе» holds for an order placed in this same visit and not only for
+       one after a reload. */
+    applyAcctShipPref();
+  }
+  /** The saved preference, only for the address that is signed in now. */
+  function acctPrefLoad() {
+    try {
+      var p = JSON.parse(localStorage.getItem(ACCT_SHIP_LS));
+      if (!p || typeof p !== "object") return null;
+      var who = (S.cust && S.cust.email) || S.email || "";
+      if (!who || String(p.email || "").toLowerCase() !== who.toLowerCase()) return null;
+      return p;
+    } catch (e) { return null; }
+  }
+  /* Put the preference into the checkout — country, method and carrier —
+     unless the shopper has already chosen a delivery in this session. The
+     parcel machine itself waits for the live list: the account's names come
+     from the static shipping-data table and the checkout's come from
+     /api/shipping/points/, so the saved one is matched by name when the list
+     lands and simply left unchosen when the machine is no longer there
+     (matchAcctPoint below). */
+  function applyAcctShipPref() {
+    if (S.shipPicked) return;
+    var p = acctPrefLoad();
+    if (!p) return;
+    var known = { pickup: 1, parcel: 1, courier: 1 };
+    if (p.country && SHIP[p.country]) S.country = p.country;
+    /* …and «Доставка по умолчанию» itself, which otherwise showed the
+       built-in default on every fresh load while quietly remembering
+       something else. The row is found by what it means — pickup, this
+       carrier's parcel, the courier — never by a stored index, because the
+       table differs per country. */
+    var rows = methods();
+    for (var i = 0; i < rows.length; i++) {
+      var kind = rows[i].pickup ? "pickup" : rows[i].pm ? "parcel" : "courier";
+      if (kind === p.method && (rows[i].pm || "") === (p.carrier || "")) { S.acctMethod = i; break; }
+    }
+    if (p.method && known[p.method]) S.ship.method = p.method;
+    S.ship.carrier = p.method === "parcel" && p.carrier ? p.carrier : "";
+    if (isParcel()) loadPoints();
+    /* The carrier's list is usually already here by now — the checkout asks
+       for every carrier of the country at its first paint, and the profile
+       answers after that — so the saved machine is matched right away;
+       pointsArrived() catches the other order. */
+    matchAcctPoint();
+    /* The profile lands after the checkout has already painted — acctLoad()
+       is one shot and its answer arrives whenever it arrives — so the block
+       that draws the method, the carrier chips and the chosen machine has to
+       be told. Without this the preference was in S and nowhere on screen
+       unless a parcel feed happened to come back afterwards and repaint it by
+       accident. */
+    if (S.screen === "checkout") { patchDelivery(); patchSummary(); }
+  }
+  /** The saved machine, once the carrier's real list has answered. */
+  function matchAcctPoint() {
+    if (S.shipPicked || S.ship.point || !isParcel()) return false;
+    var p = acctPrefLoad();
+    if (!p || !p.machine) return false;
+    var list = pointsList();
+    if (!list) return false;
+    var want = String(p.machine).toLowerCase();
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].name || "").toLowerCase() === want) { S.ship.point = list[i]; return true; }
+    }
+    return false;
+  }
   function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
   /* What the applied promo code takes off. The RULE comes from the server
      (POST /api/promos/check); the euro figure is recomputed here so it tracks
@@ -6090,7 +6278,87 @@
       return h && h !== location.hostname ? h : "";
     } catch (e) { return ""; }
   }
+  /* ---------- consent -----------------------------------------------------
+
+     The shop had no banner at all until 07.09.2026, and Dim asked for one.
+     What it is actually about, because "cookies" is the wrong word for most
+     of it:
+
+       · Necessary, always on. The basket and the chosen language in
+         localStorage (persist()), the "intro seen" flag in sessionStorage,
+         and — only for someone who signs in — the signed `rmp_cust` session
+         cookie. Without these the shop cannot hold a basket or keep you
+         signed in, so there is nothing to consent to and nothing to switch
+         off.
+       · Visit statistics, off until they are allowed. track() writes a
+         random per-tab number into sessionStorage and posts it to
+         /api/track/ (db/migrations/080_events.sql: no cookie, no name, no
+         e-mail, gone when the tab closes), and, on the live domain only,
+         Cloudflare Web Analytics. Both wait for an answer here.
+       · Nothing else loads on its own. The video is click-to-load and the
+         parcel-point map fetches its tiles only when the shopper opens the
+         map view — said in the banner because it is the honest thing to say,
+         not because it needs consent.
+
+     The choice lives in localStorage under one key and is remembered until
+     the shopper changes it — «Данные и cookie» in the footer reopens the
+     banner. The wording below is plain and factual; a lawyer should read it
+     before the shop opens (docs/audit/2026-09-07-storefront.md). */
+  var CONSENT_LS = "rempire-consent";
+  /** `{v, analytics, at}` — null until the shopper has answered. */
+  function consentRead() {
+    try {
+      var c = JSON.parse(localStorage.getItem(CONSENT_LS));
+      return c && typeof c === "object" && typeof c.analytics === "boolean" ? c : null;
+    } catch (e) { return null; }
+  }
+  function consentAnalytics() { var c = consentRead(); return !!(c && c.analytics); }
+  /* Not answered yet, or reopened from the footer. The banner never covers
+     the checkout or the receipt — a shopper mid-payment is the last person
+     who should be reading about statistics, and on a phone the bar would sit
+     over «Оплатить» — nor the owner's own two screens. */
+  function consentShown() {
+    if (S.screen === "checkout" || S.screen === "done" || S.screen === "admin" || S.screen === "scan") return false;
+    return S.consentOpen || !consentRead();
+  }
+  function consentSave(analytics) {
+    try {
+      localStorage.setItem(CONSENT_LS, JSON.stringify({ v: 1, analytics: !!analytics, at: Date.now() }));
+    } catch (e) {}
+    S.consentOpen = false;
+    paintConsent();
+    // saying yes starts the beacon now rather than on the next page load
+    if (analytics) mountCfBeacon();
+  }
+  var consentPainted = "";
+  function paintConsent() {
+    /* The language is part of the key: the bar can sit there for as long as
+       the shopper leaves it, and translateTree() only runs on a repaint —
+       without this, switching language left it in the language before. */
+    var key = consentShown() ? (consentRead() ? "open-again" : "first") + "|" + S.lang : "";
+    if (key === consentPainted) return;
+    consentPainted = key;
+    cbSlot.innerHTML = key ? consentHTML() : "";
+    translateTree(cbSlot);
+  }
+  function consentHTML() {
+    var c = consentRead();
+    return '<div class="cbanner" role="region" aria-label="Данные и cookie"><div class="cbanner__box">' +
+      '<p class="cbanner__t">Что мы храним</p>' +
+      '<p class="cbanner__x">Корзина и язык — в вашем браузере: без них магазин не работает. При входе в кабинет добавится защищённый cookie.</p>' +
+      '<p class="cbanner__x">Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.</p>' +
+      '<div class="cbanner__acts">' +
+        '<button class="btn btn--sm" data-consent="all"' + (c && c.analytics ? ' aria-current="true"' : "") + ">Принять всё</button>" +
+        '<button class="btn btn--ghost btn--sm" data-consent="need"' + (c && !c.analytics ? ' aria-current="true"' : "") + ">Только необходимое</button>" +
+        '<button class="link" data-page="privacy">Конфиденциальность</button>' +
+      "</div></div></div>";
+  }
+
   function track(type, extra) {
+    /* No statistics until the shopper has said yes. The order itself is
+       never affected: the authoritative revenue row is written server-side
+       on the paid transition (src/lib/payments/apply.ts), not from here. */
+    if (!consentAnalytics()) return;
     try {
       var body = { sid: sid(), type: type, lang: S.lang, ref: refHost() };
       if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) body[k] = extra[k];
@@ -6118,6 +6386,8 @@
      (e2e/sweep-shop-helpers.ts) is right to fail on. */
   function mountCfBeacon() {
     try {
+      // …and, since 07.09.2026, only once the shopper has allowed statistics
+      if (!consentAnalytics()) return;
       var meta = document.querySelector('meta[name="cf-beacon"]');
       var token = meta ? String(meta.getAttribute("content") || "").trim() : "";
       if (!token || token === "CF_BEACON_TOKEN") return;
@@ -6691,14 +6961,26 @@
     var on = giftAmountsOn();
     return on.indexOf(S.giftAmount) >= 0 ? S.giftAmount : on[0];
   }
-  /* The tile's own sentence names the three amounts the shop has always sold
-     and stays a fixed, translated string: the denominations the owner can
-     switch off are the buttons on /gift/ below, which is where a shopper
-     actually chooses one. */
+  /** The denominations on sale, written out — «25 €, 50 €, 100 €» in Russian
+      and Estonian, «€25, €50, €100» in English, because eur() already knows
+      where the sign goes. Deliberately a comma list and not «25, 50 или 100»:
+      a conjunction inside a run of digits is the one thing translateTree()
+      cannot rewrite (it works on whole text nodes, and this node's text
+      depends on a setting), and a list of prices needs no dictionary at all.
+      Its own text node everywhere it is used, for the same reason. */
+  function giftAmountsPhrase() {
+    return giftAmountsOn().map(eur).join(", ");
+  }
+  /* The tile used to name «25, 50 или 100 €» in fixed text while the buttons
+     on /gift/ followed «Маркетинг → Подарочные карты» — so switching 25 off
+     or 75 on made the tile and the page disagree. Dim, 07.09.2026: the tile
+     comes from the setting. Two nodes, not one: the amounts are generated and
+     the sentence around them is a dictionary key. */
   function giftTileHTML() {
     return '<div class="gifttile"><span class="gifttile__art" aria-hidden="true">' + tower("gifttile__mark") + "</span>" +
       '<div class="gifttile__txt"><h2 class="sec__title">Подарочная карта</h2>' +
-      '<p class="muted">25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.</p></div>' +
+      '<p class="muted"><span class="num">' + esc(giftAmountsPhrase()) + "</span> " +
+      "<span>— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.</span></p></div>" +
       '<button class="btn btn--ghost" data-go="gift">Выбрать сумму</button></div>';
   }
   function giftEmailBad() {
@@ -7656,7 +7938,9 @@
       ftrSec("Реквизиты", cCompanyHTML()) +
       ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
       ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-go="blog">Блог</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
-      ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
+      ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · ' +
+        // the one way back to a choice that is otherwise made once and kept
+        '<button class="link" data-cookies>Данные и cookie</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 " + esc(contentConf().company.legalName) + "</span>" +
         cSocialsHTML("socials--bottom") +
@@ -7854,6 +8138,26 @@
           '<span class="brandtile__mark">' + brandMark(b.name, "brandtile") + "</span>" +
           '<span class="brandtile__n num">' + b.n + " " + plural(b.n) + "</span></button>";
       }).join("") + "</div></section></div>";
+  }
+
+  /* ---------- 404 ---------------------------------------------------------
+     An address the shop has no page for. Until 07.09.2026 every unknown
+     /shop2/… path quietly drew the home page at HTTP 200 — kind to nobody:
+     Google reads a soft 404 and de-indexes around it, and a customer on a
+     stale link is left wondering which page they are looking at. Dim's
+     answer was «Make a page not found», so there is one, in the shop's own
+     design, in all three languages, with the two ways out a lost shopper
+     actually wants — and the server answers 404 for the same set of paths
+     (src/lib/notfound-page.ts), which is the half a crawler reads. */
+  function screenNotFound() {
+    return '<div class="wrap wrap--narrow"><section class="sec nf">' +
+      '<p class="nf__code num" aria-hidden="true">404</p>' +
+      '<h1 class="display h1">Страница не найдена</h1>' +
+      '<p class="sec__intro">Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.</p>' +
+      '<div class="nf__acts">' +
+        '<button class="btn" data-go="home">На главную</button>' +
+        '<button class="btn btn--ghost" data-go-cat="all">В каталог</button>' +
+      "</div></section></div>";
   }
 
   function screenCatalog() {
@@ -9407,10 +9711,25 @@
       ? ' <a class="link rowcard__act" href="' + esc(o.trackingUrl) + '" target="_blank" rel="noopener">Отследить</a>'
       : o.tracking ? ' <span class="muted num">' + esc(o.tracking) + "</span>" : "";
     var what = (o.items || []).map(function (i) { return i.title + (i.qty > 1 ? " ×" + i.qty : ""); }).join(", ");
+    /* features: the printable card, a second time. It was on the receipt and
+       nowhere else, so closing that tab left the buyer with the code in an
+       e-mail and no card to print (QA sweep 06.09, question 10; Dim said yes).
+       The link and its token come from the server with the order — the browser
+       cannot make one up — and it is in the delegate's [data-giftpdf] list
+       already, which lets the <a> do its own work and only records the
+       download. Several cards on one order get a row each, named by code. */
+    var cards = Array.isArray(o.giftCards) ? o.giftCards : [];
+    var pdfs = cards.length
+      ? '<span class="rowcard__gifts">' + cards.map(function (c) {
+          return '<a class="link" href="' + esc(c.pdfUrl) + '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">' +
+            "<span>Скачать подарочную карту (PDF)</span>" +
+            (cards.length > 1 ? ' <span class="num">' + esc(c.code) + "</span>" : "") + "</a>";
+        }).join("") + "</span>"
+      : "";
     return '<div class="rowcard"><span class="num rowcard__id">' + esc(o.number) + "</span>" +
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
       '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + track +
-      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + "</div>";
+      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pdfs + "</div>";
   }
   function screenAccount() {
     acctLoad();
@@ -9506,10 +9825,15 @@
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
           '<span class="opt__price num">' + (xp ? eur(xp) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
-      (machinesFor(m[ai]).length
-        ? '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(machinesFor(m[ai]).length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
-          machinesFor(m[ai]).map(function (n, i) { return "<option" + (i === Math.min(S.acctMachine, machinesFor(m[ai]).length - 1) ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>"
-        : "") +
+      (function () {
+        // the live list, so the machine saved here is one the checkout can
+        // find again by name — acctMachines()
+        var mach = acctMachines();
+        if (!mach.length) return "";
+        var sel = acctMachineName();
+        return '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(mach.length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
+          mach.map(function (n) { return "<option" + (n === sel ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>";
+      })() +
 
       "</section></div>";
   }
@@ -9538,6 +9862,9 @@
          way through typing another address is never overwritten. */
       if (!S.ship.name && S.cust.name) S.ship.name = S.cust.name;
       if (!S.ship.phone && S.cust.phone) S.ship.phone = S.cust.phone;
+      /* …and the delivery they told us to remember. Same rule as the two
+         lines above — only where the shopper has not already chosen. */
+      applyAcctShipPref();
       // pro pricing only exists for an approved salon/pro account, and only
       // needs fetching once — S.pro stays put across re-renders until logout.
       if (S.cust.tier === "pro" && !S.pro) loadProPricing();
@@ -9545,6 +9872,10 @@
     return true;
   }
   function acctForget() {
+    /* «Выйти» leaves nothing behind, the saved delivery preference included —
+       it is keyed to this address, and a shared machine should not offer the
+       next person the parcel machine round the corner from the last one. */
+    try { localStorage.removeItem(ACCT_SHIP_LS); } catch (e) {}
     S.cust = null; S.loggedIn = false; S.acctOrders = []; S.acctStage = "email";
     S.acctCode = ""; S.acctSaved = false; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
     S.acctForm = { name: "", phone: "", birthday: "", marketing: false };
@@ -9966,7 +10297,25 @@
     translateTree(box);
   }
   function pointsArrived() {
+    /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
+       asks for it from inside a render — so the answer has to bring a repaint
+       with it or the select stays on the static stand-in until something else
+       redraws the screen. */
+    if (S.screen === "account") {
+      render();
+      /* …and write the preference back from the list that has just landed:
+         a machine saved off the static stand-in is a name the checkout could
+         never find again. acctMachineName() keeps the saved one when it is
+         really there, so this only ever replaces a stale name. */
+      acctPrefSave();
+      return;
+    }
     if (S.screen !== "checkout") return;
+    /* The account's saved parcel machine is a NAME from the static list; the
+       real one only exists once this carrier's feed has answered. Matched
+       here, so the shopper who set a default finds it already chosen — and
+       simply left unchosen when the machine has closed since. */
+    matchAcctPoint();
     if (S.pointOpen && POINTS.view === "map") { paintPointMarkers(); return; }
     if (S.pointOpen) patchPointList();
     // The picker is closed: refresh the carrier chips (an empty carrier can
@@ -10053,7 +10402,10 @@
     if (focusSel) refocus(focusSel);
     settleModalFocus();   // the sheet is modal — focus in on open, back on close
   }
-  function pickPoint(p) { S.ship.point = p; S.pointOpen = false; patchDelivery(); patchSummary(); refocus("[data-pointopen]"); }
+  function pickPoint(p) {
+    S.ship.point = p; S.pointOpen = false; S.shipPicked = true;
+    patchDelivery(); patchSummary(); refocus("[data-pointopen]");
+  }
   /* Only the markers inside the current view, capped — a country's full list
      can run past 400 points and nobody can read that many pins at once
      anyway. Re-run on "moveend" so panning/zooming keeps the cap honest
@@ -10190,7 +10542,14 @@
       /* wholesale/loyalty: a bare toggle — the server quotes the actual euro
          amount from the real balance (createOrder() in src/lib/orders.ts),
          never a number the browser proposes. */
-      redeemPoints: !!S.loyaltyRedeem
+      redeemPoints: !!S.loyaltyRedeem,
+      /* «Хочу получать новости и скидки» in step 1. It used to stop here: the
+         checkbox wrote S.newsletter and nothing read it, so a shopper ticked a
+         consent box and the shop recorded nothing (QA sweep 06.09 §5.3; Dim,
+         07.09.2026: «Wire»). POST /api/orders writes it to customers.marketing
+         — the same column the account screen's own checkbox writes — creating
+         the row for a guest who has never signed in. */
+      newsletter: !!S.newsletter
     };
     /* «По счёту»: the method and the company go with the order itself — the
        server issues the invoice while it writes the row (src/lib/invoices.ts),
@@ -10228,6 +10587,8 @@
     rate_limited: "Слишком много попыток — подождите минуту",
     bad_email: "Проверьте e-mail",
     out_of_stock: "Товара не хватает на складе",
+    // the owner switched this denomination off while the card sat in the basket
+    gift_unavailable: "Такой подарочной карты сейчас нет — выберите другую сумму",
     db_unavailable: "Магазин временно недоступен — попробуйте позже",
     // «По счёту»: what src/lib/invoices.ts cleanCompany() refuses, by field
     bad_company: "Укажите название фирмы",
@@ -10309,6 +10670,8 @@
     S.loyaltyRedeem = false;   // wholesale/loyalty: points applied here are spent too
     // the basket is empty by now, so shipMethod() no longer answers "digital"
     S.ship = { name: "", addr: "", zip: "", city: "", phone: "", method: shipMethod(), carrier: S.ship.carrier, point: null };
+    // the next order starts from the account's default again, not from this one
+    S.shipPicked = false;
     // «По счёту»: the company was this order's; the next one starts blank
     S.inv = { name: "", regCode: "", vatNumber: "", sameAddr: true, address: "", email: "" }; S.invTouched = false;
     S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
@@ -10599,7 +10962,22 @@
     // The summary follows the breakpoint until the shopper touches it; after
     // that their choice wins, so applying a promo can't slam it shut.
     var summaryOpen = S.sumOpen === null ? wide() : S.sumOpen;
-    return '<div class="cohdr"><div class="wrap wrap--co">' +
+    /* Seven Tab presses used to separate the top of this page from the
+       e-mail box — the logo, the three language buttons, «← В магазин» and
+       the step headings all come first (QA sweep 06.09, question 6; Dim said
+       add one). This is the standard skip link: off-screen until it takes
+       focus, then the first thing a keyboard shopper sees, and it puts the
+       caret straight into the first control of whichever step is open.
+
+       A button and not an anchor to an id, which is the more usual shape:
+       Safari does not move Tab focus to links unless the shopper has turned
+       on full keyboard access, so on the one browser every iPhone runs an
+       <a class="skip"> is not reachable by the very keyboard it exists for
+       (measured, not assumed — the mobile-safari project fails on it). The
+       page is drawn by this script anyway, so a skip link that needs the
+       script costs nothing. */
+    return '<button class="skip" type="button" data-coskip>Перейти к оформлению</button>' +
+      '<div class="cohdr"><div class="wrap wrap--co">' +
         '<button class="hdr__logo" data-go="home" data-ident aria-label="REMPIRE — на главную">' + tower("hdr__tower") + '<span class="hdr__word">Rempire</span></button>' +
         '<h1 class="cohdr__t">Оформление заказа</h1>' +
         '<span class="cohdr__langs" role="group" aria-label="Язык интерфейса">' + LANGS.map(function (l) {
@@ -15081,6 +15459,11 @@
     if (S.admCustTier === "pro") list = list.filter(function (c) { return c.tier === "pro"; });
     else if (S.admCustTier === "retail") list = list.filter(function (c) { return c.tier !== "pro"; });
     else if (S.admCustTier === "pending") list = list.filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; });
+    /* Who agreed to be written to. Not a tier, but it is the same question —
+       «which customers am I looking at» — and this is the one place the owner
+       can now see the consent the checkout collects (07.09.2026). «Скачать
+       CSV» carries the same column for anyone who wants the list in a file. */
+    else if (S.admCustTier === "news") list = list.filter(function (c) { return !!c.marketing; });
     var q = (S.admCustQ || "").toLowerCase().trim();
     if (q) {
       list = list.filter(function (c) {
@@ -15109,6 +15492,10 @@
           '<span class="adm-row__sub adm-row__sub--one">' + esc(c.email) + " · " +
             admOrdersLabel(c.ordersCount) + " · " + eur(c.revenue) + "</span></button>" +
         '<span class="adm-badge ' + badge[1] + '">' + badge[0] + "</span>" +
+        /* Who agreed to be written to. Its own badge, not a word appended to
+           the grey line: a badge is one text node the dictionary can rewrite,
+           and the line beside it is already a run of e-mail, count and sum. */
+        (c.marketing ? '<span class="adm-badge adm-badge--quiet">Подписан</span>' : "") +
         (pending
           ? '<span class="adm-acts"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) +
             '">Одобрить Pro</button>' +
@@ -15118,7 +15505,7 @@
         "</div>";
     }).join("") + "</div>";
   }
-  var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки Pro"], ["pro", "Партнёры"], ["retail", "Розница"]];
+  var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки Pro"], ["pro", "Партнёры"], ["retail", "Розница"], ["news", "Подписаны"]];
   function loadAdminCustomerDetail(id, force) {
     if (SRV.admin !== true) return;
     if (S.admCustDetail && S.admCustDetail.customer.id === id && !force) return;
@@ -20688,12 +21075,15 @@
   var preRendered = document.getElementById("prerender");
   app.insertAdjacentHTML("beforeend",
     '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
-    '<div id="ovl"></div><div id="toastslot"></div>');
+    '<div id="ovl"></div><div id="toastslot"></div><div id="cbslot"></div>');
   var hdrSlot = document.getElementById("hdrslot");
   var bodySlot = document.getElementById("bodyslot");
   var navSlot = document.getElementById("navslot");
   var ovl = document.getElementById("ovl");
   var toastSlot = document.getElementById("toastslot");
+  // the consent banner: its own slot for the same reason the toast has one —
+  // a render must not replay its entrance or move it under the finger
+  var cbSlot = document.getElementById("cbslot");
   var ovlKey = "";
   var lastFocus = null;
 
@@ -20780,10 +21170,32 @@
      word what tools/prerender-shop2.mjs writes into the same static pages. */
   var INFO_DESC_TAIL = "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.";
   var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
-  var GIFT_DESC = "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
+  /* The gift card's meta description. Not one dictionary key any more: the
+     denominations in the middle of it are the owner's setting, so the
+     sentence is built from two keys with the generated amounts between them
+     — same words as before when the shop sells the usual three, and the
+     truth when it does not (Dim, 07.09.2026). tools/prerender-shop2.mjs
+     builds the static /gift/ page's description the same way, from
+     src/lib/seo-head.mjs's giftDesc(). */
+  var GIFT_DESC_HEAD = "Подарочная карта Rempire на";
+  var GIFT_DESC_TAIL = "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
+  function giftDescText(lang) {
+    return trText(GIFT_DESC_HEAD, lang, false) + " " + giftAmountsPhrase() + " " + trText(GIFT_DESC_TAIL, lang, false);
+  }
   var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
   // the sentence screenBrands() opens with, reused as that page's description
   var BRANDS_DESC = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
+  // the sentence screenNotFound() opens with, reused as that page's description
+  var NOTFOUND_DESC = "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.";
+  /* What the page was SERVED with, read once. The 404 screen has to say
+     `noindex` and every other screen has to put back whatever the deploy
+     decided (docs/seo.md § «The three noindex layers»): the meta follows
+     PUBLIC_BASE_URL at build, so hard-coding either value here would fight
+     it. Read at boot, before setHead() has ever run. */
+  var SERVED_ROBOTS = (function () {
+    var m = document.querySelector('meta[name="robots"]');
+    return (m && m.getAttribute("content")) || "";
+  })();
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -20864,6 +21276,13 @@
         t = trText("Бренды", S.lang, false) + " — REMPIRE";
         d = trText(BRANDS_DESC, S.lang, false).slice(0, 158);
       }
+      /* 404: the tab says so, and so does the robots meta. The server already
+         answered 404 for this address; this is the same fact for a crawler
+         that runs the script and reads the rendered DOM. */
+      else if (S.screen === "notfound") {
+        t = trText("Страница не найдена", S.lang, false) + " — REMPIRE";
+        d = trText(NOTFOUND_DESC, S.lang, false).slice(0, 158);
+      }
       // features
       /* Sets off: the tab must not advertise them either. Both screens are
          showing setsOffHTML() and say so in the title; the description stays
@@ -20882,7 +21301,7 @@
         }
       } else if (S.screen === "gift") {
         t = trText("Подарочная карта", S.lang, false) + " — REMPIRE";
-        d = trText(GIFT_DESC, S.lang, false).slice(0, 158);
+        d = giftDescText(S.lang).slice(0, 158);
       }
       // blog: the listing's title/description are UI chrome (through the
       // dictionary); a post's are the author's own text, already in S.lang
@@ -20905,6 +21324,7 @@
     }
     document.title = t;
     if (d) setMetaTag("description", d);
+    if (SERVED_ROBOTS) setMetaTag("robots", S.screen === "notfound" ? "noindex, nofollow" : SERVED_ROBOTS);
     /* Client navigation has to move the canonical and the hreflang set with
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */
@@ -21014,6 +21434,7 @@
     else if (S.screen === "info") body = screenInfo();
     else if (S.screen === "admin") body = screenAdmin();
     else if (S.screen === "scan") body = screenScan();         // scanner app
+    else if (S.screen === "notfound") body = screenNotFound();
 
     var chromeless = S.screen === "checkout" || S.screen === "done" || S.screen === "admin" || S.screen === "scan";
     if (!hdrSlot.firstChild) hdrSlot.innerHTML = headerHTML();
@@ -21158,7 +21579,9 @@
       if (opening && close) close.focus();
       if (!key && lastFocus && document.contains(lastFocus)) { lastFocus.focus(); lastFocus = null; }
     }
+    dropStaleToast();
     paintToast();
+    paintConsent();
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
     // inventory: the scanner lives outside bodySlot on purpose (module doc
     // above scanMount()) — mount/unmount here, once per render(), rather than
@@ -21570,6 +21993,14 @@
      prefix — it is the default and the x-default. */
   function pathFor() {
     var b = "/shop2" + SEG_OF_LANG[pathLang];
+    /* A 404 keeps the address the shopper asked for — that is the whole point
+       of it. Nothing pushes /shop2/notfound/ into the history. The language
+       prefix still follows the switcher, so «EN» on a missing page moves to
+       the English shop's version of the same missing address rather than
+       silently leaving a Russian prefix over English words. */
+    if (S.screen === "notfound") {
+      return b + stripLangPrefix(location.pathname).replace(/^\/shop2/, "") + location.search;
+    }
     if (S.screen === "product" && S.productId) return b + "/p/" + encodeURIComponent(S.productId) + "/";
     if (S.screen === "catalog") return S.brand ? b + "/b/" + slugify(S.brand) + "/" : b + "/c/" + S.cat + "/";
     if (S.screen === "search") return b + "/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
@@ -21793,6 +22224,33 @@
     clearTimeout(toast._t);
     toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, undo ? 6000 : 2600);
   }
+  /** Take the standing toast down now, before its timer is up. */
+  function toastOff() {
+    if (!S.toast && !S.toastUndo) return;
+    S.toast = null; S.toastUndo = null;
+    clearTimeout(toast._t);
+    paintToast(); patchHeader(); patchNav();
+  }
+  /* Two contradicting messages must never be on screen at once. Typing a
+     wrong login code used to leave «Код отправлен — проверьте почту ✓» sitting
+     under «Код не подошёл — проверьте цифры» for the rest of its 2.6 seconds
+     (Dim, 07.09.2026 — «Improve»). One rule instead of a call at every error
+     site: a render that paints an alert the previous render did not takes the
+     standing toast down. A toast raised by the action *after* its own render —
+     failStep()'s «Проверьте e-mail», «Добавлено: …» — is younger than the
+     paint and is left alone, because toast() runs after render() returns.
+     The admin is out of it: its bar carries «Отменить» for six seconds and an
+     unrelated error must not swallow the offer. */
+  var alertsPainted = "";
+  function dropStaleToast() {
+    if (S.screen === "admin" || S.screen === "scan") { alertsPainted = ""; return; }
+    var nodes = bodySlot.querySelectorAll('[role="alert"]');
+    var key = "";
+    for (var i = 0; i < nodes.length; i++) key += "|" + nodes[i].textContent;
+    var fresh = !!key && key !== alertsPainted;
+    alertsPainted = key;
+    if (fresh) toastOff();
+  }
   /** «Отменить» on the toast: put the change back through the journal, and
       leave a «Отмена: …» line behind so the journal tells the whole story. */
   function admUndoToast() {
@@ -21987,7 +22445,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies]");
     var t = e.target.closest("[data-giftpdf],[data-payagain],[data-donepay],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-admrefund],[data-admunpaidsave],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
@@ -22157,6 +22615,9 @@
     /* ---------- delivery picker ---------- */
     if (d.dm) {
       S.ship.method = d.dm;
+      // from here on this order's delivery is the shopper's own — the
+      // account's «Доставка по умолчанию» stops filling anything in
+      S.shipPicked = true;
       if (d.dm !== "parcel") S.ship.point = null;
       else loadPoints();
       render(); refocus('[data-dm="' + d.dm + '"]'); return;
@@ -22164,6 +22625,7 @@
     if (d.carrier) {
       // another carrier is another set of machines — the old choice is not one
       S.ship.carrier = d.carrier; S.ship.point = null; POINTS.q = "";
+      S.shipPicked = true;
       loadPoints(); render(); refocus('[data-carrier="' + d.carrier + '"]'); return;
     }
     if (d.pointopen !== undefined) {
@@ -22192,7 +22654,7 @@
     }
     // machine index must reset too — carriers have different-length lists, so
     // the stored index pointed at a place the shopper never chose
-    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; render(); return; }
+    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; acctPrefSave(); render(); return; }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) { S.admAi = !S.admAi; admPanesSave(); render(); refocus("[data-admai]"); return; }
     // the phone «Ещё» sheet
@@ -23829,6 +24291,22 @@
     /* ---------- /blog ------------------------------------------------------ */
 
     if (d.q) { S.query = d.q; scheduleSearchTrack(); go("search"); return; }   // analytics agent
+    /* The skip link: into the first control of the step that is open, which
+       is the e-mail box on step 1, the country on step 2 and the first
+       payment method on step 3. The step's own heading is a `data-step`
+       button and would be found first, so the search starts inside the body. */
+    if (d.coskip !== undefined) {
+      refocus(".costep.is-open .costep__body input, .costep.is-open .costep__body select, " +
+        ".costep.is-open .costep__body textarea, .costep.is-open .costep__body button");
+      return;
+    }
+    if (d.consent !== undefined) {
+      consentSave(d.consent === "all");
+      // the footer link is where this came from and where it goes back to
+      refocus("[data-cookies]");
+      return;
+    }
+    if (d.cookies !== undefined) { S.consentOpen = true; paintConsent(); refocus('[data-consent="all"]'); return; }
     if (d.closetoast !== undefined) { S.toast = null; render(); return; }
   });
 
@@ -24200,10 +24678,11 @@
       S.country = t.value;
       // another country is another carrier and another set of machines
       S.ship.carrier = ""; S.ship.point = null; POINTS.q = "";
+      S.shipPicked = true;
       if (isParcel()) loadPoints();
       render();
     }
-    else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
+    else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; acctPrefSave(); render(); }
     /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
     else if (t.matches("[data-delivdays]")) {
       var dvc = deliveryConf();
@@ -24242,7 +24721,7 @@
       if (bsIt) bsIt.variant = Number(t.value) || 0;
       render();
     }
-    else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; }
+    else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; acctPrefSave(); }
     // «Главный баннер»: the link target, the picture URL and the timing —
     // on change, so a half-typed URL never becomes the banner's picture
     else if (t.matches("[data-herogo]")) {
@@ -24563,11 +25042,43 @@
        shopper back to, with ?n=&s= naming the order and how it went. Without
        that query there is no order behind it, and home is the honest answer.
        A payment form with an empty basket bounces straight back out anyway. */
-    if (/\/shop2\/done$/.test(p) && /[?&]s=(paid|failed|pending|invoice)\b/.test(location.search)) {
-      S.screen = "done"; return true;
+    if (/\/shop2\/done$/.test(p)) {
+      if (/[?&]s=(paid|failed|pending|invoice)\b/.test(location.search)) { S.screen = "done"; return true; }
+      return routeHome();
     }
-    if (/\/shop2\/checkout$/.test(p) && S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }
+    if (/\/shop2\/checkout$/.test(p)) {
+      if (S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }
+      return routeHome();
+    }
+    // the home page itself, in any of the three languages
+    if (p === "/shop2" || p === "") { S.screen = "home"; return true; }
+    /* Everything this cascade did not recognise is an address the shop has no
+       page for. It used to be answered with the home page at HTTP 200 — a
+       soft 404, which Google de-indexes and which leaves a shopper on a stale
+       link wondering what happened (Dim, 07.09.2026: «Make a page not
+       found»). The server says 404 for the same set of paths
+       (src/app/shop2/[...path]/route.ts → src/lib/notfound-page.ts); this is
+       the same answer once the script has taken over, on the address the
+       shopper actually asked for. */
+    S.screen = "notfound";
+    return true;
+  }
+
+  /* The address bar has to agree with the screen. Two addresses are
+     legitimate to ask for and impossible to render — /shop2/checkout/ with an
+     empty basket, /shop2/done/ with no order in its query — and both used to
+     draw the home page while leaving their own URL up, so a reload, the tab
+     title and the canonical all described a page the shopper was not on
+     (Dim, 07.09.2026: fix it, address included). Replaced, never pushed:
+     there is nothing here to go Back to. */
+  function routeHome() {
     S.screen = "home";
+    try {
+      var want = "/shop2" + SEG_OF_LANG[pathLang] + "/";
+      if (location.pathname + location.search !== want) {
+        history.replaceState({ y: 0, shown: S.shown }, "", want);
+      }
+    } catch (e) {}
     return true;
   }
 

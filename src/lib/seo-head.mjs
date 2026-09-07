@@ -111,7 +111,11 @@ export const T = {
     save: "выгода", pieces: "товара в наборе",
     setsDesc: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.",
     setDesc: (price, save, n) => `${price} вместо розницы, ${save} — ${n} в наборе. Магазин Rempire, Таллинн: доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
-    giftDesc: "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.",
+    /* The denominations are the owner's setting (settings.gift_amounts), not
+       a fixed three, so this is a function of the amounts the prerender read
+       — «25 €, 50 €, 100 €», already formatted for the language. app.js builds
+       the live head from the same two halves (giftDescText). */
+    giftDesc: amounts => `Подарочная карта Rempire на ${amounts} — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.`,
     infoDesc: title => `${title} — магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.`,
     blogDesc: "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.",
     blogEmpty: "Статей пока нет — загляните позже.",
@@ -119,7 +123,13 @@ export const T = {
     /* the request-time blog page (src/lib/blog-page.ts) — the prerender
        lifts these three out of app.js's dictionary; they are copied here
        for the same reason CAT_NAMES_I18N is. Keep them in step. */
-    blog: "Блог", postProducts: "Товары из статьи", postMissing: "Статья не найдена."
+    blog: "Блог", postProducts: "Товары из статьи", postMissing: "Статья не найдена.",
+    /* the request-time 404 (src/lib/notfound-page.ts) — word for word the
+       strings screenNotFound() draws in public/shop2/app.js, so the page a
+       crawler is served and the page the script paints over it say the same
+       thing. Keep them in step. */
+    notFound: "Страница не найдена",
+    notFoundText: "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка."
   },
   ET: {
     base: "REMPIRE — kosmeetikapood Tallinnas",
@@ -142,13 +152,16 @@ export const T = {
     save: "sääst", pieces: "toodet komplektis",
     setsDesc: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
     setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
-    giftDesc: "Rempire'i kinkekaart 25, 50 või 100 € — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
+    giftDesc: amounts => `Rempire'i kinkekaart ${amounts} — tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.`,
     infoDesc: title => `${title} — Rempire'i pood, Tallinn. Tarne Omniva, SmartPosti ja DPD-ga üle Eesti ja Baltikumi, järeletulek Mardi 1.`,
     blogDesc: "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
     blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
     otherPosts: "Teised artiklid",
-    // «Blog», not «Ajaveeb» — the owner's own word for the section (app.js dictionary)
-    blog: "Blog", postProducts: "Tooted artiklist", postMissing: "Artiklit ei leitud."
+    // «Blogi», not «Ajaveeb» and not «Blog» — the owner's own word, settled
+    // 07.09.2026; the same line as the app.js dictionary's "Блог" entry
+    blog: "Blogi", postProducts: "Tooted artiklist", postMissing: "Artiklit ei leitud.",
+    notFound: "Lehte ei leitud",
+    notFoundText: "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga."
   },
   EN: {
     base: "REMPIRE — grooming shop in Tallinn",
@@ -171,12 +184,14 @@ export const T = {
     save: "you save", pieces: "products in the set",
     setsDesc: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
     setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
-    giftDesc: "A Rempire gift card for €25, €50 or €100 — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
+    giftDesc: amounts => `A Rempire gift card for ${amounts} — e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.`,
     infoDesc: title => `${title} — Rempire shop, Tallinn. Omniva, SmartPosti and DPD delivery across Estonia and the Baltics, pickup at Mardi 1.`,
     blogDesc: "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
     blogEmpty: "No articles yet — check back soon.",
     otherPosts: "More articles",
-    blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found."
+    blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found.",
+    notFound: "Page not found",
+    notFoundText: "There is no such page — the link may be out of date, or the address has a typo."
   }
 };
 

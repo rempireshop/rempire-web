@@ -242,6 +242,11 @@ for (const [lang, seg] of LANGS) {
         { lang, seg, rest: `/set/${encodeURIComponent(b.id)}/`, product: true });
     }
   }
+  /* The brands landing — a page of its own since 07.09.2026, so it is
+     checked like the rest. No product photograph on it: it is a list of
+     26 links. */
+  await checkPage(path.join(SHOP2, seg, "brands", "index.html"),
+    { lang, seg, rest: "/brands/", needImg: false, minBody: 200 });
   await checkPage(path.join(SHOP2, seg, "gift", "index.html"),
     { lang, seg, rest: "/gift/", minBody: 700 });
   // blog: skipped whole when BLOG_SLUGS is null (see its declaration above) —
@@ -319,7 +324,9 @@ else {
   } else { failed++; console.error("FAIL public/sitemap.xml is not a sitemapindex — the prerender always writes one now"); }
   const locs = all(/<loc>([^<]+)<\/loc>/g, sm);
   SITE_BASE = (locs[0] || "").match(/^https?:\/\/[^/]+/)?.[0] || "";
-  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + CATALOGUE.length +
+  // home + /c/all/ + the categories + the brand pages + the brands landing +
+  // the products + the policy pages + the sets + the gift card + the blog
+  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + 1 + CATALOGUE.length +
     LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 +
     (BLOG_SLUGS ? BLOG_SLUGS.size + 1 : 0);
   const expected = LANGS.length * perLang;

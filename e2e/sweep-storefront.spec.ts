@@ -383,20 +383,27 @@ for (const lang of LANGS) {
 
       const w = await open(page, lang.seg, "/", "home");
 
-      // An unknown path is not a dead end — routeFromPath() falls through to
-      // the home screen (app.js), which is the app's stated contract.
+      /* An unknown path says so. Until 07.09.2026 routeFromPath() ended its
+         cascade on the home screen and the server answered 200 — kind to
+         nobody: a soft 404 is what Google de-indexes, and a shopper on a
+         stale link could not tell what had happened. Both halves agree now
+         (Dim: «Make a page not found»), and the address is kept. */
       await clientNav(page, shopUrl(lang.seg, "/nope/"));
-      await expectScreen(page, "home", { screen: "unknown-url", lang: L });
+      await expectScreen(page, "notfound", { screen: "unknown-url", lang: L });
       await check(page, w, { screen: "unknown-url", lang: L });
 
       await clientNav(page, shopUrl(lang.seg, "/p/no-such-product-12345/"));
-      await expectScreen(page, "home", { screen: "unknown-product", lang: L });
+      await expectScreen(page, "notfound", { screen: "unknown-product", lang: L });
       await check(page, w, { screen: "unknown-product", lang: L });
 
-      // …and neither is a cold load of one.
-      await coldVisit(page, shopUrl(lang.seg, "/nope/"), "home");
+      // …and a cold load of one carries the status a crawler reads
+      for (const path of ["/nope/", "/p/no-such-product-12345/"]) {
+        const res = await page.request.get(shopUrl(lang.seg, path));
+        expect(res.status(), `${label({ screen: "unknown:cold", lang: L })} ${path}`).toBe(404);
+      }
+      await coldVisit(page, shopUrl(lang.seg, "/nope/"), "notfound");
       await check(page, w, { screen: "unknown-url:cold", lang: L });
-      await coldVisit(page, shopUrl(lang.seg, "/p/no-such-product-12345/"), "home");
+      await coldVisit(page, shopUrl(lang.seg, "/p/no-such-product-12345/"), "notfound");
       await check(page, w, { screen: "unknown-product:cold", lang: L });
 
       // Empty cart drawer.

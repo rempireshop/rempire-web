@@ -26,6 +26,7 @@
  */
 import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import catalogueMin from "@/data/catalogue.min.json";
 import {
   getCustomProduct,
   isCustomId,
@@ -215,20 +216,30 @@ async function isHiddenProduct(id: string): Promise<boolean> {
  * A `c-…` id is answered from its row; every other id gets the shell the
  * /shop2/:path+ fallback would have served.
  */
+/* Every id the catalogue ships. A product page for one of these is normally
+   a static file the rewrites answer before this route is reached; the route
+   sees one only in a tree that has not run `npm run prerender` yet, and it
+   must serve it rather than claim it does not exist. */
+const CATALOGUE_IDS = new Set((catalogueMin as Array<{ id: string }>).map((p) => p.id));
+
 export async function productPageResponse(id: string, seg: string): Promise<Response> {
   const shell = readShell();
   const lang = langBySeg(seg) as Lang | null;
-  if (!lang || !isCustomId(id)) {
-    /* «Показывать в магазине» switched off (product_overrides.hidden,
-       db/migrations/147). The address must stop being an indexable page the
-       moment the owner takes the product out of the shop — the same 404 with
-       `noindex, nofollow` a hidden custom product gets below.
-       Caveat worth knowing: a CATALOGUE product also has a static page
-       written at build (tools/prerender-shop2.mjs), and next.config.ts routes
-       that file before this route is reached — so for a product that was
-       prerendered the file keeps answering until the next deploy. app.js
-       drops the product from its own list either way, so the shopper who
-       lands there is sent nowhere he can buy it. */
+  if (!lang) return html(shell, 200, "public, max-age=0, must-revalidate");
+  if (!isCustomId(id)) {
+    /* Two ways an address under /p/ is not a page a search engine should keep.
+       An id in no catalogue never existed — before 07.09.2026 the shop answered
+       those with the home page at 200, a soft 404. And a catalogue product the
+       owner has switched off with «Показывать в магазине»
+       (product_overrides.hidden, db/migrations/147) must stop being indexable
+       the moment he does it. Both get what a hidden custom product gets below:
+       the shell, noindex, 404.
+       Caveat worth knowing: a catalogue product also has a static page written
+       at build (tools/prerender-shop2.mjs), and next.config.ts serves that file
+       before this route is reached — so a prerendered product keeps answering
+       until the next deploy. app.js drops it from its own list either way, so a
+       shopper who lands there is sent nowhere he can buy it. */
+    if (!CATALOGUE_IDS.has(id)) return html(noindexShell(shell), 404, NO_STORE);
     if (await isHiddenProduct(id)) return html(noindexShell(shell), 404, NO_STORE);
     return html(shell, 200, "public, max-age=0, must-revalidate");
   }
