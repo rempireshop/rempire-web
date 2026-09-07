@@ -367,7 +367,53 @@ Nothing in the visit statistics is a name, an e-mail or an address
 
 ---
 
-## 5. How to re-run this
+## 5. Where the tests are, and what they found
+
+Fourteen new test blocks in `e2e/storefront-sweep-2.spec.ts` — one `describe`
+per decision, several of them repeated per language, so 24 more cases in each
+of the three projects it runs on (desktop, the Chromium phone, mobile-safari):
+that file went from 16 cases per project to 40. Seventeen more in a new
+`tests/storefront-decisions.test.ts` for the halves with no screen. Four existing tests were changed rather than added to, because the
+behaviour they pinned is the behaviour Dim asked to change:
+
+| test | was | is |
+|---|---|---|
+| `sweep-storefront` — «unknown URLs» | an unknown path falls through to the home screen | it is a 404, screen and status |
+| `storefront-sweep-2` — the malformed address | `/b/%E0/` renders the home screen | it is a clean 400, and the router's `safeDecode()` is exercised by a client-side navigation instead |
+| `security-product-page` — the hostile id | the shell at 200 | the shell at **404**, `noindex`, `no-store` — and a real catalogue id still 200 |
+| `blog-page`, `home`, `fixtures` — «Blog» | the Estonian label | «Blogi» |
+
+One allow-list entry was added to the crawl's console watchdog
+(`sweep-shop-helpers.ts`): Chromium logs the status of a document it just
+loaded, so a page that is *meant* to be a 404 prints one console error.
+Scoped to a `/shop2/` document — a 404 on a script, an image or an API call
+still fails the sweep.
+
+The state of the branch, every run in the foreground, every one green:
+
+| command | result |
+|---|---|
+| `npx vitest run` | 80 files, **1621 passed** |
+| `storefront-sweep-2`, desktop + mobile + mobile-safari | **118 passed**, 2 skipped (the beacon pair on WebKit — an intercepted `sendBeacon` there has no body) |
+| `sweep-storefront` + `sweep-checkout`, desktop + tablet + mobile | **77 passed**, 31 skipped |
+| home, product, catalogue, checkout, account, sets, giftcard, blog, info-pages, chatbot, seo, pwa, a11y, accessibility, security, visual — desktop + mobile-safari | **222 passed**, 1 skipped |
+| `node tools/i18n-gaps.mjs` | 0 untranslated, ET/EN key parity exact |
+| `node tools/check-prerender.mjs` | 813 pages, **0 failures** |
+| `npx tsc --noEmit` | clean |
+| `node --check public/shop2/app.js` | clean after every edit |
+
+Two flakes seen once each and not reproducible, both pre-existing and neither
+caused by anything here: `blog.spec.ts`'s pointer test failed once in a
+sixteen-file batch and passes alone and in its own file on both projects (the
+suite shares one database and the blog specs publish into it); and
+`visual.spec.ts`'s three `webkit-local` cases "failed" on their very first run
+because that project had no baselines at all — Playwright writes one and calls
+it a failure the first time. Those three generated files were deleted rather
+than committed: the repo ships Windows Chromium baselines only, on purpose
+(`docs/testing.md` § «Visual snapshots»), and `webkit-local` is a local
+convenience project.
+
+## 6. How to re-run this
 
 ```bash
 E2E_PORT=4017 node tools/e2e-build.mjs
