@@ -182,6 +182,13 @@ export async function POST(req: Request) {
         "pos",
         { decrementStock: decrementPosStock },
       );
+      /* What the register screen turns into «чек ушёл на почту»: an address
+         was given and the settlement handed the «Заказ принят» letter to the
+         mail layer. It is the same claim every other letter in this shop
+         makes — src/lib/mail.ts swallows a Resend outage by design — and it
+         is deliberately NOT the invoice's `sentAt`: there the shop refuses to
+         send at all when the IBAN is blank, which is a state of our own
+         making and therefore one the screen must not paper over. */
       mailed = !!settled.email;
     } catch (err) {
       /* The money is in the till and the order row exists; a settlement that
