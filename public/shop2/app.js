@@ -13718,7 +13718,8 @@
           return '<div class="adm-q"><span class="adm-q__q">' + esc(q.query) + "</span>" +
             '<span class="adm-q__s"><span>Показов: ' + numGrp(q.impressions) +
             " · переходов: " + numGrp(q.clicks) + " · место в Google: " + Math.round(q.position) + "</span>" +
-            (q.clicks ? "" : " <span>По этому слову в магазин не зашёл никто.</span>") + "</span></div>";
+            (q.clicks ? "" : ' <span class="adm-q__x">По этому слову в магазин не зашёл никто.</span>') +
+            "</span></div>";
         }).join("") + "</div>"
         : '<div class="adm-empty">Пока нет данных</div>');
     return lead + defs + queries;

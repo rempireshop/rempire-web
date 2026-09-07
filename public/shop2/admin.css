@@ -1165,6 +1165,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-q { padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
 .adm-q__q { display: block; font-size: 14px; }
 .adm-q__s { display: block; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-top: 2px; }
+/* the half of that line that is bad news — a word Google showed and nobody
+   opened. On its own line, because it is a sentence and the counts before it
+   end in a bare number; the colour only makes it easier to find, the sentence
+   is what says it. */
+.adm-q__x { display: block; color: var(--a-warn); }
 
 /* ---------- «Цены и баллы»: one basket, both price lists ------------------
    The card's six numbers only mean something together, so the foot of the
