@@ -11780,7 +11780,7 @@
       '<button class="adm-btn adm-btn--row" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
     else if (v.unpaid) acts =
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
-    return '<div class="adm-row adm-row--stack">' +
+    return '<div class="adm-row adm-row--stack adm-row--open">' +
       '<button class="adm-row--click" data-admorder="' + esc(v.id) + '" ' +
         'style="display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:0;text-align:left;width:100%">' +
         '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
@@ -12948,7 +12948,7 @@
     return '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
       var flow = m[3];
       var on = flow ? !!DEMO.flows[flow] : true;
-      return '<div class="adm-row adm-row--tall">' +
+      return '<div class="adm-row adm-row--tall adm-row--open">' +
         '<button class="adm-row__body" data-mailtpl="' + m[0] + '" style="border:0;background:none;padding:0;text-align:left">' +
           '<span class="adm-row__nm">' + m[1] + "</span>" +
           '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
@@ -15081,7 +15081,7 @@
       (list.length
         ? '<div class="adm-list">' + list.map(function (p) {
             var meta = [promoKindLabel(p), promoWhen(p), admPromoUsedLine(p)].join(" · ");
-            return '<div class="adm-row adm-row--tall">' +
+            return '<div class="adm-row adm-row--tall adm-row--open">' +
               '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '" ' +
                 'style="border:0;background:none;padding:0;text-align:left">' +
                 '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
@@ -15537,7 +15537,7 @@
     return '<div class="adm-list">' + list.map(function (c) {
       var pending = partnersOn() && c.tier !== "pro" && c.proRequestedAt;
       var badge = admCustBadge(c);
-      return '<div class="adm-row adm-row--tall">' +
+      return '<div class="adm-row adm-row--tall adm-row--open">' +
         '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '" ' +
           'style="border:0;background:none;padding:0;text-align:left">' +
           '<span class="adm-row__nm">' + esc(c.name || c.email) + "</span>" +

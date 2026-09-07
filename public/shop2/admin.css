@@ -263,8 +263,46 @@
 }
 .adm-row--tall { min-height: 72px; }
 .adm-row--click { cursor: pointer; }
-.adm-row--click:hover { background: var(--a-tint); }
 .adm-row--stack { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px 0; }
+
+/* ---------- which row am I on? -------------------------------------------
+   Dim, 07.09.2026: «на странице заказов при наведении на заказ (как на других
+   страницах) должно быть видно, на какой заказ мы наводим.»
+
+   Two shapes of row exist. Where the row IS the button (товары, блог, «Обзор»)
+   a plain `:hover` tint was already there — invisible in practice, a 4 %
+   wash with nothing to anchor it. Where the row is a wrapper with a button
+   inside it (заказы, промокоды, клиенты, письма) there was NOTHING: the
+   button carries `background:none` in a style attribute, which beats any
+   class, so the tint landed on nobody.
+
+   One answer for both, and it is not colour alone: the whole row takes the
+   tint, the tint BLEEDS 10 px past the list's edges so it reads as a band
+   rather than a slightly warmer paragraph, and a 3-px ink bar stands in that
+   bleed on the left. `:focus-within` gives the keyboard the same band as the
+   mouse — Tab through a list and the row you are in is the row that is lit,
+   which is also what a screen magnifier follows. */
+.adm-row.adm-row--click, .adm-row--open { position: relative; cursor: pointer; }
+.adm-row.adm-row--click, .adm-row--open,
+.adm-row.adm-row--click::before, .adm-row--open::before { transition: background .12s ease-out, opacity .12s ease-out; }
+.adm-row.adm-row--click:hover, .adm-row.adm-row--click:focus-visible,
+.adm-row--open:hover, .adm-row--open:focus-within {
+  background: var(--a-tint);
+  box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint);
+  /* the hairline under the row goes to ink: on a panel this pale a 4 % wash
+     is not a difference you can see across a room, and a rule that darkens is */
+  border-bottom-color: var(--a-ink);
+}
+.adm-row.adm-row--click::before, .adm-row--open::before {
+  content: ""; position: absolute; left: -10px; top: 0; bottom: -1px; width: 4px;
+  background: var(--a-ink); opacity: 0;
+}
+.adm-row.adm-row--click:hover::before, .adm-row.adm-row--click:focus-visible::before,
+.adm-row--open:hover::before, .adm-row--open:focus-within::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .adm-row.adm-row--click, .adm-row--open,
+  .adm-row.adm-row--click::before, .adm-row--open::before { transition: none; }
+}
 /* the row's two lines are <span>s (a row is often a <button>, which may not
    contain a <div>), so they have to be told to stack */
 .adm-row__body { flex: 1 1 160px; min-width: 0; }
