@@ -1431,6 +1431,32 @@
       "Склад обновлён ✓": "Ladu uuendatud ✓",
       "← Все статьи": "← Kõik artiklid",
       "Язык статьи": "Artikli keel",
+      // integration: the language bar — «which of the three am I editing»
+      "Это язык текста, а не язык панели — у каждого языка свой текст.":
+        "See on teksti keel, mitte paneeli keel — igal keelel on oma tekst.",
+      "Вы правите русскую версию. Это язык статьи, а не язык панели — эстонский и английский текст живут отдельно.":
+        "Muudad venekeelset versiooni. See on artikli keel, mitte paneeli keel — eesti- ja ingliskeelne tekst on eraldi.",
+      "Вы правите эстонскую версию. Это язык статьи, а не язык панели — русский и английский текст живут отдельно.":
+        "Muudad eestikeelset versiooni. See on artikli keel, mitte paneeli keel — vene- ja ingliskeelne tekst on eraldi.",
+      "Вы правите английскую версию. Это язык статьи, а не язык панели — русский и эстонский текст живут отдельно.":
+        "Muudad ingliskeelset versiooni. See on artikli keel, mitte paneeli keel — vene- ja eestikeelne tekst on eraldi.",
+      "пусто": "tühi",
+      "не дописано": "pooleli",
+      "готово": "valmis",
+      "с товарами": "toodetega",
+      "без товаров": "toodeteta",
+      "копия русского": "vene teksti koopia",
+      "есть текст": "tekst olemas",
+      "свой текст": "oma tekst",   // «стандартный текст» is already a key above
+      "только по-русски": "ainult vene keeles",
+      "не на всех языках": "mitte kõigis keeltes",
+      "Товар добавлен в русский текст статьи": "Toode lisati artikli venekeelsesse teksti",
+      "Товар добавлен в эстонский текст статьи": "Toode lisati artikli eestikeelsesse teksti",
+      "Товар добавлен в английский текст статьи": "Toode lisati artikli ingliskeelsesse teksti",
+      "Правки не сохранены — если выйти, они пропадут.":
+        "Muudatused on salvestamata — kui väljud, lähevad need kaotsi.",
+      "Выйти без сохранения": "Välju salvestamata",
+      "Остаться": "Jää siia",
       "JPEG, PNG или WebP, до 12 МБ.": "JPEG, PNG või WebP, kuni 12 MB.",
       "SEO-заголовок ·": "SEO-pealkiri ·",
       "SEO-описание ·": "SEO-kirjeldus ·",
@@ -3478,6 +3504,32 @@
       "Склад обновлён ✓": "Stock updated ✓",
       "← Все статьи": "← All posts",
       "Язык статьи": "Post language",
+      // integration: the language bar — «which of the three am I editing»
+      "Это язык текста, а не язык панели — у каждого языка свой текст.":
+        "This is the language of the text, not of the panel — each language has its own.",
+      "Вы правите русскую версию. Это язык статьи, а не язык панели — эстонский и английский текст живут отдельно.":
+        "You are editing the Russian version. This is the post's language, not the panel's — the Estonian and English texts are separate.",
+      "Вы правите эстонскую версию. Это язык статьи, а не язык панели — русский и английский текст живут отдельно.":
+        "You are editing the Estonian version. This is the post's language, not the panel's — the Russian and English texts are separate.",
+      "Вы правите английскую версию. Это язык статьи, а не язык панели — русский и эстонский текст живут отдельно.":
+        "You are editing the English version. This is the post's language, not the panel's — the Russian and Estonian texts are separate.",
+      "пусто": "empty",
+      "не дописано": "unfinished",
+      "готово": "ready",
+      "с товарами": "with products",
+      "без товаров": "no products",
+      "копия русского": "a copy of the Russian",
+      "есть текст": "has text",
+      "свой текст": "your own text",   // «стандартный текст» is already a key above
+      "только по-русски": "Russian only",
+      "не на всех языках": "not in every language",
+      "Товар добавлен в русский текст статьи": "Product added to the Russian text of the post",
+      "Товар добавлен в эстонский текст статьи": "Product added to the Estonian text of the post",
+      "Товар добавлен в английский текст статьи": "Product added to the English text of the post",
+      "Правки не сохранены — если выйти, они пропадут.":
+        "Your changes are not saved — leaving now loses them.",
+      "Выйти без сохранения": "Leave without saving",
+      "Остаться": "Stay",
       "JPEG, PNG или WebP, до 12 МБ.": "JPEG, PNG or WebP, up to 12 MB.",
       "SEO-заголовок ·": "SEO title ·",
       "SEO-описание ·": "SEO description ·",
@@ -9033,6 +9085,7 @@
     var el = blogBox();
     if (!el || !S.adminBlogEdit) return;
     S.adminBlogEdit.body[S.adminBlogLang || "RU"] = el.innerHTML;
+    blogPaintState();   // the tab's own «готово · с товарами», without a render()
   }
   function blogExec(cmd, arg) {
     if (!blogSelRestore()) return;
@@ -9140,12 +9193,17 @@
   function blogInsertProduct(id) {
     var p = productsById([id])[0];
     if (!p) return;
+    var L = S.adminBlogLang || "RU";
     var pro = proPrice(p, 0);
     var price = (p.priceFrom ? "от " : "") + eur(pro != null ? pro : p.price);
-    var href = "/shop2" + SEG_OF_LANG[S.adminBlogLang || "RU"] + "/p/" + encodeURIComponent(p.id) + "/";
+    var href = "/shop2" + SEG_OF_LANG[L] + "/p/" + encodeURIComponent(p.id) + "/";
     blogToolClose();
     blogInsertHtml('<a data-product="' + esc(p.id) + '" href="' + esc(href) + '">' +
       esc(p.brand + " " + p.name) + " — " + esc(price) + "</a>&nbsp;");
+    /* Which of the three texts it landed in — said out loud, because from
+       the other two tabs the card is simply not there, and reading that as
+       «it did not save» is exactly what happened once. */
+    toast(BLOG_INSERTED_IN[L] || BLOG_INSERTED_IN.RU);
   }
   function blogUploadImage(files) {
     if (!files || !files.length) return;
@@ -9252,6 +9310,7 @@
       S.adminBlogEditBusy = false;
       if (r.status === 200 && r.body.ok && r.body.post) {
         S.adminBlogEdit = blogDraftFromPost(r.body.post);
+        blogMarkSaved(S.adminBlogEdit);   // nothing typed yet — see blogDirty()
         S.adminBlogLang = "RU"; S.adminBlogQ = ""; S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
         S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
         S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
@@ -9279,6 +9338,81 @@
       seoTitle: d.seoTitle, seoDesc: d.seoDesc,
       author: d.author
     };
+  }
+
+  /* ---- which language you are in, and what the other two hold -------------
+     The whole point of the language bar above the article: switching a tab
+     is not a save and not a loss, and the tab you are not on says out loud
+     what is written there. A version is «пусто» when it has neither a title
+     nor a text — the shop then shows the Russian one (pickLang() in
+     src/lib/blog.ts) — «не дописано» when it has one of the two, and
+     «готово» when it has both. An ET/EN body byte-identical to the Russian
+     one was copied, not translated, and says so.
+
+     Then the chip that would have answered the owner's question before he
+     asked it: whether *this* language's text has product cards in it. He
+     put two into the Russian body, looked at the English one and saw an
+     article without them. */
+  function blogTextLen(html) {
+    return stripTags(String(html || "")).replace(/&nbsp;|&#160;/g, " ").trim().length;
+  }
+  function blogHasProducts(html) {
+    return /<a[^>]*\bdata-product=/i.test(String(html || ""));
+  }
+  function blogLangWords(d, L) {
+    var titled = !!String(d.title[L] || "").trim(), len = blogTextLen(d.body[L]);
+    if (!titled && !len) return ["пусто"];
+    if (L !== "RU" && len && d.body[L] === d.body.RU) return ["копия русского"];
+    var out = [titled && len ? "готово" : "не дописано"];
+    if (len) out.push(blogHasProducts(d.body[L]) ? "с товарами" : "без товаров");
+    return out;
+  }
+  /* One sentence per language, not one with the name plugged into a hole:
+     the dictionary keys stay whole sentences, which is what translateTree()
+     and tools/i18n-gaps.mjs both work on. */
+  var BLOG_LANG_NOTE = {
+    RU: "Вы правите русскую версию. Это язык статьи, а не язык панели — эстонский и английский текст живут отдельно.",
+    ET: "Вы правите эстонскую версию. Это язык статьи, а не язык панели — русский и английский текст живут отдельно.",
+    EN: "Вы правите английскую версию. Это язык статьи, а не язык панели — русский и эстонский текст живут отдельно."
+  };
+  /** Where an inserted product row landed — named, because it is invisible
+      from the other two tabs and that is exactly what confused the owner. */
+  var BLOG_INSERTED_IN = {
+    RU: "Товар добавлен в русский текст статьи",
+    ET: "Товар добавлен в эстонский текст статьи",
+    EN: "Товар добавлен в английский текст статьи"
+  };
+  /** Everything «Сохранить» would send — the yardstick for «не сохранено». */
+  function blogDraftSig(d) {
+    return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt,
+      d.tagsText, d.products, d.seoTitle, d.seoDesc, d.author]);
+  }
+  function blogMarkSaved(d) {
+    S.adminBlogSaved = d ? blogDraftSig(d) : "";
+    S.adminBlogConfirmBack = false;
+  }
+  function blogCloseEditor() {
+    S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
+    BLOGSEL = null; BLOGCARET = null; render();
+  }
+  function blogDirty() {
+    var d = S.adminBlogEdit;
+    return !!(d && S.adminBlogSaved !== undefined && blogDraftSig(d) !== S.adminBlogSaved);
+  }
+  /* Typing must not cost the caret, so the three tab states and the «not
+     saved» line repaint themselves instead of going through render() — the
+     same idiom paintMailPreview() uses for the letter. */
+  function blogPaintState() {
+    var d = S.adminBlogEdit;
+    if (!d) return;
+    LANGS.forEach(function (l) {
+      var slot = document.querySelector('[data-langst="' + l[0] + '"]');
+      if (!slot) return;
+      slot.innerHTML = admLangStateHTML(blogLangWords(d, l[0]));
+      translateTree(slot);
+    });
+    var dirty = document.querySelector("[data-blogdirty]");
+    if (dirty) dirty.hidden = !blogDirty();
   }
 
   /* ---- the Google pair, written from the article ---------------------------
@@ -9457,6 +9591,7 @@
       if (!(r.status === 200 && r.body.ok && r.body.post)) throw new Error((r.body && r.body.error) || "save_failed");
       var p = r.body.post;
       d.id = p.id; d.slug = p.slug; d.status = p.status; d.publishedAt = p.publishedAt;
+      if (d === S.adminBlogEdit) blogMarkSaved(d);   // «не сохранено» is answered
       S.adminBlog = null; // the list is stale now
       return p;
     });
@@ -12680,6 +12815,49 @@
       return "<button " + attr + '="' + esc(x[0]) + '" aria-current="' + (cur === x[0]) + '">' + x[1] + "</button>";
     }).join("") + "</div>";
   }
+  /* ---------- «Язык статьи», never «язык панели» ---------------------------
+     A text that exists in three languages is three texts, and until now every
+     one of these strips was a bare «Русский · Eesti · English» — the same
+     three words, in the same shape, as the interface switch in the sidebar.
+     The owner put a product card into the Russian body of a post, pressed
+     «English» expecting the *panel* to change language, got the English body
+     (which has no card in it) and read that as «my edit did not save»
+     (docs/audit/2026-09-07-blog-language.md).
+
+     So a strip that picks the language of the *content* now says three
+     things instead of one: what it switches (a visible label, not only an
+     aria-label), what each of the three versions already holds (under its
+     own name), and — in one line under it — that these are separate texts
+     and that this is not the panel's language. The state word is text, never
+     a colour alone: the filled tab and the word say the same thing twice.
+
+     `stateOf(code)` returns the words for one language, each of them a whole
+     sentence fragment of its own so translateTree() and tools/i18n-gaps.mjs
+     see one dictionary key per chip and not a glued-together string. */
+  function admLangStateHTML(words) {
+    if (!words || !words.length) return "";
+    return '<span class="adm-seg__st">' + words.map(function (w) {
+      return "<span>" + w + "</span>";
+    }).join("") + "</span>";
+  }
+  function admLangBarHTML(attr, items, cur, label, stateOf, note) {
+    return '<div class="adm-langbar">' +
+      '<div class="adm-langbar__l">' + label + "</div>" +
+      '<div class="adm-seg adm-seg--lang" role="group" aria-label="' + label + '">' + items.map(function (x) {
+        return "<button " + attr + '="' + esc(x[0]) + '" aria-current="' + (cur === x[0]) + '">' +
+          '<span class="adm-seg__nm">' + x[1] + "</span>" +
+          '<span class="adm-seg__slot" data-langst="' + esc(x[0]) + '">' +
+            admLangStateHTML(stateOf ? stateOf(x[0]) : null) + "</span></button>";
+      }).join("") + "</div>" +
+      (note ? '<p class="adm-hint adm-langbar__n">' + note + "</p>" : "") +
+      "</div>";
+  }
+  /** The one line every language strip outside the blog carries. */
+  var LANG_BAR_NOTE = "Это язык текста, а не язык панели — у каждого языка свой текст.";
+  /** The goods editor keeps its language codes lower-case (data-eddesclang). */
+  var ED_LANGS = [["ru", "Русский"], ["et", "Eesti"], ["en", "English"]];
+  /** «пусто» / «есть текст» — the state of a plain per-language string. */
+  function admLangHas(v) { return String(v || "").trim() ? ["есть текст"] : ["пусто"]; }
   /** One tab in a section's own strip, still addressed by its old section key
       — «Отзывы» is `data-admtab="reviews"`, «Письма» is `"mail"` — so the
       assistant's «Открыть …» buttons and the e2e suite keep working. */
@@ -12987,7 +13165,9 @@
     var pending = pendingAction && pendingAction.type === "set_mail_texts" ? confirmCard(pendingAction) : "";
     var left =
       '<div class="adm-sec__t">' + admMailName(tpl) + "</div>" +
-      admSegHTML("data-maillang", LANGS, lang, "Язык письма") +
+      admLangBarHTML("data-maillang", LANGS, lang, "Язык письма", function (code) {
+        return mailLangWords(tpl, code);
+      }, LANG_BAR_NOTE) +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять тексты писем.</div>') +
       pending +
       '<p class="adm-hint" data-maildirty' + (mailDirty() && !pending ? "" : " hidden") + ">" +
@@ -13077,6 +13257,19 @@
     if (!posts.length) return head + '<div class="adm-empty">Пока нет ни одной статьи — нажмите «+ Статья»</div></div>';
     return head + '<div class="adm-list">' + posts.map(admBlogRowHTML).join("") + "</div></div>";
   }
+  /* The list has no bodies in it (GET /api/admin/blog/ leaves them out), so
+     what a row can honestly say about the three languages is whether each
+     has a title. Worth saying: an empty Estonian version is not a blank
+     page, it is the Russian article shown to an Estonian reader
+     (pickLang(), src/lib/blog.ts) — which is a thing to decide, not a thing
+     to discover. */
+  function admBlogCoverageHTML(p) {
+    var t = p.title || {};
+    var has = LANGS.filter(function (l) { return String(t[l[0]] || "").trim(); }).length;
+    if (has >= LANGS.length) return "";
+    return '<span class="adm-badge adm-badge--sm adm-badge--quiet">' +
+      (has <= 1 && String(t.RU || "").trim() ? "только по-русски" : "не на всех языках") + "</span>";
+  }
   function admBlogRowHTML(p) {
     // the panel's own language first — an Estonian panel lists the Estonian titles
     var title = p.title[S.lang] || p.title.RU || p.title.ET || p.title.EN || p.slug;
@@ -13088,6 +13281,7 @@
         '"></span>' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(title) + "</span>" +
         '<span class="adm-row__sub adm-row__sub--one">' + esc(date) + (ex ? " · " + esc(ex) : "") + "</span></span>" +
+      admBlogCoverageHTML(p) +
       '<span class="adm-badge adm-badge--sm ' + (p.status === "published" ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
         (p.status === "published" ? "Опубликована" : "Черновик") + "</span></button>";
   }
@@ -13107,7 +13301,15 @@
     }).slice(0, 8) : [];
 
     var left =
-      admSegHTML("data-admbloglang", LANGS, L, "Язык статьи") +
+      /* The strip that used to be three bare words. It now names itself,
+         says what each of the three versions holds and — under it — that
+         these are three texts and not the panel's own language. See
+         admLangBarHTML() and docs/audit/2026-09-07-blog-language.md. */
+      admLangBarHTML("data-admbloglang", LANGS, L, "Язык статьи", function (code) {
+        return blogLangWords(d, code);
+      }, BLOG_LANG_NOTE[L] || BLOG_LANG_NOTE.RU) +
+      '<p class="adm-hint adm-hint--warn" data-blogdirty' + (blogDirty() ? "" : " hidden") + ">" +
+        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
       '<input class="adm-title-in" data-blogf="title" maxlength="200" placeholder="Заголовок" value="' + esc(d.title[L]) + '">' +
       admBlogCoverHTML(d) +
       '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
@@ -13206,6 +13408,14 @@
 
     return '<div class="adm-screen adm-screen--tight">' +
       admBackHTML("data-admblogback", "Блог") +
+      /* Switching a language tab keeps every unsaved word — all three live in
+         one draft — but leaving the editor drops the lot, and it used to do
+         it silently. Same inline confirmation «Удалить статью» uses. */
+      (S.adminBlogConfirmBack
+        ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogbackyes>Выйти без сохранения</button>' +
+          '<button class="adm-link adm-link--muted" data-admblogbackno>Остаться</button></div>'
+        : "") +
       admColsHTML(left, side) + "</div>";
   }
   function admBlogPicksHTML(matches) {
@@ -13929,7 +14139,21 @@
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === S.mailTpl) return S.mailTpl;
     return ADM_MAIL_ROWS[0][0];
   }
-  function mailLang() { return S.mailLang || S.lang; }
+  /* «RU», not S.lang. The letter's language is a property of the letter, and
+     letting the panel's own language pick it meant an owner who had switched
+     the panel to English was editing the English letter without ever saying
+     so — the same trap the blog editor's language strip walked the owner
+     into (docs/audit/2026-09-07-blog-language.md). Now it starts on Russian,
+     like every other content language in this panel, and the strip above the
+     fields says which one is on screen and what the other two hold. */
+  function mailLang() { return S.mailLang || "RU"; }
+  /** «свой текст» / «стандартный текст» for one language of one letter. */
+  function mailLangWords(tpl, code) {
+    var own = MAIL_FIELDS.some(function (f) {
+      return mailValue(tpl, code, f[0]) !== mailDefault(tpl, code, f[0]);
+    });
+    return [own ? "свой текст" : "стандартный текст"];
+  }
   /* Keep whatever is half-typed in the address box: every chip re-renders the
      panel, and losing the address after each click made the button unusable. */
   function keepMailTo() {
@@ -14201,7 +14425,11 @@
     };
     return '<div class="adm-card adm-card--pad adm-form adm-form--inline">' +
       '<div class="adm-edbar"><span class="adm-sec__t">' + "Баннер " + (i + 1) + "</span>" +
-        admSegHTML("data-herolang", LANGS, L, "Язык баннера") + "</div>" +
+        admLangBarHTML("data-herolang", LANGS, L, "Язык баннера", function (code) {
+          return admLangHas(["eyebrow", "title", "sub", "cta"].map(function (f) {
+            return (s[f] && s[f][code]) || "";
+          }).join(""));
+        }, LANG_BAR_NOTE) + "</div>" +
       heroFieldHTML(s, "eyebrow", "Строка сверху", "input", 40) +
       heroFieldHTML(s, "title", "Заголовок", "input", 40) +
       heroFieldHTML(s, "sub", "Подзаголовок", "textarea", 90) +
@@ -14396,8 +14624,12 @@
         : '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" value="' + esc(val) + '">') +
       (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + fell + "</label>";
   }
+  /** The five texts on this card that exist per language — cTri() above. */
+  var CONTENT_TRI = ["hours.note", "announcement.text", "announcement.short", "contactPage", "emailFooter"];
   function cLangPills() {
-    return admSegHTML("data-contentlang", LANGS, S.contentLang || "RU", "Язык текстов");
+    return admLangBarHTML("data-contentlang", LANGS, S.contentLang || "RU", "Язык текстов", function (code) {
+      return admLangHas(CONTENT_TRI.map(function (p) { return cDraftGet(p + "." + code); }).join(""));
+    }, LANG_BAR_NOTE);
   }
   /** One block of the document as a row; «Изменить» opens its fields right
       under the row — the document is long, a phone screen is not. */
@@ -15937,6 +16169,27 @@
     ET: ["[data-edseotet]", "[data-edseodet]"],
     EN: ["[data-edseoten]", "[data-edseoden]"]
   };
+  var DESC_HOOKS = { RU: "[data-eddescru]", ET: "[data-eddescet]", EN: "[data-eddescen]" };
+  /* «пусто» / «есть текст» under each language of «Описание» and «Google».
+     This form keeps no draft in S — it is read off the DOM when saved — so
+     the state is read off the DOM too, on every switch and on every
+     keystroke. Otherwise a tab would go on saying «пусто» about a language
+     the owner is typing into, which is the very lie this strip exists to
+     stop telling. */
+  function edFieldVal(sel) { var el = document.querySelector(sel); return el ? el.value : ""; }
+  function edLangStatePaint() {
+    ED_LANGS.forEach(function (l) {
+      var L = l[0].toUpperCase();
+      [["data-eddesclang", admLangHas(edFieldVal(DESC_HOOKS[L]))],
+       ["data-edseolang", admLangHas(edFieldVal(SEO_HOOKS[L][0]) + edFieldVal(SEO_HOOKS[L][1]))]
+      ].forEach(function (pair) {
+        var slot = document.querySelector("[" + pair[0] + '="' + l[0] + '"] [data-langst]');
+        if (!slot) return;
+        slot.innerHTML = admLangStateHTML(pair[1]);
+        translateTree(slot);
+      });
+    });
+  }
   function admSeoFill(p, langs, btn) {
     if (btn.disabled) return;
     var label = btn.textContent; btn.disabled = true; btn.textContent = "…";
@@ -16684,10 +16937,12 @@
     };
     return '<div class="adm-edpane" data-edpane="desc"' + (edTab() === "desc" ? "" : " hidden") + ">" +
       '<div class="adm-edbar">' +
-        '<div class="adm-seg" role="group" aria-label="Язык описания">' +
-          [["ru", "Русский"], ["et", "Eesti"], ["en", "English"]].map(function (l) {
-            return '<button class="adm-seg__b" data-eddesclang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
-          }).join("") + "</div>" +
+        /* Same labelled strip the blog and the letters got: which of the
+           three descriptions is in the box, and whether the other two are
+           written — see admLangBarHTML(). */
+        admLangBarHTML("data-eddesclang", ED_LANGS, lang, "Язык описания", function (code) {
+          return admLangHas(dov[code.toUpperCase()]);
+        }, LANG_BAR_NOTE) +
         '<div class="adm-acts">' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admdescgen="' + esc(p.id) + '">Написать черновик</button>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admtranslate="' + esc(p.id) + '">Перевести с русского</button>' +
@@ -16716,10 +16971,10 @@
     var lang = S.goodsSeoLang || "ru";
     return '<div class="adm-edpane" data-edpane="seo"' + (edTab() === "seo" ? "" : " hidden") + ">" +
       '<div class="adm-edbar">' +
-        '<div class="adm-seg" role="group" aria-label="Язык для Google">' +
-          [["ru", "Русский"], ["et", "Eesti"], ["en", "English"]].map(function (l) {
-            return '<button class="adm-seg__b" data-edseolang="' + l[0] + '" aria-current="' + (lang === l[0]) + '">' + l[1] + "</button>";
-          }).join("") + "</div>" +
+        admLangBarHTML("data-edseolang", ED_LANGS, lang, "Язык для Google", function (code) {
+          var v = ov[code.toUpperCase()] || {};
+          return admLangHas(String(v.t || "") + String(v.d || ""));
+        }, LANG_BAR_NOTE) +
         '<div class="adm-acts">' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admseogen="' + esc(p.id) + '">Заполнить автоматически</button>' +
           '<button class="adm-link adm-link--muted" data-admseoall="' + esc(p.id) + '">все три языка</button>' +
@@ -20753,7 +21008,7 @@
     var topic = String(a.topic || "").trim();
     if (!topic) return;
     S.adminTab = "blog"; S.adminOrder = 0; S.adminEdit = "";
-    S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
+    S.adminBlogEdit = blogNewDraft(); blogMarkSaved(S.adminBlogEdit); S.adminBlogLang = "RU"; S.adminBlogQ = "";
     S.adminBlogConfirmDelete = false; S.adminBlogErr = ""; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;
     S.adminBlogTopic = topic;
     S.admMore = false;
@@ -22453,7 +22708,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admblogbackyes],[data-admblogbackno],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -22944,6 +23199,7 @@
       for (var si2 = 0; si2 < segs.length; si2++) {
         segs[si2].setAttribute("aria-current", String(segs[si2].getAttribute(segAttr) === pickL));
       }
+      edLangStatePaint();   // …and what the two languages you left behind hold
       return;
     }
     // The chip only decides which door is shown; the value stays in the one
@@ -24145,16 +24401,25 @@
 
     /* ---------- blog: the admin editor ------------------------------------ */
     if (d.admblognew !== undefined) {
-      S.adminBlogEdit = blogNewDraft(); S.adminBlogLang = "RU"; S.adminBlogQ = "";
+      S.adminBlogEdit = blogNewDraft(); blogMarkSaved(S.adminBlogEdit); S.adminBlogLang = "RU"; S.adminBlogQ = "";
       S.adminBlogConfirmDelete = false; S.adminBlogErr = "";
       S.adminBlogTopic = ""; if (S.adminBlogGen && S.adminBlogGen.err) S.adminBlogGen = null;
       S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
-    if (d.admblogback !== undefined) { S.adminBlogEdit = null; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return; }
+    if (d.admblogback !== undefined) {
+      // unsaved work dies with the draft — ask once (blogDirty)
+      if (blogDirty() && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; render(); return; }
+      blogCloseEditor(); return;
+    }
+    if (d.admblogbackyes !== undefined) { blogCloseEditor(); return; }
+    if (d.admblogbackno !== undefined) { S.adminBlogConfirmBack = false; render(); return; }
     if (d.admbloglang) {
-      // another language is another box: the remembered caret belongs to the old one
+      /* Another language is another box: the remembered caret belongs to the
+         old one. Nothing is saved and nothing is lost by this — all three
+         texts sit in the same draft — and the tab you land on now says what
+         it holds, which is the whole point of the strip. */
       S.adminBlogLang = d.admbloglang; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return;
     }
     /* ---- the visual editor's toolbar --------------------------------------
@@ -24462,6 +24727,11 @@
     else if (t.matches("[data-edproprice]")) { t.setAttribute("data-edauto", "0"); }
     // the owner's product: the line under the name follows what is typed
     else if (t.matches("[data-edname]")) { edNameHintPaint(t.value.trim()); }
+    // the language strips over «Описание» and «Google» — see edLangStatePaint()
+    else if (t.matches("[data-eddescru],[data-eddescet],[data-eddescen]," +
+      "[data-edseot],[data-edseod],[data-edseotet],[data-edseodet],[data-edseoten],[data-edseoden]")) {
+      edLangStatePaint();
+    }
     else if (t.matches("[data-posq]")) {
       S.posQ = t.value;
       var posList = document.getElementById("poslist");
@@ -24582,6 +24852,7 @@
         var cntEl = document.querySelector('[data-blogcount="' + bf + '"]');
         if (cntEl) cntEl.textContent = t.value.length + (bf === "seoTitle" ? "/70" : "/170");
       }
+      blogPaintState();
     }
     else if (t.matches("[data-blogslug]")) {
       if (S.adminBlogEdit) {

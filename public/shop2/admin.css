@@ -982,6 +982,40 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* phone: a thumb-sized segment — after the base rule, same specificity, so it wins */
 @media (max-width: 899px) { .adm-seg button { height: 44px; } }
 
+/* ---------- language of the *text*, not of the panel ----------------------
+   The strip that says which of three language versions is on screen. It has
+   to be impossible to mistake for the RU · ET · EN switch in the sidebar,
+   which changes the panel's own language — so it is labelled, its tabs are
+   two lines deep (the language, then what that version holds), and one line
+   under it says these are separate texts. Same tokens, same square geometry
+   as every other control here; the difference is that it talks.
+   See admLangBarHTML() in app.js. */
+
+.adm-langbar { display: flex; flex-direction: column; gap: 8px; }
+.adm-langbar__l { font-size: 13px; font-weight: 600; color: var(--a-muted); }
+.adm-langbar__n { max-width: 62ch; margin: 0; }
+.adm-seg--lang button {
+  height: auto; min-height: 48px; padding: 7px 16px;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
+  text-align: left; line-height: 16px;
+}
+.adm-seg--lang .adm-seg__nm { font-size: 14px; }
+/* colour is never the only carrier: the filled tab and this word agree */
+.adm-seg--lang .adm-seg__st { font-size: 11px; font-weight: 400; color: var(--a-muted); white-space: nowrap; }
+.adm-seg--lang .adm-seg__st span + span::before { content: " · "; }
+.adm-seg--lang button[aria-current="true"] .adm-seg__st { color: rgba(255, 255, 255, .8); }
+/* an empty slot must not collapse the tab to one line while typing fills it */
+.adm-seg--lang .adm-seg__slot { min-height: 14px; display: block; }
+/* inside an editor's top bar (goods «Описание»/«Google», the banner slide) the
+   strip takes the whole row and the buttons wrap under it — the label and the
+   note are a sentence, not a chip that can share a line with two buttons */
+.adm-edbar .adm-langbar { flex: 1 1 100%; }
+@media (max-width: 899px) {
+  .adm-seg--lang { width: 100%; }
+  .adm-seg--lang button { flex: 1 1 0; min-height: 52px; padding: 7px 10px; }
+  .adm-seg--lang .adm-seg__st { white-space: normal; }
+}
+
 /* ---------- switch (44 × 26, knob 20, .15 s) ------------------------------
    A <button aria-pressed>, not a checkbox: every other control in the panel
    is a button the delegated click handler already sees, and a switch that
