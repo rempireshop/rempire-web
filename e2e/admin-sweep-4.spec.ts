@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { ipHeaders } from "./fixtures";
-import { assertClean, clearToast, openAdmin, watch } from "./sweep-helpers";
+import { assertClean, clearToast, openAdmin, tab, watch } from "./sweep-helpers";
 
 /**
  * The fourth admin sweep — Dim's answers of 07.09.2026
@@ -89,7 +89,7 @@ test.describe("admin — «Журнал изменений» shows the shop's ow
     // the chat-bot switch: shop-wide, reversible, and audited by the server
     await settings(page, "home");
     await page.locator("[data-admchatbot]").click();
-    const card = page.locator(".adm-propose");
+    const card = page.locator(".adm-confirm");
     if (await card.count()) await page.locator("[data-admapply]").click();
     await clearToast(page);
 
@@ -105,5 +105,171 @@ test.describe("admin — «Журнал изменений» shows the shop's ow
     // put the shop back exactly as it was
     await page.locator('[data-admundo="0"]').click();
     await clearToast(page);
+  });
+});
+
+test.describe("admin — the browser's Back closes an open card", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(178) });
+
+  test("Back leaves the panel only once nothing is open any more", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    await openAdmin(page);
+
+    // a settings page is a card of its own: Back closes it and stays in the panel
+    await settings(page, "journal");
+    await page.goBack();
+    await expect(page.locator("[data-admsetback]"), "Back did not close the settings page").toHaveCount(0);
+    await expect(page.locator('[data-admsetpage="journal"]'), "Back left the panel altogether").toBeVisible();
+    await assertClean(page, w, "Back on a settings page");
+
+    // a product editor: two layers deep — the editor, then a confirm card over it
+    await tab(page, "goods");
+    const first = page.locator("[data-admgoods]").first();
+    await first.click();
+    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+    await page.locator("[data-admgoodspull]").click();
+    await expect(page.locator(".adm-confirm")).toBeVisible();
+
+    // one Back closes the confirm and leaves the editor open…
+    await page.goBack();
+    await expect(page.locator(".adm-confirm"), "Back did not close the confirm card").toHaveCount(0);
+    await expect(page.locator("[data-admsavegoods]"), "Back closed the editor too").toBeVisible();
+
+    // …the next one closes the editor and still keeps the panel
+    await page.goBack();
+    await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
+    await expect(page.locator("[data-admgoods]").first(), "Back left the panel").toBeVisible();
+    await assertClean(page, w, "Back through the editor");
+
+    // closing with the button spends the parked entry, so the next Back is
+    // not a press that does nothing: it really leaves the panel
+    await first.click();
+    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+    await page.locator("[data-admclose]").first().click();
+    await expect(page.locator("[data-admsavegoods]")).toHaveCount(0);
+    await page.goBack();
+    await expect(page.locator("[data-admgoods]"), "Back after a button-close did nothing").toHaveCount(0);
+  });
+});
+
+test.describe("admin — «Подключения» tells the truth about the model", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(179) });
+
+  test("the «ИИ-помощник» square is not green while it says the model is off", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+
+    // no key in this suite → GET /api/assistant/ answers enabled:false
+    await page.route("**/api/assistant/", async (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: false }) });
+    });
+    await openAdmin(page);
+
+    const direct = page.locator('[data-admtab="apps"][aria-current]:visible');
+    const more = page.locator("[data-admmore]:visible");
+    await expect(direct.or(more).first()).toBeVisible();
+    if (await direct.count()) await direct.first().click();
+    else {
+      await more.first().click();
+      await page.locator('.adm-sheet [data-admtab="apps"]').first().click();
+    }
+
+    const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
+    await expect(row).toBeVisible();
+    await expect(row, "the row no longer says the model is off").toContainText("Модель не подключена");
+    // the square is grey, not the green every working row wears
+    await expect(row.locator(".adm-dot--off"),
+      "the «ИИ-помощник» square is still green while it says the model is off").toHaveCount(1);
+    await assertClean(page, w, "«Подключения» with no model");
+  });
+
+  test("…and green when a model really answers", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.route("**/api/assistant/", async (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true }) });
+    });
+    await openAdmin(page);
+    const direct = page.locator('[data-admtab="apps"][aria-current]:visible');
+    const more = page.locator("[data-admmore]:visible");
+    await expect(direct.or(more).first()).toBeVisible();
+    if (await direct.count()) await direct.first().click();
+    else {
+      await more.first().click();
+      await page.locator('.adm-sheet [data-admtab="apps"]').first().click();
+    }
+    const row = page.locator(".adm-row", { hasText: "ИИ-помощник" }).first();
+    await expect(row).toContainText("Модель подключена");
+    await expect(row.locator(".adm-dot--off"), "a working model still shows the grey square").toHaveCount(0);
+  });
+});
+
+test.describe("admin — «Написать клиенту» asks before it sends", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(182) });
+
+  test("«Отправить» goes through the confirm card, and «Отмена» sends nothing", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const sent: string[] = [];
+    await page.route("**/api/admin/mail/send/", async (route) => {
+      sent.push(String(route.request().postData() || ""));
+      await route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({ ok: true, messages: [] }),
+      });
+    });
+
+    /* An order of this spec's own, straight through the public route — the
+       panel needs something to write about and the suite must not depend on
+       another file having run first. */
+    const made = await page.request.post("/api/orders/", {
+      data: {
+        lang: "ru", items: [{ id: "proraso-azur-lime-after-shave-balm-100-ml", qty: 1 }],
+        customer: { name: "Тест Письмо", email: "letter-confirm@example.com", phone: "+372 5555 5555" },
+        shipping: { method: "parcel", country: "EE" },
+      },
+    });
+    expect(made.ok(), "the test order was not created").toBe(true);
+    const number = (await made.json()).number as string;
+
+    await openAdmin(page);
+    await tab(page, "orders");
+    await page.locator("[data-admorderq]").fill(number);
+    const first = page.locator("[data-admorder]").first();
+    await expect(first, "no orders to write about").toBeVisible({ timeout: 15_000 });
+    await first.click();
+    await expect(page.locator("[data-admorderreply]")).toBeVisible();
+    await page.locator("[data-admorderreply]").click();
+
+    const draft = page.locator("[data-orderreplydraft]");
+    await expect(draft).toBeVisible();
+    await draft.fill("Здравствуйте! Посылка уйдёт завтра утром.");
+    await page.locator("[data-admordersend]").click();
+
+    // the card, with the address and the letter in it
+    const card = page.locator(".adm-confirm");
+    await expect(card, "«Отправить» still sends with no confirm").toBeVisible();
+    await expect(card).toContainText("Отправить письмо клиенту?");
+    await expect(card).toContainText("отозвать его нельзя");
+    await expect(card, "the card does not show the letter it is about to send")
+      .toContainText("Посылка уйдёт завтра утром");
+    expect(sent, "the letter left before the card was answered").toEqual([]);
+
+    // «Отмена» sends nothing and keeps the draft
+    await page.locator("[data-admcancel]").click();
+    await expect(card).toHaveCount(0);
+    expect(sent, "«Отмена» sent the letter anyway").toEqual([]);
+    await expect(page.locator("[data-orderreplydraft]"), "«Отмена» threw the draft away")
+      .toHaveValue(/Посылка уйдёт завтра утром/);
+
+    // …and «Отправить» on the card really sends
+    await page.locator("[data-admordersend]").click();
+    await page.locator("[data-admapply]").click();
+    await expect.poll(() => sent.length, { timeout: 15_000, message: "the confirmed letter never left" }).toBe(1);
+    expect(sent[0]).toContain("завтра утром");
+    await clearToast(page);
+    await assertClean(page, w, "«Написать клиенту» behind the confirm card");
   });
 });

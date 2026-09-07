@@ -547,6 +547,11 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-propose { border: 1px solid var(--a-ink); padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .adm-propose__t { font-weight: 600; font-size: 14px; }
 .adm-propose__d { font-size: 14px; line-height: 20px; white-space: pre-line; }
+/* the letter «Написать клиенту» is about to send, as typed */
+.adm-propose__prev {
+  font-size: 14px; line-height: 20px; white-space: pre-wrap; max-height: 180px; overflow: auto;
+  border-left: 2px solid var(--a-rule); padding-left: 10px; color: var(--a-muted);
+}
 .adm-propose__acts { display: flex; gap: 8px; }
 .adm-propose__acts .adm-btn { flex: 1; height: 44px; }
 /* «Убрать фон» on a photo proposal — a plain checkbox row inside the card */
@@ -1102,6 +1107,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    one. 7 px is the name's own first-line centre. */
 .adm-dot { width: 10px; height: 10px; flex: none; background: var(--a-ok); align-self: flex-start; margin-top: 7px; }
 .adm-dot--warn { background: var(--a-warn); }
+/* known to be off, and not a fault — the assistant with no model behind it */
+.adm-dot--off { background: var(--a-rule); }
 
 /* ---------- Настройки ----------------------------------------------------- */
 

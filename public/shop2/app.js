@@ -307,6 +307,12 @@
       "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
       "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Liidestused", "Настройки": "Seaded",
       "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
+      "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
+        "Mudel on ühendatud: vastab küsimustele ja valmistab mustandeid. Ilma teie «Rakenda» nuputa ei muuda ta midagi.",
+      "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.":
+        "Mudel ei ole ühendatud — töötavad ainult sisseehitatud vastused, uusi tekste ta ei kirjuta. Ühendab Dim.",
+      "Отправить письмо клиенту?":
+        "Kas saata kiri kliendile?",
       "Журнал магазина не загрузился.":
         "Poe logi ei laadinud.",
       "владелец":
@@ -2203,6 +2209,12 @@
       "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
       "Аналитика": "Analytics", "Письма": "E-mails", "Подключения": "Integrations", "Настройки": "Settings",
       "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
+      "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
+        "The model is connected: it answers questions and prepares drafts. It changes nothing without your «Apply».",
+      "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.":
+        "The model is not connected — only the built-in answers work, it will write no new texts. Dim connects it.",
+      "Отправить письмо клиенту?":
+        "Send the letter to the customer?",
       "Журнал магазина не загрузился.":
         "The shop's log did not load.",
       "владелец":
@@ -3928,6 +3940,15 @@
     [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера\.$/,
       { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» — ilma jälgimisnumbrita.",
         EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter — without a tracking number." }],
+    /* «Написать клиенту» → «Отправить»: the confirm card's own two lines —
+       the order and the address, then the warning. One text node either way,
+       and the letter itself is drawn in the card's preview box below it. */
+    [/^([^\n]+)\nПисьмо уйдёт сразу, отозвать его нельзя\.$/,
+      { ET: "$1\nKiri läheb kohe välja, seda ei saa tagasi võtta.",
+        EN: "$1\nThe letter goes out at once and cannot be recalled." }],
+    // …and the journal line it leaves behind
+    [/^Письмо клиенту · заказ (.+)$/,
+      { ET: "Kiri kliendile · tellimus $1", EN: "Letter to the customer · order $1" }],
     [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
       { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
@@ -10943,6 +10964,18 @@
     return v.number + " · " + v.who + "\n" + v.ship +
       "\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера.";
   }
+  /* «Написать клиенту» → «Отправить». Audit 06.09.2026 question 9; Dim's
+     answer: yes, ask first. The letter cannot be recalled and every cheaper
+     action in this panel already goes through the card, so this one does too —
+     with the address it is going to and the first lines of what is going, so
+     the question is worth answering rather than clicking through. */
+  function admMailConfirmText(v) {
+    var mail = (v.srv && v.srv.email) || "";
+    // two straight chains, same reason as admShipConfirmText(): each is one
+    // text node, and the letter itself goes in the card's own preview box
+    if (mail) return v.number + " · " + mail + "\nПисьмо уйдёт сразу, отозвать его нельзя.";
+    return v.number + "\nПисьмо уйдёт сразу, отозвать его нельзя.";
+  }
   /* «Отменить заказ» — what actually happens, not what would be nice. The
      server (setOrderStatus in src/lib/orders.ts) moves the status and puts a
      counted shelf back; it sends no letter and it refunds nothing — there is
@@ -11631,6 +11664,9 @@
       '<div class="adm-confirm__card">' +
         '<div class="adm-confirm__t">' + esc(a.title || "Подтвердите изменение") + "</div>" +
         '<div class="adm-confirm__d">' + esc(a.detail || actionText(a)) + "</div>" +
+        // «Написать клиенту»: the letter itself, in the owner's own words —
+        // see confirmCard() for why it is a box of its own
+        (a.preview ? '<div class="adm-propose__prev">' + esc(a.preview) + "</div>" : "") +
         '<div class="adm-confirm__acts">' +
           '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
             esc(a.ok || "Применить") + "</button>" +
@@ -12397,11 +12433,19 @@
     rows.push({ name: "Аналитика посещений", ok: !ANALYTICS["7d"] || !!an,
       sub: an ? "Откуда приходят и что ищут. Всё в разделе «Аналитика»." : "Считаем…", act: "" });
 
-    rows.push({ name: "ИИ-помощник", ok: true,
-      sub: admAI
-        ? "Отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить»."
-        : "Работает на встроенных ответах — модель не подключена. Сам он по-прежнему ничего не меняет.",
-      act: "" });
+    /* The square used to be green while the line under it said the model was
+       not connected (audit 06.09.2026, question 7; Dim: make it tell the
+       truth). Green only when a real model answers; grey — not red — while it
+       runs on the built-in answers, because that is not a fault: the panel
+       still works, it simply cannot write anything new. `admAI` is null until
+       GET /api/assistant/ answers, so «Проверяем…» is the honest first state. */
+    rows.push({ name: "ИИ-помощник", ok: true, quiet: admAI === false,
+      sub: admAI === null
+        ? "Проверяем…"
+        : admAI
+          ? "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить»."
+          : "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.",
+      act: admAI === false ? admDevLink() : "" });
 
     var cam = scanSupportInfo().camera;
     rows.push({ name: "Сканер · камера телефона", ok: cam,
@@ -12417,7 +12461,9 @@
       admHead("", "Подключения", "") +
       '<div class="adm-list">' + admIntegrationRows().map(function (r) {
         return '<div class="adm-row adm-row--tall">' +
-          '<span class="adm-dot' + (r.ok ? "" : " adm-dot--warn") + '" aria-hidden="true"></span>' +
+          // three states, not two: green = working, grey = known to be off but
+          // not broken (the assistant with no model), red = something is wrong
+          '<span class="adm-dot' + (r.ok ? (r.quiet ? " adm-dot--off" : "") : " adm-dot--warn") + '" aria-hidden="true"></span>' +
           '<span class="adm-row__body"><span class="adm-row__nm">' + r.name + "</span>" +
             '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
           r.act + "</div>";
@@ -15502,13 +15548,19 @@
       return { size: String(s || ""), price: Number(prices[Math.min(i, prices.length - 1)]) };
     });
   }
-  function edLadderSame(a, b) {
-    if (!a || !b || a.length !== b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (String(a[i].size) !== String(b[i].size)) return false;
-      if (Math.abs(Number(a[i].price) - Number(b[i].price)) > 0.001) return false;
+  /* Did the VOLUMES move — one added, removed or renamed, or a price on any
+     rung but the first? Only then is the whole ladder what has to travel.
+     The first rung's price on its own stays the plain `set_price` it has
+     always been: one journal line saying «Цена …», one call to undo it, and
+     nothing about a price change pretending to be a change of volumes. */
+  function edLadderMoved(was, now) {
+    if (!was || !now) return false;
+    if (was.length !== now.length) return true;
+    for (var i = 0; i < was.length; i++) {
+      if (String(was[i].size) !== String(now[i].size)) return true;
+      if (i > 0 && Math.abs(Number(was[i].price) - Number(now[i].price)) > 0.001) return true;
     }
-    return true;
+    return false;
   }
   function customRowFromForm(p) {
     var g = function (sel) { var e = document.querySelector(sel); return e ? e.value.trim() : ""; };
@@ -17726,6 +17778,25 @@
       return r;
     }, function () { toast("Сервер не отвечает — изменение не сохранилось"); });
   }
+  /* migration 147: one place where a set_sizes action — the forward one or the
+     `prev` an undo sends back — becomes the demo layer's two values. An empty
+     ladder means «снова как в каталоге»; `price` then says what the price
+     override should be, null clearing it too. */
+  function setSizesLocal(a) {
+    var lad = sizeLadder(a.value);
+    if (lad.length) { DEMO.sizes[a.id] = lad; DEMO.price[a.id] = lad[0].price; }
+    else {
+      delete DEMO.sizes[a.id];
+      if (a.price != null) DEMO.price[a.id] = a.price; else delete DEMO.price[a.id];
+    }
+    S.goodsSizes = null;   // the open editor re-reads the ladder it now has
+  }
+  /** The same two values as the body PUT /api/admin/overrides takes. */
+  function sizesBody(a) {
+    var lad = sizeLadder(a.value);
+    return { id: a.id, sizes: lad.length ? lad : null,
+      price: lad.length ? lad[0].price : (a.price != null ? a.price : null) };
+  }
   function srvPush(a) {
     if (!SRV.admin || !a) return;
     var ov = "/api/admin/overrides/", st = "/api/admin/settings/";
@@ -17737,7 +17808,7 @@
     /* migration 147: the whole ladder (null = back to the catalogue file's
        volumes) and «Показывать в магазине» — both product_overrides columns,
        both written through the same PUT their neighbours use. */
-    else if (a.type === "set_sizes") srvSaved(apiSend(ov, "PUT", { id: a.id, sizes: (a.value && a.value.length) ? sizeLadder(a.value) : null }));
+    else if (a.type === "set_sizes") srvSaved(apiSend(ov, "PUT", sizesBody(a)));
     else if (a.type === "set_hidden") srvSaved(apiSend(ov, "PUT", { id: a.id, hidden: !!a.value }));
     /* inventory: a ± on the «Склад» row is a relative move, so undo is simply
        the same call with the opposite sign — POST /api/admin/inventory/moves/
@@ -17974,6 +18045,24 @@
      went out is out. Both leave a line in the journal. */
   function admInvoiceConfirmText(v) {
     return v.number + " · " + eur(v.sum) + "\nДеньги по счёту №" + v.invoice.number + " пришли на счёт? Заказ станет оплаченным, клиенту уйдёт письмо «Заказ принят».";
+  }
+  /* «Написать клиенту» → «Отправить», once the confirm card said yes. The
+     letter cannot be recalled, so nothing about this goes through demoApply()
+     — the journal gets a plain note and the toast offers no «Отменить». */
+  function srvOrderMailSend(pa) {
+    apiSend("/api/admin/mail/send/", "POST", {
+      orderId: pa.id, reply: pa.reply, customerMessage: pa.customerMessage || ""
+    }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.orderReplyDraft = "";
+        S.orderMsgs = r.body.messages || null; S.orderMsgsFor = pa.id;
+        journalNote("Письмо клиенту · заказ " + pa.number);
+        toast("Письмо отправлено ✓");
+      } else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
+      else toast("Не удалось отправить письмо");
+      render();
+    }).catch(function () { toast("Не удалось отправить письмо"); render(); });
   }
   function srvInvoicePaid(id, number, invoiceNumber) {
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/invoice/", "POST", { action: "paid" }).then(function (r) {
@@ -18482,11 +18571,15 @@
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
     /* migration 147: the size ladder travels whole, so undo is the previous
        whole ladder — null when the owner had none and the catalogue file's
-       volumes were in force. */
+       volumes were in force. The first rung's price rides with it: `price` and
+       the ladder are one fact stored twice (mapOverride on the server), and an
+       undo that put the volumes back but left the price would be half a way
+       back. */
     else if (a.type === "set_sizes") {
-      entry.prev = { type: "set_sizes", id: a.id, value: DEMO.sizes[a.id] ? DEMO.sizes[a.id].slice() : null, name: a.name };
-      var ladNew = sizeLadder(a.value);
-      if (ladNew.length) DEMO.sizes[a.id] = ladNew; else delete DEMO.sizes[a.id];
+      entry.prev = { type: "set_sizes", id: a.id, name: a.name,
+        value: DEMO.sizes[a.id] ? DEMO.sizes[a.id].slice() : null,
+        price: DEMO.price[a.id] != null ? DEMO.price[a.id] : null };
+      setSizesLocal(a);
     }
     /* «Показывать в магазине»: the product leaves the shop's list entirely,
        so CATALOGUE is rebuilt and any basket line pointing at it is dropped */
@@ -18658,11 +18751,7 @@
     if (a.type === "set_price") DEMO.price[a.id] = a.value;
     else if (a.type === "set_pro_price") DEMO.proPrice[a.id] = a.value;
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
-    else if (a.type === "set_sizes") {   // migration 147
-      var ladBack = sizeLadder(a.value);
-      if (ladBack.length) DEMO.sizes[a.id] = ladBack; else delete DEMO.sizes[a.id];
-      S.goodsSizes = null;   // the open editor re-reads the ladder it now has
-    }
+    else if (a.type === "set_sizes") setSizesLocal(a);   // migration 147
     else if (a.type === "set_hidden") {
       if (a.value) DEMO.hidden[a.id] = true; else delete DEMO.hidden[a.id];
       rebuildCatalogue();
@@ -18730,6 +18819,12 @@
     return '<div class="adm-propose">' +
       '<div class="adm-propose__t">' + esc(a.title || "Предпросмотр изменения") + "</div>" +
       '<div class="adm-propose__d">' + esc(a.detail || actionText(a)) + "</div>" +
+      /* What is about to leave, in the owner's own words — «Написать клиенту»
+         is the one action whose whole content he typed himself, and a
+         «Отправить?» with the letter out of sight is a question he cannot
+         answer. Its own box, so the sentence above it stays one text node the
+         dictionary can translate. */
+      (a.preview ? '<div class="adm-propose__prev">' + esc(a.preview) + "</div>" : "") +
       /* a photo going onto a product may have its background removed on the
          way — offered only when the server said it can (MEDIA.cutout), the
          same switch the editor's «✂» is behind */
@@ -18745,12 +18840,19 @@
   /* When /api/assistant/ has a key, the owner's questions go to the real
      model (mode:"admin" — its own system prompt, demo-data caveats, tab
      routing). The canned answers below stay as the offline fallback. */
-  var admAI = null, admConvo = [];
+  /* `admAI` is a THREE-state value, not a boolean: null = «не спрашивали /
+     ещё не ответили», true = a real model is behind /api/assistant/, false =
+     only the built-in answers. «Подключения» prints all three, because a
+     square that is green before the answer arrives is the same lie the audit
+     found (question 7). The «asked» flag is separate so null can survive
+     until the fetch really lands. */
+  var admAI = null, admConvo = [], admAIAsked = false;
   function probeAdmAI() {
-    if (admAI !== null) return;
-    admAI = false;
+    if (admAIAsked) return;
+    admAIAsked = true;
     fetch("/api/assistant/").then(function (r) { return r.json(); })
-      .then(function (j) { admAI = !!j.enabled; }).catch(function () {});
+      .then(function (j) { admAI = !!j.enabled; render(); })
+      .catch(function () { admAI = false; render(); });
   }
   /* What the banner says right now, trimmed to what the assistant can act on —
      «поменяй второй слайд» needs to know there is a second slide. */
@@ -19750,6 +19852,9 @@
     if (renderQueued) { renderPending = true; return; }
     renderQueued = true;
     renderImpl();
+    // «Назад» closes an open card: one parked history entry, kept in step with
+    // what is actually open, so no opener has to remember to park one
+    admSyncHistory();
     markLastRows();
     requestAnimationFrame(function () {
       renderQueued = false;
@@ -20161,8 +20266,83 @@
     render();
   }
 
+  /* ---------- «Назад» inside the panel -----------------------------------
+     Audit 06.09.2026, question 6; Dim's answer: yes. The whole admin lives at
+     ONE address, so the browser's Back — the gesture a phone owner reaches for
+     to dismiss anything — used to drop Renat out of the panel into the shop
+     with an order card still open, and the way back in was the menu.
+
+     The fix is the trick openDrawer() already plays for the cart: while
+     anything is open, ONE entry is parked on the history stack. Back spends
+     it and closes the topmost layer instead of leaving; if something is still
+     open underneath, the entry is parked again, so Back walks out layer by
+     layer. Closing with a button («← Заказы», «Отмена») spends the parked
+     entry itself, so the next Back is never a press that does nothing. */
+  var ADM_HIST = false, ADM_POP = false;
+  /** What is open over the panel right now, bottom layer first. */
+  function admLayers() {
+    if (S.screen !== "admin") return [];
+    var l = [];
+    if (S.adminEdit) l.push("edit");
+    else if (S.adminOrder) l.push("order");
+    else if (S.admCustOpen) l.push("customer");
+    else if (S.mailOpen) l.push("mail");
+    else if (S.admSetPage) l.push("setpage");
+    if (S.admMore) l.push("more");
+    if (pendingAction) l.push("confirm");
+    return l;
+  }
+  /** Closes the topmost layer. False when there was nothing to close. */
+  function admCloseTop() {
+    var top = admLayers().pop();
+    if (!top) return false;
+    if (top === "confirm") pendingAction = null;
+    else if (top === "more") S.admMore = false;
+    else if (top === "edit") {
+      S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
+      S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+    } else if (top === "order") {
+      S.adminOrder = 0;
+      S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+    } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; }
+    else if (top === "mail") S.mailOpen = false;
+    else if (top === "setpage") S.admSetPage = "";
+    return true;
+  }
+  /** One parked entry while anything is open, none while nothing is. Called
+      at the end of every render, so no opener has to remember to call it. */
+  function admSyncHistory() {
+    /* Left the panel altogether («Открыть магазин», a product link): the entry
+       parked for the card sits BEHIND the one that navigation just pushed, so
+       it must not be spent — Back simply returns to the panel, which is what
+       Back should do from the shop. */
+    if (S.screen !== "admin") { ADM_HIST = false; return; }
+    var open = admLayers().length > 0;
+    if (open === ADM_HIST) return;
+    if (open) {
+      stamp();
+      try { history.pushState({ y: window.scrollY, shown: S.shown, adm: 1 }, "", here()); } catch (e) {}
+      ADM_HIST = true;
+      return;
+    }
+    ADM_HIST = false;
+    if (ADM_POP) { ADM_POP = false; return; }   // Back is what closed it
+    // closed with a button: spend the entry we parked, quietly
+    ADM_POP = true;
+    try { history.back(); } catch (e) { ADM_POP = false; }
+  }
+
   window.addEventListener("popstate", function (e) {
     var st = e.state || {};
+    /* the entry the panel parked, spent by admSyncHistory() itself after a
+       card was closed with a button — nothing moved, nothing to redraw */
+    if (ADM_POP && !st.adm) { ADM_POP = false; return; }
+    /* …and spent by the owner's own Back: it closes the topmost open layer of
+       the panel and stays in the admin (see admLayers above) */
+    if (ADM_HIST && !st.adm) {
+      ADM_HIST = false;
+      if (admCloseTop()) { render(); return; }
+    }
     S.histDrawer = !!st.drawer;
     S.langOpen = false;
     routeFromPath();
@@ -20832,6 +21012,10 @@
       }).catch(function () { composeBtn.disabled = false; composeBtn.textContent = composeLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
+    /* The one action that used to send at once with no confirm and no undo,
+       while «Отправлен» — a cheaper, reversible step — asked (audit q9; Dim:
+       yes). The typed text goes into S first, so the card's own render cannot
+       lose it, and the customer's pasted message travels on the action. */
     if (d.admordersend !== undefined) {
       if (t.disabled) return;
       var ordRow2 = currentAdminOrderRow();
@@ -20839,22 +21023,16 @@
       var custEl2 = document.querySelector("[data-ordercustmsg]");
       var draft = draftEl ? draftEl.value.trim() : "";
       if (!ordRow2 || !draft) return;
-      t.disabled = true;
-      apiSend("/api/admin/mail/send/", "POST", {
-        orderId: ordRow2.srv.id, reply: draft, customerMessage: custEl2 ? custEl2.value.trim() : ""
-      }).then(function (r) {
-        t.disabled = false;
-        if (r.status === 200 && r.body.ok) {
-          S.orderReplyDraft = "";
-          if (custEl2) custEl2.value = "";
-          S.orderMsgs = r.body.messages || null; S.orderMsgsFor = ordRow2.srv.id;
-          toast("Письмо отправлено ✓");
-        } else if (r.status === 401) { SRV.admin = false; }
-        else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
-        else toast("Не удалось отправить письмо");
-        render();
-      }).catch(function () { t.disabled = false; toast("Не удалось отправить письмо"); render(); });
-      return;
+      S.orderReplyDraft = draft;
+      pendingAction = {
+        type: "order_mail", overlay: true, id: ordRow2.srv.id, number: ordRow2.number,
+        reply: draft, customerMessage: custEl2 ? custEl2.value.trim() : "",
+        title: "Отправить письмо клиенту?",
+        detail: admMailConfirmText(ordRow2),
+        preview: draft.length > 400 ? draft.slice(0, 400) + "…" : draft,
+        ok: "Отправить"
+      };
+      render(); refocus("[data-admapply]"); return;
     }
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; mediaProbe();   // media
@@ -21255,7 +21433,7 @@
       if (!gp.custom && document.querySelector("[data-edpx]")) {
         edLadder = edLadderFromForm(gp);
         if (!edLadder) return;
-        edLadderChanged = !edLadderSame(edLadder, edLadderNow(gp));
+        edLadderChanged = edLadderMoved(edLadderNow(gp), edLadder);
       }
       /* A salon price the field only *followed* (data-edauto="1" — nothing
          typed by hand, the value is price × (1 − discount) painted by the
@@ -21470,6 +21648,9 @@
         }
         // «По счёту»: the server settles the payment (src/lib/invoices.ts markInvoicePaid) — no undo, money came
         else if (pa.type === "invoice_paid") { srvInvoicePaid(pa.id, pa.number, pa.invoice); return; }
+        // «Написать клиенту»: the letter the card just asked about — no undo,
+        // which is exactly why it was asked
+        else if (pa.type === "order_mail") { srvOrderMailSend(pa); return; }
         /* «Настройки → Доставка и оплата»: the tariff table names itself in
            the toast, and the journal entry it just wrote is what «Отменить»
            takes back. */
