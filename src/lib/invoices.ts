@@ -41,15 +41,34 @@ import { resolveVatRate } from "@/lib/reports";
 
 /* ---------- settings ------------------------------------------------------ */
 
-/** `settings.invoice` — the number prefix and the payment term. */
+/** `settings.invoice` — the number prefix, the payment term and the two dunning intervals. */
 export interface InvoiceSettings {
   /** «A-» → A-2026-0001. Letters, digits and dashes, up to 8 characters; may be empty. */
   prefix: string;
   /** Days from the issue date to the due date, 1–60. */
   dueDays: number;
+  /**
+   * Days BEFORE the due date the reminder letter goes out, 0–30; 0 turns the
+   * reminder off. The letter is sent once per invoice (`remindedAt` stamps
+   * the record) and never on the day the invoice was issued, so a term
+   * shorter than this interval cannot turn the invoice itself into a nag.
+   */
+  remindBeforeDays: number;
+  /**
+   * Days PAST the due date after which an unpaid invoice order is cancelled
+   * by itself, 0–90; 0 turns the auto-cancel off and the invoice hangs the
+   * way it did before, for the owner to cancel by hand.
+   */
+  cancelAfterDays: number;
 }
 
-export const INVOICE_DEFAULTS: InvoiceSettings = { prefix: "A-", dueDays: 7 };
+export const INVOICE_DEFAULTS: InvoiceSettings = { prefix: "A-", dueDays: 7, remindBeforeDays: 2, cancelAfterDays: 7 };
+
+/** A whole number inside [min, max], or the default — the same clamp for every day count. */
+function dayCount(raw: unknown, min: number, max: number, fallback: number): number {
+  const n = Math.round(Number(raw));
+  return Number.isFinite(n) && n >= min && n <= max ? n : fallback;
+}
 
 /** The one door for `settings.invoice`: anything unusable falls back to the default. */
 export function cleanInvoiceSettings(raw: unknown): InvoiceSettings {
@@ -58,9 +77,12 @@ export function cleanInvoiceSettings(raw: unknown): InvoiceSettings {
     typeof o.prefix === "string"
       ? o.prefix.trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8)
       : INVOICE_DEFAULTS.prefix;
-  const days = Math.round(Number(o.dueDays));
-  const dueDays = Number.isFinite(days) && days >= 1 && days <= 60 ? days : INVOICE_DEFAULTS.dueDays;
-  return { prefix, dueDays };
+  return {
+    prefix,
+    dueDays: dayCount(o.dueDays, 1, 60, INVOICE_DEFAULTS.dueDays),
+    remindBeforeDays: dayCount(o.remindBeforeDays, 0, 30, INVOICE_DEFAULTS.remindBeforeDays),
+    cancelAfterDays: dayCount(o.cancelAfterDays, 0, 90, INVOICE_DEFAULTS.cancelAfterDays),
+  };
 }
 
 /* ---------- the buyer ------------------------------------------------------ */
@@ -213,10 +235,14 @@ export type InvoiceRecord = {
   email: string;
   /** ISO timestamp of the last letter that really went out, null when none did. */
   sentAt: string | null;
-  /** Why the last send did not go out (`no_api_key`, …), "" when it did. */
+  /** Why the last send did not go out (`no_iban`, `no_api_key`, …), "" when it did. */
   sendError: string;
   /** ISO timestamp of «Отметить оплаченным», null while waiting. */
   paidAt: string | null;
+  /** ISO timestamp of the one reminder letter, null while none was due (src/lib/invoice-dunning.ts). */
+  remindedAt: string | null;
+  /** ISO timestamp of the automatic cancellation, null on an invoice nobody cancelled. */
+  cancelledAt: string | null;
 };
 
 /** The stored record read back — null for an order that has none. */
@@ -240,6 +266,8 @@ export function invoiceOf(order: { invoice?: unknown } | null | undefined): Invo
     sentAt: text(r.sentAt, 40) || null,
     sendError: text(r.sendError, 80),
     paidAt: text(r.paidAt, 40) || null,
+    remindedAt: text(r.remindedAt, 40) || null,
+    cancelledAt: text(r.cancelledAt, 40) || null,
   };
 }
 
@@ -250,7 +278,17 @@ export function invoiceOverdueDays(invoice: InvoiceRecord | null | undefined, no
   return Number.isFinite(diff) && diff > 0 ? diff : 0;
 }
 
-async function saveInvoiceRecord(orderId: string, record: InvoiceRecord): Promise<void> {
+/**
+ * Whole days still left to pay — negative once the due date has passed, NaN
+ * for a record without a usable due date. The reminder's own clock; the
+ * mirror of invoiceOverdueDays(), which the admin card reads.
+ */
+export function invoiceDaysLeft(invoice: InvoiceRecord | null | undefined, now: Date = new Date()): number {
+  if (!invoice) return Number.NaN;
+  return dayNumber(invoice.dueAt) - dayNumber(tallinnDate(now));
+}
+
+export async function saveInvoiceRecord(orderId: string, record: InvoiceRecord): Promise<void> {
   await query("update orders set invoice = $2::jsonb, updated_at = now() where id = $1", [orderId, jsonbParam(record)]);
 }
 
@@ -298,6 +336,24 @@ export function sellerGaps(seller: InvoiceSeller): Array<keyof InvoiceSeller> {
     if (!String(seller[k] || "").trim()) out.push(k);
   }
   return out;
+}
+
+/**
+ * The one gap that stops a letter rather than merely warning about it.
+ *
+ * Every other blank field makes an invoice incomplete; a blank IBAN makes it
+ * **unpayable** — a numbered demand for money with nowhere to send it, which
+ * is worse than no letter at all, because the company believes it has been
+ * invoiced and the shop believes it is waiting for a transfer. So the send is
+ * refused here, at the one door every invoice letter goes through, and the
+ * reason («no_iban») is written onto the record: the order card says the
+ * letter did not go out and why, the admin's own «Сделать сегодня» says the
+ * IBAN is missing, and «Отправить счёт ещё раз» sends it the moment Renat
+ * fills the field in. The PDF is not blocked — «Скачать счёт» still renders
+ * one, marked «— (не указан)», so the owner can see exactly what is missing.
+ */
+export function invoiceSendBlock(seller: InvoiceSeller): "" | "no_iban" {
+  return String(seller.iban || "").trim() ? "" : "no_iban";
 }
 
 /* ---------- the money ------------------------------------------------------ */
@@ -432,6 +488,8 @@ export async function issueInvoice(order: Order, now: Date = new Date()): Promis
     sentAt: null,
     sendError: "",
     paidAt: null,
+    remindedAt: null,
+    cancelledAt: null,
   };
   const payment = invoicePaymentBlob(order, record);
   await query(
@@ -469,12 +527,15 @@ export interface InvoiceSendResult {
   skipped?: boolean;
   error?: string;
   id?: string;
+  /** True when nothing was even attempted because the invoice is unpayable — see invoiceSendBlock(). */
+  blocked?: boolean;
 }
 
 /**
  * «Счёт на оплату» with the PDF attached. Never throws: a Resend outage or a
  * missing font costs the customer the letter or its attachment, never the
- * order — the card shows the failure and offers to send again.
+ * order — the card shows the failure and offers to send again. A blank IBAN
+ * stops it before anything is rendered (invoiceSendBlock above).
  */
 export async function sendInvoiceMail(
   order: Order,
@@ -490,6 +551,8 @@ export async function sendInvoiceMail(
     ]);
     await loadBrand();
     const seller = await invoiceSeller();
+    const blocked = invoiceSendBlock(seller);
+    if (blocked) return { ok: false, error: blocked, blocked: true };
     const lang = normalizeLang(order.lang);
     const totals = invoiceLines(order, invoice.vatRate, lang);
     const mail = renderInvoice(order, { invoice, seller, totals }, lang);

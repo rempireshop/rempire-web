@@ -12,6 +12,8 @@ import { renderBackInStock } from "./back-in-stock";
 import { renderBirthday } from "./birthday";
 import { renderGiftCard, type GiftCardLike } from "./gift-card";
 import { renderInvoice, type InvoiceMailData } from "./invoice";
+import { renderInvoiceCancelled, type InvoiceCancelledData } from "./invoice-cancelled";
+import { renderInvoiceReminder, type InvoiceReminderData } from "./invoice-reminder";
 import { renderLoginCode } from "./login-code";
 import { renderOrderConfirmed } from "./order-confirmed";
 import { renderOrderShipped } from "./order-shipped";
@@ -34,6 +36,10 @@ export { renderBirthday } from "./birthday";
 export { renderGiftCard } from "./gift-card";
 export { renderInvoice } from "./invoice";
 export type { InvoiceMailData } from "./invoice";
+export { renderInvoiceReminder } from "./invoice-reminder";
+export type { InvoiceReminderData } from "./invoice-reminder";
+export { renderInvoiceCancelled } from "./invoice-cancelled";
+export type { InvoiceCancelledData } from "./invoice-cancelled";
 export { renderLoginCode } from "./login-code";
 export { renderPartnerWelcome } from "./partner-welcome";
 export type { PartnerWelcomeOptions } from "./partner-welcome";
@@ -74,6 +80,8 @@ export const TEMPLATE_IDS = [
   "login-code",
   "partner-welcome",
   "invoice",
+  "invoice-reminder",
+  "invoice-cancelled",
 ] as const;
 
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
@@ -93,6 +101,8 @@ export const TEMPLATE_LABELS: Record<TemplateId, string> = {
   "login-code": "Код для входа",
   "partner-welcome": "Цены для салонов включены",
   invoice: "Счёт на оплату",
+  "invoice-reminder": "Напоминание об оплате счёта",
+  "invoice-cancelled": "Заказ отменён — счёт не оплачен",
 };
 
 /* ---------- demo data --------------------------------------------------- */
@@ -248,6 +258,24 @@ export function demoInvoice(total = 95): InvoiceMailData {
   };
 }
 
+/** The reminder preview: the same demo invoice, two days before it is due, auto-cancel a week later. */
+export function demoInvoiceReminder(total = 95): InvoiceReminderData {
+  const d = demoInvoice(total);
+  return {
+    invoice: { number: d.invoice.number, dueAt: d.invoice.dueAt },
+    seller: { name: d.seller.name, iban: d.seller.iban, bankName: d.seller.bankName },
+    totals: { total: d.totals.total },
+    cancelAt: "2026-09-20",
+    overdue: false,
+  };
+}
+
+/** The cancellation preview: the same demo invoice, a week past its due date. */
+export function demoInvoiceCancelled(total = 95): InvoiceCancelledData {
+  const d = demoInvoice(total);
+  return { invoice: { number: d.invoice.number, dueAt: d.invoice.dueAt }, totals: { total: d.totals.total } };
+}
+
 /* ---------- demo render ------------------------------------------------- */
 
 /**
@@ -281,6 +309,10 @@ export function renderDemo(
       return renderPartnerWelcome(demoCustomer(L), L, { percent: 20, company: "Salon Demo OÜ" });
     case "invoice":
       return renderInvoice({ ...demoOrder(L), status: "new" }, demoInvoice(95), L);
+    case "invoice-reminder":
+      return renderInvoiceReminder({ ...demoOrder(L), status: "new" }, demoInvoiceReminder(95), L);
+    case "invoice-cancelled":
+      return renderInvoiceCancelled({ ...demoOrder(L), status: "cancelled" }, demoInvoiceCancelled(95), L);
     case "order-confirmed":
     default:
       return renderOrderConfirmed(demoOrder(L), L);

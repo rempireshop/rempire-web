@@ -522,6 +522,8 @@ export interface FlowsReport {
   abandoned: FlowRun;
   backstock: FlowRun;
   birthday: FlowRun;
+  /** «По счёту»: the reminder and the automatic cancellation — src/lib/invoice-dunning.ts. */
+  invoices: { reminded: number; cancelled: number; skipped: number; reason?: string };
   ms: number;
 }
 
@@ -532,6 +534,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     abandoned: { sent: 0, skipped: 0, reason: "error" },
     backstock: { sent: 0, skipped: 0, reason: "error" },
     birthday: { sent: 0, skipped: 0, reason: "error" },
+    invoices: { reminded: 0, cancelled: 0, skipped: 0, reason: "error" },
     ms: 0,
   };
   for (const [key, fn] of [
@@ -545,6 +548,15 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
       console.error(`[flows] ${key} failed:`, err);
       out[key] = { sent: 0, skipped: 0, reason: "error" };
     }
+  }
+  /* «Счета для компаний»: one reminder before the due date, then the
+     automatic cancellation. Its own module (and its own dynamic import, so
+     this file's static graph never reaches src/lib/orders.ts — see the note
+     at the top about the cycle). */
+  try {
+    out.invoices = await (await import("@/lib/invoice-dunning")).runInvoiceDunning(now);
+  } catch (err) {
+    console.error("[flows] invoices failed:", err);
   }
   out.ms = Date.now() - started;
   return out;

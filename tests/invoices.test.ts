@@ -102,12 +102,26 @@ describe("the 0 € door, in the checkout", () => {
 });
 
 describe("the settings clamp", () => {
-  it("defaults to «A-» and 7 days and refuses nonsense", () => {
+  /* Dim's confirmed defaults, in one place: «A-», a seven-day term, one
+     reminder two days before it runs out, cancellation a week after it has.
+     A change to any of these four is a change to what a company is promised
+     in the checkout and in the letters, so it fails here first. */
+  it("defaults to «A-», 7 days, a reminder on day −2 and auto-cancel on day +7", () => {
+    expect(INVOICE_DEFAULTS).toEqual({ prefix: "A-", dueDays: 7, remindBeforeDays: 2, cancelAfterDays: 7 });
     expect(cleanInvoiceSettings(null)).toEqual(INVOICE_DEFAULTS);
-    expect(cleanInvoiceSettings({ prefix: "arve/", dueDays: 14 })).toEqual({ prefix: "ARVE", dueDays: 14 });
-    expect(cleanInvoiceSettings({ prefix: "", dueDays: 0 })).toEqual({ prefix: "", dueDays: 7 });
-    expect(cleanInvoiceSettings({ prefix: "ABCDEFGHIJK", dueDays: "30" })).toEqual({ prefix: "ABCDEFGH", dueDays: 30 });
+  });
+
+  it("refuses nonsense in every field", () => {
+    expect(cleanInvoiceSettings({ prefix: "arve/", dueDays: 14 })).toEqual({ ...INVOICE_DEFAULTS, prefix: "ARVE", dueDays: 14 });
+    expect(cleanInvoiceSettings({ prefix: "", dueDays: 0 })).toEqual({ ...INVOICE_DEFAULTS, prefix: "" });
+    expect(cleanInvoiceSettings({ prefix: "ABCDEFGHIJK", dueDays: "30" })).toEqual({ ...INVOICE_DEFAULTS, prefix: "ABCDEFGH", dueDays: 30 });
     expect(cleanInvoiceSettings({ dueDays: 400 }).dueDays).toBe(7);
+    // the two dunning intervals: 0 is «off» and stands, anything past the cap falls back
+    expect(cleanInvoiceSettings({ remindBeforeDays: 0, cancelAfterDays: 0 })).toMatchObject({ remindBeforeDays: 0, cancelAfterDays: 0 });
+    expect(cleanInvoiceSettings({ remindBeforeDays: 5, cancelAfterDays: 30 })).toMatchObject({ remindBeforeDays: 5, cancelAfterDays: 30 });
+    expect(cleanInvoiceSettings({ remindBeforeDays: 90 }).remindBeforeDays).toBe(2);
+    expect(cleanInvoiceSettings({ cancelAfterDays: -3 }).cancelAfterDays).toBe(7);
+    expect(cleanInvoiceSettings({ cancelAfterDays: "ждать" }).cancelAfterDays).toBe(7);
   });
 });
 
