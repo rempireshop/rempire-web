@@ -15105,7 +15105,10 @@
       form, so it answers before the owner presses «Сохранить». */
   function admPricingCalcHTML() {
     var d = pricingDraft(), b = PRICING_EX_BASKET, lo = d.loyalty.enabled;
-    var pro = exProPays(b, d), blocked = d.proMinOrder > b;
+    /* «Скидка не сработала» only where there was a discount to lose: with the
+       percentage at 0 the partner pays full price for a different reason, and
+       the field's own hint above already says which. */
+    var pro = exProPays(b, d), blocked = d.proMinOrder > b && d.proDiscountPct > 0;
     var row = function (name, val) {
       return '<div class="adm-calc__r"><span>' + name + "</span><b>" + val + "</b></div>";
     };
