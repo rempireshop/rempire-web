@@ -1182,6 +1182,15 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-tariffs .adm-input { height: 44px; padding: 0 10px; min-width: 0; }
 /* the column name inside each cell — shown only where the header row is not */
 .adm-tariffs__l { display: none; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-bottom: 4px; }
+/* a country row's name cell: the name and its «доставляем сюда» switch on one
+   line. Only real countries have one — a zone cannot be switched off. */
+.adm-tariffs__c { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* a country the shop does not deliver to: still editable, visibly not for sale */
+.adm-tariffs--off > span:first-child { color: var(--a-muted); }
+.adm-tariffs--off .adm-input { opacity: .55; }
+/* the folded country list sits inside the tariff table, so it is indented and
+   ruled rather than boxed like a top-level fold */
+.adm-fold--sub { margin-top: 12px; border-top: 1px solid var(--a-rule); padding-top: 12px; }
 .adm-jrow {
   display: flex; align-items: center; gap: 12px; min-height: 56px;
   border-bottom: 1px solid var(--a-rule); padding: 8px 0; flex-wrap: wrap;
@@ -1215,6 +1224,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-input[aria-invalid="true"] { border-color: var(--a-warn); }
 /* the tariff grid's «тариф Montonio: 5,46 €» under each price box */
 .adm-hint--cell { display: block; font-size: 11px; line-height: 14px; margin-top: 2px; }
+/* the shop's price is under what the delivery costs — the one thing this hint
+   exists to make visible before an order is taken, not after */
+.adm-hint--loss { color: var(--a-warn); font-weight: 600; }
 /* appearance:none takes the native arrow away with the native chrome — a
    select with no arrow reads as a text box the owner cannot type into */
 .adm2 select.adm-input {

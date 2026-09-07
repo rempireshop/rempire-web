@@ -920,6 +920,19 @@
         "Neid hindu pood nii näitab kui ka arvestab tellimuse vormistamisel. Tühi — võetakse rida „Ülejäänud riigid“. „нет“ veerus „Tasuta alates“ — sinna riiki ei ole tarne kunagi tasuta.",
       "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
         "Kui vedajal on oma hind, kirjuta see siia — see on tugevam kui ülemine tabel. Tühi — hind võetakse tabelist.",
+      // per-country prices, 07.09.2026 — «real per-country prices»
+      "Цены по странам Европы": "Hinnad Euroopa riikide kaupa",
+      "цена страны сильнее цены зоны": "riigi hind on tugevam kui tsooni hind",
+      "Под каждой ценой — сколько эта посылка стоит магазину по контракту Montonio и каким перевозчиком. Пусто — берётся цена строки «Другие страны Европы».":
+        "Iga hinna all on see, kui palju see pakk poele Montonio lepingu järgi maksab ja millise vedajaga. Tühi — kehtib rea „Muud Euroopa riigid“ hind.",
+      "Доставлять в эту страну": "Saata sellesse riiki",
+      "Не доставлять в эту страну": "Mitte saata sellesse riiki",
+      "Куда Montonio не возит": "Kuhu Montonio ei vii",
+      "Montonio не берёт посылки в эти страны ни одним перевозчиком. Пока страна выключена, покупатель не увидит её в списке при оформлении. Включите её, только если готовы договариваться о доставке письмом.":
+        "Montonio ei võta neisse riikidesse pakke ühegi vedajaga. Kuni riik on välja lülitatud, ostja seda tellimuse vormistamisel nimekirjas ei näe. Lülita sisse ainult siis, kui oled valmis tarnes kirja teel kokku leppima.",
+      "не доставляем": "ei saada",
+      "доставляем — отправить будет нечем": "saadame — aga saata pole millegagi",
+      "— дешевле себестоимости": "— odavam kui omahind",
 
       // i18n pass 2 — contacts, opening hours and the account
       "Размер —": "Suurus —",
@@ -3016,6 +3029,19 @@
         "These are the prices the shop shows and the prices it charges at checkout. Empty — the «All other countries» row applies. «нет» in the «Free from» column means delivery to that country is never free.",
       "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
         "If a carrier has its own price, put it here — it beats the table above. Empty — the price comes from the table.",
+      // per-country prices, 07.09.2026 — «real per-country prices»
+      "Цены по странам Европы": "Prices by European country",
+      "цена страны сильнее цены зоны": "a country's price beats its zone's",
+      "Под каждой ценой — сколько эта посылка стоит магазину по контракту Montonio и каким перевозчиком. Пусто — берётся цена строки «Другие страны Европы».":
+        "Under each price: what this parcel costs the shop on the Montonio contract, and with which carrier. Empty — the «Other European countries» price applies.",
+      "Доставлять в эту страну": "Deliver to this country",
+      "Не доставлять в эту страну": "Do not deliver to this country",
+      "Куда Montonio не возит": "Where Montonio does not ship",
+      "Montonio не берёт посылки в эти страны ни одним перевозчиком. Пока страна выключена, покупатель не увидит её в списке при оформлении. Включите её, только если готовы договариваться о доставке письмом.":
+        "Montonio takes no parcel to these countries with any carrier. While a country is switched off, shoppers do not see it in the checkout list. Switch one on only if you are ready to arrange delivery by e-mail.",
+      "не доставляем": "not delivered to",
+      "доставляем — отправить будет нечем": "delivered to — but nothing can post it",
+      "— дешевле себестоимости": "— below what it costs",
 
       // i18n pass 2 — contacts, opening hours and the account
       "Размер —": "Size —",
@@ -5164,8 +5190,30 @@
       if (seen.length === 1) return money(min);
       return '<span class="num">' + tr("от " + eur(min)) + "</span>";
     }
+    /* «Другие страны Европы» stopped being one price on 07.09.2026: every
+       country Montonio serves has a cell of its own, from 8,09 € to 43,19 €.
+       A single number in this row would be a promise the checkout does not
+       keep, so the row shows the cheapest of them — «от 8,09 €» — the same
+       «от» the parcel column already uses where carriers differ, and the exact
+       price appears at checkout the moment the country is picked. Any cell
+       that is not a row of this table and not «default» is one of those
+       countries; nothing else is ever written into the methods table. */
+    function zoneFloor(table) {
+      if (!table) return null;
+      var keys = rows.map(function (r) { return r[0]; }), min = null;
+      Object.keys(table).forEach(function (k) {
+        if (k === "default" || keys.indexOf(k) >= 0) return;
+        var v = table[k];
+        if (typeof v === "number" && isFinite(v) && v > 0 && (min === null || v < min)) min = v;
+      });
+      return min;
+    }
     function courierCell(c) {
       var p = priceOf(rules.methods && rules.methods.courier, c);
+      if (c === "EU") {
+        var floor = zoneFloor(rules.methods && rules.methods.courier);
+        if (floor !== null) return '<span class="num">' + tr("от " + eur(floor)) + "</span>";
+      }
       return p == null ? "—" : money(p);
     }
     function freeCell(c) {
@@ -5843,6 +5891,7 @@
     shipErr: "",
     shipLiveRates: null,   // integration: {EE:[...], LV:[...], ...} once loadShipLiveRates() lands
     shipAllowLower: false, // integration: let «Заполнить по тарифам Montonio» lower an already-saved price
+    shipEuOpen: false,     // «Цены по странам Европы» — kept across a re-render so a country switch does not close it
     admPromos: null,    // admin tab «Промокоды»: [promo] once loaded
     admPromoErr: "",
     promoForm: null,    // the code being created or edited, or null
@@ -13857,12 +13906,11 @@
       '<div class="adm-tariffs adm-tariffs--head"><span>Страна</span><span>Пакомат, €</span>' +
         "<span>Курьер, €</span><span>Бесплатно от, €</span></div>" +
       SHIP_ROWS.map(function (r) {
-        return '<div class="adm-tariffs" style="margin-top:8px"><span>' + r[1] + "</span>" +
-          '<span>' + admShipCellHTML("m:parcel:" + r[0], shipCell("parcel", r[0]), "Пакомат — " + r[1], "Пакомат, €") +
-            montonioHint("parcel", r[0]) + "</span>" +
-          '<span>' + admShipCellHTML("m:courier:" + r[0], shipCell("courier", r[0]), "Курьер — " + r[1], "Курьер, €") +
-            montonioHint("courier", r[0]) + "</span>" +
-          '<span>' + admShipCellHTML("free:" + r[0], shipFreeCell(r[0]), "Бесплатно от — " + r[1], "Бесплатно от, €") + "</span></div>";
+        return admShipRowHTML(r[0], r[1], "") +
+          // the twenty-one countries behind «Другие страны Европы» fold out
+          // right under it, so the zone price and the country prices read as
+          // one table and not as two screens
+          (r[0] === "EU" ? admShipEuropeHTML() : "");
       }).join("") +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       '<div class="adm-acts" style="margin-top:16px">' +
@@ -14006,6 +14054,77 @@
     return (col ? '<span class="adm-tariffs__l">' + col + "</span>" : "") +
       '<input class="adm-input" data-shiprule="' + key + '" value="' + esc(value) +
       '" inputmode="decimal" autocomplete="off" aria-label="' + esc(label) + '">';
+  }
+  /**
+   * One line of the tariff grid: country, parcel machine, courier, free-from.
+   * The same four columns for a zone («Другие страны Европы») and for a single
+   * country (Германия) — the countries are the same table, one fold deeper,
+   * so nothing new has to be learnt to read them.
+   * `iso` non-empty adds the «доставляем сюда» switch beside the name: only a
+   * real country can be switched off, not a zone.
+   */
+  function admShipRowHTML(key, name, iso) {
+    var off = iso ? shipCountryOff(iso) : false;
+    var head = "<span>" + (iso
+      ? '<span class="adm-tariffs__c">' + esc(name) +
+          admSwitch('data-shipcountry="' + iso + '"', !off,
+            off ? "Доставлять в эту страну" : "Не доставлять в эту страну") + "</span>"
+      : name) + "</span>";
+    return '<div class="adm-tariffs' + (off ? " adm-tariffs--off" : "") + '" style="margin-top:8px">' + head +
+      "<span>" + admShipCellHTML("m:parcel:" + key, shipCell("parcel", key), "Пакомат — " + name, "Пакомат, €") +
+        montonioHint("parcel", key, shipCellNum("parcel", key)) + "</span>" +
+      "<span>" + admShipCellHTML("m:courier:" + key, shipCell("courier", key), "Курьер — " + name, "Курьер, €") +
+        montonioHint("courier", key, shipCellNum("courier", key)) + "</span>" +
+      "<span>" + admShipCellHTML("free:" + key, shipFreeCell(key), "Бесплатно от — " + name, "Бесплатно от, €") +
+      "</span></div>";
+  }
+  /**
+   * «Цены по странам Европы» — the twenty-one countries behind the zone row,
+   * plus the seven Montonio cannot reach at all.
+   *
+   * Folded rather than laid out flat, and folded *under* the zone row rather
+   * than on a page of its own: the six-line table is what Renat reads at a
+   * glance and twenty-seven lines is not, but the country he needs is one tap
+   * from the zone whose price it overrides. Country names come from the
+   * browser, so all three languages get them free.
+   */
+  function admShipEuropeHTML() {
+    return '<details class="adm-fold adm-fold--sub"' + (S.shipEuOpen ? " open" : "") + '>' +
+      '<summary class="adm-link" data-shipeu>Цены по странам Европы' +
+        '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
+      '<div style="padding-top:8px">' +
+        '<p class="adm-hint" style="margin:0 0 10px">Под каждой ценой — сколько эта посылка стоит магазину ' +
+          "по контракту Montonio и каким перевозчиком. Пусто — берётся цена строки «Другие страны Европы».</p>" +
+        SHIP_EU_COUNTRIES.map(function (c) { return [c, countryName(c)]; })
+          .sort(function (a, b) { return a[1].localeCompare(b[1]); })
+          .map(function (r) { return admShipRowHTML(r[0], r[1], r[0]); }).join("") +
+        admShipUnservedHTML() +
+      "</div></details>";
+  }
+  /**
+   * The seven countries the checkout used to offer and Montonio cannot post
+   * to: Cyprus, Malta, Iceland, Liechtenstein, Norway, Switzerland, the UK.
+   * Off by default since 07.09.2026 — an order to any of them could be placed
+   * and paid for and then not sent — and no price boxes at all, because there
+   * is no tariff to put in them. Renat can switch one back on; what he does
+   * then is his own arrangement with the customer.
+   */
+  function admShipUnservedHTML() {
+    return '<div class="adm-sec__t" style="margin-top:20px">Куда Montonio не возит</div>' +
+      '<p class="adm-hint" style="margin:4px 0 10px">Montonio не берёт посылки в эти страны ни одним перевозчиком. ' +
+        "Пока страна выключена, покупатель не увидит её в списке при оформлении. " +
+        "Включите её, только если готовы договариваться о доставке письмом.</p>" +
+      '<div class="adm-list adm-list--flat">' +
+        SHIP_UNSERVED.map(function (c) { return [c, countryName(c)]; })
+          .sort(function (a, b) { return a[1].localeCompare(b[1]); })
+          .map(function (r) {
+            var off = shipCountryOff(r[0]);
+            return '<div class="adm-swrow"><span>' + esc(r[1]) +
+              '<span class="adm-row__sub">' + (off ? "не доставляем" : "доставляем — отправить будет нечем") + "</span></span>" +
+              admSwitch('data-shipcountry="' + r[0] + '"', !off,
+                off ? "Доставлять в эту страну" : "Не доставлять в эту страну") + "</div>";
+          }).join("") +
+      "</div>";
   }
 
   /* Главная страница: the two switches that decide what the shop shows at all,
@@ -15131,6 +15250,18 @@
     ["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"],
     ["EU", "Другие страны Европы"], ["default", "Остальные страны"]
   ];
+  /* The twenty-one European countries Montonio serves that do not have a row
+     of their own above, and the seven it serves not at all. Both lists fold
+     out of the «Другие страны Европы» row rather than sitting in the grid:
+     twenty-seven rows on one screen stops being the six-line table Renat can
+     read at a glance, and the zone row still answers «сколько за Европу» in
+     one number for anything he never opens. Names come from the browser
+     (countryName → Intl.DisplayNames), so no country needs translating.
+     Kept in step with src/data/montonio-tariffs.json by
+     tests/shipping-admin-mirror.test.ts. */
+  var SHIP_EU_COUNTRIES = ["AT", "BE", "BG", "CZ", "DE", "DK", "ES", "FR", "GR", "HR", "HU", "IE", "IT",
+    "LU", "NL", "PL", "PT", "RO", "SE", "SI", "SK"];
+  var SHIP_UNSERVED = ["CH", "CY", "GB", "IS", "LI", "MT", "NO"];
   var SHIP_CARRIER_ROWS = [
     ["omniva", "Omniva", ["EE", "LV", "LT"]],
     ["smartpost", "SmartPosti", ["EE", "FI"]],
@@ -15178,6 +15309,52 @@
       LT: { parcel: 5.58, courier: 10.42 }, FI: { parcel: 12.39, courier: 20.09 }
     },
     unisend: { EE: { parcel: 2.47 }, LV: { parcel: 3.72 }, LT: { parcel: 3.72 } }
+  };
+  /* ---------- what a delivery COSTS, per country ----------------------------
+     07.09.2026, «real per-country prices». One row per country per method:
+     [price incl. VAT, carrier]. Mirrors costBasis() in
+     src/lib/shipping/country-prices.ts, which picks
+       · the DEAREST carrier for a parcel machine in EE/LV/LT/FI, because the
+         shopper picks the carrier there from the chips under «Пакомат»;
+       · the CHEAPEST carrier the shop can actually use everywhere else —
+         couriers at home included, because nobody can choose a courier's
+         carrier; Renat does, when he makes the label. Its name is printed
+         beside the number so he knows which carrier the price assumed.
+     «Can actually use» excludes Nova Post (Montonio International Shipping):
+     no carrier row here, never named by the storefront, no returns at all.
+     Its prices are the low ones in docs/audit/2026-09-07-shipping-returns.md
+     — Germany 12,91 €, Poland 8,51 € — and the shop cannot reach them today.
+     A missing method means Montonio quotes no carrier the shop can use:
+     Greece has no parcel machine from Estonia at all, Hungary and Romania have
+     only a Nova Post one.
+     tests/shipping-admin-mirror.test.ts fails if a cent here drifts from
+     src/data/montonio-tariffs.json. */
+  var MONTONIO_COST = {
+    AT: { parcel: [37.20, "dpd"], courier: [28.40, "smartpost"] },
+    BE: { parcel: [29.76, "dpd"], courier: [24.33, "smartpost"] },
+    BG: { parcel: [52.08, "dpd"], courier: [32.57, "smartpost"] },
+    CZ: { parcel: [28.27, "dpd"], courier: [23.93, "smartpost"] },
+    DE: { parcel: [29.76, "dpd"], courier: [22.23, "smartpost"] },
+    DK: { parcel: [23.81, "dpd"], courier: [24.19, "smartpost"] },
+    EE: { parcel: [3.10, "omniva"], courier: [6.82, "dpd"] },
+    ES: { parcel: [38.69, "dpd"], courier: [34.29, "smartpost"] },
+    FI: { parcel: [12.39, "dpd"], courier: [15.62, "smartpost"] },
+    FR: { parcel: [44.64, "dpd"], courier: [24.19, "smartpost"] },
+    GR: { courier: [43.15, "dpd"] },
+    HR: { parcel: [59.52, "dpd"], courier: [28.26, "smartpost"] },
+    HU: { courier: [27.33, "smartpost"] },
+    IE: { parcel: [52.08, "dpd"], courier: [38.69, "dpd"] },
+    IT: { parcel: [34.22, "dpd"], courier: [30.08, "smartpost"] },
+    LT: { parcel: [5.58, "dpd"], courier: [8.00, "smartpost"] },
+    LU: { parcel: [35.71, "dpd"], courier: [26.03, "smartpost"] },
+    LV: { parcel: [5.58, "dpd"], courier: [8.00, "smartpost"] },
+    NL: { parcel: [29.76, "dpd"], courier: [25.51, "smartpost"] },
+    PL: { parcel: [17.86, "dpd"], courier: [20.66, "smartpost"] },
+    PT: { parcel: [41.66, "dpd"], courier: [38.33, "smartpost"] },
+    RO: { courier: [36.63, "smartpost"] },
+    SE: { parcel: [13.63, "dpd"], courier: [21.58, "dpd"] },
+    SI: { parcel: [40.18, "dpd"], courier: [32.57, "smartpost"] },
+    SK: { parcel: [26.78, "dpd"], courier: [27.60, "smartpost"] }
   };
   /** Smallest price ending in 9 cents at or above `n` — never rounds down.
       Mirrors src/lib/shipping/tariffs.ts roundUpToX9() exactly. */
@@ -15231,18 +15408,28 @@
     });
     return out;
   }
-  /** The highest tariff among carriers that have one, for a method+country —
-      the safe generic price when no specific carrier is known: whichever
-      carrier Montonio actually ships it with, this never sells below cost.
-      {price, source} — source is "live" only when the carrier that set the
-      max price is itself live; a country with no live answer yet reads as
-      static, matching what montonioHint() below actually shows for it. */
-  function montonioCeiling(method, country) {
-    var max = null, source = "static";
-    tariffRowsFor(country).forEach(function (r) {
-      if (r.method === method && (max === null || r.price > max)) { max = r.price; source = r.source; }
-    });
-    return max === null ? null : { price: max, source: source };
+  /** What a delivery COSTS for a method+country, by the one rule
+      src/lib/shipping/country-prices.ts costBasis() sets out: the dearest
+      carrier for a parcel machine in the four countries whose checkout shows
+      carrier chips (the shopper picks, so the price must cover the dearest he
+      can pick), the cheapest the shop can actually use everywhere else
+      (Renat picks when he makes the label).
+      {price, carrier, source} — source is "live" when this row came from the
+      store's own Montonio quote, "static" from the offline mirror. Live rows
+      carry only carriers the store has actually activated, which is exactly
+      what makes the live answer the better one. */
+  function montonioCost(method, country) {
+    var rows = tariffRowsFor(country).filter(function (r) { return r.method === method; });
+    if (rows.length) {
+      var dearest = method === "parcel" && ["EE", "LV", "LT", "FI"].indexOf(country) >= 0;
+      var best = null;
+      rows.forEach(function (r) {
+        if (!best || (dearest ? r.price > best.price : r.price < best.price)) best = r;
+      });
+      if (best) return { price: best.price, carrier: best.carrier, source: best.source };
+    }
+    var m = MONTONIO_COST[country] && MONTONIO_COST[country][method];
+    return m ? { price: m[0], carrier: m[1], source: "static" } : null;
   }
   /** «тариф Montonio (live): 4,49 €» / «…(прайс-лист): …» next to a
       method-table price — "" when nothing was sourced for it. */
@@ -15253,11 +15440,34 @@
   function montonioSourceLabel(source) {
     return source === "live" ? "тариф Montonio (live): " : "тариф Montonio (прайс-лист): ";
   }
-  function montonioHint(method, country) {
-    var t = montonioCeiling(method, country);
+  /** «· SmartPosti» — which carrier the cost belongs to, so «22,23 €» is not
+      a number out of nowhere. Never translated: they are proper nouns. */
+  function montonioCarrierTag(carrier) {
+    if (!carrier) return "";
+    return " · " + (CARRIER_NAMES[carrier] || (carrier === "novapost" ? "Nova Post" : carrier));
+  }
+  /**
+   * The provider's own price beside the owner's, quietly — Dim, 07.09.2026:
+   * «so a loss is visible before it happens». Greece costs 43,15 € and the
+   * shop charged 9,90 €; that used to be true and invisible.
+   * `charged` is the price in the draft box right above this hint. When it is
+   * below cost the hint says so and turns into a warning, which is the whole
+   * point of putting the two numbers on the same line.
+   */
+  function montonioHint(method, country, charged) {
+    var t = montonioCost(method, country);
     if (t == null) return "";
-    return '<span class="adm-hint adm-hint--cell">' +
-      montonioSourceLabel(t.source) + eur(t.price) + "</span>";
+    var loss = typeof charged === "number" && isFinite(charged) && charged > 0 && charged < t.price;
+    return '<span class="adm-hint adm-hint--cell' + (loss ? " adm-hint--loss" : "") + '">' +
+      montonioSourceLabel(t.source) + eur(t.price) + montonioCarrierTag(t.carrier) +
+      (loss ? " — дешевле себестоимости" : "") + "</span>";
+  }
+  /** The number in a method cell of the draft, or undefined when it is empty
+      (the cell then falls back to the zone, and there is no loss to report). */
+  function shipCellNum(m, c) {
+    var t = shipDraft().methods[m] || {};
+    var v = Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined;
+    return typeof v === "number" && isFinite(v) ? v : undefined;
   }
   /** Same hint, for one carrier's own cell in «Цены по перевозчикам» (parcel tariffs only — see below). */
   function montonioCarrierHint(carrier, country) {
@@ -15292,14 +15502,21 @@
     // carrier this table has no tariff for) would vanish under the fill
     // unless the patch already carries it forward. Start from what is there.
     var carriers = draft.carriers ? cloneRules(draft.carriers) : {};
-    ["EE", "LV", "LT", "FI"].forEach(function (cc) {
+    /* Every country Montonio serves, not just the four the checkout names —
+       Dim, 07.09.2026: «"Заполнить по тарифам Montonio" should fill every
+       country». Twenty-five destinations; the «EU» and «Остальные страны»
+       cells are still left alone, because no tariff can be invented for a
+       route Montonio does not sell. */
+    ["EE", "LV", "LT", "FI"].concat(SHIP_EU_COUNTRIES).forEach(function (cc) {
       ["parcel", "courier"].forEach(function (m) {
-        var ceil = montonioCeiling(m, cc);
-        if (ceil == null) return;
-        var price = montonioPrice(ceil.price, markup);
+        var cost = montonioCost(m, cc);
+        if (cost == null) return;
+        var price = montonioPrice(cost.price, markup);
         var current = draft.methods[m] && draft.methods[m][cc];
         methods[m][cc] = (!allowLower && typeof current === "number") ? Math.max(price, current) : price;
       });
+      // carrier cells only where the checkout lets a carrier be picked
+      if (["EE", "LV", "LT", "FI"].indexOf(cc) < 0) return;
       tariffRowsFor(cc).forEach(function (row) {
         if (row.method !== "parcel") return;
         // …and only for a carrier «Цены по перевозчикам» actually has a row
@@ -15344,6 +15561,20 @@
     var by = shipDraft().carriers;
     var t = by && by[k];
     return shipShow(t && Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined);
+  }
+  /** Is this country switched off in the draft (not yet in the shop)? */
+  function shipCountryOff(c) {
+    var off = shipDraft().countriesOff;
+    return !!off && off.indexOf(c) >= 0;
+  }
+  /** Flip one country on or off in the draft. «Сохранить» is what tells the shop. */
+  function toggleShipCountry(c) {
+    var d = shipDraft();
+    if (!Array.isArray(d.countriesOff)) d.countriesOff = [];
+    var i = d.countriesOff.indexOf(c);
+    if (i >= 0) d.countriesOff.splice(i, 1);
+    else d.countriesOff.push(c);
+    d.countriesOff.sort();
   }
   /** Наценка, % / € — always a plain number, never "empty" or "нет". */
   function shipMarkupCell(k) {
@@ -20706,6 +20937,13 @@
         parts.push("бесплатно " + c + " " + (v === null ? "— никогда" : "от " + eur(v)));
       });
     }
+    /* Switching a country off changes what a stranger sees in the checkout, so
+       it belongs on the confirm card and in the journal beside the prices. */
+    if (Array.isArray(r.countriesOff)) {
+      parts.push(r.countriesOff.length
+        ? "не доставляем: " + r.countriesOff.join(", ")
+        : "доставляем во все страны");
+    }
     if (r.markup) parts.push("наценка " + (r.markup.percent || 0) + "% + " + eur(r.markup.fixed || 0));
     if (!parts.length) return "Доставка: без изменений";
     var head = a.full ? "Тарифы доставки: " : "Доставка: ";
@@ -22929,7 +23167,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -24230,6 +24468,15 @@
     // «Разрешить снижать текущие цены» — computeMontonioFillPatch() clamps at
     // the current price unless this is on; a switch like every other one here
     if (d.shipallowlower !== undefined) { S.shipAllowLower = !S.shipAllowLower; render(); return; }
+    /* «Доставляем сюда» — a draft change like every price box beside it, so
+       «Сохранить» is the one thing that changes what a stranger sees. The fold
+       is remembered so the panel does not close under the finger that tapped. */
+    if (d.shipcountry) {
+      toggleShipCountry(d.shipcountry);
+      S.shipEuOpen = true;
+      render(); refocus('[data-shipcountry="' + d.shipcountry + '"]'); return;
+    }
+    if (d.shipeu !== undefined) { S.shipEuOpen = !S.shipEuOpen; render(); return; }
     // the defaults are prices too — the same card as «Сохранить»
     if (d.admshipreset !== undefined) {
       pendingAction = {
