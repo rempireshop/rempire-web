@@ -5,10 +5,10 @@ what the HTML says before any script runs, so every page a shopper could land
 on is written out as a static file, in all three languages, by
 `tools/prerender-shop2.mjs`. app.js then takes over in the browser.
 
-**810 pages** — 270 per language: 220 products, 8 categories plus `all`, 26
-brands, the home page, the 5 policy pages, 8 sets plus their landing, and the
-gift card. Every one of them carries a 1 200×630 link-preview card that exists
-on disk. Verify with `npm run prerender:check`.
+**813 pages** — 271 per language: 220 products, 8 categories plus `all`, 26
+brands **and the brands landing**, the home page, the 5 policy pages, 8 sets
+plus their landing, and the gift card. Every one of them carries a 1 200×630
+link-preview card that exists on disk. Verify with `npm run prerender:check`.
 
 Nothing has been submitted to Google yet. The Search Console **domain property
 for rempireshop.com is verified** (03.09.2026); the site switch happens later.
@@ -32,6 +32,7 @@ at, and changing it would have thrown away the whole existing link graph.
 | sets landing | `/shop2/sets/` | `/shop2/et/sets/` | `/shop2/en/sets/` |
 | one set | `/shop2/set/<id>/` | `/shop2/et/set/<id>/` | `/shop2/en/set/<id>/` |
 | gift card | `/shop2/gift/` | `/shop2/et/gift/` | `/shop2/en/gift/` |
+| brands landing | `/shop2/brands/` | `/shop2/et/brands/` | `/shop2/en/brands/` |
 
 `<cat>` is a catalogue key (`hair`, `styling`, `beard`, `face`, `body`,
 `perfume`, `merch`) plus `all`. `<brand>` is the brand name slugified.
@@ -45,15 +46,23 @@ For sets, `<id>` is a `BUNDLES` id from `public/shop/bundles.js`.
 `pathFor()` in app.js pushes and what `routeFromPath()` matches, so it is what
 the prerender writes — an indexed URL and a clicked URL have to be one address.
 
-The remaining screens — `search`, `brands`, `account`, `checkout`, `done`,
-`admin` — are client-side only and take the same prefixes
-(`/shop2/et/search/`). They are deliberately **not** prerendered and **not** in
-the sitemap: five of the six need state to mean anything (an empty basket
-renders an empty checkout), all but `brands` are robots-disallowed, and a
-static copy of them would be a page that lies. `tools/prerender-shop2.mjs`
-throws if one of them ever reaches the sitemap, and `check-prerender.mjs`
-fails if one is found there. `brands` is the one that could be added later —
-it duplicates the brand list already on every home page, so it was left out.
+The remaining screens — `search`, `account`, `checkout`, `done`, `admin` —
+are client-side only and take the same prefixes (`/shop2/et/search/`). They are
+deliberately **not** prerendered and **not** in the sitemap: every one of them
+needs state to mean anything (an empty checkout renders an empty checkout),
+every one is robots-disallowed, and a static copy of them would be a page that
+lies. `tools/prerender-shop2.mjs` throws if one of them ever reaches the
+sitemap, and `check-prerender.mjs` fails if one is found there.
+
+**`brands` was the sixth of them until 07.09.2026** and is a real page now
+(`brandsPage()` in the prerender): it was the one screen a shopper could land
+on cold, so `/shop2/et/brands/` and `/shop2/en/brands/` were served the Russian
+shell — the home page's title, the home page's description and a canonical
+pointing at `/shop2/`. It has its own head, its own crawlable list of the 26
+brand pages and its own sitemap row now (priority 0.5: it is a hub, below the
+pages it links to). `f8a3926` had already taught `setHead()` to correct the
+head once the script runs; this is the half a crawler without JavaScript
+reads.
 
 `/shop2/ru/...` is accepted by the router so a hand-typed URL still works, but
 `next.config.ts` 301s it to the unprefixed path so it can never become a second
@@ -112,7 +121,7 @@ PUBLIC_BASE_URL=https://rempireshop.com npm run prerender
 npm run prerender:check
 ```
 
-The check reads the 810 files off disk — no DOM library, no network — and
+The check reads the 813 files off disk — no DOM library, no network — and
 asserts the things that are easy to get wrong and impossible to see: a missing
 hreflang, a canonical pointing at the wrong language, JSON-LD that does not
 parse or has no `@context`, a `Product` without `offers`, a title Google would
@@ -135,7 +144,7 @@ that is the point:
 | **unset** | `noindex, nofollow` | the closed policy |
 
 Opening the site takes an explicit variable, not merely the absence of one. A
-bare `npm run prerender` used to write "index, follow" into 810 pages and swap
+bare `npm run prerender` used to write "index, follow" into every page and swap
 `robots.txt` for the open policy without saying so — which happened during the
 build wave, in a working tree somebody could have committed. It now fails safe
 and prints a warning, and the state it leaves (live URLs with noindex) is
@@ -232,17 +241,19 @@ falls back to built-in constants.
 | `public/shop2/{,et/,en/}sets/index.html` | the sets landing × 3 |
 | `public/shop2/{,et/,en/}set/<id>/index.html` | 8 sets × 3 |
 | `public/shop2/{,et/,en/}gift/index.html` | the gift card × 3 |
+| `public/shop2/{,et/,en/}brands/index.html` | the brands landing × 3 |
 | `public/shop/og/<id>.jpg` | one 1 200×630 card per product — drawn once |
 | `public/shop/og/set-<id>.jpg` | one card per set — drawn once |
 | `public/brand/og-default.png` | the card for pages with no photograph |
 | `public/sitemap.xml` | a `sitemapindex`: `sitemap-1.xml` (…`-N.xml` above 1 000 URLs) **plus `sitemap-custom.xml`**, which is not a file but a route — see "Custom products" below |
-| `public/sitemap-1.xml` | the 810 URLs with `xhtml:link` alternates |
+| `public/sitemap-1.xml` | the 813 URLs with `xhtml:link` alternates |
 | `public/robots.txt` | **the policy that matches `PUBLIC_BASE_URL`** |
 | `public/robots.production.txt` | the open policy, for reading and diffing |
 | `public/robots.staging.txt` | the closed policy, ditto |
 
-810 pages — 270 per language: 220 products, 8 categories + `all`, 26 brands,
-1 home, 5 policy pages, 8 sets + the landing, 1 gift card. `public/sitemap.xml`
+813 pages — 271 per language: 220 products, 8 categories + `all`, 26 brands,
+the brands landing, 1 home, 5 policy pages, 8 sets + the landing, 1 gift card.
+`public/sitemap.xml`
 is **always a `sitemapindex`**: the pages go into `public/sitemap-1.xml`
 (`-N.xml` chunks of 1 000 above that), and the index also names
 `sitemap-custom.xml` — the products the owner created in the panel, which do
@@ -317,8 +328,8 @@ The consequence: every non-prerendered `/shop2/` path (search, the cart, the
 checkout) is served that same file, so its raw HTML carries the home page's
 head. app.js corrects the title, canonical and hreflang on boot. Those screens
 are robots-disallowed and out of the sitemap, so nobody arrives on one from a
-search. `info/<slug>`, `sets`, `set/<id>` and `gift` used to be in that list —
-they are prerendered now.
+search. `info/<slug>`, `sets`, `set/<id>`, `gift` and `brands` used to be in
+that list — they are prerendered now.
 
 ### Translation fidelity
 
@@ -355,6 +366,58 @@ the file:
 `check-prerender.mjs` asserts that split both ways.
 
 ---
+
+## «Страница не найдена» — the 404
+
+Until 07.09.2026 **every** unrecognised `/shop2/…` address answered **200 with
+the home page**: `next.config.ts`'s `/shop2/:path+` fallback rewrite handed the
+shell to anything it did not otherwise route, and app.js's `routeFromPath()`
+ended its cascade on `S.screen = "home"`. That is a soft 404 — a page that says
+"found" while showing something else. Google indexes it, then drops it, and
+takes the neighbourhood's crawl budget with it; a shopper on a stale link was
+simply left wondering which page they were looking at. Dim's answer was «Make a
+page not found».
+
+Both halves say the same thing now:
+
+| | what answers | what it carries |
+|---|---|---|
+| the request | `src/app/shop2/[...path]/route.ts` → `src/lib/notfound-page.ts` | **404**, the shell patched into the 404 screen, `noindex, nofollow`, a canonical that is *this* address, the crumb, and links home and to `/c/all/` — in the language of the path |
+| the script | `routeFromPath()` → `S.screen = "notfound"` → `screenNotFound()` | the same words on the same address (`pathFor()` never rewrites it), `document.title`, and the robots meta flipped to `noindex` for that screen only |
+
+**What is a 404 and what is not** is one list, `isKnownShopPath()`, written
+against app.js's own router so the two cannot drift:
+
+* **200, the plain shell** — the screens that live only in the browser
+  (`search`, `brands`, `account`, `checkout`, `done`, `admin`, `scan`), the
+  single prerendered pages (`sets`, `gift`, `blog`) and the shapes whose id
+  lives in a database rather than in a build-time file: `p/<id>`, `set/<id>`,
+  `blog/<slug>`. Those three each have a route of their own that answers 404
+  for an id nobody has — guessing here from a build-time file would 404 a post
+  the owner published an hour ago.
+* **404** — a category, a brand or a policy slug that does not exist (all three
+  are closed sets known at build time and are checked against the catalogue and
+  against the pages the prerender wrote), anything of another shape
+  (`/shop2/cart/`, `/shop2/wat/`), and anything deeper than two segments.
+
+Two consequences worth knowing:
+
+* **A product id nobody has is a 404 too** (`src/lib/product-page.ts`). A real
+  catalogue id still gets the shell at 200 — that is the fresh-clone case,
+  where `npm run prerender` has not run and the static file does not exist
+  yet — but an id that is in neither the catalogue nor `custom_products`
+  answers 404 with the noindex shell, exactly as a hidden `c-…` already did.
+* **A malformed escape (`/shop2/b/%E0/`) answers 400**, from Next, before any
+  of this runs: it refuses to decode an un-decodable segment into a route
+  parameter. `/shop2/p/%E0/` has done that ever since the request-time product
+  page existed; now that every `/shop2/` path is a route, they all do. The
+  router's own `safeDecode()` still holds for a mangled address the SPA reaches
+  by navigation, and a mangled *query* (`/search/?q=%E0`, the share link a
+  messenger really does break) boots the shop exactly as before.
+
+`/shop2/` itself is never matched by the catch-all — a catch-all needs at least
+one segment — and the more specific routes beside it (`p/[id]`, `blog`,
+`blog/[slug]`, `og/[file]`) win over it, so nothing that already worked moved.
 
 ## Routing
 
@@ -399,7 +462,7 @@ the file:
 1. Change `PUBLIC_BASE_URL` on the Vercel project to
    `https://rempireshop.com`. That is the whole switch — the robots meta, the
    absolute URLs and `public/robots.txt` all follow it, and `prebuild`
-   regenerates the 810 pages on the next deploy.
+   regenerates the 813 pages on the next deploy.
 2. Verify locally first:
    ```bash
    PUBLIC_BASE_URL=https://rempireshop.com npm run prerender
@@ -422,7 +485,7 @@ the file:
 5. **Google Search Console** — the domain property `rempireshop.com` is already
    verified, so nothing needs re-verifying:
    - Sitemaps → submit `sitemap.xml`. One entry: it is a sitemapindex that
-     names `sitemap-1.xml` (the 810 static URLs) and `sitemap-custom.xml`
+     names `sitemap-1.xml` (the 813 static URLs) and `sitemap-custom.xml`
      (the owner's own products, served by the app).
    - URL Inspection → Request indexing for `/shop2/`, `/shop2/et/`,
      `/shop2/en/`, `/shop2/sets/`, a couple of top products and
@@ -444,9 +507,8 @@ the file:
 
 ## Known gaps
 
-- **`brands` is still shell-only.** It is the one remaining screen a shopper
-  might land on cold, and it duplicates the brand list that is already on all
-  three home pages, so it was left out rather than made into a fourth copy.
+- ~~`brands` is still shell-only.~~ **Closed 07.09.** It has its own
+  prerendered page in all three languages — see "URL scheme" above.
 - ~~Three things in app.js do not agree with the prerendered pages.~~ **Closed
   03.09.** `setHead()` now runs an info page's `<title>` through
   `trText(pg.title, S.lang, false)` (the English tab read «Доставка и оплата»
