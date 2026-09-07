@@ -198,10 +198,23 @@
     log.appendChild(d);
     log.scrollTop = log.scrollHeight;
   }
+  /* The catalogue stores one Russian name per product; the shop translates the
+     descriptive tail («— шампунь») when it draws a card. This widget draws its
+     own rows, so it has to ask for the same treatment — app.js publishes the
+     function, and a missing one just means the Russian name, as before. */
+  function pname(p) {
+    var l = lang();
+    if (l === "RU" || typeof window.rempireTrName !== "function") return p.name;
+    try {
+      return window.rempireTrName(p.name, l) || p.name;
+    } catch (e) {
+      return p.name;
+    }
+  }
   function productRow(p) {
     return '<div class="sbot__prod">' +
       '<span class="sbot__ph" style="background-image:url(\'' + (p.img || "") + '\')"></span>' +
-      '<span class="sbot__pn">' + esc(p.brand) + " " + esc(p.name) +
+      '<span class="sbot__pn">' + esc(p.brand) + " " + esc(pname(p)) +
         '<span class="sbot__pp">' + (p.priceFrom ? tt().from : "") + eur(p.price) + "</span></span>" +
       '<span class="sbot__pact"><button class="sbot__mini" data-add="' + p.id + '">' + tt().add + "</button>" +
       '<button class="sbot__mini sbot__mini--ghost" data-go-product="' + p.id + '">' + tt().open + "</button></span>" +

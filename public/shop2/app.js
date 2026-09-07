@@ -4635,6 +4635,15 @@
       return " — " + head[i] + rest;
     });
   }
+  /* The shop's chat widget lives in its own file (public/shop2/chat.js) and
+     builds its own product rows, so it never went through the translation the
+     cards here get: an English shopper was answered in English and handed
+     «System 4 Bio Botanical Shampoo — шампунь» (Dim, 07.09.2026). The tables
+     above are the whole reason a name can be translated at all, and copying
+     them into chat.js would be two sets of rules to keep in step, so the one
+     function is published instead. chat.js falls back to the raw name when it
+     is missing, which is what it did before. */
+  window.rempireTrName = trName;
   function trText(s, lang, allowName) {
     // Russian is the source language — and UI has no RU table, so without
     // this guard every direct trText caller (setHead, patchCart) threw in
