@@ -11424,6 +11424,16 @@
       id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
       items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
       paid: status === "paid" && !pos,
+      /* Waiting for a parcel — which is not the same thing as `paid`.
+         An all-gift-card order is `shipping.method === "digital"`: the card
+         went out by e-mail the moment it was paid, there is nothing on the
+         shelf and the card already hides every parcel step (`v.digital`
+         below). It still sat in «Отправить» on «Обзор», in the chip and in
+         «Сделать сегодня», because those three counted `paid` (Dim,
+         07.09.2026). `paid` itself must stay as it is: «Вернуть деньги» and
+         the journal are about money, and a digital order has money.
+         Same rule on the server — src/lib/analytics.ts, `to_ship`. */
+      toShip: status === "paid" && !pos && method !== "digital",
       unpaid: status === "new" || status === "failed",
       refunded: back,
       refundable: canRefund ? Math.max(0, Math.round((Number(o.sum) - back) * 100) / 100) : 0,
@@ -11459,12 +11469,12 @@
       if (OVERVIEW.data) return OVERVIEW.data.attention.ordersToShip;
       return 0;
     }
-    return admOrders().map(admOrderVM).filter(function (v) { return v.paid; }).length;
+    return admOrders().map(admOrderVM).filter(function (v) { return v.toShip; }).length;
   }
   /** The real orders waiting to go out — [] on a shop that has taken none. */
   function admLiveToShip() {
     return (SRV.admin === true ? (SRV.orders || []) : admOrders())
-      .map(admOrderVM).filter(function (v) { return v.paid; });
+      .map(admOrderVM).filter(function (v) { return v.toShip; });
   }
   /** The waiting orders split the way the chips split them: no label yet /
       label ready. Their sum is admWaitingCount(). */
@@ -11666,7 +11676,9 @@
   function admOrderMatches(v, f) {
     if (f === "all") return true;
     // everything paid that has not left yet — a sticker is not a hand-over
-    if (f === "new" || f === "label") return v.paid;
+    // «Отправить» is the parcel queue: a digital order has no parcel and is
+    // found under «Все» (v.toShip, admOrderVM)
+    if (f === "new" || f === "label") return v.toShip;
     // …and everything that has: «Отправлен» and «Доставлен» are one answer to
     // «где посылка» — the row itself says which of the two it is
     if (f === "shipped" || f === "delivered") return v.shipped || v.delivered;

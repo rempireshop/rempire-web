@@ -40,6 +40,23 @@ async function orderAt(when: Date, status = "paid", items = [{ id: productA.id, 
   return o;
 }
 
+/** The same, for a basket that is nothing but a gift card — `shipping.method`
+ *  comes back «digital» and there is no parcel to wait for. */
+async function giftOrderAt(when: Date, status = "paid") {
+  const o = await createOrder({
+    lang: "ru",
+    items: [{ id: "gift:50", qty: 1, meta: { name: "Mari", email: "mari@example.com" } }],
+    customer,
+    shipping: { method: "digital", country: "EE" },
+  });
+  await query("update orders set status = $2, created_at = $3, updated_at = $3 where id = $1", [
+    o.id,
+    status,
+    when.toISOString(),
+  ]);
+  return o;
+}
+
 describe("getOverviewSummary", () => {
   beforeAll(async () => {
     await setupDb();
@@ -153,6 +170,10 @@ describe("getOverviewSummary", () => {
     // parcel, so never «ждёт отправки» (the list filters it out the same way)
     const salon = await orderAt(at("2026-06-15T10:00:00Z"), "paid");
     await query("update orders set channel = 'pos' where id = $1", [salon.id]);
+    // an all-gift-card order is «digital»: the card was e-mailed when the
+    // payment landed, so there is no parcel for the owner to hand over and it
+    // must not sit in «Отправить» (Dim, 07.09.2026)
+    await giftOrderAt(at("2026-06-15T11:00:00Z"));
 
     await query(
       "insert into customers (email, tier, pro_requested_at) values ($1, 'retail', now()), ($2, 'retail', null), ($3, 'pro', now())",
