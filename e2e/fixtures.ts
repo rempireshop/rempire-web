@@ -246,6 +246,8 @@ const DICT: Record<string, { ET: string; EN: string }> = {
   // the aria-label on a product card's size picker (cardSizeHTML in app.js)
   "Объём": { ET: "Maht", EN: "Size" },
   "Подарочная карта": { ET: "Kinkekaart", EN: "Gift card" },
+  // the 404 screen (screenNotFound in app.js, 07.09.2026)
+  "Страница не найдена": { ET: "Lehte ei leitud", EN: "Page not found" },
   "Отзывов пока нет — станьте первым.": { ET: "Arvustusi veel pole — ole esimene.", EN: "No reviews yet — be the first." },
   "Спасибо! Отзыв отправлен — он появится на странице после проверки.": {
     ET: "Aitäh! Arvustus on saadetud — see ilmub lehele pärast ülevaatamist.",

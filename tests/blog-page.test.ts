@@ -126,7 +126,8 @@ describe("a post's page at request time", () => {
     expect(article.datePublished).toBeTruthy();
     expect(article.description).toBe(meta(html, "description"));
     const crumbs = ld.find((o) => o["@type"] === "BreadcrumbList") as Record<string, unknown> & { itemListElement: Array<{ name: string; item?: string }> };
-    expect(crumbs.itemListElement.map((i) => i.name)).toEqual(["Avaleht", "Blog", "Kuidas hooldada habet talvel"]);
+    // ET says «Blogi» — the owner's own word, settled 07.09.2026 (src/lib/seo-head.mjs T.ET.blog)
+    expect(crumbs.itemListElement.map((i) => i.name)).toEqual(["Avaleht", "Blogi", "Kuidas hooldada habet talvel"]);
     expect(crumbs.itemListElement[1].item).toBe(`${LIVE}/shop2/et/blog/`);
     expect(html).not.toContain('id="ldjson"');
 
@@ -223,7 +224,7 @@ describe("a post's page at request time", () => {
 describe("the listing at request time", () => {
   it("lists the published posts with the head, the ItemList and the #blogdata snapshot; says so when there are none", async () => {
     const empty = await (await listPage("et")).text();
-    expect(title(empty)).toBe("Blog — REMPIRE");
+    expect(title(empty)).toBe("Blogi — REMPIRE");
     expect(empty).toContain('<p class="muted">Artikleid veel pole — vaata varsti uuesti.</p>');
     expect(empty).not.toContain('id="blogdata"');
 
@@ -237,7 +238,7 @@ describe("the listing at request time", () => {
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/et/blog/`);
     expect(meta(html, "og:type")).toBe("website");
     expect(meta(html, "og:image")).toContain(`/shop2/og/blog-${post.slug}.et.png?v=`);
-    expect(html).toContain('<h1 class="display h1">Blog</h1>');
+    expect(html).toContain('<h1 class="display h1">Blogi</h1>');
     expect(html).toContain(`<li><a class="pre__card blog__tile" href="/shop2/et/blog/${post.slug}/">`);
     expect(html).toContain('<span class="pre__nm">Kuidas hooldada habet talvel</span>');
     expect(html).not.toContain("chernovik");
