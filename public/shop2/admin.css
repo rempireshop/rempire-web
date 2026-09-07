@@ -1353,6 +1353,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   font-size: 11px; line-height: 14px; color: var(--a-muted);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* The gift card in the banner's picture grid: it has no photo, so the tile
+   carries the same tower mark the storefront's gift block does. */
+.adm-pick-tile__img--gift { display: flex; align-items: center; justify-content: center; }
+.adm-pick-tile__mark { width: 18px; height: 28px; color: var(--a-ink); }
 /* the wordy tile («Автоматически · три фото стопкой») takes two columns */
 .adm-pick-tile--text {
   grid-column: span 2; min-height: 92px; align-items: center; justify-content: center;

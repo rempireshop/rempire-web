@@ -1,6 +1,7 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
 import {
+  CATEGORY,
   continueButton,
   freshEmail,
   functionalProject,
@@ -11,6 +12,7 @@ import {
   payButton,
   PRODUCT,
   shopUrl,
+  tr,
   waitForScreen,
 } from "./fixtures";
 
@@ -214,4 +216,138 @@ test.describe("gift card — digital checkout and the printable card", () => {
     await expect(adminLink).toContainText("Карта PDF");
     await ctx.close();
   });
+});
+
+/* Dim: «do we have possibility to add gift card to hero banner?»
+ *
+ * Yes — and without a line of code, which is the whole point of this test.
+ * The banner is an editable set of up to five slides («Настройки → Главная
+ * страница»), each with its own texts in three languages, a picture and a
+ * link; «Подарочная карта» is one of the link targets the panel offers, and
+ * — since it is the one target with no product photo behind it — the picture
+ * grid offers the card's own mark too. So Renat can put the slide up before
+ * Christmas and take it down after, himself.
+ *
+ * This flips a shop-wide setting other specs read (visual.spec.ts screenshots
+ * the home page's hero), so it puts the banner back in a `finally` — the same
+ * rule as e2e/sets.spec.ts and e2e/admin-sections.spec.ts.
+ */
+test.describe("the gift card as a banner slide", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(64) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "one write per action is enough — desktop runs it");
+  });
+
+  /** «Настройки» is a sidebar tab on a desktop and lives behind «Ещё» on a
+   *  phone; this spec is desktop-only, so the direct tab is enough. */
+  async function openBannerCard(page: Page): Promise<void> {
+    await page.locator('[data-admtab="setup"][aria-current]:visible').first().click();
+    await page.locator('[data-admsetpage="home"]').click();
+    await expect(page.getByText("Главный баннер")).toBeVisible();
+  }
+
+  test("the owner points slide 1 at it, picks its picture, and the shop's banner opens /gift/", async ({ page, browser }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    const before = await (await page.request.get("/api/admin/settings/")).json();
+
+    try {
+      await openBannerCard(page);
+      await page.locator('[data-heroedit="0"]').click();
+
+      // 1) the panel really offers the gift card as a link target…
+      const go = page.locator("[data-herogo]");
+      await expect(go.locator('option[value="gift"]')).toHaveCount(1);
+      await go.selectOption("gift");
+      // the slide's own row in the list now says where its button goes
+      await expect(page.locator(".adm-row--tall").first().locator(".adm-row__sub"))
+        .toHaveText("Подарочная карта");
+
+      // 2) …and as a picture, because it has no product photo of its own.
+      //    Without it a gift-card banner fell through to the first product in
+      //    the catalogue and advertised a present with a photo of a shampoo.
+      const giftPic = page.locator('[data-heroimg="gift"]');
+      await expect(giftPic).toBeVisible();
+      await giftPic.click();
+      await expect(giftPic).toHaveAttribute("aria-current", "true");
+      // the live preview inside the panel draws the mark, not a product photo
+      await expect(page.locator("#heroprev .hero__art--gift")).toHaveCount(1);
+
+      await page.locator('[data-herof="title"]').fill("Подарочная карта Rempire");
+      await page.locator('[data-herof="cta"]').fill("Выбрать сумму");
+      await page.locator("[data-heroclose]").click();
+
+      const put = page.waitForResponse(
+        (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+      await page.locator("[data-herosave]").click();
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
+      await page.locator("[data-admapply]").click();
+      expect((await put).ok()).toBe(true);
+
+      const saved = await (await page.request.get("/api/admin/settings/")).json();
+      expect(saved.settings.hero.slides[0].go, "the slide's link never reached settings.hero").toBe("gift");
+      expect(saved.settings.hero.slides[0].image, "the slide's picture never reached settings.hero").toBe("gift");
+
+      // 3) the shopper's side: a clean context, the home page, the button
+      const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(64) });
+      const shop = await ctx.newPage();
+      await shop.goto(shopUrl("", "/"));
+      await waitForScreen(shop, "home");
+      const slide = shop.locator('.hero__slide[data-on="1"]');
+      await expect(slide.locator(".hero__art--gift")).toHaveCount(1);
+      await slide.getByRole("button", { name: "Выбрать сумму" }).click();
+      await waitForScreen(shop, "gift");
+      await expect(shop).toHaveURL(/\/shop2\/gift\/$/);
+      await ctx.close();
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { hero: before.settings.hero ?? null } });
+    }
+  });
+});
+
+/* Dim, 07.09.2026: «Also in "all products" the gift card option should be
+ * somewhere.» It is — as the tile the home page and the cabinet already use,
+ * under the grid rather than in it.
+ *
+ * The distinction this test defends is the honest one: a card in #catgrid
+ * promises a price, a size and «В корзину», and a gift card has none of those
+ * — the amount is chosen on its own page. So the tile must be OUTSIDE the
+ * grid, carry no add-to-cart button, and be counted by nothing: the toolbar's
+ * «N товаров» still counts products only. And it belongs to «Все товары»
+ * alone — a gift card is not part of «Уход за бородой».
+ */
+test.describe("the gift card in «Все товары»", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(65) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(!functionalProject(testInfo), "functional spec — see docs/testing.md");
+  });
+
+  for (const lang of LANGS) {
+    test(`a tile under the grid, never a product card — ${lang.code}`, async ({ page }) => {
+      await page.goto(shopUrl(lang.seg, "/c/all/"));
+      await waitForScreen(page, "catalog");
+
+      const tile = page.locator(".sec--gift .gifttile");
+      await expect(tile).toBeVisible();
+      await expect(tile.getByRole("heading")).toHaveText(tr("Подарочная карта", lang.code));
+
+      // not a product: outside #catgrid, no add-to-cart, no stock chip
+      await expect(page.locator("#catgrid .gifttile")).toHaveCount(0);
+      await expect(tile.locator("[data-add]")).toHaveCount(0);
+      await expect(tile.locator(".chip")).toHaveCount(0);
+      // …and it did not join the count in the toolbar
+      const counted = Number((await page.locator("[data-count]").innerText()).replace(/\D+/g, ""));
+      const cards = await page.locator("#catgrid [data-go-product]").count();
+      expect(counted, "the gift card was counted as a product").toBeGreaterThanOrEqual(cards);
+
+      await tile.locator('[data-go="gift"]').click();
+      await waitForScreen(page, "gift");
+      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+
+      // one shelf only — a category page does not carry it
+      await page.goto(shopUrl(lang.seg, `/c/${CATEGORY.id}/`));
+      await waitForScreen(page, "catalog");
+      await expect(page.locator(".sec--gift")).toHaveCount(0);
+    });
+  }
 });

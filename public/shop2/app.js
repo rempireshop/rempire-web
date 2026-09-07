@@ -5131,8 +5131,21 @@
     return /^[A-Za-z0-9._~:/?#[\]@!$&*+,=%-]+$/.test(v) ? v : "";
   }
   /* A picture is either a catalogue photo (by product id, drawn by the same
-     media() as everywhere else) or a plain URL the owner pasted. */
+     media() as everywhere else), the gift card's own mark, or a plain URL the
+     owner pasted.
+
+     `image: "gift"` exists because the gift card is the one thing a slide can
+     point at that has no product photo behind it: without it a gift-card
+     banner fell through to CATALOGUE[0] and advertised a present with a
+     picture of a shampoo. The mark is the same tower on the same shell panel
+     the gift tile already uses on the home page, so the slide looks like the
+     page it opens. */
+  var HERO_GIFT_IMG = "gift";
   function heroArt(image, cls) {
+    if (String(image || "") === HERO_GIFT_IMG) {
+      return '<span class="' + (cls || "hero__art") + ' hero__art--gift" aria-hidden="true">' +
+        tower("hero__giftmark") + "</span>";
+    }
     var u = heroUrl(image);
     if (u) {
       return '<span class="' + (cls || "hero__art") + '" style="background-image:url(\'' +
@@ -6725,9 +6738,65 @@
       }
     } catch (e) { /* a tracking call must never be why a click failed */ }
   }
-  // chat.js runs after app.js (see index.html) and cannot reach an id inside
-  // this closure any other way — one deliberate, narrow bridge.
+  // chat.js runs after app.js (see mountChat below) and cannot reach an id
+  // inside this closure any other way — one deliberate, narrow bridge.
   window.__rmpTrack = track;
+
+  /* ---------- the shop assistant's <script>, on demand -------------------
+     Dim, 07.09.2026: «checkoutis pole assistenti vaja ja mobiilis ei kasuta
+     üldse poes assistenti, adminis võib jääda». So the widget is wanted on a
+     wide screen, in the shop, anywhere except the checkout — and on a phone
+     it is wanted nowhere at all.
+
+     "Nowhere at all" has to mean the file is never fetched either, which is
+     why the <script> tag left index.html and is added from here instead: a
+     phone that will never see the chat now downloads, parses and runs none
+     of it (chat.js also builds its whole catalogue index at load). Same
+     pattern as mountCfBeacon() above, and for the same reason it cannot be
+     an inline gate in the shell: /shop2/* runs under `script-src 'self'`
+     with no 'unsafe-inline' (next.config.ts).
+
+     The version token is lifted off app.js's own tag rather than written
+     here, so the two assets can never fall out of step and nothing in this
+     file has to be touched when the token moves.
+
+     chat.js keeps its own copy of the same rule (chatAllowed()) because the
+     script may already be loaded when the shopper walks into the checkout or
+     drags a desktop window down to phone width — mounting is one-way, hiding
+     is not. */
+  var CHAT_WIDE = "(min-width: 768px)";   // the shop's own phone/desktop line
+  function chatWide() {
+    try { return !!(window.matchMedia && window.matchMedia(CHAT_WIDE).matches); }
+    catch (e) { return true; }
+  }
+  function chatWanted() {
+    if (!chatWide()) return false;
+    if (S.screen === "checkout" || S.screen === "admin" || S.screen === "scan") return false;
+    return DEMO.chatbot !== false;
+  }
+  function mountChat() {
+    try {
+      if (!chatWanted()) return;
+      if (document.querySelector('script[data-shopchat]')) return;
+      var app = document.querySelector('script[src*="/shop2/app.js"]');
+      var v = ((app && app.getAttribute("src")) || "").split("?")[1];
+      var s = document.createElement("script");
+      s.defer = true;
+      s.setAttribute("data-shopchat", "");
+      s.src = "/shop2/chat.js" + (v ? "?" + v : "");
+      document.body.appendChild(s);
+    } catch (e) { /* the assistant must never be why the shop failed to boot */ }
+  }
+  // a desktop window dragged narrow and back again, or an orientation change
+  // on a tablet: the first time it is wide enough, the script arrives
+  try {
+    if (window.matchMedia) {
+      var chatMq = window.matchMedia(CHAT_WIDE);
+      var onChatMq = function () { mountChat(); };
+      if (chatMq.addEventListener) chatMq.addEventListener("change", onChatMq);
+      else if (chatMq.addListener) chatMq.addListener(onChatMq);
+    }
+  } catch (e) {}
 
   /* Cloudflare Web Analytics (docs/analytics.md). The token sits in a <meta
      name="cf-beacon"> in index.html — the integrator pastes it there — and
@@ -8112,6 +8181,12 @@
         '<button data-go-cat="all">Все товары</button>' +
         CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
         (allBundles().length ? '<button data-go="bundles" data-nav-bundles>Наборы</button>' : "") +
+        /* Dim, 07.09.2026: the gift card belongs beside «Наборы» in the
+           navigation — that is where someone shopping for a present is
+           already looking, and it is why the footer no longer repeats it.
+           Unlike «Наборы» it is never removed: the card is not a set and
+           stays on sale with sets switched off (docs/features.md). */
+        '<button data-go="gift" data-nav-gift>Подарочная карта</button>' +
         '<button data-go="brands" data-nav-brands>Бренды</button>' +
         '<button data-go="blog" data-nav-blog>Блог</button>' +
       "</nav></header>";
@@ -8155,7 +8230,8 @@
     var navSets = nav && nav.querySelector("[data-nav-bundles]");
     var wantSets = !!allBundles().length;
     if (nav && wantSets && !navSets) {
-      var before = nav.querySelector("[data-nav-brands]");
+      // back in front of the gift card, which is where headerHTML() puts it
+      var before = nav.querySelector("[data-nav-gift]") || nav.querySelector("[data-nav-brands]");
       var btn = document.createElement("button");
       btn.setAttribute("data-go", "bundles");
       btn.setAttribute("data-nav-bundles", "");
@@ -8166,7 +8242,10 @@
     }
     h.querySelectorAll(".hdr__nav button").forEach(function (b) {
       if (b.dataset.navBundles !== undefined) {
-        b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle" || S.screen === "gift"));
+        // «gift» used to light this one up — it has its own entry now
+        b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle"));
+      } else if (b.dataset.navGift !== undefined) {
+        b.setAttribute("aria-current", String(S.screen === "gift"));
       } else if (b.dataset.navBrands !== undefined) {
         b.setAttribute("aria-current", String(S.screen === "brands" || (S.screen === "catalog" && !!S.brand)));
       } else if (b.dataset.navBlog !== undefined) {
@@ -8283,7 +8362,21 @@
     var addr = contentConf().company.address;
     return '<footer class="ftr"><div class="wrap">' +
       '<div class="ftr__accs">' +
-      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE + " € · 230 пакоматов в 4 странах") +
+      /* The «Покупателю» group is gone (Dim, 07.09.2026): «Наборы»,
+         «Подарочная карта» and «Блог» all sit in the top navigation, and a
+         second copy of them at the bottom of the page was the only thing he
+         kept noticing there. The four links in it that are NOT in the
+         navigation did not go with it — each one moved to the block that
+         already says the same thing, so nothing became unreachable:
+         «Доставка и оплата» here, «Контакты» under «Связаться», and the two
+         consumer-rights pages under «Правовое», where the rest of them are. */
+      /* The link is a sibling node, never glued onto the sentence: that
+         sentence carries a price and is translated by a UI_RX rule anchored
+         on its last word — one appended « · » and it stops matching in ET
+         and EN. Same reason «Самовывоз» below keeps its own <span>. */
+      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE +
+        " € · 230 пакоматов в 4 странах" +
+        '<br><button class="link" data-page="shipping">Доставка и оплата</button>') +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       /* content: the address is data now, so the sentence after it lives in its
          own element — the dictionary matches whole text nodes, and gluing an
@@ -8291,9 +8384,10 @@
       ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.</span>") +
       (hours ? ftrSec("Часы работы", hours) : "") +
       ftrSec("Реквизиты", cCompanyHTML()) +
-      ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
-      ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-go="blog">Блог</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
+      ftrSec("Связаться", [cPhoneHTML(), cMailHTML(), '<button class="link" data-page="contact">Контакты</button>']
+        .filter(Boolean).join(" · ")) +
       ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · ' +
+        '<button class="link" data-page="returns">Возврат товара</button> · ' +
         // the one way back to a choice that is otherwise made once and kept
         '<button class="link" data-cookies>Данные и cookie</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
@@ -8569,6 +8663,17 @@
            prefix by [data-go-product], and a set card would break that match
            and make every infinite-scroll batch rebuild the whole grid. */
         bundleGridHTML(bundlesForCatalog(), S.cat === "all" ? "Наборы" : "Наборы из этого раздела") +
+        /* Dim, 07.09.2026: «in "all products" the gift card option should be
+           somewhere». It is the same block as on the home page and in the
+           cabinet — deliberately NOT a card in #catgrid: the card layout
+           promises a price, a size and «В корзину», and a gift card has an
+           amount the shopper chooses on its own page, no stock and no size.
+           A tile under the grid says «this exists» without pretending to be
+           a product, and it sits outside #catgrid so infinite scroll's
+           prefix match (patchCatalog) never sees it.
+           «Все товары» only: this is the one shelf that claims to hold
+           everything, and a gift card is not part of «Уход за бородой». */
+        (S.cat === "all" && !S.brand ? '<section class="sec sec--gift">' + giftTileHTML() + "</section>" : "") +
       "</section></div>";
   }
   /* Russian counts take three forms; "12 товаров / 22 товара / 21 товар". */
@@ -14886,11 +14991,22 @@
       '<span class="adm-pick-tile__img">' + media(p, 0, "ph") + "</span>" +
       '<span class="adm-pick-tile__nm">' + esc(p.name) + "</span></button>";
   }
+  /* The gift card as a picture, first in the grid and only while the search
+     box is empty — it is not a product, so a search for «шампунь» must not
+     turn it up. Same tile shape as the product ones, the mark instead of a
+     photo. */
+  function heroGiftTile(current) {
+    return '<button class="adm-pick-tile" data-heroimg="' + HERO_GIFT_IMG + '" aria-current="' + !!current +
+      '" title="Подарочная карта">' +
+      '<span class="adm-pick-tile__img adm-pick-tile__img--gift">' + tower("adm-pick-tile__mark") + "</span>" +
+      '<span class="adm-pick-tile__nm">Подарочная карта</span></button>';
+  }
   function heroImgRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
+    var gift = String(S.heroImgQ || "").trim() ? "" : heroGiftTile(cur.image === HERO_GIFT_IMG);
     var list = heroFind(S.heroImgQ);
-    if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
+    if (!list.length) return gift || HERO_NOHIT;
+    return gift + list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
   }
   function heroGoRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
@@ -22724,7 +22840,10 @@
     else if (SCANEL) { scanUnmount(); }
     // the toast has to clear the camera view — see .is-scanning in styles.css
     document.body.classList.toggle("is-scanning", !!S.scanOpen);
-    document.body.dataset.screen = S.screen; // chat.js hides itself in the admin
+    document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
+    // …and, if this is the first screen that wants the assistant at all, the
+    // widget's <script> is fetched now rather than at boot (mountChat above)
+    mountChat();
     translatePage();
     setHead();
     // the scanner route wears the same header on its wait/login cards
