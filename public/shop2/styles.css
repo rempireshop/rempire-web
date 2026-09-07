@@ -2058,3 +2058,28 @@ button, a, summary, label { touch-action: manipulation; }
 .admblog__toolrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .admblog__toolrow .input { flex: 1 1 200px; min-width: 0; }
 
+/* ==========================================================================
+   07.09.2026 — the three pieces of chrome Dim asked for: the «page not
+   found» screen, the checkout's skip link and the consent banner. Nothing
+   here reaches an existing selector; each block is namespaced (.nf, .skip,
+   .cbanner) so it can be read, moved or removed on its own.
+   ========================================================================== */
+
+/* ---------- 404 ----------
+   Centred like the receipt, because it is the same shape of page: one fact,
+   one sentence, the ways out. The number is drawn as the receipt's tick is —
+   big, quiet, decorative — and is aria-hidden, since the <h1> already says
+   what happened in words. */
+.nf { text-align: center; }
+.nf__code {
+  margin: 0 0 6px;
+  font-family: Oswald, sans-serif; font-size: 46px; line-height: 1;
+  letter-spacing: .06em; color: var(--muted);
+}
+.nf .sec__intro { margin-inline: auto; }
+.nf__acts { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+@media (min-width: 561px) {
+  .nf__acts { flex-direction: row; justify-content: center; }
+  .nf__acts .btn { min-width: 200px; }
+}
+

@@ -119,7 +119,13 @@ export const T = {
     /* the request-time blog page (src/lib/blog-page.ts) — the prerender
        lifts these three out of app.js's dictionary; they are copied here
        for the same reason CAT_NAMES_I18N is. Keep them in step. */
-    blog: "Блог", postProducts: "Товары из статьи", postMissing: "Статья не найдена."
+    blog: "Блог", postProducts: "Товары из статьи", postMissing: "Статья не найдена.",
+    /* the request-time 404 (src/lib/notfound-page.ts) — word for word the
+       strings screenNotFound() draws in public/shop2/app.js, so the page a
+       crawler is served and the page the script paints over it say the same
+       thing. Keep them in step. */
+    notFound: "Страница не найдена",
+    notFoundText: "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка."
   },
   ET: {
     base: "REMPIRE — kosmeetikapood Tallinnas",
@@ -149,7 +155,9 @@ export const T = {
     otherPosts: "Teised artiklid",
     // «Blogi», not «Ajaveeb» and not «Blog» — the owner's own word, settled
     // 07.09.2026; the same line as the app.js dictionary's "Блог" entry
-    blog: "Blogi", postProducts: "Tooted artiklist", postMissing: "Artiklit ei leitud."
+    blog: "Blogi", postProducts: "Tooted artiklist", postMissing: "Artiklit ei leitud.",
+    notFound: "Lehte ei leitud",
+    notFoundText: "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga."
   },
   EN: {
     base: "REMPIRE — grooming shop in Tallinn",
@@ -177,7 +185,9 @@ export const T = {
     blogDesc: "Rempire articles on hair, beard and face care: products, techniques and routines, step by step. Rempire shop, Tallinn.",
     blogEmpty: "No articles yet — check back soon.",
     otherPosts: "More articles",
-    blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found."
+    blog: "Blog", postProducts: "Products from this article", postMissing: "Article not found.",
+    notFound: "Page not found",
+    notFoundText: "There is no such page — the link may be out of date, or the address has a typo."
   }
 };
 

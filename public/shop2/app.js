@@ -197,6 +197,8 @@
       "Мои заказы": "Minu tellimused", "Мои данные": "Minu andmed", "Мои промокоды": "Minu sooduskoodid",
       "Повторить заказ": "Korda tellimust",
       "Страница не найдена": "Lehte ei leitud",
+      "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
+        "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga.",
       "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormista tellimus külalisena.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Hinnad sisaldavad käibemaksu. Tarnehind arvutatakse tellimuse vormistamisel.",
       "Каталог, товары и инфостраницы — на трёх языках.": "Kataloog, tooted ja infolehed on kolmes keeles.",
@@ -2003,6 +2005,8 @@
       "Мои заказы": "My orders", "Мои данные": "My details", "Мои промокоды": "My promo codes",
       "Повторить заказ": "Repeat order",
       "Страница не найдена": "Page not found",
+      "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
+        "There is no such page — the link may be out of date, or the address has a typo.",
       "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
       "Налоги включены. Доставка рассчитается при оформлении.": "Taxes included. Delivery is calculated at checkout.",
       "Каталог, товары и инфостраницы — на трёх языках.": "The catalogue, products and info pages are in three languages.",
@@ -7300,6 +7304,26 @@
           '<span class="brandtile__mark">' + brandMark(b.name, "brandtile") + "</span>" +
           '<span class="brandtile__n num">' + b.n + " " + plural(b.n) + "</span></button>";
       }).join("") + "</div></section></div>";
+  }
+
+  /* ---------- 404 ---------------------------------------------------------
+     An address the shop has no page for. Until 07.09.2026 every unknown
+     /shop2/… path quietly drew the home page at HTTP 200 — kind to nobody:
+     Google reads a soft 404 and de-indexes around it, and a customer on a
+     stale link is left wondering which page they are looking at. Dim's
+     answer was «Make a page not found», so there is one, in the shop's own
+     design, in all three languages, with the two ways out a lost shopper
+     actually wants — and the server answers 404 for the same set of paths
+     (src/lib/notfound-page.ts), which is the half a crawler reads. */
+  function screenNotFound() {
+    return '<div class="wrap wrap--narrow"><section class="sec nf">' +
+      '<p class="nf__code num" aria-hidden="true">404</p>' +
+      '<h1 class="display h1">Страница не найдена</h1>' +
+      '<p class="sec__intro">Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.</p>' +
+      '<div class="nf__acts">' +
+        '<button class="btn" data-go="home">На главную</button>' +
+        '<button class="btn btn--ghost" data-go-cat="all">В каталог</button>' +
+      "</div></section></div>";
   }
 
   function screenCatalog() {
@@ -18852,6 +18876,17 @@
   var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
   // the sentence screenBrands() opens with, reused as that page's description
   var BRANDS_DESC = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
+  // the sentence screenNotFound() opens with, reused as that page's description
+  var NOTFOUND_DESC = "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.";
+  /* What the page was SERVED with, read once. The 404 screen has to say
+     `noindex` and every other screen has to put back whatever the deploy
+     decided (docs/seo.md § «The three noindex layers»): the meta follows
+     PUBLIC_BASE_URL at build, so hard-coding either value here would fight
+     it. Read at boot, before setHead() has ever run. */
+  var SERVED_ROBOTS = (function () {
+    var m = document.querySelector('meta[name="robots"]');
+    return (m && m.getAttribute("content")) || "";
+  })();
   /** The shop's own title in the current language — the <title> of every
       screen that has no better one, and the home page's hidden <h1>. */
   function siteTitle() {
@@ -18932,6 +18967,13 @@
         t = trText("Бренды", S.lang, false) + " — REMPIRE";
         d = trText(BRANDS_DESC, S.lang, false).slice(0, 158);
       }
+      /* 404: the tab says so, and so does the robots meta. The server already
+         answered 404 for this address; this is the same fact for a crawler
+         that runs the script and reads the rendered DOM. */
+      else if (S.screen === "notfound") {
+        t = trText("Страница не найдена", S.lang, false) + " — REMPIRE";
+        d = trText(NOTFOUND_DESC, S.lang, false).slice(0, 158);
+      }
       // features
       /* Sets off: the tab must not advertise them either. Both screens are
          showing setsOffHTML() and say so in the title; the description stays
@@ -18973,6 +19015,7 @@
     }
     document.title = t;
     if (d) setMetaTag("description", d);
+    if (SERVED_ROBOTS) setMetaTag("robots", S.screen === "notfound" ? "noindex, nofollow" : SERVED_ROBOTS);
     /* Client navigation has to move the canonical and the hreflang set with
        the screen, or a crawler that runs JS reads the landing page's cluster
        on every product it walks to. */
@@ -19082,6 +19125,7 @@
     else if (S.screen === "info") body = screenInfo();
     else if (S.screen === "admin") body = screenAdmin();
     else if (S.screen === "scan") body = screenScan();         // scanner app
+    else if (S.screen === "notfound") body = screenNotFound();
 
     var chromeless = S.screen === "checkout" || S.screen === "done" || S.screen === "admin" || S.screen === "scan";
     if (!hdrSlot.firstChild) hdrSlot.innerHTML = headerHTML();
@@ -19226,6 +19270,7 @@
       if (opening && close) close.focus();
       if (!key && lastFocus && document.contains(lastFocus)) { lastFocus.focus(); lastFocus = null; }
     }
+    dropStaleToast();
     paintToast();
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
     // inventory: the scanner lives outside bodySlot on purpose (module doc
@@ -19635,6 +19680,9 @@
      prefix — it is the default and the x-default. */
   function pathFor() {
     var b = "/shop2" + SEG_OF_LANG[pathLang];
+    /* A 404 keeps the address the shopper asked for — that is the whole point
+       of it. Nothing pushes /shop2/notfound/ into the history. */
+    if (S.screen === "notfound") return location.pathname + location.search;
     if (S.screen === "product" && S.productId) return b + "/p/" + encodeURIComponent(S.productId) + "/";
     if (S.screen === "catalog") return S.brand ? b + "/b/" + slugify(S.brand) + "/" : b + "/c/" + S.cat + "/";
     if (S.screen === "search") return b + "/search/" + (S.query ? "?q=" + encodeURIComponent(S.query) : "");
@@ -19779,6 +19827,33 @@
     paintToast(); patchHeader(); patchNav();
     clearTimeout(toast._t);
     toast._t = setTimeout(function () { S.toast = null; S.toastUndo = null; paintToast(); }, undo ? 6000 : 2600);
+  }
+  /** Take the standing toast down now, before its timer is up. */
+  function toastOff() {
+    if (!S.toast && !S.toastUndo) return;
+    S.toast = null; S.toastUndo = null;
+    clearTimeout(toast._t);
+    paintToast(); patchHeader(); patchNav();
+  }
+  /* Two contradicting messages must never be on screen at once. Typing a
+     wrong login code used to leave «Код отправлен — проверьте почту ✓» sitting
+     under «Код не подошёл — проверьте цифры» for the rest of its 2.6 seconds
+     (Dim, 07.09.2026 — «Improve»). One rule instead of a call at every error
+     site: a render that paints an alert the previous render did not takes the
+     standing toast down. A toast raised by the action *after* its own render —
+     failStep()'s «Проверьте e-mail», «Добавлено: …» — is younger than the
+     paint and is left alone, because toast() runs after render() returns.
+     The admin is out of it: its bar carries «Отменить» for six seconds and an
+     unrelated error must not swallow the offer. */
+  var alertsPainted = "";
+  function dropStaleToast() {
+    if (S.screen === "admin" || S.screen === "scan") { alertsPainted = ""; return; }
+    var nodes = bodySlot.querySelectorAll('[role="alert"]');
+    var key = "";
+    for (var i = 0; i < nodes.length; i++) key += "|" + nodes[i].textContent;
+    var fresh = !!key && key !== alertsPainted;
+    alertsPainted = key;
+    if (fresh) toastOff();
   }
   /** «Отменить» on the toast: put the change back through the journal, and
       leave a «Отмена: …» line behind so the journal tells the whole story. */
@@ -22478,11 +22553,43 @@
        shopper back to, with ?n=&s= naming the order and how it went. Without
        that query there is no order behind it, and home is the honest answer.
        A payment form with an empty basket bounces straight back out anyway. */
-    if (/\/shop2\/done$/.test(p) && /[?&]s=(paid|failed|pending|invoice)\b/.test(location.search)) {
-      S.screen = "done"; return true;
+    if (/\/shop2\/done$/.test(p)) {
+      if (/[?&]s=(paid|failed|pending|invoice)\b/.test(location.search)) { S.screen = "done"; return true; }
+      return routeHome();
     }
-    if (/\/shop2\/checkout$/.test(p) && S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }
+    if (/\/shop2\/checkout$/.test(p)) {
+      if (S.cart.length) { S.screen = "checkout"; S.coStep = 1; return true; }
+      return routeHome();
+    }
+    // the home page itself, in any of the three languages
+    if (p === "/shop2" || p === "") { S.screen = "home"; return true; }
+    /* Everything this cascade did not recognise is an address the shop has no
+       page for. It used to be answered with the home page at HTTP 200 — a
+       soft 404, which Google de-indexes and which leaves a shopper on a stale
+       link wondering what happened (Dim, 07.09.2026: «Make a page not
+       found»). The server says 404 for the same set of paths
+       (src/app/shop2/[...path]/route.ts → src/lib/notfound-page.ts); this is
+       the same answer once the script has taken over, on the address the
+       shopper actually asked for. */
+    S.screen = "notfound";
+    return true;
+  }
+
+  /* The address bar has to agree with the screen. Two addresses are
+     legitimate to ask for and impossible to render — /shop2/checkout/ with an
+     empty basket, /shop2/done/ with no order in its query — and both used to
+     draw the home page while leaving their own URL up, so a reload, the tab
+     title and the canonical all described a page the shopper was not on
+     (Dim, 07.09.2026: fix it, address included). Replaced, never pushed:
+     there is nothing here to go Back to. */
+  function routeHome() {
     S.screen = "home";
+    try {
+      var want = "/shop2" + SEG_OF_LANG[pathLang] + "/";
+      if (location.pathname + location.search !== want) {
+        history.replaceState({ y: 0, shown: S.shown }, "", want);
+      }
+    } catch (e) {}
     return true;
   }
 
