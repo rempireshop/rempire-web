@@ -200,6 +200,16 @@ function html(body: string, status: number, cacheControl: string): Response {
   return new Response(body, { status, headers: { "content-type": HTML, "cache-control": cacheControl } });
 }
 
+/** Has the owner taken this product out of the shop? Best effort: no database
+    means no hidden products, which is the safe direction for a shop page. */
+async function isHiddenProduct(id: string): Promise<boolean> {
+  try {
+    return (await getOverrides([id]))[id]?.hidden === true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * GET /shop2/{,et/,en/}p/<id>/ for anything the prerender did not write.
  * A `c-…` id is answered from its row; every other id gets the shell the
@@ -208,7 +218,20 @@ function html(body: string, status: number, cacheControl: string): Response {
 export async function productPageResponse(id: string, seg: string): Promise<Response> {
   const shell = readShell();
   const lang = langBySeg(seg) as Lang | null;
-  if (!lang || !isCustomId(id)) return html(shell, 200, "public, max-age=0, must-revalidate");
+  if (!lang || !isCustomId(id)) {
+    /* «Показывать в магазине» switched off (product_overrides.hidden,
+       db/migrations/147). The address must stop being an indexable page the
+       moment the owner takes the product out of the shop — the same 404 with
+       `noindex, nofollow` a hidden custom product gets below.
+       Caveat worth knowing: a CATALOGUE product also has a static page
+       written at build (tools/prerender-shop2.mjs), and next.config.ts routes
+       that file before this route is reached — so for a product that was
+       prerendered the file keeps answering until the next deploy. app.js
+       drops the product from its own list either way, so the shopper who
+       lands there is sent nowhere he can buy it. */
+    if (await isHiddenProduct(id)) return html(noindexShell(shell), 404, NO_STORE);
+    return html(shell, 200, "public, max-age=0, must-revalidate");
+  }
 
   let row: CustomProduct | null;
   try {

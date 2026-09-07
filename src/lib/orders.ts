@@ -171,11 +171,18 @@ export type OverrideRow = {
   gallery: unknown;
   /** Wholesale/pro price override — db/migrations/100_tiers_loyalty.sql. Null = computed from settings.pricing.proDiscountPct. */
   pro_price: string | number | null;
+  /** The whole size ladder the owner saved — db/migrations/147_override_sizes_hidden.sql. */
+  sizes: unknown;
+  /** Out of the shop entirely — same migration. */
+  hidden: boolean | null;
   updated_at: string | Date;
 };
 
 /** One photo the owner uploaded — see db/migrations/003_product_gallery.sql. */
 export type GalleryPhoto = { url: string; thumb: string; alt: string };
+
+/** One rung of a product's size ladder: «100 мл» at 12,50 €. */
+export type SizeRung = { size: string; price: number };
 
 export type Override = {
   price: number | null;
@@ -189,6 +196,10 @@ export type Override = {
   gallery: GalleryPhoto[] | null;
   /** Wholesale/pro price override, null = base price × (1 − proDiscountPct/100). Admin-only — never in the public /api/overrides response. */
   proPrice: number | null;
+  /** The whole size ladder as the owner saved it; null = the catalogue's own. */
+  sizes: SizeRung[] | null;
+  /** True = out of the shop, the search, the sets and the sitemap. */
+  hidden: boolean;
   updatedAt: string | null;
 };
 
@@ -214,6 +225,38 @@ export function cleanGallery(value: unknown): GalleryPhoto[] | null {
       : url;
     out.push({ url, thumb, alt: typeof o.alt === "string" ? o.alt.slice(0, 120) : "" });
     if (out.length >= MAX_GALLERY) break;
+  }
+  return out.length ? out : null;
+}
+
+/** Up to a dozen rungs on one product's ladder — the editor's own limit. */
+export const MAX_SIZES = 12;
+
+/**
+ * The only door into `sizes`. A ladder is a list of {size, price}: the label
+ * is one short line (an empty one means «один объём»), the price a number the
+ * shop could actually charge. Anything else is dropped rather than stored —
+ * this list decides what the storefront offers, what the cart may hold and
+ * what the warehouse counts, so a malformed rung is a rung that must not
+ * exist. `null` (and an empty list) means «the catalogue's own ladder».
+ */
+export function cleanSizes(value: unknown): SizeRung[] | null {
+  if (value == null) return null;
+  const raw = typeof value === "string" ? safeParse(value) : value;
+  if (!Array.isArray(raw)) return null;
+  const out: SizeRung[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    const o = (item && typeof item === "object" ? item : {}) as Record<string, unknown>;
+    const label = typeof o.size === "string" ? o.size.replace(/[\p{Cc}\p{Cf}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 30) : "";
+    const price = Number(o.price);
+    if (!Number.isFinite(price) || price < 0 || price > 100000) continue;
+    /* Two rungs with the same label would give the cart two lines it cannot
+       tell apart and the shelf one key for two counts. */
+    if (seen.has(label)) continue;
+    seen.add(label);
+    out.push({ size: label, price: money(price) });
+    if (out.length >= MAX_SIZES) break;
   }
   return out.length ? out : null;
 }
@@ -440,8 +483,19 @@ function mapOverride(r: OverrideRow): Override {
     videoUrl: r.video_url ?? null,
     gallery: cleanGallery(r.gallery),
     proPrice: r.pro_price == null ? null : money(num(r.pro_price)),
+    /* The ladder and the first rung's price are one fact stored twice — the
+       column `price` predates `sizes` and everything older reads it. So the
+       ladder that leaves here always agrees with it: `price` wins on rung 0. */
+    sizes: sizesWithPrice(cleanSizes(r.sizes), r.price == null ? null : money(num(r.price))),
+    hidden: r.hidden === true,
     updatedAt: r.updated_at ? new Date(r.updated_at as string).toISOString() : null,
   };
+}
+
+/** The ladder with `price` (the older, single-value override) on its first rung. */
+function sizesWithPrice(sizes: SizeRung[] | null, price: number | null): SizeRung[] | null {
+  if (!sizes || !sizes.length || price == null) return sizes;
+  return sizes.map((r, i) => (i === 0 ? { size: r.size, price } : r));
 }
 
 /** Every override, or just the ones for the given product ids. */
@@ -469,7 +523,7 @@ export async function getOverrides(ids?: string[]): Promise<Record<string, Overr
     for (const [id, stock] of Object.entries(derived)) {
       out[id] = out[id]
         ? { ...out[id], stock }
-        : { price: null, stock, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null };
+        : { price: null, stock, seoTitle: null, seoDesc: null, subcat: null, varImg: null, videoUrl: null, gallery: null, proPrice: null, sizes: null, hidden: false, updatedAt: null };
     }
   } catch (err) {
     console.error("[orders] inventory stock derivation failed, using manual overrides:", err);
@@ -504,6 +558,15 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
     cols.gallery = list == null ? null : jsonbParam(list);
   }
   if ("proPrice" in patch) cols.pro_price = patch.proPrice == null ? null : money(num(patch.proPrice));
+  /* The size ladder: the whole list every time, `null` giving it back to the
+     catalogue file. Saving the ladder also writes `price`, because the two
+     are one fact (see mapOverride) and everything older reads `price` alone. */
+  if ("sizes" in patch) {
+    const ladder = cleanSizes(patch.sizes);
+    cols.sizes = ladder == null ? null : jsonbParam(ladder);
+    if (ladder && ladder.length && !("price" in patch)) cols.price = money(ladder[0].price);
+  }
+  if ("hidden" in patch) cols.hidden = patch.hidden === true;
 
   if (cols.stock != null && !["in", "low", "out"].includes(String(cols.stock))) {
     throw new OrderError("bad_stock", String(cols.stock));
@@ -511,7 +574,7 @@ export async function upsertOverride(productId: string, patch: Partial<Override>
 
   const keys = Object.keys(cols);
   const params: unknown[] = [productId, ...keys.map((k) => cols[k])];
-  const JSONB = new Set(["var_img", "gallery"]);
+  const JSONB = new Set(["var_img", "gallery", "sizes"]);
   const holes = keys.map((k, i) => (JSONB.has(k) ? `$${i + 2}::jsonb` : `$${i + 2}`));
   const sql = keys.length
     ? `insert into product_overrides (product_id, ${keys.join(", ")}, updated_at)
@@ -594,6 +657,19 @@ export async function listAudit(limit = 100): Promise<AuditRow[]> {
 /* ---------- pricing ------------------------------------------------------ */
 
 type PricedLine = OrderItem;
+
+/**
+ * The owner's own size ladder for a product, in the shape variantOf() reads —
+ * or null when he has not saved one and the catalogue file still decides.
+ * A single rung with no label is «один объём» and is not a ladder at all:
+ * it prices through `price` exactly as it always has.
+ */
+export function overrideLadder(o: Override | undefined | null): { sizes: string[]; prices: number[] } | null {
+  const rungs = o?.sizes;
+  if (!rungs || !rungs.length) return null;
+  if (rungs.length === 1 && !rungs[0].size) return null;
+  return { sizes: rungs.map((r) => r.size), prices: rungs.map((r) => r.price) };
+}
 
 function variantOf(
   productId: string,
@@ -693,7 +769,8 @@ function bundlePrice(def: BundleDef, overrides: Record<string, Override>): numbe
   for (const part of parts) {
     const p = BY_ID.get(part.id);
     if (!p) continue;
-    const v = variantOf(part.id, part.variant ?? part.size);
+    // migration 147: an owner-saved ladder decides this part's size price too
+    const v = variantOf(part.id, part.variant ?? part.size, overrideLadder(overrides[part.id]));
     const base = v.price != null && Number.isFinite(v.price) ? v.price : p.p;
     const o = overrides[part.id];
     const unit = o?.price != null ? o.price : base;
@@ -812,8 +889,22 @@ export async function priceItems(
     // наличии» is the honest refusal for something the owner took off sale
     const stock: StockState = own && own.min.s === "out" ? "out" : (o?.stock ?? (p.s as StockState)) || "in";
     if (stock === "out") throw new OrderError("out_of_stock", raw.id);
+    /* «Показывать в магазине» switched off (product_overrides.hidden,
+       migration 147). The storefront drops such a line from the basket at
+       boot; a basket that reaches the server anyway — an old tab, a replayed
+       payload — is refused with the same words a sold-out product gets,
+       because from the shopper's side that is exactly what it is. */
+    if (o?.hidden) throw new OrderError("out_of_stock", raw.id);
 
-    const v = variantOf(raw.id, raw.variant, own?.variants);
+  /* The ladder the owner saved in the editor (product_overrides.sizes,
+       migration 147) is the whole truth about this product's sizes wherever
+       it exists: «+ Размер» adds a rung the generated catalogue file has
+       never heard of, «×» takes one away, and the cart, the shelf and the
+       storefront all have to agree with the editor about which rungs exist.
+       Below it, the owner's own product's ladder, then the file's. */
+    const ownLadder = overrideLadder(o);
+    const ladder = ownLadder ?? own?.variants ?? VARIANTS[raw.id];
+    const v = variantOf(raw.id, raw.variant, ladder);
     /* A size the product does not have — «250 ml» against a «250 мл» ladder,
        an index past the end — used to fall through to the base price with
        the browser's label kept on the line: a tampered cart bought the big
@@ -821,15 +912,17 @@ export async function priceItems(
        label said. With a ladder to check against, an unknown size is refused
        (security re-audit 04.09.2026). A product with no ladder keeps taking
        whatever label the cart carries, priced at its one price, as before. */
-    const ladder = own?.variants ?? VARIANTS[raw.id];
     if (ladder && ladder.sizes.length && raw.variant != null && raw.variant !== "" && v.price == null) {
       throw new OrderError("bad_variant", raw.id);
     }
     /* An override price replaces the base price; a size that costs more keeps
        its premium over the base, so «−1 € on the 75 ml» does not silently
-       hand away 16 € on the 500 ml. */
+       hand away 16 € on the 500 ml. An owner-saved ladder needs none of that
+       arithmetic: every rung on it already carries the price he typed. */
     let unit: number;
-    if (o?.price != null) {
+    if (ownLadder) {
+      unit = v.price != null && Number.isFinite(v.price) ? v.price : ownLadder.prices[0];
+    } else if (o?.price != null) {
       unit = v.price != null && Number.isFinite(v.price) ? money(o.price + (v.price - p.p)) : o.price;
     } else {
       unit = v.price != null && Number.isFinite(v.price) ? v.price : p.p;

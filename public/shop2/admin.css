@@ -662,6 +662,8 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   gap: 12px; padding: 0 14px; border: 1px solid var(--a-rule); background: var(--a-paper);
 }
 .adm-switch[aria-disabled="true"] { color: var(--a-muted); }
+/* the same box as a real control — «Показывать в магазине» in the editor */
+button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left; }
 .adm-switch__t { width: 44px; height: 26px; border: 1px solid var(--a-ink); position: relative; flex: none; }
 .adm-switch__t i { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: var(--a-ink); transition: left .15s; }
 .adm-switch__t.is-on { background: var(--a-ink); }

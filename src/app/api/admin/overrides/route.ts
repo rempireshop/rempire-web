@@ -18,7 +18,7 @@
  * GET returns the same map as /api/overrides but uncached, for the panel.
  */
 import { requireAdmin } from "@/lib/auth";
-import { getOverrides, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
+import { getOverrides, MAX_SIZES, OrderError, upsertOverride, writeAuditSafe, type Override } from "@/lib/orders";
 import {
   getDescriptionOverrides,
   setDescriptionOverride,
@@ -31,7 +31,8 @@ type OverrideOut = Override & { description?: DescriptionOverride | null; seo?: 
 function emptyOverride(): Override {
   return {
     price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
-    varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null,
+    varImg: null, videoUrl: null, gallery: null, proPrice: null,
+    sizes: null, hidden: false, updatedAt: null,
   };
 }
 
@@ -99,6 +100,12 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
   // wholesale/loyalty: the salon/pro price for this one product — null clears
   // it back to base price × (1 − settings.pricing.proDiscountPct/100).
   pick(["proPrice", "pro_price"], "proPrice");
+  /* migration 147 — the editor's «+ Размер» / «×» and «Показывать в магазине».
+     The ladder travels whole (a merge cannot say «this rung is gone»), goes
+     through cleanSizes() in upsertOverride, and `null` gives the product back
+     to the generated catalogue file. */
+  pick(["sizes"], "sizes");
+  pick(["hidden"], "hidden");
   if ("price" in patch && patch.price != null) {
     const n = Number(patch.price);
     if (!Number.isFinite(n) || n < 0 || n > 100000) throw new OrderError("bad_price", id);
@@ -118,6 +125,17 @@ function normalise(raw: Record<string, unknown>): { id: string; patch: Partial<O
       v.every((n) => typeof n === "number" && Number.isInteger(n) && n >= -1 && n <= 999);
     if (!ok) throw new OrderError("bad_body", "varImg");
   }
+  /* The ladder is either a list or `null`; a scalar or an object is a caller
+     that thinks it is sending something else, and silently storing null for
+     it would wipe the sizes the owner had. cleanSizes() (src/lib/orders.ts)
+     drops the rungs inside it that make no sense. */
+  if ("sizes" in patch && patch.sizes != null && !Array.isArray(patch.sizes)) {
+    throw new OrderError("bad_body", "sizes");
+  }
+  if ("sizes" in patch && Array.isArray(patch.sizes) && patch.sizes.length > MAX_SIZES) {
+    throw new OrderError("bad_body", "sizes");
+  }
+  if ("hidden" in patch && typeof patch.hidden !== "boolean") throw new OrderError("bad_body", "hidden");
   return { id, patch };
 }
 

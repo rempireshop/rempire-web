@@ -112,7 +112,8 @@ export async function GET() {
     for (const [id, description] of Object.entries(descriptions)) {
       Object.assign(overrides[id] ??= {
         price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
-        varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null,
+        varImg: null, videoUrl: null, gallery: null, proPrice: null,
+        sizes: null, hidden: false, updatedAt: null,
       }, { description });
     }
     /* The per-language Google title/description (src/lib/product-seo.ts):
@@ -122,7 +123,8 @@ export async function GET() {
     for (const [id, seo] of Object.entries(seos)) {
       Object.assign(overrides[id] ??= {
         price: null, stock: null, seoTitle: null, seoDesc: null, subcat: null,
-        varImg: null, videoUrl: null, gallery: null, proPrice: null, updatedAt: null,
+        varImg: null, videoUrl: null, gallery: null, proPrice: null,
+        sizes: null, hidden: false, updatedAt: null,
       }, { seo });
     }
     const published = Object.fromEntries(

@@ -1437,7 +1437,13 @@
       "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dim. Kõike muud sellel lehel muudate ise.",
       "Нет в наличии": "Pole laos",
       "Показывать в магазине": "Näidata poes",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Kõik kataloogi tooted on poes näha. Toote päriselt eemaldamiseks kirjutage Dimile; müügi peatamiseks valige «Pole laos».",
+      "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть.":
+        "Toode on poest eemaldatud: seda pole ei kataloogis, ei otsingus ega komplektides. Tagasi toomiseks lülitage lüliti sisse.",
+      "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.":
+        "Lülitage välja — ja toode kaob poest: kataloogist, otsingust ja komplektidest. Kui soovite lihtsalt müügi peatada, valige «Pole laos» — leht jääb alles.",
+      "Товар убран из магазина ✓": "Toode on poest eemaldatud ✓", "Товар снова в магазине ✓": "Toode on jälle poes ✓",
+      "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе».":
+        "Igal mahul on oma hind. Esimest mahtu näeb ostja esimesena. «×» eemaldab mahu poest — selle mahu jääk ja triipkood jäävad «Lattu» alles.",
       "Салон, €": "Salong, €",
       "Остаток": "Jääk",
       "Штрихкод": "Triipkood",
@@ -3235,7 +3241,13 @@
       "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dim changes those. Everything else on this page is yours to edit.",
       "Нет в наличии": "Out of stock",
       "Показывать в магазине": "Show in the shop",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Every catalogue product is visible in the shop. To remove one for good, write to Dim; to simply stop selling it, choose «Out of stock».",
+      "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть.":
+        "The product is out of the shop: it is not in the catalogue, the search or the sets. Switch it back on to bring it back.",
+      "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.":
+        "Switch this off and the product leaves the shop: the catalogue, the search and the sets. To simply stop selling it, choose «Out of stock» — the page stays.",
+      "Товар убран из магазина ✓": "The product is out of the shop ✓", "Товар снова в магазине ✓": "The product is back in the shop ✓",
+      "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе».":
+        "Each size has its own price. The customer sees the first size first. «×» removes a size from the shop — that size's stock and barcode stay in «Stock».",
       "Салон, €": "Salon, €",
       "Остаток": "Stock",
       "Штрихкод": "Barcode",
@@ -11199,7 +11211,9 @@
     var own = CATALOGUE.filter(function (p) { return p.custom; });
     var file = CATALOGUE.filter(function (p) { return !p.custom; });
     var hidden = (S.customAll || []).filter(function (c) { return c && c.active === false && !byIdOrNull(c.id); }).map(customProduct);
-    return own.concat(file, hidden);
+    // migration 147: a catalogue product switched off «Показывать в магазине»
+    // is out of CATALOGUE — the panel is the one place it must still be found
+    return own.concat(file, hidden, hiddenFileProducts());
   }
   function admCatalogRows() {
     var q = (S.goodsQ || "").toLowerCase().trim();
@@ -11228,7 +11242,8 @@
       : S.lang === "EN" ? eur(lo) + "–" + eur(hi).replace(/^€/, "")
       : eur(lo).replace(/\s?€$/, "") + "–" + eur(hi);
     // product creation: a hidden custom product says so instead of a stock badge
-    var badge = p.custom && p.active === false ? ["Скрыт", "adm-badge--quiet"]
+    // — migration 147: and so does a catalogue product taken out of the shop
+    var badge = (p.custom && p.active === false) || shopHidden(p.id) ? ["Скрыт", "adm-badge--quiet"]
       : p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
       : p.stock === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
     var fresh = p.custom && p.active !== false && (customFresh(p) || (S.goodsFresh && S.goodsFresh[p.id]));
@@ -11539,6 +11554,14 @@
   function admSwitch(attrs, on, label) {
     return '<button class="adm-sw" ' + attrs + ' aria-pressed="' + !!on +
       '" title="' + label + '" aria-label="' + label + '"><i></i></button>';
+  }
+  /** The same switch where the label belongs INSIDE the control rather than in
+      a row beside it — the editor's «Показывать в магазине» box, which the
+      design draws as one bordered line of «name … toggle». */
+  function admLabelledSwitch(attrs, label, on) {
+    return '<button class="adm-switch" type="button" ' + attrs + ' aria-pressed="' + !!on + '">' +
+      "<span>" + label + "</span>" +
+      '<span class="adm-switch__t' + (on ? " is-on" : "") + '" aria-hidden="true"><i></i></span></button>';
   }
   /** A segmented control — RU · ET · EN above the letter and the article. */
   function admSegHTML(attr, items, cur, aria) {
@@ -14763,7 +14786,12 @@
     var p = byIdOrNull(id);
     if (p) return p;
     var c = findCustom(id);
-    return c ? customProduct(c) : byId(id);
+    if (c) return customProduct(c);
+    /* migration 147: a product the owner switched off «Показывать в магазине»
+       is not in CATALOGUE at all any more — byId() would answer with the
+       first product in the shop and the editor would open the wrong one. */
+    for (var i = 0; i < FILE_PRODUCTS.length; i++) if (FILE_PRODUCTS[i].id === id) return FILE_PRODUCTS[i];
+    return byId(id);
   }
   /** The size rows a custom product is edited with — {size, price} per row,
       size "" for the single-price case. The list lives in S so «+ Размер»
@@ -14869,13 +14897,15 @@
             [["in", "В наличии"], ["low", "Мало"], ["out", "Нет в наличии"]].map(function (o) {
               return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
             }).join("") + "</select></label>" +
-          /* The switch the design asks for, honestly dead: there is no
-             `hidden` column in product_overrides and no route that writes one
-             (src/app/api/admin/overrides), so it shows the truth — every
-             catalogue product is in the shop — and says who can change that. */
-          '<span class="adm-switch" aria-disabled="true"><span>Показывать в магазине</span>' +
-            '<span class="adm-switch__t is-on" aria-hidden="true"><i></i></span></span>' +
-          '<p class="adm-hint">Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».</p>' +
+          /* product_overrides.hidden (migration 147). Off = the product is
+             gone from the shop, the search, the sets and the sitemap — not
+             the same thing as «нет в наличии», which is a page a customer may
+             still land on and wait at. Applied on the spot with the toast's
+             undo, like every other reversible switch. */
+          admLabelledSwitch('data-edhidden="' + esc(p.id) + '"', "Показывать в магазине", !shopHidden(p.id)) +
+          '<p class="adm-hint">' + (shopHidden(p.id)
+            ? "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть."
+            : "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.") + "</p>" +
           '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>' +
         "</div>" +
       "</div></div>";
@@ -14951,46 +14981,55 @@
       (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
       "</div>";
   }
+  /* «+ Размер» and «×» for a CATALOGUE product (migration 147). The volumes
+     used to be the generated file's alone, so both buttons were dead and only
+     the first price was editable. Now the whole ladder is the owner's: the
+     rows below are the same {size, price} list the owner's own products are
+     edited with (edSizeRows / S.goodsSizes), saved as product_overrides.sizes,
+     and «Сохранить» writes it whole — which is the only shape in which «this
+     volume is gone» can be said at all. The «Остаток» and «Штрихкод» columns
+     stay the warehouse's, keyed by the volume's label, so renaming a volume
+     starts a new shelf line rather than silently moving the old one. */
   function edPaneSizes(p) {
     if (p.custom) return edPaneSizesOwn(p);   // product creation
     loadStockLevels(false);
-    var sizes = (p.sizes && p.sizes.length) ? p.sizes : [""];
-    var prices = (p.prices && p.prices.length) ? p.prices : [p.price];
+    var rows0 = edSizeRows(p), n = rows0.length;
+    var multi = n > 1 || (n === 1 && !!rows0[0].size);
     var head = '<div class="adm-grid__head"><span>Размер</span><span>Цена, €</span><span>Салон, €</span>' +
       "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
-    var rows = sizes.map(function (sz, i) {
+    var rows = rows0.map(function (r, i) {
+      var sz = multi ? r.size : "";
       var lv = edStockFor(p, sz);
-      var price = prices[Math.min(i, prices.length - 1)];
+      var price = r.price === "" || r.price == null ? "" : String(r.price);
       var key = stockKey(p.id, sz);
       var qty = lv && lv.tracked ? String(lv.qty) : "";
       var low = lv && lv.tracked && lv.qty <= 3;
-      /* Only the first size has a price of its own here, because that is the
-         only one the shop stores: product_overrides.price patches p.price and
-         p.prices[0] (applyDemoOverrides). The rest are the catalogue's, shown
-         so the owner sees the whole ladder — read-only rather than editable
-         and quietly dropped. */
+      var salon = edSalonOf(goodsPrice(price) || 0);
       return '<div class="adm-grid__row">' +
-        '<span class="adm-grid__sz">' + (sz ? esc(sz) : "один объём") + "</span>" +
-        edCell("", "Цена, €", i === 0
-          ? '<input class="adm-input adm-input--cell" data-edprice inputmode="decimal" value="' + price + '" aria-label="Цена, €">'
-          : '<input class="adm-input adm-input--cell" value="' + price + '" readonly aria-label="Цена, €">') +
+        (multi
+          ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) +
+            '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
+          : '<span class="adm-grid__sz">один объём</span>') +
+        edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
+          '" inputmode="decimal" value="' + esc(price) + '" placeholder="12,50" aria-label="Цена, €">') +
         edCell("", "Салон, €", i === 0
           ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
             '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
-            '" placeholder="' + edSalonOf(price) + '" aria-label="Салон, €">'
-          : '<input class="adm-input adm-input--cell" value="' + edSalonOf(price) + '" readonly aria-label="Салон, €">') +
+            '" placeholder="' + salon + '" aria-label="Салон, €">'
+          : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
         edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
           '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
         edEanCell(key, lv && lv.ean) +
-        '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дим" aria-label="Убрать размер">×</button>' +
+        '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
+          ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
       "</div>";
     }).join("");
     return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
       '<div class="adm-grid">' + head + rows + "</div>" +
-      // the same reason as the «×» above and the hint below it — «скоро» said
-      // a third thing, and a title is invisible on the phone anyway
-      '<button class="adm-btn adm-btn--dash" type="button" disabled title="Объёмы заводит Дим" aria-label="Добавить размер — объёмы заводит Дим">+ Размер</button>' +
-      '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
+      '<button class="adm-btn adm-btn--dash" type="button" data-edsizeadd>+ Размер</button>' +
+      '<p class="adm-hint">' + (multi
+        ? "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе»."
+        : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
       '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       edEanHint() +
       "</div>";
@@ -15163,6 +15202,45 @@
     goodsFail(e[0], focusSel || e[1]);
   }
   /** The row the form describes, or null after goodsFail() said why not. */
+  /* migration 147: the size ladder as the form has it right now, [{size,
+     price}], or null when something in it is wrong (the offending cell is
+     focused and the error line written, exactly as customRowFromForm does —
+     this is the same validation, shared so a catalogue product and the
+     owner's own cannot start disagreeing about what a volume may be called). */
+  function edLadderFromForm(p) {
+    var rows = edSizeRowsRead(p);
+    var multi = rows.length > 1 || (rows.length === 1 && !!String(rows[0].size || "").trim());
+    var out = [], seen = {};
+    for (var i = 0; i < rows.length; i++) {
+      var price = goodsPrice(rows[i].price);
+      if (price === null) { customFail("bad_price", '[data-edpx="' + i + '"]'); return null; }
+      var label = multi ? String(rows[i].size || "").trim() : "";
+      if (multi) {
+        if (!label) { customFail("bad_size", '[data-edsz="' + i + '"]'); return null; }
+        if (seen[label.toLowerCase()]) { customFail("sizes_duplicate", '[data-edsz="' + i + '"]'); return null; }
+        seen[label.toLowerCase()] = true;
+      }
+      out.push({ size: label, price: price });
+    }
+    if (out.length > 12) { customFail("too_many_sizes"); return null; }
+    return out;
+  }
+  /** The ladder the shop has for a product now — what the form is compared to. */
+  function edLadderNow(p) {
+    var sizes = (p.sizes && p.sizes.length) ? p.sizes : [""];
+    var prices = (p.prices && p.prices.length) ? p.prices : [p.price];
+    return sizes.map(function (s, i) {
+      return { size: String(s || ""), price: Number(prices[Math.min(i, prices.length - 1)]) };
+    });
+  }
+  function edLadderSame(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (String(a[i].size) !== String(b[i].size)) return false;
+      if (Math.abs(Number(a[i].price) - Number(b[i].price)) > 0.001) return false;
+    }
+    return true;
+  }
   function customRowFromForm(p) {
     var g = function (sel) { var e = document.querySelector(sel); return e ? e.value.trim() : ""; };
     var brand = g("[data-edbrand]"), name = g("[data-edname]"), cat = g("[data-edcat]") || p.cat;
@@ -16903,6 +16981,9 @@
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
     proPrice: {}, // wholesale/loyalty: product_overrides.pro_price, per product id — null/absent = computed from the global discount
+    // migration 147: the whole size ladder the owner saved, per product id,
+    // and the products he switched off «Показывать в магазине»
+    sizes: {}, hidden: {},
     gallery: {},  // media: photos the owner uploaded, per product id
     desc: {},     // assistant-work: product_overrides.description {RU,ET,EN}, per product id
     hero: null,   // null = the built-in banner (heroDefault())
@@ -16925,6 +17006,7 @@
       DEMO.price = _dj.price || {}; DEMO.stock = _dj.stock || {}; DEMO.seo = _dj.seo || {};
       DEMO.subcat = _dj.subcat || {}; DEMO.varimg = _dj.varimg || {};
       DEMO.proPrice = _dj.proPrice || {};   // wholesale/loyalty: pro-price overrides
+      DEMO.sizes = _dj.sizes || {}; DEMO.hidden = _dj.hidden || {};   // migration 147
       DEMO.video = _dj.video || {};   // features: product video links
       DEMO.gallery = _dj.gallery || {};   // media: uploaded photos
       DEMO.desc = _dj.desc || {};   // assistant-work: description overrides
@@ -16941,6 +17023,20 @@
     }
   } catch (e) {}
   function demoSave() { try { localStorage.setItem(ADM_LS, JSON.stringify(DEMO)); } catch (e) {} }
+  /* «+ Размер» / «×» (migration 147): one shape for the size ladder wherever
+     it comes from — the server's [{size, price}] or the editor's rows, whose
+     price is still a string the owner typed. A rung whose price is not a
+     number is dropped here rather than shown as «NaN €» in the shop. */
+  function sizeLadder(list) {
+    var out = [];
+    for (var i = 0; i < (list || []).length && out.length < 12; i++) {
+      var r = list[i] || {};
+      var price = Number(String(r.price == null ? "" : r.price).trim().replace(",", "."));
+      if (!isFinite(price) || price < 0 || price > 100000) continue;
+      out.push({ size: String(r.size == null ? "" : r.size).trim().slice(0, 30), price: Math.round(price * 100) / 100 });
+    }
+    return out;
+  }
   /* One shape for the Google title/description override, whatever wrote it:
      {t, d} from the older panel (= Russian), {RU:{t,d}, ET:{…}, EN:{…}} from
      this one, {RU:{title, desc}, …} from the server. Empty strings are
@@ -17001,6 +17097,10 @@
      has to put the original price back, not merely stop overwriting it. */
   function baseOf(p) {
     return { price: p.price, prices: p.prices ? p.prices.slice() : null,
+      /* «+ Размер» / «×» (product_overrides.sizes, migration 147): the ladder
+         the file or the row shipped with, so removing the owner's own ladder
+         puts the original volumes back rather than merely stopping to add. */
+      sizes: p.sizes ? p.sizes.slice() : null, priceFrom: !!p.priceFrom,
       stock: p.stock, seo: p.seo, varImg: p.varImg ? p.varImg.slice() : null,
       // media: the catalogue's own photos, so deleting an upload brings them back
       img: p.img, gallery: p.gallery ? p.gallery.slice() : null,
@@ -17009,6 +17109,23 @@
       seoOv: p.seoOv || null, descOv: p.descOv || null };
   }
   var BASE = CATALOGUE.map(baseOf);
+
+  /* ---------- «Показывать в магазине» -------------------------------------
+     product_overrides.hidden (migration 147). A hidden product leaves the
+     shop the same way an owner's product taken off sale does: it is REMOVED
+     from CATALOGUE rather than flagged inside it, so every reader — the
+     categories, the search, the brand pages, the sets, the chat, the related
+     rail, the sitemap route — is right without any of them learning a new
+     rule. What that costs is a list to rebuild from, kept here, and the
+     panel's own list (admCatalogList) putting the hidden ones back at the
+     end with «Скрыт» beside them, exactly as it already does for the owner's
+     own hidden products. */
+  var FILE_PRODUCTS = CATALOGUE.slice(), FILE_BASE = BASE.slice();
+  function shopHidden(id) { return !!(DEMO.hidden && DEMO.hidden[id]); }
+  /** The file's products the owner has hidden — the panel still lists them. */
+  function hiddenFileProducts() {
+    return FILE_PRODUCTS.filter(function (p) { return shopHidden(p.id); });
+  }
 
   /* ---------- product creation: the owner's own products -------------------
      The catalogue is a file (public/shop/catalogue2.js) and the panel cannot
@@ -17050,15 +17167,20 @@
   /** The feed's rows (or the offline copy) become products: every custom entry
       already in CATALOGUE is replaced, the hidden ones are left out, the
       order of the file's own products is untouched. Idempotent. */
-  function adoptCustom(list) {
-    var keep = [], keepBase = [];
-    for (var i = 0; i < CATALOGUE.length; i++) {
-      if (!CATALOGUE[i].custom) { keep.push(CATALOGUE[i]); keepBase.push(BASE[i]); }
-    }
+  var CUSTOM_ROWS = [];
+  function adoptCustom(list) { CUSTOM_ROWS = (list || []).slice(); rebuildCatalogue(); }
+  /** CATALOGUE and BASE from scratch: the file's products that are not hidden,
+      in the file's order, then the owner's active, not-hidden rows. Both
+      «Показывать в магазине» and an adoption go through here, so they cannot
+      undo each other. Idempotent. */
+  function rebuildCatalogue() {
     CATALOGUE.length = 0; BASE.length = 0;
-    for (var k = 0; k < keep.length; k++) { CATALOGUE.push(keep[k]); BASE.push(keepBase[k]); }
-    (list || []).forEach(function (c) {
-      if (!c || !c.id || c.active === false) return;
+    for (var i = 0; i < FILE_PRODUCTS.length; i++) {
+      if (shopHidden(FILE_PRODUCTS[i].id)) continue;
+      CATALOGUE.push(FILE_PRODUCTS[i]); BASE.push(FILE_BASE[i]);
+    }
+    CUSTOM_ROWS.forEach(function (c) {
+      if (!c || !c.id || c.active === false || shopHidden(c.id)) return;
       var p = customProduct(c);
       CATALOGUE.push(p); BASE.push(baseOf(p));
       // BRAND_BY_SLUG is built further down at boot (and then covers these);
@@ -17117,11 +17239,35 @@
       var p = CATALOGUE[i], b = BASE[i];
       p.price = b.price;
       if (b.prices) p.prices = b.prices.slice();
+      if (b.sizes) p.sizes = b.sizes.slice(); else delete p.sizes;
+      if (b.priceFrom) p.priceFrom = true; else delete p.priceFrom;
       p.stock = b.stock;
       p.seo = b.seo;
       if (b.varImg) p.varImg = b.varImg.slice();
       p.img = b.img;
       if (b.gallery) p.gallery = b.gallery.slice(); else delete p.gallery;
+      /* «+ Размер» / «×» (migration 147): the owner's ladder replaces the
+         file's whole list of volumes, not just its first price — that is the
+         only shape in which «this volume is gone» can be said at all. One
+         rung with no label is the single-price case and leaves the product
+         without volumes, exactly as the file writes it. */
+      var lad = DEMO.sizes && DEMO.sizes[p.id];
+      if (lad && lad.length) {
+        if (lad.length === 1 && !lad[0].size) {
+          delete p.sizes; delete p.prices; delete p.priceFrom; delete p.varImg;
+          p.price = lad[0].price;
+        } else {
+          p.sizes = lad.map(function (r) { return r.size; });
+          p.prices = lad.map(function (r) { return r.price; });
+          p.price = p.prices[0];
+          p.priceFrom = Math.min.apply(null, p.prices) !== Math.max.apply(null, p.prices);
+          // a per-size photo map from a ladder of another length would point
+          // «500 мл» at a photo that is not there — trimmed and padded here
+          if (p.varImg) {
+            p.varImg = p.sizes.map(function (_s, k) { return p.varImg[k] != null ? p.varImg[k] : 0; });
+          }
+        }
+      }
       if (DEMO.price[p.id] != null) {
         p.price = DEMO.price[p.id];
         if (p.prices && p.prices.length) p.prices[0] = DEMO.price[p.id];
@@ -17199,9 +17345,13 @@
     DEMO.gallery = {};   // media
     DEMO.desc = {};   // assistant-work
     DEMO.proPrice = {};   // wholesale/loyalty
+    DEMO.sizes = {}; DEMO.hidden = {};   // migration 147
     Object.keys(ov).forEach(function (id) {
       var o = ov[id] || {};
       if (o.price != null) DEMO.price[id] = o.price;
+      // migration 147: the whole size ladder and «Показывать в магазине»
+      if (Array.isArray(o.sizes) && o.sizes.length) DEMO.sizes[id] = sizeLadder(o.sizes);
+      if (o.hidden === true) DEMO.hidden[id] = true;
       if (o.proPrice != null) DEMO.proPrice[id] = o.proPrice;   // wholesale/loyalty
       if (o.stock) DEMO.stock[id] = o.stock;
       if (Array.isArray(o.gallery) && o.gallery.length) DEMO.gallery[id] = o.gallery;   // media
@@ -17216,6 +17366,14 @@
       if (o.description && typeof o.description === "object" && (o.description.RU || o.description.ET || o.description.EN)) {
         DEMO.desc[id] = o.description;
       }
+    });
+    /* «Показывать в магазине»: the hidden map is only known now, so the shop's
+       product list is rebuilt after it — and a basket holding something the
+       owner has just taken out of the shop loses that line, the same rule the
+       custom-product filter above follows. */
+    rebuildCatalogue();
+    S.cart = S.cart.filter(function (l) {
+      return l.type === "bundle" || l.type === "gift" || !shopHidden(l.id);
     });
     var s = j.settings || {};
     if (typeof s.chatbot === "boolean") DEMO.chatbot = s.chatbot;
@@ -17307,6 +17465,11 @@
     // to base price × (1 − discount%), same PUT the retail price uses
     else if (a.type === "set_pro_price") srvSaved(apiSend(ov, "PUT", { id: a.id, proPrice: a.value }));
     else if (a.type === "set_stock") srvSaved(apiSend(ov, "PUT", { id: a.id, stock: a.value }));
+    /* migration 147: the whole ladder (null = back to the catalogue file's
+       volumes) and «Показывать в магазине» — both product_overrides columns,
+       both written through the same PUT their neighbours use. */
+    else if (a.type === "set_sizes") srvSaved(apiSend(ov, "PUT", { id: a.id, sizes: (a.value && a.value.length) ? sizeLadder(a.value) : null }));
+    else if (a.type === "set_hidden") srvSaved(apiSend(ov, "PUT", { id: a.id, hidden: !!a.value }));
     /* inventory: a ± on the «Склад» row is a relative move, so undo is simply
        the same call with the opposite sign — POST /api/admin/inventory/moves/
        takes `delta` for exactly this (src/app/api/admin/inventory/moves). */
@@ -17765,6 +17928,21 @@
     // wholesale/loyalty: a.value null means "cleared back to the global discount"
     if (a.type === "set_pro_price") return "Цена для салонов «" + (p ? p.brand + " " + p.name : a.id) + "»: " + (a.value == null ? "по умолчанию (скидка)" : eur(a.value));
     if (a.type === "set_stock") return "Наличие «" + (p ? p.name : a.id) + "»: " + ({ in: "в наличии", low: "мало", out: "нет" })[a.value];
+    /* migration 147 — «+ Размер», «×» and «Показывать в магазине». byId()
+       cannot help for a hidden product: it is not in CATALOGUE any more,
+       which is the whole point, so the action carries the name it was made
+       under and the line reads the same after a reload. */
+    if (a.type === "set_sizes") {
+      var lad = sizeLadder(a.value);
+      return "Объёмы «" + (a.name || (p ? p.brand + " " + p.name : a.id)) + "»: " +
+        (lad.length && (lad.length > 1 || lad[0].size)
+          ? lad.map(function (r) { return (r.size || "—") + " · " + eur(r.price); }).join(" / ")
+          : "один объём");
+    }
+    if (a.type === "set_hidden") {
+      return "Товар «" + (a.name || (p ? p.brand + " " + p.name : a.id)) + "»: " +
+        (a.value ? "убрать из магазина" : "показывать в магазине");
+    }
     // inventory: numeric stock — a.id is empty for these (they key off product_id, not id)
     if (a.type === "stock_adjust" || a.type === "stock_set") {
       var sp = a.product_id && byId(a.product_id);
@@ -18033,6 +18211,22 @@
     // from the global discount" — same null-clears convention as set_seo/set_varimg
     else if (a.type === "set_pro_price") { entry.prev = { type: "set_pro_price", id: a.id, value: DEMO.proPrice[a.id] != null ? DEMO.proPrice[a.id] : null }; DEMO.proPrice[a.id] = a.value; }
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
+    /* migration 147: the size ladder travels whole, so undo is the previous
+       whole ladder — null when the owner had none and the catalogue file's
+       volumes were in force. */
+    else if (a.type === "set_sizes") {
+      entry.prev = { type: "set_sizes", id: a.id, value: DEMO.sizes[a.id] ? DEMO.sizes[a.id].slice() : null, name: a.name };
+      var ladNew = sizeLadder(a.value);
+      if (ladNew.length) DEMO.sizes[a.id] = ladNew; else delete DEMO.sizes[a.id];
+    }
+    /* «Показывать в магазине»: the product leaves the shop's list entirely,
+       so CATALOGUE is rebuilt and any basket line pointing at it is dropped */
+    else if (a.type === "set_hidden") {
+      entry.prev = { type: "set_hidden", id: a.id, value: !a.value, name: a.name };
+      if (a.value) DEMO.hidden[a.id] = true; else delete DEMO.hidden[a.id];
+      rebuildCatalogue();
+      if (a.value) S.cart = S.cart.filter(function (l) { return l.type === "bundle" || l.type === "gift" || l.id !== a.id; });
+    }
     /* inventory + orders: neither has a demo layer — the shelf and the order
        row live on the server. What these two branches add is the JOURNAL entry
        and, in `prev`, the action that puts the change back; srvPush() carries
@@ -18195,6 +18389,15 @@
     if (a.type === "set_price") DEMO.price[a.id] = a.value;
     else if (a.type === "set_pro_price") DEMO.proPrice[a.id] = a.value;
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
+    else if (a.type === "set_sizes") {   // migration 147
+      var ladBack = sizeLadder(a.value);
+      if (ladBack.length) DEMO.sizes[a.id] = ladBack; else delete DEMO.sizes[a.id];
+      S.goodsSizes = null;   // the open editor re-reads the ladder it now has
+    }
+    else if (a.type === "set_hidden") {
+      if (a.value) DEMO.hidden[a.id] = true; else delete DEMO.hidden[a.id];
+      rebuildCatalogue();
+    }
     /* inventory + orders: srvPush() at the bottom of this function is the
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
@@ -19970,7 +20173,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-edhidden]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -20464,9 +20667,22 @@
       S.goodsSizes = null;
       toast("Снова в продаже ✓", showEntry); render(); return;
     }
+    /* «Показывать в магазине» (migration 147). Reversible and instant, like
+       every other switch: the toast's «Отменить» and the journal's «Вернуть»
+       are the way back, no confirm card. */
+    if (d.edhidden !== undefined) {
+      var hidP = admEditProduct(d.edhidden);
+      if (!hidP || hidP.custom) return;
+      var hidWant = shopHidden(hidP.id);   // pressed while hidden = show again
+      var hidEntry = demoApply({ type: "set_hidden", id: hidP.id, value: !hidWant,
+        name: hidP.brand + " — " + hidP.name });
+      render();
+      toast(hidWant ? "Товар снова в магазине ✓" : "Товар убран из магазина ✓", hidEntry);
+      return;
+    }
     if (d.edsizeadd !== undefined || d.edsizedel !== undefined) {
       var szP = admEditProduct(S.adminEdit);
-      if (!szP.custom) return;
+      if (!szP || szP.isNew && !szP.custom) return;
       var szRows = edSizeRowsRead(szP);
       if (d.edsizeadd !== undefined) {
         if (szRows.length >= 12) { goodsFail("Больше 12 объёмов не нужно."); return; }
@@ -20481,7 +20697,7 @@
       var szPane = document.querySelector('[data-edpane="sizes"]');
       if (szPane) {
         var szTpl = document.createElement("template");
-        szTpl.innerHTML = edPaneSizesOwn(szP);
+        szTpl.innerHTML = szP.custom ? edPaneSizesOwn(szP) : edPaneSizes(szP);
         var szFresh = szTpl.content.firstElementChild;
         translateTree(szFresh);
         szPane.replaceWith(szFresh);
@@ -20762,6 +20978,15 @@
       if (priceEl && np === null) {
         goodsFail("Цена — число от 1 до 500 €, например 12,50.", "[data-edprice]"); return;
       }
+      /* migration 147: the whole size ladder of a catalogue product. Read and
+         checked here, before any write, like everything else in this handler —
+         a half-saved ladder is the one thing the owner could not untangle. */
+      var edLadder = null, edLadderChanged = false;
+      if (!gp.custom && document.querySelector("[data-edpx]")) {
+        edLadder = edLadderFromForm(gp);
+        if (!edLadder) return;
+        edLadderChanged = !edLadderSame(edLadder, edLadderNow(gp));
+      }
       /* A salon price the field only *followed* (data-edauto="1" — nothing
          typed by hand, the value is price × (1 − discount) painted by the
          input handler) is not an override. Saving it as one would freeze the
@@ -20798,7 +21023,14 @@
       goodsErrClear();
 
       var changed = false;
-      if (!gp.custom && np !== null && Math.abs(np - gp.price) > 0.001) {
+      /* A ladder whose volumes moved travels whole (set_sizes, which carries
+         the first price with it); a plain price change on an untouched ladder
+         stays the one-line set_price it has always been, so the journal keeps
+         saying «Цена …» for what is a price change. */
+      if (edLadderChanged) {
+        demoApply({ type: "set_sizes", id: gp.id, value: edLadder,
+          name: gp.brand + " — " + gp.name }); changed = true;
+      } else if (!gp.custom && np !== null && Math.abs(np - gp.price) > 0.001) {
         demoApply({ type: "set_price", id: gp.id, value: np }); changed = true;
       }
       // wholesale/loyalty: salon/pro price — empty field clears the override
