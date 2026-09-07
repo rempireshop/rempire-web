@@ -1,30 +1,53 @@
 #!/usr/bin/env node
 /**
- * Refreshes src/data/montonio-tariffs.json — the fallback carrier tariffs
- * src/lib/shipping/tariffs.ts uses when the live quote is not available.
+ * Rebuilds src/data/montonio-tariffs.json — what a delivery costs Rempire,
+ * which src/lib/shipping/tariffs.ts uses when the per-store live quote is not
+ * available, and which the admin's «Заполнить по тарифам Montonio» button
+ * prices from.
  *
- *   node tools/fetch-montonio-tariffs.mjs                    # EE, LV, LT, FI
+ *   node tools/fetch-montonio-tariffs.mjs                    # every destination
  *   node tools/fetch-montonio-tariffs.mjs --countries ee,lv
  *   node tools/fetch-montonio-tariffs.mjs --dry               # print, write nothing
  *
- * WHY THIS USUALLY HAS NOTHING TO FETCH: unlike the carrier feeds
- * tools/fetch-parcel-points.mjs pulls from, Montonio publishes no public
- * per-carrier/country/size price list — montonio.com/pricing shows a rate
- * comparison table with the actual numbers replaced by dashes, gated behind a
- * signed-in merchant account (checked 03.09.2026, see docs/shipping.md §
- * «Тарифы Montonio»). The only real source is
- * `POST /shipping-methods/rates` (Shipping API v2), and it only answers for
- * carriers this store has *activated* in the Montonio partner portal — so
- * with no keys, or with keys but nothing switched on yet, there is nothing
- * machine-readable to fetch, and this script says so rather than pretending.
+ * TWO SOURCES, in this order of trust:
  *
- * With MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY set (the same pair used for
- * payments and for src/lib/shipping/montonio.ts — MONTONIO_ENV defaults to
- * sandbox), it calls that endpoint for each country and *merges* the answer
- * into the existing JSON: every carrier/method Montonio actually quotes is
- * updated in place: everything else — including every row nobody has
- * activated yet — is left exactly as it was, sourced from the carriers' own
- * published price lists. Nothing is ever deleted by this script.
+ *   1. **Per-store rates** — `POST /shipping-methods/rates` (Shipping API v2),
+ *      authenticated with MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY. This is
+ *      the only source that knows what *this* store pays: its plan, its
+ *      activated carriers, any negotiated override. Used when keys are set.
+ *
+ *   2. **Montonio's own published contract prices** —
+ *      `GET https://shipping.montonio.com/api/v2/contract-prices
+ *           ?carrierCode&shippingMethod&source&destination&weight&length&width&height`
+ *      No auth. This is the endpoint behind Montonio's public shipping
+ *      calculator (https://shipping-calculator.montonio.com, linked from
+ *      help.montonio.com/en/articles/219852-shipping-with-montonio-contracts);
+ *      it answers with the standard Montonio-contract price list — the rows it
+ *      returns carry `storeId: ""` and `contractId: null`, i.e. no store's
+ *      own deal, the list every merchant on Montonio contracts starts from.
+ *      Prices come back **excluding VAT** (the calculator prints "+VAT" under
+ *      each one); this script stores them with Estonian VAT added, because the
+ *      shelf price they are compared against includes VAT too.
+ *
+ * This replaces the previous premise of this file, which was that "Montonio
+ * publishes no public per-carrier/country/size price list" and that with no
+ * keys there was nothing machine-readable to fetch. That was true of
+ * montonio.com/pricing (dashes, gated) and is false of the calculator's
+ * endpoint. The table this script now writes is Montonio's own money, not the
+ * carriers' list prices it used to hold — see docs/shipping.md
+ * § «Тарифы Montonio».
+ *
+ * A route Montonio does not serve answers HTTP 400
+ * `contract_prices_no_applicable_tier`; a route it knows but has no
+ * Montonio-contract price for (a direct-contract-only carrier, e.g. Venipak,
+ * or Omniva to Finland) answers `[]`. Neither is worth listing combination by
+ * combination — nine carriers × two methods × thirty-two countries is mostly
+ * noise about carriers that simply do not operate somewhere. What the output
+ * records instead is the shape a reader actually needs: `notServed`, the
+ * destinations the checkout offers and Montonio will not quote *at all*;
+ * `coverage`, where each carrier that has any price does have one; and
+ * `noMontonioContractPrice`, the carriers Montonio quotes nowhere from
+ * Estonia, which is what "direct contract only" means in practice.
  */
 import { createHmac } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
@@ -34,10 +57,32 @@ import path from "node:path";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "src", "data", "montonio-tariffs.json");
 
+/** Public contract-price endpoint — no auth, live prices, always the live host. */
+const CONTRACT_PRICES = "https://shipping.montonio.com/api/v2/contract-prices";
+/** Rempire ships out of Estonia; every row in the table is a route from EE. */
+const SOURCE_COUNTRY = "EE";
+/** Estonian VAT, as in src/data/montonio-tariffs.json's own `vatRateEE`. */
+const VAT_EE = 0.24;
+
+/** Montonio's `carrierCode` values, from the calculator bundle's own enum. */
+const CARRIERS = ["omniva", "smartpost", "dpd", "venipak", "unisend", "novaPost", "latvian_post", "inpost", "orlen"];
+
+/**
+ * Everywhere the checkout can send a parcel: the four countries with a row of
+ * their own (public/shop2/app.js COUNTRIES) plus every country behind «Другая
+ * страна Европы» (app.js EUROPE_ISO). Anything Montonio will not quote lands
+ * in `notServed` so the gap is written down rather than guessed at.
+ */
+const DESTINATIONS = [
+  "EE", "LV", "LT", "FI",
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "FR", "DE", "GR", "HU", "IE", "IT", "LU", "MT", "NL", "PL",
+  "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO", "CH", "GB",
+];
+
 const args = process.argv.slice(2);
 const dry = args.includes("--dry");
 const countries = (
-  args.includes("--countries") ? args[args.indexOf("--countries") + 1] : "ee,lv,lt,fi"
+  args.includes("--countries") ? args[args.indexOf("--countries") + 1] : DESTINATIONS.join(",")
 )
   .split(",")
   .map((c) => c.trim().toUpperCase())
@@ -47,6 +92,8 @@ const countries = (
 const REFERENCE_PARCEL = { length: 30, width: 30, height: 30, weight: 5 };
 
 const log = (...a) => console.log(...a);
+const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+const withVat = (n) => round2(Number(n) * (1 + VAT_EE));
 
 /* ---------- minimal HS256 JWT, mirroring src/lib/payments/jwt.ts ----------
    Duplicated on purpose: every tools/*.mjs script here is a standalone node
@@ -75,6 +122,99 @@ function montonioConfig() {
     env === "live" ? "https://shipping.montonio.com/api/v2" : "https://sandbox-shipping.montonio.com/api/v2";
   return { accessKey, secretKey, env, base };
 }
+
+/* ---------- source 2: Montonio's published contract prices ---------------- */
+
+/**
+ * One carrier/method/destination. Returns a row, `null` when Montonio knows
+ * the route but has no Montonio-contract price for it (`[]` — direct contract
+ * only), or `"unserved"` when it will not quote the route at all (HTTP 400).
+ */
+async function contractPrice(carrierCode, shippingMethod, destination) {
+  const qs = new URLSearchParams({
+    carrierCode,
+    shippingMethod,
+    source: SOURCE_COUNTRY,
+    destination,
+    weight: String(REFERENCE_PARCEL.weight),
+    length: String(REFERENCE_PARCEL.length),
+    width: String(REFERENCE_PARCEL.width),
+    height: String(REFERENCE_PARCEL.height),
+  });
+  const res = await fetch(`${CONTRACT_PRICES}?${qs}`, {
+    headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (res.status === 400) return "unserved";
+  if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 200)}`);
+  const body = await res.json();
+  if (!Array.isArray(body) || !body.length) return null;
+  // More than one tier can match a parcel (size bands); the dearest is the one
+  // that must not be undersold, same reasoning as methodCeiling() in tariffs.ts.
+  const row = body.reduce((a, b) => (Number(a.pricePerParcel) > Number(b.pricePerParcel) ? a : b));
+  const ex = Number(row.pricePerParcel);
+  if (!Number.isFinite(ex)) return null;
+  return {
+    carrier: carrierCode.toLowerCase(),
+    country: destination,
+    method: shippingMethod === "courier" ? "courier" : "parcel",
+    price: withVat(ex),
+    priceExVat: round2(ex),
+    currency: String(row.currency || "EUR"),
+    vatIncluded: true,
+    /** What Montonio charges the merchant for the return leg; null = not priced. */
+    returnPrice: row.returnPrice == null ? null : withVat(row.returnPrice),
+    pricingStrategy: String(row.pricingStrategy || ""),
+    size: row.size ?? null,
+    maxWeightKg: row.maxWeight ?? null,
+    effectiveDate: String(row.updatedAt || "").slice(0, 10) || undefined,
+  };
+}
+
+async function fetchContractTable(dests) {
+  const rates = [];
+  for (const destination of dests) {
+    for (const carrier of CARRIERS) {
+      for (const method of ["pickupPoint", "courier"]) {
+        let r;
+        try {
+          r = await contractPrice(carrier, method, destination);
+        } catch (err) {
+          log(`  ${carrier} ${destination} ${method}: failed — ${err.message}`);
+          continue;
+        }
+        // "unserved" (HTTP 400) and null ([]) both mean "no price here"; the
+        // summaries below are built from what *did* come back, so an absent
+        // row says it once instead of nine hundred times.
+        if (r && r !== "unserved") rates.push(r);
+      }
+    }
+  }
+  return rates;
+}
+
+/** Where each carrier that has any price does have one, and who has none at all. */
+function summarise(rates, dests) {
+  const priced = new Set(rates.map((r) => r.country));
+  const coverage = {};
+  for (const r of rates) {
+    coverage[r.carrier] = coverage[r.carrier] ?? { parcel: [], courier: [] };
+    if (!coverage[r.carrier][r.method].includes(r.country)) coverage[r.carrier][r.method].push(r.country);
+  }
+  for (const c of Object.keys(coverage)) {
+    coverage[c].parcel.sort();
+    coverage[c].courier.sort();
+  }
+  return {
+    notServed: dests.filter((c) => !priced.has(c)).sort(),
+    coverage,
+    noMontonioContractPrice: CARRIERS.map((c) => c.toLowerCase())
+      .filter((c) => !coverage[c])
+      .sort(),
+  };
+}
+
+/* ---------- source 1: this store's own rates ------------------------------ */
 
 async function fetchRatesFor(config, country) {
   const token = signHs256({ accessKey: config.accessKey }, config.secretKey, 3600);
@@ -119,90 +259,95 @@ function flatten(body, country) {
       const pick = subtypes.find((s) => s.code === preferred) ?? subtypes[0];
       const price = Number(pick?.rate);
       if (!pick || !Number.isFinite(price)) continue;
-      out.push({ carrier, country, method, price: Math.round(price * 100) / 100, currency: pick.currency || "EUR" });
+      out.push({ carrier, country, method, price: round2(price), currency: pick.currency || "EUR" });
     }
   }
   return out;
 }
 
+/* ---------- main ---------------------------------------------------------- */
+
 async function main() {
-  const config = montonioConfig();
   const raw = await readFile(OUT, "utf8");
   const data = JSON.parse(raw);
+  const today = new Date().toISOString().slice(0, 10);
 
-  if (!config) {
-    log("No MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY in the environment — nothing to fetch live.");
-    log("");
-    log("This is normal until Renat has:");
-    log("  1. activated carriers for the store in the Montonio partner portal");
-    log("     (https://partner.montonio.com, or https://sandbox-partner.montonio.com to test), and");
-    log("  2. put MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY (the same pair used for payments and for");
-    log("     src/lib/shipping/montonio.ts) in the environment — .env.local for `npm run dev`, or");
-    log("     exported in the shell for this script — plus MONTONIO_ENV=live once production keys are issued.");
-    log("");
-    log(`Then re-run this script; it calls POST /shipping-methods/rates for ${countries.join(", ")}`);
-    log("and updates only the carrier/method rows Montonio actually answers for — everything else in");
-    log(`  ${path.relative(ROOT, OUT)}`);
-    log("stays exactly as it is: the carriers' own published business-list prices, each with its own");
-    log("source URL and date — see docs/shipping.md § «Тарифы Montonio» for how that table was built");
-    log("and how to redo it by hand if a price list changes before this script has real keys to run with.");
+  log(`Fetching Montonio's published contract prices for ${countries.length} destination(s)...`);
+  const rates = await fetchContractTable(countries);
+  if (!rates.length) {
+    log("Montonio quoted nothing at all — the table is unchanged. Check network access to");
+    log(`  ${CONTRACT_PRICES}`);
     process.exitCode = 1;
     return;
   }
-
-  log(`Fetching live Montonio rates (${config.env}) for ${countries.join(", ")}...`);
-  let updated = 0;
-  let touched = 0;
-  for (const country of countries) {
-    let body;
-    try {
-      body = await fetchRatesFor(config, country);
-    } catch (err) {
-      log(`  ${country}: failed — ${err.message}`);
-      continue;
-    }
-    const rows = flatten(body, country);
-    if (!rows.length) {
-      log(`  ${country}: Montonio answered but quoted no carrier — nothing activated for this country yet.`);
-      continue;
-    }
-    touched++;
-    const today = new Date().toISOString().slice(0, 10);
-    for (const row of rows) {
-      const i = data.rates.findIndex(
-        (r) => r.carrier === row.carrier && r.country === row.country && r.method === row.method,
-      );
-      const entry = {
-        carrier: row.carrier,
-        country: row.country,
-        method: row.method,
-        price: row.price,
-        currency: row.currency,
-        effectiveDate: today,
-        vatIncluded: true,
-        source: `live quote, POST /shipping-methods/rates (${config.env}), fetched ${today}`,
-      };
-      if (i >= 0) data.rates[i] = { ...data.rates[i], ...entry };
-      else data.rates.push(entry);
-      updated++;
-      log(`  ${row.carrier} ${row.country} ${row.method}: ${row.price} ${row.currency} (live)`);
-    }
+  for (const r of rates) {
+    log(
+      `  ${r.carrier} ${r.country} ${r.method}: ${r.price} ${r.currency} incl. VAT` +
+        (r.returnPrice == null ? " (return not priced)" : ` (return ${r.returnPrice})`),
+    );
   }
 
-  if (!updated) {
-    log("");
-    log("Nothing came back from Montonio for any requested country — the static table is unchanged.");
-    process.exitCode = touched ? 0 : 1;
-    return;
+  // Only the requested countries are rebuilt; rows for other countries stay.
+  const asked = new Set(countries);
+  const kept = (data.rates ?? []).filter((r) => !asked.has(String(r.country).toUpperCase()));
+  data.rates = [...kept, ...rates].sort(
+    (a, b) =>
+      String(a.country).localeCompare(String(b.country)) ||
+      String(a.carrier).localeCompare(String(b.carrier)) ||
+      String(a.method).localeCompare(String(b.method)),
+  );
+  const summary = summarise(data.rates, countries);
+  data.notServed = summary.notServed;
+  data.coverage = summary.coverage;
+  data.noMontonioContractPrice = summary.noMontonioContractPrice;
+  data.compiledDate = today;
+  data.priceSource = `GET ${CONTRACT_PRICES} (public, no auth), source=${SOURCE_COUNTRY}`;
+
+  const config = montonioConfig();
+  let overlaid = 0;
+  if (config) {
+    log(`\nOverlaying this store's own rates (${config.env})...`);
+    for (const country of countries) {
+      let body;
+      try {
+        body = await fetchRatesFor(config, country);
+      } catch (err) {
+        log(`  ${country}: failed — ${err.message}`);
+        continue;
+      }
+      for (const row of flatten(body, country)) {
+        const i = data.rates.findIndex(
+          (r) => r.carrier === row.carrier && r.country === row.country && r.method === row.method,
+        );
+        const entry = {
+          ...(i >= 0 ? data.rates[i] : {}),
+          ...row,
+          effectiveDate: today,
+          vatIncluded: false,
+          source: `live quote, POST /shipping-methods/rates (${config.env}), fetched ${today}`,
+        };
+        if (i >= 0) data.rates[i] = entry;
+        else data.rates.push(entry);
+        overlaid++;
+        log(`  ${row.carrier} ${row.country} ${row.method}: ${row.price} ${row.currency} (this store)`);
+      }
+    }
+    if (!overlaid) {
+      log("  Montonio answered but quoted no carrier — nothing activated for these countries yet.");
+    }
+  } else {
+    log("\nNo MONTONIO_ACCESS_KEY / MONTONIO_SECRET_KEY set, so the table holds Montonio's standard");
+    log("contract prices rather than this store's. They differ if Renat's plan or a negotiated rate");
+    log("differs from the list — activate the carriers in https://partner.montonio.com, export the");
+    log("key pair (plus MONTONIO_ENV=live) and re-run to overlay the store's own numbers.");
   }
 
-  data.compiledDate = new Date().toISOString().slice(0, 10);
   if (dry) {
-    log(`\n--dry: would update ${updated} row(s) in ${path.relative(ROOT, OUT)}; nothing written.`);
+    log(`\n--dry: would write ${data.rates.length} row(s) to ${path.relative(ROOT, OUT)}; nothing written.`);
     return;
   }
   await writeFile(OUT, JSON.stringify(data, null, 2) + "\n", "utf8");
-  log(`\nWrote ${updated} updated row(s) to ${path.relative(ROOT, OUT)}.`);
+  log(`\nWrote ${data.rates.length} row(s) to ${path.relative(ROOT, OUT)}.`);
 }
 
 main().catch((err) => {
