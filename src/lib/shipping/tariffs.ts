@@ -27,11 +27,39 @@
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 import type { ShipMethod } from "@/lib/shipping";
 import {
+  CARRIER_CHOICE_COUNTRIES,
+  customerPrice,
+  type ShippingMarkup,
+} from "./country-prices";
+import {
   fetchMontonioRates,
   isMontonioShippingConfigured,
   MONTONIO_CARRIERS,
   type MontonioRate,
 } from "./montonio";
+
+/* The markup arithmetic and the not-served list moved down into
+   ./country-prices, the leaf src/lib/shipping.ts can import without a cycle.
+   Re-exported here because this is where the rest of the codebase looks for
+   them, and one implementation is the whole point. */
+export {
+  applyMarkup,
+  ceilingCost,
+  cheapestCost,
+  cheapestCostAnyCarrier,
+  costBasis,
+  countryPriceTable,
+  customerPrice,
+  DEFAULT_MARKUP,
+  MONTONIO_COUNTRIES,
+  MONTONIO_NOT_SERVED,
+  montonioServes,
+  returnCost,
+  roundUpToX9,
+  SHOP_CARRIERS,
+  type CountryCost,
+  type ShippingMarkup,
+} from "./country-prices";
 
 /**
  * The parcel every quote — live or static — is priced for: ~5 kg, 30×30×30 cm,
@@ -39,15 +67,6 @@ import {
  * on, so the two sources are always comparing the same nominal box.
  */
 export const REFERENCE_PARCEL = { weightKg: 5, lengthCm: 30, widthCm: 30, heightCm: 30 };
-
-export interface ShippingMarkup {
-  /** Percent added to the tariff, e.g. 10 for +10%. */
-  percent: number;
-  /** Flat EUR added on top of the percent markup. */
-  fixed: number;
-}
-
-export const DEFAULT_MARKUP: ShippingMarkup = { percent: 0, fixed: 0 };
 
 export interface TariffQuote {
   carrier: string;
@@ -86,19 +105,6 @@ interface StaticRateRow {
 }
 
 const STATIC_RATES: StaticRateRow[] = (montonioTariffsData as { rates: StaticRateRow[] }).rates;
-
-/**
- * The destinations the checkout offers that Montonio will not quote at all —
- * it answers HTTP 400 `contract_prices_no_applicable_tier` for every carrier
- * and both methods. Rebuilt with the table by tools/fetch-montonio-tariffs.mjs.
- */
-export const MONTONIO_NOT_SERVED: readonly string[] =
-  (montonioTariffsData as { notServed?: string[] }).notServed ?? [];
-
-/** False for a country Montonio has no route to — nothing here can ship there. */
-export function montonioServes(country: string): boolean {
-  return !MONTONIO_NOT_SERVED.includes(String(country || "").toUpperCase());
-}
 
 function methodOf(m: string): ShipMethod | null {
   return m === "parcel" || m === "courier" || m === "pickup" ? m : null;
@@ -247,39 +253,6 @@ export async function getMontonioTariffsForCountry(country: string): Promise<Tar
   return out;
 }
 
-/* ---------- markup + psychological rounding --------------------------------
-   The seller's price, not the carrier's: tariff, plus a markup the owner
-   controls (settings.shipping_rules.markup, default 0 — see
-   src/lib/shipping.ts), rounded UP to the next price ending in 9 cents. Always
-   up, never to the nearest one: rounding down could put the shelf price below
-   what was just computed as the floor, which is the one thing this whole
-   feature exists to stop happening. */
-
-/** Smallest amount ending in "9 cents" (…, 4.39, 4.49, 4.59, …) at or above `n`. */
-export function roundUpToX9(n: number): number {
-  if (!Number.isFinite(n) || n <= 0) return 0;
-  const cents = Math.ceil(n * 100 - 1e-7);
-  const rem = ((cents % 10) + 10) % 10;
-  const up = rem === 9 ? 0 : (9 - rem + 10) % 10;
-  return (cents + up) / 100;
-}
-
-/** tariff × (1 + percent/100) + fixed — the markup is on top of cost, not a discount. */
-export function applyMarkup(tariff: number, markup: Partial<ShippingMarkup> = {}): number {
-  const percent =
-    typeof markup.percent === "number" && Number.isFinite(markup.percent) && markup.percent >= 0
-      ? markup.percent
-      : 0;
-  const fixed =
-    typeof markup.fixed === "number" && Number.isFinite(markup.fixed) && markup.fixed >= 0 ? markup.fixed : 0;
-  return Math.round((tariff * (1 + percent / 100) + fixed + Number.EPSILON) * 100) / 100;
-}
-
-/** What the shopper pays for a tariff: markup, then rounded up to .x9. */
-export function customerPrice(tariff: number, markup: Partial<ShippingMarkup> = {}): number {
-  return roundUpToX9(applyMarkup(tariff, markup));
-}
-
 /* ---------- suggestion builder ---------------------------------------------
    Used by the admin's «Заполнить по тарифам Montonio» button (mirrored in
    public/shop2/app.js — see computeMontonioFillPatch there and
@@ -297,7 +270,7 @@ export interface ShippingRulesPatch {
  * The four countries the checkout names, and the only ones where it lets the
  * shopper pick a carrier — so the only ones that get carrier-specific rows.
  */
-const CARRIER_COUNTRIES = ["EE", "LV", "LT", "FI"] as const;
+const CARRIER_COUNTRIES = CARRIER_CHOICE_COUNTRIES;
 
 /**
  * Every destination the static table has a price for — the four above plus
@@ -312,17 +285,32 @@ export function tariffCountries(): string[] {
 }
 
 /**
- * The generic (carrier-unaware) price for a method+country: the highest
- * tariff among the carriers we have one for, so that whichever carrier
- * Montonio actually assigns the order to, this price does not sell it below
- * cost. Carrier-specific entries (below) then let a customer who picked a
- * cheaper carrier pay that carrier's own, lower, accurate price instead.
+ * The generic (carrier-unaware) price for a method+country, by the one rule
+ * ./country-prices sets out: whoever does the choosing has to be covered.
+ *
+ *   · **a parcel machine in EE, LV, LT or FI** — the *shopper* picks the
+ *     carrier from the chips under «Пакомат», so the price must cover the
+ *     dearest of them.
+ *   · **everything else, couriers at home included** — one line and no carrier
+ *     under it; *Renat* picks when he makes the label. The price covers the
+ *     cheapest carrier he can actually pick, and the admin prints that
+ *     carrier's name beside the number so the assumption is visible.
+ *
+ * "Can actually pick" excludes Nova Post (Montonio International Shipping): no
+ * carrier row in the admin, never named by the storefront, no returns at all.
+ * Its prices are the low ones in docs/audit/2026-09-07-shipping-returns.md,
+ * and pricing off a carrier the shop cannot use would sell every European
+ * order below cost — Poland's cheapest reachable courier is 20.66 €, not the
+ * 8.51 € the audit quoted.
  */
-function methodCeiling(rows: TariffQuote[], method: ShipMethod): TariffQuote | null {
+function methodBasis(rows: TariffQuote[], method: ShipMethod, country: string): TariffQuote | null {
+  const dearest = method === "parcel" && (CARRIER_COUNTRIES as readonly string[]).includes(country);
+  const usable = rows.filter(
+    (r) => r.method === method && (MONTONIO_CARRIERS as readonly string[]).includes(r.carrier),
+  );
   let best: TariffQuote | null = null;
-  for (const r of rows) {
-    if (r.method !== method) continue;
-    if (!best || r.price > best.price) best = r;
+  for (const r of usable) {
+    if (!best || (dearest ? r.price > best.price : r.price < best.price)) best = r;
   }
   return best;
 }
@@ -343,15 +331,13 @@ function methodCeiling(rows: TariffQuote[], method: ShipMethod): TariffQuote | n
  * contract only). "EU" now only prices the seven European countries the
  * checkout offers and Montonio serves not at all — CH, CY, GB, IS, LI, MT, NO
  * (MONTONIO_NOT_SERVED) — and no tariff can be invented for a parcel that
- * cannot be sent; see docs/audit/2026-09-07-shipping-returns.md, question 3.
+ * cannot be sent; those seven are switched off in the shop by default since
+ * 07.09.2026 (ShippingRules.countriesOff).
  *
- * A note on the ceiling: `methodCeiling` takes the dearest carrier, so the
- * price cannot fall below cost whichever carrier Montonio assigns. Against
- * the static table that means the dearest carrier Montonio *offers*, which
- * for Germany is DPD at 29.76 € even if Nova Post would do it for 12.56 €.
- * With MONTONIO_ACCESS_KEY/SECRET_KEY set, the live quote only returns the
- * carriers this store has actually activated, and the ceiling narrows to
- * them — which is the real fix, not a cleverer rule here.
+ * The basis rule is `methodBasis()` above. With MONTONIO_ACCESS_KEY/SECRET_KEY
+ * set, the live quote only returns the carriers this store has actually
+ * activated, and the whole calculation narrows to them automatically — which
+ * is the real fix for a table that today has to guess which carriers are on.
  */
 export async function suggestShippingRulesFromTariffs(
   markup: Partial<ShippingMarkup> = {},
@@ -361,10 +347,10 @@ export async function suggestShippingRulesFromTariffs(
   for (const country of tariffCountries()) {
     const rows = await getMontonioTariffsForCountry(country);
     for (const method of ["parcel", "courier"] as const) {
-      const ceiling = methodCeiling(rows, method);
-      if (!ceiling) continue;
+      const basis = methodBasis(rows, method, country);
+      if (!basis) continue;
       patch.methods[method] = patch.methods[method] ?? {};
-      (patch.methods[method] as Record<string, number>)[country] = customerPrice(ceiling.price, markup);
+      (patch.methods[method] as Record<string, number>)[country] = customerPrice(basis.price, markup);
     }
     if (!carrierCountries.has(country)) continue;
     for (const row of rows) {

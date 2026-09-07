@@ -14,8 +14,10 @@ import { vi } from "vitest";
 import montonioTariffsData from "@/data/montonio-tariffs.json";
 import {
   applyMarkup,
+  cheapestCost,
   customerPrice,
   getMontonioTariff,
+  MONTONIO_COUNTRIES,
   MONTONIO_NOT_SERVED,
   montonioServes,
   resetMontonioTariffCache,
@@ -247,13 +249,15 @@ describe("getMontonioTariff — live preferred, static as the fallback", () => {
 });
 
 describe("suggestShippingRulesFromTariffs — what the admin's fill button applies", () => {
-  it("prices every method/country to the priciest known carrier, so no carrier is sold below cost", async () => {
+  it("prices the four carrier-choice countries to the priciest carrier the shopper can pick", async () => {
     const patch = await suggestShippingRulesFromTariffs();
-    // EE parcel: highest of novapost 2.33 / unisend 2.47 / smartpost 2.54 /
-    // dpd 2.59 / omniva 3.10 -> Omniva's 3.10 -> .x9
+    // EE parcel: highest of unisend 2.47 / smartpost 2.54 / dpd 2.59 /
+    // omniva 3.10 -> Omniva's 3.10 -> .x9. Nova Post's 2.33 is not in the
+    // running: the shop has no carrier row for it and never names it.
     expect(patch.methods.parcel?.EE).toBe(3.19);
-    // EE courier: highest of novapost 4.76 / dpd 6.82 / omniva 6.82 / smartpost 7.38
-    expect(patch.methods.courier?.EE).toBe(7.39);
+    // A courier has no chips anywhere, home included — Renat picks it, so the
+    // basis is the cheapest he can pick: DPD/Omniva 6.82, not SmartPosti 7.38.
+    expect(patch.methods.courier?.EE).toBe(6.89);
     // LT parcel ceiling is DPD's 5.58
     expect(patch.methods.parcel?.LT).toBe(5.59);
   });
@@ -282,12 +286,43 @@ describe("suggestShippingRulesFromTariffs — what the admin's fill button appli
     const patch = await suggestShippingRulesFromTariffs();
     // Poland's parcel machine and Croatia's are the same box on the same
     // shelf; charging one price for both is what the «EU» cell used to do.
-    expect(patch.methods.parcel?.PL).toBe(17.89); // dpd 17.86, the only ceiling above novapost 7.85
+    expect(patch.methods.parcel?.PL).toBe(17.89); // dpd 17.86, the only carrier the shop can use
     expect(patch.methods.parcel?.HR).toBe(59.59); // dpd 59.52 — the dearest route Montonio sells
-    expect(patch.methods.courier?.DE).toBe(32.79); // dpd 32.74
+    // Outside the four carrier-choice countries Renat picks the carrier, so
+    // the price covers the cheapest he can pick: SmartPosti 22.23, not DPD's
+    // 32.74 — and not Nova Post's 12.91, which the shop cannot use at all.
+    expect(patch.methods.courier?.DE).toBe(22.29);
+    expect(patch.methods.courier?.FR).toBe(24.19); // smartpost 24.19, against dpd 44.64
     // Greece has no parcel machine at all from Estonia, only a courier.
     expect(patch.methods.parcel?.GR).toBeUndefined();
-    expect(patch.methods.courier?.GR).toBeDefined();
+    expect(patch.methods.courier?.GR).toBe(43.19);
+  });
+
+  /* The one thing that must never happen: a European shelf price under the
+     cheapest carrier the shop could actually put the parcel on. */
+  it("never prices a European country below the cheapest carrier the shop can use", async () => {
+    const patch = await suggestShippingRulesFromTariffs();
+    for (const country of MONTONIO_COUNTRIES) {
+      for (const method of ["parcel", "courier"] as const) {
+        const cost = cheapestCost(country, method);
+        const price = patch.methods[method]?.[country];
+        if (!cost) {
+          expect(price).toBeUndefined();
+          continue;
+        }
+        expect(price).toBeGreaterThanOrEqual(cost.price);
+      }
+    }
+  });
+
+  /* Hungary and Romania have a Nova Post parcel machine and nothing else, so
+     the shop has no parcel price for them — better a missing cell than a
+     price for a parcel it cannot send. */
+  it("writes no cell where the only carrier is one the shop cannot use", async () => {
+    const patch = await suggestShippingRulesFromTariffs();
+    expect(patch.methods.parcel?.HU).toBeUndefined();
+    expect(patch.methods.parcel?.RO).toBeUndefined();
+    expect(patch.methods.courier?.HU).toBe(27.39); // smartpost 27.33
   });
 
   it("names a carrier only for the four countries the checkout lets one be picked in", async () => {

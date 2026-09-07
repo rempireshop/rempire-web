@@ -3,6 +3,7 @@ import { query } from "@/lib/db";
 import {
   DEFAULT_SHIPPING_RULES,
   computeShipping,
+  countryOff,
   loadShippingRules,
   normalizeMethod,
   parseShippingRules,
@@ -93,20 +94,69 @@ describe("the default price list", () => {
     expect(quote("EE", "parcel", 10).price).toBe(5.47);
     expect(quote("LV", "parcel", 10).price).toBe(4.99);
     expect(quote("LT", "parcel", 10).price).toBe(4.99);
-    // anything not named falls to the method's default
-    expect(quote("DE", "parcel", 10).price).toBe(4.99);
+    // Since 07.09.2026 every country Montonio serves has its own cell rather
+    // than falling to the method's default: a German parcel machine costs
+    // 29.76 € on the cheapest carrier the shop can actually put it on.
+    expect(quote("DE", "parcel", 10).price).toBe(29.79);
   });
 
   it("prices a courier per country", () => {
     expect(quote("EE", "courier", 10).price).toBe(10.84);
-    expect(quote("DE", "courier", 10).price).toBe(9.9);
-    expect(quote("FI", "courier", 10).price).toBe(9.9);
+    expect(quote("DE", "courier", 10).price).toBe(22.29);
+    expect(quote("FI", "courier", 10).price).toBe(15.69);
+    expect(quote("GR", "courier", 10).price).toBe(43.19);
+    expect(quote("PL", "courier", 10).price).toBe(20.69);
+  });
+
+  /* The zone cell is still there, and still 9.90 — it is what a destination
+     with no tariff row of its own falls back to, exactly as before. */
+  it("keeps the zone and the global fallback for anything not in the table", () => {
+    expect(quote("CH", "courier", 10).price).toBe(9.9); // Europe, Montonio does not serve it
+    expect(quote("US", "courier", 10).price).toBe(9.9); // outside Europe → `default`
+    expect(quote("CH", "parcel", 10).price).toBe(4.99);
   });
 
   it("never charges for a pickup", () => {
     const q = quote("EE", "pickup", 0);
     expect(q.price).toBe(0);
     expect(q.free).toBe(true);
+  });
+
+  /* The whole point of the change: not one number for the continent. */
+  it("gives twenty-five different countries genuinely different prices", () => {
+    const couriers = new Set(
+      ["AT", "BE", "BG", "CZ", "DE", "DK", "ES", "FR", "GR", "HR", "IE", "IT", "NL", "PL", "SE"].map(
+        (c) => quote(c, "courier", 10).price,
+      ),
+    );
+    expect(couriers.size).toBeGreaterThan(10);
+    expect(couriers.has(9.9)).toBe(false);
+  });
+});
+
+describe("countries switched off in the shop", () => {
+  it("defaults the seven Montonio cannot reach to off", () => {
+    for (const c of ["CY", "MT", "IS", "LI", "NO", "CH", "GB"]) {
+      expect(countryOff(rules, c)).toBe(true);
+    }
+  });
+
+  it("leaves every country Montonio serves on", () => {
+    for (const c of ["EE", "LV", "LT", "FI", "DE", "GR", "PL", "SE"]) {
+      expect(countryOff(rules, c)).toBe(false);
+    }
+  });
+
+  /* A switched-off country is a storefront rule, not a pricing one: an order
+     that got past the dropdown is still priced rather than dropped. */
+  it("still quotes a price for a country that is off", () => {
+    expect(quote("GB", "courier", 10).price).toBe(9.9);
+  });
+
+  it("is Renat's to change, empty list included", () => {
+    expect(countryOff({ ...rules, countriesOff: [] }, "GB")).toBe(false);
+    expect(countryOff({ ...rules, countriesOff: ["GB"] }, "CY")).toBe(false);
+    expect(countryOff({ ...rules, countriesOff: ["GB"] }, "gb")).toBe(true);
   });
 });
 
@@ -134,11 +184,40 @@ describe("free delivery", () => {
       freeFrom: 59,
       freeFromByCountry: { FI: 150, LV: null },
     };
-    expect(quote("FI", "parcel", 100, undefined, custom).price).toBe(4.99);
+    expect(quote("FI", "parcel", 100, undefined, custom).price).toBe(12.39);
     expect(quote("FI", "parcel", 150, undefined, custom).price).toBe(0);
     // null = never free in that country, however big the basket
     expect(quote("LV", "parcel", 10_000, undefined, custom).price).toBe(4.99);
     expect(quote("EE", "parcel", 59, undefined, custom).price).toBe(0);
+  });
+
+  /* Item 5 of Dim's decision: the threshold has to be settable per ZONE, so
+     one number covers all of Europe without twenty-one edits — and a country
+     of its own still beats its zone. */
+  it("honours a per-zone threshold, and lets one country beat its zone", () => {
+    const custom: ShippingRules = {
+      ...rules,
+      freeFrom: 59,
+      freeFromByCountry: { EU: 150, GR: null },
+    };
+    // Europe: 59 € is no longer enough, 150 € is
+    expect(quote("DE", "courier", 100, undefined, custom).free).toBe(false);
+    expect(quote("DE", "courier", 100, undefined, custom).freeFrom).toBe(150);
+    expect(quote("DE", "courier", 150, undefined, custom).price).toBe(0);
+    // Greece costs 43.15 € to reach — never free, whatever the basket
+    expect(quote("GR", "courier", 10_000, undefined, custom).price).toBe(43.19);
+    expect(quote("GR", "courier", 10_000, undefined, custom).freeFrom).toBe(null);
+    // home is untouched by a European rule
+    expect(quote("EE", "parcel", 59, undefined, custom).price).toBe(0);
+    expect(quote("EE", "parcel", 59, undefined, custom).freeFrom).toBe(59);
+  });
+
+  /* Nothing changes until Renat says so — the defaults still give free
+     delivery from 59 € everywhere, including where it loses money. */
+  it("ships free from 59 € everywhere by default, Croatia included", () => {
+    expect(rules.freeFromByCountry).toBeUndefined();
+    expect(quote("HR", "courier", 59).price).toBe(0);
+    expect(quote("GR", "courier", 59).price).toBe(0);
   });
 });
 
@@ -154,6 +233,16 @@ describe("carrier overrides", () => {
     expect(quote("LV", "parcel", 10, "dpd", withCarriers).price).toBe(6.5);
     // a carrier with no entry falls back to the method table
     expect(quote("EE", "parcel", 10, "smartpost", withCarriers).price).toBe(5.47);
+  });
+
+  /* A carrier cell is a parcel-machine price — the fill button writes no
+     courier ones, because the checkout shows carrier chips only under
+     «Пакомат». Reading one for a courier charged the Omniva *parcel* price
+     for an Estonian courier as soon as the fill button was used. */
+  it("ignores a carrier price for a courier or a pickup", () => {
+    expect(quote("EE", "courier", 10, "omniva", withCarriers).price).toBe(10.84);
+    expect(quote("LV", "courier", 10, "dpd", withCarriers).price).toBe(9.9);
+    expect(quote("EE", "pickup", 10, "omniva", withCarriers).price).toBe(0);
   });
 });
 

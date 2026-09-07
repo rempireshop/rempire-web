@@ -1,4 +1,5 @@
 import { query } from "@/lib/db";
+import { countryPriceTable, MONTONIO_NOT_SERVED } from "@/lib/shipping/country-prices";
 
 /**
  * What a delivery costs.
@@ -25,6 +26,20 @@ export interface ShippingRules {
   methods: Record<ShipMethod, Record<string, number>>;
   /** Optional per-carrier override of the method price, same shape. */
   carriers?: Record<string, Record<string, number>>;
+  /**
+   * ISO codes the shop does not deliver to at all — the checkout's country
+   * list drops them. Defaults to the seven European countries Montonio has no
+   * route to (MONTONIO_NOT_SERVED): an order to Cyprus, Malta, Iceland,
+   * Liechtenstein, Norway, Switzerland or the UK could be placed and paid for
+   * but never posted, so offering it is a promise the shop cannot keep.
+   *
+   * Off is a *storefront* switch, not a pricing one: quoteFromRules() still
+   * prices a basket for a switched-off country, because a checkout that
+   * refuses to quote is a checkout that cannot take money, and an order that
+   * reached the server past the dropdown is better priced than dropped. Use
+   * `countryOff()` to ask.
+   */
+  countriesOff?: string[];
   /**
    * Markup added to a Montonio carrier tariff to get the customer-facing
    * price: `tariff * (1 + percent/100) + fixed`, then rounded up to the next
@@ -64,48 +79,62 @@ export interface ShippingQuote {
 }
 
 /**
- * Defaults, per the checkout brief: parcel LV, LT 4.99; courier EU 9.90;
- * pickup free; free delivery from 59 €. EE parcel 5.47 and courier 10.84 came
- * from the carriers' own 2025–26 business list prices, researched 03.09.2026.
+ * One price per country, from Montonio's own contract prices — Dim's decision
+ * of 07.09.2026, «real per-country prices».
  *
- * **What those numbers were measured against changed on 07.09.2026.** The
- * table they were computed from held what Omniva, SmartPosti and DPD charge a
- * merchant with no Montonio contract. Montonio's own contract prices turned
- * out to be public after all (src/data/montonio-tariffs.json,
- * docs/audit/2026-09-07-shipping-returns.md), and they are far lower at home:
- * a parcel machine in Estonia costs 2.54–3.10 € incl. VAT, not 4.50–5.47. So
- * EE is no longer sold below cost — it is sold at roughly double it, which is
- * a margin, not a bug, and not this file's to change.
+ * Until then the shop charged one 9.90 € courier rate for the whole of Europe
+ * against a real cost of 8.00 € to 43.15 €, and 59 € of free delivery on top
+ * of it, so a 59 € basket to Croatia could cost nearly 59 € to send. The gap
+ * was found in docs/audit/2026-09-07-shipping-returns.md; what closes it is
+ * `countryPriceTable()` in src/lib/shipping/country-prices.ts, which turns the
+ * tariff table into one cell per country per method, and `quoteFromRules()`
+ * below, which reads a country's own cell before its zone's.
  *
- * Where the shop still sells below cost is everywhere else, and by more than
- * was thought:
- *   · LV/LT parcel 4.99 against 3.72–5.58 — now roughly break-even.
- *   · LV/LT courier 9.90 against 8.00–11.16 — roughly break-even.
- *   · FI has no row at all, so it falls to `default`: parcel 4.99 against
- *     SmartPosti 9.30 / DPD 12.39, courier 9.90 against 15.62–20.09.
- *   · «Другая страна Европы» also falls to `default`. Taking the cheapest
- *     carrier Montonio offers for each country, a parcel machine costs
- *     7.85 € (Poland) to 59.52 € (Croatia) and a courier 8.51 € (Poland) to
- *     43.15 € (Greece). 4.99 € covers the parcel machine in **no** European
- *     country; 9.90 € covers the courier in exactly one, Poland.
+ * **The audit's cost column was optimistic and this table is not.** It quoted
+ * the cheapest carrier Montonio prices for each route — which for Germany,
+ * Italy, Poland and half the others is **Nova Post** (Montonio International
+ * Shipping): a product the shop has not activated, has no carrier row for,
+ * never names in the storefront, and which supports no returns at all. Against
+ * the carriers the shop can actually put a parcel on, the cheapest courier to
+ * Poland is 20.66 €, not 8.51 €. So 9.90 € covered the courier in **no**
+ * European country — not even the one the audit found it covered.
  *
- * And `freeFrom: 59` applies to all of them, so a 59 € basket to Croatia
- * ships free at a cost of up to 59.52 € — the one place where a bigger order
- * is worth less than a smaller one.
+ * What is kept deliberately:
+ *   · **EE 5.47 / 10.84 and LV, LT 4.99 / 9.90.** All four sit above cost
+ *     already (a parcel machine in Estonia costs 2.47–3.10 €), and dropping a
+ *     home price to match cost is a revenue cut nobody asked for.
+ *   · **The `EU` and `default` cells, 4.99 / 9.90.** They are the fallback the
+ *     brief asks to keep: any destination the tariff table has no row for
+ *     still gets a price rather than a blank.
+ *   · **`freeFrom: 59` everywhere, and no per-country thresholds.** The
+ *     threshold is now settable per zone and per country
+ *     (`freeFromByCountry`), but it defaults to exactly what it did before, so
+ *     nothing about free delivery changes until Renat decides it should. It is
+ *     also where the money still leaks — see the audit's question 5.
  *
- * These stay as they are on purpose. Closing the gap — and deciding whether
- * Rempire keeps eating it for reach — is Renat's call, not a default this
- * file should make for him. He can close all of it in one click with
- * «Заполнить по тарифам Montonio» in Настройки → Доставка, which now prices
- * every European country separately (src/lib/shipping/tariffs.ts), or by hand.
+ * What changes for a shopper: Finland and the twenty-one other European
+ * countries Montonio serves stop being one number. Finland's courier goes
+ * 9.90 → 15.69 €, Germany's 9.90 → 22.29 €, Greece's 9.90 → 43.19 €. The
+ * before/after table for all twenty-five is in
+ * docs/audit/2026-09-07-eu-rates.md.
  */
+const COUNTRY_PRICES = countryPriceTable();
+
 export const DEFAULT_SHIPPING_RULES: ShippingRules = {
   freeFrom: 59,
   methods: {
-    parcel: { default: 4.99, EE: 5.47, LV: 4.99, LT: 4.99 },
-    courier: { default: 9.9, EE: 10.84 },
+    // spread first, hand-set home prices second: the four the shop already
+    // sells above cost keep the number Renat sells at
+    parcel: { default: 4.99, ...COUNTRY_PRICES.parcel, EE: 5.47, LV: 4.99, LT: 4.99 },
+    courier: { default: 9.9, ...COUNTRY_PRICES.courier, EE: 10.84, LV: 9.9, LT: 9.9 },
     pickup: { default: 0 },
   },
+  /* Off by default because an order to one of them cannot be posted at all —
+     Montonio answers `contract_prices_no_applicable_tier` for every carrier.
+     Renat can switch any of them back on in Настройки → Доставка, which is
+     the point of the switch: the shop stops promising what it cannot do, and
+     the decision stays his. */
+  countriesOff: [...MONTONIO_NOT_SERVED],
   markup: { percent: 0, fixed: 0 },
 };
 
@@ -178,6 +207,7 @@ export function parseShippingRules(value: unknown): ShippingRules {
       courier: { ...DEFAULT_SHIPPING_RULES.methods.courier },
       pickup: { ...DEFAULT_SHIPPING_RULES.methods.pickup },
     },
+    countriesOff: [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])],
     markup: {
       percent: DEFAULT_SHIPPING_RULES.markup?.percent ?? 0,
       fixed: DEFAULT_SHIPPING_RULES.markup?.fixed ?? 0,
@@ -220,6 +250,20 @@ export function parseShippingRules(value: unknown): ShippingRules {
       if (parsed) out[name.toLowerCase()] = parsed;
     }
     if (Object.keys(out).length) rules.carriers = out;
+  }
+
+  /* An array, and an *authoritative* one: [] means «deliver everywhere», which
+     is a real answer Renat can give and must survive the merge. Only a missing
+     or malformed key keeps the default seven. */
+  const off = raw.countriesOff;
+  if (Array.isArray(off)) {
+    rules.countriesOff = [
+      ...new Set(
+        off
+          .map((c) => String(c ?? "").trim().toUpperCase())
+          .filter((c) => /^[A-Z]{2}$/.test(c)),
+      ),
+    ].sort();
   }
 
   const markup = raw.markup;
@@ -281,6 +325,17 @@ export function shippingZone(country: string): string {
   return EUROPE.has(c) ? "EU" : "default";
 }
 
+/**
+ * Is this country switched off in the shop? The checkout's country list asks
+ * this before it draws an option; nothing else does, on purpose — see
+ * ShippingRules.countriesOff.
+ */
+export function countryOff(rules: ShippingRules, country: string): boolean {
+  const c = String(country || "").toUpperCase();
+  const off = rules.countriesOff ?? DEFAULT_SHIPPING_RULES.countriesOff ?? [];
+  return off.includes(c);
+}
+
 /** The pure half: rules in, price out. No I/O, so it is trivially testable. */
 export function quoteFromRules(
   rules: ShippingRules,
@@ -304,7 +359,17 @@ export function quoteFromRules(
    * with none behaves exactly as it did before.
    */
   const table = rules.methods[method] ?? {};
-  const carrierTable = carrier ? rules.carriers?.[carrier] : undefined;
+  /*
+   * A carrier cell is a **parcel-machine** price. Nothing writes a courier one
+   * — «Заполнить по тарифам Montonio» skips them on purpose, because the
+   * checkout only shows carrier chips under «Пакомат» — so reading the table
+   * for a courier order charged the Omniva *parcel* price (3.19 €) for an
+   * Estonian courier the moment the fill button was pressed, against a real
+   * courier cost of 6.82 €. The storefront's own shipCost() passes the
+   * carrier for every method, so both halves had the same hole; both now
+   * ignore the carrier unless the method is one a carrier was picked for.
+   */
+  const carrierTable = carrier && method === "parcel" ? rules.carriers?.[carrier] : undefined;
   const base =
     carrierTable?.[country] ??
     carrierTable?.[zone] ??
@@ -314,6 +379,18 @@ export function quoteFromRules(
     table.default ??
     0;
 
+  /*
+   * Free delivery, same three steps as the price: the country's own threshold,
+   * then its zone's, then the shop-wide one. So `freeFromByCountry: {EU: 150}`
+   * raises the bar for all of Europe at once and `{GR: null}` turns free
+   * delivery off for Greece alone, where it costs 43.15 € to send.
+   *
+   * Nothing sets either by default — `freeFrom: 59` everywhere is exactly what
+   * it was — because how much free delivery to give away is Renat's decision,
+   * not a default this file should make for him. It is also the place the
+   * per-country prices above do NOT fix: a 59 € basket still ships free at
+   * whatever it costs. docs/audit/2026-09-07-eu-rates.md, question 5.
+   */
   const byCountry = rules.freeFromByCountry;
   const freeFrom = !byCountry
     ? rules.freeFrom
