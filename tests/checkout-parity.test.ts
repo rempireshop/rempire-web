@@ -16,7 +16,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { quoteFromPromo, type Promo } from "@/lib/promos";
-import { quoteFromRules, type ShippingRules } from "@/lib/shipping";
+import { DEFAULT_SHIPPING_RULES, quoteFromRules, type ShippingRules } from "@/lib/shipping";
 
 const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
 const src = readFileSync(APP_JS, "utf8");
@@ -33,6 +33,20 @@ function slice(name: string): string {
   throw new Error(`unbalanced braces around ${name}() in app.js`);
 }
 
+/** Read a `var <name> = { … };` literal out of app.js and evaluate it. */
+function literal<T>(name: string): T {
+  const start = src.indexOf(`var ${name} = {`);
+  if (start < 0) throw new Error(`public/shop2/app.js no longer has var ${name}`);
+  let depth = 0;
+  for (let i = src.indexOf("{", start); i < src.length; i++) {
+    if (src[i] === "{") depth++;
+    else if (src[i] === "}" && --depth === 0) {
+      return new Function(`return ${src.slice(src.indexOf("{", start), i + 1)};`)() as T;
+    }
+  }
+  throw new Error(`unbalanced braces around ${name} in app.js`);
+}
+
 type ClientOut = { discount: number; ship: number; sum: number };
 type PromoInfo = { code: string; kind: string; value: number; minSubtotal: number } | null;
 
@@ -41,30 +55,38 @@ type PromoInfo = { code: string; kind: string; value: number; minSubtotal: numbe
  * basket, with the handful of neighbours they call stubbed to the same values
  * the server is given.
  */
-function client(promoInfo: PromoInfo, cartSum: number, rules: ShippingRules, country = "EE"): ClientOut {
+function client(
+  promoInfo: PromoInfo,
+  cartSum: number,
+  rules: ShippingRules,
+  country = "EE",
+  method = "parcel",
+  countryIso = "",
+): ClientOut {
+  /* threshold() and orderCountry() are sliced out of app.js too rather than
+     restated here. Both learned about the real country on 07.09.2026 — the
+     shop prices Greece and Germany apart now — and a stub would have hidden
+     exactly the drift this file exists to catch. */
   const body = `
     ${slice("discount")}
     ${slice("promoLive")}
     ${slice("shipPriceFor")}
     ${slice("shipRulePrice")}
+    ${slice("threshold")}
+    ${slice("orderCountry")}
     function cartSum() { return CART_SUM; }
-    function threshold() {
-      var by = SHIP_RULES.freeFromByCountry;
-      var f = by && Object.prototype.hasOwnProperty.call(by, S.country) ? by[S.country] : SHIP_RULES.freeFrom;
-      return f === null || f === undefined ? Infinity : f;
-    }
     function freeShip() { return cartSum() >= threshold(); }
-    function shipMethod() { return "parcel"; }
+    function shipMethod() { return METHOD; }
     function shipCarrier() { return S.ship.carrier; }
     function shipCost() { return shipPriceFor(shipMethod(), shipCarrier()); }
     return { discount: discount(), ship: shipCost(), sum: cartSum() };
   `;
   // The body is this repository's own source plus fixed stub text — no input
   // of any kind is interpolated into it.
-  const run = new Function("S", "CART_SUM", "SHIP_RULES", body) as (
-    s: unknown, n: number, r: ShippingRules,
+  const run = new Function("S", "CART_SUM", "SHIP_RULES", "METHOD", body) as (
+    s: unknown, n: number, r: ShippingRules, m: string,
   ) => ClientOut;
-  return run({ promoInfo, country, ship: { carrier: "" } }, cartSum, rules);
+  return run({ promoInfo, country, countryIso, ship: { carrier: "" } }, cartSum, rules, method);
 }
 
 const RULES: ShippingRules = {
@@ -94,6 +116,27 @@ const cases: Array<[string, Promo | null, number]> = [
   ["an odd basket, so the rounding shows", promo({ value: 15 }), 33.33],
 ];
 
+/* The storefront is a static bundle: it cannot import the server's defaults,
+   so it carries a copy of them. Twenty-five countries × two methods is far too
+   much to keep in step by eye, and a single wrong cent is a shopper shown one
+   price and billed another. */
+describe("the storefront's copy of the default rules is the server's", () => {
+  const mirror = literal<ShippingRules & { freeFromByCountry: null; carriers: null }>("SHIP_RULES");
+
+  it("has the same price in every cell", () => {
+    expect(mirror.methods).toEqual(DEFAULT_SHIPPING_RULES.methods);
+  });
+
+  it("has the same free-delivery floor and the same countries switched off", () => {
+    expect(mirror.freeFrom).toBe(DEFAULT_SHIPPING_RULES.freeFrom);
+    expect(mirror.freeFromByCountry).toBe(null); // the server's is simply absent
+    expect(DEFAULT_SHIPPING_RULES.freeFromByCountry).toBeUndefined();
+    expect([...(mirror.countriesOff ?? [])].sort()).toEqual(
+      [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])].sort(),
+    );
+  });
+});
+
 describe("the checkout total on screen equals the one the server bills", () => {
   for (const [label, p, sum] of cases) {
     it(label, () => {
@@ -121,5 +164,45 @@ describe("the checkout total on screen equals the one the server bills", () => {
     // ships free on screen and is billed 6,90 €
     expect(c.ship).toBe(6.9);
     expect(server.price).toBe(6.9);
+  });
+
+  /* «Другая страна Европы» → the second select. The shopper's screen has to
+     price the country he actually picked, not the zone: this is the whole of
+     the 07.09.2026 change, and getting it wrong shows 9,90 € for Greece and
+     bills 43,19 €. */
+  it("agrees about every country behind «Другая страна Европы»", () => {
+    for (const iso of Object.keys(DEFAULT_SHIPPING_RULES.methods.courier)) {
+      if (iso === "default") continue;
+      const c = client(null, 40, DEFAULT_SHIPPING_RULES, "EU", "courier", iso);
+      const server = quoteFromRules(DEFAULT_SHIPPING_RULES, {
+        country: iso, method: "courier", subtotal: 40,
+      });
+      expect([iso, c.ship]).toEqual([iso, server.price]);
+    }
+  });
+
+  it("agrees about the free-delivery floor a zone sets for all of Europe", () => {
+    const rules: ShippingRules = {
+      ...DEFAULT_SHIPPING_RULES,
+      freeFromByCountry: { EU: 150, GR: null },
+    };
+    for (const [iso, sum] of [["DE", 100], ["DE", 150], ["GR", 10_000]] as const) {
+      const c = client(null, sum, rules, "EU", "courier", iso);
+      const server = quoteFromRules(rules, { country: iso, method: "courier", subtotal: sum });
+      expect([iso, sum, c.ship]).toEqual([iso, sum, server.price]);
+    }
+  });
+
+  /* A carrier price is a parcel-machine price — the fill button writes no
+     courier ones. Both halves have to ignore it for a courier, or the screen
+     and the bill disagree the moment «Заполнить по тарифам Montonio» is used. */
+  it("agrees that a carrier price does not price a courier", () => {
+    const rules: ShippingRules = { ...RULES, carriers: { omniva: { EE: 2.99 } } };
+    const c = client(null, 40, rules, "EE", "courier");
+    const server = quoteFromRules(rules, {
+      country: "EE", method: "courier", subtotal: 40, carrier: "omniva",
+    });
+    expect(c.ship).toBe(server.price);
+    expect(c.ship).toBe(5.99);
   });
 });
