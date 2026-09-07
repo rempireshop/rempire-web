@@ -465,6 +465,74 @@ export async function fetchMontonioRates(
   }
 }
 
+/* ---------- returns: the one thing the API says about them ---------------- */
+
+/** One carrier contract as `GET /carriers` reports it, returns fields only. */
+export interface MontonioCarrierReturns {
+  carrier: string;
+  /** ISO country the contract covers. */
+  country: string;
+  /** true = the merchant's own carrier agreement, false = "by Montonio". */
+  directContract: boolean;
+  /** `contracts[].returnsAllowed` — "Whether returns are enabled for this contract". */
+  returnsAllowed: boolean;
+  /** `contracts[].daysAllowedForReturns` — "Number of days allowed for returns". */
+  daysAllowedForReturns: number | null;
+}
+
+/**
+ * Whether returns are switched on, per carrier contract — `GET /carriers`.
+ *
+ * This is the **whole** of Montonio's Shipping API v2 on the subject. There is
+ * no return endpoint, no return shipment, no return label and no return
+ * webhook (reference, read 07.09.2026: /carriers, /shipping-methods and its
+ * three sub-paths, /shipments, /label-files, /webhooks — and nothing else).
+ * Returns are a per-carrier checkbox in the Montonio partner portal
+ * («Yes, send SMS return code»), the code goes to the customer by SMS and
+ * «You as a merchant do not see the parcel return codes»
+ * (help.montonio.com/en/articles/212957). So the most this shop can ever know
+ * is what this function reads: is the switch on, and for how many days.
+ *
+ * `null` — never a throw — when there are no keys or Montonio would not
+ * answer, like every other reader here.
+ */
+export async function fetchMontonioCarrierReturns(): Promise<MontonioCarrierReturns[] | null> {
+  const config = montonioShippingConfig();
+  if (!config) return null;
+  try {
+    const body = await call<{
+      carriers?: Array<{
+        code?: string;
+        contracts?: Array<{
+          country?: string;
+          isDirectContract?: boolean;
+          returnsAllowed?: boolean;
+          daysAllowedForReturns?: number | null;
+        }> | null;
+      }>;
+    }>(config, "/carriers");
+    const out: MontonioCarrierReturns[] = [];
+    for (const carrier of body.carriers ?? []) {
+      const code = str(carrier?.code).toLowerCase();
+      if (!code) continue;
+      for (const contract of carrier.contracts ?? []) {
+        const days = contract?.daysAllowedForReturns;
+        out.push({
+          carrier: code,
+          country: str(contract?.country).toUpperCase(),
+          directContract: contract?.isDirectContract === true,
+          returnsAllowed: contract?.returnsAllowed === true,
+          daysAllowedForReturns: typeof days === "number" && Number.isFinite(days) ? days : null,
+        });
+      }
+    }
+    return out;
+  } catch (err) {
+    console.error("[montonio shipping] carriers failed —", err);
+    return null;
+  }
+}
+
 /* ---------- merging with the public feeds -------------------------------- */
 
 /** A carrier-feed point in Montonio vocabulary, so the two lists can be one. */

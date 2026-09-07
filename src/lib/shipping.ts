@@ -65,27 +65,39 @@ export interface ShippingQuote {
 
 /**
  * Defaults, per the checkout brief: parcel LV, LT 4.99; courier EU 9.90;
- * pickup free; free delivery from 59 €. **EE parcel and courier are no longer
- * the brief's numbers** — see docs/shipping.md § «Тарифы Montonio», researched
- * 03.09.2026: the brief's 3.49/5.99 sat below every sourced Omniva/SmartPosti/
- * DPD business-list tariff for Estonia, so this shop was paying more for a
- * delivery than it charged for it on day one, in its home market. EE parcel is
- * now 5.47 (the highest of Omniva 5.46, SmartPosti 5.47, DPD Pickup 4.50 — the
- * ceiling, since a plain "parcel" order with no carrier override can land on
- * any of the three) and EE courier is 10.84 (SmartPosti's flat rate, itself
- * above DPD's priciest zone at 10.78).
+ * pickup free; free delivery from 59 €. EE parcel 5.47 and courier 10.84 came
+ * from the carriers' own 2025–26 business list prices, researched 03.09.2026.
  *
- * LV, LT and the EU/default rows are untouched on purpose: those are below
- * cost by the same evidence (LV/LT parcel 4.99 against a sourced 8.06–11.79;
- * courier against 16–26), but closing that gap for every market — and
- * deciding whether Rempire keeps eating it for reach — is Renat's call, not a
- * default this file should make for him. He can close all of it in one click
- * with «Заполнить по тарифам Montonio» in Настройки → Доставка, which prices
- * every country this way (src/lib/shipping/tariffs.ts), or by hand.
+ * **What those numbers were measured against changed on 07.09.2026.** The
+ * table they were computed from held what Omniva, SmartPosti and DPD charge a
+ * merchant with no Montonio contract. Montonio's own contract prices turned
+ * out to be public after all (src/data/montonio-tariffs.json,
+ * docs/audit/2026-09-07-shipping-returns.md), and they are far lower at home:
+ * a parcel machine in Estonia costs 2.54–3.10 € incl. VAT, not 4.50–5.47. So
+ * EE is no longer sold below cost — it is sold at roughly double it, which is
+ * a margin, not a bug, and not this file's to change.
  *
- * Note for whoever tunes these next: the storefront demo table
- * (public/shop2/app.js SHIP) and src/data/montonio-tariffs.json carry the
- * sourced 2025–26 carrier list prices these numbers are computed from.
+ * Where the shop still sells below cost is everywhere else, and by more than
+ * was thought:
+ *   · LV/LT parcel 4.99 against 3.72–5.58 — now roughly break-even.
+ *   · LV/LT courier 9.90 against 8.00–11.16 — roughly break-even.
+ *   · FI has no row at all, so it falls to `default`: parcel 4.99 against
+ *     SmartPosti 9.30 / DPD 12.39, courier 9.90 against 15.62–20.09.
+ *   · «Другая страна Европы» also falls to `default`. Taking the cheapest
+ *     carrier Montonio offers for each country, a parcel machine costs
+ *     7.85 € (Poland) to 59.52 € (Croatia) and a courier 8.51 € (Poland) to
+ *     43.15 € (Greece). 4.99 € covers the parcel machine in **no** European
+ *     country; 9.90 € covers the courier in exactly one, Poland.
+ *
+ * And `freeFrom: 59` applies to all of them, so a 59 € basket to Croatia
+ * ships free at a cost of up to 59.52 € — the one place where a bigger order
+ * is worth less than a smaller one.
+ *
+ * These stay as they are on purpose. Closing the gap — and deciding whether
+ * Rempire keeps eating it for reach — is Renat's call, not a default this
+ * file should make for him. He can close all of it in one click with
+ * «Заполнить по тарифам Montonio» in Настройки → Доставка, which now prices
+ * every European country separately (src/lib/shipping/tariffs.ts), or by hand.
  */
 export const DEFAULT_SHIPPING_RULES: ShippingRules = {
   freeFrom: 59,
@@ -281,19 +293,35 @@ export function quoteFromRules(
   const carrier = input.carrier?.toLowerCase() || sniffCarrier(input.method);
   const subtotal = toNumber(input.subtotal) ?? 0;
 
+  /*
+   * Exact country first, then the zone, then the method's `default`. Until
+   * 07.09.2026 only the zone was looked up, which made «Другая страна Европы»
+   * a single price for twenty-four countries — and Montonio's own contract
+   * rates run from 17.86 € (Poland, parcel machine) to 52.08 € (Croatia) for
+   * the same box, so one number is wrong for almost all of them by a lot.
+   * Nothing writes country cells by default; the admin's «Заполнить по
+   * тарифам Montonio» does (src/lib/shipping/tariffs.ts), and a rules row
+   * with none behaves exactly as it did before.
+   */
   const table = rules.methods[method] ?? {};
   const carrierTable = carrier ? rules.carriers?.[carrier] : undefined;
   const base =
+    carrierTable?.[country] ??
     carrierTable?.[zone] ??
     carrierTable?.default ??
+    table[country] ??
     table[zone] ??
     table.default ??
     0;
 
-  const freeFrom =
-    rules.freeFromByCountry && zone in rules.freeFromByCountry
-      ? rules.freeFromByCountry[zone]
-      : rules.freeFrom;
+  const byCountry = rules.freeFromByCountry;
+  const freeFrom = !byCountry
+    ? rules.freeFrom
+    : country in byCountry
+      ? byCountry[country]
+      : zone in byCountry
+        ? byCountry[zone]
+        : rules.freeFrom;
 
   // Pickup is free because it is pickup, not because the basket was big enough
   const earnedFree = freeFrom !== null && freeFrom >= 0 && subtotal >= freeFrom;

@@ -17,6 +17,7 @@ import {
   createMontonioShipment,
   enrichCoordinates,
   estimateWeightKg,
+  fetchMontonioCarrierReturns,
   fetchMontonioPickupPoints,
   fetchMontonioRates,
   fromParcelPoint,
@@ -196,6 +197,55 @@ describe("authentication", () => {
     const auth = new Headers(calls[0].init?.headers).get("authorization") ?? "";
     expect(auth.startsWith("Bearer ")).toBe(true);
     expect(verifyHs256<{ accessKey?: string }>(auth.slice(7), SECRET).accessKey).toBe(ACCESS);
+  });
+});
+
+/* ---------- returns ------------------------------------------------------ */
+
+describe("fetchMontonioCarrierReturns — the only thing the API says about returns", () => {
+  it("is null without keys, and asks nobody anything", async () => {
+    const calls = stubFetch([[/./, () => json({})]]);
+    expect(await fetchMontonioCarrierReturns()).toBeNull();
+    expect(calls).toHaveLength(0);
+  });
+
+  it("reads returnsAllowed and daysAllowedForReturns off each contract", async () => {
+    withKeys();
+    const calls = stubFetch([
+      [
+        /\/carriers$/,
+        () =>
+          json({
+            carriers: [
+              {
+                code: "OMNIVA",
+                contracts: [
+                  { country: "ee", isDirectContract: false, returnsAllowed: true, daysAllowedForReturns: 14 },
+                  { country: "LV", isDirectContract: false, returnsAllowed: false, daysAllowedForReturns: null },
+                ],
+              },
+              // SmartPosti's returns run through the carrier's own self-service,
+              // so its contract can say false while returns still work.
+              { code: "smartpost", contracts: [{ country: "FI", returnsAllowed: false }] },
+              { code: "dpd", contracts: null }, // no contract at all
+              { contracts: [{ country: "EE", returnsAllowed: true }] }, // no code — skipped
+            ],
+          }),
+      ],
+    ]);
+    const rows = await fetchMontonioCarrierReturns();
+    expect(calls).toHaveLength(1);
+    expect(rows).toEqual([
+      { carrier: "omniva", country: "EE", directContract: false, returnsAllowed: true, daysAllowedForReturns: 14 },
+      { carrier: "omniva", country: "LV", directContract: false, returnsAllowed: false, daysAllowedForReturns: null },
+      { carrier: "smartpost", country: "FI", directContract: false, returnsAllowed: false, daysAllowedForReturns: null },
+    ]);
+  });
+
+  it("answers null rather than throwing when Montonio will not talk", async () => {
+    withKeys();
+    stubFetch([[/\/carriers$/, () => new Response("nope", { status: 500 })]]);
+    expect(await fetchMontonioCarrierReturns()).toBeNull();
   });
 });
 
