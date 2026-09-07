@@ -193,8 +193,16 @@ describe("a custom product's page at request time", () => {
     const p = await createCustomProduct({ ...BALM, seo: null });
     let html = await (await pageFor("", p.id)).text();
     expect(html).toMatch(/^<!doctype html>\n<html lang="ru">/);
-    expect(title(html)).toBe("Proraso Beard Balm — бальзам для бороды — REMPIRE");
-    expect(meta(html, "description")).toBe("Бальзам для бороды. Смягчает и укладывает.");
+    /* The title ladder's middle rung and the description's tail, both added
+       07.09.2026 (src/lib/seo-head.mjs fitTitle()/descFrom(),
+       docs/audit/2026-09-07-seo.md): the full sentence «… — купить в Rempire ·
+       от 14,90 €» is 62 characters, so the price rides on the short form
+       instead of «— REMPIRE», and a description cut from the product's own
+       text ends on what a shopper is deciding about. */
+    expect(title(html)).toBe("Proraso Beard Balm — бальзам для бороды · от 14,90 €");
+    expect(meta(html, "description")).toBe(
+      "Бальзам для бороды. Смягчает и укладывает · от 14,90 € · в наличии · доставка по Эстонии и Балтии",
+    );
     expect(link(html, 'rel="canonical"')).toBe(`${LIVE}/shop2/p/${p.id}/`);
     expect(html).toContain('<span class="chip chip--ok">В наличии</span>');
 

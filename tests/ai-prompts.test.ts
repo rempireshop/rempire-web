@@ -16,7 +16,13 @@ import {
   buildTranslatePrompt,
   HOUSE_VOICE,
   isAiTask,
+  buildCopyPrompt,
+  DESC_MAX,
   SEO_POST_BODY_MAX,
+  SEO_PRODUCT_RULES,
+  SEO_RULES,
+  TITLE_MAX,
+  TITLE_SUFFIXED_UNDER,
 } from "@/lib/ai-prompts";
 
 describe("HOUSE_VOICE — the shared house style every task inherits", () => {
@@ -232,5 +238,93 @@ describe("buildPrompt dispatcher", () => {
     expect(isAiTask("frobnicate")).toBe(false);
     expect(isAiTask(42)).toBe(false);
     expect(isAiTask(undefined)).toBe(false);
+  });
+});
+
+/* ---------- what a search result is made of ------------------------------
+ *
+ * Added 07.09.2026 after the Search Console export (docs/audit/
+ * 2026-09-07-seo.md). Dim: «Every text generated with AI / Assistant needs to
+ * be perfect for SEO.» The prompts used to say «at most 60 characters» and
+ * «no trailing "| Rempire"» and nothing else — no shape for the title, no
+ * account of what the shop appends by itself, and no word about the fact that
+ * the front of a product description IS the meta description of 220 pages. */
+describe("SEO_RULES — the budget every snippet task inherits", () => {
+  it("states both budgets as numbers the code actually uses", () => {
+    expect(TITLE_MAX).toBe(60);
+    expect(DESC_MAX).toBe(155);
+    expect(SEO_RULES).toContain("about 60 characters of the title and about 155 of the description");
+    /* And every task that inherits them repeats its own field's limit as a
+       number the model has to count to. */
+    expect(buildSeoPrompt("RU", { name: "x" }).system).toMatch(/at most 60 characters INCLUDING spaces/);
+    expect(buildSeoPrompt("RU", { name: "x" }).system).toMatch(/at most 155 characters INCLUDING spaces/);
+    /* fitTitle() in src/lib/seo-head.mjs adds " — REMPIRE" below 50 chars —
+       the model has to know, or it writes the shop's name twice. */
+    expect(TITLE_SUFFIXED_UNDER).toBe(50);
+    expect(SEO_RULES).toContain('adds " — REMPIRE" to a title of 50 characters or fewer');
+    expect(SEO_RULES).toMatch(/Never write "Rempire"/);
+  });
+
+  it("forbids the four things that make a snippet look automated", () => {
+    expect(SEO_RULES).toMatch(/one subject/i);          // one product per title
+    expect(SEO_RULES).toMatch(/keyword stuffing/i);
+    expect(SEO_RULES).toMatch(/call to action/i);
+    /* A price written into a saved text is wrong the day it changes; the shop
+       puts the live one into the result itself (src/lib/seo-head.mjs). */
+    expect(SEO_RULES).toMatch(/Never write a price/);
+  });
+
+  it("tells the model the words this shop is actually searched by", () => {
+    /* Every example is a real query out of the export — brand, the maker's
+       own name for the line, then the form. */
+    for (const query of [
+      "system 4 bio botanical shampoo",
+      "kevin murphy anti.gravity spray",
+      "davines naturaltech calming shampoo",
+      "mandom gatsby moving rubber grunge mat hair wax 80g",
+    ]) {
+      expect(SEO_PRODUCT_RULES).toContain(query);
+    }
+    expect(SEO_PRODUCT_RULES).toMatch(/the brand, then the maker's own name for the line, then what the thing is/);
+  });
+
+  it("reaches every task that writes a title or a snippet", () => {
+    const carries = (system: string) => expect(system).toContain(SEO_RULES);
+    carries(buildSeoPrompt("RU", { name: "Touchable" }).system);
+    carries(buildSeoPrompt("RU", { kind: "post", title: "Зимний уход" }).system);
+    carries(buildBlogOutlinePrompt("RU", { topic: "борода зимой" }).system);
+    carries(buildPrompt("post_full", "RU", { topic: "борода зимой" }).system);
+    carries(buildPrompt("post_translate", "ET", { title: "Зимний уход", body: "<p>x</p>" }).system);
+    /* Only those. A reply to a customer and a translation of a product text
+       are not search results, and 1.3 kB of snippet rules in their prompt
+       would be noise. */
+    expect(buildReplyPrompt("RU", { customerMessage: "где заказ", order: { number: "R-1" } }).system)
+      .not.toContain(SEO_RULES);
+    expect(buildTranslatePrompt("RU", { text: "x", targetLangs: ["ET"] }).system).not.toContain(SEO_RULES);
+  });
+
+  it("only a product's snippet gets the product query shape", () => {
+    expect(buildSeoPrompt("RU", { name: "Touchable" }).system).toContain(SEO_PRODUCT_RULES);
+    expect(buildSeoPrompt("RU", { kind: "post", title: "Зимний уход" }).system).not.toContain(SEO_PRODUCT_RULES);
+  });
+});
+
+describe("the first sentence of a description is a search snippet", () => {
+  /* src/lib/seo-head.mjs descFrom(): with no Google pair of its own, a product
+     page's meta description is cut from the front of this text — for all 220
+     catalogue products today. The prompt has to say so, or the model opens
+     with a heading and Google prints the heading. */
+  it("tells the describe task what its first sentence is for", () => {
+    const { system } = buildDescribePrompt("RU", { name: "Touchable", brand: "Kevin.Murphy" });
+    expect(system).toContain("THE FIRST SENTENCE IS THE SEARCH SNIPPET");
+    expect(system).toMatch(/under 100 characters/);
+    expect(system).toMatch(/capitals/);
+  });
+
+  it("tells the product-name task that the name becomes the page title", () => {
+    const { system } = buildCopyPrompt("RU", { kind: "product_name", name: "Moving Rubber 80g", brand: "Gatsby" });
+    expect(system).toMatch(/builds the product page's <title>/);
+    expect(system).toMatch(/the size when the maker's name carries one/);
+    expect(system).toContain("ANTI.GRAVITY.SPRAY");
   });
 });

@@ -79,6 +79,34 @@ Absolute rules, in order of importance:
 6. Russian is the shop's own plain, warm, informal retail Russian — never corporate or bureaucratic ("Уважаемый клиент" does not belong here).
 7. Output ONLY the JSON object described for this task. No markdown code fences, no commentary before or after it.`;
 
+/* ---------- what a search result is made of --------------------------------
+ *
+ * Every task below that writes a title or a snippet inherits these. They are
+ * not style preferences — each line is a fact about how this shop's pages are
+ * built (src/lib/seo-head.mjs) or a number out of the Search Console export of
+ * 07.09.2026 (docs/audit/2026-09-07-seo.md), where the shop ranked first for
+ * five of its own products and took no clicks at all from any of them.
+ *
+ * Dim, 07.09.2026: «Every text generated with AI / Assistant needs to be
+ * perfect for SEO.» */
+export const TITLE_MAX = 60;
+export const DESC_MAX = 155;
+/** fitTitle() in src/lib/seo-head.mjs appends " — REMPIRE" below this length. */
+export const TITLE_SUFFIXED_UNDER = 50;
+
+export const SEO_RULES = `HOW THIS SHOP'S SEARCH RESULTS WORK — the budget you are writing to:
+- A Google result prints about ${TITLE_MAX} characters of the title and about ${DESC_MAX} of the description. Both are hard limits: count the characters INCLUDING spaces and stay inside them. What runs past is cut mid-word, and a result that ends mid-word reads as a broken page.
+- The shop adds " — REMPIRE" to a title of ${TITLE_SUFFIXED_UNDER} characters or fewer by itself, and Google prints the site's name beside every result anyway. Never write "Rempire", "| Rempire", "REMPIRE" or the domain into a title yourself.
+- One title, one subject. A title naming two products, or a product and a category, ranks for neither.
+- No keyword stuffing: never repeat a word to fit it in twice, never chain synonyms ("шампунь, шампуни, средство для мытья волос"), never bolt on a city, a country or "купить" where the sentence does not need it.
+- The description is a reason to click, not a second title and not a slogan. Say what the thing is and who it is for, then the one concrete thing about it that would decide a purchase — taken from INPUT, never invented. No call to action ("Купите сейчас", "Заказывайте"), no exclamation marks, no ALL-CAPS.
+- Never write a price, a discount, a delivery time or a stock figure into either field. The shop puts the live price and "в наличии" into the result itself, from its own data; a number saved inside a text is wrong the first time it changes.`;
+
+/* The one rule that is specific to a product, and the one the export settles
+   rather than guesses: every query this shop is found by is the maker's own
+   words in the maker's own order. */
+export const SEO_PRODUCT_RULES = `WHAT PEOPLE ACTUALLY TYPE — write the title in their words, in their order: the brand, then the maker's own name for the line, then what the thing is. The shop's real queries look like this: "system 4 bio botanical shampoo", "kevin murphy anti.gravity spray", "davines naturaltech calming shampoo", "mandom gatsby moving rubber grunge mat hair wax 80g", "system 4 t scalp tonic". So keep the maker's spelling exactly as INPUT gives it — the dots in "ANTI.GRAVITY.SPRAY", the line name ("Naturaltech", "Moving Rubber", "Bio Botanical"), and the size when the maker's own name carries one ("80 g"). Do not translate, transliterate or re-case any of it.`;
+
 /* ---------- describe -------------------------------------------------------
  * product name, brand, category, size list, optional bullet facts
  * → 80–140-word description + 3 bullets, in `lang`. */
@@ -121,6 +149,7 @@ export function buildDescribePrompt(lang: Lang3, rawInput: unknown): PromptResul
 
 TASK: write a product-page description from the facts under INPUT, in ${LANG_NAME[lang]}.
 - "description": 80–140 words, one to three short paragraphs, no headings, no bullet points inside it.
+- THE FIRST SENTENCE IS THE SEARCH SNIPPET. When nobody writes a separate Google description for this product, the shop cuts the page's meta description out of the front of this text (src/lib/seo-head.mjs). So sentence one has to stand on its own in a search result: under 100 characters, saying plainly what the product is and who it is for. Do not open with a heading, with the brand shouted back at the reader, or with a line in capitals — the shop strips a capitalised opening, and what is left is what a stranger reads first.
 - "bullets": exactly 3 short bullet phrases (each under 12 words), the three most useful facts from INPUT for someone deciding whether to buy — not a repeat of the description sentence by sentence.
 Respond with exactly this JSON shape and nothing else: {"description": "...", "bullets": ["...", "...", "..."]}`;
 
@@ -257,9 +286,13 @@ export function buildSeoPrompt(lang: Lang3, rawInput: unknown): PromptResult {
 
   const system = `${HOUSE_VOICE}
 
+${SEO_RULES}
+
+${SEO_PRODUCT_RULES}
+
 TASK: write a Google search snippet for this product, in ${LANG_NAME[lang]}.
-- "title": an SEO title, at most 60 characters INCLUDING spaces — count them. Include the product type and brand naturally, no keyword stuffing, no trailing "| Rempire" (the site appends that itself).
-- "description": an SEO meta description, at most 155 characters INCLUDING spaces — count them. A concrete, specific reason to click, not a repeat of the title.
+- "title": at most ${TITLE_MAX} characters INCLUDING spaces — count them. Brand, then the maker's name for the product, then what it is, in ${LANG_NAME[lang]}: "System 4 Bio Botanical Shampoo — шампунь", "Kevin.Murphy ANTI.GRAVITY.SPRAY — спрей для объёма".
+- "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. One sentence on what it is and whom it suits, one on the thing about it that decides the purchase. Nothing that is not in INPUT.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
 
   return { system, user: `INPUT:\n${facts}` };
@@ -281,9 +314,11 @@ function buildPostSeoPrompt(lang: Lang3, input: SeoClean): PromptResult {
 
   const system = `${HOUSE_VOICE}
 
+${SEO_RULES}
+
 TASK: write a Google search snippet for this blog article, in ${LANG_NAME[lang]}. The article under INPUT may be written in another language — write the snippet in ${LANG_NAME[lang]} regardless: it is for the ${LANG_NAME[lang]} page of the same article.
-- "title": an SEO title, at most 60 characters INCLUDING spaces — count them. Name the article's topic the way a reader would search for it, no keyword stuffing, no trailing "| Rempire" (the site appends that itself).
-- "description": an SEO meta description, at most 155 characters INCLUDING spaces — count them. Say concretely what the reader will learn — a reason to click, not a repeat of the title.
+- "title": at most ${TITLE_MAX} characters INCLUDING spaces — count them. Name the article's subject in the reader's own words, the way they would type the question into the search box. A product or brand name belongs in it only when the article really is about that one thing.
+- "description": at most ${DESC_MAX} characters INCLUDING spaces — count them. Say concretely what the reader will know after reading it — the answer the article gives, not a promise that it gives one.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "description": "..."}`;
 
   return { system, user: `INPUT:\n${facts}` };
@@ -379,11 +414,13 @@ export function buildBlogOutlinePrompt(lang: Lang3, rawInput: unknown): PromptRe
 
   const system = `${HOUSE_VOICE}
 
+${SEO_RULES}
+
 TASK: plan a grooming-advice blog article for the shop's own blog, in ${LANG_NAME[lang]}, on the topic given under INPUT. This is a skeleton for the owner to write into, not a finished article — do not invent product names, brand claims or statistics; keep every heading generic enough that no fact-check is needed.
 - "title": an article title, plain and specific to the topic, under 70 characters.
-- "h2": exactly 6 section headings (H2s) that would structure a genuinely useful article on this topic, in a sensible reading order, each under 60 characters, no numbering.
-- "metaTitle": SEO title for this article, at most 60 characters including spaces.
-- "metaDescription": SEO meta description, at most 155 characters including spaces.
+- "h2": exactly 6 section headings (H2s) that would structure a genuinely useful article on this topic, in a sensible reading order, each under 60 characters, no numbering. Each one should read like a question a reader would actually ask, not like a chapter of a textbook.
+- "metaTitle": SEO title for this article, at most ${TITLE_MAX} characters INCLUDING spaces — count them. The topic in the reader's own search words.
+- "metaDescription": SEO meta description, at most ${DESC_MAX} characters INCLUDING spaces — count them. What the reader will know after reading it.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "h2": ["...","...","...","...","...","..."], "metaTitle": "...", "metaDescription": "..."}`;
 
   return { system, user: `INPUT:\nTopic: ${input.topic}` };
@@ -449,13 +486,15 @@ export function buildPostFullPrompt(lang: Lang3, rawInput: unknown): PromptResul
 
   const system = `${HOUSE_VOICE}
 
+${SEO_RULES}
+
 TASK: write a complete grooming-advice article for the shop's own blog, in ${LANG_NAME[lang]}, on the topic under INPUT. This is the finished piece the owner will read once and publish — not an outline, not a stub. Practical, specific, honest; general grooming knowledge is fine, invented facts about products, ingredients or studies are not.
 - "title": the article title, plain and specific, under 80 characters, no trailing punctuation.
 - "excerpt": two sentences (under 300 characters) that say what the reader will learn — shown in the list and in search.
 - "body": ${POST_WORDS[0]}–${POST_WORDS[1]} words of clean HTML. Use ONLY these tags: <h2> for section headings (4 to 6 sections, in a sensible reading order), <p> for paragraphs (2–4 sentences each), <ul><li> for one or two lists where a list genuinely helps (steps, a short checklist), <strong> for a key phrase now and then. No <h1>, no <h3>, no images, no links, no inline styles, no markdown, no comments. Start with an opening paragraph before the first <h2>. Mention 1–3 of the PRODUCTS by their exact name inside the advice where they fit, at most once each, and never as a sales pitch — a recommendation a barber would make out loud. End with one short closing paragraph that invites the reader to ask at the Rempire barbershop (Mardi 1, Tallinn) or in the shop — no prices, no discounts, no promises.
 - "tags": 3 to 5 short lowercase tags in ${LANG_NAME[lang]} (single words or two-word phrases), the reader's own search words.
-- "seoTitle": a Google title, at most 60 characters INCLUDING spaces — count them, no trailing "| Rempire".
-- "seoDescription": a Google meta description, at most 155 characters INCLUDING spaces — count them; concrete, what the reader will learn.
+- "seoTitle": a Google title, at most ${TITLE_MAX} characters INCLUDING spaces — count them. The article's subject in the reader's own search words; the shop's name is added for you.
+- "seoDescription": a Google meta description, at most ${DESC_MAX} characters INCLUDING spaces — count them; concrete, what the reader will know after reading it.
 - "products": the ids (from PRODUCTS) of the products the body actually mentions, in the order they appear — an empty list if none.
 Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt": "...", "body": "<p>...</p><h2>...</h2><p>...</p>", "tags": ["...", "...", "..."], "seoTitle": "...", "seoDescription": "...", "products": ["id"]}`;
 
@@ -511,10 +550,12 @@ export function buildPostTranslatePrompt(lang: Lang3, rawInput: unknown): Prompt
     : "";
   const system = `${HOUSE_VOICE}
 
+${SEO_RULES}
+
 TASK: translate a blog article from ${LANG_NAME[input.sourceLang]} into ${LANG_NAME[lang]}. Translate meaning, not word for word — it must read as if written natively in ${LANG_NAME[lang]}, in the voice above. Do not shorten, summarise, expand, reorder or add anything the source does not say.
 - "body" is HTML: keep every tag exactly where it is (<h2>, <p>, <ul>, <li>, <strong>, <em>) and translate only the text between tags. Never add, drop or rename a tag.
 - "tags": the same tags, translated as short lowercase words a reader in ${LANG_NAME[lang]} would search for.
-- "seoTitle": at most 60 characters INCLUDING spaces — count them, shorten if the translation runs long. "seoDescription": at most 155 characters INCLUDING spaces — same rule.${keep}
+- "seoTitle": at most ${TITLE_MAX} characters INCLUDING spaces — count them. ${LANG_NAME[lang]} is often longer than the source; re-write the title to fit rather than translating it and letting it run over. "seoDescription": at most ${DESC_MAX} characters INCLUDING spaces — same rule.${keep}
 Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt": "...", "body": "...", "tags": ["..."], "seoTitle": "...", "seoDescription": "..."}`;
 
   const user = [
@@ -641,6 +682,8 @@ Respond with exactly this JSON shape and nothing else: {"text": "..."}`;
   } else {
     if (!input.name && !input.hint) throw new AiInputError("missing_name");
     task = `TASK: write the shop's catalogue name for a new product. The house pattern is «<line and product name in Latin script, exactly as the maker writes it> — <Russian type tail>», e.g. «Beard Balm Cypress & Vetyver — бальзам для бороды», «PLUMPING.WASH — шампунь», «Oil Cure Scalp Treatment — маска для кожи головы». Keep the brand out of the name (it is a separate field). The Russian tail MUST start with one of these words, because the storefront translates only these into Estonian and English by itself: ${PRODUCT_NAME_TAILS.join(", ")} — optionally followed by one of: ${PRODUCT_NAME_FRAGS.join(", ")}. Pick the tail that truthfully describes the product from INPUT; do not invent a type the input does not support.
+
+This name is not only a label: the shop builds the product page's <title> out of the brand and this name, so it is what the page will rank for. Keep every word a buyer would type — the maker's own line name ("Naturaltech", "Moving Rubber", "Bio Botanical"), the maker's own punctuation ("ANTI.GRAVITY.SPRAY"), and the size when the maker's name carries one ("Hair Wax 80g"). Do not tidy, translate or shorten those, and do not add words of your own to help it rank. Brand plus name has to stay under 50 characters when it can.
 Respond with exactly this JSON shape and nothing else: {"name": "..."}`;
     facts = [
       input.brand ? `Brand: ${input.brand}` : "",
