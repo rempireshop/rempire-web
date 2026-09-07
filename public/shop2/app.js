@@ -368,6 +368,8 @@
       "Слишком много попыток — подождите минуту": "Liiga palju katseid — oota minut",
       "Проверьте e-mail": "Kontrolli e-posti aadressi",
       "Товара не хватает на складе": "Laos ei ole piisavalt kaupa",
+      "Такой подарочной карты сейчас нет — выберите другую сумму":
+        "Sellist kinkekaarti praegu ei müüda — vali teine summa",
       "Магазин временно недоступен — попробуйте позже": "Pood on ajutiselt kättesaamatu — proovi hiljem",
       "Не получилось оформить заказ — попробуйте ещё раз": "Tellimuse vormistamine ebaõnnestus — proovi uuesti",
       "Не получилось оформить заказ": "Tellimuse vormistamine ebaõnnestus",
@@ -447,8 +449,15 @@
       "Набор сейчас не собрать — товар закончился": "Komplekti ei saa praegu kokku panna — toode on otsas",
       "Набор в корзине ✓": "Komplekt on ostukorvis ✓",
       "Подарочная карта": "Kinkekaart", "Выбрать сумму": "Vali summa", "Сумма": "Summa",
-      "25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
-        "25, 50 või 100 € — saadame kirjaga saajale. Kui ei tea, mida valida, sobib see alati.",
+      /* The amounts are their own node now (giftAmountsPhrase) — they come
+         from settings.gift_amounts, so the sentence around them is the only
+         part a dictionary can hold. Same two halves build the /gift/ meta
+         description (giftDescText). */
+      "— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
+        "— saadame kirjaga saajale. Kui ei tea, mida valida, sobib see alati.",
+      "Подарочная карта Rempire на": "Rempire'i kinkekaart",
+      "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
+        "— tuleb kirjaga sulle või kohe saajale. Kehtib aasta, jääk säilib.",
       "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
         "Kehtib kogu poes ega aegu kohe. Pärast maksmist tuleb kirjaga kood — sulle või kohe saajale.",
       "Кому — имя": "Kellele — nimi", "Имя получателя": "Saaja nimi",
@@ -2177,6 +2186,8 @@
       "Слишком много попыток — подождите минуту": "Too many attempts — wait a minute",
       "Проверьте e-mail": "Check the e-mail address",
       "Товара не хватает на складе": "Not enough stock",
+      "Такой подарочной карты сейчас нет — выберите другую сумму":
+        "That gift card is not on sale right now — pick another amount",
       "Магазин временно недоступен — попробуйте позже": "The shop is temporarily unavailable — try again later",
       "Не получилось оформить заказ — попробуйте ещё раз": "Could not place the order — please try again",
       "Не получилось оформить заказ": "Could not place the order",
@@ -2257,8 +2268,11 @@
       "Набор сейчас не собрать — товар закончился": "The set can't be made up right now — a product is out of stock",
       "Набор в корзине ✓": "Set added to your cart ✓",
       "Подарочная карта": "Gift card", "Выбрать сумму": "Choose an amount", "Сумма": "Amount",
-      "25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
-        "€25, €50 or €100 — sent to the recipient by e-mail. When you don't know what to pick, this always works.",
+      "— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.":
+        "— sent to the recipient by e-mail. When you don't know what to pick, this always works.",
+      "Подарочная карта Rempire на": "A Rempire gift card for",
+      "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.":
+        "— e-mailed to you or straight to the recipient. Valid for a year, the balance carries over.",
       "Работает на весь магазин и не сгорает. После оплаты придёт письмо с кодом — вам или сразу получателю.":
         "Valid across the whole shop and it doesn't expire on you. After payment the code arrives by e-mail — to you or straight to the recipient.",
       "Кому — имя": "To — name", "Имя получателя": "Recipient's name",
@@ -6144,14 +6158,26 @@
     var on = giftAmountsOn();
     return on.indexOf(S.giftAmount) >= 0 ? S.giftAmount : on[0];
   }
-  /* The tile's own sentence names the three amounts the shop has always sold
-     and stays a fixed, translated string: the denominations the owner can
-     switch off are the buttons on /gift/ below, which is where a shopper
-     actually chooses one. */
+  /** The denominations on sale, written out — «25 €, 50 €, 100 €» in Russian
+      and Estonian, «€25, €50, €100» in English, because eur() already knows
+      where the sign goes. Deliberately a comma list and not «25, 50 или 100»:
+      a conjunction inside a run of digits is the one thing translateTree()
+      cannot rewrite (it works on whole text nodes, and this node's text
+      depends on a setting), and a list of prices needs no dictionary at all.
+      Its own text node everywhere it is used, for the same reason. */
+  function giftAmountsPhrase() {
+    return giftAmountsOn().map(eur).join(", ");
+  }
+  /* The tile used to name «25, 50 или 100 €» in fixed text while the buttons
+     on /gift/ followed «Маркетинг → Подарочные карты» — so switching 25 off
+     or 75 on made the tile and the page disagree. Dim, 07.09.2026: the tile
+     comes from the setting. Two nodes, not one: the amounts are generated and
+     the sentence around them is a dictionary key. */
   function giftTileHTML() {
     return '<div class="gifttile"><span class="gifttile__art" aria-hidden="true">' + tower("gifttile__mark") + "</span>" +
       '<div class="gifttile__txt"><h2 class="sec__title">Подарочная карта</h2>' +
-      '<p class="muted">25, 50 или 100 € — придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.</p></div>' +
+      '<p class="muted"><span class="num">' + esc(giftAmountsPhrase()) + "</span> " +
+      "<span>— придёт письмом получателю. Если не знаете, что выбрать, это всегда подходит.</span></p></div>" +
       '<button class="btn btn--ghost" data-go="gift">Выбрать сумму</button></div>';
   }
   function giftEmailBad() {
@@ -9695,6 +9721,8 @@
     rate_limited: "Слишком много попыток — подождите минуту",
     bad_email: "Проверьте e-mail",
     out_of_stock: "Товара не хватает на складе",
+    // the owner switched this denomination off while the card sat in the basket
+    gift_unavailable: "Такой подарочной карты сейчас нет — выберите другую сумму",
     db_unavailable: "Магазин временно недоступен — попробуйте позже",
     // «По счёту»: what src/lib/invoices.ts cleanCompany() refuses, by field
     bad_company: "Укажите название фирмы",
@@ -18884,7 +18912,18 @@
      word what tools/prerender-shop2.mjs writes into the same static pages. */
   var INFO_DESC_TAIL = "магазин Rempire, Таллинн. Доставка Omniva, SmartPosti и DPD по Эстонии и Балтии, самовывоз на Mardi 1.";
   var SETS_DESC = "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.";
-  var GIFT_DESC = "Подарочная карта Rempire на 25, 50 или 100 € — придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
+  /* The gift card's meta description. Not one dictionary key any more: the
+     denominations in the middle of it are the owner's setting, so the
+     sentence is built from two keys with the generated amounts between them
+     — same words as before when the shop sells the usual three, and the
+     truth when it does not (Dim, 07.09.2026). tools/prerender-shop2.mjs
+     builds the static /gift/ page's description the same way, from
+     src/lib/seo-head.mjs's giftDesc(). */
+  var GIFT_DESC_HEAD = "Подарочная карта Rempire на";
+  var GIFT_DESC_TAIL = "— придёт письмом вам или сразу получателю. Действует год, остаток сохраняется.";
+  function giftDescText(lang) {
+    return trText(GIFT_DESC_HEAD, lang, false) + " " + giftAmountsPhrase() + " " + trText(GIFT_DESC_TAIL, lang, false);
+  }
   var BLOG_DESC = "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.";
   // the sentence screenBrands() opens with, reused as that page's description
   var BRANDS_DESC = "Марки, с которыми работает салон Rempire. Нажмите на бренд — покажем всё, что есть в наличии.";
@@ -19004,7 +19043,7 @@
         }
       } else if (S.screen === "gift") {
         t = trText("Подарочная карта", S.lang, false) + " — REMPIRE";
-        d = trText(GIFT_DESC, S.lang, false).slice(0, 158);
+        d = giftDescText(S.lang).slice(0, 158);
       }
       // blog: the listing's title/description are UI chrome (through the
       // dictionary); a post's are the author's own text, already in S.lang

@@ -312,7 +312,7 @@ try {
    defaults that app.js applyShipRules() does (key by key, a bad number
    ignored), so the page prints what the checkout will bill. Without
    DATABASE_URL these are the defaults src/lib/shipping.ts carries too. */
-const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing"]);
+const LIVE_SETTINGS = await fetchSettings(["shipping_rules", "pricing", "gift_amounts"]);
 function mergeShipRules(defaults, raw) {
   const out = JSON.parse(JSON.stringify(defaults));
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
@@ -1130,7 +1130,24 @@ function setsPage(lang) {
   };
 }
 
-const GIFT_AMOUNTS = [25, 50, 100];
+/* The gift-card denominations actually on sale. It used to be a fixed three
+   here (and, worse, the four the SERVER accepts a few lines down), while
+   «Маркетинг → Подарочные карты» decided what the /gift/ page really offered
+   — so a build after the owner switched 25 off wrote a page naming a card
+   nobody could buy. Dim, 07.09.2026: the page comes from the setting.
+   Same sanitiser as cleanGiftAmounts() in src/lib/giftcards.ts — the four the
+   server will accept, sorted, de-duplicated, falling back to the three the
+   shop has always sold rather than leaving the page with no amount on it. */
+const GIFT_AMOUNTS_ALLOWED = [25, 50, 75, 100];
+const GIFT_AMOUNTS_DEFAULT = [25, 50, 100];
+const GIFT_AMOUNTS = (() => {
+  const raw = LIVE_SETTINGS.gift_amounts;
+  if (!Array.isArray(raw)) return [...GIFT_AMOUNTS_DEFAULT];
+  const out = [...new Set(raw.map(Number).filter(n => GIFT_AMOUNTS_ALLOWED.includes(n)))].sort((x, y) => x - y);
+  return out.length ? out : [...GIFT_AMOUNTS_DEFAULT];
+})();
+/** «25 €, 50 €, 100 €» / «€25, €50, €100» — giftAmountsPhrase() in app.js. */
+const giftAmountsPhrase = code => GIFT_AMOUNTS.map(a => eurFor(a, code)).join(", ");
 
 function giftPage(lang) {
   const { code, seg } = lang;
@@ -1154,7 +1171,7 @@ function giftPage(lang) {
         code, false)) + "</p>" +
       '<h2 class="display h1" style="font-size:13px;letter-spacing:.18em">' +
         esc(tr("Сумма", code, false)) + "</h2>" +
-      '<ul class="pre__sizes">' + GIFT_AMOUNTS.map(a => "<li><span class=\"num\">" + esc(eur(a)) + "</span></li>").join("") + "</ul>" +
+      '<ul class="pre__sizes">' + GIFT_AMOUNTS.map(a => "<li><span class=\"num\">" + esc(eurFor(a, code)) + "</span></li>").join("") + "</ul>" +
       "<p>" + esc(tr(
         "Карта действует год со дня покупки. Остаток сохраняется: можно потратить за несколько заказов.",
         code, false)) + "</p>" +
@@ -1169,7 +1186,7 @@ function giftPage(lang) {
     spec: {
       lang, seg, rest,
       title: fitTitle(heading, heading + " — REMPIRE"),
-      desc: clip(t.giftDesc, 158),
+      desc: clip(t.giftDesc(giftAmountsPhrase(code)), 158),
       image: ogPick(OG_DEFAULT), imageAlt: heading, ogType: "website",
       jsonld: [ORG_LD, breadcrumbLD(crumbItems.map(([l, u]) => [l, u]))],
       content

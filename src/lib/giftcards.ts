@@ -51,6 +51,24 @@ export function cleanGiftAmounts(raw: unknown): number[] {
 }
 
 /**
+ * The denominations the shop is selling right now — `settings.gift_amounts`
+ * through the sanitiser above, the way getPricingSettings() reads
+ * `settings.pricing`.
+ *
+ * createOrder() checks a gift line against **this**, not against the ceiling
+ * above. Until 07.09.2026 it checked the ceiling, so a card the owner had
+ * switched off in «Маркетинг → Подарочные карты» — 75 €, most of the time —
+ * still went through the checkout if it was already sitting in a basket or if
+ * somebody posted the item id by hand. Dim's answer was that the setting
+ * decides what is sold, at the till as well as in the window; the storefront
+ * renders the same list (giftAmountsOn() in public/shop2/app.js).
+ */
+export async function giftAmountsOnSale(): Promise<number[]> {
+  const rows = await query<{ value: unknown }>("select value from settings where key = 'gift_amounts'", []);
+  return cleanGiftAmounts(rows.length ? rows[0].value : null);
+}
+
+/**
  * How long a card lives — «Карта действует год со дня покупки», the sentence
  * the gift page has always printed (public/shop2/app.js screenGift, and
  * docs/features.md § «Что нужно знать»). It is a *derived* date, not a column:
