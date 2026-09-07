@@ -199,6 +199,16 @@
       "Мои заказы": "Minu tellimused", "Мои данные": "Minu andmed", "Мои промокоды": "Minu sooduskoodid",
       "Повторить заказ": "Korda tellimust",
       "Страница не найдена": "Lehte ei leitud",
+      /* Данные и cookie — the consent banner (consentHTML). Plain, factual
+         wording; a lawyer reviews the final copy before the shop opens. */
+      "Данные и cookie": "Andmed ja küpsised",
+      "Что мы храним": "Mida me salvestame",
+      "Корзина и язык — в вашем браузере: без них магазин не работает. При входе в кабинет добавится защищённый cookie.":
+        "Ostukorv ja keel on teie brauseris: ilma nendeta pood ei tööta. Kontole sisse logides lisandub turvaline küpsis.",
+      "Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.":
+        "Külastusstatistika on teie valik: juhuslik külastusnumber, ilma nimeta, kaob koos vahekaardiga.",
+      "Принять всё": "Nõustun kõigega",
+      "Только необходимое": "Ainult vajalik",
       "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
         "Sellist lehte ei ole — link võib olla vananenud või aadressis on trükiviga.",
       "Аккаунт не нужен — оформляйте как гость.": "Kontot pole vaja — vormista tellimus külalisena.",
@@ -2019,6 +2029,14 @@
       "Мои заказы": "My orders", "Мои данные": "My details", "Мои промокоды": "My promo codes",
       "Повторить заказ": "Repeat order",
       "Страница не найдена": "Page not found",
+      "Данные и cookie": "Data and cookies",
+      "Что мы храним": "What we store",
+      "Корзина и язык — в вашем браузере: без них магазин не работает. При входе в кабинет добавится защищённый cookie.":
+        "Your basket and language live in your browser: the shop cannot work without them. Signing in adds a secure session cookie.",
+      "Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.":
+        "Visit statistics are up to you: a random visit number, no name attached, gone when the tab closes.",
+      "Принять всё": "Accept all",
+      "Только необходимое": "Only what is needed",
       "Такой страницы нет — возможно, ссылка устарела или в адресе опечатка.":
         "There is no such page — the link may be out of date, or the address has a typo.",
       "Аккаунт не нужен — оформляйте как гость.": "No account needed — check out as a guest.",
@@ -5041,6 +5059,9 @@
     sumOpen: null,      // checkout summary; null = follow the breakpoint
     // method/carrier/point drive the real checkout; the rest is the address
     ship: { name: "", addr: "", zip: "", city: "", phone: "", method: "parcel", carrier: "", point: null },
+    /* The consent banner, reopened from «Данные и cookie» in the footer. It
+       shows itself on a first visit whatever this says — see consentShown(). */
+    consentOpen: false,
     /* Has the shopper chosen a delivery in THIS session? Only while this is
        false may the account's «Доставка по умолчанию» fill the checkout in —
        a saved preference is a starting point, never something that reaches
@@ -5649,7 +5670,84 @@
       return h && h !== location.hostname ? h : "";
     } catch (e) { return ""; }
   }
+  /* ---------- consent -----------------------------------------------------
+
+     The shop had no banner at all until 07.09.2026, and Dim asked for one.
+     What it is actually about, because "cookies" is the wrong word for most
+     of it:
+
+       · Necessary, always on. The basket and the chosen language in
+         localStorage (persist()), the "intro seen" flag in sessionStorage,
+         and — only for someone who signs in — the signed `rmp_cust` session
+         cookie. Without these the shop cannot hold a basket or keep you
+         signed in, so there is nothing to consent to and nothing to switch
+         off.
+       · Visit statistics, off until they are allowed. track() writes a
+         random per-tab number into sessionStorage and posts it to
+         /api/track/ (db/migrations/080_events.sql: no cookie, no name, no
+         e-mail, gone when the tab closes), and, on the live domain only,
+         Cloudflare Web Analytics. Both wait for an answer here.
+       · Nothing else loads on its own. The video is click-to-load and the
+         parcel-point map fetches its tiles only when the shopper opens the
+         map view — said in the banner because it is the honest thing to say,
+         not because it needs consent.
+
+     The choice lives in localStorage under one key and is remembered until
+     the shopper changes it — «Данные и cookie» in the footer reopens the
+     banner. The wording below is plain and factual; a lawyer should read it
+     before the shop opens (docs/audit/2026-09-07-storefront.md). */
+  var CONSENT_LS = "rempire-consent";
+  /** `{v, analytics, at}` — null until the shopper has answered. */
+  function consentRead() {
+    try {
+      var c = JSON.parse(localStorage.getItem(CONSENT_LS));
+      return c && typeof c === "object" && typeof c.analytics === "boolean" ? c : null;
+    } catch (e) { return null; }
+  }
+  function consentAnalytics() { var c = consentRead(); return !!(c && c.analytics); }
+  /* Not answered yet, or reopened from the footer. The banner never covers
+     the checkout or the receipt — a shopper mid-payment is the last person
+     who should be reading about statistics, and on a phone the bar would sit
+     over «Оплатить» — nor the owner's own two screens. */
+  function consentShown() {
+    if (S.screen === "checkout" || S.screen === "done" || S.screen === "admin" || S.screen === "scan") return false;
+    return S.consentOpen || !consentRead();
+  }
+  function consentSave(analytics) {
+    try {
+      localStorage.setItem(CONSENT_LS, JSON.stringify({ v: 1, analytics: !!analytics, at: Date.now() }));
+    } catch (e) {}
+    S.consentOpen = false;
+    paintConsent();
+    // saying yes starts the beacon now rather than on the next page load
+    if (analytics) mountCfBeacon();
+  }
+  var consentPainted = "";
+  function paintConsent() {
+    var key = consentShown() ? (consentRead() ? "open-again" : "first") : "";
+    if (key === consentPainted) return;
+    consentPainted = key;
+    cbSlot.innerHTML = key ? consentHTML() : "";
+    translateTree(cbSlot);
+  }
+  function consentHTML() {
+    var c = consentRead();
+    return '<div class="cbanner" role="region" aria-label="Данные и cookie"><div class="cbanner__box">' +
+      '<p class="cbanner__t">Что мы храним</p>' +
+      '<p class="cbanner__x">Корзина и язык — в вашем браузере: без них магазин не работает. При входе в кабинет добавится защищённый cookie.</p>' +
+      '<p class="cbanner__x">Статистика посещений — по вашему выбору: случайный номер визита, без имени, исчезает вместе с вкладкой.</p>' +
+      '<div class="cbanner__acts">' +
+        '<button class="btn btn--sm" data-consent="all"' + (c && c.analytics ? ' aria-current="true"' : "") + ">Принять всё</button>" +
+        '<button class="btn btn--ghost btn--sm" data-consent="need"' + (c && !c.analytics ? ' aria-current="true"' : "") + ">Только необходимое</button>" +
+        '<button class="link" data-page="privacy">Конфиденциальность</button>' +
+      "</div></div></div>";
+  }
+
   function track(type, extra) {
+    /* No statistics until the shopper has said yes. The order itself is
+       never affected: the authoritative revenue row is written server-side
+       on the paid transition (src/lib/payments/apply.ts), not from here. */
+    if (!consentAnalytics()) return;
     try {
       var body = { sid: sid(), type: type, lang: S.lang, ref: refHost() };
       if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) body[k] = extra[k];
@@ -5677,6 +5775,8 @@
      (e2e/sweep-shop-helpers.ts) is right to fail on. */
   function mountCfBeacon() {
     try {
+      // …and, since 07.09.2026, only once the shopper has allowed statistics
+      if (!consentAnalytics()) return;
       var meta = document.querySelector('meta[name="cf-beacon"]');
       var token = meta ? String(meta.getAttribute("content") || "").trim() : "";
       if (!token || token === "CF_BEACON_TOKEN") return;
@@ -7227,7 +7327,9 @@
       ftrSec("Реквизиты", cCompanyHTML()) +
       ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
       ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-go="blog">Блог</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
-      ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
+      ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · ' +
+        // the one way back to a choice that is otherwise made once and kept
+        '<button class="link" data-cookies>Данные и cookie</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
       '<div class="ftr__bottom"><span class="ftr__sig">' + tower("ftr__mark") + "© 2026 " + esc(contentConf().company.legalName) + "</span>" +
         cSocialsHTML("socials--bottom") +
@@ -18960,12 +19062,15 @@
   var preRendered = document.getElementById("prerender");
   app.insertAdjacentHTML("beforeend",
     '<div id="hdrslot"></div><div id="bodyslot"></div><div id="navslot"></div>' +
-    '<div id="ovl"></div><div id="toastslot"></div>');
+    '<div id="ovl"></div><div id="toastslot"></div><div id="cbslot"></div>');
   var hdrSlot = document.getElementById("hdrslot");
   var bodySlot = document.getElementById("bodyslot");
   var navSlot = document.getElementById("navslot");
   var ovl = document.getElementById("ovl");
   var toastSlot = document.getElementById("toastslot");
+  // the consent banner: its own slot for the same reason the toast has one —
+  // a render must not replay its entrance or move it under the finger
+  var cbSlot = document.getElementById("cbslot");
   var ovlKey = "";
   var lastFocus = null;
 
@@ -19463,6 +19568,7 @@
     }
     dropStaleToast();
     paintToast();
+    paintConsent();
     document.body.classList.toggle("is-locked", S.cartOpen || S.filterOpen);
     // inventory: the scanner lives outside bodySlot on purpose (module doc
     // above scanMount()) — mount/unmount here, once per render(), rather than
@@ -20240,7 +20346,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-consent],[data-cookies],[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -22027,6 +22133,13 @@
     /* ---------- /blog ------------------------------------------------------ */
 
     if (d.q) { S.query = d.q; scheduleSearchTrack(); go("search"); return; }   // analytics agent
+    if (d.consent !== undefined) {
+      consentSave(d.consent === "all");
+      // the footer link is where this came from and where it goes back to
+      refocus("[data-cookies]");
+      return;
+    }
+    if (d.cookies !== undefined) { S.consentOpen = true; paintConsent(); refocus('[data-consent="all"]'); return; }
     if (d.closetoast !== undefined) { S.toast = null; render(); return; }
   });
 

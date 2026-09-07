@@ -2108,3 +2108,58 @@ button, a, summary, label { touch-action: manipulation; }
 .costep__body:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) { .skip { transition: none; } }
 
+/* ---------- the consent banner ----------
+   A bar, not a modal: nothing about it is urgent enough to take the shop
+   away from someone who came to buy something, and a scrim over a first
+   visit is the pattern everybody has learnt to resent. It rides low on the
+   page in the shop's own ink-on-paper, sized to its own text.
+
+   On a phone it sits ABOVE the bottom nav — the nav is fixed at bottom:0 and
+   is how a shopper moves around, so covering it would be worse than the
+   banner itself; the same sum the toast uses. It is never drawn on the
+   checkout or the receipt at all (consentShown() in app.js), so it cannot
+   come between anybody and «Оплатить». */
+.cbanner {
+  /* Above the chat bubble (z 60) and its panel (61), which are optional
+     chrome next to a one-time question — but hidden outright while a drawer
+     owns the screen, exactly as .sbot is, so it can never float over an open
+     cart. */
+  position: fixed; left: 0; right: 0; z-index: 62;
+  bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+  display: flex; justify-content: center;
+  padding: 0 var(--gutter) 10px;
+  pointer-events: none;   /* the page stays clickable either side of the box */
+  animation: cbUp .3s var(--ease);
+}
+.cbanner__box {
+  pointer-events: auto;
+  width: min(720px, 100%);
+  background: var(--ink); color: var(--paper);
+  padding: 14px 16px 12px;
+  box-shadow: 0 8px 30px rgba(28, 26, 0, .28);
+}
+.cbanner__t {
+  margin: 0 0 6px;
+  font-family: Oswald, sans-serif; font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase;
+}
+.cbanner__x { margin: 0 0 6px; font-size: 12.5px; line-height: 1.5; opacity: .82; }
+.cbanner__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+/* the buttons are the shop's own, inverted onto the ink ground */
+.cbanner .btn { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.cbanner .btn--ghost { background: none; color: var(--paper); }
+.cbanner .link { color: var(--paper); opacity: .8; margin-left: auto; }
+.cbanner .link:hover { opacity: 1; }
+@keyframes cbUp { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) { .cbanner { animation: none; } }
+@media (min-width: 768px) { .cbanner { bottom: 0; padding-bottom: 16px; } }
+body.is-locked .cbanner { display: none; }
+@media (max-width: 560px) {
+  /* the box must not eat the screen it is standing on: tighter everywhere,
+     and the policy link drops to its own line under the two buttons */
+  .cbanner__box { padding: 11px 13px 10px; }
+  .cbanner__t { margin-bottom: 4px; }
+  .cbanner__x { font-size: 12px; line-height: 1.45; margin-bottom: 4px; }
+  .cbanner__acts { margin-top: 8px; gap: 6px; }
+  .cbanner .link { margin-left: 0; }
+}
+

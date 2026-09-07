@@ -76,6 +76,23 @@ export default defineConfig({
     // docs/seo.md), so the locale has to be pinned here or "RU" silently
     // becomes "whatever this machine's Chromium defaults to".
     locale: "ru-RU",
+    /* Every test starts as a visitor who has already answered the consent
+       banner (07.09.2026, docs/features.md § «Данные и cookie»): analytics
+       allowed, banner gone. Without this the bar is on screen in all ~90
+       crawl screens and every visual baseline, and the purchase-beacon tests
+       would be measuring a shopper who never agreed to be measured — which
+       is a fact about the banner, not about the checkout they are testing.
+       The banner's own tests (e2e/storefront-sweep-2.spec.ts) clear this key
+       for themselves and drive it from a genuine first visit. */
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: E2E_BASE_URL,
+          localStorage: [{ name: "rempire-consent", value: JSON.stringify({ v: 1, analytics: true, at: 0 }) }],
+        },
+      ],
+    },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
