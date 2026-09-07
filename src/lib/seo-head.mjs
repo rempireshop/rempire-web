@@ -52,16 +52,48 @@ export const baseFrom = baseEnv => String(baseEnv || "https://rempireshop.com").
 export const esc = s => String(s == null ? "" : s)
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 export const eur = n => (Math.round(n * 100) / 100).toFixed(2).replace(".", ",").replace(",00", "") + " €";
+/* The entities the product texts actually carry — the same five app.js's
+   unentity() knows, plus the typographic ones the Shopify export left behind.
+   stripTags() produces *plain text*, and a meta description is escaped once on
+   the way out: leaving «&amp;» in it published «Mat &amp;amp; Hard Lift-Up
+   Wax» to Google. tools/build-merchant-feed.mjs has decoded these since it was
+   written; the SEO head did not (audit 07.09.2026). */
+const ENTITY = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", "#39": "'", nbsp: " ",
+  ndash: "–", mdash: "—", rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", hellip: "…"
+};
+export const unentity = s => String(s == null ? "" : s)
+  .replace(/&(amp|lt|gt|quot|apos|#39|nbsp|ndash|mdash|rsquo|lsquo|rdquo|ldquo|hellip);/g, (_, e) => ENTITY[e])
+  .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)));
+
 /* Same rule as stripTags() in public/shop2/app.js: an inline tag vanishes, a
    block tag becomes a space. Turning every tag into a space split words that
    carry markup inside them — «s<b>trong</b>» came out as «s trong». */
 const INLINE_TAGS = /^(?:span|b|i|strong|em|a|u|sup|sub)$/i;
-export const stripTags = h => String(h || "")
+export const stripTags = h => unentity(String(h || "")
   .replace(/<\/?([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>/g, (_, tag) => (INLINE_TAGS.test(tag) ? "" : " "))
-  .replace(/<[^>]+>/g, " ")
+  .replace(/<[^>]+>/g, " "))
   .replace(/\s+/g, " ")
   .trim();
 export const slugify = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+/* A product text that opens with a SHOUTED heading — «BIO BOTANICAL SERUM ОТ
+   SYSTEM 4 Сыворотка, стимулирующая…», «НЕВЕСОМЫЙ ЛАК ДЛЯ ВОЛОС — ОБЪЁМ И
+   БЛЕСК БЕЗ МАСЕЛ ОТ KEVIN MURPHY Бросьте вызов…». On the page it is a
+   <strong> line above the copy; in a search result it is 60 characters of
+   capitals repeating the title, which is the first thing a reader skips. Drop
+   the run and start on the sentence after it. Nothing is dropped when the text
+   never gets to a normal sentence (an all-caps description stays as it is) or
+   when the run is too short to be a heading.
+
+   The classes are written out rather than \p{Ll}/\p{Lu} so this rule and
+   app.js's copy of it are the same regex: Latin, Latin-1 accents, the two
+   Estonian carons and Cyrillic. */
+const LOWER = "a-zà-öø-ÿšžа-яё";
+const UPPER = "A-ZÀ-ÖØ-ÞŠŽА-ЯЁ";
+const SHOUT = new RegExp("^[^" + LOWER + "]{10,160}?(?=[" + UPPER + "][" + LOWER + "])");
+export const dropShout = s => String(s || "").replace(SHOUT, "").trim();
 
 /* Cut at a word, not mid-word: a description that ends "…профессионал" reads
    as a broken page in a result listing. */
@@ -74,9 +106,17 @@ export function clip(s, max) {
 }
 
 /* A result listing shows about sixty characters of a title. Take the longest
-   version that fits — app.js's fitTitle() runs the same ladder. */
-export function fitTitle(core, full) {
+   version that fits — app.js's fitTitle() runs the same ladder.
+
+   `alt` is the middle rung, added 07.09.2026: brand + name + the price, for
+   the 123 of 220 products whose full title («… — купить в Rempire · 15 €»)
+   ran past sixty and fell straight to «… — REMPIRE». Google prints the site
+   name beside the title itself, from og:site_name and the WebSite block, so
+   those ten characters bought a word the reader already had; a price is the
+   one thing a shopping result can say that its neighbours often do not. */
+export function fitTitle(core, full, alt) {
   if (full && full.length <= 60) return full;
+  if (alt && alt.length <= 60) return alt;
   if (core.length + 10 <= 60) return core + " — REMPIRE";
   if (core.length <= 60) return core;
   return clip(core, 60);
@@ -107,6 +147,9 @@ export const T = {
     brandDesc: b => `${b} в наличии в Rempire, Таллинн — весь ассортимент бренда во всех разделах магазина.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Магазин Rempire, Таллинн — доставка Omniva, SmartPosti и DPD, самовывоз на Mardi 1.`,
+    /* What a product's own copy gets after it, when the description is cut
+       from the product text rather than written by the owner. See descFrom(). */
+    descTail: (price, stock) => `${price} · ${stock} · доставка по Эстонии и Балтии`,
     /* the four screens added 03.09 — sets, one set, the gift card, the policy pages */
     save: "выгода", pieces: "товара в наборе",
     setsDesc: "Готовые наборы Rempire — уход, стайлинг и бритьё комплектом. Те же товары, что и поштучно, только дешевле. Таллинн, доставка по Балтии.",
@@ -149,6 +192,7 @@ export const T = {
     brandDesc: b => `${b} laos Rempire'is, Tallinn — kogu brändi valik kõigist poe osakondadest.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire'i pood, Tallinn — tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
+    descTail: (price, stock) => `${price} · ${stock} · tarne Eestis ja Baltikumis`,
     save: "sääst", pieces: "toodet komplektis",
     setsDesc: "Rempire'i valmiskomplektid — hooldus, viimistlus ja habemeajamine ühes pakis. Samad tooted mis eraldi, ainult soodsamalt. Tallinn, tarne üle Baltikumi.",
     setDesc: (price, save, n) => `${price} jaehinna asemel, ${save} — ${n}. Rempire'i pood, Tallinn: tarne Omniva, SmartPosti ja DPD-ga, järeletulek Mardi 1.`,
@@ -181,6 +225,7 @@ export const T = {
     brandDesc: b => `${b} in stock at Rempire, Tallinn — the brand's full range across every section of the shop.`,
     prodDesc: (price, cat, stock) =>
       `${price} · ${cat} · ${stock}. Rempire shop, Tallinn — Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
+    descTail: (price, stock) => `${price} · ${stock} · delivery across Estonia and the Baltics`,
     save: "you save", pieces: "products in the set",
     setsDesc: "Rempire ready-made sets — care, styling and shaving in one box. The same products the shop sells separately, only cheaper. Tallinn, Baltic delivery.",
     setDesc: (price, save, n) => `${price} instead of retail, ${save} — ${n}. Rempire shop, Tallinn: Omniva, SmartPosti and DPD delivery, pickup at Mardi 1.`,
@@ -347,6 +392,32 @@ export function breadcrumbLD(base, items) {
    one, `image` the 1 200×630 card, `imageUrls` the absolute photo URLs for
    the JSON-LD. Extra keys on the result (core, priceText, crumbItems) are
    for the caller's body; headBlock() ignores them. */
+/* The meta description of a product page, when nobody has written one.
+   Until 07.09.2026 this was `clip(text, 158)` — the first 158 characters of
+   the description body, cut mid-sentence, for all 220 products. Search Console
+   caught what that costs: «gatsby moving rubber hair wax» sat at position 1.16
+   with 134 impressions and no clicks at all (docs/audit/2026-09-07-seo.md).
+   A snippet has to answer two questions — what is this, and why buy it here —
+   and half a sentence of an ingredient list answers neither.
+
+   So: the shouted heading goes, the product's own first words stay, and the
+   three facts a shopper is actually deciding on come after them, always
+   whole. The tail is budgeted first and the copy takes what is left, so the
+   price is never the half that gets cut off. */
+export const DESC_MAX = 158;
+export function descFrom(text, t, priceText, stockText) {
+  const tail = t.descTail(priceText, String(stockText).toLowerCase());
+  const lead = dropShout(text) || text;
+  if (!lead) return clip(tail, DESC_MAX);
+  const room = DESC_MAX - tail.length - 3;   // " · "
+  /* A tail so long there is no room for the copy would be a snippet that says
+     only the price — then the copy wins and the tail goes. */
+  if (room < 40) return clip(lead, DESC_MAX);
+  /* A full stop directly before « · » reads as a typo; clip() already drops
+     one when it has to cut, so this is the case where the copy fitted whole. */
+  return clip(lead, room).replace(/\.$/, "") + " · " + tail;
+}
+
 export function productSpec({ base, lang, id, cat, catName: section, brand, name, price, priceFrom, stock, seoTitle, seoDesc, body, image, imageUrls }) {
   const t = T[lang.code];
   const seg = lang.seg;
@@ -354,12 +425,18 @@ export function productSpec({ base, lang, id, cat, catName: section, brand, name
   const core = brand + " " + name;
   const priceText = (priceFrom ? t.from : "") + eur(price);
   const full = core + " — " + t.buy + " · " + priceText;
-  let title = fitTitle(core, full);
+  let title = fitTitle(core, full, core + " · " + priceText);
   if (seoTitle) title = fitTitle(seoTitle, "");
 
   const text = stripTags(body);
   const stockText = stock === "out" ? t.out : stock === "low" ? t.low : t.inStock;
-  const desc = clip(seoDesc || text || t.prodDesc(priceText, section, stockText), 158);
+  /* An owner's or the assistant's own pair is deliberate and is left alone —
+     no price is appended to a sentence somebody wrote on purpose. */
+  const desc = seoDesc
+    ? clip(seoDesc, DESC_MAX)
+    : text
+      ? descFrom(text, t, priceText, stockText)
+      : clip(t.prodDesc(priceText, section, stockText), DESC_MAX);
 
   const crumbItems = [
     [t.home, langPath(seg, "/")],

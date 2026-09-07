@@ -120,7 +120,11 @@ async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = t
     catch (e) { fail(file, `JSON-LD block ${i} does not parse: ${e.message}`); continue; }
     if (!ld["@context"]) fail(file, `JSON-LD block ${i} has no @context`);
     if (!ld["@type"]) { fail(file, `JSON-LD block ${i} has no @type`); continue; }
-    types.push(ld["@type"]);
+    /* @type may be a list — the home page's Organization is also a Store
+       (a real counter at Mardi 1 with pickup), which is how schema.org says
+       to declare two types of one thing. Flatten it so `types.includes(…)`
+       below still asks a simple question. */
+    types.push(...(Array.isArray(ld["@type"]) ? ld["@type"] : [ld["@type"]]));
     if (ld["@type"] === "BreadcrumbList") {
       const items = ld.itemListElement || [];
       if (!items.length) fail(file, "BreadcrumbList has no itemListElement");

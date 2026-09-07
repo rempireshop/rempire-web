@@ -177,6 +177,9 @@
       "Фильтры": "Filtrid", "Сортировка": "Järjesta", "Сбросить": "Lähtesta",
       "Сбросить всё": "Lähtesta kõik", "Сбросить фильтры": "Lähtesta filtrid",
       "Наличие": "Saadavus", "Бренд": "Bränd", "В наличии": "Laos",
+      // the tail of a product page's meta description — the same words
+      // src/lib/seo-head.mjs's descTail() writes into the static page
+      "доставка по Эстонии и Балтии": "tarne Eestis ja Baltikumis",
       "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
       "Пока пусто.": "Ostukorv on tühi.", "К товарам": "Toodete juurde",
       "Хиты продаж": "Populaarsemad ees", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓",
@@ -2251,6 +2254,7 @@
       "Фильтры": "Filters", "Сортировка": "Sort", "Сбросить": "Reset",
       "Сбросить всё": "Reset all", "Сбросить фильтры": "Reset filters",
       "Наличие": "Availability", "Бренд": "Brand", "В наличии": "In stock",
+      "доставка по Эстонии и Балтии": "delivery across Estonia and the Baltics",
       "Закрыть": "Close", "Меньше": "Less", "Больше": "More", "Размер": "Size",
       "Пока пусто.": "Your cart is empty.", "К товарам": "Browse products",
       "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓",
@@ -21145,12 +21149,44 @@
   }
   /* Google shows about sixty characters of a title. Take the longest version
      that fits — tools/prerender-shop2.mjs runs the same ladder, so the tab does
-     not change under the shopper when this script takes over a static page. */
-  function fitTitle(core, full) {
+     not change under the shopper when this script takes over a static page.
+     `alt` is brand + name + price, the rung between the full sentence and the
+     bare «— REMPIRE» (src/lib/seo-head.mjs fitTitle(), 07.09.2026). */
+  function fitTitle(core, full, alt) {
     if (full && full.length <= 60) return full;
+    if (alt && alt.length <= 60) return alt;
     if (core.length + 10 <= 60) return core + " — REMPIRE";
     if (core.length <= 60) return core;
     return core.slice(0, 59).replace(/[\s·—–-]+$/, "") + "…";
+  }
+  /* A product text that opens with a SHOUTED heading — «BIO BOTANICAL SERUM ОТ
+     SYSTEM 4 Сыворотка…» — reads in a search result as capitals repeating the
+     title. Drop the run and start on the sentence after it; leave a text that
+     never reaches a normal sentence alone. Same regex as dropShout() in
+     src/lib/seo-head.mjs. */
+  var SHOUT_RX = /^[^a-zà-öø-ÿšžа-яё]{10,160}?(?=[A-ZÀ-ÖØ-ÞŠŽА-ЯЁ][a-zà-öø-ÿšžа-яё])/;
+  function dropShout(s) { return String(s || "").replace(SHOUT_RX, "").trim(); }
+  /* Cut at a word, not mid-word — clip() in src/lib/seo-head.mjs. */
+  function clipDesc(s, max) {
+    var t = String(s || "").trim();
+    if (t.length <= max) return t;
+    var cut = t.slice(0, max - 1), sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s.,;:·—–-]+$/, "") + "…";
+  }
+  /* The meta description of a product page when nobody has written one: the
+     product's own words, then the price, the stock and the delivery line —
+     what it is and why buy it here. descFrom() in src/lib/seo-head.mjs writes
+     the same sentence into the static page, so the head a crawler is served
+     and the head it reads after this script runs are one text. */
+  var DESC_MAX = 158;
+  function descFromText(text, priceText, stockText, lang) {
+    var tail = priceText + " · " + String(stockText).toLowerCase() + " · " +
+      trText("доставка по Эстонии и Балтии", lang, false);
+    var lead = dropShout(text) || text;
+    if (!lead) return clipDesc(tail, DESC_MAX);
+    var room = DESC_MAX - tail.length - 3;
+    if (room < 40) return clipDesc(lead, DESC_MAX);
+    return clipDesc(lead, room).replace(/\.$/, "") + " · " + tail;
   }
   /* One page, three URLs, one cluster: canonical plus ru/et/en/x-default. The
      addresses come from the path, never from S.lang — a German browser
@@ -21223,15 +21259,22 @@
     if (S.screen === "product") {
       var p = byId(S.productId);
       var core = p.brand + " " + trText(p.name, S.lang, true);
-      t = fitTitle(core, core + " — " + buy + " · " + (p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price)));
+      var priceText = p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price);
+      var stockText = trText(p.stock === "out" ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
+      t = fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText);
       /* The owner's pair for this language (Russian as the fallback) wins;
          the catalogue's own English pair still serves the EN page when he
          wrote nothing; everything else is built from the product. */
       var so = seoFor(p, S.lang);
       if (so && so.t) t = fitTitle(so.t, "");
       else if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
+      /* A pair somebody wrote is left exactly as written; a description cut
+         from the product text gets the shouted heading dropped and the price,
+         the stock and the delivery line added — descFrom() in
+         src/lib/seo-head.mjs, the same sentence the static page carries. */
       d = so && so.d ? so.d
-        : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d : stripTags(descFor(p)).slice(0, 155);
+        : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d
+          : descFromText(unentity(stripTags(descFor(p))), priceText, stockText, S.lang);
       var pUrl = location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/p/" + encodeURIComponent(p.id) + "/";
       // same shape the prerendered pages carry, so taking over a static page
       // does not quietly thin out its structured data
@@ -21239,7 +21282,7 @@
         "@context": "https://schema.org", "@type": "Product",
         name: p.brand + " " + p.name, brand: { "@type": "Brand", name: p.brand },
         image: [location.origin + p.img],
-        description: stripTags(descFor(p)).slice(0, 500),
+        description: unentity(stripTags(descFor(p))).slice(0, 500),
         category: trText(CAT_NAMES[p.cat] || "", S.lang, false),
         sku: p.id,
         url: pUrl,
