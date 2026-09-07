@@ -332,6 +332,170 @@
       "Обзор": "Ülevaade", "Заказы": "Tellimused", "Товары": "Tooted", "Клиенты": "Kliendid",
       "Аналитика": "Analüütika", "Письма": "Kirjad", "Подключения": "Liidestused", "Настройки": "Seaded",
       "Админка": "Admin", "Помощник": "Abiline", "Журнал изменений": "Muudatuste logi",
+      "Партнёры и баллы":
+        "Partnerid ja punktid",
+      "салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара":
+        "salongihinnad ja ostupunktid — korraga kõikjal: poes, kabinetis, «Klientides» ja toote kaardil",
+      "Выключить партнёров и баллы":
+        "Lülita partnerid ja punktid välja",
+      "Включить партнёров и баллы":
+        "Lülita partnerid ja punktid sisse",
+      "Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.":
+        "Praegu välja lülitatud: kõigil ostjatel on tavahinnad, punkte ei koguta ega kasutata. Allolevad seaded säilivad — lülitage sisse ja kõik tuleb tagasi nii, nagu oli.",
+      "Здесь все, кто у вас покупал: имя, почта, сколько заказов и на какую сумму.":
+        "Siin on kõik, kes on teilt ostnud: nimi, e-post, mitu tellimust ja mis summas.",
+      "Партнёрские цены и баллы сейчас выключены — включаются в":
+        "Partnerihinnad ja punktid on praegu välja lülitatud — sisse lülitatakse",
+      "Цены и остатки — на вкладке «Размеры и цены».":
+        "Hinnad ja jäägid on vahekaardil «Mahud ja hinnad».",
+      "Набор открыт — впишите цену и сохраните":
+        "Komplekt on avatud — sisestage hind ja salvestage",
+      "когда вы вернёте товар в наличие — всем, кто оставил почту":
+        "kui panete toote taas laost saadavaks — kõigile, kes jätsid e-posti",
+      "раз в сутки: корзинам старше 3 часов, если заказа так и не было":
+        "kord ööpäevas: üle 3 tunni vanadele korvidele, kui tellimust nii ei tulnudki",
+      "раз в сутки, с промокодом на две недели":
+        "kord ööpäevas, kahenädalase sooduskoodiga",
+      "Когда поздравлять":
+        "Millal õnnitleda",
+      "За сколько дней поздравлять":
+        "Mitu päeva varem õnnitleda",
+      "промокод действует две недели, так что запас в пару дней ему не мешает":
+        "sooduskood kehtib kaks nädalat, nii et paari päeva varu talle ei sega",
+      "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
+        "Kolm lülitiga kirja saadab pood ise, üks kord ööpäevas. Kuni lüliti on väljas, ei lähe kiri kellelegi.",
+      "Когда заказ считается доставленным":
+        "Millal tellimus loetakse kohale toimetatuks",
+      "Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.":
+        "Nupp «Kohale toimetatud» jääb tellimuse kaardile alles — see on selleks, et te ei peaks seda iga paki puhul käsitsi vajutama.",
+      "Спрашивать перевозчика":
+        "Küsida vedajalt",
+      "Не спрашивать перевозчика":
+        "Mitte küsida vedajalt",
+      "раз в сутки магазин спрашивает Montonio, дошла ли посылка":
+        "kord ööpäevas küsib pood Montoniolt, kas pakk on kohale jõudnud",
+      "Закрывать заказ через":
+        "Sulgeda tellimus",
+      "Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».":
+        "Kirju seejuures ei saadeta — «Kohale toimetatud» ei ole neid kunagi saatnud. Tellimus lihtsalt ei ripu enam «Teel» all.",
+      "за 1 день до даты":
+        "1 päev enne kuupäeva",
+      "за 2 дня до даты":
+        "2 päeva enne kuupäeva",
+      "за 3 дня до даты":
+        "3 päeva enne kuupäeva",
+      "за 5 дней до даты":
+        "5 päeva enne kuupäeva",
+      "за 7 дней до даты":
+        "7 päeva enne kuupäeva",
+      "за 14 дней до даты":
+        "14 päeva enne kuupäeva",
+      "никогда — только вручную":
+        "mitte kunagi — ainult käsitsi",
+      "через 3 дня после отправки":
+        "3 päeva pärast saatmist",
+      "через 5 дней после отправки":
+        "5 päeva pärast saatmist",
+      "через 7 дней после отправки":
+        "7 päeva pärast saatmist",
+      "через 10 дней после отправки":
+        "10 päeva pärast saatmist",
+      "через 14 дней после отправки":
+        "14 päeva pärast saatmist",
+      "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
+        "Mudel on ühendatud: vastab küsimustele ja valmistab mustandeid. Ilma teie «Rakenda» nuputa ei muuda ta midagi.",
+      "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.":
+        "Mudel ei ole ühendatud — töötavad ainult sisseehitatud vastused, uusi tekste ta ei kirjuta. Ühendab Dim.",
+      "Отправить письмо клиенту?":
+        "Kas saata kiri kliendile?",
+      "Журнал магазина не загрузился.":
+        "Poe logi ei laadinud.",
+      "владелец":
+        "omanik",
+      "магазин сам":
+        "pood ise",
+      "вход с адреса":
+        "sisselogimine aadressilt",
+      "Товар изменён":
+        "Toodet muudetud",
+      "Тексты для Google изменены":
+        "Google'i tekste muudetud",
+      "Описание товара изменено":
+        "Toote kirjeldust muudetud",
+      "Свой товар изменён":
+        "Oma toodet muudetud",
+      "Товар снят с продажи":
+        "Toode müügilt maha võetud",
+      "Товар снова в продаже":
+        "Toode on jälle müügil",
+      "Статус заказа":
+        "Tellimuse staatus",
+      "Заметка к заказу":
+        "Märkus tellimuse juurde",
+      "Этикетка создана":
+        "Silt on loodud",
+      "Шаг «этикетка» изменён":
+        "Sammu «silt» muudetud",
+      "Счёт выписан":
+        "Arve on väljastatud",
+      "Счёт отправлен":
+        "Arve on saadetud",
+      "Письмо клиенту отправлено":
+        "Kiri kliendile on saadetud",
+      "Настройка изменена":
+        "Seadet muudetud",
+      "Промокод сохранён":
+        "Sooduskood salvestatud",
+      "Промокод включён или выключен":
+        "Sooduskood sisse või välja lülitatud",
+      "Набор сохранён":
+        "Komplekt salvestatud",
+      "Набор показан или скрыт":
+        "Komplekt näidatud või peidetud",
+      "Набор удалён":
+        "Komplekt kustutatud",
+      "Порядок наборов изменён":
+        "Komplektide järjekorda muudetud",
+      "Новый клиент":
+        "Uus klient",
+      "Добавлен партнёр":
+        "Lisatud partner",
+      "Партнёр одобрен":
+        "Partner on kinnitatud",
+      "Заявке партнёра отказано":
+        "Partneri taotlus tagasi lükatud",
+      "Клиент переведён между «Розница» и «Партнёр»":
+        "Klient viidud «Jaemüügi» ja «Partneri» vahel",
+      "Баллы клиента изменены":
+        "Kliendi punkte muudetud",
+      "Загружен файл":
+        "Fail on üles laaditud",
+      "Файл удалён":
+        "Fail kustutatud",
+      "У фото убран фон":
+        "Fotolt on taust eemaldatud",
+      "Черновик у ИИ запрошен":
+        "Mustand küsitud tehisintellektilt",
+      "Неудачный вход":
+        "Ebaõnnestunud sisselogimine",
+      "Выход из админки":
+        "Admini paneelist väljalogimine",
+      "Обновление базы":
+        "Andmebaasi uuendus",
+      "Изменений в этом браузере пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
+        "Selles brauseris pole veel muudatusi. Kõik, mille rakendate, ilmub siia — koos nupuga «Taasta».",
+      "Войдите как владелец, чтобы увидеть журнал магазина.":
+        "Poe logi nägemiseks logige sisse omanikuna.",
+      "Сервер пока ничего не записал.":
+        "Server pole veel midagi kirja pannud.",
+      "Ваши изменения в этом браузере":
+        "Teie muudatused selles brauseris",
+      "«Вернуть» работает только здесь: чтобы отменить изменение, браузеру нужно помнить, что было до него. То, что вы поменяли с телефона, отменить с ноутбука нельзя — но увидеть это можно ниже.":
+        "«Taasta» toimib ainult siin: muudatuse tagasivõtmiseks peab brauser mäletama, mis oli enne seda. Seda, mida muutsite telefonis, ei saa sülearvutis tagasi võtta — aga näha saab seda allpool.",
+      "Журнал магазина":
+        "Poe logi",
+      "Всё, что записал сервер: с любого устройства и из любого входа, последние 100 записей. Только для чтения.":
+        "Kõik, mille server kirja pani: igast seadmest ja igast sisselogimisest, viimased 100 kirjet. Ainult lugemiseks.",
       "Все заказы": "Kõik tellimused", "Отменить": "Võta tagasi",
       "Применить": "Rakenda", "Отмена": "Tühista", "Сохранить": "Salvesta",
       "Найти товар: название, бренд…": "Otsi toodet: nimi, bränd…",
@@ -1360,7 +1524,7 @@
       "Этикетка PDF ↗": "Silt PDF ↗",
       "Отследить ↗": "Jälgi ↗",
       /* order flow: the four steps, the label box, the hints under the buttons */
-      "Этикетка готова": "Silt valmis", "Доставлены": "Kohale toimetatud",
+      "Этикетка готова": "Silt valmis", "Доставлены": "Kohale toimetatud", "В пути": "Teel",
       "Создать этикетку": "Loo silt", "Создаём…": "Loome…",
       "Выдан клиенту": "Kliendile üle antud", "Выдан": "Üle antud",
       "Этикетка": "Silt", "готова": "valmis", "без этикетки": "ilma sildita", "Шаги заказа": "Tellimuse sammud",
@@ -1510,7 +1674,13 @@
       "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dim. Kõike muud sellel lehel muudate ise.",
       "Нет в наличии": "Pole laos",
       "Показывать в магазине": "Näidata poes",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Kõik kataloogi tooted on poes näha. Toote päriselt eemaldamiseks kirjutage Dimile; müügi peatamiseks valige «Pole laos».",
+      "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть.":
+        "Toode on poest eemaldatud: seda pole ei kataloogis, ei otsingus ega komplektides. Tagasi toomiseks lülitage lüliti sisse.",
+      "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.":
+        "Lülitage välja — ja toode kaob poest: kataloogist, otsingust ja komplektidest. Kui soovite lihtsalt müügi peatada, valige «Pole laos» — leht jääb alles.",
+      "Товар убран из магазина ✓": "Toode on poest eemaldatud ✓", "Товар снова в магазине ✓": "Toode on jälle poes ✓",
+      "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе».":
+        "Igal mahul on oma hind. Esimest mahtu näeb ostja esimesena. «×» eemaldab mahu poest — selle mahu jääk ja triipkood jäävad «Lattu» alles.",
       "Салон, €": "Salong, €",
       "Остаток": "Jääk",
       "Штрихкод": "Triipkood",
@@ -1795,7 +1965,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "salongi soodustus, püsikliendipunktid, Pro hinnad",
       "Языки": "Keeled",
       "RU основной · ET · EN": "RU peamine · ET · EN",
-      "что вы меняли в этом браузере, и кнопка «Вернуть»": "mida selles brauseris muutsite, ja nupp «Taasta»",
+      "ваши изменения с «Вернуть» и журнал сервера": "teie muudatused koos «Taasta» nupuga ja serveri logi",
       "Пакомат, €": "Pakiautomaat, €",
       "Курьер, €": "Kuller, €",
       "Бесплатно от, €": "Tasuta alates, €",
@@ -2199,6 +2369,170 @@
       "Обзор": "Overview", "Заказы": "Orders", "Товары": "Products", "Клиенты": "Customers",
       "Аналитика": "Analytics", "Письма": "E-mails", "Подключения": "Integrations", "Настройки": "Settings",
       "Админка": "Admin", "Помощник": "Assistant", "Журнал изменений": "Change log",
+      "Партнёры и баллы":
+        "Partners and points",
+      "салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара":
+        "salon prices and points for purchases — everywhere at once: the shop, the account, «Customers» and the product card",
+      "Выключить партнёров и баллы":
+        "Switch partners and points off",
+      "Включить партнёров и баллы":
+        "Switch partners and points on",
+      "Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.":
+        "Off right now: every shopper pays the ordinary price, and no points are earned or spent. The settings below are kept — switch it on and everything comes back as it was.",
+      "Здесь все, кто у вас покупал: имя, почта, сколько заказов и на какую сумму.":
+        "Everyone who has bought from you: the name, the address, how many orders and for how much.",
+      "Партнёрские цены и баллы сейчас выключены — включаются в":
+        "Partner prices and points are off right now — they are switched on in",
+      "Цены и остатки — на вкладке «Размеры и цены».":
+        "Prices and stock are on the «Sizes and prices» tab.",
+      "Набор открыт — впишите цену и сохраните":
+        "The set is open — type the price and save it",
+      "когда вы вернёте товар в наличие — всем, кто оставил почту":
+        "when you put the product back in stock — to everyone who left an address",
+      "раз в сутки: корзинам старше 3 часов, если заказа так и не было":
+        "once a day: to carts older than 3 hours, when no order ever came",
+      "раз в сутки, с промокодом на две недели":
+        "once a day, with a promo code good for two weeks",
+      "Когда поздравлять":
+        "When to send it",
+      "За сколько дней поздравлять":
+        "How many days early to send it",
+      "промокод действует две недели, так что запас в пару дней ему не мешает":
+        "the promo code is good for two weeks, so a couple of days' head start does it no harm",
+      "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
+        "The shop sends the three switchable letters itself, once a day. While a switch is off, that letter goes to nobody.",
+      "Когда заказ считается доставленным":
+        "When an order counts as delivered",
+      "Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.":
+        "The «Delivered» button stays on the order card — this is about not having to press it by hand for every parcel.",
+      "Спрашивать перевозчика":
+        "Ask the carrier",
+      "Не спрашивать перевозчика":
+        "Do not ask the carrier",
+      "раз в сутки магазин спрашивает Montonio, дошла ли посылка":
+        "once a day the shop asks Montonio whether the parcel has arrived",
+      "Закрывать заказ через":
+        "Close the order after",
+      "Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».":
+        "No letters go out for this — «Delivered» never sent any. The order simply stops sitting in «On the way».",
+      "за 1 день до даты":
+        "1 day before the date",
+      "за 2 дня до даты":
+        "2 days before the date",
+      "за 3 дня до даты":
+        "3 days before the date",
+      "за 5 дней до даты":
+        "5 days before the date",
+      "за 7 дней до даты":
+        "7 days before the date",
+      "за 14 дней до даты":
+        "14 days before the date",
+      "никогда — только вручную":
+        "never — by hand only",
+      "через 3 дня после отправки":
+        "3 days after it was shipped",
+      "через 5 дней после отправки":
+        "5 days after it was shipped",
+      "через 7 дней после отправки":
+        "7 days after it was shipped",
+      "через 10 дней после отправки":
+        "10 days after it was shipped",
+      "через 14 дней после отправки":
+        "14 days after it was shipped",
+      "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить».":
+        "The model is connected: it answers questions and prepares drafts. It changes nothing without your «Apply».",
+      "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.":
+        "The model is not connected — only the built-in answers work, it will write no new texts. Dim connects it.",
+      "Отправить письмо клиенту?":
+        "Send the letter to the customer?",
+      "Журнал магазина не загрузился.":
+        "The shop's log did not load.",
+      "владелец":
+        "the owner",
+      "магазин сам":
+        "the shop itself",
+      "вход с адреса":
+        "a sign-in from",
+      "Товар изменён":
+        "Product changed",
+      "Тексты для Google изменены":
+        "Google texts changed",
+      "Описание товара изменено":
+        "Product description changed",
+      "Свой товар изменён":
+        "Your own product changed",
+      "Товар снят с продажи":
+        "Product taken off sale",
+      "Товар снова в продаже":
+        "Product back on sale",
+      "Статус заказа":
+        "Order status",
+      "Заметка к заказу":
+        "Order note",
+      "Этикетка создана":
+        "Label created",
+      "Шаг «этикетка» изменён":
+        "The label step changed",
+      "Счёт выписан":
+        "Invoice issued",
+      "Счёт отправлен":
+        "Invoice sent",
+      "Письмо клиенту отправлено":
+        "Letter to the customer sent",
+      "Настройка изменена":
+        "A setting changed",
+      "Промокод сохранён":
+        "Promo code saved",
+      "Промокод включён или выключен":
+        "Promo code switched on or off",
+      "Набор сохранён":
+        "Set saved",
+      "Набор показан или скрыт":
+        "Set shown or hidden",
+      "Набор удалён":
+        "Set deleted",
+      "Порядок наборов изменён":
+        "The order of the sets changed",
+      "Новый клиент":
+        "New customer",
+      "Добавлен партнёр":
+        "Partner added",
+      "Партнёр одобрен":
+        "Partner approved",
+      "Заявке партнёра отказано":
+        "Partner request refused",
+      "Клиент переведён между «Розница» и «Партнёр»":
+        "Customer moved between «Retail» and «Partner»",
+      "Баллы клиента изменены":
+        "Customer points changed",
+      "Загружен файл":
+        "File uploaded",
+      "Файл удалён":
+        "File deleted",
+      "У фото убран фон":
+        "The photo's background was removed",
+      "Черновик у ИИ запрошен":
+        "A draft was asked of the AI",
+      "Неудачный вход":
+        "A failed sign-in",
+      "Выход из админки":
+        "Signed out of the panel",
+      "Обновление базы":
+        "Database update",
+      "Изменений в этом браузере пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
+        "No changes in this browser yet. Everything you apply appears here — with a «Restore» button.",
+      "Войдите как владелец, чтобы увидеть журнал магазина.":
+        "Sign in as the owner to see the shop's log.",
+      "Сервер пока ничего не записал.":
+        "The server has recorded nothing yet.",
+      "Ваши изменения в этом браузере":
+        "Your changes in this browser",
+      "«Вернуть» работает только здесь: чтобы отменить изменение, браузеру нужно помнить, что было до него. То, что вы поменяли с телефона, отменить с ноутбука нельзя — но увидеть это можно ниже.":
+        "«Restore» only works here: to undo a change the browser has to remember what came before it. What you changed on the phone cannot be undone from the laptop — but it can be seen below.",
+      "Журнал магазина":
+        "The shop's log",
+      "Всё, что записал сервер: с любого устройства и из любого входа, последние 100 записей. Только для чтения.":
+        "Everything the server recorded: from any device and any sign-in, the last 100 entries. Read-only.",
       "Все заказы": "All orders", "Отменить": "Undo",
       "Применить": "Apply", "Отмена": "Cancel", "Сохранить": "Save",
       "Найти товар: название, бренд…": "Find a product: name, brand…",
@@ -3220,7 +3554,7 @@
       "Этикетка PDF ↗": "Label PDF ↗",
       "Отследить ↗": "Track ↗",
       /* order flow: the four steps, the label box, the hints under the buttons */
-      "Этикетка готова": "Label ready", "Доставлены": "Delivered",
+      "Этикетка готова": "Label ready", "Доставлены": "Delivered", "В пути": "On the way",
       "Создать этикетку": "Create the label", "Создаём…": "Creating…",
       "Выдан клиенту": "Handed to the customer", "Выдан": "Handed over",
       "Этикетка": "Label", "готова": "ready", "без этикетки": "no label", "Шаги заказа": "Order steps",
@@ -3368,7 +3702,13 @@
       "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dim changes those. Everything else on this page is yours to edit.",
       "Нет в наличии": "Out of stock",
       "Показывать в магазине": "Show in the shop",
-      "Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».": "Every catalogue product is visible in the shop. To remove one for good, write to Dim; to simply stop selling it, choose «Out of stock».",
+      "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть.":
+        "The product is out of the shop: it is not in the catalogue, the search or the sets. Switch it back on to bring it back.",
+      "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.":
+        "Switch this off and the product leaves the shop: the catalogue, the search and the sets. To simply stop selling it, choose «Out of stock» — the page stays.",
+      "Товар убран из магазина ✓": "The product is out of the shop ✓", "Товар снова в магазине ✓": "The product is back in the shop ✓",
+      "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе».":
+        "Each size has its own price. The customer sees the first size first. «×» removes a size from the shop — that size's stock and barcode stay in «Stock».",
       "Салон, €": "Salon, €",
       "Остаток": "Stock",
       "Штрихкод": "Barcode",
@@ -3653,7 +3993,7 @@
       "скидка салона, баллы лояльности, Pro-цены": "the salon discount, loyalty points, Pro prices",
       "Языки": "Languages",
       "RU основной · ET · EN": "RU main · ET · EN",
-      "что вы меняли в этом браузере, и кнопка «Вернуть»": "what you changed in this browser, with a “Restore” button",
+      "ваши изменения с «Вернуть» и журнал сервера": "your own changes with «Restore», plus the server's log",
       "Пакомат, €": "Parcel locker, €",
       "Курьер, €": "Courier, €",
       "Бесплатно от, €": "Free from, €",
@@ -3873,6 +4213,15 @@
     [/^([^\n]+) · ([^\n]+)\n([^\n]+)\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера\.$/,
       { ET: "$1 · $2\n$3\nKliendile läheb kiri «Tellimus on teele pandud» — ilma jälgimisnumbrita.",
         EN: "$1 · $2\n$3\nThe customer gets the “Order shipped” letter — without a tracking number." }],
+    /* «Написать клиенту» → «Отправить»: the confirm card's own two lines —
+       the order and the address, then the warning. One text node either way,
+       and the letter itself is drawn in the card's preview box below it. */
+    [/^([^\n]+)\nПисьмо уйдёт сразу, отозвать его нельзя\.$/,
+      { ET: "$1\nKiri läheb kohe välja, seda ei saa tagasi võtta.",
+        EN: "$1\nThe letter goes out at once and cannot be recalled." }],
+    // …and the journal line it leaves behind
+    [/^Письмо клиенту · заказ (.+)$/,
+      { ET: "Kiri kliendile · tellimus $1", EN: "Letter to the customer · order $1" }],
     [/^(\d+) заказ(?:|а|ов) · (\d+) в салоне$/,
       { ET: "$1 tellimust · $2 salongis", EN: "$1 orders · $2 in the salon" }],
     [/^(\d+) заказ(?:|а|ов) · (.+) в день$/,
@@ -4744,7 +5093,33 @@
   /* wholesale/loyalty: the public half of settings.pricing (enabled + earn
      rate only — publicPricing() in src/lib/loyalty.ts), adopted from
      /api/overrides at boot for the «Баллы» row of the delivery page. */
-  var LOYALTY_PUBLIC = { enabled: true, earnPct: 5 };
+  /* «Партнёры и баллы» (settings.pricing.partnersOn, Dim 07.09.2026): the one
+     switch above both programmes, OFF by default — Renat said «later», and
+     until he says otherwise the shop has no wholesale tier and no points at
+     all. `partnersOn` false hides the points block and «Стать партнёром» in
+     the cabinet, «Использовать баллы» at checkout, the tier chips in
+     «Клиенты», the editor's «Салон, €» column and the salon line under it.
+     Nothing is deleted: every number keeps its stored value, and the switch
+     back on puts all five screens back exactly as they were. */
+  var LOYALTY_PUBLIC = { partnersOn: false, enabled: false, earnPct: 5 };
+  /** Is the whole «Партнёры и баллы» programme on right now? */
+  function partnersOn() { return !!LOYALTY_PUBLIC.partnersOn; }
+  /** …and points specifically — the inner switch inside the outer one. */
+  function pointsOn() { return partnersOn() && LOYALTY_PUBLIC.enabled !== false; }
+  /* The panel must not wait for the public feed to see its own switch:
+     /api/overrides is cached at the edge for half a minute, and «Партнёры и
+     баллы» decides what five screens draw. The owner's own save (and its
+     undo) copies the answer across at once — the same «the demo layer shows
+     the change, the server confirms it» rule the rest of the panel follows. */
+  function adoptPricingLocally() {
+    var p = S.pricingLoaded;
+    if (!p) return;
+    LOYALTY_PUBLIC = {
+      partnersOn: p.partnersOn === true,
+      enabled: p.partnersOn === true && p.loyalty && p.loyalty.enabled !== false,
+      earnPct: (p.loyalty && isFinite(Number(p.loyalty.earnPct))) ? Number(p.loyalty.earnPct) : LOYALTY_PUBLIC.earnPct
+    };
+  }
 
   /* Is there a server behind this page? null until the first call answers.
      false puts the checkout back into demo mode — the prototype is hosted
@@ -5662,6 +6037,7 @@
      other. createOrder() quotes the real amount from the real balance — this
      browser never decides what a point is worth. */
   function loyaltyMaxRedeem() {
+    if (!pointsOn()) return 0;   // «Партнёры и баллы» off
     if (!S.loyalty || !S.loyalty.settings || !S.loyalty.settings.enabled) return 0;
     var st = S.loyalty.settings;
     if (S.loyalty.balance < st.minRedeem) return 0;
@@ -9085,7 +9461,13 @@
       (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
       '<button class="btn btn--ghost btn--sm" data-save' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctSaved ? "Сохранено ✓" : "Сохранить") + "</button>" +
 
-      /* ---- wholesale/loyalty: points balance/history ---------------------- */
+      /* ---- wholesale/loyalty: points balance/history ----------------------
+         Both blocks below hang off «Партнёры и баллы» (settings.pricing.
+         partnersOn, Dim 07.09.2026). Off — and this is a shop with no points
+         and no wholesale tier, so neither block is drawn at all: a balance of
+         0 with an explanation of a programme that is not running is worse
+         than nothing. Every stored balance survives the switch. */
+      (!partnersOn() ? "" :
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Баллы лояльности</h2></div>' +
       (S.loyalty
         ? '<p class="num" style="font-size:20px;margin:0 0 6px">' + S.loyalty.balance + " " + pl(S.loyalty.balance, "балл", "балла", "баллов") + "</p>" +
@@ -9112,7 +9494,7 @@
             '<button class="btn btn--ghost btn--sm" data-acctprosend' + (S.acctProBusy ? " disabled" : "") + ">" + (S.acctProBusy ? "Отправляем…" : "Отправить заявку") + "</button>" +
             /* what happens next — the one thing the old form never said */
             '<p class="hint" style="margin:12px 0 0"><span>Что дальше: мы проверим данные — обычно в течение рабочего дня — и включим цены для салонов.</span> ' +
-              "<span>Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.</span></p>") +
+              "<span>Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.</span></p>")) +
 
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
@@ -10153,7 +10535,8 @@
          Independent of the promo/gift box above — a checkbox, not a code,
          so it stacks with either. Shown only once signed in with a real,
          usable balance; loyaltyMaxRedeem() already checks minRedeem. */
-      (S.loggedIn && S.loyalty && loyaltyMaxRedeem() > 0
+      // «Партнёры и баллы» off — no points anywhere, so no box to tick either
+      (pointsOn() && S.loggedIn && S.loyalty && loyaltyMaxRedeem() > 0
         ? '<label class="opt opt--plain cosum__loyalty"><input type="checkbox" data-loyaltyredeem' + (S.loyaltyRedeem ? " checked" : "") + '>' +
             '<span>Использовать баллы — доступно ' + S.loyalty.balance + "</span></label>" +
           (S.loyaltyRedeem
@@ -10884,20 +11267,31 @@
 
   /* ---------- Заказы ------------------------------------------------------ */
 
-  /* The chips follow the fulfilment steps: a paid order is «Новые» until its
-     label exists, «Этикетка готова» until it leaves, then «Отправлены» and
-     «Доставлены». Unpaid orders (new / failed) live under «Все» with their
-     «Ждёт оплаты» badge — nothing about them is a step of the owner's. */
+  /* Six chips down to three (Dim, 07.09.2026). «Новые · Этикетка готова ·
+     Отправлены · Доставлены · Салон · Все» asked Renat to know which of six
+     boxes an order was in before he could find it; what he actually does is
+     two things — send what has not gone yet, and look at what is already on
+     its way. So: «Отправить N» (paid, still on the shelf, label or no label),
+     «В пути» (gone: shipped and delivered together) and «Все». «По счёту»
+     stays beside them because it is not a step of the same journey — it is an
+     invoice waiting for a bank transfer, and it belongs to the invoice flow.
+     Salon sales, unpaid and cancelled orders are all under «Все», which is
+     why «Все» is a chip and not a link.
+
+     The KEYS are the old ones on purpose: `data-admfilter="new"` is what the
+     overview's «Отправить N» button, the assistant's «Открыть заказы» and the
+     e2e suite have always pressed. Only the labels and what each key MATCHES
+     changed. */
   var ADM_ORDER_FILTERS = [
-    ["new", "Новые"], ["label", "Этикетка готова"], ["shipped", "Отправлены"],
-    ["delivered", "Доставлены"], ["invoice", "По счёту"], ["salon", "Салон"], ["all", "Все"]
+    ["new", "Отправить"], ["shipped", "В пути"], ["invoice", "По счёту"], ["all", "Все"]
   ];
   function admOrderMatches(v, f) {
     if (f === "all") return true;
-    if (f === "new") return v.paid && !v.labeled;
-    if (f === "label") return v.paid && v.labeled;
-    if (f === "shipped") return v.shipped;
-    if (f === "delivered") return v.delivered;
+    // everything paid that has not left yet — a sticker is not a hand-over
+    if (f === "new" || f === "label") return v.paid;
+    // …and everything that has: «Отправлен» and «Доставлен» are one answer to
+    // «где посылка» — the row itself says which of the two it is
+    if (f === "shipped" || f === "delivered") return v.shipped || v.delivered;
     // «По счёту»: the invoices still waiting for their transfer
     if (f === "invoice") return !!v.invoice && v.unpaid;
     if (f === "salon") return v.pos;
@@ -10915,7 +11309,8 @@
       admHead("", "Заказы", "") +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Какие заказы">' + ADM_ORDER_FILTERS.map(function (x) {
-          var n = x[0] === "new" ? split.fresh : x[0] === "label" ? split.labeled : x[0] === "invoice" ? admInvoicesWaiting().length : 0;
+          // «Отправить N» counts everything still on the shelf, labelled or not
+          var n = x[0] === "new" ? split.fresh + split.labeled : x[0] === "invoice" ? admInvoicesWaiting().length : 0;
           return '<button class="adm-chip" data-admfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
             x[1] + (n ? " " + n : "") + "</button>";
         }).join("") + "</div>" +
@@ -11040,6 +11435,18 @@
     }
     return v.number + " · " + v.who + "\n" + v.ship +
       "\nКлиенту уйдёт письмо «Заказ отправлен» — без трек-номера.";
+  }
+  /* «Написать клиенту» → «Отправить». Audit 06.09.2026 question 9; Dim's
+     answer: yes, ask first. The letter cannot be recalled and every cheaper
+     action in this panel already goes through the card, so this one does too —
+     with the address it is going to and the first lines of what is going, so
+     the question is worth answering rather than clicking through. */
+  function admMailConfirmText(v) {
+    var mail = (v.srv && v.srv.email) || "";
+    // two straight chains, same reason as admShipConfirmText(): each is one
+    // text node, and the letter itself goes in the card's own preview box
+    if (mail) return v.number + " · " + mail + "\nПисьмо уйдёт сразу, отозвать его нельзя.";
+    return v.number + "\nПисьмо уйдёт сразу, отозвать его нельзя.";
   }
   /* «Отменить заказ» — what actually happens, not what would be nice. The
      server (setOrderStatus in src/lib/orders.ts) moves the status and puts a
@@ -11192,8 +11599,12 @@
         : '<div class="adm-hint">Трек-номер появится, когда перевозчик примет посылку.</div>') +
       (mont.dropOffPin ? '<div class="adm-hint">Код сдачи посылки: ' + esc(mont.dropOffPin) + "</div>" : "") +
       '<div class="adm-ship__links">' +
+        /* One label button, A4 (Dim, 07.09.2026): two equal buttons made Renat
+           choose a paper size before he could print, and the office printer is
+           the one he has. A6 stays reachable — a quiet link beside it, for the
+           day a thermal printer appears — rather than removed. */
         '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A4" target="_blank" rel="noopener" data-labelpdf="A4">Открыть PDF (A4) ↗</a>' +
-        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + base + '?size=A6" target="_blank" rel="noopener" data-labelpdf="A6">A6 для термопринтера ↗</a>' +
+        '<a class="adm-link adm-link--muted" href="' + base + '?size=A6" target="_blank" rel="noopener" data-labelpdf="A6">A6 для термопринтера ↗</a>' +
         // http(s) only: an href is a place a "javascript:" string would run
         (/^https?:\/\//i.test(String(mont.trackingUrl || ""))
           ? '<a class="adm-link adm-link--muted" href="' + esc(mont.trackingUrl) + '" target="_blank" rel="noopener">Отследить ↗</a>' : "") +
@@ -11522,7 +11933,9 @@
     var own = CATALOGUE.filter(function (p) { return p.custom; });
     var file = CATALOGUE.filter(function (p) { return !p.custom; });
     var hidden = (S.customAll || []).filter(function (c) { return c && c.active === false && !byIdOrNull(c.id); }).map(customProduct);
-    return own.concat(file, hidden);
+    // migration 147: a catalogue product switched off «Показывать в магазине»
+    // is out of CATALOGUE — the panel is the one place it must still be found
+    return own.concat(file, hidden, hiddenFileProducts());
   }
   function admCatalogRows() {
     var q = (S.goodsQ || "").toLowerCase().trim();
@@ -11551,7 +11964,8 @@
       : S.lang === "EN" ? eur(lo) + "–" + eur(hi).replace(/^€/, "")
       : eur(lo).replace(/\s?€$/, "") + "–" + eur(hi);
     // product creation: a hidden custom product says so instead of a stock badge
-    var badge = p.custom && p.active === false ? ["Скрыт", "adm-badge--quiet"]
+    // — migration 147: and so does a catalogue product taken out of the shop
+    var badge = (p.custom && p.active === false) || shopHidden(p.id) ? ["Скрыт", "adm-badge--quiet"]
       : p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
       : p.stock === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
     var fresh = p.custom && p.active !== false && (customFresh(p) || (S.goodsFresh && S.goodsFresh[p.id]));
@@ -11771,6 +12185,9 @@
               '<input class="adm-input" type="number" step="0.01" min="0.01" max="' + esc(a.amount) +
               '" inputmode="decimal" data-admrefundamt value="' + esc(a.amount) + '"></label>'
           : "") +
+        // «Написать клиенту»: the letter itself, in the owner's own words —
+        // see confirmCard() for why it is a box of its own
+        (a.preview ? '<div class="adm-propose__prev">' + esc(a.preview) + "</div>" : "") +
         '<div class="adm-confirm__acts">' +
           '<button class="adm-btn' + (a.danger ? " adm-btn--warn" : "") + '" data-admapply>' +
             esc(a.ok || "Применить") + "</button>" +
@@ -11871,6 +12288,14 @@
     return '<button class="adm-sw" ' + attrs + ' aria-pressed="' + !!on +
       '" title="' + label + '" aria-label="' + label + '"><i></i></button>';
   }
+  /** The same switch where the label belongs INSIDE the control rather than in
+      a row beside it — the editor's «Показывать в магазине» box, which the
+      design draws as one bordered line of «name … toggle». */
+  function admLabelledSwitch(attrs, label, on) {
+    return '<button class="adm-switch" type="button" ' + attrs + ' aria-pressed="' + !!on + '">' +
+      "<span>" + label + "</span>" +
+      '<span class="adm-switch__t' + (on ? " is-on" : "") + '" aria-hidden="true"><i></i></span></button>';
+  }
   /** A segmented control — RU · ET · EN above the letter and the article. */
   function admSegHTML(attr, items, cur, aria) {
     return '<div class="adm-seg" role="group" aria-label="' + aria + '">' + items.map(function (x) {
@@ -11916,7 +12341,8 @@
     var pend = admReviewCounts().pending || 0;
     /* «+ Партнёр» — the same head slot «+ Промокод» uses: a salon the owner
        already knows is added by e-mail, without waiting for a request. */
-    var add = !onReviews && !S.admCustOpen && !S.partnerForm && SRV.admin === true
+    // «Партнёры и баллы» off: no partners to add (Dim, 07.09.2026)
+    var add = partnersOn() && !onReviews && !S.admCustOpen && !S.partnerForm && SRV.admin === true
       ? '<button class="adm-btn adm-btn--head" data-admpartnernew>+ Партнёр</button>'
       : "";
     return '<div class="adm-screen adm-screen--tight">' +
@@ -12033,6 +12459,12 @@
      fields, the same placeholder chips, the same «Сохранить» → confirm card →
      one set_mail_texts action. New is the layout — fields left, the letter
      right, redrawn from the draft as it is typed. */
+  /* Each row says what the letter really does AND when it really fires (Dim,
+     07.09.2026: «keep and make them work … need a switch and be manageble»).
+     The three switchable ones all start off — the same FLOW_DEFAULTS the
+     sender reads (src/lib/flows.ts) — and all three are sent by one job that
+     runs ONCE A DAY on the free plan, which is why every «когда» below is
+     written in days rather than in hours. */
   var ADM_MAIL_ROWS = [
     ["order-confirmed", "Заказ принят", "сразу после оплаты", ""],
     ["order-shipped", "Заказ отправлен", "когда вы нажмёте «Отправлен»", ""],
@@ -12045,15 +12477,34 @@
     ["order-unpaid", "Заказ ждёт оплаты", "через несколько дней без оплаты", "unpaid"],
     ["order-cancelled", "Заказ отменён", "когда заказ отменён — вами или по сроку", ""],
     ["order-refunded", "Деньги возвращены", "когда вы вернули деньги", ""],
-    ["back-in-stock", "Товар снова в наличии", "тем, кто оставил почту", "backstock"],
-    ["abandoned-cart", "Брошенная корзина", "через 3 часа", "abandoned"],
-    // «в день рождения», because that is what runBirthdays() does: it matches
-    // today's month and day (src/lib/flows.ts). The row used to promise three
-    // days of warning the sender never gave.
-    ["birthday", "Скидка ко дню рождения", "в день рождения", "birthday"],
+    ["back-in-stock", "Товар снова в наличии", "когда вы вернёте товар в наличие — всем, кто оставил почту", "backstock"],
+    ["abandoned-cart", "Брошенная корзина", "раз в сутки: корзинам старше 3 часов, если заказа так и не было", "abandoned"],
+    ["birthday", "Скидка ко дню рождения", "раз в сутки, с промокодом на две недели", "birthday"],
     ["login-code", "Код для входа", "когда покупатель входит в кабинет", ""],
     ["partner-welcome", "Цены для салонов включены", "когда вы добавили или одобрили партнёра", ""]
   ];
+  /* «за N дней» (Dim: «the days before need to be a setting»). A select, not
+     a number box: on a phone it is one tap, and the values are the ones a
+     birthday promo is worth sending on. 0 is the day itself — what
+     runBirthdays() has always done. */
+  /* Whole sentences, not «за » + n + a plural word: each option is one string
+     the dictionary can hold, which is what keeps the panel trilingual without
+     a rule per number (the same reason ADM_MAIL_ROWS spells its «когда» out). */
+  var BIRTHDAY_DAY_CHOICES = [
+    [0, "в день рождения"], [1, "за 1 день до даты"], [2, "за 2 дня до даты"],
+    [3, "за 3 дня до даты"], [5, "за 5 дней до даты"], [7, "за 7 дней до даты"],
+    [14, "за 14 дней до даты"]
+  ];
+  function birthdayDays() { return Number(DEMO.flows.birthdayDays) || 0; }
+  function admBirthdayDaysHTML() {
+    var n = birthdayDays();
+    return '<div class="adm-swrow"><span>Когда поздравлять' +
+        '<span class="adm-row__sub">промокод действует две недели, так что запас в пару дней ему не мешает</span></span>' +
+      '<span class="sel sel--box"><select class="adm-input" data-flowbdays aria-label="За сколько дней поздравлять">' +
+      BIRTHDAY_DAY_CHOICES.map(function (x) {
+        return '<option value="' + x[0] + '"' + (x[0] === n ? " selected" : "") + ">" + x[1] + "</option>";
+      }).join("") + "</select></span></div>";
+  }
   function admMailName(tpl) {
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
     return tpl;
@@ -12073,7 +12524,9 @@
           ? admSwitch('data-admflow="' + flow + '"', on, on ? "Выключить письмо" : "Включить письмо")
           : '<span class="adm-badge adm-badge--ok">всегда</span>') +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
-        "</div>";
+        "</div>" +
+        // the one letter with a setting of its own, right under its own row
+        (flow === "birthday" && on ? admBirthdayDaysHTML() : "");
     }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
@@ -12132,6 +12585,7 @@
       }
       toast("Не удалось сохранить");
     }).catch(function () { toast("Сервер не отвечает"); });
+      '<p class="adm-hint">Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.</p>';
   }
   /** « · Ждут письма: 3» — only when the server actually counted, never a zero
       the panel cannot stand behind. Its own function so the i18n check sees
@@ -12593,11 +13047,19 @@
     rows.push({ name: "Аналитика посещений", ok: !ANALYTICS["7d"] || !!an,
       sub: an ? "Откуда приходят и что ищут. Всё в разделе «Аналитика»." : "Считаем…", act: "" });
 
-    rows.push({ name: "ИИ-помощник", ok: true,
-      sub: admAI
-        ? "Отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить»."
-        : "Работает на встроенных ответах — модель не подключена. Сам он по-прежнему ничего не меняет.",
-      act: "" });
+    /* The square used to be green while the line under it said the model was
+       not connected (audit 06.09.2026, question 7; Dim: make it tell the
+       truth). Green only when a real model answers; grey — not red — while it
+       runs on the built-in answers, because that is not a fault: the panel
+       still works, it simply cannot write anything new. `admAI` is null until
+       GET /api/assistant/ answers, so «Проверяем…» is the honest first state. */
+    rows.push({ name: "ИИ-помощник", ok: true, quiet: admAI === false,
+      sub: admAI === null
+        ? "Проверяем…"
+        : admAI
+          ? "Модель подключена: отвечает на вопросы и готовит черновики. Ничего не меняет без вашего «Применить»."
+          : "Модель не подключена — работают только встроенные ответы, новые тексты он не напишет. Подключает Дим.",
+      act: admAI === false ? admDevLink() : "" });
 
     var cam = scanSupportInfo().camera;
     rows.push({ name: "Сканер · камера телефона", ok: cam,
@@ -12613,7 +13075,9 @@
       admHead("", "Подключения", "") +
       '<div class="adm-list">' + admIntegrationRows().map(function (r) {
         return '<div class="adm-row adm-row--tall">' +
-          '<span class="adm-dot' + (r.ok ? "" : " adm-dot--warn") + '" aria-hidden="true"></span>' +
+          // three states, not two: green = working, grey = known to be off but
+          // not broken (the assistant with no model), red = something is wrong
+          '<span class="adm-dot' + (r.ok ? (r.quiet ? " adm-dot--off" : "") : " adm-dot--warn") + '" aria-hidden="true"></span>' +
           '<span class="adm-row__body"><span class="adm-row__nm">' + r.name + "</span>" +
             '<span class="adm-row__sub' + (r.ok ? "" : " adm-row__sub--warn") + '">' + r.sub + "</span></span>" +
           r.act + "</div>";
@@ -12640,7 +13104,7 @@
        localStorage list (ADM_LS), not the server's admin_audit. What was
        changed from the phone is not in the laptop's journal — the row used to
        say «всё, что применялось» and read like a shop-wide history. */
-    ["journal", "Журнал изменений", "что вы меняли в этом браузере, и кнопка «Вернуть»"]
+    ["journal", "Журнал изменений", "ваши изменения с «Вернуть» и журнал сервера"]
   ];
   function admSetTitle(key) {
     for (var i = 0; i < ADM_SET_PAGES.length; i++) if (ADM_SET_PAGES[i][0] === key) return ADM_SET_PAGES[i][1];
@@ -12726,7 +13190,42 @@
       }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
         "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
+      admDeliveryCloseHTML() +
       "</div>";
+  }
+  /* ---- «Доставлен» без вашей кнопки (settings.delivery) -------------------
+     Dim: «we need to improve this». The last step of an order was manual and
+     sent nothing, so marking it meant tracking every parcel by hand. Two
+     honest ways, both here, both off-able:
+
+       · the carrier's own answer — Montonio's shipping API really does carry
+         a status (GET /shipments/<id>, docs/shipping.md), asked once a day;
+       · time — «через N дней после отправки», 0 meaning never, for a parcel
+         with no Montonio record at all and for a status the shop cannot read.
+
+     Off by default (0 days): a shop that has not decided must not be closing
+     orders on its own. The manual button stays exactly where it was. */
+  var DELIVERY_DAY_CHOICES = [
+    [0, "никогда — только вручную"], [3, "через 3 дня после отправки"], [5, "через 5 дней после отправки"],
+    [7, "через 7 дней после отправки"], [10, "через 10 дней после отправки"], [14, "через 14 дней после отправки"]
+  ];
+  function deliveryConf() {
+    return S.deliveryLoaded || { autoDays: 0, useCarrier: true };
+  }
+  function admDeliveryCloseHTML() {
+    loadAdminPricing(false);   // the same GET /api/admin/settings the prices card makes
+    var d = deliveryConf();
+    return '<div class="adm-sec__t" style="margin-top:24px">Когда заказ считается доставленным</div>' +
+      '<p class="adm-hint" style="margin:0 0 10px">Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.</p>' +
+      '<div class="adm-swrow"><span>Спрашивать перевозчика' +
+        '<span class="adm-row__sub">раз в сутки магазин спрашивает Montonio, дошла ли посылка</span></span>' +
+        admSwitch("data-delivcarrier", d.useCarrier, d.useCarrier ? "Не спрашивать перевозчика" : "Спрашивать перевозчика") + "</div>" +
+      '<label class="adm-field" style="margin-top:12px"><span>Закрывать заказ через</span>' +
+        '<span class="sel sel--box"><select class="adm-input" data-delivdays>' +
+        DELIVERY_DAY_CHOICES.map(function (n) {
+          return '<option value="' + n[0] + '"' + (n[0] === d.autoDays ? " selected" : "") + ">" + n[1] + "</option>";
+        }).join("") + "</select></span></label>" +
+      '<p class="adm-hint" style="margin-top:8px">Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».</p>';
   }
   /* `col` is the column's own name, drawn only on a phone: the header row of
      the grid is hidden there, and three bare boxes under «Эстония» gave the
@@ -12902,21 +13401,114 @@
       '<div class="adm-acts">' + admDevLink() + "</div>" +
       "</div>";
   }
-  /* Журнал изменений: the same DEMO.log the undo toast writes into, as rows of
-     `time · text · «Вернуть»`. An entry with nothing to put back (an undo's own
-     «Отмена: …» line) gets no button — a «Вернуть» that does nothing is worse
-     than none at all. */
+  /* ---------- Журнал изменений --------------------------------------------
+     Two lists, because there really are two (audit 06.09.2026, question 5;
+     Dim's answer: «show the server log»).
+
+     · «Ваши изменения в этом браузере» — DEMO.log, the same list the undo
+       toast writes into, and the only one «Вернуть» can act on: putting a
+       change back means knowing what it was before, and only the browser that
+       made it holds that. Said in one plain sentence instead of hiding the
+       button, which is what was asked for.
+     · «Журнал магазина» — admin_audit, written by the server from ~25 places
+       (GET /api/admin/audit), every device and every session. Read-only, and
+       labelled as such: this is the history of the shop, not of this laptop.
+
+     An entry with nothing to put back (an undo's own «Отмена: …» line) gets no
+     button — a «Вернуть» that does nothing is worse than none at all. */
+  var AUDIT = { rows: null, err: "", asked: false };
+  function loadAudit(force) {
+    if (SRV.admin !== true) return;
+    if (AUDIT.asked && !force) return;
+    AUDIT.asked = true;
+    apiJson("/api/admin/audit/?limit=100").then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      var ok = r.status === 200 && r.body.ok && Array.isArray(r.body.audit);
+      AUDIT.rows = ok ? r.body.audit : [];
+      AUDIT.err = ok ? "" : "Журнал магазина не загрузился.";
+      render();
+    }).catch(function () { AUDIT.rows = []; AUDIT.err = "Сервер не отвечает."; render(); });
+  }
+  /** «13.09, 14:05» out of the ISO stamp the route answers with. */
+  function auditWhen(at) {
+    var d = new Date(at);
+    return isNaN(d.getTime()) ? String(at || "") : d.toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+  /** Who did it, in words the owner uses: himself, the shop, or a sign-in from
+      an address. HTML, not text: the address is its own node so the label
+      beside it is one translatable string rather than a Russian fragment
+      glued to a number (same shape as flowCountLine). */
+  function auditWhoHTML(actor) {
+    var a = String(actor || "");
+    if (a === "admin") return "владелец";
+    if (a === "system") return "магазин сам";
+    if (a.indexOf("ip:") === 0) return "<span>вход с адреса</span> " + esc(a.slice(3));
+    return esc(a) || "—";
+  }
+  /* One Russian line per server action. The payload shapes are the ones the
+     writeAudit() calls in src/** actually pass; anything this table does not
+     know falls back to its own name plus whatever id it carries, which is
+     still more useful than an empty row. */
+  var AUDIT_WORDS = {
+    "override.set": "Товар изменён", "override.seo": "Тексты для Google изменены",
+    "override.description": "Описание товара изменено",
+    "product.create": "Новый товар", "product.update": "Свой товар изменён",
+    "product.hide": "Товар снят с продажи", "product.show": "Товар снова в продаже",
+    "order.status": "Статус заказа", "order.note": "Заметка к заказу",
+    "shipment.create": "Этикетка создана", "shipment.step": "Шаг «этикетка» изменён",
+    "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
+    "mail.send": "Письмо клиенту отправлено",
+    "setting.set": "Настройка изменена",
+    "promo.set": "Промокод сохранён", "promo.active": "Промокод включён или выключен",
+    "bundle.set": "Набор сохранён", "bundle.active": "Набор показан или скрыт",
+    "bundle.delete": "Набор удалён", "bundle.reorder": "Порядок наборов изменён",
+    "customer.created": "Новый клиент", "customer.partner_added": "Добавлен партнёр",
+    "customer.pro_approved": "Партнёр одобрен", "customer.pro_rejected": "Заявке партнёра отказано",
+    "customer.tier_set": "Клиент переведён между «Розница» и «Партнёр»",
+    "customer.points_adjust": "Баллы клиента изменены",
+    "media.upload": "Загружен файл", "media.delete": "Файл удалён", "media.cutout": "У фото убран фон",
+    "ai.text": "Черновик у ИИ запрошен",
+    "admin.login": "Вход в админку", "admin.login.failed": "Неудачный вход",
+    "admin.logout": "Выход из админки", "db.migrate": "Обновление базы"
+  };
+  function auditText(row) {
+    var p = row && row.payload && typeof row.payload === "object" ? row.payload : {};
+    var word = AUDIT_WORDS[row.action] || row.action;
+    var what = p.number || p.code || p.key || p.email || p.id || p.orderId || "";
+    return word + (what ? ": " + what : "");
+  }
   function admSetJournalHTML() {
-    if (!DEMO.log.length) {
-      return '<div class="adm-narrow"><div class="adm-empty">' +
-        "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».</div></div>";
+    loadAudit(false);
+    var mine = DEMO.log.length
+      ? DEMO.log.map(function (e, i) {
+          return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(e.t) + "</span>" +
+            '<span class="adm-jrow__x">' + esc(e.txt) + "</span>" +
+            (e.prev ? '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admundo="' + i + '">Вернуть</button>' : "") +
+            "</div>";
+        }).join("")
+      : '<div class="adm-empty">Изменений в этом браузере пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».</div>';
+    var srv;
+    if (SRV.admin !== true) srv = '<div class="adm-note">Войдите как владелец, чтобы увидеть журнал магазина.</div>';
+    else if (AUDIT.err) {
+      srv = '<div class="adm-error"><span>' + esc(AUDIT.err) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admreload="audit">Повторить</button></div>';
+    } else if (!AUDIT.rows) srv = '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    else if (!AUDIT.rows.length) srv = '<div class="adm-empty">Сервер пока ничего не записал.</div>';
+    else {
+      srv = AUDIT.rows.map(function (r) {
+        return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(auditWhen(r.at)) + "</span>" +
+          '<span class="adm-jrow__x">' + esc(auditText(r)) + "</span>" +
+          '<span class="adm-jrow__who">' + auditWhoHTML(r.actor) + "</span></div>";
+      }).join("");
     }
-    return '<div class="adm-narrow">' + DEMO.log.map(function (e, i) {
-      return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(e.t) + "</span>" +
-        '<span class="adm-jrow__x">' + esc(e.txt) + "</span>" +
-        (e.prev ? '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admundo="' + i + '">Вернуть</button>' : "") +
-        "</div>";
-    }).join("") + "</div>";
+    return '<div class="adm-narrow">' +
+      '<div class="adm-sec"><span class="adm-sec__t">Ваши изменения в этом браузере</span></div>' +
+      '<p class="adm-hint">«Вернуть» работает только здесь: чтобы отменить изменение, браузеру нужно помнить, что было до него. То, что вы поменяли с телефона, отменить с ноутбука нельзя — но увидеть это можно ниже.</p>' +
+      mine +
+      '<div class="adm-sec" style="margin-top:24px"><span class="adm-sec__t">Журнал магазина</span></div>' +
+      '<p class="adm-hint">Всё, что записал сервер: с любого устройства и из любого входа, последние 100 записей. Только для чтения.</p>' +
+      srv +
+      "</div>";
   }
 
   /* ---------- «Письма»: preview + test send -----------------------------
@@ -13511,18 +14103,20 @@
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
-          // «✨»: the strip and its phone-width line, from what the owner typed as the gist
-          admSparkHTML('data-contentspark="announcement"', "✨ Написать текст полоски", 'data-contentspark="announcement:all"') +
+          /* No «✨» here any more (Dim, 07.09.2026: «fewer sparkle buttons»).
+             Six one-off writers were six different ways to ask the same
+             assistant for a sentence; the two that stayed are the two the
+             owner cannot easily write himself — a banner slide and a product
+             name. Everything else he asks the assistant for in its own words,
+             where it can also show him what it is about to change. */
           cInput("announcement.link", "Ссылка (необязательно)", "https://…", 300))) +
         (!show("contact") ? "" : cBlock("contact", "Страница «Контакты»",
           "вступительный абзац; телефон, почта, адрес и часы подставляются сами",
-          cTri("contactPage", "Текст страницы", "textarea", 1200) +
-          admSparkHTML('data-contentspark="contact"', "✨ Написать текст страницы", 'data-contentspark="contact:all"'))) +
+          cTri("contactPage", "Текст страницы", "textarea", 1200))) +
         (!show("emailfooter") ? "" : cBlock("emailfooter", "Подпись в письмах",
           esc(cText(d.emailFooter)) || "нет",
           cTri("emailFooter", "Строка внизу письма", "input", 300,
-            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет.") +
-          admSparkHTML('data-contentspark="footer"', "✨ Написать строку", 'data-contentspark="footer:all"'))) +
+            "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
       "</div>" +
       '<div class="adm-acts" style="margin-top:16px">' +
         '<button class="adm-btn" data-contentsave>Сохранить</button>' +
@@ -13543,11 +14137,25 @@
      GET /api/admin/settings instead, the same door shipRulesCard() and
      admContentCard() write through (PUT /api/admin/settings), so a save here
      lands in the change log with an undo like everything else. */
-  var PRICING_DEFAULT = { proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } };
+  // partnersOn false = «Партнёры и баллы» off, the same default cleanPricing()
+  // has on the server (src/lib/loyalty.ts) — Renat said «later» (Dim, 07.09.2026)
+  var PRICING_DEFAULT = { partnersOn: false, proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } };
+  /** settings.delivery, in the shape cleanDelivery() enforces on the server. */
+  function normaliseDelivery(raw) {
+    var r = raw && typeof raw === "object" ? raw : {};
+    var days = Math.trunc(Number(r.autoDays));
+    return {
+      autoDays: isFinite(days) && days > 0 ? Math.min(days, 60) : 0,
+      useCarrier: r.useCarrier === undefined ? true : r.useCarrier !== false
+    };
+  }
   function normalisePricing(raw) {
     var r = raw && typeof raw === "object" ? raw : {};
     var l = r.loyalty && typeof r.loyalty === "object" ? r.loyalty : {};
     return {
+      // «Партнёры и баллы» — the one switch above both, off unless the server
+      // says on (settings.pricing.partnersOn, Dim 07.09.2026)
+      partnersOn: r.partnersOn === true,
       proDiscountPct: isFinite(Number(r.proDiscountPct)) ? Number(r.proDiscountPct) : PRICING_DEFAULT.proDiscountPct,
       proMinOrder: isFinite(Number(r.proMinOrder)) ? Number(r.proMinOrder) : PRICING_DEFAULT.proMinOrder,
       loyalty: {
@@ -13562,6 +14170,7 @@
   function mergePricing(base, patch) {
     var b = normalisePricing(base), p = patch || {}, pl2 = p.loyalty || {};
     return {
+      partnersOn: p.partnersOn != null ? p.partnersOn === true : b.partnersOn,
       proDiscountPct: p.proDiscountPct != null ? p.proDiscountPct : b.proDiscountPct,
       proMinOrder: p.proMinOrder != null ? p.proMinOrder : b.proMinOrder,
       loyalty: {
@@ -13581,7 +14190,20 @@
       loadAdminPricing._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        S.pricingLoaded = normalisePricing(r.body.settings && r.body.settings.pricing);
+        var st0 = r.body.settings || {};
+        /* The form's own draft is seeded from S.pricingLoaded, and the first
+           paint happens before this answer lands — so a draft made from the
+           empty defaults has to go, or the card would keep drawing «Партнёры
+           и баллы» off after the server said otherwise. Only ever on the very
+           first load: after that the draft is what the owner has typed. */
+        var firstLoad = !S.pricingLoaded;
+        S.pricingLoaded = normalisePricing(st0.pricing);
+        if (firstLoad) S.pricingDraft = null;
+        // the admin's own copy is the authoritative one for the panel: the
+        // public feed it would otherwise wait for is edge-cached for 30 s
+        adoptPricingLocally();
+        // «Доставлен» без кнопки: the same admin-only settings map, read once
+        S.deliveryLoaded = normaliseDelivery(st0.delivery);
         render();
       }
     }).catch(function () { loadAdminPricing._busy = false; });
@@ -13662,11 +14284,24 @@
   }
   function admPricingCard() {
     loadAdminPricing(false);
-    var d = pricingDraft(), lo = d.loyalty.enabled;
+    var d = pricingDraft(), lo = d.loyalty.enabled, on = d.partnersOn === true;
     return '<div class="adm-form">' +
       '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять цены и баллы.</div>') +
       (pricingDirty() ? '<p class="adm-hint adm-hint--warn" style="margin:0">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      /* «Партнёры и баллы» — the one switch Dim asked for (07.09.2026), off by
+         default because Renat said «later». Off, the shop has no wholesale
+         tier and no points: nothing is shown about either, on any screen, and
+         nothing is earned, spent or discounted. The numbers below keep their
+         values, so switching it on puts everything back as it was. */
+      '<div class="adm-swrow"><span>Партнёры и баллы' +
+        '<span class="adm-row__sub">салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара</span></span>' +
+        admSwitch("data-partnerson", on, on ? "Выключить партнёров и баллы" : "Включить партнёров и баллы") + "</div>" +
+      (!on
+        ? '<p class="adm-hint" style="margin:0">Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.</p>' +
+          '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div></div>"
+        : "") +
+      (!on ? "" :
       '<div class="adm-sec__t">Салоны и мастера</div>' +
       '<div class="adm-edpair">' +
         admPricingField("proDiscountPct", "Скидка для салонов, %", "0 — если оптовых цен сейчас нет.", d.proDiscountPct) +
@@ -13684,7 +14319,7 @@
         : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
       // filled in place by paintPricingState() as the owner types
       '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>" +
-      '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>" +
+      '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>") +
       "</div>";
   }
 
@@ -13999,8 +14634,6 @@
             '<input class="adm-input" data-promof="maxUses" inputmode="numeric" value="' + esc(String(f.maxUses)) + '"></label>' +
           '<label class="adm-field" style="margin-top:10px">Заметка для себя' +
             '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
-          // «✨»: one line from the code's own conditions — what it is for, where it is given out
-          admSparkHTML("data-promospark", "✨ Написать заметку") +
         "</div></details>" +
       (S.promoFormErr ? '<div class="adm-err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
       '<div class="adm-acts"><button class="adm-btn" data-admpromosave>' +
@@ -14114,6 +14747,64 @@
     });
   }
 
+  /** «Шампунь + кондиционер ×2» — what a set's item list says out loud. */
+  function bundlePartsText(items) {
+    return (items || []).map(function (it) {
+      var p = byIdOrNull(it.productId || it.id);
+      var nm = p ? p.name : String(it.productId || it.id || "");
+      return nm + (Number(it.qty) > 1 ? " ×" + it.qty : "");
+    }).join(" + ");
+  }
+  /* «Наборы»: the assistant's proposal, applied. A set is a price the shop
+     will charge, so nothing is saved here — the editor opens with the
+     products and the name already in it, and the owner names the price and
+     presses «Сохранить» himself (see sanitizeProposeBundle's own comment). */
+  function applyProposeBundle(a) {
+    var form = blankBundle();
+    form.cat = a.cat || form.cat;
+    form.title = { RU: (a.title && a.title.RU) || "", ET: (a.title && a.title.ET) || "", EN: (a.title && a.title.EN) || "" };
+    form.desc = { RU: (a.desc && a.desc.RU) || "", ET: (a.desc && a.desc.ET) || "", EN: (a.desc && a.desc.EN) || "" };
+    form.items = (a.items || []).map(function (it) {
+      return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
+    });
+    // «Наборы» is the third tab of «Товары» (admProductTab), not a section
+    S.adminTab = "goods"; S.goodsTab = "bundles"; S.adminEdit = "";
+    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = "";
+    window.scrollTo({ top: 0 }); render();
+    toast("Набор открыт — впишите цену и сохраните");
+  }
+  /* …and a change to a set that exists: the same POST the editor's own
+     «Сохранить» makes, so validateBundle() on the server has the last word
+     about whether the set is still cheaper than its parts. */
+  function applySetBundle(a) {
+    var was = (S.admBundles || []).filter(function (b) { return b.id === a.id; })[0];
+    var body = {
+      id: a.id,
+      cat: a.cat || (was && was.cat) || "beard",
+      title: a.title || (was && was.title) || {},
+      desc: a.desc || (was && was.desc) || {},
+      items: (a.items || []).map(function (it) {
+        return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
+      }),
+      image: (was && was.image) || "",
+      sort: (was && was.sort) || 0,
+      active: a.active != null ? a.active : !(was && was.active === false)
+    };
+    if (a.price != null) body.price = a.price;
+    else if (a.discountPct != null) body.discountPct = a.discountPct;
+    else if (was && was.price != null) body.price = was.price;
+    apiSend("/api/admin/bundles/", "POST", body).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        journalNote(actionText(a));
+        toast("Набор сохранён ✓");
+        loadAdminBundles(true); loadBundles();
+        render(); return;
+      }
+      toast(BUNDLE_SAVE_ERRS[r.body && r.body.error] || "Не получилось сохранить набор.");
+      render();
+    }).catch(function () { toast("Сервер не отвечает"); render(); });
+  }
   function blankBundle() {
     return {
       id: "", cat: "beard", editing: false,
@@ -14376,12 +15067,17 @@
   }
   /** The tier as a badge — the same words on the row and on the card. */
   function admCustBadge(c) {
+    // «Партнёры и баллы» off: every customer is simply a customer
+    if (!partnersOn()) return ["Клиент", "adm-badge--quiet"];
     if (c.tier === "pro") return ["Pro", "adm-badge--ink"];
     if (c.proRequestedAt) return ["Заявка Pro", "adm-badge--warn"];
     return ["Розница", "adm-badge--quiet"];
   }
   function filteredAdminCustomers() {
     var list = S.admCustomers || [];
+    // «Партнёры и баллы» off: there are no tiers to filter by, and a chip the
+    // screen no longer draws must not go on quietly hiding half the list
+    if (!partnersOn()) S.admCustTier = "";
     if (S.admCustTier === "pro") list = list.filter(function (c) { return c.tier === "pro"; });
     else if (S.admCustTier === "retail") list = list.filter(function (c) { return c.tier !== "pro"; });
     else if (S.admCustTier === "pending") list = list.filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; });
@@ -14404,7 +15100,7 @@
         : '<div class="adm-skel"><i></i><i></i><i></i></div>';
     }
     return '<div class="adm-list">' + list.map(function (c) {
-      var pending = c.tier !== "pro" && c.proRequestedAt;
+      var pending = partnersOn() && c.tier !== "pro" && c.proRequestedAt;
       var badge = admCustBadge(c);
       return '<div class="adm-row adm-row--tall">' +
         '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '" ' +
@@ -14451,11 +15147,13 @@
       '<div class="adm-kpis" style="margin-top:16px">' +
         admPlainKpi("Заказов", String(c.ordersCount)) +
         admPlainKpi("Потратил", eur(c.revenue)) +
-        admPlainKpi("Баллы", String(c.pointsBalance)) +
+        // «Партнёры и баллы» off: a balance nobody can earn or spend is not a
+        // number worth a tile of its own (Dim, 07.09.2026)
+        (partnersOn() ? admPlainKpi("Баллы", String(c.pointsBalance)) : "") +
       "</div>" +
       /* the request, as the customer filed it — company, reg. code and phone
          were only ever in the grey line under the name, easy to miss */
-      (c.tier !== "pro" && c.proRequestedAt
+      (partnersOn() && c.tier !== "pro" && c.proRequestedAt
         ? '<div class="adm-sec__t" style="margin-top:28px">Заявка на статус партнёра</div>' +
           '<div class="adm-list adm-list--flat" style="margin-top:8px">' +
             admCustFactRow("Компания", c.company) +
@@ -14468,6 +15166,11 @@
         : "") +
       /* the tier, as a switch the owner can read: which one is on now, and
          what pressing the other does (askTierSwitch → confirm card) */
+      /* Everything from here to the private note belongs to «Партнёры и
+         баллы» (Dim, 07.09.2026): the tier switch, the points form and the
+         points history. Off — and the card is the customer's name, what he
+         bought and your own note about him. Nothing is deleted. */
+      (!partnersOn() ? "" :
       '<div class="adm-sec__t" style="margin-top:28px">Статус клиента</div>' +
       '<div class="adm-seg" role="group" aria-label="Статус клиента" style="margin-top:10px">' +
         '<button data-admcusttierset="retail" aria-current="' + (c.tier !== "pro") + '">Розница</button>' +
@@ -14490,7 +15193,7 @@
       '<div class="adm-sec__t" style="margin-top:28px">История баллов</div>' +
       (d.history.length
         ? '<div class="adm-list">' + d.history.map(admLoyaltyRowHTML).join("") + "</div>"
-        : '<div class="adm-empty">Начислений ещё не было.</div>') +
+        : '<div class="adm-empty">Начислений ещё не было.</div>')) +
       '<div class="adm-sec__t" style="margin-top:28px">Заметка о клиенте</div>' +
       '<div class="adm-form" style="margin-top:12px">' +
         '<label class="adm-field">Видна только вам' +
@@ -14533,12 +15236,17 @@
     var pendN = (S.admCustomers || []).filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; }).length;
     return (S.admCustErr ? '<div class="adm-note">' + esc(S.admCustErr) + "</div>" : "") +
       admCustLeadHTML() +
-      (S.partnerForm ? admPartnerFormHTML() : "") +
+      (partnersOn() && S.partnerForm ? admPartnerFormHTML() : "") +
       '<div class="adm-acts">' +
-        '<div class="adm-chips" role="group" aria-label="Какие клиенты">' + ADM_CUST_TIERS.map(function (f) {
-          return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' +
-            (S.admCustTier === f[0]) + '">' + f[1] + (f[0] === "pending" && pendN ? " " + pendN : "") + "</button>";
-        }).join("") + "</div>" +
+        /* «Партнёры и баллы» off: «Все клиенты» is the only answer there is,
+           so the four chips that sort them into tiers are not drawn — and the
+           filter itself falls back to «Все» (admCustRowsHTML). */
+        (partnersOn()
+          ? '<div class="adm-chips" role="group" aria-label="Какие клиенты">' + ADM_CUST_TIERS.map(function (f) {
+              return '<button class="adm-chip" data-admcusttier="' + f[0] + '" aria-current="' +
+                (S.admCustTier === f[0]) + '">' + f[1] + (f[0] === "pending" && pendN ? " " + pendN : "") + "</button>";
+            }).join("") + "</div>"
+          : "") +
         '<a class="adm-link" href="/api/admin/customers/?format=csv" target="_blank" rel="noopener">Скачать CSV</a>' +
       "</div>" +
       '<input class="adm-input" data-admcustq value="' + esc(S.admCustQ || "") +
@@ -14550,6 +15258,14 @@
      its own node for the dictionary. The link jumps straight to the page
      where the discount lives (data-admgoset, see the click handler). */
   function admCustLeadHTML() {
+    // «Партнёры и баллы» off: the three sentences below describe a programme
+    // the shop is not running, so it says the one true thing instead
+    if (!partnersOn()) {
+      return '<p class="adm-lead" style="margin:0 0 14px">' +
+        "<span>Здесь все, кто у вас покупал: имя, почта, сколько заказов и на какую сумму.</span> " +
+        "<span>Партнёрские цены и баллы сейчас выключены — включаются в</span> " +
+        '<button class="adm-link" data-admgoset="prices">Настройки → Цены и баллы</button>.</p>';
+    }
     return '<p class="adm-lead" style="margin:0 0 14px">' +
       "<span>Розница — все, кто покупает по обычным ценам; партнёры — салоны и мастера, которым включены цены для салонов.</span> " +
       "<span>Заявка на партнёрство приходит из кабинета покупателя (кнопка «Стать партнёром») и появляется здесь с пометкой «Заявка Pro» — одобрите её прямо в строке или добавьте партнёра сами кнопкой «+ Партнёр».</span> " +
@@ -15212,7 +15928,12 @@
     var p = byIdOrNull(id);
     if (p) return p;
     var c = findCustom(id);
-    return c ? customProduct(c) : byId(id);
+    if (c) return customProduct(c);
+    /* migration 147: a product the owner switched off «Показывать в магазине»
+       is not in CATALOGUE at all any more — byId() would answer with the
+       first product in the shop and the editor would open the wrong one. */
+    for (var i = 0; i < FILE_PRODUCTS.length; i++) if (FILE_PRODUCTS[i].id === id) return FILE_PRODUCTS[i];
+    return byId(id);
   }
   /** The size rows a custom product is edited with — {size, price} per row,
       size "" for the single-price case. The list lives in S so «+ Размер»
@@ -15285,7 +16006,9 @@
                 ? '<p class="adm-hint adm-hint--warn">Товар снят с продажи — в магазине его нет.</p>' +
                   '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-admgoodsshow="' + esc(p.id) + '">Вернуть в продажу</button></div>'
                 : '<p class="adm-hint">Это ваш товар: название, бренд, раздел, объёмы и фото здесь меняете вы сами. Убрать его с полки — «Снять с продажи» внизу; вернуть можно из журнала.</p>') +
-              '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>') +
+              '<p class="adm-hint">' + (partnersOn()
+                ? "Цены и остатки — на вкладке «Размеры и цены». Салон платит на " + edSalonPct() + " % меньше, если для товара не задана своя цена."
+                : "Цены и остатки — на вкладке «Размеры и цены».") + "</p>") +
         "</div>" +
       "</div></div>";
   }
@@ -15318,14 +16041,18 @@
             [["in", "В наличии"], ["low", "Мало"], ["out", "Нет в наличии"]].map(function (o) {
               return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
             }).join("") + "</select></label>" +
-          /* The switch the design asks for, honestly dead: there is no
-             `hidden` column in product_overrides and no route that writes one
-             (src/app/api/admin/overrides), so it shows the truth — every
-             catalogue product is in the shop — and says who can change that. */
-          '<span class="adm-switch" aria-disabled="true"><span>Показывать в магазине</span>' +
-            '<span class="adm-switch__t is-on" aria-hidden="true"><i></i></span></span>' +
-          '<p class="adm-hint">Все товары каталога видны в магазине. Чтобы убрать товар совсем — напишите Диму; чтобы просто перестать продавать, поставьте «Нет в наличии».</p>' +
-          '<p class="adm-hint">Цены и остатки — на вкладке «Размеры и цены». Салон платит на ' + edSalonPct() + ' % меньше, если для товара не задана своя цена.</p>' +
+          /* product_overrides.hidden (migration 147). Off = the product is
+             gone from the shop, the search, the sets and the sitemap — not
+             the same thing as «нет в наличии», which is a page a customer may
+             still land on and wait at. Applied on the spot with the toast's
+             undo, like every other reversible switch. */
+          admLabelledSwitch('data-edhidden="' + esc(p.id) + '"', "Показывать в магазине", !shopHidden(p.id)) +
+          '<p class="adm-hint">' + (shopHidden(p.id)
+            ? "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть."
+            : "Выключите — и товар исчезнет из магазина: из каталога, из поиска, из наборов. Чтобы просто перестать продавать, поставьте «Нет в наличии» — страница останется.") + "</p>" +
+          '<p class="adm-hint">' + (partnersOn()
+            ? "Цены и остатки — на вкладке «Размеры и цены». Салон платит на " + edSalonPct() + " % меньше, если для товара не задана своя цена."
+            : "Цены и остатки — на вкладке «Размеры и цены».") + "</p>" +
         "</div>" +
       "</div></div>";
   }
@@ -15363,8 +16090,12 @@
     if (!p.isNew) loadStockLevels(false);
     var rows = edSizeRows(p), n = rows.length;
     var multi = n > 1 || (n === 1 && !!rows[0].size);
-    var head = '<div class="adm-grid__head"><span>Размер</span><span>Цена, €</span>' +
-      (p.isNew ? "" : "<span>Салон, €</span><span>Остаток</span><span>Штрихкод</span>") + "<span></span></div>";
+    /* «Партнёры и баллы» off (Dim, 07.09.2026): no «Салон, €» column at all —
+       a price for a tier the shop does not have is a box that cannot be
+       right. The stored pro price survives; the column comes back with it. */
+    var salonCol = partnersOn();
+    var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Размер</span><span>Цена, €</span>' +
+      (p.isNew ? "" : (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span>") + "<span></span></div>";
     var body = rows.map(function (r, i) {
       var variant = multi ? r.size : "";
       var key = stockKey(p.id, variant);
@@ -15373,17 +16104,19 @@
       var low = edStockLow(lv);
       var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
       var salon = edSalonOf(goodsPrice(priceVal) || 0);
-      return '<div class="adm-grid__row">' +
+      return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
         (multi
           ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) + '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
           : '<span class="adm-grid__sz">один объём</span>') +
         edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
           '" inputmode="decimal" value="' + esc(priceVal) + '" placeholder="12,50" aria-label="Цена, €">') +
         (p.isNew ? "" :
-          edCell("", "Салон, €", i === 0
-            ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
-              '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
-            : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">') +
+          (salonCol
+            ? edCell("", "Салон, €", i === 0
+              ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
+                '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") + '" placeholder="' + salon + '" aria-label="Салон, €">'
+              : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
+            : "") +
           edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
             '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
           edEanCell(key, lv && lv.ean)) +
@@ -15400,47 +16133,59 @@
       (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
       "</div>";
   }
+  /* «+ Размер» and «×» for a CATALOGUE product (migration 147). The volumes
+     used to be the generated file's alone, so both buttons were dead and only
+     the first price was editable. Now the whole ladder is the owner's: the
+     rows below are the same {size, price} list the owner's own products are
+     edited with (edSizeRows / S.goodsSizes), saved as product_overrides.sizes,
+     and «Сохранить» writes it whole — which is the only shape in which «this
+     volume is gone» can be said at all. The «Остаток» and «Штрихкод» columns
+     stay the warehouse's, keyed by the volume's label, so renaming a volume
+     starts a new shelf line rather than silently moving the old one. */
   function edPaneSizes(p) {
     if (p.custom) return edPaneSizesOwn(p);   // product creation
     loadStockLevels(false);
-    var sizes = (p.sizes && p.sizes.length) ? p.sizes : [""];
-    var prices = (p.prices && p.prices.length) ? p.prices : [p.price];
-    var head = '<div class="adm-grid__head"><span>Размер</span><span>Цена, €</span><span>Салон, €</span>' +
-      "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
-    var rows = sizes.map(function (sz, i) {
+    var rows0 = edSizeRows(p), n = rows0.length;
+    var multi = n > 1 || (n === 1 && !!rows0[0].size);
+    var salonCol = partnersOn();   // «Партнёры и баллы» — see edPaneSizesOwn
+    var head = '<div class="adm-grid__head' + (salonCol ? "" : " adm-grid__head--nosalon") + '"><span>Размер</span><span>Цена, €</span>' +
+      (salonCol ? "<span>Салон, €</span>" : "") + "<span>Остаток</span><span>Штрихкод</span><span></span></div>";
+    var rows = rows0.map(function (r, i) {
+      var sz = multi ? r.size : "";
       var lv = edStockFor(p, sz);
-      var price = prices[Math.min(i, prices.length - 1)];
+      var price = r.price === "" || r.price == null ? "" : String(r.price);
       var key = stockKey(p.id, sz);
       var qty = lv && lv.tracked ? String(lv.qty) : "";
       var low = edStockLow(lv);
-      /* Only the first size has a price of its own here, because that is the
-         only one the shop stores: product_overrides.price patches p.price and
-         p.prices[0] (applyDemoOverrides). The rest are the catalogue's, shown
-         so the owner sees the whole ladder — read-only rather than editable
-         and quietly dropped. */
-      return '<div class="adm-grid__row">' +
-        '<span class="adm-grid__sz">' + (sz ? esc(sz) : "один объём") + "</span>" +
-        edCell("", "Цена, €", i === 0
-          ? '<input class="adm-input adm-input--cell" data-edprice inputmode="decimal" value="' + price + '" aria-label="Цена, €">'
-          : '<input class="adm-input adm-input--cell" value="' + price + '" readonly aria-label="Цена, €">') +
-        edCell("", "Салон, €", i === 0
-          ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
-            '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
-            '" placeholder="' + edSalonOf(price) + '" aria-label="Салон, €">'
-          : '<input class="adm-input adm-input--cell" value="' + edSalonOf(price) + '" readonly aria-label="Салон, €">') +
+      var salon = edSalonOf(goodsPrice(price) || 0);
+      return '<div class="adm-grid__row' + (salonCol ? "" : " adm-grid__row--nosalon") + '">' +
+        (multi
+          ? edCell("sz", "Размер", '<input class="adm-input adm-input--cell" data-edsz="' + i + '" value="' + esc(r.size) +
+            '" maxlength="30" placeholder="100 мл" aria-label="Размер">')
+          : '<span class="adm-grid__sz">один объём</span>') +
+        edCell("", "Цена, €", '<input class="adm-input adm-input--cell"' + (i === 0 ? " data-edprice" : "") + ' data-edpx="' + i +
+          '" inputmode="decimal" value="' + esc(price) + '" placeholder="12,50" aria-label="Цена, €">') +
+        (salonCol
+          ? edCell("", "Салон, €", i === 0
+            ? '<input class="adm-input adm-input--cell" data-edproprice data-edauto="' + (p.proPrice != null ? "0" : "1") +
+              '" inputmode="decimal" value="' + (p.proPrice != null ? p.proPrice : "") +
+              '" placeholder="' + salon + '" aria-label="Салон, €">'
+            : '<input class="adm-input adm-input--cell" value="' + salon + '" readonly aria-label="Салон, €">')
+          : "") +
         edCell("", "Остаток", '<input class="adm-input adm-input--cell' + (low ? " adm-input--warn" : "") + '" data-edqty="' + esc(key) +
           '" inputmode="numeric" value="' + qty + '" placeholder="' + (lv && lv.tracked ? "0" : "не учтено") + '" aria-label="Остаток">') +
         edEanCell(key, lv && lv.ean) +
-        '<button class="adm-grid__x" type="button" disabled title="Объёмы заводит Дим" aria-label="Убрать размер">×</button>' +
+        '<button class="adm-grid__x" type="button" data-edsizedel="' + i + '"' + (multi ? "" : " disabled") +
+          ' aria-label="Убрать размер" title="Убрать размер">×</button>' +
       "</div>";
     }).join("");
     return '<div class="adm-edpane" data-edpane="sizes"' + (edTab() === "sizes" ? "" : " hidden") + ">" +
       '<div class="adm-grid">' + head + rows + "</div>" +
-      // the same reason as the «×» above and the hint below it — «скоро» said
-      // a third thing, and a title is invisible on the phone anyway
-      '<button class="adm-btn adm-btn--dash" type="button" disabled title="Объёмы заводит Дим" aria-label="Добавить размер — объёмы заводит Дим">+ Размер</button>' +
-      '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
-      '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
+      '<button class="adm-btn adm-btn--dash" type="button" data-edsizeadd>+ Размер</button>' +
+      '<p class="adm-hint">' + (multi
+        ? "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе»."
+        : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
+      '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       edEanHint() +
       "</div>";
   }
@@ -15612,6 +16357,51 @@
     goodsFail(e[0], focusSel || e[1]);
   }
   /** The row the form describes, or null after goodsFail() said why not. */
+  /* migration 147: the size ladder as the form has it right now, [{size,
+     price}], or null when something in it is wrong (the offending cell is
+     focused and the error line written, exactly as customRowFromForm does —
+     this is the same validation, shared so a catalogue product and the
+     owner's own cannot start disagreeing about what a volume may be called). */
+  function edLadderFromForm(p) {
+    var rows = edSizeRowsRead(p);
+    var multi = rows.length > 1 || (rows.length === 1 && !!String(rows[0].size || "").trim());
+    var out = [], seen = {};
+    for (var i = 0; i < rows.length; i++) {
+      var price = goodsPrice(rows[i].price);
+      if (price === null) { customFail("bad_price", '[data-edpx="' + i + '"]'); return null; }
+      var label = multi ? String(rows[i].size || "").trim() : "";
+      if (multi) {
+        if (!label) { customFail("bad_size", '[data-edsz="' + i + '"]'); return null; }
+        if (seen[label.toLowerCase()]) { customFail("sizes_duplicate", '[data-edsz="' + i + '"]'); return null; }
+        seen[label.toLowerCase()] = true;
+      }
+      out.push({ size: label, price: price });
+    }
+    if (out.length > 12) { customFail("too_many_sizes"); return null; }
+    return out;
+  }
+  /** The ladder the shop has for a product now — what the form is compared to. */
+  function edLadderNow(p) {
+    var sizes = (p.sizes && p.sizes.length) ? p.sizes : [""];
+    var prices = (p.prices && p.prices.length) ? p.prices : [p.price];
+    return sizes.map(function (s, i) {
+      return { size: String(s || ""), price: Number(prices[Math.min(i, prices.length - 1)]) };
+    });
+  }
+  /* Did the VOLUMES move — one added, removed or renamed, or a price on any
+     rung but the first? Only then is the whole ladder what has to travel.
+     The first rung's price on its own stays the plain `set_price` it has
+     always been: one journal line saying «Цена …», one call to undo it, and
+     nothing about a price change pretending to be a change of volumes. */
+  function edLadderMoved(was, now) {
+    if (!was || !now) return false;
+    if (was.length !== now.length) return true;
+    for (var i = 0; i < was.length; i++) {
+      if (String(was[i].size) !== String(now[i].size)) return true;
+      if (i > 0 && Math.abs(Number(was[i].price) - Number(now[i].price)) > 0.001) return true;
+    }
+    return false;
+  }
   function customRowFromForm(p) {
     var g = function (sel) { var e = document.querySelector(sel); return e ? e.value.trim() : ""; };
     var brand = g("[data-edbrand]"), name = g("[data-edname]"), cat = g("[data-edcat]") || p.cat;
@@ -17711,6 +18501,9 @@
   var ADM_LS = "rempire-admin-demo";
   var DEMO = { price: {}, stock: {}, seo: {}, subcat: {}, varimg: {}, video: {}, chatbot: true, bundles: true,
     proPrice: {}, // wholesale/loyalty: product_overrides.pro_price, per product id — null/absent = computed from the global discount
+    // migration 147: the whole size ladder the owner saved, per product id,
+    // and the products he switched off «Показывать в магазине»
+    sizes: {}, hidden: {},
     gallery: {},  // media: photos the owner uploaded, per product id
     desc: {},     // assistant-work: product_overrides.description {RU,ET,EN}, per product id
     hero: null,   // null = the built-in banner (heroDefault())
@@ -17726,16 +18519,17 @@
        снова в наличии» used to start on here and in GET /api/overrides while
        the sender read it as off, so the switch said «включено» and no letter
        ever left — the owner had to toggle it off and on to turn it on. */
-    /* «Заказ ждёт оплаты»: the switch and its two intervals, mirroring
-       FLOW_DEFAULTS in src/lib/flows.ts — the panel must show the same
-       numbers the cron would use before the server has answered. */
-    flows: { abandoned: false, birthday: false, backstock: false, unpaid: false, unpaidRemindDays: 3, unpaidCancelDays: 7 }, log: [] };
+    /* «Заказ ждёт оплаты» and «за N дней» before a birthday: the panel
+       must show the same numbers the cron would use before the server
+       has answered — FLOW_DEFAULTS in src/lib/flows.ts. */
+    flows: { abandoned: false, birthday: false, backstock: false, unpaid: false, unpaidRemindDays: 3, unpaidCancelDays: 7, birthdayDays: 0 }, log: [] };
   try {
     var _dj = JSON.parse(localStorage.getItem(ADM_LS));
     if (_dj && typeof _dj === "object") {
       DEMO.price = _dj.price || {}; DEMO.stock = _dj.stock || {}; DEMO.seo = _dj.seo || {};
       DEMO.subcat = _dj.subcat || {}; DEMO.varimg = _dj.varimg || {};
       DEMO.proPrice = _dj.proPrice || {};   // wholesale/loyalty: pro-price overrides
+      DEMO.sizes = _dj.sizes || {}; DEMO.hidden = _dj.hidden || {};   // migration 147
       DEMO.video = _dj.video || {};   // features: product video links
       DEMO.gallery = _dj.gallery || {};   // media: uploaded photos
       DEMO.desc = _dj.desc || {};   // assistant-work: description overrides
@@ -17752,6 +18546,20 @@
     }
   } catch (e) {}
   function demoSave() { try { localStorage.setItem(ADM_LS, JSON.stringify(DEMO)); } catch (e) {} }
+  /* «+ Размер» / «×» (migration 147): one shape for the size ladder wherever
+     it comes from — the server's [{size, price}] or the editor's rows, whose
+     price is still a string the owner typed. A rung whose price is not a
+     number is dropped here rather than shown as «NaN €» in the shop. */
+  function sizeLadder(list) {
+    var out = [];
+    for (var i = 0; i < (list || []).length && out.length < 12; i++) {
+      var r = list[i] || {};
+      var price = Number(String(r.price == null ? "" : r.price).trim().replace(",", "."));
+      if (!isFinite(price) || price < 0 || price > 100000) continue;
+      out.push({ size: String(r.size == null ? "" : r.size).trim().slice(0, 30), price: Math.round(price * 100) / 100 });
+    }
+    return out;
+  }
   /* One shape for the Google title/description override, whatever wrote it:
      {t, d} from the older panel (= Russian), {RU:{t,d}, ET:{…}, EN:{…}} from
      this one, {RU:{title, desc}, …} from the server. Empty strings are
@@ -17812,6 +18620,10 @@
      has to put the original price back, not merely stop overwriting it. */
   function baseOf(p) {
     return { price: p.price, prices: p.prices ? p.prices.slice() : null,
+      /* «+ Размер» / «×» (product_overrides.sizes, migration 147): the ladder
+         the file or the row shipped with, so removing the owner's own ladder
+         puts the original volumes back rather than merely stopping to add. */
+      sizes: p.sizes ? p.sizes.slice() : null, priceFrom: !!p.priceFrom,
       stock: p.stock, seo: p.seo, varImg: p.varImg ? p.varImg.slice() : null,
       // media: the catalogue's own photos, so deleting an upload brings them back
       img: p.img, gallery: p.gallery ? p.gallery.slice() : null,
@@ -17820,6 +18632,23 @@
       seoOv: p.seoOv || null, descOv: p.descOv || null };
   }
   var BASE = CATALOGUE.map(baseOf);
+
+  /* ---------- «Показывать в магазине» -------------------------------------
+     product_overrides.hidden (migration 147). A hidden product leaves the
+     shop the same way an owner's product taken off sale does: it is REMOVED
+     from CATALOGUE rather than flagged inside it, so every reader — the
+     categories, the search, the brand pages, the sets, the chat, the related
+     rail, the sitemap route — is right without any of them learning a new
+     rule. What that costs is a list to rebuild from, kept here, and the
+     panel's own list (admCatalogList) putting the hidden ones back at the
+     end with «Скрыт» beside them, exactly as it already does for the owner's
+     own hidden products. */
+  var FILE_PRODUCTS = CATALOGUE.slice(), FILE_BASE = BASE.slice();
+  function shopHidden(id) { return !!(DEMO.hidden && DEMO.hidden[id]); }
+  /** The file's products the owner has hidden — the panel still lists them. */
+  function hiddenFileProducts() {
+    return FILE_PRODUCTS.filter(function (p) { return shopHidden(p.id); });
+  }
 
   /* ---------- product creation: the owner's own products -------------------
      The catalogue is a file (public/shop/catalogue2.js) and the panel cannot
@@ -17861,15 +18690,20 @@
   /** The feed's rows (or the offline copy) become products: every custom entry
       already in CATALOGUE is replaced, the hidden ones are left out, the
       order of the file's own products is untouched. Idempotent. */
-  function adoptCustom(list) {
-    var keep = [], keepBase = [];
-    for (var i = 0; i < CATALOGUE.length; i++) {
-      if (!CATALOGUE[i].custom) { keep.push(CATALOGUE[i]); keepBase.push(BASE[i]); }
-    }
+  var CUSTOM_ROWS = [];
+  function adoptCustom(list) { CUSTOM_ROWS = (list || []).slice(); rebuildCatalogue(); }
+  /** CATALOGUE and BASE from scratch: the file's products that are not hidden,
+      in the file's order, then the owner's active, not-hidden rows. Both
+      «Показывать в магазине» and an adoption go through here, so they cannot
+      undo each other. Idempotent. */
+  function rebuildCatalogue() {
     CATALOGUE.length = 0; BASE.length = 0;
-    for (var k = 0; k < keep.length; k++) { CATALOGUE.push(keep[k]); BASE.push(keepBase[k]); }
-    (list || []).forEach(function (c) {
-      if (!c || !c.id || c.active === false) return;
+    for (var i = 0; i < FILE_PRODUCTS.length; i++) {
+      if (shopHidden(FILE_PRODUCTS[i].id)) continue;
+      CATALOGUE.push(FILE_PRODUCTS[i]); BASE.push(FILE_BASE[i]);
+    }
+    CUSTOM_ROWS.forEach(function (c) {
+      if (!c || !c.id || c.active === false || shopHidden(c.id)) return;
       var p = customProduct(c);
       CATALOGUE.push(p); BASE.push(baseOf(p));
       // BRAND_BY_SLUG is built further down at boot (and then covers these);
@@ -17928,11 +18762,35 @@
       var p = CATALOGUE[i], b = BASE[i];
       p.price = b.price;
       if (b.prices) p.prices = b.prices.slice();
+      if (b.sizes) p.sizes = b.sizes.slice(); else delete p.sizes;
+      if (b.priceFrom) p.priceFrom = true; else delete p.priceFrom;
       p.stock = b.stock;
       p.seo = b.seo;
       if (b.varImg) p.varImg = b.varImg.slice();
       p.img = b.img;
       if (b.gallery) p.gallery = b.gallery.slice(); else delete p.gallery;
+      /* «+ Размер» / «×» (migration 147): the owner's ladder replaces the
+         file's whole list of volumes, not just its first price — that is the
+         only shape in which «this volume is gone» can be said at all. One
+         rung with no label is the single-price case and leaves the product
+         without volumes, exactly as the file writes it. */
+      var lad = DEMO.sizes && DEMO.sizes[p.id];
+      if (lad && lad.length) {
+        if (lad.length === 1 && !lad[0].size) {
+          delete p.sizes; delete p.prices; delete p.priceFrom; delete p.varImg;
+          p.price = lad[0].price;
+        } else {
+          p.sizes = lad.map(function (r) { return r.size; });
+          p.prices = lad.map(function (r) { return r.price; });
+          p.price = p.prices[0];
+          p.priceFrom = Math.min.apply(null, p.prices) !== Math.max.apply(null, p.prices);
+          // a per-size photo map from a ladder of another length would point
+          // «500 мл» at a photo that is not there — trimmed and padded here
+          if (p.varImg) {
+            p.varImg = p.sizes.map(function (_s, k) { return p.varImg[k] != null ? p.varImg[k] : 0; });
+          }
+        }
+      }
       if (DEMO.price[p.id] != null) {
         p.price = DEMO.price[p.id];
         if (p.prices && p.prices.length) p.prices[0] = DEMO.price[p.id];
@@ -18010,9 +18868,13 @@
     DEMO.gallery = {};   // media
     DEMO.desc = {};   // assistant-work
     DEMO.proPrice = {};   // wholesale/loyalty
+    DEMO.sizes = {}; DEMO.hidden = {};   // migration 147
     Object.keys(ov).forEach(function (id) {
       var o = ov[id] || {};
       if (o.price != null) DEMO.price[id] = o.price;
+      // migration 147: the whole size ladder and «Показывать в магазине»
+      if (Array.isArray(o.sizes) && o.sizes.length) DEMO.sizes[id] = sizeLadder(o.sizes);
+      if (o.hidden === true) DEMO.hidden[id] = true;
       if (o.proPrice != null) DEMO.proPrice[id] = o.proPrice;   // wholesale/loyalty
       if (o.stock) DEMO.stock[id] = o.stock;
       if (Array.isArray(o.gallery) && o.gallery.length) DEMO.gallery[id] = o.gallery;   // media
@@ -18027,6 +18889,14 @@
       if (o.description && typeof o.description === "object" && (o.description.RU || o.description.ET || o.description.EN)) {
         DEMO.desc[id] = o.description;
       }
+    });
+    /* «Показывать в магазине»: the hidden map is only known now, so the shop's
+       product list is rebuilt after it — and a basket holding something the
+       owner has just taken out of the shop loses that line, the same rule the
+       custom-product filter above follows. */
+    rebuildCatalogue();
+    S.cart = S.cart.filter(function (l) {
+      return l.type === "bundle" || l.type === "gift" || !shopHidden(l.id);
     });
     var s = j.settings || {};
     if (typeof s.chatbot === "boolean") DEMO.chatbot = s.chatbot;
@@ -18056,9 +18926,15 @@
     }
     /* wholesale/loyalty: the public half of settings.pricing — whether points
        are on and the earn rate — for the «Баллы» row of «Доставка и оплата». */
-    if (s.pricing && s.pricing.loyalty && typeof s.pricing.loyalty === "object") {
-      var lp = s.pricing.loyalty, lpPct = Number(lp.earnPct);
-      LOYALTY_PUBLIC = { enabled: lp.enabled !== false, earnPct: isFinite(lpPct) && lpPct >= 0 ? lpPct : LOYALTY_PUBLIC.earnPct };
+    if (s.pricing && typeof s.pricing === "object") {
+      var lp = (s.pricing.loyalty && typeof s.pricing.loyalty === "object") ? s.pricing.loyalty : {};
+      var lpPct = Number(lp.earnPct);
+      LOYALTY_PUBLIC = {
+        // «Партнёры и баллы»: the outer switch, off unless the server says on
+        partnersOn: s.pricing.partnersOn === true,
+        enabled: lp.enabled !== false,
+        earnPct: isFinite(lpPct) && lpPct >= 0 ? lpPct : LOYALTY_PUBLIC.earnPct
+      };
     }
     /* content: the server always answers with the merged document (defaults +
        whatever the owner wrote), so it replaces the local copy outright and
@@ -18119,6 +18995,25 @@
       return r;
     }, function () { toast("Сервер не отвечает — изменение не сохранилось"); });
   }
+  /* migration 147: one place where a set_sizes action — the forward one or the
+     `prev` an undo sends back — becomes the demo layer's two values. An empty
+     ladder means «снова как в каталоге»; `price` then says what the price
+     override should be, null clearing it too. */
+  function setSizesLocal(a) {
+    var lad = sizeLadder(a.value);
+    if (lad.length) { DEMO.sizes[a.id] = lad; DEMO.price[a.id] = lad[0].price; }
+    else {
+      delete DEMO.sizes[a.id];
+      if (a.price != null) DEMO.price[a.id] = a.price; else delete DEMO.price[a.id];
+    }
+    S.goodsSizes = null;   // the open editor re-reads the ladder it now has
+  }
+  /** The same two values as the body PUT /api/admin/overrides takes. */
+  function sizesBody(a) {
+    var lad = sizeLadder(a.value);
+    return { id: a.id, sizes: lad.length ? lad : null,
+      price: lad.length ? lad[0].price : (a.price != null ? a.price : null) };
+  }
   function srvPush(a) {
     if (!SRV.admin || !a) return;
     var ov = "/api/admin/overrides/", st = "/api/admin/settings/";
@@ -18127,6 +19022,11 @@
     // to base price × (1 − discount%), same PUT the retail price uses
     else if (a.type === "set_pro_price") srvSaved(apiSend(ov, "PUT", { id: a.id, proPrice: a.value }));
     else if (a.type === "set_stock") srvSaved(apiSend(ov, "PUT", { id: a.id, stock: a.value }));
+    /* migration 147: the whole ladder (null = back to the catalogue file's
+       volumes) and «Показывать в магазине» — both product_overrides columns,
+       both written through the same PUT their neighbours use. */
+    else if (a.type === "set_sizes") srvSaved(apiSend(ov, "PUT", sizesBody(a)));
+    else if (a.type === "set_hidden") srvSaved(apiSend(ov, "PUT", { id: a.id, hidden: !!a.value }));
     /* inventory: a ± on the «Склад» row is a relative move, so undo is simply
        the same call with the opposite sign — POST /api/admin/inventory/moves/
        takes `delta` for exactly this (src/app/api/admin/inventory/moves). */
@@ -18181,7 +19081,9 @@
     }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") srvSaved(apiSend(ov, "PUT", { id: a.id, description: a.value || null }));
-    else if (a.type === "toggle_flow") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
+    else if (a.type === "toggle_flow" || a.type === "set_flow_days") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
+    // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
+    else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
     else if (a.type === "toggle_chatbot") srvSaved(apiSend(st, "PUT", { chatbot: DEMO.chatbot }));
     else if (a.type === "toggle_bundles") srvSaved(apiSend(st, "PUT", { bundles: DEMO.bundles }));
     else if (a.type === "set_hero") srvSaved(apiSend(st, "PUT", { hero: DEMO.hero }));
@@ -18362,6 +19264,24 @@
      went out is out. Both leave a line in the journal. */
   function admInvoiceConfirmText(v) {
     return v.number + " · " + eur(v.sum) + "\nДеньги по счёту №" + v.invoice.number + " пришли на счёт? Заказ станет оплаченным, клиенту уйдёт письмо «Заказ принят».";
+  }
+  /* «Написать клиенту» → «Отправить», once the confirm card said yes. The
+     letter cannot be recalled, so nothing about this goes through demoApply()
+     — the journal gets a plain note and the toast offers no «Отменить». */
+  function srvOrderMailSend(pa) {
+    apiSend("/api/admin/mail/send/", "POST", {
+      orderId: pa.id, reply: pa.reply, customerMessage: pa.customerMessage || ""
+    }).then(function (r) {
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        S.orderReplyDraft = "";
+        S.orderMsgs = r.body.messages || null; S.orderMsgsFor = pa.id;
+        journalNote("Письмо клиенту · заказ " + pa.number);
+        toast("Письмо отправлено ✓");
+      } else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
+      else toast("Не удалось отправить письмо");
+      render();
+    }).catch(function () { toast("Не удалось отправить письмо"); render(); });
   }
   function srvInvoicePaid(id, number, invoiceNumber) {
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/invoice/", "POST", { action: "paid" }).then(function (r) {
@@ -18631,6 +19551,21 @@
     // wholesale/loyalty: a.value null means "cleared back to the global discount"
     if (a.type === "set_pro_price") return "Цена для салонов «" + (p ? p.brand + " " + p.name : a.id) + "»: " + (a.value == null ? "по умолчанию (скидка)" : eur(a.value));
     if (a.type === "set_stock") return "Наличие «" + (p ? p.name : a.id) + "»: " + ({ in: "в наличии", low: "мало", out: "нет" })[a.value];
+    /* migration 147 — «+ Размер», «×» and «Показывать в магазине». byId()
+       cannot help for a hidden product: it is not in CATALOGUE any more,
+       which is the whole point, so the action carries the name it was made
+       under and the line reads the same after a reload. */
+    if (a.type === "set_sizes") {
+      var lad = sizeLadder(a.value);
+      return "Объёмы «" + (a.name || (p ? p.brand + " " + p.name : a.id)) + "»: " +
+        (lad.length && (lad.length > 1 || lad[0].size)
+          ? lad.map(function (r) { return (r.size || "—") + " · " + eur(r.price); }).join(" / ")
+          : "один объём");
+    }
+    if (a.type === "set_hidden") {
+      return "Товар «" + (a.name || (p ? p.brand + " " + p.name : a.id)) + "»: " +
+        (a.value ? "убрать из магазина" : "показывать в магазине");
+    }
     // inventory: numeric stock — a.id is empty for these (they key off product_id, not id)
     if (a.type === "stock_adjust" || a.type === "stock_set") {
       var sp = a.product_id && byId(a.product_id);
@@ -18654,8 +19589,28 @@
         (more.length ? " · " + more.join(", ") : "");
     }
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
+    if (a.type === "set_flow_days") {
+      return "Поздравление: " + (a.value ? "за " + a.value + " " + pl(a.value, "день", "дня", "дней") + " до дня рождения" : "в день рождения");
+    }
+    if (a.type === "set_delivery") {
+      var dv = normaliseDelivery(a.value);
+      return "Доставлен сам: " + (dv.useCarrier ? "спрашивать перевозчика" : "не спрашивать перевозчика") + " · " +
+        (dv.autoDays ? "через " + dv.autoDays + " " + pl(dv.autoDays, "день", "дня", "дней") : "по времени не закрывать");
+    }
     if (a.type === "toggle_chatbot") return "ИИ-чат для покупателей: " + (a.value ? "включить" : "выключить");
     if (a.type === "toggle_bundles") return "Наборы на сайте: " + (a.value ? "показать" : "скрыть");
+    /* «Наборы»: the assistant's two set actions (Dim, 07.09.2026). A proposal
+       names the products and opens the editor; a change names the set. Both
+       lines list what is in the set, because that is the whole of what the
+       owner is being asked to look at. */
+    if (a.type === "propose_bundle") {
+      return "Набор «" + ((a.title && a.title.RU) || "") + "»: " + bundlePartsText(a.items);
+    }
+    if (a.type === "set_bundle") {
+      var sbName = (a.title && a.title.RU) || a.id;
+      return "Набор «" + sbName + "»: " + bundlePartsText(a.items) +
+        (a.price != null ? " · " + eur(a.price) : "");
+    }
     if (a.type === "set_hero") {
       var hsl = a.value && Array.isArray(a.value.slides) ? a.value.slides : null;
       if (!hsl || !hsl.length) return "Баннер: стандартный";
@@ -18730,6 +19685,8 @@
     // wholesale/loyalty
     if (a.type === "set_pricing") {
       var pv = a.value || {}, plo = pv.loyalty || {}, bits = [];
+      // the one switch above both — first, because it decides the rest
+      if (pv.partnersOn != null) bits.push(pv.partnersOn ? "партнёры и баллы включены" : "партнёры и баллы выключены");
       if (pv.proDiscountPct != null) bits.push("скидка для салонов " + pv.proDiscountPct + "%");
       if (pv.proMinOrder != null) bits.push("от " + eur(pv.proMinOrder));
       if (plo.enabled != null) bits.push("баллы " + (plo.enabled ? "включены" : "выключены"));
@@ -18899,6 +19856,26 @@
     // from the global discount" — same null-clears convention as set_seo/set_varimg
     else if (a.type === "set_pro_price") { entry.prev = { type: "set_pro_price", id: a.id, value: DEMO.proPrice[a.id] != null ? DEMO.proPrice[a.id] : null }; DEMO.proPrice[a.id] = a.value; }
     else if (a.type === "set_stock") { entry.prev = { type: "set_stock", id: a.id, value: DEMO.stock[a.id] || p.stock }; DEMO.stock[a.id] = a.value; }
+    /* migration 147: the size ladder travels whole, so undo is the previous
+       whole ladder — null when the owner had none and the catalogue file's
+       volumes were in force. The first rung's price rides with it: `price` and
+       the ladder are one fact stored twice (mapOverride on the server), and an
+       undo that put the volumes back but left the price would be half a way
+       back. */
+    else if (a.type === "set_sizes") {
+      entry.prev = { type: "set_sizes", id: a.id, name: a.name,
+        value: DEMO.sizes[a.id] ? DEMO.sizes[a.id].slice() : null,
+        price: DEMO.price[a.id] != null ? DEMO.price[a.id] : null };
+      setSizesLocal(a);
+    }
+    /* «Показывать в магазине»: the product leaves the shop's list entirely,
+       so CATALOGUE is rebuilt and any basket line pointing at it is dropped */
+    else if (a.type === "set_hidden") {
+      entry.prev = { type: "set_hidden", id: a.id, value: !a.value, name: a.name };
+      if (a.value) DEMO.hidden[a.id] = true; else delete DEMO.hidden[a.id];
+      rebuildCatalogue();
+      if (a.value) S.cart = S.cart.filter(function (l) { return l.type === "bundle" || l.type === "gift" || l.id !== a.id; });
+    }
     /* inventory + orders: neither has a demo layer — the shelf and the order
        row live on the server. What these two branches add is the JOURNAL entry
        and, in `prev`, the action that puts the change back; srvPush() carries
@@ -18924,6 +19901,19 @@
       if (seoNew) DEMO.seo[a.id] = seoNew; else delete DEMO.seo[a.id];
     }
     else if (a.type === "toggle_flow") { entry.prev = { type: "toggle_flow", id: a.id, value: !!DEMO.flows[a.id] }; DEMO.flows[a.id] = a.value; }
+    /* «за N дней до дня рождения» (Dim, 07.09.2026). Same settings.flows row
+       the switch writes, so the whole map travels and undo re-sends it. */
+    else if (a.type === "set_flow_days") {
+      entry.prev = { type: "set_flow_days", id: a.id, value: Number(DEMO.flows.birthdayDays) || 0 };
+      DEMO.flows.birthdayDays = a.value;
+    }
+    /* «Доставлен» без кнопки: settings.delivery has no demo layer either —
+       S.deliveryLoaded IS the last known server value, and the whole object
+       travels, so undo puts the previous pair back. */
+    else if (a.type === "set_delivery") {
+      entry.prev = { type: "set_delivery", value: normaliseDelivery(S.deliveryLoaded) };
+      S.deliveryLoaded = normaliseDelivery(a.value);
+    }
     else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
     else if (a.type === "toggle_bundles") { entry.prev = { type: "toggle_bundles", value: DEMO.bundles !== false }; DEMO.bundles = a.value; }
     else if (a.type === "set_hero") {
@@ -19017,6 +20007,7 @@
       entry.prev = { type: "set_pricing", value: cloneRules(S.pricingLoaded || normalisePricing(null)) };
       S.pricingLoaded = mergePricing(S.pricingLoaded, a.value);
       S.pricingDraft = null;
+      adoptPricingLocally();
     }
     // a manual points credit/correction — nothing to keep "in sync" locally,
     // just force whichever customer views are open to reload after the write
@@ -19061,12 +20052,19 @@
     if (a.type === "set_price") DEMO.price[a.id] = a.value;
     else if (a.type === "set_pro_price") DEMO.proPrice[a.id] = a.value;
     else if (a.type === "set_stock") DEMO.stock[a.id] = a.value;
+    else if (a.type === "set_sizes") setSizesLocal(a);   // migration 147
+    else if (a.type === "set_hidden") {
+      if (a.value) DEMO.hidden[a.id] = true; else delete DEMO.hidden[a.id];
+      rebuildCatalogue();
+    }
     /* inventory + orders: srvPush() at the bottom of this function is the
        whole undo — there is no demo copy of the shelf or the order to put
        back, only the opposite call to make. */
     else if (a.type === "stock_adjust" || a.type === "order_status" || a.type === "order_label") noop();
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
+    else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
+    else if (a.type === "set_delivery") S.deliveryLoaded = normaliseDelivery(a.value);
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
     else if (a.type === "set_hero") {
@@ -19100,7 +20098,7 @@
     // content: `whole` is the document as it was, null meaning «стандартный»
     else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }
     // wholesale/loyalty
-    else if (a.type === "set_pricing") { S.pricingLoaded = mergePricing(S.pricingLoaded, a.value); S.pricingDraft = null; }
+    else if (a.type === "set_pricing") { S.pricingLoaded = mergePricing(S.pricingLoaded, a.value); S.pricingDraft = null; adoptPricingLocally(); }
     else if (a.type === "adjust_points") {
       S.admCustomers = null;
       if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
@@ -19124,6 +20122,12 @@
     return '<div class="adm-propose">' +
       '<div class="adm-propose__t">' + esc(a.title || "Предпросмотр изменения") + "</div>" +
       '<div class="adm-propose__d">' + esc(a.detail || actionText(a)) + "</div>" +
+      /* What is about to leave, in the owner's own words — «Написать клиенту»
+         is the one action whose whole content he typed himself, and a
+         «Отправить?» with the letter out of sight is a question he cannot
+         answer. Its own box, so the sentence above it stays one text node the
+         dictionary can translate. */
+      (a.preview ? '<div class="adm-propose__prev">' + esc(a.preview) + "</div>" : "") +
       /* a photo going onto a product may have its background removed on the
          way — offered only when the server said it can (MEDIA.cutout), the
          same switch the editor's «✂» is behind */
@@ -19139,12 +20143,19 @@
   /* When /api/assistant/ has a key, the owner's questions go to the real
      model (mode:"admin" — its own system prompt, demo-data caveats, tab
      routing). The canned answers below stay as the offline fallback. */
-  var admAI = null, admConvo = [];
+  /* `admAI` is a THREE-state value, not a boolean: null = «не спрашивали /
+     ещё не ответили», true = a real model is behind /api/assistant/, false =
+     only the built-in answers. «Подключения» prints all three, because a
+     square that is green before the answer arrives is the same lie the audit
+     found (question 7). The «asked» flag is separate so null can survive
+     until the fetch really lands. */
+  var admAI = null, admConvo = [], admAIAsked = false;
   function probeAdmAI() {
-    if (admAI !== null) return;
-    admAI = false;
+    if (admAIAsked) return;
+    admAIAsked = true;
     fetch("/api/assistant/").then(function (r) { return r.json(); })
-      .then(function (j) { admAI = !!j.enabled; }).catch(function () {});
+      .then(function (j) { admAI = !!j.enabled; render(); })
+      .catch(function () { admAI = false; render(); });
   }
   /* What the banner says right now, trimmed to what the assistant can act on —
      «поменяй второй слайд» needs to know there is a second slide. */
@@ -20203,6 +21214,9 @@
     if (renderQueued) { renderPending = true; return; }
     renderQueued = true;
     renderImpl();
+    // «Назад» closes an open card: one parked history entry, kept in step with
+    // what is actually open, so no opener has to remember to park one
+    admSyncHistory();
     markLastRows();
     requestAnimationFrame(function () {
       renderQueued = false;
@@ -20614,8 +21628,83 @@
     render();
   }
 
+  /* ---------- «Назад» inside the panel -----------------------------------
+     Audit 06.09.2026, question 6; Dim's answer: yes. The whole admin lives at
+     ONE address, so the browser's Back — the gesture a phone owner reaches for
+     to dismiss anything — used to drop Renat out of the panel into the shop
+     with an order card still open, and the way back in was the menu.
+
+     The fix is the trick openDrawer() already plays for the cart: while
+     anything is open, ONE entry is parked on the history stack. Back spends
+     it and closes the topmost layer instead of leaving; if something is still
+     open underneath, the entry is parked again, so Back walks out layer by
+     layer. Closing with a button («← Заказы», «Отмена») spends the parked
+     entry itself, so the next Back is never a press that does nothing. */
+  var ADM_HIST = false, ADM_POP = false;
+  /** What is open over the panel right now, bottom layer first. */
+  function admLayers() {
+    if (S.screen !== "admin") return [];
+    var l = [];
+    if (S.adminEdit) l.push("edit");
+    else if (S.adminOrder) l.push("order");
+    else if (S.admCustOpen) l.push("customer");
+    else if (S.mailOpen) l.push("mail");
+    else if (S.admSetPage) l.push("setpage");
+    if (S.admMore) l.push("more");
+    if (pendingAction) l.push("confirm");
+    return l;
+  }
+  /** Closes the topmost layer. False when there was nothing to close. */
+  function admCloseTop() {
+    var top = admLayers().pop();
+    if (!top) return false;
+    if (top === "confirm") pendingAction = null;
+    else if (top === "more") S.admMore = false;
+    else if (top === "edit") {
+      S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
+      S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+    } else if (top === "order") {
+      S.adminOrder = 0;
+      S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
+    } else if (top === "customer") { S.admCustOpen = ""; S.admCustDetail = null; S.admCustNotesDraft = null; }
+    else if (top === "mail") S.mailOpen = false;
+    else if (top === "setpage") S.admSetPage = "";
+    return true;
+  }
+  /** One parked entry while anything is open, none while nothing is. Called
+      at the end of every render, so no opener has to remember to call it. */
+  function admSyncHistory() {
+    /* Left the panel altogether («Открыть магазин», a product link): the entry
+       parked for the card sits BEHIND the one that navigation just pushed, so
+       it must not be spent — Back simply returns to the panel, which is what
+       Back should do from the shop. */
+    if (S.screen !== "admin") { ADM_HIST = false; return; }
+    var open = admLayers().length > 0;
+    if (open === ADM_HIST) return;
+    if (open) {
+      stamp();
+      try { history.pushState({ y: window.scrollY, shown: S.shown, adm: 1 }, "", here()); } catch (e) {}
+      ADM_HIST = true;
+      return;
+    }
+    ADM_HIST = false;
+    if (ADM_POP) { ADM_POP = false; return; }   // Back is what closed it
+    // closed with a button: spend the entry we parked, quietly
+    ADM_POP = true;
+    try { history.back(); } catch (e) { ADM_POP = false; }
+  }
+
   window.addEventListener("popstate", function (e) {
     var st = e.state || {};
+    /* the entry the panel parked, spent by admSyncHistory() itself after a
+       card was closed with a button — nothing moved, nothing to redraw */
+    if (ADM_POP && !st.adm) { ADM_POP = false; return; }
+    /* …and spent by the owner's own Back: it closes the topmost open layer of
+       the panel and stays in the admin (see admLayers above) */
+    if (ADM_HIST && !st.adm) {
+      ADM_HIST = false;
+      if (admCloseTop()) { render(); return; }
+    }
     S.histDrawer = !!st.drawer;
     S.langOpen = false;
     routeFromPath();
@@ -20898,7 +21987,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden]");
     var t = e.target.closest("[data-giftpdf],[data-payagain],[data-donepay],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-admrefund],[data-admunpaidsave],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
@@ -21143,6 +22232,7 @@
       else if (d.admreload === "promos") loadAdminPromos(true);
       else if (d.admreload === "giftcards") loadAdminGiftCards(true);
       else if (d.admreload === "stats") { delete ANALYTICS[statsRange()]; loadAnalytics(statsRange()); }
+      else if (d.admreload === "audit") { AUDIT.rows = null; AUDIT.err = ""; loadAudit(true); }
       render(); return;
     }
     if (d.admtoastundo !== undefined) { admUndoToast(); return; }
@@ -21196,6 +22286,20 @@
     if (d.admshipnow) {
       var shipRow = admOrderById(d.admshipnow);
       if (!shipRow) return;
+      /* With a label the parcel is already registered, the tracking number is
+         known and the letter is predictable to the word — so the step applies
+         at once with the toast's undo behind it, like every other reversible
+         action in this panel (Dim, 07.09.2026). Without a label the letter
+         goes out with no tracking number at all, which is worth one question. */
+      if (shipRow.labeled) {
+        var shipEntry = demoApply({
+          type: "order_status", id: shipRow.id, number: shipRow.number,
+          value: "shipped", prev: shipRow.status
+        });
+        render();
+        toast(shipRow.number + " отправлен · письмо ушло", shipEntry);
+        return;
+      }
       pendingAction = {
         type: "order_status", overlay: true, id: shipRow.id, number: shipRow.number,
         value: "shipped", prev: shipRow.status,
@@ -21313,6 +22417,10 @@
       }).catch(function () { composeBtn.disabled = false; composeBtn.textContent = composeLabel; toast("Не получилось — попробуйте ещё раз"); });
       return;
     }
+    /* The one action that used to send at once with no confirm and no undo,
+       while «Отправлен» — a cheaper, reversible step — asked (audit q9; Dim:
+       yes). The typed text goes into S first, so the card's own render cannot
+       lose it, and the customer's pasted message travels on the action. */
     if (d.admordersend !== undefined) {
       if (t.disabled) return;
       var ordRow2 = currentAdminOrderRow();
@@ -21320,22 +22428,16 @@
       var custEl2 = document.querySelector("[data-ordercustmsg]");
       var draft = draftEl ? draftEl.value.trim() : "";
       if (!ordRow2 || !draft) return;
-      t.disabled = true;
-      apiSend("/api/admin/mail/send/", "POST", {
-        orderId: ordRow2.srv.id, reply: draft, customerMessage: custEl2 ? custEl2.value.trim() : ""
-      }).then(function (r) {
-        t.disabled = false;
-        if (r.status === 200 && r.body.ok) {
-          S.orderReplyDraft = "";
-          if (custEl2) custEl2.value = "";
-          S.orderMsgs = r.body.messages || null; S.orderMsgsFor = ordRow2.srv.id;
-          toast("Письмо отправлено ✓");
-        } else if (r.status === 401) { SRV.admin = false; }
-        else if (r.body && r.body.error === "no_customer_email") toast("У заказа нет e-mail покупателя");
-        else toast("Не удалось отправить письмо");
-        render();
-      }).catch(function () { t.disabled = false; toast("Не удалось отправить письмо"); render(); });
-      return;
+      S.orderReplyDraft = draft;
+      pendingAction = {
+        type: "order_mail", overlay: true, id: ordRow2.srv.id, number: ordRow2.number,
+        reply: draft, customerMessage: custEl2 ? custEl2.value.trim() : "",
+        title: "Отправить письмо клиенту?",
+        detail: admMailConfirmText(ordRow2),
+        preview: draft.length > 400 ? draft.slice(0, 400) + "…" : draft,
+        ok: "Отправить"
+      };
+      render(); refocus("[data-admapply]"); return;
     }
     if (d.admgoods !== undefined) {
       S.adminEdit = d.admgoods; S.adminTab = "goods"; GAL.id = ""; S.goodsErr = ""; mediaProbe();   // media
@@ -21418,9 +22520,22 @@
       S.goodsSizes = null;
       toast("Снова в продаже ✓", showEntry); render(); return;
     }
+    /* «Показывать в магазине» (migration 147). Reversible and instant, like
+       every other switch: the toast's «Отменить» and the journal's «Вернуть»
+       are the way back, no confirm card. */
+    if (d.edhidden !== undefined) {
+      var hidP = admEditProduct(d.edhidden);
+      if (!hidP || hidP.custom) return;
+      var hidWant = shopHidden(hidP.id);   // pressed while hidden = show again
+      var hidEntry = demoApply({ type: "set_hidden", id: hidP.id, value: !hidWant,
+        name: hidP.brand + " — " + hidP.name });
+      render();
+      toast(hidWant ? "Товар снова в магазине ✓" : "Товар убран из магазина ✓", hidEntry);
+      return;
+    }
     if (d.edsizeadd !== undefined || d.edsizedel !== undefined) {
       var szP = admEditProduct(S.adminEdit);
-      if (!szP.custom) return;
+      if (!szP || szP.isNew && !szP.custom) return;
       var szRows = edSizeRowsRead(szP);
       if (d.edsizeadd !== undefined) {
         if (szRows.length >= 12) { goodsFail("Больше 12 объёмов не нужно."); return; }
@@ -21435,7 +22550,7 @@
       var szPane = document.querySelector('[data-edpane="sizes"]');
       if (szPane) {
         var szTpl = document.createElement("template");
-        szTpl.innerHTML = edPaneSizesOwn(szP);
+        szTpl.innerHTML = szP.custom ? edPaneSizesOwn(szP) : edPaneSizes(szP);
         var szFresh = szTpl.content.firstElementChild;
         translateTree(szFresh);
         szPane.replaceWith(szFresh);
@@ -21625,50 +22740,11 @@
       });
       return;
     }
-    if (d.contentspark !== undefined) {
-      var csParts = d.contentspark.split(":"), csWhat = csParts[0];
-      var cLangs = csParts[1] === "all" ? ["RU", "ET", "EN"] : [S.contentLang || "RU"];
-      var cd = contentDraft(), cco = cd.company || {};
-      var companyIn = {
-        name: cco.legalName || "", address: cco.address || "", phone: cco.phone || "", email: cco.email || "",
-        hours: CONTENT_DAYS.filter(function (r) { return cd.hours[r[0]]; }).map(function (r) { return r[1] + " " + cd.hours[r[0]]; }).join(", ")
-      };
-      if (csWhat === "announcement") {
-        var annHint = cd.announcement.text[S.contentLang || "RU"] || cd.announcement.text.RU || cd.announcement.text.ET || cd.announcement.text.EN || "";
-        if (!annHint) { toast("Сначала впишите, о чём полоска — хотя бы по-русски"); refocus('[data-contentf="announcement.text.' + (S.contentLang || "RU") + '"]'); return; }
-        admSpark(t, cLangs, "announcement", function () { return { hint: annHint }; }, function (L, tx) {
-          if (tx.text) { cDraftSet("announcement.text." + L, tx.text); cPatchField("announcement.text." + L, tx.text); }
-          if (tx.short) { cDraftSet("announcement.short." + L, tx.short); cPatchField("announcement.short." + L, tx.short); }
-        });
-      } else if (csWhat === "contact") {
-        admSpark(t, cLangs, "contact_page", function (L) {
-          return { hint: cd.contactPage[L] || cd.contactPage.RU || "", company: companyIn };
-        }, function (L, tx) {
-          if (tx.text) { cDraftSet("contactPage." + L, tx.text); cPatchField("contactPage." + L, tx.text); }
-        });
-      } else {
-        admSpark(t, cLangs, "email_footer", function (L) {
-          return { hint: cd.emailFooter[L] || cd.emailFooter.RU || "", company: companyIn };
-        }, function (L, tx) {
-          if (tx.text) { cDraftSet("emailFooter." + L, tx.text); cPatchField("emailFooter." + L, tx.text); }
-        });
-      }
-      return;
-    }
-    if (d.promospark !== undefined) {
-      var pfs = S.promoForm;
-      if (!pfs) return;
-      if (!pfs.code) { toast("Сначала впишите код"); refocus('[data-promof="code"]'); return; }
-      admSpark(t, [S.lang === "ET" || S.lang === "EN" ? S.lang : "RU"], "promo_note", function () {
-        return { promo: { code: pfs.code, kind: pfs.kind, value: pfs.value, minSubtotal: pfs.minSubtotal, endsAt: pfs.endsAt, maxUses: pfs.maxUses }, hint: pfs.note || "" };
-      }, function (L, tx) {
-        if (!tx.text) return;
-        pfs.note = String(tx.text).slice(0, 200);
-        var noteEl2 = document.querySelector('[data-promof="note"]');
-        if (noteEl2) noteEl2.value = pfs.note;
-      });
-      return;
-    }
+    /* «✨» on the strip, the contact page, the letter signature and the promo
+       note is gone (Dim, 07.09.2026) — with its handler and its prompt kind.
+       The assistant itself lost nothing: it still writes all four through its
+       own set_content / create_promo actions, where the owner sees what is
+       about to change before he applies it. */
     if (d.ednamespark !== undefined) {
       var nbEl = document.querySelector("[data-edbrand]"), nnEl = document.querySelector("[data-edname]"), ncEl = document.querySelector("[data-edcat]");
       var typedName = nnEl ? nnEl.value.trim() : "";
@@ -21716,6 +22792,15 @@
       if (priceEl && np === null) {
         goodsFail("Цена — число от 1 до 500 €, например 12,50.", "[data-edprice]"); return;
       }
+      /* migration 147: the whole size ladder of a catalogue product. Read and
+         checked here, before any write, like everything else in this handler —
+         a half-saved ladder is the one thing the owner could not untangle. */
+      var edLadder = null, edLadderChanged = false;
+      if (!gp.custom && document.querySelector("[data-edpx]")) {
+        edLadder = edLadderFromForm(gp);
+        if (!edLadder) return;
+        edLadderChanged = edLadderMoved(edLadderNow(gp), edLadder);
+      }
       /* A salon price the field only *followed* (data-edauto="1" — nothing
          typed by hand, the value is price × (1 − discount) painted by the
          input handler) is not an override. Saving it as one would freeze the
@@ -21752,7 +22837,14 @@
       goodsErrClear();
 
       var changed = false;
-      if (!gp.custom && np !== null && Math.abs(np - gp.price) > 0.001) {
+      /* A ladder whose volumes moved travels whole (set_sizes, which carries
+         the first price with it); a plain price change on an untouched ladder
+         stays the one-line set_price it has always been, so the journal keeps
+         saying «Цена …» for what is a price change. */
+      if (edLadderChanged) {
+        demoApply({ type: "set_sizes", id: gp.id, value: edLadder,
+          name: gp.brand + " — " + gp.name }); changed = true;
+      } else if (!gp.custom && np !== null && Math.abs(np - gp.price) > 0.001) {
         demoApply({ type: "set_price", id: gp.id, value: np }); changed = true;
       }
       // wholesale/loyalty: salon/pro price — empty field clears the override
@@ -21889,6 +22981,10 @@
           applyProductPhoto(pa, !!(cutBox && cutBox.checked)); return;
         }
         if (pa.type === "set_post_cover") { applyPostCover(pa); return; }
+        /* «Наборы»: the proposal opens the editor (no price is set for the
+           owner), the change goes straight to POST /api/admin/bundles */
+        if (pa.type === "propose_bundle") { applyProposeBundle(pa); return; }
+        if (pa.type === "set_bundle") { applySetBundle(pa); return; }
         // the assistant named a topic: the article is written here, in the
         // blog editor, by the same generator its own button runs
         if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
@@ -21930,6 +23026,9 @@
           srvOrderRefund(pa.id, pa.number, amtEl ? amtEl.value : pa.amount, Number(pa.amount));
           return;
         }
+        // «Написать клиенту»: the letter the card just asked about — no undo,
+        // which is exactly why it was asked
+        else if (pa.type === "order_mail") { srvOrderMailSend(pa); return; }
         /* «Настройки → Доставка и оплата»: the tariff table names itself in
            the toast, and the journal entry it just wrote is what «Отменить»
            takes back. */
@@ -21970,6 +23069,13 @@
     if (d.admflow !== undefined) {
       demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
       toast("Сохранено ✓"); render(); return;
+    }
+    /* «Доставлен» без кнопки: both halves of settings.delivery apply at once
+       with the toast's undo — nothing here sends anything or moves money. */
+    if (d.delivcarrier !== undefined) {
+      var dc = deliveryConf();
+      var dcEntry = demoApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } });
+      render(); toast("Сохранено ✓", dcEntry); return;
     }
     // assistant-work: «Отчёты» — the browser follows content-disposition:
     // attachment and downloads it; nothing here needs a fetch/promise.
@@ -22239,6 +23345,10 @@
     if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; S.pricingErrField = ""; render(); return; }
     // the loyalty switch: a <button aria-pressed> like every other switch in the panel
     if (d.pricingtoggle !== undefined) { var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled; render(); return; }
+    /* «Партнёры и баллы»: the outer switch. A draft change like every other
+       field on this form — «Сохранить» is what puts it through the confirm
+       card and into the journal, so one mis-tap costs nothing. */
+    if (d.partnerson !== undefined) { var pd = pricingDraft(); pd.partnersOn = !pd.partnersOn; render(); return; }
 
     /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
     // «Настройки»: the index of six and the way back out of a sub-page
@@ -23094,6 +24204,17 @@
       render();
     }
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; render(); }
+    /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
+    else if (t.matches("[data-delivdays]")) {
+      var dvc = deliveryConf();
+      var dvEntry = demoApply({ type: "set_delivery", value: { autoDays: Number(t.value) || 0, useCarrier: dvc.useCarrier } });
+      render(); toast("Сохранено ✓", dvEntry);
+    }
+    /* «за N дней до дня рождения» — settings.flows, the same row the switch writes */
+    else if (t.matches("[data-flowbdays]")) {
+      var bdEntry = demoApply({ type: "set_flow_days", id: "birthday", value: Number(t.value) || 0 });
+      render(); toast("Сохранено ✓", bdEntry);
+    }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     // product creation: the subsection list follows the section — a DOM
     // patch, like every other change on the goods editor's form

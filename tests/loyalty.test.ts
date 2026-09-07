@@ -23,6 +23,7 @@ import {
   adjustLoyaltyPoints,
   approveProCustomer,
   cleanPricing,
+  loyaltyOn,
   customerTier,
   earnLoyaltyPoints,
   eurosToPoints,
@@ -121,9 +122,21 @@ describe("eurosToPoints — one point is one euro, rounded", () => {
 });
 
 describe("cleanPricing — bounds and defaults", () => {
-  it("fills in every field from nothing", () => {
+  it("fills in every field from nothing — with «Партнёры и баллы» OFF", () => {
     const p = cleanPricing(null);
-    expect(p).toEqual({ proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } });
+    /* partnersOn false is the whole default (Dim, 07.09.2026: «Renat said
+       later»): a shop nobody has asked has no wholesale tier and no points.
+       The numbers underneath still have sane values, so switching it on later
+       is one tap and not a form to fill in. */
+    expect(p).toEqual({ partnersOn: false, proDiscountPct: 20, proMinOrder: 0, loyalty: { enabled: true, earnPct: 5, redeemMaxPct: 30, minRedeem: 5 } });
+    expect(cleanPricing({ partnersOn: "yes" }).partnersOn, "a non-boolean switched the programme on").toBe(false);
+    expect(cleanPricing({ partnersOn: true }).partnersOn).toBe(true);
+  });
+
+  it("loyaltyOn() needs both switches", () => {
+    expect(loyaltyOn(cleanPricing({ partnersOn: true, loyalty: { enabled: true } }))).toBe(true);
+    expect(loyaltyOn(cleanPricing({ partnersOn: true, loyalty: { enabled: false } }))).toBe(false);
+    expect(loyaltyOn(cleanPricing({ partnersOn: false, loyalty: { enabled: true } }))).toBe(false);
   });
   it("clamps out-of-range numbers instead of storing them", () => {
     const p = cleanPricing({ proDiscountPct: 500, proMinOrder: -10, loyalty: { earnPct: 999, redeemMaxPct: -5 } });
@@ -143,7 +156,7 @@ describe("pro pricing — who gets it", () => {
   it("an anonymous checkout (no customerId) never sees a pro price", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 50 }),
+      JSON.stringify({ partnersOn: true, proDiscountPct: 50 }),
     ]);
     const { lines, pricingTier } = await priceItems([{ id: plain.id, qty: 1 }], "RU");
     expect(pricingTier).toBeNull();
@@ -160,7 +173,7 @@ describe("pro pricing — who gets it", () => {
   it("an approved pro customer gets base price × (1 − proDiscountPct/100)", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 25 }),
+      JSON.stringify({ partnersOn: true, proDiscountPct: 25 }),
     ]);
     const id = await makeProCustomer();
     const { lines, pricingTier, subtotal } = await priceItems([{ id: plain.id, qty: 2 }], "RU", { customerId: id });
@@ -173,7 +186,7 @@ describe("pro pricing — who gets it", () => {
   it("a per-product pro_price override wins over the percentage, and a sized variant keeps its own premium", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 10 }),
+      JSON.stringify({ partnersOn: true, proDiscountPct: 10 }),
     ]);
     await upsertOverride(sized.id, { proPrice: 5 });
     const id = await makeProCustomer();
@@ -192,7 +205,7 @@ describe("pro pricing — who gets it", () => {
   it("proMinOrder gates a pro customer's own basket — under it, retail; the order records 'retail'", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 30, proMinOrder: 100_000 }), // unreachable
+      JSON.stringify({ partnersOn: true, proDiscountPct: 30, proMinOrder: 100_000 }), // unreachable
     ]);
     const id = await makeProCustomer();
     const { lines, pricingTier } = await priceItems([{ id: plain.id, qty: 1 }], "RU", { customerId: id });
@@ -203,7 +216,7 @@ describe("pro pricing — who gets it", () => {
   it("createOrder stores customer_id and pricing_tier, and prices at pro rates", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 20 }),
+      JSON.stringify({ partnersOn: true, proDiscountPct: 20 }),
     ]);
     const id = await makeProCustomer();
     const order = await createOrder(
@@ -230,12 +243,14 @@ describe("GET /api/overrides — the pro discount never reaches an anonymous sho
   it("publishes only loyalty.enabled/earnPct under 'pricing'", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 42, proMinOrder: 77, loyalty: { enabled: true, earnPct: 8 } }),
+      JSON.stringify({ partnersOn: true, proDiscountPct: 42, proMinOrder: 77, loyalty: { enabled: true, earnPct: 8 } }),
     ]);
     const { GET } = await import("@/app/api/overrides/route");
     const res = await GET();
     const body = await res.json();
-    expect(body.settings.pricing).toEqual({ loyalty: { enabled: true, earnPct: 8 } });
+    // partnersOn is public — the storefront has to know whether to draw the
+    // points block and «Стать партнёром» at all; the DISCOUNT still is not
+    expect(body.settings.pricing).toEqual({ partnersOn: true, loyalty: { enabled: true, earnPct: 8 } });
     expect(JSON.stringify(body)).not.toContain("42");
     expect(JSON.stringify(body)).not.toContain("77");
   });
@@ -247,7 +262,7 @@ describe("loyalty ledger — earn", () => {
   it("credits earnPct of the given subtotal, rounded to whole points", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ loyalty: { enabled: true, earnPct: 5 } }),
+      JSON.stringify({ partnersOn: true, loyalty: { enabled: true, earnPct: 5 } }),
     ]);
     const id = await recordLogin("shopper@example.com", "RU").then((c) => c.id);
     const out = await earnLoyaltyPoints(id, "11111111-1111-1111-1111-111111111111", 118.4);
@@ -259,7 +274,7 @@ describe("loyalty ledger — earn", () => {
   it("earns nothing when the programme is disabled", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ loyalty: { enabled: false, earnPct: 50 } }),
+      JSON.stringify({ partnersOn: true, loyalty: { enabled: false, earnPct: 50 } }),
     ]);
     const id = await recordLogin("shopper2@example.com", "RU").then((c) => c.id);
     const out = await earnLoyaltyPoints(id, "22222222-2222-2222-2222-222222222222", 100);
@@ -268,6 +283,10 @@ describe("loyalty ledger — earn", () => {
   });
 
   it("is idempotent per order — a second call for the same order does not double the balance", async () => {
+    await query("insert into settings (key, value) values ($1, $2::jsonb)", [
+      "pricing",
+      JSON.stringify({ partnersOn: true, loyalty: { enabled: true, earnPct: 5 } }),
+    ]);
     const id = await recordLogin("shopper3@example.com", "RU").then((c) => c.id);
     const orderId = "33333333-3333-3333-3333-333333333333";
     const first = await earnLoyaltyPoints(id, orderId, 100);
@@ -389,6 +408,10 @@ describe("applyPaymentResult — loyalty settles once, only on paid", () => {
   });
 
   it("createOrder's quote, followed by the real redeem, actually spends the balance", async () => {
+    await query("insert into settings (key, value) values ($1, $2::jsonb)", [
+      "pricing",
+      JSON.stringify({ partnersOn: true, loyalty: { enabled: true, earnPct: 5 } }),
+    ]);
     const id = await recordLogin("e2e@example.com", "RU").then((c) => c.id);
     await adjustLoyaltyPoints(id, 20, "seed");
     const order = await createOrder(
@@ -501,7 +524,7 @@ describe("customer-facing routes require the customer cookie", () => {
 
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 33 }),
+      JSON.stringify({ partnersOn: true, proDiscountPct: 33 }),
     ]);
     await recordLogin(customer.email, "RU");
     const retail = await GET(customerReq("https://x/api/account/pricing/"));
@@ -514,7 +537,7 @@ describe("customer-facing routes require the customer cookie", () => {
   it("GET /api/account/pricing returns real pro prices for an approved pro account", async () => {
     await query("insert into settings (key, value) values ($1, $2::jsonb)", [
       "pricing",
-      JSON.stringify({ proDiscountPct: 15 }),
+      JSON.stringify({ partnersOn: true, proDiscountPct: 15 }),
     ]);
     await makeProCustomer();
     const { GET } = await import("@/app/api/account/pricing/route");

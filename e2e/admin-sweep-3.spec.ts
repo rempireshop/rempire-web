@@ -178,8 +178,9 @@ test.describe("admin sweep 3 — the orders search says the filter is off", () =
     await loginAsAdmin(page);
     await ordersTab(page).click();
 
-    // a chip that cannot contain a freshly paid order
-    await page.locator('[data-admfilter="delivered"]').click();
+    // a chip that cannot contain a freshly paid order («В пути» is what has
+    // already left; the chips became three on 07.09.2026)
+    await page.locator('[data-admfilter="shipped"]').click();
     await expect(page.locator(`[data-admorder]:has-text("${number}")`)).toHaveCount(0);
     const hint = page.locator("#orderlist .adm-hint");
     await expect(hint).toHaveCount(0);
@@ -189,7 +190,7 @@ test.describe("admin sweep 3 — the orders search says the filter is off", () =
     await expect(page.locator(`[data-admorder]:has-text("${number}")`).first()).toBeVisible();
     await expect(hint).toHaveText("Ищем по всем заказам — фильтр сейчас не действует.");
     // the chip is still the one the owner will come back to
-    await expect(page.locator('[data-admfilter="delivered"]')).toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-admfilter="shipped"]')).toHaveAttribute("aria-current", "true");
 
     // clearing the box puts the filter back, and takes the line away with it
     await page.locator("[data-admorderq]").fill("");
@@ -223,10 +224,13 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
     const flows = await (await page.request.get("/api/overrides/")).json();
     expect(flows.settings.flows.backstock, "the shop's own default disagrees with the switch").toBe(false);
 
-    // …and the birthday row names the day runBirthdays() actually sends on
+    /* …and the birthday row names what really happens: the daily job, and a
+       code good for two weeks. Since 07.09.2026 «когда» is a setting of its
+       own («за N дней», admin-sweep-4.spec.ts), so the row says the schedule
+       rather than a day it might not be sending on. */
     const birthday = page.locator(".adm-row", { hasText: "Скидка ко дню рождения" }).first();
-    await expect(birthday).toContainText("в день рождения");
-    await expect(birthday).not.toContainText("за 3 дня");
+    await expect(birthday).toContainText("раз в сутки");
+    await expect(birthday).not.toContainText("за 3 дня до даты");
     await assertClean(page, w, "the mail list");
 
     /* «Салон»: the receipt is a link on the order, not a letter — POST
@@ -282,11 +286,12 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await custQ.fill("");
 
     /* ---- the browser's Back in the middle of an edit ---------------------
-       The panel is one URL: opening a product pushes no history entry, so Back
-       leaves the panel altogether rather than closing the editor. That is a
-       question for the owner (docs/audit/2026-09-06-admin-qa.md), not a bug to
-       fix behind his back — what has to hold is that nothing breaks and that
-       the half-typed price never reached the shop. */
+       The panel is one URL, and Back used to leave it altogether with the
+       editor still open. Dim answered «yes, make Back close the card»
+       (docs/audit/2026-09-07-admin.md), so the first Back now closes the
+       editor and stays in «Товары»; the second really does leave. What has to
+       hold either way is that nothing breaks and that the half-typed price
+       never reached the shop. */
     await section(page, "goods");
     await page.locator("[data-admgoods]").first().click();
     // «Сохранить» carries the open product's id — it is on both editors, the
@@ -295,9 +300,13 @@ test.describe("admin sweep 3 — the corners a hurried owner finds", () => {
     await page.locator('[data-edtab="sizes"]').click();
     await page.locator("[data-edprice]").first().fill("999999999");
     await page.goBack();
-    // it lands in the shop, not on «Товары» — one URL, no history of its own
+    await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
+    await expect(page.locator("[data-admgoods]").first(), "Back left the panel too").toBeVisible();
+    await assertClean(page, w, "goods: Back closes an open editor");
+    // …and the next one leaves the panel for the shop it came from
+    await page.goBack();
     await waitForScreen(page, "home");
-    await assertClean(page, w, "goods: Back out of an open editor");
+    await assertClean(page, w, "goods: Back out of the panel");
     // …and nothing of that half-typed price survived into the shop
     const priced = await (await page.request.get("/api/overrides/")).json();
     for (const o of Object.values(priced.overrides || {}) as Array<{ price?: number }>) {

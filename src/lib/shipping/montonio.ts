@@ -858,6 +858,32 @@ export async function createMontonioShipment(
    stored. Removed 07.09.2026 (docs/audit/2026-09-07-cleanup.md); in git at
    448cbd7 if a refresh button is ever built. */
 
+/** One shipment as Montonio currently has it — used to pick up a late tracking code. */
+export async function getMontonioShipment(shipmentId: string): Promise<MontonioShipment> {
+  const config = montonioShippingConfig();
+  if (!config) throw new MontonioShippingError("not_configured");
+  const body = await call<{
+    id?: string;
+    status?: string;
+    createdAt?: string;
+    shippingMethod?: { type?: string; carrierCode?: string; countryCode?: string };
+    parcels?: Array<{ carrierParcelId?: string | null; trackingLink?: string | null; dropOffPin?: string | null }>;
+  }>(config, `/shipments/${encodeURIComponent(shipmentId)}`);
+  const first = body.parcels?.[0];
+  return {
+    provider: "montonio",
+    shipmentId: str(body.id) || shipmentId,
+    status: str(body.status),
+    carrier: str(body.shippingMethod?.carrierCode),
+    country: str(body.shippingMethod?.countryCode).toUpperCase(),
+    method: str(body.shippingMethod?.type) === "courier" ? "courier" : "pickupPoint",
+    trackingCode: str(first?.carrierParcelId),
+    trackingUrl: str(first?.trackingLink),
+    dropOffPin: str(first?.dropOffPin),
+    createdAt: str(body.createdAt),
+  };
+}
+
 /* ---------- labels ------------------------------------------------------- */
 
 /**

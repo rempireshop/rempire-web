@@ -208,6 +208,16 @@ describe("a salon sale is settled, not just marked paid", () => {
   }
 
   it("earns points, records the purchase and mails the customer who gave an address", async () => {
+    /* «Партнёры и баллы» is OFF by default since 07.09.2026 (Dim: «Renat said
+       later» — settings.pricing.partnersOn, docs/loyalty.md). A till sale
+       earning points is therefore a shop where the owner switched it on; with
+       the switch off the same sale settles exactly as below minus the points,
+       which the next test pins. */
+    await query(
+      `insert into settings (key, value) values ('pricing', $1::jsonb)
+       on conflict (key) do update set value = $1::jsonb`,
+      [JSON.stringify({ partnersOn: true })],
+    );
     const email = "salon-regular@example.com";
     const customer = await recordLogin(email, "RU");
     await move({ productId: product.id, delta: 10, reason: "goods_in" });

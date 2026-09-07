@@ -63,7 +63,18 @@ export interface Flows {
   birthdayCode: string;
   /** Percent shown in the birthday letter. */
   birthdayPercent: number;
+  /**
+   * How many days BEFORE the birthday the letter goes out (Dim, 07.09.2026:
+   * «the days before need to be a setting»). 0 — on the day itself, which is
+   * what runBirthdays() has always done and what the panel now says by
+   * default. The daily cron is what makes any other number honest: one run a
+   * day means «за 3 дня» really is three days, not three days and some hours.
+   */
+  birthdayDays: number;
 }
+
+/** The most warning that still reads as a birthday letter rather than a random promo. */
+export const BIRTHDAY_MAX_DAYS = 30;
 
 export const FLOW_DEFAULTS: Flows = {
   abandoned: false,
@@ -75,6 +86,7 @@ export const FLOW_DEFAULTS: Flows = {
   unpaidCancelDays: 7,
   birthdayCode: "",
   birthdayPercent: 10,
+  birthdayDays: 0,
 };
 
 /** 1–60 whole days, or the default. The panel clamps too; this is the door. */
@@ -119,7 +131,9 @@ export async function getFlows(): Promise<Flows> {
      to the day before rather than refused — the panel refuses it too, and this
      is the door that cannot be walked round. */
   const remindDays = Math.min(days(f.unpaidRemindDays, FLOW_DEFAULTS.unpaidRemindDays), Math.max(1, cancelDays - 1));
+  const birthdayN = Math.trunc(Number(f.birthdayDays));
   return {
+    birthdayDays: Number.isFinite(birthdayN) && birthdayN > 0 ? Math.min(birthdayN, BIRTHDAY_MAX_DAYS) : 0,
     abandoned: bool(f.abandoned, FLOW_DEFAULTS.abandoned),
     birthday: bool(f.birthday, FLOW_DEFAULTS.birthday),
     backstock: bool(f.backstock, FLOW_DEFAULTS.backstock),
@@ -489,16 +503,26 @@ async function promoForBirthday(flows: Flows, now: number): Promise<{ code: stri
 }
 
 /**
- * Everybody whose birthday is today, who has said yes to marketing, and who
- * has not had this year's letter. `birthday_sent_year` is the idempotency
- * guard — the job may run hourly without sending twice.
+ * Everybody whose birthday is `flows.birthdayDays` days from now, who has said
+ * yes to marketing, and who has not had this year's letter.
+ *
+ * `birthdayDays` is 0 by default — the day itself, which is what this has
+ * always done. A larger number moves the window forward: with 3, the letter
+ * for a 14 March birthday goes out on 11 March, so a code with two weeks on it
+ * is in the customer's hand before the day rather than after it. The year the
+ * guard stamps is the BIRTHDAY's year, not today's: on 30 December, «за 3 дня»
+ * is looking at a birthday in January, and stamping this year would let the
+ * same letter go out again a few days later.
+ *
+ * `birthday_sent_year` is that guard — the job may run hourly without sending
+ * twice, and the daily cron is what makes «за N дней» mean N whole days.
  */
 export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.birthday) return { sent: 0, skipped: 0, reason: "disabled" };
   await loadTexts();
 
-  const today = new Date(now);
+  const today = new Date(now + flows.birthdayDays * 24 * 60 * 60 * 1000);
   const month = today.getUTCMonth() + 1;
   const day = today.getUTCDate();
   const year = today.getUTCFullYear();
@@ -738,6 +762,8 @@ export interface FlowsReport {
   /** «По счёту»: the reminder and the automatic cancellation — src/lib/invoice-dunning.ts. */
   invoices: { reminded: number; cancelled: number; skipped: number; reason?: string };
   unpaid: UnpaidRun;
+  /** «Доставлен» closed without anybody pressing it — src/lib/delivery.ts. */
+  delivered: { closed: number; checked: number; reason?: string };
   ms: number;
 }
 
@@ -750,6 +776,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     birthday: { sent: 0, skipped: 0, reason: "error" },
     invoices: { reminded: 0, cancelled: 0, skipped: 0, reason: "error" },
     unpaid: { sent: 0, skipped: 0, cancelled: 0, reason: "error" },
+    delivered: { closed: 0, checked: 0, reason: "error" },
     ms: 0,
   };
   for (const [key, fn] of [
@@ -786,6 +813,18 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
   } catch (err) {
     console.error("[flows] unpaid failed:", err);
     out.unpaid = { sent: 0, skipped: 0, cancelled: 0, reason: "error" };
+  }
+  /* Not a letter — the last step of an order, closed for the owner instead of
+     by him (Dim: «we need to improve this»). It rides this job because this is
+     the one thing the shop runs on a schedule, and once a day is exactly the
+     right frequency for «дошла ли посылка». Loaded lazily and guarded like
+     everything else: a carrier that is down must not stop the letters. */
+  try {
+    const { closeDeliveredOrders } = await import("@/lib/delivery");
+    out.delivered = await closeDeliveredOrders(now);
+  } catch (err) {
+    console.error("[flows] delivered failed:", err);
+    out.delivered = { closed: 0, checked: 0, reason: "error" };
   }
   out.ms = Date.now() - started;
   return out;

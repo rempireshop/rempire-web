@@ -121,10 +121,19 @@ describe("buildPostTranslatePrompt — the same article in another language", ()
 });
 
 describe("buildCopyPrompt — the «✨» texts", () => {
-  it("knows its six kinds and refuses any other", () => {
-    expect(COPY_KINDS).toEqual(["hero", "announcement", "contact_page", "email_footer", "promo_note", "product_name"]);
+  /* Two kinds since 07.09.2026 (Dim: «fewer sparkle buttons»). The four that
+     went — announcement, contact_page, email_footer, promo_note — were one-off
+     writers behind a button in a corner of a form; the assistant still writes
+     all four through set_content / create_promo, where the owner sees the
+     change before he applies it. */
+  it("knows its two kinds and refuses any other", () => {
+    expect(COPY_KINDS).toEqual(["hero", "product_name"]);
     expect(isCopyKind("hero")).toBe(true);
     expect(isCopyKind("slogan")).toBe(false);
+    for (const gone of ["announcement", "contact_page", "email_footer", "promo_note"]) {
+      expect(isCopyKind(gone), `${gone} is still a copy kind`).toBe(false);
+      expect(() => buildCopyPrompt("RU", { kind: gone, hint: "x" })).toThrow(AiInputError);
+    }
     expect(() => buildCopyPrompt("RU", { kind: "slogan", hint: "x" })).toThrow(AiInputError);
     expect(() => buildCopyPrompt("RU", {})).toThrow(AiInputError);
   });
@@ -140,43 +149,6 @@ describe("buildCopyPrompt — the «✨» texts", () => {
     expect(user).toContain("Proraso Beard Balm");
     expect(user).toContain("Уход за бородой");
     expect(() => buildCopyPrompt("RU", { kind: "hero" })).toThrow(AiInputError);
-  });
-
-  it("announcement: one line and its phone-width twin, placeholders kept, nothing invented", () => {
-    const { system } = buildCopyPrompt("RU", { kind: "announcement", hint: "−15 % на наборы до воскресенья" });
-    expect(system).toMatch(/"text": at most 90 characters/);
-    expect(system).toMatch(/"short"[^\n]*at most 40 characters/);
-    expect(system).toContain("{EE} {LV} {FI} {EU}");
-    expect(system).toMatch(/no invented dates, percentages or conditions/i);
-    expect(() => buildCopyPrompt("RU", { kind: "announcement" })).toThrow(AiInputError);
-  });
-
-  it("contact_page: never repeats the phone, e-mail, address or hours the page prints itself", () => {
-    const { system, user } = buildCopyPrompt("EN", { kind: "contact_page", company: { name: "Rempire Store OÜ", address: "Mardi 1", phone: "+372 1", hours: "пн 10:00–19:00" } });
-    expect(system).toMatch(/do NOT repeat them/);
-    expect(system).toMatch(/at most 600 characters/);
-    expect(user).toContain("Company: Rempire Store OÜ");
-    expect(user).toContain("Mardi 1");
-    expect(user).not.toContain("+372 1"); // the phone is printed under the text — not even offered
-  });
-
-  it("email_footer: one warm line, capped", () => {
-    const { system } = buildCopyPrompt("RU", { kind: "email_footer", hint: "спасибо" });
-    expect(system).toMatch(/one extra line/i);
-    expect(system).toMatch(/at most 110 characters/);
-  });
-
-  it("promo_note: from the code's own conditions, needs a code, never invents a channel", () => {
-    const { system, user } = buildCopyPrompt("RU", { kind: "promo_note", promo: { code: "SUVI10", kind: "percent", value: 10, minSubtotal: 50, endsAt: "2026-09-30", maxUses: 100 } });
-    expect(user).toContain("Code: SUVI10");
-    expect(user).toContain("What it gives: 10 % off");
-    expect(user).toContain("Minimum order: 50 €");
-    expect(user).toContain("Valid until: 2026-09-30");
-    expect(user).toContain("Uses allowed: 100");
-    expect(system).toMatch(/never invent a channel or a date/i);
-    expect(() => buildCopyPrompt("RU", { kind: "promo_note", promo: { kind: "percent", value: 10 } })).toThrow(AiInputError);
-    const free = buildCopyPrompt("RU", { kind: "promo_note", promo: { code: "FREE", kind: "free_shipping" } });
-    expect(free.user).toContain("What it gives: free delivery");
   });
 
   it("product_name: the house pattern with a tail the storefront can translate", () => {
@@ -198,6 +170,6 @@ describe("the dispatcher knows the new tasks", () => {
     expect(AI_TASKS).toContain("copy");
     expect(buildPrompt("post_full", "RU", { topic: "x" }).user).toContain("Topic: x");
     expect(buildPrompt("post_translate", "ET", { title: "x", body: "<p>y</p>" }).system).toMatch(/into Estonian/);
-    expect(buildPrompt("copy", "RU", { kind: "email_footer" }).system).toMatch(/one extra line/i);
+    expect(buildPrompt("copy", "RU", { kind: "hero", hint: "наборы" }).system).toMatch(/one slide of the shop.s home-page banner/i);
   });
 });

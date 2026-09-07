@@ -547,6 +547,11 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-propose { border: 1px solid var(--a-ink); padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .adm-propose__t { font-weight: 600; font-size: 14px; }
 .adm-propose__d { font-size: 14px; line-height: 20px; white-space: pre-line; }
+/* the letter «Написать клиенту» is about to send, as typed */
+.adm-propose__prev {
+  font-size: 14px; line-height: 20px; white-space: pre-wrap; max-height: 180px; overflow: auto;
+  border-left: 2px solid var(--a-rule); padding-left: 10px; color: var(--a-muted);
+}
 .adm-propose__acts { display: flex; gap: 8px; }
 .adm-propose__acts .adm-btn { flex: 1; height: 44px; }
 /* «Убрать фон» on a photo proposal — a plain checkbox row inside the card */
@@ -662,6 +667,8 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   gap: 12px; padding: 0 14px; border: 1px solid var(--a-rule); background: var(--a-paper);
 }
 .adm-switch[aria-disabled="true"] { color: var(--a-muted); }
+/* the same box as a real control — «Показывать в магазине» in the editor */
+button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left; }
 .adm-switch__t { width: 44px; height: 26px; border: 1px solid var(--a-ink); position: relative; flex: none; }
 .adm-switch__t i { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: var(--a-ink); transition: left .15s; }
 .adm-switch__t.is-on { background: var(--a-ink); }
@@ -673,6 +680,9 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   display: grid; grid-template-columns: 1.2fr 1fr 1fr .8fr 1.4fr 44px; gap: 8px; align-items: center;
 }
 .adm-grid__head { font-size: 12px; color: var(--a-muted); padding-bottom: 6px; border-bottom: 1px solid var(--a-ink); }
+/* «Партнёры и баллы» off: the «Салон, €» column is not drawn at all, so the
+   remaining five share the width instead of leaving a gap where it was */
+.adm-grid__head--nosalon, .adm-grid__row--nosalon { grid-template-columns: 1.2fr 1fr .8fr 1.4fr 44px; }
 .adm-grid__sz { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adm-input--cell { height: 44px; padding: 0 10px; }
 .adm-input--warn { color: var(--a-warn); }
@@ -1114,6 +1124,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    one. 7 px is the name's own first-line centre. */
 .adm-dot { width: 10px; height: 10px; flex: none; background: var(--a-ok); align-self: flex-start; margin-top: 7px; }
 .adm-dot--warn { background: var(--a-warn); }
+/* known to be off, and not a fault — the assistant with no model behind it */
+.adm-dot--off { background: var(--a-rule); }
 
 /* ---------- Настройки ----------------------------------------------------- */
 
@@ -1142,6 +1154,8 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .adm-jrow__t { font-family: "PT Mono", ui-monospace, monospace; font-size: 13px; color: var(--a-muted); white-space: nowrap; }
 .adm-jrow__x { flex: 1 1 200px; min-width: 0; }
+/* who the server recorded — the second list of «Журнал изменений» */
+.adm-jrow__who { font-size: 13px; color: var(--a-muted); white-space: nowrap; }
 .adm-narrow { max-width: 720px; }
 .adm-narrow--form { max-width: 560px; }
 

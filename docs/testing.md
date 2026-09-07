@@ -86,8 +86,20 @@ easy to be suspicious of:
    bundling involved, so it is unaffected by any of the above).
 
 2. **`E2E_BOOTSTRAP=1`** gates three routes:
-   - `GET /api/e2e/bootstrap/` — applies pending migrations and is also what
-     `playwright.config.ts` polls as the webServer's readiness URL. Why a
+   - `GET /api/e2e/bootstrap/` — applies pending migrations, seeds the one
+     setting the suite's shop needs, and is also what `playwright.config.ts`
+     polls as the webServer's readiness URL. The seed is
+     `settings.pricing = {partnersOn: true}` (`on conflict do nothing`, so a
+     spec that changed it keeps its own row): «Партнёры и баллы» is OFF on a
+     fresh shop since 07.09.2026 (docs/loyalty.md), and most of this suite
+     describes a shop that HAS the wholesale tier and the points — salon
+     prices in the editor and on the product page, «Одобрить Pro» in
+     «Клиенты», the points row on «Доставка и оплата», «Использовать баллы»
+     at checkout. Seeding it here beats having every one of those specs turn
+     the switch on for itself; the OFF state is covered by
+     `tests/partners-switch.test.ts` and `tests/loyalty.test.ts` (vitest, no
+     bootstrap) and by `e2e/admin-sweep-4.spec.ts`, which flips it off and
+     back on through the panel. Why a
      route and not just running `npm run migrate` first: `DB_DRIVER=pglite`
      with no `PGLITE_PATH` is a pure in-memory database that lives inside
      *one* Node process (`src/lib/db.ts` caches it on `globalThis`).

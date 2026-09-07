@@ -129,9 +129,12 @@ orders, goods, the till, and everything else behind «Ещё».
   :15955 sends the matching request; `demoUndo()` :16796 reverses; «Настройки →
   Журнал изменений» (`admSetJournalHTML` :11748) lists `DEMO.log` with «Вернуть».
   `DEMO` (incl. the log, capped at 40) lives in `localStorage["rempire-admin-demo"]`
-  (:15579–15615) — **the journal is per browser, not per shop**; the server-side
-  `admin_audit` table is written by ~25 call sites but is never shown
-  (`GET /api/admin/audit/` has no caller in `app.js`).
+  — **that list is per browser, not per shop**, and «Вернуть» can only act on
+  it. Since 07.09.2026 the same page shows a second list under it: the
+  server-side `admin_audit` (written by ~25 call sites), read through
+  `GET /api/admin/audit/?limit=100` (`loadAudit()` / `AUDIT_WORDS` /
+  `auditText()` in app.js), read-only, labelled «Журнал магазина», with one
+  sentence saying why undo stops at the browser's own half.
 - **One click delegate** `document.addEventListener("click")` :18481 with a
   ~230-entry `closest()` selector list at :18484 and a flat `if (d.xxx)` chain
   to :20170; inputs :20185–20470, selects/files :20526–20626. The attribute
@@ -285,9 +288,15 @@ shoppers (read).
   Subcategories are a hard-coded regex map (`SUBCATS`).
 - **What the owner can change on a catalogue product** = one row in
   `product_overrides` (`001_core.sql`; columns added by `003` gallery, `100`
-  `pro_price`, `110` `description`, `130` `seo_langs`): `price`, `pro_price`,
-  `stock` (`in|low|out` manual badge), `seo_title/seo_desc` (+ ET/EN pairs),
-  `subcat`, `var_img`, `video_url`, `gallery`, `description {RU,ET,EN}`.
+  `pro_price`, `110` `description`, `130` `seo_langs`, `147` `sizes`/`hidden`):
+  `price`, `pro_price`, `stock` (`in|low|out` manual badge), `seo_title/seo_desc`
+  (+ ET/EN pairs), `subcat`, `var_img`, `video_url`, `gallery`,
+  `description {RU,ET,EN}`, **`sizes`** (the whole volume ladder
+  `[{size,price}]`, `null` = the generated file's own — this is what makes
+  «+ Размер» and «×» real; `price` stays rung 0 either way, reconciled in
+  `mapOverride`/`overrideLadder`) and **`hidden`** (out of the catalogue, the
+  search, the sets, the cart and `/shop2/p/<id>/`; the panel's own list keeps
+  it with «Скрыт»).
   `PUT /api/admin/overrides/` (`src/app/api/admin/overrides/route.ts`,
   `orders.upsertOverride`, `product-descriptions.ts`, `product-seo.ts`);
   published by `GET /api/overrides/` (30 s cache, `pricing`/`proPrice`
@@ -759,8 +768,19 @@ retail customers who pay (1 point = 1 €).
 **How it works.** `100_tiers_loyalty.sql` (customers `tier|company|reg_code|
 pro_requested_at|pro_approved_at|notes`, `product_overrides.pro_price`, orders
 `customer_id|pricing_tier|loyalty_discount`, `loyalty_ledger` with earn/redeem
-once per order); `src/lib/loyalty.ts` (`settings.pricing` = `proDiscountPct 20,
-proMinOrder 0, loyalty {enabled true, earnPct 5, redeemMaxPct 30, minRedeem 5}`
+once per order); `src/lib/loyalty.ts` (`settings.pricing` = **`partnersOn
+false`** + `proDiscountPct 20, proMinOrder 0, loyalty {enabled true, earnPct 5,
+redeemMaxPct 30, minRedeem 5}`
+
+**`partnersOn` is the one switch above both programmes** (07.09.2026, Dim:
+default OFF, «Renat said later»). Off, `loyaltyOn()` is false everywhere —
+nothing earned, nothing redeemed, an approved partner priced and recorded as
+`retail`, `/api/account/pricing` answering retail — and the panel and the
+storefront draw none of it: no tier chips or «+ Партнёр» in «Клиенты», no
+points block or «Стать партнёром» in the cabinet, no «Использовать баллы» at
+checkout, no «Салон, €» column in the editor. Nothing is deleted, so the
+switch back on restores all five screens exactly. `publicPricing()` publishes
+`partnersOn` (the storefront has to know what to draw) but never the discount
 with bounds; `proUnitPrice`, `earn/redeemLoyaltyPoints`, `upsertPartner`, CSV).
 Routes: `GET /api/account/pricing/`, `POST /api/account/pro-request/`,
 `GET|POST /api/admin/customers/` (`?tier=`, `?format=csv`, «+ Партнёр»),
@@ -844,8 +864,11 @@ RU/ET/EN, inline-CSS tables, dark-mode logos), `src/lib/mail-hooks.ts`
 `src/emails/texts.ts` (`settings.mail_texts`: subject/intro/signature per
 letter per language, 7 placeholders, caps 200/1500/300), `src/lib/flows.ts`
 (abandoned cart after 3 h, back-in-stock on the out→in move or the daily sweep,
-birthday **on the day** with a minted promo, `settings.flows` switches, queue
-counters), `src/lib/notify.ts` (owner ping: Telegram + e-mail to `RESEND_TO`,
+birthday `settings.flows.birthdayDays` days early — 0, the day itself, by
+default — with a minted promo, `settings.flows` switches, queue counters),
+`src/lib/delivery.ts` (the same daily job closes a `shipped` order when
+Montonio's own shipment status reads as delivered or after
+`settings.delivery.autoDays` days — 0/never by default; no letter either way), `src/lib/notify.ts` (owner ping: Telegram + e-mail to `RESEND_TO`,
 default `info@diipsolutions.eu`, from `REMPIRE QA <onboarding@resend.dev>` when
 `RESEND_FROM` is unset — a different fallback from `mail.ts`'s
 `Rempire <shop@rempireshop.com>`). Routes: `GET /api/admin/mail/preview/`
@@ -911,12 +934,18 @@ Dim pays the OpenAI bill.
   requires the admin cookie **and** an `Origin` header, `max_tokens` 1500, the
   whole catalogue + custom products + low stock + (on keywords) customers and
   posts + attached photo keys. `src/app/api/assistant/actions.ts`
-  `sanitizeAction()` whitelists 28 types, admin ones: `set_price`, `set_stock`,
+  `sanitizeAction()` whitelists 30 types, admin ones: `set_price`, `set_stock`,
   `set_seo`, `toggle_flow`, `toggle_chatbot`, `toggle_bundles`, `set_hero`,
   `create_promo`, `toggle_promo`, `set_shipping_rules`, `set_content`,
   `set_pricing`, `adjust_points`, `stock_adjust`, `stock_set`, `draft_post`,
   `publish_post`, `set_post_cover`, `add_product_photo`, `create_product`,
-  `update_product`, `export_report`. Every action is *proposed* as a card and
+  `update_product`, `export_report`, and — 07.09.2026, Dim: «assistant needs
+  to be able to help there as well» — `propose_bundle` (products and a name
+  for a set that does not exist; NO price and no id, applying it opens the
+  set editor filled in) and `set_bundle` (an existing set changed, straight to
+  `POST /api/admin/bundles` so `validateBundle()` still decides whether it is
+  cheaper than its parts; the ids come from `bundleLinesForPrompt()`, read
+  only when the message is about sets). Every action is *proposed* as a card and
   applied by the panel through the normal routes after «Применить»
   (`askAdminAI` :16933, `confirmCard` :16862, `applyBlogAction` :8327,
   `applyProductPhoto` :17028…). Replies that are not a sentence are replaced
@@ -1269,7 +1298,8 @@ posts · `071` sample posts · `080` events + paid index · `081` sales index ·
 `090` stock_levels + stock_moves · `091` orders.channel · `100` tiers/loyalty
 (customers columns, pro_price, orders columns, loyalty_ledger) · `110`
 description · `111` order_messages · `120` bundles (+ seed) · `130` seo_langs ·
-`131` custom_products · `140` `delivered` status + rebuilt index. Packed by
+`131` custom_products · `140` `delivered` status + rebuilt index ·
+`147` product_overrides `sizes` + `hidden` (+ partial index). Packed by
 `tools/pack-migrations.mjs` into `src/db/migrations.generated.ts` (`prebuild`),
 applied by `tools/migrate.mjs --if-configured` (`postbuild`, only when
 `DATABASE_URL` is set), tracked in `_migrations`; manual `GET|POST

@@ -225,6 +225,14 @@ describe("money and stock invariants", () => {
   it("redeems no more loyalty than the cap, and only once", async () => {
     const { recordLogin } = await import("@/lib/customers");
     const { adjustLoyaltyPoints, getLoyaltyBalance, getPricingSettings } = await import("@/lib/loyalty");
+    /* «Партнёры и баллы» is OFF by default since 07.09.2026 (Dim: «Renat said
+       later» — settings.pricing.partnersOn, docs/loyalty.md), so a shop with a
+       points programme is a shop where the owner switched it on. */
+    await query(
+      `insert into settings (key, value) values ('pricing', $1::jsonb)
+       on conflict (key) do update set value = $1::jsonb`,
+      [JSON.stringify({ partnersOn: true })],
+    );
     const email = "loyal@example.com";
     const customer = await recordLogin(email, "RU");
     await adjustLoyaltyPoints(customer.id, 100_000, "fuzz");
