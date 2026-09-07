@@ -102,8 +102,6 @@ function routes(): RouteCase[] {
     { name: "POST /api/stock-alerts/", path: "/api/stock-alerts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/stock-alerts/route"), body: { email: "fuzz@example.com", productId: PRODUCT.id, lang: "RU" } },
     { name: "GET /api/reviews/", path: "/api/reviews/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/reviews/route"), queries: [`?product=${PRODUCT.id}`] },
     { name: "POST /api/reviews/", path: "/api/reviews/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/reviews/route"), body: { product: PRODUCT.id, name: "Фазз", rating: 5, text: "Отличный товар, всем советую.", lang: "RU", consent: true, website: "" } },
-    { name: "POST /api/feedback/", path: "/api/feedback/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/feedback/route"), body: { page: "/shop2/", text: "Нравится", mood: "good", section: "hero", element: { label: "a" }, website: "" } },
-    { name: "POST /api/submit/", path: "/api/submit/", method: "POST", exports: ["POST"], load: () => import("@/app/api/submit/route"), body: { summary: "ответы", answers: { a: 1 }, answered: 1, total: 2, round: "1", website: "" } },
     { name: "GET /api/blog/", path: "/api/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/api/blog/route"), queries: ["?lang=RU&page=1", "?page=-1", "?page=1e9", "?page=abc", "?lang=" + "x".repeat(500)] },
     { name: "GET /api/blog/[slug]/", path: "/api/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/api/blog/[slug]/route"), params: { slug: "fuzz-post" } },
     { name: "GET /api/shipping/points/", path: "/api/shipping/points/", method: "GET", exports: ["GET"], load: () => import("@/app/api/shipping/points/route"), queries: ["?country=EE&carrier=omniva", "?country=zz&carrier=all", "?country=&carrier=", "?country=EE&country=LV"] },
@@ -450,7 +448,6 @@ describe("API fuzzing", () => {
   it("answers 405 with a code on the methods that exist only to refuse", async () => {
     const refusers: Array<[string, () => Promise<Record<string, unknown>>, string]> = [
       ["/api/track/", () => import("@/app/api/track/route"), "GET"],
-      ["/api/feedback/", () => import("@/app/api/feedback/route"), "GET"],
       ["/api/giftcards/check/", () => import("@/app/api/giftcards/check/route"), "GET"],
       ["/api/payments/create/", () => import("@/app/api/payments/create/route"), "GET"],
       ["/api/payments/notify/", () => import("@/app/api/payments/notify/route"), "GET"],

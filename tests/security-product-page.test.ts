@@ -275,21 +275,34 @@ describe("the security headers over /shop2/*", () => {
       expect(header(source, "X-Content-Type-Options"), source).toBe("nosniff");
     }
     // nothing anywhere loosened past what the audit accepted: 'unsafe-inline' for
-    // scripts only where Next streams its own payload, never eval, never hashes
+    // scripts only on the two rules that need it, never eval, never hashes
     const inlineScript = rules
       .filter((r) => (directives(r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "")["script-src"] ?? []).includes("'unsafe-inline'"))
       .map((r) => r.source);
-    expect(inlineScript).toEqual(["/:path*", "/prototypes/:path*", "/api/admin/mail/preview/:path*"]);
-    // 'unsafe-eval' exists for exactly one path: the design archive under
-    // /prototypes/, whose pages compile their own JSX in the browser. Nothing
-    // the shop, the admin or the API serve may ever carry it.
+    expect(inlineScript).toEqual(["/:path*", "/api/admin/mail/preview/:path*"]);
+    // 'unsafe-eval' exists nowhere at all. It used to be granted to
+    // /prototypes/*, the design archive that compiled its own JSX in the
+    // browser; that archive was deleted on 07.09 with the rest of the
+    // prototype surfaces (docs/audit/2026-09-07-cleanup.md), and no rule may
+    // ever bring the grant back.
     for (const r of rules) {
       const csp = r.headers.find((h) => h.key === "Content-Security-Policy")?.value ?? "";
-      if (r.source === "/prototypes/:path*") {
-        expect(directives(csp)["script-src"]).toEqual(["'self'", "'unsafe-inline'", "'unsafe-eval'"]);
-        continue;
-      }
       expect(csp, r.source).not.toMatch(/unsafe-eval|unsafe-hashes|strict-dynamic/);
+    }
+  });
+
+  it("the site root is a redirect to the shop, not a page — and no rule mentions the retired prototype surfaces", async () => {
+    const { default: nextConfig } = await import("../next.config");
+    const redirects = await nextConfig.redirects!();
+    expect(redirects[0]).toMatchObject({ source: "/", destination: "/shop2/", permanent: false });
+
+    const rules = await nextConfig.headers!();
+    const rewrites = await nextConfig.rewrites!();
+    const surfaces = /\/(prototypes|qa2?|demo)\b/;
+    for (const r of rules) expect(r.source, r.source).not.toMatch(surfaces);
+    for (const r of redirects) expect(r.source + " " + r.destination, r.source).not.toMatch(surfaces);
+    for (const phase of Object.values(rewrites as Record<string, { source: string; destination: string }[]>)) {
+      for (const r of phase) expect(r.source + " " + r.destination, r.source).not.toMatch(surfaces);
     }
   });
 

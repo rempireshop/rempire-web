@@ -98,7 +98,7 @@ for (const p of CATALOGUE) {
 <script src="/shop/paylogos.js"></script>
 <script src="/shop/shipping-data.js"></script>
 <script src="/shop/app.js"></script>
-<script src="/feedback.js" defer></script>
+
 </body>
 </html>
 `;

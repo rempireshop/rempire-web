@@ -1,8 +1,16 @@
 # REMPIRE — Tower Motion
 
 The tower moves like a chess piece: one confident move, then stillness. This document is the
-contract for every animated appearance of the mark. Demo: `/brand/motion` (staging, noindex).
-Component: `TowerAnimated.tsx` (static `Tower.tsx` remains for non-animated use).
+contract for every animated appearance of the mark.
+
+**Where the code is (07.09.2026).** `TowerAnimated.tsx` and the static `Tower.tsx` were React
+components used only by the design-review hub at `/demo`, which was deleted together with the
+rest of the prototype surfaces (`docs/audit/2026-09-07-cleanup.md`); the demo page
+`/prototypes/motion/` went with it. Nothing in the shop is React, so there is nothing for them
+to live in today. Both files, and the motion demo page, are in git history at `448cbd7` —
+take them from there when the mark is animated again. This document is still the contract; the
+timings and the technique below are what any reimplementation must match, and the canonical
+mark it clips is `public/brand/rempire-tower.svg`.
 
 ## Technique — the mark is never redrawn
 

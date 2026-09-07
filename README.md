@@ -1,104 +1,116 @@
 # rempire-web
 
-REMPIRE shop rebuild — the web application (storefront + admin eventually).
-Current phase: **questionnaire for Renat** at `/qa` on the staging domain
-`rempireshop.diipsolutions.eu`.
+The REMPIRE shop: storefront and admin panel, one Next.js 15 project.
+Live-ish at `https://rempireshop.diipsolutions.eu/shop2/`; production domain
+`rempireshop.com` still points at the old Shopify shop until the switch.
 
-Backend counterpart: `rempire-api` (ASP.NET Core, separate repo).
-Project brief and master prompts live in the `Rempire` docs folder
-(`REMPIRE Commerce Platform — Claude Code Master Build Prompt.md` et al.).
+**Start here:** [`docs/SYSTEM-MAP.md`](docs/SYSTEM-MAP.md) — every system, who
+it is for, how it works, how it is tested, what state it is in.
+[`docs/HOSTING.md`](docs/HOSTING.md) — what Vercel does and what Railway does.
+[`docs/GLOSSARY.md`](docs/GLOSSARY.md) — one agreed name per thing.
 
-## Stack
+## Shape
+
+The shop and the admin are **one vanilla-JS single-page app** —
+`public/shop2/app.js` plus its stylesheets — served as static files and
+talking to ~70 JSON routes under `src/app/api/**`. Next.js is the server: the
+API, the request-time product/blog pages, the OG-card renderer, the sitemap
+and the two cron jobs. There are **no React pages**; `src/app/layout.tsx`
+exists for the day one is added.
 
 | Concern | Choice |
 |---|---|
-| Framework | Next.js 15 App Router, serverful on Vercel (static export dropped 2026-08-21 for `/api/submit`) |
-| Language | TypeScript |
-| Styling | Tailwind CSS 4, tokens in `src/app/globals.css` |
-| Fonts | Korolev Bold, self-hosted from `public/fonts` |
-| Package manager | bun |
-| Hosting | Vercel, `rempireshop.diipsolutions.eu` |
+| Framework | Next.js 15 App Router, serverful (static export is not possible — see `next.config.ts`) |
+| Language | TypeScript for `src/**` and `tools/**`; plain ES5-ish JS for `public/shop2/app.js` |
+| Storefront/admin UI | hand-written JS + CSS in `public/shop2/` — no framework, no build step |
+| Styling (Next side) | Tailwind CSS 4, tokens in `src/app/globals.css` |
+| Database | Postgres (Railway) via `src/lib/db.ts`; PGlite in memory for every test |
+| Package manager | npm (`package-lock.json`; CI runs `npm ci` on Node 22) |
+| Hosting | Vercel — see `docs/HOSTING.md` |
+
+## Running it
 
 ```bash
-bun install
-bun run dev        # http://localhost:3300 — / redirects to /qa/
-bun run build      # static export into out/
-bun run typecheck
+npm ci
+npm run dev          # http://localhost:3300 — / redirects to /shop2/
+npm run typecheck
+npm test             # vitest, in-memory PGlite, no services needed
+npm run e2e          # Playwright; builds the e2e fixture first
 ```
+
+`npm run dev` works with an empty `.env.local`: without `DATABASE_URL` the
+shop falls back to demo/localStorage mode. Every environment variable is
+listed by NAME in `docs/accounts.md` and `docs/backend.md`; values live in the
+Bitwarden vault and in Vercel, never in this repository.
+
+Two generated things are committed and must be rebuilt when their sources
+change: `npm run prerender` (810 static shop pages under `public/shop2/`) and
+`npm run pack:migrations` (`db/migrations/*.sql` → `src/db/migrations.generated.ts`).
+Both run automatically in `prebuild`.
 
 ## Routes
 
 ```
-/            → client redirect to /qa/
-/qa/         → Russian questionnaire for Renat (26 questions, localStorage autosave)
-/api/submit  → POST: stores answers, forwards to Telegram/email when configured
+/                    → 307 to /shop2/
+/shop2/…             the shop and the admin (one static shell + prerendered pages)
+/shop2/{,et/,en/}p/… a custom product's page, rendered per request
+/shop/…              legacy: 95 prerendered product pages that hand the visitor
+                     on to their /shop2/ twin (they carry shared link previews —
+                     see docs/redirect-map.csv), plus redirects for the other
+                     old screens
+/api/**              ~70 JSON routes: catalogue overrides, cart, checkout,
+                     payments, shipping, orders, admin, assistant, cron
 ```
 
-## Submissions
+## Testing
 
-Primary path: «Отправить Диме» POSTs `{answers, summary, answered, total}` to
-`/api/submit`, which
+- `npm test` — 79 vitest files against PGlite; routes are called directly and
+  external HTTP is stubbed. Includes a fuzz layer (`tests/fuzz-*.test.ts`) that
+  throws a fixed corpus of hostile input at every route.
+- `npm run e2e` — Playwright, Chromium in four CI shards plus a WebKit job for
+  the customer-facing specs. `docs/testing.md` has the local recipes.
+- `node tools/i18n-gaps.mjs` — must print 0. The admin and shop UI are Russian
+  in the source and translated to ET/EN by a dictionary in `app.js`.
+- CI (`.github/workflows/ci.yml`) runs typecheck, unit tests and e2e. It does
+  **not** deploy; Vercel deploys on its own trigger.
 
-1. **always** writes JSON to the private Vercel Blob store `rempire-qa`
-   (`store_QvhPeh4dCJ2fVftE`, iad1) under `qa/<timestamp>-<random>.json`;
-2. forwards the summary to Telegram if `TELEGRAM_BOT_TOKEN` +
-   `TELEGRAM_CHAT_ID` are set;
-3. emails the summary via Resend if `RESEND_API_KEY` is set
-   (`RESEND_FROM`/`RESEND_TO` optional, defaults to the project owner).
+## Committing and deploying
 
-Forwarding failures never fail the request; Blob storage is the contract.
-Share/copy/mailto remain as manual fallbacks under the primary button.
+Vercel Hobby only builds commits authored by the account owner, so every
+commit here is authored as:
 
-Read submissions (rw token comes from `.env.local`, created by
-`vercel blob create-store`):
-
-```bash
-bun x vercel@latest blob list --rw-token "$BLOB_READ_WRITE_TOKEN"
-bun x vercel@latest blob get <pathname> --access private --rw-token "$BLOB_READ_WRITE_TOKEN"
+```
+Rempire Store <324390963+rempireshop@users.noreply.github.com>
 ```
 
-## Staging SEO safety
-
-This host must never enter search indexes (non-negotiable until production
-launch): `robots` metadata in `src/app/layout.tsx`, `public/robots.txt`,
-and an `X-Robots-Tag: noindex, nofollow, noarchive` header from `vercel.json`.
-Lift all three deliberately at launch, not before.
+A push to `main` of `github.com/rempireshop/rempire-web` builds and deploys.
+The build is `prebuild` (pack migrations, pack content, copy vendor files,
+prerender) → `next build` → `postbuild` (apply migrations when `DATABASE_URL`
+is set). The switch-day checklist lives in `docs/seo.md` and
+`docs/SYSTEM-MAP.md` §24.
 
 ## Brand
 
 The 2025 identity is the **tower badge** (`rempire_logo_2025`): rook tower,
 REMPIRE TOWER arc, "est 2018", "666 ways", script slogan. Source vectors in
 `public/brand/` (badge + lockup, dark/white) and `design/` (AI/PDF originals,
-PNG renders).
-
-`public/brand/rempire-tower.svg` and `src/components/Tower.tsx` are the tower
-mark **extracted verbatim** from the badge (path 0, bbox `292.24 171.22
-265.18 409.8`). Do not redraw; re-extract if the brand file changes.
-Brand ink: `#1c1a00`.
+PNG renders). `public/brand/rempire-tower.svg` is the tower mark extracted
+verbatim from the badge (path 0, bbox `292.24 171.22 265.18 409.8`) — do not
+redraw it; re-extract if the brand file changes. Brand ink: `#1c1a00`.
+The motion system is `docs/design/MOTION.md`.
 
 ### Font licensing — read before production
 
 `Korolev Bold.otf` (Device Fonts) and `VodkaBrush-Regular.otf` arrived as
 desktop OTFs from the client's Dropbox. Desktop licences usually do **not**
-cover web embedding. Fine for a private staging questionnaire; before the
-public storefront launches, confirm or buy webfont licences (and convert to
-woff2). VodkaBrush is not used on the site yet — it lives in `design/` only.
+cover web embedding. Confirm or buy webfont licences (and convert to woff2)
+before the public launch. VodkaBrush is not used on the site; it lives in
+`design/` only.
 
-## Link previews (OG)
+## History
 
-`public/og-qa-v2.png` is the 1200×630 card for `/qa`, wired in
-`src/app/qa/page.tsx`. Rules that keep Telegram/WhatsApp happy (learned on
-FrameForge): absolute image URL via `metadataBase`, explicit
-`og:image:width/height`, the PNG must answer `200 image/png` with no
-redirect. If the artwork changes, change the filename (`og-qa-v2.png`) —
-clients cache by URL. Regenerate: `design/og-qa.html` in a 1200×630 viewport.
-
-## Deploying
-
-Vercel project `rempire-web` (dimnovare-9994), production = `main`.
-
-1. `vercel --prod` (or push to `main` once the Git integration is on).
-2. Domains: `rempireshop.diipsolutions.eu` (+ `www.` redirect).
-3. DNS at the `diipsolutions.eu` zone: `CNAME rempireshop → cname.vercel-dns.com.`
-   (+ same for `www.rempireshop`). Only these subdomains — apex and the other
-   project subdomains stay untouched.
+Until 21.08.2026 this repository was a questionnaire for the owner (`/qa`,
+`/qa2`), a design-review hub (`/demo`) and eight design prototypes
+(`/prototypes/*`). All of that was deleted on 07.09.2026 —
+`docs/audit/2026-09-07-cleanup.md` says what went and what it removed from the
+attack surface. Anything you need from it is in git history at `448cbd7`.

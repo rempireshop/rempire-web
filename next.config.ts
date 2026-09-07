@@ -100,13 +100,16 @@ function prerenderedRewrites() {
  *                 <script type="application/ld+json"> blocks in the prerendered
  *                 pages are data, not code, and are not covered by script-src.
  *                 So /shop2/* gets a strict `script-src 'self'`.
- *                 Everything else needs 'unsafe-inline': Next's App Router
- *                 streams its flight payload through inline <script> tags on
- *                 /, /qa, /qa2, /demo, and the 95 legacy product pages under
- *                 public/shop/p/ hand humans over with an inline
- *                 location.replace(). Both are ours, neither renders untrusted
- *                 input; the admin panel — the one screen a stranger's text
- *                 reaches — is under /shop2/ and gets the strict policy.
+ *                 Everything else keeps 'unsafe-inline' for two reasons: the
+ *                 95 legacy product pages under public/shop/p/ hand humans
+ *                 over with an inline location.replace(), and Next's App
+ *                 Router would stream its flight payload through inline
+ *                 <script> tags the day a rendered page is added back (there
+ *                 is none today — the questionnaire and design-review pages
+ *                 were retired 07.09, docs/audit/2026-09-07-cleanup.md).
+ *                 Both are ours, neither renders untrusted input; the admin
+ *                 panel — the one screen a stranger's text reaches — is under
+ *                 /shop2/ and gets the strict policy.
  *   · styles    — app.js writes style="…" attributes on nearly every row, so
  *                 'unsafe-inline' is load-bearing here and cannot be dropped
  *                 without rewriting the renderer. Google Fonts is a stylesheet.
@@ -190,9 +193,10 @@ function baseSecurityHeaders(frameOptions = "DENY", permissionsPolicy = DEFAULT_
 }
 
 /**
- * Serverful Next.js on Vercel: /api/submit persists questionnaire answers
- * (Vercel Blob) and forwards them to Telegram/email when tokens are set.
- * Static export was dropped for exactly this reason on 2026-08-21.
+ * Serverful Next.js on Vercel. Static export was dropped on 2026-08-21 (for
+ * the questionnaire's /api/submit, since retired) and is no longer possible
+ * anyway: ~70 API routes, the request-time product and blog pages, the OG
+ * card renderer and two cron jobs all need a running function.
  */
 const nextConfig: NextConfig = {
   trailingSlash: true,
@@ -251,20 +255,6 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline'") },
-          ...baseSecurityHeaders(),
-        ],
-      },
-      /* The design archive — the eight directions, the motion study, the
-         Opus page — is written in JSX that Babel compiles in the browser and
-         runs through new Function, so it is the one place that needs
-         'unsafe-eval'. It renders only its own files (React and Babel are
-         vendored under /vendor/react/ — the CDN they used to load from is
-         not on the policy), takes no input, and is noindex; the shop, the
-         admin and the API keep the strict policy above. */
-      {
-        source: "/prototypes/:path*",
-        headers: [
-          { key: "Content-Security-Policy", value: csp("'self' 'unsafe-inline' 'unsafe-eval'") },
           ...baseSecurityHeaders(),
         ],
       },
@@ -327,6 +317,17 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      /* The site root. It used to be a React page that client-redirected to
+         the /demo review hub; the hub, the two questionnaires and the design
+         prototypes were deleted on 07.09 (docs/audit/2026-09-07-cleanup.md),
+         and with no page left at `/` a bare rempireshop.com would 404. A
+         redirect answers before the router looks for a page, so this is the
+         whole of it.
+
+         307, not 308: at the switch the shop is expected to BE the root
+         (docs/seo.md), and a permanent redirect cached in every visitor's
+         browser is the one thing that would make that move painful. */
+      { source: "/", destination: "/shop2/", permanent: false },
       { source: "/shop", destination: "/shop2/", permanent: false },
       { source: "/shop/c/:cat", destination: "/shop2/c/:cat/", permanent: false },
       { source: "/shop/b/:brand", destination: "/shop2/b/:brand/", permanent: false },
