@@ -145,6 +145,16 @@ export function refundableAmount(total: number, payment: unknown): number {
  * `applied` is true only the first time a `ref` is seen: that is what the
  * caller hangs the customer's letter off, exactly the way `alreadyPaid` gates
  * the confirmation letter in applyPaymentResult().
+ *
+ * Read-modify-write, deliberately: the whole array is written back, so an
+ * admin refund and a refund webhook landing in the same instant could lose
+ * one entry. `setOrderPayment()` merges top-level keys, not array elements,
+ * and a jsonb array append in SQL would buy real concurrency at the cost of
+ * this file being testable without a database. At three to five orders a
+ * month, with a human pressing the button, the window is not the risk worth
+ * paying for — the amount is checked against the remainder before the
+ * provider is called either way, so the failure mode is a missing line in the
+ * ledger, never money leaving twice.
  */
 export function foldRefund(
   payment: unknown,
