@@ -10,7 +10,9 @@
  *   · no owner-typed string opens a tag or an attribute, or ends the <title>;
  *   · the JSON-LD block cannot be ended early («</script>»), cannot open the
  *     HTML parser's escaped state («<!--») and carries no raw U+2028/U+2029;
- *   · the id is a slug or the request gets the shell — never a file path;
+ *   · the id is a slug or the request answers 404 with the shell — never a
+ *     file path, never a 5xx (the 404 half is new on 07.09.2026: a product
+ *     nobody has is a page nobody has);
  *   · a hidden product is a 404 no cache may keep, a shown one is cached for
  *     a minute, a database outage is the shell, uncached;
  *   · the sitemap escapes and caches sanely;
@@ -22,6 +24,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { createCustomProduct, setCustomProductActive } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
 import { esc, headBlock } from "@/lib/seo-head.mjs";
+import catalogueMin from "@/data/catalogue.min.json";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 const LIVE = "https://rempireshop.com";
@@ -155,21 +158,39 @@ describe("owner-typed text on a custom product's page", () => {
 /* ---------- the id ----------------------------------------------------------- */
 
 describe("the id in the path", () => {
-  it("anything that is not a `c-` slug gets the shell, whatever it looks like", async () => {
+  /* Every one of these is a product that does not exist, whatever it is
+     dressed up as. Until 07.09.2026 they were all answered with the shell at
+     200 — safe, but a soft 404 for a page nobody has (see
+     docs/audit/2026-09-07-storefront.md): a `c-` slug nobody owns already
+     answered 404, and now so does everything else that is neither a real
+     catalogue id nor a real custom one. What the security of it rests on has
+     not moved: the shell, never a file, never a 5xx, never somebody else's
+     product, and never a `Product` block for a row that is not there. */
+  it("anything that is not a product answers 404 with the shell, whatever it looks like", async () => {
     const ids = [
       "c-../../etc/passwd", "c-x/../y", "..%2f..%2fetc", "c-A", "C-UPPER", "c-", "c-x y",
       "c-" + "a".repeat(200), "c-x\u0000", "c-<script>", "c-%00", "c-x'; drop table custom_products; --",
     ];
     for (const id of ids) {
       const res = await pageFor("et", id);
-      expect(res.status, id).toBe(200);
+      expect(res.status, id).toBe(404);
       expect(res.headers.get("content-type"), id).toContain("text/html");
-      expect(res.headers.get("cache-control"), id).toBe("public, max-age=0, must-revalidate");
+      // an address that does not exist is never cached and never indexed
+      expect(res.headers.get("cache-control"), id).toBe("no-store");
       const html = await res.text();
       expect(html, id).toContain('<div id="app">');
+      expect(html, id).toContain('<meta name="robots" content="noindex, nofollow">');
       expect(html, id).not.toContain('id="ldjson"');
       expect(html, id).not.toContain("passwd");
     }
+    /* …and a real catalogue id still gets the shell at 200: that is the
+       fresh-clone case, where `npm run prerender` has not written the static
+       page yet and 404ing a product the shop really sells would be worse than
+       the soft 404 this test used to pin. */
+    const real = await pageFor("et", (catalogueMin as Array<{ id: string }>)[0].id);
+    expect(real.status).toBe(200);
+    expect(await real.text()).toContain('<div id="app">');
+
     // and the table is still there — nothing above was SQL
     expect(await createCustomProduct(BALM)).toMatchObject({ id: "c-proraso-beard-balm" });
   });
