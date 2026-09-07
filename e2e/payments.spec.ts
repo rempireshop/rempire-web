@@ -354,7 +354,54 @@ test.describe("payments — a gift card at checkout", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* 3. Cancelling at the bank, and trying again                          */
+/* 3. «Вернуть деньги» on the order card                                */
+/* ------------------------------------------------------------------ */
+
+test.describe("payments — the money goes back", () => {
+  /* The admin panel is Chromium-only in this suite (docs/testing.md
+     «Safari»), so this one walks the owner's side on desktop alone. */
+  test("«Вернуть деньги» sends the whole amount back and turns the order into «возврат»", async ({ page, browser }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "admin panel — desktop project only");
+
+    await addProduct(page);
+    await toPaymentStep(page, freshEmail("pay-refund"), "pickup");
+    await page.locator('input[data-paym="1"]').check();
+    await payButton(page).click();
+    await page.waitForURL(/\/api\/payments\/mock\//);
+    await page.getByRole("link", { name: "Оплатить" }).click();
+    await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+    await waitForScreen(page, "done");
+    const number = receiptNumber(page);
+    const paid = await adminOrder(browser, number);
+    expect(paid.status).toBe("paid");
+
+    await loginAsAdmin(page);
+    await page.locator('[data-admtab="orders"][aria-current]:visible').first().click();
+    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+    await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
+
+    // the confirm card is the only one with a field in it: the whole remainder
+    await page.locator("[data-admrefund]").click();
+    const card = page.locator(".adm-confirm");
+    await expect(card.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
+    const amount = card.locator("[data-admrefundamt]");
+    await expect(amount).toHaveValue(paid.total.toFixed(2));
+    await card.locator("[data-admapply]").click();
+
+    await expect(page.getByRole("status")).toContainText("возврат");
+    // the order card says where the money went…
+    await expect(page.locator(".adm-kv", { hasText: "Возвращено" })).toBeVisible();
+    // …and the button is gone, because there is nothing left to send back
+    await expect(page.locator("[data-admrefund]")).toHaveCount(0);
+
+    const after = await adminOrder(browser, number);
+    expect(after.status).toBe("refunded");
+    expect((after.payment as { refundedTotal?: number }).refundedTotal).toBe(paid.total);
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* 4. Cancelling at the bank, and trying again                          */
 /* ------------------------------------------------------------------ */
 
 test.describe("payments — cancelled at the bank", () => {
