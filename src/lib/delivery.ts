@@ -39,6 +39,8 @@ import { setOrderStatus } from "@/lib/orders";
 export interface DeliveryRun {
   closed: number;
   checked: number;
+  /** Parcels the carrier has sent back — left open on purpose, not closed. */
+  returned?: number;
   reason?: string;
 }
 
@@ -92,9 +94,32 @@ export async function getDeliverySettings(): Promise<DeliverySettings> {
 export function looksDelivered(status: unknown): boolean {
   const s = String(status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
   if (!s) return false;
+  if (looksReturned(s)) return false;
   return s === "delivered" || s === "completed" || s === "finished" ||
     s === "picked_up" || s === "collected" || s === "handed_over" ||
     s.startsWith("delivered");
+}
+
+/**
+ * The parcel came back. Montonio's own shipment vocabulary is
+ * `pending | registered | registrationFailed | inTransit | awaitingCollection |
+ * delivered | returned` (docs.montonio.com, shipping v2, «Shipments»), and
+ * `returned` is what an uncollected parcel becomes: the carriers hold it for
+ * their own window — Omniva 4 days since 01.05.2026, SmartPosti and DPD 7,
+ * Unisend 72 h plus 4 to redirect, Posti in Finland 5 — and then send it back
+ * to the sender address held in Montonio, never to the machine it was dropped
+ * into. The shop pays that leg at roughly the outbound price.
+ *
+ * Two reasons this matters here. It must never read as delivered — the
+ * customer never got it. And `autoDays` closes a shipped order after N days
+ * whatever the carrier says, so with that setting on, a parcel sitting on
+ * Renat's own desk would have been marked «Доставлен» on schedule.
+ */
+export function looksReturned(status: unknown): boolean {
+  const s = String(status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (!s) return false;
+  return s === "returned" || s === "return" || s.startsWith("returned") ||
+    s.startsWith("return_to") || s === "returning";
 }
 
 type ShippedRow = { id: string; number: string; shipping: unknown; updated_at: string | Date };
@@ -139,19 +164,25 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
 
   const cutoff = settings.autoDays ? now - settings.autoDays * 24 * 60 * 60 * 1000 : null;
   let closed = 0;
+  let returned = 0;
   for (const row of rows) {
     let deliver = false;
-
-    if (settings.useCarrier) {
-      const shipmentId = shipmentIdOf(row.shipping);
-      if (shipmentId) {
-        try {
-          const { getMontonioShipment } = await import("@/lib/shipping/montonio");
-          const shipment = await getMontonioShipment(shipmentId);
-          if (looksDelivered(shipment.status)) deliver = true;
-        } catch {
-          /* not configured, a 404, a timeout — the time rule below still applies */
+    /* A parcel the carrier has sent back is the one case where the clock must
+       not run: it is on its way to Renat, not to the customer. Asked for
+       whenever we have a shipment id, even with «спрашивать перевозчика» off,
+       because the alternative is closing it as delivered by the calendar. */
+    const shipmentId = shipmentIdOf(row.shipping);
+    if (shipmentId) {
+      try {
+        const { getMontonioShipment } = await import("@/lib/shipping/montonio");
+        const shipment = await getMontonioShipment(shipmentId);
+        if (looksReturned(shipment.status)) {
+          returned += 1;
+          continue;
         }
+        if (settings.useCarrier && looksDelivered(shipment.status)) deliver = true;
+      } catch {
+        /* not configured, a 404, a timeout — the time rule below still applies */
       }
     }
 
@@ -168,5 +199,6 @@ export async function closeDeliveredOrders(now: number = Date.now()): Promise<De
       console.error(`[delivery] could not close ${row.number}:`, err);
     }
   }
-  return { closed, checked: rows.length };
+  //  is reported so the nightly line says why a parcel did not close
+  return { closed, checked: rows.length, returned };
 }
