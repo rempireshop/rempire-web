@@ -1116,6 +1116,55 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-pair__n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adm-pair__v { font-family: Oswald, sans-serif; white-space: nowrap; }
 .adm-pair__v--plain { font-family: inherit; color: var(--a-muted); }
+/* a row that carries the sentence saying what its number means — the name
+   keeps its one-line ellipsis, the sentence under it wraps freely */
+.adm-pair--note { align-items: flex-start; }
+.adm-pair__x { min-width: 0; }
+.adm-pair__x .adm-pair__n { display: block; }
+.adm-pair__s {
+  display: block; font-size: 12px; line-height: 16px; color: var(--a-muted);
+  margin-top: 2px; white-space: normal;
+}
+
+/* ---------- numbers that read themselves ---------------------------------
+   Renat has never opened an analytics dashboard, so a figure on this screen
+   is only half of what he needs: the other half is the sentence next to it
+   (Dim, 07.09.2026). Three shapes carry that sentence — under a KPI cell,
+   under a section title, and beside a figure in the Google block — and one
+   more, `.adm-read`, states in words what the numbers add up to. */
+.adm-kpi__s { font-size: 12px; line-height: 16px; color: var(--a-muted); margin-top: 8px; }
+.adm-lead--stats { margin: 0; }
+/* the sentence under a section title: same muted hint, given room to breathe
+   and a measure that stays readable next to a full-width table */
+.adm-hint--lead { margin: 4px 0 0; max-width: 620px; }
+.adm-hint--lead + .adm-list, .adm-hint--lead + .adm-empty,
+.adm-hint--lead + .adm-defs, .adm-hint--lead + .adm-qs { margin-top: 10px; }
+/* a second title inside one section (the right rail stacks two lists) */
+.adm-sec__t--sub { margin-top: 24px; }
+
+/* The reading of the numbers, not a number itself: one rule down its left
+   side, ink when the news is fine and warm brown when it is not — and the
+   sentence says which, because a colour is not a sentence. */
+.adm-read {
+  border-left: 3px solid var(--a-ink); padding: 2px 0 2px 12px; margin: 10px 0 0;
+  font-size: 14px; line-height: 20px; max-width: 620px;
+}
+.adm-read--warn { border-left-color: var(--a-warn); }
+
+/* figure · name · what the word means — the Google block */
+.adm-defs { border-top: 1px solid var(--a-ink); margin-top: 16px; }
+.adm-def { padding: 12px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-def__h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.adm-def__v { font-family: Oswald, sans-serif; font-size: 24px; line-height: 1.1; white-space: nowrap; }
+.adm-def__n { font-size: 14px; }
+.adm-def__s { font-size: 13px; line-height: 18px; color: var(--a-muted); margin: 4px 0 0; max-width: 620px; }
+
+/* what somebody typed into Google, and what happened next — the word on its
+   own line so a long phrase is never cut, the outcome under it */
+.adm-qs { border-top: 1px solid var(--a-ink); margin-top: 10px; }
+.adm-q { padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-q__q { display: block; font-size: 14px; }
+.adm-q__s { display: block; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-top: 2px; }
 
 /* ---------- Подключения --------------------------------------------------- */
 

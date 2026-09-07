@@ -1298,6 +1298,72 @@
       "Открытий чата": "Vestluse avamisi",
       "Подарочных карт продано": "Kinkekaarte müüdud", "Подарочных карт потрачено": "Kinkekaarte kasutatud",
       "Всё в наличии.": "Kõik on laos.",
+      /* stats: the sentences that read the numbers out loud (Dim, 07.09.2026) */
+      "Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.":
+        "Kõik sellel ekraanil on valitud perioodi kohta. Raha loetakse ainult tasutud tellimustelt. Ja «+12%» numbri all tähendab «võrreldes sama pika ajavahemikuga enne seda»: «7 päeva» puhul seitsme sellele eelnenud päevaga.",
+      "Деньги по оплаченным заказам, вместе с доставкой.": "Raha tasutud tellimustelt, koos tarnega.",
+      "Сколько заказов за это время оплатили.": "Mitu tellimust selle aja jooksul ära maksti.",
+      "Сколько денег в среднем в одном заказе.": "Kui palju raha on keskmiselt ühes tellimuses.",
+      "Сколько человек из каждых 100 зашедших в магазин что-то купили.":
+        "Mitu inimest igast 100 poodi sisenenust midagi ostis.",
+      "Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.":
+        "Üks tulp on üks päev, kõige parempoolsem on tänane. Mida kõrgem tulp, seda rohkem raha see päev tõi.",
+      "Что принесло больше всего денег за период.": "Mis tõi perioodi jooksul kõige rohkem raha.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
+        "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse.",
+      "Путь до покупки": "Tee ostuni", "Зашли в магазин": "Sisenesid poodi",
+      "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.":
+        "Mitu inimest jõudis igasse sammu. Numbrid kahanevad alati: kõik sisenejad ei vaata kaupa ja kõik vaatajad ei osta. Kõige suurem aste allapoole — sealt ostjad kaovadki.",
+      "Сколько денег принёс каждый бренд за период.": "Kui palju raha tõi iga bränd perioodi jooksul.",
+      "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
+        "Neid kaupu avati, aga kordagi ei pandud ostukorvi. Paremal on, mitu korda avati. Tavaliselt aitab teine foto, aus hind või arusaadav kirjeldus.",
+      "Что люди печатали в поиске внутри магазина. Справа — сколько раз.":
+        "Mida inimesed poe enda otsingusse kirjutasid. Paremal on, mitu korda.",
+      "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.":
+        "Kui palju soodustust te iga koodiga ära andsite. See on raha, mida pood ei saanud.",
+      "С чего заходят": "Millega sisenetakse", "Телефоны": "Telefonid",
+      "С телефона или с компьютера. Справа — сколько человек.": "Telefonist või arvutist. Paremal on inimeste arv.",
+      "Из каких стран": "Millistest riikidest",
+      "Страна определяется по интернет-адресу гостя — это не адрес доставки.":
+        "Riik tuvastatakse külastaja internetiaadressi järgi — see ei ole tarneaadress.",
+      "С каких сайтов приходят": "Millistelt saitidelt tullakse",
+      "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.":
+        "Sait, kust inimene teie juurde tuli. Kui ta kirjutas poe aadressi ise või tuli järjehoidjatest, siis teda siin ei ole — seepärast on summa külastajate arvust väiksem.",
+      "Четыре вещи, которые не поместились выше.": "Neli asja, mis ülalpool ära ei mahtunud.",
+      "Человек оставил почту и собрал корзину, но заказ так и не оформил.":
+        "Inimene jättis e-posti ja pani ostukorvi kokku, aga tellimust ei vormistanudki.",
+      "Сколько раз в магазине открыли окно чата.": "Mitu korda poes vestlusaken avati.",
+      "Куплено карт и на какую сумму. Деньги пришли, товар ещё не выбран.":
+        "Mitu kaarti osteti ja mis summas. Raha tuli, kaup on veel valimata.",
+      "Сколько карт использовали при оплате и на какую сумму.": "Mitu kaarti kasutati maksmisel ja mis summas.",
+      /* stats → Google: every word of Search Console's own vocabulary, said in
+         a sentence Renat can repeat to somebody else */
+      "Магазин в поиске Google": "Pood Google'i otsingus",
+      "Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.":
+        "Viimased 28 päeva. Google saadab need numbrid kahe-kolme päevase hilinemisega, nii et eilset päeva siin veel ei ole.",
+      "За эти 28 дней Google ни разу не показал магазин в поиске.":
+        "Nende 28 päeva jooksul ei näidanud Google poodi otsingus kordagi.",
+      "Это первая страница Google — там вас видно.": "See on Google'i esimene lehekülg — seal teid nähakse.",
+      "Это вторая страница Google, а до неё доходят единицы: почти все выбирают что-то на первой.":
+        "See on Google'i teine lehekülg ja sinna jõuavad vähesed: peaaegu kõik valivad midagi esimeselt.",
+      "Это третья страница Google или дальше — туда почти никто не заглядывает.":
+        "See on Google'i kolmas lehekülg või kaugemal — sinna ei vaata peaaegu keegi.",
+      "Показ — это когда магазин попал в список Google по чьему-то запросу: человек его увидел, но мог и не заметить.":
+        "Näitamine on see, kui pood sattus kellegi päringu peale Google'i nimekirja: inimene nägi seda, aga võis ka mitte tähele panna.",
+      "Переходы": "Üleminekud",
+      "Переход — человек увидел магазин в Google и нажал на ссылку. Это и есть покупатели, пришедшие из поиска.":
+        "Üleminek on see, kui inimene nägi poodi Google'is ja klõpsas lingil. Just nemad on otsingust tulnud ostjad.",
+      "Доля переходов (CTR)": "Üleminekute osakaal (CTR)",
+      "Доля переходов, по-английски CTR, — какая часть показов превратилась в переход. Чем выше место в Google, тем она больше.":
+        "Üleminekute osakaal, inglise keeles CTR, on see, kui suur osa näitamistest muutus üleminekuks. Mida kõrgem koht Google'is, seda suurem see on.",
+      "Из каждых 100 показов не переходит почти никто.": "Igast 100 näitamisest ei lähe edasi peaaegu keegi.",
+      "Среднее место в Google": "Keskmine koht Google'is",
+      "Место — какой по счёту ваш магазин в списке Google. Первая строка забирает больше половины всех переходов, десятая — единицы.":
+        "Koht on see, mitmes teie pood Google'i nimekirjas on. Esimene rida võtab üle poole kõigist üleminekutest, kümnes üksikud.",
+      "Что люди искали — и что они увидели": "Mida inimesed otsisid — ja mida nad nägid",
+      "Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.":
+        "Need on sõnad, mida inimesed Google'isse endasse kirjutasid. Iga sõna all on see, mis edasi juhtus.",
+      "По этому слову в магазин не зашёл никто.": "Selle sõna peale ei tulnud poodi mitte keegi.",
       "Google Search Console — последние 28 дней": "Google Search Console — viimased 28 päeva",
       "Аналитика сейчас не отвечает — попробуйте позже.": "Analüütika ei vasta praegu — proovi hiljem uuesti.",
       "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
@@ -3346,6 +3412,72 @@
       "Открытий чата": "Chat opens",
       "Подарочных карт продано": "Gift cards sold", "Подарочных карт потрачено": "Gift cards redeemed",
       "Всё в наличии.": "Everything is in stock.",
+      /* stats: the sentences that read the numbers out loud (Dim, 07.09.2026) */
+      "Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.":
+        "Everything on this screen is for the period you picked. Money counts paid orders only. And a “+12%” under a figure means “compared with the same stretch of time just before it”: for “7 days”, the seven days before those.",
+      "Деньги по оплаченным заказам, вместе с доставкой.": "Money from paid orders, delivery included.",
+      "Сколько заказов за это время оплатили.": "How many orders were paid for in this time.",
+      "Сколько денег в среднем в одном заказе.": "How much money an average order brings.",
+      "Сколько человек из каждых 100 зашедших в магазин что-то купили.":
+        "Out of every 100 people who came into the shop, this many bought something.",
+      "Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.":
+        "One bar is one day, the rightmost is today. The taller the bar, the more money that day brought.",
+      "Что принесло больше всего денег за период.": "What brought in the most money over the period.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
+        "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it.",
+      "Путь до покупки": "The road to a purchase", "Зашли в магазин": "Came into the shop",
+      "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.":
+        "How many people reached each step. The numbers always go down: not everyone who comes in looks at a product, and not everyone who looks buys. The biggest step down is where the buyers are lost.",
+      "Сколько денег принёс каждый бренд за период.": "How much money each brand brought over the period.",
+      "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
+        "These products were opened but never put into a basket. On the right — how many times they were opened. Usually a better photo, an honest price or a clear description fixes it.",
+      "Что люди печатали в поиске внутри магазина. Справа — сколько раз.":
+        "What people typed into the shop's own search. On the right — how many times.",
+      "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.":
+        "How much discount you gave away with each code over the period. This is money the shop did not get.",
+      "С чего заходят": "What they come from", "Телефоны": "Phones",
+      "С телефона или с компьютера. Справа — сколько человек.": "From a phone or from a computer. On the right — how many people.",
+      "Из каких стран": "Which countries from",
+      "Страна определяется по интернет-адресу гостя — это не адрес доставки.":
+        "The country comes from the visitor's internet address — it is not the delivery address.",
+      "С каких сайтов приходят": "Which sites they come from",
+      "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.":
+        "The site a person came to you from. If they typed the shop's address themselves or came from a bookmark, they are not here — which is why this adds up to less than the number of visitors.",
+      "Четыре вещи, которые не поместились выше.": "Four things that did not fit above.",
+      "Человек оставил почту и собрал корзину, но заказ так и не оформил.":
+        "The person left an e-mail and filled a basket, but never placed the order.",
+      "Сколько раз в магазине открыли окно чата.": "How many times the chat window was opened in the shop.",
+      "Куплено карт и на какую сумму. Деньги пришли, товар ещё не выбран.":
+        "How many cards were bought and for how much. The money has arrived, the goods are not chosen yet.",
+      "Сколько карт использовали при оплате и на какую сумму.": "How many cards were used to pay and for how much.",
+      /* stats → Google: every word of Search Console's own vocabulary, said in
+         a sentence Renat can repeat to somebody else */
+      "Магазин в поиске Google": "The shop in Google search",
+      "Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.":
+        "The last 28 days. Google sends these figures two or three days late, so yesterday is not here yet.",
+      "За эти 28 дней Google ни разу не показал магазин в поиске.":
+        "In these 28 days Google never once showed the shop in search.",
+      "Это первая страница Google — там вас видно.": "That is Google's first page — you are visible there.",
+      "Это вторая страница Google, а до неё доходят единицы: почти все выбирают что-то на первой.":
+        "That is Google's second page, and few people get that far: almost everybody picks something from the first.",
+      "Это третья страница Google или дальше — туда почти никто не заглядывает.":
+        "That is Google's third page or further — hardly anybody looks there.",
+      "Показ — это когда магазин попал в список Google по чьему-то запросу: человек его увидел, но мог и не заметить.":
+        "An impression is when the shop landed in Google's list for somebody's search: they saw it, but may not have noticed it.",
+      "Переходы": "Visits from Google",
+      "Переход — человек увидел магазин в Google и нажал на ссылку. Это и есть покупатели, пришедшие из поиска.":
+        "A click is when somebody saw the shop in Google and pressed the link. Those are your visitors from search.",
+      "Доля переходов (CTR)": "Share of clicks (CTR)",
+      "Доля переходов, по-английски CTR, — какая часть показов превратилась в переход. Чем выше место в Google, тем она больше.":
+        "The share of clicks, CTR for short, is how much of what Google showed turned into a visit. The higher the place in Google, the bigger it is.",
+      "Из каждых 100 показов не переходит почти никто.": "Out of every 100 impressions almost nobody clicks through.",
+      "Среднее место в Google": "Average place in Google",
+      "Место — какой по счёту ваш магазин в списке Google. Первая строка забирает больше половины всех переходов, десятая — единицы.":
+        "The place is where your shop stands in Google's list. The first line takes more than half of all clicks, the tenth takes a handful.",
+      "Что люди искали — и что они увидели": "What people searched for — and what they saw",
+      "Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.":
+        "These are the words people typed into Google itself. Under each word is what happened next.",
+      "По этому слову в магазин не зашёл никто.": "Nobody came to the shop from this word.",
       "Google Search Console — последние 28 дней": "Google Search Console — last 28 days",
       "Аналитика сейчас не отвечает — попробуйте позже.": "Analytics is not responding right now — try again later.",
       "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
@@ -4215,6 +4347,20 @@
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* «Аналитика» → «Магазин в поиске Google»: the four sentences that carry a
+       live figure. Everything else in that block is a plain key above — only
+       the numbers Google reports have to be spliced in here. */
+    [/^В среднем ваш магазин показывается в Google на (\d+)-м месте\.$/,
+      { ET: "Keskmiselt näidatakse teie poodi Google'is $1. kohal.",
+        EN: "On average your shop shows up in Google in position $1." }],
+    [/^Из (.+) показов перешли (.+)\.$/,
+      { ET: "$1 näitamisest tehti $2 üleminekut.", EN: "Out of $1 impressions, $2 clicked through." }],
+    [/^Из каждых 100 показов переходов — примерно (\d+)\.$/,
+      { ET: "Igast 100 näitamisest on üleminekuid umbes $1.",
+        EN: "Out of every 100 impressions, about $1 click through." }],
+    [/^Показов: (.+) · переходов: (.+) · место в Google: (\d+)$/,
+      { ET: "Näitamisi: $1 · üleminekuid: $2 · koht Google'is: $3",
+        EN: "Impressions: $1 · clicks: $2 · place in Google: $3" }],
     /* «Доставка и оплата» and «Клиенты → партнёры»: the lines built around a
        number, an address or the confirm card's two-line text */
     [/^от (€\d.*)$/, { ET: "alates $1", EN: "from $1" }],
@@ -5943,6 +6089,20 @@
     // one decimal, language-aware separator (ratings)
     var v = (Math.round(n * 10) / 10).toFixed(1);
     return S.lang === "EN" ? v : v.replace(".", ",");
+  }
+  /* A whole count with a non-breaking gap every three digits — «2 900», not
+     «2900». Four digits read as a year and five read as noise; the analytics
+     screen is the one place in the panel where the owner meets numbers that
+     big, and «2900 показов» is the kind of figure he has to be able to say
+     out loud. Digits only, so nothing here needs translating. */
+  function numGrp(n) {
+    var v = Math.round(Number(n) || 0);
+    var s = String(Math.abs(v)), out = "";
+    for (var i = 0; i < s.length; i++) {
+      if (i && (s.length - i) % 3 === 0) out += " ";
+      out += s.charAt(i);
+    }
+    return (v < 0 ? "-" : "") + out;
   }
   function byId(id) { for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i]; return CATALOGUE[0]; }
   /* byId() always returns SOMETHING (see above) — exactly wrong for a list of
@@ -11321,7 +11481,9 @@
      own min/max. Reads var(--ink)/var(--rule-soft) like the rest of the
      panel, so it is never a colour of its own. */
   var FUNNEL_STAGES = [
-    ["sessions", "Сессии"], ["product", "Смотрели товар"], ["addToCart", "Добавили в корзину"],
+    // «Сессии» was the one word on this screen that only a developer reads;
+    // the step it counts is «somebody opened the shop» (Dim, 07.09.2026)
+    ["sessions", "Зашли в магазин"], ["product", "Смотрели товар"], ["addToCart", "Добавили в корзину"],
     ["checkout", "Открыли оформление"], ["purchase", "Купили"]
   ];
   /* Generic two-column list — name + one number — reused across most tables
@@ -13242,14 +13404,18 @@
      — stay under them, because a redesign that quietly drops numbers is a
      redesign that loses the owner data. */
   var ADM_WEEKDAYS = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-  function admKpiHTML(label, value, deltaPct) {
+  /** A KPI cell. `what` is the one plain sentence that says what the number
+      is — four words the owner never has to guess at, printed under the
+      figure instead of hidden in a tooltip (Dim, 07.09.2026). */
+  function admKpiHTML(label, value, deltaPct, what) {
     var cls = deltaPct == null ? "" : deltaPct > 0 ? " adm-kpi__d--up" : deltaPct < 0 ? " adm-kpi__d--down" : "";
     var line = deltaPct == null
       ? "нет данных за прошлый период"
       : (deltaPct >= 0 ? "+" : "") + num1(deltaPct) + "% к прошлому периоду";
     return '<div class="adm-kpi"><div class="adm-kpi__l">' + label + "</div>" +
       '<div class="adm-kpi__v">' + value + "</div>" +
-      '<div class="adm-kpi__d' + cls + '">' + line + "</div></div>";
+      '<div class="adm-kpi__d' + cls + '">' + line + "</div>" +
+      (what ? '<div class="adm-kpi__s">' + what + "</div>" : "") + "</div>";
   }
   /** One bar per day, labelled with its weekday; the last one is today, so it
       is the ink one. At most a fortnight — beyond that the labels stop being
@@ -13265,12 +13431,22 @@
         eur(r.revenue) + '"><span>' + lbl + "</span></div>";
     }).join("") + "</div>";
   }
-  /** Name + one number, the shape most of this screen is made of. */
+  /** Name + one number, the shape most of this screen is made of. A row may
+      carry a third element — the sentence that says what its number means —
+      and it is drawn under the name rather than in a tooltip: a tooltip is
+      a thing the owner has to know to open, and he does not (Dim,
+      07.09.2026). It is passed through as markup, not escaped, because the
+      only callers below write it themselves. */
   function admPairsHTML(rows, empty, plain) {
     if (!rows.length) return '<div class="adm-empty">' + empty + "</div>";
     return '<div class="adm-list">' + rows.map(function (r) {
-      return '<div class="adm-pair"><span class="adm-pair__n">' + esc(String(r[0])) + "</span>" +
-        '<span class="adm-pair__v' + (plain ? " adm-pair__v--plain" : "") + '">' + esc(String(r[1])) + "</span></div>";
+      var val = '<span class="adm-pair__v' + (plain ? " adm-pair__v--plain" : "") + '">' + esc(String(r[1])) + "</span>";
+      if (!r[2]) {
+        return '<div class="adm-pair"><span class="adm-pair__n">' + esc(String(r[0])) + "</span>" + val + "</div>";
+      }
+      return '<div class="adm-pair adm-pair--note"><span class="adm-pair__x">' +
+        '<span class="adm-pair__n">' + esc(String(r[0])) + "</span>" +
+        '<span class="adm-pair__s">' + r[2] + "</span></span>" + val + "</div>";
     }).join("") + "</div>";
   }
   function admStatsScreen() {
@@ -13294,18 +13470,31 @@
     }
     var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, eur(p.revenue)]; };
     return head +
+      /* One sentence before the numbers, because two things about this screen
+         are impossible to guess and both change what every figure means: the
+         money is paid orders only, and every «+12%» is against the same
+         stretch of time just before this one. */
+      '<p class="adm-lead adm-lead--stats">Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. ' +
+        "А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.</p>" +
       '<div class="adm-kpis">' +
-        admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct) +
-        admKpiHTML("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct) +
-        admKpiHTML("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct) +
-        admKpiHTML("Из корзины в заказ", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct) +
+        admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct,
+          "Деньги по оплаченным заказам, вместе с доставкой.") +
+        admKpiHTML("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct,
+          "Сколько заказов за это время оплатили.") +
+        admKpiHTML("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct,
+          "Сколько денег в среднем в одном заказе.") +
+        admKpiHTML("Из корзины в заказ", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct,
+          "Сколько человек из каждых 100 зашедших в магазин что-то купили.") +
       "</div>" +
       admColsHTML(
         '<div><div class="adm-sec__t">Выручка по дням</div>' +
+          '<p class="adm-hint adm-hint--lead">Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.</p>' +
           (a.revenueByDay.length ? admBarsHTML(a.revenueByDay) : '<div class="adm-empty">Пока нет данных</div>') + "</div>",
         '<div class="adm-sec__t">Топ товаров</div>' +
+        '<p class="adm-hint adm-hint--lead">Что принесло больше всего денег за период.</p>' +
         admPairsHTML(a.topProductsByRevenue.map(prod), "Пока нет продаж") +
-        '<div class="adm-sec__t" style="margin-top:24px">Искали, но не нашли</div>' +
+        '<div class="adm-sec__t adm-sec__t--sub">Искали, но не нашли</div>' +
+        '<p class="adm-hint adm-hint--lead">Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.</p>' +
         admPairsHTML(a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }),
           "Таких запросов нет", true)) +
       admStatsMoreHTML(a) + "</div>";
@@ -13314,35 +13503,93 @@
       had all along: the funnel, brands, views, searches, promo codes, traffic
       and Search Console. */
   function admStatsMoreHTML(a) {
+    /** A section: a title, the one sentence that says what its numbers are,
+        and the list itself. The sentence is not optional — it is the
+        difference between a table the owner reads and a table he scrolls
+        past (Dim, 07.09.2026). */
+    var sec = function (title, lead, body) {
+      return '<div><div class="adm-sec__t">' + title + "</div>" +
+        '<p class="adm-hint adm-hint--lead">' + lead + "</p>" + body + "</div>";
+    };
     return '<div class="adm-stack adm-stack--tight">' +
-      '<div><div class="adm-sec__t">Воронка</div>' + admPairsHTML(FUNNEL_STAGES.map(function (s) {
-        return [s[1], String(a.funnel[s[0]] || 0)];
-      }), "Пока нет данных", true) + "</div>" +
-      '<div><div class="adm-sec__t">Бренды: что приносит деньги</div>' +
-        admPairsHTML(a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж") + "</div>" +
-      '<div><div class="adm-sec__t">Смотрят, но не покупают</div>' +
+      sec("Путь до покупки",
+        "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.",
+        admPairsHTML(FUNNEL_STAGES.map(function (s) {
+          return [s[1], String(a.funnel[s[0]] || 0)];
+        }), "Пока нет данных", true)) +
+      sec("Бренды: что приносит деньги", "Сколько денег принёс каждый бренд за период.",
+        admPairsHTML(a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж")) +
+      sec("Смотрят, но не покупают",
+        "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.",
         admPairsHTML(a.viewedNotBought.map(function (p) {
           return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)];
-        }), "Таких товаров нет", true) + "</div>" +
-      '<div><div class="adm-sec__t">Что искали чаще всего</div>' +
-        admPairsHTML(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали", true) + "</div>" +
-      '<div><div class="adm-sec__t">Промокоды</div>' +
+        }), "Таких товаров нет", true)) +
+      sec("Что искали чаще всего", "Что люди печатали в поиске внутри магазина. Справа — сколько раз.",
+        admPairsHTML(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали", true)) +
+      sec("Промокоды", "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.",
         admPairsHTML(a.promoUsage.map(function (r) { return [r.code, eur(r.amount)]; }),
-          "Промокоды пока не использовали") + "</div>" +
-      '<div><div class="adm-sec__t">Откуда приходят</div>' +
-        admPairsHTML([["Мобильные", String(a.traffic.device.mobile)], ["Компьютеры", String(a.traffic.device.desktop)]]
-          .concat(a.traffic.countries.map(function (c) { return [c.country, String(c.sessions)]; }))
-          .concat(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; })),
-          "Пока нет данных", true) + "</div>" +
-      '<div><div class="adm-sec__t">Ещё цифры</div>' +
+          "Промокоды пока не использовали")) +
+      /* One list of «Мобильные · EE · google.com» was three different questions
+         stacked in one column, and the country came as a two-letter code. Three
+         named lists now, and a real country name (countryName()). */
+      sec("С чего заходят", "С телефона или с компьютера. Справа — сколько человек.",
         admPairsHTML([
-          ["Брошенные корзины", String(a.abandonedCarts)],
-          ["Открытий чата", String(a.chatOpens)],
-          ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount)],
-          ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount)]
-        ], "Пока нет данных", true) + "</div>" +
-      '<div><div class="adm-sec__t">Google: 28 дней</div>' + admGscHTML() + "</div>" +
+          ["Телефоны", String(a.traffic.device.mobile)],
+          ["Компьютеры", String(a.traffic.device.desktop)]
+        ], "Пока нет данных", true)) +
+      sec("Из каких стран", "Страна определяется по интернет-адресу гостя — это не адрес доставки.",
+        admPairsHTML(a.traffic.countries.map(function (c) { return [countryName(c.country), String(c.sessions)]; }),
+          "Пока нет данных", true)) +
+      sec("С каких сайтов приходят",
+        "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.",
+        admPairsHTML(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; }),
+          "Пока нет данных", true)) +
+      sec("Ещё цифры", "Четыре вещи, которые не поместились выше.",
+        admPairsHTML([
+          ["Брошенные корзины", String(a.abandonedCarts),
+            "Человек оставил почту и собрал корзину, но заказ так и не оформил."],
+          ["Открытий чата", String(a.chatOpens), "Сколько раз в магазине открыли окно чата."],
+          ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount),
+            "Куплено карт и на какую сумму. Деньги пришли, товар ещё не выбран."],
+          ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount),
+            "Сколько карт использовали при оплате и на какую сумму."]
+        ], "Пока нет данных", true)) +
+      sec("Магазин в поиске Google",
+        "Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.",
+        admGscHTML()) +
       "</div>";
+  }
+  /* ---------- «Магазин в поиске Google» ------------------------------------
+     This block used to be three rows of bare numbers — «Клики 47», «Показы
+     2900», «Средняя позиция 13,0» — and under them a list of words with a
+     count beside each. Dim, 07.09.2026: Renat has never opened Search
+     Console, and «средняя позиция» says nothing to him; «в среднем ваш
+     магазин показывается на 13-м месте в Google» does.
+
+     So: the block opens with the sentence the numbers add up to, every
+     figure carries one plain line saying what that word even means, and the
+     words people typed are shown as «вот что искали — и что Google им
+     показал», with the outcome under each word instead of a lone number in
+     a right-hand column. Where the news is bad — page two of Google, a word
+     nobody clicked — it is said in words. A number a specialist has to
+     decode is the same as no number at all, and hiding the bad half of it
+     is worse than that. */
+  /** Which page of Google an average position lands on: the one fact that
+      turns a bare «13» into something the owner can act on. */
+  function gscPageLine(pos) {
+    if (pos <= 10) return "Это первая страница Google — там вас видно.";
+    if (pos <= 20) return "Это вторая страница Google, а до неё доходят единицы: почти все выбирают что-то на первой.";
+    return "Это третья страница Google или дальше — туда почти никто не заглядывает.";
+  }
+  /** A figure with the sentences that read it: what the word means at all,
+      and — where it helps — what today's value of it means. Each sentence is
+      its own text node, so the translator finds it by key or by rule. */
+  function admDefHTML(value, name, what, read) {
+    return '<div class="adm-def"><div class="adm-def__h">' +
+      '<span class="adm-def__v">' + value + "</span>" +
+      '<span class="adm-def__n">' + name + "</span></div>" +
+      '<p class="adm-def__s"><span>' + what + "</span>" +
+      (read ? " <span>" + read + "</span>" : "") + "</p></div>";
   }
   function admGscHTML() {
     loadGsc();
@@ -13354,12 +13601,45 @@
           ? "Ключ Search Console не читается — см. «Подключения»"
           : "Google Search Console сейчас не отвечает — попробуйте позже") + "</div>";
     }
-    return admPairsHTML([
-      ["Клики", String(GSC.clicks)], ["Показы", String(GSC.impressions)],
-      ["Средняя позиция", num1(GSC.position)]
-    ].concat((GSC.topQueries || []).slice(0, 5).map(function (q) {
-      return [q.query, String(q.clicks)];
-    })), "Пока нет данных", true);
+    var pos = Number(GSC.position) || 0;
+    var imp = Number(GSC.impressions) || 0;
+    var clk = Number(GSC.clicks) || 0;
+    var per100 = imp ? Math.round((clk / imp) * 100) : 0;
+    /* The headline, and the only place on this screen where a colour changes:
+       off the first page of Google is bad news, so the rule beside it turns —
+       but the sentence says it too, because a colour is not a sentence. */
+    var lead = imp
+      ? '<p class="adm-read' + (pos > 10 ? " adm-read--warn" : "") + '">' +
+        "<span>В среднем ваш магазин показывается в Google на " + Math.round(pos) + "-м месте.</span> " +
+        "<span>" + gscPageLine(pos) + "</span></p>"
+      : '<p class="adm-read adm-read--warn"><span>За эти 28 дней Google ни разу не показал магазин в поиске.</span></p>';
+    var defs = '<div class="adm-defs">' +
+      admDefHTML(numGrp(imp), "Показы",
+        "Показ — это когда магазин попал в список Google по чьему-то запросу: человек его увидел, но мог и не заметить.", "") +
+      admDefHTML(numGrp(clk), "Переходы",
+        "Переход — человек увидел магазин в Google и нажал на ссылку. Это и есть покупатели, пришедшие из поиска.",
+        imp ? "Из " + numGrp(imp) + " показов перешли " + numGrp(clk) + "." : "") +
+      admDefHTML(num1(imp ? (clk / imp) * 100 : 0) + " %", "Доля переходов (CTR)",
+        "Доля переходов, по-английски CTR, — какая часть показов превратилась в переход. Чем выше место в Google, тем она больше.",
+        !imp ? ""
+          : per100 >= 1
+            ? "Из каждых 100 показов переходов — примерно " + per100 + "."
+            : "Из каждых 100 показов не переходит почти никто.") +
+      admDefHTML(num1(pos), "Среднее место в Google",
+        "Место — какой по счёту ваш магазин в списке Google. Первая строка забирает больше половины всех переходов, десятая — единицы.", "") +
+      "</div>";
+    var qs = (GSC.topQueries || []).slice(0, 8);
+    var queries = '<div class="adm-sec__t adm-sec__t--sub">Что люди искали — и что они увидели</div>' +
+      '<p class="adm-hint adm-hint--lead">Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.</p>' +
+      (qs.length
+        ? '<div class="adm-qs">' + qs.map(function (q) {
+          return '<div class="adm-q"><span class="adm-q__q">' + esc(q.query) + "</span>" +
+            '<span class="adm-q__s"><span>Показов: ' + numGrp(q.impressions) +
+            " · переходов: " + numGrp(q.clicks) + " · место в Google: " + Math.round(q.position) + "</span>" +
+            (q.clicks ? "" : " <span>По этому слову в магазин не зашёл никто.</span>") + "</span></div>";
+        }).join("") + "</div>"
+        : '<div class="adm-empty">Пока нет данных</div>');
+    return lead + defs + queries;
   }
 
   /* ---------- Подключения -------------------------------------------------
