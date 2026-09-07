@@ -988,12 +988,16 @@
       "Оплата картой, Apple Pay или Google Pay — на защищённой странице Montonio, затем возврат в магазин.":
         "Maksmine pangakaardiga, Apple Pay või Google Pay — Montonio turvalisel lehel, seejärel tagasi poodi.",
       // blog
-      /* «Blog», not «Ajaveeb» — the owner's own word for the section in
-         Estonian, and the one every ET surface has to carry: nav, footer,
-         breadcrumbs, the <h1>, the SEO title and the prerendered/sitemap
-         labels (tools/prerender-shop2.mjs lifts this very table out of this
-         file, so they all follow from this one line). */
-      "Блог": "Blog",
+      /* «Blogi», not «Ajaveeb» and not the bare «Blog» — the owner's own word,
+         settled 07.09.2026: the shop's own sentences already decline it
+         («Blogi pole ajutiselt saadaval», «Tagasi Blogisse», «kontrolli
+         aadressi Blogis»), so the label follows them and the section has one
+         name. Every ET surface carries it: nav, footer, breadcrumbs, the
+         <h1>, the SEO title and the prerendered/sitemap labels
+         (tools/prerender-shop2.mjs lifts this very table out of this file, so
+         they all follow from this one line — src/lib/seo-head.mjs carries the
+         same word for the request-time blog page). */
+      "Блог": "Blogi",
       "Статьи Rempire об уходе за волосами, бородой и лицом: разбираем средства, техники и уход шаг за шагом. Магазин Rempire, Таллинн.":
         "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
       "Статей пока нет — загляните позже.": "Artikleid veel pole — vaata varsti uuesti.",

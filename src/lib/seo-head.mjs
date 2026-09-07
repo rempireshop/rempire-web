@@ -147,8 +147,9 @@ export const T = {
     blogDesc: "Rempire'i artiklid juuste, habeme ja näo hooldusest: tooted, tehnikad ja hooldus samm-sammult. Rempire'i pood, Tallinn.",
     blogEmpty: "Artikleid veel pole — vaata varsti uuesti.",
     otherPosts: "Teised artiklid",
-    // «Blog», not «Ajaveeb» — the owner's own word for the section (app.js dictionary)
-    blog: "Blog", postProducts: "Tooted artiklist", postMissing: "Artiklit ei leitud."
+    // «Blogi», not «Ajaveeb» and not «Blog» — the owner's own word, settled
+    // 07.09.2026; the same line as the app.js dictionary's "Блог" entry
+    blog: "Blogi", postProducts: "Tooted artiklist", postMissing: "Artiklit ei leitud."
   },
   EN: {
     base: "REMPIRE — grooming shop in Tallinn",
