@@ -16451,6 +16451,13 @@
     var track = scanTrack();
     if (!track || !track.applyConstraints) return;
     var next = scanZoomClamp(z);
+    /* A pinch fires a touchmove per frame, and applyConstraints() on a camera
+       track is a real round trip to the driver — sixty of them a second, most
+       asking for a change smaller than the lens can make, is how a smooth
+       gesture turns into a stuttering one. A hundredth of the range is the
+       smallest step worth sending. */
+    var step = (SCAN.zoomCaps.max - SCAN.zoomCaps.min) / 100;
+    if (S.scanZoom && Math.abs(next - S.scanZoom) < step) return;
     S.scanZoom = next;
     try { track.applyConstraints({ advanced: [{ zoom: next }] }).catch(noop); } catch (e) {}
     if (show) {
@@ -16476,6 +16483,10 @@
     if (e.touches && e.touches.length === 2) {
       SCAN.pinchFrom = scanTouchDist(e.touches);
       SCAN.pinchZoom = S.scanZoom || scanZoomClamp(SCAN_ZOOM_START);
+      /* The first finger of a pinch arrives as a one-touch touchstart and was
+         counted as half a double tap; the next single tap, moments later,
+         then zoomed on its own. A second finger cancels that reading. */
+      SCAN.tapAt = 0;
       e.preventDefault();
       return;
     }
