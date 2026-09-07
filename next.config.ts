@@ -73,7 +73,7 @@ function prerenderedRewrites() {
     /* Single pages, so no alternation to build — but still listed off disk,
        so a run of `npm run prerender` that has not happened yet leaves them
        falling through to the shell rather than 404ing. */
-    for (const one of ["sets", "gift", "blog"]) {
+    for (const one of ["sets", "gift", "blog", "brands"]) {
       if (existsSync(path.join(PUBLIC, dir, one, "index.html"))) {
         out.push({ source: `/shop2${prefix}/${one}`, destination: `/shop2${prefix}/${one}/index.html` });
       }
