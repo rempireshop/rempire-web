@@ -268,7 +268,10 @@ test.describe("admin — product creation", () => {
 
       const gone = await freshShop(browser);
       await gone.page.goto(shopUrl("", `/p/${id}/`));
-      await waitForScreen(gone.page, "home");
+      /* A product taken out of the shop leaves a dead address behind, and since
+         07.09.2026 a dead address says so rather than quietly showing the home
+         page (Dim: «make a page not found»). */
+      await waitForScreen(gone.page, "notfound");
       await gone.page.goto(shopUrl("", `/search/?q=${encodeURIComponent(NAME.split(" ")[0])}`));
       await waitForScreen(gone.page, "search");
       await expect(gone.page.locator(`.card__go[data-go-product="${id}"]`)).toHaveCount(0);
@@ -459,7 +462,10 @@ test.describe("admin — product creation", () => {
       const hidden = await freshShop(browser);
       const r404 = await hidden.page.goto(shopUrl("/et", `/p/${id}/`));
       expect(r404?.status()).toBe(404);
-      await waitForScreen(hidden.page, "home");
+      /* Since 07.09.2026 a dead address gets a page that says so instead of
+         the home page underneath it (Dim: «make a page not found»), so app.js
+         settles on its own «Страница не найдена» screen here. */
+      await waitForScreen(hidden.page, "notfound");
       await hidden.close();
     } finally {
       if (id) {

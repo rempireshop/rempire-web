@@ -6,7 +6,8 @@
     "address": "Mardi 1, 10145 Tallinn",
     "email": "info@rempireshop.com",
     "phone": "+372 5623 7237",
-    "iban": ""
+    "iban": "",
+    "bankName": ""
   },
   "hours": {
     "mon": "",

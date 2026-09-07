@@ -233,12 +233,19 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
     await expect(birthday).not.toContainText("за 3 дня до даты");
     await assertClean(page, w, "the mail list");
 
-    /* «Салон»: the receipt is a link on the order, not a letter — POST
-       /api/admin/pos-orders/ sends nothing at all. */
+    /* «Салон»: the hint has to match what the till actually does, and what it
+       does changed on 07.09.2026. It used to promise a receipt by e-mail and
+       send nothing; then it was corrected to say no letter goes out; and now
+       POST /api/admin/pos-orders/ settles the sale like an online payment, so
+       a customer who gives an address really is written to and really does
+       earn points (Dim: salon sales must count as purchases). The printable
+       receipt is still a link on the order, which is the part that never
+       changed. */
     await section(page, "pos");
-    await expect(page.locator(".adm-hint", { hasText: "Покупатель не обязателен" }).first())
-      .toContainText("письмом он не уходит");
-    await expect(page.locator(".adm-hint", { hasText: "чек письмом" })).toHaveCount(0);
+    const salonHint = page.locator(".adm-hint", { hasText: "Покупатель не обязателен" }).first();
+    await expect(salonHint).toContainText("уйдёт письмо");
+    await expect(salonHint).toContainText("Чек ↗");
+    await expect(page.locator(".adm-hint", { hasText: "письмом он не уходит" })).toHaveCount(0);
     await assertClean(page, w, "the salon register");
   });
 });

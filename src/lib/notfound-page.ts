@@ -60,7 +60,7 @@ const CATALOGUE = catalogueMin as MinProduct[];
 
 /** The catalogue's own section keys, plus the `all` pseudo-section. */
 const CATEGORIES = new Set<string>(["all", ...CATALOGUE.map((p) => p.c)]);
-/** Every brand slug the shop has a page for — the same slugify() the prerender uses. */
+/** Every brand slug the catalogue has a page for — the same slugify() the prerender uses. */
 const BRAND_SLUGS = new Set<string>(CATALOGUE.map((p) => slugify(p.b)));
 
 /* The five policy slugs, read off the pages the prerender wrote rather than
@@ -132,7 +132,7 @@ const SINGLE_PAGES = new Set(["sets", "gift", "blog"]);
  * their own request-time route that answers 404 for an id nobody has, and
  * guessing here from a build-time file would 404 a page the owner published
  * an hour ago. Categories, brands and policy slugs are closed sets known at
- * build time, so those are checked.
+ * build time, so that one is checked; brands are not (see below).
  */
 export function isKnownShopPath(segs: string[]): boolean {
   if (segs.length === 0) return true; // the home page in one of the three languages
@@ -141,6 +141,12 @@ export function isKnownShopPath(segs: string[]): boolean {
   if (segs.length !== 2 || !id) return false;
   if (kind === "p" || kind === "set" || kind === "blog") return true;
   if (kind === "c") return CATEGORIES.has(id);
+  /* Brands are the one set that is only half closed. The catalogue's brands
+     are known here; a brand the owner typed on a product of his own is not,
+     and is asked of the database by notFoundPageResponse() below. Deciding it
+     from the catalogue alone 404s a page the shop really serves — found by
+     e2e/admin-products.spec.ts on 07.09.2026, where a new product's brand page
+     answered 404 while the product's own page answered 200. */
   if (kind === "b") return BRAND_SLUGS.has(id);
   if (kind === "info") {
     const slugs = legalSlugs();
@@ -211,13 +217,35 @@ export function renderNotFoundPage(shell: string, lang: Lang, rest: string, base
  * plain shell at 200 — that is the behaviour every one of those screens has
  * always had.
  */
-export function notFoundPageResponse(pathname: string): Response {
+/**
+ * Is this a brand only the owner's own products carry? Asked only when the
+ * catalogue has never heard of the slug, so a shop without custom products
+ * never reaches the database from here. A database that is down answers
+ * "maybe": serving the shell at 200 is the older, softer wrong answer, and a
+ * far better one than telling a crawler that a real brand page is gone because
+ * Postgres blinked.
+ */
+async function isCustomBrand(slug: string): Promise<boolean> {
+  try {
+    const { listCustomProducts } = await import("@/lib/custom-products");
+    const rows = await listCustomProducts({ activeOnly: true });
+    return rows.some((r) => slugify(r.brand) === slug);
+  } catch (err) {
+    console.error("[notfound] custom brands unavailable:", err);
+    return true;
+  }
+}
+
+export async function notFoundPageResponse(pathname: string): Promise<Response> {
   const shell = readShell();
   const parsed = shopPath(pathname);
   if (!parsed) return html(shell, 200);
 
   const lang = (langBySeg(parsed.seg) as Lang | null) ?? (langBySeg("") as Lang);
   if (isKnownShopPath(parsed.segs)) return html(shell, 200);
+  if (parsed.segs.length === 2 && parsed.segs[0] === "b" && (await isCustomBrand(parsed.segs[1]))) {
+    return html(shell, 200);
+  }
 
   /* The canonical is the address that was asked for, normalised the way the
      rest of the shop writes one: lower-cased prefix, one trailing slash. */

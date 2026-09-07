@@ -59,7 +59,7 @@ describe("404 — the address the shop has no page for", () => {
   });
 
   it("answers 404 with the shop's own page, noindex, in the path's language", async () => {
-    const res = notFoundPageResponse("/shop2/et/no-such-page/");
+    const res = await notFoundPageResponse("/shop2/et/no-such-page/");
     expect(res.status).toBe(404);
     expect(res.headers.get("content-type")).toContain("text/html");
     const html = await res.text();
@@ -77,10 +77,10 @@ describe("404 — the address the shop has no page for", () => {
     /* Untouched, not merely 200: the shell is whatever the prerender wrote
        (its robots meta follows PUBLIC_BASE_URL, so THAT proves nothing here)
        — what matters is that no 404 page was built over it. */
-    const shell = await notFoundPageResponse("/shop2/definitely-not-a-page/does-not-matter/extra/").text();
+    const shell = await (await notFoundPageResponse("/shop2/definitely-not-a-page/does-not-matter/extra/")).text();
     expect(shell).toContain("Страница не найдена");   // the sanity check for the check below
     for (const path of ["/shop2/search/", "/shop2/en/account/", "/shop2/brands/"]) {
-      const res = notFoundPageResponse(path);
+      const res = await notFoundPageResponse(path);
       expect(res.status, path).toBe(200);
       const html = await res.text();
       expect(html, path).not.toContain("Страница не найдена");

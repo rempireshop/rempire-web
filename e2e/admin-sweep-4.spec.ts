@@ -447,7 +447,12 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
 
     // ---- off: the five screens Dim named ----------------------------------
     await section(page, "people");
-    await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(0);
+    /* Off, the row keeps the two chips that are not about tiers at all — «Все»
+           and «Подписаны», who agreed to hear from the shop. The three tier chips
+           («Заявки Pro», «Партнёры», «Розница») are what the switch takes away. */
+        await expect(page.locator("[data-admcusttier]"), "the tier chips survived the off switch").toHaveCount(2);
+        await expect(page.locator('[data-admcusttier="pro"]'), "«Партнёры» survived the off switch").toHaveCount(0);
+        await expect(page.locator('[data-admcusttier="news"]'), "«Подписаны» went with the tiers").toHaveCount(1);
     await expect(page.locator("[data-admpartnernew]"), "«+ Партнёр» survived the off switch").toHaveCount(0);
 
     await section(page, "goods");
@@ -475,7 +480,7 @@ test.describe("admin — «Партнёры и баллы» is one switch above 
         { timeout: 15_000, message: "the switch never reached the storefront" }).toBe(true);
 
       await section(page, "people");
-      await expect(page.locator("[data-admcusttier]"), "the tier chips did not come back").toHaveCount(4);
+      await expect(page.locator("[data-admcusttier]"), "the tier chips did not come back").toHaveCount(5);
       await expect(page.locator("[data-admpartnernew]")).toBeVisible();
 
       await section(page, "goods");
