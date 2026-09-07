@@ -540,7 +540,9 @@ because of it; one target for all of them is the point.
 Middleware rather than `next.config.ts`, because it is a lookup rather than a
 pattern, because 1 639 config rules would be matched in order on every request
 to the site, and because dropping the query needs a decision per shape. It runs
-only for the paths in its `matcher` — none of which the new shop uses.
+only for the paths in its `matcher` — none of which the new shop uses — and
+`next build` reports it at **43.1 kB**, catalogue included (Vercel's edge
+budget is 1 MB).
 
 `docs/redirect-map.csv` is kept as the **test fixture**, not as run-time data:
 1 447 of its 1 639 rows point at the home page, including every
