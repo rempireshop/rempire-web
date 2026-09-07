@@ -187,8 +187,8 @@ GET https://shipping.montonio.com/api/v2/contract-prices
 | Omniva | EE, LV, LT | EE, LV, LT |
 | Unisend | EE, LV, LT | — |
 | SmartPosti | EE, LV, LT, FI | EE + все 25 стран |
-| DPD | EE, LV, LT, FI, SE + 17 стран ЕС | EE + все 25 стран |
-| Nova Post (Montonio International Shipping) | 12 стран ЕС | 14 стран ЕС |
+| DPD | EE, LV, LT, FI + 18 стран европейской зоны | EE + все 25 стран |
+| Nova Post (Montonio International Shipping) | 9 стран европейской зоны (+EE/LV/LT) | 11 стран европейской зоны (+EE/LV/LT) |
 | Venipak | нет цены по контракту Montonio (только прямой договор) | то же |
 
 Nova Post — это и есть «Montonio International Shipping»: дешевле всех по
@@ -822,9 +822,9 @@ seed-файла, DPD и Venipak не предлагаются, «Создать 
 2. **Семь стран, куда Montonio не возит вообще** — Кипр, Мальта, Исландия,
    Лихтенштейн, Норвегия, Швейцария, Великобритания, — при этом чекаут их
    предлагает и берёт за них 9,90 €.
-3. **Пакомат по Европе не предложен**, хотя DPD Pickup работает в 17 странах
-   ЕС, а Nova Post (Montonio International Shipping) — в 12, и он заметно
-   дешевле курьера.
+3. **Пакомат по Европе не предложен**, хотя DPD Pickup работает в 18 странах
+   европейской зоны, а Nova Post (Montonio International Shipping) — в 9, и он
+   заметно дешевле курьера.
 
 Всё три — решения владельца, а не баги кода; они вынесены вопросами 1–4 в
 `docs/audit/2026-09-07-shipping-returns.md`.
