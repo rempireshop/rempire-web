@@ -328,6 +328,43 @@ LT — Omniva, DPD, Venipak; FI — SmartPosti, DPD. При открытии ш�
 появляются ровно там, где Montonio их отдал, а Финляндия получает пакомат в тот
 день, когда Montonio вернёт финские точки, — без ещё одной выкладки.
 
+### Логотипы перевозчиков — `GET /carriers`
+
+Ренат, 07.09.2026: «есть ли у Montonio логотипы пакоматов (Omniva и других)?
+Сейчас там просто какие-то цвета». Цвета — это правда: кнопка перевозчика в
+кассе рисуется точкой-кружком из CSS, `public/shop2/styles.css`, правила
+`.carrier[data-carrier="omniva"]::before` и соседние (Omniva `#f47a20`, DPD
+`#dc0032`, SmartPosti жёлто-чёрный, Venipak `#1e4b9d`, Unisend `#7dd957`).
+Сама кнопка — `public/shop2/app.js`, `'<button class="carrier" …>' +
+CARRIER_NAMES[c]`.
+
+**Логотипы у Montonio есть — но не там, где мы смотрим.** Проверено по
+справочнику Shipping API v2 (сверено 07.09.2026):
+
+| Эндпоинт | Есть `logoUrl`? |
+| --- | --- |
+| `GET /shipping-methods` | нет |
+| `GET /shipping-methods/pickup-points` | нет (`id`, `name`, `type`, `streetAddress`, `locality`, `postalCode`, `carrierCode`, `additionalServices`) |
+| **`GET /carriers`** | **да** |
+
+Ответ `GET /carriers` — по объекту на перевозчика: `id`, `code`, `name`,
+**`logoUrl`**, `contracts`, `hasMontonioContract`, `supportedContractTypes`.
+`logoUrl` — это SVG на публичном хосте Montonio, вида
+`https://public.montonio.com/images/carrier_logos/smartpost.svg`.
+
+Мы этот эндпоинт **не вызываем**: `src/lib/shipping/montonio.ts` ходит в
+`/shipping-methods/pickup-points`, `/shipping-methods/courier-services`,
+`/shipping-methods/rates`, `/shipments` и `/label-files`. Чтобы заменить
+кружки на логотипы, нужно: наш маршрут (по образцу
+`GET /api/payments/methods/`, который так же даёт `logoUrl` банкам), кэш на
+те же 6 часов, и `<img>` вместо `::before` в кнопке перевозчика. Это меняет
+внешний вид кассы, поэтому сделано не будет, пока Ренат не скажет —
+вопрос 3 в `docs/audit/2026-09-07-montonio.md`.
+
+Картинку отдаёт домен Montonio, а не наш, но правку CSP это не потребует:
+`img-src 'self' data: https:` в `next.config.ts` уже разрешает любой https —
+логотипы банков приходят оттуда же и рисуются.
+
 ### Что реально есть у каждого перевозчика
 
 Проверено 03.09.2026.
