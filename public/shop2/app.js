@@ -15207,7 +15207,10 @@
    */
   function admShipEuropeHTML() {
     return '<details class="adm-fold adm-fold--sub"' + (S.shipEuOpen ? " open" : "") + '>' +
-      '<summary class="adm-link" data-shipeu>Цены по странам Европы' +
+      /* the title is the link, the caption beside it is not: `text-decoration`
+         propagates into every in-flow descendant, so an underline on the
+         <summary> itself would underline the caption too */
+      '<summary data-shipeu><span class="adm-link">Цены по странам Европы</span>' +
         '<span class="adm-row__sub">цена страны сильнее цены зоны</span></summary>' +
       '<div style="padding-top:8px">' +
         '<p class="adm-hint" style="margin:0 0 10px">Под каждой ценой — сколько эта посылка стоит магазину ' +
@@ -16672,7 +16675,18 @@
       carry only carriers the store has actually activated, which is exactly
       what makes the live answer the better one. */
   function montonioCost(method, country) {
-    var rows = tariffRowsFor(country).filter(function (r) { return r.method === method; });
+    /* Only carriers «Цены по перевозчикам» has a row for. tariffRowsFor()
+       serves whatever the server merged, and the static half of that carries
+       Nova Post — Montonio International Shipping, which the shop has no row
+       for, never names, and cannot put a parcel on. Left in, it becomes the
+       cheapest quote on half these routes and the panel would print a
+       себестоимость nobody can reach: Estonia's courier read «4,76 € · Nova
+       Post» instead of DPD's 6,82 €, which is the number that has to be
+       covered. Same guard as computeMontonioFillPatch() below and as
+       SHOP_CARRIERS in src/lib/shipping/country-prices.ts. */
+    var rows = tariffRowsFor(country).filter(function (r) {
+      return r.method === method && SHIP_CARRIER_ROWS.some(function (c) { return c[0] === r.carrier; });
+    });
     if (rows.length) {
       var dearest = method === "parcel" && ["EE", "LV", "LT", "FI"].indexOf(country) >= 0;
       var best = null;

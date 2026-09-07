@@ -1338,6 +1338,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 /* the folded country list sits inside the tariff table, so it is indented and
    ruled rather than boxed like a top-level fold */
 .adm-fold--sub { margin-top: 12px; border-top: 1px solid var(--a-rule); padding-top: 12px; }
+/* its one-line explanation is a caption beside the link, not part of it — the
+   underline lives on the inner .adm-link, so nothing here has to fight
+   text-decoration inheritance */
+.adm-fold--sub > summary .adm-row__sub { display: inline; margin-left: 10px; }
 .adm-jrow {
   display: flex; align-items: center; gap: 12px; min-height: 56px;
   border-bottom: 1px solid var(--a-rule); padding: 8px 0; flex-wrap: wrap;
