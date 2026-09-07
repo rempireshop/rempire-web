@@ -544,7 +544,7 @@ Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt
  * are the two the owner genuinely cannot dash off himself — a banner in three
  * languages, and a catalogue name in the house pattern. */
 
-export const COPY_KINDS = ["hero", "product_name"] as const;
+export const COPY_KINDS = ["hero", "product_name", "bundle"] as const;
 export type CopyKind = (typeof COPY_KINDS)[number];
 
 export interface CopyInput {
@@ -554,11 +554,21 @@ export interface CopyInput {
   /** hero: the product the slide points at, if any; where the button leads. */
   product?: string;
   target?: string;
-  /** product_name: what the owner typed. */
+  /** product_name: what the owner typed. bundle: the set's own Russian name. */
   brand?: string;
   name?: string;
   category?: string;
+  /** bundle: the products inside the set, «Brand Name, 100 мл ×2» each. */
+  products?: string[];
 }
+
+/* A set's description is the one AI text in the shop that is BOTH the page's
+   copy and its Google snippet: tools/prerender-shop2.mjs writes
+   `desc: clip(blurb, 158)` into the <meta description> of /shop2/set/<id>/.
+   So the budget is not a style note — it is the snippet's own limit, and the
+   first sentence has to carry the search words on its own. */
+export const BUNDLE_DESC_SNIPPET_MAX = 155;
+export const BUNDLE_DESC_CHARS = [240, 420] as const;
 
 /** The Russian type tails the storefront knows how to translate (app.js NAME_TAILS / TAIL_EXACT). */
 export const PRODUCT_NAME_TAILS = [
@@ -583,6 +593,7 @@ function cleanCopyInput(raw: unknown) {
     brand: line(src.brand, 60),
     name: line(src.name, 120),
     category: line(src.category, 60),
+    products: listOf(src.products, 8, 160),
   };
 }
 
@@ -604,6 +615,28 @@ Respond with exactly this JSON shape and nothing else: {"eyebrow": "...", "title
       input.hint ? `What the slide is about: ${input.hint}` : "",
       input.product ? `The product the slide points at: ${input.product}` : "",
       input.target ? `Where the button leads: ${input.target}` : "",
+    ];
+  } else if (input.kind === "bundle") {
+    /* «Наборы» — the set editor's own «Написать черновик» (Dim, 07.09.2026:
+       «Set descriptions should be possible to generate with AI»). The set is
+       real products the owner has already put in the form, so the products
+       are the facts; everything else about it — what it does, who it is for —
+       has to come out of those and nothing else. */
+    if (!input.products.length && !input.name && !input.hint) throw new AiInputError("missing_products");
+    task = `TASK: write the shop's own description of a SET («набор») — several products sold together at one price — in ${L}.
+The set has its own page, and THE FIRST ${BUNDLE_DESC_SNIPPET_MAX} CHARACTERS OF THIS TEXT BECOME THAT PAGE'S GOOGLE SNIPPET. So:
+- open with what the set is and who it is for, in the words a customer would actually search — the shop section and the product types, named naturally («Набор для бороды: масло, бальзам и мыло …»), never a keyword list and never the shop's name (the site appends it);
+- then one or two sentences on why these products belong together and what the set gives whoever buys it.
+- ${BUNDLE_DESC_CHARS[0]}–${BUNDLE_DESC_CHARS[1]} characters in total, 2 to 4 sentences, plain text — no headings, no bullet points, no emoji, no line breaks.
+- Name the products from INPUT by their exact names where it helps the reader; never mention a product INPUT does not list.
+- Never name a price, a discount, a percentage or "save X": the set's price is edited separately and this text would start lying the day it changes.
+- Never invent an ingredient, a result, an award or a medical claim — only what the products under INPUT plainly are.
+Respond with exactly this JSON shape and nothing else: {"text": "..."}`;
+    facts = [
+      input.name ? `The set's name: ${input.name}` : "",
+      input.category ? `Shop section: ${input.category}` : "",
+      input.products.length ? `What is inside the set, use only these:\n- ${input.products.join("\n- ")}` : "",
+      input.hint ? `The owner's note: ${input.hint}` : "",
     ];
   } else {
     if (!input.name && !input.hint) throw new AiInputError("missing_name");

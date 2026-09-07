@@ -12,6 +12,8 @@ import {
   AI_TASKS,
   AiInputError,
   buildCopyPrompt,
+  BUNDLE_DESC_CHARS,
+  BUNDLE_DESC_SNIPPET_MAX,
   buildPostFullPrompt,
   buildPostTranslatePrompt,
   buildPrompt,
@@ -126,8 +128,9 @@ describe("buildCopyPrompt — the «✨» texts", () => {
      writers behind a button in a corner of a form; the assistant still writes
      all four through set_content / create_promo, where the owner sees the
      change before he applies it. */
-  it("knows its two kinds and refuses any other", () => {
-    expect(COPY_KINDS).toEqual(["hero", "product_name"]);
+  it("knows its kinds and refuses any other", () => {
+    // «bundle» joined on 07.09.2026 — the set editor's «Написать черновик»
+    expect(COPY_KINDS).toEqual(["hero", "product_name", "bundle"]);
     expect(isCopyKind("hero")).toBe(true);
     expect(isCopyKind("slogan")).toBe(false);
     for (const gone of ["announcement", "contact_page", "email_footer", "promo_note"]) {
@@ -160,6 +163,36 @@ describe("buildCopyPrompt — the «✨» texts", () => {
     expect(user).toContain("Brand: Proraso");
     expect(user).toContain("What the owner typed as the name: beard balm cypress");
     expect(() => buildCopyPrompt("RU", { kind: "product_name" })).toThrow(AiInputError);
+  });
+
+  /* «Наборы» — the set editor's own «Написать черновик» (Dim, 07.09.2026:
+     «Set descriptions should be possible to generate with AI»). The set page's
+     <meta description> is this text clipped at 158 characters
+     (tools/prerender-shop2.mjs), so the SEO budget is part of the contract. */
+  it("bundle: the set's own description, written to the snippet it becomes", () => {
+    const { system, user } = buildCopyPrompt("RU", {
+      kind: "bundle",
+      name: "Набор для бороды",
+      category: "Уход за бородой",
+      products: ["Proraso Beard Oil Azur Lime, 30 мл", "Proraso Beard Balm Wood & Spice, 100 мл ×2"],
+      hint: "для тех, кто только отращивает",
+    });
+    expect(system).toContain(`FIRST ${BUNDLE_DESC_SNIPPET_MAX} CHARACTERS`);
+    expect(system).toContain("GOOGLE SNIPPET");
+    expect(system).toContain(`${BUNDLE_DESC_CHARS[0]}–${BUNDLE_DESC_CHARS[1]} characters`);
+    expect(system).toMatch(/Never name a price, a discount, a percentage/);
+    expect(system).toMatch(/never a keyword list/);
+    expect(system).toMatch(/Never invent an ingredient, a result, an award or a medical claim/);
+    expect(system).toContain('{"text": "..."}');
+    expect(system).toContain("in Russian");
+    expect(user).toContain("The set's name: Набор для бороды");
+    expect(user).toContain("Proraso Beard Oil Azur Lime, 30 мл");
+    expect(user).toContain("для тех, кто только отращивает");
+    // …and the three languages the editor asks for, one call each
+    expect(buildCopyPrompt("ET", { kind: "bundle", products: ["x"] }).system).toContain("in Estonian");
+    expect(buildCopyPrompt("EN", { kind: "bundle", products: ["x"] }).system).toContain("in English");
+    // nothing to work from is not a description
+    expect(() => buildCopyPrompt("RU", { kind: "bundle" })).toThrow(AiInputError);
   });
 });
 

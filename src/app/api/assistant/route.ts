@@ -6,6 +6,14 @@ import { listAllPosts, listPublished } from "@/lib/blog";
 import { extractJsonObject, looksLikeJson } from "@/lib/ai-json";
 import { catalogueLines, relevantLines, rowLine, type CatRow } from "@/lib/catalogue-slice";
 import { briefAnalytics, briefAttachments, briefHero, sanitizeAction, type AttachmentBrief } from "./actions";
+import {
+  ASK_WHICH,
+  ASK_WHICH_REPLY,
+  discountIntent,
+  intentConflicts,
+  intentPromptBlock,
+  type DiscountIntent,
+} from "./intent";
 
 /* The shop chat's brain. Rule-based fallback lives in the client
    (public/shop2/chat.js); when OPENAI_API_KEY is set on Vercel this route
@@ -23,7 +31,7 @@ import { briefAnalytics, briefAttachments, briefHero, sanitizeAction, type Attac
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 18; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 19; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -249,6 +257,7 @@ function adminPrompt(
   blogLines = "",
   attachments: AttachmentBrief[] = [],
   bundleLines = "",
+  intent: DiscountIntent = "",
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
@@ -291,11 +300,11 @@ What the panel really does (say so when relevant, and never promise more): photo
 You can CHANGE things via the optional "action" field. The panel shows the owner a preview and asks to confirm before applying — so propose the action AND say what it does in the reply. Once confirmed, an action is written to the shop's server for real (customers see it within a minute) and lands in the change journal — «Настройки → Журнал» — where «Вернуть» takes it back; say «отменить можно в журнале» when it fits, never that a change is a demo. Available actions:
   {"type":"set_price","id":"<catalogue id>","value":<number 1..500>} — change a product's price
   {"type":"set_stock","id":"<catalogue id>","value":"in|low|out"} — availability
-  {"type":"set_seo","id":"<catalogue id>","title":"<up to 60 chars>","description":"<up to 155 chars>"} — write/replace SEO title and meta description (write them yourself, well-formed, language of the shop = Russian unless asked otherwise)
+  {"type":"set_seo","id":"<catalogue id>","title":"<up to 60 chars>","description":"<up to 155 chars>"} — write/replace the product's Google title and meta description (Russian unless the owner asks otherwise). title: AT MOST 60 characters including spaces — count them — and it must carry the brand, the product type and the volume the way a customer types them into Google («Proraso масло для бороды, 30 мл»); no keyword stuffing, no trailing «| Rempire» (the site appends it). description: AT MOST 155 characters including spaces — what the product is and one concrete reason to buy it, never a repeat of the title, never an invented ingredient, result or claim.
   {"type":"toggle_flow","id":"abandoned|birthday|backstock","value":true|false} — switch a customer e-mail flow on or off
   {"type":"toggle_chatbot","value":true|false} — switch the storefront AI chat widget on or off («выключи чат на сайте»)
   {"type":"toggle_bundles","value":true|false} — show or hide the curated sets («наборы») on the storefront («скрой наборы»)
-  {"type":"propose_bundle","title":{"RU":"…","ET":"…","EN":"…"},"cat":"beard","items":[{"id":"<catalogue id>","variant":0,"qty":1},…]} — SUGGEST a new set the shop does not have («предложи набор для бороды», «собери набор из шампуня и кондиционера»). 2 to 8 products, ids from the CATALOGUE above, variant is the index of the volume (0 = the first), qty 1–20. Give NO price: applying this opens the set editor filled in, and the owner names the price and saves it himself — say exactly that in the reply.
+  {"type":"propose_bundle","title":{"RU":"…","ET":"…","EN":"…"},"desc":{"RU":"…","ET":"…","EN":"…"},"cat":"beard","items":[{"id":"<catalogue id>","variant":0,"qty":1},…]} — SUGGEST a new set the shop does not have («предложи набор для бороды», «собери набор из шампуня и кондиционера», «сделай набор из этих товаров»). 2 to 8 products, ids from the CATALOGUE above, variant is the index of the volume (0 = the first), qty 1–20. cat is exactly one of hair|styling|beard|face|body|perfume|merch. Write title AND desc in all three languages (see SETS below — they are the set page's Google title and snippet). Give NO price: applying this opens the set editor filled in, with the running total of the products and the discount showing, and the owner names the price and saves it himself — say exactly that in the reply.
   {"type":"set_bundle","id":"<id from SETS above>","items":[{"id":"<catalogue id>","variant":0,"qty":1},…],"price":39.90} — change a set that EXISTS («добавь масло в набор для бороды», «сделай набор Борода за 39,90»). Send the WHOLE list of products the set keeps — a product left out is removed. price (or discountPct 1–90) only when the owner named one; a set must stay cheaper than its parts or the shop refuses it, and the reply should say so if it is close.
   {"type":"set_hero","value":{"slides":[…],"interval":6000}} — rewrite the home-page banner («поменяй баннер на скидку 20 % на бороду», «сделай баннер про наборы»). {"type":"set_hero","value":null} puts the built-in banner back.
   {"type":"create_promo","promo":{"code":"SUVI10","kind":"percent|fixed|free_shipping","value":10,"minSubtotal":0,"endsAt":"2026-09-30T23:59:59Z","maxUses":100,"note":"…"}} — make or edit a promo code («сделай промокод на 10 %», «код на бесплатную доставку до конца месяца»)
@@ -312,9 +321,19 @@ You can CHANGE things via the optional "action" field. The panel shows the owner
   {"type":"adjust_points","customerId":"<uuid>","delta":50,"note":"…"} OR {"type":"adjust_points","customerEmail":"<e-mail>","delta":50,"note":"…"} — credit or correct one customer's point balance by hand. Use customerId when the owner is looking at that customer's card in «Клиенты» and the id is visible in this conversation; otherwise use customerEmail, but ONLY an address copied from the CUSTOMERS list above — never guess or invent either one
   {"type":"stock_adjust","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","delta":6,"reason":"goods_in|adjust|return"} — a RELATIVE stock move, real numbers not the mало/нет badge («приход 6 штук масла Proraso» is delta:6, reason:"goods_in"; «спишите 2 штуки, разбились» is delta:-2, reason:"adjust"; «вернули 1 шампунь» is delta:1, reason:"return"). delta is the change, never the new total. reason defaults to "adjust" when the owner does not say why.
   {"type":"stock_set","product_id":"<catalogue id>","variant":"<size, only if the product has sizes>","qty":10} — an ABSOLUTE count after a physical recount («на полке на самом деле 10 штук» → qty:10), not a delta.
-  {"type":"create_product","brand":"Proraso","name":"Beard Balm Cypress & Vetyver — бальзам для бороды","cat":"beard","price":14.9,"sizes":[{"size":"100 мл","price":14.9}],"description":{"RU":"…","ET":"…","EN":"…"}} — add a NEW product the shop does not have yet («добавь товар», «заведи новый товар», «новый бальзам Proraso за 14,90»). Never for a product already in the CATALOGUE above — change that one with set_price/set_stock instead. brand and name as the owner said them; name = the line and the type, with the Russian type tail the catalogue uses («Beard Balm — бальзам для бороды»). cat is exactly one of hair|styling|beard|face|body|perfume|merch. price 1–500 €. sizes ONLY when the owner named volumes, each with its own price; otherwise leave sizes out and give one price. description: all three languages, short and honest, only what the owner said — or leave it out. Photos are NOT part of this action: after the owner confirms, the panel creates the product and opens it on its «Фото и видео» tab, so say in the reply that the photos are added there.
+  {"type":"create_product","brand":"Proraso","name":"Beard Balm Cypress & Vetyver — бальзам для бороды","cat":"beard","price":14.9,"sizes":[{"size":"100 мл","price":14.9}],"description":{"RU":"…","ET":"…","EN":"…"}} — add a NEW product the shop does not have yet («добавь товар», «заведи новый товар», «новый бальзам Proraso за 14,90»). Never for a product already in the CATALOGUE above — change that one with set_price/set_stock instead. brand and name as the owner said them; name = the line and the type, with the Russian type tail the catalogue uses («Beard Balm — бальзам для бороды»). cat is exactly one of hair|styling|beard|face|body|perfume|merch. price 1–500 €. sizes ONLY when the owner named volumes, each with its own price; otherwise leave sizes out and give one price. description: all three languages, two to four plain sentences each. It is the product page's own text and its opening is what Google shows, so the first sentence names the type and the brand the way a customer searches for them («Бальзам для бороды Proraso …») and says what it does; then who it is for. Only what the owner said — never an invented ingredient, result, award or medical claim. Leave it out entirely rather than pad it. Photos are NOT part of this action: after the owner confirms, the panel creates the product and opens it on its «Фото и видео» tab, so say in the reply that the photos are added there.
   {"type":"update_product","id":"c-…","brand":"…","name":"…","cat":"beard","subcat":"ba","sizes":[{"size":"100 мл","price":14.9}],"price":14.9,"description":{"RU":"…","ET":"…","EN":"…"}} — change a product the owner created himself: ONLY an id starting with «c-» from the CATALOGUE above (a catalogue product is changed with set_price/set_stock/set_seo instead — its name and sizes cannot be edited here). Send the id and ONLY the fields that change. sizes replaces the WHOLE size list, each size with its own price — copy every size the product keeps from its «|sizes:» line (a size left out is removed; a size respelled at the same position keeps its stock count); price alone makes the product single-price; description replaces all three languages, so write all three; cat exactly one of hair|styling|beard|face|body|perfume|merch («переименуй мой бальзам в …», «поставь бальзаму Proraso 16,90», «добавь объём 250 мл за 24,90», «перенеси товар в раздел борода»)
 Use exactly one action per reply, only when the owner asks for a change. If the owner asks to change several things, do the first and say you'll do the rest one by one.
+
+${intentPromptBlock(intent)}
+EXAMPLE — owner: «собери набор для бороды: масло, бальзам и мыло»
+{"reply":"Собрал набор для бороды из трёх товаров — масло, бальзам и мыло. Подтвердите: откроется редактор наборов, там впишете цену и сохраните. Сумму по отдельности он посчитает сам.","product_ids":[],"tab":"goods","action":{"type":"propose_bundle","title":{"RU":"Набор для бороды — масло, бальзам и мыло","ET":"Habemekomplekt — õli, palsam ja seep","EN":"Beard care set — oil, balm and soap"},"cat":"beard","items":[{"id":"proraso-beard-oil-azur-lime-30ml","variant":0,"qty":1},{"id":"proraso-wood-spice-beard-balm-100ml","variant":0,"qty":1}]}}
+EXAMPLE — owner: «сделай скидку на шампунь и кондиционер» (neither word — ask, propose nothing)
+{"reply":"Уточните, что сделать: набор — оба товара продаются вместе по одной цене, у набора своя страница в магазине; промокод — код на скидку, покупатель вводит его в корзине.","product_ids":[],"tab":"","action":null}
+
+SETS («наборы», propose_bundle / set_bundle) in detail. A set is 2–8 real catalogue products sold at one price, and that price MUST be lower than the same products bought separately — the shop refuses a set that is not. propose_bundle carries NO price: applying it opens the set editor with the products in it, the editor shows the running total and the discount, and the owner names the price himself. set_bundle carries the WHOLE product list the set keeps — a product left out is removed — and a price (or discountPct 1–90) only when the owner named one.
+  · title — Russian first, then Estonian and English, all three yourself. This is the set's page title in Google: name the section and the word people search — «Набор для бороды», «Набор для волос», «Набор для бритья» — plus what is in it, up to about 60 characters. Never a cute label nobody searches for («Мужской выбор»), never the shop's name (the site appends it).
+  · desc — two or three plain sentences, all three languages. THE FIRST 155 CHARACTERS BECOME THE GOOGLE SNIPPET of the set's page, so open with what is in the set and who it is for, in words a customer would type; then why it is worth buying together. Only what the products really are — never an invented ingredient, result or claim, never a discount figure (the price moves and the text would lie).
 
 PROMO CODES (create_promo) in detail. code — LATIN capitals, digits and «-» only, up to 24 characters; invent a short readable one if the owner did not name it. kind: "percent" (value 1–90, per cent off the goods), "fixed" (value 1–200, euro off the goods) or "free_shipping" (value ignored — delivery becomes free). minSubtotal — the basket the code needs, 0 when the owner did not say. endsAt / startsAt — full ISO dates, omit when open-ended. maxUses — how many times it may be used in total, omit for unlimited. A promo is quoted at checkout and counted only when the order is paid, so say that in the reply if the owner asks how it is spent.
 
@@ -474,15 +493,23 @@ export async function POST(req: NextRequest) {
   const attachments = isAdmin ? briefAttachments(body.attachments) : [];
   const adminBlogLines =
     isAdmin && !isMini && (attachments.length || BLOG_TRIGGER.test(lastUser)) ? await adminBlogLinesForPrompt() : "";
+  /* «набор» or «промокод» — read off the owner's own words before the model
+     sees them (src/app/api/assistant/intent.ts). It goes into the prompt as a
+     plain instruction AND is checked again against whatever the model
+     answered, below: a live promo code for a sentence that said «набор» is
+     Dim's own bug, and a prompt alone is only a request. */
+  const intent: DiscountIntent = isAdmin && !isMini ? discountIntent(lastUser) : "";
   // «Наборы»: only when the owner is talking about them (bundleLinesForPrompt)
   const adminBundleLines =
-    isAdmin && !isMini && BUNDLE_TRIGGER.test(lastUser) ? await bundleLinesForPrompt() : "";
+    isAdmin && !isMini && (intent === "bundle" || intent === "ask" || BUNDLE_TRIGGER.test(lastUser))
+      ? await bundleLinesForPrompt()
+      : "";
   const lang = body.lang === "ET" || body.lang === "EN" ? body.lang : "RU";
   const system =
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines)
+        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent)
         : shopPrompt(lang, lastUser, blogLines);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -527,7 +554,7 @@ export async function POST(req: NextRequest) {
     const topic = typeof a.topic === "string" ? a.topic : typeof title === "string" ? title : "";
     rawAction = topic ? { type: "draft_post", topic, lang: "RU" } : null;
   }
-  const action = sanitizeAction(rawAction, known, isAdmin, { attachedKeys: new Set(attachments.map((a) => a.key)) });
+  let action = sanitizeAction(rawAction, known, isAdmin, { attachedKeys: new Set(attachments.map((a) => a.key)) });
 
   let reply = typeof parsed.reply === "string" ? parsed.reply.trim().slice(0, 1200) : "";
   let retry = false;
@@ -539,8 +566,27 @@ export async function POST(req: NextRequest) {
     reply += "… " + CUT_REPLY[lang];
     retry = true;
   }
+
+  /* The last door on «набор» vs «промокод». The model was told which of the
+     two this message is; if it answered with the other one anyway — or chose
+     at all where the words allow both — the action is dropped here and the
+     owner is asked instead. `ask` puts two chips under the answer in the
+     panel («Сделай набор из этих товаров» / «Сделай промокод на скидку»), so
+     the question costs him one tap and not a retype. */
+  let ask = "";
+  if (intentConflicts(intent, (action as { type?: unknown } | null)?.type)) {
+    action = null;
+    reply = ASK_WHICH_REPLY[lang] ?? ASK_WHICH_REPLY.RU;
+    retry = false;
+    ask = ASK_WHICH;
+  } else if (intent === "ask" && !action) {
+    // the model obeyed and asked by itself — the chips still help
+    ask = ASK_WHICH;
+  }
+
   return NextResponse.json({
     reply, product_ids: ids, tab, action,
+    ...(ask ? { ask } : {}),
     ...(retry ? { retry: true } : {}),
     ...(extracted.truncated ? { truncated: true } : {}),
     v: PROMPT_V, model: data.model ?? MODEL,
