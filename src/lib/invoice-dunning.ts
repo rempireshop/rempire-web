@@ -185,9 +185,15 @@ async function cancelOrder(order: Order, invoice: InvoiceRecord, now: Date): Pro
   const fresh = await getOrder(order.id);
   if (!fresh || fresh.status !== order.status || fresh.status === "paid") return false;
   const current = invoiceOf(fresh);
-  if (!current || current.paidAt || current.cancelledAt) return false;
+  if (!current || current.paidAt) return false;
 
-  await saveInvoiceRecord(order.id, { ...current, cancelledAt: now.toISOString() });
+  /* Stamped first, like every other automatic letter — and, unlike them, the
+     stamp is not also the guard. A `cancelledAt` on an order that is somehow
+     still open means the last run died between these two lines: the status
+     write never happened, so neither did the letter (it comes after), and
+     finishing the job now is exactly right. A run cannot see an order it has
+     already cancelled, because the selection only asks for open ones. */
+  await saveInvoiceRecord(order.id, { ...current, cancelledAt: current.cancelledAt ?? now.toISOString() });
   await setOrderStatus(order.id, "cancelled", "system:invoice");
 
   let sent = false;

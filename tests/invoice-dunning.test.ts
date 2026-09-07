@@ -285,6 +285,27 @@ describe("the daily walk", () => {
     expect(await runInvoiceDunning()).toMatchObject({ cancelled: 1 });
   });
 
+  /* The stamp is written before the status change, so a process that died in
+     between leaves an order that is marked cancelled inside its invoice and
+     still open in its own status column. The letter comes after the status
+     write, so nothing was sent either — and the next run has to finish the
+     job rather than skip it for ever. */
+  it("finishes a cancellation a previous run died in the middle of", async () => {
+    const order = await createOrder(invoiceOrderInput());
+    await ageInvoice(order.id, 9);
+    const half = invoiceOf(await getOrder(order.id))!;
+    const stamp = "2026-09-01T09:00:00.000Z";
+    await saveInvoiceRecord(order.id, { ...half, cancelledAt: stamp });
+    sinkClear();
+
+    expect(await runInvoiceDunning()).toMatchObject({ cancelled: 1 });
+    const closed = (await getOrder(order.id))!;
+    expect(closed.status).toBe("cancelled");
+    // the original moment is kept — the order was cancelled then, not now
+    expect(invoiceOf(closed)?.cancelledAt).toBe(stamp);
+    expect(mailsOf("invoice-cancelled")).toHaveLength(1);
+  });
+
   it("rides along in the cron's own report", async () => {
     const order = await createOrder(invoiceOrderInput());
     await ageInvoice(order.id, 10);
