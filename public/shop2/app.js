@@ -1050,6 +1050,8 @@
       "Покажи аналитику за неделю": "Näita nädala statistikat",
       "Какие письма получают клиенты?": "Milliseid kirju kliendid saavad?",
       "Какие заказы ждут отправки?": "Millised tellimused ootavad saatmist?",
+      "Сделай набор из этих товаров": "Tee nendest toodetest komplekt",
+      "Сделай промокод на скидку": "Tee sooduskood",
       "Спросить…": "Küsi…",
       "Вопрос помощнику": "Küsimus abilisele",
       "Спросить": "Küsi",
@@ -3110,6 +3112,8 @@
       "Покажи аналитику за неделю": "Show me this week's analytics",
       "Какие письма получают клиенты?": "What e-mails do customers get?",
       "Какие заказы ждут отправки?": "Which orders are waiting to be shipped?",
+      "Сделай набор из этих товаров": "Make a set of these products",
+      "Сделай промокод на скидку": "Make a promo code",
       "Спросить…": "Ask…",
       "Вопрос помощнику": "Question for the assistant",
       "Спросить": "Ask",
@@ -12472,12 +12476,28 @@
       the same reply and the same confirm card again instead of putting «…»
       back over a proposal the owner was about to confirm. The card itself
       follows pendingAction: applied or cancelled, it is gone next render. */
+  /* «Набор» or «промокод» — the two chips the route asks for when the owner's
+     words fit both (`ask: "bundle_or_promo"`, see src/app/api/assistant/
+     intent.ts). Each one is a whole next question, so one tap answers instead
+     of a retype — and each names its own mechanism, so the answer that comes
+     back can no longer be the other one. */
+  var ASK_CHOICES = {
+    bundle_or_promo: ["Сделай набор из этих товаров", "Сделай промокод на скидку"]
+  };
+  function admAskChipsHTML(key) {
+    var list = ASK_CHOICES[key];
+    if (!list) return "";
+    return '<div class="adm-asst__chips" style="margin-top:10px">' + list.map(function (q) {
+      return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
+    }).join("") + "</div>";
+  }
   function admAnswerHTML() {
     var a = S.adminAns;
     if (!a || a.q !== S.adminAsk) return "…";
     if (a.fallback) return adminAnswer(a.q);
     return esc(a.reply || "") +
       (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
+      (a.ask && !a.action ? admAskChipsHTML(a.ask) : "") +
       (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "") +
       /* the route could not read the model's answer (or the panel could not
          read the route's): a sentence was shown instead of the raw text, and
@@ -20618,7 +20638,8 @@
         if (S.adminAsk !== q) return;
         pendingAction = j.action || null;
         // kept in S, drawn by admAnswerHTML() — here and on every later render
-        S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry };
+        // (`ask` is the route's «набор или промокод?» — two chips, no action)
+        S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry, ask: typeof j.ask === "string" ? j.ask : "" };
         admPaintAnswer();
       })
       .catch(function (err) {

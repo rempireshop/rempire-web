@@ -9,6 +9,7 @@
  */
 import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import { createCustomProduct } from "@/lib/custom-products";
 import { exec } from "@/lib/db";
@@ -67,7 +68,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(18);
+    expect(body.v).toBe(19);
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];
@@ -95,5 +96,105 @@ describe("the admin prompt tells the truth about the panel", () => {
     const { POST } = await import("@/app/api/assistant/route");
     const body = await (await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй" }] }, admin))).json();
     expect(body.action).toBeNull();
+  });
+
+  /* «Набор» vs «промокод» — Dim, 07.09.2026: he asked for a set of products
+     and got the live promo code «Beardset50». The words collide, so the route
+     reads the owner's own sentence itself (src/app/api/assistant/intent.ts),
+     tells the model which of the two it is looking at, and refuses the other
+     one however confidently the model proposes it. Here the model is stubbed
+     into making exactly the mistake it made for Dim. */
+  describe("«набор» is never a promo code", () => {
+    const cat = catalogueMin as Array<{ id: string }>;
+    const two = [{ id: cat[0].id, variant: 0, qty: 1 }, { id: cat[1].id, variant: 0, qty: 1 }];
+    const title = { RU: "Набор для бороды", ET: "Habemekomplekt", EN: "Beard set" };
+    const beardset50 = {
+      type: "create_promo",
+      promo: { code: "BEARDSET50", kind: "percent", value: 50, minSubtotal: 0, note: "набор для бороды" },
+    };
+
+    /* The route's own per-IP limiter is ten messages a minute and lives in
+       the module, not in resetRateLimits() — so every question here comes
+       from an address of its own. */
+    let nth = 0;
+    function askReq(message: string) {
+      nth += 1;
+      return new NextRequest(`${ORIGIN}/api/assistant/`, {
+        method: "POST",
+        headers: { "content-type": "application/json", host: HOST, origin: ORIGIN, cookie: admin, "x-real-ip": `10.0.0.${nth}` },
+        body: JSON.stringify({ mode: "admin", messages: [{ role: "user", content: message }] }),
+      });
+    }
+
+    async function ask(message: string, action: unknown) {
+      stubOpenAI({ reply: "Сделал.", product_ids: [], tab: "promos", action });
+      const { POST } = await import("@/app/api/assistant/route");
+      const res = await POST(askReq(message));
+      return res.json();
+    }
+
+    it("refuses the promo code the assistant made for «хочу набор Beardset со скидкой 50 %»", async () => {
+      const body = await ask("хочу набор Beardset со скидкой 50 %", beardset50);
+      expect(body.action, "a live promo code for a request that said «набор»").toBeNull();
+      expect(body.ask).toBe("bundle_or_promo");
+      expect(body.reply).toContain("набор");
+      expect(body.reply).toContain("промокод");
+      expect(body.retry).toBeUndefined();
+    });
+
+    it("lets the same promo code through when the owner asked for one", async () => {
+      const body = await ask("сделай промокод на 50 %", beardset50);
+      expect(body.action).toMatchObject({ type: "create_promo", promo: { code: "BEARDSET50", value: 50 } });
+      expect(body.ask).toBeUndefined();
+    });
+
+    it("lets a set proposal through for «собери набор для бороды»", async () => {
+      const body = await ask("собери набор для бороды", { type: "propose_bundle", title, cat: "beard", items: two });
+      expect(body.action).toMatchObject({ type: "propose_bundle", cat: "beard" });
+      expect(body.action.items).toHaveLength(2);
+      expect(body.ask).toBeUndefined();
+    });
+
+    it("refuses a set proposal when the owner asked for a promo code", async () => {
+      const body = await ask("сделай купон на 10 %", { type: "propose_bundle", title, items: two });
+      expect(body.action).toBeNull();
+      expect(body.ask).toBe("bundle_or_promo");
+    });
+
+    it("asks — and proposes nothing — when the sentence could mean either", async () => {
+      for (const action of [beardset50, { type: "propose_bundle", title, items: two }]) {
+        const body = await ask("сделай скидку на несколько товаров", action);
+        expect(body.action).toBeNull();
+        expect(body.ask).toBe("bundle_or_promo");
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it("still offers the chips when the model asked by itself", async () => {
+      const body = await ask("сделай скидку на эти три товара", null);
+      expect(body.action).toBeNull();
+      expect(body.ask).toBe("bundle_or_promo");
+    });
+
+    it("tells the model which of the two the message is, and how they differ", async () => {
+      const sent = stubOpenAI({ reply: "ок", action: null });
+      const { POST } = await import("@/app/api/assistant/route");
+      await POST(askReq("собери набор для бороды"));
+      const prompt = sent[0].messages[0].content;
+      expect(prompt).toContain("НАБОР or ПРОМОКОД");
+      expect(prompt).toContain("THIS MESSAGE IS ABOUT A SET");
+      expect(prompt).toContain("create_promo is forbidden for this message");
+      // …and the set's own SEO budget rides along with it
+      expect(prompt).toContain("SETS («наборы», propose_bundle / set_bundle) in detail");
+      expect(prompt).toContain("THE FIRST 155 CHARACTERS BECOME THE GOOGLE SNIPPET");
+    });
+
+    it("leaves an ordinary price change alone", async () => {
+      const body = await ask("подними цену на PLUMPING.WASH до 9 евро", {
+        type: "set_price", id: "kevin-muprhy-plumping-wash", value: 9,
+      });
+      expect(body.action).toMatchObject({ type: "set_price", value: 9 });
+      expect(body.ask).toBeUndefined();
+    });
   });
 });
