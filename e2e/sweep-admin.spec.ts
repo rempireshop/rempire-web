@@ -245,7 +245,7 @@ test.describe("sweep — the banner", () => {
       // Bring the one survivor back on so the home page has something to draw
       // — the slide's on/off control is a switch since phase 4, so read its state.
       const onBtn = page.locator("[data-heroon]").first();
-      if ((await onBtn.getAttribute("aria-pressed")) === "false") await onBtn.click();
+      if ((await onBtn.getAttribute("aria-checked")) === "false") await onBtn.click();
       await assertClean(page, w, "hero after delete");
 
       // Save goes through the confirm card, never straight to the shop.

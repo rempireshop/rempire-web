@@ -100,6 +100,10 @@ function routes(): RouteCase[] {
     { name: "GET /api/geo/", path: "/api/geo/", method: "GET", exports: ["GET"], load: () => import("@/app/api/geo/route"), req: { next: true } },
     { name: "POST /api/track/", path: "/api/track/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/track/route"), body: { sid: "s1", type: "view", path: "/", productId: PRODUCT.id, value: 1, lang: "RU", ref: "google.com" } },
     { name: "POST /api/stock-alerts/", path: "/api/stock-alerts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/stock-alerts/route"), body: { email: "fuzz@example.com", productId: PRODUCT.id, lang: "RU" } },
+    // search: the storefront's last-resort «what does this phrase mean» call.
+    // With no OPENAI_API_KEY (which is the suite) it never reaches the model —
+    // the body is still read and checked first, so this walks the validation.
+    { name: "POST /api/search/", path: "/api/search/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/search/route"), body: { q: "жирные волосы", lang: "RU" } },
     { name: "GET /api/reviews/", path: "/api/reviews/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/reviews/route"), queries: [`?product=${PRODUCT.id}`] },
     { name: "POST /api/reviews/", path: "/api/reviews/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/reviews/route"), body: { product: PRODUCT.id, name: "Фазз", rating: 5, text: "Отличный товар, всем советую.", lang: "RU", consent: true, website: "" } },
     { name: "GET /api/blog/", path: "/api/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/api/blog/route"), queries: ["?lang=RU&page=1", "?page=-1", "?page=1e9", "?page=abc", "?lang=" + "x".repeat(500)] },

@@ -763,7 +763,7 @@ export interface FlowsReport {
   invoices: { reminded: number; cancelled: number; skipped: number; reason?: string };
   unpaid: UnpaidRun;
   /** «Доставлен» closed without anybody pressing it — src/lib/delivery.ts. */
-  delivered: { closed: number; checked: number; reason?: string };
+  delivered: { closed: number; checked: number; returned?: number; reason?: string };
   ms: number;
 }
 

@@ -98,12 +98,29 @@ test.describe("admin — наборы", () => {
       // and the set is priced at whichever one is chosen (the first by default)
       await expect(page.locator("[data-bundlesize]").first().locator("option")).toHaveCount(PRODUCT.sizes.length);
 
+      /* Dim, 07.09.2026: «when creating sets and putting together items, we
+         need to see somewhere what the price total of the set is, so we can
+         apply a percentage as discount.» The running total sits under the item
+         list, and the two money boxes are that one price seen two ways: a per
+         cent typed into one fills the euro price into the other, in place. */
+      const sumLine = page.locator("[data-bundlesum]");
+      await expect(sumLine).toContainText("Сумма товаров");
+      const sum = eu(((await sumLine.textContent()) || "").replace("Сумма товаров —", ""));
+      expect(sum).toBeGreaterThan(SET_PRICE);
+
+      await page.locator("[data-bundlepct]").fill("20");
+      await expect(page.locator('[data-bundlef="price"]')).toHaveValue(String(Math.round(sum * 80) / 100));
+
       /* The hint is the number the owner is really deciding against, and it has
          to answer while the price is being typed — without a re-render taking
          the caret out of the box. */
       await page.locator('[data-bundlef="price"]').fill(String(SET_PRICE));
       await expect(page.locator("[data-bundlehint]")).toContainText("Сумма по отдельности");
       await expect(page.locator("[data-bundlehint]")).toContainText("скидка");
+      // …and the per-cent box followed the euro one back
+      await expect(page.locator("[data-bundlepct]")).toHaveValue(
+        String(Math.round(((sum - SET_PRICE) / sum) * 1000) / 10).replace(".", ","),
+      );
 
       await page.locator("[data-bundlesave]").click();
       // the row in the list is the proof, not the 2.6-second toast
@@ -190,6 +207,18 @@ test.describe("admin — наборы", () => {
       // the form stays open on the refused value — nothing was saved
       await expect(page.locator("[data-bundlesave]")).toBeVisible();
       await page.locator("[data-bundlecancel]").click();
+
+      /* …and a NEW set typed onto an address that already belongs to one:
+         POST /api/admin/bundles/ is an upsert, so this used to replace that
+         set — its name, its products and its price — without a word. */
+      await page.locator("[data-bundlenew]").click();
+      await page.locator('[data-bundlef="id"]').fill(SET_ID);
+      await page.locator('[data-bundlef="title"]').fill("Другой набор");
+      await page.locator("[data-bundlesave]").click();
+      await expect(page.locator('.err[role="alert"]')).toContainText("уже есть");
+      await page.locator("[data-bundlecancel]").click();
+      // the set that was there is untouched
+      await expect(page.locator(`[data-bundleedit="${SET_ID}"]`)).toBeVisible();
     });
   });
 

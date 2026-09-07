@@ -385,7 +385,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       await section(page, "setup");
       await page.locator('[data-admsetpage="home"]').click();
       // a slide is a row with its own switch, order buttons and «Изменить»
-      await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-pressed", "true");
+      await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-checked", "true");
       await page.locator('[data-heroedit="0"]').click();
       await page.locator('[data-herof="title"]').fill(title);
       await page.locator("[data-heroclose]").click();
@@ -572,6 +572,102 @@ test.describe("admin sections — Клиенты: «+ Партнёр»", () => {
       // leave the shop as it was found
       await page.request.patch(`/api/admin/customers/${encodeURIComponent(email)}/`, { data: { tier: "retail" } });
     }
+  });
+});
+
+/* ---------------------------------------------------------------------------
+ * The two places on this panel where a number is useless without the sentence
+ * beside it: the Google block on «Аналитика» and the six figures on
+ * «Настройки → Цены и баллы» (docs/audit/2026-09-07-wording.md; Dim,
+ * 07.09.2026 — Renat does not use Search Console and has never run a loyalty
+ * scheme). Both screens now do the arithmetic instead of naming it, and that
+ * arithmetic is real behaviour, not decoration: it is computed from what is
+ * in the form and it has to agree with what the server would actually charge
+ * and award (priceItems() / earnLoyaltyPoints(), src/lib/loyalty.ts).
+ */
+test.describe("admin sections — the numbers explain themselves", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(189) });
+
+  /* Nothing here is ever saved: «Партнёры и баллы» and the five fields move
+     the local draft only (pricingDraft() in app.js), and the confirm card is
+     never opened — so this test needs no cleanup and cannot leak settings
+     into the specs that run after it. */
+  test("«Цены и баллы» works the example out in euros while the owner types", async ({ page }) => {
+    await loginAsAdmin(page);
+    await section(page, "setup");
+    await page.locator('[data-admsetpage="prices"]').click();
+    /* «Партнёры и баллы» is off by default (Renat said «later»), and with it
+       off the five fields are not drawn at all — so the switch comes first.
+       admSwitch() writes aria-pressed, not aria-checked. */
+    const partners = page.locator("[data-partnerson]");
+    if ((await partners.getAttribute("aria-pressed")) !== "true") await partners.click();
+    await expect(partners).toHaveAttribute("aria-pressed", "true");
+
+    const hint = (key: string) => page.locator(`[data-pricingex="${key}"]`);
+    const calc = page.locator(".adm-calc__c", { hasText: "Партнёр — салон или мастер" });
+
+    await page.locator('[data-pricingf="proDiscountPct"]').fill("25");
+    await expect(hint("proDiscountPct"), "the discount is not worked out in euros")
+      .toHaveText("Партнёр платит на 25 % меньше: товар за 40 € обойдётся ему в 30 €.");
+    await expect(calc, "the sample basket did not follow the field").toContainText("30 €");
+
+    /* A threshold above the sample basket is the case the owner cannot see
+       coming: the partner pays full price and the panel has to say why. */
+    await page.locator('[data-pricingf="proMinOrder"]').fill("50");
+    await expect(calc).toContainText("Скидка не сработала: корзина не набрала 50 €.");
+    await expect(calc, "a blocked discount still showed the discounted price").toContainText("40 €");
+    await page.locator('[data-pricingf="proMinOrder"]').fill("0");
+
+    // 10% of a 40 € order is 4 points, and a point is a euro — earnLoyaltyPoints()
+    await page.locator('[data-pricingf="earnPct"]').fill("10");
+    await expect(hint("earnPct")).toHaveText(
+      "Начисляем 10 %: с заказа на 40 € вернётся 4 € баллами. Один балл — одно евро.");
+    await expect(page.locator(".adm-calc")).toContainText("Вернётся баллами");
+
+    // …and the redeem cap, which is the other half of what a point is worth
+    await page.locator('[data-pricingf="redeemMaxPct"]').fill("50");
+    await expect(hint("redeemMaxPct")).toHaveText(
+      "Из корзины на 40 € баллами можно закрыть не больше 20 €, остальное — деньгами.");
+  });
+
+  test("the Google block says where 13th place puts the shop, not «средняя позиция»", async ({ page }) => {
+    /* Search Console is not wired up in an e2e run (no service-account key),
+       and the point of this test is the wording, not the fetch — so the real
+       shape of Renat's own answer is served from here: about 2 900 показов,
+       47 кликов, average position 13, and «rempire» itself at 3.79. */
+    await page.route("**/api/admin/analytics/gsc/**", (r) => r.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true, clicks: 47, impressions: 2900, ctr: 47 / 2900, position: 13.02,
+        topQueries: [
+          { query: "rempire", clicks: 31, impressions: 210, ctr: 0.147, position: 3.79 },
+          { query: "краска для волос таллинн", clicks: 0, impressions: 340, ctr: 0, position: 27.6 },
+        ],
+        topPages: [],
+      }),
+    }));
+    await loginAsAdmin(page);
+    await section(page, "stats");
+
+    const work = page.locator(".adm-page");
+    await expect(work.locator(".adm-read"), "the position is still only a number")
+      .toContainText("В среднем ваш магазин показывается в Google на 13-м месте.");
+    // …and the bad half of it said out loud, not left for the owner to infer
+    await expect(work.locator(".adm-read")).toContainText("Это вторая страница Google");
+    await expect(work.locator(".adm-read")).toHaveClass(/adm-read--warn/);
+
+    const defs = work.locator(".adm-defs");
+    await expect(defs, "«показ» is used without ever being explained")
+      .toContainText("Показ — это когда магазин попал в список Google");
+    await expect(defs).toContainText("Из 2 900 показов перешли 47.");
+    await expect(defs).toContainText("Из каждых 100 показов переходов — примерно 2.");
+
+    const queries = work.locator(".adm-qs");
+    await expect(queries).toContainText("rempire");
+    await expect(queries).toContainText("Показов: 210 · переходов: 31 · место в Google: 4");
+    await expect(queries, "a word nobody clicked reads the same as one that worked")
+      .toContainText("По этому слову в магазин не зашёл никто.");
   });
 });
 

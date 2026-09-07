@@ -928,7 +928,7 @@ Dim pays the OpenAI bill.
   10–15 k tokens (≈ cents); every text call is logged to `admin_audit` as
   `ai.text` with token counts — visible only in the database.
 - **Assistant** `POST /api/assistant/` (`src/app/api/assistant/route.ts`,
-  `PROMPT_V 18`): shop mode public (same-origin, 10 msg/min/IP, `max_tokens`
+  `PROMPT_V 19`): shop mode public (same-origin, 10 msg/min/IP, `max_tokens`
   400, catalogue slice `src/lib/catalogue-slice.ts`, blog links, actions
   `add_to_cart|open_product|open_category|open_cart|checkout`); admin mode
   requires the admin cookie **and** an `Origin` header, `max_tokens` 1500, the
@@ -953,7 +953,12 @@ Dim pays the OpenAI bill.
   paper-clip uploads to R2 `products/inbox/` first.
 - **Shop chat** `public/shop2/chat.js`: rule-based fallback when
   `GET /api/assistant/` says disabled; gated by `settings.chatbot`; tracks
-  `chat` events.
+  `chat` events. Its `<script>` is **not** in `index.html` — `mountChat()` in
+  `app.js` adds it per render, and only on a wide screen (`min-width: 768px`)
+  outside `checkout`/`admin`/`scan`, so a phone never downloads it at all
+  (Dim, 07.09.2026). `chatAllowed()` in `chat.js` repeats the same rule for a
+  widget already in the page: a window resized narrow, or a walk into the
+  checkout, has to take it off screen.
 - **Text generator** `POST /api/admin/ai/text/` (`requireAdmin`, 30/h, 128 KB):
   tasks `describe`, `translate`, `seo` (product or post), `reply` (signature
   appended from `settings.content`, never model text), `blog_outline`,

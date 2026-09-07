@@ -130,6 +130,17 @@ test.describe("sets switched off", () => {
   test.use({ extraHTTPHeaders: ipHeaders(76) });
 
   test("hides every trace of sets in all three languages and keeps a cart line alive", async ({ page, browser }) => {
+    /* The default 30 s is not enough for what this test actually does: an
+       admin login, a shop-wide write, then three fresh browser contexts each
+       walking home → catalogue → product → search → two set URLs → the gift
+       card, and a fourth for the seeded cart — about thirty page loads
+       against `next dev`, which compiles a route on its first hit. It ran out
+       of budget in the three-language sweep, and because a Playwright timeout
+       kills the test before `finally`, the sets switch it had just turned off
+       stayed off for every spec that ran after it on the same server. Same
+       bump, for the same reason, as the banner/details/prices test in
+       e2e/admin-sections.spec.ts. */
+    test.setTimeout(180_000);
     await loginAsAdmin(page);
     /* «Настройки» is an index of six sub-pages since the phase-3 redesign;
        the two shop-wide switches live on «Главная страница». */
@@ -236,8 +247,8 @@ test.describe("sets switched off", () => {
     } finally {
       await openSetupHome(page);
       const back = page.locator("[data-admbundles]");
-      // a switch since the redesign: aria-pressed, not a label that flips
-      if ((await back.getAttribute("aria-pressed")) !== "true") {
+      // a switch since the redesign: aria-checked, not a label that flips
+      if ((await back.getAttribute("aria-checked")) !== "true") {
         /* Waiting for the write, not just the click: the panel applies the
            switch locally and PUTs it in the background, and a test that ends
            on the click has its context torn down with the request still in

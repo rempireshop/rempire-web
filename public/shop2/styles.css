@@ -692,6 +692,12 @@ body:has(.stickybar) .ftr {
   background-size: contain; background-position: center; background-repeat: no-repeat;
   pointer-events: none;
 }
+/* The gift card is the one banner target with no product photo behind it
+   (heroArt() in app.js): the slide shows the same tower on the same shell
+   panel the gift block on the home page uses, so the banner looks like the
+   page its button opens. */
+.hero__art--gift { display: flex; align-items: center; justify-content: center; background: var(--shell); }
+.hero__giftmark { width: 42px; height: 66px; color: var(--ink); }
 .hero__arrow {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
   width: 42px; height: 42px; border: none; cursor: pointer;

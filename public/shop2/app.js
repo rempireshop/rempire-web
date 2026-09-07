@@ -93,6 +93,8 @@
   var UI = {
     ET: {
       "Включить": "Lülita sisse", "Выключить": "Lülita välja", "включён": "sees", "выключен": "väljas",
+      /* the word every admin switch now wears beside its knob (admSwitchFace) */
+      "Вкл": "Sees", "Выкл": "Väljas",
       "Наборы на сайте": "Komplektid poes",
       "готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»": "valmiskomplektid sinu enda toodetest — menüüs, avalehel ja kataloogis. Komplekte ise pane kokku «Tooted → Komplektid»",
       "показаны": "näidatakse", "скрыты": "peidetud", "Скрыть": "Peida", "Показать": "Näita",
@@ -131,6 +133,13 @@
       "Страница набора исчезнет, уже оформленные заказы не изменятся.": "Komplekti leht kaob, juba vormistatud tellimused ei muutu.",
       "Этот товар уже в наборе": "See toode on juba komplektis",
       "Добавьте хотя бы два товара — тогда посчитаем.": "Lisa vähemalt kaks toodet — siis arvutame.",
+      "…или скидка от суммы, %": "…või soodustus summast, %",
+      "Набор с таким адресом уже есть — придумайте другой адрес.": "Selle aadressiga komplekt on juba olemas — mõtle välja teine aadress.",
+      "Сначала добавьте в набор хотя бы два товара": "Lisa komplekti esmalt vähemalt kaks toodet",
+      "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
+        "Mustand kirjutatakse komplekti toodete järgi. Kirjelduse esimesi ridu näitab pood Google'is.",
+      "Список наборов не загрузился — откройте «Товары → Наборы»": "Komplektide nimekiri ei laadinud — ava «Tooted → Komplektid»",
+      "Такого набора нет — соберите новый в «Товары → Наборы»": "Sellist komplekti ei ole — koosta uus «Tooted → Komplektid» all",
       "Набор сохранён ✓": "Komplekt salvestatud ✓",
       "Набор показан ✓": "Komplekt on näha ✓",
       "Набор скрыт ✓": "Komplekt peidetud ✓",
@@ -177,6 +186,9 @@
       "Фильтры": "Filtrid", "Сортировка": "Järjesta", "Сбросить": "Lähtesta",
       "Сбросить всё": "Lähtesta kõik", "Сбросить фильтры": "Lähtesta filtrid",
       "Наличие": "Saadavus", "Бренд": "Bränd", "В наличии": "Laos",
+      // the tail of a product page's meta description — the same words
+      // src/lib/seo-head.mjs's descTail() writes into the static page
+      "доставка по Эстонии и Балтии": "tarne Eestis ja Baltikumis",
       "Закрыть": "Sule", "Меньше": "Vähem", "Больше": "Rohkem", "Размер": "Suurus",
       "Пока пусто.": "Ostukorv on tühi.", "К товарам": "Toodete juurde",
       "Хиты продаж": "Populaarsemad ees", "Цена ↑": "Hind ↑", "Цена ↓": "Hind ↓",
@@ -1063,6 +1075,8 @@
       "Покажи аналитику за неделю": "Näita nädala statistikat",
       "Какие письма получают клиенты?": "Milliseid kirju kliendid saavad?",
       "Какие заказы ждут отправки?": "Millised tellimused ootavad saatmist?",
+      "Сделай набор из этих товаров": "Tee nendest toodetest komplekt",
+      "Сделай промокод на скидку": "Tee sooduskood",
       "Спросить…": "Küsi…",
       "Вопрос помощнику": "Küsimus abilisele",
       "Спросить": "Küsi",
@@ -1311,6 +1325,72 @@
       "Открытий чата": "Vestluse avamisi",
       "Подарочных карт продано": "Kinkekaarte müüdud", "Подарочных карт потрачено": "Kinkekaarte kasutatud",
       "Всё в наличии.": "Kõik on laos.",
+      /* stats: the sentences that read the numbers out loud (Dim, 07.09.2026) */
+      "Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.":
+        "Kõik sellel ekraanil on valitud perioodi kohta. Raha loetakse ainult tasutud tellimustelt. Ja «+12%» numbri all tähendab «võrreldes sama pika ajavahemikuga enne seda»: «7 päeva» puhul seitsme sellele eelnenud päevaga.",
+      "Деньги по оплаченным заказам, вместе с доставкой.": "Raha tasutud tellimustelt, koos tarnega.",
+      "Сколько заказов за это время оплатили.": "Mitu tellimust selle aja jooksul ära maksti.",
+      "Сколько денег в среднем в одном заказе.": "Kui palju raha on keskmiselt ühes tellimuses.",
+      "Сколько человек из каждых 100 зашедших в магазин что-то купили.":
+        "Mitu inimest igast 100 poodi sisenenust midagi ostis.",
+      "Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.":
+        "Üks tulp on üks päev, kõige parempoolsem on tänane. Mida kõrgem tulp, seda rohkem raha see päev tõi.",
+      "Что принесло больше всего денег за период.": "Mis tõi perioodi jooksul kõige rohkem raha.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
+        "Seda kirjutati poe enda otsingusse, aga pood ei leidnud midagi. Kas kirjaviga või kaup, mida teil ei ole — aga mida küsitakse.",
+      "Путь до покупки": "Tee ostuni", "Зашли в магазин": "Sisenesid poodi",
+      "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.":
+        "Mitu inimest jõudis igasse sammu. Numbrid kahanevad alati: kõik sisenejad ei vaata kaupa ja kõik vaatajad ei osta. Kõige suurem aste allapoole — sealt ostjad kaovadki.",
+      "Сколько денег принёс каждый бренд за период.": "Kui palju raha tõi iga bränd perioodi jooksul.",
+      "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
+        "Neid kaupu avati, aga kordagi ei pandud ostukorvi. Paremal on, mitu korda avati. Tavaliselt aitab teine foto, aus hind või arusaadav kirjeldus.",
+      "Что люди печатали в поиске внутри магазина. Справа — сколько раз.":
+        "Mida inimesed poe enda otsingusse kirjutasid. Paremal on, mitu korda.",
+      "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.":
+        "Kui palju soodustust te iga koodiga ära andsite. See on raha, mida pood ei saanud.",
+      "С чего заходят": "Millega sisenetakse", "Телефоны": "Telefonid",
+      "С телефона или с компьютера. Справа — сколько человек.": "Telefonist või arvutist. Paremal on inimeste arv.",
+      "Из каких стран": "Millistest riikidest",
+      "Страна определяется по интернет-адресу гостя — это не адрес доставки.":
+        "Riik tuvastatakse külastaja internetiaadressi järgi — see ei ole tarneaadress.",
+      "С каких сайтов приходят": "Millistelt saitidelt tullakse",
+      "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.":
+        "Sait, kust inimene teie juurde tuli. Kui ta kirjutas poe aadressi ise või tuli järjehoidjatest, siis teda siin ei ole — seepärast on summa külastajate arvust väiksem.",
+      "Четыре вещи, которые не поместились выше.": "Neli asja, mis ülalpool ära ei mahtunud.",
+      "Человек оставил почту и собрал корзину, но заказ так и не оформил.":
+        "Inimene jättis e-posti ja pani ostukorvi kokku, aga tellimust ei vormistanudki.",
+      "Сколько раз в магазине открыли окно чата.": "Mitu korda poes vestlusaken avati.",
+      "Куплено карт и на какую сумму. Деньги пришли, товар ещё не выбран.":
+        "Mitu kaarti osteti ja mis summas. Raha tuli, kaup on veel valimata.",
+      "Сколько карт использовали при оплате и на какую сумму.": "Mitu kaarti kasutati maksmisel ja mis summas.",
+      /* stats → Google: every word of Search Console's own vocabulary, said in
+         a sentence Renat can repeat to somebody else */
+      "Магазин в поиске Google": "Pood Google'i otsingus",
+      "Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.":
+        "Viimased 28 päeva. Google saadab need numbrid kahe-kolme päevase hilinemisega, nii et eilset päeva siin veel ei ole.",
+      "За эти 28 дней Google ни разу не показал магазин в поиске.":
+        "Nende 28 päeva jooksul ei näidanud Google poodi otsingus kordagi.",
+      "Это первая страница Google — там вас видно.": "See on Google'i esimene lehekülg — seal teid nähakse.",
+      "Это вторая страница Google, а до неё доходят единицы: почти все выбирают что-то на первой.":
+        "See on Google'i teine lehekülg ja sinna jõuavad vähesed: peaaegu kõik valivad midagi esimeselt.",
+      "Это третья страница Google или дальше — туда почти никто не заглядывает.":
+        "See on Google'i kolmas lehekülg või kaugemal — sinna ei vaata peaaegu keegi.",
+      "Показ — это когда магазин попал в список Google по чьему-то запросу: человек его увидел, но мог и не заметить.":
+        "Näitamine on see, kui pood sattus kellegi päringu peale Google'i nimekirja: inimene nägi seda, aga võis ka mitte tähele panna.",
+      "Переходы": "Üleminekud",
+      "Переход — человек увидел магазин в Google и нажал на ссылку. Это и есть покупатели, пришедшие из поиска.":
+        "Üleminek on see, kui inimene nägi poodi Google'is ja klõpsas lingil. Just nemad on otsingust tulnud ostjad.",
+      "Доля переходов (CTR)": "Üleminekute osakaal (CTR)",
+      "Доля переходов, по-английски CTR, — какая часть показов превратилась в переход. Чем выше место в Google, тем она больше.":
+        "Üleminekute osakaal, inglise keeles CTR, on see, kui suur osa näitamistest muutus üleminekuks. Mida kõrgem koht Google'is, seda suurem see on.",
+      "Из каждых 100 показов не переходит почти никто.": "Igast 100 näitamisest ei lähe edasi peaaegu keegi.",
+      "Среднее место в Google": "Keskmine koht Google'is",
+      "Место — какой по счёту ваш магазин в списке Google. Первая строка забирает больше половины всех переходов, десятая — единицы.":
+        "Koht on see, mitmes teie pood Google'i nimekirjas on. Esimene rida võtab üle poole kõigist üleminekutest, kümnes üksikud.",
+      "Что люди искали — и что они увидели": "Mida inimesed otsisid — ja mida nad nägid",
+      "Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.":
+        "Need on sõnad, mida inimesed Google'isse endasse kirjutasid. Iga sõna all on see, mis edasi juhtus.",
+      "По этому слову в магазин не зашёл никто.": "Selle sõna peale ei tulnud poodi mitte keegi.",
       "Google Search Console — последние 28 дней": "Google Search Console — viimased 28 päeva",
       "Аналитика сейчас не отвечает — попробуйте позже.": "Analüütika ei vasta praegu — proovi hiljem uuesti.",
       "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
@@ -1709,6 +1789,8 @@
       "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Igal mahul on oma hind. Esimest mahtu näeb ostja esimesena.",
       "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
         "Üks hind kogu tootele. Kui mahtusid on mitu — vajuta «+ Suurus» ja kirjuta igale hind.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».":
+        "Jääk on punane, kui see ei ületa selle mahu «vähe» piiri. «pole arvestatud» — seda mahtu pole kordagi loetud; kirjuta number ja see ilmub «Laos».",
       "Фото — после первого сохранения": "Fotod — pärast esimest salvestamist",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Täida «Põhiline», kirjuta hind ja vajuta «Salvesta toode» — toode ilmub ja siia saab lisada fotod telefonist.",
@@ -1764,6 +1846,7 @@
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
       "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa «vähe» läve — vaikimisi 2; igal mahul on oma lävi, seda muudab laos nupp «Muuda». «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa selle mahu «vähe» läve. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Левее": "Vasakule",
       "Правее": "Paremale",
       "Убрать фото": "Eemalda foto",
@@ -2141,11 +2224,37 @@
       "Войдите как владелец, чтобы менять цены и баллы.": "Logige omanikuna sisse, et muuta hindu ja punkte.",
       "Салоны и мастера": "Salongid ja meistrid",
       "Скидка для салонов, %": "Salongisoodustus, %",
-      "0 — если оптовых цен сейчас нет.": "0 — kui hulgihindu praegu ei ole.",
       "Действует от суммы корзины, €": "Kehtib alates ostukorvi summast, €",
-      "0 — без условия.": "0 — ilma tingimuseta.",
       "Баллы за покупки": "Punktid ostude eest", "Начислять баллы": "Koguda punkte",
-      "один балл — одно евро при списании": "üks punkt — üks euro kasutamisel",
+      /* prices/points: who a partner is, what each of the six numbers does, and
+         the 40 € basket at the foot of the card (Dim, 07.09.2026) */
+      "Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.":
+        "Partner on salong või meister, kes ostab teie käest töö jaoks, mitte endale.",
+      "Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».":
+        "Ta läheb «Kabinetti», vajutab «Saada partneriks» ning jätab ettevõtte nime ja registrikoodi; teie kinnitate ta jaotises «Kliendid».",
+      "После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».":
+        "Pärast seda näeb ta kõigil kaupadel oma soodsamat hinda ja talle läheb kiri «Salongihinnad on sisse lülitatud».",
+      "Всё остальное у него как у обычного покупателя: та же корзина, та же доставка, та же оплата.":
+        "Kõik muu on tal nagu tavalisel ostjal: sama ostukorv, sama tarne, sama maksmine.",
+      "Сейчас 0 — у партнёров те же цены, что у всех. Впишите, например, 20, и они станут платить на пятую часть меньше.":
+        "Praegu on 0 — partneritel on samad hinnad mis kõigil. Kirjutage näiteks 20, ja nad hakkavad maksma viiendiku võrra vähem.",
+      "Сейчас 0 — скидка действует на любой заказ партнёра, хоть на один тюбик.":
+        "Praegu on 0 — soodustus kehtib partneri igale tellimusele, kas või ühele tuubile.",
+      "Сейчас 0 — баллы не начисляются ни за одну покупку.": "Praegu on 0 — ühegi ostu eest punkte ei koguta.",
+      "Сейчас 0 — баллами нельзя оплатить ничего, они просто копятся.":
+        "Praegu on 0 — punktidega ei saa midagi maksta, need lihtsalt kogunevad.",
+      "Сейчас 0 — платить баллами можно с первого же начисленного балла.":
+        "Praegu on 0 — punktidega saab maksta juba esimesest kogutud punktist.",
+      "часть оплаченного заказа возвращается покупателю баллами; один балл — одно евро":
+        "osa tasutud tellimusest tuleb ostjale punktidena tagasi; üks punkt on üks euro",
+      "Обычный покупатель": "Tavaline ostja", "Партнёр — салон или мастер": "Partner — salong või meister",
+      "Платит": "Maksab", "Вернётся баллами": "Tuleb tagasi punktidena", "Баллами закроет до": "Punktidega katab kuni",
+      "Баллы получает и партнёр — с той суммы, которую заплатил он.":
+        "Punkte saab ka partner — sellelt summalt, mille tema maksis.",
+      "«Баллами закроет до» — это про следующий заказ: сначала баллы надо накопить.":
+        "«Punktidega katab kuni» käib järgmise tellimuse kohta: kõigepealt tuleb punktid koguda.",
+      "Баллы сейчас выключены, поэтому в примере их нет — оба платят деньгами.":
+        "Punktid on praegu välja lülitatud, seepärast neid näites ei ole — mõlemad maksavad rahaga.",
       "Выключить баллы": "Lülita punktid välja", "Включить баллы": "Lülita punktid sisse",
       "Начисляем, % от суммы оплаченного заказа": "Kogume, % tasutud tellimuse summast",
       "Списать можно не больше, % от корзины": "Kasutada saab kuni, % ostukorvist",
@@ -2216,6 +2325,8 @@
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
+      /* the word every admin switch now wears beside its knob (admSwitchFace) */
+      "Вкл": "On", "Выкл": "Off",
       "Наборы на сайте": "Sets on the site",
       "готовые комплекты из ваших же товаров — в меню, на главной и в каталоге. Сами наборы собираются в «Товары → Наборы»": "ready-made sets from your own products — in the menu, on the home page and in the catalogue. The sets themselves are built in «Goods → Sets»",
       "показаны": "shown", "скрыты": "hidden", "Скрыть": "Hide", "Показать": "Show",
@@ -2254,6 +2365,13 @@
       "Страница набора исчезнет, уже оформленные заказы не изменятся.": "The set's page will disappear; orders already placed do not change.",
       "Этот товар уже в наборе": "That product is already in the set",
       "Добавьте хотя бы два товара — тогда посчитаем.": "Add at least two products — then we can do the maths.",
+      "…или скидка от суммы, %": "…or a discount off the total, %",
+      "Набор с таким адресом уже есть — придумайте другой адрес.": "A set already has that address — think of another one.",
+      "Сначала добавьте в набор хотя бы два товара": "Add at least two products to the set first",
+      "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
+        "The draft is written from the products in the set. The first lines of the description are what the shop shows in Google.",
+      "Список наборов не загрузился — откройте «Товары → Наборы»": "The list of sets did not load — open «Goods → Sets»",
+      "Такого набора нет — соберите новый в «Товары → Наборы»": "There is no such set — build a new one in «Goods → Sets»",
       "Набор сохранён ✓": "Set saved ✓",
       "Набор показан ✓": "Set shown ✓",
       "Набор скрыт ✓": "Set hidden ✓",
@@ -2300,6 +2418,7 @@
       "Фильтры": "Filters", "Сортировка": "Sort", "Сбросить": "Reset",
       "Сбросить всё": "Reset all", "Сбросить фильтры": "Reset filters",
       "Наличие": "Availability", "Бренд": "Brand", "В наличии": "In stock",
+      "доставка по Эстонии и Балтии": "delivery across Estonia and the Baltics",
       "Закрыть": "Close", "Меньше": "Less", "Больше": "More", "Размер": "Size",
       "Пока пусто.": "Your cart is empty.", "К товарам": "Browse products",
       "Хиты продаж": "Bestsellers", "Цена ↑": "Price ↑", "Цена ↓": "Price ↓",
@@ -3172,6 +3291,8 @@
       "Покажи аналитику за неделю": "Show me this week's analytics",
       "Какие письма получают клиенты?": "What e-mails do customers get?",
       "Какие заказы ждут отправки?": "Which orders are waiting to be shipped?",
+      "Сделай набор из этих товаров": "Make a set of these products",
+      "Сделай промокод на скидку": "Make a promo code",
       "Спросить…": "Ask…",
       "Вопрос помощнику": "Question for the assistant",
       "Спросить": "Ask",
@@ -3408,6 +3529,72 @@
       "Открытий чата": "Chat opens",
       "Подарочных карт продано": "Gift cards sold", "Подарочных карт потрачено": "Gift cards redeemed",
       "Всё в наличии.": "Everything is in stock.",
+      /* stats: the sentences that read the numbers out loud (Dim, 07.09.2026) */
+      "Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.":
+        "Everything on this screen is for the period you picked. Money counts paid orders only. And a “+12%” under a figure means “compared with the same stretch of time just before it”: for “7 days”, the seven days before those.",
+      "Деньги по оплаченным заказам, вместе с доставкой.": "Money from paid orders, delivery included.",
+      "Сколько заказов за это время оплатили.": "How many orders were paid for in this time.",
+      "Сколько денег в среднем в одном заказе.": "How much money an average order brings.",
+      "Сколько человек из каждых 100 зашедших в магазин что-то купили.":
+        "Out of every 100 people who came into the shop, this many bought something.",
+      "Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.":
+        "One bar is one day, the rightmost is today. The taller the bar, the more money that day brought.",
+      "Что принесло больше всего денег за период.": "What brought in the most money over the period.",
+      "Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.":
+        "This was typed into the shop's own search and the shop found nothing. Either a typo, or a product you do not carry — and people are asking for it.",
+      "Путь до покупки": "The road to a purchase", "Зашли в магазин": "Came into the shop",
+      "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.":
+        "How many people reached each step. The numbers always go down: not everyone who comes in looks at a product, and not everyone who looks buys. The biggest step down is where the buyers are lost.",
+      "Сколько денег принёс каждый бренд за период.": "How much money each brand brought over the period.",
+      "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.":
+        "These products were opened but never put into a basket. On the right — how many times they were opened. Usually a better photo, an honest price or a clear description fixes it.",
+      "Что люди печатали в поиске внутри магазина. Справа — сколько раз.":
+        "What people typed into the shop's own search. On the right — how many times.",
+      "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.":
+        "How much discount you gave away with each code over the period. This is money the shop did not get.",
+      "С чего заходят": "What they come from", "Телефоны": "Phones",
+      "С телефона или с компьютера. Справа — сколько человек.": "From a phone or from a computer. On the right — how many people.",
+      "Из каких стран": "Which countries from",
+      "Страна определяется по интернет-адресу гостя — это не адрес доставки.":
+        "The country comes from the visitor's internet address — it is not the delivery address.",
+      "С каких сайтов приходят": "Which sites they come from",
+      "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.":
+        "The site a person came to you from. If they typed the shop's address themselves or came from a bookmark, they are not here — which is why this adds up to less than the number of visitors.",
+      "Четыре вещи, которые не поместились выше.": "Four things that did not fit above.",
+      "Человек оставил почту и собрал корзину, но заказ так и не оформил.":
+        "The person left an e-mail and filled a basket, but never placed the order.",
+      "Сколько раз в магазине открыли окно чата.": "How many times the chat window was opened in the shop.",
+      "Куплено карт и на какую сумму. Деньги пришли, товар ещё не выбран.":
+        "How many cards were bought and for how much. The money has arrived, the goods are not chosen yet.",
+      "Сколько карт использовали при оплате и на какую сумму.": "How many cards were used to pay and for how much.",
+      /* stats → Google: every word of Search Console's own vocabulary, said in
+         a sentence Renat can repeat to somebody else */
+      "Магазин в поиске Google": "The shop in Google search",
+      "Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.":
+        "The last 28 days. Google sends these figures two or three days late, so yesterday is not here yet.",
+      "За эти 28 дней Google ни разу не показал магазин в поиске.":
+        "In these 28 days Google never once showed the shop in search.",
+      "Это первая страница Google — там вас видно.": "That is Google's first page — you are visible there.",
+      "Это вторая страница Google, а до неё доходят единицы: почти все выбирают что-то на первой.":
+        "That is Google's second page, and few people get that far: almost everybody picks something from the first.",
+      "Это третья страница Google или дальше — туда почти никто не заглядывает.":
+        "That is Google's third page or further — hardly anybody looks there.",
+      "Показ — это когда магазин попал в список Google по чьему-то запросу: человек его увидел, но мог и не заметить.":
+        "An impression is when the shop landed in Google's list for somebody's search: they saw it, but may not have noticed it.",
+      "Переходы": "Visits from Google",
+      "Переход — человек увидел магазин в Google и нажал на ссылку. Это и есть покупатели, пришедшие из поиска.":
+        "A click is when somebody saw the shop in Google and pressed the link. Those are your visitors from search.",
+      "Доля переходов (CTR)": "Share of clicks (CTR)",
+      "Доля переходов, по-английски CTR, — какая часть показов превратилась в переход. Чем выше место в Google, тем она больше.":
+        "The share of clicks, CTR for short, is how much of what Google showed turned into a visit. The higher the place in Google, the bigger it is.",
+      "Из каждых 100 показов не переходит почти никто.": "Out of every 100 impressions almost nobody clicks through.",
+      "Среднее место в Google": "Average place in Google",
+      "Место — какой по счёту ваш магазин в списке Google. Первая строка забирает больше половины всех переходов, десятая — единицы.":
+        "The place is where your shop stands in Google's list. The first line takes more than half of all clicks, the tenth takes a handful.",
+      "Что люди искали — и что они увидели": "What people searched for — and what they saw",
+      "Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.":
+        "These are the words people typed into Google itself. Under each word is what happened next.",
+      "По этому слову в магазин не зашёл никто.": "Nobody came to the shop from this word.",
       "Google Search Console — последние 28 дней": "Google Search Console — last 28 days",
       "Аналитика сейчас не отвечает — попробуйте позже.": "Analytics is not responding right now — try again later.",
       "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
@@ -3803,6 +3990,8 @@
       "У каждого объёма своя цена. Первый объём покупатель видит первым.": "Every size has its own price. The customer sees the first size first.",
       "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.":
         "One price for the whole product. If there are several sizes, press «+ Size» and give each one a price.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».":
+        "The count turns red once it is at or below this size's «low» threshold. «not counted» means this size has never been counted; type a number and it appears in «Stock».",
       "Фото — после первого сохранения": "Photos — after the first save",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Fill in «Basics», type the price and press «Save the product» — the product appears, and photos from the phone can be added here.",
@@ -3858,6 +4047,7 @@
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
       "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below the «low» threshold — 2 by default; every size has its own, changed in the warehouse with «Edit». «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
+      "Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below this size's «low» threshold. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Левее": "Left",
       "Правее": "Right",
       "Убрать фото": "Remove the photo",
@@ -4235,11 +4425,37 @@
       "Войдите как владелец, чтобы менять цены и баллы.": "Sign in as the owner to change prices and points.",
       "Салоны и мастера": "Salons and stylists",
       "Скидка для салонов, %": "Salon discount, %",
-      "0 — если оптовых цен сейчас нет.": "0 — if there is no wholesale pricing right now.",
       "Действует от суммы корзины, €": "Applies from a basket total of, €",
-      "0 — без условия.": "0 — no condition.",
       "Баллы за покупки": "Points for purchases", "Начислять баллы": "Award points",
-      "один балл — одно евро при списании": "one point — one euro when redeemed",
+      /* prices/points: who a partner is, what each of the six numbers does, and
+         the 40 € basket at the foot of the card (Dim, 07.09.2026) */
+      "Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.":
+        "A partner is a salon or a stylist who buys from you for their work, not for themselves.",
+      "Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».":
+        "They open “My account”, press “Become a partner” and leave the company name and registry code; you approve them under “Customers”.",
+      "После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».":
+        "From then on they see their own, lower price on every product, and the letter “Salon prices are on” goes out to them.",
+      "Всё остальное у него как у обычного покупателя: та же корзина, та же доставка, та же оплата.":
+        "Everything else works as it does for any shopper: the same basket, the same delivery, the same payment.",
+      "Сейчас 0 — у партнёров те же цены, что у всех. Впишите, например, 20, и они станут платить на пятую часть меньше.":
+        "It is 0 right now — partners pay the same as everybody else. Put in 20, say, and they start paying a fifth less.",
+      "Сейчас 0 — скидка действует на любой заказ партнёра, хоть на один тюбик.":
+        "It is 0 right now — the discount applies to any partner order, down to a single tube.",
+      "Сейчас 0 — баллы не начисляются ни за одну покупку.": "It is 0 right now — no purchase earns any points.",
+      "Сейчас 0 — баллами нельзя оплатить ничего, они просто копятся.":
+        "It is 0 right now — points cannot pay for anything, they just pile up.",
+      "Сейчас 0 — платить баллами можно с первого же начисленного балла.":
+        "It is 0 right now — points can be spent from the very first one earned.",
+      "часть оплаченного заказа возвращается покупателю баллами; один балл — одно евро":
+        "part of every paid order comes back to the shopper as points; one point is one euro",
+      "Обычный покупатель": "An ordinary shopper", "Партнёр — салон или мастер": "A partner — a salon or a stylist",
+      "Платит": "Pays", "Вернётся баллами": "Comes back as points", "Баллами закроет до": "Points will cover up to",
+      "Баллы получает и партнёр — с той суммы, которую заплатил он.":
+        "A partner earns points too — on the sum they actually paid.",
+      "«Баллами закроет до» — это про следующий заказ: сначала баллы надо накопить.":
+        "“Points will cover up to” is about the next order: the points have to be earned first.",
+      "Баллы сейчас выключены, поэтому в примере их нет — оба платят деньгами.":
+        "Points are off right now, so they are not in the example — both pay with money.",
       "Выключить баллы": "Switch points off", "Включить баллы": "Switch points on",
       "Начисляем, % от суммы оплаченного заказа": "Awarded, % of the paid order total",
       "Списать можно не больше, % от корзины": "Redeem at most, % of the basket",
@@ -4313,12 +4529,58 @@
      captured piece that is itself a dictionary term (a country, a carrier
      label) is translated too. */
   var UI_RX = [
+    /* «Аналитика» → «Магазин в поиске Google»: the four sentences that carry a
+       live figure. Everything else in that block is a plain key above — only
+       the numbers Google reports have to be spliced in here. */
+    [/^В среднем ваш магазин показывается в Google на (\d+)-м месте\.$/,
+      { ET: "Keskmiselt näidatakse teie poodi Google'is $1. kohal.",
+        EN: "On average your shop shows up in Google in position $1." }],
+    [/^Из (.+) показов перешли (.+)\.$/,
+      { ET: "$1 näitamisest tehti $2 üleminekut.", EN: "Out of $1 impressions, $2 clicked through." }],
+    [/^Из каждых 100 показов переходов — примерно (\d+)\.$/,
+      { ET: "Igast 100 näitamisest on üleminekuid umbes $1.",
+        EN: "Out of every 100 impressions, about $1 click through." }],
+    [/^Показов: (.+) · переходов: (.+) · место в Google: (\d+)$/,
+      { ET: "Näitamisi: $1 · üleminekuid: $2 · koht Google'is: $3",
+        EN: "Impressions: $1 · clicks: $2 · place in Google: $3" }],
+    /* «Настройки → Цены и баллы»: the worked example under each field and the
+       40 € basket at the foot of the card. They have to be rules and not keys
+       because every one of them is the owner's own number done as arithmetic —
+       which is the whole point of them (Dim, 07.09.2026). First in this list,
+       ahead of the promo-code and «от …» rules, which would otherwise catch
+       some of these lines by their leading figure. */
+    [/^Партнёр платит на (.+) % меньше: товар за (.+) обойдётся ему в (.+)\.$/,
+      { ET: "Partner maksab $1 % vähem: kaup hinnaga $2 läheb talle maksma $3.",
+        EN: "A partner pays $1% less: an item at $2 costs them $3." }],
+    [/^Скидка включится, только если партнёр набрал корзину на (.+) по обычным ценам\. Меньше — он платит как все\.$/,
+      { ET: "Soodustus rakendub ainult siis, kui partneri ostukorv on tavahindades vähemalt $1. Vähem — ta maksab nagu kõik.",
+        EN: "The discount only starts once the partner's basket reaches $1 at ordinary prices. Below that they pay like everybody else." }],
+    [/^Начисляем (.+) %: с заказа на (.+) вернётся (.+) баллами\. Один балл — одно евро\.$/,
+      { ET: "Kogume $1 %: tellimuselt summas $2 tuleb tagasi $3 punktidena. Üks punkt on üks euro.",
+        EN: "We give back $1%: an order of $2 returns $3 in points. One point is one euro." }],
+    [/^Из корзины на (.+) баллами можно закрыть не больше (.+), остальное — деньгами\.$/,
+      { ET: "Ostukorvist summas $1 saab punktidega katta kuni $2, ülejäänu tuleb maksta rahaga.",
+        EN: "Of a $1 basket, points can cover at most $2 — the rest is paid with money." }],
+    [/^Пока баллов меньше (.+), покупатель вообще не увидит галочку «оплатить баллами»\.$/,
+      { ET: "Kuni punkte on vähem kui $1, ei näe ostja linnukest «maksa punktidega» üldse.",
+        EN: "Until they have $1 points, the shopper does not see the “pay with points” tick box at all." }],
+    [/^Столько накопится с покупок примерно на (.+)\.$/,
+      { ET: "Nii palju koguneb umbes $1 eest ostmisest.",
+        EN: "That many pile up from roughly $1 worth of shopping." }],
+    [/^Скидка не сработала: корзина не набрала (.+)\.$/,
+      { ET: "Soodustus ei rakendunud: ostukorv ei ulatunud summani $1.",
+        EN: "The discount did not apply: the basket did not reach $1." }],
+    [/^Как это посчитается на заказе в (.+)$/,
+      { ET: "Kuidas see arvutatakse $1 suuruse tellimuse pealt",
+        EN: "How this works out on an order of $1" }],
     /* «Доставка и оплата» and «Клиенты → партнёры»: the lines built around a
        number, an address or the confirm card's two-line text */
     [/^от (€\d.*)$/, { ET: "alates $1", EN: "from $1" }],
     [/^Начисляем (\d+(?:[.,]\d+)?) % от суммы оплаченного заказа; один балл — одно евро, списать можно при следующем заказе\.$/,
       { ET: "Kogume $1 % tasutud tellimuse summast; üks punkt on üks euro, kasutada saab järgmise tellimuse juures.",
         EN: "$1% of every paid order comes back as points; one point is one euro, redeemable on your next order." }],
+    /* the switch on a promo-code row is named after the code it belongs to */
+    [/^Промокод (.+)$/, { ET: "Sooduskood $1", EN: "Promo code $1" }],
     [/^Партнёр · (.+)$/, { ET: "Partner · $1", EN: "Partner · $1" }],
     [/^Розница · (.+)$/, { ET: "Jaemüük · $1", EN: "Retail · $1" }],
     [/^Уже партнёр · (.+)$/, { ET: "Juba partner · $1", EN: "Already a partner · $1" }],
@@ -4484,6 +4746,9 @@
       { ET: "Eraldi kokku — $1, soodustus $2 % · sääst $3", EN: "Separately — $1, $2 % off · you save $3" }],
     [/^Набор дороже, чем товары по отдельности \((.+)\) — так нельзя\.$/,
       { ET: "Komplekt on kallim kui tooted eraldi ($1) — nii ei saa.", EN: "The set costs more than the products apart ($1) — that cannot be." }],
+    /* …and the running total under the item list, the number the percentage
+       box takes its per cent off (Dim, 07.09.2026). */
+    [/^Сумма товаров — (.+)$/, { ET: "Toodete summa — $1", EN: "Products total — $1" }],
     // features
     [/^выгода (.+)$/, { ET: "sääst $1", EN: "you save $1" }],
     [/^В корзину — (.+)$/, { ET: "Lisa ostukorvi — $1", EN: "Add to cart — $1" }],
@@ -4904,8 +5169,21 @@
     return /^[A-Za-z0-9._~:/?#[\]@!$&*+,=%-]+$/.test(v) ? v : "";
   }
   /* A picture is either a catalogue photo (by product id, drawn by the same
-     media() as everywhere else) or a plain URL the owner pasted. */
+     media() as everywhere else), the gift card's own mark, or a plain URL the
+     owner pasted.
+
+     `image: "gift"` exists because the gift card is the one thing a slide can
+     point at that has no product photo behind it: without it a gift-card
+     banner fell through to CATALOGUE[0] and advertised a present with a
+     picture of a shampoo. The mark is the same tower on the same shell panel
+     the gift tile already uses on the home page, so the slide looks like the
+     page it opens. */
+  var HERO_GIFT_IMG = "gift";
   function heroArt(image, cls) {
+    if (String(image || "") === HERO_GIFT_IMG) {
+      return '<span class="' + (cls || "hero__art") + ' hero__art--gift" aria-hidden="true">' +
+        tower("hero__giftmark") + "</span>";
+    }
     var u = heroUrl(image);
     if (u) {
       return '<span class="' + (cls || "hero__art") + '" style="background-image:url(\'' +
@@ -6124,6 +6402,20 @@
     var v = (Math.round(n * 10) / 10).toFixed(1);
     return S.lang === "EN" ? v : v.replace(".", ",");
   }
+  /* A whole count with a non-breaking gap every three digits — «2 900», not
+     «2900». Four digits read as a year and five read as noise; the analytics
+     screen is the one place in the panel where the owner meets numbers that
+     big, and «2900 показов» is the kind of figure he has to be able to say
+     out loud. Digits only, so nothing here needs translating. */
+  function numGrp(n) {
+    var v = Math.round(Number(n) || 0);
+    var s = String(Math.abs(v)), out = "";
+    for (var i = 0; i < s.length; i++) {
+      if (i && (s.length - i) % 3 === 0) out += " ";
+      out += s.charAt(i);
+    }
+    return (v < 0 ? "-" : "") + out;
+  }
   function byId(id) { for (var i = 0; i < CATALOGUE.length; i++) if (CATALOGUE[i].id === id) return CATALOGUE[i]; return CATALOGUE[0]; }
   /* byId() always returns SOMETHING (see above) — exactly wrong for a list of
      ids that may no longer exist (a post's featured products, deleted since
@@ -6575,9 +6867,65 @@
       }
     } catch (e) { /* a tracking call must never be why a click failed */ }
   }
-  // chat.js runs after app.js (see index.html) and cannot reach an id inside
-  // this closure any other way — one deliberate, narrow bridge.
+  // chat.js runs after app.js (see mountChat below) and cannot reach an id
+  // inside this closure any other way — one deliberate, narrow bridge.
   window.__rmpTrack = track;
+
+  /* ---------- the shop assistant's <script>, on demand -------------------
+     Dim, 07.09.2026: «checkoutis pole assistenti vaja ja mobiilis ei kasuta
+     üldse poes assistenti, adminis võib jääda». So the widget is wanted on a
+     wide screen, in the shop, anywhere except the checkout — and on a phone
+     it is wanted nowhere at all.
+
+     "Nowhere at all" has to mean the file is never fetched either, which is
+     why the <script> tag left index.html and is added from here instead: a
+     phone that will never see the chat now downloads, parses and runs none
+     of it (chat.js also builds its whole catalogue index at load). Same
+     pattern as mountCfBeacon() above, and for the same reason it cannot be
+     an inline gate in the shell: /shop2/* runs under `script-src 'self'`
+     with no 'unsafe-inline' (next.config.ts).
+
+     The version token is lifted off app.js's own tag rather than written
+     here, so the two assets can never fall out of step and nothing in this
+     file has to be touched when the token moves.
+
+     chat.js keeps its own copy of the same rule (chatAllowed()) because the
+     script may already be loaded when the shopper walks into the checkout or
+     drags a desktop window down to phone width — mounting is one-way, hiding
+     is not. */
+  var CHAT_WIDE = "(min-width: 768px)";   // the shop's own phone/desktop line
+  function chatWide() {
+    try { return !!(window.matchMedia && window.matchMedia(CHAT_WIDE).matches); }
+    catch (e) { return true; }
+  }
+  function chatWanted() {
+    if (!chatWide()) return false;
+    if (S.screen === "checkout" || S.screen === "admin" || S.screen === "scan") return false;
+    return DEMO.chatbot !== false;
+  }
+  function mountChat() {
+    try {
+      if (!chatWanted()) return;
+      if (document.querySelector('script[data-shopchat]')) return;
+      var app = document.querySelector('script[src*="/shop2/app.js"]');
+      var v = ((app && app.getAttribute("src")) || "").split("?")[1];
+      var s = document.createElement("script");
+      s.defer = true;
+      s.setAttribute("data-shopchat", "");
+      s.src = "/shop2/chat.js" + (v ? "?" + v : "");
+      document.body.appendChild(s);
+    } catch (e) { /* the assistant must never be why the shop failed to boot */ }
+  }
+  // a desktop window dragged narrow and back again, or an orientation change
+  // on a tablet: the first time it is wide enough, the script arrives
+  try {
+    if (window.matchMedia) {
+      var chatMq = window.matchMedia(CHAT_WIDE);
+      var onChatMq = function () { mountChat(); };
+      if (chatMq.addEventListener) chatMq.addEventListener("change", onChatMq);
+      else if (chatMq.addListener) chatMq.addListener(onChatMq);
+    }
+  } catch (e) {}
 
   /* Cloudflare Web Analytics (docs/analytics.md). The token sits in a <meta
      name="cf-beacon"> in index.html — the integrator pastes it there — and
@@ -6615,6 +6963,12 @@
   function trackNav() {
     track("view", { path: pathFor() });
     if (S.screen === "product" && S.productId) track("product", { productId: S.productId });
+    /* search: a reload, a shared link or the Back button lands on the search
+       screen with a query already in the address — nobody typed, so the input
+       handler never ran and neither the search event nor the assistant's pass
+       would ever happen for it. Debounced and idempotent, like every other
+       caller. */
+    if (S.screen === "search" && String(S.query || "").trim()) scheduleSearchTrack();
   }
   /* Search fires once per pause in typing, not once per keystroke — a
      700 ms debounce shared by the header search box, the search screen's
@@ -6625,8 +6979,71 @@
     searchTrackTimer = setTimeout(function () {
       var q = String(S.query || "").trim();
       if (!q) return;
-      track("search", { path: q, value: searchResults().length });
+      /* The model is asked only for a phrase the shop's own three passes
+         could not answer, and the search event WAITS for its answer: the
+         number that lands in the events table has to be the number the
+         shopper really ended up seeing, or a query the assistant rescued
+         would sit in «Искали, но не нашли» for ever. */
+      if (searchResults().length >= SRCH_WIDEN) { trackSearch(q, false); return; }
+      askSearchAI(q, function (rescued) { trackSearch(q, rescued); });
     }, 700);
+  }
+  /** One search row: the query, how many products it ended up showing, and —
+      when the model is what found them — the marker «ai» in `product_id`.
+      db/migrations/080_events.sql leaves that column free on a search row,
+      and the owner's «Искали, но не нашли» is `value = 0`, so a query that
+      now succeeds drops out of that report by itself while the rescues stay
+      countable (docs/audit/2026-09-07-search.md). */
+  function trackSearch(q, rescued) {
+    if (String(S.query || "").trim() !== q) return;   // typed on: a later run reports
+    var body = { path: q, value: searchResults().length };
+    if (rescued) body.productId = "ai";
+    track("search", body);
+  }
+  /* ---------- search, pass four: the model ---------------------------------
+     POST /api/search turns a phrase the catalogue has no words for into words
+     it does have (src/lib/search-terms.ts). It is asked at most ONCE per
+     phrase per session, only after the free passes came back nearly empty,
+     and never while the shopper is still typing — the 700 ms debounce above
+     is the same one the analytics beacon waits for.
+
+     Every failure is the same failure: remember nothing new, keep the results
+     already on the screen, say nothing. No key (503), another origin (403),
+     no such route at all (404, a static copy of the shop with no server) also
+     switch the whole thing off for the session, because none of those will
+     start working on the next keystroke. A rate limit or a hiccup is recorded
+     as «nothing to add» for THAT phrase only: the shop must not sit in a
+     retry loop over somebody's search box. */
+  var AI_SEARCH_OFF = false;
+  var aiSearchAsking = null;
+  function askSearchAI(q, done) {
+    var k = srchNorm(q);
+    if (Object.prototype.hasOwnProperty.call(AI_TERMS, k)) { done(AI_TERMS[k].length > 0); return; }
+    if (AI_SEARCH_OFF || aiSearchAsking === k || typeof fetch !== "function") { done(false); return; }
+    aiSearchAsking = k;
+    function settle(terms, off) {
+      if (off) AI_SEARCH_OFF = true;
+      aiSearchAsking = null;
+      AI_TERMS[k] = terms && terms.length ? terms : [];
+      // the page is showing an empty (or nearly empty) result list right now
+      if (AI_TERMS[k].length && S.screen === "search") render();
+      done(AI_TERMS[k].length > 0);
+    }
+    try {
+      // the trailing slash is not optional: `trailingSlash: true` in
+      // next.config.ts turns a POST without it into a 308 redirect
+      fetch("/api/search/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ q: q.slice(0, 80), lang: S.lang })
+      }).then(function (r) {
+        if (r.status === 503 || r.status === 403 || r.status === 404) { settle([], true); return null; }
+        if (!r.ok) { settle([]); return null; }
+        return r.json().then(function (b) {
+          settle(b && b.ok && Array.isArray(b.terms) ? b.terms.slice(0, 8) : []);
+        });
+      }).catch(function () { settle([]); });
+    } catch (e) { settle([]); }
   }
 
   function emailBad() { return S.emailTouched && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(S.email); }
@@ -6737,15 +7154,451 @@
   function stem(w) {
     return w.length > 5 ? w.slice(0, w.length - 2) : w.length > 4 ? w.slice(0, w.length - 1) : w;
   }
-  function searchResults() {
-    var q = S.query.trim().toLowerCase();
-    if (!q) return [];
-    var words = q.split(/\s+/).map(stem);
+  /** Pass 1, and the whole of the search this shop had until 07.09.2026:
+      every word of the query, stemmed, somewhere in the product's name, brand
+      or section. Untouched on purpose — it is what «Davines», «шампунь» and
+      «un.tangled» want, it answers off data already in memory, and keeping it
+      word for word is what makes «nothing that used to be found stops being
+      found» a fact rather than a hope (tools/search-bench.mjs). */
+  function searchNames(q) {
+    var words = String(q).split(/\s+/).map(stem);
     return CATALOGUE.filter(function (p) {
       var hay = (p.name + " " + p.brand + " " + CAT_NAMES[p.cat]).toLowerCase();
       for (var i = 0; i < words.length; i++) if (hay.indexOf(words[i]) < 0) return false;
       return true;
     });
+  }
+
+  /* ---------- search: what the shopper means, not only what they typed -----
+     «rasvased juuksed» — Estonian for oily hair — used to find nothing. No
+     product is called that; the products that solve it are shampoos whose
+     DESCRIPTIONS say «жирные волосы», «oily», «rasustele juustele» and
+     «себорегулирующий». Same for «перхоть», «выпадение волос», «сухая кожа
+     головы», «секущиеся кончики» — and for «система 4», which is the brand
+     «System 4» written in the alphabet the customer types in.
+
+     Three passes, cheapest first, and only as far as the query needs:
+
+       1. NAMES  — searchNames() above.
+       2. TEXT   — the same words, plus their bridges («шампунь» → shampoo,
+                   «систем» → system), looked up in the product's own
+                   description, its Google pair and its volumes, in all three
+                   languages at once. Free: those texts are already in the
+                   page (public/shop/content*.js), so this costs no request
+                   and works with no server at all.
+       3. CONCERNS — a curated table from the phrase a person types about
+                   themselves to the words the catalogue really uses.
+
+     Passes 2 and 3 run ONLY when pass 1 came back with fewer than SRCH_WIDEN
+     products, and their finds are appended after pass 1's. So «шампунь» and
+     «Davines» look exactly as they did, and the widening is spent where the
+     page was otherwise empty. The model (askSearchAI) is a fourth pass on top
+     of these, and only for what all three could not reach.
+
+     EVERY TABLE BELOW IS WRITTEN THE WAY srchNorm() LEAVES TEXT: lower case,
+     ё → е, and õäöüšž folded to oaousz — «koom», not «kõõm». Both the query
+     and the product text go through it, so the two always meet in the same
+     spelling, and a shopper who types Estonian without the diacritics is not
+     punished for it. Cyrillic lives in regex literals rather than in strings
+     on purpose: these are matching keys, never shown to anyone, and
+     tools/i18n-gaps.mjs is right to demand a translation for every Russian
+     string that CAN reach the screen. */
+
+  /** Fewer than this from pass 1 and the search widens. Six is what a phone
+      shows above the fold — below it the shopper is looking at an empty page
+      and would rather have near misses than nothing. */
+  var SRCH_WIDEN = 6;
+  /** And at most this many widened finds: a concern like «сухие волосы» is
+      honestly true of half the shelf, and half a shelf is not an answer. */
+  var SRCH_WIDE_MAX = 48;
+
+  /** Word endings, stripped once — so «жирные», «жирный» and «жирным» all
+      become «жирн», and «rasvased»/«rasvastele» both become something the
+      other's written form starts with. Everything is matched as a word
+      PREFIX afterwards, which is what lets one cut serve three languages: a
+      letter too few costs a word form, a letter too many costs precision.
+
+      Two tables, two floors, because the two alphabets are not alike. A
+      Russian root is short and its endings are many, so three letters is
+      enough to keep («сухая» → «сух», and «гель» is left whole). A Latin word
+      here is usually a brand or an English noun with almost nothing to strip,
+      and three letters was actively wrong: «creed» came out as «cre» and
+      found every «cream» in the shop. Four is the floor there, which leaves
+      «creed», «care» and «cure» exactly as typed.
+
+      Both regexes are anchored at the end and unanchored at the start, so the
+      engine's earliest match is the longest ending. */
+  var SRCH_SUFFIX_RU = /(ами|ями|ого|его|ому|ему|ыми|ими|ей|ой|ый|ий|ая|яя|ое|ее|ые|ие|ов|ев|ах|ях|ам|ям|ом|ем|ым|им|ую|юю|ся|сь|ь|й|ы|и|а|о|у|е|я|ю|м|х)$/;
+  var SRCH_SUFFIX_LAT = /(idega|itega|dega|tega|isse|asse|esse|itel|idel|iste|este|dele|tele|sele|ides|ites|tes|des|sed|ted|ded|ele|ega|eks|ile|ilt|ist|ing|ies|ks|le|lt|st|ga|de|te|id|ed|ne|se|es|d|t|s|l|e|a|i|u)$/;
+
+  /** Words that say nothing about which product is wanted. «купить» and
+      «hind» are in here for the same reason «для» is: they are how a person
+      talks to a shop, not what they are shopping for. */
+  var SRCH_STOP = /^(и|в|во|на|с|со|для|от|из|по|у|о|об|к|ко|за|при|не|же|ли|бы|это|мне|мой|моя|как|что|где|или|the|a|an|of|for|and|or|to|in|on|at|with|my|me|is|it|do|how|what|best|top|nr|no|number|номер|ja|ning|voi|kui|see|ei|mu|ma|mis|kas|ka|kuidas|купить|куплю|цена|цены|стоимость|заказать|заказ|отзыв[а-я]*|обзор[а-я]*|официальн[а-я]*|сайт[а-я]*|магазин[а-я]*|osta|hind|hinnad|pood|ametlik|buy|price|prices|shop|store|website|official|reviews|review|online)$/;
+
+  /** One query word → the other spellings this catalogue uses for it. The
+      product names carry a Russian tail («… — шампунь»), the brands are
+      Latin, and the descriptions are Russian, Estonian and English at once,
+      so the same thing is written three ways in three places. Each rule only
+      ADDS a spelling — the word itself is always tried too, so a bridge can
+      find more and never less. The brand half is the Search Console export
+      of 07.09.2026 talking: «система 4», «систем 4», «наксос», «крид
+      авентус» and «биоботаническая» are real queries this shop was found
+      by, and none of them is spelled the way the catalogue spells it. */
+  var SRCH_BRIDGE = [
+    [/^sampoon/, ["shampoo"]], [/^шампун/, ["shampoo"]],
+    [/^кондиционер/, ["conditioner"]], [/^palsam/, ["conditioner", "balm"]],
+    [/^бальзам/, ["balm", "conditioner"]],
+    [/^сыворотк/, ["serum"]], [/^seerum/, ["serum"]],
+    [/^тоник|^тонер/, ["tonic", "toner"]],
+    [/^масл/, ["oil"]], [/^oli$|^olid/, ["oil"]],
+    [/^воск/, ["wax"]], [/^vaha/, ["wax"]],
+    [/^паст/, ["paste"]], [/^глин/, ["clay"]],
+    [/^крем/, ["cream"]], [/^kreem/, ["cream"]],
+    [/^спрей/, ["spray"]], [/^sprei/, ["spray"]],
+    [/^гел/, ["gel"]], [/^geel/, ["gel"]],
+    [/^лосьон/, ["lotion", "aftershave"]],
+    [/^пудр/, ["powder"]], [/^puuder/, ["powder"]],
+    [/^мыл/, ["soap"]], [/^seep/, ["soap"]],
+    [/^маск/, ["mask"]], [/^скраб/, ["scrub"]],
+    [/^пенк|^пена/, ["foam"]], [/^помад/, ["pomade"]],
+    [/^лак/, ["hairspray", "spray"]], [/^патч/, ["patch"]],
+    [/^гребен|^расческ/, ["comb"]], [/^бритв|^станок/, ["razor"]],
+    [/^футболк|^майк/, ["shirt", "tee"]],
+    [/^парфюм|^духи|^аромат|^туалетн/, ["parfum", "perfume", "eau", "fragrance"]],
+    [/^parfuum|^lohn/, ["parfum", "perfume", "fragrance"]],
+    [/^дезодорант/, ["deodorant"]],
+    [/^волос/, ["hair"]], [/^juuk|^juus/, ["hair"]],
+    [/^бород|^усы/, ["beard", "moustache"]], [/^habe/, ["beard"]],
+    [/^кож/, ["skin"]], [/^nahk|^naha/, ["skin"]],
+    [/^лиц/, ["face", "facial"]], [/^nagu$|^nao/, ["face"]],
+    [/^голов/, ["scalp", "head"]], [/^peanah/, ["scalp"]],
+    [/^тел/, ["body"]], [/^keha/, ["body"]],
+    [/^увлажн/, ["hydrating", "moisturising", "moisturizing"]],
+    [/^питат/, ["nourishing"]], [/^восстанавлив|^восстановл/, ["repair", "restoring"]],
+    [/^защит/, ["protect", "protection"]], [/^блеск/, ["shine", "gloss"]],
+    [/^объем/, ["volume", "thickening", "plumping"]], [/^укладк/, ["styling"]],
+    [/^матов/, ["matte"]], [/^фиксац/, ["hold"]],
+    [/^перхот/, ["dandruff"]], [/^koom/, ["dandruff"]],
+    [/^зуд/, ["itch", "itching"]], [/^сух/, ["dry"]], [/^kuiv/, ["dry"]],
+    [/^жирн|^сальн/, ["oily", "greasy"]], [/^rasu|^rasvas|^rasune/, ["oily", "greasy"]],
+    [/^окраш/, ["colour", "color", "coloured"]], [/^varvit/, ["colour", "color"]],
+    [/^кудр|^вьющ|^локон/, ["curl", "curly"]], [/^lokk/, ["curl", "curly"]],
+    [/^тонк/, ["fine", "thin"]], [/^чувствительн/, ["sensitive"]], [/^tundlik/, ["sensitive"]],
+    [/^рост/, ["growth"]], [/^подарок|^подароч/, ["gift"]], [/^kingitus|^kinke/, ["gift"]],
+    [/^систем|^sistem|^sustem/, ["system"]], [/^наксос/, ["naxos"]], [/^ксерджоф|^ксерж/, ["xerjoff"]],
+    [/^крид/, ["creed"]], [/^авентус/, ["aventus"]], [/^байредо|^биредо/, ["byredo"]],
+    [/^давинес|^давинс/, ["davines"]], [/^кевин/, ["kevin"]], [/^мерфи|^мерф/, ["murphy"]],
+    [/^пол$|^поль$/, ["paul"]], [/^митчел/, ["mitchell"]], [/^гэтсби|^гетсби/, ["gatsby"]],
+    [/^прорасо/, ["proraso"]], [/^люмин/, ["lumin"]], [/^ануа/, ["anua"]],
+    [/^косрикс|^косрх/, ["cosrx"]], [/^ланейж|^ланеж/, ["laneige"]],
+    [/^версач/, ["versace"]], [/^диор/, ["dior"]], [/^герлен/, ["guerlain"]],
+    [/^килиан/, ["kilian"]], [/^роджа/, ["roja"]], [/^том$/, ["tom"]], [/^форд$/, ["ford"]],
+    [/^биоботанич|^био$/, ["bio", "botanical"]], [/^капитан|^фосет|^фавсет/, ["captain", "fawcett"]],
+    [/^ремпайр|^ремпаир/, ["rempire"]]
+  ];
+
+  /** The concern table: what a person says about themselves → what the shop
+      wrote about the products that answer it.
+
+        q  the phrase, tested against the whole normalised query
+        n  and what rules that reading out — «жирная кожа ГОЛОВЫ» is a scalp,
+           not a face
+        t  the words the catalogue itself uses (global: a product that says
+           it four times outranks one that says it once)
+        c  the sections it can be in at all; absent means any
+
+      Every entry was checked against the shop's own descriptions with
+      `node tools/search-bench.mjs "<phrase>"` — a rule that matches nothing
+      is worse than no rule, and one that matches the whole shelf is worse
+      still. Renat's real answer to most of these is a better product text;
+      until then this is what stands between a shopper and an empty page. */
+  var SRCH_CONCERNS = [
+    { q: /(жирн|сальн)[а-я]*([ ][а-я]+){0,2}[ ](волос|голов)|(rasvas|rasus|rasune|olis)[a-z]*([ ][a-z]+){0,2}[ ](juu|pea)|(oily|greasy)([ ][a-z]+){0,2}[ ](hair|scalp|roots)|себорегул|жирност/,
+      t: /жирн|сальн|себорегул|себум|излишк|oily|greasy|sebum|oil control|excess oil|rasu|rasvas|olisus/g,
+      c: ["hair", "styling"] },
+    { q: /(жирн|сальн)[а-я]*([ ][а-я]+){0,2}[ ](кож|лиц)|(rasu|rasus|rasune|olis)[a-z]*([ ][a-z]+){0,2}(nahk|nagu|nao)|oily([ ][a-z]+){0,2}[ ](skin|face)|блеск[ ]кож|t[ ]zone/,
+      n: /голов|волос|peanah|juus|scalp|hair/,
+      t: /жирн|сальн|себум|поры|матир|oily|sebum|shine|pore|mattif|rasu|rasus|poor/g,
+      c: ["face"] },
+    { q: /перхот|koom|dandruff|шелуш[а-я]*[ ]кож|flak/,
+      t: /перхот|шелуш|dandruff|flak|koom|seborr|себоре/g, c: ["hair"] },
+    { q: /выпаден[а-я]*[ ]волос|выпадают[ ]волос|облыс|редеющ|тонк[а-я]*[ ]волос|густот|vaijalang|valjalang|ohenev|horen|juuste[ ]kadu|hair[ ](loss|fall)|thinning|balding/,
+      t: /выпаден|редеющ|истонч|густот|плотност|рост волос|hair loss|thinning|thicken|densit|fuller|valjalang|ohenev|tihed/g,
+      c: ["hair", "styling"] },
+    { q: /сух[а-я]*([ ][а-я]+){0,2}[ ]голов|стянут|kuiv([ ][a-z]+){0,2}[ ]peanah|dry([ ][a-z]+){0,2}[ ]scalp/,
+      t: /сух[а-я]* кож|сухост|увлажн|успокаива|раздражен|dry scalp|dryness|soothing|hydrat|kuiv|niisut|rahustav/g,
+      c: ["hair"] },
+    { q: /сух[а-я]*([ ][а-я]+){0,2}[ ]волос|ломк|поврежденн|секущ|тускл|пушат|kuiv([ ][a-z]+){0,2}[ ]juu|kahjustatud|dry([ ][a-z]+){0,2}[ ]hair|damaged|brittle|frizz/,
+      t: /сух|ломк|поврежд|секущ|восстанавлива|восстановл|питат|увлажн|damaged|brittle|repair|restor|nourish|hydrat|kuiv|kahjustatud|taastav|toitev/g,
+      c: ["hair", "styling"] },
+    { q: /объем|прикорнев|пышн|kohev|mahtu|volume|volumis|thicken/,
+      t: /объем|прикорнев|пышн|плотност|густот|volume|volumis|body|thicken|plump|lift|fuller|kohev|maht/g,
+      c: ["hair", "styling"] },
+    { q: /секущ|кончик|otste[ ]lohen|lohenev|split[ ]end/,
+      t: /секущ|кончик|split end|otste|lohenev/g, c: ["hair", "styling"] },
+    { q: /зуд|чешет|раздражен[а-я]*[ ]кож|sugele|arritunud|itch|irritated[ ]scalp/,
+      t: /зуд|раздражен|успокаива|чувствительн|itch|irritat|soothing|sensitive|sugele|rahustav|tundlik/g,
+      c: ["hair", "face", "beard"] },
+    { q: /окраш|краш[её]н|varvit|colou?r[ ](treated|protect)|colou?red[ ]hair|блонд|blond|осветл/,
+      t: /окраш|цвет волос|блонд|осветл|varvitud|varv|colour|color|blonde|toning/g,
+      c: ["hair", "styling"] },
+    { q: /кудр|вьющ|локон|завит|lokki|curl|wavy/,
+      t: /кудр|вьющ|локон|завит|curl|wave|wavy|coil|lokk/g, c: ["hair", "styling"] },
+    { q: /прыщ|акне|высыпан|воспален|(черн|чёрн)[а-я]*[ ]точк|vistrik|akne|acne|breakout|blemish|pimple/,
+      t: /прыщ|акне|высыпан|воспален|салицил|acne|breakout|blemish|blackhead|salicylic|bha|vistrik|akne/g,
+      c: ["face"] },
+    { q: /морщин|старен|возрастн|антивозраст|упруг|kortsu|vananemis|wrinkl|anti[ ]?age|ageing|aging|firmness/,
+      t: /морщин|старен|антивозраст|упруг|коллаген|ретинол|wrinkl|anti age|anti-age|ageing|firm|collagen|retinol|peptide|kortsu|vananemis/g,
+      c: ["face"] },
+    { q: /поры|расширенн[а-я]*[ ]пор|poor|pore|blackhead/,
+      t: /поры|пор[ыа]|сужа|pore|blackhead|clarify|deep clean|poor/g, c: ["face"] },
+    { q: /сух[а-я]*([ ][а-я]+){0,2}[ ](кож|лиц)|обезвож|kuiv([ ][a-z]+){0,2}[ ](nahk|nagu|nao)|dry([ ][a-z]+){0,2}[ ](skin|face)|dehydrat/,
+      n: /голов|волос|peanah|juus|scalp|hair/,
+      t: /сух|обезвож|увлажн|питат|барьер|гиалурон|dry|dehydrat|hydrat|moistur|nourish|barrier|hyaluron|ceramide|kuiv|niisut/g,
+      c: ["face", "body"] },
+    { q: /чувствительн[а-я]*([ ][а-я]+){0,2}[ ](кож|лиц)|краснот|купероз|tundlik|sensitive[ ]skin|redness|rosacea/,
+      t: /чувствительн|краснот|успокаива|раздражен|sensitive|redness|soothing|calm|centella|cica|tundlik|rahustav/g,
+      c: ["face", "body"] },
+    { q: /(рост|густ|мягк)[а-я]*[ ]бород|уход[ ]за[ ]бород|habemekasv|pehme[ ]habe|habeme[ ]hooldus|beard[ ](growth|care|softener)|softer[ ]beard/,
+      t: /бород|усы|habe|beard|moustache/g, c: ["beard"] },
+    { q: /раздражен[а-я]*([ ][а-я]+){0,2}[ ]брить|после[ ]брить|порез|врос[а-я]*[ ]волос|raseerimis|parast[ ]raseer|after[ ]?shave|shaving[ ](irritation|rash|burn)|razor[ ]burn|ingrown/,
+      t: /после брить|раздражен|успокаива|порез|врос|aftershave|after shave|shaving|razor|ingrown|soothing|raseer/g,
+      c: ["beard", "face"] },
+    { q: /(сильн|стойк)[а-я]*[ ]фиксац|матов|tugev[ ]fiksatsioon|matt[ ]viimistlus|strong[ ]hold|matte[ ]finish|firm[ ]hold/,
+      t: /фиксац|матов|текстур|укладк|hold|matte|texture|styling|finish|matt/g, c: ["styling"] }
+  ];
+
+  /** The one spelling everything in this block is compared in: lower case,
+      ё → е, õäöüšž → oaousz, every other non-letter a space, a digit and a
+      letter always parted («100ml» → «100 ml», «4system» → «4 system» — both
+      real Search Console queries), and a space at each end — so
+      `blob.indexOf(" " + word)` is a word-START test and «murphy» finds
+      «Kevin.Murphy» while «ampoo» finds nothing. */
+  function srchNorm(s) {
+    var t = String(s == null ? "" : s).toLowerCase();
+    /* One line instead of a table of letters: NFD splits every accented
+       letter into a plain one plus a combining mark, and dropping the marks
+       leaves ё → е, õäöü → oaou and šž → sz at once. It also keeps this file
+       free of one-letter Russian string literals, which tools/i18n-gaps.mjs
+       would be right to read as text somebody forgot to translate.
+       The one mark kept is the breve (U+0306): stripping it would fold й
+       into и, and «мой» and «мои» are two words, not one word twice. */
+    if (t.normalize) t = t.normalize("NFD").replace(/[\u0300-\u0305\u0307-\u036f]/g, "").normalize("NFC");
+    return " " + t.replace(/[^0-9a-zа-я]+/g, " ")
+      .replace(/([0-9])([a-zа-я])/g, "$1 $2").replace(/([a-zа-я])([0-9])/g, "$1 $2")
+      .replace(/^ +| +$/g, "") + " ";
+  }
+  /** One ending off, and only when enough of the word survives — the floor is
+      three letters in Russian and four in the Latin alphabet (SRCH_SUFFIX_*). */
+  function srchStem(w) {
+    if (/[а-я]$/.test(w)) {
+      var r = w.replace(SRCH_SUFFIX_RU, "");
+      return r.length >= 3 ? r : w;
+    }
+    var s = w.replace(SRCH_SUFFIX_LAT, "");
+    return s.length >= 4 ? s : w;
+  }
+  /** The words of a query that say something: the small talk dropped, a bare
+      digit kept («система 4»), at most eight of them. If small talk is all
+      there is, the small talk is the query. */
+  function srchWords(q) {
+    var all = srchNorm(q).split(" ").filter(function (w) { return w; });
+    var keep = all.filter(function (w) {
+      return (w.length > 1 || /[0-9]/.test(w)) && !SRCH_STOP.test(w);
+    });
+    return (keep.length ? keep : all).slice(0, 8);
+  }
+  /** Each word as the set of spellings worth looking for — its own stem
+      first, then whatever SRCH_BRIDGE adds. */
+  function srchGroups(q) {
+    var words = srchWords(q), out = [];
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i], alts = [srchStem(w)];
+      for (var b = 0; b < SRCH_BRIDGE.length; b++) {
+        if (!SRCH_BRIDGE[b][0].test(w)) continue;
+        var add = SRCH_BRIDGE[b][1];
+        for (var k = 0; k < add.length; k++) if (alts.indexOf(add[k]) < 0) alts.push(add[k]);
+      }
+      out.push(alts);
+    }
+    return out;
+  }
+  /** The concerns this phrase is about. */
+  function srchConcerns(q) {
+    var qn = srchNorm(q), out = [];
+    for (var i = 0; i < SRCH_CONCERNS.length; i++) {
+      var c = SRCH_CONCERNS[i];
+      if (c.q.test(qn) && !(c.n && c.n.test(qn))) out.push(c);
+    }
+    return out;
+  }
+  /** Everything the shop has ever written about a product, all three
+      languages at once — the name, brand, section and volumes, the
+      description the page shows (the owner's override first, the shop's own
+      static text after) and the Google pair. */
+  function srchText(p) {
+    // the volumes twice: the catalogue writes «75 мл», Google Search Console
+    // says people type «75 ml» — and the second spelling costs one replace
+    var sizes = " " + (p.sizes || []).join(" ") + " ";
+    var t = [p.name, p.brand, CAT_NAMES[p.cat] || "", sizes, sizes.replace(/мл/g, " ml ").replace(/ г /g, " g ")];
+    var ov = p.descOv || {}, so = p.seoOv || {}, langs = ["RU", "ET", "EN"];
+    for (var i = 0; i < langs.length; i++) {
+      var L = langs[i];
+      if (ov[L]) t.push(ov[L]);
+      if (so[L]) t.push(so[L].t || "", so[L].d || "");
+    }
+    if (p.seo) t.push(p.seo.t || "", p.seo.d || "");
+    if (typeof CONTENT !== "undefined" && CONTENT[p.id]) t.push(CONTENT[p.id]);
+    if (typeof CONTENT_RU !== "undefined" && CONTENT_RU[p.id]) t.push(CONTENT_RU[p.id]);
+    if (typeof CONTENT_ET !== "undefined" && CONTENT_ET[p.id]) t.push(CONTENT_ET[p.id]);
+    return t.join(" ");
+  }
+  /* The index is two normalised strings per product, built on the first
+     widened search of the session and kept until something changes the
+     catalogue — applyDemoOverrides() and rebuildCatalogue() bump SRCH_GEN and
+     empty SRCH_IX, which is the whole invalidation story. Nothing is built at
+     boot: a shopper who never searches never pays for this.
+
+     Beside the products rather than on them, on purpose: a product row is
+     handed around this file freely, and half a megabyte of search text bolted
+     onto it would eventually find its way into an order body or into
+     localStorage. Keyed by id, which is unique across the file's rows and the
+     owner's own («c-…»). */
+  var SRCH_GEN = 0, SRCH_IX = {};
+  function srchIndex(p) {
+    var ix = SRCH_IX[p.id];
+    if (!ix) {
+      ix = SRCH_IX[p.id] = {
+        name: srchNorm(p.name + " " + p.brand + " " + (CAT_NAMES[p.cat] || "")),
+        all: srchNorm(srchText(p).replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " "))
+      };
+    }
+    return ix;
+  }
+  function srchNameBlob(p) { return srchIndex(p).name; }
+  function srchBlob(p) { return srchIndex(p).all; }
+  /** The model's answer as plain stems (askSearchAI) — same shape the shop's
+      own words end up in, so it is scored by the very same loop. */
+  function srchExtra(list) {
+    var out = [];
+    for (var i = 0; list && i < list.length && out.length < 12; i++) {
+      var w = srchWords(list[i]);
+      for (var k = 0; k < w.length; k++) {
+        var s = srchStem(w[k]);
+        if (out.indexOf(s) < 0) out.push(s);
+      }
+    }
+    return out;
+  }
+  /** Passes 2–4 over the products pass 1 did not already return, best first.
+      A product qualifies when EVERY word of the query is somewhere in its
+      text, or when a concern it belongs to recognised it, or on the model's
+      terms — two of them, or one that is in the product's own name, so a
+      single loose word like «hair» cannot drag the whole shelf in.
+
+      «Every word» is the rule for a short query and too hard a rule for a
+      long one: Search Console says people paste whole product titles («system
+      4 nr. 2 climbazole shampoo 500 ml», «how to apply kevin murphy plumping
+      wash»), and one word the shop happens not to use — «nr», «grey»,
+      «freehold» written without its dot — used to be enough to answer nothing
+      at all. From three words up, one word in every three may be missing,
+      provided at least one of the rest is in the product's own name; and the
+      full matches sort above the partial ones anyway.
+
+      A bare number is never one of the words that has to be found. «creed
+      aventus 50ml» is a person asking for Creed Aventus, and the shop's row
+      for it may simply not carry a 50 ml rung — demanding the 50 handed the
+      page to every OTHER 50 ml bottle instead. It still scores, so «шампунь
+      номер 1» still puts Special Shampoo 1 first. */
+  function searchWide(query, have, aiTerms) {
+    var groups = srchGroups(query), cons = srchConcerns(query), extra = srchExtra(aiTerms);
+    if (!groups.length && !cons.length && !extra.length) return [];
+    var words = 0;
+    for (var q = 0; q < groups.length; q++) if (!/^[0-9]+$/.test(groups[q][0])) words++;
+    var need = words - Math.floor(words / 3);
+    /* A recognised concern also says which shelf the shopper is standing at,
+       and that binds the plain word matching too: «объём волосам» is about
+       hair, so a beard oil whose text happens to say «volume» and «hair» is
+       not an answer to it. Only when every concern that fired names its
+       sections — one that does not (a gift, say) leaves the shop open. */
+    var only = null;
+    for (var k = 0; k < cons.length; k++) {
+      if (!cons[k].c) { only = null; break; }
+      only = (only || []).concat(cons[k].c);
+    }
+    var out = [];
+    for (var i = 0; i < CATALOGUE.length; i++) {
+      var p = CATALOGUE[i];
+      if (have && have.indexOf(p) >= 0) continue;
+      if (only && only.indexOf(p.cat) < 0) continue;
+      var name = srchNameBlob(p), all = srchBlob(p), score = 0, hit = 0, named = 0, ok = false;
+      for (var g = 0; g < groups.length; g++) {
+        var best = 0;
+        for (var a = 0; a < groups[g].length; a++) {
+          var w = " " + groups[g][a];
+          if (name.indexOf(w) >= 0) { best = 4; break; }
+          if (all.indexOf(w) >= 0) best = 2;
+        }
+        if (best) {
+          score += best;
+          if (!/^[0-9]+$/.test(groups[g][0])) { hit++; if (best === 4) named++; }
+        }
+        else if (groups[g][0].length > 4) {
+          /* A word the shop writes with a dot inside it, or one the shopper
+             glued to the next: «freehold» is «FREE.HOLD», «luminskin» is
+             «Lumin Skin». Its first four letters are enough to put the right
+             product at the top of a shelf full of near-equal ones — they
+             score, and they never qualify a product on their own. */
+          var pre = " " + groups[g][0].slice(0, 4);
+          if (name.indexOf(pre) >= 0) score += 2;
+          else if (all.indexOf(pre) >= 0) score += 1;
+        }
+      }
+      if (words && (hit === words || (hit >= need && named))) ok = true;
+      for (var c = 0; c < cons.length; c++) {
+        if (cons[c].c && cons[c].c.indexOf(p.cat) < 0) continue;
+        var n = (all.match(cons[c].t) || []).length;
+        if (!n) continue;
+        ok = true;
+        score += 3 + (n > 4 ? 4 : n) + ((name.match(cons[c].t) || []).length ? 4 : 0);
+      }
+      var eHit = 0, eName = 0;
+      for (var e = 0; e < extra.length; e++) {
+        var x = " " + extra[e];
+        if (name.indexOf(x) >= 0) { eName++; eHit++; score += 4; }
+        else if (all.indexOf(x) >= 0) { eHit++; score += 2; }
+      }
+      if (eName || eHit >= 2) ok = true;
+      if (ok) out.push([score, i, p]);
+    }
+    out.sort(function (x, y) { return y[0] - x[0] || x[1] - y[1]; });
+    return out.slice(0, SRCH_WIDE_MAX).map(function (r) { return r[2]; });
+  }
+
+  /* The model's extra terms for a query, once it has been asked and answered
+     — see askSearchAI() further down. Empty until then, and empty for the
+     whole session when the shop has no key: the three passes above are the
+     entire search on their own, and they are what runs first anyway. */
+  var AI_TERMS = {};
+  function aiTermsFor(q) {
+    var k = srchNorm(q);
+    return Object.prototype.hasOwnProperty.call(AI_TERMS, k) ? AI_TERMS[k] : [];
+  }
+
+  /* One query's answer, remembered — searchResults() is called by every
+     render, and a render happens on every keystroke. */
+  var SRCH_LAST = { key: "", res: null };
+  function searchResults() {
+    var q = S.query.trim().toLowerCase();
+    if (!q) return [];
+    var ai = aiTermsFor(S.query);
+    var key = SRCH_GEN + "|" + q + "|" + ai.join(",");
+    if (SRCH_LAST.key === key) return SRCH_LAST.res;
+    var res = searchNames(q);
+    if (res.length < SRCH_WIDEN || ai.length) res = res.concat(searchWide(S.query, res, ai));
+    SRCH_LAST = { key: key, res: res };
+    return res;
   }
 
   // ---------- components ----------
@@ -7962,6 +8815,12 @@
         '<button data-go-cat="all">Все товары</button>' +
         CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
         (allBundles().length ? '<button data-go="bundles" data-nav-bundles>Наборы</button>' : "") +
+        /* Dim, 07.09.2026: the gift card belongs beside «Наборы» in the
+           navigation — that is where someone shopping for a present is
+           already looking, and it is why the footer no longer repeats it.
+           Unlike «Наборы» it is never removed: the card is not a set and
+           stays on sale with sets switched off (docs/features.md). */
+        '<button data-go="gift" data-nav-gift>Подарочная карта</button>' +
         '<button data-go="brands" data-nav-brands>Бренды</button>' +
         '<button data-go="blog" data-nav-blog>Блог</button>' +
       "</nav></header>";
@@ -8005,7 +8864,8 @@
     var navSets = nav && nav.querySelector("[data-nav-bundles]");
     var wantSets = !!allBundles().length;
     if (nav && wantSets && !navSets) {
-      var before = nav.querySelector("[data-nav-brands]");
+      // back in front of the gift card, which is where headerHTML() puts it
+      var before = nav.querySelector("[data-nav-gift]") || nav.querySelector("[data-nav-brands]");
       var btn = document.createElement("button");
       btn.setAttribute("data-go", "bundles");
       btn.setAttribute("data-nav-bundles", "");
@@ -8016,7 +8876,10 @@
     }
     h.querySelectorAll(".hdr__nav button").forEach(function (b) {
       if (b.dataset.navBundles !== undefined) {
-        b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle" || S.screen === "gift"));
+        // «gift» used to light this one up — it has its own entry now
+        b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle"));
+      } else if (b.dataset.navGift !== undefined) {
+        b.setAttribute("aria-current", String(S.screen === "gift"));
       } else if (b.dataset.navBrands !== undefined) {
         b.setAttribute("aria-current", String(S.screen === "brands" || (S.screen === "catalog" && !!S.brand)));
       } else if (b.dataset.navBlog !== undefined) {
@@ -8133,7 +8996,21 @@
     var addr = contentConf().company.address;
     return '<footer class="ftr"><div class="wrap">' +
       '<div class="ftr__accs">' +
-      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE + " € · 230 пакоматов в 4 странах") +
+      /* The «Покупателю» group is gone (Dim, 07.09.2026): «Наборы»,
+         «Подарочная карта» and «Блог» all sit in the top navigation, and a
+         second copy of them at the bottom of the page was the only thing he
+         kept noticing there. The four links in it that are NOT in the
+         navigation did not go with it — each one moved to the block that
+         already says the same thing, so nothing became unreachable:
+         «Доставка и оплата» here, «Контакты» under «Связаться», and the two
+         consumer-rights pages under «Правовое», where the rest of them are. */
+      /* The link is a sibling node, never glued onto the sentence: that
+         sentence carries a price and is translated by a UI_RX rule anchored
+         on its last word — one appended « · » and it stops matching in ET
+         and EN. Same reason «Самовывоз» below keeps its own <span>. */
+      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE +
+        " € · 230 пакоматов в 4 странах" +
+        '<br><button class="link" data-page="shipping">Доставка и оплата</button>') +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       /* content: the address is data now, so the sentence after it lives in its
          own element — the dictionary matches whole text nodes, and gluing an
@@ -8141,9 +9018,10 @@
       ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.</span>") +
       (hours ? ftrSec("Часы работы", hours) : "") +
       ftrSec("Реквизиты", cCompanyHTML()) +
-      ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
-      ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-go="blog">Блог</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
+      ftrSec("Связаться", [cPhoneHTML(), cMailHTML(), '<button class="link" data-page="contact">Контакты</button>']
+        .filter(Boolean).join(" · ")) +
       ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · ' +
+        '<button class="link" data-page="returns">Возврат товара</button> · ' +
         // the one way back to a choice that is otherwise made once and kept
         '<button class="link" data-cookies>Данные и cookie</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
@@ -8419,6 +9297,17 @@
            prefix by [data-go-product], and a set card would break that match
            and make every infinite-scroll batch rebuild the whole grid. */
         bundleGridHTML(bundlesForCatalog(), S.cat === "all" ? "Наборы" : "Наборы из этого раздела") +
+        /* Dim, 07.09.2026: «in "all products" the gift card option should be
+           somewhere». It is the same block as on the home page and in the
+           cabinet — deliberately NOT a card in #catgrid: the card layout
+           promises a price, a size and «В корзину», and a gift card has an
+           amount the shopper chooses on its own page, no stock and no size.
+           A tile under the grid says «this exists» without pretending to be
+           a product, and it sits outside #catgrid so infinite scroll's
+           prefix match (patchCatalog) never sees it.
+           «Все товары» only: this is the one shelf that claims to hold
+           everything, and a gift card is not part of «Уход за бородой». */
+        (S.cat === "all" && !S.brand ? '<section class="sec sec--gift">' + giftTileHTML() + "</section>" : "") +
       "</section></div>";
   }
   /* Russian counts take three forms; "12 товаров / 22 товара / 21 товар". */
@@ -11617,7 +12506,9 @@
      own min/max. Reads var(--ink)/var(--rule-soft) like the rest of the
      panel, so it is never a colour of its own. */
   var FUNNEL_STAGES = [
-    ["sessions", "Сессии"], ["product", "Смотрели товар"], ["addToCart", "Добавили в корзину"],
+    // «Сессии» was the one word on this screen that only a developer reads;
+    // the step it counts is «somebody opened the shop» (Dim, 07.09.2026)
+    ["sessions", "Зашли в магазин"], ["product", "Смотрели товар"], ["addToCart", "Добавили в корзину"],
     ["checkout", "Открыли оформление"], ["purchase", "Купили"]
   ];
   /* Generic two-column list — name + one number — reused across most tables
@@ -11987,6 +12878,8 @@
   function admInvoicesWaiting() {
     return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM).filter(function (v) { return v.invoice && v.unpaid; });
   }
+  /* «Заказы» pages like «Товары» (40) and «Склад» (60) — see admOrderRows(). */
+  var ORDERS_PAGE = 40;
   function admOrdersHTML() {
     if (SRV.admin === true) loadSrvOrders(false);
     var f = S.admOrderFilter || "new";
@@ -12036,8 +12929,21 @@
     var over = q && f !== "all"
       ? '<div class="adm-hint" style="margin:0 0 8px">Ищем по всем заказам — фильтр сейчас не действует.</div>'
       : "";
-    return over + list.map(admOrderRowHTML).join("") +
-      (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
+    /* Speed, 07.09.2026. «Все» was the one list in the panel that drew
+       everything it had: «Товары» pages at 40 and «Склад» at 60, but 100 orders
+       meant 100 rows — 1 500 elements — rebuilt as a string, parsed and diffed
+       on every single render of the screen, including the one behind every
+       keystroke in the search box. The chips and the search are what the owner
+       actually finds an order with; the page button is for the rare scroll. */
+    var cap = S.ordersShown || ORDERS_PAGE;
+    var shown = list.slice(0, cap);
+    return over + shown.map(admOrderRowHTML).join("") +
+      (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>') +
+      (list.length > cap
+        ? '<p class="adm-hint" style="margin:10px 0 0">Показаны первые ' + cap + " из " + list.length + "</p>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admordersmore ' +
+            'style="margin-top:10px">Показать ещё</button>'
+        : "");
   }
   /** The one step an order is at, as a button — the same primary action the
       card leads with, so the row can do it without opening the card. */
@@ -12078,7 +12984,7 @@
       '<button class="adm-btn adm-btn--row" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
     else if (v.unpaid) acts =
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
-    return '<div class="adm-row adm-row--stack">' +
+    return '<div class="adm-row adm-row--stack adm-row--open">' +
       '<button class="adm-row--click" data-admorder="' + esc(v.id) + '" ' +
         'style="display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:0;text-align:left;width:100%">' +
         '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
@@ -12509,11 +13415,20 @@
   function admGiftCardsHTML(o) {
     var cards = (o && o.giftCards) || [];
     if (!cards.length) return "";
-    /* Each half in its own text node: the code is data, «Карта PDF ↗» is a
-       phrase the dictionary translates (translateTree rewrites whole nodes). */
-    return '<div class="adm-acts" style="margin-top:10px">' + cards.map(function (c) {
-      return '<a class="adm-link" href="' + esc(c.pdfUrl) + '" target="_blank" rel="noopener" data-giftpdf="' +
-        esc(c.code) + '"><span class="adm-mono">' + esc(c.code) + '</span> <span>Карта PDF ↗</span></a>';
+    /* Dim, 07.09.2026: «код карты и кнопка „Карта PDF“ должны быть хотя бы на
+       разных строках — сейчас они одной строкой.» They were one link: the code
+       and the phrase run together, so the code could not be read off the
+       screen without reading the button, and on a phone the pair wrapped
+       mid-code. Now the code is a line of its own (mono, selectable, nothing
+       clickable on it) and the PDF is a 44-px button under it.
+
+       Each half still in its own text node: the code is data, «Карта PDF ↗» is
+       a phrase the dictionary translates (translateTree rewrites whole nodes). */
+    return '<div class="adm-gifts" style="margin-top:10px">' + cards.map(function (c) {
+      return '<div class="adm-gifts__c">' +
+        '<span class="adm-mono adm-gifts__code">' + esc(c.code) + "</span>" +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(c.pdfUrl) +
+          '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">Карта PDF ↗</a></div>';
     }).join("") +
       '<span class="adm-hint"><span>Действует до</span> <span>' +
       esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
@@ -12780,12 +13695,28 @@
       the same reply and the same confirm card again instead of putting «…»
       back over a proposal the owner was about to confirm. The card itself
       follows pendingAction: applied or cancelled, it is gone next render. */
+  /* «Набор» or «промокод» — the two chips the route asks for when the owner's
+     words fit both (`ask: "bundle_or_promo"`, see src/app/api/assistant/
+     intent.ts). Each one is a whole next question, so one tap answers instead
+     of a retype — and each names its own mechanism, so the answer that comes
+     back can no longer be the other one. */
+  var ASK_CHOICES = {
+    bundle_or_promo: ["Сделай набор из этих товаров", "Сделай промокод на скидку"]
+  };
+  function admAskChipsHTML(key) {
+    var list = ASK_CHOICES[key];
+    if (!list) return "";
+    return '<div class="adm-asst__chips" style="margin-top:10px">' + list.map(function (q) {
+      return '<button data-admask="' + esc(q) + '">' + esc(q) + "</button>";
+    }).join("") + "</div>";
+  }
   function admAnswerHTML() {
     var a = S.adminAns;
     if (!a || a.q !== S.adminAsk) return "…";
     if (a.fallback) return adminAnswer(a.q);
     return esc(a.reply || "") +
       (pendingAction && pendingAction === a.action ? confirmCard(pendingAction) : "") +
+      (a.ask && !a.action ? admAskChipsHTML(a.ask) : "") +
       (a.tab && !a.action ? aiGo(a.tab, TAB_LABEL[a.tab] || "Открыть") : "") +
       /* the route could not read the model's answer (or the panel could not
          read the route's): a sentence was shown instead of the raw text, and
@@ -12838,6 +13769,14 @@
      markup rather than two, because `[data-aians]` — where askAdminAI() writes
      the answer — has to be the only one of its kind on the page. */
   function admAsstHTML() {
+    /* speed, 07.09.2026: the 30-day summary analyticsForAI() puts in the
+       prompt used to be fetched from probeAdmin(), i.e. by every cold open of
+       the panel — a second run of the heaviest query in the admin (the first
+       being «Обзор»'s own 7-day one), for a question most mornings never get
+       asked. It is asked for here instead, the way every other screen asks for
+       its own data: when the assistant is on screen. By the time a question is
+       typed the answer has long landed. */
+    loadAnalytics("30d");
     // data-admdrop: a photo dragged onto the pane is attached (the drop
     // listener next to the gallery's own, at the bottom of this file)
     return '<button class="adm-scrim adm-scrim--phone" data-admai aria-label="Закрыть помощника"></button>' +
@@ -12900,6 +13839,9 @@
      DOM without cutting it short. renderImpl() clears the key on the way out
      of the panel, so coming back plays it again. */
   var admShownKey = "", admShownAt = 0;
+  /* «language + the screen as a string» at the last paint of the panel — the
+     memo renderImpl() checks before parsing and diffing anything (see there). */
+  var admPaintedKey = "";
   function admViewKey() {
     return [S.adminTab, S.adminOrder || "", S.adminEdit || "", admProductTab(), S.posDone ? "receipt" : ""].join("|");
   }
@@ -12966,21 +13908,65 @@
      already used, so a redesign cannot change what the shop does.
      ====================================================================== */
 
-  /** The 44×26 switch of § «Design tokens». A <button aria-pressed>, not a
-      checkbox: every other control in the panel is a button the delegated
-      click handler already sees, and a switch that only answered to `change`
-      would be the one exception in the file. */
-  function admSwitch(attrs, on, label) {
-    return '<button class="adm-sw" ' + attrs + ' aria-pressed="' + !!on +
-      '" title="' + label + '" aria-label="' + label + '"><i></i></button>';
+  /* ---------- the switch --------------------------------------------------
+     Dim, 07.09.2026: «в маркетинге — промокоды — переключатель трудно понять,
+     включён он или выключен; все переключатели надо сделать проще и понятнее.»
+
+     The old control was a 44×26 track whose only difference between the two
+     states was which end of it was filled with ink — on a monochrome panel, in
+     sunlight, on a phone, that is one cue and it is a colour one. It now
+     carries four, and only the last of them is colour:
+
+       · POSITION — the knob is left when off, right when on (kept);
+       · a WORD — «Вкл» / «Выкл», read without decoding anything;
+       · a CHECK — drawn inside the knob, and only when the switch is on;
+       · the fill of the track.
+
+     It is still ONE component, so every screen that draws a switch — promo
+     codes, the four letters, «Партнёры и баллы», наборы, чат-бот, слайды,
+     верхняя полоска, «Показывать в магазине» — improves at once.
+
+     `role="switch"` + `aria-checked`, not `aria-pressed`: a screen reader then
+     says «включено / выключено» rather than «нажата», which is the same
+     sentence the eye now reads off the control. The accessible name is the
+     thing being switched and never changes with the state (the state is
+     `aria-checked`'s job) — an `aria-label` that flipped between «Включить…»
+     and «Выключить…» was announcing an instruction where a state belongs.
+
+     Still a <button>, not a checkbox: every other control in the panel is a
+     button the delegated click handler already sees, and a switch that only
+     answered to `change` would be the one exception in the file. */
+  var ADM_SW_TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" ' +
+    'stroke-linecap="square" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+  /** The visible half of a switch: the word, then the track with its knob.
+      `aria-hidden` throughout — the state a reader announces is `aria-checked`
+      on the button, and hearing «Вкл» after it would be the same fact twice. */
+  function admSwitchFace(on) {
+    return '<span class="adm-sw__w" aria-hidden="true">' + (on ? "Вкл" : "Выкл") + "</span>" +
+      '<span class="adm-sw__t" aria-hidden="true"><i>' + (on ? ADM_SW_TICK : "") + "</i></span>";
   }
-  /** The same switch where the label belongs INSIDE the control rather than in
+  /** `name` is WHAT is being switched («Промокод SUMMER», «Брошенная
+      корзина»), not what pressing it would do.
+
+      Carried as clipped text inside the button rather than as an `aria-label`:
+      WCAG 2.5.3 «Label in Name» (and the axe rule the a11y sweep runs with it
+      switched on) wants everything the eye reads on a control to be part of
+      what a voice user can say — an `aria-label` naming only the row would
+      have hidden the visible «Вкл» from the name. Reading the name off the
+      contents puts both in it, in the order they are on screen. */
+  function admSwitch(attrs, on, name) {
+    return '<button class="adm-sw" type="button" role="switch" ' + attrs +
+      ' aria-checked="' + !!on + '"><span class="vh">' + name + "</span>" +
+      admSwitchFace(on) + "</button>";
+  }
+  /** The same switch where the name belongs INSIDE the control rather than in
       a row beside it — the editor's «Показывать в магазине» box, which the
       design draws as one bordered line of «name … toggle». */
   function admLabelledSwitch(attrs, label, on) {
-    return '<button class="adm-switch" type="button" ' + attrs + ' aria-pressed="' + !!on + '">' +
+    return '<button class="adm-switch" type="button" role="switch" ' + attrs +
+      ' aria-checked="' + !!on + '">' +
       "<span>" + label + "</span>" +
-      '<span class="adm-switch__t' + (on ? " is-on" : "") + '" aria-hidden="true"><i></i></span></button>';
+      '<span class="adm-switch__st">' + admSwitchFace(on) + "</span></button>";
   }
   /** A segmented control — RU · ET · EN above the letter and the article. */
   function admSegHTML(attr, items, cur, aria) {
@@ -13148,13 +14134,26 @@
         : rows);
     return admColsHTML(left, side);
   }
+  /* One issued card. Three lines, not one: the code, then who and when, then
+     the card itself as a button — the same shape the order card now uses, and
+     the same reason (Dim, 07.09.2026). «Действует до» is new here: a card is
+     money the shop owes, and the date it stops owing it is the second thing
+     the owner wants after the balance. */
   function admGiftRowHTML(c) {
     var to = (c.recipient && (c.recipient.name || c.recipient.email)) || "покупателю";
-    return '<div class="adm-row"><span class="adm-row__body">' +
-      '<span class="adm-row__nm adm-mono">' + esc(c.code) + "</span>" +
-      '<span class="adm-row__sub">' + esc(to) + " · " + esc(shortDate(c.createdAt)) + "</span></span>" +
-      '<span class="adm-row__end"><span class="adm-row__amt">' + eur(c.balance) + "</span>" +
-      '<span class="adm-row__sub">из ' + eur(c.amount) + "</span></span></div>";
+    var until = String(c.validUntil || "").split("-").reverse().join(".");
+    return '<div class="adm-row adm-row--stack">' +
+      '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
+        '<span class="adm-row__nm adm-mono">' + esc(c.code) + "</span>" +
+        '<span class="adm-row__amt">' + eur(c.balance) + "</span></span>" +
+      '<span class="adm-row__sub" style="width:100%">' + esc(to) + " · " + esc(shortDate(c.createdAt)) +
+        (until ? ' · <span>Действует до</span> <span>' + esc(until) + "</span>" : "") +
+        (c.balance === c.amount ? "" : ' · <span>из ' + eur(c.amount) + "</span>") + "</span>" +
+      (c.pdfUrl
+        ? '<div class="adm-acts"><a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(c.pdfUrl) +
+          '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">Карта PDF ↗</a></div>'
+        : "") +
+      "</div>";
   }
   /* The issued cards, once per visit to the tab — a shop that sells three of
      these a month does not need a poll, and «Повторить» re-asks. */
@@ -13245,12 +14244,12 @@
     return '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
       var flow = m[3];
       var on = flow ? !!DEMO.flows[flow] : true;
-      return '<div class="adm-row adm-row--tall">' +
+      return '<div class="adm-row adm-row--tall adm-row--open">' +
         '<button class="adm-row__body" data-mailtpl="' + m[0] + '" style="border:0;background:none;padding:0;text-align:left">' +
           '<span class="adm-row__nm">' + m[1] + "</span>" +
           '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
         (flow
-          ? admSwitch('data-admflow="' + flow + '"', on, on ? "Выключить письмо" : "Включить письмо")
+          ? admSwitch('data-admflow="' + flow + '"', on, m[1])
           : '<span class="adm-badge adm-badge--ok">всегда</span>') +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
         "</div>" +
@@ -13625,14 +14624,18 @@
      — stay under them, because a redesign that quietly drops numbers is a
      redesign that loses the owner data. */
   var ADM_WEEKDAYS = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-  function admKpiHTML(label, value, deltaPct) {
+  /** A KPI cell. `what` is the one plain sentence that says what the number
+      is — four words the owner never has to guess at, printed under the
+      figure instead of hidden in a tooltip (Dim, 07.09.2026). */
+  function admKpiHTML(label, value, deltaPct, what) {
     var cls = deltaPct == null ? "" : deltaPct > 0 ? " adm-kpi__d--up" : deltaPct < 0 ? " adm-kpi__d--down" : "";
     var line = deltaPct == null
       ? "нет данных за прошлый период"
       : (deltaPct >= 0 ? "+" : "") + num1(deltaPct) + "% к прошлому периоду";
     return '<div class="adm-kpi"><div class="adm-kpi__l">' + label + "</div>" +
       '<div class="adm-kpi__v">' + value + "</div>" +
-      '<div class="adm-kpi__d' + cls + '">' + line + "</div></div>";
+      '<div class="adm-kpi__d' + cls + '">' + line + "</div>" +
+      (what ? '<div class="adm-kpi__s">' + what + "</div>" : "") + "</div>";
   }
   /** One bar per day, labelled with its weekday; the last one is today, so it
       is the ink one. At most a fortnight — beyond that the labels stop being
@@ -13648,12 +14651,22 @@
         eur(r.revenue) + '"><span>' + lbl + "</span></div>";
     }).join("") + "</div>";
   }
-  /** Name + one number, the shape most of this screen is made of. */
+  /** Name + one number, the shape most of this screen is made of. A row may
+      carry a third element — the sentence that says what its number means —
+      and it is drawn under the name rather than in a tooltip: a tooltip is
+      a thing the owner has to know to open, and he does not (Dim,
+      07.09.2026). It is passed through as markup, not escaped, because the
+      only callers below write it themselves. */
   function admPairsHTML(rows, empty, plain) {
     if (!rows.length) return '<div class="adm-empty">' + empty + "</div>";
     return '<div class="adm-list">' + rows.map(function (r) {
-      return '<div class="adm-pair"><span class="adm-pair__n">' + esc(String(r[0])) + "</span>" +
-        '<span class="adm-pair__v' + (plain ? " adm-pair__v--plain" : "") + '">' + esc(String(r[1])) + "</span></div>";
+      var val = '<span class="adm-pair__v' + (plain ? " adm-pair__v--plain" : "") + '">' + esc(String(r[1])) + "</span>";
+      if (!r[2]) {
+        return '<div class="adm-pair"><span class="adm-pair__n">' + esc(String(r[0])) + "</span>" + val + "</div>";
+      }
+      return '<div class="adm-pair adm-pair--note"><span class="adm-pair__x">' +
+        '<span class="adm-pair__n">' + esc(String(r[0])) + "</span>" +
+        '<span class="adm-pair__s">' + r[2] + "</span></span>" + val + "</div>";
     }).join("") + "</div>";
   }
   function admStatsScreen() {
@@ -13677,18 +14690,31 @@
     }
     var prod = function (p) { return [(p.brand ? p.brand + " — " : "") + p.name, eur(p.revenue)]; };
     return head +
+      /* One sentence before the numbers, because two things about this screen
+         are impossible to guess and both change what every figure means: the
+         money is paid orders only, and every «+12%» is against the same
+         stretch of time just before this one. */
+      '<p class="adm-lead adm-lead--stats">Всё на этом экране — за выбранный период. Деньги считаются только по оплаченным заказам. ' +
+        "А «+12%» под цифрой значит «по сравнению с таким же отрезком времени до него»: для «7 дней» — с семью днями до них.</p>" +
       '<div class="adm-kpis">' +
-        admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct) +
-        admKpiHTML("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct) +
-        admKpiHTML("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct) +
-        admKpiHTML("Из корзины в заказ", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct) +
+        admKpiHTML("Выручка", eur(a.kpi.revenue.value), a.kpi.revenue.deltaPct,
+          "Деньги по оплаченным заказам, вместе с доставкой.") +
+        admKpiHTML("Заказы", String(a.kpi.orders.value), a.kpi.orders.deltaPct,
+          "Сколько заказов за это время оплатили.") +
+        admKpiHTML("Средний чек", eur(a.kpi.aov.value), a.kpi.aov.deltaPct,
+          "Сколько денег в среднем в одном заказе.") +
+        admKpiHTML("Из корзины в заказ", num1(a.kpi.conversion.value * 100) + "%", a.kpi.conversion.deltaPct,
+          "Сколько человек из каждых 100 зашедших в магазин что-то купили.") +
       "</div>" +
       admColsHTML(
         '<div><div class="adm-sec__t">Выручка по дням</div>' +
+          '<p class="adm-hint adm-hint--lead">Один столбик — один день, самый правый — сегодня. Чем выше столбик, тем больше денег принёс этот день.</p>' +
           (a.revenueByDay.length ? admBarsHTML(a.revenueByDay) : '<div class="adm-empty">Пока нет данных</div>') + "</div>",
         '<div class="adm-sec__t">Топ товаров</div>' +
+        '<p class="adm-hint adm-hint--lead">Что принесло больше всего денег за период.</p>' +
         admPairsHTML(a.topProductsByRevenue.map(prod), "Пока нет продаж") +
-        '<div class="adm-sec__t" style="margin-top:24px">Искали, но не нашли</div>' +
+        '<div class="adm-sec__t adm-sec__t--sub">Искали, но не нашли</div>' +
+        '<p class="adm-hint adm-hint--lead">Это печатали в поиске внутри магазина, а магазин не нашёл ничего. Или опечатка, или товар, которого у вас нет, — а спрашивают.</p>' +
         admPairsHTML(a.zeroResultTerms.map(function (s) { return [s.term, String(s.count)]; }),
           "Таких запросов нет", true)) +
       admStatsMoreHTML(a) + "</div>";
@@ -13697,35 +14723,93 @@
       had all along: the funnel, brands, views, searches, promo codes, traffic
       and Search Console. */
   function admStatsMoreHTML(a) {
+    /** A section: a title, the one sentence that says what its numbers are,
+        and the list itself. The sentence is not optional — it is the
+        difference between a table the owner reads and a table he scrolls
+        past (Dim, 07.09.2026). */
+    var sec = function (title, lead, body) {
+      return '<div><div class="adm-sec__t">' + title + "</div>" +
+        '<p class="adm-hint adm-hint--lead">' + lead + "</p>" + body + "</div>";
+    };
     return '<div class="adm-stack adm-stack--tight">' +
-      '<div><div class="adm-sec__t">Воронка</div>' + admPairsHTML(FUNNEL_STAGES.map(function (s) {
-        return [s[1], String(a.funnel[s[0]] || 0)];
-      }), "Пока нет данных", true) + "</div>" +
-      '<div><div class="adm-sec__t">Бренды: что приносит деньги</div>' +
-        admPairsHTML(a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж") + "</div>" +
-      '<div><div class="adm-sec__t">Смотрят, но не покупают</div>' +
+      sec("Путь до покупки",
+        "Сколько человек дошло до каждого шага. Числа всегда убывают: не все, кто зашёл, смотрят товар, и не все, кто смотрит, покупают. Самая большая ступенька вниз — там и теряются покупатели.",
+        admPairsHTML(FUNNEL_STAGES.map(function (s) {
+          return [s[1], String(a.funnel[s[0]] || 0)];
+        }), "Пока нет данных", true)) +
+      sec("Бренды: что приносит деньги", "Сколько денег принёс каждый бренд за период.",
+        admPairsHTML(a.brandRevenue.map(function (r) { return [r.brand, eur(r.revenue)]; }), "Пока нет продаж")) +
+      sec("Смотрят, но не покупают",
+        "Эти товары открывали, но ни разу не положили в корзину. Справа — сколько раз открыли. Обычно помогает другое фото, честная цена или понятное описание.",
         admPairsHTML(a.viewedNotBought.map(function (p) {
           return [(p.brand ? p.brand + " — " : "") + p.name, String(p.views)];
-        }), "Таких товаров нет", true) + "</div>" +
-      '<div><div class="adm-sec__t">Что искали чаще всего</div>' +
-        admPairsHTML(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали", true) + "</div>" +
-      '<div><div class="adm-sec__t">Промокоды</div>' +
+        }), "Таких товаров нет", true)) +
+      sec("Что искали чаще всего", "Что люди печатали в поиске внутри магазина. Справа — сколько раз.",
+        admPairsHTML(a.searchTerms.map(function (s) { return [s.term, String(s.count)]; }), "Пока не искали", true)) +
+      sec("Промокоды", "Сколько скидки вы отдали по каждому коду за период. Это деньги, которых магазин не получил.",
         admPairsHTML(a.promoUsage.map(function (r) { return [r.code, eur(r.amount)]; }),
-          "Промокоды пока не использовали") + "</div>" +
-      '<div><div class="adm-sec__t">Откуда приходят</div>' +
-        admPairsHTML([["Мобильные", String(a.traffic.device.mobile)], ["Компьютеры", String(a.traffic.device.desktop)]]
-          .concat(a.traffic.countries.map(function (c) { return [c.country, String(c.sessions)]; }))
-          .concat(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; })),
-          "Пока нет данных", true) + "</div>" +
-      '<div><div class="adm-sec__t">Ещё цифры</div>' +
+          "Промокоды пока не использовали")) +
+      /* One list of «Мобильные · EE · google.com» was three different questions
+         stacked in one column, and the country came as a two-letter code. Three
+         named lists now, and a real country name (countryName()). */
+      sec("С чего заходят", "С телефона или с компьютера. Справа — сколько человек.",
         admPairsHTML([
-          ["Брошенные корзины", String(a.abandonedCarts)],
-          ["Открытий чата", String(a.chatOpens)],
-          ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount)],
-          ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount)]
-        ], "Пока нет данных", true) + "</div>" +
-      '<div><div class="adm-sec__t">Google: 28 дней</div>' + admGscHTML() + "</div>" +
+          ["Телефоны", String(a.traffic.device.mobile)],
+          ["Компьютеры", String(a.traffic.device.desktop)]
+        ], "Пока нет данных", true)) +
+      sec("Из каких стран", "Страна определяется по интернет-адресу гостя — это не адрес доставки.",
+        admPairsHTML(a.traffic.countries.map(function (c) { return [countryName(c.country), String(c.sessions)]; }),
+          "Пока нет данных", true)) +
+      sec("С каких сайтов приходят",
+        "Сайт, с которого человек к вам перешёл. Если он набрал адрес магазина сам или пришёл из закладок, его здесь не будет — поэтому сумма меньше числа гостей.",
+        admPairsHTML(a.traffic.referrers.map(function (r) { return [r.host, String(r.sessions)]; }),
+          "Пока нет данных", true)) +
+      sec("Ещё цифры", "Четыре вещи, которые не поместились выше.",
+        admPairsHTML([
+          ["Брошенные корзины", String(a.abandonedCarts),
+            "Человек оставил почту и собрал корзину, но заказ так и не оформил."],
+          ["Открытий чата", String(a.chatOpens), "Сколько раз в магазине открыли окно чата."],
+          ["Подарочных карт продано", a.giftCards.sold.count + " · " + eur(a.giftCards.sold.amount),
+            "Куплено карт и на какую сумму. Деньги пришли, товар ещё не выбран."],
+          ["Подарочных карт потрачено", a.giftCards.redeemed.count + " · " + eur(a.giftCards.redeemed.amount),
+            "Сколько карт использовали при оплате и на какую сумму."]
+        ], "Пока нет данных", true)) +
+      sec("Магазин в поиске Google",
+        "Последние 28 дней. Google присылает эти цифры с задержкой в два-три дня, так что вчерашнего дня здесь ещё нет.",
+        admGscHTML()) +
       "</div>";
+  }
+  /* ---------- «Магазин в поиске Google» ------------------------------------
+     This block used to be three rows of bare numbers — «Клики 47», «Показы
+     2900», «Средняя позиция 13,0» — and under them a list of words with a
+     count beside each. Dim, 07.09.2026: Renat has never opened Search
+     Console, and «средняя позиция» says nothing to him; «в среднем ваш
+     магазин показывается на 13-м месте в Google» does.
+
+     So: the block opens with the sentence the numbers add up to, every
+     figure carries one plain line saying what that word even means, and the
+     words people typed are shown as «вот что искали — и что Google им
+     показал», with the outcome under each word instead of a lone number in
+     a right-hand column. Where the news is bad — page two of Google, a word
+     nobody clicked — it is said in words. A number a specialist has to
+     decode is the same as no number at all, and hiding the bad half of it
+     is worse than that. */
+  /** Which page of Google an average position lands on: the one fact that
+      turns a bare «13» into something the owner can act on. */
+  function gscPageLine(pos) {
+    if (pos <= 10) return "Это первая страница Google — там вас видно.";
+    if (pos <= 20) return "Это вторая страница Google, а до неё доходят единицы: почти все выбирают что-то на первой.";
+    return "Это третья страница Google или дальше — туда почти никто не заглядывает.";
+  }
+  /** A figure with the sentences that read it: what the word means at all,
+      and — where it helps — what today's value of it means. Each sentence is
+      its own text node, so the translator finds it by key or by rule. */
+  function admDefHTML(value, name, what, read) {
+    return '<div class="adm-def"><div class="adm-def__h">' +
+      '<span class="adm-def__v">' + value + "</span>" +
+      '<span class="adm-def__n">' + name + "</span></div>" +
+      '<p class="adm-def__s"><span>' + what + "</span>" +
+      (read ? " <span>" + read + "</span>" : "") + "</p></div>";
   }
   function admGscHTML() {
     loadGsc();
@@ -13737,12 +14821,46 @@
           ? "Ключ Search Console не читается — см. «Подключения»"
           : "Google Search Console сейчас не отвечает — попробуйте позже") + "</div>";
     }
-    return admPairsHTML([
-      ["Клики", String(GSC.clicks)], ["Показы", String(GSC.impressions)],
-      ["Средняя позиция", num1(GSC.position)]
-    ].concat((GSC.topQueries || []).slice(0, 5).map(function (q) {
-      return [q.query, String(q.clicks)];
-    })), "Пока нет данных", true);
+    var pos = Number(GSC.position) || 0;
+    var imp = Number(GSC.impressions) || 0;
+    var clk = Number(GSC.clicks) || 0;
+    var per100 = imp ? Math.round((clk / imp) * 100) : 0;
+    /* The headline, and the only place on this screen where a colour changes:
+       off the first page of Google is bad news, so the rule beside it turns —
+       but the sentence says it too, because a colour is not a sentence. */
+    var lead = imp
+      ? '<p class="adm-read' + (pos > 10 ? " adm-read--warn" : "") + '">' +
+        "<span>В среднем ваш магазин показывается в Google на " + Math.round(pos) + "-м месте.</span> " +
+        "<span>" + gscPageLine(pos) + "</span></p>"
+      : '<p class="adm-read adm-read--warn"><span>За эти 28 дней Google ни разу не показал магазин в поиске.</span></p>';
+    var defs = '<div class="adm-defs">' +
+      admDefHTML(numGrp(imp), "Показы",
+        "Показ — это когда магазин попал в список Google по чьему-то запросу: человек его увидел, но мог и не заметить.", "") +
+      admDefHTML(numGrp(clk), "Переходы",
+        "Переход — человек увидел магазин в Google и нажал на ссылку. Это и есть покупатели, пришедшие из поиска.",
+        imp ? "Из " + numGrp(imp) + " показов перешли " + numGrp(clk) + "." : "") +
+      admDefHTML(num1(imp ? (clk / imp) * 100 : 0) + " %", "Доля переходов (CTR)",
+        "Доля переходов, по-английски CTR, — какая часть показов превратилась в переход. Чем выше место в Google, тем она больше.",
+        !imp ? ""
+          : per100 >= 1
+            ? "Из каждых 100 показов переходов — примерно " + per100 + "."
+            : "Из каждых 100 показов не переходит почти никто.") +
+      admDefHTML(num1(pos), "Среднее место в Google",
+        "Место — какой по счёту ваш магазин в списке Google. Первая строка забирает больше половины всех переходов, десятая — единицы.", "") +
+      "</div>";
+    var qs = (GSC.topQueries || []).slice(0, 8);
+    var queries = '<div class="adm-sec__t adm-sec__t--sub">Что люди искали — и что они увидели</div>' +
+      '<p class="adm-hint adm-hint--lead">Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.</p>' +
+      (qs.length
+        ? '<div class="adm-qs">' + qs.map(function (q) {
+          return '<div class="adm-q"><span class="adm-q__q">' + esc(q.query) + "</span>" +
+            '<span class="adm-q__s"><span>Показов: ' + numGrp(q.impressions) +
+            " · переходов: " + numGrp(q.clicks) + " · место в Google: " + Math.round(q.position) + "</span>" +
+            (q.clicks ? "" : ' <span class="adm-q__x">По этому слову в магазин не зашёл никто.</span>') +
+            "</span></div>";
+        }).join("") + "</div>"
+        : '<div class="adm-empty">Пока нет данных</div>');
+    return lead + defs + queries;
   }
 
   /* ---------- Подключения -------------------------------------------------
@@ -13937,8 +15055,7 @@
             admShipCellHTML("markup:fixed", shipMarkupCell("fixed"), "Наценка, евро") + "</label>" +
           '<div class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
             '<span class="adm-row__sub">по умолчанию тариф только поднимает цену до реальной стоимости</span></span>' +
-            admSwitch("data-shipallowlower", !!S.shipAllowLower,
-              S.shipAllowLower ? "Запретить снижать цены" : "Разрешить снижать цены") + "</div>" +
+            admSwitch("data-shipallowlower", !!S.shipAllowLower, "Разрешить снижать текущие цены") + "</div>" +
           '<div class="adm-acts" style="margin-top:12px">' +
             '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admshipreset>Вернуть значения по умолчанию</button>' +
           "</div></div></details>" +
@@ -14039,7 +15156,7 @@
       '<p class="adm-hint" style="margin:0 0 10px">Кнопка «Доставлен» в карточке заказа остаётся — это про то, чтобы не нажимать её вручную для каждой посылки.</p>' +
       '<div class="adm-swrow"><span>Спрашивать перевозчика' +
         '<span class="adm-row__sub">раз в сутки магазин спрашивает Montonio, дошла ли посылка</span></span>' +
-        admSwitch("data-delivcarrier", d.useCarrier, d.useCarrier ? "Не спрашивать перевозчика" : "Спрашивать перевозчика") + "</div>" +
+        admSwitch("data-delivcarrier", d.useCarrier, "Спрашивать перевозчика") + "</div>" +
       '<label class="adm-field" style="margin-top:12px"><span>Закрывать заказ через</span>' +
         '<span class="sel sel--box"><select class="adm-input" data-delivdays>' +
         DELIVERY_DAY_CHOICES.map(function (n) {
@@ -14139,10 +15256,10 @@
       '<div class="adm-list adm-list--flat">' +
         '<div class="adm-swrow"><span>Показывать наборы' +
           '<span class="adm-row__sub">если выключено — их не видно нигде в магазине</span></span>' +
-          admSwitch("data-admbundles", sets, sets ? "Скрыть наборы" : "Показать наборы") + "</div>" +
+          admSwitch("data-admbundles", sets, "Показывать наборы") + "</div>" +
         '<div class="adm-swrow"><span>ИИ-чат для покупателей' +
           '<span class="adm-row__sub">кружок-консультант в углу магазина</span></span>' +
-          admSwitch("data-admchatbot", chat, chat ? "Выключить чат" : "Включить чат") + "</div>" +
+          admSwitch("data-admchatbot", chat, "ИИ-чат для покупателей") + "</div>" +
       "</div>" +
       '<p class="adm-hint" style="margin-top:10px">Подарочная карта продаётся отдельным пунктом в меню — ' +
         "номиналы включаются в «Маркетинг → Подарочные карты».</p>" +
@@ -14669,11 +15786,22 @@
       '<span class="adm-pick-tile__img">' + media(p, 0, "ph") + "</span>" +
       '<span class="adm-pick-tile__nm">' + esc(p.name) + "</span></button>";
   }
+  /* The gift card as a picture, first in the grid and only while the search
+     box is empty — it is not a product, so a search for «шампунь» must not
+     turn it up. Same tile shape as the product ones, the mark instead of a
+     photo. */
+  function heroGiftTile(current) {
+    return '<button class="adm-pick-tile" data-heroimg="' + HERO_GIFT_IMG + '" aria-current="' + !!current +
+      '" title="Подарочная карта">' +
+      '<span class="adm-pick-tile__img adm-pick-tile__img--gift">' + tower("adm-pick-tile__mark") + "</span>" +
+      '<span class="adm-pick-tile__nm">Подарочная карта</span></button>';
+  }
   function heroImgRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
+    var gift = String(S.heroImgQ || "").trim() ? "" : heroGiftTile(cur.image === HERO_GIFT_IMG);
     var list = heroFind(S.heroImgQ);
-    if (!list.length) return HERO_NOHIT;
-    return list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
+    if (!list.length) return gift || HERO_NOHIT;
+    return gift + list.map(function (p) { return admPickTile("data-heroimg", p.id, p, cur.image === p.id); }).join("");
   }
   function heroGoRows() {
     var cur = heroDraft().slides[S.heroEdit] || {};
@@ -14696,7 +15824,7 @@
           ' aria-label="Выше" title="Выше">↑</button>' +
         '<button class="adm-iconbtn" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") +
           ' aria-label="Ниже" title="Ниже">↓</button>' +
-        admSwitch('data-heroon="' + i + '"', on, on ? "Скрыть слайд" : "Показать слайд") +
+        admSwitch('data-heroon="' + i + '"', on, esc(heroT(s.title)) || "Без заголовка") +
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-heroedit="' + i + '">Изменить</button>' +
         '<button class="adm-link adm-link--warn" data-herodel="' + i + '">Удалить</button>' +
       "</span></div>";
@@ -15012,7 +16140,7 @@
           (annOn ? esc(cTokens(cText(d.announcement.text)) || "стандартный текст") : "выключена"),
           '<div class="adm-swrow"><span>Показывать полоску' +
             '<span class="adm-row__sub">чёрная строка над шапкой магазина</span></span>' +
-            admSwitch("data-contentannon", annOn, annOn ? "Скрыть полоску" : "Показать полоску") + "</div>" +
+            admSwitch("data-contentannon", annOn, "Показывать полоску") + "</div>" +
           cTri("announcement.text", "Текст полоски", "input", 300,
             "Пусто во всех трёх языках — вернём стандартную строку про бесплатную доставку. {EE} {LV} {FI} подставляют суммы бесплатной доставки.") +
           cTri("announcement.short", "Короткий текст для телефона", "input", 120, "Пусто — покажем основной текст.") +
@@ -15174,6 +16302,19 @@
     for (var i = 0; i < fields.length; i++) {
       fields[i].setAttribute("aria-invalid", String(!!S.pricingErr && fields[i].getAttribute("data-pricingf") === S.pricingErrField));
     }
+    /* The worked example under each field, and the basket at the foot of the
+       card, are the point of this screen (Dim, 07.09.2026): they have to move
+       with the digit the owner is typing, or he is reading last minute's
+       arithmetic while changing this minute's number. Repainted here rather
+       than through render() for the same reason as everything else in this
+       function — the caret. */
+    var ex = document.querySelectorAll("[data-pricingex]");
+    for (var j = 0; j < ex.length; j++) {
+      ex[j].innerHTML = pricingHintHTML(ex[j].getAttribute("data-pricingex"));
+      translateTree(ex[j]);
+    }
+    var calc = document.getElementById("pricingcalc");
+    if (calc) { calc.innerHTML = admPricingCalcHTML(); translateTree(calc); }
     var acts = document.getElementById("pricingacts");
     if (acts) { acts.innerHTML = pricingActsHTML(); translateTree(acts); }
   }
@@ -15191,11 +16332,113 @@
     };
     render(); refocus("[data-admapply]");
   }
-  function admPricingField(key, label, hint, val) {
+  /* ---------- what each of these six numbers actually does -----------------
+     Renat has never run a loyalty scheme, and «Списать не больше, % от
+     корзины» is not a sentence anybody can act on (Dim, 07.09.2026: «prices
+     and points need better explanations»). So every field carries the same
+     thing a price tag carries — the arithmetic done on a real basket, in
+     euros, with the number he is looking at — and the card ends with the
+     whole order worked through from both sides at once.
+
+     40 € is the sample basket: about what one order at this shop is. It is
+     only ever used to explain — nothing here is charged to anybody. */
+  var PRICING_EX_BASKET = 40;
+  /** A percentage the way the owner typed it: «20», not «20,0» — but «7,5»
+      when he really did type a half. */
+  function numPc(n) { return n % 1 ? num1(n) : String(Math.round(n)); }
+  /** Points a paid subtotal earns, exactly as earnLoyaltyPoints() computes it
+      on the server (src/lib/loyalty.ts): earnPct of the goods, rounded to a
+      whole point, and one point is one euro. */
+  function exPoints(sum, earnPct) { return Math.round((sum * earnPct) / 100); }
+  /** What a partner really pays for a `sum` basket: the discount, but only
+      once the basket has reached proMinOrder AT RETAIL — the same gate
+      priceItems() applies (docs/loyalty.md § «Ценообразование pro»). */
+  function exProPays(sum, d) {
+    if (d.proMinOrder > sum) return sum;
+    return Math.round(sum * (1 - d.proDiscountPct / 100) * 100) / 100;
+  }
+  /** The sentence under one field: what the number does, done on 40 €. Each
+      sentence is its own text node so the translator finds it by key or rule. */
+  function pricingHintHTML(key) {
+    var d = pricingDraft(), b = PRICING_EX_BASKET, s = function (t) { return "<span>" + t + "</span>"; };
+    if (key === "proDiscountPct") {
+      return d.proDiscountPct > 0
+        ? s("Партнёр платит на " + numPc(d.proDiscountPct) + " % меньше: товар за " + eur(b) +
+            " обойдётся ему в " + eur(Math.round(b * (1 - d.proDiscountPct / 100) * 100) / 100) + ".")
+        : s("Сейчас 0 — у партнёров те же цены, что у всех. Впишите, например, 20, и они станут платить на пятую часть меньше.");
+    }
+    if (key === "proMinOrder") {
+      return d.proMinOrder > 0
+        ? s("Скидка включится, только если партнёр набрал корзину на " + eur(d.proMinOrder) +
+            " по обычным ценам. Меньше — он платит как все.")
+        // «0 — …» on its own would be eaten by the promo-code rule
+        // /^([A-Z0-9-]+) — скидка (.+)$/ two hundred lines below, which reads
+        // a bare «0» as a code; «Сейчас 0» cannot be a code.
+        : s("Сейчас 0 — скидка действует на любой заказ партнёра, хоть на один тюбик.");
+    }
+    if (key === "earnPct") {
+      return d.loyalty.earnPct > 0
+        ? s("Начисляем " + numPc(d.loyalty.earnPct) + " %: с заказа на " + eur(b) + " вернётся " +
+            eur(exPoints(b, d.loyalty.earnPct)) + " баллами. Один балл — одно евро.")
+        : s("Сейчас 0 — баллы не начисляются ни за одну покупку.");
+    }
+    if (key === "redeemMaxPct") {
+      return d.loyalty.redeemMaxPct > 0
+        ? s("Из корзины на " + eur(b) + " баллами можно закрыть не больше " +
+            eur(exPoints(b, d.loyalty.redeemMaxPct)) + ", остальное — деньгами.")
+        : s("Сейчас 0 — баллами нельзя оплатить ничего, они просто копятся.");
+    }
+    if (key === "minRedeem") {
+      if (!(d.loyalty.minRedeem > 0)) return s("Сейчас 0 — платить баллами можно с первого же начисленного балла.");
+      var line = s("Пока баллов меньше " + numGrp(d.loyalty.minRedeem) +
+        ", покупатель вообще не увидит галочку «оплатить баллами».");
+      // …and what that threshold costs him in purchases, at today's earn rate
+      if (d.loyalty.earnPct > 0) {
+        line += " " + s("Столько накопится с покупок примерно на " +
+          eur(Math.round((d.loyalty.minRedeem * 100) / d.loyalty.earnPct)) + ".");
+      }
+      return line;
+    }
+    return "";
+  }
+  /** One 40 € order taken through both price lists at once — the whole thing
+      on one screen, which is what «покажи арифметику настоящей корзины»
+      asked for. Every figure is computed with the numbers currently in the
+      form, so it answers before the owner presses «Сохранить». */
+  function admPricingCalcHTML() {
+    var d = pricingDraft(), b = PRICING_EX_BASKET, lo = d.loyalty.enabled;
+    /* «Скидка не сработала» only where there was a discount to lose: with the
+       percentage at 0 the partner pays full price for a different reason, and
+       the field's own hint above already says which. */
+    var pro = exProPays(b, d), blocked = d.proMinOrder > b && d.proDiscountPct > 0;
+    var row = function (name, val) {
+      return '<div class="adm-calc__r"><span>' + name + "</span><b>" + val + "</b></div>";
+    };
+    var col = function (title, pays, note) {
+      return '<div class="adm-calc__c"><div class="adm-calc__t">' + title + "</div>" +
+        row("Платит", eur(pays)) +
+        (note ? '<div class="adm-calc__n">' + note + "</div>" : "") +
+        (lo ? row("Вернётся баллами", eur(exPoints(pays, d.loyalty.earnPct))) : "") +
+        (lo ? row("Баллами закроет до", eur(exPoints(pays, d.loyalty.redeemMaxPct))) : "") +
+        "</div>";
+    };
+    return '<div class="adm-calc">' +
+      col("Обычный покупатель", b, "") +
+      col("Партнёр — салон или мастер", pro,
+        blocked ? "Скидка не сработала: корзина не набрала " + eur(d.proMinOrder) + "." : "") +
+      "</div>" +
+      '<p class="adm-hint adm-hint--lead">' +
+        (lo
+          ? "<span>Баллы получает и партнёр — с той суммы, которую заплатил он.</span> " +
+            "<span>«Баллами закроет до» — это про следующий заказ: сначала баллы надо накопить.</span>"
+          : "<span>Баллы сейчас выключены, поэтому в примере их нет — оба платят деньгами.</span>") +
+      "</p>";
+  }
+  function admPricingField(key, label, val) {
     return '<label class="adm-field">' + label +
       '<input class="adm-input" data-pricingf="' + key + '" inputmode="decimal" value="' + esc(String(val)) +
         '" aria-invalid="' + (!!S.pricingErr && S.pricingErrField === key) + '">' +
-      (hint ? '<span class="adm-hint">' + hint + "</span>" : "") + "</label>";
+      '<span class="adm-hint" data-pricingex="' + key + '">' + pricingHintHTML(key) + "</span></label>";
   }
   function admPricingCard() {
     loadAdminPricing(false);
@@ -15211,27 +16454,37 @@
          values, so switching it on puts everything back as it was. */
       '<div class="adm-swrow"><span>Партнёры и баллы' +
         '<span class="adm-row__sub">салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара</span></span>' +
-        admSwitch("data-partnerson", on, on ? "Выключить партнёров и баллы" : "Включить партнёров и баллы") + "</div>" +
+        admSwitch("data-partnerson", on, "Партнёры и баллы") + "</div>" +
       (!on
         ? '<p class="adm-hint" style="margin:0">Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.</p>' +
           '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div></div>"
         : "") +
       (!on ? "" :
       '<div class="adm-sec__t">Салоны и мастера</div>' +
+      /* Who a «партнёр» even is: the word runs through five screens of this
+         panel and nothing anywhere said it out loud (Dim, 07.09.2026). */
+      '<div class="adm-note"><span>Партнёр — это салон или мастер, который покупает у вас для работы, а не для себя.</span> ' +
+        "<span>Он заходит в «Кабинет», нажимает «Стать партнёром» и оставляет название и рег. номер; вы одобряете его в разделе «Клиенты».</span> " +
+        "<span>После этого он видит на всех товарах свою, сниженную цену, и ему уходит письмо «Цены для салонов включены».</span> " +
+        "<span>Всё остальное у него как у обычного покупателя: та же корзина, та же доставка, та же оплата.</span></div>" +
       '<div class="adm-edpair">' +
-        admPricingField("proDiscountPct", "Скидка для салонов, %", "0 — если оптовых цен сейчас нет.", d.proDiscountPct) +
-        admPricingField("proMinOrder", "Действует от суммы корзины, €", "0 — без условия.", d.proMinOrder) +
+        admPricingField("proDiscountPct", "Скидка для салонов, %", d.proDiscountPct) +
+        admPricingField("proMinOrder", "Действует от суммы корзины, €", d.proMinOrder) +
       "</div>" +
       '<div class="adm-sec__t">Баллы за покупки</div>' +
       '<div class="adm-swrow"><span>Начислять баллы' +
-        '<span class="adm-row__sub">один балл — одно евро при списании</span></span>' +
-        admSwitch("data-pricingtoggle", lo, lo ? "Выключить баллы" : "Включить баллы") + "</div>" +
+        '<span class="adm-row__sub">часть оплаченного заказа возвращается покупателю баллами; один балл — одно евро</span></span>' +
+        admSwitch("data-pricingtoggle", lo, "Начислять баллы") + "</div>" +
       (lo
-        ? admPricingField("earnPct", "Начисляем, % от суммы оплаченного заказа", "", d.loyalty.earnPct) +
+        ? admPricingField("earnPct", "Начисляем, % от суммы оплаченного заказа", d.loyalty.earnPct) +
           '<div class="adm-edpair">' +
-            admPricingField("redeemMaxPct", "Списать можно не больше, % от корзины", "", d.loyalty.redeemMaxPct) +
-            admPricingField("minRedeem", "Списание доступно от, баллов на счету", "", d.loyalty.minRedeem) + "</div>"
+            admPricingField("redeemMaxPct", "Списать можно не больше, % от корзины", d.loyalty.redeemMaxPct) +
+            admPricingField("minRedeem", "Списание доступно от, баллов на счету", d.loyalty.minRedeem) + "</div>"
         : '<p class="adm-hint" style="margin:0">Баллы выключены: за покупки они не начисляются, и списать их при оформлении нельзя.</p>') +
+      /* The whole thing on one basket, both price lists side by side — and it
+         answers while he types, before anything is saved. */
+      '<div class="adm-sec__t">Как это посчитается на заказе в ' + eur(PRICING_EX_BASKET) + "</div>" +
+      '<div id="pricingcalc">' + admPricingCalcHTML() + "</div>" +
       // filled in place by paintPricingState() as the owner types
       '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>" +
       '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>") +
@@ -15702,13 +16955,12 @@
       (list.length
         ? '<div class="adm-list">' + list.map(function (p) {
             var meta = [promoKindLabel(p), promoWhen(p), admPromoUsedLine(p)].join(" · ");
-            return '<div class="adm-row adm-row--tall">' +
+            return '<div class="adm-row adm-row--tall adm-row--open">' +
               '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '" ' +
                 'style="border:0;background:none;padding:0;text-align:left">' +
                 '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
                 '<span class="adm-row__sub adm-row__sub--one">' + esc(meta) + (p.note ? " · " + esc(p.note) : "") + "</span></button>" +
-              admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active,
-                p.active ? "Выключить промокод" : "Включить промокод") +
+              admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
               "</div>";
           }).join("") + "</div>"
         : (S.admPromos ? '<div class="adm-empty">Промокодов пока нет</div>' : '<div class="adm-skel"><i></i><i></i></div>')) +
@@ -15799,6 +17051,20 @@
     });
   }
 
+  /* The assistant may not invent a set's address — propose_bundle carries no
+     id on purpose — and Renat should not have to invent a latin slug either.
+     So the Russian name becomes one here, through the same transliteration
+     the blog uses, with a number appended when a set already owns it. He can
+     still change it: the box is read-only only once the set has been saved. */
+  function bundleSuggestId(titleRu) {
+    var base = blogSlugify(String(titleRu || "")).slice(0, 48).replace(/-+$/, "");
+    if (base.length < 2 || base === "post") return "";
+    var taken = {};
+    (S.admBundles || []).forEach(function (b) { taken[b.id] = true; });
+    if (!taken[base]) return base;
+    for (var n = 2; n < 50; n++) if (!taken[base + "-" + n]) return base + "-" + n;
+    return "";
+  }
   /** «Шампунь + кондиционер ×2» — what a set's item list says out loud. */
   function bundlePartsText(items) {
     return (items || []).map(function (it) {
@@ -15812,6 +17078,18 @@
      products and the name already in it, and the owner names the price and
      presses «Сохранить» himself (see sanitizeProposeBundle's own comment). */
   function applyProposeBundle(a) {
+    /* The list first, for the same reason applySetBundle wants it: the
+       address suggested below has to be one no set already owns. The tab this
+       opens loads it anyway — this only makes sure it is here before the form
+       is built rather than a moment after. */
+    if (!S.admBundles) {
+      apiJson("/api/admin/bundles/").then(function (r) {
+        if (r.status === 401) { SRV.admin = false; render(); return; }
+        S.admBundles = r.status === 200 && r.body.ok ? hydrateBundles(r.body.bundles || []) : [];
+        applyProposeBundle(a);
+      }).catch(function () { S.admBundles = []; applyProposeBundle(a); });
+      return;
+    }
     var form = blankBundle();
     form.cat = a.cat || form.cat;
     form.title = { RU: (a.title && a.title.RU) || "", ET: (a.title && a.title.ET) || "", EN: (a.title && a.title.EN) || "" };
@@ -15819,9 +17097,10 @@
     form.items = (a.items || []).map(function (it) {
       return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
     });
+    form.id = bundleSuggestId(form.title.RU);
     // «Наборы» is the third tab of «Товары» (admProductTab), not a section
     S.adminTab = "goods"; S.goodsTab = "bundles"; S.adminEdit = "";
-    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = "";
+    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
     window.scrollTo({ top: 0 }); render();
     toast("Набор открыт — впишите цену и сохраните");
   }
@@ -15829,7 +17108,28 @@
      «Сохранить» makes, so validateBundle() on the server has the last word
      about whether the set is still cheaper than its parts. */
   function applySetBundle(a) {
+    /* POST /api/admin/bundles/ is a whole-row upsert, so the set has to be
+       READ before it is written: a title, a photo or a sort order left out of
+       the body is one deleted. The panel usually has the list («Товары →
+       Наборы» loads it), but the assistant is a side pane and the owner may
+       never have opened that tab in this sitting — and then the confirmed
+       action used to answer «Русское название обязательно» and change
+       nothing. So an unloaded list is fetched here, once, and the action is
+       re-applied on top of it. */
+    if (!S.admBundles) {
+      apiJson("/api/admin/bundles/").then(function (r) {
+        if (r.status === 401) { SRV.admin = false; render(); return; }
+        if (r.status !== 200 || !r.body.ok) { toast("Список наборов не загрузился — откройте «Товары → Наборы»"); return; }
+        S.admBundles = hydrateBundles(r.body.bundles || []);
+        applySetBundle(a);
+      }).catch(function () { toast("Сервер не отвечает"); });
+      return;
+    }
     var was = (S.admBundles || []).filter(function (b) { return b.id === a.id; })[0];
+    /* set_bundle changes a set that EXISTS. An id that is not one of them
+       would silently create a nameless third set instead of editing anything,
+       so it stops here with the one sentence that helps. */
+    if (!was) { toast("Такого набора нет — соберите новый в «Товары → Наборы»"); return; }
     var body = {
       id: a.id,
       cat: a.cat || (was && was.cat) || "beard",
@@ -15877,6 +17177,39 @@
       image: b.image || "", active: b.active !== false, sort: b.sort || 0, lang: "RU"
     };
   }
+  /* «Написать черновик» / «Перевести с русского» over a set's description
+     (Dim, 07.09.2026: «Set descriptions should be possible to generate with
+     AI»). One snapshot per visit to the form, taken before the first AI
+     button is pressed, so «Отменить» always puts back what was on screen
+     before any of them — the same contract AI_UNDO gives the goods editor. */
+  var BUNDLE_AI_UNDO = null;
+  function bundleDescSnapshot() {
+    var f = S.bundleForm;
+    if (!f || BUNDLE_AI_UNDO) return;
+    BUNDLE_AI_UNDO = { desc: { RU: f.desc.RU || "", ET: f.desc.ET || "", EN: f.desc.EN || "" } };
+    var slot = document.querySelector("[data-bundleundoslot]");
+    if (slot) slot.innerHTML = '<button class="adm-link adm-link--muted" data-bundledescundo>Отменить</button>';
+  }
+  /** The facts the draft is written from: the set's name, its section and what is in it. */
+  function bundleDescInput() {
+    var f = S.bundleForm;
+    var catRow = BUNDLE_CATS.filter(function (c) { return c[0] === f.cat; })[0];
+    return {
+      name: f.title.RU || f.title[f.lang || "RU"] || "",
+      category: catRow ? catRow[1] : f.cat,
+      products: bundleKeepNames(true)
+    };
+  }
+  /** The product names as the model must keep them — with the volume when `sized`. */
+  function bundleKeepNames(sized) {
+    return (S.bundleForm ? S.bundleForm.items : []).map(function (it) {
+      var p = byIdOrNull(it.productId);
+      var nm = p ? p.brand + " " + p.name : String(it.productId || "");
+      if (!sized) return nm;
+      var sz = p && p.sizes && p.sizes.length ? p.sizes[it.variant || 0] : "";
+      return nm + (sz ? ", " + sz : "") + ((it.qty || 1) > 1 ? " ×" + it.qty : "");
+    });
+  }
   /** What the parts cost separately, at today's shop prices. */
   function bundleFormSum() {
     var f = S.bundleForm;
@@ -15891,6 +17224,40 @@
   function bundleFormPrice() {
     var n = Number(String(S.bundleForm.price || "").replace(",", "."));
     return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+  }
+  /* Dim, 07.09.2026: «when creating sets and putting together items, we need
+     to see somewhere what the price total of the set is, so we can apply a
+     percentage as discount.» The two boxes are one number seen two ways: the
+     euro price is what is stored and sent, the percentage is that price read
+     against the running total of the items. Typing in either one fills the
+     other in place — no render, the caret stays where the owner is typing. */
+  /** The euro price as a percentage off the parts, one decimal, "" when there is no answer yet. */
+  function bundleFormPctText() {
+    var sum = bundleFormSum(), price = bundleFormPrice();
+    if (!sum || !price || price >= sum) return "";
+    var pct = Math.round(((sum - price) / sum) * 1000) / 10;
+    return String(pct).replace(".", ",");
+  }
+  /** …and a percentage typed in becomes the euro price it means, "" when it cannot. */
+  function bundlePriceFromPct(raw) {
+    var sum = bundleFormSum();
+    var n = Number(String(raw == null ? "" : raw).replace(",", ".").replace("%", "").trim());
+    if (!sum || !isFinite(n) || n <= 0 || n >= 100) return "";
+    return String(Math.round(sum * (1 - n / 100) * 100) / 100);
+  }
+  /** The running total under the item list — the number the percentage is taken off. */
+  function bundleSumLine() {
+    return "Сумма товаров — " + eur(bundleFormSum());
+  }
+  /** Both companions of the box being typed in, patched where they stand. */
+  function paintBundleMoney(from) {
+    var priceEl = document.querySelector('[data-bundlef="price"]');
+    var pctEl = document.querySelector("[data-bundlepct]");
+    if (from !== "price" && priceEl) priceEl.value = S.bundleForm.price;
+    if (from !== "pct" && pctEl) pctEl.value = bundleFormPctText();
+    var sumEl = document.querySelector("[data-bundlesum]");
+    if (sumEl) { sumEl.textContent = bundleSumLine(); translateTree(sumEl); }
+    paintBundleHint();
   }
   /* The one number the owner is really deciding. Patched in place on every
      keystroke instead of rendered, so the caret stays in the price box. */
@@ -15968,15 +17335,31 @@
         '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" placeholder="' +
         (lang === "RU" ? "Масло, бальзам и мыло — всё, с чего начинается уход." : esc(f.desc.RU || "")) + '">' +
         esc(f.desc[lang] || "") + "</textarea></label>" +
+      /* «Написать черновик» / «Перевести с русского» — the same pair the goods
+         editor has over a product's description, and the same promise: the
+         answer lands in the box, nothing is saved, «Отменить» puts back what
+         was there before the first of them was pressed. The draft is written
+         from the products the set already holds, so the button says so and
+         refuses until there are two — an empty set has nothing to describe. */
+      '<div class="adm-acts">' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundledescgen>Написать черновик</button>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundletranslate>Перевести с русского</button>' +
+        '<span data-bundleundoslot>' +
+          (BUNDLE_AI_UNDO ? '<button class="adm-link adm-link--muted" data-bundledescundo>Отменить</button>' : "") +
+        "</span></div>" +
+      '<p class="hint adm-hint" style="margin:0">Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.</p>' +
       '<div class="adm-sec__t">Что внутри — минимум два товара</div>' +
       bundleItemRowsHTML() +
+      '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
       '<label class="adm-field">Найти товар' +
         '<input class="adm-input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
       '<div class="adm-picks" id="bundlepicks">' + bundlePickRows() + "</div>" +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">' +
         '<label class="adm-field">Цена набора, €' +
           '<input class="adm-input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
-        '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p></div>" +
+        '<label class="adm-field">…или скидка от суммы, %' +
+          '<input class="adm-input" data-bundlepct inputmode="decimal" value="' + esc(bundleFormPctText()) + '" placeholder="20"></label></div>' +
+      '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p>" +
       '<div class="adm-field">Фото набора</div>' +
       '<div class="adm-picks">' + bundleImageRowHTML() + "</div>" +
       (S.bundleFormErr ? '<div class="err adm-err" role="alert">' + esc(S.bundleFormErr) + "</div>" : "") +
@@ -16033,13 +17416,26 @@
   };
   function saveBundleForm() {
     if (!S.bundleForm || saveBundleForm._busy) return;   // a second tap while the first is on its way
+    /* POST /api/admin/bundles/ is an upsert, so a NEW set typed onto the
+       address of one that exists would quietly replace it — its name, its
+       products and its price, with no warning and no way back. The server
+       cannot tell the two apart (both are "save this set"), so the panel,
+       which knows the owner pressed «Новый набор», says so here. */
+    if (!S.bundleForm.editing) {
+      var wantId = String(S.bundleForm.id || "").trim().toLowerCase();
+      var clash = (S.admBundles || []).filter(function (b) { return b.id === wantId; })[0];
+      if (clash) {
+        S.bundleFormErr = "Набор с таким адресом уже есть — придумайте другой адрес.";
+        render(); return;
+      }
+    }
     saveBundleForm._busy = true;
     S.bundleFormErr = "";
     apiSend("/api/admin/bundles/", "POST", bundleFormPayload()).then(function (r) {
       saveBundleForm._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        S.bundleForm = null; S.bundleQ = "";
+        S.bundleForm = null; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
         toast("Набор сохранён ✓");
         loadAdminBundles(true); loadBundles();   // the shop follows the panel
         return;
@@ -16085,7 +17481,7 @@
       if (r.status === 401) { SRV.admin = false; render(); return; }
       S.bundleDel = "";
       if (r.status === 200 && r.body.ok) {
-        if (S.bundleForm && S.bundleForm.id === id) S.bundleForm = null;
+        if (S.bundleForm && S.bundleForm.id === id) { S.bundleForm = null; BUNDLE_AI_UNDO = null; }
         toast("Набор удалён ✓");
         loadAdminBundles(true); loadBundles();
         return;
@@ -16159,7 +17555,7 @@
     return '<div class="adm-list">' + list.map(function (c) {
       var pending = partnersOn() && c.tier !== "pro" && c.proRequestedAt;
       var badge = admCustBadge(c);
-      return '<div class="adm-row adm-row--tall">' +
+      return '<div class="adm-row adm-row--tall adm-row--open">' +
         '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '" ' +
           'style="border:0;background:none;padding:0;text-align:left">' +
           '<span class="adm-row__nm">' + esc(c.name || c.email) + "</span>" +
@@ -19204,8 +20600,14 @@
     S.scanFrom = S.adminTab === "pos" ? "pos" : "stock";
     render();
   }
-  function closeScanner() {
+  /** The flag alone — «Назад» closes the scanner through admCloseTop(), whose
+      caller does the render, and a second one from in here would be a second
+      full repaint of the screen underneath. */
+  function closeScannerState() {
     S.scanOpen = false;
+  }
+  function closeScanner() {
+    closeScannerState();
     render();
   }
   /* scanner app: the /shop2/scan/ route IS the scanner — no button to press,
@@ -19802,6 +21204,7 @@
       // an adoption after boot has to add a brand the file never had itself
       if (typeof BRAND_BY_SLUG === "object" && BRAND_BY_SLUG) BRAND_BY_SLUG[slugify(p.brand)] = p.brand;
     });
+    SRCH_GEN++; SRCH_IX = {};   // search: the shelf changed, every blob is stale
   }
   /** The row behind an id — from the feed's copy first, then from the panel's
       full list (S.customAll, hidden products included). */
@@ -19910,6 +21313,9 @@
         }
       }
     }
+    // search: a description or a Google pair the owner just saved has to be
+    // findable — the whole invalidation of the search index is these two lines
+    SRCH_GEN++; SRCH_IX = {};
   }
   applyDemoOverrides();
 
@@ -20555,10 +21961,11 @@
     if (admProbed) return;
     admProbed = true;
     checkAdmin().then(function (ok) {
-      // analytics agent: warm the 30-day summary as soon as we know this is
-      // the owner, so analyticsForAI() already has something to say the
-      // first time he asks a sales question, whatever tab he opens first.
-      if (ok) { loadSrvOrders(true); loadAnalytics("30d"); }
+      /* The 30-day summary for analyticsForAI() used to be warmed here — see
+         admAsstHTML(), which now asks for it when the assistant is actually on
+         screen. Boot is the one moment the owner is waiting, and this was a
+         whole extra analytics query in it for a question nobody had asked. */
+      if (ok) loadSrvOrders(true);
       render();
     });
   }
@@ -21332,7 +22739,8 @@
         if (S.adminAsk !== q) return;
         pendingAction = j.action || null;
         // kept in S, drawn by admAnswerHTML() — here and on every later render
-        S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry };
+        // (`ask` is the route's «набор или промокод?» — two chips, no action)
+        S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry, ask: typeof j.ask === "string" ? j.ask : "" };
         admPaintAnswer();
       })
       .catch(function (err) {
@@ -21859,12 +23267,44 @@
   }
   /* Google shows about sixty characters of a title. Take the longest version
      that fits — tools/prerender-shop2.mjs runs the same ladder, so the tab does
-     not change under the shopper when this script takes over a static page. */
-  function fitTitle(core, full) {
+     not change under the shopper when this script takes over a static page.
+     `alt` is brand + name + price, the rung between the full sentence and the
+     bare «— REMPIRE» (src/lib/seo-head.mjs fitTitle(), 07.09.2026). */
+  function fitTitle(core, full, alt) {
     if (full && full.length <= 60) return full;
+    if (alt && alt.length <= 60) return alt;
     if (core.length + 10 <= 60) return core + " — REMPIRE";
     if (core.length <= 60) return core;
     return core.slice(0, 59).replace(/[\s·—–-]+$/, "") + "…";
+  }
+  /* A product text that opens with a SHOUTED heading — «BIO BOTANICAL SERUM ОТ
+     SYSTEM 4 Сыворотка…» — reads in a search result as capitals repeating the
+     title. Drop the run and start on the sentence after it; leave a text that
+     never reaches a normal sentence alone. Same regex as dropShout() in
+     src/lib/seo-head.mjs. */
+  var SHOUT_RX = /^[^a-zà-öø-ÿšžа-яё]{10,160}?(?=[A-ZÀ-ÖØ-ÞŠŽА-ЯЁ][a-zà-öø-ÿšžа-яё])/;
+  function dropShout(s) { return String(s || "").replace(SHOUT_RX, "").trim(); }
+  /* Cut at a word, not mid-word — clip() in src/lib/seo-head.mjs. */
+  function clipDesc(s, max) {
+    var t = String(s || "").trim();
+    if (t.length <= max) return t;
+    var cut = t.slice(0, max - 1), sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s.,;:·—–-]+$/, "") + "…";
+  }
+  /* The meta description of a product page when nobody has written one: the
+     product's own words, then the price, the stock and the delivery line —
+     what it is and why buy it here. descFrom() in src/lib/seo-head.mjs writes
+     the same sentence into the static page, so the head a crawler is served
+     and the head it reads after this script runs are one text. */
+  var DESC_MAX = 158;
+  function descFromText(text, priceText, stockText, lang) {
+    var tail = priceText + " · " + String(stockText).toLowerCase() + " · " +
+      trText("доставка по Эстонии и Балтии", lang, false);
+    var lead = dropShout(text) || text;
+    if (!lead) return clipDesc(tail, DESC_MAX);
+    var room = DESC_MAX - tail.length - 3;
+    if (room < 40) return clipDesc(lead, DESC_MAX);
+    return clipDesc(lead, room).replace(/\.$/, "") + " · " + tail;
   }
   /* One page, three URLs, one cluster: canonical plus ru/et/en/x-default. The
      addresses come from the path, never from S.lang — a German browser
@@ -21937,15 +23377,22 @@
     if (S.screen === "product") {
       var p = byId(S.productId);
       var core = p.brand + " " + trText(p.name, S.lang, true);
-      t = fitTitle(core, core + " — " + buy + " · " + (p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price)));
+      var priceText = p.priceFrom ? trText("от " + eur(p.price), S.lang, false) : eur(p.price);
+      var stockText = trText(p.stock === "out" ? "нет в наличии" : p.stock === "low" ? "мало" : "В наличии", S.lang, false);
+      t = fitTitle(core, core + " — " + buy + " · " + priceText, core + " · " + priceText);
       /* The owner's pair for this language (Russian as the fallback) wins;
          the catalogue's own English pair still serves the EN page when he
          wrote nothing; everything else is built from the product. */
       var so = seoFor(p, S.lang);
       if (so && so.t) t = fitTitle(so.t, "");
       else if (S.lang === "EN" && p.seo && p.seo.t) t = fitTitle(p.seo.t, "");
+      /* A pair somebody wrote is left exactly as written; a description cut
+         from the product text gets the shouted heading dropped and the price,
+         the stock and the delivery line added — descFrom() in
+         src/lib/seo-head.mjs, the same sentence the static page carries. */
       d = so && so.d ? so.d
-        : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d : stripTags(descFor(p)).slice(0, 155);
+        : (S.lang === "EN" && p.seo && p.seo.d) ? p.seo.d
+          : descFromText(unentity(stripTags(descFor(p))), priceText, stockText, S.lang);
       var pUrl = location.origin + "/shop2" + SEG_OF_LANG[pathLang] + "/p/" + encodeURIComponent(p.id) + "/";
       // same shape the prerendered pages carry, so taking over a static page
       // does not quietly thin out its structured data
@@ -21953,7 +23400,7 @@
         "@context": "https://schema.org", "@type": "Product",
         name: p.brand + " " + p.name, brand: { "@type": "Brand", name: p.brand },
         image: [location.origin + p.img],
-        description: stripTags(descFor(p)).slice(0, 500),
+        description: unentity(stripTags(descFor(p))).slice(0, 500),
         category: trText(CAT_NAMES[p.cat] || "", S.lang, false),
         sku: p.id,
         url: pUrl,
@@ -22250,13 +23697,27 @@
        first, so in ET/EN the patch compares like with like and an unchanged
        screen is left exactly as it is — no DOM mutation at all, which is what
        admin-shell.spec.ts measures. The storefront keeps the rebuild. */
+    /* …and a screen that has not changed at all is not patched either.
+       Speed, 07.09.2026 (Dim: «загрузка каждой страницы должна быть быстрее»).
+       render() lands after every fetch, every probe and every state change, and
+       a great many of those produce byte-for-byte the screen that is already on
+       the glass — the boot alone fires six. Each one still cost a full parse of
+       ~50 KB of markup into a <template>, a dictionary walk over it and a
+       node-by-node diff against the DOM. One string comparison answers the same
+       question. The language is part of the key because the dictionary pass
+       runs on the parsed copy, not on the string. */
     if (S.screen === "admin" && bodySlot.dataset.painted === "admin") {
-      var tpl = document.createElement("template");
-      tpl.innerHTML = bodyHTML;
-      translateTree(tpl.content);
-      admMorphChildren(bodySlot, tpl.content);
+      var paintKey = S.lang + "\n" + bodyHTML;
+      if (paintKey !== admPaintedKey) {
+        var tpl = document.createElement("template");
+        tpl.innerHTML = bodyHTML;
+        translateTree(tpl.content);
+        admMorphChildren(bodySlot, tpl.content);
+        admPaintedKey = paintKey;
+      }
     } else {
       bodySlot.innerHTML = bodyHTML;
+      admPaintedKey = S.screen === "admin" ? S.lang + "\n" + bodyHTML : "";
     }
     if (S.screen !== "admin") admShownKey = "";   // the fade plays again on the way back in
     bodySlot.dataset.painted = S.screen;
@@ -22317,7 +23778,10 @@
     else if (SCANEL) { scanUnmount(); }
     // the toast has to clear the camera view — see .is-scanning in styles.css
     document.body.classList.toggle("is-scanning", !!S.scanOpen);
-    document.body.dataset.screen = S.screen; // chat.js hides itself in the admin
+    document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
+    // …and, if this is the first screen that wants the assistant at all, the
+    // widget's <script> is fetched now rather than at boot (mountChat above)
+    mountChat();
     translatePage();
     setHead();
     // the scanner route wears the same header on its wait/login cards
@@ -22794,7 +24258,12 @@
      layer. Closing with a button («← Заказы», «Отмена») spends the parked
      entry itself, so the next Back is never a press that does nothing. */
   var ADM_HIST = false, ADM_POP = false;
-  /** What is open over the panel right now, bottom layer first. */
+  /** What is open over the panel right now, bottom layer first.
+
+      The order is what the eye sees stacked, because Back closes the top one:
+      a card first, then the phone's «Ещё» sheet, then a confirm card — and the
+      scanner last of all, since its viewfinder is mounted outside the panel
+      (scanMount) and covers every one of them. */
   function admLayers() {
     if (S.screen !== "admin") return [];
     var l = [];
@@ -22803,16 +24272,28 @@
     else if (S.admCustOpen) l.push("customer");
     else if (S.mailOpen) l.push("mail");
     else if (S.admSetPage) l.push("setpage");
+    /* blog: «← Блог» is the same shape of card as «← Товары», and the audit's
+       question 6 was about cards, not about which section they belong to. */
+    else if (S.adminBlogEdit) l.push("blog");
     if (S.admMore) l.push("more");
     if (pendingAction) l.push("confirm");
+    /* The scanner: an overlay the owner opens with a phone in one hand and a
+       bottle in the other — the one screen in the panel where Back is the
+       gesture that comes first. It was missing here, so Back left the admin
+       for the shop with the camera still running. Not the standalone
+       /shop2/scan/ route, which IS the screen: there Back belongs to the
+       browser, and there is nothing underneath to go back to. */
+    if (S.scanOpen && !S.scanApp) l.push("scan");
     return l;
   }
   /** Closes the topmost layer. False when there was nothing to close. */
   function admCloseTop() {
     var top = admLayers().pop();
     if (!top) return false;
-    if (top === "confirm") pendingAction = null;
+    if (top === "scan") closeScannerState();
+    else if (top === "confirm") pendingAction = null;
     else if (top === "more") S.admMore = false;
+    else if (top === "blog") { S.adminBlogEdit = null; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; }
     else if (top === "edit") {
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
@@ -23167,7 +24648,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -23403,7 +24884,8 @@
       window.scrollTo({ top: 0 }); render(); return;
     }
     // the «Заказы» chips (a filter with no tab of its own next to it)
-    if (d.admfilter) { S.admOrderFilter = d.admfilter; render(); return; }
+    if (d.admfilter) { S.admOrderFilter = d.admfilter; S.ordersShown = ORDERS_PAGE; render(); return; }
+    if (d.admordersmore !== undefined) { S.ordersShown = (S.ordersShown || ORDERS_PAGE) + ORDERS_PAGE; render(); return; }
     /* The «Повторить» button on every error state: drop the cache the screen
        reads and ask again, so the owner never has to reload the page. */
     if (d.admreload) {
@@ -24702,16 +26184,16 @@
     if (d.admgoodstab) {
       S.goodsTab = d.admgoodstab;
       S.adminTab = "goods"; S.adminEdit = "";
-      S.bundleForm = null; S.bundleFormErr = ""; S.bundleDel = "";
+      S.bundleForm = null; S.bundleFormErr = ""; S.bundleDel = ""; BUNDLE_AI_UNDO = null;
       render(); return;
     }
     if (d.bundlenew !== undefined) {
-      S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = "";
+      S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
       render(); refocus('[data-bundlef="id"]'); return;
     }
     if (d.bundleedit) {
       var bEd = (S.admBundles || []).filter(function (x) { return x.id === d.bundleedit; })[0];
-      if (bEd) { S.bundleForm = bundleToForm(bEd); S.bundleFormErr = ""; S.bundleQ = ""; render(); }
+      if (bEd) { S.bundleForm = bundleToForm(bEd); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null; render(); }
       return;
     }
     if (d.bundletoggle) {
@@ -24725,7 +26207,7 @@
       return;
     }
     if (d.bundlesave !== undefined) { saveBundleForm(); return; }
-    if (d.bundlecancel !== undefined) { S.bundleForm = null; S.bundleFormErr = ""; render(); return; }
+    if (d.bundlecancel !== undefined) { S.bundleForm = null; S.bundleFormErr = ""; BUNDLE_AI_UNDO = null; render(); return; }
     if (d.bundledelete) { S.bundleDel = d.bundledelete; render(); return; }
     if (d.bundledelyes) { deleteBundleById(d.bundledelyes); return; }
     if (d.bundledelno !== undefined) { S.bundleDel = ""; render(); return; }
@@ -24761,6 +26243,63 @@
       if (!S.bundleForm) return;
       S.bundleForm.lang = d.bundlelang;
       render(); return;
+    }
+    /* The set's description, written and translated in place. Direct DOM
+       patches, never a render(): every box in this form is one the owner may
+       be mid-typing in, and a render would put the saved values back over it —
+       the same rule the goods editor's own AI buttons follow. */
+    if (d.bundledescgen !== undefined) {
+      if (!S.bundleForm) return;
+      if (S.bundleForm.items.length < 2) { toast("Сначала добавьте в набор хотя бы два товара"); return; }
+      bundleDescSnapshot();
+      admSpark(t, [S.bundleForm.lang || "RU"], "bundle", bundleDescInput, function (L, tx) {
+        if (!tx.text) return;
+        S.bundleForm.desc[L] = tx.text;
+        if (L === (S.bundleForm.lang || "RU")) {
+          var dEl = document.querySelector('[data-bundlef="desc"]');
+          if (dEl) dEl.value = tx.text;
+        }
+      });
+      return;
+    }
+    if (d.bundletranslate !== undefined) {
+      if (!S.bundleForm) return;
+      var bSrc = String(S.bundleForm.desc.RU || "").trim();
+      if (!bSrc) { toast("Сначала напишите или сгенерируйте русское описание"); refocus('[data-bundlef="desc"]'); return; }
+      bundleDescSnapshot();
+      var bTrB = t, bTrL = t.textContent; t.disabled = true; t.textContent = "…";
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "translate", lang: "RU",
+        input: { text: bSrc, sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: bundleKeepNames(false) }
+      }).then(function (r) {
+        bTrB.disabled = false; bTrB.textContent = bTrL;
+        if (r.status === 200 && r.body.ok && r.body.texts) {
+          if (r.body.texts.ET) S.bundleForm.desc.ET = r.body.texts.ET;
+          if (r.body.texts.EN) S.bundleForm.desc.EN = r.body.texts.EN;
+          var bCur = S.bundleForm.lang || "RU";
+          if (bCur !== "RU" && r.body.texts[bCur]) {
+            var bEl = document.querySelector('[data-bundlef="desc"]');
+            if (bEl) bEl.value = r.body.texts[bCur];
+          }
+          toast("Черновик готов — проверьте и сохраните");
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (r.body && r.body.error === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { bTrB.disabled = false; bTrB.textContent = bTrL; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    if (d.bundledescundo !== undefined) {
+      if (!BUNDLE_AI_UNDO || !S.bundleForm) return;
+      S.bundleForm.desc = {
+        RU: BUNDLE_AI_UNDO.desc.RU, ET: BUNDLE_AI_UNDO.desc.ET, EN: BUNDLE_AI_UNDO.desc.EN
+      };
+      var undoEl = document.querySelector('[data-bundlef="desc"]');
+      if (undoEl) undoEl.value = S.bundleForm.desc[S.bundleForm.lang || "RU"] || "";
+      BUNDLE_AI_UNDO = null;
+      var undoSlot = document.querySelector("[data-bundleundoslot]");
+      if (undoSlot) undoSlot.textContent = "";
+      return;
     }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
@@ -25170,6 +26709,7 @@
     // «Заказы»: the same targeted patch, so the search box keeps its caret
     else if (t.matches("[data-admorderq]")) {
       S.admOrderQ = t.value;
+      S.ordersShown = ORDERS_PAGE;   // a new search starts from its first page again
       var ordList = document.getElementById("orderlist");
       if (ordList) { ordList.innerHTML = admOrderRows(); translateTree(ordList); }
     }
@@ -25277,7 +26817,15 @@
         S.bundleForm.id = t.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 64);
         if (t.value !== S.bundleForm.id) t.value = S.bundleForm.id;
       } else if (bf === "title" || bf === "desc") S.bundleForm[bf][bl] = t.value;
-      else if (bf === "price") { S.bundleForm.price = t.value; paintBundleHint(); }
+      else if (bf === "price") { S.bundleForm.price = t.value; paintBundleMoney("price"); }
+    }
+    /* …and the same price seen as a percentage off the running total: what is
+       typed here becomes the euro price, which is the only number stored and
+       sent. An empty box clears the price rather than guessing at one. */
+    else if (t.matches("[data-bundlepct]")) {
+      if (!S.bundleForm) return;
+      S.bundleForm.price = String(t.value).trim() ? bundlePriceFromPct(t.value) : "";
+      paintBundleMoney("pct");
     }
     else if (t.matches("[data-bundleq]")) { S.bundleQ = t.value; paintHeroPicks("bundlepicks", bundlePickRows()); }
     else if (t.matches("[data-heroq]")) { S.heroGoQ = t.value; paintHeroPicks("herogolist", heroGoRows()); }
@@ -25617,7 +27165,11 @@
       }
     }
     if (e.key === "Escape") {
-      if (S.pointOpen) { S.pointOpen = false; repaintPicker("[data-pointopen]"); }
+      /* the scanner's viewfinder covers the whole panel, so it answers first —
+       * except on /shop2/scan/, where the scanner IS the screen and Escape has
+       * nothing to uncover */
+      if (S.scanOpen && !S.scanApp) { closeScanner(); }
+      else if (S.pointOpen) { S.pointOpen = false; repaintPicker("[data-pointopen]"); }
       else if (S.cartOpen || S.filterOpen) { closeDrawers(); }
       // the admin confirm card: Escape is «Отмена» — nothing is applied
       else if (pendingAction && pendingAction.overlay && document.querySelector(".adm-confirm")) { pendingAction = null; render(); }
@@ -25923,7 +27475,7 @@
     ["[data-stockeaninput],[data-stocklowinput],[data-stockqtyinput],[data-stockreasoninput]", "[data-stocksave]"],
     ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
     ["[data-admcustnotesf]", "[data-admcustsavenotes]"],
-    ["[data-bundlef]", "[data-bundlesave]"],
+    ["[data-bundlef],[data-bundlepct]", "[data-bundlesave]"],
     ["[data-mailto]", "[data-mailtest]"]
   ];
   function admEnterTarget(input) {

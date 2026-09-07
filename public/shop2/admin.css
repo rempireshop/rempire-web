@@ -263,8 +263,46 @@
 }
 .adm-row--tall { min-height: 72px; }
 .adm-row--click { cursor: pointer; }
-.adm-row--click:hover { background: var(--a-tint); }
 .adm-row--stack { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px 0; }
+
+/* ---------- which row am I on? -------------------------------------------
+   Dim, 07.09.2026: «на странице заказов при наведении на заказ (как на других
+   страницах) должно быть видно, на какой заказ мы наводим.»
+
+   Two shapes of row exist. Where the row IS the button (товары, блог, «Обзор»)
+   a plain `:hover` tint was already there — invisible in practice, a 4 %
+   wash with nothing to anchor it. Where the row is a wrapper with a button
+   inside it (заказы, промокоды, клиенты, письма) there was NOTHING: the
+   button carries `background:none` in a style attribute, which beats any
+   class, so the tint landed on nobody.
+
+   One answer for both, and it is not colour alone: the whole row takes the
+   tint, the tint BLEEDS 10 px past the list's edges so it reads as a band
+   rather than a slightly warmer paragraph, and a 3-px ink bar stands in that
+   bleed on the left. `:focus-within` gives the keyboard the same band as the
+   mouse — Tab through a list and the row you are in is the row that is lit,
+   which is also what a screen magnifier follows. */
+.adm-row.adm-row--click, .adm-row--open { position: relative; cursor: pointer; }
+.adm-row.adm-row--click, .adm-row--open,
+.adm-row.adm-row--click::before, .adm-row--open::before { transition: background .12s ease-out, opacity .12s ease-out; }
+.adm-row.adm-row--click:hover, .adm-row.adm-row--click:focus-visible,
+.adm-row--open:hover, .adm-row--open:focus-within {
+  background: var(--a-tint);
+  box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint);
+  /* the hairline under the row goes to ink: on a panel this pale a 4 % wash
+     is not a difference you can see across a room, and a rule that darkens is */
+  border-bottom-color: var(--a-ink);
+}
+.adm-row.adm-row--click::before, .adm-row--open::before {
+  content: ""; position: absolute; left: -10px; top: 0; bottom: -1px; width: 4px;
+  background: var(--a-ink); opacity: 0;
+}
+.adm-row.adm-row--click:hover::before, .adm-row.adm-row--click:focus-visible::before,
+.adm-row--open:hover::before, .adm-row--open:focus-within::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .adm-row.adm-row--click, .adm-row--open,
+  .adm-row.adm-row--click::before, .adm-row--open::before { transition: none; }
+}
 /* the row's two lines are <span>s (a row is often a <button>, which may not
    contain a <div>), so they have to be told to stack */
 .adm-row__body { flex: 1 1 160px; min-width: 0; }
@@ -659,20 +697,18 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-area { height: auto; padding: 12px 14px; line-height: 22px; resize: vertical; }
 .adm-area--sm { min-height: 88px; }
 
-/* the design's switch row — 44×26 with a 20-px knob. Disabled here because
-   the shop has no «скрыт» field to write (see goodsEditor's own comment); the
-   markup is the same one Phase 3 will reuse where a switch really switches. */
+/* The switch with its name INSIDE the box — «Показывать в магазине» in the
+   product editor. Its right-hand half is the very same face as `.adm-sw`
+   (word · knob · tick), so the panel has one switch, not two that look alike;
+   only the frame around it differs. */
 .adm-switch {
-  height: 48px; display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; padding: 0 14px; border: 1px solid var(--a-rule); background: var(--a-paper);
+  min-height: 48px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 8px 14px; border: 1px solid var(--a-rule); background: var(--a-paper);
 }
 .adm-switch[aria-disabled="true"] { color: var(--a-muted); }
 /* the same box as a real control — «Показывать в магазине» in the editor */
 button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left; }
-.adm-switch__t { width: 44px; height: 26px; border: 1px solid var(--a-ink); position: relative; flex: none; }
-.adm-switch__t i { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: var(--a-ink); transition: left .15s; }
-.adm-switch__t.is-on { background: var(--a-ink); }
-.adm-switch__t.is-on i { left: 20px; background: var(--a-paper); }
+.adm-switch__st { display: inline-flex; align-items: center; gap: 8px; flex: none; }
 
 /* Размер · Цена · Салон · Остаток · Штрихкод · × — the grid of the design. */
 .adm-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -1020,20 +1056,53 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    A <button aria-pressed>, not a checkbox: every other control in the panel
    is a button the delegated click handler already sees, and a switch that
    only answered to `change` would be the one exception. */
+/* ---------- switch: a word, a knob and a tick -----------------------------
+   07.09.2026, Dim: «переключатель трудно понять, включён он или выключен».
+   The 44×26 track of § «Design tokens» is still here, and still the thing the
+   thumb aims at — but it no longer carries the state on its own. Four cues,
+   only the last of them colour:
+
+     · the WORD «Вкл» / «Выкл», left of the track, upper-case, in ink;
+     · the knob's POSITION, left or right;
+     · a TICK drawn inside the knob, and only when the switch is on;
+     · the track's fill.
+
+   The whole control is the button, so the word is part of the target: 86 × 44
+   instead of 44 × 26 with an invisible 9-px skirt. `role="switch"` +
+   `aria-checked` (app.js admSwitch) is what a reader announces; everything
+   drawn here is aria-hidden, so nothing is said twice. */
 
 .adm-sw {
-  width: 44px; height: 26px; flex: none; border: 1px solid var(--a-ink); background: var(--a-paper);
-  position: relative; padding: 0;
+  display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px;
+  min-height: 44px; flex: none; padding: 0; border: 0; background: none;
+  color: var(--a-ink); font: inherit;
 }
-.adm-sw i {
+.adm-sw__w {
+  font-size: 13px; line-height: 1; letter-spacing: .06em; text-transform: uppercase;
+  min-width: 38px; text-align: right; white-space: nowrap;
+}
+/* Keyed on the ROLE, not on `.adm-sw`: the boxed variant («Показывать в
+   магазине») wears the same face inside a different frame, and one set of
+   state rules is what keeps the two from drifting apart. */
+/* off is quieter than on — but it is still a word, at 5.4:1 on paper */
+[role="switch"][aria-checked="false"] .adm-sw__w { color: var(--a-muted); }
+[role="switch"][aria-checked="true"] .adm-sw__w { font-weight: 600; }
+.adm-sw__t {
+  width: 44px; height: 26px; flex: none; border: 1px solid var(--a-ink);
+  background: var(--a-paper); position: relative; display: block;
+}
+.adm-sw__t i {
   position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
-  background: var(--a-ink); transition: left .15s, background .15s;
+  background: var(--a-ink); color: var(--a-ink);
+  display: flex; align-items: center; justify-content: center;
+  transition: left .18s ease-out, background .18s ease-out;
 }
-.adm-sw[aria-pressed="true"] { background: var(--a-ink); }
-.adm-sw[aria-pressed="true"] i { left: 20px; background: #fff; }
-/* a switch is 26 px tall but has to be a 44-px target — the padding is the
-   hit area, drawn nowhere */
-.adm-sw::after { content: ""; position: absolute; inset: -9px 0; }
+.adm-sw__t i svg { width: 13px; height: 13px; display: block; }
+[role="switch"][aria-checked="true"] .adm-sw__t { background: var(--a-ink); }
+[role="switch"][aria-checked="true"] .adm-sw__t i { left: 20px; background: #fff; }
+.adm-sw:focus-visible { outline: 2px solid var(--a-ink); outline-offset: 2px; }
+/* the knob slides only for people who asked for motion */
+@media (prefers-reduced-motion: reduce) { .adm-sw__t i { transition: none; } }
 
 .adm-swrow {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -1059,6 +1128,13 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   color: #fff; display: flex; align-items: flex-end; padding: 8px;
   font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .15em;
 }
+/* The cards an order bought. Dim, 07.09.2026: the code and «Карта PDF ↗» were
+   one line and one link — so the code, which is money and gets read aloud or
+   copied, could not be looked at without looking at a button. One card per
+   block now: the code on its own line, the button under it. */
+.adm-gifts { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.adm-gifts__c { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.adm-gifts__code { font-size: 16px; letter-spacing: .04em; user-select: all; }
 
 /* ---------- Маркетинг: письма — the live preview -------------------------- */
 
@@ -1150,6 +1226,77 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .adm-pair__n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adm-pair__v { font-family: Oswald, sans-serif; white-space: nowrap; }
 .adm-pair__v--plain { font-family: inherit; color: var(--a-muted); }
+/* a row that carries the sentence saying what its number means — the name
+   keeps its one-line ellipsis, the sentence under it wraps freely */
+.adm-pair--note { align-items: flex-start; }
+.adm-pair__x { min-width: 0; }
+.adm-pair__x .adm-pair__n { display: block; }
+.adm-pair__s {
+  display: block; font-size: 12px; line-height: 16px; color: var(--a-muted);
+  margin-top: 2px; white-space: normal;
+}
+
+/* ---------- numbers that read themselves ---------------------------------
+   Renat has never opened an analytics dashboard, so a figure on this screen
+   is only half of what he needs: the other half is the sentence next to it
+   (Dim, 07.09.2026). Three shapes carry that sentence — under a KPI cell,
+   under a section title, and beside a figure in the Google block — and one
+   more, `.adm-read`, states in words what the numbers add up to. */
+.adm-kpi__s { font-size: 12px; line-height: 16px; color: var(--a-muted); margin-top: 8px; }
+.adm-lead--stats { margin: 0; }
+/* the sentence under a section title: same muted hint, given room to breathe
+   and a measure that stays readable next to a full-width table */
+.adm-hint--lead { margin: 4px 0 0; max-width: 620px; }
+.adm-hint--lead + .adm-list, .adm-hint--lead + .adm-empty,
+.adm-hint--lead + .adm-defs, .adm-hint--lead + .adm-qs { margin-top: 10px; }
+/* a second title inside one section (the right rail stacks two lists) */
+.adm-sec__t--sub { margin-top: 24px; }
+
+/* The reading of the numbers, not a number itself: one rule down its left
+   side, ink when the news is fine and warm brown when it is not — and the
+   sentence says which, because a colour is not a sentence. */
+.adm-read {
+  border-left: 3px solid var(--a-ink); padding: 2px 0 2px 12px; margin: 10px 0 0;
+  font-size: 14px; line-height: 20px; max-width: 620px;
+}
+.adm-read--warn { border-left-color: var(--a-warn); }
+
+/* figure · name · what the word means — the Google block */
+.adm-defs { border-top: 1px solid var(--a-ink); margin-top: 16px; }
+.adm-def { padding: 12px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-def__h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.adm-def__v { font-family: Oswald, sans-serif; font-size: 24px; line-height: 1.1; white-space: nowrap; }
+.adm-def__n { font-size: 14px; }
+.adm-def__s { font-size: 13px; line-height: 18px; color: var(--a-muted); margin: 4px 0 0; max-width: 620px; }
+
+/* what somebody typed into Google, and what happened next — the word on its
+   own line so a long phrase is never cut, the outcome under it */
+.adm-qs { border-top: 1px solid var(--a-ink); margin-top: 10px; }
+.adm-q { padding: 10px 0; border-bottom: 1px solid var(--a-rule); }
+.adm-q__q { display: block; font-size: 14px; }
+.adm-q__s { display: block; font-size: 12px; line-height: 16px; color: var(--a-muted); margin-top: 2px; }
+/* the half of that line that is bad news — a word Google showed and nobody
+   opened. On its own line, because it is a sentence and the counts before it
+   end in a bare number; the colour only makes it easier to find, the sentence
+   is what says it. */
+.adm-q__x { display: block; color: var(--a-warn); }
+
+/* ---------- «Цены и баллы»: one basket, both price lists ------------------
+   The card's six numbers only mean something together, so the foot of the
+   form works a real 40 € order through twice — once as an ordinary shopper,
+   once as a partner — and moves as the owner types. Two columns on a desk,
+   one under the other on a phone; the ink rule over each column is the same
+   1 px the rest of the panel is built from. */
+.adm-calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 32px; }
+.adm-calc__c { border-top: 1px solid var(--a-ink); padding-top: 8px; min-width: 0; }
+.adm-calc__t { font-weight: 600; font-size: 14px; padding-bottom: 6px; }
+.adm-calc__r {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: 7px 0; border-top: 1px solid var(--a-rule); font-size: 14px;
+}
+.adm-calc__r b { font-family: Oswald, sans-serif; font-weight: 400; white-space: nowrap; }
+/* why a figure above is not what the owner expected — «скидка не сработала» */
+.adm-calc__n { font-size: 12px; line-height: 16px; color: var(--a-warn); padding: 2px 0 4px; }
 
 /* ---------- Подключения --------------------------------------------------- */
 
@@ -1294,6 +1441,10 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   font-size: 11px; line-height: 14px; color: var(--a-muted);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* The gift card in the banner's picture grid: it has no photo, so the tile
+   carries the same tower mark the storefront's gift block does. */
+.adm-pick-tile__img--gift { display: flex; align-items: center; justify-content: center; }
+.adm-pick-tile__mark { width: 18px; height: 28px; color: var(--a-ink); }
 /* the wordy tile («Автоматически · три фото стопкой») takes two columns */
 .adm-pick-tile--text {
   grid-column: span 2; min-height: 92px; align-items: center; justify-content: center;

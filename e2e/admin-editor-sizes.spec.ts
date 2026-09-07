@@ -137,7 +137,7 @@ test.describe("admin — «+ Размер», «×» and «Показывать �
 
     const sw = page.locator(`[data-edhidden="${id}"]`);
     await expect(sw, "«Показывать в магазине» is still a dead decoration").toBeEnabled();
-    await expect(sw).toHaveAttribute("aria-pressed", "true");
+    await expect(sw).toHaveAttribute("aria-checked", "true");
 
     try {
       await sw.click();

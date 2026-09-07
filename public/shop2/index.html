@@ -129,7 +129,15 @@
 <script src="/shop/legal.et.js?v=i18n81"></script>
 <script src="/shop/legal.en.js?v=i18n81"></script>
 <script src="/shop2/app.js?v=i18n81"></script>
-<script src="/shop2/chat.js?v=i18n81" defer></script>
+<!-- The shop assistant (/shop2/chat.js) is NOT listed here on purpose: it is
+     wanted on a wide screen, in the shop, outside the checkout, and never on
+     a phone (Dim, 07.09.2026). app.js adds the tag itself when the screen and
+     the viewport both allow it — mountChat() — and copies this file's own ?v=
+     token off the app.js tag above, so the two assets never fall out of step.
+     A phone downloads none of it.
+     Mind the wording of any comment added here: this block is lifted verbatim
+     into every prerendered page, and tests/fuzz-routes.test.ts reads a line
+     that starts with indentation and the word "at" as a leaked stack frame. -->
 
 </body>
 </html>

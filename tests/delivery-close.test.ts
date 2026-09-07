@@ -6,12 +6,20 @@
  * off switch as much as the on one: a shop that has decided nothing must not
  * be closing orders or mailing people early on its own.
  */
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { query } from "@/lib/db";
-import { cleanDelivery, closeDeliveredOrders, looksDelivered, MAX_AUTO_DAYS } from "@/lib/delivery";
+import { cleanDelivery, closeDeliveredOrders, looksDelivered, looksReturned, MAX_AUTO_DAYS } from "@/lib/delivery";
 import { BIRTHDAY_MAX_DAYS, FLOW_DEFAULTS, getFlows, runBirthdays } from "@/lib/flows";
 import { setSetting } from "@/lib/orders";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
+
+/* The one carrier call this module makes. Stubbed so a shipment status can be
+   chosen per test; empty by default, which is what a shop with no Montonio key
+   effectively sees. */
+let carrierStatus = "";
+vi.mock("@/lib/shipping/montonio", () => ({
+  getMontonioShipment: async () => ({ status: carrierStatus }),
+}));
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -33,7 +41,7 @@ async function statusOf(id: string): Promise<string> {
 describe("«Доставлен» without the button", () => {
   beforeAll(setupDb);
   afterAll(teardownDb);
-  beforeEach(truncateAll);
+  beforeEach(async () => { await truncateAll(); carrierStatus = ""; });
 
   it("is off by default — no days, nothing closed", async () => {
     const id = await shippedOrder(30);
@@ -94,6 +102,44 @@ describe("«Доставлен» without the button", () => {
     for (const no of ["", null, undefined, "registered", "pending", "in_transit", "ready", "returned", "cancelled", "failed", "не знаю"]) {
       expect(looksDelivered(no), `${String(no)} must not count as delivered`).toBe(false);
     }
+  });
+
+  /* An uncollected parcel comes BACK to the shop — Omniva holds it 4 days,
+     SmartPosti and DPD 7, Posti in Finland 5, and then the carrier returns it
+     to the sender address held in Montonio. Montonio calls that `returned`
+     (docs.montonio.com, shipping v2). It is the one status the day-counter
+     must not close over: the box is on Renat's desk, not the customer's. */
+  it("knows a parcel that came back, and never calls it delivered", () => {
+    for (const yes of ["returned", "RETURNED", "Returned", "return", "returning", "returned_to_sender", "return-to-sender"]) {
+      expect(looksReturned(yes), `${yes} should count as returned`).toBe(true);
+      expect(looksDelivered(yes), `${yes} must never read as delivered`).toBe(false);
+    }
+    for (const no of ["", null, undefined, "delivered", "in_transit", "awaiting_collection", "registered"]) {
+      expect(looksReturned(no), `${String(no)} must not count as returned`).toBe(false);
+    }
+  });
+
+  it("leaves a returned parcel open even when the day-counter says close it", async () => {
+    /* The day rule alone would have closed this one: nine days shipped, the
+       setting says one. The carrier says it came back, so it stays open and
+       the run reports it. */
+    carrierStatus = "returned";
+    await setSetting("delivery", { autoDays: 1, useCarrier: false });
+    const id = await shippedOrder(9, { shipmentId: "shp-returned" });
+    const run = await closeDeliveredOrders();
+    expect(run.returned, "the run should count the parcel that came back").toBe(1);
+    expect(run.closed, "a returned parcel must not be closed as delivered").toBe(0);
+    expect(await statusOf(id)).toBe("shipped");
+  });
+
+  it("still closes by the day rule when the carrier says nothing useful", async () => {
+    carrierStatus = "inTransit";
+    await setSetting("delivery", { autoDays: 1, useCarrier: false });
+    const id = await shippedOrder(9, { shipmentId: "shp-normal" });
+    const run = await closeDeliveredOrders();
+    expect(run.returned ?? 0).toBe(0);
+    expect(run.closed).toBe(1);
+    expect(await statusOf(id)).toBe("delivered");
   });
 });
 

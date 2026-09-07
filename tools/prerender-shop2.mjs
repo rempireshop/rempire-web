@@ -495,13 +495,41 @@ function postalAddress(oneLine) {
    from the same place the footer's icons do — the content defaults — in the
    order the shop shows them. */
 const SOCIAL_ORDER = ["instagram", "facebook", "tiktok", "youtube"];
+/* One node, named, so the WebSite block on every home page can point at it
+   instead of describing the shop a second time. */
+const ORG_ID = abs("/shop2/") + "#organization";
+/* «rempire» is the shop's biggest query — 141 impressions in the week of
+   29.08–05.09.2026 — and it ranks 3.79th for its own name. A brand ranks for
+   its name on the strength of what the site says the brand IS: the names it
+   also goes by, the company behind it, where to reach it. Until 07.09 this
+   block was five keys and none of them was a name (docs/audit/2026-09-07-seo.md).
+   Every value below comes from src/data/content.default.json — the same place
+   the footer and the invoices take them from — so there is nothing here to
+   contradict or to keep in step by hand.
+   `Store`, not only `Organization`: there is a counter at Mardi 1 and the
+   checkout offers pickup from it, so the physical shop is a fact, not a
+   flourish. */
 const ORG_LD = {
-  "@context": "https://schema.org", "@type": "Organization",
-  name: "REMPIRE", url: abs("/shop2/"),
+  "@context": "https://schema.org", "@type": ["Organization", "Store"],
+  "@id": ORG_ID,
+  name: "REMPIRE",
+  alternateName: ["Rempire", "Rempire Shop", "rempireshop", IDENTITY.legalName].filter(Boolean),
+  legalName: IDENTITY.legalName,
+  url: abs("/shop2/"),
   logo: abs("/brand/rempire-tower.svg"),
+  image: abs(OG_FALLBACK),
+  email: IDENTITY.email || undefined,
+  telephone: IDENTITY.phone || undefined,
+  vatID: IDENTITY.vatNumber || undefined,
+  taxID: IDENTITY.regCode || undefined,
   address: postalAddress(IDENTITY.address),
+  areaServed: ["EE", "LV", "LT", "FI"],
   sameAs: SOCIAL_ORDER.map(k => SHOP_CONTENT.social[k]).filter(Boolean)
 };
+/* JSON.stringify drops an undefined value, so an empty setting leaves the key
+   out rather than publishing "" — but a reader of this file should not have to
+   know that. */
+for (const k of Object.keys(ORG_LD)) if (ORG_LD[k] === undefined) delete ORG_LD[k];
 
 /* ---------- screens ----------------------------------------------------- */
 
@@ -858,9 +886,19 @@ function homePage(lang) {
       lang, seg, rest,
       title: t.base, desc: t.homeDesc,
       image: ogPick(OG_FALLBACK), imageAlt: "REMPIRE", ogType: "website",
+      /* The WebSite block names the site the way a searcher types it and
+         hands the publisher back to the Organization node above rather than
+         repeating it — one entity, three language home pages. No
+         `potentialAction`/SearchAction: Google retired the sitelinks
+         searchbox it fed, so it would be markup nobody reads. */
       jsonld: [ORG_LD, {
         "@context": "https://schema.org", "@type": "WebSite",
-        name: "REMPIRE", url: abs(langPath(seg, "/")), inLanguage: lang.tag
+        "@id": abs(langPath(seg, "/")) + "#website",
+        name: "REMPIRE",
+        alternateName: ["Rempire", "Rempire Shop", "rempireshop.com"],
+        url: abs(langPath(seg, "/")),
+        inLanguage: lang.tag,
+        publisher: { "@id": ORG_ID }
       }],
       content
     }
@@ -1558,7 +1596,17 @@ for (const lang of LANGS) {
   entries.push(urlEntry("/", lang.seg, "1.0"));
   for (const c of ["all", ...CATS]) entries.push(urlEntry("/c/" + c + "/", lang.seg, "0.8"));
   for (const b of BRANDS) entries.push(urlEntry("/b/" + BRAND_SLUG.get(b) + "/", lang.seg, "0.6"));
-  for (const p of CATALOGUE) entries.push(urlEntry("/p/" + encodeURIComponent(p.id) + "/", lang.seg, "0.7"));
+  /* A product with nothing on the shelf stays in the sitemap and stays
+     indexable — its page still answers the question the searcher asked, still
+     carries «Сообщить о наличии», and dropping it would throw away a ranking
+     that has to be earned again when the stock comes back (the Gatsby Grunge
+     Mat is exactly this case: 100 impressions in one week, out of stock).
+     What it does not keep is the same claim on the crawler's time as a
+     product somebody can buy today, and its Product block says OutOfStock, so
+     Google leaves it out of the merchant surfaces by itself. */
+  for (const p of CATALOGUE) {
+    entries.push(urlEntry("/p/" + encodeURIComponent(p.id) + "/", lang.seg, p.stock === "out" ? "0.4" : "0.7"));
+  }
   for (const slug of LEGAL_SLUGS) entries.push(urlEntry(infoRest(slug), lang.seg, "0.4"));
   if (BUNDLES.length) {
     entries.push(urlEntry("/sets/", lang.seg, "0.8"));

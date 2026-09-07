@@ -219,8 +219,12 @@ test.describe("admin sweep 3 — «Письма» and «Салон» describe th
        used to draw itself on while the sender read it as off, so the row
        claimed to be mailing a queue nobody was mailing. */
     const backstock = page.locator('[data-admflow="backstock"]');
-    await expect(backstock).toHaveAttribute("aria-pressed", "false");
-    await expect(backstock).toHaveAttribute("aria-label", "Включить письмо");
+    await expect(backstock).toHaveAttribute("aria-checked", "false");
+    /* The switch is named after WHAT it switches, never after what pressing it
+       would do — the state is `aria-checked`'s job (app.js admSwitch). The
+       name is clipped text inside the button, not an aria-label; see the
+       comment on admSwitch for why. */
+    await expect(backstock.locator(".vh")).toHaveText("Товар снова в наличии");
     const flows = await (await page.request.get("/api/overrides/")).json();
     expect(flows.settings.flows.backstock, "the shop's own default disagrees with the switch").toBe(false);
 
