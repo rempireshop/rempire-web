@@ -91,7 +91,7 @@ export function sliceVar(name) {
 
 export const SEARCH_PARTS = {
   vars: ["SRCH_WIDEN", "SRCH_WIDE_MAX", "SRCH_SUFFIX_RU", "SRCH_SUFFIX_LAT", "SRCH_STOP",
-    "SRCH_BRIDGE", "SRCH_CONCERNS"],
+    "SRCH_BRIDGE", "SRCH_CONCERNS", "SRCH_GEN"],
   fns: ["stem", "srchNorm", "srchStem", "srchWords", "srchGroups", "srchConcerns", "srchText",
     "srchIndex", "srchNameBlob", "srchBlob", "srchExtra", "searchNames", "searchWide"],
 };
@@ -101,7 +101,6 @@ export function buildSearch(context = ctx) {
   const body = `
     ${SEARCH_PARTS.vars.map(sliceVar).join("\n")}
     ${SEARCH_PARTS.fns.map(slice).join("\n")}
-    var SRCH_GEN = 0;
     function descOvText(p) { return ""; }
     function searchAll(query, aiTerms) {
       var q = String(query || "").trim().toLowerCase();

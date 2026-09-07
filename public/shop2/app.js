@@ -6889,8 +6889,8 @@
   function srchText(p) {
     // the volumes twice: the catalogue writes «75 мл», Google Search Console
     // says people type «75 ml» — and the second spelling costs one replace
-    var sizes = (p.sizes || []).join(" ");
-    var t = [p.name, p.brand, CAT_NAMES[p.cat] || "", sizes, sizes.replace(/мл/g, " ml ").replace(/г /g, " g ")];
+    var sizes = " " + (p.sizes || []).join(" ") + " ";
+    var t = [p.name, p.brand, CAT_NAMES[p.cat] || "", sizes, sizes.replace(/мл/g, " ml ").replace(/ г /g, " g ")];
     var ov = p.descOv || {}, so = p.seoOv || {}, langs = ["RU", "ET", "EN"];
     for (var i = 0; i < langs.length; i++) {
       var L = langs[i];
@@ -6905,20 +6905,28 @@
   }
   /* The index is two normalised strings per product, built on the first
      widened search of the session and kept until something changes the
-     catalogue — applyDemoOverrides() and rebuildCatalogue() bump SRCH_GEN,
-     which is the whole invalidation story. Nothing is built at boot: a
-     shopper who never searches never pays for this. */
-  var SRCH_GEN = 0;
+     catalogue — applyDemoOverrides() and rebuildCatalogue() bump SRCH_GEN and
+     empty SRCH_IX, which is the whole invalidation story. Nothing is built at
+     boot: a shopper who never searches never pays for this.
+
+     Beside the products rather than on them, on purpose: a product row is
+     handed around this file freely, and half a megabyte of search text bolted
+     onto it would eventually find its way into an order body or into
+     localStorage. Keyed by id, which is unique across the file's rows and the
+     owner's own («c-…»). */
+  var SRCH_GEN = 0, SRCH_IX = {};
   function srchIndex(p) {
-    if (p.sGen !== SRCH_GEN) {
-      p.sName = srchNorm(p.name + " " + p.brand + " " + (CAT_NAMES[p.cat] || ""));
-      p.sAll = srchNorm(srchText(p).replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " "));
-      p.sGen = SRCH_GEN;
+    var ix = SRCH_IX[p.id];
+    if (!ix) {
+      ix = SRCH_IX[p.id] = {
+        name: srchNorm(p.name + " " + p.brand + " " + (CAT_NAMES[p.cat] || "")),
+        all: srchNorm(srchText(p).replace(/<[^>]*>/g, " ").replace(/&[a-z#0-9]+;/gi, " "))
+      };
     }
-    return p;
+    return ix;
   }
-  function srchNameBlob(p) { return srchIndex(p).sName; }
-  function srchBlob(p) { return srchIndex(p).sAll; }
+  function srchNameBlob(p) { return srchIndex(p).name; }
+  function srchBlob(p) { return srchIndex(p).all; }
   /** The model's answer as plain stems (askSearchAI) — same shape the shop's
       own words end up in, so it is scored by the very same loop. */
   function srchExtra(list) {
@@ -19604,7 +19612,7 @@
       // an adoption after boot has to add a brand the file never had itself
       if (typeof BRAND_BY_SLUG === "object" && BRAND_BY_SLUG) BRAND_BY_SLUG[slugify(p.brand)] = p.brand;
     });
-    SRCH_GEN++;   // search: the shelf changed, so every cached blob is stale
+    SRCH_GEN++; SRCH_IX = {};   // search: the shelf changed, every blob is stale
   }
   /** The row behind an id — from the feed's copy first, then from the panel's
       full list (S.customAll, hidden products included). */
@@ -19714,8 +19722,8 @@
       }
     }
     // search: a description or a Google pair the owner just saved has to be
-    // findable — the whole invalidation of the search index is this line
-    SRCH_GEN++;
+    // findable — the whole invalidation of the search index is these two lines
+    SRCH_GEN++; SRCH_IX = {};
   }
   applyDemoOverrides();
 
