@@ -32,6 +32,33 @@ test.describe("invoice for companies", () => {
     const email = freshEmail("invoice-buyer");
     const invoiceEmail = freshEmail("invoice-accountant");
 
+    /* ---- the shop has an IBAN ----
+       Since 07.09.2026 an invoice with no IBAN is not merely incomplete, it is
+       unsent: src/lib/invoices.ts invoiceSendBlock() refuses the letter,
+       because a numbered demand for money with nowhere to pay it is worse than
+       no letter at all. The suite starts from the built-in content, where the
+       IBAN is blank, so it is set here — merged into whatever content the rest
+       of the run has stored, never overwriting it — and the bank name is left
+       blank on purpose, so the settings card's «не заполнено» warning is still
+       exercised further down. */
+    {
+      const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(200) });
+      const admin = await ctx.newPage();
+      try {
+        await loginAsAdmin(admin);
+        const settings = (await (await admin.request.get("/api/admin/settings/")).json()) as {
+          settings?: { content?: { company?: Record<string, unknown> } };
+        };
+        const content = settings.settings?.content ?? {};
+        const put = await admin.request.put("/api/admin/settings/", {
+          data: { content: { ...content, company: { ...(content.company ?? {}), iban: "EE38 2200 2210 2014 5685" } } },
+        });
+        expect(put.status()).toBe(200);
+      } finally {
+        await ctx.close();
+      }
+    }
+
     /* ---- the shopper ---- */
     await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
     await waitForScreen(page, "product");
@@ -72,7 +99,11 @@ test.describe("invoice for companies", () => {
     // no bank page: the receipt straight away, with the order number in the address
     const created = page.waitForResponse((r) => r.url().includes("/api/orders/") && r.request().method() === "POST");
     await payButton(page).click();
-    const body = (await (await created).json()) as { ok: boolean; number: string; invoice?: { number: string; dueDays: number; email: string } };
+    const body = (await (await created).json()) as {
+      ok: boolean;
+      number: string;
+      invoice?: { number: string; dueDays: number; email: string; sent: boolean };
+    };
     expect(body.ok).toBe(true);
     expect(body.invoice?.number).toMatch(/^A-\d{4}-\d{4}$/);
     expect(body.invoice?.email).toBe(invoiceEmail);
@@ -83,7 +114,13 @@ test.describe("invoice for companies", () => {
     await expect(page.locator("h1")).toHaveText("Заказ оформлен");
     await expect(page.locator(".done__num")).toContainText(number);
     const done = page.locator("[data-invoicedone]");
-    await expect(done).toContainText("Счёт отправлен на");
+    /* The receipt says what really happened. This suite runs with no
+       RESEND_API_KEY, so the letter was skipped and `invoice.sent` came back
+       false — «Счёт выписан — пришлём его на …», not «Счёт отправлен». On the
+       live shop, with the key set, the same screen says «Счёт отправлен на …»
+       (the sink below proves the letter was in fact composed and handed over). */
+    expect(body.invoice?.sent).toBe(false);
+    await expect(done).toContainText("Счёт выписан — пришлём его на");
     await expect(done).toContainText(invoiceEmail);
     await expect(done).toContainText("Оплатите в течение 7 дней — после оплаты отправим заказ.");
 
@@ -188,9 +225,37 @@ test.describe("invoice for companies", () => {
         await admin.locator('[data-admsetpage="company"]').click();
         const card = admin.locator("[data-adminvsettings]");
         await expect(card).toBeVisible();
+        // the IBAN is filled in (above), the bank name is not — so the softer
+        // «не заполнено» list is shown and the hard «Без IBAN» block is not
         await expect(card).toContainText("В блоке «Реквизиты» выше не заполнено:");
+        await expect(card).not.toContainText("Без IBAN счёт не уходит вообще.");
         await expect(card.locator('[data-invsetf="prefix"]')).toHaveValue("A-");
         await expect(card.locator('[data-invsetf="dueDays"]')).toHaveValue("7");
+        // the two dunning intervals Dim asked for: remind on day −2, cancel on day +7
+        await expect(card.locator('[data-invsetf="remindBeforeDays"]')).toHaveValue("2");
+        await expect(card.locator('[data-invsetf="cancelAfterDays"]')).toHaveValue("7");
+        /* …and they are settings, not constants: typing one and saving really
+           writes settings.invoice. Read back from the settings route rather
+           than from the re-rendered card — the panel refills the card from
+           /api/overrides/, which is a cached public response, and this test is
+           about the value being stored, not about when the cache expires. */
+        await card.locator('[data-invsetf="remindBeforeDays"]').fill("3");
+        await card.locator("[data-adminvsave]").click();
+        await expect(admin.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
+        await admin.locator("[data-closetoast]").click();
+        const saved = (await (await admin.request.get("/api/admin/settings/")).json()) as {
+          settings: { invoice: { prefix: string; dueDays: number; remindBeforeDays: number; cancelAfterDays: number } };
+        };
+        expect(saved.settings.invoice).toMatchObject({ prefix: "A-", dueDays: 7, remindBeforeDays: 3, cancelAfterDays: 7 });
+        // the journal records the interval that moved, and only that one
+        await admin.locator("[data-admsetback]").click();
+        await admin.locator('[data-admsetpage="journal"]').click();
+        await expect(admin.locator(".adm-jrow", { hasText: "Счета для компаний: напоминание за 3 дн. до срока" })).toHaveCount(1);
+        await expect(admin.locator(".adm-jrow", { hasText: "автоотмена" })).toHaveCount(0);
+        // put the default back — the whole run shares one database
+        await admin.request.put("/api/admin/settings/", {
+          data: { invoice: { prefix: "A-", dueDays: 7, remindBeforeDays: 2, cancelAfterDays: 7 } },
+        });
       }
     } finally {
       await ctx.close();

@@ -30,9 +30,11 @@ import {
   invoiceLines,
   invoiceOf,
   invoiceOverdueDays,
+  invoiceSendBlock,
   isInvoiceMethod,
   markInvoicePaid,
   nextInvoiceNumber,
+  resendInvoice,
   sellerGaps,
   splitGross,
   tallinnDate,
@@ -367,6 +369,45 @@ describe("on the database", () => {
     expect(ok.total).toBe(0);
     expect(ok.invoice).toBeNull();
     expect(ok.company).toBeNull();
+  });
+
+  /* The IBAN is «later» in Dim's own list, so this is the door that makes
+     «later» safe: an invoice with nowhere to pay it is not sent at all. The
+     number is still allocated and the PDF still renders — the owner fills the
+     field in and presses «Отправить счёт ещё раз», and the same invoice goes.
+     What must never happen is a company receiving a numbered demand for money
+     with a blank line where the account number belongs. */
+  it("никогда не отправляет счёт без IBAN — the letter is blocked, not silently unpayable", async () => {
+    await setSetting("content", { company: { iban: "", bankName: "" } });
+    const order = await createOrder(invoiceOrderInput());
+
+    // the order and its number exist; the letter does not
+    const inv = invoiceOf(order)!;
+    expect(inv.number).toMatch(/^A-\d{4}-\d{4}$/);
+    expect(inv.sentAt).toBeNull();
+    expect(inv.sendError).toBe("no_iban");
+    expect(capturedMail().filter((m) => m.template === "invoice")).toHaveLength(0);
+
+    // «Отправить счёт ещё раз» refuses for the same reason, and says which
+    const again = await resendInvoice((await getOrder(order.id))!, "admin");
+    expect(again.sent).toMatchObject({ ok: false, error: "no_iban", blocked: true });
+    expect(capturedMail().filter((m) => m.template === "invoice")).toHaveLength(0);
+
+    // fill the IBAN in and the very same invoice goes out
+    await setSetting("content", { company: { iban: "EE38 2200 2210 2014 5685", bankName: "Swedbank" } });
+    const sent = await resendInvoice((await getOrder(order.id))!, "admin");
+    expect(sent.sent.error).toBe("no_api_key"); // no key in the suite — attempted, and the sink saw it
+    const mails = capturedMail().filter((m) => m.template === "invoice");
+    expect(mails).toHaveLength(1);
+    expect(mails[0].to).toEqual([COMPANY.email]);
+  });
+
+  it("invoiceSendBlock names the one gap that stops a letter", () => {
+    const seller = { name: "Rempire Store OÜ", regCode: "1", vatNumber: "EE1", address: "Mardi 1", email: "", phone: "", iban: "", bankName: "" };
+    expect(invoiceSendBlock(seller)).toBe("no_iban");
+    expect(invoiceSendBlock({ ...seller, iban: "   " })).toBe("no_iban");
+    // a missing bank NAME is a gap the card warns about, never a reason to withhold the invoice
+    expect(invoiceSendBlock({ ...seller, iban: "EE382200221020145685" })).toBe("");
   });
 
   it("a card order is untouched: no company, no invoice, the pending letter as before", async () => {
