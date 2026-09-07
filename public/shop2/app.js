@@ -1452,7 +1452,7 @@
       "Добавить размер — объёмы заводит Дим": "Lisa suurus — mahud lisab Dim",
       "+ Размер": "+ Suurus",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Toote mahud lisab Dim. Esimese mahu hind, salongi hind, jääk ja triipkood salvestatakse siin — all oleva nupuga «Salvesta».",
-      "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui seda on 3 või vähem. «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
+      "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "Jääk on punane, kui see ei ületa «vähe» läve — vaikimisi 2; igal mahul on oma lävi, seda muudab laos nupp «Muuda». «pole arvestatud» — seda mahtu pole veel kordagi loetud; kirjutage arv ja see ilmub lattu.",
       "Левее": "Vasakule",
       "Правее": "Paremale",
       "Убрать фото": "Eemalda foto",
@@ -3250,7 +3250,7 @@
       "Добавить размер — объёмы заводит Дим": "Add a size — sizes are added by Dim",
       "+ Размер": "+ Size",
       "Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.": "Dim adds the sizes. The first size's price, the salon price, the stock and the barcode are saved here — with «Save» at the bottom.",
-      "Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red at 3 or fewer. «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
+      "Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».": "The stock turns red when it is at or below the «low» threshold — 2 by default; every size has its own, changed in the warehouse with «Edit». «not counted» means nobody has ever counted this size; type a number and it appears in the warehouse.",
       "Левее": "Left",
       "Правее": "Right",
       "Убрать фото": "Remove the photo",
@@ -3931,8 +3931,15 @@
         EN: "One point is one euro. We credit $1% of every paid purchase. Redeem it at checkout — up to $2% of the cart total." }],
     // integration: admin «Склад» search count — mirrors the catalogue's own
     // "первые 24" rules just above, only the shown-count differs (60 rows)
-    [/^Показаны первые 60 из (\d+) по запросу «(.+)»$/, { ET: "Kuvatud esimesed 60, kokku $1 · otsing „$2“", EN: "First 60 shown, $1 in total · search “$2”" }],
-    [/^Показаны первые 60 из (\d+)$/, { ET: "Kuvatud esimesed 60, kokku $1", EN: "First 60 shown, $1 in total" }],
+    /* «Склад» pages the whole warehouse now (60 at a time, «Показать ещё» or
+       a scroll to the end), so the number in this line is no longer the
+       constant 60 the rule used to spell out. */
+    [/^Показаны первые (\d+) из (\d+) по запросу «(.+)»$/,
+      { ET: "Kuvatud esimesed $1, kokku $2 · otsing „$3“", EN: "First $1 shown, $2 in total · search “$3”" }],
+    /* «Штрихкоды: привязано 12 из 348» — how far the first pass over the
+       shelves has got, on «Склад» and on the scanner's idle screen. */
+    [/^Штрихкоды: привязано (\d+) из (\d+)$/,
+      { ET: "Triipkoodid: seotud $1 / $2", EN: "Barcodes: $1 of $2 linked" }],
     [/^· рег\. (.+)$/, { ET: "· reg. $1", EN: "· reg. $1" }],
     [/^([+-]?[\d.,]+)% к прошлому периоду$/, { ET: "$1% eelmise perioodiga võrreldes", EN: "$1% vs. previous period" }],
     [/^Остаток: (.+)$/, { ET: "Jääk: $1", EN: "Stock: $1" }],
@@ -5165,6 +5172,7 @@
     stockBusy: false,
     stockErr: "",
     stockQ: "",
+    stockShown: 60,      // how many rows of the (~350-row) list are on screen — «Показать ещё», or scrolling to the end
     stockFilter: "all",  // "all" | "low" | "out" | "untracked"
     stockEdit: "",        // "<productId> <variant>" (space-joined) of the row whose qty/EAN/threshold form is open
     stockEditQty: "",
@@ -11160,8 +11168,14 @@
       '<button class="adm-tab" data-admgoodstab="bundles" aria-current="' + (tab === "sets") + '" title="Наборы">Наборы</button>';
     var add = tab === "sets"
       ? '<button class="adm-btn adm-btn--head" data-bundlenew>+ Набор</button>'
+      /* One action, one name. This header used to carry «Приёмка» over a
+         «Склад» whose own first button says «Сканировать» and whose «Салон»
+         neighbour says it a third time — three words for the one thing the
+         owner does with a phone and a bottle (Dim: "one name everywhere").
+         The word that won is «Сканировать», and it lives in the screen's
+         body, one line below where this button was. */
       : tab === "stock"
-        ? '<button class="adm-btn adm-btn--head" data-scanopen>Приёмка' + admIcon("scan", false, 20) + "</button>"
+        ? ""
         /* product creation: a blank product the editor really can save —
            custom_products on the server, CATALOGUE here (adoptCustom). */
         : '<button class="adm-btn adm-btn--head" data-admgoodsnew>+ Товар</button>';
@@ -14714,6 +14728,13 @@
     }
     return null;
   }
+  /** Is this size's remainder low enough to draw red? The row's OWN «Порог
+      «мало»» (`state`, from deriveState() in src/lib/inventory.ts — server
+      default 2), never a number written into this screen. The grid used to
+      say a flat «3 или меньше», so a size the «Мало» chip on «Склад» listed
+      was black here, and a size set to warn at 5 stayed black at 4: one
+      warehouse, two different ideas of «мало» (Dim: «We should use 2»). */
+  function edStockLow(lv) { return !!(lv && lv.tracked && lv.state !== "in"); }
   /** wholesale/loyalty: the discount a salon gets when the product has no
       price of its own — the real setting, not the prototype's flat 20 %. */
   function edSalonPct() {
@@ -14921,7 +14942,7 @@
       var key = stockKey(p.id, variant);
       var lv = p.isNew ? null : edStockFor(p, variant);
       var qty = lv && lv.tracked ? String(lv.qty) : "";
-      var low = lv && lv.tracked && lv.qty <= 3;
+      var low = edStockLow(lv);
       var priceVal = r.price === "" || r.price == null ? "" : String(r.price);
       var salon = edSalonOf(goodsPrice(priceVal) || 0);
       return '<div class="adm-grid__row">' +
@@ -14948,7 +14969,7 @@
       '<p class="adm-hint">' + (multi
         ? "У каждого объёма своя цена. Первый объём покупатель видит первым."
         : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
+      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
       "</div>";
   }
   function edPaneSizes(p) {
@@ -14963,7 +14984,7 @@
       var price = prices[Math.min(i, prices.length - 1)];
       var key = stockKey(p.id, sz);
       var qty = lv && lv.tracked ? String(lv.qty) : "";
-      var low = lv && lv.tracked && lv.qty <= 3;
+      var low = edStockLow(lv);
       /* Only the first size has a price of its own here, because that is the
          only one the shop stores: product_overrides.price patches p.price and
          p.prices[0] (applyDemoOverrides). The rest are the catalogue's, shown
@@ -14991,7 +15012,7 @@
       // a third thing, and a title is invisible on the phone anyway
       '<button class="adm-btn adm-btn--dash" type="button" disabled title="Объёмы заводит Дим" aria-label="Добавить размер — объёмы заводит Дим">+ Размер</button>' +
       '<p class="adm-hint">Объёмы товара заводит Дим. Цена первого объёма, цена для салона, остаток и штрихкод сохраняются здесь — кнопкой «Сохранить» внизу.</p>' +
-      '<p class="adm-hint">Остаток красный, когда его 3 или меньше. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
+      '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       edEanHint() +
       "</div>";
   }
@@ -15378,6 +15399,11 @@
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
   var STOCK = { asked: false, seq: 0, movesAsked: false };
+  /** How many «Склад» rows one page of the list holds. The whole warehouse is
+      ~350 rows and every one of them has to be reachable (Dim: «We need
+      all»), but the list is re-drawn on every keystroke of the search box, so
+      it arrives a page at a time — pressed, or scrolled to. */
+  var STOCK_PAGE = 60;
   function loadStockLevels(force) {
     if (SRV.admin !== true) return;
     if ((S.stockLevels || STOCK.asked) && !force) return;
@@ -15493,13 +15519,39 @@
       var qa = a.tracked ? a.qty : Infinity, qb = b.tracked ? b.qty : Infinity;
       return qa - qb;
     });
-    var shown = rows.slice(0, 60);
+    /* «We need all» (Dim). The list used to stop dead at 60 of ~350 rows, so
+       the tail of the warehouse was reachable only by guessing a search term.
+       Now it pages the way «Каталог» does — and stockScrollMore() turns the
+       page over by itself when the owner scrolls to the end, so on a phone
+       there is nothing to press at all. Paging rather than all 350 at once
+       because this list is re-drawn on every keystroke of the search box. */
+    var cap = S.stockShown || STOCK_PAGE;
+    var shown = rows.slice(0, cap);
     return shown.map(stockRowHTML).join("") +
       (shown.length ? "" : '<div class="adm-empty">Таких товаров нет</div>') +
       '<p class="adm-hint" style="margin:10px 0 0">' +
-        (rows.length > 60 ? "Показаны первые 60 из " + rows.length : rows.length + " " + plural(rows.length)) +
+        (rows.length > cap ? "Показаны первые " + cap + " из " + rows.length : rows.length + " " + plural(rows.length)) +
         // what the owner typed, not the folded copy the matching runs on
-        (q ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "") + "</p>";
+        (q ? " по запросу «" + esc(String(S.stockQ || "").trim()) + "»" : "") + "</p>" +
+      (rows.length > cap
+        ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-stockmore style="margin-top:10px">Показать ещё</button>'
+        : "");
+  }
+  /** The «Склад» list turns its own page: the owner scrolling to the last row
+      is the same intent as pressing «Показать ещё», and on a phone with ~350
+      rows it is the only one that does not need six taps. Patched in place,
+      never render()ed — a repaint would jump the scroll back to the top. */
+  function stockScrollMore() {
+    if (!S.stockLevels || S.screen !== "admin" || S.scanOpen) return;
+    var list = document.getElementById("stocklist");
+    if (!list) return;
+    var more = list.querySelector("[data-stockmore]");
+    if (!more) return;
+    var box = more.getBoundingClientRect();
+    if (box.top > (window.innerHeight || 0) + 400) return;
+    S.stockShown = (S.stockShown || STOCK_PAGE) + STOCK_PAGE;
+    list.innerHTML = stockRows();
+    translateTree(list);
   }
 
   /* Three installable apps from one page: the shop (manifest.webmanifest,
@@ -15538,6 +15590,24 @@
     return '<div class="adm-note" data-pwahint><span>📱 Откройте /shop2/admin/ на телефоне и добавьте на экран — появится отдельная иконка «Админка» (магазин ставится своей иконкой «Rempire»): в Safari — «Поделиться» → «На экран “Домой”»; в Chrome — меню (⋮) → «Установить приложение».</span>' +
       '<button class="adm-link adm-link--muted" data-pwahintclose>Скрыть</button></div>';
   }
+  /* «привязано 12 из 348» — where the first pass over the shelves has got to.
+     Nothing in the catalogue carries a barcode (the Shopify export's every
+     filled `Variant Barcode` cell reads «NA»), so every code in the database
+     is one Renat scanned and tapped, roughly 220 bottles across several
+     evenings — «he will do it soon, but not all at once» (Dim). Counted over
+     the whole warehouse, never over the filtered list: it is a total, and a
+     total that moved with the search box would answer a different question
+     every time it was read. */
+  function stockBoundCount() {
+    var rows = S.stockLevels || [];
+    var n = 0;
+    for (var i = 0; i < rows.length; i++) if (rows[i].ean) n++;
+    return { bound: n, total: rows.length };
+  }
+  function stockBoundLine() {
+    var c = stockBoundCount();
+    return "Штрихкоды: привязано " + c.bound + " из " + c.total;
+  }
   function admStockHTML() {
     if (SRV.admin !== true) return '<div class="adm-empty">Войдите в панель, чтобы видеть склад</div>';
     loadStockLevels(false);
@@ -15548,6 +15618,8 @@
         '<span class="adm-hint">Приёмка и привязка штрихкодов — через сканер. ' +
           'Здесь можно поправить остаток вручную.</span>' +
       "</div>" +
+      // the progress of the first bind pass, next to the button that does it
+      (S.stockLevels ? '<p class="adm-hint" data-stockbound style="margin:0 0 12px">' + esc(stockBoundLine()) + "</p>" : "") +
       pwaHintHTML() +
       '<div class="adm-acts">' +
         '<div class="adm-chips" role="group" aria-label="Фильтр">' +
@@ -15798,6 +15870,12 @@
          the three taps are the whole job, but between codes this is the only
          place that answers «что я уже принял сегодня». */
       return err + '<p class="scan__hint">Наведите на штрихкод. Товар найдётся сам — останется указать количество.</p>' +
+        /* The first pass over the shelves is one scan and one tap per bottle,
+           and it takes more evenings than one — so between codes the scanner
+           says where it has got to, on the screen the owner is actually
+           holding while he does it. Between codes only: while a card is up
+           the three taps are the whole job. */
+        (S.stockLevels ? '<p class="scan__hint scan__hint--sm">' + esc(stockBoundLine()) + "</p>" : "") +
         (S.scanToday && S.scanToday.length
           ? '<div class="scan__today"><div class="scan__today__t">Сегодня</div>' +
             S.scanToday.slice(0, 6).map(function (m) {
@@ -15937,7 +16015,10 @@
       S.scanErr || "", S.scanBusy ? 1 : 0, S.scanReady ? 1 : 0, S.scanFrom || "",
       // «Сегодня» is drawn between codes only — while a card is up the list
       // landing must not count as a change
-      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-"
+      !h && S.scanToday ? S.scanToday.length + ":" + (S.scanToday.length ? S.scanToday[0].id : "") : "-",
+      // …and «привязано N из M» beside it, by the same rule: the warehouse
+      // list landing behind a card must not rebuild the card
+      !h && S.stockLevels ? stockBoundLine() : "-"
     ].join("|");
   }
   function scanRenderPanel() {
@@ -19970,7 +20051,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -21319,7 +21400,16 @@
       render(); return;
     }
     if (d.stocksave) { stockCommit(d.stocksave); return; }
-    if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; render(); return; }
+    /* «Показать ещё» — the next page of the warehouse. Patched into the list
+       rather than render()ed, so the page the owner just read does not jump
+       out from under him; stockScrollMore() does the same thing unasked. */
+    if (d.stockmore !== undefined) {
+      S.stockShown = (S.stockShown || STOCK_PAGE) + STOCK_PAGE;
+      var moreList = document.getElementById("stocklist");
+      if (moreList) { moreList.innerHTML = stockRows(); translateTree(moreList); } else render();
+      return;
+    }
+    if (d.stockfilter !== undefined) { S.stockFilter = d.stockfilter; S.stockShown = STOCK_PAGE; render(); return; }
     if (d.stockmovesopen !== undefined) {
       S.stockMovesOpen = !!d.stockmovesopen;
       // coming back to a history that failed asks again, rather than showing
@@ -21877,6 +21967,7 @@
     /* ---- inventory: «Склад», «Продажа в салоне», the scanner's assign search — targeted patches, same reasoning as data-goodsq above ---- */
     else if (t.matches("[data-stockq]")) {
       S.stockQ = t.value;
+      S.stockShown = STOCK_PAGE;   // a new search starts from its first page again
       var stockList = document.getElementById("stocklist");
       if (stockList) { stockList.innerHTML = stockRows(); translateTree(stockList); }
     }
@@ -22555,7 +22646,11 @@
   window.addEventListener("scroll", function () {
     if (tickQueued) return;
     tickQueued = true;
-    requestAnimationFrame(function () { tickQueued = false; paintTint(); });
+    requestAnimationFrame(function () {
+      tickQueued = false; paintTint();
+      // inventory: «Склад» turns its own page when the last row comes up
+      stockScrollMore();
+    });
   }, { passive: true });
   window.addEventListener("resize", measureHdr, { passive: true });
   /* Enter in a one-line box of the panel's small forms presses that form's
