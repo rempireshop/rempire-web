@@ -6,6 +6,15 @@ Full UI/UX overhaul of the Rempire admin panel (Rempire Store OÜ, rempireshop.c
 ## About the design files
 Files in this bundle are **design references built in HTML** — an interactive prototype showing intended look and behavior. They are not production code. Recreate them in the existing **vanilla-JS single-page app** (no React, no new third-party services), keeping the existing login card, RU/ET/EN toggle, confirm-before-apply, change journal with undo, AI assistant (propose-only) and toasts. Must work as an installed PWA on iPhone and Android, WCAG AA, touch targets ≥ 44 px.
 
+## Wording — read this before quoting any label from here (07.09.2026)
+This file is the design brief as it was handed over. Where its Russian copy and
+the shipped panel disagree, **the panel wins** and `docs/GLOSSARY.md` is the
+list. The three that were still wrong here have been corrected in place, with
+the original word kept in brackets so the intent is not lost: «Наклейка» →
+**«Этикетка»**, «Отметить отправленным» → **«Отправлен»**, and the fourth step
+of the order strip is **«Доставлен»**, not «Письмо клиенту» — the letter is
+sent from «Написать клиенту», which is not a step.
+
 ## Fidelity
 **High-fidelity.** Colors, type, spacing, component sizes and copy are final. Icons are simple 24-px line icons (paths are in the prototype source; any equivalent 1.5-px-stroke line icon set is acceptable). Product photos are placeholders. Blog "visual editor" is a behavioral spec — implement with a small contenteditable block editor, not Markdown.
 
@@ -95,10 +104,10 @@ Header: date line (13 muted) + title; right: primary «Отправить N» wh
 - **Продажи**: Сегодня (real sum of today's paid+salon orders, «2 заказа · 1 в салоне») and 7 дней (sum, «11 заказов · 44,60 € в день», 7 bars 36 h, today ink). No demo numbers anywhere (fix #1).
 
 ### Заказы
-Title; chips «Новые N · Отправлены · Ждут оплаты · Салон · Все» + search (id, name, phone). Row (card): name 600 + amount Oswald 17 · `R-xxxxx · time · N товара` / delivery line · badge + inline actions right-aligned: paid → «Наклейка» (secondary, becomes «Наклейка ✓») + «Отправлен» (primary); unpaid → «Написать». Empty: «Таких заказов нет».
+Title; chips «Новые N · Отправлены · Ждут оплаты · Салон · Все» + search (id, name, phone). Row (card): name 600 + amount Oswald 17 · `R-xxxxx · time · N товара` / delivery line · badge + inline actions right-aligned: paid → «Этикетка» [design: «Наклейка»] (secondary, becomes «Этикетка ✓») + «Отправлен» (primary); unpaid → «Написать». Empty: «Таких заказов нет».
 
 ### Заказ (card)
-«← Заказы»; mono `id · time`; title = customer; badge. **4-step strip** in a 1 px ink box, 4 equal cells: 1 Оплачен · 2 Наклейка · 3 Отправлен · 4 Письмо клиенту; done cells ink/white, current tint/600, future white/muted. Actions row: «Напечатать наклейку» (primary until printed, then secondary «Наклейка ✓») · «Отметить отправленным» (secondary until label printed, then primary) · «Написать клиенту» · destructive «Отменить заказ». Steps/actions hidden for salon and cancelled orders. «Написать клиенту» opens an inline card with the AI-drafted message (prefilled per status), «Отправить»/«Отмена». Then two columns: Состав (lines, delivery price or «бесплатно», Итого Oswald 20) · Покупатель / Доставка (address, tracking in mono when present) / Заметка textarea. Shipping = confirm card → status shipped, tracking generated, toast «R-… отправлен · письмо ушло» with Отменить, journal entry (fix #14).
+«← Заказы»; mono `id · time`; title = customer; badge. **4-step strip** in a 1 px ink box, 4 equal cells: 1 Оплачен · 2 Этикетка · 3 Отправлен · 4 Доставлен [design said: 2 Наклейка · 4 Письмо клиенту]; done cells ink/white, current tint/600, future white/muted. Actions row: «Этикетка» [design: «Напечатать наклейку»] (primary until printed, then secondary «Этикетка ✓») · «Отправлен» [design: «Отметить отправленным»] (secondary until label printed, then primary) · «Написать клиенту» · destructive «Отменить заказ». Steps/actions hidden for salon and cancelled orders. «Написать клиенту» opens an inline card with the AI-drafted message (prefilled per status), «Отправить»/«Отмена». Then two columns: Состав (lines, delivery price or «бесплатно», Итого Oswald 20) · Покупатель / Доставка (address, tracking in mono when present) / Заметка textarea. Shipping = confirm card → status shipped, tracking generated, toast «R-… отправлен · письмо ушло» with Отменить, journal entry (fix #14).
 
 ### Товары
 Title with muted count; primary button changes per tab: «+ Товар» / «Приёмка» / «+ Набор». Tabs Каталог · Склад (warn count) · Наборы.

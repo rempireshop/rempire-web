@@ -29,7 +29,8 @@
 «Поделиться» → «На экран “Домой”»; в Chrome — меню ⋮ → «Установить
 приложение»). Появится третья иконка, **«Сканер»**, которая открывается
 сразу в камере. Пароль спросят один раз, как в админке. Из админки туда
-ведёт кнопка «Открыть сканер» на вкладке «Склад».
+ведёт кнопка «Приёмка» в шапке вкладки «Склад» (она же «Сканировать» там,
+где на неё ссылаются подсказки).
 
 ## Как принять товар (приход)
 
@@ -499,7 +500,7 @@ its own icon, and opens straight into the camera.
   mounts the overlay) lifts it back on top. This affects the «Склад» overlay
   too, where it was equally invisible and equally wrong.
 - **Getting there.** «Склад» carries one line — «📷 Сканер как отдельное
-  приложение: откройте /shop2/scan/ на телефоне…» — and an «Открыть сканер»
+  приложение: откройте /shop2/scan/ на телефоне…» — and an «Сканер отдельным приложением ↗»
   button (`data-scanapp`).
 
 ## Assistant (`src/app/api/assistant/actions.ts`, `route.ts`)
