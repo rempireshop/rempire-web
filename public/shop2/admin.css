@@ -1090,6 +1090,13 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   color: #fff; display: flex; align-items: flex-end; padding: 8px;
   font-family: Oswald, sans-serif; font-size: 12px; letter-spacing: .15em;
 }
+/* The cards an order bought. Dim, 07.09.2026: the code and «Карта PDF ↗» were
+   one line and one link — so the code, which is money and gets read aloud or
+   copied, could not be looked at without looking at a button. One card per
+   block now: the code on its own line, the button under it. */
+.adm-gifts { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.adm-gifts__c { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.adm-gifts__code { font-size: 16px; letter-spacing: .04em; user-select: all; }
 
 /* ---------- Маркетинг: письма — the live preview -------------------------- */
 

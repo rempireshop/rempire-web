@@ -12211,11 +12211,20 @@
   function admGiftCardsHTML(o) {
     var cards = (o && o.giftCards) || [];
     if (!cards.length) return "";
-    /* Each half in its own text node: the code is data, «Карта PDF ↗» is a
-       phrase the dictionary translates (translateTree rewrites whole nodes). */
-    return '<div class="adm-acts" style="margin-top:10px">' + cards.map(function (c) {
-      return '<a class="adm-link" href="' + esc(c.pdfUrl) + '" target="_blank" rel="noopener" data-giftpdf="' +
-        esc(c.code) + '"><span class="adm-mono">' + esc(c.code) + '</span> <span>Карта PDF ↗</span></a>';
+    /* Dim, 07.09.2026: «код карты и кнопка „Карта PDF“ должны быть хотя бы на
+       разных строках — сейчас они одной строкой.» They were one link: the code
+       and the phrase run together, so the code could not be read off the
+       screen without reading the button, and on a phone the pair wrapped
+       mid-code. Now the code is a line of its own (mono, selectable, nothing
+       clickable on it) and the PDF is a 44-px button under it.
+
+       Each half still in its own text node: the code is data, «Карта PDF ↗» is
+       a phrase the dictionary translates (translateTree rewrites whole nodes). */
+    return '<div class="adm-gifts" style="margin-top:10px">' + cards.map(function (c) {
+      return '<div class="adm-gifts__c">' +
+        '<span class="adm-mono adm-gifts__code">' + esc(c.code) + "</span>" +
+        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(c.pdfUrl) +
+          '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">Карта PDF ↗</a></div>';
     }).join("") +
       '<span class="adm-hint"><span>Действует до</span> <span>' +
       esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
@@ -12851,13 +12860,26 @@
         : rows);
     return admColsHTML(left, side);
   }
+  /* One issued card. Three lines, not one: the code, then who and when, then
+     the card itself as a button — the same shape the order card now uses, and
+     the same reason (Dim, 07.09.2026). «Действует до» is new here: a card is
+     money the shop owes, and the date it stops owing it is the second thing
+     the owner wants after the balance. */
   function admGiftRowHTML(c) {
     var to = (c.recipient && (c.recipient.name || c.recipient.email)) || "покупателю";
-    return '<div class="adm-row"><span class="adm-row__body">' +
-      '<span class="adm-row__nm adm-mono">' + esc(c.code) + "</span>" +
-      '<span class="adm-row__sub">' + esc(to) + " · " + esc(shortDate(c.createdAt)) + "</span></span>" +
-      '<span class="adm-row__end"><span class="adm-row__amt">' + eur(c.balance) + "</span>" +
-      '<span class="adm-row__sub">из ' + eur(c.amount) + "</span></span></div>";
+    var until = String(c.validUntil || "").split("-").reverse().join(".");
+    return '<div class="adm-row adm-row--stack">' +
+      '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
+        '<span class="adm-row__nm adm-mono">' + esc(c.code) + "</span>" +
+        '<span class="adm-row__amt">' + eur(c.balance) + "</span></span>" +
+      '<span class="adm-row__sub" style="width:100%">' + esc(to) + " · " + esc(shortDate(c.createdAt)) +
+        (until ? ' · <span>Действует до</span> <span>' + esc(until) + "</span>" : "") +
+        (c.balance === c.amount ? "" : ' · <span>из ' + eur(c.amount) + "</span>") + "</span>" +
+      (c.pdfUrl
+        ? '<div class="adm-acts"><a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(c.pdfUrl) +
+          '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">Карта PDF ↗</a></div>'
+        : "") +
+      "</div>";
   }
   /* The issued cards, once per visit to the tab — a shop that sells three of
      these a month does not need a poll, and «Повторить» re-asks. */
