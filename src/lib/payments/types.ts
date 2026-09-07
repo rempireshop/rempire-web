@@ -108,6 +108,15 @@ export interface VerifyResult {
   currency?: string;
   /** Free-form provider detail for the order journal (bank name, card brand). */
   detail?: string;
+  /**
+   * Set when the provider's own token says this payment has already been sent
+   * back — Montonio's REFUNDED / PARTIALLY_REFUNDED. The payment `status`
+   * stays `paid` (the money did arrive); this is the second movement, and the
+   * notify route hands it to src/lib/payments/refund.ts. Without it a refund
+   * made inside Montonio's portal left the order reading «Оплачен» here for
+   * ever (Dim, 07.09.2026).
+   */
+  refunded?: "full" | "partial";
 }
 
 export interface PaymentProvider {

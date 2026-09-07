@@ -1,5 +1,12 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { signHs256, verifyHs256 } from "./jwt";
+import type {
+  RefundNotification,
+  RefundRequest,
+  RefundResult,
+  RefundStatus,
+  RefundingProvider,
+} from "./refund";
 import {
   PaymentError,
   paymentMethodKind,
@@ -93,7 +100,20 @@ export function mockMethodLabel(method: PaymentMethodKind | undefined, bank?: st
   return bank ? `банковская ссылка · ${bank}` : "банковская ссылка";
 }
 
-export class MockProvider implements PaymentProvider {
+/** The stand-in bank's refund ticket — the same shape Montonio's carries. */
+export interface MockRefundTicket {
+  refundRef: string;
+  providerOrderRef: string;
+  amount: number;
+  status?: RefundStatus;
+  [k: string]: unknown;
+}
+
+export function signMockRefundTicket(ticket: MockRefundTicket, secret: string): string {
+  return signHs256(ticket, secret, { expiresInSeconds: TOKEN_TTL_SECONDS });
+}
+
+export class MockProvider implements PaymentProvider, RefundingProvider {
   readonly name = "mock";
 
   constructor(private readonly secret: string = mockSecret()) {}
@@ -131,14 +151,66 @@ export class MockProvider implements PaymentProvider {
     return this.read(token);
   }
 
-  async verifyNotification(req: Request): Promise<VerifyResult> {
-    let body: { mockToken?: unknown };
+  /**
+   * The stand-in bank always has the balance, so its refund is `done` at once
+   * — the one place it is deliberately kinder than Montonio, whose refund
+   * starts at PENDING. What it does keep is the shape: an id of its own, the
+   * amount echoed back, and the idempotency key carried into the ticket so a
+   * repeat is visible in a test.
+   */
+  async refundPayment(req: RefundRequest): Promise<RefundResult> {
+    const amount = Math.round(Number(req.amount) * 100) / 100;
+    if (!(amount > 0)) throw new PaymentError("bad_amount");
+    return {
+      ref: `mockref_${(req.idempotencyKey || randomUUID()).replace(/-/g, "").slice(0, 12)}`,
+      amount,
+      status: "done",
+      currency: req.currency ?? "EUR",
+      detail: "тестовый возврат",
+    };
+  }
+
+  async verifyRefundNotification(req: Request): Promise<RefundNotification> {
+    let body: { mockRefundToken?: unknown };
     try {
-      body = (await req.json()) as { mockToken?: unknown };
+      body = (await req.json()) as { mockRefundToken?: unknown };
     } catch {
       throw new PaymentError("bad_body");
     }
-    if (typeof body?.mockToken !== "string") throw new PaymentError("missing_token");
+    if (typeof body?.mockRefundToken !== "string") throw new PaymentError("missing_token");
+    let claims: Record<string, unknown>;
+    try {
+      claims = verifyHs256<Record<string, unknown>>(body.mockRefundToken, this.secret);
+    } catch {
+      throw new PaymentError("token_invalid");
+    }
+    const refundRef = claims.refundRef;
+    const providerOrderRef = claims.providerOrderRef;
+    if (typeof refundRef !== "string" || typeof providerOrderRef !== "string") {
+      throw new PaymentError("token_payload");
+    }
+    const status = claims.status;
+    return {
+      refundRef,
+      providerOrderRef,
+      amount: typeof claims.amount === "number" ? claims.amount : 0,
+      status: status === "done" || status === "failed" ? status : "pending",
+      detail: "тестовый возврат",
+    };
+  }
+
+  async verifyNotification(req: Request): Promise<VerifyResult> {
+    let body: { mockToken?: unknown; mockRefundToken?: unknown };
+    try {
+      body = (await req.json()) as { mockToken?: unknown; mockRefundToken?: unknown };
+    } catch {
+      throw new PaymentError("bad_body");
+    }
+    if (typeof body?.mockToken !== "string") {
+      // parity with Montonio: a refund webhook is understood, and read by
+      // verifyRefundNotification() rather than by this method
+      throw new PaymentError(body?.mockRefundToken ? "not_order_webhook" : "missing_token");
+    }
     return this.read(body.mockToken);
   }
 

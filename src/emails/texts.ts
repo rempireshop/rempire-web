@@ -36,6 +36,9 @@ import type { Lang } from "./types";
 export const MAIL_TEXT_TEMPLATES = [
   "order-confirmed",
   "order-shipped",
+  "order-unpaid",
+  "order-cancelled",
+  "order-refunded",
   "abandoned-cart",
   "back-in-stock",
   "birthday",
@@ -148,6 +151,66 @@ const D: Record<MailTextTemplate, Record<Lang, MailTextSet>> = {
       subject: "Order {order} has shipped — Rempire",
       intro: "Your order no. {order} has been handed to the carrier and is on its way.",
       signature: "Tracking usually starts working a few hours after the parcel is handed over.",
+    },
+  },
+  /* The three letters an order gets when it does NOT end in a parcel: the
+     reminder before an unpaid order is let go, the cancellation, and the
+     refund. `{total}` in the refund letter is what actually went back — on a
+     partial refund that is not the order's total, and the number the customer
+     will see on their statement is the one that belongs in the letter
+     (docs/mail.md). */
+  "order-unpaid": {
+    ru: {
+      subject: "Заказ {order} ждёт оплаты — Rempire",
+      intro:
+        "Заказ № {order} мы собрали, но оплата за него так и не пришла. Оплатить можно кнопкой ниже — корзину заново собирать не нужно.",
+      signature: "Что-то пошло не так при оплате? Ответьте на это письмо — разберёмся вместе.",
+    },
+    et: {
+      subject: "Tellimus {order} ootab tasumist — Rempire",
+      intro:
+        "Tellimuse nr {order} panime kokku, aga makse pole kohale jõudnud. Maksta saab alloleva nupuga — ostukorvi uuesti koguda pole vaja.",
+      signature: "Kas maksmisel läks midagi valesti? Vastake sellele kirjale — leiame lahenduse.",
+    },
+    en: {
+      subject: "Order {order} is waiting for payment — Rempire",
+      intro:
+        "We put order no. {order} together, but the payment never arrived. You can pay with the button below — no need to fill the basket again.",
+      signature: "Did something go wrong while paying? Reply to this e-mail and we will sort it out.",
+    },
+  },
+  "order-cancelled": {
+    ru: {
+      subject: "Заказ {order} отменён — Rempire",
+      intro: "Заказ № {order} отменён. Деньги за него не списаны — платить ничего не нужно.",
+      signature: "Если это ошибка или вы хотите оформить заказ заново — просто ответьте на это письмо.",
+    },
+    et: {
+      subject: "Tellimus {order} on tühistatud — Rempire",
+      intro: "Tellimus nr {order} on tühistatud. Raha selle eest maha ei võetud — maksta pole vaja midagi.",
+      signature: "Kui see on eksitus või soovite tellimuse uuesti vormistada — vastake lihtsalt sellele kirjale.",
+    },
+    en: {
+      subject: "Order {order} has been cancelled — Rempire",
+      intro: "Order no. {order} has been cancelled. Nothing was charged — there is nothing to pay.",
+      signature: "If this is a mistake, or you would like to order again, just reply to this e-mail.",
+    },
+  },
+  "order-refunded": {
+    ru: {
+      subject: "Возврат по заказу {order} — Rempire",
+      intro: "Мы вернули деньги по заказу № {order} — сумма указана ниже. Они идут обратно тем же путём, каким пришли.",
+      signature: "Если деньги не придут в течение пяти рабочих дней — ответьте на это письмо, мы проверим.",
+    },
+    et: {
+      subject: "Tagasimakse tellimuse {order} eest — Rempire",
+      intro: "Tagastasime raha tellimuse nr {order} eest — summa on allpool. See liigub tagasi sama teed, kust tuli.",
+      signature: "Kui raha ei jõua viie tööpäeva jooksul kohale — vastake sellele kirjale, kontrollime üle.",
+    },
+    en: {
+      subject: "Refund for order {order} — Rempire",
+      intro: "We have refunded order no. {order} — the amount is below. The money travels back the way it came.",
+      signature: "If it has not arrived within five business days, reply to this e-mail and we will check.",
     },
   },
   "abandoned-cart": {

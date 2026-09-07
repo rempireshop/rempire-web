@@ -1264,6 +1264,24 @@ export async function getOrderByNumber(number: string): Promise<Order | null> {
   return rows.length ? mapOrder(rows[0]) : null;
 }
 
+/**
+ * The order a provider knows by its own id — `orders.payment.ref`.
+ *
+ * Refund webhooks name the order by the provider's uuid (Montonio's
+ * `orderUuid`), never by our merchantReference, so this is the only way in for
+ * a refund made in Montonio's own portal. Newest first: an id is unique in
+ * practice, and taking the newest is the safer answer if it ever is not.
+ */
+export async function getOrderByPaymentRef(ref: string): Promise<Order | null> {
+  const r = String(ref ?? "").trim();
+  if (!r) return null;
+  const rows = await query<OrderRow>(
+    "select * from orders where payment->>'ref' = $1 order by created_at desc limit 1",
+    [r],
+  );
+  return rows.length ? mapOrder(rows[0]) : null;
+}
+
 /** Merges into the existing payment payload rather than replacing it. */
 export async function setOrderPayment(id: string, payment: Record<string, unknown>): Promise<Order | null> {
   if (!id || !UUID_RE.test(id)) return null;
