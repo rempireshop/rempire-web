@@ -591,10 +591,11 @@ interface UnpaidRow {
   currency: string | null;
   status: string;
   invoice: unknown;
+  created_at: string | Date;
 }
 
 const UNPAID_COLUMNS =
-  "id, number, email, name, lang, items, shipping, subtotal, shipping_price, discount, total, currency, status, invoice";
+  "id, number, email, name, lang, items, shipping, subtotal, shipping_price, discount, total, currency, status, invoice, created_at";
 
 /* The two statuses an order carries while its money has not arrived: «новый»
    (never left for the bank, or left and never came back) and «не оплачен»
@@ -674,10 +675,11 @@ export async function runUnpaidOrders(now: number = Date.now()): Promise<UnpaidR
       continue;
     }
     const lang = normalizeLangCode(row.lang);
-    const daysLeft = Math.max(
-      0,
-      flows.unpaidCancelDays - flows.unpaidRemindDays,
-    );
+    /* How long this order really has left, not how long the settings say a
+       reminder normally leaves: the cron runs once a day and can miss one, so
+       an order reminded on its fifth day must not promise four more. */
+    const ageDays = Math.floor((now - new Date(row.created_at).getTime()) / day);
+    const daysLeft = Math.max(0, flows.unpaidCancelDays - ageDays);
     const res = await onOrderUnpaid(unpaidOrderLike(row), {
       daysLeft,
       payUrl: payAgainUrl(lang, row),
