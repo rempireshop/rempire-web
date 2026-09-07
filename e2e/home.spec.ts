@@ -63,8 +63,12 @@ for (const lang of LANGS) {
      * the last place someone shopping for a present looks. It now has three
      * homes; two of them are on this screen. The home block deliberately does
      * NOT hang off the sets rail: it is its own <section class="sec--gift">,
-     * so switching sets off (admin → Магазин) cannot take it with them. */
-    test("the gift card is reachable from the home page and from the footer", async ({ page }) => {
+     * so switching sets off (admin → Магазин) cannot take it with them.
+     *
+     * Dim, 07.09.2026: the third home moved from the footer to the top
+     * navigation, beside «Наборы» — the footer group that repeated the
+     * navigation is gone, so [data-nav-gift] is what this now checks. */
+    test("the gift card is reachable from the home page and from the navigation", async ({ page }) => {
       await page.goto(shopUrl(lang.seg, "/"));
       await waitForScreen(page, "home");
 
@@ -74,16 +78,19 @@ for (const lang of LANGS) {
       // Its own section, not a child of the sets rail.
       await expect(page.locator(".sec--bundles .gifttile")).toHaveCount(0);
 
-      // The footer group «Покупателю» — sections are closed <details>.
+      // …and the navigation entry, which is not a copy of a footer link any
+      // more — the footer must not have one at all.
       const summaries = page.locator(".ftr .ftr__acc summary");
       const n = await summaries.count();
       for (let i = 0; i < n; i++) await summaries.nth(i).click();
-      const footerLink = page.locator('.ftr [data-go="gift"]');
-      await expect(footerLink).toHaveText(tr("Подарочная карта", lang.code));
+      await expect(page.locator('.ftr [data-go="gift"]')).toHaveCount(0);
 
-      await footerLink.click();
+      const navGift = page.locator("[data-nav-gift]");
+      await expect(navGift).toHaveText(tr("Подарочная карта", lang.code));
+      await navGift.click();
       await waitForScreen(page, "gift");
       await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+      await expect(navGift).toHaveAttribute("aria-current", "true");
 
       // …and the home block's own button reaches the same screen.
       await page.goto(shopUrl(lang.seg, "/"));
@@ -106,7 +113,8 @@ for (const lang of LANGS) {
 
       const navBlog = page.locator("[data-nav-blog]");
       await expect(navBlog).toHaveText(tr("Блог", lang.code));
-      await expect(page.locator('.ftr [data-go="blog"]')).toHaveText(tr("Блог", lang.code));
+      // the footer's copy of this link went with the «Покупателю» group
+      await expect(page.locator('.ftr [data-go="blog"]')).toHaveCount(0);
 
       await navBlog.click();
       await waitForScreen(page, "blog");
@@ -156,4 +164,44 @@ test.describe("language switch", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "et");
     await expect(page.locator('[data-go-cat="all"]').first()).toHaveText("Kõik tooted");
   });
+});
+
+/* The navigation gained an entry (the gift card, beside «Наборы»), and the
+   strip is the one row in the shop chrome that is allowed to scroll sideways
+   — but only itself. At 360 px, the narrowest phone the shop is held to, the
+   PAGE must still not scroll sideways, every entry must stay reachable by
+   scrolling the strip, and the new one must be a real 44-px target.
+   Checked in all three languages: «Подарочная карта» is the longest of the
+   three labels and the Estonian «Kinkekaart» the shortest. */
+test.describe("the navigation on a 360-px phone", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(11) });
+
+  for (const lang of LANGS) {
+    test(`the strip scrolls, the page does not — ${lang.code}`, async ({ page }) => {
+      await page.setViewportSize({ width: 360, height: 780 });
+      await page.goto(shopUrl(lang.seg, "/"));
+      await waitForScreen(page, "home");
+
+      const pageOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(pageOverflow, "the home page scrolls sideways at 360 px").toBeLessThanOrEqual(1);
+
+      const nav = page.locator(".hdr__nav");
+      const overflow = await nav.evaluate((el) => el.scrollWidth - el.clientWidth);
+      expect(overflow, "the nav strip does not scroll — it should, it is longer than the phone")
+        .toBeGreaterThan(0);
+
+      const gift = page.locator("[data-nav-gift]");
+      await expect(gift).toHaveText(tr("Подарочная карта", lang.code));
+      const box = await gift.boundingBox();
+      expect(box, "the gift-card entry has no box").not.toBeNull();
+      expect(box!.height, "the gift-card entry is under the 44-px touch target").toBeGreaterThanOrEqual(44);
+
+      // reachable by scrolling the strip, and it goes where it says
+      await gift.scrollIntoViewIfNeeded();
+      await gift.click();
+      await waitForScreen(page, "gift");
+      await expect(page).toHaveURL(new RegExp(`/shop2${lang.seg}/gift/`));
+    });
+  }
 });

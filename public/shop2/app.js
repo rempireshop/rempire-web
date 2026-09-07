@@ -7813,6 +7813,12 @@
         '<button data-go-cat="all">Все товары</button>' +
         CATS.map(function (c) { return '<button data-go-cat="' + c.id + '">' + c.name + "</button>"; }).join("") +
         (allBundles().length ? '<button data-go="bundles" data-nav-bundles>Наборы</button>' : "") +
+        /* Dim, 07.09.2026: the gift card belongs beside «Наборы» in the
+           navigation — that is where someone shopping for a present is
+           already looking, and it is why the footer no longer repeats it.
+           Unlike «Наборы» it is never removed: the card is not a set and
+           stays on sale with sets switched off (docs/features.md). */
+        '<button data-go="gift" data-nav-gift>Подарочная карта</button>' +
         '<button data-go="brands" data-nav-brands>Бренды</button>' +
         '<button data-go="blog" data-nav-blog>Блог</button>' +
       "</nav></header>";
@@ -7856,7 +7862,8 @@
     var navSets = nav && nav.querySelector("[data-nav-bundles]");
     var wantSets = !!allBundles().length;
     if (nav && wantSets && !navSets) {
-      var before = nav.querySelector("[data-nav-brands]");
+      // back in front of the gift card, which is where headerHTML() puts it
+      var before = nav.querySelector("[data-nav-gift]") || nav.querySelector("[data-nav-brands]");
       var btn = document.createElement("button");
       btn.setAttribute("data-go", "bundles");
       btn.setAttribute("data-nav-bundles", "");
@@ -7867,7 +7874,10 @@
     }
     h.querySelectorAll(".hdr__nav button").forEach(function (b) {
       if (b.dataset.navBundles !== undefined) {
-        b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle" || S.screen === "gift"));
+        // «gift» used to light this one up — it has its own entry now
+        b.setAttribute("aria-current", String(S.screen === "bundles" || S.screen === "bundle"));
+      } else if (b.dataset.navGift !== undefined) {
+        b.setAttribute("aria-current", String(S.screen === "gift"));
       } else if (b.dataset.navBrands !== undefined) {
         b.setAttribute("aria-current", String(S.screen === "brands" || (S.screen === "catalog" && !!S.brand)));
       } else if (b.dataset.navBlog !== undefined) {
@@ -7984,7 +7994,21 @@
     var addr = contentConf().company.address;
     return '<footer class="ftr"><div class="wrap">' +
       '<div class="ftr__accs">' +
-      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE + " € · 230 пакоматов в 4 странах") +
+      /* The «Покупателю» group is gone (Dim, 07.09.2026): «Наборы»,
+         «Подарочная карта» and «Блог» all sit in the top navigation, and a
+         second copy of them at the bottom of the page was the only thing he
+         kept noticing there. The four links in it that are NOT in the
+         navigation did not go with it — each one moved to the block that
+         already says the same thing, so nothing became unreachable:
+         «Доставка и оплата» here, «Контакты» under «Связаться», and the two
+         consumer-rights pages under «Правовое», where the rest of them are. */
+      /* The link is a sibling node, never glued onto the sentence: that
+         sentence carries a price and is translated by a UI_RX rule anchored
+         on its last word — one appended « · » and it stops matching in ET
+         and EN. Same reason «Самовывоз» below keeps its own <span>. */
+      ftrSec("Доставка", "DPD, Omniva, SmartPosti и курьер · 1–3 дня · по Эстонии бесплатно от " + THRESH.EE +
+        " € · 230 пакоматов в 4 странах" +
+        '<br><button class="link" data-page="shipping">Доставка и оплата</button>') +
       ftrSec("Оплата", payLogosHTML(["bank", "visa", "mastercard", "applepay", "gpay"]) + '<span class="ftr__pay">Банковская ссылка (Swedbank, SEB, LHV, Luminor, Coop), карта, Apple Pay / Google Pay, счёт для компаний.</span>') +
       /* content: the address is data now, so the sentence after it lives in its
          own element — the dictionary matches whole text nodes, and gluing an
@@ -7992,9 +8016,10 @@
       ftrSec("Самовывоз", esc(addr) + " · <span>бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.</span>") +
       (hours ? ftrSec("Часы работы", hours) : "") +
       ftrSec("Реквизиты", cCompanyHTML()) +
-      ftrSec("Связаться", [cPhoneHTML(), cMailHTML()].filter(Boolean).join(" · ")) +
-      ftrSec("Покупателю", (allBundles().length ? '<button class="link" data-go="bundles">Наборы</button> · ' : "") + '<button class="link" data-go="gift">Подарочная карта</button> · <button class="link" data-go="blog">Блог</button> · <button class="link" data-page="shipping">Доставка и оплата</button> · <button class="link" data-page="returns">Возврат товара</button> · <button class="link" data-page="terms">Условия продажи</button> · <button class="link" data-page="contact">Контакты</button>') +
+      ftrSec("Связаться", [cPhoneHTML(), cMailHTML(), '<button class="link" data-page="contact">Контакты</button>']
+        .filter(Boolean).join(" · ")) +
       ftrSec("Правовое", '<button class="link" data-page="privacy">Конфиденциальность</button> · <button class="link" data-page="terms">Правовая информация</button> · ' +
+        '<button class="link" data-page="returns">Возврат товара</button> · ' +
         // the one way back to a choice that is otherwise made once and kept
         '<button class="link" data-cookies>Данные и cookie</button> · <a href="https://ec.europa.eu/consumers/odr">Споры онлайн (ODR)</a>') +
       "</div>" +
