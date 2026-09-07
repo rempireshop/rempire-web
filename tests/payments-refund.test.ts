@@ -37,6 +37,7 @@ import {
   refundableAmount,
   refundedTotal,
   refundsOf,
+  type RefundStatus,
 } from "@/lib/payments/refund";
 import { adminCookieHeader, makeRequest, PRODUCT, resetIps, setFuzzEnv } from "./fuzz-harness";
 import { setupDb, teardownDb, truncateAll } from "./helpers";
@@ -259,7 +260,12 @@ async function refund(id: string, body: Record<string, unknown> = {}) {
   return { status: res.status, body: (await res.json()) as Record<string, unknown> };
 }
 
-async function refundWebhook(providerOrderRef: string, refundRef: string, amount: number, status = "done") {
+async function refundWebhook(
+  providerOrderRef: string,
+  refundRef: string,
+  amount: number,
+  status: RefundStatus = "done",
+) {
   const { POST } = await import("@/app/api/payments/notify/route");
   const token = signMockRefundTicket({ refundRef, providerOrderRef, amount, status }, mockSecret());
   const res = await POST(
