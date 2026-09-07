@@ -676,3 +676,165 @@ test.describe("blog — the sample posts", () => {
     await assertClean(page, w, "a sample article on a phone");
   });
 });
+
+/**
+ * The language trap, and the answer to it.
+ *
+ * What happened once: the owner put a product card into the **Russian** body
+ * of «Почему зудит борода», then pressed the strip's «English» — three words
+ * shaped exactly like the panel's own RU · ET · EN switch in the sidebar —
+ * got the English body, which of course had no card in it, and read that as
+ * «my edit did not save». Nothing was broken; the editor simply never said
+ * which of three texts was on screen (docs/audit/2026-09-07-blog-language.md).
+ *
+ * So these tests hold the editor to saying it: the strip is labelled, each
+ * tab carries the state of its own version, the insert names the language it
+ * landed in, switching keeps every unsaved word, and leaving asks first.
+ */
+const langState = (page: Page, attr: string, code: string) =>
+  page.locator(`[${attr}="${code}"] [data-langst]`);
+
+test.describe("blog — which language am I writing", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(215) });
+
+  test("the strip says it is the post's language, each tab says what that version holds, and a product row names the text it went into", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    const st = (code: string) => langState(page, "data-admbloglang", code);
+    await openAdmin(page);
+    await tab(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    const box = page.locator("[data-blogbody]");
+    await expect(box).toBeVisible();
+
+    // the strip names itself — it used to be three bare words and an aria-label
+    await expect(page.locator(".adm-langbar__l").first()).toHaveText("Язык статьи");
+    await expect(page.locator(".adm-langbar__n").first(), "the strip never says it is not the panel's language")
+      .toContainText("а не язык панели");
+
+    // an untouched post: three empty versions
+    for (const code of ["RU", "ET", "EN"]) await expect(st(code)).toHaveText("пусто");
+
+    await page.locator('[data-blogf="title"]').fill("Почему зудит борода");
+    await box.click();
+    await page.keyboard.type("Русский текст статьи.");
+    await expect(st("RU"), "the tab still calls a written Russian version empty").toContainText("готово");
+    await expect(st("RU")).toContainText("без товаров");
+    await expect(st("ET")).toHaveText("пусто");
+
+    // the English version, written the way the translator writes it
+    await page.locator('[data-admbloglang="EN"]').click();
+    await page.locator('[data-blogf="title"]').fill("Why a beard itches");
+    await box.click();
+    await page.keyboard.type("English body of the article.");
+    await page.locator('[data-admbloglang="RU"]').click();
+
+    /* ---- the insert that started all this ------------------------------- */
+    await box.click();
+    await page.keyboard.press("End");
+    await page.locator('[data-blogrt="product"]').click();
+    await page.locator("[data-blogtoolq]").fill(PRODUCT.id);
+    await page.locator(`[data-blogtoolpick="${PRODUCT.id}"]`).click();
+    await expect(box.locator(`a[data-product="${PRODUCT.id}"]`)).toBeVisible();
+    expect(await toastText(page), "the insert never said which language it went into")
+      .toContain("русский текст статьи");
+    await clearToast(page);
+
+    // …and from now on the strip carries the answer, on every tab
+    await expect(st("RU")).toContainText("с товарами");
+    await expect(st("EN"), "the English version claims a product card it does not have")
+      .toContainText("без товаров");
+
+    // pressing «English» is still the same click — it just cannot mislead now
+    await page.locator('[data-admbloglang="EN"]').click();
+    expect(await box.locator("a[data-product]").count(), "the English body has a card in it").toBe(0);
+    await expect(page.locator(".adm-langbar__n").first()).toContainText("английскую версию");
+    await expect(st("RU"), "the Russian version's card is not visible from the English tab")
+      .toContainText("с товарами");
+
+    await assertClean(page, w, "the blog editor's language strip");
+  });
+
+  test("switching language keeps every unsaved word, and leaving without saving asks first", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await tab(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    const box = page.locator("[data-blogbody]");
+    await expect(box).toBeVisible();
+    const dirty = page.locator("[data-blogdirty]");
+    await expect(dirty, "a post nobody has touched says it has unsaved changes").toBeHidden();
+
+    await page.locator('[data-blogf="title"]').fill("Черновик о бороде");
+    await box.click();
+    await page.keyboard.type("Первый абзац по-русски.");
+    await expect(dirty, "typing into the body never says it is unsaved").toBeVisible();
+
+    // ET and back — nothing typed is lost, and it still says so
+    await page.locator('[data-admbloglang="ET"]').click();
+    await expect(box).toHaveText("");
+    await page.locator('[data-admbloglang="RU"]').click();
+    await expect(box, "switching language lost the unsaved Russian text").toContainText("Первый абзац по-русски.");
+    await expect(page.locator('[data-blogf="title"]')).toHaveValue("Черновик о бороде");
+    await expect(dirty).toBeVisible();
+
+    /* ---- leaving, which really does drop it ------------------------------ */
+    await page.locator("[data-admblogback]").click();
+    await expect(page.locator("[data-admblogbackyes]"), "the editor let unsaved work go without a word").toBeVisible();
+    await page.locator("[data-admblogbackno]").click();
+    await expect(box, "«Остаться» threw the text away anyway").toContainText("Первый абзац по-русски.");
+
+    await page.locator("[data-admblogsave]").click();
+    await expect(dirty, "a saved post still says it has unsaved changes").toBeHidden();
+    await clearToast(page);
+    // …and now the door is open again, no question asked
+    await page.locator("[data-admblogback]").click();
+    await expect(page.locator("[data-admblognew]")).toBeVisible();
+
+    await assertClean(page, w, "unsaved blog work");
+  });
+
+  test("the panel's own language changes the panel, never which body is being edited", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    const st = (code: string) => langState(page, "data-admbloglang", code);
+    await openAdmin(page);
+    await tab(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    const box = page.locator("[data-blogbody]");
+    await expect(box).toBeVisible();
+    await page.locator('[data-blogf="title"]').fill("Про бороду");
+    await box.click();
+    await page.keyboard.type("Русский текст.");
+
+    await page.locator('.adm-side [data-lang="EN"]').click();
+    await expect(page.locator(".adm-langbar__l").first(), "the strip's label did not follow the panel")
+      .toHaveText("Post language");
+    // the tab names are endonyms — a language names itself in any panel
+    await expect(page.locator('[data-admbloglang="RU"] .adm-seg__nm')).toHaveText("Русский");
+    await expect(page.locator('[data-admbloglang="RU"]'), "the panel's language moved the post's language")
+      .toHaveAttribute("aria-current", "true");
+    await expect(box, "an English panel swapped the body under the owner").toContainText("Русский текст.");
+    await expect(st("RU")).toContainText("ready");
+    await expect(page.locator(".adm-langbar__n").first()).toContainText("You are editing the Russian version");
+
+    await page.locator('.adm-side [data-lang="RU"]').click();
+    await assertClean(page, w, "the blog editor on an English panel");
+  });
+
+  test("the letters editor opens on Russian even when the panel is in English, and says what the other two hold", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    await openAdmin(page);
+    await page.locator('.adm-side [data-lang="EN"]').click();
+    await tab(page, "mail");
+    await page.locator("[data-mailtpl]").first().click();
+    await expect(page.locator('[data-maillang="RU"]'), "an English panel picked the English letter to edit")
+      .toHaveAttribute("aria-current", "true");
+    await expect(page.locator(".adm-langbar__l").first()).toHaveText("Letter language");
+    await expect(langState(page, "data-maillang", "ET")).toHaveText("the standard text");
+    await page.locator('.adm-side [data-lang="RU"]').click();
+    await assertClean(page, w, "the letters editor on an English panel");
+  });
+});
