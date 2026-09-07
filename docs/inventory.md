@@ -300,9 +300,25 @@ full reasoning — read it before changing any of the derivation logic.
   ref?}` (absolute, via `setQty()`); `actor` is always `"admin"` here.
 - `GET /api/admin/inventory/lookup/?ean=<code>` — `byEan()`, the scanner's hit.
 - `POST /api/admin/pos-orders/` — `{items, customer?, payment:{method}, discountPercent?}`.
-  Creates the order (`channel:'pos'`), marks it paid (`setOrderPayment` +
-  `setOrderStatus`), decrements stock per line (`reason:'sale_pos'`, best
-  effort — the sale already happened in the room).
+  Creates the order (`channel:'pos'`), records the method, then **settles it
+  through the same door a card payment goes through** — `settlePayment()` in
+  `src/lib/payments/settle.ts` (07.09.2026; it used to write the status by hand
+  and skip everything that hangs off the paid transition). So a salon sale now
+  earns loyalty points, writes the `purchase` row «Аналитика» counts, and sends
+  «Заказ принят» when the cashier typed an e-mail — the register screen says
+  «чек ушёл на почту» only when the server really did. Stock is still
+  decremented per line as `reason:'sale_pos'`, not `'sale_web'`: that is what
+  the `decrementStock` dependency handed to `settlePayment()` is for, and it is
+  what keeps «Склад → Продажа в салоне» meaningful. Answers
+  `{ok, orderId, number, total, mailed}`. Best effort throughout — the sale
+  already happened in the room, so a mail outage or a stock hiccup must never
+  turn into a failure on the register screen.
+  - The typed e-mail is also matched against the customer cards: a card that
+    already exists is stamped onto the order (`customer_id`, `pricing_tier:
+    'retail'`) so the points land somewhere. It is **never** passed to
+    `createOrder()` as the pricing context — that would silently switch a
+    partner salon's own purchase to pro prices, and the register charges what
+    its chips say. No card is ever created from the till.
 - `GET /api/admin/pos-orders/<id>/receipt/?lang=` — a standalone, trilingual,
   print-ready HTML page (own `<style>`, no admin chrome), `window.print()`
   button. `<id>` is the uuid or the order number, same convention as
@@ -707,8 +723,12 @@ drift apart.
 - `e2e/scanner-app.spec.ts` — ten scenarios end to end on a phone viewport;
   see docs/testing.md § "The scanner app".
 - `tests/pos-orders.test.ts` — the POS route (admin auth, `channel:'pos'`,
-  no-e-mail order, stock decrement, discount-percent-as-discount-code) and
-  the receipt route (auth, content, 404 on an unknown order).
+  no-e-mail order, stock decrement, discount-percent-as-discount-code), the
+  settlement it now goes through (points earned, the `purchase` row, the
+  «Заказ принят» letter, `sale_pos` and never `sale_web`, and a walk-in with
+  neither e-mail nor customer card still going through) and the receipt route
+  (auth, content, 404 on an unknown order). `e2e/salon-sale.spec.ts` walks the
+  cashier's own path for the same thing.
 - `tests/assistant-actions.test.ts` — `stock_adjust`/`stock_set` sanitizing.
 - `tests/helpers.ts`'s shared `truncateAll()` now also wipes
   `stock_levels`/`stock_moves`, and carries `cascade` — needed once

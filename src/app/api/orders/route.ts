@@ -72,7 +72,16 @@ export async function POST(req: Request) {
        payment page. Absent on every other order. */
     const inv = order.invoice;
     const invoice = inv && typeof inv.number === "string"
-      ? { number: inv.number, dueAt: String(inv.dueAt ?? ""), dueDays: Number(inv.dueDays) || 7, email: String(inv.email ?? order.email) }
+      ? {
+          number: inv.number,
+          dueAt: String(inv.dueAt ?? ""),
+          dueDays: Number(inv.dueDays) || 7,
+          email: String(inv.email ?? order.email),
+          /* Whether the letter really left. A blank IBAN blocks the send
+             (src/lib/invoices.ts invoiceSendBlock) and so does a mail outage;
+             the receipt must not say «Счёт отправлен на …» when nothing was. */
+          sent: !!inv.sentAt,
+        }
       : undefined;
     return Response.json(
       { ok: true, orderId: order.id, number: order.number, total: order.total, ...(invoice ? { invoice } : {}) },

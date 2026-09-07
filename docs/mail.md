@@ -1,4 +1,4 @@
-# Customer e-mail — Resend, five templates, three languages
+# Customer e-mail — Resend, ten templates, three languages
 
 Everything the shop sends to a customer goes through one function
 (`sendMail`) and one renderer per letter. No SDK: Resend's REST API over
@@ -17,7 +17,7 @@ log.
 |---|---|
 | `src/lib/mail.ts` | `sendMail()` — Resend REST, one retry on 5xx, never throws |
 | `src/lib/mail-hooks.ts` | `onOrderCreated` / `onOrderPaid` / `onOrderShipped` |
-| `src/emails/*.ts` | the five renderers → `{ subject, html, text }` |
+| `src/emails/*.ts` | one renderer per letter → `{ subject, html, text }` |
 | `src/emails/layout.ts` | shared shell, palette, dark-mode CSS, money/URL helpers |
 | `src/emails/common.ts` | customer name, item table, delivery line, totals |
 | `src/emails/texts.ts` | the owner's own subject / intro / closing line — see below |
@@ -111,12 +111,20 @@ Each returns `{ ok, skipped?, reason?, id?, notified? }`. Callers may ignore it.
 Sends carry an idempotency key derived from the order number, so a payment
 webhook delivered twice does not send the letter twice.
 
+**A salon sale is one of these too** (07.09.2026). `POST /api/admin/pos-orders/`
+used to mark the order paid by hand and therefore never reached `onOrderPaid`;
+it now settles through `settlePayment()` like a card payment, so a till sale
+with an e-mail in the box gets «Заказ принят» — and the register screen says
+«чек ушёл на почту» only when the server really sent it. A walk-in with no
+address is `{ skipped: true, reason: "no_customer_email" }`, exactly as it was.
+See docs/inventory.md and `tests/pos-orders.test.ts`.
+
 The order shape is `db/migrations/001_core.sql` / `mapOrder()` in
 `src/lib/orders.ts`. Both the snake_case row and the camelCase mapped object
 are accepted, and every field is optional: a guest checkout with no name, no
 variant and a jsonb address still renders a correct letter.
 
-## The five letters
+## The letters
 
 | id | Renderer | Kind |
 |---|---|---|
@@ -127,6 +135,41 @@ variant and a jsonb address still renders a correct letter.
 | `birthday` | `renderBirthday(customer, lang, code)` | marketing — unsubscribe link |
 | `login-code` | `renderLoginCode(code, lang, {minutes})` | service — the account sign-in code (docs/flows.md) |
 | `partner-welcome` | `renderPartnerWelcome(customer, lang, {percent, company})` | service — «Цены для салонов включены», sent by `src/lib/partner-mail.ts` when the owner makes a customer a partner (docs/loyalty.md) |
+| `invoice` | `renderInvoice(order, {invoice, seller, totals}, lang)` | service — «Счёт на оплату» with the PDF attached, sent by `src/lib/invoices.ts` (docs/payments.md § 10) |
+| `invoice-reminder` | `renderInvoiceReminder(order, {invoice, seller, totals, cancelAt?, overdue?}, lang)` | service — the one reminder before the due date, the PDF again |
+| `invoice-cancelled` | `renderInvoiceCancelled(order, {invoice, totals}, lang)` | service — the order was closed because nobody paid |
+
+### The three invoice letters
+
+They belong to «По счёту — для компаний» and are described end to end in
+docs/payments.md § 10. In mail terms:
+
+- They go to the **invoice e-mail** (`orders.invoice.email` — the bookkeeper's
+  address the checkout asked for), not to `order.email`, and in the order's own
+  language.
+- They are **not owner-editable**. `settings.mail_texts` covers the seven
+  letters above; an invoice's wording is bound to the numbers printed in it, so
+  it is not in `MAIL_TEXT_TEMPLATES` (src/emails/texts.ts) and not in the
+  «Письма» list. All three are in `TEMPLATE_IDS`, so the admin preview and the
+  «отправить тест» button can render them.
+- `invoice` and `invoice-reminder` carry the **same PDF** as an attachment,
+  `rempire-invoice-<номер>.pdf` (src/lib/invoice-pdf.ts). The attachment is
+  best effort in both: a missing font costs the file, never the letter.
+- **A blank IBAN blocks the send.** `invoiceSendBlock()` in `src/lib/invoices.ts`
+  refuses before anything is rendered, and `invoice.sendError` is set to
+  `no_iban`; the admin order card says so in words and offers «Отправить счёт
+  ещё раз», and the shopper's receipt says «Счёт выписан — пришлём его на …»
+  instead of claiming it was sent. This is the one condition under which the
+  shop deliberately does not write to a customer: an invoice with nowhere to
+  pay it is worse than no invoice.
+- Idempotency keys: `invoice:<номер>` on the first send, `invoice:<номер>:<ms>`
+  on a deliberate resend, `invoice-reminder:<номер>` and
+  `invoice-cancelled:<номер>` for the two automatic ones — so the daily cron
+  running twice cannot mail a bookkeeper twice, and neither can Resend.
+
+The reminder and the cancellation are sent by `src/lib/invoice-dunning.ts` from
+the daily cron, not by a hook; the intervals are settings («Настройки → О
+компании → Счета для компаний»).
 
 `lang` accepts anything the row carries — `"RU"`, `"et-EE"`, `"ee"`, `null` —
 and normalises to `ru` / `et` / `en`, Russian being the fallback. Subject,

@@ -2,7 +2,11 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
+import { recordLogin } from "@/lib/customers";
+import { query } from "@/lib/db";
 import { getLevel, listMoves, move } from "@/lib/inventory";
+import { getLoyaltyBalance } from "@/lib/loyalty";
+import { capturedMail } from "@/lib/mail";
 import { getOrder } from "@/lib/orders";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
@@ -153,5 +157,118 @@ describe("GET /api/admin/pos-orders/<id>/receipt", () => {
       params: Promise.resolve({ id: "R-999999" }),
     });
     expect(res.status).toBe(404);
+  });
+});
+
+/**
+ * Since 07.09.2026 a salon sale is settled through the same door a card
+ * payment goes through (src/lib/payments/settle.ts settlePayment), so
+ * everything that used to be skipped now happens: the loyalty points, the
+ * `purchase` row «Аналитика» counts, and the «Заказ принят» letter when the
+ * cashier typed an address. What must NOT change is the shelf reason — a till
+ * sale is 'sale_pos', never 'sale_web' — and the fact that a walk-in with no
+ * e-mail and no customer card still goes through without a murmur.
+ */
+describe("a salon sale is settled, not just marked paid", () => {
+  let admin = "";
+  const savedEnv: Record<string, string | undefined> = {};
+  const ENV = ["RESEND_API_KEY", "E2E_BOOTSTRAP"] as const;
+
+  beforeAll(async () => {
+    process.env.SESSION_SECRET = TEST_SECRET;
+    process.env.ADMIN_PASSWORD_HASH = hashPassword("a long enough password");
+    for (const k of ENV) savedEnv[k] = process.env[k];
+    delete process.env.RESEND_API_KEY; // every send is skipped and recorded by the sink
+    process.env.E2E_BOOTSTRAP = "1";
+    await setupDb();
+    admin = `${ADMIN_COOKIE}=${makeSessionToken()}`;
+  });
+  afterAll(async () => {
+    for (const k of ENV) {
+      if (savedEnv[k] === undefined) delete process.env[k];
+      else process.env[k] = savedEnv[k];
+    }
+    await teardownDb();
+  });
+  beforeEach(async () => {
+    resetRateLimits();
+    await truncateAll();
+    (globalThis as unknown as { __rempireMailSink?: unknown[] }).__rempireMailSink = [];
+  });
+
+  async function sell(body: unknown) {
+    const { POST } = await import("@/app/api/admin/pos-orders/route");
+    const res = await POST(post("/api/admin/pos-orders/", body, admin));
+    expect(res.status).toBe(201);
+    return (await res.json()) as { orderId: string; number: string; total: number; mailed: boolean };
+  }
+
+  async function purchaseEvents(orderId: string) {
+    return query<{ id: number }>("select id from events where type = 'purchase' and product_id = $1", [orderId]);
+  }
+
+  it("earns points, records the purchase and mails the customer who gave an address", async () => {
+    const email = "salon-regular@example.com";
+    const customer = await recordLogin(email, "RU");
+    await move({ productId: product.id, delta: 10, reason: "goods_in" });
+
+    const body = await sell({
+      items: [{ id: product.id, qty: 2 }],
+      customer: { email },
+      payment: { method: "terminal" },
+    });
+    expect(body.mailed).toBe(true);
+
+    const order = (await getOrder(body.orderId))!;
+    expect(order.status).toBe("paid");
+    expect(order.channel).toBe("pos");
+    // the method the cashier pressed survives the settlement's own blob
+    expect(order.payment).toMatchObject({ provider: "pos", method: "terminal", status: "paid" });
+    // tied to the customer card, and charged retail — the register's own prices
+    expect(order.customerId).toBe(customer.id);
+    expect(order.pricingTier).toBe("retail");
+
+    // the three things the old path skipped
+    expect(await getLoyaltyBalance(customer.id)).toBeGreaterThan(0);
+    expect(await purchaseEvents(order.id)).toHaveLength(1);
+    const letters = capturedMail().filter((m) => m.template === "order-confirmed");
+    expect(letters).toHaveLength(1);
+    expect(letters[0].to).toEqual([email]);
+
+    // and the one thing that must not change: the shelf reason
+    expect((await getLevel(product.id, ""))?.qty).toBe(8);
+    const moves = await listMoves({ productId: product.id, reason: "sale_pos" });
+    expect(moves).toHaveLength(1);
+    expect(moves[0].ref).toBe(order.number);
+    expect(await listMoves({ productId: product.id, reason: "sale_web" })).toHaveLength(0);
+  });
+
+  it("settles a walk-in with no e-mail and no customer card just the same", async () => {
+    await move({ productId: product.id, delta: 5, reason: "goods_in" });
+    const body = await sell({ items: [{ id: product.id, qty: 1 }], payment: { method: "cash" } });
+    expect(body.mailed).toBe(false);
+
+    const order = (await getOrder(body.orderId))!;
+    expect(order.status).toBe("paid");
+    expect(order.email).toBe("");
+    expect(order.customerId).toBeNull();
+    // the revenue row is written for a walk-in too — it is the shop's takings
+    expect(await purchaseEvents(order.id)).toHaveLength(1);
+    expect(capturedMail().filter((m) => m.template === "order-confirmed")).toHaveLength(0);
+    expect((await getLevel(product.id, ""))?.qty).toBe(4);
+  });
+
+  it("does not invent a customer card for an address nobody has signed up with", async () => {
+    const body = await sell({
+      items: [{ id: product.id, qty: 1 }],
+      customer: { email: "never-seen-before@example.com" },
+      payment: { method: "cash" },
+    });
+    const order = (await getOrder(body.orderId))!;
+    expect(order.customerId).toBeNull();
+    expect(await query("select id from customers where email = 'never-seen-before@example.com'")).toHaveLength(0);
+    // the letter still goes — the address was typed for exactly that
+    expect(body.mailed).toBe(true);
+    expect(capturedMail().filter((m) => m.template === "order-confirmed")).toHaveLength(1);
   });
 });

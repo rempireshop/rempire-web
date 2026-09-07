@@ -21,6 +21,8 @@ import {
   renderBirthday,
   renderGiftCard,
   renderInvoice,
+  renderInvoiceCancelled,
+  renderInvoiceReminder,
   renderLoginCode,
   renderOrderConfirmed,
   renderOrderShipped,
@@ -269,6 +271,31 @@ export function renderSample(template: TemplateId, lang: Lang): RenderedEmail {
         const order = sampleOrder(lang);
         const total = Number(order.total) || 0;
         return renderInvoice({ ...order, status: "new" }, demoInvoice(total), lang);
+      }
+      case "invoice-reminder": {
+        // the same invoice two days before it runs out, auto-cancel a week later
+        const order = sampleOrder(lang);
+        const d = demoInvoice(Number(order.total) || 0);
+        return renderInvoiceReminder(
+          { ...order, status: "new" },
+          {
+            invoice: { number: d.invoice.number, dueAt: d.invoice.dueAt },
+            seller: { name: d.seller.name, iban: d.seller.iban, bankName: d.seller.bankName },
+            totals: { total: d.totals.total },
+            cancelAt: "2026-09-20",
+          },
+          lang,
+        );
+      }
+      case "invoice-cancelled": {
+        // …and the same invoice a week after it ran out, with nothing owed
+        const order = sampleOrder(lang);
+        const d = demoInvoice(Number(order.total) || 0);
+        return renderInvoiceCancelled(
+          { ...order, status: "cancelled" },
+          { invoice: { number: d.invoice.number, dueAt: d.invoice.dueAt }, totals: { total: d.totals.total } },
+          lang,
+        );
       }
     }
     throw new Error(`unknown template ${String(template)}`);

@@ -258,10 +258,19 @@
       "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "Tellimus on juba täielikult kaetud kinkekaardi või punktidega — valige teine makseviis",
       "Заполните данные фирмы для счёта": "Täitke ettevõtte andmed arve jaoks",
       "Счёт отправлен на": "Arve on saadetud aadressile", "Счёт отправлен на почту.": "Arve on saadetud e-postile.",
+      /* …and the honest halves of the same two sentences: a blank IBAN blocks
+         the send (src/lib/invoices.ts invoiceSendBlock), so the receipt says
+         the invoice was issued rather than that it was sent */
+      "Счёт выписан — пришлём его на": "Arve on koostatud — saadame selle aadressile",
+      "Счёт выписан — пришлём его на почту.": "Arve on koostatud — saadame selle e-postile.",
       /* …and the owner's side of it: «Заказы», the card, «Настройки → О компании» */
       "Счёт просрочен": "Arve on üle tähtaja", "Ждёт оплаты по счёту": "Ootab arve tasumist",
       "счёт просрочен": "arve on üle tähtaja", "счёта просрочены": "arvet on üle tähtaja", "счетов просрочены": "arvet on üle tähtaja",
-      "По счёту": "Arvega", "Отметить оплаченным": "Märgi makstuks", "Отметить оплаченным?": "Märkida makstuks?",
+      /* «По счёту» and «Отметить оплаченным?» already have their entries in the
+         order-card and confirm-card blocks below — a second copy of a key here
+         only made the i18n report warn about a duplicate that always won with
+         the same value. */
+      "Отметить оплаченным": "Märgi makstuks",
       "Скачать счёт": "Laadi arve alla", "Отправить счёт ещё раз": "Saada arve uuesti",
       "Заказ ждёт оплаты по счёту — отправлять пока нечего. Когда деньги придут на счёт, нажмите «Отметить оплаченным»: клиенту уйдёт письмо «Заказ принят», а заказ встанет в очередь на отправку.": "Tellimus ootab arve tasumist — saata pole veel midagi. Kui raha on kontole laekunud, vajutage «Märgi makstuks»: kliendile läheb kiri «Tellimus vastu võetud» ja tellimus läheb saatmisjärjekorda.",
       "Заказ отменён — оплату не отметить": "Tellimus on tühistatud — makset ei saa märkida",
@@ -277,6 +286,22 @@
       "Без IBAN и банка в счёте не будет реквизитов для оплаты.": "Ilma IBAN-i ja pangata pole arvel makserekvisiite.",
       "Префикс номера": "Numbri prefiks", "Срок оплаты, дней": "Maksetähtaeg, päeva",
       "От 1 до 60. Столько дней касса обещает компании на перевод.": "1 kuni 60. Nii mitu päeva lubab kassa ettevõttele ülekandeks.",
+      /* напоминание и автоотмена — «Счета для компаний», src/lib/invoice-dunning.ts */
+      "Напомнить за, дней до срока": "Meelde tuletada, päeva enne tähtaega",
+      "Письмо с тем же счётом уйдёт ещё раз. 0 — не напоминать.": "Sama arvega kiri läheb veel kord välja. 0 — ära tuleta meelde.",
+      "Отменить через, дней после срока": "Tühistada, päeva pärast tähtaega",
+      "Заказ закроется сам, товар вернётся в продажу, компании уйдёт письмо. 0 — не отменять.": "Tellimus sulgub ise, kaup läheb tagasi müüki, ettevõttele läheb kiri. 0 — ära tühista.",
+      "Считает раз в сутки. Оплаченный счёт не трогает никогда — даже если вы отметили оплату уже после срока.": "Käib läbi kord ööpäevas. Makstud arvet ei puuduta kunagi — ka siis, kui märkisite makse alles pärast tähtaega.",
+      "Напоминание — от 0 до 30 дней": "Meeldetuletus — 0 kuni 30 päeva",
+      "Отмена — от 0 до 90 дней": "Tühistamine — 0 kuni 90 päeva",
+      "Счета для компаний: напоминание выключено": "Ettevõtete arved: meeldetuletus välja lülitatud",
+      "Счета для компаний: автоотмена выключена": "Ettevõtete arved: automaatne tühistamine välja lülitatud",
+      /* нет IBAN — письмо не уходит вовсе: карточка заказа, «Сделать сегодня», сама карточка настроек */
+      "Заполните IBAN — счета не уходят": "Täitke IBAN — arved ei lähe välja",
+      "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»": "Ettevõte ootab arvet, aga tasuda pole kuhu: «Ettevõttest → Ettevõtte andmed»",
+      "Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».": "Arve on saatmata: «Ettevõtte andmetes» pole IBAN-i. Täitke see jaotises «Seaded → Ettevõttest» ja vajutage «Saada arve uuesti».",
+      "Без IBAN счёт не уходит вообще.": "Ilma IBAN-ita arve üldse välja ei lähe.",
+      "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо. Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Täitke IBAN ülal olevas plokis «Ettevõtte andmed» — ilma pangakonto numbrita pole arvet kuhugi tasuda, seepärast pood sellist kirja välja ei saada. Täitke ja vajutage tellimuses «Saada arve uuesti».",
       "Банк": "Pank", "банк": "pank", "Печатается в счёте рядом с IBAN.": "Trükitakse arvele IBAN-i kõrvale.",
       "Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — условия продажи, возврат, конфиденциальность — и в счета для компаний.": "Need andmed lähevad poe jalusesse, lehele «Kontakt», õigustekstidesse — müügitingimused, tagastamine, privaatsus — ja ettevõtete arvetele.",
       "Самовывоз — Mardi 1, Таллинн": "Järeletulek — Mardi 1, Tallinn",
@@ -1512,8 +1537,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "Nuppudel olevad hinnad lähevad tšekile. Salongi allahindlus märgitakse ostukorvis protsendina.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Praegu tühi — leidke toode vasakult või skaneerige triipkood.",
       "Почта клиента": "Kliendi e-post",
-      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
-        "Ostja pole kohustuslik. Tšeki avab tellimuses link «Tšekk ↗» — kirjaga seda ei saadeta.",
+      "Покупатель не обязателен. Укажете почту — на неё уйдёт письмо о покупке, а баллы лягут на карточку клиента. Чек для печати открывается ссылкой «Чек ↗» в заказе.":
+        "Ostja pole kohustuslik. Kui märgite e-posti, läheb sellele ostukiri ja punktid lähevad kliendikaardile. Prinditava tšeki avab tellimuses link «Tšekk ↗».",
       "Ничего не найдено": "Midagi ei leitud",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -2059,10 +2084,13 @@
       "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "The order is already fully covered by a gift card or points — choose another payment method",
       "Заполните данные фирмы для счёта": "Fill in the company details for the invoice",
       "Счёт отправлен на": "The invoice has been sent to", "Счёт отправлен на почту.": "The invoice has been sent by e-mail.",
+      "Счёт выписан — пришлём его на": "The invoice has been issued — we will send it to",
+      "Счёт выписан — пришлём его на почту.": "The invoice has been issued — we will send it by e-mail.",
       /* …and the owner's side of it: «Заказы», the card, «Настройки → О компании» */
       "Счёт просрочен": "Invoice overdue", "Ждёт оплаты по счёту": "Awaiting invoice payment",
       "счёт просрочен": "invoice overdue", "счёта просрочены": "invoices overdue", "счетов просрочены": "invoices overdue",
-      "По счёту": "By invoice", "Отметить оплаченным": "Mark as paid", "Отметить оплаченным?": "Mark as paid?",
+      /* same two duplicates as on the ET side — the entries live below */
+      "Отметить оплаченным": "Mark as paid",
       "Скачать счёт": "Download the invoice", "Отправить счёт ещё раз": "Send the invoice again",
       "Заказ ждёт оплаты по счёту — отправлять пока нечего. Когда деньги придут на счёт, нажмите «Отметить оплаченным»: клиенту уйдёт письмо «Заказ принят», а заказ встанет в очередь на отправку.": "The order is waiting for the invoice to be paid — nothing to ship yet. When the money is on the account, press “Mark as paid”: the customer gets the “Order confirmed” letter and the order joins the shipping queue.",
       "Заказ отменён — оплату не отметить": "The order is cancelled — the payment cannot be recorded",
@@ -2078,6 +2106,20 @@
       "Без IBAN и банка в счёте не будет реквизитов для оплаты.": "Without the IBAN and the bank the invoice has no payment details on it.",
       "Префикс номера": "Number prefix", "Срок оплаты, дней": "Payment term, days",
       "От 1 до 60. Столько дней касса обещает компании на перевод.": "1 to 60. How many days the checkout promises a company for the transfer.",
+      "Напомнить за, дней до срока": "Remind, days before the due date",
+      "Письмо с тем же счётом уйдёт ещё раз. 0 — не напоминать.": "The same invoice goes out once more. 0 — no reminder.",
+      "Отменить через, дней после срока": "Cancel, days after the due date",
+      "Заказ закроется сам, товар вернётся в продажу, компании уйдёт письмо. 0 — не отменять.": "The order closes itself, the goods go back on sale and the company gets a letter. 0 — never cancel.",
+      "Считает раз в сутки. Оплаченный счёт не трогает никогда — даже если вы отметили оплату уже после срока.": "Runs once a day. A paid invoice is never touched — not even when you marked the payment after the due date.",
+      "Напоминание — от 0 до 30 дней": "The reminder — from 0 to 30 days",
+      "Отмена — от 0 до 90 дней": "Cancellation — from 0 to 90 days",
+      "Счета для компаний: напоминание выключено": "Company invoices: the reminder is off",
+      "Счета для компаний: автоотмена выключена": "Company invoices: automatic cancellation is off",
+      "Заполните IBAN — счета не уходят": "Fill in the IBAN — invoices are not going out",
+      "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»": "A company is waiting for an invoice with nowhere to pay it: «About the company → Details»",
+      "Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».": "The invoice was not sent: there is no IBAN in «Details». Fill it in under «Settings → About the company» and press “Send the invoice again”.",
+      "Без IBAN счёт не уходит вообще.": "Without an IBAN the invoice does not go out at all.",
+      "Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, поэтому магазин не отправляет такое письмо. Заполните и нажмите в заказе «Отправить счёт ещё раз».": "Fill in the IBAN in the «Details» block above — an invoice with no bank account number on it cannot be paid, so the shop does not send that letter. Fill it in, then press “Send the invoice again” on the order.",
       "Банк": "Bank", "банк": "bank", "Печатается в счёте рядом с IBAN.": "Printed on the invoice next to the IBAN.",
       "Эти данные подставляются в подвал магазина, на страницу «Контакты», в правовые тексты — условия продажи, возврат, конфиденциальность — и в счета для компаний.": "These details go into the shop's footer, the “Contacts” page, the legal texts — terms of sale, returns, privacy — and the company invoices.",
       "Самовывоз — Mardi 1, Таллинн": "Pickup — Mardi 1, Tallinn",
@@ -3309,8 +3351,8 @@
       "Цены в чипах — те, что уйдут в чек. Салонная скидка ставится процентом в корзине.": "The prices on the chips are the ones that reach the receipt. The salon discount is set as a percentage in the cart.",
       "Пока пусто — найдите товар слева или отсканируйте штрихкод.": "Empty for now — find a product on the left or scan a barcode.",
       "Почта клиента": "Customer e-mail",
-      "Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.":
-        "The customer is optional. The receipt opens from the “Receipt ↗” link on the order — it is not e-mailed.",
+      "Покупатель не обязателен. Укажете почту — на неё уйдёт письмо о покупке, а баллы лягут на карточку клиента. Чек для печати открывается ссылкой «Чек ↗» в заказе.":
+        "The customer is optional. Give an e-mail and the purchase letter goes there, and the points land on the customer's card. The printable receipt opens from the “Receipt ↗” link on the order.",
       "Ничего не найдено": "Nothing found",
       /* ---- админка, этап 3: «Клиенты», «Маркетинг», «Блог», «Аналитика»,
          «Подключения», «Настройки» ---- */
@@ -3979,6 +4021,10 @@
         EN: "$1 — $2\nThe product disappears from the shop — the catalogue, search and the cart. Put it back right here in «Products» or from the log." }],
     [/^(\d+) поз\. · (.+) · остатки списаны$/,
       { ET: "$1 rida · $2 · jäägid maha kantud", EN: "$1 lines · $2 · stock written off" }],
+    // the same line when the sale carried an e-mail and the letter really went
+    [/^(\d+) поз\. · (.+) · остатки списаны · чек ушёл на почту$/,
+      { ET: "$1 rida · $2 · jäägid maha kantud · tšekk läks e-postile",
+        EN: "$1 lines · $2 · stock written off · the receipt went by e-mail" }],
     /* the confirm card before a salon sale — one pre-line block, so the whole
        thing is one text node (same shape as the shipping confirm above) */
     [/^([\s\S]+)\n\nИтого (.+) · (.+)$/, { ET: "$1\n\nKokku $2 · $3", EN: "$1\n\nTotal $2 · $3" }],
@@ -4025,6 +4071,11 @@
     [/^Счёт (.+) \((.+)\): отправлен ещё раз$/, { ET: "Arve $1 ($2): saadetud uuesti", EN: "Invoice $1 ($2): sent again" }],
     [/^Счета для компаний: префикс «(.*)», срок оплаты (\d+) (?:день|дня|дней)$/,
       { ET: "Ettevõtete arved: prefiks «$1», maksetähtaeg $2 päeva", EN: "Company invoices: prefix “$1”, payment term $2 days" }],
+    // …and the two dunning intervals, each logged only when it actually moved
+    [/^Счета для компаний: напоминание за (\d+) дн\. до срока$/,
+      { ET: "Ettevõtete arved: meeldetuletus $1 p enne tähtaega", EN: "Company invoices: a reminder $1 d before the due date" }],
+    [/^Счета для компаний: автоотмена через (\d+) дн\. после срока$/,
+      { ET: "Ettevõtete arved: automaatne tühistamine $1 p pärast tähtaega", EN: "Company invoices: automatic cancellation $1 d after the due date" }],
     [/^Например: (.+)-0001$/, { ET: "Näiteks: $1-0001", EN: "For example: $1-0001" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
@@ -9768,7 +9819,7 @@
         var invEmail = inv.email || invoiceEmail();
         clearOrderState();
         S.paying = false;
-        S.done = { status: "invoice", number: res.body.number || "", email: invEmail, dueDays: Number(inv.dueDays) || invoiceDueDays(), invoice: inv.number || "" };
+        S.done = { status: "invoice", number: res.body.number || "", email: invEmail, dueDays: Number(inv.dueDays) || invoiceDueDays(), invoice: inv.number || "", sent: inv.sent !== false };
         go("done");
         // a reload of the receipt keeps the order number and the state, like a bank's return
         try { history.replaceState(history.state, "", pathFor() + "?n=" + encodeURIComponent(S.done.number) + "&s=invoice"); } catch (e) {}
@@ -10524,9 +10575,15 @@
     var revN = o ? o.attention.reviewsPending : 0;
     var proN = o ? o.attention.proRequests : 0;
     // «По счёту»: invoices past their due date are the owner's to chase
-    var overdue = admInvoicesWaiting().filter(function (v) { return v.overdue; });
+    var waiting = admInvoicesWaiting();
+    var overdue = waiting.filter(function (v) { return v.overdue; });
     var overN = overdue.length;
-    var taskN = shipN + lowN + revN + proN + overN;
+    /* The one setting whose absence silently stops a letter: with no IBAN the
+       invoice cannot be sent at all (src/lib/invoices.ts invoiceSendBlock), so
+       the moment a company is actually waiting for one, this belongs on the
+       first screen of the panel and not only inside «О компании». */
+    var noIban = waiting.length > 0 && !contentConf().company.iban;
+    var taskN = shipN + lowN + revN + proN + overN + (noIban ? 1 : 0);
 
     var names = function (list, get) { return list.slice(0, 4).map(get).filter(Boolean).join(" · "); };
     var tasks = "";
@@ -10534,6 +10591,10 @@
       pl(shipN, "заказ ждёт отправки", "заказа ждут отправки", "заказов ждут отправки"),
       names(toShip, function (v) { return v.who; }),
       'data-admtab="orders" data-admfilter="new"');
+    if (noIban) tasks += admTaskRow("!",
+      "Заполните IBAN — счета не уходят",
+      "Компания ждёт счёт, а платить по нему некуда: «О компании → Реквизиты»",
+      'data-admtab="settings" data-admsetpage="company"', true);
     if (overN) tasks += admTaskRow(overN,
       pl(overN, "счёт просрочен", "счёта просрочены", "счетов просрочены"),
       names(overdue, function (v) { return v.who; }),
@@ -11066,6 +11127,12 @@
       out += "<span>Счёт №" + esc(inv.number) + "</span>";
     }
     if (inv.sentAt) out += " · <span>Письмо ушло " + esc(admInvoiceDate(inv.sentAt)) + "</span>";
+    /* The one refusal that is not an outage but a missing setting, and the
+       only one the owner can fix in a minute: without an IBAN the invoice is
+       unpayable, so the shop does not send it at all (src/lib/invoices.ts
+       invoiceSendBlock). Said in words, with the way out, rather than as the
+       bare code the generic line below prints. */
+    else if (inv.sendError === "no_iban") out += '<br><span class="adm-hint--warn">Счёт не отправлен: в «Реквизитах» нет IBAN. Заполните его в «Настройки → О компании» и нажмите «Отправить счёт ещё раз».</span>';
     else if (inv.sendError) out += '<br><span class="adm-hint--warn">Письмо со счётом не ушло (' + esc(inv.sendError) + ") — нажмите «Отправить счёт ещё раз».</span>";
     return '<div class="adm-hint" data-adminvstate>' + out + "</div>";
   }
@@ -12386,14 +12453,34 @@
   }
 
   /* ---------- «Счета для компаний» ------------------------------------------
-     settings.invoice: the number prefix («A-» → A-2026-0001) and the payment
-     term. Two fields and a save — not money, so no confirm card, but a
-     journal line like every other setting. The card also says plainly when
-     the bank details the invoice prints are still blank in «Реквизиты»
-     above: an invoice with no IBAN on it is a letter the customer cannot act
-     on, and nobody but the owner can fill that in. */
+     settings.invoice: the number prefix («A-» → A-2026-0001), the payment
+     term, and the two intervals the daily job works on — when to remind and
+     when to cancel by itself (src/lib/invoice-dunning.ts). Four fields and a
+     save — not money, so no confirm card, but a journal line like every other
+     setting. The card also says plainly when the bank details the invoice
+     prints are still blank in «Реквизиты» above: since 07.09.2026 a missing
+     IBAN does not merely look bad on the PDF, it **stops the letter** — an
+     invoice nobody can pay is worse than no invoice — and nobody but the
+     owner can fill that field in. */
+  function invoiceConf() {
+    var s = DEMO.invoice && typeof DEMO.invoice === "object" ? DEMO.invoice : {};
+    return {
+      prefix: s.prefix != null ? String(s.prefix) : "A-",
+      dueDays: invoiceDueDays(),
+      remindBeforeDays: invoiceDayNum(s.remindBeforeDays, 2, 30),
+      cancelAfterDays: invoiceDayNum(s.cancelAfterDays, 7, 90)
+    };
+  }
+  /** A whole 0…max, or the default — the browser half of cleanInvoiceSettings(). */
+  function invoiceDayNum(v, fallback, max) {
+    var n = Math.round(Number(v));
+    return isFinite(n) && n >= 0 && n <= max ? n : fallback;
+  }
   function invoiceDraft() {
-    if (!S.invDraft) S.invDraft = { prefix: DEMO.invoice && DEMO.invoice.prefix != null ? String(DEMO.invoice.prefix) : "A-", dueDays: String(invoiceDueDays()) };
+    if (!S.invDraft) {
+      var c = invoiceConf();
+      S.invDraft = { prefix: c.prefix, dueDays: String(c.dueDays), remindBeforeDays: String(c.remindBeforeDays), cancelAfterDays: String(c.cancelAfterDays) };
+    }
     return S.invDraft;
   }
   function invoiceSettingsCard() {
@@ -12409,6 +12496,11 @@
       '<div class="adm-form" style="margin-top:8px" data-adminvsettings>' +
         '<p class="adm-hint" style="margin:0">Компания в кассе выбирает «По счёту» — счёт с номером и PDF уходит ей на почту сам, а заказ ждёт перевода. ' +
           "Когда деньги придут, в карточке заказа нажмите «Отметить оплаченным».</p>" +
+        (co.iban
+          ? ""
+          : '<p class="adm-hint adm-hint--warn" style="margin:8px 0 0"><span>Без IBAN счёт не уходит вообще.</span> ' +
+              "<span>Заполните IBAN в блоке «Реквизиты» выше — платить по счёту без номера счёта в банке некуда, " +
+              "поэтому магазин не отправляет такое письмо. Заполните и нажмите в заказе «Отправить счёт ещё раз».</span></p>") +
         (gaps.length
           ? '<p class="adm-hint adm-hint--warn" style="margin:8px 0 0">' +
               "<span>В блоке «Реквизиты» выше не заполнено:</span> " + gaps.map(function (g) { return "<span>" + esc(g) + "</span>"; }).join(", ") + ". " +
@@ -12421,16 +12513,29 @@
           '<label class="adm-field">Срок оплаты, дней' +
             '<input class="adm-input" type="number" min="1" max="60" inputmode="numeric" data-invsetf="dueDays" value="' + esc(d.dueDays) + '">' +
             '<span class="adm-hint">От 1 до 60. Столько дней касса обещает компании на перевод.</span></label>' +
+          '<label class="adm-field">Напомнить за, дней до срока' +
+            '<input class="adm-input" type="number" min="0" max="30" inputmode="numeric" data-invsetf="remindBeforeDays" value="' + esc(d.remindBeforeDays) + '">' +
+            '<span class="adm-hint">Письмо с тем же счётом уйдёт ещё раз. 0 — не напоминать.</span></label>' +
+          '<label class="adm-field">Отменить через, дней после срока' +
+            '<input class="adm-input" type="number" min="0" max="90" inputmode="numeric" data-invsetf="cancelAfterDays" value="' + esc(d.cancelAfterDays) + '">' +
+            '<span class="adm-hint">Заказ закроется сам, товар вернётся в продажу, компании уйдёт письмо. 0 — не отменять.</span></label>' +
         "</div>" +
+        '<p class="adm-hint" style="margin-top:10px">Считает раз в сутки. Оплаченный счёт не трогает никогда — ' +
+          "даже если вы отметили оплату уже после срока.</p>" +
         '<div class="adm-acts"><button class="adm-btn" data-adminvsave>Сохранить</button></div>' +
       "</div>";
   }
   function srvInvoiceSettingsSave() {
     var d = invoiceDraft();
+    var was = invoiceConf();
     var days = Math.round(Number(d.dueDays));
     if (!isFinite(days) || days < 1 || days > 60) { toast("Срок оплаты — от 1 до 60 дней"); return; }
+    var remind = Math.round(Number(d.remindBeforeDays));
+    if (!isFinite(remind) || remind < 0 || remind > 30) { toast("Напоминание — от 0 до 30 дней"); return; }
+    var cancel = Math.round(Number(d.cancelAfterDays));
+    if (!isFinite(cancel) || cancel < 0 || cancel > 90) { toast("Отмена — от 0 до 90 дней"); return; }
     var prefix = String(d.prefix || "").trim().toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 8);
-    var value = { prefix: prefix, dueDays: days };
+    var value = { prefix: prefix, dueDays: days, remindBeforeDays: remind, cancelAfterDays: cancel };
     apiSend("/api/admin/settings/", "PUT", { invoice: value }).then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
@@ -12440,6 +12545,14 @@
           "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дня",
           "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дней");
         journalNote(setLine);
+        /* The two intervals get their own lines, and only when they moved:
+           the journal is a record of changes, not a form dump. */
+        if (remind !== was.remindBeforeDays) {
+          journalNote(remind ? "Счета для компаний: напоминание за " + remind + " дн. до срока" : "Счета для компаний: напоминание выключено");
+        }
+        if (cancel !== was.cancelAfterDays) {
+          journalNote(cancel ? "Счета для компаний: автоотмена через " + cancel + " дн. после срока" : "Счета для компаний: автоотмена выключена");
+        }
         toast("Счета для компаний: сохранено ✓"); render();
         return;
       }
@@ -17040,8 +17153,13 @@
         '<button class="adm-btn" data-posnew>Новая продажа</button></div></div>';
   }
   /** «3 поз. · терминал · остатки списаны» — its own function so the i18n
-      checker sees one sentence with two holes rather than three fragments. */
+      checker sees one sentence with two holes rather than three fragments.
+      With an e-mail on the sale the letter is the fourth fact: the server
+      really did send it (POST /api/admin/pos-orders/ answers `mailed`), and a
+      receipt that stayed silent about it is how the old screen managed to
+      promise a letter nobody ever got. */
   function admPosDoneMeta(d) {
+    if (d.mailed) return d.items + " поз. · " + POS_HOW[d.how] + " · остатки списаны · чек ушёл на почту";
     return d.items + " поз. · " + POS_HOW[d.how] + " · остатки списаны";
   }
   /** The line the sale leaves in Renat's change journal. Nothing to undo — a
@@ -17092,10 +17210,12 @@
             '<label class="adm-field">Почта клиента<input class="adm-input adm-input--row" type="email" data-posemail value="' + esc(S.posEmail || "") + '"></label>' +
             '<label class="adm-field">Телефон<input class="adm-input adm-input--row" type="tel" data-posphone value="' + esc(S.posPhone || "") + '"></label>' +
           "</div>" +
-          /* The e-mail box is worth filling in — it ties the sale to a customer
-             card — but nothing is posted from here: POST /api/admin/pos-orders/
-             creates, pays and stocks the order and sends no letter at all. */
-          '<p class="adm-hint">Покупатель не обязателен. Чек открывается ссылкой «Чек ↗» в заказе — письмом он не уходит.</p>' +
+          /* The e-mail box is what turns a walk-in into a customer: since
+             07.09.2026 the sale goes through the same settlement a card
+             payment does (POST /api/admin/pos-orders/ → settlePayment), so a
+             typed address gets the «Заказ принят» letter and the customer
+             card gets its points. Blank is still fine — it is a walk-in. */
+          '<p class="adm-hint">Покупатель не обязателен. Укажете почту — на неё уйдёт письмо о покупке, а баллы лягут на карточку клиента. Чек для печати открывается ссылкой «Чек ↗» в заказе.</p>' +
           (S.posErr ? '<p class="adm-err">' + esc(S.posErr) + "</p>" : "") +
           '<div class="adm-pospay">' +
             '<button class="adm-btn adm-btn--ghost adm-btn--pay" data-possend="cash"' +
@@ -17121,7 +17241,7 @@
       S.posBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 201 && r.body.ok) {
-        S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how };
+        S.posDone = { orderId: r.body.orderId, number: r.body.number, total: r.body.total, items: nLines, how: how, mailed: !!r.body.mailed };
         S.posCart = []; S.posEmail = ""; S.posPhone = ""; S.posDiscount = ""; S.posPayment = "cash";
         journalNote(admPosJournalLine(r.body.number, r.body.total));
         admOrdersChanged();
@@ -17603,9 +17723,18 @@
        GIFT_AMOUNTS so a bad row cannot price a card the server would refuse. */
     if (Array.isArray(s.gift_amounts)) DEMO.giftAmounts = s.gift_amounts;
     /* «По счёту»: the payment term the server prints on the invoice, so the
-       checkout's «в течение N дней» says the same number (settings.invoice,
-       «Настройки → О компании → Счета для компаний»). */
-    if (s.invoice && typeof s.invoice === "object") DEMO.invoice = { dueDays: Number(s.invoice.dueDays) || 7, prefix: String(s.invoice.prefix == null ? "A-" : s.invoice.prefix) };
+       checkout's «в течение N дней» says the same number — plus the two
+       dunning intervals, so the settings card opens on what is really saved
+       rather than on the defaults (settings.invoice, «Настройки → О компании
+       → Счета для компаний»). */
+    if (s.invoice && typeof s.invoice === "object") {
+      DEMO.invoice = {
+        dueDays: Number(s.invoice.dueDays) || 7,
+        prefix: String(s.invoice.prefix == null ? "A-" : s.invoice.prefix),
+        remindBeforeDays: invoiceDayNum(s.invoice.remindBeforeDays, 2, 30),
+        cancelAfterDays: invoiceDayNum(s.invoice.cancelAfterDays, 7, 90)
+      };
+    }
     /* wholesale/loyalty: the public half of settings.pricing — whether points
        are on and the earn rate — for the «Баллы» row of «Доставка и оплата». */
     if (s.pricing && s.pricing.loyalty && typeof s.pricing.loyalty === "object") {
@@ -18988,16 +19117,26 @@
     /* «По счёту — для компаний»: the order is placed, the invoice is in the
        mail, nothing is paid yet. The address is its own text node so the two
        sentences around it stay dictionary keys; a reload of the receipt has
-       the number but not the address, and says so more plainly. */
+       the number but not the address, and says so more plainly.
+
+       `d.sent` is what the server actually managed to do (POST /api/orders/
+       answers it): a blank IBAN in the shop's own settings stops the letter
+       (src/lib/invoices.ts invoiceSendBlock), and a receipt that says «Счёт
+       отправлен» when nothing was sent leaves a company waiting for a letter
+       that is not coming. A reload has no flag and keeps the plain sentence. */
     if (d.status === "invoice") {
       var dn = Number(d.dueDays) || invoiceDueDays();
+      var invLine = d.sent === false
+        ? (d.email
+            ? "<span>Счёт выписан — пришлём его на</span> <b>" + esc(d.email) + "</b>. "
+            : "<span>Счёт выписан — пришлём его на почту.</span> ")
+        : (d.email
+            ? "<span>Счёт отправлен на</span> <b>" + esc(d.email) + "</b>. "
+            : "<span>Счёт отправлен на почту.</span> ");
       return '<div class="wrap wrap--narrow" style="text-align:center"><section class="sec">' +
         '<div class="done__tick">' + icon("check") + "</div>" +
         '<h1 class="display h1">Заказ оформлен</h1>' + num +
-        '<p class="muted" style="margin-bottom:22px" data-invoicedone>' +
-          (d.email
-            ? "<span>Счёт отправлен на</span> <b>" + esc(d.email) + "</b>. "
-            : "<span>Счёт отправлен на почту.</span> ") +
+        '<p class="muted" style="margin-bottom:22px" data-invoicedone>' + invLine +
           "<span>" + invoiceDoneNote(dn) + "</span></p>" +
         '<button class="btn" data-go="home">Вернуться в магазин</button></section></div>';
     }
@@ -20562,6 +20701,8 @@
       // a queue row on «Обзор» carries the filter its section should open on
       if (d.admfilter && d.admtab === "orders") S.admOrderFilter = d.admfilter;
       if (d.admfilter && d.admtab === "people") S.admCustTier = d.admfilter;
+      // …and a queue row may name the settings page it wants («Заполните IBAN»)
+      if (d.admsetpage && d.admtab === "settings") S.admSetPage = d.admsetpage;
       window.scrollTo({ top: 0 }); render(); return;
     }
     // the «Заказы» chips (a filter with no tab of its own next to it)
