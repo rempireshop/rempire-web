@@ -11051,9 +11051,17 @@
                 shipField("city", "Город", "Город", "address-level2", "") + "</div>" : "") +
               (isDigital() ? "" : shipField("phone", "Телефон", "+372…", "tel", "tel")) +
               (isDigital() ? ""
-                : '<p class="cosrc">Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.' +
-                  (S.country === "FI" ? " Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика." : "") +
-                  (S.country === "EU" ? " Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD." : "") + "</p>") +
+                /* Three sentences, three elements — not one text node. All
+                   three are in the dictionary, but concatenated they became a
+                   fourth string nobody had translated, so an Estonian shopper
+                   choosing Finland or «другая страна Европы» was handed a
+                   Russian sentence (tools/i18n-gaps.mjs, «untranslated: 1»).
+                   translateTree() looks up an element's own text, so each
+                   sentence gets its own span and the rendered line is
+                   character-for-character what it was. */
+                : '<p class="cosrc"><span>Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.</span>' +
+                  (S.country === "FI" ? " <span>Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.</span>" : "") +
+                  (S.country === "EU" ? " <span>Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.</span>" : "") + "</p>") +
               '<button class="btn btn--wide" data-step="3">Далее — оплата</button></div>' : "") +
           "</section>" +
 
@@ -16589,7 +16597,7 @@
       '<p class="adm-hint">' + (multi
         ? "У каждого объёма своя цена. Первый объём покупатель видит первым. «×» убирает объём из магазина — остаток и штрихкод этого объёма останутся на «Складе»."
         : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» этого объёма. «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
+      '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' +
       edEanHint() +
       "</div>";
   }
