@@ -201,9 +201,16 @@ export class MontonioProvider implements PaymentProvider, RefundingProvider {
     const method = opts.method === "card" || opts.method === "wallet" ? "cardPayments" : "paymentInitiation";
     const country = String(opts.country ?? order.address?.country ?? "").toUpperCase();
 
+    /* `preferredMethod` decides which half of that one card page opens first.
+       Montonio's own words (orders guide, checked 07.09.2026): it "enables to
+       choose which payment method is shown first by default in the UI — Card
+       payments or Wallets", allowed values `"card"` and `"wallet"`, default
+       `"wallet"`. We sent `"card"` for both, so the shopper who tapped
+       «Apple Pay / Google Pay» arrived at the card form with the wallet
+       buttons pushed below it — the right page, opened at the wrong half. */
     const methodOptions: Record<string, unknown> =
       method === "cardPayments"
-        ? { preferredMethod: "card" }
+        ? { preferredMethod: opts.method === "wallet" ? "wallet" : "card" }
         : {
             paymentDescription: `REMPIRE ${order.number}`,
             preferredLocale: locale,

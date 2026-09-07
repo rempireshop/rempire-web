@@ -2011,6 +2011,16 @@
         "vaikimisi tõstab tariif hinna ainult tegeliku maksumuseni",
       "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
         "Maksevõimalused lülitab sisse makseteenuse pakkuja. Millegi eemaldamiseks või lisamiseks kirjuta Dimile.",
+      "Какие банки показывать": "Milliseid panku näidata",
+      "Список придёт от Montonio, когда магазин к нему подключён. Пока в кассе пять банков по умолчанию: Swedbank, SEB, LHV, Luminor, Coop.":
+        "Nimekiri tuleb Montoniolt, kui pood on sellega ühendatud. Seni on kassas viis vaikimisi panka: Swedbank, SEB, LHV, Luminor, Coop.",
+      "Показываются только включённые.": "Näidatakse ainult sisselülitatuid.",
+      "Включены все — покупатель видит весь список Montonio.":
+        "Kõik on sees — ostja näeb Montonio kogu nimekirja.",
+      "Выключенный банк пропадает из фишек в кассе; на странице Montonio он всё равно остаётся. Выключить все сразу нельзя — тогда снова показываются все.":
+        "Väljalülitatud pank kaob kassa nuppude hulgast; Montonio enda lehele ta ikkagi jääb. Kõiki korraga välja lülitada ei saa — siis näidatakse jälle kõiki.",
+      "Скрыть банк": "Peida pank",
+      "Показать банк": "Näita panka",
       "Показывать наборы": "Näita komplekte",
       "если выключено — их не видно нигде в магазине": "kui välja lülitatud — poes neid kusagil ei näe",
       "Скрыть наборы": "Peida komplektid",
@@ -4056,6 +4066,16 @@
         "by default a tariff only raises the price up to the real cost",
       "Способы оплаты включает платёжный провайдер. Чтобы что-то убрать или добавить, напишите Диму.":
         "Payment methods are switched on by the payment provider. To remove or add one, write to Dim.",
+      "Какие банки показывать": "Which banks to show",
+      "Список придёт от Montonio, когда магазин к нему подключён. Пока в кассе пять банков по умолчанию: Swedbank, SEB, LHV, Luminor, Coop.":
+        "The list comes from Montonio once the shop is connected to it. For now the checkout has five banks by default: Swedbank, SEB, LHV, Luminor, Coop.",
+      "Показываются только включённые.": "Only the ones switched on are shown.",
+      "Включены все — покупатель видит весь список Montonio.":
+        "All are on — the shopper sees Montonio's whole list.",
+      "Выключенный банк пропадает из фишек в кассе; на странице Montonio он всё равно остаётся. Выключить все сразу нельзя — тогда снова показываются все.":
+        "A bank switched off disappears from the checkout's chips; it is still there on Montonio's own page. They cannot all be switched off at once — that shows them all again.",
+      "Скрыть банк": "Hide the bank",
+      "Показать банк": "Show the bank",
       "Показывать наборы": "Show sets",
       "если выключено — их не видно нигде в магазине": "when off, they are nowhere in the shop",
       "Скрыть наборы": "Hide the sets",
@@ -5491,7 +5511,7 @@
      src/app/api/payments/methods/route.ts, 6h cache, only answers when
      Montonio is configured). Until it answers — or if it never does — the
      chips fall back to the plain BANKS/BANK_CODES pair above, unchanged. */
-  var PAYMETHODS = { banks: null, asked: false };
+  var PAYMETHODS = { banks: null, all: null, asked: false };
   function loadPayMethods() {
     if (PAYMETHODS.asked) return;
     PAYMETHODS.asked = true;
@@ -5499,12 +5519,19 @@
       if (!j || !j.ok || !j.banks || !j.banks.length) return;
       apiSeen(true);
       PAYMETHODS.banks = j.banks;
+      /* `allBanks` is Montonio's list with nothing taken out — `banks` is the
+         same list minus whatever the owner switched off in «Настройки →
+         Доставка и оплата» (settings.payment_banks). The checkout draws
+         `banks`; the panel ticks its boxes against `allBanks`, or it could
+         never switch a hidden bank back on. */
+      PAYMETHODS.all = j.allBanks && j.allBanks.length ? j.allBanks : j.banks;
       // a different list can be a different length or order — the index a
       // shopper had picked in the fallback list may no longer be that bank
       S.bank = 0;
       patchPayment();
-      // «Доставка и оплата» draws the same bank marks in its payment list
-      if (S.screen === "info") render();
+      // «Доставка и оплата» draws the same bank marks in its payment list,
+      // and «Настройки → Доставка и оплата» draws one switch per bank
+      if (S.screen === "info" || S.screen === "admin") render();
     }).catch(function () { apiSeen(false); });
   }
   /* The banks to offer: Montonio's list comes for every country the store
@@ -11441,6 +11468,16 @@
       id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
       items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
       paid: status === "paid" && !pos,
+      /* Waiting for a parcel — which is not the same thing as `paid`.
+         An all-gift-card order is `shipping.method === "digital"`: the card
+         went out by e-mail the moment it was paid, there is nothing on the
+         shelf and the card already hides every parcel step (`v.digital`
+         below). It still sat in «Отправить» on «Обзор», in the chip and in
+         «Сделать сегодня», because those three counted `paid` (Dim,
+         07.09.2026). `paid` itself must stay as it is: «Вернуть деньги» and
+         the journal are about money, and a digital order has money.
+         Same rule on the server — src/lib/analytics.ts, `to_ship`. */
+      toShip: status === "paid" && !pos && method !== "digital",
       unpaid: status === "new" || status === "failed",
       refunded: back,
       refundable: canRefund ? Math.max(0, Math.round((Number(o.sum) - back) * 100) / 100) : 0,
@@ -11476,12 +11513,12 @@
       if (OVERVIEW.data) return OVERVIEW.data.attention.ordersToShip;
       return 0;
     }
-    return admOrders().map(admOrderVM).filter(function (v) { return v.paid; }).length;
+    return admOrders().map(admOrderVM).filter(function (v) { return v.toShip; }).length;
   }
   /** The real orders waiting to go out — [] on a shop that has taken none. */
   function admLiveToShip() {
     return (SRV.admin === true ? (SRV.orders || []) : admOrders())
-      .map(admOrderVM).filter(function (v) { return v.paid; });
+      .map(admOrderVM).filter(function (v) { return v.toShip; });
   }
   /** The waiting orders split the way the chips split them: no label yet /
       label ready. Their sum is admWaitingCount(). */
@@ -11683,7 +11720,9 @@
   function admOrderMatches(v, f) {
     if (f === "all") return true;
     // everything paid that has not left yet — a sticker is not a hand-over
-    if (f === "new" || f === "label") return v.paid;
+    // «Отправить» is the parcel queue: a digital order has no parcel and is
+    // found under «Все» (v.toShip, admOrderVM)
+    if (f === "new" || f === "label") return v.toShip;
     // …and everything that has: «Отправлен» and «Доставлен» are one answer to
     // «где посылка» — the row itself says which of the two it is
     if (f === "shipped" || f === "delivered") return v.shipped || v.delivered;
@@ -13585,8 +13624,68 @@
       }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Способы оплаты включает платёжный провайдер. ' +
         "Чтобы что-то убрать или добавить, напишите Диму.</p>" +
+      admBanksHTML() +
       admDeliveryCloseHTML() +
       "</div>";
+  }
+  /* ---- «Слишком много банков» (Ренат, 07.09.2026) -------------------------
+     Montonio отдаёт весь список банков магазина и убрать из него один банк у
+     себя не даёт — в его документации такой настройки нет (docs/payments.md).
+     Значит список режем мы: settings.payment_banks — коды банков, которые
+     касса рисует фишками. Пусто = показывать все, и это состояние по
+     умолчанию: магазин, который ничего не выбирал, не должен молча терять
+     банк в тот день, когда Montonio добавит новый.
+     Правило «страна целиком» живёт на сервере (filterBanks в
+     src/lib/payments/methods.ts): страна, у которой не отмечен ни один банк,
+     остаётся как была — иначе покупатель с доставкой в Ригу увидел бы
+     эстонские банки. */
+  function bankFilter() {
+    return Array.isArray(S.banksLoaded) ? S.banksLoaded : [];
+  }
+  /** Montonio's whole list — what the switches are drawn from. */
+  function admBankList() {
+    return (PAYMETHODS.all || PAYMETHODS.banks || []);
+  }
+  function admBankOn(code) {
+    var f = bankFilter();
+    return !f.length || f.indexOf(String(code).toUpperCase()) >= 0;
+  }
+  /** The list this switch would leave behind. Empty means «показывать все»,
+      so the first «off» has to materialise every other code first, and
+      turning the last one back on collapses to empty again. */
+  function admBankToggle(code) {
+    var all = admBankList().map(function (b) { return String(b.code).toUpperCase(); });
+    var c = String(code).toUpperCase();
+    var f = bankFilter();
+    var next;
+    if (!f.length) next = all.filter(function (x) { return x !== c; });
+    else if (f.indexOf(c) >= 0) next = f.filter(function (x) { return x !== c; });
+    else next = all.filter(function (x) { return f.indexOf(x) >= 0 || x === c; });
+    return next.length === all.length ? [] : next;
+  }
+  function admBanksHTML() {
+    loadPayMethods();        // Montonio's list — the switches
+    loadAdminPricing(false); // the same GET /api/admin/settings — which of them are on
+    var list = admBankList();
+    if (!list.length) {
+      return '<div class="adm-sec__t" style="margin-top:24px">Какие банки показывать</div>' +
+        '<p class="adm-hint" style="margin:0">Список придёт от Montonio, когда магазин к нему подключён. ' +
+        "Пока в кассе пять банков по умолчанию: Swedbank, SEB, LHV, Luminor, Coop.</p>";
+    }
+    var f = bankFilter();
+    return '<div class="adm-sec__t" style="margin-top:24px">Какие банки показывать</div>' +
+      '<p class="adm-hint" style="margin:0 0 4px">' +
+        (f.length ? "Показываются только включённые." : "Включены все — покупатель видит весь список Montonio.") +
+      "</p>" +
+      '<p class="adm-hint" style="margin:0 0 10px">Выключенный банк пропадает из фишек в кассе; ' +
+        "на странице Montonio он всё равно остаётся. Выключить все сразу нельзя — тогда снова показываются все.</p>" +
+      '<div class="adm-list">' + list.map(function (b) {
+        var on = admBankOn(b.code);
+        return '<div class="adm-swrow"><span>' + esc(String(b.name || b.code)) +
+          '<span class="adm-row__sub">' + esc(String(b.country || "")) + " · " + esc(String(b.code)) + "</span></span>" +
+          admSwitch('data-admbank="' + esc(String(b.code)) + '"', on,
+            on ? "Скрыть банк" : "Показать банк") + "</div>";
+      }).join("") + "</div>";
   }
   /* ---- «Доставлен» без вашей кнопки (settings.delivery) -------------------
      Dim: «we need to improve this». The last step of an order was manual and
@@ -14599,6 +14698,8 @@
         adoptPricingLocally();
         // «Доставлен» без кнопки: the same admin-only settings map, read once
         S.deliveryLoaded = normaliseDelivery(st0.delivery);
+        // «Какие банки показывать» — settings.payment_banks, from the same map
+        S.banksLoaded = Array.isArray(st0.payment_banks) ? st0.payment_banks.slice() : [];
         render();
       }
     }).catch(function () { loadAdminPricing._busy = false; });
@@ -19496,6 +19597,8 @@
     else if (a.type === "toggle_flow" || a.type === "set_flow_days") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
     // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
     else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
+    // «Какие банки показывать» — the whole array of codes, so undo re-sends it
+    else if (a.type === "set_banks") srvSaved(apiSend(st, "PUT", { payment_banks: bankFilter() }));
     else if (a.type === "toggle_chatbot") srvSaved(apiSend(st, "PUT", { chatbot: DEMO.chatbot }));
     else if (a.type === "toggle_bundles") srvSaved(apiSend(st, "PUT", { bundles: DEMO.bundles }));
     else if (a.type === "set_hero") srvSaved(apiSend(st, "PUT", { hero: DEMO.hero }));
@@ -20326,6 +20429,13 @@
       entry.prev = { type: "set_delivery", value: normaliseDelivery(S.deliveryLoaded) };
       S.deliveryLoaded = normaliseDelivery(a.value);
     }
+    /* «Какие банки показывать»: settings.payment_banks is a plain array of
+       codes with no demo layer either — S.banksLoaded IS the last known
+       server value, and the whole array travels, so undo puts it back. */
+    else if (a.type === "set_banks") {
+      entry.prev = { type: "set_banks", value: bankFilter().slice() };
+      S.banksLoaded = Array.isArray(a.value) ? a.value.slice() : [];
+    }
     else if (a.type === "toggle_chatbot") { entry.prev = { type: "toggle_chatbot", value: DEMO.chatbot }; DEMO.chatbot = a.value; }
     else if (a.type === "toggle_bundles") { entry.prev = { type: "toggle_bundles", value: DEMO.bundles !== false }; DEMO.bundles = a.value; }
     else if (a.type === "set_hero") {
@@ -20477,6 +20587,7 @@
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
     else if (a.type === "set_delivery") S.deliveryLoaded = normaliseDelivery(a.value);
+    else if (a.type === "set_banks") S.banksLoaded = Array.isArray(a.value) ? a.value.slice() : [];
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
     else if (a.type === "toggle_bundles") DEMO.bundles = a.value;
     else if (a.type === "set_hero") {
@@ -22470,7 +22581,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -23562,6 +23673,11 @@
       var dc = deliveryConf();
       var dcEntry = demoApply({ type: "set_delivery", value: { autoDays: dc.autoDays, useCarrier: !dc.useCarrier } });
       render(); toast("Сохранено ✓", dcEntry); return;
+    }
+    // «Какие банки показывать»: one switch per Montonio bank, settings.payment_banks
+    if (d.admbank !== undefined) {
+      var bkEntry = demoApply({ type: "set_banks", value: admBankToggle(d.admbank) });
+      render(); toast("Сохранено ✓", bkEntry); return;
     }
     // assistant-work: «Отчёты» — the browser follows content-disposition:
     // attachment and downloads it; nothing here needs a fetch/promise.

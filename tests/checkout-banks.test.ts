@@ -15,6 +15,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { cleanBankFilter, filterBanks } from "@/lib/payments/methods";
 
 const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
 const src = readFileSync(APP_JS, "utf8");
@@ -92,5 +93,65 @@ describe("the bank chips follow the delivery country", () => {
     const out = run(null, "EE", "", 3);
     expect(out.banks).toBeNull();
     expect(out.code).toBe("RIKOEE22");
+  });
+});
+
+/* ---------- «Слишком много банков» — settings.payment_banks ---------------- */
+
+describe("cleanBankFilter — what the owner is allowed to store", () => {
+  it("uppercases, de-duplicates and keeps Montonio's own order", () => {
+    expect(cleanBankFilter(["lhvbee22", "HABAEE2X", "LHVBEE22"])).toEqual(["LHVBEE22", "HABAEE2X"]);
+  });
+
+  it("anything that is not a list of codes means «показывать все»", () => {
+    expect(cleanBankFilter(null)).toEqual([]);
+    expect(cleanBankFilter("HABAEE2X")).toEqual([]);
+    expect(cleanBankFilter({ HABAEE2X: true })).toEqual([]);
+    expect(cleanBankFilter([])).toEqual([]);
+  });
+
+  it("drops junk entries rather than the whole setting", () => {
+    expect(cleanBankFilter(["HABAEE2X", "", 7, null, "a code with spaces", "x".repeat(40)])).toEqual([
+      "HABAEE2X",
+    ]);
+  });
+
+  it("stops at forty codes — a настройка, not a paste of the internet", () => {
+    const many = Array.from({ length: 60 }, (_, i) => `BANK${i}`);
+    expect(cleanBankFilter(many)).toHaveLength(40);
+  });
+});
+
+describe("filterBanks — the same chips, fewer of them", () => {
+  it("keeps only the named Estonian banks", () => {
+    const out = filterBanks(LIST, ["HABAEE2X", "LHVBEE22"]);
+    expect(out.filter((b) => b.country === "EE").map((b) => b.code)).toEqual([
+      "HABAEE2X",
+      "LHVBEE22",
+    ]);
+  });
+
+  it("leaves a country nobody named exactly as it was — a parcel to Riga still gets Latvian banks", () => {
+    const out = filterBanks(LIST, ["HABAEE2X"]);
+    expect(out.filter((b) => b.country === "LV").map((b) => b.code)).toEqual([
+      "HABALV22",
+      "UNLALV2X",
+    ]);
+    expect(out.filter((b) => b.country === "LT").map((b) => b.code)).toEqual(["CBVILT2X"]);
+  });
+
+  it("an empty setting, or codes Montonio does not have, change nothing", () => {
+    expect(filterBanks(LIST, [])).toEqual(LIST);
+    expect(filterBanks(LIST, ["NOSUCHBANK"])).toEqual(LIST);
+  });
+
+  it("matches codes case-insensitively — the setting is stored uppercase, Montonio's list may not be", () => {
+    const mixed = [{ code: "habaee2x", name: "Swedbank", country: "EE", logoUrl: "" }];
+    expect(filterBanks(mixed, ["HABAEE2X"])).toEqual(mixed);
+  });
+
+  it("never leaves the checkout with no chip at all", () => {
+    expect(filterBanks(LIST, ["NOPE"]).length).toBe(LIST.length);
+    expect(filterBanks([], ["HABAEE2X"])).toEqual([]);
   });
 });

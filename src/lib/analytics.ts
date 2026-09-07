@@ -582,7 +582,16 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
  * «Отправить N» badge grow with every salon sale, and disagree with the
  * orders list, which has always filtered those out (admLiveToShip in app.js).
  *
- * «To ship» = every paid web order, label or no label. Since the order-flow
+ * It also leaves out `shipping.method = 'digital'` — an order whose basket was
+ * nothing but gift cards. The card is e-mailed the moment the payment lands
+ * (src/lib/payments/receipt.ts), the order card has hidden its parcel steps
+ * since the day the method existed, and yet «Отправить» counted it: the owner
+ * was told a parcel was waiting that nobody could ever hand over (Dim,
+ * 07.09.2026). The same order still counts as paid everywhere money is
+ * counted — revenue, refunds, the customer's history. It is the *queue* it
+ * does not belong in. `admOrderVM.toShip` in app.js is the same rule.
+ *
+ * «To ship» = every paid web order with a parcel, label or no label. Since the order-flow
  * rework a Montonio label («Создать этикетку») no longer moves the status —
  * the parcel is registered, but it is still on the shelf until the owner
  * presses «Отправлен» — so a paid order with a label ready is as much
@@ -594,7 +603,9 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
 async function qAttention(): Promise<OverviewSummary["attention"]> {
   const rows = await query<{ to_ship: string; pro: string; reviews: string; alerts: string }>(
     `select
-       (select count(*) from orders where status = 'paid' and channel <> 'pos') as to_ship,
+       (select count(*) from orders
+          where status = 'paid' and channel <> 'pos'
+            and coalesce(shipping->>'method', '') <> 'digital') as to_ship,
        (select count(*) from customers where pro_requested_at is not null and tier = 'retail') as pro,
        (select count(*) from reviews where status = 'pending') as reviews,
        (select count(*) from stock_alerts where sent_at is null) as alerts`,
