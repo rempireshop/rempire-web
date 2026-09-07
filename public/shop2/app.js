@@ -1141,6 +1141,8 @@
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Logige omanikuna sisse, et näha päris kliente.",
       "Никого не нашлось.": "Kedagi ei leitud.",
       "На рассмотрении": "Läbivaatamisel", "Партнёры": "Partnerid", "Розница": "Jaemüük", "розница": "jaemüük",
+      // «Клиенты»: who agreed to the newsletter — the chip and the row badge
+      "Подписаны": "Tellinud uudiskirja", "Подписан": "Uudiskiri",
       "Заявка отклонена": "Taotlus lükati tagasi", "Партнёр одобрен ✓": "Partner kinnitatud ✓",
       "Статус партнёра снят": "Partneri staatus eemaldatud",
       "Начислить или списать баллы": "Lisa või vähenda punkte",
@@ -2947,6 +2949,7 @@
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Sign in as the owner to see real customers.",
       "Никого не нашлось.": "Nobody found.",
       "На рассмотрении": "Under review", "Партнёры": "Partners", "Розница": "Retail", "розница": "retail",
+      "Подписаны": "Subscribed", "Подписан": "Newsletter",
       "Заявка отклонена": "Request rejected", "Партнёр одобрен ✓": "Partner approved ✓",
       "Статус партнёра снят": "Partner status removed",
       "Начислить или списать баллы": "Credit or deduct points",
@@ -9802,7 +9805,14 @@
       /* wholesale/loyalty: a bare toggle — the server quotes the actual euro
          amount from the real balance (createOrder() in src/lib/orders.ts),
          never a number the browser proposes. */
-      redeemPoints: !!S.loyaltyRedeem
+      redeemPoints: !!S.loyaltyRedeem,
+      /* «Хочу получать новости и скидки» in step 1. It used to stop here: the
+         checkbox wrote S.newsletter and nothing read it, so a shopper ticked a
+         consent box and the shop recorded nothing (QA sweep 06.09 §5.3; Dim,
+         07.09.2026: «Wire»). POST /api/orders writes it to customers.marketing
+         — the same column the account screen's own checkbox writes — creating
+         the row for a guest who has never signed in. */
+      newsletter: !!S.newsletter
     };
     /* «По счёту»: the method and the company go with the order itself — the
        server issues the invoice while it writes the row (src/lib/invoices.ts),
@@ -14132,6 +14142,11 @@
     if (S.admCustTier === "pro") list = list.filter(function (c) { return c.tier === "pro"; });
     else if (S.admCustTier === "retail") list = list.filter(function (c) { return c.tier !== "pro"; });
     else if (S.admCustTier === "pending") list = list.filter(function (c) { return c.tier !== "pro" && c.proRequestedAt; });
+    /* Who agreed to be written to. Not a tier, but it is the same question —
+       «which customers am I looking at» — and this is the one place the owner
+       can now see the consent the checkout collects (07.09.2026). «Скачать
+       CSV» carries the same column for anyone who wants the list in a file. */
+    else if (S.admCustTier === "news") list = list.filter(function (c) { return !!c.marketing; });
     var q = (S.admCustQ || "").toLowerCase().trim();
     if (q) {
       list = list.filter(function (c) {
@@ -14160,6 +14175,10 @@
           '<span class="adm-row__sub adm-row__sub--one">' + esc(c.email) + " · " +
             admOrdersLabel(c.ordersCount) + " · " + eur(c.revenue) + "</span></button>" +
         '<span class="adm-badge ' + badge[1] + '">' + badge[0] + "</span>" +
+        /* Who agreed to be written to. Its own badge, not a word appended to
+           the grey line: a badge is one text node the dictionary can rewrite,
+           and the line beside it is already a run of e-mail, count and sum. */
+        (c.marketing ? '<span class="adm-badge adm-badge--quiet">Подписан</span>' : "") +
         (pending
           ? '<span class="adm-acts"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) +
             '">Одобрить Pro</button>' +
@@ -14169,7 +14188,7 @@
         "</div>";
     }).join("") + "</div>";
   }
-  var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки Pro"], ["pro", "Партнёры"], ["retail", "Розница"]];
+  var ADM_CUST_TIERS = [["", "Все"], ["pending", "Заявки Pro"], ["pro", "Партнёры"], ["retail", "Розница"], ["news", "Подписаны"]];
   function loadAdminCustomerDetail(id, force) {
     if (SRV.admin !== true) return;
     if (S.admCustDetail && S.admCustDetail.customer.id === id && !force) return;
