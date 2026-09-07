@@ -11689,6 +11689,8 @@
   function admInvoicesWaiting() {
     return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM).filter(function (v) { return v.invoice && v.unpaid; });
   }
+  /* «Заказы» pages like «Товары» (40) and «Склад» (60) — see admOrderRows(). */
+  var ORDERS_PAGE = 40;
   function admOrdersHTML() {
     if (SRV.admin === true) loadSrvOrders(false);
     var f = S.admOrderFilter || "new";
@@ -11738,8 +11740,21 @@
     var over = q && f !== "all"
       ? '<div class="adm-hint" style="margin:0 0 8px">Ищем по всем заказам — фильтр сейчас не действует.</div>'
       : "";
-    return over + list.map(admOrderRowHTML).join("") +
-      (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>');
+    /* Speed, 07.09.2026. «Все» was the one list in the panel that drew
+       everything it had: «Товары» pages at 40 and «Склад» at 60, but 100 orders
+       meant 100 rows — 1 500 elements — rebuilt as a string, parsed and diffed
+       on every single render of the screen, including the one behind every
+       keystroke in the search box. The chips and the search are what the owner
+       actually finds an order with; the page button is for the rare scroll. */
+    var cap = S.ordersShown || ORDERS_PAGE;
+    var shown = list.slice(0, cap);
+    return over + shown.map(admOrderRowHTML).join("") +
+      (list.length ? "" : '<div class="adm-empty">Таких заказов нет</div>') +
+      (list.length > cap
+        ? '<p class="adm-hint" style="margin:10px 0 0">Показаны первые ' + cap + " из " + list.length + "</p>" +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admordersmore ' +
+            'style="margin-top:10px">Показать ещё</button>'
+        : "");
   }
   /** The one step an order is at, as a button — the same primary action the
       card leads with, so the row can do it without opening the card. */
@@ -12549,6 +12564,14 @@
      markup rather than two, because `[data-aians]` — where askAdminAI() writes
      the answer — has to be the only one of its kind on the page. */
   function admAsstHTML() {
+    /* speed, 07.09.2026: the 30-day summary analyticsForAI() puts in the
+       prompt used to be fetched from probeAdmin(), i.e. by every cold open of
+       the panel — a second run of the heaviest query in the admin (the first
+       being «Обзор»'s own 7-day one), for a question most mornings never get
+       asked. It is asked for here instead, the way every other screen asks for
+       its own data: when the assistant is on screen. By the time a question is
+       typed the answer has long landed. */
+    loadAnalytics("30d");
     // data-admdrop: a photo dragged onto the pane is attached (the drop
     // listener next to the gallery's own, at the bottom of this file)
     return '<button class="adm-scrim adm-scrim--phone" data-admai aria-label="Закрыть помощника"></button>' +
@@ -12611,6 +12634,9 @@
      DOM without cutting it short. renderImpl() clears the key on the way out
      of the panel, so coming back plays it again. */
   var admShownKey = "", admShownAt = 0;
+  /* «language + the screen as a string» at the last paint of the panel — the
+     memo renderImpl() checks before parsing and diffing anything (see there). */
+  var admPaintedKey = "";
   function admViewKey() {
     return [S.adminTab, S.adminOrder || "", S.adminEdit || "", admProductTab(), S.posDone ? "receipt" : ""].join("|");
   }
@@ -19936,10 +19962,11 @@
     if (admProbed) return;
     admProbed = true;
     checkAdmin().then(function (ok) {
-      // analytics agent: warm the 30-day summary as soon as we know this is
-      // the owner, so analyticsForAI() already has something to say the
-      // first time he asks a sales question, whatever tab he opens first.
-      if (ok) { loadSrvOrders(true); loadAnalytics("30d"); }
+      /* The 30-day summary for analyticsForAI() used to be warmed here — see
+         admAsstHTML(), which now asks for it when the assistant is actually on
+         screen. Boot is the one moment the owner is waiting, and this was a
+         whole extra analytics query in it for a question nobody had asked. */
+      if (ok) loadSrvOrders(true);
       render();
     });
   }
@@ -21616,13 +21643,27 @@
        first, so in ET/EN the patch compares like with like and an unchanged
        screen is left exactly as it is — no DOM mutation at all, which is what
        admin-shell.spec.ts measures. The storefront keeps the rebuild. */
+    /* …and a screen that has not changed at all is not patched either.
+       Speed, 07.09.2026 (Dim: «загрузка каждой страницы должна быть быстрее»).
+       render() lands after every fetch, every probe and every state change, and
+       a great many of those produce byte-for-byte the screen that is already on
+       the glass — the boot alone fires six. Each one still cost a full parse of
+       ~50 KB of markup into a <template>, a dictionary walk over it and a
+       node-by-node diff against the DOM. One string comparison answers the same
+       question. The language is part of the key because the dictionary pass
+       runs on the parsed copy, not on the string. */
     if (S.screen === "admin" && bodySlot.dataset.painted === "admin") {
-      var tpl = document.createElement("template");
-      tpl.innerHTML = bodyHTML;
-      translateTree(tpl.content);
-      admMorphChildren(bodySlot, tpl.content);
+      var paintKey = S.lang + "\n" + bodyHTML;
+      if (paintKey !== admPaintedKey) {
+        var tpl = document.createElement("template");
+        tpl.innerHTML = bodyHTML;
+        translateTree(tpl.content);
+        admMorphChildren(bodySlot, tpl.content);
+        admPaintedKey = paintKey;
+      }
     } else {
       bodySlot.innerHTML = bodyHTML;
+      admPaintedKey = S.screen === "admin" ? S.lang + "\n" + bodyHTML : "";
     }
     if (S.screen !== "admin") admShownKey = "";   // the fade plays again on the way back in
     bodySlot.dataset.painted = S.screen;
@@ -22550,7 +22591,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admordersmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -22786,7 +22827,8 @@
       window.scrollTo({ top: 0 }); render(); return;
     }
     // the «Заказы» chips (a filter with no tab of its own next to it)
-    if (d.admfilter) { S.admOrderFilter = d.admfilter; render(); return; }
+    if (d.admfilter) { S.admOrderFilter = d.admfilter; S.ordersShown = ORDERS_PAGE; render(); return; }
+    if (d.admordersmore !== undefined) { S.ordersShown = (S.ordersShown || ORDERS_PAGE) + ORDERS_PAGE; render(); return; }
     /* The «Повторить» button on every error state: drop the cache the screen
        reads and ask again, so the owner never has to reload the page. */
     if (d.admreload) {
@@ -24529,6 +24571,7 @@
     // «Заказы»: the same targeted patch, so the search box keeps its caret
     else if (t.matches("[data-admorderq]")) {
       S.admOrderQ = t.value;
+      S.ordersShown = ORDERS_PAGE;   // a new search starts from its first page again
       var ordList = document.getElementById("orderlist");
       if (ordList) { ordList.innerHTML = admOrderRows(); translateTree(ordList); }
     }
