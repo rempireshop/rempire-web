@@ -131,6 +131,12 @@
       "Страница набора исчезнет, уже оформленные заказы не изменятся.": "Komplekti leht kaob, juba vormistatud tellimused ei muutu.",
       "Этот товар уже в наборе": "See toode on juba komplektis",
       "Добавьте хотя бы два товара — тогда посчитаем.": "Lisa vähemalt kaks toodet — siis arvutame.",
+      "…или скидка от суммы, %": "…või soodustus summast, %",
+      "Сначала добавьте в набор хотя бы два товара": "Lisa komplekti esmalt vähemalt kaks toodet",
+      "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
+        "Mustand kirjutatakse komplekti toodete järgi. Kirjelduse esimesi ridu näitab pood Google'is.",
+      "Список наборов не загрузился — откройте «Товары → Наборы»": "Komplektide nimekiri ei laadinud — ava «Tooted → Komplektid»",
+      "Такого набора нет — соберите новый в «Товары → Наборы»": "Sellist komplekti ei ole — koosta uus «Tooted → Komplektid» all",
       "Набор сохранён ✓": "Komplekt salvestatud ✓",
       "Набор показан ✓": "Komplekt on näha ✓",
       "Набор скрыт ✓": "Komplekt peidetud ✓",
@@ -2207,6 +2213,12 @@
       "Страница набора исчезнет, уже оформленные заказы не изменятся.": "The set's page will disappear; orders already placed do not change.",
       "Этот товар уже в наборе": "That product is already in the set",
       "Добавьте хотя бы два товара — тогда посчитаем.": "Add at least two products — then we can do the maths.",
+      "…или скидка от суммы, %": "…or a discount off the total, %",
+      "Сначала добавьте в набор хотя бы два товара": "Add at least two products to the set first",
+      "Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.":
+        "The draft is written from the products in the set. The first lines of the description are what the shop shows in Google.",
+      "Список наборов не загрузился — откройте «Товары → Наборы»": "The list of sets did not load — open «Goods → Sets»",
+      "Такого набора нет — соберите новый в «Товары → Наборы»": "There is no such set — build a new one in «Goods → Sets»",
       "Набор сохранён ✓": "Set saved ✓",
       "Набор показан ✓": "Set shown ✓",
       "Набор скрыт ✓": "Set hidden ✓",
@@ -4390,6 +4402,9 @@
       { ET: "Eraldi kokku — $1, soodustus $2 % · sääst $3", EN: "Separately — $1, $2 % off · you save $3" }],
     [/^Набор дороже, чем товары по отдельности \((.+)\) — так нельзя\.$/,
       { ET: "Komplekt on kallim kui tooted eraldi ($1) — nii ei saa.", EN: "The set costs more than the products apart ($1) — that cannot be." }],
+    /* …and the running total under the item list, the number the percentage
+       box takes its per cent off (Dim, 07.09.2026). */
+    [/^Сумма товаров — (.+)$/, { ET: "Toodete summa — $1", EN: "Products total — $1" }],
     // features
     [/^выгода (.+)$/, { ET: "sääst $1", EN: "you save $1" }],
     [/^В корзину — (.+)$/, { ET: "Lisa ostukorvi — $1", EN: "Add to cart — $1" }],
@@ -15167,7 +15182,7 @@
     });
     // «Наборы» is the third tab of «Товары» (admProductTab), not a section
     S.adminTab = "goods"; S.goodsTab = "bundles"; S.adminEdit = "";
-    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = "";
+    S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
     window.scrollTo({ top: 0 }); render();
     toast("Набор открыт — впишите цену и сохраните");
   }
@@ -15175,7 +15190,28 @@
      «Сохранить» makes, so validateBundle() on the server has the last word
      about whether the set is still cheaper than its parts. */
   function applySetBundle(a) {
+    /* POST /api/admin/bundles/ is a whole-row upsert, so the set has to be
+       READ before it is written: a title, a photo or a sort order left out of
+       the body is one deleted. The panel usually has the list («Товары →
+       Наборы» loads it), but the assistant is a side pane and the owner may
+       never have opened that tab in this sitting — and then the confirmed
+       action used to answer «Русское название обязательно» and change
+       nothing. So an unloaded list is fetched here, once, and the action is
+       re-applied on top of it. */
+    if (!S.admBundles) {
+      apiJson("/api/admin/bundles/").then(function (r) {
+        if (r.status === 401) { SRV.admin = false; render(); return; }
+        if (r.status !== 200 || !r.body.ok) { toast("Список наборов не загрузился — откройте «Товары → Наборы»"); return; }
+        S.admBundles = hydrateBundles(r.body.bundles || []);
+        applySetBundle(a);
+      }).catch(function () { toast("Сервер не отвечает"); });
+      return;
+    }
     var was = (S.admBundles || []).filter(function (b) { return b.id === a.id; })[0];
+    /* set_bundle changes a set that EXISTS. An id that is not one of them
+       would silently create a nameless third set instead of editing anything,
+       so it stops here with the one sentence that helps. */
+    if (!was) { toast("Такого набора нет — соберите новый в «Товары → Наборы»"); return; }
     var body = {
       id: a.id,
       cat: a.cat || (was && was.cat) || "beard",
@@ -15223,6 +15259,39 @@
       image: b.image || "", active: b.active !== false, sort: b.sort || 0, lang: "RU"
     };
   }
+  /* «Написать черновик» / «Перевести с русского» over a set's description
+     (Dim, 07.09.2026: «Set descriptions should be possible to generate with
+     AI»). One snapshot per visit to the form, taken before the first AI
+     button is pressed, so «Отменить» always puts back what was on screen
+     before any of them — the same contract AI_UNDO gives the goods editor. */
+  var BUNDLE_AI_UNDO = null;
+  function bundleDescSnapshot() {
+    var f = S.bundleForm;
+    if (!f || BUNDLE_AI_UNDO) return;
+    BUNDLE_AI_UNDO = { desc: { RU: f.desc.RU || "", ET: f.desc.ET || "", EN: f.desc.EN || "" } };
+    var slot = document.querySelector("[data-bundleundoslot]");
+    if (slot) slot.innerHTML = '<button class="adm-link adm-link--muted" data-bundledescundo>Отменить</button>';
+  }
+  /** The facts the draft is written from: the set's name, its section and what is in it. */
+  function bundleDescInput() {
+    var f = S.bundleForm;
+    var catRow = BUNDLE_CATS.filter(function (c) { return c[0] === f.cat; })[0];
+    return {
+      name: f.title.RU || f.title[f.lang || "RU"] || "",
+      category: catRow ? catRow[1] : f.cat,
+      products: bundleKeepNames(true)
+    };
+  }
+  /** The product names as the model must keep them — with the volume when `sized`. */
+  function bundleKeepNames(sized) {
+    return (S.bundleForm ? S.bundleForm.items : []).map(function (it) {
+      var p = byIdOrNull(it.productId);
+      var nm = p ? p.brand + " " + p.name : String(it.productId || "");
+      if (!sized) return nm;
+      var sz = p && p.sizes && p.sizes.length ? p.sizes[it.variant || 0] : "";
+      return nm + (sz ? ", " + sz : "") + ((it.qty || 1) > 1 ? " ×" + it.qty : "");
+    });
+  }
   /** What the parts cost separately, at today's shop prices. */
   function bundleFormSum() {
     var f = S.bundleForm;
@@ -15237,6 +15306,40 @@
   function bundleFormPrice() {
     var n = Number(String(S.bundleForm.price || "").replace(",", "."));
     return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+  }
+  /* Dim, 07.09.2026: «when creating sets and putting together items, we need
+     to see somewhere what the price total of the set is, so we can apply a
+     percentage as discount.» The two boxes are one number seen two ways: the
+     euro price is what is stored and sent, the percentage is that price read
+     against the running total of the items. Typing in either one fills the
+     other in place — no render, the caret stays where the owner is typing. */
+  /** The euro price as a percentage off the parts, one decimal, "" when there is no answer yet. */
+  function bundleFormPctText() {
+    var sum = bundleFormSum(), price = bundleFormPrice();
+    if (!sum || !price || price >= sum) return "";
+    var pct = Math.round(((sum - price) / sum) * 10) / 10;
+    return String(pct).replace(".", ",");
+  }
+  /** …and a percentage typed in becomes the euro price it means, "" when it cannot. */
+  function bundlePriceFromPct(raw) {
+    var sum = bundleFormSum();
+    var n = Number(String(raw == null ? "" : raw).replace(",", ".").replace("%", "").trim());
+    if (!sum || !isFinite(n) || n <= 0 || n >= 100) return "";
+    return String(Math.round(sum * (1 - n / 100) * 100) / 100);
+  }
+  /** The running total under the item list — the number the percentage is taken off. */
+  function bundleSumLine() {
+    return "Сумма товаров — " + eur(bundleFormSum());
+  }
+  /** Both companions of the box being typed in, patched where they stand. */
+  function paintBundleMoney(from) {
+    var priceEl = document.querySelector('[data-bundlef="price"]');
+    var pctEl = document.querySelector("[data-bundlepct]");
+    if (from !== "price" && priceEl) priceEl.value = S.bundleForm.price;
+    if (from !== "pct" && pctEl) pctEl.value = bundleFormPctText();
+    var sumEl = document.querySelector("[data-bundlesum]");
+    if (sumEl) { sumEl.textContent = bundleSumLine(); translateTree(sumEl); }
+    paintBundleHint();
   }
   /* The one number the owner is really deciding. Patched in place on every
      keystroke instead of rendered, so the caret stays in the price box. */
@@ -15314,15 +15417,31 @@
         '<textarea class="adm-input" rows="3" maxlength="1000" data-bundlef="desc" placeholder="' +
         (lang === "RU" ? "Масло, бальзам и мыло — всё, с чего начинается уход." : esc(f.desc.RU || "")) + '">' +
         esc(f.desc[lang] || "") + "</textarea></label>" +
+      /* «Написать черновик» / «Перевести с русского» — the same pair the goods
+         editor has over a product's description, and the same promise: the
+         answer lands in the box, nothing is saved, «Отменить» puts back what
+         was there before the first of them was pressed. The draft is written
+         from the products the set already holds, so the button says so and
+         refuses until there are two — an empty set has nothing to describe. */
+      '<div class="adm-acts">' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundledescgen>Написать черновик</button>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundletranslate>Перевести с русского</button>' +
+        '<span data-bundleundoslot>' +
+          (BUNDLE_AI_UNDO ? '<button class="adm-link adm-link--muted" data-bundledescundo>Отменить</button>' : "") +
+        "</span></div>" +
+      '<p class="hint adm-hint" style="margin:0">Черновик пишется по товарам набора. Первые строки описания магазин показывает в Google.</p>' +
       '<div class="adm-sec__t">Что внутри — минимум два товара</div>' +
       bundleItemRowsHTML() +
+      '<p class="hint adm-hint" data-bundlesum style="margin:0">' + esc(bundleSumLine()) + "</p>" +
       '<label class="adm-field">Найти товар' +
         '<input class="adm-input" data-bundleq value="' + esc(S.bundleQ || "") + '" placeholder="Название или бренд"></label>' +
       '<div class="adm-picks" id="bundlepicks">' + bundlePickRows() + "</div>" +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:end">' +
         '<label class="adm-field">Цена набора, €' +
           '<input class="adm-input" data-bundlef="price" inputmode="decimal" value="' + esc(String(f.price)) + '" placeholder="34.90"></label>' +
-        '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p></div>" +
+        '<label class="adm-field">…или скидка от суммы, %' +
+          '<input class="adm-input" data-bundlepct inputmode="decimal" value="' + esc(bundleFormPctText()) + '" placeholder="20"></label></div>' +
+      '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p>" +
       '<div class="adm-field">Фото набора</div>' +
       '<div class="adm-picks">' + bundleImageRowHTML() + "</div>" +
       (S.bundleFormErr ? '<div class="err adm-err" role="alert">' + esc(S.bundleFormErr) + "</div>" : "") +
@@ -15385,7 +15504,7 @@
       saveBundleForm._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        S.bundleForm = null; S.bundleQ = "";
+        S.bundleForm = null; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
         toast("Набор сохранён ✓");
         loadAdminBundles(true); loadBundles();   // the shop follows the panel
         return;
@@ -15431,7 +15550,7 @@
       if (r.status === 401) { SRV.admin = false; render(); return; }
       S.bundleDel = "";
       if (r.status === 200 && r.body.ok) {
-        if (S.bundleForm && S.bundleForm.id === id) S.bundleForm = null;
+        if (S.bundleForm && S.bundleForm.id === id) { S.bundleForm = null; BUNDLE_AI_UNDO = null; }
         toast("Набор удалён ✓");
         loadAdminBundles(true); loadBundles();
         return;
@@ -22474,7 +22593,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -23994,16 +24113,16 @@
     if (d.admgoodstab) {
       S.goodsTab = d.admgoodstab;
       S.adminTab = "goods"; S.adminEdit = "";
-      S.bundleForm = null; S.bundleFormErr = ""; S.bundleDel = "";
+      S.bundleForm = null; S.bundleFormErr = ""; S.bundleDel = ""; BUNDLE_AI_UNDO = null;
       render(); return;
     }
     if (d.bundlenew !== undefined) {
-      S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = "";
+      S.bundleForm = blankBundle(); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
       render(); refocus('[data-bundlef="id"]'); return;
     }
     if (d.bundleedit) {
       var bEd = (S.admBundles || []).filter(function (x) { return x.id === d.bundleedit; })[0];
-      if (bEd) { S.bundleForm = bundleToForm(bEd); S.bundleFormErr = ""; S.bundleQ = ""; render(); }
+      if (bEd) { S.bundleForm = bundleToForm(bEd); S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null; render(); }
       return;
     }
     if (d.bundletoggle) {
@@ -24017,7 +24136,7 @@
       return;
     }
     if (d.bundlesave !== undefined) { saveBundleForm(); return; }
-    if (d.bundlecancel !== undefined) { S.bundleForm = null; S.bundleFormErr = ""; render(); return; }
+    if (d.bundlecancel !== undefined) { S.bundleForm = null; S.bundleFormErr = ""; BUNDLE_AI_UNDO = null; render(); return; }
     if (d.bundledelete) { S.bundleDel = d.bundledelete; render(); return; }
     if (d.bundledelyes) { deleteBundleById(d.bundledelyes); return; }
     if (d.bundledelno !== undefined) { S.bundleDel = ""; render(); return; }
@@ -24053,6 +24172,63 @@
       if (!S.bundleForm) return;
       S.bundleForm.lang = d.bundlelang;
       render(); return;
+    }
+    /* The set's description, written and translated in place. Direct DOM
+       patches, never a render(): every box in this form is one the owner may
+       be mid-typing in, and a render would put the saved values back over it —
+       the same rule the goods editor's own AI buttons follow. */
+    if (d.bundledescgen !== undefined) {
+      if (!S.bundleForm) return;
+      if (S.bundleForm.items.length < 2) { toast("Сначала добавьте в набор хотя бы два товара"); return; }
+      bundleDescSnapshot();
+      admSpark(t, [S.bundleForm.lang || "RU"], "bundle", bundleDescInput, function (L, tx) {
+        if (!tx.text) return;
+        S.bundleForm.desc[L] = tx.text;
+        if (L === (S.bundleForm.lang || "RU")) {
+          var dEl = document.querySelector('[data-bundlef="desc"]');
+          if (dEl) dEl.value = tx.text;
+        }
+      });
+      return;
+    }
+    if (d.bundletranslate !== undefined) {
+      if (!S.bundleForm) return;
+      var bSrc = String(S.bundleForm.desc.RU || "").trim();
+      if (!bSrc) { toast("Сначала напишите или сгенерируйте русское описание"); refocus('[data-bundlef="desc"]'); return; }
+      bundleDescSnapshot();
+      var bTrB = t, bTrL = t.textContent; t.disabled = true; t.textContent = "…";
+      apiSend("/api/admin/ai/text/", "POST", {
+        task: "translate", lang: "RU",
+        input: { text: bSrc, sourceLang: "RU", targetLangs: ["ET", "EN"], keepNames: bundleKeepNames(false) }
+      }).then(function (r) {
+        bTrB.disabled = false; bTrB.textContent = bTrL;
+        if (r.status === 200 && r.body.ok && r.body.texts) {
+          if (r.body.texts.ET) S.bundleForm.desc.ET = r.body.texts.ET;
+          if (r.body.texts.EN) S.bundleForm.desc.EN = r.body.texts.EN;
+          var bCur = S.bundleForm.lang || "RU";
+          if (bCur !== "RU" && r.body.texts[bCur]) {
+            var bEl = document.querySelector('[data-bundlef="desc"]');
+            if (bEl) bEl.value = r.body.texts[bCur];
+          }
+          toast("Черновик готов — проверьте и сохраните");
+        } else if (r.status === 401) { SRV.admin = false; render(); }
+        else if (r.body && r.body.error === "rate_limited") toast("Слишком много запросов — попробуйте позже");
+        else if (r.body && r.body.error === "not_configured") toast("Помощник не подключён — нужен ключ OpenAI на сервере.");
+        else toast("Не получилось — попробуйте ещё раз");
+      }).catch(function () { bTrB.disabled = false; bTrB.textContent = bTrL; toast("Не получилось — попробуйте ещё раз"); });
+      return;
+    }
+    if (d.bundledescundo !== undefined) {
+      if (!BUNDLE_AI_UNDO || !S.bundleForm) return;
+      S.bundleForm.desc = {
+        RU: BUNDLE_AI_UNDO.desc.RU, ET: BUNDLE_AI_UNDO.desc.ET, EN: BUNDLE_AI_UNDO.desc.EN
+      };
+      var undoEl = document.querySelector('[data-bundlef="desc"]');
+      if (undoEl) undoEl.value = S.bundleForm.desc[S.bundleForm.lang || "RU"] || "";
+      BUNDLE_AI_UNDO = null;
+      var undoSlot = document.querySelector("[data-bundleundoslot]");
+      if (undoSlot) undoSlot.textContent = "";
+      return;
     }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
@@ -24555,7 +24731,15 @@
         S.bundleForm.id = t.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 64);
         if (t.value !== S.bundleForm.id) t.value = S.bundleForm.id;
       } else if (bf === "title" || bf === "desc") S.bundleForm[bf][bl] = t.value;
-      else if (bf === "price") { S.bundleForm.price = t.value; paintBundleHint(); }
+      else if (bf === "price") { S.bundleForm.price = t.value; paintBundleMoney("price"); }
+    }
+    /* …and the same price seen as a percentage off the running total: what is
+       typed here becomes the euro price, which is the only number stored and
+       sent. An empty box clears the price rather than guessing at one. */
+    else if (t.matches("[data-bundlepct]")) {
+      if (!S.bundleForm) return;
+      S.bundleForm.price = String(t.value).trim() ? bundlePriceFromPct(t.value) : "";
+      paintBundleMoney("pct");
     }
     else if (t.matches("[data-bundleq]")) { S.bundleQ = t.value; paintHeroPicks("bundlepicks", bundlePickRows()); }
     else if (t.matches("[data-heroq]")) { S.heroGoQ = t.value; paintHeroPicks("herogolist", heroGoRows()); }
@@ -25200,7 +25384,7 @@
     ["[data-stockeaninput],[data-stocklowinput],[data-stockqtyinput],[data-stockreasoninput]", "[data-stocksave]"],
     ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
     ["[data-admcustnotesf]", "[data-admcustsavenotes]"],
-    ["[data-bundlef]", "[data-bundlesave]"],
+    ["[data-bundlef],[data-bundlepct]", "[data-bundlesave]"],
     ["[data-mailto]", "[data-mailtest]"]
   ];
   function admEnterTarget(input) {
