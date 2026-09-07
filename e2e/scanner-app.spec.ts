@@ -449,13 +449,19 @@ test.describe("scanner app", () => {
   });
 
   /* The camera itself, on a phone that is not here: a fake BarcodeDetector
-     and a fake getUserMedia stand in for Chrome on the owner's Samsung.
-     Three things went wrong there (Dim: «scanning was hard and almost
+     and a fake getUserMedia stand in for Chrome on the owner's Samsung, with
+     a track that really has focus, zoom and torch capabilities so the tuning
+     is exercised and not skipped.
+
+     What went wrong on the S21 FE (Dim: «scanning was hard and almost
      impossible»): `facingMode: environment` landed on the wide lens; the
      native detector answered nothing (Play Services' barcode module missing)
-     and the page waited on it forever; and the manual field pulled the
-     keyboard over the viewfinder. */
-  scenario(195, "camera: the main back lens is picked, a code the camera reads twice is a hit, a silent or broken native detector hands over to zxing", async ({ page }) => {
+     and the page waited on it forever; the manual field pulled the keyboard
+     over the viewfinder; every code had to be read twice before it counted;
+     and there was no way to zoom or to see in the dark.
+     tools/scan-bench.mjs measured the last three — see
+     docs/audit/2026-09-07-scanner.md. */
+  scenario(195, "camera: the main back lens, a pinch and a double tap on the viewfinder, a torch that lights itself in the dark, a first-frame hit, and a silent or broken native detector handing over to zxing without telling the owner", async ({ page }) => {
     test.setTimeout(150_000);
     const w = watch(page);
     await page.addInitScript(() => {

@@ -15909,7 +15909,7 @@
            says where it has got to, on the screen the owner is actually
            holding while he does it. Between codes only: while a card is up
            the three taps are the whole job. */
-        (S.stockLevels ? '<p class="scan__hint scan__hint--sm">' + esc(stockBoundLine()) + "</p>" : "") +
+        (S.stockLevels ? '<p class="scan__count">' + esc(stockBoundLine()) + "</p>" : "") +
         (S.scanToday && S.scanToday.length
           ? '<div class="scan__today"><div class="scan__today__t">Сегодня</div>' +
             S.scanToday.slice(0, 6).map(function (m) {

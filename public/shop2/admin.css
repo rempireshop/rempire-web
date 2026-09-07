@@ -890,6 +890,9 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 .scan__panel { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
 .scan__hint { margin: 0; text-align: center; font-size: 15px; line-height: 22px; color: var(--a-dim); }
 .scan__hint--sm { font-size: 13px; text-align: left; }
+/* «Штрихкоды: привязано 12 из 322» — how far the first pass over the shelves
+   has got, between codes. Quiet: it is a bearing, not an instruction. */
+.scan__count { margin: -6px 0 0; text-align: center; font-size: 13px; line-height: 18px; color: var(--a-dim); }
 
 .scan__card {
   background: #fff; color: var(--a-ink); padding: 20px;
