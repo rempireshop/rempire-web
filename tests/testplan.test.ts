@@ -47,11 +47,11 @@ interface Item {
   lang: string;
   title: string;
   steps: string[];
-  expect: string;
+  expect: string[];
   why: string;
   risk: string;
   writes: boolean;
-  en: { title: string; steps: string[]; expect: string; why: string };
+  en: { title: string; steps: string[]; expect: string[]; why: string };
 }
 interface Plan {
   version: number;
@@ -134,7 +134,12 @@ describe("testplan.json — the shape the checklist page reads", () => {
         expect(typeof s, `${it_.id}.steps[${i}]`).toBe("string");
         expect(s.trim().length, `${it_.id}.steps[${i}] is blank`).toBeGreaterThan(0);
       }
-      expect(it_.expect.trim().length, `${it_.id}.expect is empty`).toBeGreaterThan(0);
+      expect(Array.isArray(it_.expect), `${it_.id}.expect`).toBe(true);
+      expect(it_.expect.length, `${it_.id}.expect is empty`).toBeGreaterThan(0);
+      for (const [i, e] of it_.expect.entries()) {
+        expect(typeof e, `${it_.id}.expect[${i}]`).toBe("string");
+        expect(e.trim().length, `${it_.id}.expect[${i}] is blank`).toBeGreaterThan(0);
+      }
       expect(it_.why.trim().length, `${it_.id}.why is empty`).toBeGreaterThan(0);
     }
   });
@@ -148,13 +153,48 @@ describe("testplan.json — the shape the checklist page reads", () => {
     for (const it_ of plan.items) {
       expect(it_.en, `${it_.id} has no en`).toBeTruthy();
       expect(it_.en.title.trim().length, `${it_.id}.en.title is blank`).toBeGreaterThan(0);
-      expect(it_.en.expect.trim().length, `${it_.id}.en.expect is blank`).toBeGreaterThan(0);
+      expect(Array.isArray(it_.en.expect), `${it_.id}.en.expect`).toBe(true);
+      expect(it_.en.expect.length, `${it_.id}.en.expect counts ${it_.en.expect.length}, Russian counts ${it_.expect.length}`).toBe(it_.expect.length);
+      for (const [i, e] of it_.en.expect.entries()) {
+        expect(typeof e, `${it_.id}.en.expect[${i}]`).toBe("string");
+        expect(e.trim().length, `${it_.id}.en.expect[${i}] is blank`).toBeGreaterThan(0);
+      }
       expect(it_.en.why.trim().length, `${it_.id}.en.why is blank`).toBeGreaterThan(0);
       expect(Array.isArray(it_.en.steps), `${it_.id}.en.steps`).toBe(true);
       expect(it_.en.steps.length, `${it_.id}.en.steps counts ${it_.en.steps.length}, Russian counts ${it_.steps.length}`).toBe(it_.steps.length);
       for (const [i, s] of it_.en.steps.entries()) {
         expect(typeof s, `${it_.id}.en.steps[${i}]`).toBe("string");
         expect(s.trim().length, `${it_.id}.en.steps[${i}] is blank`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  /* The reason `expect` is a list at all. On 08.09.2026 the owner read the
+     first check and could not follow it: six things to verify, joined by
+     commas into one 34-word sentence, read on a phone while looking at the
+     shop. Splitting it fixes that only for as long as nobody writes the
+     sentence back in — so the shape is held here rather than in a style note
+     nobody opens. The numbers are deliberately generous: they catch a line
+     that has turned back into a paragraph, not a line that is a few words
+     longer than its neighbours. */
+  it("keeps every expected result short enough to check at a glance", () => {
+    for (const it_ of plan.items) {
+      expect(it_.expect.length, `${it_.id}.expect has ${it_.expect.length} lines — split the check instead`).toBeLessThanOrEqual(6);
+      for (const [lang, lines] of [["ru", it_.expect], ["en", it_.en.expect]] as const) {
+        for (const [i, e] of lines.entries()) {
+          const words = e.trim().split(/\s+/).length;
+          expect(words, `${it_.id}.${lang} expect[${i}] runs ${words} words: ${e}`).toBeLessThanOrEqual(16);
+          /* Two commas a line are ignored on purpose, and so are two whole
+             classes of comma that are not list commas at all: the one inside
+             a Russian price (5,47 €), and everything after a colon, because
+             «Не возим: Норвегия, Швейцария, …» is one fact however many
+             countries it names. What is left is the shape that made the plan
+             unreadable — several different checks strung together. */
+          const flat = e.replace(/(\d),(\d)/g, "$1.$2");
+          const head = flat.includes(":") ? flat.slice(0, flat.indexOf(":")) : flat;
+          const commas = (head.match(/,/g) ?? []).length;
+          expect(commas, `${it_.id}.${lang} expect[${i}] packs several checks into one line: ${e}`).toBeLessThanOrEqual(2);
+        }
       }
     }
   });

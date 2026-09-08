@@ -2110,10 +2110,10 @@
       "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
         "Vedajate tariife ei tulnud — «Seadetes» kehtivad sinu enda hinnad.",
       "Письма клиентам · Resend": "Kirjad klientidele · Resend",
-      "Тест дошёл — письма уходят с info@rempireshop.com.":
-        "Test jõudis kohale — kirjad lähevad aadressilt info@rempireshop.com.",
-      "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
-        "Saatja on info@rempireshop.com. Kontrollida saab ainult testiga: «Turundus → Kirjad → Saada mulle test».",
+      "Тест дошёл — письма уходят с shop@rempireshop.com, ответы приходят на info@rempireshop.com.":
+        "Test jõudis kohale — kirjad lähevad aadressilt shop@rempireshop.com, vastused tulevad aadressile info@rempireshop.com.",
+      "Отправитель — shop@rempireshop.com, ответы приходят на info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
+        "Saatja on shop@rempireshop.com, vastused tulevad aadressile info@rempireshop.com. Kontrollida saab ainult testiga: «Turundus → Kirjad → Saada mulle test».",
       "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
         "Kirjade saatmine pole seadistatud: test tuli veaga tagasi, kliendid kirju ei saa.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
@@ -4346,10 +4346,10 @@
       "Тарифы перевозчиков не пришли — в «Настройках» действуют ваши собственные цены.":
         "The carriers' tariffs did not arrive — your own prices in “Settings” apply.",
       "Письма клиентам · Resend": "Customer letters · Resend",
-      "Тест дошёл — письма уходят с info@rempireshop.com.":
-        "The test arrived — letters go out from info@rempireshop.com.",
-      "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
-        "The sender is info@rempireshop.com. The only way to check is a test: “Marketing → Letters → Send me a test”.",
+      "Тест дошёл — письма уходят с shop@rempireshop.com, ответы приходят на info@rempireshop.com.":
+        "The test arrived — letters go out from shop@rempireshop.com, replies come to info@rempireshop.com.",
+      "Отправитель — shop@rempireshop.com, ответы приходят на info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест».":
+        "The sender is shop@rempireshop.com, replies come to info@rempireshop.com. The only way to check is a test: “Marketing → Letters → Send me a test”.",
       "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.":
         "Sending letters is not set up: the test came back with an error and customers get nothing.",
       "Google видит магазин, позиции — в разделе «Аналитика».":
@@ -15538,9 +15538,9 @@
     var mailOk = S.admMailKey !== false;
     rows.push({ name: "Письма клиентам · Resend", ok: mailOk,
       sub: S.admMailKey === true
-        ? "Тест дошёл — письма уходят с info@rempireshop.com."
+        ? "Тест дошёл — письма уходят с shop@rempireshop.com, ответы приходят на info@rempireshop.com."
         : mailOk
-          ? "Отправитель — info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест»."
+          ? "Отправитель — shop@rempireshop.com, ответы приходят на info@rempireshop.com. Проверено это будет только тестом: «Маркетинг → Письма → Отправить мне тест»."
           : "Отправка писем не настроена: тест вернулся с ошибкой, покупатели писем не получают.",
       act: mailOk ? "" : admDevLink() });
 

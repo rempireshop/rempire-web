@@ -353,6 +353,16 @@ const nextConfig: NextConfig = {
          second address for the same page. */
       { source: "/shop2/ru", destination: "/shop2/", permanent: true },
       { source: "/shop2/ru/:path*", destination: "/shop2/:path*/", permanent: true },
+      /* The hand-written pages, at the name a human types. Dim asked for the
+         checklist twice as /tests/ before anyone noticed the page is at
+         /test/; a page whose whole job is to be opened on a phone from a chat
+         message cannot 404 on the plural. Same for the other two, and for
+         /karty — the page is Russian, so a Russian spelling is a fair guess. */
+      { source: "/tests", destination: "/test/", permanent: false },
+      { source: "/checklist", destination: "/test/", permanent: false },
+      { source: "/card", destination: "/cards/", permanent: false },
+      { source: "/karty", destination: "/cards/", permanent: false },
+      { source: "/guides", destination: "/guide/", permanent: false },
     ];
   },
   /* Three phases, not one list. A plain array is `afterFiles`, which Next

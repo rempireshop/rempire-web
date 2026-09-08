@@ -692,6 +692,16 @@ test.describe(`deployed shop — ${BASE}`, () => {
       ["/shop", "/shop2/", [307, 308]],
       ["/shop2/ru/", "/shop2/", [301, 308]],
       ["/shop2/ru/c/hair/", "/shop2/c/hair/", [301, 308]],
+      /* The names a human types for the three hand-written pages. Dim asked
+         for the checklist as /tests/ twice, from his phone, and got a 404
+         both times — a page whose whole job is to be opened from a chat
+         message cannot fail on the plural. 307, because these pages move to
+         the real domain later and nothing should have cached them. */
+      ["/tests/", "/test/", [307]],
+      ["/checklist/", "/test/", [307]],
+      ["/card/", "/cards/", [307]],
+      ["/karty/", "/cards/", [307]],
+      ["/guides/", "/guide/", [307]],
     ];
     for (const [from, to, codes] of hops) {
       /* The first hop of `/shop` is trailingSlash's own `/shop` → `/shop/`,

@@ -41,7 +41,13 @@ import planFile from "@/data/testplan.json";
  * fields are in it. `who`, `device`, `lang`, `risk` and `writes` are values,
  * not prose: the page has its own words for them in both languages.
  */
-export type TestText = { title: string; steps: string[]; expect: string; why: string };
+/* `expect` is a LIST of separate things to look at, not one sentence.
+   It was a sentence until 08.09.2026, and the owner said the very first
+   check was hard to understand: six things to verify, run together with
+   commas, read on a phone while looking at the shop. A tester ticks them
+   off one at a time or loses their place. The English list carries the
+   same lines in the same order — see the parity test. */
+export type TestText = { title: string; steps: string[]; expect: string[]; why: string };
 
 export type TestArea = { id: string; name: string; note?: string; en: { name: string; note: string } };
 
@@ -53,7 +59,8 @@ export type TestItem = {
   lang: "RU" | "ET" | "EN" | "any";
   title: string;
   steps: string[];
-  expect: string;
+  /** See TestText.expect — a list, one checkable line each. */
+  expect: string[];
   why: string;
   risk: "high" | "med" | "low";
   /** True when running the item creates real data — an order, a letter, stock
