@@ -121,23 +121,24 @@ const cases: Array<[string, Promo | null, number]> = [
    much to keep in step by eye, and a single wrong cent is a shopper shown one
    price and billed another. */
 describe("the storefront's copy of the default rules is the server's", () => {
-  /* Omit, not intersect: `ShippingRules` declares both of these optional with
-     an object type, so `& { freeFromByCountry: null }` has no inhabitant and
-     TypeScript collapses the whole thing to `never` — every property read then
-     fails. The storefront's mirror really does carry an explicit null in both
-     places, which is what this states. */
-  const mirror = literal<
-    Omit<ShippingRules, "freeFromByCountry" | "carriers"> & { freeFromByCountry: null; carriers: null }
-  >("SHIP_RULES");
+  /* Omit, not intersect: `ShippingRules` declares `carriers` optional with an
+     object type, so `& { carriers: null }` has no inhabitant and TypeScript
+     collapses the whole thing to `never` — every property read then fails. The
+     storefront's mirror really does carry an explicit null there, which is what
+     this states. */
+  const mirror = literal<Omit<ShippingRules, "carriers"> & { carriers: null }>("SHIP_RULES");
 
   it("has the same price in every cell", () => {
     expect(mirror.methods).toEqual(DEFAULT_SHIPPING_RULES.methods);
   });
 
-  it("has the same free-delivery floor and the same countries switched off", () => {
+  it("has the same free-delivery floors and the same countries switched off", () => {
     expect(mirror.freeFrom).toBe(DEFAULT_SHIPPING_RULES.freeFrom);
-    expect(mirror.freeFromByCountry).toBe(null); // the server's is simply absent
-    expect(DEFAULT_SHIPPING_RULES.freeFromByCountry).toBeUndefined();
+    /* Dim, 08.09.2026: «Rest of EU — from €200». Both halves have to carry it,
+       or the shopper reads one threshold in the basket and the server applies
+       another — and this is the cell where that difference is 141 €. */
+    expect(mirror.freeFromByCountry).toEqual(DEFAULT_SHIPPING_RULES.freeFromByCountry);
+    expect(mirror.freeFromByCountry).toEqual({ EU: 200 });
     expect([...(mirror.countriesOff ?? [])].sort()).toEqual(
       [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])].sort(),
     );
@@ -186,6 +187,24 @@ describe("the checkout total on screen equals the one the server bills", () => {
       });
       expect([iso, c.ship]).toEqual([iso, server.price]);
     }
+  });
+
+  /* The floors the shop actually ships with, not a fixture: 59 € at home and
+     200 € for the rest of Europe (Dim, 08.09.2026). A 59 € basket to Germany
+     is the exact case the audit found — free on screen, 22,29 € of courier off
+     the shop — so it is the one worth pinning on both sides. */
+  it("agrees about the default floors: 59 € at home, 200 € for the rest of Europe", () => {
+    const at = (country: string, zone: string, sum: number, iso = "") => {
+      const c = client(null, sum, DEFAULT_SHIPPING_RULES, zone, "courier", iso);
+      const server = quoteFromRules(DEFAULT_SHIPPING_RULES, { country, method: "courier", subtotal: sum });
+      expect([country, sum, c.ship]).toEqual([country, sum, server.price]);
+      return server;
+    };
+    expect(at("EE", "EE", 59).price).toBe(0);
+    expect(at("DE", "EU", 59, "DE").price).toBe(22.29);
+    expect(at("DE", "EU", 199.99, "DE").price).toBe(22.29);
+    expect(at("DE", "EU", 200, "DE").price).toBe(0);
+    expect(at("GR", "EU", 59, "GR").freeFrom).toBe(200);
   });
 
   it("agrees about the free-delivery floor a zone sets for all of Europe", () => {

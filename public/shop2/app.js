@@ -5281,8 +5281,10 @@
      and refreshShipThresholds() updates them the moment the real rules land.
      Per-country floors — 50 € everywhere is a giveaway outside Estonia, where
      the FI courier alone costs ~26 € incl. VAT — are set through the rules'
-     freeFromByCountry, not here. */
-  var THRESH = { EE: 59, LV: 59, LT: 59, FI: 59, EU: 59 };
+     freeFromByCountry, not here; EU seeds at 200 because that is what the
+     rules now say (Dim, 08.09.2026), and this line is only ever the value
+     shown before /api/overrides answers. */
+  var THRESH = { EE: 59, LV: 59, LT: 59, FI: 59, EU: 200 };
   function refreshShipThresholds() {
     Object.keys(THRESH).forEach(function (c) {
       var by = SHIP_RULES.freeFromByCountry;
@@ -5355,17 +5357,24 @@
      src/lib/shipping/country-prices.ts and mirrored here byte for byte:
      tests/checkout-parity.test.ts reads this literal out of app.js and fails
      if it drifts from the server's DEFAULT_SHIPPING_RULES by a cent.
-     EE/LV/LT keep the prices Renat already sells above cost; the «default»
-     cells stay 4,99 / 9,90 as the fallback for anything unpriced. */
+     EE and the LV/LT courier keep the prices Renat already sells above cost;
+     the «default» cells stay 4,99 / 9,90 as the fallback for anything
+     unpriced. */
+  /* 08.09.2026 — the two questions the audit left open, answered (Дмитрий).
+     «Rest of EU — from €200»: freeFromByCountry.EU below, while EE, LV, LT and
+     FI have no key and keep the 59 € of freeFrom. And the Latvian and
+     Lithuanian parcel machine up from 4,99 to 5,59 € — the last two cells the
+     shop sold below what the parcel costs, because a Latvian locker is 5,58 €
+     with DPD and DPD is one of the carriers the shopper himself can pick. */
   var SHIP_RULES = {
     freeFrom: 59,
-    freeFromByCountry: null,
+    freeFromByCountry: { EU: 200 },
     methods: {
       parcel: {
         "default": 4.99,
         AT: 37.29, BE: 29.79, BG: 52.09, CZ: 28.29, DE: 29.79, DK: 23.89, EE: 5.47,
-        ES: 38.69, FI: 12.39, FR: 44.69, HR: 59.59, IE: 52.09, IT: 34.29, LT: 4.99,
-        LU: 35.79, LV: 4.99, NL: 29.79, PL: 17.89, PT: 41.69, SE: 13.69, SI: 40.19,
+        ES: 38.69, FI: 12.39, FR: 44.69, HR: 59.59, IE: 52.09, IT: 34.29, LT: 5.59,
+        LU: 35.79, LV: 5.59, NL: 29.79, PL: 17.89, PT: 41.69, SE: 13.69, SI: 40.19,
         SK: 26.79
       },
       courier: {
@@ -5654,7 +5663,10 @@
       would otherwise survive its own deletion. */
   function setShipRules(raw) {
     SHIP_RULES.freeFrom = SHIP_RULES_DEFAULT.freeFrom;
-    SHIP_RULES.freeFromByCountry = null;
+    /* Back to the default map, not to null: since 08.09.2026 the defaults
+       carry «Европа — от 200 €», and nulling it here would have quietly given
+       Europe the 59 € floor back on every whole-table save. */
+    SHIP_RULES.freeFromByCountry = cloneRules(SHIP_RULES_DEFAULT.freeFromByCountry);
     SHIP_RULES.methods = cloneRules(SHIP_RULES_DEFAULT.methods);
     SHIP_RULES.carriers = null;
     SHIP_RULES.countriesOff = cloneRules(SHIP_RULES_DEFAULT.countriesOff);
@@ -6478,8 +6490,9 @@
     /* Country, then zone, then the shop-wide floor — the same three steps as
        the price above and as quoteFromRules() on the server, so «ещё 12 € до
        бесплатной доставки» cannot promise a floor the server does not honour.
-       Nothing sets a per-country or per-zone floor by default: 59 € everywhere
-       is exactly what it was. */
+       Since 08.09.2026 the zone step is the one that carries a default: the
+       «EU» row asks 200 €, while EE, LV, LT and FI have no key and fall
+       through to the 59 € of freeFrom. */
     var by = SHIP_RULES.freeFromByCountry, iso = orderCountry();
     var f = SHIP_RULES.freeFrom;
     if (by) {

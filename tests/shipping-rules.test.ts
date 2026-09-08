@@ -179,8 +179,21 @@ describe("the rules the shop actually bills on", () => {
 
   it("lets a country never have free delivery", () => {
     const rules = parseShippingRules({ freeFrom: 59, freeFromByCountry: { LV: null } });
-    expect(quoteFromRules(rules, { country: "LV", method: "parcel", subtotal: 500 }).price).toBe(4.99);
+    expect(quoteFromRules(rules, { country: "LV", method: "parcel", subtotal: 500 }).price).toBe(5.59);
     expect(quoteFromRules(rules, { country: "EE", method: "parcel", subtotal: 500 }).price).toBe(0);
+  });
+
+  /* The owner's whole answer, not a merge: the row he saved replaces the map,
+     so clearing «Бесплатно от» on the «Другие страны Европы» row really does
+     put Europe back on the shop-wide 59 € rather than quietly restoring the
+     200 € default. A row written before that default existed — every
+     production row until db/migrations/149 runs — still gets it. */
+  it("takes the owner's free-delivery map whole, empty included", () => {
+    expect(parseShippingRules({ freeFrom: 59 }).freeFromByCountry).toEqual({ EU: 200 });
+    expect(parseShippingRules({ freeFromByCountry: { EU: 150 } }).freeFromByCountry).toEqual({ EU: 150 });
+    expect(parseShippingRules({ freeFromByCountry: {} }).freeFromByCountry).toEqual({});
+    const cleared = parseShippingRules({ freeFrom: 59, freeFromByCountry: {} });
+    expect(quoteFromRules(cleared, { country: "DE", method: "courier", subtotal: 59 }).price).toBe(0);
   });
 
   it("prices an order from the row the panel saved", async () => {

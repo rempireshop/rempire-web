@@ -20,7 +20,11 @@ export type ShipMethod = "parcel" | "courier" | "pickup";
 export interface ShippingRules {
   /** Basket subtotal (EUR, pre-discount) at or above which delivery is free. */
   freeFrom: number | null;
-  /** Per-country override of freeFrom, e.g. { "FI": 99 }. */
+  /**
+   * Override of freeFrom by country **or by zone**, e.g. { "EU": 200 } for all
+   * of Europe and { "GR": null } for «never free to Greece»; a country's own
+   * key beats its zone's. Defaults to { "EU": 200 } — see below.
+   */
   freeFromByCountry?: Record<string, number | null>;
   /** price[method][ISO country] with a "default" fallback per method. */
   methods: Record<ShipMethod, Record<string, number>>;
@@ -100,32 +104,59 @@ export interface ShippingQuote {
  * European country — not even the one the audit found it covered.
  *
  * What is kept deliberately:
- *   · **EE 5.47 / 10.84 and LV, LT 4.99 / 9.90.** All four sit above cost
- *     already (a parcel machine in Estonia costs 2.47–3.10 €), and dropping a
- *     home price to match cost is a revenue cut nobody asked for.
+ *   · **EE 5.47 / 10.84 and the LV, LT courier at 9.90.** All three sit above
+ *     cost already (a parcel machine in Estonia costs 2.47–3.10 €, a courier
+ *     to Latvia 8.00 €), and dropping a home price to match cost is a revenue
+ *     cut nobody asked for.
  *   · **The `EU` and `default` cells, 4.99 / 9.90.** They are the fallback the
  *     brief asks to keep: any destination the tariff table has no row for
  *     still gets a price rather than a blank.
- *   · **`freeFrom: 59` everywhere, and no per-country thresholds.** The
- *     threshold is now settable per zone and per country
- *     (`freeFromByCountry`), but it defaults to exactly what it did before, so
- *     nothing about free delivery changes until Renat decides it should. It is
- *     also where the money still leaks — see the audit's question 5.
  *
  * What changes for a shopper: Finland and the twenty-one other European
  * countries Montonio serves stop being one number. Finland's courier goes
  * 9.90 → 15.69 €, Germany's 9.90 → 22.29 €, Greece's 9.90 → 43.19 €. The
  * before/after table for all twenty-five is in
  * docs/audit/2026-09-07-eu-rates.md.
+ *
+ * ## The two numbers that were the owner's to give — Dim, 08.09.2026
+ *
+ * That audit left the free-delivery threshold and the two Baltic parcel cells
+ * unanswered on purpose (its questions 2 and 5), because how much delivery to
+ * give away is not a decision this file should make. Both came back:
+ *
+ *   · **«Rest of EU — from €200»** — `freeFromByCountry: { EU: 200 }` below.
+ *     Estonia, Latvia, Lithuania and Finland keep the 59 € they have always
+ *     had; every European country without a row of its own now has to reach
+ *     200 € before the shop pays for the parcel. What it fixes: a 59 € basket
+ *     to Greece shipped free against a 43.15 € courier, so a bigger order
+ *     earned the shop less than a smaller one — 73 % of the basket, and worse
+ *     in Ireland, Portugal and Romania.
+ *   · **LV and LT parcel machines, 4.99 → 5.59.** The last two cells sold
+ *     below cost. The dearest carrier a Latvian or Lithuanian shopper can pick
+ *     under «Пакомат» is DPD at 5.58 (he picks, so the price has to cover him
+ *     — costBasis() in ./shipping/country-prices), and 5.59 is the first price
+ *     ending in nine cents that covers it. Renat was not asked to lose 59
+ *     cents an order.
  */
 const COUNTRY_PRICES = countryPriceTable();
 
 export const DEFAULT_SHIPPING_RULES: ShippingRules = {
   freeFrom: 59,
+  /* The Baltics and Finland at 59 €, the rest of Europe at 200 € — Dim's
+     answer of 08.09.2026, above. Only the `EU` zone gets a key: EE, LV, LT and
+     FI are meant to fall through to `freeFrom`, and there is deliberately no
+     `default` one, because the admin's «Остальные страны» row edits `freeFrom`
+     itself (shipFreeCell() in public/shop2/app.js) — a threshold parked under
+     `default` would be one the panel could neither show nor change, which is
+     the one thing the whole rules table exists to avoid. */
+  freeFromByCountry: { EU: 200 },
   methods: {
-    // spread first, hand-set home prices second: the four the shop already
-    // sells above cost keep the number Renat sells at
-    parcel: { default: 4.99, ...COUNTRY_PRICES.parcel, EE: 5.47, LV: 4.99, LT: 4.99 },
+    /* Spread first, home prices second. EE and the LV/LT courier are held at a
+       number of the shop's own; LV and LT parcel now agree with the table to
+       the cent (5.58 → 5.59) and are still written out, because the storefront
+       mirror and db/migrations/149 carry the same literal and three files that
+       must say one number should say it the same way. */
+    parcel: { default: 4.99, ...COUNTRY_PRICES.parcel, EE: 5.47, LV: 5.59, LT: 5.59 },
     courier: { default: 9.9, ...COUNTRY_PRICES.courier, EE: 10.84, LV: 9.9, LT: 9.9 },
     pickup: { default: 0 },
   },
@@ -202,6 +233,15 @@ export function parseShippingRules(value: unknown): ShippingRules {
   const raw = value as Record<string, unknown>;
   const rules: ShippingRules = {
     freeFrom: DEFAULT_SHIPPING_RULES.freeFrom,
+    /* Seeded like countriesOff and markup, and for the same reason: since
+       08.09.2026 the defaults carry a real threshold (`EU: 200`), so a rules
+       row written before that key existed — every production row until
+       db/migrations/149 runs — must still price Europe at 200 €. The
+       storefront's own copy of the defaults does exactly this on its side
+       (applyShipRules() in public/shop2/app.js only overwrites a key the row
+       actually sends), and the screen and the bill have to agree in the window
+       between a deploy and its migration. */
+    freeFromByCountry: { ...(DEFAULT_SHIPPING_RULES.freeFromByCountry ?? {}) },
     methods: {
       parcel: { ...DEFAULT_SHIPPING_RULES.methods.parcel },
       courier: { ...DEFAULT_SHIPPING_RULES.methods.courier },
@@ -220,6 +260,12 @@ export function parseShippingRules(value: unknown): ShippingRules {
     if (n !== null && n >= 0) rules.freeFrom = n;
   }
 
+  /* An object, and an *authoritative* one, empty included — the same rule
+     countriesOff follows below and for the same reason: `{}` means «one
+     threshold everywhere», which is a real answer Renat gives by clearing the
+     «Бесплатно от» box on the «Другие страны Европы» row, and a merge that
+     quietly put the 200 € default back would be a box that refuses to empty.
+     Only a missing or malformed key keeps the default. */
   const byCountry = raw.freeFromByCountry;
   if (typeof byCountry === "object" && byCountry !== null && !Array.isArray(byCountry)) {
     const out: Record<string, number | null> = {};
@@ -230,7 +276,7 @@ export function parseShippingRules(value: unknown): ShippingRules {
         if (n !== null && n >= 0) out[c.toUpperCase()] = n;
       }
     }
-    if (Object.keys(out).length) rules.freeFromByCountry = out;
+    rules.freeFromByCountry = out;
   }
 
   const methods = raw.methods;
@@ -381,15 +427,13 @@ export function quoteFromRules(
 
   /*
    * Free delivery, same three steps as the price: the country's own threshold,
-   * then its zone's, then the shop-wide one. So `freeFromByCountry: {EU: 150}`
-   * raises the bar for all of Europe at once and `{GR: null}` turns free
-   * delivery off for Greece alone, where it costs 43.15 € to send.
+   * then its zone's, then the shop-wide one. So `freeFromByCountry: {EU: 200}`
+   * — the default since 08.09.2026 — raises the bar for all of Europe at once,
+   * and `{GR: null}` would turn free delivery off for Greece alone.
    *
-   * Nothing sets either by default — `freeFrom: 59` everywhere is exactly what
-   * it was — because how much free delivery to give away is Renat's decision,
-   * not a default this file should make for him. It is also the place the
-   * per-country prices above do NOT fix: a 59 € basket still ships free at
-   * whatever it costs. docs/audit/2026-09-07-eu-rates.md, question 5.
+   * A country's own key still beats its zone's, which is what makes «Европа от
+   * 200 €, но в Польшу от 90 €» expressible at all; the four home rows have no
+   * key and so read `freeFrom`, the 59 € they have always had.
    */
   const byCountry = rules.freeFromByCountry;
   const freeFrom = !byCountry

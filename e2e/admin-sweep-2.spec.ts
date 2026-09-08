@@ -176,6 +176,18 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await page.locator("[data-closetoast]").click();
       await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
 
+      /* The reset needs a price to put back, and since 08.09.2026 the fill
+         above no longer leaves one: Dim raised the Latvian and Lithuanian
+         locker to the 5,59 € the tariff itself computes, so every default cell
+         now equals what «Заполнить» would write and the button moves nothing
+         on a standard table. The box is therefore put out of step by hand. */
+      await lv.fill("3,49");
+      await page.locator("[data-admshipsave]").click();
+      await page.locator("[data-admapply]").click();
+      await expect(page.getByRole("status")).toContainText("Тарифы доставки сохранены");
+      await page.locator("[data-closetoast]").click();
+      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBe(3.49);
+
       /* «Вернуть значения по умолчанию» — a delivery price too, so it asks; «Отмена» changes nothing. */
       /* The one that HOLDS the reset button — «Самовывоз, перевозчики и
          наценка». Since 07.09.2026 the page has a second fold above it (the
@@ -186,12 +198,13 @@ test.describe("admin sweep 2 — delivery tariffs", () => {
       await expect(page.locator(".adm-confirm__t")).toHaveText("Вернуть тарифы по умолчанию?");
       await page.locator("[data-admcancel]").click();
       await expect(page.locator(".adm-confirm")).toHaveCount(0);
-      expect(Number((await rules())?.methods?.parcel?.LV)).toBeGreaterThanOrEqual(LV_PARCEL_FILL);
+      expect(Number((await rules())?.methods?.parcel?.LV)).toBe(3.49);
       await page.locator("[data-admshipreset]").click();
       await page.locator("[data-admapply]").click();
       await expect(page.getByRole("status")).toContainText("Тарифы снова стандартные");
       await expect(page.locator(".adm-toast__undo")).toBeVisible();
-      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBeLessThan(LV_PARCEL_FILL);
+      // back to the shipped default, which is the tariff price to the cent
+      await expect.poll(async () => Number((await rules())?.methods?.parcel?.LV)).toBe(LV_PARCEL_FILL);
     } finally {
       await page.request.put("/api/admin/settings/", { data: { shipping_rules: original ?? {} } });
     }
