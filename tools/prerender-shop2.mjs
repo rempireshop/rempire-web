@@ -26,9 +26,13 @@
    singular /set/<id>/ for one set beside the plural /sets/ for the landing.
 
    Nothing here is hand-written twice: the asset tags come out of
-   public/shop2/index.html (including its ?v= token) and the translation
-   tables come out of public/shop2/app.js, so a prerendered title and the one
-   app.js sets a moment later are the same string.
+   public/shop2/index.html and the translation tables come out of
+   public/shop2/app.js, so a prerendered title and the one app.js sets a
+   moment later are the same string. The tags' `?v=` token is not written by
+   hand at all any more — this tool derives it from the content of the files
+   it versions and patches it into index.html on every run, so a push cannot
+   ship a fix behind an address browsers already have cached
+   (tools/lib/asset-token.mjs).
 
    Every page's og:image is a 1 200×630 asset that exists on disk — the cards
    for the products that had none are generated here with sharp, so the card
@@ -38,9 +42,11 @@
    LinkedIn.
 
    Also writes the sitemap — public/sitemap.xml, an index over
-   public/sitemap-N.xml (the pages above, with xhtml:link alternates) and
-   sitemap-custom.xml, which the app serves for the owner's own products —
-   and the two robots policies; public/robots.txt is written to match
+   public/sitemap-N.xml (the pages above except the products, with xhtml:link
+   alternates), sitemap-products.xml, which the app serves for the catalogue's
+   product pages so a product hidden after this build drops out of it without
+   waiting for the next one, and sitemap-custom.xml, which the app serves for
+   the owner's own products — and the two robots policies; robots.txt matches
    $PUBLIC_BASE_URL, so staging and production cannot disagree. Base URL:
    $PUBLIC_BASE_URL, default the live domain. See docs/seo.md.
 
@@ -57,6 +63,10 @@ import { fileURLToPath } from "node:url";
 // read — see tools/lib/blog-export.mjs for why this is a separate module.
 import { fetchPublishedPosts, pickLang, renderPostBody } from "./lib/blog-export.mjs";
 import { fetchSettings } from "./lib/settings-export.mjs";
+/* The assets' ?v= token — a hash of the files it versions rather than a
+   number somebody remembers to raise. tools/lib/asset-token.mjs says why the
+   token exists at all and what a stale one cost. */
+import { assetToken, currentToken, retokenise } from "./lib/asset-token.mjs";
 /* The head builders, the copy table and the sitemap row are shared with the
    request-time page of a custom product (src/lib/product-page.ts, a row of
    custom_products that did not exist when this ran) — one module, so the
@@ -68,7 +78,7 @@ import {
   OG_W, OG_H, OG_DEFAULT, OG_FALLBACK,
   headBlock as sharedHeadBlock, href, langNav, crumbs, breadcrumbLD as sharedBreadcrumbLD,
   productSpec, patchShell, HEAD_MARK, PRE_MARK,
-  sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM,
+  sitemapUrlEntry, SITEMAP_OPEN, SITEMAP_CLOSE, SITEMAP_CUSTOM, SITEMAP_PRODUCTS,
   baseFrom, isLiveBase, ROBOTS_OPEN, ROBOTS_CLOSED
 } from "../src/lib/seo-head.mjs";
 
@@ -354,12 +364,21 @@ function eurFor(n, code) {
    falls back to, and the Russian home page — Vercel serves that file for
    /shop2/ and there is no way to put a different one there. So it is the one
    file the tool patches instead of writing: the SEO head and the #app content
-   are replaced between their markers, and everything else — the asset tags
-   with their ?v= token, the script list — stays hand-maintained and is read
-   from there for every other page written here. */
+   are replaced between their markers, and everything else — the asset tags,
+   the script list — stays hand-maintained and is read from there for every
+   other page written here. The one thing in that hand-maintained part this
+   tool does write is the assets' ?v= token: it is a hash of the very files
+   the tags name, so it moves with them and with nothing else. Why the token
+   exists at all, and what a stale one cost on 06.09.2026, is in
+   tools/lib/asset-token.mjs — read that before removing anything here. */
 
 const SHELL_FILE = path.join(SHOP2, "index.html");
-const shell = (await readFile(SHELL_FILE, "utf8")).replace(/\r\n?/g, "\n");
+const shellOnDisk = (await readFile(SHELL_FILE, "utf8")).replace(/\r\n?/g, "\n");
+/* Derived, not typed. Every page written below inherits this token through
+   headAssets/bodyScripts, and index.html itself is patched with it, so a
+   build cannot ship one file at a new address and another at the old one. */
+const ASSET_V = await assetToken(shellOnDisk, PUB);
+const shell = retokenise(shellOnDisk, ASSET_V);
 // HEAD_MARK / PRE_MARK — the two marker pairs — are shared with the
 // request-time page, which patches the very same shell (src/lib/seo-head.mjs)
 /* The copy starts at the first favicon <link>. It is matched on a copy of the
@@ -372,12 +391,12 @@ const headAssets = (shellNoComments.match(/<link rel="icon"[\s\S]*?(?=<\/head>)/
 // anchored on the marker, not on the first </div>: the block between them is
 // full of divs of its own once a run has happened
 const bodyScripts = (shell.match(/<!-- prerender:end -->\s*<\/div>\s*([\s\S]*?)<\/body>/) || [])[1];
-const ASSET_V = (shell.match(/app\.js\?v=([^"']*)/) || [])[1] || "";
-if (!headAssets || !bodyScripts || !HEAD_MARK.test(shell) || !PRE_MARK.test(shell)) {
+if (!headAssets || !bodyScripts || !HEAD_MARK.test(shell) || !PRE_MARK.test(shell) || !currentToken(shell)) {
   throw new Error("public/shop2/index.html no longer has the shape this tool reads. It needs, in " +
     "order: <!-- seo:start --> … <!-- seo:end -->, then <link rel=\"icon\"> … </head>, and a body " +
     "with <div id=\"app\"><!-- prerender:start --> … <!-- prerender:end --></div> followed by the " +
-    "script tags. Restore those markers — do not let the tool guess.");
+    "script tags, one of them /shop2/app.js with a ?v= token the other versioned tags share. " +
+    "Restore those markers — do not let the tool guess.");
 }
 
 /* ---------- copy, one table per language --------------------------------
@@ -1596,17 +1615,14 @@ for (const lang of LANGS) {
   entries.push(urlEntry("/", lang.seg, "1.0"));
   for (const c of ["all", ...CATS]) entries.push(urlEntry("/c/" + c + "/", lang.seg, "0.8"));
   for (const b of BRANDS) entries.push(urlEntry("/b/" + BRAND_SLUG.get(b) + "/", lang.seg, "0.6"));
-  /* A product with nothing on the shelf stays in the sitemap and stays
-     indexable — its page still answers the question the searcher asked, still
-     carries «Сообщить о наличии», and dropping it would throw away a ranking
-     that has to be earned again when the stock comes back (the Gatsby Grunge
-     Mat is exactly this case: 100 impressions in one week, out of stock).
-     What it does not keep is the same claim on the crawler's time as a
-     product somebody can buy today, and its Product block says OutOfStock, so
-     Google leaves it out of the merchant surfaces by itself. */
-  for (const p of CATALOGUE) {
-    entries.push(urlEntry("/p/" + encodeURIComponent(p.id) + "/", lang.seg, p.stock === "out" ? "0.4" : "0.7"));
-  }
+  /* The product pages are NOT here. Their files are still written above —
+     that is what makes the shop fast and indexable — but which of them a
+     crawler is offered depends on «Показывать в магазине», a column the owner
+     flips between deploys (db/migrations/147), and a file written now cannot
+     un-name a page later. So the product rows are served by
+     src/app/sitemap-products.xml/route.ts, named in the index below, and the
+     reasoning about a sold-out product keeping its page and its ranking moved
+     there with them. Everything the database cannot hide stays on disk. */
   for (const slug of LEGAL_SLUGS) entries.push(urlEntry(infoRest(slug), lang.seg, "0.4"));
   if (BUNDLES.length) {
     entries.push(urlEntry("/sets/", lang.seg, "0.8"));
@@ -1648,16 +1664,19 @@ for (let i = sitemapFiles.length + 1; i <= 20; i++) {
 }
 
 /* public/sitemap.xml is always a sitemapindex: the pages written above, in
-   sitemap-N.xml, plus sitemap-custom.xml — which is not a file at all but a
-   route (src/app/sitemap-custom.xml/route.ts) answering at request time with
-   the owner's own products (custom_products, ids `c-…`). Those rows do not
-   exist when this runs, and an index is the one shape that lets a static
-   file point at a dynamic one. It used to be a plain urlset below 1 000
-   URLs; robots.txt names only the index, so nothing else moved. */
+   sitemap-N.xml, plus two names that are not files at all but routes
+   answering at request time — sitemap-products.xml
+   (src/app/sitemap-products.xml/route.ts) for the catalogue's product pages
+   minus the ones the owner has hidden since this ran, and sitemap-custom.xml
+   (src/app/sitemap-custom.xml/route.ts) for his own products
+   (custom_products, ids `c-…`) and the posts published after the build. Both
+   are things this run cannot know, and an index is the one shape that lets a
+   static file point at a dynamic one. It used to be a plain urlset below
+   1 000 URLs; robots.txt names only the index, so nothing else moved. */
 await writeFile(path.join(PUB, "sitemap.xml"),
   '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  [...sitemapFiles, SITEMAP_CUSTOM].map(f => `  <sitemap><loc>${abs("/" + f)}</loc><lastmod>${today}</lastmod></sitemap>`).join("\n") +
+  [...sitemapFiles, SITEMAP_PRODUCTS, SITEMAP_CUSTOM].map(f => `  <sitemap><loc>${abs("/" + f)}</loc><lastmod>${today}</lastmod></sitemap>`).join("\n") +
   "\n</sitemapindex>\n", "utf8");
 
 /* ---------- robots ------------------------------------------------------
@@ -1737,5 +1756,6 @@ console.log(
     `${BLOG_POSTS.length ? BLOG_POSTS.length + 1 : 0} blog\n` +
   `           base ${BASE}  robots "${ROBOTS}"  robots.txt = ${LIVE ? "production" : "staging"}  assets ?v=${ASSET_V}\n` +
   `           og cards: ${OG_CARDS.size} on disk (${cardsMade} drawn this run)  every og:image ${OG_W}×${OG_H}\n` +
-  `           sitemap: ${entries.length} urls in ${sitemapFiles.length} file(s) + ${SITEMAP_CUSTOM} (the app's, custom products) behind the index`
+  `           sitemap: ${entries.length} urls in ${sitemapFiles.length} file(s) + ${SITEMAP_PRODUCTS} (the app's, ` +
+    `${LANGS.length * CATALOGUE.length} product pages minus the hidden ones) + ${SITEMAP_CUSTOM} (the app's, own products and new posts) behind the index`
 );

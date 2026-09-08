@@ -18,6 +18,11 @@
  * their pages answer 404 with noindex (src/lib/product-page.ts,
  * src/lib/blog-page.ts).
  *
+ * The catalogue's own product pages are not here: they have a sitemap of
+ * their own beside this one (src/app/sitemap-products.xml/route.ts), served
+ * by the app for the same reason — a product hidden after the build has to
+ * leave the sitemap without waiting for the next one.
+ *
  * `trailingSlash: true` leaves a path with a file extension alone, so this
  * answers at /sitemap-custom.xml exactly, like the static files next to it.
  */

@@ -1,6 +1,6 @@
 import { expect, type Browser, type Page, test } from "@playwright/test";
 import { E2E_BASE_URL } from "./env.mjs";
-import { eur, ipHeaders, LANGS, shopUrl, waitForScreen } from "./fixtures";
+import { eur, ipHeaders, LANGS, PRODUCT, shopUrl, waitForScreen } from "./fixtures";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
@@ -28,6 +28,11 @@ import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } 
  *
  * Everything this spec makes is taken off sale at the end, so the specs that
  * count the catalogue never see it.
+ *
+ * The second describe at the bottom is about a CATALOGUE product rather than
+ * one of the owner's own: hiding it has to withhold a page that is already a
+ * file on disk, which is a different layer and a different promise
+ * (docs/seo.md, «The one thing that runs before the file»).
  */
 
 test.beforeEach(async ({}, testInfo) => {
@@ -472,6 +477,98 @@ test.describe("admin — product creation", () => {
         await page.request.put("/api/admin/overrides/", { data: { id, stock: null } });
         await page.request.delete(`/api/admin/products/${id}/`);
       }
+    }
+  });
+});
+
+/* ---------- a catalogue product, hidden, with no rebuild -------------------
+ *
+ * The custom product above never had a static page, so 404ing it was only ever
+ * a matter of the route saying so. A CATALOGUE product is the hard case and the
+ * one Dim answered on 08.09.2026 («if the item is hidden, it should be hidden
+ * without any deploys or rebuilds»): tools/prerender-shop2.mjs wrote its page
+ * to disk at build time, and the static layer answers a file before any route
+ * runs — on Vercel by itself, here through `prerenderedRewrites()` in
+ * next.config.ts. So until src/middleware.ts started asking first, «Показывать
+ * в магазине» took the product out of the shop everywhere except the one
+ * address Google holds.
+ *
+ * This is the spec for that. It runs against exactly the tree `node
+ * tools/e2e-build.mjs` prerendered — no second build, no restart — and it
+ * checks both directions, because a switch that cannot be switched back is a
+ * different bug.
+ */
+test.describe("admin — «Показывать в магазине» on a catalogue product", () => {
+  /* A product no other spec touches (nothing in e2e/ or tests/ names it) and
+     that is not in the home page's prerendered grid, so hiding it for the few
+     seconds this test takes cannot move anything else. */
+  const ID = "system-4-hydro-care-conditioner-h";
+
+  test("its prerendered page stops being served the moment the switch goes off, and comes back", async ({ page, browser }) => {
+    const w = watch(page);
+    await openAdmin(page);
+    const setHidden = (hidden: boolean) =>
+      page.request.put("/api/admin/overrides/", { data: { id: ID, hidden } });
+    try {
+      /* The dev server compiles a route on its first hit; the middleware asks
+         /api/overrides/hidden/ on every product page and will not wait forever
+         for an answer, so warm it before the timing matters. Nothing about
+         production needs this. */
+      expect((await page.request.get("/api/overrides/hidden/")).status()).toBe(200);
+
+      // ---- as built: the static file, with the product's own head ----------
+      for (const seg of ["", "/et", "/en"]) {
+        const res = await page.request.get(shopUrl(seg, `/p/${ID}/`));
+        expect(res.status(), seg || "ru").toBe(200);
+        const html = await res.text();
+        /* The page tools/prerender-shop2.mjs wrote, not the shell: the shell's
+           canonical is the home page's and it has no product <h1>. (The robots
+           meta is not the tell — this suite builds against localhost, so every
+           page is noindex here on purpose, docs/seo.md.) */
+        expect(html, seg || "ru").toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2${seg}/p/${ID}/"`);
+        expect(html, seg || "ru").toContain('<h1 class="pdp__title">');
+        expect(html, seg || "ru").toContain('"@type":"Product"');
+      }
+      // …and it is in the sitemap the app serves for the catalogue
+      const listed = await (await page.request.get("/sitemap-products.xml")).text();
+      expect(listed).toContain(`/shop2/p/${ID}/`);
+      expect(listed).toContain(`/shop2/et/p/${ID}/`);
+
+      // ---- switched off: 404 with noindex, in all three languages ----------
+      expect((await setHidden(true)).status()).toBe(200);
+      for (const seg of ["", "/et", "/en"]) {
+        const gone = await page.request.get(shopUrl(seg, `/p/${ID}/`));
+        expect(gone.status(), seg || "ru").toBe(404);
+        const html = await gone.text();
+        expect(html, seg || "ru").toContain('<meta name="robots" content="noindex, nofollow">');
+        /* The page the build wrote is genuinely withheld, not merely
+           restatused: no product <h1>, and the canonical is no longer this
+           address claiming to be a product page. */
+        expect(html, seg || "ru").not.toContain('<h1 class="pdp__title">');
+        expect(html, seg || "ru").not.toContain(`<link rel="canonical" href="${E2E_BASE_URL}/shop2${seg}/p/${ID}/"`);
+      }
+      // gone from the sitemap too, without anything being rebuilt
+      const dropped = await (await page.request.get("/sitemap-products.xml")).text();
+      expect(dropped).not.toContain(`/p/${ID}/`);
+      // the shop as a whole is still listed — hiding one product is not un-listing 220
+      expect(dropped).toContain(`/shop2/p/${PRODUCT.id}/`);
+
+      // ---- and a real browser lands on «Страница не найдена» ---------------
+      const shopper = await freshShop(browser);
+      const r404 = await shopper.page.goto(shopUrl("/et", `/p/${ID}/`));
+      expect(r404?.status()).toBe(404);
+      await waitForScreen(shopper.page, "notfound");
+      await shopper.close();
+
+      // ---- back on: the same static page as before -------------------------
+      expect((await setHidden(false)).status()).toBe(200);
+      const back = await page.request.get(shopUrl("", `/p/${ID}/`));
+      expect(back.status()).toBe(200);
+      expect(await back.text()).toContain('<h1 class="pdp__title">');
+      expect(await (await page.request.get("/sitemap-products.xml")).text()).toContain(`/shop2/p/${ID}/`);
+      await assertClean(page, w, "hidden catalogue product");
+    } finally {
+      await setHidden(false);
     }
   });
 });
