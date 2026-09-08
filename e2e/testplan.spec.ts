@@ -138,15 +138,17 @@ test.describe("/test/ — the acceptance checklist", () => {
   test("says which items create real data, and filters down to what is unanswered", async ({ page }) => {
     await openChecklist(page);
 
-    // the standing warning, so nobody runs a real order by accident
-    const danger = page.locator("[data-tp-writes]");
-    await expect(danger).toBeVisible();
-    await expect(danger).toContainText("создают настоящие данные");
+    /* The warning is on the card and nowhere else (Dim, 08.09.2026). The list
+       that used to stand at the top of the page was written for a live shop;
+       this one is served from staging, where every order is a test one, so it
+       warned about a danger that is not there — at the top of every visit. */
+    await expect(page.locator("[data-tp-writes]")).toHaveCount(0);
     const marked = page.locator('[data-tp-item][data-writes="1"]');
     expect(await marked.count()).toBeGreaterThan(0);
     await expect(marked.first().locator(".warns")).toContainText("Создаёт настоящие данные");
-    // every listed item is one of the marked ones
-    expect(await danger.locator("li").count()).toBe(await marked.count());
+    // and an item that creates nothing carries no warning at all
+    const clean = page.locator('[data-tp-item][data-writes="0"]').first();
+    await expect(clean.locator(".warns")).toHaveCount(0);
 
     const total = await page.locator("[data-tp-item]").count();
     const id = await firstItemId(page);
@@ -159,6 +161,11 @@ test.describe("/test/ — the acceptance checklist", () => {
     await page.locator("[data-tp-only]").click();
     await expect(page.locator(`[data-tp-item="${id}"]`)).toBeVisible();
   });
+
+/** The first check that creates real data — the one carrying the warning. */
+function marked1st(page: Page) {
+  return page.locator('[data-tp-item][data-writes="1"]').first();
+}
 
   test("opens in Russian and switches the whole page to English", async ({ page }) => {
     await openChecklist(page);
@@ -177,7 +184,7 @@ test.describe("/test/ — the acceptance checklist", () => {
     // the page's own words
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page.locator("h1")).toHaveText("What we check before launch");
-    await expect(page.locator("[data-tp-writes]")).toContainText("create real data");
+    await expect(marked1st(page).locator(".warns")).toContainText("Creates real data");
     await expect(page.locator("[data-tp-only]")).toHaveText("Unanswered only");
     await expect(page.locator("[data-tp-copy]")).toHaveText("Copy answers");
     await expect(page.locator("[data-tp-state]")).toContainText("on this device only");
@@ -218,7 +225,7 @@ test.describe("/test/ — the acceptance checklist", () => {
     /* Word for word what Renat has been reading. These are not decoration:
        the whole point of adding English was that the Russian did not move. */
     await expect(page.locator("h1")).toHaveText("Что проверяем перед запуском");
-    await expect(page.locator("[data-tp-writes] h2")).toHaveText("Осторожно: эти пункты создают настоящие данные");
+    await expect(marked1st(page).locator(".warns")).toContainText("Создаёт настоящие данные");
     await expect(page.locator("[data-tp-only]")).toHaveText("Только без ответа");
     await expect(page.locator("[data-tp-copy]")).toHaveText("Скопировать ответы");
     await expect(page.locator("[data-tp-sync]")).toHaveText("Сохранить на сервер сейчас");

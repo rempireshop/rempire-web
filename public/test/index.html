@@ -106,11 +106,6 @@
   .howto ol { margin: 0; padding-left: 1.2rem; }
   .howto li { margin-bottom: .35rem; }
 
-  .danger { background: var(--bad-bg); border: 1px solid rgba(140, 26, 15, .35); padding: 1rem; margin: 1.4rem 0; }
-  .danger h2 { color: var(--bad); font-size: 1.05rem; }
-  .danger ul { margin: .6rem 0 0; padding-left: 1.1rem; }
-  .danger li { margin-bottom: .3rem; }
-  .danger a { color: var(--bad); }
 
   .jump ul { list-style: none; display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; }
   .jump a {
@@ -244,12 +239,6 @@
     </ol>
   </section>
 
-  <div class="danger" data-tp-writes hidden>
-    <h2 data-t="dangerH">Осторожно: эти пункты создают настоящие данные</h2>
-    <p data-t="dangerP">Настоящий заказ, настоящее письмо покупателю, настоящее движение по складу. Не запускай их на живом магазине, не предупредив второго.</p>
-    <ul data-tp-writes-list></ul>
-  </div>
-
   <nav class="jump" data-tp-jump hidden aria-label="Разделы" data-ta="sections">
     <span class="filters__label" data-t="sections">Разделы</span>
     <ul data-tp-jump-list></ul>
@@ -372,8 +361,6 @@
       howto3: "Пиши в комментарий всё, что показалось неудобным, — даже мелочь.",
       howto4: "Ответы сохраняются сами. Строчка вверху всегда говорит, где именно они сейчас лежат.",
       howto5: ["Чтобы ответы увидел второй, надо быть в кабинете магазина: ", { a: "/shop2/admin/", href: "/shop2/admin/" }, ". Если ты не вошёл — тестируй спокойно, всё останется на устройстве и уйдёт на сервер само, как только войдёшь."],
-      dangerH: "Осторожно: эти пункты создают настоящие данные",
-      dangerP: "Настоящий заказ, настоящее письмо покупателю, настоящее движение по складу. Не запускай их на живом магазине, не предупредив второго.",
       sections: "Разделы",
       fWho: "Чьи пункты показывать",
       fAll: "Все",
@@ -452,8 +439,6 @@
       howto3: "Write anything that felt awkward into the comment — even a small thing.",
       howto4: "Answers save themselves. The line at the top always says where they are right now.",
       howto5: ["For the other person to see your answers you have to be signed into the shop's panel: ", { a: "/shop2/admin/", href: "/shop2/admin/" }, ". If you are not signed in, test away — everything stays on the device and goes up to the server by itself the moment you sign in."],
-      dangerH: "Careful: these checks create real data",
-      dangerP: "A real order, a real letter to a buyer, a real stock movement. Do not run them on the live shop without warning the other person.",
       sections: "Sections",
       fWho: "Whose checks to show",
       fAll: "All",
@@ -758,16 +743,12 @@
     }
     $("[data-tp-jump]").hidden = order.length < 2;
 
-    /* The «creates real data» list, so nobody has to scroll the whole page to
-       learn which pumps a real order into a live shop. */
-    var writes = [];
-    for (i = 0; i < items.length; i++) if (items[i].writes) writes.push(items[i]);
-    var box = $("[data-tp-writes]"), ul = $("[data-tp-writes-list]");
-    ul.textContent = "";
-    for (i = 0; i < writes.length; i++) {
-      ul.appendChild(el("li", null, [el("a", { href: "#i-" + writes[i].id, text: say(writes[i]).title })]));
-    }
-    box.hidden = writes.length === 0;
+    /* No summary of the «creates real data» checks up here any more (Dim,
+       08.09.2026): this page is served from the staging domain, where every
+       order and every letter is a test one, and the list was a standing alarm
+       about a danger that is not present. The warning that matters is still on
+       each card — the red tag and the sentence under it — where it is read at
+       the moment somebody is about to run that check. */
 
     for (i = 0; i < state.ids.length; i++) paintItem(state.ids[i]);
     paintProgress();
