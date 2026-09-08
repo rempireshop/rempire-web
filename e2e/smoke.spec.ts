@@ -618,9 +618,35 @@ test.describe(`deployed shop — ${BASE}`, () => {
     const NOPE = "smoke-test-no-such-page-8f2c1";
 
     /* The shapes the `[...path]` route answers itself: a real 404 page, in the
-       language of the path, with a canonical that is its own address. */
+       language of the path, with a canonical that is its own address.
+
+       `info/` and `set/` were measured as 200 here on 08.09.2026, reported as
+       findings rather than asserted, and fixed the same day; this is where
+       they are held. They are worth naming because they failed in opposite
+       ways, and only one of the two could ever have been caught on a laptop:
+
+         · `info/<slug>` was checked against the directories `npm run prerender`
+           writes under public/shop2/info/, which no deployment has — only
+           public/shop2/index.html is traced into the function bundle — so the
+           check passed locally and was off on every host that serves the shop.
+           The five slugs are a build-time module now (src/data/legal-slugs.json,
+           tools/pack-legal.mjs), traced because the source names it.
+         · `set/<id>` was accepted whatever the id, on the stated grounds that
+           it had "its own request-time route that answers 404 for an id nobody
+           has" — true of p/<id> and blog/<slug>, and never true of sets. Sets
+           are the owner's to create and hide, so the id is asked of the
+           `bundles` table, exactly as a brand slug is.
+
+       Both were soft 404s in unlimited numbers, noindex on staging only for as
+       long as the whole host is, and indexable on rempireshop.com. */
     for (const { lang, seg, html } of LANGS) {
-      for (const path of [`/shop2${seg}/${NOPE}/`, `/shop2${seg}/c/${NOPE}/`, `/shop2${seg}/b/${NOPE}/`]) {
+      for (const path of [
+        `/shop2${seg}/${NOPE}/`,
+        `/shop2${seg}/c/${NOPE}/`,
+        `/shop2${seg}/b/${NOPE}/`,
+        `/shop2${seg}/info/${NOPE}/`,
+        `/shop2${seg}/set/${NOPE}/`,
+      ]) {
         const url = abs(path);
         const at = `${lang} · ${url}`;
         const res = await get(request, url);
@@ -649,24 +675,6 @@ test.describe(`deployed shop — ${BASE}`, () => {
     /* Outside /shop2/ there is no shell to patch, so this is Next's own
        not-found — still a 404, which is the only part that matters. */
     expect((await get(request, abs(`/${NOPE}/`))).status(), "a 404 outside /shop2/").toBe(404);
-
-    /* Measured on staging 08.09.2026 and deliberately NOT asserted, because it
-       is a fault in the shop rather than in this suite and a permanently red
-       smoke run is a smoke run nobody reads:
-         · /shop2/info/<anything>/ answers 200 with the shell. isKnownShopPath()
-           checks the slug against the directories `npm run prerender` wrote
-           under public/shop2/info/, and falls through to "let it through" when
-           it cannot find that directory — which on Vercel it never can: only
-           public/shop2/index.html is traced into the function bundle
-           (outputFileTracingIncludes in next.config.ts), so the check that
-           works locally is off in every deployment.
-         · /shop2/set/<anything>/ answers 200 for the same reason it is let
-           through — isKnownShopPath() accepts `set/<id>` on the grounds that
-           "they each have their own request-time route that answers 404 for an
-           id nobody has", and for sets there is no such route.
-       Both are soft 404s, unbounded in number, and both are noindex only for
-       as long as the whole host is. On rempireshop.com they would be indexable.
-       Reported rather than pinned; pin them when they are fixed. */
 
     await visit(page, await guardPage(page), abs(`/shop2/${NOPE}/`), "notfound", "the 404 screen", 404);
   });

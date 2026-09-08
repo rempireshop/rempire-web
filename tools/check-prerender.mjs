@@ -295,6 +295,29 @@ if (sharp) {
   console.log(`og:image: ${OG_SEEN.size} distinct cards (sharp missing — dimensions unchecked)`);
 }
 
+/* ---------- the policy slugs the request-time 404 believes in ------------
+   src/lib/notfound-page.ts answers 404 for an `/shop2/info/<slug>/` that is
+   not in src/data/legal-slugs.json, which tools/pack-legal.mjs writes from
+   this same LEGAL. A JSON left behind by an edit to legal.js would 404 a
+   policy page that is sitting right there on disk, so the two lists are
+   compared rather than assumed — `npm run pack:legal` is the fix. */
+{
+  const file = path.join(ROOT, "src", "data", "legal-slugs.json");
+  let generated = null;
+  try { generated = JSON.parse(await readFile(file, "utf8")); }
+  catch (e) { failed++; console.error(`FAIL src/data/legal-slugs.json does not read: ${e.message}`); }
+  if (generated && [...generated].sort().join() !== [...LEGAL_SLUGS].sort().join()) {
+    failed++;
+    console.error(
+      "FAIL src/data/legal-slugs.json is stale: it has [" + generated.join(", ") +
+      "], public/shop/legal.js has [" + LEGAL_SLUGS.join(", ") + "] — run `npm run pack:legal`",
+    );
+  } else if (generated) {
+    checked++;
+    console.log(`legal slugs: ${LEGAL_SLUGS.length} in legal.js and in src/data/legal-slugs.json`);
+  }
+}
+
 /* ---------- nothing prerendered that is not in the catalogue ------------- */
 const stale = [
   ["p", new Set(CATALOGUE.map((p) => p.id)), "product"],

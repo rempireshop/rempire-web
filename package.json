@@ -5,7 +5,7 @@
   "description": "REMPIRE shop rebuild — storefront + admin (Next.js). First route: /qa questionnaire for Renat.",
   "scripts": {
     "dev": "next dev --port 3300",
-    "prebuild": "node tools/pack-migrations.mjs && node tools/pack-content.mjs && node tools/copy-vendor.mjs && node tools/prerender-shop2.mjs",
+    "prebuild": "node tools/pack-migrations.mjs && node tools/pack-content.mjs && node tools/pack-legal.mjs && node tools/copy-vendor.mjs && node tools/prerender-shop2.mjs",
     "build": "next build",
     "postbuild": "node tools/migrate.mjs --if-configured",
     "start": "next start --port 3300",
@@ -20,6 +20,7 @@
     "i18n:gaps": "node tools/i18n-gaps.mjs",
     "pack:migrations": "node tools/pack-migrations.mjs",
     "pack:content": "node tools/pack-content.mjs",
+    "pack:legal": "node tools/pack-legal.mjs",
     "e2e": "node tools/e2e-build.mjs && playwright test",
     "e2e:ui": "node tools/e2e-build.mjs && playwright test --ui",
     "e2e:update": "node tools/e2e-build.mjs && playwright test --update-snapshots",

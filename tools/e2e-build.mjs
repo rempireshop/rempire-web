@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * Prebuild step for the e2e suite, cross-platform — the SEO layer
- * (`tools/prerender-shop2.mjs`) and the two generated-file packers
+ * (`tools/prerender-shop2.mjs`) and the three generated-file packers
  * (`db/migrations/*.sql` → `src/db/migrations.generated.ts`, `DEFAULT_CONTENT`
- * → `src/data/content.default.json`) that `npm run build`'s own `prebuild`
+ * → `src/data/content.default.json`, `LEGAL`'s keys →
+ * `src/data/legal-slugs.json`) that `npm run build`'s own `prebuild`
  * hook normally runs before `next build`. Playwright's webServer runs `next
  * dev`, not `next build` — see the long comment below for why that is not a
  * downgrade so much as the only correct choice here — and `next dev` never
@@ -70,6 +71,7 @@ const env = {
 const steps = [
   ["node", ["tools/pack-migrations.mjs"]],
   ["node", ["tools/pack-content.mjs"]],
+  ["node", ["tools/pack-legal.mjs"]],
   ["node", ["tools/copy-vendor.mjs"]],
   ["node", ["tools/prerender-shop2.mjs"]],
 ];

@@ -860,27 +860,53 @@ about the wrong bytes.
   deploy forever. It needs no secret of any kind — the only input is a public
   hostname.
 
-### Two things staging is doing wrong (08.09.2026)
+### The two soft 404s this suite found, and what fixed them (08.09.2026)
 
-Measured by this suite and left unasserted on purpose, because they are faults
-in the shop rather than in the tests and a permanently red smoke run is a smoke
-run nobody reads. Both are soft 404s — a 200 where a 404 belongs — and both are
-noindex today only for as long as the whole staging host is:
+The first run against staging found two addresses answering **200 with the
+storefront shell** where a 404 belongs — unbounded in number, noindex only for
+as long as the whole staging host is, and indexable on `rempireshop.com`, which
+is the exact class of fault the 07.09 work set out to remove. They were
+reported rather than asserted at first, on the rule that a permanently red
+smoke run is a smoke run nobody reads. Both are fixed, and the assertions now
+live in the "a page that must not exist answers 404 with noindex, in every
+language" test, beside `c/<nope>` and `b/<nope>`.
 
-- `/shop2/info/<anything>/` answers **200 with the shell**. `isKnownShopPath()`
-  in `src/lib/notfound-page.ts` checks the slug against the directories
-  `npm run prerender` wrote under `public/shop2/info/`, and falls through to
-  "let it through" when it cannot find that directory — which in a deployment
-  it never can: only `public/shop2/index.html` is traced into the function
-  bundle (`outputFileTracingIncludes` in `next.config.ts`). The check works
-  locally and is off everywhere it matters.
-- `/shop2/set/<anything>/` answers **200** for the same reason it is let
-  through: `isKnownShopPath()` accepts `set/<id>` on the grounds that "they each
-  have their own request-time route that answers 404 for an id nobody has", and
-  for sets there is no such route.
+They are worth keeping in this document because they failed in opposite ways,
+and only one of them could ever have been caught on a laptop:
 
-On `rempireshop.com` both would be indexable, in unlimited numbers. Pin them
-here once they are fixed.
+- **`/shop2/info/<anything>/`** — `isKnownShopPath()` checked the slug against
+  the directories `npm run prerender` writes under `public/shop2/info/`. A
+  deployment has no such directory: `outputFileTracingIncludes` in
+  `next.config.ts` traces only `public/shop2/index.html` into `/shop2/**`, the
+  `readdir` failed, and the function fell through to its "let every slug
+  through" branch. The check passed on the developer's disk and was off on
+  every host that serves the shop — which is worse than no check, because it
+  reads as done. The five slugs are a **build-time module** now:
+  `tools/pack-legal.mjs` writes `src/data/legal-slugs.json` from
+  `Object.keys(LEGAL)` in `public/shop/legal.js` during `prebuild` — the same
+  expression `tools/prerender-shop2.mjs` uses to decide which directories to
+  write — and `src/lib/notfound-page.ts` imports it, so Next traces it because
+  the source names it. `tools/check-prerender.mjs` fails on a JSON that has
+  drifted from `legal.js`; `npm run pack:legal` is the fix.
+- **`/shop2/set/<anything>/`** — `isKnownShopPath()` accepted `set/<id>`
+  whatever the id, on the stated grounds that "they each have their own
+  request-time route that answers 404 for an id nobody has". True of `p/<id>`
+  and `blog/<slug>`; never true of sets, which have no such route. Sets are the
+  owner's to create and hide (`bundles`, `db/migrations/120`), so a build-time
+  list would go stale the way a brand list does — the id is asked of the table
+  instead, in `notFoundPageResponse()`, exactly as a custom brand slug is. A
+  set switched off answers 404 too, because `/api/bundles/` is active-only and
+  the browser already says «Набор не найден» for one.
+
+Two things that deliberately did **not** change: `app.js`'s router still
+accepts `set/<id>` whatever the id — the list arrives from `/api/bundles/`
+after boot, and routing on data that has not landed is what used to turn an old
+link into the home page — and with «Наборы на сайте» switched off every set
+page still answers 200 with «Наборы сейчас недоступны» (that switch is a shop
+setting, not the row's `active`), which is what `e2e/sets.spec.ts` requires.
+A database that is down answers 200 with the shell for both shapes, the same
+"maybe" the brand check gives: better than telling a crawler a real page is
+gone because Postgres blinked.
 
 ## Files
 

@@ -41,17 +41,30 @@ describe("404 — the address the shop has no page for", () => {
     }
     // the single prerendered pages
     for (const s of ["sets", "gift", "blog"]) expect(isKnownShopPath([s]), s).toBe(true);
-    // shapes whose id lives in the database — accepted, and answered by their
-    // own route (a post published an hour ago must not 404 here)
+    // shapes whose id lives in the database and that have a request-time route
+    // of their own to 404 it — accepted here (a post published an hour ago
+    // must not 404 on this line)
     expect(isKnownShopPath(["p", "c-whatever"])).toBe(true);
-    expect(isKnownShopPath(["set", "beard-start"])).toBe(true);
     expect(isKnownShopPath(["blog", "some-slug"])).toBe(true);
+    /* `set/<id>` was in that list until 08.09.2026 on the same grounds, and
+       has no such route: every id anybody typed answered 200 with the shell.
+       It is refused here and asked of `bundles` by notFoundPageResponse(),
+       the way a brand is — see the two cases further down. */
+    expect(isKnownShopPath(["set", "beard-start"])).toBe(false);
+    expect(isKnownShopPath(["set", "no-such-set"])).toBe(false);
     // closed sets, known at build time: checked
     expect(isKnownShopPath(["c", "all"])).toBe(true);
     expect(isKnownShopPath(["c", "hair"])).toBe(true);
     expect(isKnownShopPath(["c", "not-a-section"])).toBe(false);
     expect(isKnownShopPath(["b", "davines"])).toBe(true);
     expect(isKnownShopPath(["b", "not-a-brand"])).toBe(false);
+    /* The five policy slugs, from src/data/legal-slugs.json — a build-time
+       module now, not the prerendered directories this used to read at request
+       time, which a deployment never has (tools/pack-legal.mjs says why). */
+    for (const s of ["shipping", "returns", "terms", "privacy", "contact"]) {
+      expect(isKnownShopPath(["info", s]), s).toBe(true);
+    }
+    expect(isKnownShopPath(["info", "no-such-policy"])).toBe(false);
     // and everything else
     expect(isKnownShopPath(["wat"])).toBe(false);
     expect(isKnownShopPath(["cart"])).toBe(false);
@@ -87,6 +100,42 @@ describe("404 — the address the shop has no page for", () => {
       expect(html, path).not.toContain("Lehte ei leitud");
       expect(html, path).not.toContain("Page not found");
     }
+  });
+});
+
+/* The half of the 404 decision that needs a database. Sets are the owner's to
+   create, rename and hide, so no list written at build time can answer for
+   them — until 08.09.2026 nothing did, and /shop2/set/<anything>/ answered 200
+   with the shell for every id anybody typed. */
+describe("404 — a set is asked of the `bundles` table", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+
+  it("hands the shell, at 200, to a set the shop really sells", async () => {
+    const res = await notFoundPageResponse("/shop2/set/beard-start/");
+    expect(res.status).toBe(200);
+    expect(await res.text()).not.toContain("Страница не найдена");
+  });
+
+  it("answers 404 with the shop's own page for an id nobody has", async () => {
+    const res = await notFoundPageResponse("/shop2/en/set/no-such-set-8f2c1/");
+    expect(res.status).toBe(404);
+    const html = await res.text();
+    expect(html).toContain('<html lang="en"');
+    expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
+    expect(html).toMatch(/<link rel="canonical" href="[^"]*\/shop2\/en\/set\/no-such-set-8f2c1\/"/);
+  });
+
+  /* «active» is what /api/bundles/ filters on, so a set the owner switched off
+     is «Набор не найден» in the browser; the status says the same thing now. */
+  it("answers 404 for a set the owner switched off", async () => {
+    await exec("update bundles set active = false where id = 'shave-smooth'");
+    try {
+      expect((await notFoundPageResponse("/shop2/set/shave-smooth/")).status).toBe(404);
+    } finally {
+      await exec("update bundles set active = true where id = 'shave-smooth'");
+    }
+    expect((await notFoundPageResponse("/shop2/set/shave-smooth/")).status).toBe(200);
   });
 });
 

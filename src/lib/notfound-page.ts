@@ -24,10 +24,17 @@
  * What is NOT a 404 is decided by `isKnownShopPath()` below — deliberately the
  * same set of shapes app.js's router accepts, so the server and the script
  * never disagree about whether an address exists.
+ *
+ * One shape answers differently in the two, on purpose. `set/<id>` is accepted
+ * by app.js's router whatever the id, because the list of sets arrives from
+ * /api/bundles/ a moment after boot and deciding a route from data that has
+ * not landed used to turn an old link into the home page; screenBundle() then
+ * says «Набор не найден» rather than bouncing. The server has the row in front
+ * of it and no such excuse, so it answers 404 — the same words to the human,
+ * and the truth to a crawler, which is the entire point of this file.
  */
-import { existsSync, readdirSync } from "node:fs";
-import path from "node:path";
 import catalogueMin from "@/data/catalogue.min.json";
+import legalSlugsGenerated from "@/data/legal-slugs.json";
 import { readShell } from "@/lib/product-page";
 import {
   baseFrom,
@@ -63,26 +70,23 @@ const CATEGORIES = new Set<string>(["all", ...CATALOGUE.map((p) => p.c)]);
 /** Every brand slug the catalogue has a page for — the same slugify() the prerender uses. */
 const BRAND_SLUGS = new Set<string>(CATALOGUE.map((p) => slugify(p.b)));
 
-/* The five policy slugs, read off the pages the prerender wrote rather than
-   copied here, so the two can never drift. A tree that has not been
-   prerendered yet (a fresh clone, a test fixture) has no directory to read:
-   then every `info/<slug>` is let through and app.js decides, exactly as it
-   did before this file existed. */
-function legalSlugs(): Set<string> | null {
-  for (const root of [process.cwd(), path.join(process.cwd(), "..")]) {
-    const dir = path.join(root, "public", "shop2", "info");
-    if (!existsSync(dir)) continue;
-    try {
-      const names = readdirSync(dir, { withFileTypes: true })
-        .filter((d) => d.isDirectory())
-        .map((d) => d.name);
-      if (names.length) return new Set(names);
-    } catch {
-      /* unreadable — fall through to "let it through" */
-    }
-  }
-  return null;
-}
+/* The five policy slugs, derived rather than copied here, so they cannot
+   drift from the pages that exist: tools/pack-legal.mjs writes this file in
+   `prebuild` from `Object.keys(LEGAL)` in public/shop/legal.js — the exact
+   expression tools/prerender-shop2.mjs uses to decide which
+   public/shop2/info/<slug>/ directories to write, and the list app.js's own
+   router gates on.
+
+   Until 08.09.2026 this function read those directories at request time,
+   which is the same list one step later and one step too late: only
+   public/shop2/index.html is traced into the function bundle
+   (`outputFileTracingIncludes` in next.config.ts), so the readdir always
+   failed in a deployment, the check fell through to "let every slug through",
+   and /shop2/info/<anything>/ answered 200 with the shell — a soft 404,
+   unbounded in number, measured against staging. A check that works on the
+   developer's disk and nowhere else is worse than no check: it reads as done.
+   A module the source names is traced because the source names it. */
+const LEGAL_SLUGS = new Set<string>(legalSlugsGenerated as string[]);
 
 /**
  * `/shop2/et/c/hair/` → `{ seg: "et", segs: ["c", "hair"] }`.
@@ -127,19 +131,27 @@ const SINGLE_PAGES = new Set(["sets", "gift", "blog"]);
  * `routeFromPath()` cascade, in the same order, so the server's 404 and the
  * script's 404 are the same answer.
  *
- * `p/<id>`, `set/<id>` and `blog/<slug>` are accepted without checking the id:
- * a custom product, a set and a post all live in the database, they each have
- * their own request-time route that answers 404 for an id nobody has, and
- * guessing here from a build-time file would 404 a page the owner published
- * an hour ago. Categories, brands and policy slugs are closed sets known at
- * build time, so that one is checked; brands are not (see below).
+ * `p/<id>` and `blog/<slug>` are accepted without checking the id: a custom
+ * product and a post both live in the database, they each have their own
+ * request-time route that answers 404 for an id nobody has
+ * (src/app/shop2/{,et/,en/}p/[id] and .../blog/[slug]), and guessing here
+ * from a build-time file would 404 a page the owner published an hour ago.
+ * `set/<id>` used to be in that sentence too and had no such route behind it,
+ * so every id anybody typed answered 200 with the shell — the soft 404 this
+ * whole file exists to remove, measured against staging on 08.09.2026. Sets
+ * are owner-editable (the `bundles` table), so a build-time list would go
+ * stale the same way; the id is asked of the database instead, in
+ * notFoundPageResponse() below, exactly as a brand is.
+ *
+ * Categories and policy slugs are closed sets known at build time, so those
+ * are checked here; brands are only half closed (see below).
  */
 export function isKnownShopPath(segs: string[]): boolean {
   if (segs.length === 0) return true; // the home page in one of the three languages
   const [kind, id] = segs;
   if (segs.length === 1) return CLIENT_SCREENS.has(kind) || SINGLE_PAGES.has(kind);
   if (segs.length !== 2 || !id) return false;
-  if (kind === "p" || kind === "set" || kind === "blog") return true;
+  if (kind === "p" || kind === "blog") return true;
   if (kind === "c") return CATEGORIES.has(id);
   /* Brands are the one set that is only half closed. The catalogue's brands
      are known here; a brand the owner typed on a product of his own is not,
@@ -148,10 +160,7 @@ export function isKnownShopPath(segs: string[]): boolean {
      e2e/admin-products.spec.ts on 07.09.2026, where a new product's brand page
      answered 404 while the product's own page answered 200. */
   if (kind === "b") return BRAND_SLUGS.has(id);
-  if (kind === "info") {
-    const slugs = legalSlugs();
-    return slugs ? slugs.has(id) : true;
-  }
+  if (kind === "info") return LEGAL_SLUGS.has(id);
   return false;
 }
 
@@ -236,6 +245,35 @@ async function isCustomBrand(slug: string): Promise<boolean> {
   }
 }
 
+/**
+ * Does the shop sell a set with this id? The same question as the brand above
+ * and answered the same way, because a set has the same shape of life: the
+ * owner creates, renames and hides one in the panel (`bundles`,
+ * db/migrations/120), so no list written at build time can be trusted, and
+ * asking the row is the only honest answer.
+ *
+ * The eight sets that shipped with the build have a prerendered page each, and
+ * the static layer serves those before this route is reached — so what arrives
+ * here is a set created after the build, one the owner switched off, or an id
+ * nobody ever had. `active` is what separates the first from the other two:
+ * /api/bundles/ is active-only, so a hidden set is «Набор не найден» in the
+ * browser as well, and the status now says the same thing.
+ *
+ * A database that is down answers "maybe", for the reason the brand check
+ * does: the shell at 200 is the older, softer wrong answer, and a far better
+ * one than telling a crawler that a real set is gone because Postgres blinked.
+ */
+async function isPublishedSet(id: string): Promise<boolean> {
+  try {
+    const { getBundle } = await import("@/lib/bundles");
+    const row = await getBundle(id);
+    return !!row && row.active;
+  } catch (err) {
+    console.error("[notfound] sets unavailable:", err);
+    return true;
+  }
+}
+
 export async function notFoundPageResponse(pathname: string): Promise<Response> {
   const shell = readShell();
   const parsed = shopPath(pathname);
@@ -243,8 +281,15 @@ export async function notFoundPageResponse(pathname: string): Promise<Response> 
 
   const lang = (langBySeg(parsed.seg) as Lang | null) ?? (langBySeg("") as Lang);
   if (isKnownShopPath(parsed.segs)) return html(shell, 200);
-  if (parsed.segs.length === 2 && parsed.segs[0] === "b" && (await isCustomBrand(parsed.segs[1]))) {
-    return html(shell, 200);
+  /* The two shapes whose ids only the database knows, asked only once the
+     closed lists above have said no. A brand slug reaches Postgres only when
+     the catalogue has never heard of it; a set id reaches it whenever the
+     static layer did not already answer with a prerendered page, which is
+     what the request-time question is for. */
+  if (parsed.segs.length === 2) {
+    const [kind, id] = parsed.segs;
+    if (kind === "b" && (await isCustomBrand(id))) return html(shell, 200);
+    if (kind === "set" && (await isPublishedSet(id))) return html(shell, 200);
   }
 
   /* The canonical is the address that was asked for, normalised the way the
