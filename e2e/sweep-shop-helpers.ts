@@ -96,6 +96,10 @@ const CONSOLE_ALLOW: RegExp[] = [
   // of a real shopper's console, but that is a server-side call, not a
   // storefront one.
   /503 \(Service Unavailable\).*\/api\/payments\/methods\//i,
+  /* The carriers' logos at the delivery step come from the same provider
+     and take the same answer without keys. Added 08.09.2026 with the
+     logos themselves; the step falls back to the coloured dots. */
+  /503 \(Service Unavailable\).*\/api\/shipping\/carriers\//i,
   // A promo code whose *shape* is unusable ("!!!", which normalises to an
   // empty code) is answered 400, while an unknown or expired code is
   // answered 200 + {ok:false} on purpose so the checkout can show a specific
@@ -469,6 +473,7 @@ export async function warmRoutes(request: APIRequestContext): Promise<void> {
     "/api/shipping/points/?country=EE&carrier=omniva",
     "/api/account/me/",
     "/api/payments/methods/",
+    "/api/shipping/carriers/",
     "/api/admin/me/",
   ];
   for (const route of routes) {

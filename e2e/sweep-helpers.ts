@@ -58,6 +58,11 @@ const CONSOLE_ALLOW: RegExp[] = [
   // says nothing about the admin panel. Flagged in the sweep report as a
   // server-side nit rather than silently tolerated everywhere.
   /\/api\/payments\/methods\//,
+  /* GET /api/shipping/carriers/ is the same posture one step along: it
+     fetches the carriers' own logos for the delivery step and answers 503
+     {error:"not_configured"} without Montonio keys, which is this whole
+     suite. The step then draws the coloured dots it always drew. */
+  /\/api\/shipping\/carriers\//,
 ];
 
 /**
