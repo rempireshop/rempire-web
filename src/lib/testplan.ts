@@ -29,7 +29,21 @@ import planFile from "@/data/testplan.json";
 
 /* ---------- the plan ----------------------------------------------------- */
 
-export type TestArea = { id: string; name: string; note?: string };
+/**
+ * The English half of a row, carried alongside the Russian rather than instead
+ * of it.
+ *
+ * Renat tests in Russian and Dim reads English, and they answer the SAME 158
+ * checks: one item id, one stored answer, one page with a language switch
+ * (public/test/index.html). Two translated files would mean two half-filled
+ * checklists, which is the one outcome this page may not produce — so the
+ * translation lives inside the row it translates, and only the four text
+ * fields are in it. `who`, `device`, `lang`, `risk` and `writes` are values,
+ * not prose: the page has its own words for them in both languages.
+ */
+export type TestText = { title: string; steps: string[]; expect: string; why: string };
+
+export type TestArea = { id: string; name: string; note?: string; en: { name: string; note: string } };
 
 export type TestItem = {
   id: string;
@@ -46,6 +60,8 @@ export type TestItem = {
       movement. The page paints these red so nobody runs one by accident on a
       live shop; see public/test/index.html. */
   writes: boolean;
+  /** The same item in English — every text field, never a subset. */
+  en: TestText;
 };
 
 export type TestPlan = { version: number; areas: TestArea[]; items: TestItem[] };

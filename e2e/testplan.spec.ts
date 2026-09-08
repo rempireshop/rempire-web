@@ -18,6 +18,14 @@ import { functionalProject, ipHeaders, loginAsAdmin } from "./fixtures";
  * Plus the handover between them: a page that collected answers with no
  * session pushes them up the moment one appears, which is exactly what
  * happens when Renat signs into the panel halfway through an evening.
+ *
+ * And since 08.09.2026 the second thing it may not do: split. Renat reads
+ * Russian, Dim reads English, and the switch in the header is a view over one
+ * checklist — same item ids, same stored document. The three tests at the
+ * bottom drive exactly that: that the switch really changes the language, that
+ * an answer given in one is still there in the other (locally and off the
+ * server), and that the Russian a tester has been using for weeks is word for
+ * word what it was.
  */
 test.use({ extraHTTPHeaders: ipHeaders(218) });
 
@@ -41,6 +49,28 @@ async function firstItemId(page: Page): Promise<string> {
 /** The answers this device has kept for itself. */
 async function localAnswers(page: Page): Promise<Record<string, { status: string; note: string }>> {
   return page.evaluate(() => JSON.parse(localStorage.getItem("rempire-testplan-v1") || "{}"));
+}
+
+/** Presses one of the two language chips and waits for the list to be redrawn
+    in it — the switch repaints in place, so what proves it finished is the
+    verdict buttons under the first item saying the other language's word. */
+async function switchTo(page: Page, lang: "ru" | "en"): Promise<void> {
+  await page.locator(`[data-tp-lang="${lang}"]`).click();
+  await expect(page.locator(`[data-tp-lang="${lang}"]`)).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-tp-set='ok']").first()).toHaveText(lang === "ru" ? "Работает" : "Works");
+}
+
+/** The first row of the shipped plan, in both languages. Read from the route
+    rather than written out here: src/data/testplan.json is replaced wholesale,
+    and a spec that hardcodes a title tests the copy, not the page. */
+type PlanRow = { id: string; title: string; steps: string[]; en: { title: string; steps: string[] } };
+
+async function firstRow(page: Page): Promise<PlanRow> {
+  return page.evaluate(async () => {
+    const r = await fetch("/api/testplan/", { headers: { accept: "application/json" } });
+    const body = (await r.json()) as { plan: { items: PlanRow[] } };
+    return body.plan.items[0];
+  });
 }
 
 test.describe("/test/ — the acceptance checklist", () => {
@@ -128,5 +158,97 @@ test.describe("/test/ — the acceptance checklist", () => {
 
     await page.locator("[data-tp-only]").click();
     await expect(page.locator(`[data-tp-item="${id}"]`)).toBeVisible();
+  });
+
+  test("opens in Russian and switches the whole page to English", async ({ page }) => {
+    await openChecklist(page);
+    const row = await firstRow(page);
+
+    /* Russian with nothing chosen: Renat is the tester this page is for, and
+       he never presses the switch at all. */
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await expect(page.locator("h1")).toHaveText("Что проверяем перед запуском");
+    await expect(page.locator("[data-tp-lang='ru']")).toHaveAttribute("aria-pressed", "true");
+    await expect(firstItem(page).locator("h3")).toHaveText(row.title);
+    await expect(page.locator("[data-tp-progress]")).toContainText("Отвечено 0 из");
+
+    await switchTo(page, "en");
+
+    // the page's own words
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.locator("h1")).toHaveText("What we check before launch");
+    await expect(page.locator("[data-tp-writes]")).toContainText("create real data");
+    await expect(page.locator("[data-tp-only]")).toHaveText("Unanswered only");
+    await expect(page.locator("[data-tp-copy]")).toHaveText("Copy answers");
+    await expect(page.locator("[data-tp-state]")).toContainText("on this device only");
+    await expect(page.locator("[data-tp-progress]")).toContainText("Answered 0 of");
+    // and the checklist itself, out of the plan's own `en` half
+    await expect(firstItem(page).locator("h3")).toHaveText(row.en.title);
+    await expect(firstItem(page).locator(".steps li").first()).toHaveText(row.en.steps[0]);
+    expect(row.en.title).not.toBe(row.title);
+    expect(row.en.steps.length).toBe(row.steps.length);
+
+    /* The choice is this device's, and it survives being closed — otherwise
+       Dim re-presses it every time he opens the list. */
+    expect(await page.evaluate(() => localStorage.getItem("rempire-testplan-lang"))).toBe("en");
+    await page.reload();
+    await expect(page.locator("[data-tp-set='ok']").first()).toHaveText("Works");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  });
+
+  test("an answer given in English is still there in Russian, and the Russian is unchanged", async ({ page }) => {
+    await openChecklist(page);
+    const id = await firstItemId(page);
+
+    await switchTo(page, "en");
+    await page.locator(`[data-tp-set="ok"][data-tp-id="${id}"]`).click();
+    await page.locator(`[data-tp-note="${id}"]`).fill("works, but the button is tiny");
+    await expect.poll(async () => (await localAnswers(page))[id]?.note).toBe("works, but the button is tiny");
+    await expect(page.locator("[data-tp-progress]")).toContainText("Answered 1 of");
+
+    /* Back to Russian: same item id, same answer, and it is the Russian words
+       for the verdict that appear against it now. One document, two readers. */
+    await switchTo(page, "ru");
+    await expect(page.locator(`[data-tp-set="ok"][data-tp-id="${id}"]`)).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(`[data-tp-note="${id}"]`)).toHaveValue("works, but the button is tiny");
+    await expect(page.locator(`[data-tp-item="${id}"]`)).toHaveAttribute("data-status", "ok");
+    await expect(page.locator(`[data-tp-by="${id}"]`)).toContainText("работает");
+    await expect(page.locator("[data-tp-progress]")).toContainText("Отвечено 1 из");
+
+    /* Word for word what Renat has been reading. These are not decoration:
+       the whole point of adding English was that the Russian did not move. */
+    await expect(page.locator("h1")).toHaveText("Что проверяем перед запуском");
+    await expect(page.locator("[data-tp-writes] h2")).toHaveText("Осторожно: эти пункты создают настоящие данные");
+    await expect(page.locator("[data-tp-only]")).toHaveText("Только без ответа");
+    await expect(page.locator("[data-tp-copy]")).toHaveText("Скопировать ответы");
+    await expect(page.locator("[data-tp-sync]")).toHaveText("Сохранить на сервер сейчас");
+    await expect(page.locator("[data-tp-state]")).toContainText("только на этом устройстве");
+    const first = firstItem(page);
+    await expect(first.locator("[data-tp-set='bad']")).toHaveText("Не работает");
+    await expect(first.locator("[data-tp-set='skip']")).toHaveText("Пропустить");
+    await expect(first.locator(".expect b")).toHaveText("Должно получиться:");
+    await expect(first.locator(".why summary")).toHaveText("Зачем это проверяем");
+  });
+
+  test("an answer given in English comes back off the server for the Russian reader", async ({ page }) => {
+    await loginAsAdmin(page);
+    await openChecklist(page);
+    await switchTo(page, "en");
+
+    const id = await firstItemId(page);
+    await page.locator(`[data-tp-set="bad"][data-tp-id="${id}"]`).click();
+    await page.locator(`[data-tp-note="${id}"]`).fill("second tap does nothing");
+    await expect(page.locator("[data-tp-state]")).toContainText("Saved on the server");
+
+    /* The device's own copy goes, so what comes back can only be the row in
+       `settings` — the same row, keyed by the same id, that Renat's phone
+       reads in Russian. */
+    await page.evaluate(() => localStorage.removeItem("rempire-testplan-v1"));
+    await page.reload();
+    await expect(page.locator(`[data-tp-set="bad"][data-tp-id="${id}"]`)).toHaveAttribute("aria-pressed", "true");
+
+    await switchTo(page, "ru");
+    await expect(page.locator(`[data-tp-note="${id}"]`)).toHaveValue("second tap does nothing");
+    await expect(page.locator(`[data-tp-by="${id}"]`)).toContainText("не работает");
   });
 });
