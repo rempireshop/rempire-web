@@ -17,6 +17,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetRateLimits } from "@/lib/auth";
 import { resetRateLimits as resetPayRateLimits } from "@/lib/payments/ratelimit";
+import { PLAN as TEST_PLAN } from "@/lib/testplan";
 import { setupDb, teardownDb } from "./helpers";
 import {
   CRON_SECRET,
@@ -70,6 +71,8 @@ let F: Fixtures;
 let restoreEnv: () => void = () => {};
 const BODIES = hostileBodies();
 const PAGINATION = ["?limit=0", "?limit=-1", "?limit=1e9", "?limit=abc", "?limit=1&limit=2", "?limit=" + "9".repeat(400)];
+/** An id the checklist really has — see the /api/testplan/ rows below. */
+const TESTPLAN_ITEM = TEST_PLAN.items[0].id;
 
 function routes(): RouteCase[] {
   const admin = { cookie: adminCookieHeader() };
@@ -103,6 +106,13 @@ function routes(): RouteCase[] {
     { name: "GET /api/geo/", path: "/api/geo/", method: "GET", exports: ["GET"], load: () => import("@/app/api/geo/route"), req: { next: true } },
     { name: "POST /api/track/", path: "/api/track/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/track/route"), body: { sid: "s1", type: "view", path: "/", productId: PRODUCT.id, value: 1, lang: "RU", ref: "google.com" } },
     { name: "POST /api/stock-alerts/", path: "/api/stock-alerts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/stock-alerts/route"), body: { email: "fuzz@example.com", productId: PRODUCT.id, lang: "RU" } },
+    /* The acceptance checklist at /test/. GET is public on purpose (a tester
+       with no session still has to see the list); PUT is the admin half and is
+       listed with the other locked routes below. The item id is read off the
+       plan rather than written out — src/data/testplan.json is replaced
+       wholesale, and a hardcoded id here would quietly stop fuzzing the
+       validation and start fuzzing the "unknown id" branch only. */
+    { name: "GET /api/testplan/", path: "/api/testplan/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/testplan/route") },
     // search: the storefront's last-resort «what does this phrase mean» call.
     // With no OPENAI_API_KEY (which is the suite) it never reaches the model —
     // the body is still read and checked first, so this walks the validation.
@@ -156,6 +166,9 @@ function routes(): RouteCase[] {
     { deep: true, name: "PUT /api/admin/overrides/", path: "/api/admin/overrides/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/overrides/route"), auth: "admin", req: admin, body: { id: PRODUCT.id, price: 9.9, stock: "in", seoTitle: "t", seoDesc: "d", subcat: "s", varImg: [0], videoUrl: "https://x/y", gallery: [{ url: "/a.webp", thumb: "/a.webp", alt: "" }], proPrice: 5, description: { RU: "о" }, seo: { RU: { title: "t", desc: "d" }, ET: { title: "e" } } } },
     { name: "GET /api/admin/settings/", path: "/api/admin/settings/", method: "GET", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/settings/route"), auth: "admin", req: admin },
     { deep: true, name: "PUT /api/admin/settings/", path: "/api/admin/settings/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/admin/settings/route"), auth: "admin", req: admin, body: { chatbot: true, bundles: false, hero: null, flows: { abandoned: true }, pricing: { proDiscountPct: 20 }, gift_amounts: [25, 50, 100] } },
+    /* The answers half of /api/testplan/ — the same route as the public GET
+       above, so it is listed here for its lock rather than for its path. */
+    { name: "PUT /api/testplan/", path: "/api/testplan/", method: "PUT", exports: ["GET", "PUT"], load: () => import("@/app/api/testplan/route"), auth: "admin", req: admin, body: { answers: { [TESTPLAN_ITEM]: { status: "ok", note: "работает, но кнопка мелкая", at: "2026-09-08T10:00:00.000Z", by: "renat" } } } },
     { name: "GET /api/admin/bundles/", path: "/api/admin/bundles/", method: "GET", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin },
     { deep: true, name: "POST /api/admin/bundles/", path: "/api/admin/bundles/", method: "POST", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin, body: { id: "fuzz-set", cat: "beard", title: { RU: "Фазз", ET: "F", EN: "F" }, desc: { RU: "о" }, items: [{ productId: PRODUCT.id, variant: 0, qty: 1 }, { productId: PRODUCT_2.id, variant: 0, qty: 1 }], price: 1, image: null, active: true, sort: 10 } },
     { name: "PATCH /api/admin/bundles/", path: "/api/admin/bundles/", method: "PATCH", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/bundles/route"), auth: "admin", req: admin, body: { id: "beard-start", active: false, order: ["beard-start"] } },
