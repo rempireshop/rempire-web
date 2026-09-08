@@ -109,6 +109,12 @@ function routes(): RouteCase[] {
     { name: "GET /api/blog/", path: "/api/blog/", method: "GET", exports: ["GET"], load: () => import("@/app/api/blog/route"), queries: ["?lang=RU&page=1", "?page=-1", "?page=1e9", "?page=abc", "?lang=" + "x".repeat(500)] },
     { name: "GET /api/blog/[slug]/", path: "/api/blog/x/", method: "GET", exports: ["GET"], load: () => import("@/app/api/blog/[slug]/route"), params: { slug: "fuzz-post" } },
     { name: "GET /api/shipping/points/", path: "/api/shipping/points/", method: "GET", exports: ["GET"], load: () => import("@/app/api/shipping/points/route"), queries: ["?country=EE&carrier=omniva", "?country=zz&carrier=all", "?country=&carrier=", "?country=EE&country=LV"] },
+    { name: "GET /api/shipping/carriers/", path: "/api/shipping/carriers/", method: "GET", exports: ["GET"], load: () => import("@/app/api/shipping/carriers/route") },
+    /* The shipment webhook. Like its payment twin it is signature-only, so
+       every case here is a refusal — which is the property worth fuzzing: no
+       body shape may talk this route into recording a status or closing an
+       order without a token signed with our own secret. */
+    { name: "POST /api/shipping/notify/", path: "/api/shipping/notify/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/shipping/notify/route"), body: { payload: "not.a.token" } },
     { name: "GET /api/payments/methods/", path: "/api/payments/methods/", method: "GET", exports: ["GET"], load: () => import("@/app/api/payments/methods/route") },
     { name: "GET /api/payments/mock/", path: "/api/payments/mock/", method: "GET", exports: ["GET"], load: () => import("@/app/api/payments/mock/route"), jsonBody: false, queries: ["", "?t=abc", "?t=abc&do=paid", "?do=failed"] },
     { deep: true, name: "POST /api/payments/create/", path: "/api/payments/create/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/payments/create/route"), body: { orderId: F.orderId, method: "bank", bank: "LHVBEE22", lang: "RU" } },
@@ -463,6 +469,7 @@ describe("API fuzzing", () => {
       ["/api/giftcards/check/", () => import("@/app/api/giftcards/check/route"), "GET"],
       ["/api/payments/create/", () => import("@/app/api/payments/create/route"), "GET"],
       ["/api/payments/notify/", () => import("@/app/api/payments/notify/route"), "GET"],
+      ["/api/shipping/notify/", () => import("@/app/api/shipping/notify/route"), "GET"],
       ["/api/admin/mail/send/", () => import("@/app/api/admin/mail/send/route"), "GET"],
       ["/api/admin/mail/test/", () => import("@/app/api/admin/mail/test/route"), "GET"],
       ["/api/admin/ai/text/", () => import("@/app/api/admin/ai/text/route"), "GET"],

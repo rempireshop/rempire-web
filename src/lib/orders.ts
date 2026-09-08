@@ -1401,6 +1401,24 @@ export async function getOrderByPaymentRef(ref: string): Promise<Order | null> {
   return rows.length ? mapOrder(rows[0]) : null;
 }
 
+/**
+ * The order a parcel belongs to — `orders.shipping.montonio.shipmentId`.
+ *
+ * The shipping webhook (POST /api/shipping/notify/) is about a *shipment*, and
+ * Montonio's own reference documents no order number on it, so this is the way
+ * in whenever the token carries no `merchantReference`. Same shape and the same
+ * "newest first" caution as getOrderByPaymentRef() above.
+ */
+export async function getOrderByShipmentId(shipmentId: string): Promise<Order | null> {
+  const id = String(shipmentId ?? "").trim();
+  if (!id) return null;
+  const rows = await query<OrderRow>(
+    "select * from orders where shipping->'montonio'->>'shipmentId' = $1 order by created_at desc limit 1",
+    [id],
+  );
+  return rows.length ? mapOrder(rows[0]) : null;
+}
+
 /** Merges into the existing payment payload rather than replacing it. */
 export async function setOrderPayment(id: string, payment: Record<string, unknown>): Promise<Order | null> {
   if (!id || !UUID_RE.test(id)) return null;

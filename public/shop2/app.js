@@ -463,6 +463,8 @@
         "Silt on loodud",
       "Шаг «этикетка» изменён":
         "Sammu «silt» muudetud",
+      "Новый статус посылки":
+        "Uus saadetise staatus",
       "Счёт выписан":
         "Arve on väljastatud",
       "Счёт отправлен":
@@ -2684,6 +2686,8 @@
         "Label created",
       "Шаг «этикетка» изменён":
         "The label step changed",
+      "Новый статус посылки":
+        "A new parcel status",
       "Счёт выписан":
         "Invoice issued",
       "Счёт отправлен":
@@ -5770,6 +5774,9 @@
      kept, and the route is CDN-cached for an hour — four cheap calls, not four
      expensive ones. */
   function loadPoints() {
+    // The brand marks travel with the machine lists: same step, same one shot,
+    // and the chips they belong to are drawn from the same block.
+    loadCarrierLogos();
     var all = CARRIERS_BY_COUNTRY[S.country] || [];
     for (var i = 0; i < all.length; i++) loadPointsFor(all[i]);
   }
@@ -5806,6 +5813,36 @@
         else done(demoPoints(carrier));
       })
       .catch(function () { apiSeen(false); done(demoPoints(carrier)); });
+  }
+  /* The carriers' own brand marks — GET /api/shipping/carriers/ (server route:
+     src/app/api/shipping/carriers/route.ts, 6h cache, only answers when
+     Montonio is configured). Dim, 08.09.2026: «поставьте фирменный знак рядом
+     с названием, как у банков» — the shopper should recognise on this step the
+     same mark he will walk up to at the machine. Until it answers — or if it
+     never does — the chips keep the colour dot they have always had
+     (.carrier::before in styles.css). One shot, silent, and it patches its own
+     block instead of calling render(), like the other checkout probes. */
+  var CARRIER_LOGOS = { by: null, asked: false };
+  function loadCarrierLogos() {
+    if (CARRIER_LOGOS.asked) return;
+    CARRIER_LOGOS.asked = true;
+    fetch("/api/shipping/carriers/").then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.ok || !j.carriers || !j.carriers.length) return;
+      apiSeen(true);
+      var by = {};
+      for (var i = 0; i < j.carriers.length; i++) {
+        var c = j.carriers[i];
+        // a carrier Montonio lists without a mark keeps its dot, not a hole
+        if (c && c.code && c.logoUrl) by[String(c.code).toLowerCase()] = String(c.logoUrl);
+      }
+      CARRIER_LOGOS.by = by;
+      patchDelivery();
+    }).catch(function () { apiSeen(false); });
+  }
+  /** The mark for one carrier code, or "" — the caller draws the name either way. */
+  function carrierLogo(code) {
+    var by = CARRIER_LOGOS.by;
+    return by && by[code] ? by[code] : "";
   }
   /** Name, address and city — the three things people type. No cap: the list
       view caps its own render (pointsFiltered), and the map applies its own
@@ -11469,7 +11506,16 @@
       }).join("") + "</div>" +
       (cur === "parcel" && chips.length > 1
         ? '<div class="carriers" role="group" aria-label="Перевозчик">' + chips.map(function (c) {
-            return '<button class="carrier" data-carrier="' + c + '" aria-current="' + (c === shipCarrier()) + '">' +
+            /* The mark and the name, exactly the pattern the bank chips use
+               (UX fix 9) — with the one difference that follows from showing
+               both: the name is already there as text, so the image is
+               decorative and its alt is empty rather than the carrier's name
+               said twice. A mark that 404s or times out is removed by the same
+               capture-phase "error" listener at the bottom of this file, and
+               what is left is the name that was beside it all along. */
+            var logo = carrierLogo(c);
+            return '<button class="carrier' + (logo ? " carrier--logo" : "") + '" data-carrier="' + c + '" aria-current="' + (c === shipCarrier()) + '">' +
+              (logo ? '<img class="carrier__logo" src="' + esc(logo) + '" alt="" height="20">' : "") +
               CARRIER_NAMES[c] + "</button>";
           }).join("") + "</div>"
         : "") +
@@ -15550,6 +15596,10 @@
     "product.hide": "Товар снят с продажи", "product.show": "Товар снова в продаже",
     "order.status": "Статус заказа", "order.note": "Заметка к заказу",
     "shipment.create": "Этикетка создана", "shipment.step": "Шаг «этикетка» изменён",
+    /* Written once per status word, not once per webhook — the news is that a
+       word nobody had seen before arrived from the carrier, and the word
+       itself is what the line ends with (payload `code`, see auditText). */
+    "shipment.status": "Новый статус посылки",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "mail.send": "Письмо клиенту отправлено",
     "setting.set": "Настройка изменена",
@@ -27428,10 +27478,14 @@
 
   /* UX fix 9: a bank's logoUrl that 404s or times out falls back to its name
      — "error" does not bubble, so this has to run on the capture phase, same
-     as the blur delegate above. */
+     as the blur delegate above. The carrier marks (Dim, 08.09.2026) fall back
+     through the same listener: their alt is empty because the carrier's name
+     is already text beside the image, so this leaves that name alone on the
+     chip — which is the whole requirement, and the reason they were built on
+     the bank pattern rather than a second one of their own. */
   document.addEventListener("error", function (e) {
     var t = e.target;
-    if (t && t.matches && t.matches(".bank__logo")) t.replaceWith(document.createTextNode(t.alt));
+    if (t && t.matches && t.matches(".bank__logo,.carrier__logo")) t.replaceWith(document.createTextNode(t.alt));
   }, true);
 
   document.addEventListener("keydown", function (e) {
