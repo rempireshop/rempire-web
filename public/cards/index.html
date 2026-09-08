@@ -115,8 +115,10 @@
     padding: .7rem 0; margin: 0 -1.1rem; padding-inline: 1.1rem; background: var(--page); border-bottom: 1px solid var(--rule); }
   .bar .lbl { font-size: .82rem; color: var(--muted); margin-right: .2rem; }
   .bar .gap { flex-basis: 100%; height: 0; }
-  /* The phone model is a hint, not the setting — the number is the setting.
-     Dropped below 460 px, where three long labels wrapped to three rows. */
+  /* The phone model is a hint, not the setting — the number is; and a button
+     that only ever says «вниз» or «вверх» does not need the verb repeated
+     three times. Dropped below 460 px, where the long labels turned the bar
+     into five rows and a quarter of the screen. */
   @media (max-width: 460px) { .wbtn .wide { display: none; } }
   .wbtn { font: inherit; font-size: .82rem; padding: .35rem .7rem; border: 1px solid var(--rule);
     background: transparent; color: var(--soft); cursor: pointer; min-height: 2.4rem; }
@@ -184,7 +186,6 @@
        quarter of the screen following you down five shelves is worse than
        scrolling back up to it once. */
     .bar { position: static; margin-inline: -.6rem; padding-inline: .6rem; }
-    .bar .lbl { flex-basis: 100%; margin: 0 0 .1rem; }
     .wbtn { font-size: .78rem; padding: .3rem .55rem; min-height: 2.2rem; }
     h1 { font-size: 1.5rem; }
     .why h2 { font-size: 1.1rem; }
@@ -210,8 +211,8 @@
     <button class="wbtn" id="sitecol" aria-pressed="true">Цвета сайта</button>
     <span class="gap"></span>
     <span class="lbl">Список объёмов:</span>
-    <button class="wbtn" data-dir="down" aria-pressed="true">Открывать вниз</button>
-    <button class="wbtn" data-dir="up" aria-pressed="false">Открывать вверх</button>
+    <button class="wbtn" data-dir="down" aria-pressed="true"><span class="wide">Открывать </span>вниз</button>
+    <button class="wbtn" data-dir="up" aria-pressed="false"><span class="wide">Открывать </span>вверх</button>
     <button class="wbtn" data-dir="auto" aria-pressed="false">Как поместится</button>
   </div>
 
