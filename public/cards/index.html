@@ -201,6 +201,7 @@
     <p>Надпись «В корзину» — это <span class="num">11</span> пикселей текста. Чтобы по ней можно было попасть, магазин незаметно растягивает область нажатия на <span class="num">14</span> пикселей вверх и вниз: получается около <span class="num">39</span>. Это работает, пока такая надпись одна. Когда их две, одна под другой, невидимые половины встречаются — и палец попадает не туда, куда целился, хотя на экране ничто не соприкасается. <b>Нажмите «Показать зоны нажатия»</b>: пунктиром обведена настоящая зона каждого элемента, а под каждой полкой появляется строчка с двумя числами — <b>самая маленькая зона</b> и <b>пересекаются ли зоны между собой</b>. Второе и есть главное: пересечение означает, что палец попадёт не туда, куда целился.</p>
     <p>Сплошной красной рамкой обведено только то, что меньше <span class="num">24</span> пикселей, — это уже нарушение стандарта. Между <span class="num">24</span> и <span class="num">44</span> рамка пунктирная: в карточку шириной <span class="num">164</span> пикселя три кнопки объёма по <span class="num">44</span> пикселя вместе с фотографией не помещаются никак, и красить всю полку в красный значило бы не сказать ничего.</p>
     <p>Настоящей кнопке эта хитрость не нужна: она сама <span class="num">32–38</span> пикселей высотой, и её видно ровно там, где она есть. Поэтому в вариантах с кнопками зон перекрытия нет по построению, а не потому, что мы их развели.</p>
+    <p><b>И вот на что здесь стоит смотреть внимательно.</b> У варианта «Как сейчас» зона нажатия самая большая из всех пяти — <span class="num">46</span> пикселей. Но видно там <span class="num">18</span>: тонкую надпись. Палец идёт туда, куда смотрит глаз, а глаз видит надпись, а не зону вокруг неё. Поэтому строчка под каждой полкой показывает <b>оба</b> числа. Кнопка в <span class="num">32</span> пикселя, которую видно целиком, на телефоне удобнее подчёркнутой надписи в <span class="num">18</span> с невидимым запасом.</p>
 
     <h3>Зачем сумка на кнопке</h3>
     <p>Значок сумки читается быстрее слова и не зависит от языка: покупатель из Финляндии понимает кнопку, не читая её. На <span class="num">12</span> пикселях подписи это заметная разница. Так делают все крупные магазины — по той же причине, а не ради украшения.</p>
@@ -359,19 +360,20 @@
       if (!b.width || !b.height) return;
       const reach = el.classList.contains("link") || el.classList.contains("szb") ? 14 : 0;
       out.push({ el, top: b.top - reach, bottom: b.bottom + reach, left: b.left, right: b.right,
-        h: b.height + reach * 2, w: b.width });
+        h: b.height + reach * 2, seen: b.height, w: b.width });
     });
     return out;
   }
 
   function measureTargets() {
     document.querySelectorAll(".opt").forEach((sec) => {
-      let smallest = Infinity, worstW = 0, worstH = 0;
+      let smallest = Infinity, seen = Infinity, worstW = 0, worstH = 0;
       sec.querySelectorAll(".card").forEach((c) => {
         const t = targets(c);
         t.forEach((x) => {
           x.el.dataset.small = x.h < 24 ? "1" : "0";
           if (x.h < smallest) smallest = x.h;
+          if (x.seen < seen) seen = x.seen;
         });
         /* Two tap areas sharing a rectangle is the failure this page was made
            for: nothing looks wrong on screen and the thumb still lands on the
@@ -387,10 +389,19 @@
       const v = sec.querySelector(".verdict");
       if (!v) return;
       const min = smallest === Infinity ? 0 : Math.round(smallest);
+      const vis = seen === Infinity ? 0 : Math.round(seen);
       const overlap = worstW > 0 && worstH > 0
         ? '<span class="bad">зоны нажатия пересекаются: ' + Math.round(worstW) + " × " + Math.round(worstH) + " px</span>"
         : "зоны нажатия нигде не пересекаются ✓";
-      v.innerHTML = "Самая маленькая зона нажатия — <b>" + min + " px</b>. " + overlap + ".";
+      /* Both numbers, always, and the gap between them stated out loud where
+         there is one: a 46-px zone under an 18-px label is not a 46-px button,
+         and printing only the zone would score the two text layouts highest —
+         which is the opposite of what this page is asking. */
+      const size = vis === min
+        ? "Самое маленькое, во что надо попасть: <b>" + min + " px</b> — столько же и видно."
+        : "Самое маленькое, во что надо попасть: видно <b>" + vis + " px</b>, нажимается <b>" + min +
+          " px</b> — попасть можно, но целиться приходится в надпись.";
+      v.innerHTML = size + " " + overlap + ".";
     });
   }
 
