@@ -46,6 +46,10 @@
     --cw: 164px;
   }
   * { box-sizing: border-box; }
+  /* Chrome on Android inflates the type of any block it decides is wide,
+     which turned this page into something twice its size on a Galaxy S21.
+     Pinned to 100 % the way /guide/ has always pinned it. */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
   .wrap { max-width: 60rem; margin: 0 auto; padding: 2.2rem 1.1rem 4rem; display: flex; flex-direction: column; gap: 1.8rem; }
 
@@ -111,6 +115,9 @@
     padding: .7rem 0; margin: 0 -1.1rem; padding-inline: 1.1rem; background: var(--page); border-bottom: 1px solid var(--rule); }
   .bar .lbl { font-size: .82rem; color: var(--muted); margin-right: .2rem; }
   .bar .gap { flex-basis: 100%; height: 0; }
+  /* The phone model is a hint, not the setting — the number is the setting.
+     Dropped below 460 px, where three long labels wrapped to three rows. */
+  @media (max-width: 460px) { .wbtn .wide { display: none; } }
   .wbtn { font: inherit; font-size: .82rem; padding: .35rem .7rem; border: 1px solid var(--rule);
     background: transparent; color: var(--soft); cursor: pointer; min-height: 2.4rem; }
   .wbtn[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); font-weight: 600; }
@@ -164,6 +171,25 @@
   .why ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .35rem; }
   .num { font-variant-numeric: tabular-nums; }
 
+  /* ---- the phone ------------------------------------------------------ */
+  /* Everything here is arithmetic, not taste. A shelf is two 164-px cards and
+     a 10-px gap — 338 px — and a 412-px phone has 74 px spare around it. The
+     page was spending more than that on its own padding, so the second card
+     was cut off. These numbers give it back. */
+  @media (max-width: 460px) {
+    .wrap { padding-inline: .6rem; gap: 1.2rem; }
+    .phone { padding: 8px; }
+    .opt { padding: .8rem; }
+    /* Not sticky on a phone: the bar is four rows of buttons there, and a
+       quarter of the screen following you down five shelves is worse than
+       scrolling back up to it once. */
+    .bar { position: static; margin-inline: -.6rem; padding-inline: .6rem; }
+    .bar .lbl { flex-basis: 100%; margin: 0 0 .1rem; }
+    .wbtn { font-size: .78rem; padding: .3rem .55rem; min-height: 2.2rem; }
+    h1 { font-size: 1.5rem; }
+    .why h2 { font-size: 1.1rem; }
+  }
+
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -176,9 +202,9 @@
 
   <div class="bar">
     <span class="lbl">Ширина экрана:</span>
-    <button class="wbtn" data-w="164" aria-pressed="true">iPhone SE · 375</button>
-    <button class="wbtn" data-w="173" aria-pressed="false">iPhone 14 · 390</button>
-    <button class="wbtn" data-w="193" aria-pressed="false">iPhone Plus · 430</button>
+    <button class="wbtn" data-w="164" aria-pressed="true">375 px<span class="wide"> · iPhone SE</span></button>
+    <button class="wbtn" data-w="173" aria-pressed="false">390 px<span class="wide"> · iPhone 14</span></button>
+    <button class="wbtn" data-w="193" aria-pressed="false">430 px<span class="wide"> · iPhone Plus</span></button>
     <span class="gap"></span>
     <button class="wbtn" id="hits" aria-pressed="false">Показать зоны нажатия</button>
     <button class="wbtn" id="sitecol" aria-pressed="true">Цвета сайта</button>
