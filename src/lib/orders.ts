@@ -1417,10 +1417,27 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
   if (!ORDER_STATUSES.includes(status)) throw new OrderError("bad_status", String(status));
   const before = await getOrder(id);
   if (!before) return null;
-  const rows = await query<OrderRow>("update orders set status = $2, updated_at = now() where id = $1 returning *", [
-    id,
-    status,
-  ]);
+  /* The day «Доставлен» was pressed, stamped onto the shipping jsonb the first
+     time it happens. The shop needs it for exactly one thing: the return
+     window a customer's «Хочу вернуть заказ» tick lives inside runs from the
+     hand-over and from nothing else (src/lib/returns.ts, and the 30 days
+     /shop2/info/returns/ promises). `updated_at` cannot stand in for it — a
+     note typed a month later moves that. Written once: an undo back to
+     shipped and a second «Доставлен» keep the first date, because the parcel
+     reached the customer once. */
+  const deliveredStamp = status === "delivered" ? new Date().toISOString() : null;
+  const rows = await query<OrderRow>(
+    `update orders
+        set status = $2,
+            shipping = case
+              when $3::text is not null and (shipping -> 'deliveredAt') is null
+                then coalesce(shipping, '{}'::jsonb) || jsonb_build_object('deliveredAt', $3::text)
+              else shipping end,
+            updated_at = now()
+      where id = $1
+     returning *`,
+    [id, status, deliveredStamp],
+  );
   const after = mapOrder(rows[0]);
   await writeAudit(actor, "order.status", { id, number: after.number, from: before.status, to: status });
 

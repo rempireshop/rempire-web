@@ -125,6 +125,7 @@ function routes(): RouteCase[] {
     { name: "PATCH /api/account/me/", path: "/api/account/me/", method: "PATCH", exports: ["GET", "PATCH"], load: () => import("@/app/api/account/me/route"), auth: "customer", req: cust, body: { name: "Фазз", phone: "+372 1", birthday: "1990-02-28", marketing: true, lang: "ET" } },
     { name: "GET /api/account/pricing/", path: "/api/account/pricing/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/pricing/route"), auth: "customer", req: cust },
     { name: "POST /api/account/pro-request/", path: "/api/account/pro-request/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/pro-request/route"), auth: "customer", req: cust, body: { company: "Salon OÜ", regCode: "12345678", phone: "+372 1" } },
+    { name: "POST /api/account/return-request/", path: "/api/account/return-request/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/return-request/route"), auth: "customer", req: cust, body: { number: "R-100001" } },
 
     /* ---- admin ----------------------------------------------------------- */
     { name: "POST /api/admin/login/", path: "/api/admin/login/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/login/route"), body: { password: "wrong password" } },

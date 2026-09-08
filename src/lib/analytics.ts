@@ -508,8 +508,15 @@ export type OverviewSummary = {
   /** Paid orders of the last 7×24 hours. `perDay` is total ÷ 7, not ÷ days-with-a-sale. */
   revenue7d: { total: number; perDay: number; orders: number };
   lowStock: { total: number; low: number; out: number; items: OverviewLowStockItem[] };
-  /** The four queues the owner is the only one who can empty. */
-  attention: { ordersToShip: number; proRequests: number; reviewsPending: number; stockAlerts: number };
+  /** The five queues the owner is the only one who can empty. */
+  attention: {
+    ordersToShip: number;
+    proRequests: number;
+    reviewsPending: number;
+    stockAlerts: number;
+    /** Delivered orders whose customer ticked «Хочу вернуть заказ» — src/lib/returns.ts. */
+    returnRequests: number;
+  };
 };
 
 async function qOrdersToday(dayStart: Date, dayEnd: Date, prevStart: Date) {
@@ -571,10 +578,10 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
 }
 
 /**
- * The four queues. One statement of four subselects rather than four round
+ * The five queues. One statement of five subselects rather than five round
  * trips — each is a count over an index this schema already carries
  * (orders_status_idx, customers_pro_pending_idx, reviews_status_idx,
- * stock_alerts_pending_idx).
+ * stock_alerts_pending_idx, orders_return_requested_idx).
  *
  * `to_ship` leaves out the salon channel: a sale rung up at the counter is
  * created paid and handed over on the spot (POST /api/admin/pos-orders), so
@@ -599,16 +606,27 @@ async function qOverviewLowStock(): Promise<OverviewSummary["lowStock"]> {
  * «Новые» / «Этикетка готова» chips split the same set in two; their sum is
  * this number (admWaitingCount in app.js reads the loaded list and lands on
  * the same total).
+ *
+ * `returns` is the tick a customer put on a delivered order — «Хочу вернуть
+ * заказ», src/lib/returns.ts. It counts the orders still standing at
+ * «доставлен», because that is what "waiting for the owner to write back"
+ * looks like in the database: the answer to a return is a refund, and a refund
+ * that covers the order moves it to «возврат» and out of this count by itself.
+ * The predicate is spelled exactly as orders_return_requested_idx spells it
+ * (db/migrations/149_order_return_request.sql), or the partial index would not
+ * be used.
  */
 async function qAttention(): Promise<OverviewSummary["attention"]> {
-  const rows = await query<{ to_ship: string; pro: string; reviews: string; alerts: string }>(
+  const rows = await query<{ to_ship: string; pro: string; reviews: string; alerts: string; returns: string }>(
     `select
        (select count(*) from orders
           where status = 'paid' and channel <> 'pos'
             and coalesce(shipping->>'method', '') <> 'digital') as to_ship,
        (select count(*) from customers where pro_requested_at is not null and tier = 'retail') as pro,
        (select count(*) from reviews where status = 'pending') as reviews,
-       (select count(*) from stock_alerts where sent_at is null) as alerts`,
+       (select count(*) from stock_alerts where sent_at is null) as alerts,
+       (select count(*) from orders
+          where status = 'delivered' and (shipping -> 'returnRequest') is not null) as returns`,
   );
   const r = rows[0];
   return {
@@ -616,6 +634,7 @@ async function qAttention(): Promise<OverviewSummary["attention"]> {
     proRequests: int(r?.pro),
     reviewsPending: int(r?.reviews),
     stockAlerts: int(r?.alerts),
+    returnRequests: int(r?.returns),
   };
 }
 

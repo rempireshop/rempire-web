@@ -636,6 +636,11 @@
       "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
         "Tellimusi veel ei ole. Kõik, mis selle e-posti aadressiga tellid, ilmub siia.",
       "Отследить": "Jälgi pakki",
+      /* returns: the tick on a delivered order, and what it says afterwards */
+      "Хочу вернуть заказ": "Soovin tellimuse tagastada",
+      "Возврат запрошен": "Tagastus taotletud",
+      "Мы получили заявку и напишем вам на почту.": "Saime taotluse kätte ja kirjutame teile e-postiga.",
+      "Заявка на возврат отправлена ✓": "Tagastustaotlus on saadetud ✓",
       "принят": "vastu võetud", "оплачен": "makstud", "отправлен": "teele saadetud",
       "отменён": "tühistatud", "возврат": "tagastatud",
       "Телефон": "Telefon",
@@ -1633,6 +1638,14 @@
       "заявка на партнёрство": "partnerlustaotlus",
       "заявки на партнёрство": "partnerlustaotlust",
       "заявок на партнёрство": "partnerlustaotlust",
+      /* returns: the queue row on «Обзор», the line on the order card and the
+         journal's word for the tick — src/lib/returns.ts */
+      "заявка на возврат": "tagastustaotlus",
+      "заявки на возврат": "tagastustaotlust",
+      "заявок на возврат": "tagastustaotlust",
+      "Покупатель просит вернуть заказ": "Ostja soovib tellimust tagastada",
+      "Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.":
+        "Kirjutage ostjale: pood ei saa tagastussilti väljastada — tagastuskoodi saadab vedaja.",
       "Сводка не отвечает — цифры могут быть неполными.": "Kokkuvõte ei vasta — numbrid võivad olla puudulikud.",
       "Повторить": "Proovi uuesti",
       "Отправлены": "Saadetud",
@@ -2282,6 +2295,13 @@
       "Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.":
         "Kirjutage meile e-kiri koos tellimuse numbriga — saadame juhised ja aadressi; raha tagastame samal viisil 10 tööpäeva jooksul pärast kontrolli.",
       "Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "Avatud kosmeetikat ei saa hügieenilistel põhjustel tagastada.",
+      /* returns: the shop's own paragraph at the foot of /info/returns/ — the
+         tick in the account, and the promise that a person answers it */
+      "Как попросить возврат": "Kuidas tagastust taotleda",
+      "Если заказ уже доставлен, откройте «Кабинет → Мои заказы» и отметьте «Хочу вернуть заказ» — на это есть 30 дней с момента получения.":
+        "Kui tellimus on juba kohale toimetatud, avage «Konto → Minu tellimused» ja märkige «Soovin tellimuse tagastada» — selleks on aega 30 päeva kättesaamisest.",
+      "Мы увидим отметку и напишем вам на почту: расскажем, как отправить посылку обратно, и вернём деньги после проверки.":
+        "Näeme märget ja kirjutame teile e-postiga: räägime, kuidas pakk tagasi saata, ja tagastame raha pärast kontrolli.",
       "Полные условия возврата": "Tagastamise täistingimused", "Все контакты": "Kõik kontaktid",
       "Полные условия доставки": "Tarne täistingimused",
       "Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.":
@@ -2857,6 +2877,11 @@
       "Заказов пока нет. Всё, что вы закажете с этой почты, появится здесь.":
         "No orders yet. Everything you order with this e-mail will show up here.",
       "Отследить": "Track",
+      /* returns: the tick on a delivered order, and what it says afterwards */
+      "Хочу вернуть заказ": "I want to return this order",
+      "Возврат запрошен": "Return requested",
+      "Мы получили заявку и напишем вам на почту.": "We have your request and will write to you by e-mail.",
+      "Заявка на возврат отправлена ✓": "Return request sent ✓",
       "принят": "received", "оплачен": "paid", "отправлен": "shipped",
       "отменён": "cancelled", "возврат": "refunded",
       "Телефон": "Phone",
@@ -3837,6 +3862,14 @@
       "заявка на партнёрство": "partner request",
       "заявки на партнёрство": "partner requests",
       "заявок на партнёрство": "partner requests",
+      /* returns: the queue row on «Обзор», the line on the order card and the
+         journal's word for the tick — src/lib/returns.ts */
+      "заявка на возврат": "return request",
+      "заявки на возврат": "return requests",
+      "заявок на возврат": "return requests",
+      "Покупатель просит вернуть заказ": "The customer wants to return this order",
+      "Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.":
+        "Write to the customer: the shop cannot issue a return label — the return code comes from the carrier.",
       "Сводка не отвечает — цифры могут быть неполными.": "The summary is not answering — the figures may be incomplete.",
       "Повторить": "Try again",
       "Отправлены": "Shipped",
@@ -4484,6 +4517,13 @@
       "Напишите нам на почту с номером заказа — пришлём инструкцию и адрес; деньги вернём тем же способом в течение 10 рабочих дней после проверки.":
         "E-mail us with the order number — we send the instructions and the address; the refund goes back the same way within 10 working days after the check.",
       "Вскрытая косметика возврату не подлежит по гигиеническим причинам.": "Opened cosmetics cannot be returned, for reasons of hygiene.",
+      /* returns: the shop's own paragraph at the foot of /info/returns/ — the
+         tick in the account, and the promise that a person answers it */
+      "Как попросить возврат": "How to ask for a return",
+      "Если заказ уже доставлен, откройте «Кабинет → Мои заказы» и отметьте «Хочу вернуть заказ» — на это есть 30 дней с момента получения.":
+        "If the order has already been delivered, open “Account → My orders” and tick “I want to return this order” — you have 30 days from receiving it.",
+      "Мы увидим отметку и напишем вам на почту: расскажем, как отправить посылку обратно, и вернём деньги после проверки.":
+        "We will see the tick and write to you by e-mail: we will tell you how to send the parcel back, and refund the money once we have checked it.",
       "Полные условия возврата": "Full returns policy", "Все контакты": "All contact details",
       "Полные условия доставки": "Full terms of delivery",
       "Отправляем из Таллинна по Эстонии, Латвии, Литве, Финляндии и остальной Европе. Ниже — способы доставки, сроки, цены и как можно заплатить.":
@@ -6053,6 +6093,9 @@
     acctErr: "",          // dictionary key of the last failure, "" when fine
     acctSaved: false,     // «Сохранено ✓» on the profile form
     acctForm: { name: "", phone: "", birthday: "", marketing: false },
+    // returns: the order number whose «Хочу вернуть заказ» is in flight, ""
+    // when none — one tick at a time, and that row's box locks while it flies
+    acctReturnBusy: "",
     notifyOpen: "",       // product id whose «сообщить о наличии» form is open
     notifyEmail: "",
     notifyBusy: false,
@@ -9165,6 +9208,30 @@
       "</section></div>";
   }
 
+  /* ---------- returns: the shop's own paragraph on /info/returns/ ----------
+     The policy text on that page is the old shop's, waiting for the lawyer.
+     This paragraph is ours, and it is the other half of the tick in «Мои
+     заказы»: where to put it, how long there is, and what actually happens
+     next — a person writes back. It deliberately promises no return label,
+     because Montonio hands the merchant no return codes and has no return
+     endpoint at all (docs/audit/2026-09-07-shipping-returns.md).
+
+     A pure function of `tr` for the same reason deliveryPageHTML() is one:
+     tools/prerender-shop2.mjs lifts it out of this file by name and runs it
+     with the real dictionary, so the static page a crawler reads carries the
+     same three sentences the live one does. Each of them is its own text node
+     (translateTree rewrites whole nodes), and `tr` is the identity here —
+     translateTree() does the work after the render. */
+  function returnsAskHTML(tr) {
+    function t(s) { return "<span>" + tr(s) + "</span>"; }
+    return '<div class="legal legal--ask" data-returnsask>' +
+      "<p><b>" + tr("Как попросить возврат") + "</b><br>" +
+      t("Если заказ уже доставлен, откройте «Кабинет → Мои заказы» и отметьте «Хочу вернуть заказ» — на это есть 30 дней с момента получения.") +
+      " " +
+      t("Мы увидим отметку и напишем вам на почту: расскажем, как отправить посылку обратно, и вернём деньги после проверки.") +
+      "</p></div>";
+  }
+
   /* The old shop's own policy texts, served as real pages — placeholders
      until the lawyer pass, but real placeholders. The company identity inside
      them is NOT frozen: the texts carry {{legalName}} / {{regCode}} /
@@ -9185,6 +9252,8 @@
       '<div class="crumbs"><button data-go="home">Главная</button> / ' + esc(title) + "</div>" +
       '<section class="sec"><h1 class="display h1">' + esc(title) + "</h1>" +
       '<div class="legal">' + (ownText ? "<p>" + body + "</p>" : body) + "</div>" +
+      // …and on the returns page, the one paragraph that is the shop's own
+      (S.infoSlug === "returns" ? returnsAskHTML(function (s) { return s; }) : "") +
       (ownText ? "" : '<p class="note" style="margin-top:22px">Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.</p>') +
       "</section></div>";
   }
@@ -10916,10 +10985,27 @@
             (cards.length > 1 ? ' <span class="num">' + esc(c.code) + "</span>" : "") + "</a>";
         }).join("") + "</span>"
       : "";
+    /* returns: «Хочу вернуть заказ» — the tick, and what the row says once it
+       has been ticked. Both come from the server (returnable /
+       returnRequestedAt, listCustomerOrders): a delivered order, inside the 30
+       days /info/returns/ promises, that nobody has asked about yet. The tick
+       tells the shop and nothing more — Montonio gives out no return codes and
+       has no return endpoint, so no label is promised here and a person writes
+       back instead (src/lib/returns.ts). */
+    var ret = "";
+    if (o.returnRequestedAt) {
+      ret = '<span class="rowcard__ret rowcard__retdone">' +
+        '<span class="chip chip--low">Возврат запрошен</span> ' +
+        '<span class="muted">' + esc(shortDate(o.returnRequestedAt)) + "</span>" +
+        '<span class="muted rowcard__retnote">Мы получили заявку и напишем вам на почту.</span></span>';
+    } else if (o.returnable) {
+      ret = '<label class="opt opt--plain rowcard__ret"><input type="checkbox" data-acctreturn="' + esc(o.number) + '"' +
+        (S.acctReturnBusy === o.number ? " disabled" : "") + "><span>Хочу вернуть заказ</span></label>";
+    }
     return '<div class="rowcard"><span class="num rowcard__id">' + esc(o.number) + "</span>" +
       '<span class="muted">' + esc(shortDate(o.createdAt)) + " · " + eur(Number(o.total) || 0) + "</span>" +
       '<span class="chip ' + st[1] + '">' + st[0] + "</span>" + track +
-      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pdfs + "</div>";
+      (what ? '<span class="muted rowcard__what">' + esc(what) + "</span>" : "") + pdfs + ret + "</div>";
   }
   function screenAccount() {
     acctLoad();
@@ -11225,6 +11311,39 @@
       S.acctProErr = ""; render();
       toast("Заявка отправлена ✓");
     }).catch(function () { S.acctProBusy = false; S.acctProErr = "error"; render(); });
+  }
+
+  /* ---------- returns: «Хочу вернуть заказ» --------------------------------
+     The tick on a delivered order in «Мои заказы». It sends one thing — the
+     order number — and the server decides everything else: whose order it is,
+     whether it is delivered, and whether the 30 days /info/returns/ promises
+     are still running (src/lib/returns.ts). What comes back is the date the
+     shop recorded, which is what the row then shows and what Renat sees in
+     «Сделать сегодня» and on the order card. Nothing here promises a label:
+     Montonio has no return endpoint at all, so the answer is a person writing
+     back. */
+  function acctReturnSubmit(number) {
+    var num = String(number || "");
+    if (!num || S.acctReturnBusy) return;
+    S.acctReturnBusy = num; render();
+    postJSON("/api/account/return-request/", { number: num }).then(function (res) {
+      S.acctReturnBusy = "";
+      var at = res.body && res.body.ok ? res.body.at || new Date().toISOString() : "";
+      if (!at) { render(); toast("Не получилось отправить — попробуйте ещё раз"); return; }
+      /* Reflected on the row we already hold rather than by reloading the
+         whole account: the server has recorded it, and the next acctLoad()
+         confirms the very same date. */
+      for (var i = 0; i < S.acctOrders.length; i++) {
+        if (S.acctOrders[i].number !== num) continue;
+        S.acctOrders[i].returnRequestedAt = at;
+        S.acctOrders[i].returnable = false;
+      }
+      render();
+      toast("Заявка на возврат отправлена ✓");
+    }).catch(function () {
+      S.acctReturnBusy = ""; render();
+      toast("Не получилось отправить — попробуйте ещё раз");
+    });
   }
 
   /* ---------- the abandoned-cart snapshot ---------------------------------
@@ -12650,6 +12769,11 @@
     });
     return Math.round(sum * 100) / 100;
   }
+  /** returns: when the customer ticked «Хочу вернуть заказ», "" if never. */
+  function admReturnAskedAt(srv) {
+    var req = srv && srv.shipping && srv.shipping.returnRequest;
+    return req && typeof req === "object" && req.at ? String(req.at) : "";
+  }
   function admOrderVM(o) {
     var srv = o.srv || null;
     var status = srv ? srv.status
@@ -12697,6 +12821,11 @@
       overdue: invoice && (status === "new" || status === "failed") ? admInvoiceOverdue(invoice) : 0,
       shipped: status === "shipped",
       delivered: status === "delivered",
+      /* returns: the tick the customer put on this order in «Мои заказы» —
+         `shipping.returnRequest.at`, written by POST /api/account/return-
+         request/ (src/lib/returns.ts). "" on every order nobody has asked
+         about, which is nearly all of them. */
+      returnAskedAt: admReturnAskedAt(srv),
       /* A pickup order has no parcel to label and no «Отправлен» either — the
          customer takes it from the salon counter, so its one step after
          payment is «Выдан». An all-gift-card order has nothing to hand over. */
@@ -12748,7 +12877,9 @@
     var diff = Math.round((today - due) / 86400000);
     return diff > 0 ? diff : 0;
   }
-  /** «13.09.2026» out of a `YYYY-MM-DD` — the date as the invoice prints it. */
+  /** «13.09.2026» out of a `YYYY-MM-DD` — the date as the invoice prints it.
+      A full ISO stamp works too (it starts with the same ten characters),
+      which is what the return line on the card is drawn with. */
   function admInvoiceDate(ymd) {
     return String(ymd || "").slice(0, 10).split("-").reverse().join(".");
   }
@@ -12818,16 +12949,22 @@
     var shipN = admWaitingCount();
     var revN = o ? o.attention.reviewsPending : 0;
     var proN = o ? o.attention.proRequests : 0;
+    // returns: delivered orders a customer has ticked and nobody has answered
+    var retList = admReturnsAsked();
+    var retN = o ? o.attention.returnRequests : 0;
     // «По счёту»: invoices past their due date are the owner's to chase
     var waiting = admInvoicesWaiting();
     var overdue = waiting.filter(function (v) { return v.overdue; });
     var overN = overdue.length;
+    // the two counts can disagree for a heartbeat after a tick lands: the
+    // summary is cached, the list is not — the bigger one is the honest answer
+    if (retList.length > retN) retN = retList.length;
     /* The one setting whose absence silently stops a letter: with no IBAN the
        invoice cannot be sent at all (src/lib/invoices.ts invoiceSendBlock), so
        the moment a company is actually waiting for one, this belongs on the
        first screen of the panel and not only inside «О компании». */
     var noIban = waiting.length > 0 && !contentConf().company.iban;
-    var taskN = shipN + lowN + revN + proN + overN + (noIban ? 1 : 0);
+    var taskN = shipN + lowN + revN + proN + retN + overN + (noIban ? 1 : 0);
 
     var names = function (list, get) { return list.slice(0, 4).map(get).filter(Boolean).join(" · "); };
     var tasks = "";
@@ -12853,6 +12990,15 @@
     if (proN) tasks += admTaskRow(proN,
       pl(proN, "заявка на партнёрство", "заявки на партнёрство", "заявок на партнёрство"),
       "", 'data-admtab="people" data-admfilter="pending"');
+    /* returns: the tick from «Кабинет → Мои заказы» arrives here, in the same
+       queue a new review and a partner request arrive in — the shop has one
+       way of telling Renat that somebody is waiting for him, and this is it.
+       The row leads to «В пути», which is where a delivered order lives; the
+       names under it are how he finds the right card. */
+    if (retN) tasks += admTaskRow(retN,
+      pl(retN, "заявка на возврат", "заявки на возврат", "заявок на возврат"),
+      names(retList, function (v) { return v.who; }),
+      'data-admtab="orders" data-admfilter="shipped"', true);
     if (!tasks) tasks = '<div class="adm-empty"><div class="adm-empty__t">Всё в порядке</div>' +
       '<div class="adm-empty__s">Отправлять нечего, остатки в норме, отзывы проверены</div></div>';
 
@@ -12945,6 +13091,14 @@
   /** The invoice orders waiting for a transfer — the chip's count and the overview's row. */
   function admInvoicesWaiting() {
     return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM).filter(function (v) { return v.invoice && v.unpaid; });
+  }
+  /** returns: the delivered orders somebody has ticked and nobody has answered
+      yet — the same set the overview's own count comes from server-side
+      (qAttention in src/lib/analytics.ts). Read from the loaded list, which is
+      what lets the row name the customers. */
+  function admReturnsAsked() {
+    return (SRV.admin === true ? (SRV.orders || []) : []).map(admOrderVM)
+      .filter(function (v) { return v.delivered && v.returnAskedAt; });
   }
   /* «Заказы» pages like «Товары» (40) and «Склад» (60) — see admOrderRows(). */
   var ORDERS_PAGE = 40;
@@ -13340,6 +13494,7 @@
       '<button class="adm-link" data-admorder="">← Заказы</button>' +
       admHead(esc(v.number) + " · " + esc(v.date), esc(v.who), admOrderBadge(v, true), true) +
       (showSteps ? admOrderSteps(v) : "") +
+      admReturnStateHTML(v) +
       admInvoiceStateHTML(v) +
       (acts ? '<div class="adm-acts adm-ordacts">' + acts + "</div>" : "") +
       (hint ? '<div class="adm-hint">' + hint + "</div>" : "") +
@@ -13423,6 +13578,23 @@
       "<span>" + esc(sub) + (p.ref ? (sub ? " · " : "") + '<span class="adm-mono">' + esc(String(p.ref)) + "</span>" : "") + "</span>" +
       notes + "</div></div>";
   }
+  /* ---------- returns: «Покупатель просит вернуть заказ» -------------------
+     The tick from «Кабинет → Мои заказы», with the day it was put there, at
+     the top of the card where the owner cannot miss it. It is a message, not a
+     step: nothing here changes the order, because the answer to a return is
+     «Вернуть деньги» further down, which the owner presses once the parcel is
+     actually back. The second line says the one thing about returns this shop
+     genuinely cannot do — print a return label — so that Renat writes the
+     customer the truth (docs/audit/2026-09-07-shipping-returns.md § «Ответ 2»,
+     docs/payments.md § 11). */
+  function admReturnStateHTML(v) {
+    if (!v.returnAskedAt) return "";
+    return '<div class="adm-hint" data-admreturn>' +
+      '<span class="adm-hint--warn">Покупатель просит вернуть заказ</span> · ' +
+      '<span class="adm-mono">' + esc(admInvoiceDate(v.returnAskedAt)) + "</span><br>" +
+      "<span>Напишите покупателю: этикетку возврата магазин выдать не может — код на возврат присылает перевозчик.</span></div>";
+  }
+
   /* ---------- «По счёту — для компаний» on the card ------------------------
      One line that says what the invoice is waiting for: the number, the due
      date, «Просрочен на N дн.» past it, a paid date once the transfer came,
@@ -15534,6 +15706,9 @@
     "product.create": "Новый товар", "product.update": "Свой товар изменён",
     "product.hide": "Товар снят с продажи", "product.show": "Товар снова в продаже",
     "order.status": "Статус заказа", "order.note": "Заметка к заказу",
+    /* the one row in this journal nobody in the panel wrote: the customer's
+       own tick in «Кабинет → Мои заказы», actor = their address */
+    "order.return_request": "Покупатель просит вернуть заказ",
     "shipment.create": "Этикетка создана", "shipment.step": "Шаг «этикетка» изменён",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "mail.send": "Письмо клиенту отправлено",
@@ -27085,6 +27260,10 @@
       render();
     }
     else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; acctPrefSave(); render(); }
+    /* returns: the tick on a delivered order goes to the server the moment it
+       is ticked. `change` and not the click delegate: the box is inside its
+       label, so a tap on the words never reaches the input's own attribute. */
+    else if (t.matches("[data-acctreturn]")) { acctReturnSubmit(t.getAttribute("data-acctreturn")); }
     /* «Доставлен» без кнопки — «закрывать заказ через N дней» */
     else if (t.matches("[data-delivdays]")) {
       var dvc = deliveryConf();

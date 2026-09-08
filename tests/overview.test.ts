@@ -75,7 +75,13 @@ describe("getOverviewSummary", () => {
     expect(o.orders).toEqual({ today: 0, yesterday: 0 });
     expect(o.revenue7d).toEqual({ total: 0, perDay: 0, orders: 0 });
     expect(o.lowStock).toEqual({ total: 0, low: 0, out: 0, items: [] });
-    expect(o.attention).toEqual({ ordersToShip: 0, proRequests: 0, reviewsPending: 0, stockAlerts: 0 });
+    expect(o.attention).toEqual({
+      ordersToShip: 0,
+      proRequests: 0,
+      reviewsPending: 0,
+      stockAlerts: 0,
+      returnRequests: 0,
+    });
     expect(o.now).toBe(NOW.toISOString());
   });
 
@@ -162,7 +168,7 @@ describe("getOverviewSummary", () => {
 
   /* ---------- «Требует внимания» -------------------------------------------- */
 
-  it("counts the four queues only the owner can empty", async () => {
+  it("counts the five queues only the owner can empty", async () => {
     await orderAt(at("2026-06-15T09:00:00Z"), "paid");     // waiting to be shipped
     await orderAt(at("2026-06-14T09:00:00Z"), "shipped");  // already gone — not waiting
     await orderAt(at("2026-06-14T09:00:00Z"), "new");      // never paid — not waiting either
@@ -189,8 +195,28 @@ describe("getOverviewSummary", () => {
       ["waiting@example.com", "already-told@example.com", productB.id],
     );
 
+    /* returns: the tick a customer put on a delivered order — «Хочу вернуть
+       заказ», src/lib/returns.ts. The second one is the same tick on an order
+       that has since been refunded: the money went back, the queue is
+       answered, and only the delivered one is still waiting for the owner. */
+    const asked = await orderAt(at("2026-06-10T09:00:00Z"), "delivered");
+    const answered = await orderAt(at("2026-06-09T09:00:00Z"), "refunded");
+    for (const o of [asked, answered]) {
+      await query(
+        `update orders set shipping = shipping || jsonb_build_object('returnRequest', jsonb_build_object('at', $2::text))
+          where id = $1`,
+        [o.id, at("2026-06-12T09:00:00Z").toISOString()],
+      );
+    }
+
     const o = await getOverviewSummary(NOW);
-    expect(o.attention).toEqual({ ordersToShip: 1, proRequests: 1, reviewsPending: 1, stockAlerts: 1 });
+    expect(o.attention).toEqual({
+      ordersToShip: 1,
+      proRequests: 1,
+      reviewsPending: 1,
+      stockAlerts: 1,
+      returnRequests: 1,
+    });
   });
 });
 

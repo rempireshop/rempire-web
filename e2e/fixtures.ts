@@ -304,6 +304,16 @@ const DICT: Record<string, { ET: string; EN: string }> = {
     ET: "Artikleid veel pole — vaata varsti uuesti.",
     EN: "No articles yet — check back soon.",
   },
+  // the shop's own paragraph at the foot of /info/returns/ (returnsAskHTML)
+  "Как попросить возврат": { ET: "Kuidas tagastust taotleda", EN: "How to ask for a return" },
+  "Если заказ уже доставлен, откройте «Кабинет → Мои заказы» и отметьте «Хочу вернуть заказ» — на это есть 30 дней с момента получения.": {
+    ET: "Kui tellimus on juba kohale toimetatud, avage «Konto → Minu tellimused» ja märkige «Soovin tellimuse tagastada» — selleks on aega 30 päeva kättesaamisest.",
+    EN: "If the order has already been delivered, open “Account → My orders” and tick “I want to return this order” — you have 30 days from receiving it.",
+  },
+  "Мы увидим отметку и напишем вам на почту: расскажем, как отправить посылку обратно, и вернём деньги после проверки.": {
+    ET: "Näeme märget ja kirjutame teile e-postiga: räägime, kuidas pakk tagasi saata, ja tagastame raha pärast kontrolli.",
+    EN: "We will see the tick and write to you by e-mail: we will tell you how to send the parcel back, and refund the money once we have checked it.",
+  },
   // the first row of the «Доставка и оплата» price table (deliveryPageHTML)
   "Эстония": { ET: "Eesti", EN: "Estonia" },
   "Бесплатно от": { ET: "Tasuta alates", EN: "Free from" },
