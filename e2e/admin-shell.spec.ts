@@ -511,7 +511,14 @@ async function fitsThePhone(page: Page, label: string): Promise<void> {
     document.querySelectorAll<HTMLElement>(".adm2 button, .adm2 a").forEach((el) => {
       const b = el.getBoundingClientRect();
       if (!b.width || !b.height) return;   // hidden, or on the nav this viewport does not show
-      if (b.height < 44 || b.width < 44) {
+      /* Half a pixel of slack, and only that. A button laid out at exactly
+         44 px measures 43.99 on a machine whose font metrics round the other
+         way — this test has failed three times in CI on «Заказы» and passed
+         on every re-run and on every local run, always naming an element the
+         design gives a real 44. What the rule is about is a target a thumb
+         misses, and no thumb can tell 43.99 from 44; anything genuinely
+         short still fails. */
+      if (b.height < 43.5 || b.width < 43.5) {
         const name = `${el.tagName.toLowerCase()}.${String(el.className).split(" ")[0]}`;
         const text = (el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 24);
         small.push(`${name} ${Math.round(b.width)}×${Math.round(b.height)} «${text}»`);
