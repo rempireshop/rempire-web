@@ -997,6 +997,13 @@ body:has(.stickybar) .ftr {
    not another fact, and several cards on one order stack rather than fighting
    the row for space. */
 .rowcard__gifts { flex-basis: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+/* returns: «Хочу вернуть заказ» — the tick, and the line it turns into once
+   it has been ticked. Its own full-width row under the order's facts, for the
+   same reason the gift-card links have one: it is a thing to do, not another
+   fact about the order, and on a phone it must not fight the chips for space. */
+.rowcard__ret { flex-basis: 100%; }
+.rowcard__retdone { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rowcard__retnote { flex-basis: 100%; font-size: 12.5px; }
 
 /* ---------- checkout ---------- */
 .cohdr {
@@ -1604,6 +1611,11 @@ button, a, summary, label { touch-action: manipulation; }
 .legal table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
 .legal td, .legal th { border: 1px solid var(--rule); padding: 6px 9px; text-align: left; }
 .legal a { color: var(--ink); }
+/* returns: the shop's own paragraph under the policy text on /info/returns/
+   (returnsAskHTML). A hairline above it, because it is this shop speaking and
+   not the harvested policy — the same way «Полные условия доставки» is set
+   apart from the page that carries it. */
+.legal--ask { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rule); }
 
 /* ---------- «Доставка и оплата» — the customer page (deliveryPageHTML) ----
    The same voice as the rest of the shop: Oswald section titles, Golos body,

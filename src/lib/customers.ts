@@ -20,6 +20,10 @@ import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 import catalogueMin from "@/data/catalogue.min.json";
 import variantData from "@/data/catalogue.variants.json";
 import { jsonbParam, query } from "@/lib/db";
+// «Хочу вернуть заказ» — the window and the stamps, in one place for the
+// account screen and the route alike. src/lib/returns.ts imports nothing but
+// the database, which is what keeps this module the leaf it has always been.
+import { canRequestReturn, returnRequestedAt } from "@/lib/returns";
 
 export const CUSTOMER_COOKIE = "rmp_cust";
 export const CUSTOMER_SESSION_DAYS = 90;
@@ -417,6 +421,12 @@ export interface CustomerOrder {
      that already proved it owns this mailbox (the signed rmp_cust cookie in
      /api/account/me), so nothing new is exposed. */
   giftCards: Array<{ code: string; amount: number; pdfUrl: string }>;
+  /* «Хочу вернуть заказ» (src/lib/returns.ts): whether the screen may offer
+     the tick on this order, and — once it has been ticked — when. The window
+     is decided here and never in the browser: the same three questions the
+     route asks again before it writes anything. */
+  returnable: boolean;
+  returnRequestedAt: string | null;
 }
 
 /**
@@ -433,10 +443,12 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
     total: string | number;
     currency: string | null;
     created_at: string | Date;
+    updated_at: string | Date;
     items: unknown;
     payment: unknown;
+    shipping: unknown;
   }>(
-    `select id, number, status, total, currency, created_at, items, payment
+    `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping
        from orders where lower(email) = $1 order by created_at desc limit $2`,
     [normalizeEmail(email), Math.min(Math.max(Number(limit) || 20, 1), 50)],
   );
@@ -454,6 +466,16 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
     const tr = payment && typeof payment === "object" ? (payment.tracking as unknown) : null;
     const code = typeof tr === "string" ? tr : tr && typeof tr === "object" ? String((tr as Record<string, unknown>).code ?? "") : "";
     const url = tr && typeof tr === "object" ? String((tr as Record<string, unknown>).url ?? "") : "";
+    /* The shipping jsonb carries the two fulfilment stamps returns are read
+       from — `deliveredAt` and `returnRequest` — and nothing else on this
+       screen needs it, so it is unpacked here and not carried any further. */
+    const ret = {
+      id: r.id,
+      number: r.number,
+      status: r.status,
+      shipping: parseJson<Record<string, unknown>>(r.shipping, {}),
+      updatedAt: iso(r.updated_at) ?? "",
+    };
     return {
       number: r.number,
       status: r.status,
@@ -468,6 +490,8 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       tracking: code || null,
       trackingUrl: url || null,
       giftCards: cardsByOrder.get(r.id) ?? [],
+      returnable: canRequestReturn(ret),
+      returnRequestedAt: returnRequestedAt(ret),
     };
   });
 }

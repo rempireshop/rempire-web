@@ -33,6 +33,30 @@ test.describe("policy pages and the blog route", () => {
           await waitForScreen(page, "info");
         });
       }
+
+      /* /info/returns/ carries one paragraph that is not the harvested policy:
+         the shop's own «tick it in your account, we write back»
+         (returnsAskHTML in app.js, the other half of the tick in «Мои
+         заказы»). It has to be there in all three languages, and — because a
+         crawler and a cold visit read the static shell — in the prerendered
+         page too, which tools/prerender-shop2.mjs builds by lifting that very
+         function. Nothing here may promise a return label: Montonio cannot
+         produce one (docs/audit/2026-09-07-shipping-returns.md). */
+      test("/info/returns/ says how to ask, in this language, live and prerendered", async ({ page, request }) => {
+        await page.goto(shopUrl(lang.seg, "/info/returns/"));
+        await waitForScreen(page, "info");
+        const ask = page.locator("[data-returnsask]");
+        await expect(ask).toBeVisible();
+        await expect(ask).toContainText(tr("Как попросить возврат", lang.code));
+        await expect(ask).toContainText(
+          tr("Если заказ уже доставлен, откройте «Кабинет → Мои заказы» и отметьте «Хочу вернуть заказ» — на это есть 30 дней с момента получения.", lang.code));
+        await expect(ask).toContainText(
+          tr("Мы увидим отметку и напишем вам на почту: расскажем, как отправить посылку обратно, и вернём деньги после проверки.", lang.code));
+
+        const html = await (await request.get(shopUrl(lang.seg, "/info/returns/"))).text();
+        expect(html, "the prerendered page is missing the paragraph").toContain("data-returnsask");
+        expect(html).toContain(tr("Как попросить возврат", lang.code));
+      });
     });
   }
 

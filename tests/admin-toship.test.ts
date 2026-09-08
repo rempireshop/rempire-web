@@ -70,6 +70,7 @@ function panel(orders: ReturnType<typeof row>[]): Panel {
     ${slice("admLiveToShip")}
     ${slice("admWaitingSplit")}
     ${slice("admOrderMatches")}
+    ${slice("admReturnAskedAt")}
     function admRefundedTotal() { return 0; }
     function admInvoiceOverdue() { return 0; }
     function admOrders() { return []; }
@@ -133,6 +134,7 @@ describe("the admin's «Отправить» queue", () => {
   it("keeps a digital order «paid» — money is money, only the queue is a parcel queue", () => {
     const body = `
       ${slice("admOrderVM")}
+      ${slice("admReturnAskedAt")}
       function admRefundedTotal() { return 0; }
       function admInvoiceOverdue() { return 0; }
       return admOrderVM(ORDER);

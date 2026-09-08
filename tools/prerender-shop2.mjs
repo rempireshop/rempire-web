@@ -318,6 +318,23 @@ try {
   DELIVERY = null;
 }
 
+/* returns: the shop's own paragraph at the foot of /info/returns/ — «tick it
+   in your account, we write back» — lifted exactly as the delivery page above
+   is. It says what the tick in «Кабинет → Мои заказы» does, so it lives in
+   app.js beside that tick and only there; the static page a crawler (and a
+   customer on a cold visit) reads must carry the same words, in the same three
+   languages. Without the slice the page is still the policy text, as before. */
+let RETURNS_ASK = null;
+try {
+  const piece = sliceFrom(/^ {2}function returnsAskHTML\(tr\) \{$/, FN_END);
+  if (!piece) throw new Error("could not lift returnsAskHTML out of app.js");
+  RETURNS_ASK = new Function(piece + "\nreturn returnsAskHTML;")();
+  if (typeof RETURNS_ASK !== "function") throw new Error("the lifted returns paragraph has the wrong shape");
+} catch (e) {
+  console.warn("! " + e.message + "\n! /info/returns/ is written from the policy text alone");
+  RETURNS_ASK = null;
+}
+
 /* The live rules, when the database is there — the same merge over the
    defaults that app.js applyShipRules() does (key by key, a bad number
    ignored), so the page prints what the checkout will bill. Without
@@ -1086,6 +1103,8 @@ function infoPage(slug, lang) {
     '<section class="sec">' +
       '<h1 class="display h1">' + esc(heading) + "</h1>" +
       (isContact ? body : '<div class="legal">' + body + "</div>" +
+        // …and on the returns page, the one paragraph that is the shop's own
+        (slug === "returns" && RETURNS_ASK ? RETURNS_ASK(s => tr(s, code, false)) : "") +
         '<p class="note" style="margin-top:22px">' +
           esc(tr("Текст перенесён с текущего сайта; перед запуском пройдёт проверку юристом.", code, false)) + "</p>") +
     "</section>" +
