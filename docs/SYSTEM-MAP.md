@@ -579,12 +579,29 @@ automatic (feeds, caches).
   Mock for tests: `SHIPPING_PROVIDER=mock` → `src/lib/shipping/montonio-mock.ts`
   (tracking `MK…EE`, PIN 4821, a one-page PDF). Courier: «Отправлен» without a
   label sends the letter without a tracking code. Pickup: «Выдан клиенту».
+- **Carrier logos** `GET /api/shipping/carriers/`
+  (`src/app/api/shipping/carriers/route.ts`, `fetchMontonioCarriers()`): Montonio's
+  `GET /carriers` — the only endpoint of theirs carrying a `logoUrl` — 6 h in the
+  instance, `s-maxage=21600`, `503 not_configured` without keys. Checkout draws
+  the mark plus the name in the carrier chip (`deliveryPicker`, `.carrier__logo`);
+  a 404 or no keys leaves the colour dot. Dim, 08.09.2026.
+- **Shipment webhook** `POST /api/shipping/notify/` (`{payload: <jwt>}`,
+  `src/app/api/shipping/notify/route.ts`, `src/lib/shipping/webhook.ts`):
+  `shipment.statusUpdated`, registered by hand in the partner system. Token
+  verified like the payment webhook's (HS256, our secret, our accessKey); every
+  distinct status word is recorded in `settings.shipping_statuses` (count, first,
+  last, event, meaning, shipment) and its first sighting in `admin_audit`
+  (`shipment.status`). `looksDelivered()`/`looksReturned()` — the white list in
+  `src/lib/delivery.ts`, **a fallback until that row says what the real words
+  are** — close a `shipped` order and never one that came back. 200 for anything
+  understood, 400 for a bad token, 503 for our own database.
 - Env: the same three `MONTONIO_*` as payments; `SHIPPING_PROVIDER`.
 
 **How to test it.** `tests/shipping.test.ts` (rules, zones), `tests/shipping-
 rules.test.ts`, `tests/shipping-tariffs.test.ts`, `tests/shipping-migration.
 test.ts`, `tests/shipping-montonio.test.ts` (shipment body, PATCH flow, mock),
 `tests/shipping-label-pdf.test.ts`, `tests/parcel-points.test.ts`,
+`tests/shipping-webhook.test.ts` (signature, unknown status, redelivery),
 `tests/orders-carrier.test.ts`; e2e `admin.spec.ts` (label → letter with
 tracking link → delivered → undo), `checkout.spec.ts` (picker, live Omniva
 feed), `info-pages.spec.ts` (prices on the delivery page follow the rules),

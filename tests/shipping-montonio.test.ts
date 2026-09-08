@@ -18,6 +18,7 @@ import {
   enrichCoordinates,
   estimateWeightKg,
   fetchMontonioCarrierReturns,
+  fetchMontonioCarriers,
   fetchMontonioPickupPoints,
   fetchMontonioRates,
   fromParcelPoint,
@@ -25,6 +26,7 @@ import {
   mapMontonioPickupPoints,
   mergePoints,
   montonioShippingBaseUrl,
+  resetMontonioCarriersCache,
   resetMontonioPointsCache,
   shippingAuthToken,
   splitPhone,
@@ -121,12 +123,14 @@ function withoutKeys() {
 
 beforeEach(() => {
   resetMontonioPointsCache();
+  resetMontonioCarriersCache();
   resetPointsCache();
 });
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();   // SHIPPING_PROVIDER=mock and the e2e mail sink must not leak into the next test
   resetMontonioPointsCache();
+  resetMontonioCarriersCache();
   resetPointsCache();
   withoutKeys();
 });
@@ -246,6 +250,87 @@ describe("fetchMontonioCarrierReturns — the only thing the API says about retu
     withKeys();
     stubFetch([[/\/carriers$/, () => new Response("nope", { status: 500 })]]);
     expect(await fetchMontonioCarrierReturns()).toBeNull();
+  });
+});
+
+/* ---------- carrier logos ------------------------------------------------- */
+
+/* Dim, 08.09.2026: the delivery step should show each carrier's own mark next
+   to its name, the way the payment step already shows the banks'. `GET
+   /carriers` is the only Montonio endpoint that carries a logoUrl at all — the
+   three /shipping-methods paths do not — so this is where the picture comes
+   from, and what happens when it does not come is as much of the feature as
+   the picture itself: the checkout keeps its coloured dots. */
+describe("fetchMontonioCarriers — the brand marks", () => {
+  it("is null without keys, and asks nobody anything", async () => {
+    const calls = stubFetch([[/./, () => json({})]]);
+    expect(await fetchMontonioCarriers()).toBeNull();
+    expect(calls).toHaveLength(0);
+  });
+
+  it("reads code, name and logoUrl, and holds the answer", async () => {
+    withKeys();
+    const calls = stubFetch([
+      [
+        /\/carriers$/,
+        () =>
+          json({
+            carriers: [
+              {
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                code: "SMARTPOST",
+                name: "SmartPosti",
+                logoUrl: "https://public.montonio.com/images/carrier_logos/smartpost.svg",
+                hasMontonioContract: true,
+              },
+              // a carrier with no mark of its own keeps its dot, not a hole
+              { code: "venipak", name: "Venipak", logoUrl: null },
+              { name: "no code at all" },
+            ],
+          }),
+      ],
+    ]);
+
+    expect(await fetchMontonioCarriers()).toEqual([
+      { code: "smartpost", name: "SmartPosti", logoUrl: "https://public.montonio.com/images/carrier_logos/smartpost.svg" },
+      { code: "venipak", name: "Venipak", logoUrl: "" },
+    ]);
+    // …and the second reader of the day gets the cached copy, not a second call
+    await fetchMontonioCarriers();
+    expect(calls).toHaveLength(1);
+  });
+
+  it("answers null rather than throwing when Montonio will not talk", async () => {
+    withKeys();
+    stubFetch([[/\/carriers$/, () => new Response("nope", { status: 500 })]]);
+    expect(await fetchMontonioCarriers()).toBeNull();
+  });
+});
+
+describe("GET /api/shipping/carriers", () => {
+  it("refuses without keys, so the checkout falls back to its dots", async () => {
+    const { GET } = await import("@/app/api/shipping/carriers/route");
+    const res = await GET(new Request("https://rempireshop.ee/api/shipping/carriers/"));
+    expect(res.status).toBe(503);
+    expect(await res.json()).toMatchObject({ ok: false, error: "not_configured" });
+  });
+
+  it("hands the checkout the list, cached at the edge", async () => {
+    withKeys();
+    stubFetch([
+      [
+        /\/carriers$/,
+        () => json({ carriers: [{ code: "omniva", name: "Omniva", logoUrl: "https://public.montonio.com/x.svg" }] }),
+      ],
+    ]);
+    const { GET } = await import("@/app/api/shipping/carriers/route");
+    const res = await GET(new Request("https://rempireshop.ee/api/shipping/carriers/"));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      ok: true,
+      carriers: [{ code: "omniva", name: "Omniva", logoUrl: "https://public.montonio.com/x.svg" }],
+    });
+    expect(res.headers.get("cache-control")).toContain("s-maxage=21600");
   });
 });
 

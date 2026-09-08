@@ -1689,13 +1689,21 @@ button, a, summary, label { touch-action: manipulation; }
   transition: background .15s var(--ease), border-color .15s var(--ease);
 }
 .carrier:hover { background: var(--hover); }
-/* Carrier colour marks — own brand colours, no logo files.
-   TODO logo: swap this ::before dot for the carrier's real mark once we have
-   licensed artwork; data-carrier already names the carrier for that <img>. */
+/* Carrier colour marks — own brand colours, drawn when there is no real logo:
+   without Montonio keys, and for any carrier its /carriers list has no logoUrl
+   for. The real mark comes from Montonio itself (GET /api/shipping/carriers/,
+   Dim 08.09.2026) and lands as an <img class="carrier__logo"> in the chip,
+   which also carries .carrier--logo so this dot steps aside for it. */
 .carrier::before {
   content: ""; flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%;
   background: var(--muted);
 }
+/* height as briefed, width left to the image's own ratio — same rule as
+   .bank__logo. A 404 or a timeout removes the image (the "error" listener near
+   the bottom of app.js) and the carrier's name, which is beside it rather than
+   inside it, stays exactly where it was. */
+.carrier__logo { height: 20px; width: auto; display: block; }
+.carrier--logo::before { display: none; }
 .carrier[data-carrier="omniva"]::before { background: #f47a20; }
 .carrier[data-carrier="dpd"]::before { background: #dc0032; }
 .carrier[data-carrier="smartpost"]::before { background: linear-gradient(135deg, #ffcf00 50%, #111 50%); }

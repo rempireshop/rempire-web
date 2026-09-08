@@ -465,6 +465,68 @@ export async function fetchMontonioRates(
   }
 }
 
+/* ---------- carriers: the brand marks -------------------------------------- */
+
+/** One carrier as `GET /carriers` reports it — the three fields a chip needs. */
+export interface MontonioCarrier {
+  /** Montonio's own `carrierCode`: omniva | smartpost | dpd | venipak | unisend. */
+  code: string;
+  name: string;
+  /** An SVG on Montonio's public host, e.g. …/carrier_logos/smartpost.svg. */
+  logoUrl: string;
+}
+
+type CarrierCacheEntry = { at: number; carriers: MontonioCarrier[] };
+/* Same six hours and the same globalThis home as the pickup-point cache above:
+   the list of carriers a store resells changes when Renat signs a contract,
+   not between two checkouts. */
+const gc = globalThis as unknown as { __rempireMontonioCarriers?: CarrierCacheEntry };
+
+/** Forgets the cached list — the tests set a different answer per case. */
+export function resetMontonioCarriersCache(): void {
+  gc.__rempireMontonioCarriers = undefined;
+}
+
+/**
+ * The carriers this store has, each with its brand mark — `GET /carriers`.
+ *
+ * Dim, 08.09.2026: «покажите фирменный знак и название, как уже сделано у
+ * банков». This is the shipping half of that answer, and it is deliberately
+ * built like the payments half (`fetchPaymentMethods()` in
+ * src/lib/payments/methods.ts): the same Bearer-JWT auth, the same six-hour
+ * cache, the same `null`-not-a-throw contract. `logoUrl` is the whole point of
+ * this endpoint for us — none of the three `/shipping-methods` paths carries
+ * one (reference, read 07.09.2026), which is why the chips were coloured dots
+ * until today.
+ *
+ * `null` — never a throw — when there are no keys or Montonio would not
+ * answer, exactly like every other reader here: the checkout keeps the dots.
+ */
+export async function fetchMontonioCarriers(): Promise<MontonioCarrier[] | null> {
+  const config = montonioShippingConfig();
+  if (!config) return null;
+
+  const hit = gc.__rempireMontonioCarriers;
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.carriers;
+
+  try {
+    const body = await call<{
+      carriers?: Array<{ code?: string; name?: string; logoUrl?: string | null }>;
+    }>(config, "/carriers");
+    const out: MontonioCarrier[] = [];
+    for (const carrier of body.carriers ?? []) {
+      const code = str(carrier?.code).toLowerCase();
+      if (!code) continue;
+      out.push({ code, name: str(carrier?.name) || code, logoUrl: str(carrier?.logoUrl) });
+    }
+    gc.__rempireMontonioCarriers = { at: Date.now(), carriers: out };
+    return out;
+  } catch (err) {
+    console.error("[montonio shipping] carriers failed —", err);
+    return hit?.carriers ?? null;
+  }
+}
+
 /* ---------- returns: the one thing the API says about them ---------------- */
 
 /** One carrier contract as `GET /carriers` reports it, returns fields only. */

@@ -11,15 +11,14 @@
  * `shipped`:
  *
  * 1. **The carrier's own answer.** Montonio's shipping API DOES expose a
- *    status — `GET /shipments/<id>` returns one, and there is a
- *    `shipment.statusUpdated` webhook we deliberately do not register
- *    (docs/shipping.md: registration is synchronous, so nothing needed one
- *    until now). `getMontonioShipment()` already reads it. What the reference
- *    does not spell out is the vocabulary of that field, so this asks a
- *    narrow question — «does the status LOOK delivered» — and treats anything
- *    it does not recognise as «not yet». A wrong «доставлен» is worse than a
- *    late one: the order stops appearing in «В пути» and Renat stops looking
- *    at it.
+ *    status — `GET /shipments/<id>` returns one, which `getMontonioShipment()`
+ *    reads, and since 08.09.2026 the same word also arrives by itself, in the
+ *    `shipment.statusUpdated` webhook (POST /api/shipping/notify/). What the
+ *    reference does not spell out is the vocabulary of that field, so this
+ *    asks a narrow question — «does the status LOOK delivered» — and treats
+ *    anything it does not recognise as «not yet». A wrong «доставлен» is worse
+ *    than a late one: the order stops appearing in «В пути» and Renat stops
+ *    looking at it.
  *
  * 2. **Time, with a setting.** `settings.delivery.autoDays` — «закрывать
  *    заказ через N дней после отправки». 0 (the default) means never: a shop
@@ -84,12 +83,21 @@ export async function getDeliverySettings(): Promise<DeliverySettings> {
 /**
  * Does a carrier status mean «the customer has it»?
  *
- * Deliberately a small allow-list rather than «anything that is not one of the
- * statuses we know are in-flight»: this decides whether an order leaves the
- * owner's screen, and an unknown word must fall on the safe side. The spellings
- * are the ones carriers and Montonio use between them — the exact vocabulary of
- * Montonio's own `status` field is not in the reference we have, so a status
- * this does not recognise simply leaves the order where it is.
+ * **This white list is a fallback, and it is meant to be replaced.** The six
+ * spellings below are the ones carriers and Montonio use between them, written
+ * down before anybody here had seen a real status: the exact vocabulary of
+ * Montonio's own `status` field is not in the reference we have. Dim's answer
+ * to that, 08.09.2026, was to stop guessing and go and look — so
+ * `shipment.statusUpdated` is registered (POST /api/shipping/notify/) and every
+ * distinct word it delivers is written into `settings.shipping_statuses` with
+ * what this function made of it. When that row says what the real words are,
+ * this list is rewritten from it and stops being a guess.
+ *
+ * Until then it stays exactly as careful as it was: deliberately an allow-list
+ * rather than «anything that is not one of the statuses we know are in
+ * flight», because this decides whether an order leaves the owner's screen and
+ * an unknown word must fall on the safe side. A status this does not recognise
+ * simply leaves the order where it is.
  */
 export function looksDelivered(status: unknown): boolean {
   const s = String(status ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");

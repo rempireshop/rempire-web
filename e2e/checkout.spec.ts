@@ -279,3 +279,57 @@ test.describe("checkout — the step says when it is finished", () => {
     await expect(next, "the finished step never pointed at the way on").toHaveClass(/btn--nudge/);
   });
 });
+
+test.describe("checkout — the carrier's own mark", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(47) });
+
+  /* Dim, 08.09.2026: «есть ли у Montonio логотипы пакоматов? Сейчас там просто
+     цвета» — put the brand mark next to the name, the way the bank list at the
+     payment step already does it, so the shopper recognises here the sign he
+     will walk up to at the machine. There is no Montonio in an e2e run
+     (GET /api/shipping/carriers/ answers 503 and the chips keep their colour
+     dots, which is the no-keys half of the feature), so the list is stubbed —
+     one carrier with a mark that loads and one with a mark that does not,
+     because the second is the half Dim asked about by name. */
+  test("draws the mark beside the name, and keeps the name when the mark 404s", async ({ page }) => {
+    // the first hit on /checkout/ compiles the route on a cold dev server
+    test.setTimeout(90_000);
+    await page.route("**/api/shipping/carriers/**", (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          ok: true,
+          carriers: [
+            // a file this server really serves, so the <img> loads
+            { code: "omniva", name: "Omniva", logoUrl: "/og-shop.png" },
+            { code: "smartpost", name: "SmartPosti", logoUrl: "/no-such-carrier-mark.svg" },
+          ],
+        }),
+      }),
+    );
+
+    await addProductAndGoToCheckout(page, "");
+    await fillContactStep(page, freshEmail("carrier-mark"));
+    await page.locator('input[data-dm="parcel"]').check();
+    /* The block is rewritten every time a carrier feed lands; "0" means it has
+       stopped moving, so the assertions below are about the final chips. */
+    await expect
+      .poll(async () => page.locator("[data-co-delivery]").getAttribute("data-points-loading").catch(() => null),
+        { timeout: 25_000, message: "parcel-point feeds never settled" })
+      .not.toMatch(/^[1-9]/);
+
+    const omniva = page.locator('[data-carrier="omniva"]');
+    await expect(omniva.locator("img.carrier__logo")).toBeVisible();
+    // the mark AND the name — the chip that has one drops the colour dot
+    await expect(omniva).toHaveClass(/carrier--logo/);
+    await expect(omniva).toContainText("Omniva");
+
+    /* The fallback, which is the same one the bank chips have had since UX fix
+       9: the capture-phase "error" listener takes the broken image out, and
+       the name it was sitting next to is what stays on the chip. */
+    const smartpost = page.locator('[data-carrier="smartpost"]');
+    await expect(smartpost.locator("img.carrier__logo")).toHaveCount(0);
+    await expect(smartpost).toContainText("SmartPosti");
+  });
+});
