@@ -386,8 +386,8 @@
         "Millal õnnitleda",
       "За сколько дней поздравлять":
         "Mitu päeva varem õnnitleda",
-      "промокод действует две недели, так что запас в пару дней ему не мешает":
-        "sooduskood kehtib kaks nädalat, nii et paari päeva varu talle ei sega",
+      "промокод действует две недели от самого дня рождения, каким бы ни был запас":
+        "sooduskood kehtib kaks nädalat sünnipäevast endast, olgu varu kui tahes pikk",
       "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
         "Kolm lülitiga kirja saadab pood ise, üks kord ööpäevas. Kuni lüliti on väljas, ei lähe kiri kellelegi.",
       "Когда заказ считается доставленным":
@@ -1391,7 +1391,10 @@
       "Что люди искали — и что они увидели": "Mida inimesed otsisid — ja mida nad nägid",
       "Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.":
         "Need on sõnad, mida inimesed Google'isse endasse kirjutasid. Iga sõna all on see, mis edasi juhtus.",
-      "По этому слову в магазин не зашёл никто.": "Selle sõna peale ei tulnud poodi mitte keegi.",
+      "На ссылку не нажал никто.": "Lingile ei klõpsanud mitte keegi.",
+      "Какие страницы находят в Google": "Milliseid lehti Google'is leitakse",
+      "Это страницы магазина, которые Google показывал чаще всего. Если показов много, а на ссылку не нажимают — перепишите заголовок и описание для Google: «Товары» → откройте товар → вкладка «Google». Это те самые две строки, которые человек читает в списке Google и по которым решает, заходить или нет.":
+        "Need on poe lehed, mida Google kõige sagedamini näitas. Kui näitamisi on palju, aga lingile ei klõpsata, kirjutage Google'i jaoks pealkiri ja kirjeldus ümber: «Tooted» → avage toode → vahekaart «Google». Just neid kahte rida loeb inimene Google'i loendis ja nende järgi otsustab, kas tulla või mitte.",
       "Google Search Console — последние 28 дней": "Google Search Console — viimased 28 päeva",
       "Аналитика сейчас не отвечает — попробуйте позже.": "Analüütika ei vasta praegu — proovi hiljem uuesti.",
       "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
@@ -2606,8 +2609,8 @@
         "When to send it",
       "За сколько дней поздравлять":
         "How many days early to send it",
-      "промокод действует две недели, так что запас в пару дней ему не мешает":
-        "the promo code is good for two weeks, so a couple of days' head start does it no harm",
+      "промокод действует две недели от самого дня рождения, каким бы ни был запас":
+        "the promo code is good for two weeks from the birthday itself, however long the head start",
       "Три письма с переключателем магазин рассылает сам, один раз в сутки. Пока переключатель выключен, письмо не уходит никому.":
         "The shop sends the three switchable letters itself, once a day. While a switch is off, that letter goes to nobody.",
       "Когда заказ считается доставленным":
@@ -3596,7 +3599,10 @@
       "Что люди искали — и что они увидели": "What people searched for — and what they saw",
       "Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.":
         "These are the words people typed into Google itself. Under each word is what happened next.",
-      "По этому слову в магазин не зашёл никто.": "Nobody came to the shop from this word.",
+      "На ссылку не нажал никто.": "Nobody clicked the link.",
+      "Какие страницы находят в Google": "Which pages people find in Google",
+      "Это страницы магазина, которые Google показывал чаще всего. Если показов много, а на ссылку не нажимают — перепишите заголовок и описание для Google: «Товары» → откройте товар → вкладка «Google». Это те самые две строки, которые человек читает в списке Google и по которым решает, заходить или нет.":
+        "These are the shop's own pages Google showed most often. When a page gets plenty of impressions and nobody clicks the link, rewrite its title and description for Google: “Products” → open the product → the “Google” tab. Those two lines are exactly what a person reads in Google's list and what they decide on.",
       "Google Search Console — последние 28 дней": "Google Search Console — last 28 days",
       "Аналитика сейчас не отвечает — попробуйте позже.": "Analytics is not responding right now — try again later.",
       "Добавьте сервисный аккаунт как пользователя в Search Console → см. docs/analytics.md":
@@ -4542,9 +4548,37 @@
     [/^Из каждых 100 показов переходов — примерно (\d+)\.$/,
       { ET: "Igast 100 näitamisest on üleminekuid umbes $1.",
         EN: "Out of every 100 impressions, about $1 click through." }],
-    [/^Показов: (.+) · переходов: (.+) · место в Google: (\d+)$/,
-      { ET: "Näitamisi: $1 · üleminekuid: $2 · koht Google'is: $3",
-        EN: "Impressions: $1 · clicks: $2 · place in Google: $3" }],
+    /* …and the two sentences under each word and each page. Russian needs
+       three plural forms and gets by on two strings, because «раз» is the
+       same word after 1 and after 340 — but Estonian and English are not: «1
+       kord» / «340 korda», «once» / «340 times». So the literal-«1» rule
+       stands ahead of the general one and is the only thing that can match
+       the singular. Nothing below can match it back: «2 раза» does not end
+       in « раз,», and «21 раз» does not start with «магазин 1 раз». */
+    [/^Google показал магазин 1 раз, в среднем на (\d+)-м месте\.$/,
+      { ET: "Google näitas poodi 1 kord, keskmiselt $1. kohal.",
+        EN: "Google showed the shop once, in position $1 on average." }],
+    [/^Google показал магазин (.+) раза, в среднем на (\d+)-м месте\.$/,
+      { ET: "Google näitas poodi $1 korda, keskmiselt $2. kohal.",
+        EN: "Google showed the shop $1 times, in position $2 on average." }],
+    [/^Google показал магазин (.+) раз, в среднем на (\d+)-м месте\.$/,
+      { ET: "Google näitas poodi $1 korda, keskmiselt $2. kohal.",
+        EN: "Google showed the shop $1 times, in position $2 on average." }],
+    [/^Google показал эту страницу 1 раз, в среднем на (\d+)-м месте\.$/,
+      { ET: "Google näitas seda lehte 1 kord, keskmiselt $1. kohal.",
+        EN: "Google showed this page once, in position $1 on average." }],
+    [/^Google показал эту страницу (.+) раза, в среднем на (\d+)-м месте\.$/,
+      { ET: "Google näitas seda lehte $1 korda, keskmiselt $2. kohal.",
+        EN: "Google showed this page $1 times, in position $2 on average." }],
+    [/^Google показал эту страницу (.+) раз, в среднем на (\d+)-м месте\.$/,
+      { ET: "Google näitas seda lehte $1 korda, keskmiselt $2. kohal.",
+        EN: "Google showed this page $1 times, in position $2 on average." }],
+    [/^На ссылку нажали 1 раз\.$/,
+      { ET: "Lingile klõpsati 1 kord.", EN: "The link was clicked once." }],
+    [/^На ссылку нажали (.+) раза\.$/,
+      { ET: "Lingile klõpsati $1 korda.", EN: "The link was clicked $1 times." }],
+    [/^На ссылку нажали (.+) раз\.$/,
+      { ET: "Lingile klõpsati $1 korda.", EN: "The link was clicked $1 times." }],
     /* «Настройки → Цены и баллы»: the worked example under each field and the
        40 € basket at the foot of the card. They have to be rules and not keys
        because every one of them is the owner's own number done as arithmetic —
@@ -13698,6 +13732,19 @@
       return '<button data-lang="' + l[0] + '" aria-current="' + (S.lang === l[0]) + '">' + l[0] + "</button>";
     }).join("") + "</div>";
   }
+  /* «Выйти» is a button and not a link, in both feet (Dim, 08.09.2026). There
+     are no roles yet — one password, one panel — so logging out is the only
+     way to hand the shop phone to somebody else, and on a phone that is two
+     taps down inside «Ещё». A word with an underline under it reads as «and
+     also…», which is exactly what the one control that ends the session must
+     not read as. `--row` is the panel's own secondary button: 40 px beside
+     every other secondary button on a desk, and 44 on a phone, where the
+     media query in admin.css lifts it — a thumb's size where a thumb is what
+     is doing the tapping. */
+  function admLogoutHTML() {
+    if (SRV.admin !== true) return "";
+    return '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admlogout>Выйти</button>';
+  }
   function admSideHTML(waiting) {
     var fold = S.admNav ? "Свернуть меню" : "Развернуть меню";
     return '<aside class="adm-side">' +
@@ -13714,7 +13761,7 @@
       "</nav>" +
       '<div class="adm-side__foot">' + admLangsHTML() +
         '<button class="adm-link" data-go="home">Открыть магазин ↗</button>' +
-        (SRV.admin === true ? '<button class="adm-link adm-link--muted" data-admlogout>Выйти</button>' : "") +
+        admLogoutHTML() +
       "</div></aside>";
   }
   function admBarHTML(waiting) {
@@ -13745,7 +13792,7 @@
         }).join("") + "</div>" +
         '<div class="adm-sheet__foot">' + admLangsHTML() +
           '<button class="adm-link" data-go="home">Магазин ↗</button>' +
-          (SRV.admin === true ? '<button class="adm-link adm-link--muted" data-admlogout>Выйти</button>' : "") +
+          admLogoutHTML() +
         "</div></div>";
   }
 
@@ -14294,8 +14341,15 @@
   function birthdayDays() { return Number(DEMO.flows.birthdayDays) || 0; }
   function admBirthdayDaysHTML() {
     var n = birthdayDays();
+    /* The sub-line used to say «запас в пару дней ему не мешает», which was
+       true of a couple of days and false of the fourteen this same select
+       offers: the code lived fourteen days from the day it was written, so
+       «за 14 дней» handed out a code that died on the birthday. The code's
+       life now grows with the head start (birthdayCodeDays, src/lib/flows.ts)
+       — so the line says what the owner can now count on whichever number he
+       picks. */
     return '<div class="adm-swrow"><span>Когда поздравлять' +
-        '<span class="adm-row__sub">промокод действует две недели, так что запас в пару дней ему не мешает</span></span>' +
+        '<span class="adm-row__sub">промокод действует две недели от самого дня рождения, каким бы ни был запас</span></span>' +
       '<span class="sel sel--box"><select class="adm-input" data-flowbdays aria-label="За сколько дней поздравлять">' +
       BIRTHDAY_DAY_CHOICES.map(function (x) {
         return '<option value="' + x[0] + '"' + (x[0] === n ? " selected" : "") + ">" + x[1] + "</option>";
@@ -14861,13 +14915,105 @@
      a right-hand column. Where the news is bad — page two of Google, a word
      nobody clicked — it is said in words. A number a specialist has to
      decode is the same as no number at all, and hiding the bad half of it
-     is worse than that. */
+     is worse than that.
+
+     Two things changed again on 08.09.2026. The outcome under each word was
+     still «Показов: 340 · переходов: 0 · место в Google: 28» — a row of data
+     wearing a sentence's clothes — and is two plain sentences now. And the
+     pages Search Console sends beside the words, fetched since the block was
+     written and never drawn, are under them: they are the half of this the
+     owner can go and change. */
   /** Which page of Google an average position lands on: the one fact that
       turns a bare «13» into something the owner can act on. */
   function gscPageLine(pos) {
     if (pos <= 10) return "Это первая страница Google — там вас видно.";
     if (pos <= 20) return "Это вторая страница Google, а до неё доходят единицы: почти все выбирают что-то на первой.";
     return "Это третья страница Google или дальше — туда почти никто не заглядывает.";
+  }
+  /* A place is an ordinal, and Google's own average is a fraction — 3.79 is
+     «на 4-м месте». Never 0: a row Search Console returned was shown at least
+     once, and «на 0-м месте» is not a place anybody can be in. */
+  function gscPos(pos) { return Math.max(1, Math.round(Number(pos) || 0)); }
+  /* «Показов: 340 · переходов: 0 · место в Google: 28» was the most compact
+     line that stayed grammatical at any number — and it read as a row of
+     data, which is the one thing this screen is not supposed to do (Dim,
+     08.09.2026: сделать предложение). So the three numbers are two sentences
+     now.
+
+     Each plural form is a whole sentence with the number already inside it —
+     the same rule invoiceHint() follows, and for the same reason: a plural
+     word glued on as its own fragment is a text node no dictionary can hold.
+     «раз» happens to be the same word after 1 and after 340, so the one- and
+     many-forms below are one string; what tells them apart in Estonian and
+     English is a UI_RX rule matching the literal «1», standing ahead of the
+     general one. And nothing here lets a number govern a verb: «Google
+     показал» agrees with Google, «нажали» has no named subject at all — so
+     «нажали 21 раз» is right, where «зашли 21 человек» would not have
+     been. */
+  function gscShopSeenLine(n, pos) {
+    var v = numGrp(n);
+    return pl(n,
+      "Google показал магазин " + v + " раз, в среднем на " + pos + "-м месте.",
+      "Google показал магазин " + v + " раза, в среднем на " + pos + "-м месте.",
+      "Google показал магазин " + v + " раз, в среднем на " + pos + "-м месте.");
+  }
+  function gscPageSeenLine(n, pos) {
+    var v = numGrp(n);
+    return pl(n,
+      "Google показал эту страницу " + v + " раз, в среднем на " + pos + "-м месте.",
+      "Google показал эту страницу " + v + " раза, в среднем на " + pos + "-м месте.",
+      "Google показал эту страницу " + v + " раз, в среднем на " + pos + "-м месте.");
+  }
+  /** The second half of that pair. Zero has a sentence of its own rather than
+      «нажали 0 раз»: it is the bad news of this whole block, and bad news is
+      said in words here, not left as a nought at the end of a list. */
+  function gscClickLine(n) {
+    if (!n) return "На ссылку не нажал никто.";
+    var v = numGrp(n);
+    return pl(n,
+      "На ссылку нажали " + v + " раз.",
+      "На ссылку нажали " + v + " раза.",
+      "На ссылку нажали " + v + " раз.");
+  }
+  /** A Search Console page is a whole address — «https://rempire.ee/shop2/et/
+      p/reuzel-fiber/». The owner does not think in addresses, he thinks in the
+      товар he sells and the pages of his own shop, so the address is read back
+      into that name. The language stays beside it: /shop2/ and /shop2/et/ are
+      two different pages to Google, and the same product listed twice with
+      nothing to tell the two apart would read as a fault in the panel. What
+      the shop has no name for keeps its path — still something he can open
+      and recognise, and never a guess. */
+  function gscPageName(url) {
+    var path = String(url || "").replace(/^https?:\/\/[^/]+/i, "").split("?")[0].split("#")[0];
+    var tag = langFromPath(path);
+    var p = stripLangPrefix(path).replace(/\/+$/, "");
+    if (tag === "RU") tag = "";
+    var m;
+    if ((m = p.match(/^\/shop2\/p\/([^/]+)$/))) {
+      var prod = byIdOrNull(safeDecode(m[1]));
+      return [prod ? (prod.brand ? prod.brand + " — " : "") + prod.name : safeDecode(m[1]), tag];
+    }
+    if ((m = p.match(/^\/shop2\/c\/([^/]+)$/))) {
+      return [m[1] === "all" ? "Каталог" : CAT_NAMES[m[1]] || safeDecode(m[1]), tag];
+    }
+    if ((m = p.match(/^\/shop2\/b\/([^/]+)$/))) return [BRAND_BY_SLUG[safeDecode(m[1])] || safeDecode(m[1]), tag];
+    if (p === "/shop2" || p === "") return ["Главная", tag];
+    if (p === "/shop2/sets") return ["Наборы", tag];
+    if (p === "/shop2/gift") return ["Подарочная карта", tag];
+    if (p === "/shop2/blog") return ["Блог", tag];
+    return [p.replace(/^\/shop2/, "") || "/", tag];
+  }
+  /** One line of the Google block: what was typed, or which page it was, and
+      under it the two sentences saying what Google did with it. Words and
+      pages are drawn the same way on purpose — they are one question asked
+      from two sides, and the owner should not have to learn two layouts. */
+  function gscRowHTML(name, tag, seen, clicks) {
+    var click = gscClickLine(clicks);
+    return '<div class="adm-q"><span class="adm-q__q">' + esc(name) +
+      (tag ? "<span> · " + tag + "</span>" : "") + "</span>" +
+      '<span class="adm-q__s"><span>' + seen + "</span> " +
+      (clicks ? "<span>" + click + "</span>" : '<span class="adm-q__x">' + click + "</span>") +
+      "</span></div>";
   }
   /** A figure with the sentences that read it: what the word means at all,
       and — where it helps — what today's value of it means. Each sentence is
@@ -14921,14 +15067,27 @@
       '<p class="adm-hint adm-hint--lead">Это слова, которые люди печатали в самом Google. Под каждым словом — что было дальше.</p>' +
       (qs.length
         ? '<div class="adm-qs">' + qs.map(function (q) {
-          return '<div class="adm-q"><span class="adm-q__q">' + esc(q.query) + "</span>" +
-            '<span class="adm-q__s"><span>Показов: ' + numGrp(q.impressions) +
-            " · переходов: " + numGrp(q.clicks) + " · место в Google: " + Math.round(q.position) + "</span>" +
-            (q.clicks ? "" : ' <span class="adm-q__x">По этому слову в магазин не зашёл никто.</span>') +
-            "</span></div>";
+          return gscRowHTML(q.query, "", gscShopSeenLine(q.impressions, gscPos(q.position)), q.clicks);
         }).join("") + "</div>"
         : '<div class="adm-empty">Пока нет данных</div>');
-    return lead + defs + queries;
+    /* Search Console hands back the top twenty pages beside the top twenty
+       words, and until now the panel threw them away. They are the half of
+       this block the owner can actually do something about: a word is what a
+       stranger typed and nobody can edit that, but a page is his own, and its
+       title and description for Google are two fields on the «Google» tab of
+       the товар. Eight of them, the same number as the words above — the
+       screen is already long, and the tail of a twenty-row list is pages
+       Google showed twice. */
+    var ps = (GSC.topPages || []).slice(0, 8);
+    var pages = '<div class="adm-sec__t adm-sec__t--sub">Какие страницы находят в Google</div>' +
+      '<p class="adm-hint adm-hint--lead">Это страницы магазина, которые Google показывал чаще всего. Если показов много, а на ссылку не нажимают — перепишите заголовок и описание для Google: «Товары» → откройте товар → вкладка «Google». Это те самые две строки, которые человек читает в списке Google и по которым решает, заходить или нет.</p>' +
+      (ps.length
+        ? '<div class="adm-qs">' + ps.map(function (r) {
+          var nm = gscPageName(r.page);
+          return gscRowHTML(nm[0], nm[1], gscPageSeenLine(r.impressions, gscPos(r.position)), r.clicks);
+        }).join("") + "</div>"
+        : '<div class="adm-empty">Пока нет данных</div>');
+    return lead + defs + queries + pages;
   }
 
   /* ---------- Подключения -------------------------------------------------

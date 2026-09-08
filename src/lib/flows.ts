@@ -442,7 +442,25 @@ async function sendStockAlerts(alerts: StockAlertRow[], known?: Map<string, Aler
 
 /* ---------- «С днём рождения» --------------------------------------------- */
 
+/** How long the code is worth having AFTER the birthday itself — the two weeks
+ *  the panel promises under «Скидка ко дню рождения». It is not the code's
+ *  whole life: see birthdayCodeDays() for what the head start does to it. */
 const BIRTHDAY_DAYS = 14;
+
+/**
+ * The code's whole life, counted from the day it is issued.
+ *
+ * The letter can be sent `birthdayDays` days early, and the code is written on
+ * the day the letter goes out — so a fixed fourteen days meant the head start
+ * ate into them: «за 14 дней» handed the customer a code that expired exactly
+ * on his birthday, which is the one day it was bought for. Dim, 08.09.2026:
+ * extend the code's life by the head start. The customer then always has the
+ * same fourteen usable days starting on the birthday itself, whether the
+ * letter arrived that morning or two weeks before it.
+ */
+function birthdayCodeDays(flows: Flows): number {
+  return BIRTHDAY_DAYS + flows.birthdayDays;
+}
 
 /** `REM-BD-7QK4X9` — readable, unambiguous, never confused with a gift card. */
 export function birthdayCode(): string {
@@ -460,7 +478,7 @@ export function birthdayCode(): string {
  * a birthday letter with a code that does nothing is worse than silence.
  */
 async function promoForBirthday(flows: Flows, now: number): Promise<{ code: string; expires: Date } | null> {
-  const expires = new Date(now + BIRTHDAY_DAYS * 24 * 60 * 60 * 1000);
+  const expires = new Date(now + birthdayCodeDays(flows) * 24 * 60 * 60 * 1000);
   try {
     /* The checkout agent's module. Both spellings are accepted: `upsertPromo`
        is what it shipped with, `createPromo` is what the brief called it. The
@@ -508,11 +526,12 @@ async function promoForBirthday(flows: Flows, now: number): Promise<{ code: stri
  *
  * `birthdayDays` is 0 by default — the day itself, which is what this has
  * always done. A larger number moves the window forward: with 3, the letter
- * for a 14 March birthday goes out on 11 March, so a code with two weeks on it
- * is in the customer's hand before the day rather than after it. The year the
- * guard stamps is the BIRTHDAY's year, not today's: on 30 December, «за 3 дня»
- * is looking at a birthday in January, and stamping this year would let the
- * same letter go out again a few days later.
+ * for a 14 March birthday goes out on 11 March, and the code it carries is
+ * written to last three days longer for it (birthdayCodeDays), so the head
+ * start is added to the customer's two weeks instead of taken out of them.
+ * The year the guard stamps is the BIRTHDAY's year, not today's: on
+ * 30 December, «за 3 дня» is looking at a birthday in January, and stamping
+ * this year would let the same letter go out again a few days later.
  *
  * `birthday_sent_year` is that guard — the job may run hourly without sending
  * twice, and the daily cron is what makes «за N дней» mean N whole days.
