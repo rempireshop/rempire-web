@@ -427,15 +427,37 @@ against app.js's own router so the two cannot drift:
 
 * **200, the plain shell** — the screens that live only in the browser
   (`search`, `brands`, `account`, `checkout`, `done`, `admin`, `scan`), the
-  single prerendered pages (`sets`, `gift`, `blog`) and the shapes whose id
-  lives in a database rather than in a build-time file: `p/<id>`, `set/<id>`,
-  `blog/<slug>`. Those three each have a route of their own that answers 404
-  for an id nobody has — guessing here from a build-time file would 404 a post
-  the owner published an hour ago.
-* **404** — a category, a brand or a policy slug that does not exist (all three
-  are closed sets known at build time and are checked against the catalogue and
-  against the pages the prerender wrote), anything of another shape
-  (`/shop2/cart/`, `/shop2/wat/`), and anything deeper than two segments.
+  single prerendered pages (`sets`, `gift`, `blog`) and the two shapes whose id
+  lives in a database and that have a request-time route of their own to answer
+  404 for an id nobody has: `p/<id>` and `blog/<slug>`. Guessing those from a
+  build-time file would 404 a post the owner published an hour ago.
+* **404** — a category or a policy slug that does not exist (both are closed
+  sets known at build time: the catalogue's own section keys, and
+  `src/data/legal-slugs.json`, which `tools/pack-legal.mjs` writes in
+  `prebuild` from `Object.keys(LEGAL)` in `public/shop/legal.js`), anything of
+  another shape (`/shop2/cart/`, `/shop2/wat/`), and anything deeper than two
+  segments.
+* **404 after one question to the database** — the two half-open lists, asked
+  only once the closed ones above have said no: a **brand** the catalogue has
+  never heard of may still be one the owner typed on a product of their own
+  (`custom_products`), and a **set** may have been created in the panel after
+  the build (`bundles`). Both are owner-editable, so no build-time list can
+  answer for them; a row that is missing or switched off is a 404, and a
+  database that is down answers 200 with the shell — the older, softer wrong
+  answer, and a far better one than telling a crawler that a real page is gone
+  because Postgres blinked.
+
+  `set/<id>` was in the 200 list until 08.09.2026, on the grounds that it "has
+  its own request-time route that answers 404 for an id nobody has". It never
+  had one, so every id anybody typed answered 200 with the shell — a soft 404
+  in unlimited numbers, found against staging by `e2e/smoke.spec.ts`, which now
+  asserts it. What deliberately did **not** change is `app.js`'s router: it
+  still accepts `set/<id>` whatever the id, because the list of sets arrives
+  from `/api/bundles/` after boot, routing on data that has not landed used to
+  turn an old link into the home page, and `screenBundle()` says «Набор не
+  найден» rather than bouncing. The server has the row in front of it and no
+  such excuse, so it answers 404 — the same words to the reader, and the truth
+  to a crawler.
 
 Two consequences worth knowing:
 

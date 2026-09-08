@@ -11,7 +11,7 @@ import { adminPasswordHash, E2E_BASE_URL, E2E_PORT, E2E_SESSION_SECRET } from ".
  * Quick orientation:
  *   - `npm run e2e` prepares first (tools/e2e-build.mjs — a plain Node
  *     script, not a shell one-liner, so it behaves the same on Windows and
- *     in CI: runs the SEO prerender + the two generated-file packers that
+ *     in CI: runs the SEO prerender + the three generated-file packers that
  *     `next build`'s own `prebuild` hook would otherwise run), then runs
  *     `playwright test`, which starts the app itself (`webServer` below,
  *     `next dev` — see that env block's own comment for why not `next
