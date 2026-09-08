@@ -132,11 +132,18 @@
   .card.hits .buy::after, .card.hits .band::after, .card.hits .szrow button::after, .card.hits .szrow .one::after {
     content: ""; position: absolute; inset: 0; pointer-events: none;
   }
-  /* Under the 44 px every phone maker asks for — the same red the shop uses
-     for «нет в наличии», because it means the same thing: do not ship this. */
+  /* Solid red is a real failure: under the 24 px WCAG 2.2 asks for as a
+     minimum. Everything between that and Apple's ideal 44 stays dashed — a
+     164-px card cannot carry three 44-px buttons and a photograph, and
+     colouring it all red would say nothing about which variant is better. */
   .card.hits [data-small="1"]::after, .card.hits [data-small="1"]::before {
-    outline-style: solid; background: rgba(140, 26, 15, .22);
+    outline-style: solid; outline-width: 2px; background: rgba(140, 26, 15, .28);
   }
+  /* The verdict for the whole shelf, in words, under the phone. */
+  .verdict { font-size: .86rem; color: var(--soft); display: none; }
+  .verdict b { color: var(--ink); }
+  .verdict .bad { color: var(--warn); font-weight: 600; }
+  body.showhits .verdict { display: block; }
 
   /* ---- «Цвета сайта» off: the same shapes with the colour taken out ------ */
   body.plain { --ink: #23231f; --muted: #77776e; --soft: #55554d; --page: #f4f4f1; --paper: #ebebe7;
@@ -191,7 +198,8 @@
     <p>Это единственное число здесь, которое придумали не мы. <b>Apple</b> в своих правилах для iPhone требует, чтобы по кнопке можно было попасть в квадрат <span class="num">44 × 44</span> пункта. <b>Google</b> для Android просит <span class="num">48 × 48</span>. Стандарт доступности <b>WCAG 2.2</b> называет <span class="num">24 × 24</span> обязательным минимумом, а <span class="num">44 × 44</span> — рекомендацией. Меньше — и палец начинает промахиваться, причём чаще всего у тех, кто держит телефон одной рукой на ходу.</p>
 
     <h3>Что магазин делает сегодня</h3>
-    <p>Надпись «В корзину» — это <span class="num">11</span> пикселей текста. Чтобы по ней можно было попасть, магазин незаметно растягивает область нажатия на <span class="num">14</span> пикселей вверх и вниз: получается около <span class="num">39</span>. Это работает, пока такая надпись одна. Когда их две, одна под другой, невидимые половины встречаются — и палец попадает не туда, куда целился, хотя на экране ничто не соприкасается. <b>Нажмите «Показать зоны нажатия»</b>: сплошной красной рамкой обведено всё, что меньше 44 пикселей, пунктирной — всё остальное.</p>
+    <p>Надпись «В корзину» — это <span class="num">11</span> пикселей текста. Чтобы по ней можно было попасть, магазин незаметно растягивает область нажатия на <span class="num">14</span> пикселей вверх и вниз: получается около <span class="num">39</span>. Это работает, пока такая надпись одна. Когда их две, одна под другой, невидимые половины встречаются — и палец попадает не туда, куда целился, хотя на экране ничто не соприкасается. <b>Нажмите «Показать зоны нажатия»</b>: пунктиром обведена настоящая зона каждого элемента, а под каждой полкой появляется строчка с двумя числами — <b>самая маленькая зона</b> и <b>пересекаются ли зоны между собой</b>. Второе и есть главное: пересечение означает, что палец попадёт не туда, куда целился.</p>
+    <p>Сплошной красной рамкой обведено только то, что меньше <span class="num">24</span> пикселей, — это уже нарушение стандарта. Между <span class="num">24</span> и <span class="num">44</span> рамка пунктирная: в карточку шириной <span class="num">164</span> пикселя три кнопки объёма по <span class="num">44</span> пикселя вместе с фотографией не помещаются никак, и красить всю полку в красный значило бы не сказать ничего.</p>
     <p>Настоящей кнопке эта хитрость не нужна: она сама <span class="num">32–38</span> пикселей высотой, и её видно ровно там, где она есть. Поэтому в вариантах с кнопками зон перекрытия нет по построению, а не потому, что мы их развели.</p>
 
     <h3>Зачем сумка на кнопке</h3>
@@ -341,14 +349,48 @@
      read after the render and marked when its real tap area is under 44 px —
      the text ones through the 14-px reach the shop gives them, the buttons by
      their own box. */
+  /* The rectangle a thumb actually has to hit: a real button is its own box,
+     a text control is its box plus the 14 px the shop stretches above and
+     below it. Everything below is measured off the live page, never typed. */
+  function targets(cardEl) {
+    const out = [];
+    cardEl.querySelectorAll(".link, .szb, .buy, .band, .szrow button, .szrow .one").forEach((el) => {
+      const b = el.getBoundingClientRect();
+      if (!b.width || !b.height) return;
+      const reach = el.classList.contains("link") || el.classList.contains("szb") ? 14 : 0;
+      out.push({ el, top: b.top - reach, bottom: b.bottom + reach, left: b.left, right: b.right,
+        h: b.height + reach * 2, w: b.width });
+    });
+    return out;
+  }
+
   function measureTargets() {
-    document.querySelectorAll(".card").forEach((c) => {
-      c.querySelectorAll(".link, .szb, .buy, .band, .szrow button, .szrow .one").forEach((el) => {
-        const b = el.getBoundingClientRect();
-        const reach = el.classList.contains("link") || el.classList.contains("szb") ? 28 : 0;
-        const h = b.height + reach;
-        el.dataset.small = h < 44 && b.width > 0 ? "1" : "0";
+    document.querySelectorAll(".opt").forEach((sec) => {
+      let smallest = Infinity, worstW = 0, worstH = 0;
+      sec.querySelectorAll(".card").forEach((c) => {
+        const t = targets(c);
+        t.forEach((x) => {
+          x.el.dataset.small = x.h < 24 ? "1" : "0";
+          if (x.h < smallest) smallest = x.h;
+        });
+        /* Two tap areas sharing a rectangle is the failure this page was made
+           for: nothing looks wrong on screen and the thumb still lands on the
+           other control. Measured pair by pair, inside one card only. */
+        for (let a = 0; a < t.length; a++) {
+          for (let b = a + 1; b < t.length; b++) {
+            const ow = Math.min(t[a].right, t[b].right) - Math.max(t[a].left, t[b].left);
+            const oh = Math.min(t[a].bottom, t[b].bottom) - Math.max(t[a].top, t[b].top);
+            if (ow > 0 && oh > 0 && ow * oh > worstW * worstH) { worstW = ow; worstH = oh; }
+          }
+        }
       });
+      const v = sec.querySelector(".verdict");
+      if (!v) return;
+      const min = smallest === Infinity ? 0 : Math.round(smallest);
+      const overlap = worstW > 0 && worstH > 0
+        ? '<span class="bad">зоны нажатия пересекаются: ' + Math.round(worstW) + " × " + Math.round(worstH) + " px</span>"
+        : "зоны нажатия нигде не пересекаются ✓";
+      v.innerHTML = "Самая маленькая зона нажатия — <b>" + min + " px</b>. " + overlap + ".";
     });
   }
 
@@ -359,7 +401,7 @@
         "<p>" + esc(o.note) + "</p>" +
         '<div class="phone"><div class="grid">' +
           P.map((p, i) => card(p, o.id, i, i >= P.length - 2)).join("") +
-        "</div></div></section>").join("");
+        '</div></div><p class="verdict"></p></section>').join("");
     if (document.getElementById("hits").getAttribute("aria-pressed") === "true") {
       document.querySelectorAll(".card").forEach((c) => c.classList.add("hits"));
     }
@@ -416,6 +458,7 @@
       const on = hb.getAttribute("aria-pressed") !== "true";
       hb.setAttribute("aria-pressed", String(on));
       document.querySelectorAll(".card").forEach((c) => c.classList.toggle("hits", on));
+      document.body.classList.toggle("showhits", on);
       measureTargets();
       return;
     }
