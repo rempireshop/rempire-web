@@ -6,6 +6,15 @@ provider — nothing here needs a network, a real bank, or a mailbox. Unit
 tests (`npm test`, vitest) are a separate, faster layer; see the root of this
 file for what moved there instead of into a browser test and why.
 
+**The third layer is a person.** Everything a robot cannot reach — real money
+at a real bank, a letter landing in somebody's inbox rather than in spam,
+Apple Pay on an actual iPhone, a parcel a machine has to accept, and a thumb on
+a 375 px screen — is a hand-run checklist: **[`docs/testplan.md`](testplan.md)**
+(who tests what, in what order, and what must never be run on the live shop),
+with the 158 checks themselves in `src/data/testplan.json` and its shape pinned
+by `tests/testplan.test.ts`. "What could not be automated, and why" below is
+the list of holes; the test plan is what fills them.
+
 ## Running it locally
 
 ```bash
@@ -385,6 +394,9 @@ coverage now instead of the workaround it briefly needed.
 
 ## What could not be automated, and why
 
+*Each of these is a hole a person has to walk through by hand;
+[`docs/testplan.md`](testplan.md) is who walks it and in what order.*
+
 - **`/api/assistant` admin-mode-without-cookie is a 401, literally.** The
   route checks `OPENAI_API_KEY` *before* it checks the admin cookie
   (`if (!key) return … 503`, first line of `POST`) — and this suite
@@ -742,6 +754,7 @@ tracking link in it, which is the one thing that letter is for.
 | `e2e/admin-sections.spec.ts` | The six «Ещё» sections after the phase-3 redesign: every one drawing on desktop **and** on a phone with no page error and no sideways scroll, plus one real action each — approve a Pro request from the row, publish a review with its undo, create a promo code, switch a gift denomination on and see it on `/gift/`, save a letter's subject, publish a post, change a tariff through the confirm card and take it back from the journal — see above |
 | `e2e/blog.spec.ts` | The storefront blog, desktop **and** mobile: tiles show the pointer, an article's crumbs start where the listing's do and its product cards keep their foot row whole (ET), and home → Blog → article paints from the idle prefetch / sessionStorage while `/api/blog/` is held for 4 s (docs/blog.md «Откуда берутся данные») |
 | `tests/account-code-e2e-hook.test.ts`, `tests/assistant-admin-auth.test.ts` | vitest backstops referenced above |
+| `docs/testplan.md`, `src/data/testplan.json`, `tests/testplan.test.ts` | The hand-run layer: the page a tester reads, the 158 checks it renders, and the test that keeps the data loadable — unique ids, a real area on every item, legal enum values, non-empty steps and an expectation |
 | `.github/workflows/ci.yml` | CI — typecheck + unit tests in one job, the Chromium e2e suite sharded into 3 parallel jobs (each with its own server and database), and the `safari` job running `--project=mobile-safari` on WebKit; see its own comments |
 
 ## Фаззинг API (`tests/fuzz-*.test.ts`)
