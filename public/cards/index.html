@@ -391,8 +391,8 @@
       const min = smallest === Infinity ? 0 : Math.round(smallest);
       const vis = seen === Infinity ? 0 : Math.round(seen);
       const overlap = worstW > 0 && worstH > 0
-        ? '<span class="bad">зоны нажатия пересекаются: ' + Math.round(worstW) + " × " + Math.round(worstH) + " px</span>"
-        : "зоны нажатия нигде не пересекаются ✓";
+        ? '<span class="bad">Зоны нажатия пересекаются: ' + Math.round(worstW) + " × " + Math.round(worstH) + " px</span>"
+        : "Зоны нажатия нигде не пересекаются ✓";
       /* Both numbers, always, and the gap between them stated out loud where
          there is one: a 46-px zone under an 18-px label is not a 46-px button,
          and printing only the zone would score the two text layouts highest —
