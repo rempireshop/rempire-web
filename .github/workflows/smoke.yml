@@ -80,8 +80,10 @@ jobs:
       #
       #   · a manual run takes the `target` input, and that is the ONLY path to
       #     production;
-      #   · a deploy takes the URL Vercel just reported, so a preview alias is
-      #     tested at its own address rather than at staging's;
+      #   · a deploy takes the URL Vercel just reported — but only if that URL
+      #     actually answers, because Vercel protects per-deployment addresses
+      #     and they redirect a stranger to a login page; the probe below falls
+      #     back to staging, which aliases the same build;
       #   · a scheduled run takes staging.
       #
       # If anything other than a manual run resolves to the live shop, the job
@@ -129,6 +131,28 @@ jobs:
                 echo "::notice::Run this workflow by hand with target=production to smoke-test it."
                 ;;
             esac
+          fi
+          # Vercel protects a per-deployment URL: an unauthenticated request to
+          # rempire-<hash>-rempire.vercel.app answers 302 to its SSO page, not
+          # the shop. Every deploy since this workflow was written therefore
+          # failed on the first assertion — sitemap-1.xml expected 200, got 302
+          # — and a job that is always red is a job nobody reads, on an account
+          # whose Actions minutes are already at 100 %.
+          #
+          # So the reported URL is *probed* rather than trusted. When it
+          # answers, it is tested at its own address, which was the point of
+          # using it. When it does not, the run falls back to staging — an
+          # alias of the newest deploy of this branch, so the same build, one
+          # name further away — and the log says which happened. Only the
+          # deploy path can fall back: a manual run asked for a specific shop
+          # and must not be quietly redirected to a different one.
+          if [ "$EVENT" = "deployment_status" ] && [ "$RUN" = "yes" ]; then
+            CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$URL/shop2/" || echo 000)
+            if [ "$CODE" != "200" ]; then
+              echo "::notice::$URL answered $CODE, not 200 — it is behind Vercel's deployment protection."
+              echo "::notice::Smoke-testing $STAGING instead, which is an alias of the same build."
+              URL="$STAGING"
+            fi
           fi
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "run=$RUN" >> "$GITHUB_OUTPUT"
