@@ -92,8 +92,10 @@ const quote = (
 describe("the default price list", () => {
   it("prices a parcel machine per country", () => {
     expect(quote("EE", "parcel", 10).price).toBe(5.47);
-    expect(quote("LV", "parcel", 10).price).toBe(4.99);
-    expect(quote("LT", "parcel", 10).price).toBe(4.99);
+    // 08.09.2026, Dim: the Latvian and Lithuanian locker covers its 5.58 € DPD
+    // cost now — those two were the last cells the shop sold at a loss.
+    expect(quote("LV", "parcel", 10).price).toBe(5.59);
+    expect(quote("LT", "parcel", 10).price).toBe(5.59);
     // Since 07.09.2026 every country Montonio serves has its own cell rather
     // than falling to the method's default: a German parcel machine costs
     // 29.76 € on the cheapest carrier the shop can actually put it on.
@@ -187,7 +189,7 @@ describe("free delivery", () => {
     expect(quote("FI", "parcel", 100, undefined, custom).price).toBe(12.39);
     expect(quote("FI", "parcel", 150, undefined, custom).price).toBe(0);
     // null = never free in that country, however big the basket
-    expect(quote("LV", "parcel", 10_000, undefined, custom).price).toBe(4.99);
+    expect(quote("LV", "parcel", 10_000, undefined, custom).price).toBe(5.59);
     expect(quote("EE", "parcel", 59, undefined, custom).price).toBe(0);
   });
 
@@ -212,12 +214,19 @@ describe("free delivery", () => {
     expect(quote("EE", "parcel", 59, undefined, custom).freeFrom).toBe(59);
   });
 
-  /* Nothing changes until Renat says so — the defaults still give free
-     delivery from 59 € everywhere, including where it loses money. */
-  it("ships free from 59 € everywhere by default, Croatia included", () => {
-    expect(rules.freeFromByCountry).toBeUndefined();
-    expect(quote("HR", "courier", 59).price).toBe(0);
-    expect(quote("GR", "courier", 59).price).toBe(0);
+  /* Renat's partner said so on 08.09.2026 — «Rest of EU — from €200». Croatia
+     and Greece are exactly the countries this was written for: a 59 € basket
+     to either used to ship free against a courier costing 28.26 € and
+     43.15 €, so the bigger order earned the shop less than the smaller one. */
+  it("ships free from 59 € at home and from 200 € for the rest of Europe", () => {
+    expect(rules.freeFromByCountry).toEqual({ EU: 200 });
+    for (const c of ["EE", "LV", "LT", "FI"]) {
+      expect([c, quote(c, "courier", 59).price]).toEqual([c, 0]);
+    }
+    expect(quote("HR", "courier", 59).price).toBe(28.29);
+    expect(quote("GR", "courier", 59).price).toBe(43.19);
+    expect(quote("GR", "courier", 200).price).toBe(0);
+    expect(quote("GR", "courier", 59).freeFrom).toBe(200);
   });
 });
 
@@ -288,7 +297,7 @@ describe("parsing the settings row", () => {
     expect(parsed.freeFrom).toBe(75);
     expect(parsed.methods.parcel.EE).toBe(2.5);
     // untouched entries survive
-    expect(parsed.methods.parcel.LV).toBe(4.99);
+    expect(parsed.methods.parcel.LV).toBe(5.59);
     expect(parsed.methods.courier.EE).toBe(10.84);
   });
 

@@ -22,6 +22,8 @@ import { setupDb, teardownDb } from "./helpers";
 const MIGRATION = "031_shipping_rules_ee_tariffs.sql";
 /** 148 puts the per-country table into the row 030 seeded. */
 const MIGRATION_148 = "148_shipping_country_prices.sql";
+/** 149 carries Dim's two answers of 08.09.2026 into the same row. */
+const MIGRATION_149 = "149_shipping_free_from_eu_lv_lt_parcel.sql";
 
 type Rules = {
   freeFrom?: number | null;
@@ -92,6 +94,14 @@ describe("a fresh database", () => {
     expect([...(value.countriesOff ?? [])].sort()).toEqual(
       [...(DEFAULT_SHIPPING_RULES.countriesOff ?? [])].sort(),
     );
+  });
+
+  it("asks 200 € for free delivery outside the Baltics and Finland", async () => {
+    const { value } = await rulesRow();
+    expect(value.freeFromByCountry).toEqual(DEFAULT_SHIPPING_RULES.freeFromByCountry);
+    expect(value.freeFromByCountry).toEqual({ EU: 200 });
+    // …and the four home rows keep the 59 € they have always had
+    expect(value.freeFrom).toBe(59);
   });
 });
 
@@ -174,6 +184,77 @@ describe("replaying 148 over a row 030 already seeded", () => {
   it("does not invent a row where there is none", async () => {
     const applied = await replay(null, MIGRATION_148);
     expect(applied).toEqual([MIGRATION_148]);
+    expect(await rulesRows()).toHaveLength(0);
+  });
+});
+
+/*
+ * 149 is Dim's two answers of 08.09.2026 (docs/audit/2026-09-07-eu-rates.md,
+ * questions 2 and 5): free delivery outside the Baltics and Finland starts at
+ * 200 €, and the Latvian and Lithuanian parcel machine goes 4.99 → 5.59,
+ * because the dearest locker a shopper there can pick costs the shop 5.58.
+ * Neither cell is new — 030 seeded the parcel prices and nothing has ever
+ * written freeFromByCountry — so the guards are «still says 4.99» and «has no
+ * Europe threshold at all», not 148's «is missing».
+ */
+describe("replaying 149 over a row 030 already seeded", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+
+  it("raises the Baltic parcel cells and gives Europe a floor of its own", async () => {
+    const applied = await replay(SEED_030, MIGRATION_149);
+    expect(applied).toEqual([MIGRATION_149]);
+
+    const { value } = await rulesRow();
+    expect(value.methods.parcel.LV).toBe(5.59);
+    expect(value.methods.parcel.LT).toBe(5.59);
+    expect(value.freeFromByCountry).toEqual({ EU: 200 });
+    // the home floor, the courier table and the fallback cell are not its business
+    expect(value.freeFrom).toBe(59);
+    expect(value.methods.courier).toEqual(SEED_030.methods.courier);
+    expect(value.methods.parcel.default).toBe(4.99);
+  });
+
+  it("leaves a parcel price the owner has already typed alone, one cell at a time", async () => {
+    await replay(
+      {
+        ...SEED_030,
+        methods: { ...SEED_030.methods, parcel: { ...SEED_030.methods.parcel, LV: 6.9 } },
+      },
+      MIGRATION_149,
+    );
+    const { value } = await rulesRow();
+    expect(value.methods.parcel.LV).toBe(6.9);
+    expect(value.methods.parcel.LT).toBe(5.59);
+  });
+
+  it("leaves a Europe threshold the owner has already set alone", async () => {
+    await replay({ ...SEED_030, freeFrom: 79, freeFromByCountry: { EU: 150 } }, MIGRATION_149);
+    const { value } = await rulesRow();
+    expect(value.freeFromByCountry).toEqual({ EU: 150 });
+    expect(value.freeFrom).toBe(79);
+  });
+
+  it("adds Europe beside a threshold he set for somewhere else", async () => {
+    await replay({ ...SEED_030, freeFromByCountry: { FI: 99 } }, MIGRATION_149);
+    expect((await rulesRow()).value.freeFromByCountry).toEqual({ FI: 99, EU: 200 });
+  });
+
+  it("is idempotent — running its SQL again changes nothing, not even updated_at", async () => {
+    await replay(SEED_030, MIGRATION_149);
+    const before = await rulesRow();
+
+    const sql = readFileSync(new URL(`../db/migrations/${MIGRATION_149}`, import.meta.url), "utf8");
+    await exec(sql);
+
+    const after = await rulesRow();
+    expect(after.value).toEqual(before.value);
+    expect(new Date(after.updated_at).getTime()).toBe(new Date(before.updated_at).getTime());
+  });
+
+  it("does not invent a row where there is none", async () => {
+    const applied = await replay(null, MIGRATION_149);
+    expect(applied).toEqual([MIGRATION_149]);
     expect(await rulesRows()).toHaveLength(0);
   });
 });

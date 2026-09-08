@@ -159,21 +159,44 @@ describe("what the shop now charges", () => {
     for (const c of euro) expect(price(c, "courier")).not.toBe(9.9);
   });
 
-  it("never sells a European courier below what it costs to send", () => {
+  /* Since 08.09.2026 this holds for the parcel machine too, and that is the
+     whole of the audit's question 5: the Latvian and Lithuanian lockers were
+     the last two cells sold under cost, and Dim raised them to 5.59. Both
+     methods are checked in one loop so neither can quietly slip back. */
+  it("never sells a delivery below what it costs to send", () => {
     for (const c of MONTONIO_COUNTRIES) {
-      const cost = costBasis(c, "courier");
-      if (!cost) continue;
-      expect(price(c, "courier")).toBeGreaterThanOrEqual(cost.price);
+      for (const m of ["parcel", "courier"] as const) {
+        const cost = costBasis(c, m);
+        if (!cost) continue;
+        expect([c, m, price(c, m) >= cost.price]).toEqual([c, m, true]);
+      }
     }
   });
 
   it("leaves the home prices Renat already sells above cost alone", () => {
     expect(price("EE", "parcel")).toBe(5.47);
     expect(price("EE", "courier")).toBe(10.84);
-    expect(price("LV", "parcel")).toBe(4.99);
-    expect(price("LT", "parcel")).toBe(4.99);
     expect(price("LV", "courier")).toBe(9.9);
     expect(price("LT", "courier")).toBe(9.9);
+  });
+
+  /* Dim, 08.09.2026, the audit's question 5. A Latvian locker costs 5.58 with
+     DPD and the shopper picks the carrier himself, so 4.99 lost 59 cents on
+     every order — «Ренат не просил терять по 59 центов с заказа». */
+  it("charges 5.59 for a Latvian and Lithuanian parcel machine, not 4.99", () => {
+    expect(price("LV", "parcel")).toBe(5.59);
+    expect(price("LT", "parcel")).toBe(5.59);
+    expect(costBasis("LV", "parcel")).toEqual({ price: 5.58, carrier: "dpd" });
+  });
+
+  /* The other half of the same day: free delivery stops at the Baltic and
+     Finnish border. A 59 € basket to Greece used to ship free against a
+     43.15 € courier — the bigger order earned the shop less than the smaller. */
+  it("gives free delivery at 59 € at home and at 200 € for the rest of Europe", () => {
+    const floor = (country: string) =>
+      quoteFromRules(DEFAULT_SHIPPING_RULES, { country, method: "courier", subtotal: 10 }).freeFrom;
+    for (const c of ["EE", "LV", "LT", "FI"]) expect([c, floor(c)]).toEqual([c, 59]);
+    for (const c of ["DE", "GR", "PL", "HR", "EU"]) expect([c, floor(c)]).toEqual([c, 200]);
   });
 
   it("keeps the zone and global cells as the fallback for anything unpriced", () => {
