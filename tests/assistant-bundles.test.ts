@@ -123,6 +123,37 @@ describe("set_bundle — a set that exists, changed", () => {
   });
 });
 
+describe("delete_bundle — a set taken off the shop", () => {
+  /* Dim, 08.09.2026, said yes to this. It is the narrowest action in the
+     whitelist on purpose: the panel needs an id and looks the rest up itself,
+     because the confirm card it draws is the last thing standing between the
+     model's answer and a set that cannot be brought back. */
+  it("takes an id and nothing else", () => {
+    const out = sanitizeAction(
+      { type: "delete_bundle", id: "beard-start", title, items: [{ id: a }, { id: b }], price: 39.9, reason: "он старый" },
+      known, true,
+    ) as Record<string, unknown>;
+    expect(out).toEqual({ type: "delete_bundle", id: "beard-start" });
+  });
+
+  it("refuses an id that is not a set's id", () => {
+    // the same shapes set_bundle refuses above, plus the ways a field can
+    // arrive that is not a string at all
+    for (const bad of ["", "-nope", "НАБОР", "a", "x".repeat(70), "with space", null, undefined, { id: "beard-start" }]) {
+      expect(sanitizeAction({ type: "delete_bundle", id: bad }, known, true),
+        `${String(bad)} was accepted as a set id`).toBeNull();
+    }
+    expect(sanitizeAction({ type: "delete_bundle" }, known, true)).toBeNull();
+    // …and the same set shouted in capitals is the same set, lower-cased
+    expect(sanitizeAction({ type: "delete_bundle", id: " BEARD-START " }, known, true))
+      .toEqual({ type: "delete_bundle", id: "beard-start" });
+  });
+
+  it("is admin-only — a shopper cannot delete a set", () => {
+    expect(sanitizeAction({ type: "delete_bundle", id: "beard-start" }, known, false)).toBeNull();
+  });
+});
+
 describe("the bounds are the same two copies", () => {
   /* actions.ts stays free of database imports on purpose (it is tested as a
      pure function; @/lib/bundles pulls in @/lib/db), so the limits are

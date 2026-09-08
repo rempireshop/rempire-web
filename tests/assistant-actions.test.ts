@@ -81,6 +81,30 @@ describe("set_hero", () => {
     expect(pick("/api/admin/settings/")).toBe("");
     expect(pick(`https://cdn.example.com/${"a".repeat(400)}.jpg`)).toBe("");
     expect(pick({ nested: true })).toBe("");
+    // …and "gift", the one picture with no product behind it — see below
+    expect(pick("gift")).toBe("gift");
+    expect(pick("gifts")).toBe("");
+    expect(pick("GIFT")).toBe("");
+  });
+
+  /* The gift-card slide. Renat sets it by hand — «Куда ведёт кнопка» →
+     «Подарочная карта», picture → the «Подарочная карта» tile — and
+     PUT /api/admin/settings stores it as it is, so it used to look fine. But
+     the moment he asked the ASSISTANT to change the banner, the whole hero
+     came back through sanitizeHero(): heroGo() knew the word "gift", and
+     heroImage() did not, so the picture was quietly dropped and heroArt() in
+     app.js fell through to CATALOGUE[0] — a banner about a present, sold with
+     a photograph of a shampoo. This is that round trip. */
+  it("keeps a gift-card slide whole when the assistant rewrites the banner", () => {
+    const gift = { ...goodSlide, id: "gift", go: "gift", image: "gift" };
+    const out = sanitizeAction({ type: "set_hero", value: { slides: [gift, goodSlide], interval: 6000 } }, known, true) as {
+      value: { slides: Array<{ id: string; go: string; image: string }> };
+    };
+    expect(out.value.slides[0]).toEqual(gift);
+    expect(out.value.slides[0].image, "the gift card's picture was cleaned away again").toBe("gift");
+    expect(out.value.slides[0].go).toBe("gift");
+    // the ordinary product slide beside it is untouched
+    expect(out.value.slides[1].image).toBe(someId);
   });
 
   it("drops unknown keys and slides with no title at all", () => {

@@ -140,6 +140,7 @@
         "Mustand kirjutatakse komplekti toodete järgi. Kirjelduse esimesi ridu näitab pood Google'is.",
       "Список наборов не загрузился — откройте «Товары → Наборы»": "Komplektide nimekiri ei laadinud — ava «Tooted → Komplektid»",
       "Такого набора нет — соберите новый в «Товары → Наборы»": "Sellist komplekti ei ole — koosta uus «Tooted → Komplektid» all",
+      "Такого набора нет — откройте «Товары → Наборы»": "Sellist komplekti ei ole — ava «Tooted → Komplektid»",
       "Набор сохранён ✓": "Komplekt salvestatud ✓",
       "Набор показан ✓": "Komplekt on näha ✓",
       "Набор скрыт ✓": "Komplekt peidetud ✓",
@@ -2373,6 +2374,7 @@
         "The draft is written from the products in the set. The first lines of the description are what the shop shows in Google.",
       "Список наборов не загрузился — откройте «Товары → Наборы»": "The list of sets did not load — open «Goods → Sets»",
       "Такого набора нет — соберите новый в «Товары → Наборы»": "There is no such set — build a new one in «Goods → Sets»",
+      "Такого набора нет — откройте «Товары → Наборы»": "There is no such set — open «Goods → Sets»",
       "Набор сохранён ✓": "Set saved ✓",
       "Набор показан ✓": "Set shown ✓",
       "Набор скрыт ✓": "Set hidden ✓",
@@ -17162,13 +17164,95 @@
     });
   }
 
-  /* The assistant may not invent a set's address — propose_bundle carries no
-     id on purpose — and Renat should not have to invent a latin slug either.
-     So the Russian name becomes one here, through the same transliteration
-     the blog uses, with a number appended when a set already owns it. He can
-     still change it: the box is read-only only once the set has been saved. */
-  function bundleSuggestId(titleRu) {
-    var base = blogSlugify(String(titleRu || "")).slice(0, 48).replace(/-+$/, "");
+  /* ---------- the address of a new set ------------------------------------
+     The assistant may not invent a set's address — propose_bundle carries no
+     id on purpose — and Renat should not have to invent a latin one either.
+     So the Russian name becomes one here.
+
+     Dim, 08.09.2026, chose an ENGLISH word over a transliteration: «Набор для
+     бороды» is `beard-set`, not `nabor-dlya-borody`. This address is a URL —
+     the shopper reads it, Google indexes it, and the shop sells across Europe
+     — and every set the shop shipped with is already named that way
+     (`beard-start`, `shave-smooth`, `face-basic`, db/migrations/120_bundles.sql).
+
+     How the English comes out of a Russian name: word by word through the
+     vocabulary below — the words a barbershop's set names are actually made
+     of — and then the generic tail («набор», «уход») is moved to the END,
+     because Russian puts it first («Набор для бороды») and English puts it
+     last («beard set»). A word already written in latin letters is a brand
+     and passes through as it is. A Russian word the vocabulary does not know
+     is DROPPED rather than transliterated: half an address in the wrong
+     alphabet is worse than a short one. Only when nothing English survives
+     does the set's own English name get used, and only after that does the
+     transliteration come back — an address the owner can read beats an empty
+     box, and he can rewrite it in either case. */
+  var BUNDLE_EN_WORDS = [
+    ["набор", "set"], ["наборчик", "set"], ["комплект", "set"], ["сет", "set"],
+    ["уход", "care"], ["ухаж", "care"], ["рутин", "routine"],
+    ["борода", "beard"], ["бород", "beard"], ["усы", "moustache"], ["усов", "moustache"],
+    ["волос", "hair"], ["причёск", "hair"], ["причес", "hair"], ["стрижк", "haircut"],
+    ["брить", "shave"], ["бритьё", "shave"], ["бритье", "shave"], ["бритв", "shave"], ["брит", "shave"],
+    ["лицо", "face"], ["лица", "face"], ["лицу", "face"], ["тело", "body"], ["тела", "body"],
+    ["кожа", "skin"], ["кожи", "skin"], ["татуиров", "tattoo"], ["тату", "tattoo"],
+    ["парфюм", "perfume"], ["аромат", "scent"], ["одеколон", "cologne"],
+    ["подарок", "gift"], ["подарк", "gift"], ["подароч", "gift"],
+    ["старт", "starter"], ["новичк", "starter"], ["базов", "basic"], ["полн", "full"],
+    ["классик", "classic"], ["классич", "classic"], ["премиум", "premium"],
+    ["мужск", "men"], ["женск", "women"], ["салон", "salon"], ["барбер", "barber"],
+    ["дорож", "travel"], ["путешеств", "travel"], ["мини", "mini"], ["пробн", "trial"],
+    ["зимн", "winter"], ["зима", "winter"], ["летн", "summer"], ["лето", "summer"],
+    ["шампун", "shampoo"], ["кондиционер", "conditioner"], ["маск", "mask"],
+    ["масло", "oil"], ["масла", "oil"], ["масел", "oil"], ["маслом", "oil"],
+    ["бальзам", "balm"], ["мыло", "soap"], ["мыла", "soap"], ["крем", "cream"],
+    ["гель", "gel"], ["воск", "wax"], ["паста", "paste"], ["помад", "pomade"],
+    ["глина", "clay"], ["пена", "foam"], ["спрей", "spray"], ["сыворотк", "serum"],
+    ["тоник", "tonic"], ["скраб", "scrub"], ["дезодорант", "deodorant"],
+    ["станок", "razor"], ["помазок", "brush"], ["щётк", "brush"], ["щетк", "brush"],
+    ["расчёск", "comb"], ["расческ", "comb"], ["ножниц", "scissors"],
+    ["стайлинг", "styling"], ["укладк", "styling"], ["дуэт", "duo"], ["трио", "trio"],
+    ["очищ", "cleansing"], ["увлажн", "moisture"], ["питат", "nourish"]
+  ];
+  /* The generic half of a set's name. English wants it last, so it is held
+     back and appended after the words that say WHAT the set is about. */
+  var BUNDLE_EN_TAIL = { set: 1, care: 1, routine: 1 };
+  /** The longest stem that starts this word wins — «бритв» beats «брит». */
+  function bundleEnWord(w) {
+    var hit = "", best = 0;
+    for (var i = 0; i < BUNDLE_EN_WORDS.length; i++) {
+      var stem = BUNDLE_EN_WORDS[i][0];
+      if (stem.length > best && w.indexOf(stem) === 0) { best = stem.length; hit = BUNDLE_EN_WORDS[i][1]; }
+    }
+    return hit;
+  }
+  /** «Набор для бороды» → «beard-set»; "" when no English word came out of it. */
+  function bundleEnglishSlug(name) {
+    var words = String(name || "").toLowerCase().replace(/[^0-9a-zа-яёäöüõšž]+/g, " ").split(" ");
+    var head = [], tail = [], seen = {};
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (w.length < 2) continue;
+      // a latin word in a Russian name is a brand — Proraso, Rempire, Barberism
+      var en = /^[a-z][a-z0-9]*$/.test(w) ? w : bundleEnWord(w);
+      if (!en || seen[en]) continue;
+      seen[en] = 1;
+      if (BUNDLE_EN_TAIL[en]) tail.push(en); else head.push(en);
+    }
+    // «Набор» on its own says nothing about the set: that is not an address
+    if (!head.length) return "";
+    return head.slice(0, 2).concat(tail.slice(0, 1)).join("-");
+  }
+  /** A name already written in latin letters, as an address: «Smooth shave» → «smooth-shave». */
+  function bundleLatinSlug(name) {
+    var s = String(name || "");
+    if (!s.trim() || /[а-яё]/i.test(s)) return "";   // an «English» box filled in Russian is not English
+    return blogSlugify(s).split("-").filter(function (w) { return w.length > 1; }).slice(0, 3).join("-");
+  }
+  /* `title` is the form's trilingual name — the Russian one is what a set is
+     always named in first, and the other two are what the assistant wrote. */
+  function bundleSuggestId(title) {
+    var t = title && typeof title === "object" ? title : { RU: String(title || "") };
+    var base = bundleEnglishSlug(t.RU) || bundleLatinSlug(t.EN) || bundleLatinSlug(t.ET) || blogSlugify(t.RU || "");
+    base = base.slice(0, 48).replace(/-+$/, "");
     if (base.length < 2 || base === "post") return "";
     var taken = {};
     (S.admBundles || []).forEach(function (b) { taken[b.id] = true; });
@@ -17208,7 +17292,9 @@
     form.items = (a.items || []).map(function (it) {
       return { productId: it.productId || it.id, variant: Number(it.variant) || 0, qty: Number(it.qty) || 1 };
     });
-    form.id = bundleSuggestId(form.title.RU);
+    // all three names, because the English one the assistant wrote is the
+    // second place bundleSuggestId() looks for a latin address
+    form.id = bundleSuggestId(form.title);
     // «Наборы» is the third tab of «Товары» (admProductTab), not a section
     S.adminTab = "goods"; S.goodsTab = "bundles"; S.adminEdit = "";
     S.bundleForm = form; S.bundleFormErr = ""; S.bundleQ = ""; BUNDLE_AI_UNDO = null;
@@ -17268,9 +17354,41 @@
       render();
     }).catch(function () { toast("Сервер не отвечает"); render(); });
   }
+  /* …and a set removed (Dim, 08.09.2026: the assistant may delete a set).
+     Nothing new happens here: the confirmed action walks the same path
+     «Удалить набор» → «Да, удалить» walks in the editor, down to the same
+     DELETE /api/admin/bundles/ and the same toast, so the server writes the
+     same `bundle.delete` line into «Журнал магазина» either way.
+
+     The list is read first for the reason applySetBundle reads it — the side
+     pane may never have opened «Товары → Наборы» — and for one more: this is
+     the action with no way back, so an id that belongs to no set has to say
+     so out loud instead of quietly deleting nothing. The journal note is
+     written from the set as it still stands, because a second later there is
+     nothing left to name it by. */
+  function applyDeleteBundle(a) {
+    if (!S.admBundles) {
+      apiJson("/api/admin/bundles/").then(function (r) {
+        if (r.status === 401) { SRV.admin = false; render(); return; }
+        if (r.status !== 200 || !r.body.ok) { toast("Список наборов не загрузился — откройте «Товары → Наборы»"); return; }
+        S.admBundles = hydrateBundles(r.body.bundles || []);
+        applyDeleteBundle(a);
+      }).catch(function () { toast("Сервер не отвечает"); });
+      return;
+    }
+    var gone = (S.admBundles || []).filter(function (b) { return b.id === a.id; })[0];
+    if (!gone) { toast("Такого набора нет — откройте «Товары → Наборы»"); return; }
+    // the first line only: the second is the warning the card asked with, and
+    // a journal row is one line of what happened, not the question before it
+    deleteBundleById(a.id, actionText(a).split("\n")[0]);
+  }
+  /* `idTyped` is the one thing the suggested address must respect: once the
+     owner has written an address of his own, the name he goes on typing must
+     never rewrite it under him. Clearing the box empties the flag again — an
+     empty address is a request for a new suggestion, not a decision. */
   function blankBundle() {
     return {
-      id: "", cat: "beard", editing: false,
+      id: "", idTyped: false, cat: "beard", editing: false,
       title: { RU: "", ET: "", EN: "" }, desc: { RU: "", ET: "", EN: "" },
       items: [], price: "", image: "", active: true, sort: 0, lang: "RU"
     };
@@ -17359,6 +17477,15 @@
   /** The running total under the item list — the number the percentage is taken off. */
   function bundleSumLine() {
     return "Сумма товаров — " + eur(bundleFormSum());
+  }
+  /* The suggested address, patched where it stands — the name is being typed
+     in the box above and a render would take the caret out of it, the same
+     rule the money boxes below follow. */
+  function paintBundleId() {
+    var el = document.querySelector('[data-bundlef="id"]');
+    if (!el || !S.bundleForm) return;
+    S.bundleForm.id = bundleSuggestId(S.bundleForm.title);
+    el.value = S.bundleForm.id;
   }
   /** Both companions of the box being typed in, patched where they stand. */
   function paintBundleMoney(from) {
@@ -17584,7 +17711,11 @@
       loadAdminBundles(true);
     }).catch(function () { toast("Сервер не отвечает"); loadAdminBundles(true); });
   }
-  function deleteBundleById(id) {
+  /* `note` is the line the change journal keeps when the assistant asked for
+     this (applyDeleteBundle) — a note, not an entry: there is no `prev` to
+     put back, so no «Вернуть» appears beside it. The editor's own button
+     passes none: it is already standing in the list it just changed. */
+  function deleteBundleById(id, note) {
     if (deleteBundleById._busy) return;   // «Да, удалить» twice is one deletion
     deleteBundleById._busy = true;
     apiJson("/api/admin/bundles/?id=" + encodeURIComponent(id), { method: "DELETE" }).then(function (r) {
@@ -17593,6 +17724,7 @@
       S.bundleDel = "";
       if (r.status === 200 && r.body.ok) {
         if (S.bundleForm && S.bundleForm.id === id) { S.bundleForm = null; BUNDLE_AI_UNDO = null; }
+        if (note) journalNote(note);
         toast("Набор удалён ✓");
         loadAdminBundles(true); loadBundles();
         return;
@@ -22223,6 +22355,19 @@
       return "Набор «" + sbName + "»: " + bundlePartsText(a.items) +
         (a.price != null ? " · " + eur(a.price) : "");
     }
+    /* …and a set removed (Dim, 08.09.2026). This is the only action of the
+       assistant's with nothing behind it to undo, so the card names the set
+       the shop will really lose — the title and the products are read out of
+       the panel's own list, never out of the model's answer, which carries an
+       id and nothing else for exactly this reason. Until that list has
+       arrived the line falls back to the address; applyDeleteBundle() fetches
+       it and the render that follows puts the name in. */
+    if (a.type === "delete_bundle") {
+      var dbSet = (S.admBundles || []).filter(function (b) { return b.id === a.id; })[0];
+      var dbName = (dbSet && dbSet.title && (dbSet.title.RU || dbSet.title.ET || dbSet.title.EN)) || a.id;
+      return "Удалить набор «" + dbName + "»" + (dbSet ? ": " + bundlePartsText(dbSet.items) : "") +
+        "\nСтраница набора перестанет открываться, вернуть его будет нельзя. Уже оформленные заказы не изменятся.";
+    }
     if (a.type === "set_hero") {
       var hsl = a.value && Array.isArray(a.value.slides) ? a.value.slides : null;
       if (!hsl || !hsl.length) return "Баннер: стандартный";
@@ -22849,6 +22994,18 @@
         admConvo.push({ role: "assistant", content: reply });
         if (S.adminAsk !== q) return;
         pendingAction = j.action || null;
+        /* «Удалить набор» is the one thing the assistant can propose that the
+           change journal cannot take back, so it wears the panel's own
+           destructive card: the red button and the words the set editor's own
+           «Удалить набор» asks with. And the card has to NAME the set — that
+           name lives in the sets list, which this side pane may never have
+           opened, so it is fetched now and loadAdminBundles()'s own render
+           redraws the answer with the name in it. */
+        if (pendingAction && pendingAction.type === "delete_bundle") {
+          pendingAction.danger = true;
+          pendingAction.ok = "Да, удалить";
+          loadAdminBundles();
+        }
         // kept in S, drawn by admAnswerHTML() — here and on every later render
         // (`ask` is the route's «набор или промокод?» — two chips, no action)
         S.adminAns = { q: q, reply: reply, action: pendingAction, tab: j.tab || "", retry: retry, ask: typeof j.ask === "string" ? j.ask : "" };
@@ -25767,6 +25924,8 @@
            owner), the change goes straight to POST /api/admin/bundles */
         if (pa.type === "propose_bundle") { applyProposeBundle(pa); return; }
         if (pa.type === "set_bundle") { applySetBundle(pa); return; }
+        // …and a set deleted: the same DELETE the editor's «Да, удалить» sends
+        if (pa.type === "delete_bundle") { applyDeleteBundle(pa); return; }
         // the assistant named a topic: the article is written here, in the
         // blog editor, by the same generator its own button runs
         if (pa.type === "draft_post" && pa.topic && !pa.title) { startArticleFromAssistant(pa); return; }
@@ -26932,8 +27091,17 @@
       if (bf === "id") {
         S.bundleForm.id = t.value.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 64);
         if (t.value !== S.bundleForm.id) t.value = S.bundleForm.id;
-      } else if (bf === "title" || bf === "desc") S.bundleForm[bf][bl] = t.value;
-      else if (bf === "price") { S.bundleForm.price = t.value; paintBundleMoney("price"); }
+        // …and from now on it is his address, not ours — until he empties it
+        S.bundleForm.idTyped = S.bundleForm.id !== "";
+      } else if (bf === "title" || bf === "desc") {
+        S.bundleForm[bf][bl] = t.value;
+        /* The address follows the Russian name while it is being typed, so
+           Renat never has to think one up in latin (Dim, 08.09.2026 — see
+           bundleSuggestId). A saved set keeps the address it has: its box is
+           read-only, and a live URL that changes is a broken link and a lost
+           search result. */
+        if (bf === "title" && bl === "RU" && !S.bundleForm.editing && !S.bundleForm.idTyped) paintBundleId();
+      } else if (bf === "price") { S.bundleForm.price = t.value; paintBundleMoney("price"); }
     }
     /* …and the same price seen as a percentage off the running total: what is
        typed here becomes the euro price, which is the only number stored and
