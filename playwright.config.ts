@@ -184,8 +184,13 @@ export default defineConfig({
       // sweep-checkout is in for its one phone-layout test (the rest of that
       // file skips itself off the desktop project), and storefront-sweep-2
       // because its own beforeEach already asks for this project by name
+      /* `testplan` is here for the same reason the storefront specs are: the
+         acceptance checklist at /test/ is a page Renat fills in on an iPhone,
+         so the engine that has to keep its answers between reloads is the one
+         he actually uses — Safari, whose private mode is also the browser that
+         refuses localStorage outright. */
       testMatch:
-        /[\\/](catalogue|product|checkout|invoice|payments|storefront-sweep-2|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout)\.spec\.ts$/,
+        /[\\/](catalogue|product|checkout|invoice|payments|storefront-sweep-2|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/,
     },
     ...(webkitInstalled
       ? [{ name: "webkit-local", use: { ...devices["Desktop Safari"] } }]

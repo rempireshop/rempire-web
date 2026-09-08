@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Приёмка магазина — что проверяем · REMPIRE</title>
+<meta name="description" content="Список проверок нового магазина Rempire: что открыть, что нажать и что должно получиться. Ответы и замечания сохраняются здесь же.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="REMPIRE">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://rempireshop.diipsolutions.eu/test/">
+<meta property="og:title" content="Приёмка магазина — что проверяем">
+<meta property="og:description" content="Открой на телефоне, пройди по списку, отметь «работает» или «не работает» и допиши, что не так.">
+<meta property="og:image" content="https://rempireshop.diipsolutions.eu/og-shop.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rempireshop.diipsolutions.eu/og-shop.png">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+
+<style>
+  /* The shop's own palette (public/shop2/styles.css), painted explicitly and
+     in one theme: this page is a work tool Renat holds in one hand in a
+     bright salon, and a checklist that changes colour with the phone's night
+     mode is a checklist whose red warnings stop reading as warnings. */
+  :root {
+    --ink: #1c1a00;
+    --soft: #4a4738;
+    --muted: #6f6b57;
+    --page: #ffffff;
+    --paper: #fdfcf9;
+    --shell: #edeae1;
+    --rule: rgba(28, 26, 0, .16);
+    --hair: rgba(28, 26, 0, .10);
+    --ok: #2f6a3f;
+    --ok-bg: #eef5ef;
+    --bad: #8c1a0f;
+    --bad-bg: #fbeceb;
+    --skip: #6f6b57;
+    --skip-bg: #f1efe9;
+    --sans: "Golos Text", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    --serif: "Literata", Georgia, serif;
+    --gutter: 14px;
+    /* Nothing a finger has to hit is ever smaller than this. WCAG 2.2 asks
+       for 24 px and Apple for 44; a checklist is all buttons, so it gets the
+       generous number — see /cards/ for where those two figures come from. */
+    --tap: 46px;
+  }
+  @media (min-width: 720px) { :root { --gutter: 24px; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font-family: var(--sans); font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 0 var(--gutter); }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; margin: 0; }
+
+  /* ---------- header ---------- */
+  .top { background: var(--shell); border-bottom: 1px solid var(--rule); padding: 26px 0 22px; }
+  .kicker { margin: 0; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-size: 1.6rem; line-height: 1.15; margin: .35rem 0 .5rem; text-wrap: balance; }
+  .lede { margin: 0; color: var(--soft); }
+  .lede + .lede { margin-top: .5rem; }
+
+  /* ---------- «я — …» ---------- */
+  .me { margin-top: 1rem; }
+  .me__label { font-size: .85rem; color: var(--muted); display: block; margin-bottom: .35rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip {
+    font: inherit; font-size: .92rem; min-height: var(--tap); padding: .4rem .9rem;
+    background: var(--page); color: var(--ink); border: 1px solid var(--rule); border-radius: 0;
+    cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+
+  /* ---------- sticky progress ---------- */
+  .bar {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--page); border-bottom: 1px solid var(--rule);
+    padding: .55rem 0 .6rem;
+  }
+  .bar__grid { display: flex; flex-wrap: wrap; gap: .2rem 1rem; align-items: baseline; }
+  .bar__count { font-size: .95rem; font-weight: 500; }
+  .bar__state { font-size: .82rem; color: var(--muted); margin: 0; flex: 1 1 100%; }
+  .bar__state--warn { color: var(--bad); }
+  .track { flex: 1 1 100%; height: 6px; background: var(--shell); margin-top: .45rem; }
+  .track i { display: block; height: 100%; background: var(--ok); width: 0; transition: width .2s; }
+
+  /* ---------- blocks ---------- */
+  section { padding: 1.4rem 0; border-bottom: 1px solid var(--hair); }
+  h2 { font-size: 1.15rem; margin-bottom: .2rem; }
+  .h2sub { margin: .1rem 0 .9rem; color: var(--muted); font-size: .9rem; }
+  p { margin: 0 0 .7rem; }
+  p:last-child { margin-bottom: 0; }
+
+  .howto { background: var(--paper); }
+  .howto ol { margin: 0; padding-left: 1.2rem; }
+  .howto li { margin-bottom: .35rem; }
+
+  .danger { background: var(--bad-bg); border: 1px solid rgba(140, 26, 15, .35); padding: 1rem; margin: 1.4rem 0; }
+  .danger h2 { color: var(--bad); font-size: 1.05rem; }
+  .danger ul { margin: .6rem 0 0; padding-left: 1.1rem; }
+  .danger li { margin-bottom: .3rem; }
+  .danger a { color: var(--bad); }
+
+  .jump ul { list-style: none; display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; }
+  .jump a {
+    display: flex; align-items: center; min-height: var(--tap);
+    padding: .3rem .8rem; border: 1px solid var(--rule); font-size: .9rem; text-decoration: none;
+  }
+
+  /* ---------- filters ---------- */
+  .filters { padding: 1rem 0; }
+  .filters__row + .filters__row { margin-top: .6rem; }
+  .filters__label { display: block; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; }
+
+  /* ---------- the list ---------- */
+  .area { padding-top: 1.6rem; }
+  .area > h2 { scroll-margin-top: 4.5rem; }
+  .item {
+    border: 1px solid var(--rule); border-left-width: 4px; border-left-color: var(--rule);
+    padding: .9rem; margin-top: 1rem; background: var(--page); scroll-margin-top: 5rem;
+  }
+  .item[data-status="ok"]   { border-left-color: var(--ok);   background: var(--ok-bg); }
+  .item[data-status="bad"]  { border-left-color: var(--bad);  background: var(--bad-bg); }
+  .item[data-status="skip"] { border-left-color: var(--skip); background: var(--skip-bg); }
+  .item[hidden] { display: none; }
+  .item h3 { font-size: 1.05rem; line-height: 1.25; margin: .35rem 0 .5rem; scroll-margin-top: 4.5rem; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .tag {
+    font-size: .72rem; letter-spacing: .04em; text-transform: uppercase;
+    border: 1px solid var(--rule); padding: .1rem .4rem; color: var(--muted); white-space: nowrap;
+  }
+  .tag--high { border-color: var(--bad); color: var(--bad); }
+  .tag--writes { border-color: var(--bad); background: var(--bad); color: #fff; }
+
+  .warns { margin: 0 0 .6rem; padding: .5rem .6rem; background: var(--bad-bg); border: 1px solid rgba(140, 26, 15, .35); color: var(--bad); font-size: .88rem; }
+
+  .steps { margin: 0 0 .6rem; padding-left: 1.2rem; }
+  .steps li { margin-bottom: .25rem; }
+  .expect { font-size: .95rem; }
+  .expect b { font-weight: 600; }
+  .why { font-size: .9rem; color: var(--muted); margin-bottom: .8rem; }
+  .why summary { cursor: pointer; min-height: 2rem; display: flex; align-items: center; }
+  .why p { margin: .3rem 0 0; }
+
+  .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .verdict button {
+    font: inherit; font-size: .95rem; min-height: var(--tap); padding: .5rem .4rem;
+    background: var(--page); color: var(--ink); border: 1px solid var(--rule); cursor: pointer;
+  }
+  .verdict button[data-tp-set="skip"] { grid-column: 1 / -1; }
+  .verdict button[aria-pressed="true"][data-tp-set="ok"]   { background: var(--ok);   border-color: var(--ok);   color: #fff; }
+  .verdict button[aria-pressed="true"][data-tp-set="bad"]  { background: var(--bad);  border-color: var(--bad);  color: #fff; }
+  .verdict button[aria-pressed="true"][data-tp-set="skip"] { background: var(--skip); border-color: var(--skip); color: #fff; }
+
+  .note { display: block; margin-top: .7rem; }
+  .note span { display: block; font-size: .82rem; color: var(--muted); margin-bottom: .25rem; }
+  .note textarea {
+    font: inherit; font-size: 16px; /* under 16px iOS Safari zooms the page on focus */
+    width: 100%; min-height: 3.2rem; padding: .5rem;
+    border: 1px solid var(--rule); background: var(--page); color: var(--ink); resize: vertical;
+  }
+  .by { margin: .4rem 0 0; font-size: .8rem; color: var(--muted); min-height: 1.1rem; }
+
+  /* ---------- report ---------- */
+  .report textarea { font: inherit; font-size: 14px; width: 100%; min-height: 9rem; padding: .5rem; border: 1px solid var(--rule); }
+  .btn {
+    font: inherit; min-height: var(--tap); padding: .5rem 1rem; cursor: pointer;
+    background: var(--ink); color: var(--page); border: 1px solid var(--ink);
+  }
+  .btn--ghost { background: var(--page); color: var(--ink); border-color: var(--rule); }
+  .btns { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+  footer { padding: 1.6rem 0 3rem; color: var(--muted); font-size: .9rem; }
+
+  @media (min-width: 720px) {
+    body { font-size: 17px; }
+    h1 { font-size: 2.1rem; }
+    .verdict { grid-template-columns: repeat(3, 1fr); }
+    .verdict button[data-tp-set="skip"] { grid-column: auto; }
+  }
+</style>
+</head>
+
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="kicker">REMPIRE · приёмка</p>
+    <h1>Что проверяем перед запуском</h1>
+    <p class="lede">Открой список на том устройстве, на котором будешь смотреть магазин. Проходи пункты сверху вниз, отмечай <b>работает</b> или <b>не работает</b> и дописывай, что не так.</p>
+    <p class="lede">Комментарий можно оставить и к тому, что работает — «работает, но кнопка мелкая» это самое полезное, что тут можно написать.</p>
+    <div class="me">
+      <span class="me__label" id="who-label">Кто отвечает — чтобы было видно, чей ответ</span>
+      <div class="chips" role="group" aria-labelledby="who-label">
+        <button type="button" class="chip" data-tp-who="renat" aria-pressed="false">Ренат</button>
+        <button type="button" class="chip" data-tp-who="dim" aria-pressed="false">Дима</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap bar__grid">
+    <strong class="bar__count" data-tp-progress>Загружаю список…</strong>
+    <p class="bar__state" data-tp-state></p>
+    <div class="track" aria-hidden="true"><i data-tp-track></i></div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="howto">
+    <h2>Как это работает</h2>
+    <ol>
+      <li>Отметь вверху, кто ты — Ренат или Дима.</li>
+      <li>Иди по списку и жми одну из трёх кнопок под каждым пунктом.</li>
+      <li>Пиши в комментарий всё, что показалось неудобным, — даже мелочь.</li>
+      <li>Ответы сохраняются сами. Строчка вверху всегда говорит, где именно они сейчас лежат.</li>
+      <li>Чтобы ответы увидел второй, надо быть в кабинете магазина: <a href="/shop2/admin/">/shop2/admin/</a>. Если ты не вошёл — тестируй спокойно, всё останется на устройстве и уйдёт на сервер само, как только войдёшь.</li>
+    </ol>
+  </section>
+
+  <div class="danger" data-tp-writes hidden>
+    <h2>Осторожно: эти пункты создают настоящие данные</h2>
+    <p>Настоящий заказ, настоящее письмо покупателю, настоящее движение по складу. Не запускай их на живом магазине, не предупредив второго.</p>
+    <ul data-tp-writes-list></ul>
+  </div>
+
+  <nav class="jump" data-tp-jump hidden aria-label="Разделы">
+    <span class="filters__label">Разделы</span>
+    <ul data-tp-jump-list></ul>
+  </nav>
+
+  <section class="filters">
+    <div class="filters__row">
+      <span class="filters__label" id="f-who">Чьи пункты показывать</span>
+      <div class="chips" role="group" aria-labelledby="f-who">
+        <button type="button" class="chip" data-tp-filter="all" aria-pressed="true">Все</button>
+        <button type="button" class="chip" data-tp-filter="renat" aria-pressed="false">Ренат</button>
+        <button type="button" class="chip" data-tp-filter="dim" aria-pressed="false">Дима</button>
+      </div>
+    </div>
+    <div class="filters__row">
+      <span class="filters__label" id="f-open">Что показывать</span>
+      <div class="chips" role="group" aria-labelledby="f-open">
+        <button type="button" class="chip" data-tp-only aria-pressed="false">Только без ответа</button>
+      </div>
+    </div>
+  </section>
+
+  <div data-tp-list></div>
+
+  <section class="report">
+    <h2>Забрать ответы текстом</h2>
+    <p class="h2sub">Готовый список ответов и замечаний — переслать в чат или вставить в письмо.</p>
+    <div class="btns">
+      <button type="button" class="btn" data-tp-copy>Скопировать ответы</button>
+      <button type="button" class="btn btn--ghost" data-tp-sync>Сохранить на сервер сейчас</button>
+    </div>
+    <p class="h2sub" data-tp-copied hidden>Скопировано.</p>
+    <textarea data-tp-report rows="10" readonly hidden aria-label="Ответы текстом"></textarea>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>Вопросы и правки — Диме. Обзор магазина: <a href="/guide/">/guide/</a> · варианты карточки товара: <a href="/cards/">/cards/</a> · сам магазин: <a href="/shop2/">/shop2/</a></p>
+</footer>
+
+<script>
+/*
+ * The checklist page. Static file, no build step, no framework — same shape as
+ * /guide/ and /cards/, which is what lets Renat open one address on his phone.
+ *
+ * Where the answers live, in order of preference:
+ *
+ *   1. the server, in one `settings` row behind the admin session
+ *      (src/app/api/testplan/route.ts). This is the copy Dim reads without
+ *      having to ask Renat what he found.
+ *   2. localStorage on this device, ALWAYS, whether or not anyone is signed
+ *      in — written before the network is even asked. An hour of testing must
+ *      not depend on a request going through.
+ *
+ * So a save never blocks on the network, a failed save is retried and said out
+ * loud, and the moment a signed-in session appears the local copy is pushed
+ * up. The one thing this page may not do is lose an answer.
+ */
+(function () {
+  "use strict";
+
+  var API = "/api/testplan/";
+  var LS_ANSWERS = "rempire-testplan-v1";
+  var LS_PLAN = "rempire-testplan-plan-v1";
+  var LS_WHO = "rempire-testplan-who";
+
+  var WHO = { renat: "Ренат", dim: "Дима", both: "Оба" };
+  var DEVICE = { phone: "телефон", desktop: "компьютер", any: "любое устройство" };
+  var RISK = { high: "критично", med: "важно", low: "мелочь" };
+  var STATUS = { ok: "работает", bad: "не работает", skip: "пропущено" };
+
+  var state = {
+    plan: null,
+    ids: [],            // item ids in plan order — also the filter for what we send up
+    items: {},          // id -> plan item
+    answers: {},        // id -> {status, note, at, by}
+    nodes: {},          // id -> <article>
+    signedIn: false,
+    who: "",
+    filter: "all",
+    onlyOpen: false,
+    dirty: false,
+    busy: false,
+    /* Bumped by every answer. A save that finishes may only report "nothing
+       left to send" if this is still what it was when the request left — a
+       verdict pressed while the request was in the air belongs to the next
+       one, and clearing `dirty` on its behalf is how it would be lost. */
+    rev: 0,
+    stopped: false,     // a failure retrying cannot fix — say so, stop hammering
+    noStore: false,     // this browser refuses localStorage (private mode, full disk)
+    tries: 0,
+    timer: 0,
+    savedAt: null,
+    error: "",
+    fromCache: false,
+    lastCheck: 0
+  };
+
+  /* ---------- tiny DOM helpers ------------------------------------------ */
+  /* Everything is built with createElement/textContent rather than innerHTML:
+     the plan is our own file today, but a checklist is exactly the kind of
+     document that later gets filled in by somebody else, and this is the
+     class of mistake that then costs a page. */
+
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    if (attrs) for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) {
+      if (k === "text") n.textContent = attrs[k];
+      else if (attrs[k] !== null && attrs[k] !== undefined) n.setAttribute(k, attrs[k]);
+    }
+    if (kids) for (var i = 0; i < kids.length; i++) if (kids[i]) n.appendChild(kids[i]);
+    return n;
+  }
+  function $(sel) { return document.querySelector(sel); }
+
+  /* ---------- localStorage (never allowed to throw) --------------------- */
+
+  function lsGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function lsSet(key, value) {
+    try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+  }
+  function readJson(key) {
+    var raw = lsGet(key);
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch (e) { return null; }
+  }
+  function saveLocal() {
+    if (!lsSet(LS_ANSWERS, JSON.stringify(state.answers))) {
+      /* Private-mode Safari and a full disk both land here. The answers are
+         still in memory and still go to the server, but the tester has to know
+         that closing the tab loses whatever did not. Its own flag, not
+         `state.error`: a successful save to the server clears that one, and it
+         must not clear a warning that is still true. */
+      state.noStore = true;
+      paintState();
+    }
+  }
+
+  /* ---------- merging --------------------------------------------------- */
+  /* The same rule the server applies (src/lib/testplan.ts mergeAnswers): per
+     item id, the newer `at` wins. ISO instants compare correctly as strings. */
+
+  function merge(base, incoming) {
+    var out = {}, id;
+    for (id in base) if (Object.prototype.hasOwnProperty.call(base, id)) out[id] = base[id];
+    for (id in incoming) if (Object.prototype.hasOwnProperty.call(incoming, id)) {
+      if (!out[id] || incoming[id].at >= out[id].at) out[id] = incoming[id];
+    }
+    return out;
+  }
+
+  /** What we are willing to send: only ids the plan we are showing knows.
+      Anything else stays in localStorage untouched — an answer to an item a
+      newer plan dropped is not worth a 400 that blocks every other answer. */
+  function outgoing() {
+    var out = {};
+    for (var i = 0; i < state.ids.length; i++) {
+      var id = state.ids[i];
+      if (state.answers[id]) out[id] = state.answers[id];
+    }
+    return out;
+  }
+
+  /* ---------- rendering ------------------------------------------------- */
+
+  function tag(text, cls) { return el("span", { "class": "tag" + (cls ? " tag--" + cls : ""), text: text }); }
+
+  function itemNode(item) {
+    var tags = el("div", { "class": "tags" }, [
+      tag(RISK[item.risk] || item.risk, item.risk === "high" ? "high" : null),
+      tag(WHO[item.who] || item.who),
+      tag(DEVICE[item.device] || item.device),
+      item.lang && item.lang !== "any" ? tag("язык " + item.lang) : null,
+      item.writes ? tag("создаёт данные", "writes") : null
+    ]);
+
+    var steps = el("ol", { "class": "steps" });
+    var list = item.steps || [];
+    for (var i = 0; i < list.length; i++) steps.appendChild(el("li", { text: list[i] }));
+
+    var verdict = el("div", { "class": "verdict", role: "group", "aria-label": "Оценка пункта" }, [
+      el("button", { type: "button", "data-tp-set": "ok", "data-tp-id": item.id, "aria-pressed": "false", text: "Работает" }),
+      el("button", { type: "button", "data-tp-set": "bad", "data-tp-id": item.id, "aria-pressed": "false", text: "Не работает" }),
+      el("button", { type: "button", "data-tp-set": "skip", "data-tp-id": item.id, "aria-pressed": "false", text: "Пропустить" })
+    ]);
+
+    var area = el("article", {
+      "class": "item", id: "i-" + item.id, "data-tp-item": item.id,
+      "data-who": item.who, "data-status": "", "data-writes": item.writes ? "1" : "0"
+    }, [
+      tags,
+      el("h3", { text: item.title }),
+      item.writes ? el("p", { "class": "warns", text: "Создаёт настоящие данные: заказ, письмо или движение по складу. На живом магазине — только предупредив второго." }) : null,
+      steps,
+      el("p", { "class": "expect" }, [el("b", { text: "Должно получиться: " }), document.createTextNode(item.expect || "")]),
+      el("details", { "class": "why" }, [
+        el("summary", { text: "Зачем это проверяем" }),
+        el("p", { text: item.why || "" })
+      ]),
+      verdict,
+      el("label", { "class": "note" }, [
+        el("span", { text: "Комментарий — можно и к тому, что работает" }),
+        el("textarea", { "data-tp-note": item.id, rows: "2", placeholder: "Работает, но кнопка мелкая…" })
+      ]),
+      el("p", { "class": "by", "data-tp-by": item.id })
+    ]);
+    return area;
+  }
+
+  function render() {
+    var host = $("[data-tp-list]");
+    host.textContent = "";
+    state.nodes = {};
+    state.ids = [];
+    state.items = {};
+
+    var plan = state.plan || { areas: [], items: [] };
+    var areas = plan.areas || [];
+    var items = plan.items || [];
+    var i, j;
+
+    /* An item whose area is not in `areas` still has to appear — the plan is
+       replaced wholesale by another hand, and a typo in `area` must cost a
+       misplaced heading, never a checklist item nobody ever sees. */
+    var known = {}, order = [];
+    for (i = 0; i < areas.length; i++) { known[areas[i].id] = areas[i]; order.push(areas[i].id); }
+    var byArea = {};
+    for (i = 0; i < items.length; i++) {
+      var it = items[i];
+      state.ids.push(it.id);
+      state.items[it.id] = it;
+      var key = known[it.area] ? it.area : "__other";
+      if (!byArea[key]) { byArea[key] = []; if (!known[key]) order.push(key); }
+      byArea[key].push(it);
+    }
+
+    var jump = $("[data-tp-jump-list]");
+    jump.textContent = "";
+
+    for (i = 0; i < order.length; i++) {
+      var id = order[i];
+      var group = byArea[id];
+      if (!group || !group.length) continue;
+      var meta = known[id] || { id: id, name: "Остальное", note: "" };
+      var sec = el("section", { "class": "area", "data-tp-area": id }, [
+        el("h2", { id: "a-" + id, text: meta.name }),
+        meta.note ? el("p", { "class": "h2sub", text: meta.note }) : null
+      ]);
+      for (j = 0; j < group.length; j++) {
+        var node = itemNode(group[j]);
+        state.nodes[group[j].id] = node;
+        sec.appendChild(node);
+      }
+      host.appendChild(sec);
+      jump.appendChild(el("li", null, [el("a", { href: "#a-" + id, text: meta.name })]));
+    }
+    $("[data-tp-jump]").hidden = order.length < 2;
+
+    /* The «creates real data» list, so nobody has to scroll the whole page to
+       learn which pumps a real order into a live shop. */
+    var writes = [];
+    for (i = 0; i < items.length; i++) if (items[i].writes) writes.push(items[i]);
+    var box = $("[data-tp-writes]"), ul = $("[data-tp-writes-list]");
+    ul.textContent = "";
+    for (i = 0; i < writes.length; i++) {
+      ul.appendChild(el("li", null, [el("a", { href: "#i-" + writes[i].id, text: writes[i].title })]));
+    }
+    box.hidden = writes.length === 0;
+
+    for (i = 0; i < state.ids.length; i++) paintItem(state.ids[i]);
+    paintProgress();
+    applyFilters();
+  }
+
+  function paintItem(id) {
+    var node = state.nodes[id];
+    if (!node) return;
+    var a = state.answers[id];
+    node.setAttribute("data-status", a ? a.status : "");
+    var buttons = node.querySelectorAll("[data-tp-set]");
+    for (var i = 0; i < buttons.length; i++) {
+      var on = !!a && buttons[i].getAttribute("data-tp-set") === a.status;
+      buttons[i].setAttribute("aria-pressed", on ? "true" : "false");
+    }
+    var box = node.querySelector("[data-tp-note]");
+    if (box && document.activeElement !== box) box.value = a ? a.note : "";
+    var by = node.querySelector("[data-tp-by]");
+    if (by) by.textContent = a ? [WHO[a.by] || a.by || "кто-то", STATUS[a.status], when(a.at)].filter(Boolean).join(" · ") : "";
+  }
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+
+  function paintProgress() {
+    var total = state.ids.length, answered = 0, ok = 0, bad = 0, skip = 0;
+    for (var i = 0; i < total; i++) {
+      var a = state.answers[state.ids[i]];
+      if (!a) continue;
+      answered++;
+      if (a.status === "ok") ok++; else if (a.status === "bad") bad++; else skip++;
+    }
+    /* The breakdown only once there is one. The bar is sticky and a phone
+       screen is short — three zeroes at the top of an untouched checklist cost
+       a line of screen and tell nobody anything. */
+    var line = "Отвечено " + answered + " из " + total;
+    if (ok) line += " · работает " + ok;
+    if (bad) line += " · не работает " + bad;
+    if (skip) line += " · пропущено " + skip;
+    $("[data-tp-progress]").textContent = total ? line : "В списке пока нет пунктов";
+    $("[data-tp-track]").style.width = total ? Math.round((answered / total) * 100) + "%" : "0";
+  }
+
+  /** A route error code in words a tester can act on. Unknown codes are shown
+      as they came — a code nobody recognises is still better than «ошибка». */
+  function why(code) {
+    if (code === "unknown_item") return "список проверок на сервере уже другой — перезагрузи страницу";
+    if (code === "too_large") return "слишком много текста";
+    if (code === "rate_limited") return "слишком часто, подожди минуту";
+    if (code === "db_unavailable") return "база магазина не отвечает";
+    return code || "нет связи";
+  }
+
+  /** The save line. This is the only place the page says where the answers are,
+      so it never says "saved" about anything that is not. */
+  function paintState() {
+    var node = $("[data-tp-state]");
+    var warn = false, text;
+    if (state.noStore) {
+      text = "Устройство не даёт сохранить ответы у себя (частный режим?). Не закрывай вкладку, пока вверху не появится «сохранено на сервере».";
+      warn = true;
+    } else if (!state.signedIn) {
+      text = "Ответы только на этом устройстве — войди в кабинет, и они улетят сами.";
+    } else if (state.stopped) {
+      text = "Сервер не принимает ответы (" + why(state.error) + "). Всё сохранено на устройстве — нажми «Скопировать ответы» и пришли их Диме.";
+      warn = true;
+    } else if (state.busy) {
+      text = "Сохраняю…";
+    } else if (state.dirty) {
+      text = state.error ? "Пока не сохранилось на сервере, пробую ещё раз. Ответы на устройстве." : "Есть несохранённое, сейчас отправлю.";
+      warn = !!state.error;
+    } else if (state.savedAt) {
+      text = "Сохранено на сервере в " + when(state.savedAt.toISOString()) + ".";
+    } else {
+      text = "Вошёл в кабинет — ответы сохраняются на сервер.";
+    }
+    if (state.fromCache) text = "Список показан из памяти устройства — сервер не ответил. " + text;
+    node.textContent = text;
+    node.className = "bar__state" + (warn ? " bar__state--warn" : "");
+  }
+
+  function applyFilters() {
+    for (var i = 0; i < state.ids.length; i++) {
+      var id = state.ids[i], node = state.nodes[id], item = state.items[id];
+      if (!node) continue;
+      var mine = state.filter === "all" || item.who === state.filter || item.who === "both";
+      var open = !state.onlyOpen || !state.answers[id];
+      node.hidden = !(mine && open);
+    }
+    /* A section whose every item is filtered away hides its heading too —
+       otherwise a phone screen fills with headings and nothing under them. */
+    var sections = document.querySelectorAll("[data-tp-area]");
+    for (var s = 0; s < sections.length; s++) {
+      var vis = sections[s].querySelectorAll(".item:not([hidden])");
+      sections[s].hidden = vis.length === 0;
+    }
+  }
+
+  /* ---------- answering -------------------------------------------------- */
+
+  /* A comment typed before any verdict is pressed becomes a «пропустить» with
+     a note, and the Пропустить button lights up to say so. The stored shape
+     has exactly three verdicts and none of them means «ещё не смотрел», so the
+     choice is between showing the tester what was actually stored and quietly
+     storing something the page does not show. This shows it — one tap changes
+     it to «работает» or «не работает». */
+  function touch(id, patch) {
+    var prev = state.answers[id] || { status: "skip", note: "", at: "", by: "" };
+    var next = {
+      status: patch.status !== undefined ? patch.status : prev.status,
+      note: patch.note !== undefined ? patch.note : prev.note,
+      at: new Date().toISOString(),
+      by: state.who || prev.by || ""
+    };
+    state.answers[id] = next;
+    saveLocal();               // first, always, before the network is asked
+    state.dirty = true;
+    state.rev++;
+    state.stopped = false;     // a new answer deserves a fresh attempt
+    paintItem(id);
+    paintProgress();
+    paintState();
+    schedule(patch.note !== undefined ? 1200 : 350);
+  }
+
+  function schedule(delay) {
+    clearTimeout(state.timer);
+    state.timer = setTimeout(syncUp, delay);
+  }
+
+  function syncUp() {
+    if (!state.signedIn || !state.dirty || state.stopped) { paintState(); return; }
+    /* Already in the air. Nothing to do: `dirty` is still set, so the request
+       that is running will reschedule for whatever arrived after it left. */
+    if (state.busy) return;
+    state.busy = true;
+    var sent = state.rev;
+    paintState();
+
+    fetch(API, {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ answers: outgoing() })
+    }).then(function (r) {
+      return r.json().then(function (body) { return { status: r.status, body: body }; },
+                           function () { return { status: r.status, body: null }; });
+    }).then(function (res) {
+      state.busy = false;
+      if (res.status === 200 && res.body && res.body.ok) {
+        state.tries = 0; state.error = ""; state.savedAt = new Date();
+        // only if nothing was answered while this request was in the air
+        if (state.rev === sent) state.dirty = false;
+        adopt(res.body.answers);
+        paintState();
+        if (state.dirty) schedule(300);
+        return;
+      }
+      if (res.status === 401) {
+        /* The session ran out mid-test. Nothing is lost — everything is on the
+           device — and the line above now says so. */
+        state.signedIn = false; state.error = ""; state.tries = 0; paintState(); return;
+      }
+      var code = (res.body && res.body.error) || ("http " + res.status);
+      /* Retrying a body the server refuses on its contents just burns battery.
+         Retry the ones that can pass later (rate limit, database down); stop on
+         the ones that never will, and tell the tester to send the text instead. */
+      if (code === "unknown_item" || code === "too_large" || code === "bad_body" || code === "bad_json") {
+        state.stopped = true; state.error = code; paintState(); return;
+      }
+      failed(code);
+    }).catch(function () {
+      state.busy = false;
+      failed("нет сети");
+    });
+  }
+
+  function failed(code) {
+    state.error = code;
+    state.tries++;
+    paintState();
+    schedule(Math.min(30000, 2000 * Math.pow(2, Math.min(state.tries, 4))));
+  }
+
+  /** Takes the server's merged map. The item being typed into right now is
+      left alone — nothing is more infuriating than a field that rewrites
+      itself under the thumb. */
+  function adopt(server) {
+    if (!server) return;
+    var focused = document.activeElement;
+    var typing = focused && focused.getAttribute ? focused.getAttribute("data-tp-note") : null;
+    var changed = [];
+    for (var id in server) if (Object.prototype.hasOwnProperty.call(server, id)) {
+      if (id === typing) continue;
+      var mine = state.answers[id];
+      if (!mine || server[id].at > mine.at) { state.answers[id] = server[id]; changed.push(id); }
+    }
+    if (!changed.length) return;
+    saveLocal();
+    for (var i = 0; i < changed.length; i++) paintItem(changed[i]);
+    paintProgress();
+  }
+
+  /* ---------- loading ---------------------------------------------------- */
+
+  /* localStorage is a text file the phone's owner can edit and a place a
+     half-written value survives a crash. Read it back the way the server reads
+     its own row (src/lib/testplan.ts getTestAnswers): whatever is not an
+     answer is not an answer. */
+  function saneAnswers(raw) {
+    var out = {};
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+    for (var id in raw) if (Object.prototype.hasOwnProperty.call(raw, id)) {
+      var a = raw[id];
+      if (!a || typeof a !== "object" || !STATUS[a.status]) continue;
+      out[id] = {
+        status: a.status,
+        note: typeof a.note === "string" ? a.note : "",
+        at: typeof a.at === "string" ? a.at : "",
+        by: typeof a.by === "string" ? a.by : ""
+      };
+    }
+    return out;
+  }
+
+  function boot() {
+    state.answers = saneAnswers(readJson(LS_ANSWERS));
+    var who = lsGet(LS_WHO);
+    if (who === "renat" || who === "dim") setWho(who, true);
+
+    fetch(API, { credentials: "same-origin", headers: { accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .then(function (body) {
+        if (!body || !body.plan) throw new Error("no plan");
+        state.plan = body.plan;
+        state.signedIn = !!body.signedIn;
+        lsSet(LS_PLAN, JSON.stringify(body.plan));
+        if (body.answers) state.answers = merge(state.answers, body.answers);
+        render();
+        /* The whole reason the local copy exists: the moment there is a
+           session, whatever this device collected alone goes up. */
+        if (state.signedIn && Object.keys(state.answers).length) { state.dirty = true; schedule(200); }
+        paintState();
+      })
+      .catch(function () {
+        /* No network, or a server that could not answer. The plan we saw last
+           time is enough to keep testing — answers keep landing in
+           localStorage, and the line at the top says where they are. */
+        var cached = readJson(LS_PLAN);
+        state.fromCache = true;
+        if (cached) { state.plan = cached; render(); }
+        else $("[data-tp-progress]").textContent = "Не удалось загрузить список — открой страницу ещё раз, когда будет связь";
+        paintState();
+      });
+  }
+
+  /** Did somebody sign into the panel in another tab? Cheap enough to ask
+      whenever the page comes back to the front, throttled so a tab being
+      flipped through does not become traffic. */
+  function recheck() {
+    if (state.signedIn) { if (state.dirty) schedule(200); return; }
+    var now = Date.now();
+    if (now - state.lastCheck < 10000) return;
+    state.lastCheck = now;
+    fetch(API, { credentials: "same-origin", headers: { accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .then(function (body) {
+        if (!body || !body.signedIn) return;
+        state.signedIn = true;
+        state.fromCache = false;
+        if (body.answers) adopt(body.answers);
+        if (Object.keys(state.answers).length) { state.dirty = true; schedule(200); }
+        paintState();
+      })
+      .catch(function () { /* still offline; the line already says so */ });
+  }
+
+  /* ---------- report ----------------------------------------------------- */
+
+  function reportText() {
+    var plan = state.plan || { areas: [], items: [] };
+    var out = ["REMPIRE — приёмка магазина, " + when(new Date().toISOString())];
+    out.push($("[data-tp-progress]").textContent);
+    out.push("");
+    var areas = plan.areas || [], items = plan.items || [], i, j;
+    var seen = {};
+    for (i = 0; i < areas.length; i++) {
+      var rows = [];
+      for (j = 0; j < items.length; j++) if (items[j].area === areas[i].id) { rows.push(items[j]); seen[items[j].id] = 1; }
+      if (!rows.length) continue;
+      out.push("## " + areas[i].name);
+      for (j = 0; j < rows.length; j++) out.push(line(rows[j]));
+      out.push("");
+    }
+    var rest = [];
+    for (j = 0; j < items.length; j++) if (!seen[items[j].id]) rest.push(items[j]);
+    if (rest.length) {
+      out.push("## Остальное");
+      for (j = 0; j < rest.length; j++) out.push(line(rest[j]));
+    }
+    return out.join("\n");
+  }
+
+  function line(item) {
+    var a = state.answers[item.id];
+    var head = "[" + (a ? STATUS[a.status] : "нет ответа") + "] " + item.title;
+    if (a && a.by) head += " — " + (WHO[a.by] || a.by);
+    if (a && a.note) head += "\n    " + a.note.replace(/\n/g, "\n    ");
+    return head;
+  }
+
+  /* ---------- events ----------------------------------------------------- */
+
+  function setWho(value, quiet) {
+    state.who = value;
+    var chips = document.querySelectorAll("[data-tp-who]");
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].setAttribute("aria-pressed", chips[i].getAttribute("data-tp-who") === value ? "true" : "false");
+    }
+    if (!quiet) lsSet(LS_WHO, value);
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+
+    var set = t.closest("[data-tp-set]");
+    if (set) {
+      /* No "un-answer": a mis-tap is corrected by pressing the right button.
+         The stored document only ever grows and merges (src/lib/testplan.ts),
+         so a local delete would come straight back on the next sync — a button
+         that undoes itself a second later is worse than no button. */
+      touch(set.getAttribute("data-tp-id"), { status: set.getAttribute("data-tp-set") });
+      return;
+    }
+
+    var who = t.closest("[data-tp-who]");
+    if (who) { setWho(who.getAttribute("data-tp-who")); return; }
+
+    var filter = t.closest("[data-tp-filter]");
+    if (filter) {
+      state.filter = filter.getAttribute("data-tp-filter");
+      var chips = document.querySelectorAll("[data-tp-filter]");
+      for (var i = 0; i < chips.length; i++) {
+        chips[i].setAttribute("aria-pressed", chips[i] === filter ? "true" : "false");
+      }
+      applyFilters();
+      return;
+    }
+
+    var only = t.closest("[data-tp-only]");
+    if (only) {
+      state.onlyOpen = !state.onlyOpen;
+      only.setAttribute("aria-pressed", state.onlyOpen ? "true" : "false");
+      applyFilters();
+      return;
+    }
+
+    if (t.closest("[data-tp-sync]")) {
+      state.stopped = false; state.tries = 0;
+      if (!state.signedIn) { state.lastCheck = 0; recheck(); } else { state.dirty = true; schedule(0); }
+      return;
+    }
+
+    if (t.closest("[data-tp-copy]")) {
+      var text = reportText();
+      var box = $("[data-tp-report]");
+      box.hidden = false;
+      box.value = text;
+      var said = $("[data-tp-copied]");
+      var done = function () { said.hidden = false; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { box.focus(); box.select(); });
+      } else { box.focus(); box.select(); }
+      return;
+    }
+  });
+
+  document.addEventListener("input", function (e) {
+    var box = e.target;
+    if (!box || !box.getAttribute) return;
+    var id = box.getAttribute("data-tp-note");
+    if (!id) return;
+    touch(id, { note: box.value });
+  });
+
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) recheck(); });
+  window.addEventListener("focus", recheck);
+
+  boot();
+})();
+</script>
+
+</body>
+</html>
