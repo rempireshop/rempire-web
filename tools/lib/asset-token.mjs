@@ -88,27 +88,52 @@ export function versionedAssets(shell) {
 }
 
 /**
- * The token those files hash to. `publicDir` is the repository's public/ —
- * the URLs are absolute paths inside it.
+ * The token those files hash to, given a way to fetch one of them.
+ *
+ * `read(url)` is handed each versioned URL — `/shop2/app.js` — and answers with
+ * the file's text, or with null/undefined for a file that is not there. It may
+ * be async.
  *
  * The URL goes into the hash beside the bytes, so renaming an asset moves the
  * token even when the content is identical; a file that is not on disk hashes
  * as a named absence rather than throwing, because public/shop/bundles.js is
  * genuinely optional (no file, no «Наборы») and a build must not die over it.
+ *
+ * The reader is a parameter rather than "read from public/" because the same
+ * question is now asked of two different piles of bytes: `assetToken()` below
+ * asks it of the working tree, and e2e/smoke.spec.ts asks it of the files a
+ * deployment is actually serving over HTTP — which is the only version of the
+ * question that could have caught the stale token of 06.09.2026, since a
+ * working tree is always in agreement with itself. One algorithm, two readers:
+ * the moment these were two functions they would start to disagree about
+ * something small (the line endings, the missing file, the order) and the
+ * deployed check would be measuring its own copy of the rule instead of the
+ * rule the build uses.
  */
-export async function assetToken(shell, publicDir) {
+export async function assetTokenWith(shell, read) {
   const h = createHash("sha256");
   for (const url of versionedAssets(shell)) {
     h.update(url).update("\0");
     let body;
     try {
-      body = (await readFile(path.join(publicDir, url.replace(/^\/+/, "")), "utf8")).replace(/\r\n?/g, "\n");
+      const text = await read(url);
+      body = text == null ? "\0missing\0" : String(text).replace(/\r\n?/g, "\n");
     } catch {
       body = "\0missing\0";
     }
     h.update(body).update("\0");
   }
   return h.digest("hex").slice(0, TOKEN_LEN);
+}
+
+/**
+ * The token the files in a checkout hash to. `publicDir` is the repository's
+ * public/ — the URLs are absolute paths inside it. This is what the prerender
+ * and `prerender:check` use; see assetTokenWith() above for why the reading is
+ * separable from the hashing.
+ */
+export async function assetToken(shell, publicDir) {
+  return assetTokenWith(shell, (url) => readFile(path.join(publicDir, url.replace(/^\/+/, "")), "utf8"));
 }
 
 /**

@@ -41,6 +41,13 @@ const webkitInstalled = (() => {
 
 export default defineConfig({
   testDir: "./e2e",
+  /* e2e/smoke.spec.ts is the one file in this directory that is NOT about the
+     server below: it runs against a deployed shop, from its own config
+     (playwright.smoke.config.ts, `npm run smoke`), and asserting its
+     robots.txt, its sitemap host and its security headers against a `next dev`
+     on localhost would fail for reasons that are all correct. Excluded by
+     name so the two suites can share one directory. */
+  testIgnore: /smoke\.spec\.ts$/,
   timeout: 30_000,
   expect: {
     timeout: 8_000,

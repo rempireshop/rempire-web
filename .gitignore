@@ -40,8 +40,13 @@ public/vendor/leaflet/
 
 # Playwright (docs/testing.md) — run artifacts only. e2e/__screenshots__/ is
 # NOT ignored: those .png files are the committed visual-regression baselines.
+# The -smoke pair is the deployed-shop suite's own report and output directory
+# (playwright.smoke.config.ts keeps them separate so a smoke run cannot delete
+# the artefacts of an e2e failure somebody is in the middle of reading).
 /playwright-report/
+/playwright-report-smoke/
 /test-results/
+/test-results-smoke/
 /blob-report/
 
 # sitemap.xml (the index), its sitemap-N.xml chunks and the three robots files
