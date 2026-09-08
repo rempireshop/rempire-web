@@ -234,11 +234,15 @@ export async function productPageResponse(id: string, seg: string): Promise<Resp
        (product_overrides.hidden, db/migrations/147) must stop being indexable
        the moment he does it. Both get what a hidden custom product gets below:
        the shell, noindex, 404.
-       Caveat worth knowing: a catalogue product also has a static page written
-       at build (tools/prerender-shop2.mjs), and next.config.ts serves that file
-       before this route is reached — so a prerendered product keeps answering
-       until the next deploy. app.js drops it from its own list either way, so a
-       shopper who lands there is sent nowhere he can buy it. */
+       This is not the only place that decides it, and until 08.09.2026 it was
+       the only place that did — which meant it barely decided anything. A
+       catalogue product also has a static page written at build
+       (tools/prerender-shop2.mjs), and the static layer answers that file
+       before this route is reached, so a prerendered product went on answering
+       200 until the next deploy. src/middleware.ts now runs the same check one
+       layer earlier, where it can withhold the file; this branch is what
+       answers in the tree where no file was written yet, and the two give the
+       same body and the same status on purpose. */
     if (!CATALOGUE_IDS.has(id)) return html(noindexShell(shell), 404, NO_STORE);
     if (await isHiddenProduct(id)) return html(noindexShell(shell), 404, NO_STORE);
     return html(shell, 200, "public, max-age=0, must-revalidate");

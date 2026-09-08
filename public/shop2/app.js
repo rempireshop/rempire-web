@@ -21860,6 +21860,16 @@
        owner has just taken out of the shop loses that line, the same rule the
        custom-product filter above follows. */
     rebuildCatalogue();
+    /* And the shopper may be standing on the page of the product that just
+       left it — a link to a hidden id, or the owner switching one off while
+       someone reads it. Until now the screen stayed «product» and byId() fell
+       back to whatever was first in the shop, so the address quietly showed a
+       DIFFERENT product; since 08.09.2026 the server answers that address with
+       404 (src/middleware.ts for a catalogue product, src/lib/product-page.ts
+       for the owner's own), and the script has to agree with it. Re-reading
+       the path is the whole fix: the id is out of CATALOGUE now, so the
+       cascade in routeFromPath() ends on «Страница не найдена». */
+    if (S.screen === "product" && S.productId && !byIdOrNull(S.productId)) routeFromPath();
     S.cart = S.cart.filter(function (l) {
       return l.type === "bundle" || l.type === "gift" || !shopHidden(l.id);
     });

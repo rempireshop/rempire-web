@@ -96,6 +96,9 @@ function routes(): RouteCase[] {
        without the HMAC). See tests/giftcard-mail-pdf.test.ts for the 200. */
     { name: "GET /api/giftcards/[code]/pdf/", path: "/api/giftcards/x/pdf/", method: "GET", exports: ["GET"], load: () => import("@/app/api/giftcards/[code]/pdf/route"), params: { code: "RMP-ACDE-FGHJ" }, jsonBody: false, queries: ["", "?t=", "?t=junk", "?t=../../etc/passwd", "?t=" + "9".repeat(400), "?t=%00"] },
     { name: "GET /api/overrides/", path: "/api/overrides/", method: "GET", exports: ["GET"], load: () => import("@/app/api/overrides/route") },
+    /* the ids «Показывать в магазине» is off for — what src/middleware.ts asks
+       before the static layer is allowed to answer a product page */
+    { name: "GET /api/overrides/hidden/", path: "/api/overrides/hidden/", method: "GET", exports: ["GET"], load: () => import("@/app/api/overrides/hidden/route") },
     { name: "GET /api/bundles/", path: "/api/bundles/", method: "GET", exports: ["GET"], load: () => import("@/app/api/bundles/route") },
     { name: "GET /api/geo/", path: "/api/geo/", method: "GET", exports: ["GET"], load: () => import("@/app/api/geo/route"), req: { next: true } },
     { name: "POST /api/track/", path: "/api/track/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/track/route"), body: { sid: "s1", type: "view", path: "/", productId: PRODUCT.id, value: 1, lang: "RU", ref: "google.com" } },
@@ -212,6 +215,9 @@ function routes(): RouteCase[] {
     { name: "GET /shop2/et/p/[id]/", path: "/shop2/et/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/et/p/[id]/route"), params: { id: "" }, jsonBody: false },
     { name: "GET /shop2/en/p/[id]/", path: "/shop2/en/p/x/", method: "GET", exports: ["GET"], load: () => import("@/app/shop2/en/p/[id]/route"), params: { id: "" }, jsonBody: false },
     { name: "GET /sitemap-custom.xml", path: "/sitemap-custom.xml", method: "GET", exports: ["GET"], load: () => import("@/app/sitemap-custom.xml/route"), jsonBody: false },
+    /* the catalogue's product rows, served rather than written so a product
+       hidden after the build leaves the sitemap with it */
+    { name: "GET /sitemap-products.xml", path: "/sitemap-products.xml", method: "GET", exports: ["GET"], load: () => import("@/app/sitemap-products.xml/route"), jsonBody: false },
     /* The request-time blog pages (src/lib/blog-page.ts) — the list and one
        post, three languages — and the OG card drawn for a created product or a
        post (src/lib/og-card.ts). Same rule: hostile slugs/file names are a 404

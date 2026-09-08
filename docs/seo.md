@@ -245,8 +245,8 @@ falls back to built-in constants.
 | `public/shop/og/<id>.jpg` | one 1 200×630 card per product — drawn once |
 | `public/shop/og/set-<id>.jpg` | one card per set — drawn once |
 | `public/brand/og-default.png` | the card for pages with no photograph |
-| `public/sitemap.xml` | a `sitemapindex`: `sitemap-1.xml` (…`-N.xml` above 1 000 URLs) **plus `sitemap-custom.xml`**, which is not a file but a route — see "Custom products" below |
-| `public/sitemap-1.xml` | the 813 URLs with `xhtml:link` alternates |
+| `public/sitemap.xml` | a `sitemapindex`: `sitemap-1.xml` (…`-N.xml` above 1 000 URLs) **plus `sitemap-products.xml` and `sitemap-custom.xml`**, which are not files but routes — see "The sitemaps the app serves" and "Custom products" below |
+| `public/sitemap-1.xml` | the 153 URLs the database cannot hide, with `xhtml:link` alternates |
 | `public/robots.txt` | **the policy that matches `PUBLIC_BASE_URL`** |
 | `public/robots.production.txt` | the open policy, for reading and diffing |
 | `public/robots.staging.txt` | the closed policy, ditto |
@@ -254,12 +254,38 @@ falls back to built-in constants.
 813 pages — 271 per language: 220 products, 8 categories + `all`, 26 brands,
 the brands landing, 1 home, 5 policy pages, 8 sets + the landing, 1 gift card.
 `public/sitemap.xml`
-is **always a `sitemapindex`**: the pages go into `public/sitemap-1.xml`
-(`-N.xml` chunks of 1 000 above that), and the index also names
-`sitemap-custom.xml` — the products the owner created in the panel, which do
-not exist at build time and are listed by a route at request time (see
-"Custom products" below). The checker follows the index and skips that one
-entry, since it is not on disk.
+is **always a `sitemapindex`**: the pages that no database row can take away
+go into `public/sitemap-1.xml` (`-N.xml` chunks of 1 000 above that), and the
+index also names two routes — `sitemap-products.xml` and
+`sitemap-custom.xml`. The checker follows the index and skips those two
+entries, since they are not on disk.
+
+### The sitemaps the app serves
+
+A static sitemap is a promise made at build time, and two kinds of page break
+that promise between builds. Both are answered by a route instead:
+
+| route | what it lists | why it cannot be a file |
+|---|---|---|
+| `src/app/sitemap-products.xml/route.ts` | the catalogue's 220 product pages × 3, **minus the ones the owner has switched off with «Показывать в магазине»** | `product_overrides.hidden` (migration 147) changes while the deployment stands still, and a file written at build cannot un-name a page |
+| `src/app/sitemap-custom.xml/route.ts` | the owner's own products (`c-…`) and the blog posts published after the build | those rows do not exist when the build runs |
+
+The **pages** are still prerendered — one static file per product per
+language, which is what makes the shop fast and indexable. Only the rows that
+offer them to a crawler moved. `lastmod` for a product is the owner's own edit
+(`product_overrides.updated_at`) when he has made one and today otherwise;
+priority is 0.7, or 0.4 for a product that is out of stock. A product with
+nothing on the shelf stays listed and stays indexable: its page still answers
+the question the searcher asked, still carries «Сообщить о наличии», and
+dropping it would throw away a ranking that has to be earned again when the
+stock comes back (the Gatsby Grunge Mat is exactly this case — 100 impressions
+in one week, out of stock). What it does not keep is the same claim on the
+crawler's time as a product somebody can buy today, and its `Product` block
+says `OutOfStock`, so Google leaves it out of the merchant surfaces by itself.
+
+No database, or a query that fails: the route lists every product, which is
+the same list the static sitemap offered for months. The page itself is what
+decides who may read it.
 
 The HTML pages are gitignored (`.gitignore`) because `prebuild` regenerates
 them. The OG cards are **not**: they are drawn once from images that are in the
@@ -465,6 +491,31 @@ one segment — and the more specific routes beside it (`p/[id]`, `blog`,
   previews the shop has been sharing and hand humans over with a script. At the
   switch, consider replacing them with 301s to `/shop2/p/<id>/`, which now has
   its own OpenGraph tags; that is a decision, not a leftover.
+
+### The one thing that runs before the file: hidden products
+
+`src/middleware.ts` matches `/shop2/{,et/,en/}p/<id>/` as well as the Shopify
+addresses. Middleware is the **only** layer that runs before the static layer
+answers, and that is exactly what a hidden product needs: switching
+«Показывать в магазине» off already removed the product from the listing, the
+search, the sets, the cart and the `p/[id]` route, but the prerendered file
+went on being served — so Google and anyone holding the link still had a page
+until the next deploy. Dim, 08.09.2026: «if the item is hidden, it should be
+hidden without any deploys or rebuilds».
+
+So the middleware asks `GET /api/overrides/hidden/` — a list of ids, never
+cached, one indexed query (the partial index in migration 147 exists for it) —
+and, for a hidden id, answers **404 with the shell carrying `noindex,
+nofollow`**: byte for byte what `src/lib/product-page.ts` answers for a hidden
+custom product, so the two kinds of product behave identically once they are
+off sale. app.js boots from that shell and settles on «Страница не найдена».
+
+Everything else is untouched: a product that is not hidden gets
+`NextResponse.next()` and its static file, exactly as before. The lookup is
+deliberately **not** memoised — a cache here is a window in which a hidden
+product is still served, which is the whole thing being fixed — and it fails
+open: a database that cannot answer within 2.5 s means the page is served, the
+behaviour this layer inherited.
 
 ---
 

@@ -5,12 +5,14 @@
    out with regexes and asserts the things that are actually easy to get wrong
    — a missing hreflang, a canonical pointing at the wrong language, JSON-LD
    that does not parse, a title Google would cut in half, an image that is not
-   on disk, a page whose asset tags drifted from index.html. */
+   on disk, a page whose asset tags drifted from index.html, and an asset
+   token that no longer matches the files it versions. */
 
 import { readFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assetToken } from "./lib/asset-token.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -51,12 +53,23 @@ const PAGE_ROBOTS = new Set();  // the <meta name="robots"> values seen, which m
 let sharp = null;
 try { ({ default: sharp } = await import("sharp")); } catch { /* dimensions unchecked */ }
 
-const shell = await readFile(path.join(SHOP2, "index.html"), "utf8");
+const shell = (await readFile(path.join(SHOP2, "index.html"), "utf8")).replace(/\r\n?/g, "\n");
 const ASSET_V = (shell.match(/app\.js\?v=([^"']*)/) || [])[1];
 const SCRIPTS = (shell.match(/<!-- prerender:end -->\s*<\/div>\s*([\s\S]*?)<\/body>/) || [])[1];
 if (!ASSET_V || !SCRIPTS) {
   console.error("FAIL public/shop2/index.html: no ?v= token or no script block after #app");
   process.exit(1);
+}
+/* The token is a hash of the files it versions (tools/lib/asset-token.mjs),
+   so "is it current" is a question with an answer: recompute it. A mismatch
+   means app.js, styles.css or one of the generated files was edited and the
+   prerender has not run since — exactly the state that let the 06.09.2026
+   wallet fix sit behind a cached address for thirteen hours. */
+const WANT_V = await assetToken(shell, PUB);
+if (ASSET_V !== WANT_V) {
+  failed++;
+  console.error(`FAIL public/shop2/index.html carries ?v=${ASSET_V} but its assets hash to ${WANT_V} ` +
+    "— a versioned file changed after the last prerender. Re-run `npm run prerender`.");
 }
 
 const all = (re, s) => [...s.matchAll(re)].map((m) => m[1]);
@@ -309,17 +322,23 @@ if (!existsSync(smFile)) { failed++; console.error("FAIL public/sitemap.xml is m
 else {
   let sm = await readFile(smFile, "utf8");
   /* public/sitemap.xml is a sitemapindex: the pages live in sitemap-N.xml,
-     so follow it rather than counting the index's own rows. One entry is not
-     a file at all — sitemap-custom.xml is a route
-     (src/app/sitemap-custom.xml/route.ts) that lists the owner's own
-     products at request time; it is expected in the index and skipped here,
-     the same way the pages it names are not on disk either. */
+     so follow it rather than counting the index's own rows. Two entries are
+     not files at all — sitemap-products.xml
+     (src/app/sitemap-products.xml/route.ts), the catalogue's product pages
+     minus the ones the owner has hidden since the build, and
+     sitemap-custom.xml (src/app/sitemap-custom.xml/route.ts), his own
+     products and the posts published after it. Both are expected in the index
+     and skipped here, the same way the pages they name are not on disk
+     either. */
+  const ROUTED = ["sitemap-products.xml", "sitemap-custom.xml"];
   if (/<sitemapindex/.test(sm)) {
     const chunks = all(/<loc>([^<]+)<\/loc>/g, sm).map((u) => u.replace(/^https?:\/\/[^/]+\//, ""));
-    if (!chunks.includes("sitemap-custom.xml")) { failed++; console.error("FAIL sitemapindex does not name sitemap-custom.xml (the custom products' sitemap the app serves)"); }
+    for (const r of ROUTED) {
+      if (!chunks.includes(r)) { failed++; console.error(`FAIL sitemapindex does not name ${r} (a sitemap the app serves)`); }
+    }
     let joined = "";
     for (const c of chunks) {
-      if (c === "sitemap-custom.xml") continue;
+      if (ROUTED.includes(c)) continue;
       const f = path.join(PUB, c);
       if (!existsSync(f)) { failed++; console.error(`FAIL sitemapindex points at a missing ${c}`); continue; }
       joined += await readFile(f, "utf8");
@@ -328,9 +347,12 @@ else {
   } else { failed++; console.error("FAIL public/sitemap.xml is not a sitemapindex — the prerender always writes one now"); }
   const locs = all(/<loc>([^<]+)<\/loc>/g, sm);
   SITE_BASE = (locs[0] || "").match(/^https?:\/\/[^/]+/)?.[0] || "";
-  // home + /c/all/ + the categories + the brand pages + the brands landing +
-  // the products + the policy pages + the sets + the gift card + the blog
-  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + 1 + CATALOGUE.length +
+  /* home + /c/all/ + the categories + the brand pages + the brands landing +
+     the policy pages + the sets + the gift card + the blog. NOT the products:
+     their pages are still written, but the rows that offer them to a crawler
+     are served by src/app/sitemap-products.xml/route.ts, because whether a
+     product is hidden is a question only the database can answer. */
+  const perLang = 1 + 1 + Object.keys(CAT_NAMES).length + BRANDS.length + 1 +
     LEGAL_SLUGS.length + (BUNDLES.length ? BUNDLES.length + 1 : 0) + 1 +
     (BLOG_SLUGS ? BLOG_SLUGS.size + 1 : 0);
   const expected = LANGS.length * perLang;
@@ -345,7 +367,7 @@ else {
   for (const [, seg] of LANGS) {
     const b = "/shop2" + (seg ? "/" + seg : "");
     const want = [
-      b + "/p/" + CATALOGUE[0].id + "/",
+      // no product row here — src/app/sitemap-products.xml/route.ts serves those
       ...LEGAL_SLUGS.map((s) => b + "/info/" + s + "/"),
       ...(BUNDLES.length ? [b + "/sets/", ...BUNDLES.map((x) => b + "/set/" + x.id + "/")] : []),
       b + "/gift/",

@@ -523,3 +523,14 @@ export function sitemapUrlEntry(base, rest, seg, priority, lastmod) {
 
 /** The custom products' sitemap the app serves — named once, here, for the prerender's index and the route. */
 export const SITEMAP_CUSTOM = "sitemap-custom.xml";
+
+/* The catalogue's product pages are in a sitemap the app serves too, and for
+   the same reason the custom products are: what belongs in it is a question
+   only the database can answer. «Показывать в магазине» takes a product out of
+   the shop while the deployment stands still (db/migrations/147), and a static
+   file written at build cannot un-name it — so the products moved out of
+   public/sitemap-N.xml and into src/app/sitemap-products.xml/route.ts, which
+   drops the hidden ones every time it is asked. Everything the database cannot
+   hide — the home pages, categories, brands, policy pages, sets, the gift card
+   and the blog — is still a static file. */
+export const SITEMAP_PRODUCTS = "sitemap-products.xml";

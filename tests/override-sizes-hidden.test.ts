@@ -5,7 +5,9 @@
  * What is proven here is the half a browser cannot: that the size ladder the
  * owner saves is the ladder the shop CHARGES from (a volume the generated
  * catalogue file has never heard of included), that removing a rung really
- * removes it, and that a hidden product can no longer be bought or indexed.
+ * removes it, and that a hidden product can no longer be bought or indexed —
+ * the last of which stopped meaning "until the next deploy" on 08.09.2026,
+ * see the block at the bottom of this file.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
@@ -138,5 +140,99 @@ describe("product_overrides.sizes / .hidden", () => {
     expect(overrideLadder({ sizes: [{ size: "100 мл", price: 9 }] } as never))
       .toEqual({ sizes: ["100 мл"], prices: [9] });
     expect(overrideLadder(null)).toBeNull();
+  });
+});
+
+/* ---------- hidden without a deploy ---------------------------------------
+ *
+ * A catalogue product has a static page written at build and a row in the
+ * static sitemap, and until 08.09.2026 both went on answering until the next
+ * deploy — Dim: «if the item is hidden, it should be hidden without any
+ * deploys or rebuilds». The two layers that make that true are the lookup
+ * src/middleware.ts asks before the static layer is allowed to answer, and the
+ * product sitemap the app serves instead of writing. Both are here; the layer
+ * a unit test cannot reach — the middleware standing in front of a real static
+ * file — is proven end to end in e2e/admin-products.spec.ts. */
+
+const LIVE = "https://rempireshop.com";
+
+describe("a hidden catalogue product, without a rebuild", () => {
+  beforeAll(setupDb);
+  afterAll(teardownDb);
+  beforeEach(async () => {
+    await truncateAll();
+    process.env.PUBLIC_BASE_URL = LIVE;
+  });
+
+  it("GET /api/overrides/hidden/ names exactly the ids the switch is off for", async () => {
+    const { GET } = await import("@/app/api/overrides/hidden/route");
+    expect(await (await GET()).json()).toEqual({ ok: true, ids: [] });
+
+    await upsertOverride(plain.id, { hidden: true });
+    await upsertOverride(sized.id, { price: 1.5 });   // an override that is not a hiding
+    const res = await GET();
+    expect(res.status).toBe(200);
+    // never cached: every second of s-maxage is a second the hidden page is still served
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    expect(await res.json()).toEqual({ ok: true, ids: [plain.id] });
+
+    await upsertOverride(plain.id, { hidden: false });
+    expect(await (await GET()).json()).toEqual({ ok: true, ids: [] });
+  });
+
+  it("its own page answers 404 with noindex, and 200 again when the switch goes back on", async () => {
+    const { productPageResponse } = await import("@/lib/product-page");
+    expect((await productPageResponse(plain.id, "")).status).toBe(200);
+
+    await upsertOverride(plain.id, { hidden: true });
+    for (const seg of ["", "et", "en"]) {
+      const res = await productPageResponse(plain.id, seg);
+      expect(res.status, seg || "ru").toBe(404);
+      expect(await res.text()).toContain('<meta name="robots" content="noindex, nofollow">');
+    }
+
+    await upsertOverride(plain.id, { hidden: false });
+    expect((await productPageResponse(plain.id, "")).status).toBe(200);
+  });
+
+  it("drops out of the sitemap the app serves, and comes back", async () => {
+    const { GET } = await import("@/app/sitemap-products.xml/route");
+    const locs = async () => [...(await (await GET()).text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+
+    const before = await locs();
+    // every product in every language, each <url> carrying the whole cluster
+    expect(before).toHaveLength(CATALOGUE.length * 3);
+    expect(before).toContain(`${LIVE}/shop2/p/${plain.id}/`);
+    expect(before).toContain(`${LIVE}/shop2/et/p/${plain.id}/`);
+
+    await upsertOverride(plain.id, { hidden: true });
+    const after = await locs();
+    expect(after).toHaveLength((CATALOGUE.length - 1) * 3);
+    expect(after.some((l) => l.includes(`/p/${plain.id}/`))).toBe(false);
+    // the neighbours are untouched — hiding one product is not un-listing the shop
+    expect(after).toContain(`${LIVE}/shop2/p/${sized.id}/`);
+
+    await upsertOverride(plain.id, { hidden: false });
+    expect(await locs()).toHaveLength(CATALOGUE.length * 3);
+  });
+
+  it("is a valid sitemap: xhtml namespace, four alternates per url, priority following the shelf", async () => {
+    const { GET } = await import("@/app/sitemap-products.xml/route");
+    const res = await GET();
+    expect(res.headers.get("content-type")).toContain("application/xml");
+    const xml = await res.text();
+    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">');
+    const locs = (xml.match(/<loc>/g) || []).length;
+    expect((xml.match(/<xhtml:link/g) || []).length).toBe(locs * 4);
+    /* A product the owner has taken off the shelf keeps its page and its
+       ranking — it just stops asking for the same crawl budget as one somebody
+       can buy today. */
+    const out = CATALOGUE.find((p) => p.s === "out");
+    if (out) {
+      const row = xml.split("<url>").find((u) => u.includes(`/shop2/p/${out.id}/<`))!;
+      expect(row).toContain("<priority>0.4</priority>");
+    }
+    const inStock = xml.split("<url>").find((u) => u.includes(`/shop2/p/${plain.id}/<`))!;
+    expect(inStock).toContain("<priority>0.7</priority>");
   });
 });
