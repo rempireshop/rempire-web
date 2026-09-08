@@ -8,6 +8,12 @@
  * item is missing the two halves that make it a test — what the finger does and
  * what the screen must then show.
  *
+ * Since 08.09.2026 the file carries both languages: every row and every area
+ * has an `en` beside its Russian, because Renat tests in Russian and Dim reads
+ * English and the two of them answer the same ids into the same document. A
+ * row with no English half is not a formatting slip — it is a check one of the
+ * two testers cannot read, so it is pinned here exactly as hard as the rest.
+ *
  * It is deliberately a plain data test with no database and no fetch: it must
  * stay fast enough that nobody is tempted to skip it while editing the plan.
  */
@@ -17,6 +23,9 @@ import { fileURLToPath } from "node:url";
 
 const PLAN_PATH = fileURLToPath(new URL("../src/data/testplan.json", import.meta.url));
 const raw = readFileSync(PLAN_PATH, "utf8");
+
+const PAGE_PATH = fileURLToPath(new URL("../public/test/index.html", import.meta.url));
+const page = readFileSync(PAGE_PATH, "utf8");
 
 /** The four closed lists the renderer switches on. */
 const WHO = ["renat", "dim", "both"] as const;
@@ -28,6 +37,7 @@ interface Area {
   id: string;
   name: string;
   note: string;
+  en: { name: string; note: string };
 }
 interface Item {
   id: string;
@@ -41,6 +51,7 @@ interface Item {
   why: string;
   risk: string;
   writes: boolean;
+  en: { title: string; steps: string[]; expect: string; why: string };
 }
 interface Plan {
   version: number;
@@ -70,6 +81,21 @@ describe("testplan.json — the shape the checklist page reads", () => {
       seen.add(a.id);
       expect(a.name.trim().length, `area ${a.id} name`).toBeGreaterThan(0);
       expect(a.note.trim().length, `area ${a.id} note`).toBeGreaterThan(0);
+    }
+  });
+
+  /* One page, two languages. Renat answers in Russian and Dim in English, and
+     both write into the same document keyed by the same ids — so a row that is
+     missing its English half is not "untranslated", it is a check one of the
+     two testers cannot read. Hence: every row, every field, no exceptions and
+     no blanks standing in for one. */
+  it("says every area in English too", () => {
+    for (const a of plan.areas) {
+      expect(a.en, `area ${a.id} has no en`).toBeTruthy();
+      expect(typeof a.en.name, `area ${a.id}.en.name`).toBe("string");
+      expect(a.en.name.trim().length, `area ${a.id}.en.name is blank`).toBeGreaterThan(0);
+      expect(typeof a.en.note, `area ${a.id}.en.note`).toBe("string");
+      expect(a.en.note.trim().length, `area ${a.id}.en.note is blank`).toBeGreaterThan(0);
     }
   });
 
@@ -113,13 +139,35 @@ describe("testplan.json — the shape the checklist page reads", () => {
     }
   });
 
+  /* The step lists are checked against each other, not just for being
+     non-empty: the page numbers the steps and the two testers compare notes by
+     that number, so «step 3 fails» has to mean the same instruction in both
+     languages. A translation that merged two steps into one silently renumbers
+     everything after it. */
+  it("gives every item the same steps in English, one for one", () => {
+    for (const it_ of plan.items) {
+      expect(it_.en, `${it_.id} has no en`).toBeTruthy();
+      expect(it_.en.title.trim().length, `${it_.id}.en.title is blank`).toBeGreaterThan(0);
+      expect(it_.en.expect.trim().length, `${it_.id}.en.expect is blank`).toBeGreaterThan(0);
+      expect(it_.en.why.trim().length, `${it_.id}.en.why is blank`).toBeGreaterThan(0);
+      expect(Array.isArray(it_.en.steps), `${it_.id}.en.steps`).toBe(true);
+      expect(it_.en.steps.length, `${it_.id}.en.steps counts ${it_.en.steps.length}, Russian counts ${it_.steps.length}`).toBe(it_.steps.length);
+      for (const [i, s] of it_.en.steps.entries()) {
+        expect(typeof s, `${it_.id}.en.steps[${i}]`).toBe("string");
+        expect(s.trim().length, `${it_.id}.en.steps[${i}] is blank`).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it("carries no field the renderer does not know about", () => {
-    const keys = ["id", "area", "who", "device", "lang", "title", "steps", "expect", "why", "risk", "writes"];
+    const keys = ["id", "area", "who", "device", "lang", "title", "steps", "expect", "why", "risk", "writes", "en"];
     for (const it_ of plan.items) {
       expect(Object.keys(it_).sort(), `${it_.id} keys`).toEqual([...keys].sort());
+      expect(Object.keys(it_.en).sort(), `${it_.id}.en keys`).toEqual(["expect", "steps", "title", "why"]);
     }
     for (const a of plan.areas) {
-      expect(Object.keys(a).sort(), `area ${a.id} keys`).toEqual(["id", "name", "note"]);
+      expect(Object.keys(a).sort(), `area ${a.id} keys`).toEqual(["en", "id", "name", "note"]);
+      expect(Object.keys(a.en).sort(), `area ${a.id}.en keys`).toEqual(["name", "note"]);
     }
   });
 
@@ -135,5 +183,52 @@ describe("testplan.json — the shape the checklist page reads", () => {
     const firstSeen: string[] = [];
     for (const a of order) if (firstSeen[firstSeen.length - 1] !== a) firstSeen.push(a);
     expect(new Set(firstSeen).size, "an area's items are split across the list").toBe(firstSeen.length);
+  });
+});
+
+/**
+ * The page's own words exist twice: once written into the markup — which is
+ * what a browser shows before the script has run, and the reason a tester
+ * whose phone blocked the script still gets a Russian checklist — and once in
+ * the `TEXT` dictionary the language switch paints from. Two copies of one
+ * sentence drift, and the way this pair would drift is invisible: the page
+ * looks right until somebody switches to English and back, and comes back
+ * reading something slightly different from what they started with.
+ *
+ * So they are compared here rather than trusted. Text, not implementation:
+ * the markup is HTML and the dictionary is an ES5 object literal, and the only
+ * thing that has to be true of both is the sentence.
+ */
+describe("public/test/index.html — one Russian, written twice", () => {
+  const ruBlock = page.slice(page.indexOf("    ru: {"), page.indexOf("    en: {"));
+  const enBlock = page.slice(page.indexOf("    en: {"), page.indexOf("  /** One string in the language"));
+
+  it("says the same thing in the markup and in the dictionary", () => {
+    expect(ruBlock.length, "the ru dictionary was not found").toBeGreaterThan(1000);
+    expect(enBlock.length, "the en dictionary was not found").toBeGreaterThan(1000);
+
+    /* Every node the switch repaints — `data-t="key"`, always the last
+       attribute, always a leaf with plain text in it. */
+    const nodes = [...page.matchAll(/data-t="([\w.]+)"[^>]*>([^<]+)</g)];
+    expect(nodes.length, "no data-t nodes found — did the markup change shape?").toBeGreaterThan(15);
+
+    for (const [, key, text] of nodes) {
+      /* Dotted keys reach into the small maps: `who.renat` is written
+         `renat: "Ренат"` inside `who: { … }`. */
+      const leaf = key.split(".").pop() as string;
+      const entry = `${leaf}: ${JSON.stringify(text)}`;
+      expect(ruBlock, `«${text}» is in the markup as ${key} but not in TEXT.ru`).toContain(entry);
+      expect(enBlock, `${key} has no English`).toContain(`${leaf}: "`);
+    }
+  });
+
+  it("keeps the default Russian and the two keys the answers live under", () => {
+    /* A default of anything but Russian would hand Renat a page he cannot read
+       and a switch he cannot find; the language key is separate from the
+       answers on purpose, so clearing a preference never touches an answer. */
+    expect(page).toContain('lang: "ru",         // Renat is the primary tester');
+    expect(page).toContain('var LS_LANG = "rempire-testplan-lang";');
+    expect(page).toContain('var LS_ANSWERS = "rempire-testplan-v1";');
+    expect(page).toContain('state.lang = TEXT[value] ? value : "ru";');
   });
 });

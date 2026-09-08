@@ -70,8 +70,9 @@
   .lede { margin: 0; color: var(--soft); }
   .lede + .lede { margin-top: .5rem; }
 
-  /* ---------- «я — …» ---------- */
+  /* ---------- «я — …» and the language switch ---------- */
   .me { margin-top: 1rem; }
+  .me + .me { margin-top: .8rem; }
   .me__label { font-size: .85rem; color: var(--muted); display: block; margin-bottom: .35rem; }
   .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
   .chip {
@@ -196,15 +197,27 @@
 
 <header class="top">
   <div class="wrap">
-    <p class="kicker">REMPIRE · приёмка</p>
-    <h1>Что проверяем перед запуском</h1>
-    <p class="lede">Открой список на том устройстве, на котором будешь смотреть магазин. Проходи пункты сверху вниз, отмечай <b>работает</b> или <b>не работает</b> и дописывай, что не так.</p>
-    <p class="lede">Комментарий можно оставить и к тому, что работает — «работает, но кнопка мелкая» это самое полезное, что тут можно написать.</p>
+    <p class="kicker" data-t="kicker">REMPIRE · приёмка</p>
+    <h1 data-t="h1">Что проверяем перед запуском</h1>
+    <p class="lede" data-t-lede>Открой список на том устройстве, на котором будешь смотреть магазин. Проходи пункты сверху вниз, отмечай <b>работает</b> или <b>не работает</b> и дописывай, что не так.</p>
+    <p class="lede" data-t="lede2">Комментарий можно оставить и к тому, что работает — «работает, но кнопка мелкая» это самое полезное, что тут можно написать.</p>
+    <!-- The language switch comes before «кто отвечает» because it is the one
+         control somebody who cannot read this page has to find on it. Its two
+         chips are named in their own languages for the same reason: «English»
+         reads as English from inside Russian, and «Русский» from inside
+         English, so neither reader has to guess which chip is theirs. -->
     <div class="me">
-      <span class="me__label" id="who-label">Кто отвечает — чтобы было видно, чей ответ</span>
+      <span class="me__label" id="lang-label" data-t="langLabel">Язык страницы</span>
+      <div class="chips" role="group" aria-labelledby="lang-label">
+        <button type="button" class="chip" data-tp-lang="ru" aria-pressed="true" lang="ru">Русский</button>
+        <button type="button" class="chip" data-tp-lang="en" aria-pressed="false" lang="en">English</button>
+      </div>
+    </div>
+    <div class="me">
+      <span class="me__label" id="who-label" data-t="whoLabel">Кто отвечает — чтобы было видно, чей ответ</span>
       <div class="chips" role="group" aria-labelledby="who-label">
-        <button type="button" class="chip" data-tp-who="renat" aria-pressed="false">Ренат</button>
-        <button type="button" class="chip" data-tp-who="dim" aria-pressed="false">Дима</button>
+        <button type="button" class="chip" data-tp-who="renat" aria-pressed="false" data-t="who.renat">Ренат</button>
+        <button type="button" class="chip" data-tp-who="dim" aria-pressed="false" data-t="who.dim">Дима</button>
       </div>
     </div>
   </div>
@@ -221,40 +234,40 @@
 <main class="wrap">
 
   <section class="howto">
-    <h2>Как это работает</h2>
+    <h2 data-t="howtoH">Как это работает</h2>
     <ol>
-      <li>Отметь вверху, кто ты — Ренат или Дима.</li>
-      <li>Иди по списку и жми одну из трёх кнопок под каждым пунктом.</li>
-      <li>Пиши в комментарий всё, что показалось неудобным, — даже мелочь.</li>
-      <li>Ответы сохраняются сами. Строчка вверху всегда говорит, где именно они сейчас лежат.</li>
-      <li>Чтобы ответы увидел второй, надо быть в кабинете магазина: <a href="/shop2/admin/">/shop2/admin/</a>. Если ты не вошёл — тестируй спокойно, всё останется на устройстве и уйдёт на сервер само, как только войдёшь.</li>
+      <li data-t="howto1">Отметь вверху, кто ты — Ренат или Дима.</li>
+      <li data-t="howto2">Иди по списку и жми одну из трёх кнопок под каждым пунктом.</li>
+      <li data-t="howto3">Пиши в комментарий всё, что показалось неудобным, — даже мелочь.</li>
+      <li data-t="howto4">Ответы сохраняются сами. Строчка вверху всегда говорит, где именно они сейчас лежат.</li>
+      <li data-t-howto5>Чтобы ответы увидел второй, надо быть в кабинете магазина: <a href="/shop2/admin/">/shop2/admin/</a>. Если ты не вошёл — тестируй спокойно, всё останется на устройстве и уйдёт на сервер само, как только войдёшь.</li>
     </ol>
   </section>
 
   <div class="danger" data-tp-writes hidden>
-    <h2>Осторожно: эти пункты создают настоящие данные</h2>
-    <p>Настоящий заказ, настоящее письмо покупателю, настоящее движение по складу. Не запускай их на живом магазине, не предупредив второго.</p>
+    <h2 data-t="dangerH">Осторожно: эти пункты создают настоящие данные</h2>
+    <p data-t="dangerP">Настоящий заказ, настоящее письмо покупателю, настоящее движение по складу. Не запускай их на живом магазине, не предупредив второго.</p>
     <ul data-tp-writes-list></ul>
   </div>
 
-  <nav class="jump" data-tp-jump hidden aria-label="Разделы">
-    <span class="filters__label">Разделы</span>
+  <nav class="jump" data-tp-jump hidden aria-label="Разделы" data-ta="sections">
+    <span class="filters__label" data-t="sections">Разделы</span>
     <ul data-tp-jump-list></ul>
   </nav>
 
   <section class="filters">
     <div class="filters__row">
-      <span class="filters__label" id="f-who">Чьи пункты показывать</span>
+      <span class="filters__label" id="f-who" data-t="fWho">Чьи пункты показывать</span>
       <div class="chips" role="group" aria-labelledby="f-who">
-        <button type="button" class="chip" data-tp-filter="all" aria-pressed="true">Все</button>
-        <button type="button" class="chip" data-tp-filter="renat" aria-pressed="false">Ренат</button>
-        <button type="button" class="chip" data-tp-filter="dim" aria-pressed="false">Дима</button>
+        <button type="button" class="chip" data-tp-filter="all" aria-pressed="true" data-t="fAll">Все</button>
+        <button type="button" class="chip" data-tp-filter="renat" aria-pressed="false" data-t="who.renat">Ренат</button>
+        <button type="button" class="chip" data-tp-filter="dim" aria-pressed="false" data-t="who.dim">Дима</button>
       </div>
     </div>
     <div class="filters__row">
-      <span class="filters__label" id="f-open">Что показывать</span>
+      <span class="filters__label" id="f-open" data-t="fOpen">Что показывать</span>
       <div class="chips" role="group" aria-labelledby="f-open">
-        <button type="button" class="chip" data-tp-only aria-pressed="false">Только без ответа</button>
+        <button type="button" class="chip" data-tp-only aria-pressed="false" data-t="onlyOpen">Только без ответа</button>
       </div>
     </div>
   </section>
@@ -262,20 +275,20 @@
   <div data-tp-list></div>
 
   <section class="report">
-    <h2>Забрать ответы текстом</h2>
-    <p class="h2sub">Готовый список ответов и замечаний — переслать в чат или вставить в письмо.</p>
+    <h2 data-t="reportH">Забрать ответы текстом</h2>
+    <p class="h2sub" data-t="reportSub">Готовый список ответов и замечаний — переслать в чат или вставить в письмо.</p>
     <div class="btns">
-      <button type="button" class="btn" data-tp-copy>Скопировать ответы</button>
-      <button type="button" class="btn btn--ghost" data-tp-sync>Сохранить на сервер сейчас</button>
+      <button type="button" class="btn" data-tp-copy data-t="copy">Скопировать ответы</button>
+      <button type="button" class="btn btn--ghost" data-tp-sync data-t="syncNow">Сохранить на сервер сейчас</button>
     </div>
-    <p class="h2sub" data-tp-copied hidden>Скопировано.</p>
-    <textarea data-tp-report rows="10" readonly hidden aria-label="Ответы текстом"></textarea>
+    <p class="h2sub" data-tp-copied hidden data-t="copied">Скопировано.</p>
+    <textarea data-tp-report rows="10" readonly hidden aria-label="Ответы текстом" data-ta="reportAria"></textarea>
   </section>
 
 </main>
 
 <footer class="wrap">
-  <p>Вопросы и правки — Диме. Обзор магазина: <a href="/guide/">/guide/</a> · варианты карточки товара: <a href="/cards/">/cards/</a> · сам магазин: <a href="/shop2/">/shop2/</a></p>
+  <p data-t-footer>Вопросы и правки — Диме. Обзор магазина: <a href="/guide/">/guide/</a> · варианты карточки товара: <a href="/cards/">/cards/</a> · сам магазин: <a href="/shop2/">/shop2/</a></p>
 </footer>
 
 <script>
@@ -295,6 +308,15 @@
  * So a save never blocks on the network, a failed save is retried and said out
  * loud, and the moment a signed-in session appears the local copy is pushed
  * up. The one thing this page may not do is lose an answer.
+ *
+ * Two languages, one page. Renat tests in Russian, Dim reads English, and both
+ * answer the same 158 checks into the same document: the switch in the header
+ * chooses which half of each row (`en` in src/data/testplan.json) and which
+ * half of TEXT below is drawn, and nothing else about the page changes — same
+ * item ids, same localStorage keys, same PUT. A second translated page would
+ * have produced two half-filled checklists, which is the one outcome this page
+ * exists to prevent. The choice is remembered per device and defaults to
+ * Russian.
  */
 (function () {
   "use strict";
@@ -303,13 +325,222 @@
   var LS_ANSWERS = "rempire-testplan-v1";
   var LS_PLAN = "rempire-testplan-plan-v1";
   var LS_WHO = "rempire-testplan-who";
+  var LS_LANG = "rempire-testplan-lang";
 
-  var WHO = { renat: "Ренат", dim: "Дима", both: "Оба" };
-  var DEVICE = { phone: "телефон", desktop: "компьютер", any: "любое устройство" };
-  var RISK = { high: "критично", med: "важно", low: "мелочь" };
-  var STATUS = { ok: "работает", bad: "не работает", skip: "пропущено" };
+  /* The three verdicts as *values*, kept apart from the words for them: this is
+     what a stored answer is checked against when it is read back, and that
+     check must give the same result whichever language the page is showing. */
+  var VERDICTS = { ok: 1, bad: 1, skip: 1 };
+
+  /* The request that never left, as a code rather than as a sentence: what is
+     kept in `state.error` outlives the language it was written in, and a
+     Russian «нет сети» frozen into an English page is exactly the kind of
+     small lie this page cannot afford. No route answers with this word. */
+  var OFFLINE = "offline";
+
+  /*
+   * Everything this page says, in both languages.
+   *
+   * Renat tests in Russian and Dim reads English, and they fill in the SAME
+   * checklist: one set of item ids, one stored document, one API. So the
+   * language is a view over one page rather than a second page — and that is
+   * why every string lives here instead of in the markup: the switch has to be
+   * able to repaint the whole page without reloading it, offline included.
+   *
+   * The Russian half repeats, word for word, the text written into the markup
+   * above. The markup keeps its copy so that a page whose script never ran is
+   * still readable in the language its primary tester reads.
+   *
+   * What is deliberately NOT translated, in either direction: the shop's own
+   * on-screen words — «В корзину», «Заказы», «Маркетинг → Письма». A step
+   * tells a tester which button to press, and the button says what it says. An
+   * English gloss stands beside it where the Russian alone would not be enough
+   * to find the thing (src/data/testplan.json, the `en` half of every row).
+   */
+  var TEXT = {
+    ru: {
+      title: "Приёмка магазина — что проверяем · REMPIRE",
+      kicker: "REMPIRE · приёмка",
+      h1: "Что проверяем перед запуском",
+      lede1: ["Открой список на том устройстве, на котором будешь смотреть магазин. Проходи пункты сверху вниз, отмечай ", { b: "работает" }, " или ", { b: "не работает" }, " и дописывай, что не так."],
+      lede2: "Комментарий можно оставить и к тому, что работает — «работает, но кнопка мелкая» это самое полезное, что тут можно написать.",
+      langLabel: "Язык страницы",
+      whoLabel: "Кто отвечает — чтобы было видно, чей ответ",
+      howtoH: "Как это работает",
+      howto1: "Отметь вверху, кто ты — Ренат или Дима.",
+      howto2: "Иди по списку и жми одну из трёх кнопок под каждым пунктом.",
+      howto3: "Пиши в комментарий всё, что показалось неудобным, — даже мелочь.",
+      howto4: "Ответы сохраняются сами. Строчка вверху всегда говорит, где именно они сейчас лежат.",
+      howto5: ["Чтобы ответы увидел второй, надо быть в кабинете магазина: ", { a: "/shop2/admin/", href: "/shop2/admin/" }, ". Если ты не вошёл — тестируй спокойно, всё останется на устройстве и уйдёт на сервер само, как только войдёшь."],
+      dangerH: "Осторожно: эти пункты создают настоящие данные",
+      dangerP: "Настоящий заказ, настоящее письмо покупателю, настоящее движение по складу. Не запускай их на живом магазине, не предупредив второго.",
+      sections: "Разделы",
+      fWho: "Чьи пункты показывать",
+      fAll: "Все",
+      fOpen: "Что показывать",
+      onlyOpen: "Только без ответа",
+      reportH: "Забрать ответы текстом",
+      reportSub: "Готовый список ответов и замечаний — переслать в чат или вставить в письмо.",
+      copy: "Скопировать ответы",
+      syncNow: "Сохранить на сервер сейчас",
+      copied: "Скопировано.",
+      reportAria: "Ответы текстом",
+      footer: ["Вопросы и правки — Диме. Обзор магазина: ", { a: "/guide/", href: "/guide/" }, " · варианты карточки товара: ", { a: "/cards/", href: "/cards/" }, " · сам магазин: ", { a: "/shop2/", href: "/shop2/" }],
+
+      who: { renat: "Ренат", dim: "Дима", both: "Оба" },
+      device: { phone: "телефон", desktop: "компьютер", any: "любое устройство" },
+      risk: { high: "критично", med: "важно", low: "мелочь" },
+      status: { ok: "работает", bad: "не работает", skip: "пропущено" },
+      tagLang: "язык ",
+      tagWrites: "создаёт данные",
+
+      verdictAria: "Оценка пункта",
+      btnOk: "Работает",
+      btnBad: "Не работает",
+      btnSkip: "Пропустить",
+      writesWarn: "Создаёт настоящие данные: заказ, письмо или движение по складу. На живом магазине — только предупредив второго.",
+      expectLabel: "Должно получиться: ",
+      whySummary: "Зачем это проверяем",
+      noteLabel: "Комментарий — можно и к тому, что работает",
+      notePlaceholder: "Работает, но кнопка мелкая…",
+      otherArea: "Остальное",
+      someone: "кто-то",
+
+      loading: "Загружаю список…",
+      loadFailed: "Не удалось загрузить список — открой страницу ещё раз, когда будет связь",
+      empty: "В списке пока нет пунктов",
+      answeredA: "Отвечено ",
+      answeredB: " из ",
+      countOk: " · работает ",
+      countBad: " · не работает ",
+      countSkip: " · пропущено ",
+
+      errUnknownItem: "список проверок на сервере уже другой — перезагрузи страницу",
+      errTooLarge: "слишком много текста",
+      errRateLimited: "слишком часто, подожди минуту",
+      errDbDown: "база магазина не отвечает",
+      errNoLink: "нет связи",
+      errOffline: "нет сети",
+
+      stNoStore: "Устройство не даёт сохранить ответы у себя (частный режим?). Не закрывай вкладку, пока вверху не появится «сохранено на сервере».",
+      stLocalOnly: "Ответы только на этом устройстве — войди в кабинет, и они улетят сами.",
+      stStoppedA: "Сервер не принимает ответы (",
+      stStoppedB: "). Всё сохранено на устройстве — нажми «Скопировать ответы» и пришли их Диме.",
+      stBusy: "Сохраняю…",
+      stRetry: "Пока не сохранилось на сервере, пробую ещё раз. Ответы на устройстве.",
+      stPending: "Есть несохранённое, сейчас отправлю.",
+      stSavedA: "Сохранено на сервере в ",
+      stSavedB: ".",
+      stSignedIn: "Вошёл в кабинет — ответы сохраняются на сервер.",
+      stCache: "Список показан из памяти устройства — сервер не ответил. ",
+
+      reportHead: "REMPIRE — приёмка магазина, ",
+      reportNoAnswer: "нет ответа",
+      reportOther: "## Остальное"
+    },
+    en: {
+      title: "Shop acceptance — what we check · REMPIRE",
+      kicker: "REMPIRE · acceptance",
+      h1: "What we check before launch",
+      lede1: ["Open this list on the device you are going to look at the shop with. Work down it from the top, mark each check ", { b: "works" }, " or ", { b: "broken" }, ", and write down what is wrong."],
+      lede2: "A comment is worth leaving on something that works, too — «works, but the button is tiny» is the most useful thing you can write here.",
+      langLabel: "Page language",
+      whoLabel: "Who is answering — so it is clear whose answer it is",
+      howtoH: "How this works",
+      howto1: "Mark at the top who you are — Renat or Dim.",
+      howto2: "Go down the list and press one of the three buttons under each check.",
+      howto3: "Write anything that felt awkward into the comment — even a small thing.",
+      howto4: "Answers save themselves. The line at the top always says where they are right now.",
+      howto5: ["For the other person to see your answers you have to be signed into the shop's panel: ", { a: "/shop2/admin/", href: "/shop2/admin/" }, ". If you are not signed in, test away — everything stays on the device and goes up to the server by itself the moment you sign in."],
+      dangerH: "Careful: these checks create real data",
+      dangerP: "A real order, a real letter to a buyer, a real stock movement. Do not run them on the live shop without warning the other person.",
+      sections: "Sections",
+      fWho: "Whose checks to show",
+      fAll: "All",
+      fOpen: "What to show",
+      onlyOpen: "Unanswered only",
+      reportH: "Take the answers as text",
+      reportSub: "A ready-made list of answers and remarks — to forward in a chat or paste into an e-mail.",
+      copy: "Copy answers",
+      syncNow: "Save to the server now",
+      copied: "Copied.",
+      reportAria: "Answers as text",
+      footer: ["Questions and fixes — to Dim. Shop overview: ", { a: "/guide/", href: "/guide/" }, " · product-card variants: ", { a: "/cards/", href: "/cards/" }, " · the shop itself: ", { a: "/shop2/", href: "/shop2/" }],
+
+      who: { renat: "Renat", dim: "Dim", both: "Both" },
+      device: { phone: "phone", desktop: "computer", any: "any device" },
+      risk: { high: "critical", med: "important", low: "minor" },
+      status: { ok: "works", bad: "broken", skip: "skipped" },
+      tagLang: "lang ",
+      tagWrites: "creates data",
+
+      verdictAria: "Verdict on this check",
+      btnOk: "Works",
+      btnBad: "Broken",
+      btnSkip: "Skip",
+      writesWarn: "Creates real data: an order, a letter or a stock movement. On the live shop — only after warning the other person.",
+      expectLabel: "Expected: ",
+      whySummary: "Why we check this",
+      noteLabel: "Comment — worth writing even when it works",
+      notePlaceholder: "Works, but the button is tiny…",
+      otherArea: "Other",
+      someone: "somebody",
+
+      loading: "Loading the list…",
+      loadFailed: "Could not load the list — open the page again when there is a connection",
+      empty: "No checks in the list yet",
+      answeredA: "Answered ",
+      answeredB: " of ",
+      countOk: " · works ",
+      countBad: " · broken ",
+      countSkip: " · skipped ",
+
+      errUnknownItem: "the checklist on the server is a different one now — reload the page",
+      errTooLarge: "too much text",
+      errRateLimited: "too often, wait a minute",
+      errDbDown: "the shop's database is not answering",
+      errNoLink: "no connection",
+      errOffline: "no network",
+
+      stNoStore: "This device will not let the answers be kept on it (private mode?). Do not close the tab until the line above says «saved on the server».",
+      stLocalOnly: "The answers are on this device only — sign into the panel and they will go up by themselves.",
+      stStoppedA: "The server is not taking the answers (",
+      stStoppedB: "). Everything is saved on the device — press «Copy answers» and send them to Dim.",
+      stBusy: "Saving…",
+      stRetry: "Not saved on the server yet, trying again. The answers are on the device.",
+      stPending: "There is something unsaved, sending it now.",
+      stSavedA: "Saved on the server at ",
+      stSavedB: ".",
+      stSignedIn: "Signed into the panel — the answers are saved to the server.",
+      stCache: "The list is shown from this device's memory — the server did not answer. ",
+
+      reportHead: "REMPIRE — shop acceptance, ",
+      reportNoAnswer: "no answer",
+      reportOther: "## Other"
+    }
+  };
+
+  /** One string in the language now on screen. Dotted keys reach into the
+      small maps (`who.renat`), so a word used both on a chip and on a badge is
+      written once. */
+  function t(key) {
+    var node = TEXT[state.lang] || TEXT.ru;
+    var parts = key.split(".");
+    for (var i = 0; i < parts.length && node !== undefined; i++) node = node[parts[i]];
+    return node === undefined ? "" : node;
+  }
+
+  /** The Russian row, or its English half when the page is in English. Plan
+      rows carry both (`en` in src/data/testplan.json); the "Остальное" bucket
+      render() invents does not, and neither does a plan cached by an older
+      version of this page — both fall through to the Russian, which is a row a
+      tester can still read and act on. A blank one is not. */
+  function say(row) {
+    return state.lang === "en" && row && row.en ? row.en : row;
+  }
 
   var state = {
+    lang: "ru",         // Renat is the primary tester; English is the choice
     plan: null,
     ids: [],            // item ids in plan order — also the filter for what we send up
     items: {},          // id -> plan item
@@ -333,6 +564,7 @@
     savedAt: null,
     error: "",
     fromCache: false,
+    loadFailed: false,  // neither the server nor the cache had a plan to show
     lastCheck: 0
   };
 
@@ -352,6 +584,28 @@
     return n;
   }
   function $(sel) { return document.querySelector(sel); }
+
+  /** A sentence that has a bold word or a link in the middle of it, as data:
+      strings and `{b: …}` / `{a: …, href: …}` pieces. Three of them on this
+      page, and they have to be rebuilt rather than assigned, because switching
+      the language replaces the sentence around the markup, not just the words
+      in it. */
+  function rich(parts) {
+    var out = [];
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+      if (typeof p === "string") out.push(document.createTextNode(p));
+      else if (p.b) out.push(el("b", { text: p.b }));
+      else if (p.a) out.push(el("a", { href: p.href, text: p.a }));
+    }
+    return out;
+  }
+  function fill(node, parts) {
+    if (!node) return;
+    node.textContent = "";
+    var kids = rich(parts);
+    for (var i = 0; i < kids.length; i++) node.appendChild(kids[i]);
+  }
 
   /* ---------- localStorage (never allowed to throw) --------------------- */
 
@@ -408,22 +662,28 @@
   function tag(text, cls) { return el("span", { "class": "tag" + (cls ? " tag--" + cls : ""), text: text }); }
 
   function itemNode(item) {
+    /* The item's own words in the language on screen; everything around them —
+       the badges, the buttons, the labels — comes from TEXT. `id`, `who`,
+       `device`, `writes` and the item id itself never change with the
+       language, which is what lets one answer belong to both testers. */
+    var said = say(item);
+
     var tags = el("div", { "class": "tags" }, [
-      tag(RISK[item.risk] || item.risk, item.risk === "high" ? "high" : null),
-      tag(WHO[item.who] || item.who),
-      tag(DEVICE[item.device] || item.device),
-      item.lang && item.lang !== "any" ? tag("язык " + item.lang) : null,
-      item.writes ? tag("создаёт данные", "writes") : null
+      tag(t("risk." + item.risk) || item.risk, item.risk === "high" ? "high" : null),
+      tag(t("who." + item.who) || item.who),
+      tag(t("device." + item.device) || item.device),
+      item.lang && item.lang !== "any" ? tag(t("tagLang") + item.lang) : null,
+      item.writes ? tag(t("tagWrites"), "writes") : null
     ]);
 
     var steps = el("ol", { "class": "steps" });
-    var list = item.steps || [];
+    var list = said.steps || [];
     for (var i = 0; i < list.length; i++) steps.appendChild(el("li", { text: list[i] }));
 
-    var verdict = el("div", { "class": "verdict", role: "group", "aria-label": "Оценка пункта" }, [
-      el("button", { type: "button", "data-tp-set": "ok", "data-tp-id": item.id, "aria-pressed": "false", text: "Работает" }),
-      el("button", { type: "button", "data-tp-set": "bad", "data-tp-id": item.id, "aria-pressed": "false", text: "Не работает" }),
-      el("button", { type: "button", "data-tp-set": "skip", "data-tp-id": item.id, "aria-pressed": "false", text: "Пропустить" })
+    var verdict = el("div", { "class": "verdict", role: "group", "aria-label": t("verdictAria") }, [
+      el("button", { type: "button", "data-tp-set": "ok", "data-tp-id": item.id, "aria-pressed": "false", text: t("btnOk") }),
+      el("button", { type: "button", "data-tp-set": "bad", "data-tp-id": item.id, "aria-pressed": "false", text: t("btnBad") }),
+      el("button", { type: "button", "data-tp-set": "skip", "data-tp-id": item.id, "aria-pressed": "false", text: t("btnSkip") })
     ]);
 
     var area = el("article", {
@@ -431,18 +691,18 @@
       "data-who": item.who, "data-status": "", "data-writes": item.writes ? "1" : "0"
     }, [
       tags,
-      el("h3", { text: item.title }),
-      item.writes ? el("p", { "class": "warns", text: "Создаёт настоящие данные: заказ, письмо или движение по складу. На живом магазине — только предупредив второго." }) : null,
+      el("h3", { text: said.title }),
+      item.writes ? el("p", { "class": "warns", text: t("writesWarn") }) : null,
       steps,
-      el("p", { "class": "expect" }, [el("b", { text: "Должно получиться: " }), document.createTextNode(item.expect || "")]),
+      el("p", { "class": "expect" }, [el("b", { text: t("expectLabel") }), document.createTextNode(said.expect || "")]),
       el("details", { "class": "why" }, [
-        el("summary", { text: "Зачем это проверяем" }),
-        el("p", { text: item.why || "" })
+        el("summary", { text: t("whySummary") }),
+        el("p", { text: said.why || "" })
       ]),
       verdict,
       el("label", { "class": "note" }, [
-        el("span", { text: "Комментарий — можно и к тому, что работает" }),
-        el("textarea", { "data-tp-note": item.id, rows: "2", placeholder: "Работает, но кнопка мелкая…" })
+        el("span", { text: t("noteLabel") }),
+        el("textarea", { "data-tp-note": item.id, rows: "2", placeholder: t("notePlaceholder") })
       ]),
       el("p", { "class": "by", "data-tp-by": item.id })
     ]);
@@ -483,7 +743,7 @@
       var id = order[i];
       var group = byArea[id];
       if (!group || !group.length) continue;
-      var meta = known[id] || { id: id, name: "Остальное", note: "" };
+      var meta = say(known[id] || { id: id, name: t("otherArea"), note: "" });
       var sec = el("section", { "class": "area", "data-tp-area": id }, [
         el("h2", { id: "a-" + id, text: meta.name }),
         meta.note ? el("p", { "class": "h2sub", text: meta.note }) : null
@@ -505,7 +765,7 @@
     var box = $("[data-tp-writes]"), ul = $("[data-tp-writes-list]");
     ul.textContent = "";
     for (i = 0; i < writes.length; i++) {
-      ul.appendChild(el("li", null, [el("a", { href: "#i-" + writes[i].id, text: writes[i].title })]));
+      ul.appendChild(el("li", null, [el("a", { href: "#i-" + writes[i].id, text: say(writes[i]).title })]));
     }
     box.hidden = writes.length === 0;
 
@@ -527,7 +787,7 @@
     var box = node.querySelector("[data-tp-note]");
     if (box && document.activeElement !== box) box.value = a ? a.note : "";
     var by = node.querySelector("[data-tp-by]");
-    if (by) by.textContent = a ? [WHO[a.by] || a.by || "кто-то", STATUS[a.status], when(a.at)].filter(Boolean).join(" · ") : "";
+    if (by) by.textContent = a ? [t("who." + a.by) || a.by || t("someone"), t("status." + a.status), when(a.at)].filter(Boolean).join(" · ") : "";
   }
 
   function when(iso) {
@@ -538,6 +798,16 @@
   }
 
   function paintProgress() {
+    var node = $("[data-tp-progress]");
+    /* Before the list is on screen this line is the only thing the page says,
+       so it belongs here too rather than in the markup alone: switching the
+       language while the plan is still on its way must not leave a Russian
+       «Загружаю список…» above an English page. */
+    if (!state.plan) {
+      node.textContent = state.loadFailed ? t("loadFailed") : t("loading");
+      $("[data-tp-track]").style.width = "0";
+      return;
+    }
     var total = state.ids.length, answered = 0, ok = 0, bad = 0, skip = 0;
     for (var i = 0; i < total; i++) {
       var a = state.answers[state.ids[i]];
@@ -548,22 +818,24 @@
     /* The breakdown only once there is one. The bar is sticky and a phone
        screen is short — three zeroes at the top of an untouched checklist cost
        a line of screen and tell nobody anything. */
-    var line = "Отвечено " + answered + " из " + total;
-    if (ok) line += " · работает " + ok;
-    if (bad) line += " · не работает " + bad;
-    if (skip) line += " · пропущено " + skip;
-    $("[data-tp-progress]").textContent = total ? line : "В списке пока нет пунктов";
+    var line = t("answeredA") + answered + t("answeredB") + total;
+    if (ok) line += t("countOk") + ok;
+    if (bad) line += t("countBad") + bad;
+    if (skip) line += t("countSkip") + skip;
+    node.textContent = total ? line : t("empty");
     $("[data-tp-track]").style.width = total ? Math.round((answered / total) * 100) + "%" : "0";
   }
 
   /** A route error code in words a tester can act on. Unknown codes are shown
-      as they came — a code nobody recognises is still better than «ошибка». */
+      as they came — a code nobody recognises is still better than «ошибка».
+      `failed()` passes a sentence of its own for a request that never left. */
   function why(code) {
-    if (code === "unknown_item") return "список проверок на сервере уже другой — перезагрузи страницу";
-    if (code === "too_large") return "слишком много текста";
-    if (code === "rate_limited") return "слишком часто, подожди минуту";
-    if (code === "db_unavailable") return "база магазина не отвечает";
-    return code || "нет связи";
+    if (code === "unknown_item") return t("errUnknownItem");
+    if (code === "too_large") return t("errTooLarge");
+    if (code === "rate_limited") return t("errRateLimited");
+    if (code === "db_unavailable") return t("errDbDown");
+    if (code === OFFLINE) return t("errOffline");
+    return code || t("errNoLink");
   }
 
   /** The save line. This is the only place the page says where the answers are,
@@ -572,24 +844,24 @@
     var node = $("[data-tp-state]");
     var warn = false, text;
     if (state.noStore) {
-      text = "Устройство не даёт сохранить ответы у себя (частный режим?). Не закрывай вкладку, пока вверху не появится «сохранено на сервере».";
+      text = t("stNoStore");
       warn = true;
     } else if (!state.signedIn) {
-      text = "Ответы только на этом устройстве — войди в кабинет, и они улетят сами.";
+      text = t("stLocalOnly");
     } else if (state.stopped) {
-      text = "Сервер не принимает ответы (" + why(state.error) + "). Всё сохранено на устройстве — нажми «Скопировать ответы» и пришли их Диме.";
+      text = t("stStoppedA") + why(state.error) + t("stStoppedB");
       warn = true;
     } else if (state.busy) {
-      text = "Сохраняю…";
+      text = t("stBusy");
     } else if (state.dirty) {
-      text = state.error ? "Пока не сохранилось на сервере, пробую ещё раз. Ответы на устройстве." : "Есть несохранённое, сейчас отправлю.";
+      text = state.error ? t("stRetry") : t("stPending");
       warn = !!state.error;
     } else if (state.savedAt) {
-      text = "Сохранено на сервере в " + when(state.savedAt.toISOString()) + ".";
+      text = t("stSavedA") + when(state.savedAt.toISOString()) + t("stSavedB");
     } else {
-      text = "Вошёл в кабинет — ответы сохраняются на сервер.";
+      text = t("stSignedIn");
     }
-    if (state.fromCache) text = "Список показан из памяти устройства — сервер не ответил. " + text;
+    if (state.fromCache) text = t("stCache") + text;
     node.textContent = text;
     node.className = "bar__state" + (warn ? " bar__state--warn" : "");
   }
@@ -686,7 +958,7 @@
       failed(code);
     }).catch(function () {
       state.busy = false;
-      failed("нет сети");
+      failed(OFFLINE);
     });
   }
 
@@ -727,7 +999,7 @@
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
     for (var id in raw) if (Object.prototype.hasOwnProperty.call(raw, id)) {
       var a = raw[id];
-      if (!a || typeof a !== "object" || !STATUS[a.status]) continue;
+      if (!a || typeof a !== "object" || !VERDICTS[a.status]) continue;
       out[id] = {
         status: a.status,
         note: typeof a.note === "string" ? a.note : "",
@@ -739,6 +1011,10 @@
   }
 
   function boot() {
+    /* The language before anything is drawn, so the first paint is already the
+       right one — a page that flashes Russian and then becomes English is a
+       page that looks broken on a slow phone. */
+    setLang(lsGet(LS_LANG), true);
     state.answers = saneAnswers(readJson(LS_ANSWERS));
     var who = lsGet(LS_WHO);
     if (who === "renat" || who === "dim") setWho(who, true);
@@ -764,7 +1040,7 @@
         var cached = readJson(LS_PLAN);
         state.fromCache = true;
         if (cached) { state.plan = cached; render(); }
-        else $("[data-tp-progress]").textContent = "Не удалось загрузить список — открой страницу ещё раз, когда будет связь";
+        else { state.loadFailed = true; paintProgress(); }
         paintState();
       });
   }
@@ -792,9 +1068,13 @@
 
   /* ---------- report ----------------------------------------------------- */
 
+  /* The text goes out in the language the tester was reading, comments and
+     all: it is pasted straight into a chat with the other one, and a report
+     whose verdicts are in one language and whose titles are in the other is a
+     report nobody can read out loud. */
   function reportText() {
     var plan = state.plan || { areas: [], items: [] };
-    var out = ["REMPIRE — приёмка магазина, " + when(new Date().toISOString())];
+    var out = [t("reportHead") + when(new Date().toISOString())];
     out.push($("[data-tp-progress]").textContent);
     out.push("");
     var areas = plan.areas || [], items = plan.items || [], i, j;
@@ -803,14 +1083,14 @@
       var rows = [];
       for (j = 0; j < items.length; j++) if (items[j].area === areas[i].id) { rows.push(items[j]); seen[items[j].id] = 1; }
       if (!rows.length) continue;
-      out.push("## " + areas[i].name);
+      out.push("## " + say(areas[i]).name);
       for (j = 0; j < rows.length; j++) out.push(line(rows[j]));
       out.push("");
     }
     var rest = [];
     for (j = 0; j < items.length; j++) if (!seen[items[j].id]) rest.push(items[j]);
     if (rest.length) {
-      out.push("## Остальное");
+      out.push(t("reportOther"));
       for (j = 0; j < rest.length; j++) out.push(line(rest[j]));
     }
     return out.join("\n");
@@ -818,8 +1098,8 @@
 
   function line(item) {
     var a = state.answers[item.id];
-    var head = "[" + (a ? STATUS[a.status] : "нет ответа") + "] " + item.title;
-    if (a && a.by) head += " — " + (WHO[a.by] || a.by);
+    var head = "[" + (a ? t("status." + a.status) : t("reportNoAnswer")) + "] " + say(item).title;
+    if (a && a.by) head += " — " + (t("who." + a.by) || a.by);
     if (a && a.note) head += "\n    " + a.note.replace(/\n/g, "\n    ");
     return head;
   }
@@ -835,11 +1115,61 @@
     if (!quiet) lsSet(LS_WHO, value);
   }
 
-  document.addEventListener("click", function (e) {
-    var t = e.target;
-    if (!t || !t.closest) return;
+  /** Everything on the page that is not a checklist row: the header, the two
+      standing blocks, the filters, the report section, the tab's own title.
+      Called on every language change and once at boot. */
+  function paintChrome() {
+    var nodes = document.querySelectorAll("[data-t]"), i;
+    for (i = 0; i < nodes.length; i++) nodes[i].textContent = t(nodes[i].getAttribute("data-t"));
+    nodes = document.querySelectorAll("[data-ta]");
+    for (i = 0; i < nodes.length; i++) nodes[i].setAttribute("aria-label", t(nodes[i].getAttribute("data-ta")));
+    fill($("[data-t-lede]"), t("lede1"));
+    fill($("[data-t-howto5]"), t("howto5"));
+    fill($("[data-t-footer]"), t("footer"));
+    document.title = t("title");
+    document.documentElement.setAttribute("lang", state.lang);
+  }
 
-    var set = t.closest("[data-tp-set]");
+  /**
+   * The language this device reads the checklist in.
+   *
+   * Russian by default and after anything unrecognised: Renat is the tester
+   * this page was written for, he is the one who cannot switch back if the
+   * page comes up in a language he does not read, and «English» is a word he
+   * can find on a Russian page. The preference is per device (localStorage),
+   * not per person and not on the server — the two of them share one document
+   * of answers and nothing else, and Renat's phone reading Russian must not
+   * turn Dim's laptop Russian too.
+   *
+   * The switch redraws; it never reloads and never re-fetches, so it works
+   * with no network and mid-way through a half-answered list.
+   */
+  function setLang(value, quiet) {
+    state.lang = TEXT[value] ? value : "ru";
+    var chips = document.querySelectorAll("[data-tp-lang]");
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].setAttribute("aria-pressed", chips[i].getAttribute("data-tp-lang") === state.lang ? "true" : "false");
+    }
+    if (!quiet) lsSet(LS_LANG, state.lang);
+    paintChrome();
+    /* The rows are rebuilt from the plan already in memory, and the answers
+       are keyed by item id — so a verdict given in one language is still on
+       screen, still pressed, in the other. */
+    if (state.plan) render(); else paintProgress();
+    /* Only once the page knows something to say. Before the first answer from
+       /api/testplan/ this line is blank, and "the answers are on this device
+       only" — true of every page that has not asked yet — would be a warning
+       about a session nobody has looked for. */
+    if (state.plan || state.loadFailed) paintState();
+  }
+
+  document.addEventListener("click", function (e) {
+    /* `hit`, not `t`: `t()` is the translation lookup, and a local called `t`
+       here would shadow it for the whole handler. */
+    var hit = e.target;
+    if (!hit || !hit.closest) return;
+
+    var set = hit.closest("[data-tp-set]");
     if (set) {
       /* No "un-answer": a mis-tap is corrected by pressing the right button.
          The stored document only ever grows and merges (src/lib/testplan.ts),
@@ -849,10 +1179,13 @@
       return;
     }
 
-    var who = t.closest("[data-tp-who]");
+    var who = hit.closest("[data-tp-who]");
     if (who) { setWho(who.getAttribute("data-tp-who")); return; }
 
-    var filter = t.closest("[data-tp-filter]");
+    var lang = hit.closest("[data-tp-lang]");
+    if (lang) { setLang(lang.getAttribute("data-tp-lang")); return; }
+
+    var filter = hit.closest("[data-tp-filter]");
     if (filter) {
       state.filter = filter.getAttribute("data-tp-filter");
       var chips = document.querySelectorAll("[data-tp-filter]");
@@ -863,7 +1196,7 @@
       return;
     }
 
-    var only = t.closest("[data-tp-only]");
+    var only = hit.closest("[data-tp-only]");
     if (only) {
       state.onlyOpen = !state.onlyOpen;
       only.setAttribute("aria-pressed", state.onlyOpen ? "true" : "false");
@@ -871,13 +1204,13 @@
       return;
     }
 
-    if (t.closest("[data-tp-sync]")) {
+    if (hit.closest("[data-tp-sync]")) {
       state.stopped = false; state.tries = 0;
       if (!state.signedIn) { state.lastCheck = 0; recheck(); } else { state.dirty = true; schedule(0); }
       return;
     }
 
-    if (t.closest("[data-tp-copy]")) {
+    if (hit.closest("[data-tp-copy]")) {
       var text = reportText();
       var box = $("[data-tp-report]");
       box.hidden = false;
