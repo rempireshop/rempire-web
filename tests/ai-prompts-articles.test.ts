@@ -120,6 +120,22 @@ describe("buildPostTranslatePrompt — the same article in another language", ()
     const { system } = buildPostTranslatePrompt("EN", article);
     expect(system).toMatch(/\{"title": "\.\.\.", "excerpt": "\.\.\.", "body": "\.\.\.", "tags": \["\.\.\."\], "seoTitle": "\.\.\.", "seoDescription": "\.\.\."\}/);
   });
+
+  /* An inserted product card never reaches the model: the editor swaps it
+     for a «[[1]]» first and puts the card back where the token came home
+     (blogCardsOut()/blogCardsIn() in public/shop2/app.js). A token that came
+     back translated or renumbered costs that card its paragraph — the editor
+     can then only append it at the end — so the prompt says so, and only
+     when the body actually carries one. */
+  it("tells the model to carry the product-card placeholders through the article untouched", () => {
+    const { system } = buildPostTranslatePrompt("ET", {
+      ...article,
+      body: "<p>Зимой борода сохнет: [[1]].</p>",
+    });
+    expect(system).toContain("[[1]], [[2]]");
+    expect(system).toMatch(/same sentence and the same order/i);
+    expect(buildPostTranslatePrompt("ET", article).system).not.toMatch(/placeholder/i);
+  });
 });
 
 describe("buildCopyPrompt — the «✨» texts", () => {

@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { E2E_BASE_URL } from "./env.mjs";
-import { LANGS, PRODUCT, ipHeaders, shopUrl, waitForScreen } from "./fixtures";
+import { LANGS, PRODUCT, PRODUCT_2, ipHeaders, shopUrl, waitForScreen } from "./fixtures";
 import { assertClean, clearToast, freshShop, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
@@ -123,7 +123,11 @@ test.describe("blog — the visual editor", () => {
     const slug = await page.locator("[data-blogslug]").inputValue();
     expect(slug).toMatch(/^[a-z0-9-]+$/);
 
+    /* Russian only, so «Опубликовать» asks which reader gets what before it
+       does anything — see «blog — publishing with a language still empty»
+       below for that question's own test. */
     await page.locator("[data-admblogpublish]").click();
+    await page.locator("[data-admblogpublishyes]").click();
     await clearToast(page);
     await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
 
@@ -257,8 +261,11 @@ test.describe("blog — the visual editor", () => {
     await assertClean(page, w, "Google block filled in");
 
     /* The save round trip: all three pairs reach the post, and come back
-       into the editor under their pills. */
+       into the editor under their pills. A Google pair is not an article, so
+       the Estonian and English texts are still empty here and «Опубликовать»
+       asks about them first. */
     await page.locator("[data-admblogpublish]").click();
+    await page.locator("[data-admblogpublishyes]").click();
     await clearToast(page);
     await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
     const slug = await page.locator("[data-blogslug]").inputValue();
@@ -836,5 +843,209 @@ test.describe("blog — which language am I writing", () => {
     await expect(langState(page, "data-maillang", "ET")).toHaveText("the standard text");
     await page.locator('.adm-side [data-lang="RU"]').click();
     await assertClean(page, w, "the letters editor on an English panel");
+  });
+});
+
+/**
+ * The audit's questions 1 and 2, answered (Dim, 08.09.2026 —
+ * docs/audit/2026-09-07-blog-language.md § «Вопросы к Диму»).
+ *
+ * 1. A post published in Russian only is not a post with two empty pages: the
+ *    shop serves the Russian text at the Estonian and English addresses
+ *    (pickLang() in src/lib/blog.ts), which is the right thing to do and the
+ *    wrong thing to do without telling anybody. Publishing in Russian only is
+ *    a legitimate way to work here, so «Опубликовать» asks rather than
+ *    refuses — once, at the moment of publishing.
+ * 2. A product card put into the Russian body did not survive «Перевести на
+ *    ET и EN»: the body goes to the model as text, so the marker went as the
+ *    card's own words and came back translated. Now the cards do not make
+ *    that trip at all.
+ */
+test.describe("blog — publishing with a language still empty", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(216) });
+
+  test("«Опубликовать» names the empty language and what the reader will see there, and publishes on the second press", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    const marker = Date.now().toString().slice(-6);
+    const RU_TEXT = `Русский текст статьи про бороду ${marker}.`;
+    const ET_TEXT = `Eestikeelne artikli tekst habemest ${marker}.`;
+    await openAdmin(page);
+    await tab(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    const box = page.locator("[data-blogbody]");
+    await expect(box).toBeVisible();
+    await page.locator('[data-blogf="title"]').fill(`Только по-русски ${marker}`);
+    await box.click();
+    await page.keyboard.type(RU_TEXT);
+
+    /* ---- both other languages empty: one question, naming both ---------- */
+    await page.locator("[data-admblogpublish]").click();
+    const ask = page.getByText("Эстонский и английский тексты статьи пустые");
+    await expect(ask, "a Russian-only post was published without a word").toBeVisible();
+    await expect(ask, "the question never says what the reader gets instead").toContainText("покупатель увидит русский текст");
+    expect(await page.locator("[data-admblogpublish]").count(), "the question and the button it answers are both on screen").toBe(0);
+    // asked, not done: the post is still a draft while the question stands
+    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
+
+    // «Отмена» puts the ordinary button back, and nothing was published
+    await page.locator("[data-admblogpublishno]").click();
+    await expect(page.locator("[data-admblogpublish]")).toBeVisible();
+    await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
+    await assertClean(page, w, "the publish question");
+
+    /* ---- the Estonian text written, the English one still not ----------- */
+    await page.locator('[data-admbloglang="ET"]').click();
+    await page.locator('[data-blogf="title"]').fill(`Ainult vene keeles ${marker}`);
+    await box.click();
+    await page.keyboard.type(ET_TEXT);
+    await page.locator('[data-admbloglang="RU"]').click();
+    await page.locator("[data-admblogpublish]").click();
+    await expect(page.getByText("Английский текст статьи пустой"), "the question did not notice the Estonian text was written").toBeVisible();
+    expect(await page.getByText("Эстонский и английский тексты статьи пустые").count()).toBe(0);
+
+    // …and it does not block him: the second press publishes what he wrote
+    await page.locator("[data-admblogpublishyes]").click();
+    await clearToast(page);
+    await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
+    const slug = await page.locator("[data-blogslug]").inputValue();
+    const row = await page.request.get(`/api/admin/blog/?slug=${slug}`);
+    expect(row.status()).toBe(200);
+    const post = (await row.json()).post as { id: string };
+    try {
+      /* The question told the truth: the English address really does answer
+         with the Russian text, and the Estonian one with the Estonian. */
+      const en = await page.request.get(`/api/blog/${slug}/?lang=EN`);
+      expect(en.status(), "the post was not published after «Опубликовать всё равно»").toBe(200);
+      expect((await en.json()).post.bodyHtml, "the English page does not show what the question promised").toContain(RU_TEXT);
+      const et = await page.request.get(`/api/blog/${slug}/?lang=ET`);
+      expect((await et.json()).post.bodyHtml).toContain(ET_TEXT);
+
+      /* ---- and no question at all once all three are written ------------ */
+      await page.locator("[data-admblogunpublish]").click();
+      await clearToast(page);
+      await page.locator('[data-admbloglang="EN"]').click();
+      await page.locator('[data-blogf="title"]').fill(`Russian only ${marker}`);
+      await box.click();
+      await page.keyboard.type(`The English body of the article ${marker}.`);
+      await page.locator("[data-admblogpublish]").click();
+      await clearToast(page);
+      await expect(page.getByText("Опубликована. Изменения появятся"), "a post written in all three languages was asked about anyway").toBeVisible();
+      expect(await page.locator("[data-admblogpublishyes]").count()).toBe(0);
+      await assertClean(page, w, "publishing a post written in three languages");
+    } finally {
+      // this suite leaves the blog as it found it
+      await page.request.delete(`/api/admin/blog/?id=${post.id}`);
+    }
+  });
+});
+
+test.describe("blog — the product cards survive a translation", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(217) });
+
+  /** The «translate» task, stubbed — this suite has no OPENAI_API_KEY, and
+      what is under test is the editor, not the model. The answer is the text
+      it was handed under a language prefix, so a card that comes back came
+      back through the editor's own hands. `eatMarkers` is the other model,
+      the one that flattens whatever it is given and returns no tokens at
+      all: it is the reason the cards are not simply trusted to the answer. */
+  async function stubTranslate(page: Page, state: { eatMarkers: boolean }): Promise<Array<{ task: string; input: { text: string } }>> {
+    const calls: Array<{ task: string; input: { text: string } }> = [];
+    await page.route("**/api/admin/ai/text/", async (route) => {
+      const body = route.request().postDataJSON() as { task: string; input: { text: string } };
+      calls.push(body);
+      const say = (l: string) => {
+        const answer = `${l} ${body.input.text}`;
+        return state.eatMarkers ? answer.replace(/\[\[\d+\]\]/g, "") : answer;
+      };
+      await route.fulfill({
+        status: 200, contentType: "application/json",
+        body: JSON.stringify({ ok: true, texts: { ET: say("ET"), EN: say("EN") } }),
+      });
+    });
+    return calls;
+  }
+
+  async function insertCard(page: Page, id: string): Promise<void> {
+    await page.locator('[data-blogrt="product"]').click();
+    await page.locator("[data-blogtoolq]").fill(id);
+    await page.locator(`[data-blogtoolpick="${id}"]`).click();
+    await expect(page.locator(`[data-blogbody] a[data-product="${id}"]`)).toBeVisible();
+  }
+
+  /** «Перевести на ET и EN» lives inside the «Только часть» disclosure, and
+      that is a plain <details>: clicking its summary is a toggle, so opening
+      it blind closes it whenever a render has left it open. Press until the
+      button is on screen, then press the button. */
+  async function translate(page: Page): Promise<void> {
+    const btn = page.locator("[data-admblogtranslate]");
+    await expect(async () => {
+      if (!(await btn.isVisible())) await page.locator("summary", { hasText: "Только часть" }).click();
+      await expect(btn).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20_000 });
+    await btn.click();
+    await expect(page.getByRole("status").first()).toContainText("Черновик готов", { timeout: 30_000 });
+    await clearToast(page);
+  }
+
+  test("«Перевести на ET и EN» carries two cards out of the Russian body into the Estonian one, in their places", async ({ page }) => {
+    test.setTimeout(150_000);
+    const w = watch(page);
+    const state = { eatMarkers: false };
+    const calls = await stubTranslate(page, state);
+    await openAdmin(page);
+    await tab(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    const box = page.locator("[data-blogbody]");
+    await expect(box).toBeVisible();
+    await page.locator('[data-blogf="title"]').fill(`Две карточки ${Date.now().toString().slice(-6)}`);
+
+    // the Russian body the owner writes: a paragraph and a card, twice
+    await box.click();
+    await page.keyboard.type("Первый абзац про шампунь.");
+    await insertCard(page, PRODUCT.id);
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("Второй абзац про спрей.");
+    await insertCard(page, PRODUCT_2.id);
+    await expect(box.locator("a[data-product]")).toHaveCount(2);
+    await clearToast(page);
+
+    await translate(page);
+
+    /* What the model was handed: numbered tokens, never the card itself —
+       which is how it used to go, as the card's own words, and how it used
+       to come back: translated, flattened, no marker left. */
+    const bodyCall = calls.find((c) => c.input.text.includes("абзац"));
+    expect(bodyCall, "the body was never sent for translation").toBeTruthy();
+    expect(bodyCall!.input.text).toContain("[[1]]");
+    expect(bodyCall!.input.text).toContain("[[2]]");
+    expect(bodyCall!.input.text, "the card still goes to the model as its own words").not.toContain(PRODUCT.brand);
+
+    // …and what came back: both cards, each still in its own paragraph,
+    // each pointing at the Estonian page of its product
+    await page.locator('[data-admbloglang="ET"]').click();
+    const cards = box.locator("a[data-product]");
+    await expect(cards, "the Estonian text came back without the product cards").toHaveCount(2);
+    await expect(cards.nth(0)).toHaveAttribute("data-product", PRODUCT.id);
+    await expect(cards.nth(0)).toHaveAttribute("href", `/shop2/et/p/${PRODUCT.id}/`);
+    await expect(cards.nth(1)).toHaveAttribute("data-product", PRODUCT_2.id);
+    await expect(langState(page, "data-admbloglang", "ET"), "the Estonian tab still says it has no products").toContainText("с товарами");
+    const placed = await box.innerHTML();
+    expect(placed.indexOf(PRODUCT.id), "the first card did not stay in the first paragraph")
+      .toBeLessThan(placed.indexOf("Второй абзац"));
+    await assertClean(page, w, "the translated Estonian body");
+
+    /* ---- the other model: the one that hands the text back with the
+       markers gone. The cards are still in the article — at the end of it,
+       which is a card in the wrong paragraph, not a card the owner lost. */
+    state.eatMarkers = true;
+    await page.locator('[data-admbloglang="RU"]').click();
+    await translate(page);
+    await page.locator('[data-admbloglang="ET"]').click();
+    await expect(box.locator("a[data-product]"), "a model that ate the markers ate the cards with them").toHaveCount(2);
+    const appended = await box.innerHTML();
+    expect(appended, "a leftover token was left in the article as words").not.toContain("[[1]]");
+    expect(appended.indexOf(PRODUCT.id)).toBeGreaterThan(appended.indexOf("Второй абзац"));
+    await assertClean(page, w, "the translation a flattening model answered");
   });
 });

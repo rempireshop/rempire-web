@@ -354,10 +354,22 @@ field the owner types into is a trap worth more than the non-breaking space.
 of the letters the shop sends by itself — the three account flows carry a
 switch, the transactional three say «всегда». Opening one opens its editor:
 the three fields on the left, the letter as the customer will see it on the
-right (redrawn from the draft as it is typed, placeholders filled in), the RU /
-ET / EN segmented control above them, and the full server render in an iframe
-under both, with the test-address box beside «Отправить мне тест». The preview
-is demo data — a made-up order — so nothing real ever leaves the browser.
+right (redrawn from the draft as it is typed, placeholders filled in), the
+«Язык письма» strip above them, and the full server render in an iframe under
+both, with the test-address box beside «Отправить мне тест». The preview is
+demo data — a made-up order — so nothing real ever leaves the browser.
+
+**Which language the editor opens on.** The one it was closed in. It is a
+property of the letter, never of the panel: an English panel used to put the
+English letter under the owner's hands without saying so, which is the trap
+`docs/audit/2026-09-07-blog-language.md` is about, and the fix for that made
+it always Russian — one language too few for an owner who spends an evening
+on the Estonian letters (Dim, 08.09.2026). So `S.mailLang` is remembered per
+machine, in the panel's own preferences key (`rempire-admin-panes`,
+`admPanesLoad()`/`admPanesSave()` in `public/shop2/app.js` — the same object
+that remembers which side panes are folded), and is Russian until there is
+one to remember. Each tab of the strip still says what its version holds
+(«свой текст» / «стандартный текст»), so the answer is on screen either way.
 
 **By URL** (demo data, no login needed — it is the admin iframe's source):
 

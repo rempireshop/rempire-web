@@ -183,6 +183,21 @@ function cleanTranslateInput(
   return { text, targetLangs, sourceLang, keepNames: listOf(src.keepNames, 20, 80) };
 }
 
+/* A blog body reaches a translation task with its product cards taken out and
+ * a numbered token left where each one stood — «[[1]]», «[[2]]»
+ * (blogCardsOut() in public/shop2/app.js). The editor puts the cards back
+ * wherever it finds the tokens, so a token the model translated, renumbered
+ * or swallowed costs that card its paragraph: the editor can only append it
+ * at the end of the article. Hence this line — and hence it is said only when
+ * there is a token to say it about, because an instruction about placeholders
+ * in a text that has none is an invitation to invent one. */
+const PLACEHOLDER_RX = /\[\[\d+\]\]/;
+function placeholderRule(text: string): string {
+  return PLACEHOLDER_RX.test(text)
+    ? "\nThe source contains placeholders written as [[1]], [[2]] — copy each one into the translation exactly as it stands, in the same sentence and the same order. Never translate, renumber, drop or duplicate one, and never add one of your own."
+    : "";
+}
+
 export function buildTranslatePrompt(lang: Lang3, rawInput: unknown): PromptResult {
   const input = cleanTranslateInput(rawInput, lang);
   const keep = input.keepNames.length
@@ -191,7 +206,7 @@ export function buildTranslatePrompt(lang: Lang3, rawInput: unknown): PromptResu
 
   const system = `${HOUSE_VOICE}
 
-TASK: translate the SOURCE TEXT below from ${LANG_NAME[input.sourceLang]} into ${input.targetLangs.map((l) => LANG_NAME[l]).join(" and ")}. Translate meaning, not word for word — it must read as if it had been written natively in each target language, following the voice and formatting rules above. Do not shorten, summarise, expand or add anything the source does not say.${keep}
+TASK: translate the SOURCE TEXT below from ${LANG_NAME[input.sourceLang]} into ${input.targetLangs.map((l) => LANG_NAME[l]).join(" and ")}. Translate meaning, not word for word — it must read as if it had been written natively in each target language, following the voice and formatting rules above. Do not shorten, summarise, expand or add anything the source does not say.${keep}${placeholderRule(input.text)}
 Respond with exactly this JSON shape, one key per requested target language, nothing else: {${input.targetLangs.map((l) => `"${l}": "..."`).join(", ")}}`;
 
   return { system, user: `SOURCE TEXT (${LANG_NAME[input.sourceLang]}):\n${input.text}` };
@@ -555,7 +570,7 @@ ${SEO_RULES}
 TASK: translate a blog article from ${LANG_NAME[input.sourceLang]} into ${LANG_NAME[lang]}. Translate meaning, not word for word — it must read as if written natively in ${LANG_NAME[lang]}, in the voice above. Do not shorten, summarise, expand, reorder or add anything the source does not say.
 - "body" is HTML: keep every tag exactly where it is (<h2>, <p>, <ul>, <li>, <strong>, <em>) and translate only the text between tags. Never add, drop or rename a tag.
 - "tags": the same tags, translated as short lowercase words a reader in ${LANG_NAME[lang]} would search for.
-- "seoTitle": at most ${TITLE_MAX} characters INCLUDING spaces — count them. ${LANG_NAME[lang]} is often longer than the source; re-write the title to fit rather than translating it and letting it run over. "seoDescription": at most ${DESC_MAX} characters INCLUDING spaces — same rule.${keep}
+- "seoTitle": at most ${TITLE_MAX} characters INCLUDING spaces — count them. ${LANG_NAME[lang]} is often longer than the source; re-write the title to fit rather than translating it and letting it run over. "seoDescription": at most ${DESC_MAX} characters INCLUDING spaces — same rule.${keep}${placeholderRule(input.body)}
 Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt": "...", "body": "...", "tags": ["..."], "seoTitle": "...", "seoDescription": "..."}`;
 
   const user = [

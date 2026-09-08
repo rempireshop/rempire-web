@@ -273,7 +273,10 @@ test.describe("admin sections — Блог", () => {
     // the right column: «Публикация» says what the state is, and publishes
     await expect(page.getByText("Черновик. В магазине его пока не видно.")).toBeVisible();
     const slug = await page.locator("[data-blogslug]").inputValue();
+    /* Written in Russian only, so «Опубликовать» first asks what the Estonian
+       and English readers will get — its own test is in admin-blog.spec.ts. */
     await page.locator("[data-admblogpublish]").click();
+    await page.locator("[data-admblogpublishyes]").click();
     await expect(page.getByRole("status")).toBeVisible();
     await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();
 

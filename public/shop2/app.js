@@ -1550,6 +1550,14 @@
       "Товар добавлен в русский текст статьи": "Toode lisati artikli venekeelsesse teksti",
       "Товар добавлен в эстонский текст статьи": "Toode lisati artikli eestikeelsesse teksti",
       "Товар добавлен в английский текст статьи": "Toode lisati artikli ingliskeelsesse teksti",
+      // integration: «Опубликовать» asks once when a language has no text of its own
+      "Эстонский текст статьи пустой — на эстонской странице покупатель увидит русский текст. Всё равно опубликовать?":
+        "Artikli eestikeelne tekst on tühi — eestikeelsel lehel näeb klient venekeelset teksti. Kas avaldada ikkagi?",
+      "Английский текст статьи пустой — на английской странице покупатель увидит русский текст. Всё равно опубликовать?":
+        "Artikli ingliskeelne tekst on tühi — ingliskeelsel lehel näeb klient venekeelset teksti. Kas avaldada ikkagi?",
+      "Эстонский и английский тексты статьи пустые — на этих страницах покупатель увидит русский текст. Всё равно опубликовать?":
+        "Artikli eesti- ja ingliskeelne tekst on tühjad — nendel lehtedel näeb klient venekeelset teksti. Kas avaldada ikkagi?",
+      "Опубликовать всё равно": "Avalda ikkagi",
       "Правки не сохранены — если выйти, они пропадут.":
         "Muudatused on salvestamata — kui väljud, lähevad need kaotsi.",
       "Выйти без сохранения": "Välju salvestamata",
@@ -3757,6 +3765,14 @@
       "Товар добавлен в русский текст статьи": "Product added to the Russian text of the post",
       "Товар добавлен в эстонский текст статьи": "Product added to the Estonian text of the post",
       "Товар добавлен в английский текст статьи": "Product added to the English text of the post",
+      // integration: «Опубликовать» asks once when a language has no text of its own
+      "Эстонский текст статьи пустой — на эстонской странице покупатель увидит русский текст. Всё равно опубликовать?":
+        "The post has no Estonian text — on the Estonian page the reader will get the Russian one. Publish anyway?",
+      "Английский текст статьи пустой — на английской странице покупатель увидит русский текст. Всё равно опубликовать?":
+        "The post has no English text — on the English page the reader will get the Russian one. Publish anyway?",
+      "Эстонский и английский тексты статьи пустые — на этих страницах покупатель увидит русский текст. Всё равно опубликовать?":
+        "The post has neither an Estonian nor an English text — on both pages the reader will get the Russian one. Publish anyway?",
+      "Опубликовать всё равно": "Publish anyway",
       "Правки не сохранены — если выйти, они пропадут.":
         "Your changes are not saved — leaving now loses them.",
       "Выйти без сохранения": "Leave without saving",
@@ -6164,7 +6180,7 @@
     contentLang: "RU",   // which language pill the trilingual fields show
     contentOpen: "",     // which sub-block is unfolded ("" = the summary)
     mailTpl: "order-confirmed", // «Письма»: which letter the preview shows
-    mailLang: "",    // letter language; "" follows the panel language
+    mailLang: "",    // letter language; "" = never chosen here → Russian. admPanesLoad() brings back the last one
     mailTo: "",      // address typed into «отправить тест на…»
     mailDraft: null, // unsaved subject/intro/signature edits, by letter+language
     admNav: true,       // the admin sidebar: 232 px expanded, 68 px folded
@@ -6244,6 +6260,10 @@
     adminBlogTopic: "",    // «Тема статьи» in the editor's assistant card — prefilled from the title
     adminBlogGen: null,    // the article generator's progress: {step, msg, err} while «Написать статью целиком» runs
     adminBlogConfirmDelete: false,
+    /* The «эстонский текст пустой — всё равно опубликовать?» question while
+       it is on screen: the sentence itself, so the buttons under it and the
+       reason for them can never drift apart. "" = nothing to ask. */
+    adminBlogConfirmPublish: "",
     /* The editor's toolbar sheet: "" | "link" | "image" | "product". It is
        drawn into its own slot by hand rather than by render(), because a
        render() would rebuild the contenteditable and take the caret (and the
@@ -10296,17 +10316,26 @@
     blogToolClose();
     blogInsertHtml('<figure><img src="' + esc(u) + '" alt="" loading="lazy"></figure><p><br></p>');
   }
-  /** The «Товар» marker. blogBodyHTML() turns it into a real card in the shop. */
-  function blogInsertProduct(id) {
+  /** The «Товар» marker, written out for one language. blogBodyHTML() turns it
+      into a real card in the shop; a crawler and a reader without JS follow it
+      as the ordinary product link it is, which is why the marker is an <a> and
+      not an empty <span>. Its own function because the translation rebuilds it
+      too, for the language the translated text landed in — blogCardsIn(). */
+  function blogProductLinkHTML(id, L) {
     var p = productsById([id])[0];
-    if (!p) return;
-    var L = S.adminBlogLang || "RU";
+    if (!p) return "";
     var pro = proPrice(p, 0);
     var price = (p.priceFrom ? "от " : "") + eur(pro != null ? pro : p.price);
-    var href = "/shop2" + SEG_OF_LANG[L] + "/p/" + encodeURIComponent(p.id) + "/";
+    var href = "/shop2" + (SEG_OF_LANG[L] || "") + "/p/" + encodeURIComponent(p.id) + "/";
+    return '<a data-product="' + esc(p.id) + '" href="' + esc(href) + '">' +
+      esc(p.brand + " " + p.name) + " — " + esc(price) + "</a>";
+  }
+  function blogInsertProduct(id) {
+    var L = S.adminBlogLang || "RU";
+    var a = blogProductLinkHTML(id, L);
+    if (!a) return;
     blogToolClose();
-    blogInsertHtml('<a data-product="' + esc(p.id) + '" href="' + esc(href) + '">' +
-      esc(p.brand + " " + p.name) + " — " + esc(price) + "</a>&nbsp;");
+    blogInsertHtml(a + "&nbsp;");
     /* Which of the three texts it landed in — said out loud, because from
        the other two tabs the card is simply not there, and reading that as
        «it did not save» is exactly what happened once. */
@@ -10358,34 +10387,113 @@
   function blogBody3ToHtml(b) {
     return { RU: blogBodyToHtml(b && b.RU), ET: blogBodyToHtml(b && b.ET), EN: blogBodyToHtml(b && b.EN) };
   }
-  /** The other direction: the model's translate task wants text, not tags. */
+  /* The other direction: the model's translate task wants text, not tags.
+     Everything between two blocks is one line of it, whatever that stretch
+     happens to be made of — a text node, a <strong>, a product marker. That
+     matters because the first line typed into an empty box has no <p> around
+     it at all: a browser editing an empty element writes a bare text node and
+     only starts wrapping when Enter is pressed. Walking element children
+     alone dropped that whole first line — its words, and any product card
+     standing in it — and the article came back from the model a paragraph
+     short, with nobody told. */
+  var BLOG_TEXT_BLOCKS = { P: 1, DIV: 1, H1: 1, H2: 1, H3: 1, H4: 1, H5: 1, H6: 1, LI: 1, BLOCKQUOTE: 1 };
   function blogHtmlToText(html) {
     var doc = null;
     try { doc = new DOMParser().parseFromString("<body>" + String(html || "") + "</body>", "text/html"); } catch (e) { doc = null; }
     if (!doc || !doc.body) return String(html || "");
-    var out = [];
+    var out = [], buf = "";
+    var flush = function () {
+      var t = buf.replace(/\s+/g, " ").trim();
+      if (t) out.push(t);
+      buf = "";
+    };
     var walk = function (parent) {
       var kids = parent.childNodes, i;
       for (i = 0; i < kids.length; i++) {
         var n = kids[i];
+        if (n.nodeType === 3) { buf += n.nodeValue; continue; }
         if (n.nodeType !== 1) continue;
         var tag = n.tagName;
-        if (tag === "UL" || tag === "OL") { walk(n); continue; }
+        if (tag === "UL" || tag === "OL" || tag === "FIGURE") { flush(); walk(n); continue; }
+        if (tag === "IMG") {
+          var src = n.getAttribute("src");
+          if (src) { flush(); out.push("![](" + src + ")"); }
+          continue;
+        }
+        // <a>, <strong>, <em>, <br> — inside the line, not a line of their own
+        if (!BLOG_TEXT_BLOCKS[tag]) { buf += tag === "BR" ? " " : (n.textContent || ""); continue; }
+        flush();
         var text = (n.textContent || "").replace(/\s+/g, " ").trim();
-        if (tag === "H1" || tag === "H2") { if (text) out.push("## " + text); continue; }
-        if (tag === "H3") { if (text) out.push("### " + text); continue; }
-        if (tag === "LI") { if (text) out.push("- " + text); continue; }
-        if (tag === "BLOCKQUOTE") { if (text) out.push("> " + text); continue; }
-        if (tag === "FIGURE") { walk(n); continue; }
-        if (tag === "IMG") { var src = n.getAttribute("src"); if (src) out.push("![](" + src + ")"); continue; }
-        if (text) out.push(text);
+        if (!text) continue;
+        if (tag === "H1" || tag === "H2") out.push("## " + text);
+        else if (tag === "H3" || tag === "H4" || tag === "H5" || tag === "H6") out.push("### " + text);
+        else if (tag === "LI") out.push("- " + text);
+        else if (tag === "BLOCKQUOTE") out.push("> " + text);
+        else out.push(text);
       }
+      flush();
     };
     walk(doc.body);
     return out.join("\n\n");
   }
   /** A plain-text paste: blank lines are paragraphs, «## » and «- » still work. */
   function blogTextToHtml(text) { return blogCleanHtml(blogMdToHtml(text)); }
+
+  /* ---- the product cards, carried through a translation --------------------
+     Three texts, three sets of product cards: a card put into the Russian
+     body is not in the Estonian one, and never was — that is what the
+     language strip says on every tab. What it must not do is *lose* them,
+     and it did, twice over. «Перевести на ET и EN» hands the body to the
+     model as text (blogHtmlToText(), because a model given tags returns them
+     rearranged), so the marker arrived as the words «Proraso … — 12,90 €»
+     and came back translated and flat; the whole-article generator sends
+     HTML and asks for the tags back untouched, which is a request, not a
+     guarantee. Either way the Estonian article had no cards in it, and the
+     owner — who had put two into the Russian text — read that as a lost edit
+     (docs/audit/2026-09-07-blog-language.md).
+
+     So the markers do not go to the model at all. blogCardsOut() lifts each
+     one out and leaves a numbered token in its place; blogCardsIn() puts it
+     back where the token came home, rebuilt for the target language, so the
+     Estonian card links to the Estonian product page. Numbers in double
+     brackets because that is the shape a model leaves alone — and because
+     «leaves alone» is a habit and not a promise, a card whose token did not
+     survive is appended to the end of the translated text instead of
+     vanishing. In its own place when the model behaved, in the article
+     either way: the answer was «carry them across every time» (Dim,
+     08.09.2026), not «when the model cooperates». */
+  function blogCardMark(n) { return "[[" + n + "]]"; }
+  var BLOG_CARD_MARK_RX = /\[\[\d+\]\]/g;
+  function blogCardsOut(html) {
+    var src = String(html || ""), doc = null;
+    if (src.indexOf("data-product") < 0) return { html: src, cards: [] };
+    try { doc = new DOMParser().parseFromString("<body>" + src + "</body>", "text/html"); } catch (e) { doc = null; }
+    if (!doc || !doc.body) return { html: src, cards: [] };
+    var list = doc.body.querySelectorAll("a[data-product]"), cards = [], i;
+    for (i = 0; i < list.length; i++) {
+      cards.push(list[i].getAttribute("data-product"));
+      list[i].parentNode.replaceChild(doc.createTextNode(blogCardMark(cards.length)), list[i]);
+    }
+    return cards.length ? { html: doc.body.innerHTML, cards: cards } : { html: src, cards: [] };
+  }
+  function blogCardsIn(html, cards, L) {
+    var s = String(html || "");
+    if (!cards || !cards.length) return s;
+    var tail = [];
+    cards.forEach(function (id, i) {
+      var mark = blogCardMark(i + 1), a = blogProductLinkHTML(id, L), at = s.indexOf(mark);
+      // the token did not come back — the card goes to the end rather than nowhere
+      if (at < 0) { if (a) tail.push(a); return; }
+      // `a` is "" for a product that has left the catalogue: then the token
+      // simply goes, and nothing takes its place
+      s = s.slice(0, at) + a + s.slice(at + mark.length);
+    });
+    /* Whatever tokens are left were invented or duplicated by the model —
+       they are not text the owner wrote, so they are not text he has to
+       delete by hand. */
+    s = s.replace(BLOG_CARD_MARK_RX, "");
+    return tail.length ? s + tail.map(function (a) { return "<p>" + a + "</p>"; }).join("") : s;
+  }
 
   var BLOG_EMPTY3 = { RU: "", ET: "", EN: "" };
   function blogNewDraft() {
@@ -10489,6 +10597,40 @@
     ET: "Товар добавлен в эстонский текст статьи",
     EN: "Товар добавлен в английский текст статьи"
   };
+
+  /* ---- publishing with one of the three still empty ------------------------
+     «Опубликовать» opens the post on all three addresses at once, and an
+     empty Estonian text is not an empty Estonian page: pickLang()
+     (src/lib/blog.ts) quietly serves the Russian one instead. A reader in
+     Tallinn gets an article in a language he may not read, and nobody is
+     told — not the reader, and until now not the owner either.
+
+     Publishing in Russian only is a legitimate thing to do: that is how this
+     shop's articles are written, Russian first and translated after. So this
+     is a question, asked once at the moment of publishing, and never a rule:
+     it names the language that is empty, says what the reader gets there,
+     and the next press publishes anyway (Dim, 08.09.2026). Not a line that
+     appears and disappears under the keyboard — the language strip already
+     carries «пусто» on the tab, all the time, for that.
+
+     One whole sentence per case rather than one with the language plugged
+     into a hole, for the same reason as BLOG_LANG_NOTE: translateTree() and
+     tools/i18n-gaps.mjs both work on whole keys. */
+  function blogEmptyLangs(d) {
+    /* No Russian text either — then «покупатель увидит русский текст» is a
+       promise this post cannot keep, and an article with nothing in it at
+       all is a different conversation. */
+    if (!blogTextLen(d.body.RU)) return [];
+    return ["ET", "EN"].filter(function (l) { return !blogTextLen(d.body[l]); });
+  }
+  var BLOG_PUBLISH_WARN = {
+    ET: "Эстонский текст статьи пустой — на эстонской странице покупатель увидит русский текст. Всё равно опубликовать?",
+    EN: "Английский текст статьи пустой — на английской странице покупатель увидит русский текст. Всё равно опубликовать?",
+    "ET,EN": "Эстонский и английский тексты статьи пустые — на этих страницах покупатель увидит русский текст. Всё равно опубликовать?"
+  };
+  function blogPublishWarnText(d) {
+    return BLOG_PUBLISH_WARN[blogEmptyLangs(d).join(",")] || "";
+  }
   /** Everything «Сохранить» would send — the yardstick for «не сохранено». */
   function blogDraftSig(d) {
     return JSON.stringify([d.slug, d.title, d.excerpt, d.body, d.coverUrl, d.coverAlt,
@@ -10497,9 +10639,11 @@
   function blogMarkSaved(d) {
     S.adminBlogSaved = d ? blogDraftSig(d) : "";
     S.adminBlogConfirmBack = false;
+    S.adminBlogConfirmPublish = "";
   }
   function blogCloseEditor() {
     S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
+    S.adminBlogConfirmPublish = "";
     BLOGSEL = null; BLOGCARET = null; render();
   }
   function blogDirty() {
@@ -10628,13 +10772,15 @@
     if (tx.seo && tx.seo.description) d.seoDesc.RU = String(tx.seo.description).slice(0, 170);
     if (d.slugAuto && d.title.RU) d.slug = blogSlugify(d.title.RU);
   }
-  /** One target language: the Russian article translated whole, tags kept as they are. */
+  /** One target language: the Russian article translated whole, tags kept as
+      they are, product cards lifted out and put back by hand (blogCardsOut). */
   function blogGenTranslate(d, L) {
     var keep = productsById(d.products).map(function (p) { return p.brand + " " + p.name; });
+    var src = blogCardsOut(d.body.RU);
     return apiSend("/api/admin/ai/text/", "POST", {
       task: "post_translate", lang: L,
       input: {
-        sourceLang: "RU", title: d.title.RU, excerpt: d.excerpt.RU, body: d.body.RU,
+        sourceLang: "RU", title: d.title.RU, excerpt: d.excerpt.RU, body: src.html,
         tags: blogTags(d), seoTitle: d.seoTitle.RU, seoDescription: d.seoDesc.RU, keepNames: keep
       }
     }).then(function (r) {
@@ -10642,7 +10788,7 @@
       if (!tx || !(tx.title || tx.body)) throw new Error(blogGenErrText(r));
       if (tx.title) d.title[L] = String(tx.title).slice(0, 200);
       if (tx.excerpt) d.excerpt[L] = String(tx.excerpt).slice(0, 500);
-      if (tx.body) d.body[L] = blogCleanHtml(String(tx.body));
+      if (tx.body) d.body[L] = blogCleanHtml(blogCardsIn(String(tx.body), src.cards, L));
       if (tx.seo && tx.seo.title) d.seoTitle[L] = String(tx.seo.title).slice(0, 70);
       if (tx.seo && tx.seo.description) d.seoDesc[L] = String(tx.seo.description).slice(0, 170);
     });
@@ -10733,11 +10879,15 @@
       S.adminBlogBusy = false; blogFail(); render();
     });
   }
-  function publishBlogPost() {
+  /** `confirmed` — the second press, the one that answers blogPublishWarnText(). */
+  function publishBlogPost(confirmed) {
     if (S.adminBlogBusy || !S.adminBlogEdit) return;
     if (blogTitleMissing(S.adminBlogEdit)) {
       S.adminBlogErr = "Заполните заголовок хотя бы на русском."; render(); return;
     }
+    var warn = confirmed ? "" : blogPublishWarnText(S.adminBlogEdit);
+    if (warn) { S.adminBlogConfirmPublish = warn; S.adminBlogErr = ""; render(); return; }
+    S.adminBlogConfirmPublish = "";
     S.adminBlogBusy = true; S.adminBlogErr = ""; render();
     saveBlogFields().then(function (p) {
       return apiSend("/api/admin/blog/", "PATCH", { id: p.id, publish: true });
@@ -12428,7 +12578,16 @@
   /* Which of the two side panes are folded, remembered across visits. The
      panel is the owner's daily tool on one laptop — a preference that resets
      on every reload is not a preference. Its own key, not persist()'s: that
-     one is the shopper's cart and language, saved on a different schedule. */
+     one is the shopper's cart and language, saved on a different schedule.
+
+     The letter editor's language rides along in the same object. It used to
+     follow the panel's own language, which meant an English panel silently
+     put the English letter under the owner's hands; the language-strip fix
+     made it always Russian (docs/audit/2026-09-07-blog-language.md), and
+     always Russian is one language too few for an owner spending an evening
+     on the Estonian letters. So it opens where it was left (Dim, 08.09.2026)
+     — and it is a preference of exactly the kind these two panes are, so it
+     lives in their key rather than in a second one of its own. */
   var ADM_PANES_LS = "rempire-admin-panes";
   function admPanesLoad() {
     try {
@@ -12436,11 +12595,15 @@
       if (p && typeof p === "object") {
         if (typeof p.nav === "boolean") S.admNav = p.nav;
         if (typeof p.ai === "boolean") S.admAi = p.ai;
+        // one of the three, spelled out: anything else and mailLang() keeps Russian
+        if (["RU", "ET", "EN"].indexOf(p.maillang) >= 0) S.mailLang = p.maillang;
       }
     } catch (e) {}
   }
   function admPanesSave() {
-    try { localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi })); } catch (e) {}
+    try {
+      localStorage.setItem(ADM_PANES_LS, JSON.stringify({ nav: S.admNav, ai: S.admAi, maillang: S.mailLang }));
+    } catch (e) {}
   }
   admPanesLoad();
 
@@ -14678,7 +14841,17 @@
         (d.status === "published"
           ? '<button class="adm-btn" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
             '<button class="adm-btn adm-btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
-          : '<button class="adm-btn" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>" +
+          /* One language still empty: the same inline question «Удалить
+             статью» asks, in the same card, replacing the button that asked
+             it — the post is published by the next press, never blocked
+             (blogPublishWarnText()). «Сохранить черновик» stays where it
+             is: the other answer to «эстонского текста ещё нет» is to go on
+             writing it. */
+          : (S.adminBlogConfirmPublish
+            ? '<div class="adm-hint adm-hint--warn">' + S.adminBlogConfirmPublish + "</div>" +
+              '<button class="adm-btn" data-admblogpublishyes' + (busy ? " disabled" : "") + ">Опубликовать всё равно</button>" +
+              '<button class="adm-link adm-link--muted" data-admblogpublishno>Отмена</button>'
+            : '<button class="adm-btn" data-admblogpublish' + (busy ? " disabled" : "") + ">Опубликовать</button>") +
             '<button class="adm-btn adm-btn--ghost" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить черновик</button>") +
         (d.id
           ? (S.adminBlogConfirmDelete
@@ -15695,13 +15868,14 @@
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === S.mailTpl) return S.mailTpl;
     return ADM_MAIL_ROWS[0][0];
   }
-  /* «RU», not S.lang. The letter's language is a property of the letter, and
+  /* Never S.lang. The letter's language is a property of the letter, and
      letting the panel's own language pick it meant an owner who had switched
      the panel to English was editing the English letter without ever saying
      so — the same trap the blog editor's language strip walked the owner
-     into (docs/audit/2026-09-07-blog-language.md). Now it starts on Russian,
-     like every other content language in this panel, and the strip above the
-     fields says which one is on screen and what the other two hold. */
+     into (docs/audit/2026-09-07-blog-language.md). What it starts on now is
+     the language it was last left in, which admPanesLoad() brings back off
+     this machine, and Russian until there is one; the strip above the fields
+     says which one is on screen and what the other two hold either way. */
   function mailLang() { return S.mailLang || "RU"; }
   /** «свой текст» / «стандартный текст» for one language of one letter. */
   function mailLangWords(tpl, code) {
@@ -24971,7 +25145,7 @@
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
     if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -26083,7 +26257,10 @@
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.mailback !== undefined) { keepMailTo(); S.mailOpen = false; render(); return; }
-    if (d.maillang !== undefined) { keepMailTo(); S.mailLang = d.maillang; render(); return; }
+    /* Remembered on the switch, not on the way out: the language the editor
+       was closed in is the last one switched to, and there is no other door
+       out of it — «← Все письма», another section, a closed tab. */
+    if (d.maillang !== undefined) { keepMailTo(); S.mailLang = d.maillang; admPanesSave(); render(); return; }
     if (d.mailtest !== undefined) {
       keepMailTo();
       var mailAddr = (S.mailTo || "").trim();
@@ -26838,11 +27015,16 @@
       /* The body goes to the model as text, not as tags: a translation task
          handed HTML comes back with the markup rearranged, and the answer
          has to be parseable either way. blogHtmlToText() flattens it to
-         headings and «- » lines, blogTextToHtml() puts the tags back. */
+         headings and «- » lines, blogTextToHtml() puts the tags back.
+         The product cards never make that trip at all — blogCardsOut()
+         swaps each one for a numbered token first, and blogCardsIn() below
+         puts them back into the translated text, rebuilt for the language
+         they landed in. */
+      var trCards = blogCardsOut(bdTr.body[srcLang]);
       var jobs = [
         { field: "title", text: bdTr.title[srcLang] },
         { field: "excerpt", text: bdTr.excerpt[srcLang] },
-        { field: "body", text: blogHtmlToText(bdTr.body[srcLang]) },
+        { field: "body", text: blogHtmlToText(trCards.html) },
       ].filter(function (j) { return j.text; });
       var tbtn = t, tlabel = t.textContent; t.disabled = true; t.textContent = "…";
       Promise.all(jobs.map(function (j) {
@@ -26859,7 +27041,11 @@
           if (res.r.status === 200 && res.r.body.ok && res.r.body.texts) {
             targets.forEach(function (l) {
               var v = res.r.body.texts[l];
-              if (v) { bdTr[res.field][l] = res.field === "body" ? blogTextToHtml(v) : v; ok = true; }
+              if (!v) return;
+              bdTr[res.field][l] = res.field === "body"
+                ? blogCleanHtml(blogCardsIn(blogTextToHtml(v), trCards.cards, l))
+                : v;
+              ok = true;
             });
           }
         });
@@ -26893,6 +27079,8 @@
     if (d.admblogcoverdel !== undefined) { if (S.adminBlogEdit) S.adminBlogEdit.coverUrl = ""; render(); return; }
     if (d.admblogsave !== undefined) { saveBlogDraft(); return; }
     if (d.admblogpublish !== undefined) { publishBlogPost(); return; }
+    if (d.admblogpublishyes !== undefined) { publishBlogPost(true); return; }
+    if (d.admblogpublishno !== undefined) { S.adminBlogConfirmPublish = ""; render(); return; }
     if (d.admblogunpublish !== undefined) { unpublishBlogPost(); return; }
     if (d.admblogdel !== undefined) { S.adminBlogConfirmDelete = true; render(); return; }
     if (d.admblogdelyes !== undefined) { deleteBlogPost(); return; }
