@@ -39,6 +39,11 @@
     --warn: #8c1a0f;
     --sans: "Golos Text", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
     --serif: "Literata", Georgia, serif;
+    /* One card's width. 164 px is what a card really measures on an
+       iPhone SE: 375 screen, 12 px of page padding each side, 10 px
+       between the two columns. The other two are the same arithmetic on
+       an iPhone 14 (390) and a Plus (430). */
+    --cw: 164px;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
@@ -58,7 +63,7 @@
 
   /* the shop's grid at a real phone width */
   .phone { background: var(--paper); border: 1px solid var(--rule); padding: 12px; overflow-x: auto; }
-  .grid { display: grid; grid-template-columns: repeat(2, 164px); gap: 14px 10px; width: max-content; }
+  .grid { display: grid; grid-template-columns: repeat(2, var(--cw)); gap: 14px 10px; width: max-content; }
   .card { display: flex; flex-direction: column; position: relative; padding-bottom: 11px; }
   .card::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid var(--hair); }
   .card--last::after { display: none; }
@@ -99,6 +104,59 @@
 
   .close { border-top: 1px solid var(--rule); padding-top: 1.2rem; color: var(--soft); font-size: .93rem; display: flex; flex-direction: column; gap: .5rem; }
   .close p { margin: 0; max-width: 40rem; }
+  /* ---- the controls -------------------------------------------------- */
+  /* Sticky, because the page is five shelves long and the width you are
+     judging at is the first thing you lose when you scroll. */
+  .bar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem;
+    padding: .7rem 0; margin: 0 -1.1rem; padding-inline: 1.1rem; background: var(--page); border-bottom: 1px solid var(--rule); }
+  .bar .lbl { font-size: .82rem; color: var(--muted); margin-right: .2rem; }
+  .bar .gap { flex-basis: 100%; height: 0; }
+  .wbtn { font: inherit; font-size: .82rem; padding: .35rem .7rem; border: 1px solid var(--rule);
+    background: transparent; color: var(--soft); cursor: pointer; min-height: 2.4rem; }
+  .wbtn[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); font-weight: 600; }
+  .wbtn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ---- the invisible reach the shop gives its text controls ------------- */
+  /* «В корзину» as a link is an 11-px label. The shop stretches its tap area
+     14 px above and below (card__add::before in styles.css), so the thumb has
+     something to hit. The button variants do not need it: a real button is
+     32–38 px of its own. Both are drawn by «Показать зоны нажатия». */
+  .link, .szb { position: relative; }
+  .link::before, .szb::before { content: ""; position: absolute; inset: -14px 0; }
+
+  .card.hits .link::before, .card.hits .szb::before,
+  .card.hits .buy::after, .card.hits .band::after, .card.hits .szrow button::after, .card.hits .szrow .one::after {
+    outline: 1px dashed var(--warn); background: rgba(140, 26, 15, .10);
+  }
+  .card.hits .buy, .card.hits .band, .card.hits .szrow button, .card.hits .szrow .one { position: relative; }
+  .card.hits .buy::after, .card.hits .band::after, .card.hits .szrow button::after, .card.hits .szrow .one::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+  }
+  /* Under the 44 px every phone maker asks for — the same red the shop uses
+     for «нет в наличии», because it means the same thing: do not ship this. */
+  .card.hits [data-small="1"]::after, .card.hits [data-small="1"]::before {
+    outline-style: solid; background: rgba(140, 26, 15, .22);
+  }
+
+  /* ---- «Цвета сайта» off: the same shapes with the colour taken out ------ */
+  body.plain { --ink: #23231f; --muted: #77776e; --soft: #55554d; --page: #f4f4f1; --paper: #ebebe7;
+    --shell: #dcdcd6; --rule: rgba(0, 0, 0, .18); --hair: rgba(0, 0, 0, .14); --warn: #6b6b63; }
+  body.plain .flag { color: var(--soft); }
+
+  /* ---- which way the list opens ---------------------------------------- */
+  /* Capped and scrollable: ten colour-and-size variants opening upwards would
+     otherwise run off the top of the shelf. */
+  .pop { max-height: 190px; overflow-y: auto; }
+  .pop--up { top: auto; bottom: calc(100% + 4px); }
+
+  .why { border-top: 1px solid var(--rule); padding-top: 1.4rem; display: flex; flex-direction: column; gap: .9rem; }
+  .why h2 { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; margin: 0; }
+  .why h3 { font-size: .95rem; font-weight: 600; margin: .4rem 0 0; }
+  .why p, .why li { margin: 0; color: var(--soft); max-width: 44rem; }
+  .why b { color: var(--ink); }
+  .why ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .35rem; }
+  .num { font-variant-numeric: tabular-nums; }
+
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -109,7 +167,54 @@
     <p class="lede">Ниже — одна и та же полка магазина, показанная <b>ровно так, как она выглядит на телефоне</b>: те же товары, та же ширина, те же цвета. Отличается только нижняя часть карточки. Объёмы можно нажимать — цена меняется по-настоящему. <b>Посмотрите с телефона и скажите, какой вариант нравится.</b></p>
   </header>
 
+  <div class="bar">
+    <span class="lbl">Ширина экрана:</span>
+    <button class="wbtn" data-w="164" aria-pressed="true">iPhone SE · 375</button>
+    <button class="wbtn" data-w="173" aria-pressed="false">iPhone 14 · 390</button>
+    <button class="wbtn" data-w="193" aria-pressed="false">iPhone Plus · 430</button>
+    <span class="gap"></span>
+    <button class="wbtn" id="hits" aria-pressed="false">Показать зоны нажатия</button>
+    <button class="wbtn" id="sitecol" aria-pressed="true">Цвета сайта</button>
+    <span class="gap"></span>
+    <span class="lbl">Список объёмов:</span>
+    <button class="wbtn" data-dir="down" aria-pressed="true">Открывать вниз</button>
+    <button class="wbtn" data-dir="up" aria-pressed="false">Открывать вверх</button>
+    <button class="wbtn" data-dir="auto" aria-pressed="false">Как поместится</button>
+  </div>
+
   <div class="opts" id="opts"></div>
+
+  <section class="why">
+    <h2>Откуда взялись эти варианты</h2>
+
+    <h3>Почему 44 пикселя — не вкусовщина</h3>
+    <p>Это единственное число здесь, которое придумали не мы. <b>Apple</b> в своих правилах для iPhone требует, чтобы по кнопке можно было попасть в квадрат <span class="num">44 × 44</span> пункта. <b>Google</b> для Android просит <span class="num">48 × 48</span>. Стандарт доступности <b>WCAG 2.2</b> называет <span class="num">24 × 24</span> обязательным минимумом, а <span class="num">44 × 44</span> — рекомендацией. Меньше — и палец начинает промахиваться, причём чаще всего у тех, кто держит телефон одной рукой на ходу.</p>
+
+    <h3>Что магазин делает сегодня</h3>
+    <p>Надпись «В корзину» — это <span class="num">11</span> пикселей текста. Чтобы по ней можно было попасть, магазин незаметно растягивает область нажатия на <span class="num">14</span> пикселей вверх и вниз: получается около <span class="num">39</span>. Это работает, пока такая надпись одна. Когда их две, одна под другой, невидимые половины встречаются — и палец попадает не туда, куда целился, хотя на экране ничто не соприкасается. <b>Нажмите «Показать зоны нажатия»</b>: сплошной красной рамкой обведено всё, что меньше 44 пикселей, пунктирной — всё остальное.</p>
+    <p>Настоящей кнопке эта хитрость не нужна: она сама <span class="num">32–38</span> пикселей высотой, и её видно ровно там, где она есть. Поэтому в вариантах с кнопками зон перекрытия нет по построению, а не потому, что мы их развели.</p>
+
+    <h3>Зачем сумка на кнопке</h3>
+    <p>Значок сумки читается быстрее слова и не зависит от языка: покупатель из Финляндии понимает кнопку, не читая её. На <span class="num">12</span> пикселях подписи это заметная разница. Так делают все крупные магазины — по той же причине, а не ради украшения.</p>
+
+    <h3>Почему на полке именно эти шесть товаров</h3>
+    <p>Это не витрина, а набор трудных случаев из вашего же каталога. Вариант, который выживает на всех шести, выживет в магазине:</p>
+    <ul>
+      <li><b>Шампунь System 4</b> — три объёма и цена «от». Самый частый товар в магазине и самая длинная нижняя часть карточки.</li>
+      <li><b>Парфюм Xerjoff</b> — объёмов нет вовсе, цена в три знака. Раньше именно на нём цена уезжала вниз относительно соседа.</li>
+      <li><b>Kevin.Murphy Touchable</b> — объём ровно один. Показывать его кнопкой не нужно, но место он занимать обязан, иначе цены соседей встанут на разной высоте.</li>
+      <li><b>Воск Gatsby</b> — нет в наличии. Вместо «В корзину» — «Сообщить о наличии», и надпись длиннее кнопки.</li>
+      <li><b>Футболка Siim Hanikat</b> — пять размеров. Граница, после которой кнопки перестают помещаться в строку.</li>
+      <li><b>Вторая футболка</b> — десять вариантов с цветом. Кнопками их не показать никогда, поэтому здесь виден запасной путь: один список.</li>
+    </ul>
+
+    <h3>Что мы уже измерили</h3>
+    <p>Цены соседних товаров стоят на одной высоте во всех вариантах. Раньше «<span class="num">190 €</span>» опускалось на <span class="num">9</span> пикселей ниже «от <span class="num">9 €</span>», потому что у товара без объёмов строка объёма исчезала, а низ карточки прибит к её нижнему краю. Теперь строка объёма занимает своё место всегда, даже когда объём один.</p>
+    <p>Ширина карточки здесь настоящая: <span class="num">164</span> пикселя на iPhone SE, <span class="num">173</span> на iPhone 14, <span class="num">193</span> на Plus. Переключатель вверху меняет её по-настоящему, а не рисует рамку телефона вокруг картинки.</p>
+
+    <h3>Куда открывать список объёмов</h3>
+    <p>У товара с десятью вариантами список длинный. Если он открывается вниз, у нижнего ряда полки он упирается в край экрана; если вверх — закрывает фотографию. Переключатель вверху показывает оба варианта и третий, <b>«как поместится»</b>: список сам смотрит, где больше места. Это и есть то, что мы предлагаем оставить в магазине.</p>
+  </section>
 
   <footer class="close">
     <p>Вместо фотографий — серые квадраты: здесь важно только то, что под ними. В магазине фотографии остаются на месте.</p>
@@ -220,6 +325,33 @@
       '<div class="nm">' + esc(p.name) + "</div>" + foot(p, o, i) + "</div>";
   }
 
+  /* «как поместится»: the same decision the shop should make — open the list
+     downwards unless the card is nearer the bottom of the window than the top.
+     Measured at the moment of opening, because the answer depends on where the
+     shelf has been scrolled to. */
+  let popDir = "down";
+  function openUpwards(cardEl) {
+    if (popDir === "up") return true;
+    if (popDir === "down") return false;
+    const b = cardEl.getBoundingClientRect();
+    return b.bottom > window.innerHeight - 210;
+  }
+
+  /* The overlay is only honest if it measures. Every control in every card is
+     read after the render and marked when its real tap area is under 44 px —
+     the text ones through the 14-px reach the shop gives them, the buttons by
+     their own box. */
+  function measureTargets() {
+    document.querySelectorAll(".card").forEach((c) => {
+      c.querySelectorAll(".link, .szb, .buy, .band, .szrow button, .szrow .one").forEach((el) => {
+        const b = el.getBoundingClientRect();
+        const reach = el.classList.contains("link") || el.classList.contains("szb") ? 28 : 0;
+        const h = b.height + reach;
+        el.dataset.small = h < 44 && b.width > 0 ? "1" : "0";
+      });
+    });
+  }
+
   function render() {
     document.getElementById("opts").innerHTML = OPTS.map((o) =>
       '<section class="opt' + (o.now ? " opt--now" : "") + '">' +
@@ -228,6 +360,10 @@
         '<div class="phone"><div class="grid">' +
           P.map((p, i) => card(p, o.id, i, i >= P.length - 2)).join("") +
         "</div></div></section>").join("");
+    if (document.getElementById("hits").getAttribute("aria-pressed") === "true") {
+      document.querySelectorAll(".card").forEach((c) => c.classList.add("hits"));
+    }
+    measureTargets();
   }
 
   function closePop() {
@@ -255,13 +391,45 @@
       closePop();
       if (!was) {
         const el = document.querySelector('[data-popfor="' + id + '"]');
-        if (el) { el.hidden = false; open = id; document.querySelector('[data-card="' + id + '"]').classList.add("open"); }
+        const c = document.querySelector('[data-card="' + id + '"]');
+        if (el && c) { el.classList.toggle("pop--up", openUpwards(c)); el.hidden = false; open = id; c.classList.add("open"); }
       }
+      return;
+    }
+    const w = e.target.closest(".wbtn[data-w]");
+    if (w) {
+      document.querySelectorAll(".wbtn[data-w]").forEach((b) => b.setAttribute("aria-pressed", String(b === w)));
+      document.documentElement.style.setProperty("--cw", w.dataset.w + "px");
+      closePop();
+      measureTargets();
+      return;
+    }
+    const d = e.target.closest(".wbtn[data-dir]");
+    if (d) {
+      document.querySelectorAll(".wbtn[data-dir]").forEach((b) => b.setAttribute("aria-pressed", String(b === d)));
+      popDir = d.dataset.dir;
+      closePop();
+      return;
+    }
+    const hb = e.target.closest("#hits");
+    if (hb) {
+      const on = hb.getAttribute("aria-pressed") !== "true";
+      hb.setAttribute("aria-pressed", String(on));
+      document.querySelectorAll(".card").forEach((c) => c.classList.toggle("hits", on));
+      measureTargets();
+      return;
+    }
+    const sc = e.target.closest("#sitecol");
+    if (sc) {
+      const on = sc.getAttribute("aria-pressed") !== "true";
+      sc.setAttribute("aria-pressed", String(on));
+      document.body.classList.toggle("plain", !on);
       return;
     }
     closePop();
   });
 
+  window.addEventListener("resize", measureTargets);
   render();
 </script>
 
