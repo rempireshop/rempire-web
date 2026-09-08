@@ -517,7 +517,10 @@ test.describe("sweep — blog", () => {
     // A draft is invisible to the shop. That is the whole point of a draft.
     expect(await listed(), "an unpublished draft was on the public blog").toBe(false);
 
+    /* Russian only, so the question about the two empty languages comes
+       first — admin-blog.spec.ts holds it to naming them. */
     await page.locator("[data-admblogpublish]").click();
+    await page.locator("[data-admblogpublishyes]").click();
     await clearToast(page);
     // the state is a sentence in the «Публикация» card now, not a chip
     await expect(page.getByText("Опубликована. Изменения появятся")).toBeVisible();

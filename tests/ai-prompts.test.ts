@@ -111,6 +111,23 @@ describe("buildTranslatePrompt", () => {
     expect(system).toContain("Kevin.Murphy");
     expect(system).toContain("PLUMPING.WASH");
   });
+
+  /* The blog editor takes every inserted product card out of a body before
+     the body is translated and puts it back where its token came home —
+     blogCardsOut()/blogCardsIn() in public/shop2/app.js — so the one thing
+     the model must not do to a «[[1]]» is touch it. A text without any is
+     not told about them at all: an instruction about placeholders in a text
+     that has none is an invitation to invent one. */
+  it("tells the model to carry the [[1]] placeholders through untouched, and says so only when there are some", () => {
+    const marked = buildTranslatePrompt("RU", {
+      text: "Вечером [[1]], утром [[2]].",
+      targetLangs: ["ET"],
+    }).system;
+    expect(marked).toContain("[[1]], [[2]]");
+    expect(marked).toMatch(/never translate, renumber, drop or duplicate one/i);
+    const plain = buildTranslatePrompt("RU", { text: "Крем для лица", targetLangs: ["ET"] }).system;
+    expect(plain).not.toMatch(/placeholder/i);
+  });
 });
 
 describe("buildSeoPrompt", () => {

@@ -130,6 +130,48 @@ test.describe("admin — letter texts", () => {
     }
   });
 
+  /* The editor opens where it was left (Dim, 08.09.2026 — question 6 of
+     docs/audit/2026-09-07-blog-language.md). It used to open on whatever
+     language the panel itself was in, which was the trap the blog editor
+     walked the owner into; the fix made it always Russian, and always
+     Russian is one language too few for an owner who spends an evening on
+     the Estonian letters. The preference rides in the panel's own key
+     (`rempire-admin-panes`, admPanesSave() in public/shop2/app.js) next to
+     the folded panes — a machine's worth of preferences, not one key each.
+     A fresh context knows nothing, so this test starts on Russian. */
+  test("the letter editor opens on the language it was closed in", async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
+    await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
+    await page.locator('[data-mailtpl="order-confirmed"]').first().click();
+    await expect(page.locator('[data-maillang="RU"]'), "a browser that has never been here opened on something other than Russian")
+      .toHaveAttribute("aria-current", "true");
+
+    // …switch to Estonian and leave by «← Все письма»
+    await page.locator('[data-maillang="ET"]').click();
+    await page.locator("[data-mailback]").click();
+    await expect(page.locator("[data-mailtpl]").first()).toBeVisible();
+
+    // another letter, opened from the list: Estonian, not Russian again
+    await page.locator('[data-mailtpl="order-shipped"]').first().click();
+    await expect(page.locator('[data-maillang="ET"]'), "the editor forgot the language it was closed in")
+      .toHaveAttribute("aria-current", "true");
+
+    // …and it is remembered on the machine, not in this page's memory
+    await page.reload();
+    await page.locator('[data-admtab="promos"][aria-current]:visible').first().click();
+    await page.locator('[data-admtab="mail"][aria-current]:visible').first().click();
+    await page.locator('[data-mailtpl="order-confirmed"]').first().click();
+    await expect(page.locator('[data-maillang="ET"]'), "the language was forgotten on reload")
+      .toHaveAttribute("aria-current", "true");
+    await expect(page.locator('[data-mailtxt="subject"]')).toHaveValue(
+      "Tellimus {order} on vastu võetud — Rempire",
+    );
+
+    // back to Russian, so nothing here depends on the order the tests ran in
+    await page.locator('[data-maillang="RU"]').click();
+  });
+
   test("what the owner types is text, never markup", async ({ page }) => {
     await loginAsAdmin(page);
     try {
