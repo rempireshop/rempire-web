@@ -97,6 +97,17 @@ describe("the action the model sent back is held to those words", () => {
     expect(intentConflicts("ask", "set_bundle")).toBe(true);
   });
 
+  /* Deleting a set is the newest of the four writes (Dim, 08.09.2026) and the
+     only one the change journal cannot take back, so it is held to the
+     owner's words exactly as hard as making one is: «выключи промокод» must
+     never come back as a set that is gone. */
+  it("holds delete_bundle to the same words as the other set writes", () => {
+    expect(intentConflicts("promo", "delete_bundle")).toBe(true);
+    expect(intentConflicts("ask", "delete_bundle")).toBe(true);
+    expect(intentConflicts("bundle", "delete_bundle")).toBe(false);
+    expect(intentConflicts("", "delete_bundle")).toBe(false);
+  });
+
   it("leaves every other action alone, whatever the sentence was about", () => {
     for (const intent of ["bundle", "promo", "ask", ""] as const) {
       for (const type of ["set_price", "set_stock", "set_hero", "draft_post", "create_product", "toggle_bundles", "toggle_promo"]) {

@@ -96,13 +96,16 @@ export function discountIntent(message: unknown): DiscountIntent {
   return "";
 }
 
-/* The three actions the collision actually bites on. The two switches —
+/* The four actions the collision actually bites on. The two switches —
    `toggle_promo` («выключи промокод SUVI10») and `toggle_bundles` («скрой
    наборы») — are deliberately NOT here: they change nothing that did not
    already exist, the owner named the thing he is switching, and a wrong one
    is visible and one tap away from being put back. Creating is the dangerous
-   direction, and that is what is guarded. */
-const BUNDLE_WRITES = new Set(["propose_bundle", "set_bundle"]);
+   direction, and that is what is guarded — together with `delete_bundle`
+   (Dim, 08.09.2026), which is the same danger read backwards: a sentence
+   about a promo code must not be able to take a set off the shop, and there
+   is no journal entry to put it back with. */
+const BUNDLE_WRITES = new Set(["propose_bundle", "set_bundle", "delete_bundle"]);
 const PROMO_WRITES = new Set(["create_promo"]);
 
 /**

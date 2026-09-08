@@ -68,7 +68,7 @@ describe("the admin prompt tells the truth about the panel", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "переименуй бальзам" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(19);
+    expect(body.v).toBe(20);
 
     expect(sent).toHaveLength(1);
     const system = sent[0].messages[0];
@@ -187,6 +187,32 @@ describe("the admin prompt tells the truth about the panel", () => {
       // …and the set's own SEO budget rides along with it
       expect(prompt).toContain("SETS («наборы», propose_bundle / set_bundle) in detail");
       expect(prompt).toContain("THE FIRST 155 CHARACTERS BECOME THE GOOGLE SNIPPET");
+    });
+
+    /* «Помощнику нужен delete?» — Dim, 08.09.2026: yes. It reaches the panel
+       for a sentence that asked for it, and it is held to the owner's words
+       as hard as making a set is, because there is no journal entry behind it
+       to undo with. */
+    it("lets a delete through for «удали набор», and never for a sentence about a promo code", async () => {
+      const gone = await ask("удали набор для бороды", { type: "delete_bundle", id: "beard-start", title });
+      expect(gone.action, "the assistant may delete a set now").toEqual({ type: "delete_bundle", id: "beard-start" });
+      expect(gone.ask).toBeUndefined();
+      vi.unstubAllGlobals();
+
+      const kept = await ask("выключи промокод SUVI10", { type: "delete_bundle", id: "beard-start" });
+      expect(kept.action, "a sentence about a promo code deleted a set").toBeNull();
+      expect(kept.ask).toBe("bundle_or_promo");
+    });
+
+    it("tells the model that a delete cannot be undone, and what to reach for instead", async () => {
+      const sent = stubOpenAI({ reply: "ок", action: null });
+      const { POST } = await import("@/app/api/assistant/route");
+      await POST(askReq("удали набор для бороды"));
+      const prompt = sent[0].messages[0].content;
+      expect(prompt).toContain('{"type":"delete_bundle","id":"<id from SETS above>"}');
+      expect(prompt).toContain("This cannot be undone");
+      // …and the cheaper thing to do instead, so it is not the first reach
+      expect(prompt).toContain("a hidden set keeps its address, a deleted one does not");
     });
 
     it("leaves an ordinary price change alone", async () => {

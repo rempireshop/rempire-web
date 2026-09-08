@@ -25,12 +25,14 @@ import {
  *
  * Serial, and each test gets its own fake IP through its own nested describe:
  * admin login is rate-limited at 5 tries a minute per IP (src/lib/auth.ts) and
- * this file signs in six times — the same arrangement e2e/admin.spec.ts uses
+ * this file signs in eight times — the same arrangement e2e/admin.spec.ts uses
  * and for the same reason.
  *
- * The set this file creates ("e2e-set") is deleted by the fifth test, so the
- * suite leaves the shop with exactly the sets it started with. Everything else
- * it touches (PRODUCT, PRODUCT_2) it only reads.
+ * Both sets this file creates ("e2e-set" through the editor, "e2e-set-assist"
+ * through the API) are deleted before it ends — one by the owner's own
+ * «Удалить набор», one by the assistant's — so the suite leaves the shop with
+ * exactly the sets it started with. Everything else it touches (PRODUCT,
+ * PRODUCT_2) it only reads.
  */
 test.beforeEach(async ({}, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "admin spec — desktop project only, see docs/testing.md");
@@ -38,6 +40,10 @@ test.beforeEach(async ({}, testInfo) => {
 
 const SET_ID = "e2e-set";
 const SET_NAME = "Набор для проверки";
+/** A second set, made through the API and deleted by the assistant — so the
+ *  walk above is never the thing the delete test is aiming at. */
+const ASSIST_ID = "e2e-set-assist";
+const ASSIST_NAME = "Набор для помощника";
 /** Well under PRODUCT (9 € at its first size) + PRODUCT_2 (8 €) — the panel
  *  refuses anything that is not cheaper than the parts. */
 const SET_PRICE = 12.9;
@@ -80,6 +86,42 @@ function eu(text: string): number {
 
 test.describe("admin — наборы", () => {
   test.describe.configure({ mode: "serial" });
+
+  test.describe(() => {
+    test.use({ extraHTTPHeaders: ipHeaders(186) });
+    test("the address of a new set is an English word, and one the owner typed stays his", async ({ page }) => {
+      await loginAsAdmin(page);
+      await openSets(page);
+
+      /* Dim, 08.09.2026: this address is a URL. The shopper reads it, Google
+         indexes it and the shop sells across Europe, so «Набор для бороды»
+         becomes `beard-set` and not `nabor-dlya-borody` — the same English
+         the sets the shop shipped with already use (`beard-start`,
+         `shave-smooth`, db/migrations/120_bundles.sql). */
+      await page.locator("[data-bundlenew]").click();
+      const addr = page.locator('[data-bundlef="id"]');
+      await expect(addr).toHaveValue("");
+      await page.locator('[data-bundlef="title"]').fill("Набор для бороды");
+      await expect(addr).toHaveValue("beard-set");
+      // …and it keeps following the name while the name is still being typed
+      await page.locator('[data-bundlef="title"]').fill("Набор для бритья");
+      await expect(addr).toHaveValue("shave-set");
+
+      /* An address the owner wrote himself is his: the name may go on
+         changing above it and the box must not move under his hands. */
+      await addr.fill("renat-classic");
+      await page.locator('[data-bundlef="title"]').fill("Уход за бородой");
+      await expect(addr).toHaveValue("renat-classic");
+      // …and emptying the box is a request for a suggestion, not a decision
+      await addr.fill("");
+      await page.locator('[data-bundlef="title"]').fill("Набор для волос");
+      await expect(addr).toHaveValue("hair-set");
+
+      // nothing here was saved: this test leaves the shelf exactly as it was
+      await page.locator("[data-bundlecancel]").click();
+      await expect(page.locator("[data-bundlesave]")).toHaveCount(0);
+    });
+  });
 
   test.describe(() => {
     test.use({ extraHTTPHeaders: ipHeaders(180) });
@@ -268,6 +310,86 @@ test.describe("admin — наборы", () => {
       const shop = await freshShop(browser);
       try {
         await shop.page.goto(shopUrl("", `/set/${SET_ID}/`));
+        await waitForScreen(shop.page, "bundle");
+        await expect(shop.page.locator("h1")).toContainText("Набор не найден");
+      } finally {
+        await shop.close();
+      }
+    });
+  });
+
+  test.describe(() => {
+    test.use({ extraHTTPHeaders: ipHeaders(188) });
+    test("the assistant may delete a set, once — the card names it and «Отмена» keeps it", async ({ page, browser }) => {
+      /* Dim, 08.09.2026: yes to delete. The model is stubbed at the network
+         edge, the way e2e/admin-products.spec.ts stubs it for create_product
+         — what is being walked here is the panel's half: one confirm card,
+         the set named on it, and the same DELETE the editor's own «Удалить
+         набор» sends. */
+      await page.route("**/api/assistant/**", async (route) => {
+        if (route.request().method() === "GET") {
+          await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true, v: 99, model: "stub" }) });
+          return;
+        }
+        await route.fulfill({
+          status: 200, contentType: "application/json",
+          body: JSON.stringify({
+            reply: "Удалю этот набор — подтвердите, вернуть его будет нельзя.",
+            product_ids: [], tab: "goods",
+            // an id and nothing else: the NAME on the card can then only have
+            // come from the panel's own list of sets (sanitizeDeleteBundle)
+            action: { type: "delete_bundle", id: ASSIST_ID },
+          }),
+        });
+      });
+
+      await loginAsAdmin(page);
+      const made = await page.request.post("/api/admin/bundles/", {
+        data: {
+          id: ASSIST_ID, cat: "beard", title: { RU: ASSIST_NAME, ET: "", EN: "" },
+          desc: { RU: "", ET: "", EN: "" },
+          items: [{ productId: PRODUCT.id, variant: 0, qty: 1 }, { productId: PRODUCT_2.id, variant: 0, qty: 1 }],
+          price: SET_PRICE, image: null, active: true, sort: 95,
+        },
+      });
+      expect(made.status(), "the set the assistant is meant to delete was not created").toBe(200);
+
+      /* Deliberately NOT through «Товары → Наборы»: the assistant lives in a
+         side pane and the owner may never have opened that tab in this
+         sitting, so this is also the test that the panel fetches the list it
+         needs to name the set. */
+      await page.locator(".adm-fab[data-admai]").click();
+      await page.locator("[data-admq]").fill(`удали набор ${ASSIST_NAME}`);
+      await page.locator("[data-admsend]").click();
+
+      const answer = page.locator("[data-aians]");
+      const card = answer.locator(".adm-propose");
+      await expect(card).toContainText(`Удалить набор «${ASSIST_NAME}»`);
+      await expect(card).toContainText("вернуть его будет нельзя");
+      // the destructive button, the same red one «Да, удалить» wears in the editor
+      const apply = card.locator("[data-admapply]");
+      await expect(apply).toHaveText("Да, удалить");
+      await expect(apply).toHaveClass(/adm-btn--warn/);
+
+      // «Отмена» keeps the set: the card is the whole of the gate
+      await card.locator("[data-admcancel]").click();
+      await expect(answer.locator(".adm-propose")).toHaveCount(0);
+      const still = await (await page.request.get("/api/admin/bundles/")).json();
+      expect(still.bundles.map((b: { id: string }) => b.id), "«Отмена» deleted the set anyway").toContain(ASSIST_ID);
+
+      // asked again and confirmed, it goes — and it goes for good
+      await page.locator("[data-admq]").fill(`удали набор ${ASSIST_NAME}`);
+      await page.locator("[data-admsend]").click();
+      await expect(answer.locator(".adm-propose")).toBeVisible();
+      await answer.locator("[data-admapply]").click();
+      await expect.poll(async () => {
+        const list = await (await page.request.get("/api/admin/bundles/")).json();
+        return list.bundles.map((b: { id: string }) => b.id);
+      }, { timeout: 15_000, message: "the set the assistant deleted is still on the shelf" }).not.toContain(ASSIST_ID);
+
+      const shop = await freshShop(browser);
+      try {
+        await shop.page.goto(shopUrl("", `/set/${ASSIST_ID}/`));
         await waitForScreen(shop.page, "bundle");
         await expect(shop.page.locator("h1")).toContainText("Набор не найден");
       } finally {

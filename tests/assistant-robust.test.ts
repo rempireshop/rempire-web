@@ -80,7 +80,7 @@ describe("POST /api/assistant — what comes back is always a sentence", () => {
     const res = await POST(req({ mode: "admin", messages: [{ role: "user", content: "напиши статью про уход за бородой зимой" }] }, admin));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.v).toBe(19);
+    expect(body.v).toBe(20);
     expect(body.reply).toBe(FULL_DRAFT.reply);
     expect(body.reply).not.toMatch(/[{}]/);
     expect(body.truncated).toBe(true);

@@ -352,6 +352,11 @@ const INTENTIONAL_FNS = {
   // whose only reader is monthLabelRu(), itself only ever called from the
   // already-exempted actionText() above
   BLOG_TRANSLIT: "transliteration table (blogSlugify()) — object keys/values, never rendered",
+  // …and the vocabulary that turns a Russian set name into an English address
+  // (bundleSuggestId()): stems on the left, the slug word on the right. Both
+  // halves are matched against, never shown — the owner reads the address it
+  // produces, which is latin by design.
+  BUNDLE_EN_WORDS: "Russian→English stems for a set's address (bundleSuggestId()) — matching only, never shown",
   MONTH_RU: "month names for monthLabelRu(), consumed only by the exempted actionText() above",
   // …and the word each review status gets in that same journal line
   REVIEW_STATE_WORD: "the three status words actionText() splices into a journal line — same decision",

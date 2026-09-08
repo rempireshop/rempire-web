@@ -67,11 +67,20 @@ function heroGo(raw: unknown, known: Set<string>): string {
   return "";
 }
 
-/** A catalogue photo (by product id) or a picture URL — nothing else. */
+/** A catalogue photo (by product id), the gift card's own mark, or a picture URL — nothing else. */
 function heroImage(raw: unknown, known: Set<string>): string {
   const v = typeof raw === "string" ? raw.trim() : "";
   if (!v || v.length > 300) return "";
   if (known.has(v)) return v;
+  /* "gift" is the one picture in the banner that is not a photograph: the
+     gift card has no product behind it, so the storefront draws its own tower
+     mark instead (HERO_GIFT_IMG in public/shop2/app.js), exactly the way
+     heroGo() above already knows the word as a destination. Without this line
+     a gift-card slide the owner had set by hand survived only until he asked
+     the ASSISTANT to change the banner: the whole hero object comes back
+     through here then, "gift" was cleaned away as an unknown product id, and
+     the slide fell back to a photograph of a shampoo. */
+  if (v === "gift") return v;
   if (/^https?:\/\/[^\s"'<>]+$/i.test(v)) return v;
   if (/^\/shop\/[^\s"'<>]+$/.test(v)) return v;
   return "";
@@ -234,6 +243,24 @@ export function sanitizeSetBundle(raw: unknown, known: Set<string>): object | nu
   }
   if (typeof x.active === "boolean") out.active = x.active;
   return out;
+}
+
+/**
+ * «Удали набор для бороды» — a set taken off the shop for good.
+ *
+ * Dim, 08.09.2026, said yes to this: the assistant could already propose a
+ * set and change one, and not being able to remove one was the hole. It is
+ * the narrowest action in this file — an id and nothing else — because it is
+ * also the only one with nothing behind it to undo. Everything the owner
+ * reads on the confirm card (the set's name, what is inside it) the panel
+ * looks up in its own list of sets, so a model that named the wrong set
+ * cannot also write the sentence that describes it.
+ */
+export function sanitizeDeleteBundle(raw: unknown): object | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const x = raw as Record<string, unknown>;
+  const id = String(x.id ?? "").trim().toLowerCase();
+  return BUNDLE_SLUG.test(id) ? { id } : null;
 }
 
 export function sanitizePromo(raw: unknown): object | null {
@@ -827,6 +854,13 @@ export function sanitizeAction(a: unknown, known: Set<string>, isAdmin: boolean,
   if (t === "set_bundle") {
     const bundle = sanitizeSetBundle(x.bundle ?? x, known);
     return bundle ? { type: t, ...bundle } : null;
+  }
+  /* …and a set removed. The only action here the change journal cannot take
+     back, which is why the panel puts it behind the same red «Да, удалить»
+     card the set editor's own delete button uses. */
+  if (t === "delete_bundle") {
+    const gone = sanitizeDeleteBundle(x);
+    return gone ? { type: t, ...gone } : null;
   }
   if (t === "set_hero") {
     // null is «вернуть стандартный баннер» — a real thing the owner asks for
