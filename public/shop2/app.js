@@ -822,14 +822,14 @@
       "Убрать из заказа": "Eemalda tellimusest",
       "Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
         "DPD kullerihind Soome on esialgne ja ootab vedaja kinnitust.",
-      "Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
-        "Täpne hind Euroopas sõltub riigist — DPD hinnakirja järgi 26–56 €.",
+      "Цена доставки своя у каждой страны и уже посчитана для выбранной — она показана выше.":
+        "Tarnehind on igas riigis erinev ja valitud riigi jaoks juba arvutatud — see on näidatud ülalpool.",
       // the tariff note renders as one text node, so the two country variants
       // need the whole sentence, not just their tail
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
         "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel. DPD kullerihind Soome on esialgne ja ootab vedaja kinnitust.",
-      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
-        "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel. Täpne hind Euroopas sõltub riigist — DPD hinnakirja järgi 26–56 €.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Цена доставки своя у каждой страны и уже посчитана для выбранной — она показана выше.":
+        "Hinnad — vedajate hinnakirjad 2025–2026, koos 24 % käibemaksuga. Alates 40 pakist kuus annavad Omniva ja DPD 3–20 % allahindlust — lõplikud hinnad täpsustame lepingu sõlmimisel. Tarnehind on igas riigis erinev ja valitud riigi jaoks juba arvutatud — see on näidatud ülalpool.",
 
       // i18n pass 2: product page
       "Товара сейчас нет. Оставьте почту — напишем, когда появится.":
@@ -3073,14 +3073,14 @@
       "Убрать из заказа": "Remove from the order",
       "Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
         "The DPD courier rate to Finland is provisional and awaits the carrier’s confirmation.",
-      "Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
-        "The exact price across Europe depends on the country — €26–56 on the DPD rate card.",
+      "Цена доставки своя у каждой страны и уже посчитана для выбранной — она показана выше.":
+        "Delivery is priced per country and is already worked out for the one you picked — it is shown above.",
       // the tariff note renders as one text node, so the two country variants
       // need the whole sentence, not just their tail
       "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.":
         "Rates — the carriers’ 2025–2026 price lists, including 24 % VAT. From 40 parcels a month Omniva and DPD give 3–20 % off — final prices are confirmed when the contract is signed. The DPD courier rate to Finland is provisional and awaits the carrier’s confirmation.",
-      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.":
-        "Rates — the carriers’ 2025–2026 price lists, including 24 % VAT. From 40 parcels a month Omniva and DPD give 3–20 % off — final prices are confirmed when the contract is signed. The exact price across Europe depends on the country — €26–56 on the DPD rate card.",
+      "Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении. Цена доставки своя у каждой страны и уже посчитана для выбранной — она показана выше.":
+        "Rates — the carriers’ 2025–2026 price lists, including 24 % VAT. From 40 parcels a month Omniva and DPD give 3–20 % off — final prices are confirmed when the contract is signed. Delivery is priced per country and is already worked out for the one you picked — it is shown above.",
 
       // i18n pass 2: product page
       "Товара сейчас нет. Оставьте почту — напишем, когда появится.":
@@ -12660,7 +12660,7 @@
                    character-for-character what it was. */
                 : '<p class="cosrc"><span>Тарифы — прайс-листы перевозчиков 2025–2026, с НДС 24 %. От 40 посылок в месяц Omniva и DPD дают скидку 3–20 % — итоговые цены уточним при подключении.</span>' +
                   (S.country === "FI" ? " <span>Тариф курьера DPD в Финляндию — предварительный, ждёт подтверждения перевозчика.</span>" : "") +
-                  (S.country === "EU" ? " <span>Точная цена по Европе зависит от страны — 26–56 € по прайсу DPD.</span>" : "") + "</p>") +
+                  (S.country === "EU" ? " <span>Цена доставки своя у каждой страны и уже посчитана для выбранной — она показана выше.</span>" : "") + "</p>") +
               '<button class="btn btn--wide' + coNextPulse() + '" data-step="3">Далее — оплата</button></div>' : "") +
           "</section>" +
 
