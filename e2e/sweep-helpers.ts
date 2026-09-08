@@ -76,6 +76,12 @@ const CONSOLE_ALLOW: RegExp[] = [
 function isExpectedResourceError(text: string, url: string): boolean {
   if (!/Failed to load resource/i.test(text)) return false;
   if (!/\b(401|403|404|429)\b/.test(text)) return false;
+  /* Since 08.09.2026 «Показывать в магазине» takes the product's own page
+     away the moment it is switched off, with no rebuild — the 404 IS the
+     answer that switch now gives, and Chromium logs the status of a
+     document it just loaded as a console error. A /shop2/ page address
+     only: a 404 on a script, an image or an API call still fails. */
+  if (/404/.test(text) && /\/shop2\/[^?#]*\/$/.test(url)) return true;
   return /\/api\/(admin|account|assistant|promos)\//.test(url) || /\/favicon|\.png|\.webp|\.jpg|\.svg/.test(url);
 }
 

@@ -100,6 +100,19 @@ test.describe("admin — «Журнал изменений» shows the shop's ow
   });
 });
 
+/** The panel parks ONE history entry while anything is open over it, at the
+ *  end of the render that opened it, and stamps that entry `adm: 1`
+ *  (admSyncHistory in app.js). Pressing Back before it lands walks past the
+ *  panel instead of closing a layer — which a loaded CI runner does and this
+ *  machine does not. Wait for the entry itself, not for the DOM: the card is
+ *  drawn by the same render, so a visible card is not proof the push has
+ *  happened yet. */
+async function parked(page: Page): Promise<void> {
+  await expect
+    .poll(async () => page.evaluate(() => Boolean((history.state || {}).adm)), { timeout: 10_000 })
+    .toBe(true);
+}
+
 test.describe("admin — the browser's Back closes an open card", () => {
   test.use({ extraHTTPHeaders: ipHeaders(178) });
 
@@ -122,11 +135,14 @@ test.describe("admin — the browser's Back closes an open card", () => {
     await expect(page.locator("[data-admsavegoods]")).toBeVisible();
     await page.locator("[data-admgoodspull]").click();
     await expect(page.locator(".adm-confirm")).toBeVisible();
+    await parked(page);
 
     // one Back closes the confirm and leaves the editor open…
     await page.goBack();
     await expect(page.locator(".adm-confirm"), "Back did not close the confirm card").toHaveCount(0);
     await expect(page.locator("[data-admsavegoods]"), "Back closed the editor too").toBeVisible();
+    // the editor is still open, so the panel parks the entry again
+    await parked(page);
 
     // …the next one closes the editor and still keeps the panel
     await page.goBack();
