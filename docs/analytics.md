@@ -284,15 +284,45 @@ never opened Search Console. `admGscHTML()` now prints, in this order:
    всех переходов, десятая — единицы»), which is the answer to "why does
    position matter".
 3. **«Что люди искали — и что они увидели»** — the word on its own line and
-   the outcome under it («Показов: 340 · переходов: 0 · место в Google: 28»),
-   instead of a word in the left column and a lone number in the right. A word
-   Google showed that nobody clicked says so in its own line, in the same warm
-   brown: «По этому слову в магазин не зашёл никто.»
+   the outcome under it, instead of a word in the left column and a lone
+   number in the right. A word Google showed that nobody clicked says so in
+   its own line, in the same warm brown.
 
-`topPages` is still fetched and still unused on screen — the pages of this
-shop are its product pages, and the owner already has «Топ товаров».
+### The two sentences under a row, and the pages (08.09.2026)
 
-The trilingual half of this is four `UI_RX` rules at the head of the list
+That outcome was still «Показов: 340 · переходов: 0 · место в Google: 28» —
+the most compact line that stays grammatical at any number, and a row of data
+all the same. Dim asked for a sentence, so a row now reads:
+
+> **краска для волос таллинн**
+> Google показал магазин 340 раз, в среднем на 28-м месте. **На ссылку не
+> нажал никто.**
+
+`gscShopSeenLine()` / `gscPageSeenLine()` / `gscClickLine()` build them, and
+each plural form is a whole sentence with the number already inside it — the
+rule `invoiceHint()` follows, because a plural word glued on separately is a
+text node no dictionary can hold. Russian gets by on two strings («раз» is
+the same word after 1 and after 340); Estonian and English do not («1 kord» /
+«340 korda», «once» / «340 times»), so a `UI_RX` rule that matches the
+literal «1» stands ahead of the general one. Nothing in these sentences lets
+a number govern a verb — «Google показал» agrees with Google, «нажали» has no
+named subject — which is what keeps «нажали 21 раз» right where «зашли 21
+человек» would have been wrong. Zero has a sentence of its own rather than
+«нажали 0 раз».
+
+And **«Какие страницы находят в Google»** — the `topPages` Search Console has
+been sending all along and the panel threw away. The first eight, the same
+number as the words above, drawn the same way. An address is worth nothing to
+Renat, so `gscPageName()` reads it back into the name he knows: a product's
+brand and name from `CATALOGUE`, «Главная» / «Наборы» / «Подарочная карта» /
+«Блог» / a section for the shop's own pages, and the bare path for anything
+else. The language segment stays beside the name — /shop2/ and /shop2/et/ are
+two different pages to Google, and the same product listed twice with nothing
+to tell the two apart would read as a fault in the panel. This is the half of
+the block the owner can act on, and the lead says how: показов много, а на
+ссылку не нажимают → «Товары» → откройте товар → вкладка «Google».
+
+The trilingual half of this is thirteen `UI_RX` rules at the head of the list
 (the sentences that carry a live figure); everything else in the block is a
 plain dictionary key. They sit first on purpose: the promo-code rule
 `/^([A-Z0-9-]+) — скидка (.+)$/` further down reads a bare leading «0» as a

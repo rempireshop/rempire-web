@@ -113,7 +113,9 @@ orders, goods, the till, and everything else behind «Ещё».
   письма»), «Блог», «Аналитика», «Подключения», «Настройки» («доставка ·
   главная · компания · цены · языки · журнал»). Phone: sticky bottom bar
   `admBarHTML` :10671 + «Ещё» sheet `admMoreSheetHTML` :10684 (its foot: RU/ET/EN
-  pills, «Магазин ↗», «Выйти»). Desktop: sidebar `admSideHTML` :10652,
+  pills, «Магазин ↗», «Выйти» — `admLogoutHTML`, a real button rather than a
+  text link since 08.09.2026: with no roles yet it is the only way to hand a
+  shared phone to somebody else). Desktop: sidebar `admSideHTML` :10652,
   232 → 68 px, state in `localStorage["rempire-admin-panes"]`.
 - The thirteen old section keys still work as deep links
   (`ADM_SECTION_OF` :9696: `stock→goods`, `reviews→people`, `gift/mail→promos`)

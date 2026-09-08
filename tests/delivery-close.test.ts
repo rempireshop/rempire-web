@@ -159,6 +159,21 @@ describe("«за N дней до дня рождения»", () => {
     const rows = await query<{ y: number | null }>("select birthday_sent_year as y from customers where id = $1", [id]);
     return rows[0].y == null ? null : Number(rows[0].y);
   }
+  /* truncateAll() leaves promo_codes and customers standing (they have no
+     foreign key into the tables it names), so the head-start tests below wipe
+     the codes themselves and pick a birthday no other test in this file uses.
+     Otherwise «the newest code» is whichever test ran last. */
+  async function clearPromos(): Promise<void> {
+    await query("delete from promo_codes");
+  }
+  /** When the code this run wrote stops working, in epoch milliseconds. */
+  async function issuedCodeExpiry(): Promise<number> {
+    const rows = await query<{ ends_at: string | Date }>(
+      "select ends_at from promo_codes where code like 'REM-BD-%' order by created_at desc limit 1",
+    );
+    expect(rows.length, "the run wrote no birthday code at all").toBe(1);
+    return new Date(rows[0].ends_at).getTime();
+  }
 
   it("defaults to the day itself, exactly as before", async () => {
     expect(FLOW_DEFAULTS.birthdayDays).toBe(0);
@@ -204,5 +219,52 @@ describe("«за N дней до дня рождения»", () => {
     const run = await runBirthdays(Date.UTC(2026, 2, 11, 9, 0, 0));
     expect(run.reason).toBe("disabled");
     expect(run.sent).toBe(0);
+  });
+
+  /* Dim, 08.09.2026. The code is written on the day the LETTER goes out, and
+     it used to be given a flat fourteen days — so every day of head start was
+     a day taken off the customer's fortnight, and «за 14 дней» handed him a
+     code that died on his birthday, the one day it was bought for. The head
+     start is added to the code's life now, so what the customer has is always
+     the same: the birthday itself and a fortnight after it. */
+  it("on the day itself the code still lives the plain two weeks", async () => {
+    await clearPromos();
+    const now = Date.UTC(2026, 5, 20, 9, 0, 0);       // 20 June, the birthday
+    const id = await customerWithBirthday("1990-06-20");
+    await setSetting("flows", { birthday: true, birthdayDays: 0 });
+
+    await runBirthdays(now);
+    expect(await sentYear(id)).toBe(2026);
+    expect(await issuedCodeExpiry()).toBe(now + 14 * DAY);
+  });
+
+  it("«за 3 дня» gives the code back the three days the head start took", async () => {
+    await clearPromos();
+    const now = Date.UTC(2026, 6, 2, 9, 0, 0);        // 2 July, three days out
+    const id = await customerWithBirthday("1990-07-05");
+    await setSetting("flows", { birthday: true, birthdayDays: 3 });
+
+    await runBirthdays(now);
+    expect(await sentYear(id)).toBe(2026);
+    const ends = await issuedCodeExpiry();
+    expect(ends).toBe(now + 17 * DAY);
+    // …which is the same fortnight measured from the birthday itself
+    expect(ends - Date.UTC(2026, 6, 5, 9, 0, 0)).toBe(14 * DAY);
+  });
+
+  it("«за 14 дней» no longer hands out a code that expires on the birthday", async () => {
+    await clearPromos();
+    const now = Date.UTC(2026, 7, 9, 9, 0, 0);        // 9 August, a fortnight out
+    const birthday = Date.UTC(2026, 7, 23, 9, 0, 0);
+    const id = await customerWithBirthday("1990-08-23");
+    await setSetting("flows", { birthday: true, birthdayDays: 14 });
+
+    await runBirthdays(now);
+    expect(await sentYear(id)).toBe(2026);
+    const ends = await issuedCodeExpiry();
+    // the case that started this: the old code expired exactly here
+    expect(ends).toBeGreaterThan(birthday);
+    expect(ends).toBe(now + 28 * DAY);
+    expect(ends - birthday).toBe(14 * DAY);
   });
 });

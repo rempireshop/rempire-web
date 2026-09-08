@@ -57,10 +57,19 @@ test.describe("admin shell — the five places", () => {
     for (const label of ["Клиенты", "Маркетинг", "Блог", "Аналитика", "Подключения", "Настройки"]) {
       await expect(sheet.getByText(label, { exact: true })).toBeVisible();
     }
-    // its footer: the language switch, the shop and the way out
+    /* Its footer: the language switch, the shop and the way out. «Выйти» is a
+       real button rather than a text link (Dim, 08.09.2026) — there are no
+       roles yet, so logging out is the only way to hand this phone to
+       somebody else, and it is already two taps down inside «Ещё». The
+       44-px check itself is fitsThePhone() further down; what is fixed here
+       is that it is drawn as one of the panel's buttons and not as a word
+       with a line under it. */
     await expect(sheet.locator(".adm-langs button")).toHaveCount(3);
     await expect(sheet.getByText("Магазин ↗")).toBeVisible();
-    await expect(sheet.locator("[data-admlogout]")).toBeVisible();
+    const out = sheet.locator("[data-admlogout]");
+    await expect(out).toBeVisible();
+    await expect(out, "«Выйти» went back to being a text link").toHaveClass(/adm-btn/);
+    expect((await out.boundingBox())!.height, "«Выйти» is under a thumb's size").toBeGreaterThanOrEqual(44);
 
     // a row opens its section and closes the sheet behind it
     await page.locator('.adm-sheet [data-admtab="blog"]').click();

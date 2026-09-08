@@ -620,7 +620,11 @@ test.describe("admin sections — the numbers explain themselves", () => {
     /* Search Console is not wired up in an e2e run (no service-account key),
        and the point of this test is the wording, not the fetch — so the real
        shape of Renat's own answer is served from here: about 2 900 показов,
-       47 кликов, average position 13, and «rempire» itself at 3.79. */
+       47 кликов, average position 13, and «rempire» itself at 3.79.
+       `topPages` carries the three shapes the page list has to survive: a
+       product address, the same kind of address one language over, and the
+       home page — the last one clicked exactly once, which is the singular
+       every language spells differently (Dim, 08.09.2026). */
     await page.route("**/api/admin/analytics/gsc/**", (r) => r.fulfill({
       status: 200,
       contentType: "application/json",
@@ -630,7 +634,11 @@ test.describe("admin sections — the numbers explain themselves", () => {
           { query: "rempire", clicks: 31, impressions: 210, ctr: 0.147, position: 3.79 },
           { query: "краска для волос таллинн", clicks: 0, impressions: 340, ctr: 0, position: 27.6 },
         ],
-        topPages: [],
+        topPages: [
+          { page: `https://rempire.ee/shop2/p/${PRODUCT.id}/`, clicks: 12, impressions: 480, ctr: 0.025, position: 8.2 },
+          { page: "https://rempire.ee/shop2/et/p/kevin-murphy-un-tangled-spray/", clicks: 0, impressions: 260, ctr: 0, position: 22.4 },
+          { page: "https://rempire.ee/shop2/", clicks: 1, impressions: 90, ctr: 0.011, position: 5.4 },
+        ],
       }),
     }));
     await loginAsAdmin(page);
@@ -649,11 +657,37 @@ test.describe("admin sections — the numbers explain themselves", () => {
     await expect(defs).toContainText("Из 2 900 показов перешли 47.");
     await expect(defs).toContainText("Из каждых 100 показов переходов — примерно 2.");
 
-    const queries = work.locator(".adm-qs");
+    /* Two lists of the same shape now — the words first, the pages under
+       them — so each is addressed by its place rather than by a class of its
+       own. */
+    const queries = work.locator(".adm-qs").nth(0);
     await expect(queries).toContainText("rempire");
-    await expect(queries).toContainText("Показов: 210 · переходов: 31 · место в Google: 4");
+    await expect(queries, "the outcome is still a row of data, not a sentence")
+      .toContainText("Google показал магазин 210 раз, в среднем на 4-м месте.");
+    await expect(queries).toContainText("На ссылку нажали 31 раз.");
     await expect(queries, "a word nobody clicked reads the same as one that worked")
-      .toContainText("По этому слову в магазин не зашёл никто.");
+      .toContainText("На ссылку не нажал никто.");
+
+    /* The pages Search Console sends beside the words. They arrive as bare
+       addresses and are worth nothing to Renat in that form, so what has to
+       be on screen is the name he knows the товар by — and, on the screen's
+       own instruction, where to go and change it. */
+    await expect(work, "the top pages are still fetched and thrown away")
+      .toContainText("Какие страницы находят в Google");
+    await expect(work).toContainText("перепишите заголовок и описание для Google");
+    const pages = work.locator(".adm-qs").nth(1);
+    await expect(pages, "the address was printed instead of the product's name")
+      .toContainText("System 4 — Bio Botanical Shampoo — шампунь");
+    await expect(pages).not.toContainText("https://");
+    await expect(pages).toContainText("Google показал эту страницу 480 раз, в среднем на 8-м месте.");
+    await expect(pages).toContainText("На ссылку нажали 12 раз.");
+    // the same product one language over is a different page to Google, and says so
+    await expect(pages).toContainText("Un.Tangled Spray — спрей для волос");
+    await expect(pages.locator(".adm-q").nth(1)).toContainText("· ET");
+    await expect(pages.locator(".adm-q").nth(1)).toContainText("На ссылку не нажал никто.");
+    // …and one single click, the number every one of the three languages spells its own way
+    await expect(pages.locator(".adm-q").nth(2)).toContainText("Главная");
+    await expect(pages.locator(".adm-q").nth(2)).toContainText("На ссылку нажали 1 раз.");
   });
 });
 
