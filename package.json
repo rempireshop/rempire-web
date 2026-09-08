@@ -22,7 +22,8 @@
     "pack:content": "node tools/pack-content.mjs",
     "e2e": "node tools/e2e-build.mjs && playwright test",
     "e2e:ui": "node tools/e2e-build.mjs && playwright test --ui",
-    "e2e:update": "node tools/e2e-build.mjs && playwright test --update-snapshots"
+    "e2e:update": "node tools/e2e-build.mjs && playwright test --update-snapshots",
+    "smoke": "node tools/smoke.mjs"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",

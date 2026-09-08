@@ -1,0 +1,171 @@
+# Smoke tests against a deployed shop — e2e/smoke.spec.ts, `npm run smoke`.
+# Read-only by construction: every request is a GET a crawler could make (the
+# rule, and how the suite enforces it, are in that spec's header comment). No
+# orders, no letters, no admin writes, no sign-in.
+#
+# ---- why these three triggers, and not a fourth --------------------------
+#
+# The obvious trigger — "run after CI has deployed" — does not exist here,
+# because CI does not deploy. Vercel builds and deploys this repository on its
+# own webhook from a push to `main`, entirely independently of GitHub Actions
+# (.github/workflows/ci.yml says so at length, docs/accounts.md has the
+# arrangement). So a `push` trigger would fire the moment the commit lands,
+# race Vercel's build, and cheerfully test the *previous* deployment — a green
+# run about the wrong bytes, which is worse than no run at all. That is the one
+# trigger deliberately not used.
+#
+#   1. `deployment_status` — this IS "after a deploy". Vercel's GitHub
+#      integration creates a Deployment on the repository and posts a status to
+#      it when the build finishes, and the payload carries the URL that was
+#      just deployed. Filtered to `success` below, so a failed build does not
+#      produce a second red mark saying the same thing. This is the trigger
+#      that answers "did what we just shipped survive contact with the CDN".
+#
+#   2. `schedule` — twice a day, because the interesting half of what this
+#      suite watches can break with nobody pushing anything: the Railway
+#      database going away (every page still renders, /api/overrides/ starts
+#      answering 503 and the shop quietly serves yesterday's prices), a TLS
+#      certificate lapsing, a DNS change, a sitemap route that has started
+#      throwing on a row Renat added this morning. A deploy-only trigger is
+#      blind to all of it. Twice rather than hourly: at 3–5 orders a month
+#      (docs/HOSTING.md) an eight-hour blind spot is not what will cost this
+#      shop a customer, and a suite that mails somebody 24 times a day stops
+#      being read by the second week.
+#
+#   3. `workflow_dispatch` — the button. It is also the ONLY way this workflow
+#      ever touches production: `target` defaults to staging, and the guard
+#      step below refuses the live shop unless a human chose it here. The
+#      checks are read-only either way, so the guard is not about safety so
+#      much as about honesty — a scheduled job that silently started reporting
+#      on a different shop than its name says is a job that lies.
+#
+# Secrets: none, and none is possible. The only input is a base URL, which is
+# a public hostname anybody can type into a browser; both live in e2e/env.mjs.
+name: Smoke (deployed)
+
+on:
+  deployment_status:
+  schedule:
+    # 06:20 and 18:20 UTC. Off the hour on purpose — GitHub's scheduler queues
+    # everybody's `0 * * * *` together and runs them late.
+    - cron: "20 6,18 * * *"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which deployment to smoke-test"
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # A deployment_status event fires for every state Vercel reports — queued,
+    # building, error, success. Only the last one has a deployment behind it
+    # worth testing, and `environment_url` is only populated then.
+    if: github.event_name != 'deployment_status' || github.event.deployment_status.state == 'success'
+
+    steps:
+      # Which shop, and whether to go at all. The whole decision is one step so
+      # the answer is readable in the log instead of assembled out of four `if:`
+      # expressions, and it runs before the checkout because it needs nothing
+      # from the repository:
+      #
+      #   · a manual run takes the `target` input, and that is the ONLY path to
+      #     production;
+      #   · a deploy takes the URL Vercel just reported, so a preview alias is
+      #     tested at its own address rather than at staging's;
+      #   · a scheduled run takes staging.
+      #
+      # If anything other than a manual run resolves to the live shop, the job
+      # stops here — that is the explicit-input rule, enforced rather than
+      # described. It stops by *skipping*, with a notice, rather than by
+      # failing: the day the DNS moves and Vercel starts reporting deploys of
+      # rempireshop.com, an `exit 1` here would put a red cross on every
+      # correct deploy forever, and a workflow that is always red is a workflow
+      # nobody reads. Nothing ran against production, which is the rule; the
+      # log says why; the scheduled staging run is untouched; and production is
+      # a click away on the dispatch form.
+      #
+      # Every value that came out of an event payload is read from the
+      # environment rather than interpolated into the script with ${{ }}: an
+      # `environment_url` is a string somebody else's system wrote, and a shell
+      # that pastes it into its own source is a shell that runs it.
+      - name: Choose the base URL
+        id: target
+        env:
+          EVENT: ${{ github.event_name }}
+          DEPLOYED_URL: ${{ github.event.deployment_status.environment_url }}
+          CHOICE: ${{ github.event.inputs.target }}
+          STAGING: https://rempireshop.diipsolutions.eu
+          PRODUCTION: https://rempireshop.com
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            [ "$CHOICE" = "production" ] && URL="$PRODUCTION" || URL="$STAGING"
+            ALLOW_PRODUCTION=yes
+          elif [ "$EVENT" = "deployment_status" ]; then
+            URL="${DEPLOYED_URL:-$STAGING}"
+            ALLOW_PRODUCTION=no
+          else
+            URL="$STAGING"
+            ALLOW_PRODUCTION=no
+          fi
+          # No trailing slash, no path — e2e/env.mjs would reject one anyway,
+          # but saying so here beats saying it after a browser download.
+          URL="${URL%/}"
+          RUN=yes
+          if [ "$ALLOW_PRODUCTION" != "yes" ]; then
+            case "$URL" in
+              https://rempireshop.com|https://www.rempireshop.com)
+                RUN=no
+                echo "::notice::$URL is the live shop, and this run did not ask for it."
+                echo "::notice::Run this workflow by hand with target=production to smoke-test it."
+                ;;
+            esac
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+          echo "Smoke target: $URL (run: $RUN)"
+
+      - uses: actions/checkout@v4
+        if: steps.target.outputs.run == 'yes'
+
+      - uses: actions/setup-node@v4
+        if: steps.target.outputs.run == 'yes'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.target.outputs.run == 'yes'
+        run: npm ci
+
+      # Chromium only, and nothing else: this suite starts no server, needs no
+      # database and never runs the prerender — there is nothing to build,
+      # because the thing under test was built by Vercel days ago.
+      - name: Install Playwright's Chromium
+        if: steps.target.outputs.run == 'yes'
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke
+        if: steps.target.outputs.run == 'yes'
+        env:
+          URL: ${{ steps.target.outputs.url }}
+        run: npm run smoke -- "$URL"
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-report
+          path: |
+            playwright-report-smoke/
+            test-results-smoke/
+          retention-days: 14

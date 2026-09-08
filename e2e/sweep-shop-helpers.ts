@@ -119,8 +119,14 @@ const CONSOLE_ALLOW: RegExp[] = [
   /* A page that does not exist is served with a 404 since 07.09.2026 — the
      whole point of it — and Chromium logs the status of the document it just
      loaded as a console error. Scoped to a /shop2/ document so a 404 on a
-     script, an image or an API call still fails the sweep. */
-  /404 \(Not Found\) @ https?:\/\/[^\s]+\/shop2\/[^\s?]*\/$/i,
+     script, an image or an API call still fails the sweep.
+     The reason phrase is matched as "anything in the brackets" rather than as
+     "Not Found": HTTP/2 has no reason phrase at all, so the same 404 that
+     prints `404 (Not Found)` from the local `next dev` over HTTP/1.1 prints
+     `404 ()` from a deployment — found by e2e/smoke.spec.ts, which is the
+     first thing in this repository to read a console on a real host. The
+     status number and the URL shape are what carry the meaning here anyway. */
+  /404 \([^)]*\) @ https?:\/\/[^\s]+\/shop2\/[^\s?]*\/$/i,
 ];
 
 export type Watch = {

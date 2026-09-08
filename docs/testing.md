@@ -6,14 +6,24 @@ provider — nothing here needs a network, a real bank, or a mailbox. Unit
 tests (`npm test`, vitest) are a separate, faster layer; see the root of this
 file for what moved there instead of into a browser test and why.
 
-**The third layer is a person.** Everything a robot cannot reach — real money
-at a real bank, a letter landing in somebody's inbox rather than in spam,
-Apple Pay on an actual iPhone, a parcel a machine has to accept, and a thumb on
-a 375 px screen — is a hand-run checklist: **[`docs/testplan.md`](testplan.md)**
+**The third layer is the only one that talks to a shop that is actually
+deployed:** «Smoke tests against a deployed shop» below (`npm run smoke`).
+Everything else on this page runs on localhost and therefore has no opinion at
+all about the build Vercel shipped, the database behind it or the CDN in front
+of it. It is read-only by construction — a deployed shop is somebody's real
+one — so it proves the pages, the token, the sitemap, the redirects and the
+headers, and nothing that costs money.
+
+**The fourth layer is a person.** Everything no robot can reach — real money at
+a real bank, a letter landing in somebody's inbox rather than in spam, Apple
+Pay on an actual iPhone, a parcel a machine has to accept, and a thumb on a
+375 px screen — is a hand-run checklist: **[`docs/testplan.md`](testplan.md)**
 (who tests what, in what order, and what must never be run on the live shop),
-with the 158 checks themselves in `src/data/testplan.json` and its shape pinned
-by `tests/testplan.test.ts`. "What could not be automated, and why" below is
-the list of holes; the test plan is what fills them.
+with the 158 checks themselves in `src/data/testplan.json`, their shape pinned
+by `tests/testplan.test.ts`, and the page the testers actually use at `/test/`
+(`public/test/index.html`, its storage in `tests/testplan-route.test.ts`).
+"What could not be automated, and why" below is the list of holes; the test
+plan is what fills them.
 
 ## Running it locally
 
@@ -728,12 +738,160 @@ bytes, same rule as the body — and, since the order-flow rework, the http(s)
 `e2e/admin.spec.ts` proves «Заказ отправлен» went out with the carrier's
 tracking link in it, which is the one thing that letter is for.
 
+## Smoke tests against a deployed shop
+
+Everything above this line runs against `next dev` on localhost, with
+`PAYMENT_PROVIDER=mock` and a PGlite database that is thrown away when the run
+ends. That is the right shape for testing what the *code* does, and it is
+structurally incapable of testing what the *deployment* does. On 07.09.2026 a
+stale asset token shipped and every returning browser ran the old `app.js` for
+thirteen hours (`tools/lib/asset-token.mjs` tells that story) — a green CI the
+whole time, because nothing in this repository had ever fetched a URL that
+Vercel was serving.
+
+`e2e/smoke.spec.ts` is that missing check. It takes a base URL, starts no
+server, builds nothing, and asks a running shop a few dozen questions.
+
+```bash
+npm run smoke                                # staging
+npm run smoke -- https://rempireshop.com     # the live shop
+npm run smoke -- -g "sitemap"                # one test
+npm run smoke -- --headed                    # …any Playwright flag
+```
+
+Both hosts live in `e2e/env.mjs` beside the local suite's port and credentials,
+so nothing here needs a secret and nothing here has one; `SMOKE_BASE_URL` in
+the environment does the same job as the argument if you prefer it that way.
+`tools/smoke.mjs` is the wrapper — a Node script rather than `VAR=value cmd`,
+for the same Windows reason `tools/e2e-build.mjs` exists. It prints the URL it
+resolved before it runs anything, because "which shop did that just talk to?"
+is a question worth never having to ask.
+
+### The rule: read-only, and it is enforced
+
+**Every request the suite makes must be a GET a crawler could make.** There is
+a real shop at the other end, with Renat's catalogue, Renat's customers and a
+real payment provider behind it. No orders, no letters, no admin writes, no
+sign-in, nothing that costs a cent or leaves a row.
+
+Three things hold that up, so it is not merely an intention written at the top
+of a file:
+
+- `forbidWrites()` hangs a route handler on every page that answers any non-GET
+  the storefront attempts with a synthetic 200 — the request never leaves the
+  browser — and records it. Every test that opens a page asserts nothing was
+  recorded. Add a write, and the suite goes red on your machine before it can
+  go red on Renat's database.
+- Everything the suite fetches without a browser goes through one `get()`
+  helper, which takes no body and defaults to `maxRedirects: 0`.
+- The consent banner is answered with «Только необходимое» before the first
+  page load (`playwright.smoke.config.ts`), so `track()` in `app.js` returns
+  before it builds a body and the `POST /api/track/` that every page view
+  otherwise fires is never sent at all. Declining is a better way not to write
+  than blocking is.
+
+### What it asserts
+
+| | |
+| --- | --- |
+| Pages | Home, a product, a category, a brand, the brands landing, the sets landing, one set, the gift card, the blog index, a post and all five policy pages — **in all three languages** — each 200, with its own `canonical`, its own `<html lang>`, its own `<title>` (no two pages in the matrix share one) and a prerendered block that is not the shell's. One of each kind per language is also loaded in a real browser: `body[data-screen]` correct, no uncaught error, no `console.error`, and no same-origin request the page could not load |
+| Which pages | Read off the deployment's own sitemaps, not typed into the spec — a set or a post Renat retires from the panel would otherwise turn into a false alarm about a URL that is *supposed* to be gone. Picks are seeded with `SWEEP_SEED`, so two runs walk the same pages |
+| `robots.txt` | Byte for byte the policy this host should be serving (`robots.production.txt` on `rempireshop.com`, `robots.staging.txt` anywhere else — both files are deployed, so the comparison needs no checkout), with the `Sitemap:` line naming this host. Plus: the two policy files really are the open and the closed one, and both still shut the cart, the checkout, the account and `/api/` out of an index |
+| `X-Robots-Tag` | The third of docs/seo.md's three noindex layers, and the only one keyed on the request host rather than on the build: `noindex, nofollow` everywhere that is not `rempireshop.com`, absent on the live shop |
+| Sitemaps | `sitemap.xml` is a `sitemapindex`, it names `sitemap-1.xml`, `sitemap-products.xml` and `sitemap-custom.xml`, every sitemap it names is valid XML (parsed by the browser's `DOMParser`, not a regex — a stray `&` in a product title is a file Google rejects whole), every `<loc>` is on this host, and a seeded sample of twenty of them answers 200 |
+| The asset token | The `?v=` in the served `index.html` is recomputed from the bytes the deployment is serving, with `assetTokenWith()` out of `tools/lib/asset-token.mjs` — the same function `prerender:check` uses, with a reader that fetches instead of one that opens files. **This is the check that would have caught 07.09.2026**, and it is the only version of the question with teeth: a working tree always agrees with itself |
+| Assets | Every versioned `<script>` and `<link>` in the shell loads at the token it is asked for, with the right content type and a non-empty body |
+| 404 | An address no product, category or post could have answers a real 404 with `noindex`, in every language, with its own canonical — not a 200 with the home page in it |
+| Redirects | `/` → `/shop2/` still 307 (not 308 — a permanent redirect cached in every browser is what would make moving the shop to the root painful), `/shop` → `/shop2/`, and the `/shop2/ru/…` pair still permanent |
+| Security headers | On a page, a product, a static asset and an API route: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, HSTS, `Permissions-Policy` (`camera=(self)` under `/shop2/*` for the scanner, `camera=()` elsewhere, everything else denied everywhere), and the CSP parsed into directives — `default-src`, `frame-ancestors`, `base-uri`, `object-src`, and **no `'unsafe-inline'` in `script-src` under `/shop2/*`**, which is the rule that turns an `innerHTML` mistake into a broken layout instead of a takeover |
+| Boot probes | `/api/overrides/`, `/api/bundles/` and `/api/geo/` — what a cold visitor's browser asks for before it paints — answer 200 with a sane shape and no session. Each has a documented fallback, and a fallback is not the same as working: a shop quietly running on `localStorage`'s copy of yesterday's prices is exactly the failure nobody notices. Plus `/api/admin/me/` → 401 with no cookie handed back, which is a test that the door is shut |
+| Link previews | The `og:image` of the home page and of a product is really served. `prerender:check` proves every card is on disk and is 1 200×630; what it cannot prove is that the deployment serves it, and a card that 404s is invisible until somebody pastes a link into Telegram |
+
+The console allow-list is `watchPage()` from `e2e/sweep-shop-helpers.ts`, used
+as-is. It is deliberately not extended for this suite: every entry there is a
+line no fix inside `public/shop2/**` could remove and each is argued for in
+that file, so a deployed page producing an error the local sweep does not is a
+finding — the answer to which is a fix or a reported fault, never a new row in
+an allow-list only one suite reads.
+
+### What it deliberately does NOT cover
+
+- **Payments.** A checkout that reaches Montonio is money, a real order row and
+  a letter. `e2e/checkout.spec.ts` and `e2e/payments.spec.ts` drive the whole
+  flow against `PAYMENT_PROVIDER=mock`, which is where a flow that spends money
+  belongs.
+- **Mail.** Nothing here asks the shop to send anything to anybody.
+  `e2e/admin-mail.spec.ts` reads the in-memory ring of letters `sendMail()` was
+  *asked* to send, on a server with no Resend key.
+- **Anything behind a login.** No admin session, no customer session, no
+  scanner. `/api/admin/me/` is asked once, anonymously, and the only acceptable
+  answer is 401.
+- **The cart, the checkout screens, `/done`, `/account`, `/search`.**
+  Robots-disallowed, not prerendered, not in the sitemap, meaningless without
+  state (docs/seo.md). A crawler never sees them and neither does this suite.
+- **Visual snapshots.** A baseline that has to be renewed whenever Renat edits
+  a banner is a suite nobody trusts by the third false alarm.
+- **What `prerender:check` already proves.** Every hreflang, every JSON-LD
+  block, every `og:image`'s pixel size — 813 pages of it, off disk, with no
+  network. If an assertion would pass or fail identically against a working
+  tree, it belongs there or in the local e2e suite, not here.
+
+### In CI
+
+`.github/workflows/smoke.yml`, on three triggers, and the fourth one is
+deliberately missing. There is no "after CI deployed", because CI does not
+deploy: Vercel builds from its own webhook on a push to `main`, independently
+of GitHub Actions (`docs/accounts.md`). A `push` trigger would therefore race
+Vercel's build and cheerfully test the *previous* deployment — a green run
+about the wrong bytes.
+
+- **`deployment_status`** (filtered to `success`) is the real "after a deploy":
+  Vercel's GitHub integration posts it when the build finishes, and the payload
+  carries the URL that was just deployed.
+- **`schedule`**, twice a day, because the interesting half of what this suite
+  watches breaks with nobody pushing anything — the database going away, a
+  certificate lapsing, a sitemap route that starts throwing on a row Renat
+  added this morning.
+- **`workflow_dispatch`** with a `target` choice, which is the **only** way the
+  workflow ever points at production: anything else that resolves to
+  `rempireshop.com` skips with a notice saying so. A skip rather than a
+  failure, because the day the DNS moves and Vercel starts reporting deploys of
+  the live domain, an `exit 1` there would put a red cross on every correct
+  deploy forever. It needs no secret of any kind — the only input is a public
+  hostname.
+
+### Two things staging is doing wrong (08.09.2026)
+
+Measured by this suite and left unasserted on purpose, because they are faults
+in the shop rather than in the tests and a permanently red smoke run is a smoke
+run nobody reads. Both are soft 404s — a 200 where a 404 belongs — and both are
+noindex today only for as long as the whole staging host is:
+
+- `/shop2/info/<anything>/` answers **200 with the shell**. `isKnownShopPath()`
+  in `src/lib/notfound-page.ts` checks the slug against the directories
+  `npm run prerender` wrote under `public/shop2/info/`, and falls through to
+  "let it through" when it cannot find that directory — which in a deployment
+  it never can: only `public/shop2/index.html` is traced into the function
+  bundle (`outputFileTracingIncludes` in `next.config.ts`). The check works
+  locally and is off everywhere it matters.
+- `/shop2/set/<anything>/` answers **200** for the same reason it is let
+  through: `isKnownShopPath()` accepts `set/<id>` on the grounds that "they each
+  have their own request-time route that answers 404 for an id nobody has", and
+  for sets there is no such route.
+
+On `rempireshop.com` both would be indexable, in unlimited numbers. Pin them
+here once they are fixed.
+
 ## Files
 
 | Path | What |
 | --- | --- |
 | `playwright.config.ts` | Projects, `webServer`, screenshot config — read its own comments first |
-| `e2e/env.mjs` | Port, base URL, fixed test admin password + its hash |
+| `playwright.smoke.config.ts` | The deployed-shop suite's own config: base URL from the environment, **no `webServer`**, its own report and output folders — see "Smoke tests against a deployed shop" |
+| `e2e/smoke.spec.ts` | The deployed-shop suite itself. Read-only; its header comment is the rule |
+| `tools/smoke.mjs` | `npm run smoke` — resolves the base URL (argument, then `SMOKE_BASE_URL`, then staging) and hands everything else to Playwright |
+| `.github/workflows/smoke.yml` | The smoke suite in CI: after a Vercel deploy, twice a day, or by hand — production only by hand |
+| `e2e/env.mjs` | Port, base URL, fixed test admin password + its hash — and, below the line, the two **deployed** hosts the smoke suite points at plus the one rule that says which of them is the live shop |
 | `e2e/fixtures.ts` | Shared constants/helpers every spec imports: `LANGS`, `PRODUCT`/`PRODUCT_2`/`BUNDLE`, `waitForScreen`, `loginAsAdmin`, `adminSection()`/`adminLang()` (the panel's navigation and language strip, both of which are drawn twice and sit behind «Ещё» on a phone), `ipHeaders`, `tr()` (the RU→ET/EN dictionary lookups actually used, copied verbatim from `app.js`'s own `UI` table — see that file's own comment before adding to it), `functionalProject()` and the viewport-aware `searchFor()` / `payButton()` / `openSummary()` (see "Safari") |
 | `e2e/*.spec.ts` | One file per area of the task brief — each has its own top-of-file comment for anything not obvious from this document |
 | `e2e/scanner-app.spec.ts` | The standalone scanner route `/shop2/scan/`, desktop + mobile — see below |
