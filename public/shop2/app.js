@@ -22755,8 +22755,56 @@
          admAsstHTML(), which now asks for it when the assistant is actually on
          screen. Boot is the one moment the owner is waiting, and this was a
          whole extra analytics query in it for a question nobody had asked. */
-      if (ok) loadSrvOrders(true);
+      if (ok) { loadSrvOrders(true); admPrefetch(); }
       render();
+    });
+  }
+
+  /* ---- the panel's sections, fetched before they are opened ---------------
+   *
+   * A section used to ask for its data as it painted, so the first visit was
+   * always heading → grey bar → content, and only the second was instant. The
+   * loaders below are the same ones those sections call; nothing here fetches
+   * anything a section would not have fetched anyway, and every one of them
+   * still refuses to run twice. The only change is WHEN.
+   *
+   * Waves, not a burst: the screen on display has its own requests in flight
+   * and these must not race them. Cheap and likely first — the «Товары» badge
+   * needs the stock levels, and «Аналитика» is where the second grey bar
+   * lives, because Google Search Console is an external call and reliably the
+   * slowest thing the panel waits for. The customer list and the four
+   * shipping tariffs are the heaviest, so they go last.
+   *
+   * This is a panel one person opens a few times a day. Fetching a section he
+   * may not visit costs the shop nothing that matters and saves him the wait
+   * every time he does. */
+  var admPrefetched = false;
+  function admIdle(fn, delay) {
+    setTimeout(function () {
+      if (typeof requestIdleCallback === "function") requestIdleCallback(fn, { timeout: 3000 });
+      else fn();
+    }, delay);
+  }
+  function admPrefetch() {
+    if (admPrefetched || SRV.admin !== true) return;
+    admPrefetched = true;
+    var waves = [
+      [loadStockLevels, loadCustomAll],        // «Товары» — the «Склад N» badge and the catalogue
+      [loadGsc, loadAdminPromos],              // «Аналитика» second stage, «Маркетинг»
+      [loadAdminBlog, loadAdminBundles],       // «Блог», «Товары → Наборы»
+      [loadPayMethods, loadAdminCustomers],    // «Подключения», «Клиенты»
+      [loadShipLiveRates]                      // four countries in one wave, heaviest last
+    ];
+    /* loadAdminPricing() is deliberately NOT here. Its first answer discards
+       the pricing form's draft — safe when the section itself asks, because
+       then the answer lands before anybody has typed, but silent data loss if
+       it arrives while the owner is editing «Цены и баллы».
+       e2e/admin-sections.spec.ts caught that. It stays where it was: asked
+       for by the screen that shows it. */
+    waves.forEach(function (wave, i) {
+      admIdle(function () {
+        wave.forEach(function (fn) { try { fn(); } catch (e) { /* a warm-up may never break the panel */ } });
+      }, 500 + i * 700);
     });
   }
   // kept: the boot at the end of the file may wait for this one answer
