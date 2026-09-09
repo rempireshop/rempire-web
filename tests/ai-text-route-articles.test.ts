@@ -3,9 +3,10 @@
  * OpenAI stubbed at fetch, same idiom as tests/ai-text-route.test.ts. What
  * is pinned is the route's own work around the model: the per-task token
  * budget, the catalogue slice offered for the topic and the answer's
- * products filtered against exactly that slice, the body through the blog's
- * HTML allowlist, the caps on every field, a cut article refused rather
- * than saved half-written, a fenced answer still read.
+ * products — the list it names and the cards it placed in the body alike —
+ * filtered against exactly that slice, the body through the blog's HTML
+ * allowlist, the caps on every field, a cut article refused rather than
+ * saved half-written, a fenced answer still read.
  */
 import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -109,6 +110,51 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     expect(body.text.products).toEqual(["system-4-bio-botanical-shampoo"]);
     const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(JSON.parse(String((init as RequestInit).body)).messages[1].content).toContain("system-4-bio-botanical-shampoo | System 4 | Bio Botanical Shampoo — шампунь");
+  });
+
+  /* The article places its own product cards in the body — the editor's own
+     `<a data-product>` marker. A card is a link to a product page, so an id
+     the model invented is a dead link in a published article that the owner
+     could only find by reading it: the ids in the body are filtered against
+     the same slice the answer's `products` is, and a card that loses its id
+     loses its tag too, keeping whatever words were inside. */
+  it("post_full: a card for a product that was offered survives, one for anything else does not", async () => {
+    const body =
+      '<p>Зимой борода сохнет.</p>' +
+      '<p><a data-product="proraso-beard-oil-azur-lime-30ml"></a></p>' +          // offered for this topic
+      '<p><a data-product="system-4-bio-botanical-shampoo"></a></p>' +            // real, but not in this slice
+      '<p><a data-product="proraso-beard-oil-2000ml">Масло на два литра</a></p>'; // never existed
+    vi.stubGlobal("fetch", vi.fn(async () => completion(JSON.stringify({ ...ARTICLE, body, products: [] }))));
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "post_full", lang: "RU", input: { topic: "уход за бородой зимой" } }, admin));
+    expect(res.status).toBe(200);
+    const t = (await res.json()).text;
+    expect(t.body).toContain('<a data-product="proraso-beard-oil-azur-lime-30ml">');
+    expect(t.body, "a card for a product this topic was never offered").not.toContain("system-4-bio-botanical-shampoo");
+    expect(t.body, "a card for a product that does not exist").not.toContain("proraso-beard-oil-2000ml");
+    // the tag went, its words stayed — an article never loses text to this
+    expect(t.body).toContain("Масло на два литра");
+    expect(t.body).toContain("<p>Зимой борода сохнет.</p>");
+  });
+
+  it("post_full: a body with no cards is left exactly as the allowlist wrote it", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => completion(JSON.stringify(ARTICLE))));
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "post_full", lang: "RU", input: { topic: "уход за бородой зимой" } }, admin));
+    const t = (await res.json()).text;
+    expect(t.body).not.toContain("data-product");
+    expect(t.body).toContain("<h2>Масло каждый вечер</h2>");
+  });
+
+  it("post_full: a card for a product the editor itself picked is kept — that list is offered too", async () => {
+    const body = '<p>Мойте голову.</p><p><a data-product="system-4-bio-botanical-shampoo"></a></p>';
+    vi.stubGlobal("fetch", vi.fn(async () => completion(JSON.stringify({ ...ARTICLE, body, products: [] }))));
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({
+      task: "post_full", lang: "RU",
+      input: { topic: "уход за бородой зимой", products: [{ id: "system-4-bio-botanical-shampoo", brand: "System 4", name: "Bio Botanical Shampoo — шампунь" }] },
+    }, admin));
+    expect((await res.json()).text.body).toContain('<a data-product="system-4-bio-botanical-shampoo">');
   });
 
   it("post_full: a cut article is refused as `truncated`, never handed back half-written", async () => {
