@@ -83,61 +83,64 @@ function cartButton(page: Page) {
   return page.locator("[data-cart]:visible").first();
 }
 
-/** Opens the first product card's size listbox on the current screen, if the
- *  screen has a multi-size card at all. */
-async function openSizeListbox(page: Page): Promise<boolean> {
-  const opener = page.locator("[data-cardsizeopen]").first();
-  if (!(await opener.count())) return false;
-  await opener.scrollIntoViewIfNeeded();
-  await opener.click();
-  await expect(page.locator("[data-cardpop]")).toBeVisible();
-  return true;
+/** Waits for the product cards on the current screen to be finished, and
+ *  checks there is nothing left of the size picker to open.
+ *
+ *  Until 09.09.2026 this helper opened a card's size listbox so axe could see
+ *  it; the picker is gone (owner: «размеры и мл не нужны») and the card is a
+ *  link, a price and «В корзину», all of it on screen from the first paint.
+ *  The wait is the part that still matters — axe run against a grid that is
+ *  still being built reports a clean card because there is no card yet — and
+ *  the count is what stops this from quietly going back to testing nothing if
+ *  a picker ever returns without its own audit. */
+async function cardsReady(page: Page): Promise<void> {
+  const card = page.locator(".card").first();
+  await expect(card).toBeVisible();
+  await expect(card.locator(".card__price")).toBeVisible();
+  await expect(card.locator(".card__add")).toBeVisible();
+  expect(await page.locator(".card select, [data-cardsizeopen], .card [role='listbox']").count(),
+    "a card grew a size control again — give it its own audit pass here").toBe(0);
 }
 
 for (const [i, lang] of LANGS.entries()) {
   test.describe(`a11y storefront — ${lang.code}`, () => {
     test.use({ extraHTTPHeaders: ipHeaders(140 + i) });
 
-    test("home, category (+ size listbox), search", async ({ page }, testInfo) => {
+    test("home, category, search", async ({ page }, testInfo) => {
       test.setTimeout(120_000);
       const audit = new Audit(testInfo);
 
       await page.goto(shopUrl(lang.seg, "/"));
       await waitForScreen(page, "home");
-      await expect(page.locator(".card").first()).toBeVisible();
+      await cardsReady(page);
       await audit.check(page, `home ${lang.code}`);
 
       await page.goto(shopUrl(lang.seg, "/c/hair/"));
       await waitForScreen(page, "catalog");
-      await expect(page.locator(".card").first()).toBeVisible();
+      await cardsReady(page);
       await audit.check(page, `category ${lang.code}`);
-      if (await openSizeListbox(page)) {
-        await audit.check(page, `category + size listbox ${lang.code}`);
-        await page.keyboard.press("Escape");
-        await expect(page.locator("[data-cardpop]")).toHaveCount(0);
-      }
 
       await page.goto(shopUrl(lang.seg, "/search/?q=System"));
       await waitForScreen(page, "search");
-      await expect(page.locator(".card").first()).toBeVisible();
+      await cardsReady(page);
       await audit.check(page, `search ${lang.code}`);
 
       audit.done();
     });
 
-    test("product page (+ size listbox), cart drawer", async ({ page }, testInfo) => {
+    test("product page (+ its card shelf), cart drawer", async ({ page }, testInfo) => {
       test.setTimeout(120_000);
       const audit = new Audit(testInfo);
 
       await page.goto(shopUrl(lang.seg, `/p/${PRODUCT.id}/`));
       await waitForScreen(page, "product");
       await expect(page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`)).toBeVisible();
+      // the «с этим берут» shelf under the product is built from the same
+      // cardHTML() as the grids, so this audit covers the card too — and the
+      // page's own size chips (.sizes [data-size]) are already on screen,
+      // which is why neither needs an opening step of its own any more
+      await cardsReady(page);
       await audit.check(page, `product ${lang.code}`);
-      if (await openSizeListbox(page)) {
-        await audit.check(page, `product + size listbox ${lang.code}`);
-        await page.keyboard.press("Escape");
-        await expect(page.locator("[data-cardpop]")).toHaveCount(0);
-      }
 
       await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
       await expect(page.getByRole("status")).toBeVisible();

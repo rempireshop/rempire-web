@@ -1,15 +1,17 @@
 import { expect, test } from "@playwright/test";
 import { CATEGORY, eur, functionalProject, ipHeaders, LANGS, PRODUCT, searchFor, shopUrl, tr, waitForScreen } from "./fixtures";
+import variants from "../src/data/catalogue.variants.json";
 
-/** Category nav, brand page, search, infinite scroll, and the size picker
- *  that lives inside every product card.
+/** Category nav, brand page, search, infinite scroll, and the product card
+ *  itself — its one price, its «В корзину» and its geometry.
  *
  *  The desktop-only guard used to be one file-level `beforeEach`. It is a
- *  per-describe call now because one block in this file — "card size picker —
- *  layout" — is the exception the rule allows for: a native `<select>` is as
- *  wide as its widest option and a card is a 150px grid track on a phone, so
- *  that one test has to run at 375px too (docs/testing.md "Why most specs run
- *  on desktop only"). Everything else here is business logic that does not
+ *  per-describe call now because one block in this file — "product card —
+ *  layout" — is the exception the rule allows for: what it asserts is
+ *  geometry, and a card is a 150px grid track on a phone against a 200px one
+ *  on a laptop, so the two-line name clamp and the two-row foot have to be
+ *  measured at 375px as well (docs/testing.md "Why most specs run on desktop
+ *  only"). Everything else here is business logic or text that does not
  *  change with viewport width and still opts in to desktop only. */
 function desktopOnly(): void {
   test.beforeEach(async ({}, testInfo) => {
@@ -19,11 +21,47 @@ function desktopOnly(): void {
 test.use({ extraHTTPHeaders: ipHeaders(20) });
 
 /** A single-size, in-stock product sitting in the same /c/hair/ listing as
- *  PRODUCT — the control case for "no picker where there is nothing to pick".
- *  Its price is deliberately not asserted anywhere: the admin sweeps may edit
- *  a randomly sampled product's price, and this test only cares about the
- *  absence of a control. */
+ *  PRODUCT — the control case for "one volume or several, the card is the
+ *  same shape". Its price is deliberately not asserted anywhere: the admin
+ *  sweeps may edit a randomly sampled product's price, and this test only
+ *  cares about the card's structure. */
 const SINGLE_SIZE_PRODUCT = "touchable";
+
+/** src/data/catalogue.variants.json — the volumes and their prices the shop
+ *  is built from. Read from the file rather than copied into a constant here
+ *  so that a price Renat edits in «Товары → Размеры и цены», and then
+ *  regenerates the file from, moves the expectation with it instead of
+ *  turning these tests red for something that is not a bug. */
+const VARIANTS: Record<string, { sizes: string[]; prices: number[] }> = variants;
+
+/** RE.STORE — the reason cardSizeIdx() in app.js compares prices instead of
+ *  taking sizes[0]: it is 36 € for 40 мл and 7 € for 200 мл, so the cheapest
+ *  volume is the SECOND one. A card that silently went back to "the first
+ *  size in the list" would still look right on almost every other product in
+ *  the catalogue and would quote 36 € for this one. Reachable in a listing
+ *  through the search screen, which renders every hit at once. */
+const ASYMMETRIC = "kevin-murphy-re-store";
+
+/** The volume a card must speak for — the cheapest, by price and not by
+ *  position (cardSizeIdx in app.js). */
+function cheapest(id: string): { index: number; size: string; price: number } {
+  const v = VARIANTS[id];
+  if (!v) throw new Error(`e2e/catalogue.spec.ts: "${id}" has no entry in src/data/catalogue.variants.json`);
+  let index = 0;
+  for (let i = 1; i < v.prices.length; i++) if (v.prices[i] < v.prices[index]) index = i;
+  return { index, size: v.sizes[index], price: v.prices[index] };
+}
+
+/** The card's add-to-cart toast opens with this. It comes from a UI_RX
+ *  *pattern* in app.js (`/^Добавлено: (.+)$/` → «Lisatud: $1» / «Added: $1»),
+ *  not from the flat `UI` table fixtures.ts's DICT is copied out of, which is
+ *  why it is spelled out here instead of going through tr(). */
+const ADDED = { RU: "Добавлено:", ET: "Lisatud:", EN: "Added:" } as const;
+
+/** A card by the product it is for. Re-queried rather than held in a
+ *  variable: patchCatalog() and render() both replace the element. */
+const cardFor = (page: import("@playwright/test").Page, id: string) =>
+  page.locator(".card", { has: page.locator(`[data-go-product="${id}"]`) }).first();
 
 for (const lang of LANGS) {
   test.describe(`catalogue — ${lang.code}`, () => {
@@ -97,158 +135,314 @@ for (const lang of LANGS) {
     });
   });
 
-  /* The size picker inside a product card (cardSizeHTML/cardPriceText in
-   * app.js). «В корзину» on a card used to add the smallest size silently;
-   * the card now carries a native <select>, the price follows it and the add
-   * button puts THAT size in the cart at qty 1. Trilingual because the
-   * control's only label is an aria-label that goes through the dictionary,
-   * and because the price format itself is language-dependent. */
-  test.describe(`card size picker — ${lang.code}`, () => {
+  /* The product card as the owner asked for it on 09.09.2026 («размеры и мл
+   * не нужны»): no picker, one price, «В корзину» under it. The card used to
+   * carry a native <select>; the shopper now gets the cheapest volume without
+   * choosing, and both the price on the card and the line in the cart have to
+   * say so. Trilingual because the price format, the button's label and the
+   * toast all go through the dictionary. */
+  test.describe(`product card — ${lang.code}`, () => {
     desktopOnly();
 
-    /** PRODUCT's card in the /c/hair/ grid. Re-queried rather than held in a
-     *  variable: patchCatalog() and render() both replace the element. */
-    const cardFor = (page: import("@playwright/test").Page, id: string) =>
-      page.locator(".card", { has: page.locator(`[data-go-product="${id}"]`) }).first();
-    /** Opens the card's size listbox and picks option `i`; the foot row is
-     *  rebuilt in place, so everything is re-queried afterwards. */
-    const pick = async (page: import("@playwright/test").Page, id: string, i: number) => {
-      await cardFor(page, id).locator("[data-cardsizeopen]").click();
-      await cardFor(page, id).locator(`[data-cardsizepick="${id}:${i}"]`).click();
-      await expect(cardFor(page, id).locator(".card__pop")).toHaveCount(0);
-    };
+    test("a multi-volume card shows the cheapest volume's price, not the first one's", async ({ page }) => {
+      const cheap = cheapest(ASYMMETRIC);
+      const first = VARIANTS[ASYMMETRIC].prices[0];
+      // If someone ever reorders this product's volumes cheapest-first, the
+      // assertion below would still pass while testing nothing at all — so
+      // say out loud that the asymmetry is what makes it worth running.
+      expect(first, `${ASYMMETRIC} is no longer the "cheapest is not first" case — pick another product`)
+        .toBeGreaterThan(cheap.price);
 
-    test("the price follows the chosen size, and the cart line gets that size", async ({ page }) => {
+      // The search screen renders every hit in one grid (no paging), so this
+      // product is reachable there; it is past the first twelve of /c/hair/.
+      // Straight to the URL rather than through searchFor(): the search box
+      // has its own test above and is not what this one is about.
+      await page.goto(shopUrl(lang.seg, "/search/?q=RE.STORE"));
+      await waitForScreen(page, "search");
+
+      const price = cardFor(page, ASYMMETRIC).locator(".card__price");
+      await expect(price).toHaveText(eur(cheap.price, lang.code));
+      await expect(price).not.toHaveText(eur(first, lang.code));
+
+      // …and the ordinary case, where cheapest and first happen to coincide:
+      // the card must print an exact price, never the old «от 9 €», which is
+      // a range and not something you can put a single «В корзину» under.
       await page.goto(shopUrl(lang.seg, "/c/hair/"));
       await waitForScreen(page, "catalog");
+      await expect(cardFor(page, PRODUCT.id).locator(".card__price"))
+        .toHaveText(eur(cheapest(PRODUCT.id).price, lang.code));
+    });
 
-      const card = cardFor(page, PRODUCT.id);
-      const picker = card.locator("[data-cardsizeopen]");
-      // The trigger's name opens with its label — «Объём» / «Maht» / «Size» —
-      // and keeps the size the shopper can see («Объём 75 мл», WCAG 2.5.3);
-      // the listbox behind it carries the same label.
-      await expect(picker).toHaveAccessibleName(new RegExp("^" + tr("Объём", lang.code) + " "));
-      await picker.click();
-      await expect(card.locator("[data-cardsizepick]")).toHaveCount(PRODUCT.sizes.length);
-      await page.keyboard.press("Escape");
-      await expect(card.locator(".card__pop")).toHaveCount(0);
+    test("«В корзину» on a multi-volume card puts that volume in the cart", async ({ page }) => {
+      const cheap = cheapest(ASYMMETRIC);
+      await page.goto(shopUrl(lang.seg, "/search/?q=RE.STORE"));
+      await waitForScreen(page, "search");
 
-      // Untouched, the card shows the smallest size's exact price. It used to
-      // read «от 9 €», which is the wrong thing to say next to a control that
-      // already has a size selected in it.
-      const price = card.locator("[data-cardpr]");
-      await expect(price).toHaveText(eur(PRODUCT.prices[0], lang.code));
+      await cardFor(page, ASYMMETRIC).locator(`[data-add="${ASYMMETRIC}"]`).click();
 
-      for (let i = PRODUCT.sizes.length - 1; i >= 0; i--) {
-        await pick(page, PRODUCT.id, i);
-        await expect(price).toHaveText(eur(PRODUCT.prices[i], lang.code));
-      }
-
-      // The real point: the cart, not just the card.
-      const last = PRODUCT.sizes.length - 1;
-      await pick(page, PRODUCT.id, last);
-      await card.locator(`[data-add="${PRODUCT.id}"]`).click();
-      await expect(page.getByRole("status")).toBeVisible();
+      // The toast names the volume — «Добавлено: RE.STORE · 200 мл». Without
+      // it the card would be silently adding a 200 мл bottle to a basket the
+      // shopper never picked a size for. The number is the same in all three
+      // languages, the unit is not, so assert the digits.
+      const toast = page.getByRole("status");
+      await expect(toast).toContainText(ADDED[lang.code]);
+      await expect(toast).toContainText(cheap.size.replace(/\D+/g, ""));
       await expect(page.locator("[data-cartbadge]")).toHaveText("1");
 
+      // The real point: the cart, not just the toast. This is the whole
+      // regression — «В корзину» must put the 7 € / 200 мл bottle in, not the
+      // 36 € / 40 мл one that heads the variant list.
       await page.locator("[data-cart]").first().click();
       const dialog = page.getByRole("dialog", { name: /Корзина|Ostukorv|Cart/ });
       await expect(dialog).toBeVisible();
       const line = dialog.locator(".cline").first();
-      // The volume: the number is the same in all three languages («500 мл» →
-      // «500 ml»), the unit is not — so assert the digits.
-      await expect(line.locator(".cline__nm")).toContainText(PRODUCT.sizes[last].replace(/\D+/g, ""));
-      // …at the chosen size's price and qty 1, not the smallest size's 9 €.
-      await expect(line.locator("[data-linepr]")).toHaveText(eur(PRODUCT.prices[last], lang.code));
+      await expect(line.locator(".cline__nm")).toContainText(cheap.size.replace(/\D+/g, ""));
+      await expect(line.locator("[data-linepr]")).toHaveText(eur(cheap.price, lang.code));
       await expect(line.locator("[data-qtyval]")).toHaveText("1");
     });
 
-    test("the choice survives leaving the list and coming back", async ({ page }) => {
-      await page.goto(shopUrl(lang.seg, "/c/hair/"));
-      await waitForScreen(page, "catalog");
+    test("no card carries a size control, and every language says the whole «В корзину»", async ({ page }) => {
+      /* cardHTML() is shared, so whatever is wrong with a card is wrong on
+         every list built from it — the home rails and the search results,
+         not only the catalogue grid. */
+      for (const [where, url, screen] of [
+        ["catalogue", shopUrl(lang.seg, "/c/hair/"), "catalog"],
+        ["home rails", shopUrl(lang.seg, "/"), "home"],
+        ["search", shopUrl(lang.seg, "/search/?q=System"), "search"],
+      ] as const) {
+        await page.goto(url);
+        await waitForScreen(page, screen);
+        await expect(page.locator(".card").first()).toBeVisible();
 
-      await pick(page, PRODUCT.id, 1);
-      await expect(cardFor(page, PRODUCT.id).locator("[data-cardpr]")).toHaveText(eur(PRODUCT.prices[1], lang.code));
+        const report = await page.evaluate(() => {
+          const cards = Array.from(document.querySelectorAll<HTMLElement>(".card"));
+          return {
+            cards: cards.length,
+            /* Every trace the picker left behind. A half-removal — the markup
+               gone but a stray <select> still emitted by one code path, or the
+               `.card__sp` price/size row surviving in the stylesheet — is
+               exactly what would slip through a test that only looked at the
+               one product it had in mind. */
+            leftovers: [
+              "[data-cardsizeopen]", "[data-cardsizepick]", "[data-cardpop]", "[data-cardpr]",
+              ".card__sizebtn", ".card__pop", ".card__opt", ".card__sizelbl", ".card__sp",
+              ".card__addtxt", ".card__bag", ".card select", ".card [role='listbox']",
+            ].filter((sel) => document.querySelectorAll(sel).length),
+            // the foot is two rows and nothing else: the price, then the link
+            feet: cards.map((c) => Array.from(c.querySelector(".card__foot")?.children ?? [])
+              .map((el) => el.className.split(" ")[0]).join("+")),
+          };
+        });
 
-      // A real navigation and back: the grid is rebuilt from nothing, so this
-      // only passes because the choice lives in S.cardSize (app.js) rather
-      // than in the markup that was just thrown away.
-      await cardFor(page, PRODUCT.id).locator(`[data-go-product="${PRODUCT.id}"]`).click();
-      await waitForScreen(page, "product");
-      await page.goBack();
-      await waitForScreen(page, "catalog");
+        expect(report.cards, `${where}: no cards rendered — the check would be vacuous`).toBeGreaterThan(0);
+        expect(report.leftovers, `${where}: the card size picker left something behind`).toEqual([]);
+        expect([...new Set(report.feet)], `${where}: a card foot is not «price, then add»`).toEqual(["card__price+card__add"]);
 
-      await expect(cardFor(page, PRODUCT.id).locator(".card__sizelbl")).toContainText(PRODUCT.sizes[1].replace(/\D+/g, ""));
-      await expect(cardFor(page, PRODUCT.id).locator("[data-cardpr]")).toHaveText(eur(PRODUCT.prices[1], lang.code));
+        /* «Lisa korvi» was Estonian's shortened label, needed while the price,
+           the volume and the link shared one 155px row. The link owns a row of
+           its own now, so all three languages say the whole thing — and this
+           runs on the phone project too (mobile-safari), which is where the
+           short form used to appear. */
+        const adds = page.locator(".card__add:not(.card__add--notify)");
+        expect(await adds.count(), `${where}: no in-stock card to read a label off`).toBeGreaterThan(0);
+        /* textContent, not innerText: styles.css gives every card
+           `content-visibility: auto`, and innerText is a *rendered* text
+           reading — it answers "" for a card that has never been near the
+           viewport, so half this grid would silently compare against an
+           empty string instead of its label. */
+        for (const text of await adds.allTextContents()) expect(text.trim()).toBe(tr("В корзину", lang.code));
+      }
     });
 
-    test("no picker on a single-size product; every card list has one", async ({ page }) => {
+    test("a single-volume product's card is the same shape as a multi-volume one", async ({ page }) => {
       await page.goto(shopUrl(lang.seg, "/c/hair/"));
       await waitForScreen(page, "catalog");
-      const single = cardFor(page, SINGLE_SIZE_PRODUCT);
-      await expect(single).toBeVisible();
-      await expect(single.locator("[data-cardsizeopen]")).toHaveCount(0);
 
-      // cardHTML() is shared, so the picker reaches every list built from it —
-      // the home rails and the search results, not only the catalogue grid.
-      await page.goto(shopUrl(lang.seg, "/"));
-      await waitForScreen(page, "home");
-      expect(await page.locator(".sec .grid [data-cardsizeopen]").count()).toBeGreaterThan(0);
-
-      await searchFor(page, "System");
-      expect(await page.locator(".grid [data-cardsizeopen]").count()).toBeGreaterThan(0);
+      // Both are just «price / В корзину» now. The interesting half is the
+      // single-size one: cardPriceText() still has a «от …» branch for a
+      // product with priceFrom, and «от 9 €» over a button that adds one
+      // definite thing is the same wrong sentence the picker was removed for.
+      for (const id of [SINGLE_SIZE_PRODUCT, PRODUCT.id]) {
+        const card = cardFor(page, id);
+        await expect(card).toBeVisible();
+        await expect(card.locator(".card__price")).toHaveText(/^[^…]*\d/);
+        await expect(card.locator(".card__price")).not.toContainText(/^от |^alates |^from /i);
+        await expect(card.locator(`.card__add[data-add="${id}"]`)).toBeVisible();
+      }
     });
   });
 }
 
-/* The one viewport-sensitive thing about this picker, and the reason the
- * desktop-only guard moved into the describes above: a native <select> is as
- * wide as its widest option («white / XXL»), and a card is a 150px grid track
- * on a 375px phone — an overflowing control there gives the whole page a
- * sideways scroll. Geometry, not text, so one language is enough
- * (docs/testing.md). Run it with `--project=mobile` as well as desktop. */
-test.describe("card size picker — layout", () => {
-  // /c/merch/ is the worst case on purpose: a t-shirt's variants are one flat
-  // «colour / size» list («white / XXL»), by far the widest option text in the
-  // catalogue. /c/hair/ is the ordinary case («500 мл»).
+/* The cheapest-volume rule over the whole catalogue rather than the one
+ * product that motivated it. Prices and euro formatting, no dictionary — one
+ * language is enough (docs/testing.md). */
+test.describe("product card — the cheapest volume rule", () => {
+  desktopOnly();
+
+  test("every multi-volume card in a listing prints its cheapest volume's price", async ({ page }) => {
+    const wrong: string[] = [];
+    let checked = 0, asymmetric = 0;
+
+    /* Two listings, one verdict. The catalogue grid is the ordinary shelf;
+       the search screen is the one that reaches past the first twelve of a
+       category and so is where the Kevin.Murphy and Davines bottles live —
+       three dozen products whose cheapest volume is NOT the first in the
+       list. Counting across both is what lets the "would sizes[0] have
+       passed?" guard below be strict without pinning it to one URL. */
+    for (const [url, screen] of [["/search/?q=RE.STORE", "search"], ["/c/hair/", "catalog"]] as const) {
+      await page.goto(shopUrl("", url));
+      await waitForScreen(page, screen);
+      await expect(page.locator(".grid .card").first()).toBeVisible();
+
+      const printed = await page.locator(".grid .card").evaluateAll((cards) =>
+        cards.map((c) => ({
+          id: c.querySelector("[data-go-product]")?.getAttribute("data-go-product") ?? "",
+          // textContent, not innerText — `content-visibility: auto` leaves a
+          // card below the fold with no *rendered* text to read
+          text: (c.querySelector(".card__price") as HTMLElement | null)?.textContent?.trim() ?? "",
+        })));
+
+      for (const { id, text } of printed) {
+        const v = VARIANTS[id];
+        if (!v || v.prices.length < 2) continue;   // one volume — nothing to choose between
+        /* A price that is none of this product's known volumes is a price the
+           admin panel overrode (the goods-editor sweep edits five sampled
+           products), not a card picking the wrong volume — skip it. The bug
+           this test is for always lands ON one of these numbers, so it can
+           never be skipped away. */
+        if (!v.prices.some((p) => eur(p, "RU") === text)) continue;
+        const cheap = cheapest(id);
+        checked++;
+        if (cheap.index !== 0) asymmetric++;
+        if (text !== eur(cheap.price, "RU")) {
+          wrong.push(`${url} ${id}: card says «${text}», cheapest of ${JSON.stringify(v.prices)} is ${eur(cheap.price, "RU")}`);
+        }
+      }
+    }
+
+    expect(wrong, "card(s) not showing the cheapest volume's price").toEqual([]);
+    expect(checked, "no multi-volume card was checked — the sweep would be vacuous").toBeGreaterThan(5);
+    expect(asymmetric, "no product here has its cheapest volume anywhere but first — sizes[0] would pass this sweep")
+      .toBeGreaterThan(0);
+  });
+
+  test("no hairline under a card any more", async ({ page }) => {
+    await page.goto(shopUrl("", "/c/hair/"));
+    await waitForScreen(page, "catalog");
+    await expect(page.locator("#catgrid .card").first()).toBeVisible();
+
+    /* The rule the owner cut on 09.09.2026: «the add to cart button already
+       has it». Worth a test of its own because the line was drawn by a
+       `.card::after` that markLastRows() switched off row by row — it
+       measured every card after every paint, so a stylesheet that brings the
+       pseudo-element back gets a line under every card and nothing left to
+       turn it off. */
+    const line = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("#catgrid .card"))
+        .map((c) => getComputedStyle(c, "::after").content)
+        .filter((c) => c && c !== "none"));
+    expect(line, ".card::after is drawing something again").toEqual([]);
+    expect(await page.locator(".card--last").count(), "markLastRows() is back").toBe(0);
+  });
+});
+
+/* The viewport-sensitive half of the card, and the reason the desktop-only
+ * guard sits in the describes above rather than at the top of the file: a
+ * card is a 150px grid track on a 375px phone against 200px on a laptop, and
+ * everything the owner asked for on 09.09.2026 — a name clamped to two lines
+ * so «everything is on same height», a foot of two rows instead of one, the
+ * full «Lisa ostukorvi» in place of the shortened label — is a size the phone
+ * has least room for. An overflowing card there gives the whole page a
+ * sideways scroll, which is what the picker's own layout test used to guard
+ * and what must not be lost with it. Geometry, not text, so one language is
+ * enough (docs/testing.md). Run it with `--project=mobile` as well as
+ * desktop. */
+test.describe("product card — layout", () => {
+  // /c/merch/ is the worst case on purpose: a t-shirt's name and its ten
+  // «colour / size» variants are the longest strings in the catalogue.
+  // /c/hair/ is the ordinary case.
   for (const cat of ["hair", "merch"]) {
-    test(`every picker fits inside its card in /c/${cat}/ and adds no sideways scroll`, async ({ page }) => {
+    test(`every card in /c/${cat}/ is one height, its foot lines up, and the page never scrolls sideways`, async ({ page }) => {
       await page.goto(shopUrl("", `/c/${cat}/`));
       await waitForScreen(page, "catalog");
       await expect(page.locator("#catgrid .card").first()).toBeVisible();
 
-      const report = await page.evaluate(() => {
+      const report = await page.evaluate(async () => {
+        const grid = document.getElementById("catgrid")!;
+        /* Hold the nodes before scrolling: the scroll below reaches the
+           infinite-scroll sentinel and patchCatalog() may append a further
+           twelve behind our back — those are not what was measured. */
+        const cards = Array.from(grid.querySelectorAll<HTMLElement>(".card"));
+        /* styles.css gives every card `content-visibility: auto` with a
+           `contain-intrinsic-size` of 340px, so a card that has never been
+           near the viewport reports that placeholder instead of its real
+           height and "every card is the same height" would fail on the
+           bottom row for a reason that is not a bug. One pass down the page
+           lays them all out for good. */
+        for (let y = 0; y <= document.documentElement.scrollHeight; y += 400) {
+          window.scrollTo(0, y);
+          await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        }
+        window.scrollTo(0, 0);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
         const escaped: string[] = [];
-        const pickers = document.querySelectorAll<HTMLElement>("[data-cardfoot]");
-        pickers.forEach((sel) => {
-          const card = sel.closest(".card");
-          if (!card) {
-            escaped.push(`${sel.dataset.cardfoot}: no .card around the foot row`);
+        const heights = new Set<number>();
+        const rows = new Map<number, Array<{ price: number; add: number }>>();
+        cards.forEach((card, i) => {
+          const c = card.getBoundingClientRect();
+          const name = card.querySelector<HTMLElement>(".card__name");
+          const price = card.querySelector<HTMLElement>(".card__price");
+          const add = card.querySelector<HTMLElement>(".card__add");
+          if (!name || !price || !add) {
+            escaped.push(`card ${i}: name=${!!name} price=${!!price} add=${!!add}`);
             return;
           }
-          const s = sel.getBoundingClientRect();
-          const c = card.getBoundingClientRect();
-          // 1px of slack for sub-pixel layout rounding; the row must not wrap
-          // either (its height would then be two lines). On a phone the link
-          // reads «Lisa korvi» (styles.css .card__addtxt--short) and the size
-          // label is what gives way if anything must — never the row.
-          if (s.right > c.right + 1 || s.left < c.left - 1 || sel.scrollWidth > sel.clientWidth + 1 || s.height > 40) {
-            escaped.push(
-              `${sel.dataset.cardfoot}: foot ${Math.round(s.left)}…${Math.round(s.right)} h${Math.round(s.height)} sw${sel.scrollWidth}` +
-                ` vs card ${Math.round(c.left)}…${Math.round(c.right)}`,
-            );
+          heights.add(Math.round(c.height));
+          const p = price.getBoundingClientRect(), a = add.getBoundingClientRect();
+          const foot = card.querySelector<HTMLElement>(".card__foot")!.getBoundingClientRect();
+          const id = card.querySelector("[data-go-product]")?.getAttribute("data-go-product") ?? `card ${i}`;
+          // the foot has to stay inside the track it was given, and the link
+          // must not be cut off (it is one line, `white-space: nowrap`)
+          if (foot.right > c.right + 1 || foot.left < c.left - 1 || add.scrollWidth > add.clientWidth + 1) {
+            escaped.push(`${id}: foot ${Math.round(foot.left)}…${Math.round(foot.right)} sw${add.scrollWidth}/cw${add.clientWidth}` +
+              ` vs card ${Math.round(c.left)}…${Math.round(c.right)}`);
           }
+          // two rows, in that order — the price above, the link below
+          if (a.top < p.bottom) escaped.push(`${id}: «В корзину» sits on top of the price`);
+          const key = Math.round(c.top + window.scrollY);
+          if (!rows.has(key)) rows.set(key, []);
+          rows.get(key)!.push({ price: p.top + window.scrollY, add: a.top + window.scrollY });
         });
+
+        const ragged = Array.from(rows.entries())
+          .map(([top, cells]) => {
+            const spread = (k: "price" | "add") => Math.max(...cells.map((c) => c[k])) - Math.min(...cells.map((c) => c[k]));
+            return { top, n: cells.length, price: spread("price"), add: spread("add") };
+          })
+          .filter((r) => r.price > 1 || r.add > 1)
+          .map((r) => `row at ${r.top} (${r.n} cards): price tops differ by ${r.price.toFixed(2)}px, add tops by ${r.add.toFixed(2)}px`);
+
         return {
-          escaped,
-          count: pickers.length,
+          escaped, ragged,
+          cards: cards.length,
+          rows: rows.size,
+          heights: Array.from(heights),
           scrollWidth: document.documentElement.scrollWidth,
           clientWidth: document.documentElement.clientWidth,
         };
       });
 
-      expect(report.count, "no size pickers rendered — the check would be vacuous").toBeGreaterThan(0);
-      expect(report.escaped, "size picker(s) hanging out of their card").toEqual([]);
+      expect(report.cards, "no cards rendered — the check would be vacuous").toBeGreaterThan(0);
+      expect(report.escaped, "card foot / add link out of its card").toEqual([]);
+      /* More than one row, or "every card is the same height" is a statement
+         about one row that the grid's own `align-items: stretch` guarantees
+         for free — the clamp on .card__name is what makes two DIFFERENT rows
+         agree, and that is the regression worth catching. */
+      expect(report.rows, "only one row of cards — same-height would prove nothing").toBeGreaterThan(1);
+      expect(report.heights, "cards in this grid are not all the same height (.card__name lost its two-line clamp?)")
+        .toHaveLength(1);
+      expect(report.ragged, "the price / «В корзину» rows of one grid row do not line up").toEqual([]);
       expect(report.scrollWidth, "the catalogue must not scroll sideways").toBeLessThanOrEqual(report.clientWidth + 1);
     });
   }

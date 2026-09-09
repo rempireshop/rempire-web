@@ -119,9 +119,9 @@ for (const lang of LANGS) {
  * cards under an article — and, on top of it, the add link's own text: at
  * 2560 px the old 680 px column crammed the cards into two narrow tracks
  * and «Lisa ostukorvi» / «Anna teada, kui on laos» were cut off. Estonian
- * on purpose: its labels are the widest of the three. The text check is a
- * desktop concern — under 480 px the link reads «Lisa korvi», and a phone's
- * 155 px card shows the notify text with the catalogue's own ellipsis. */
+ * on purpose: its labels are the widest of the three, and since 09.09.2026
+ * every language says its label in full — the shortened «Lisa korvi» went
+ * when the card's foot became two rows and the link stopped sharing one. */
 test("every card under an article keeps its foot in the card and its add text whole (ET)", async ({ page }) => {
   await page.goto(shopUrl("/et", `/blog/${SLUGS[0]}/`));
   await waitForScreen(page, "blogpost");
@@ -130,22 +130,32 @@ test("every card under an article keeps its foot in the card and its add text wh
   const report = await page.evaluate(() => {
     const escaped: string[] = [];
     const wide = window.innerWidth >= 768;
-    const feet = document.querySelectorAll<HTMLElement>(".blog__shelf [data-cardfoot]");
-    feet.forEach((foot) => {
+    const feet = document.querySelectorAll<HTMLElement>(".blog__shelf .card__foot");
+    feet.forEach((foot, i) => {
       const card = foot.closest(".card");
-      if (!card) { escaped.push(`${foot.dataset.cardfoot}: no .card around the foot row`); return; }
+      if (!card) { escaped.push(`foot ${i}: no .card around it`); return; }
       const s = foot.getBoundingClientRect();
       const c = card.getBoundingClientRect();
-      if (s.right > c.right + 1 || s.left < c.left - 1 || foot.scrollWidth > foot.clientWidth + 1 || s.height > 40) {
+      if (s.right > c.right + 1 || s.left < c.left - 1 || foot.scrollWidth > foot.clientWidth + 1) {
         escaped.push(
-          `${foot.dataset.cardfoot}: foot ${Math.round(s.left)}…${Math.round(s.right)} h${Math.round(s.height)} sw${foot.scrollWidth}` +
+          `foot ${i}: ${Math.round(s.left)}…${Math.round(s.right)} sw${foot.scrollWidth}` +
             ` vs card ${Math.round(c.left)}…${Math.round(c.right)}`,
         );
       }
       const add = foot.querySelector<HTMLElement>(".card__add");
-      if (!add) { escaped.push(`${foot.dataset.cardfoot}: no add link in the foot`); return; }
+      if (!add) { escaped.push(`foot ${i}: no add link`); return; }
       if (wide && add.scrollWidth > add.clientWidth + 1) {
-        escaped.push(`${foot.dataset.cardfoot}: «${add.textContent?.trim()}» is clipped (sw${add.scrollWidth} > cw${add.clientWidth})`);
+        escaped.push(`foot ${i}: «${add.textContent?.trim()}» is clipped (sw${add.scrollWidth} > cw${add.clientWidth})`);
+      }
+      /* The foot is a column now: the price sits above the link, and the two
+         must not touch. The link stretches its hit area 13 px up to reach a
+         thumb-sized target and the gap is 14 px, so a tap on the price must
+         still land on the price. */
+      const price = foot.querySelector<HTMLElement>(".card__price");
+      if (price) {
+        const p = price.getBoundingClientRect();
+        const a = add.getBoundingClientRect();
+        if (a.top < p.bottom) escaped.push(`foot ${i}: the add link overlaps the price`);
       }
     });
     return {

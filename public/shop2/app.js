@@ -178,7 +178,7 @@
       "Пудры": "Puudrid", "Масла": "Õlid", "Бальзамы": "Palsamid",
       "После бритья": "Pärast raseerimist", "Тоники": "Toonikud", "Очищение": "Puhastus",
       "Кремы и сыворотки": "Kreemid ja seerumid",
-      "В корзину": "Lisa ostukorvi", "В корзину|short": "Lisa korvi", "мало": "viimased", "нет в наличии": "otsas",
+      "В корзину": "Lisa ostukorvi", "мало": "viimased", "нет в наличии": "otsas",
       "Главная": "Avaleht", "Каталог": "Kataloog", "Поиск": "Otsi", "Корзина": "Ostukorv",
       "Кабинет": "Konto", "Описание": "Kirjeldus", "Доставка и возврат": "Tarne ja tagastus",
       "Похожие товары": "Sarnased tooted", "Вместе лучше": "Sobivad kokku",
@@ -2445,7 +2445,7 @@
       "Пудры": "Powders", "Масла": "Oils", "Бальзамы": "Balms",
       "После бритья": "Aftershave", "Тоники": "Toners", "Очищение": "Cleansing",
       "Кремы и сыворотки": "Creams & serums",
-      "В корзину": "Add to cart", "В корзину|short": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
+      "В корзину": "Add to cart", "мало": "low stock", "нет в наличии": "out of stock",
       "Главная": "Home", "Каталог": "Catalogue", "Поиск": "Search", "Корзина": "Cart",
       "Кабинет": "Account", "Описание": "Description", "Доставка и возврат": "Delivery & returns",
       "Похожие товары": "Similar products", "Вместе лучше": "Better together",
@@ -5157,12 +5157,7 @@
          copy on an ET/EN panel and save the translation back as the article. */
       if (el && el.closest && el.closest("[data-blogbody]")) continue;
       var allowName = !!(el && el.closest && el.closest(NAME_CTX));
-      /* data-i18n-alt="short" asks for the dictionary's shorter wording of the
-         same Russian text («В корзину|short» → «Lisa korvi»): the phone card
-         shows it where «Lisa ostukorvi» does not fit the row. Falls back to
-         the ordinary translation when no such entry exists. */
-      var alt = el && el.getAttribute ? el.getAttribute("data-i18n-alt") : null;
-      var tr = alt && UI[lang] && UI[lang][t + "|" + alt] ? UI[lang][t + "|" + alt] : trText(t, lang, allowName);
+      var tr = trText(t, lang, allowName);
       if (tr !== t) node.nodeValue = raw.replace(t, tr);
     }
     var els = root.querySelectorAll ? root.querySelectorAll("[placeholder],[aria-label],[title]") : [];
@@ -6265,12 +6260,6 @@
        so it starts closed, and admPanesSave() remembers it per machine. */
     admAi: false,
     size: 0,
-    /* The size chosen in a product CARD's own picker (cardSizeHTML), by
-       product id — NOT in the DOM, so it survives every render()/patchCatalog
-       rebuild of the list and stays the same when the product shows up in two
-       lists at once (both home rails, a rail and «с этим покупают»). Absent =
-       the smallest size, which is what a card added before this existed. */
-    cardSize: {}, cardPop: null,
     qty: 1,
     gallery: 0,
     sort: "hit",
@@ -7763,32 +7752,46 @@
       '" style="background-image:url(\'' + src + '\')"></span>';
   }
 
-  /* ---------- size picker inside a product card ---------------------------
-     «В корзину» on a card used to add the smallest size, silently — the
-     shopper had to open the product to buy the 500 ml. Every card of a
-     multi-size product now carries its own picker, the price follows it, and
-     the add button puts THAT size in the cart (qty 1).
+  /* ---------- the volume a card speaks for --------------------------------
+     A card used to carry its own volume picker, so a shopper could take the
+     500 ml without opening the product. The owner took it off on 09.09.2026
+     — «размеры и мл не нужны» — and the card now shows one price for one
+     volume: the cheapest, which is also the one «В корзину» baskets.
 
-     A native <select>, not a chip row, everywhere: a card is 150px wide on a
-     phone and merch runs to ten «colour / size» variants, which is a wrapped
-     three-line chip block on a 375px screen — the native control is one line
-     at any width, gets the system wheel on a phone, and is keyboard- and
-     screen-reader-operable for free. The label goes in aria-label rather than
-     a visible <span> so the card keeps its height (translateTree() rewrites
-     aria-label like any text, and «Объём»/«Размер» are both dictionary keys).
-
-     The option text is the raw size string: «75 мл» is covered by a UI_RX
-     rule (→ «75 ml»), and merch variants are Latin already — so nothing new
-     has to be translated, and no Cyrillic leaks into the ET/EN card. */
+     Nothing is hidden by that. addToCart() names the volume in its toast,
+     lineLabel() prints it on the cart line, and the product page still sells
+     every volume there is. What went is the choice being offered twice, in a
+     150px box, before the shopper has decided they want the thing at all. */
   function cardSizes(p) {
     return p.sizes && p.sizes.length > 1 ? p.sizes : [];
   }
-  /** The card's chosen size index, clamped — an id whose product lost sizes
-   *  (an admin edit between two renders) must not index past the list. */
+  /** Which of a product's volumes the card speaks for.
+   *
+   *  There is no picker on the card any more (owner, 09.09.2026: «размеры и
+   *  мл не нужны»), so one volume has to answer for all of them, and it is
+   *  the cheapest — the number a shopper scanning a shelf should see, and the
+   *  one «В корзину» puts in the basket.
+   *
+   *  Chosen by price, never by position: the list is not always ordered by
+   *  size. RE.STORE is 36 € for 40 мл and 7 € for 200 мл, so `sizes[0]` would
+   *  have shown the dearest of the two. The comparison runs on the price the
+   *  card would actually print, so a salon customer's own price decides it
+   *  for a salon customer. */
   function cardSizeIdx(id) {
-    var p = byId(id), n = (p.sizes || []).length;
-    var i = Number(S.cardSize[id]);
-    return i > 0 && i < n ? i : 0;
+    var p = byId(id), sizes = (p && p.sizes) || [];
+    if (sizes.length < 2) return 0;
+    var best = 0, bestPr = shownPrice(p, 0);
+    for (var i = 1; i < sizes.length; i++) {
+      var pr = shownPrice(p, i);
+      if (pr < bestPr) { best = i; bestPr = pr; }
+    }
+    return best;
+  }
+  /** The price the card prints for volume `i` — the salon price where there
+      is one, the shelf price otherwise. */
+  function shownPrice(p, i) {
+    var pro = proPrice(p, i);
+    return pro != null ? pro : sizePrice(p, i);
   }
   /** Price text for a card at size `i`. «от » survives only where there is
    *  nothing to pick: with a picker the price shown IS the chosen size's, so
@@ -7799,52 +7802,18 @@
     var pro = proPrice(p, idx);
     return (!multi && p.priceFrom ? "от " : "") + eur(pro != null ? pro : (multi ? sizePrice(p, idx) : p.price));
   }
-  /* The size trigger: plain text with a chevron, no border, no background —
-     the size reads as part of the price line, not as a form control. The
-     listbox under it (cardPopHTML) is a sibling absolutely positioned under
-     the row, so it spans the card and never widens it. One popover per grid:
-     S.cardPop holds the open card's id. */
-  function cardSizeLabel(p) { return p.cat === "merch" ? "Размер" : "Объём"; }
-  function cardSizeHTML(p) {
-    var sizes = cardSizes(p);
-    if (!sizes.length) return "";       // single size: no control at all
-    var cur = cardSizeIdx(p.id), open = S.cardPop === p.id;
-    /* The name reads «Объём 75 мл»: the label is a visually hidden span (the
-       card keeps its height, translateTree() still finds the word) and the
-       size the shopper can see stays part of the name — an aria-label of
-       «Объём» alone hid the visible «75 мл» from voice control (WCAG 2.5.3). */
-    return '<button type="button" class="card__sizebtn" data-cardsizeopen="' + p.id + '" aria-haspopup="listbox"' +
-      ' aria-expanded="' + open + '">' +
-      '<span class="vh">' + cardSizeLabel(p) + "</span>" +
-      '<span class="card__sizelbl">' + esc(sizes[cur]) + "</span>" + '<svg class="card__chev" width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>' + "</button>";
-  }
-  function cardPopHTML(p) {
-    var sizes = cardSizes(p), cur = cardSizeIdx(p.id);
-    if (!sizes.length || S.cardPop !== p.id) return "";
-    return '<div class="card__pop" role="listbox" aria-label="' + cardSizeLabel(p) + '" data-cardpop="' + p.id + '">' +
-      sizes.map(function (sz, i) {
-        var pro = proPrice(p, i);
-        return '<button type="button" class="card__opt" role="option" aria-selected="' + (i === cur) + '" data-cardsizepick="' + p.id + ":" + i + '">' +
-          "<span>" + esc(sz) + "</span><span class=\"card__optpr num\">" + eur(pro != null ? pro : sizePrice(p, i)) + "</span></button>";
-      }).join("") + "</div>";
-  }
-  /* The whole foot row as one string, so a size change or a popover toggle
-     can rebuild just this row in place (patchCardFoot) — the photo and the
-     title above it stay put, nothing flickers, focus is re-placed by hand. */
+  /* Two rows: the price, and «В корзину» under it. Nothing in here changes
+     after it is drawn any more — the size picker was the only thing that
+     rebuilt a foot in place — so this is plain markup with no patch path
+     behind it. */
   function cardFootInnerHTML(p) {
-    var i = cardSizeIdx(p.id);
-    return '<span class="card__price num" data-cardpr>' + cardPriceText(p, i) + "</span>" +
-      (p.stock === "out" ? "" : cardSizeHTML(p)) +
-      '<span class="card__sp"></span>' +
+    return '<span class="card__price num">' + cardPriceText(p, cardSizeIdx(p.id)) + "</span>" +
       (p.stock === "out"
-        // out of stock keeps the row, so prices and links line up across the
-        // grid — the link leads to the product page, where the «сообщить о
+        // out of stock keeps its row, so every card in the grid is the same
+        // height — the link leads to the product page, where the «сообщить о
         // наличии» form lives
         ? '<button type="button" class="card__add card__add--notify" data-go-product="' + p.id + '">Сообщить о наличии</button>'
-        // the text on wide cards, the bag icon (spec variant 2b) on a phone's
-        // 155px card — CSS picks; the text stays for screen readers
-        : '<button type="button" class="card__add" data-add="' + p.id + '"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
-      cardPopHTML(p);
+        : '<button type="button" class="card__add" data-add="' + p.id + '">В корзину</button>');
   }
 
   function cardHTML(p) {
@@ -7869,11 +7838,11 @@
       "</button>" +
       /* The foot is a sibling of the card button, not inside it: a control
          inside a <button> is invalid markup and every tap on it would open
-         the product. One row — price · size · «В корзину» — pinned to the
-         card bottom by margin-top:auto, so rows line up across one- and
-         two-line titles. Stock and salon-price flags sit on the photo
-         instead of beside the price: the row must never wrap. */
-      '<div class="card__foot" data-cardfoot="' + p.id + '">' + cardFootInnerHTML(p) + "</div>" +
+         the product. Two rows — the price, «В корзину» under it — and the
+         name above is always two lines tall, so both land on the same height
+         in every card of a row. Stock and salon-price flags sit on the photo,
+         not beside the price. */
+      '<div class="card__foot">' + cardFootInnerHTML(p) + "</div>" +
       "</div>";
   }
 
@@ -8024,9 +7993,9 @@
   }
   function bundleCardHTML(b) {
     var out = b.stock === "out";
-    // the same foot row as a product card (cardFootInnerHTML): price with the
-    // crossed-out sum of the parts, a spacer, «В корзину» — so a grid that
-    // mixes sets and products keeps one rhythm
+    // the same two rows as a product card (cardFootInnerHTML): the price —
+    // here with the crossed-out sum of the parts — and «В корзину» under it,
+    // so a grid that mixes sets and products keeps one rhythm
     return '<div class="card card--bundle">' +
       '<button class="card__go" data-go-bundle="' + b.id + '">' +
         '<span class="card__media">' + bundleStack(b, "bstack--card") +
@@ -8038,10 +8007,9 @@
       "</button>" +
       '<div class="card__foot">' +
         '<span class="card__price num">' + eur(b.price) + ' <s class="bwas">' + eur(b.sum) + "</s></span>" +
-        '<span class="card__sp"></span>' +
         (out
           ? '<button type="button" class="card__add card__add--notify" data-go-bundle="' + b.id + '">Смотреть</button>'
-          : '<button type="button" class="card__add" data-addbundle="' + b.id + '"><span class="card__addtxt">В корзину</span><span class="card__addtxt card__addtxt--short" data-i18n-alt="short">В корзину</span><svg class="card__bag" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.5h10l-.8 8.5H3.8L3 5.5zM5.5 5.5V4a2.5 2.5 0 0 1 5 0v1.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></button>') +
+          : '<button type="button" class="card__add" data-addbundle="' + b.id + '">В корзину</button>') +
       "</div>" +
       "</div>";
   }
@@ -24662,36 +24630,11 @@
     // «Назад» closes an open card: one parked history entry, kept in step with
     // what is actually open, so no opener has to remember to park one
     admSyncHistory();
-    markLastRows();
     requestAnimationFrame(function () {
       renderQueued = false;
-      if (renderPending) { renderPending = false; renderImpl(); markLastRows(); }
+      if (renderPending) { renderPending = false; renderImpl(); }
     });
   }
-
-  /* The hairline under a card closes the product off (styles.css, .card::after).
-     The last row of a grid has nothing below it to close off, so its cards get
-     .card--last and lose the line. Rows are found by measuring — the column
-     count follows the viewport — after every paint and on resize. */
-  function markLastRows() {
-    var grids = document.querySelectorAll(".grid");
-    for (var g = 0; g < grids.length; g++) {
-      var cards = grids[g].querySelectorAll(".card");
-      if (!cards.length) continue;
-      var tops = [], maxTop = -Infinity;
-      for (var i = 0; i < cards.length; i++) {
-        var t = Math.round(cards[i].getBoundingClientRect().top);
-        tops.push(t);
-        if (t > maxTop) maxTop = t;
-      }
-      for (var j = 0; j < cards.length; j++) cards[j].classList.toggle("card--last", tops[j] >= maxTop - 1);
-    }
-  }
-  var markLastRowsTimer = null;
-  window.addEventListener("resize", function () {
-    clearTimeout(markLastRowsTimer);
-    markLastRowsTimer = setTimeout(markLastRows, 120);
-  }, { passive: true });
 
   /* Size, colour, gallery and quantity clicks on the product page patch in
      place — a full render destroyed the focused button, so a keyboard user
@@ -24727,51 +24670,6 @@
     });
     var cn = document.querySelector("[data-colourname]");
     if (cn && cur.length === 2) cn.textContent = colourRu(cur[0]);
-  }
-
-  /* A card's size picker, same reasoning as patchPdp(): a full render() would
-     destroy the <select> the shopper is standing on, and on a phone that
-     closes the system wheel mid-choice. Only the price text changes, so patch
-     it — across the whole page, because one product can sit in two lists at
-     once (both home rails, a rail and «с этим покупают») and both copies must
-     agree with the one value in S.cardSize. eur() reads S.lang itself, so the
-     patched text needs no translateTree() pass. */
-  /* Rebuilds every foot row of one product in place (the same product can
-     sit in two rails on the home page) and translates the fresh Russian
-     markup. `focusSel` names what to focus afterwards: the trigger when a
-     popover closes, the selected option when it opens. */
-  function patchCardFoot(id, focusSel) {
-    var p = byId(id);
-    if (!p) return;
-    var feet = document.querySelectorAll('[data-cardfoot="' + id + '"]');
-    for (var k = 0; k < feet.length; k++) {
-      feet[k].innerHTML = cardFootInnerHTML(p);
-      translateTree(feet[k]);
-      // .card--pop lifts the card's paint containment so the listbox can hang below it
-      var card = feet[k].closest(".card");
-      if (card) card.classList.toggle("card--pop", S.cardPop === id);
-    }
-    if (focusSel) {
-      var el = document.querySelector(focusSel);
-      if (el) el.focus();
-    }
-  }
-  function openCardPop(id) {
-    var prev = S.cardPop;
-    S.cardPop = id;
-    if (prev && prev !== id) patchCardFoot(prev);
-    patchCardFoot(id, '[data-cardsizepick="' + id + ":" + cardSizeIdx(id) + '"]');
-  }
-  function closeCardPop(focusTrigger) {
-    var id = S.cardPop;
-    if (!id) return;
-    S.cardPop = null;
-    patchCardFoot(id, focusTrigger ? '[data-cardsizeopen="' + id + '"]' : null);
-  }
-  function pickCardSize(id, i) {
-    S.cardSize[id] = Number(i) || 0;
-    S.cardPop = null;
-    patchCardFoot(id, '[data-cardsizeopen="' + id + '"]');
   }
 
   /* Quantity steppers patch the numbers in place. Rebuilding the drawer would
@@ -24994,7 +24892,6 @@
     if (chips) chips.outerHTML = activeChips();
     translateTree(bodySlot);
     observeSentinel();
-    markLastRows();
   }
 
   /* ---------- history ----------
@@ -25318,11 +25215,11 @@
   function addToCart(id, sizeIdx) {
     // backstop: nothing out of stock enters the cart, whatever button sent it
     if (byId(id).stock === "out") { toast("Товара нет в наличии"); return; }
-    /* Off the product page the size is the one the card's own picker holds
-       (S.cardSize, cardSizeIdx) — 0 for a single-size product and for anything
-       nobody has touched, so every existing caller behaves exactly as before.
-       This covers the card «В корзину», the drawer's free-shipping upsell and
-       «Купить через …» alike, none of which carry a size of their own. */
+    /* Off the product page the volume is the one the card printed a price
+       for — the cheapest, see cardSizeIdx(). The card «В корзину», the
+       drawer's free-shipping upsell and «Купить сейчас» all come through
+       here, none of them carrying a volume of their own, and all three now
+       basket the volume the shopper was quoted. The toast below names it. */
     var si = sizeIdx === undefined
       ? (S.productId === id && S.screen === "product" ? S.size : cardSizeIdx(id))
       : sizeIdx;
@@ -25343,7 +25240,8 @@
     // adding from INSIDE the open drawer (the free-shipping upsell) must
     // redraw the lines and totals, or the tap looks like it did nothing
     if (S.cartOpen) rebuildCart();
-    // a card with a size picker says which size went in — «Добавлено: Un.Tangled Spray · 150 мл»
+    // a multi-volume product says which volume went in, because the card no
+    // longer shows one — «Добавлено: Un.Tangled Spray · 150 мл»
     var addedP = byId(id);
     toast(cardSizes(addedP).length && !(S.screen === "product" && S.productId === id)
       ? "Добавлено: " + addedP.name + " · " + addedP.sizes[si]
@@ -25488,8 +25386,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    if (S.cardPop && !e.target.closest(".card__pop, [data-cardsizeopen]")) closeCardPop(false);
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cardsizeopen],[data-cardsizepick],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -25577,15 +25474,6 @@
     }
     if (d.unstock !== undefined) { S.onlyInStock = false; S.shown = 12; patchCatalog(); return; }
     if (d.slide) { setSlide(S.slide + Number(d.slide), true); return; }
-    if (d.cardsizeopen !== undefined) {
-      if (S.cardPop === d.cardsizeopen) closeCardPop(true); else openCardPop(d.cardsizeopen);
-      return;
-    }
-    if (d.cardsizepick !== undefined) {
-      var pk = d.cardsizepick.split(":");
-      pickCardSize(pk[0], pk[1]);
-      return;
-    }
     if (d.langtoggle !== undefined) { S.langOpen = !S.langOpen; patchHeader(); return; }
     // full render, not just the header: descriptions, legal pages and the
     // whole chrome follow the language. The persistent slots are rebuilt from
@@ -28025,21 +27913,6 @@
   }, true);
 
   document.addEventListener("keydown", function (e) {
-    /* the card's size popover: Esc closes, arrows walk the options, Enter
-       and Space pick (they are buttons, so the click handler does the rest) */
-    if (S.cardPop) {
-      if (e.key === "Escape") { e.preventDefault(); closeCardPop(true); return; }
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        var opts = document.querySelectorAll('[data-cardpop="' + S.cardPop + '"] [data-cardsizepick]');
-        if (!opts.length) return;
-        e.preventDefault();
-        var at = -1;
-        for (var oi = 0; oi < opts.length; oi++) if (opts[oi] === document.activeElement) at = oi;
-        var next = at < 0 ? 0 : (at + (e.key === "ArrowDown" ? 1 : opts.length - 1)) % opts.length;
-        opts[next].focus();
-        return;
-      }
-    }
     if (e.key === "Escape") {
       /* the scanner's viewfinder covers the whole panel, so it answers first —
        * except on /shop2/scan/, where the scanner IS the screen and Escape has

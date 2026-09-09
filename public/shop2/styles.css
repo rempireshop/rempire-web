@@ -460,110 +460,59 @@ body:has(.stickybar) .ftr {
 }
 .card__brand { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .card__name { font-size: 13px; line-height: 1.35; }
-/* The card foot (size picker variant 2a): price · size trigger · spacer ·
-   «В корзину» on one line that never wraps, pinned to the card bottom by
-   margin-top:auto so rows align across one- and two-line titles. The size
-   trigger is text with a chevron — no border, no background — and its
-   listbox opens under the row, spanning the card. */
-.card__name { margin: 4px 0 4px; }
-/* a rail is one row — nothing under it to close off */
-.rail .card::after { display: none; }
-/* The row (06.09, owner's call after Renat's note): price on the left,
-   «В корзину» on the right as before, but pulled up close under the name,
-   and CLOSED by a hairline under it rather than opened by one above — the
-   line under the row says «this product ends here», where a line above it
-   read as «the next one starts here». The last row of a grid has no line:
-   app.js marks those cards .card--last after every render and on resize,
-   because the column count changes with the viewport. */
-/* The line lives INSIDE the card's box (padding-bottom, line at bottom:0):
-   cards carry content-visibility:auto, whose paint containment clips anything
-   drawn outside the box — a line hung 10 px below the card never painted. */
-.card { position: relative; padding-bottom: 6px; box-sizing: border-box; }
-.card::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
-  border-top: 1px solid rgba(28, 26, 0, .13); pointer-events: none;
+/* Exactly two lines, always — «make sure everything is on same height».
+   A one-line name still occupies two, so the price and «В корзину» beneath it
+   land on the same height in every card of a row; a longer one is cut with an
+   ellipsis, which happens to 43 of the 220 products and never to the brand,
+   the price or the button. The full name is on the product page. */
+.card__name {
+  margin: 4px 0 4px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* the box the two lines sit in, whether or not there are two of them */
+  min-height: calc(2 * 1.35em);
 }
-.card--last::after { display: none; }
-/* The row is pinned to the card's bottom (margin-top:auto), so every price
-   and «В корзину» in a grid row sit on one height whatever the name's line
-   count, and the line runs 6 px under them as one straight rule. */
+/* No line between products (owner, 09.09.2026): «the add to cart button
+   already has it» — the underline under «В корзину» closes each card off, so
+   the hairline that used to run under the whole card is gone, and with it
+   markLastRows(), which measured every card after every paint just to leave
+   the bottom row's line undrawn. */
+.card { position: relative; box-sizing: border-box; }
+/* Two rows, left-aligned: the price, «В корзину» under it. Pinned to the
+   card's bottom, though with the name fixed at two lines every foot already
+   starts at the same height — this only catches a card whose photo failed to
+   load at the declared ratio. */
 .card__foot {
-  position: relative; display: flex; align-items: center; gap: 6px;
-  margin-top: auto; padding-top: 4px; min-height: 30px; white-space: nowrap;
+  position: relative; display: flex; flex-direction: column; align-items: flex-start;
+  /* 14px, and it is load-bearing, not taste: the add link stretches its own
+     hit area 13px upwards (.card__add::before) to reach a thumb-sized target,
+     and anything less than that here would put the invisible half of the
+     button on top of the price — a tap on «9 €» would add to the basket. */
+  gap: 14px; margin-top: auto; padding-top: 6px;
 }
-.card__sp { flex: 1 1 0 !important; min-width: 0; }
-.card__foot > * { flex: none; }
-.card__price { font-size: 13px; font-weight: 600; }
-.card__sizebtn {
-  display: inline-flex; align-items: center; gap: 4px; padding: 0; margin: 0;
-  border: 0; background: none; font: inherit; font-size: 11px; line-height: 1.5;
-  color: rgba(28, 26, 0, .6); cursor: pointer; touch-action: manipulation;
-  /* the visual stays 11px tall; the hit area is stretched to the touch minimum */
-  position: relative;
-}
-/* vertical only: a horizontal reach would poke past the card and give the
-   row a scroll width wider than the card */
-.card__sizebtn::before { content: ""; position: absolute; inset: -14px 0; }
-/* .card carries content-visibility:auto (paint containment) for the long
-   grids, which would clip a popover that hangs below the card — lifted for
-   the one card whose listbox is open. scroll-margin keeps an option that is
-   scrolled into view (keyboard, tests) from landing under the sticky header. */
-.card.card--pop { content-visibility: visible; contain: none; position: relative; z-index: 6; }  /* .card.card--pop outranks the @supports content-visibility rule below */
-.card__pop, .card__opt { scroll-margin-top: 170px; scroll-margin-bottom: 24px; }
-.card__sizebtn:hover, .card__sizebtn[aria-expanded="true"] { color: var(--ink); }
-.card__sizebtn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-.card__chev { flex: none; transition: transform .16s ease; }
-.card__sizebtn[aria-expanded="true"] .card__chev { transform: rotate(180deg); }
+/* nowrap belongs here rather than on the foot, which is a column now: a price
+   must not break, but «Сообщить о наличии» has to be allowed to. */
+.card__price { font-size: 13px; font-weight: 600; white-space: nowrap; }
 .card__add {
   display: inline-block; padding: 0; margin: 0; border: 0; border-bottom: 1px solid rgba(28, 26, 0, .4);
   background: none; font: inherit; font-size: 11px; line-height: 1.5; color: var(--ink);
   cursor: pointer; text-decoration: none; touch-action: manipulation; position: relative;
 }
-.card__add::before { content: ""; position: absolute; inset: -14px 0; }
+/* The thumb target, 43px tall around an 11px line. It reaches 13px up and
+   14px down: up stops inside the foot's 14px gap, short of the price; down
+   runs into the grid's 32px row gap, well short of the next card's photo. */
+.card__add::before { content: ""; position: absolute; inset: -13px 0 -14px; }
 .card__add:hover { border-bottom-color: var(--ink); }
 .card__add:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-.card__add--notify { color: var(--muted); border-bottom-color: rgba(28, 26, 0, .25); flex: 0 1 auto !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-/* Wide cards: one row, «7,90 € · 75 мл · В корзину». Should a size label ever
-   be too long for a wide card, it is the part that gives way (ellipsis; the
-   listbox shows every size in full) — the price and the link never are.
-   The bag icon in the markup is unused. */
-.card__bag { display: none; flex: none; }
-.card__sizebtn { flex: 0 1 auto !important; min-width: 0; }
-.card__sizelbl { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* Phone cards (two per row, 155–190 px): the row stays, but Estonian gets its
-   shorter wording — the link carries two spans with the same Russian text,
-   and translateTree() gives the second one the dictionary's «|short» entry
-   («Lisa korvi» instead of «Lisa ostukorvi», owner's call 04.09). CSS shows
-   one span per viewport. A set's old price steps aside on the narrowest
-   phones — the «−13 %» flag on the picture says the same thing. */
-.card__addtxt--short { display: none; }
-@media (max-width: 480px) {
-  .card__add .card__addtxt { display: none; }
-  .card__add .card__addtxt--short { display: inline; }
-}
+/* «Сообщить о наличии» is the longest label on any card and it owns a whole
+   row now, so it wraps rather than being cut. */
+.card__add--notify { color: var(--muted); border-bottom-color: rgba(28, 26, 0, .25); white-space: normal; }
+/* A set's crossed-out old price steps aside on the narrowest phones — the
+   «−13 %» flag on the picture already says the same thing. */
 @media (max-width: 360px) { .card__price .bwas { display: none; } }
-/* the listbox */
-.card__pop {
-  position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 5;
-  background: #fdfcf9; border: 1px solid var(--ink); box-shadow: 0 8px 24px rgba(28, 26, 0, .14);
-  white-space: normal; animation: cardpop .16s ease;
-}
-@keyframes cardpop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-.card__opt {
-  display: flex; justify-content: space-between; gap: 12px; width: 100%;
-  padding: 9px 12px; border: 0; background: none; font: inherit; font-size: 12.5px;
-  text-align: left; color: var(--ink); cursor: pointer;
-}
-.card__opt:hover, .card__opt:focus-visible { background: rgba(28, 26, 0, .06); }
-/* a 6 % tint alone is not a focus indicator anyone can see — the ring, kept
-   inside the popover so it never spills past its edge */
-.card__opt:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
-.card__opt[aria-selected="true"] { font-weight: 600; background: rgba(28, 26, 0, .05); }
-.card__optpr { color: rgba(28, 26, 0, .7); font-weight: 400; }
-/* stock / salon-price flags live on the photo so the foot row never wraps */
+/* stock / salon-price flags live on the photo, not beside the price */
 .card__flags { position: absolute; left: 6px; top: 6px; display: flex; gap: 4px; pointer-events: none; }
 .card__flag { background: var(--page); }
-@media (prefers-reduced-motion: reduce) { .card__pop { animation: none; } .card__chev { transition: none; } }
 
 .chip {
   display: inline-block; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
@@ -2002,6 +1951,19 @@ button, a, summary, label { touch-action: manipulation; }
    title underlines and the cover lifts a touch — quiet, like the product
    cards' own hover, not a box appearing around it. */
 .blog__tile { text-decoration: none; color: inherit; cursor: pointer; }
+/* The line between articles. It used to come from .card::after, which every
+   blog tile inherited by also carrying the class; that line went when the
+   product cards lost theirs (owner, 09.09.2026), and an article has no
+   «В корзину» underneath it to close it off in the way a product now does.
+   So it is the tile's own rule. The last one has nothing below it to
+   separate from — on a phone the grid is a single column, where :last-child
+   is exactly the bottom row, and that is the screen this is read on. */
+.blog__tile { position: relative; padding-bottom: 6px; }
+.blog__tile::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  border-top: 1px solid rgba(28, 26, 0, .13); pointer-events: none;
+}
+.blog__grid > li:last-child .blog__tile::after { display: none; }
 .blog__tile .blog__tileimg { transition: transform .4s var(--ease); }
 @media (hover: hover) {
   .blog__tile:hover .blog__tiletitle, .blog__tile:hover .pre__nm { text-decoration: underline; text-underline-offset: 3px; }

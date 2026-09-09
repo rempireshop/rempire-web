@@ -271,8 +271,10 @@
   ];
 
   const OPTS = [
-    { id: "now", name: "Как сейчас", now: true,
-      note: "Цена, объём и «В корзину» — всё в одну строчку под названием." },
+    { id: "live", name: "Одна цена, кнопка прописью", now: true,
+      note: "Выбрано 09.09.2026 и уже стоит в магазине. Цена отдельной строкой, «В корзину» под ней прописью. Объёма на карточке нет: цена показана за самый маленький, он же и кладётся в корзину — какой именно, написано и во всплывающей подсказке, и в корзине." },
+    { id: "now", name: "Как было раньше",
+      note: "Цена, объём и «В корзину» — всё в одну строчку под названием. Это то, что стояло в магазине до 09.09.2026." },
     { id: "s3", name: "Объёмы кнопками, цена в кнопке",
       note: "Объёмы видно сразу, нажимать не нужно. Цена стоит прямо в кнопке — там, куда и так тянется палец." },
     { id: "s", name: "Объёмы кнопками, цена отдельно",
@@ -330,6 +332,14 @@
 
     if (o === "s3") return '<div class="foot"><div class="row">' + sizeButtons(p, o, i) + '</div><div class="row">' + buyPriced + "</div>" + popup(p, o, i) + "</div>";
     if (o === "s") return '<div class="foot"><div class="row">' + price + '</div><div class="row">' + sizeButtons(p, o, i) + '</div><div class="row">' + buy + "</div>" + popup(p, o, i) + "</div>";
+    if (o === "live") {
+      /* No volume at all: one price, one link under it. The price is the
+         cheapest of the volumes and carries no «от» — the shop quotes the
+         volume it is about to put in the basket, not a range. */
+      const low = '<span class="price">' + esc(eur(Math.min.apply(null, p.prices))) + "</span>";
+      return '<div class="foot" style="min-height:52px;row-gap:14px"><div class="row">' + low + '</div><div class="row">' +
+        (out ? '<button class="link">Сообщить о наличии</button>' : '<button class="link">В корзину</button>') + "</div></div>";
+    }
     if (o === "two") {
       const sz = p.sizes.length > 1
         ? '<button class="szb" data-pop="' + o + "|" + i + '">' + esc(p.sizes[idx]) + ' <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button>'
