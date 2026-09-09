@@ -923,7 +923,7 @@ gone because Postgres blinked.
 | `e2e/scanner-app.spec.ts` | The standalone scanner route `/shop2/scan/`, desktop + mobile — see below |
 | `e2e/sweep-helpers.ts` | The admin sweep's watchdog (`assertClean`), seeded PRNG and admin plumbing — not a spec file |
 | `e2e/__screenshots__/` | Visual baselines — see above |
-| `tools/e2e-build.mjs` | Cross-platform prebuild step for the suite — SEO prerender + generated-file packers, ahead of `next dev` (env vars via `child_process`, not shell syntax) |
+| `tools/e2e-build.mjs` | Cross-platform prebuild step for the suite — SEO prerender + generated-file packers + `minify-shop2` (the shell links the gitignored `app.min.js`, so without it every page loads a 404 and nothing paints), ahead of `next dev` (env vars via `child_process`, not shell syntax) |
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
 | `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts`, `src/app/api/e2e/mail/route.ts` | The three test-only routes — see above |
 | `e2e/giftcard.spec.ts` | The gift card: three languages of buy → issue → redeem, plus «Электронная доставка» and the printable PDF — see above |

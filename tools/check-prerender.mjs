@@ -12,7 +12,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { assetToken } from "./lib/asset-token.mjs";
+import { assetToken, currentToken } from "./lib/asset-token.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -54,7 +54,10 @@ let sharp = null;
 try { ({ default: sharp } = await import("sharp")); } catch { /* dimensions unchecked */ }
 
 const shell = (await readFile(path.join(SHOP2, "index.html"), "utf8")).replace(/\r\n?/g, "\n");
-const ASSET_V = (shell.match(/app\.js\?v=([^"']*)/) || [])[1];
+/* currentToken(), not a regex of its own: which tag carries the shared token
+   is a rule, and a second copy of it here drifted the day the shell started
+   linking the built app.min.js instead of app.js. */
+const ASSET_V = currentToken(shell);
 const SCRIPTS = (shell.match(/<!-- prerender:end -->\s*<\/div>\s*([\s\S]*?)<\/body>/) || [])[1];
 if (!ASSET_V || !SCRIPTS) {
   console.error("FAIL public/shop2/index.html: no ?v= token or no script block after #app");

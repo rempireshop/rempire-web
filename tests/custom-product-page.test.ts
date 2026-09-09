@@ -170,7 +170,7 @@ describe("a custom product's page at request time", () => {
     expect(html).toContain('<div class="acc__rich"><p>Habemepalsam.</p></div>');
     expect(html).toContain(`href="/shop2/et/b/proraso/"`);
     // the shell's own assets travel unchanged
-    expect(html).toContain('<script src="/shop2/app.js?v=');
+    expect(html).toContain('<script src="/shop2/app.min.js?v=');
     expect(html).toContain("<!-- seo:end -->");
   });
 

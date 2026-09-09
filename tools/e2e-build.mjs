@@ -73,6 +73,11 @@ const steps = [
   ["node", ["tools/pack-content.mjs"]],
   ["node", ["tools/pack-legal.mjs"]],
   ["node", ["tools/copy-vendor.mjs"]],
+  /* public/shop2/app.min.js — what the shell links and therefore the only
+     copy of the shop a browser in this suite ever runs. Gitignored, so
+     without this step `next dev` serves a 404 for it and every spec fails on
+     an empty page. Before the prerender, which reads the shell it patches. */
+  ["node", ["tools/minify-shop2.mjs"]],
   ["node", ["tools/prerender-shop2.mjs"]],
 ];
 

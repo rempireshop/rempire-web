@@ -295,7 +295,7 @@ async function guardPage(page: Page): Promise<Guard> {
   };
   /* Same-origin responses the browser actually fetched. A 404 here is the shape
      of the stale-token bug seen from the other side: the shell asks for
-     /shop2/app.js?v=<token> and the static layer has never heard of it. The
+     /shop2/app.min.js?v=<token> and the static layer has never heard of it. The
      document itself is exempt — one of the pages this suite visits on purpose
      is a 404, and its own status is asserted by visit(). */
   page.on("response", (res) => {
@@ -427,8 +427,9 @@ test.describe(`deployed shop — ${BASE}`, () => {
       const { kinds } = await discover(request);
       /* One policy page rather than five: the five differ only in the prose
          inside a screen whose rendering the first of them already proved, and
-         a browser load of a deployed page costs a real 845 KB app.js. The
-         other four are checked as served HTML by the test above. */
+         a browser load of a deployed page costs a real app.min.js download —
+         240 KB over the wire and 1.3 MB to parse. The other four are checked
+         as served HTML by the test above. */
       const walk = kinds.filter((k) => !k.kind.startsWith("info:") || k.kind === "info:privacy");
       const g = await guardPage(page);
       for (const { kind, path, screen } of walk) {
@@ -731,7 +732,7 @@ test.describe(`deployed shop — ${BASE}`, () => {
     const cases: Array<{ url: string; strict: boolean }> = [
       { url: abs("/shop2/"), strict: true },
       ...kinds.filter((k) => k.kind === "product").map((k) => ({ url: abs(k.path), strict: true })),
-      { url: abs(`/shop2/app.js?v=${token}`), strict: true },
+      { url: abs(`/shop2/app.min.js?v=${token}`), strict: true },
       { url: abs("/api/geo/"), strict: false },
     ];
 

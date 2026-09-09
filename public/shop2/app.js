@@ -7058,7 +7058,12 @@
     try {
       if (!chatWanted()) return;
       if (document.querySelector('script[data-shopchat]')) return;
-      var app = document.querySelector('script[src*="/shop2/app.js"]');
+      /* `/shop2/app` and not `/shop2/app.js`: the shell links the built
+         app.min.js (tools/minify-shop2.mjs), so a selector naming the source
+         matches nothing, and the line below then hands chat.js no ?v= at all
+         — a browser would go on running whatever copy of the assistant it
+         already had. Matches either name. */
+      var app = document.querySelector('script[src*="/shop2/app"]');
       var v = ((app && app.getAttribute("src")) || "").split("?")[1];
       var s = document.createElement("script");
       s.defer = true;

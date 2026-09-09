@@ -225,8 +225,11 @@ The company details, the socials and the contact-page intro come from
 `src/lib/content.ts`. A missing file is not fatal; the prerender says so and
 falls back to built-in constants.
 
-`prebuild` is `pack-migrations` → `pack-content` → `prerender`, so
-`npm run build` regenerates everything before `next build`.
+`prebuild` is `pack-migrations` → `pack-content` → `pack-legal` →
+`copy-vendor` → `minify-shop2` → `prerender`, so `npm run build` regenerates
+everything before `next build`. `minify-shop2` comes before the prerender
+because the prerender copies the shell's script tags into all 813 pages, and
+one of those tags names the file it writes.
 
 ### What it writes
 

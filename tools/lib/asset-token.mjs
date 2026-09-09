@@ -43,6 +43,12 @@
    behind a token that had not moved, which is the original bug wearing a
    different hat.
 
+   One of the tags names a file no checkout holds: /shop2/app.min.js is built
+   from /shop2/app.js by tools/minify-shop2.mjs and is gitignored. It is
+   hashed all the same — through its source, see BUILT_FROM below — because a
+   token that only existed after a build would make the committed index.html
+   and the committed assets disagree until somebody ran one.
+
    Line endings are normalised before hashing. This repository is developed on
    Windows with core.autocrlf=true, so the same committed file is CRLF in the
    working tree and LF on Vercel's Linux builder; hashing the raw bytes would
@@ -52,6 +58,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { stripJs } from "./js-strip.mjs";
 
 /** How long the derived token is. Twelve hex characters of SHA-256 — far more
     than enough to never collide across the handful of builds a day this shop
@@ -64,10 +71,25 @@ const TAGGED = /(?:href|src)="(\/[^"?\s]+)\?v=([^"'\s]*)"/g;
 /** Files that carry the shared token without wearing a tag of their own. */
 const UNTAGGED = ["/shop2/chat.js"];
 
-/** The token the shell is wearing now — read off the app.js tag, which is the
-    one tag this file's whole reason for existing is about. */
+/**
+ * A tag the shell links that no checkout contains, and the source a build
+ * makes it from. public/shop2/app.min.js is public/shop2/app.js with its
+ * comments and indentation taken out (tools/minify-shop2.mjs); it is derived,
+ * so it is gitignored, so `assetToken()` below cannot read it out of a fresh
+ * clone — and a token that came out different before and after a build would
+ * leave the committed index.html disagreeing with its own assets, which is
+ * the one thing this file exists to prevent. The working tree answers for a
+ * build output by making it, in memory, with the same function the build
+ * uses; a deployment answers for it by serving it. Both hash the same bytes.
+ */
+const BUILT_FROM = { "/shop2/app.min.js": ["/shop2/app.js", stripJs] };
+
+/** The token the shell is wearing now — read off the app tag, which is the
+    one tag this file's whole reason for existing is about. `.min` is
+    optional because the shell links the built file and the fixtures in
+    tests/asset-token.test.ts link a plain one. */
 export function currentToken(shell) {
-  const m = /app\.js\?v=([^"'\s]*)/.exec(String(shell));
+  const m = /app(?:\.min)?\.js\?v=([^"'\s]*)/.exec(String(shell));
   return m ? m[1] : "";
 }
 
@@ -133,7 +155,11 @@ export async function assetTokenWith(shell, read) {
  * separable from the hashing.
  */
 export async function assetToken(shell, publicDir) {
-  return assetTokenWith(shell, (url) => readFile(path.join(publicDir, url.replace(/^\/+/, "")), "utf8"));
+  const open = (url) => readFile(path.join(publicDir, url.replace(/^\/+/, "")), "utf8");
+  return assetTokenWith(shell, async (url) => {
+    const built = BUILT_FROM[url];
+    return built ? built[1](await open(built[0])) : open(url);
+  });
 }
 
 /**
