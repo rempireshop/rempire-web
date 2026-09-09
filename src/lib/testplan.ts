@@ -33,7 +33,7 @@ import planFile from "@/data/testplan.json";
  * The English half of a row, carried alongside the Russian rather than instead
  * of it.
  *
- * Renat tests in Russian and Dim reads English, and they answer the SAME 158
+ * Renat tests in Russian and Dim reads English, and they answer the SAME 164
  * checks: one item id, one stored answer, one page with a language switch
  * (public/test/index.html). Two translated files would mean two half-filled
  * checklists, which is the one outcome this page may not produce — so the
