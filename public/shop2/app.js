@@ -14725,10 +14725,10 @@
        picks. */
     return '<div class="adm-swrow"><span>Когда поздравлять' +
         '<span class="adm-row__sub">промокод действует две недели от самого дня рождения, каким бы ни был запас</span></span>' +
-      '<span class="sel sel--box"><select class="adm-input" data-flowbdays aria-label="За сколько дней поздравлять">' +
+      '<select class="adm-input" data-flowbdays aria-label="За сколько дней поздравлять">' +
       BIRTHDAY_DAY_CHOICES.map(function (x) {
         return '<option value="' + x[0] + '"' + (x[0] === n ? " selected" : "") + ">" + x[1] + "</option>";
-      }).join("") + "</select></span></div>";
+      }).join("") + "</select></div>";
   }
   function admMailName(tpl) {
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
@@ -15770,10 +15770,10 @@
         '<span class="adm-row__sub">раз в сутки магазин спрашивает Montonio, дошла ли посылка</span></span>' +
         admSwitch("data-delivcarrier", d.useCarrier, "Спрашивать перевозчика") + "</div>" +
       '<label class="adm-field" style="margin-top:12px"><span>Закрывать заказ через</span>' +
-        '<span class="sel sel--box"><select class="adm-input" data-delivdays>' +
+        '<select class="adm-input" data-delivdays>' +
         DELIVERY_DAY_CHOICES.map(function (n) {
           return '<option value="' + n[0] + '"' + (n[0] === d.autoDays ? " selected" : "") + ">" + n[1] + "</option>";
-        }).join("") + "</select></span></label>" +
+        }).join("") + "</select></label>" +
       '<p class="adm-hint" style="margin-top:8px">Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».</p>';
   }
   /* `col` is the column's own name, drawn only on a phone: the header row of
