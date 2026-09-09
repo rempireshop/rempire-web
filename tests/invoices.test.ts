@@ -86,10 +86,13 @@ function sliceFn(name: string): string {
 /** The storefront's own PAYS list, so the indexes below are the real ones. */
 const PAYS = new Function(`${/var PAYS = \[[\s\S]*?\n {2}\];/.exec(APP_JS)?.[0] ?? "throw new Error('no PAYS in app.js')"}\nreturn PAYS;`)() as Array<{ k: string }>;
 
-/** isInvoice() over a chosen radio and an order total, with total() stubbed. */
-function checkoutPicksInvoice(pay: number, orderTotal: number): boolean {
-  const body = `${sliceFn("invoiceOffered")}\n${sliceFn("isInvoice")}\nfunction total() { return TOTAL; }\nreturn isInvoice();`;
-  return new Function("PAYS", "S", "TOTAL", body)(PAYS, { pay }, orderTotal) as boolean;
+/** isInvoice() over a chosen radio, an order total and the shopper's country,
+ *  with total() stubbed. orderCountry() is sliced in rather than stubbed: it
+ *  is what turns «Другая страна Европы» into a real ISO code, and the rule
+ *  under test is about the code it hands back. */
+function checkoutPicksInvoice(pay: number, orderTotal: number, country = "EE", countryIso = ""): boolean {
+  const body = `${sliceFn("invoiceOffered")}\n${sliceFn("isInvoice")}\n${sliceFn("orderCountry")}\nfunction total() { return TOTAL; }\nreturn isInvoice();`;
+  return new Function("PAYS", "S", "TOTAL", body)(PAYS, { pay, country, countryIso }, orderTotal) as boolean;
 }
 
 describe("the 0 € door, in the checkout", () => {
@@ -100,6 +103,19 @@ describe("the 0 € door, in the checkout", () => {
     expect(checkoutPicksInvoice(3, 0.003)).toBe(false); // rounding dust is not money to invoice
     expect(checkoutPicksInvoice(3, -2)).toBe(false); // a card bigger than the basket
     expect(checkoutPicksInvoice(1, 61.47)).toBe(false); // the card method is not an invoice
+  });
+
+  /* Estonia only (owner, 09.09.2026) — the invoice is issued at 24 % Estonian
+     VAT, which is right in Estonia and wrong everywhere else. createOrder()
+     refuses the rest («issues no invoice outside Estonia» below); this is the
+     half a shopper meets, where the option is simply not on the list. */
+  it("offers «По счёту» in Estonia and nowhere else", () => {
+    expect(checkoutPicksInvoice(3, 61.47, "EE")).toBe(true);
+    expect(checkoutPicksInvoice(3, 61.47, "LV")).toBe(false);
+    expect(checkoutPicksInvoice(3, 61.47, "FI")).toBe(false);
+    // «Другая страна Европы» keeps the real code in S.countryIso — «EU» is not one
+    expect(checkoutPicksInvoice(3, 61.47, "EU", "DE")).toBe(false);
+    expect(checkoutPicksInvoice(3, 61.47, "EU", "EE")).toBe(true);
   });
 });
 
@@ -350,6 +366,37 @@ describe("on the database", () => {
     await expect(createOrder(invoiceOrderInput({ company: null }))).rejects.toMatchObject({ code: "bad_company" });
     // no row was written for either
     expect(await query("select id from orders")).toHaveLength(0);
+  });
+
+  /* «По счёту» is for Estonian companies (owner, 09.09.2026). The invoice is
+     issued at 24 % Estonian VAT, which is right for a buyer in Estonia and
+     wrong for anyone else: a VAT-registered company elsewhere in the EU is a
+     reverse charge at 0 % with its own note on the document, and outside the
+     EU it is an export. Neither is implemented, so an invoice issued there
+     would be a wrong invoice rather than a missing feature. The checkout hides
+     the method (invoiceOffered() in public/shop2/app.js); this is the door
+     behind it, because a body is not the browser that sent it. */
+  it("issues no invoice outside Estonia, whatever the body asks for", async () => {
+    for (const country of ["LV", "FI", "DE", "GB"]) {
+      await expect(
+        createOrder(invoiceOrderInput({
+          shipping: { method: "courier", country, address: { addr: "Testitänav 1", zip: "10111", city: "Tallinn" } },
+        })),
+        `an invoice was issued to ${country}`,
+      ).rejects.toMatchObject({ code: "invoice_country" });
+    }
+    // nothing was written and no invoice number was burnt on any of them
+    expect(await query("select id from orders")).toHaveLength(0);
+    expect(await query("select year from invoice_counters")).toHaveLength(0);
+    expect(capturedMail()).toHaveLength(0);
+
+    // …and the same basket goes through to Latvia on a payment method that works there
+    const ok = await createOrder(invoiceOrderInput({
+      payment: { method: "card" },
+      company: undefined,
+      shipping: { method: "courier", country: "LV", address: { addr: "Testitänav 1", zip: "10111", city: "Tallinn" } },
+    }));
+    expect(ok.number).toMatch(/^R-\d+$/);
   });
 
   /* The payments agent's boundary note: a basket a gift card already covers

@@ -284,6 +284,8 @@
       "Проверьте e-mail для счёта": "Kontrollige arve e-posti aadressi",
       "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "Tellimus on juba täielikult kaetud kinkekaardi või punktidega — valige teine makseviis",
       "Заполните данные фирмы для счёта": "Täitke ettevõtte andmed arve jaoks",
+      "Счёт для фирмы мы выставляем только по Эстонии — выберите другой способ оплаты":
+        "Arve ettevõttele väljastame ainult Eestisse — valige teine makseviis",
       "Счёт отправлен на": "Arve on saadetud aadressile", "Счёт отправлен на почту.": "Arve on saadetud e-postile.",
       /* …and the honest halves of the same two sentences: a blank IBAN blocks
          the send (src/lib/invoices.ts invoiceSendBlock), so the receipt says
@@ -385,6 +387,9 @@
         "kord ööpäevas, kahenädalase sooduskoodiga",
       "Когда поздравлять":
         "Millal õnnitleda",
+      "Скидка в поздравлении": "Soodustus õnnitluses",
+      "код выписывается каждому свой и работает один раз": "igaühele kirjutatakse oma kood, mis töötab ühe korra",
+      "Размер скидки ко дню рождения": "Sünnipäevasoodustuse suurus",
       "За сколько дней поздравлять":
         "Mitu päeva varem õnnitleda",
       "промокод действует две недели от самого дня рождения, каким бы ни был запас":
@@ -2546,6 +2551,8 @@
       "Проверьте e-mail для счёта": "Check the invoice e-mail",
       "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты": "The order is already fully covered by a gift card or points — choose another payment method",
       "Заполните данные фирмы для счёта": "Fill in the company details for the invoice",
+      "Счёт для фирмы мы выставляем только по Эстонии — выберите другой способ оплаты":
+        "We only issue a company invoice within Estonia — please choose another payment method",
       "Счёт отправлен на": "The invoice has been sent to", "Счёт отправлен на почту.": "The invoice has been sent by e-mail.",
       "Счёт выписан — пришлём его на": "The invoice has been issued — we will send it to",
       "Счёт выписан — пришлём его на почту.": "The invoice has been issued — we will send it by e-mail.",
@@ -2639,6 +2646,9 @@
         "once a day, with a promo code good for two weeks",
       "Когда поздравлять":
         "When to send it",
+      "Скидка в поздравлении": "Discount in the greeting",
+      "код выписывается каждому свой и работает один раз": "each person gets their own code, good for one purchase",
+      "Размер скидки ко дню рождения": "The size of the birthday discount",
       "За сколько дней поздравлять":
         "How many days early to send it",
       "промокод действует две недели от самого дня рождения, каким бы ни был запас":
@@ -5989,7 +5999,15 @@
      the shopper had picked before the card was applied. createOrder() refuses
      the same order server-side (`invoice_zero_total`), so a stale tab cannot
      talk its way past this either. */
-  function invoiceOffered() { return total() > 0.004; }
+  /** Estonia only (owner, 09.09.2026). The invoice is issued at 24 % Estonian
+   *  VAT, which is correct for a buyer in Estonia and wrong for one anywhere
+   *  else — an EU company is a reverse charge at 0 % and everything outside
+   *  the EU is an export at 0 %, and the shop can do neither yet. So the
+   *  option is not offered where it could not be issued correctly.
+   *
+   *  orderCountry() rather than S.country: «Другая страна Европы» keeps the
+   *  real ISO code in S.countryIso, and «EU» is not a country. */
+  function invoiceOffered() { return total() > 0.004 && orderCountry() === "EE"; }
   function isInvoice() { return !!(PAYS[S.pay] && PAYS[S.pay].k === "invoice") && invoiceOffered(); }
   /** The payment term the server prints on the invoice (settings.invoice.dueDays, 7 by default). */
   function invoiceDueDays() {
@@ -12148,7 +12166,8 @@
     bad_vat_number: "Проверьте номер НДС",
     bad_company_address: "Укажите адрес фирмы",
     bad_invoice_email: "Проверьте e-mail для счёта",
-    invoice_zero_total: "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты"
+    invoice_zero_total: "Заказ уже полностью покрыт подарочной картой или баллами — выберите другой способ оплаты",
+    invoice_country: "Счёт для фирмы мы выставляем только по Эстонии — выберите другой способ оплаты",
   };
   function orderErrText(code) {
     return ORDER_ERRS[code] || "Не получилось оформить заказ — попробуйте ещё раз";
@@ -14714,6 +14733,23 @@
     [14, "за 14 дней до даты"]
   ];
   function birthdayDays() { return Number(DEMO.flows.birthdayDays) || 0; }
+  /* Percent, in the steps a birthday discount is worth sending in. No «%» in
+     a dictionary key anywhere: the label is a number and a sign, so it reads
+     the same in all three languages and needs no entry. */
+  var BIRTHDAY_PERCENT_CHOICES = [5, 7, 10, 15, 20, 25, 30];
+  function birthdayPercent() {
+    var n = Number(DEMO.flows.birthdayPercent);
+    return isFinite(n) && n > 0 ? Math.round(n) : 10;
+  }
+  function admBirthdayPercentHTML() {
+    var p = birthdayPercent();
+    return '<div class="adm-swrow"><span>Скидка в поздравлении' +
+        '<span class="adm-row__sub">код выписывается каждому свой и работает один раз</span></span>' +
+      '<select class="adm-input" data-flowbpct aria-label="Размер скидки ко дню рождения">' +
+      BIRTHDAY_PERCENT_CHOICES.map(function (n) {
+        return '<option value="' + n + '"' + (n === p ? " selected" : "") + ">" + n + " %</option>";
+      }).join("") + "</select></div>";
+  }
   function admBirthdayDaysHTML() {
     var n = birthdayDays();
     /* The sub-line used to say «запас в пару дней ему не мешает», which was
@@ -14751,7 +14787,7 @@
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
         "</div>" +
         // the one letter with a setting of its own, right under its own row
-        (flow === "birthday" && on ? admBirthdayDaysHTML() : "");
+        (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "");
     }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
@@ -22369,7 +22405,7 @@
     }
     // assistant-work: {RU,ET,EN} product-page description override
     else if (a.type === "set_description") srvSaved(apiSend(ov, "PUT", { id: a.id, description: a.value || null }));
-    else if (a.type === "toggle_flow" || a.type === "set_flow_days") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
+    else if (a.type === "toggle_flow" || a.type === "set_flow_days" || a.type === "set_flow_pct") srvSaved(apiSend(st, "PUT", { flows: DEMO.flows }));
     // «Доставлен» без кнопки — the whole settings.delivery object, so undo re-sends it
     else if (a.type === "set_delivery") srvSaved(apiSend(st, "PUT", { delivery: normaliseDelivery(S.deliveryLoaded) }));
     // «Какие банки показывать» — the whole array of codes, so undo re-sends it
@@ -22880,6 +22916,7 @@
         (more.length ? " · " + more.join(", ") : "");
     }
     if (a.type === "toggle_flow") return "Письмо «" + (FLOW_NAMES[a.id] || a.id) + "»: " + (a.value ? "включить" : "выключить");
+    if (a.type === "set_flow_pct") return "Скидка в поздравлении: " + a.value + " %";
     if (a.type === "set_flow_days") {
       return "Поздравление: " + (a.value ? "за " + a.value + " " + pl(a.value, "день", "дня", "дней") + " до дня рождения" : "в день рождения");
     }
@@ -23218,6 +23255,11 @@
       entry.prev = { type: "set_flow_days", id: a.id, value: Number(DEMO.flows.birthdayDays) || 0 };
       DEMO.flows.birthdayDays = a.value;
     }
+    /* «Скидка в поздравлении» — the same map, so undo re-sends it whole */
+    else if (a.type === "set_flow_pct") {
+      entry.prev = { type: "set_flow_pct", id: a.id, value: birthdayPercent() };
+      DEMO.flows.birthdayPercent = a.value;
+    }
     /* «Доставлен» без кнопки: settings.delivery has no demo layer either —
        S.deliveryLoaded IS the last known server value, and the whole object
        travels, so undo puts the previous pair back. */
@@ -23382,6 +23424,7 @@
     else if (a.type === "set_seo") { var seoU = seoOfAction(a); if (seoU) DEMO.seo[a.id] = seoU; else delete DEMO.seo[a.id]; }
     else if (a.type === "toggle_flow") DEMO.flows[a.id] = a.value;
     else if (a.type === "set_flow_days") DEMO.flows.birthdayDays = a.value;
+    else if (a.type === "set_flow_pct") DEMO.flows.birthdayPercent = a.value;
     else if (a.type === "set_delivery") S.deliveryLoaded = normaliseDelivery(a.value);
     else if (a.type === "set_banks") S.banksLoaded = Array.isArray(a.value) ? a.value.slice() : [];
     else if (a.type === "toggle_chatbot") DEMO.chatbot = a.value;
@@ -27777,6 +27820,11 @@
     else if (t.matches("[data-flowbdays]")) {
       var bdEntry = demoApply({ type: "set_flow_days", id: "birthday", value: Number(t.value) || 0 });
       render(); toast("Сохранено ✓", bdEntry);
+    }
+    /* «Скидка в поздравлении» — the same settings.flows row, saved the same way */
+    else if (t.matches("[data-flowbpct]")) {
+      var bpEntry = demoApply({ type: "set_flow_pct", id: "birthday", value: Number(t.value) || 10 });
+      render(); toast("Сохранено ✓", bpEntry);
     }
     else if (t.matches("[data-sort]")) { S.sort = t.value; S.shown = 12; patchCatalog(); }
     // product creation: the subsection list follows the section — a DOM

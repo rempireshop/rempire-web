@@ -1225,6 +1225,17 @@ export async function createOrder(input: CreateOrderInput, ctx: PriceContext = {
   // Rebuilt from a whitelist before anything is priced or stored (audit C2/M2).
   const shippingJson = cleanShipping(input?.shipping ?? {}, 0);
   const { method, country, carrier } = shippingJson;
+  /* An invoice is only issued to an Estonian company (owner, 09.09.2026).
+     The checkout hides the option elsewhere; this is the door, because a body
+     is not the browser that sent it. 24 % Estonian VAT is right for a buyer in
+     Estonia and wrong for anyone else — a VAT-registered company in another EU
+     country is a reverse charge at 0 % with its own note on the invoice, and
+     outside the EU it is an export — and neither is implemented, so an invoice
+     issued there would be a wrong invoice rather than a missing feature.
+     `country` is always a two-letter code here (cleanShipping defaults it to
+     EE) and it is the customer's own, kept even for a digital order. */
+  if (invoiceMethod && country !== "EE") throw new OrderError("invoice_country");
+
   // Nothing physical ships when the whole order is gift cards.
   const giftOnly = lines.length > 0 && lines.every((l) => l.kind === "gift");
   /* «Электронная доставка» is a promise about the whole order, and this is the
