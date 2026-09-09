@@ -24635,16 +24635,25 @@
      whatever still does. */
   var renderQueued = false, renderPending = false;
   function render() {
-    if (renderQueued) { renderPending = true; return; }
-    renderQueued = true;
-    renderImpl();
-    // «Назад» closes an open card: one parked history entry, kept in step with
-    // what is actually open, so no opener has to remember to park one
+    if (renderQueued) renderPending = true;
+    else {
+      renderQueued = true;
+      renderImpl();
+      requestAnimationFrame(function () {
+        renderQueued = false;
+        if (renderPending) { renderPending = false; renderImpl(); }
+      });
+    }
+    /* «Назад» closes an open card: one parked history entry, kept in step with
+       what is actually open, so no opener has to remember to park one.
+       Deliberately OUTSIDE the coalescing above — it reads S, not the DOM, and
+       a call folded into the next frame has still changed what is open. Inside
+       it, a card opened in the same frame as any other render (a background
+       answer landing — mediaProbe, the overview poll) parked no entry at all
+       and the next «Назад» walked out of the panel, while a card closed in
+       such a frame never spent the entry it had parked and the next «Назад»
+       did nothing. Renat, 09.09.2026: «иногда выкидывает из админки». */
     admSyncHistory();
-    requestAnimationFrame(function () {
-      renderQueued = false;
-      if (renderPending) { renderPending = false; renderImpl(); }
-    });
   }
 
   /* Size, colour, gallery and quantity clicks on the product page patch in
@@ -24946,11 +24955,15 @@
   }
   function here() { return location.pathname + location.search; }
   /* Stamp the live scroll onto the entry being left, so Back returns to the
-     place on the page rather than to the top of it. */
+     place on the page rather than to the top of it. What the entry IS survives
+     the stamp — an open drawer, an open panel card: leaving the admin for a
+     product link stamps the entry the card parked, and an entry that came back
+     from that without its `adm` was a marker the panel could no longer find,
+     which cost a press of «Назад» on the way back in. */
   function stamp() {
     try {
       var st = history.state || {};
-      history.replaceState({ y: window.scrollY, shown: S.shown, drawer: st.drawer }, "");
+      history.replaceState({ y: window.scrollY, shown: S.shown, drawer: st.drawer, adm: st.adm }, "");
     } catch (e) {}
   }
   function navTo(replace) {
@@ -25001,7 +25014,17 @@
      open underneath, the entry is parked again, so Back walks out layer by
      layer. Closing with a button («← Заказы», «Отмена») spends the parked
      entry itself, so the next Back is never a press that does nothing. */
-  var ADM_HIST = false, ADM_POP = false;
+  var ADM_POP = false;
+  /** Is an entry parked right now? Asked of the history stack itself, because
+      a flag beside it and the stack drifted apart and every drift ended the
+      same way — one «Назад» too many, out of the panel. The stack loses the
+      entry without telling anybody (navTo() and routeHome() replaceState over
+      it), and the flag used to be set from a place that did not always run.
+      history.state is the one answer that cannot be stale. */
+  function admParked() {
+    var s = history.state;
+    return !!(s && s.adm);
+  }
   /** What is open over the panel right now, bottom layer first.
 
       The order is what the eye sees stacked, because Back closes the top one:
@@ -25050,23 +25073,28 @@
     return true;
   }
   /** One parked entry while anything is open, none while nothing is. Called
-      at the end of every render, so no opener has to remember to call it. */
+      from every render(), so no opener has to remember to call it. */
   function admSyncHistory() {
-    /* Left the panel altogether («Открыть магазин», a product link): the entry
-       parked for the card sits BEHIND the one that navigation just pushed, so
-       it must not be spent — Back simply returns to the panel, which is what
-       Back should do from the shop. */
-    if (S.screen !== "admin") { ADM_HIST = false; return; }
+    /* A history.back() of our own is still on its way. history.back() is
+       asynchronous: until its popstate arrives the stack has not moved, so
+       everything below would read the entry we are already spending and spend
+       a SECOND one — which is the browser leaving the panel. Nothing is
+       decided in this window; the popstate that ends it runs this again, and
+       whatever opened or closed meanwhile is settled then. */
+    if (ADM_POP) return;
+    /* admLayers() is empty off the admin screen, so leaving the panel
+       («Открыть магазин», a product link) needs no case of its own: the entry
+       parked for the card sits BEHIND the one that navigation just pushed, and
+       neither side of this comparison names it any more. It is not spent —
+       Back simply returns to the panel, card and all, which is what Back
+       should do from the shop. */
     var open = admLayers().length > 0;
-    if (open === ADM_HIST) return;
+    if (open === admParked()) return;
     if (open) {
       stamp();
       try { history.pushState({ y: window.scrollY, shown: S.shown, adm: 1 }, "", here()); } catch (e) {}
-      ADM_HIST = true;
       return;
     }
-    ADM_HIST = false;
-    if (ADM_POP) { ADM_POP = false; return; }   // Back is what closed it
     // closed with a button: spend the entry we parked, quietly
     ADM_POP = true;
     try { history.back(); } catch (e) { ADM_POP = false; }
@@ -25075,14 +25103,17 @@
   window.addEventListener("popstate", function (e) {
     var st = e.state || {};
     /* the entry the panel parked, spent by admSyncHistory() itself after a
-       card was closed with a button — nothing moved, nothing to redraw */
-    if (ADM_POP && !st.adm) { ADM_POP = false; return; }
-    /* …and spent by the owner's own Back: it closes the topmost open layer of
-       the panel and stays in the admin (see admLayers above) */
-    if (ADM_HIST && !st.adm) {
-      ADM_HIST = false;
-      if (admCloseTop()) { render(); return; }
-    }
+       card was closed with a button — nothing moved, nothing to redraw. The
+       sync runs again because only now does the stack have its new shape:
+       anything opened or closed while the back() was in flight was left
+       untouched precisely so it could be decided here, once. */
+    if (ADM_POP) { ADM_POP = false; admSyncHistory(); return; }
+    /* …and spent by the owner's own Back. Landing on an entry that is not a
+       parked one while the panel still has something open means this press was
+       aimed at the topmost layer, so close that and stay in the admin (see
+       admLayers above); admCloseTop() answers false everywhere else, including
+       every screen of the shop. */
+    if (!st.adm && admCloseTop()) { render(); return; }
     S.histDrawer = !!st.drawer;
     S.langOpen = false;
     routeFromPath();

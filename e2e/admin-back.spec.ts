@@ -26,7 +26,17 @@ async function back(page: Page): Promise<void> {
 }
 
 test.describe("admin — «Назад» closes what is open", () => {
-  test.use({ extraHTTPHeaders: ipHeaders(154) });
+  /* One address per repeat, not one for the file. `--repeat-each` is how this
+     file is read — the bug it guards is a race, and a race that only shows up
+     one run in three is not caught by running once — but every test in here
+     signs in, and /api/admin/login allows five attempts a minute from one
+     address (src/app/api/admin/login/route.ts). Six repeats past that limit
+     and the sign-in card simply stays up, which fails the tests for a reason
+     that has nothing to do with «Назад». 220+ is free — nothing else in this
+     suite goes above 218 — and index 0 is what a normal single run gets. */
+  test.use({
+    extraHTTPHeaders: async ({}, use, testInfo) => { await use(ipHeaders(220 + testInfo.repeatEachIndex)); },
+  });
 
   test("desktop: order card, product editor, customer card, settings page, confirm card, blog editor", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "the cards are the same on both; the phone gets its own test below");
@@ -161,5 +171,76 @@ test.describe("admin — «Назад» closes what is open", () => {
     await page.goBack();
     await expect(page.locator('body[data-screen="admin"]'),
       "Back after a button-close did nothing at all").toHaveCount(0);
+  });
+
+  /* ---------------------------------------------------------------------- *
+   * The frame the owner cannot see
+   *
+   * Renat, 09.09.2026: «в админке кнопка назад иногда выкидывает из админки».
+   * Sometimes, not always — because app.js folds render() into one rebuild per
+   * animation frame, and the panel's history bookkeeping used to ride inside
+   * the call that gets folded away. Whatever opened or closed in a frame that
+   * already had a render in it was invisible to it: a card on screen with no
+   * entry parked (the next Back walks out of the panel), or a card closed with
+   * its button and its entry never spent (the next Back does nothing, and the
+   * one after that walks out). In the shop the second render is a background
+   * answer landing — the goods editor's own mediaProbe(), the overview poll —
+   * which is why it came and went.
+   *
+   * Two clicks issued from one task ARE that frame, with none of the waiting:
+   * no animation frame can run between two synchronous dispatches, so the
+   * second render() is folded away every single time. The first click in each
+   * pair only redraws — «Развернуть меню» and «Показать ещё» open nothing and
+   * close nothing — so what these two tests measure is the fold, not the
+   * button.
+   * ---------------------------------------------------------------------- */
+
+  test("a card opened in the same frame as another render still parks its entry", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the fold is in render(), not in the layout");
+
+    await page.goto(shopUrl("", "/"));
+    await waitForScreen(page, "home");
+    await loginAsAdmin(page);
+    await adminSection(page, "goods");
+    await expect(page.locator("[data-admgoods]").first()).toBeVisible();
+
+    await page.evaluate(() => {
+      // «Показать ещё» lengthens the list and redraws — nothing opens
+      document.querySelector<HTMLElement>("[data-admgoodsmore]")!.click();
+      // …and in that same frame the owner taps a product
+      document.querySelector<HTMLElement>("[data-admgoods]")!.click();
+    });
+    await expect(page.locator("[data-admsavegoods]"), "the editor did not open").toBeVisible();
+
+    await back(page);
+    await expect(page.locator("[data-admsavegoods]"),
+      "Back left the panel instead of closing the editor").toHaveCount(0);
+    await expect(page.locator("[data-admgoods]").first(), "the catalogue did not come back").toBeVisible();
+  });
+
+  test("a card closed in the same frame as another render still spends its entry", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the fold is in render(), not in the layout");
+
+    // into the panel from the shop, so there IS somewhere for Back to go
+    await page.goto(shopUrl("", "/"));
+    await waitForScreen(page, "home");
+    await loginAsAdmin(page);
+    await adminSection(page, "goods");
+    await page.locator("[data-admgoods]").first().click();
+    await expect(page.locator("[data-admsavegoods]")).toBeVisible();
+
+    await page.evaluate(() => {
+      // the sidebar's fold button redraws the panel — nothing opens or closes
+      document.querySelector<HTMLElement>("[data-admnav]")!.click();
+      // …and in that same frame the owner presses «← Товары»
+      document.querySelector<HTMLElement>("[data-admclose]")!.click();
+    });
+    await expect(page.locator("[data-admsavegoods]"), "the editor did not close").toHaveCount(0);
+    await expect(page.locator("[data-admgoods]").first()).toBeVisible();
+
+    // the entry the editor parked is gone, so this Back is a real navigation
+    await page.goBack();
+    await expect(page.locator('body[data-screen="admin"]'),
+      "Back did nothing: the entry the card parked was never spent").toHaveCount(0);
   });
 });
