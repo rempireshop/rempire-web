@@ -19,6 +19,7 @@ import {
   buildPrompt,
   COPY_KINDS,
   isCopyKind,
+  POST_CARDS_MAX,
   POST_PRODUCTS_MAX,
   POST_WORDS,
   PRODUCT_NAME_TAILS,
@@ -72,6 +73,28 @@ describe("buildPostFullPrompt — a whole article, not an outline", () => {
     expect(lines).toHaveLength(POST_PRODUCTS_MAX);
     expect(user).not.toContain("Bad Id!");
     expect(user).not.toContain("../x");
+  });
+
+  /* The article places its own product cards now (Dim, 09.09.2026). The card
+     is the editor's own «Товар» marker, so what the prompt has to promise is
+     narrow: that shape, an id out of PRODUCTS, and nothing invented when
+     nothing fits. Everything else about a card — the picture, the name, the
+     price, the language of the link — is the panel's, and a card whose id
+     was never offered is dropped by the route (tests/ai-text-route-
+     articles.test.ts) and then again by the panel. */
+  it("asks for the editor's own product marker in the body, next to the advice, and never an invented id", () => {
+    const { system } = buildPostFullPrompt("RU", { topic: "борода зимой", products });
+    expect(system).toContain('<p><a data-product="ID"></a></p>');
+    expect(system).toMatch(/copied character for character from the PRODUCTS list/i);
+    expect(system).toMatch(/right after the paragraph that recommends/i);
+    expect(system).toContain(`at most ${POST_CARDS_MAX} in the whole article`);
+    expect(system, "the model may write the name and the price itself, and print them twice")
+      .toMatch(/no href, no other attribute/i);
+    expect(system, "an id outside the list has to be refused, not guessed")
+      .toMatch(/not in the PRODUCTS list is not a product/i);
+    expect(system, "no card at all has to be an allowed answer").toMatch(/write no cards at all/i);
+    // the JSON example shows the card too, escaped as it has to be inside a JSON string
+    expect(system).toContain('<p><a data-product=\\"id\\"></a></p>');
   });
 
   it("carries the owner's note when given, and writes in the language asked for", () => {

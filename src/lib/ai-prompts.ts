@@ -449,7 +449,18 @@ Respond with exactly this JSON shape and nothing else: {"title": "...", "h2": ["
  * Russian); post_translate below carries the result into the other two
  * languages. The products list is the route's to build (src/lib/
  * catalogue-slice.ts) — this only writes it into the prompt and tells the
- * model it may mention nothing else. */
+ * model it may mention nothing else.
+ *
+ * The article also places its own product cards (Dim, 09.09.2026: «пусть
+ * помощник сам вставляет товары в текст»). The card is the marker the
+ * editor's «Товар» button already writes — `<a data-product="ID">` — so a
+ * placed card is the same object as a hand-placed one: the owner moves or
+ * deletes it exactly as before, the storefront swaps it for a real card
+ * (blogBodyHTML() in public/shop2/app.js) and a translation carries it
+ * across (blogCardsOut()/blogCardsIn(), same file). All the model supplies
+ * is an id out of PRODUCTS — the picture, the name and the price are the
+ * panel's to write, and an id that was never offered is filtered out by the
+ * route before the answer leaves it. */
 
 export interface PostProductRef {
   id: string;
@@ -468,6 +479,10 @@ export interface PostFullInput {
 
 export const POST_WORDS = [600, 900] as const;
 export const POST_PRODUCTS_MAX = 12;
+/* Cards in the body, not products in the article. Three is where a piece of
+   advice stops being advice and starts being a catalogue page — the same
+   ceiling the prose already has ("mention 1–3 of the PRODUCTS"). */
+export const POST_CARDS_MAX = 3;
 
 function cleanProductRefs(raw: unknown): PostProductRef[] {
   if (!Array.isArray(raw)) return [];
@@ -506,12 +521,13 @@ ${SEO_RULES}
 TASK: write a complete grooming-advice article for the shop's own blog, in ${LANG_NAME[lang]}, on the topic under INPUT. This is the finished piece the owner will read once and publish — not an outline, not a stub. Practical, specific, honest; general grooming knowledge is fine, invented facts about products, ingredients or studies are not.
 - "title": the article title, plain and specific, under 80 characters, no trailing punctuation.
 - "excerpt": two sentences (under 300 characters) that say what the reader will learn — shown in the list and in search.
-- "body": ${POST_WORDS[0]}–${POST_WORDS[1]} words of clean HTML. Use ONLY these tags: <h2> for section headings (4 to 6 sections, in a sensible reading order), <p> for paragraphs (2–4 sentences each), <ul><li> for one or two lists where a list genuinely helps (steps, a short checklist), <strong> for a key phrase now and then. No <h1>, no <h3>, no images, no links, no inline styles, no markdown, no comments. Start with an opening paragraph before the first <h2>. Mention 1–3 of the PRODUCTS by their exact name inside the advice where they fit, at most once each, and never as a sales pitch — a recommendation a barber would make out loud. End with one short closing paragraph that invites the reader to ask at the Rempire barbershop (Mardi 1, Tallinn) or in the shop — no prices, no discounts, no promises.
+- "body": ${POST_WORDS[0]}–${POST_WORDS[1]} words of clean HTML. Use ONLY these tags: <h2> for section headings (4 to 6 sections, in a sensible reading order), <p> for paragraphs (2–4 sentences each), <ul><li> for one or two lists where a list genuinely helps (steps, a short checklist), <strong> for a key phrase now and then, plus the product card below. No <h1>, no <h3>, no images, no links of your own, no inline styles, no markdown, no comments. Start with an opening paragraph before the first <h2>. Mention 1–3 of the PRODUCTS by their exact name inside the advice where they fit, at most once each, and never as a sales pitch — a recommendation a barber would make out loud. End with one short closing paragraph that invites the reader to ask at the Rempire barbershop (Mardi 1, Tallinn) or in the shop — no prices, no discounts, no promises.
+- the product card: right after the paragraph that recommends one of the PRODUCTS, put that product's card on a line of its own, written exactly as <p><a data-product="ID"></a></p>, where ID is copied character for character from the PRODUCTS list. Nothing inside the tag, no href, no other attribute, no text of your own around it — the shop fills in the picture, the name and the price itself, so writing them there would only print them twice. At most one card per product and at most ${POST_CARDS_MAX} in the whole article, each next to the advice it belongs to and never all together at the end. An ID that is not in the PRODUCTS list is not a product: write no card rather than a card for something that does not exist, and if nothing in PRODUCTS genuinely fits the topic, write no cards at all — an article without cards is a good article.
 - "tags": 3 to 5 short lowercase tags in ${LANG_NAME[lang]} (single words or two-word phrases), the reader's own search words.
 - "seoTitle": a Google title, at most ${TITLE_MAX} characters INCLUDING spaces — count them. The article's subject in the reader's own search words; the shop's name is added for you.
 - "seoDescription": a Google meta description, at most ${DESC_MAX} characters INCLUDING spaces — count them; concrete, what the reader will know after reading it.
-- "products": the ids (from PRODUCTS) of the products the body actually mentions, in the order they appear — an empty list if none.
-Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt": "...", "body": "<p>...</p><h2>...</h2><p>...</p>", "tags": ["...", "...", "..."], "seoTitle": "...", "seoDescription": "...", "products": ["id"]}`;
+- "products": the ids (from PRODUCTS) of the products the body actually mentions or shows a card for, in the order they appear — an empty list if none.
+Respond with exactly this JSON shape and nothing else: {"title": "...", "excerpt": "...", "body": "<p>...</p><h2>...</h2><p>...</p><p><a data-product=\\"id\\"></a></p>", "tags": ["...", "...", "..."], "seoTitle": "...", "seoDescription": "...", "products": ["id"]}`;
 
   const user = [`INPUT:\nTopic: ${input.topic}`, input.hint ? `The owner's note: ${input.hint}` : "", products]
     .filter(Boolean)

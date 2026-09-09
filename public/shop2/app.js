@@ -10842,14 +10842,23 @@
   function blogGenApplyFull(d, tx) {
     d.title.RU = String(tx.title || "").slice(0, 200);
     d.excerpt.RU = String(tx.excerpt || "").slice(0, 500);
-    d.body.RU = blogCleanHtml(String(tx.body || ""));
+    /* The article places its own product cards now (src/lib/ai-prompts.ts),
+       and all the model was given is an id: the marker it wrote is bare, so
+       the picture, the name and the price are written here — by the same
+       two functions a translation uses, so a card the assistant placed and
+       a card the owner placed are one object from this line onwards. Out to
+       a token, back as a card: an id this panel does not know rebuilds to
+       nothing at all, which is the second door in front of an invented
+       product (the route filtered against its own slice first). */
+    var wrote = blogCardsOut(String(tx.body || ""));
+    d.body.RU = blogCleanHtml(blogCardsIn(wrote.html, wrote.cards, "RU"));
     if (Array.isArray(tx.tags) && tx.tags.length) d.tagsText = tx.tags.map(String).join(", ");
-    if (Array.isArray(tx.products)) {
-      tx.products.forEach(function (id) {
-        // only a product this panel knows — the route filtered against its slice, this is the second door
-        if (d.products.indexOf(id) < 0 && d.products.length < 12 && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
-      });
-    }
+    // the ids it listed, plus the ids it put a card next to — a card standing
+    // in the text is a product the article is about, «Товары в статье» or not
+    (Array.isArray(tx.products) ? tx.products : []).concat(wrote.cards).forEach(function (id) {
+      // only a product this panel knows — the route filtered against its slice, this is the second door
+      if (d.products.indexOf(id) < 0 && d.products.length < 12 && (byIdOrNull(id) || findCustom(id))) d.products.push(id);
+    });
     if (tx.seo && tx.seo.title) d.seoTitle.RU = String(tx.seo.title).slice(0, 70);
     if (tx.seo && tx.seo.description) d.seoDesc.RU = String(tx.seo.description).slice(0, 170);
     if (d.slugAuto && d.title.RU) d.slug = blogSlugify(d.title.RU);

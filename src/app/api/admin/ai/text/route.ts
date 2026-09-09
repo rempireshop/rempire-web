@@ -19,7 +19,11 @@
  * words of HTML, tags, the Google pair, the products it mentions — offered
  * the slice of the catalogue that fits the topic (src/lib/catalogue-slice.ts)
  * and allowed to name nothing else; the body comes back through the blog's
- * own sanitizeHtml(), so what is stored is what the shop can show.
+ * own sanitizeHtml(), so what is stored is what the shop can show. The
+ * article also places its own product cards in the body, as the editor's
+ * «Товар» marker — and both the ids it lists and the ids it placed are
+ * filtered here against the slice it was offered (keepKnownCards below), so
+ * no card can point at a product that does not exist.
  * "post_translate" carries that article (or the owner's own) into another
  * language, tags kept in place. "copy" is the short text behind every «✨»
  * button in the panel (banner slide, announcement strip, contact page,
@@ -162,6 +166,27 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
   }
   void lang;
   return {};
+}
+
+/* The product cards the article placed in its own body, held to the same
+   list its `products` is held to.
+ *
+ * The card is an `<a data-product="ID">` — the editor's own «Товар» marker,
+ * which the storefront swaps for a real card by looking the id up in the
+ * catalogue. So an id the model invented is not a wrong card, it is no card
+ * at all plus a dead link in a published article, and the owner would have
+ * to find it by reading. It never leaves this route: the attribute goes and
+ * the sanitiser is run again, which unwraps the now-bare `<a>` and keeps
+ * whatever words were inside it.
+ *
+ * Runs over the already-sanitised body, where every `<a>` is exactly what
+ * openTag() in src/lib/blog.ts wrote — `data-product` first, one space, one
+ * pair of double quotes — so this pattern cannot match anything but a tag,
+ * text having lost its `<` to escapeText() long before. */
+function keepKnownCards(html: string, allowed: Set<string>): string {
+  if (!html.includes("data-product")) return html;
+  const kept = html.replace(/<a data-product="([^"]*)"/g, (m, id: string) => (allowed.has(id) ? m : "<a"));
+  return kept === html ? html : sanitizeHtml(kept);
 }
 
 /* post_full: the products the article may mention. The panel may name a
@@ -309,6 +334,7 @@ export async function POST(req: NextRequest) {
     if (post && result.text && typeof result.text === "object") {
       const t = result.text as Record<string, unknown>;
       t.products = (t.products as string[]).filter((id) => post.allowed.has(id));
+      t.body = keepKnownCards(String(t.body ?? ""), post.allowed);
     }
   }
 
