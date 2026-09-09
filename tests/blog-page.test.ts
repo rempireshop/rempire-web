@@ -163,7 +163,7 @@ describe("a post's page at request time", () => {
     expect(list.total).toBe(2);
     expect(list.posts.map((p) => p.slug).sort()).toEqual([other.slug, post.slug].sort());
     // the shell's own assets travel unchanged
-    expect(html).toContain('<script src="/shop2/app.js?v=');
+    expect(html).toContain('<script src="/shop2/app.min.js?v=');
   });
 
   it("EN with no English pair: the Russian pair; no pair at all: the title and the excerpt; no excerpt: the text", async () => {

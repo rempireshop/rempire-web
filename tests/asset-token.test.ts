@@ -23,6 +23,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { assetToken, currentToken, retokenise, versionedAssets } from "../tools/lib/asset-token.mjs";
+import { stripJs } from "../tools/lib/js-strip.mjs";
 
 /* ---------- a shell of our own, with files we can edit -------------------- */
 
@@ -176,7 +177,9 @@ describe("public/shop2/index.html", () => {
     expect((real.match(new RegExp("\\?v=" + token, "g")) || []).length).toBe(13);
     const urls = versionedAssets(real);
     expect(urls).toHaveLength(14); // the thirteen tags + the untagged chat.js
-    expect(urls).toContain("/shop2/app.js");
+    // the shell links the built file, not the source it is stripped from
+    expect(urls).toContain("/shop2/app.min.js");
+    expect(urls).not.toContain("/shop2/app.js");
     expect(urls).toContain("/shop2/chat.js");
   });
 
@@ -184,5 +187,48 @@ describe("public/shop2/index.html", () => {
     const pub = path.join(process.cwd(), "public");
     const real = (await readFile(path.join(pub, "shop2", "index.html"), "utf8")).replace(/\r\n?/g, "\n");
     expect(currentToken(real)).toBe(await assetToken(real, pub));
+  });
+});
+
+/* ---------- a tag whose file no checkout holds ---------------------------- */
+
+describe("the built app.min.js the shell links", () => {
+  /* Same fixture shell, with the tag the real one now carries. */
+  const builtShell = (token: string) => shell(token).replace("/shop2/app.js?v=", "/shop2/app.min.js?v=");
+
+  it("is read off the tag like any other, .min and all", () => {
+    expect(currentToken(builtShell("i18n84"))).toBe("i18n84");
+    expect(versionedAssets(builtShell("i18n84"))).toContain("/shop2/app.min.js");
+  });
+
+  it("hashes through app.js, so a checkout that has never run a build agrees", async () => {
+    /* app.min.js is gitignored (tools/minify-shop2.mjs): it exists after a
+       build and not before. A token hashed off the file on disk would be one
+       string in a fresh clone and another after `npm run build`, so the
+       committed index.html would be wrong in whichever state it was not
+       written in — the stale-token bug arriving through the front door. The
+       answer must not depend on the built file being there at all. */
+    const s = builtShell("i18n84");
+    const withoutBuild = await assetToken(s, PUB);
+    write("shop2/app.min.js", stripJs(FILES["shop2/app.js"]));
+    try {
+      expect(await assetToken(s, PUB)).toBe(withoutBuild);
+    } finally {
+      rmSync(path.join(PUB, "shop2/app.min.js"), { force: true });
+    }
+  });
+
+  it("moves when app.js gains code and stands still when it gains a comment", async () => {
+    /* Both halves matter. Code changes what the browser runs, so the address
+       has to change with it; a comment does not survive the stripper at all,
+       so moving the token for one would send every browser to fetch bytes it
+       already has. */
+    const s = builtShell("i18n84");
+    const before = await assetToken(s, PUB);
+    write("shop2/app.js", FILES["shop2/app.js"] + "var theWalletFix = 1;\n");
+    expect(await assetToken(s, PUB)).not.toBe(before);
+    write("shop2/app.js", FILES["shop2/app.js"] + "/* a note for a human */\n");
+    expect(await assetToken(s, PUB)).toBe(before);
+    write("shop2/app.js", FILES["shop2/app.js"]);
   });
 });

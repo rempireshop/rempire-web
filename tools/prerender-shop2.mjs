@@ -412,7 +412,7 @@ if (!headAssets || !bodyScripts || !HEAD_MARK.test(shell) || !PRE_MARK.test(shel
   throw new Error("public/shop2/index.html no longer has the shape this tool reads. It needs, in " +
     "order: <!-- seo:start --> … <!-- seo:end -->, then <link rel=\"icon\"> … </head>, and a body " +
     "with <div id=\"app\"><!-- prerender:start --> … <!-- prerender:end --></div> followed by the " +
-    "script tags, one of them /shop2/app.js with a ?v= token the other versioned tags share. " +
+    "script tags, one of them /shop2/app.min.js with a ?v= token the other versioned tags share. " +
     "Restore those markers — do not let the tool guess.");
 }
 

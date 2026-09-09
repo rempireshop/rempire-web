@@ -30,7 +30,9 @@ no automated test and not walked by hand.
 
 **Shape.** One Next.js 15 (App Router, serverful) project on Vercel. The shop and
 the admin are **one vanilla-JS single-page app** — `public/shop2/app.js`
-(21 111 lines, 874 functions, 1.46 MB), `styles.css`, `admin.css`, `chat.js`,
+(28 415 lines, 1.92 MB; a browser downloads `app.min.js` instead — the same
+file with the comments and indentation out, built in `prebuild` by
+`tools/minify-shop2.mjs`), `styles.css`, `admin.css`, `chat.js`,
 `index.html` — served as static files and talking to ~72 JSON routes under
 `src/app/api/**`. Postgres (Railway, `DATABASE_URL`) behind `src/lib/db.ts`;
 PGlite in memory for every test. The catalogue itself is **not** in the
@@ -1399,9 +1401,9 @@ shop before then.
 03.09) builds on push to `main` of `github.com/rempireshop/rempire-web`.
 **Hobby rule:** only commits authored by the account owner deploy, hence the
 `Rempire Store <324390963+rempireshop@users.noreply.github.com>` author on
-every commit. `npm run build` = `prebuild` (pack migrations, pack content, copy
-vendor, prerender with `PUBLIC_BASE_URL`) → `next build` → `postbuild` (migrate
-if `DATABASE_URL`). Environment variables: the table in `docs/accounts.md`
+every commit. `npm run build` = `prebuild` (pack migrations, pack content, pack legal, copy
+vendor, minify `app.js` → `app.min.js`, prerender with `PUBLIC_BASE_URL`) →
+`next build` → `postbuild` (migrate if `DATABASE_URL`). Environment variables: the table in `docs/accounts.md`
 (`OPENAI_API_KEY`, `RESEND_*`, `MAIL_REPLY_TO`, `DATABASE_URL`, `SESSION_SECRET`,
 `ADMIN_PASSWORD_HASH`, `PUBLIC_BASE_URL`=staging, `CRON_SECRET`, `PAYMENT_PROVIDER=
 montonio`, `MONTONIO_*` sandbox, `R2_*` set; `GSC_*`, `TELEGRAM_*` pending).
