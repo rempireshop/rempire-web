@@ -505,6 +505,7 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
     // all three switchable letters start off, exactly as the sender reads them
     await expect(page.locator('[data-admflow="birthday"]')).toHaveAttribute("aria-checked", "false");
     await expect(page.locator("[data-flowbdays]"), "the days setting shows while the letter is off").toHaveCount(0);
+    await expect(page.locator("[data-flowbpct]"), "the discount setting shows while the letter is off").toHaveCount(0);
 
     try {
       await page.locator('[data-admflow="birthday"]').click();
@@ -523,8 +524,25 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
         const res = await page.request.get(`/api/overrides/?t=${Date.now()}`);
         return ((await res.json()).settings.flows || {}).birthdayDays;
       }, { timeout: 30_000, message: "«за N дней» never reached the server" }).toBe(3);
+
+      /* «Скидка в поздравлении» (owner, 09.09.2026). The percent used to live
+         in FLOW_DEFAULTS with no way to change it but editing the source; it
+         rides the same settings.flows map as the days beside it, so the only
+         thing worth proving is that the panel now sends it. */
+      const pct = page.locator("[data-flowbpct]");
+      await expect(pct, "switching the letter on did not offer the discount").toBeVisible();
+      await expect(pct, "the discount does not default to the 10 % the letters have always said").toHaveValue("10");
+      await pct.selectOption("15");
+      await clearToast(page);
+      await expect.poll(async () => {
+        const res = await page.request.get(`/api/overrides/?t=${Date.now()}`);
+        return ((await res.json()).settings.flows || {}).birthdayPercent;
+      }, { timeout: 30_000, message: "the discount never reached the server" }).toBe(15);
+
       await assertClean(page, w, "the birthday days setting");
     } finally {
+      const pct2 = page.locator("[data-flowbpct]");
+      if (await pct2.count()) { await pct2.selectOption("10"); await clearToast(page); }
       const days2 = page.locator("[data-flowbdays]");
       if (await days2.count()) { await days2.selectOption("0"); await clearToast(page); }
       await page.locator('[data-admflow="birthday"]').click();
