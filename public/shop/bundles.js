@@ -199,15 +199,15 @@ const BUNDLES = [
     "brand": "Kevin.Murphy",
     "name": "SESSION.SPRAY — спрей",
     "sizeLabel": "400 мл",
-    "price": 18,
+    "price": 28,
     "img": "/shop/img/kevin-murphy-session-spray-0.webp?v=5",
     "stock": "in"
    }
   ],
-  "sum": 29,
-  "price": 24.9,
-  "save": 4.1,
-  "pct": 14,
+  "sum": 39,
+  "price": 33.9,
+  "save": 5.1,
+  "pct": 13,
   "images": [
    "/shop/img/night-rider-0.webp?v=5",
    "/shop/img/kevin-murphy-session-spray-0.webp?v=5"
@@ -290,7 +290,7 @@ const BUNDLES = [
     "brand": "Kevin.Murphy",
     "name": "YOUNG.AGAIN.WASH — шампунь",
     "sizeLabel": "250 мл",
-    "price": 6,
+    "price": 28,
     "img": "/shop/img/kevin-murphy-young-again-wash-0.webp?v=5",
     "stock": "in"
    },
@@ -300,7 +300,7 @@ const BUNDLES = [
     "brand": "Kevin.Murphy",
     "name": "YOUNG.AGAIN.RINSE — кондиционер",
     "sizeLabel": "250 мл",
-    "price": 6,
+    "price": 28,
     "img": "/shop/img/kevin-murphy-young-again-rinse-0.webp?v=5",
     "stock": "in"
    },
@@ -315,10 +315,10 @@ const BUNDLES = [
     "stock": "low"
    }
   ],
-  "sum": 46,
-  "price": 39.9,
-  "save": 6.1,
-  "pct": 13,
+  "sum": 90,
+  "price": 78.9,
+  "save": 11.1,
+  "pct": 12,
   "images": [
    "/shop/img/kevin-murphy-young-again-wash-0.webp?v=5",
    "/shop/img/kevin-murphy-young-again-rinse-0.webp?v=5",

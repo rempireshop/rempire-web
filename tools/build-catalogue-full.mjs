@@ -285,10 +285,16 @@ for (const [rawH, rs] of active) {
     entry.sizes = o1.map(ruSize);
     const vi = variantImageMap(rs);
     if (vi && vi.length === o1.length && vi.every(ix => ix < uniq.length)) entry.varImg = vi;
-    sortSizesAscending(entry); // 40→150→500, никогда вразнобой
+    /* Prices FIRST, then the sort — in that order, and it matters. Both
+       arrays are built against `o1`, the store's own variant order, and
+       sortSizesAscending() re-pairs sizes, varImg and prices with one
+       permutation. Called before `entry.prices` exists it silently sorts
+       only half of them, and the product ends up with ascending volumes
+       against the store's unsorted prices. */
     const pMap = {}; vars.forEach(r => { const v = r[C.o1val]; if (v && r[C.price]) pMap[v] = parseFloat(r[C.price]); });
     entry.prices = o1.map(v => pMap[v] ?? price);
     if (entry.prices.some(p2 => p2 !== price)) entry.priceFrom = true;
+    sortSizesAscending(entry); // 40→150→500, никогда вразнобой
   }
   const seoT = first[C.seoT], seoD = first[C.seoD];
   if (seoT || seoD) entry.seo = { t: seoT || "", d: seoD || "" };

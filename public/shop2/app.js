@@ -4791,7 +4791,11 @@
     [/^Вопросы — (.+)$/, { ET: "Küsimused — $1", EN: "Questions — $1" }],
     // real orders: «Заказ R-100042», «Пакомат · Kristiine keskus»
     [/^Заказ (R-\d+)$/, { ET: "Tellimus $1", EN: "Order $1" }],
-    // the card's add-to-cart toast: «Добавлено: Un.Tangled Spray · 150 мл»
+    /* The card's add-to-cart toast. Two rules, and the order matters: the
+       first keeps the volume out of $1 so the unit is translated too, because
+       here the name and the volume cannot be separate nodes — a toast is a
+       string. The second is every other shape. */
+    [/^Добавлено: (.+) · (\d+(?:[.,]\d+)?) мл$/, { ET: "Lisatud: $1 · $2 ml", EN: "Added: $1 · $2 ml" }],
     [/^Добавлено: (.+)$/, { ET: "Lisatud: $1", EN: "Added: $1" }],
     [/^Пакомат · (.+)$/, { ET: "Pakiautomaat · $1", EN: "Parcel locker · $1" }],
     [/^Курьер · (.+)$/, { ET: "Kuller · $1", EN: "Courier · $1" }],
@@ -5070,7 +5074,11 @@
     [/ для лица/g, { ET: " näole", EN: " for face" }],
     [/ для бороды/g, { ET: " habemele", EN: " for beard" }],
     [/ для бритья/g, { ET: " raseerimiseks", EN: " for shaving" }],
-    [/(\d) мл\b/g, { ET: "$1 ml", EN: "$1 ml" }]
+    /* \b after «л» never matches: a word boundary needs a word character on
+       one side and JavaScript's \w is ASCII, so this rule sat dead in the
+       table since it was written. The lookahead is what was meant, and it
+       keeps «млн» out of it. */
+    [/(\d) мл(?![а-яё])/g, { ET: "$1 ml", EN: "$1 ml" }]
   ];
   var TAIL_EXACT = {
     "футболка оверсайз": ["oversize T-särk", "oversized tee"],
@@ -5135,8 +5143,11 @@
   // without them the Russian type tail survived into the Estonian cart
   // …and the panel's own rows and picker tiles (phase 4): a product listed in
   // «Товары» or picked for a banner keeps its Russian tail otherwise
+  /* .toast is here because «Добавлено: <товар> · 75 мл» names a product:
+     without it trText() gets allowName=false and hands the name back
+     untouched, so an English shopper read «Added: … — шампунь». */
   var NAME_CTX = ".card__name,.cline__nm,.cline__parts,.cosum__nm,.bitem__nm,.crumbs,.pdp,.rail,h1,option,.adm__nm," +
-    ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2,.scan__cand__nm,.scan__nm,.scan__today__r";
+    ".adm-row__nm,.adm-row__sub,.adm-pick-tile,.adm-h2,.scan__cand__nm,.scan__nm,.scan__today__r,.toast";
   function translateTree(root) {
     if (S.lang === "RU" || !root) return;
     var lang = S.lang;
@@ -7759,7 +7770,7 @@
      volume: the cheapest, which is also the one «В корзину» baskets.
 
      Nothing is hidden by that. addToCart() names the volume in its toast,
-     lineLabel() prints it on the cart line, and the product page still sells
+     lineLabelHTML() prints it on the cart line, and the product page still sells
      every volume there is. What went is the choice being offered twice, in a
      150px box, before the shopper has decided they want the thing at all. */
   function cardSizes(p) {
@@ -12443,7 +12454,7 @@
       (S.cart.length ? S.cart.map(function (l) {
         // features: a line can be a product, a set or a gift card
         return '<div class="cosum__line"><span class="cosum__ph">' + lineImageHTML(l) + "</span>" +
-          '<span class="cosum__nm">' + esc(lineTitle(l)) + lineLabel(l) + " × " + l.qty +
+          '<span class="cosum__nm">' + esc(lineTitle(l)) + lineLabelHTML(l) + " × " + l.qty +
             ' <button class="link cosum__rm" data-remove="' + S.cart.indexOf(l) + '" aria-label="Убрать из заказа">Убрать</button>' +
             lineNoteHTML(l) + "</span>" +
           '<span class="num cosum__pr">' + eur(lineUnit(l) * l.qty) + "</span></div>";
@@ -23916,7 +23927,7 @@
       // a line is a product, a set or a gift card — lineTitle/lineImageHTML/
       // lineNoteHTML resolve which, so this markup stays one shape
       return '<div class="cline" data-cline="' + li + '"><span class="cline__ph">' + lineImageHTML(l) + "</span>" +
-        '<span class="cline__mid"><span class="cline__nm">' + esc(lineTitle(l)) + lineLabel(l) + "</span>" +
+        '<span class="cline__mid"><span class="cline__nm">' + esc(lineTitle(l)) + lineLabelHTML(l) + "</span>" +
         lineNoteHTML(l) +
         '<span class="stepper stepper--sm"><button data-line="' + li + '" data-d="-1" aria-label="Меньше"' + (l.qty <= 1 ? ' aria-disabled="true"' : "") + '>−</button><span class="num" data-qtyval>' + l.qty + '</span><button data-line="' + li + '" data-d="1" aria-label="Больше">+</button></span>' +
         '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
@@ -25297,15 +25308,31 @@
       ? "Бесплатная доставка — порог " + thr + " € достигнут ✓"
       : "До бесплатной доставки (" + COUNTRY_SHORT[S.country] + ", от " + thr + " €) — ещё " + eur(thr - sum);
   }
-  function lineLabel(l) {
+  /** The volume, or the colour and size, of a cart line — as separate
+   *  pieces, because each one is translated on its own. */
+  function lineLabelParts(l) {
     // sets and gift cards carry no size — their detail is in lineNoteHTML
-    if (l.type) return "";
+    if (l.type) return [];
     var p = byId(l.id);
-    if (!p.sizes || !p.sizes.length) return "";
+    if (!p.sizes || !p.sizes.length) return [];
     var s = p.sizes[Math.min(l.size || 0, p.sizes.length - 1)];
-    // "white / S" → "белый · S" in the cart and the checkout summary
+    // "white / S" → «белый», «S» in the cart and the checkout summary
     var parts = s.split(" / ");
-    return " · " + (parts.length === 2 ? colourRu(parts[0]) + " · " + parts[1] : s);
+    return parts.length === 2 ? [colourRu(parts[0]), parts[1]] : [s];
+  }
+  /** …and as markup, one <span> per piece.
+   *
+   *  The span per piece is the whole point, not decoration. translateTree()
+   *  works on text nodes: «Bio Botanical Shampoo — шампунь · 150 мл» as one
+   *  node matches nothing — trName() anchors the Russian type-tail on the end
+   *  of the string and « · 150 мл» sits in the way — so an Estonian shopper
+   *  read both the tail and the volume in Russian. Split, the name meets
+   *  trName() and «150 мл» meets the rule that has always translated it.
+   *  esc() because a size can come from the owner's own product. */
+  function lineLabelHTML(l) {
+    return lineLabelParts(l).map(function (part) {
+      return ' <span class="lsep" aria-hidden="true">·</span> <span class="lsz">' + esc(part) + "</span>";
+    }).join("");
   }
 
   // infinite scroll

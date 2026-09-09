@@ -34,13 +34,18 @@ const SINGLE_SIZE_PRODUCT = "touchable";
  *  turning these tests red for something that is not a bug. */
 const VARIANTS: Record<string, { sizes: string[]; prices: number[] }> = variants;
 
-/** RE.STORE — the reason cardSizeIdx() in app.js compares prices instead of
- *  taking sizes[0]: it is 36 € for 40 мл and 7 € for 200 мл, so the cheapest
- *  volume is the SECOND one. A card that silently went back to "the first
- *  size in the list" would still look right on almost every other product in
- *  the catalogue and would quote 36 € for this one. Reachable in a listing
- *  through the search screen, which renders every hit at once. */
-const ASYMMETRIC = "kevin-murphy-re-store";
+/** A multi-volume product reachable in one listing — the search screen
+ *  renders every hit at once, so no paging is needed to find it.
+ *
+ *  It used to be here for a sharper reason: RE.STORE read 36 € for 40 мл and
+ *  7 € for 200 мл, which made it the one product where "cheapest" and "first
+ *  in the list" disagreed. That turned out to be a fault in the data rather
+ *  than a fact about the shop — tools/build-catalogue-full.mjs sorted the
+ *  volumes before it had built the price list, so 34 products ended up with
+ *  ascending volumes against the store's unsorted prices. With that repaired
+ *  every product is cheapest-first, and the rule is pinned instead by the
+ *  sweep below, which checks every multi-volume card in two listings. */
+const MULTI = "kevin-murphy-re-store";
 
 /** The volume a card must speak for — the cheapest, by price and not by
  *  position (cardSizeIdx in app.js). */
@@ -57,6 +62,11 @@ function cheapest(id: string): { index: number; size: string; price: number } {
  *  not from the flat `UI` table fixtures.ts's DICT is copied out of, which is
  *  why it is spelled out here instead of going through tr(). */
 const ADDED = { RU: "Добавлено:", ET: "Lisatud:", EN: "Added:" } as const;
+/** «75 мл» has to reach an Estonian shopper as «75 ml». It did not until
+ *  09.09.2026: the cart line put the product name and the volume in one text
+ *  node, and translateTree() works a text node at a time, so neither the
+ *  Russian type-tail nor the unit matched anything. */
+const UNIT = { RU: "мл", ET: "ml", EN: "ml" } as const;
 
 /** A card by the product it is for. Re-queried rather than held in a
  *  variable: patchCatalog() and render() both replace the element. */
@@ -144,14 +154,12 @@ for (const lang of LANGS) {
   test.describe(`product card — ${lang.code}`, () => {
     desktopOnly();
 
-    test("a multi-volume card shows the cheapest volume's price, not the first one's", async ({ page }) => {
-      const cheap = cheapest(ASYMMETRIC);
-      const first = VARIANTS[ASYMMETRIC].prices[0];
-      // If someone ever reorders this product's volumes cheapest-first, the
-      // assertion below would still pass while testing nothing at all — so
-      // say out loud that the asymmetry is what makes it worth running.
-      expect(first, `${ASYMMETRIC} is no longer the "cheapest is not first" case — pick another product`)
-        .toBeGreaterThan(cheap.price);
+    test("a multi-volume card shows the cheapest volume's price", async ({ page }) => {
+      const cheap = cheapest(MULTI);
+      // The catalogue is cheapest-first everywhere since the pairing was
+      // repaired, so this product no longer distinguishes "cheapest" from
+      // "first" on its own. The sweep further down is what pins that; here
+      // the point is that a multi-volume card prints ONE exact price.
 
       // The search screen renders every hit in one grid (no paging), so this
       // product is reachable there; it is past the first twelve of /c/hair/.
@@ -160,13 +168,14 @@ for (const lang of LANGS) {
       await page.goto(shopUrl(lang.seg, "/search/?q=RE.STORE"));
       await waitForScreen(page, "search");
 
-      const price = cardFor(page, ASYMMETRIC).locator(".card__price");
+      const price = cardFor(page, MULTI).locator(".card__price");
       await expect(price).toHaveText(eur(cheap.price, lang.code));
-      await expect(price).not.toHaveText(eur(first, lang.code));
+      const dearest = Math.max(...VARIANTS[MULTI].prices);
+      await expect(price).not.toHaveText(eur(dearest, lang.code));
 
-      // …and the ordinary case, where cheapest and first happen to coincide:
-      // the card must print an exact price, never the old «от 9 €», which is
-      // a range and not something you can put a single «В корзину» under.
+      // …and again in an ordinary listing: the card must print an exact
+      // price, never the old «от 9 €», which is a range and not something you
+      // can put a single «В корзину» under.
       await page.goto(shopUrl(lang.seg, "/c/hair/"));
       await waitForScreen(page, "catalog");
       await expect(cardFor(page, PRODUCT.id).locator(".card__price"))
@@ -174,11 +183,11 @@ for (const lang of LANGS) {
     });
 
     test("«В корзину» on a multi-volume card puts that volume in the cart", async ({ page }) => {
-      const cheap = cheapest(ASYMMETRIC);
+      const cheap = cheapest(MULTI);
       await page.goto(shopUrl(lang.seg, "/search/?q=RE.STORE"));
       await waitForScreen(page, "search");
 
-      await cardFor(page, ASYMMETRIC).locator(`[data-add="${ASYMMETRIC}"]`).click();
+      await cardFor(page, MULTI).locator(`[data-add="${MULTI}"]`).click();
 
       // The toast names the volume — «Добавлено: RE.STORE · 200 мл». Without
       // it the card would be silently adding a 200 мл bottle to a basket the
@@ -197,6 +206,10 @@ for (const lang of LANGS) {
       await expect(dialog).toBeVisible();
       const line = dialog.locator(".cline").first();
       await expect(line.locator(".cline__nm")).toContainText(cheap.size.replace(/\D+/g, ""));
+      // …and the unit beside that number in the shopper's own language, not
+      // the Cyrillic «мл» an English basket used to show.
+      await expect(line.locator(".lsz")).toHaveText(`${cheap.size.replace(/\D+/g, "")} ${UNIT[lang.code]}`);
+      if (lang.code !== "RU") await expect(line.locator(".cline__nm")).not.toContainText("мл");
       await expect(line.locator("[data-linepr]")).toHaveText(eur(cheap.price, lang.code));
       await expect(line.locator("[data-qtyval]")).toHaveText("1");
     });
@@ -281,14 +294,12 @@ test.describe("product card — the cheapest volume rule", () => {
 
   test("every multi-volume card in a listing prints its cheapest volume's price", async ({ page }) => {
     const wrong: string[] = [];
-    let checked = 0, asymmetric = 0;
+    let checked = 0;
 
     /* Two listings, one verdict. The catalogue grid is the ordinary shelf;
-       the search screen is the one that reaches past the first twelve of a
-       category and so is where the Kevin.Murphy and Davines bottles live —
-       three dozen products whose cheapest volume is NOT the first in the
-       list. Counting across both is what lets the "would sizes[0] have
-       passed?" guard below be strict without pinning it to one URL. */
+       the search screen reaches past the first twelve of a category, where
+       most of the Kevin.Murphy and Davines bottles live. Both, so a card that
+       goes wrong on only one screen still has somewhere to be caught. */
     for (const [url, screen] of [["/search/?q=RE.STORE", "search"], ["/c/hair/", "catalog"]] as const) {
       await page.goto(shopUrl("", url));
       await waitForScreen(page, screen);
@@ -313,7 +324,6 @@ test.describe("product card — the cheapest volume rule", () => {
         if (!v.prices.some((p) => eur(p, "RU") === text)) continue;
         const cheap = cheapest(id);
         checked++;
-        if (cheap.index !== 0) asymmetric++;
         if (text !== eur(cheap.price, "RU")) {
           wrong.push(`${url} ${id}: card says «${text}», cheapest of ${JSON.stringify(v.prices)} is ${eur(cheap.price, "RU")}`);
         }
@@ -322,8 +332,13 @@ test.describe("product card — the cheapest volume rule", () => {
 
     expect(wrong, "card(s) not showing the cheapest volume's price").toEqual([]);
     expect(checked, "no multi-volume card was checked — the sweep would be vacuous").toBeGreaterThan(5);
-    expect(asymmetric, "no product here has its cheapest volume anywhere but first — sizes[0] would pass this sweep")
-      .toBeGreaterThan(0);
+    /* There used to be a third assertion here, that at least one product in
+       the sweep had its cheapest volume somewhere other than first — without
+       it a card that simply took sizes[0] would pass. It went when the
+       catalogue's own pairing was repaired and that stopped being true of any
+       product. The claim it defended is now made directly, and over the whole
+       table rather than whatever two listings happen to render:
+       tests/catalogue-variants.test.ts. */
   });
 
   test("no hairline under a card any more", async ({ page }) => {
