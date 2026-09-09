@@ -315,6 +315,135 @@
       }
     },
     {
+      "id": "shop-card-price",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Цена на карточке в списке товаров",
+      "steps": [
+        "Открыть раздел «Уход за волосами» и найти товар с несколькими объёмами.",
+        "Посмотреть, что написано на его карточке.",
+        "Открыть этот товар и нажать на каждый объём по очереди.",
+        "Вернуться назад и нажать «В корзину» прямо на карточке.",
+        "Открыть корзину."
+      ],
+      "expect": [
+        "Кнопок объёма на карточке нет.",
+        "Цена на карточке — самая дешёвая из цен этого товара.",
+        "«В корзину» кладёт именно этот объём.",
+        "Подсказка называет объём: «Добавлено: … · 75 мл».",
+        "В корзине у строки написан тот же объём.",
+        "Цена в корзине совпадает с ценой на карточке."
+      ],
+      "why": "Раз выбора на карточке больше нет, цена должна отвечать за тот объём, который туда и ложится.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "The price on a card in a product list",
+        "steps": [
+          "Open the «Уход за волосами» section and find a product with several sizes.",
+          "Look at what its card says.",
+          "Open that product and tap each size in turn.",
+          "Go back and press «В корзину» on the card itself.",
+          "Open the cart."
+        ],
+        "expect": [
+          "There are no size buttons on the card.",
+          "The card's price is the lowest of that product's prices.",
+          "«В корзину» baskets exactly that size.",
+          "The toast names the size: «Добавлено: … · 75 мл».",
+          "The cart line carries the same size.",
+          "The price in the cart matches the card."
+        ],
+        "why": "With no choice left on the card, its price must answer for the size it baskets."
+      }
+    },
+    {
+      "id": "shop-card-look",
+      "area": "shop",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Как выглядит ряд товаров",
+      "steps": [
+        "Открыть «Все товары» на телефоне.",
+        "Посмотреть на два соседних товара в ряду.",
+        "Найти товар с длинным названием.",
+        "Пролистать список вниз."
+      ],
+      "expect": [
+        "Все карточки в ряду одной высоты.",
+        "Цена и кнопка у соседей стоят на одной линии.",
+        "Длинное название занимает две строки и обрывается многоточием.",
+        "Между товарами нет разделительных линий.",
+        "«В корзину» написано словами, а не значком сумки."
+      ],
+      "why": "Ровный ряд читается с одного взгляда, а рваный выглядит сломанным.",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "How a row of products looks",
+        "steps": [
+          "Open «Все товары» (all products) on a phone.",
+          "Look at two products side by side in one row.",
+          "Find a product with a long name.",
+          "Scroll the list down."
+        ],
+        "expect": [
+          "Every card in a row is the same height.",
+          "Price and button sit on one line across neighbours.",
+          "A long name takes two lines and ends in dots.",
+          "There are no dividing lines between products.",
+          "«В корзину» is words, not a bag icon."
+        ],
+        "why": "An even row reads at a glance; a ragged one looks broken."
+      }
+    },
+    {
+      "id": "shop-card-lang",
+      "area": "shop",
+      "who": "dim",
+      "device": "any",
+      "lang": "ET",
+      "title": "Объём и кнопка на карточке по-эстонски",
+      "steps": [
+        "Переключить магазин на эстонский.",
+        "Найти в списке шампунь с несколькими объёмами.",
+        "Нажать «В корзину» на карточке и прочитать подсказку.",
+        "Открыть корзину и прочитать строку товара.",
+        "Повторить то же самое на английском."
+      ],
+      "expect": [
+        "Кнопка на карточке — «Lisa ostukorvi» целиком.",
+        "В подсказке объём написан «75 ml».",
+        "В корзине у строки тоже «75 ml».",
+        "В корзине после названия стоит «— šampoon», а не «— шампунь».",
+        "На английском в тех же местах «75 ml»."
+      ],
+      "why": "Кириллица посреди эстонской строки говорит покупателю, что магазин не для него.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "The size and the button on a card in Estonian",
+        "steps": [
+          "Switch the shop to Estonian.",
+          "Find a shampoo with several sizes in a listing.",
+          "Press «В корзину» on the card and read the toast.",
+          "Open the cart and read the product line.",
+          "Do the same again in English."
+        ],
+        "expect": [
+          "The card's button reads «Lisa ostukorvi» in full.",
+          "The toast writes the size as «75 ml».",
+          "The cart line says «75 ml» too.",
+          "The cart line reads «— šampoon», not «— шампунь».",
+          "In English the same places say «75 ml»."
+        ],
+        "why": "Cyrillic in the middle of an Estonian line tells the buyer this shop is not for them."
+      }
+    },
+    {
       "id": "shop-product-sizes",
       "area": "shop",
       "who": "renat",
@@ -329,12 +458,13 @@
       ],
       "expect": [
         "Другой объём — другая цена.",
+        "Больший объём не дешевле меньшего.",
         "Надпись о наличии тоже меняется.",
         "Фотографии листаются пальцем.",
         "Описание на русском.",
         "Описание видно целиком, не обрезано."
       ],
-      "why": "Цена, которая не поменялась вместе с объёмом, — это спор на кассе.",
+      "why": "Цена, которая не поменялась вместе с объёмом, — это спор на кассе, а литр дешевле флакона — ваш убыток.",
       "risk": "med",
       "writes": false,
       "en": {
@@ -347,12 +477,13 @@
         ],
         "expect": [
           "A different size shows a different price.",
+          "A bigger size is never cheaper than a smaller one.",
           "The in-stock line changes too.",
           "The photos swipe with a finger.",
           "The description is in Russian.",
           "The whole description is there, not cut off."
         ],
-        "why": "A price that did not follow the size is an argument at the till."
+        "why": "A price that did not follow the size is an argument at the till, and a cheaper litre is your loss."
       }
     },
     {
@@ -1062,6 +1193,53 @@
           "Back closes the screen instead of throwing you out."
         ],
         "why": "A section that fails on the phone is work for the computer."
+      }
+    },
+    {
+      "id": "panel-back",
+      "area": "panel",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "«Назад» закрывает то, что открыто в панели",
+      "steps": [
+        "В «Заказах» открыть карточку заказа и нажать «Назад» телефона.",
+        "Открыть её снова, нажать «Отправлен» и на вопросе нажать «Назад» дважды.",
+        "В «Товарах» открыть товар на правку и нажать «Назад».",
+        "Нажать «Ещё», потом «Назад».",
+        "Открыть «Товары» → «Склад», нажать «Сканировать», потом «Назад».",
+        "Снова открыть товар на правку, закрыть его кнопкой «← Товары» и нажать «Назад»."
+      ],
+      "expect": [
+        "Карточка заказа закрывается, а панель остаётся.",
+        "Первое «Назад» убирает вопрос, второе — карточку.",
+        "Редактор товара и «Ещё» закрываются так же.",
+        "Сканер закрывается, камера гаснет, панель на месте.",
+        "После «← Товары» одно «Назад» уводит из панели.",
+        "Ни одно нажатие не проходит впустую."
+      ],
+      "why": "Ренат жаловался, что «Назад» иногда выкидывало его из панели в магазин, а обратно приходилось идти через меню.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "Back closes whatever is open in the panel",
+        "steps": [
+          "In «Заказы» open an order card and press the phone's back button.",
+          "Open it again, press «Отправлен», and press back twice on the question.",
+          "In «Товары» open a product for editing and press back.",
+          "Press «Ещё», then back.",
+          "Open «Товары» → «Склад», press «Сканировать», then back.",
+          "Open a product for editing again, close it with «← Товары», then press back."
+        ],
+        "expect": [
+          "The order card closes and the panel stays.",
+          "The first back clears the question, the second the card.",
+          "The product editor and «Ещё» close the same way.",
+          "The scanner closes, the camera goes out, the panel stays.",
+          "After «← Товары» one back leaves the panel.",
+          "No press does nothing at all."
+        ],
+        "why": "Renat's complaint was that Back sometimes threw him out of the panel into the shop, and the way back in was the menu."
       }
     },
     {
@@ -2017,7 +2195,7 @@
       "lang": "RU",
       "title": "Оплата по счёту — для компаний",
       "steps": [
-        "Набрать корзину и дойти до шага оплаты.",
+        "Набрать корзину, на шаге доставки выбрать Эстонию и дойти до шага оплаты.",
         "Выбрать «По счёту — для компаний».",
         "Заполнить название фирмы, регистрационный номер, KMKR, юридический адрес и почту для счёта.",
         "Оформить заказ."
@@ -2034,7 +2212,7 @@
       "en": {
         "title": "Payment by invoice — for companies",
         "steps": [
-          "Fill the cart and get to the payment step.",
+          "Fill the cart, choose Estonia at the delivery step and get to the payment step.",
           "Choose «По счёту — для компаний» (by invoice, for companies).",
           "Fill in the company name, the registration number, the KMKR (VAT) number, the legal address and the e-mail for the invoice.",
           "Place the order."
@@ -2049,6 +2227,47 @@
       }
     },
     {
+      "id": "checkout-invoice-abroad",
+      "area": "checkout",
+      "who": "dim",
+      "device": "desktop",
+      "lang": "RU",
+      "title": "Счёт для фирмы — только по Эстонии",
+      "steps": [
+        "Набрать корзину и на шаге доставки выбрать Латвию.",
+        "Перейти на шаг оплаты и прочитать список способов.",
+        "Вернуться на доставку, выбрать «Другая страна Европы» и Германию.",
+        "Снова открыть шаг оплаты.",
+        "Поставить Эстонию и открыть шаг оплаты ещё раз."
+      ],
+      "expect": [
+        "Для Латвии «По счёту — для компаний» в списке нет.",
+        "Для Германии его тоже нет.",
+        "Для Эстонии он снова на месте.",
+        "Остальные способы оплаты никуда не делись."
+      ],
+      "why": "Счёт выписывается с эстонским налогом 24 %, а за границей это неверный документ, а не просто лишняя кнопка.",
+      "risk": "high",
+      "writes": false,
+      "en": {
+        "title": "An invoice for a company — Estonia only",
+        "steps": [
+          "Fill the cart and choose Latvia at the delivery step.",
+          "Go to the payment step and read the list of methods.",
+          "Go back to delivery, choose «Другая страна Европы» and Germany.",
+          "Open the payment step again.",
+          "Set Estonia and open the payment step once more."
+        ],
+        "expect": [
+          "For Latvia «По счёту — для компаний» is not in the list.",
+          "For Germany it is missing too.",
+          "For Estonia it is back.",
+          "The other payment methods are all still there."
+        ],
+        "why": "The invoice is issued at Estonian tax of 24 %, which abroad is a wrong document rather than a missing button."
+      }
+    },
+    {
       "id": "checkout-invoice-zero",
       "area": "checkout",
       "who": "dim",
@@ -2056,7 +2275,7 @@
       "lang": "RU",
       "title": "Счёт на ноль евро",
       "steps": [
-        "Набрать корзину и выбрать «По счёту — для компаний».",
+        "Набрать корзину с доставкой по Эстонии и выбрать «По счёту — для компаний».",
         "Вернуться в сводку и применить подарочную карту, которая закрывает заказ целиком.",
         "Вернуться на шаг оплаты."
       ],
@@ -2071,7 +2290,7 @@
       "en": {
         "title": "A zero-euro invoice",
         "steps": [
-          "Fill the cart and choose «По счёту — для компаний».",
+          "Fill the cart with delivery in Estonia and choose «По счёту — для компаний».",
           "Go back to the summary and apply a gift card that covers the whole order.",
           "Return to the payment step."
         ],
@@ -3759,6 +3978,7 @@
       "title": "Письмо ко дню рождения",
       "steps": [
         "В разделе «Письма» включить «Скидка ко дню рождения» и выбрать «в день рождения».",
+        "Тут же в «Скидка в поздравлении» поставить 15 %.",
         "В кабинете покупателя поставить сегодняшнюю дату рождения и согласие на новости.",
         "Попросить Дима запустить расписание вручную.",
         "Проверить почту и применить пришедший промокод на кассе."
@@ -3766,6 +3986,7 @@
       "expect": [
         "Письмо пришло, в нём личный промокод.",
         "Код срабатывает на кассе.",
+        "Скидка ровно та, что выбрали — 15 %.",
         "Код живёт ещё две недели после дня рождения."
       ],
       "why": "Промокод, сгоревший в тот же день, — поздравление, которым не воспользоваться.",
@@ -3775,6 +3996,7 @@
         "title": "The birthday letter",
         "steps": [
           "In «Письма» switch on «Скидка ко дню рождения» and choose «в день рождения».",
+          "Right below it, set «Скидка в поздравлении» to 15 %.",
           "In the customer account set today as the date of birth, and accept news.",
           "Ask Dim to start the schedule by hand.",
           "Check your mail and apply the promo code that arrived at the checkout."
@@ -3782,6 +4004,7 @@
         "expect": [
           "The letter arrives with a personal promo code.",
           "The code works at the checkout.",
+          "The discount is exactly the one chosen — 15 %.",
           "It lives two more weeks after the birthday."
         ],
         "why": "A code that expires the same day is a greeting nobody can use."
@@ -5204,6 +5427,49 @@
       }
     },
     {
+      "id": "ai-blog-cards",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Помощник сам ставит товары в статью",
+      "steps": [
+        "«Блог» → «+ Статья».",
+        "Вписать тему про уход за волосами и нажать «Написать статью целиком».",
+        "Дождаться готового текста и пролистать его.",
+        "Нажать на карточку товара внутри текста.",
+        "Пролистать вниз до списка «Товары в статье»."
+      ],
+      "expect": [
+        "В тексте стоят карточки товаров — не больше трёх.",
+        "У карточки есть фотография, название и цена.",
+        "Карточка открывает страницу этого товара.",
+        "Эти же товары стоят в «Товары в статье».",
+        "Если по теме ничего не подошло, карточек нет."
+      ],
+      "why": "Раньше каждую карточку приходилось искать и вставлять руками кнопкой «Товар».",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "The assistant places products in the article itself",
+        "steps": [
+          "«Блог» → «+ Статья».",
+          "Type a subject about hair care and press «Написать статью целиком».",
+          "Wait for the finished text and scroll through it.",
+          "Tap a product card inside the text.",
+          "Scroll down to the «Товары в статье» list."
+        ],
+        "expect": [
+          "Product cards stand in the text — three at most.",
+          "A card has a photo, a name and a price.",
+          "The card opens that product's page.",
+          "The same products are listed in «Товары в статье».",
+          "If nothing fitted the subject, there are no cards."
+        ],
+        "why": "Every card used to be hunted down and inserted by hand with the «Товар» button."
+      }
+    },
+    {
       "id": "ai-blog-translate",
       "area": "ai",
       "who": "renat",
@@ -5211,7 +5477,7 @@
       "lang": "RU",
       "title": "Перевод статьи со вставленным товаром",
       "steps": [
-        "В статье со вставленным товаром нажать «Перевести на ET и EN».",
+        "В статье с карточкой товара — своей или от помощника — нажать «Перевести на ET и EN».",
         "Открыть эстонский и найти в тексте этот товар.",
         "Опубликовать и открыть эстонскую статью в магазине."
       ],
@@ -5225,7 +5491,7 @@
       "en": {
         "title": "Translating an article with a product in it",
         "steps": [
-          "In an article holding a product, press «Перевести на ET и EN».",
+          "In an article with a product card — yours or the assistant's — press «Перевести на ET и EN».",
           "Switch to Estonian and find that product in the text.",
           "Publish and open the Estonian article in the shop."
         ],
@@ -5743,7 +6009,8 @@
       ],
       "expect": [
         "Новое число дней сохранилось и осталось после перезагрузки.",
-        "Кнопка «Доставлен» в заказе никуда не делась."
+        "Кнопка «Доставлен» в заказе никуда не делась.",
+        "У списка «Закрывать заказ через» одна стрелка, а не две."
       ],
       "why": "Заказ, закрывшийся сам слишком рано, спрячет посылку, которая ещё едет.",
       "risk": "low",
@@ -5757,7 +6024,8 @@
         ],
         "expect": [
           "The new number of days saved and stayed after a reload.",
-          "The «Доставлен» button in the order is still there."
+          "The «Доставлен» button in the order is still there.",
+          "The «Закрывать заказ через» list has one arrow, not two."
         ],
         "why": "An order closing itself too early hides a parcel still travelling."
       }
