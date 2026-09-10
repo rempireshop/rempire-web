@@ -192,6 +192,33 @@ export async function listReviews(status?: ReviewStatus, limit = 100): Promise<R
   return rows.map(toReview);
 }
 
+/**
+ * One customer's reviews, for the admin's customer card. The table carries
+ * no e-mail (021_reviews.sql — the form asks for a name and nothing else), so
+ * the match is by name: the row's `name` against every name this customer is
+ * known by — the account's own and the ones on their orders — compared
+ * case-blind with the whitespace collapsed, which is how both were stored
+ * (clean() above, text() in src/lib/customers.ts). A namesake's review is the
+ * price of that, and the card says so under the section's title.
+ */
+export async function reviewsByAuthor(names: Array<string | null | undefined>, limit = 20): Promise<Review[]> {
+  const keys = [
+    ...new Set(
+      names
+        .map((n) => String(n ?? "").replace(/\s+/g, " ").trim().toLowerCase())
+        .filter((n) => n.length >= 2),
+    ),
+  ];
+  if (!keys.length) return [];
+  const rows = await query<ReviewRow>(
+    `select id, product_id, name, rating, text, lang, status, created_at
+       from reviews where lower(name) = any($1::text[])
+      order by created_at desc limit $2`,
+    [keys, Math.min(100, Math.max(1, limit))],
+  );
+  return rows.map(toReview);
+}
+
 export async function reviewCounts(): Promise<Record<ReviewStatus, number>> {
   const rows = await query<{ status: ReviewStatus; n: string | number }>(
     "select status, count(*) as n from reviews group by status",

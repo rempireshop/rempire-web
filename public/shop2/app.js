@@ -1591,6 +1591,14 @@
       "Страница": "Leht",
       "Список клиентов не загрузился.": "Klientide loend ei laadinud.",
       "← Ко всем клиентам": "← Kõikide klientide juurde",
+      // the customer card: what he bought, what he wrote (10.09.2026)
+      "Заказов пока нет": "Tellimusi veel pole",
+      "Отзывы клиента": "Kliendi arvustused",
+      "Первый заказ": "Esimene tellimus",
+      "Последний заказ": "Viimane tellimus",
+      "Любимые бренды": "Lemmikbrändid",
+      "К клиенту": "Kliendi juurde",
+      "Подобраны по имени — так, как покупатель подписал отзыв.": "Leitud nime järgi — nii, nagu ostja arvustusele alla kirjutas.",
       "например, извинение за задержку": "näiteks, vabandus viivituse eest",
       "например: постоянный клиент, оптовик": "näiteks: püsiklient, hulgimüügiklient",
       "Имя, почта, телефон, компания…": "Nimi, e-post, telefon, ettevõte…",
@@ -3846,6 +3854,14 @@
       "Страница": "Page",
       "Список клиентов не загрузился.": "The customer list didn't load.",
       "← Ко всем клиентам": "← Back to all customers",
+      // the customer card: what he bought, what he wrote (10.09.2026)
+      "Заказов пока нет": "No orders yet",
+      "Отзывы клиента": "Customer's reviews",
+      "Первый заказ": "First order",
+      "Последний заказ": "Last order",
+      "Любимые бренды": "Favourite brands",
+      "К клиенту": "Back to the customer",
+      "Подобраны по имени — так, как покупатель подписал отзыв.": "Matched by name — the way the customer signed the review.",
       "например, извинение за задержку": "e.g., an apology for the delay",
       "например: постоянный клиент, оптовик": "e.g.: regular customer, wholesale buyer",
       "Имя, почта, телефон, компания…": "Name, e-mail, phone, company…",
@@ -13887,7 +13903,8 @@
       admItemsLabel(v.items) + '</span></span><span class="adm-row__amt">' + eur(v.sum) + "</span></div>";
 
     return '<div class="adm-screen adm-screen--card">' +
-      '<button class="adm-link" data-admorder="">← Заказы</button>' +
+      // opened from a customer's card: the way back is that customer, not the list
+      (S.admCustOpen ? admBackHTML('data-admorder=""', "К клиенту") : '<button class="adm-link" data-admorder="">← Заказы</button>') +
       admHead(esc(v.number) + " · " + esc(v.date), esc(v.who), admOrderBadge(v, true), true) +
       (showSteps ? admOrderSteps(v) : "") +
       admReturnStateHTML(v) +
@@ -14702,6 +14719,14 @@
   function admCustomersScreen() {
     var onReviews = S.adminTab === "reviews";
     if (onReviews) loadAdminReviews(false);
+    /* A card is its own page (Dim, 10.09.2026): on it, the «Все клиенты /
+       Отзывы» tabs — which sort the list — threw the owner out to the queue
+       when he expected this customer's reviews. They are not drawn while a
+       card is open; «← Все клиенты» is the way out, and the customer's own
+       reviews live on the card (admCustReviewsHTML). The queue stays one tap
+       away from the list. An order opened from the card is drawn over it. */
+    var card = !!S.admCustOpen && SRV.admin === true;
+    if (card && S.adminOrder) return admCustOrderCardHTML();
     var pend = admReviewCounts().pending || 0;
     /* «+ Партнёр» — the same head slot «+ Промокод» uses: a salon the owner
        already knows is added by e-mail, without waiting for a request. */
@@ -14711,9 +14736,9 @@
       : "";
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Клиенты", add) +
-      admTabsHTML(
+      (card ? "" : admTabsHTML(
         admTabBtn("people", "Все клиенты", 0, !onReviews) +
-        admTabBtn("reviews", "Отзывы", pend, onReviews)) +
+        admTabBtn("reviews", "Отзывы", pend, onReviews))) +
       (onReviews ? admReviewsHTML() : admCustomersHTML()) +
       "</div>";
   }
@@ -18547,7 +18572,11 @@
     if (S.admCustDetail && S.admCustDetail.customer.id === id && !force) return;
     apiJson("/api/admin/customers/" + encodeURIComponent(id) + "/").then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) { S.admCustDetail = { customer: r.body.customer, history: r.body.history || [] }; render(); }
+      if (r.status === 200 && r.body.ok) {
+        S.admCustDetail = { customer: r.body.customer, history: r.body.history || [],
+          orders: r.body.orders || [], stats: r.body.stats || null, reviews: r.body.reviews || [] };
+        render();
+      }
     }).catch(noop);
   }
   function admCustomerCardHTML() {
@@ -18589,6 +18618,12 @@
           '<div class="adm-acts" style="margin-top:12px"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) + '">Одобрить Pro</button>' +
           '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustreject="' + esc(c.id) + '">Отказать</button></div>'
         : "") +
+      /* what is behind the tiles (Dim, 10.09.2026): four facts, the orders
+         themselves, and the reviews this person wrote — the three functions
+         after this one */
+      admCustFactsHTML(d) +
+      admCustOrdersHTML(d) +
+      admCustReviewsHTML(d) +
       /* the tier, as a switch the owner can read: which one is on now, and
          what pressing the other does (askTierSwitch → confirm card) */
       /* Everything from here to the private note belongs to «Партнёры и
@@ -18625,6 +18660,139 @@
           '<input class="adm-input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
         '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-admcustsavenotes="' + esc(c.id) + '">Сохранить заметку</button></div>' +
       "</div>";
+  }
+  /* ---------- the card: what he bought, what he wrote ----------------------
+     Dim, 10.09.2026: «the card says two orders and a sum, and shows no
+     orders, no analytics, nothing else». GET /api/admin/customers/<id> now
+     carries the last twenty orders under that e-mail, four facts drawn from
+     the whole history, and the reviews signed with one of this customer's
+     names (src/lib/loyalty.ts customerOrdersAdmin, src/lib/reviews.ts
+     reviewsByAuthor). Three sections under the tiles, in that order. */
+  /** Four plain rows — no chart: one customer is not a trend. Drawn only
+      once there is a purchase to draw them from. */
+  function admCustFactsHTML(d) {
+    var s = d.stats;
+    if (!s || !s.firstOrderAt) return "";
+    var firstD = shortDate(s.firstOrderAt), lastD = shortDate(s.lastOrderAt);
+    var brands = (s.topBrands || []).map(function (b) { return b.brand; }).filter(Boolean).join(" · ");
+    return '<div class="adm-list">' +
+      admCustFactRow("Первый заказ", firstD) +
+      // one purchase, or two on one day: a «last» that repeats the first says nothing
+      (lastD !== firstD ? admCustFactRow("Последний заказ", lastD) : "") +
+      admCustFactRow("Средний чек", eur(s.avgOrder)) +
+      (brands ? admCustFactRow("Любимые бренды", brands) : "") +
+      "</div>";
+  }
+  /** The customer's orders as rows — number, date, sum and the same status
+      chip the orders list draws; a tap opens the order card over this one
+      (admCustOrderCardHTML, and the tab handler's one line for it). */
+  function admCustOrdersHTML(d) {
+    var list = d.orders;
+    var body = !list ? '<div class="adm-skel"><i></i><i></i></div>'
+      : !list.length ? '<div class="adm-empty">Заказов пока нет</div>'
+      : '<div class="adm-list">' + list.map(admCustOrderRowHTML).join("") + "</div>";
+    return '<div class="adm-sec__t" style="margin-top:28px">Заказы</div>' + body;
+  }
+  /** The chip reads the loaded orders list when the order is in it — that
+      copy moves the moment «Отправлен» is pressed on the card — and the
+      summary the customer's GET carried otherwise (an order older than the
+      last hundred, or a list not fetched yet). */
+  function admCustOrderRowHTML(o) {
+    var unpaid = o.status === "new" || o.status === "failed";
+    var v = admOrderById(o.id) || {
+      status: o.status, pos: o.channel === "pos", invoice: o.invoice || null, unpaid: unpaid,
+      overdue: o.invoice && unpaid ? admInvoiceOverdue(o.invoice) : 0,
+      delivered: o.status === "delivered", shipped: o.status === "shipped", labeled: !!o.labeled
+    };
+    return '<button class="adm-row adm-row--click" data-admorder="' + esc(o.id) + '">' +
+      '<span class="adm-row__body"><span class="adm-row__nm"><span class="adm-mono">' + esc(o.number) + "</span> · " + esc(shortDate(o.createdAt)) + "</span>" +
+        '<span class="adm-row__sub"><span>' + admItemsLabel(o.itemsCount) + "</span>" + (o.firstItem ? " · " + esc(o.firstItem) : "") + "</span></span>" +
+      admOrderBadge(v) +
+      '<span class="adm-row__amt">' + eur(o.total) + "</span></button>";
+  }
+  /** «Отзывы клиента»: stars, the product, the whole text and the chip —
+      with «Опубликовать» / «Скрыть» right here (moderateCustReview), the same
+      reversible edit the queue makes, so the card is never left for it. The
+      line under the title says how they were found: the reviews table has no
+      e-mail, only the name the shopper signed with. */
+  function admCustReviewsHTML(d) {
+    var list = d.reviews;
+    var body = !list ? '<div class="adm-skel"><i></i><i></i></div>'
+      : !list.length ? '<div class="adm-empty">Отзывов пока нет</div>'
+      : '<div class="adm-list">' + list.map(admCustReviewRowHTML).join("") + "</div>";
+    return '<div class="adm-sec__t" style="margin-top:28px">Отзывы клиента</div>' +
+      '<p class="adm-hint adm-hint--lead">Подобраны по имени — так, как покупатель подписал отзыв.</p>' + body;
+  }
+  /** The status a review shows here: the journal entry this card made for it
+      while that entry stands — «Отменить» on the toast takes the entry out of
+      the journal, and the chip goes back with it — the server's word
+      otherwise. */
+  function admCustReviewStatus(d, r) {
+    var e = d && d.revSet && d.revSet[r.id];
+    return e && DEMO.log.indexOf(e) >= 0 ? e.a.value : r.status;
+  }
+  function admCustReviewRowHTML(r) {
+    var status = admCustReviewStatus(S.admCustDetail, r);
+    var st = status === "approved" ? ["Опубликован", "adm-badge--ok"]
+      : status === "rejected" ? ["Скрыт", "adm-badge--quiet"] : ["Новый", ""];
+    var p = r.product ? null : byIdOrNull(r.productId);
+    var product = r.product || (p ? p.brand + " — " + p.name : r.productId);
+    return '<div class="adm-row adm-row--stack">' +
+      '<span class="adm-sec"><span><span class="adm-stars">' + "★★★★★".slice(0, Number(r.rating) || 0) + "</span> · " + esc(product) + "</span>" +
+        '<span class="adm-badge ' + st[1] + '">' + st[0] + "</span></span>" +
+      '<span class="adm-revtext">' + esc(r.text) + "</span>" +
+      '<span class="adm-row__sub">' + esc(shortDate(r.createdAt)) + (r.name ? " · " + esc(r.name) : "") + "</span>" +
+      '<span class="adm-acts">' +
+        (status === "approved" ? "" : '<button class="adm-btn adm-btn--row" data-admcustrev="' + esc(r.id) + ':approved">Опубликовать</button>') +
+        (status === "rejected" ? "" : '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admcustrev="' + esc(r.id) + ':rejected">Скрыть</button>') +
+      "</span></div>";
+  }
+  /** «Опубликовать» / «Скрыть» from the card. The same journal entry the
+      queue writes (demoApply → srvPush, PATCH /api/admin/reviews/), so the
+      toast's «Отменить» works from here too; the card keeps the entry beside
+      the review so the chip can follow it (admCustReviewStatus). */
+  function moderateCustReview(id, status) {
+    var d = S.admCustDetail;
+    var list = (d && d.reviews) || [];
+    var r = null;
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) { r = list[i]; break; }
+    if (!r) return;
+    var prev = admCustReviewStatus(d, r);
+    if (prev === status) return;
+    var entry = demoApply({ type: "moderate_review", id: id, name: r.name || "", value: status, prev: prev });
+    d.revSet = d.revSet || {};
+    d.revSet[id] = entry;
+    toast(status === "approved" ? "Отзыв опубликован" : "Отзыв скрыт", entry);
+    render();
+  }
+  /* An order opened from the customer card (data-admorder on its rows): the
+     card «Заказы» draws (admOrderCardHTML), only the way back is different —
+     «← К клиенту», and the browser's Back does the same (admLayers closes the
+     order first; the customer's card is still open underneath). The list the
+     order card reads is the last hundred (loadSrvOrders); an older order of
+     this customer is fetched on its own, once, and set beside them. */
+  var CUST_ORDER = { id: "", busy: false, missing: "" };
+  function admCustOrderCardHTML() {
+    var id = String(S.adminOrder);
+    loadSrvOrders(false);
+    if (SRV.orders && !admOrderById(id) && CUST_ORDER.id !== id) {
+      CUST_ORDER = { id: id, busy: true, missing: "" };
+      apiJson("/api/admin/orders/" + encodeURIComponent(id) + "/").then(function (r) {
+        CUST_ORDER.busy = false;
+        if (r.status === 200 && r.body.ok && r.body.order) {
+          if (SRV.orders && !admOrderById(id)) SRV.orders.push(srvRow(r.body.order));
+        } else CUST_ORDER.missing = id;
+        render();
+      }).catch(function () { CUST_ORDER.busy = false; CUST_ORDER.missing = id; render(); });
+    }
+    var back = admBackHTML('data-admorder=""', "К клиенту");
+    if (!SRV.orders || (CUST_ORDER.id === id && CUST_ORDER.busy)) {
+      return '<div class="adm-screen adm-screen--card">' + back + '<div class="adm-skel"><i></i><i></i><i></i></div></div>';
+    }
+    if (CUST_ORDER.id === id && CUST_ORDER.missing === id && !admOrderById(id)) {
+      return '<div class="adm-screen adm-screen--card">' + back + '<div class="adm-empty">Заказ не найден</div></div>';
+    }
+    return admOrderCardHTML();
   }
   /* «Хочу получать скидки и поздравление ко дню рождения» — when it was
      ticked and where (касса / кабинет / панель), or when it was taken back:
@@ -25719,7 +25887,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admcustrev]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -25972,7 +26140,10 @@
     // demo orders are numbered, real ones carry a uuid — keep both as they came
     if (d.admorder !== undefined) {
       S.adminOrder = d.admorder ? (/^\d+$/.test(d.admorder) ? Number(d.admorder) : d.admorder) : 0;
-      S.adminTab = "orders";
+      /* an order opened from a customer's card stays on «Клиенты»: the card
+         is drawn over the customer's (admCustOrderCardHTML), so «←» and the
+         browser's Back land on that customer again (Dim, 10.09.2026) */
+      S.adminTab = S.admCustOpen ? "people" : "orders";
       // assistant-work: a fresh order gets a fresh reply panel
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
       window.scrollTo({ top: 0 }); render(); return;
@@ -27098,6 +27269,8 @@
     }
     if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
     if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
+    // «Опубликовать» / «Скрыть» on the customer card's own review rows
+    if (d.admcustrev) { var custRev = d.admcustrev.split(":"); moderateCustReview(custRev[0], custRev[1]); return; }
     if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
     if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; S.pricingErrField = ""; render(); return; }
     // the loyalty switch: a <button aria-pressed> like every other switch in the panel
