@@ -1,6 +1,18 @@
 /**
  * GET   /api/admin/customers/<id> — one customer's card: profile, orders
- *       count/revenue, points balance, notes, and the last 50 ledger lines.
+ *       count/revenue, points balance, notes, and the last 50 ledger lines —
+ *       plus, since 10.09.2026 (Dim: «the card says two orders and shows
+ *       none»), what is behind the numbers:
+ *         orders   the last 20 orders under this e-mail, every status
+ *                  (id, number, createdAt, total, status, itemsCount,
+ *                  firstItem, and channel/labeled/invoice for the chip)
+ *         stats    firstOrderAt, lastOrderAt, avgOrder, topBrands[≤3]
+ *                  over every purchase (cancelled and failed left out)
+ *         reviews  this person's reviews — id, productId, product,
+ *                  rating, text, status, createdAt, name. The reviews
+ *                  table has no e-mail column, so they are matched by
+ *                  name: the account's and the ones on their orders
+ *                  (reviewsByAuthor in src/lib/reviews.ts).
  * PATCH /api/admin/customers/<id> — any of:
  *   {"action":"approve"}                 «Одобрить» a pending pro request
  *   {"action":"reject"}                  «Отклонить» — clears the request, tier stays retail
@@ -20,13 +32,15 @@
  * «+ Партнёр» sends (src/lib/partner-mail.ts); the answer carries `mail`.
  * Demotions and repeats send nothing.
  */
-import { isEmail } from "@/lib/customers";
+import { isEmail, productsForAlerts } from "@/lib/customers";
 import { requireAdmin } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
 import { sendPartnerWelcome } from "@/lib/partner-mail";
+import { reviewsByAuthor } from "@/lib/reviews";
 import {
   adjustLoyaltyPoints,
   approveProCustomer,
+  customerOrdersAdmin,
   getCustomerAdmin,
   getCustomerAdminByEmail,
   getLoyaltyHistory,
@@ -52,8 +66,30 @@ export async function GET(req: Request, ctx: Ctx) {
   try {
     const customer = await resolveCustomer(id);
     if (!customer) return Response.json({ ok: false, error: "not_found" }, { status: 404 });
-    const history = await getLoyaltyHistory(customer.id, 50);
-    return Response.json({ ok: true, customer, history }, { headers: { "cache-control": "no-store" } });
+    const [history, bought] = await Promise.all([getLoyaltyHistory(customer.id, 50), customerOrdersAdmin(customer.email)]);
+    /* The reviews signed with any name this person is known by, each with
+       its product named the way the panel names one («Brand — title»); a
+       product the catalogue no longer has keeps its id and the panel shows
+       that. */
+    const found = await reviewsByAuthor([customer.name, ...bought.names]);
+    const products = await productsForAlerts(found.map((r) => r.productId));
+    const reviews = found.map((r) => {
+      const p = products.get(r.productId);
+      return {
+        id: r.id,
+        productId: r.productId,
+        product: p ? `${p.brand} — ${p.name}` : "",
+        rating: r.rating,
+        text: r.text,
+        status: r.status,
+        createdAt: r.createdAt,
+        name: r.name,
+      };
+    });
+    return Response.json(
+      { ok: true, customer, history, orders: bought.orders, stats: bought.stats, reviews },
+      { headers: { "cache-control": "no-store" } },
+    );
   } catch (err) {
     console.error("[api/admin/customers/:id] read failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503 });

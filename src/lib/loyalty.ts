@@ -575,9 +575,15 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
   };
 }
 
-/* orders placed as a guest (customer_id null) or later cancelled do not count
-   toward "ordersCount"/"revenue" on a customer card — a cancelled order is
-   not revenue, and a guest order belongs to nobody's account. */
+/* "ordersCount"/"revenue" on a row and on the card: the purchases under the
+   customer's e-mail. Until 10.09.2026 they were joined on customer_id, so a
+   guest checkout — most of this shop's orders — counted for nobody, and the
+   card could say «Заказов: 0» above a list of three orders once the list
+   (customerOrdersAdmin, matched by e-mail like the account's «Мои заказы»)
+   was drawn beneath the tiles. Same key, same rule as the facts under them:
+   a cancelled order is not a purchase and a failed one never became one.
+   c.email is stored lower-cased (normalizeEmail); orders.email is whatever
+   the checkout typed, hence lower() on that side — orders_email_idx covers it. */
 const CUSTOMER_COLS = `
   c.id, c.email, c.name, c.phone, c.lang, c.tier, c.marketing, c.company, c.reg_code, c.notes,
   c.marketing_at, c.marketing_source, c.marketing_off_at,
@@ -589,10 +595,10 @@ const CUSTOMER_COLS = `
 const CUSTOMER_JOIN = `
   from customers c
   left join (
-    select customer_id, count(*) as orders_count, sum(total) as revenue
-    from orders where customer_id is not null and status <> 'cancelled'
-    group by customer_id
-  ) agg on agg.customer_id = c.id
+    select lower(email) as email, count(*) as orders_count, sum(total) as revenue
+    from orders where email is not null and status not in ('cancelled', 'failed')
+    group by lower(email)
+  ) agg on agg.email = c.email
   left join (
     select customer_id, sum(delta) as points_balance
     from loyalty_ledger group by customer_id
@@ -650,6 +656,169 @@ export async function getCustomerAdminByEmail(email: string): Promise<AdminCusto
   if (!e) return null;
   const rows = await query<AdminCustomerDbRow>(`select ${CUSTOMER_COLS} ${CUSTOMER_JOIN} where lower(c.email) = $1`, [e]);
   return rows.length ? toAdminCustomer(rows[0]) : null;
+}
+
+/* ---------- admin: what one customer bought -------------------------------
+   Dim, 10.09.2026: «the card says two orders and a sum, and shows no orders,
+   no analytics, nothing else». The card's GET now carries the orders behind
+   the tiles and four facts drawn from them — src/app/api/admin/customers/[id]. */
+
+/** One order on the customer card: enough for a row and for the same status
+    chip the orders list draws. The card itself is opened by id through
+    GET /api/admin/orders/<id>, so nothing heavier travels here. */
+export interface CustomerOrderRow {
+  id: string;
+  number: string;
+  createdAt: string | null;
+  total: number;
+  status: string;
+  /** "web" | "pos" — a salon sale wears its own chip. */
+  channel: "web" | "pos";
+  /** A Montonio label already made and not undone — «Этикетка готова». */
+  labeled: boolean;
+  /** «По счёту»: the invoice's number and due date, for the chip's overdue ink. */
+  invoice: { number: string; dueAt: string | null } | null;
+  /** Pieces, summed over the lines — the count the orders list shows. */
+  itemsCount: number;
+  /** «Brand — title» of the first line, "" on an order with none. */
+  firstItem: string;
+}
+
+export interface CustomerStats {
+  firstOrderAt: string | null;
+  lastOrderAt: string | null;
+  /** Average order total over the counted orders, 0 when there are none. */
+  avgOrder: number;
+  /** Up to three brands, biggest spend first. */
+  topBrands: Array<{ brand: string; spent: number }>;
+}
+
+interface CustomerOrderDbRow {
+  id: string;
+  number: string;
+  status: string;
+  total: string | number | null;
+  created_at: string | Date | null;
+  items: unknown;
+  shipping: unknown;
+  invoice: unknown;
+  channel: string | null;
+  name: string | null;
+}
+
+/** pg hands jsonb back parsed; a driver that hands back text is still honoured. */
+function jsonOf<T>(v: unknown, fallback: T): T {
+  if (v == null) return fallback;
+  if (typeof v === "string") {
+    try {
+      return JSON.parse(v) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return v as T;
+}
+
+/* Which orders the facts read: a cancelled order is not a purchase and a
+   failed one never became one — the same two the tiles on the card leave out
+   (CUSTOMER_JOIN above). A failed payment is an unpaid basket the shopper
+   walked away from: not money, and not a date worth calling «first». */
+const NOT_A_PURCHASE = new Set(["cancelled", "failed"]);
+
+/**
+ * The orders behind a customer's card, and the facts drawn from them.
+ *
+ * Matched by e-mail, not by customer_id, for the reason the account's «Мои
+ * заказы» is (listCustomerOrders in src/lib/customers.ts): a guest checkout
+ * placed before the account existed — most of this shop's orders — belongs
+ * to the person who owns the mailbox. `orders` is the last `limit` of them
+ * in every status, the cancelled ones included, because a customer's history
+ * is what the owner is reading; the stats read the whole history (up to two
+ * hundred rows) and skip what never was a purchase. `names` is every name
+ * this person has signed an order with — what the review match is keyed on.
+ */
+export async function customerOrdersAdmin(
+  email: string,
+  limit = 20,
+): Promise<{ orders: CustomerOrderRow[]; stats: CustomerStats; names: string[] }> {
+  const addr = normalizeEmail(email);
+  const empty = { orders: [], stats: { firstOrderAt: null, lastOrderAt: null, avgOrder: 0, topBrands: [] }, names: [] };
+  if (!addr) return empty;
+  const rows = await query<CustomerOrderDbRow>(
+    `select id, number, status, total, created_at, items, shipping, invoice, channel, name
+       from orders where lower(email) = $1 order by created_at desc limit 200`,
+    [addr],
+  );
+  if (!rows.length) return empty;
+
+  const brands = new Map<string, number>();
+  const names = new Set<string>();
+  let counted = 0;
+  let spent = 0;
+  let first: string | null = null;
+  let last: string | null = null;
+
+  const orders = rows.map((r) => {
+    const items = jsonOf<Array<Record<string, unknown>>>(r.items, []);
+    const lines = Array.isArray(items) ? items : [];
+    const ship = jsonOf<Record<string, unknown>>(r.shipping, {});
+    const mont = ship && typeof ship.montonio === "object" && ship.montonio ? (ship.montonio as Record<string, unknown>) : null;
+    const inv = jsonOf<Record<string, unknown> | null>(r.invoice, null);
+    const at = isoOrNull(r.created_at);
+    const total = money(num(r.total));
+    const name = String(r.name ?? "").replace(/\s+/g, " ").trim();
+    if (name) names.add(name);
+
+    if (!NOT_A_PURCHASE.has(r.status)) {
+      counted += 1;
+      spent += total;
+      // newest first: the first row seen is the last order, the last row the first
+      if (at) {
+        if (!last) last = at;
+        first = at;
+      }
+      for (const it of lines) {
+        const brand = String(it?.brand ?? "").trim();
+        if (!brand) continue;
+        const sum = Number(it.sum);
+        const lineSum = Number.isFinite(sum) ? sum : num(it.price) * Math.max(1, num(it.qty, 1));
+        brands.set(brand, (brands.get(brand) ?? 0) + lineSum);
+      }
+    }
+
+    const firstLine = lines[0];
+    const title = firstLine ? String(firstLine.title ?? firstLine.name ?? firstLine.id ?? "").trim() : "";
+    const brand = firstLine ? String(firstLine.brand ?? "").trim() : "";
+    return {
+      id: String(r.id),
+      number: r.number,
+      createdAt: at,
+      total,
+      status: r.status,
+      channel: r.channel === "pos" ? ("pos" as const) : ("web" as const),
+      labeled: !!(mont && mont.shipmentId && !mont.dismissed),
+      invoice: inv && inv.number ? { number: String(inv.number), dueAt: inv.dueAt ? String(inv.dueAt) : null } : null,
+      itemsCount: lines.reduce((n, it) => n + Math.max(0, Math.trunc(num(it?.qty, 1))), 0),
+      firstItem: title ? (brand ? `${brand} — ${title}` : title) : "",
+    };
+  });
+
+  const topBrands = [...brands.entries()]
+    .map(([brand, sum]) => ({ brand, spent: money(sum) }))
+    .filter((b) => b.spent > 0)
+    .sort((a, b) => b.spent - a.spent || a.brand.localeCompare(b.brand))
+    .slice(0, 3);
+
+  return {
+    orders: orders.slice(0, Math.min(Math.max(Math.trunc(limit) || 20, 1), 50)),
+    stats: {
+      firstOrderAt: first,
+      lastOrderAt: last,
+      avgOrder: counted ? money(spent / counted) : 0,
+      topBrands,
+    },
+    names: [...names],
+  };
 }
 
 /** «Одобрить» — flips the tier and stamps when. */
