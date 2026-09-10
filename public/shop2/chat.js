@@ -8,6 +8,27 @@
   "use strict";
   if (typeof CATALOGUE === "undefined") return;
 
+  /* ---- the reminder bubble -------------------------------------------------
+     Dim, 10.09.2026: a shopper who has been browsing for a while may never
+     have noticed the round button, so half a minute in, a small speech
+     bubble beside it says «Подобрать уход? Спросите ассистента». Catalogue-
+     side screens only, once per browser session, never after the chat was
+     opened, and a × keeps it away for a week. Everything about when and how
+     often it appears lives here — tune it, or switch it off, in one line. */
+  var NUDGE_ON = true;                  // false: the bubble never appears
+  var NUDGE_DELAY_MS = 30 * 1000;       // time on the page before it shows
+  var NUDGE_DISMISS_DAYS = 7;           // a × (or Escape) keeps it away this long
+  // the screens it may appear on — the shopper is still choosing there;
+  // never the checkout, the account, the legal pages, the blog
+  var NUDGE_SCREENS = ["home", "catalog", "brands", "search", "product", "bundles", "bundle"];
+  var NUDGE_SS = "rempire-nudge-done";  // sessionStorage: shown once, or the chat was opened
+  var NUDGE_LS = "rempire-nudge-off";   // localStorage: when the × was pressed
+  /* ---- the wide window -----------------------------------------------------
+     «Развернуть» in the panel's header: ~720 px wide and 80 vh tall instead
+     of the 360-px column (styles.css .sbot--wide), remembered for the
+     session. A phone never loads this file at all (app.js mountChat). */
+  var WIDE_SS = "rempire-chat-wide";    // sessionStorage: "1" while enlarged
+
   var LS = "rempire-shop-proto";
   /* The language on screen, not the saved preference: app.js writes <html
      lang> on every render (setHead), and the observer below already watches
@@ -46,7 +67,10 @@
       placeholder: "Например: масло для бороды…",
       // the chat root hangs off document.body, outside translateTree()'s four
       // slots, so the screen-reader labels and the price prefix live here too
-      aria: "Чат с помощником", close: "Закрыть", send: "Отправить", from: "от "
+      aria: "Чат с помощником", close: "Закрыть", send: "Отправить", from: "от ",
+      // the reminder bubble and the header's size toggle (NUDGE_* / WIDE_SS above)
+      nudge: "Подобрать уход? Спросите ассистента", nudgeClose: "Закрыть подсказку",
+      wide: "Развернуть", narrow: "Свернуть"
     },
     ET: {
       title: "Rempire abiline", hint: "Demo: saan aru lihtsatest fraasidest",
@@ -56,7 +80,9 @@
       found: "Need sobivad:", none: "Täpset vastet ei leidnud — siin on populaarsed:",
       set: "Panin komplekti kokku — koos:", cart: "Avan ostukorvi…",
       placeholder: "Näiteks: habemeõli…",
-      aria: "Vestlus abilisega", close: "Sule", send: "Saada", from: "alates "
+      aria: "Vestlus abilisega", close: "Sule", send: "Saada", from: "alates ",
+      nudge: "Vajad abi valikul? Küsi abiliselt", nudgeClose: "Sule vihje",
+      wide: "Laienda", narrow: "Ahenda"
     },
     EN: {
       title: "Rempire assistant", hint: "Demo: I understand simple phrases",
@@ -66,7 +92,9 @@
       found: "Here's what fits:", none: "No exact match — here are the popular ones:",
       set: "Here's a set — together:", cart: "Opening the cart…",
       placeholder: "e.g. beard oil…",
-      aria: "Chat with the assistant", close: "Close", send: "Send", from: "from "
+      aria: "Chat with the assistant", close: "Close", send: "Send", from: "from ",
+      nudge: "Need help choosing? Ask the assistant", nudgeClose: "Close the tip",
+      wide: "Expand", narrow: "Shrink"
     }
   };
 
@@ -178,16 +206,22 @@
     "</button>" +
     '<section class="sbot__panel" hidden aria-label="Чат с помощником">' +
       '<header class="sbot__head"><b data-bt></b><span class="sbot__hint" data-bh></span>' +
+        '<button class="sbot__wide" data-wide type="button"></button>' +
         '<button class="sbot__x" aria-label="Закрыть">✕</button></header>' +
       '<div class="sbot__log" data-log></div>' +
       '<div class="sbot__chips" data-chips></div>' +
       '<form class="sbot__form"><input data-in autocomplete="off"><button class="sbot__send" aria-label="Отправить">→</button></form>' +
-    "</section>";
+    "</section>" +
+    /* the reminder bubble: an EMPTY polite live region from the first paint,
+       so a screen reader hears the text the moment it is put in (nudgeShow)
+       and focus never moves; empty it has no box at all (styles.css) */
+    '<div class="sbot__nudge" data-nudge aria-live="polite"></div>';
   document.body.appendChild(root);
 
   var fab = root.querySelector(".sbot__fab"), panel = root.querySelector(".sbot__panel"),
     log = root.querySelector("[data-log]"), chipsEl = root.querySelector("[data-chips]"),
-    input = root.querySelector("[data-in]"), form = root.querySelector("form");
+    input = root.querySelector("[data-in]"), form = root.querySelector("form"),
+    wideBtn = root.querySelector("[data-wide]"), nudgeEl = root.querySelector("[data-nudge]");
 
   function tt() { return T[lang()] || T.RU; }
   /* The markup above is written in Russian like every template in the shop,
@@ -199,7 +233,28 @@
     panel.setAttribute("aria-label", t.aria);
     root.querySelector(".sbot__x").setAttribute("aria-label", t.close);
     root.querySelector(".sbot__send").setAttribute("aria-label", t.send);
+    paintWide();
+    if (nudgeVisible()) nudgePaint();
   }
+
+  /* «Развернуть» / «Свернуть»: the panel grows to ~720 px and 80 vh
+     (styles.css .sbot--wide) and the choice lives for the session. The
+     label is the state — «Свернуть» while wide — so the button needs no
+     aria-pressed on top of it. */
+  function isWide() { return root.classList.contains("sbot--wide"); }
+  function setWide(on) {
+    root.classList.toggle("sbot--wide", !!on);
+    try { sessionStorage.setItem(WIDE_SS, on ? "1" : "0"); } catch (e) {}
+    paintWide();
+  }
+  function paintWide() {
+    var t = tt(), on = isWide();
+    wideBtn.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      (on ? '<path d="M10 14H4v6M14 10h6V4M4 20l6-6M20 4l-6 6"/>' : '<path d="M15 4h5v5M9 20H4v-5M20 4l-6 6M4 20l6-6"/>') +
+      "</svg><span>" + esc(on ? t.narrow : t.wide) + "</span>";
+  }
+  try { if (sessionStorage.getItem(WIDE_SS) === "1") root.classList.add("sbot--wide"); } catch (e) {}
   paintLabels();
   function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
   // the shop's own eur(): «12,90 €» in RU/ET, «€12.90» on the English shop
@@ -321,6 +376,8 @@
   function openPanel(open) {
     panel.hidden = !open;
     fab.setAttribute("aria-expanded", String(open));
+    // a chat that was opened needs no reminder — not now, not later this session
+    if (open) { nudgeMarkDone(); if (nudgeVisible()) nudgeHide(false); }
     if (open) probeAI();
     if (open) paintPanel();
     if (open) input.focus();
@@ -332,6 +389,9 @@
     var ok = chatAllowed();
     root.style.display = ok ? "" : "none";
     if (!ok && !panel.hidden) openPanel(false);
+    // the bubble belongs to the catalogue side: walking on to the account
+    // or a legal page takes it away (it has been shown; it does not return)
+    if (nudgeVisible() && (!ok || !nudgeScreenOk())) nudgeHide(false);
   }
   refreshVisibility();
   new MutationObserver(refreshVisibility)
@@ -345,6 +405,56 @@
       else if (mq.addListener) mq.addListener(refreshVisibility);
     }
   } catch (e) {}
+
+  /* ---- the reminder bubble (NUDGE_* at the top of this file) --------------
+     One timer from load. When it runs out: show the bubble if this is a
+     moment for it; wait another turn if the shopper is somewhere it does not
+     belong right now (the checkout, an open cart drawer, a window dragged
+     narrow); stop for good once it has been shown, dismissed, or the chat
+     itself was opened. Storage is read through try/catch throughout — a
+     private window that refuses it simply gets the once-per-page behaviour. */
+  function nudgeDismissed() {
+    try {
+      var at = Number(localStorage.getItem(NUDGE_LS) || 0);
+      return at > 0 && Date.now() - at < NUDGE_DISMISS_DAYS * 864e5;
+    } catch (e) { return false; }
+  }
+  function nudgeDone() { try { return sessionStorage.getItem(NUDGE_SS) === "1"; } catch (e) { return false; } }
+  function nudgeMarkDone() { try { sessionStorage.setItem(NUDGE_SS, "1"); } catch (e) {} }
+  function nudgeScreenOk() { return NUDGE_SCREENS.indexOf(document.body.dataset.screen) >= 0; }
+  function nudgeVisible() { return !!nudgeEl.childNodes.length; }
+  function nudgePaint() {
+    var t = tt();
+    nudgeEl.innerHTML = '<button class="sbot__nudge-go" data-nudgego>' + esc(t.nudge) + "</button>" +
+      '<button class="sbot__nudge-x" data-nudgex aria-label="' + esc(t.nudgeClose) + '">✕</button>';
+  }
+  function nudgeShow() { nudgePaint(); nudgeMarkDone(); }
+  /* `forget` — the × or Escape: not for another NUDGE_DISMISS_DAYS */
+  function nudgeHide(forget) {
+    nudgeEl.innerHTML = "";
+    if (forget) { try { localStorage.setItem(NUDGE_LS, String(Date.now())); } catch (e) {} }
+  }
+  var nudgeTimer = null;
+  function nudgeArm() {
+    if (!NUDGE_ON || nudgeTimer) return;
+    nudgeTimer = setTimeout(nudgeTick, NUDGE_DELAY_MS);
+  }
+  function nudgeTick() {
+    nudgeTimer = null;
+    if (!NUDGE_ON || nudgeDone() || nudgeDismissed() || !panel.hidden) return;
+    if (!chatAllowed() || !nudgeScreenOk() || document.body.classList.contains("is-locked")) { nudgeArm(); return; }
+    nudgeShow();
+  }
+  nudgeArm();
+  /* Escape takes it away like the × does — without moving focus anywhere.
+     Not while a drawer owns the screen: body.is-locked hides the whole
+     widget (styles.css), so that Escape is the drawer's, and a bubble nobody
+     could see must not be put away for a week by it. */
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape" || !nudgeVisible()) return;
+    if (document.body.classList.contains("is-locked")) return;
+    nudgeHide(true);
+  });
 
   /* The language switch sits in the header, which stays clickable while the
      chat is open — and the chat root is outside translateTree(), so nothing
@@ -366,6 +476,10 @@
     setTimeout(function () { reply(q); }, 250);
   });
   root.addEventListener("click", function (e) {
+    if (e.target.closest("[data-wide]")) { setWide(!isWide()); return; }
+    // the bubble: its text opens the chat, its × puts it away for a week
+    if (e.target.closest("[data-nudgego]")) { nudgeHide(false); openPanel(true); return; }
+    if (e.target.closest("[data-nudgex]")) { nudgeHide(true); return; }
     var chip = e.target.closest("[data-q]");
     if (chip && chip.closest(".sbot")) {
       bubble("me", esc(chip.dataset.q));

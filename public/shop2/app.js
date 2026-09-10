@@ -2085,6 +2085,10 @@
       "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
         "Näen sinu kataloogi, tellimusi ja laoseisu. Küsi tavaliste sõnadega — muudatused panen ette kinnitamiseks. Foto saab lisada kirjaklambriga või siia lohistada.",
       "Прикрепить фото": "Lisa foto", "Фото для помощника": "Foto abilisele",
+      /* the microphone beside the question box (admVoiceMicHTML) */
+      "Голосовой ввод": "Häälsisestus", "Слушаю…": "Kuulan…",
+      "Нет доступа к микрофону": "Mikrofonile puudub ligipääs",
+      "Микрофон не найден": "Mikrofoni ei leitud", "Ничего не услышал": "Ei kuulnud midagi",
       "Написать статью целиком": "Kirjuta kogu artikkel",
       "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
         "Pealkiri, sissejuhatus, tekst jaotistega, sildid, tooted ja Google'i tekst — vene keeles, seejärel eesti ja inglise keeles. Mustand salvestub ise; sina loed ja avaldad.",
@@ -4381,6 +4385,10 @@
       "Я вижу ваш каталог, заказы и остатки. Спрашивайте обычными словами — а изменения предложу на подтверждение. Фото можно прикрепить скрепкой или перетащить сюда.":
         "I can see your catalogue, orders and stock. Ask in plain words — any change I will put up for your approval. Attach a photo with the clip or drop it here.",
       "Прикрепить фото": "Attach a photo", "Фото для помощника": "Photo for the assistant",
+      /* the microphone beside the question box (admVoiceMicHTML) */
+      "Голосовой ввод": "Voice input", "Слушаю…": "Listening…",
+      "Нет доступа к микрофону": "No access to the microphone",
+      "Микрофон не найден": "No microphone found", "Ничего не услышал": "I heard nothing",
       "Написать статью целиком": "Write the whole article",
       "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
         "Title, excerpt, text with sections, tags, products and the Google text — in Russian, then in Estonian and English. The draft saves itself; you read and publish.",
@@ -14499,6 +14507,98 @@
           : '<span class="adm-hint">Напишите, куда его поставить: «это фото для Bio Botanical Shampoo, сделай главным».</span>') +
       "</div>";
   }
+  /* Voice input for the question box (Dim, 10.09.2026). The browser's own
+     speech recognition — Chrome on a desktop and on Android, Safari on an
+     iPhone since iOS 14.5 — so there is no server, no key and no cost. A
+     browser without it (Firefox) simply gets no button. One tap listens, a
+     second tap or a pause stops; what was heard is left in the box for the
+     owner to read, fix and send himself — it is never sent on its own. The
+     language follows the panel's: a Russian panel hears Russian.
+
+     The running recognition and what the box held when it started live
+     here, not in the DOM: a render in between (a probe landing, the products
+     list arriving) rebuilds the box, and the rebuilt box is drawn from them. */
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  var ADM_VOICE_LANG = { RU: "ru-RU", ET: "et-EE", EN: "en-GB" };
+  var admVoice = null, admVoiceBase = "";
+  function admVoiceMicHTML() {
+    if (!SpeechRec) return "";
+    return '<button class="adm-asst__mic' + (admVoice ? " is-on" : "") + '" data-admvoice aria-pressed="' +
+      (admVoice ? "true" : "false") + '" aria-label="Голосовой ввод" title="Голосовой ввод">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg></button>';
+  }
+  function admVoicePlaceholder() { return admVoice ? "Слушаю…" : "Спросите обычными словами"; }
+  /* the button and the placeholder, patched in place — a full render would
+     take the caret out of the box the owner is about to edit */
+  function admVoicePaint() {
+    var b = document.querySelector("[data-admvoice]"), q = document.querySelector("[data-admq]");
+    if (b) { b.classList.toggle("is-on", !!admVoice); b.setAttribute("aria-pressed", admVoice ? "true" : "false"); }
+    if (q) q.placeholder = trText(admVoicePlaceholder(), S.lang);
+  }
+  /* what was heard so far — interim words included, so the box moves while
+     the owner speaks — after whatever was already typed */
+  function admVoiceWrite(heard) {
+    var q = document.querySelector("[data-admq]");
+    if (!q) { admVoiceStop(); return; }   // the pane was folded away mid-sentence
+    var text = (admVoiceBase ? admVoiceBase + " " : "") + String(heard || "").replace(/^\s+/, "");
+    q.value = text; S.adminQ = text;
+  }
+  /* short on purpose: the admin toast is one line with an ellipsis
+     (admin.css .adm-toast__t), and a phone shows about thirty characters of
+     it — «Микрофон не разрешён — разрешите его в…» lost the half that mattered */
+  function admVoiceFail(code) {
+    if (code === "not-allowed" || code === "service-not-allowed") toast("Нет доступа к микрофону");
+    else if (code === "audio-capture") toast("Микрофон не найден");
+    else if (code === "no-speech") toast("Ничего не услышал");
+    // "aborted", "network": nothing to say — the box keeps what was heard
+  }
+  function admVoiceStart() {
+    if (!SpeechRec || admVoice) return;
+    var rec;
+    try { rec = new SpeechRec(); } catch (e) { return; }
+    var q = document.querySelector("[data-admq]");
+    admVoiceBase = ((q && q.value) || S.adminQ || "").replace(/\s+$/, "");
+    rec.lang = ADM_VOICE_LANG[S.lang] || "ru-RU";
+    rec.interimResults = true;
+    rec.continuous = false;     // a pause ends it, like a sentence does
+    rec.maxAlternatives = 1;
+    rec.onresult = function (e) {
+      var heard = "";
+      for (var i = 0; i < e.results.length; i++) heard += e.results[i][0].transcript;
+      admVoiceWrite(heard);
+    };
+    rec.onerror = function (e) {
+      if (admVoice !== rec) return;
+      admVoice = null; admVoicePaint();
+      admVoiceFail(e && e.error);
+    };
+    rec.onend = function () { if (admVoice === rec) { admVoice = null; admVoicePaint(); } };
+    admVoice = rec;
+    try { rec.start(); } catch (e) { admVoice = null; return; }
+    admVoicePaint();
+  }
+  /* the second tap: stop listening, keep what was heard (a last result may
+     still arrive after stop() — the handler above is still attached for it) */
+  function admVoiceStop() {
+    var rec = admVoice;
+    if (!rec) return;
+    admVoice = null;
+    try { rec.stop(); } catch (e) {}
+    admVoicePaint();
+  }
+  /* «Спросить» while the microphone is still on: what is in the box goes,
+     and a result arriving after it must not put the sent words back */
+  function admVoiceDrop() {
+    var rec = admVoice;
+    if (!rec) return;
+    admVoice = null;
+    rec.onresult = null;
+    try { rec.abort(); } catch (e) {}
+    admVoicePaint();
+  }
+  function admVoiceToggle() { if (admVoice) admVoiceStop(); else admVoiceStart(); }
   function admAsstBodyHTML() {
     return '<div class="adm-asst__body">' +
       (S.adminAsk
@@ -14517,7 +14617,8 @@
           'stroke-linecap="round" aria-hidden="true"><path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/></svg></button>' +
         '<input class="adm-file" type="file" accept="image/*" multiple data-admfile aria-label="Фото для помощника">' +
         '<input class="adm-input" data-admq value="' + esc(S.adminQ || "") +
-          '" placeholder="Спросите обычными словами" aria-label="Вопрос помощнику">' +
+          '" placeholder="' + admVoicePlaceholder() + '" aria-label="Вопрос помощнику">' +
+        admVoiceMicHTML() +
         '<button class="adm-btn" data-admsend aria-label="Спросить">→</button></div>';
   }
   /* One assistant, two skins: a 380-px column beside the work on a desktop,
@@ -26138,7 +26239,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -27799,11 +27900,13 @@
     }
     if (d.admask) { S.adminAsk = d.admask; render(); if (admAI) askAdminAI(d.admask); return; }
     if (d.admsend !== undefined) {
+      admVoiceDrop();
       var qEl = document.querySelector("[data-admq]");
       var q = ((qEl && qEl.value) || S.adminQ || "").trim();
       if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
       return;
     }
+    if (d.admvoice !== undefined) { admVoiceToggle(); return; }
     if (d.admretry !== undefined) { askAdminAgain(); return; }
     // photos through the assistant: the clip opens the picker, × removes one
     if (d.admattach !== undefined) {
@@ -29020,6 +29123,7 @@
     var t = e.target;
     if (t && t.matches && t.matches("[data-admq]")) {
       e.preventDefault();
+      admVoiceDrop();
       var q = (t.value || S.adminQ || "").trim();
       if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
     }
