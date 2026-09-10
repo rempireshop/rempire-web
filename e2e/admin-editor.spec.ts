@@ -357,4 +357,132 @@ test.describe("admin — the product editor", () => {
       }, { timeout: 15_000 }).toBeNull();
     }
   });
+
+  /**
+   * The phone. Renat tested the editor on a Samsung S21 FE (10.09.2026) and
+   * sent a screenshot: «Сохранить» and «Отмена» half under the bottom nav,
+   * the assistant's black square on the form, the photo tiles' arrows running
+   * into the next tile. Three things a person saw, pinned as geometry:
+   *   · the save bar stands ON the nav — with and without the 34-px
+   *     home-indicator inset an iPhone reports under viewport-fit=cover
+   *     (index.html), which is what put the bar's lower third under the nav
+   *     on his phone (admin.css `--a-barh`);
+   *   · the assistant's button is inside the bar's own row, over nothing;
+   *   · every photo button lies inside its own row and crosses no other;
+   *   · «Сканер» beside a size's barcode box fills THAT box, closes, and
+   *     leaves the editor as it was — and Back closes the scanner alone.
+   * The inset comes from the CDP emulation Chromium has for exactly this; a
+   * real phone is not needed to see the bar slide under the nav.
+   */
+  test("phone: the save bar stands on the nav, photo buttons stay in their rows, «Сканер» fills the barcode box", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "the phone layout — the desktop has no bottom nav");
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const id = PRODUCT_2.id;
+    const VARIANT = "40 мл", OTHER = "150 мл";
+    type Box = { l: number; t: number; r: number; b: number };
+    const overlaps = (a: Box, b: Box) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+    const inside = (a: Box, b: Box) => a.l >= b.l - 0.5 && a.r <= b.r + 0.5 && a.t >= b.t - 0.5 && a.b <= b.b + 0.5;
+
+    await openAdmin(page);
+    await openEditor(page, id);
+    await edTab(page, "sizes");
+
+    // ---- the save bar, the nav and the assistant's button ------------------
+    const stacked = async (label: string) => {
+      const r = await page.evaluate(() => {
+        const box = (el: Element) => { const b = el.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
+        const q = (sel: string) => box(document.querySelector(sel)!);
+        return {
+          vh: window.innerHeight, bar: q(".adm-savebar"), nav: q(".adm-bar"), fab: q(".adm-fab"), del: q("[data-admgoodspull]"),
+          buttons: Array.from(document.querySelectorAll(".adm-savebar button")).map((el) => ({ name: (el.textContent || "").trim(), ...box(el) })),
+        };
+      });
+      expect(r.nav.b, `${label}: the nav is not at the bottom of the screen`).toBe(r.vh);
+      // the bar's bottom edge IS the nav's top edge — not under it, not floating above it
+      expect(Math.abs(r.bar.b - r.nav.t), `${label}: the save bar's bottom is ${Math.round(r.bar.b - r.nav.t)}px off the nav's top`).toBeLessThanOrEqual(0.5);
+      expect(r.del.b, `${label}: «Снять с продажи» is under the nav`).toBeLessThanOrEqual(r.nav.t);
+      // the assistant's button: in the bar's row, over none of the bar's buttons, over none of the form
+      expect(r.fab.t, `${label}: the assistant's button is above the bar, on the form`).toBeGreaterThanOrEqual(r.bar.t);
+      expect(r.fab.b, `${label}: the assistant's button is under the nav`).toBeLessThanOrEqual(r.nav.t);
+      for (const btn of r.buttons) expect(overlaps(r.fab, btn), `${label}: the assistant's button covers «${btn.name}»`).toBe(false);
+    };
+    await page.evaluate(() => window.scrollTo(0, 200));
+    await stacked("no inset");
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 0, left: 0, bottom: 34, right: 0 } });
+    await expect.poll(() => page.locator(".adm-bar").evaluate((el) => el.getBoundingClientRect().height),
+      { message: "the nav did not grow by the inset" }).toBeGreaterThanOrEqual(98);
+    await stacked("iPhone inset");
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await stacked("iPhone inset, end of the scroll");
+    await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 0, left: 0, bottom: 0, right: 0 } });
+    await cdp.detach();
+
+    // ---- the photo rows -----------------------------------------------------
+    await edTab(page, "media");
+    const photos = await page.evaluate(() => {
+      const box = (el: Element) => { const b = el.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
+      return Array.from(document.querySelectorAll(".adm-photo:not(.adm-photo--add)")).map((t) => ({
+        tile: box(t),
+        ops: Array.from(t.querySelectorAll(".adm-photo__op")).map((o) => ({ name: o.getAttribute("aria-label") || "", ...box(o) })),
+      }));
+    });
+    expect(photos.length, "PRODUCT_2 has two catalogue photos — the second is the one with ← → ★ ×").toBeGreaterThanOrEqual(2);
+    photos.forEach((p, i) => {
+      expect(p.ops.length, `photo ${i + 1} has no buttons`).toBeGreaterThanOrEqual(3);
+      for (const op of p.ops) {
+        expect(inside(op, p.tile), `photo ${i + 1}: «${op.name}» sticks out of its own tile`).toBe(true);
+        expect(Math.min(op.r - op.l, op.b - op.t), `photo ${i + 1}: «${op.name}» is under a thumb's size`).toBeGreaterThanOrEqual(43.5);
+        for (const other of p.ops) if (other !== op) expect(overlaps(op, other), `photo ${i + 1}: «${op.name}» overlaps «${other.name}»`).toBe(false);
+        photos.forEach((q, j) => { if (j !== i) expect(overlaps(op, q.tile), `photo ${i + 1}: «${op.name}» lies over photo ${j + 1}`).toBe(false); });
+      }
+    });
+    await assertClean(page, w, "phone editor: bar and photos");
+
+    // ---- «Сканер» fills the box it was opened from ---------------------------
+    await edTab(page, "sizes");
+    const box = page.locator(`[data-edean="${id} ${VARIANT}"]`);
+    const other = page.locator(`[data-edean="${id} ${OTHER}"]`);
+    const otherWas = await other.inputValue();
+    const eanWas = await stockEan(page, id, VARIANT);
+    await page.locator(`[data-edscan="${id} ${VARIANT}"]`).click();
+    await expect(page.locator(".scanoverlay")).toBeVisible();
+    await expect(page.locator(".scan__mode")).toHaveText("Товар: код встанет в поле «Штрихкод»");
+    // Back while it is up: the scanner goes, the editor stays, the panel stays
+    await page.goBack();
+    await expect(page.locator(".scanoverlay"), "Back did not close the scanner").toHaveCount(0);
+    await expect(page.locator("[data-admsavegoods]"), "Back closed the editor along with the scanner").toBeVisible();
+    await expect(page.locator('body[data-screen="admin"]')).toBeAttached();
+    // again, and this time a code arrives — the manual field is the camera's
+    // stand-in in headless Chromium, the same path a camera hit takes
+    // (scanner-app.spec.ts, handleScanCode)
+    await page.locator(`[data-edscan="${id} ${VARIANT}"]`).click();
+    await expect(page.locator(".scanoverlay")).toBeVisible();
+    await expect(page.locator("[data-scanmanualsubmit]")).toHaveText("Вписать");
+    const code = `27${Date.now().toString().slice(-10)}`;
+    await page.locator("[data-scanmanual]").fill(code);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator(".scanoverlay"), "the scanner stayed open after the read").toHaveCount(0);
+    await expect(page.locator("[data-admsavegoods]"), "the editor closed with the scanner").toBeVisible();
+    await expect(page.locator('[data-edtab="sizes"][aria-current="true"]'), "the editor lost its tab").toBeVisible();
+    await expect(box, "the code did not land in the box the scanner was opened from").toHaveValue(code);
+    expect(await other.inputValue(), "the code landed in the other size's box too").toBe(otherWas);
+    expect(await toastText(page)).toMatch(/Код считан/);
+    // …and the toast asking for «Сохранить» does not sit on «Сохранить»
+    const toastVsSave = await page.evaluate(() => {
+      const t = document.querySelector(".adm-toast")!.getBoundingClientRect();
+      const s = document.querySelector("[data-admsavegoods]")!.getBoundingClientRect();
+      return { l: t.left, t: t.top, r: t.right, b: t.bottom, save: { l: s.left, t: s.top, r: s.right, b: s.bottom } };
+    });
+    expect(overlaps(toastVsSave, toastVsSave.save), "the toast covers the «Сохранить» it asks for").toBe(false);
+    await clearToast(page);
+    // the scan itself wrote nothing — like a typed code, it is bound by «Сохранить»
+    expect(await stockEan(page, id, VARIANT), "the scan bound the code on its own").toBe(eanWas);
+    // Back now closes the editor — the one layer left — and stays in the panel
+    await page.goBack();
+    await expect(page.locator("[data-admsavegoods]"), "Back did not close the editor").toHaveCount(0);
+    await expect(page.locator('body[data-screen="admin"]'), "Back left the admin").toBeAttached();
+    await assertClean(page, w, "phone editor: the scanner into the box");
+  });
 });

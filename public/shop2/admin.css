@@ -24,6 +24,15 @@
   --a-dim: #bdb9a8;          /* de-emphasised step numbers on ink */
   --a-scrim: rgba(28, 26, 0, .35);
   --a-bar: 64px;             /* phone bottom bar */
+  /* …and the bar as it is actually drawn. index.html asks for
+     viewport-fit=cover, so an iPhone adds its home-indicator inset (34 px on
+     an iPhone 14) under the bar, and Chrome on Android 15 does the same for
+     an installed app. Everything that stacks on the bar — the save bar, the
+     toast, the assistant's button, the page's own bottom padding — offsets
+     by THIS. Offset by the bare 64 px, as they were, the save bar's lower
+     third went under the nav on the owner's phone: «Сохранить» and «Отмена»
+     half over the nav, «Снять с продажи» cut off (Renat, 10.09.2026). */
+  --a-barh: calc(var(--a-bar) + env(safe-area-inset-bottom, 0px));
   --a-side: 232px;           /* desktop sidebar */
   --a-side-min: 68px;
   --a-asst: 380px;
@@ -638,20 +647,20 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   .adm-asst__chev { display: none; }
   .adm-asst__x { display: inline; font-size: 22px; line-height: 1; color: var(--a-muted); }
   .adm-asst__fold { width: 44px; height: 44px; border: 0; }
-  .adm-page { padding: 16px 20px calc(var(--a-bar) + 96px); }
+  .adm-page { padding: 16px 20px calc(var(--a-barh) + 96px); }
   .adm-h1 { font-size: 28px; line-height: 32px; }
   .adm-bar {
     display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0;
-    height: calc(var(--a-bar) + env(safe-area-inset-bottom, 0px));
+    height: var(--a-barh);
     padding-bottom: env(safe-area-inset-bottom, 0px);
     border-top: 1px solid var(--a-rule); background: var(--a-paper); z-index: 50;
   }
   .adm-confirm { align-items: flex-end; padding: 0; }
   .adm-confirm__card { max-width: none; border-left: 0; border-right: 0; border-bottom: 0; }
-  .adm-toast { bottom: calc(var(--a-bar) + 20px); }
-  .adm-fab { bottom: calc(var(--a-bar) + 20px); }
+  .adm-toast { bottom: calc(var(--a-barh) + 20px); }
+  .adm-fab { bottom: calc(var(--a-barh) + 20px); }
   /* the toast owns the strip above the bar while it is up */
-  body.adm-toasting .adm-fab { bottom: calc(var(--a-bar) + 88px); }
+  body.adm-toasting .adm-fab { bottom: calc(var(--a-barh) + 88px); }
   .adm-fab__lbl { display: none; }
   .adm-cols, .adm-cols--wide { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .adm-sales { grid-template-columns: 1fr 1fr; gap: 0 20px; }
@@ -742,17 +751,39 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   flex: none; height: 44px; padding: 0 10px; border: 1px solid var(--a-rule); background: var(--a-paper);
   color: var(--a-muted); font-size: 13px; line-height: 1; white-space: nowrap;
 }
+/* the scanner, for THIS size (data-edscan): a 44-px square on a desktop,
+   where a word would only crowd the cell and a webcam is rare; on a phone —
+   the one place a camera is — it says what it is */
+.adm-grid__scan {
+  flex: none; height: 44px; min-width: 44px; padding: 0; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 13px; line-height: 1; white-space: nowrap;
+}
+.adm-grid__scan__lbl { display: none; }
+@media (max-width: 899px) {
+  .adm-grid__scan { padding: 0 12px; }
+  .adm-grid__scan__lbl { display: inline; }
+}
 @media (max-width: 720px) {
   .adm-grid__head { display: none; }
-  /* three equal boxes — price · salon · stock — then the barcode across two
-     of them with «×» at the end; the 44-px column used to squeeze the stock */
+  /* the size with its «×», three equal boxes — price · salon · stock — then
+     the barcode line across all three; the 44-px column used to squeeze
+     the stock */
   .adm-grid__row {
     grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 6px; align-items: end;
     padding-bottom: 12px; border-bottom: 1px solid var(--a-rule);
   }
-  .adm-grid__sz, .adm-grid__c--sz { grid-column: 1 / -1; font-weight: 600; }
-  .adm-grid__c--ean { grid-column: 1 / 3; }
-  .adm-grid__x { grid-column: 3; justify-self: end; }
+  /* The size's name and its «×» share the first line — «убрать размер»
+     belongs beside the name — and that frees the last line for the barcode
+     alone: a 13-digit EAN, the «Сканер» button and «Отвязать» need the
+     whole width. Sharing two thirds of it with «×», the box showed
+     «271234567890·» with the last digit cut off — a code the owner cannot
+     check against the bottle. The box asks for 140 px first, so «Отвязать»
+     drops to its own line rather than the code losing a digit. */
+  .adm-grid__sz, .adm-grid__c--sz { grid-column: 1 / 3; font-weight: 600; }
+  .adm-grid__x { grid-column: 3; grid-row: 1; justify-self: end; }
+  .adm-grid__c--ean { grid-column: 1 / -1; }
+  .adm-grid__c--ean .adm-input { flex-basis: 140px; }
   .adm-grid__l { display: block; }
   .adm-grid--new .adm-grid__row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
@@ -777,7 +808,10 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .adm-photo__tag--ink { background: var(--a-ink); color: #fff; }
-.adm-photo__ops { position: absolute; right: 4px; bottom: 4px; display: flex; gap: 2px; }
+/* Anchored to BOTH edges and allowed to wrap: five 30-px buttons are 158 px,
+   and a five-column desktop grid gives a tile 144 — anchored to the right
+   edge alone the strip ran 14 px out of the tile over its neighbour. */
+.adm-photo__ops { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px; }
 .adm-photo__op {
   width: 30px; height: 30px; border: 0; background: var(--a-paper); color: var(--a-ink);
   font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center;
@@ -821,15 +855,39 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* the editor's refusal («Цена — число от 1 до 500 €…») rides in the bar, a
    full line above the buttons, so it is on screen wherever the owner is */
 .adm-savebar__err { flex-basis: 100%; margin: 0 0 4px; }
-/* On a phone the bar sits above the nav — and so does the assistant's
-   floating button, which was landing on top of «Снять с продажи». The button
-   is the one that moves: the save bar is the screen's own controls, and a
-   destructive action half-hidden under a FAB is exactly the kind of thing
-   that gets pressed by accident. Same idiom as `body:has(.stickybar) .ftr`
-   in styles.css and the same offset as the toast's. */
+/* On a phone the order from the bottom is: the nav, the save bar on it, the
+   form above both. `body.adm-saving` is set by render() whenever a save bar
+   is on screen (renderImpl), which is what lets the rules reach the page
+   column and `main.screen--co` above the panel without a :has(). What was
+   here before — `.adm2:has(.adm-savebar) .adm-fab { bottom: bar + 88px }` —
+   did hold wherever :has() exists (every phone the owner has); it was the
+   idea that was wrong: it lifted the assistant's button clear of the bar and
+   straight onto the form's last rows («+ Размер», the size boxes). The
+   button now lives in the bar's own row, in its right-hand corner, and the
+   bar keeps that corner free for it: nothing floats over the form, nothing
+   over the nav. The toast rule above loses to this on purpose — while the
+   bar is up the button stays put and the toast passes over it.
+
+   The bottom padding goes to exactly the nav's height while a bar is on
+   screen. With the usual 96 px of breathing room (plus the 150 px
+   `.screen--co` keeps for the storefront's own sticky bar) the bar came
+   unstuck at the end of the scroll and stood 250 px above the nav — the
+   owner scrolls to the last field, and the buttons float mid-screen.
+
+   The toast climbs over the bar too. «Код считан — нажмите «Сохранить»»
+   and «Штрихкод убран — …» land on the bar the moment it matters, and at
+   its usual 20 px they sat on «Сохранить» — the very button they ask for.
+   140 px clears the bar at its tallest (two rows of buttons and the rule);
+   over a one-row bar the toast simply floats a little higher. */
 @media (max-width: 899px) {
-  .adm-savebar { bottom: var(--a-bar); }
-  .adm2:has(.adm-savebar) .adm-fab { bottom: calc(var(--a-bar) + 88px); }
+  .adm-savebar { bottom: var(--a-barh); padding-right: 56px; }
+  body.adm-saving .screen--co { padding-bottom: 0; }
+  body.adm-saving .adm-page { padding-bottom: var(--a-barh); }
+  body.adm-saving .adm-fab {
+    width: 48px; height: 48px; padding: 0; justify-content: center; right: 20px;
+    bottom: calc(var(--a-barh) + 12px);
+  }
+  body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 140px); }
 }
 
 /* ---------- Салон (POS) ---------------------------------------------------- */
@@ -866,6 +924,27 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 @media (max-width: 899px) {
   .adm-seg__b { height: 44px; }
   .adm-photo__op, .adm-vidrow__x { width: 44px; height: 44px; }
+  /* A phone's tile is ~160 px wide and its buttons are 44 px each: four of
+     them are 182 px, five 228 — the strip ran out of the tile over the next
+     one, and the two photos' controls read as one row of seven glyphs
+     (Renat, S21 FE, 10.09.2026). So on a phone a photo is a ROW, not a
+     tile: the picture at the left, its tag beside it, and under the tag one
+     line of 44-px buttons that belongs to that picture and no other. The
+     line wraps on a phone narrower than 360 px, where a thumbnail and five
+     buttons do not fit side by side — the row grows, nothing overlaps. */
+  .adm-photos { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .adm-photo {
+    aspect-ratio: auto; display: grid; grid-template-columns: 72px minmax(0, 1fr); grid-template-rows: auto auto;
+    column-gap: 12px; align-items: center; align-content: center; padding: 8px; background: var(--a-paper);
+  }
+  .adm-photo__img { position: static; grid-column: 1; grid-row: 1 / 3; width: 72px; height: 72px; background-color: var(--a-tint); }
+  .adm-photo__tag { position: static; grid-column: 2; grid-row: 1; justify-self: start; max-width: 100%; margin-bottom: 6px; background: var(--a-tint); }
+  .adm-photo__tag--ink { background: var(--a-ink); }
+  .adm-photo__ops { position: static; grid-column: 2; grid-row: 2; justify-content: flex-start; gap: 4px; }
+  /* on paper, not on a photo: a button with no edge is invisible */
+  .adm-photo__op { border: 1px solid var(--a-rule); }
+  /* «Фото с телефона» is a row too — a dashed bar the height of a button */
+  .adm-photo--add { display: flex; flex-direction: row; min-height: 64px; padding: 0 16px; }
 }
 
 /* ---------- Сканер: full-screen dark --------------------------------------
