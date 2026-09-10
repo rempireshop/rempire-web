@@ -489,12 +489,24 @@ export interface AdminCustomerRow {
   /** The language they signed in from — the language their letters are written in. */
   lang: "RU" | "ET" | "EN";
   tier: "retail" | "pro";
-  /* «Хочу получать новости и скидки» — customers.marketing. Ticked in the
-     account screen, and, since 07.09.2026, at the checkout as well (the tick
-     used to be collected and thrown away — QA sweep 06.09 §5.3). Carried here
-     so «Клиенты» can show who consented and the CSV can be the subscriber
-     list until there is a newsletter to send from. */
+  /* «Хочу получать скидки и поздравление ко дню рождения» —
+     customers.marketing. Ticked in the account screen, and, since 07.09.2026,
+     at the checkout as well (the tick used to be collected and thrown away —
+     QA sweep 06.09 §5.3). Carried here so «Клиенты» can show who consented and
+     the CSV can be the subscriber list until there is a newsletter to send
+     from. Since 10.09.2026 the tick is answerable (052_marketing_consent.sql,
+     src/lib/consent.ts): when it went on, where, when it last went off — and
+     whether the address pressed «Отписаться» in a letter, which is the one
+     thing the tick alone could not say. ISO strings or null. */
   marketing: boolean;
+  /** When the consent was switched on (the current stretch of it). */
+  marketingAt: string | null;
+  /** Where: "checkout" | "account" | "admin". */
+  marketingSource: string | null;
+  /** When it was last switched off — the account tick or the letter's link. */
+  marketingOffAt: string | null;
+  /** The address is on the stop list (`mail_optouts`): no cart reminder, no birthday letter. */
+  optedOut: boolean;
   company: string | null;
   regCode: string | null;
   notes: string | null;
@@ -515,6 +527,10 @@ interface AdminCustomerDbRow {
   lang: string | null;
   tier: string;
   marketing: boolean | null;
+  marketing_at: string | Date | null;
+  marketing_source: string | null;
+  marketing_off_at: string | Date | null;
+  opted_out: boolean | null;
   company: string | null;
   reg_code: string | null;
   notes: string | null;
@@ -542,6 +558,10 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
     lang: normalizeLangCode(r.lang),
     tier: r.tier === "pro" ? "pro" : "retail",
     marketing: r.marketing === true,
+    marketingAt: isoOrNull(r.marketing_at),
+    marketingSource: r.marketing_source ? String(r.marketing_source) : null,
+    marketingOffAt: isoOrNull(r.marketing_off_at),
+    optedOut: r.opted_out === true,
     company: r.company,
     regCode: r.reg_code,
     notes: r.notes,
@@ -560,6 +580,8 @@ function toAdminCustomer(r: AdminCustomerDbRow): AdminCustomerRow {
    not revenue, and a guest order belongs to nobody's account. */
 const CUSTOMER_COLS = `
   c.id, c.email, c.name, c.phone, c.lang, c.tier, c.marketing, c.company, c.reg_code, c.notes,
+  c.marketing_at, c.marketing_source, c.marketing_off_at,
+  exists (select 1 from mail_optouts mo where mo.email = c.email) as opted_out,
   c.pro_requested_at, c.pro_approved_at, c.created_at, c.last_login_at,
   coalesce(agg.orders_count, 0) as orders_count,
   coalesce(agg.revenue, 0) as revenue,
@@ -761,8 +783,11 @@ const CSV_HEAD = [
   "name",
   "phone",
   "tier",
-  // who may be written to — the list Renat exports until there is a sender
+  // who may be written to — the list Renat exports until there is a sender —
+  // and, since 10.09.2026, since when and from where (blank for a "no")
   "marketing",
+  "marketing_at",
+  "marketing_source",
   "company",
   "regCode",
   "ordersCount",
@@ -783,6 +808,8 @@ export function customersToCsv(rows: AdminCustomerRow[]): string {
         r.phone,
         r.tier,
         r.marketing ? "yes" : "no",
+        r.marketingAt ?? "",
+        r.marketingSource ?? "",
         r.company ?? "",
         r.regCode ?? "",
         r.ordersCount,

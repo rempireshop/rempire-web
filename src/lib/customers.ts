@@ -390,59 +390,30 @@ export async function recordLogin(email: string, lang?: unknown): Promise<Custom
   return mapCustomer(rows[0]);
 }
 
-/**
- * «Хочу получать новости и скидки» at the checkout.
- *
- * The tick has been on that screen for as long as the checkout has: it was
- * collected into S.newsletter and read by nothing — no row, no list, no
- * letter (QA sweep 06.09 §5.3). Dim, 07.09.2026: «Wire». So the order carries
- * it and it lands here, on `customers.marketing` — the same column the
- * account screen's own checkbox writes and the same one the birthday and
- * abandoned-cart jobs read. A guest gets a row created for the address they
- * just ordered from, which is what makes their consent storable at all.
- *
- * Consent only ever goes ON here. Not ticking a box at a checkout is not a
- * withdrawal — the shopper may have said yes in their account last month, and
- * an order is no place to revoke that silently. Turning it off stays where it
- * belongs: the account screen, and the owner's own panel.
- *
- * Never throws: a consent that could not be written must not fail an order
- * that has already been paid for.
- */
-export async function recordMarketingConsent(email: string, lang?: unknown): Promise<boolean> {
-  const addr = normalizeEmail(email);
-  if (!addr || !isEmail(addr)) return false;
-  try {
-    await query(
-      `insert into customers (email, lang, marketing) values ($1, $2, true)
-       on conflict (email) do update set marketing = true`,
-      [addr, normalizeLangCode(lang)],
-    );
-    return true;
-  } catch (err) {
-    console.error("[customers] newsletter consent not stored:", err);
-    return false;
-  }
-}
+/* «Хочу получать скидки и поздравление ко дню рождения» — `customers.marketing`
+   — is written by one module only, src/lib/consent.ts: recordMarketingConsent()
+   from the checkout and the account form, withdrawMarketingConsent() from the
+   form, optOut() from the letter's own link. The stamps beside it
+   (marketing_at / marketing_source / marketing_off_at, 052_marketing_consent.sql)
+   are what make the tick answerable — «когда и где» — and a second writer
+   here would be a second place to forget them. This file only reads it. */
 
 export interface CustomerPatch {
   name?: unknown;
   phone?: unknown;
   birthday?: unknown;
-  marketing?: unknown;
   lang?: unknown;
   /** «Доставка по умолчанию» — a ShipPref-shaped object, or null to clear it. */
   shipPref?: unknown;
 }
 
-/** Only the keys present are touched; `null`/`""` clears one. */
+/** Only the keys present are touched; `null`/`""` clears one. The consent tick is not one of them — see above. */
 export async function updateCustomer(email: string, patch: CustomerPatch): Promise<Customer | null> {
   const addr = normalizeEmail(email);
   const cols: Record<string, unknown> = {};
   if ("name" in patch) cols.name = text(patch.name, 120);
   if ("phone" in patch) cols.phone = text(patch.phone, 40);
   if ("birthday" in patch) cols.birthday = normalizeBirthday(patch.birthday);
-  if ("marketing" in patch) cols.marketing = patch.marketing === true || patch.marketing === "true" || patch.marketing === 1;
   if ("lang" in patch) cols.lang = normalizeLangCode(patch.lang);
   // a shape the checkout cannot act on clears the column rather than sitting in it
   if ("shipPref" in patch) {

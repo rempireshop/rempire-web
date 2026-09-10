@@ -106,6 +106,13 @@ function routes(): RouteCase[] {
     { name: "GET /api/geo/", path: "/api/geo/", method: "GET", exports: ["GET"], load: () => import("@/app/api/geo/route"), req: { next: true } },
     { name: "POST /api/track/", path: "/api/track/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/track/route"), body: { sid: "s1", type: "view", path: "/", productId: PRODUCT.id, value: 1, lang: "RU", ref: "google.com" } },
     { name: "POST /api/stock-alerts/", path: "/api/stock-alerts/", method: "POST", exports: ["POST"], load: () => import("@/app/api/stock-alerts/route"), body: { email: "fuzz@example.com", productId: PRODUCT.id, lang: "RU" } },
+    /* «Отписаться» from a marketing letter (src/lib/consent.ts). The token in
+       the URL is the whole credential, so every case here is a refusal — an
+       HTML page on GET, plain text on the one-click POST — and none of them
+       may say more than «ссылка не работает». The 200s, the stop-list row and
+       the cancelled alerts live in tests/consent.test.ts. */
+    { name: "GET /api/mail/unsubscribe/", path: "/api/mail/unsubscribe/", method: "GET", exports: ["GET", "POST"], load: () => import("@/app/api/mail/unsubscribe/route"), jsonBody: false, queries: ["", "?u=&t=", "?u=junk&t=junk", `?u=${Buffer.from("fuzz@example.com|marketing|RU").toString("base64url")}&t=forged`, `?u=${Buffer.from("fuzz@example.com|marketing|RU").toString("base64url")}&t=`, "?u=%00&t=%00", `?u=${"A".repeat(3000)}&t=${"B".repeat(3000)}`] },
+    { name: "POST /api/mail/unsubscribe/", path: "/api/mail/unsubscribe/", method: "POST", exports: ["GET", "POST"], load: () => import("@/app/api/mail/unsubscribe/route"), jsonBody: false, req: { raw: "List-Unsubscribe=One-Click", contentType: "application/x-www-form-urlencoded" }, queries: ["", "?u=junk&t=junk", `?u=${Buffer.from("fuzz@example.com|backstock|ET").toString("base64url")}&t=forged`] },
     /* The acceptance checklist at /test/. GET is public on purpose (a tester
        with no session still has to see the list); PUT is the admin half and is
        listed with the other locked routes below. The item id is read off the

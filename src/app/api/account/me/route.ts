@@ -7,6 +7,7 @@
  * shopper can only ever read and edit their own row.
  */
 import { clientIp, rateLimit } from "@/lib/auth";
+import { recordMarketingConsent, withdrawMarketingConsent } from "@/lib/consent";
 import {
   getCustomer,
   listCustomerOrders,
@@ -88,9 +89,16 @@ export async function PATCH(req: Request) {
   }
 
   const patch: Record<string, unknown> = {};
-  for (const key of ["name", "phone", "birthday", "marketing", "lang", "shipPref"] as const) {
+  for (const key of ["name", "phone", "birthday", "lang", "shipPref"] as const) {
     if (key in body) patch[key] = body[key];
   }
+  /* The consent tick travels with the rest of the form but is not a profile
+     field: it goes through src/lib/consent.ts, which stamps when and where
+     («account») and clears an earlier «Отписаться» on the way on. Only a
+     real change is written — the form re-sends the tick on every save, and
+     a save that changed the phone must not re-date the consent. */
+  const marketing =
+    "marketing" in body ? body.marketing === true || body.marketing === "true" || body.marketing === 1 : null;
 
   try {
     // A shopper signed in from another device before the row existed (only
@@ -99,6 +107,11 @@ export async function PATCH(req: Request) {
     if (!customer) {
       await recordLogin(email, patch.lang);
       customer = await updateCustomer(email, patch);
+    }
+    if (marketing !== null && customer && customer.marketing !== marketing) {
+      if (marketing) await recordMarketingConsent(email, customer.lang, "account");
+      else await withdrawMarketingConsent(email, "account");
+      customer = (await getCustomer(email)) ?? customer;
     }
     return Response.json({ ok: true, customer }, { headers: NO_STORE });
   } catch (err) {
