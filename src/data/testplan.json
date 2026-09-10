@@ -1643,47 +1643,6 @@
       }
     },
     {
-      "id": "panel-note-saved",
-      "area": "orders",
-      "who": "renat",
-      "device": "phone",
-      "lang": "RU",
-      "title": "Заметка к заказу: видно, что сохранено",
-      "steps": [
-        "В «Заказах» открыть заказ и вписать заметку.",
-        "Нажать «Сохранить заметку».",
-        "Закрыть карточку и открыть снова.",
-        "Открыть карточку клиента и так же поменять заметку о клиенте."
-      ],
-      "expect": [
-        "Пока текст не тронут, кнопка серая и выключена.",
-        "При правке рядом написано «Не сохранено».",
-        "После сохранения на кнопке «Сохранено ✓».",
-        "Заметка на месте после повторного открытия.",
-        "У заметки о клиенте те же три состояния; Enter сохраняет."
-      ],
-      "why": "Раньше кнопка всегда была одинаковой, и было не понять, сохранилось ли.",
-      "risk": "low",
-      "writes": true,
-      "en": {
-        "title": "Order note: you can see it is saved",
-        "steps": [
-          "In «Заказы» open an order and type a note.",
-          "Press «Сохранить заметку».",
-          "Close the card and open it again.",
-          "Open a customer card and change the customer note the same way."
-        ],
-        "expect": [
-          "Until you type, the button is grey and off.",
-          "While editing, «Не сохранено» stands beside it.",
-          "After saving the button reads «Сохранено ✓».",
-          "The note is still there when the card is reopened.",
-          "The customer note has the same three states; Enter saves."
-        ],
-        "why": "The button used to look the same always, so you could not tell whether it saved."
-      }
-    },
-    {
       "id": "cart-basics",
       "area": "checkout",
       "who": "renat",
@@ -3278,6 +3237,47 @@
           "A «Действует до» line carries a date."
         ],
         "why": "Somebody who lost the letter wants the card now, not a new one."
+      }
+    },
+    {
+      "id": "panel-note-saved",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Заметка к заказу: видно, что сохранено",
+      "steps": [
+        "В «Заказах» открыть заказ и вписать заметку.",
+        "Нажать «Сохранить заметку».",
+        "Закрыть карточку и открыть снова.",
+        "Открыть карточку клиента и так же поменять заметку о клиенте."
+      ],
+      "expect": [
+        "Пока текст не тронут, кнопка серая и выключена.",
+        "При правке рядом написано «Не сохранено».",
+        "После сохранения на кнопке «Сохранено ✓».",
+        "Заметка на месте после повторного открытия.",
+        "У заметки о клиенте те же три состояния; Enter сохраняет."
+      ],
+      "why": "Раньше кнопка всегда была одинаковой, и было не понять, сохранилось ли.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "Order note: you can see it is saved",
+        "steps": [
+          "In «Заказы» open an order and type a note.",
+          "Press «Сохранить заметку».",
+          "Close the card and open it again.",
+          "Open a customer card and change the customer note the same way."
+        ],
+        "expect": [
+          "Until you type, the button is grey and off.",
+          "While editing, «Не сохранено» stands beside it.",
+          "After saving the button reads «Сохранено ✓».",
+          "The note is still there when the card is reopened.",
+          "The customer note has the same three states; Enter saves."
+        ],
+        "why": "The button used to look the same always, so you could not tell whether it saved."
       }
     },
     {
