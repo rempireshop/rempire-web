@@ -1326,6 +1326,16 @@ body.is-locked .sbot { display: none; }
 .toast__x { color: var(--paper); min-width: 44px; min-height: 44px; padding: 4px; }
 @keyframes toastUp { from { opacity: 0; transform: translate(-50%, 12px); } }
 @media (min-width: 768px) { .toast { bottom: 24px; } }
+/* The account form's save bar (.acctbar) sits exactly where the toast lands,
+   so «Сохранено ✓» in the toast covered «Сохранено ✓» in the bar the moment
+   the bar changed — the one moment it is there to be read. Lift the toast
+   over the bar while the bar is on the page, on both widths. */
+@media (max-width: 767px) {
+  body:has(.acctbar) .toast { bottom: calc(var(--bottomnav-h) + var(--bar-h) + 12px + env(safe-area-inset-bottom)); }
+}
+@media (min-width: 768px) {
+  body:has(.acctbar) .toast { bottom: calc(var(--bar-h) + 12px); }
+}
 
 .done__tick { color: var(--ok); margin: 0 auto 12px; width: 46px; }
 .done__tick svg { width: 46px; height: 46px; stroke-width: 1.6; }

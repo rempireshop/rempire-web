@@ -329,7 +329,11 @@ test.describe("checkout — the carrier's own mark", () => {
        9: the capture-phase "error" listener takes the broken image out, and
        the name it was sitting next to is what stays on the chip. */
     const smartpost = page.locator('[data-carrier="smartpost"]');
-    await expect(smartpost.locator("img.carrier__logo")).toHaveCount(0);
+    /* The 404 is what removes the mark, and on a cold `next dev` the first
+       404 of the run compiles the not-found route first — on a CI runner
+       that alone ran past the 8-second default (shard 1, 10.09.2026: failed,
+       then passed on the retry with the route warm). */
+    await expect(smartpost.locator("img.carrier__logo"), "the broken mark was not taken off the chip").toHaveCount(0, { timeout: 30_000 });
     await expect(smartpost).toContainText("SmartPosti");
   });
 });
