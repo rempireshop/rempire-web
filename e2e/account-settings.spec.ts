@@ -4,7 +4,7 @@ import { continueButton, freshEmail, functionalProject, ipHeaders, PRODUCT, shop
 /**
  * The account's settings, all the way to the checkout — the two things Renat
  * found missing at his own checkout on 10.09.2026 (signed in, subscribed, a
- * default delivery set): «Хочу получать новости и скидки» unticked and no
+ * default delivery set): «Хочу получать скидки и поздравление ко дню рождения» unticked and no
  * delivery preselected — and the save bar that replaced the «Сохранить»
  * button he could not find between the birthday and the delivery block.
  *

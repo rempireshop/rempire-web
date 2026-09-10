@@ -2518,9 +2518,9 @@
       "who": "dim",
       "device": "any",
       "lang": "RU",
-      "title": "Галочка «Хочу получать новости»",
+      "title": "Галочка «Хочу получать скидки и поздравление»",
       "steps": [
-        "Оформить заказ, поставив на первом шаге галочку про новости и скидки.",
+        "Оформить заказ, поставив на первом шаге галочку про скидки и поздравление.",
         "Открыть «Ещё» → «Клиенты».",
         "Найти этого покупателя и посмотреть пометку.",
         "Включить фильтр «Подписаны»."
@@ -2529,15 +2529,16 @@
         "Покупатель есть в списке клиентов.",
         "У него стоит пометка о подписке.",
         "Фильтр «Подписаны» его находит.",
-        "Он там есть, хотя в кабинет ни разу не входил."
+        "Он там есть, хотя в кабинет ни разу не входил.",
+        "В карточке клиента написано, когда и где дано согласие: дата и «на кассе»."
       ],
       "why": "Письмо тому, кто согласия не давал, — это штраф.",
       "risk": "high",
       "writes": true,
       "en": {
-        "title": "The «Хочу получать новости» tick box",
+        "title": "The «Хочу получать скидки и поздравление» tick box",
         "steps": [
-          "Place an order with the news-and-offers box ticked on the first step.",
+          "Place an order with the discounts-and-greeting box ticked on the first step.",
           "Open «Ещё» → «Клиенты».",
           "Find that buyer and look at the marker.",
           "Switch on the «Подписаны» (subscribed) filter."
@@ -2546,7 +2547,8 @@
           "The buyer is in the customer list.",
           "They are marked as subscribed.",
           "The «Подписаны» filter finds them.",
-          "They are there though they never signed into an account."
+          "They are there though they never signed into an account.",
+          "The customer card says when and where consent was given: a date and «на кассе»."
         ],
         "why": "A letter to somebody who never consented is a fine."
       }
@@ -3506,7 +3508,7 @@
       "steps": [
         "В кабинете открыть «Мои данные».",
         "Заполнить имя, телефон и день рождения.",
-        "Снять и снова поставить галочку про новости.",
+        "Снять и снова поставить галочку про скидки и поздравление.",
         "Нажать «Сохранить» в полосе внизу и перезагрузить страницу.",
         "Набрать корзину и дойти до первого шага кассы."
       ],
@@ -3514,8 +3516,8 @@
         "Пока есть несохранённые правки, внизу написано «Изменения не сохранены».",
         "После сохранения там стоит «Сохранено ✓».",
         "После перезагрузки имя, телефон и день рождения на месте.",
-        "Галочка про новости выключается и включается.",
-        "На кассе галочка про новости стоит так же, как в кабинете."
+        "Галочка про скидки и поздравление выключается и включается.",
+        "На кассе галочка про скидки стоит так же, как в кабинете."
       ],
       "why": "День рождения нужен для поздравления со скидкой, а отписка — требование закона.",
       "risk": "med",
@@ -3525,7 +3527,7 @@
         "steps": [
           "In the account open «Мои данные» (my details).",
           "Fill in the name, the phone and the date of birth.",
-          "Untick the news box and tick it again.",
+          "Untick the discounts-and-greeting box and tick it again.",
           "Press «Сохранить» in the bar at the bottom and reload the page.",
           "Fill a cart and get to the first step of the checkout."
         ],
@@ -3533,8 +3535,8 @@
           "While there are unsaved edits, the bottom bar says «Изменения не сохранены».",
           "Once saved, it says «Сохранено ✓».",
           "After the reload the name, phone and date of birth remain.",
-          "The news tick switches off and on again.",
-          "At the checkout the news box is ticked the same way as in the account."
+          "The discounts-and-greeting tick switches off and on again.",
+          "At the checkout the discounts box is ticked the same way as in the account."
         ],
         "why": "The birthday drives the discount letter; unsubscribing is required by law."
       }
@@ -3940,7 +3942,7 @@
         "Письмо пришло сразу, как товар вернулся в наличие.",
         "В письме название товара и цена.",
         "Есть ссылка на сам товар.",
-        "Внизу есть ссылка, чтобы отписаться."
+        "Внизу есть «Отписаться» — с одного нажатия снимает ожидание этого товара."
       ],
       "why": "Если переключатель выключен, все собранные подписки пропадают зря.",
       "risk": "med",
@@ -3957,7 +3959,7 @@
           "The letter arrives as soon as the product is back.",
           "It carries the product's name and price.",
           "There is a link to the product itself.",
-          "An unsubscribe link sits at the bottom."
+          "«Отписаться» at the bottom cancels the wait for that product with one press."
         ],
         "why": "With the switch off, every subscription you collected is wasted."
       }
@@ -3973,12 +3975,15 @@
         "В разделе «Письма» включить переключатель «Брошенная корзина».",
         "Убедиться, что корзина брошена не меньше трёх часов назад.",
         "Попросить Дима запустить расписание вручную — из панели это не делается.",
-        "Проверить почту и нажать ссылку возврата к корзине."
+        "Проверить почту и нажать ссылку возврата к корзине.",
+        "Нажать «Отписаться» внизу письма."
       ],
       "expect": [
         "Письмо пришло со списком товаров из корзины.",
         "Кнопка в письме открывает магазин с той же корзиной.",
-        "На одну брошенную корзину приходит только одно письмо."
+        "На одну брошенную корзину приходит только одно письмо.",
+        "«Отписаться» срабатывает с одного нажатия, страница это подтверждает.",
+        "Следующая брошенная корзина с этой почты письма уже не получает."
       ],
       "why": "Второе письмо про ту же корзину надоедает, и человек отписывается.",
       "risk": "med",
@@ -3989,12 +3994,15 @@
           "In the «Письма» section switch on the «Брошенная корзина» switch.",
           "Make sure the cart was abandoned at least three hours ago.",
           "Ask Dim to start the schedule by hand — not possible from the panel.",
-          "Check your mail and press the link back to the cart."
+          "Check your mail and press the link back to the cart.",
+          "Press «Отписаться» at the bottom of the letter."
         ],
         "expect": [
           "The letter arrives with the list of products from the cart.",
           "Its button opens the shop with that same cart.",
-          "One abandoned cart gets one letter, not two."
+          "One abandoned cart gets one letter, not two.",
+          "«Отписаться» works with one press, and the page confirms it.",
+          "The next abandoned cart from that address gets no letter."
         ],
         "why": "A second letter about the same cart annoys people into unsubscribing."
       }
@@ -4009,15 +4017,17 @@
       "steps": [
         "В разделе «Письма» включить «Скидка ко дню рождения» и выбрать «в день рождения».",
         "Тут же в «Скидка в поздравлении» поставить 15 %.",
-        "В кабинете покупателя поставить сегодняшнюю дату рождения и согласие на новости.",
+        "В кабинете покупателя поставить сегодняшнюю дату рождения и галочку про скидки и поздравление.",
         "Попросить Дима запустить расписание вручную.",
-        "Проверить почту и применить пришедший промокод на кассе."
+        "Проверить почту и применить пришедший промокод на кассе.",
+        "Нажать «Отписаться» внизу письма и открыть карточку клиента в панели."
       ],
       "expect": [
         "Письмо пришло, в нём личный промокод.",
         "Код срабатывает на кассе.",
         "Скидка ровно та, что выбрали — 15 %.",
-        "Код живёт ещё две недели после дня рождения."
+        "Код живёт ещё две недели после дня рождения.",
+        "После «Отписаться» в карточке клиента стоит «Отписался по ссылке в письме»."
       ],
       "why": "Промокод, сгоревший в тот же день, — поздравление, которым не воспользоваться.",
       "risk": "med",
@@ -4027,15 +4037,17 @@
         "steps": [
           "In «Письма» switch on «Скидка ко дню рождения» and choose «в день рождения».",
           "Right below it, set «Скидка в поздравлении» to 15 %.",
-          "In the customer account set today as the date of birth, and accept news.",
+          "In the customer account set today as the date of birth and tick discounts-and-greeting.",
           "Ask Dim to start the schedule by hand.",
-          "Check your mail and apply the promo code that arrived at the checkout."
+          "Check your mail and apply the promo code that arrived at the checkout.",
+          "Press «Отписаться» at the bottom of the letter and open the customer card in the panel."
         ],
         "expect": [
           "The letter arrives with a personal promo code.",
           "The code works at the checkout.",
           "The discount is exactly the one chosen — 15 %.",
-          "It lives two more weeks after the birthday."
+          "It lives two more weeks after the birthday.",
+          "After «Отписаться» the customer card says «Отписался по ссылке в письме»."
         ],
         "why": "A code that expires the same day is a greeting nobody can use."
       }

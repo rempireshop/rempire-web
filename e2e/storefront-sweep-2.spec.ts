@@ -784,7 +784,7 @@ test.describe("«Бренды» — a page of its own, before any script runs", 
 test.describe("the newsletter tick travels with the order", () => {
   test.use({ extraHTTPHeaders: ipHeaders(213) });
 
-  test("«Хочу получать новости и скидки» reaches POST /api/orders", async ({ page }) => {
+  test("«Хочу получать скидки и поздравление ко дню рождения» reaches POST /api/orders", async ({ page }) => {
     const email = freshEmail("news");
     let sent: Record<string, unknown> | null = null;
     page.on("request", (req) => {

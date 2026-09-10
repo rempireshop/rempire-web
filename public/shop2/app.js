@@ -336,7 +336,7 @@
       "Самовывоз — Mardi 1, Таллинн": "Järeletulek — Mardi 1, Tallinn",
       "Курьер до двери (DPD)": "Kuller uksele (DPD)", "Курьер DPD": "DPD kuller",
       "Курьер SmartPosti": "SmartPosti kuller", "Курьер Omniva": "Omniva kuller",
-      "Хочу получать новости и скидки": "Soovin uudiseid ja soodustusi",
+      "Хочу получать скидки и поздравление ко дню рождения": "Soovin soodustusi ja sünnipäevaõnnitlust",
       "E-mail для подтверждения заказа": "E-post tellimuse kinnituseks",
       "Имя и фамилия": "Ees- ja perekonnanimi", "Индекс": "Postiindeks",
       "улица, дом": "tänav, maja number", "Имя Фамилия": "Eesnimi Perekonnanimi",
@@ -657,8 +657,6 @@
       "отменён": "tühistatud", "возврат": "tagastatud",
       "Телефон": "Telefon",
       "День рождения — пришлём скидку": "Sünnipäev — saadame soodustuse",
-      "Хочу получать новости, скидки и поздравление ко дню рождения":
-        "Soovin uudiseid, sooduspakkumisi ja sünnipäevaõnnitlust",
       "Сообщить о наличии": "Anna teada, kui on laos",
       "Корзина восстановлена ✓": "Ostukorv on taastatud ✓",
       "Ждут письма:": "Ootavad kirja:", "Дней рождения за неделю:": "Sünnipäevi nädalas:",
@@ -1467,6 +1465,11 @@
       "На рассмотрении": "Läbivaatamisel", "Партнёры": "Partnerid", "Розница": "Jaemüük", "розница": "jaemüük",
       // «Клиенты»: who agreed to the newsletter — the chip and the row badge
       "Подписаны": "Tellinud uudiskirja", "Подписан": "Uudiskiri",
+      // the customer card: the consent, dated and placed
+      "Отписался по ссылке в письме": "Loobus kirjas oleva lingi kaudu",
+      "Согласие на скидки и поздравление": "Nõusolek soodustusteks ja õnnitluseks",
+      "Отказался от писем": "Loobus kirjadest",
+      "на кассе": "kassas", "в кабинете": "kontos", "в панели": "paneelis",
       "Заявка отклонена": "Taotlus lükati tagasi", "Партнёр одобрен ✓": "Partner kinnitatud ✓",
       "Статус партнёра снят": "Partneri staatus eemaldatud",
       "Начислить или списать баллы": "Lisa või vähenda punkte",
@@ -2604,7 +2607,7 @@
       "Самовывоз — Mardi 1, Таллинн": "Pickup — Mardi 1, Tallinn",
       "Курьер до двери (DPD)": "Courier to the door (DPD)", "Курьер DPD": "DPD courier",
       "Курьер SmartPosti": "SmartPost courier", "Курьер Omniva": "Omniva courier",
-      "Хочу получать новости и скидки": "Send me news and discounts",
+      "Хочу получать скидки и поздравление ко дню рождения": "Send me discounts and a birthday greeting",
       "E-mail для подтверждения заказа": "E-mail for the order confirmation",
       "Имя и фамилия": "Full name", "Индекс": "Postcode",
       "улица, дом": "street and house number", "Имя Фамилия": "First name Last name",
@@ -2926,8 +2929,6 @@
       "отменён": "cancelled", "возврат": "refunded",
       "Телефон": "Phone",
       "День рождения — пришлём скидку": "Birthday — we'll send a discount",
-      "Хочу получать новости, скидки и поздравление ко дню рождения":
-        "Send me news, offers and a birthday greeting",
       "Сообщить о наличии": "Tell me when it's back",
       "Корзина восстановлена ✓": "Cart restored ✓",
       "Ждут письма:": "Waiting for a letter:", "Дней рождения за неделю:": "Birthdays this week:",
@@ -3718,7 +3719,12 @@
       "Войдите как владелец, чтобы видеть настоящих клиентов.": "Sign in as the owner to see real customers.",
       "Никого не нашлось.": "Nobody found.",
       "На рассмотрении": "Under review", "Партнёры": "Partners", "Розница": "Retail", "розница": "retail",
-      "Подписаны": "Subscribed", "Подписан": "Newsletter",
+      "Подписаны": "Subscribed", "Подписан": "Consented",
+      // the customer card: the consent, dated and placed
+      "Отписался по ссылке в письме": "Unsubscribed through the link in a letter",
+      "Согласие на скидки и поздравление": "Consent to discounts and the birthday greeting",
+      "Отказался от писем": "Withdrew the consent",
+      "на кассе": "at the checkout", "в кабинете": "in the account", "в панели": "in the panel",
       "Заявка отклонена": "Request rejected", "Партнёр одобрен ✓": "Partner approved ✓",
       "Статус партнёра снят": "Partner status removed",
       "Начислить или списать баллы": "Credit or deduct points",
@@ -11326,7 +11332,7 @@
       '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" value="' + esc(S.cust ? S.cust.email : S.email) + '" autocomplete="email" readonly aria-readonly="true"></label>' +
       '<label class="field"><span class="field__label">Телефон</span><input class="input" type="tel" data-acctf="phone" value="' + esc(f.phone) + '" placeholder="+372…" autocomplete="tel"></label>' +
       '<label class="field"><span class="field__label">День рождения — пришлём скидку</span><input class="input" type="date" data-acctf="birthday" value="' + esc(f.birthday) + '"></label>' +
-      '<label class="opt opt--plain"><input type="checkbox" data-acctmk' + (f.marketing ? " checked" : "") + '><span>Хочу получать новости, скидки и поздравление ко дню рождения</span></label>' +
+      '<label class="opt opt--plain"><input type="checkbox" data-acctmk' + (f.marketing ? " checked" : "") + '><span>Хочу получать скидки и поздравление ко дню рождения</span></label>' +
 
       /* ---- wholesale/loyalty: points balance/history ----------------------
          Both blocks below hang off «Партнёры и баллы» (settings.pricing.
@@ -12733,7 +12739,7 @@
               '<label class="field"><span class="field__label">E-mail для подтверждения заказа</span>' +
               '<input class="input" type="email" autocomplete="email" data-email value="' + esc(S.email) + '" aria-invalid="' + emailBad() + '" placeholder="you@example.com" inputmode="email"></label>' +
               (emailBad() ? '<div class="err" role="alert">' + emailMsg() + "</div>" : '<div class="hint">Аккаунт не нужен — оформляйте как гость.</div>') +
-              '<label class="opt opt--plain"><input type="checkbox" data-news' + (S.newsletter ? " checked" : "") + '><span>Хочу получать новости и скидки</span></label>' +
+              '<label class="opt opt--plain"><input type="checkbox" data-news' + (S.newsletter ? " checked" : "") + '><span>Хочу получать скидки и поздравление ко дню рождения</span></label>' +
               '<button class="btn btn--wide" data-step="2">' + (isDigital() ? "Далее — получатель" : "Далее — доставка") + "</button></div>" : "") +
           "</section>" +
 
@@ -18554,6 +18560,7 @@
     var c = d.customer;
     if (S.admCustNotesDraft === null) S.admCustNotesDraft = c.notes || "";
     var badge = admCustBadge(c);
+    var consent = admConsentLine(c);
     return back +
       '<div class="adm-head" style="margin-top:12px"><div>' +
         '<h2 class="adm-h2">' + esc(c.name || c.email) + "</h2>" +
@@ -18561,6 +18568,7 @@
           (c.company ? "<br>" + esc(c.company) + (c.regCode ? " · <span>рег. " + esc(c.regCode) + "</span>" : "") : "") +
         "</div></div>" +
         '<span class="adm-badge adm-badge--big ' + badge[1] + '">' + badge[0] + "</span></div>" +
+      (consent ? '<p class="adm-hint" style="margin:10px 0 0">' + consent + "</p>" : "") +
       '<div class="adm-kpis" style="margin-top:16px">' +
         admPlainKpi("Заказов", String(c.ordersCount)) +
         admPlainKpi("Потратил", eur(c.revenue)) +
@@ -18617,6 +18625,24 @@
           '<input class="adm-input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
         '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-admcustsavenotes="' + esc(c.id) + '">Сохранить заметку</button></div>' +
       "</div>";
+  }
+  /* «Хочу получать скидки и поздравление ко дню рождения» — when it was
+     ticked and where (касса / кабинет / панель), or when it was taken back:
+     the proof a consent needs, and the reason a birthday letter did or did
+     not go. The server stamps marketingAt/marketingSource on the way in and
+     marketingOffAt on the way out; optedOut is the one-click link in a
+     letter (src/lib/consent.ts). Nothing stamped yet — the old rows — draws
+     the bare fact. */
+  var CONSENT_SOURCE = { checkout: "на кассе", account: "в кабинете", admin: "в панели" };
+  /* Each phrase is its own node, so the dictionary translates it whole and
+     the date between them stays a date (the same split admCustFactRow makes). */
+  function admConsentLine(c) {
+    var where = CONSENT_SOURCE[c.marketingSource] || "";
+    var parts = [];
+    if (c.optedOut) parts = ["Отписался по ссылке в письме", shortDate(c.marketingOffAt)];
+    else if (c.marketing) parts = ["Согласие на скидки и поздравление", shortDate(c.marketingAt), where];
+    else if (c.marketingOffAt) parts = ["Отказался от писем", shortDate(c.marketingOffAt)];
+    return parts.filter(Boolean).map(function (t) { return "<span>" + esc(t) + "</span>"; }).join(" · ");
   }
   /** One fact of a partner request — the label its own node, the value
       data; an empty value draws «—» rather than nothing, so the owner sees
