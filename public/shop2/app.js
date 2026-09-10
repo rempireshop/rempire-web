@@ -1817,8 +1817,8 @@
       "Не удалось сохранить товар": "Toodet ei õnnestunud salvestada",
       "Например, Proraso": "Näiteks Proraso",
       "Beard Balm — бальзам для бороды": "Beard Balm — habemepalsam",
-      "Бренд можно выбрать из списка или вписать новый. Название — как его увидит покупатель: линейка и что это, например «Beard Balm — бальзам для бороды».":
-        "Brändi saab valida nimekirjast või kirjutada uue. Nimetus — nii, nagu ostja seda näeb: sari ja mis see on, näiteks «Beard Balm — habemepalsam».",
+      "Бренд можно выбрать из списка или вписать новый. Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.":
+        "Brändi saab valida nimekirjast või kirjutada uue. Nimetus kirjutatakse üks kord: sari ladina tähtedega, tüüp vene keeles — näiteks «Beard Balm — бальзам для бороды». Tüübi tõlgib pood ise eesti ja inglise keelde.",
       "Товар появится в магазине сразу после сохранения. Фото добавите на вкладке «Фото и видео» — она откроется сама.":
         "Toode ilmub poodi kohe pärast salvestamist. Fotod lisad vahekaardil «Fotod ja video» — see avaneb ise.",
       "Цена — на вкладке «Размеры и цены»: одна на товар или своя для каждого объёма.":
@@ -4112,8 +4112,8 @@
       "Не удалось сохранить товар": "Could not save the product",
       "Например, Proraso": "For example, Proraso",
       "Beard Balm — бальзам для бороды": "Beard Balm — beard balm",
-      "Бренд можно выбрать из списка или вписать новый. Название — как его увидит покупатель: линейка и что это, например «Beard Balm — бальзам для бороды».":
-        "Pick a brand from the list or type a new one. The name is what the customer sees: the line and what it is, e.g. «Beard Balm — beard balm».",
+      "Бренд можно выбрать из списка или вписать новый. Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.":
+        "Pick a brand from the list or type a new one. The name is written once: the line in Latin letters, the type in Russian — e.g. «Beard Balm — бальзам для бороды». The shop translates the type into Estonian and English itself.",
       "Товар появится в магазине сразу после сохранения. Фото добавите на вкладке «Фото и видео» — она откроется сама.":
         "The product appears in the shop as soon as it is saved. Add the photos on the «Photos and video» tab — it opens by itself.",
       "Цена — на вкладке «Размеры и цены»: одна на товар или своя для каждого объёма.":
@@ -4816,7 +4816,8 @@
     /* ai-everywhere: the toasts that carry a product's name, and the line under a new product's name */
     [/^Главное фото поставлено · (.+)$/, { ET: "Peamine foto pandud · $1", EN: "Main photo set · $1" }],
     [/^Фото добавлено · (.+)$/, { ET: "Foto lisatud · $1", EN: "Photo added · $1" }],
-    [/^По-эстонски: (.+) · по-английски: (.+)$/, { ET: "Eesti keeles: $1 · inglise keeles: $2", EN: "In Estonian: $1 · in English: $2" }],
+    [/^Тип по-русски — так и нужно, магазин переведёт сам\. По-эстонски: (.+) · по-английски: (.+)$/,
+      { ET: "Tüüp vene keeles — nii peabki, pood tõlgib ise. Eesti keeles: $1 · inglise keeles: $2", EN: "Type in Russian — that is right, the shop translates it itself. In Estonian: $1 · in English: $2" }],
     /* админка, редизайн: the lines that carry a number, a sum or an order
        number — «Обзор», «Заказы», «Товары» and the toasts behind them. */
     [/^Отправить (\d+)$/, { ET: "Saada $1", EN: "Ship $1" }],
@@ -19222,7 +19223,7 @@
   /** Under the name box of the owner's product: what the ET and EN shop will show for the tail the name has. */
   function edNameHintText(name) {
     var et = trName(name, "ET"), en = trName(name, "EN");
-    if (et !== name || en !== name) return "По-эстонски: " + et + " · по-английски: " + en;
+    if (et !== name || en !== name) return "Тип по-русски — так и нужно, магазин переведёт сам. По-эстонски: " + et + " · по-английски: " + en;
     return / — /.test(name)
       ? "Хвост после « — » не переведётся сам: возьмите слово из списка — шампунь, бальзам, масло, паста…"
       : "";
@@ -19793,7 +19794,7 @@
             "</select></label>" +
             '<span data-edsubslot>' + edSubcatField(p.cat, curSub) + "</span>" +
           "</div>" +
-          '<p class="adm-hint">Бренд можно выбрать из списка или вписать новый. Название — как его увидит покупатель: линейка и что это, например «Beard Balm — бальзам для бороды».</p>' +
+          '<p class="adm-hint">Бренд можно выбрать из списка или вписать новый. Название пишется один раз: линейка латиницей, тип по-русски — например «Beard Balm — бальзам для бороды». Тип магазин сам переводит на эстонский и английский.</p>' +
           // product creation: the way on is a button, not a hunt through the tabs
           (p.isNew ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-edgo="sizes">Дальше — цена →</button></div>' : "") +
         "</div>" +
