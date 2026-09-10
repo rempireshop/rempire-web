@@ -146,7 +146,13 @@ easy to be suspicious of:
      regression worth fearing is the preview and the real send drifting apart:
      with no Resend key there is no mailbox to check, no `mail_log` table
      (deliberately, docs/mail.md) and no screen that shows a subject line.
-     `e2e/admin-mail.spec.ts` is the only caller.
+     `e2e/admin-mail.spec.ts` and `e2e/admin-newsletter.spec.ts` are the
+     callers. Behind the same two gates the sink also stands in for Resend
+     for one sender — «Маркетинг → Рассылка» counts a skipped-for-no-key
+     letter as delivered (`src/lib/newsletters.ts` e2eSinkTransport), which
+     is what lets the newsletter spec watch a real send run to the end and
+     read every letter back; anywhere else a missing key refuses the send
+     before a single address is queued (docs/flows.md § «Рассылка»).
 
    `tools/e2e-bootstrap.mjs` is a related but separate thing: a manual CLI for
    a *human* running `npm run dev` locally who wants the running dev server's

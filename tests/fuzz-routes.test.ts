@@ -230,6 +230,19 @@ function routes(): RouteCase[] {
     { name: "GET /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "GET", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" } },
     { deep: true, name: "PUT /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "PUT", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" }, body: { brand: "Фазз", name: "Balm", cat: "beard", price: 12, sizes: ["75 мл", "250 мл"], prices: [9, 16], active: true } },
     { name: "DELETE /api/admin/products/[id]/", path: "/api/admin/products/x/", method: "DELETE", exports: ["GET", "PUT", "DELETE"], load: () => import("@/app/api/admin/products/[id]/route"), auth: "admin", req: admin, params: { id: "" } },
+    /* «Рассылка» (src/lib/newsletters.ts): the drafts, the audience count,
+       the test letter, the batch send and the preview. The send really runs
+       against the stubbed Resend when the fixture customer has ticked the
+       box by then (PATCH /api/account/me/ above does), so a case may answer
+       `already_sent` (409) — a refusal with a code, like every other. */
+    { name: "GET /api/admin/newsletters/", path: "/api/admin/newsletters/", method: "GET", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/newsletters/route"), auth: "admin", req: admin, queries: ["", "?id=not-a-uuid", "?id=", "?id=%00"] },
+    { name: "POST /api/admin/newsletters/", path: "/api/admin/newsletters/", method: "POST", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/newsletters/route"), auth: "admin", req: admin, body: { title: "Фазз", subject: { RU: "т", ET: "e" }, body: { RU: "<p>b</p>", ET: "<p>e</p>" }, products: [PRODUCT.id] } },
+    { name: "PATCH /api/admin/newsletters/", path: "/api/admin/newsletters/", method: "PATCH", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/newsletters/route"), auth: "admin", req: admin, body: { id: "", title: "Фазз", subject: { RU: "т" }, body: { RU: "<p>b</p>" }, products: [PRODUCT.id] } },
+    { name: "DELETE /api/admin/newsletters/", path: "/api/admin/newsletters/", method: "DELETE", exports: ["GET", "POST", "PATCH", "DELETE"], load: () => import("@/app/api/admin/newsletters/route"), auth: "admin", req: admin, queries: ["?id=not-a-uuid", "?id=", "?id=%2e%2e%2f", "?id=00000000-0000-0000-0000-000000000000"] },
+    { name: "GET /api/admin/newsletters/audience/", path: "/api/admin/newsletters/audience/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/newsletters/audience/route"), auth: "admin", req: admin },
+    { name: "POST /api/admin/newsletters/[id]/test/", path: "/api/admin/newsletters/x/test/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/newsletters/[id]/test/route"), auth: "admin", req: admin, params: { id: "" }, body: { to: "fuzz@example.com", lang: "RU" } },
+    { name: "POST /api/admin/newsletters/[id]/send/", path: "/api/admin/newsletters/x/send/", method: "POST", exports: ["POST", "GET"], load: () => import("@/app/api/admin/newsletters/[id]/send/route"), auth: "admin", req: admin, params: { id: "" } },
+    { name: "GET /api/admin/newsletters/[id]/preview/", path: "/api/admin/newsletters/x/preview/", method: "GET", exports: ["GET"], load: () => import("@/app/api/admin/newsletters/[id]/preview/route"), auth: "admin", req: admin, params: { id: "" }, jsonBody: false, queries: ["?lang=RU", "?lang=zz", "?format=text", "?format=json", "?lang=ET&format=exe"] },
 
     /* ---- pages outside /api ------------------------------------------------
        The request-time product page of a product the owner created, in its
@@ -336,6 +349,7 @@ function goodIdFor(name: string): string {
   if (name.includes("/blog/")) return F.postSlug;
   if (name.includes("/shipments/")) return F.paidOrderNumber;
   if (name.includes("/shop2/") || name.includes("/products/")) return F.customId;
+  if (name.includes("/newsletters/")) return F.newsletterId;
   return F.orderId;
 }
 
@@ -505,6 +519,8 @@ describe("API fuzzing", () => {
       ["/api/admin/mail/send/", () => import("@/app/api/admin/mail/send/route"), "GET"],
       ["/api/admin/mail/test/", () => import("@/app/api/admin/mail/test/route"), "GET"],
       ["/api/admin/ai/text/", () => import("@/app/api/admin/ai/text/route"), "GET"],
+      ["/api/admin/newsletters/x/test/", () => import("@/app/api/admin/newsletters/[id]/test/route"), "GET"],
+      ["/api/admin/newsletters/x/send/", () => import("@/app/api/admin/newsletters/[id]/send/route"), "GET"],
     ];
     for (const [path, load, method] of refusers) {
       const mod = await load();

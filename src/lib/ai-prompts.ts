@@ -12,7 +12,7 @@
  */
 import { TRANSLATABLE_FRAGS, TRANSLATABLE_TAILS } from "@/lib/product-name";
 
-export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "copy"] as const;
+export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "copy", "newsletter"] as const;
 export type AiTask = (typeof AI_TASKS)[number];
 
 export const LANGS3 = ["RU", "ET", "EN"] as const;
@@ -737,6 +737,55 @@ Respond with exactly this JSON shape and nothing else: {"name": "..."}`;
   return { system: `${HOUSE_VOICE}\n\n${task}`, user: `INPUT:\n${facts.filter(Boolean).join("\n")}` };
 }
 
+/* ---------- newsletter ---------------------------------------------------------
+ * «Рассылка» → «✨ Написать»: the owner's one-line brief (+ the products he
+ * picked for the letter) → a subject line and a short letter body in `lang`,
+ * in the same allowlisted HTML the blog writes and with the same product
+ * marker (`<p><a data-product="ID"></a></p>`), so the letter editor's box,
+ * the storefront's card and the mail renderer (src/emails/newsletter.ts) all
+ * read one shape. Russian first, like an article; post_translate carries it
+ * into the other two languages. The products list is the panel's own pick —
+ * nothing is filled in from the catalogue: a letter names what the owner
+ * chose to show, and the route filters the cards against exactly that list. */
+
+export interface NewsletterBriefInput {
+  /** What the letter is about — a phrase, a sentence, a paragraph. */
+  brief: string;
+  /** The products the letter may name and show — these and no others. */
+  products?: PostProductRef[];
+}
+
+export const NEWSLETTER_WORDS = [90, 220] as const;
+export const NEWSLETTER_CARDS_MAX = 3;
+
+function cleanNewsletterBriefInput(raw: unknown): { brief: string; products: PostProductRef[] } {
+  const src = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  const brief = para(src.brief, 600);
+  if (!brief) throw new AiInputError("missing_brief");
+  return { brief, products: cleanProductRefs(src.products) };
+}
+
+export function buildNewsletterPrompt(lang: Lang3, rawInput: unknown): PromptResult {
+  const input = cleanNewsletterBriefInput(rawInput);
+  const products = input.products.length
+    ? `PRODUCTS from the shop you may name and show (id | brand | name | category) — these and no others, by their exact names, and only where they genuinely fit what the letter is about:\n${input.products
+        .map((p) => `${p.id} | ${p.brand || "-"} | ${p.name || "-"} | ${p.category || "-"}`)
+        .join("\n")}`
+    : "PRODUCTS: none listed — do not name any product or brand, and write no product cards.";
+
+  const system = `${HOUSE_VOICE}
+
+TASK: write one short newsletter e-mail from the shop to the customers who asked for its news, in ${LANG_NAME[lang]}, about what the owner says under INPUT. This is the finished letter he will read once and send — friendly, concrete, no hype, no exclamation marks. General grooming knowledge is fine; invented facts — a discount, a date, a price, an ingredient, a study — are not: only what INPUT says.
+- "subject": the subject line, plain and specific, under 60 characters, no trailing punctuation, never the word "newsletter".
+- "body": ${NEWSLETTER_WORDS[0]}–${NEWSLETTER_WORDS[1]} words of clean HTML. Use ONLY these tags: <p> for paragraphs (1–3 sentences each, three to five of them), at most one <h2> section heading, at most one <ul><li> list of 2–4 short items where a list genuinely helps, <strong> for a key phrase once or twice, plus the product card below. No <h1>, no images, no links of your own, no inline styles, no markdown, no comments; no greeting with a name (the letter has none) and no signature (the shop adds its own footer). Name the PRODUCTS by their exact names where they fit, at most once each — a recommendation a barber would make out loud, never a sales pitch.
+- the product card: right after the paragraph that recommends one of the PRODUCTS, put that product's card on a line of its own, written exactly as <p><a data-product="ID"></a></p>, where ID is copied character for character from the PRODUCTS list. Nothing inside the tag, no href, no other attribute, no text of your own around it — the shop draws the picture, the name, the price and the button itself. At most one card per product and at most ${NEWSLETTER_CARDS_MAX} in the whole letter. An ID that is not in the PRODUCTS list is not a product: write no card rather than a card for something that does not exist.
+- End with one short closing line inviting the reader to the shop or to the Rempire barbershop (Mardi 1, Tallinn) — no prices, no promises.
+Respond with exactly this JSON shape and nothing else: {"subject": "...", "body": "<p>...</p><p><a data-product=\\"id\\"></a></p><p>...</p>"}`;
+
+  const user = [`INPUT:\nWhat the letter is about: ${input.brief}`, products].join("\n\n");
+  return { system, user };
+}
+
 /* ---------- dispatch --------------------------------------------------------- */
 
 export function buildPrompt(task: AiTask, lang: Lang3, input: unknown): PromptResult {
@@ -748,6 +797,7 @@ export function buildPrompt(task: AiTask, lang: Lang3, input: unknown): PromptRe
   if (task === "post_full") return buildPostFullPrompt(lang, input);
   if (task === "post_translate") return buildPostTranslatePrompt(lang, input);
   if (task === "copy") return buildCopyPrompt(lang, input);
+  if (task === "newsletter") return buildNewsletterPrompt(lang, input);
   throw new AiInputError("unknown_task");
 }
 

@@ -77,6 +77,8 @@ const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
 const MAX_TOKENS: Record<AiTask, number> = {
   describe: 900, translate: 900, seo: 900, reply: 900, blog_outline: 900,
   post_full: 4500, post_translate: 4500, copy: 400,
+  // «Рассылка»: a subject line and 90–220 words of HTML (src/lib/ai-prompts.ts)
+  newsletter: 1500,
 };
 const TEMPERATURE = 0.4;
 const RATE_MAX = 30;
@@ -156,6 +158,10 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
       out.products = readCardPicks(p.products);
     }
     return { text: out };
+  }
+  if (task === "newsletter") {
+    // the letter editor's allowlist, like an article's body — what is stored is what the letter shows
+    return { text: { subject: str(p.subject, 200), body: sanitizeHtml(str(p.body, 20_000)) } };
   }
   if (task === "copy") {
     return {
@@ -245,6 +251,20 @@ async function postFullInput(raw: unknown): Promise<PostFullRefs> {
     })
     .slice(0, POST_PRODUCTS_MAX);
   return { input: { ...src, products: offered }, allowed: new Set(offered.map((r) => r.id)), refs: offered, topic };
+}
+
+/* newsletter: the cards the letter may draw are the products the panel picked
+   for it — the ids under `input.products`, nothing filled in from the
+   catalogue — and the answer's body is held to that list the same way an
+   article's is (keepKnownCards). */
+function newsletterAllowed(raw: unknown): Set<string> {
+  const src = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  const out = new Set<string>();
+  for (const item of Array.isArray(src.products) ? src.products : []) {
+    const id = typeof item === "string" ? item : ((item && typeof item === "object" ? (item as Record<string, unknown>).id : "") as string);
+    if (typeof id === "string" && /^[a-z0-9][a-z0-9._-]{0,79}$/i.test(id.trim())) out.add(id.trim());
+  }
+  return out;
 }
 
 export async function POST(req: NextRequest) {
@@ -342,7 +362,7 @@ export async function POST(req: NextRequest) {
   /* A cut article is not an article: the editor would show a piece that
      stops mid-sentence and the owner would publish it. Refused here, with
      its own code, so the panel can say «попробуйте ещё раз» and mean it. */
-  if ((task === "post_full" || task === "post_translate") && (extracted.truncated || !extracted.value)) {
+  if ((task === "post_full" || task === "post_translate" || task === "newsletter") && (extracted.truncated || !extracted.value)) {
     console.error("[admin/ai/text] article cut or unreadable", task, choice.finish_reason);
     return NextResponse.json({ ok: false, error: "truncated" }, { status: 502 });
   }
@@ -374,6 +394,10 @@ export async function POST(req: NextRequest) {
       const ids = placed.cards.slice();
       for (const c of picks) if (!ids.includes(c.id)) ids.push(c.id);
       t.products = ids.slice(0, POST_PRODUCTS_MAX);
+    }
+    if (task === "newsletter" && result.text && typeof result.text === "object") {
+      const t = result.text as Record<string, unknown>;
+      t.body = keepKnownCards(String(t.body ?? ""), newsletterAllowed(body.input));
     }
   }
 
