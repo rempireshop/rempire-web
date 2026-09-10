@@ -1868,12 +1868,13 @@
       "Остаток": "Jääk",
       "Штрихкод": "Triipkood",
       "один объём": "üks maht",
-      "сканер ›": "skanner ›",
-      "не привязан · сканер ›": "pole seotud · skanner ›",
+      "не привязан": "pole seotud",
+      "Сканировать штрихкод": "Skaneeri triipkood",
       "Отвязать": "Eemalda",
       "Штрихкод убран — нажмите «Сохранить»": "Triipkood eemaldatud — vajutage «Salvesta»",
-      "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
-        "Triipkoodi seob skanner laos: avage «Ladu», vajutage «Skaneeri» ja suunake kaamera pakendile. «Eemalda» võtab koodi mahult — see vabaneb pärast «Salvesta».",
+      "Код считан — нажмите «Сохранить»": "Kood loetud — vajutage «Salvesta»",
+      "Штрихкод можно считать прямо здесь: нажмите «Сканер» рядом с полем и наведите камеру на упаковку — код встанет в это поле. Или впишите его руками. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
+        "Triipkoodi saab lugeda otse siin: vajutage välja kõrval «Skanner» ja suunake kaamera pakendile — kood läheb sellesse välja. Või kirjutage see käsitsi. «Eemalda» võtab koodi mahult — see vabaneb pärast «Salvesta».",
       "Убрать размер": "Eemalda suurus",
       "Добавить размер — объёмы заводит Дим": "Lisa suurus — mahud lisab Dim",
       "+ Размер": "+ Suurus",
@@ -1920,6 +1921,9 @@
       "Начните вводить название": "Hakake nime sisestama",
       "Продажа: товар добавится в корзину": "Müük: toode läheb ostukorvi",
       "Склад: приёмка и списание": "Ladu: vastuvõtt ja mahakandmine",
+      "Товар: код встанет в поле «Штрихкод»": "Toode: kood läheb välja «Triipkood»",
+      "Наведите на штрихкод — код встанет в поле «Штрихкод», сканер закроется сам.": "Suunake triipkoodile — kood läheb välja «Triipkood», skanner sulgub ise.",
+      "Вписать": "Kirjuta",
       "или введите код вручную": "või sisestage kood käsitsi",
       "Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.": "Seesama ekraan on telefonis eraldi rakendus «Rempire Skanner». Sisse pääseb ainult omanik.",
       "Нет на складе": "Laos pole",
@@ -4109,12 +4113,13 @@
       "Остаток": "Stock",
       "Штрихкод": "Barcode",
       "один объём": "one size",
-      "сканер ›": "scanner ›",
-      "не привязан · сканер ›": "not linked · scanner ›",
+      "не привязан": "not linked",
+      "Сканировать штрихкод": "Scan the barcode",
       "Отвязать": "Unlink",
       "Штрихкод убран — нажмите «Сохранить»": "The barcode is off — press «Save»",
-      "Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
-        "The scanner links a barcode in the warehouse: open «Warehouse», press «Scan» and point the camera at the bottle. «Unlink» takes the code off a size — it is freed once you press «Save».",
+      "Код считан — нажмите «Сохранить»": "Code read — press «Save»",
+      "Штрихкод можно считать прямо здесь: нажмите «Сканер» рядом с полем и наведите камеру на упаковку — код встанет в это поле. Или впишите его руками. «Отвязать» убирает код с объёма — он освободится после «Сохранить».":
+        "You can read the barcode right here: press «Scanner» beside the box and point the camera at the bottle — the code lands in this box. Or type it in by hand. «Unlink» takes the code off a size — it is freed once you press «Save».",
       "Убрать размер": "Remove the size",
       "Добавить размер — объёмы заводит Дим": "Add a size — sizes are added by Dim",
       "+ Размер": "+ Size",
@@ -4161,6 +4166,9 @@
       "Начните вводить название": "Start typing the name",
       "Продажа: товар добавится в корзину": "Sale: the product goes into the cart",
       "Склад: приёмка и списание": "Warehouse: goods in and goods out",
+      "Товар: код встанет в поле «Штрихкод»": "Product: the code goes into the «Barcode» box",
+      "Наведите на штрихкод — код встанет в поле «Штрихкод», сканер закроется сам.": "Point at the barcode — the code lands in the «Barcode» box and the scanner closes by itself.",
+      "Вписать": "Fill in",
       "или введите код вручную": "or type the code by hand",
       "Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.": "This same screen is a separate «Rempire Scanner» app on the phone. Owner access only.",
       "Нет на складе": "Not in the warehouse",
@@ -14896,7 +14904,12 @@
       '<label class="adm-field">Адрес для теста' +
         '<input class="adm-input" type="email" data-mailto value="' + esc(S.mailTo || "") +
         '" placeholder="renat@rempireshop.com"></label>' +
-      '<div class="adm-acts" id="mailacts">' + admMailActsHTML() + "</div>";
+      /* the test send stays with the address it sends to (Enter in that box
+         presses it — ADM_ENTER_FORMS); the bar below is the product editor's
+         sticky one, so «Сохранить» is above the nav on a phone wherever the
+         owner is in a long letter, with the same width the other forms have */
+      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button></div>' +
+      '<div class="adm-savebar" id="mailacts">' + admMailActsHTML() + "</div>";
     return admBackHTML("data-mailback", "Все письма") +
       admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
       '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
@@ -14920,7 +14933,6 @@
   }
   function admMailActsHTML() {
     return '<button class="adm-btn" data-mailsave>Сохранить</button>' +
-      '<button class="adm-btn adm-btn--ghost" data-mailtest>Отправить мне тест</button>' +
       (mailDirty() ? '<button class="adm-link adm-link--muted" data-mailrevert>Отменить правки</button>' : "");
   }
   /** The letter as the customer will see it, drawn from the draft — so the
@@ -17640,9 +17652,12 @@
           '<label class="adm-field" style="margin-top:10px">Заметка для себя' +
             '<input class="adm-input" data-promof="note" maxlength="200" value="' + esc(f.note || "") + '"></label>' +
         "</div></details>" +
-      (S.promoFormErr ? '<div class="adm-err" role="alert">' + esc(S.promoFormErr) + "</div>" : "") +
-      '<div class="adm-acts"><button class="adm-btn" data-admpromosave>' +
-        (f.editing ? "Сохранить" : "Создать") + "</button>" +
+      /* the product editor's sticky bar — one shape for every form that
+         saves (Renat, 10.09.2026), with the refusal riding in it so it is on
+         screen on a phone wherever the owner is in the form */
+      '<div class="adm-savebar">' +
+        (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) + "</p>" : "") +
+        '<button class="adm-btn" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
         '<button class="adm-btn adm-btn--ghost" data-admpromocancel>Отмена</button></div></div>';
   }
   function admPromosHTML() {
@@ -18187,9 +18202,12 @@
       '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p>" +
       '<div class="adm-field">Фото набора</div>' +
       '<div class="adm-picks">' + bundleImageRowHTML() + "</div>" +
-      (S.bundleFormErr ? '<div class="err adm-err" role="alert">' + esc(S.bundleFormErr) + "</div>" : "") +
-      '<div class="adm-acts"><button class="adm-btn" data-bundlesave>Сохранить</button>' +
+      // the product editor's sticky bar, destructive slot included — see promoFormHTML()
+      '<div class="adm-savebar">' +
+        (S.bundleFormErr ? '<p class="err adm-err adm-savebar__err" role="alert">' + esc(S.bundleFormErr) + "</p>" : "") +
+        '<button class="adm-btn" data-bundlesave>Сохранить</button>' +
         '<button class="adm-btn adm-btn--ghost" data-bundlecancel>Отмена</button>' +
+        '<span class="adm-savebar__sp"></span>' +
         (f.editing ? '<button class="adm-del" data-bundledelete="' + esc(f.id) + '">Удалить набор</button>' : "") +
       "</div></div>";
   }
@@ -18584,9 +18602,10 @@
         '<label class="adm-field">Телефон — необязательно' +
           '<input class="adm-input" type="tel" data-partnerf="phone" value="' + esc(f.phone) + '" placeholder="+372…"></label>' +
       "</div>" +
-      (S.partnerErr ? '<div class="adm-err" role="alert">' + esc(S.partnerErr) + "</div>" : "") +
       '<p class="adm-hint" style="margin:0">Партнёру уйдёт письмо «Цены для салонов включены»; скидка действует с первого входа в кабинет по этой почте.</p>' +
-      '<div class="adm-acts">' +
+      // the product editor's sticky bar, the refusal in it — see promoFormHTML()
+      '<div class="adm-savebar">' +
+        (S.partnerErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.partnerErr) + "</p>" : "") +
         '<button class="adm-btn" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
         '<button class="adm-btn adm-btn--ghost" data-admpartnercancel>Отмена</button>' +
       "</div></div>";
@@ -19394,13 +19413,19 @@
   function edEanCell(key, ean) {
     return edCell("ean", "Штрихкод",
       '<input class="adm-input adm-input--cell adm-mono" data-edean="' + esc(key) + '" value="' + esc(ean || "") +
-        '" placeholder="не привязан · сканер ›" aria-label="Штрихкод">' +
+        '" placeholder="не привязан" aria-label="Штрихкод">' +
+      /* the scanner for THIS size: the code it reads lands in the box beside
+         the button and nowhere else (openScannerFor / scanToEditor). The
+         placeholder used to promise «сканер ›» with nothing to press — the
+         owner tapped the box and got a keyboard (Renat, 10.09.2026). */
+      '<button class="adm-grid__scan" type="button" data-edscan="' + esc(key) + '" aria-label="Сканировать штрихкод" title="Сканировать штрихкод">' +
+        admIcon("scan", false, 18) + '<span class="adm-grid__scan__lbl">Сканер</span></button>' +
       (ean ? '<button class="adm-grid__unbind" type="button" data-edunbind="' + esc(key) + '">Отвязать</button>' : ""));
   }
   /** The one line under the grid that says where a barcode comes from. */
   function edEanHint() {
-    return '<p class="adm-hint">Штрихкод привязывается сканером на складе: откройте «Склад», нажмите «Сканировать» и наведите камеру на упаковку. ' +
-      "«Отвязать» убирает код с объёма — он освободится после «Сохранить».</p>";
+    return '<p class="adm-hint">Штрихкод можно считать прямо здесь: нажмите «Сканер» рядом с полем и наведите камеру на упаковку — код встанет в это поле. ' +
+      "Или впишите его руками. «Отвязать» убирает код с объёма — он освободится после «Сохранить».</p>";
   }
   function edPaneSizesOwn(p) {
     if (!p.isNew) loadStockLevels(false);
@@ -20437,6 +20462,12 @@
        camera, so a code typed into it must still bring its card up. */
     var err = S.scanErr ? '<div class="scan__card scan__card--err"><p>' + esc(S.scanErr) + "</p></div>" : "";
     if (!S.scanHit) {
+      // the editor's door (openScannerFor): one code and the overlay is gone,
+      // so neither «Сегодня» nor the count of bound sizes has a place here —
+      // this is not a shelf-counting session
+      if (S.scanFrom === "editor") {
+        return err + '<p class="scan__hint">Наведите на штрихкод — код встанет в поле «Штрихкод», сканер закроется сам.</p>';
+      }
       /* «Сегодня» belongs to the idle state and only there: while a card is up
          the three taps are the whole job, but between codes this is the only
          place that answers «что я уже принял сегодня». */
@@ -20551,6 +20582,7 @@
     "</div>";
   }
   function scanModeLine() {
+    if (S.scanFrom === "editor") return "Товар: код встанет в поле «Штрихкод»";
     return S.scanFrom === "pos" ? "Продажа: товар добавится в корзину" : "Склад: приёмка и списание";
   }
   function scannerShellHTML() {
@@ -20576,7 +20608,8 @@
         // attached to it (also in scanMount()) survives every #scanpanel update.
         '<div class="scan__manual"><input class="scan__mfield adm-mono" data-scanmanual inputmode="numeric" ' +
           'autocomplete="off" placeholder="или введите код вручную" aria-label="Ввести код вручную">' +
-          '<button class="scan__mbtn" data-scanmanualsubmit type="button">Найти</button></div>' +
+          // the editor's door looks nothing up: a typed code goes into the box, so the button says so
+          '<button class="scan__mbtn" data-scanmanualsubmit type="button">' + (S.scanFrom === "editor" ? "Вписать" : "Найти") + "</button></div>" +
       "</div>" +
       '<div class="scan__foot">Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.</div>';
   }
@@ -20691,9 +20724,33 @@
     SCAN.zoomCaps = null; SCAN.pinchFrom = 0;
     scanSetEngine("");
   }
+  /* The one code the product editor asked for (openScannerFor). Written into
+     the size's box exactly as a typed one would be — the value, not the
+     attribute, so renderImpl's goodsKeep carries it across the repaint the
+     close causes, and «Сохранить» sees a box that differs from the warehouse
+     copy and binds it. Nothing is written to the warehouse here, and no card
+     is shown: the code is the answer, not a question. The box is not
+     focused — on a phone that raises the keyboard over the very code the
+     owner wants to look at — but it is brought into view. */
+  function scanToEditor(code) {
+    var key = S.scanFor;
+    var box = key ? document.querySelector('[data-edean="' + key + '"]') : null;
+    closeScannerState();
+    if (!box) { render(); return; }   // the editor is gone from under the overlay — nothing to fill
+    box.value = code;
+    scanBeep();
+    render();
+    var after = document.querySelector('[data-edean="' + key + '"]');
+    if (after && after.scrollIntoView) after.scrollIntoView({ block: "center" });
+    // «Код», not «Штрихкод»: the toast is one line with an ellipsis, and the
+    // longer word cost it the «Сохранить» it is asking for on a 375-px phone
+    toast("Код считан — нажмите «Сохранить»");
+  }
   function handleScanCode(code) {
     var now = Date.now();
     if (!code) return;
+    // the editor's door: no lookup, no debounce — the first read closes the overlay
+    if (S.scanFrom === "editor") { scanToEditor(code); return; }
     /* The bottle that is already on screen. The camera reads it again every
        frame for as long as it is in view, and each re-read used to rebuild the
        panel — wiping the product search, closing the keyboard and pulling the
@@ -21427,7 +21484,19 @@
      (README § Сканер). */
   function openScanner() {
     scanResetState();
+    S.scanFor = "";
     S.scanFrom = S.adminTab === "pos" ? "pos" : "stock";
+    render();
+  }
+  /** The product editor's door: `key` is a size's «productId variant» — the
+      key its [data-edean] box carries — and the next code read is written
+      there (scanToEditor) instead of being looked up. The editor stays open
+      underneath: the overlay is a layer over it (admLayers), so Back and ×
+      both land on the form exactly as it was. */
+  function openScannerFor(key) {
+    scanResetState();
+    S.scanFor = key;
+    S.scanFrom = "editor";
     render();
   }
   /** The flag alone — «Назад» closes the scanner through admCloseTop(), whose
@@ -21435,6 +21504,9 @@
       full repaint of the screen underneath. */
   function closeScannerState() {
     S.scanOpen = false;
+    // the box the editor asked for goes with the session: a later «Склад»
+    // scan must not land in a field the editor no longer shows
+    S.scanFor = "";
   }
   function closeScanner() {
     closeScannerState();
@@ -24650,6 +24722,14 @@
     else if (SCANEL) { scanUnmount(); }
     // the toast has to clear the camera view — see .is-scanning in styles.css
     document.body.classList.toggle("is-scanning", !!S.scanOpen);
+    /* A save bar is on screen: on a phone the page's bottom padding, the
+       storefront shell's (.screen--co) and the assistant's button all make
+       room for it — admin.css `body.adm-saving`. A body class rather than
+       `:has()` because two of those three are above .adm2 in the tree, and
+       because a rule dropped by an older browser is exactly the kind of
+       thing that puts a button under a nav bar on one phone and not the
+       next. */
+    document.body.classList.toggle("adm-saving", S.screen === "admin" && !!bodySlot.querySelector(".adm-savebar"));
     document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
     // …and, if this is the first screen that wants the assistant at all, the
     // widget's <script> is fetched now rather than at boot (mountChat above)
@@ -25501,7 +25581,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -26012,6 +26092,11 @@
       toast("Штрихкод убран — нажмите «Сохранить»");
       return;
     }
+    /* inventory: the scanner, opened from a size's own «Штрихкод» box. The
+       code it reads goes into that box (scanToEditor) and NOT to the
+       warehouse: like a typed one it is bound by «Сохранить», so a mis-scan
+       costs a tap on the box rather than a wrong code on the shelf. */
+    if (d.edscan !== undefined) { openScannerFor(d.edscan); return; }
     /* product creation: «+ Товар» opens the editor over a product that does
        not exist yet; «Вернуть в продажу» is the undo of the hide, applied at
        once (nothing destructive about it) with the toast's own undo. */
