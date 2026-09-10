@@ -698,6 +698,44 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 .adm-edcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .adm-edpair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 720px) { .adm-edcols, .adm-edpair { grid-template-columns: minmax(0, 1fr); } }
+
+/* Бренд: an in-page list under the box (Dim, 10.09.2026). <datalist> handed
+   the choice to the OS — a dark popup taller than the window on his desktop
+   — so the list is the panel's own: paper, one ink rule, 44-px rows a thumb
+   can hit, the typed part marked in each name, «Новый бренд «…»» as the
+   last row when nothing matches. app.js edBrand*. */
+.adm-combo { position: relative; }
+.adm-combo__list {
+  position: absolute; left: 0; right: 0; top: 100%; z-index: 6; margin-top: -1px;
+  background: var(--a-paper); border: 1px solid var(--a-ink); max-height: 353px; overflow-y: auto;
+}
+.adm-combo__opt {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 44px;
+  padding: 0 14px; border: 0; border-bottom: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-ink);
+  font-size: 15px; line-height: 20px; text-align: left; cursor: pointer;
+}
+.adm-combo__opt:last-child { border-bottom: 0; }
+.adm-combo__opt:hover, .adm-combo__opt[aria-selected="true"] { background: var(--a-tint); }
+.adm-combo__nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-combo__nm mark { background: none; color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.adm-combo__n { flex: none; font-size: 13px; color: var(--a-muted); }
+.adm-combo__plus { flex: none; width: 20px; font-weight: 600; }
+
+/* Новый товар: three steps instead of five tabs (Dim, 10.09.2026). The same
+   strip an order card wears — done in ink, the current one on tint, the rest
+   on paper — but every cell is a button that opens its pane, so the strip
+   is the navigation and not a picture of it. «Описание» and «Google» wait
+   under it as two words: they are not steps, they are optional. */
+.adm-steps--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.adm-step--btn { font: inherit; text-align: left; cursor: pointer; min-height: 44px; }
+.adm-step--btn .adm-step__n, .adm-step--btn .adm-step__l, .adm-step--btn .adm-step__s { display: block; }
+.adm-step--btn:hover { background: var(--a-tint); }
+.adm-step--btn[aria-current="true"] { background: var(--a-tint); color: var(--a-ink); }
+.adm-step--btn[aria-current="true"] .adm-step__l { font-weight: 600; }
+.adm-step--btn.adm-step--done:hover { background: var(--a-ink); }
+.adm-edopt { margin: -8px 0 0; }
+.adm-edopt .adm-link { font-size: 13px; }
+@media (max-width: 480px) { .adm-steps--ed .adm-step__s { display: none; } }
 /* «← Товары» is a link, and a link in a flex column stretches to the whole
    width — which centres its text and puts a 1000-px hit area behind it. */
 .adm-link--back { align-self: flex-start; }
@@ -798,27 +836,39 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 .adm-btn--dash[disabled] { border-style: dashed; background: var(--a-paper); }
 .adm-btn--tall { height: 64px; width: 100%; }
 
-/* Фото: the tile grid, «главное» and the per-size tags. */
-.adm-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-.adm-photo { position: relative; aspect-ratio: 1; background: var(--a-tint); border: 1px solid var(--a-rule); }
-.adm-photo__img { position: absolute; inset: 0; background-size: contain; background-position: center; background-repeat: no-repeat; }
+/* Фото: the tile grid, «главное» and the per-size tags.
+   A desktop tile is a column (Dim, 10.09.2026): the picture on top and, on
+   the panel's paper under it, one row of 36-px buttons that belong to that
+   picture and no other. They used to be laid over the picture's bottom edge,
+   30 px each: on the 144-px tile a 760-px pane gives, four of them wrapped
+   and the fifth was clipped. A tile is at least 200 px now — three to a row
+   in the pane — so ← → ★ ✂ × always stand side by side on one line. The
+   phone keeps its own row layout (the media block further down). */
+.adm-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; align-items: stretch; }
+.adm-photo { position: relative; display: flex; flex-direction: column; min-width: 0; background: var(--a-paper); border: 1px solid var(--a-rule); }
+.adm-photo__img {
+  position: relative; display: block; width: 100%; aspect-ratio: 1; background-color: var(--a-tint);
+  background-size: contain; background-position: center; background-repeat: no-repeat;
+}
+/* «главное» and the size names — over the picture's top-left corner, big
+   enough to read from a chair: 12 px, not 11, and ink on the main one */
 .adm-photo__tag {
-  position: absolute; top: 6px; left: 6px; font-size: 11px; padding: 2px 6px;
-  background: var(--a-paper); color: var(--a-muted); max-width: calc(100% - 12px);
+  position: absolute; top: 8px; left: 8px; font-size: 12px; line-height: 16px; padding: 3px 8px;
+  background: var(--a-paper); color: var(--a-ink); border: 1px solid var(--a-rule); max-width: calc(100% - 16px);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.adm-photo__tag--ink { background: var(--a-ink); color: #fff; }
-/* Anchored to BOTH edges and allowed to wrap: five 30-px buttons are 158 px,
-   and a five-column desktop grid gives a tile 144 — anchored to the right
-   edge alone the strip ran 14 px out of the tile over its neighbour. */
-.adm-photo__ops { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 2px; }
+.adm-photo__tag--ink { background: var(--a-ink); color: #fff; border-color: var(--a-ink); font-weight: 600; }
+.adm-photo__ops { display: flex; justify-content: flex-start; gap: 4px; padding: 6px; border-top: 1px solid var(--a-rule); }
 .adm-photo__op {
-  width: 30px; height: 30px; border: 0; background: var(--a-paper); color: var(--a-ink);
-  font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper); color: var(--a-ink);
+  font-size: 15px; line-height: 1; display: flex; align-items: center; justify-content: center;
 }
-.adm-photo__op[disabled] { color: var(--a-rule); cursor: default; }
+.adm-photo__op:hover { background: var(--a-tint); }
+.adm-photo__op[disabled] { color: var(--a-rule); cursor: default; background: var(--a-paper); }
+/* the dashed «+ Фото с телефона» tile: square on its own, and as tall as its
+   neighbours once there are photos beside it (the grid stretches it) */
 .adm-photo--add {
-  border: 1px dashed var(--a-ink); background: var(--a-paper); font-weight: 500; font-size: 14px;
+  border: 1px dashed var(--a-ink); background: var(--a-paper); font-weight: 500; font-size: 14px; aspect-ratio: 1; padding: 12px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
 }
 .adm-photo--add[disabled] { border-color: var(--a-rule); color: var(--a-muted); cursor: default; }
@@ -938,9 +988,9 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
     column-gap: 12px; align-items: center; align-content: center; padding: 8px; background: var(--a-paper);
   }
   .adm-photo__img { position: static; grid-column: 1; grid-row: 1 / 3; width: 72px; height: 72px; background-color: var(--a-tint); }
-  .adm-photo__tag { position: static; grid-column: 2; grid-row: 1; justify-self: start; max-width: 100%; margin-bottom: 6px; background: var(--a-tint); }
+  .adm-photo__tag { position: static; grid-column: 2; grid-row: 1; justify-self: start; max-width: 100%; margin-bottom: 6px; background: var(--a-tint); border: 0; }
   .adm-photo__tag--ink { background: var(--a-ink); }
-  .adm-photo__ops { position: static; grid-column: 2; grid-row: 2; justify-content: flex-start; gap: 4px; }
+  .adm-photo__ops { position: static; grid-column: 2; grid-row: 2; justify-content: flex-start; gap: 4px; padding: 0; border-top: 0; }
   /* on paper, not on a photo: a button with no edge is invisible */
   .adm-photo__op { border: 1px solid var(--a-rule); }
   /* «Фото с телефона» is a row too — a dashed bar the height of a button */

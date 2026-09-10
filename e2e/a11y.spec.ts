@@ -293,6 +293,16 @@ test.describe("a11y admin", () => {
       await audit.check(page, `admin editor · ${tab}`);
     }
     await page.locator("[data-admclose]").first().click();
+    // «+ Товар»: the three-step editor with the brand list open, and its photo step (round 12)
+    await page.locator("[data-admgoodsnew]").click();
+    await expect(page.locator("[data-edbrand]")).toBeVisible();
+    await page.locator("[data-edbrand]").focus();
+    await expect(page.locator("#edbrandlist")).toBeVisible();
+    await audit.check(page, "admin новый товар");
+    await page.locator('[data-edtab="media"]').click();
+    await expect(page.locator('[data-edpane="media"]')).toBeVisible();
+    await audit.check(page, "admin новый товар · фото");
+    await page.locator("[data-admclose]").first().click();
 
     await section("pos", /Продажа в салоне/);
     await expect(page.locator("[data-posq]")).toBeVisible();

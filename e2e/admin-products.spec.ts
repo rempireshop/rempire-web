@@ -153,10 +153,11 @@ test.describe("admin — product creation", () => {
     await page.locator("[data-admgoodsnew]").click();
     await expect(page.locator(".adm-head__kicker")).toHaveText("Новый товар");
     await expect(page.locator("[data-edbrand]")).toBeVisible();
-    // no photo button before there is a product to file it under
+    // the photo tile is there from the start — picking a photo saves the
+    // product first (the test below) — with the one line that says so
     await edTab(page, "media");
-    await expect(page.locator("[data-galwait]")).toBeVisible();
-    await expect(page.locator("[data-galup]")).toHaveCount(0);
+    await expect(page.locator('[data-galup="new"]'), "no photo tile on a new product").toBeEnabled();
+    await expect(page.locator("[data-galwait]")).toContainText("товар сохранится сам");
     await edTab(page, "main");
 
     try {
@@ -195,12 +196,20 @@ test.describe("admin — product creation", () => {
       await expect(page.locator(".adm-head__kicker")).toContainText("ваш товар");
       expect(await customRow(page, id)).toMatchObject({ active: true, price: 14.9 });
       expect(await feedHas(page, id), "the public feed does not carry the new product").toBe(true);
+      /* The dev server compiles a route on its first hit, and the row's own
+         route (PUT below) took 4.7 s cold on a fresh server — longer than
+         toastText() waits for «Сохранено». Warm it here, before the timing
+         matters; nothing about production needs this. */
+      expect((await page.request.get(`/api/admin/products/${id}/`)).status()).toBe(200);
 
       // ---- a photo, and «Убрать фон» when the server offers it -------------
       await expect(page.locator(`[data-galup="${id}"]`)).toBeEnabled();
       await page.locator(`[data-galfile="${id}"]`).setInputFiles({ name: "e2e.png", mimeType: "image/png", buffer: PNG });
       await expect(page.locator(".adm-photo:not(.adm-photo--add)")).toHaveCount(1);
       expect(uploads).toContain("upload");
+      // the tile is on screen, the shop has not seen it yet — the toast says what makes it so
+      expect(await toastText(page), "no nudge to press «Сохранить» after the upload").toMatch(/Фото загружено/);
+      await clearToast(page);
       await expect(page.locator('[data-galcut="0"]'), "no «Убрать фон» although the server offers it").toBeVisible();
       await page.locator('[data-galcut="0"]').click();
       expect(await toastText(page)).toMatch(/Фон убран/);
@@ -295,6 +304,112 @@ test.describe("admin — product creation", () => {
       expect(await toastText(page)).toMatch(/Снова в продаже/);
       await clearToast(page);
       await expect.poll(async () => (await customRow(page, id))?.active, { timeout: 15_000 }).toBe(true);
+    } finally {
+      if (id) await page.request.delete(`/api/admin/products/${id}/`);
+    }
+  });
+
+  /**
+   * Round 12 (Dim, 10.09.2026): a photo on a NEW product. The media tab used
+   * to be a dead end — «Фото — после первого сохранения» and nothing to
+   * press — and an upload that failed on staging said only «попробуйте ещё
+   * раз». Pinned here:
+   *   · a photo picked with the form empty uploads nothing: the save bar
+   *     names the empty box and the tab that holds it opens by itself;
+   *   · with the form filled, the photo MAKES the product (the same POST the
+   *     save bar sends), lands on it, and «Сохранить» then puts it in the shop;
+   *   · a refused upload — no bucket, no connection, a body the platform
+   *     will not take — is a sentence in the pane every time.
+   */
+  test("a photo picked before the first save makes the product, and an upload that fails says why", async ({ page }) => {
+    test.setTimeout(180_000);
+    const w = watch(page);
+    const stamp = Date.now().toString().slice(-6);
+    const BRAND = `E2E Photo ${stamp}`;
+    const NAME = `Oil ${stamp} — масло для бороды`;
+    const FILE = { name: "e2e.png", mimeType: "image/png", buffer: PNG };
+    let mode: "ok" | "storage" | "offline" | "huge" = "ok";
+    const posted: string[] = [];
+    await page.route("**/api/admin/upload/**", async (route) => {
+      const req = route.request();
+      if (req.method() === "GET") {
+        await route.fulfill({ status: 200, contentType: "application/json",
+          body: JSON.stringify({ ok: true, configured: true, cutout: false, maxBytes: 12 * 1024 * 1024, maxVideoBytes: 60 * 1024 * 1024 }) });
+        return;
+      }
+      if (req.method() !== "POST") { await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); return; }
+      posted.push(mode);
+      if (mode === "storage") {
+        await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ ok: false, error: "storage_not_configured" }) });
+      } else if (mode === "offline") {
+        await route.abort("failed");
+      } else if (mode === "huge") {
+        // what a Vercel function answers to a body over 4.5 MB — before any code of ours runs, and not JSON
+        await route.fulfill({ status: 413, contentType: "text/plain", body: "FUNCTION_PAYLOAD_TOO_LARGE" });
+      } else {
+        await route.fulfill({ status: 200, contentType: "application/json",
+          body: JSON.stringify({ ok: true, key: "products/e2e/2-e2e.webp", url: PHOTO_URL, thumbUrl: PHOTO_URL, width: 1, height: 1, bytes: 10, alt: "" }) });
+      }
+    });
+    let id = "";
+
+    await openAdmin(page);
+    try {
+      await tab(page, "goods");
+      await page.locator("[data-admgoodsnew]").click();
+      await expect(page.locator("[data-edbrand]")).toBeVisible();
+
+      // ---- the form is empty: nothing is uploaded, the empty box gets the caret, on its own tab
+      await edTab(page, "media");
+      await page.locator('[data-galfile="new"]').setInputFiles(FILE);
+      await expect(page.locator("[data-goodserr]")).toContainText("Впишите бренд");
+      await expect(page.locator('[data-edtab="main"][aria-current="true"]'), "the refusal did not open the tab with the empty box").toBeVisible();
+      await expect(page.locator("[data-edbrand]")).toBeFocused();
+      expect(posted, "a photo was uploaded with no product to file it under").toEqual([]);
+
+      // ---- filled in, the photo makes the product and lands on it
+      await page.locator("[data-edbrand]").fill(BRAND);
+      await page.locator("[data-edname]").fill(NAME);
+      await page.locator("[data-edcat]").selectOption("beard");
+      await edTab(page, "sizes");
+      await page.locator("[data-edprice]").fill("9,90");
+      await edTab(page, "media");
+      await page.locator('[data-galfile="new"]').setInputFiles(FILE);
+      await expect(page.locator(".adm-photo:not(.adm-photo--add)"), "the photo did not land on the created product").toHaveCount(1);
+      id = (await page.locator("[data-admsavegoods]").getAttribute("data-admsavegoods")) || "";
+      expect(id, "the editor did not move onto the created product").toMatch(/^c-e2e-photo-/);
+      await expect(page.locator('[data-edtab="media"][aria-current="true"]')).toBeVisible();
+      expect(posted).toEqual(["ok"]);
+      expect(await customRow(page, id)).toMatchObject({ active: true, price: 9.9 });
+      await clearToast(page);
+      // «Сохранить» is what puts the photo in the shop — the pane says so, and it does
+      await expect(page.locator('[data-edpane="media"]')).toContainText("нажмите «Сохранить»");
+      await page.locator(`[data-admsavegoods="${id}"]`).click();
+      expect(await toastText(page)).toMatch(/Сохранено/);
+      await clearToast(page);
+      await expect.poll(async () => (await customRow(page, id))?.gallery?.[0], { timeout: 15_000 }).toBe(PHOTO_URL);
+      await assertClean(page, w, "created through the photo");
+
+      // ---- every refusal is a sentence in the pane, never a silent stop
+      await openEditor(page, id);
+      await edTab(page, "media");
+      const refusal = page.locator("[data-uperr]");
+      mode = "storage";
+      await page.locator(`[data-galfile="${id}"]`).setInputFiles(FILE);
+      await expect(refusal).toContainText("Не удалось загрузить фото: хранилище фото не настроено");
+      mode = "offline";
+      await page.locator(`[data-galfile="${id}"]`).setInputFiles(FILE);
+      await expect(refusal).toContainText("Не удалось загрузить фото: нет связи");
+      mode = "huge";
+      await page.locator(`[data-galfile="${id}"]`).setInputFiles(FILE);
+      await expect(refusal).toContainText("Не удалось загрузить фото: файл слишком большой для сервера");
+      await expect(page.locator(".adm-photo:not(.adm-photo--add)"), "a refused upload left a tile behind").toHaveCount(1);
+      await expect(page.locator(`[data-galup="${id}"]`), "the tile stayed busy after a refusal").toBeEnabled();
+      // the three refusals were provoked: the 503 and the aborted request are
+      // the test's own, not the panel's — a thrown error would still fail here
+      expect(w.pageErrors, "uncaught page error during a refused upload").toEqual([]);
+      w.reset();
+      await assertClean(page, w, "upload refusals");
     } finally {
       if (id) await page.request.delete(`/api/admin/products/${id}/`);
     }

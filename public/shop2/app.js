@@ -1835,6 +1835,48 @@
       "Фото — после первого сохранения": "Fotod — pärast esimest salvestamist",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Täida «Põhiline», kirjuta hind ja vajuta «Salvesta toode» — toode ilmub ja siia saab lisada fotod telefonist.",
+      /* round 12 (Dim, 10.09.2026): the three steps of a new product, the
+         photo tile before the first save, the brand list, the upload's refusals */
+      "Шаги": "Sammud", "Цена": "Hind",
+      "бренд, название, раздел": "bränd, nimetus, jaotis", "и объёмы": "ja mahud", "после сохранения": "pärast salvestamist",
+      "Описание и текст для Google — необязательно, можно потом:": "Kirjeldus ja Google'i tekst — pole kohustuslik, saab hiljem:",
+      "Что нужно:": "Mida on vaja:",
+      "бренд, название, раздел — здесь; цена — на шаге «Цена».": "bränd, nimetus, jaotis — siin; hind — sammul «Hind».",
+      "Что будет:": "Mis juhtub:",
+      "после «Сохранить товар» товар сразу появится в магазине, а редактор откроет шаг «Фото».":
+        "pärast «Salvesta toode» ilmub toode kohe poodi ja redaktor avab sammu «Fotod».",
+      "Потом, по желанию:": "Hiljem, soovi korral:", "описание и текст для Google.": "kirjeldus ja Google'i tekst.",
+      "Дальше — цена →": "Edasi — hind →",
+      "Готово? Нажмите «Сохранить товар» внизу — товар появится в магазине, и откроется шаг «Фото».":
+        "Valmis? Vajuta all «Salvesta toode» — toode ilmub poodi ja avaneb samm «Fotod».",
+      "Выберите фото — товар сохранится сам, и фото встанет на него. Нужны бренд, название и цена.":
+        "Vali foto — toode salvestub ise ja foto läheb selle külge. Vaja on brändi, nimetust ja hinda.",
+      "Сохраняем товар и загружаем фото…": "Salvestame toote ja laadime foto üles…",
+      "Товар создан ✓ — загружаем фото": "Toode on loodud ✓ — laadime fotod üles",
+      "Фото загружено ✓ — нажмите «Сохранить»": "Foto on üles laaditud ✓ — vajuta «Salvesta»",
+      "Фото загружены ✓ — нажмите «Сохранить»": "Fotod on üles laaditud ✓ — vajuta «Salvesta»",
+      "Не удалось загрузить фото: хранилище фото не настроено — его нужно подключить на сервере.":
+        "Fotot ei õnnestunud üles laadida: fotohoidla pole seadistatud — see tuleb serveris ühendada.",
+      "Не удалось загрузить фото: файл больше 12 МБ — уменьшите снимок и попробуйте ещё раз.":
+        "Fotot ei õnnestunud üles laadida: fail on üle 12 MB — vähenda pilti ja proovi uuesti.",
+      "Не удалось загрузить фото: файл слишком большой для сервера — уменьшите снимок и попробуйте ещё раз.":
+        "Fotot ei õnnestunud üles laadida: fail on serveri jaoks liiga suur — vähenda pilti ja proovi uuesti.",
+      "Не удалось загрузить фото: такой файл не подходит — нужен JPEG, PNG или WebP.":
+        "Fotot ei õnnestunud üles laadida: see fail ei sobi — vaja on JPEG, PNG või WebP.",
+      "Не удалось загрузить фото: это HEIC с айфона, мы его прочитать не можем. В «Настройки → Камера → Форматы» выберите «Наиболее совместимый» — снимки станут JPEG.":
+        "Fotot ei õnnestunud üles laadida: see on iPhone’i HEIC, mida me lugeda ei oska. Vali „Seaded → Kaamera → Vormingud“ alt „Kõige ühilduvam“ — pildid salvestuvad JPEG-ina.",
+      "Не удалось загрузить фото: файл не читается — попробуйте другой.": "Fotot ei õnnestunud üles laadida: faili ei saa lugeda — proovi teist.",
+      "Не удалось загрузить фото: файл пустой — попробуйте ещё раз.": "Fotot ei õnnestunud üles laadida: fail on tühi — proovi uuesti.",
+      "Не удалось загрузить фото: слишком много загрузок за час — подождите немного.":
+        "Fotot ei õnnestunud üles laadida: liiga palju üleslaadimisi tunnis — oota veidi.",
+      "Не удалось загрузить фото: вы вышли из админки — войдите снова.": "Fotot ei õnnestunud üles laadida: oled administ välja logitud — logi uuesti sisse.",
+      "Не удалось загрузить фото: обработка фото на сервере недоступна — напишите Диму.":
+        "Fotot ei õnnestunud üles laadida: fototöötlus serveris pole saadaval — kirjuta Dimile.",
+      "Не удалось загрузить фото: нет связи — проверьте интернет и попробуйте ещё раз.":
+        "Fotot ei õnnestunud üles laadida: ühendust pole — kontrolli internetti ja proovi uuesti.",
+      "Не удалось загрузить фото — попробуйте ещё раз.": "Fotot ei õnnestunud üles laadida — proovi uuesti.",
+      "Не удалось загрузить видео: нет связи — проверьте интернет и попробуйте ещё раз.":
+        "Videot ei õnnestunud üles laadida: ühendust pole — kontrolli internetti ja proovi uuesti.",
       "Убираем фон…": "Eemaldame tausta…",
       "Убрать фон": "Eemalda taust",
       "✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.":
@@ -4088,6 +4130,48 @@
       "Фото — после первого сохранения": "Photos — after the first save",
       "Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.":
         "Fill in «Basics», type the price and press «Save the product» — the product appears, and photos from the phone can be added here.",
+      /* round 12 (Dim, 10.09.2026): the three steps of a new product, the
+         photo tile before the first save, the brand list, the upload's refusals */
+      "Шаги": "Steps", "Цена": "Price",
+      "бренд, название, раздел": "brand, name, section", "и объёмы": "and sizes", "после сохранения": "after saving",
+      "Описание и текст для Google — необязательно, можно потом:": "The description and the Google text — optional, they can wait:",
+      "Что нужно:": "What is needed:",
+      "бренд, название, раздел — здесь; цена — на шаге «Цена».": "the brand, the name and the section — here; the price — on the «Price» step.",
+      "Что будет:": "What happens:",
+      "после «Сохранить товар» товар сразу появится в магазине, а редактор откроет шаг «Фото».":
+        "after «Save the product» the product appears in the shop at once, and the editor opens the «Photos» step.",
+      "Потом, по желанию:": "Later, if you like:", "описание и текст для Google.": "the description and the Google text.",
+      "Дальше — цена →": "Next — the price →",
+      "Готово? Нажмите «Сохранить товар» внизу — товар появится в магазине, и откроется шаг «Фото».":
+        "Done? Press «Save the product» below — the product appears in the shop and the «Photos» step opens.",
+      "Выберите фото — товар сохранится сам, и фото встанет на него. Нужны бренд, название и цена.":
+        "Pick a photo — the product saves itself and the photo goes onto it. The brand, the name and a price are needed.",
+      "Сохраняем товар и загружаем фото…": "Saving the product and uploading the photo…",
+      "Товар создан ✓ — загружаем фото": "Product created ✓ — uploading the photos",
+      "Фото загружено ✓ — нажмите «Сохранить»": "Photo uploaded ✓ — press «Save»",
+      "Фото загружены ✓ — нажмите «Сохранить»": "Photos uploaded ✓ — press «Save»",
+      "Не удалось загрузить фото: хранилище фото не настроено — его нужно подключить на сервере.":
+        "Could not upload the photo: the photo storage is not set up — it has to be connected on the server.",
+      "Не удалось загрузить фото: файл больше 12 МБ — уменьшите снимок и попробуйте ещё раз.":
+        "Could not upload the photo: the file is over 12 MB — make it smaller and try again.",
+      "Не удалось загрузить фото: файл слишком большой для сервера — уменьшите снимок и попробуйте ещё раз.":
+        "Could not upload the photo: the file is too big for the server — make it smaller and try again.",
+      "Не удалось загрузить фото: такой файл не подходит — нужен JPEG, PNG или WebP.":
+        "Could not upload the photo: that file will not do — JPEG, PNG or WebP, please.",
+      "Не удалось загрузить фото: это HEIC с айфона, мы его прочитать не можем. В «Настройки → Камера → Форматы» выберите «Наиболее совместимый» — снимки станут JPEG.":
+        "Could not upload the photo: it is an iPhone HEIC, which we cannot read. Under Settings → Camera → Formats choose “Most Compatible” and photos will be saved as JPEG.",
+      "Не удалось загрузить фото: файл не читается — попробуйте другой.": "Could not upload the photo: the file cannot be read — try another one.",
+      "Не удалось загрузить фото: файл пустой — попробуйте ещё раз.": "Could not upload the photo: the file is empty — try again.",
+      "Не удалось загрузить фото: слишком много загрузок за час — подождите немного.":
+        "Could not upload the photo: too many uploads this hour — wait a little.",
+      "Не удалось загрузить фото: вы вышли из админки — войдите снова.": "Could not upload the photo: you are signed out of the admin — sign in again.",
+      "Не удалось загрузить фото: обработка фото на сервере недоступна — напишите Диму.":
+        "Could not upload the photo: photo processing on the server is unavailable — write to Dim.",
+      "Не удалось загрузить фото: нет связи — проверьте интернет и попробуйте ещё раз.":
+        "Could not upload the photo: no connection — check the internet and try again.",
+      "Не удалось загрузить фото — попробуйте ещё раз.": "Could not upload the photo — try again.",
+      "Не удалось загрузить видео: нет связи — проверьте интернет и попробуйте ещё раз.":
+        "Could not upload the video: no connection — check the internet and try again.",
       "Убираем фон…": "Removing the background…",
       "Убрать фон": "Remove the background",
       "✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.":
@@ -5085,7 +5169,9 @@
       { ET: "Ettevõtete arved: meeldetuletus $1 p enne tähtaega", EN: "Company invoices: a reminder $1 d before the due date" }],
     [/^Счета для компаний: автоотмена через (\d+) дн\. после срока$/,
       { ET: "Ettevõtete arved: automaatne tühistamine $1 p pärast tähtaega", EN: "Company invoices: automatic cancellation $1 d after the due date" }],
-    [/^Например: (.+)-0001$/, { ET: "Näiteks: $1-0001", EN: "For example: $1-0001" }]
+    [/^Например: (.+)-0001$/, { ET: "Näiteks: $1-0001", EN: "For example: $1-0001" }],
+    // product creation: the last row of the brand list (edBrandPaint) when nothing matches what was typed
+    [/^Новый бренд «(.+)»$/, { ET: "Uus bränd «$1»", EN: "New brand «$1»" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -18900,7 +18986,7 @@
      Without the bucket configured the server says so once, the button greys
      out with a plain sentence, and every other part of the panel is unchanged.
      The prototype with no backend behind it lands in the same place. */
-  var MEDIA = { on: null, busy: false, cutout: false };
+  var MEDIA = { on: null, busy: false, cutout: false, maxBytes: 12 * 1024 * 1024 };
   function mediaProbe() {
     if (MEDIA.on !== null || MEDIA.busy) return;
     MEDIA.busy = true;
@@ -18909,44 +18995,92 @@
         MEDIA.on = r.status === 200 && r.body.ok === true && r.body.configured === true;
         // «Убрать фон» is offered only when the server says it can do it
         MEDIA.cutout = MEDIA.on && r.body.cutout === true;
+        // the ceiling the route enforces (src/lib/images.ts MAX_UPLOAD_BYTES),
+        // checked here first so a file over it is refused before it travels
+        if (MEDIA.on && r.body.maxBytes > 0) MEDIA.maxBytes = Number(r.body.maxBytes);
       })
       .catch(function () { MEDIA.on = false; MEDIA.cutout = false; })
       .then(function () { MEDIA.busy = false; render(); });
   }
+  /* Every refusal is one sentence: what did not happen, why, what to do.
+     Dim (10.09.2026) watched a desktop upload on staging die with nothing
+     better than «попробуйте ещё раз» — see uploadPhoto() for what it was.
+     The two codes the route never sends come from the browser: `network` is
+     a fetch that got no answer at all, `payload_too_large` a 413 with no
+     JSON behind it — the platform's own body cap, 4.5 MB on a Vercel
+     function (docs/HOSTING.md § 4), refused before any code of ours runs. */
   var MEDIA_ERR = {
-    storage_not_configured: "Загрузка фото пока не настроена — нужно подключить хранилище.",
-    too_large: "Файл больше 12 МБ — уменьшите фотографию и попробуйте ещё раз.",
-    bad_type: "Такой файл не подходит: нужен JPEG, PNG или WebP.",
-    heic_unsupported: "Формат HEIC с айфона мы прочитать не можем. В «Настройки → Камера → Форматы» выберите «Наиболее совместимый» — снимки станут JPEG.",
-    bad_image: "Не получилось прочитать фотографию — попробуйте другой файл.",
-    empty_file: "Файл пустой — попробуйте ещё раз.",
-    rate_limited: "Слишком много загрузок за час — подождите немного.",
-    unauthorized: "Вы вышли из админки — войдите снова.",
-    not_configured: "Загрузка фото пока не настроена — нужно подключить хранилище.",
-    image_tools_unavailable: "Обработка фото на сервере недоступна."
+    storage_not_configured: "Не удалось загрузить фото: хранилище фото не настроено — его нужно подключить на сервере.",
+    not_configured: "Не удалось загрузить фото: хранилище фото не настроено — его нужно подключить на сервере.",
+    too_large: "Не удалось загрузить фото: файл больше 12 МБ — уменьшите снимок и попробуйте ещё раз.",
+    payload_too_large: "Не удалось загрузить фото: файл слишком большой для сервера — уменьшите снимок и попробуйте ещё раз.",
+    bad_type: "Не удалось загрузить фото: такой файл не подходит — нужен JPEG, PNG или WebP.",
+    heic_unsupported: "Не удалось загрузить фото: это HEIC с айфона, мы его прочитать не можем. В «Настройки → Камера → Форматы» выберите «Наиболее совместимый» — снимки станут JPEG.",
+    bad_image: "Не удалось загрузить фото: файл не читается — попробуйте другой.",
+    empty_file: "Не удалось загрузить фото: файл пустой — попробуйте ещё раз.",
+    rate_limited: "Не удалось загрузить фото: слишком много загрузок за час — подождите немного.",
+    unauthorized: "Не удалось загрузить фото: вы вышли из админки — войдите снова.",
+    image_tools_unavailable: "Не удалось загрузить фото: обработка фото на сервере недоступна — напишите Диму.",
+    network: "Не удалось загрузить фото: нет связи — проверьте интернет и попробуйте ещё раз."
   };
   function mediaErrText(e) {
-    return MEDIA_ERR[String((e && e.message) || e || "")] || "Не получилось загрузить — попробуйте ещё раз";
+    return MEDIA_ERR[String((e && e.message) || e || "")] || "Не удалось загрузить фото — попробуйте ещё раз.";
+  }
+  /* A phone's own photo is 3–8 MB, and the server keeps 1600 px of it
+     anyway (src/lib/images.ts MAX_EDGE) — so a big one is redrawn at 2000 px
+     in the browser before it travels: a tenth of the bytes over mobile data,
+     and under the 4.5 MB a Vercel function will take in one request at all
+     (docs/HOSTING.md § 4). That cap is where a desktop upload on staging
+     died (Dim, 10.09.2026): the panel promised 12 MB, the platform answered
+     413 with no JSON in it, and the toast said only «попробуйте ещё раз».
+     The browser's own decoder turns the picture upright by its EXIF
+     (imageOrientation), so the server has nothing left to rotate. A file it
+     cannot decode (HEIC) goes up as it is, and the server says what it is. */
+  var SHRINK_OVER = 3 * 1024 * 1024, SHRINK_EDGE = 2000;
+  function shrinkPhoto(file) {
+    if (!file || file.size <= SHRINK_OVER || typeof createImageBitmap !== "function" ||
+        !/^image\/(jpeg|png|webp)$/i.test(file.type || "")) return Promise.resolve(file);
+    return createImageBitmap(file, { imageOrientation: "from-image" }).then(function (bmp) {
+      var k = Math.min(1, SHRINK_EDGE / Math.max(bmp.width, bmp.height, 1));
+      var c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(bmp.width * k)); c.height = Math.max(1, Math.round(bmp.height * k));
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      if (bmp.close) bmp.close();
+      var png = /png$/i.test(file.type);   // a cut-out keeps its transparency
+      return new Promise(function (resolve) {
+        c.toBlob(function (b) {
+          if (!b || b.size >= file.size) { resolve(file); return; }
+          try {
+            resolve(new File([b], String(file.name || "photo").replace(/\.[^.]*$/, "") + (png ? ".png" : ".jpg"), { type: b.type }));
+          } catch (e) { resolve(file); }
+        }, png ? "image/png" : "image/jpeg", 0.86);
+      });
+    }).catch(function () { return file; });
   }
   /* One file, one request. multipart/form-data, so no base64 and no size
      surprises; the browser sets its own boundary, which is why no content-type
      header is set here. */
   function uploadPhoto(file, kind, id) {
-    var fd = new FormData();
-    fd.append("file", file);
-    fd.append("kind", kind);
-    if (kind === "product") fd.append("productId", id || "");
-    if (kind === "review") fd.append("reviewId", id || "");
-    return fetch("/api/admin/upload/", { method: "POST", body: fd }).then(function (res) {
-      return res.json().catch(function () { return {}; }).then(function (j) {
-        if (!res.ok || j.ok !== true) throw new Error(j.error || "upload_failed");
-        return j;
-      });
+    return shrinkPhoto(file).then(function (blob) {
+      // over the route's own ceiling even after the redraw — refused here, before it travels
+      if (MEDIA.maxBytes && blob.size > MEDIA.maxBytes) throw new Error("too_large");
+      var fd = new FormData();
+      fd.append("file", blob);
+      fd.append("kind", kind);
+      if (kind === "product") fd.append("productId", id || "");
+      if (kind === "review") fd.append("reviewId", id || "");
+      return fetch("/api/admin/upload/", { method: "POST", body: fd }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (j) {
+          // a 413 with no JSON in it is the platform's, not the route's (MEDIA_ERR)
+          if (!res.ok || j.ok !== true) throw new Error(j.error || (res.status === 413 ? "payload_too_large" : "upload_failed"));
+          return j;
+        });
+      }, function () { throw new Error("network"); });
     });
   }
   /* Only one editor is open at a time, so one progress state serves both the
      goods editor and the banner. */
-  var UP = { busy: 0, total: 0, err: "" };
+  var UP = { busy: 0, total: 0, err: "", creating: false };   // creating: a new product being made for the photos just picked
   function upBusyText() {
     return UP.total > 1 ? "Загружаем… " + (UP.total - UP.busy + 1) + " из " + UP.total : "Загружаем…";
   }
@@ -19144,6 +19278,7 @@
     fetch("/api/admin/upload/?key=" + encodeURIComponent(key), { method: "DELETE" }).catch(noop);
   }
   function galUpload(files, p) {
+    if (p && p.isNew) { galNewUpload(files); return; }   // product creation: no id to file it under yet
     var queue = [];
     for (var i = 0; i < files.length; i++) queue.push(files[i]);
     if (!queue.length) return;
@@ -19154,18 +19289,51 @@
     }
     GAL.reset = false;
     UP.err = ""; UP.total = queue.length; UP.busy = queue.length; render();
+    var okN = 0;
     var step = function () {
       var f = queue.shift();
-      if (!f) { UP.busy = 0; UP.total = 0; render(); return; }
+      if (!f) {
+        UP.busy = 0; UP.total = 0; render();
+        // the tile is on screen, the shop has not seen it yet — say what makes it so
+        if (okN) toast(okN > 1 ? "Фото загружены ✓ — нажмите «Сохранить»" : "Фото загружено ✓ — нажмите «Сохранить»");
+        return;
+      }
       uploadPhoto(f, "product", p.id).then(function (r) {
         GAL.list.push({ url: r.url, thumb: r.thumbUrl || r.url, alt: "" });
         if (r.key) GAL.fresh[r.url] = r.key;
+        okN++;
         UP.busy = queue.length;
         render();
         step();
       }).catch(upFail);
     };
     step();
+  }
+  /* product creation: a photo picked before the first «Сохранить товар».
+     An upload is filed under the product's id and there is none yet, so the
+     row is made FIRST — the same POST the save bar makes, with the same
+     refusals (customRowFromForm names the empty box and goodsFail opens its
+     tab) — and the photos go up the moment the id is back (customCreate's
+     `files`). The tab used to be a dead end that said «после первого
+     сохранения» and offered nothing to press (Dim, 10.09.2026). */
+  function galNewUpload(files) {
+    var picked = [];
+    for (var i = 0; i < files.length; i++) picked.push(files[i]);
+    if (!picked.length || S.goodsBusy) return;
+    if (picked.length > MAX_PHOTOS) {
+      UP.err = "Больше " + MAX_PHOTOS + " фотографий на товар не нужно";
+      toast(UP.err); render(); return;
+    }
+    var row = customRowFromForm(admEditProduct("new"));
+    if (!row) return;   // the reason is in the save bar, and the box that needs filling has the caret
+    goodsErrClear();
+    UP.err = ""; UP.total = picked.length; UP.busy = picked.length; UP.creating = true; render();
+    customCreate(row, "photo", picked);
+  }
+  /** The «Сохраняем товар и загружаем фото…» tile is a button again when the row was refused. */
+  function upCreateReset() {
+    if (!UP.creating) return;
+    UP.creating = false; UP.busy = 0; UP.total = 0; render();
   }
   function heroUpload(files) {
     if (!files || !files.length) return;
@@ -19211,7 +19379,8 @@
     too_large: "Файл больше 60 МБ — снимите ролик короче или сожмите его.",
     bad_video_type: "Такой файл не подходит: нужен MP4 или MOV.",
     storage_not_configured: "Загрузка видео пока не настроена — нужно подключить хранилище.",
-    not_configured: "Загрузка видео пока не настроена — нужно подключить хранилище."
+    not_configured: "Загрузка видео пока не настроена — нужно подключить хранилище.",
+    network: "Не удалось загрузить видео: нет связи — проверьте интернет и попробуйте ещё раз."
   };
   function vidFail(e) {
     UP.busy = 0; UP.total = 0;
@@ -19228,7 +19397,7 @@
         if (!res.ok || j.ok !== true) throw new Error(j.error || "upload_failed");
         return j;
       });
-    });
+    }, function () { throw new Error("network"); });
   }
   function videoUpload(files, p) {
     if (!files || !files.length || !p) return;
@@ -19290,7 +19459,15 @@
     S.goodsErr = msg;
     var slot = document.querySelector("[data-goodserr]");
     if (slot) { slot.textContent = msg; slot.hidden = false; translateTree(slot); }
-    if (focusSel) refocus(focusSel);
+    if (focusSel) {
+      /* The box that needs fixing may sit on another tab: «Цена — число…»
+         used to be answered from «Основное» with the price box out of sight
+         (Dim, 10.09.2026). Its pane opens first, then the caret goes in. */
+      var fEl = document.querySelector(focusSel);
+      var fPane = fEl && fEl.closest ? fEl.closest("[data-edpane]") : null;
+      if (fPane && fPane.hidden) edShowTab(fPane.getAttribute("data-edpane"));
+      refocus(focusSel);
+    }
   }
   function goodsErrClear() {
     S.goodsErr = "";
@@ -19429,10 +19606,162 @@
     }
     return rows;
   }
-  /** Every brand the shop sells — the file's and the owner's — for the datalist. */
-  function edBrandOptions() {
-    return brands().map(function (b) { return '<option value="' + esc(b.name) + '">'; }).join("");
+  /* ---- Бренд: the in-page list under the box (Dim, 10.09.2026) ----------
+     <datalist> put the choice in the OS's hands: Chrome drew its own popup
+     — dark, taller than the window — beside the field. This is the panel's
+     own list: the shop's brands (brands() — the file's and the owner's, the
+     ones with most products first), at most eight rows, the typed part
+     marked in each name, and «Новый бренд «…»» as the one row when nothing
+     matches. The <input> keeps its data-edbrand hook and its value — goodsKeep
+     and customRowFromForm read it exactly as before; the list only writes
+     into it. ARIA combobox over a listbox; ↑ ↓ Enter Escape; a press outside
+     closes it; 44-px rows for a thumb. */
+  var EDB = { open: false, ix: -1, rows: [], hush: false };
+  /* The template draws the list open whenever it IS open — the box has the
+     focus and nobody closed it — so a render() landing in the background (the
+     media probe's answer, a badge count) morphs it in place instead of
+     shutting it under the owner's finger. */
+  function edBrandBoxHTML(value) {
+    var live = document.activeElement;
+    var open = EDB.open && !!(live && live.matches && live.matches("[data-edbrand]"));
+    var rows = open ? edBrandRows(value) : [];
+    if (open) { EDB.rows = rows; EDB.ix = -1; }
+    var shown = open && rows.length > 0;
+    return '<div class="adm-combo" data-edbrandbox>' +
+      '<input class="adm-input" id="edbrand" data-edbrand value="' + esc(value) + '" maxlength="60" placeholder="Например, Proraso"' +
+        ' autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="' + shown + '" aria-controls="edbrandlist">' +
+      '<div class="adm-combo__list" id="edbrandlist" role="listbox" aria-label="Бренды"' + (shown ? "" : " hidden") + ">" +
+        (shown ? edBrandRowsHTML(rows, value) : "") + "</div>" +
+      "</div>";
   }
+  function edBrandRowsHTML(rows, q) {
+    return rows.map(function (r, i) {
+      return '<button type="button" class="adm-combo__opt' + (r.fresh ? " adm-combo__opt--new" : "") + '" role="option" id="edbrandopt-' + i +
+        '" aria-selected="false" data-edbrandpick="' + esc(r.name) + '">' +
+        (r.fresh ? '<span class="adm-combo__plus" aria-hidden="true">+</span>' : "") +
+        '<span class="adm-combo__nm">' + (r.fresh ? esc("Новый бренд «" + r.name + "»") : edBrandMark(r.name, q)) + "</span>" +
+        (r.fresh ? "" : '<span class="adm-combo__n">' + r.n + " " + plural(r.n) + "</span>") +
+        "</button>";
+    }).join("");
+  }
+  function edBrandRows(q) {
+    var s = String(q || "").trim().toLowerCase();
+    var all = brands(), out = [], exact = false;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].name.toLowerCase() === s) exact = true;
+      if (out.length < 8 && (!s || all[i].name.toLowerCase().indexOf(s) >= 0)) out.push({ name: all[i].name, n: all[i].n });
+    }
+    if (s && !out.length && !exact) out.push({ name: String(q).trim(), n: 0, fresh: true });
+    return out;
+  }
+  function edBrandMark(name, q) {
+    var s = String(q || "").trim();
+    var at = s ? name.toLowerCase().indexOf(s.toLowerCase()) : -1;
+    if (at < 0) return esc(name);
+    return esc(name.slice(0, at)) + "<mark>" + esc(name.slice(at, at + s.length)) + "</mark>" + esc(name.slice(at + s.length));
+  }
+  function edBrandEls() {
+    var input = document.querySelector("[data-edbrand]"), list = document.getElementById("edbrandlist");
+    return input && list ? { input: input, list: list } : null;
+  }
+  /** The rows for what is in the box, and the list shown. */
+  function edBrandPaint() {
+    var e = edBrandEls();
+    if (!e) return;
+    var q = e.input.value;
+    EDB.open = true; EDB.rows = edBrandRows(q); EDB.ix = -1;
+    e.list.innerHTML = edBrandRowsHTML(EDB.rows, q);
+    translateTree(e.list);
+    e.list.hidden = !EDB.rows.length;
+    e.input.setAttribute("aria-expanded", String(!e.list.hidden));
+    e.input.removeAttribute("aria-activedescendant");
+  }
+  function edBrandClose() {
+    EDB.open = false;
+    var e = edBrandEls();
+    if (!e) return;
+    e.list.hidden = true; e.list.innerHTML = "";
+    e.input.setAttribute("aria-expanded", "false");
+    e.input.removeAttribute("aria-activedescendant");
+    EDB.ix = -1; EDB.rows = [];
+  }
+  function edBrandIsOpen() { var e = edBrandEls(); return !!(e && !e.list.hidden); }
+  function edBrandMove(dir) {
+    var e = edBrandEls();
+    if (!e || e.list.hidden || !EDB.rows.length) return;
+    var n = EDB.rows.length;
+    EDB.ix = EDB.ix < 0 ? (dir > 0 ? 0 : n - 1) : (EDB.ix + dir + n) % n;
+    var opts = e.list.querySelectorAll("[role=option]");
+    for (var i = 0; i < opts.length; i++) opts[i].setAttribute("aria-selected", String(i === EDB.ix));
+    var cur = opts[EDB.ix];
+    if (cur) {
+      e.input.setAttribute("aria-activedescendant", cur.id);
+      if (cur.scrollIntoView) cur.scrollIntoView({ block: "nearest" });
+    }
+  }
+  function edBrandPick(name) {
+    var e = edBrandEls();
+    if (!e) return;
+    e.input.value = String(name || "").slice(0, 60);
+    edBrandClose();
+    EDB.hush = true;   // the focus goes back to the box without the list opening again
+    e.input.focus();
+    EDB.hush = false;
+    edStepsPaint();
+  }
+  document.addEventListener("focusin", function (e) {
+    if (e.target && e.target.matches && e.target.matches("[data-edbrand]") && !EDB.hush) edBrandPaint();
+  });
+  document.addEventListener("focusout", function (e) {
+    if (!e.target || !e.target.matches || !e.target.matches("[data-edbrand],[data-edbrandpick]")) return;
+    var box = e.target.closest("[data-edbrandbox]");
+    if (box && e.relatedTarget && box.contains(e.relatedTarget)) return;   // into the list, or back to the box
+    edBrandClose();
+  });
+  /* mousedown, not click: the press keeps the caret in the box (so the list
+     is not closed by a blur before the click can land — Safari and Firefox
+     never focus a button), and a tap sends the same event once it is over */
+  document.addEventListener("mousedown", function (e) {
+    if (!e.target || !e.target.closest) return;
+    var opt = e.target.closest("[data-edbrandpick]");
+    if (opt) { e.preventDefault(); edBrandPick(opt.getAttribute("data-edbrandpick")); return; }
+    // a press in the box itself opens the list again — it may have been closed with the caret left in place
+    if (e.target.matches && e.target.matches("[data-edbrand]")) { if (!edBrandIsOpen()) edBrandPaint(); return; }
+    if (edBrandIsOpen() && !e.target.closest("[data-edbrandbox]")) edBrandClose();
+  });
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t || !t.matches) return;
+    if (t.matches("[data-edbrand]")) edBrandPaint();
+    if (t.matches("[data-edbrand],[data-edname],[data-edpx]")) edStepsPaint();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!e.target || !e.target.matches || !e.target.matches("[data-edbrand]")) return;
+    var open = edBrandIsOpen();
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!open) edBrandPaint();
+      edBrandMove(e.key === "ArrowDown" ? 1 : -1);
+    } else if (e.key === "Enter") {
+      if (!open) return;
+      e.preventDefault();
+      if (EDB.ix >= 0 && EDB.rows[EDB.ix]) edBrandPick(EDB.rows[EDB.ix].name); else edBrandClose();
+    } else if (e.key === "Escape") {
+      if (!open) return;
+      e.preventDefault(); e.stopPropagation();   // the panel's own Escape (the «Ещё» sheet, the card) stays out of it
+      edBrandClose();
+    } else if (e.key === "Tab") { edBrandClose(); }
+  }, true);
+  /* product creation: «Дальше — цена →» at the foot of «Основное». Its own
+     hook, not a second data-edtab: the specs address a step by that
+     attribute, and two elements answering to it would make the address
+     ambiguous. The price box gets the caret — that is what was asked for. */
+  document.addEventListener("click", function (e) {
+    var go = e.target && e.target.closest && e.target.closest("[data-edgo]");
+    if (!go) return;
+    edShowTab(go.getAttribute("data-edgo"));
+    refocus("[data-edprice]");
+  });
   function edSubcatField(cat, cur) {
     var subs = SUBCATS[cat] || [];
     return '<label class="adm-field">Подраздел<select class="adm-input" data-edsubcat' + (subs.length ? "" : " disabled") + ">" +
@@ -19449,9 +19778,8 @@
         '<div class="adm-edcol">' +
           // the label text and its asterisk are one flex item of the column, so
           // the asterisk stays on the label's line instead of taking a row
-          '<label class="adm-field"><span>Бренд <span class="adm-req" aria-hidden="true">*</span></span>' +
-            '<input class="adm-input" data-edbrand list="edbrands" value="' + esc(p.brand) + '" maxlength="60" placeholder="Например, Proraso" autocomplete="off"></label>' +
-          '<datalist id="edbrands">' + edBrandOptions() + "</datalist>" +
+          '<div class="adm-field"><label for="edbrand"><span>Бренд <span class="adm-req" aria-hidden="true">*</span></span></label>' +
+            edBrandBoxHTML(p.brand) + "</div>" +
           '<label class="adm-field"><span>Название <span class="adm-req" aria-hidden="true">*</span></span>' +
             '<input class="adm-input" data-edname value="' + esc(p.name) + '" maxlength="120" placeholder="Beard Balm — бальзам для бороды"></label>' +
           /* «✨»: the house pattern «Latin line name — русский хвост», with a
@@ -19466,11 +19794,16 @@
             '<span data-edsubslot>' + edSubcatField(p.cat, curSub) + "</span>" +
           "</div>" +
           '<p class="adm-hint">Бренд можно выбрать из списка или вписать новый. Название — как его увидит покупатель: линейка и что это, например «Beard Balm — бальзам для бороды».</p>' +
+          // product creation: the way on is a button, not a hunt through the tabs
+          (p.isNew ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-edgo="sizes">Дальше — цена →</button></div>' : "") +
         "</div>" +
         '<div class="adm-edcol">' +
           (p.isNew
-            ? '<p class="adm-hint">Товар появится в магазине сразу после сохранения. Фото добавите на вкладке «Фото и видео» — она откроется сама.</p>' +
-              '<p class="adm-hint">Цена — на вкладке «Размеры и цены»: одна на товар или своя для каждого объёма.</p>'
+            /* what is required, what «Сохранить товар» does, where the photo
+               goes — the three things a first-time owner asked the screen */
+            ? '<p class="adm-hint"><b>Что нужно:</b> бренд, название, раздел — здесь; цена — на шаге «Цена».</p>' +
+              '<p class="adm-hint"><b>Что будет:</b> после «Сохранить товар» товар сразу появится в магазине, а редактор откроет шаг «Фото».</p>' +
+              '<p class="adm-hint"><b>Потом, по желанию:</b> описание и текст для Google.</p>'
             : '<label class="adm-field">Наличие<select class="adm-input" data-edstock>' +
                 [["in", "В наличии"], ["low", "Мало"], ["out", "Нет в наличии"]].map(function (o) {
                   return '<option value="' + o[0] + '"' + (p.stock === o[0] ? " selected" : "") + ">" + o[1] + "</option>";
@@ -19609,7 +19942,8 @@
       '<p class="adm-hint">' + (multi
         ? "У каждого объёма своя цена. Первый объём покупатель видит первым."
         : "Одна цена на весь товар. Если объёмов несколько — нажмите «+ Размер» и впишите цену для каждого.") + "</p>" +
-      (p.isNew ? "" : '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
+      (p.isNew ? '<p class="adm-hint">Готово? Нажмите «Сохранить товар» внизу — товар появится в магазине, и откроется шаг «Фото».</p>'
+        : '<p class="adm-hint">Остаток красный, когда он не больше порога «мало» — по умолчанию 2; порог у каждого объёма свой, меняется в «Складе» кнопкой «Править». «не учтено» — этот объём ещё ни разу не считали; впишите число, и он появится на «Складе».</p>' + edEanHint()) +
       "</div>";
   }
   /* «+ Размер» and «×» for a CATALOGUE product (migration 147). The volumes
@@ -19672,10 +20006,18 @@
     /* product creation: no id yet, so nothing to file a photo under — the
        tab says what to do instead of showing a button that cannot work */
     if (p.isNew) {
+      /* …so the tile is there from the start and picking a photo saves the
+         product first (galNewUpload) — the pane says so in one line */
       return '<div class="adm-edpane" data-edpane="media"' + (edTab() === "media" ? "" : " hidden") + ">" +
         '<div class="adm-sec"><span class="adm-sec__t">Фото</span></div>' +
-        '<div class="adm-empty" data-galwait><div class="adm-empty__t">Фото — после первого сохранения</div>' +
-          '<p class="adm-empty__s">Заполните «Основное», впишите цену и нажмите «Сохранить товар» — товар появится, и здесь можно будет добавить фото с телефона.</p></div>' +
+        '<div class="adm-photos" data-galdrop="new">' +
+          '<button class="adm-photo adm-photo--add" data-galup="new"' + (UP.busy || MEDIA.on === false ? " disabled" : "") + '><span class="adm-photo__plus">+</span>' +
+            (UP.busy && UP.creating ? "Сохраняем товар и загружаем фото…" : "Фото с телефона") + "</button>" +
+          '<input class="adm-photo__file" type="file" accept="image/*" multiple data-galfile="new" aria-label="Загрузить фото">' +
+        "</div>" +
+        '<p class="adm-hint" data-galwait>Выберите фото — товар сохранится сам, и фото встанет на него. Нужны бренд, название и цена.</p>' +
+        (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
+        (UP.err ? '<p class="adm-hint adm-hint--warn" role="alert" data-uperr>' + esc(UP.err) + "</p>" : "") +
         "</div>";
     }
     var list = galDraft(p), n = list.length;
@@ -19687,14 +20029,14 @@
         '<span class="adm-photo__img" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
         (tag ? '<span class="adm-photo__tag' + (i === 0 && GAL.cutting !== i ? " adm-photo__tag--ink" : "") + '">' + esc(tag) + "</span>" : "") +
         '<span class="adm-photo__ops">' +
-          '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее">←</button>' +
-          '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее">→</button>' +
-          (i === 0 ? "" : '<button class="adm-photo__op" data-galmain="' + i + '" aria-label="Сделать главным">★</button>') +
+          '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее" title="Левее">←</button>' +
+          '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее" title="Правее">→</button>' +
+          (i === 0 ? "" : '<button class="adm-photo__op" data-galmain="' + i + '" aria-label="Сделать главным" title="Сделать главным">★</button>') +
           /* «Убрать фон» — only when the server said it can (MEDIA.cutout,
              src/lib/photo-cutout.ts); the original photo stays, the cut-out
              takes its place in this list until «Сохранить» */
           (MEDIA.cutout ? '<button class="adm-photo__op" data-galcut="' + i + '"' + (GAL.cutting != null ? " disabled" : "") + ' aria-label="Убрать фон" title="Убрать фон">✂</button>' : "") +
-          '<button class="adm-photo__op" data-galdel="' + i + '" aria-label="Убрать фото">×</button>' +
+          '<button class="adm-photo__op" data-galdel="' + i + '" aria-label="Убрать фото" title="Убрать фото">×</button>' +
         "</span></div>";
     }).join("");
     return '<div class="adm-edpane" data-edpane="media"' + (edTab() === "media" ? "" : " hidden") + ">" +
@@ -19705,10 +20047,11 @@
           (UP.busy ? esc(upBusyText()) : "Фото с телефона") + "</button>" +
         '<input class="adm-photo__file" type="file" accept="image/*" multiple data-galfile="' + esc(p.id) + '" aria-label="Загрузить фото">' +
       "</div>" +
+      // a refusal stands right under the tiles, where the eye is — not below the hints
+      (UP.err ? '<p class="adm-hint adm-hint--warn" role="alert" data-uperr>' + esc(UP.err) + "</p>" : "") +
       '<p class="adm-hint">Первое фото — главное: его видно в каталоге, в поиске и в письмах. ← → меняют порядок, ★ делает фото главным. Фото показываются как есть, на белом фоне.</p>' +
       (MEDIA.cutout ? '<p class="adm-hint">✂ убирает фон с фотографии — оригинал остаётся, а если не получится, фото просто не изменится.</p>' : "") +
       (MEDIA.on === false ? '<p class="adm-hint adm-hint--warn">Загрузка фото пока не настроена — нужно подключить хранилище.</p>' : "") +
-      (UP.err ? '<p class="adm-hint adm-hint--warn">' + esc(UP.err) + "</p>" : "") +
       (DEMO.gallery && DEMO.gallery[p.id] && !GAL.reset && !p.custom
         ? '<div class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-galreset="' + esc(p.id) + '">Вернуть фото из каталога</button></div>'
         : "") +
@@ -19947,12 +20290,12 @@
   /** POST — a new row. `from` says who asked: the form or the assistant;
       either way the editor opens on the product, on «Фото и видео», and a
       journal line is left whose undo is «снять с продажи». */
-  function customCreate(patch, from) {
+  function customCreate(patch, from, files) {
     if (S.goodsBusy) return;
     S.goodsBusy = true;
     apiSend("/api/admin/products/", "POST", patch).then(function (r) {
       S.goodsBusy = false;
-      if (!(r.status === 201 && r.body.ok && r.body.product)) { customErrToast(r); return; }
+      if (!(r.status === 201 && r.body.ok && r.body.product)) { upCreateReset(); customErrToast(r); return; }
       var product = r.body.product;
       customAdopt(product);
       S.goodsFresh = S.goodsFresh || {}; S.goodsFresh[product.id] = true;
@@ -19964,9 +20307,13 @@
       pendingAction = null;
       mediaProbe();
       window.scrollTo({ top: 0 });
-      toast(from === "assistant" ? "Товар создан ✓ — добавьте фото" : "Товар создан ✓ — теперь добавьте фото", entry);
+      toast(from === "assistant" ? "Товар создан ✓ — добавьте фото"
+        : from === "photo" ? "Товар создан ✓ — загружаем фото" : "Товар создан ✓ — теперь добавьте фото", entry);
       render();
-    }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
+      // product creation: the photos picked before there was an id go up now, onto the row that just got one
+      UP.creating = false;
+      if (files && files.length) galUpload(files, admEditProduct(product.id));
+    }).catch(function () { S.goodsBusy = false; upCreateReset(); toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
   /** PUT — the row's own fields; the override-owned ones (stock, salon price,
       video, counts, barcodes) went through demoApply() before this. */
@@ -20042,6 +20389,36 @@
       render();
     }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
+  /* product creation: the three steps a new product is made in — the main
+     boxes, the price, the photos — as the strip an order card wears (Dim,
+     10.09.2026: five equal tabs, two of them off a phone's screen, said
+     nothing about what is required or in what order). Each cell opens its
+     pane through data-edtab, exactly like a tab, so the specs' path and the
+     owner's are the same; «Описание» and «Google» wait under the strip as
+     two words, because they are optional and not steps. */
+  var ED_STEPS = [["main", "Основное", "бренд, название, раздел"], ["sizes", "Цена", "и объёмы"], ["media", "Фото", "после сохранения"]];
+  function edStepsHTML(t) {
+    return '<div class="adm-steps adm-steps--3 adm-steps--ed" role="group" aria-label="Шаги">' +
+      ED_STEPS.map(function (s, i) {
+        return '<button type="button" class="adm-step adm-step--btn" data-edtab="' + s[0] + '" data-edstep="' + s[0] +
+          '" aria-current="' + (t === s[0]) + '"><span class="adm-step__n">' + (i + 1) + "</span>" +
+          '<span class="adm-step__l">' + s[1] + '</span><span class="adm-step__s">' + s[2] + "</span></button>";
+      }).join("") + "</div>" +
+      '<p class="adm-hint adm-edopt">Описание и текст для Google — необязательно, можно потом: ' +
+        '<button type="button" class="adm-link adm-link--muted" data-edtab="desc">Описание</button> · ' +
+        '<button type="button" class="adm-link adm-link--muted" data-edtab="seo">Google</button></p>';
+  }
+  /** The steps already done go ink — read off the form, like everything else in this editor. */
+  function edStepsPaint() {
+    var steps = document.querySelectorAll("[data-edstep]");
+    if (!steps.length) return;
+    var g = function (sel) { var el = document.querySelector(sel); return el ? el.value.trim() : ""; };
+    var done = { main: !!(g("[data-edbrand]") && g("[data-edname]")), sizes: goodsPrice(g("[data-edprice]")) !== null };
+    for (var i = 0; i < steps.length; i++) {
+      var k = steps[i].getAttribute("data-edstep");
+      steps[i].classList.toggle("adm-step--done", !!done[k] && steps[i].getAttribute("aria-current") !== "true");
+    }
+  }
   function goodsEditor(p) {
     loadAdminPricing(false);   // wholesale/loyalty: for the salon column below
     var t = edTab();
@@ -20053,10 +20430,11 @@
           : esc(p.brand) + " · <span>" + esc(CAT_NAMES[p.cat] || p.cat) + "</span>" + (p.custom ? " · <span>ваш товар</span>" : "")) + "</div>" +
         '<h1 class="adm-h1 adm-h1--flat">' + (isNew ? "Что добавляем?" : esc(p.name)) + "</h1></div>" +
         (isNew || p.active === false ? "" : '<button class="adm-link" data-go-product="' + esc(p.id) + '">Открыть в магазине ↗</button>') + "</div>" +
-      '<div class="adm-tabs" role="group" aria-label="Что показываем">' +
-        ED_TABS.map(function (x) {
-          return '<button class="adm-tab" data-edtab="' + x[0] + '" aria-current="' + (t === x[0]) + '" title="' + x[1] + '">' + x[1] + "</button>";
-        }).join("") + "</div>" +
+      (isNew ? edStepsHTML(t)
+        : '<div class="adm-tabs" role="group" aria-label="Что показываем">' +
+          ED_TABS.map(function (x) {
+            return '<button class="adm-tab" data-edtab="' + x[0] + '" aria-current="' + (t === x[0]) + '" title="' + x[1] + '">' + x[1] + "</button>";
+          }).join("") + "</div>") +
       edPaneMain(p) + edPaneSizes(p) + edPaneMedia(p) + edPaneDesc(p) + edPaneSeo(p) +
       // goodsFail() fills this in place, so the message appears without a
       // render() taking the caret out of whatever field is being fixed — and
@@ -20088,6 +20466,7 @@
     for (var j = 0; j < tabs.length; j++) {
       tabs[j].setAttribute("aria-current", String(tabs[j].getAttribute("data-edtab") === key));
     }
+    edStepsPaint();   // product creation: the strip's done/now state follows the form
   }
   /* ---------- inventory: «Склад» — numeric stock, EAN, the moves ledger ---
      Real quantities live in stock_levels/stock_moves (src/lib/inventory.ts,
@@ -23865,7 +24244,7 @@
       list.push(att);
       uploadPhoto(f, "product", "inbox").then(function (r) {
         att.busy = false; att.key = r.key || ""; att.url = r.url || ""; att.thumb = r.thumbUrl || r.url || "";
-        if (!att.key) att.err = "Не получилось загрузить — попробуйте ещё раз";
+        if (!att.key) att.err = mediaErrText("upload_failed");
         render();
       }).catch(function (e) {
         att.busy = false; att.err = mediaErrText(e);

@@ -485,4 +485,127 @@ test.describe("admin — the product editor", () => {
     await expect(page.locator('body[data-screen="admin"]'), "Back left the admin").toBeAttached();
     await assertClean(page, w, "phone editor: the scanner into the box");
   });
+
+  /**
+   * Round 12 (Dim, 10.09.2026). The brand box of «+ Товар» was an <input
+   * list> over a <datalist>, and Chrome drew the OS's own popup for it —
+   * dark, taller than the window. It is the panel's own list now: the shop's
+   * brands with the most products first, at most eight rows, filtered as you
+   * type with the typed part marked, ↑ ↓ Enter Escape, a press outside
+   * closes it, and «Новый бренд «…»» is the one row when nothing matches.
+   * Nothing is written — the editor is cancelled at the end.
+   */
+  test("«+ Товар»: the brand box is the panel's own list — filtered, keyboard-driven, a new brand when nothing matches", async ({ page }) => {
+    const w = watch(page);
+    await openAdmin(page);
+    await tab(page, "goods");
+    await page.locator("[data-admgoodsnew]").click();
+    const box = page.locator("[data-edbrand]");
+    const list = page.locator("#edbrandlist");
+    const opts = list.locator('[role="option"]');
+    await expect(box).toBeVisible();
+    // no OS popup: a combobox over the panel's own listbox
+    await expect(page.locator("datalist"), "the <datalist> is still there").toHaveCount(0);
+    await expect(box).toHaveAttribute("role", "combobox");
+    await expect(list).toHaveAttribute("role", "listbox");
+
+    // opens on focus — «+ Товар» puts the caret there — and on a press in the
+    // box, with the shop's brands, every row a thumb's size; it survives the
+    // background render the media probe's answer causes
+    await expect(list, "the list did not open with the focus").toBeVisible();
+    await page.waitForTimeout(700);
+    await expect(list, "a background render closed the list").toBeVisible();
+    await box.click();
+    await expect(list).toBeVisible();
+    await expect(box).toHaveAttribute("aria-expanded", "true");
+    expect(await opts.count()).toBeGreaterThanOrEqual(2);
+    expect(await opts.count()).toBeLessThanOrEqual(8);
+    for (const h of await opts.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height))) {
+      expect(h, "a brand row is under a thumb's size").toBeGreaterThanOrEqual(43.5);
+    }
+
+    // typed → filtered, the typed part marked in each name
+    await box.fill("pror");
+    await expect(opts.first()).toContainText("Proraso");
+    await expect(opts.first().locator("mark")).toHaveText(/^pror$/i);
+    for (const name of await opts.allTextContents()) expect(name.toLowerCase()).toContain("pror");
+
+    // ↓ then Enter picks the marked row and closes the list
+    await box.press("ArrowDown");
+    await expect(box).toHaveAttribute("aria-activedescendant", "edbrandopt-0");
+    await expect(opts.first()).toHaveAttribute("aria-selected", "true");
+    await box.press("Enter");
+    await expect(box).toHaveValue("Proraso");
+    await expect(list).toBeHidden();
+    await expect(box).toHaveAttribute("aria-expanded", "false");
+
+    // nothing matches → the one row offers what was typed as a new brand
+    await box.fill("Zeta Beard Co");
+    await expect(opts).toHaveCount(1);
+    await expect(opts.first()).toContainText("Новый бренд «Zeta Beard Co»");
+    await opts.first().click();
+    await expect(box).toHaveValue("Zeta Beard Co");
+    await expect(list).toBeHidden();
+
+    // Escape closes the list and nothing else; a press outside closes it too
+    await box.press("ArrowDown");
+    await expect(list).toBeVisible();
+    await box.press("Escape");
+    await expect(list).toBeHidden();
+    await expect(page.locator("[data-admsavegoods]"), "Escape closed more than the list").toBeVisible();
+    await box.press("ArrowDown");
+    await expect(list).toBeVisible();
+    await page.locator("h1.adm-h1").click();
+    await expect(list).toBeHidden();
+    expect(await box.inputValue(), "closing the list changed the typed brand").toBe("Zeta Beard Co");
+    await assertClean(page, w, "the brand list");
+    await page.locator("[data-admclose]").first().click();
+  });
+
+  /**
+   * Round 12 (Dim, 10.09.2026): the desktop photo tile. Its buttons — 30 px,
+   * laid over the picture's bottom edge — wrapped and clipped on the 144-px
+   * tile a 760-px pane gave. They stand under the picture now, on paper, in
+   * one row, 36 px each and named; the tile itself is at least 200 px and
+   * the «главное» tag reads at 12 px. The phone's row layout is the test
+   * above; this one is the desktop's.
+   */
+  test("desktop: photo buttons stand in one row under the picture, big enough to hit, inside their own tile", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "the desktop tile — the phone has its own row layout");
+    const w = watch(page);
+    type Box = { l: number; t: number; r: number; b: number };
+    const overlaps = (a: Box, b: Box) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
+    const inside = (a: Box, b: Box) => a.l >= b.l - 0.5 && a.r <= b.r + 0.5 && a.t >= b.t - 0.5 && a.b <= b.b + 0.5;
+
+    await openAdmin(page);
+    await openEditor(page, PRODUCT_2.id);
+    await edTab(page, "media");
+    const photos = await page.evaluate(() => {
+      const box = (el: Element) => { const b = el.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
+      return Array.from(document.querySelectorAll(".adm-photo:not(.adm-photo--add)")).map((t) => {
+        const tag = t.querySelector(".adm-photo__tag");
+        return {
+          tile: box(t), img: box(t.querySelector(".adm-photo__img")!),
+          tag: tag ? { text: (tag.textContent || "").trim(), size: parseFloat(getComputedStyle(tag).fontSize) } : null,
+          ops: Array.from(t.querySelectorAll(".adm-photo__op")).map((o) => ({ name: o.getAttribute("aria-label") || "", title: o.getAttribute("title") || "", ...box(o) })),
+        };
+      });
+    });
+    expect(photos.length, "PRODUCT_2 has two catalogue photos").toBeGreaterThanOrEqual(2);
+    photos.forEach((p, i) => {
+      expect(p.tile.r - p.tile.l, `tile ${i + 1} is narrower than 160 px`).toBeGreaterThanOrEqual(160);
+      expect(p.ops.length, `tile ${i + 1} has no buttons`).toBeGreaterThanOrEqual(3);
+      for (const op of p.ops) {
+        expect(op.name && op.title, `tile ${i + 1}: a button with no name`).toBeTruthy();
+        expect(inside(op, p.tile), `tile ${i + 1}: «${op.name}» sticks out of its tile`).toBe(true);
+        expect(Math.min(op.r - op.l, op.b - op.t), `tile ${i + 1}: «${op.name}» is under 32 px`).toBeGreaterThanOrEqual(32);
+        expect(op.t, `tile ${i + 1}: «${op.name}» lies over the picture`).toBeGreaterThanOrEqual(p.img.b - 0.5);
+        for (const other of p.ops) if (other !== op) expect(overlaps(op, other), `tile ${i + 1}: «${op.name}» overlaps «${other.name}»`).toBe(false);
+      }
+      expect(new Set(p.ops.map((o) => Math.round(o.t))).size, `tile ${i + 1}: the buttons wrapped onto two lines`).toBe(1);
+    });
+    expect(photos[0].tag?.text, "the first photo does not say «главное»").toBe("главное");
+    expect(photos[0].tag!.size, "the «главное» tag is too small to read").toBeGreaterThanOrEqual(12);
+    await assertClean(page, w, "desktop photo tiles");
+  });
 });
