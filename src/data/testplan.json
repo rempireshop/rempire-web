@@ -5055,12 +5055,15 @@
       "title": "Написать и опубликовать статью",
       "steps": [
         "Открыть «Ещё» → «Блог» и нажать «+ Статья».",
-        "Написать заголовок, пару абзацев и поставить обложку.",
+        "Написать заголовок и пару абзацев, поставить обложку.",
         "Вставить в текст карточку товара кнопкой «Товар».",
+        "Нажать «Удалить» под обложкой, затем поставить её снова.",
         "Нажать «Опубликовать» и открыть блог в магазине."
       ],
       "expect": [
         "При вставке товара панель пишет, в какой язык он добавлен.",
+        "С обложкой видна сама картинка во всю ширину, под ней «Заменить обложку» и «Удалить».",
+        "Без обложки — пунктирное поле «+ Обложка» с подсказкой про форматы.",
         "Статья видна в блоге магазина вместе с обложкой.",
         "Карточка товара в тексте открывает сам товар."
       ],
@@ -5070,15 +5073,18 @@
       "en": {
         "title": "Writing and publishing an article",
         "steps": [
-          "«Ещё» → «Блог» → «+ Статья».",
-          "Write a headline and a couple of paragraphs, and set a cover image.",
-          "With the «Товар» button insert a product card into the text.",
+          "Open «Ещё» → «Блог» and press «+ Статья».",
+          "Write a title and a couple of paragraphs, set a cover.",
+          "Insert a product card into the text with the «Товар» button.",
+          "Press «Удалить» under the cover, then set it again.",
           "Press «Опубликовать» and open the blog in the shop."
         ],
         "expect": [
-          "Inserting a product says which language version it went into.",
-          "The article shows in the shop's blog with its cover.",
-          "The product card in the text opens the product."
+          "When a product is inserted the panel says which language it went into.",
+          "With a cover the picture shows full width; under it «Заменить обложку» and «Удалить».",
+          "Without a cover — the dashed «+ Обложка» zone with the file-type hint.",
+          "The post is visible in the shop's blog with its cover.",
+          "The product card in the text opens the product itself."
         ],
         "why": "An article that did not publish brings nobody from Google."
       }
@@ -5136,8 +5142,8 @@
       ],
       "expect": [
         "Каждая кнопка оставляет в списке только своих людей.",
-        "В карточке видно, сколько человек купил и на какую сумму.",
-        "Там же его заказы и место для заметки."
+        "В карточке видно, сколько человек купил и на какую сумму — с учётом гостевых заказов.",
+        "На открытой карточке вкладок «Все клиенты / Отзывы» нет — только «← Все клиенты»."
       ],
       "why": "Это единственная база покупателей, которая у магазина есть.",
       "risk": "med",
@@ -5151,10 +5157,51 @@
         ],
         "expect": [
           "Each button leaves only its own people in the list.",
-          "The card shows how much they bought and for how much.",
-          "Their orders and a place for a note are there."
+          "The card shows how much the person bought and for how much — guest orders included.",
+          "An open card has no «Все клиенты / Отзывы» tabs — only «← Все клиенты»."
         ],
         "why": "This is the only list of buyers the shop has."
+      }
+    },
+    {
+      "id": "people-customer-card",
+      "area": "people",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Карточка клиента: заказы, факты, отзывы",
+      "steps": [
+        "Открыть «Клиенты» и карточку покупателя с заказами и отзывом.",
+        "Прочитать факты под плитками и раздел «Заказы».",
+        "Нажать на заказ, затем «← К клиенту».",
+        "В разделе «Отзывы клиента» нажать «Опубликовать» и открыть товар в магазине."
+      ],
+      "expect": [
+        "Под плитками — первый и последний заказ, средний чек и любимые бренды.",
+        "В «Заказах» номер и дата, сумма и тот же чип состояния, что в списке заказов.",
+        "Заказ открывается поверх клиента; «← К клиенту» и «Назад» возвращают к этому клиенту.",
+        "Отзыв клиента — со звёздами, товаром и текстом; «Опубликовать» работает прямо здесь.",
+        "Опубликованный отзыв виден на странице товара."
+      ],
+      "why": "Раньше карточка обещала два заказа и не показывала ни одного.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "Customer card: orders, facts, reviews",
+        "steps": [
+          "Open «Клиенты» and the card of a buyer with orders and a review.",
+          "Read the facts under the tiles and the «Заказы» section.",
+          "Tap an order, then «← К клиенту».",
+          "In «Отзывы клиента» press «Опубликовать» and open the product in the shop."
+        ],
+        "expect": [
+          "Under the tiles: first and last order, the average order and favourite brands.",
+          "«Заказы» shows number and date, the total and the same status chip as the orders list.",
+          "The order opens over the customer; «← К клиенту» and Back return to that customer.",
+          "The customer's review shows stars, product and text; «Опубликовать» works right there.",
+          "The published review is visible on the product page."
+        ],
+        "why": "The card used to promise two orders and show none."
       }
     },
     {
@@ -5502,14 +5549,15 @@
         "Вписать тему про уход за волосами и нажать «Написать статью целиком».",
         "Дождаться готового текста и пролистать его.",
         "Нажать на карточку товара внутри текста.",
-        "Пролистать вниз до списка «Товары в статье»."
+        "Удалить одну карточку крестиком."
       ],
       "expect": [
-        "В тексте стоят карточки товаров — не больше трёх.",
-        "У карточки есть фотография, название и цена.",
-        "Карточка открывает страницу этого товара.",
-        "Эти же товары стоят в «Товары в статье».",
-        "Если по теме ничего не подошло, карточек нет."
+        "Внизу мелькает «Добавлены товары: …», та же строка остаётся под кнопкой.",
+        "В тексте две–четыре карточки, каждая после подходящего абзаца; одна — ближе к концу.",
+        "Карточек нет в заголовках и списках, две подряд не стоят.",
+        "У карточки фотография, название и цена; она открывает страницу товара.",
+        "Все товары в наличии и показаны в магазине.",
+        "Удалённая карточка исчезает, панель пишет про несохранённые изменения."
       ],
       "why": "Раньше каждую карточку приходилось искать и вставлять руками кнопкой «Товар».",
       "risk": "med",
@@ -5518,17 +5566,18 @@
         "title": "The assistant places products in the article itself",
         "steps": [
           "«Блог» → «+ Статья».",
-          "Type a subject about hair care and press «Написать статью целиком».",
-          "Wait for the finished text and scroll through it.",
+          "Type a hair-care topic and press «Написать статью целиком».",
+          "Wait for the text and scroll through it.",
           "Tap a product card inside the text.",
-          "Scroll down to the «Товары в статье» list."
+          "Delete one card with its cross."
         ],
         "expect": [
-          "Product cards stand in the text — three at most.",
-          "A card has a photo, a name and a price.",
-          "The card opens that product's page.",
-          "The same products are listed in «Товары в статье».",
-          "If nothing fitted the subject, there are no cards."
+          "A toast «Добавлены товары: …» flashes; the same line stays under the button.",
+          "The text holds two to four cards, each after a fitting paragraph; one near the end.",
+          "No card sits inside a heading or a list, never two in a row.",
+          "A card has a photo, the name and the price; it opens the product page.",
+          "Every product is in stock and shown in the shop.",
+          "A deleted card disappears; the panel notes unsaved changes."
         ],
         "why": "Every card used to be hunted down and inserted by hand with the «Товар» button."
       }
@@ -5601,6 +5650,45 @@
           "The buttons under the answer open the right section."
         ],
         "why": "It is the fastest way to see what needs doing today."
+      }
+    },
+    {
+      "id": "ai-assistant-voice",
+      "area": "ai",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Спросить помощника голосом",
+      "steps": [
+        "Открыть помощника в панели и нажать кнопку микрофона у поля вопроса.",
+        "Разрешить микрофон, если телефон спросит.",
+        "Сказать «какие заказы ждут отправки» и замолчать.",
+        "Прочитать поле и нажать «Отправить»."
+      ],
+      "expect": [
+        "Пока вы говорите, слова появляются в поле сами.",
+        "После паузы кнопка выключается, текст остаётся в поле — сам не отправляется.",
+        "Если микрофон запрещён, внизу короткая подсказка «Нет доступа к микрофону».",
+        "Ответ помощника такой же, как на напечатанный вопрос."
+      ],
+      "why": "На телефоне у кассы говорить быстрее, чем печатать.",
+      "risk": "low",
+      "writes": false,
+      "en": {
+        "title": "Asking the assistant by voice",
+        "steps": [
+          "Open the assistant in the panel and press the microphone next to the question box.",
+          "Allow the microphone if the phone asks.",
+          "Say «какие заказы ждут отправки» and stop talking.",
+          "Read the box and press «Отправить»."
+        ],
+        "expect": [
+          "While you speak the words appear in the box by themselves.",
+          "After a pause the button switches off; the text stays — nothing is sent by itself.",
+          "With the microphone refused, a short note «Нет доступа к микрофону» shows at the bottom.",
+          "The assistant answers the same as to a typed question."
+        ],
+        "why": "At the till on a phone, speaking is faster than typing."
       }
     },
     {
@@ -5763,17 +5851,19 @@
       "lang": "RU",
       "title": "Чат для покупателей на компьютере",
       "steps": [
-        "Открыть магазин на компьютере в широком окне.",
+        "Открыть магазин на компьютере в широком окне и подождать полминуты на каталоге.",
         "Найти кружок чата справа внизу и спросить «что посоветуете от перхоти».",
+        "В шапке чата нажать «Развернуть», потом «Свернуть».",
         "Перейти в оформление заказа.",
         "Сузить окно браузера до ширины телефона."
       ],
       "expect": [
+        "Через полминуты у кружка появляется «Подобрать уход? Спросите ассистента» с крестиком.",
+        "Крестик убирает подсказку, и она больше не возвращается неделю.",
         "Чат отвечает по-русски и предлагает товары из каталога.",
-        "На оформлении заказа кружка чата нет.",
-        "В узком окне он пропадает.",
-        "При расширении окна он возвращается.",
-        "На телефоне его нет вообще."
+        "«Развернуть» делает окно широким, «Свернуть» возвращает узкое.",
+        "На оформлении заказа кружка чата нет; в узком окне он пропадает.",
+        "На телефоне его нет вовсе."
       ],
       "why": "Кружок чата поверх кнопки «Оплатить» — это несостоявшаяся покупка.",
       "risk": "med",
@@ -5781,17 +5871,19 @@
       "en": {
         "title": "The customer chat on a computer",
         "steps": [
-          "Open the shop on a computer in a wide window.",
-          "Find the chat circle bottom right and ask «что посоветуете от перхоти».",
-          "Go on to the checkout.",
-          "Narrow the browser window to the width of a phone."
+          "Open the shop on a computer in a wide window and wait half a minute on the catalogue.",
+          "Find the chat circle at the bottom right and ask «что посоветуете от перхоти».",
+          "In the chat header press «Развернуть», then «Свернуть».",
+          "Go to the checkout.",
+          "Narrow the browser window to a phone's width."
         ],
         "expect": [
-          "The chat answers in Russian and suggests real products.",
-          "At the checkout the chat circle is gone.",
-          "In a narrow window it disappears.",
-          "Widen the window and it comes back.",
-          "On a phone it is never there."
+          "After half a minute the circle gets «Подобрать уход? Спросите ассистента» with a cross.",
+          "The cross removes the hint and it stays away for a week.",
+          "The chat answers in Russian and suggests products from the catalogue.",
+          "«Развернуть» makes the window wide, «Свернуть» brings the narrow one back.",
+          "At the checkout there is no chat circle; in a narrow window it disappears.",
+          "On a phone it is not there at all."
         ],
         "why": "A chat circle over the «Оплатить» button is a lost sale."
       }
