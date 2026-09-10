@@ -1291,10 +1291,11 @@
       "steps": [
         "«Ещё» → «Настройки» → «Цены и баллы».",
         "Включить первый переключатель, «Партнёры и баллы».",
-        "Нажать «Сохранить».",
+        "Нажать «Сохранить» в полосе внизу и подтвердить.",
         "Открыть в магазине кабинет покупателя."
       ],
       "expect": [
+        "Полоса внизу пишет «Изменения не сохранены: Цены и баллы».",
         "В кабинете покупателя появились баллы.",
         "Там же появилась кнопка «Стать партнёром».",
         "На кассе появилось «Использовать баллы».",
@@ -1308,10 +1309,11 @@
         "steps": [
           "«Ещё» → «Настройки» → «Цены и баллы».",
           "Switch on the first switch, «Партнёры и баллы» (partners and points).",
-          "Press «Сохранить» (save).",
+          "Press «Сохранить» in the bar at the bottom and confirm.",
           "Open the customer account in the shop."
         ],
         "expect": [
+          "The bar says «Изменения не сохранены: Цены и баллы».",
           "The customer account now shows points.",
           "A «Стать партнёром» button has appeared there.",
           "«Использовать баллы» has appeared at the checkout.",
@@ -1491,12 +1493,14 @@
         "На той же странице выписать текущие цены Эстонии.",
         "Оставить «Разрешить снижать текущие цены» выключенным.",
         "Нажать «Заполнить по тарифам Montonio».",
-        "Посмотреть, что изменилось, и нажать «Отмена» вместо сохранения."
+        "Посмотреть, что изменилось, и нажать «Отменить правки» в полосе внизу."
       ],
       "expect": [
         "Кнопка проставляет цены по всем странам.",
         "Уже стоящие цены она не опускает.",
-        "Под каждой ценой подсказка с ценой перевозчика."
+        "Под каждой ценой подсказка с ценой перевозчика.",
+        "Полоса внизу пишет «Изменения не сохранены: Тарифы доставки».",
+        "«Отменить правки» возвращает старые цены, ничего не сохранив."
       ],
       "why": "Одно нажатие может опустить доставку ниже себестоимости сразу везде.",
       "risk": "high",
@@ -1507,12 +1511,14 @@
           "On the same page write down Estonia's current prices.",
           "Leave «Разрешить снижать текущие цены» (allow lowering current prices) switched off.",
           "Press «Заполнить по тарифам Montonio» (fill in from Montonio's rates).",
-          "Look at what changed and press «Отмена» (cancel) instead of saving."
+          "Look at what changed and press «Отменить правки» in the bar at the bottom."
         ],
         "expect": [
           "The button fills in prices for every country.",
           "It lowers no price that is already set.",
-          "Under each price is the carrier's own rate."
+          "Under each price is the carrier's own rate.",
+          "The bar says «Изменения не сохранены: Тарифы доставки».",
+          "«Отменить правки» brings the old prices back, saving nothing."
         ],
         "why": "One press can drop delivery below cost in every country at once."
       }
@@ -1565,13 +1571,14 @@
         "«Ещё» → «Настройки» → «О компании».",
         "Проверить название, регистрационный номер, номер KMKR, адрес, почту и телефон.",
         "Заполнить IBAN и название банка, если они пустые.",
-        "Сохранить."
+        "Нажать «Сохранить» в полосе внизу и подтвердить."
       ],
       "expect": [
         "Название, адрес и номера заполнены.",
         "IBAN и название банка заполнены.",
         "Пока IBAN пуст, панель пишет об этом красной строкой.",
-        "Пока он пуст, счета компаниям не уходят."
+        "Пока он пуст, счета компаниям не уходят.",
+        "Полоса внизу называла карточку «Данные магазина», после сохранения — «Сохранено ✓»."
       ],
       "why": "Счёт без номера счёта не оплатят, а с чужими реквизитами деньги уйдут мимо.",
       "risk": "high",
@@ -1582,13 +1589,14 @@
           "«Ещё» → «Настройки» → «О компании».",
           "Check the name, the registration number, the KMKR (VAT) number, the address, the e-mail and the phone.",
           "Fill in the IBAN and the bank name if they are empty.",
-          "Save."
+          "Press «Сохранить» in the bar at the bottom and confirm."
         ],
         "expect": [
           "The name, address and numbers are filled in.",
           "The IBAN and the bank name are filled in.",
           "While the IBAN is empty a red line says so.",
-          "While it is empty no invoice goes out to companies."
+          "While it is empty no invoice goes out to companies.",
+          "The bar named the card «Данные магазина», and reads «Сохранено ✓» after saving."
         ],
         "why": "An invoice with no account number goes unpaid; wrong details send the money elsewhere."
       }
@@ -1603,13 +1611,15 @@
       "steps": [
         "На той же странице найти блок «Счета для компаний».",
         "Проверить приставку номера, срок оплаты и два поля с днями.",
-        "Сохранить."
+        "Поменять срок оплаты и нажать Enter в поле."
       ],
       "expect": [
         "Срок оплаты — 7 дней.",
         "«Напомнить за, дней до срока» — 2.",
         "«Отменить через, дней после срока» — 7.",
-        "Ноль в этих полях значит «не делать этого»."
+        "Ноль в этих полях значит «не делать этого».",
+        "Enter в поле сохраняет через полосу внизу: «Счета для компаний: сохранено ✓».",
+        "На кнопке полосы «Сохранено ✓», пока вы не начнёте печатать."
       ],
       "why": "Слишком короткий срок отменит заказ фирмы, которая платит раз в неделю.",
       "risk": "med",
@@ -1619,15 +1629,58 @@
         "steps": [
           "On the same page find the «Счета для компаний» (invoices for companies) block.",
           "Check the number prefix, the payment term and the two fields counted in days.",
-          "Save."
+          "Change the payment term and press Enter in the box."
         ],
         "expect": [
           "The payment term is 7 days.",
           "«Напомнить за, дней до срока» is 2.",
           "«Отменить через, дней после срока» is 7.",
-          "A zero in either field means «do not do this»."
+          "A zero in either field means «do not do this».",
+          "Enter in the box saves through the bar: «Счета для компаний: сохранено ✓».",
+          "The bar's button reads «Сохранено ✓» until you type again."
         ],
         "why": "Too short a term cancels the order of a company that pays weekly."
+      }
+    },
+    {
+      "id": "panel-note-saved",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Заметка к заказу: видно, что сохранено",
+      "steps": [
+        "В «Заказах» открыть заказ и вписать заметку.",
+        "Нажать «Сохранить заметку».",
+        "Закрыть карточку и открыть снова.",
+        "Открыть карточку клиента и так же поменять заметку о клиенте."
+      ],
+      "expect": [
+        "Пока текст не тронут, кнопка серая и выключена.",
+        "При правке рядом написано «Не сохранено».",
+        "После сохранения на кнопке «Сохранено ✓».",
+        "Заметка на месте после повторного открытия.",
+        "У заметки о клиенте те же три состояния; Enter сохраняет."
+      ],
+      "why": "Раньше кнопка всегда была одинаковой, и было не понять, сохранилось ли.",
+      "risk": "low",
+      "writes": true,
+      "en": {
+        "title": "Order note: you can see it is saved",
+        "steps": [
+          "In «Заказы» open an order and type a note.",
+          "Press «Сохранить заметку».",
+          "Close the card and open it again.",
+          "Open a customer card and change the customer note the same way."
+        ],
+        "expect": [
+          "Until you type, the button is grey and off.",
+          "While editing, «Не сохранено» stands beside it.",
+          "After saving the button reads «Сохранено ✓».",
+          "The note is still there when the card is reopened.",
+          "The customer note has the same three states; Enter saves."
+        ],
+        "why": "The button used to look the same always, so you could not tell whether it saved."
       }
     },
     {
@@ -6084,14 +6137,16 @@
       "title": "Большая картинка на главной",
       "steps": [
         "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-        "Поправить текст первого слайда и выбрать, куда ведёт кнопка.",
-        "Добавить слайд про подарочную карту и выбрать ему картинку карты.",
-        "Сохранить, подтвердить и открыть главную страницу магазина."
+        "Поправить текст первого слайда и выбрать другую картинку из плиток.",
+        "Добавить слайд про подарочную карту; добавлять слайды, пока кнопка не погаснет.",
+        "Нажать «Сохранить» в полосе внизу, подтвердить и открыть главную магазина."
       ],
       "expect": [
-        "Картинки наверху сменяют друг друга сами.",
-        "Текст на них тот, который вы вписали.",
-        "Кнопка ведёт туда, куда вы выбрали.",
+        "При выборе картинки страница остаётся на месте.",
+        "Полоса внизу пишет «Изменения не сохранены: Главный баннер».",
+        "При пяти слайдах «Добавить слайд» серая, рядом причина про максимум.",
+        "После сохранения на кнопке «Сохранено ✓».",
+        "На главной картинки сменяются сами; текст и картинки те, что вы выбрали.",
         "На слайде про карту стоит картинка карты, а не шампунь."
       ],
       "why": "Кнопка, ведущая не туда, тратит самый видный экран магазина.",
@@ -6101,14 +6156,16 @@
         "title": "The big picture at the top",
         "steps": [
           "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
-          "Edit the first slide's text and choose where its button leads.",
-          "Add a gift-card slide and pick the card picture for it.",
-          "Save, confirm, then open the shop's home page."
+          "Edit the first slide's text and pick another picture from the tiles.",
+          "Add a gift-card slide; keep adding slides until the button goes grey.",
+          "Press «Сохранить» in the bar at the bottom, confirm, open the shop's home page."
         ],
         "expect": [
-          "The pictures at the top change by themselves.",
-          "The text on them is what you typed.",
-          "The button leads where you chose.",
+          "Picking a picture leaves the page where it was.",
+          "The bar at the bottom says «Изменения не сохранены: Главный баннер».",
+          "At five slides «Добавить слайд» is grey, with the reason beside it.",
+          "After saving the button reads «Сохранено ✓».",
+          "On the home page the pictures change by themselves; text and pictures are yours.",
           "The gift-card slide shows the card, not a shampoo bottle."
         ],
         "why": "A button leading to the wrong place wastes the shop's best screen."
@@ -6124,11 +6181,11 @@
       "steps": [
         "«Настройки» → «О компании»: вписать часы работы по дням и соцсети.",
         "«Настройки» → «Главная страница»: вписать текст верхней полоски.",
-        "Сохранить и открыть магазин."
+        "На каждой странице нажать «Сохранить» в полосе внизу, подтвердить и открыть магазин."
       ],
       "expect": [
-        "Часы работы видны на странице «Контакты».",
-        "Они же видны внизу каждой страницы магазина.",
+        "Пока вы печатаете, полоса внизу называет карточку: «Данные магазина» или «Верхняя полоска».",
+        "Часы работы видны на «Контактах» и внизу каждой страницы.",
         "Узкая полоска с вашим текстом стоит над магазином.",
         "Она есть и на эстонском, и на английском."
       ],
@@ -6140,11 +6197,11 @@
         "steps": [
           "«Настройки» → «О компании»: fill in the opening hours and social links.",
           "«Настройки» → «Главная страница»: type the text for the top strip.",
-          "Save and open the shop."
+          "On each page press «Сохранить» in the bar at the bottom, confirm and open the shop."
         ],
         "expect": [
-          "The opening hours show on the «Контакты» page.",
-          "They also show at the foot of every page.",
+          "While you type, the bar names the card: «Данные магазина» or «Верхняя полоска».",
+          "The opening hours show on «Контакты» and at the foot of every page.",
           "The thin strip with your text sits above the shop.",
           "It is there in Estonian and in English too."
         ],
