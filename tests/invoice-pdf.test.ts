@@ -5,11 +5,29 @@
  * number, the due date or a Cyrillic heading fails here — the legal minimum
  * of VAT Act §37 is asserted field by field.
  */
-import { PDFDocument } from "pdf-lib";
-import { describe, expect, it } from "vitest";
+import fontkit from "@pdf-lib/fontkit";
+import { PDFDocument, type PDFFont } from "pdf-lib";
+import { beforeAll, describe, expect, it } from "vitest";
+import { giftPdfFonts } from "@/lib/giftcard-pdf";
 import { A4_HEIGHT, A4_WIDTH, amount, invoicePdfFilename, renderInvoicePdf, type InvoicePdfData } from "@/lib/invoice-pdf";
 import { invoiceLines, type InvoiceSeller, type OrderCompany } from "@/lib/invoices";
-import { pdfBaselines, pdfText } from "./pdf-text";
+import { pdfBaselines, pdfRuns, pdfText, type PdfRun } from "./pdf-text";
+
+/* The three faces embedded once more, so a run read back off the page can be
+   measured with the metrics it was set in — the only way to know whether the
+   run after it on the same baseline starts before it ends. */
+let faces: { display: PDFFont; body: PDFFont; mono: PDFFont };
+beforeAll(async () => {
+  const doc = await PDFDocument.create();
+  doc.registerFontkit(fontkit);
+  const f = giftPdfFonts();
+  faces = { display: await doc.embedFont(f.display), body: await doc.embedFont(f.body), mono: await doc.embedFont(f.mono) };
+});
+
+function widthOf(run: PdfRun): number {
+  const face = /oswald/i.test(run.font) ? faces.display : /mono/i.test(run.font) ? faces.mono : faces.body;
+  return face.widthOfTextAtSize(run.text, run.size);
+}
 
 const SELLER: InvoiceSeller = {
   name: "Rempire Store OÜ",
@@ -148,6 +166,72 @@ describe("invoice PDF — the page", () => {
         expect(x).toBeLessThanOrEqual(A4_WIDTH - 40);
       }
     }
+  });
+
+  it("starts every payment-box value after its label ends, in all three languages", async () => {
+    // a Russian order's labels are trilingual — «Selgitus / Reference / Пояснение
+    // платежа» — and the value column pinned at +128 pt put «Rempire Store OÜ»
+    // on top of «Saaja / Beneficiary / Получатель» (Dim's phone, 10.09.2026)
+    for (const lang of ["ru", "et", "en"] as const) {
+      const runs = pdfRuns(await renderInvoicePdf(data({ totals: invoiceLines(ORDER, 24, lang) }, lang)));
+      // the box's labels are the 8 pt runs at its left inset; the meta block's are right-aligned
+      const labels = runs.filter((r) => r.size === 8 && r.x === 44 + 14);
+      expect(labels.map((l) => l.text.split(" / ")[0]), lang).toEqual(["Saaja", "IBAN", "Pank", "Selgitus", "Summa", "Maksetähtaeg"]);
+      for (const label of labels) {
+        const value = runs.find((r) => r.stream === label.stream && r.y === label.y && r.x > label.x);
+        expect(value, `${lang}: «${label.text}» has no value beside it`).toBeDefined();
+        expect(value!.x, `${lang}: «${value!.text}» starts before «${label.text}» ends`).toBeGreaterThanOrEqual(label.x + widthOf(label) + 8);
+      }
+      const reference = runs.find((r) => r.text === "R-100042, A-2026-0007");
+      expect(reference, `${lang}: the reference wrapped or went missing`).toBeDefined();
+      expect(reference!.x + widthOf(reference!)).toBeLessThanOrEqual(A4_WIDTH - 44);
+    }
+  });
+
+  it("never draws two runs on one baseline over each other, in all three languages", async () => {
+    for (const lang of ["ru", "et", "en"] as const) {
+      const runs = pdfRuns(await renderInvoicePdf(data({ totals: invoiceLines(ORDER, 24, lang) }, lang)));
+      expect(runs.length).toBeGreaterThan(30);
+      const lines = new Map<string, PdfRun[]>();
+      for (const r of runs) {
+        const key = `${r.stream}:${r.y}`;
+        lines.set(key, [...(lines.get(key) ?? []), r]);
+      }
+      for (const line of lines.values()) {
+        line.sort((a, b) => a.x - b.x);
+        for (let i = 1; i < line.length; i++) {
+          const prev = line[i - 1];
+          expect(line[i].x, `${lang}: «${line[i].text}» overprints «${prev.text}» at y=${prev.y}`).toBeGreaterThanOrEqual(
+            prev.x + widthOf(prev) - 0.01,
+          );
+        }
+      }
+    }
+  });
+
+  it("prints the product's type tail in the invoice's language, the way the storefront shows it", async () => {
+    const items = [
+      { id: "s", kind: "product" as const, brand: "Rempire", title: "Чёрное мыло 666 — ручная работа", variant: null, qty: 1, price: 12, sum: 12 },
+      { id: "t", kind: "product" as const, brand: "System 4", title: "Bio Botanical Shampoo — шампунь", variant: "215 мл", qty: 1, price: 9, sum: 9 },
+      { id: "u", kind: "product" as const, brand: "Davines", title: "OI Oil", variant: null, qty: 1, price: 34, sum: 34 },
+    ];
+    const order = { ...ORDER, items, subtotal: 55, shippingPrice: 0, discount: 0, total: 55, discountCode: null };
+    const page = async (lang: InvoicePdfData["lang"]) =>
+      pdfText(await renderInvoicePdf(data({ totals: invoiceLines(order, 24, lang) }, lang))).join("\n");
+    const en = await page("en");
+    expect(en).toContain("Rempire Чёрное мыло 666 — handmade");
+    expect(en).toContain("— shampoo");
+    expect(en).toContain("215 мл");
+    expect(en).not.toMatch(/ручная работа|шампунь/);
+    const et = await page("et");
+    expect(et).toContain("— käsitöö");
+    expect(et).toContain("— šampoon");
+    expect(et).not.toMatch(/ручная работа|шампунь/);
+    const ru = await page("ru");
+    expect(ru).toContain("— ручная работа");
+    expect(ru).toContain("— шампунь");
+    // a Latin name is not touched in any language
+    for (const text of [en, et, ru]) expect(text).toContain("Davines OI Oil");
   });
 
   it("runs a long order onto a second page and numbers the pages", async () => {

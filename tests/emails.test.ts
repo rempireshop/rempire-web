@@ -244,3 +244,34 @@ describe("real order rows", () => {
     expectNoHoles("birthday", ...Object.values(renderBirthday({}, "ru", "")));
   });
 });
+
+/* ---------- product names in the customer's language ---------------------- */
+
+describe("product names", () => {
+  const ITEMS = [
+    { brand: "Rempire", title: "Чёрное мыло 666 — ручная работа", qty: 1, price: 12, sum: 12 },
+    { brand: "System 4", title: "Bio Botanical Shampoo — шампунь", variant: "215 мл", qty: 2, price: 9, sum: 18 },
+    { brand: "Davines", title: "OI Oil", qty: 1, price: 34, sum: 34 },
+  ];
+
+  it("carry the type tail in the letter's language, as the storefront shows it", () => {
+    const en = renderOrderConfirmed({ number: "R-4", items: ITEMS }, "en");
+    expect(en.text).toContain("Rempire Чёрное мыло 666 — handmade");
+    expect(en.text).toContain("System 4 Bio Botanical Shampoo — shampoo · 215 мл");
+    expect(en.text).not.toMatch(/ручная работа|шампунь/);
+    const et = renderOrderConfirmed({ number: "R-4", items: ITEMS }, "et");
+    expect(et.text).toContain("— käsitöö");
+    expect(et.text).toContain("— šampoon · 215 мл");
+    const ru = renderOrderConfirmed({ number: "R-4", items: ITEMS }, "ru");
+    expect(ru.text).toContain("— ручная работа");
+    expect(ru.text).toContain("— шампунь · 215 мл");
+    // a Latin name is not touched in any language
+    for (const mail of [en, et, ru]) expect(mail.text).toContain("Davines OI Oil");
+  });
+
+  it("…in the back-in-stock subject and body too", () => {
+    const mail = renderBackInStock({ brand: "System 4", title: "Bio Botanical Shampoo — шампунь", price: 9 }, "en");
+    expect(mail.subject + mail.text).toContain("Bio Botanical Shampoo — shampoo");
+    expect(mail.subject + mail.text).not.toContain("шампунь");
+  });
+});

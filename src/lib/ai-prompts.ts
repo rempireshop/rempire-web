@@ -10,6 +10,7 @@
  * Nothing here calls fetch or touches OPENAI_API_KEY; the route
  * (src/app/api/admin/ai/text/route.ts) owns the actual call.
  */
+import { TRANSLATABLE_FRAGS, TRANSLATABLE_TAILS } from "@/lib/product-name";
 
 export const AI_TASKS = ["describe", "translate", "seo", "reply", "blog_outline", "post_full", "post_translate", "copy"] as const;
 export type AiTask = (typeof AI_TASKS)[number];
@@ -642,13 +643,14 @@ export interface CopyInput {
 export const BUNDLE_DESC_SNIPPET_MAX = 155;
 export const BUNDLE_DESC_CHARS = [240, 420] as const;
 
-/** The Russian type tails the storefront knows how to translate (app.js NAME_TAILS / TAIL_EXACT). */
-export const PRODUCT_NAME_TAILS = [
-  "шампунь", "кондиционер", "маска", "сыворотка", "тоник", "спрей", "футболка", "худи", "масло", "бальзам",
-  "паста", "воск", "пудра", "гель", "крем", "пенка", "лосьон", "патчи", "глазурь", "эссенция",
-  "футболка оверсайз", "парфюм", "гидрофильное масло", "ручная работа",
-] as const;
-export const PRODUCT_NAME_FRAGS = ["для волос", "для кожи головы", "для укладки", "для лица", "для бороды", "для бритья"] as const;
+/**
+ * The Russian type tails the storefront knows how to translate. Read off the
+ * tables in src/lib/product-name.ts rather than listed again here: a third
+ * copy of the same words was the one nobody remembered to extend, and the
+ * assistant would then name products with a tail the sites cannot translate.
+ */
+export const PRODUCT_NAME_TAILS: readonly string[] = TRANSLATABLE_TAILS;
+export const PRODUCT_NAME_FRAGS: readonly string[] = TRANSLATABLE_FRAGS;
 
 export function isCopyKind(v: unknown): v is CopyKind {
   return typeof v === "string" && (COPY_KINDS as readonly string[]).includes(v);

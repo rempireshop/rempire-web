@@ -344,8 +344,47 @@ export async function renderInvoicePdf(data: InvoicePdfData): Promise<Uint8Array
     page.drawLine({ start: { x: MARGIN, y: y + 6 }, end: { x: A4_WIDTH - MARGIN, y: y + 6 }, thickness: 0.4, color: RULE });
   }
 
+  /* ---- the payment box, measured before anything under the table is drawn ---- */
+  const boxX = MARGIN;
+  const payRows: Array<[string, string, PDFFont]> = [
+    [lab(W.beneficiary, L), clean(s.name, 120), faces.body],
+    ["IBAN", s.iban ? clean(s.iban, 42) : `— (${lab(W.notSet, L)})`, faces.mono],
+    [lab(W.bank, L), s.bankName ? clean(s.bankName, 60) : `— (${lab(W.notSet, L)})`, faces.body],
+    [lab(W.reference, L), `${clean(data.orderNumber, 20)}, ${number}`, faces.mono],
+    [lab(W.amount, L), euro(data.totals.total), faces.body],
+    [lab(W.due, L), humanDate(data.dueAt), faces.body],
+  ];
+  /* The labels are bilingual, and trilingual on a Russian order — «Selgitus /
+     Reference / Пояснение платежа» runs to some 165 pt at 8 pt — so the value
+     column cannot sit at a fixed offset from the box's edge: it starts one
+     gap after the widest label, the box grows to hold the widest value, and a
+     value even the full-width box cannot hold wraps onto more lines. With the
+     column pinned at +128, «Rempire Store OÜ» printed on top of «Saaja /
+     Beneficiary / Получатель» on every Russian invoice (Dim's phone,
+     10.09.2026). */
+  const inset = 14;
+  const labelSize = 8;
+  const valueSize = 9.5;
+  const labelW = Math.max(...payRows.map(([label]) => faces.body.widthOfTextAtSize(label, labelSize)));
+  const valueX = boxX + inset + labelW + 12;
+  const widestValue = Math.max(...payRows.map(([, value, font]) => font.widthOfTextAtSize(value, valueSize)));
+  // the room a value gets: the widest one, as far as the page has it. The wrap
+  // width is this very number, not read back off the box — re-derived through
+  // the box's width it came out a rounding error narrower than the IBAN that
+  // had set it, and the IBAN wrapped
+  const valueW = Math.max(330 - (valueX - boxX) - inset, Math.min(widestValue, A4_WIDTH - MARGIN - valueX - inset));
+  const boxW = valueX - boxX + valueW + inset;
+  const payLines = payRows.map(([label, value, font]) => {
+    const lines = wrapText(value, font, valueSize, valueW, 3);
+    return { label, font, lines: lines.length ? lines : [""] };
+  });
+  const boxH = 24 + payLines.reduce((h, r) => h + r.lines.length * 14, 0) + 10;
+
   /* ---- totals and the payment box: together, and never split off the last line ---- */
-  if (y < 250) {
+  // 132 pt is what sits around the box: the totals above it, the note and the
+  // footer's clearance below — a wrapped value makes the box taller, and the
+  // break has to know, or the note lands on the footer
+  if (y < 132 + boxH) {
     footer();
     page = newPage();
     y = A4_HEIGHT - MARGIN;
@@ -372,25 +411,16 @@ export async function renderInvoicePdf(data: InvoicePdfData): Promise<Uint8Array
   /* ---- how to pay ---- */
   y -= 6;
   const boxTop = y;
-  const boxX = MARGIN;
-  const boxW = 330;
-  const payRows: Array<[string, string, PDFFont]> = [
-    [lab(W.beneficiary, L), clean(s.name, 120), faces.body],
-    ["IBAN", s.iban ? clean(s.iban, 42) : `— (${lab(W.notSet, L)})`, faces.mono],
-    [lab(W.bank, L), s.bankName ? clean(s.bankName, 60) : `— (${lab(W.notSet, L)})`, faces.body],
-    [lab(W.reference, L), `${clean(data.orderNumber, 20)}, ${number}`, faces.mono],
-    [lab(W.amount, L), euro(data.totals.total), faces.body],
-    [lab(W.due, L), humanDate(data.dueAt), faces.body],
-  ];
-  const boxH = 24 + payRows.length * 14 + 10;
   page.drawRectangle({ x: boxX, y: boxTop - boxH, width: boxW, height: boxH, borderColor: INK, borderWidth: 1, color: PAPER });
   let by = boxTop - 16;
-  page.drawText(lab(W.payment, L).toUpperCase(), { x: boxX + 14, y: by, size: 7.5, font: faces.body, color: MUTED });
+  page.drawText(lab(W.payment, L).toUpperCase(), { x: boxX + inset, y: by, size: 7.5, font: faces.body, color: MUTED });
   by -= 16;
-  for (const [label, value, font] of payRows) {
-    page.drawText(label, { x: boxX + 14, y: by, size: 8, font: faces.body, color: MUTED });
-    page.drawText(value, { x: boxX + 128, y: by, size: 9.5, font, color: INK });
-    by -= 14;
+  for (const { label, font, lines } of payLines) {
+    page.drawText(label, { x: boxX + inset, y: by, size: labelSize, font: faces.body, color: MUTED });
+    for (const line of lines) {
+      if (line) page.drawText(line, { x: valueX, y: by, size: valueSize, font, color: INK });
+      by -= 14;
+    }
   }
   y = boxTop - boxH - 14;
   wrapText(W.payNote[L === "ru" ? "ru" : L], faces.body, 8.5, A4_WIDTH - 2 * MARGIN, 3).forEach((line, i) => {

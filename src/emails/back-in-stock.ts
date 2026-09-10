@@ -26,6 +26,7 @@ import {
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, ProductLike, RenderedEmail } from "./types";
+import { translateProductName } from "../lib/product-name";
 
 interface Strings {
   preheader: string;
@@ -67,14 +68,20 @@ const T: Record<Lang, Strings> = {
   },
 };
 
+/**
+ * Brand and name joined, the name's type tail in the letter's language —
+ * «— šampoon» to an Estonian, the way the product card showed it when they
+ * asked to be told. Empty when the row carries no name at all.
+ */
+function productName(product: ProductLike, lang: Lang): string {
+  return [pick(product.brand), translateProductName(pick(product.title, product.name), lang)]
+    .filter(Boolean)
+    .join(" ");
+}
+
 /** "Kevin.Murphy Fresh.Hair — сухой шампунь, 34 €" from whatever we have. */
 function productTitle(product: ProductLike, lang: Lang): string {
-  const base = pick(
-    [pick(product.brand), pick(product.title, product.name)]
-      .filter(Boolean)
-      .join(" "),
-    T[lang].fallbackName,
-  );
+  const base = pick(productName(product, lang), T[lang].fallbackName);
   const variant = pick(product.variant);
   const price = num(product.price, NaN);
   const tail = [variant, Number.isFinite(price) ? money(price) : ""]
@@ -92,12 +99,7 @@ export function renderBackInStock(
   const c = COMMON[L];
 
   const title = productTitle(product, L);
-  const subjectName = pick(
-    [pick(product.brand), pick(product.title, product.name)]
-      .filter(Boolean)
-      .join(" "),
-    t.fallbackName,
-  );
+  const subjectName = pick(productName(product, L), t.fallbackName);
   const url = absUrl(
     pick(product.url, product.slug ? `/shop2/p/${product.slug}/` : ""),
     "/shop2/",

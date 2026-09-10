@@ -18,6 +18,7 @@ import {
   type LineRow,
 } from "./layout";
 import type { Lang, OrderItem, OrderLike, OrderShipping } from "./types";
+import { translateProductName } from "../lib/product-name";
 
 /* ---------- customer --------------------------------------------------- */
 
@@ -56,10 +57,13 @@ const NOT_SPECIFIED: Record<Lang, string> = {
 /**
  * orders.ts stores brand and title in separate columns ("Kevin.Murphy" +
  * "Fresh.Hair"); the shop always shows them together, and so does every
- * letter and every Telegram ping.
+ * letter and every Telegram ping. The Russian type tail of the name goes
+ * into the letter's language the way the storefront shows it («— shampoo»,
+ * «— käsitöö»): an English customer read «Чёрное мыло 666 — ручная работа»
+ * in the order summary before (src/lib/product-name.ts).
  */
 export function itemTitle(it: OrderItem, lang: Lang = "ru"): string {
-  const raw = pick(it.title, it.name, NOT_SPECIFIED[lang]);
+  const raw = translateProductName(pick(it.title, it.name, NOT_SPECIFIED[lang]), lang);
   const brand = pick(it.brand);
   return brand && !raw.toLowerCase().startsWith(brand.toLowerCase())
     ? `${brand} ${raw}`

@@ -48,11 +48,9 @@ function cmapOf(text: string): Map<string, string> {
   return map;
 }
 
-/** All the text the pages draw, one string per `Tj`, in drawing order. */
-export function pdfText(bytes: Uint8Array): string[] {
-  const blobs = pdfStreams(bytes);
+/** BaseFont family (suffix stripped) → its ToUnicode CMap, for every embedded font. */
+function families(blobs: Map<number, string>): Map<string, Map<string, string>> {
   const all = [...blobs.values()].join("\n");
-
   const family = new Map<string, Map<string, string>>();
   const fontRe = /\/BaseFont\s*\/([A-Za-z0-9+._-]+)[\s\S]{0,400}?\/ToUnicode\s+(\d+)\s+0\s+R/g;
   let f: RegExpExecArray | null;
@@ -61,24 +59,66 @@ export function pdfText(bytes: Uint8Array): string[] {
     if (!cmapText || !cmapText.includes("beginbfchar")) continue;
     family.set(f[1].replace(/-\d+$/, ""), cmapOf(cmapText));
   }
+  return family;
+}
 
-  const content = [...blobs.values()].filter((t) => t.includes("BT") && t.includes("Tj"));
-  const runs: string[] = [];
-  for (const stream of content) {
-    let current: Map<string, string> | undefined;
-    const opRe = /\/([A-Za-z0-9+._-]+)\s+[\d.]+\s+Tf|<([0-9A-Fa-f]+)>\s*Tj/g;
+/** The family a `Tf` operand names — the resource key carries the family plus a numeric suffix. */
+function familyOf(resource: string, family: Map<string, Map<string, string>>): [string, Map<string, string> | undefined] {
+  const name = resource.replace(/-\d+$/, "");
+  const hit = family.has(name) ? name : [...family.keys()].find((k) => name.startsWith(k));
+  return [hit ?? name, hit ? family.get(hit) : undefined];
+}
+
+/** All the text the pages draw, one string per `Tj`, in drawing order. */
+export function pdfText(bytes: Uint8Array): string[] {
+  return pdfRuns(bytes).map((r) => r.text);
+}
+
+/** One `Tj`, with the font, size and baseline in force when it was drawn. */
+export interface PdfRun {
+  /** The content stream's object number — runs on different pages never share one. */
+  stream: number;
+  /** The BaseFont family, e.g. `GolosText-Regular`. */
+  font: string;
+  size: number;
+  x: number;
+  y: number;
+  text: string;
+}
+
+/**
+ * Every run with where and how it was drawn, in drawing order. pdf-lib writes
+ * `Tf`, then `1 0 0 1 x y Tm`, then `Tj` inside each BT…ET, so the last
+ * `Tf` and `Tm` seen are the ones the run was drawn with. With the font's own
+ * metrics a test can tell whether two runs on one baseline overprint.
+ */
+export function pdfRuns(bytes: Uint8Array): PdfRun[] {
+  const blobs = pdfStreams(bytes);
+  const family = families(blobs);
+  const out: PdfRun[] = [];
+  for (const [num, stream] of blobs) {
+    if (!stream.includes("BT") || !stream.includes("Tj")) continue;
+    let cmap: Map<string, string> | undefined;
+    let font = "";
+    let size = 0;
+    let x = 0;
+    let y = 0;
+    const opRe = /\/([A-Za-z0-9+._-]+)\s+([\d.]+)\s+Tf|1 0 0 1 ([-\d.]+) ([-\d.]+) Tm|<([0-9A-Fa-f]+)>\s*Tj/g;
     let op: RegExpExecArray | null;
     while ((op = opRe.exec(stream))) {
       if (op[1]) {
-        const name = op[1].replace(/-\d+$/, "");
-        current = family.get(name) ?? [...family.entries()].find(([k]) => name.startsWith(k))?.[1];
-        continue;
+        [font, cmap] = familyOf(op[1], family);
+        size = Number(op[2]);
+      } else if (op[3]) {
+        x = Number(op[3]);
+        y = Number(op[4]);
+      } else {
+        const codes = (op[5] ?? "").toUpperCase().match(/.{4}/g) ?? [];
+        out.push({ stream: num, font, size, x, y, text: codes.map((c) => cmap?.get(c) ?? "�").join("") });
       }
-      const codes = (op[2] ?? "").toUpperCase().match(/.{4}/g) ?? [];
-      runs.push(codes.map((c) => current?.get(c) ?? "�").join(""));
     }
   }
-  return runs;
+  return out;
 }
 
 /** Every `1 0 0 1 x y Tm` baseline in the content streams. */
