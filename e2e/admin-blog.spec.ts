@@ -298,6 +298,64 @@ test.describe("blog — the visual editor", () => {
     await assertClean(page, w, "Google pair test cleaned up");
   });
 
+  /* The cover block once a cover is set (Dim, 10.09.2026): the picture
+     itself, large, its caption, and the two actions under it on the paper —
+     «Заменить обложку» and a quiet «Удалить» — with no hint about file
+     types, because the picture is the explanation. Without a cover, the
+     dashed zone with «+ Обложка» and the hint. One upload behind both. The
+     suite has no bucket, so «Заменить обложку» stands disabled with the
+     storage note — a state line, not the hint. */
+  test("the cover block: a large preview with «Заменить обложку» and «Удалить» once a cover is set, the dashed «+ Обложка» zone without one", async ({ page }) => {
+    test.setTimeout(90_000);
+    const w = watch(page);
+    const marker = Date.now().toString().slice(-6);
+    await openAdmin(page);
+    const created = await page.request.post("/api/admin/blog/", {
+      data: {
+        title: { RU: `Обложка ${marker}`, ET: "", EN: "" },
+        body: { RU: "<p>Текст.</p>" },
+        coverUrl: IMAGE_URL,
+        coverAlt: { RU: "Бальзам Proraso на полке" },
+      },
+    });
+    expect(created.status()).toBe(200);
+    const post = (await created.json()).post as { id: string };
+    try {
+      await tab(page, "blog");
+      await page.locator(`[data-admblogedit="${post.id}"]`).click();
+      const cover = page.locator('.adm-cover[data-galdrop="blog"]');
+      await expect(cover).toBeVisible();
+      const img = cover.locator("img.adm-cover__img");
+      await expect(img).toHaveAttribute("src", IMAGE_URL);
+      await expect(img).toHaveAttribute("alt", "Бальзам Proraso на полке");
+      // large: the picture is the block's width and 16:9, not a thumbnail beside the buttons
+      const pic = await img.boundingBox();
+      const zone = await cover.boundingBox();
+      expect(pic!.width).toBeGreaterThan(zone!.width - 4);
+      expect(pic!.height).toBeGreaterThanOrEqual(150);
+      expect(pic!.height).toBeLessThanOrEqual(282);
+      await expect(cover.locator(".adm-cover__alt")).toHaveText("Бальзам Proraso на полке");
+      await expect(cover.locator('[data-galup="blog"]')).toHaveText("Заменить обложку");
+      await expect(cover.locator("[data-admblogcoverdel]")).toHaveText("Удалить");
+      await expect(cover.locator('[data-galfile="blog"]'), "the upload lost its picker").toHaveCount(1);
+      await expect(cover, "the file-type hint is back under the buttons").not.toContainText("JPEG/PNG/WebP");
+      await expect(page.locator('.adm-drop[data-galdrop="blog"]'), "the dashed zone is on screen with a cover set").toHaveCount(0);
+
+      // «Удалить»: the picture goes, and the dashed zone with «+ Обложка» and the hint is what stands there
+      await cover.locator("[data-admblogcoverdel]").click();
+      await expect(page.locator(".adm-cover")).toHaveCount(0);
+      const drop = page.locator('.adm-drop[data-galdrop="blog"]');
+      await expect(drop).toBeVisible();
+      await expect(drop.locator('[data-galup="blog"]')).toHaveText("+ Обложка");
+      await expect(drop.locator('[data-galfile="blog"]')).toHaveCount(1);
+      await expect(drop.locator(".adm-hint")).toBeVisible();
+      await expect(page.locator("[data-blogdirty]"), "deleting the cover was not noticed as an unsaved change").toBeVisible();
+      await assertClean(page, w, "the cover block");
+    } finally {
+      await page.request.delete(`/api/admin/blog/?id=${post.id}`);
+    }
+  });
+
   /* A post published after the last build has no static page — until now the
      /shop2/:path+ fallback handed a crawler the Russian home page. The page
      is built from the row at request time (src/lib/blog-page.ts): what the
@@ -469,16 +527,20 @@ async function stubArticle(page: Page, marker: string, opts: { failFirst?: boole
 const GHOST_ID = "proraso-beard-oil-2000ml";
 
 /**
- * The same generator, writing the product cards itself (src/lib/ai-prompts.ts):
- * the Russian body carries the editor's own «Товар» marker — bare, an id and
- * nothing else, which is all the model is ever given — for a real product and
+ * The same generator, writing the product cards itself (src/lib/ai-prompts.ts,
+ * the count and the places held by src/lib/blog-cards.ts — unit-tested, the
+ * route is stubbed here): the Russian body carries the editor's own «Товар»
+ * marker — bare, an id and nothing else, which is all the model is ever
+ * given — for two real products, each after the paragraph it belongs to, and
  * for one that does not exist.
  *
  * The translation answers with the body it was handed, numbered tokens
  * untouched, with the language written into the first paragraph. So where a
  * card lands in the Estonian article is the editor's own arithmetic
  * (blogCardsOut()/blogCardsIn() in public/shop2/app.js) and not something the
- * stub arranged.
+ * stub arranged. It takes a moment to answer, so the toast that names the
+ * products the article came with can be read before the article's own toast
+ * takes its place.
  */
 async function stubArticleWithCards(page: Page, marker: string): Promise<AiCall[]> {
   const calls: AiCall[] = [];
@@ -488,16 +550,19 @@ async function stubArticleWithCards(page: Page, marker: string): Promise<AiCall[
     if (body.task === "post_full") {
       const text = {
         ...articleFor("RU", marker),
-        products: [],   // named by the card alone — the editor picks the id up from the body
+        products: [],   // named by the cards alone — the editor picks the ids up from the body
         body:
           `<p>Первый абзац про шампунь ${marker}.</p>` +
           `<p><a data-product="${PRODUCT.id}"></a></p>` +
           `<h2>Второй раздел ${marker}</h2>` +
-          "<p>Второй абзац про масло.</p>" +
+          "<p>Второй абзац про спрей.</p>" +
+          `<p><a data-product="${PRODUCT_2.id}"></a></p>` +
+          "<p>Третий абзац, заключительный.</p>" +
           `<p><a data-product="${GHOST_ID}"></a></p>`,
       };
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, text }) });
     }
+    await new Promise((r) => setTimeout(r, 1500));
     const src = String((body.input as { body?: unknown }).body ?? "");
     await route.fulfill({
       status: 200, contentType: "application/json",
@@ -621,7 +686,7 @@ test.describe("blog — the whole article", () => {
    * way, it renders on the shop the same way, and the owner deletes it the
    * same way. And an id nobody has ever sold leaves nothing behind at all.
    */
-  test("the article places its own product cards: a real one becomes a card in three languages, an invented one leaves nothing", async ({ page, browser }) => {
+  test("the article places its own product cards: two real ones become cards in three languages and the toast names them, an invented one leaves nothing", async ({ page, browser }) => {
     test.setTimeout(180_000);
     const w = watch(page);
     const marker = Date.now().toString().slice(-6);
@@ -633,43 +698,59 @@ test.describe("blog — the whole article", () => {
     await page.locator("[data-admblognew]").click();
     await page.locator("[data-admblogtopic]").fill("уход за бородой зимой");
     await page.locator("[data-admblogfull]").click();
+    /* The products the article came with, named the moment the Russian text
+       lands — the cards are the assistant's choice, not the owner's, and a
+       card two screens down is easy to miss (Dim, 10.09.2026). The brand and
+       the name, without the Russian tail: a toast has one line. */
+    await expect(page.getByRole("status").first(), "the toast did not say which products were added")
+      .toContainText(`Добавлены товары: ${PRODUCT.brand} Bio Botanical Shampoo, ${PRODUCT_2.brand} Un.Tangled Spray`, { timeout: 15_000 });
     await expect(page.getByRole("status").first()).toContainText("Статья готова на трёх языках", { timeout: 30_000 });
     await clearToast(page);
+    // …and the same sentence stays under the button, where a phone can wrap it and the toast's 2.6 s do not apply
+    await expect(page.locator("[data-admblogplaced]")).toHaveText(`Добавлены товары: ${PRODUCT.brand} Bio Botanical Shampoo, ${PRODUCT_2.brand} Un.Tangled Spray`);
 
-    /* ---- the Russian article: one card, and it is a real card ----------- */
+    /* ---- the Russian article: two cards, and they are real cards -------- */
     const box = page.locator("[data-blogbody]");
     const cards = box.locator("a[data-product]");
-    await expect(cards, "the article the assistant wrote has no product card in it").toHaveCount(1);
+    await expect(cards, "the article the assistant wrote has not got its two product cards").toHaveCount(2);
     await expect(cards.first()).toHaveAttribute("data-product", PRODUCT.id);
     await expect(cards.first(), "the card does not link to the Russian product page").toHaveAttribute("href", `/shop2/p/${PRODUCT.id}/`);
     await expect(cards.first(), "the panel never wrote the name and the price the model was not given").toContainText(PRODUCT.brand);
     await expect(cards.first()).toContainText("€");
+    await expect(cards.nth(1)).toHaveAttribute("data-product", PRODUCT_2.id);
+    await expect(cards.nth(1)).toHaveAttribute("href", `/shop2/p/${PRODUCT_2.id}/`);
+    await expect(cards.nth(1)).toContainText(PRODUCT_2.brand);
 
     const ru = await box.innerHTML();
     expect(ru, "a card for a product that does not exist reached the article").not.toContain(GHOST_ID);
-    expect(ru, "the card did not stay next to the advice it belongs to")
-      .toMatch(new RegExp(`Первый абзац[\\s\\S]*${PRODUCT.id}[\\s\\S]*Второй раздел`));
-    // and the product it shows is in «Товары в статье», though the answer named none
-    await expect(page.locator(`[data-admblogproductdel="${PRODUCT.id}"]`), "the card's product is not in «Товары в статье»").toBeVisible();
+    expect(ru, "a card did not stay next to the advice it belongs to")
+      .toMatch(new RegExp(`Первый абзац[\\s\\S]*${PRODUCT.id}[\\s\\S]*Второй раздел[\\s\\S]*Второй абзац[\\s\\S]*${PRODUCT_2.id}[\\s\\S]*Третий абзац`));
+    // and the products they show are in «Товары в статье», though the answer named none
+    await expect(page.locator(`[data-admblogproductdel="${PRODUCT.id}"]`), "the first card's product is not in «Товары в статье»").toBeVisible();
+    await expect(page.locator(`[data-admblogproductdel="${PRODUCT_2.id}"]`), "the second card's product is not in «Товары в статье»").toBeVisible();
 
-    /* ---- what the translation was handed: a token, never the card ------- */
+    /* ---- what the translation was handed: tokens, never the cards ------- */
     const et = calls.find((c) => c.task === "post_translate" && c.lang === "ET");
     expect(et, "the article was never sent for translation").toBeTruthy();
     expect(String(et!.input.body)).toContain("[[1]]");
-    expect(String(et!.input.body), "the invented card was still being carried around").not.toContain("[[2]]");
-    expect(String(et!.input.body), "the card went to the model as its own words").not.toContain(PRODUCT.brand);
-    expect(et!.input.keepNames).toEqual([`${PRODUCT.brand} Bio Botanical Shampoo — шампунь`]);
+    expect(String(et!.input.body)).toContain("[[2]]");
+    expect(String(et!.input.body), "the invented card was still being carried around").not.toContain("[[3]]");
+    expect(String(et!.input.body), "a card went to the model as its own words").not.toContain(PRODUCT.brand);
+    expect(String(et!.input.body)).not.toContain(PRODUCT_2.brand);
+    expect(et!.input.keepNames).toEqual([`${PRODUCT.brand} Bio Botanical Shampoo — шампунь`, `${PRODUCT_2.brand} Un.Tangled Spray — спрей для волос`]);
 
-    /* ---- and what came back: the same card, in its place, in Estonian --- */
+    /* ---- and what came back: the same cards, in their places, in Estonian --- */
     await page.locator('[data-admbloglang="ET"]').click();
-    await expect(cards, "the Estonian article came back without the card").toHaveCount(1);
+    await expect(cards, "the Estonian article came back without its cards").toHaveCount(2);
     await expect(cards.first()).toHaveAttribute("href", `/shop2/et/p/${PRODUCT.id}/`);
+    await expect(cards.nth(1)).toHaveAttribute("href", `/shop2/et/p/${PRODUCT_2.id}/`);
     const etHtml = await box.innerHTML();
     expect(etHtml).toContain("ET:");
-    expect(etHtml, "the card was appended at the end instead of staying in its paragraph")
-      .toMatch(new RegExp(`Первый абзац[\\s\\S]*${PRODUCT.id}[\\s\\S]*Второй раздел`));
+    expect(etHtml, "a card was appended at the end instead of staying in its paragraph")
+      .toMatch(new RegExp(`Первый абзац[\\s\\S]*${PRODUCT.id}[\\s\\S]*Второй раздел[\\s\\S]*${PRODUCT_2.id}[\\s\\S]*Третий абзац`));
     await page.locator('[data-admbloglang="EN"]').click();
     await expect(cards.first()).toHaveAttribute("href", `/shop2/en/p/${PRODUCT.id}/`);
+    await expect(cards.nth(1)).toHaveAttribute("href", `/shop2/en/p/${PRODUCT_2.id}/`);
     await page.locator('[data-admbloglang="RU"]').click();
     await assertClean(page, w, "the article's own product cards in the editor");
 
@@ -681,10 +762,12 @@ test.describe("blog — the whole article", () => {
     postId = post.id;
     try {
       expect(post.body.RU).toContain(`data-product="${PRODUCT.id}"`);
+      expect(post.body.RU).toContain(`data-product="${PRODUCT_2.id}"`);
       expect(post.body.ET).toContain(`data-product="${PRODUCT.id}"`);
+      expect(post.body.ET).toContain(`data-product="${PRODUCT_2.id}"`);
       expect(post.body.RU, "the invented id was stored").not.toContain(GHOST_ID);
       expect(post.body.EN).not.toContain(GHOST_ID);
-      expect(post.products).toEqual([PRODUCT.id]);
+      expect(post.products).toEqual([PRODUCT.id, PRODUCT_2.id]);
 
       await page.locator("[data-admblogpublish]").click();
       await clearToast(page);
@@ -693,9 +776,10 @@ test.describe("blog — the whole article", () => {
       await shop.page.goto(shopUrl("/et", `/blog/${slug}/`));
       await waitForScreen(shop.page, "blogpost");
       const article = shop.page.locator(".blog__body:not(.blog__sk)");
-      await expect(article.locator(".blog__prod"), "the card is not a card on the shop").toHaveCount(1);
+      await expect(article.locator(".blog__prod"), "the cards are not cards on the shop").toHaveCount(2);
       await expect(article.locator(`.blog__prod[data-go-product="${PRODUCT.id}"]`)).toBeVisible();
-      await expect(article.locator(".blog__prod")).toContainText(PRODUCT.brand);
+      await expect(article.locator(`.blog__prod[data-go-product="${PRODUCT_2.id}"]`)).toBeVisible();
+      await expect(article.locator(".blog__prod").first()).toContainText(PRODUCT.brand);
       await assertClean(shop.page, shop.w, "the Estonian page carrying the article's own card");
       await shop.close();
 
@@ -704,7 +788,8 @@ test.describe("blog — the whole article", () => {
       await cards.first().click({ clickCount: 3 });   // the card's line, selected as any other line
       await page.keyboard.press("Delete");
       await expect(box, "the click followed the card's link instead of editing it").toContainText("Второй раздел");
-      await expect(cards, "the owner cannot delete a card the assistant placed").toHaveCount(0);
+      await expect(cards, "the owner cannot delete a card the assistant placed").toHaveCount(1);
+      await expect(cards.first(), "the wrong card went").toHaveAttribute("data-product", PRODUCT_2.id);
       await expect(page.locator("[data-blogdirty]"), "deleting the card was not noticed as an unsaved change").toBeVisible();
       await assertClean(page, w, "a placed card taken out by hand");
     } finally {

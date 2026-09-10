@@ -1244,8 +1244,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   display: flex; align-items: center; justify-content: center; gap: 14px;
   font-size: 14px; color: var(--a-muted); padding: 12px; text-align: center;
 }
-.adm-drop--set { background: var(--a-tint); }
-.adm-drop__img { width: 120px; height: 80px; flex: none; background-size: cover; background-position: center; }
+/* The blog cover once there is one (admBlogCoverHTML): the picture itself,
+   16:9 and as wide as the column, its caption, and the two actions on the
+   paper under it — «Заменить обложку» a ghost button, «Удалить» a quiet
+   warn-coloured word. Not the dashed zone above with a thumbnail, two
+   buttons and a hint sharing one grey field, which could not be read once a
+   cover was set (Dim, 10.09.2026). The zone is still a drop target: a photo
+   dropped onto the picture replaces it, and .is-over says so. */
+.adm-cover { border: 1px solid var(--a-rule); background: var(--a-paper); }
+.adm-cover.is-over { outline: 1px dashed var(--a-ink); outline-offset: -1px; background: var(--a-tint); }
+.adm-cover__img { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 220px; object-fit: cover; background: var(--a-tint); }
+.adm-cover__alt { display: block; padding: 10px 14px 0; font-size: 13px; line-height: 18px; color: var(--a-muted); }
+.adm-cover__acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 14px; }
+.adm-cover__acts .adm-link { min-height: 40px; }
+.adm-cover__note { flex-basis: 100%; }
+@media (min-width: 900px) { .adm-cover__img { max-height: 280px; } }
 .adm-tools { display: flex; gap: 4px; flex-wrap: wrap; border: 1px solid var(--a-rule); padding: 6px; }
 .adm-tools button {
   height: 40px; min-width: 40px; padding: 0 10px; border: 0; background: var(--a-paper);

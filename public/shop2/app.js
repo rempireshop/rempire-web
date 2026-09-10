@@ -2074,6 +2074,7 @@
       "Заменить обложку": "Vaheta kaanepilt",
       "+ Обложка": "+ Kaanepilt",
       "Обложка статьи": "Artikli kaanepilt",
+      "Удалить обложку": "Kustuta kaanepilt",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "Foto telefonist või lõikelaualt, JPEG/PNG/WebP kuni 12 MB.",
       "вс": "P", "пн": "E", "вт": "T", "ср": "K", "чт": "N", "пт": "R", "сб": "L",
@@ -4327,6 +4328,7 @@
       "Заменить обложку": "Replace the cover",
       "+ Обложка": "+ Cover",
       "Обложка статьи": "Article cover",
+      "Удалить обложку": "Delete the cover",
       "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.":
         "A photo from your phone or the clipboard, JPEG/PNG/WebP up to 12 MB.",
       "вс": "Su", "пн": "Mo", "вт": "Tu", "ср": "We", "чт": "Th", "пт": "Fr", "сб": "Sa",
@@ -4831,6 +4833,8 @@
        string. The second is every other shape. */
     [/^Добавлено: (.+) · (\d+(?:[.,]\d+)?) мл$/, { ET: "Lisatud: $1 · $2 ml", EN: "Added: $1 · $2 ml" }],
     [/^Добавлено: (.+)$/, { ET: "Lisatud: $1", EN: "Added: $1" }],
+    // the blog editor's toast after the assistant wrote an article and chose its products (admBlogWriteFull)
+    [/^Добавлены товары: (.+)$/, { ET: "Lisatud tooted: $1", EN: "Products added: $1" }],
     [/^Пакомат · (.+)$/, { ET: "Pakiautomaat · $1", EN: "Parcel locker · $1" }],
     [/^Курьер · (.+)$/, { ET: "Kuller · $1", EN: "Courier · $1" }],
     [/^Курьера Montonio в (.+) нет — отправьте другим способом\.$/,
@@ -10770,7 +10774,7 @@
   }
   function blogCloseEditor() {
     S.adminBlogEdit = null; S.adminBlogTool = ""; S.adminBlogConfirmBack = false;
-    S.adminBlogConfirmPublish = "";
+    S.adminBlogConfirmPublish = ""; S.adminBlogPlaced = null;
     BLOGSEL = null; BLOGCARET = null; render();
   }
   function blogDirty() {
@@ -10883,18 +10887,25 @@
     if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
     return "Не получилось — попробуйте ещё раз";
   }
-  /** The Russian article, field by field, into the draft. */
+  /** «Proraso Wood & Spice» — the brand and the name before its Russian tail, for a toast that has one line. */
+  function blogProductShort(p) {
+    return (p.brand + " " + String(p.name || "").split(" — ")[0]).replace(/\s+/g, " ").trim();
+  }
+  /** The Russian article, field by field, into the draft. Answers with the
+      products whose cards now stand in the text, in their order — what the
+      toast under admBlogWriteFull() names. */
   function blogGenApplyFull(d, tx) {
     d.title.RU = String(tx.title || "").slice(0, 200);
     d.excerpt.RU = String(tx.excerpt || "").slice(0, 500);
-    /* The article places its own product cards now (src/lib/ai-prompts.ts),
-       and all the model was given is an id: the marker it wrote is bare, so
-       the picture, the name and the price are written here — by the same
-       two functions a translation uses, so a card the assistant placed and
-       a card the owner placed are one object from this line onwards. Out to
-       a token, back as a card: an id this panel does not know rebuilds to
-       nothing at all, which is the second door in front of an invented
-       product (the route filtered against its own slice first). */
+    /* The article places its own product cards now (src/lib/ai-prompts.ts,
+       the count and the places held by src/lib/blog-cards.ts), and all the
+       model was given is an id: the marker it wrote is bare, so the picture,
+       the name and the price are written here — by the same two functions a
+       translation uses, so a card the assistant placed and a card the owner
+       placed are one object from this line onwards. Out to a token, back as
+       a card: an id this panel does not know rebuilds to nothing at all,
+       which is the second door in front of an invented product (the route
+       filtered against its own slice first). */
     var wrote = blogCardsOut(String(tx.body || ""));
     d.body.RU = blogCleanHtml(blogCardsIn(wrote.html, wrote.cards, "RU"));
     if (Array.isArray(tx.tags) && tx.tags.length) d.tagsText = tx.tags.map(String).join(", ");
@@ -10907,6 +10918,8 @@
     if (tx.seo && tx.seo.title) d.seoTitle.RU = String(tx.seo.title).slice(0, 70);
     if (tx.seo && tx.seo.description) d.seoDesc.RU = String(tx.seo.description).slice(0, 170);
     if (d.slugAuto && d.title.RU) d.slug = blogSlugify(d.title.RU);
+    // once each: productsById() skips an id the panel does not know, i.e. a card that rebuilt to nothing
+    return productsById(wrote.cards.filter(function (id, i) { return wrote.cards.indexOf(id) === i; }));
   }
   /** One target language: the Russian article translated whole, tags kept as
       they are, product cards lifted out and put back by hand (blogCardsOut). */
@@ -10949,7 +10962,14 @@
     }).then(function (r) {
       var tx = r.status === 200 && r.body.ok && r.body.text;
       if (!tx || !tx.title || !tx.body) throw new Error(blogGenErrText(r));
-      blogGenApplyFull(d, tx);
+      var placedNames = blogGenApplyFull(d, tx).map(blogProductShort);
+      /* Which products the article came with — said out loud, because the
+         cards are the assistant's choice and not the owner's, and a card
+         two screens down in the text is easy to miss (Dim, 10.09.2026). The
+         toast has one line and a phone cuts it after the first name, so the
+         same sentence stays under the button too (admBlogEditorScreen). */
+      S.adminBlogPlaced = placedNames.length ? { d: d, names: placedNames } : null;
+      if (placedNames.length) toast("Добавлены товары: " + placedNames.join(", "));
       step("et");
       return blogGenTranslate(d, "ET");
     }).then(function () {
@@ -15142,6 +15162,7 @@
     var L = S.adminBlogLang || "RU";
     var busy = S.adminBlogBusy;
     var gen = S.adminBlogGen && S.adminBlogGen.d === d ? S.adminBlogGen : null, genBusy = !!(gen && !gen.err);
+    var placedLine = S.adminBlogPlaced && S.adminBlogPlaced.d === d ? "Добавлены товары: " + S.adminBlogPlaced.names.join(", ") : "";
     blogKeepCaret();   // this render is about to replace the box being typed in
     var picked = productsById(d.products);
     var q = (S.adminBlogQ || "").trim().toLowerCase();
@@ -15258,6 +15279,8 @@
           (genBusy ? " disabled" : "") + "></label>" +
         '<button class="adm-btn" data-admblogfull' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "Написать статью целиком") + "</button>" +
         '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-admblogprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(blogGenText(d)) + "</div>" +
+        // the products the article came with — the toast's sentence, standing (admBlogWriteFull)
+        (placedLine ? '<div class="adm-hint" data-admblogplaced>' + esc(placedLine) + "</div>" : "") +
         '<div class="adm-hint">Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.</div>' +
         '<details class="adm-fold"><summary class="adm-link adm-link--muted">Только часть</summary>' +
           '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
@@ -15285,21 +15308,37 @@
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admblogproductadd="' + esc(p.id) + '">Добавить</button></div>';
     }).join("") + "</div>";
   }
-  /** The 160-px cover zone: a drop target with the picture in it once there is
-      one, and the same [data-galdrop="blog"]/[data-galup="blog"] upload the
-      editor already used. */
+  /** The cover. With one: the picture itself, large (16:9, .adm-cover__img),
+      its caption under it when there is one, and the two actions on the
+      panel's paper below — «Заменить обложку» and a quiet «Удалить» — with
+      no hint, because the picture is the explanation. Without one: the dashed
+      drop zone with «+ Обложка» and the hint on what fits. It used to be one
+      grey field for all of it — a thumbnail, two buttons and the hint — and
+      could not be read once a cover was set (Dim, 10.09.2026). The same
+      [data-galdrop="blog"]/[data-galup="blog"]/[data-galfile="blog"] upload
+      stands behind both, so a photo dropped onto the picture replaces it. */
   function admBlogCoverHTML(d) {
-    return '<div class="adm-drop' + (d.coverUrl ? " adm-drop--set" : "") + '" data-galdrop="blog">' +
-      (d.coverUrl ? '<span class="adm-drop__img" style="background-image:url(&#39;' + esc(d.coverUrl) + '&#39;)"></span>' : "") +
-      '<span><button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' +
-        (UP.busy || MEDIA.on === false ? " disabled" : "") + ">" +
-        (UP.busy ? upBusyText() : d.coverUrl ? "Заменить обложку" : "+ Обложка") + "</button>" +
-      '<input class="adm-file" type="file" accept="image/*" data-galfile="blog" aria-label="Обложка статьи">' +
-      (d.coverUrl ? ' <button class="adm-link adm-link--muted" data-admblogcoverdel>Удалить</button>' : "") +
-      '<span class="adm-hint" style="display:block;margin-top:6px">' +
-        (MEDIA.on === false ? "Загрузка фото пока не настроена — нужно подключить хранилище."
-          : "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.") + "</span></span>" +
-      (UP.err ? '<span class="adm-err">' + esc(UP.err) + "</span>" : "") +
+    var off = MEDIA.on === false;
+    var hint = off ? "Загрузка фото пока не настроена — нужно подключить хранилище." : "Фото с телефона или из буфера, JPEG/PNG/WebP до 12 МБ.";
+    var file = '<input class="adm-file" type="file" accept="image/*" data-galfile="blog" aria-label="Обложка статьи">';
+    var err = UP.err ? '<span class="adm-err">' + esc(UP.err) + "</span>" : "";
+    if (d.coverUrl) {
+      var L = S.adminBlogLang || "RU";
+      var alt = String(d.coverAlt[L] || d.coverAlt.RU || d.coverAlt.ET || d.coverAlt.EN || "").trim();
+      return '<div class="adm-cover" data-galdrop="blog">' +
+        '<img class="adm-cover__img" src="' + esc(d.coverUrl) + '" alt="' + esc(alt) + '" loading="lazy">' +
+        (alt ? '<span class="adm-cover__alt">' + esc(alt) + "</span>" : "") +
+        '<div class="adm-cover__acts">' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
+            (UP.busy ? upBusyText() : "Заменить обложку") + "</button>" + file +
+          '<button class="adm-link adm-link--warn" data-admblogcoverdel aria-label="Удалить обложку">Удалить</button>' +
+          (off ? '<span class="adm-hint adm-cover__note">' + hint + "</span>" : "") + err +
+        "</div></div>";
+    }
+    return '<div class="adm-drop" data-galdrop="blog">' +
+      '<span><button class="adm-btn adm-btn--ghost adm-btn--row" data-galup="blog"' + (UP.busy || off ? " disabled" : "") + ">" +
+        (UP.busy ? upBusyText() : "+ Обложка") + "</button>" + file +
+      '<span class="adm-hint" style="display:block;margin-top:6px">' + hint + "</span></span>" + err +
       "</div>";
   }
 
