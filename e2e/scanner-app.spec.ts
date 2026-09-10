@@ -642,8 +642,11 @@ test.describe("scanner app", () => {
     await expect(cell).toHaveValue("");
     await expect(cell).toHaveAttribute("placeholder", /не привязан/);
     await expect(unbindBtn, "a size with no code still offers «Отвязать»").toHaveCount(0);
+    /* The hint changed with the «Сканер» button beside the box (Dim's phone
+       test, 09.09.2026): a code is read into this very field now, not only
+       bound on «Склад». */
     await expect(page.locator('[data-edpane="sizes"]'),
-      "the grid never says where a barcode comes from").toContainText("Штрихкод привязывается сканером на складе");
+      "the grid never says where a barcode comes from").toContainText("Штрихкод можно считать прямо здесь");
     await assertClean(page, w, "editor: a size with no code");
 
     /* Dim was asked whether this cell should go read-only now that the
