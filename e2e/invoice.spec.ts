@@ -240,7 +240,9 @@ test.describe("invoice for companies", () => {
            /api/overrides/, which is a cached public response, and this test is
            about the value being stored, not about when the cache expires. */
         await card.locator('[data-invsetf="remindBeforeDays"]').fill("3");
-        await card.locator("[data-adminvsave]").click();
+        // «Сохранить» is the page's save bar since r12 — it names the card while it differs
+        await expect(admin.locator("[data-setnote]")).toContainText("Счета для компаний");
+        await admin.locator("[data-adminvsave]").click();
         await expect(admin.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
         await admin.locator("[data-closetoast]").click();
         const saved = (await (await admin.request.get("/api/admin/settings/")).json()) as {

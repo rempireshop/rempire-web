@@ -457,7 +457,9 @@ test.describe("sweep — prices & loyalty, reports, mail, assistant", () => {
         await expect(err, `${field}="${typed}" was dropped with no message`).toBeVisible();
         const errText = (await err.textContent() || "").trim();
         expect(isRussian(errText), `${field}="${typed}" message is not Russian — "${errText}"`).toBe(true);
-        if (await page.locator("[data-admpricingsave]").count()) {
+        /* Since r12 the page's bar always carries «Сохранить», disabled while
+           the draft equals what is saved — a refused value leaves it so. */
+        if (await page.locator("[data-admpricingsave]:enabled").count()) {
           await page.locator("[data-admpricingsave]").click();
           if (await page.locator("[data-admapply]").count()) await page.locator("[data-admapply]").click();
           await clearToast(page);

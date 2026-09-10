@@ -776,7 +776,7 @@
       "Изменить": "Muuda", "Удалить": "Kustuta", "Готово": "Valmis",
       "Добавить слайд": "Lisa slaid", "Сбросить к стандартному": "Taasta tavaline",
       "Смена слайдов, секунд": "Slaidivahetus, sekundit",
-      "Больше пяти слайдов не нужно": "Rohkem kui viit slaidi pole vaja",
+      "Максимум 5 слайдов — удалите один, чтобы добавить новый": "Kõige rohkem 5 slaidi — kustutage üks, et lisada uus",
       "Язык баннера": "Bänneri keel",
       "Строка сверху": "Rida ülal", "Заголовок": "Pealkiri",
       "Подзаголовок": "Alapealkiri", "Надпись на кнопке": "Nupu tekst",
@@ -790,6 +790,9 @@
       "Предпросмотр": "Eelvaade", "Баннер: стандартный": "Bänner: tavaline",
       "Ничего не нашлось — попробуйте другое слово.": "Midagi ei leitud — proovi teist sõna.",
       "Есть несохранённые изменения — нажмите «Сохранить».": "Salvestamata muudatused — vajuta „Salvesta“.",
+      /* r12: the save bars and the small forms' own state lines */
+      "Есть несохранённые изменения": "Salvestamata muudatused", "Ещё не сохранено": "Veel salvestamata",
+      "Не сохранено": "Salvestamata", "Данные магазина": "Poe andmed", "Тарифы доставки": "Tarnetariifid",
       // media: фотографии товара и картинка баннера
       "Фото": "Fotod", "Главное фото": "Peamine foto", "Сделать главным": "Tee peamiseks",
       "Первая фотография — главная: её видно в каталоге, в поиске и в письмах. Перетащите файлы сюда или нажмите кнопку.":
@@ -3044,7 +3047,7 @@
       "Изменить": "Edit", "Удалить": "Delete", "Готово": "Done",
       "Добавить слайд": "Add a slide", "Сбросить к стандартному": "Reset to default",
       "Смена слайдов, секунд": "Slide change, seconds",
-      "Больше пяти слайдов не нужно": "Five slides is plenty",
+      "Максимум 5 слайдов — удалите один, чтобы добавить новый": "Five slides at most — delete one to add a new one",
       "Язык баннера": "Banner language",
       "Строка сверху": "Line above", "Заголовок": "Title",
       "Подзаголовок": "Subtitle", "Надпись на кнопке": "Button text",
@@ -3058,6 +3061,9 @@
       "Предпросмотр": "Preview", "Баннер: стандартный": "Banner: default",
       "Ничего не нашлось — попробуйте другое слово.": "Nothing found — try another word.",
       "Есть несохранённые изменения — нажмите «Сохранить».": "Unsaved changes — press “Save”.",
+      /* r12: the save bars and the small forms' own state lines */
+      "Есть несохранённые изменения": "There are unsaved changes", "Ещё не сохранено": "Not saved yet",
+      "Не сохранено": "Not saved", "Данные магазина": "Shop details", "Тарифы доставки": "Delivery tariffs",
       // media: product photos and the banner picture
       "Фото": "Photos", "Главное фото": "Main photo", "Сделать главным": "Make it the main one",
       "Первая фотография — главная: её видно в каталоге, в поиске и в письмах. Перетащите файлы сюда или нажмите кнопку.":
@@ -6237,6 +6243,16 @@
     acctBusy: false,      // a request is in flight — the button locks
     acctErr: "",          // dictionary key of the last failure, "" when fine
     acctSaved: false,     // «Сохранено ✓» on the save bar, until the next edit
+    /* The panel's small save flows (r12, Dim 10.09.2026: «all saving flows …
+       least clicks, comfortable»): each remembers what was just saved so the
+       button can say «Сохранено ✓» in place until the next edit.
+         admSetSaved — the settings page («home» …) whose bar just saved;
+         orderNote   — {id, text, saved}: the order card's note draft, kept
+                       across the order poll's renders (goodsKeep's idea);
+         custNoteSaved / unpaidSaved — the customer note and the «Неоплаченные
+                       заказы» card; stockSaved — the warehouse row key that
+                       «Править» just wrote, for its «Сохранено ✓» badge. */
+    admSetSaved: "", orderNote: null, custNoteSaved: false, unpaidSaved: false, stockSaved: "",
     /* The profile form's draft — what the fields show, compared against
        S.cust by acctDirty() to light the save bar. `ship` is «Доставка по
        умолчанию» in the checkout's words ({country, method, carrier,
@@ -10791,6 +10807,19 @@
     });
     var dirty = document.querySelector("[data-blogdirty]");
     if (dirty) dirty.hidden = !blogDirty();
+    // …and the «Публикация» card's own line (blogPubStateHTML), which sits
+    // beside the buttons it is about
+    var pub = document.querySelector("[data-blogpubstate]");
+    if (pub) { pub.innerHTML = blogPubStateHTML(d, !!S.adminBlogBusy); translateTree(pub); }
+  }
+  /** The state line of the «Публикация» card: whether what is on screen is
+      what the server holds. A new post has nothing on the server yet, so it
+      says so instead of a «Сохранено ✓» it has not earned. */
+  function blogPubStateHTML(d, busy) {
+    if (busy) return "<span>Сохраняем…</span>";
+    if (!d.id) return '<span class="adm-hint--warn">Ещё не сохранено</span>';
+    if (blogDirty()) return '<span class="adm-hint--warn">Есть несохранённые изменения</span>';
+    return '<span class="adm-hint--ok">Сохранено ✓</span>';
   }
 
   /* ---- the Google pair, written from the article ---------------------------
@@ -13918,11 +13947,16 @@
           "<span>" + esc(o ? (srvDigital(o) ? srvGiftTo(o) : srvAddrLine(o.shipping)) : "") + "</span></div>" +
           admGiftCardsHTML(o) + "</div>" +
         admPaymentHTML(o) +
+        /* The note. Its draft lives in S (orderNoteValue), so the order
+           poll's renders never wipe what is being typed, and the button says
+           where things stand — quiet while nothing differs, ink the moment
+           something does, «Сохранено ✓» once it is back in step (r12; the
+           cabinet's paintAcctBar idiom). Ctrl+Enter saves: this is a
+           textarea, so plain Enter stays a new line. */
         (o ? '<div><div class="adm-sec__t">Заметка</div>' +
           '<textarea class="adm-input" rows="2" data-admnote placeholder="Только для вас" style="margin-top:10px">' +
-          esc(o.notes || "") + "</textarea>" +
-          '<div class="adm-acts" style="margin-top:8px">' +
-          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admnotesave>Сохранить заметку</button></div></div>' : "") +
+          esc(orderNoteValue(o)) + "</textarea>" +
+          '<div class="adm-acts" style="margin-top:8px" data-admnoteacts>' + orderNoteActsHTML(o) + "</div></div>" : "") +
       "</div></div></div>";
   }
   /* «Оплата» on the order card — how the shopper meant to pay, through what,
@@ -14963,8 +14997,31 @@
             '<input class="adm-input" type="number" min="2" max="60" inputmode="numeric" data-unpaidf="cancel" value="' + esc(d.cancel) + '">' +
             '<span class="adm-hint">Через столько дней заказ отменится сам, товары останутся в магазине.</span></label>' +
         "</div>" +
-        '<div class="adm-acts"><button class="adm-btn" data-admunpaidsave>Сохранить</button></div>' +
+        // the button carries the state (unpaidActsHTML): quiet, then ink, then «Сохранено ✓»
+        '<div class="adm-acts" data-admunpaidacts>' + unpaidActsHTML() + "</div>" +
       "</div>";
+  }
+  /** Does the card show something other than what the shop runs on? */
+  function unpaidDirty() {
+    if (!S.unpaidDraft) return false;
+    var d = S.unpaidDraft;
+    return String(d.remind) !== String(Number(DEMO.flows.unpaidRemindDays) || 3) ||
+      String(d.cancel) !== String(Number(DEMO.flows.unpaidCancelDays) || 7);
+  }
+  /* The same three states every small form in the panel has since r12 (the
+     cabinet's paintAcctBar idiom): nothing to save — a quiet, disabled
+     button; something typed — the ink button and a line that says so;
+     just saved — «Сохранено ✓» on the button until the next keystroke. */
+  function unpaidActsHTML() {
+    var dirty = unpaidDirty(), saved = S.unpaidSaved && !dirty;
+    return '<button class="adm-btn' + (dirty ? "" : " adm-btn--ghost") + '" data-admunpaidsave' + (dirty ? "" : " disabled") + ">" +
+      (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
+      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Изменения не сохранены</span>";
+  }
+  /** In place, while the owner types — a render() would take the caret. */
+  function paintUnpaidState() {
+    var acts = document.querySelector("[data-admunpaidacts]");
+    if (acts) { acts.innerHTML = unpaidActsHTML(); translateTree(acts); }
   }
   function srvUnpaidSettingsSave() {
     var d = unpaidDraft();
@@ -14979,7 +15036,7 @@
     apiSend("/api/admin/settings/", "PUT", { flows: flows }).then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        DEMO.flows = flows; demoSave(); S.unpaidDraft = null;
+        DEMO.flows = flows; demoSave(); S.unpaidDraft = null; S.unpaidSaved = true;
         journalNote("Неоплаченные заказы: напоминание через " + remind + ", отмена через " + cancel);
         toast("Неоплаченные заказы: сохранено ✓"); render();
         return;
@@ -15223,6 +15280,9 @@
         '<div class="adm-hint">' + (d.status === "published"
           ? "Опубликована. Изменения появятся в магазине сразу после сохранения."
           : "Черновик. В магазине его пока не видно.") + "</div>" +
+        /* whether the screen is in step with the server — repainted by
+           blogPaintState() on every keystroke, so it never lags the text */
+        '<p class="adm-hint" data-blogpubstate style="margin:0">' + blogPubStateHTML(d, busy) + "</p>" +
         (d.status === "published"
           ? '<button class="adm-btn" data-admblogsave' + (busy ? " disabled" : "") + ">Сохранить и обновить</button>" +
             '<button class="adm-btn adm-btn--ghost" data-admblogunpublish' + (busy ? " disabled" : "") + ">Снять с публикации</button>"
@@ -15781,6 +15841,83 @@
     for (var i = 0; i < ADM_SET_PAGES.length; i++) if (ADM_SET_PAGES[i][0] === key) return ADM_SET_PAGES[i][1];
     return "Настройки";
   }
+  /* ---------- the settings pages' one save bar ------------------------------
+     Dim, 10.09.2026: «all saving flows … least clicks, comfortable on the
+     phone and on the desktop». A settings page used to end each card with
+     its own bare «Сохранить»: on a phone the banner's stood two screens
+     below the slide being edited, and nothing anywhere said whether what
+     was on screen had been saved. Now each page with a draft — Главная
+     страница, О компании, Доставка и оплата, Цены и баллы — ends in the
+     product editor's sticky bar (admin.css .adm-savebar: above the nav on a
+     phone, the toast climbs over it), and the bar is the ONLY «Сохранить»
+     on the page:
+
+       · quiet while nothing differs — a ghost, disabled button and
+         «Изменений нет»;
+       · the moment a draft differs, a line that names the card —
+         «Изменения не сохранены: Главный баннер» — the ink button and
+         «Отменить правки»;
+       · «Сохранено ✓» on the button once the change went through, until
+         the next keystroke (S.admSetSaved, cleared on any edit).
+
+     The button carries the ATTRIBUTE of the first dirty card («data-
+     herosave», «data-contentsave» …), so the existing handlers, the confirm
+     cards and the e2e suite reach it exactly as before; two dirty cards are
+     saved one after the other, each through its own question. Painted in
+     place by paintSetBar() from every input handler of these forms — a
+     render() would take the caret out of the field being typed in. */
+  var ADM_SET_CARDS = {
+    home: [["hero", "Главный баннер"], ["content", "Верхняя полоска"]],
+    company: [["content", "Данные магазина"], ["invoice", "Счета для компаний"]],
+    delivery: [["ship", "Тарифы доставки"]],
+    prices: [["pricing", "Цены и баллы"]]
+  };
+  var ADM_SET_SAVE_ATTR = {
+    hero: "data-herosave", content: "data-contentsave", invoice: "data-adminvsave",
+    ship: "data-admshipsave", pricing: "data-admpricingsave"
+  };
+  function admSetCardDirty(kind, page) {
+    if (kind === "hero") return heroDirty();
+    if (kind === "content") return contentDirtyFor(page);
+    if (kind === "invoice") return invoiceDirty();
+    if (kind === "ship") return shipDirty();
+    if (kind === "pricing") return pricingDirty();
+    return false;
+  }
+  function admSetDirtyCards(page) {
+    return (ADM_SET_CARDS[page] || []).filter(function (c) { return admSetCardDirty(c[0], page); });
+  }
+  function admSetBarHTML(page) {
+    if (!ADM_SET_CARDS[page]) return "";
+    return '<div class="adm-savebar adm-savebar--set" data-setbar>' + admSetBarInnerHTML(page) + "</div>";
+  }
+  function admSetBarInnerHTML(page) {
+    var cards = ADM_SET_CARDS[page] || [];
+    if (!cards.length) return "";
+    var dirty = admSetDirtyCards(page);
+    var saved = !dirty.length && S.admSetSaved === page;
+    var attr = ADM_SET_SAVE_ATTR[(dirty.length ? dirty[0] : cards[0])[0]];
+    /* each name its own node, the colon outside them: the dictionary
+       translates «Изменения не сохранены» and «Главный баннер» as the
+       whole keys they already are */
+    // once saved the button itself says so, and the line goes quiet — the
+    // same two words twice in one bar would be noise
+    var note = dirty.length
+      ? '<span class="adm-savebar__note adm-savebar__note--warn" data-setnote><span>Изменения не сохранены</span>: ' +
+          dirty.map(function (c) { return "<span>" + c[1] + "</span>"; }).join(", ") + "</span>"
+      : saved ? ""
+      : '<span class="adm-savebar__note" data-setnote>Изменений нет</span>';
+    return note +
+      '<button class="adm-btn' + (dirty.length ? "" : " adm-btn--ghost") + '" ' + attr + (dirty.length ? "" : " disabled") + ">" +
+        (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
+      (dirty.length ? '<button class="adm-link adm-link--muted" data-setrevert>Отменить правки</button>' : "");
+  }
+  function paintSetBar() {
+    var bar = document.querySelector("[data-setbar]");
+    if (!bar) return;
+    bar.innerHTML = admSetBarInnerHTML(S.admSetPage || "");
+    translateTree(bar);
+  }
   function admSetupHTML() {
     var page = S.admSetPage || "";
     if (!page) {
@@ -15800,6 +15937,8 @@
         : page === "prices" ? admSetPricesHTML()
         : page === "langs" ? admSetLangsHTML()
         : admSetJournalHTML()) +
+      // the page's one «Сохранить», sticky at the bottom (ADM_SET_CARDS above)
+      admSetBarHTML(page) +
       "</div>";
   }
 
@@ -15823,8 +15962,8 @@
           (r[0] === "EU" ? admShipEuropeHTML() : "");
       }).join("") +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
+      // «Сохранить» is the page's bar (admSetBarHTML) — the fill button stays with its hint
       '<div class="adm-acts" style="margin-top:16px">' +
-        '<button class="adm-btn" data-admshipsave>Сохранить</button>' +
         '<button class="adm-btn adm-btn--ghost" data-admshipfill>Заполнить по тарифам Montonio</button>' +
       "</div>" +
       '<p class="adm-hint" style="margin-top:8px">Кнопка впишет тарифы перевозчика плюс наценку, ' +
@@ -16139,8 +16278,15 @@
         "</div>" +
         '<p class="adm-hint" style="margin-top:10px">Считает раз в сутки. Оплаченный счёт не трогает никогда — ' +
           "даже если вы отметили оплату уже после срока.</p>" +
-        '<div class="adm-acts"><button class="adm-btn" data-adminvsave>Сохранить</button></div>' +
+        // «Сохранить» is the page's bar (admSetBarHTML), which names this card while it differs
       "</div>";
+  }
+  /** Does the card show something other than settings.invoice? */
+  function invoiceDirty() {
+    if (!S.invDraft) return false;
+    var d = S.invDraft, c = invoiceConf();
+    return String(d.prefix) !== c.prefix || String(d.dueDays) !== String(c.dueDays) ||
+      String(d.remindBeforeDays) !== String(c.remindBeforeDays) || String(d.cancelAfterDays) !== String(c.cancelAfterDays);
   }
   function srvInvoiceSettingsSave() {
     var d = invoiceDraft();
@@ -16157,6 +16303,7 @@
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
         DEMO.invoice = value; S.invDraft = null;
+        if (S.admSetPage === "company") S.admSetSaved = "company";   // the bar's «Сохранено ✓»
         var setLine = pl(days,
           "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " день",
           "Счета для компаний: префикс «" + prefix + "», срок оплаты " + days + " дня",
@@ -16617,7 +16764,8 @@
      of them edits the draft; nothing reaches the shop before «Сохранить». */
   function heroRowHTML(s, i, n) {
     var on = s.on !== false;
-    return '<div class="adm-row adm-row--tall">' +
+    // data-herorow: paintHeroPick() repaints this one row when its picture changes
+    return '<div class="adm-row adm-row--tall" data-herorow="' + i + '">' +
       '<span class="adm-thumb">' + heroArt(s.image, "ph") + "</span>" +
       '<span class="adm-row__body"><span class="adm-row__nm">' + (esc(heroT(s.title)) || "Без заголовка") +
         (on ? "" : ' <span class="adm-badge adm-badge--sm adm-badge--quiet">скрыт</span>') + "</span>" +
@@ -16680,12 +16828,17 @@
           '<optgroup label="Информация">' + HERO_PAGES.map(function (p) { return opt("page:" + p[0], p[1]); }).join("") + "</optgroup>" +
           '<optgroup label="Один товар">' + opt("product", "Товар — выберите ниже") + "</optgroup>" +
         "</select></label>" +
-      (isProduct
-        ? '<p class="adm-hint" style="margin:-8px 0 0">Кнопка ведёт на: ' + esc(heroGoLabel(go)) + "</p>" +
-          '<input class="adm-input" data-heroq value="' + esc(S.heroGoQ || "") +
-            '" placeholder="Найти товар: название, бренд…" aria-label="Найти товар">' +
-          '<div class="adm-picks" id="herogolist">' + heroGoRows() + "</div>"
-        : "") +
+      /* Always in the tree, hidden while the link is not a product. A block
+         that comes and goes shifts every sibling after it under the
+         index-based morph (admMorphChildren): the picture picker below was
+         torn down and rebuilt each time the select moved — see paintHeroPick
+         for what that did to the page. */
+      '<div class="adm-form" data-herogopanel' + (isProduct ? "" : " hidden") + ">" +
+        '<p class="adm-hint" style="margin:-8px 0 0" data-herogohint>Кнопка ведёт на: ' + esc(heroGoLabel(go)) + "</p>" +
+        '<input class="adm-input" data-heroq value="' + esc(S.heroGoQ || "") +
+          '" placeholder="Найти товар: название, бренд…" aria-label="Найти товар">' +
+        '<div class="adm-picks" id="herogolist">' + heroGoRows() + "</div>" +
+      "</div>" +
       '<div class="adm-sec__t">Картинка</div>' +
       '<label class="adm-field">Ссылка на картинку — или выберите фото товара ниже' +
         '<input class="adm-input" data-heroimgurl value="' + esc(heroUrl(s.image)) +
@@ -16711,16 +16864,25 @@
         '<div class="adm-sec__x">' + heroCountLabel(n) + "</div></div>" +
       '<p class="adm-hint" style="margin-top:6px">Большая картинка на главной. Слайды показываются по кругу; ' +
         "один слайд — просто картинка без стрелок. Пустой эстонский или английский текст заменяем русским.</p>" +
-      (heroDirty() ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      /* No «есть несохранённые изменения» line here any more: the page's
+         save bar says it (admSetBarHTML). The paragraph used to come and go
+         between the hint and the list — and under the index-based morph
+         every sibling after it was rebuilt each time the draft crossed the
+         line between «same as saved» and «different», the picture picker
+         with them; that was the jump Dim saw (paintHeroPick). */
       (n ? '<div class="adm-list">' + d.slides.map(function (s, i) { return heroRowHTML(s, i, n); }).join("") + "</div>"
          : '<div class="adm-empty">Слайдов нет — баннер на главной не показывается. Нажмите «Добавить слайд».</div>') +
       (S.heroEdit >= 0 && S.heroEdit < n ? heroFormHTML(S.heroEdit) : "") +
       '<label class="adm-field" style="max-width:220px;margin-top:16px">Смена слайдов, секунд' +
         '<input class="adm-input" type="number" min="2" max="30" step="1" data-herotick value="' +
         Math.round(tick / 1000) + '"></label>' +
+      /* «Сохранить» is the page's bar. At the ceiling the add button is
+         disabled AND says why beside it — a grey button on its own read as
+         «nothing happens» (Dim, 10.09.2026). The sentence is always in the
+         tree, hidden below five, for the same index-stability reason. */
       '<div class="adm-acts" style="margin-top:16px">' +
-        '<button class="adm-btn" data-herosave>Сохранить</button>' +
         '<button class="adm-btn adm-btn--ghost" data-heroadd' + (n >= 5 ? " disabled" : "") + ">Добавить слайд</button>" +
+        '<span class="adm-hint" data-heromax' + (n >= 5 ? "" : " hidden") + ">Максимум 5 слайдов — удалите один, чтобы добавить новый</span>" +
         '<button class="adm-link adm-link--muted" data-heroreset>Сбросить к стандартному</button></div>';
   }
   /** The confirm card's detail line for a banner save — the shop-wide thing
@@ -16746,6 +16908,45 @@
     if (!box) return;
     box.innerHTML = html;
     translateTree(box);
+  }
+  /* The open slide's picture or link target changed — from a tile, the URL
+     box or an upload. Patched in place, never through render().
+
+     Dim, 10.09.2026 (defect 10): «picking a new image for an existing slide
+     makes the page jump to the top». Measured before the fix: the first
+     pick stayed put, the pick that made the draft equal the saved banner
+     again threw the page 869 px on a desktop and 1433 px on a phone. The
+     culprit was the «есть несохранённые изменения» paragraph the card drew
+     between the hint and the list only while the draft differed: a node
+     that appears or disappears mid-column shifts every sibling after it,
+     and the index-based morph (admMorphChildren) then replaces the slide
+     list, the open form and the picker the owner had just tapped — the
+     browser loses its scroll anchor with them. That paragraph is gone (the
+     bar says it), the link picker is a permanent hidden node, and a pick
+     touches only what it changes: the tiles' aria-current, the URL box, the
+     row's thumbnail, the preview and the bar. The tapped tile keeps its
+     node and its focus. */
+  function paintHeroPick() {
+    var d = heroDraft(), i = S.heroEdit, s = d.slides[i];
+    if (!s) return;
+    var k, cur = String(s.image || ""), go = String(s.go || "");
+    var tiles = document.querySelectorAll("#heroimglist [data-heroimg]");
+    for (k = 0; k < tiles.length; k++) tiles[k].setAttribute("aria-current", String(tiles[k].getAttribute("data-heroimg") === cur));
+    var goTiles = document.querySelectorAll("#herogolist [data-herogopick]");
+    for (k = 0; k < goTiles.length; k++) goTiles[k].setAttribute("aria-current", String("product:" + goTiles[k].getAttribute("data-herogopick") === go));
+    var url = document.querySelector("[data-heroimgurl]");
+    if (url && url.value !== heroUrl(s.image)) url.value = heroUrl(s.image);
+    var goHint = document.querySelector("[data-herogohint]");
+    if (goHint) { goHint.textContent = "Кнопка ведёт на: " + heroGoLabel(go); translateTree(goHint); }
+    var row = document.querySelector('[data-herorow="' + i + '"]');
+    if (row && row.parentNode) {
+      var tmp = document.createElement("div");
+      tmp.innerHTML = heroRowHTML(s, i, d.slides.length);
+      translateTree(tmp);
+      row.parentNode.replaceChild(tmp.firstChild, row);
+    }
+    paintHeroPreview();
+    paintSetBar();
   }
 
   /* ---------- admin: «Контент» — the shop's own details --------------------
@@ -16838,6 +17039,25 @@
     try { return Object.keys(contentDiff(contentConf(), contentDraft())).length > 0; }
     catch (e) { return false; }
   }
+  /** The same diff, split the way the settings pages show the document: the
+      announcement bar is on «Главная страница», everything else on «О
+      компании» — so each page's save bar names only the card that is on it. */
+  function contentDirtyFor(page) {
+    var diff;
+    try { diff = contentDiff(contentConf(), contentDraft()); } catch (e) { return false; }
+    var keys = Object.keys(diff);
+    if (page === "home") return keys.indexOf("announcement") >= 0;
+    return keys.some(function (k) { return k !== "announcement"; });
+  }
+  /** «Отменить правки» for one page: that page's part of the draft goes back
+      to what the shop shows; typing made on the other page is left alone. */
+  function contentRevert(page) {
+    var conf;
+    try { conf = JSON.parse(JSON.stringify(contentConf())); } catch (e) { S.contentDraft = null; return; }
+    var d = contentDraft();
+    if (page === "home") { d.announcement = conf.announcement; return; }
+    Object.keys(conf).forEach(function (k) { if (k !== "announcement") d[k] = conf[k]; });
+  }
   function cInput(path, label, ph, max, hint) {
     return '<label class="adm-field">' + label +
       '<input class="adm-input" maxlength="' + max + '" data-contentf="' + path + '" value="' +
@@ -16910,7 +17130,7 @@
         ? '<p class="adm-lead" style="margin:0">Всё, что магазин говорит о себе. Меняется здесь один раз — и меняется везде: ' +
           "в подвале, на «Контактах», в правовых текстах и в письмах.</p>"
         : "") +
-      (contentDirty() ? '<p class="adm-hint adm-hint--warn" style="margin-top:8px">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      // no dirty line here: the page's save bar names this card while it differs (admSetBarHTML)
       '<div style="margin-top:12px">' + cLangPills() + "</div>" +
       '<div class="adm-list">' +
         (!show("company") ? "" : cBlock("company", "Реквизиты",
@@ -16962,8 +17182,8 @@
           cTri("emailFooter", "Строка внизу письма", "input", 300,
             "Одна строка под реквизитами в каждом письме. Пустой язык — в письме на этом языке строки не будет."))) +
       "</div>" +
+      // «Сохранить» is the page's bar (admSetBarHTML); only the reset stays with the card
       '<div class="adm-acts" style="margin-top:16px">' +
-        '<button class="adm-btn" data-contentsave>Сохранить</button>' +
         '<button class="adm-link adm-link--muted" data-contentreset>Сбросить к стандартному</button></div>';
   }
   /** The confirm card's detail for a content save: what changes, then where
@@ -17095,11 +17315,6 @@
     else if (key === "minRedeem") d.loyalty.minRedeem = v;
     return "";
   }
-  function pricingActsHTML() {
-    if (!pricingDirty()) return "";
-    return '<button class="adm-btn" data-admpricingsave>Сохранить</button>' +
-      '<button class="adm-link adm-link--muted" data-admpricingreset>Отменить правки</button>';
-  }
   /* Typing must not cost the caret, so the moving parts of this card are
      repainted on their own instead of through render() — same idiom as
      paintHeroPreview(). The refused field is marked as well as the sentence
@@ -17124,8 +17339,8 @@
     }
     var calc = document.getElementById("pricingcalc");
     if (calc) { calc.innerHTML = admPricingCalcHTML(); translateTree(calc); }
-    var acts = document.getElementById("pricingacts");
-    if (acts) { acts.innerHTML = pricingActsHTML(); translateTree(acts); }
+    // «Сохранить» / «Отменить правки» are the page's bar — lit the same way
+    paintSetBar();
   }
   /* «Сохранить» proposes and the confirm card applies: a discount is money,
      and it lands on every partner's next basket the moment it is saved. */
@@ -17265,7 +17480,7 @@
     return '<div class="adm-form">' +
       '<p class="adm-lead" style="margin:0">Скидка для салонов и мастеров — и то, как покупатели зарабатывают и тратят баллы.</p>' +
       (SRV.admin === true ? "" : '<div class="adm-note">Войдите как владелец, чтобы менять цены и баллы.</div>') +
-      (pricingDirty() ? '<p class="adm-hint adm-hint--warn" style="margin:0">Есть несохранённые изменения — нажмите «Сохранить».</p>' : "") +
+      // no dirty line here: the page's save bar says it (admSetBarHTML, painted by paintPricingState)
       /* «Партнёры и баллы» — the one switch Dim asked for (07.09.2026), off by
          default because Renat said «later». Off, the shop has no wholesale
          tier and no points: nothing is shown about either, on any screen, and
@@ -17275,8 +17490,7 @@
         '<span class="adm-row__sub">салонные цены и баллы за покупки — сразу везде: в магазине, в кабинете, в «Клиентах» и в карточке товара</span></span>' +
         admSwitch("data-partnerson", on, "Партнёры и баллы") + "</div>" +
       (!on
-        ? '<p class="adm-hint" style="margin:0">Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.</p>' +
-          '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div></div>"
+        ? '<p class="adm-hint" style="margin:0">Сейчас выключено: у всех покупателей обычные цены, баллы не начисляются и не списываются. Настройки ниже сохранятся — включите переключатель, и всё вернётся как было.</p>'
         : "") +
       (!on ? "" :
       '<div class="adm-sec__t">Салоны и мастера</div>' +
@@ -17305,8 +17519,7 @@
       '<div class="adm-sec__t">Как это посчитается на заказе в ' + eur(PRICING_EX_BASKET) + "</div>" +
       '<div id="pricingcalc">' + admPricingCalcHTML() + "</div>" +
       // filled in place by paintPricingState() as the owner types
-      '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>" +
-      '<div class="adm-acts" id="pricingacts">' + pricingActsHTML() + "</div>") +
+      '<p class="adm-err" role="alert" data-pricingerr' + (S.pricingErr ? "" : " hidden") + ' style="margin:0">' + esc(S.pricingErr || "") + "</p>") +
       "</div>";
   }
 
@@ -17620,6 +17833,32 @@
   function shipDraft() {
     if (!S.shipDraft) S.shipDraft = cloneRules(SHIP_RULES);
     return S.shipDraft;
+  }
+  /** JSON with the keys in one fixed order — so a cell emptied and refilled
+      with the same number compares equal to the rules it came from. */
+  function jsonCanon(o) {
+    if (o === undefined) return "null";
+    if (!o || typeof o !== "object") return JSON.stringify(o);
+    if (Array.isArray(o)) return "[" + o.map(jsonCanon).join(",") + "]";
+    return "{" + Object.keys(o).sort().map(function (k) { return JSON.stringify(k) + ":" + jsonCanon(o[k]); }).join(",") + "}";
+  }
+  /** What the tariff table means, whichever way it is spelt: no carriers and
+      an empty carriers map are the same thing, a missing markup is 0 / 0. */
+  function shipSig(r) {
+    var m = r.markup || {};
+    return jsonCanon({
+      freeFrom: r.freeFrom === undefined ? null : r.freeFrom,
+      by: r.freeFromByCountry || {},
+      methods: r.methods || {},
+      carriers: r.carriers && Object.keys(r.carriers).length ? r.carriers : null,
+      off: (r.countriesOff || []).slice().sort(),
+      markup: { percent: Number(m.percent) || 0, fixed: Number(m.fixed) || 0 }
+    });
+  }
+  /** Does the table show prices the shop is not yet charging? */
+  function shipDirty() {
+    if (!S.shipDraft) return false;
+    try { return shipSig(S.shipDraft) !== shipSig(SHIP_RULES); } catch (e) { return true; }
   }
   function shipNum(raw, max) {
     var s = String(raw == null ? "" : raw).trim().replace(",", ".");
@@ -18623,8 +18862,25 @@
       '<div class="adm-form" style="margin-top:12px">' +
         '<label class="adm-field">Видна только вам' +
           '<input class="adm-input" data-admcustnotesf value="' + esc(S.admCustNotesDraft) + '" placeholder="например: постоянный клиент, оптовик"></label>' +
-        '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-admcustsavenotes="' + esc(c.id) + '">Сохранить заметку</button></div>' +
+        // the button carries the state (custNoteActsHTML); Enter saves (ADM_ENTER_FORMS)
+        '<div class="adm-acts" data-admcustnoteacts>' + custNoteActsHTML(c) + "</div>" +
       "</div>";
+  }
+  /** Quiet while the box holds what the server holds; ink the moment it
+      differs; «Сохранено ✓» once it is back in step — the cabinet's
+      paintAcctBar idiom, on the one field of this card (r12). */
+  function custNoteDirty(c) { return (S.admCustNotesDraft || "") !== (c.notes || ""); }
+  function custNoteActsHTML(c) {
+    var dirty = custNoteDirty(c), saved = S.custNoteSaved && !dirty;
+    return '<button class="adm-btn adm-btn--row' + (dirty ? "" : " adm-btn--ghost") + '" data-admcustsavenotes="' + esc(c.id) + '"' +
+      (dirty ? "" : " disabled") + ">" + (saved ? "Сохранено ✓" : "Сохранить заметку") + "</button>" +
+      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Не сохранено</span>";
+  }
+  function paintCustNote() {
+    var acts = document.querySelector("[data-admcustnoteacts]");
+    var c = S.admCustDetail && S.admCustDetail.customer;
+    if (!acts || !c) return;
+    acts.innerHTML = custNoteActsHTML(c); translateTree(acts);
   }
   /* «Хочу получать скидки и поздравление ко дню рождения» — when it was
      ticked and where (касса / кабинет / панель), or when it was taken back:
@@ -18868,11 +19124,20 @@
     }).catch(function () { S.admCustBusy = false; toast("Сервер не отвечает"); render(); });
   }
   function saveCustomerNotes(id) {
-    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { notes: S.admCustNotesDraft || null }).then(function (r) {
+    var note = S.admCustNotesDraft || "";
+    // the button says the round trip is on, in place (the card is not re-rendered until the answer)
+    var btn = document.querySelector("[data-admcustsavenotes]");
+    if (btn) { btn.disabled = true; btn.textContent = trText("Сохраняем…", S.lang); }
+    apiSend("/api/admin/customers/" + encodeURIComponent(id) + "/", "PATCH", { notes: note || null }).then(function (r) {
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      if (r.status === 200 && r.body.ok) { toast("Заметка сохранена ✓"); loadAdminCustomers(true); return; }
-      toast("Не получилось сохранить заметку");
-    }).catch(function () { toast("Сервер не отвечает"); });
+      if (r.status === 200 && r.body.ok) {
+        // the card's own copy follows at once, so the button can say «Сохранено ✓» now
+        if (S.admCustDetail && String(S.admCustDetail.customer.id) === String(id)) S.admCustDetail.customer.notes = note || null;
+        S.custNoteSaved = true;
+        toast("Заметка сохранена ✓"); render(); loadAdminCustomers(true); return;
+      }
+      toast("Не получилось сохранить заметку"); render();
+    }).catch(function () { toast("Сервер не отвечает"); render(); });
   }
 
   /* Every string in this table came from a stranger filling in a checkout form —
@@ -20176,7 +20441,9 @@
        black at 4. */
     var low = r.tracked && r.state !== "in";
     return '<div class="adm-row adm-row--tall adm-row--stock">' +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) + "</span>" +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) +
+        // the row «Править» just wrote says so, until it is edited or stepped again (stockCommit)
+        (S.stockSaved === key ? ' <span class="adm-badge adm-badge--sm adm-badge--ok">Сохранено ✓</span>' : "") + "</span>" +
         '<span class="adm-row__sub' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
           (r.variant ? "<span>" + esc(r.variant) + "</span> · " : "") +
           (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : "<span>штрихкод не привязан</span>") + "</span></span>" +
@@ -21972,6 +22239,7 @@
   function stockCommit(key) {
     var r = stockFindRow(key);
     if (!r) return;
+    S.stockSaved = "";
     var jobs = [];
     var eanChanged = (S.stockEditEan || "") !== (r.ean || "");
     /* «Порог «мало»» took the same road «Остаток сейчас» used to (see
@@ -22005,12 +22273,18 @@
         reason: "adjust", ref: S.stockEditReason || undefined
       }).then(function (ok) { return { ok: ok, error: ok ? "" : "move_failed" }; }));
     }
-    if (!jobs.length) { S.stockEdit = ""; render(); return; }
+    // nothing typed — the form folds away and says so, rather than a silent close
+    if (!jobs.length) { S.stockEdit = ""; toast("Изменений нет"); render(); return; }
+    // the button says the round trip is on; the list is redrawn when it lands
+    var btn = document.querySelector('[data-stocksave="' + key.replace(/"/g, "") + '"]');
+    if (btn) { btn.disabled = true; btn.textContent = trText("Сохраняем…", S.lang); }
     Promise.all(jobs).then(function (results) {
       var failed = results.filter(function (x) { return !x.ok; })[0];
       if (!failed) toast("Сохранено ✓");
       else toast(stockSaveErrText(failed) || "Часть изменений не сохранилась");
       S.stockEdit = failed ? key : "";
+      // «Сохранено ✓» on the row itself, where the eye is (stockRowHTML)
+      S.stockSaved = failed ? "" : key;
       reloadStock();
     });
   }
@@ -22804,6 +23078,44 @@
       else if (r.status === 401) { SRV.admin = false; render(); }
       else toast("Не удалось сохранить");
     }).catch(function () { toast("Сервер не отвечает"); });
+  }
+  /* ---- the order card's note (r12) ------------------------------------------
+     The draft is kept in S rather than read off the textarea alone: the card
+     is redrawn on every order poll, and a draft that lives only in the DOM
+     survives a morph but not a reopened card. `saved` is what lets the
+     button say «Сохранено ✓» until the next keystroke. */
+  function orderNoteValue(o) {
+    var d = S.orderNote;
+    return d && d.id === String(o.id) ? d.text : (o.notes || "");
+  }
+  function orderNoteDirty(o) { return orderNoteValue(o) !== (o.notes || ""); }
+  function orderNoteActsHTML(o) {
+    var dirty = orderNoteDirty(o);
+    var saved = !dirty && S.orderNote && S.orderNote.id === String(o.id) && S.orderNote.saved;
+    return '<button class="adm-btn adm-btn--row' + (dirty ? "" : " adm-btn--ghost") + '" data-admnotesave' + (dirty ? "" : " disabled") + ">" +
+      (saved ? "Сохранено ✓" : "Сохранить заметку") + "</button>" +
+      '<span class="adm-hint adm-hint--warn"' + (dirty ? "" : " hidden") + ">Не сохранено</span>";
+  }
+  /** In place, while the owner types — a render() would take the caret. */
+  function paintOrderNote() {
+    var v = admCurOrder(), o = v && v.srv, acts = document.querySelector("[data-admnoteacts]");
+    if (!o || !acts) return;
+    acts.innerHTML = orderNoteActsHTML(o); translateTree(acts);
+  }
+  function srvOrderNoteSave(id, note) {
+    var btn = document.querySelector("[data-admnotesave]");
+    if (btn) { btn.disabled = true; btn.textContent = trText("Сохраняем…", S.lang); }
+    apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", { note: note }).then(function (r) {
+      if (r.status === 200 && r.body.ok) {
+        // the card's own copy follows at once — «Сохранено ✓» now, the poll confirms later
+        var v = admCurOrder();
+        if (v && v.srv && String(v.srv.id) === String(id)) v.srv.notes = note;
+        S.orderNote = { id: String(id), text: note, saved: true };
+        toast("Заметка сохранена ✓"); render(); loadSrvOrders(true);
+      }
+      else if (r.status === 401) { SRV.admin = false; render(); }
+      else { toast("Не удалось сохранить"); render(); }
+    }).catch(function () { toast("Сервер не отвечает"); render(); });
   }
 
   /* ---------- «По счёту — для компаний»: the card's two server calls ------
@@ -25719,7 +26031,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-setrevert]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -26093,6 +26405,7 @@
       var stDelta = Number(stParts[1]);
       var stRow = stockFindRow(stParts[0]);
       if (!stRow) return;
+      if (S.stockSaved === stParts[0]) S.stockSaved = "";   // the row moved on from what «Править» saved
       var was = stRow.tracked ? stRow.qty : 0;
       if (stDelta < 0 && was <= 0) return;
       // paint the new number before the round trip; reloadStock() confirms it
@@ -26107,7 +26420,7 @@
     }
     if (d.admnotesave !== undefined) {
       var noteEl = document.querySelector("[data-admnote]");
-      srvOrderPatch(S.adminOrder, { note: noteEl ? noteEl.value : "" });
+      srvOrderNoteSave(S.adminOrder, noteEl ? noteEl.value : "");
       return;
     }
     /* ---- assistant-work: «Ответить клиенту» — see admOrderMsgHTML() -------- */
@@ -26801,6 +27114,10 @@
           else toast("Розница · " + pa.email, tierEntry);
         }
         else { demoApply(pa); toast("Применено ✓ · журнал в «Настройках»"); }
+        // the settings bar says «Сохранено ✓» for the page whose card just went through
+        if (pa.type === "set_hero" || pa.type === "set_content" || pa.type === "set_pricing" || pa.type === "set_shipping_rules") {
+          S.admSetSaved = S.admSetPage || "";
+        }
         render();
       }
       return;
@@ -26906,6 +27223,24 @@
       if (DEMO.bundles === false && (S.screen === "bundles" || S.screen === "bundle")) S.screen = "home";
       toast(DEMO.bundles !== false ? "Наборы показаны ✓" : "Наборы скрыты ✓"); render(); return;
     }
+    /* ---- «Отменить правки» on a settings page's save bar (admSetBarHTML):
+       the drafts of the cards the bar lists go back to what the shop shows —
+       only those, and only this page's part of a shared draft. ----------- */
+    if (d.setrevert !== undefined) {
+      var rvPage = S.admSetPage || "";
+      if (rvPage === "home" && heroDirty()) {
+        S.heroDraft = null;
+        if (S.heroEdit >= heroConf().slides.length) S.heroEdit = -1;
+      }
+      // the shared content draft is only on these two pages' bars — «Отменить
+      // правки» elsewhere must leave what was typed on «О компании» alone
+      if ((rvPage === "home" || rvPage === "company") && contentDirtyFor(rvPage)) contentRevert(rvPage);
+      if (rvPage === "company") S.invDraft = null;
+      if (rvPage === "delivery") { S.shipDraft = null; S.shipErr = ""; }
+      if (rvPage === "prices") { S.pricingDraft = null; S.pricingErr = ""; S.pricingErrField = ""; }
+      S.admSetSaved = "";
+      render(); return;
+    }
     /* ---- «Главный баннер». Every button here edits the draft only; the shop
        changes on «Сохранить», through the confirm card. ------------------- */
     if (d.heroedit !== undefined) {
@@ -26917,7 +27252,8 @@
     if (d.herolang) { S.heroLang = d.herolang; render(); return; }
     if (d.heroadd !== undefined) {
       var hAdd = heroDraft();
-      if (hAdd.slides.length >= 5) { toast("Больше пяти слайдов не нужно"); return; }
+      // the button is disabled at the ceiling and says why beside itself (admHeroCard); this is the belt
+      if (hAdd.slides.length >= 5) { toast("Максимум 5 слайдов — удалите один, чтобы добавить новый"); return; }
       hAdd.slides.push({
         id: "s" + Date.now().toString(36),
         eyebrow: { RU: "" }, title: { RU: "Новый баннер" }, sub: { RU: "" }, cta: { RU: "Смотреть" },
@@ -26945,15 +27281,17 @@
       if (hOn) hOn.on = hOn.on === false;
       render(); return;
     }
+    // a picture or a link target picked from a tile: patched in place, so the
+    // page stays where the finger is (paintHeroPick — defect 10, 10.09.2026)
     if (d.heroimg) {
       var hImg = heroDraft().slides[S.heroEdit];
       if (hImg) hImg.image = d.heroimg;
-      render(); return;
+      paintHeroPick(); return;
     }
     if (d.herogopick) {
       var hGo = heroDraft().slides[S.heroEdit];
       if (hGo) hGo.go = "product:" + d.herogopick;
-      render(); return;
+      paintHeroPick(); return;
     }
     /* The banner is the first thing every visitor sees, so a save asks first
        — the same overlay card as a tariff or a shipped order (README § State). */
@@ -27099,7 +27437,7 @@
     if (d.admcustadjust) { adjustCustomerPoints(d.admcustadjust); return; }
     if (d.admcustsavenotes) { saveCustomerNotes(d.admcustsavenotes); return; }
     if (d.admpricingsave !== undefined) { savePricing(); render(); return; }
-    if (d.admpricingreset !== undefined) { S.pricingDraft = null; S.pricingErr = ""; S.pricingErrField = ""; render(); return; }
+    // «Отменить правки» for this card is the bar's own data-setrevert above
     // the loyalty switch: a <button aria-pressed> like every other switch in the panel
     if (d.pricingtoggle !== undefined) { var lty = pricingDraft().loyalty; lty.enabled = !lty.enabled; render(); return; }
     /* «Партнёры и баллы»: the outer switch. A draft change like every other
@@ -27109,8 +27447,9 @@
 
     /* ---------- этап 3: настройки, подарочные карты, подключения ---------- */
     // «Настройки»: the index of six and the way back out of a sub-page
-    if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; window.scrollTo({ top: 0 }); render(); return; }
-    if (d.admsetback !== undefined) { S.admSetPage = ""; window.scrollTo({ top: 0 }); render(); return; }
+    // …the bar's «Сохранено ✓» belongs to the page it was earned on
+    if (d.admsetpage !== undefined) { S.admSetPage = d.admsetpage; S.admSetSaved = ""; window.scrollTo({ top: 0 }); render(); return; }
+    if (d.admsetback !== undefined) { S.admSetPage = ""; S.admSetSaved = ""; window.scrollTo({ top: 0 }); render(); return; }
     /* A denomination is a quick, reversible edit: it applies at once and the
        toast offers to take it back (README § State). The last one on cannot be
        switched off — a gift page with no amounts on it is a broken page. */
@@ -27137,6 +27476,7 @@
     if (d.stockedit !== undefined) {
       S.stockEdit = d.stockedit;
       if (d.stockedit) {
+        S.stockSaved = "";   // a «Сохранено ✓» badge next to an open form would be a lie
         var stRow = stockFindRow(d.stockedit);
         if (stRow) {
           S.stockEditEan = stRow.ean || "";
@@ -27754,7 +28094,12 @@
     }
     else if (t.matches("[data-admcustpoints]")) { S.admCustPoints = t.value; }
     else if (t.matches("[data-admcustnote]")) { S.admCustNote = t.value; }
-    else if (t.matches("[data-admcustnotesf]")) { S.admCustNotesDraft = t.value; }
+    // the two notes: the draft, then the button lit in place (r12)
+    else if (t.matches("[data-admcustnotesf]")) { S.admCustNotesDraft = t.value; S.custNoteSaved = false; paintCustNote(); }
+    else if (t.matches("[data-admnote]")) {
+      var noteOrd = admCurOrder();
+      if (noteOrd && noteOrd.srv) { S.orderNote = { id: String(noteOrd.srv.id), text: t.value, saved: false }; paintOrderNote(); }
+    }
     else if (t.matches("[data-notifyf]")) { S.notifyEmail = t.value; }
     else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
     else if (t.matches("[data-shipf]")) { S.ship[t.dataset.shipf] = t.value; }
@@ -27881,13 +28226,20 @@
         if (!hSl[hF] || typeof hSl[hF] !== "object") hSl[hF] = {};
         hSl[hF][S.heroLang || "RU"] = t.value;
         paintHeroPreview();
+        paintSetBar();   // the page's bar lights up with the first keystroke
       }
+    }
+    // the timing on input as well as on change: Enter here is «Сохранить»
+    // (ADM_ENTER_FORMS), and the draft has to hold the number before the click
+    else if (t.matches("[data-herotick]")) {
+      heroDraft().interval = Math.max(2, Math.min(30, Number(t.value) || 6)) * 1000;
+      paintSetBar();
     }
     /* checkout-gaps: the delivery table and the promo form both keep the caret
        — a full render on every keystroke would take it out of the field. The
        draft holds only values that parse; garbage is ignored and the field
        snaps back on the next render. */
-    else if (t.matches("[data-shiprule]")) { setShipDraftField(t.dataset.shiprule, t.value); }
+    else if (t.matches("[data-shiprule]")) { setShipDraftField(t.dataset.shiprule, t.value); paintSetBar(); }
     else if (t.matches("[data-promof]")) {
       if (!S.promoForm) return;
       var pf = t.dataset.promof;
@@ -27933,10 +28285,12 @@
        every field here is a text box the owner is in the middle of typing in,
        and a render would take the caret with it. The card redraws when a
        button is pressed, and «Сохранить» reads the draft, not the DOM. */
-    else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); }
-    else if (t.matches("[data-invsetf]")) { invoiceDraft()[t.dataset.invsetf] = t.value; }
-    else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; }
-    else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; }
+    // …and each lights its own save control in place: the page's bar for the
+    // settings cards, the card's own button for «Неоплаченные заказы»
+    else if (t.matches("[data-contentf]")) { cDraftSet(t.dataset.contentf, t.value); paintSetBar(); }
+    else if (t.matches("[data-invsetf]")) { invoiceDraft()[t.dataset.invsetf] = t.value; paintSetBar(); }
+    else if (t.matches("[data-unpaidf]")) { unpaidDraft()[t.dataset.unpaidf] = t.value; S.unpaidSaved = false; paintUnpaidState(); }
+    else if (t.matches("[data-contenthours]")) { contentDraft().hours[t.dataset.contenthours] = t.value; paintSetBar(); }
     else if (t.matches("[data-instock]")) { S.onlyInStock = t.checked; S.shown = 12; patchCatalog(); }
     else if (t.matches("[data-brand]")) {
       var b = t.dataset.brand;
@@ -28151,10 +28505,11 @@
     }
     else if (t.matches("[data-heroimgurl]")) {
       var uSl = heroDraft().slides[S.heroEdit], uV = t.value.trim();
-      if (uSl && uV) { uSl.image = uV; render(); }
+      if (uSl && uV) { uSl.image = uV; paintHeroPick(); }   // in place — see paintHeroPick
     }
     else if (t.matches("[data-herotick]")) {
       heroDraft().interval = Math.max(2, Math.min(30, Number(t.value) || 6)) * 1000;
+      paintSetBar();
     }
     /* media: the file picker — «Загрузить фото» in the goods editor and the
        banner's own button both land here. On a phone the same input offers the
@@ -28584,13 +28939,28 @@
     ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
     ["[data-admcustnotesf]", "[data-admcustsavenotes]"],
     ["[data-bundlef],[data-bundlepct]", "[data-bundlesave]"],
-    ["[data-mailto]", "[data-mailtest]"]
+    ["[data-mailto]", "[data-mailtest]"],
+    /* r12: the settings cards and the two small cards. Their «Сохранить» is
+       the page's bar (admSetBarHTML) — outside the card the box is in, so
+       admEnterTarget() looks up to the page when the card has no button of
+       its own. Not the banner's search boxes ([data-heroq], [data-heroimgq])
+       and not its URL box: Enter there must never mean «save the banner». */
+    ["[data-unpaidf]", "[data-admunpaidsave]"],
+    ["[data-invsetf]", "[data-adminvsave]"],
+    ["[data-shiprule]", "[data-admshipsave]"],
+    ["[data-pricingf]", "[data-admpricingsave]"],
+    ["[data-contentf],[data-contenthours]", "[data-contentsave]"],
+    ["[data-herof],[data-herotick]", "[data-herosave]"]
   ];
   function admEnterTarget(input) {
     for (var i = 0; i < ADM_ENTER_FORMS.length; i++) {
       if (!input.matches(ADM_ENTER_FORMS[i][0])) continue;
       var scope = input.closest(".adm-card, .adm-form, .adm-page") || document;
       var btn = scope.querySelector(ADM_ENTER_FORMS[i][1]);
+      if (!btn) {
+        var pg = input.closest(".adm-page");
+        btn = pg ? pg.querySelector(ADM_ENTER_FORMS[i][1]) : null;
+      }
       return btn && !btn.disabled ? btn : null;
     }
     return null;
@@ -28603,6 +28973,13 @@
       e.preventDefault();
       var q = (t.value || S.adminQ || "").trim();
       if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+    }
+    // the order card's note is a textarea — Ctrl/Cmd+Enter saves it, plain Enter is a new line
+    if (t && t.matches && t.matches("[data-admnote]") && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      var noteBtn = document.querySelector("[data-admnotesave]");
+      if (noteBtn && !noteBtn.disabled) noteBtn.click();
+      return;
     }
     if (t && t.matches && t.tagName === "INPUT" && S.screen === "admin") {
       var enterBtn = admEnterTarget(t);
