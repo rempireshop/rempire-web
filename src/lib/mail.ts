@@ -55,6 +55,14 @@ export interface SendMailInput {
   idempotencyKey?: string;
   /** Files to send with the letter. Empty/oversized entries are dropped. */
   attachments?: MailAttachment[];
+  /**
+   * Extra message headers — `List-Unsubscribe` and `List-Unsubscribe-Post`
+   * on the marketing letters (src/lib/consent.ts unsubscribeHeaders()), so
+   * the mail client's own «Отписаться» button works. Resend takes them as a
+   * `headers` object in the same POST; nothing here touches the HTTP headers
+   * the request itself is sent with.
+   */
+  headers?: Record<string, string>;
 }
 
 export interface SendMailResult {
@@ -121,6 +129,20 @@ function attachmentPayload(list: MailAttachment[] | undefined): Array<Record<str
     out.push(entry);
   }
   return out.length ? out : undefined;
+}
+
+/* A header is one line: a name of letters, digits and dashes, a value with
+   no line break in it. Anything else is dropped rather than sent — a stray
+   newline in a header value is how a letter grows a second recipient. */
+function headerPayload(headers: Record<string, string> | undefined): Record<string, string> | undefined {
+  if (!headers) return undefined;
+  const out: Record<string, string> = {};
+  for (const [rawName, rawValue] of Object.entries(headers)) {
+    const name = String(rawName ?? "").trim();
+    const value = String(rawValue ?? "").replace(/[\r\n]+/g, " ").trim().slice(0, 2000);
+    if (/^[A-Za-z0-9-]{1,80}$/.test(name) && value) out[name] = value;
+  }
+  return Object.keys(out).length ? out : undefined;
 }
 
 /** The names only — what the e2e sink records and what the tests assert. */
@@ -355,6 +377,9 @@ export async function sendMail(
 
   const attachments = attachmentPayload(input.attachments);
   if (attachments) payload.attachments = attachments;
+
+  const extraHeaders = headerPayload(input.headers);
+  if (extraHeaders) payload.headers = extraHeaders;
 
   let res = await attempt(key, payload, input.idempotencyKey);
   let retried = false;

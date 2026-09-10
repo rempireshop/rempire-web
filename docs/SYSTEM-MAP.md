@@ -387,7 +387,9 @@ card); automatic (payment callbacks).
   meta; qty ≤ 9; persisted in `localStorage["rempire-shop-proto"]`; totals
   `total()` :5132 (free-shipping threshold, promo or gift discount, points).
 - **Checkout** `screenCheckout()` :9501 — three steps «Контакт» (e-mail,
-  «Хочу получать новости и скидки»), «Доставка» / «Получатель» (country incl.
+  «Хочу получать скидки и поздравление ко дню рождения» — lands on the
+  customer row via `src/lib/consent.ts`, stamped `checkout`), «Доставка» /
+  «Получатель» (country incl.
   «Другая страна Европы» → ISO select; methods «Пакомат» / «Курьер до двери» /
   «Самовывоз — Mardi 1, Таллинн»; carrier chips; parcel-point sheet with list +
   Leaflet map; address fields), «Оплата» (`PAYS` :4572: «Банковская ссылка» with
@@ -842,8 +844,11 @@ password; and remembering carts and "tell me when it is back" requests.
 **Who uses it.** Shoppers; automatic (flows); Renat sees the resulting queues.
 
 **How it works.** `050_customers.sql` (`customers`, `login_codes`, `carts`,
-`stock_alerts`); `src/lib/customers.ts` (cookie `rmp_cust` 90 days signed with
-`SESSION_SECRET`, six-digit code hashed, 15 min, 5 attempts). Routes
+`stock_alerts`), `052_marketing_consent.sql` (consent stamps on `customers`,
+the `mail_optouts` stop list); `src/lib/customers.ts` (cookie `rmp_cust` 90
+days signed with `SESSION_SECRET`, six-digit code hashed, 15 min, 5 attempts),
+`src/lib/consent.ts` (the tick, stamped when/where; `optOut`; the per-mailbox
+unsubscribe token). Routes
 `POST /api/account/code/` (3/15 min per IP and per e-mail), `POST /api/account/
 login/`, `GET|PATCH /api/account/me/`, `POST /api/account/logout/`, `GET
 /api/account/orders/<id>/invoice/` (the customer's own invoice PDF — the
@@ -860,10 +865,14 @@ e2e-hook.test.ts`, `tests/security-*`; e2e `account.spec.ts` (code via the
 `E2E_EXPOSE_LOGIN_CODE` door, order visible, profile saved, logout). Manual:
 «Кабинет» → e-mail → «Получить код» → code from the letter → «Войти».
 
-**State today.** Works. Missing (documented): unsubscribe endpoint (link leads
-to the profile checkbox), GDPR self-delete, the «Доставка по умолчанию» block
-prices with the *old* `SHIP` table (:4091) not the live rules (agent finding);
-the checkout newsletter checkbox is never sent (§4).
+**State today.** Works. Since 10.09.2026 «Отписаться» in a letter is real:
+`GET|POST /api/mail/unsubscribe/?u=…&t=…` (one HMAC per mailbox, RFC 8058
+one-click, 30/min per IP) puts the address on `mail_optouts`, which the cart
+and birthday letters skip and the back-in-stock alert does not; the tick
+carries `marketing_at` / `marketing_source` / `marketing_off_at`, and the
+admin list exposes them plus `optedOut`. Missing (documented): GDPR
+self-delete, the «Доставка по умолчанию» block prices with the *old* `SHIP`
+table (:4091) not the live rules (agent finding).
 
 **Simplification candidates.** Q12 (flows), Q44 (account extras: default
 delivery block, birthday field).
@@ -889,7 +898,11 @@ RU/ET/EN, inline-CSS tables, dark-mode logos), `src/lib/mail-hooks.ts`
 letter per language, 7 placeholders, caps 200/1500/300), `src/lib/flows.ts`
 (abandoned cart after 3 h, back-in-stock on the out→in move or the daily sweep,
 birthday `settings.flows.birthdayDays` days early — 0, the day itself, by
-default — with a minted promo, `settings.flows` switches, queue counters),
+default — with a minted promo, `settings.flows` switches, queue counters;
+every one of the three carries a per-mailbox link to `/api/mail/unsubscribe/`
+and the `List-Unsubscribe` / `List-Unsubscribe-Post` headers from
+`src/lib/consent.ts`, and the cart and birthday letters skip addresses on
+`mail_optouts`),
 `src/lib/delivery.ts` (the same daily job closes a `shipped` order when
 Montonio's own shipment status reads as delivered or after
 `settings.delivery.autoDays` days — 0/never by default; no letter either way), `src/lib/notify.ts` (owner ping: Telegram + e-mail to `RESEND_TO`,
@@ -899,7 +912,8 @@ default `info@diipsolutions.eu`, from `REMPIRE QA <onboarding@resend.dev>` when
 (unauthenticated by design, rate-limited; `?format=texts` feeds the editor),
 `POST /api/admin/mail/test/` (20/h, subject `[test]`), `POST /api/admin/mail/
 send/` (customer reply), `GET /api/admin/flows/` (counters), `GET /api/cron/
-flows/`. Admin «Письма» `ADM_MAIL_ROWS` :11062 — seven rows: «Заказ принят»
+flows/`, `GET|POST /api/mail/unsubscribe/` (the letter's own «Отписаться»
+and the mail client's one-click). Admin «Письма» `ADM_MAIL_ROWS` :11062 — seven rows: «Заказ принят»
 («сразу после оплаты», always), «Заказ отправлен» («когда вы нажмёте
 „Отправлен“»), «Товар снова в наличии» (switch `backstock`), «Брошенная корзина»
 («через 3 часа», switch), «Скидка ко дню рождения» («за 3 дня до даты», switch),
@@ -912,7 +926,8 @@ flows/`. Admin «Письма» `ADM_MAIL_ROWS` :11062 — seven rows: «Зак�
 **How to test it.** `tests/emails.test.ts`, `tests/emails-compat.test.ts` (mail-
 client rules), `tests/mail.test.ts`, `tests/mail-hooks.test.ts`, `tests/mail-
 texts.test.ts`, `tests/mail-send.test.ts`, `tests/account-flows.test.ts`
-(flows + cron auth), `tests/partners.test.ts`; e2e `admin-mail.spec.ts` (owner
+(flows + cron auth), `tests/consent.test.ts` (stop list, unsubscribe route,
+the headers on every marketing letter), `tests/partners.test.ts`; e2e `admin-mail.spec.ts` (owner
 text reaches a real paid order's letter), `admin.spec.ts` (shipped letter with
 tracking link via `/api/e2e/mail/`), `admin-sections.spec.ts`. Manual: «Ещё» →
 «Маркетинг» → «Письма» → row → «Адрес для теста» → «Отправить мне тест».

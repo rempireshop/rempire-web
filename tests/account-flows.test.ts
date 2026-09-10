@@ -9,6 +9,7 @@
  * mails customers for anybody who finds the URL.
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { recordMarketingConsent } from "@/lib/consent";
 import { exec, query } from "@/lib/db";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 import {
@@ -103,7 +104,7 @@ beforeEach(async () => {
   await exec(
     // cascade: order_messages (111_order_messages.sql) has a foreign key onto
     // orders, so a plain truncate of orders alone is refused by Postgres.
-    "truncate customers, login_codes, carts, stock_alerts, orders, settings, product_overrides restart identity cascade",
+    "truncate customers, login_codes, carts, stock_alerts, mail_optouts, orders, settings, product_overrides restart identity cascade",
   );
 });
 
@@ -219,7 +220,9 @@ describe("customer profile", () => {
 
   it("patches only the keys it is given and refuses a nonsense birthday", async () => {
     await recordLogin(EMAIL, "RU");
-    await updateCustomer(EMAIL, { name: "Рената", phone: "+372 5 555 555", marketing: true, birthday: "1990-04-17" });
+    await updateCustomer(EMAIL, { name: "Рената", phone: "+372 5 555 555", birthday: "1990-04-17" });
+    // the tick is not a profile field — it goes through src/lib/consent.ts
+    await recordMarketingConsent(EMAIL, "RU", "account");
     let c = await getCustomer(EMAIL);
     expect(c?.name).toBe("Рената");
     expect(c?.marketing).toBe(true);
@@ -501,7 +504,8 @@ describe("birthday flow", () => {
     const today = new Date();
     const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
     await recordLogin(email, "RU");
-    await updateCustomer(email, { birthday: iso, marketing });
+    await updateCustomer(email, { birthday: iso });
+    if (marketing) await recordMarketingConsent(email, "RU", "account");
   }
 
   it("picks today's birthdays that consented, and nobody else", async () => {
@@ -595,9 +599,9 @@ describe("admin counters", () => {
     const today = new Date();
     await recordLogin("bday@example.com", "RU");
     await updateCustomer("bday@example.com", {
-      marketing: true,
       birthday: `1988-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`,
     });
+    await recordMarketingConsent("bday@example.com", "RU", "account");
 
     // «Заказ ждёт оплаты» has its own queue now; no unpaid order was made here
     expect(await flowCounters()).toEqual({ carts: 1, alerts: 1, birthdays: 1, unpaid: 0 });

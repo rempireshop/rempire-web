@@ -13,6 +13,13 @@
  * Nothing in here throws. A flow that fails is a flow that did not send; the
  * shop keeps selling.
  *
+ * Who may be written to (src/lib/consent.ts): an address on the stop list
+ * `mail_optouts` — «Отписаться» from any of the letters — gets no cart
+ * reminder and no birthday letter, whatever the tick on its row says; a
+ * «снова в наличии» alert is something the shopper asked for by name and is
+ * never blocked by it. Every marketing letter carries its own unsubscribe
+ * link and the RFC 8058 headers, so the way out is one click from the letter.
+ *
  * Deliberately imports `@/lib/db` and not `@/lib/orders`: orders.ts calls back
  * into this file (the back-in-stock hook in `upsertOverride`), and a top-level
  * cycle between the two would be a live hazard for a rarely-exercised path.
@@ -22,6 +29,7 @@ import { renderBackInStock } from "@/emails/back-in-stock";
 import { renderBirthday } from "@/emails/birthday";
 import { baseUrl, normalizeLang } from "@/emails/layout";
 import { cleanMailTexts, setMailTextsOverride } from "@/emails/texts";
+import { optedOutSet, unsubscribeHeaders, unsubscribeUrl } from "@/lib/consent";
 import { query } from "@/lib/db";
 import { sendRendered } from "@/lib/mail";
 import {
@@ -238,11 +246,6 @@ function resumeUrl(lang: LangCode, items: CartLine[]): string {
   return `${baseUrl()}/shop2${seg}/checkout/?resume=${encodeURIComponent(makeResumeToken(items))}`;
 }
 
-function accountUrl(lang: LangCode): string {
-  const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
-  return `${baseUrl()}/shop2${seg}/account/`;
-}
-
 function productUrl(lang: LangCode, id: string): string {
   const seg = lang === "ET" ? "/et" : lang === "EN" ? "/en" : "";
   return `${baseUrl()}/shop2${seg}/p/${encodeURIComponent(id)}/`;
@@ -266,6 +269,12 @@ const BATCH = 100;
  * `reminded_at` is stamped **before** the send, not after: a crash between the
  * two costs one letter, while the other order costs the customer a second copy
  * every time the cron runs.
+ *
+ * An address on the stop list (`mail_optouts` — the person pressed
+ * «Отписаться» in an earlier letter) is skipped and its cart stamped the same
+ * way: it must not be re-selected and re-counted on every run, and no letter
+ * is exactly what was asked for. `reason: "opted_out"` in the report says how
+ * many.
  */
 export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
@@ -294,8 +303,14 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
     [cutoff],
   );
 
+  /* Read before any stamp goes down: a stop list that cannot be read means
+     this run sends nothing (the throw is caught in runFlows), never "send to
+     everybody and hope". */
+  const blocked = await optedOutSet(rows.map((r) => r.email));
+
   let sent = 0;
   let skipped = 0;
+  let reason: string | undefined;
   for (const row of rows) {
     const items = parseItems(row.items);
     if (!items.length) {
@@ -304,6 +319,11 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
       continue;
     }
     await query("update carts set reminded_at = now() where id = $1", [row.id]);
+    if (blocked.has(row.email)) {
+      skipped += 1;
+      reason = "opted_out";
+      continue;
+    }
     const lang = normalizeLangCode(row.lang);
     const mail = renderAbandonedCart(
       {
@@ -311,7 +331,7 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
         lang,
         items,
         total: Number(row.total) || undefined,
-        unsubscribeUrl: accountUrl(lang),
+        unsubscribeUrl: unsubscribeUrl(row.email, lang, "marketing"),
       },
       normalizeLang(lang),
       resumeUrl(lang, items),
@@ -319,11 +339,12 @@ export async function runAbandonedCarts(now: number = Date.now()): Promise<FlowR
     const res = await sendRendered(row.email, mail, {
       tags: { template: "abandoned-cart", lang: lang.toLowerCase() },
       idempotencyKey: `cart:${row.id}`,
+      headers: unsubscribeHeaders(row.email, lang, "marketing"),
     });
     if (res.ok && !res.skipped) sent += 1;
     else skipped += 1;
   }
-  return { sent, skipped };
+  return { sent, skipped, reason };
 }
 
 function parseItems(v: unknown): CartLine[] {
@@ -419,6 +440,9 @@ async function sendStockAlerts(alerts: StockAlertRow[], known?: Map<string, Aler
     // Stamped first: a repeat is worse than a miss (see runAbandonedCarts).
     await markStockAlertSent(alert.id);
     const lang = normalizeLangCode(alert.lang);
+    /* Kind "backstock", not "marketing": this letter was asked for by name,
+       so the stop list does not apply to it — and its own link cancels the
+       person's other pending alerts rather than only the tick. */
     const mail = renderBackInStock(
       {
         id: p.id,
@@ -426,13 +450,14 @@ async function sendStockAlerts(alerts: StockAlertRow[], known?: Map<string, Aler
         title: p.name,
         price: p.price,
         url: productUrl(lang, p.id),
-        unsubscribeUrl: accountUrl(lang),
+        unsubscribeUrl: unsubscribeUrl(alert.email, lang, "backstock"),
       },
       normalizeLang(lang),
     );
     const res = await sendRendered(alert.email, mail, {
       tags: { template: "back-in-stock", lang: lang.toLowerCase() },
       idempotencyKey: `stock:${alert.id}`,
+      headers: unsubscribeHeaders(alert.email, lang, "backstock"),
     });
     if (res.ok && !res.skipped) sent += 1;
     else skipped += 1;
@@ -559,10 +584,22 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   );
   if (!rows.length) return { sent: 0, skipped: 0 };
 
+  /* `marketing = true` above is the tick; this is the stop list. The link
+     turns the tick off on a row it finds, so the two rarely disagree — but a
+     row written after the click, or by hand, must still not get a letter.
+     Not stamped: no letter went out, and the query only sees this birthday
+     for the days the window covers anyway. */
+  const blocked = await optedOutSet(rows.map((r) => r.email));
+
   let sent = 0;
   let skipped = 0;
   let reason: string | undefined;
   for (const row of rows) {
+    if (blocked.has(row.email)) {
+      skipped += 1;
+      reason = "opted_out";
+      continue;
+    }
     const promo = await promoForBirthday(flows, now);
     if (!promo) {
       /* No promo module and no settings.flows.birthdayCode: a birthday letter
@@ -575,7 +612,7 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
     await query("update customers set birthday_sent_year = $2 where id = $1", [row.id, year]);
     const lang = normalizeLangCode(row.lang);
     const mail = renderBirthday(
-      { email: row.email, name: row.name ?? "", lang, unsubscribeUrl: accountUrl(lang) },
+      { email: row.email, name: row.name ?? "", lang, unsubscribeUrl: unsubscribeUrl(row.email, lang, "marketing") },
       normalizeLang(lang),
       promo.code,
       { percent: flows.birthdayPercent, expires: promo.expires },
@@ -583,6 +620,7 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
     const res = await sendRendered(row.email, mail, {
       tags: { template: "birthday", lang: lang.toLowerCase() },
       idempotencyKey: `bday:${row.id}:${year}`,
+      headers: unsubscribeHeaders(row.email, lang, "marketing"),
     });
     if (res.ok && !res.skipped) sent += 1;
     else skipped += 1;
@@ -852,15 +890,19 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
 /* ---------- the admin's three counters ------------------------------------ */
 
 export interface FlowCounters {
-  /** Carts waiting for a reminder — abandoned, never reminded, no order since. */
+  /** Carts waiting for a reminder — abandoned, never reminded, no order since, address not opted out. */
   carts: number;
   /** Addresses waiting for a «снова в наличии» letter. */
   alerts: number;
-  /** Birthdays in the next seven days, marketing consent given. */
+  /** Birthdays in the next seven days, marketing consent given, address not opted out. */
   birthdays: number;
   /** Unpaid orders old enough for the reminder and not reminded yet. */
   unpaid: number;
 }
+
+/* The panel's «в очереди N» must not promise a letter the run will refuse:
+   the stop list is subtracted here the same way the runs skip it. */
+const NOT_OPTED_OUT = (email: string) => `not exists (select 1 from mail_optouts mo where mo.email = ${email})`;
 
 export async function flowCounters(now: number = Date.now()): Promise<FlowCounters> {
   const out: FlowCounters = { carts: 0, alerts: 0, birthdays: 0, unpaid: 0 };
@@ -869,7 +911,8 @@ export async function flowCounters(now: number = Date.now()): Promise<FlowCounte
     const [carts] = await query<{ n: string | number }>(
       `select count(*)::int as n from carts c
         where c.reminded_at is null and c.recovered_at is null and c.updated_at <= $1
-          and not exists (select 1 from orders o where lower(o.email) = c.email and o.created_at >= c.updated_at)`,
+          and not exists (select 1 from orders o where lower(o.email) = c.email and o.created_at >= c.updated_at)
+          and ${NOT_OPTED_OUT("c.email")}`,
       [cutoff],
     );
     out.carts = Number(carts?.n) || 0;
@@ -896,9 +939,10 @@ export async function flowCounters(now: number = Date.now()): Promise<FlowCounte
     // about how a JS array becomes a Postgres one, and seven holes cost nothing.
     const holes = days.map((_, i) => `$${i + 1}`).join(",");
     const [bd] = await query<{ n: string | number }>(
-      `select count(*)::int as n from customers
-        where birthday is not null and marketing = true
-          and (extract(month from birthday) * 100 + extract(day from birthday)) in (${holes})`,
+      `select count(*)::int as n from customers c
+        where c.birthday is not null and c.marketing = true
+          and (extract(month from c.birthday) * 100 + extract(day from c.birthday)) in (${holes})
+          and ${NOT_OPTED_OUT("c.email")}`,
       days,
     );
     out.birthdays = Number(bd?.n) || 0;

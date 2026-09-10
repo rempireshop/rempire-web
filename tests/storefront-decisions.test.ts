@@ -13,8 +13,9 @@
  *   · the Estonian blog label the request-time pages carry.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { recordMarketingConsent, withdrawMarketingConsent } from "@/lib/consent";
 import { exec, query } from "@/lib/db";
-import { getCustomer, listCustomerOrders, recordMarketingConsent, updateCustomer } from "@/lib/customers";
+import { getCustomer, listCustomerOrders } from "@/lib/customers";
 import { cleanGiftAmounts, giftAmountsOnSale } from "@/lib/giftcards";
 import { giftPdfToken } from "@/lib/giftcard-pdf";
 import { isKnownShopPath, notFoundPageResponse, shopPath } from "@/lib/notfound-page";
@@ -198,7 +199,7 @@ describe("the newsletter tick at the checkout", () => {
 
   it("creates a row for a guest who has never signed in", async () => {
     expect(await getCustomer("guest@example.com")).toBeNull();
-    expect(await recordMarketingConsent("Guest@Example.COM", "ET")).toBe(true);
+    expect(await recordMarketingConsent("Guest@Example.COM", "ET", "checkout")).toBe(true);
     const c = await getCustomer("guest@example.com");
     expect(c?.marketing).toBe(true);
     expect(c?.lang).toBe("ET");
@@ -208,13 +209,13 @@ describe("the newsletter tick at the checkout", () => {
      said yes in their account last month, and an order is no place to revoke
      that silently. Consent only ever goes ON from here. */
   it("never turns an existing consent off", async () => {
-    await recordMarketingConsent("someone@example.com");
+    await recordMarketingConsent("someone@example.com", "RU", "checkout");
     expect((await getCustomer("someone@example.com"))?.marketing).toBe(true);
     // the account screen is where it comes off…
-    await updateCustomer("someone@example.com", { marketing: false });
+    await withdrawMarketingConsent("someone@example.com", "account");
     expect((await getCustomer("someone@example.com"))?.marketing).toBe(false);
     // …and a second order with the box ticked turns it back on
-    await recordMarketingConsent("someone@example.com");
+    await recordMarketingConsent("someone@example.com", "RU", "checkout");
     expect((await getCustomer("someone@example.com"))?.marketing).toBe(true);
   });
 
