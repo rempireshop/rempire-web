@@ -1337,7 +1337,8 @@
         "TEST10 стоит в списке.",
         "TESTSHIP стоит в списке.",
         "У обоих переключатель стоит на «включён».",
-        "Кнопки удаления нет — код можно только выключить."
+        "Кнопки удаления нет — код можно только выключить.",
+        "«Создать» и «Отмена» стоят в полосе внизу, над навигацией."
       ],
       "why": "Неработающий код в рассылке выглядит как обман.",
       "risk": "med",
@@ -1354,7 +1355,8 @@
           "TEST10 is in the list.",
           "TESTSHIP is in the list.",
           "Both stand at «включён» (on).",
-          "There is no delete button — a code can only be switched off."
+          "There is no delete button — a code can only be switched off.",
+          "«Создать» and «Отмена» sit in the bar at the bottom, above the navigation."
         ],
         "why": "A code that does not work in a mailing looks like a swindle."
       }
@@ -3309,13 +3311,15 @@
       "steps": [
         "Войдя в кабинет, открыть «Мои заказы».",
         "Найти заказ, который вы отметили отправленным.",
-        "Найти заказ на подарочную карту."
+        "Найти заказ на подарочную карту.",
+        "Найти заказ по счёту, если такой оформляли."
       ],
       "expect": [
         "У каждого заказа виден номер, дата, сумма и состояние.",
         "Отправленный заказ показан как «Отправлен».",
         "У заказа с картами есть «Скачать подарочную карту (PDF)».",
-        "Ссылок столько, сколько карт в заказе."
+        "Ссылок столько, сколько карт в заказе.",
+        "У заказа по счёту есть «Скачать счёт (PDF)», и открывается тот же PDF, что в письме."
       ],
       "why": "Покупатель, не видящий своего заказа, пишет вам, и это ваше время.",
       "risk": "med",
@@ -3325,13 +3329,15 @@
         "steps": [
           "Signed into the account, open «Мои заказы» (my orders).",
           "Find the order you marked as dispatched.",
-          "Find the gift-card order."
+          "Find the gift-card order.",
+          "Find an invoice order, if one was placed."
         ],
         "expect": [
           "Every order shows its number, date, total and state.",
           "A dispatched order shows as «Отправлен».",
           "A gift-card order has «Скачать подарочную карту (PDF)».",
-          "There are as many links as there are cards."
+          "There are as many links as there are cards.",
+          "An invoice order has «Скачать счёт (PDF)», opening the same PDF as the letter."
         ],
         "why": "A buyer who cannot see their order writes to you."
       }
@@ -3454,13 +3460,16 @@
       "title": "Доставка по умолчанию",
       "steps": [
         "В кабинете открыть «Доставка по умолчанию».",
-        "Выбрать страну, способ, перевозчика и пакомат и сохранить.",
+        "Выбрать страну, способ, перевозчика и пакомат.",
+        "Нажать «Сохранить» в полосе внизу.",
         "Набрать новую корзину и дойти до шага доставки.",
-        "Вернуться в кабинет и нажать «Выйти».",
-        "Снова оформить корзину."
+        "Войти в кабинет с другого телефона и снова дойти до шага доставки.",
+        "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
+        "Пока выбор не сохранён, внизу написано «Изменения не сохранены».",
         "Сохранённая доставка подставляется в кассу сама.",
+        "На другом телефоне после входа она подставляется тоже.",
         "После «Выйти» она больше не подставляется.",
         "На общем компьютере следующий человек чужого пакомата не видит."
       ],
@@ -3471,13 +3480,16 @@
         "title": "Default delivery",
         "steps": [
           "In the account open «Доставка по умолчанию» (default delivery).",
-          "Choose a country, a method, a carrier and a locker, and save.",
+          "Choose a country, a method, a carrier and a locker.",
+          "Press «Сохранить» in the bar at the bottom.",
           "Fill a new cart and get to the delivery step.",
-          "Go back to the account and press «Выйти» (sign out).",
-          "Go through the checkout again."
+          "Sign in on another phone and get to the delivery step again.",
+          "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
+          "Until the choice is saved, the bottom bar says «Изменения не сохранены».",
           "The saved delivery fills itself in at the checkout.",
+          "On the other phone, once signed in, it fills in too.",
           "After «Выйти» it stops filling in.",
           "On a shared computer the next person sees no stranger's locker."
         ],
@@ -3495,11 +3507,15 @@
         "В кабинете открыть «Мои данные».",
         "Заполнить имя, телефон и день рождения.",
         "Снять и снова поставить галочку про новости.",
-        "Нажать «Сохранить» и перезагрузить страницу."
+        "Нажать «Сохранить» в полосе внизу и перезагрузить страницу.",
+        "Набрать корзину и дойти до первого шага кассы."
       ],
       "expect": [
+        "Пока есть несохранённые правки, внизу написано «Изменения не сохранены».",
+        "После сохранения там стоит «Сохранено ✓».",
         "После перезагрузки имя, телефон и день рождения на месте.",
-        "Галочка про новости выключается и включается."
+        "Галочка про новости выключается и включается.",
+        "На кассе галочка про новости стоит так же, как в кабинете."
       ],
       "why": "День рождения нужен для поздравления со скидкой, а отписка — требование закона.",
       "risk": "med",
@@ -3510,11 +3526,15 @@
           "In the account open «Мои данные» (my details).",
           "Fill in the name, the phone and the date of birth.",
           "Untick the news box and tick it again.",
-          "Press «Сохранить» and reload the page."
+          "Press «Сохранить» in the bar at the bottom and reload the page.",
+          "Fill a cart and get to the first step of the checkout."
         ],
         "expect": [
+          "While there are unsaved edits, the bottom bar says «Изменения не сохранены».",
+          "Once saved, it says «Сохранено ✓».",
           "After the reload the name, phone and date of birth remain.",
-          "The news tick switches off and on again."
+          "The news tick switches off and on again.",
+          "At the checkout the news box is ticked the same way as in the account."
         ],
         "why": "The birthday drives the discount letter; unsubscribing is required by law."
       }
@@ -3575,7 +3595,8 @@
       "expect": [
         "В пришедшем тесте стоит ваш текст, а не старый.",
         "Вместо вставленного поля — настоящее имя покупателя.",
-        "«Вернуть стандартный текст» возвращает письмо к исходному."
+        "«Вернуть стандартный текст» возвращает письмо к исходному.",
+        "«Сохранить» стоит в полосе внизу, над навигацией."
       ],
       "why": "Если правки не сохраняются, письма так и остаются чужими.",
       "risk": "low",
@@ -3592,7 +3613,8 @@
         "expect": [
           "The test that arrives carries your text, not the old one.",
           "The inserted field has turned into a real name.",
-          "«Вернуть стандартный текст» brings the original letter back."
+          "«Вернуть стандартный текст» brings the original letter back.",
+          "«Сохранить» sits in the bar at the bottom, above the navigation."
         ],
         "why": "If your edits do not save, the letters stay somebody else's."
       }
@@ -3608,12 +3630,14 @@
         "Открыть «Письма» → «Заказ принят».",
         "Переключить «Язык письма» на эстонский и посмотреть предпросмотр.",
         "Переключить на английский и посмотреть предпросмотр.",
-        "Отправить себе тест на каждом из трёх языков."
+        "Отправить себе тест на каждом из трёх языков.",
+        "Оформить тестовый заказ на английской версии сайта и открыть письмо «Заказ принят»."
       ],
       "expect": [
         "В эстонском письме нет ни одного русского слова.",
         "В английском письме русских слов тоже нет.",
-        "Тема, текст и кнопки — всё на одном языке."
+        "Тема, текст и кнопки — всё на одном языке.",
+        "В письме о заказе название товара переведено: «— shampoo», «215 ml»."
       ],
       "why": "Русская строчка в эстонском письме чаще попадает в спам.",
       "risk": "med",
@@ -3624,12 +3648,14 @@
           "Open «Письма» → «Заказ принят».",
           "Switch «Язык письма» (letter language) to Estonian and look at the preview.",
           "Switch to English and look at the preview.",
-          "Send yourself a test in each of the three languages."
+          "Send yourself a test in each of the three languages.",
+          "Place a test order on the English site and open the «Заказ принят» letter."
         ],
         "expect": [
           "The Estonian letter carries no Russian word at all.",
           "The English letter has no Russian in it either.",
-          "Subject, body and buttons are all in one language."
+          "Subject, body and buttons are all in one language.",
+          "In the order letter the product name is translated: «— shampoo», «215 ml»."
         ],
         "why": "A Russian line in an Estonian letter lands in spam more often."
       }
@@ -3761,14 +3787,16 @@
       "steps": [
         "Открыть почту, которую указали для счёта при оформлении «По счёту».",
         "Найти письмо со счётом и открыть вложенный PDF.",
-        "Проверить номер, срок оплаты, суммы, IBAN и реквизиты обеих сторон."
+        "Проверить номер, срок оплаты, суммы, IBAN и реквизиты обеих сторон.",
+        "Оформить ещё один такой заказ на английской версии сайта и открыть его счёт."
       ],
       "expect": [
-        "Письмо лежит в ящике, указанном для счёта.",
-        "Это может быть не тот ящик, что у заказа.",
+        "Письмо лежит в ящике, указанном для счёта — пусть и не в том, что у заказа.",
         "В PDF номер счёта вида A-2026-0001.",
         "В счёте налог 24 % и IBAN магазина.",
-        "Реквизиты покупателя такие же, как их вписали."
+        "Реквизиты покупателя такие же, как их вписали.",
+        "Подписи и суммы в блоке оплаты не наезжают друг на друга.",
+        "В английском счёте название и объём по-английски: «— shampoo», «215 ml»."
       ],
       "why": "Счёт без IBAN оплатить нельзя, а неверный налог — это вопрос от налоговой.",
       "risk": "high",
@@ -3778,14 +3806,16 @@
         "steps": [
           "Open the mailbox given for the invoice when ordering «По счёту».",
           "Find the invoice letter and open the attached PDF.",
-          "Check the number, the payment term, the totals, the IBAN and both parties' details."
+          "Check the number, the payment term, the totals, the IBAN and both parties' details.",
+          "Place one more such order on the English site and open its invoice."
         ],
         "expect": [
-          "The letter is in the mailbox given for the invoice.",
-          "That may not be the same mailbox as the order's.",
+          "The letter is in the mailbox given for the invoice — even if not the order's.",
           "The PDF has an invoice number like A-2026-0001.",
           "The invoice shows tax at 24 % and the shop's IBAN.",
-          "The buyer's details are exactly as they were typed."
+          "The buyer's details are exactly as they were typed.",
+          "In the payment box the labels and the amounts do not run into each other.",
+          "On the English invoice the name and volume are English: «— shampoo», «215 ml»."
         ],
         "why": "An invoice with no IBAN cannot be paid, and wrong tax means questions."
       }
@@ -4691,11 +4721,15 @@
       "title": "Добавить и убрать объём",
       "steps": [
         "Нажать «+ Размер» на вкладке «Размеры и цены».",
-        "Вписать объём и цену и сохранить.",
+        "Вписать объём и цену.",
+        "Нажать «Сканер» у поля «Штрихкод» и навести камеру на код с упаковки.",
+        "Нажать «Сохранить товар» в полосе внизу.",
         "Открыть товар в магазине и выбрать новый объём.",
         "Вернуться, убрать этот объём крестиком и сохранить снова."
       ],
       "expect": [
+        "Код с упаковки встал в поле «Штрихкод» сам, без набора руками.",
+        "Полоса «Сохранить товар» стоит над нижней навигацией, а не под ней.",
         "Новый объём виден в магазине со своей ценой.",
         "Его можно выбрать и положить в корзину.",
         "После удаления объём пропал со страницы товара.",
@@ -4708,11 +4742,15 @@
         "title": "Adding and removing a size",
         "steps": [
           "In the product editor, on the «Размеры и цены» tab, press «+ Размер».",
-          "Type in the size and the price, and save.",
+          "Type in the size and the price.",
+          "Press «Сканер» next to the «Штрихкод» field and point the camera at the packaging's code.",
+          "Press «Сохранить товар» in the bar at the bottom.",
           "Open the product in the shop and choose the new size.",
           "Go back, remove that size with the cross and save again."
         ],
         "expect": [
+          "The code from the packaging landed in the «Штрихкод» field by itself, nothing typed.",
+          "The «Сохранить товар» bar sits above the bottom navigation, not under it.",
           "The new size shows in the shop at its own price.",
           "You can choose it and put it in the cart.",
           "After deleting, the size is gone from the product page.",
@@ -4810,6 +4848,7 @@
       ],
       "expect": [
         "Фотография загрузилась и встала первой.",
+        "На телефоне у каждой фотографии свой ряд кнопок, ничего не наезжает на соседнюю.",
         "В магазине фотографии листаются пальцем.",
         "Слишком большой файл не проходит, и об этом пишут."
       ],
@@ -4826,6 +4865,7 @@
         ],
         "expect": [
           "The photo uploaded and sits first.",
+          "On the phone each photo has its own row of buttons; nothing overlaps the next one.",
           "In the shop the photos swipe with a finger.",
           "A file that is too big is refused with a message."
         ],
@@ -4876,11 +4916,12 @@
         "Открыть «Товары» и нажать «+ Товар».",
         "Заполнить бренд, название и раздел.",
         "Вписать цену на «Размеры и цены» и добавить второй объём.",
-        "Нажать «Сохранить товар».",
+        "Нажать «Сохранить товар» в полосе внизу.",
         "Добавить фотографию и сохранить ещё раз.",
         "Найти товар в магазине через поиск и купить его."
       ],
       "expect": [
+        "«Сохранить товар» и «Отмена» стоят над нижней навигацией, кружок «+» их не закрывает.",
         "Товар сразу виден в магазине.",
         "Поиск его находит.",
         "Он кладётся в корзину и покупается.",
@@ -4895,11 +4936,12 @@
           "«Товары» → «+ Товар».",
           "Fill in the brand, the name and the section.",
           "On «Размеры и цены» type in a price and add a second size.",
-          "Press «Сохранить товар».",
+          "Press «Сохранить товар» in the bar at the bottom.",
           "Add a photo and save again.",
           "Find the product in the shop through the search and buy it."
         ],
         "expect": [
+          "«Сохранить товар» and «Отмена» sit above the bottom navigation, uncovered by the «+» button.",
           "The product shows in the shop straight away.",
           "The search finds it.",
           "It goes into the cart and can be bought.",
@@ -4925,7 +4967,8 @@
         "Под ценой видно, сколько стоят товары по отдельности.",
         "Набор дороже этой суммы сохранить не дают.",
         "Сохранённый набор виден в магазине на главной и в «Наборах».",
-        "В корзину он ложится одной строкой."
+        "В корзину он ложится одной строкой.",
+        "«Сохранить» и «Отмена» стоят в полосе внизу, над навигацией."
       ],
       "why": "Набор дороже своих частей отпугивает покупателя прямо на витрине.",
       "risk": "med",
@@ -4942,7 +4985,8 @@
           "Under the price you see what the products cost separately.",
           "A set dearer than that sum will not save.",
           "The saved set shows on the home page and under «Наборы».",
-          "It goes into the cart as a single line."
+          "It goes into the cart as a single line.",
+          "«Сохранить» and «Отмена» sit in the bar at the bottom, above the navigation."
         ],
         "why": "A set dearer than its parts turns the buyer away."
       }
@@ -5146,7 +5190,8 @@
       ],
       "expect": [
         "Партнёр появился в списке с пометкой партнёра.",
-        "На его почту пришло письмо."
+        "На его почту пришло письмо.",
+        "«Сохранить» и «Отмена» стоят в полосе внизу, над навигацией."
       ],
       "why": "Салон, договорившийся по телефону, должен получить свои цены в тот же день.",
       "risk": "med",
@@ -5160,7 +5205,8 @@
         ],
         "expect": [
           "The partner is in the list with a partner marker.",
-          "A letter has arrived in their mailbox."
+          "A letter has arrived in their mailbox.",
+          "«Сохранить» and «Отмена» sit in the bar at the bottom, above the navigation."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
       }
