@@ -466,7 +466,8 @@ test.describe("gift card — refunds, both ways", () => {
 
       await loginAsAdmin(page);
       await page.locator('[data-admtab="orders"][aria-current]:visible').first().click();
-      await page.locator('[data-admfilter="new"]').click();
+      // «Обзор» draws the queue twice once it is long — the head button and the row — either opens the list
+      await page.locator('[data-admfilter="new"]').first().click();
       await expect(page.locator(`[data-admorder]:has-text("${shopOrder}")`).first(), "the card-paid order is not in «Отправить»").toBeVisible();
 
       /* 4) The order that BOUGHT the card cannot be refunded while the card
