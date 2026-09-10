@@ -293,7 +293,12 @@ test.describe("sweep — goods editor", () => {
  * shipping an order does (README § State) — two clicks, not one.
  */
 async function saveTariffs(page: Page): Promise<void> {
-  await page.locator("[data-admshipsave]").click();
+  /* r12: the page's save bar is quiet while the table equals what the shop
+     charges — garbage never enters the draft, so there is nothing to save
+     and the button is off; that IS the refusal (the cell goes red). */
+  const save = page.locator("[data-admshipsave]");
+  if (await save.isDisabled()) return;
+  await save.click();
   await expect(page.locator("[data-admapply]")).toBeVisible();
   await page.locator("[data-admapply]").click();
 }

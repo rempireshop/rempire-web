@@ -30030,7 +30030,14 @@
        — a full render on every keystroke would take it out of the field. The
        draft holds only values that parse; garbage is ignored and the field
        snaps back on the next render. */
-    else if (t.matches("[data-shiprule]")) { setShipDraftField(t.dataset.shiprule, t.value); paintSetBar(); }
+    else if (t.matches("[data-shiprule]")) {
+      /* out of range («abc», «-5», «999999») is not taken into the draft, so
+         the page's bar rightly stays quiet — the cell says why in red */
+      var shipRaw = String(t.value).trim().replace(",", "."), shipMax = t.dataset.shiprule.indexOf("free:") === 0 ? 10000 : 99;
+      var shipBad = shipRaw !== "" && !/^(нет|no|-|—)$/i.test(shipRaw) && !(isFinite(Number(shipRaw)) && Number(shipRaw) >= 0 && Number(shipRaw) <= shipMax);
+      if (shipBad) t.setAttribute("aria-invalid", "true"); else t.removeAttribute("aria-invalid");
+      setShipDraftField(t.dataset.shiprule, t.value); paintSetBar();
+    }
     else if (t.matches("[data-promof]")) {
       if (!S.promoForm) return;
       var pf = t.dataset.promof;
