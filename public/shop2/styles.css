@@ -937,6 +937,35 @@ body:has(.stickybar) .ftr {
 
 /* ---------- account ---------- */
 .acct__top { display: flex; justify-content: space-between; align-items: baseline; }
+/* One Save for the whole profile form, in a bar that follows the page to the
+   bottom — the admin's .adm-savebar idiom in the shop's own dress (the ink
+   rule, the shop's own .btn). Renat, 10.09.2026: the button sat between the
+   birthday and the delivery block, so he could not tell whether either had
+   been saved. Sticky, not fixed: it is the last thing in the form, so it
+   rides the bottom edge while the form is on screen and scrolls away with it
+   before the footer — nothing to reserve, nothing covered. The ghost button
+   is the quiet state (nothing differs from the server); app.js swaps it for
+   the ink one the moment a field does (paintAcctBar). */
+.acctbar {
+  position: sticky; bottom: 0; z-index: var(--z-bar);
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-top: 28px; padding: 12px 0;
+  background: var(--page); border-top: 1px solid var(--ink);
+}
+.acctbar__note { flex: 1; min-width: 0; font-size: 12.5px; color: var(--muted); }
+.acctbar__err { flex-basis: 100%; margin: 0; }
+.acctbar .btn { flex-shrink: 0; }
+/* the quiet state still has to be readable — «Сохранено ✓» is the answer to
+   the question this bar exists for, not a control nobody can press */
+.acctbar .btn--ghost[disabled] { opacity: .6; }
+/* On a phone the bar sits above the bottom nav and runs edge to edge like
+   .stickybar, so it reads as the screen's own bar, not a ruled paragraph. */
+@media (max-width: 767px) {
+  .acctbar {
+    bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+    margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter);
+  }
+}
 .rowcard { border: 1px solid var(--rule); padding: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .rowcard__id { font-weight: 600; }
 .rowcard__code { font-size: 13px; letter-spacing: .08em; }
@@ -1338,7 +1367,8 @@ body.is-locked .sbot { display: none; }
    the phone query or it outranks the desktop reset — and `.stickybar` is
    `display: none` on a desktop but still in the DOM, so it would match there. */
 @media (max-width: 767px) {
-  body:has(.stickybar) #rempire-feedback > button[title="Оставить комментарий"] {
+  body:has(.stickybar) #rempire-feedback > button[title="Оставить комментарий"],
+  body:has(.acctbar) #rempire-feedback > button[title="Оставить комментарий"] {
     bottom: calc(var(--bottomnav-h) + var(--bar-h) + 12px + env(safe-area-inset-bottom)) !important;
   }
 }
@@ -1524,6 +1554,10 @@ body:has(.drawer) #rempire-feedback { display: none; }
      silently did nothing on --project=mobile-safari. --hdrh is measured by
      measureHdr() in app.js; the fallback is the header's usual height. */
   html { scroll-padding: calc(var(--hdrh, 160px) + 8px) 0 calc(var(--bottomnav-h) + 8px); }
+  /* …and the account form's save bar (.acctbar) rides above that nav, so a
+     field brought into view by focus has to clear both, or the birthday box
+     lands exactly under «Сохранить». */
+  html:has(.acctbar) { scroll-padding-bottom: calc(var(--bottomnav-h) + var(--bar-h) + 8px); }
 }
 
 /* ---------- fluidity ---------- */

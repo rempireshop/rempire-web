@@ -88,6 +88,52 @@ export function normalizeBirthday(v: unknown): string | null {
   return `${y}-${mo}-${d}`;
 }
 
+/**
+ * «Доставка по умолчанию» — the account's standing delivery choice, in the
+ * checkout's own words (db/migrations/051_customer_ship_pref.sql). Until
+ * 10.09.2026 it lived in the shopper's browser only, so it never followed
+ * the owner from his phone to his laptop and he could not tell whether it
+ * had been kept at all.
+ *
+ * `carrier` and `machine` mean something only for a parcel; for the other two
+ * they are stored empty so the checkout never inherits a machine from a
+ * choice that no longer involves one. The machine is a NAME, not a carrier
+ * id: the list is the carrier's live one and ids change under it, while «the
+ * machine round the corner» is what the shopper actually chose (app.js
+ * matchAcctPoint matches by name).
+ */
+export interface ShipPref {
+  /** The storefront's zone code — EE, LV, LT, FI, or EU for «другая страна». */
+  country: string;
+  method: "pickup" | "parcel" | "courier";
+  carrier: string;
+  machine: string;
+}
+
+const SHIP_METHODS: ReadonlyArray<ShipPref["method"]> = ["pickup", "parcel", "courier"];
+
+/** A well-formed preference or null — a shape the checkout cannot act on is not stored. */
+export function normalizeShipPref(v: unknown): ShipPref | null {
+  // pg hands jsonb back parsed; a driver that hands back text is still honoured
+  if (typeof v === "string") {
+    try {
+      v = JSON.parse(v);
+    } catch {
+      return null;
+    }
+  }
+  if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+  const o = v as Record<string, unknown>;
+  const method = String(o.method ?? "").trim().toLowerCase() as ShipPref["method"];
+  if (!SHIP_METHODS.includes(method)) return null;
+  const country = String(o.country ?? "").trim().toUpperCase().slice(0, 2);
+  if (!/^[A-Z]{2}$/.test(country)) return null;
+  const parcel = method === "parcel";
+  const carrier = parcel ? String(o.carrier ?? "").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40) : "";
+  const machine = parcel ? text(o.machine, 120) ?? "" : "";
+  return { country, method, carrier, machine };
+}
+
 /* ---------- the session cookie ------------------------------------------- */
 
 function payloadOf(email: string, expiry: number): string {
@@ -257,6 +303,8 @@ export interface Customer {
   /** `YYYY-MM-DD` or null. */
   birthday: string | null;
   marketing: boolean;
+  /** «Доставка по умолчанию», or null when the shopper never set one. */
+  shipPref: ShipPref | null;
   createdAt: string | null;
   lastLoginAt: string | null;
   /* ---- wholesale (salon/pro) — db/migrations/100_tiers_loyalty.sql ------- */
@@ -277,6 +325,7 @@ type CustomerRow = {
   lang: string | null;
   birthday: string | Date | null;
   marketing: boolean | string | null;
+  ship_pref: unknown;
   created_at: string | Date | null;
   last_login_at: string | Date | null;
   tier: string | null;
@@ -308,6 +357,7 @@ export function mapCustomer(r: CustomerRow): Customer {
     lang: normalizeLangCode(r.lang),
     birthday: isoDay(r.birthday),
     marketing: r.marketing === true || r.marketing === "t" || r.marketing === "true",
+    shipPref: normalizeShipPref(r.ship_pref),
     createdAt: iso(r.created_at),
     lastLoginAt: iso(r.last_login_at),
     tier: r.tier === "pro" ? "pro" : "retail",
@@ -381,6 +431,8 @@ export interface CustomerPatch {
   birthday?: unknown;
   marketing?: unknown;
   lang?: unknown;
+  /** «Доставка по умолчанию» — a ShipPref-shaped object, or null to clear it. */
+  shipPref?: unknown;
 }
 
 /** Only the keys present are touched; `null`/`""` clears one. */
@@ -392,10 +444,16 @@ export async function updateCustomer(email: string, patch: CustomerPatch): Promi
   if ("birthday" in patch) cols.birthday = normalizeBirthday(patch.birthday);
   if ("marketing" in patch) cols.marketing = patch.marketing === true || patch.marketing === "true" || patch.marketing === 1;
   if ("lang" in patch) cols.lang = normalizeLangCode(patch.lang);
+  // a shape the checkout cannot act on clears the column rather than sitting in it
+  if ("shipPref" in patch) {
+    const pref = normalizeShipPref(patch.shipPref);
+    cols.ship_pref = pref ? jsonbParam(pref) : null;
+  }
 
   const keys = Object.keys(cols);
   if (!keys.length) return getCustomer(addr);
-  const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(", ");
+  // the jsonb column needs the cast — a text parameter is not a jsonb one to Postgres
+  const sets = keys.map((k, i) => `${k} = $${i + 2}${k === "ship_pref" ? "::jsonb" : ""}`).join(", ");
   const rows = await query<CustomerRow>(
     `update customers set ${sets} where email = $1 returning *`,
     [addr, ...keys.map((k) => cols[k])],

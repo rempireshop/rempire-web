@@ -1,6 +1,7 @@
 /**
  * GET  /api/account/me — profile + the last 20 orders for the signed-in address.
- * PATCH /api/account/me — name, phone, birthday, marketing consent, language.
+ * PATCH /api/account/me — name, phone, birthday, marketing consent, language,
+ * and «Доставка по умолчанию» (shipPref — src/lib/customers.ts normalizeShipPref).
  *
  * The e-mail is never in the body: it comes out of the signed cookie, so a
  * shopper can only ever read and edit their own row.
@@ -39,6 +40,7 @@ export async function GET(req: Request) {
           lang: "RU",
           birthday: null,
           marketing: false,
+          shipPref: null,
           tier: "retail",
           company: null,
           regCode: null,
@@ -86,7 +88,7 @@ export async function PATCH(req: Request) {
   }
 
   const patch: Record<string, unknown> = {};
-  for (const key of ["name", "phone", "birthday", "marketing", "lang"] as const) {
+  for (const key of ["name", "phone", "birthday", "marketing", "lang", "shipPref"] as const) {
     if (key in body) patch[key] = body[key];
   }
 

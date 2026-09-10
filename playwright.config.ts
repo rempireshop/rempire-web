@@ -197,7 +197,7 @@ export default defineConfig({
          he actually uses — Safari, whose private mode is also the browser that
          refuses localStorage outright. */
       testMatch:
-        /[\\/](catalogue|product|checkout|invoice|payments|storefront-sweep-2|home|blog|sets|giftcard|account|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/,
+        /[\\/](catalogue|product|checkout|invoice|payments|storefront-sweep-2|home|blog|sets|giftcard|account|account-settings|pwa|sweep-storefront|sweep-checkout|testplan)\.spec\.ts$/,
     },
     ...(webkitInstalled
       ? [{ name: "webkit-local", use: { ...devices["Desktop Safari"] } }]
