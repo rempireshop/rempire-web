@@ -18,7 +18,7 @@ import {
   type LineRow,
 } from "./layout";
 import type { Lang, OrderItem, OrderLike, OrderShipping } from "./types";
-import { translateProductName } from "../lib/product-name";
+import { translateProductName, translateVariant } from "../lib/product-name";
 
 /* ---------- customer --------------------------------------------------- */
 
@@ -79,7 +79,8 @@ export function lineTotal(it: OrderItem): number {
 
 function itemLabel(it: OrderItem, lang: Lang): string {
   const title = itemTitle(it, lang);
-  const variant = pick(it.variant);
+  // «215 мл» → «215 ml» on an Estonian or English letter, like the name before it
+  const variant = translateVariant(pick(it.variant), lang);
   const qty = Math.max(1, Math.round(num(it.qty, 1)));
   const head = variant ? `${title} · ${variant}` : title;
   const unit = COMMON[lang].qty[qty === 1 ? 0 : 1];

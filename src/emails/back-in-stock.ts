@@ -26,7 +26,7 @@ import {
 } from "./layout";
 import { mailText, mailTextHtml, type MailTextValues } from "./texts";
 import type { Lang, ProductLike, RenderedEmail } from "./types";
-import { translateProductName } from "../lib/product-name";
+import { translateProductName, translateVariant } from "../lib/product-name";
 
 interface Strings {
   preheader: string;
@@ -82,7 +82,7 @@ function productName(product: ProductLike, lang: Lang): string {
 /** "Kevin.Murphy Fresh.Hair — сухой шампунь, 34 €" from whatever we have. */
 function productTitle(product: ProductLike, lang: Lang): string {
   const base = pick(productName(product, lang), T[lang].fallbackName);
-  const variant = pick(product.variant);
+  const variant = translateVariant(pick(product.variant), lang);
   const price = num(product.price, NaN);
   const tail = [variant, Number.isFinite(price) ? money(price) : ""]
     .filter(Boolean)

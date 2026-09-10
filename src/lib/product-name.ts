@@ -25,7 +25,9 @@
  *     («— бальзам после бритья» → «— balm»);
  *   · Russian stays Russian.
  * Only the name is translated: a variant («250 мл») appended after it puts
- * the tail away from the end of the string, so translate before appending.
+ * the tail away from the end of the string, so translate before appending —
+ * and put the variant through translateVariant() below, which is the port of
+ * the storefront's volume rules («250 мл» → «250 ml», «50 г» → «50 g»).
  */
 
 /** «шампунь» → [Estonian, English]. */
@@ -77,6 +79,33 @@ export const TRANSLATABLE_FRAGS: readonly string[] = NAME_FRAGS.map(([rx]) => rx
 function tableLang(lang: unknown): "ET" | "EN" | null {
   const s = String(lang ?? "").toLowerCase().slice(0, 2);
   return s === "et" ? "ET" : s === "en" ? "EN" : null;
+}
+
+/**
+ * The two rules of UI_RX in public/shop2/app.js that turn a size label into
+ * the site's language: «250 мл» → «250 ml», «50 г» → «50 g». The variant is
+ * what the size buttons say and what the order row keeps, and it is appended
+ * after the name on the invoice line and in every letter — «— shampoo ·
+ * 215 мл» reached an English customer with the name already translated.
+ * Sizes that are not a volume («white / M», «S-M») match neither rule and
+ * pass through, in every language. tests/product-name.test.ts runs these
+ * against the browser's own UI_RX over every variant in the catalogue.
+ */
+export const VARIANT_UNITS: ReadonlyArray<readonly [RegExp, { readonly ET: string; readonly EN: string }]> = [
+  [/^(\d+(?:[.,]\d+)?) мл$/, { ET: "$1 ml", EN: "$1 ml" }],
+  [/^(\d+(?:[.,]\d+)?) г$/, { ET: "$1 g", EN: "$1 g" }],
+];
+
+/**
+ * A variant («215 мл») in the customer's language. Russian and anything
+ * unrecognised return it as it is; so does a size the rules do not know.
+ */
+export function translateVariant(variant: string, lang: unknown): string {
+  const L = tableLang(lang);
+  if (!L) return variant;
+  const s = String(variant).trim();
+  for (const [rx, to] of VARIANT_UNITS) if (rx.test(s)) return s.replace(rx, to[L]);
+  return variant;
 }
 
 /**

@@ -142,12 +142,17 @@ describe("invoice PDF — the page", () => {
     const et = pdfText(await renderInvoicePdf(data({ totals: invoiceLines(ORDER, 24, "et") }, "et"))).join("\n");
     expect(et).toContain("ARVE");
     expect(et).toContain("MÜÜJA / SELLER");
-    // the product lines keep the catalogue's own wording («250 мл»); the headings carry no Russian
+    // the headings carry no Russian, and the volume is the site's «250 ml»; a name without
+    // a type tail («Wood & Spice масло для бороды») is the catalogue's own wording, as on the site
     expect(et).not.toMatch(/продавец|счёт|доставка|скидка|покупатель/i);
+    expect(et).toContain("250 ml");
+    expect(et).not.toContain("250 мл");
 
     const en = pdfText(await renderInvoicePdf(data({ totals: invoiceLines(ORDER, 24, "en") }, "en"))).join("\n");
     expect(en).toContain("OSTJA / BUYER");
     expect(en).not.toMatch(/покупатель|счёт/i);
+    expect(en).toContain("250 ml");
+    expect(en).not.toContain("250 мл");
   });
 
   it("says out loud when the bank details are not set instead of printing nothing", async () => {
@@ -220,16 +225,19 @@ describe("invoice PDF — the page", () => {
       pdfText(await renderInvoicePdf(data({ totals: invoiceLines(order, 24, lang) }, lang))).join("\n");
     const en = await page("en");
     expect(en).toContain("Rempire Чёрное мыло 666 — handmade");
+    // the volume wraps onto its own line in the narrow name column, so it is looked for on its own
     expect(en).toContain("— shampoo");
-    expect(en).toContain("215 мл");
-    expect(en).not.toMatch(/ручная работа|шампунь/);
+    expect(en).toContain("· 215 ml");
+    expect(en).not.toMatch(/ручная работа|шампунь|215 мл/);
     const et = await page("et");
     expect(et).toContain("— käsitöö");
     expect(et).toContain("— šampoon");
-    expect(et).not.toMatch(/ручная работа|шампунь/);
+    expect(et).toContain("· 215 ml");
+    expect(et).not.toMatch(/ручная работа|шампунь|215 мл/);
     const ru = await page("ru");
     expect(ru).toContain("— ручная работа");
     expect(ru).toContain("— шампунь");
+    expect(ru).toContain("· 215 мл");
     // a Latin name is not touched in any language
     for (const text of [en, et, ru]) expect(text).toContain("Davines OI Oil");
   });

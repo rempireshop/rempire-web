@@ -19,12 +19,15 @@ import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 import { PRODUCT_NAME_FRAGS, PRODUCT_NAME_TAILS } from "@/lib/ai-prompts";
-import { NAME_FRAGS, NAME_TAILS, TAIL_EXACT, translateProductName } from "@/lib/product-name";
+import { NAME_FRAGS, NAME_TAILS, TAIL_EXACT, VARIANT_UNITS, translateProductName, translateVariant } from "@/lib/product-name";
 
 const APP_JS = readFileSync(fileURLToPath(new URL("../public/shop2/app.js", import.meta.url)), "utf8");
 const CATALOGUE = JSON.parse(
   readFileSync(fileURLToPath(new URL("../src/data/catalogue.min.json", import.meta.url)), "utf8"),
 ) as Array<{ b: string; n: string }>;
+const VARIANTS = JSON.parse(
+  readFileSync(fileURLToPath(new URL("../src/data/catalogue.variants.json", import.meta.url)), "utf8"),
+) as Record<string, { sizes: string[] }>;
 
 /** The literal after `var NAME = `, up to the line that closes it. */
 function sliceLiteral(marker: string, terminator: string): string {
@@ -56,6 +59,18 @@ const exactSrc = sliceLiteral("var TAIL_EXACT = ", "\n  };");
 const appTails = runInNewContext(`(${tailsSrc})`) as Record<string, Pair>;
 const appFrags = runInNewContext(`(${fragsSrc})`) as Frag[];
 const appExact = runInNewContext(`(${exactSrc})`) as Record<string, Pair>;
+/* The storefront's UI_RX — every regex rule of the interface, the two for a
+   size label among them — and the loop trText() runs it with: the first rule
+   that matches wins, and its «$1» is the match's group. */
+const uiRx = runInNewContext(`(${sliceLiteral("var UI_RX = ", "\n  ];")})`) as Array<[RegExp, { ET: string; EN: string }]>;
+function trRx(s: string, lang: "ET" | "EN"): string {
+  for (const [rx, to] of uiRx) {
+    const m = s.match(rx);
+    if (m) return to[lang].replace(/\$(\d)/g, (_, n: string) => m[+n]);
+  }
+  return s;
+}
+
 /** The storefront's own function, closed over the storefront's own tables. */
 const trName = runInNewContext(
   `var NAME_TAILS = ${tailsSrc};\nvar NAME_FRAGS = ${fragsSrc};\nvar TAIL_EXACT = ${exactSrc};\n${sliceFn("trName")}\ntrName`,
@@ -157,5 +172,49 @@ describe("product-name — the server's copy of trName()", () => {
       expect(trName(`X — шампунь ${frag}`, "EN"), frag).not.toMatch(/[а-яё]/i);
       expect(trName(`X — шампунь ${frag}`, "ET"), frag).not.toMatch(/[а-яё]/i);
     }
+  });
+});
+
+/* ---------- the variant: «215 мл» → «215 ml» --------------------------- */
+
+describe("product-name — the server's copy of the storefront's size rules", () => {
+  it("carries the two UI_RX rules for a size label word for word", () => {
+    const flat = (rules: ReadonlyArray<readonly [RegExp, { readonly ET: string; readonly EN: string }]>) =>
+      rules.map(([rx, t]) => [rx.source, rx.flags, t.ET, t.EN]);
+    const browser = uiRx.filter(([rx]) => / (мл|г)\$$/.test(rx.source) && rx.source.startsWith("^("));
+    expect(flat(VARIANT_UNITS)).toEqual(flat(browser));
+  });
+
+  it("agrees with the browser on every size in the catalogue", () => {
+    let translated = 0;
+    const seen = new Set<string>();
+    for (const v of Object.values(VARIANTS)) for (const size of v.sizes) seen.add(size);
+    expect(seen.size).toBeGreaterThan(20);
+    for (const size of seen) {
+      const et = translateVariant(size, "et");
+      const en = translateVariant(size, "en");
+      expect(et, `ET ${size}`).toBe(trRx(size, "ET"));
+      expect(en, `EN ${size}`).toBe(trRx(size, "EN"));
+      expect(en, `EN ${size} still Cyrillic`).not.toMatch(/[а-яё]/i);
+      expect(et, `ET ${size} still Cyrillic`).not.toMatch(/[а-яё]/i);
+      if (en !== size) translated++;
+    }
+    expect(translated).toBeGreaterThan(10);
+  });
+
+  it("spells it out: volumes go over, sizes and Russian stay", () => {
+    expect(translateVariant("215 мл", "en")).toBe("215 ml");
+    expect(translateVariant("215 мл", "et")).toBe("215 ml");
+    expect(translateVariant("2,5 мл", "en")).toBe("2,5 ml");
+    expect(translateVariant("50 г", "en")).toBe("50 g");
+    expect(translateVariant("50 г", "et")).toBe("50 g");
+    expect(translateVariant("215 мл", "ru")).toBe("215 мл");
+    expect(translateVariant("215 мл", null)).toBe("215 мл");
+    for (const size of ["white / M", "S-M", "XL", "yellow-2", ""]) {
+      for (const lang of ["en", "et", "ru"]) expect(translateVariant(size, lang), `${lang} ${size}`).toBe(size);
+    }
+    // the trap the storefront's rule was written around: «млн» is not a volume
+    expect(translateVariant("150 млн", "en")).toBe("150 млн");
+    for (const v of ["EN", "en-GB", "En"]) expect(translateVariant("215 мл", v)).toBe("215 ml");
   });
 });

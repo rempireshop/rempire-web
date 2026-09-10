@@ -207,6 +207,9 @@ describe("the VAT arithmetic — 24 % out of VAT-inclusive prices", () => {
     const t = invoiceLines(order, 24, "ru");
     expect(t.lines.map((l) => l.kind)).toEqual(["item", "item", "item", "shipping", "discount", "discount"]);
     expect(t.lines[0]).toMatchObject({ title: "Kevin.Murphy Fresh.Hair · 250 мл", qty: 3, unitGross: 9.99, gross: 29.97, net: 24.17, vat: 5.8 });
+    // the volume goes into the invoice's language with the name: «250 ml» to an Estonian or English buyer
+    expect(invoiceLines(order, 24, "et").lines[0].title).toBe("Kevin.Murphy Fresh.Hair · 250 ml");
+    expect(invoiceLines(order, 24, "en").lines[0].title).toBe("Kevin.Murphy Fresh.Hair · 250 ml");
     expect(t.lines[3]).toMatchObject({ title: "Tarne / Delivery / Доставка", gross: 5.47 });
     expect(t.lines[4]).toMatchObject({ title: "Allahindlus / Discount / Скидка (SUVI10)", gross: -10 });
     expect(t.lines[5]).toMatchObject({ title: "Boonuspunktid / Loyalty points / Баллы", gross: -3 });
