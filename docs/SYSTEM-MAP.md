@@ -845,8 +845,11 @@ password; and remembering carts and "tell me when it is back" requests.
 `stock_alerts`); `src/lib/customers.ts` (cookie `rmp_cust` 90 days signed with
 `SESSION_SECRET`, six-digit code hashed, 15 min, 5 attempts). Routes
 `POST /api/account/code/` (3/15 min per IP and per e-mail), `POST /api/account/
-login/`, `GET|PATCH /api/account/me/`, `POST /api/account/logout/`, `POST
-/api/carts/` (abandoned-cart snapshot, no prices), `POST /api/stock-alerts/`.
+login/`, `GET|PATCH /api/account/me/`, `POST /api/account/logout/`, `GET
+/api/account/orders/<id>/invoice/` (the customer's own invoice PDF — the
+cookie's address must be the order's, a stranger's order is `not_found`),
+`POST /api/carts/` (abandoned-cart snapshot, no prices), `POST
+/api/stock-alerts/`.
 Shop `screenAccount` :8491 («Получить код» → «Войти» → «Мои заказы», «Мои
 данные» + «Сохранить», points, partner request, «Доставка по умолчанию»).
 Orders are matched by e-mail, so guest orders appear after the first login.

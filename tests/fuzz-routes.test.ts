@@ -145,6 +145,11 @@ function routes(): RouteCase[] {
     { name: "GET /api/account/pricing/", path: "/api/account/pricing/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/pricing/route"), auth: "customer", req: cust },
     { name: "POST /api/account/pro-request/", path: "/api/account/pro-request/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/pro-request/route"), auth: "customer", req: cust, body: { company: "Salon OÜ", regCode: "12345678", phone: "+372 1" } },
     { name: "POST /api/account/return-request/", path: "/api/account/return-request/", method: "POST", exports: ["POST"], load: () => import("@/app/api/account/return-request/route"), auth: "customer", req: cust, body: { number: "R-100001" } },
+    /* The customer's own copy of the invoice — application/pdf on a hit, so
+       no {ok,error} shape to check. The fixture order is the customer's own
+       but was never paid «По счёту», so every case here is a 404; the 200,
+       and the stranger's 404, live in tests/account-invoice.test.ts. */
+    { name: "GET /api/account/orders/[id]/invoice/", path: "/api/account/orders/x/invoice/", method: "GET", exports: ["GET"], load: () => import("@/app/api/account/orders/[id]/invoice/route"), auth: "customer", req: cust, params: { id: "" }, jsonBody: false },
 
     /* ---- admin ----------------------------------------------------------- */
     { name: "POST /api/admin/login/", path: "/api/admin/login/", method: "POST", exports: ["POST"], load: () => import("@/app/api/admin/login/route"), body: { password: "wrong password" } },

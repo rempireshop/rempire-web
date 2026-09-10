@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 import { E2E_ADMIN_PASSWORD } from "./env.mjs";
-import { freshEmail, functionalProject, ipHeaders, LANGS, payOrder, PRODUCT, shopUrl, tr, waitForScreen } from "./fixtures";
+import {
+  continueButton,
+  freshEmail,
+  functionalProject,
+  ipHeaders,
+  LANGS,
+  payButton,
+  payOrder,
+  PRODUCT,
+  shopUrl,
+  tr,
+  waitForScreen,
+} from "./fixtures";
 
 /**
  * Account: request code → login with the exposed code → order list shows the
@@ -159,5 +171,103 @@ test.describe("account — «Хочу вернуть заказ»", () => {
     await expect(card.locator(".adm-mono")).toHaveText(/^\d{2}\.\d{2}\.\d{4}$/);
     // and the one thing the shop cannot do, said out loud
     await expect(card).toContainText("этикетку возврата магазин выдать не может");
+  });
+});
+
+/**
+ * «Скачать счёт (PDF)» — the invoice, back from the account.
+ *
+ * The owner's finding (10.09.2026): «I see my orders and statuses, but I do
+ * not see any of the invoices or other files that were sent by e-mail — I
+ * should be able to download them from my account instead of digging through
+ * my mail.» So: a customer signs in, checks out «По счёту» under the same
+ * address (the company form is step 3, driven the way invoice.spec.ts drives
+ * it), and the order's row in «Мои заказы» carries the link the letter used
+ * to be the only home of — on the same line a gift card's link takes. The
+ * link is followed with the page's own cookies, the only way to assert on a
+ * response the browser would hand to a viewer, and then without any cookie,
+ * which must be refused: the link is not a bearer link.
+ */
+test.describe("account — «Скачать счёт (PDF)»", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(57) });
+
+  test("an invoice order placed signed in shows the link, and the link is the PDF", async ({ page, browser }) => {
+    test.setTimeout(120_000);
+    const email = freshEmail("acct-invoice");
+
+    // 1) Sign in first — this order is placed by a customer, not by a guest.
+    await page.goto(shopUrl("", "/account/"));
+    await waitForScreen(page, "account");
+    await page.locator("[data-email]").fill(email);
+    const codeResponse = page.waitForResponse((r) => r.url().includes("/api/account/code/"));
+    await page.locator("[data-login]").click();
+    const codeBody = (await (await codeResponse).json()) as { ok: boolean; code?: string };
+    await page.locator("[data-acctcode]").fill(codeBody.code!);
+    await page.locator("[data-logincode]").click();
+    await expect(page.locator("[data-logout]")).toBeVisible();
+
+    // 2) Checkout «По счёту» under the same address.
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+    await page.locator("[data-email]").fill(email);
+    await continueButton(page, 2).click();
+    await page.locator('input[data-dm="courier"]').check();
+    await page.locator('[data-shipf="name"]').fill("Mari Tamm");
+    await page.locator('[data-shipf="addr"]').fill("Testitänav 1");
+    await page.locator('[data-shipf="zip"]').fill("10111");
+    await page.locator('[data-shipf="city"]').fill("Tallinn");
+    await page.locator('[data-shipf="phone"]').fill("+372 5550000");
+    await continueButton(page, 3).click();
+    await page.locator('input[data-paym="3"]').check();
+    await expect(page.locator("[data-invoice]")).toBeVisible();
+    await page.locator('[data-invf="name"]').fill("Salong Näidis OÜ");
+    await page.locator('[data-invf="regCode"]').fill("16123456");
+    const created = page.waitForResponse((r) => r.url().includes("/api/orders/") && r.request().method() === "POST");
+    await payButton(page).click();
+    const body = (await (await created).json()) as { ok: boolean; number: string; invoice?: { number: string } };
+    expect(body.ok).toBe(true);
+    expect(body.invoice?.number).toMatch(/^A-\d{4}-\d{4}$/);
+    const invoiceNumber = body.invoice!.number;
+    await waitForScreen(page, "done");
+
+    // 3) Back in the account: the row has the link next to its status, named by the invoice number.
+    await page.goto(shopUrl("", "/account/"));
+    await waitForScreen(page, "account");
+    await expect(page.locator("[data-logout]")).toBeVisible();
+    const row = page.locator(".rowcard", { hasText: body.number });
+    await expect(row).toBeVisible();
+    await expect(row.getByText("принят")).toBeVisible();
+    const link = row.locator("[data-invpdf]");
+    await expect(link, "no «Скачать счёт (PDF)» on an invoice order").toBeVisible();
+    await expect(link).toHaveAttribute("data-invpdf", invoiceNumber);
+    await expect(link).toContainText("Скачать счёт (PDF)");
+    await expect(link).toContainText(invoiceNumber);
+    const href = await link.getAttribute("href");
+    expect(href).toBe(`/api/account/orders/${encodeURIComponent(body.number)}/invoice/`);
+    // the one link on this order: a card order carries none, and this order bought no card
+    await expect(row.locator("[data-giftpdf]")).toHaveCount(0);
+
+    // 4) Following it — with the page's own cookies — really is the PDF, named after the invoice.
+    const pdf = await page.request.get(href as string);
+    expect(pdf.status()).toBe(200);
+    expect(pdf.headers()["content-type"]).toContain("application/pdf");
+    expect(pdf.headers()["content-disposition"]).toContain(`rempire-invoice-${invoiceNumber}.pdf`);
+    const bytes = await pdf.body();
+    expect(bytes.subarray(0, 5).toString("latin1")).toBe("%PDF-");
+    expect(bytes.length).toBeGreaterThan(3000);
+
+    // 5) …and the same address with no cookie gets nothing: the link cannot be forwarded.
+    const stranger = await browser.newContext({ extraHTTPHeaders: ipHeaders(57) });
+    try {
+      const refused = await stranger.request.get(href as string);
+      expect(refused.status()).toBe(401);
+      expect(refused.headers()["content-type"]).not.toContain("application/pdf");
+    } finally {
+      await stranger.close();
+    }
   });
 });

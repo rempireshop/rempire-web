@@ -421,6 +421,15 @@ export interface CustomerOrder {
      that already proved it owns this mailbox (the signed rmp_cust cookie in
      /api/account/me), so nothing new is exposed. */
   giftCards: Array<{ code: string; amount: number; pdfUrl: string }>;
+  /* The invoice of an order paid «По счёту — для компаний» — its number and
+     the link to /api/account/orders/<number>/invoice/, the same PDF the
+     «Счёт на оплату» letter attached. Null on every other order. Since
+     10.09.2026 (owner: «I see my orders and statuses, but not the invoices
+     that were sent by e-mail — I should be able to download them from my
+     account»). No token in this link, unlike the card's: that route reads the
+     same signed cookie /api/account/me does and matches the order's address
+     against it, so the link is only ever good to the account it was drawn on. */
+  invoice: { number: string; pdfUrl: string } | null;
   /* «Хочу вернуть заказ» (src/lib/returns.ts): whether the screen may offer
      the tick on this order, and — once it has been ticked — when. The window
      is decided here and never in the browser: the same three questions the
@@ -447,8 +456,9 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
     items: unknown;
     payment: unknown;
     shipping: unknown;
+    invoice: unknown;
   }>(
-    `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping
+    `select id, number, status, total, currency, created_at, updated_at, items, payment, shipping, invoice
        from orders where lower(email) = $1 order by created_at desc limit $2`,
     [normalizeEmail(email), Math.min(Math.max(Number(limit) || 20, 1), 50)],
   );
@@ -460,9 +470,17 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
      account screen its cards and not its orders. */
   const cardsByOrder = await giftCardsForOrders(rows.map((r) => r.id));
 
+  /* invoiceOf() is the one reader of the invoice record, and it lives in
+     src/lib/invoices.ts with the payments and mail modules behind it. Loaded
+     only when one of these orders carries an invoice at all, so a shopper who
+     never paid «По счёту» — nearly everyone — costs the sign-in routes none of
+     that graph. */
+  const invoiceOf = rows.some((r) => r.invoice != null) ? (await import("@/lib/invoices")).invoiceOf : null;
+
   return rows.map((r) => {
     const items = parseJson<Array<Record<string, unknown>>>(r.items, []);
     const payment = parseJson<Record<string, unknown>>(r.payment, {});
+    const inv = invoiceOf ? invoiceOf({ invoice: r.invoice }) : null;
     const tr = payment && typeof payment === "object" ? (payment.tracking as unknown) : null;
     const code = typeof tr === "string" ? tr : tr && typeof tr === "object" ? String((tr as Record<string, unknown>).code ?? "") : "";
     const url = tr && typeof tr === "object" ? String((tr as Record<string, unknown>).url ?? "") : "";
@@ -490,10 +508,21 @@ export async function listCustomerOrders(email: string, limit = 20): Promise<Cus
       tracking: code || null,
       trackingUrl: url || null,
       giftCards: cardsByOrder.get(r.id) ?? [],
+      invoice: inv ? { number: inv.number, pdfUrl: accountInvoicePath(r.number) } : null,
       returnable: canRequestReturn(ret),
       returnRequestedAt: returnRequestedAt(ret),
     };
   });
+}
+
+/**
+ * Where «Скачать счёт (PDF)» in the account points: the customer's own copy of
+ * the invoice, GET /api/account/orders/<number>/invoice/. By number, not
+ * uuid — the number is what the account already shows and what the
+ * bookkeeper quotes, and the route takes either.
+ */
+export function accountInvoicePath(orderNumber: string): string {
+  return `/api/account/orders/${encodeURIComponent(String(orderNumber || ""))}/invoice/`;
 }
 
 /**
