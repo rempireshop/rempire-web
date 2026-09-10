@@ -4106,6 +4106,90 @@
       }
     },
     {
+      "id": "mail-newsletter-send",
+      "area": "mail",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Рассылка уходит подписчикам на их языке",
+      "steps": [
+        "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
+        "Написать название, тему и текст по-русски, добавить товар, «Сохранить».",
+        "Переключить на Eesti, написать тему и текст, «Сохранить».",
+        "Ввести свой адрес, «Отправить мне тест».",
+        "Нажать «Отправить N подписчикам», прочитать карточку, «Отправить»."
+      ],
+      "expect": [
+        "Тест пришёл с пометкой [test] в теме и карточкой товара.",
+        "Карточка назвала число подписчиков по языкам до отправки.",
+        "Счётчик рос до «Отправлено N из N», письмо стало только для чтения.",
+        "Подписчик с эстонским языком получил эстонскую версию.",
+        "Внизу письма есть «Отписаться», и ссылка работает.",
+        "В журнале есть строка «Рассылка «…»: отправлено N, ошибок 0»."
+      ],
+      "why": "Одно письмо всем подписчикам — первый раз, когда галочка на кассе что-то значит; ошибка уйдёт сотням.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "The newsletter reaches subscribers in their language",
+        "steps": [
+          "«Ещё» → «Маркетинг» → «Рассылка» → «+ Письмо».",
+          "Write a name, subject and text in Russian, add a product, «Сохранить».",
+          "Switch to Eesti, write the subject and text, «Сохранить».",
+          "Enter your address, «Отправить мне тест».",
+          "Press «Отправить N подписчикам», read the card, «Отправить»."
+        ],
+        "expect": [
+          "The test arrived with [test] in the subject and a product card.",
+          "The card named the subscriber count per language before sending.",
+          "The counter climbed to «Отправлено N из N», then the letter became read-only.",
+          "The Estonian-language subscriber got the Estonian version.",
+          "The letter ends with «Отписаться», and the link works.",
+          "The journal has «Рассылка «…»: отправлено N, ошибок 0»."
+        ],
+        "why": "One letter to every subscriber is the first time the checkout tick means something; a mistake goes to hundreds."
+      }
+    },
+    {
+      "id": "mail-newsletter-resume",
+      "area": "mail",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Прерванная рассылка продолжается без повторов",
+      "steps": [
+        "Открыть черновик с темой и текстом, «Отправить N подписчикам» → «Отправить».",
+        "Пока счётчик растёт, закрыть вкладку.",
+        "Снова открыть «Рассылка» и то же письмо.",
+        "Нажать «Продолжить», дождаться конца."
+      ],
+      "expect": [
+        "В списке письмо помечено «Отправляется», в редакторе есть «Продолжить».",
+        "После «Продолжить» счётчик дошёл до конца, статус «Отправлено».",
+        "Ни один подписчик не получил письмо дважды.",
+        "Второй раз отправить нельзя — письмо только для чтения."
+      ],
+      "why": "Отправка идёт порциями с сервера; оборванная связь не должна ни терять адреса, ни слать дубли.",
+      "risk": "med",
+      "writes": true,
+      "en": {
+        "title": "An interrupted send resumes without duplicates",
+        "steps": [
+          "Open a draft with subject and text, «Отправить N подписчикам» → «Отправить».",
+          "While the counter climbs, close the tab.",
+          "Open «Рассылка» and the same letter again.",
+          "Press «Продолжить», wait for the end."
+        ],
+        "expect": [
+          "In the list the letter says «Отправляется», the editor shows «Продолжить».",
+          "After «Продолжить» the counter reached the end, status «Отправлено».",
+          "No subscriber received the letter twice.",
+          "It cannot be sent again — the letter is read-only."
+        ],
+        "why": "Sending runs in batches from the server; a dropped connection must neither lose addresses nor send duplicates."
+      }
+    },
+    {
       "id": "mail-unpaid-and-invoice-dunning",
       "area": "mail",
       "who": "dim",
