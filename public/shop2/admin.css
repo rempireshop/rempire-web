@@ -612,6 +612,25 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
   color: var(--a-ink); padding: 0; display: inline-flex; align-items: center; justify-content: center;
 }
 .adm-asst__clip:disabled { color: var(--a-dim); }
+/* the microphone beside the box (app.js admVoiceMicHTML — not drawn at all
+   in a browser without speech recognition): the clip's twin while idle; ink
+   with a ring that breathes while it listens. The ring is a pseudo-element,
+   which the `.adm2 *` reduced-motion rule at the top of this file does not
+   reach (`*` matches elements only, and animation-duration is not
+   inherited) — so it is switched off by name below, and the filled button
+   alone says «listening». */
+.adm-asst__mic {
+  width: 44px; height: 48px; flex: none; border: 1px solid var(--a-rule); background: var(--a-paper);
+  color: var(--a-ink); padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.adm-asst__mic.is-on { background: var(--a-ink); border-color: var(--a-ink); color: #fff; }
+.adm-asst__mic.is-on::after {
+  content: ""; position: absolute; inset: -4px; border: 2px solid var(--a-ink); opacity: 0;
+  animation: adm-listen 1.6s ease-out infinite; pointer-events: none;
+}
+@keyframes adm-listen { 0% { opacity: .55; transform: scale(.92); } 100% { opacity: 0; transform: scale(1.18); } }
+@media (prefers-reduced-motion: reduce) { .adm-asst__mic.is-on::after { animation: none; } }
 .adm-asst.is-over { outline: 2px dashed var(--a-ink); outline-offset: -6px; }
 .adm-att { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .adm-att__i { position: relative; width: 64px; height: 64px; flex: none; border: 1px solid var(--a-rule); }
