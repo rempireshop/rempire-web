@@ -15473,7 +15473,11 @@
     return admBackHTML("data-mailback", "Все письма") +
       admColsHTML(left, admMailPreviewHTML(tpl, lang), true) +
       '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
-        '<iframe class="adm-frame" title="Предпросмотр письма" loading="lazy" style="margin-top:10px" ' +
+        /* not loading="lazy": the morph keeps this element and only changes
+           its src after a save, and a lazy iframe below the fold shows the OLD
+           letter until scrolled to — the owner read a preview that had not
+           taken the text just saved (admin-mail.spec, 10.09.2026) */
+        '<iframe class="adm-frame" title="Предпросмотр письма" style="margin-top:10px" ' +
           'src="/api/admin/mail/preview/?template=' + encodeURIComponent(tpl) + "&amp;lang=" +
           encodeURIComponent(lang) + "&amp;v=" + mailPreviewV + '"></iframe></div>';
   }
@@ -17622,6 +17626,16 @@
   var MAIL_TEXTS = null;          // { templates, placeholders, limits, defaults, texts }
   var mailTextsAsked = false;
   var mailPreviewV = 0;           // bumped on apply so the iframe refetches
+  /* The apply bumps the version and render() gives the iframe its new src at
+     once — usually before the PUT behind the apply has landed, so the frame
+     fetched the letter with the OLD texts and kept it (admin-mail.spec,
+     10.09.2026: the preview did not carry the intro just saved). Bumped
+     again when the server answers, and the src set in place. */
+  function mailPreviewRefresh() {
+    mailPreviewV += 1;
+    var fr = document.querySelector('iframe.adm-frame[src^="/api/admin/mail/preview/"]');
+    if (fr) fr.src = fr.getAttribute("src").replace(/([?&])v=\d+/, "$1v=" + mailPreviewV);
+  }
   var MAIL_LANGS = ["ru", "et", "en"];
   var MAIL_LIMITS = { subject: 200, intro: 1500, signature: 300 };
   var MAIL_FIELDS = [
@@ -24427,7 +24441,9 @@
     else if (a.type === "set_hero") srvSaved(apiSend(st, "PUT", { hero: DEMO.hero }));
     // «Письма»: the whole map travels, so undo re-sends the previous one —
     // same reasoning as the banner and the content document
-    else if (a.type === "set_mail_texts") srvSaved(apiSend(st, "PUT", { mail_texts: (MAIL_TEXTS && MAIL_TEXTS.texts) || {} }));
+    else if (a.type === "set_mail_texts") srvSaved(apiSend(st, "PUT", { mail_texts: (MAIL_TEXTS && MAIL_TEXTS.texts) || {} })).then(function (r) {
+      if (r && r.status === 200 && r.body && r.body.ok) mailPreviewRefresh();
+    });
     // content: the whole document travels, so undo re-sends the previous one
     else if (a.type === "set_content") srvSaved(apiSend(st, "PUT", { content: DEMO.content }));
     /* checkout-gaps: the whole delivery table travels, because a merge cannot
