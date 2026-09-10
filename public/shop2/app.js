@@ -1874,7 +1874,7 @@
       "Штрихкод": "Triipkood",
       "один объём": "üks maht",
       "не привязан": "pole seotud",
-      "Сканировать штрихкод": "Skaneeri triipkood",
+      "Сканер штрихкода": "Triipkoodi skanner",
       "Отвязать": "Eemalda",
       "Штрихкод убран — нажмите «Сохранить»": "Triipkood eemaldatud — vajutage «Salvesta»",
       "Код считан — нажмите «Сохранить»": "Kood loetud — vajutage «Salvesta»",
@@ -4124,7 +4124,7 @@
       "Штрихкод": "Barcode",
       "один объём": "one size",
       "не привязан": "not linked",
-      "Сканировать штрихкод": "Scan the barcode",
+      "Сканер штрихкода": "Barcode scanner",
       "Отвязать": "Unlink",
       "Штрихкод убран — нажмите «Сохранить»": "The barcode is off — press «Save»",
       "Код считан — нажмите «Сохранить»": "Code read — press «Save»",
@@ -19530,7 +19530,7 @@
          the button and nowhere else (openScannerFor / scanToEditor). The
          placeholder used to promise «сканер ›» with nothing to press — the
          owner tapped the box and got a keyboard (Renat, 10.09.2026). */
-      '<button class="adm-grid__scan" type="button" data-edscan="' + esc(key) + '" aria-label="Сканировать штрихкод" title="Сканировать штрихкод">' +
+      '<button class="adm-grid__scan" type="button" data-edscan="' + esc(key) + '" aria-label="Сканер штрихкода" title="Сканер штрихкода">' +
         admIcon("scan", false, 18) + '<span class="adm-grid__scan__lbl">Сканер</span></button>' +
       (ean ? '<button class="adm-grid__unbind" type="button" data-edunbind="' + esc(key) + '">Отвязать</button>' : ""));
   }
