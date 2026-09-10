@@ -21,7 +21,7 @@ log.
 | `src/lib/mail-hooks.ts` | `onOrderCreated` / `onOrderPaid` / `onOrderShipped` / `onOrderClosed` / `onOrderUnpaid` |
 | `src/emails/*.ts` | the five renderers → `{ subject, html, text }` |
 | `src/emails/layout.ts` | shared shell, palette, dark-mode CSS, money/URL helpers |
-| `src/emails/common.ts` | customer name, item table, delivery line, totals |
+| `src/emails/common.ts` | customer name, item table (names with the type tail in the letter's language — `src/lib/product-name.ts`), delivery line, totals |
 | `src/emails/texts.ts` | the owner's own subject / intro / closing line — see below |
 | `src/lib/mail-texts.ts` | `loadMailTexts()` — `settings.mail_texts` → the renderers |
 | `src/emails/index.ts` | template registry + demo data for the preview |

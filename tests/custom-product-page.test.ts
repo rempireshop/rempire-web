@@ -324,7 +324,11 @@ describe("stock alerts for a custom product", () => {
     expect((await sweepBackInStock()).sent).toBe(1);
     expect(sent).toHaveLength(1);
     expect(sent[0].to).toEqual(["shopper@example.com"]);
-    expect(sent[0].text).toContain("Proraso Beard Balm — бальзам для бороды");
+    // the alert was asked for on the Estonian site, so the letter names the
+    // product the way that site showed it — the Russian type tail translated
+    // (src/lib/product-name.ts), not «— бальзам для бороды» to an Estonian
+    expect(sent[0].text).toContain("Proraso Beard Balm — palsam habemele");
+    expect(sent[0].text).not.toContain("бальзам");
     expect(sent[0].text).toContain(`${LIVE}/shop2/et/p/${p.id}/`);
     // once
     expect((await sweepBackInStock()).sent).toBe(0);

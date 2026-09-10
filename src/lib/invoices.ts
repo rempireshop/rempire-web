@@ -37,6 +37,7 @@ import { mergeContent, type ShopContent } from "@/lib/content";
 import { getSettings, OrderError, writeAuditSafe, type Order } from "@/lib/orders";
 import { applyPaymentResult, type ApplyDeps, type ApplyOutcome } from "@/lib/payments/apply";
 import { notifyOrderPaid } from "@/lib/payments/mail-hook";
+import { translateProductName } from "@/lib/product-name";
 import { resolveVatRate } from "@/lib/reports";
 
 /* ---------- settings ------------------------------------------------------ */
@@ -423,7 +424,10 @@ export function invoiceLines(order: OrderMoney, vatRate: number, lang = "ru"): I
     const qty = Math.max(1, Math.round(Number(it.qty) || 1));
     const gross = money(Number.isFinite(Number(it.sum)) ? Number(it.sum) : Number(it.price) * qty);
     const unit = money(Number.isFinite(Number(it.price)) ? Number(it.price) : gross / qty);
-    const title = [it.brand, it.title].filter((s) => typeof s === "string" && s.trim()).join(" ") + (it.variant ? ` · ${it.variant}` : "");
+    // the name goes into the customer's language before the variant is added:
+    // «— шампунь · 250 мл» has the tail away from the end, where the rule looks
+    const name = typeof it.title === "string" ? translateProductName(it.title, lang) : "";
+    const title = [it.brand, name].filter((s) => typeof s === "string" && s.trim()).join(" ") + (it.variant ? ` · ${it.variant}` : "");
     lines.push({ kind: "item", title: title || String(it.id || ""), qty, unitGross: unit, gross, ...splitGross(gross, rate) });
   }
   const shipping = money(Math.max(0, Number(order.shippingPrice) || 0));

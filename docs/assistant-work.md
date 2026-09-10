@@ -284,7 +284,8 @@ Everything below runs on OpenAI (тот же движок, что и обычн�
   товаров не трогать, Google-пара заново в 60/155), `buildCopyPrompt()`
   (шесть `kind`, у каждого свои факты и своя форма JSON; для
   `product_name` в промпт вшит список хвостов `PRODUCT_NAME_TAILS`, которые
-  витрина умеет переводить, — `NAME_TAILS`/`TAIL_EXACT` в `app.js`).
+  витрина умеет переводить, — читается из таблиц `src/lib/product-name.ts`,
+  серверной копии `NAME_TAILS`/`TAIL_EXACT` из `app.js`).
 - `src/lib/ai-json.ts` — `extractJsonObject(text, {finishReason})`:
   терпимое чтение ответа модели — ```json-ограждение, фраза перед скобкой,
   документ, обрезанный `max_tokens` (закрывается открытая строка,
