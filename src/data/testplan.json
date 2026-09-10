@@ -2099,13 +2099,16 @@
         "Положить в корзину подарочную карту на 50 € и больше ничего.",
         "Нажать «Оформить» и ввести почту.",
         "Пройти второй шаг.",
-        "Оставить включённым «Отправить мне на почту, а не получателю» и оплатить."
+        "Оставить включённым «Отправить мне на почту, а не получателю» и оплатить.",
+        "В панели открыть этот заказ и нажать «Вернуть деньги» — не подтверждать."
       ],
       "expect": [
         "Второй шаг называется «Получатель», а не «Доставка».",
         "Страну, пакомат и адрес не спрашивают.",
         "В сводке вместо доставки — «Электронная доставка».",
-        "Кнопка «Скачать подарочную карту (PDF)» открывает карту с кодом."
+        "Кнопка «Скачать подарочную карту (PDF)» открывает карту с кодом.",
+        "В карточке заказа стоит код карты и «Карта PDF».",
+        "Окошко возврата предупреждает: карта будет аннулирована."
       ],
       "why": "Считать доставку за письмо — это лишние 5,47 € и вопрос от покупателя.",
       "risk": "med",
@@ -2116,13 +2119,16 @@
           "Put a 50 € gift card in the cart and nothing else.",
           "Press «Оформить» and enter an e-mail.",
           "Go through the second step.",
-          "Leave «Отправить мне на почту, а не получателю» on and pay."
+          "Leave «Отправить мне на почту, а не получателю» on and pay.",
+          "In the panel open this order and press «Вернуть деньги» — do not confirm."
         ],
         "expect": [
-          "The second step is «Получатель» (recipient), not «Доставка».",
+          "The second step is «Получатель», not «Доставка».",
           "No country, locker or address is asked for.",
           "The summary says «Электронная доставка» instead of delivery.",
-          "«Скачать подарочную карту (PDF)» opens the card with its code."
+          "«Скачать подарочную карту (PDF)» opens the card with its code.",
+          "The order card shows the card code and «Карта PDF».",
+          "The refund box warns the card will be cancelled."
         ],
         "why": "Charging delivery for an e-mail is 5.47 € too much."
       }
@@ -2144,6 +2150,7 @@
         "Видно, сколько карта снимает.",
         "Видно, сколько на карте останется.",
         "Заказ проходит без банка.",
+        "В панели в «Оплата» написано «Подарочная карта».",
         "Остаток карты тратится следующим заказом."
       ],
       "why": "Сгоревший остаток карты — это деньги покупателя, которые вы взяли и не отдали.",
@@ -2161,6 +2168,7 @@
           "You see how much the card takes off.",
           "You see how much is left on it.",
           "The order goes through without a bank.",
+          "In the panel, «Оплата» says «Подарочная карта».",
           "The remainder can be spent on the next order."
         ],
         "why": "A balance that burns is the buyer's money you kept."
@@ -2176,12 +2184,15 @@
       "steps": [
         "Собрать заказ, который карта закрывает целиком: карта 50 €, товар 15 €.",
         "Дойти до шага оплаты.",
-        "Нажать кнопку внизу."
+        "Нажать кнопку внизу.",
+        "Открыть панель → «Заказы» → «Отправить»."
       ],
       "expect": [
         "Список банков пропал.",
         "Кнопка называется «Оформить заказ», а не «Оплатить 0 €».",
-        "Заказ создан и сразу считается оплаченным."
+        "Страница «Заказ оплачен» открывается сразу, без банка.",
+        "Заказ стоит под «Отправить» со статусом «Оплачен».",
+        "В «Оплата» написано «Подарочная карта · к оплате было 0 €»."
       ],
       "why": "Ноль, отправленный в банк, — это отказ банка и потерянный заказ.",
       "risk": "high",
@@ -2191,12 +2202,15 @@
         "steps": [
           "Build an order a card covers completely: a 50 € card, a 15 € product.",
           "Get to the payment step.",
-          "Press the button at the bottom."
+          "Press the button at the bottom.",
+          "Open the panel → «Заказы» → «Отправить»."
         ],
         "expect": [
           "The bank list has gone.",
           "The button says «Оформить заказ», not «Оплатить 0 €».",
-          "The order is created and counts as paid at once."
+          "The «Заказ оплачен» page opens at once, no bank.",
+          "The order sits under «Отправить» with the «Оплачен» state.",
+          "«Оплата» says «Подарочная карта · к оплате было 0 €»."
         ],
         "why": "Sending zero to a bank is a refusal and a lost order."
       }
@@ -3281,6 +3295,51 @@
       }
     },
     {
+      "id": "order-refund-giftcard",
+      "area": "orders",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "«Вернуть деньги» с подарочной картой",
+      "steps": [
+        "Открыть заказ, которым купили карту, нажать «Вернуть деньги» и подтвердить.",
+        "Открыть заказ, оплаченный этой картой, и нажать «Вернуть деньги».",
+        "Прочитать окошко и подтвердить.",
+        "Снова открыть заказ с картой и вернуть деньги.",
+        "На кассе ввести код карты."
+      ],
+      "expect": [
+        "Первый возврат отказан: «…уже потрачена на … — вернуть заказ целиком нельзя».",
+        "Окошко показывает «Вернём на подарочную карту» всю сумму, «на счёт покупателя: 0 €».",
+        "Заказ стал «возврат», в «Оплата» — «На подарочную карту … вернулось …».",
+        "Теперь заказ с картой возвращается; у кода стоит «Аннулирована», «Карта PDF» пропала.",
+        "На кассе код больше не принимается.",
+        "Покупателю ушло письмо «Деньги возвращены» с названием карты."
+      ],
+      "why": "Возврат на карту, которую уже потратили, — двойные деньги; карта без возврата — деньги в никуда.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "«Вернуть деньги» with a gift card",
+        "steps": [
+          "Open the order that bought the card, press «Вернуть деньги» and confirm.",
+          "Open the order paid with that card and press «Вернуть деньги».",
+          "Read the box and confirm.",
+          "Open the card's order again and refund it.",
+          "Enter the card code at the checkout."
+        ],
+        "expect": [
+          "The first refund is refused: «…уже потрачена на … — вернуть заказ целиком нельзя».",
+          "The box shows the whole sum under «Вернём на подарочную карту», «на счёт покупателя: 0 €».",
+          "The order is «возврат», and «Оплата» says «На подарочную карту … вернулось …».",
+          "Now the card's order refunds; the code shows «Аннулирована», «Карта PDF» is gone.",
+          "The checkout no longer accepts the code.",
+          "The buyer got the «Деньги возвращены» letter naming the card."
+        ],
+        "why": "A refund onto a card already spent is double money; a card never refunded is money lost."
+      }
+    },
+    {
       "id": "acct-code-login",
       "area": "account",
       "who": "renat",
@@ -4025,18 +4084,20 @@
       "lang": "RU",
       "title": "Письмо про брошенную корзину",
       "steps": [
-        "В разделе «Письма» включить переключатель «Брошенная корзина».",
-        "Убедиться, что корзина брошена не меньше трёх часов назад.",
-        "Попросить Дима запустить расписание вручную — из панели это не делается.",
-        "Проверить почту и нажать ссылку возврата к корзине.",
+        "В «Письмах» включить «Брошенная корзина».",
+        "Набрать корзину, ввести почту на кассе и не оплачивать; выждать три часа.",
+        "Нажать «Запустить сейчас» под письмом.",
+        "Нажать «Запустить сейчас» ещё раз.",
+        "Проверить почту и нажать кнопку возврата к корзине.",
         "Нажать «Отписаться» внизу письма."
       ],
       "expect": [
-        "Письмо пришло со списком товаров из корзины.",
-        "Кнопка в письме открывает магазин с той же корзиной.",
-        "На одну брошенную корзину приходит только одно письмо.",
+        "Тост «Отправлено 1 · пропущено 0».",
+        "Под письмом — «Последний запуск» с сегодняшним временем и «отправлено 1».",
+        "Второе нажатие: «Отправлено 0» — одна корзина, одно письмо.",
+        "Письмо пришло со списком товаров, кнопка открывает магазин с той же корзиной.",
         "«Отписаться» срабатывает с одного нажатия, страница это подтверждает.",
-        "Следующая брошенная корзина с этой почты письма уже не получает."
+        "Следующая брошенная корзина с этой почты письма не получает."
       ],
       "why": "Второе письмо про ту же корзину надоедает, и человек отписывается.",
       "risk": "med",
@@ -4044,16 +4105,18 @@
       "en": {
         "title": "The abandoned-cart letter",
         "steps": [
-          "In the «Письма» section switch on the «Брошенная корзина» switch.",
-          "Make sure the cart was abandoned at least three hours ago.",
-          "Ask Dim to start the schedule by hand — not possible from the panel.",
-          "Check your mail and press the link back to the cart.",
+          "In «Письма» switch on «Брошенная корзина».",
+          "Fill a cart, enter an e-mail at the checkout and do not pay; wait three hours.",
+          "Press «Запустить сейчас» under the letter.",
+          "Press «Запустить сейчас» once more.",
+          "Check your mail and press the button back to the cart.",
           "Press «Отписаться» at the bottom of the letter."
         ],
         "expect": [
-          "The letter arrives with the list of products from the cart.",
-          "Its button opens the shop with that same cart.",
-          "One abandoned cart gets one letter, not two.",
+          "Toast «Отправлено 1 · пропущено 0».",
+          "Under the letter, «Последний запуск» shows today's time and «отправлено 1».",
+          "The second press says «Отправлено 0» — one cart, one letter.",
+          "The letter lists the cart, and its button opens the shop with that cart.",
           "«Отписаться» works with one press, and the page confirms it.",
           "The next abandoned cart from that address gets no letter."
         ],
@@ -4068,19 +4131,20 @@
       "lang": "RU",
       "title": "Письмо ко дню рождения",
       "steps": [
-        "В разделе «Письма» включить «Скидка ко дню рождения» и выбрать «в день рождения».",
-        "Тут же в «Скидка в поздравлении» поставить 15 %.",
-        "В кабинете покупателя поставить сегодняшнюю дату рождения и галочку про скидки и поздравление.",
-        "Попросить Дима запустить расписание вручную.",
-        "Проверить почту и применить пришедший промокод на кассе.",
-        "Нажать «Отписаться» внизу письма и открыть карточку клиента в панели."
+        "В «Письмах» включить «Скидка ко дню рождения» и выбрать «за 3 дня».",
+        "Там же поставить «Скидка в поздравлении» 15 %.",
+        "В кабинете покупателя вписать дату рождения послезавтра и поставить галочку.",
+        "В «Письмах» нажать «Запустить сейчас» под этим письмом, потом ещё раз.",
+        "Проверить почту и применить промокод на кассе.",
+        "Нажать «Отписаться» внизу письма и открыть карточку клиента."
       ],
       "expect": [
-        "Письмо пришло, в нём личный промокод.",
-        "Код срабатывает на кассе.",
-        "Скидка ровно та, что выбрали — 15 %.",
-        "Код живёт ещё две недели после дня рождения.",
-        "После «Отписаться» в карточке клиента стоит «Отписался по ссылке в письме»."
+        "Тост «Отправлено 1 · пропущено 0», под письмом — «Последний запуск» с этим временем.",
+        "Письмо пришло, в нём личный промокод на 15 %.",
+        "Второе нажатие второго письма не шлёт.",
+        "Код срабатывает на кассе и живёт две недели после дня рождения.",
+        "«Ближайшие 7 дней» считает этого покупателя.",
+        "После «Отписаться» в карточке стоит «Отписался по ссылке в письме»."
       ],
       "why": "Промокод, сгоревший в тот же день, — поздравление, которым не воспользоваться.",
       "risk": "med",
@@ -4088,19 +4152,20 @@
       "en": {
         "title": "The birthday letter",
         "steps": [
-          "In «Письма» switch on «Скидка ко дню рождения» and choose «в день рождения».",
-          "Right below it, set «Скидка в поздравлении» to 15 %.",
-          "In the customer account set today as the date of birth and tick discounts-and-greeting.",
-          "Ask Dim to start the schedule by hand.",
-          "Check your mail and apply the promo code that arrived at the checkout.",
-          "Press «Отписаться» at the bottom of the letter and open the customer card in the panel."
+          "In «Письма» switch on «Скидка ко дню рождения» and choose «за 3 дня».",
+          "Right there set «Скидка в поздравлении» to 15 %.",
+          "In the customer account enter a birthday two days ahead and tick the box.",
+          "In «Письма» press «Запустить сейчас» under this letter, then once more.",
+          "Check your mail and apply the promo code at the checkout.",
+          "Press «Отписаться» at the bottom of the letter and open the customer card."
         ],
         "expect": [
-          "The letter arrives with a personal promo code.",
-          "The code works at the checkout.",
-          "The discount is exactly the one chosen — 15 %.",
-          "It lives two more weeks after the birthday.",
-          "After «Отписаться» the customer card says «Отписался по ссылке в письме»."
+          "Toast «Отправлено 1 · пропущено 0», and «Последний запуск» under the letter shows this time.",
+          "The letter arrives with a personal 15 % promo code.",
+          "The second press sends no second letter.",
+          "The code works at the checkout and lives two weeks past the birthday.",
+          "«Ближайшие 7 дней» counts this customer.",
+          "After «Отписаться» the card says «Отписался по ссылке в письме»."
         ],
         "why": "A code that expires the same day is a greeting nobody can use."
       }
