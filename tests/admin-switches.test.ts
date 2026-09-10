@@ -19,11 +19,15 @@ import { describe, expect, it } from "vitest";
 const APP_JS = fileURLToPath(new URL("../public/shop2/app.js", import.meta.url));
 const src = readFileSync(APP_JS, "utf8");
 
-/** The one `e.target.closest("[data-…],[data-…]")` the click handler opens with. */
+/** The one `e.target.closest("[data-…],[data-…]")` the click handler opens
+ *  with — the longest such list in the file: since round 12 the brand
+ *  combobox and the blog body have their own short `closest()` calls
+ *  earlier in the source, and the first match was one of those. */
 function delegated(): Set<string> {
-  const m = src.match(/e\.target\.closest\("(\[data-[^"]*)"\)/);
-  if (!m) throw new Error("public/shop2/app.js no longer opens its click handler with one closest() list");
-  return new Set(m[1].split(",").map((s) => s.trim()));
+  const lists = [...src.matchAll(/e\.target\.closest\("(\[data-[^"]*)"\)/g)].map((m) => m[1]);
+  if (!lists.length) throw new Error("public/shop2/app.js no longer opens its click handler with one closest() list");
+  const longest = lists.reduce((a, b) => (b.length > a.length ? b : a));
+  return new Set(longest.split(",").map((s) => s.trim()));
 }
 
 /** `d.admBank` → `[data-adm-bank]`, the way the DOM spells a dataset key. */
