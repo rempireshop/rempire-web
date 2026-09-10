@@ -730,6 +730,9 @@ test.describe("admin — a warehouse row and the blog card say when they are sav
     await page.locator("[data-admblogdelyes]").click();
     await expect(page.getByRole("status")).toContainText("Статья удалена");
   });
+});
+
+/**
  * «Запустить сейчас» (Dim, 10.09.2026). The test plan used to say «Попросить
  * Дима запустить расписание вручную — из панели это не делается»; now the
  * two time-driven letters have a button under their row that runs the daily
