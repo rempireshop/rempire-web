@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
-import { adminSection, ipHeaders, waitForScreen } from "./fixtures";
+import {
+  adminSection, freshEmail, ipHeaders, loginAsAdmin, payOrder, PRODUCT, PRODUCT_2, shopUrl, waitForScreen,
+} from "./fixtures";
 import { assertClean, clearToast, openAdmin, tab, toastText, watch } from "./sweep-helpers";
 
 /**
@@ -548,5 +550,184 @@ test.describe("admin — the birthday letter has a switch and a «за N дне�
       await page.locator('[data-admflow="birthday"]').click();
       await clearToast(page);
     }
+  });
+});
+
+/**
+ * r12 (Dim, 10.09.2026: «all saving flows … least clicks, comfortable»). The
+ * panel's small forms — the order card's note, the customer's note, a
+ * warehouse row's «Править», the blog's «Публикация» card — say where they
+ * stand: a quiet, disabled button while nothing differs, the ink button and
+ * «Не сохранено» the moment something does, «Сохранено ✓» in place once it
+ * went through. Enter is the button (Ctrl+Enter in the note's textarea),
+ * and a draft survives a background render.
+ */
+test.describe("admin — the small forms say when they are saved", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(221) });
+
+  test("the order card's note: quiet, lit, «Сохранено ✓» — and the draft survives a render", async ({ page }, testInfo) => {
+    test.setTimeout(180_000);
+    // an order to write on
+    await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+    await waitForScreen(page, "product");
+    await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+    await expect(page.getByRole("status")).toBeVisible();
+    await page.goto(shopUrl("", "/checkout/"));
+    await waitForScreen(page, "checkout");
+    const number = await payOrder(page, freshEmail("r12-note"), "paid");
+
+    const openCard = async () => {
+      await adminSection(page, "orders");
+      await page.locator("[data-admorderq]").fill(number);
+      await page.locator("[data-admorder]:not([data-admorder=''])").first().click();
+      await expect(page.locator("[data-admnote]")).toBeVisible();
+    };
+    await loginAsAdmin(page);
+    await openCard();
+    const box = page.locator("[data-admnote]");
+    const btn = page.locator("[data-admnotesave]");
+    await expect(btn, "nothing typed, yet the button is live").toBeDisabled();
+    await box.fill("Позвонить перед отправкой");
+    await expect(btn).toBeEnabled();
+    await expect(page.locator("[data-admnoteacts]")).toContainText("Не сохранено");
+
+    // a background render must not wipe the draft — force one through the assistant pane
+    await page.locator(".adm-fab").click();
+    await expect(page.locator(".adm-asst")).toBeVisible();
+    await page.locator(".adm-asst__fold").click();
+    await expect(page.locator(".adm-asst")).toHaveCount(0);
+    await expect(box, "a render wiped the note being typed").toHaveValue("Позвонить перед отправкой");
+    await expect(btn).toBeEnabled();
+
+    await btn.click();
+    await expect(page.getByRole("status")).toContainText("Заметка сохранена");
+    await expect(btn).toHaveText("Сохранено ✓");
+    await expect(btn).toBeDisabled();
+    await clearToast(page);
+
+    // …and it is really there: reload, reopen
+    await page.reload();
+    await waitForScreen(page, "admin");
+    await openCard();
+    await expect(page.locator("[data-admnote]")).toHaveValue("Позвонить перед отправкой");
+    await expect(page.locator("[data-admnotesave]")).toBeDisabled();
+
+    if (testInfo.project.name === "desktop") {
+      // Ctrl+Enter is the button; plain Enter stays a new line in a textarea
+      const box2 = page.locator("[data-admnote]");
+      await box2.fill("Позвонить перед отправкой — после 18:00");
+      await box2.press("Control+Enter");
+      await expect(page.getByRole("status")).toContainText("Заметка сохранена");
+      await expect(page.locator("[data-admnotesave]")).toHaveText("Сохранено ✓");
+    }
+  });
+
+  test("the customer's note: Enter is the button, «Сохранено ✓» stays until the next keystroke", async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    // a guest checkout makes no customer row — the owner's own «+ Партнёр» does
+    const email = freshEmail("r12-cust");
+    const made = await page.request.post("/api/admin/customers/", { data: { email, company: "Salon R12 OÜ", phone: "", lang: "RU" } });
+    expect(made.ok()).toBe(true);
+    const id = String(((await made.json()) as { customer: { id: string } }).customer.id);
+    /* `next dev` compiles a route on its first hit, and the card's detail GET
+       can be that hit — ask for it once here, so the card below opens on a
+       warm route instead of a skeleton that outlives the assertion. */
+    expect((await page.request.get(`/api/admin/customers/${encodeURIComponent(id)}/`)).ok()).toBe(true);
+    await adminSection(page, "people");
+    await page.locator("[data-admcustq]").fill(email);
+    const open = page.locator("[data-admcustopen]").first();
+    await expect(open).toBeVisible();
+    await open.click();
+    const box = page.locator("[data-admcustnotesf]");
+    const btn = page.locator("[data-admcustsavenotes]");
+    await expect(box).toBeVisible({ timeout: 15_000 });
+    await expect(btn, "nothing typed, yet the button is live").toBeDisabled();
+    await box.fill("постоянный клиент, оптовик");
+    await expect(btn).toBeEnabled();
+    await expect(page.locator("[data-admcustnoteacts]")).toContainText("Не сохранено");
+    await box.press("Enter");
+    await expect(page.getByRole("status")).toContainText("Заметка сохранена");
+    await expect(btn).toHaveText("Сохранено ✓");
+    await expect(btn).toBeDisabled();
+    await clearToast(page);
+    await box.fill("постоянный клиент");
+    await expect(btn).toHaveText("Сохранить заметку");
+    await expect(btn).toBeEnabled();
+    // the value reached the server
+    const detail = await (await page.request.get(`/api/admin/customers/${encodeURIComponent(id)}/`)).json();
+    expect(detail.customer.notes).toBe("постоянный клиент, оптовик");
+  });
+});
+
+test.describe("admin — a warehouse row and the blog card say when they are saved", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(222) });
+
+  test("«Править»: «Изменений нет» for an untouched form, «Сохранено ✓» on the row it wrote", async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    await adminSection(page, "goods", "stock");
+    await page.locator("[data-stockq]").fill(PRODUCT_2.id);
+    const edit = page.locator('[data-stockedit]:not([data-stockedit=""])').first();
+    await expect(edit).toBeVisible();
+    const key = (await edit.getAttribute("data-stockedit")) as string;
+    await edit.click();
+    const save = page.locator(`[data-stocksave="${key}"]`);
+    await expect(save).toBeVisible();
+    // nothing typed → said out loud, and the form folds away
+    await save.click();
+    await expect(page.getByRole("status")).toContainText("Изменений нет");
+    await expect(page.locator(`[data-stocksave="${key}"]`)).toHaveCount(0);
+    await clearToast(page);
+
+    /* The threshold only — never the count: PRODUCT_2's stock belongs to the
+       register sweep (fixtures.ts), and a threshold is not a stock move. The
+       write is awaited by its response, not by a toast snapshot: the route
+       compiles on its first hit under `next dev`, and a toast read in a fixed
+       window can still be the previous one. */
+    const inventoryPut = () =>
+      page.waitForResponse((r) => r.url().includes("/api/admin/inventory/") && r.request().method() === "PUT");
+    await page.locator(`[data-stockedit="${key}"]`).click();
+    const low = page.locator("[data-stocklowinput]");
+    const was = (await low.inputValue()) || "2";
+    await low.fill(String(Number(was) + 1));
+    const put = inventoryPut();
+    await low.press("Enter");   // Enter is «Сохранить» (ADM_ENTER_FORMS)
+    expect((await put).ok()).toBe(true);
+    await expect(page.getByRole("status")).toContainText("Сохранено");
+    const badge = page.locator("#stocklist .adm-badge--ok", { hasText: "Сохранено" });
+    await expect(badge, "the row it saved does not say so").toHaveCount(1);
+    await clearToast(page);
+    // opening the form again takes the badge away: «Сохранено ✓» beside an open form would be a lie
+    await page.locator(`[data-stockedit="${key}"]`).click();
+    await expect(badge).toHaveCount(0);
+    // …and back to what it was
+    await page.locator("[data-stocklowinput]").fill(was);
+    const put2 = inventoryPut();
+    await page.locator(`[data-stocksave="${key}"]`).click();
+    expect((await put2).ok()).toBe(true);
+    await expect(page.getByRole("status")).toContainText("Сохранено");
+    await clearToast(page);
+  });
+
+  test("the blog's «Публикация» card says whether the article is saved", async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    await adminSection(page, "blog");
+    await page.locator("[data-admblognew]").click();
+    const state = page.locator("[data-blogpubstate]");
+    await expect(state).toHaveText("Ещё не сохранено");
+    await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации");
+    await expect(state, "a new post has nothing on the server yet").toHaveText("Ещё не сохранено");
+    await page.locator("[data-admblogsave]").click();
+    await expect(page.getByRole("status")).toContainText("Черновик сохранён");
+    await expect(state).toHaveText("Сохранено ✓");
+    await clearToast(page);
+    await page.locator('[data-blogf="title"]').fill("R12 — карточка публикации, правка");
+    await expect(state).toHaveText("Есть несохранённые изменения");
+    // tidy up through the same card
+    await page.locator("[data-admblogdel]").click();
+    await page.locator("[data-admblogdelyes]").click();
+    await expect(page.getByRole("status")).toContainText("Статья удалена");
   });
 });

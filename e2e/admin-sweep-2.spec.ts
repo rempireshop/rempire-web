@@ -218,10 +218,12 @@ test.describe("admin sweep 2 — settings", () => {
     test.skip(testInfo.project.name !== "desktop", "one write per action is enough");
     await loginAsAdmin(page);
     await openSettings(page, "home");
-    await page.locator("[data-herosave]").click();
-    await expect(page.getByRole("status")).toContainText("Изменений нет");
+    /* Since r12 the page's save bar answers before a click: with nothing
+       typed the bar says «Изменений нет» and its «Сохранить» is disabled, so
+       an untouched banner cannot even reach the confirm card. */
+    await expect(page.locator("[data-setnote]")).toHaveText("Изменений нет");
+    await expect(page.locator("[data-herosave]")).toBeDisabled();
     await expect(page.locator(".adm-confirm")).toHaveCount(0);
-    await page.locator("[data-closetoast]").click();
 
     /* The chatbot switch writes settings in the background. With the server
        refusing, the owner used to see «Чат выключен ✓» and nothing else —

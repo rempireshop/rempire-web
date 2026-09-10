@@ -374,7 +374,9 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       await page.locator('[data-heroedit="0"]').click();
       await page.locator('[data-herof="title"]').fill(title);
       await page.locator("[data-heroclose]").click();
-      await expect(page.getByText("Есть несохранённые изменения — нажмите «Сохранить».").first()).toBeVisible();
+      // since r12 the page's save bar says what is unsaved and names the card
+      await expect(page.locator("[data-setnote]")).toContainText("Изменения не сохранены");
+      await expect(page.locator("[data-setnote]")).toContainText("Главный баннер");
 
       await page.locator("[data-herosave]").click();
       await expect(page.locator(".adm-confirm__t")).toHaveText("Изменить баннер на главной?");
@@ -688,6 +690,187 @@ test.describe("admin sections — the numbers explain themselves", () => {
     // …and one single click, the number every one of the three languages spells its own way
     await expect(pages.locator(".adm-q").nth(2)).toContainText("Главная");
     await expect(pages.locator(".adm-q").nth(2)).toContainText("На ссылку нажали 1 раз.");
+  });
+});
+
+/**
+ * r12 (Dim, 10.09.2026: «all saving flows … the least clicks, comfortable on
+ * the phone and on the desktop»). A settings page has ONE «Сохранить» — the
+ * product editor's sticky bar at the bottom — and the bar says what is
+ * unsaved and where before anything is pressed (app.js admSetBarHTML):
+ * «Изменений нет» and a disabled button while nothing differs, the card's
+ * name and the ink button the moment something does, «Сохранено ✓» on the
+ * button once it went through. Both viewports: the bar exists for the phone.
+ */
+test.describe("admin sections — Настройки: one save bar per page", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(219) });
+
+  test("the bar names the unsaved card, stays in view, and «Отменить правки» takes it back", async ({ page }, testInfo) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    await adminSection(page, "setup");
+    await page.locator('[data-admsetpage="home"]').click();
+    const bar = page.locator("[data-setbar]");
+    const note = page.locator("[data-setnote]");
+    await expect(bar, "the home page has no save bar").toBeVisible();
+    await expect(note).toHaveText("Изменений нет");
+    await expect(page.locator("[data-herosave]"), "nothing typed, yet «Сохранить» is live").toBeDisabled();
+    // one «Сохранить» on the page — the bar's; no card keeps one of its own
+    expect(await page.locator(".adm-page").getByRole("button", { name: "Сохранить", exact: true }).count(),
+      "a card kept a «Сохранить» of its own").toBe(1);
+
+    await page.locator('[data-heroedit="0"]').click();
+    const title = page.locator('[data-herof="title"]');
+    const was = await title.inputValue();
+    await title.fill("E2E — полоса сохранения");
+    await expect(note).toContainText("Изменения не сохранены");
+    await expect(note).toContainText("Главный баннер");
+    await expect(page.locator("[data-herosave]")).toBeEnabled();
+    await expect(page.locator("[data-setrevert]")).toBeVisible();
+
+    // …and it is on screen without scrolling, wherever the owner is in the form
+    await page.locator("#heroimglist").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const geo = await page.evaluate(() => {
+      const box = (el: Element | null) => {
+        const r = el ? el.getBoundingClientRect() : null;
+        return r ? { top: r.top, bottom: r.bottom, h: r.height } : null;
+      };
+      return {
+        vh: window.innerHeight,
+        bar: box(document.querySelector("[data-setbar]")),
+        nav: box(document.querySelector(".adm-bar")),
+        save: box(document.querySelector("[data-herosave]")),
+      };
+    });
+    expect(geo.bar, "no bar").not.toBeNull();
+    expect(geo.bar!.top, "the bar is above the fold").toBeGreaterThanOrEqual(0);
+    expect(geo.bar!.bottom, "the bar is below the fold").toBeLessThanOrEqual(geo.vh + 1);
+    if (testProjectIsMobile(testInfo)) {
+      expect(geo.nav, "no bottom nav on the phone").not.toBeNull();
+      expect(geo.bar!.bottom, "the bar runs under the phone's nav").toBeLessThanOrEqual(geo.nav!.top + 1);
+      expect(geo.save!.h, "«Сохранить» is under 44 px on the phone").toBeGreaterThanOrEqual(44);
+    }
+
+    // the strip card on the same page lights the same bar, under its own name
+    await page.locator('[data-contentblock="announcement"]').click();
+    await page.locator('[data-contentf="announcement.link"]').fill("https://example.com/e2e");
+    await expect(note).toContainText("Верхняя полоска");
+    await expect(note).toContainText("Главный баннер");
+
+    // «Отменить правки»: both drafts go back, the bar goes quiet, nothing was written
+    await page.locator("[data-setrevert]").click();
+    await expect(note).toHaveText("Изменений нет");
+    await expect(page.locator("[data-herosave]")).toBeDisabled();
+    await page.locator('[data-heroedit="0"]').click();
+    await expect(page.locator('[data-herof="title"]')).toHaveValue(was);
+  });
+
+  test("«О компании»: the bar names the invoice card, Enter saves through it, «Сохранено ✓» follows", async ({ page }, testInfo) => {
+    test.skip(testProjectIsMobile(testInfo), "one write per action is enough — desktop runs it");
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    const before = await (await page.request.get("/api/admin/settings/")).json();
+    try {
+      await adminSection(page, "setup");
+      await page.locator('[data-admsetpage="company"]').click();
+      const note = page.locator("[data-setnote]");
+      const save = page.locator("[data-adminvsave]");
+      await expect(note).toHaveText("Изменений нет");
+      const due = page.locator('[data-invsetf="dueDays"]');
+      const was = await due.inputValue();
+      await due.fill(String(Number(was) + 2));
+      await expect(note).toContainText("Изменения не сохранены");
+      await expect(note).toContainText("Счета для компаний");
+      await expect(save).toBeEnabled();
+      // Enter in the box is the bar's «Сохранить»: the box is in the card, the button is not
+      const put = page.waitForResponse((r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
+      await due.press("Enter");
+      expect((await put).ok()).toBe(true);
+      await expect(page.getByRole("status")).toContainText("Счета для компаний: сохранено ✓");
+      // quiet again, the button itself says so — one bar button, whichever card it was
+      const barBtn = page.locator("[data-setbar] .adm-btn");
+      await expect(barBtn).toHaveText("Сохранено ✓");
+      await expect(barBtn).toBeDisabled();
+      await expect(note, "the bar said «saved» twice").toHaveCount(0);
+      // the next keystroke takes the tick away again
+      await due.fill(was);
+      await expect(page.locator("[data-setnote]")).toContainText("Изменения не сохранены");
+      await expect(page.locator("[data-adminvsave]")).toHaveText("Сохранить");
+    } finally {
+      await page.request.put("/api/admin/settings/", { data: { invoice: before.settings.invoice ?? null } });
+    }
+  });
+});
+
+/**
+ * Defects 10 and 11 of Dim's list (10.09.2026), both on «Настройки → Главная».
+ * 10: picking a new picture for an existing slide threw the page — measured
+ * 869 px on a desktop and 1433 px on a phone before the fix (app.js
+ * paintHeroPick says why). 11: with five slides «Добавить слайд» went grey
+ * and nothing said why.
+ */
+test.describe("admin sections — the banner editor keeps its place", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(220) });
+
+  test("picking a picture keeps the page where it is, and the tile keeps its focus", async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    await adminSection(page, "setup");
+    await page.locator('[data-admsetpage="home"]').click();
+    await page.locator('[data-heroedit="0"]').click();
+    const list = page.locator("#heroimglist");
+    await list.scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollBy(0, -120));
+    await page.waitForTimeout(300);
+    const y = () => page.evaluate(() => window.scrollY);
+    const saved = await list.locator('[data-heroimg][aria-current="true"]').first().getAttribute("data-heroimg");
+    const other = await list.locator(`[data-heroimg]:not([data-heroimg="${saved}"])`).first().getAttribute("data-heroimg");
+    // away from the saved picture, then back to it — the second pick is the
+    // one that used to throw the page (the draft equals the saved banner again)
+    for (const id of [other, saved]) {
+      const before = await y();
+      await list.locator(`[data-heroimg="${id}"]`).click();
+      await expect(list.locator(`[data-heroimg="${id}"]`)).toHaveAttribute("aria-current", "true");
+      await page.waitForTimeout(300);
+      expect(Math.abs((await y()) - before), `picking ${id} moved the page`).toBeLessThan(4);
+      expect(await page.evaluate(() => !!document.activeElement && document.activeElement.hasAttribute("data-heroimg")),
+        `picking ${id} lost the focus`).toBe(true);
+    }
+    // back where it started: the bar knows
+    await expect(page.locator("[data-setnote]")).toHaveText("Изменений нет");
+  });
+
+  test("the sixth slide is refused out loud, next to the button", async ({ page }) => {
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+    await adminSection(page, "setup");
+    await page.locator('[data-admsetpage="home"]').click();
+    const add = page.locator("[data-heroadd]");
+    const why = page.locator("[data-heromax]");
+    const rows = page.locator("[data-heroedit]");
+    const had = await rows.count();
+    // the standard banner IS five slides — step below the ceiling first
+    if (await add.isDisabled()) await page.locator("[data-herodel]").last().click();
+    await expect(add).toBeEnabled();
+    await expect(why, "the reason shows below the ceiling").toBeHidden();
+    let guard = 0;
+    while (!(await add.isDisabled()) && guard++ < 8) {
+      await add.click();
+      await page.locator("[data-heroclose]").click();
+    }
+    expect(await rows.count(), "more than five slides were accepted").toBe(5);
+    await expect(add).toBeDisabled();
+    await expect(why).toBeVisible();
+    await expect(why).toContainText("Максимум 5 слайдов");
+    // beside the button — in its row on a desktop, the line right under it on a phone
+    const [b, w] = await Promise.all([add.boundingBox(), why.boundingBox()]);
+    expect(b && w, "no boxes to compare").toBeTruthy();
+    expect(w!.y, "the reason is nowhere near the button").toBeLessThan(b!.y + b!.height + 24);
+    // the draft only: «Отменить правки» puts the list back, nothing was written
+    await page.locator("[data-setrevert]").click();
+    await expect(page.locator("[data-setnote]")).toHaveText("Изменений нет");
+    expect(await rows.count()).toBe(had);
   });
 });
 

@@ -924,6 +924,21 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
 /* the editor's refusal («Цена — число от 1 до 500 €…») rides in the bar, a
    full line above the buttons, so it is on screen wherever the owner is */
 .adm-savebar__err { flex-basis: 100%; margin: 0 0 4px; }
+/* The settings pages' bar (app.js admSetBarHTML, r12) carries a status line
+   as well as the buttons: what is unsaved and where — «Изменения не
+   сохранены: Главный баннер» — or «Изменений нет» while nothing differs.
+   Desktop: right after the buttons in the bar's row — beside what it
+   describes, and clear of the assistant's button fixed in the viewport's
+   corner (a right-aligned line ran under it at 1280 px). Phone (the media
+   block below): its own line ABOVE the buttons, so the words are read
+   before the thumb reaches «Сохранить». The colour is never the only cue —
+   the words differ too. */
+.adm-savebar__note { font-size: 13px; line-height: 18px; color: var(--a-muted); order: 1; margin-left: 8px; }
+.adm-savebar__note--warn { color: var(--a-warn); font-weight: 500; }
+.adm-savebar__note--ok { color: var(--a-ok); font-weight: 500; }
+/* «Сохранено ✓» beside a small form's own button (the blog's «Публикация»
+   card); the warn twin is .adm-hint--warn above */
+.adm-hint--ok { color: var(--a-ok); }
 /* On a phone the order from the bottom is: the nav, the save bar on it, the
    form above both. `body.adm-saving` is set by render() whenever a save bar
    is on screen (renderImpl), which is what lets the rules reach the page
@@ -950,6 +965,9 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
    over a one-row bar the toast simply floats a little higher. */
 @media (max-width: 899px) {
   .adm-savebar { bottom: var(--a-barh); padding-right: 56px; }
+  /* the status line takes the row above the buttons — the assistant's
+     button sits in the buttons' row, so the words never run under it */
+  .adm-savebar__note { flex-basis: 100%; order: -1; margin-left: 0; text-align: left; }
   body.adm-saving .screen--co { padding-bottom: 0; }
   body.adm-saving .adm-page { padding-bottom: var(--a-barh); }
   body.adm-saving .adm-fab {
