@@ -11,6 +11,7 @@
 import { NextRequest } from "next/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
+import { splitBlocks } from "@/lib/blog-cards";
 import { setupDb, teardownDb, truncateAll, TEST_SECRET } from "./helpers";
 
 const ORIGIN = "https://rempireshop.com";
@@ -94,8 +95,18 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     expect(t.body).not.toContain("onclick");
     expect(t.tags).toEqual(["борода", "зима", "уход", "масло", "бальзам"]);   // five, lowercase
     expect(t.seo).toEqual({ title: ARTICLE.seoTitle, description: ARTICLE.seoDescription });
-    // only ids from the slice the model was offered — the shampoo was not offered for a beard topic
-    expect(t.products).toEqual(["proraso-beard-oil-azur-lime-30ml"]);
+    /* only ids from the slice the model was offered — the shampoo was not
+       offered for a beard topic, the invented id never existed; the oil it
+       named got its card, after the paragraph that names it, and a second
+       product from the slice fills the article up to the minimum (src/lib/
+       blog-cards.ts), so `products` is the cards as they stand */
+    expect(t.products[0]).toBe("proraso-beard-oil-azur-lime-30ml");
+    expect(t.products).toHaveLength(2);
+    expect(t.products).not.toContain("system-4-bio-botanical-shampoo");
+    expect(t.products).not.toContain("not-in-the-slice");
+    expect(t.body).toContain('<p>Proraso <strong>Beard Oil</strong> после умывания.</p><p><a data-product="proraso-beard-oil-azur-lime-30ml"></a></p>');
+    expect(t.body).toContain(`<p><a data-product="${t.products[1]}"></a></p>`);
+    expect(userMsg, "the second card is for a product the model was offered").toContain(`${t.products[1]} | `);
   });
 
   it("post_full: the products the editor already picked are offered too, and come back if mentioned", async () => {
@@ -107,9 +118,90 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
       input: { topic: "уход за бородой зимой", products: [{ id: "system-4-bio-botanical-shampoo", brand: "System 4", name: "Bio Botanical Shampoo — шампунь" }] },
     }, admin));
     const body = await res.json();
-    expect(body.text.products).toEqual(["system-4-bio-botanical-shampoo"]);
+    expect(body.text.products).toContain("system-4-bio-botanical-shampoo");
+    expect(body.text.body).toContain('<a data-product="system-4-bio-botanical-shampoo">');
     const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(JSON.parse(String((init as RequestInit).body)).messages[1].content).toContain("system-4-bio-botanical-shampoo | System 4 | Bio Botanical Shampoo — шампунь");
+  });
+
+  /* The cards are the route's promise, not the model's (Dim, 10.09.2026):
+     an article that came back with none gets 2–4 of the products it was
+     offered, after the paragraphs they belong to, never two in a row, never
+     inside a heading or a list, one of them near the end — and the ids the
+     model named, in either shape, get theirs first. */
+  it("post_full: an article without cards leaves with 2–4 of the slice's products in it, placed by the rules", async () => {
+    const fetchMock = vi.fn(async () => completion(JSON.stringify({ ...ARTICLE, products: [] })));
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "post_full", lang: "RU", input: { topic: "уход за бородой зимой" } }, admin));
+    expect(res.status).toBe(200);
+    const t = (await res.json()).text as { body: string; products: string[] };
+    const cards = [...t.body.matchAll(/<a data-product="([^"]+)"/g)].map((m) => m[1]);
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+    expect(cards.length).toBeLessThanOrEqual(4);
+    expect(new Set(cards).size).toBe(cards.length);
+    expect(t.products).toEqual(cards);
+    // the oil the text names by brand and name, right after that paragraph
+    expect(t.body).toContain('<p>Proraso <strong>Beard Oil</strong> после умывания.</p><p><a data-product="proraso-beard-oil-azur-lime-30ml"></a></p>');
+    const blocks = splitBlocks(t.body);
+    for (let i = 1; i < blocks.length; i++) {
+      expect(blocks[i].html.includes("data-product") && blocks[i - 1].html.includes("data-product"), `two cards in a row: ${blocks[i - 1].html}${blocks[i].html}`).toBe(false);
+    }
+    for (const b of blocks) if (b.tag !== "p") expect(b.html, `a card inside <${b.tag}>`).not.toContain("data-product");
+    expect(blocks.slice(Math.floor((blocks.length * 2) / 3)).some((b) => b.html.includes("data-product")), "no card in the last third").toBe(true);
+    expect(t.body.endsWith("<p>Заходите на Mardi 1.</p>"), "the article no longer ends in words").toBe(true);
+    // every one of them is a product the model was offered
+    const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    const userMsg = JSON.parse(String((init as RequestInit).body)).messages[1].content as string;
+    for (const id of cards) expect(userMsg).toContain(`${id} | `);
+  });
+
+  it("post_full: `products` as {id, after} is read too — the card goes after the paragraph the hint points at", async () => {
+    const body = "<p>Первый абзац о зиме.</p><h2>Масло</h2><p>Второй абзац о масле.</p><h2>Бальзам</h2><p>Третий абзац о бальзаме.</p><p>Четвёртый, заключительный.</p>";
+    vi.stubGlobal("fetch", vi.fn(async () => completion(JSON.stringify({
+      ...ARTICLE, body,
+      products: [{ id: "proraso-beard-oil-azur-lime-30ml", after: "Масло" }, { id: "proraso-wood-spice-beard-balm-100ml", after: 3 }],
+    }))));
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "post_full", lang: "RU", input: { topic: "уход за бородой зимой" } }, admin));
+    const t = (await res.json()).text as { body: string; products: string[] };
+    expect(t.body).toContain('<p>Второй абзац о масле.</p><p><a data-product="proraso-beard-oil-azur-lime-30ml"></a></p>');
+    expect(t.body).toContain('<p>Третий абзац о бальзаме.</p><p><a data-product="proraso-wood-spice-beard-balm-100ml"></a></p>');
+    expect(t.products).toEqual(["proraso-beard-oil-azur-lime-30ml", "proraso-wood-spice-beard-balm-100ml"]);
+  });
+
+  /* «Показывать в магазине» off, or the stock set to «нет» — by hand or by
+     the count (product_overrides): neither is offered to the model, and a
+     card the model wrote for one anyway does not survive. A recommendation
+     to buy what cannot be bought is a dead end in a published article. */
+  it("post_full: a hidden product and one out of stock are neither offered nor placed", async () => {
+    const { upsertOverride } = await import("@/lib/orders");
+    await upsertOverride("proraso-beard-oil-azur-lime-30ml", { hidden: true });
+    await upsertOverride("proraso-wood-spice-beard-balm-100ml", { stock: "out" });
+    const body =
+      '<p>Зимой борода сохнет.</p>' +
+      '<p><a data-product="proraso-beard-oil-azur-lime-30ml"></a></p>' +
+      '<p>Бальзам утром.</p>' +
+      '<p><a data-product="proraso-wood-spice-beard-balm-100ml"></a></p>' +
+      '<p>Заходите на Mardi 1.</p>';
+    const fetchMock = vi.fn(async () => completion(JSON.stringify({ ...ARTICLE, body, products: ["proraso-beard-oil-azur-lime-30ml", "proraso-wood-spice-beard-balm-100ml"] })));
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "post_full", lang: "RU", input: { topic: "уход за бородой зимой" } }, admin));
+    expect(res.status).toBe(200);
+    const [, init] = (fetchMock as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    const userMsg = JSON.parse(String((init as RequestInit).body)).messages[1].content as string;
+    expect(userMsg, "a hidden product was offered").not.toContain("proraso-beard-oil-azur-lime-30ml");
+    expect(userMsg, "a product out of stock was offered").not.toContain("proraso-wood-spice-beard-balm-100ml");
+    expect(userMsg).toMatch(/proraso-beard-oil-[a-z0-9-]+ \| Proraso/);   // the other oils still are
+    const t = (await res.json()).text as { body: string; products: string[] };
+    expect(t.body).not.toContain("proraso-beard-oil-azur-lime-30ml");
+    expect(t.body).not.toContain("proraso-wood-spice-beard-balm-100ml");
+    expect(t.products).not.toContain("proraso-beard-oil-azur-lime-30ml");
+    expect(t.products).not.toContain("proraso-wood-spice-beard-balm-100ml");
+    // and the article still has its cards — the next best of the slice
+    expect(t.products.length).toBeGreaterThanOrEqual(2);
+    for (const id of t.products) expect(userMsg).toContain(`${id} | `);
   });
 
   /* The article places its own product cards in the body — the editor's own
@@ -137,13 +229,15 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     expect(t.body).toContain("<p>Зимой борода сохнет.</p>");
   });
 
-  it("post_full: a body with no cards is left exactly as the allowlist wrote it", async () => {
+  it("post_full: the text around the cards is left exactly as the allowlist wrote it", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => completion(JSON.stringify(ARTICLE))));
     const { POST } = await import("@/app/api/admin/ai/text/route");
     const res = await POST(req({ task: "post_full", lang: "RU", input: { topic: "уход за бородой зимой" } }, admin));
     const t = (await res.json()).text;
-    expect(t.body).not.toContain("data-product");
-    expect(t.body).toContain("<h2>Масло каждый вечер</h2>");
+    // the cards out again, the article is the sanitiser's own
+    expect(t.body.replace(/<p><a data-product="[^"]+"><\/a><\/p>/g, "")).toBe(
+      "<p>Зимой борода становится суше.</p><h2>Масло каждый вечер</h2><p>Proraso <strong>Beard Oil</strong> после умывания.</p><ul><li>капля</li><li>две</li></ul><p>Заходите на Mardi 1.</p>",
+    );
   });
 
   it("post_full: a card for a product the editor itself picked is kept — that list is offered too", async () => {

@@ -20,6 +20,7 @@ import {
   COPY_KINDS,
   isCopyKind,
   POST_CARDS_MAX,
+  POST_CARDS_MIN,
   POST_PRODUCTS_MAX,
   POST_WORDS,
   PRODUCT_NAME_TAILS,
@@ -88,6 +89,14 @@ describe("buildPostFullPrompt — a whole article, not an outline", () => {
     expect(system).toMatch(/copied character for character from the PRODUCTS list/i);
     expect(system).toMatch(/right after the paragraph that recommends/i);
     expect(system).toContain(`at most ${POST_CARDS_MAX} in the whole article`);
+    /* 2–4 cards, chosen by the topic, kept apart, one near the end (Dim,
+       10.09.2026) — asked of the model here, and held to by the route
+       whatever it answers (src/lib/blog-cards.ts, tests/blog-cards.test.ts) */
+    expect(system).toContain(`Choose ${POST_CARDS_MIN} to ${POST_CARDS_MAX} of the PRODUCTS that genuinely fit the topic`);
+    expect(system).toMatch(/the category the article is about, a brand or a product it names/);
+    expect(system).toMatch(/never two cards one after another/);
+    expect(system).toMatch(/never inside a heading or a list/);
+    expect(system).toMatch(/at least one of them in the last third of the text, before the closing paragraph/);
     expect(system, "the model may write the name and the price itself, and print them twice")
       .toMatch(/no href, no other attribute/i);
     expect(system, "an id outside the list has to be refused, not guessed")

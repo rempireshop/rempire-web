@@ -74,3 +74,8 @@ export function relevantLines(text: string): string {
 export function catalogueIds(): Set<string> {
   return new Set(CAT.map((p) => p.id));
 }
+
+/** One row by id, or null for an id the file does not know (the owner's own products live in the database). */
+export function catalogueRow(id: string): CatRow | null {
+  return CAT.find((p) => p.id === id) ?? null;
+}

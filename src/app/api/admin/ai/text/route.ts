@@ -23,7 +23,13 @@
  * article also places its own product cards in the body, as the editor's
  * «Товар» marker — and both the ids it lists and the ids it placed are
  * filtered here against the slice it was offered (keepKnownCards below), so
- * no card can point at a product that does not exist.
+ * no card can point at a product that does not exist. The slice itself is
+ * in-stock and shown-in-the-shop only (postFullInput reads product_overrides
+ * for the hidden switch and the counted stock), and the answer leaves with
+ * 2–4 cards in it whatever the model did (src/lib/blog-cards.ts): the ids it
+ * named get a card after the paragraph they belong to, an article short of
+ * cards is filled from the slice by the topic's own words, never two cards
+ * in a row, one of them near the end.
  * "post_translate" carries that article (or the owner's own) into another
  * language, tags kept in place. "copy" is the short text behind every «✨»
  * button in the panel (banner slide, announcement strip, contact page,
@@ -51,12 +57,13 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
-import { getSettings, writeAuditSafe } from "@/lib/orders";
+import { getOverrides, getSettings, writeAuditSafe, type Override } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
 import { AiInputError, buildPrompt, isAiTask, LANGS3, POST_PRODUCTS_MAX, type AiTask, type Lang3 } from "@/lib/ai-prompts";
 import { extractJsonObject } from "@/lib/ai-json";
-import { relevantProducts } from "@/lib/catalogue-slice";
+import { catalogueRow, relevantProducts } from "@/lib/catalogue-slice";
 import { sanitizeHtml } from "@/lib/blog";
+import { placeArticleCards, readCardPicks, type CardCandidate, type CardPick } from "@/lib/blog-cards";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -145,9 +152,8 @@ function shapeNonReply(task: string, lang: Lang3, parsed: unknown): { text?: unk
       seo: { title: str(p.seoTitle, 70), description: str(p.seoDescription ?? p.seoDesc, 170) },
     };
     if (task === "post_full") {
-      out.products = Array.isArray(p.products)
-        ? p.products.map((id) => str(id, 80)).filter((id) => /^[a-z0-9][a-z0-9-]*$/.test(id)).slice(0, POST_PRODUCTS_MAX)
-        : [];
+      // ids, or {id, after} — whichever shape the model chose; placed and filtered below
+      out.products = readCardPicks(p.products);
     }
     return { text: out };
   }
@@ -193,12 +199,21 @@ function keepKnownCards(html: string, allowed: Set<string>): string {
    few itself (the editor's own «Товары в статье»); the rest of the slice
    comes from the catalogue file by topic, so the model always has a short,
    relevant list — and its answer's `products` is filtered against exactly
-   that list, never anything it made up. */
-function postFullInput(raw: unknown): { input: Record<string, unknown>; allowed: Set<string> } {
+   that list, never anything it made up.
+
+   In stock and shown in the shop, every one of them: a card is a
+   recommendation to buy, and one for a product the owner has hidden
+   («Показывать в магазине» off) or that has run out is a dead end in a
+   published article. The catalogue's own in/low/out is the first word,
+   product_overrides (the switch, the counted stock — getOverrides) the
+   last; a database that does not answer leaves the catalogue's word
+   standing rather than the article without products. */
+type PostFullRefs = { input: Record<string, unknown>; allowed: Set<string>; refs: CardCandidate[]; topic: string };
+async function postFullInput(raw: unknown): Promise<PostFullRefs> {
   const src = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
   const topic = typeof src.topic === "string" ? src.topic : "";
   const given = Array.isArray(src.products) ? src.products : [];
-  const refs: Array<{ id: string; brand: string; name: string; category: string }> = [];
+  const refs: CardCandidate[] = [];
   const seen = new Set<string>();
   for (const item of given) {
     const o = (item && typeof item === "object" ? item : {}) as Record<string, unknown>;
@@ -208,13 +223,28 @@ function postFullInput(raw: unknown): { input: Record<string, unknown>; allowed:
     refs.push({ id, brand: str(o.brand, 60), name: str(o.name, 140), category: str(o.category, 40) });
     if (refs.length >= POST_PRODUCTS_MAX) break;
   }
-  for (const p of relevantProducts(topic, { limit: POST_PRODUCTS_MAX, fill: 8 })) {
-    if (refs.length >= POST_PRODUCTS_MAX) break;
+  // a few more than the list holds: the ones the shop's switches strike out below leave room for the next best
+  for (const p of relevantProducts(topic, { limit: POST_PRODUCTS_MAX * 2, fill: 8 })) {
+    if (refs.length >= POST_PRODUCTS_MAX * 2) break;
     if (seen.has(p.id) || p.s === "out") continue;
     seen.add(p.id);
     refs.push({ id: p.id, brand: p.b, name: p.n, category: p.c });
   }
-  return { input: { ...src, products: refs }, allowed: seen };
+  let over: Record<string, Override> = {};
+  try {
+    over = await getOverrides(refs.map((r) => r.id));
+  } catch (err) {
+    console.error("[admin/ai/text] overrides lookup failed, the catalogue's own stock stands", err);
+  }
+  const offered = refs
+    .filter((r) => {
+      const o = over[r.id];
+      if (o?.hidden) return false;
+      const stock = o?.stock ?? catalogueRow(r.id)?.s ?? "in";
+      return stock !== "out";
+    })
+    .slice(0, POST_PRODUCTS_MAX);
+  return { input: { ...src, products: offered }, allowed: new Set(offered.map((r) => r.id)), refs: offered, topic };
 }
 
 export async function POST(req: NextRequest) {
@@ -258,7 +288,7 @@ export async function POST(req: NextRequest) {
   const lang: Lang3 = isLang3(body.lang) ? body.lang : "RU";
 
   // post_full: the catalogue slice rides in with the topic — see postFullInput()
-  const post = task === "post_full" ? postFullInput(body.input) : null;
+  const post = task === "post_full" ? await postFullInput(body.input) : null;
   const input = post ? post.input : body.input;
 
   let prompt: { system: string; user: string };
@@ -333,8 +363,17 @@ export async function POST(req: NextRequest) {
     result = shapeNonReply(task, lang, parsed);
     if (post && result.text && typeof result.text === "object") {
       const t = result.text as Record<string, unknown>;
-      t.products = (t.products as string[]).filter((id) => post.allowed.has(id));
-      t.body = keepKnownCards(String(t.body ?? ""), post.allowed);
+      /* The cards: the model's own kept (known ids only), the products it
+         named given one, the article filled up to the minimum from the
+         slice — src/lib/blog-cards.ts. `products` is then the cards as they
+         stand, then whatever else it named: what the editor lists under
+         «Товары в статье». */
+      const picks = (t.products as CardPick[]).filter((c) => post.allowed.has(c.id));
+      const placed = placeArticleCards(keepKnownCards(String(t.body ?? ""), post.allowed), picks, post.refs, { topic: post.topic });
+      t.body = placed.html;
+      const ids = placed.cards.slice();
+      for (const c of picks) if (!ids.includes(c.id)) ids.push(c.id);
+      t.products = ids.slice(0, POST_PRODUCTS_MAX);
     }
   }
 
