@@ -1570,3 +1570,12 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   .adm2 input.adm-title-in { font-size: 24px; height: 48px; }
   .adm-drop { height: auto; min-height: 120px; flex-wrap: wrap; }
 }
+
+/* ---------- Маркетинг → «Рассылка» ---------------------------------------- */
+
+/* the subscriber count above the list: one Oswald figure, the per-language line under it */
+.adm-news__n { font-family: Oswald, sans-serif; font-size: 32px; line-height: 36px; color: var(--a-ink); }
+/* the climbing count while a letter goes out — ink filling a hairline box */
+.adm-progress { height: 8px; border: 1px solid var(--a-ink); background: var(--a-paper); margin: 8px 0; }
+.adm-progress i { display: block; height: 100%; background: var(--a-ink); transition: width .3s ease-out; }
+@media (prefers-reduced-motion: reduce) { .adm-progress i { transition: none; } }

@@ -326,6 +326,18 @@ const nextConfig: NextConfig = {
           ...baseSecurityHeaders("SAMEORIGIN"),
         ],
       },
+      /* «Маркетинг → Рассылка» frames the owner's own draft the same way
+         («Письмо целиком», src/app/api/admin/newsletters/[id]/preview/).
+         Only the framing is relaxed: a letter carries inline styles, which
+         style-src already allows everywhere, and no script at all — so
+         script-src stays at 'self', tighter than the catch-all above. */
+      {
+        source: "/api/admin/newsletters/:id/preview/:path*",
+        headers: [
+          { key: "Content-Security-Policy", value: csp("'self'", "'self'") },
+          ...baseSecurityHeaders("SAMEORIGIN"),
+        ],
+      },
     ];
   },
   async redirects() {

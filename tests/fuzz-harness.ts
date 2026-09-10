@@ -384,6 +384,8 @@ export interface Fixtures {
   giftCode: string;
   /** A product the owner created (custom_products, `c-…`) — the request-time product page has a row to answer from. */
   customId: string;
+  /** A newsletter draft (newsletters) — the letter routes have a row to answer from. */
+  newsletterId: string;
 }
 
 /** One known row of every shape a route can be asked for, so "not_found" is a
@@ -396,6 +398,7 @@ export async function seedFixtures(): Promise<Fixtures> {
   const { upsertPost } = await import("@/lib/blog");
   const { recordLogin } = await import("@/lib/customers");
   const { createCustomProduct } = await import("@/lib/custom-products");
+  const { createNewsletter } = await import("@/lib/newsletters");
 
   const base = {
     lang: "RU",
@@ -419,6 +422,9 @@ export async function seedFixtures(): Promise<Fixtures> {
     "insert into gift_cards (code, amount, balance, lang) values ($1, $2, $3, 'RU') on conflict (code) do nothing",
     ["RMP-ACDE-FGHJ", 50, 50],
   );
+  const news = await createNewsletter({
+    title: "Фазз", subject: { RU: "Тема" }, body: { RU: "<p>Текст письма.</p>" }, products: [PRODUCT.id],
+  });
 
   return {
     orderId: order.id,
@@ -433,5 +439,6 @@ export async function seedFixtures(): Promise<Fixtures> {
     promoCode: promo.code,
     giftCode: "RMP-ACDE-FGHJ",
     customId: custom.id,
+    newsletterId: news.id,
   };
 }

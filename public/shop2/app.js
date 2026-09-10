@@ -2374,6 +2374,65 @@
         "Mis edasi: kontrollime andmed — tavaliselt tööpäeva jooksul — ja lülitame sisse salongihinnad.",
       "Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.":
         "Saate kirja ja siia ilmub märge „partner“; soodustus on näha tootekaartidel, tootelehel ja ostukorvis.",
+      /* «Маркетинг → Рассылка» (admNewsHTML and friends) */
+      "+ Письмо": "+ Kiri",
+      "Подписчики": "Tellijad", "по-русски": "vene keeles", "по-эстонски": "eesti keeles", "по-английски": "inglise keeles",
+      "Это те, кто поставил галочку «Хочу получать скидки и поздравление ко дню рождения» — на кассе или в кабинете — и не нажал «Отписаться». Каждый получит письмо на своём языке.":
+        "Need on inimesed, kes tegid linnukese «Soovin saada soodustusi ja sünnipäevaõnnitlust» — kassas või kontos — ega vajutanud «Loobu». Igaüks saab kirja oma keeles.",
+      "Список писем не загрузился.": "Kirjade nimekiri ei laadinud.",
+      "Пока ни одного письма — нажмите «+ Письмо».": "Veel ühtegi kirja pole — vajuta «+ Kiri».",
+      "Без названия": "Nimeta", "отправлено": "saadetud", "ошибок": "vigu", "изменено": "muudetud",
+      "Отправлено": "Saadetud", "Отправляется": "Saatmisel",
+      "без темы": "teemata", "без текста": "tekstita",
+      "Название — для вас, покупатель его не увидит": "Nimi — sinule, ostja seda ei näe",
+      "Тема письма — покупатель увидит её в списке писем": "Kirja teema — ostja näeb seda kirjade loendis",
+      "Текст письма": "Kirja tekst",
+      "Начните писать — или нажмите «✨ Написать» справа. Кнопки сверху добавят заголовок, список, ссылку, картинку или товар.":
+        "Alusta kirjutamist — või vajuta paremal «✨ Kirjuta». Ülemised nupud lisavad pealkirja, loendi, lingi, pildi või toote.",
+      "Товары в письме": "Tooted kirjas",
+      "Каждый товар из списка встанет в конец письма карточкой: фото, название, цена и кнопка «Смотреть». Кнопка «Товар» над текстом ставит карточку прямо в нужное место.":
+        "Iga toode loendist läheb kirja lõppu kaardina: foto, nimi, hind ja nupp «Vaata». Nupp «Toode» teksti kohal paneb kaardi otse õigesse kohta.",
+      "Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.": "Test läheb ülal valitud keeles, teemas märge [test].",
+      "Отправить подписчикам": "Saada tellijatele", "Отправить 1 подписчику": "Saada 1 tellijale",
+      "Отправка": "Saatmine",
+      "Черновик — покупатели его не видят. Сохраните, отправьте себе тест, потом — подписчикам.":
+        "Mustand — ostjad seda ei näe. Salvesta, saada endale test, siis — tellijatele.",
+      "Получат письмо": "Kirja saavad",
+      "Эстонского текста нет — эти подписчики получат русскую версию.": "Eestikeelset teksti pole — need tellijad saavad venekeelse versiooni.",
+      "Английского текста нет — эти подписчики получат русскую версию.": "Ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
+      "Эстонского и английского текста нет — эти подписчики получат русскую версию.": "Eesti- ja ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
+      "Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.": "Saatmine katkes — vajuta «Jätka» ja kiri läheb ülejäänutele.",
+      "Продолжить": "Jätka", "Ход отправки": "Saatmise käik",
+      "О чём письмо": "Millest kiri", "новинки сентября, скидка 10 % до воскресенья": "septembri uudised, 10 % soodustus pühapäevani",
+      "✨ Написать": "✨ Kirjuta",
+      "Тема и текст — по-русски, потом на эстонском и английском. Товары из списка попадут в текст карточками. Черновик сохранится сам; вы читаете и отправляете.":
+        "Teema ja tekst — vene keeles, siis eesti ja inglise keeles. Loendi tooted lähevad teksti kaartidena. Mustand salvestub ise; sina loed ja saadad.",
+      "Точно удалить письмо? Вернуть его будет нельзя.": "Kindlasti kustutada kiri? Tagasi seda ei saa.",
+      "Удалить письмо": "Kustuta kiri",
+      "Сохраните черновик — ниже появится письмо целиком, как его увидит покупатель.": "Salvesta mustand — allpool ilmub kogu kiri nii, nagu ostja seda näeb.",
+      "Вы правите русскую версию. Это язык письма, а не язык панели — эстонский и английский текст живут отдельно.":
+        "Muudad venekeelset versiooni. See on kirja keel, mitte paneeli keel — eesti- ja ingliskeelne tekst on eraldi.",
+      "Вы правите эстонскую версию. Это язык письма, а не язык панели — русский и английский текст живут отдельно.":
+        "Muudad eestikeelset versiooni. See on kirja keel, mitte paneeli keel — vene- ja ingliskeelne tekst on eraldi.",
+      "Вы правите английскую версию. Это язык письма, а не язык панели — русский и эстонский текст живут отдельно.":
+        "Muudad ingliskeelset versiooni. See on kirja keel, mitte paneeli keel — vene- ja eestikeelne tekst on eraldi.",
+      "Товар добавлен в русский текст письма": "Toode lisatud kirja venekeelsesse teksti",
+      "Товар добавлен в эстонский текст письма": "Toode lisatud kirja eestikeelsesse teksti",
+      "Товар добавлен в английский текст письма": "Toode lisatud kirja ingliskeelsesse teksti",
+      "Сначала заполните тему и текст письма": "Täida enne kirja teema ja tekst",
+      "Некому отправлять — подписчиков пока нет.": "Pole kellelegi saata — tellijaid veel pole.",
+      "Это письмо уже отправлено.": "See kiri on juba saadetud.",
+      "Отправка уже идёт — подождите минуту.": "Saatmine juba käib — oota hetk.",
+      "Сервер не отвечает — нажмите «Продолжить».": "Server ei vasta — vajuta «Jätka».",
+      "Подождите — письмо ещё пишется": "Oota — kiri on veel kirjutamisel",
+      "Напишите, о чём письмо": "Kirjuta, millest kiri on",
+      "Письмо готово на трёх языках — проверьте и отправьте себе тест": "Kiri on valmis kolmes keeles — vaata üle ja saada endale test",
+      "Сначала напишите письмо по-русски — тему и текст": "Kirjuta kiri enne vene keeles — teema ja tekst",
+      "Переведено — проверьте и сохраните": "Tõlgitud — vaata üle ja salvesta",
+      "Письмо не дописалось до конца — попробуйте ещё раз": "Kiri jäi lõpuni kirjutamata — proovi uuesti",
+      "Письмо удалено ✓": "Kiri kustutatud ✓",
+      "Отправить письмо?": "Saata kiri?",
+      "Рассылка отправлена": "Uudiskiri saadetud",
     },
     EN: {
       "Включить": "Turn on", "Выключить": "Turn off", "включён": "on", "выключен": "off",
@@ -4627,6 +4686,65 @@
         "What happens next: we check the details — usually within a working day — and switch on salon prices.",
       "Вы получите письмо, а здесь появится пометка «партнёр»; скидка будет видна на карточках товаров, в товаре и в корзине.":
         "You get a letter and the “partner” mark appears here; the discount shows on product cards, the product page and in the cart.",
+      /* «Маркетинг → Рассылка» (admNewsHTML and friends) */
+      "+ Письмо": "+ Letter",
+      "Подписчики": "Subscribers", "по-русски": "in Russian", "по-эстонски": "in Estonian", "по-английски": "in English",
+      "Это те, кто поставил галочку «Хочу получать скидки и поздравление ко дню рождения» — на кассе или в кабинете — и не нажал «Отписаться». Каждый получит письмо на своём языке.":
+        "These are the people who ticked «I want discounts and a birthday greeting» — at the checkout or in the account — and have not pressed «Unsubscribe». Each gets the letter in their own language.",
+      "Список писем не загрузился.": "The letters list did not load.",
+      "Пока ни одного письма — нажмите «+ Письмо».": "No letters yet — press «+ Letter».",
+      "Без названия": "Untitled", "отправлено": "sent", "ошибок": "failed", "изменено": "edited",
+      "Отправлено": "Sent", "Отправляется": "Sending",
+      "без темы": "no subject", "без текста": "no text",
+      "Название — для вас, покупатель его не увидит": "A name — for you, the customer never sees it",
+      "Тема письма — покупатель увидит её в списке писем": "Subject — what the customer sees in the inbox",
+      "Текст письма": "Letter text",
+      "Начните писать — или нажмите «✨ Написать» справа. Кнопки сверху добавят заголовок, список, ссылку, картинку или товар.":
+        "Start writing — or press «✨ Write» on the right. The buttons above add a heading, a list, a link, a picture or a product.",
+      "Товары в письме": "Products in the letter",
+      "Каждый товар из списка встанет в конец письма карточкой: фото, название, цена и кнопка «Смотреть». Кнопка «Товар» над текстом ставит карточку прямо в нужное место.":
+        "Each product in the list goes at the end of the letter as a card: photo, name, price and a «View» button. The «Product» button above the text puts the card right where you want it.",
+      "Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.": "The test goes out in the language chosen above, with [test] in the subject.",
+      "Отправить подписчикам": "Send to subscribers", "Отправить 1 подписчику": "Send to 1 subscriber",
+      "Отправка": "Sending",
+      "Черновик — покупатели его не видят. Сохраните, отправьте себе тест, потом — подписчикам.":
+        "A draft — customers do not see it. Save, send yourself a test, then send it to the subscribers.",
+      "Получат письмо": "Will get the letter",
+      "Эстонского текста нет — эти подписчики получат русскую версию.": "There is no Estonian text — these subscribers get the Russian version.",
+      "Английского текста нет — эти подписчики получат русскую версию.": "There is no English text — these subscribers get the Russian version.",
+      "Эстонского и английского текста нет — эти подписчики получат русскую версию.": "There is no Estonian or English text — these subscribers get the Russian version.",
+      "Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.": "Sending was interrupted — press «Continue» and the letter goes to the rest.",
+      "Продолжить": "Continue", "Ход отправки": "Sending progress",
+      "О чём письмо": "What the letter is about", "новинки сентября, скидка 10 % до воскресенья": "September's new arrivals, 10% off until Sunday",
+      "✨ Написать": "✨ Write",
+      "Тема и текст — по-русски, потом на эстонском и английском. Товары из списка попадут в текст карточками. Черновик сохранится сам; вы читаете и отправляете.":
+        "Subject and text — in Russian, then in Estonian and English. The products in the list go into the text as cards. The draft saves itself; you read and send.",
+      "Точно удалить письмо? Вернуть его будет нельзя.": "Really delete the letter? It cannot be brought back.",
+      "Удалить письмо": "Delete the letter",
+      "Сохраните черновик — ниже появится письмо целиком, как его увидит покупатель.": "Save the draft — the whole letter appears below, as the customer will see it.",
+      "Вы правите русскую версию. Это язык письма, а не язык панели — эстонский и английский текст живут отдельно.":
+        "You are editing the Russian version. This is the letter's language, not the panel's — the Estonian and English texts live separately.",
+      "Вы правите эстонскую версию. Это язык письма, а не язык панели — русский и английский текст живут отдельно.":
+        "You are editing the Estonian version. This is the letter's language, not the panel's — the Russian and English texts live separately.",
+      "Вы правите английскую версию. Это язык письма, а не язык панели — русский и эстонский текст живут отдельно.":
+        "You are editing the English version. This is the letter's language, not the panel's — the Russian and Estonian texts live separately.",
+      "Товар добавлен в русский текст письма": "Product added to the Russian text of the letter",
+      "Товар добавлен в эстонский текст письма": "Product added to the Estonian text of the letter",
+      "Товар добавлен в английский текст письма": "Product added to the English text of the letter",
+      "Сначала заполните тему и текст письма": "Fill in the subject and the text first",
+      "Некому отправлять — подписчиков пока нет.": "Nobody to send to — there are no subscribers yet.",
+      "Это письмо уже отправлено.": "This letter has already been sent.",
+      "Отправка уже идёт — подождите минуту.": "Sending is already under way — wait a minute.",
+      "Сервер не отвечает — нажмите «Продолжить».": "The server is not responding — press «Continue».",
+      "Подождите — письмо ещё пишется": "Wait — the letter is still being written",
+      "Напишите, о чём письмо": "Say what the letter is about",
+      "Письмо готово на трёх языках — проверьте и отправьте себе тест": "The letter is ready in three languages — check it and send yourself a test",
+      "Сначала напишите письмо по-русски — тему и текст": "Write the letter in Russian first — the subject and the text",
+      "Переведено — проверьте и сохраните": "Translated — check and save",
+      "Письмо не дописалось до конца — попробуйте ещё раз": "The letter was cut short — try again",
+      "Письмо удалено ✓": "Letter deleted ✓",
+      "Отправить письмо?": "Send the letter?",
+      "Рассылка отправлена": "Newsletter sent",
     }
   };
   /* Strings with numbers or sums inside. $1 keeps the captured piece; a
@@ -5085,7 +5203,30 @@
       { ET: "Ettevõtete arved: meeldetuletus $1 p enne tähtaega", EN: "Company invoices: a reminder $1 d before the due date" }],
     [/^Счета для компаний: автоотмена через (\d+) дн\. после срока$/,
       { ET: "Ettevõtete arved: automaatne tühistamine $1 p pärast tähtaega", EN: "Company invoices: automatic cancellation $1 d after the due date" }],
-    [/^Например: (.+)-0001$/, { ET: "Näiteks: $1-0001", EN: "For example: $1-0001" }]
+    [/^Например: (.+)-0001$/, { ET: "Näiteks: $1-0001", EN: "For example: $1-0001" }],
+    /* «Маркетинг → Рассылка»: the save bar's button, the climbing count, the
+       sent letter's line, the toast, the server's journal line — and the
+       confirm card's one sentence, with and without the «…получат русскую
+       версию» tail (NEWS_FALLBACK_NOTE), because the card is one text node. */
+    [/^Отправить (\d+) подписчикам$/, { ET: "Saada $1 tellijale", EN: "Send to $1 subscribers" }],
+    [/^Отправлено (\d+) из (\d+)…$/, { ET: "Saadetud $1 / $2…", EN: "Sent $1 of $2…" }],
+    [/^Отправлено (\d+) из (\d+) · ошибок (\d+)$/, { ET: "Saadetud $1 / $2 · vigu $3", EN: "Sent $1 of $2 · $3 failed" }],
+    [/^Письмо ушло — отправлено (\d+), ошибок (\d+) ✓$/,
+      { ET: "Kiri läks välja — saadetud $1, vigu $2 ✓", EN: "The letter has gone — $1 sent, $2 failed ✓" }],
+    [/^Рассылка «(.+)»: отправлено (\d+), ошибок (\d+)$/,
+      { ET: "Uudiskiri «$1»: saadetud $2, vigu $3", EN: "Newsletter «$1»: $2 sent, $3 failed" }],
+    [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\.$/,
+      { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5.",
+        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English." }],
+    [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\. Эстонского текста нет — эти подписчики получат русскую версию\.$/,
+      { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5. Eestikeelset teksti pole — need tellijad saavad venekeelse versiooni.",
+        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian text — these subscribers get the Russian version." }],
+    [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\. Английского текста нет — эти подписчики получат русскую версию\.$/,
+      { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5. Ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
+        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no English text — these subscribers get the Russian version." }],
+    [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\. Эстонского и английского текста нет — эти подписчики получат русскую версию\.$/,
+      { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5. Eesti- ja ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
+        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian or English text — these subscribers get the Russian version." }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -10328,7 +10469,7 @@
     if (at == null) return;
     Promise.resolve().then(function () {
       var el = blogBox();
-      if (!el || !S.adminBlogEdit) return;
+      if (!el || !richDraft()) return;
       el.focus();
       blogRangeSet(el, at);
       blogSelSave();
@@ -10337,9 +10478,11 @@
   /** The box → the draft. Called after every keystroke and every insert. */
   function blogSync() {
     var el = blogBox();
-    if (!el || !S.adminBlogEdit) return;
-    S.adminBlogEdit.body[S.adminBlogLang || "RU"] = el.innerHTML;
-    blogPaintState();   // the tab's own «готово · с товарами», without a render()
+    var rd = richDraft();   // the article, or the newsletter — whichever owns the box on screen
+    if (!el || !rd) return;
+    rd.body[rd.lang] = el.innerHTML;
+    // the tab's own «готово · с товарами», without a render()
+    if (rd.kind === "news") newsPaintState(); else blogPaintState();
   }
   function blogExec(cmd, arg) {
     if (!blogSelRestore()) return;
@@ -10458,7 +10601,8 @@
       esc(p.brand + " " + p.name) + " — " + esc(price) + "</a>";
   }
   function blogInsertProduct(id) {
-    var L = S.adminBlogLang || "RU";
+    var rd = richDraft();
+    var L = rd ? rd.lang : (S.adminBlogLang || "RU");
     var a = blogProductLinkHTML(id, L);
     if (!a) return;
     blogToolClose();
@@ -10466,7 +10610,8 @@
     /* Which of the three texts it landed in — said out loud, because from
        the other two tabs the card is simply not there, and reading that as
        «it did not save» is exactly what happened once. */
-    toast(BLOG_INSERTED_IN[L] || BLOG_INSERTED_IN.RU);
+    var said = rd && rd.kind === "news" ? NEWS_INSERTED_IN : BLOG_INSERTED_IN;
+    toast(said[L] || said.RU);
   }
   function blogUploadImage(files) {
     if (!files || !files.length) return;
@@ -12932,6 +13077,8 @@
     // Маркетинг → Промокоды · Подарочные карты · Письма. `gift` is new in
     // phase 3: gift cards had no place in the panel at all before it.
     promos: "promos", gift: "promos", mail: "promos",
+    // «Рассылка» — the fourth tab of «Маркетинг» (admNewsHTML)
+    news: "promos",
     blog: "blog", stats: "stats", apps: "apps", setup: "setup"
   };
   /* 24-px line icons, stroke 1.5 (2.2 when the section is open), square caps —
@@ -14520,7 +14667,7 @@
     else if (tab === "pos") body = admSalonHTML();
     // phase 3: the six «Ещё» sections, each redrawn on the loader it already had
     else if (tab === "people" || tab === "reviews") body = admCustomersScreen();
-    else if (tab === "promos" || tab === "gift" || tab === "mail") body = admMarketingScreen();
+    else if (tab === "promos" || tab === "gift" || tab === "mail" || tab === "news") body = admMarketingScreen();
     else if (tab === "blog") body = admBlogScreen();
     else if (tab === "stats") body = admStatsScreen();
     else if (tab === "apps") body = admAppsHTML();
@@ -14725,20 +14872,25 @@
   function admMarketingTab() {
     if (S.adminTab === "gift") return "gift";
     if (S.adminTab === "mail") return "mail";
+    if (S.adminTab === "news") return "news";
     return "promos";
   }
   function admMarketingScreen() {
     var tab = admMarketingTab();
     var add = tab === "promos" && !S.promoForm
       ? '<button class="adm-btn adm-btn--head" data-admpromonew>+ Промокод</button>'
-      : "";
+      // «Рассылка»: a new letter, from the list only — the editor has its own bar
+      : tab === "news" && !S.newsEdit && !S.newsEditBusy
+        ? '<button class="adm-btn adm-btn--head" data-newsnew>+ Письмо</button>'
+        : "";
     return '<div class="adm-screen adm-screen--tight">' +
       admHead("", "Маркетинг", add) +
       admTabsHTML(
         admTabBtn("promos", "Промокоды", 0, tab === "promos") +
         admTabBtn("gift", "Подарочные карты", 0, tab === "gift") +
-        admTabBtn("mail", "Письма", 0, tab === "mail")) +
-      (tab === "gift" ? admGiftScreenHTML() : tab === "mail" ? admMailHTML() : admPromosHTML()) +
+        admTabBtn("mail", "Письма", 0, tab === "mail") +
+        admTabBtn("news", "Рассылка", 0, tab === "news")) +
+      (tab === "gift" ? admGiftScreenHTML() : tab === "mail" ? admMailHTML() : tab === "news" ? admNewsHTML() : admPromosHTML()) +
       "</div>";
   }
 
@@ -15302,6 +15454,677 @@
       (UP.err ? '<span class="adm-err">' + esc(UP.err) + "</span>" : "") +
       "</div>";
   }
+
+  /* ---------- Маркетинг → «Рассылка» ---------------------------------------
+     The one letter the owner writes himself, to everybody who ticked «Хочу
+     получать скидки и поздравление ко дню рождения» and has not pressed
+     «Отписаться» (src/lib/newsletters.ts — the audience, the send and the
+     letter's HTML all live there; this file is the screen). A fourth tab
+     beside «Промокоды · Подарочные карты · Письма», addressed as
+     `data-admtab="news"` like every other section key (ADM_SECTION_OF).
+
+     The editor is the blog's: the same contenteditable box under the same
+     toolbar (ADM_BLOG_TOOLS / data-blogrt), the same «Ссылка» / «Картинка» /
+     «Товар» sheets and the same caret bookkeeping — richDraft() is what
+     tells that code which draft the box on screen belongs to. Three texts,
+     one draft, the language strip says what each holds; a language the
+     owner leaves empty is not an empty letter for that reader — the send
+     falls back to Russian, and the card that asks «Отправить?» says so.
+
+     Nothing here calls render() while the owner is typing: the fields write
+     straight into S.newsEdit and the strip repaints itself (newsPaintState),
+     the same rule the blog editor follows. The send itself is a loop of
+     POSTs — each one sends what fits in a function's budget and answers
+     `done:false` until the queue is empty (docs/mail.md); the card on the
+     right shows the count climbing, and a loop that broke off leaves a
+     «Продолжить» that picks it up where it stopped. */
+  var NEWS_LANG_NOTE = {
+    RU: "Вы правите русскую версию. Это язык письма, а не язык панели — эстонский и английский текст живут отдельно.",
+    ET: "Вы правите эстонскую версию. Это язык письма, а не язык панели — русский и английский текст живут отдельно.",
+    EN: "Вы правите английскую версию. Это язык письма, а не язык панели — русский и эстонский текст живут отдельно."
+  };
+  var NEWS_INSERTED_IN = {
+    RU: "Товар добавлен в русский текст письма",
+    ET: "Товар добавлен в эстонский текст письма",
+    EN: "Товар добавлен в английский текст письма"
+  };
+  /* Who gets the Russian letter because their own language is empty — one
+     whole sentence per case, so the dictionary sees whole keys. */
+  var NEWS_FALLBACK_NOTE = {
+    ET: "Эстонского текста нет — эти подписчики получат русскую версию.",
+    EN: "Английского текста нет — эти подписчики получат русскую версию.",
+    "ET,EN": "Эстонского и английского текста нет — эти подписчики получат русскую версию."
+  };
+  var NEWS_LANG_WORD = { RU: "по-русски", ET: "по-эстонски", EN: "по-английски" };
+  /* One visual editor, two drafts. The box on screen belongs to the article
+     when «Блог» is open and to the letter when «Рассылка» is — both drafts
+     may exist at once (an article the owner walked away from mid-sentence
+     survives a tab change), so the tab decides, not the draft. */
+  function richDraft() {
+    if (S.adminTab === "news") {
+      return S.newsEdit ? { body: S.newsEdit.body, lang: S.newsLang || "RU", kind: "news" } : null;
+    }
+    return S.adminBlogEdit ? { body: S.adminBlogEdit.body, lang: S.adminBlogLang || "RU", kind: "blog" } : null;
+  }
+  function newsEmpty3() { return { RU: "", ET: "", EN: "" }; }
+  function newsNewDraft() {
+    return { id: "", status: "draft", title: "", subject: newsEmpty3(), body: newsEmpty3(), products: [],
+      sentAt: null, sentCount: 0, failedCount: 0, audienceCount: 0, updatedAt: "" };
+  }
+  function newsDraftFrom(n) {
+    return {
+      id: n.id, status: n.status || "draft", title: n.title || "",
+      subject: Object.assign(newsEmpty3(), n.subject),
+      body: blogBody3ToHtml(Object.assign(newsEmpty3(), n.body)),
+      products: (n.products || []).slice(),
+      sentAt: n.sentAt || null, sentCount: n.sentCount || 0, failedCount: n.failedCount || 0,
+      audienceCount: n.audienceCount || 0, updatedAt: n.updatedAt || ""
+    };
+  }
+  /* The list and the count, once per visit — a letter a month does not
+     need a poll; «Повторить» re-asks and every save drops the cached list. */
+  function loadNewsletters(force) {
+    if (SRV.admin !== true) return;
+    if (S.news && !force) return;
+    if (loadNewsletters._busy) return;
+    loadNewsletters._busy = true;
+    apiJson("/api/admin/newsletters/").then(function (r) {
+      loadNewsletters._busy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      var ok = r.status === 200 && r.body.ok;
+      S.news = ok ? (r.body.newsletters || []) : [];
+      S.newsListErr = ok ? "" : "Список писем не загрузился.";
+      render();
+    }).catch(function () {
+      loadNewsletters._busy = false;
+      S.news = []; S.newsListErr = "Сервер не отвечает."; render();
+    });
+  }
+  function loadNewsAudience(force, then) {
+    if (SRV.admin !== true) return;
+    if (S.newsAudience && !force) { if (then) then(); return; }
+    if (loadNewsAudience._busy) return;
+    loadNewsAudience._busy = true;
+    apiJson("/api/admin/newsletters/audience/").then(function (r) {
+      loadNewsAudience._busy = false;
+      if (r.status === 200 && r.body.ok && r.body.audience) { S.newsAudience = r.body.audience; render(); if (then) then(); }
+    }).catch(function () { loadNewsAudience._busy = false; });
+  }
+  function admNewsHTML() {
+    loadNewsletters(false); loadNewsAudience(false);
+    if (S.newsEdit) return S.newsEdit.status === "draft" ? admNewsEditorHTML(S.newsEdit) : admNewsSentHTML(S.newsEdit);
+    if (S.newsEditBusy) return '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    var list = S.news, rows;
+    if (!list) rows = '<div class="adm-skel"><i></i><i></i><i></i></div>';
+    else if (S.newsListErr) {
+      rows = '<div class="adm-error"><span>' + esc(S.newsListErr) + "</span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newsreload>Повторить</button></div>';
+    }
+    else if (!list.length) rows = '<div class="adm-empty">Пока ни одного письма — нажмите «+ Письмо».</div>';
+    else rows = '<div class="adm-list">' + list.map(admNewsRowHTML).join("") + "</div>";
+    return admNewsAudienceHTML() + rows;
+  }
+  /** «по-русски 80 · по-эстонски 30 · по-английски 10» — each label its own node. */
+  function newsCountsHTML(a) {
+    return LANGS.map(function (l) { return "<span>" + NEWS_LANG_WORD[l[0]] + "</span> " + (a[l[0]] || 0); }).join(" · ");
+  }
+  function admNewsAudienceHTML() {
+    var a = S.newsAudience;
+    return '<div class="adm-card adm-card--soft adm-news__aud"><div class="adm-sec__t">Подписчики</div>' +
+      (a
+        ? '<div class="adm-news__n">' + (a.total || 0) + "</div><div class=\"adm-hint\">" + newsCountsHTML(a) + "</div>"
+        : '<div class="adm-skel"><i></i></div>') +
+      '<p class="adm-hint">Это те, кто поставил галочку «Хочу получать скидки и поздравление ко дню рождения» — на кассе или в кабинете — и не нажал «Отписаться». Каждый получит письмо на своём языке.</p>' +
+      "</div>";
+  }
+  function admNewsRowHTML(n) {
+    var st = n.status, sub, badge;
+    if (st === "sent") {
+      sub = '<span>отправлено</span> ' + esc(shortDate(n.sentAt)) + ' · <span>' + n.sentCount + " из " + n.audienceCount + "</span>" +
+        (n.failedCount ? ' · <span>ошибок</span> ' + n.failedCount : "");
+      badge = '<span class="adm-badge adm-badge--sm adm-badge--ok">Отправлено</span>';
+    } else if (st === "sending") {
+      sub = "<span>" + (n.sentCount + n.failedCount) + " из " + n.audienceCount + "</span>";
+      badge = '<span class="adm-badge adm-badge--sm adm-badge--warn">Отправляется</span>';
+    } else {
+      sub = '<span>изменено</span> ' + esc(shortDate(n.updatedAt));
+      badge = '<span class="adm-badge adm-badge--sm adm-badge--quiet">Черновик</span>';
+    }
+    return '<button class="adm-row adm-row--tall adm-row--click" data-newsedit="' + esc(n.id) + '">' +
+      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(n.title || "Без названия") + "</span>" +
+        '<span class="adm-row__sub adm-row__sub--one">' + sub + "</span></span>" + badge + "</button>";
+  }
+  /* ---- the draft: what each language holds, and «не сохранено» ---------- */
+  function newsBodyHas(html) { return blogTextLen(html) > 0 || /<img\b|data-product=/i.test(String(html || "")); }
+  function newsReady(d, L) { return !!String(d.subject[L] || "").trim() && newsBodyHas(d.body[L]); }
+  function newsLangWords(d, L) {
+    var subj = !!String(d.subject[L] || "").trim(), has = newsBodyHas(d.body[L]);
+    if (!subj && !has) return ["пусто"];
+    if (subj && has) return ["готово"];
+    return [subj ? "без текста" : "без темы"];
+  }
+  /** The languages whose readers fall back to Russian — only when Russian is there to fall back to. */
+  function newsMissingLangs(d) {
+    if (!newsReady(d, "RU")) return [];
+    return ["ET", "EN"].filter(function (l) { return !newsReady(d, l); });
+  }
+  function newsDraftSig(d) { return JSON.stringify([d.title, d.subject, d.body, d.products]); }
+  function newsMarkSaved(d) { S.newsSaved = d ? newsDraftSig(d) : ""; S.newsConfirmBack = false; }
+  function newsDirty() {
+    var d = S.newsEdit;
+    return !!(d && d.status === "draft" && S.newsSaved !== undefined && newsDraftSig(d) !== S.newsSaved);
+  }
+  /* Typing must not cost the caret: the strip and the «не сохранено» line
+     repaint on their own — blogPaintState()'s idiom. */
+  function newsPaintState() {
+    var d = S.newsEdit;
+    if (!d) return;
+    LANGS.forEach(function (l) {
+      var slot = document.querySelector('[data-langst="' + l[0] + '"]');
+      if (!slot) return;
+      slot.innerHTML = admLangStateHTML(newsLangWords(d, l[0]));
+      translateTree(slot);
+    });
+    var dirty = document.querySelector("[data-newsdirty]");
+    if (dirty) dirty.hidden = !newsDirty();
+  }
+  /* ---- the editor ---------------------------------------------------------- */
+  function newsSendLabel(aud) {
+    if (!aud) return "Отправить подписчикам";
+    var n = Number(aud.total) || 0;
+    return n === 1 ? "Отправить 1 подписчику" : "Отправить " + n + " подписчикам";
+  }
+  function newsMatches(d) {
+    var q = (S.newsQ || "").trim().toLowerCase();
+    if (!q) return [];
+    return CATALOGUE.filter(function (p) {
+      return d.products.indexOf(p.id) < 0 && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0;
+    }).slice(0, 8);
+  }
+  function admNewsPicksHTML(matches) {
+    if (!matches.length) return "";
+    return '<div class="adm-list adm-list--flat">' + matches.map(function (p) {
+      return '<div class="adm-row"><span class="adm-thumb adm-thumb--sm">' + media(p, 0, "ph") + "</span>" +
+        '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) + "</span></span>" +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newsproductadd="' + esc(p.id) + '">Добавить</button></div>';
+    }).join("") + "</div>";
+  }
+  function admNewsProductsHTML(d) {
+    var picked = productsById(d.products);
+    return '<div><div class="adm-sec__t">Товары в письме</div>' +
+      '<p class="adm-hint" style="margin:6px 0 8px">Каждый товар из списка встанет в конец письма карточкой: фото, название, цена и кнопка «Смотреть». Кнопка «Товар» над текстом ставит карточку прямо в нужное место.</p>' +
+      (picked.length ? '<div class="adm-acts" style="margin:8px 0">' + picked.map(function (p) {
+        return '<span class="adm-badge">' + esc(p.brand + " " + p.name) +
+          ' <button class="adm-link" data-newsproductdel="' + esc(p.id) + '" aria-label="Убрать">✕</button></span>';
+      }).join("") + "</div>" : "") +
+      '<input class="adm-input" data-newsq value="' + esc(S.newsQ || "") + '" placeholder="Найти товар по названию">' +
+      '<div id="admnewsproducts">' + admNewsPicksHTML(newsMatches(d)) + "</div></div>";
+  }
+  function newsProgressHTML(done, total) {
+    var pct = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
+    return '<div class="adm-progress" role="progressbar" aria-label="Ход отправки" aria-valuemin="0" aria-valuemax="' + total +
+      '" aria-valuenow="' + done + '"><i style="width:' + pct + '%"></i></div>';
+  }
+  function newsProgressLine(st) {
+    // one whole sentence for the dictionary rule; the failures ride behind it as their own node
+    var line = "Отправлено " + (st.sent + st.failed) + " из " + st.total + "…";
+    return st.failed ? line + ' · <span>ошибок</span> ' + st.failed : line;
+  }
+  function newsFallbackHTML(d, aud) {
+    var miss = newsMissingLangs(d).filter(function (l) { return !aud || (aud[l] || 0) > 0; });
+    var note = NEWS_FALLBACK_NOTE[miss.join(",")];
+    return note ? '<div class="adm-hint adm-hint--warn" style="margin-top:8px">' + note + "</div>" : "";
+  }
+  /** The right-hand «Отправка» card: the draft's advice, the climbing count, or what was sent. */
+  function admNewsSendCardHTML(d) {
+    var st = S.newsSend && S.newsSend.id === d.id ? S.newsSend : null;
+    var aud = S.newsAudience, inner;
+    var err = st && st.err ? '<div class="adm-hint adm-hint--warn" role="alert">' + esc(st.err) + "</div>" : "";
+    if (st && st.busy) {
+      inner = newsProgressHTML(st.sent + st.failed, st.total || d.audienceCount) +
+        '<div class="adm-hint" aria-live="polite">' + newsProgressLine(st) + "</div>";
+    } else if (d.status === "sending") {
+      inner = newsProgressHTML(d.sentCount + d.failedCount, d.audienceCount) +
+        (err || '<div class="adm-hint adm-hint--warn">Отправка прервалась — нажмите «Продолжить», и письмо уйдёт остальным.</div>') +
+        '<button class="adm-btn" data-newsresume>Продолжить</button>';
+    } else if (d.status === "sent") {
+      inner = '<div><span class="adm-badge adm-badge--ok">Отправлено</span></div>' +
+        '<div class="adm-hint">' + "Отправлено " + d.sentCount + " из " + d.audienceCount + " · ошибок " + d.failedCount + "</div>" +
+        (d.sentAt ? '<div class="adm-hint"><span>отправлено</span> ' + esc(shortDate(d.sentAt)) + "</div>" : "");
+    } else {
+      inner = '<div class="adm-hint">Черновик — покупатели его не видят. Сохраните, отправьте себе тест, потом — подписчикам.</div>' +
+        (aud ? '<div class="adm-hint" style="margin-top:8px"><span>Получат письмо</span>: ' + (aud.total || 0) + " · " + newsCountsHTML(aud) + "</div>" : "") +
+        newsFallbackHTML(d, aud) + err;
+    }
+    return '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Отправка</div>' + inner + "</div>";
+  }
+  function newsGenText() {
+    var g = S.newsGen;
+    if (!g) return "";
+    return g.err || BLOGGEN_STEPS[g.step] || "";
+  }
+  function admNewsAssistantHTML(d) {
+    var gen = S.newsGen, genBusy = !!(gen && !gen.err);
+    var brief = S.newsBrief || "";
+    return '<div class="adm-card adm-card--soft" style="margin-top:16px"><div class="adm-sec__t">Помощник</div>' +
+      '<label class="adm-field">О чём письмо' +
+        '<input class="adm-input" data-newsbrief value="' + esc(brief) +
+        '" placeholder="новинки сентября, скидка 10 % до воскресенья"' + (genBusy ? " disabled" : "") + "></label>" +
+      '<button class="adm-btn" data-newswrite' + (genBusy ? " disabled" : "") + ">" + (genBusy ? "…" : "✨ Написать") + "</button>" +
+      '<div class="adm-hint' + (gen && gen.err ? " adm-hint--warn" : "") + '" data-newsprogress aria-live="polite"' + (gen ? "" : " hidden") + ">" + esc(newsGenText()) + "</div>" +
+      '<div class="adm-hint">Тема и текст — по-русски, потом на эстонском и английском. Товары из списка попадут в текст карточками. Черновик сохранится сам; вы читаете и отправляете.</div>' +
+      '<details class="adm-fold"><summary class="adm-link adm-link--muted">Только часть</summary>' +
+        '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
+        '<button class="adm-link" data-newstranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
+      "</div></details>" +
+      (d.id
+        ? (S.newsConfirmDelete
+          ? '<div class="adm-hint adm-hint--warn">Точно удалить письмо? Вернуть его будет нельзя.</div>' +
+            '<button class="adm-btn adm-btn--warn" data-newsdelyes' + (S.newsBusy ? " disabled" : "") + ">Да, удалить</button>" +
+            '<button class="adm-link adm-link--muted" data-newsdelno>Отмена</button>'
+          : '<button class="adm-link adm-link--warn" data-newsdel>Удалить письмо</button>')
+        : "") +
+      "</div>";
+  }
+  function admNewsPreviewHTML(d, L) {
+    if (!d.id) return '<p class="adm-hint" style="margin-top:20px">Сохраните черновик — ниже появится письмо целиком, как его увидит покупатель.</p>';
+    return '<div style="margin-top:24px"><div class="adm-sec__t">Письмо целиком</div>' +
+      '<iframe class="adm-frame" title="Предпросмотр письма" loading="lazy" style="margin-top:10px" ' +
+        'src="/api/admin/newsletters/' + encodeURIComponent(d.id) + "/preview/?lang=" + encodeURIComponent(L) +
+        "&amp;v=" + (S.newsPreviewV || 0) + '"></iframe></div>';
+  }
+  function admNewsEditorHTML(d) {
+    var L = S.newsLang || "RU";
+    var busy = !!S.newsBusy;
+    var sending = !!(S.newsSend && S.newsSend.id === d.id && S.newsSend.busy);
+    blogKeepCaret();   // this render is about to replace the box being typed in
+    var left =
+      admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) {
+        return newsLangWords(d, code);
+      }, NEWS_LANG_NOTE[L] || NEWS_LANG_NOTE.RU) +
+      '<p class="adm-hint adm-hint--warn" data-newsdirty' + (newsDirty() ? "" : " hidden") + ">" +
+        "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
+      '<input class="adm-title-in" data-newsf="title" maxlength="120" placeholder="Название — для вас, покупатель его не увидит" value="' + esc(d.title) + '">' +
+      '<label class="adm-field">Тема письма — покупатель увидит её в списке писем' +
+        '<input class="adm-input" data-newsf="subject" maxlength="200" value="' + esc(d.subject[L]) + '"></label>' +
+      '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
+        return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
+      }).join("") + '<button data-blogrt="undo" title="Отменить">Отменить</button></div>' +
+      '<div class="adm-tool" data-blogtool>' + blogToolSheet() + "</div>" +
+      '<div class="adm-canvas" contenteditable="true" data-blogbody role="textbox" aria-multiline="true" ' +
+        'aria-label="Текст письма" placeholder="Начните писать — или нажмите «✨ Написать» справа. Кнопки сверху добавят заголовок, список, ссылку, картинку или товар.">' +
+        (d.body[L] || "") + "</div>" +
+      admNewsProductsHTML(d) +
+      '<label class="adm-field">Адрес для теста' +
+        '<input class="adm-input" type="email" data-newsto value="' + esc(S.mailTo || "") + '" placeholder="renat@rempireshop.com"></label>' +
+      '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-newstest' + (busy ? " disabled" : "") + ">Отправить мне тест</button></div>" +
+      '<p class="adm-hint">Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.</p>' +
+      (S.newsErr ? '<div class="adm-err" role="alert">' + esc(S.newsErr) + "</div>" : "") +
+      /* the product editor's sticky bar: «Сохранить» stays above the nav on
+         a phone wherever the owner is in the letter, and the one primary
+         action — sending — sits at its right end, behind the confirm card */
+      '<div class="adm-savebar">' +
+        '<button class="adm-btn adm-btn--ghost" data-newssave' + (busy ? " disabled" : "") + ">Сохранить</button>" +
+        (newsDirty() ? '<button class="adm-link adm-link--muted" data-newsrevert>Отменить правки</button>' : "") +
+        '<span class="adm-savebar__sp"></span>' +
+        '<button class="adm-btn" data-newssend' + (busy || sending ? " disabled" : "") + ">" + newsSendLabel(S.newsAudience) + "</button>" +
+      "</div>";
+    return admBackHTML("data-newsback", "Рассылка") +
+      (S.newsConfirmBack
+        ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--row" data-newsbackyes>Выйти без сохранения</button>' +
+          '<button class="adm-link adm-link--muted" data-newsbackno>Остаться</button></div>'
+        : "") +
+      admColsHTML(left, admNewsSendCardHTML(d) + admNewsAssistantHTML(d)) +
+      admNewsPreviewHTML(d, L);
+  }
+  /** A letter that has gone out, or is going out: read-only — the counts, the subject per language, the letter itself. */
+  function admNewsSentHTML(d) {
+    var L = S.newsLang || "RU";
+    var left =
+      '<div class="adm-sec__t">' + esc(d.title || "Без названия") + "</div>" +
+      admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) { return newsLangWords(d, code); }, "") +
+      '<label class="adm-field">Тема письма<input class="adm-input" value="' + esc(d.subject[L]) + '" readonly></label>' +
+      (d.products.length
+        ? '<div><div class="adm-sec__t">Товары в письме</div><div class="adm-acts" style="margin:8px 0">' +
+          productsById(d.products).map(function (p) { return '<span class="adm-badge">' + esc(p.brand + " " + p.name) + "</span>"; }).join("") +
+          "</div></div>"
+        : "");
+    return admBackHTML("data-newsback", "Рассылка") +
+      admColsHTML(left, admNewsSendCardHTML(d)) +
+      admNewsPreviewHTML(d, L);
+  }
+  /* ---- opening, saving, closing ------------------------------------------ */
+  function newsOpen(d) {
+    S.newsEdit = d; newsMarkSaved(d);
+    S.newsLang = "RU"; S.newsQ = ""; S.newsErr = ""; S.newsConfirmDelete = false; S.newsConfirmBack = false;
+    S.newsBrief = ""; if (S.newsGen && S.newsGen.err) S.newsGen = null;
+    S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;   // another box, another caret
+    window.scrollTo({ top: 0 });
+  }
+  function openNewsEditor(id) {
+    if (S.newsEditBusy) return;
+    S.newsEditBusy = true; render();
+    apiJson("/api/admin/newsletters/?id=" + encodeURIComponent(id)).then(function (r) {
+      S.newsEditBusy = false;
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok && r.body.newsletter) newsOpen(newsDraftFrom(r.body.newsletter));
+      else toast("Не получилось — попробуйте ещё раз");
+      render();
+    }).catch(function () { S.newsEditBusy = false; toast("Сервер не отвечает."); render(); });
+  }
+  function newsCloseEditor() {
+    S.newsEdit = null; S.newsConfirmBack = false; S.newsConfirmDelete = false;
+    S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null;
+    window.scrollTo({ top: 0 }); render();
+  }
+  function newsPayload(d) {
+    // through the allowlist on the way out, like an article; the server cleans again
+    return { title: d.title, subject: d.subject, body: blogBody3ToHtml(d.body), products: d.products };
+  }
+  function saveNewsFields(d) {
+    var body = newsPayload(d);
+    var req = d.id
+      ? apiSend("/api/admin/newsletters/", "PATCH", Object.assign({ id: d.id }, body))
+      : apiSend("/api/admin/newsletters/", "POST", body);
+    return req.then(function (r) {
+      if (r.status === 401) { SRV.admin = false; throw new Error("auth"); }
+      if (!(r.status === 200 && r.body.ok && r.body.newsletter)) throw new Error((r.body && r.body.error) || "save_failed");
+      var n = r.body.newsletter;
+      d.id = n.id; d.status = n.status; d.updatedAt = n.updatedAt;
+      if (d === S.newsEdit) newsMarkSaved(d);
+      S.news = null;                                    // the list is stale now
+      S.newsPreviewV = (S.newsPreviewV || 0) + 1;       // …and so is the iframe
+      return n;
+    });
+  }
+  function saveNewsDraft(then) {
+    var d = S.newsEdit;
+    if (!d || S.newsBusy) return;
+    S.newsBusy = true; S.newsErr = ""; render();
+    saveNewsFields(d).then(function () {
+      S.newsBusy = false;
+      if (then) then(); else { toast("Черновик сохранён ✓"); render(); }
+    }).catch(function (e) {
+      S.newsBusy = false;
+      if (!(e && e.message === "auth")) { S.newsErr = BLOG_SAVE_ERR; toast(BLOG_SAVE_ERR); }
+      render();
+    });
+  }
+  /** «Отменить правки»: the saved letter again — from the server for a saved one, a blank for a new one. */
+  function newsRevert() {
+    var d = S.newsEdit;
+    if (!d) return;
+    if (d.id) openNewsEditor(d.id);
+    else { newsOpen(newsNewDraft()); render(); }
+  }
+  function deleteNews() {
+    var d = S.newsEdit;
+    if (!d || !d.id || S.newsBusy) return;
+    S.newsBusy = true; render();
+    apiJson("/api/admin/newsletters/?id=" + encodeURIComponent(d.id), { method: "DELETE" }).then(function (r) {
+      S.newsBusy = false; S.newsConfirmDelete = false;
+      if (r.status === 200 && r.body.ok) { toast("Письмо удалено ✓"); S.news = null; S.newsEdit = null; }
+      else toast("Не получилось — попробуйте ещё раз");
+      render();
+    }).catch(function () { S.newsBusy = false; S.newsConfirmDelete = false; toast("Сервер не отвечает."); render(); });
+  }
+  /* ---- the test letter --------------------------------------------------- */
+  function keepNewsTo() {
+    var el = document.querySelector("[data-newsto]");
+    if (el) S.mailTo = el.value;
+  }
+  function newsTest(btn) {
+    var d = S.newsEdit;
+    if (!d) return;
+    keepNewsTo();
+    var addr = (S.mailTo || "").trim();
+    if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(addr)) { toast("Введите e-mail — на него придёт образец"); refocus("[data-newsto]"); return; }
+    if (!newsReady(d, S.newsLang || "RU") && !newsReady(d, "RU") && !newsReady(d, "ET") && !newsReady(d, "EN")) {
+      toast("Сначала заполните тему и текст письма"); return;
+    }
+    // the test is the saved letter — save first, then send the same thing again
+    if (!d.id || newsDirty()) { saveNewsDraft(function () { render(); newsTest(document.querySelector("[data-newstest]")); }); return; }
+    if (btn && btn.disabled) return;
+    if (btn) btn.disabled = true;
+    apiSend("/api/admin/newsletters/" + encodeURIComponent(d.id) + "/test/", "POST", { to: addr, lang: S.newsLang || "RU" }).then(function (r) {
+      if (btn) btn.disabled = false;
+      var err = r.body && r.body.error;
+      /* «Подключения» reads S.admMailKey the same way the «Письма» test does */
+      if (r.body && r.body.ok) { S.admMailKey = true; toast("Тест отправлен ✓"); }
+      else if (r.status === 401) { SRV.admin = false; toast("Нужен вход в админку"); render(); }
+      else if (err === "no_api_key") { S.admMailKey = false; toast("Отправка писем ещё не подключена"); }
+      else if (err === "rate_limited") toast("Слишком много писем — попробуйте позже");
+      else if (err === "bad_email") toast("Введите e-mail — на него придёт образец");
+      else if (err === "empty_body" || err === "no_subject") toast("Сначала заполните тему и текст письма");
+      else toast("Не получилось — попробуйте ещё раз");
+    }).catch(function () { if (btn) btn.disabled = false; toast("Не получилось — попробуйте ещё раз"); });
+  }
+  /* ---- the send: confirm, loop, resume ------------------------------------- */
+  function newsConfirmDetail(d, aud) {
+    var line = "Письмо «" + (d.title || d.subject.RU || d.subject.ET || d.subject.EN) + "» уйдёт подписчикам: " + (aud.total || 0) +
+      " — по-русски " + (aud.RU || 0) + ", по-эстонски " + (aud.ET || 0) + ", по-английски " + (aud.EN || 0) + ".";
+    var miss = newsMissingLangs(d).filter(function (l) { return (aud[l] || 0) > 0; });
+    var note = NEWS_FALLBACK_NOTE[miss.join(",")];
+    return note ? line + " " + note : line;
+  }
+  function newsSendAsk() {
+    var d = S.newsEdit;
+    if (!d || S.newsBusy) return;
+    if (!newsReady(d, "RU") && !newsReady(d, "ET") && !newsReady(d, "EN")) { toast("Сначала заполните тему и текст письма"); return; }
+    // the letter that goes out is the saved one — save first, then ask
+    if (!d.id || newsDirty()) { saveNewsDraft(function () { render(); newsSendAsk(); }); return; }
+    var aud = S.newsAudience;
+    if (!aud) { loadNewsAudience(true, newsSendAsk); return; }
+    if (!aud.total) { toast("Некому отправлять — подписчиков пока нет."); return; }
+    pendingAction = {
+      type: "newsletter_send", overlay: true, id: d.id,
+      title: "Отправить письмо?", ok: "Отправить", detail: newsConfirmDetail(d, aud)
+    };
+    render(); refocus("[data-admapply]");
+  }
+  function newsSendErrText(r) {
+    if (r.status === 401) { SRV.admin = false; return "Нужен вход в админку"; }
+    var code = (r.body && r.body.error) || "";
+    if (code === "already_sent") return "Это письмо уже отправлено.";
+    if (code === "busy") return "Отправка уже идёт — подождите минуту.";
+    if (code === "empty_body" || code === "no_subject") return "Сначала заполните тему и текст письма";
+    if (code === "no_recipients") return "Некому отправлять — подписчиков пока нет.";
+    if (code === "no_api_key") return "Отправка писем ещё не подключена";
+    return "Не получилось — попробуйте ещё раз";
+  }
+  /** The letter as the server now has it, back into the draft on screen. */
+  function newsSyncSent(n) {
+    var d = S.newsEdit;
+    if (!n || !d || d.id !== n.id) return;
+    d.status = n.status; d.sentAt = n.sentAt || null;
+    d.sentCount = n.sentCount || 0; d.failedCount = n.failedCount || 0; d.audienceCount = n.audienceCount || 0;
+    newsMarkSaved(d);
+  }
+  function newsDoneLine(sent, failed) { return "Письмо ушло — отправлено " + sent + ", ошибок " + failed + " ✓"; }
+  function newsSendStart(pa) {
+    S.newsSend = { id: pa.id, busy: true, sent: 0, failed: 0, left: null, total: 0, err: "" };
+    render();
+    newsSendStep(pa.id);
+  }
+  function newsSendStep(id) {
+    apiSend("/api/admin/newsletters/" + encodeURIComponent(id) + "/send/", "POST", {}).then(function (r) {
+      var st = S.newsSend;
+      if (!st || st.id !== id) return;
+      if (!(r.status === 200 && r.body.ok)) {
+        st.busy = false; st.err = newsSendErrText(r);
+        newsSyncSent(r.body && r.body.newsletter);
+        toast(st.err); render(); return;
+      }
+      st.sent = r.body.sent || 0; st.failed = r.body.failed || 0; st.left = r.body.left || 0; st.total = r.body.total || 0;
+      newsSyncSent(r.body.newsletter);
+      if (r.body.done) {
+        st.busy = false; S.news = null;
+        var line = newsDoneLine(st.sent, st.failed);
+        journalNote(line); toast(line);
+        render(); return;
+      }
+      render();
+      setTimeout(function () { newsSendStep(id); }, Number(r.body.retryAfterMs) || 0);
+    }).catch(function () {
+      var st = S.newsSend;
+      if (!st || st.id !== id) return;
+      st.busy = false; st.err = "Сервер не отвечает — нажмите «Продолжить».";
+      if (S.newsEdit && S.newsEdit.id === id && S.newsEdit.status === "draft") S.newsEdit.status = "sending";
+      render();
+    });
+  }
+  /* ---- the assistant: the whole letter, or a translation ------------------ */
+  function newsProductRefs(d) {
+    return productsById(d.products).map(function (p) {
+      return { id: p.id, brand: p.brand, name: p.name, category: CAT_NAMES[p.cat] || p.cat };
+    });
+  }
+  function newsGenErrText(r) {
+    if (r.status === 401) { SRV.admin = false; return "Вы вышли из админки — войдите снова."; }
+    var code = (r.body && r.body.error) || "";
+    if (code === "rate_limited") return "Слишком много запросов — попробуйте позже";
+    if (code === "truncated") return "Письмо не дописалось до конца — попробуйте ещё раз";
+    if (code === "not_configured") return "Помощник не подключён — нужен ключ OpenAI на сервере.";
+    return "Не получилось — попробуйте ещё раз";
+  }
+  /** The Russian letter into the draft — the cards rebuilt by the same two functions an article's are. */
+  function newsApplyWritten(d, tx) {
+    if (tx.subject) d.subject.RU = String(tx.subject).slice(0, 200);
+    var wrote = blogCardsOut(String(tx.body || ""));
+    d.body.RU = blogCleanHtml(blogCardsIn(wrote.html, wrote.cards, "RU"));
+    if (!d.title && d.subject.RU) d.title = d.subject.RU.slice(0, 120);
+  }
+  function newsTranslateOne(d, L) {
+    var keep = productsById(d.products).map(function (p) { return p.brand + " " + p.name; });
+    var src = blogCardsOut(d.body.RU);
+    return apiSend("/api/admin/ai/text/", "POST", {
+      task: "post_translate", lang: L,
+      input: { sourceLang: "RU", title: d.subject.RU, body: src.html, keepNames: keep }
+    }).then(function (r) {
+      var tx = r.status === 200 && r.body.ok && r.body.text;
+      if (!tx || !(tx.title || tx.body)) throw new Error(newsGenErrText(r));
+      if (tx.title) d.subject[L] = String(tx.title).slice(0, 200);
+      if (tx.body) d.body[L] = blogCleanHtml(blogCardsIn(String(tx.body), src.cards, L));
+    });
+  }
+  function newsWrite(d, brief) {
+    if (!d) return;
+    if (S.newsGen && !S.newsGen.err) { toast("Подождите — письмо ещё пишется"); return; }
+    brief = String(brief || "").trim();
+    if (!brief) { toast("Напишите, о чём письмо"); refocus("[data-newsbrief]"); return; }
+    var paint = function () { if (S.newsEdit === d) render(); };
+    var step = function (s) { S.newsGen = { step: s, err: "" }; paint(); };
+    S.newsErr = "";
+    step("ru");
+    apiSend("/api/admin/ai/text/", "POST", {
+      task: "newsletter", lang: "RU", input: { brief: brief, products: newsProductRefs(d) }
+    }).then(function (r) {
+      var tx = r.status === 200 && r.body.ok && r.body.text;
+      if (!tx || !tx.subject || !tx.body) throw new Error(newsGenErrText(r));
+      newsApplyWritten(d, tx);
+      step("et");
+      return newsTranslateOne(d, "ET");
+    }).then(function () {
+      step("en");
+      return newsTranslateOne(d, "EN");
+    }).then(function () {
+      step("save");
+      return saveNewsFields(d).catch(function () { throw new Error(BLOG_SAVE_ERR); });
+    }).then(function () {
+      S.newsGen = null;
+      toast("Письмо готово на трёх языках — проверьте и отправьте себе тест");
+      paint();
+    }).catch(function (e) {
+      var msg = (e && e.message) || "Не получилось — попробуйте ещё раз";
+      S.newsGen = { step: "error", err: msg };
+      toast(msg); paint();
+    });
+  }
+  function newsTranslate(d) {
+    if (!d) return;
+    if (S.newsGen && !S.newsGen.err) { toast("Подождите — письмо ещё пишется"); return; }
+    if (!newsReady(d, "RU")) { toast("Сначала напишите письмо по-русски — тему и текст"); return; }
+    var paint = function () { if (S.newsEdit === d) render(); };
+    var step = function (s) { S.newsGen = { step: s, err: "" }; paint(); };
+    step("et");
+    newsTranslateOne(d, "ET").then(function () {
+      step("en");
+      return newsTranslateOne(d, "EN");
+    }).then(function () {
+      S.newsGen = null;
+      toast("Переведено — проверьте и сохраните");
+      paint();
+    }).catch(function (e) {
+      var msg = (e && e.message) || "Не получилось — попробуйте ещё раз";
+      S.newsGen = { step: "error", err: msg };
+      toast(msg); paint();
+    });
+  }
+  /* ---- the clicks: one door from the delegate below ----------------------- */
+  function newsClick(t, d) {
+    if (d.newsnew !== undefined) { newsOpen(newsNewDraft()); render(); return true; }
+    if (d.newsedit) { openNewsEditor(d.newsedit); return true; }
+    if (d.newsback !== undefined) {
+      // unsaved work dies with the draft — ask once (newsDirty), like the blog
+      if (newsDirty() && !S.newsConfirmBack) { S.newsConfirmBack = true; render(); return true; }
+      newsCloseEditor(); return true;
+    }
+    if (d.newsbackyes !== undefined) { newsCloseEditor(); return true; }
+    if (d.newsbackno !== undefined) { S.newsConfirmBack = false; render(); return true; }
+    if (d.newslang) {
+      // another language is another box: the remembered caret belongs to the old one
+      S.newsLang = d.newslang; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return true;
+    }
+    if (d.newsproductadd) {
+      var pd = S.newsEdit;
+      if (pd && pd.products.indexOf(d.newsproductadd) < 0 && pd.products.length < 8) pd.products.push(d.newsproductadd);
+      S.newsQ = ""; render(); return true;
+    }
+    if (d.newsproductdel) {
+      if (S.newsEdit) S.newsEdit.products = S.newsEdit.products.filter(function (id) { return id !== d.newsproductdel; });
+      render(); return true;
+    }
+    if (d.newssave !== undefined) {
+      if (S.newsEdit && S.newsEdit.id && !newsDirty()) { toast("Изменений нет"); return true; }
+      saveNewsDraft(); return true;
+    }
+    if (d.newsrevert !== undefined) { newsRevert(); return true; }
+    if (d.newstest !== undefined) { newsTest(t); return true; }
+    if (d.newssend !== undefined) { newsSendAsk(); return true; }
+    if (d.newsresume !== undefined) { if (S.newsEdit && S.newsEdit.id) newsSendStart({ id: S.newsEdit.id }); return true; }
+    if (d.newswrite !== undefined) {
+      if (t.disabled || !S.newsEdit) return true;
+      var bEl = document.querySelector("[data-newsbrief]");
+      S.newsBrief = ((bEl && bEl.value) || S.newsBrief || "").trim();
+      newsWrite(S.newsEdit, S.newsBrief); return true;
+    }
+    if (d.newstranslate !== undefined) { if (!t.disabled) newsTranslate(S.newsEdit); return true; }
+    if (d.newsdel !== undefined) { S.newsConfirmDelete = true; render(); return true; }
+    if (d.newsdelyes !== undefined) { deleteNews(); return true; }
+    if (d.newsdelno !== undefined) { S.newsConfirmDelete = false; render(); return true; }
+    if (d.newsreload !== undefined) { S.newsListErr = ""; S.news = null; loadNewsletters(true); render(); return true; }
+    return false;
+  }
+  /* The fields write straight into the draft — no render() under a caret.
+     The body itself is the shared box: the [data-blogbody] branch of the
+     main input listener syncs it through richDraft(). */
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (!t || !t.matches || !S.newsEdit) return;
+    if (t.matches("[data-newsf]")) {
+      var nd = S.newsEdit, nf = t.dataset.newsf;
+      if (nf === "title") nd.title = t.value;
+      else if (nf === "subject") nd.subject[S.newsLang || "RU"] = t.value;
+      newsPaintState();
+    } else if (t.matches("[data-newsq]")) {
+      S.newsQ = t.value;
+      var nlist = document.getElementById("admnewsproducts");
+      if (nlist) { nlist.innerHTML = admNewsPicksHTML(newsMatches(S.newsEdit)); translateTree(nlist); }
+    } else if (t.matches("[data-newsto]")) { S.mailTo = t.value; }
+    else if (t.matches("[data-newsbrief]")) { S.newsBrief = t.value; }
+  });
+  /* ---------- /Рассылка ---------------------------------------------------- */
 
   /* ---------- Аналитика ---------------------------------------------------
      Everything here comes from the endpoint the tab already read
@@ -16278,11 +17101,14 @@
     "customer.points_adjust": "Баллы клиента изменены",
     "media.upload": "Загружен файл", "media.delete": "Файл удалён", "media.cutout": "У фото убран фон",
     "ai.text": "Черновик у ИИ запрошен",
+    "newsletter.sent": "Рассылка отправлена",
     "admin.login": "Вход в админку", "admin.login.failed": "Неудачный вход",
     "admin.logout": "Выход из админки", "db.migrate": "Обновление базы"
   };
   function auditText(row) {
     var p = row && row.payload && typeof row.payload === "object" ? row.payload : {};
+    // an action may carry its own one-line summary («Рассылка «…»: отправлено N, ошибок M»)
+    if (typeof p.line === "string" && p.line) return p.line;
     var word = AUDIT_WORDS[row.action] || row.action;
     var what = p.number || p.code || p.key || p.email || p.id || p.orderId || "";
     return word + (what ? ": " + what : "");
@@ -25719,7 +26545,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -26705,6 +27531,8 @@
         if (pa.type === "create_product") { applyCreateProduct(pa); return; }
         // …and a change to one of those rows: a PUT, journalled with the row as it was
         if (pa.type === "update_product") { applyUpdateProduct(pa); return; }
+        // «Рассылка»: the send is a loop of POSTs with its own progress card — nothing to undo
+        if (pa.type === "newsletter_send") { newsSendStart(pa); return; }
         if (pa.type === "set_product_active") {
           var actEntry = demoApply(pa);
           S.adminEdit = ""; S.goodsSizes = null;
@@ -27662,6 +28490,9 @@
     if (d.admblogdelno !== undefined) { S.adminBlogConfirmDelete = false; render(); return; }
     /* ---------- /blog ------------------------------------------------------ */
 
+    // «Маркетинг → Рассылка»: every data-news* button, in one place (newsClick)
+    if (newsClick(t, d)) return;
+
     if (d.q) { S.query = d.q; scheduleSearchTrack(); go("search"); return; }   // analytics agent
     /* The skip link: into the first control of the step that is open, which
        is the e-mail box on step 1, the country on step 2 and the first
@@ -28017,7 +28848,7 @@
      from the last keystroke instead of the selection, and the button would
      apply to nothing. */
   document.addEventListener("selectionchange", function () {
-    if (S.adminBlogEdit) blogSelSave();
+    if (richDraft()) blogSelSave();
   });
 
   /* blog: a tile the pointer has reached, a finger has landed on or the focus
@@ -28584,7 +29415,10 @@
     ["[data-admcustpoints],[data-admcustnote]", "[data-admcustadjust]"],
     ["[data-admcustnotesf]", "[data-admcustsavenotes]"],
     ["[data-bundlef],[data-bundlepct]", "[data-bundlesave]"],
-    ["[data-mailto]", "[data-mailtest]"]
+    ["[data-mailto]", "[data-mailtest]"],
+    // «Рассылка»: Enter in the test-address box sends the test, in the brief asks the assistant
+    ["[data-newsto]", "[data-newstest]"],
+    ["[data-newsbrief]", "[data-newswrite]"]
   ];
   function admEnterTarget(input) {
     for (var i = 0; i < ADM_ENTER_FORMS.length; i++) {

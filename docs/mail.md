@@ -30,6 +30,8 @@ log.
 | `tests/emails-compat.test.ts` | the mail-client rules, held against every one of those renders |
 | `src/app/api/admin/mail/preview/route.ts` | `GET` — HTML for the admin iframe, `?format=texts` for the editor |
 | `src/app/api/admin/mail/test/route.ts` | `POST` — send a sample (admin only) |
+| `src/emails/newsletter.ts`, `src/lib/newsletters.ts` | «Рассылка» — the owner's own letter: the editor's allowlisted HTML rebuilt as the shell's rows, product cards, the unsubscribe footer; the audience, the resumable batch send (docs/features.md § 8, docs/flows.md § «Рассылка») |
+| `src/app/api/admin/newsletters/*` | the drafts, `audience/` (counts per language), `<id>/test/`, `<id>/send/` (one budgeted batch per call), `<id>/preview/` (the iframe — the owner's draft, so admin-gated unlike `mail/preview`) |
 | `public/shop/emails/*.html` | **design source of truth**, hand-made, keep |
 | `tests/emails.test.ts`, `tests/mail.test.ts`, `tests/mail-hooks.test.ts`, `tests/mail-texts.test.ts` | `npm test` |
 
@@ -146,6 +148,7 @@ variant and a jsonb address still renders a correct letter.
 | `invoice` | `renderInvoice(order, {invoice, seller, totals}, lang)` | service — «Счёт на оплату» with the PDF attached, sent by `src/lib/invoices.ts` (docs/payments.md § 10) |
 | `invoice-reminder` | `renderInvoiceReminder(order, {invoice, seller, totals, cancelAt?, overdue?}, lang)` | service — the one reminder before the due date, the PDF again |
 | `invoice-cancelled` | `renderInvoiceCancelled(order, {invoice, totals}, lang)` | service — the order was closed because nobody paid |
+| `newsletter` | `renderNewsletter({subject, body, products, unsubscribeUrl}, lang)` | marketing — unsubscribe link + the RFC 8058 headers; the owner's own letter from «Маркетинг → Рассылка», sent by `src/lib/newsletters.ts`. Not in `TEMPLATE_IDS` (it has no demo data): its preview is `/api/admin/newsletters/<id>/preview/`, tags `template=newsletter`, idempotency key `news:<id>:<address>` |
 
 ### The three invoice letters
 
@@ -428,7 +431,19 @@ including "does not throw on a garbage order".
   never the bytes — the same rule as the body.
 - No mail is logged to the database. If a delivery log is ever needed, that is
   a `040_*.sql` migration (the mail range is 040–049) and a `mail_log` table —
-  deliberately not built yet.
+  deliberately not built yet. The one exception is the newsletter's own queue,
+  `newsletter_sends` (`160_newsletters.sql`): one row per address per letter,
+  which is what makes a send resumable and a second letter to the same
+  mailbox impossible — a queue, not a log of everything the shop sends.
+- **The newsletter's pace.** Resend takes two requests a second, and a
+  serverless function has about ten; so `POST /api/admin/newsletters/<id>/send/`
+  sends two letters at a time, one pair a second, for ~6.5 s, and answers
+  `done:false` — the panel calls again until the queue is empty (a hundred
+  subscribers is under a minute). A 429 leaves the row queued and asks the
+  panel to wait; a 4xx marks it failed with Resend's word; a 5xx is retried
+  once by `sendMail()` and then marked failed. In the e2e suite (no key) the
+  sink in this file counts as delivery, under the suite's double gate only
+  (`src/lib/newsletters.ts` e2eSinkTransport, docs/testing.md).
 - The three flow letters (`abandoned-cart`, `back-in-stock`, `birthday`) now
   have senders, storage and a scheduler, and the admin toggles drive them for
   real — see **docs/flows.md**. `back-in-stock` fires from the admin's own
