@@ -659,7 +659,15 @@
       "День рождения — пришлём скидку": "Sünnipäev — saadame soodustuse",
       "Сообщить о наличии": "Anna teada, kui on laos",
       "Корзина восстановлена ✓": "Ostukorv on taastatud ✓",
-      "Ждут письма:": "Ootavad kirja:", "Дней рождения за неделю:": "Sünnipäevi nädalas:",
+      "Ждут письма:": "Ootavad kirja:", "Ближайшие 7 дней:": "Järgmised 7 päeva:", "подписчиков с датой": "kuupäevaga tellijat",
+      /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
+      "Не ждать расписания": "Ära oota ajakava", "Запустить сейчас": "Käivita kohe", "Запускаем…": "Käivitame…",
+      "Ещё не запускалось": "Pole veel käivitatud", "Последний запуск:": "Viimane käivitus:",
+      "отправлено": "saadetud", "пропущено": "vahele jäetud", "письмо было выключено": "kiri oli välja lülitatud",
+      "почта не подключена": "post pole ühendatud",
+      "Письмо выключено — включите переключатель и запустите ещё раз.": "Kiri on välja lülitatud — lülitage lüliti sisse ja käivitage uuesti.",
+      "Почта не подключена — письма не отправлены.": "Post pole ühendatud — kirju ei saadetud.",
+      "Не удалось запустить — попробуйте ещё раз.": "Käivitamine ei õnnestunud — proovige uuesti.",
       "Код для входа": "Sisselogimiskood",
       "напоминание через 3 часа, если заказ не завершён":
         "meeldetuletus 3 tunni pärast, kui tellimus jäi lõpetamata",
@@ -1743,6 +1751,10 @@
       "Проверьте сумму — вернуть можно не больше остатка.":
         "Kontrollige summat — tagastada saab kuni jäägi ulatuses.",
       "Заказ закрыт — возврат не оформить.": "Tellimus on suletud — tagasimakset ei saa vormistada.",
+      /* gift cards and refunds (10.09.2026): the order card and the two refusals */
+      "Аннулирована": "Tühistatud",
+      "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "Tellimuse kinkekaardi saab tagastada ainult koos kogu tellimuse jäägiga.",
+      "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "Raha ei õnnestunud kinkekaardile tagastada — kontrollige seda jaotises «Kinkekaardid».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio ei vasta — proovige minuti pärast.",
       "Montonio отказал в возврате — проверьте баланс в его панели.":
         "Montonio keeldus tagasimaksest — kontrollige tema töölaual saldot.",
@@ -2931,7 +2943,15 @@
       "День рождения — пришлём скидку": "Birthday — we'll send a discount",
       "Сообщить о наличии": "Tell me when it's back",
       "Корзина восстановлена ✓": "Cart restored ✓",
-      "Ждут письма:": "Waiting for a letter:", "Дней рождения за неделю:": "Birthdays this week:",
+      "Ждут письма:": "Waiting for a letter:", "Ближайшие 7 дней:": "Next 7 days:", "подписчиков с датой": "subscribers with a date",
+      /* «Запустить сейчас» under the two time-driven letters, and the line about the last run */
+      "Не ждать расписания": "Don't wait for the schedule", "Запустить сейчас": "Run now", "Запускаем…": "Running…",
+      "Ещё не запускалось": "Never run yet", "Последний запуск:": "Last run:",
+      "отправлено": "sent", "пропущено": "skipped", "письмо было выключено": "the letter was off",
+      "почта не подключена": "mail not connected",
+      "Письмо выключено — включите переключатель и запустите ещё раз.": "The letter is off — turn the switch on and run it again.",
+      "Почта не подключена — письма не отправлены.": "Mail is not connected — no letters were sent.",
+      "Не удалось запустить — попробуйте ещё раз.": "Could not run it — try again.",
       "Код для входа": "Sign-in code",
       "напоминание через 3 часа, если заказ не завершён":
         "a reminder 3 hours later if the order was not finished",
@@ -3997,6 +4017,10 @@
       "Проверьте сумму — вернуть можно не больше остатка.":
         "Check the amount — you can refund at most what is left.",
       "Заказ закрыт — возврат не оформить.": "The order is closed — no refund can be made.",
+      /* gift cards and refunds (10.09.2026): the order card and the two refusals */
+      "Аннулирована": "Cancelled",
+      "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.": "A gift card from an order can only be refunded together with the whole of what is left of the order.",
+      "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах».": "The money could not be put back on the gift card — check it under «Gift cards».",
       "Montonio не отвечает — попробуйте через минуту.": "Montonio is not answering — try again in a minute.",
       "Montonio отказал в возврате — проверьте баланс в его панели.":
         "Montonio refused the refund — check the balance in its panel.",
@@ -4807,6 +4831,31 @@
     [/^(.+) · возврат (.+) — письмо ушло$/,
       { ET: "$1 · tagasimakse $2 — kiri läks välja", EN: "$1 · refunded $2 — the letter is out" }],
     [/^(.+) · вернули часть, (.+)$/, { ET: "$1 · tagastasime osa, $2", EN: "$1 · partly refunded, $2" }],
+    /* gift cards and refunds (10.09.2026): the split on the confirm card, the
+       note about the cards the order sold, the toasts, and the order card's
+       own lines about a card */
+    [/^([^\n]+) · ([^\n]+)\nВернём на подарочную карту: (.+) · на счёт покупателя: (.+)\. Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли\. Клиенту уйдёт письмо\.$/,
+      { ET: "$1 · $2\nTagastame kinkekaardile: $3 · ostja kontole: $4. Kõigepealt tagastatakse kaardiga makstud osa, ülejäänu läheb Montonio kaudu sama teed, kust raha tuli. Kliendile läheb kiri.",
+        EN: "$1 · $2\nBack onto the gift card: $3 · to the buyer's account: $4. The part paid with the card goes back first; the rest goes through Montonio the way the money came. The customer gets a letter." }],
+    [/^([^\n]+) · ([^\n]+)\nВернём на подарочную карту: (.+) · на счёт покупателя: (.+)\. Картой снова можно будет платить\. Клиенту уйдёт письмо\.$/,
+      { ET: "$1 · $2\nTagastame kinkekaardile: $3 · ostja kontole: $4. Kaardiga saab jälle maksta. Kliendile läheb kiri.",
+        EN: "$1 · $2\nBack onto the gift card: $3 · to the buyer's account: $4. The card works again. The customer gets a letter." }],
+    [/^Подарочная карта (.+) из этого заказа уже потрачена на (.+) — вернуть заказ целиком нельзя\.$/,
+      { ET: "Selle tellimuse kinkekaart $1 on juba kulutatud $2 ulatuses — tervet tellimust tagastada ei saa.",
+        EN: "Gift card $1 from this order has already been spent — $2 of it — so the whole order cannot be refunded." }],
+    [/^Подарочная карта из этого заказа будет аннулирована: (.+)\.$/,
+      { ET: "Selle tellimuse kinkekaart tühistatakse: $1.", EN: "The gift card from this order will be cancelled: $1." }],
+    [/^(.+) · возврат (.+) · на карту (.+) — письмо ушло$/,
+      { ET: "$1 · tagasimakse $2 · kaardile $3 — kiri läks välja", EN: "$1 · refunded $2 · $3 onto the card — the letter is out" }],
+    [/^(.+) · вернули часть, (.+) · на карту (.+)$/,
+      { ET: "$1 · tagastasime osa, $2 · kaardile $3", EN: "$1 · partly refunded, $2 · $3 onto the card" }],
+    [/^На подарочную карту (.+) вернулось (.+)$/,
+      { ET: "Kinkekaardile $1 tagastati $2", EN: "$2 went back onto gift card $1" }],
+    [/^использовано (.+)$/, { ET: "kasutatud $1", EN: "$1 used" }],
+    // «Запустить сейчас»: what the run did, and its line in the journal
+    [/^Отправлено (\d+) · пропущено (\d+)$/, { ET: "Saadetud $1 · vahele jäetud $2", EN: "Sent $1 · skipped $2" }],
+    [/^Письмо «(.+)»: запущено вручную, отправлено (\d+)$/,
+      { ET: "Kiri «$1»: käivitatud käsitsi, saadetud $2", EN: "Letter «$1»: run by hand, sent $2" }],
     [/^Неоплаченные заказы: напоминание через (\d+), отмена через (\d+)$/,
       { ET: "Maksmata tellimused: meeldetuletus $1 päeva pärast, tühistamine $2 päeva pärast",
         EN: "Unpaid orders: reminder after $1 days, cancellation after $2 days" }],
@@ -13165,6 +13214,52 @@
     });
     return Math.round(sum * 100) / 100;
   }
+  /** The card a ledger entry went back onto — its code, or a dash for an entry that names none. */
+  function admRefundCode(r) {
+    return r && typeof r.code === "string" && r.code ? r.code : "—";
+  }
+  /** «Вернуть деньги», as the card offers it (10.09.2026): what the order was
+      worth to the customer — the money plus what a gift card paid
+      (`srv.giftPaid`, src/lib/giftcard-links.ts) — what has gone back, and
+      how what is left would split between the card and Montonio. The split is
+      the server's rule (src/lib/payments/refund.ts splitRefund): the card
+      first, the provider for the rest. So an order a card covered entirely,
+      with no Montonio payment behind it at all, is refundable — to the card.
+      Money the shop cannot send back from here (marked paid by hand, another
+      provider) is simply not offered; the card's part still is. `sold` is the
+      cards the order itself bought, with what has been spent off each — the
+      refund route refuses a used one, and the confirm card says so first. */
+  function admRefundView(sum, srv) {
+    var pay = (srv && srv.payment) || null;
+    var back = admRefundedTotal(pay);
+    var giftBack = 0;
+    admRefunds(pay).forEach(function (r) {
+      if (r && r.status !== "failed" && r.to === "giftcard") giftBack += Number(r.amount) || 0;
+    });
+    var giftPaid = 0, giftLeft = 0, giftCode = "";
+    ((srv && Array.isArray(srv.giftPaid)) ? srv.giftPaid : []).forEach(function (g) {
+      giftPaid += Number(g.amount) || 0;
+      giftLeft += Math.max(0, Number(g.left) || 0);
+      if (!giftCode && Number(g.left) > 0.004) giftCode = String(g.code || "");
+    });
+    giftLeft = Math.max(0, Math.min(giftLeft, giftPaid - giftBack));
+    var value = Math.round(((Number(sum) || 0) + giftPaid) * 100) / 100;
+    var paid = !!(pay && pay.status === "paid");
+    var viaProvider = !!(pay && pay.ref && (pay.provider === "montonio" || pay.provider === "mock"));
+    var left = Math.max(0, Math.round((value - back) * 100) / 100);
+    var gift = Math.round(Math.min(left, giftLeft) * 100) / 100;
+    var money = Math.round((left - gift) * 100) / 100;
+    if (!viaProvider) { left = gift; money = 0; }
+    return {
+      refunded: back,
+      refundable: paid ? left : 0,
+      gift: paid ? gift : 0,
+      money: paid ? money : 0,
+      giftCode: giftCode,
+      value: value,
+      sold: (srv && Array.isArray(srv.giftCards)) ? srv.giftCards : []
+    };
+  }
   /** returns: when the customer ticked «Хочу вернуть заказ», "" if never. */
   function admReturnAskedAt(srv) {
     var req = srv && srv.shipping && srv.shipping.returnRequest;
@@ -13192,9 +13287,8 @@
        `orders.payment` (src/lib/payments/refund.ts). `refundable` is what the
        «Вернуть деньги» card offers and what the server will accept; it is 0
        for an order the shop never actually took money for. */
-    var pay = (srv && srv.payment) || null;
-    var back = admRefundedTotal(pay);
-    var canRefund = !!(pay && pay.ref && pay.status === "paid" && (pay.provider === "montonio" || pay.provider === "mock"));
+    var rv = admRefundView(o.sum, srv);
+    var back = rv.refunded;
     return {
       id: String(o.id), number: o.number || "#" + o.id, who: o.who, date: o.date,
       items: o.items, sum: o.sum, ship: o.ship, status: status, pos: pos, srv: srv,
@@ -13211,7 +13305,8 @@
       toShip: status === "paid" && !pos && method !== "digital",
       unpaid: status === "new" || status === "failed",
       refunded: back,
-      refundable: canRefund ? Math.max(0, Math.round((Number(o.sum) - back) * 100) / 100) : 0,
+      refundable: rv.refundable,
+      refund: rv,
       invoice: invoice,
       company: srv && srv.company && srv.company.name ? srv.company : null,
       overdue: invoice && (status === "new" || status === "failed") ? admInvoiceOverdue(invoice) : 0,
@@ -13964,11 +14059,17 @@
        mean different things to the shop. */
     var back = admRefundedTotal(p);
     if (back > 0.004) {
-      notes += '<br><span>Возвращено ' + eur(back) + " из " + eur(o.total) + "</span>";
+      /* «из» what the order was worth to the customer — the money plus what a
+         gift card paid (admRefundView), never the bare total: an order a card
+         covered entirely has a total of 0 and «Возвращено 16 € из 0 €» would
+         be a lie. */
+      notes += '<br><span>Возвращено ' + eur(back) + " из " + eur(admRefundView(o.total, o).value) + "</span>";
     }
     admRefunds(p).forEach(function (r) {
       if (r.status === "failed") notes += '<br><span class="adm-err">⚠ Возврат ' + eur(r.amount) + " не прошёл — проверьте в Montonio</span>";
       else if (r.status === "pending") notes += '<br><span>Возврат ' + eur(r.amount) + " в обработке у Montonio</span>";
+      // …and the part that went back onto the gift card that paid, as balance
+      else if (r.to === "giftcard") notes += '<br><span>На подарочную карту ' + esc(admRefundCode(r)) + " вернулось " + eur(r.amount) + "</span>";
     });
     return '<div><div class="adm-sec__t">Оплата</div><div class="adm-kv">' + esc(method || "—") + "<br>" +
       "<span>" + esc(sub) + (p.ref ? (sub ? " · " : "") + '<span class="adm-mono">' + esc(String(p.ref)) + "</span>" : "") + "</span>" +
@@ -14061,10 +14162,18 @@
        Each half still in its own text node: the code is data, «Карта PDF ↗» is
        a phrase the dictionary translates (translateTree rewrites whole nodes). */
     return '<div class="adm-gifts" style="margin-top:10px">' + cards.map(function (c) {
+      /* What became of the card since (10.09.2026): cancelled with the
+         order's refund (src/lib/giftcards.ts voidGiftCards — the code pays
+         for nothing any more, so no PDF either), or partly spent — the amount
+         the refund route would name if the owner tried to refund this order. */
+      var used = Math.round((Number(c.amount) - Number(c.balance)) * 100) / 100;
+      var state = c.voidedAt
+        ? '<span class="adm-badge adm-badge--quiet" data-giftvoid="' + esc(c.code) + '">Аннулирована</span>'
+        : used > 0.004 ? '<span class="adm-hint" data-giftused="' + esc(c.code) + '">использовано ' + eur(used) + "</span>" : "";
       return '<div class="adm-gifts__c">' +
-        '<span class="adm-mono adm-gifts__code">' + esc(c.code) + "</span>" +
-        '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(c.pdfUrl) +
-          '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">Карта PDF ↗</a></div>';
+        '<span class="adm-mono adm-gifts__code">' + esc(c.code) + "</span>" + state +
+        (c.voidedAt ? "" : '<a class="adm-btn adm-btn--ghost adm-btn--row" href="' + esc(c.pdfUrl) +
+          '" target="_blank" rel="noopener" data-giftpdf="' + esc(c.code) + '">Карта PDF ↗</a>') + "</div>";
     }).join("") +
       '<span class="adm-hint"><span>Действует до</span> <span>' +
       esc(String(cards[0].validUntil || "").split("-").reverse().join(".")) + "</span></span></div>";
@@ -14910,6 +15019,59 @@
     for (var i = 0; i < ADM_MAIL_ROWS.length; i++) if (ADM_MAIL_ROWS[i][0] === tpl) return ADM_MAIL_ROWS[i][1];
     return tpl;
   }
+  /* «Запустить сейчас» (10.09.2026) under «Брошенная корзина» and «Скидка ко
+     дню рождения» — the two letters whose moment is a matter of time. The
+     test plan used to say «Попросить Дима запустить расписание вручную — из
+     панели это не делается»; this is the door from the panel. The button runs
+     the very function the daily job runs (POST /api/admin/flows/run/), so the
+     switch still decides and nothing goes out twice. Under it the last run,
+     the cron's or this button's alike — «Последний запуск: 10.09 07:00 —
+     отправлено 1» — which is also the one place that shows whether the
+     schedule reaches this deployment at all. */
+  var FLOW_RUNNABLE = { abandoned: true, birthday: true };
+  /** `10.09 07:00`, in this machine's own time — the owner reads his phone's clock, not UTC. */
+  function flowRunWhen(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+  function flowLastRunHTML(flow) {
+    var r = FLOW_RUNS && FLOW_RUNS[flow];
+    if (!r || !r.at) return "<span>Ещё не запускалось</span>";
+    var line = "<span>Последний запуск:</span> " + esc(flowRunWhen(r.at)) + " — <span>отправлено</span> " + (Number(r.sent) || 0);
+    if (Number(r.skipped) > 0) line += " · <span>пропущено</span> " + Number(r.skipped);
+    if (r.reason === "disabled") line += " · <span>письмо было выключено</span>";
+    else if (r.reason === "no_api_key") line += " · <span>почта не подключена</span>";
+    return line;
+  }
+  function admFlowRunHTML(flow) {
+    var busy = SRV.flowRunBusy === flow;
+    return '<div class="adm-swrow" data-admflowlast="' + flow + '"><span>Не ждать расписания' +
+        '<span class="adm-row__sub">' + flowLastRunHTML(flow) + "</span></span>" +
+      '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admflowrun="' + flow + '"' + (busy ? " disabled" : "") + ">" +
+        (busy ? "Запускаем…" : "Запустить сейчас") + "</button></div>";
+  }
+  function srvFlowRun(flow) {
+    if (SRV.flowRunBusy || !FLOW_RUNNABLE[flow]) return;
+    SRV.flowRunBusy = flow; render();
+    apiSend("/api/admin/flows/run/", "POST", { flow: flow }).then(function (r) {
+      SRV.flowRunBusy = "";
+      if (r.status === 401) { SRV.admin = false; render(); return; }
+      if (r.status === 200 && r.body.ok) {
+        if (r.body.runs) FLOW_RUNS = r.body.runs;
+        var flowName = FLOW_NAMES[flow] || flow, sentN = Number(r.body.sent) || 0;
+        journalNote("Письмо «" + flowName + "»: запущено вручную, отправлено " + sentN);
+        if (r.body.reason === "disabled") toast("Письмо выключено — включите переключатель и запустите ещё раз.");
+        else if (r.body.reason === "no_api_key") toast("Почта не подключена — письма не отправлены.");
+        else toast("Отправлено " + (Number(r.body.sent) || 0) + " · пропущено " + (Number(r.body.skipped) || 0));
+        loadFlowCounts(true);
+        render();
+        return;
+      }
+      toast("Не удалось запустить — попробуйте ещё раз."); render();
+    }).catch(function () { SRV.flowRunBusy = ""; toast("Сервер не отвечает"); render(); });
+  }
   function admMailHTML() {
     loadMailTexts(false);
     if (SRV.admin === true) loadFlowCounts();
@@ -14927,7 +15089,9 @@
         '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
         "</div>" +
         // the one letter with a setting of its own, right under its own row
-        (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "");
+        (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "") +
+        // …and the two that can be started by hand, once they are on
+        (FLOW_RUNNABLE[flow] && on && SRV.admin === true ? admFlowRunHTML(flow) : "");
     }).join("") + "</div>" +
       '<p class="adm-hint" style="margin-top:12px">Номер заказа, состав и трек-номер подставляются сами — ' +
         "их править не нужно.</p>" +
@@ -14995,7 +15159,11 @@
     var key = { backstock: "alerts", abandoned: "carts", birthday: "birthdays", unpaid: "unpaid" }[flow];
     if (!FLOW_COUNTS || !key || FLOW_COUNTS[key] === undefined) return "";
     // the label is its own node: glued to the count it was one Russian string
-    return " · <span>" + FLOW_COUNT_LABEL[key] + "</span> " + Number(FLOW_COUNTS[key]);
+    var line = " · <span>" + FLOW_COUNT_LABEL[key] + "</span> " + Number(FLOW_COUNTS[key]);
+    /* «Ближайшие 7 дней: 3 подписчиков с датой» (Dim, 10.09.2026) — who the
+       birthday letter can reach at all: a date on the row AND the tick */
+    if (key === "birthdays") line += " <span>подписчиков с датой</span>";
+    return line;
   }
   function admMailEditorHTML() {
     /* Nothing until the texts land. Drawn early the fields are empty, «Вернуть
@@ -16335,6 +16503,9 @@
      numbers simply do not draw — an unconfigured shop must not show zeros it
      cannot stand behind. */
   var FLOW_COUNTS = null;
+  /* …and when each flow last ran, from the same answer (`settings.flow_runs`,
+     src/lib/flows.ts recordFlowRun): «Последний запуск» under the row. */
+  var FLOW_RUNS = null;
   /* When the answer last came back. Asked once per session, «Ждут письма: 3»
      was this morning's three all day: the panel is a tab Renat leaves open,
      and the number is the reason he opens the screen. One request per minute
@@ -16348,13 +16519,19 @@
     if (!force && flowCountsAt && now - flowCountsAt < FLOW_COUNTS_TTL) return;
     flowCountsAt = now;
     fetch("/api/admin/flows/").then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { if (j && j.ok && j.counters) { FLOW_COUNTS = j.counters; render(); } })
+      .then(function (j) {
+        if (j && j.ok && j.counters) {
+          FLOW_COUNTS = j.counters;
+          FLOW_RUNS = j.runs && typeof j.runs === "object" ? j.runs : {};
+          render();
+        }
+      })
       .catch(noop);
   }
   var FLOW_COUNT_LABEL = {
     carts: "Ждут письма:",
     alerts: "Ждут письма:",
-    birthdays: "Дней рождения за неделю:",
+    birthdays: "Ближайшие 7 дней:",
     unpaid: "Ждут оплаты:"
   };
   function mailTpl() {
@@ -22862,9 +23039,47 @@
     order_closed: "Заказ закрыт — возврат не оформить.",
     provider_unreachable: "Montonio не отвечает — попробуйте через минуту.",
     provider_rejected: "Montonio отказал в возврате — проверьте баланс в его панели.",
-    recorded_failed: "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте."
+    recorded_failed: "Деньги ушли, но запись не сохранилась — откройте заказ ещё раз и проверьте.",
+    /* gift cards (10.09.2026): a card this order sold is refunded whole or not
+       at all, and never once somebody has spent from it (the used one names
+       its amount, see srvOrderRefund); a card that would not take its money
+       back is the owner's to look at */
+    gift_whole: "Подарочную карту из заказа можно вернуть только вместе со всем остатком заказа.",
+    gift_credit_failed: "Не удалось вернуть деньги на подарочную карту — проверьте её в «Подарочных картах»."
   };
-  function admRefundConfirmText(v) {
+  /** The cards this order sold, as a sentence for the confirm card (its own
+      block under the text): which will be cancelled with the refund, or the
+      one somebody has spent from — the reason the server will refuse a full
+      refund. "" for an order that sold none, or whose cards are already
+      cancelled. */
+  function admRefundSoldNote(sold) {
+    var live = (sold || []).filter(function (c) { return !c.voidedAt; });
+    if (!live.length) return "";
+    for (var i = 0; i < live.length; i++) {
+      var used = Math.round((Number(live[i].amount) - Number(live[i].balance)) * 100) / 100;
+      if (used > 0.004) return "Подарочная карта " + live[i].code + " из этого заказа уже потрачена на " + eur(used) + " — вернуть заказ целиком нельзя.";
+    }
+    var codes = live.map(function (c) { return c.code; }).join(", ");
+    return "Подарочная карта из этого заказа будет аннулирована: " + codes + ".";
+  }
+  /** The confirm card's text. `typed` is the amount in the box while the
+      owner edits it; the split under it follows (the input handler repaints
+      the text), so what he confirms is what the server will do. */
+  function admRefundConfirmText(v, typed) {
+    var rv = v.refund || { gift: 0, money: v.refundable };
+    if (rv.gift > 0.004) {
+      var amount = typed === undefined || !isFinite(Number(typed)) ? v.refundable : Math.max(0, Math.min(v.refundable, Number(typed)));
+      var gift = Math.round(Math.min(amount, rv.gift) * 100) / 100;
+      var money = Math.round((amount - gift) * 100) / 100;
+      if (money > 0.004) {
+        return v.number + " · " + v.who +
+          "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
+          ". Сначала возвращается часть, оплаченная картой, остаток уйдёт через Montonio тем же путём, каким деньги пришли. Клиенту уйдёт письмо.";
+      }
+      return v.number + " · " + v.who +
+        "\nВернём на подарочную карту: " + eur(gift) + " · на счёт покупателя: " + eur(money) +
+        ". Картой снова можно будет платить. Клиенту уйдёт письмо.";
+    }
     if (v.refunded > 0.004) {
       return v.number + " · " + v.who +
         "\nПо заказу уже возвращено " + eur(v.refunded) + ". Осталось " + eur(v.refundable) +
@@ -22872,6 +23087,18 @@
     }
     return v.number + " · " + v.who +
       "\nВернём " + eur(v.refundable) + " через Montonio — тем же путём, каким деньги пришли. Клиенту уйдёт письмо, товары вернутся на склад, заказ станет «возврат». Можно вернуть часть — измените сумму.";
+  }
+  /** The amount box on the refund card changed: the split line follows it. */
+  function admRefundRepaint(typed) {
+    if (!pendingAction || pendingAction.type !== "order_refund") return;
+    var row = admOrderById(pendingAction.id);
+    var node = document.querySelector(".adm-confirm__d");
+    if (!row || !node) return;
+    var text = admRefundConfirmText(row, Number(String(typed).replace(",", ".")));
+    if (node.textContent === text) return;
+    node.textContent = text;
+    pendingAction.detail = text;
+    translateTree(node.parentElement || node);
   }
   function srvOrderRefund(id, number, typed, max) {
     if (SRV.refundBusy) return;
@@ -22882,13 +23109,29 @@
       SRV.refundBusy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
       if (r.status === 200 && r.body.ok) {
-        journalNote("Заказ " + number + ": возврат " + eur(r.body.amount));
-        toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " — письмо ушло"
-          : number + " · вернули часть, " + eur(r.body.amount));
+        var gift = Number(r.body.gift) || 0;
+        /* The toast (and the journal) name the card's part when there is one:
+           «письмо ушло» alone would send the owner to Montonio for money
+           that is on a card */
+        if (gift > 0.004) {
+          journalNote("Заказ " + number + ": возврат " + eur(r.body.amount) + ", на карту " + eur(gift));
+          toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " · на карту " + eur(gift) + " — письмо ушло"
+            : number + " · вернули часть, " + eur(r.body.amount) + " · на карту " + eur(gift));
+        } else {
+          journalNote("Заказ " + number + ": возврат " + eur(r.body.amount));
+          toast(r.body.fully ? number + " · возврат " + eur(r.body.amount) + " — письмо ушло"
+            : number + " · вернули часть, " + eur(r.body.amount));
+        }
         admOrdersChanged();
         return;
       }
-      toast(REFUND_ERR[r.body && r.body.error] || "Не удалось оформить возврат");
+      var err = r.body && r.body.error;
+      if (err === "gift_used") {
+        var usedCode = admRefundCode(r.body);
+        toast("Подарочная карта " + usedCode + " из этого заказа уже потрачена на " + eur(Number(r.body.used) || 0) + " — вернуть заказ целиком нельзя.");
+      } else {
+        toast(REFUND_ERR[err] || "Не удалось оформить возврат");
+      }
       render();
     }).catch(function () { SRV.refundBusy = false; toast("Сервер не отвечает"); render(); });
   }
@@ -25719,7 +25962,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-admpricingreset],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admflowrun]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -26060,11 +26303,15 @@
     if (d.admrefund) {
       var refRow = admOrderById(d.admrefund);
       if (!refRow || !(refRow.refundable > 0.004)) return;
+      // the cards this order sold, in the card's own block under the text:
+      // cancelled with the refund, or the used one the server will refuse
+      var soldNote = admRefundSoldNote(refRow.refund ? refRow.refund.sold : []);
       pendingAction = {
         type: "order_refund", overlay: true, danger: true, id: refRow.id, number: refRow.number,
         amount: refRow.refundable.toFixed(2),
         title: "Вернуть деньги?",
         detail: admRefundConfirmText(refRow),
+        preview: soldNote || undefined,
         ok: "Вернуть деньги"
       };
       render(); refocus("[data-admrefundamt]"); return;
@@ -26810,6 +27057,8 @@
       demoApply({ type: "toggle_flow", id: d.admflow, value: !DEMO.flows[d.admflow] });
       toast("Сохранено ✓"); render(); return;
     }
+    // «Запустить сейчас»: the daily job's own function, from the panel
+    if (d.admflowrun !== undefined) { srvFlowRun(d.admflowrun); return; }
     /* «Доставлен» без кнопки: both halves of settings.delivery apply at once
        with the toast's undo — nothing here sends anything or moves money. */
     if (d.delivcarrier !== undefined) {
@@ -28097,6 +28346,8 @@
       var dvEntry = demoApply({ type: "set_delivery", value: { autoDays: Number(t.value) || 0, useCarrier: dvc.useCarrier } });
       render(); toast("Сохранено ✓", dvEntry);
     }
+    // «Вернуть деньги»: the split under the amount follows what is typed
+    else if (t.matches("[data-admrefundamt]")) admRefundRepaint(t.value);
     /* «за N дней до дня рождения» — settings.flows, the same row the switch writes */
     else if (t.matches("[data-flowbdays]")) {
       var bdEntry = demoApply({ type: "set_flow_days", id: "birthday", value: Number(t.value) || 0 });

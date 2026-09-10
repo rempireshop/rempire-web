@@ -6,7 +6,7 @@
  * off switch as much as the on one: a shop that has decided nothing must not
  * be closing orders or mailing people early on its own.
  */
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { query } from "@/lib/db";
 import { cleanDelivery, closeDeliveredOrders, looksDelivered, looksReturned, MAX_AUTO_DAYS } from "@/lib/delivery";
 import { BIRTHDAY_MAX_DAYS, FLOW_DEFAULTS, getFlows, runBirthdays } from "@/lib/flows";
@@ -144,9 +144,26 @@ describe("«Доставлен» without the button", () => {
 });
 
 describe("«за N дней до дня рождения»", () => {
-  beforeAll(setupDb);
-  afterAll(teardownDb);
-  beforeEach(truncateAll);
+  /* Mail answered, not sent: since 10.09.2026 a send the mail layer SKIPS
+     (no RESEND_API_KEY) takes the year stamp off again — nothing reached
+     anybody — so the stamps these tests read are only there when a letter
+     really went out. A key and a stubbed Resend make every send real. */
+  beforeAll(async () => {
+    await setupDb();
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.MAIL_RETRY_DELAY_MS = "0";
+  });
+  afterAll(async () => {
+    delete process.env.RESEND_API_KEY;
+    await teardownDb();
+  });
+  beforeEach(async () => {
+    await truncateAll();
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify({ id: "msg_1" }), { status: 200, headers: { "Content-Type": "application/json" } }),
+    );
+  });
+  afterEach(() => vi.unstubAllGlobals());
 
   async function customerWithBirthday(iso: string): Promise<string> {
     const rows = await query<{ id: string }>(
@@ -189,16 +206,21 @@ describe("«за N дней до дня рождения»", () => {
     expect((await getFlows()).birthdayDays).toBe(0);
   });
 
-  it("with «за 3 дня» the letter goes out three days early and not on the day", async () => {
+  it("with «за 3 дня» the letter goes out three days early — and a birthday the window is closing on is not left out", async () => {
     // a fixed «now» so the test does not depend on today's date
     const now = Date.UTC(2026, 2, 11, 9, 0, 0); // 11 March
     const inThree = await customerWithBirthday("1990-03-14");
     const today = await customerWithBirthday("1990-03-11");
+    const past = await customerWithBirthday("1990-03-10");
     await setSetting("flows", { birthday: true, birthdayDays: 3, birthdayCode: "REM-BD-TEST" });
 
     await runBirthdays(now);
     expect(await sentYear(inThree), "the birthday three days out was skipped").toBe(2026);
-    expect(await sentYear(today), "today's birthday was greeted while «за 3 дня» is on").toBeNull();
+    /* Since 10.09.2026 the window is «today … the birthday», not one day:
+       a customer whose earlier days the job missed (or who typed the date
+       this morning) is greeted on the day itself rather than never. */
+    expect(await sentYear(today), "today's birthday was skipped although its window is still open").toBe(2026);
+    expect(await sentYear(past), "yesterday's birthday was greeted after the day").toBeNull();
   });
 
   it("stamps the birthday's own year, so a New Year crossing cannot send twice", async () => {
