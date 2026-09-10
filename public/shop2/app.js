@@ -627,6 +627,10 @@
       "Введите e-mail — на него придёт код": "Sisesta e-posti aadress — sellele saadame koodi",
       "Товары заказа #1042 в корзине ✓": "Tellimuse #1042 tooted on ostukorvis ✓",
       "Сохранено ✓": "Salvestatud ✓",
+      /* the account form's save bar (acctBarHTML / paintAcctBar) and its
+         «Доставка по умолчанию» machine select */
+      "Сохраняем…": "Salvestame…", "Изменения не сохранены": "Muudatused on salvestamata",
+      "— выберите пакомат —": "— vali pakiautomaat —", "Пакомат по умолчанию": "Vaikimisi pakiautomaat",
       /* ---- account-flows: кабинет, код входа, письма-автоматы ---- */
       "Войти": "Logi sisse", "Другой e-mail": "Teine e-posti aadress",
       "Код из письма": "Kood kirjast",
@@ -2891,6 +2895,10 @@
       "Введите e-mail — на него придёт код": "Enter your e-mail — we'll send the code there",
       "Товары заказа #1042 в корзине ✓": "Items from order #1042 are in your cart ✓",
       "Сохранено ✓": "Saved ✓",
+      /* the account form's save bar (acctBarHTML / paintAcctBar) and its
+         «Доставка по умолчанию» machine select */
+      "Сохраняем…": "Saving…", "Изменения не сохранены": "Changes not saved",
+      "— выберите пакомат —": "— choose a parcel locker —", "Пакомат по умолчанию": "Default parcel locker",
       /* ---- account-flows: account, login code, automatic letters ---- */
       "Войти": "Sign in", "Другой e-mail": "Use another e-mail",
       "Код из письма": "Code from the e-mail",
@@ -5416,14 +5424,6 @@
       if (typeof v === "number" && isFinite(v)) THRESH[c] = v;
     });
   }
-  function machinesFor(m) {
-    if (!m || !m.pm) return [];
-    try {
-      var byCarrier = SHIPPING_DATA.machines[S.country];
-      if (byCarrier && byCarrier[m.pm] && byCarrier[m.pm].length) return byCarrier[m.pm];
-    } catch (e) {}
-    return [];
-  }
   var COUNTRIES = [["EE", "Эстония"], ["LV", "Латвия"], ["LT", "Литва"], ["FI", "Финляндия"], ["EU", "Другая страна Европы"]];
   /* «Другая страна Европы» prices the parcel (the EU row of the rules), but a
      parcel cannot be registered to «Europe»: the carrier needs the country.
@@ -5876,9 +5876,9 @@
   var POINTS = { by: {}, empty: {}, loading: {}, q: "", view: "list" };  // view: "list" | "map" (UX fix 8)
   function pointsKey() { return shipCarrier() + ":" + S.country; }
   function pointsList() { return POINTS.by[pointsKey()] || null; }
-  function demoPoints(carrier) {
+  function demoPoints(carrier, country) {
     try {
-      var names = SHIPPING_DATA.machines[S.country][carrier] || [];
+      var names = SHIPPING_DATA.machines[country || S.country][carrier] || [];
       return names.map(function (n, i) {
         return { id: carrier + "-demo-" + i, name: n, address: "", city: "" };
       });
@@ -5909,9 +5909,13 @@
     var c = document.querySelector("[data-co-delivery]");
     if (c) c.setAttribute("data-points-loading", String(pointsLoadingCount()));
   }
-  function loadPointsFor(carrier) {
+  /* `country` is the checkout's own unless the account asks for another: its
+     «Доставка по умолчанию» draws the list for the country of the draft it
+     holds, which need not be the one this session's checkout is going to. */
+  function loadPointsFor(carrier, country) {
     if (!carrier) return;
-    var key = carrier + ":" + S.country;
+    var cc = country || S.country;
+    var key = carrier + ":" + cc;
     if (POINTS.by[key] || POINTS.loading[key]) return;
     POINTS.loading[key] = true;
     stampPointsLoading();
@@ -5922,13 +5926,13 @@
       if (!list.length) POINTS.empty[key] = true;
       pointsArrived();
     };
-    fetch("/api/shipping/points/?country=" + encodeURIComponent(S.country) + "&carrier=" + encodeURIComponent(carrier))
+    fetch("/api/shipping/points/?country=" + encodeURIComponent(cc) + "&carrier=" + encodeURIComponent(carrier))
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
         if (j && j.ok && j.points) { apiSeen(true); done(j.points); }
-        else done(demoPoints(carrier));
+        else done(demoPoints(carrier, cc));
       })
-      .catch(function () { apiSeen(false); done(demoPoints(carrier)); });
+      .catch(function () { apiSeen(false); done(demoPoints(carrier, cc)); });
   }
   /* The carriers' own brand marks — GET /api/shipping/carriers/ (server route:
      src/app/api/shipping/carriers/route.ts, 6h cache, only answers when
@@ -6220,22 +6224,25 @@
        file (the header icon, the checkout hints) reads the same property it
        always did. */
     loggedIn: false,
-    cust: null,           // {email, name, phone, lang, birthday, marketing}
+    cust: null,           // {email, name, phone, lang, birthday, marketing, shipPref}
     acctOrders: [],       // the last 20 orders for that address
     acctStage: "email",   // "email" → "code" → signed in
     acctCode: "",         // the six digits being typed
     acctBusy: false,      // a request is in flight — the button locks
     acctErr: "",          // dictionary key of the last failure, "" when fine
-    acctSaved: false,     // «Сохранено ✓» on the profile form
-    acctForm: { name: "", phone: "", birthday: "", marketing: false },
+    acctSaved: false,     // «Сохранено ✓» on the save bar, until the next edit
+    /* The profile form's draft — what the fields show, compared against
+       S.cust by acctDirty() to light the save bar. `ship` is «Доставка по
+       умолчанию» in the checkout's words ({country, method, carrier,
+       machine}) and null while nothing is saved and nothing was touched, so
+       an untouched block never turns into a preference on its own. */
+    acctForm: { name: "", phone: "", birthday: "", marketing: false, ship: null },
     // returns: the order number whose «Хочу вернуть заказ» is in flight, ""
     // when none — one tick at a time, and that row's box locks while it flies
     acctReturnBusy: "",
     notifyOpen: "",       // product id whose «сообщить о наличии» form is open
     notifyEmail: "",
     notifyBusy: false,
-    acctMethod: 1,
-    acctMachine: 0,
     toast: null,
     toastUndo: null,   // the journal entry the admin toast's «Отменить» takes back
     coStep: 1,
@@ -6248,12 +6255,18 @@
     /* Has the shopper chosen a delivery in THIS session? Only while this is
        false may the account's «Доставка по умолчанию» fill the checkout in —
        a saved preference is a starting point, never something that reaches
-       over the shopper's own hand. See acctShipPref()/applyAcctShipPref(). */
+       over the shopper's own hand. See applyAcctShipPref(). */
     shipPicked: false,
     pointOpen: false,   // the parcel-machine picker sheet
     paying: false,      // «Оплатить» is in flight — the button locks
     done: null,         // receipt state when we got here without a redirect
     newsletter: false,
+    /* Has the shopper ticked or unticked «Хочу получать новости и скидки» in
+       THIS checkout? Only while this is false does the account's own consent
+       fill the box in (acctSyncNewsletter) — the same rule as shipPicked
+       above: a stored answer is a starting point, never something that
+       reaches over the shopper's own hand. */
+    newsTouched: false,
     // «По счёту — для компаний»: the company the invoice is made out to (step 3)
     inv: { name: "", regCode: "", vatNumber: "", sameAddr: true, address: "", email: "" },
     invTouched: false,
@@ -6671,12 +6684,32 @@
   /* The old demo delivery table. The checkout has run on the live rules
      (SHIP_RULES) and the live parcel-point API for a while now; what is left
      of SHIP is the row LABELS the account's «Доставка по умолчанию» draws —
-     the prices beside them come from the rules, like everywhere else. */
-  function methods() { return SHIP[S.country]; }
-  /* Clamp the stored index rather than clamping only on read: the radio
-     markup compares `i === S.acctMethod` exactly, so an out-of-range index
-     left every radio unchecked. */
-  function acctIdx() { S.acctMethod = Math.min(S.acctMethod, methods().length - 1); return S.acctMethod; }
+     the prices beside them come from the rules, like everywhere else. The
+     rows are the draft's country's (acctShipCountry), not S.country's: the
+     checkout owns S.country, and the block has to show what is stored even
+     while this session's checkout is going somewhere else. */
+  function methods() { return SHIP[acctShipCountry()] || SHIP.EE; }
+  /** The country «Доставка по умолчанию» is drawn for: the draft's, else the shop's. */
+  function acctShipCountry() {
+    var d = S.acctForm.ship;
+    return d && SHIP[d.country] ? d.country : S.country;
+  }
+  /* What a row of SHIP means to the checkout: `pickup` is pickup, `pm` is a
+     parcel with that carrier, anything else is the courier. */
+  function rowKind(x) { return x.pickup ? "pickup" : x.pm ? "parcel" : "courier"; }
+  /** The row the draft names, or -1: no row is checked until there is a
+      preference, so an untouched block can never look like a choice. The
+      row is found by what it means, never by a stored index — the table
+      differs per country. */
+  function acctIdx() {
+    var d = S.acctForm.ship;
+    if (!d) return -1;
+    var rows = methods();
+    for (var i = 0; i < rows.length; i++) {
+      if (rowKind(rows[i]) === d.method && (rows[i].pm || "") === (d.carrier || "")) return i;
+    }
+    return -1;
+  }
   /** Delivery price for any method, straight off the rules: carrier, then method. */
   function shipPriceFor(m, carrier) {
     // features: nothing is posted, so nothing is billed — createOrder() prices
@@ -6729,109 +6762,82 @@
   /* ---------- «Доставка по умолчанию»: the account → the checkout ----------
 
      The block promised «Подставим это при следующем заказе» and never did:
-     the row and the machine were written to S.acctMethod/S.acctMachine, read
-     by nothing, and gone on the next reload (QA sweep 06.09, question 7).
-     Dim, 07.09.2026: «It should reach checkout.» So it does — and it is kept
-     across visits, because a preference that resets is not a preference.
+     the row and the machine were written to S, read by nothing, and gone on
+     the next reload (QA sweep 06.09, question 7). Dim, 07.09.2026: «It should
+     reach checkout.» So it does — and since 10.09.2026 it lives on the
+     customer's row (customers.ship_pref, db/migrations/051_customer_ship_
+     pref.sql) rather than in the browser that set it: Renat chose a default
+     on his phone, opened the checkout on another device and found nothing,
+     and on the account screen itself could not tell whether the choice had
+     been kept at all. The browser copy («rempire-ship-pref», stamped with
+     the e-mail) is gone with it — nothing else ever read it, and a guest has
+     no block to set one from.
 
-     Stored in the browser, next to the cart, not on the customer's row: there
-     is no column for it and the value is a convenience, not a fact about the
-     order (which carries its own method, carrier and point). It is stamped
-     with the address that saved it, so a shared computer never hands one
-     person's parcel machine to the next one who signs in.
+     The form holds a DRAFT (S.acctForm.ship) and the row holds the truth
+     (S.cust.shipPref). The draft is what the block draws and what
+     «Сохранить» sends; the truth is what the checkout starts from. Both are
+     the same shape, in the checkout's own words — {country, method, carrier,
+     machine} — so nothing is translated between the two screens.
 
      The account's rows are the old SHIP table's — one shape, three
      translations — and the checkout's are the live rules; the mapping is the
-     one thing that has to be right, and it is exactly what the rows carry:
-     `pickup` is pickup, `pm` is a parcel with that carrier, anything else is
-     the courier. */
-  var ACCT_SHIP_LS = "rempire-ship-pref";
-  /** The account's current choice, in the checkout's own words. */
-  function acctShipPref() {
-    var m = methods(), x = m[acctIdx()];
-    if (!x) return null;
-    return {
-      country: S.country,
-      method: x.pickup ? "pickup" : x.pm ? "parcel" : "courier",
-      carrier: x.pm || "",
-      machine: acctMachineName()
-    };
+     one thing that has to be right, and it is exactly what the rows carry
+     (rowKind above). */
+  /** One row of the block as a draft: the carrier comes with the row, the
+      machine is still to be chosen — or kept, when it is the same carrier in
+      the same country again. */
+  function acctShipFromRow(country, x) {
+    var prev = S.acctForm.ship, carrier = x.pm || "";
+    var same = !!prev && prev.country === country && prev.method === rowKind(x) && (prev.carrier || "") === carrier;
+    return { country: country, method: rowKind(x), carrier: carrier, machine: same ? prev.machine : "" };
   }
-  /* The machines the account offers. They used to be the static names in
-     public/shop/shipping-data.js while the checkout showed the live
-     /api/shipping/points/ list — two lists that can name different machines
-     in the same town (QA sweep 06.09, polish item 7), and a default saved
-     from one of them could never be found in the other. It is the same feed
-     now, per carrier, with the static names as the stand-in while it is in
-     flight or if it fails — which is exactly what demoPoints() does for the
-     checkout. Names only: the account stores a preference, and a preference
-     that survives a redeploy has to be something a human recognises rather
-     than a carrier's internal id. */
+  /* The machines the account offers: the same live /api/shipping/points/
+     list the checkout shows, per carrier and for the draft's country. Two
+     lists that could name different machines in the same town (QA sweep
+     06.09, polish item 7) meant a default saved from one was never found in
+     the other. null while the feed is in flight — the block says so rather
+     than offering the static stand-in, because a name picked off that list
+     is one the checkout may never find again. Names only: the account
+     stores a preference, and a preference that survives a redeploy has to
+     be something a human recognises rather than a carrier's internal id. */
   function acctMachines() {
-    var m = methods(), x = m[acctIdx()];
+    var x = methods()[acctIdx()];
     if (!x || !x.pm) return [];
-    loadPointsFor(x.pm);
-    var live = POINTS.by[x.pm + ":" + S.country];
-    return live && live.length ? live.map(function (pt) { return pt.name; }) : machinesFor(x);
+    var cc = acctShipCountry();
+    loadPointsFor(x.pm, cc);
+    var live = POINTS.by[x.pm + ":" + cc];
+    return live ? live.map(function (pt) { return pt.name; }) : null;
   }
-  /** The machine «Доставка по умолчанию» is on right now: the saved one while
-      it is still in the list, else whatever the index points at. A name and
-      not an index, because the list is the carrier's live one — it changes
-      under a stored index, and «the machine round the corner» is the thing
-      the shopper actually chose. */
+  /** The machine the block's select is on: the draft's, while the list still
+      has it — else nothing, and the placeholder asks for one. A name and not
+      an index, because the list is the carrier's live one: it changes under
+      a stored index, and «the machine round the corner» is the thing the
+      shopper actually chose. */
   function acctMachineName() {
-    var mach = acctMachines();
-    if (!mach.length) return "";
-    var p = acctPrefLoad();
-    if (p && p.machine && mach.indexOf(p.machine) >= 0) return p.machine;
-    return mach[Math.min(S.acctMachine, mach.length - 1)];
+    var d = S.acctForm.ship, mach = acctMachines();
+    return d && d.machine && mach && mach.indexOf(d.machine) >= 0 ? d.machine : "";
   }
-  function acctPrefSave() {
-    if (!S.loggedIn) return;
-    var p = acctShipPref();
-    if (!p) return;
-    p.email = (S.cust && S.cust.email) || S.email || "";
-    try { localStorage.setItem(ACCT_SHIP_LS, JSON.stringify(p)); } catch (e) {}
-    /* …and into the checkout right away, so «Подставим это при следующем
-       заказе» holds for an order placed in this same visit and not only for
-       one after a reload. */
-    applyAcctShipPref();
-  }
-  /** The saved preference, only for the address that is signed in now. */
-  function acctPrefLoad() {
-    try {
-      var p = JSON.parse(localStorage.getItem(ACCT_SHIP_LS));
-      if (!p || typeof p !== "object") return null;
-      var who = (S.cust && S.cust.email) || S.email || "";
-      if (!who || String(p.email || "").toLowerCase() !== who.toLowerCase()) return null;
-      return p;
-    } catch (e) { return null; }
-  }
-  /* Put the preference into the checkout — country, method and carrier —
-     unless the shopper has already chosen a delivery in this session. The
-     parcel machine itself waits for the live list: the account's names come
-     from the static shipping-data table and the checkout's come from
-     /api/shipping/points/, so the saved one is matched by name when the list
-     lands and simply left unchosen when the machine is no longer there
-     (matchAcctPoint below). */
+  /* Put the saved preference into the checkout — country, method and
+     carrier — unless the shopper has already chosen a delivery in this
+     session (S.shipPicked): a standing preference is a starting point,
+     never something that reaches over the shopper's own hand. The parcel
+     machine itself waits for the live list and is matched by name when it
+     lands, simply left unchosen when the machine is no longer there
+     (matchAcctPoint below). Called whenever the profile arrives and again
+     after «Сохранить», so «Подставим это при следующем заказе» holds for an
+     order placed in this same visit and not only for one after a reload. */
   function applyAcctShipPref() {
     if (S.shipPicked) return;
-    var p = acctPrefLoad();
+    var p = S.cust && S.cust.shipPref;
     if (!p) return;
     var known = { pickup: 1, parcel: 1, courier: 1 };
     if (p.country && SHIP[p.country]) S.country = p.country;
-    /* …and «Доставка по умолчанию» itself, which otherwise showed the
-       built-in default on every fresh load while quietly remembering
-       something else. The row is found by what it means — pickup, this
-       carrier's parcel, the courier — never by a stored index, because the
-       table differs per country. */
-    var rows = methods();
-    for (var i = 0; i < rows.length; i++) {
-      var kind = rows[i].pickup ? "pickup" : rows[i].pm ? "parcel" : "courier";
-      if (kind === p.method && (rows[i].pm || "") === (p.carrier || "")) { S.acctMethod = i; break; }
-    }
     if (p.method && known[p.method]) S.ship.method = p.method;
     S.ship.carrier = p.method === "parcel" && p.carrier ? p.carrier : "";
+    /* Nothing picked by hand here (the guard above), so a point in S.ship
+       can only be an earlier match of an earlier preference — cleared, or a
+       machine just changed in the account would never replace it. */
+    S.ship.point = null;
     if (isParcel()) loadPoints();
     /* The carrier's list is usually already here by now — the checkout asks
        for every carrier of the country at its first paint, and the profile
@@ -6849,7 +6855,7 @@
   /** The saved machine, once the carrier's real list has answered. */
   function matchAcctPoint() {
     if (S.shipPicked || S.ship.point || !isParcel()) return false;
-    var p = acctPrefLoad();
+    var p = S.cust && S.cust.shipPref;
     if (!p || !p.machine) return false;
     var list = pointsList();
     if (!list) return false;
@@ -11321,8 +11327,6 @@
       '<label class="field"><span class="field__label">Телефон</span><input class="input" type="tel" data-acctf="phone" value="' + esc(f.phone) + '" placeholder="+372…" autocomplete="tel"></label>' +
       '<label class="field"><span class="field__label">День рождения — пришлём скидку</span><input class="input" type="date" data-acctf="birthday" value="' + esc(f.birthday) + '"></label>' +
       '<label class="opt opt--plain"><input type="checkbox" data-acctmk' + (f.marketing ? " checked" : "") + '><span>Хочу получать новости, скидки и поздравление ко дню рождения</span></label>' +
-      (S.acctErr ? '<div class="err" role="alert">' + acctErrText() + "</div>" : "") +
-      '<button class="btn btn--ghost btn--sm" data-save' + (S.acctBusy ? " disabled" : "") + ">" + (S.acctSaved ? "Сохранено ✓" : "Сохранить") + "</button>" +
 
       /* ---- wholesale/loyalty: points balance/history ----------------------
          Both blocks below hang off «Партнёры и баллы» (settings.pricing.
@@ -11362,7 +11366,7 @@
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Доставка по умолчанию</h2></div>' +
       '<p class="muted" style="margin:0 0 12px">Подставим это при следующем заказе — менять можно в любой момент.</p>' +
       '<label class="field"><span class="field__label">Страна</span><span class="sel sel--box"><select data-acctcountry>' +
-        COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (S.country === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
+        COUNTRIES.map(function (c) { return '<option value="' + c[0] + '"' + (acctShipCountry() === c[0] ? " selected" : "") + ">" + c[1] + "</option>"; }).join("") +
       "</select></span></label>" +
       '<div class="optlist">' + m.map(function (x, i) {
         var xp = acctShipPrice(x);
@@ -11371,13 +11375,33 @@
       }).join("") + "</div>" +
       (function () {
         // the live list, so the machine saved here is one the checkout can
-        // find again by name — acctMachines()
+        // find again by name — acctMachines(); null while it is in flight
         var mach = acctMachines();
-        if (!mach.length) return "";
+        if (mach && !mach.length) return "";
         var sel = acctMachineName();
-        return '<label class="field" style="margin-top:14px"><span class="field__label">Пакомат по умолчанию — ' + points(mach.length) + '</span><span class="sel sel--box"><select data-acctmachine>' +
-          mach.map(function (n) { return "<option" + (n === sel ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select></span></label>";
+        return '<label class="field" style="margin-top:14px"><span class="field__label">' +
+          (mach ? "Пакомат по умолчанию — " + points(mach.length) : "Пакомат по умолчанию") + "</span>" +
+          '<span class="sel sel--box"><select data-acctmachine' + (mach ? "" : " disabled") + ">" +
+          (mach
+            ? '<option value=""' + (sel ? "" : " selected") + ">— выберите пакомат —</option>" +
+              mach.map(function (n) { return '<option value="' + esc(n) + '"' + (n === sel ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("")
+            : "<option>Загружаем список…</option>") +
+          "</select></span></label>";
       })() +
+
+      /* ---- one Save for the whole form ------------------------------------
+         Renat, 10.09.2026: «I added my birthday and I was unsure if it was
+         stored; same for my default delivery location — because the Save
+         button is between the birthday and the delivery location.» So the
+         button leaves the middle of the form for a bar that follows the page
+         to the bottom (styles.css .acctbar — the admin's .adm-savebar idiom
+         in the shop's own dress): quiet while nothing differs from what the
+         server holds, the ink button the moment anything does, «Сохранено ✓»
+         once it is back in step. Every field above — name, phone, birthday,
+         the newsletter tick, the delivery — goes through this one button.
+         Painted in place by paintAcctBar() while the shopper types, since a
+         render() would take the caret out of the field being edited. */
+      acctBarHTML() +
 
       "</section></div>";
   }
@@ -11395,12 +11419,7 @@
     // fetch and every login response — see accountLoyaltySummary() server-side.
     if (j.loyalty) S.loyalty = j.loyalty;
     if (S.cust) {
-      S.acctForm = {
-        name: S.cust.name || "",
-        phone: S.cust.phone || "",
-        birthday: S.cust.birthday || "",
-        marketing: !!S.cust.marketing
-      };
+      acctSeedForm();
       S.email = S.cust.email || S.email;
       /* Checkout pre-fill: only into empty fields, so a shopper who is part
          way through typing another address is never overwritten. */
@@ -11409,6 +11428,8 @@
       /* …and the delivery they told us to remember. Same rule as the two
          lines above — only where the shopper has not already chosen. */
       applyAcctShipPref();
+      // …and the newsletter tick, by the same rule (acctSyncNewsletter)
+      acctSyncNewsletter();
       // pro pricing only exists for an approved salon/pro account, and only
       // needs fetching once — S.pro stays put across re-renders until logout.
       if (S.cust.tier === "pro" && !S.pro) loadProPricing();
@@ -11416,13 +11437,13 @@
     return true;
   }
   function acctForget() {
-    /* «Выйти» leaves nothing behind, the saved delivery preference included —
-       it is keyed to this address, and a shared machine should not offer the
-       next person the parcel machine round the corner from the last one. */
-    try { localStorage.removeItem(ACCT_SHIP_LS); } catch (e) {}
+    /* «Выйти» leaves nothing behind. The delivery preference goes with S.cust
+       — it lives on the row now, not in this browser — so a shared machine
+       cannot offer the next person the parcel machine round the corner from
+       the last one. */
     S.cust = null; S.loggedIn = false; S.acctOrders = []; S.acctStage = "email";
     S.acctCode = ""; S.acctSaved = false; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
-    S.acctForm = { name: "", phone: "", birthday: "", marketing: false };
+    S.acctForm = { name: "", phone: "", birthday: "", marketing: false, ship: null };
     S.acctProForm = { company: "", regCode: "", phone: "" }; S.acctProErr = "";
   }
   /** Fetched once, only for a 'pro' account — see proPrice() near sizePrice(). */
@@ -11518,19 +11539,97 @@
       pushCart(true);
     }).catch(function () { S.acctBusy = false; S.acctErr = "error"; render(); });
   }
+  /* ---------- the profile form: one draft, one Save, one bar -------------- */
+  /** The form from the row — on every profile fetch and after every save, so
+      «unchanged» always means «same as the server», never «same as before». */
+  function acctSeedForm() {
+    var c = S.cust, p = c.shipPref;
+    S.acctForm = {
+      name: c.name || "",
+      phone: c.phone || "",
+      birthday: c.birthday || "",
+      marketing: !!c.marketing,
+      ship: p ? { country: p.country, method: p.method, carrier: p.carrier || "", machine: p.machine || "" } : null
+    };
+  }
+  function shipKey(p) { return p ? [p.country, p.method, p.carrier || "", p.machine || ""].join("|") : ""; }
+  /** Does the form differ from what the server holds? This is what lights the save bar. */
+  function acctDirty() {
+    var c = S.cust, f = S.acctForm;
+    if (!c) return false;
+    return (f.name || "") !== (c.name || "") ||
+      (f.phone || "") !== (c.phone || "") ||
+      (f.birthday || "") !== (c.birthday || "") ||
+      !!f.marketing !== !!c.marketing ||
+      shipKey(f.ship) !== shipKey(c.shipPref);
+  }
+  /** What «Сохранить» sends — the whole form every time, so one button really is every field's. */
+  function acctPayload() {
+    return {
+      name: S.acctForm.name,
+      phone: S.acctForm.phone,
+      birthday: S.acctForm.birthday,
+      marketing: !!S.acctForm.marketing,
+      lang: S.lang,
+      // «Доставка по умолчанию» — null while nothing was ever chosen, and the
+      // server keeps the column null for it (normalizeShipPref)
+      shipPref: S.acctForm.ship
+    };
+  }
+  /* «Хочу получать новости и скидки» at the checkout starts from the
+     account's own consent: Renat, signed in and subscribed, found it unticked
+     (10.09.2026). Only while the shopper has not touched the box in this
+     checkout — and only for a signed-in shopper: a guest sees the box exactly
+     as before. The box is patched in place when it is on screen, because the
+     profile lands after the checkout has painted and acctLoad() never calls
+     render() there (the e-mail field's stability). */
+  function acctSyncNewsletter() {
+    if (!S.cust || S.newsTouched) return;
+    S.newsletter = !!S.cust.marketing;
+    var box = document.querySelector("[data-news]");
+    if (box) box.checked = S.newsletter;
+  }
+  /** The save bar — placed at the foot of screenAccount(); see the note there. */
+  function acctBarHTML() {
+    var dirty = acctDirty();
+    return '<div class="acctbar" data-acctbar>' +
+      (S.acctErr ? '<div class="err acctbar__err" role="alert">' + acctErrText() + "</div>" : "") +
+      '<span class="acctbar__note" data-acctnote>' + acctBarNote() + "</span>" +
+      '<button class="btn' + (dirty || S.acctBusy ? "" : " btn--ghost") + '" data-save' + (S.acctBusy || !dirty ? " disabled" : "") + ">" + acctBarLabel() + "</button>" +
+      "</div>";
+  }
+  function acctBarLabel() {
+    if (S.acctBusy) return "Сохраняем…";
+    return S.acctSaved && !acctDirty() ? "Сохранено ✓" : "Сохранить";
+  }
+  function acctBarNote() { return acctDirty() && !S.acctBusy ? "Изменения не сохранены" : ""; }
+  /* The bar in place, never a render(): the fields are what the shopper is
+     typing into, and renderImpl() carries focus across a rebuild only for the
+     checkout's own fields. Translated here by hand for the same reason —
+     translatePage() runs after a render, not after a patch. */
+  function paintAcctBar() {
+    var bar = document.querySelector("[data-acctbar]");
+    if (!bar) return;
+    var dirty = acctDirty();
+    var btn = bar.querySelector("[data-save]");
+    if (btn) {
+      btn.classList.toggle("btn--ghost", !dirty && !S.acctBusy);
+      btn.disabled = S.acctBusy || !dirty;
+      btn.textContent = trText(acctBarLabel(), S.lang);
+    }
+    var note = bar.querySelector("[data-acctnote]");
+    if (note) note.textContent = acctBarNote() ? trText(acctBarNote(), S.lang) : "";
+  }
   function acctSave() {
-    if (S.acctBusy) return;
-    S.acctBusy = true; S.acctErr = ""; S.acctSaved = false; render();
+    if (S.acctBusy || !acctDirty()) return;
+    /* The bar, not a render(): Save is often pressed straight from a field,
+       and a rebuild here would take the caret with it. */
+    S.acctBusy = true; S.acctErr = ""; S.acctSaved = false; paintAcctBar();
+    var sent = JSON.stringify(acctPayload());
     fetch("/api/account/me/", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        name: S.acctForm.name,
-        phone: S.acctForm.phone,
-        birthday: S.acctForm.birthday,
-        marketing: !!S.acctForm.marketing,
-        lang: S.lang
-      })
+      body: sent
     }).then(function (r) { return r.json().then(function (j) { return { body: j, status: r.status }; }, function () { return {}; }); })
       .then(function (res) {
         S.acctBusy = false;
@@ -11539,6 +11638,13 @@
           S.acctErr = (res.body && res.body.error) || "error"; render(); return;
         }
         S.cust = res.body.customer || S.cust;
+        /* The form re-reads the row it just wrote — the server trims and
+           caps, and «unchanged» has to mean «same as the server» — unless a
+           key landed while the request was in flight, in which case the
+           newer typing stays and the bar stays lit. The checkout takes the
+           new default straight away, under the usual guard. */
+        if (JSON.stringify(acctPayload()) === sent) acctSeedForm();
+        applyAcctShipPref(); acctSyncNewsletter();
         S.acctSaved = true; render();
         toast("Сохранено ✓");
       })
@@ -11903,19 +12009,11 @@
   function pointsArrived() {
     /* «Доставка по умолчанию» draws the same list now (acctMachines), and it
        asks for it from inside a render — so the answer has to bring a repaint
-       with it or the select stays on the static stand-in until something else
-       redraws the screen. */
-    if (S.screen === "account") {
-      render();
-      /* …and write the preference back from the list that has just landed:
-         a machine saved off the static stand-in is a name the checkout could
-         never find again. acctMachineName() keeps the saved one when it is
-         really there, so this only ever replaces a stale name. */
-      acctPrefSave();
-      return;
-    }
+       with it or the select stays on «Загружаем список…» until something
+       else redraws the screen. */
+    if (S.screen === "account") { render(); return; }
     if (S.screen !== "checkout") return;
-    /* The account's saved parcel machine is a NAME from the static list; the
+    /* The account's saved parcel machine is a NAME off this same list; the
        real one only exists once this carrier's feed has answered. Matched
        here, so the shopper who set a default finds it already chosen — and
        simply left unchosen when the machine has closed since. */
@@ -12280,7 +12378,8 @@
     S.shipPicked = false;
     // «По счёту»: the company was this order's; the next one starts blank
     S.inv = { name: "", regCode: "", vatNumber: "", sameAddr: true, address: "", email: "" }; S.invTouched = false;
-    S.emailTouched = false; S.shipTouched = false; S.coStep = 1;
+    // …and the newsletter box starts from the account again (acctSyncNewsletter)
+    S.emailTouched = false; S.shipTouched = false; S.newsTouched = false; S.coStep = 1;
     persist();
   }
   function finishDemo() {
@@ -25792,9 +25891,13 @@
       if (S.screen === "done") S.doneBankPicked = true;
       S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return;
     }
-    // machine index must reset too — carriers have different-length lists, so
-    // the stored index pointed at a place the shopper never chose
-    if (d.acctm !== undefined) { S.acctMethod = Number(d.acctm); S.acctMachine = 0; acctPrefSave(); render(); return; }
+    // «Доставка по умолчанию»: a row is a draft, saved by the form's own
+    // «Сохранить»; the machine select under it has to be redrawn, so render()
+    if (d.acctm !== undefined) {
+      var acctRowPick = methods()[Number(d.acctm)];
+      if (acctRowPick) { S.acctForm.ship = acctShipFromRow(acctShipCountry(), acctRowPick); S.acctSaved = false; }
+      render(); return;
+    }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) { S.admAi = !S.admAi; admPanesSave(); render(); refocus("[data-admai]"); return; }
     // the phone «Ещё» sheet
@@ -27596,8 +27699,10 @@
       if (S.screen === "checkout") pushCart();
     }
     else if (t.matches("[data-acctcode]")) { S.acctCode = t.value.replace(/\D/g, "").slice(0, 6); }
-    else if (t.matches("[data-acctf]")) { S.acctForm[t.dataset.acctf] = t.value; S.acctSaved = false; }
-    else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; S.acctSaved = false; }
+    // the profile form: no render() — the caret stays put — and the save bar
+    // is painted in place so the change shows the moment it is made
+    else if (t.matches("[data-acctf]")) { S.acctForm[t.dataset.acctf] = t.value; S.acctSaved = false; paintAcctBar(); }
+    else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; S.acctSaved = false; paintAcctBar(); }
     /* ---- wholesale/loyalty ------------------------------------------------ */
     else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
     // partners: the «+ Партнёр» form — no render(), the caret stays put
@@ -27627,7 +27732,7 @@
     else if (t.matches("[data-notifyf]")) { S.notifyEmail = t.value; }
     else if (t.matches("[data-acctname]")) { S.acctName = t.value; }
     else if (t.matches("[data-shipf]")) { S.ship[t.dataset.shipf] = t.value; }
-    else if (t.matches("[data-news]")) { S.newsletter = t.checked; }
+    else if (t.matches("[data-news]")) { S.newsletter = t.checked; S.newsTouched = true; }
     /* «По счёту»: the company fields keep their own state, no render() while
        typing — same reason as [data-shipf]. The checkbox redraws the block:
        it swaps the address line for a field, and nobody is typing in it. */
@@ -27949,7 +28054,13 @@
       if (isParcel()) loadPoints();
       render();
     }
-    else if (t.matches("[data-acctcountry]")) { S.country = t.value; S.acctMethod = 0; S.acctMachine = 0; acctPrefSave(); render(); }
+    /* «Доставка по умолчанию»: another country is another table of rows, so
+       the draft restarts on its first row. The account's own country, not
+       S.country — that one belongs to the checkout in progress. */
+    else if (t.matches("[data-acctcountry]")) {
+      var acctCc = SHIP[t.value] ? t.value : "EE";
+      S.acctForm.ship = acctShipFromRow(acctCc, SHIP[acctCc][0]); S.acctSaved = false; render();
+    }
     /* returns: the tick on a delivered order goes to the server the moment it
        is ticked. `change` and not the click delegate: the box is inside its
        label, so a tap on the words never reaches the input's own attribute. */
@@ -27997,7 +28108,10 @@
       if (bsIt) bsIt.variant = Number(t.value) || 0;
       render();
     }
-    else if (t.matches("[data-acctmachine]")) { S.acctMachine = t.selectedIndex; acctPrefSave(); }
+    // the machine is a name (acctMachineName); "" is the placeholder — none chosen yet
+    else if (t.matches("[data-acctmachine]")) {
+      if (S.acctForm.ship) { S.acctForm.ship.machine = t.value; S.acctSaved = false; paintAcctBar(); }
+    }
     // «Главный баннер»: the link target, the picture URL and the timing —
     // on change, so a half-typed URL never becomes the banner's picture
     else if (t.matches("[data-herogo]")) {

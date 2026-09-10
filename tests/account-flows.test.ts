@@ -24,6 +24,7 @@ import {
   makeCustomerToken,
   markCartRecovered,
   normalizeBirthday,
+  normalizeShipPref,
   readCustomerToken,
   recordLogin,
   saveCart,
@@ -234,6 +235,73 @@ describe("customer profile", () => {
     expect(normalizeBirthday("")).toBeNull();
     await updateCustomer(EMAIL, { birthday: "не дата" });
     expect((await getCustomer(EMAIL))?.birthday).toBeNull();
+  });
+
+  /* «Доставка по умолчанию» lives on the row since 10.09.2026
+     (051_customer_ship_pref.sql) — it used to be a localStorage value the
+     owner's phone never shared with his laptop. */
+  it("keeps the default delivery on the row, in the checkout's own words", async () => {
+    await recordLogin(EMAIL, "RU");
+    expect((await getCustomer(EMAIL))?.shipPref).toBeNull();
+
+    const machine = "Kristiine keskuse pakiautomaat";
+    await updateCustomer(EMAIL, { shipPref: { country: "ee", method: "Parcel", carrier: "Omniva", machine } });
+    expect((await getCustomer(EMAIL))?.shipPref).toEqual({ country: "EE", method: "parcel", carrier: "omniva", machine });
+
+    // a courier or a pickup carries no machine — nothing to inherit from the parcel it replaced
+    await updateCustomer(EMAIL, { shipPref: { country: "EE", method: "courier", carrier: "omniva", machine } });
+    expect((await getCustomer(EMAIL))?.shipPref).toEqual({ country: "EE", method: "courier", carrier: "", machine: "" });
+
+    // the rest of the profile is untouched by a delivery-only patch, and vice versa
+    await updateCustomer(EMAIL, { name: "Рената" });
+    expect((await getCustomer(EMAIL))?.shipPref?.method).toBe("courier");
+    await updateCustomer(EMAIL, { shipPref: null });
+    const c = await getCustomer(EMAIL);
+    expect(c?.shipPref).toBeNull();
+    expect(c?.name).toBe("Рената");
+
+    // a shape the checkout could not act on is not stored — the column stays null
+    await updateCustomer(EMAIL, { shipPref: { country: "EE", method: "teleport" } });
+    expect((await getCustomer(EMAIL))?.shipPref).toBeNull();
+    expect(normalizeShipPref({ method: "pickup" })).toBeNull();         // no country
+    expect(normalizeShipPref({ country: "EE", method: "pickup" })).toEqual({ country: "EE", method: "pickup", carrier: "", machine: "" });
+    expect(normalizeShipPref("[]")).toBeNull();
+    expect(normalizeShipPref(JSON.stringify({ country: "LV", method: "parcel", carrier: "omniva" })))
+      .toEqual({ country: "LV", method: "parcel", carrier: "omniva", machine: "" });
+  });
+
+  /* The route end to end: the account screen saves the whole form through
+     PATCH and the checkout reads it back through GET, so both have to carry
+     the preference and the consent — the two things Renat found missing at
+     his checkout on 10.09.2026. */
+  it("PATCH /api/account/me stores the delivery and the consent, GET hands them back", async () => {
+    await recordLogin(EMAIL, "RU");
+    const { GET, PATCH } = await import("@/app/api/account/me/route");
+    const cookie = `rmp_cust=${makeCustomerToken(EMAIL)}`;
+    const patched = await PATCH(
+      new Request("https://rempireshop.com/api/account/me/", {
+        method: "PATCH",
+        headers: { cookie, "content-type": "application/json", "x-forwarded-for": "203.0.113.9" },
+        body: JSON.stringify({
+          name: "Рената",
+          birthday: "1990-04-17",
+          marketing: true,
+          shipPref: { country: "EE", method: "parcel", carrier: "smartpost", machine: "Solaris pakiautomaat" },
+        }),
+      }),
+    );
+    expect(patched.status).toBe(200);
+    const saved = (await patched.json()) as { ok: boolean; customer: { marketing: boolean; shipPref: unknown } };
+    expect(saved.ok).toBe(true);
+    expect(saved.customer.marketing).toBe(true);
+    expect(saved.customer.shipPref).toEqual({ country: "EE", method: "parcel", carrier: "smartpost", machine: "Solaris pakiautomaat" });
+
+    const got = await GET(new Request("https://rempireshop.com/api/account/me/", { headers: { cookie } }));
+    expect(got.status).toBe(200);
+    const body = (await got.json()) as { customer: { birthday: string; marketing: boolean; shipPref: { machine: string } } };
+    expect(body.customer.birthday).toBe("1990-04-17");
+    expect(body.customer.marketing).toBe(true);
+    expect(body.customer.shipPref.machine).toBe("Solaris pakiautomaat");
   });
 
   it("lists the orders that carry the address, newest first", async () => {

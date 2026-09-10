@@ -1,0 +1,25 @@
+-- 051_customer_ship_pref.sql — account-flows (migration range 050–059)
+--
+-- «Доставка по умолчанию» from «Кабинет» moves onto the customer's row.
+--
+-- Until now the preference lived only in the browser that set it
+-- (localStorage «rempire-ship-pref», stamped with the e-mail that saved it —
+-- app.js acctPrefSave(), 07.09.2026). The owner's phone test, 10.09.2026:
+-- he chose a default on one device, opened the checkout on another and found
+-- nothing preselected — and on the account screen itself he could not tell
+-- whether the choice had been kept at all. A preference that lives in one
+-- browser is not something a person can rely on; a column is.
+--
+-- One jsonb column rather than four. The value is exactly what the checkout
+-- needs to preselect — {"country":"EE","method":"parcel","carrier":"omniva",
+-- "machine":"<the machine's name>"} — it is read and written by one function
+-- pair (normalizeShipPref / updateCustomer in src/lib/customers.ts), it is
+-- never queried by value, and null means «none set». The order still carries
+-- its own method, carrier and point (orders.shipping): this is a starting
+-- point for the next checkout, not a fact about any order.
+--
+-- Recorded by name in _migrations (tools/migrate.mjs), so this file never runs
+-- twice and must never be edited once it has run anywhere. Runs on Postgres
+-- 13+ and on PGlite.
+
+alter table customers add column if not exists ship_pref jsonb;

@@ -613,11 +613,11 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await page.locator("[data-logincode]").click();
     await expect(page.locator("[data-logout]")).toBeVisible();
 
-    /* «Пакомат SmartPosti» is neither the account's default row (that is
-       «Пакомат DPD», S.acctMethod = 1) nor the checkout's first carrier
-       chip (that is Omniva), so finding it selected at the till can only
-       mean the preference travelled. The block promised «Подставим это при
-       следующем заказе» and did nothing at all until 07.09.2026. */
+    /* «Пакомат SmartPosti» is not the checkout's first carrier chip (that is
+       Omniva) — and the account checks no row at all until a preference
+       exists — so finding it selected at the till can only mean the
+       preference travelled. The block promised «Подставим это при следующем
+       заказе» and did nothing at all until 07.09.2026. */
     const row = page.locator(".optlist .opt").filter({ hasText: "Пакомат SmartPosti" }).first();
     await expect(row).toBeVisible();
     /* The machine list is the checkout's own live feed now, not the static
@@ -627,10 +627,20 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await row.locator("input[data-acctm]").check();
     await feed;
     const machines = page.locator("[data-acctmachine]");
-    await expect(machines).toBeVisible();
+    await expect(machines).toBeEnabled();
     await expect.poll(async () => (await machines.locator("option").count())).toBeGreaterThan(1);
+    /* The select opens on a placeholder — a machine is chosen, never assumed
+       (the alphabetically first one is in Abja-Paluoja) — and since
+       10.09.2026 the block is part of the profile form: the choice reaches
+       the row through the form's own «Сохранить», which lights up the moment
+       the row is ticked and says «Сохранено ✓» once it is stored. */
+    await machines.selectOption({ index: 1 });
     const machine = (await machines.inputValue()).trim();
     expect(machine.length, "no parcel machine offered in the account").toBeGreaterThan(0);
+    const save = page.locator("[data-save]");
+    await expect(save).not.toHaveClass(/btn--ghost/);
+    await save.click();
+    await expect(save).toContainText("✓");
 
     await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
     await waitForScreen(page, "product");

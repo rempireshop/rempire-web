@@ -262,7 +262,9 @@ curl -fsS -H "authorization: Bearer $CRON_SECRET" https://rempireshop.com/api/cr
 ## Таблицы (`db/migrations/050_customers.sql`)
 
 - **`customers`** — `email` (в нижнем регистре, уникальный), `name`, `phone`,
-  `lang`, `birthday`, `marketing`, `last_login_at`, `birthday_sent_year`.
+  `lang`, `birthday`, `marketing`, `last_login_at`, `birthday_sent_year`;
+  с 10.09.2026 — `ship_pref` (jsonb, «Доставка по умолчанию» из кабинета,
+  `051_customer_ship_pref.sql`).
 - **`login_codes`** — одна строка на адрес: хэш кода, срок, счётчик попыток.
 - **`carts`** — одна строка на адрес: снимок корзины, `updated_at`,
   `recovered_at`, `reminded_at`.
