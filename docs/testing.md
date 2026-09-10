@@ -136,7 +136,10 @@ easy to be suspicious of:
      because nothing else in the app can: the confirmation letter is skipped
      (no Resend key), the receipt screen never shows a code, and no existing
      admin route joins `gift_cards` back onto an order — see the route's own
-     comment for the full chain. `e2e/giftcard.spec.ts` is the only caller.
+     comment for the full chain. `e2e/giftcard.spec.ts` and `e2e/payments.spec.ts`
+     call it, and since 10.09.2026 the gift-card refund story in
+     `e2e/giftcard.spec.ts` reads a card's balance through it before and after
+     each refund.
    - `GET /api/e2e/mail/?template=…&to=…` — **is** behind `requireAdmin` too,
      for the same reason (it hands back customers' addresses). It reads an
      in-memory ring of the last 50 letters `sendMail()` was *asked* to send —
@@ -146,7 +149,10 @@ easy to be suspicious of:
      regression worth fearing is the preview and the real send drifting apart:
      with no Resend key there is no mailbox to check, no `mail_log` table
      (deliberately, docs/mail.md) and no screen that shows a subject line.
-     `e2e/admin-mail.spec.ts` and `e2e/admin-newsletter.spec.ts` are the
+     `e2e/admin-mail.spec.ts` was the only caller; since 10.09.2026
+     `e2e/admin-sweep-4.spec.ts` reads it to prove «Запустить сейчас» reached the
+     sender, `e2e/giftcard.spec.ts` to see the refund letter go out, and
+     `e2e/admin-newsletter.spec.ts` for the newsletter.
      callers. Behind the same two gates the sink also stands in for Resend
      for one sender — «Маркетинг → Рассылка» counts a skipped-for-no-key
      letter as delivered (`src/lib/newsletters.ts` e2eSinkTransport), which
@@ -932,7 +938,7 @@ gone because Postgres blinked.
 | `tools/e2e-build.mjs` | Cross-platform prebuild step for the suite — SEO prerender + generated-file packers + `minify-shop2` (the shell links the gitignored `app.min.js`, so without it every page loads a 404 and nothing paints), ahead of `next dev` (env vars via `child_process`, not shell syntax) |
 | `tools/e2e-bootstrap.mjs` | Manual: migrate an already-running `npm run dev` server's in-memory database |
 | `src/app/api/e2e/bootstrap/route.ts`, `src/app/api/e2e/gift-card/route.ts`, `src/app/api/e2e/mail/route.ts` | The three test-only routes — see above |
-| `e2e/giftcard.spec.ts` | The gift card: three languages of buy → issue → redeem, plus «Электронная доставка» and the printable PDF — see above |
+| `e2e/giftcard.spec.ts` | The gift card: three languages of buy → issue → redeem, plus «Электронная доставка» and the printable PDF — see above; and, since 10.09.2026, the refund story both ways: a card pays an order in full (paid at once, in «Отправить»), the order that bought a spent-from card is refused, the card-paid order's refund goes back onto the card, then the buying order's refund cancels the card |
 | `e2e/payments.spec.ts` | The payment step, desktop **and** mobile-safari: Apple Pay / Google Pay lands on the mock **card** page (`data-mock-page`) and the order remembers `method: wallet` (the admin card shows it); «Купить через G Pay» preselects the wallet; a gift card bigger than the basket skips the bank and is charged once; a card covering the goods but not the delivery sends the rest to the bank; cancel at the bank → «Оплатить ещё раз» → the same order paid (docs/payments.md §8b–8d, docs/audit/2026-09-06-payments.md) |
 | `tests/payments-create.test.ts`, `tests/checkout-banks.test.ts` | `POST /api/payments/create/` through the real routes: the method mapping, the 0 € order (card, points, promo, the one-cent remainder, a card spent in between → `not_covered`, no provider at all), the retry with a bare id, the refund webhook, a doubled webhook; and the checkout's bank chips following the delivery country (sliced out of app.js like `checkout-parity`) |
 | `tests/giftcard-pdf.test.ts`, `tests/giftcard-mail-pdf.test.ts`, `tests/orders-digital.test.ts` | The card as a file, the letter that carries it, and the order that pays no delivery |

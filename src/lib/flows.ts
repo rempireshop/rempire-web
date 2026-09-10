@@ -475,16 +475,18 @@ const BIRTHDAY_DAYS = 14;
 /**
  * The code's whole life, counted from the day it is issued.
  *
- * The letter can be sent `birthdayDays` days early, and the code is written on
- * the day the letter goes out — so a fixed fourteen days meant the head start
- * ate into them: «за 14 дней» handed the customer a code that expired exactly
- * on his birthday, which is the one day it was bought for. Dim, 08.09.2026:
- * extend the code's life by the head start. The customer then always has the
- * same fourteen usable days starting on the birthday itself, whether the
- * letter arrived that morning or two weeks before it.
+ * The letter can be sent up to `birthdayDays` days early, and the code is
+ * written on the day the letter goes out — so a fixed fourteen days meant the
+ * head start ate into them: «за 14 дней» handed the customer a code that
+ * expired exactly on his birthday, which is the one day it was bought for.
+ * Dim, 08.09.2026: extend the code's life by the head start. `daysAhead` is
+ * the REAL distance to this customer's birthday on the day the letter goes —
+ * since the window became tolerant (runBirthdays) a letter set for «за 3 дня»
+ * may go out two days early or on the day itself, and either way the customer
+ * has the same fourteen usable days starting on the birthday.
  */
-function birthdayCodeDays(flows: Flows): number {
-  return BIRTHDAY_DAYS + flows.birthdayDays;
+function birthdayCodeDays(daysAhead: number): number {
+  return BIRTHDAY_DAYS + Math.max(0, daysAhead);
 }
 
 /** `REM-BD-7QK4X9` — readable, unambiguous, never confused with a gift card. */
@@ -502,8 +504,8 @@ export function birthdayCode(): string {
  * Null means "there is no code to send" — and then no letter goes out, because
  * a birthday letter with a code that does nothing is worse than silence.
  */
-async function promoForBirthday(flows: Flows, now: number): Promise<{ code: string; expires: Date } | null> {
-  const expires = new Date(now + birthdayCodeDays(flows) * 24 * 60 * 60 * 1000);
+async function promoForBirthday(flows: Flows, now: number, daysAhead: number): Promise<{ code: string; expires: Date } | null> {
+  const expires = new Date(now + birthdayCodeDays(daysAhead) * 24 * 60 * 60 * 1000);
   try {
     /* The checkout agent's module. Both spellings are accepted: `upsertPromo`
        is what it shipped with, `createPromo` is what the brief called it. The
@@ -545,42 +547,101 @@ async function promoForBirthday(flows: Flows, now: number): Promise<{ code: stri
   return flows.birthdayCode ? { code: flows.birthdayCode, expires } : null;
 }
 
+/** One day of the birthday window: the calendar day the job is looking at, and how far ahead of «now» it is. */
+interface WindowDay {
+  /** `month * 100 + day` — the shape the query compares a birthday against. */
+  mmdd: number;
+  /** The year that calendar day falls in — what `birthday_sent_year` is stamped with. */
+  year: number;
+  /** 0 for today, 1 for tomorrow … `birthdayDays` for the last day of the window. */
+  ahead: number;
+}
+
+function isLeapYear(y: number): boolean {
+  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+}
+
 /**
- * Everybody whose birthday is `flows.birthdayDays` days from now, who has said
- * yes to marketing, and who has not had this year's letter.
+ * The days a run looks at: today and the next `birthdayDays` days, each with
+ * its own year. A 29 February birthday exists only every fourth year; in the
+ * other three it is celebrated on 28 February, so the pair (2, 29) is put on
+ * the 28th's line whenever that 28th is in a non-leap year — the customer
+ * born on the 29th gets the letter the day before the 1st of March, and the
+ * customer born on the 28th gets theirs as always.
+ */
+export function birthdayWindow(now: number, birthdayDays: number): WindowDay[] {
+  const out: WindowDay[] = [];
+  const span = Math.max(0, Math.min(BIRTHDAY_MAX_DAYS, Math.trunc(birthdayDays) || 0));
+  for (let i = 0; i <= span; i += 1) {
+    const d = new Date(now + i * 24 * 60 * 60 * 1000);
+    const month = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    const year = d.getUTCFullYear();
+    out.push({ mmdd: month * 100 + day, year, ahead: i });
+    if (month === 2 && day === 28 && !isLeapYear(year)) out.push({ mmdd: 229, year, ahead: i });
+  }
+  return out;
+}
+
+/**
+ * Everybody whose birthday falls in the window — today up to `birthdayDays`
+ * days ahead — who has said yes to marketing, and who has not had this
+ * year's letter.
  *
  * `birthdayDays` is 0 by default — the day itself, which is what this has
- * always done. A larger number moves the window forward: with 3, the letter
- * for a 14 March birthday goes out on 11 March, and the code it carries is
- * written to last three days longer for it (birthdayCodeDays), so the head
- * start is added to the customer's two weeks instead of taken out of them.
- * The year the guard stamps is the BIRTHDAY's year, not today's: on
- * 30 December, «за 3 дня» is looking at a birthday in January, and stamping
- * this year would let the same letter go out again a few days later.
+ * always done. A larger number opens the window: with 3, the letter for a
+ * 14 March birthday goes out on 11 March — or on the 12th, 13th or 14th if
+ * the job did not run on the 11th, or the customer only typed the date on
+ * the 13th. Until 10.09.2026 the job matched exactly one day (the birthday
+ * minus the head start), so a run the cron missed, or a date entered after
+ * the morning run, was a letter lost for the whole year (Dim: «I added my
+ * birthday … but have not gotten any birthday email»). The window's last day
+ * is the birthday itself: a greeting after the day is not a greeting.
  *
- * `birthday_sent_year` is that guard — the job may run hourly without sending
- * twice, and the daily cron is what makes «за N дней» mean N whole days.
+ * The code the letter carries lasts fourteen days from the birthday, however
+ * early the letter goes (birthdayCodeDays). The year the guard stamps is the
+ * BIRTHDAY's year, not today's: on 30 December, «за 3 дня» is looking at a
+ * birthday in January, and stamping this year would let the same letter go
+ * out again a few days later. `birthday_sent_year` is that guard — the job
+ * may run hourly, or be started by hand from the panel, without sending
+ * twice. A send the mail layer skipped (no RESEND_API_KEY, no address) takes
+ * the stamp off again: nothing went out, and the letter is owed as soon as
+ * mail works.
  */
 export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   const flows = await getFlows();
   if (!flows.birthday) return { sent: 0, skipped: 0, reason: "disabled" };
   await loadTexts();
 
-  const today = new Date(now + flows.birthdayDays * 24 * 60 * 60 * 1000);
-  const month = today.getUTCMonth() + 1;
-  const day = today.getUTCDate();
-  const year = today.getUTCFullYear();
+  const window = birthdayWindow(now, flows.birthdayDays);
+  const byDay = new Map<number, WindowDay>();
+  for (const d of window) if (!byDay.has(d.mmdd)) byDay.set(d.mmdd, d);
+  const holes = window.map((_, i) => `$${i + 1}`).join(",");
+  const maxYear = Math.max(...window.map((d) => d.year));
 
-  const rows = await query<{ id: string; email: string; name: string | null; lang: string | null }>(
-    `select id, email, name, lang from customers
+  /* The year test in SQL is only a coarse cut (a row stamped with the last
+     year of the window can never be due); the exact one is per row below,
+     against the year of the very day that row matched. Across a New Year the
+     window holds two years, and a December birthday stamped this year must
+     not be mistaken for a January one stamped last year. */
+  const rows = await query<{
+    id: string;
+    email: string;
+    name: string | null;
+    lang: string | null;
+    mmdd: string | number;
+    birthday_sent_year: number | string | null;
+  }>(
+    `select id, email, name, lang, birthday_sent_year,
+            extract(month from birthday) * 100 + extract(day from birthday) as mmdd
+       from customers
       where birthday is not null
         and marketing = true
-        and extract(month from birthday) = $1
-        and extract(day   from birthday) = $2
-        and (birthday_sent_year is null or birthday_sent_year <> $3)
+        and (extract(month from birthday) * 100 + extract(day from birthday)) in (${holes})
+        and (birthday_sent_year is null or birthday_sent_year < $${window.length + 1})
       order by created_at
       limit ${BATCH}`,
-    [month, day, year],
+    [...window.map((d) => d.mmdd), maxYear],
   );
   if (!rows.length) return { sent: 0, skipped: 0 };
 
@@ -595,12 +656,17 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
   let skipped = 0;
   let reason: string | undefined;
   for (const row of rows) {
+    const day = byDay.get(Number(row.mmdd));
+    if (!day) continue;
+    const year = day.year;
+    const stamped = row.birthday_sent_year == null ? null : Number(row.birthday_sent_year);
+    if (stamped === year) continue; // this birthday's letter has gone
     if (blocked.has(row.email)) {
       skipped += 1;
       reason = "opted_out";
       continue;
     }
-    const promo = await promoForBirthday(flows, now);
+    const promo = await promoForBirthday(flows, now, day.ahead);
     if (!promo) {
       /* No promo module and no settings.flows.birthdayCode: a birthday letter
          whose code does nothing is worse than no letter. The row is left
@@ -609,6 +675,7 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
       skipped += 1;
       continue;
     }
+    // Stamped first: a repeat is worse than a miss (see runAbandonedCarts).
     await query("update customers set birthday_sent_year = $2 where id = $1", [row.id, year]);
     const lang = normalizeLangCode(row.lang);
     const mail = renderBirthday(
@@ -622,8 +689,20 @@ export async function runBirthdays(now: number = Date.now()): Promise<FlowRun> {
       idempotencyKey: `bday:${row.id}:${year}`,
       headers: unsubscribeHeaders(row.email, lang, "marketing"),
     });
-    if (res.ok && !res.skipped) sent += 1;
-    else skipped += 1;
+    if (res.ok && !res.skipped) {
+      sent += 1;
+    } else {
+      skipped += 1;
+      /* Skipped, not failed: the mail layer did not even try (no key, no
+         address). Nothing reached anybody, so the stamp comes off — a shop
+         that gets its Resend key next week must still greet this customer
+         this year. A real failure keeps the stamp: Resend was asked, and a
+         retry from here would be the double letter the stamp exists to stop. */
+      if (res.skipped) {
+        reason = reason ?? res.error;
+        await query("update customers set birthday_sent_year = null where id = $1 and birthday_sent_year = $2", [row.id, year]);
+      }
+    }
   }
   return { sent, skipped, reason };
 }
@@ -824,6 +903,102 @@ export interface FlowsReport {
   ms: number;
 }
 
+/* ---------- «Последний запуск» ------------------------------------------- */
+
+/** The flows a run is recorded for — the two the panel can start by hand and the two beside them. */
+export const RUNNABLE_FLOWS = ["abandoned", "birthday", "backstock", "unpaid"] as const;
+export type RunnableFlow = (typeof RUNNABLE_FLOWS)[number];
+
+/** One line of `settings.flow_runs`: what the last run of a flow did and when. */
+export interface FlowRunRecord {
+  /** ISO instant of the run. */
+  at: string;
+  sent: number;
+  skipped: number;
+  reason?: string;
+  /** `cron` — the daily job; `admin` — «Запустить сейчас» in the panel. */
+  by: "cron" | "admin";
+}
+
+/**
+ * Remembers the last run of one flow in `settings.flow_runs` — the line
+ * «Последний запуск: 10.09 07:00 — отправлено 1» under the letter's row in
+ * «Маркетинг → Письма». The same line whether the cron ran it or the owner
+ * pressed the button: it answers the one question both cases raise, «did it
+ * run at all, and did it send anything». Merged key by key with jsonb `||`,
+ * so the two flows never overwrite each other's line. Best effort — a
+ * settings write must never be the reason a run counts as failed.
+ */
+export async function recordFlowRun(flow: RunnableFlow, run: FlowRun, by: FlowRunRecord["by"], now: number = Date.now()): Promise<FlowRunRecord> {
+  const record: FlowRunRecord = {
+    at: new Date(now).toISOString(),
+    sent: Math.max(0, Math.trunc(Number(run.sent) || 0)),
+    skipped: Math.max(0, Math.trunc(Number(run.skipped) || 0)),
+    by,
+    ...(run.reason ? { reason: String(run.reason).slice(0, 40) } : {}),
+  };
+  try {
+    await query(
+      `insert into settings (key, value, updated_at) values ('flow_runs', $1::jsonb, now())
+       on conflict (key) do update
+         set value = coalesce(settings.value, '{}'::jsonb) || excluded.value, updated_at = now()`,
+      [JSON.stringify({ [flow]: record })],
+    );
+  } catch (err) {
+    console.error(`[flows] flow_runs not recorded for ${flow}:`, err);
+  }
+  return record;
+}
+
+/** `settings.flow_runs`, cleaned: only the flows we know, only the fields we wrote. Empty when nothing has run. */
+export async function getFlowRuns(): Promise<Partial<Record<RunnableFlow, FlowRunRecord>>> {
+  let raw: unknown = null;
+  try {
+    const rows = await query<{ value: unknown }>("select value from settings where key = 'flow_runs'");
+    raw = rows.length ? rows[0].value : null;
+  } catch {
+    return {};
+  }
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw);
+    } catch {
+      raw = null;
+    }
+  }
+  const map = (raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}) as Record<string, unknown>;
+  const out: Partial<Record<RunnableFlow, FlowRunRecord>> = {};
+  for (const flow of RUNNABLE_FLOWS) {
+    const v = map[flow];
+    if (!v || typeof v !== "object" || Array.isArray(v)) continue;
+    const r = v as Record<string, unknown>;
+    const at = typeof r.at === "string" && !Number.isNaN(new Date(r.at).getTime()) ? r.at : "";
+    if (!at) continue;
+    out[flow] = {
+      at,
+      sent: Math.max(0, Math.trunc(Number(r.sent) || 0)),
+      skipped: Math.max(0, Math.trunc(Number(r.skipped) || 0)),
+      by: r.by === "admin" ? "admin" : "cron",
+      ...(typeof r.reason === "string" && r.reason ? { reason: r.reason.slice(0, 40) } : {}),
+    };
+  }
+  return out;
+}
+
+/**
+ * One flow, started by hand — `POST /api/admin/flows/run/` behind
+ * «Запустить сейчас». Exactly the function the cron calls, so the button and
+ * the schedule can never disagree; the switch still decides («disabled»
+ * comes back as the reason and nothing goes out), and the same stamps that
+ * keep the cron from sending twice keep the button from it too. The run is
+ * recorded as the panel's, so the line under the row says who ran it.
+ */
+export async function runFlowByHand(flow: "abandoned" | "birthday", now: number = Date.now()): Promise<FlowRun & { at: string }> {
+  const run = flow === "abandoned" ? await runAbandonedCarts(now) : await runBirthdays(now);
+  const record = await recordFlowRun(flow, run, "admin", now);
+  return { ...run, at: record.at };
+}
+
 /** What `GET /api/cron/flows` runs. Every branch is independently guarded. */
 export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
   const started = Date.now();
@@ -847,6 +1022,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
       console.error(`[flows] ${key} failed:`, err);
       out[key] = { sent: 0, skipped: 0, reason: "error" };
     }
+    await recordFlowRun(key, out[key], "cron", now);
   }
   /* «Счета для компаний»: one reminder before the due date, then the
      automatic cancellation. Its own module (and its own dynamic import, so
@@ -871,6 +1047,7 @@ export async function runFlows(now: number = Date.now()): Promise<FlowsReport> {
     console.error("[flows] unpaid failed:", err);
     out.unpaid = { sent: 0, skipped: 0, cancelled: 0, reason: "error" };
   }
+  await recordFlowRun("unpaid", out.unpaid, "cron", now);
   /* Not a letter — the last step of an order, closed for the owner instead of
      by him (Dim: «we need to improve this»). It rides this job because this is
      the one thing the shop runs on a schedule, and once a day is exactly the

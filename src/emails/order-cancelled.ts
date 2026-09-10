@@ -40,7 +40,42 @@ export interface ClosedOptions {
   kind: ClosedKind;
   /** What actually went back, on a refund. Defaults to the order's total. */
   amount?: number;
+  /**
+   * The part of `amount` that went back onto the gift card that paid for the
+   * order — as balance, not as money — and the card's code. The letter then
+   * says so, because «the money travels the way it came» is wrong for a
+   * card: nothing arrives on a bank statement, the code simply works again.
+   */
+  giftAmount?: number;
+  giftCode?: string;
 }
+
+/**
+ * The money line and the «what next» line when a gift card is involved. Two
+ * shapes: everything went back onto the card (the order was paid with it
+ * entirely), or part did and the rest went to the bank. `{sum}`, `{gift}`,
+ * `{money}` and `{code}` are filled by giftLines() below.
+ */
+const GIFT: Record<Lang, { all: string; allWait: string; part: string; partWait: string }> = {
+  ru: {
+    all: "Мы вернули {sum} на подарочную карту {code}.",
+    allWait: "Картой снова можно платить: введите её код в поле «Промокод или подарочная карта» при оформлении заказа.",
+    part: "Мы отправили обратно {sum}: {gift} — на подарочную карту {code}, {money} — на ваш счёт.",
+    partWait: "Картой снова можно платить. Деньги на счёт идут тем же путём, каким пришли: на банковский счёт — обычно 1–2 рабочих дня, на карту — до 5 рабочих дней.",
+  },
+  et: {
+    all: "Tagastasime {sum} kinkekaardile {code}.",
+    allWait: "Kaardiga saab jälle maksta: sisestage selle kood tellimuse vormistamisel väljale «Sooduskood või kinkekaart».",
+    part: "Saatsime tagasi {sum}: {gift} — kinkekaardile {code}, {money} — teie kontole.",
+    partWait: "Kaardiga saab jälle maksta. Raha kontole liigub sama teed, kust tuli: pangakontole tavaliselt 1–2 tööpäeva, kaardile kuni 5 tööpäeva.",
+  },
+  en: {
+    all: "We have put {sum} back onto gift card {code}.",
+    allWait: "The card works again: enter its code in the «Promo code or gift card» box at the checkout.",
+    part: "We have sent {sum} back: {gift} onto gift card {code}, {money} to your account.",
+    partWait: "The card works again. The money to your account travels the way it came: to a bank account usually 1–2 business days, to a card up to 5 business days.",
+  },
+};
 
 interface Strings {
   preheader: string;
@@ -131,15 +166,19 @@ export function renderOrderCancelled(
   const intro = mailText(template, L, "intro", values);
   const signature = mailText(template, L, "signature", values);
   const withSum = kind === "refunded";
-  const detail = withSum ? t.detail[0] + sum + t.detail[1] : t.detail[0];
-  const detailHtml = withSum
-    ? esc(t.detail[0]) + money(amount, true) + esc(t.detail[1])
-    : esc(t.detail[0]);
+  const gift = withSum ? giftLines(L, amount, options) : null;
+  const detail = gift ? gift.detail : withSum ? t.detail[0] + sum + t.detail[1] : t.detail[0];
+  const detailHtml = gift
+    ? gift.detailHtml
+    : withSum
+      ? esc(t.detail[0]) + money(amount, true) + esc(t.detail[1])
+      : esc(t.detail[0]);
+  const wait = gift ? gift.wait : t.wait;
 
   const body =
     rowTitle(t.title) +
     rowLead(`${esc(hello)} ${mailTextHtml(template, L, "intro", values)}`) +
-    rowPanel(t.label, detailHtml, esc(t.wait)) +
+    rowPanel(t.label, detailHtml, esc(wait)) +
     rowNote([mailTextHtml(template, L, "signature", values)]);
 
   const html = shell({
@@ -156,11 +195,47 @@ export function renderOrderCancelled(
     `${hello} ${intro}`,
     "",
     `${t.label}: ${detail}`,
-    t.wait,
+    wait,
     "",
     signature,
     textFooter(L, c.serviceNote),
   ]);
 
   return { subject: mailText(template, L, "subject", values), html, text };
+}
+
+/**
+ * The gift-card wording, or null when no part of the refund went onto a card.
+ * Both copies are built from the same template: the plain text with the sums
+ * as they are, the HTML with the sums non-breaking and everything else
+ * escaped — the same two rules the plain refund line follows above.
+ */
+function giftLines(
+  L: Lang,
+  amount: number,
+  options: ClosedOptions,
+): { detail: string; detailHtml: string; wait: string } | null {
+  const giftAmount = Math.min(amount, Math.max(0, num(options.giftAmount, 0)));
+  if (!(giftAmount > 0)) return null;
+  const code = typeof options.giftCode === "string" ? options.giftCode.trim() : "";
+  const moneyAmount = Math.max(0, Math.round((amount - giftAmount) * 100) / 100);
+  const all = moneyAmount < 0.005;
+  const g = GIFT[L];
+  const template = all ? g.all : g.part;
+  const fill = (html: boolean) => {
+    const sumOf = (n: number) => (html ? money(n, true) : money(n));
+    const codeText = html ? esc(code) : code;
+    // literal pieces are escaped for the HTML copy, the sums and the code spliced in after
+    return template
+      .split(/(\{sum\}|\{gift\}|\{money\}|\{code\})/)
+      .map((piece) => {
+        if (piece === "{sum}") return sumOf(amount);
+        if (piece === "{gift}") return sumOf(giftAmount);
+        if (piece === "{money}") return sumOf(moneyAmount);
+        if (piece === "{code}") return codeText;
+        return html ? esc(piece) : piece;
+      })
+      .join("");
+  };
+  return { detail: fill(false), detailHtml: fill(true), wait: all ? g.allWait : g.partWait };
 }

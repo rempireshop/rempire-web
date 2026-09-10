@@ -90,12 +90,23 @@ export async function settleRefund(
     ref: entry.ref,
     amount: entry.amount,
     status: entry.status,
+    to: entry.to ?? "provider",
+    code: entry.code,
     refundedTotal: folded.refundedTotal,
     repeat: !folded.applied,
   });
 
-  const total = Number(order.total) || 0;
-  const fully = entry.status !== "failed" && fullyRefunded(total, folded.refundedTotal);
+  /* «Covered» is measured against what the customer gave, not against the
+     money alone: an order a gift card paid for has a total of 0 and is fully
+     refunded only once the card has its balance back (refundValue below). */
+  const value = await refundValue(order);
+  const fully = entry.status !== "failed" && fullyRefunded(value, folded.refundedTotal);
+  /* The move into «возврат» is also what cancels the gift cards the order
+     sold (setOrderStatus in src/lib/orders.ts): the money is back in full, so
+     whoever holds the code must not keep the value the shop has just handed
+     back. Both doors — the admin card has already refused a used card by now
+     (docs/payments.md § 11); a refund made in Montonio's own portal cannot be
+     refused, so the card dies with whatever was left on it. */
   let status = String(order.status ?? "");
   if (fully && (PAID_ORDER_STATUSES as readonly string[]).includes(status)) {
     const moved = await setOrderStatus(order.id, "refunded", entry.by || "system");
@@ -107,10 +118,42 @@ export async function settleRefund(
      customer. `notify: false` is for the caller that sends its own (the admin
      route, which knows the language and the amount before this returns). */
   if (opts.notify !== false && folded.applied && entry.status !== "failed") {
-    await notifyOrderClosed({ ...order, status }, { kind: "refunded", amount: entry.amount });
+    await notifyOrderClosed(
+      { ...order, status },
+      entry.to === "giftcard"
+        ? { kind: "refunded", amount: entry.amount, giftAmount: entry.amount, giftCode: entry.code }
+        : { kind: "refunded", amount: entry.amount },
+    );
   }
 
   return { applied: folded.applied, refundedTotal: folded.refundedTotal, fully, status };
+}
+
+/**
+ * What the customer gave for the order — the money (`orders.total`) plus what
+ * a gift card paid. The amount a refund is measured against, on both doors
+ * and on the order card; it does not shrink as refunds are made.
+ *
+ * Read off the card ledger (gift_card_uses, src/lib/giftcards.ts
+ * giftPaidByOrder), never off `orders.discount`: a card that emptied between
+ * the quote and the payment paid nothing, and there is nothing to return to
+ * it. Best effort — with no gift-card module the value is the money.
+ */
+export async function refundValue(order: OrderLike): Promise<number> {
+  const total = Number(order.total) || 0;
+  const gift = (await giftPaidOf(order)).reduce((sum, g) => sum + g.amount, 0);
+  return Math.round((total + gift + Number.EPSILON) * 100) / 100;
+}
+
+/** What gift cards paid for this order, and what of it may still go back to them. */
+export async function giftPaidOf(order: OrderLike): Promise<Array<{ code: string; amount: number; left: number }>> {
+  try {
+    const { giftPaidByOrder } = await import("@/lib/giftcards");
+    return await giftPaidByOrder(order.id);
+  } catch (err) {
+    console.error(`[payments] gift-card ledger unavailable for ${order.number}:`, err);
+    return [];
+  }
 }
 
 /** What paid for an order whose total came to 0 — for the order card. */

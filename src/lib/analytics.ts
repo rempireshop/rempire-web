@@ -325,8 +325,8 @@ async function qGiftCards(from: Date, to: Date) {
     `select
        (select count(*) from gift_cards where created_at >= $1 and created_at < $2) as sold_count,
        (select coalesce(sum(amount), 0) from gift_cards where created_at >= $1 and created_at < $2) as sold_amount,
-       (select count(*) from gift_card_uses where created_at >= $1 and created_at < $2) as redeemed_count,
-       (select coalesce(sum(amount), 0) from gift_card_uses where created_at >= $1 and created_at < $2) as redeemed_amount`,
+       (select count(*) from gift_card_uses where amount > 0 and created_at >= $1 and created_at < $2) as redeemed_count,
+       (select coalesce(sum(amount), 0) from gift_card_uses where amount > 0 and created_at >= $1 and created_at < $2) as redeemed_amount`,
     [from, to],
   );
   const r = rows[0];

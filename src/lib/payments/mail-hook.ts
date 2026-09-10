@@ -59,7 +59,14 @@ export async function issueOrderGiftCards(order: unknown): Promise<boolean> {
  */
 export async function notifyOrderClosed(
   order: unknown,
-  opts: { kind: "cancelled" | "refunded"; amount?: number; reason?: string },
+  opts: {
+    kind: "cancelled" | "refunded";
+    amount?: number;
+    reason?: string;
+    /** The part of `amount` that went back onto a gift card, and which card — the letter names it. */
+    giftAmount?: number;
+    giftCode?: string;
+  },
 ): Promise<boolean> {
   return call("onOrderClosed", order, opts);
 }

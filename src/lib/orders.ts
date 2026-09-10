@@ -1504,6 +1504,26 @@ export async function setOrderStatus(id: string, status: OrderStatus, actor = "s
     }
   }
 
+  /* gift cards (10.09.2026): an order refunded in full — «Вернуть деньги»,
+     a refund made in Montonio's portal, or «возврат» set by hand after cash
+     was handed back — takes the gift cards it sold with it: balance 0,
+     `voided_at` stamped, the code buys nothing any more (src/lib/giftcards.ts
+     voidGiftCards). Otherwise the customer keeps a live card AND the money it
+     cost. A cancellation is not a refund — the order still holds the money —
+     so it leaves the cards alone. Idempotent, best effort, one audit row
+     naming the cards and what was left on them. */
+  if (wasPaid && status === "refunded") {
+    try {
+      const voidCards = fn(await optionalLib("giftcards"), "voidGiftCards");
+      const voided = voidCards ? ((await voidCards(id)) as Array<{ code: string; amount: number; lost: number }>) : [];
+      if (Array.isArray(voided) && voided.length) {
+        await writeAuditSafe(actor, "giftcards.voided", { id, number: after.number, cards: voided });
+      }
+    } catch (err) {
+      console.error("[orders] voiding the gift cards of a refunded order failed:", err);
+    }
+  }
+
   return after;
 }
 

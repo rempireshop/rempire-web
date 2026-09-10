@@ -71,7 +71,9 @@ function panel(orders: ReturnType<typeof row>[]): Panel {
     ${slice("admWaitingSplit")}
     ${slice("admOrderMatches")}
     ${slice("admReturnAskedAt")}
+    ${slice("admRefundView")}
     function admRefundedTotal() { return 0; }
+    function admRefunds() { return []; }
     function admInvoiceOverdue() { return 0; }
     function admOrders() { return []; }
     var vms = SRV.orders.map(admOrderVM);
@@ -135,7 +137,9 @@ describe("the admin's «Отправить» queue", () => {
     const body = `
       ${slice("admOrderVM")}
       ${slice("admReturnAskedAt")}
+      ${slice("admRefundView")}
       function admRefundedTotal() { return 0; }
+      function admRefunds() { return []; }
       function admInvoiceOverdue() { return 0; }
       return admOrderVM(ORDER);
     `;

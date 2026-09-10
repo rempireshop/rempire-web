@@ -108,6 +108,12 @@ export interface GiftCard {
   lang: string;
   createdAt: string;
   redeemedAt: string | null;
+  /**
+   * Set when the order that bought the card was refunded: the balance is 0
+   * for good and the code no longer pays for anything (151_gift_card_refunds).
+   * Different from `redeemedAt` — that one is a card spent to the end.
+   */
+  voidedAt: string | null;
 }
 
 export interface GiftRecipient {
@@ -135,6 +141,7 @@ interface GiftRow {
   lang: string;
   created_at: Date | string;
   redeemed_at: Date | string | null;
+  voided_at: Date | string | null;
 }
 
 const cents = (n: number) => Math.round(n * 100) / 100;
@@ -152,6 +159,7 @@ function toCard(r: GiftRow): GiftCard {
     lang: r.lang,
     createdAt: iso(r.created_at) as string,
     redeemedAt: iso(r.redeemed_at),
+    voidedAt: iso(r.voided_at ?? null),
   };
 }
 
@@ -236,7 +244,7 @@ export async function issueGiftCards(order: OrderLike): Promise<GiftCard[]> {
   if (!order?.id) return [];
 
   const existing = await query<GiftRow>(
-    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
        from gift_cards where order_id = $1 order by created_at`,
     [order.id],
   );
@@ -259,7 +267,7 @@ export async function issueGiftCards(order: OrderLike): Promise<GiftCard[]> {
           `insert into gift_cards (code, amount, balance, order_id, recipient, lang)
              values ($1, $2, $2, $3, $4::jsonb, $5)
            on conflict (code) do nothing
-           returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at`,
+           returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
           [code, amount, order.id, jsonbParam(recipient), order.lang || "RU"],
         );
         if (rows.length) {
@@ -283,7 +291,7 @@ export async function issueGiftCards(order: OrderLike): Promise<GiftCard[]> {
 export async function orderGiftCards(orderId: string): Promise<GiftCard[]> {
   if (!orderId) return [];
   const rows = await query<GiftRow>(
-    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
        from gift_cards where order_id = $1 order by created_at`,
     [orderId],
   );
@@ -300,7 +308,7 @@ export async function orderGiftCards(orderId: string): Promise<GiftCard[]> {
 export async function listGiftCards(limit = 500): Promise<GiftCard[]> {
   const n = Number.isFinite(limit) ? Math.min(Math.max(Math.trunc(limit), 1), 1000) : 500;
   const rows = await query<GiftRow>(
-    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
        from gift_cards order by created_at desc limit $1`,
     [n],
   );
@@ -315,7 +323,7 @@ export async function giftCardsByOrder(orderIds: string[]): Promise<Record<strin
   const ids = [...new Set(orderIds.filter(Boolean))];
   if (!ids.length) return {};
   const rows = await query<GiftRow>(
-    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
        from gift_cards where order_id = any($1) order by created_at`,
     [ids],
   );
@@ -334,7 +342,7 @@ export async function getGiftCard(code: string): Promise<GiftCard | null> {
   const norm = normaliseCode(code);
   if (!norm) return null;
   const rows = await query<GiftRow>(
-    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at
+    `select code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at
        from gift_cards where code = $1`,
     [norm],
   );
@@ -415,8 +423,8 @@ export async function redeemGiftCard(
     `update gift_cards
         set balance = balance - $2,
             redeemed_at = case when balance - $2 <= 0 then now() else redeemed_at end
-      where code = $1 and balance >= $2
-      returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at`,
+      where code = $1 and balance >= $2 and voided_at is null
+      returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
     [norm, want],
   );
   if (!rows.length) {
@@ -429,11 +437,149 @@ export async function redeemGiftCard(
   // audit only — the balance above is already correct if this insert fails
   try {
     await query(
-      `insert into gift_card_uses (code, order_id, amount) values ($1, $2, $3)`,
+      `insert into gift_card_uses (code, order_id, amount, kind) values ($1, $2, $3, 'redeem')`,
       [card.code, orderId ?? null, want],
     );
   } catch (err) {
     console.error("gift_card_uses insert failed", err);
   }
   return { ok: true, code: card.code, taken: want, remaining: card.balance };
+}
+
+/* ---------- refunds: the card as a payment that comes back ------------- */
+
+/** What a gift card paid for one order, and what of that is still on the order's tab. */
+export interface GiftPaid {
+  code: string;
+  /** What the card paid — the positive ledger rows (`kind = 'redeem'`). Never shrinks. */
+  amount: number;
+  /** `amount` minus what has already gone back onto the card — what a refund may still return to it. */
+  left: number;
+}
+
+/**
+ * What one order took off gift cards, read off the ledger: positive rows are
+ * spends, negative rows refunds (151_gift_card_refunds.sql). `amount` is the
+ * spend and stays what it was; `left` is the spend net of refunds — the most
+ * «Вернуть деньги» may still hand back to the card. Off the ledger rather
+ * than off `orders.discount`, because a card that emptied between the quote
+ * and the payment (apply.ts giftShortfall) never paid anything at all.
+ *
+ * One code per order in practice (the checkout takes one code); the list is
+ * for the day that changes. Empty for an order no card paid for.
+ */
+export async function giftPaidByOrder(orderId: string): Promise<GiftPaid[]> {
+  const map = await giftPaidByOrders([orderId]);
+  return map[orderId] ?? [];
+}
+
+/** The same for a page of orders at once: `{ <orderId>: GiftPaid[] }`. */
+export async function giftPaidByOrders(orderIds: string[]): Promise<Record<string, GiftPaid[]>> {
+  const ids = [...new Set(orderIds.filter(Boolean))];
+  if (!ids.length) return {};
+  const rows = await query<{ order_id: string; code: string; paid: string | number; net: string | number }>(
+    `select order_id, code,
+            sum(case when amount > 0 then amount else 0 end) as paid,
+            sum(amount) as net
+       from gift_card_uses
+      where order_id = any($1)
+      group by order_id, code
+     having sum(case when amount > 0 then amount else 0 end) > 0
+      order by order_id, code`,
+    [ids],
+  );
+  const out: Record<string, GiftPaid[]> = {};
+  for (const r of rows) {
+    (out[r.order_id] ??= []).push({
+      code: r.code,
+      amount: cents(num(r.paid)),
+      left: cents(Math.max(0, num(r.net))),
+    });
+  }
+  return out;
+}
+
+/**
+ * Put `amount` back onto the card for `orderId` — the refund of an order the
+ * card paid for. The mirror image of redeemGiftCard(): one conditional UPDATE
+ * (the card must exist, must not be voided, and can never be credited past
+ * its face value), then the negative ledger row that explains the balance.
+ *
+ * `redeemed_at` is cleared: a card that was spent to the end and then had a
+ * spend reversed is a card with money on it again.
+ */
+export async function creditGiftCard(code: string, amount: number, orderId: string | null): Promise<GiftRedeem> {
+  const norm = normaliseCode(code);
+  if (!norm) return { ok: false, error: "bad_code", taken: 0, remaining: 0 };
+  const want = cents(Number(amount) || 0);
+  if (!(want > 0)) return { ok: false, error: "bad_amount", taken: 0, remaining: 0 };
+
+  const rows = await query<GiftRow>(
+    `update gift_cards
+        set balance = balance + $2,
+            redeemed_at = null
+      where code = $1 and voided_at is null and balance + $2 <= amount + 0.005
+      returning code, amount, balance, order_id, recipient, lang, created_at, redeemed_at, voided_at`,
+    [norm, want],
+  );
+  if (!rows.length) {
+    const card = await getGiftCard(norm);
+    if (!card) return { ok: false, error: "not_found", taken: 0, remaining: 0 };
+    return { ok: false, error: card.voidedAt ? "voided" : "over_face_value", code: card.code, taken: 0, remaining: card.balance };
+  }
+  const card = toCard(rows[0]);
+  await query(
+    `insert into gift_card_uses (code, order_id, amount, kind) values ($1, $2, $3, 'refund')`,
+    [card.code, orderId ?? null, -want],
+  );
+  return { ok: true, code: card.code, taken: want, remaining: card.balance };
+}
+
+/** A card an order bought, and how much of it somebody has already spent. */
+export interface SoldCardUsage {
+  code: string;
+  amount: number;
+  balance: number;
+  /** face value minus balance — 0 for a card nobody has used. */
+  used: number;
+  voidedAt: string | null;
+}
+
+/**
+ * The cards `orderId` bought, with what has been spent off each. What the
+ * refund route checks before it lets the money go: a card that has paid for
+ * something is not the shop's to take back (docs/payments.md § 11).
+ */
+export async function soldCardsUsage(orderId: string): Promise<SoldCardUsage[]> {
+  const cards = await orderGiftCards(orderId);
+  return cards.map((c) => ({
+    code: c.code,
+    amount: c.amount,
+    balance: c.balance,
+    used: c.voidedAt ? 0 : cents(Math.max(0, c.amount - c.balance)),
+    voidedAt: c.voidedAt,
+  }));
+}
+
+/**
+ * Cancel every card `orderId` bought — the order's money went back, so the
+ * cards it paid for stop being money. Balance 0, `voided_at` stamped,
+ * `redeemed_at` set so every reader that only knows the old column sees a
+ * finished card. Idempotent: a card already voided is left alone and not
+ * returned. The balance that was lost is in the answer, for the audit row.
+ */
+export async function voidGiftCards(orderId: string): Promise<Array<{ code: string; amount: number; lost: number }>> {
+  if (!orderId) return [];
+  const rows = await query<{ code: string; amount: string | number; lost: string | number }>(
+    `with was as (select code, balance from gift_cards where order_id = $1 and voided_at is null)
+     update gift_cards g
+        set balance = 0,
+            voided_at = now(),
+            redeemed_at = coalesce(g.redeemed_at, now())
+       from was
+      where g.code = was.code
+      returning g.code, g.amount, was.balance as lost`,
+    [orderId],
+  );
+  return rows.map((r) => ({ code: r.code, amount: cents(num(r.amount)), lost: cents(num(r.lost)) }));
 }

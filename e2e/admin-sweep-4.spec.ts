@@ -730,4 +730,82 @@ test.describe("admin — a warehouse row and the blog card say when they are sav
     await page.locator("[data-admblogdelyes]").click();
     await expect(page.getByRole("status")).toContainText("Статья удалена");
   });
+ * «Запустить сейчас» (Dim, 10.09.2026). The test plan used to say «Попросить
+ * Дима запустить расписание вручную — из панели это не делается»; now the
+ * two time-driven letters have a button under their row that runs the daily
+ * job's own function, and the row remembers the run. This suite has no
+ * Resend key, so a letter is «skipped» — counted, recorded, and handed to
+ * the mail sink (GET /api/e2e/mail/) — which is exactly enough to prove the
+ * button reaches the sender.
+ */
+test.describe("admin — «Письма» can be run without waiting for the schedule", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(202) });
+
+  test("«Запустить сейчас» runs the letter's own job and the row remembers the run", async ({ page, browser }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+
+    /* A customer whose birthday is today, with the tick — through the
+       account API, the way a person's own phone would do it. */
+    const email = freshEmail("bday-run");
+    const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(202) });
+    const codeRes = await ctx.request.post("/api/account/code/", { data: { email, lang: "RU" } });
+    const { code } = (await codeRes.json()) as { code?: string };
+    expect(code, "the e2e login code did not come back").toMatch(/^\d{6}$/);
+    const login = await ctx.request.post("/api/account/login/", { data: { email, code, lang: "RU" } });
+    expect(login.ok()).toBe(true);
+    const today = new Date();
+    const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+    const patched = await ctx.request.patch("/api/account/me/", { data: { birthday: iso, marketing: true } });
+    expect(patched.ok()).toBe(true);
+    await ctx.close();
+
+    await openAdmin(page);
+    await adminSection(page, "promos", "mail");
+    // nothing to run while the letter is off — the button only comes with the switch
+    await expect(page.locator('[data-admflowrun="birthday"]')).toHaveCount(0);
+    try {
+      await page.locator('[data-admflow="birthday"]').click();
+      await clearToast(page);
+      const run = page.locator('[data-admflowrun="birthday"]');
+      await expect(run, "switching the letter on did not offer «Запустить сейчас»").toBeVisible();
+      // the count line now says who the letter can reach at all
+      await expect(page.locator('.adm-row__body[data-mailtpl="birthday"]')).toContainText("Ближайшие 7 дней:", { timeout: 15_000 });
+      await expect(page.locator('.adm-row__body[data-mailtpl="birthday"]')).toContainText("подписчиков с датой");
+
+      await run.click();
+      /* No Resend key in this suite, so the one letter due is «skipped» — the
+         toast says so in the owner's words rather than «отправлено 0», and
+         the row under it counts the skip and names the reason. */
+      await expect(page.getByRole("status")).toContainText("Почта не подключена");
+      await expect(page.locator('[data-admflowlast="birthday"]')).toContainText("Последний запуск:");
+      await expect(page.locator('[data-admflowlast="birthday"]')).toContainText("пропущено");
+      await expect(page.locator('[data-admflowlast="birthday"]')).toContainText("почта не подключена");
+      // …and the letter really reached the sender, for this address
+      await expect
+        .poll(async () => {
+          const res = await page.request.get(`/api/e2e/mail/?template=birthday&to=${encodeURIComponent(email)}`);
+          return ((await res.json()) as { mails: unknown[] }).mails.length;
+        }, { message: "the birthday letter never reached the mail sink" })
+        .toBeGreaterThan(0);
+      await clearToast(page);
+
+      // the abandoned-cart row has the same button and answers for itself
+      await page.locator('[data-admflow="abandoned"]').click();
+      await clearToast(page);
+      await page.locator('[data-admflowrun="abandoned"]').click();
+      await expect(page.getByRole("status")).toContainText("Отправлено 0 · пропущено 0");
+      await expect(page.locator('[data-admflowlast="abandoned"]')).toContainText("Последний запуск:");
+      await clearToast(page);
+      await assertClean(page, w, "run now");
+    } finally {
+      for (const flow of ["abandoned", "birthday"]) {
+        const sw = page.locator(`[data-admflow="${flow}"]`);
+        if ((await sw.getAttribute("aria-checked")) === "true") {
+          await sw.click();
+          await clearToast(page);
+        }
+      }
+    }
+  });
 });

@@ -356,3 +356,166 @@ test.describe("the gift card in «Все товары»", () => {
     });
   }
 });
+
+/**
+ * Gift cards and refunds, both ways (Dim, 10.09.2026: «Can a gift card order
+ * be refunded? I hope that orders paid fully with a gift card are now in the
+ * correct status — already paid and waiting for shipment»).
+ *
+ * One story, in the order it happens at the till: a card is bought; it pays
+ * a product order in full — no bank, «Оформить заказ», paid at once and
+ * waiting in «Отправить» like any paid order; the order that bought the card
+ * cannot be refunded while the card is spent from (the confirm card says so,
+ * and so does the server); the product order is refunded and the money goes
+ * back onto the card, the confirm card having shown the split; and now the
+ * order that bought the card is refunded and the card is cancelled.
+ *
+ * Admin panel, so desktop only (docs/testing.md «Safari»). One admin request
+ * context for the whole story — POST /api/admin/login/ allows 5/min per IP.
+ */
+test.describe("gift card — refunds, both ways", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(66) });
+  test.beforeEach(async ({}, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "admin panel — desktop project only");
+  });
+
+  type AdminOrder = { number: string; status: string; total: number; payment: Record<string, unknown> | null };
+  type Req = Awaited<ReturnType<Browser["newContext"]>>["request"];
+
+  async function adminApi(browser: Browser) {
+    const ctx = await browser.newContext({ extraHTTPHeaders: ipHeaders(66) });
+    const login = await ctx.request.post("/api/admin/login/", { data: { password: E2E_ADMIN_PASSWORD } });
+    expect(login.ok(), "gift refunds: admin login").toBe(true);
+    return ctx;
+  }
+  async function orderOf(req: Req, number: string): Promise<AdminOrder> {
+    const res = await req.get(`/api/admin/orders/?q=${encodeURIComponent(number)}`);
+    expect(res.ok()).toBe(true);
+    const order = ((await res.json()) as { orders: AdminOrder[] }).orders.find((o) => o.number === number);
+    expect(order, `order ${number} not found server-side`).toBeTruthy();
+    return order!;
+  }
+  async function cardOf(req: Req, orderNumber: string) {
+    const res = await req.get(`/api/e2e/gift-card/?order=${orderNumber}`);
+    expect(res.ok()).toBe(true);
+    const cards = ((await res.json()) as { cards: Array<{ code: string; amount: number; balance: number }> }).cards;
+    expect(cards).toHaveLength(1);
+    return cards[0];
+  }
+  /** «Заказы» → the row for one order, whichever chip it lives under. */
+  async function openOrder(page: Page, number: string): Promise<void> {
+    await page.locator('[data-admtab="orders"][aria-current]:visible').first().click();
+    await page.locator('[data-admfilter="all"]').click();
+    await page.locator(`[data-admorder]:has-text("${number}")`).first().click();
+    await expect(page.locator(".adm-head__kicker--code")).toContainText(number);
+  }
+
+  test("a card pays an order in full, the order is paid and queued, and both refunds go the right way", async ({ page, browser }) => {
+    test.setTimeout(180_000);
+    const admin = await adminApi(browser);
+    const req = admin.request;
+    try {
+      /* 1) A 25 € card, bought and paid through the mock bank. */
+      await page.goto(shopUrl("", "/gift/"));
+      await waitForScreen(page, "gift");
+      await page.locator('[data-giftamt="25"]').click();
+      await page.locator('[data-giftf="name"]').fill("Refund");
+      await page.locator('[data-addgift="25"]').click();
+      await expect(page.getByRole("status")).toBeVisible();
+      await page.goto(shopUrl("", "/checkout/"));
+      await waitForScreen(page, "checkout");
+      const giftOrder = await payDigitalOrder(page, freshEmail("refund-gift"), freshEmail("refund-to"));
+      const card = await cardOf(req, giftOrder);
+      expect(card.balance).toBe(25);
+
+      /* 2) The card pays a product order entirely: no bank, «Оформить заказ»,
+            straight to the paid receipt. */
+      await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
+      await waitForScreen(page, "product");
+      await page.locator(`.pdp__add[data-add="${PRODUCT.id}"]`).click();
+      await expect(page.getByRole("status")).toBeVisible();
+      await page.goto(shopUrl("", "/checkout/"));
+      await waitForScreen(page, "checkout");
+      await page.locator("[data-email]").fill(freshEmail("refund-shop"));
+      await continueButton(page, 2).click();
+      await page.locator('input[data-dm="pickup"]').check();
+      await page.locator('[data-shipf="name"]').fill("E2E Refund");
+      await page.locator('[data-shipf="phone"]').fill("+372 5550066");
+      await continueButton(page, 3).click();
+      await openSummary(page);
+      await page.locator("[data-promo]").fill(card.code);
+      await page.locator("[data-applypromo]").click();
+      await expect(page.locator("[data-giftoff]")).toBeVisible();
+      await expect(payButton(page)).toHaveText(tr("Оформить заказ", "RU"));
+      await payButton(page).click();
+      await page.waitForURL(/\/shop2.*\/done\/\?.*s=paid/);
+      await waitForScreen(page, "done");
+      expect(page.url()).not.toMatch(/\/api\/payments\/mock\//);
+      await expect(page.locator("h1")).toHaveText(tr("Заказ оплачен", "RU"));
+      const shopOrder = new URL(page.url()).searchParams.get("n") ?? "";
+      expect(shopOrder).toBeTruthy();
+
+      /* 3) The owner's side: paid, provider «none», and waiting in
+            «Отправить» like any paid order. */
+      const paid = await orderOf(req, shopOrder);
+      expect(paid.status).toBe("paid");
+      expect(paid.total).toBe(0);
+      expect(paid.payment?.provider).toBe("none");
+      const spent = 25 - (await cardOf(req, giftOrder)).balance;
+      expect(spent).toBeGreaterThan(0);
+
+      await loginAsAdmin(page);
+      await page.locator('[data-admtab="orders"][aria-current]:visible').first().click();
+      await page.locator('[data-admfilter="new"]').click();
+      await expect(page.locator(`[data-admorder]:has-text("${shopOrder}")`).first(), "the card-paid order is not in «Отправить»").toBeVisible();
+
+      /* 4) The order that BOUGHT the card cannot be refunded while the card
+            is spent from — the confirm card says so first, the server after. */
+      await openOrder(page, giftOrder);
+      await expect(page.locator("[data-giftused]")).toContainText(`${spent} €`);
+      await page.locator("[data-admrefund]").click();
+      await expect(page.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
+      await expect(page.locator(".adm-propose__prev")).toContainText("уже потрачена");
+      await page.locator("[data-admapply]").click();
+      await expect(page.getByRole("status")).toContainText("уже потрачена");
+      expect((await orderOf(req, giftOrder)).status).toBe("paid");
+      expect((await cardOf(req, giftOrder)).balance).toBe(25 - spent);
+
+      /* 5) The product order is refunded: the confirm card shows the split,
+            and the money goes back onto the card, not to any bank. */
+      await openOrder(page, shopOrder);
+      await expect(page.locator(".adm-kv", { hasText: "Подарочная карта" })).toBeVisible();
+      await page.locator("[data-admrefund]").click();
+      const confirm = page.locator(".adm-confirm");
+      await expect(confirm.locator(".adm-confirm__t")).toHaveText("Вернуть деньги?");
+      await expect(confirm.locator("[data-admrefundamt]")).toHaveValue(spent.toFixed(2));
+      await expect(confirm.locator(".adm-confirm__d")).toContainText(`Вернём на подарочную карту: ${spent} € · на счёт покупателя: 0 €`);
+      await confirm.locator("[data-admapply]").click();
+      await expect(page.getByRole("status")).toContainText("на карту");
+      await expect.poll(async () => (await orderOf(req, shopOrder)).status).toBe("refunded");
+      expect((await cardOf(req, giftOrder)).balance).toBe(25);
+      await expect(page.locator(".adm-kv", { hasText: "На подарочную карту" })).toBeVisible();
+      await expect(page.locator("[data-admrefund]")).toHaveCount(0);
+      const refunded = await page.request.get("/api/e2e/mail/?template=order-refunded");
+      expect(((await refunded.json()) as { mails: unknown[] }).mails.length).toBeGreaterThan(0);
+
+      /* 6) …and now the order that bought the card can be refunded: the
+            card is cancelled with it and buys nothing any more. */
+      await openOrder(page, giftOrder);
+      await expect(page.locator("[data-giftused]")).toHaveCount(0);
+      await page.locator("[data-admrefund]").click();
+      await expect(page.locator(".adm-propose__prev")).toContainText("будет аннулирована");
+      await expect(page.locator(".adm-propose__prev")).toContainText(card.code);
+      await page.locator("[data-admapply]").click();
+      await expect(page.getByRole("status")).toContainText("возврат 25 €");
+      await expect.poll(async () => (await orderOf(req, giftOrder)).status).toBe("refunded");
+      expect((await cardOf(req, giftOrder)).balance).toBe(0);
+      await expect(page.locator("[data-giftvoid]")).toContainText("Аннулирована");
+      await expect(page.locator("[data-giftpdf]")).toHaveCount(0);
+      const check = await page.request.post("/api/giftcards/check/", { data: { code: card.code } });
+      expect(((await check.json()) as { ok: boolean }).ok).toBe(false);
+    } finally {
+      await admin.close();
+    }
+  });
+});

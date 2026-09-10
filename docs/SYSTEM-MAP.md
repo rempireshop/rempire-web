@@ -1244,12 +1244,21 @@ abandoned carts, back-in-stock sweep, birthdays; `maxDuration 60`) and
 floats within the hour.
 
 **How to test it.** `tests/account-flows.test.ts` (auth, idempotency),
-`tests/events.test.ts`; manual `curl -H "authorization: Bearer …"
-https://<host>/api/cron/flows/` → `{ok, abandoned, backstock, birthday}`.
+`tests/flows-run.test.ts` (the birthday window, «Запустить сейчас», the
+`settings.flow_runs` record), `tests/events.test.ts`; manual `curl -H
+"authorization: Bearer …" https://<host>/api/cron/flows/` → `{ok, abandoned,
+backstock, birthday}`. From the panel: «Маркетинг → Письма» → «Запустить
+сейчас» under «Брошенная корзина» / «Скидка ко дню рождения»
+(`POST /api/admin/flows/run/`, the same function the cron runs).
 
-**State today.** Works when `CRON_SECRET` is set (✅ per `docs/accounts.md`);
-whether the daily run fires on the Rempire Vercel project has not been
-verified in the docs (no log cited). Once a day makes «через 3 часа» untrue.
+**State today.** Works when `CRON_SECRET` is set (✅ per `docs/accounts.md`).
+Whether the daily run fires on the Rempire Vercel project is now visible
+without a log: every run — the cron's and the button's — writes
+`settings.flow_runs`, and «Письма» shows it as «Последний запуск: 10.09 07:00
+— отправлено 1» under the row (docs/flows.md). Vercel runs crons only on the
+project's production deployment, which `rempireshop.diipsolutions.eu` is
+(`main` of `rempire-web`); a preview deployment never gets one. Once a day
+makes «через 3 часа» untrue.
 
 **Simplification candidates.** Q12.
 

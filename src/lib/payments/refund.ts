@@ -92,6 +92,16 @@ export interface RefundEntry {
   /** `admin` for the order card, `webhook` for one made in Montonio's portal. */
   by?: string;
   detail?: string;
+  /**
+   * Where the money went back to. Absent (or `provider`) — through Montonio,
+   * to the account the payment came from. `giftcard` — onto the gift card
+   * that paid for the order, as balance (src/lib/giftcards.ts
+   * creditGiftCard); `code` says which card. Both kinds count towards
+   * refundedTotal: a refund is the customer getting their value back,
+   * whichever instrument carries it.
+   */
+  to?: "provider" | "giftcard";
+  code?: string;
 }
 
 function money(n: number): number {
@@ -120,6 +130,8 @@ export function refundsOf(payment: unknown): RefundEntry[] {
       at: typeof r.at === "string" ? r.at : "",
       by: typeof r.by === "string" ? r.by : undefined,
       detail: typeof r.detail === "string" ? r.detail : undefined,
+      to: r.to === "giftcard" ? ("giftcard" as const) : undefined,
+      code: typeof r.code === "string" && r.code ? r.code : undefined,
     }))
     .filter((r) => !!r.ref);
 }
@@ -133,9 +145,40 @@ export function refundedTotal(payment: unknown): number {
   );
 }
 
-/** What is still refundable on an order of `total`. Never below 0. */
-export function refundableAmount(total: number, payment: unknown): number {
-  return Math.max(0, money(num(total) - refundedTotal(payment)));
+/** The part of refundedTotal that went back onto a gift card. */
+export function giftRefundedTotal(payment: unknown): number {
+  return money(
+    refundsOf(payment)
+      .filter((r) => r.status !== "failed" && r.to === "giftcard")
+      .reduce((sum, r) => sum + r.amount, 0),
+  );
+}
+
+/**
+ * What is still refundable on an order worth `value`. Never below 0.
+ *
+ * `value` is what the customer gave for the order — `orders.total` (the money)
+ * plus what a gift card paid (src/lib/payments/settle.ts refundValue()). An
+ * order a card covered entirely has a total of 0 and is still worth refunding.
+ */
+export function refundableAmount(value: number, payment: unknown): number {
+  return Math.max(0, money(num(value) - refundedTotal(payment)));
+}
+
+/**
+ * How one refund of `amount` is split between the gift card that paid for
+ * the order and the payment provider: the card first, the provider for the
+ * rest. Original tender first is what every till does, and it is the rule
+ * that never turns a gift card into cash — a customer who paid 20 € with a
+ * card and 30 € by bank and asks for 10 € back gets 10 € of card balance,
+ * not 10 € of somebody else's money.
+ *
+ * `giftLeft` is what the card paid minus what has already gone back to it.
+ */
+export function splitRefund(amount: number, giftLeft: number): { gift: number; money: number } {
+  const total = Math.max(0, money(amount));
+  const gift = money(Math.min(total, Math.max(0, money(giftLeft))));
+  return { gift, money: money(total - gift) };
 }
 
 /**
