@@ -1291,11 +1291,11 @@
       "steps": [
         "«Ещё» → «Настройки» → «Цены и баллы».",
         "Включить первый переключатель, «Партнёры и баллы».",
-        "Нажать «Сохранить» в полосе внизу и подтвердить.",
+        "Нажать «Сохранить» (на телефоне — вверху экрана) и подтвердить.",
         "Открыть в магазине кабинет покупателя."
       ],
       "expect": [
-        "Полоса внизу пишет «Изменения не сохранены: Цены и баллы».",
+        "Пока не сохранили, рядом с «Сохранить» стоит «Не сохранено» (на компьютере — с названием карточки).",
         "В кабинете покупателя появились баллы.",
         "Там же появилась кнопка «Стать партнёром».",
         "На кассе появилось «Использовать баллы».",
@@ -1309,11 +1309,11 @@
         "steps": [
           "«Ещё» → «Настройки» → «Цены и баллы».",
           "Switch on the first switch, «Партнёры и баллы» (partners and points).",
-          "Press «Сохранить» in the bar at the bottom and confirm.",
+          "Press «Сохранить» (on the phone — at the top of the screen) and confirm.",
           "Open the customer account in the shop."
         ],
         "expect": [
-          "The bar says «Изменения не сохранены: Цены и баллы».",
+          "Until saved, «Не сохранено» stands next to «Сохранить» (on a computer with the card name).",
           "The customer account now shows points.",
           "A «Стать партнёром» button has appeared there.",
           "«Использовать баллы» has appeared at the checkout.",
@@ -1340,7 +1340,7 @@
         "TESTSHIP стоит в списке.",
         "У обоих переключатель стоит на «включён».",
         "Кнопки удаления нет — код можно только выключить.",
-        "«Создать» и «Отмена» стоят в полосе внизу, над навигацией."
+        "На телефоне «Создать» и «Отмена» — в шапке экрана, всегда на виду; ничего не закрыто."
       ],
       "why": "Неработающий код в рассылке выглядит как обман.",
       "risk": "med",
@@ -1358,7 +1358,7 @@
           "TESTSHIP is in the list.",
           "Both stand at «включён» (on).",
           "There is no delete button — a code can only be switched off.",
-          "«Создать» and «Отмена» sit in the bar at the bottom, above the navigation."
+          "On the phone «Создать» and «Отмена» sit in the header, always in view; nothing covered."
         ],
         "why": "A code that does not work in a mailing looks like a swindle."
       }
@@ -1493,13 +1493,13 @@
         "На той же странице выписать текущие цены Эстонии.",
         "Оставить «Разрешить снижать текущие цены» выключенным.",
         "Нажать «Заполнить по тарифам Montonio».",
-        "Посмотреть, что изменилось, и нажать «Отменить правки» в полосе внизу."
+        "Посмотреть, что изменилось, и нажать «Отменить правки» рядом с «Сохранить»."
       ],
       "expect": [
         "Кнопка проставляет цены по всем странам.",
         "Уже стоящие цены она не опускает.",
         "Под каждой ценой подсказка с ценой перевозчика.",
-        "Полоса внизу пишет «Изменения не сохранены: Тарифы доставки».",
+        "Рядом с «Сохранить» — «Не сохранено» (на компьютере — «…: Тарифы доставки»).",
         "«Отменить правки» возвращает старые цены, ничего не сохранив."
       ],
       "why": "Одно нажатие может опустить доставку ниже себестоимости сразу везде.",
@@ -1511,13 +1511,13 @@
           "On the same page write down Estonia's current prices.",
           "Leave «Разрешить снижать текущие цены» (allow lowering current prices) switched off.",
           "Press «Заполнить по тарифам Montonio» (fill in from Montonio's rates).",
-          "Look at what changed and press «Отменить правки» in the bar at the bottom."
+          "Look at what changed and press «Отменить правки» next to «Сохранить»."
         ],
         "expect": [
           "The button fills in prices for every country.",
           "It lowers no price that is already set.",
           "Under each price is the carrier's own rate.",
-          "The bar says «Изменения не сохранены: Тарифы доставки».",
+          "Next to «Сохранить» — «Не сохранено» (on a computer «…: Тарифы доставки»).",
           "«Отменить правки» brings the old prices back, saving nothing."
         ],
         "why": "One press can drop delivery below cost in every country at once."
@@ -1571,14 +1571,14 @@
         "«Ещё» → «Настройки» → «О компании».",
         "Проверить название, регистрационный номер, номер KMKR, адрес, почту и телефон.",
         "Заполнить IBAN и название банка, если они пустые.",
-        "Нажать «Сохранить» в полосе внизу и подтвердить."
+        "Нажать «Сохранить» (на телефоне — вверху экрана) и подтвердить."
       ],
       "expect": [
         "Название, адрес и номера заполнены.",
         "IBAN и название банка заполнены.",
         "Пока IBAN пуст, панель пишет об этом красной строкой.",
         "Пока он пуст, счета компаниям не уходят.",
-        "Полоса внизу называла карточку «Данные магазина», после сохранения — «Сохранено ✓»."
+        "Рядом с «Сохранить» было «Не сохранено», после сохранения — «Сохранено ✓»."
       ],
       "why": "Счёт без номера счёта не оплатят, а с чужими реквизитами деньги уйдут мимо.",
       "risk": "high",
@@ -1589,14 +1589,14 @@
           "«Ещё» → «Настройки» → «О компании».",
           "Check the name, the registration number, the KMKR (VAT) number, the address, the e-mail and the phone.",
           "Fill in the IBAN and the bank name if they are empty.",
-          "Press «Сохранить» in the bar at the bottom and confirm."
+          "Press «Сохранить» (on the phone — at the top of the screen) and confirm."
         ],
         "expect": [
           "The name, address and numbers are filled in.",
           "The IBAN and the bank name are filled in.",
           "While the IBAN is empty a red line says so.",
           "While it is empty no invoice goes out to companies.",
-          "The bar named the card «Данные магазина», and reads «Сохранено ✓» after saving."
+          "Next to «Сохранить» it said «Не сохранено», and «Сохранено ✓» after saving."
         ],
         "why": "An invoice with no account number goes unpaid; wrong details send the money elsewhere."
       }
@@ -1618,8 +1618,8 @@
         "«Напомнить за, дней до срока» — 2.",
         "«Отменить через, дней после срока» — 7.",
         "Ноль в этих полях значит «не делать этого».",
-        "Enter в поле сохраняет через полосу внизу: «Счета для компаний: сохранено ✓».",
-        "На кнопке полосы «Сохранено ✓», пока вы не начнёте печатать."
+        "Enter в поле сохраняет: рядом с «Сохранить» появляется «Сохранено ✓».",
+        "«Сохранено ✓» держится, пока вы не начнёте печатать снова."
       ],
       "why": "Слишком короткий срок отменит заказ фирмы, которая платит раз в неделю.",
       "risk": "med",
@@ -1636,8 +1636,8 @@
           "«Напомнить за, дней до срока» is 2.",
           "«Отменить через, дней после срока» is 7.",
           "A zero in either field means «do not do this».",
-          "Enter in the box saves through the bar: «Счета для компаний: сохранено ✓».",
-          "The bar's button reads «Сохранено ✓» until you type again."
+          "Enter in the box saves: «Сохранено ✓» appears next to «Сохранить».",
+          "«Сохранено ✓» stays until you type again."
         ],
         "why": "Too short a term cancels the order of a company that pays weekly."
       }
@@ -3710,7 +3710,7 @@
         "В пришедшем тесте стоит ваш текст, а не старый.",
         "Вместо вставленного поля — настоящее имя покупателя.",
         "«Вернуть стандартный текст» возвращает письмо к исходному.",
-        "«Сохранить» стоит в полосе внизу, над навигацией."
+        "На телефоне «Сохранить» — в шапке экрана; на компьютере — в полосе внизу."
       ],
       "why": "Если правки не сохраняются, письма так и остаются чужими.",
       "risk": "low",
@@ -3728,7 +3728,7 @@
           "The test that arrives carries your text, not the old one.",
           "The inserted field has turned into a real name.",
           "«Вернуть стандартный текст» brings the original letter back.",
-          "«Сохранить» sits in the bar at the bottom, above the navigation."
+          "On the phone «Сохранить» is in the screen's header; on a computer, the bottom bar."
         ],
         "why": "If your edits do not save, the letters stay somebody else's."
       }
@@ -4937,13 +4937,13 @@
         "Открыть товар, вкладка «Размеры и цены», нажать «+ Размер».",
         "Вписать объём и цену.",
         "Нажать «Сканер» у поля «Штрихкод» и навести камеру на код с упаковки.",
-        "Нажать «Сохранить» в полосе внизу.",
+        "Нажать «Сохранить» (на телефоне — вверху экрана).",
         "Открыть товар в магазине и выбрать новый объём.",
         "Вернуться, убрать этот объём крестиком и сохранить снова."
       ],
       "expect": [
         "Код с упаковки встал в поле «Штрихкод» сам, без набора руками.",
-        "Полоса «Сохранить» стоит над нижней навигацией, а не под ней.",
+        "На телефоне «Сохранить» и «Отмена» — в шапке экрана; снизу ничего не закрыто.",
         "Цена не число — редактор сам открывает «Размеры и цены» и называет поле.",
         "Новый объём виден в магазине со своей ценой, его можно положить в корзину.",
         "После удаления объём пропал со страницы товара, выбрать его больше нельзя."
@@ -4957,13 +4957,13 @@
           "Open a product, the «Размеры и цены» tab, press «+ Размер».",
           "Type in the size and the price.",
           "Press «Сканер» next to «Штрихкод» and point the camera at the packaging's code.",
-          "Press «Сохранить» in the bar at the bottom.",
+          "Press «Сохранить» (on the phone — at the top of the screen).",
           "Open the product in the shop and choose the new size.",
           "Go back, remove that size with the cross and save again."
         ],
         "expect": [
           "The code from the packaging landed in «Штрихкод» by itself, nothing typed.",
-          "The «Сохранить» bar sits above the bottom navigation, not under it.",
+          "On the phone «Сохранить» and «Отмена» sit in the header; nothing is covered below.",
           "A price that is not a number opens «Размеры и цены» itself and names the box.",
           "The new size shows in the shop at its own price and goes into the cart.",
           "After deleting, the size is gone from the product page and cannot be chosen."
@@ -5134,7 +5134,7 @@
         "Открыть «Товары» и нажать «+ Товар».",
         "Вписать бренд — выбрать из списка под полем или вписать новый.",
         "Вписать название и раздел, нажать «Дальше — цена →».",
-        "Вписать цену, добавить второй объём, нажать «Сохранить товар» внизу.",
+        "Вписать цену, добавить второй объём, нажать «Сохранить товар».",
         "На шаге «Фото» выбрать фотографию и нажать «Сохранить».",
         "Найти товар в магазине через поиск и купить его."
       ],
@@ -5143,7 +5143,7 @@
         "Полоса шагов «Основное · Цена · Фото» показывает, где вы; описание и Google — «потом».",
         "«Сохранить товар» без цены сам открывает шаг «Цена» и называет поле.",
         "После сохранения товар сразу в магазине, открылся шаг «Фото».",
-        "«Сохранить товар» и «Отмена» стоят над нижней навигацией, кружок «+» их не закрывает.",
+        "На телефоне «Сохранить товар» и «Отмена» — в шапке экрана; кружок помощника спрятан.",
         "Поиск находит товар, он кладётся в корзину и покупается."
       ],
       "why": "Новинки, которых нет в старом каталоге, продавать иначе нечем.",
@@ -5155,7 +5155,7 @@
           "Open «Товары» and press «+ Товар».",
           "Brand: pick from the list under the box or type a new one.",
           "Type the name and section, press «Дальше — цена →».",
-          "Type a price, add a second size, press «Сохранить товар» at the bottom.",
+          "Type a price, add a second size, press «Сохранить товар».",
           "On the «Фото» step pick a photo and press «Сохранить».",
           "Find the product in the shop through the search and buy it."
         ],
@@ -5164,7 +5164,7 @@
           "The «Основное · Цена · Фото» strip shows where you are; description and Google marked optional.",
           "«Сохранить товар» without a price opens the «Цена» step and names the box.",
           "After saving the product is in the shop at once; the «Фото» step opened.",
-          "«Сохранить товар» and «Отмена» sit above the bottom navigation, uncovered by «+».",
+          "On the phone «Сохранить товар» and «Отмена» sit in the header; the assistant circle is hidden.",
           "The search finds it; it goes into the cart and can be bought."
         ],
         "why": "New arrivals missing from the old catalogue cannot be sold any other way."
@@ -5188,7 +5188,7 @@
         "Набор дороже этой суммы сохранить не дают.",
         "Сохранённый набор виден в магазине на главной и в «Наборах».",
         "В корзину он ложится одной строкой.",
-        "«Сохранить» и «Отмена» стоят в полосе внизу, над навигацией."
+        "На телефоне «Сохранить» и «Отмена» — в шапке экрана; «Удалить набор» — в конце формы."
       ],
       "why": "Набор дороже своих частей отпугивает покупателя прямо на витрине.",
       "risk": "med",
@@ -5206,7 +5206,7 @@
           "A set dearer than that sum will not save.",
           "The saved set shows on the home page and under «Наборы».",
           "It goes into the cart as a single line.",
-          "«Сохранить» and «Отмена» sit in the bar at the bottom, above the navigation."
+          "On the phone «Сохранить» and «Отмена» sit in the header; «Удалить набор» ends the form."
         ],
         "why": "A set dearer than its parts turns the buyer away."
       }
@@ -5458,7 +5458,7 @@
       "expect": [
         "Партнёр появился в списке с пометкой партнёра.",
         "На его почту пришло письмо.",
-        "«Сохранить» и «Отмена» стоят в полосе внизу, над навигацией."
+        "На телефоне «Сохранить» и «Отмена» — в шапке экрана, всегда на виду."
       ],
       "why": "Салон, договорившийся по телефону, должен получить свои цены в тот же день.",
       "risk": "med",
@@ -5473,7 +5473,7 @@
         "expect": [
           "The partner is in the list with a partner marker.",
           "A letter has arrived in their mailbox.",
-          "«Сохранить» and «Отмена» sit in the bar at the bottom, above the navigation."
+          "On the phone «Сохранить» and «Отмена» sit in the screen's header, always in view."
         ],
         "why": "A salon that agreed by phone should get its prices the same day."
       }
@@ -6288,11 +6288,11 @@
         "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
         "Поправить текст первого слайда и выбрать другую картинку из плиток.",
         "Добавить слайд про подарочную карту; добавлять слайды, пока кнопка не погаснет.",
-        "Нажать «Сохранить» в полосе внизу, подтвердить и открыть главную магазина."
+        "Нажать «Сохранить» (на телефоне — вверху экрана), подтвердить и открыть главную магазина."
       ],
       "expect": [
         "При выборе картинки страница остаётся на месте.",
-        "Полоса внизу пишет «Изменения не сохранены: Главный баннер».",
+        "Рядом с «Сохранить» — «Не сохранено» (на компьютере — «…: Главный баннер»).",
         "При пяти слайдах «Добавить слайд» серая, рядом причина про максимум.",
         "После сохранения на кнопке «Сохранено ✓».",
         "На главной картинки сменяются сами; текст и картинки те, что вы выбрали.",
@@ -6307,11 +6307,11 @@
           "«Ещё» → «Настройки» → «Главная страница» → «Главный баннер».",
           "Edit the first slide's text and pick another picture from the tiles.",
           "Add a gift-card slide; keep adding slides until the button goes grey.",
-          "Press «Сохранить» in the bar at the bottom, confirm, open the shop's home page."
+          "Press «Сохранить» (on the phone — at the top), confirm and open the shop's home page."
         ],
         "expect": [
           "Picking a picture leaves the page where it was.",
-          "The bar at the bottom says «Изменения не сохранены: Главный баннер».",
+          "Next to «Сохранить» — «Не сохранено» (on a computer «…: Главный баннер»).",
           "At five slides «Добавить слайд» is grey, with the reason beside it.",
           "After saving the button reads «Сохранено ✓».",
           "On the home page the pictures change by themselves; text and pictures are yours.",
@@ -6330,10 +6330,10 @@
       "steps": [
         "«Настройки» → «О компании»: вписать часы работы по дням и соцсети.",
         "«Настройки» → «Главная страница»: вписать текст верхней полоски.",
-        "На каждой странице нажать «Сохранить» в полосе внизу, подтвердить и открыть магазин."
+        "На каждой странице нажать «Сохранить» (на телефоне — вверху), подтвердить и открыть магазин."
       ],
       "expect": [
-        "Пока вы печатаете, полоса внизу называет карточку: «Данные магазина» или «Верхняя полоска».",
+        "Пока вы печатаете, рядом с «Сохранить» стоит «Не сохранено» (на компьютере — название карточки).",
         "Часы работы видны на «Контактах» и внизу каждой страницы.",
         "Узкая полоска с вашим текстом стоит над магазином.",
         "Она есть и на эстонском, и на английском."
@@ -6346,10 +6346,10 @@
         "steps": [
           "«Настройки» → «О компании»: fill in the opening hours and social links.",
           "«Настройки» → «Главная страница»: type the text for the top strip.",
-          "On each page press «Сохранить» in the bar at the bottom, confirm and open the shop."
+          "On each page press «Сохранить» (on the phone — at the top), confirm and open the shop."
         ],
         "expect": [
-          "While you type, the bar names the card: «Данные магазина» or «Верхняя полоска».",
+          "While you type, «Не сохранено» stands next to «Сохранить» (on a computer the card name).",
           "The opening hours show on «Контакты» and at the foot of every page.",
           "The thin strip with your text sits above the shop.",
           "It is there in Estonian and in English too."
