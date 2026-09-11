@@ -33,6 +33,12 @@
      third went under the nav on the owner's phone: «Сохранить» and «Отмена»
      half over the nav, «Снять с продажи» cut off (Renat, 10.09.2026). */
   --a-barh: calc(var(--a-bar) + env(safe-area-inset-bottom, 0px));
+  /* The save bar as the phone's top header (the `.adm-savebar` block below,
+     ≤ 767): one 52-px row plus the notch inset. This is the fallback only —
+     renderImpl() measures the bar while it stands and writes the real height
+     here, a refusal row and all, so the page's top padding and the scroll
+     padding always clear exactly what is on screen. */
+  --a-hdrh: calc(52px + env(safe-area-inset-top, 0px));
   --a-side: 232px;           /* desktop sidebar */
   --a-side-min: 68px;
   --a-asst: 380px;
@@ -200,6 +206,17 @@
   font-weight: 500; font-size: 15px; text-decoration: underline; text-underline-offset: 3px;
 }
 .adm-acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+/* «Снять с продажи», «Удалить набор», «Удалить письмо»: the destructive verb
+   left the save bar (11.09.2026 — on a phone the bar is the header now, and a
+   header has no room for it) and ends the form instead, on its own row under
+   a hairline, as a quiet warn-coloured link: away from «Сохранить», in the
+   same place on every screen, and still behind its confirm card. The same
+   row on a desktop, so the panel behaves one way throughout. */
+.adm-danger {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+  border-top: 1px solid var(--a-rule); padding-top: 12px;
+}
+.adm-danger .adm-link { font-weight: 400; }
 
 /* ---------- inputs -------------------------------------------------------- */
 
@@ -975,6 +992,81 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
     bottom: calc(var(--a-barh) + 12px);
   }
   body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 140px); }
+}
+
+/* ---- phone (≤ 767): the bar IS the header ----------------------------------
+   On the nav the bar took a quarter of an iPhone 14's usable screen: two
+   rows — «Сохранить» + «Отмена», then the destructive link with the
+   assistant's button parked in the corner (Dim, 11.09.2026). So while a save
+   bar is on screen it moves to the top and wears the phone's own idiom —
+   Notes, Contacts: «Отмена · state · Сохранить» in one 52-px row over a
+   hairline — and the panel's header (logo, languages, «← В магазин») steps
+   aside until the form is closed. The same on EVERY screen that saves, so
+   the panel behaves one way throughout; a tablet (768 and up) keeps the bar
+   on the nav exactly as above.
+
+   Fixed, not sticky: the bar sits at the END of each form in the DOM, and a
+   sticky header would have to come first. `--a-hdrh` is the bar's measured
+   height (renderImpl's ResizeObserver) — the row, the notch inset, and the
+   refusal row while one stands — and is what the page's top padding and the
+   scroll padding clear, so a field the caret jumps to never lands under the
+   bar. `--a-vvtop` follows iOS's visual viewport when the keyboard pushes it
+   inside the layout viewport (the visualViewport listener beside
+   admEnterTarget); zero everywhere else, so nothing moves.
+
+   The row: the cancel («Отмена», «Отменить правки») as quiet text on the
+   left, the status word in the middle — «Не сохранено» / «Сохранено ✓» /
+   «Изменений нет», one line, cut with an ellipsis, never a second row — and
+   the primary on the right: a 40-px ink block inside a 44-px thumb target
+   (the transparent 2-px border), a ring instead of ink while there is
+   nothing to save. The destructive link is not here: it ends the form
+   (.adm-danger). The refusal («Цена — число от 1 до 500 €…») is a second row
+   under the header, full width, only while it stands. */
+@media (max-width: 767px) {
+  body.adm-saving .cohdr--adm { display: none; }
+  /* the assistant's button would sit on the form — «Ещё» keeps the assistant */
+  body.adm-saving .adm-fab { display: none; }
+  body.adm-saving .adm-toast { bottom: calc(var(--a-barh) + 20px); }
+  body.adm-saving .adm-page { padding-top: calc(var(--a-hdrh) + 16px); padding-bottom: calc(var(--a-barh) + 24px); }
+  html.adm-saving { scroll-padding-top: calc(var(--a-hdrh) + 12px); }
+  /* the screen's fade-in slides by a transform, and a transform makes the
+     screen the fixed bar's containing block for the length of the animation
+     — the header would ride in with the form. Opacity only here. */
+  body.adm-saving .adm-page--enter > .adm-screen { animation-name: adm-fade; }
+  .adm-savebar {
+    position: fixed; top: 0; left: 0; right: 0; bottom: auto; z-index: 50;
+    margin: 0; padding: calc(env(safe-area-inset-top, 0px) + 4px) 12px 4px;
+    border-top: 0; border-bottom: 1px solid var(--a-rule);
+    gap: 0 4px; flex-wrap: wrap; align-items: center;
+    transform: translate3d(0, var(--a-vvtop, 0px), 0);
+  }
+  .adm-savebar__sp { display: none; }
+  .adm-savebar__cancel {
+    order: 1; height: 44px; min-height: 44px; padding: 0 8px; margin: 0;
+    border: 0; background: none; color: var(--a-ink); font-size: 15px; font-weight: 400;
+    text-decoration: none; white-space: nowrap;
+  }
+  .adm-savebar__note {
+    order: 2; flex: 1 1 0; min-width: 0; margin: 0; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* the settings pages' long sentence («Изменения не сохранены: Главный
+     баннер, Верхняя полоска») is the desktop's; the phone says one word */
+  .adm-savebar__note--long { display: none; }
+  .adm-savebar__main {
+    order: 3; height: 44px; min-height: 44px; padding: 0 14px; margin: 0 -2px 0 0; font-size: 15px;
+    border: 2px solid transparent; background-clip: padding-box;
+    background-color: var(--a-ink); color: #fff;
+  }
+  .adm-savebar__main--quiet { background-color: var(--a-paper); color: var(--a-ink); box-shadow: inset 0 0 0 1px var(--a-ink); }
+  .adm-savebar__main[disabled] { border-color: transparent; background-color: var(--a-tint); color: var(--a-muted); box-shadow: inset 0 0 0 1px var(--a-rule); }
+  .adm-savebar__err { order: 4; flex-basis: 100%; margin: 0; padding: 2px 4px 8px; }
+}
+@keyframes adm-fade { from { opacity: 0; } to { opacity: 1; } }
+/* the status word of the bars that had none is the phone header's; on a
+   desktop their buttons say enough, and the settings bar keeps its own line */
+@media (min-width: 768px) {
+  .adm-savebar__note--phone, .adm-savebar__note--short { display: none; }
 }
 
 /* ---------- Салон (POS) ---------------------------------------------------- */

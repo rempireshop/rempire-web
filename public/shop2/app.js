@@ -6558,6 +6558,12 @@
                        заказы» card; stockSaved — the warehouse row key that
                        «Править» just wrote, for its «Сохранено ✓» badge. */
     admSetSaved: "", orderNote: null, custNoteSaved: false, unpaidSaved: false, stockSaved: "",
+    /* The save bar's status word on a phone, where the bar is the header
+       (admBarNoteState, 11.09.2026): barTouched — the draftless form (the
+       product editor, a promo, a set, a partner) typed in since it opened,
+       keyed on the open form itself (admBarIdent); barSaved — which bar just
+       saved, for its «Сохранено ✓» moment. */
+    barTouched: null, barSaved: "",
     /* The profile form's draft — what the fields show, compared against
        S.cust by acctDirty() to light the save bar. `ship` is «Доставка по
        умолчанию» in the checkout's words ({country, method, carrier,
@@ -14745,7 +14751,13 @@
             '<span><span class="adm-row__nm">' + t[1] + "</span>" +
             (t[3] ? '<span class="adm-row__sub">' + t[3] + "</span>" : "") + "</span>" +
             '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
-        }).join("") + "</div>" +
+        }).join("") +
+          /* the assistant, for the screens that hide its floating button —
+             while a save bar is the phone's header (admin.css ≤ 767) */
+          '<button class="adm-sheet__row" data-admai aria-expanded="' + !!S.admAi + '" title="Помощник">' +
+            '<span><span class="adm-row__nm">Помощник</span></span>' +
+            '<span class="adm-row__chev" aria-hidden="true">›</span></button>' +
+        "</div>" +
         '<div class="adm-sheet__foot">' + admLangsHTML() +
           '<button class="adm-link" data-go="home">Магазин ↗</button>' +
           admLogoutHTML() +
@@ -15664,8 +15676,11 @@
       "</div>";
   }
   function admMailActsHTML() {
-    return '<button class="adm-btn" data-mailsave>Сохранить</button>' +
-      (mailDirty() ? '<button class="adm-link adm-link--muted" data-mailrevert>Отменить правки</button>' : "");
+    // the phone header reads the classes: the primary (quiet while nothing
+    // differs), the cancel, the status word — admBarNoteHTML
+    return '<button class="adm-btn adm-savebar__main' + (mailDirty() ? "" : " adm-savebar__main--quiet") + '" data-mailsave>Сохранить</button>' +
+      (mailDirty() ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-mailrevert>Отменить правки</button>' : "") +
+      admBarNoteHTML("mail");
   }
   /** The letter as the customer will see it, drawn from the draft — so the
       owner watches it change while typing. The iframe below it is the real
@@ -16111,6 +16126,9 @@
     });
     var dirty = document.querySelector("[data-newsdirty]");
     if (dirty) dirty.hidden = !newsDirty();
+    // the bar follows the draft too: ink «Сохранить», «Отменить правки», the status word
+    var acts = document.getElementById("newsacts");
+    if (acts) { acts.innerHTML = admNewsActsHTML(); translateTree(acts); }
   }
   /* ---- the editor ---------------------------------------------------------- */
   function newsSendLabel(aud) {
@@ -16178,7 +16196,11 @@
     } else {
       inner = '<div class="adm-hint">Черновик — покупатели его не видят. Сохраните, отправьте себе тест, потом — подписчикам.</div>' +
         (aud ? '<div class="adm-hint" style="margin-top:8px"><span>Получат письмо</span>: ' + (aud.total || 0) + " · " + newsCountsHTML(aud) + "</div>" : "") +
-        newsFallbackHTML(d, aud) + err;
+        newsFallbackHTML(d, aud) + err +
+        /* the send itself — this card's own verb since the save bar became
+           the phone's header (11.09.2026): the count above it, the confirm
+           card behind it as before (newsSendAsk) */
+        '<button class="adm-btn" data-newssend' + (S.newsBusy ? " disabled" : "") + ">" + newsSendLabel(aud) + "</button>";
     }
     return '<div class="adm-card adm-card--soft"><div class="adm-sec__t">Отправка</div>' + inner + "</div>";
   }
@@ -16201,14 +16223,18 @@
         '<div class="adm-stack" style="padding-top:10px;gap:8px">' +
         '<button class="adm-link" data-newstranslate' + (genBusy ? " disabled" : "") + ">Перевести на ET и EN</button>" +
       "</div></details>" +
-      (d.id
-        ? (S.newsConfirmDelete
-          ? '<div class="adm-hint adm-hint--warn">Точно удалить письмо? Вернуть его будет нельзя.</div>' +
-            '<button class="adm-btn adm-btn--warn" data-newsdelyes' + (S.newsBusy ? " disabled" : "") + ">Да, удалить</button>" +
-            '<button class="adm-link adm-link--muted" data-newsdelno>Отмена</button>'
-          : '<button class="adm-link adm-link--warn" data-newsdel>Удалить письмо</button>')
-        : "") +
       "</div>";
+  }
+  /** «Удалить письмо» ends the page (.adm-danger), not the assistant's card:
+      the row every form's destructive verb has had since the save bar became
+      the phone's header (11.09.2026) — with its own in-place confirm. */
+  function admNewsDangerHTML(d) {
+    if (!d.id) return "";
+    return '<div class="adm-danger">' + (S.newsConfirmDelete
+      ? '<span class="adm-hint adm-hint--warn">Точно удалить письмо? Вернуть его будет нельзя.</span>' +
+        '<button class="adm-btn adm-btn--warn adm-btn--row" data-newsdelyes' + (S.newsBusy ? " disabled" : "") + ">Да, удалить</button>" +
+        '<button class="adm-link adm-link--muted" data-newsdelno>Отмена</button>'
+      : '<button class="adm-link adm-link--warn" data-newsdel>Удалить письмо</button>') + "</div>";
   }
   function admNewsPreviewHTML(d, L) {
     if (!d.id) return '<p class="adm-hint" style="margin-top:20px">Сохраните черновик — ниже появится письмо целиком, как его увидит покупатель.</p>';
@@ -16220,7 +16246,6 @@
   function admNewsEditorHTML(d) {
     var L = S.newsLang || "RU";
     var busy = !!S.newsBusy;
-    var sending = !!(S.newsSend && S.newsSend.id === d.id && S.newsSend.busy);
     blogKeepCaret();   // this render is about to replace the box being typed in
     var left =
       admLangBarHTML("data-newslang", LANGS, L, "Язык письма", function (code) {
@@ -16244,15 +16269,11 @@
       '<div class="adm-acts"><button class="adm-btn adm-btn--ghost" data-newstest' + (busy ? " disabled" : "") + ">Отправить мне тест</button></div>" +
       '<p class="adm-hint">Тест уйдёт на языке, который выбран сверху, с пометкой [test] в теме.</p>' +
       (S.newsErr ? '<div class="adm-err" role="alert">' + esc(S.newsErr) + "</div>" : "") +
-      /* the product editor's sticky bar: «Сохранить» stays above the nav on
-         a phone wherever the owner is in the letter, and the one primary
-         action — sending — sits at its right end, behind the confirm card */
-      '<div class="adm-savebar">' +
-        '<button class="adm-btn adm-btn--ghost" data-newssave' + (busy ? " disabled" : "") + ">Сохранить</button>" +
-        (newsDirty() ? '<button class="adm-link adm-link--muted" data-newsrevert>Отменить правки</button>' : "") +
-        '<span class="adm-savebar__sp"></span>' +
-        '<button class="adm-btn" data-newssend' + (busy || sending ? " disabled" : "") + ">" + newsSendLabel(S.newsAudience) + "</button>" +
-      "</div>";
+      /* the product editor's sticky bar — the phone's header (admin.css):
+         «Сохранить» is its primary, ink while the draft differs; the send is
+         the «Отправка» card's own button (admNewsSendCardHTML). Repainted in
+         place while typing (newsPaintState), hence the id. */
+      '<div class="adm-savebar" id="newsacts">' + admNewsActsHTML() + "</div>";
     return admBackHTML("data-newsback", "Рассылка") +
       (S.newsConfirmBack
         ? '<div class="adm-note adm-note--warn"><span>Правки не сохранены — если выйти, они пропадут.</span>' +
@@ -16260,7 +16281,15 @@
           '<button class="adm-link adm-link--muted" data-newsbackno>Остаться</button></div>'
         : "") +
       admColsHTML(left, admNewsSendCardHTML(d) + admNewsAssistantHTML(d)) +
-      admNewsPreviewHTML(d, L);
+      admNewsPreviewHTML(d, L) +
+      admNewsDangerHTML(d);
+  }
+  function admNewsActsHTML() {
+    var dirty = newsDirty();
+    return '<button class="adm-btn adm-savebar__main' + (dirty ? "" : " adm-btn--ghost adm-savebar__main--quiet") +
+        '" data-newssave' + (S.newsBusy ? " disabled" : "") + ">Сохранить</button>" +
+      (dirty ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-newsrevert>Отменить правки</button>' : "") +
+      admBarNoteHTML("news");
   }
   /** A letter that has gone out, or is going out: read-only — the counts, the subject per language, the letter itself. */
   function admNewsSentHTML(d) {
@@ -16328,7 +16357,7 @@
     S.newsBusy = true; S.newsErr = ""; render();
     saveNewsFields(d).then(function () {
       S.newsBusy = false;
-      if (then) then(); else { toast("Черновик сохранён ✓"); render(); }
+      if (then) then(); else { admBarFlash("news"); toast("Черновик сохранён ✓"); render(); }
     }).catch(function (e) {
       S.newsBusy = false;
       if (!(e && e.message === "auth")) { S.newsErr = BLOG_SAVE_ERR; toast(BLOG_SAVE_ERR); }
@@ -17134,6 +17163,73 @@
   function admSetDirtyCards(page) {
     return (ADM_SET_CARDS[page] || []).filter(function (c) { return admSetCardDirty(c[0], page); });
   }
+  /* ---- the save bar on a phone: the header's status word ------------------
+     Since 11.09.2026 the bar is the phone's top header (admin.css ≤ 767):
+     «Отмена» on the left, one word in the middle, «Сохранить» on the right.
+     The word is the draft's state — «Не сохранено» while something differs,
+     «Сохранено ✓» for a moment after a save that leaves the form open,
+     nothing while all is quiet. The bars with a draft read it (mailDirty(),
+     newsDirty(); the settings bar has its own line, admSetBarInnerHTML); the
+     forms that keep no draft and read their fields off the DOM on
+     «Сохранить» — the product editor, a promo code, a set, a partner — count
+     as dirty from the first keystroke in them (admBarTouch, keyed on the
+     open form so the next one starts quiet), and close on save, so they never
+     show the tick. A desktop hides the word: its bar says enough there. */
+  function admBarIdent() {
+    return S.goodsNew || S.adminEdit || S.bundleForm || S.promoForm || S.partnerForm || null;
+  }
+  function admBarNoteState(kind) {
+    var dirty = kind === "mail" ? mailDirty()
+      : kind === "news" ? newsDirty()
+      : !!(S.barTouched && S.barTouched === admBarIdent());
+    if (dirty) return "dirty";
+    return S.barSaved && S.barSaved === kind ? "saved" : "";
+  }
+  function admBarNoteClass(st) {
+    return "adm-savebar__note adm-savebar__note--phone" +
+      (st === "dirty" ? " adm-savebar__note--warn" : st === "saved" ? " adm-savebar__note--ok" : "");
+  }
+  function admBarNoteText(st) { return st === "dirty" ? "Не сохранено" : st === "saved" ? "Сохранено ✓" : ""; }
+  function admBarNoteHTML(kind) {
+    var st = admBarNoteState(kind);
+    return '<span class="' + admBarNoteClass(st) + '" data-barnote="' + kind + '" aria-live="polite">' + admBarNoteText(st) + "</span>";
+  }
+  /** In place — under a caret, never a render(): the touch listener, the tick's timer. */
+  function admBarPaintNote() {
+    var el = document.querySelector("[data-barnote]");
+    if (!el) return;
+    var st = admBarNoteState(el.getAttribute("data-barnote"));
+    el.className = admBarNoteClass(st);
+    el.textContent = admBarNoteText(st);
+    translateTree(el);
+  }
+  /** «Сохранено ✓» in the bar for a moment after a save that leaves the form open (the mail texts, a newsletter draft). */
+  function admBarFlash(kind) {
+    S.barSaved = kind;
+    clearTimeout(admBarFlash._t);
+    admBarFlash._t = setTimeout(function () { S.barSaved = ""; admBarPaintNote(); }, 2500);
+  }
+  /* The bar-as-header's height, measured: `--a-hdrh` is what the page's top
+     padding and the root's scroll padding clear (admin.css ≤ 767). Measured
+     rather than declared because the bar grows by a row while a refusal
+     stands in it («Цена — число от 1 до 500 €…» — goodsFail paints that in
+     place, no render), and by the notch inset on the phones that report one.
+     One observer, on whichever bar the last render left standing. */
+  var admBarRO = null, admBarEl = null, admWasSaving = false;
+  function admBarObserve(bar) {
+    if (bar === admBarEl) return;
+    if (admBarRO) { admBarRO.disconnect(); admBarRO = null; }
+    admBarEl = bar;
+    if (!bar) { document.documentElement.style.removeProperty("--a-hdrh"); return; }
+    if (typeof ResizeObserver !== "function") return;
+    admBarRO = new ResizeObserver(function () {
+      if (admBarEl) document.documentElement.style.setProperty("--a-hdrh", admBarEl.offsetHeight + "px");
+    });
+    /* the border box, not the default content box: the notch inset comes in
+       as padding, and a padding change leaves the content box as it was —
+       the observer would sleep through the very growth it is here for */
+    try { admBarRO.observe(bar, { box: "border-box" }); } catch (e) { admBarRO.observe(bar); }
+  }
   function admSetBarHTML(page) {
     if (!ADM_SET_CARDS[page]) return "";
     return '<div class="adm-savebar adm-savebar--set" data-setbar>' + admSetBarInnerHTML(page) + "</div>";
@@ -17149,15 +17245,20 @@
        whole keys they already are */
     // once saved the button itself says so, and the line goes quiet — the
     // same two words twice in one bar would be noise
+    // …and, beside the desktop's sentence, the one word the phone header has
+    // room for: the sentence is hidden there and the word here (admin.css
+    // .adm-savebar__note--long / --short)
     var note = dirty.length
-      ? '<span class="adm-savebar__note adm-savebar__note--warn" data-setnote><span>Изменения не сохранены</span>: ' +
-          dirty.map(function (c) { return "<span>" + c[1] + "</span>"; }).join(", ") + "</span>"
+      ? '<span class="adm-savebar__note adm-savebar__note--warn" data-setnote>' +
+          '<span class="adm-savebar__note--long"><span>Изменения не сохранены</span>: ' +
+          dirty.map(function (c) { return "<span>" + c[1] + "</span>"; }).join(", ") + "</span>" +
+          '<span class="adm-savebar__note--short">Не сохранено</span></span>'
       : saved ? ""
       : '<span class="adm-savebar__note" data-setnote>Изменений нет</span>';
     return note +
-      '<button class="adm-btn' + (dirty.length ? "" : " adm-btn--ghost") + '" ' + attr + (dirty.length ? "" : " disabled") + ">" +
+      '<button class="adm-btn adm-savebar__main' + (dirty.length ? "" : " adm-btn--ghost") + '" ' + attr + (dirty.length ? "" : " disabled") + ">" +
         (saved ? "Сохранено ✓" : "Сохранить") + "</button>" +
-      (dirty.length ? '<button class="adm-link adm-link--muted" data-setrevert>Отменить правки</button>' : "");
+      (dirty.length ? '<button class="adm-link adm-link--muted adm-savebar__cancel" data-setrevert>Отменить правки</button>' : "");
   }
   function paintSetBar() {
     var bar = document.querySelector("[data-setbar]");
@@ -19283,8 +19384,9 @@
          screen on a phone wherever the owner is in the form */
       '<div class="adm-savebar">' +
         (S.promoFormErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.promoFormErr) + "</p>" : "") +
-        '<button class="adm-btn" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
-        '<button class="adm-btn adm-btn--ghost" data-admpromocancel>Отмена</button></div></div>';
+        '<button class="adm-btn adm-savebar__main" data-admpromosave>' + (f.editing ? "Сохранить" : "Создать") + "</button>" +
+        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpromocancel>Отмена</button>' +
+        admBarNoteHTML("touch") + "</div></div>";
   }
   function admPromosHTML() {
     loadAdminPromos(false);
@@ -19828,13 +19930,15 @@
       '<p class="hint adm-hint" data-bundlehint style="margin:0">' + esc(bundleHintHTML()) + "</p>" +
       '<div class="adm-field">Фото набора</div>' +
       '<div class="adm-picks">' + bundleImageRowHTML() + "</div>" +
-      // the product editor's sticky bar, destructive slot included — see promoFormHTML()
+      // «Удалить набор» ends the form on its own row (.adm-danger): the bar is
+      // the phone's header now and has no slot for it; the confirm card is unchanged
+      (f.editing ? '<div class="adm-danger"><button class="adm-link adm-link--warn" data-bundledelete="' + esc(f.id) + '">Удалить набор</button></div>' : "") +
+      // the product editor's sticky bar — see promoFormHTML()
       '<div class="adm-savebar">' +
         (S.bundleFormErr ? '<p class="err adm-err adm-savebar__err" role="alert">' + esc(S.bundleFormErr) + "</p>" : "") +
-        '<button class="adm-btn" data-bundlesave>Сохранить</button>' +
-        '<button class="adm-btn adm-btn--ghost" data-bundlecancel>Отмена</button>' +
-        '<span class="adm-savebar__sp"></span>' +
-        (f.editing ? '<button class="adm-del" data-bundledelete="' + esc(f.id) + '">Удалить набор</button>' : "") +
+        '<button class="adm-btn adm-savebar__main" data-bundlesave>Сохранить</button>' +
+        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-bundlecancel>Отмена</button>' +
+        admBarNoteHTML("touch") +
       "</div></div>";
   }
 
@@ -20412,8 +20516,9 @@
       // the product editor's sticky bar, the refusal in it — see promoFormHTML()
       '<div class="adm-savebar">' +
         (S.partnerErr ? '<p class="adm-err adm-savebar__err" role="alert">' + esc(S.partnerErr) + "</p>" : "") +
-        '<button class="adm-btn" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
-        '<button class="adm-btn adm-btn--ghost" data-admpartnercancel>Отмена</button>' +
+        '<button class="adm-btn adm-savebar__main" data-admpartnersave' + (S.partnerBusy ? " disabled" : "") + ">Добавить партнёра</button>" +
+        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admpartnercancel>Отмена</button>' +
+        admBarNoteHTML("touch") +
       "</div></div>";
   }
   var PARTNER_ERRS = {
@@ -22027,6 +22132,16 @@
             return '<button class="adm-tab" data-edtab="' + x[0] + '" aria-current="' + (t === x[0]) + '" title="' + x[1] + '">' + x[1] + "</button>";
           }).join("") + "</div>") +
       edPaneMain(p) + edPaneSizes(p) + edPaneMedia(p) + edPaneDesc(p) + edPaneSeo(p) +
+      /* The destructive slot of the design — the end of the form, on its own
+         row (.adm-danger), outside the panes so it is there from any tab, on
+         both widths: the bar became the phone's header and has no slot for
+         it. There is no DELETE for a catalogue product — the catalogue is a
+         file, not a table — so the button does the strongest thing the shop
+         really has, says exactly that, and goes through the confirm card
+         with an undo like every other money-side change. For the owner's own
+         product the same button really takes it off the shelf (active=false),
+         undo included; a new product has nothing to take off yet. */
+      (isNew || p.active === false ? "" : '<div class="adm-danger"><button class="adm-link adm-link--warn" data-admgoodspull="' + esc(p.id) + '">Снять с продажи</button></div>') +
       // goodsFail() fills this in place, so the message appears without a
       // render() taking the caret out of whatever field is being fixed — and
       // it sits in the sticky save bar, outside the panes, so a refusal is on
@@ -22034,17 +22149,9 @@
       // just pressed, rather than somewhere below the fold.
       '<div class="adm-savebar">' +
         '<p class="adm-err adm-savebar__err" role="alert" data-goodserr' + (S.goodsErr ? "" : " hidden") + ">" + esc(S.goodsErr || "") + "</p>" +
-        '<button class="adm-btn" data-admsavegoods="' + esc(p.id) + '">' + (isNew ? "Сохранить товар" : "Сохранить") + "</button>" +
-        '<button class="adm-btn adm-btn--ghost" data-admclose>Отмена</button>' +
-        '<span class="adm-savebar__sp"></span>' +
-        /* The destructive slot of the design. There is no DELETE for a
-           catalogue product — the catalogue is a file, not a table — so the
-           button does the strongest thing the shop really has, says exactly
-           that, and goes through the confirm card with an undo like every
-           other money-side change. For the owner's own product the same
-           button really takes it off the shelf (active=false), undo included;
-           a new product has nothing to take off yet. */
-        (isNew || p.active === false ? "" : '<button class="adm-del" data-admgoodspull="' + esc(p.id) + '">Снять с продажи</button>') +
+        '<button class="adm-btn adm-savebar__main" data-admsavegoods="' + esc(p.id) + '">' + (isNew ? "Сохранить товар" : "Сохранить") + "</button>" +
+        '<button class="adm-btn adm-btn--ghost adm-savebar__cancel" data-admclose>Отмена</button>' +
+        admBarNoteHTML("touch") +
       "</div></div>";
   }
   /** Tabs are a DOM patch, never a render(): the panes hold everything the
@@ -25746,6 +25853,7 @@
       if (MAIL_TEXTS) MAIL_TEXTS.texts = a.value || {};
       S.mailDraft = null;
       mailPreviewV += 1;
+      admBarFlash("mail");   // the bar's «Сохранено ✓» moment (the phone header's word)
     }
     else if (a.type === "set_subcat") { if (a.value) DEMO.subcat[a.id] = a.value; else delete DEMO.subcat[a.id]; }
     else if (a.type === "set_varimg") DEMO.varimg[a.id] = a.map.slice();
@@ -26952,7 +27060,16 @@
        because a rule dropped by an older browser is exactly the kind of
        thing that puts a button under a nav bar on one phone and not the
        next. */
-    document.body.classList.toggle("adm-saving", S.screen === "admin" && !!bodySlot.querySelector(".adm-savebar"));
+    var savebar = S.screen === "admin" ? bodySlot.querySelector(".adm-savebar") : null;
+    if (admWasSaving && !savebar) S.barTouched = null;   // the form closed — the next one starts quiet
+    admWasSaving = !!savebar;
+    document.body.classList.toggle("adm-saving", !!savebar);
+    /* …and on <html> too: scroll-padding-top belongs to the root element,
+       and on a phone it is what keeps a focused field from landing under
+       the bar-as-header (admin.css ≤ 767). The bar's height is measured
+       while it stands — admBarObserve(). */
+    document.documentElement.classList.toggle("adm-saving", !!savebar);
+    admBarObserve(savebar);
     document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
     // …and, if this is the first screen that wants the assistant at all, the
     // widget's <script> is fetched now rather than at boot (mountChat above)
@@ -28010,7 +28127,11 @@
       render(); return;
     }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
-    if (d.admai !== undefined) { S.admAi = !S.admAi; admPanesSave(); render(); refocus("[data-admai]"); return; }
+    if (d.admai !== undefined) {
+      S.admAi = !S.admAi;
+      if (t.closest(".adm-sheet--phone")) S.admMore = false;   // opened from «Ещё»: the sheet gives way
+      admPanesSave(); render(); refocus("[data-admai]"); return;
+    }
     // the phone «Ещё» sheet
     if (d.admmore !== undefined) { S.admMore = true; render(); return; }
     if (d.admmoreclose !== undefined) { S.admMore = false; render(); return; }
@@ -30728,6 +30849,39 @@
     });
   }, { passive: true });
   window.addEventListener("resize", measureHdr, { passive: true });
+  /* The forms that keep no draft — the product editor, a promo code, a set,
+     a partner — are «dirty» from the first keystroke: the bar's status word
+     turns to «Не сохранено» (admBarNoteState). Keyed on what is open
+     (admBarIdent), so the next form starts quiet; renderImpl clears the key
+     when the bar leaves the screen. */
+  function admBarTouch(e) {
+    if (S.screen !== "admin") return;
+    var t = e.target;
+    if (!t || !t.closest || !t.closest(".adm-page")) return;
+    if (!document.querySelector('[data-barnote="touch"]')) return;
+    var id = admBarIdent();
+    if (!id || S.barTouched === id) return;
+    S.barTouched = id;
+    admBarPaintNote();
+  }
+  document.addEventListener("input", admBarTouch);
+  document.addEventListener("change", admBarTouch);
+  /* iOS: with the keyboard up the visual viewport slides inside the layout
+     viewport once the page cannot scroll any further, and a fixed top bar
+     stays with the layout viewport — off the screen. The bar-as-header
+     follows the visual viewport instead (admin.css: a translate by
+     `--a-vvtop`). Zero whenever the two agree, so nothing moves elsewhere. */
+  if (window.visualViewport) {
+    var admVvTop = 0;
+    var admVvFollow = function () {
+      var top = document.body.classList.contains("adm-saving") ? Math.max(0, Math.round(window.visualViewport.offsetTop)) : 0;
+      if (top === admVvTop) return;
+      admVvTop = top;
+      document.documentElement.style.setProperty("--a-vvtop", top + "px");
+    };
+    window.visualViewport.addEventListener("resize", admVvFollow);
+    window.visualViewport.addEventListener("scroll", admVvFollow);
+  }
   /* Enter in a one-line box of the panel's small forms presses that form's
      own button. None of them is a <form>, so Enter used to do nothing — which
      on a phone keyboard reads as «не сохранилось». Each row: the boxes, and
