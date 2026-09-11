@@ -1053,8 +1053,11 @@ button.adm-switch { width: 100%; font: inherit; color: inherit; text-align: left
   /* the settings pages' long sentence («Изменения не сохранены: Главный
      баннер, Верхняя полоска») is the desktop's; the phone says one word */
   .adm-savebar__note--long { display: none; }
+  /* margin-left auto: the button keeps the right edge even when it is the
+     row's only child — the settings bar after a save has no status word and
+     no «Отменить правки», and «Сохранено ✓» must not jump to the left */
   .adm-savebar__main {
-    order: 3; height: 44px; min-height: 44px; padding: 0 14px; margin: 0 -2px 0 0; font-size: 15px;
+    order: 3; height: 44px; min-height: 44px; padding: 0 14px; margin: 0 -2px 0 auto; font-size: 15px;
     border: 2px solid transparent; background-clip: padding-box;
     background-color: var(--a-ink); color: #fff;
   }
