@@ -333,8 +333,17 @@ test.describe("a11y admin", () => {
     await page.waitForTimeout(600);
     await audit.check(page, "admin Настройки · Главная");
 
-    // the assistant panel
-    await page.locator(".adm-fab").click();
+    // the assistant panel — on a phone this settings page has a save bar, and
+    // while one stands the bar is the header and the floating button is off
+    // the screen: the assistant is a row of «Ещё» there (r13)
+    if (mobile) {
+      await page.locator("[data-admmore]").click();
+      await expect(page.locator(".adm-sheet")).toBeVisible();
+      await audit.check(page, "admin «Ещё» sheet with the assistant row");
+      await page.locator(".adm-sheet [data-admai]").click();
+    } else {
+      await page.locator(".adm-fab").click();
+    }
     await expect(page.locator(".adm-asst")).toBeVisible();
     await audit.check(page, "admin assistant");
     await page.locator(".adm-asst__fold").click();

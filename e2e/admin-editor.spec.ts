@@ -362,19 +362,26 @@ test.describe("admin — the product editor", () => {
    * The phone. Renat tested the editor on a Samsung S21 FE (10.09.2026) and
    * sent a screenshot: «Сохранить» and «Отмена» half under the bottom nav,
    * the assistant's black square on the form, the photo tiles' arrows running
-   * into the next tile. Three things a person saw, pinned as geometry:
-   *   · the save bar stands ON the nav — with and without the 34-px
-   *     home-indicator inset an iPhone reports under viewport-fit=cover
-   *     (index.html), which is what put the bar's lower third under the nav
-   *     on his phone (admin.css `--a-barh`);
-   *   · the assistant's button is inside the bar's own row, over nothing;
+   * into the next tile. Then the bar that fixed that took a quarter of his
+   * iPhone 14's screen — two rows on the nav — so on a phone the bar is the
+   * screen's top header now (r13, Dim 11.09.2026): «Отмена · state ·
+   * Сохранить», the way Notes and Contacts do it (admin.css ≤ 767), and the
+   * destructive link ends the form instead. Pinned as geometry:
+   *   · the bar is the first thing on the screen — at the very top, edge to
+   *     edge, the panel's own header gone while it stands, its two buttons a
+   *     thumb's size and below the notch inset an iPhone reports under
+   *     viewport-fit=cover (index.html; the CDP emulation Chromium has for
+   *     exactly this, so no real phone is needed);
+   *   · the form starts under the bar, not behind it, and a field the caret
+   *     jumps to lands under the bar's edge, not behind it (scroll padding);
+   *   · «Снять с продажи» is the form's last row — above the nav at the end
+   *     of the scroll, inset and all, never under it;
+   *   · the assistant's button is off the screen (it would sit on the form);
    *   · every photo button lies inside its own row and crosses no other;
    *   · «Сканер» beside a size's barcode box fills THAT box, closes, and
    *     leaves the editor as it was — and Back closes the scanner alone.
-   * The inset comes from the CDP emulation Chromium has for exactly this; a
-   * real phone is not needed to see the bar slide under the nav.
    */
-  test("phone: the save bar stands on the nav, photo buttons stay in their rows, «Сканер» fills the barcode box", async ({ page }, testInfo) => {
+  test("phone: the save bar is the header — on top, clear of the form and the nav; photo buttons stay in their rows; «Сканер» fills the barcode box", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "mobile", "the phone layout — the desktop has no bottom nav");
     test.setTimeout(120_000);
     const w = watch(page);
@@ -388,34 +395,75 @@ test.describe("admin — the product editor", () => {
     await openEditor(page, id);
     await edTab(page, "sizes");
 
-    // ---- the save bar, the nav and the assistant's button ------------------
-    const stacked = async (label: string) => {
+    // ---- the bar as the header, the form under it, the nav under the form ---
+    const header = async (label: string, inset: number, where: "top" | "mid" | "end") => {
       const r = await page.evaluate(() => {
         const box = (el: Element) => { const b = el.getBoundingClientRect(); return { l: b.left, t: b.top, r: b.right, b: b.bottom }; };
         const q = (sel: string) => box(document.querySelector(sel)!);
+        const shown = (sel: string) => { const el = document.querySelector(sel); return !!el && getComputedStyle(el).display !== "none"; };
         return {
-          vh: window.innerHeight, bar: q(".adm-savebar"), nav: q(".adm-bar"), fab: q(".adm-fab"), del: q("[data-admgoodspull]"),
+          vw: window.innerWidth, vh: window.innerHeight,
+          bar: q(".adm-savebar"), nav: q(".adm-bar"), del: q("[data-admgoodspull]"), form: q(".adm-screen"),
+          fabShown: shown(".adm-fab"), panelHeaderShown: shown(".cohdr--adm"),
           buttons: Array.from(document.querySelectorAll(".adm-savebar button")).map((el) => ({ name: (el.textContent || "").trim(), ...box(el) })),
         };
       });
       expect(r.nav.b, `${label}: the nav is not at the bottom of the screen`).toBe(r.vh);
-      // the bar's bottom edge IS the nav's top edge — not under it, not floating above it
-      expect(Math.abs(r.bar.b - r.nav.t), `${label}: the save bar's bottom is ${Math.round(r.bar.b - r.nav.t)}px off the nav's top`).toBeLessThanOrEqual(0.5);
-      expect(r.del.b, `${label}: «Снять с продажи» is under the nav`).toBeLessThanOrEqual(r.nav.t);
-      // the assistant's button: in the bar's row, over none of the bar's buttons, over none of the form
-      expect(r.fab.t, `${label}: the assistant's button is above the bar, on the form`).toBeGreaterThanOrEqual(r.bar.t);
-      expect(r.fab.b, `${label}: the assistant's button is under the nav`).toBeLessThanOrEqual(r.nav.t);
-      for (const btn of r.buttons) expect(overlaps(r.fab, btn), `${label}: the assistant's button covers «${btn.name}»`).toBe(false);
+      // the bar: the top edge of the screen, edge to edge, one row plus the inset — not two rows, not a nav-stacked bar
+      expect(Math.abs(r.bar.t), `${label}: the bar is ${Math.round(r.bar.t)}px off the top of the screen`).toBeLessThanOrEqual(0.5);
+      expect(r.bar.l, `${label}: the bar does not start at the left edge`).toBeLessThanOrEqual(0.5);
+      expect(r.bar.r, `${label}: the bar does not reach the right edge`).toBeGreaterThanOrEqual(r.vw - 0.5);
+      expect(r.bar.b, `${label}: the bar is shorter than its row plus the inset`).toBeGreaterThanOrEqual(52 + inset);
+      expect(r.bar.b, `${label}: the bar is ${Math.round(r.bar.b)}px tall — more than one row over the inset`).toBeLessThanOrEqual(56 + inset);
+      expect(r.panelHeaderShown, `${label}: the panel's own header is on the screen beside the bar`).toBe(false);
+      // its buttons: «Сохранить» and «Отмена» only — the destructive link is not here — a thumb's size, under the notch
+      expect(r.buttons.map((b) => b.name).sort(), `${label}: the bar's buttons`).toEqual(["Отмена", "Сохранить"]);
+      for (const btn of r.buttons) {
+        expect(btn.b - btn.t, `${label}: «${btn.name}» is under a thumb's size`).toBeGreaterThanOrEqual(43.5);
+        expect(btn.t, `${label}: «${btn.name}» is under the notch inset`).toBeGreaterThanOrEqual(inset - 0.5);
+        expect(btn.b, `${label}: «${btn.name}» sticks out of the bar`).toBeLessThanOrEqual(r.bar.b + 0.5);
+      }
+      // the assistant's button is not on the screen while the bar is the header («Ещё» keeps the assistant)
+      expect(r.fabShown, `${label}: the assistant's button is on the form`).toBe(false);
+      // the form starts under the bar, not behind it…
+      if (where === "top") expect(r.form.t, `${label}: the form starts behind the bar`).toBeGreaterThanOrEqual(r.bar.b);
+      // …and ends in «Снять с продажи», above the nav, never under it
+      if (where === "end") {
+        expect(r.del.t, `${label}: «Снять с продажи» is under the bar`).toBeGreaterThanOrEqual(r.bar.b);
+        expect(r.del.b, `${label}: «Снять с продажи» is under the nav`).toBeLessThanOrEqual(r.nav.t + 0.5);
+      }
     };
+    // a field the caret jumps to lands under the bar's edge, not behind it
+    // (scroll-padding-top, admin.css) — and the bar stays where it is
+    const fieldUnderBar = async (label: string) => {
+      const r = await page.evaluate(() => {
+        const el = document.querySelector("[data-edprice]") as HTMLInputElement;
+        el.scrollIntoView({ block: "start" });
+        el.focus();
+        const f = el.getBoundingClientRect(), b = document.querySelector(".adm-savebar")!.getBoundingClientRect();
+        return { field: f.top, barTop: b.top, barBottom: b.bottom, focused: document.activeElement === el };
+      });
+      expect(r.focused, `${label}: the price box did not take the focus`).toBe(true);
+      expect(r.field, `${label}: the price box scrolled behind the bar`).toBeGreaterThanOrEqual(r.barBottom);
+      expect(Math.abs(r.barTop), `${label}: the bar left the top of the screen with a field focused`).toBeLessThanOrEqual(0.5);
+    };
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await header("no inset, top of the scroll", 0, "top");
     await page.evaluate(() => window.scrollTo(0, 200));
-    await stacked("no inset");
+    await header("no inset, scrolled", 0, "mid");
+    await fieldUnderBar("no inset");
+    // an iPhone 14: 47 px of notch above, 34 px of home indicator below
     const cdp = await page.context().newCDPSession(page);
-    await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 0, left: 0, bottom: 34, right: 0 } });
+    await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 47, left: 0, bottom: 34, right: 0 } });
     await expect.poll(() => page.locator(".adm-bar").evaluate((el) => el.getBoundingClientRect().height),
       { message: "the nav did not grow by the inset" }).toBeGreaterThanOrEqual(98);
-    await stacked("iPhone inset");
+    await expect.poll(() => page.locator(".adm-savebar").evaluate((el) => el.getBoundingClientRect().height),
+      { message: "the bar did not grow by the notch inset" }).toBeGreaterThanOrEqual(99);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await header("iPhone insets, top of the scroll", 47, "top");
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    await stacked("iPhone inset, end of the scroll");
+    await header("iPhone insets, end of the scroll", 47, "end");
+    await fieldUnderBar("iPhone insets");
     await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { top: 0, left: 0, bottom: 0, right: 0 } });
     await cdp.detach();
 
