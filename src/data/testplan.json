@@ -3574,14 +3574,14 @@
       "title": "Доставка по умолчанию",
       "steps": [
         "В кабинете открыть «Доставка по умолчанию».",
-        "Выбрать страну, способ, перевозчика и пакомат.",
-        "Нажать «Сохранить» в полосе внизу.",
+        "Выбрать страну и строку «Пакомат», потом сам пакомат из списка.",
         "Набрать новую корзину и дойти до шага доставки.",
         "Войти в кабинет с другого телефона и снова дойти до шага доставки.",
         "Вернуться в кабинет, нажать «Выйти» и оформить корзину ещё раз."
       ],
       "expect": [
-        "Пока выбор не сохранён, внизу написано «Изменения не сохранены».",
+        "Пока пакомат не выбран, под списком: «Выберите пакомат — тогда сохраним».",
+        "После выбора пакомата под списком «Доставка по умолчанию сохранена ✓»; кнопки нет.",
         "Сохранённая доставка подставляется в кассу сама.",
         "На другом телефоне после входа она подставляется тоже.",
         "После «Выйти» она больше не подставляется.",
@@ -3594,14 +3594,14 @@
         "title": "Default delivery",
         "steps": [
           "In the account open «Доставка по умолчанию» (default delivery).",
-          "Choose a country, a method, a carrier and a locker.",
-          "Press «Сохранить» in the bar at the bottom.",
+          "Choose a country and a «Пакомат» row, then the locker itself from the list.",
           "Fill a new cart and get to the delivery step.",
           "Sign in on another phone and get to the delivery step again.",
           "Go back to the account, press «Выйти» (sign out) and go through the checkout once more."
         ],
         "expect": [
-          "Until the choice is saved, the bottom bar says «Изменения не сохранены».",
+          "Until a locker is picked, under the list: «Выберите пакомат — тогда сохраним».",
+          "Once the locker is picked, «Доставка по умолчанию сохранена ✓» shows under the list; no button.",
           "The saved delivery fills itself in at the checkout.",
           "On the other phone, once signed in, it fills in too.",
           "After «Выйти» it stops filling in.",
@@ -3619,16 +3619,17 @@
       "title": "Мои данные",
       "steps": [
         "В кабинете открыть «Мои данные».",
-        "Заполнить имя, телефон и день рождения.",
+        "Вписать имя и нажать в другое место; так же телефон и день рождения.",
         "Снять и снова поставить галочку про скидки и поздравление.",
-        "Нажать «Сохранить» в полосе внизу и перезагрузить страницу.",
+        "Перезагрузить страницу.",
         "Набрать корзину и дойти до первого шага кассы."
       ],
       "expect": [
-        "Пока есть несохранённые правки, внизу написано «Изменения не сохранены».",
-        "После сохранения там стоит «Сохранено ✓».",
+        "Кнопки «Сохранить» нигде нет — ни внизу, ни между полями.",
+        "Как только поле оставлено, под ним «Сохраняем…», потом «Сохранено ✓».",
+        "Через пару секунд «Сохранено ✓» исчезает само, поле остаётся заполненным.",
         "После перезагрузки имя, телефон и день рождения на месте.",
-        "Галочка про скидки и поздравление выключается и включается.",
+        "Галочка про скидки сохраняется сразу — под ней «Сохранено ✓».",
         "На кассе галочка про скидки стоит так же, как в кабинете."
       ],
       "why": "День рождения нужен для поздравления со скидкой, а отписка — требование закона.",
@@ -3638,16 +3639,17 @@
         "title": "My details",
         "steps": [
           "In the account open «Мои данные» (my details).",
-          "Fill in the name, the phone and the date of birth.",
+          "Type a name and tap elsewhere; the same for the phone and the date of birth.",
           "Untick the discounts-and-greeting box and tick it again.",
-          "Press «Сохранить» in the bar at the bottom and reload the page.",
+          "Reload the page.",
           "Fill a cart and get to the first step of the checkout."
         ],
         "expect": [
-          "While there are unsaved edits, the bottom bar says «Изменения не сохранены».",
-          "Once saved, it says «Сохранено ✓».",
+          "There is no «Сохранить» button anywhere — not at the bottom, not between fields.",
+          "Once a field is left, «Сохраняем…» shows under it, then «Сохранено ✓».",
+          "«Сохранено ✓» goes away on its own after a couple of seconds; the value stays.",
           "After the reload the name, phone and date of birth remain.",
-          "The discounts-and-greeting tick switches off and on again.",
+          "The discounts tick saves at once — «Сохранено ✓» under it.",
           "At the checkout the discounts box is ticked the same way as in the account."
         ],
         "why": "The birthday drives the discount letter; unsubscribing is required by law."
