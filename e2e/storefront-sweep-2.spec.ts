@@ -631,16 +631,15 @@ test.describe("account — the default delivery reaches the checkout", () => {
     await expect.poll(async () => (await machines.locator("option").count())).toBeGreaterThan(1);
     /* The select opens on a placeholder — a machine is chosen, never assumed
        (the alphabetically first one is in Abja-Paluoja) — and since
-       10.09.2026 the block is part of the profile form: the choice reaches
-       the row through the form's own «Сохранить», which lights up the moment
-       the row is ticked and says «Сохранено ✓» once it is stored. */
+       12.09.2026 the block saves itself: a parcel row waits for its machine
+       and says so under the list, and the pick of the machine is what puts
+       the choice on the row (account-settings.spec.ts has the whole flow). */
+    const line = page.locator('[data-acctst="ship"]');
+    await expect(line).toHaveText("Выберите пакомат — тогда сохраним");
     await machines.selectOption({ index: 1 });
     const machine = (await machines.inputValue()).trim();
     expect(machine.length, "no parcel machine offered in the account").toBeGreaterThan(0);
-    const save = page.locator("[data-save]");
-    await expect(save).not.toHaveClass(/btn--ghost/);
-    await save.click();
-    await expect(save).toContainText("✓");
+    await expect(line).toContainText("✓");
 
     await page.goto(shopUrl("", `/p/${PRODUCT.id}/`));
     await waitForScreen(page, "product");

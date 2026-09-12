@@ -69,11 +69,16 @@ for (const [i, lang] of LANGS.entries()) {
       await expect(giftTile).toBeVisible();
       await expect(giftTile.getByRole("heading")).toHaveText(tr("Подарочная карта", lang.code));
 
-      // 4) Profile save.
-      await page.locator('[data-acctf="name"]').fill("E2E Тестов");
-      await page.locator('[data-acctf="phone"]').fill("+372 5550001");
-      await page.locator("[data-save]").click();
-      await expect(page.locator("[data-save]")).toContainText("✓");
+      // 4) Profile: each field saves itself when it is left (no Save button
+      //    since 12.09.2026 — account-settings.spec.ts) and says so under itself.
+      const name = page.locator('[data-acctf="name"]');
+      await name.fill("E2E Тестов");
+      await name.blur();
+      await expect(page.locator('[data-acctst="name"]')).toContainText("✓");
+      const phone = page.locator('[data-acctf="phone"]');
+      await phone.fill("+372 5550001");
+      await phone.blur();
+      await expect(page.locator('[data-acctst="phone"]')).toContainText("✓");
 
       // 5) Logout returns to the signed-out (email-entry) screen.
       await page.locator("[data-logout]").click();
