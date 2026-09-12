@@ -2312,7 +2312,6 @@
         "Pood töötab korraga kolmes keeles — vene, eesti ja inglise keeles. Ostja valib keele ise, lipukesega poe päises, ja pood jätab selle meelde.",
       "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.":
         "Liides, tootenimede venekeelsed lõpud ja abilise kirjutatud kirjeldused tõlgitakse automaatselt. Kui kuskil on vaja sõnastust parandada — kirjutage Dimile.",
-      "Ссылки на магазин": "Poe lingid",
       "Язык самой админки переключается внизу меню — на магазин это не влияет.": "Paneeli enda keelt vahetatakse menüü all — poodi see ei mõjuta.",
       "Скрыть слайд": "Peida slaid", "Показать слайд": "Näita slaidi",
       "Запретить снижать цены": "Keela hindade alandamine", "Разрешить снижать цены": "Luba hindade alandamine",
@@ -4699,7 +4698,6 @@
         "The shop runs in three languages at once — Russian, Estonian and English. The visitor picks the language with the flag in the shop's header, and the shop remembers it.",
       "Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.":
         "The interface, the Russian tails of product names and the descriptions the assistant writes are translated automatically. If a wording needs fixing somewhere, write to Dim.",
-      "Ссылки на магазин": "Shop links",
       "Язык самой админки переключается внизу меню — на магазин это не влияет.": "The panel's own language is switched at the bottom of the menu — it does not affect the shop.",
       "Скрыть слайд": "Hide the slide", "Показать слайд": "Show the slide",
       "Запретить снижать цены": "Do not lower prices", "Разрешить снижать цены": "Allow lowering prices",
@@ -13838,12 +13836,13 @@
       (detail ? '<span class="adm-row__sub">' + esc(detail) + "</span>" : "") + "</span>" +
       '<span class="adm-row__chev" aria-hidden="true">›</span></button>';
   }
-  /** «Последние заказы» and the queue rows both link into the same card. */
+  /** «Последние заказы» and the queue rows both link into the same card —
+      the same three lines as a row of «Заказы» (admOrderRowHTML), minus the
+      actions: the overview is for looking, the list is for doing. */
   function admRecentRow(v) {
-    return '<button class="adm-row adm-row--click" data-admorder="' + esc(v.id) + '">' +
-      '<span class="adm-row__body"><span class="adm-row__nm">' + esc(v.who) + "</span>" +
-      '<span class="adm-row__sub"><span class="adm-mono">' + esc(v.number) + "</span> · <span>" + esc(v.ship) + "</span></span></span>" +
-      admOrderBadge(v) +
+    return '<button class="adm-row adm-row--click adm-row--lines" data-admorder="' + esc(v.id) + '">' +
+      '<span class="adm-row__body">' + admOrderRowBodyHTML(v) + "</span>" +
+      '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(v.sum) + "</span></button>";
   }
   function admOverviewHTML() {
@@ -14114,17 +14113,28 @@
       '<button class="adm-btn adm-btn--row" data-adminvpaid="' + esc(v.id) + '">Отметить оплаченным</button>';
     else if (v.unpaid) acts =
       '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admwrite="' + esc(v.id) + '">Написать</button>';
-    return '<div class="adm-row adm-row--stack adm-row--open">' +
-      '<button class="adm-row--click" data-admorder="' + esc(v.id) + '" ' +
-        'style="display:flex;flex-direction:column;gap:6px;border:0;background:none;padding:0;text-align:left;width:100%">' +
-        '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%">' +
-          '<span style="font-weight:600">' + esc(v.who) + "</span>" +
-          '<span class="adm-row__amt">' + eur(v.sum) + "</span></span>" +
-        '<span class="adm-row__sub" style="width:100%"><span class="adm-mono">' + esc(v.number) + "</span> · " +
-          esc(v.date) + " · <span>" + admItemsLabel(v.items) + "</span><br><span>" + esc(v.ship) + "</span></span>" +
-      "</button>" +
-      '<div class="adm-acts">' + admOrderBadge(v) + '<div style="flex:1"></div>' + acts + "</div>" +
+    /* A wrapper with the button inside it, not a button: the actions are
+       buttons of their own. The body is the button (the whole text opens the
+       card), the chip has the third line, the sum the top right, and the
+       actions a full-width line under everything on a phone — the same
+       place on every row, whether the row offers «Создать этикетку» and
+       «Отправлен», one «Чек ↗» or nothing (admin.css, .adm-row--lines). */
+    return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines">' +
+      '<button class="adm-row__body adm-row--click" data-admorder="' + esc(v.id) + '">' + admOrderRowBodyHTML(v) + "</button>" +
+      '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
+      '<span class="adm-row__amt">' + eur(v.sum) + "</span>" +
+      (acts ? '<div class="adm-acts">' + acts + "</div>" : "") +
     "</div>";
+  }
+  /** The two text lines of an order in a list — «Заказы» and «Обзор» share
+      them (Dim, 11.09.2026: one shape per list, and one shape for the lists
+      of orders): the number and the day on the first, the customer, the
+      count and the delivery on the second, one line each, cut with an
+      ellipsis. Spans, not divs: the body is a <button>'s content. */
+  function admOrderRowBodyHTML(v) {
+    return '<span class="adm-row__nm"><span class="adm-mono">' + esc(v.number) + "</span> · " + esc(v.date) + "</span>" +
+      '<span class="adm-row__sub adm-row__sub--one"><span class="adm-row__who">' + esc(v.who) + "</span> · <span>" +
+        admItemsLabel(v.items) + "</span> · <span>" + esc(v.ship) + "</span></span>";
   }
 
   /* ---------- Заказ (карточка) -------------------------------------------- */
@@ -14738,13 +14748,14 @@
       : p.stock === "out" ? ["Нет", "adm-badge--warnfill"]
       : p.stock === "low" ? ["Мало", "adm-badge--warn"] : ["В наличии", "adm-badge--ok"];
     var fresh = p.custom && p.active !== false && (customFresh(p) || (S.goodsFresh && S.goodsFresh[p.id]));
-    return '<button class="adm-row adm-row--tall adm-row--click" data-admgoods="' + esc(p.id) + '">' +
+    return '<button class="adm-row adm-row--tall adm-row--click adm-row--lines" data-admgoods="' + esc(p.id) + '">' +
       '<span class="adm-thumb">' + media(p, 0, "") + "</span>" +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(p.brand) + " — " + esc(p.name) +
         (fresh ? ' <span class="adm-badge adm-badge--sm adm-badge--ink" data-goodsfresh>новый</span>' : "") + "</span>" +
-        '<span class="adm-row__sub">' + (p.sizes || []).map(function (s) { return "<span>" + esc(s) + "</span>"; }).join(" · ") + "</span></span>" +
-      '<span class="adm-row__end"><span class="adm-row__amt">' + price + "</span>" +
-        '<span class="adm-badge adm-badge--sm ' + badge[1] + '">' + badge[0] + "</span></span></button>";
+        '<span class="adm-row__sub adm-row__sub--one">' + (p.sizes || []).map(function (s) { return "<span>" + esc(s) + "</span>"; }).join(" · ") + "</span></span>" +
+      // the state, then the price: the third line on a phone, the right end of the row on a desktop
+      '<span class="adm-row__line"><span class="adm-badge adm-badge--sm ' + badge[1] + '">' + badge[0] + "</span>" +
+        '<span class="adm-row__amt">' + price + "</span></span></button>";
   }
 
   /* ---------- Товары → Наборы --------------------------------------------- */
@@ -14763,20 +14774,22 @@
       (S.bundleForm ? bundleFormHTML() : "") +
       (list.length
         ? '<div class="adm-list adm-list--flat">' + list.map(function (b, i) {
-            return '<div class="adm-row"><span class="adm-thumb">' + bundleStack(b, "bstack--line") + "</span>" +
+            return '<div class="adm-row adm-row--tall adm-row--lines"><span class="adm-thumb">' + bundleStack(b, "bstack--line") + "</span>" +
               '<span class="adm-row__body"><span class="adm-row__nm">' + esc((b.title && (b.title[S.lang] || b.title.RU)) || b.id) + "</span>" +
               // each name its own node, so the Russian type tail is translated per product
               '<span class="adm-row__sub adm-row__sub--one">' + b.items.map(function (it) {
                 var p = byIdOrNull(it.productId);
                 return "<span>" + esc(p ? p.name : it.productId) + "</span>";
               }).join(" + ") + "</span></span>" +
-              '<span class="adm-badge adm-badge--sm ' + (b.active ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
+              // the state and the price: the third line on a phone, the row's right half on a desktop
+              '<span class="adm-row__line"><span class="adm-badge adm-badge--sm ' + (b.active ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
                 (b.active ? "Показан" : "Скрыт") + "</span>" +
-              '<span class="adm-row__amt">' + eur(b.price) + "</span>" +
-              '<button class="adm-btn adm-btn--ghost adm-btn--row" data-bundleedit="' + esc(b.id) + '">Изменить</button>' +
+              '<span class="adm-row__amt">' + eur(b.price) + "</span></span>" +
+              // …and the four actions, in this order and this place on every row
+              '<span class="adm-acts"><button class="adm-btn adm-btn--ghost adm-btn--row" data-bundleedit="' + esc(b.id) + '">Изменить</button>' +
               '<button class="adm-link adm-link--muted" data-bundletoggle="' + esc(b.id) + '">' +
                 (b.active ? "Скрыть" : "Показать") + "</button>" +
-              '<span class="adm-acts"><button class="adm-link adm-link--muted" data-bundlemove="' + esc(b.id) + ':-1"' +
+              '<button class="adm-link adm-link--muted" data-bundlemove="' + esc(b.id) + ':-1"' +
                 (i === 0 ? " disabled" : "") + ' aria-label="Выше">↑</button>' +
                 '<button class="adm-link adm-link--muted" data-bundlemove="' + esc(b.id) + ':1"' +
                 (i === list.length - 1 ? " disabled" : "") + ' aria-label="Ниже">↓</button></span>' +
@@ -15636,14 +15649,16 @@
     return '<div class="adm-list">' + ADM_MAIL_ROWS.map(function (m) {
       var flow = m[3];
       var on = flow ? !!DEMO.flows[flow] : true;
-      return '<div class="adm-row adm-row--tall adm-row--open">' +
-        '<button class="adm-row__body" data-mailtpl="' + m[0] + '" style="border:0;background:none;padding:0;text-align:left">' +
+      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines">' +
+        '<button class="adm-row__body" data-mailtpl="' + m[0] + '">' +
           '<span class="adm-row__nm">' + m[1] + "</span>" +
           '<span class="adm-row__sub"><span>' + m[2] + "</span>" + flowCountLine(flow) + "</span></button>" +
+        // the third line of every row: the switch (or «всегда») on the left, «Изменить» on the right
+        '<span class="adm-row__line adm-row__line--split">' +
         (flow
           ? admSwitch('data-admflow="' + flow + '"', on, m[1])
           : '<span class="adm-badge adm-badge--ok">всегда</span>') +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button>' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-mailtpl="' + m[0] + '">Изменить</button></span>' +
         "</div>" +
         // the one letter with a setting of its own, right under its own row
         (flow === "birthday" && on ? admBirthdayDaysHTML() + admBirthdayPercentHTML() : "") +
@@ -15879,15 +15894,16 @@
     var title = p.title[S.lang] || p.title.RU || p.title.ET || p.title.EN || p.slug;
     var ex = p.excerpt && (p.excerpt[S.lang] || p.excerpt.RU || p.excerpt.ET || p.excerpt.EN) || "";
     var date = p.publishedAt ? blogDate(p.publishedAt) : "черновик";
-    return '<button class="adm-row adm-row--tall adm-row--click" data-admblogedit="' + esc(p.id) + '">' +
+    return '<button class="adm-row adm-row--tall adm-row--click adm-row--lines" data-admblogedit="' + esc(p.id) + '">' +
       '<span class="adm-thumb" style="width:72px;height:48px' +
         (p.coverUrl ? ";background-image:url('" + esc(p.coverUrl) + "');background-size:cover;background-position:center" : "") +
         '"></span>' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(title) + "</span>" +
         '<span class="adm-row__sub adm-row__sub--one">' + esc(date) + (ex ? " · " + esc(ex) : "") + "</span></span>" +
-      admBlogCoverageHTML(p) +
+      // the chips have the third line on every row — never beside a short title
+      '<span class="adm-row__line">' + admBlogCoverageHTML(p) +
       '<span class="adm-badge adm-badge--sm ' + (p.status === "published" ? "adm-badge--ok" : "adm-badge--quiet") + '">' +
-        (p.status === "published" ? "Опубликована" : "Черновик") + "</span></button>";
+        (p.status === "published" ? "Опубликована" : "Черновик") + "</span></span></button>";
   }
   var ADM_BLOG_TOOLS = [
     ["h2", "Заголовок"], ["bold", "B"], ["italic", "I"], ["ul", "• Список"],
@@ -17804,23 +17820,15 @@
      own; a switch that turned one off would have to hide a third of the shop's
      own URLs, which is a deploy, not a setting. So the page says, in two plain
      sentences, what is translated by itself and where to write when a wording
-     is off — and lists the three storefront addresses to send to people. */
-  var ADM_LANG_ROWS = [["RU", "Русский", ""], ["ET", "Eesti", "/et"], ["EN", "English", "/en"]];
+     is off. It used to list the three storefront addresses under that; Dim
+     took them out on 12.09.2026 — they overflowed a phone, and «Открыть
+     магазин ↗» in the menu's foot is the address anyone needs. */
   function admSetLangsHTML() {
-    var origin = String(location.origin || "").replace(/\/$/, "");
     return '<div class="adm-narrow--form adm-form">' +
       '<p class="adm-lead" style="margin:0">Магазин работает сразу на трёх языках — русском, эстонском и английском. ' +
         "Покупатель выбирает язык сам, флажком в шапке магазина, и магазин его запоминает.</p>" +
       '<p class="adm-lead" style="margin:0">Интерфейс, русские окончания в названиях товаров и описания, которые пишет помощник, ' +
         "переводятся автоматически. Если где-то нужно поправить формулировку — напишите Диму.</p>" +
-      '<div><div class="adm-sec__t">Ссылки на магазин</div>' +
-      '<div class="adm-list">' + ADM_LANG_ROWS.map(function (l) {
-        var url = origin + "/shop2" + l[2] + "/";
-        return '<a class="adm-row" href="' + esc(url) + '" target="_blank" rel="noopener">' +
-          '<span class="adm-row__body"><span class="adm-row__nm">' + l[1] + "</span>" +
-          '<span class="adm-row__sub adm-mono">' + esc(url) + "</span></span>" +
-          '<span class="adm-row__chev" aria-hidden="true">↗</span></a>';
-      }).join("") + "</div></div>" +
       '<p class="adm-hint" style="margin:0">Язык самой админки переключается внизу меню — на магазин это не влияет.</p>' +
       '<div class="adm-acts">' + admDevLink() + "</div>" +
       "</div>";
@@ -19525,8 +19533,7 @@
         ? '<div class="adm-list">' + list.map(function (p) {
             var meta = [promoKindLabel(p), promoWhen(p), admPromoUsedLine(p)].join(" · ");
             return '<div class="adm-row adm-row--tall adm-row--open">' +
-              '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '" ' +
-                'style="border:0;background:none;padding:0;text-align:left">' +
+              '<button class="adm-row__body" data-admpromoedit="' + esc(p.code) + '">' +
                 '<span class="adm-row__nm adm-mono' + (p.active ? "" : " adm-row__nm--muted") + '">' + esc(p.code) + "</span>" +
                 '<span class="adm-row__sub adm-row__sub--one">' + esc(meta) + (p.note ? " · " + esc(p.note) : "") + "</span></button>" +
               admSwitch('data-admpromotoggle="' + esc(p.code) + '"', p.active, "Промокод " + esc(p.code)) +
@@ -20259,17 +20266,16 @@
     return '<div class="adm-list">' + list.map(function (c) {
       var pending = partnersOn() && c.tier !== "pro" && c.proRequestedAt;
       var badge = admCustBadge(c);
-      return '<div class="adm-row adm-row--tall adm-row--open">' +
-        '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '" ' +
-          'style="border:0;background:none;padding:0;text-align:left">' +
+      return '<div class="adm-row adm-row--tall adm-row--open adm-row--lines">' +
+        '<button class="adm-row__body" data-admcustopen="' + esc(c.id) + '">' +
           '<span class="adm-row__nm">' + esc(c.name || c.email) + "</span>" +
           '<span class="adm-row__sub adm-row__sub--one">' + esc(c.email) + " · " +
             admOrdersLabel(c.ordersCount) + " · " + eur(c.revenue) + "</span></button>" +
-        '<span class="adm-badge ' + badge[1] + '">' + badge[0] + "</span>" +
+        '<span class="adm-row__line"><span class="adm-badge ' + badge[1] + '">' + badge[0] + "</span>" +
         /* Who agreed to be written to. Its own badge, not a word appended to
            the grey line: a badge is one text node the dictionary can rewrite,
            and the line beside it is already a run of e-mail, count and sum. */
-        (c.marketing ? '<span class="adm-badge adm-badge--quiet">Подписан</span>' : "") +
+        (c.marketing ? '<span class="adm-badge adm-badge--quiet">Подписан</span>' : "") + "</span>" +
         (pending
           ? '<span class="adm-acts"><button class="adm-btn adm-btn--row" data-admcustapprove="' + esc(c.id) +
             '">Одобрить Pro</button>' +
@@ -20418,10 +20424,10 @@
       overdue: o.invoice && unpaid ? admInvoiceOverdue(o.invoice) : 0,
       delivered: o.status === "delivered", shipped: o.status === "shipped", labeled: !!o.labeled
     };
-    return '<button class="adm-row adm-row--click" data-admorder="' + esc(o.id) + '">' +
+    return '<button class="adm-row adm-row--click adm-row--lines" data-admorder="' + esc(o.id) + '">' +
       '<span class="adm-row__body"><span class="adm-row__nm"><span class="adm-mono">' + esc(o.number) + "</span> · " + esc(shortDate(o.createdAt)) + "</span>" +
-        '<span class="adm-row__sub"><span>' + admItemsLabel(o.itemsCount) + "</span>" + (o.firstItem ? " · " + esc(o.firstItem) : "") + "</span></span>" +
-      admOrderBadge(v) +
+        '<span class="adm-row__sub adm-row__sub--one"><span>' + admItemsLabel(o.itemsCount) + "</span>" + (o.firstItem ? " · " + esc(o.firstItem) : "") + "</span></span>" +
+      '<span class="adm-row__line">' + admOrderBadge(v) + "</span>" +
       '<span class="adm-row__amt">' + eur(o.total) + "</span></button>";
   }
   /** «Отзывы клиента»: stars, the product, the whole text and the chip —
@@ -22378,19 +22384,20 @@
        «Мало» chip listed was not red, and a row set to warn at 5 stayed
        black at 4. */
     var low = r.tracked && r.state !== "in";
-    return '<div class="adm-row adm-row--tall adm-row--stock">' +
+    return '<div class="adm-row adm-row--tall adm-row--stock adm-row--lines">' +
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) +
         // the row «Править» just wrote says so, until it is edited or stepped again (stockCommit)
         (S.stockSaved === key ? ' <span class="adm-badge adm-badge--sm adm-badge--ok">Сохранено ✓</span>' : "") + "</span>" +
-        '<span class="adm-row__sub' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
+        '<span class="adm-row__sub adm-row__sub--one' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
           (r.variant ? "<span>" + esc(r.variant) + "</span> · " : "") +
           (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : "<span>штрихкод не привязан</span>") + "</span></span>" +
-      '<span class="adm-step-qty">' +
+      // the third line of every row: the stepper on the left, «Править» on the right
+      '<span class="adm-row__line adm-row__line--split"><span class="adm-step-qty">' +
         '<button data-stockstep="' + esc(key) + ':-1" aria-label="Меньше"' + (qty <= 0 ? " disabled" : "") + ">−</button>" +
         '<span class="adm-step-qty__v' + (low ? " adm-step-qty__v--warn" : "") + '">' + (r.tracked ? qty : "—") + "</span>" +
         '<button data-stockstep="' + esc(key) + ':1" aria-label="Больше">+</button></span>' +
       '<button class="adm-link adm-link--muted" data-stockedit="' + (open ? "" : esc(key)) + '">' +
-        (open ? "Свернуть" : "Править") + "</button>" +
+        (open ? "Свернуть" : "Править") + "</button></span>" +
     "</div>" + (open ? stockEditFormHTML(r) : "");
   }
   /** What one tap on ± says out loud, so the toast and the journal agree. */

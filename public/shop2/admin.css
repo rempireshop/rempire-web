@@ -339,10 +339,64 @@
 /* one line, cut with an ellipsis — for a sub-line that is a list of names */
 .adm-row__sub--one { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-row__amt { font-family: Oswald, sans-serif; font-size: 17px; text-align: right; white-space: nowrap; }
-.adm-row__end { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .adm-row__chev { color: var(--a-muted); font-size: 20px; line-height: 1; }
 .adm-row__big { font-family: Oswald, sans-serif; font-size: 28px; line-height: 1; width: 34px; flex: none; }
 .adm-row__big--warn { color: var(--a-warn); }
+
+/* ---------- one shape for every list --------------------------------------
+   Dim, 11.09.2026, on his phone: the rows of a list looked different from
+   one another — a chip or a price sat beside the text when the text was
+   short and dropped under it when the text was long, so no two rows lined
+   up. The rows were flex with `wrap`, and where a chip landed was decided
+   by the width of the words in it.
+
+   A row that lists something — an order, a set, a product, a post, a
+   letter, a customer — is now the same three lines on every row of its
+   list, whatever the text (`.adm-row--lines`):
+
+     1  the name, one line, cut with an ellipsis — and the sum, top right
+     2  the grey line under it, one line too
+     3  the chips: the state; for a letter its switch and «Изменить»; for
+        the warehouse the stepper and «Править»
+     +  the actions, when the row has any (`.adm-acts`): «Создать
+        этикетку · Отправлен», «Изменить · Скрыть · ↑ ↓»
+
+   On a phone the row is a grid, so the chip line CANNOT climb up beside a
+   short name — it has a row of the grid to itself — the thumbnail keeps
+   the first two lines beside it, and the actions take a full-width row
+   under everything. A desktop has the room, and there the very same DOM
+   lays out as one line: thumb · text · chips · sum · actions, `nowrap`,
+   so a long name shortens instead of pushing its chips under the text. */
+.adm-row__line { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; flex: none; min-width: 0; }
+.adm-row--lines { flex-wrap: nowrap; }
+.adm-row--lines > .adm-acts { flex: none; }
+/* the sum keeps a column of its own, so the chips before it line up from
+   row to row instead of following the number of digits */
+.adm-row--lines .adm-row__amt { min-width: 72px; }
+/* the row whose body is the button (a letter, a customer, an order in the
+   list): the button is the text, not a box around it */
+.adm2 button.adm-row__body { border: 0; background: none; padding: 0; text-align: left; color: inherit; font: inherit; }
+/* the customer's name inside an order row's grey line */
+.adm-row__who { color: var(--a-ink); font-weight: 600; }
+@media (max-width: 767px) {
+  .adm-row--lines {
+    display: grid; column-gap: 0; row-gap: 8px; align-items: start;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "thumb body amt" "thumb line line";
+  }
+  .adm-row--lines > .adm-thumb { grid-area: thumb; margin-right: 12px; }
+  .adm-row--lines > .adm-row__body { grid-area: body; }
+  .adm-row--lines > .adm-row__amt { grid-area: amt; margin-left: 12px; line-height: 20px; }
+  .adm-row--lines > .adm-row__line { grid-area: line; }
+  /* a price on the chip line (a set, a product) sits right after its chip:
+     the desktop's aligned price column would float it away from the chip */
+  .adm-row--lines > .adm-row__line > .adm-row__amt { min-width: 0; }
+  /* the letter's and the warehouse row's line: the control on the left,
+     the button on the right — the line is the row's width here */
+  .adm-row--lines > .adm-row__line--split { justify-content: space-between; }
+  /* an implicit third row, so a row with no actions ends after its chips */
+  .adm-row--lines > .adm-acts { grid-column: 1 / -1; }
+}
 /* `position: relative` is load-bearing: a set's thumbnail is the storefront's
    own three-photo stack (`.bstack`, position:absolute inset:0), which without
    a positioned box here escapes all the way out to `.adm2` and covers the
@@ -448,11 +502,6 @@
   .adm-ship__links .adm-link { align-self: flex-start; }
   .adm-ship__row--code { flex-direction: column; align-items: stretch; }
   .adm-copy { height: 44px; }
-  /* «Склад» rows: the name takes the first line, the stepper and «Править»
-     share the second — instead of the link wrapping alone under a gap */
-  .adm-row--stock { row-gap: 6px; }
-  .adm-row--stock > .adm-row__body { flex: 1 1 100%; }
-  .adm-row--stock > .adm-link { margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; }
 }
 
 .adm-card { border: 1px solid var(--a-ink); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
