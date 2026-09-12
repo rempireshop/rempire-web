@@ -135,10 +135,63 @@ test.describe("admin assistant — the microphone", () => {
     await expect(box).toHaveValue("Привет какие заказы ждут отправки");
     await expect(page.locator(".adm-msg--me")).toHaveCount(0);
 
-    // he sends it himself
+    // he sends it himself — and the box is his again, empty
     await panel.locator("[data-admsend]").click();
+    await expect(box).toHaveValue("");
     await expect(page.locator(".adm-msg--me")).toContainText("Привет какие заказы ждут отправки");
     await expect(page.locator("[data-aians]")).toBeVisible();
+  });
+});
+
+/** Counts the page's requests from the moment it is attached, so a test can
+ *  wait until the panel's start-up fetches — the orders list, the admin
+ *  probe, the 30-day summary the assistant asks for on opening — have all
+ *  landed AND painted. `waitForLoadState("networkidle")` will not do here:
+ *  it is latched per document, so once the page was idle a first time
+ *  (during the login) it resolves at once, whatever is in flight now. */
+function trafficMeter(page: Page): { quietFor: (ms: number) => boolean } {
+  let inflight = 0;
+  let quietSince = Date.now();
+  page.on("request", () => { inflight += 1; });
+  const done = () => { inflight = Math.max(0, inflight - 1); if (!inflight) quietSince = Date.now(); };
+  page.on("requestfinished", done);
+  page.on("requestfailed", done);
+  return { quietFor: (ms) => inflight === 0 && Date.now() - quietSince >= ms };
+}
+
+test.describe("admin assistant — a sent question leaves the box", () => {
+  test.use({ extraHTTPHeaders: ipHeaders(138) });
+
+  /* The panel is patched in place, and an <input> keeps what the owner typed
+   * across a render: admMorphNode only resets `.value` when the value
+   * ATTRIBUTE changed, and typing never changes the attribute. So «→» and
+   * Enter have to empty the box themselves. Before they did, the question
+   * stayed in the box next to its answer — unless a background render (the
+   * 30-day summary landing) happened to fall between the typing and the send,
+   * which is why it only cleared sometimes. The test waits those renders out
+   * first, so the send is exactly the case the old code failed in. */
+  test("typed and sent with «→» or Enter, the question moves to the thread and the box is empty", async ({ page }) => {
+    const traffic = trafficMeter(page);
+    await loginAsAdmin(page);
+    const panel = await openAssistant(page);
+    await expect.poll(() => traffic.quietFor(600), { timeout: 20_000, message: "the panel's start-up fetches never settled" }).toBe(true);
+    const box = panel.locator("[data-admq]");
+
+    await box.fill("Какие заказы ждут отправки?");
+    // the draft is in the box only, not yet in the markup (the attribute is what the last render wrote)
+    await expect(box).toHaveAttribute("value", "");
+    await panel.locator("[data-admsend]").click();
+    await expect(box).toHaveValue("");
+    await expect(page.locator(".adm-msg--me")).toContainText("Какие заказы ждут отправки?");
+    await expect(page.locator("[data-aians]")).toBeVisible();
+
+    await box.fill("Сколько заказов за месяц?");
+    await expect(box).toHaveAttribute("value", "");
+    await box.press("Enter");
+    await expect(box).toHaveValue("");
+    await expect(page.locator(".adm-msg--me")).toContainText("Сколько заказов за месяц?");
+    // and the caret is back in it for the next question
+    await expect(box).toBeFocused();
   });
 });
 

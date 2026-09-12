@@ -29768,7 +29768,18 @@
       admVoiceDrop();
       var qEl = document.querySelector("[data-admq]");
       var q = ((qEl && qEl.value) || S.adminQ || "").trim();
-      if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+      if (q) {
+        S.adminAsk = q; S.adminQ = "";
+        /* The box itself, not only S: the panel is patched in place, and
+           admMorphNode leaves an <input>'s .value alone while its value
+           ATTRIBUTE is unchanged — which it is here, "" before and after,
+           because typing never touches the attribute. Without this line the
+           question stayed in the box next to its answer, unless a background
+           render (the 30-day summary landing) happened to fall between the
+           typing and the send — which is why it only cleared sometimes. */
+        if (qEl) qEl.value = "";
+        render(); if (admAI) askAdminAI(q); refocus("[data-admq]");
+      }
       return;
     }
     if (d.admvoice !== undefined) { admVoiceToggle(); return; }
@@ -31133,7 +31144,13 @@
       e.preventDefault();
       admVoiceDrop();
       var q = (t.value || S.adminQ || "").trim();
-      if (q) { S.adminAsk = q; S.adminQ = ""; render(); if (admAI) askAdminAI(q); refocus("[data-admq]"); }
+      if (q) {
+        S.adminAsk = q; S.adminQ = "";
+        // the box is emptied by hand, same as the → button — see [data-admsend]
+        // in the click handler for why the render alone does not do it
+        t.value = "";
+        render(); if (admAI) askAdminAI(q); refocus("[data-admq]");
+      }
     }
     // the order card's note is a textarea — Ctrl/Cmd+Enter saves it, plain Enter is a new line
     if (t && t.matches && t.matches("[data-admnote]") && (e.ctrlKey || e.metaKey)) {
