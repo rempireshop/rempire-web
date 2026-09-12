@@ -627,9 +627,12 @@
       "Введите e-mail — на него придёт код": "Sisesta e-posti aadress — sellele saadame koodi",
       "Товары заказа #1042 в корзине ✓": "Tellimuse #1042 tooted on ostukorvis ✓",
       "Сохранено ✓": "Salvestatud ✓",
-      /* the account form's save bar (acctBarHTML / paintAcctBar) and its
-         «Доставка по умолчанию» machine select */
+      /* the account form's per-field save lines (acctStHTML / paintAcctSt)
+         and its «Доставка по умолчанию» machine select; «Изменения не
+         сохранены» is the admin's small forms' */
       "Сохраняем…": "Salvestame…", "Изменения не сохранены": "Muudatused on salvestamata",
+      "Доставка по умолчанию сохранена ✓": "Vaikimisi tarne salvestatud ✓",
+      "Выберите пакомат — тогда сохраним": "Vali pakiautomaat — siis salvestame",
       "— выберите пакомат —": "— vali pakiautomaat —", "Пакомат по умолчанию": "Vaikimisi pakiautomaat",
       /* ---- account-flows: кабинет, код входа, письма-автоматы ---- */
       "Войти": "Logi sisse", "Другой e-mail": "Teine e-posti aadress",
@@ -3029,9 +3032,12 @@
       "Введите e-mail — на него придёт код": "Enter your e-mail — we'll send the code there",
       "Товары заказа #1042 в корзине ✓": "Items from order #1042 are in your cart ✓",
       "Сохранено ✓": "Saved ✓",
-      /* the account form's save bar (acctBarHTML / paintAcctBar) and its
-         «Доставка по умолчанию» machine select */
+      /* the account form's per-field save lines (acctStHTML / paintAcctSt)
+         and its «Доставка по умолчанию» machine select; «Изменения не
+         сохранены» is the admin's small forms' */
       "Сохраняем…": "Saving…", "Изменения не сохранены": "Changes not saved",
+      "Доставка по умолчанию сохранена ✓": "Default delivery saved ✓",
+      "Выберите пакомат — тогда сохраним": "Choose a parcel locker — then we'll save it",
       "— выберите пакомат —": "— choose a parcel locker —", "Пакомат по умолчанию": "Default parcel locker",
       /* ---- account-flows: account, login code, automatic letters ---- */
       "Войти": "Sign in", "Другой e-mail": "Use another e-mail",
@@ -6551,7 +6557,11 @@
     acctCode: "",         // the six digits being typed
     acctBusy: false,      // a request is in flight — the button locks
     acctErr: "",          // dictionary key of the last failure, "" when fine
-    acctSaved: false,     // «Сохранено ✓» on the save bar, until the next edit
+    /* The profile form's per-field save lines (acctSt / acctStText): "" quiet,
+       "busy" «Сохраняем…», "saved" «Сохранено ✓» for a moment, "need" the
+       delivery block waiting for its machine, "err:<key>" a refusal in
+       ACCT_ERRS' words. Kept in S so a render() redraws them. */
+    acctSt: { name: "", phone: "", birthday: "", marketing: "", ship: "" },
     /* The panel's small save flows (r12, Dim 10.09.2026: «all saving flows …
        least clicks, comfortable»): each remembers what was just saved so the
        button can say «Сохранено ✓» in place until the next edit.
@@ -6569,10 +6579,11 @@
        saved, for its «Сохранено ✓» moment. */
     barTouched: null, barSaved: "",
     /* The profile form's draft — what the fields show, compared against
-       S.cust by acctDirty() to light the save bar. `ship` is «Доставка по
-       умолчанию» in the checkout's words ({country, method, carrier,
-       machine}) and null while nothing is saved and nothing was touched, so
-       an untouched block never turns into a preference on its own. */
+       S.cust field by field (acctFieldDirty) to decide what each field's
+       own save sends. `ship` is «Доставка по умолчанию» in the checkout's
+       words ({country, method, carrier, machine}) and null while nothing is
+       saved and nothing was touched, so an untouched block never turns into
+       a preference on its own. */
     acctForm: { name: "", phone: "", birthday: "", marketing: false, ship: null },
     // returns: the order number whose «Хочу вернуть заказ» is in flight, ""
     // when none — one tick at a time, and that row's box locks while it flies
@@ -7111,8 +7122,9 @@
      no block to set one from.
 
      The form holds a DRAFT (S.acctForm.ship) and the row holds the truth
-     (S.cust.shipPref). The draft is what the block draws and what
-     «Сохранить» sends; the truth is what the checkout starts from. Both are
+     (S.cust.shipPref). The draft is what the block draws and what its own
+     save sends (acctShipChanged); the truth is what the checkout starts
+     from. Both are
      the same shape, in the checkout's own words — {country, method, carrier,
      machine} — so nothing is translated between the two screens.
 
@@ -7161,8 +7173,9 @@
      machine itself waits for the live list and is matched by name when it
      lands, simply left unchosen when the machine is no longer there
      (matchAcctPoint below). Called whenever the profile arrives and again
-     after «Сохранить», so «Подставим это при следующем заказе» holds for an
-     order placed in this same visit and not only for one after a reload. */
+     after the block's own save, so «Подставим это при следующем заказе»
+     holds for an order placed in this same visit and not only for one after
+     a reload. */
   function applyAcctShipPref() {
     if (S.shipPicked) return;
     var p = S.cust && S.cust.shipPref;
@@ -11588,9 +11601,13 @@
     expired: "Код истёк — запросите новый",
     too_many: "Слишком много попыток — запросите новый код",
     db_unavailable: "Магазин временно недоступен — попробуйте позже",
-    offline: "Кабинет заработает, когда магазин подключат к серверу"
+    offline: "Кабинет заработает, когда магазин подключат к серверу",
+    // the profile form's phone, refused before it is sent — the checkout's
+    // own rule and words (phoneOk / shipMsg)
+    bad_phone: "Проверьте номер — похоже, в нём не хватает цифр."
   };
-  function acctErrText() { return ACCT_ERRS[S.acctErr] || "Не получилось — попробуйте ещё раз"; }
+  function acctErrWord(key) { return ACCT_ERRS[key] || "Не получилось — попробуйте ещё раз"; }
+  function acctErrText() { return acctErrWord(S.acctErr); }
   function shortDate(iso) {
     var d = new Date(iso || "");
     if (isNaN(d.getTime())) return "";
@@ -11691,12 +11708,19 @@
          nothing new to translate. */
       '<div class="acct__gift">' + giftTileHTML() + "</div>" +
 
+      /* Every field saves itself when it is left, and says so on the line
+         under it (acctStHTML) — see «the profile form: every field saves
+         itself» below. The line is the input's description, so a screen
+         reader hears «Сохранено ✓» against the field it belongs to. */
       '<div class="sec__head sec__head--sub"><h2 class="sec__title">Мои данные</h2></div>' +
-      '<label class="field"><span class="field__label">Имя</span><input class="input" data-acctf="name" value="' + esc(f.name) + '" placeholder="Имя" autocomplete="given-name"></label>' +
+      '<label class="field field--st"><span class="field__label">Имя</span><input class="input" data-acctf="name" value="' + esc(f.name) + '" placeholder="Имя" autocomplete="given-name"' + acctFieldAria("name") + "></label>" + acctStHTML("name") +
       '<label class="field"><span class="field__label">E-mail</span><input class="input" type="email" value="' + esc(S.cust ? S.cust.email : S.email) + '" autocomplete="email" readonly aria-readonly="true"></label>' +
-      '<label class="field"><span class="field__label">Телефон</span><input class="input" type="tel" data-acctf="phone" value="' + esc(f.phone) + '" placeholder="+372…" autocomplete="tel"></label>' +
-      '<label class="field"><span class="field__label">День рождения — пришлём скидку</span><input class="input" type="date" data-acctf="birthday" value="' + esc(f.birthday) + '"></label>' +
-      '<label class="opt opt--plain"><input type="checkbox" data-acctmk' + (f.marketing ? " checked" : "") + '><span>Хочу получать скидки и поздравление ко дню рождения</span></label>' +
+      '<label class="field field--st"><span class="field__label">Телефон</span><input class="input" type="tel" data-acctf="phone" value="' + esc(f.phone) + '" placeholder="+372…" autocomplete="tel"' + acctFieldAria("phone") + "></label>" + acctStHTML("phone") +
+      /* min/max: a birthday is a past date, and Chromium reports a year
+         still being typed («0019») as out of range, so acctFieldChange can
+         tell a half-typed date from a chosen one */
+      '<label class="field field--st"><span class="field__label">День рождения — пришлём скидку</span><input class="input" type="date" data-acctf="birthday" value="' + esc(f.birthday) + '" min="1900-01-01" max="' + isoToday() + '" autocomplete="bday"' + acctFieldAria("birthday") + "></label>" + acctStHTML("birthday") +
+      '<label class="opt opt--plain"><input type="checkbox" data-acctmk' + (f.marketing ? " checked" : "") + ' aria-describedby="acctst-marketing"><span>Хочу получать скидки и поздравление ко дню рождения</span></label>' + acctStHTML("marketing") +
 
       /* ---- wholesale/loyalty: points balance/history ----------------------
          Both blocks below hang off «Партнёры и баллы» (settings.pricing.
@@ -11743,13 +11767,17 @@
         return '<label class="opt"><input type="radio" name="acctm" ' + (i === ai ? "checked" : "") + ' data-acctm="' + i + '"><span>' + x.l + "</span>" +
           '<span class="opt__price num">' + (xp ? eur(xp) : "Бесплатно") + "</span></label>";
       }).join("") + "</div>" +
+      /* the block's one line: «Выберите пакомат — тогда сохраним» under a
+         parcel row still waiting for its machine, «Доставка по умолчанию
+         сохранена ✓» once the choice is on the row (acctShipChanged) */
+      acctStHTML("ship") +
       (function () {
         // the live list, so the machine saved here is one the checkout can
         // find again by name — acctMachines(); null while it is in flight
         var mach = acctMachines();
         if (mach && !mach.length) return "";
         var sel = acctMachineName();
-        return '<label class="field" style="margin-top:14px"><span class="field__label">' +
+        return '<label class="field"><span class="field__label">' +
           (mach ? "Пакомат по умолчанию — " + points(mach.length) : "Пакомат по умолчанию") + "</span>" +
           '<span class="sel sel--box"><select data-acctmachine' + (mach ? "" : " disabled") + ">" +
           (mach
@@ -11758,20 +11786,6 @@
             : "<option>Загружаем список…</option>") +
           "</select></span></label>";
       })() +
-
-      /* ---- one Save for the whole form ------------------------------------
-         Renat, 10.09.2026: «I added my birthday and I was unsure if it was
-         stored; same for my default delivery location — because the Save
-         button is between the birthday and the delivery location.» So the
-         button leaves the middle of the form for a bar that follows the page
-         to the bottom (styles.css .acctbar — the admin's .adm-savebar idiom
-         in the shop's own dress): quiet while nothing differs from what the
-         server holds, the ink button the moment anything does, «Сохранено ✓»
-         once it is back in step. Every field above — name, phone, birthday,
-         the newsletter tick, the delivery — goes through this one button.
-         Painted in place by paintAcctBar() while the shopper types, since a
-         render() would take the caret out of the field being edited. */
-      acctBarHTML() +
 
       "</section></div>";
   }
@@ -11812,9 +11826,10 @@
        cannot offer the next person the parcel machine round the corner from
        the last one. */
     S.cust = null; S.loggedIn = false; S.acctOrders = []; S.acctStage = "email";
-    S.acctCode = ""; S.acctSaved = false; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
+    S.acctCode = ""; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
     S.acctForm = { name: "", phone: "", birthday: "", marketing: false, ship: null };
     S.acctProForm = { company: "", regCode: "", phone: "" }; S.acctProErr = "";
+    acctQuiet();
   }
   /** Fetched once, only for a 'pro' account — see proPrice() near sizePrice(). */
   function loadProPricing() {
@@ -11909,42 +11924,188 @@
       pushCart(true);
     }).catch(function () { S.acctBusy = false; S.acctErr = "error"; render(); });
   }
-  /* ---------- the profile form: one draft, one Save, one bar -------------- */
-  /** The form from the row — on every profile fetch and after every save, so
-      «unchanged» always means «same as the server», never «same as before». */
+  /* ---------- the profile form: every field saves itself ------------------
+     Renat, 10.09.2026: «I added my birthday and I was unsure if it was
+     stored». The first answer was one «Сохранить» for the whole form, in a
+     bar pinned to the foot of the screen — and on his phone the keyboard
+     covered that bar, so the button was out of reach exactly while a field
+     was being typed into. Dim, 12.09.2026: no pinned bar, no right-aligned
+     button, nothing to press at all. So each field saves itself: a text
+     field on `change` — blur, Enter, the date picker closing — and never on
+     a keystroke; the consent tick and the delivery block the moment they
+     change. Under the control a quiet line says where things stand
+     (acctStHTML / paintAcctSt): «Сохраняем…» while the request is out,
+     «Сохранено ✓» for a moment once it is back, the refusal's own words
+     when the server says no — the server keeps its old value then and the
+     draft keeps what was typed, so the next blur tries again.
+
+     The form still holds a DRAFT (S.acctForm) against the row (S.cust): a
+     field is sent only when the two differ, and one PATCH carries one
+     field, with `lang` riding along as it always has. The requests leave
+     one at a time (acctQueue): a change made while another is in flight
+     waits its turn and is read from the draft when that turn comes, so the
+     same field is never in flight twice and nothing lands out of order.
+     Painted in place, never a render(): the fields are what the shopper is
+     typing into. The checkout keeps taking the saved default and the saved
+     consent exactly as before (applyAcctShipPref, acctSyncNewsletter), and
+     the consent stamps are still the server's (PATCH marketing). */
+  function shipDraftFrom(p) {
+    return p ? { country: p.country, method: p.method, carrier: p.carrier || "", machine: p.machine || "" } : null;
+  }
+  /** The form from the row — on every profile fetch, so «unchanged» always
+      means «same as the server», never «same as before». */
   function acctSeedForm() {
-    var c = S.cust, p = c.shipPref;
-    S.acctForm = {
-      name: c.name || "",
-      phone: c.phone || "",
-      birthday: c.birthday || "",
-      marketing: !!c.marketing,
-      ship: p ? { country: p.country, method: p.method, carrier: p.carrier || "", machine: p.machine || "" } : null
-    };
+    var c = S.cust;
+    S.acctForm = { name: c.name || "", phone: c.phone || "", birthday: c.birthday || "", marketing: !!c.marketing, ship: shipDraftFrom(c.shipPref) };
+  }
+  /** One field of the form back from the row, after its own save. */
+  function acctSeedField(f) {
+    var c = S.cust;
+    if (f === "marketing") { S.acctForm.marketing = !!c.marketing; return; }
+    if (f === "ship") { S.acctForm.ship = shipDraftFrom(c.shipPref); return; }
+    S.acctForm[f] = c[f] || "";
+    /* …and the box shows the row's spelling — trimmed, capped — unless the
+       shopper is still in it: a value written under a caret moves the caret */
+    var box = document.querySelector('[data-acctf="' + f + '"]');
+    if (box && document.activeElement !== box && box.value !== S.acctForm[f]) box.value = S.acctForm[f];
   }
   function shipKey(p) { return p ? [p.country, p.method, p.carrier || "", p.machine || ""].join("|") : ""; }
-  /** Does the form differ from what the server holds? This is what lights the save bar. */
-  function acctDirty() {
-    var c = S.cust, f = S.acctForm;
+  /** Does this one field differ from what the server holds? Only then is it sent. */
+  function acctFieldDirty(f) {
+    var c = S.cust, d = S.acctForm;
     if (!c) return false;
-    return (f.name || "") !== (c.name || "") ||
-      (f.phone || "") !== (c.phone || "") ||
-      (f.birthday || "") !== (c.birthday || "") ||
-      !!f.marketing !== !!c.marketing ||
-      shipKey(f.ship) !== shipKey(c.shipPref);
+    if (f === "marketing") return !!d.marketing !== !!c.marketing;
+    if (f === "ship") return shipKey(d.ship) !== shipKey(c.shipPref);
+    return (d[f] || "") !== (c[f] || "");
   }
-  /** What «Сохранить» sends — the whole form every time, so one button really is every field's. */
-  function acctPayload() {
-    return {
-      name: S.acctForm.name,
-      phone: S.acctForm.phone,
-      birthday: S.acctForm.birthday,
-      marketing: !!S.acctForm.marketing,
-      lang: S.lang,
-      // «Доставка по умолчанию» — null while nothing was ever chosen, and the
-      // server keeps the column null for it (normalizeShipPref)
-      shipPref: S.acctForm.ship
-    };
+  /** One field's PATCH body. */
+  function acctFieldPayload(f) {
+    var p = { lang: S.lang };
+    if (f === "marketing") p.marketing = !!S.acctForm.marketing;
+    // «Доставка по умолчанию» — null while nothing was ever chosen, and the
+    // server keeps the column null for it (normalizeShipPref)
+    else if (f === "ship") p.shipPref = S.acctForm.ship;
+    else p[f] = S.acctForm[f];
+    return p;
+  }
+  function isoToday() { return new Date().toISOString().slice(0, 10); }
+
+  /* ---- the line under each control ----------------------------------------
+     S.acctSt[f] — see its comment in S. The line lives in the markup
+     (acctStHTML), so a render() redraws it from state, and is repainted in
+     place (paintAcctSt) by everything that happens between renders. */
+  var ACCT_SAVED_MS = 2500;
+  var acctStT = {};
+  function acctSt(f, st) {
+    S.acctSt[f] = st;
+    clearTimeout(acctStT[f]);
+    if (st === "saved") acctStT[f] = setTimeout(function () { if (S.acctSt[f] === "saved") acctSt(f, ""); }, ACCT_SAVED_MS);
+    paintAcctSt(f);
+  }
+  function acctStErr(f) { return (S.acctSt[f] || "").indexOf("err:") === 0; }
+  function acctStText(f) {
+    var st = S.acctSt[f] || "";
+    if (st === "busy") return "Сохраняем…";
+    if (st === "saved") return f === "ship" ? "Доставка по умолчанию сохранена ✓" : "Сохранено ✓";
+    if (st === "need") return "Выберите пакомат — тогда сохраним";
+    if (st.indexOf("err:") === 0) return acctErrWord(st.slice(4));
+    return "";
+  }
+  function acctStHTML(f) {
+    return '<p class="acctst' + (S.acctSt[f] === "saved" ? " acctst--ok" : acctStErr(f) ? " acctst--err" : "") +
+      '" id="acctst-' + f + '" data-acctst="' + f + '" aria-live="polite">' + acctStText(f) + "</p>";
+  }
+  /** The input's tie to its line, and the red rule under it while the line is a refusal. */
+  function acctFieldAria(f) { return ' aria-describedby="acctst-' + f + '"' + (acctStErr(f) ? ' aria-invalid="true"' : ""); }
+  /* In place, never a render(): a rebuild would take the caret out of the
+     field that was just left — or is still being typed into, when the save
+     came from Enter. Translated by hand for the same reason (translatePage()
+     runs after a render, not after a patch). */
+  function paintAcctSt(f) {
+    var el = document.querySelector('[data-acctst="' + f + '"]');
+    if (!el) return;
+    el.classList.toggle("acctst--ok", S.acctSt[f] === "saved");
+    el.classList.toggle("acctst--err", acctStErr(f));
+    el.textContent = trText(acctStText(f), S.lang);
+    var box = document.querySelector('[data-acctf="' + f + '"]');
+    if (box) { if (acctStErr(f)) box.setAttribute("aria-invalid", "true"); else box.removeAttribute("aria-invalid"); }
+  }
+  /** Everything of the form's saving forgotten — «Выйти», or a session the server no longer knows. */
+  function acctQuiet() {
+    S.acctSt = { name: "", phone: "", birthday: "", marketing: "", ship: "" };
+    acctQ.length = 0; acctInflight = ""; acctGen++;
+    clearTimeout(acctBirthdayT); acctBirthdayT = 0;
+    for (var k in acctStT) clearTimeout(acctStT[k]);
+  }
+
+  /* ---- one request at a time ---------------------------------------------- */
+  var acctQ = [], acctInflight = "", acctGen = 0;
+  /** Send this field when its turn comes — «Сохраняем…» under it meanwhile. */
+  function acctQueue(f) {
+    if (acctQ.indexOf(f) < 0) acctQ.push(f);
+    acctSt(f, "busy");
+    acctNext();
+  }
+  /** Is a save of this field already on its way? (the focusout net asks) */
+  function acctPending(f) { return acctInflight === f || acctQ.indexOf(f) >= 0 || (f === "birthday" && !!acctBirthdayT); }
+  function acctNext() {
+    if (acctInflight || !acctQ.length) return;
+    var f = acctQ.shift();
+    // changed back to what the server holds before its turn came — nothing to send
+    if (!S.cust || !acctFieldDirty(f)) { if (S.acctSt[f] === "busy") acctSt(f, ""); acctNext(); return; }
+    acctInflight = f;
+    var gen = acctGen, sent = JSON.stringify(acctFieldPayload(f));
+    fetch("/api/account/me/", { method: "PATCH", headers: { "content-type": "application/json" }, body: sent })
+      .then(function (r) { return r.json().then(function (j) { return { body: j, status: r.status }; }, function () { return { status: r.status }; }); })
+      .then(function (res) {
+        if (gen !== acctGen) return;   // signed out while it was out
+        acctInflight = "";
+        if (!res.body || !res.body.ok) {
+          if (res.status === 401) { acctForget(); render(); toast("Войдите ещё раз"); return; }
+          acctSt(f, "err:" + ((res.body && res.body.error) || "error"));
+          acctNext(); return;
+        }
+        S.cust = res.body.customer || S.cust;
+        /* The field re-reads the row it just wrote — the server trims and
+           caps, and «unchanged» has to mean «same as the server» — unless it
+           was typed into again while the request was out: then the newer
+           typing stays, its line stays quiet, and its own blur sends it. */
+        if (JSON.stringify(acctFieldPayload(f)) === sent) { acctSeedField(f); acctSt(f, "saved"); }
+        else acctSt(f, "");
+        // the checkout takes the new default and the new consent straight
+        // away, under their usual guards
+        if (f === "ship") applyAcctShipPref();
+        if (f === "marketing") acctSyncNewsletter();
+        acctNext();
+      })
+      .catch(function () { if (gen !== acctGen) return; acctInflight = ""; acctSt(f, "err:error"); acctNext(); });
+  }
+  /* A text field was left (blur, Enter, the date picker closing): check it,
+     then queue it. The birthday waits 600 ms first — Chromium fires `change`
+     on every segment keystroke (typing «18» into the day passes through the
+     1st) and an iOS wheel on every notch — and a year still being typed
+     («0019») is outside the box's own min/max: not a date to store. */
+  var acctBirthdayT = 0;
+  function acctFieldChange(f, el) {
+    if (f === "birthday") {
+      clearTimeout(acctBirthdayT); acctBirthdayT = 0;
+      if (el && el.validity && !el.validity.valid) return;
+      acctBirthdayT = setTimeout(function () { acctBirthdayT = 0; acctQueue("birthday"); }, 600);
+      return;
+    }
+    /* the checkout's own rule and words for a number with too few digits
+       (phoneOk / shipMsg): nothing is sent, the server keeps the number it had */
+    if (f === "phone" && S.acctForm.phone.trim() && S.acctForm.phone.replace(/\D/g, "").length < 7) { acctSt("phone", "err:bad_phone"); return; }
+    acctQueue(f);
+  }
+  /* «Доставка по умолчанию»: the row, the country and the machine each come
+     through here. A parcel row without a machine is not a preference yet —
+     the line says what is missing, and the pick of the machine is what saves. */
+  function acctShipChanged() {
+    var d = S.acctForm.ship;
+    if (!d) return;
+    if (d.method === "parcel" && !d.machine) { acctSt("ship", "need"); return; }
+    acctQueue("ship");
   }
   /* «Хочу получать новости и скидки» at the checkout starts from the
      account's own consent: Renat, signed in and subscribed, found it unticked
@@ -11958,67 +12119,6 @@
     S.newsletter = !!S.cust.marketing;
     var box = document.querySelector("[data-news]");
     if (box) box.checked = S.newsletter;
-  }
-  /** The save bar — placed at the foot of screenAccount(); see the note there. */
-  function acctBarHTML() {
-    var dirty = acctDirty();
-    return '<div class="acctbar" data-acctbar>' +
-      (S.acctErr ? '<div class="err acctbar__err" role="alert">' + acctErrText() + "</div>" : "") +
-      '<span class="acctbar__note" data-acctnote>' + acctBarNote() + "</span>" +
-      '<button class="btn' + (dirty || S.acctBusy ? "" : " btn--ghost") + '" data-save' + (S.acctBusy || !dirty ? " disabled" : "") + ">" + acctBarLabel() + "</button>" +
-      "</div>";
-  }
-  function acctBarLabel() {
-    if (S.acctBusy) return "Сохраняем…";
-    return S.acctSaved && !acctDirty() ? "Сохранено ✓" : "Сохранить";
-  }
-  function acctBarNote() { return acctDirty() && !S.acctBusy ? "Изменения не сохранены" : ""; }
-  /* The bar in place, never a render(): the fields are what the shopper is
-     typing into, and renderImpl() carries focus across a rebuild only for the
-     checkout's own fields. Translated here by hand for the same reason —
-     translatePage() runs after a render, not after a patch. */
-  function paintAcctBar() {
-    var bar = document.querySelector("[data-acctbar]");
-    if (!bar) return;
-    var dirty = acctDirty();
-    var btn = bar.querySelector("[data-save]");
-    if (btn) {
-      btn.classList.toggle("btn--ghost", !dirty && !S.acctBusy);
-      btn.disabled = S.acctBusy || !dirty;
-      btn.textContent = trText(acctBarLabel(), S.lang);
-    }
-    var note = bar.querySelector("[data-acctnote]");
-    if (note) note.textContent = acctBarNote() ? trText(acctBarNote(), S.lang) : "";
-  }
-  function acctSave() {
-    if (S.acctBusy || !acctDirty()) return;
-    /* The bar, not a render(): Save is often pressed straight from a field,
-       and a rebuild here would take the caret with it. */
-    S.acctBusy = true; S.acctErr = ""; S.acctSaved = false; paintAcctBar();
-    var sent = JSON.stringify(acctPayload());
-    fetch("/api/account/me/", {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: sent
-    }).then(function (r) { return r.json().then(function (j) { return { body: j, status: r.status }; }, function () { return {}; }); })
-      .then(function (res) {
-        S.acctBusy = false;
-        if (!res.body || !res.body.ok) {
-          if (res.status === 401) { acctForget(); render(); toast("Войдите ещё раз"); return; }
-          S.acctErr = (res.body && res.body.error) || "error"; render(); return;
-        }
-        S.cust = res.body.customer || S.cust;
-        /* The form re-reads the row it just wrote — the server trims and
-           caps, and «unchanged» has to mean «same as the server» — unless a
-           key landed while the request was in flight, in which case the
-           newer typing stays and the bar stays lit. The checkout takes the
-           new default straight away, under the usual guard. */
-        if (JSON.stringify(acctPayload()) === sent) acctSeedForm();
-        applyAcctShipPref(); acctSyncNewsletter();
-        S.acctSaved = true; render();
-        toast("Сохранено ✓");
-      })
-      .catch(function () { S.acctBusy = false; S.acctErr = "error"; render(); });
   }
   function acctLogout() {
     acctForget(); render(); toast("Вы вышли ✓");
@@ -26930,6 +27030,10 @@
       var sel = af.hasAttribute("data-email") ? "[data-email]"
         : af.hasAttribute("data-shipf") ? '[data-shipf="' + af.getAttribute("data-shipf") + '"]'
         : af.hasAttribute("data-invf") ? '[data-invf="' + af.getAttribute("data-invf") + '"]'
+        /* the profile form's own fields: a parcel feed landing (pointsArrived)
+           redraws the account screen too, and a field that saves itself when
+           it is left has to be left by the shopper, not by the rebuild */
+        : af.hasAttribute("data-acctf") ? '[data-acctf="' + af.getAttribute("data-acctf") + '"]'
         : null;
       if (!sel) return;
       refocusSel = sel;
@@ -27952,7 +28056,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-save],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -28150,12 +28254,15 @@
       if (S.screen === "done") S.doneBankPicked = true;
       S.bank = Number(d.bank); render(); refocus('[data-bank="' + d.bank + '"]'); return;
     }
-    // «Доставка по умолчанию»: a row is a draft, saved by the form's own
-    // «Сохранить»; the machine select under it has to be redrawn, so render()
+    // «Доставка по умолчанию»: a row is a draft that saves itself
+    // (acctShipChanged) — after the render(), because the machine select
+    // under it has to be redrawn first and the line is painted in place
     if (d.acctm !== undefined) {
       var acctRowPick = methods()[Number(d.acctm)];
-      if (acctRowPick) { S.acctForm.ship = acctShipFromRow(acctShipCountry(), acctRowPick); S.acctSaved = false; }
-      render(); return;
+      if (acctRowPick) S.acctForm.ship = acctShipFromRow(acctShipCountry(), acctRowPick);
+      render();
+      if (acctRowPick) acctShipChanged();
+      return;
     }
     if (d.admnav !== undefined) { S.admNav = !S.admNav; admPanesSave(); render(); refocus("[data-admnav]"); return; }
     if (d.admai !== undefined) {
@@ -29703,7 +29810,6 @@
       S.acctStage = "email"; S.acctCode = ""; S.acctErr = ""; render(); refocus("[data-email]"); return;
     }
     if (d.logout !== undefined) { acctLogout(); return; }
-    if (d.save !== undefined) { acctSave(); return; }
     if (d.applypromo !== undefined) {
       /* ---- features: the same field takes a gift-card code ----------------
          RMP- plus eight letters is a card, everything else is a promo code —
@@ -30008,10 +30114,15 @@
       if (S.screen === "checkout") pushCart();
     }
     else if (t.matches("[data-acctcode]")) { S.acctCode = t.value.replace(/\D/g, "").slice(0, 6); }
-    // the profile form: no render() — the caret stays put — and the save bar
-    // is painted in place so the change shows the moment it is made
-    else if (t.matches("[data-acctf]")) { S.acctForm[t.dataset.acctf] = t.value; S.acctSaved = false; paintAcctBar(); }
-    else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; S.acctSaved = false; paintAcctBar(); }
+    /* the profile form: the draft follows the keystrokes — no render(), the
+       caret stays put — and the field saves itself when it is left (the
+       "change" listener, acctFieldChange). A standing «Сохранено ✓» or a
+       refusal under it is stale the moment something new is typed; only
+       «Сохраняем…» stays, that request is out. */
+    else if (t.matches("[data-acctf]")) {
+      S.acctForm[t.dataset.acctf] = t.value;
+      if (S.acctSt[t.dataset.acctf] && S.acctSt[t.dataset.acctf] !== "busy") acctSt(t.dataset.acctf, "");
+    }
     /* ---- wholesale/loyalty ------------------------------------------------ */
     else if (t.matches("[data-acctprof]")) { S.acctProForm[t.dataset.acctprof] = t.value; S.acctProErr = ""; }
     // partners: the «+ Партнёр» form — no render(), the caret stays put
@@ -30373,6 +30484,18 @@
     blogSelSave(); blogSync();
   });
 
+  /* The profile form's safety net: a text field left holding a draft the
+     server does not have, with no save on its way. The usual `change` did
+     the work already; what this catches is the value a render() carried
+     across a rebuild (renderImpl's refocus — no `change` fires for that)
+     and a refusal the shopper wants tried again by simply leaving the field. */
+  document.addEventListener("focusout", function (e) {
+    var t = e.target;
+    if (!t || !t.matches || !t.matches("[data-acctf]") || !S.cust) return;
+    var f = t.dataset.acctf;
+    if (acctFieldDirty(f) && !acctPending(f)) acctFieldChange(f, t);
+  });
+
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.matches("[data-countryiso]")) { S.countryIso = t.value; render(); }
@@ -30384,12 +30507,19 @@
       if (isParcel()) loadPoints();
       render();
     }
+    /* the profile form: a text field saves itself when it is left — blur,
+       Enter, the date picker closing — never on a keystroke (acctFieldChange) */
+    else if (t.matches("[data-acctf]")) { S.acctForm[t.dataset.acctf] = t.value; acctFieldChange(t.dataset.acctf, t); }
+    // …and the consent tick at once, through the same one-at-a-time queue
+    else if (t.matches("[data-acctmk]")) { S.acctForm.marketing = t.checked; acctQueue("marketing"); }
     /* «Доставка по умолчанию»: another country is another table of rows, so
-       the draft restarts on its first row. The account's own country, not
-       S.country — that one belongs to the checkout in progress. */
+       the draft restarts on its first row — and saves itself like a tapped
+       row would (acctShipChanged: a parcel row waits for its machine). The
+       account's own country, not S.country — that one belongs to the
+       checkout in progress. */
     else if (t.matches("[data-acctcountry]")) {
       var acctCc = SHIP[t.value] ? t.value : "EE";
-      S.acctForm.ship = acctShipFromRow(acctCc, SHIP[acctCc][0]); S.acctSaved = false; render();
+      S.acctForm.ship = acctShipFromRow(acctCc, SHIP[acctCc][0]); render(); acctShipChanged();
     }
     /* returns: the tick on a delivered order goes to the server the moment it
        is ticked. `change` and not the click delegate: the box is inside its
@@ -30440,9 +30570,10 @@
       if (bsIt) bsIt.variant = Number(t.value) || 0;
       render();
     }
-    // the machine is a name (acctMachineName); "" is the placeholder — none chosen yet
+    // the machine is a name (acctMachineName); "" is the placeholder — none
+    // chosen yet. Its pick is what saves a parcel row (acctShipChanged).
     else if (t.matches("[data-acctmachine]")) {
-      if (S.acctForm.ship) { S.acctForm.ship.machine = t.value; S.acctSaved = false; paintAcctBar(); }
+      if (S.acctForm.ship) { S.acctForm.ship.machine = t.value; acctShipChanged(); }
     }
     // «Главный баннер»: the link target, the picture URL and the timing —
     // on change, so a half-typed URL never becomes the banner's picture
