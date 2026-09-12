@@ -175,7 +175,7 @@ function csp(scriptSrc: string, frameAncestors = "'none'", connectExtra = ""): s
   ].join("; ");
 }
 
-/** Locked down everywhere by default — see SHOP2_PERMISSIONS_POLICY below for the one exception. */
+/** Locked down everywhere by default — see SHOP2_PERMISSIONS_POLICY below for the two exceptions. */
 const DEFAULT_PERMISSIONS_POLICY =
   "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), " +
   "geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()";
@@ -185,11 +185,20 @@ const DEFAULT_PERMISSIONS_POLICY =
  * or the zxing fallback both read frames off a same-origin <video> fed by
  * getUserMedia (public/shop2/app.js, scanMount()/startNativeEngine()). Same
  * default-deny policy as everywhere else, with `camera=(self)` as the one
- * opening: no third party, no cross-origin frame, gets it either. Every
- * other permission — microphone, geolocation, usb, payment, … — stays
- * denied under /shop2/* exactly like it is everywhere else.
+ * opening: no third party, no cross-origin frame, gets it either.
+ *
+ * The microphone, the same way (12.09.2026): the admin assistant's voice
+ * input (app.js admVoiceStart, the browser's own SpeechRecognition) needs
+ * it, and `microphone=()` here blocked the API outright — every tap of the
+ * mic ended in `not-allowed` before the browser could even ask the owner
+ * (Dim's S21 FE: «Нет доступа к микрофону», no prompt, ever). `(self)` lets
+ * the page ask; the owner still answers the prompt himself. Every other
+ * permission — geolocation, usb, payment, … — stays denied under /shop2/*
+ * exactly like it is everywhere else, and both openings are ours alone.
  */
-const SHOP2_PERMISSIONS_POLICY = DEFAULT_PERMISSIONS_POLICY.replace("camera=()", "camera=(self)");
+const SHOP2_PERMISSIONS_POLICY = DEFAULT_PERMISSIONS_POLICY
+  .replace("camera=()", "camera=(self)")
+  .replace("microphone=()", "microphone=(self)");
 
 /** The headers every response carries, whatever the CSP on top of it. */
 function baseSecurityHeaders(frameOptions = "DENY", permissionsPolicy = DEFAULT_PERMISSIONS_POLICY) {

@@ -558,7 +558,15 @@
   min-height: 56px; background: var(--a-ink); color: #fff; display: flex; align-items: center;
   justify-content: space-between; padding: 0 6px 0 16px; z-index: 80; animation: adm-up .2s; gap: 12px;
 }
-.adm-toast__t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+/* Up to three lines, then an ellipsis (12.09.2026). It was one line cut with
+   an ellipsis, and a phone shows about thirty characters of that: «Микрофон
+   не разрешён — разрешите его в…» lost the half that mattered, so the
+   assistant's microphone said «Нет доступа» and nothing about where to fix
+   it. A one-line toast is drawn exactly as before (min-height 56, centred). */
+.adm-toast__t {
+  flex: 1; min-width: 0; font-size: 15px; line-height: 20px; padding: 8px 0;
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
 .adm-toast__undo {
   border: 0; background: none; color: #fff; font-weight: 600; text-decoration: underline;
   text-underline-offset: 3px; font-size: 15px; height: 44px; padding: 0 8px; flex: none;
@@ -675,9 +683,23 @@ body.is-scanning .adm-toast { z-index: calc(var(--z-scan) + 1); }
 @media (max-width: 899px) {
   .adm-side { display: none; }
   /* the assistant becomes the sheet the phone spec asks for — same markup,
-     same `[data-aians]`, a different shape */
+     same `[data-aians]`, a different shape.
+
+     Three quarters of the screen; the whole of it on a short one (a phone
+     on its side); and, with the keyboard up, the whole of what is left
+     above the keys — the head at the top, the messages scrolling between,
+     the compose row pinned at the bottom, never under the keyboard (r14 —
+     Dim, 11.09.2026: on Chrome Android the box and «→» sat under the keys).
+     `--a-vvh` is the visual viewport's height and `--a-vvbot` the strip of
+     the layout viewport below it, both written by app.js admVvFollow()
+     only while the sheet is open on a phone; unset, the two fall back to
+     the plain sheet. A browser that shrinks the layout viewport itself for
+     the keyboard (Chrome with the shell's `interactive-widget=
+     resizes-content`) reports no strip, and the `min(100%, 520px)` arm is
+     what makes the sheet fill what is left there. */
   .adm-asst {
-    top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 75%;
+    top: auto; left: 0; right: 0; bottom: var(--a-vvbot, 0px); width: auto;
+    height: min(var(--a-vvh, 100%), max(75%, min(100%, 520px)));
     border-left: 0; border-top: 1px solid var(--a-ink); animation: adm-up .2s;
   }
   .adm-asst__chev { display: none; }

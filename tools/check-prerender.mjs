@@ -13,6 +13,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { assetToken, currentToken } from "./lib/asset-token.mjs";
+import { VIEWPORT_META } from "../src/lib/seo-head.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PUB = path.join(ROOT, "public");
@@ -216,6 +217,10 @@ async function checkPage(file, { lang, seg, rest, product, blogPost, needImg = t
   if (!html.includes("?v=" + ASSET_V)) fail(file, `asset version is not ?v=${ASSET_V} — re-run npm run prerender`);
   if (!html.includes(SCRIPTS.trim().split("\n")[0].trim())) fail(file, "script tags differ from index.html");
   if (!/<div id="app">/.test(html)) fail(file, "no #app root");
+  // …and every page, the shell included, asks for the one viewport
+  // (src/lib/seo-head.mjs VIEWPORT_META — the prerender patches it into
+  // index.html too, so a hand-edited line there is caught here)
+  if (!html.includes(VIEWPORT_META)) fail(file, "viewport meta differs from VIEWPORT_META — re-run npm run prerender");
 }
 
 const LANGS = [["ru", ""], ["et", "et"], ["en", "en"]];

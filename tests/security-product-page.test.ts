@@ -312,6 +312,46 @@ describe("the security headers over /shop2/*", () => {
     }
   });
 
+  /* The Permissions-Policy a request actually gets, not a rule looked up by
+     name: Next applies every rule whose `source` matches, the later one
+     winning a key. `/shop2/admin/` is where the assistant's microphone and
+     the scanner's camera are used (both `(self)` — ours, no third party, no
+     frame); `/shop2/` is the plain shop page on the same two rules; the API
+     is on the catch-all and keeps the full deny list. Until 12.09.2026 the
+     microphone was `()` under /shop2/* too, and every tap of the assistant's
+     mic failed as `not-allowed` before the browser could ask the owner. */
+  it("Permissions-Policy: camera and microphone are (self) on the admin and the shop, everything else is denied everywhere", async () => {
+    const { default: nextConfig } = await import("../next.config");
+    const rules = (await nextConfig.headers!()).filter((r) => !("missing" in r) && !("has" in r));
+    // `/shop2` matches `/shop2/` too: trailingSlash is on (nextConfig.trailingSlash)
+    const matches = (source: string, pathname: string) =>
+      new RegExp("^" + source.replace(/:[A-Za-z]+\*/g, ".*").replace(/:[A-Za-z]+(\([^)]*\))?/g, "[^/]+") + "/?$").test(pathname);
+    const policyFor = (pathname: string) =>
+      rules
+        .filter((r) => matches(r.source, pathname))
+        .map((r) => r.headers.find((h) => h.key === "Permissions-Policy")?.value)
+        .filter((v): v is string => !!v)
+        .pop() ?? "";
+    const features = (policy: string) =>
+      Object.fromEntries(policy.split(",").map((part) => part.trim().split("=") as [string, string]));
+
+    for (const path of ["/shop2/admin/", "/shop2/"]) {
+      const f = features(policyFor(path));
+      expect(f.microphone, `${path}: microphone`).toBe("(self)");
+      expect(f.camera, `${path}: camera`).toBe("(self)");
+      for (const [name, value] of Object.entries(f)) {
+        if (name === "microphone" || name === "camera") continue;
+        expect(value, `${path}: ${name} must stay denied`).toBe("()");
+      }
+    }
+    // the rest of the site opens nothing at all
+    const api = features(policyFor("/api/geo/"));
+    expect(Object.keys(api).length, "/api/geo/: a policy at all").toBeGreaterThan(5);
+    for (const [name, value] of Object.entries(api)) expect(value, `/api/geo/: ${name}`).toBe("()");
+    // and the two openings are the only differences between the two policies
+    expect(Object.keys(features(policyFor("/shop2/admin/"))).sort()).toEqual(Object.keys(api).sort());
+  });
+
   it("the site root is a redirect to the shop, not a page — and no rule mentions the retired prototype surfaces", async () => {
     const { default: nextConfig } = await import("../next.config");
     const redirects = await nextConfig.redirects!();

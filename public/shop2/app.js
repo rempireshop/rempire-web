@@ -2110,7 +2110,9 @@
       "Прикрепить фото": "Lisa foto", "Фото для помощника": "Foto abilisele",
       /* the microphone beside the question box (admVoiceMicHTML) */
       "Голосовой ввод": "Häälsisestus", "Слушаю…": "Kuulan…",
-      "Нет доступа к микрофону": "Mikrofonile puudub ligipääs",
+      "Микрофон запрещён — разрешите его в настройках браузера для этого сайта":
+        "Mikrofon on keelatud — lubage see brauseri seadetes selle saidi jaoks",
+      "Микрофон здесь недоступен": "Mikrofon pole siin saadaval",
       "Микрофон не найден": "Mikrofoni ei leitud", "Ничего не услышал": "Ei kuulnud midagi",
       "Написать статью целиком": "Kirjuta kogu artikkel",
       "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
@@ -4492,7 +4494,9 @@
       "Прикрепить фото": "Attach a photo", "Фото для помощника": "Photo for the assistant",
       /* the microphone beside the question box (admVoiceMicHTML) */
       "Голосовой ввод": "Voice input", "Слушаю…": "Listening…",
-      "Нет доступа к микрофону": "No access to the microphone",
+      "Микрофон запрещён — разрешите его в настройках браузера для этого сайта":
+        "The microphone is blocked — allow it in the browser's settings for this site",
+      "Микрофон здесь недоступен": "The microphone is not available here",
       "Микрофон не найден": "No microphone found", "Ничего не услышал": "I heard nothing",
       "Написать статью целиком": "Write the whole article",
       "Заголовок, анонс, текст с разделами, теги, товары и текст для Google — по-русски, потом на эстонском и английском. Черновик сохранится сам; вы читаете и публикуете.":
@@ -14864,11 +14868,31 @@
     var text = (admVoiceBase ? admVoiceBase + " " : "") + String(heard || "").replace(/^\s+/, "");
     q.value = text; S.adminQ = text;
   }
-  /* short on purpose: the admin toast is one line with an ellipsis
-     (admin.css .adm-toast__t), and a phone shows about thirty characters of
-     it — «Микрофон не разрешён — разрешите его в…» lost the half that mattered */
+  /* Chrome: is the microphone barred by the page's own Permissions-Policy —
+     the one refusal no browser setting of the owner's can lift? Until
+     12.09.2026 next.config.ts sent `microphone=()` for /shop2/* too, and
+     every tap ended here without a prompt (Dim's S21 FE). document.
+     featurePolicy is the older name the same API still answers to; Safari
+     has neither, and answers «no» — the wording that follows is then the
+     one he can act on. */
+  function admVoiceBarred() {
+    var fp = document.permissionsPolicy || document.featurePolicy;
+    try { return !!(fp && typeof fp.allowsFeature === "function" && !fp.allowsFeature("microphone")); }
+    catch (e) { return false; }
+  }
+  /* What the browser reported, in words the owner can act on. The same
+     `not-allowed` arrives for two very different things — he (or his
+     browser's site settings) refused the microphone, and the page never let
+     the question be asked — so the two are told apart above. The long line
+     wraps: the admin toast shows up to three lines now (admin.css
+     .adm-toast__t); the one-line «Нет доступа к микрофону» it replaced said
+     nothing about where to fix it. */
   function admVoiceFail(code) {
-    if (code === "not-allowed" || code === "service-not-allowed") toast("Нет доступа к микрофону");
+    if (code === "not-allowed") {
+      toast(admVoiceBarred() ? "Микрофон здесь недоступен"
+        : "Микрофон запрещён — разрешите его в настройках браузера для этого сайта");
+    }
+    else if (code === "service-not-allowed" || code === "language-not-supported") toast("Микрофон здесь недоступен");
     else if (code === "audio-capture") toast("Микрофон не найден");
     else if (code === "no-speech") toast("Ничего не услышал");
     // "aborted", "network": nothing to say — the box keeps what was heard
@@ -14876,7 +14900,9 @@
   function admVoiceStart() {
     if (!SpeechRec || admVoice) return;
     var rec;
-    try { rec = new SpeechRec(); } catch (e) { return; }
+    // the name exists but the browser will not build one (a webview, a
+    // policy-managed browser): the same «not here» as a barred microphone
+    try { rec = new SpeechRec(); } catch (e) { toast("Микрофон здесь недоступен"); return; }
     var q = document.querySelector("[data-admq]");
     admVoiceBase = ((q && q.value) || S.adminQ || "").replace(/\s+$/, "");
     rec.lang = ADM_VOICE_LANG[S.lang] || "ru-RU";
@@ -14895,7 +14921,7 @@
     };
     rec.onend = function () { if (admVoice === rec) { admVoice = null; admVoicePaint(); } };
     admVoice = rec;
-    try { rec.start(); } catch (e) { admVoice = null; return; }
+    try { rec.start(); } catch (e) { admVoice = null; toast("Микрофон здесь недоступен"); return; }
     admVoicePaint();
   }
   /* the second tap: stop listening, keep what was heard (a last result may
@@ -27070,6 +27096,11 @@
        while it stands — admBarObserve(). */
     document.documentElement.classList.toggle("adm-saving", !!savebar);
     admBarObserve(savebar);
+    /* …and the assistant sheet, while it is open on a phone, is sized by
+       the visual viewport — the keyboard is what it must keep clear of
+       (admVvFollow, beside admBarTouch). Run here because the sheet
+       opening or closing is a render, not a viewport event. */
+    if (S.screen === "admin" || admVvH) admVvFollow();
     document.body.dataset.screen = S.screen; // chat.js reads this to hide itself
     // …and, if this is the first screen that wants the assistant at all, the
     // widget's <script> is fetched now rather than at boot (mountChat above)
@@ -30870,15 +30901,56 @@
      viewport once the page cannot scroll any further, and a fixed top bar
      stays with the layout viewport — off the screen. The bar-as-header
      follows the visual viewport instead (admin.css: a translate by
-     `--a-vvtop`). Zero whenever the two agree, so nothing moves elsewhere. */
+     `--a-vvtop`). Zero whenever the two agree, so nothing moves elsewhere.
+
+     The assistant sheet follows it the same way while it is open on a phone
+     (r14 — Dim, 11.09.2026: on Chrome Android the box and «→» sat under the
+     keys, and he typed blind). Chrome keeps the layout viewport as it is
+     when the keyboard comes up and shrinks only the visual one, so a sheet
+     fixed to `bottom: 0` stays where the keyboard now is; Safari on an
+     iPhone does the same and then slides the page under it as well. So,
+     while the sheet is up: `--a-vvh` is the visual viewport's height and
+     `--a-vvbot` the strip of the layout viewport below it — the keyboard,
+     when one is up — and admin.css (≤ 899, .adm-asst) makes the sheet
+     exactly that visual viewport out of the two: the head at its top, the
+     compose row at its bottom, the messages scrolling between. Unset while
+     the sheet is closed and on a desktop, where the column needs none of
+     it; and a browser that resizes the layout viewport itself (Chrome with
+     the `interactive-widget=resizes-content` the shell's viewport meta asks
+     for) reports no strip at all, so the CSS's own 100 % is the answer and
+     this is a no-op there. When the viewport shrinks by more than a URL bar
+     — the keyboard came up — the newest message is scrolled into view
+     above it. renderImpl() runs this after every admin paint, since the
+     sheet opening or closing is not a viewport event. */
+  var admVvTop = 0, admVvH = 0, admVvBot = 0;
+  var ADM_PHONE_MQ = null;
+  try { ADM_PHONE_MQ = window.matchMedia("(max-width: 899px)"); } catch (e) {}
+  /* the sheet, while it is on screen AS a sheet — the same markup is a
+     fixed column on a desktop (admin.css switches at 900) */
+  function admVvSheet() {
+    if (!ADM_PHONE_MQ || !ADM_PHONE_MQ.matches) return null;
+    return document.querySelector(".adm-asst");
+  }
+  function admVvFollow() {
+    var vv = window.visualViewport;
+    if (!vv) return;
+    var root = document.documentElement.style;
+    var top = document.body.classList.contains("adm-saving") ? Math.max(0, Math.round(vv.offsetTop)) : 0;
+    if (top !== admVvTop) { admVvTop = top; root.setProperty("--a-vvtop", top + "px"); }
+    var sheet = admVvSheet();
+    var h = sheet ? Math.max(0, Math.round(vv.height)) : 0;
+    var bot = sheet ? Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height)) : 0;
+    if (h === admVvH && bot === admVvBot) return;
+    var shrank = !!sheet && admVvH > 0 && h < admVvH - 100;
+    admVvH = h; admVvBot = bot;
+    if (sheet) { root.setProperty("--a-vvh", h + "px"); root.setProperty("--a-vvbot", bot + "px"); }
+    else { root.removeProperty("--a-vvh"); root.removeProperty("--a-vvbot"); }
+    if (shrank) {
+      var msgs = sheet.querySelector(".adm-asst__body");
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }
+  }
   if (window.visualViewport) {
-    var admVvTop = 0;
-    var admVvFollow = function () {
-      var top = document.body.classList.contains("adm-saving") ? Math.max(0, Math.round(window.visualViewport.offsetTop)) : 0;
-      if (top === admVvTop) return;
-      admVvTop = top;
-      document.documentElement.style.setProperty("--a-vvtop", top + "px");
-    };
     window.visualViewport.addEventListener("resize", admVvFollow);
     window.visualViewport.addEventListener("scroll", admVvFollow);
   }

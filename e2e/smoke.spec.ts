@@ -746,13 +746,15 @@ test.describe(`deployed shop — ${BASE}`, () => {
       expect(h["referrer-policy"], `${url}: Referrer-Policy`).toBe("strict-origin-when-cross-origin");
       expect(h["strict-transport-security"], `${url}: HSTS`).toBe("max-age=31536000; includeSubDomains");
 
-      /* The camera is the one permission /shop2/* opens, for the admin's
-         barcode scanner, and `(self)` is the whole of that opening — no third
-         party and no cross-origin frame gets it. Everywhere else, and every
-         other permission everywhere, stays denied. */
+      /* The camera and the microphone are the two permissions /shop2/* opens
+         — the admin's barcode scanner and the assistant's voice input — and
+         `(self)` is the whole of each opening: no third party and no
+         cross-origin frame gets either. Everywhere else, and every other
+         permission everywhere, stays denied. */
       const perms = h["permissions-policy"] || "";
       expect(perms, `${url}: Permissions-Policy`).toContain(strict ? "camera=(self)" : "camera=()");
-      for (const denied of ["microphone=()", "geolocation=()", "payment=()", "usb=()"]) {
+      expect(perms, `${url}: Permissions-Policy`).toContain(strict ? "microphone=(self)" : "microphone=()");
+      for (const denied of ["geolocation=()", "payment=()", "usb=()"]) {
         expect(perms, `${url}: Permissions-Policy should still deny ${denied}`).toContain(denied);
       }
 

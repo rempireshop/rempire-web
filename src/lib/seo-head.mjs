@@ -493,6 +493,25 @@ export function patchShell(shell, headHtml, contentHtml, htmlLang) {
   return out;
 }
 
+/* The viewport every page asks for — written into every generated page by
+   tools/prerender-shop2.mjs and patched into the shell's hand-maintained
+   head by the same run (reviewport below), checked by tools/check-prerender;
+   `npm run build`'s prebuild runs that tool, so a deployment carries it
+   whatever the committed index.html says.
+   `interactive-widget=resizes-content` (12.09.2026) is for Chrome on Android:
+   since Chrome 108 the keyboard shrinks only the visual viewport there, and
+   anything fixed to the bottom of the layout viewport — the admin
+   assistant's compose row, in its sheet — stayed under the keys (Dim, S21
+   FE). With it Chrome shrinks the layout viewport, as it did before and as
+   every fixed-bottom bar on the site expects. Safari ignores the key; the
+   sheet follows the visual viewport by script there (app.js admVvFollow). */
+export const VIEWPORT_META =
+  '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">';
+/** The shell with its viewport meta brought up to VIEWPORT_META; unchanged if it already is. */
+export function reviewport(shell) {
+  return String(shell).replace(/<meta name="viewport" content="[^"]*">/, () => VIEWPORT_META);
+}
+
 /* The shell as a 404: whatever the head says about the home page, the one
    thing a crawler must read is that this address is not to be indexed. */
 export function noindexShell(shell) {
