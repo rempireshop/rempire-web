@@ -233,7 +233,7 @@ test.describe("scanner app", () => {
     await expect(page.locator("#stocklist")).toBeVisible();
     // searching by the barcode itself proves the binding stuck as well
     await page.locator("[data-stockq]").fill(ean);
-    const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${VARIANT}"]`).locator("xpath=..");
+    const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${VARIANT}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
     await expect(row).toContainText(ean);
     await expect(row).toContainText(String(before + 3));
     await assertClean(page, w, "«Склад» shows what the scanner wrote");
@@ -255,7 +255,7 @@ test.describe("scanner app", () => {
     await tab(page, "stock");
     await expect(page.locator("#stocklist")).toBeVisible();
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
-    const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${variant}"]`).locator("xpath=..");
+    const row = page.locator(`[data-stockedit="${PRODUCT_2.id} ${variant}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
     await expect(row).toBeVisible();
     await expect(row).toContainText("штрихкод не привязан");
     const before = (await stockQty(page, PRODUCT_2.id, variant)) ?? 0;
@@ -792,7 +792,7 @@ test.describe("scanner app", () => {
     test.setTimeout(120_000);
     const w = watch(page);
     const key = `${PRODUCT_2.id} ${VARIANT}`;
-    const row = page.locator(`[data-stockedit="${key}"]`).locator("xpath=..");
+    const row = page.locator(`[data-stockedit="${key}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
 
     await openAdmin(page);
     await tab(page, "stock");

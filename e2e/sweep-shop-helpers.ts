@@ -78,6 +78,12 @@ export function intBetween(rng: () => number, lo: number, hi: number): number {
  *    a console error.
  */
 const CONSOLE_ALLOW: RegExp[] = [
+  /* WebKit (iOS Safari, the mobile-safari project) does not know the
+     `interactive-widget` viewport key that keeps the admin assistant's
+     compose row above the Android keyboard (src/lib/seo-head.mjs) and says
+     so as a console error on every page. It ignores the key, which is the
+     spec'd behaviour for an unknown key — not a fault of ours. */
+  /Viewport argument key "interactive-widget" not recognized/i,
   /fonts\.(googleapis|gstatic)\.com/i,
   /cloudflareinsights\.com|beacon\.min\.js/i,
   // 401 for an anonymous visitor on the two "who is this?" probes. app.js

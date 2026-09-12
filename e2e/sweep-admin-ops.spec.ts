@@ -82,7 +82,7 @@ test.describe("sweep — warehouse", () => {
     // …and the grid shows the same number the route holds.
     await tab(page, "stock");
     await page.locator("[data-stockq]").fill(PRODUCT_2.id);
-    await expect(page.locator(`[data-stockedit="${key}"]`).locator("xpath=..")).toContainText("5");
+    await expect(page.locator(`[data-stockedit="${key}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]")).toContainText("5");
     await assertClean(page, w, "stock set to 5");
 
     // The dangerous ones. A count is money on a shelf: a value the panel

@@ -150,7 +150,7 @@ test.describe("admin — the product editor", () => {
       // «Склад» shows the same two numbers — it is the same rows.
       await tab(page, "stock");
       await page.locator("[data-stockq]").fill(ean);
-      const row = page.locator(`[data-stockedit="${id} ${VARIANT}"]`).locator("xpath=..");
+      const row = page.locator(`[data-stockedit="${id} ${VARIANT}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
       await expect(row, "«Склад» does not show the barcode the editor bound").toContainText(ean);
       await expect(row, "«Склад» does not show the count the editor set").toContainText(String(stockWas + 7));
       await assertClean(page, w, "«Склад» agrees with the editor");
