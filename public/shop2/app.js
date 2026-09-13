@@ -968,8 +968,6 @@
         "Veerg „Pakiautomaat“ on varuhind. Kui allpool, jaotises „Vedajate hinnad“, on Omnival, DPD-l, SmartPostil või Unisendil oma hind, maksab ostja selle, mitte tabelis oleva.",
       "Цена перевозчика сильнее колонки «Пакомат» в таблице выше: если тут стоит число, покупатель платит его.":
         "Vedaja hind on tugevam kui ülemise tabeli veerg „Pakiautomaat“: kui siin on number, maksab ostja selle.",
-      "Самовывоз всегда бесплатный — что бы тут ни стояло, в кассе будет 0 €.":
-        "Järeletulek on alati tasuta — mis iganes siin seisab, kassas on 0 €.",
       "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
         "Juurdehindlus iseenesest ei muuda midagi: selle liidab ainult nupp „Täida Montonio tariifide järgi“, kui kirjutab hinnad tabelisse.",
       "Что увидит покупатель": "Mida ostja näeb",
@@ -2258,9 +2256,11 @@
       "Бесплатно от, €": "Tasuta alates, €",
       "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
         "Nupp kirjutab sisse vedaja tariifid pluss juurdehindluse, ümardatuna X,X9 €-ni, ja ainult seal, kus tariif on teada. Kontrolli numbrid üle ja salvesta.",
-      "Самовывоз, перевозчики и наценка": "Järeletulek, vedajad ja juurdehindlus",
-      "Самовывоз, €": "Järeletulek, €",
-      "Самовывоз — Эстония": "Järeletulek — Eesti",
+      // «Самовывоз, €» and its label left the screen on 13.09.2026 — the box
+      // priced nothing; this line is what stands in its place
+      "Перевозчики и наценка": "Vedajad ja juurdehindlus",
+      "Самовывоза в таблице нет — он всегда бесплатный.":
+        "Järeletulekut tabelis ei ole — see on alati tasuta.",
       "Наценка, %": "Juurdehindlus, %",
       "Наценка, €": "Juurdehindlus, €",
       "Наценка, проценты": "Juurdehindlus, protsentides",
@@ -3385,8 +3385,6 @@
         "The «Parcel locker» column is only a fallback price. If Omniva, DPD, SmartPosti or Unisend has a price of its own below, under «Prices per carrier», that is what the customer pays — not the one in the table.",
       "Цена перевозчика сильнее колонки «Пакомат» в таблице выше: если тут стоит число, покупатель платит его.":
         "A carrier's price beats the «Parcel locker» column in the table above: if there is a number here, that is what the customer pays.",
-      "Самовывоз всегда бесплатный — что бы тут ни стояло, в кассе будет 0 €.":
-        "Pickup is always free — whatever stands here, the checkout charges 0 €.",
       "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
         "The markup changes nothing on its own: only the «Fill from Montonio tariffs» button adds it, when it writes prices into the table.",
       "Что увидит покупатель": "What the customer sees",
@@ -4660,9 +4658,11 @@
       "Бесплатно от, €": "Free from, €",
       "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
         "The button fills in the carrier tariffs plus your markup, rounded to €X.X9, and only where a tariff is known. Check the numbers and save.",
-      "Самовывоз, перевозчики и наценка": "Pickup, carriers and markup",
-      "Самовывоз, €": "Pickup, €",
-      "Самовывоз — Эстония": "Pickup — Estonia",
+      // «Самовывоз, €» and its label left the screen on 13.09.2026 — the box
+      // priced nothing; this line is what stands in its place
+      "Перевозчики и наценка": "Carriers and markup",
+      "Самовывоза в таблице нет — он всегда бесплатный.":
+        "Pickup is not in the table — it is always free.",
       "Наценка, %": "Markup, %",
       "Наценка, €": "Markup, €",
       "Наценка, проценты": "Markup in percent",
@@ -17496,6 +17496,10 @@
          threshold now, and this sentence says what happens if he empties it. */
       '<p class="adm-hint" style="margin-top:10px">«Бесплатно от»: 0 — доставка бесплатна всегда, ' +
         "пусто — бесплатной доставки в эту страну нет.</p>" +
+      /* The third delivery method has no row in the grid and no price box
+         anywhere — because it has no price. Worth one line so the table does
+         not read as «самовывоза тут нет». */
+      '<p class="adm-hint" style="margin-top:4px">Самовывоза в таблице нет — он всегда бесплатный.</p>' +
       /* The misunderstanding this whole screen turns on, said once, loudly and
          in the owner's own words — Ренат, 13.09.2026: «I do not understand the
          table and the pickup, carriers and markup difference & what is
@@ -17515,17 +17519,19 @@
       '<p class="adm-hint" style="margin-top:8px">Кнопка впишет тарифы перевозчика плюс наценку, ' +
         "округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.</p>" +
       '<details class="adm-fold" style="margin-top:16px">' +
-        '<summary class="adm-link">Самовывоз, перевозчики и наценка</summary><div style="padding-top:12px">' +
-          '<label class="adm-field"><span>Самовывоз, €</span>' +
-            admShipCellHTML("m:pickup:EE", shipCell("pickup", "EE"), "Самовывоз — Эстония") + "</label>" +
-          /* A box that prices nothing: both halves of the shop short-circuit
-             pickup to 0 before they look at a table (shipPriceFor() here,
-             quoteFromRules() on the server), so whatever is typed here is
-             stored and never read. Said out loud rather than quietly left as
-             a live-looking field. */
-          '<p class="adm-hint" style="margin-top:6px">Самовывоз всегда бесплатный — что бы тут ни ' +
-            "стояло, в кассе будет 0 €.</p>" +
-          '<p class="adm-notice" style="margin-top:12px">Цена перевозчика сильнее колонки «Пакомат» ' +
+        /* «Самовывоз, €» was the first field in this fold until 13.09.2026,
+           and it priced nothing: both halves of the shop short-circuit pickup
+           to 0 before they look at a table (shipPriceFor() here,
+           quoteFromRules() on the server), so the number typed there was
+           stored and never read. On a screen whose whole complaint was «что
+           из этого вообще работает», a box that works on nothing answers
+           better by not being there — so it is gone, with its label, and the
+           one fact worth keeping («самовывоз всегда бесплатный») is a line
+           under the table instead. `methods.pickup` stays in the rules: it is
+           part of their shape, and an old row that carries a number under it
+           goes on being ignored exactly as before. */
+        '<summary class="adm-link">Перевозчики и наценка</summary><div style="padding-top:12px">' +
+          '<p class="adm-notice" style="margin-top:0">Цена перевозчика сильнее колонки «Пакомат» ' +
             "в таблице выше: если тут стоит число, покупатель платит его.</p>" +
           SHIP_CARRIER_ROWS.map(function (c) {
             return '<div style="margin-top:12px"><div class="adm-sec__t">' + c[1] + "</div>" +
@@ -29598,9 +29604,16 @@
       render(); refocus('[data-shipcountry="' + d.shipcountry + '"]'); return;
     }
     if (d.shipeu !== undefined) { S.shipEuOpen = !S.shipEuOpen; render(); return; }
-    // «Что увидит покупатель» — remembered like the Europe fold, so the panel
-    // does not close under the finger that opened it
-    if (d.shippreview !== undefined) { S.shipPreviewOpen = !S.shipPreviewOpen; render(); return; }
+    /* «Что увидит покупатель» — remembered like the Europe fold, so the panel
+       does not close under the finger that opened it.
+       preventDefault() because <summary> carries an activation behaviour of
+       its own: the browser flips `open` after this listener returns, on the
+       node that was clicked. S is what the next render draws from, so the two
+       must not both toggle — one tap, one flip, and S makes it. */
+    if (d.shippreview !== undefined) {
+      e.preventDefault();
+      S.shipPreviewOpen = !S.shipPreviewOpen; render(); return;
+    }
     // the defaults are prices too — the same card as «Сохранить»
     if (d.admshipreset !== undefined) {
       pendingAction = {

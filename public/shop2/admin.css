@@ -1739,7 +1739,19 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
    the bleed. .dlv__table's own min-width is what makes the strip scroll on a
    375 px phone instead of the page. */
 .adm-preview .dlv__scroll { margin: 0; padding: 0; }
-.adm-preview .dlv__table { min-width: 460px; }
+/* …and no min-width, unlike the customer page's own 560 px. The point of the
+   preview is the «Бесплатно от» column next to the «Пакомат» one, and a
+   column parked off the right edge of a 375 px phone is a column the owner
+   does not read. Four short cells fit; the carrier names wrap under the
+   country, which is where they already sit. The strip keeps its overflow
+   anyway, so a longer country name still scrolls rather than the page. */
+.adm-preview .dlv__table { min-width: 0; font-size: 13.5px; }
+.adm-preview .dlv__table th, .adm-preview .dlv__table td { padding: 9px 8px 9px 0; }
+/* the customer page keeps its column heads on one line, which on 375 px hands
+   «Бесплатно от» a third of the row and squeezes the country column until the
+   carriers under it wrap one name per line */
+.adm-preview .dlv__table thead th { white-space: normal; }
+.adm-preview .dlv__carriers { font-size: 11.5px; }
 /* appearance:none takes the native arrow away with the native chrome — a
    select with no arrow reads as a text box the owner cannot type into */
 .adm2 select.adm-input {

@@ -153,8 +153,17 @@ describe("the preview is the customer's own table, not a second one", () => {
 
   it("scrolls inside its own strip, so a 375 px panel never scrolls sideways", () => {
     expect(harness(LIVE).preview()).toContain('class="dlv__scroll"');
-    // …and the storefront's gutter bleed is taken off inside the panel
+    // …and the storefront's gutter bleed and its 560 px floor are taken off
+    // inside the panel, so all four columns fit a phone
     expect(adminCss).toMatch(/\.adm-preview \.dlv__scroll \{[^}]*margin: 0;/);
+    expect(adminCss).toMatch(/\.adm-preview \.dlv__table \{[^}]*min-width: 0;/);
+  });
+
+  /* The fold's state lives in S and is redrawn from it, so the <summary>'s own
+     activation behaviour must not flip `open` a second time behind the
+     render. Source-level, because it is one line and there is no DOM here. */
+  it("keeps the fold's open state in S rather than in the browser", () => {
+    expect(src).toMatch(/d\.shippreview !== undefined\) \{[\s\S]{0,120}e\.preventDefault\(\);/);
   });
 
   it("shows all six rows of the panel's grid, «Остальные страны» included", () => {
@@ -217,18 +226,30 @@ describe("the three labels say which numbers are real", () => {
     expect(src).toContain("Цена перевозчика сильнее колонки «Пакомат» ");
   });
 
-  it("says the pickup box prices nothing and the markup only feeds the button", () => {
-    expect(src).toContain("Самовывоз всегда бесплатный — что бы тут ни ");
+  it("says the markup only feeds the button", () => {
     expect(src).toContain("Наценка сама по себе ничего не меняет: её ");
+  });
+
+  /* The «Самовывоз, €» box priced nothing and is gone (13.09.2026) — a field
+     that works on nothing is the opposite of an answer to «что из этого
+     вообще работает». The fact it carried is kept as a line. */
+  it("has no pickup price box left, and says pickup is free instead", () => {
+    expect(src).not.toContain("m:pickup:");
+    // the field's own label markup — the comment that explains the removal
+    // still names it, and should
+    expect(src).not.toMatch(/<span>Самовывоз, €<\/span>/);
+    expect(src).toContain("Самовывоза в таблице нет — он всегда бесплатный.");
+    expect(src).toContain("Перевозчики и наценка</summary>");
   });
 
   it("has every one of them in Estonian and English", () => {
     const keys = [
       "Колонка «Пакомат» — это запасная цена. Если внизу, в «Ценах по перевозчикам», у Omniva, DPD, SmartPosti или Unisend стоит своя цена, покупатель заплатит её, а не ту, что в таблице.",
       "Цена перевозчика сильнее колонки «Пакомат» в таблице выше: если тут стоит число, покупатель платит его.",
-      "Самовывоз всегда бесплатный — что бы тут ни стояло, в кассе будет 0 €.",
+      "Самовывоза в таблице нет — он всегда бесплатный.",
       "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.",
       "Что увидит покупатель",
+      "Перевозчики и наценка",
     ];
     // one key in the ET dictionary and one in the EN dictionary — never fewer
     for (const k of keys) {
