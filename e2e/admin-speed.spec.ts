@@ -68,7 +68,7 @@ test.describe("admin — speed", () => {
     await expect.poll(() => rows.count(), { message: "the chip kept the old page count" }).toBe(40);
   });
 
-  test("the cold open does not run the 30-day analytics query; the assistant does", async ({ page }) => {
+  test("the cold open runs no analytics query at all; the assistant does", async ({ page }) => {
     const calls: string[] = [];
     page.on("request", (r) => {
       const u = new URL(r.url());
@@ -77,8 +77,17 @@ test.describe("admin — speed", () => {
 
     await loginAsAdmin(page);
     await page.waitForTimeout(1500);
+    /* The 30-day query is the heavy one and the point of this test: it must
+       not run while the owner is waiting for the panel to open.
+
+       There is deliberately no assertion about «?range=7d» here any more.
+       «Обзор» used to ask for its own week just to draw seven sparkline bars
+       — sixteen queries for one field — and since 11fa08a it takes them from
+       the summary it already fetches. The only caller left is «Подключения»,
+       which is a screen, not the boot, so whether a week is asked for during
+       login depends on which screen the panel opens on. That is not what this
+       test is about. */
     expect(calls, "the boot still asks for the 30-day summary").not.toContain("?range=30d");
-    expect(calls, "«Обзор» stopped asking for its own week").toContain("?range=7d");
 
     // …and it is asked for the moment the assistant is on screen
     const opened = page.waitForResponse((r) => r.url().includes("/api/admin/analytics/?range=30d"));
