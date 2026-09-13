@@ -1505,12 +1505,14 @@
         "На той же странице выписать текущие цены Эстонии.",
         "Оставить «Разрешить снижать текущие цены» выключенным.",
         "Нажать «Заполнить по тарифам Montonio».",
-        "Посмотреть, что изменилось, и нажать «Отменить правки» рядом с «Сохранить»."
+        "Нажать её ещё раз и сравнить цены.",
+        "Опустить одну цену ниже тарифа под ней, нажать «Сохранить», потом «Отменить правки»."
       ],
       "expect": [
-        "Кнопка проставляет цены по всем странам.",
-        "Уже стоящие цены она не опускает.",
+        "Кнопка поднимает только те цены, что ниже тарифа Montonio.",
+        "Цены выше тарифа не меняются, второе нажатие ничего не даёт.",
         "Под каждой ценой подсказка с ценой перевозчика.",
+        "Сохранить цену ниже тарифа магазин не даёт и называет оба числа.",
         "Рядом с «Сохранить» — «Не сохранено» (на компьютере — «…: Тарифы доставки»).",
         "«Отменить правки» возвращает старые цены, ничего не сохранив."
       ],
@@ -1523,12 +1525,14 @@
           "On the same page write down Estonia's current prices.",
           "Leave «Разрешить снижать текущие цены» (allow lowering current prices) switched off.",
           "Press «Заполнить по тарифам Montonio» (fill in from Montonio's rates).",
-          "Look at what changed and press «Отменить правки» next to «Сохранить»."
+          "Press it a second time and compare the prices.",
+          "Drop one price below the rate printed under it, press «Сохранить», then «Отменить правки»."
         ],
         "expect": [
-          "The button fills in prices for every country.",
-          "It lowers no price that is already set.",
+          "The button raises only the prices that are below Montonio's own rate.",
+          "Prices above the rate do not move, and a second press changes nothing.",
           "Under each price is the carrier's own rate.",
+          "A price below the rate will not save; the shop names both numbers.",
           "Next to «Сохранить» — «Не сохранено» (on a computer «…: Тарифы доставки»).",
           "«Отменить правки» brings the old prices back, saving nothing."
         ],
@@ -1544,14 +1548,17 @@
       "title": "Какие банки показывать",
       "steps": [
         "«Ещё» → «Настройки» → «Доставка и оплата» → блок про банки.",
-        "Оставить включёнными только Swedbank и SEB и сохранить.",
-        "Открыть кассу в магазине и посмотреть список банков.",
+        "Оставить в Эстонии включёнными только Swedbank и SEB.",
+        "Попробовать выключить и эти два — до последнего.",
+        "Открыть кассу с доставкой в Эстонию и посмотреть список банков.",
         "Вернуть все банки обратно."
       ],
       "expect": [
-        "На кассе остались только Swedbank и SEB.",
-        "Других банков в списке нет.",
-        "Выключить все банки сразу панель не даёт."
+        "Банки в панели разбиты по странам.",
+        "На кассе с доставкой в Эстонию остались только Swedbank и SEB.",
+        "Других эстонских банков в списке нет.",
+        "Последний включённый банк страны выключить нельзя — панель говорит почему.",
+        "Латвийские банки при этом остались как были."
       ],
       "why": "Пустой список банков останавливает оплату, а лишние логотипы её замедляют.",
       "risk": "med",
@@ -1560,14 +1567,17 @@
         "title": "Which banks to show",
         "steps": [
           "«Ещё» → «Настройки» → «Доставка и оплата» → the banks block.",
-          "Leave only Swedbank and SEB switched on, and save.",
-          "Open the checkout in the shop and look at the list of banks.",
+          "Under Estonia leave only Swedbank and SEB switched on.",
+          "Try switching those two off as well, down to the last one.",
+          "Open the checkout with delivery to Estonia and look at the bank list.",
           "Switch all the banks back on."
         ],
         "expect": [
-          "Only Swedbank and SEB are left at the checkout.",
-          "No other bank is in the list.",
-          "The panel will not let you switch them all off."
+          "The banks in the panel are grouped by country.",
+          "At the checkout only Swedbank and SEB are left for Estonia.",
+          "No other Estonian bank is in the list.",
+          "The last bank of a country will not switch off; the panel says why.",
+          "The Latvian banks are left exactly as they were."
         ],
         "why": "An empty bank list stops the payment, and extra logos slow it down."
       }
@@ -1581,15 +1591,17 @@
       "title": "Реквизиты фирмы и номер счёта",
       "steps": [
         "«Ещё» → «Настройки» → «О компании».",
+        "Посмотреть на строку «Реквизиты», пока IBAN пуст.",
+        "Открыть блок и вписать в IBAN что-нибудь не похожее на счёт.",
         "Проверить название, регистрационный номер, номер KMKR, адрес, почту и телефон.",
-        "Заполнить IBAN и название банка, если они пустые.",
-        "Нажать «Сохранить» (на телефоне — вверху экрана) и подтвердить."
+        "Вписать настоящий IBAN и банк, нажать «Сохранить» (на телефоне — вверху) и подтвердить."
       ],
       "expect": [
         "Название, адрес и номера заполнены.",
-        "IBAN и название банка заполнены.",
-        "Пока IBAN пуст, панель пишет об этом красной строкой.",
-        "Пока он пуст, счета компаниям не уходят.",
+        "Пока IBAN пуст, на строке «Реквизиты» стоит метка «нет IBAN».",
+        "Под ней строка о том, что счета компаниям не уходят.",
+        "Если вписать не IBAN, подсказка у поля говорит об этом.",
+        "После сохранения IBAN и название банка на месте, метки нет.",
         "Рядом с «Сохранить» было «Не сохранено», после сохранения — «Сохранено ✓»."
       ],
       "why": "Счёт без номера счёта не оплатят, а с чужими реквизитами деньги уйдут мимо.",
@@ -1599,15 +1611,17 @@
         "title": "Company details and the bank account number",
         "steps": [
           "«Ещё» → «Настройки» → «О компании».",
+          "Look at the «Реквизиты» row while the IBAN is empty.",
+          "Open the block and type something that is not an account number into IBAN.",
           "Check the name, the registration number, the KMKR (VAT) number, the address, the e-mail and the phone.",
-          "Fill in the IBAN and the bank name if they are empty.",
-          "Press «Сохранить» (on the phone — at the top of the screen) and confirm."
+          "Type the real IBAN and bank, press «Сохранить» (on the phone — at the top) and confirm."
         ],
         "expect": [
           "The name, address and numbers are filled in.",
-          "The IBAN and the bank name are filled in.",
-          "While the IBAN is empty a red line says so.",
-          "While it is empty no invoice goes out to companies.",
+          "While the IBAN is empty the «Реквизиты» row carries a «нет IBAN» badge.",
+          "Under it a line says no invoice goes out to companies.",
+          "Type something that is not an IBAN and the field's own hint says so.",
+          "After saving the IBAN and bank name are there and the badge is gone.",
           "Next to «Сохранить» it said «Не сохранено», and «Сохранено ✓» after saving."
         ],
         "why": "An invoice with no account number goes unpaid; wrong details send the money elsewhere."
@@ -2389,11 +2403,14 @@
       "steps": [
         "Дойти до шага оплаты с доставкой в Эстонию и посмотреть логотипы банков.",
         "Вернуться на шаг доставки и поменять страну на Латвию.",
-        "Снова открыть шаг оплаты."
+        "Снова открыть шаг оплаты.",
+        "Ещё раз поменять страну — на Данию — и открыть шаг оплаты."
       ],
       "expect": [
         "Видны банки той страны, куда едет посылка, а не все подряд.",
-        "Если список не пришёл, стоят пять эстонских банков по названиям."
+        "Если список не пришёл, стоят пять эстонских банков по названиям.",
+        "У Дании логотипов банков нет вовсе.",
+        "Вместо них строка: банк выберете на странице Montonio."
       ],
       "why": "Покупатель, не нашедший свой банк, бросает оплату.",
       "risk": "med",
@@ -2403,11 +2420,14 @@
         "steps": [
           "Get to the payment step with delivery to Estonia and look at the bank logos.",
           "Go back to the delivery step and change the country to Latvia.",
-          "Open the payment step again."
+          "Open the payment step again.",
+          "Change the country once more — to Denmark — and open the payment step."
         ],
         "expect": [
           "The banks shown belong to the delivery country, not all of them.",
-          "If no list arrived, five Estonian banks are listed by name."
+          "If no list arrived, five Estonian banks are listed by name.",
+          "For Denmark there are no bank logos at all.",
+          "Instead one line: the bank is chosen on the Montonio page."
         ],
         "why": "A buyer who cannot find their bank abandons the payment."
       }
@@ -2519,13 +2539,14 @@
       "lang": "RU",
       "title": "Оплата не прошла",
       "steps": [
-        "Дойти до страницы оплаты и отменить платёж кнопкой отмены на странице банка.",
+        "Дойти до страницы оплаты и нажать в тестовом банке «Банк отклонил платёж».",
         "Посмотреть, куда вернул магазин.",
         "Нажать «Оплатить ещё раз».",
         "Выбрать другой способ и довести оплату до конца."
       ],
       "expect": [
         "Видно экран «Оплата не прошла».",
+        "Написано, что деньги не списаны, а заказ сохранён.",
         "Способ и банк остались те, что выбрали в первый раз.",
         "Их можно поменять.",
         "Повторная оплата закрывает тот же заказ, а не создаёт новый."
@@ -2536,18 +2557,60 @@
       "en": {
         "title": "The payment failed",
         "steps": [
-          "Get to the payment page and cancel the payment with the bank page's own cancel button.",
+          "Get to the payment page and press «Банк отклонил платёж» on the test bank.",
           "See where the shop brought you back to.",
           "Press «Оплатить ещё раз» (pay again).",
           "Choose a different method and see the payment through."
         ],
         "expect": [
           "You see the «Оплата не прошла» screen.",
+          "It says no money was taken and the order is kept.",
           "The method and bank are the ones chosen first time.",
           "You can change them.",
           "Paying again closes the same order, it makes no new one."
         ],
         "why": "Somebody whose payment failed does not rebuild the cart — they leave."
+      }
+    },
+    {
+      "id": "checkout-cancel-resume",
+      "area": "checkout",
+      "who": "dim",
+      "device": "any",
+      "lang": "RU",
+      "title": "Отмена платежа в банке и оплата после неё",
+      "steps": [
+        "Набрать корзину и дойти до страницы банка.",
+        "Нажать в тестовом банке «Отменить».",
+        "Посмотреть экран и заглянуть в корзину магазина.",
+        "Нажать «Оплатить ещё раз» и довести оплату до конца."
+      ],
+      "expect": [
+        "Видно экран «Заказ не оплачен», а не «Платёж обрабатывается».",
+        "Написано, что деньги не списаны и заказ сохранён.",
+        "Товары снова в корзине, вместе с промокодом.",
+        "На экране есть выбор способа и кнопка «Оплатить ещё раз».",
+        "Оплата проходит по тому же заказу, второго заказа не появилось."
+      ],
+      "why": "Человек, у которого после отмены пустая корзина и некуда нажать, уходит навсегда.",
+      "risk": "high",
+      "writes": true,
+      "en": {
+        "title": "Cancelling at the bank and paying afterwards",
+        "steps": [
+          "Fill a cart and get as far as the bank page.",
+          "Press «Отменить» (cancel) on the test bank.",
+          "Look at the screen and then at the shop's cart.",
+          "Press «Оплатить ещё раз» and see the payment through."
+        ],
+        "expect": [
+          "You see «Заказ не оплачен», not «Платёж обрабатывается».",
+          "It says no money was taken and the order is kept.",
+          "The goods are back in the cart, with the promo code.",
+          "The screen offers the methods and an «Оплатить ещё раз» button.",
+          "The payment closes that same order; no second order appeared."
+        ],
+        "why": "Somebody left with an empty cart and nothing to press after cancelling never comes back."
       }
     },
     {
@@ -2677,11 +2740,13 @@
       "lang": "RU",
       "title": "Список заказов и фильтры",
       "steps": [
-        "Открыть «Заказы».",
-        "Нажать по очереди «Отправить», «В пути», «По счёту», «Все».",
+        "Открыть «Заказы» и посмотреть, какой чип горит.",
+        "Нажать по очереди «Отправить», «В пути», «По счёту» и «Возвраты».",
         "Ввести в поиск номер одного из своих заказов."
       ],
       "expect": [
+        "Список открылся на «Все» — фильтр никто не выбирал.",
+        "Чипы идут так: Все, Отправить, В пути, По счёту, Возвраты.",
         "В «Отправить» только оплаченные заказы, которые ещё не уехали.",
         "Заказа на одну подарочную карту в «Отправить» нет.",
         "Поиск находит заказ из любого списка, не только текущего.",
@@ -2693,11 +2758,13 @@
       "en": {
         "title": "The order list and its filters",
         "steps": [
-          "Open «Заказы».",
-          "Press «Отправить», «В пути», «По счёту» and «Все» in turn.",
+          "Open «Заказы» and see which chip is lit.",
+          "Press «Отправить», «В пути», «По счёту» and «Возвраты» in turn.",
           "Type the number of one of your own orders into the search."
         ],
         "expect": [
+          "The list opens on «Все» — nobody chose a filter.",
+          "The chips run: Все, Отправить, В пути, По счёту, Возвраты.",
           "«Отправить» holds only paid orders that have not left yet.",
           "An order for a gift card alone is not there.",
           "Search finds an order from any list, not just this one.",
@@ -2796,10 +2863,11 @@
         "Вернуться и нажать «A6 для термопринтера ↗»."
       ],
       "expect": [
-        "Появилось «Отправление»: перевозчик, пакомат и трек-номер.",
+        "Появилось «Отправление»: перевозчик, пакомат, трек-номер и код сдачи.",
         "Рядом с трек-номером есть кнопка «Скопировать».",
-        "Виден код, по которому посылку сдают в пакомат.",
-        "Оба PDF открываются, на них штрихкод и адрес.",
+        "На листе A4 под этикеткой — номер заказа и код сдачи крупными цифрами.",
+        "Там же написано, куда и кому едет посылка и что внутри.",
+        "Наклейка A6 — голая этикетка перевозчика, этих строк на ней нет.",
         "Заказ остался на прежнем шаге."
       ],
       "why": "Этикетка, которая не печатается, — это посылка, которую вы не сдадите сегодня.",
@@ -2814,10 +2882,11 @@
           "Go back and press «A6 для термопринтера ↗»."
         ],
         "expect": [
-          "«Отправление» appears: carrier, locker and tracking number.",
+          "«Отправление» appears: carrier, locker, tracking number and drop-off code.",
           "Next to the tracking number is a «Скопировать» button.",
-          "The drop-off code for the locker is shown.",
-          "Both PDFs open and show a barcode and an address.",
+          "Under the label on A4: the order number and the drop-off code in big figures.",
+          "The same band says where and to whom it goes and what is inside.",
+          "The A6 sticker is the bare carrier label; those lines are not on it.",
           "The order stays at the same step."
         ],
         "why": "A label that will not print is a parcel you cannot hand over today."
@@ -2938,11 +3007,13 @@
       "lang": "RU",
       "title": "Самовывоз: «Выдан клиенту»",
       "steps": [
-        "Найти заказ с самовывозом.",
-        "Нажать «Выдан клиенту» прямо в строке списка.",
+        "Найти заказ с самовывозом в списке «Заказы».",
+        "Нажать «Выдан клиенту» прямо в строке — один раз — и смотреть на кнопку.",
         "Открыть карточку заказа."
       ],
       "expect": [
+        "Кнопка срабатывает с первого нажатия, карточка заказа не открывается.",
+        "Пока сервер отвечает, на кнопке написано «Сохраняем…» и второе нажатие не проходит.",
         "Заказ закрыт.",
         "В карточке два шага: «Оплачен» и «Выдан».",
         "Покупателю письмо не ушло."
@@ -2953,11 +3024,13 @@
       "en": {
         "title": "Collection: «Выдан клиенту»",
         "steps": [
-          "Find an order for collection.",
-          "Press «Выдан клиенту» (handed to the customer) right in the list row.",
+          "Find an order for collection in the «Заказы» list.",
+          "Press «Выдан клиенту» right in the row — once — and watch the button.",
           "Open the order card."
         ],
         "expect": [
+          "The button works on the first tap; the order card does not open.",
+          "While the server answers the button says «Сохраняем…» and refuses a second tap.",
           "The order is closed.",
           "The card shows two steps: «Оплачен» and «Выдан».",
           "No letter goes to the buyer."
@@ -3056,12 +3129,14 @@
       "title": "Отправить счёт ещё раз",
       "steps": [
         "В том же заказе нажать «Отправить счёт ещё раз».",
-        "Проверить почту, на которую выписан счёт."
+        "Проверить почту, на которую выписан счёт.",
+        "Прочитать строку про счёт в карточке заказа."
       ],
       "expect": [
         "Письмо со счётом пришло второй раз.",
         "К письму приложен PDF счёта.",
-        "Если IBAN не заполнен, магазин пишет, что письмо не ушло."
+        "Без IBAN карточка пишет, что счёт не отправлен и где его заполнить.",
+        "После заполнения IBAN она просит нажать «Отправить счёт ещё раз» — один раз."
       ],
       "why": "Компания, не получившая счёт, не заплатит, а вы будете думать, что она тянет.",
       "risk": "med",
@@ -3070,12 +3145,14 @@
         "title": "Sending the invoice again",
         "steps": [
           "In the same order press «Отправить счёт ещё раз» (send the invoice again).",
-          "Check the mailbox the invoice was made out to."
+          "Check the mailbox the invoice was made out to.",
+          "Read the invoice line on the order card."
         ],
         "expect": [
           "The invoice letter arrives a second time.",
           "The invoice PDF is attached to it.",
-          "With no IBAN filled in, the shop says the letter failed."
+          "With no IBAN the card says the invoice was not sent, and where to fix it.",
+          "Once the IBAN is filled it asks for one press of «Отправить счёт ещё раз»."
         ],
         "why": "A company that never got the invoice will not pay — and you blame them."
       }
@@ -3113,6 +3190,47 @@
           "The buyer has had the «Заказ принят» letter."
         ],
         "why": "Pressed by mistake, this button sends goods out against an unpaid invoice."
+      }
+    },
+    {
+      "id": "order-returns-chip",
+      "area": "orders",
+      "who": "renat",
+      "device": "phone",
+      "lang": "RU",
+      "title": "Возвраты: свой чип в «Заказах»",
+      "steps": [
+        "Открыть «Заказы» после того, как покупатель попросил возврат в кабинете.",
+        "Нажать чип «Возвраты».",
+        "Вернуться на «Все» и найти этот же заказ.",
+        "Открыть «Обзор» и нажать строку про возврат."
+      ],
+      "expect": [
+        "У чипа «Возвраты» стоит число.",
+        "Заказ с просьбой о возврате в этом списке.",
+        "Над списком написано: в счётчике те, на кого ещё не ответили.",
+        "В списке «Все» у строки этого заказа стоит метка «Просит возврат».",
+        "Строка с «Обзора» ведёт в «Возвраты», а не в «В пути»."
+      ],
+      "why": "Заявку на возврат, которую негде найти, покупатель повторит жалобой.",
+      "risk": "med",
+      "writes": false,
+      "en": {
+        "title": "Returns: a chip of their own in «Заказы»",
+        "steps": [
+          "Open «Заказы» after a customer has asked for a return in their account.",
+          "Press the «Возвраты» chip.",
+          "Go back to «Все» and find that same order.",
+          "Open «Обзор» and press the return row."
+        ],
+        "expect": [
+          "The «Возвраты» chip carries a number.",
+          "The order the return was asked for is in that list.",
+          "A line above says: the count is those nobody has answered.",
+          "In the «Все» list that order's row is marked «Просит возврат».",
+          "The row from «Обзор» leads to «Возвраты», not to «В пути»."
+        ],
+        "why": "A return request with nowhere to look for it comes back as a complaint."
       }
     },
     {
@@ -3716,11 +3834,12 @@
       "steps": [
         "Открыть «Письма» → «Заказ принят».",
         "Поменять «Тема письма» и «Вступление», вставив кнопкой имя покупателя.",
-        "Посмотреть предпросмотр и сохранить, подтвердив в окошке.",
+        "Посмотреть предпросмотр и нажать «Сохранить».",
         "Отправить себе тест.",
         "Нажать «Вернуть стандартный текст»."
       ],
       "expect": [
+        "«Сохранить» сохраняет сразу — окна с подтверждением больше нет.",
         "В пришедшем тесте стоит ваш текст, а не старый.",
         "Вместо вставленного поля — настоящее имя покупателя.",
         "«Вернуть стандартный текст» возвращает письмо к исходному.",
@@ -3734,11 +3853,12 @@
         "steps": [
           "Open «Письма» → «Заказ принят».",
           "Change «Тема письма» and «Вступление», inserting the buyer's name with the button.",
-          "Look at the preview and save, confirming in the box.",
+          "Look at the preview and press «Сохранить».",
           "Send yourself a test.",
           "Press «Вернуть стандартный текст» (restore the standard text)."
         ],
         "expect": [
+          "«Сохранить» saves at once — there is no confirmation box any more.",
           "The test that arrives carries your text, not the old one.",
           "The inserted field has turned into a real name.",
           "«Вернуть стандартный текст» brings the original letter back.",
@@ -4099,16 +4219,16 @@
       "title": "Письмо про брошенную корзину",
       "steps": [
         "В «Письмах» включить «Брошенная корзина».",
-        "Набрать корзину, ввести почту на кассе и не оплачивать; выждать три часа.",
-        "Нажать «Запустить сейчас» под письмом.",
-        "Нажать «Запустить сейчас» ещё раз.",
+        "Набрать корзину, ввести почту на кассе и не оплачивать.",
+        "Сразу нажать «Запустить сейчас» под письмом.",
+        "Выждать три часа и нажать «Запустить сейчас» ещё два раза.",
         "Проверить почту и нажать кнопку возврата к корзине.",
         "Нажать «Отписаться» внизу письма."
       ],
       "expect": [
-        "Тост «Отправлено 1 · пропущено 0».",
-        "Под письмом — «Последний запуск» с сегодняшним временем и «отправлено 1».",
-        "Второе нажатие: «Отправлено 0» — одна корзина, одно письмо.",
+        "Сразу после корзины тост говорит: корзине ещё нет трёх часов.",
+        "Через три часа — «Отправлено 1 · пропущено 0», под письмом «Последний запуск».",
+        "Следующее нажатие говорит, что письмо уже уходило.",
         "Письмо пришло со списком товаров, кнопка открывает магазин с той же корзиной.",
         "«Отписаться» срабатывает с одного нажатия, страница это подтверждает.",
         "Следующая брошенная корзина с этой почты письма не получает."
@@ -4120,16 +4240,16 @@
         "title": "The abandoned-cart letter",
         "steps": [
           "In «Письма» switch on «Брошенная корзина».",
-          "Fill a cart, enter an e-mail at the checkout and do not pay; wait three hours.",
-          "Press «Запустить сейчас» under the letter.",
-          "Press «Запустить сейчас» once more.",
+          "Fill a cart, enter an e-mail at the checkout and do not pay.",
+          "Press «Запустить сейчас» under the letter straight away.",
+          "Wait three hours and press «Запустить сейчас» twice more.",
           "Check your mail and press the button back to the cart.",
           "Press «Отписаться» at the bottom of the letter."
         ],
         "expect": [
-          "Toast «Отправлено 1 · пропущено 0».",
-          "Under the letter, «Последний запуск» shows today's time and «отправлено 1».",
-          "The second press says «Отправлено 0» — one cart, one letter.",
+          "Straight after the cart the toast says: the basket is under three hours old.",
+          "Three hours later — «Отправлено 1 · пропущено 0» and «Последний запуск» below.",
+          "The next press says the letter has already gone.",
           "The letter lists the cart, and its button opens the shop with that cart.",
           "«Отписаться» works with one press, and the page confirms it.",
           "The next abandoned cart from that address gets no letter."
@@ -4147,17 +4267,17 @@
       "steps": [
         "В «Письмах» включить «Скидка ко дню рождения» и выбрать «за 3 дня».",
         "Там же поставить «Скидка в поздравлении» 15 %.",
-        "В кабинете покупателя вписать дату рождения послезавтра и поставить галочку.",
-        "В «Письмах» нажать «Запустить сейчас» под этим письмом, потом ещё раз.",
+        "В кабинете вписать дату рождения послезавтра, галочку про письма не ставить.",
+        "Нажать «Запустить сейчас», потом поставить галочку и нажать ещё дважды.",
         "Проверить почту и применить промокод на кассе.",
         "Нажать «Отписаться» внизу письма и открыть карточку клиента."
       ],
       "expect": [
-        "Тост «Отправлено 1 · пропущено 0», под письмом — «Последний запуск» с этим временем.",
+        "Без галочки тост говорит: нет согласия на письма.",
+        "С галочкой — «Отправлено 1 · пропущено 0» и «Последний запуск».",
         "Письмо пришло, в нём личный промокод на 15 %.",
-        "Второе нажатие второго письма не шлёт.",
+        "Третье нажатие говорит, что письмо уже уходило.",
         "Код срабатывает на кассе и живёт две недели после дня рождения.",
-        "«Ближайшие 7 дней» считает этого покупателя.",
         "После «Отписаться» в карточке стоит «Отписался по ссылке в письме»."
       ],
       "why": "Промокод, сгоревший в тот же день, — поздравление, которым не воспользоваться.",
@@ -4168,17 +4288,17 @@
         "steps": [
           "In «Письма» switch on «Скидка ко дню рождения» and choose «за 3 дня».",
           "Right there set «Скидка в поздравлении» to 15 %.",
-          "In the customer account enter a birthday two days ahead and tick the box.",
-          "In «Письма» press «Запустить сейчас» under this letter, then once more.",
+          "In the account enter a birthday two days ahead, leaving the letters box unticked.",
+          "Press «Запустить сейчас», then tick the box and press it twice more.",
           "Check your mail and apply the promo code at the checkout.",
           "Press «Отписаться» at the bottom of the letter and open the customer card."
         ],
         "expect": [
-          "Toast «Отправлено 1 · пропущено 0», and «Последний запуск» under the letter shows this time.",
+          "Without the tick the toast says: no consent to letters.",
+          "With it — «Отправлено 1 · пропущено 0» and «Последний запуск» below.",
           "The letter arrives with a personal 15 % promo code.",
-          "The second press sends no second letter.",
+          "The third press says the letter has already gone.",
           "The code works at the checkout and lives two weeks past the birthday.",
-          "«Ближайшие 7 дней» counts this customer.",
           "After «Отписаться» the card says «Отписался по ссылке в письме»."
         ],
         "why": "A code that expires the same day is a greeting nobody can use."
@@ -4690,12 +4810,14 @@
       "title": "Поправить остаток и порог «мало»",
       "steps": [
         "Нажать «Править» у товара на «Складе».",
-        "Вписать остаток, штрихкод, порог «мало» и причину.",
-        "Сохранить и посмотреть, покраснела ли строка.",
+        "Поменять только порог «мало» и вписать причину.",
+        "Сохранить и открыть «История приёмок и продаж →».",
+        "Вернуться, поменять остаток и штрихкод, снова сохранить.",
         "Попробовать вписать в порог букву вместо числа."
       ],
       "expect": [
         "Всё, что вписали, сохранилось.",
+        "Причина от правки карточки видна в истории отдельной строкой.",
         "Строка краснеет, когда остаток ниже своего порога.",
         "Букву вместо числа поле не принимает.",
         "Старое число при этом остаётся на месте."
@@ -4707,12 +4829,14 @@
         "title": "Correcting the stock and the «low» threshold",
         "steps": [
           "On «Склад» press «Править» (edit) on a product.",
-          "Type in the stock, the barcode, the «low» threshold and a reason.",
-          "Save and see whether the row turned red.",
+          "Change only the «low» threshold and type a reason.",
+          "Save, then open «История приёмок и продаж →».",
+          "Go back, change the stock and the barcode, and save again.",
           "Try typing a letter instead of a number into the threshold."
         ],
         "expect": [
           "Everything you typed has been saved.",
+          "The reason from the card change shows in the history as its own row.",
           "A row turns red when its stock is below the threshold.",
           "The field refuses a letter where a number belongs.",
           "The old number stays where it was."
@@ -4730,12 +4854,15 @@
       "steps": [
         "Нажать на «Складе» кнопку «История приёмок и продаж →».",
         "Найти сегодняшнюю приёмку и сегодняшнее списание.",
-        "Найти продажу через сайт."
+        "Найти продажу через сайт.",
+        "Нажать чип «Правка карточки» и посмотреть эти строки."
       ],
       "expect": [
         "У каждой строки видно, когда и на сколько изменился остаток.",
-        "Рядом написана причина: приёмка, продажа, поправка.",
-        "Продажи из салона и с сайта различаются."
+        "Рядом написана причина: приёмка, продажа, поправка или правка карточки.",
+        "Продажи из салона и с сайта различаются.",
+        "У правки карточки числа нет — на полке ничего не двигалось.",
+        "Чипы сверху отбирают строки по причине."
       ],
       "why": "Когда остаток не сходится, это единственное место, где видно, кто его изменил.",
       "risk": "low",
@@ -4745,12 +4872,15 @@
         "steps": [
           "On «Склад» press «История приёмок и продаж →» (history of goods in and sales).",
           "Find today's intake and today's write-off.",
-          "Find a sale made through the website."
+          "Find a sale made through the website.",
+          "Press the «Правка карточки» chip and look at those rows."
         ],
         "expect": [
           "Every row shows when the stock changed and by how much.",
-          "The reason is written next to it: intake, sale, correction.",
-          "Salon sales and website sales are told apart."
+          "The reason is written next to it: intake, sale, correction or a card change.",
+          "Salon sales and website sales are told apart.",
+          "A card change carries no number — nothing moved on the shelf.",
+          "The chips at the top pick rows by reason."
         ],
         "why": "When the stock does not add up, only this shows who changed it."
       }
@@ -4799,12 +4929,13 @@
       "title": "Продажа в салоне",
       "steps": [
         "Открыть «Салон».",
-        "Найти товар по названию или сканером и нажать кнопку с объёмом и ценой.",
-        "Изменить в корзине количество и вписать скидку в процентах.",
-        "Вписать почту клиента.",
+        "Вписать в поиск штрихкод товара и нажать кнопку с объёмом и ценой.",
+        "Добавить второй товар сканером и поправить количество в корзине.",
+        "Вписать скидку в процентах и почту клиента.",
         "Нажать «Терминал» и подтвердить «Оформить»."
       ],
       "expect": [
+        "Поиск кассы находит товар по вписанному штрихкоду.",
         "Появился экран «Продажа оформлена».",
         "На нём видно число товаров и способ оплаты.",
         "Там же сказано, что остатки списаны и чек отправлен.",
@@ -4818,12 +4949,13 @@
         "title": "A sale in the salon",
         "steps": [
           "Open «Салон».",
-          "Find a product by name or with the scanner and press the button with the size and price.",
-          "In the cart change the quantity and type in a discount in percent.",
-          "Type in the customer's e-mail.",
+          "Type a product's barcode into the search and press the size-and-price button.",
+          "Add a second product with the scanner and fix the quantity in the cart.",
+          "Type a discount in percent and the customer's e-mail.",
           "Press «Терминал» (card terminal) and confirm with «Оформить»."
         ],
         "expect": [
+          "The register's search finds the product by the barcode you typed.",
           "The «Продажа оформлена» (sale completed) screen appears.",
           "It shows the number of items and the payment method.",
           "It says the stock is down and the receipt has gone.",
@@ -4843,11 +4975,14 @@
       "steps": [
         "Нажать «Чек для печати» на экране после продажи.",
         "Напечатать чек или посмотреть его на экране.",
-        "Проверить почту, которую вписали клиенту."
+        "Проверить почту, которую вписали клиенту.",
+        "Повторить продажу на другую почту, переключив панель на английский."
       ],
       "expect": [
         "В чеке есть товары, скидка и итоговая сумма.",
-        "На указанную почту пришло письмо о заказе.",
+        "На почту пришёл чек о продаже в салоне, а не «Заказ принят».",
+        "В письме состав, скидка, итог и чем оплачено.",
+        "Язык письма — из карточки клиента, а без карточки — язык кассы.",
         "Без вписанной почты письма нет, и экран его не обещает."
       ],
       "why": "Обещанный, но не отправленный чек вернёт клиента к вам за бумагой.",
@@ -4858,11 +4993,14 @@
         "steps": [
           "On the screen after the sale press «Чек для печати» (receipt to print).",
           "Print the receipt or look at it on screen.",
-          "Check the mailbox you typed in for the customer."
+          "Check the mailbox you typed in for the customer.",
+          "Do the sale again to another address with the panel switched to English."
         ],
         "expect": [
           "The receipt shows the products, the discount and the total.",
-          "A letter about the order reached the address you typed.",
+          "The letter that arrives is a salon receipt, not «Заказ принят».",
+          "It carries the items, the discount, the total and how it was paid.",
+          "The letter's language comes from the customer's card, or from the till.",
           "With no address typed, there is no letter and none promised."
         ],
         "why": "A receipt promised and not sent is a customer who comes back demanding paper."
@@ -4996,13 +5134,15 @@
         "Выключить «Показывать в магазине» в редакторе товара и сохранить.",
         "Открыть адрес этого товара в магазине.",
         "Поискать его в магазине через поиск и в разделе.",
+        "В панели открыть «Товары» и нажать чип «Скрытые».",
         "Вернуть переключатель обратно."
       ],
       "expect": [
         "По старой ссылке открывается «Страница не найдена».",
         "Поиск в магазине его не находит.",
         "В разделе каталога и в наборах его тоже нет.",
-        "В панели он остался в списке с пометкой «Скрыт»."
+        "В панели он остался в списке с пометкой «Скрыт».",
+        "Чип «Скрытые» с числом находит его в два касания."
       ],
       "why": "Снятый товар, купленный по старой ссылке, — это заказ, который нечем собрать.",
       "risk": "med",
@@ -5013,13 +5153,15 @@
           "In the product editor switch «Показывать в магазине» (show in the shop) off and save.",
           "Open that product's address in the shop.",
           "Look for it in the search and in its catalogue section.",
+          "In the panel open «Товары» and press the «Скрытые» chip.",
           "Switch the toggle back on."
         ],
         "expect": [
           "The old link answers «Страница не найдена».",
           "The shop's search does not find it.",
           "It is gone from its section and from the sets.",
-          "In the panel it stays in the list marked «Скрыт» (hidden)."
+          "In the panel it stays in the list marked «Скрыт» (hidden).",
+          "The «Скрытые» chip carries a count and finds it in two taps."
         ],
         "why": "A withdrawn product bought through an old link is an order you cannot pack."
       }
@@ -5069,16 +5211,17 @@
       "steps": [
         "Открыть «Фото и видео» и нажать «+ Фото с телефона».",
         "Выбрать фотографию из галереи — можно большую, с камеры.",
-        "Сделать её главной звёздочкой и поменять порядок стрелками.",
-        "Сохранить и открыть товар в магазине.",
+        "Нажать «Убрать фон» (ножницы) на одной плитке.",
+        "Пока идёт вырезание, сделать главной звёздочкой другую фотографию.",
+        "Дождаться конца, сохранить и открыть товар в магазине.",
         "На новом товаре выбрать фото на шаге «Фото» до сохранения."
       ],
       "expect": [
         "Фотография загрузилась и встала первой; тост просит нажать «Сохранить».",
-        "На телефоне у каждой фотографии свой ряд кнопок, ничего не наезжает на соседнюю.",
-        "На компьютере кнопки стоят под картинкой в один ряд, крупные и подписанные.",
+        "Плитка, с которой работает сервер, гаснет и пишет «Убираем фон…».",
+        "Вырезанное фото встало на своё место, соседнее не пропало.",
+        "На телефоне у каждой фотографии свой ряд кнопок, ничего не наезжает.",
         "В магазине фотографии листаются пальцем.",
-        "Отказ загрузки — одно понятное предложение под плитками: «Не удалось загрузить фото: …».",
         "На новом товаре выбор фото сам сохраняет товар; фото встаёт на него."
       ],
       "why": "Товар без фотографии почти не покупают.",
@@ -5089,16 +5232,17 @@
         "steps": [
           "In the editor open «Фото и видео» and press «+ Фото с телефона».",
           "Pick a photo from the gallery — a big one straight from the camera is fine.",
-          "Make it the main one with the star and change the order with the arrows.",
-          "Save and open the product in the shop.",
+          "Press «Убрать фон» (the scissors) on one tile.",
+          "While it is being cut out, make another photo the main one with the star.",
+          "Wait for it to finish, save and open the product in the shop.",
           "On a new product pick a photo on the «Фото» step before saving."
         ],
         "expect": [
           "The photo uploaded and sits first; a toast asks to press «Сохранить».",
-          "On the phone each photo has its own row of buttons; nothing overlaps the next one.",
-          "On a computer the buttons stand under the picture in one row, big and named.",
+          "The tile the server is working on dims and says «Убираем фон…».",
+          "The cut-out lands on its own photo; the neighbouring one is not lost.",
+          "On the phone each photo has its own row of buttons; nothing overlaps.",
           "In the shop the photos swipe with a finger.",
-          "A refused upload is one plain sentence under the tiles: «Не удалось загрузить фото: …».",
           "On a new product picking a photo saves the product itself; the photo lands on it."
         ],
         "why": "A product with no photo is barely bought at all."
@@ -5315,12 +5459,15 @@
       "steps": [
         "Открыть статью на правку и найти кнопки «Язык статьи».",
         "Написать русский текст, переключиться на английский и написать другой.",
-        "Вернуться на русский.",
+        "Вернуться на русский и нажать «Сохранить».",
+        "Выйти из статьи, открыть её заново и посмотреть оба языка.",
         "Нажать «Опубликовать», не заполнив эстонский."
       ],
       "expect": [
         "У каждого языка свой текст.",
         "После переключения русский текст остался на месте.",
+        "После «Сохранить» и повторного открытия оба языка на месте.",
+        "Ни один из них не переписан другим.",
         "При пустом эстонском панель один раз переспрашивает.",
         "Она предупреждает, что эстонец увидит русский текст."
       ],
@@ -5332,12 +5479,15 @@
         "steps": [
           "Open an article for editing and find the «Язык статьи» (article language) buttons.",
           "Write the Russian text, switch to English and write something else.",
-          "Switch back to Russian.",
+          "Switch back to Russian and press «Сохранить».",
+          "Leave the article, open it again and look at both languages.",
           "Without filling in Estonian, press «Опубликовать»."
         ],
         "expect": [
           "Each language holds its own text.",
           "After switching back, the Russian text is still there.",
+          "After saving and reopening, both languages are still there.",
+          "Neither has been overwritten by the other.",
           "With Estonian empty the panel asks once before publishing.",
           "It warns that an Estonian reader will see Russian."
         ],
@@ -5387,37 +5537,41 @@
       "lang": "RU",
       "title": "Карточка клиента: заказы, факты, отзывы",
       "steps": [
-        "Открыть «Клиенты» и карточку покупателя с заказами и отзывом.",
+        "Оставить отзыв на товар, войдя в кабинет этой почтой.",
+        "Открыть «Клиенты» и карточку этого покупателя.",
         "Прочитать факты под плитками и раздел «Заказы».",
         "Нажать на заказ, затем «← К клиенту».",
         "В разделе «Отзывы клиента» нажать «Опубликовать» и открыть товар в магазине."
       ],
       "expect": [
         "Под плитками — первый и последний заказ, средний чек и любимые бренды.",
-        "В «Заказах» номер и дата, сумма и тот же чип состояния, что в списке заказов.",
-        "Заказ открывается поверх клиента; «← К клиенту» и «Назад» возвращают к этому клиенту.",
-        "Отзыв клиента — со звёздами, товаром и текстом; «Опубликовать» работает прямо здесь.",
-        "Опубликованный отзыв виден на странице товара."
+        "В «Заказах» номер и дата, сумма и тот же чип состояния, что в списке.",
+        "Заказ открывается поверх клиента; «← К клиенту» возвращает к этому клиенту.",
+        "В «Отзывах клиента» только отзывы, оставленные из кабинета этой почтой.",
+        "Отзыв гостя, оставленный без входа, в карточку не попадает.",
+        "«Опубликовать» работает прямо здесь, и отзыв виден на странице товара."
       ],
-      "why": "Раньше карточка обещала два заказа и не показывала ни одного.",
+      "why": "Раньше карточка показывала отзывы однофамильца — чужие личные данные.",
       "risk": "med",
       "writes": true,
       "en": {
         "title": "Customer card: orders, facts, reviews",
         "steps": [
-          "Open «Клиенты» and the card of a buyer with orders and a review.",
+          "Leave a review on a product while signed into the account with that e-mail.",
+          "Open «Клиенты» and that buyer's card.",
           "Read the facts under the tiles and the «Заказы» section.",
           "Tap an order, then «← К клиенту».",
           "In «Отзывы клиента» press «Опубликовать» and open the product in the shop."
         ],
         "expect": [
           "Under the tiles: first and last order, the average order and favourite brands.",
-          "«Заказы» shows number and date, the total and the same status chip as the orders list.",
-          "The order opens over the customer; «← К клиенту» and Back return to that customer.",
-          "The customer's review shows stars, product and text; «Опубликовать» works right there.",
-          "The published review is visible on the product page."
+          "«Заказы» shows number and date, the total and the same status chip as the list.",
+          "The order opens over the customer; «← К клиенту» returns to that customer.",
+          "«Отзывы клиента» holds only reviews left from the account with that address.",
+          "A review left signed out belongs to nobody and is on no card.",
+          "«Опубликовать» works right here, and the review shows on the product page."
         ],
-        "why": "The card used to promise two orders and show none."
+        "why": "The card used to show a namesake's reviews — somebody else's personal data."
       }
     },
     {
@@ -5574,30 +5728,36 @@
       "who": "dim",
       "device": "desktop",
       "lang": "RU",
-      "title": "Выгрузка клиентов",
+      "title": "Выгрузка клиентов в таблицу",
       "steps": [
-        "Открыть «Клиенты» и нажать «Скачать CSV».",
-        "Открыть файл в таблице.",
+        "Открыть «Клиенты» и нажать «Скачать XLSX».",
+        "Открыть файл в Excel или другой таблице.",
+        "Нажать «Скачать CSV» и открыть этот файл тоже.",
         "Найти столбец про подписку на новости."
       ],
       "expect": [
-        "Файл открывается в таблице.",
-        "В нём есть почты и суммы покупок.",
+        "Рядом со «Скачать CSV» есть «Скачать XLSX».",
+        "XLSX открывается сразу, лист называется «Клиенты».",
+        "CSV тоже раскладывается по столбцам, а не в одну ячейку.",
+        "В обоих есть почты и суммы покупок.",
         "Виден столбец с согласием на письма."
       ],
       "why": "Письмо тому, кто согласия не давал, — это штраф.",
       "risk": "high",
       "writes": false,
       "en": {
-        "title": "Exporting the customers",
+        "title": "Exporting the customers to a spreadsheet",
         "steps": [
-          "«Клиенты» → «Скачать CSV» (download CSV).",
-          "Open the file in a spreadsheet.",
+          "Open «Клиенты» and press «Скачать XLSX».",
+          "Open the file in Excel or another spreadsheet.",
+          "Press «Скачать CSV» and open that file too.",
           "Find the column about the news subscription."
         ],
         "expect": [
-          "The file opens in a spreadsheet.",
-          "It holds the e-mails and the amounts bought.",
+          "Next to «Скачать CSV» there is a «Скачать XLSX» button.",
+          "The XLSX opens straight away; its sheet is named «Клиенты».",
+          "The CSV lands in columns too, not all in one cell.",
+          "Both hold the e-mails and the amounts bought.",
           "A column shows who agreed to letters."
         ],
         "why": "A letter to somebody who never consented is a fine."
@@ -5853,7 +6013,8 @@
       ],
       "expect": [
         "В эстонской статье товар остался на месте.",
-        "Нажатие на него открывает эстонскую страницу того же товара."
+        "Нажатие на него открывает эстонскую страницу того же товара.",
+        "Карточка товара написана по-эстонски — название и «alates», без русских слов."
       ],
       "why": "Перевод, потерявший ссылки на товары, превращает продающую статью в просто текст.",
       "risk": "low",
@@ -5867,7 +6028,8 @@
         ],
         "expect": [
           "The product is still there in the Estonian article.",
-          "Tapping it opens the Estonian page of that same product."
+          "Tapping it opens the Estonian page of that same product.",
+          "The card itself reads Estonian — the name and «alates», no Russian words."
         ],
         "why": "A translation that lost its product links turns a selling article into just text."
       }
@@ -5882,11 +6044,13 @@
       "steps": [
         "В панели нажать круглую кнопку «Помощник» внизу справа.",
         "Спросить «Какие заказы ждут отправки?».",
-        "Спросить «Что заканчивается и что дозаказать?»."
+        "Спросить «Что заканчивается и что дозаказать?».",
+        "Не меняя язык панели, спросить то же самое по-английски."
       ],
       "expect": [
-        "Ответ пришёл по-русски.",
-        "В нём настоящие номера заказов и названия товаров.",
+        "Ответ пришёл на языке вопроса: на русский — по-русски, на английский — по-английски.",
+        "Язык панели при этом не менялся.",
+        "В ответе настоящие номера заказов и названия товаров.",
         "Общих отговорок вместо конкретики нет.",
         "Кнопки под ответом открывают нужный раздел."
       ],
@@ -5898,10 +6062,12 @@
         "steps": [
           "In the panel press the round «Помощник» button, bottom right.",
           "Ask «Какие заказы ждут отправки?» — which orders are waiting?",
-          "Ask «Что заканчивается и что дозаказать?» — what is running out?"
+          "Ask «Что заканчивается и что дозаказать?» — what is running out?",
+          "Without changing the panel's language, ask the same thing in English."
         ],
         "expect": [
-          "The answer comes back in Russian.",
+          "The answer comes in the language of the question: Russian for Russian, English for English.",
+          "The panel's own language did not change.",
           "It holds real order numbers and real product names.",
           "No vague answers instead of specifics.",
           "The buttons under the answer open the right section."
@@ -5917,16 +6083,19 @@
       "lang": "RU",
       "title": "Спросить помощника голосом",
       "steps": [
-        "Открыть помощника в панели и нажать кнопку микрофона у поля вопроса.",
-        "Разрешить микрофон, если телефон спросит.",
+        "Открыть помощника в панели и найти у микрофона кнопку RU / ET / EN.",
+        "Нажать её один раз и прочитать, что на ней написано.",
+        "Нажать микрофон и разрешить его, если телефон спросит.",
         "Сказать «какие заказы ждут отправки» и замолчать.",
-        "Прочитать поле и нажать «Отправить»."
+        "Закрыть панель, открыть заново и посмотреть на кнопку языка."
       ],
       "expect": [
+        "На кнопке написано, на каком языке слушает микрофон.",
+        "Одно нажатие меняет язык; надпись видна до нажатия на микрофон.",
         "Пока вы говорите, слова появляются в поле сами.",
-        "После паузы кнопка выключается, текст остаётся в поле — сам не отправляется.",
-        "Если микрофон запрещён, внизу короткая подсказка «Нет доступа к микрофону».",
-        "Ответ помощника такой же, как на напечатанный вопрос."
+        "После паузы кнопка выключается, текст остаётся в поле.",
+        "Выбранный язык помнится и за языком панели больше не идёт.",
+        "Если микрофон запрещён, магазин пишет, где его разрешить."
       ],
       "why": "На телефоне у кассы говорить быстрее, чем печатать.",
       "risk": "low",
@@ -5934,16 +6103,19 @@
       "en": {
         "title": "Asking the assistant by voice",
         "steps": [
-          "Open the assistant in the panel and press the microphone next to the question box.",
-          "Allow the microphone if the phone asks.",
+          "Open the assistant in the panel and find the RU / ET / EN button by the microphone.",
+          "Press it once and read what it now says.",
+          "Press the microphone and allow it if the phone asks.",
           "Say «какие заказы ждут отправки» and stop talking.",
-          "Read the box and press «Отправить»."
+          "Close the panel, open it again and look at the language button."
         ],
         "expect": [
+          "The button says which language the microphone is listening for.",
+          "One press changes it; the label is readable before the microphone is pressed.",
           "While you speak the words appear in the box by themselves.",
-          "After a pause the button switches off; the text stays — nothing is sent by itself.",
-          "With the microphone refused, a short note «Нет доступа к микрофону» shows at the bottom.",
-          "The assistant answers the same as to a typed question."
+          "After a pause the button switches off and the text stays.",
+          "The chosen language is remembered and no longer follows the panel.",
+          "With the microphone refused, the shop says where to allow it."
         ],
         "why": "At the till on a phone, speaking is faster than typing."
       }
