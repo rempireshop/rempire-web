@@ -152,14 +152,31 @@ export function validateReview(input: ReviewInput): ReviewCheck {
 
 /* ---------- storage ---------------------------------------------------- */
 
-export async function addReview(v: ReviewValid["value"], ipHash?: string | null): Promise<Review> {
+/**
+ * `email` is the author's PROVEN address and nothing else: the route passes
+ * what the signed `rmp_cust` session cookie says (sessionEmail), never a
+ * field from the form — an address a stranger types is an address a stranger
+ * can borrow, and this column is what the admin's customer card trusts.
+ * Signed out, it stays null and the review belongs to nobody.
+ */
+export async function addReview(
+  v: ReviewValid["value"],
+  ipHash?: string | null,
+  email?: string | null,
+): Promise<Review> {
   const rows = await query<ReviewRow>(
-    `insert into reviews (product_id, name, rating, text, lang, ip_hash)
-       values ($1, $2, $3, $4, $5, $6)
+    `insert into reviews (product_id, name, rating, text, lang, ip_hash, email)
+       values ($1, $2, $3, $4, $5, $6, $7)
      returning id, product_id, name, rating, text, lang, status, created_at`,
-    [v.productId, v.name, v.rating, v.text, v.lang, ipHash ?? null],
+    [v.productId, v.name, v.rating, v.text, v.lang, ipHash ?? null, authorEmail(email)],
   );
   return toReview(rows[0]);
+}
+
+/** Lower-cased and trimmed, the way customers.email is stored, or null. */
+function authorEmail(v: unknown): string | null {
+  const s = String(v ?? "").trim().toLowerCase().slice(0, 160);
+  return s.includes("@") ? s : null;
 }
 
 /** What the product page shows: approved only, newest first. */
@@ -193,28 +210,30 @@ export async function listReviews(status?: ReviewStatus, limit = 100): Promise<R
 }
 
 /**
- * One customer's reviews, for the admin's customer card. The table carries
- * no e-mail (021_reviews.sql — the form asks for a name and nothing else), so
- * the match is by name: the row's `name` against every name this customer is
- * known by — the account's own and the ones on their orders — compared
- * case-blind with the whitespace collapsed, which is how both were stored
- * (clean() above, text() in src/lib/customers.ts). A namesake's review is the
- * price of that, and the card says so under the section's title.
+ * One customer's reviews, for the admin's customer card — the ones this
+ * address actually wrote, and no others.
+ *
+ * Until 13.09.2026 this matched on the NAME: the row's `name` against every
+ * name the customer was known by. Dim found what that means with two of his
+ * own mailboxes under one display name — «dim.novare@gmail.com and
+ * info@diipsolutions.eu seem to be able to see same reviews» — and any two
+ * namesakes in a real customer list have the same problem, one of them
+ * reading the other's words off a card with their address on it.
+ *
+ * The key is `reviews.email` now (022_reviews_author.sql), written only from
+ * the shopper's own signed session (addReview above). A review with no
+ * address on it — written signed out, or written before that column existed —
+ * matches nobody: `email = $1` never finds a null, which is the whole point.
+ * Those reviews are not lost, they live in «Отзывы», the moderation queue.
  */
-export async function reviewsByAuthor(names: Array<string | null | undefined>, limit = 20): Promise<Review[]> {
-  const keys = [
-    ...new Set(
-      names
-        .map((n) => String(n ?? "").replace(/\s+/g, " ").trim().toLowerCase())
-        .filter((n) => n.length >= 2),
-    ),
-  ];
-  if (!keys.length) return [];
+export async function reviewsByCustomer(email: string | null | undefined, limit = 20): Promise<Review[]> {
+  const addr = authorEmail(email);
+  if (!addr) return [];
   const rows = await query<ReviewRow>(
     `select id, product_id, name, rating, text, lang, status, created_at
-       from reviews where lower(name) = any($1::text[])
+       from reviews where email = $1
       order by created_at desc limit $2`,
-    [keys, Math.min(100, Math.max(1, limit))],
+    [addr, Math.min(100, Math.max(1, limit))],
   );
   return rows.map(toReview);
 }

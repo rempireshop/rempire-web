@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { clientIp, rateLimit } from "@/lib/auth";
+import { sessionEmail } from "@/lib/customers";
 import { addReview, approvedReviews, ratingFor, validateReview } from "@/lib/reviews";
 
 /**
@@ -90,7 +91,12 @@ export async function POST(req: Request) {
   }
 
   try {
-    const review = await addReview(check.value, ipHash(ip));
+    /* Who wrote it, when the shop can prove it: the signed `rmp_cust` cookie
+       the shopper is already carrying, never a field out of `body` — the
+       admin's customer card keys on this column, so an address a stranger
+       could type is an address a stranger could pin on somebody else. Signed
+       out, the review is stored with none and belongs to no card. */
+    const review = await addReview(check.value, ipHash(ip), sessionEmail(req));
     return Response.json({ ok: true, status: review.status, id: review.id });
   } catch (err) {
     console.error("reviews POST failed", err);

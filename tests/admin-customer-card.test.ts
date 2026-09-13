@@ -5,13 +5,13 @@
  * no analytics, nothing else. GET /api/admin/customers/<id> now carries the
  * orders under that e-mail, four facts drawn from them and the customer's
  * reviews (src/lib/loyalty.ts customerOrdersAdmin, src/lib/reviews.ts
- * reviewsByAuthor). Runs on PGlite, no server needed.
+ * reviewsByCustomer). Runs on PGlite, no server needed.
  *
  * What this file exists to catch: a guest order that does not show on the
  * account it belongs to; a cancelled order counted as a purchase; a first
- * order that is really the last; a namesake matched by a half of a name; a
- * review lost because it was signed in lower case; an e-mail id that answers
- * differently from the uuid one.
+ * order that is really the last; a namesake reading another customer's
+ * reviews off their card (13.09.2026, the block at the end of this file); an
+ * e-mail id that answers differently from the uuid one.
  */
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import catalogueMin from "@/data/catalogue.min.json";
@@ -20,7 +20,7 @@ import { CUSTOMER_COOKIE, makeCustomerToken, recordLogin, updateCustomer } from 
 import { exec, query } from "@/lib/db";
 import { customerOrdersAdmin } from "@/lib/loyalty";
 import { createOrder, setOrderStatus } from "@/lib/orders";
-import { addReview, reviewsByAuthor, setReviewStatus } from "@/lib/reviews";
+import { addReview, reviewsByCustomer, setReviewStatus } from "@/lib/reviews";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
 
 type Min = { id: string; b: string; n: string; c: string; p: number; s: string };
@@ -92,15 +92,13 @@ describe("customerOrdersAdmin — the orders behind the card", () => {
     const fresh = await order("MARIA.TAMM@example.com", "Maria Tamm", [{ id: first.id, qty: 1 }, { id: second.id, qty: 1 }], 1);
     await order("someone.else@example.com", "Кто-то другой", [{ id: first.id, qty: 1 }], 2);
 
-    const { orders, names } = await customerOrdersAdmin(EMAIL);
+    const { orders } = await customerOrdersAdmin(EMAIL);
     expect(orders.map((o) => o.number)).toEqual([fresh.number, mid.number, old.number]);
     expect(orders[0]).toMatchObject({
       id: fresh.id, status: "new", channel: "web", labeled: false, invoice: null, itemsCount: 2,
       firstItem: `${first.b} — ${first.n}`, total: fresh.total,
     });
     expect(orders[2].itemsCount).toBe(2);
-    // the names this person signed with — what the review match is keyed on
-    expect(names.sort()).toEqual(["Maria Tamm", NAME].sort());
   });
 
   it("draws the facts from purchases only — cancelled and failed do not count, and the dates are the right way round", async () => {
@@ -133,33 +131,40 @@ describe("customerOrdersAdmin — the orders behind the card", () => {
     expect(await customerOrdersAdmin("nobody@example.com")).toEqual({
       orders: [],
       stats: { firstOrderAt: null, lastOrderAt: null, avgOrder: 0, topBrands: [] },
-      names: [],
     });
   });
 });
 
-describe("reviewsByAuthor — the customer's reviews, by name", () => {
-  it("matches the whole name case-blind, across the names given, and never a part of one", async () => {
-    const mine = await addReview({ productId: first.id, name: NAME, rating: 5, text: "Беру третий раз, пенится хорошо и запах не бьёт в нос.", lang: "RU" });
-    const lower = await addReview({ productId: second.id, name: "мария тамм", rating: 4, text: "Хороший продукт, но флакон маловат для такой цены.", lang: "RU" });
-    const latin = await addReview({ productId: first.id, name: "Maria Tamm", rating: 3, text: "Normaalne toode, aga lõhn on minu jaoks liiga tugev.", lang: "ET" });
-    await addReview({ productId: first.id, name: "Мария", rating: 1, text: "Совсем не подошло, кожа головы чесалась неделю.", lang: "RU" });
-    await addReview({ productId: first.id, name: "Мария Тамм-Саар", rating: 2, text: "Ожидала большего от этого бренда, честно говоря.", lang: "RU" });
+describe("reviewsByCustomer — the customer's reviews, by the address that wrote them", () => {
+  const MINE = "Беру третий раз, пенится хорошо и запах не бьёт в нос.";
+
+  it("finds every review written from the address, newest first, whatever each was signed", async () => {
+    // one mailbox, three signatures — hers all the same
+    const one = await addReview({ productId: first.id, name: NAME, rating: 5, text: MINE, lang: "RU" }, null, EMAIL);
+    const two = await addReview({ productId: second.id, name: "мария тамм", rating: 4, text: "Хороший продукт, но флакон маловат для такой цены.", lang: "RU" }, null, "MARIA.TAMM@Example.com ");
+    const three = await addReview({ productId: first.id, name: "Maria Tamm", rating: 3, text: "Normaalne toode, aga lõhn on minu jaoks liiga tugev.", lang: "ET" }, null, EMAIL);
+    // a namesake with her own mailbox, and a stranger signed the same way with none
+    await addReview({ productId: first.id, name: NAME, rating: 1, text: "Совсем не подошло, кожа головы чесалась неделю.", lang: "RU" }, null, "maria.tamm@elsewhere.example.com");
+    await addReview({ productId: first.id, name: NAME, rating: 2, text: "Ожидала большего от этого бренда, честно говоря.", lang: "RU" });
     // three inserts in one millisecond tie on created_at — date them apart, oldest first
-    for (const [i, r] of [mine, lower, latin].entries()) {
+    for (const [i, r] of [one, two, three].entries()) {
       await query("update reviews set created_at = $2 where id = $1", [r.id, new Date(Date.now() - (3 - i) * 86_400_000).toISOString()]);
     }
 
-    const found = await reviewsByAuthor([NAME, "Maria Tamm", "", null, " "]);
-    expect(found.map((r) => r.id).sort()).toEqual([mine.id, lower.id, latin.id].sort());
-    // newest first, like the queue
-    expect(found.map((r) => r.id)).toEqual([latin.id, lower.id, mine.id]);
+    const found = await reviewsByCustomer(EMAIL);
+    expect(found.map((r) => r.id)).toEqual([three.id, two.id, one.id]);
+    // the address is keyed the way customers.email is stored — case and spaces are not an identity
+    expect((await reviewsByCustomer("  Maria.Tamm@EXAMPLE.com ")).map((r) => r.id)).toEqual(found.map((r) => r.id));
   });
 
-  it("finds nothing for no name at all", async () => {
-    await addReview({ productId: first.id, name: NAME, rating: 5, text: "Беру третий раз, пенится хорошо и запах не бьёт в нос.", lang: "RU" });
-    expect(await reviewsByAuthor([])).toEqual([]);
-    expect(await reviewsByAuthor(["", null, undefined, "x"])).toEqual([]);
+  it("finds nothing for no address, and never reaches a review that has none", async () => {
+    await addReview({ productId: first.id, name: NAME, rating: 5, text: MINE, lang: "RU" });
+    expect(await reviewsByCustomer(EMAIL)).toEqual([]);
+    expect(await reviewsByCustomer("")).toEqual([]);
+    expect(await reviewsByCustomer(null)).toEqual([]);
+    expect(await reviewsByCustomer(undefined)).toEqual([]);
+    // not an address, and above all not a name
+    expect(await reviewsByCustomer(NAME)).toEqual([]);
   });
 });
 
@@ -169,11 +174,11 @@ describe("GET /api/admin/customers/<id> — the card carries what is behind the 
     await updateCustomer(EMAIL, { name: NAME });
     const paid = await order(EMAIL, NAME, [{ id: first.id, qty: 1 }], 12, me.id);
     await setOrderStatus(paid.id, "paid");
-    // a guest order, signed a little differently — still hers, and its name still counts for the reviews
+    // a guest order, signed a little differently — still hers: the tiles key on the address
     const guest = await order(EMAIL, "Maria Tamm", [{ id: second.id, qty: 2 }], 3);
-    const review = await addReview({ productId: second.id, name: "Maria Tamm", rating: 5, text: "Отличный продукт, проверено на себе не один раз.", lang: "RU" });
+    const review = await addReview({ productId: second.id, name: "Maria Tamm", rating: 5, text: "Отличный продукт, проверено на себе не один раз.", lang: "RU" }, null, EMAIL);
     await setReviewStatus(review.id, "approved");
-    await addReview({ productId: first.id, name: "Кто-то другой", rating: 1, text: "Мне не понравилось, отправлю обратно как только смогу.", lang: "RU" });
+    await addReview({ productId: first.id, name: "Кто-то другой", rating: 1, text: "Мне не понравилось, отправлю обратно как только смогу.", lang: "RU" }, null, "странник@example.com");
 
     const byId = await card(me.id);
     expect(byId.status).toBe(200);

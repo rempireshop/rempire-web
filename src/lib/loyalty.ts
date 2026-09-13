@@ -707,7 +707,6 @@ interface CustomerOrderDbRow {
   shipping: unknown;
   invoice: unknown;
   channel: string | null;
-  name: string | null;
 }
 
 /** pg hands jsonb back parsed; a driver that hands back text is still honoured. */
@@ -738,25 +737,30 @@ const NOT_A_PURCHASE = new Set(["cancelled", "failed"]);
  * to the person who owns the mailbox. `orders` is the last `limit` of them
  * in every status, the cancelled ones included, because a customer's history
  * is what the owner is reading; the stats read the whole history (up to two
- * hundred rows) and skip what never was a purchase. `names` is every name
- * this person has signed an order with — what the review match is keyed on.
+ * hundred rows) and skip what never was a purchase.
+ *
+ * It used to hand back `names` too — every name this person had signed an
+ * order with — and the card matched their reviews against that list. Two
+ * customers under one display name then read each other's reviews
+ * (13.09.2026); reviews are keyed on the author's own address now
+ * (reviewsByCustomer in src/lib/reviews.ts) and nothing here is keyed on a
+ * name any more. Do not bring the list back: a name is not an identity.
  */
 export async function customerOrdersAdmin(
   email: string,
   limit = 20,
-): Promise<{ orders: CustomerOrderRow[]; stats: CustomerStats; names: string[] }> {
+): Promise<{ orders: CustomerOrderRow[]; stats: CustomerStats }> {
   const addr = normalizeEmail(email);
-  const empty = { orders: [], stats: { firstOrderAt: null, lastOrderAt: null, avgOrder: 0, topBrands: [] }, names: [] };
+  const empty = { orders: [], stats: { firstOrderAt: null, lastOrderAt: null, avgOrder: 0, topBrands: [] } };
   if (!addr) return empty;
   const rows = await query<CustomerOrderDbRow>(
-    `select id, number, status, total, created_at, items, shipping, invoice, channel, name
+    `select id, number, status, total, created_at, items, shipping, invoice, channel
        from orders where lower(email) = $1 order by created_at desc limit 200`,
     [addr],
   );
   if (!rows.length) return empty;
 
   const brands = new Map<string, number>();
-  const names = new Set<string>();
   let counted = 0;
   let spent = 0;
   let first: string | null = null;
@@ -770,8 +774,6 @@ export async function customerOrdersAdmin(
     const inv = jsonOf<Record<string, unknown> | null>(r.invoice, null);
     const at = isoOrNull(r.created_at);
     const total = money(num(r.total));
-    const name = String(r.name ?? "").replace(/\s+/g, " ").trim();
-    if (name) names.add(name);
 
     if (!NOT_A_PURCHASE.has(r.status)) {
       counted += 1;
@@ -821,7 +823,6 @@ export async function customerOrdersAdmin(
       avgOrder: counted ? money(spent / counted) : 0,
       topBrands,
     },
-    names: [...names],
   };
 }
 

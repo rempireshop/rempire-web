@@ -1636,7 +1636,7 @@
       "Последний заказ": "Viimane tellimus",
       "Любимые бренды": "Lemmikbrändid",
       "К клиенту": "Kliendi juurde",
-      "Подобраны по имени — так, как покупатель подписал отзыв.": "Leitud nime järgi — nii, nagu ostja arvustusele alla kirjutas.",
+      "Здесь только отзывы, оставленные из кабинета — по адресу почты. Остальные — во вкладке «Отзывы».": "Siin on ainult arvustused, mille klient jättis oma kontosse sisse logituna — e-posti aadressi järgi. Ülejäänud on vahekaardil «Arvustused».",
       "например, извинение за задержку": "näiteks, vabandus viivituse eest",
       "например: постоянный клиент, оптовик": "näiteks: püsiklient, hulgimüügiklient",
       "Имя, почта, телефон, компания…": "Nimi, e-post, telefon, ettevõte…",
@@ -4050,7 +4050,7 @@
       "Последний заказ": "Last order",
       "Любимые бренды": "Favourite brands",
       "К клиенту": "Back to the customer",
-      "Подобраны по имени — так, как покупатель подписал отзыв.": "Matched by name — the way the customer signed the review.",
+      "Здесь только отзывы, оставленные из кабинета — по адресу почты. Остальные — во вкладке «Отзывы».": "Only the reviews left from this customer's account — matched by the e-mail address. The rest are in the «Reviews» tab.",
       "например, извинение за задержку": "e.g., an apology for the delay",
       "например: постоянный клиент, оптовик": "e.g.: regular customer, wholesale buyer",
       "Имя, почта, телефон, компания…": "Name, e-mail, phone, company…",
@@ -20883,15 +20883,18 @@
   /** «Отзывы клиента»: stars, the product, the whole text and the chip —
       with «Опубликовать» / «Скрыть» right here (moderateCustReview), the same
       reversible edit the queue makes, so the card is never left for it. The
-      line under the title says how they were found: the reviews table has no
-      e-mail, only the name the shopper signed with. */
+      line under the title says how they were found: by the address the review
+      was written from (reviews.email), never by the name under it — two
+      customers called the same thing used to read each other's words here
+      (Dim, 13.09.2026). A review left signed out has no address and is on no
+      card at all; it waits in «Отзывы», the queue, like every other. */
   function admCustReviewsHTML(d) {
     var list = d.reviews;
     var body = !list ? '<div class="adm-skel"><i></i><i></i></div>'
       : !list.length ? '<div class="adm-empty">Отзывов пока нет</div>'
       : '<div class="adm-list">' + list.map(admCustReviewRowHTML).join("") + "</div>";
     return '<div class="adm-sec__t" style="margin-top:28px">Отзывы клиента</div>' +
-      '<p class="adm-hint adm-hint--lead">Подобраны по имени — так, как покупатель подписал отзыв.</p>' + body;
+      '<p class="adm-hint adm-hint--lead">Здесь только отзывы, оставленные из кабинета — по адресу почты. Остальные — во вкладке «Отзывы».</p>' + body;
   }
   /** The status a review shows here: the journal entry this card made for it
       while that entry stands — «Отменить» on the toast takes the entry out of
