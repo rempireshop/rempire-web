@@ -507,6 +507,18 @@ export type OverviewSummary = {
   orders: { today: number; yesterday: number };
   /** Paid orders of the last 7×24 hours. `perDay` is total ÷ 7, not ÷ days-with-a-sale. */
   revenue7d: { total: number; perDay: number; orders: number };
+  /**
+   * The same seven bars «Обзор» draws under the week's takings, over the same
+   * window revenue7d sums — qRevenueByDay(), the one «Аналитика» itself reads,
+   * so the two screens still agree by construction.
+   *
+   * It lives here since 13.09.2026 because of what it cost where it used to
+   * come from: the panel's first screen called GET /api/admin/analytics?range=7d
+   * — sixteen queries, several of them jsonb_array_elements scans over every
+   * order — to use ONE of its seventeen fields. «Обзор» now makes one request
+   * and this one extra (indexed, grouped, seven rows) query instead.
+   */
+  revenueByDay: Array<{ day: string; revenue: number; orders: number }>;
   lowStock: { total: number; low: number; out: number; items: OverviewLowStockItem[] };
   /** The five queues the owner is the only one who can empty. */
   attention: {
@@ -643,12 +655,18 @@ export async function getOverviewSummary(now: Date = new Date()): Promise<Overvi
   const prevStart = new Date(dayStart.getTime() - 86_400_000);
   const weekFrom = new Date(now.getTime() - 7 * 86_400_000);
 
-  const [orders, revenue7d, lowStock, attention] = await Promise.all([
+  const [orders, revenue7d, revenueByDay, lowStock, attention] = await Promise.all([
     qOrdersToday(dayStart, now, prevStart),
     qRevenue7d(weekFrom, now),
+    /* The sparkline's own rows, alongside the other four rather than behind a
+       second request to /api/admin/analytics — see revenueByDay in
+       OverviewSummary for what that request was costing the first screen of
+       the panel. Same window as qRevenue7d above, same function «Аналитика»
+       calls for its "7d" range, so the bars and the total cannot disagree. */
+    qRevenueByDay(weekFrom, now),
     qOverviewLowStock(),
     qAttention(),
   ]);
 
-  return { now: now.toISOString(), orders, revenue7d, lowStock, attention };
+  return { now: now.toISOString(), orders, revenue7d, revenueByDay, lowStock, attention };
 }

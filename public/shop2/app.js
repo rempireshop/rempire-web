@@ -11801,6 +11801,9 @@
     // fetch and every login response — see accountLoyaltySummary() server-side.
     if (j.loyalty) S.loyalty = j.loyalty;
     if (S.cust) {
+      // this browser has a session in it — the next visit may ask at boot
+      // instead of waiting for the checkout to paint (acctHint)
+      acctHint(true);
       acctSeedForm();
       S.email = S.cust.email || S.email;
       /* Checkout pre-fill: only into empty fields, so a shopper who is part
@@ -11812,9 +11815,17 @@
       applyAcctShipPref();
       // …and the newsletter tick, by the same rule (acctSyncNewsletter)
       acctSyncNewsletter();
-      // pro pricing only exists for an approved salon/pro account, and only
-      // needs fetching once — S.pro stays put across re-renders until logout.
-      if (S.cust.tier === "pro" && !S.pro) loadProPricing();
+      /* pro pricing follows the tier BOTH ways. It used to be fetched once
+         for an approved salon account and then never dropped — so when the
+         owner took a customer's partner status away, that customer's shop
+         went on quoting salon prices on the cards, in the product and in the
+         basket until the page was reloaded (Renat, 13.09.2026). A price on
+         screen that POST /api/orders would not bill at is not a slow screen,
+         it is a wrong one. Any profile answer that says the tier is no longer
+         'pro' is the invalidation this was missing: S.pro goes, and every
+         proPrice() call falls back to retail from that moment. */
+      if (S.cust.tier === "pro") { if (!S.pro) loadProPricing(); }
+      else S.pro = null;
     }
     return true;
   }
@@ -11827,6 +11838,9 @@
     S.acctCode = ""; S.pro = null; S.loyalty = null; S.loyaltyRedeem = false;
     S.acctForm = { name: "", phone: "", birthday: "", marketing: false, ship: null };
     S.acctProForm = { company: "", regCode: "", phone: "" }; S.acctProErr = "";
+    // …including the "somebody signs in here" flag, so the next visit from
+    // this browser is an anonymous one again and asks nothing at boot
+    acctHint(false);
     acctQuiet();
   }
   /** Fetched once, only for a 'pro' account — see proPrice() near sizePrice(). */
@@ -11845,20 +11859,65 @@
       if (S.screen === "checkout") patchSummary(); else render();
     }).catch(noop);
   }
+  /* Has anybody ever signed in **in this browser**? The session cookie is
+     httpOnly, so the page cannot read it — but it can remember that the last
+     answer from /api/account/me carried a customer, and that is enough to
+     decide whether asking again on the next visit is worth a request. One
+     flag, no personal data in it: who the shopper is still only ever comes
+     from the signed cookie the server reads. «Выйти» clears it, and so does
+     the first 401 — a browser whose cookie has expired stops asking early by
+     itself, and an anonymous visitor never pays for this at all. */
+  var ACCT_SEEN_LS = "rempire-shop-account";
+  function acctHint(on) {
+    try {
+      if (on) localStorage.setItem(ACCT_SEEN_LS, "1");
+      else localStorage.removeItem(ACCT_SEEN_LS);
+    } catch (e) {}
+  }
+  function acctHinted() {
+    try { return localStorage.getItem(ACCT_SEEN_LS) === "1"; } catch (e) { return false; }
+  }
+  /** The request itself. A 401 is the normal answer for a visitor with no
+      cookie — and the one that tells this browser to stop asking at boot;
+      anything else that fails is the network having a bad moment and says
+      nothing about the cookie. */
+  function acctFetch() {
+    return fetch("/api/account/me/", { headers: { accept: "application/json" } })
+      .then(function (r) {
+        if (r.status === 401) { acctHint(false); return null; }
+        return r.ok ? r.json() : null;
+      });
+  }
   /**
-   * Is there a customer cookie? A 401 is the normal answer, not a fault.
+   * Started HERE, while this file is still being evaluated — before the
+   * catalogue is indexed and long before the first screen is painted — in a
+   * browser that has been signed in before, and never in one that has not.
    *
-   * Asked once, and only from the two screens that care — the account and the
-   * checkout. The cookie is httpOnly, so the page cannot know without asking;
-   * asking on every visit would spend a server call on every anonymous
-   * shopper for nothing.
+   * Until 13.09.2026 the ask began inside the render of the account or the
+   * checkout screen, which is the same moment those screens were painted: a
+   * signed-in shopper therefore SAW the empty e-mail box, the empty name and
+   * the empty phone, and watched them fill in a second or so later (Renat).
+   * Moving the start to the top of the boot buys the answer the whole of that
+   * boot — on a phone against staging usually more than the round trip costs
+   * — so the fields are prefilled in the first paint that draws them.
+   * The one thing that has NOT changed is who pays for it: `acctHinted()` is
+   * false for every browser that has never signed in, which is what "not on
+   * every visit" was always protecting.
    */
+  var ACCT_BOOT = acctHinted() ? acctFetch() : null;
+  if (ACCT_BOOT) ACCT_BOOT.catch(noop);   // nobody is waiting on it yet
+  /** Is there a customer cookie? Asked once per page; takes the boot's answer
+      when there is one, and asks for itself on the visit where somebody signs
+      in for the first time (the two screens still call this). */
   var acctAsked = false;
+  var acctFreshAt = 0;
   function acctLoad() {
     if (acctAsked) return;
     acctAsked = true;
-    fetch("/api/account/me/", { headers: { accept: "application/json" } })
-      .then(function (r) { return r.ok ? r.json() : null; })
+    acctFreshAt = Date.now();
+    var pending = ACCT_BOOT || acctFetch();
+    ACCT_BOOT = null;
+    pending
       .then(function (j) {
         if (!j || !j.ok) return;
         apiSeen(true);
@@ -11885,6 +11944,21 @@
         }
       })
       .catch(noop);
+  }
+  /**
+   * The profile again, for a shopper who is already signed in — the one thing
+   * that can change underneath an open shop without the shopper touching it:
+   * the owner granting or taking away partner status, which decides every
+   * price on the screen. Asked when the shop comes back to the front and when
+   * the checkout opens — never on a timer, and never twice within three
+   * seconds, which is what stops a flurry of tab switches becoming a flurry of
+   * requests. Costs nothing for a visitor who is not signed in.
+   */
+  function acctRefresh() {
+    if (!S.loggedIn) return;
+    if (Date.now() - acctFreshAt < 3000) return;
+    acctAsked = false;
+    acctLoad();
   }
   function acctSendCode() {
     S.emailTouched = true;
@@ -13163,7 +13237,8 @@
     loadShipRules();
     if (isParcel()) loadPoints();
     // account-flows: a signed-in shopper should not retype their own name,
-    // address line and phone. One-shot, and silent when nobody is signed in.
+    // address line and phone. One-shot, and silent when nobody is signed in;
+    // in a browser that has been signed in before the boot already asked.
     acctLoad();
     // UX fix 9: real bank logos, one-shot and silent when Montonio has none
     loadPayMethods();
@@ -13846,7 +13921,14 @@
       '<span class="adm-row__amt">' + eur(v.sum) + "</span></button>";
   }
   function admOverviewHTML() {
-    if (SRV.admin === true) { loadOverview(); loadAnalytics("7d"); }
+    /* ONE call. Until 13.09.2026 this screen also asked for
+       /api/admin/analytics?range=7d — sixteen queries, several of them
+       jsonb_array_elements scans over every order ever placed — and used a
+       single field of the answer: the seven bars under «7 дней». That field
+       now travels with the summary itself (revenueByDay in
+       src/lib/analytics.ts getOverviewSummary), so the panel's first screen
+       waits on one request instead of two, and on the cheaper of the two. */
+    if (SRV.admin === true) loadOverview();
     var o = OVERVIEW.data;
     var vms = admOrders().map(admOrderVM);
     var toShip = admLiveToShip();
@@ -13911,8 +13993,9 @@
 
     /* «Продажи». Today's takings are summed from the orders the panel already
        holds (the overview endpoint counts today's orders but does not price
-       them); the week and its seven bars come from the analytics range that
-       «Аналитика» itself reads, so the two screens can never disagree. */
+       them); the week and its seven bars come from the summary, which builds
+       them with the very function «Аналитика» calls for its own "7d" range
+       (qRevenueByDay), so the two screens can never disagree. */
     var todaySum = 0, todayN = 0, todayPos = 0;
     var day0 = new Date(); day0.setHours(0, 0, 0, 0);
     vms.forEach(function (v) {
@@ -13923,7 +14006,10 @@
       todaySum += Number(v.sum) || 0; todayN++; if (v.pos) todayPos++;
     });
     var week = o ? o.revenue7d : null;
-    var series = (ANALYTICS["7d"] && ANALYTICS["7d"].data && ANALYTICS["7d"].data.revenueByDay) || [];
+    /* The summary's own rows; the «Аналитика» copy is the fallback for a
+       panel still holding an answer from before the field existed. */
+    var series = (o && o.revenueByDay) ||
+      (ANALYTICS["7d"] && ANALYTICS["7d"].data && ANALYTICS["7d"].data.revenueByDay) || [];
     var top = series.reduce(function (a, r) { return Math.max(a, r.revenue); }, 0) || 1;
     var bars = series.slice(-7).map(function (r, i, all) {
       return '<i class="' + (i === all.length - 1 ? "is-today" : "") + '" style="height:' +
@@ -20298,6 +20384,51 @@
       }
     }).catch(noop);
   }
+  /* «Розница ⇄ Партнёр»: the switch used to throw the card and the list away
+     (S.admCustDetail = null) and wait for two fresh requests before it could
+     draw the new side — so the owner pressed it, the whole card turned back
+     into a skeleton, and a second or two later the answer arrived (Renat,
+     13.09.2026). The tier is one field: it is moved here, on the copies
+     already on screen, the moment the owner confirms, and the PATCH either
+     confirms it (srvPush adopts the row the server sends back) or puts it
+     back and says so. Returns false when neither copy knew this customer,
+     which is only possible if the screen moved on in between. */
+  function admTierLocal(id, email, tier) {
+    var moved = false;
+    var same = function (c) {
+      return !!c && ((id && c.id === id) || (email && c.email === email));
+    };
+    if (S.admCustDetail && same(S.admCustDetail.customer)) {
+      S.admCustDetail.customer.tier = tier;
+      moved = true;
+    }
+    (S.admCustomers || []).forEach(function (c) {
+      if (same(c)) { c.tier = tier; moved = true; }
+    });
+    return moved;
+  }
+  /** The server's own copy of the row, once the PATCH answered — the card and
+      the list both take it, so anything the switch could not know (the
+      approval stamps, a cleared Pro request) lands without a re-fetch. */
+  function admCustAdopt(c) {
+    if (!c || !c.id) return;
+    if (S.admCustDetail && S.admCustDetail.customer.id === c.id) S.admCustDetail.customer = c;
+    var list = S.admCustomers || [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && list[i].id === c.id) {
+        // the list row carries counts the card's row does not — keep them
+        list[i] = mergeInto(list[i], c);
+        break;
+      }
+    }
+  }
+  /** b's own fields over a copy of a — a's extras (the list's order counts) survive. */
+  function mergeInto(a, b) {
+    var out = {}, k;
+    for (k in a) if (Object.prototype.hasOwnProperty.call(a, k)) out[k] = a[k];
+    for (k in b) if (Object.prototype.hasOwnProperty.call(b, k)) out[k] = b[k];
+    return out;
+  }
   function admCustomerCardHTML() {
     loadAdminCustomerDetail(S.admCustOpen, false);
     var d = S.admCustDetail;
@@ -24928,13 +25059,25 @@
        sends the welcome letter itself when the tier flips to pro */
     else if (a.type === "set_tier") {
       var tierId = a.id || a.email;
+      /* Where the switch goes back to if the server refuses: what the card
+         said before (a.prev, set by askTierSwitch and by the journal's undo),
+         or simply the other side when an action arrived without it. */
+      var tierBack = a.prev === "pro" || a.prev === "retail"
+        ? a.prev : (a.value === "pro" ? "retail" : "pro");
+      var tierFailed = function () {
+        admTierLocal(a.id, a.email, tierBack);
+        toast("Не получилось изменить статус");
+        render();
+      };
       apiSend("/api/admin/customers/" + encodeURIComponent(tierId) + "/", "PATCH", { tier: a.value })
         .then(function (r) {
-          if (!(r.status === 200 && r.body.ok)) toast("Не получилось изменить статус");
-          loadAdminCustomers(true);
-          if (S.admCustOpen === tierId) loadAdminCustomerDetail(tierId, true);
-          render();
-        }).catch(noop);
+          /* The switch already moved (demoApply/demoUndo → admTierLocal), so
+             there is nothing to wait for here and no reason to throw the card
+             and the 500-row list away and ask for both again. A refusal puts
+             the switch back where it was and says so — the same toast as before. */
+          if (r.status === 200 && r.body.ok) { admCustAdopt(r.body.customer); render(); }
+          else tierFailed();
+        }).catch(tierFailed);
     }
     // «+ Партнёр»: the POST already happened in applyAddPartner — nothing to push
     else if (a.type === "add_partner") noop();
@@ -25933,7 +26076,10 @@
        the journal line, and its undo is the switch back to retail. */
     else if (a.type === "set_tier") {
       entry.prev = { type: "set_tier", id: a.id, email: a.email, value: a.prev, prev: a.value };
-      S.admCustomers = null; S.admCustDetail = null;
+      /* Optimistic: the switch moves now, not when the PATCH comes back.
+         srvPush() below adopts the server's row on success and puts this
+         line back (plus the toast the panel has always shown) on failure. */
+      admTierLocal(a.id, a.email, a.value);
     }
     else if (a.type === "add_partner") {
       entry.prev = a.promoted ? { type: "set_tier", id: a.id, email: a.email, value: "retail", prev: "pro" } : null;
@@ -26015,8 +26161,9 @@
       S.admCustomers = null;
       if (S.admCustDetail && S.admCustDetail.customer.id === a.customerId) S.admCustDetail = null;
     }
-    // partners: srvPush() below is the undo — the opposite tier switch
-    else if (a.type === "set_tier") { S.admCustomers = null; S.admCustDetail = null; }
+    // partners: srvPush() below is the undo — the opposite tier switch, and
+    // the switch on screen moves with it straight away (demoApply's own note)
+    else if (a.type === "set_tier") { admTierLocal(a.id, a.email, a.value); }
     // product creation: the row comes back on (or goes off) the shelf
     else if (a.type === "set_product_active") { customSetActive(a.id, a.value); if (!a.value && S.adminEdit === a.id) S.adminEdit = ""; }
     DEMO.log.splice(i, 1);
@@ -27747,7 +27894,15 @@
   function go(screen) {
     S.screen = screen; S.cartOpen = false; S.filterOpen = false; S.langOpen = false;
     if (screen === "catalog") S.shown = 12;
-    if (screen === "checkout") { S.coStep = 1; S.pointOpen = false; }
+    if (screen === "checkout") {
+      S.coStep = 1; S.pointOpen = false;
+      /* Opening the checkout is where a price stops being a display and
+         becomes an order, so a profile answer older than acctRefresh's window
+         is re-asked here: partner status taken away in the panel must not
+         leave salon prices standing in front of a shopper who will be billed
+         retail. Silent for a visitor who is not signed in. */
+      acctRefresh();
+    }
     // leaving the receipt drops the receipt: the next one reads its own query
     // the receipt goes, and with it the method and the bank its retry picker
     // was set to — the next failed receipt seeds itself from its own order
@@ -31255,9 +31410,26 @@
 
   /* account-flows: did they arrive from an abandoned-cart letter? After the
      first paint and after the boot replaceState above, which would otherwise
-     put ?resume= straight back into the address bar. The customer session is
-     asked for by the two screens that need it, not on every visit. */
+     put ?resume= straight back into the address bar. */
   resumeCart();
+
+  /* …and who is this? Asked here, right after the first paint, in a browser
+     that has been signed in before — never in one that has not, which is what
+     "not on every visit" was always protecting (acctLoad's own note). Started
+     at boot the answer is usually already in hand by the time the checkout is
+     painted, instead of the checkout painting empty fields and filling them a
+     second later (Renat, 13.09.2026). The two screens still call acctLoad()
+     themselves for the visit where somebody signs in for the first time. */
+  if (acctHinted()) acctLoad();
+
+  /* The shop came back to the front. The one thing that can have changed
+     underneath it is who the shopper is to this shop — partner or retail —
+     and that decides every price on the screen, so it is re-checked here
+     (throttled inside acctRefresh, and silent for a visitor who is not
+     signed in). */
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) acctRefresh();
+  });
 
   /* Country refinement for the first visit only: an English-language browser
      physically in Estonia gets the Estonian shop, in a Russian-speaking

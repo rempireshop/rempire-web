@@ -414,6 +414,18 @@ test.describe("payments — cancelled at the bank", () => {
     await expect(chips.first()).toBeVisible();
     await chips.nth(1).click();
     await expect(chips.nth(1)).toHaveAttribute("aria-current", "true");
+    /* …and the chosen tile is still readable. Half the real Montonio list is
+       a bank's own logo drawn in black on nothing (SEB, LHV), and the picked
+       state used to fill the tile with --ink: tapping SEB turned it into a
+       black square (Renat, 13.09.2026). The mark stays dark whatever we do,
+       so the ground under it has to stay light — the pick is the ink ring
+       now (styles.css .bank[aria-current="true"]). */
+    const lit = await chips.nth(1).evaluate((el) => {
+      const [r, g, b, a = 1] = (getComputedStyle(el).backgroundColor.match(/[\d.]+/g) || []).map(Number);
+      const over = (c: number) => c * a + 255 * (1 - a);   // composited over the page's own white
+      return 0.2126 * over(r) + 0.7152 * over(g) + 0.0722 * over(b);
+    });
+    expect(lit, "the chosen bank tile went dark — a black logo on it is invisible").toBeGreaterThan(200);
 
     await payButton(page).click();
     await page.waitForURL(/\/api\/payments\/mock\//);
