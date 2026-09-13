@@ -407,6 +407,16 @@
   .adm-row--lines > .adm-row__line--split { justify-content: space-between; }
   /* an implicit third row, so a row with no actions ends after its chips */
   .adm-row--lines > .adm-acts { grid-column: 1 / -1; }
+  /* …and where that row carries ONE control, the control IS the row.
+     Renat, 13.09.2026: «Выдан клиенту» «worked only on second click in the
+     list row». A pickup order's action line is the row's full 335 px and the
+     button was 130 of them — the 205 px beside it belong to the row's opener
+     (ADM_ROW_OPEN in app.js), so a thumb landing an inch to the right opened
+     the order card instead of handing the order over. A lone action takes
+     the whole line and there is nothing left to miss. Two of them share it
+     exactly as before — that blank is the one «the blank beside the actions»
+     in e2e/admin-rows.spec.ts was written for. */
+  .adm-row--lines > .adm-acts > .adm-btn:only-child { flex: 1 1 auto; }
 }
 /* `position: relative` is load-bearing: a set's thumbnail is the storefront's
    own three-photo stack (`.bstack`, position:absolute inset:0), which without

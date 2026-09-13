@@ -273,21 +273,28 @@ test.describe("admin — «Написать клиенту» asks before it send
   });
 });
 
-test.describe("admin — three order chips, and the steps behind them", () => {
+test.describe("admin — the order chips, and the steps behind them", () => {
   test.use({ extraHTTPHeaders: ipHeaders(183) });
 
-  test("«Отправить · В пути · По счёту · Все», and every order reachable", async ({ page }) => {
+  test("«Все · Отправить · В пути · По счёту · Возвраты», and every order reachable", async ({ page }) => {
     test.setTimeout(120_000);
     const w = watch(page);
     await openAdmin(page);
     await tab(page, "orders");
 
+    /* r16 — Renat: «we should initially show „all“ and then the user/admin can
+       switch from each which needs to be done». «Все» leads and is where the
+       screen opens; the three steps follow it in the order they happen, and
+       «Возвраты» is the request a customer made, which had no home before. */
     const chips = page.locator("[data-admfilter]");
-    await expect(chips, "the six chips did not become four").toHaveCount(4);
-    await expect(chips.nth(0)).toContainText("Отправить");
-    await expect(chips.nth(1)).toHaveText("В пути");
-    await expect(chips.nth(2)).toContainText("По счёту");
-    await expect(chips.nth(3)).toHaveText("Все");
+    await expect(chips, "the chip strip is not the five of r16").toHaveCount(5);
+    await expect(chips.nth(0)).toHaveText("Все");
+    await expect(chips.nth(1)).toContainText("Отправить");
+    await expect(chips.nth(2)).toHaveText("В пути");
+    await expect(chips.nth(3)).toContainText("По счёту");
+    await expect(chips.nth(4)).toContainText("Возвраты");
+    await expect(page.locator('[data-admfilter="all"]'), "the screen does not open on «Все»")
+      .toHaveAttribute("aria-current", "true");
     // the ones that are gone are really gone
     for (const dead of ["label", "delivered", "salon"]) {
       await expect(page.locator(`[data-admfilter="${dead}"]`), `«${dead}» is still a chip`).toHaveCount(0);
