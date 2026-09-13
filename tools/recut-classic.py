@@ -28,6 +28,42 @@ STEP_COST = 0.985
 # grey reflective backdrops — the sweep reads the backdrop leaving as a cliff
 OVERRIDE = {"creed-creed-aventus-cologne-50ml-0": 9, "handmade-soap-666-0": 9, "handmade-soap-rule-nr-1-0": 9}
 
+# White flip-top caps on white paper (Renat, 13.09.2026: «у шампуней срезан
+# верх бутылки»). STEP_COST is a budget against the WHOLE product, so eating a
+# cap that is ~3% of the bottle costs ~1.1% a step and never trips the cliff —
+# the sweep climbs to 9% and takes a bite out of the top. Measured on the
+# cached originals, cap-band fill of the top 12% of the object:
+#     fuzz 9 (what shipped) 0.56-0.61   fuzz 3  0.78-0.86   source  ~0.87
+# so these thirteen are pinned low. All are shot on pure white, srgb(255,255,255),
+# where a 3% flood still clears the paper — checked by eye, no grey rim.
+OVERRIDE.update({k: 3 for k in [
+    "paul-mitchell-awapuhi-conditioner-0",
+    "paul-mitchell-awapuhi-shampoo-0",
+    "paul-mitchell-clear-styling-glaze-0",
+    "paul-mitchell-color-protect-conditioner-0",
+    "paul-mitchell-color-protect-shampoo-0",
+    "paul-mitchell-extra-body-daily-shampoo-0",
+    "paul-mitchell-forever-blonde-conditioner-0",
+    "paul-mitchell-forever-blonde-shampoo-0",
+    "paul-mitchell-shampoo-two-0",
+    "paul-mitchell-sheer-hydration-conditioner-0",
+    "paul-mitchell-sheer-hydration-shampoo-0",
+    "paul-mitchell-super-smooth-conditioner-0",
+    "paul-mitchell-super-smooth-shampoo-0",
+]})
+
+# Three more Paul Mitchell photographs were damaged and have been restored from
+# the rembg-era blobs in git (6a9a649), but they are NOT in the dict above and
+# this dict cannot protect them: the sweep already picks 3 for all three, so the
+# tolerance is not what is wrong.
+#   clear-essential-shampoo-0, clear-jelly-mask-0 — shot on a grey gradient,
+#     corner srgb(205,210,214) / srgb(211,211,211); a 3% flood cannot clear it
+#     and the whole backdrop survives into the cutout.
+#   curl-twirl-around-cream-serum-0 — clear plastic cap on white; the flood
+#     walks through the transparent cap at any tolerance.
+# Re-running this script would break those three again. They need a different
+# mask (rembg, or a hand cut), not a different number.
+
 merch = set((SP / "merch-ids.txt").read_text().split())
 
 def sh(args):

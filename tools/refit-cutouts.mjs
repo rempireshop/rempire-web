@@ -29,10 +29,39 @@ const STEP_COST = 0.985;   // a step may cost 1.5% of the standing product
    being breached — and stopping short of it keeps a slab of grey behind the
    product. Checked each by eye against the alternative; these want the old
    tolerance. */
+/* …and the other direction: a white flip-top cap on white paper. STEP_COST is
+   a budget against the WHOLE product, so eating a cap that is ~3% of the bottle
+   costs ~1.1% a step and never trips the cliff — the sweep climbs to 9% and
+   bites the top off (Renat, 13.09.2026: «у шампуней срезан верх бутылки»).
+   Measured on the cached originals, cap-band fill of the top 12% of the object:
+   fuzz 9 (what shipped) 0.56-0.61 · fuzz 3 0.78-0.86 · source ~0.87. All
+   thirteen are shot on pure white, where a 3% flood still clears the paper. */
+const CAPS_ON_WHITE = [
+  "paul-mitchell-awapuhi-conditioner-0",
+  "paul-mitchell-awapuhi-shampoo-0",
+  "paul-mitchell-clear-styling-glaze-0",
+  "paul-mitchell-color-protect-conditioner-0",
+  "paul-mitchell-color-protect-shampoo-0",
+  "paul-mitchell-extra-body-daily-shampoo-0",
+  "paul-mitchell-forever-blonde-conditioner-0",
+  "paul-mitchell-forever-blonde-shampoo-0",
+  "paul-mitchell-shampoo-two-0",
+  "paul-mitchell-sheer-hydration-conditioner-0",
+  "paul-mitchell-sheer-hydration-shampoo-0",
+  "paul-mitchell-super-smooth-conditioner-0",
+  "paul-mitchell-super-smooth-shampoo-0"
+];
+/* Three more were damaged and are restored from the rembg-era blobs in git
+   (6a9a649); this dict cannot protect them, because the sweep already picks 3
+   there and tolerance is not the problem — clear-essential-shampoo-0 and
+   clear-jelly-mask-0 are shot on a grey gradient a 3% flood cannot clear, and
+   curl-twirl-around-cream-serum-0 has a transparent cap the flood walks
+   through at any tolerance. Re-running this would break those three again. */
 const OVERRIDE = {
   "creed-creed-aventus-cologne-50ml-0": 9,
   "handmade-soap-666-0": 9,
-  "handmade-soap-rule-nr-1-0": 9
+  "handmade-soap-rule-nr-1-0": 9,
+  ...Object.fromEntries(CAPS_ON_WHITE.map(k => [k, 3]))
 };
 const ONLY = process.argv.slice(2).filter(a => !a.startsWith("-"));
 const APPLY = process.argv.includes("--apply");

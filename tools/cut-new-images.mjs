@@ -16,6 +16,39 @@ const WORK = "C:/Users/DMITRI~1.MAR/AppData/Local/Temp/claude/C--Users-Dmitri-MA
 const FUZZ = [3, 5, 7, 9, 12];
 const STEP_COST = 0.985;
 
+/* Per-image escape hatch, the same one refit-cutouts.mjs and recut-classic.py
+   carry — keyed `${slug}-${idx}`, and it wins over the sweep.
+
+   A white flip-top cap on white paper defeats the cliff detector: STEP_COST is
+   a budget against the WHOLE product, so eating a cap that is ~3% of the bottle
+   costs ~1.1% a step, never trips it, and the sweep climbs to 9% and bites the
+   top off (Renat, 13.09.2026: «у шампуней срезан верх бутылки»). Measured on
+   the cached originals, cap-band fill of the top 12% of the object: fuzz 9
+   (what shipped) 0.56-0.61 · fuzz 3 0.78-0.86 · source ~0.87. Every slug below
+   is shot on pure white, where a 3% flood still clears the paper.
+
+   Three further Paul Mitchell photographs were damaged too and are restored
+   from the rembg-era blobs in git (6a9a649). They are deliberately NOT here:
+   the sweep already picks 3 for all three, so no tolerance saves them —
+   clear-essential-shampoo-0 and clear-jelly-mask-0 are shot on a grey gradient
+   a 3% flood cannot clear, and curl-twirl-around-cream-serum-0 has a
+   transparent cap the flood walks through at any tolerance. */
+const OVERRIDE = Object.fromEntries([
+  "paul-mitchell-awapuhi-conditioner-0",
+  "paul-mitchell-awapuhi-shampoo-0",
+  "paul-mitchell-clear-styling-glaze-0",
+  "paul-mitchell-color-protect-conditioner-0",
+  "paul-mitchell-color-protect-shampoo-0",
+  "paul-mitchell-extra-body-daily-shampoo-0",
+  "paul-mitchell-forever-blonde-conditioner-0",
+  "paul-mitchell-forever-blonde-shampoo-0",
+  "paul-mitchell-shampoo-two-0",
+  "paul-mitchell-sheer-hydration-conditioner-0",
+  "paul-mitchell-sheer-hydration-shampoo-0",
+  "paul-mitchell-super-smooth-conditioner-0",
+  "paul-mitchell-super-smooth-shampoo-0"
+].map(k => [k, 3]));
+
 const manifest = JSON.parse(await readFile(path.join(ROOT, "tools/harvest/new-images.json"), "utf8"));
 const catSrc = await readFile(path.join(ROOT, "public/shop/catalogue2.js"), "utf8");
 const CATALOGUE = new Function(catSrc + "\nreturn CATALOGUE;")();
@@ -63,7 +96,7 @@ async function one(j) {
   for (let i = 1; i < FUZZ.length; i++) {
     if (counts[i] >= counts[i - 1] * STEP_COST) pick = i; else break;
   }
-  const fuzz = FUZZ[pick];
+  const fuzz = OVERRIDE[`${j.slug}-${j.idx}`] || FUZZ[pick];
   await run("magick", [
     tmp, "-alpha", "set", "-bordercolor", corner, "-border", "2",
     "-channel", "RGBA", "-fuzz", `${fuzz}%`, "-fill", "none",
