@@ -329,6 +329,40 @@ describe("POST /api/admin/ai/text — post_full, post_translate, copy", () => {
     expect((await res.json()).error).toBe("bad_kind");
   });
 
+  /* Renat, 12.09.2026: «The keywords (tags) offered are in English and
+     russian.» The prompt asks for the article's own language and mostly gets
+     it; what came back under his Russian text was a mixture, and a tag is a
+     reader's search word — one in the wrong alphabet is a tag for somebody
+     else's reader. Judged by script, which a model cannot argue with: a
+     Latin-script brand name is a perfectly good English or Estonian tag and
+     is only ever dropped from a Russian set. */
+  it("post_full: the tags offered are in the language the article is being written in", async () => {
+    const mixed = { ...ARTICLE, tags: ["борода", "beard care", "уход", "balm", "масло"] };
+    const fetchMock = vi.fn(async () => completion(JSON.stringify(mixed)));
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({ task: "post_full", lang: "RU", input: { topic: "борода зимой" } }, admin));
+    const t = (await res.json()).text;
+    expect(t.tags, "an English tag was offered under a Russian article").toEqual(["борода", "уход", "масло"]);
+  });
+
+  it("post_translate: an Estonian article keeps Latin tags and drops the Russian ones", async () => {
+    const et = {
+      title: "Habe talvel", excerpt: "Kolm harjumust.", body: "<p>Talvel.</p>",
+      tags: ["habe", "борода", "proraso", "talv"], seoTitle: "T", seoDescription: "D",
+    };
+    const fetchMock = vi.fn(async () => completion(JSON.stringify(et)));
+    vi.stubGlobal("fetch", fetchMock);
+    const { POST } = await import("@/app/api/admin/ai/text/route");
+    const res = await POST(req({
+      task: "post_translate", lang: "ET",
+      input: { sourceLang: "RU", title: ARTICLE.title, excerpt: ARTICLE.excerpt, body: ARTICLE.body, tags: ["борода"] },
+    }, admin));
+    const t = (await res.json()).text;
+    // «proraso» is a brand, and a brand is a word an Estonian reader searches for
+    expect(t.tags).toEqual(["habe", "proraso", "talv"]);
+  });
+
   it("the short tasks keep their 900-token budget", async () => {
     const fetchMock = vi.fn(async () => completion(JSON.stringify({ title: "t", h2: ["a"], metaTitle: "m", metaDescription: "d" })));
     vi.stubGlobal("fetch", fetchMock);

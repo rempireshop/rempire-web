@@ -1946,6 +1946,8 @@
       "Снова в продаже ✓": "Jälle müügil ✓",
       "Фон убран ✓ — проверьте и нажмите «Сохранить»": "Taust eemaldatud ✓ — kontrolli ja vajuta «Salvesta»",
       "Не получилось убрать фон — фото осталось как было": "Tausta ei õnnestunud eemaldada — foto jäi samaks",
+      "Этого фото уже нет в списке — вырезанное фото никуда не поставлено":
+        "Seda fotot pole enam nimekirjas — väljalõigatud fotot ei pandud kuhugi",
       "Новый товар заводится в «Товарах» — кнопка «+ Товар»: бренд, название, раздел и цена, потом фото с телефона. Фото показываются как есть, на белом фоне; описание и тексты для Google на трёх языках напишутся по кнопке в карточке — вы проверите и сохраните.":
         "Uus toode luuakse «Toodetes» — nupp «+ Toode»: bränd, nimetus, jaotis ja hind, siis fotod telefonist. Fotod näidatakse nii, nagu need on, valgel taustal; kirjeldus ja Google'i tekstid kolmes keeles kirjutatakse kaardil oleva nupuga — sina kontrollid ja salvestad.",
       "Размеры и цены": "Suurused ja hinnad",
@@ -1956,6 +1958,7 @@
       "у этого раздела нет подразделов": "sellel jaotusel pole alajaotusi",
       "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "Nimetus, bränd ja jaotus tulevad kataloogist — neid muudab Dim. Kõike muud sellel lehel muudate ise.",
       "Нет в наличии": "Pole laos",
+      "В продаже": "Müügil", "Скрытые": "Peidetud", "Какие товары": "Millised tooted",
       "Показывать в магазине": "Näidata poes",
       "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть.":
         "Toode on poest eemaldatud: seda pole ei kataloogis, ei otsingus ega komplektides. Tagasi toomiseks lülitage lüliti sisse.",
@@ -4358,6 +4361,8 @@
       "Снова в продаже ✓": "Back on sale ✓",
       "Фон убран ✓ — проверьте и нажмите «Сохранить»": "Background removed ✓ — check it and press «Save»",
       "Не получилось убрать фон — фото осталось как было": "Could not remove the background — the photo stays as it was",
+      "Этого фото уже нет в списке — вырезанное фото никуда не поставлено":
+        "That photo is no longer in the list — the cut-out was not put anywhere",
       "Новый товар заводится в «Товарах» — кнопка «+ Товар»: бренд, название, раздел и цена, потом фото с телефона. Фото показываются как есть, на белом фоне; описание и тексты для Google на трёх языках напишутся по кнопке в карточке — вы проверите и сохраните.":
         "A new product is created in «Products» — the «+ Product» button: brand, name, section and price, then photos from the phone. Photos are shown as they are, on a white background; the description and the Google texts in three languages are written by a button on the card — you check and save.",
       "Размеры и цены": "Sizes and prices",
@@ -4368,6 +4373,7 @@
       "у этого раздела нет подразделов": "this section has no subsections",
       "Название, бренд и раздел приходят из каталога — их меняет Дим. Всё остальное на этой странице вы правите сами.": "The name, the brand and the section come from the catalogue — Dim changes those. Everything else on this page is yours to edit.",
       "Нет в наличии": "Out of stock",
+      "В продаже": "On sale", "Скрытые": "Hidden", "Какие товары": "Which products",
       "Показывать в магазине": "Show in the shop",
       "Товар убран из магазина: его нет ни в каталоге, ни в поиске, ни в наборах. Включите переключатель, чтобы вернуть.":
         "The product is out of the shop: it is not in the catalogue, the search or the sets. Switch it back on to bring it back.",
@@ -6709,6 +6715,7 @@
     adminEdit: "",   // opened product id in goods
     goodsErr: "",    // why the goods editor refused the last «Сохранить»
     goodsQ: "",      // admin goods search
+    goodsFilter: "all", // «Товары» chips: all | on | off | out (ADM_GOODS_FILTERS)
     // ---- «Главный баннер» in the admin panel ----
     heroDraft: null, // working copy of the whole banner while it is being edited
     heroEdit: -1,    // which slide's form is open (-1 = the list)
@@ -8758,6 +8765,48 @@
       return j && j.v === 1 && j.list && Array.isArray(j.list.posts) && Number(j.list.at) > 0 ? j : null;
     } catch (e) { return null; }
   }
+  /* ---- the tab that has just published must not be the last to know --------
+     «Опубликовать» itself is two requests and takes about a tenth of a second
+     (measured 71–414 ms, 12.09.2026). What takes «a minute or two» — Renat's
+     words — is the article turning up on the shop's own /blog/ page, and none
+     of that time is spent publishing. Two caches stand in the way, and both
+     are right for a shopper and wrong for the person who wrote the article:
+
+       1. this tab's own copy of the list — S.blogLists plus the sessionStorage
+          copy beside it, which blogFresh() trusts for BLOG_TTL (60 s) and
+          which a reload restores rather than re-asks;
+       2. the browser's HTTP cache. GET /api/blog/ asks for
+          `max-age=60, stale-while-revalidate=600`, so for the first minute the
+          old list is served outright, and for ten minutes after that the first
+          load still gets the old list while the new one is fetched behind it —
+          the article appears on the load AFTER the one you are looking at.
+
+     Measured end to end in one tab: published → visible on /shop2/blog/ after
+     2 min 9 s. So a write in the panel drops this tab's copy and marks its
+     next blog reads as ones that must go past the browser's cache too. The
+     mark lives in sessionStorage because the owner reaches the shop by
+     navigating, which throws away everything that only lived in S; it expires
+     on its own after the stale-while-revalidate window it exists to outlast,
+     and it is this tab's business alone — no shopper's cache is touched. */
+  var BLOG_BUST = "rmp-blog-bust";
+  var BLOG_BUST_FOR = 10 * 60 * 1000;   // the API's stale-while-revalidate window
+  function blogForget() {
+    S.blogLists = {}; S.blogPosts = {};
+    try {
+      LANGS.forEach(function (l) { sessionStorage.removeItem(BLOG_STORE + l[0]); });
+      sessionStorage.setItem(BLOG_BUST, String(Date.now()));
+    } catch (e) {}
+  }
+  /** The second argument to fetch() for a blog read — `{cache:"reload"}` while
+      this tab is still carrying a fresh write of its own, nothing otherwise. */
+  function blogFetchInit() {
+    var at = 0;
+    try { at = Number(sessionStorage.getItem(BLOG_BUST)) || 0; } catch (e) { return undefined; }
+    if (!at) return undefined;
+    if (Date.now() - at < BLOG_BUST_FOR) return { cache: "reload" };
+    try { sessionStorage.removeItem(BLOG_BUST); } catch (e) {}
+    return undefined;
+  }
   function blogStoreWrite(lang) {
     var l = S.blogLists[lang];
     if (!l || l.failed || !l.at) return;
@@ -8816,7 +8865,7 @@
     if (blogFresh(have)) return Promise.resolve(have);
     if (BLOG_INFLIGHT[key]) return BLOG_INFLIGHT[key];
     if (leaving) return Promise.resolve(have);   // see blogIdle()
-    var p = fetch("/api/blog/?lang=" + lang + "&page=1")
+    var p = fetch("/api/blog/?lang=" + lang + "&page=1", blogFetchInit())
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (!j || !j.ok || !Array.isArray(j.posts)) throw new Error("blog");
@@ -8860,7 +8909,7 @@
     if (BLOG_INFLIGHT[key]) return BLOG_INFLIGHT[key];
     if (leaving) return Promise.resolve(have);   // see blogIdle()
     function onScreen() { return S.screen === "blogpost" && S.blogSlug === slug && S.lang === lang; }
-    var p = fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + lang)
+    var p = fetch("/api/blog/" + encodeURIComponent(slug) + "/?lang=" + lang, blogFetchInit())
       .then(function (r) { return r.json().then(function (j) { return { status: r.status, j: j }; }); })
       .then(function (res) {
         var was = S.blogPosts[key];
@@ -10770,6 +10819,14 @@
    * keystroke goes first, into a box whose caret is at the start, and the
    * letter lands in the wrong place (or is lost).
    */
+  /** Which of the three texts the box on screen is actually holding — stamped
+      into the markup at the moment it was built, so it is a fact about the
+      DOM and never a guess from S. See blogSync() for why that difference is
+      the whole of this. */
+  function blogBoxLang(el) {
+    var v = el && el.dataset ? el.dataset.blogbody : "";
+    return v === "RU" || v === "ET" || v === "EN" ? v : "";
+  }
   function blogKeepCaret() {
     var live = blogBox();
     if (!live) return;
@@ -10780,12 +10837,29 @@
        the box while document.activeElement has briefly moved on, and that is
        exactly the case where losing it hurts. */
     if (at == null) return;
+    var fromLang = blogBoxLang(live);
+    var wasY = window.scrollY;
     Promise.resolve().then(function () {
       var el = blogBox();
       if (!el || !richDraft()) return;
-      el.focus();
+      /* Another language is another text. An offset counted in the box being
+         left means nothing in the box being entered, and putting it back
+         dropped the next words the owner typed into the middle of the other
+         language's article — he wrote at the top of the Russian text, tapped
+         «English», typed, and it landed seven characters into the English one
+         (Renat, 12.09.2026). The language bar clears the remembered caret for
+         exactly this reason; this is the same rule for the caret that is
+         still in flight. */
+      if (fromLang && blogBoxLang(el) !== fromLang) return;
+      /* preventScroll, and the page put back where it stood. The caret still
+         goes back — that is what this function is for — but a bare focus()
+         also scrolls the box into view, and «Сохранить» renders, which runs
+         this: the page jumped to the text every single time he saved
+         («saving jumped me to the textbox», Renat, 12.09.2026). */
+      try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
       blogRangeSet(el, at);
       blogSelSave();
+      if (window.scrollY !== wasY) window.scrollTo(0, wasY);
     });
   }
   /** The box → the draft. Called after every keystroke and every insert. */
@@ -10793,9 +10867,55 @@
     var el = blogBox();
     var rd = richDraft();   // the article, or the newsletter — whichever owns the box on screen
     if (!el || !rd) return;
-    rd.body[rd.lang] = el.innerHTML;
+    /* The language the BOX holds, not the one S has already moved on to.
+       render() folds a second call in the same animation frame into that
+       frame's callback (see render()), so between the tap on the language bar
+       and the repaint it asks for, S.adminBlogLang is already the new language
+       while the text on screen is still the old one. An `input` landing in
+       that gap — iOS commits a pending autocorrection when the box loses the
+       keyboard — copied the Russian article straight over the English one,
+       and the English one was gone with nothing said. Stamped markup makes
+       that impossible: the box says what it is holding. */
+    var L = blogBoxLang(el) || rd.lang;
+    rd.body[L] = el.innerHTML;
     // the tab's own «готово · с товарами», without a render()
     if (rd.kind === "news") newsPaintState(); else blogPaintState();
+  }
+  /* ---- the form → the draft, before anything is decided from it ------------
+     Every field in this editor writes into the draft as it is typed, which is
+     what keeps the caret still. But «as it is typed» means «on every `input`
+     event app.js is handed», and that is not the same as «on every edit the
+     owner makes»: iOS commits dictation and an accepted autocorrection
+     without one, and so does a word dragged from one paragraph into another.
+     The text is then on screen, in the box, and not in the draft — and
+     «Сохранить» sends the draft. Renat wrote in two languages in one sitting,
+     saved, and the second language was still the old text (12.09.2026).
+
+     So the form is read once more at the three moments something is decided
+     from the draft: a save, a language switch, and the walk out of the
+     editor. Every field carries the language it was drawn for, so a read
+     landing mid-repaint can never file one language's words under another's
+     name — the same rule as blogSync() above. */
+  function blogFieldLang(el) {
+    var v = el && el.dataset ? el.dataset.blogl : "";
+    return v === "RU" || v === "ET" || v === "EN" ? v : "";
+  }
+  function blogReadForm() {
+    var d = S.adminBlogEdit;
+    if (!d || S.adminTab === "news") return;
+    var fields = document.querySelectorAll("[data-blogf]");
+    for (var i = 0; i < fields.length; i++) {
+      var el = fields[i], f = el.dataset.blogf, L = blogFieldLang(el);
+      if (f === "author") { d.author = el.value; continue; }
+      if (!L || !d[f] || typeof d[f] !== "object") continue;
+      d[f][L] = el.value;
+    }
+    var slugEl = document.querySelector("[data-blogslug]");
+    if (slugEl && !d.slugAuto) d.slug = slugEl.value;
+    var tagsEl = document.querySelector("[data-blogtags]");
+    if (tagsEl) d.tagsText = tagsEl.value;
+    var box = blogBox(), bl = blogBoxLang(box);
+    if (box && bl) d.body[bl] = box.innerHTML;
   }
   function blogExec(cmd, arg) {
     if (!blogSelRestore()) return;
@@ -11459,6 +11579,12 @@
   function saveBlogFields(draft) {
     var d = draft || S.adminBlogEdit;
     if (!d) return Promise.reject(new Error("no_draft"));
+    /* Deliberately no blogReadForm() here: this is also the assistant's save
+       (admBlogWriteFull), which has just written a whole article into the
+       draft and asked for a repaint — reading the screen back at that moment
+       could hand it the text from before. The screen is read where the owner
+       acts on it instead: saveBlogDraft, publishBlogPost, the language bar
+       and the way out of the editor. */
     var body = blogFieldsPayload(d);
     var req = d.id
       ? apiSend("/api/admin/blog/", "PATCH", Object.assign({ id: d.id }, body))
@@ -11469,6 +11595,7 @@
       d.id = p.id; d.slug = p.slug; d.status = p.status; d.publishedAt = p.publishedAt;
       if (d === S.adminBlogEdit) blogMarkSaved(d);   // «не сохранено» is answered
       S.adminBlog = null; // the list is stale now
+      blogForget();       // …and so is this tab's copy of the shop's blog
       return p;
     });
   }
@@ -11490,6 +11617,7 @@
   }
   function saveBlogDraft() {
     if (S.adminBlogBusy || !S.adminBlogEdit) return;
+    blogReadForm();   // before the title is judged, not after
     if (blogTitleMissing(S.adminBlogEdit)) {
       S.adminBlogErr = "Заполните заголовок хотя бы на русском."; render(); return;
     }
@@ -11505,6 +11633,9 @@
   /** `confirmed` — the second press, the one that answers blogPublishWarnText(). */
   function publishBlogPost(confirmed) {
     if (S.adminBlogBusy || !S.adminBlogEdit) return;
+    /* …and before blogPublishWarnText() reads the three bodies: an Estonian
+       text typed but not yet in the draft would have been called «пусто». */
+    blogReadForm();
     if (blogTitleMissing(S.adminBlogEdit)) {
       S.adminBlogErr = "Заполните заголовок хотя бы на русском."; render(); return;
     }
@@ -11520,7 +11651,7 @@
         S.adminBlogEdit.status = r.body.post.status; S.adminBlogEdit.publishedAt = r.body.post.publishedAt;
         toast("Статья опубликована ✓");
       } else blogFail();
-      S.adminBlog = null;
+      S.adminBlog = null; blogForget();
       render();
     }).catch(function () {
       S.adminBlogBusy = false; blogFail(); render();
@@ -11536,7 +11667,7 @@
         S.adminBlogEdit.status = r.body.post.status;
         toast("Статья снята с публикации ✓");
       } else blogFail();
-      S.adminBlog = null;
+      S.adminBlog = null; blogForget();
       render();
     }).catch(function () {
       S.adminBlogBusy = false; blogFail(); render();
@@ -11550,7 +11681,7 @@
       S.adminBlogBusy = false; S.adminBlogConfirmDelete = false;
       if (r.status === 200 && r.body.ok) {
         toast("Статья удалена ✓");
-        S.adminBlog = null; S.adminBlogEdit = null;
+        S.adminBlog = null; S.adminBlogEdit = null; blogForget();
       } else blogFail();
       render();
     }).catch(function () {
@@ -11575,7 +11706,7 @@
       }).then(function (r) {
         if (r.status === 200 && r.body.ok) {
           toast("Черновик сохранён ✓");
-          S.adminBlog = null; S.adminTab = "blog"; S.adminBlogEdit = null;
+          S.adminBlog = null; S.adminTab = "blog"; S.adminBlogEdit = null; blogForget();
         } else toast("Не получилось сохранить — попробуйте ещё раз.");
         render();
       }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); render(); });
@@ -11584,7 +11715,7 @@
         toast(r.status === 200 && r.body.ok
           ? (a.publish ? "Статья опубликована ✓" : "Статья снята с публикации ✓")
           : "Не получилось сохранить — попробуйте ещё раз.");
-        S.adminBlog = null;
+        S.adminBlog = null; blogForget();
         render();
       }).catch(function () { toast("Не получилось сохранить — попробуйте ещё раз."); render(); });
     }
@@ -14898,9 +15029,43 @@
       (tab === "stock" ? admStockHTML() : tab === "sets" ? admSetsHTML() : admCatalogHTML()) +
       "</div>";
   }
+  /* ---- «Какие товары» ------------------------------------------------------
+     A product taken off sale leaves CATALOGUE (rebuildCatalogue) and can only
+     come back into this list through its two trailing buckets — i.e. after
+     every product that is still on sale, and usually past the 40-row cap. The
+     owner switched one off and then could not find it again: «it lands
+     somewhere at the end of the list, so it's hard to find it again. Maybe
+     some sort of a filter would be good for such products and other statuses»
+     (Renat, 12.09.2026). «Скрытые» is two taps from anywhere, and the count
+     beside it says how many there are before he taps.
+
+     Same shape as «Заказы» and «Склад»: one .adm-chips row with the search
+     box beside it, aria-current on the chip that is on. */
+  var ADM_GOODS_FILTERS = [
+    ["all", "Все"], ["on", "В продаже"], ["off", "Скрытые"], ["out", "Нет в наличии"]
+  ];
+  function goodsOffSale(p) {
+    return !!((p.custom && p.active === false) || shopHidden(p.id));
+  }
+  function goodsMatchesFilter(p, f) {
+    if (f === "off") return goodsOffSale(p);
+    if (f === "on") return !goodsOffSale(p);
+    if (f === "out") return !goodsOffSale(p) && p.stock === "out";
+    return true;
+  }
   function admCatalogHTML() {
-    return '<input class="adm-input" data-goodsq value="' + esc(S.goodsQ || "") +
-        '" placeholder="Название, бренд, штрихкод" aria-label="Поиск по товарам">' +
+    var f = S.goodsFilter || "all";
+    var all = admCatalogList();
+    return '<div class="adm-acts">' +
+        '<div class="adm-chips" role="group" aria-label="Какие товары">' + ADM_GOODS_FILTERS.map(function (x) {
+          // only «Скрытые» carries a number: it is the one he goes looking for
+          var n = x[0] === "off" ? all.filter(goodsOffSale).length : 0;
+          return '<button class="adm-chip" data-goodsfilter="' + x[0] + '" aria-current="' + (f === x[0]) + '">' +
+            x[1] + (n ? " " + n : "") + "</button>";
+        }).join("") + "</div>" +
+        '<input class="adm-input adm-input--row" data-goodsq value="' + esc(S.goodsQ || "") +
+          '" placeholder="Название, бренд, штрихкод" aria-label="Поиск по товарам" style="flex:1;min-width:180px">' +
+      "</div>" +
       '<div class="adm-list adm-list--flat" id="goodslist">' + admCatalogRows() + "</div>";
   }
   /** Its own function so typing in the search box can patch the list in place
@@ -14931,7 +15096,8 @@
   }
   function admCatalogRows() {
     var q = (S.goodsQ || "").toLowerCase().trim();
-    var all = admCatalogList();
+    var f = S.goodsFilter || "all";
+    var all = admCatalogList().filter(function (p) { return goodsMatchesFilter(p, f); });
     var list = q
       ? all.filter(function (p) { return (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
       : all;
@@ -14946,6 +15112,34 @@
       (list.length > cap
         ? '<button class="adm-btn adm-btn--ghost adm-btn--row" type="button" data-admgoodsmore style="margin-top:10px">Показать ещё</button>'
         : "");
+  }
+  /* ---- back to the row he came from ---------------------------------------
+     Nothing ever reset the page's scroll when the product editor closed. The
+     panel is morph-patched rather than rebuilt (admMorphChildren), so the
+     browser never clamps the offset either: whatever depth the editor was
+     scrolled to is simply applied to the list that takes its place. The
+     editor is five panes tall and its «Сохранить» is a fixed bar he can press
+     from the bottom of it, so the list came back scrolled to somewhere that
+     had nothing to do with the product he had just saved — «after each save,
+     when I am put back into the list, I am put back to the bottom of the
+     list» (Renat, 12.09.2026).
+
+     So the way out remembers the way in: the row of the product he was
+     editing goes back on screen, in the middle of it. A row that is not drawn
+     — past «Показать ещё», or filtered out by the chips — has nowhere to go
+     back to, so the list starts at its top instead, which is where its search
+     box and its chips are. */
+  function goodsBackToRow(id) {
+    var want = String(id || "");
+    requestAnimationFrame(function () {
+      if (S.screen !== "admin" || S.adminEdit) return;
+      var rows = document.querySelectorAll("#goodslist [data-admgoods]"), row = null;
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].dataset.admgoods === want) { row = rows[i]; break; }
+      }
+      if (row && row.scrollIntoView) row.scrollIntoView({ block: "center" });
+      else window.scrollTo({ top: 0 });
+    });
   }
   function admCatalogRow(p) {
     var prices = p.prices && p.prices.length ? p.prices : [p.price];
@@ -16144,7 +16338,7 @@
       }, BLOG_LANG_NOTE[L] || BLOG_LANG_NOTE.RU) +
       '<p class="adm-hint adm-hint--warn" data-blogdirty' + (blogDirty() ? "" : " hidden") + ">" +
         "Есть несохранённые изменения — нажмите «Сохранить».</p>" +
-      '<input class="adm-title-in" data-blogf="title" maxlength="200" placeholder="Заголовок" value="' + esc(d.title[L]) + '">' +
+      '<input class="adm-title-in" data-blogf="title" data-blogl="' + L + '" maxlength="200" placeholder="Заголовок" value="' + esc(d.title[L]) + '">' +
       admBlogCoverHTML(d) +
       '<div class="adm-tools" role="toolbar" aria-label="Оформление текста">' + ADM_BLOG_TOOLS.map(function (t) {
         return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
@@ -16157,13 +16351,17 @@
          letter-spaced Oswald, which is the one thing the redesign bans
          everywhere (README). `.adm-canvas` carries the same shapes in the
          panel's own type instead. */
-      '<div class="adm-canvas" contenteditable="true" data-blogbody role="textbox" aria-multiline="true" ' +
+      /* Every per-language field says which of the three it was drawn for
+         (data-blogl, and data-blogbody's own value for the box): blogSync()
+         and blogReadForm() file what they read under the name the markup
+         carries, never under whatever S has moved on to since. */
+      '<div class="adm-canvas" contenteditable="true" data-blogbody="' + L + '" role="textbox" aria-multiline="true" ' +
         'aria-label="Текст статьи" placeholder="Начните писать — кнопки сверху добавят заголовок, список, ссылку или картинку.">' +
         (d.body[L] || "") + "</div>" +
       '<label class="adm-field">Анонс — две строки в списке и в поиске' +
-        '<textarea class="adm-input" rows="2" maxlength="500" data-blogf="excerpt">' + esc(d.excerpt[L]) + "</textarea></label>" +
+        '<textarea class="adm-input" rows="2" maxlength="500" data-blogf="excerpt" data-blogl="' + L + '">' + esc(d.excerpt[L]) + "</textarea></label>" +
       '<label class="adm-field">Подпись к обложке' +
-        '<input class="adm-input" data-blogf="coverAlt" maxlength="160" value="' + esc(d.coverAlt[L]) + '"></label>' +
+        '<input class="adm-input" data-blogf="coverAlt" data-blogl="' + L + '" maxlength="160" value="' + esc(d.coverAlt[L]) + '"></label>' +
       '<label class="adm-field">Теги — через запятую' +
         '<input class="adm-input" data-blogtags value="' + esc(d.tagsText) + '" placeholder="борода, зима"></label>' +
       '<div><div class="adm-sec__t">Товары в статье</div>' +
@@ -16190,10 +16388,10 @@
           "</div>" +
           '<label class="adm-field">Заголовок для Google · <span data-blogcount="seoTitle">' +
             (d.seoTitle[L] || "").length + "/70</span>" +
-            '<input class="adm-input" data-blogf="seoTitle" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
+            '<input class="adm-input" data-blogf="seoTitle" data-blogl="' + L + '" maxlength="70" value="' + esc(d.seoTitle[L]) + '"></label>' +
           '<label class="adm-field" style="margin-top:10px">Описание для Google · <span data-blogcount="seoDesc">' +
             (d.seoDesc[L] || "").length + "/170</span>" +
-            '<textarea class="adm-input" rows="3" maxlength="170" data-blogf="seoDesc">' + esc(d.seoDesc[L]) + "</textarea></label>" +
+            '<textarea class="adm-input" rows="3" maxlength="170" data-blogf="seoDesc" data-blogl="' + L + '">' + esc(d.seoDesc[L]) + "</textarea></label>" +
           '<p class="adm-hint" style="margin:8px 0 0">Это то, что человек видит в поиске Google — на каждом языке своё. Помощник пишет по тексту статьи на том языке, что выбран сверху. Пусто — берётся русский вариант, а если нет и его — заголовок и анонс статьи.</p>' +
           '<label class="adm-field" style="margin-top:10px">Адрес страницы' +
             '<input class="adm-input" data-blogslug value="' + esc(d.slug) + '" placeholder="' +
@@ -16615,7 +16813,7 @@
         return '<button data-blogrt="' + t[0] + '" title="' + t[1] + '">' + t[1] + "</button>";
       }).join("") + '<button data-blogrt="undo" title="Отменить">Отменить</button></div>' +
       '<div class="adm-tool" data-blogtool>' + blogToolSheet() + "</div>" +
-      '<div class="adm-canvas" contenteditable="true" data-blogbody role="textbox" aria-multiline="true" ' +
+      '<div class="adm-canvas" contenteditable="true" data-blogbody="' + L + '" role="textbox" aria-multiline="true" ' +
         'aria-label="Текст письма" placeholder="Начните писать — или нажмите «✨ Написать» справа. Кнопки сверху добавят заголовок, список, ссылку, картинку или товар.">' +
         (d.body[L] || "") + "</div>" +
       admNewsProductsHTML(d) +
@@ -21551,6 +21749,25 @@
   function galSaveList() {
     return GAL.reset ? [] : GAL.list.slice();
   }
+  /* ---- the photo a cut-out is being made of --------------------------------
+     GAL.cutting is `{ id, url, alt }` — the product and the photo's own
+     address — and not, as it was, the index the ✂ happened to be pressed on.
+     A cut-out is a model round trip the server gives up to 90 seconds
+     (src/lib/photo-cutout.ts): in that time the owner can move the photo,
+     make it the main one, remove another, or leave the editor, and an index
+     written down at the start means something else by the end. It did: the
+     answer landed on the photo that had slid into the old slot and replaced
+     it outright («the photo which it replaced is lost», Renat, 12.09.2026).
+     Asked of the photo, both questions below are true whatever has moved. */
+  function galCutIndex(job) {
+    if (!job || GAL.id !== job.id) return -1;
+    for (var i = 0; i < GAL.list.length; i++) if (GAL.list[i] && GAL.list[i].url === job.url) return i;
+    return -1;
+  }
+  /** Is this the photo being worked on right now? — for the tile's own «Убираем фон…». */
+  function galCutBusy(ph) {
+    return !!(GAL.cutting && ph && GAL.cutting.id === GAL.id && GAL.cutting.url === ph.url);
+  }
   function galDrop(key) {
     if (!key || MEDIA.on !== true) return;
     fetch("/api/admin/upload/?key=" + encodeURIComponent(key), { method: "DELETE" }).catch(noop);
@@ -22302,10 +22519,19 @@
     var g = list.map(function (ph) { return ph.thumb || ph.url; });
     var vurl = vidValue(p), vk = edVideoKind(vurl);
     var tiles = list.map(function (ph, i) {
-      var tag = GAL.cutting === i ? "Убираем фон…" : edPhotoTag(p, i);
-      return '<div class="adm-photo' + (i === 0 ? " is-main" : "") + '">' +
+      /* Whether THIS photo is the one the server is working on — asked of the
+         photo, not of its position, so the «Убираем фон…» label follows the
+         picture when the owner moves it or makes it the main one instead of
+         staying behind on whatever slid into its slot (galCutIndex). The tile
+         is dimmed and says aria-busy while it waits: the work takes as long
+         as it takes, and watching a picture change under you with nothing
+         marked is what made it look like a photo had been swapped. */
+      var busy = galCutBusy(ph);
+      var tag = busy ? "Убираем фон…" : edPhotoTag(p, i);
+      return '<div class="adm-photo' + (i === 0 ? " is-main" : "") + (busy ? " adm-photo--busy" : "") + '"' +
+        (busy ? ' aria-busy="true"' : "") + ">" +
         '<span class="adm-photo__img" style="background-image:url(\'' + esc(ph.thumb || ph.url) + '\')"></span>' +
-        (tag ? '<span class="adm-photo__tag' + (i === 0 && GAL.cutting !== i ? " adm-photo__tag--ink" : "") + '">' + esc(tag) + "</span>" : "") +
+        (tag ? '<span class="adm-photo__tag' + (busy || i === 0 ? " adm-photo__tag--ink" : "") + '">' + esc(tag) + "</span>" : "") +
         '<span class="adm-photo__ops">' +
           '<button class="adm-photo__op" data-galmove="' + i + ':-1"' + (i === 0 ? " disabled" : "") + ' aria-label="Левее" title="Левее">←</button>' +
           '<button class="adm-photo__op" data-galmove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") + ' aria-label="Правее" title="Правее">→</button>' +
@@ -22313,7 +22539,7 @@
           /* «Убрать фон» — only when the server said it can (MEDIA.cutout,
              src/lib/photo-cutout.ts); the original photo stays, the cut-out
              takes its place in this list until «Сохранить» */
-          (MEDIA.cutout ? '<button class="adm-photo__op" data-galcut="' + i + '"' + (GAL.cutting != null ? " disabled" : "") + ' aria-label="Убрать фон" title="Убрать фон">✂</button>' : "") +
+          (MEDIA.cutout ? '<button class="adm-photo__op" data-galcut="' + i + '"' + (GAL.cutting ? " disabled" : "") + ' aria-label="Убрать фон" title="Убрать фон">✂</button>' : "") +
           '<button class="adm-photo__op" data-galdel="' + i + '" aria-label="Убрать фото" title="Убрать фото">×</button>' +
         "</span></div>";
     }).join("");
@@ -22613,6 +22839,7 @@
       AI_UNDO = null; S.adminEdit = ""; S.goodsSizes = null; GAL.id = ""; UP.err = ""; vidReset();
       toast("Сохранено ✓");
       render();
+      goodsBackToRow(product.id);
     }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
   /** The assistant's create_product, once the owner pressed «Применить». */
@@ -25306,7 +25533,7 @@
     else if (a.type === "set_post_cover") {
       blogPatchCover(a.slug, a.url).then(function (r) {
         if (!(r.status === 200 && r.body.ok)) toast("Не получилось сохранить обложку");
-        S.adminBlog = null;
+        S.adminBlog = null; blogForget();
       }).catch(function () { toast("Не получилось сохранить обложку"); });
     }
     // assistant-work: {RU,ET,EN} product-page description override
@@ -28277,8 +28504,10 @@
     else if (top === "more") S.admMore = false;
     else if (top === "blog") { S.adminBlogEdit = null; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; }
     else if (top === "edit") {
+      var backId = S.adminEdit;
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null; S.goodsEditTab = "main"; S.goodsVidKind = "";
+      goodsBackToRow(backId);
     } else if (top === "order") {
       S.adminOrder = 0;
       S.orderReplyOpen = false; S.orderReplyDraft = ""; S.orderMsgs = null; S.orderMsgsFor = "";
@@ -28671,7 +28900,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-goodsfilter],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -29183,9 +29412,11 @@
       window.scrollTo({ top: 0 }); render(); return;
     }
     if (d.admclose !== undefined) {
+      var closeId = S.adminEdit;
       S.adminEdit = ""; S.goodsErr = ""; GAL.id = ""; vidReset(); AI_UNDO = null;
       S.goodsSizes = null; S.goodsNew = null;   // product creation
-      S.goodsEditTab = "main"; S.goodsVidKind = ""; render(); return;
+      S.goodsEditTab = "main"; S.goodsVidKind = ""; render();
+      goodsBackToRow(closeId); return;
     }
     /* ---- Товар: the five tabs -------------------------------------------
        A DOM patch, never a render(): every pane is in the page at once
@@ -29247,6 +29478,9 @@
        once (nothing destructive about it) with the toast's own undo. */
     // «Показать ещё»: the next 40 rows of the catalogue list
     if (d.admgoodsmore !== undefined) { S.goodsShown = (S.goodsShown || 40) + 40; render(); return; }
+    // «Какие товары»: the same chips «Заказы» and «Склад» have, and the same
+    // rule — another filter is another list, so it starts at its first page
+    if (d.goodsfilter) { S.goodsFilter = d.goodsfilter; S.goodsShown = 40; render(); return; }
     if (d.admgoodsnew !== undefined) {
       S.adminTab = "goods"; S.adminEdit = "new"; S.goodsNew = { brand: "", name: "", cat: "hair", subcat: "" };
       S.goodsSizes = null; S.goodsErr = ""; GAL.id = ""; AI_UNDO = null; vidReset(); mediaProbe();
@@ -29295,26 +29529,55 @@
         translateTree(szFresh);
         szPane.replaceWith(szFresh);
       }
+      /* The ladder changed, so the bar says «Не сохранено» — for the deletion
+         as well as for the addition. It used to say it only for the addition,
+         and only by accident: «+ Размер» ends by putting the caret in the new
+         box, and the owner's next keystroke is the `input` admBarTouch
+         listens for. «×» types nothing, so a real, savable change went
+         unannounced and could be walked away from (Renat, 12.09.2026). */
+      admBarTouched();
       if (d.edsizeadd !== undefined) refocus('[data-edsz="' + (szRows.length - 1) + '"]');
       return;
     }
     /* «Убрать фон»: the cut-out replaces the photo in the draft list; the
-       original stays in the bucket, and «Сохранить» is what makes it so. */
+       original stays in the bucket, and «Сохранить» is what makes it so.
+       The cut-out is a model round trip and the server gives it up to 90
+       seconds (src/lib/photo-cutout.ts), which is a long time to be standing
+       in a gallery with five buttons on every tile. */
     if (d.galcut !== undefined) {
       var cutP = admEditProduct(S.adminEdit);
       var cutI = Number(d.galcut);
       galDraft(cutP);
       var cutPh = GAL.list[cutI];
-      if (!cutPh || GAL.cutting != null) return;
-      GAL.cutting = cutI; render();
-      apiSend("/api/admin/upload/cutout/", "POST", { url: cutPh.url }).then(function (r) {
+      if (!cutPh || GAL.cutting) return;
+      /* WHICH PHOTO, not which slot. This used to remember the index the ✂
+         was pressed on and write the answer back to that index — so pressing
+         ★ on the same photo while the server worked (which is exactly what
+         the owner did) shifted the list under the answer: the cut-out landed
+         on whatever photo had moved into the old slot and **replaced** it,
+         the photo he had made the main one still had its background, and the
+         picture he lost was gone with no word said. Renat, 12.09.2026:
+         «actually the photo which it replaced is lost». */
+      var cutJob = { id: GAL.id, url: cutPh.url, alt: cutPh.alt || "" };
+      GAL.cutting = cutJob; render();
+      apiSend("/api/admin/upload/cutout/", "POST", { url: cutJob.url }).then(function (r) {
         GAL.cutting = null;
+        if (r.status === 401) { SRV.admin = false; render(); return; }
         if (r.status === 200 && r.body.ok && r.body.url) {
-          GAL.list[cutI] = { url: r.body.url, thumb: r.body.thumbUrl || r.body.url, alt: cutPh.alt || "" };
-          if (r.body.key) GAL.fresh[r.body.url] = r.body.key;
-          toast("Фон убран ✓ — проверьте и нажмите «Сохранить»");
-        } else if (r.status === 401) { SRV.admin = false; }
-        else toast("Не получилось убрать фон — фото осталось как было");
+          var at = galCutIndex(cutJob);
+          if (at < 0) {
+            /* Not in this draft any anymore — removed with ×, replaced by
+               «Вернуть фото из каталога», or another product's editor is
+               open. Nothing is written over anything; the original and the
+               cut-out both sit in the bucket, and the photo that is on
+               screen is the photo that stays. */
+            toast("Этого фото уже нет в списке — вырезанное фото никуда не поставлено");
+          } else {
+            GAL.list[at] = { url: r.body.url, thumb: r.body.thumbUrl || r.body.url, alt: cutJob.alt };
+            if (r.body.key) GAL.fresh[r.body.url] = r.body.key;
+            toast("Фон убран ✓ — проверьте и нажмите «Сохранить»");
+          }
+        } else toast("Не получилось убрать фон — фото осталось как было");
         render();
       }).catch(function () { GAL.cutting = null; toast("Не получилось убрать фон — фото осталось как было"); render(); });
       return;
@@ -29696,7 +29959,8 @@
       AI_UNDO = null;
       S.adminEdit = "";
       toast(changed ? "Сохранено ✓ · отмена — в журнале" : "Изменений нет");
-      render(); return;
+      render();
+      goodsBackToRow(gp.id); return;
     }
     if (d.admapply !== undefined) {
       if (pendingAction) {
@@ -30571,7 +30835,9 @@
     }
     if (d.admblogedit) { openBlogEditor(d.admblogedit); return; }
     if (d.admblogback !== undefined) {
-      // unsaved work dies with the draft — ask once (blogDirty)
+      // unsaved work dies with the draft — ask once (blogDirty), and about
+      // what is on screen rather than what the last `input` happened to catch
+      blogReadForm();
       if (blogDirty() && !S.adminBlogConfirmBack) { S.adminBlogConfirmBack = true; render(); return; }
       blogCloseEditor(); return;
     }
@@ -30581,7 +30847,10 @@
       /* Another language is another box: the remembered caret belongs to the
          old one. Nothing is saved and nothing is lost by this — all three
          texts sit in the same draft — and the tab you land on now says what
-         it holds, which is the whole point of the strip. */
+         it holds, which is the whole point of the strip.
+         «Nothing is lost» is the promise, so the language being left is read
+         off the screen one last time before the screen stops being it. */
+      blogReadForm();
       S.adminBlogLang = d.admbloglang; S.adminBlogTool = ""; BLOGSEL = null; BLOGCARET = null; render(); return;
     }
     /* ---- the visual editor's toolbar --------------------------------------
@@ -31065,8 +31334,15 @@
       var bd = S.adminBlogEdit;
       if (!bd) return;
       var bf = t.dataset.blogf;
-      var bl = S.adminBlogLang || "RU";
-      bd[bf][bl] = t.value;
+      /* The field's own stamp first, for the same reason blogSync() reads the
+         box's: S can be a frame ahead of the markup. «Автор» is the one field
+         here that is not one of three texts but a single name — and
+         `bd.author[bl] = …` on a plain string is a TypeError in strict mode,
+         so typing an author used to throw and take the rest of this handler
+         (the counters, the language strip) down with it. */
+      var bl = blogFieldLang(t) || S.adminBlogLang || "RU";
+      if (bf === "author") bd.author = t.value;
+      else bd[bf][bl] = t.value;
       if (bf === "title" && bl === "RU" && bd.slugAuto) {
         bd.slug = blogSlugify(t.value);
         var slugEl = document.querySelector("[data-blogslug]");
@@ -31710,6 +31986,16 @@
     var t = e.target;
     if (!t || !t.closest || !t.closest(".adm-page")) return;
     if (!document.querySelector('[data-barnote="touch"]')) return;
+    admBarTouched();
+  }
+  /* The same mark, made by hand. `input` and `change` cover every field the
+     owner types in, but not a change he makes with a button — and a size
+     deleted with «×» is exactly that: the ladder in S.goodsSizes is a rung
+     shorter, «Сохранить» would write it, and the bar went on saying nothing
+     at all, so the deletion could be walked away from and lost. «The deletion
+     does not trigger or inform that it needs to be saved» (Renat,
+     12.09.2026). Every button that edits the draft should say so here. */
+  function admBarTouched() {
     var id = admBarIdent();
     if (!id || S.barTouched === id) return;
     S.barTouched = id;
