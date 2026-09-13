@@ -9,6 +9,7 @@
  * mails customers for anybody who finds the URL.
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { shopDay } from "@/lib/day";
 import { recordMarketingConsent } from "@/lib/consent";
 import { exec, query } from "@/lib/db";
 import { setupDb, teardownDb, TEST_SECRET } from "./helpers";
@@ -502,7 +503,7 @@ describe("birthday flow", () => {
   /** A customer whose birthday is today, `years` ago. */
   async function birthdayToday(email: string, marketing: boolean): Promise<void> {
     const today = new Date();
-    const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+    const iso = "1990" + shopDay(today).slice(4);
     await recordLogin(email, "RU");
     await updateCustomer(email, { birthday: iso });
     if (marketing) await recordMarketingConsent(email, "RU", "account");
@@ -531,7 +532,7 @@ describe("birthday flow", () => {
       "select birthday_sent_year from customers where email = $1",
       [EMAIL],
     );
-    expect(Number(row.birthday_sent_year)).toBe(new Date().getUTCFullYear());
+    expect(Number(row.birthday_sent_year)).toBe(Number(shopDay(Date.now()).slice(0, 4)));
   });
 
   it("stays quiet while the switch is off", async () => {
@@ -599,7 +600,7 @@ describe("admin counters", () => {
     const today = new Date();
     await recordLogin("bday@example.com", "RU");
     await updateCustomer("bday@example.com", {
-      birthday: `1988-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`,
+      birthday: "1988" + shopDay(today).slice(4),
     });
     await recordMarketingConsent("bday@example.com", "RU", "account");
 

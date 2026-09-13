@@ -17,6 +17,7 @@
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { query } from "@/lib/db";
+import { shopDay } from "@/lib/day";
 import { birthdayWindow, getFlowRuns, runAbandonedCarts, runBirthdays, runFlows } from "@/lib/flows";
 import { setSetting } from "@/lib/orders";
 import { adminCookieHeader, makeRequest, setFuzzEnv } from "./fuzz-harness";
@@ -36,6 +37,17 @@ function mockResend(): void {
       headers: { "Content-Type": "application/json" },
     });
   });
+}
+
+/* A birthday the shop would call «today». The window is drawn on the Tallinn
+   calendar (src/lib/day.ts), so a test that builds its date from getUTC* is
+   a day out whenever the runner sits west of Tallinn and the clock has passed
+   21:00 UTC — which is how CI failed while this machine passed. */
+function shopBirthday(at: Date | number = Date.now()): string {
+  return "1990" + shopDay(at).slice(4);
+}
+function shopYear(at: Date | number = Date.now()): number {
+  return Number(shopDay(at).slice(0, 4));
 }
 
 let n = 0;
@@ -328,7 +340,7 @@ describe("runAbandonedCarts() — the skip says why", () => {
 
 describe("runBirthdays() — the skip says why", () => {
   const today = new Date();
-  const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+  const iso = shopBirthday(today);
 
   it("names a date typed without the «хочу письма» tick", async () => {
     await setSetting("flows", { birthday: true, birthdayDays: 0 });
@@ -348,7 +360,7 @@ describe("runBirthdays() — the skip says why", () => {
     const far = new Date(today.getTime() + 40 * DAY);
     await query(
       `insert into customers (email, name, lang, birthday, marketing) values ($1, 'Dim', 'EN', $2, true)`,
-      ["far@example.com", `1990-${String(far.getUTCMonth() + 1).padStart(2, "0")}-${String(far.getUTCDate()).padStart(2, "0")}`],
+      ["far@example.com", shopBirthday(far)],
     );
     const run = await runBirthdays();
     expect(run.sent).toBe(0);
@@ -357,7 +369,7 @@ describe("runBirthdays() — the skip says why", () => {
 
   it("names this year's letter that has already gone", async () => {
     await setSetting("flows", { birthday: true, birthdayDays: 0 });
-    await customer(iso, today.getUTCFullYear());
+    await customer(iso, shopYear(today));
     const run = await runBirthdays();
     expect(run.sent).toBe(0);
     expect(run.skips).toMatchObject({ already_sent: 1 });
@@ -395,13 +407,13 @@ describe("POST /api/admin/flows/run/", () => {
   it("sends today's birthday letter from the panel, once", async () => {
     await setSetting("flows", { birthday: true, birthdayDays: 0 });
     const today = new Date();
-    const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+    const iso = shopBirthday(today);
     const id = await customer(iso);
 
     const first = await run({ flow: "birthday" });
     expect(first.status).toBe(200);
     expect(first.body).toMatchObject({ ok: true, flow: "birthday", sent: 1, skipped: 0 });
-    expect(await sentYear(id)).toBe(today.getUTCFullYear());
+    expect(await sentYear(id)).toBe(shopYear(today));
     expect(sent).toHaveLength(1);
 
     // the button pressed twice is the cron run twice: nothing goes out again

@@ -767,8 +767,13 @@ test.describe("admin — «Письма» can be run without waiting for the sch
     expect(code, "the e2e login code did not come back").toMatch(/^\d{6}$/);
     const login = await ctx.request.post("/api/account/login/", { data: { email, code, lang: "RU" } });
     expect(login.ok()).toBe(true);
-    const today = new Date();
-    const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+    /* The birthday window is drawn on the Tallinn calendar (src/lib/day.ts),
+       so a date built from getUTC* is a day early whenever the runner is
+       west of Tallinn and the clock has passed 21:00 UTC — the letter is then
+       «not in the window» and this test reads a different toast. */
+    const iso = "1990" + new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Tallinn", year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(new Date()).slice(4);
     const patched = await ctx.request.patch("/api/account/me/", { data: { birthday: iso, marketing: true } });
     expect(patched.ok()).toBe(true);
     await ctx.close();

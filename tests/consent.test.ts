@@ -9,6 +9,7 @@
  * mailbox unsubscribe another; a consent nobody can date.
  */
 import catalogueMin from "@/data/catalogue.min.json";
+import { shopDay } from "@/lib/day";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ADMIN_COOKIE, hashPassword, makeSessionToken, resetRateLimits } from "@/lib/auth";
 import {
@@ -106,7 +107,7 @@ async function abandon(email: string, ageMs: number): Promise<void> {
 /** A customer whose birthday is today, with the tick as asked. */
 async function birthdayToday(email: string, marketing: boolean): Promise<void> {
   const today = new Date();
-  const iso = `1990-${String(today.getUTCMonth() + 1).padStart(2, "0")}-${String(today.getUTCDate()).padStart(2, "0")}`;
+  const iso = "1990" + shopDay(today).slice(4);
   await recordLogin(email, "RU");
   await updateCustomer(email, { birthday: iso });
   if (marketing) await recordMarketingConsent(email, "RU", "account");
