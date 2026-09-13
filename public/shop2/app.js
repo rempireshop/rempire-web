@@ -1583,6 +1583,9 @@
       "Причина (видна в истории)": "Põhjus (nähtav ajaloos)",
       "например: пересчёт на полке": "näiteks: ülelugemine riiulil",
       "Свернуть": "Ahenda", "Править": "Muuda",
+      // r16: the open slide of «Главный баннер» — the badge on its row and the
+      // ✕ at the top of its pane (heroRowHTML / heroFormHTML)
+      "открыт": "avatud", "Закрыть слайд": "Sulge slaid",
       "← Склад": "← Ladu", "Тип движения": "Liikumise tüüp",
       "Приход": "Vastuvõtt", "Продажа на сайте": "Müük veebis", "Продажа в салоне": "Müük salongis",
       "Ручная правка": "Käsitsi parandus", "Возврат": "Tagastus",
@@ -2354,6 +2357,71 @@
       "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
         "Selles seansis pole veel muudatusi. Kõik, mille kinnitad, ilmub siia — koos nupuga «Taasta».",
       "Вернуть": "Taasta",
+      /* r16 — «Журнал изменений» speaks the panel's language.
+
+         Renat, 13.09.2026: «Price change is logged, but written only, although
+         my admin is in english — "Товар «Davines — Cheap price» изменён"». The
+         journal used to be the one screen left out of the dictionary on
+         purpose («Russian by decision»); an owner who reads the panel in
+         English reads his own history in Russian, which is not a decision
+         anybody made, it is a gap. Every line is composed — a template plus a
+         product name — so the words the templates splice in are keys here and
+         the sentences around them are UI_RX rules below. */
+      "по умолчанию (скидка)": "vaikimisi (allahindlus)",
+      "убрать из магазина": "eemaldada poest",
+      "показывать в магазине": "näidata poes",
+      "создана": "loodud",
+      "отложена — отправление у Montonio остаётся": "kõrvale pandud — saadetis jääb Montoniosse",
+      "включить": "lülitada sisse",
+      "выключить": "lülitada välja",
+      "спрашивать перевозчика": "küsida vedajalt",
+      "не спрашивать перевозчика": "vedajalt mitte küsida",
+      "по времени не закрывать": "aja järgi mitte sulgeda",
+      "показать": "näidata",
+      "скрыть": "peita",
+      "Тексты писем: стандартные": "Kirjade tekstid: standardsed",
+      "авто": "automaatselt",
+      "убрано": "eemaldatud",
+      "как в каталоге": "nagu kataloogis",
+      "— заменить": "— asendada",
+      ", в каталоге, в поиске и в письмах": ", kataloogis, otsingus ja kirjades",
+      "опубликовать": "avaldada",
+      "снять с публикации": "avaldamine tühistada",
+      "партнёры и баллы включены": "partnerid ja punktid on sees",
+      "партнёры и баллы выключены": "partnerid ja punktid on väljas",
+      "включены": "sees",
+      "выключены": "väljas",
+      "без изменений": "muudatusteta",
+      "снова в продаже": "jälle müügil",
+      "снят с продажи": "müügilt eemaldatud",
+      "как было": "nagu oli",
+      "(одна цена вместо размеров)": "(üks hind suuruste asemel)",
+      "одна цена вместо размеров": "üks hind suuruste asemel",
+      "описание: убрать": "kirjeldus: eemaldada",
+      "фото: убраны": "fotod: eemaldatud",
+      "тексты для Google: свои": "Google'i tekstid: omad",
+      "тексты для Google: стандартные": "Google'i tekstid: standardsed",
+      "верхняя полоска: выключить": "ülemine riba: lülitada välja",
+      "верхняя полоска: включить": "ülemine riba: lülitada sisse",
+      "везде": "kõikjal",
+      "— никогда": "— mitte kunagi",
+      "доставляем во все страны": "tarnime kõikidesse riikidesse",
+      "Доставка: без изменений": "Tarne: muudatusteta",
+      "Доставка:": "Tarne:",
+      "Тарифы доставки:": "Tarnehinnad:",
+      "Партнёр:": "Partner:",
+      "Розница:": "Jaemüük:",
+      "опубликован": "avaldatud",
+      "вернулся в новые": "läks tagasi uute hulka",
+      "продажа": "müük",
+      "списание": "mahakandmine",
+      "возврат покупателя": "kliendi tagastus",
+      "инвентаризация": "inventuur",
+      "Снова в наличии": "Jälle laos",
+      "День рождения": "Sünnipäev",
+      "январь": "jaanuar", "февраль": "veebruar", "март": "märts", "апрель": "aprill",
+      "май": "mai", "июнь": "juuni", "июль": "juuli", "август": "august",
+      "сентябрь": "september", "октябрь": "oktoober", "ноябрь": "november", "декабрь": "detsember",
       "Выключить промокод": "Lülita sooduskood välja",
       "Включить промокод": "Lülita sooduskood sisse",
       "Промокодов пока нет": "Sooduskoode veel pole",
@@ -4047,6 +4115,8 @@
       "Причина (видна в истории)": "Reason (shown in the history)",
       "например: пересчёт на полке": "e.g. recount on the shelf",
       "Свернуть": "Collapse", "Править": "Edit",
+      // r16: the open slide of «Главный баннер» — see the ET table above
+      "открыт": "open", "Закрыть слайд": "Close the slide",
       "← Склад": "← Stock", "Тип движения": "Move type",
       "Приход": "Goods in", "Продажа на сайте": "Web sale", "Продажа в салоне": "In-salon sale",
       "Ручная правка": "Manual correction", "Возврат": "Return",
@@ -4816,6 +4886,66 @@
       "Изменений в этой сессии пока нет. Всё, что вы примените, появится здесь — с кнопкой «Вернуть».":
         "No changes in this session yet. Everything you apply appears here, with a “Restore” button.",
       "Вернуть": "Restore",
+      /* r16 — «Журнал изменений» speaks the panel's language. See the same
+         block in the ET table above for why it exists: the journal was the one
+         screen deliberately left in Russian, and the owner reads the panel in
+         English. The words below are what the journal's templates splice in;
+         the sentences around them are the UI_RX rules further down. */
+      "по умолчанию (скидка)": "the default (the discount)",
+      "убрать из магазина": "take out of the shop",
+      "показывать в магазине": "show in the shop",
+      "создана": "created",
+      "отложена — отправление у Montonio остаётся": "set aside — the shipment stays at Montonio",
+      "включить": "switch on",
+      "выключить": "switch off",
+      "спрашивать перевозчика": "ask the carrier",
+      "не спрашивать перевозчика": "do not ask the carrier",
+      "по времени не закрывать": "never close by time",
+      "показать": "show",
+      "скрыть": "hide",
+      "Тексты писем: стандартные": "Letter texts: the standard ones",
+      "авто": "automatic",
+      "убрано": "removed",
+      "как в каталоге": "as in the catalogue",
+      "— заменить": "— replace",
+      ", в каталоге, в поиске и в письмах": ", in the catalogue, in search and in the letters",
+      "опубликовать": "publish",
+      "снять с публикации": "unpublish",
+      "партнёры и баллы включены": "partners and points are on",
+      "партнёры и баллы выключены": "partners and points are off",
+      "включены": "on",
+      "выключены": "off",
+      "без изменений": "no changes",
+      "снова в продаже": "back on sale",
+      "снят с продажи": "taken off sale",
+      "как было": "as before",
+      "(одна цена вместо размеров)": "(one price instead of sizes)",
+      "одна цена вместо размеров": "one price instead of sizes",
+      "описание: убрать": "description: remove",
+      "фото: убраны": "photos: removed",
+      "тексты для Google: свои": "Google texts: your own",
+      "тексты для Google: стандартные": "Google texts: the standard ones",
+      "верхняя полоска: выключить": "the top strip: switch off",
+      "верхняя полоска: включить": "the top strip: switch on",
+      "везде": "everywhere",
+      "— никогда": "— never",
+      "доставляем во все страны": "we deliver to every country",
+      "Доставка: без изменений": "Delivery: no changes",
+      "Доставка:": "Delivery:",
+      "Тарифы доставки:": "Delivery prices:",
+      "Партнёр:": "Partner:",
+      "Розница:": "Retail:",
+      "опубликован": "published",
+      "вернулся в новые": "back among the new ones",
+      "продажа": "sale",
+      "списание": "written off",
+      "возврат покупателя": "a customer's return",
+      "инвентаризация": "stocktake",
+      "Снова в наличии": "Back in stock",
+      "День рождения": "Birthday",
+      "январь": "January", "февраль": "February", "март": "March", "апрель": "April",
+      "май": "May", "июнь": "June", "июль": "July", "август": "August",
+      "сентябрь": "September", "октябрь": "October", "ноябрь": "November", "декабрь": "December",
       "Выключить промокод": "Switch the code off",
       "Включить промокод": "Switch the code on",
       "Промокодов пока нет": "No promo codes yet",
@@ -5568,7 +5698,138 @@
         EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no English text — these subscribers get the Russian version." }],
     [/^Письмо «(.+)» уйдёт подписчикам: (\d+) — по-русски (\d+), по-эстонски (\d+), по-английски (\d+)\. Эстонского и английского текста нет — эти подписчики получат русскую версию\.$/,
       { ET: "Kiri «$1» läheb tellijatele: $2 — vene keeles $3, eesti keeles $4, inglise keeles $5. Eesti- ja ingliskeelset teksti pole — need tellijad saavad venekeelse versiooni.",
-        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian or English text — these subscribers get the Russian version." }]
+        EN: "The letter «$1» goes to $2 subscribers — $3 in Russian, $4 in Estonian, $5 in English. There is no Estonian or English text — these subscribers get the Russian version." }],
+    /* ---- r16: «Журнал изменений» -----------------------------------------
+       Every line of the change log, and every confirm card that is built from
+       the same sentence (actionText). They live at the END of this list on
+       purpose: a rule here must never win over one of the specific ones above
+       — «Заказ R-100042: оплачен по счёту 2026-0001» already has its own.
+
+       The shape is always the same: a template, a name in «…», and a value.
+       The name is left exactly as the owner typed it; the value is looked up
+       in the dictionary by the $n substitution, which is why «в наличии» or
+       «выключить» comes out translated without a rule of its own. */
+    [/^Цена «(.+)»: (.+) → (.+)$/, { ET: "Hind «$1»: $2 → $3", EN: "Price “$1”: $2 → $3" }],
+    [/^Цена для салонов «(.+)»: (.+) → (.+)$/,
+      { ET: "Salongi hind «$1»: $2 → $3", EN: "Salon price “$1”: $2 → $3" }],
+    [/^Цена для салонов «(.+)»: (.+)$/, { ET: "Salongi hind «$1»: $2", EN: "Salon price “$1”: $2" }],
+    [/^Наличие «(.+)»: (.+) → (.+)$/, { ET: "Saadavus «$1»: $2 → $3", EN: "Availability “$1”: $2 → $3" }],
+    [/^Наличие «(.+)»: (.+)$/, { ET: "Saadavus «$1»: $2", EN: "Availability “$1”: $2" }],
+    [/^Объёмы «(.+)»: (.+)$/, { ET: "Mahud «$1»: $2", EN: "Sizes “$1”: $2" }],
+    [/^Склад «(.+)»: остаток → (.+)$/, { ET: "Ladu «$1»: jääk → $2", EN: "Stock “$1”: on hand → $2" }],
+    [/^Склад «(.+)»: ([^()]+) \((.+)\)$/, { ET: "Ladu «$1»: $2 ($3)", EN: "Stock “$1”: $2 ($3)" }],
+    [/^Этикетка (.+): (.+)$/, { ET: "Silt $1: $2", EN: "Label $1: $2" }],
+    [/^Письмо «(.+)»: (.+)$/, { ET: "Kiri «$1»: $2", EN: "Letter “$1”: $2" }],
+    [/^Скидка в поздравлении: (.+) %$/,
+      { ET: "Soodustus õnnitluses: $1 %", EN: "Discount in the birthday letter: $1 %" }],
+    [/^Поздравление: за (\d+) (?:день|дня|дней) до дня рождения$/,
+      { ET: "Õnnitlus: $1 päeva enne sünnipäeva", EN: "Birthday letter: $1 days before the birthday" }],
+    [/^Поздравление: (.+)$/, { ET: "Õnnitlus: $1", EN: "Birthday letter: $1" }],
+    [/^Доставлен сам: (.+) · через (\d+) (?:день|дня|дней)$/,
+      { ET: "Ise kohale toimetatud: $1 · $2 päeva pärast", EN: "Delivered by itself: $1 · after $2 days" }],
+    [/^Доставлен сам: (.+) · (.+)$/,
+      { ET: "Ise kohale toimetatud: $1 · $2", EN: "Delivered by itself: $1 · $2" }],
+    [/^ИИ-чат для покупателей: (.+)$/, { ET: "AI-vestlus ostjatele: $1", EN: "The AI chat for shoppers: $1" }],
+    [/^Наборы на сайте: (.+)$/, { ET: "Komplektid saidil: $1", EN: "Sets on the site: $1" }],
+    [/^Набор «(.+)»: (.+)$/, { ET: "Komplekt «$1»: $2", EN: "Set “$1”: $2" }],
+    [/^Баннер: (\d+) (?:слайд|слайда|слайдов), первый — «(.*)»$/,
+      { ET: "Bänner: $1 slaidi, esimene — «$2»", EN: "Banner: $1 slides, the first is “$2”" }],
+    [/^Тексты писем: (\d+) (?:свой текст|своих текста|своих текстов)$/,
+      { ET: "Kirjade tekstid: $1 oma teksti", EN: "Letter texts: $1 of your own" }],
+    [/^Подкатегория «(.+)»: (.+)$/, { ET: "Alamkategooria «$1»: $2", EN: "Subcategory “$1”: $2" }],
+    [/^Фото по объёмам «(.+)»: (.+)$/, { ET: "Fotod mahtude kaupa «$1»: $2", EN: "Photos by size “$1”: $2" }],
+    [/^Видео «(.+)»: (.+)$/, { ET: "Video «$1»: $2", EN: "Video “$1”: $2" }],
+    [/^Фото «(.+)»: (\d+) (?:фотография|фотографии|фотографий)$/,
+      { ET: "Fotod «$1»: $2 fotot", EN: "Photos “$1”: $2" }],
+    [/^Фото «(.+)»: (.+)$/, { ET: "Fotod «$1»: $2", EN: "Photos “$1”: $2" }],
+    [/^Главное фото «(.+)»$/, { ET: "Peafoto «$1»", EN: "The main photo of “$1”" }],
+    [/^Ещё одно фото «(.+)»$/, { ET: "Veel üks foto «$1»", EN: "One more photo of “$1”" }],
+    [/^Обложка статьи «(.+)»(.*)$/, { ET: "Artikli «$1» kaanepilt$2", EN: "The cover of the article “$1”$2" }],
+    [/^Описание «(.+)» обновлено$/, { ET: "Kirjeldus «$1» uuendatud", EN: "The description of “$1” was updated" }],
+    [/^Отчёт для бухгалтера за (.+)$/, { ET: "Raamatupidaja aruanne — $1", EN: "The bookkeeper's report for $1" }],
+    [/^Отзыв (.+): (.+)$/, { ET: "Arvustus $1: $2", EN: "Review $1: $2" }],
+    [/^Партнёр: (.+)$/, { ET: "Partner: $1", EN: "Partner: $1" }],
+    [/^Розница: (.+)$/, { ET: "Jaemüük: $1", EN: "Retail: $1" }],
+    [/^Новый партнёр: (.+)$/, { ET: "Uus partner: $1", EN: "A new partner: $1" }],
+    [/^Номиналы подарочной карты: (.+) €$/,
+      { ET: "Kinkekaardi nimiväärtused: $1 €", EN: "Gift-card amounts: €$1" }],
+    [/^Контент: (.+)$/, { ET: "Sisu: $1", EN: "Content: $1" }],
+    [/^Статья «(.+)»: (.+)$/, { ET: "Artikkel «$1»: $2", EN: "Article “$1”: $2" }],
+    [/^Цены и лояльность: (.+)$/, { ET: "Hinnad ja lojaalsus: $1", EN: "Prices and loyalty: $1" }],
+    [/^Баллы клиента: (.+)$/, { ET: "Kliendi punktid: $1", EN: "The customer's points: $1" }],
+    [/^Продажа (.+) · (.+)$/, { ET: "Müük $1 · $2", EN: "Sale $1 · $2" }],
+    [/^Отмена: (.+)$/, { ET: "Tühistatud: $1", EN: "Undone: $1" }],
+    /* «Товары» — the owner's own products. The first is the head of a save,
+       which is one line per changed field underneath it (actionText's
+       update_product, rendered by jrowTextHTML); then those fields. */
+    [/^Товар «(.+)»$/, { ET: "Toode «$1»", EN: "Product “$1”" }],
+    [/^Новый товар «(.+)»$/, { ET: "Uus toode «$1»", EN: "A new product “$1”" }],
+    [/^Товар «(.+)»: (.+)$/, { ET: "Toode «$1»: $2", EN: "Product “$1”: $2" }],
+    [/^бренд: «(.*)» → «(.*)»$/, { ET: "kaubamärk: «$1» → «$2»", EN: "brand: “$1” → “$2”" }],
+    [/^название: «(.*)» → «(.*)»$/, { ET: "nimi: «$1» → «$2»", EN: "name: “$1” → “$2”" }],
+    [/^раздел: (.+) → (.+)$/, { ET: "jaotis: $1 → $2", EN: "section: $1 → $2" }],
+    [/^подраздел: (.+)$/, { ET: "alamjaotis: $1", EN: "subsection: $1" }],
+    [/^размеры и цены: (.+)$/, { ET: "suurused ja hinnad: $1", EN: "sizes and prices: $1" }],
+    [/^одна цена вместо размеров: (.+)$/,
+      { ET: "üks hind suuruste asemel: $1", EN: "one price instead of sizes: $1" }],
+    [/^цена: (.+) → (.+)$/, { ET: "hind: $1 → $2", EN: "price: $1 → $2" }],
+    [/^описание: (.+)$/, { ET: "kirjeldus: $1", EN: "description: $1" }],
+    [/^фото: (\d+) (?:фотография|фотографии|фотографий)$/, { ET: "fotod: $1", EN: "photos: $1" }],
+    /* «Доставка» and «Тарифы доставки» — one line listing what moved, so the
+       tail is data (a country code and a price) more often than words. */
+    [/^Доставка: (.+)$/, { ET: "Tarne: $1", EN: "Delivery: $1" }],
+    [/^Тарифы доставки: (.+)$/, { ET: "Tarnehinnad: $1", EN: "Delivery prices: $1" }],
+    [/^бесплатно от (.+)$/, { ET: "tasuta alates $1", EN: "free from $1" }],
+    [/^бесплатно (.+) (.+)$/, { ET: "tasuta $1 $2", EN: "free $1 $2" }],
+    [/^не доставляем: (.+)$/, { ET: "ei tarni: $1", EN: "we do not deliver: $1" }],
+    [/^наценка (.+)% \+ (.+)$/, { ET: "juurdehindlus $1% + $2", EN: "markup $1% + $2" }],
+    [/^(.+) и ещё (\d+)$/, { ET: "$1 ja veel $2", EN: "$1 and $2 more" }],
+    /* «Промокод», «Набор» and the two long confirm cards the assistant draws —
+       all of them built by the same actionText. */
+    [/^Промокод (.+): скидка (.+)%$/, { ET: "Sooduskood $1: soodustus $2%", EN: "Promo code $1: $2% off" }],
+    [/^Промокод (.+): скидка (.+)$/, { ET: "Sooduskood $1: soodustus $2", EN: "Promo code $1: $2 off" }],
+    [/^Промокод (.+): бесплатная доставка(.*)$/,
+      { ET: "Sooduskood $1: tasuta tarne$2", EN: "Promo code $1: free delivery$2" }],
+    [/^Промокод удалён: (.+)$/, { ET: "Sooduskood kustutatud: $1", EN: "Promo code deleted: $1" }],
+    [/^Удалить набор «(.+)»(.*)\nСтраница набора перестанет открываться, вернуть его будет нельзя\. Уже оформленные заказы не изменятся\.$/,
+      { ET: "Kustutada komplekt «$1»$2\nKomplekti leht enam ei avane, tagasi seda saada ei õnnestu. Juba vormistatud tellimused ei muutu.",
+        EN: "Delete the set “$1”$2\nThe set's page stops opening and it cannot be brought back. Orders already placed do not change." }],
+    [/^(Главное фото|Ещё одно фото) «(.+)»\nФото появится на странице товара(.*)\. Отменить можно в журнале\.$/,
+      { ET: "$1 «$2»\nFoto ilmub toote lehele$3. Tühistada saab logist.",
+        EN: "$1 “$2”\nThe photo appears on the product page$3. It can be undone from the log." }],
+    [/^Обложка статьи «(.+)»(.*)\nОтменить можно в журнале\.$/,
+      { ET: "Artikli «$1» kaanepilt$2\nTühistada saab logist.",
+        EN: "The cover of the article “$1”$2\nIt can be undone from the log." }],
+    [/^Статья целиком на тему «(.+)»(.*)\nЗаголовок, анонс, текст, теги, товары и текст для Google — по-русски, потом на эстонском и английском\. Откроется в редакторе блога черновиком: прочитаете и опубликуете\.$/,
+      { ET: "Terve artikkel teemal «$1»$2\nPealkiri, sissejuhatus, tekst, sildid, tooted ja Google'i tekst — vene keeles, siis eesti ja inglise keeles. Avaneb blogi redaktoris mustandina: loete läbi ja avaldate.",
+        EN: "A whole article on “$1”$2\nTitle, intro, body, tags, products and the Google text — in Russian first, then Estonian and English. It opens in the blog editor as a draft: you read it and publish it." }],
+    [/^Черновик статьи «(.+)»(.*)$/, { ET: "Artikli «$1» mustand$2", EN: "A draft of the article “$1”$2" }],
+    [/^Новый товар «(.+)» · (.+)\nФото добавите на вкладке «Фото и видео» — она откроется сама\.$/,
+      { ET: "Uus toode «$1» · $2\nFotod lisate vahekaardil «Fotod ja video» — see avaneb ise.",
+        EN: "A new product “$1” · $2\nYou add the photos on the “Photos and video” tab — it opens by itself." }],
+    /* The catch-alls of the block above, LAST of all: a line whose tail is a
+       price, a country code or a date rather than a word still gets its
+       template translated, and the value is handed back untouched. */
+    [/^Склад «(.+)»: (.+)$/, { ET: "Ladu «$1»: $2", EN: "Stock “$1”: $2" }],
+    [/^Заказ (.+): (.+)$/, { ET: "Tellimus $1: $2", EN: "Order $1: $2" }],
+    [/^Доставлен сам: (.+)$/, { ET: "Ise kohale toimetatud: $1", EN: "Delivered by itself: $1" }],
+    [/^Баннер: (.+)$/, { ET: "Bänner: $1", EN: "Banner: $1" }],
+    [/^Тексты писем: (.+)$/, { ET: "Kirjade tekstid: $1", EN: "Letter texts: $1" }],
+    [/^Промокод (.+): (.+)$/, { ET: "Sooduskood $1: $2", EN: "Promo code $1: $2" }],
+    [/^Удалить набор «(.+)»(.*)$/, { ET: "Kustutada komplekt «$1»$2", EN: "Delete the set “$1”$2" }],
+    [/^Статья целиком на тему «(.+)»(.*)$/,
+      { ET: "Terve artikkel teemal «$1»$2", EN: "A whole article on “$1”$2" }],
+    [/^Новый товар «(.+)» · (.+)$/, { ET: "Uus toode «$1» · $2", EN: "A new product “$1” · $2" }],
+    [/^бренд: (.+)$/, { ET: "kaubamärk: $1", EN: "brand: $1" }],
+    [/^название: (.+)$/, { ET: "nimi: $1", EN: "name: $1" }],
+    [/^раздел: (.+)$/, { ET: "jaotis: $1", EN: "section: $1" }],
+    [/^цена: (.+)$/, { ET: "hind: $1", EN: "price: $1" }],
+    [/^фото: (.+)$/, { ET: "fotod: $1", EN: "photos: $1" }],
+    [/^верхняя полоска: (.+)$/, { ET: "ülemine riba: $1", EN: "the top strip: $1" }],
+    /* …and the confirm card's own copy of a product save, which is ONE text
+       node with its lines still in it (the journal splits them, the card does
+       not — .adm-propose__d is `white-space: pre-line`). */
+    [/^Товар «(.+)»\n([\s\S]+)$/, { ET: "Toode «$1»\n$2", EN: "Product “$1”\n$2" }]
   ];
   /* Product names keep their Latin line names; only the Russian type tail
      and the common Russian descriptors are localised. */
@@ -18980,7 +19241,7 @@
     "shipment.create": "Этикетка создана", "shipment.step": "Шаг «этикетка» изменён",
     /* Written once per status word, not once per webhook — the news is that a
        word nobody had seen before arrived from the carrier, and the word
-       itself is what the line ends with (payload `code`, see auditText). */
+       itself is what the line ends with (payload `code`, see auditTextHTML). */
     "shipment.status": "Новый статус посылки",
     "invoice.issued": "Счёт выписан", "invoice.sent": "Счёт отправлен",
     "mail.send": "Письмо клиенту отправлено",
@@ -18999,20 +19260,49 @@
     "admin.login": "Вход в админку", "admin.login.failed": "Неудачный вход",
     "admin.logout": "Выход из админки", "db.migrate": "Обновление базы"
   };
-  function auditText(row) {
+  /** One row of the shop's own log, as HTML.
+
+      Every word in the table above IS a dictionary key — and until r16 this
+      returned plain text, gluing the word to whatever the row carried («Свой
+      товар изменён: c-davines-cheap-price»). translateTree() rewrites a text
+      node only when it recognises the WHOLE of it, so the glue alone was
+      enough to leave an English panel reading Russian (Renat, 13.09.2026).
+      The word gets a node of its own now; the id beside it is a name and is
+      left exactly as the server wrote it. */
+  function auditTextHTML(row) {
     var p = row && row.payload && typeof row.payload === "object" ? row.payload : {};
-    // an action may carry its own one-line summary («Рассылка «…»: отправлено N, ошибок M»)
-    if (typeof p.line === "string" && p.line) return p.line;
+    if (typeof p.line === "string" && p.line) return esc(p.line);
     var word = AUDIT_WORDS[row.action] || row.action;
     var what = p.number || p.code || p.key || p.email || p.id || p.orderId || "";
-    return word + (what ? ": " + what : "");
+    return "<span>" + esc(word) + "</span>" + (what ? ": " + esc(what) : "");
+  }
+  /** One entry of this browser's own list, as HTML.
+
+      A journal line is a sentence the panel composed out of a template and a
+      value — «Цена «Davines — Cheap price»: 14,90 € → 9,90 €» — and it is
+      stored that way, in Russian, because that is the language it was written
+      in and the entries in localStorage outlive any language switch. It is
+      translated on the way to the screen, by the same dictionary and the same
+      UI_RX rules as the rest of the panel (Renat, 13.09.2026: «my admin is in
+      english» and the journal was not).
+
+      Which is why the line arrives here in PIECES: an action that moved three
+      fields at once is one line per field (actionText's update_product), and
+      translateTree() rewrites a text node only when it recognises the whole of
+      it. One node per line is what lets «цена: 14,90 € → 9,90 €» be a rule of
+      its own instead of a tail glued behind the product's name, where no rule
+      could ever reach it. */
+  function jrowTextHTML(txt) {
+    return String(txt == null ? "" : txt).split("\n").map(function (line) {
+      return '<span class="adm-jrow__l">' + esc(line) + "</span>";
+    }).join("");
   }
   function admSetJournalHTML() {
     loadAudit(false);
     var mine = DEMO.log.length
       ? DEMO.log.map(function (e, i) {
           return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(e.t) + "</span>" +
-            '<span class="adm-jrow__x">' + esc(e.txt) + "</span>" +
+            '<span class="adm-jrow__x">' + jrowTextHTML(e.txt) + "</span>" +
             (e.prev ? '<button class="adm-btn adm-btn--ghost adm-btn--row" data-admundo="' + i + '">Вернуть</button>' : "") +
             "</div>";
         }).join("")
@@ -19027,7 +19317,7 @@
     else {
       srv = AUDIT.rows.map(function (r) {
         return '<div class="adm-jrow"><span class="adm-jrow__t">' + esc(auditWhen(r.at)) + "</span>" +
-          '<span class="adm-jrow__x">' + esc(auditText(r)) + "</span>" +
+          '<span class="adm-jrow__x">' + auditTextHTML(r) + "</span>" +
           '<span class="adm-jrow__who">' + auditWhoHTML(r.actor) + "</span></div>";
       }).join("");
     }
@@ -19356,11 +19646,20 @@
      of them edits the draft; nothing reaches the shop before «Сохранить». */
   function heroRowHTML(s, i, n) {
     var on = s.on !== false;
+    /* Renat, 13.09.2026: «Clicking on edit, opens the edit pane somewhere
+       below, so on mobile you might not even notice or understand if the pane
+       is open or not». The form is drawn under the whole list, which on a
+       375-px screen is off the bottom of the phone — so the row itself has to
+       say that it is the one being edited, and its button has to be the way
+       back out. `open` marks the row, aria-expanded says the same thing to a
+       screen reader, and the button reads «Свернуть» while the form is down. */
+    var open = S.heroEdit === i;
     // data-herorow: paintHeroPick() repaints this one row when its picture changes
-    return '<div class="adm-row adm-row--tall" data-herorow="' + i + '">' +
+    return '<div class="adm-row adm-row--tall' + (open ? " adm-row--open" : "") + '" data-herorow="' + i + '">' +
       '<span class="adm-thumb">' + heroArt(s.image, "ph") + "</span>" +
       '<span class="adm-row__body"><span class="adm-row__nm">' + (esc(heroT(s.title)) || "Без заголовка") +
-        (on ? "" : ' <span class="adm-badge adm-badge--sm adm-badge--quiet">скрыт</span>') + "</span>" +
+        (on ? "" : ' <span class="adm-badge adm-badge--sm adm-badge--quiet">скрыт</span>') +
+        (open ? ' <span class="adm-badge adm-badge--sm">открыт</span>' : "") + "</span>" +
         '<span class="adm-row__sub">' + esc(heroGoLabel(s.go)) + "</span></span>" +
       '<span class="adm-ops">' +
         '<button class="adm-iconbtn" data-heromove="' + i + ':-1"' + (i === 0 ? " disabled" : "") +
@@ -19368,7 +19667,11 @@
         '<button class="adm-iconbtn" data-heromove="' + i + ':1"' + (i === n - 1 ? " disabled" : "") +
           ' aria-label="Ниже" title="Ниже">↓</button>' +
         admSwitch('data-heroon="' + i + '"', on, esc(heroT(s.title)) || "Без заголовка") +
-        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-heroedit="' + i + '">Изменить</button>' +
+        /* One button, not two: data-heroedit is the address of a slide's form
+           all over this suite, and it toggles — a second tap folds the pane
+           away again, which is what «Свернуть» means. */
+        '<button class="adm-btn adm-btn--ghost adm-btn--row" data-heroedit="' + i +
+          '" aria-expanded="' + open + '" aria-controls="heroform">' + (open ? "Свернуть" : "Изменить") + "</button>" +
         '<button class="adm-link adm-link--warn" data-herodel="' + i + '">Удалить</button>' +
       "</span></div>";
   }
@@ -19397,8 +19700,14 @@
     var opt = function (v, label) {
       return '<option value="' + esc(v) + '"' + (sel === v ? " selected" : "") + ">" + esc(label) + "</option>";
     };
-    return '<div class="adm-card adm-card--pad adm-form adm-form--inline">' +
+    /* `id` and `tabindex` so the render that opens it can bring it into view
+       and put the cursor in it (heroOpenEdit); the ✕ is the way out from the
+       TOP of the pane — «Готово» is at its bottom, which on a phone is another
+       screenful away, and a pane you cannot see the end of is a pane you
+       cannot tell is open (Renat, 13.09.2026). */
+    return '<div class="adm-card adm-card--pad adm-form adm-form--inline" id="heroform" tabindex="-1">' +
       '<div class="adm-edbar"><span class="adm-sec__t">' + "Баннер " + (i + 1) + "</span>" +
+        '<button class="adm-iconbtn adm-iconbtn--x" data-heroclose aria-label="Закрыть слайд" title="Закрыть слайд">✕</button>' +
         admLangBarHTML("data-herolang", LANGS, L, "Язык баннера", function (code) {
           return admLangHas(["eyebrow", "title", "sub", "cta"].map(function (f) {
             return (s[f] && s[f][code]) || "";
@@ -19476,6 +19785,56 @@
         '<button class="adm-btn adm-btn--ghost" data-heroadd' + (n >= 5 ? " disabled" : "") + ">Добавить слайд</button>" +
         '<span class="adm-hint" data-heromax' + (n >= 5 ? "" : " hidden") + ">Максимум 5 слайдов — удалите один, чтобы добавить новый</span>" +
         '<button class="adm-link adm-link--muted" data-heroreset>Сбросить к стандартному</button></div>';
+  }
+  /** Bring an element up to just under the shop's sticky header — the header
+      is `position: sticky` at `--cohdrh`, so a plain scrollIntoView({block:
+      "start"}) parks the element's first line behind it. */
+  function admScrollUnderHeader(el, onlyIfHidden) {
+    if (!el || !el.getBoundingClientRect) return;
+    var hdr = 0;
+    try { hdr = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--cohdrh"), 10) || 0; }
+    catch (e) { hdr = 0; }
+    var r = el.getBoundingClientRect();
+    // «it is already on screen» — never move a page that does not need moving
+    if (onlyIfHidden && r.top >= hdr && r.bottom <= (window.innerHeight || 0)) return;
+    window.scrollTo({ top: Math.max(0, r.top + window.scrollY - hdr - 12) });
+  }
+  /* A slide's form has just been opened by «Изменить» or «Добавить слайд».
+
+     Renat, 13.09.2026: «Clicking on edit, opens the edit pane somewhere below,
+     so on mobile you might not even notice or understand if the pane is open
+     or not to modify». The pane is drawn under the whole list of slides, which
+     on a 375-px phone is below the fold — the tap looked like it did nothing.
+
+     So the pane comes to the owner when it OPENS, and only then: a previous
+     round deliberately stopped the page moving when a picture is picked
+     (paintHeroPick — defect 10, 10.09.2026), because jumping on every tap
+     inside the pane was itself the complaint. One scroll, on the one render
+     that puts the form on screen; everything that happens inside it after
+     that still leaves the page exactly where the finger left it. */
+  function heroOpenEdit() {
+    requestAnimationFrame(function () {
+      var form = document.getElementById("heroform");
+      if (!form) return;
+      admScrollUnderHeader(form);
+      // the pane, not a field: focusing an input raises the phone's keyboard
+      // over the very thing the owner was told to look at (scanToEditor)
+      if (form.focus) form.focus({ preventScroll: true });
+    });
+  }
+  /** …and folding it away again, from the ✕ at its top, from «Готово» at its
+      bottom, or from a second tap on the row's own button. The finger goes
+      back to the row it came from — a phone that had scrolled down to the pane
+      would otherwise be left looking at «Смена слайдов» with no idea which
+      slide it had just been editing. */
+  function heroCloseEdit() {
+    var was = S.heroEdit;
+    S.heroEdit = -1;
+    render();
+    var row = document.querySelector('[data-heroedit="' + was + '"]');
+    if (!row) return;
+    admScrollUnderHeader(row, true);
+    if (row.focus) row.focus({ preventScroll: true });
   }
   /** The confirm card's detail line for a banner save — the shop-wide thing
       the owner is about to do, in one sentence he can read in his language. */
@@ -23427,11 +23786,15 @@
   function journalStamp() {
     return new Date().toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   }
-  /** The journal's line for a product made or changed here — Russian by
-      decision, like every other line in Renat's private change log. */
-  function productJournalLine(product, changed) {
-    var nm = "«" + product.brand + " — " + product.name + "»";
-    return changed ? "Товар " + nm + " изменён" : "Новый товар " + nm;
+  /** The journal's line for a product the owner has just made.
+      A CHANGE no longer comes through here (Renat, 13.09.2026: «Товар
+      «Davines — Cheap price» изменён … I can not restore the price»): that
+      line said nothing about what moved, nothing about what it moved from,
+      and carried no «Вернуть» at all, because journalNote() files an entry
+      with no `prev`. A save on an existing row is journalled as the
+      update_product action it really is — see customUpdate(). */
+  function productJournalLine(product) {
+    return "Новый товар «" + product.brand + " — " + product.name + "»";
   }
   /** POST — a new row. `from` says who asked: the form or the assistant;
       either way the editor opens on the product, on «Фото и видео», and a
@@ -23445,7 +23808,7 @@
       var product = r.body.product;
       customAdopt(product);
       S.goodsFresh = S.goodsFresh || {}; S.goodsFresh[product.id] = true;
-      var entry = { t: journalStamp(), txt: productJournalLine(product, false),
+      var entry = { t: journalStamp(), txt: productJournalLine(product),
         a: { type: "create_product", id: product.id }, prev: { type: "set_product_active", id: product.id, value: false, name: product.brand + " — " + product.name } };
       DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
       S.adminTab = "goods"; S.adminEdit = product.id; S.goodsNew = null; S.goodsSizes = null; S.goodsErr = "";
@@ -23461,10 +23824,34 @@
       if (files && files.length) galUpload(files, admEditProduct(product.id));
     }).catch(function () { S.goodsBusy = false; upCreateReset(); toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
+  /** The row patch the goods form built, as the `update_product` action the
+      journal speaks — the very shape the assistant's own proposal arrives in,
+      so one line builder (actionText) and one undo (srvPush) serve both.
+      `sizes: []` from the form means «one price, no volumes»: carried as a
+      plain `price`, because that is what both actionText and the route read. */
+  function updateActionOf(id, patch) {
+    var a = { type: "update_product", id: id };
+    ["brand", "name", "cat", "subcat", "description", "gallery", "seo"].forEach(function (k) {
+      if (k in patch) a[k] = patch[k];
+    });
+    if (patch.sizes && patch.sizes.length) { a.sizes = patch.sizes.slice(); a.prices = (patch.prices || []).slice(); }
+    else if (patch.prices && patch.prices.length) a.price = patch.prices[0];
+    return a;
+  }
   /** PUT — the row's own fields; the override-owned ones (stock, salon price,
       video, counts, barcodes) went through demoApply() before this. */
   function customUpdate(p, patch) {
     if (S.goodsBusy) return;
+    /* The journal entry is built BEFORE the write, against the row as the
+       panel still has it: this is the only moment the old price is knowable,
+       so it is the only moment «цена: 14,90 € → 9,90 €» — and the «Вернуть»
+       that puts it back — can be made at all (Renat, 13.09.2026). A save that
+       moved nothing leaves no line: an entry that says «изменён» and names
+       nothing is noise the owner cannot act on. */
+    var before = findCustom(p.id);
+    var act = updateActionOf(p.id, patch);
+    var txt = before ? actionText(act) : "";
+    var prev = before ? productUndoOf(before) : null;
     S.goodsBusy = true;
     apiSend("/api/admin/products/" + encodeURIComponent(p.id) + "/", "PUT", patch).then(function (r) {
       S.goodsBusy = false;
@@ -23477,9 +23864,13 @@
         apiSend("/api/admin/overrides/", "PUT", { id: p.id, price: null }).catch(noop);
       }
       customAdopt(product);
-      journalNote(productJournalLine(product, true));
+      var entry = null;
+      if (txt) {
+        entry = { t: journalStamp(), txt: txt, a: act, prev: prev };
+        DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+      }
       AI_UNDO = null; S.adminEdit = ""; S.goodsSizes = null; GAL.id = ""; UP.err = ""; vidReset();
-      toast("Сохранено ✓");
+      toast(entry ? "Сохранено ✓" : "Изменений нет", entry);
       render();
       goodsBackToRow(product.id);
     }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
@@ -23494,17 +23885,28 @@
       entry's `prev` — the same shape either way. */
   function updatePatchOf(a) {
     var patch = {};
-    ["brand", "name", "cat", "subcat", "description"].forEach(function (k) { if (k in a) patch[k] = a[k]; });
+    // `gallery` and `seo` ride along so the undo of a save made in the goods
+    // form puts the photos and the Google texts back too, not only the boxes
+    // on «Основное» — the form sends all of them in one PUT
+    ["brand", "name", "cat", "subcat", "description", "gallery", "seo"].forEach(function (k) { if (k in a) patch[k] = a[k]; });
     if (a.sizes) {
       patch.sizes = a.sizes;
       if (a.prices) patch.prices = a.prices; else if (a.price != null) patch.price = a.price;
     } else if (a.price != null) patch.price = a.price;
     return patch;
   }
+  /** Photo lists in one shape — the row keeps `gallery` as plain URLs, the
+      picker hands back objects, and the two have to be comparable. */
+  function galUrlsOf(list) {
+    return (Array.isArray(list) ? list : []).map(function (g) {
+      return typeof g === "string" ? g : (g && g.url) || "";
+    }).filter(Boolean);
+  }
   /** The row's own fields as they are now — what the journal's «Вернуть» puts back. */
   function productUndoOf(p) {
     return { type: "update_product", id: p.id, brand: p.brand, name: p.name, cat: p.cat, subcat: p.subcat || "",
-      sizes: (p.sizes || []).slice(), prices: (p.prices || [p.price]).slice(), description: p.description || null };
+      sizes: (p.sizes || []).slice(), prices: (p.prices || [p.price]).slice(), description: p.description || null,
+      gallery: galUrlsOf(p.gallery && p.gallery.length ? p.gallery : p.photos), seo: p.seo || null };
   }
   /** The assistant's update_product, once the owner pressed «Применить»:
       PUT the patch, adopt the answer, and leave a journal line whose undo
@@ -23514,6 +23916,7 @@
     if (!cur) { toast("Товар не найден — обновите список товаров"); return; }
     if (S.goodsBusy) return;
     S.goodsBusy = true;
+    // "" when the proposal moves nothing — no journal line, same as a form save
     var txt = actionText(a), prev = productUndoOf(cur);
     apiSend("/api/admin/products/" + encodeURIComponent(a.id) + "/", "PUT", updatePatchOf(a)).then(function (r) {
       S.goodsBusy = false;
@@ -23530,9 +23933,12 @@
         apiSend("/api/admin/overrides/", "PUT", { id: a.id, price: null }).catch(noop);
       }
       customAdopt(product);
-      var entry = { t: journalStamp(), txt: txt, a: a, prev: prev };
-      DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
-      toast("Товар изменён ✓", entry);
+      var entry = null;
+      if (txt) {
+        entry = { t: journalStamp(), txt: txt, a: a, prev: prev };
+        DEMO.log.unshift(entry); DEMO.log = DEMO.log.slice(0, 40); demoSave();
+      }
+      toast(entry ? "Товар изменён ✓" : "Изменений нет", entry);
       render();
     }).catch(function () { S.goodsBusy = false; toast("Сервер не отвечает — попробуйте ещё раз"); });
   }
@@ -27013,10 +27419,25 @@
   var REVIEW_STATE_WORD = { approved: "опубликован", rejected: "скрыт", pending: "вернулся в новые" };
   function actionText(a) {
     var p = a.id && byId(a.id);
+    /* «… → …»: every line that says a value moved names the value it moved
+       FROM, wherever the panel still knows it. actionText() runs at the top of
+       demoApply(), before the demo layer is written, so the old value is still
+       there to be read — that is what makes the arrow possible at all, and
+       what makes a journal line something the owner can act on rather than a
+       note that something happened (Renat, 13.09.2026). */
     if (a.type === "set_price") return "Цена «" + (p ? p.brand + " " + p.name : a.id) + "»: " + eur(p ? p.price : 0) + " → " + eur(a.value);
     // wholesale/loyalty: a.value null means "cleared back to the global discount"
-    if (a.type === "set_pro_price") return "Цена для салонов «" + (p ? p.brand + " " + p.name : a.id) + "»: " + (a.value == null ? "по умолчанию (скидка)" : eur(a.value));
-    if (a.type === "set_stock") return "Наличие «" + (p ? p.name : a.id) + "»: " + ({ in: "в наличии", low: "мало", out: "нет" })[a.value];
+    if (a.type === "set_pro_price") {
+      var ppWas = DEMO.proPrice[a.id] != null ? eur(DEMO.proPrice[a.id]) : "по умолчанию (скидка)";
+      var ppNow = a.value == null ? "по умолчанию (скидка)" : eur(a.value);
+      return "Цена для салонов «" + (p ? p.brand + " " + p.name : a.id) + "»: " + (ppWas === ppNow ? ppNow : ppWas + " → " + ppNow);
+    }
+    if (a.type === "set_stock") {
+      var stWord = { in: "в наличии", low: "мало", out: "нет" };
+      var stWas = stWord[DEMO.stock[a.id] || (p && p.stock)] || "";
+      return "Наличие «" + (p ? p.name : a.id) + "»: " +
+        (stWas && stWas !== stWord[a.value] ? stWas + " → " : "") + stWord[a.value];
+    }
     /* migration 147 — «+ Размер», «×» and «Показывать в магазине». byId()
        cannot help for a hidden product: it is not in CATALOGUE any more,
        which is the whole point, so the action carries the name it was made
@@ -27191,9 +27612,13 @@
     if (a.type === "set_product_active") {
       return "Товар «" + (a.name || (p && p.custom ? p.brand + " — " + p.name : a.id)) + "»: " + (a.value ? "снова в продаже" : "снят с продажи");
     }
-    /* the assistant's update_product: the confirm card says what changes,
-       field by field, against the row as the panel has it now — and the
-       journal keeps that same line */
+    /* update_product — the assistant's proposal AND every save made in the
+       goods form (customUpdate). The card says what changes, field by field,
+       against the row as the panel has it now; the journal keeps that same
+       line, and each change is its own LINE rather than a «; »-joined tail:
+       the journal renders one text node per line, which is what lets the
+       dictionary translate «цена: 14,90 € → 9,90 €» on an English panel
+       (admSetJournalHTML). Nothing moved ⇒ "" ⇒ no journal line at all. */
     if (a.type === "update_product") {
       var up = findCustom(a.id) || (p && p.custom ? p : null);
       var upName = up ? up.brand + " — " + up.name : a.id;
@@ -27202,20 +27627,41 @@
       if (a.name != null && (!up || a.name !== up.name)) ch.push("название: «" + (up ? up.name : "—") + "» → «" + a.name + "»");
       if (a.cat != null && (!up || a.cat !== up.cat)) ch.push("раздел: " + (up && CAT_NAMES[up.cat] ? CAT_NAMES[up.cat] : "—") + " → " + (CAT_NAMES[a.cat] || a.cat));
       if (a.subcat != null && (!up || (a.subcat || "") !== (up.subcat || ""))) ch.push("подраздел: " + (a.subcat || "авто"));
-      if (a.sizes) {
-        ch.push(a.sizes.length
-          ? "размеры и цены: " + a.sizes.map(function (s, i) { return s + " — " + (a.prices && a.prices[i] != null ? eur(a.prices[i]) : "как было"); }).join(" · ")
-          : "одна цена вместо размеров: " + eur(a.price != null ? a.price : (a.prices && a.prices[0]) || 0));
-      } else if (a.price != null) {
+      if (a.sizes && a.sizes.length) {
+        if (!up || JSON.stringify([a.sizes, a.prices || []]) !== JSON.stringify([(up.sizes || []), (up.prices || [])])) {
+          ch.push("размеры и цены: " + a.sizes.map(function (s, i) { return s + " — " + (a.prices && a.prices[i] != null ? eur(a.prices[i]) : "как было"); }).join(" · "));
+        }
+      } else if (a.sizes) {
+        ch.push("одна цена вместо размеров: " + eur(a.price != null ? a.price : (a.prices && a.prices[0]) || 0));
+      } else if (a.price != null && (!up || Math.abs(Number(a.price) - Number(up.price)) > 0.001 || (up.sizes && up.sizes.length))) {
         ch.push("цена: " + (up ? eur(up.price) : "—") + " → " + eur(a.price) + (up && up.sizes && up.sizes.length ? " (одна цена вместо размеров)" : ""));
       }
-      if ("description" in a) {
+      if ("description" in a && (!up || descKey(a.description) !== descKey(up.description))) {
         var upL = a.description ? ["RU", "ET", "EN"].filter(function (L) { return a.description[L]; }) : [];
         ch.push(upL.length ? "описание: " + upL.join(", ") : "описание: убрать");
       }
-      return "Товар «" + upName + "»: " + (ch.length ? ch.join("; ") : "без изменений");
+      /* Photos and the Google texts travel in the same PUT when the save came
+         from the form, so they belong in the same line — otherwise a save that
+         only replaced a photo would leave the journal silent about it. */
+      if ("gallery" in a) {
+        var gNew = galUrlsOf(a.gallery), gOld = galUrlsOf(up && (up.gallery && up.gallery.length ? up.gallery : up.photos));
+        if (gNew.join("|") !== gOld.join("|")) {
+          ch.push(gNew.length
+            ? "фото: " + gNew.length + " " + pl(gNew.length, "фотография", "фотографии", "фотографий")
+            : "фото: убраны");
+        }
+      }
+      if ("seo" in a && JSON.stringify(seoNorm(a.seo)) !== JSON.stringify(seoNorm(up && up.seo))) {
+        ch.push(seoNorm(a.seo) ? "тексты для Google: свои" : "тексты для Google: стандартные");
+      }
+      return ch.length ? "Товар «" + upName + "»\n" + ch.join("\n") : "";
     }
     return "";
+  }
+  /** Three languages of a description as one comparable string. */
+  function descKey(v) {
+    var d = v && typeof v === "object" ? v : {};
+    return ["RU", "ET", "EN"].map(function (L) { return String(d[L] || "").trim(); }).join(" ");
   }
   /* «Контент: телефон → +372 5555 1234» — the confirm card has to say what is
      about to change in the shop's own details, and a patch object is not
@@ -27634,7 +28080,7 @@
   function confirmCard(a) {
     return '<div class="adm-propose">' +
       '<div class="adm-propose__t">' + esc(a.title || "Предпросмотр изменения") + "</div>" +
-      '<div class="adm-propose__d">' + esc(a.detail || actionText(a)) + "</div>" +
+      '<div class="adm-propose__d">' + esc(a.detail || actionText(a) || "Изменений нет") + "</div>" +
       /* What is about to leave, in the owner's own words — «Написать клиенту»
          is the one action whose whole content he typed himself, and a
          «Отправить?» with the letter out of sight is a question he cannot
@@ -31196,11 +31642,13 @@
     /* ---- «Главный баннер». Every button here edits the draft only; the shop
        changes on «Сохранить», through the confirm card. ------------------- */
     if (d.heroedit !== undefined) {
+      // the row's own button toggles: a second tap is «Свернуть» (heroRowHTML)
+      if (S.heroEdit === Number(d.heroedit)) { heroCloseEdit(); return; }
       S.heroEdit = Number(d.heroedit); S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
       UP.err = ""; mediaProbe();   // media: the «Загрузить» button under the picture
-      render(); return;
+      render(); heroOpenEdit(); return;
     }
-    if (d.heroclose !== undefined) { S.heroEdit = -1; render(); return; }
+    if (d.heroclose !== undefined) { heroCloseEdit(); return; }
     if (d.herolang) { S.heroLang = d.herolang; render(); return; }
     if (d.heroadd !== undefined) {
       var hAdd = heroDraft();
@@ -31212,7 +31660,7 @@
         go: "cat:all", image: (CATALOGUE[0] || {}).id || "", on: true
       });
       S.heroEdit = hAdd.slides.length - 1; S.heroLang = "RU"; S.heroGoQ = ""; S.heroImgQ = "";
-      render(); return;
+      render(); heroOpenEdit(); return;
     }
     if (d.herodel !== undefined) {
       heroDraft().slides.splice(Number(d.herodel), 1);

@@ -373,7 +373,7 @@ test.describe("admin sections — Настройки: the rebuilt cards", () => 
       await expect(page.locator('[data-heroon="0"]')).toHaveAttribute("aria-checked", "true");
       await page.locator('[data-heroedit="0"]').click();
       await page.locator('[data-herof="title"]').fill(title);
-      await page.locator("[data-heroclose]").click();
+      await page.locator("[data-heroclose]").first().click();
       // since r12 the page's save bar says what is unsaved and names the card
       await expect(page.locator("[data-setnote]")).toContainText("Изменения не сохранены");
       await expect(page.locator("[data-setnote]")).toContainText("Главный баннер");
@@ -776,7 +776,10 @@ test.describe("admin sections — Настройки: one save bar per page", ()
     await page.locator("[data-setrevert]").click();
     await expect(note).toHaveText("Изменений нет");
     await expect(page.locator("[data-herosave]")).toBeDisabled();
-    await page.locator('[data-heroedit="0"]').click();
+    /* The slide's form is still open — «Изменить» has been a toggle since r16
+       (its own row's «Свернуть»), so clicking it here would fold the pane away
+       rather than reopen it. Open it only if the revert closed it. */
+    if (!(await page.locator("#heroform").count())) await page.locator('[data-heroedit="0"]').click();
     await expect(page.locator('[data-herof="title"]')).toHaveValue(was);
   });
 
@@ -871,7 +874,7 @@ test.describe("admin sections — the banner editor keeps its place", () => {
     let guard = 0;
     while (!(await add.isDisabled()) && guard++ < 8) {
       await add.click();
-      await page.locator("[data-heroclose]").click();
+      await page.locator("[data-heroclose]").first().click();
     }
     expect(await rows.count(), "more than five slides were accepted").toBe(5);
     await expect(add).toBeDisabled();
