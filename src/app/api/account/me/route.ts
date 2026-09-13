@@ -15,7 +15,7 @@ import {
   sessionEmail,
   updateCustomer,
 } from "@/lib/customers";
-import { accountLoyaltySummary } from "@/lib/loyalty";
+import { accountLoyaltyByEmail } from "@/lib/loyalty";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,22 +29,25 @@ export async function GET(req: Request) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401, headers: NO_STORE });
   }
   try {
-    /* Two waits, not three. The points summary needs the customer's id, so it
-       cannot start before getCustomer() answers — but it never needed to wait
-       for the ORDERS too, and awaiting the pair together is what made it.
-       The caller that feels this is the checkout: a signed-in shopper's name,
-       phone and address stay empty on screen until this route answers
-       (acctLoad in public/shop2/app.js), so every round trip left on the
-       critical path here is a second of empty fields on a phone.
-       The orders read is started first and awaited last; the `catch` on it is
-       only so a failure in getCustomer() below cannot leave it an unhandled
-       rejection on the way to the catch block — awaiting it still throws. */
-    const ordersPending = listCustomerOrders(email);
-    ordersPending.catch(() => {});
-    const customer = await getCustomer(email);
-    const [orders, loyalty] = await Promise.all([
-      ordersPending,
-      accountLoyaltySummary(customer?.id ?? null),
+    /* ONE wait. The caller that feels this is the checkout: a signed-in
+       shopper's name, phone and address stay empty on screen until this route
+       answers (acctLoad in public/shop2/app.js), so every round trip left on
+       the critical path here is a second of empty fields on a phone.
+
+       It was four waits, then two (the points summary was made to stop waiting
+       for the orders), and the last one left was the points summary itself:
+       the ledger is keyed on the customer's id, so it could not start until
+       getCustomer() had answered. accountLoyaltyByEmail() looks that id up in
+       a sub-select instead, and listCustomerOrders() does the same for the
+       gift cards its orders issued — so all six queries of this route now
+       leave at once. Measured by giving every query() a fixed delay and
+       reading the order they go out in: six queries in two phases became six
+       in one, which on the real Postgres is one network hop a shopper is no
+       longer watching an empty form for. */
+    const [customer, orders, loyalty] = await Promise.all([
+      getCustomer(email),
+      listCustomerOrders(email),
+      accountLoyaltyByEmail(email),
     ]);
     return Response.json(
       {

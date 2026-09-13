@@ -10617,14 +10617,50 @@
       .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
       .then(function (j) {
         loadAdminReviews._busy = false;
-        S.admReviews = j && j.ok ? j : { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: (j && j.error) || "unavailable" };
+        // a REFRESH that failed keeps the list on screen (loadOverview's rule)
+        if (j && j.ok) S.admReviews = j;
+        else if (!S.admReviews) S.admReviews = { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: (j && j.error) || "unavailable" };
         if (S.screen === "admin" && S.adminTab === "reviews") render();
       })
       .catch(function () {
         loadAdminReviews._busy = false;
-        S.admReviews = { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: "unavailable" };
+        if (!S.admReviews) S.admReviews = { reviews: [], counts: { pending: 0, approved: 0, rejected: 0 }, error: "unavailable" };
         if (S.screen === "admin" && S.adminTab === "reviews") render();
       });
+  }
+  /**
+   * The row the owner has just published or hidden, moved in the list that is
+   * already on screen.
+   *
+   * Renat, 13.09.2026: «publishing a review takes time». It did, and not
+   * because of the write: the tap threw the WHOLE list away (`S.admReviews =
+   * null`), which is the same value as «never asked», so the screen fell back
+   * to its grey skeleton and stayed there until GET /api/admin/reviews had
+   * answered — a round trip spent asking the server something the panel had
+   * just told it. The list is not wrong after a tap; it is one row out of
+   * date, and this is that row. The fetch still follows, underneath, and has
+   * the last word.
+   */
+  function admReviewLocal(id, status) {
+    var data = S.admReviews;
+    if (!data || !Array.isArray(data.reviews)) return;
+    var counts = data.counts || (data.counts = { pending: 0, approved: 0, rejected: 0 });
+    for (var i = 0; i < data.reviews.length; i++) {
+      var r = data.reviews[i];
+      if (String(r.id) !== String(id)) continue;
+      var was = r.status || "pending";
+      if (was !== status) {
+        if (counts[was] > 0) counts[was] -= 1;
+        counts[status] = (counts[status] || 0) + 1;
+      }
+      r.status = status;
+      /* The list is one of three queues («Новые» · «Опубликованные» ·
+         «Отклонённые»), and the row has just left the one being shown — so it
+         leaves the list too, which is exactly what the server's own answer
+         will say a moment later. */
+      if (S.admRevFilter && S.admRevFilter !== status) data.reviews.splice(i, 1);
+      return;
+    }
   }
   /* Publishing or hiding a review is a quick, reversible edit: it applies at
      once and the toast offers to take it back (README § State). That is why it
@@ -12238,7 +12274,22 @@
    * false for every browser that has never signed in, which is what "not on
    * every visit" was always protecting.
    */
-  var ACCT_BOOT = acctHinted() ? acctFetch() : null;
+  /* …and since 13.09.2026 usually not started here at all: /shop2/boot.js is
+     a 400-byte async tag in the <head> that asks the same question the moment
+     it lands, which on a phone is a whole shop's worth of JavaScript before
+     this line runs. Whichever of the two files gets here first asks, and the
+     other takes the promise it left on `window.__rempireAcct` — one property,
+     one request, no order to get right. app.js still asks for itself when
+     boot.js is not there (an older cached shell, a browser that blocked it). */
+  var ACCT_BOOT = (function () {
+    var w;
+    try { w = window; } catch (e) { w = null; }
+    if (w && w.__rempireAcct) return w.__rempireAcct;
+    if (!acctHinted()) return null;
+    var p = acctFetch();
+    try { if (w) w.__rempireAcct = p; } catch (e) {}
+    return p;
+  })();
   if (ACCT_BOOT) ACCT_BOOT.catch(noop);   // nobody is waiting on it yet
   /** Is there a customer cookie? Asked once per page; takes the boot's answer
       when there is one, and asks for itself on the visit where somebody signs
@@ -13886,21 +13937,47 @@
      /api/admin/analytics/gsc/ (src/lib/gsc.ts). One cache per range so
      switching pills back and forth does not refetch, and one 30-day fetch
      kept warm from probeAdmin() for analyticsForAI() (near heroForAI()). */
+  /* How old an answer in the panel may be before the screen showing it asks
+     again — the same thirty seconds refreshFeeds() gives the shop's own two
+     feeds, for the same reason: it is long enough that flicking between two
+     sections costs nothing, and short enough that «I just did that, why is it
+     not here» has an answer. */
+  var ADM_TTL = 30000;
   var ANALYTICS = {};
-  function loadAnalytics(range) {
+  function loadAnalytics(range, force) {
     if (SRV.admin !== true) return;
-    if (ANALYTICS[range]) return;
+    var rec = ANALYTICS[range];
+    /* Renat, 13.09.2026: «Admin needs a hard refresh to see the results, I did
+       ctrl + R, then it showed, otherwise not — probably cached», about
+       «Искали, но не нашли». He was right about the cause. This object was
+       filled once per page and then never again for as long as the tab lived,
+       so a search somebody had just made could only be seen by reloading the
+       whole panel. Now an answer older than ADM_TTL is re-asked the next time
+       the screen is drawn — and, below, the figures already on screen stay
+       there while the new ones travel, so being fresher never costs him the
+       grey skeleton he was reading a moment ago. */
+    if (rec && !force && Date.now() - rec.at < ADM_TTL) return;
     if (loadAnalytics._busy && loadAnalytics._busy[range]) return;
     loadAnalytics._busy = loadAnalytics._busy || {};
     loadAnalytics._busy[range] = true;
+    // stamped before the call, so the render() below cannot ask again
+    if (rec) rec.at = Date.now();
     apiJson("/api/admin/analytics/?range=" + encodeURIComponent(range)).then(function (r) {
       loadAnalytics._busy[range] = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      ANALYTICS[range] = r.status === 200 && r.body.ok ? { data: r.body, err: null } : { data: null, err: (r.body && r.body.error) || "error" };
+      var had = ANALYTICS[range];
+      if (r.status === 200 && r.body.ok) ANALYTICS[range] = { data: r.body, err: null, at: Date.now() };
+      /* A refresh that failed keeps the numbers that are on screen — the same
+         rule loadOverview() and loadSrvOrders() follow. Only a first answer
+         that fails has nothing to keep and says so. */
+      else if (!(had && had.data)) ANALYTICS[range] = { data: null, err: (r.body && r.body.error) || "error", at: Date.now() };
+      else had.at = Date.now();
       render();
     }).catch(function () {
       loadAnalytics._busy[range] = false;
-      ANALYTICS[range] = { data: null, err: "offline" };
+      var had = ANALYTICS[range];
+      if (!(had && had.data)) ANALYTICS[range] = { data: null, err: "offline", at: Date.now() };
+      else had.at = Date.now();
       render();
     });
   }
@@ -13937,15 +14014,22 @@
     var why = GSC_KEY_SHAPES[shape];
     return why ? "<span>" + main + "</span> <span>" + why + "</span>" : main;
   }
-  function loadGsc() {
-    if (SRV.admin !== true || GSC || loadGsc._busy) return;
+  /* No TTL of its own: behind this one is a call to Google, not to our own
+     database, and re-asking it every half minute would be rude to somebody
+     else's server for a table that changes once a day. It refreshes when the
+     owner comes back to the tab (refreshAdmin) and not otherwise. */
+  function loadGsc(force) {
+    if (SRV.admin !== true || loadGsc._busy) return;
+    if (GSC && !force) return;
     loadGsc._busy = true;
     apiJson("/api/admin/analytics/gsc/").then(function (r) {
       loadGsc._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      GSC = (r.status === 200 || r.status === 502) ? r.body : { ok: false, error: "error" };
+      // …and a refresh that failed keeps the table that is on screen
+      if (r.status === 200 || r.status === 502) GSC = r.body;
+      else if (!GSC) GSC = { ok: false, error: "error" };
       render();
-    }).catch(function () { loadGsc._busy = false; GSC = { ok: false, error: "offline" }; render(); });
+    }).catch(function () { loadGsc._busy = false; if (!GSC) GSC = { ok: false, error: "offline" }; render(); });
   }
 
   var STATS_RANGES = [["today", "Сегодня"], ["7d", "7 дней"], ["30d", "30 дней"], ["90d", "90 дней"]];
@@ -13984,17 +14068,28 @@
      a glance-at-it screen, not a live dashboard, and a poll would cost a query
      a second for a shop with three orders a month. Signing out and back in, or
      reloading, re-asks. */
-  var OVERVIEW = { data: null, err: null, asked: false };
+  var OVERVIEW = { data: null, err: null, asked: false, at: 0 };
   function loadOverview(force) {
-    if (SRV.admin !== true) return;
+    /* `=== false`, not `!== true`. At the panel's cold open this is still null
+       — nobody has answered «is this browser the owner» yet — and that is
+       exactly the moment probeAdmin() wants this request to leave: alongside
+       that question instead of behind its answer. The route is behind
+       requireAdmin itself, so a browser that is not the owner gets a 401 here
+       and nothing else. */
+    if (SRV.admin === false) return;
     if (OVERVIEW.asked && !force) return;
     OVERVIEW.asked = true;
+    OVERVIEW.at = Date.now();
     apiJson("/api/admin/overview/").then(function (r) {
-      if (r.status === 401) { SRV.admin = false; render(); return; }
+      // …and a 401 puts the question back, so signing in re-asks
+      if (r.status === 401) { SRV.admin = false; OVERVIEW.asked = false; render(); return; }
       if (r.status === 200 && r.body.ok) { OVERVIEW.data = r.body; OVERVIEW.err = null; }
-      else { OVERVIEW.data = null; OVERVIEW.err = (r.body && r.body.error) || "error"; }
+      /* A REFRESH that failed leaves what is on screen where it is: the
+         figures from a minute ago are worth more than an empty screen. Only a
+         first load that fails has nothing to keep and says so. */
+      else if (!OVERVIEW.data) OVERVIEW.err = (r.body && r.body.error) || "error";
       render();
-    }).catch(function () { OVERVIEW.data = null; OVERVIEW.err = "offline"; render(); });
+    }).catch(function () { if (!OVERVIEW.data) OVERVIEW.err = "offline"; render(); });
   }
 
   /* ======================================================================
@@ -15790,7 +15885,7 @@
   }
   function screenAdmin() {
     probeAdmAI();
-    probeAdmin();
+    probeAdmin(true);   // …and the two reads «Обзор» is about to need
     if (SRV.on && SRV.admin === null) return admWaitScreen();
     if (SRV.on && SRV.admin === false) return admLoginScreen();
     var tab = S.adminTab;
@@ -20329,13 +20424,24 @@
     apiJson("/api/admin/promos/").then(function (r) {
       loadAdminPromos._busy = false;
       if (r.status === 401) { SRV.admin = false; render(); return; }
-      S.admPromos = r.status === 200 && r.body.ok ? (r.body.promos || []) : [];
-      S.admPromoErr = r.status === 200 && r.body.ok ? "" : "Список промокодов не загрузился.";
+      // a refresh that failed keeps the codes on screen (loadOverview's rule)
+      if (r.status === 200 && r.body.ok) { S.admPromos = r.body.promos || []; S.admPromoErr = ""; }
+      else { if (!S.admPromos) S.admPromos = []; S.admPromoErr = "Список промокодов не загрузился."; }
       render();
     }).catch(function () {
       loadAdminPromos._busy = false;
-      S.admPromos = []; S.admPromoErr = "Сервер не отвечает."; render();
+      if (!S.admPromos) S.admPromos = [];
+      S.admPromoErr = "Сервер не отвечает."; render();
     });
+  }
+  /** The switch the owner has just flicked, moved in the list on screen —
+      admReviewLocal's idea for the other list a save used to throw away. */
+  function admPromoLocal(code, on) {
+    var list = S.admPromos;
+    if (!Array.isArray(list) || !code) return;
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].code) === String(code)) { list[i].active = !!on; return; }
+    }
   }
   function blankPromo() {
     return { code: "", kind: "percent", value: 10, minSubtotal: 0, endsAt: "", maxUses: "", note: "", active: true };
@@ -26133,7 +26239,10 @@
 
   function admLogout() {
     apiSend("/api/admin/logout/", "POST", {}).catch(noop).then(function () {
-      SRV.admin = false; SRV.orders = null; S.adminOrder = 0; render();
+      SRV.admin = false; SRV.orders = null; S.adminOrder = 0;
+      // …and the summary goes with them, so signing back in asks again
+      OVERVIEW.data = null; OVERVIEW.err = null; OVERVIEW.asked = false;
+      render();
     });
   }
 
@@ -26167,15 +26276,27 @@
     };
   }
   function loadSrvOrders(force) {
-    if (!SRV.admin || (SRV.orders && !force)) return;
+    /* `=== false`, not `!SRV.admin` — see loadOverview() for why the panel's
+       cold open must be allowed to ask before it has been told who is asking. */
+    if (SRV.admin === false) return;
+    /* …which also means this can now be called twice in the same breath —
+       once by probeAdmin() and once by the answer it was not waiting for — so
+       one in flight is one enough. */
+    if (loadSrvOrders._busy) return;
+    if (SRV.orders && !force) return;
+    loadSrvOrders._busy = true;
     apiJson("/api/admin/orders/?limit=100").then(function (r) {
+      loadSrvOrders._busy = false;
       if (r.status === 401) { SRV.admin = false; SRV.orders = null; SRV.stepBusy = ""; render(); return; }
       SRV.ordersErr = !(r.status === 200 && r.body.ok === true);
-      SRV.orders = SRV.ordersErr ? null : (r.body.orders || []).map(srvRow);
+      /* A refresh that failed keeps the list that is on screen, for the same
+         reason loadOverview() keeps its figures — «Заказы» going blank after a
+         save is worse than «Заказы» being a few seconds old. */
+      if (!SRV.ordersErr) SRV.orders = (r.body.orders || []).map(srvRow);
       // the list is the new status: whatever step was in flight has landed
       SRV.stepBusy = "";
       render();
-    }).catch(function () { SRV.ordersErr = true; SRV.stepBusy = ""; render(); });
+    }).catch(function () { loadSrvOrders._busy = false; SRV.ordersErr = true; SRV.stepBusy = ""; render(); });
   }
   /** After anything that moves an order's status — shipped, cancelled, marked
       paid, a salon sale, an undo — both copies of the count are refreshed:
@@ -26516,15 +26637,31 @@
      shows. Whether this browser is the owner is asked once, and only when the
      admin screen is actually opened, so a shopper never pays for that call. */
   var admProbed = false;
-  function probeAdmin() {
+  function probeAdmin(panel) {
     if (admProbed) return;
     admProbed = true;
-    checkAdmin().then(function (ok) {
+    var probe = checkAdmin();
+    /* The panel's front door asks its three questions in one breath.
+       «Обзор» — the screen this probe is opening — draws «Последние заказы»
+       from /api/admin/orders/ and every figure in «Сделать сегодня» and
+       «Продажи» from /api/admin/overview/. Both of those used to wait for
+       /api/admin/me/ to come back before they even left: three requests, two
+       round trips, for a screen that needs all three answers anyway. Measured
+       on a 120 ms link (e2e/perf-open.spec.ts) that second trip was most of
+       the wait between the panel appearing and its numbers appearing.
+       This is NOT the background warm-up of other sections' loaders that was
+       tried and reverted in 7301d1d — nothing here is fetched for a screen
+       nobody opened, no form draft can be underneath it, and the two loaders
+       are the very ones «Обзор» calls for itself a render later. `panel` is
+       what keeps it that way: the scanner shares this probe and shows neither
+       list, so it still asks the one question it has. */
+    if (panel) { loadSrvOrders(true); loadOverview(); }
+    probe.then(function (ok) {
       /* The 30-day summary for analyticsForAI() used to be warmed here — see
          admAsstHTML(), which now asks for it when the assistant is actually on
          screen. Boot is the one moment the owner is waiting, and this was a
          whole extra analytics query in it for a question nobody had asked. */
-      if (ok) loadSrvOrders(true);
+      if (ok) loadSrvOrders(true);   // a no-op while the one above is in flight
       render();
     });
   }
@@ -26558,10 +26695,43 @@
     loadServerOverrides();
     loadBundles();
   }
+  /* ---- …and the panel, which has feeds of its own --------------------------
+     refreshFeeds() above leaves the admin alone on purpose — «those screens
+     carry half-typed forms, and they have loaders of their own». That is true
+     of the FORMS and it was never true of the REPORTS. Renat, 13.09.2026:
+     «Admin needs a hard refresh to see the results, I did ctrl + R, then it
+     showed, otherwise not — probably cached», about «Искали, но не нашли».
+     Every read-only summary in the panel was fetched once per page and never
+     again, so anything that changed while he had the tab open — a search
+     somebody made, an order that came in, a review that arrived — could only
+     be seen by reloading.
+
+     So: the same two events, the same thirty-second floor, and only answers
+     that are pure reads. Nothing here can touch a draft, which is the line
+     7301d1d was reverted for crossing: every one of these lands in a screen
+     that is already showing the previous answer and replaces it in place —
+     the loaders keep what they have until the new answer is actually here
+     (see loadOverview / loadAnalytics / loadAdminReviews), so a refresh never
+     turns a screen he is reading back into a grey skeleton. And the two that
+     belong to one section are asked for only while he is standing in it: a
+     report nobody is looking at can wait until he opens it. */
+  var admFreshAt = Date.now();
+  function refreshAdmin() {
+    if (S.screen !== "admin" || SRV.admin !== true) return;
+    var now = Date.now();
+    if (now - admFreshAt < ADM_TTL) return;
+    admFreshAt = now;
+    // the front door's own two, whichever section is open: «Обзор» is one tap
+    // away and its queue counts are what the owner steers by
+    loadOverview(true);
+    loadSrvOrders(true);
+    if (S.adminTab === "stats") { loadAnalytics(statsRange(), true); loadGsc(true); }
+    if (S.adminTab === "reviews") loadAdminReviews(true);
+  }
   document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "visible") refreshFeeds();
+    if (document.visibilityState === "visible") { refreshFeeds(); refreshAdmin(); }
   });
-  window.addEventListener("pageshow", function (e) { if (e.persisted) refreshFeeds(); });
+  window.addEventListener("pageshow", function (e) { if (e.persisted) { refreshFeeds(); refreshAdmin(); } });
 
   /* ---- features: mirror one editor change to the server ---------------------
      The demo layer is what the prototype shows; product_overrides is what the
@@ -27091,18 +27261,24 @@
     // undoing a code the assistant just made switches it off again
     else if (a.type === "create_promo") {
       entry.prev = { type: "toggle_promo", code: (a.promo || {}).code, value: false };
-      S.admPromos = null; S.promoForm = null;
+      /* Not `S.admPromos = null`. The new code is only knowable from the
+         server — it is priced there — but the codes already on screen are not
+         wrong, and dropping them turned every save into a grey skeleton (the
+         same thing «Опубликовать» did to the reviews, see admReviewLocal). */
+      loadAdminPromos(true); S.promoForm = null;
     }
     else if (a.type === "toggle_promo") {
       entry.prev = { type: "toggle_promo", code: a.code, value: !a.value };
-      S.admPromos = null;
+      admPromoLocal(a.code, a.value); loadAdminPromos(true);
     }
     /* «Клиенты → Отзывы»: reviews are rows in their own table with no demo
        layer, exactly like orders and the shelf — the journal entry and the
        opposite call are the whole of it, and srvPush() carries both ways. */
     else if (a.type === "moderate_review") {
       entry.prev = { type: "moderate_review", id: a.id, name: a.name, value: a.prev, prev: a.value };
-      S.admReviews = null;
+      // the row moves now, the list confirms itself underneath (admReviewLocal)
+      admReviewLocal(a.id, a.value);
+      loadAdminReviews(true);
     }
     /* «Маркетинг → Подарочные карты»: the denominations on sale. The whole
        list travels, so undo re-sends the previous one — same reasoning as the
@@ -27217,9 +27393,10 @@
     }
     // checkout-gaps
     else if (a.type === "set_shipping_rules") { setShipRules(a.rules); S.shipDraft = null; }
-    else if (a.type === "toggle_promo") { S.admPromos = null; }
-    // phase 3: a review has no demo copy either — srvPush() below is the undo
-    else if (a.type === "moderate_review") { S.admReviews = null; }
+    else if (a.type === "toggle_promo") { admPromoLocal(a.code, a.value); loadAdminPromos(true); }
+    // phase 3: a review has no demo copy either — srvPush() below is the undo.
+    // `a` is entry.prev here, so a.value is the status being restored.
+    else if (a.type === "moderate_review") { admReviewLocal(a.id, a.value); loadAdminReviews(true); }
     else if (a.type === "set_gift_amounts") { DEMO.giftAmounts = a.value.slice(); }
     // content: `whole` is the document as it was, null meaning «стандартный»
     else if (a.type === "set_content") { DEMO.content = a.whole || null; S.contentDraft = null; }

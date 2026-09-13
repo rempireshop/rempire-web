@@ -88,6 +88,15 @@ test.describe("admin — speed", () => {
        login depends on which screen the panel opens on. That is not what this
        test is about. */
     expect(calls, "the boot still asks for the 30-day summary").not.toContain("?range=30d");
+    /* …and not the week either, since 13.09.2026. «Обзор» used to take the
+       seven bars under «7 дней» from this route — sixteen queries for one
+       field — and now gets them from its own summary (revenueByDay in
+       getOverviewSummary, src/lib/analytics.ts). The assertion above it was
+       written when the week was still the one range the boot did ask for; the
+       line that stood here went on demanding it, and had been failing since
+       that change landed. Its own failure message already said what the right
+       expectation was. */
+    expect(calls, "the boot is asking «Аналитика» for a range again").toEqual([]);
 
     // …and it is asked for the moment the assistant is on screen
     const opened = page.waitForResponse((r) => r.url().includes("/api/admin/analytics/?range=30d"));
