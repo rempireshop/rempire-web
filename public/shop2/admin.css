@@ -1789,7 +1789,12 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
   border-bottom: 1px solid var(--a-rule); padding: 8px 0; flex-wrap: wrap;
 }
 .adm-jrow__t { font-family: "PT Mono", ui-monospace, monospace; font-size: 13px; color: var(--a-muted); white-space: nowrap; }
+/* One change per line: a save that moved three fields is three spans, each a
+   text node of its own so the dictionary can translate it (jrowTextHTML).
+   The first is the subject — the product — and the rest are what moved. */
 .adm-jrow__x { flex: 1 1 200px; min-width: 0; }
+.adm-jrow__l { display: block; }
+.adm-jrow__l + .adm-jrow__l { font-size: 13px; color: var(--a-muted); }
 /* who the server recorded — the second list of «Журнал изменений» */
 .adm-jrow__who { font-size: 13px; color: var(--a-muted); white-space: nowrap; }
 .adm-narrow { max-width: 720px; }
@@ -1895,6 +1900,21 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .adm-iconbtn:hover { background: var(--a-tint); }
 .adm-iconbtn[disabled] { color: var(--a-rule); background: var(--a-paper); cursor: default; }
+/* «Главный баннер» — the slide whose form is open under the list.
+   .adm-row--open above lights on :hover / :focus-within, and a finger has
+   neither: on a phone the row being edited was indistinguishable from the four
+   that were not (Renat, 13.09.2026). Lit outright while its pane is down. */
+.adm-row--open[data-herorow] {
+  background: var(--a-tint);
+  box-shadow: -10px 0 0 var(--a-tint), 10px 0 0 var(--a-tint);
+  border-bottom-color: var(--a-ink);
+}
+.adm-row--open[data-herorow]::before { opacity: 1; }
+/* …and the pane itself, tied to that row by the same ink bar, with the ✕ that
+   closes it at the top where the pane starts rather than a screenful down */
+#heroform { border-left: 4px solid var(--a-ink); scroll-margin-top: 16px; }
+#heroform:focus { outline: none; }
+.adm-iconbtn--x { width: 36px; height: 36px; font-size: 15px; }
 .adm-row__nm .adm-badge { margin-left: 6px; vertical-align: 2px; }
 .adm2 a.adm-row { text-decoration: none; }
 /* the blog toolbar's own line: a box and a button or two under the tools */

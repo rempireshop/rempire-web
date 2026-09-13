@@ -218,7 +218,7 @@ test.describe("sweep — the banner", () => {
       const marked = `E2E ${HTML_BOMB}`.slice(0, 40);
       await page.locator('[data-herof="title"]').fill(marked);
       await page.locator('[data-herof="sub"]').fill(EMOJI);
-      await page.locator("[data-heroclose]").click();
+      await page.locator("[data-heroclose]").first().click();
 
       // Slides: five is the documented ceiling (heroClean slices to 5 and the
       // «Добавить слайд» button disables itself) — the sixth must be refused
@@ -227,7 +227,7 @@ test.describe("sweep — the banner", () => {
       let guard = 0;
       while (!(await add.isDisabled()) && guard++ < 8) {
         await add.click();
-        await page.locator("[data-heroclose]").click();
+        await page.locator("[data-heroclose]").first().click();
       }
       const rows = page.locator('[data-heroedit]');
       expect(await rows.count(), "more than five slides were accepted").toBeLessThanOrEqual(5);
@@ -280,7 +280,7 @@ test.describe("sweep — the banner", () => {
     await openSettings(page, "home");
     await page.locator('[data-heroedit="0"]').click();
     await page.locator('[data-herof="title"]').fill("НЕ ДОЛЖНО СОХРАНИТЬСЯ");
-    await page.locator("[data-heroclose]").click();
+    await page.locator("[data-heroclose]").first().click();
     await page.locator("[data-herosave]").click();
     await expect(page.locator("[data-admapply]")).toBeVisible();
     await page.locator("[data-admcancel]").click();

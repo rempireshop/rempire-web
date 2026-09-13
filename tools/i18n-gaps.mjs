@@ -255,7 +255,7 @@ const INTENTIONAL = [
   [/^(Русский|Eesti|English)$/, "language menu — each language names itself"],
   [/^(шампунь|кондиционер|маска|паста|спрей|воск|гель|пудра|масло|бальзам|сыворотка|тоник|крем|пенка|лосьон|патчи)$/,
     "product-type key used for matching (TYPE_MATES / NAME_TAILS), never rendered"],
-  [/^(товар|товара|товаров|точка|точки|точек|раздел|раздела|разделов|заказ|заказа|заказов|балл|балла|баллов|слайд|слайда|слайдов)$/,
+  [/^(товар|товара|товаров|точка|точки|точек|раздел|раздела|разделов|заказ|заказа|заказов|балл|балла|баллов|слайд|слайда|слайдов|день|дня|дней|фотография|фотографии|фотографий|использование|использования|использований|своих текста|своих текстов)$/,
     "plural word form — pl() glues it to a number, the composed string is translated"],
   [/^[А-ЯЁ]\. [А-ЯЁ][а-яё]+$/, "demo customer name in the admin — names are not translated"],
   [/^от$/, "price prefix — glued to the amount, «от 12,90 €» is covered by a UI_RX rule"],
@@ -274,6 +274,9 @@ const INTENTIONAL = [
   // sentence is always this label plus a price, covered by the UI_RX rules
   // /^тариф Montonio \(live\): (.+)$/ and /^тариф Montonio \(прайс-лист\): (.+)$/
   [/^тариф Montonio \((live|прайс-лист)\):$/, "prefix half of montonioHint()/montonioCarrierHint()'s sentence — see the two UI_RX rules for the whole thing"],
+  // r16, «Журнал изменений»: the one tail of a journal line with no hole in
+  // it, so the ASSEMBLED list below (which keys off the hole) cannot see it
+  [/заголовок и описание для Google$/, "tail of «Черновик статьи «…» · …» — rule /^Черновик статьи «(.+)»(.*)$/"],
 ];
 /* Fragments that are only half of a string the shop assembles at runtime: the
    extractor cuts at the string-literal boundary, the browser does not. Each
@@ -313,6 +316,33 @@ const ASSEMBLED = [
   // element, not a runtime value glued into the same text node. «Сканировать»
   // on its own is already a real key (used since the storefront pass).
   [/^Сканировать$/, "key «Сканировать» — the hole is the icon's <svg>, a separate element, not text"],
+  /* r16 — «Журнал изменений». The journal's own sentences are covered by the
+     UI_RX block at the bottom of that table; these are the pieces the
+     extractor cuts them into, each checked by hand against the rule that
+     covers the whole rendered node. The three long confirm cards are the same
+     story: the runtime node is both lines at once, and one rule matches it. */
+  [/^Набор «$/, "head of «Набор «…»: …» — rule /^Набор «(.+)»: (.+)$/"],
+  [/^за $/, "half of «Поздравление: за 3 дня до дня рождения» — rule /^Поздравление: за (\\d+) …$/"],
+  [/ до дня рождения$/, "tail of the same line — same rule"],
+  [/^через $/, "half of «Доставлен сам: … · через 3 дня» — rule /^Доставлен сам: (.+) · через (\\d+) …$/"],
+  [/^, первый — «$/, "tail of «Баннер: 3 слайда, первый — «…»» — rule /^Баннер: (\\d+) …, первый — «(.*)»$/"],
+  [/^скидка $/, "half of «Промокод X: скидка …» — rules /^Промокод (.+): скидка …$/"],
+  [/^· описание: $/, "tail of «Новый товар «…» · … · описание: RU, ET» — rule /^Новый товар «(.+)» · (.+)$/"],
+  [/^\nСтраница набора перестанет открываться/, "second line of the «Удалить набор» card — the rule matches both lines at once"],
+  [/^\nФото появится на странице товара/, "second line of the «Главное фото» card — the rule matches both lines at once"],
+  [/^\. Отменить можно в журнале\.$/, "tail of that same second line — same rule"],
+  [/^\nОтменить можно в журнале\.$/, "second line of the «Обложка статьи» card — the rule matches both lines at once"],
+  [/^\nЗаголовок, анонс, текст, теги/, "second line of the «Статья целиком» card — the rule matches both lines at once"],
+  [/^\nФото добавите на вкладке/, "second line of the «Новый товар» card — the rule matches both lines at once"],
+  /* «Цены и лояльность: скидка для салонов 20% · баллы включены» — the
+     sentence is translated by /^Цены и лояльность: (.+)$/ and the facts after
+     the colon are handed back as they were composed. Deliberate, and the only
+     journal line where that is still true: the list is open-ended (seven
+     settings in any combination), so no rule can name its shapes, and every
+     one of those settings has a screen of its own that does say it in the
+     panel's language. */
+  [/^(скидка для салонов|баллы|начисление|списание до) /,
+    "one fact inside «Цены и лояльность: …» — the line is translated, the facts after the colon are not"],
 ];
 function assembled(text) {
   if (!text.includes(HOLE)) return null;
@@ -334,23 +364,23 @@ function chatWhy(fr, fn) {
   return null;
 }
 
-/* Whole functions whose Russian output is deliberate. */
+/* Whole functions whose Russian output is deliberate.
+ *
+ * The journal used to be here — actionText, productJournalLine, admCancelLine,
+ * admPosJournalLine, shipActionText and contentActionText, all exempted as
+ * «change-log line in Renat's private admin journal — Russian by decision».
+ * Renat, 13.09.2026: «Price change is logged, but written only, although my
+ * admin is in english». It was never a decision he made, and an owner who
+ * reads the panel in English has to be able to read his own history in it, so
+ * the exemption is gone and those lines are covered by real rules like every
+ * other screen. What is left below is only what genuinely is not ours to
+ * translate. */
 const INTENTIONAL_FNS = {
-  actionText: "change-log line in Renat's private admin journal — Russian by decision",
-  admCancelLine: "change-log line in Renat's private admin journal — Russian by decision",
   // админка: the draft the assistant writes for «Написать клиенту» is a letter
   // TO the customer, so it stays in the customer's language, not the panel's
   admOrderDraft: "the draft letter to the customer — written in the customer's language, not the panel's",
-  admPosJournalLine: "change-log line in Renat's private admin journal — Russian by decision",
-  shipActionText: "change-log line in Renat's private admin journal — Russian by decision",
-  contentActionText: "change-log line in Renat's private admin journal — Russian by decision",
-  promoActionText: "change-log line in Renat's private admin journal — Russian by decision",
-  // product creation: the line a new or changed custom product leaves behind
-  productJournalLine: "change-log line in Renat's private admin journal — Russian by decision",
-  // integration: data tables, never rendered as their own text node — a
-  // per-letter transliteration map (blogSlugify()) and a month-name array
-  // whose only reader is monthLabelRu(), itself only ever called from the
-  // already-exempted actionText() above
+  // integration: a data table, never rendered as its own text node — the
+  // per-letter transliteration map behind blogSlugify()
   BLOG_TRANSLIT: "transliteration table (blogSlugify()) — object keys/values, never rendered",
   // …and the vocabulary that turns a Russian set name into an English address
   // (bundleSuggestId()): stems on the left, the slug word on the right. Both

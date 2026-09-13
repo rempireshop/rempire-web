@@ -280,7 +280,7 @@ test.describe("the gift card as a banner slide", () => {
 
       await page.locator('[data-herof="title"]').fill("Подарочная карта Rempire");
       await page.locator('[data-herof="cta"]').fill("Выбрать сумму");
-      await page.locator("[data-heroclose]").click();
+      await page.locator("[data-heroclose]").first().click();
 
       const put = page.waitForResponse(
         (r) => r.url().includes("/api/admin/settings/") && r.request().method() === "PUT");
