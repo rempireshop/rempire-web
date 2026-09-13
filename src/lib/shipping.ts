@@ -18,12 +18,21 @@ import { countryPriceTable, MONTONIO_NOT_SERVED } from "@/lib/shipping/country-p
 export type ShipMethod = "parcel" | "courier" | "pickup";
 
 export interface ShippingRules {
-  /** Basket subtotal (EUR, pre-discount) at or above which delivery is free. */
+  /**
+   * Basket subtotal (EUR, pre-discount) at or above which delivery is free.
+   *
+   * Three readings, and the admin's «Бесплатно от» box says all three:
+   *   · a number — free from that subtotal up;
+   *   · `0` — free always, from the first cent;
+   *   · `null` — never free (the box left empty).
+   */
   freeFrom: number | null;
   /**
    * Override of freeFrom by country **or by zone**, e.g. { "EU": 200 } for all
    * of Europe and { "GR": null } for «never free to Greece»; a country's own
-   * key beats its zone's. Defaults to { "EU": 200 } — see below.
+   * key beats its zone's, and a country with no key of its own inherits — the
+   * panel shows what it inherits rather than an empty box. Same three readings
+   * as freeFrom above. Defaults to { "EU": 200 } — see below.
    */
   freeFromByCountry?: Record<string, number | null>;
   /** price[method][ISO country] with a "default" fallback per method. */
@@ -262,10 +271,15 @@ export function parseShippingRules(value: unknown): ShippingRules {
 
   /* An object, and an *authoritative* one, empty included — the same rule
      countriesOff follows below and for the same reason: `{}` means «one
-     threshold everywhere», which is a real answer Renat gives by clearing the
-     «Бесплатно от» box on the «Другие страны Европы» row, and a merge that
-     quietly put the 200 € default back would be a box that refuses to empty.
-     Only a missing or malformed key keeps the default. */
+     threshold everywhere», and a merge that quietly put the 200 € default
+     back would be a table that refuses to be emptied. Only a missing or
+     malformed key keeps the default.
+     Since 13.09.2026 the panel writes a null rather than dropping a key when
+     the owner clears a «Бесплатно от» box — an empty box means «сюда
+     бесплатной доставки нет», not «возьмите строку ниже» (shipFreeCell() and
+     setShipDraftField() in public/shop2/app.js) — so `{EU: null}` is what
+     clearing the «Другие страны Европы» row now sends, and `{}` arrives only
+     from a hand-written row or an older save. Both are read here unchanged. */
   const byCountry = raw.freeFromByCountry;
   if (typeof byCountry === "object" && byCountry !== null && !Array.isArray(byCountry)) {
     const out: Record<string, number | null> = {};

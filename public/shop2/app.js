@@ -969,8 +969,22 @@
       "Самовывоз": "Järeletulek", "Страна": "Riik",
       "Эстония": "Eesti", "Латвия": "Läti", "Литва": "Leedu", "Финляндия": "Soome",
       "Другие страны Европы": "Muud Euroopa riigid", "Остальные страны": "Ülejäänud riigid",
-      "Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.":
-        "Neid hindu pood nii näitab kui ka arvestab tellimuse vormistamisel. Tühi — võetakse rida „Ülejäänud riigid“. „нет“ veerus „Tasuta alates“ — sinna riiki ei ole tarne kunagi tasuta.",
+      // what an empty «Бесплатно от» box means, 13.09.2026 — see shipFreeCell()
+      "«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.":
+        "„Tasuta alates“: 0 — tarne on alati tasuta, tühi — sellesse riiki tasuta tarnet ei ole.",
+      /* what is actually charged, what is only reference — the three labels
+         and the «Что увидит покупатель» preview, 13.09.2026 */
+      "Колонка «Пакомат» — это запасная цена. Если внизу, в «Ценах по перевозчикам», у Omniva, DPD, SmartPosti или Unisend стоит своя цена, покупатель заплатит её, а не ту, что в таблице.":
+        "Veerg „Pakiautomaat“ on varuhind. Kui allpool, jaotises „Vedajate hinnad“, on Omnival, DPD-l, SmartPostil või Unisendil oma hind, maksab ostja selle, mitte tabelis oleva.",
+      "Цена перевозчика сильнее колонки «Пакомат» в таблице выше: если тут стоит число, покупатель платит его.":
+        "Vedaja hind on tugevam kui ülemise tabeli veerg „Pakiautomaat“: kui siin on number, maksab ostja selle.",
+      "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
+        "Juurdehindlus iseenesest ei muuda midagi: selle liidab ainult nupp „Täida Montonio tariifide järgi“, kui kirjutab hinnad tabelisse.",
+      "Что увидит покупатель": "Mida ostja näeb",
+      "та же таблица, что на странице «Доставка и оплата»":
+        "sama tabel, mis lehel „Tarne ja maksmine“",
+      "Показаны несохранённые правки. «от …» — у страны несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.":
+        "Näidatud on salvestamata muudatused. „alates …“ — riigis on mitu erineva hinnaga vedajat; „—“ — seda viisi selles riigis ei pakuta.",
       "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
         "Kui vedajal on oma hind, kirjuta see siia — see on tugevam kui ülemine tabel. Tühi — hind võetakse tabelist.",
       // per-country prices, 07.09.2026 — «real per-country prices»
@@ -2252,9 +2266,11 @@
       "Бесплатно от, €": "Tasuta alates, €",
       "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
         "Nupp kirjutab sisse vedaja tariifid pluss juurdehindluse, ümardatuna X,X9 €-ni, ja ainult seal, kus tariif on teada. Kontrolli numbrid üle ja salvesta.",
-      "Самовывоз, перевозчики и наценка": "Järeletulek, vedajad ja juurdehindlus",
-      "Самовывоз, €": "Järeletulek, €",
-      "Самовывоз — Эстония": "Järeletulek — Eesti",
+      // «Самовывоз, €» and its label left the screen on 13.09.2026 — the box
+      // priced nothing; this line is what stands in its place
+      "Перевозчики и наценка": "Vedajad ja juurdehindlus",
+      "Самовывоза в таблице нет — он всегда бесплатный.":
+        "Järeletulekut tabelis ei ole — see on alati tasuta.",
       "Наценка, %": "Juurdehindlus, %",
       "Наценка, €": "Juurdehindlus, €",
       "Наценка, проценты": "Juurdehindlus, protsentides",
@@ -3380,8 +3396,22 @@
       "Самовывоз": "Pickup", "Страна": "Country",
       "Эстония": "Estonia", "Латвия": "Latvia", "Литва": "Lithuania", "Финляндия": "Finland",
       "Другие страны Европы": "Other European countries", "Остальные страны": "All other countries",
-      "Эти цены магазин и показывает, и считает при оформлении. Пусто — берётся строка «Остальные страны». «нет» в колонке «Бесплатно от» — в эту страну доставка никогда не бесплатна.":
-        "These are the prices the shop shows and the prices it charges at checkout. Empty — the «All other countries» row applies. «нет» in the «Free from» column means delivery to that country is never free.",
+      // what an empty «Бесплатно от» box means, 13.09.2026 — see shipFreeCell()
+      "«Бесплатно от»: 0 — доставка бесплатна всегда, пусто — бесплатной доставки в эту страну нет.":
+        "«Free from»: 0 means delivery is always free, empty means there is no free delivery to that country.",
+      /* what is actually charged, what is only reference — the three labels
+         and the «Что увидит покупатель» preview, 13.09.2026 */
+      "Колонка «Пакомат» — это запасная цена. Если внизу, в «Ценах по перевозчикам», у Omniva, DPD, SmartPosti или Unisend стоит своя цена, покупатель заплатит её, а не ту, что в таблице.":
+        "The «Parcel locker» column is only a fallback price. If Omniva, DPD, SmartPosti or Unisend has a price of its own below, under «Prices per carrier», that is what the customer pays — not the one in the table.",
+      "Цена перевозчика сильнее колонки «Пакомат» в таблице выше: если тут стоит число, покупатель платит его.":
+        "A carrier's price beats the «Parcel locker» column in the table above: if there is a number here, that is what the customer pays.",
+      "Наценка сама по себе ничего не меняет: её прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.":
+        "The markup changes nothing on its own: only the «Fill from Montonio tariffs» button adds it, when it writes prices into the table.",
+      "Что увидит покупатель": "What the customer sees",
+      "та же таблица, что на странице «Доставка и оплата»":
+        "the same table as on the «Delivery & payment» page",
+      "Показаны несохранённые правки. «от …» — у страны несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.":
+        "These are unsaved edits. «from …» means the country has several carriers at different prices; «—» means that method is not offered there.",
       "Если у перевозчика своя цена, впишите её здесь — она сильнее таблицы выше. Пусто — цена берётся из таблицы.":
         "If a carrier has its own price, put it here — it beats the table above. Empty — the price comes from the table.",
       // per-country prices, 07.09.2026 — «real per-country prices»
@@ -4648,9 +4678,11 @@
       "Бесплатно от, €": "Free from, €",
       "Кнопка впишет тарифы перевозчика плюс наценку, округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.":
         "The button fills in the carrier tariffs plus your markup, rounded to €X.X9, and only where a tariff is known. Check the numbers and save.",
-      "Самовывоз, перевозчики и наценка": "Pickup, carriers and markup",
-      "Самовывоз, €": "Pickup, €",
-      "Самовывоз — Эстония": "Pickup — Estonia",
+      // «Самовывоз, €» and its label left the screen on 13.09.2026 — the box
+      // priced nothing; this line is what stands in its place
+      "Перевозчики и наценка": "Carriers and markup",
+      "Самовывоза в таблице нет — он всегда бесплатный.":
+        "Pickup is not in the table — it is always free.",
       "Наценка, %": "Markup, %",
       "Наценка, €": "Markup, €",
       "Наценка, проценты": "Markup in percent",
@@ -5998,6 +6030,13 @@
         return '<tr><th scope="row">' + t(r[1]) + carriersLine(r[0]) + "</th>" +
           "<td>" + parcelCell(r[0]) + "</td><td>" + courierCell(r[0]) + "</td><td>" + freeCell(r[0]) + "</td></tr>";
       }).join("") + "</tbody></table></div>";
+    /* …and the same table on its own, for the panel's «Что увидит покупатель»
+       (admShipPreviewTableHTML()). One renderer, so the preview cannot drift
+       from the page it is previewing — which is the whole reason it exists.
+       Everything below this line needs a `ctx` the panel has no business
+       assembling (the policy text, the bank marks, the contacts), so the
+       early return is here rather than a second function down there. */
+    if (ctx.tableOnly) return table;
     var pickup = '<div class="dlv__pickup">' +
       "<p><b>" + t("Самовывоз в салоне") + "</b> — " + t("бесплатно · заказ ждёт 7 дней, дальше 1,50 € в день.") + "</p>" +
       (ctx.address ? '<p class="dlv__addr">' + esc(ctx.address) + "</p>" : "") +
@@ -17625,6 +17664,27 @@
           // one table and not as two screens
           (r[0] === "EU" ? admShipEuropeHTML() : "");
       }).join("") +
+      /* The one thing the column could not say for itself: an empty box here
+         is an answer, not a blank. Renat cleared it and the shop went on
+         giving delivery away from 59 € — shipFreeCell() draws the real
+         threshold now, and this sentence says what happens if he empties it. */
+      '<p class="adm-hint" style="margin-top:10px">«Бесплатно от»: 0 — доставка бесплатна всегда, ' +
+        "пусто — бесплатной доставки в эту страну нет.</p>" +
+      /* The third delivery method has no row in the grid and no price box
+         anywhere — because it has no price. Worth one line so the table does
+         not read as «самовывоза тут нет». */
+      '<p class="adm-hint" style="margin-top:4px">Самовывоза в таблице нет — он всегда бесплатный.</p>' +
+      /* The misunderstanding this whole screen turns on, said once, loudly and
+         in the owner's own words — Ренат, 13.09.2026: «I do not understand the
+         table and the pickup, carriers and markup difference & what is
+         actually used.» A carrier cell beats the «Пакомат» column
+         (quoteFromRules(): carriers[carrier][country] is read first), and on
+         this shop every carrier cell is filled — so the column he reads as
+         «цена пакомата» is the one number in it nobody pays. */
+      '<p class="adm-notice">Колонка «Пакомат» — это запасная цена. Если внизу, в «Ценах по ' +
+        "перевозчикам», у Omniva, DPD, SmartPosti или Unisend стоит своя цена, покупатель заплатит " +
+        "её, а не ту, что в таблице.</p>" +
+      admShipPreviewHTML() +
       (S.shipErr ? '<div class="adm-err" role="alert" style="margin-top:10px">' + esc(S.shipErr) + "</div>" : "") +
       // «Сохранить» is the page's bar (admSetBarHTML) — the fill button stays with its hint
       '<div class="adm-acts" style="margin-top:16px">' +
@@ -17633,9 +17693,20 @@
       '<p class="adm-hint" style="margin-top:8px">Кнопка впишет тарифы перевозчика плюс наценку, ' +
         "округлённые до X,X9 €, и только там, где тариф известен. Проверьте цифры и сохраните.</p>" +
       '<details class="adm-fold" style="margin-top:16px">' +
-        '<summary class="adm-link">Самовывоз, перевозчики и наценка</summary><div style="padding-top:12px">' +
-          '<label class="adm-field"><span>Самовывоз, €</span>' +
-            admShipCellHTML("m:pickup:EE", shipCell("pickup", "EE"), "Самовывоз — Эстония") + "</label>" +
+        /* «Самовывоз, €» was the first field in this fold until 13.09.2026,
+           and it priced nothing: both halves of the shop short-circuit pickup
+           to 0 before they look at a table (shipPriceFor() here,
+           quoteFromRules() on the server), so the number typed there was
+           stored and never read. On a screen whose whole complaint was «что
+           из этого вообще работает», a box that works on nothing answers
+           better by not being there — so it is gone, with its label, and the
+           one fact worth keeping («самовывоз всегда бесплатный») is a line
+           under the table instead. `methods.pickup` stays in the rules: it is
+           part of their shape, and an old row that carries a number under it
+           goes on being ignored exactly as before. */
+        '<summary class="adm-link">Перевозчики и наценка</summary><div style="padding-top:12px">' +
+          '<p class="adm-notice" style="margin-top:0">Цена перевозчика сильнее колонки «Пакомат» ' +
+            "в таблице выше: если тут стоит число, покупатель платит его.</p>" +
           SHIP_CARRIER_ROWS.map(function (c) {
             return '<div style="margin-top:12px"><div class="adm-sec__t">' + c[1] + "</div>" +
               c[2].map(function (cc) {
@@ -17648,6 +17719,10 @@
             admShipCellHTML("markup:percent", shipMarkupCell("percent"), "Наценка, проценты") + "</label>" +
           '<label class="adm-field" style="margin-top:10px"><span>Наценка, €</span>' +
             admShipCellHTML("markup:fixed", shipMarkupCell("fixed"), "Наценка, евро") + "</label>" +
+          /* markup is not a surcharge on a sale — quoteFromRules() never sees
+             it; computeMontonioFillPatch() is its only reader */
+          '<p class="adm-hint" style="margin-top:6px">Наценка сама по себе ничего не меняет: её ' +
+            "прибавляет только кнопка «Заполнить по тарифам Montonio», когда вписывает цены в таблицу.</p>" +
           '<div class="adm-swrow" style="margin-top:10px"><span>Разрешить снижать текущие цены' +
             '<span class="adm-row__sub">по умолчанию тариф только поднимает цену до реальной стоимости</span></span>' +
             admSwitch("data-shipallowlower", !!S.shipAllowLower, "Разрешить снижать текущие цены") + "</div>" +
@@ -17758,6 +17833,57 @@
           return '<option value="' + n[0] + '"' + (n[0] === d.autoDays ? " selected" : "") + ">" + n[1] + "</option>";
         }).join("") + "</select></label>" +
       '<p class="adm-hint" style="margin-top:8px">Письма при этом не уходят — «Доставлен» их никогда не отправлял. Заказ просто перестаёт висеть в «В пути».</p>';
+  }
+  /**
+   * «Что увидит покупатель» — the six rows of the table above, drawn by the
+   * **customer page's own renderer** (deliveryPageHTML with `tableOnly`), over
+   * the draft rather than over the saved rules.
+   *
+   * Two rules it exists to keep, and both are the reason it is not a second
+   * table of its own:
+   *   · it cannot drift from /info/shipping/, because it *is* /info/shipping/
+   *     — one function, one set of tables (SHIP_RULES' shape, CARRIER_NAMES,
+   *     CARRIERS_BY_COUNTRY);
+   *   · it answers for what the owner is typing *now*. A preview of the saved
+   *     settings would confirm numbers he has already changed, which is worse
+   *     than no preview — so it reads shipDraft() and paintShipPreview()
+   *     repaints it on every keystroke.
+   *
+   * Six rows, not the page's five: «Остальные страны» has no row on the
+   * customer page (nothing is sold to a country that falls through to it
+   * without a checkout country first), but it is a row of this table and the
+   * owner is entitled to see what it says. The renderer prices it like any
+   * other key — no carriers, so «—» for the parcel machine, the `default`
+   * cell for the courier, `freeFrom` for the threshold.
+   */
+  var ADM_SHIP_PREVIEW_ROWS = DELIVERY_ROWS.concat([["default", "Остальные страны", ""]]);
+  function admShipPreviewTableHTML() {
+    return deliveryPageHTML({
+      tableOnly: true,
+      lang: S.lang,
+      tr: function (s) { return s; },   // translateTree() does it after render
+      esc: esc, eur: eur,
+      rules: shipDraft(),
+      carriers: CARRIERS_BY_COUNTRY, carrierNames: CARRIER_NAMES,
+      rows: ADM_SHIP_PREVIEW_ROWS
+    });
+  }
+  function admShipPreviewHTML() {
+    return '<details class="adm-fold adm-preview" style="margin-top:12px"' + (S.shipPreviewOpen ? " open" : "") + ">" +
+      '<summary data-shippreview><span class="adm-link">Что увидит покупатель</span>' +
+        '<span class="adm-row__sub">та же таблица, что на странице «Доставка и оплата»</span></summary>' +
+      '<div style="padding-top:12px" data-shippreviewbody>' + admShipPreviewTableHTML() + "</div>" +
+      '<p class="adm-hint" style="margin-top:8px">Показаны несохранённые правки. «от …» — у страны ' +
+        "несколько перевозчиков с разной ценой; «—» — этот способ в стране не предлагается.</p>" +
+      "</details>";
+  }
+  /** Repaint the preview from the draft without a render — the owner is
+      typing in a box, and a full render would take the caret out of it. */
+  function paintShipPreview() {
+    var box = document.querySelector("[data-shippreviewbody]");
+    if (!box) return;
+    box.innerHTML = admShipPreviewTableHTML();
+    translateTree(box);
   }
   /* `col` is the column's own name, drawn only on a phone: the header row of
      the grid is hidden there, and three bare boxes under «Эстония» gave the
@@ -19552,11 +19678,39 @@
     var t = shipDraft().methods[m] || {};
     return shipShow(Object.prototype.hasOwnProperty.call(t, c) ? t[c] : undefined);
   }
+  /**
+   * The «Бесплатно от» box of one row — the threshold that row **actually**
+   * bills with, never an empty box under free delivery the shop is giving
+   * away anyway.
+   *
+   * Renat, 13.09.2026: «„Бесплатно от“ пусто, а доставка всё равно
+   * бесплатная». It was: the four home rows and the twenty-one countries
+   * behind «Другие страны Европы» carry no key of their own, so the box drew
+   * `undefined` — empty — while quoteFromRules() walked on to the zone's
+   * threshold and then to `freeFrom`, and billed Estonia free from 59 € all
+   * the same. A box that says nothing while the till gives delivery away is
+   * the one thing this table exists to prevent.
+   *
+   * So the box shows the value that applies, found the same three ways the
+   * server finds it (src/lib/shipping.ts, quoteFromRules): the row's own key,
+   * then its zone's — «EU» for the folded-out countries — then the shop-wide
+   * `freeFrom` that the «Остальные страны» row edits. Nothing is written into
+   * the draft by drawing it: a row that inherits goes on inheriting, and
+   * follows the row above when that one changes.
+   *
+   * Which leaves the box with exactly three readings, and setShipDraftField()
+   * below stores all three: a number is a threshold, 0 is «всегда бесплатно»,
+   * and empty is «нет» — no free delivery to this country at all.
+   */
   function shipFreeCell(c) {
     var d = shipDraft();
-    if (c === "default") return shipShow(d.freeFrom);
-    var by = d.freeFromByCountry;
-    return shipShow(by && Object.prototype.hasOwnProperty.call(by, c) ? by[c] : undefined);
+    if (c === "default") return shipShow(d.freeFrom === undefined ? null : d.freeFrom);
+    var by = d.freeFromByCountry, zone = SHIP_EU_COUNTRIES.indexOf(c) >= 0 ? "EU" : c;
+    var v;
+    if (by && Object.prototype.hasOwnProperty.call(by, c)) v = by[c];
+    else if (by && Object.prototype.hasOwnProperty.call(by, zone)) v = by[zone];
+    else v = d.freeFrom;
+    return shipShow(v === undefined ? null : v);
   }
   function shipCarrierCell(k, c) {
     var by = shipDraft().carriers;
@@ -19593,13 +19747,23 @@
       else d.methods[parts[1]][parts[2]] = v;
       return;
     }
+    /* «Бесплатно от», the one column where an empty box is an answer and not
+       a blank. A price left empty means «возьмите строку ниже» and always
+       has; a threshold left empty means **no free delivery here**, and is
+       stored as an explicit null rather than as a missing key.
+       Before 13.09.2026 it deleted the key, which put the row straight back
+       on the shop-wide 59 € — so the one thing the box could not say was the
+       thing the owner was trying to say with it, and on the «Другие страны
+       Европы» row clearing it dropped Europe from 200 € to 59 € and shipped a
+       59 € basket to Greece free against a 43,19 € courier.
+       «Остальные страны» is the same rule one level up: its own empty box has
+       meant `freeFrom = null` — «нигде не бесплатно» — since the box existed. */
     if (parts[0] === "free") {
       var f = shipNum(raw, 10000);
       if (f !== f) return;
       if (parts[1] === "default") { d.freeFrom = f === undefined ? null : f; return; }
       if (!d.freeFromByCountry) d.freeFromByCountry = {};
-      if (f === undefined) delete d.freeFromByCountry[parts[1]];
-      else d.freeFromByCountry[parts[1]] = f;
+      d.freeFromByCountry[parts[1]] = f === undefined ? null : f;
       return;
     }
     if (parts[0] === "c") {
@@ -26868,15 +27032,23 @@
         '<button class="link cline__rm" data-remove="' + li + '">Убрать</button></span>' +
         '<span class="num cline__pr" data-linepr>' + eur(lineUnit(l) * l.qty) + "</span></div>";
     }).join("") : '<p class="muted">Пока пусто. <button class="link" data-go-cat="all">К товарам</button></p>') +
-      (S.cart.length ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
-        '<p class="muted">' + freebarText(sum, thr) + "</p></div>" + upsellHTML(sum, thr) : "");
+      /* No bar where there is no free delivery to walk towards: threshold()
+         is Infinity when the country's «Бесплатно от» is empty, and «До
+         бесплатной доставки (Эстония, от Infinity €)» is not a sentence —
+         nor is the upsell's «Добавьте — и доставка бесплатно» a promise the
+         till would keep. */
+      (S.cart.length && isFinite(thr)
+        ? '<div class="freebar"><div class="freebar__track"><div class="freebar__fill" style="width:' + pct + '%"></div></div>' +
+          '<p class="muted">' + freebarText(sum, thr) + "</p></div>" + upsellHTML(sum, thr)
+        : "");
   }
 
   /* The free-shipping bar states the gap; this closes it. One product that
      bridges the gap in a single add, one cheaper alternative — both real,
      in stock, not already in the cart. */
   function upsellHTML(sum, thr) {
-    if (sum >= thr || !S.cart.length) return "";
+    // …and nothing to add towards when the country has no free delivery at all
+    if (sum >= thr || !isFinite(thr) || !S.cart.length) return "";
     var gap = thr - sum;
     var inCart = {};
     S.cart.forEach(function (l) { inCart[l.id] = true; });
@@ -27681,10 +27853,18 @@
       }
     });
     var sum = cartSum(), thr = threshold();
-    var fill = d.querySelector(".freebar__fill");
-    if (fill) fill.style.width = Math.min(100, sum / thr * 100) + "%";
-    var note = d.querySelector(".freebar p");
-    if (note) note.textContent = trText(freebarText(sum, thr), S.lang);
+    /* The bar is drawn only where there is a threshold to reach (cartBody);
+       if the rules landed since, the whole block goes rather than being
+       patched with «от Infinity €». */
+    var bar = d.querySelector(".freebar");
+    if (bar && !isFinite(thr)) bar.hidden = true;
+    else if (bar) {
+      bar.hidden = false;
+      var fill = bar.querySelector(".freebar__fill");
+      if (fill) fill.style.width = Math.min(100, sum / thr * 100) + "%";
+      var note = bar.querySelector("p");
+      if (note) note.textContent = trText(freebarText(sum, thr), S.lang);
+    }
     var tot = d.querySelector(".drawer__tot .num");
     if (tot) tot.textContent = eur(sum);
     patchHeader(); patchNav();
@@ -28491,7 +28671,7 @@
   // ---------- events ----------
   document.addEventListener("click", function (e) {
     // the card's size popover closes on any click outside itself and its trigger
-    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun]");
+    var t = e.target.closest("[data-giftpdf],[data-invpdf],[data-payagain],[data-admnav],[data-admai],[data-admmore],[data-admmoreclose],[data-admfilter],[data-admreload],[data-admtoastundo],[data-admlabel],[data-admwrite],[data-admshipnow],[data-admordercancel],[data-stockstep],[data-vcolour],[data-vsize],[data-notify],[data-notifysend],[data-share],[data-go],[data-go-cat],[data-go-brand],[data-go-product],[data-add],[data-cart],[data-closecart],[data-filter],[data-closefilter],[data-clearfilter],[data-unbrand],[data-unstock],[data-subcat],[data-page],[data-slide],[data-langtoggle],[data-lang],[data-line],[data-remove],[data-checkout],[data-pay],[data-step],[data-acctm],[data-size],[data-qty],[data-gal],[data-login],[data-logincode],[data-loginback],[data-logout],[data-applypromo],[data-q],[data-buynow],[data-closetoast],[data-paym],[data-bank],[data-admtab],[data-admask],[data-admsend],[data-admorder],[data-admgoods],[data-admclose],[data-admsavegoods],[data-vpick],[data-admseogen],[data-admchatbot],[data-admbundles],[data-admapply],[data-admcancel],[data-admflow],[data-admundo],[data-go-bundle],[data-addbundle],[data-giftamt],[data-addgift],[data-giftoff],[data-revopen],[data-revstar],[data-revsend],[data-admrevfilter],[data-admrev],[data-playvideo],[data-mailtpl],[data-maillang],[data-mailtest],[data-mailph],[data-mailreset],[data-mailsave],[data-mailrevert],[data-dm],[data-carrier],[data-pointopen],[data-pointclose],[data-pointpick],[data-pointview],[data-admlogin],[data-admlogout],[data-admstatus],[data-admnotesave],[data-heroedit],[data-heroclose],[data-herolang],[data-heroadd],[data-herodel],[data-heromove],[data-heroon],[data-heroimg],[data-herogopick],[data-herosave],[data-heroreset],[data-galup],[data-vidup],[data-galmove],[data-galmain],[data-galdel],[data-galreset],[data-promooff],[data-admshipsave],[data-admshipreset],[data-admpromonew],[data-admpromoedit],[data-admpromosave],[data-admpromocancel],[data-admpromotoggle],[data-admpromodel],[data-admrowopen],[data-admgoodstab],[data-bundlenew],[data-bundleedit],[data-bundletoggle],[data-bundlemove],[data-bundlesave],[data-bundlecancel],[data-bundledelete],[data-bundledelyes],[data-bundledelno],[data-bundleadd],[data-bundledel],[data-bundleqty],[data-bundleimg],[data-bundlelang],[data-contentlang],[data-contentblock],[data-contentannon],[data-contentclosed],[data-contentsave],[data-contentreset],[data-go-blog],[data-blogmore],[data-blogshare],[data-admblognew],[data-admblogedit],[data-admblogback],[data-admbloglang],[data-admblogproductadd],[data-admblogproductdel],[data-admblogcoverdel],[data-admblogsave],[data-admblogpublish],[data-admblogpublishyes],[data-admblogpublishno],[data-admblogunpublish],[data-admblogdel],[data-admblogdelyes],[data-admblogdelno],[data-blogrt],[data-blogtoolok],[data-blogtoolcancel],[data-blogtoolupload],[data-blogtoolpick],[data-statsrange],[data-admdescgen],[data-admtranslate],[data-admdescundo],[data-admblogoutline],[data-admblogtranslate],[data-admblogseogen],[data-admblogseoall],[data-admorderreply],[data-admordercompose],[data-admordersend],[data-admreportdl],[data-admshipfill],[data-acctprosend],[data-admcustopen],[data-admcustclose],[data-admcusttier],[data-admcustapprove],[data-admcustreject],[data-admcustadjust],[data-admcustsavenotes],[data-admpartnernew],[data-admpartnersave],[data-admpartnercancel],[data-admcusttierset],[data-admgoset],[data-admpricingsave],[data-pricingtoggle],[data-shipallowlower],[data-shipcountry],[data-shipeu],[data-scanopen],[data-scanclose],[data-scantorch],[data-scanmanualsubmit],[data-scanapp],[data-scanadmin],[data-scanqty],[data-scanmove],[data-stockedit],[data-stocksave],[data-stockmore],[data-stockfilter],[data-stockmovesopen],[data-stockmovesreason],[data-pwahintclose],[data-posadd],[data-posqty],[data-posremove],[data-possend],[data-posnew],[data-edtab],[data-eddesclang],[data-edseolang],[data-admseoall],[data-edvidkind],[data-edvidclear],[data-admgoodspull],[data-scanbind],[data-scanreset],[data-admsetpage],[data-admsetback],[data-admgiftamt],[data-mailback],[data-promokind],[data-admcamerahelp],[data-admgoodsnew],[data-admgoodsmore],[data-admgoodsshow],[data-edsizeadd],[data-edsizedel],[data-galcut],[data-admretry],[data-admattach],[data-admattdel],[data-admblogfull],[data-herospark],[data-contentspark],[data-promospark],[data-ednamespark],[data-admdelivered],[data-admcopy],[data-adminvpaid],[data-adminvresend],[data-adminvsave],[data-edunbind],[data-edscan],[data-scanunbind],[data-partnerson],[data-edhidden],[data-coskip],[data-consent],[data-cookies],[data-donepay],[data-admrefund],[data-admunpaidsave],[data-admbank],[data-delivcarrier],[data-admblogbackyes],[data-admblogbackno],[data-bundledescgen],[data-bundletranslate],[data-bundledescundo],[data-admordersmore],[data-admvoice],[data-admcustrev],[data-setrevert],[data-newsnew],[data-newsedit],[data-newsback],[data-newsbackyes],[data-newsbackno],[data-newslang],[data-newsproductadd],[data-newsproductdel],[data-newssave],[data-newsrevert],[data-newstest],[data-newssend],[data-newsresume],[data-newswrite],[data-newstranslate],[data-newsdel],[data-newsdelyes],[data-newsdelno],[data-newsreload],[data-admflowrun],[data-shippreview]");
     if (!t) {
       if (S.langOpen) { S.langOpen = false; patchHeader(); }
       return;
@@ -29889,6 +30069,16 @@
       render(); refocus('[data-shipcountry="' + d.shipcountry + '"]'); return;
     }
     if (d.shipeu !== undefined) { S.shipEuOpen = !S.shipEuOpen; render(); return; }
+    /* «Что увидит покупатель» — remembered like the Europe fold, so the panel
+       does not close under the finger that opened it.
+       preventDefault() because <summary> carries an activation behaviour of
+       its own: the browser flips `open` after this listener returns, on the
+       node that was clicked. S is what the next render draws from, so the two
+       must not both toggle — one tap, one flip, and S makes it. */
+    if (d.shippreview !== undefined) {
+      e.preventDefault();
+      S.shipPreviewOpen = !S.shipPreviewOpen; render(); return;
+    }
     // the defaults are prices too — the same card as «Сохранить»
     if (d.admshipreset !== undefined) {
       pendingAction = {
@@ -30796,7 +30986,9 @@
       var shipRaw = String(t.value).trim().replace(",", "."), shipMax = t.dataset.shiprule.indexOf("free:") === 0 ? 10000 : 99;
       var shipBad = shipRaw !== "" && !/^(нет|no|-|—)$/i.test(shipRaw) && !(isFinite(Number(shipRaw)) && Number(shipRaw) >= 0 && Number(shipRaw) <= shipMax);
       if (shipBad) t.setAttribute("aria-invalid", "true"); else t.removeAttribute("aria-invalid");
-      setShipDraftField(t.dataset.shiprule, t.value); paintSetBar();
+      // …and «Что увидит покупатель» follows the draft, not the saved rules:
+      // a preview one keystroke behind confirms a number he has just changed
+      setShipDraftField(t.dataset.shiprule, t.value); paintSetBar(); paintShipPreview();
     }
     else if (t.matches("[data-promof]")) {
       if (!S.promoForm) return;
