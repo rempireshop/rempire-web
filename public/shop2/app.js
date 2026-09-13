@@ -32855,7 +32855,16 @@
         el.__admsx = key;
         if (on) {
           var box = el.getBoundingClientRect(), item = on.getBoundingClientRect();
-          if (item.right > box.right - 0.5) el.scrollLeft += Math.ceil(item.right - box.right) + 12;
+          /* Where the current pane sits inside the strip, not on the screen —
+             so the answer does not depend on where the strip happens to be
+             scrolled. If it fits with the strip at its head, put it back
+             there: the row then reads from the first pane, and a scroll
+             position inherited from the screen before (the panel is
+             morph-patched, so a tab row and a chip row can be the same
+             element) cannot leave «Аналитика» opened 15 px in. */
+          var from = item.left - box.left + el.scrollLeft;
+          if (from + item.width <= el.clientWidth) el.scrollLeft = 0;
+          else if (item.right > box.right - 0.5) el.scrollLeft += Math.ceil(item.right - box.right) + 12;
           else if (item.left < box.left + 0.5) el.scrollLeft += Math.floor(item.left - box.left) - 12;
         }
       }
