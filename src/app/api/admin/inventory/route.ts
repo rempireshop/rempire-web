@@ -1,12 +1,19 @@
 /**
  * GET /api/admin/inventory/?q=&filter=all|low|out|untracked
- * PUT /api/admin/inventory/ — { productId, variant?, ean?, lowThreshold? }
+ * PUT /api/admin/inventory/ — { productId, variant?, ean?, lowThreshold?, ref? }
  *
  * The «Склад» table: every catalogue product×variant, whether or not it has
  * ever been counted (src/lib/inventory.ts getLevels()). PUT only ever touches
  * the static fields — EAN and the low-stock threshold; quantities change
  * through POST /api/admin/inventory/moves/ so every qty change is a ledger
  * row, never a silent UPDATE.
+ *
+ * `ref` is «Причина (видна в истории)» from the row's own form, and it means
+ * here what it means on the moves route: the owner's sentence, kept beside
+ * the change it explains. Given one, setLevel() writes the card change into
+ * the same ledger as an 'edit' line (db/migrations/092_stock_move_edit.sql) —
+ * before that, a reason typed next to a corrected threshold was read, sent
+ * nowhere and lost under a «Сохранено ✓».
  */
 import { requireAdmin } from "@/lib/auth";
 import { byEan, getLevels, InventoryError, setLevel, type LevelFilter } from "@/lib/inventory";
@@ -64,9 +71,10 @@ export async function PUT(req: Request) {
   if ("lowThreshold" in body || "low_threshold" in body) {
     patch.lowThreshold = Number(body.lowThreshold ?? body.low_threshold);
   }
+  const note = typeof body.ref === "string" && body.ref.trim() ? body.ref.trim().slice(0, 200) : null;
 
   try {
-    const level = await setLevel(productId, variant, patch);
+    const level = await setLevel(productId, variant, patch, { note, actor: "admin" });
     return Response.json({ ok: true, level }, { headers: { "cache-control": "no-store" } });
   } catch (err) {
     if (err instanceof InventoryError) {

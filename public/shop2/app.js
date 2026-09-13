@@ -1580,6 +1580,8 @@
       "← Склад": "← Ladu", "Тип движения": "Liikumise tüüp",
       "Приход": "Vastuvõtt", "Продажа на сайте": "Müük veebis", "Продажа в салоне": "Müük salongis",
       "Ручная правка": "Käsitsi parandus", "Возврат": "Tagastus",
+      // migration 092: a change to the card (barcode, «мало» threshold), not to the shelf
+      "Правка карточки": "Kaardi muudatus",
       "Движений пока нет.": "Liikumisi veel ei ole.",
       "Ничего не найдено.": "Midagi ei leitud.",
       "Привязать": "Seo", "Код не найден": "Koodi ei leitud",
@@ -1680,6 +1682,7 @@
       "продажа в салоне": "müük salongis",
       "приход": "sissetulek",
       "ручная правка": "käsitsi parandus",
+      "правка карточки": "kaardi muudatus",
       "Фильтр": "Filter",
       "ошибка": "viga",
       "Код привязан ✓": "Kood seotud ✓",
@@ -2062,7 +2065,7 @@
       "Наведите на штрихкод — код встанет в поле «Штрихкод», сканер закроется сам.": "Suunake triipkoodile — kood läheb välja «Triipkood», skanner sulgub ise.",
       "Вписать": "Kirjuta",
       "или введите код вручную": "või sisestage kood käsitsi",
-      "Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.": "Seesama ekraan on telefonis eraldi rakendus «Rempire Skanner». Sisse pääseb ainult omanik.",
+      "Сканер есть и отдельной иконкой на телефоне.": "Skanner on telefonis olemas ka eraldi ikoonina.",
       "Нет на складе": "Laos pole",
       "Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».": "Hakake sisestama nime, brändi või triipkoodi — või vajutage «Skaneeri».",
       "наличные": "sularaha",
@@ -4031,6 +4034,8 @@
       "← Склад": "← Stock", "Тип движения": "Move type",
       "Приход": "Goods in", "Продажа на сайте": "Web sale", "Продажа в салоне": "In-salon sale",
       "Ручная правка": "Manual correction", "Возврат": "Return",
+      // migration 092: a change to the card (barcode, «мало» threshold), not to the shelf
+      "Правка карточки": "Card change",
       "Движений пока нет.": "No moves yet.",
       "Ничего не найдено.": "Nothing found.",
       "Привязать": "Link", "Код не найден": "Code not found",
@@ -4131,6 +4136,7 @@
       "продажа в салоне": "in-store sale",
       "приход": "goods in",
       "ручная правка": "manual correction",
+      "правка карточки": "card change",
       "Фильтр": "Filter",
       "ошибка": "error",
       "Код привязан ✓": "Code linked ✓",
@@ -4511,7 +4517,7 @@
       "Наведите на штрихкод — код встанет в поле «Штрихкод», сканер закроется сам.": "Point at the barcode — the code lands in the «Barcode» box and the scanner closes by itself.",
       "Вписать": "Fill in",
       "или введите код вручную": "or type the code by hand",
-      "Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.": "This same screen is a separate «Rempire Scanner» app on the phone. Owner access only.",
+      "Сканер есть и отдельной иконкой на телефоне.": "The scanner is also its own icon on the phone.",
       "Нет на складе": "Not in the warehouse",
       "Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».": "Start typing a name, a brand or a barcode — or press «Scan».",
       "наличные": "cash",
@@ -23094,16 +23100,25 @@
      in src/lib/orders.ts and the module doc in src/lib/inventory.ts for why
      that fallback matters. Levels are fetched once (like the catalogue) and
      filtered/searched client-side, same pattern as admCatalogRows(). ---- */
-  var STOCK = { asked: false, seq: 0, movesAsked: false };
+  var STOCK = { asked: false, seq: 0, movesAsked: false, at: 0 };
   /** How many «Склад» rows one page of the list holds. The whole warehouse is
       ~320 rows and every one of them has to be reachable (Dim: «We need
       all»), but the list is re-drawn on every keystroke of the search box, so
       it arrives a page at a time — pressed, or scrolled to. */
   var STOCK_PAGE = 60;
+  /** How old the copy may be when the owner arrives on a screen that reports
+      remainders. A sale on the WEBSITE is the one shelf movement the panel
+      cannot hear about: it is made by a customer, in another browser, and
+      until 13.09.2026 «Склад» kept showing the count it had fetched when the
+      panel was first opened — the shelf was right, the screen was not, and
+      the owner read that as «the sale did not come off stock» (Renat's
+      acceptance run: «I bought more, but stock did not go -1»). */
+  var STOCK_FRESH_MS = 20000;
   function loadStockLevels(force) {
     if (SRV.admin !== true) return;
     if ((S.stockLevels || STOCK.asked) && !force) return;
     STOCK.asked = true;
+    STOCK.at = Date.now();
     S.stockBusy = true;
     /* Two reloads can be in the air at once — a ± on a row fires one, and its
        undo a moment later fires another. Answers do not have to come back in
@@ -23125,6 +23140,20 @@
   }
   function reloadStock() { STOCK.asked = false; loadStockLevels(true); }
   function reloadStockMoves() { STOCK.movesAsked = false; S.stockMoves = null; S.stockMovesErr = ""; loadStockMoves(true); }
+  /* Arriving on a screen that reports remainders — «Склад», «Салон» — re-reads
+     a copy older than STOCK_FRESH_MS, in the background: the rows already on
+     screen stay until the answer lands, so nothing flickers, nothing scrolls
+     and no open «Править» form is thrown away. Deliberately NOT a timer and
+     deliberately NOT a warm-up on some other screen: loaders in this panel
+     are screen-coupled on purpose (a background refresh once wiped a form
+     draft and broke Back — reverted 7301d1d), so this fires on arrival only,
+     and not at all while a row is being edited or the scanner is up. */
+  function stockRefreshOnEntry() {
+    if (SRV.admin !== true || !S.stockLevels) return;
+    if (S.stockEdit || S.scanOpen || S.stockBusy) return;
+    if (Date.now() - STOCK.at < STOCK_FRESH_MS) return;
+    reloadStock();
+  }
 
   var STOCK_MOVE_WORD = {
     sale_web: "продажа на сайте", sale_pos: "продажа в салоне",
@@ -23132,7 +23161,11 @@
     // already owns that word for a different, past-participle-style label
     // (Начислено/Списано/Корректировка/Сгорело), and one RU string cannot
     // carry two different ET translations in this dictionary
-    goods_in: "приход", adjust: "ручная правка", return: "возврат"
+    goods_in: "приход", adjust: "ручная правка", return: "возврат",
+    /* 092_stock_move_edit.sql: the card changed, not the shelf — a barcode
+       bound, the «мало» threshold moved. Its own word because nothing came
+       in or went out, which is also why the row shows no number. */
+    edit: "правка карточки"
   };
   function stockKey(productId, variant) { return productId + " " + (variant || ""); }
   function stockFindRow(key) {
@@ -23176,14 +23209,31 @@
       '<span class="adm-row__body"><span class="adm-row__nm">' + esc(r.brand) + " — " + esc(r.name) +
         // the row «Править» just wrote says so, until it is edited or stepped again (stockCommit)
         (S.stockSaved === key ? ' <span class="adm-badge adm-badge--sm adm-badge--ok">Сохранено ✓</span>' : "") + "</span>" +
+        /* The grey line is the barcode's alone now. The volume used to open
+           it — «250 мл · штрихкод не привязан» — right under a product name
+           the row cuts off with an ellipsis, so on a phone the size read as
+           the tail of the name and three rows of one product looked like
+           three spellings of it («the sizes seem to be at the end of the
+           product name, so it's hard to understand», Renat). It has its own
+           place on the line below now, next to the count it belongs to. */
         '<span class="adm-row__sub adm-row__sub--one' + (r.ean ? "" : " adm-row__sub--warn") + '">' +
-          (r.variant ? "<span>" + esc(r.variant) + "</span> · " : "") +
           (r.ean ? '<span class="adm-mono">' + esc(r.ean) + "</span>" : "<span>штрихкод не привязан</span>") + "</span></span>" +
-      // the third line of every row: the stepper on the left, «Править» on the right
-      '<span class="adm-row__line adm-row__line--split"><span class="adm-step-qty">' +
-        '<button data-stockstep="' + esc(key) + ':-1" aria-label="Меньше"' + (qty <= 0 ? " disabled" : "") + ">−</button>" +
-        '<span class="adm-step-qty__v' + (low ? " adm-step-qty__v--warn" : "") + '">' + (r.tracked ? qty : "—") + "</span>" +
-        '<button data-stockstep="' + esc(key) + ':1" aria-label="Больше">+</button></span>' +
+      // the third line of every row: the size and the stepper on the left, «Править» on the right
+      '<span class="adm-row__line adm-row__line--split"><span class="adm-row__stock">' +
+        /* migration 147 / custom_products.active: the shelf and the shop are
+           two different truths, and this row is the one place they used to
+           disagree in silence — a product switched off «Показывать в
+           магазине» keeps its count, its barcode and a working ± here while
+           the shop drops it from the catalogue, the search and the sets and
+           answers its page with 404. «Каталог» has always marked it; now so
+           does «Склад», with the same word and the same badge. */
+        (shopHidden(r.productId) ? '<span class="adm-badge adm-badge--sm adm-badge--quiet">Скрыт</span>' : "") +
+        // «один объём» is the editor's own word for a product with no sizes
+        '<span class="adm-row__sz">' + (r.variant ? esc(r.variant) : "один объём") + "</span>" +
+        '<span class="adm-step-qty">' +
+          '<button data-stockstep="' + esc(key) + ':-1" aria-label="Меньше"' + (qty <= 0 ? " disabled" : "") + ">−</button>" +
+          '<span class="adm-step-qty__v' + (low ? " adm-step-qty__v--warn" : "") + '">' + (r.tracked ? qty : "—") + "</span>" +
+          '<button data-stockstep="' + esc(key) + ':1" aria-label="Больше">+</button></span></span>' +
       '<button class="adm-link adm-link--muted" data-stockedit="' + (open ? "" : esc(key)) + '">' +
         (open ? "Свернуть" : "Править") + "</button></span>" +
     "</div>" + (open ? stockEditFormHTML(r) : "");
@@ -23341,6 +23391,7 @@
   function admStockHTML() {
     if (SRV.admin !== true) return '<div class="adm-empty">Войдите в панель, чтобы видеть склад</div>';
     loadStockLevels(false);
+    stockRefreshOnEntry();   // a sale on the website moved the shelf while the panel was elsewhere
     if (S.stockMovesOpen) return admStockMovesHTML();
     var FILTERS = [["all", "Все"], ["low", "Мало"], ["out", "Нет"], ["untracked", "Не учтено"]];
     return '<div class="adm-acts">' +
@@ -23371,7 +23422,7 @@
   function admStockMovesHTML() {
     loadStockMoves(false);
     var moves = S.stockMoves || [];
-    var REASONS = [["", "Все"], ["goods_in", "Приход"], ["sale_web", "Продажа на сайте"], ["sale_pos", "Продажа в салоне"], ["adjust", "Ручная правка"], ["return", "Возврат"]];
+    var REASONS = [["", "Все"], ["goods_in", "Приход"], ["sale_web", "Продажа на сайте"], ["sale_pos", "Продажа в салоне"], ["adjust", "Ручная правка"], ["return", "Возврат"], ["edit", "Правка карточки"]];
     return '<button class="adm-link" data-stockmovesopen="">← Склад</button>' +
       '<div class="adm-sec__t" style="margin-top:12px">История приёмок и продаж</div>' +
       '<div class="adm-chips" role="group" aria-label="Тип движения" style="margin:12px 0">' +
@@ -23386,9 +23437,13 @@
           var sign = m.delta > 0 ? "+" : "";
           return '<div class="adm-row"><span class="adm-row__body"><span class="adm-row__nm">' +
               esc(m.brand || m.productId) + (m.brand ? " — " + esc(m.name) : "") + "</span>" +
-              '<span class="adm-row__sub">' + (m.variant ? esc(m.variant) + " · " : "") + esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
+              // the volume in a box of its own, as on «Склад» — a bare «150 мл ·»
+              // under a cut-off product name read as the end of the name
+              '<span class="adm-row__sub">' + (m.variant ? '<span class="adm-row__sz">' + esc(m.variant) + "</span> " : "") +
+                esc(STOCK_MOVE_WORD[m.reason] || m.reason) + (m.ref ? " · " + esc(m.ref) : "") + "</span></span>" +
             '<span class="adm-row__sub" style="margin:0">' + esc(String(m.at).slice(0, 16).replace("T", " ")) + "</span>" +
-            '<span class="adm-row__amt">' + sign + m.delta + "</span></div>";
+            // a card change moved nothing, so it shows no number (migration 092)
+            '<span class="adm-row__amt">' + (m.reason === "edit" ? "" : sign + m.delta) + "</span></div>";
         }).join("") + "</div>" : (S.stockMovesErr ? "" : '<div class="adm-empty">Пока пусто</div>')));
   }
 
@@ -23624,7 +23679,13 @@
             }).join("") + "</div>"
           : "");
     }
-    var h = S.scanHit, p = h.product ? byId(h.product.id) : null;
+    /* byId() answers with CATALOGUE[0] for an id the shop does not carry, so
+       scanning a bottle the owner has switched off «Показывать в магазине»
+       (which takes it out of CATALOGUE) used to put a DIFFERENT product's
+       name on the card — over the right shelf row, because every write uses
+       S.scanHit.productId. The lookup's own answer is the fallback: it names
+       the bottle that actually owns the code. */
+    var h = S.scanHit, p = h.product ? (byIdOrNull(h.product.id) || h.product) : null;
     var n = S.scanQty || 1;
     if (p) {
       /* Three taps, at most: scan, set the number (it is already 1), press
@@ -23749,7 +23810,13 @@
           // the editor's door looks nothing up: a typed code goes into the box, so the button says so
           '<button class="scan__mbtn" data-scanmanualsubmit type="button">' + (S.scanFrom === "editor" ? "Вписать" : "Найти") + "</button></div>" +
       "</div>" +
-      '<div class="scan__foot">Этот же экран — отдельное приложение «Rempire Сканер» на телефоне. Вход только для админа.</div>';
+      /* Two lines of small print at the bottom of the viewfinder — «too much
+         space» on the screen the owner actually works on (Renat). One line
+         now, and the half it lost («Вход только для админа») said nothing to
+         a reader who is already signed in and standing inside the panel;
+         «Сканер отдельным приложением ↗» on «Склад» is the button that
+         actually opens it. */
+      '<div class="scan__foot">Сканер есть и отдельной иконкой на телефоне.</div>';
   }
   /** Everything scanPanelHTML() draws from, as one string — the panel is
       redrawn only when this changes. What is patched in place (the stepper's
@@ -24728,10 +24795,45 @@
   /* One row per product, one 44-px chip per size — «150 мл · 21,60 €». The
      chip is the whole control: no «Добавить» button, no size select, one tap
      from the search box to a line in the cart. */
+  /** productId → every barcode bound to any of its sizes, as one folded
+      string. Built once per «Склад» copy: the register's list is redrawn on
+      every keystroke, and walking ~320 shelf rows per product per keystroke
+      is work nobody asked for. */
+  var POS_EAN = { src: null, map: null };
+  function posEanIndex() {
+    var rows = S.stockLevels || [];
+    if (POS_EAN.src === rows && POS_EAN.map) return POS_EAN.map;
+    var map = {};
+    for (var i = 0; i < rows.length; i++) {
+      if (!rows[i].ean) continue;
+      map[rows[i].productId] = (map[rows[i].productId] ? map[rows[i].productId] + " " : "") + rows[i].ean;
+    }
+    POS_EAN.src = rows; POS_EAN.map = map;
+    return map;
+  }
   function posSearchResultsHTML() {
-    var q = (S.posQ || "").toLowerCase().trim();
-    var list = q
-      ? CATALOGUE.filter(function (p) { return p.stock !== "out" && (p.brand + " " + p.name + " " + p.id).toLowerCase().indexOf(q) >= 0; })
+    /* The box says «Название, бренд или штрихкод» and the hint under it says
+       the same — and until 13.09.2026 the barcode was the one thing it did
+       not look at: the register searched CATALOGUE, which carries no codes at
+       all, while «Склад» one tab away searched the shelf rows, which do. So
+       the very code that finds a bottle in «Склад» found nothing in «Салон»
+       — «I had a product with scanned code, then I went to salon -> scan,
+       scanned the same product and it did not find it» (Renat). Both screens
+       search the same two places now, with the same folding, so «kevin
+       murphy», «un tangled 40» and a typed-in EAN all behave the same in
+       both. */
+    var q = scanFold(S.posQ);
+    var words = q ? q.split(" ") : [];
+    var eans = posEanIndex();
+    var list = words.length
+      ? CATALOGUE.filter(function (p) {
+          if (p.stock === "out") return false;
+          var hay = scanFold(p.brand + " " + p.name + " " + p.id + " " +
+            (p.sizes && p.sizes.length ? p.sizes.join(" ") : "") + " " + (eans[p.id] || ""));
+          var hayWords = hay.split(" ");
+          for (var i = 0; i < words.length; i++) if (!scanWordHas(hay, hayWords, words[i])) return false;
+          return true;
+        })
       : [];
     if (!q) {
       if (S.posCart.length) return '<p class="adm-hint">Начните вводить название, бренд или штрихкод — или нажмите «Сканировать».</p>';
@@ -24812,6 +24914,7 @@
         '<div class="adm-empty">Войдите в панель, чтобы оформлять продажи</div></div>';
     }
     loadStockLevels(false);   // the chips need the shelf to know what is out
+    stockRefreshOnEntry();    // …and a stale copy would grey out a size that is back, or offer one that is gone
     var scan = '<button class="adm-btn adm-btn--head" data-scanopen>Сканировать' + admIcon("scan", false, 20) + "</button>";
     var head = admHead("", "Продажа в салоне", scan);
     if (S.posDone) return '<div class="adm-screen adm-screen--tight">' + head + admPosReceiptHTML() + "</div>";
@@ -25001,13 +25104,23 @@
       qty = stockQtyValue(rawQty);
       if (qty === null) { toast("Остаток — целое число от 0 до 1 000 000."); refocus("[data-stockqtyinput]"); return; }
     }
+    var qtyChanged = qty !== null && qty !== (r.tracked ? r.qty : 0);
     if (eanChanged || lowChanged) {
       var patch = { productId: r.productId, variant: r.variant };
       if (eanChanged) patch.ean = S.stockEditEan || null;
       if (lowChanged) patch.lowThreshold = lowWant;
+      /* «Причина (видна в истории)» is what the box under it promises, and
+         until 13.09.2026 it was kept only when the COUNT changed: a reason
+         typed beside a corrected «мало» threshold (or a barcode written in
+         by hand) was read, sent nowhere and lost under a «Сохранено ✓» —
+         «Reason is not stored» (Renat). The route records it as an 'edit'
+         line in the same history (db/migrations/092_stock_move_edit.sql).
+         Only when no quantity move is carrying it already: one correction,
+         one sentence, one line — not the same sentence twice. */
+      if (!qtyChanged && S.stockEditReason) patch.ref = S.stockEditReason;
       jobs.push(stockLevelSaveDetailed(patch));
     }
-    if (qty !== null && qty !== (r.tracked ? r.qty : 0)) {
+    if (qtyChanged) {
       jobs.push(stockMoveSend({
         productId: r.productId, variant: r.variant, qty: qty,
         reason: "adjust", ref: S.stockEditReason || undefined
@@ -25850,6 +25963,14 @@
        is looking at costs nothing. */
     flowCountsAt = 0;
     reportSummaryAt = 0;
+    /* …and so is the shelf. A till sale, «Отметить оплаченным» and «Отменить
+       заказ» all move stock on the server (sale_pos / sale_web on the paid
+       transition / a 'return' move, src/lib/payments/apply.ts and
+       setOrderStatus in src/lib/orders.ts), and the copy «Склад» draws from
+       was fetched before any of it. The receipt promising «остатки списаны»
+       over a «Склад» screen still showing the old number is exactly what the
+       owner reported. Same door the scanner already uses. */
+    scanStockChanged();
   }
   function srvOrderPatch(id, patch) {
     apiSend("/api/admin/orders/" + encodeURIComponent(id) + "/", "PATCH", patch).then(function (r) {

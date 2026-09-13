@@ -539,6 +539,20 @@
 
 /* ---------- Склад stepper -------------------------------------------------- */
 
+/* «Склад» and its history: the volume in a box of its own. It used to open
+   the grey line under the product name — «250 мл · штрихкод не привязан» —
+   and `.adm-row__nm` cuts a long name off with an ellipsis, so on a phone
+   the size read as the end of the name and three rows of one product looked
+   like three spellings of it (Renat, acceptance run). A box next to the
+   count it belongs to is the same way the product editor's grid shows a
+   size: its own cell, not a prefix. */
+.adm-row__sz {
+  flex: none; display: inline-block; padding: 0 7px; border: 1px solid var(--a-rule);
+  font-size: 12px; line-height: 18px; color: var(--a-ink); white-space: nowrap;
+}
+/* the size, the «Скрыт» badge and the stepper travel together on the left of
+   the row's split line, so «Править» stays on its right */
+.adm-row__stock { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .adm-step-qty { display: flex; align-items: center; border: 1px solid var(--a-rule); flex: none; }
 .adm-step-qty button {
   width: 44px; height: 44px; border: 0; background: var(--a-paper); font-size: 20px; color: var(--a-ink); padding: 0;
@@ -1349,7 +1363,11 @@ body.is-scanning .toast { z-index: calc(var(--z-scan, 95) + 1); }
 }
 .scan__mfield::placeholder { color: var(--a-dim); }
 .scan__mbtn { height: 48px; padding: 0 16px; border: 1px solid var(--a-muted); background: none; color: #fff; font-size: 14px; }
-.scan__foot { flex: none; padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px)); font-size: 13px; color: var(--a-dim); text-align: center; }
+/* One line of small print, not two paragraphs' worth of padding: this sits
+   under the viewfinder on the screen the owner works on, and at 375 px the
+   old block took 80 px of it (Renat: «Text seems to be taking too much
+   space»). */
+.scan__foot { flex: none; padding: 8px 20px calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 12px; color: var(--a-dim); text-align: center; }
 /* ======================================================================
    Phase 3 — Клиенты · Маркетинг · Блог · Аналитика · Подключения ·
    Настройки · Помощник.

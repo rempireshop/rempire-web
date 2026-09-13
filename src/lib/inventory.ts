@@ -38,6 +38,20 @@ export type StockState = "in" | "low" | "out";
 export const MOVE_REASONS = ["sale_web", "sale_pos", "goods_in", "adjust", "return"] as const;
 export type MoveReason = (typeof MOVE_REASONS)[number];
 
+/**
+ * 'edit' is a ledger reason nobody may ask for — setLevel() writes it itself
+ * when the CARD changed rather than the count (a barcode bound, the «мало»
+ * threshold moved), so the sentence the owner typed under «Причина (видна в
+ * истории)» ends up where the label promises it will. Always delta 0, and
+ * never one of TRACKING_REASONS: see db/migrations/092_stock_move_edit.sql.
+ * Kept out of MOVE_REASONS on purpose — that list is what the admin route
+ * and the assistant validate against, and neither may write a card change
+ * as if it were a movement of goods.
+ */
+export const EDIT_REASON = "edit" as const;
+export const LEDGER_REASONS = [...MOVE_REASONS, EDIT_REASON] as const;
+export type LedgerReason = (typeof LEDGER_REASONS)[number];
+
 export class InventoryError extends Error {
   code: string;
   detail?: string;
@@ -145,27 +159,72 @@ export type EanHit = StockLevel & {
   product: { id: string; brand: string; name: string; category: string; price: number } | null;
 };
 
-export async function byEan(code: string): Promise<EanHit | null> {
+/** The level a code is bound to, with no catalogue lookup — what setLevel()'s
+    «is this code taken?» question needs, and half of byEan() below. */
+async function levelByEan(code: string): Promise<StockLevel | null> {
   const ean = normEan(code);
   if (!ean) return null;
   const rows = await query<StockLevelRow>("select * from stock_levels where ean = $1", [ean]);
-  if (!rows.length) return null;
-  const level = mapLevel(rows[0]);
-  const p = BY_ID.get(level.productId) ?? null;
-  return { ...level, product: p ? { id: p.id, brand: p.b, name: p.n, category: p.c, price: p.p } : null };
+  return rows.length ? mapLevel(rows[0]) : null;
+}
+
+/**
+ * The product behind an id — the catalogue file first, then the owner's own
+ * products (custom_products, db/migrations/131_custom_products.sql).
+ *
+ * That second half is the whole point: BY_ID is built from
+ * src/data/catalogue.min.json, which by construction cannot contain a row the
+ * owner created in the panel. So a barcode bound to one of HIS products came
+ * back from byEan() with `product: null`, and the scanner read that as «Код
+ * не привязан» — on «Склад» AND on «Салон», where «Добавить в продажу» does
+ * nothing at all without a product (scanToCart in public/shop2/app.js). His
+ * own bottle scanned as an unknown code no matter how carefully he had bound
+ * it. Best effort, like customUniverse() below: a missing table leaves the
+ * catalogue answer exactly as it was.
+ */
+async function productRef(productId: string): Promise<EanHit["product"]> {
+  const p = BY_ID.get(productId);
+  if (p) return { id: p.id, brand: p.b, name: p.n, category: p.c, price: p.p };
+  try {
+    const { customMinByIds, isCustomId } = await import("@/lib/custom-products");
+    if (!isCustomId(productId)) return null;
+    const own = (await customMinByIds([productId])).get(productId);
+    if (!own) return null;
+    const m = own.min;
+    return { id: m.id, brand: m.b, name: m.n, category: m.c, price: m.p };
+  } catch (err) {
+    console.error("[inventory] custom product lookup failed:", err);
+    return null;
+  }
+}
+
+export async function byEan(code: string): Promise<EanHit | null> {
+  const level = await levelByEan(code);
+  if (!level) return null;
+  return { ...level, product: await productRef(level.productId) };
 }
 
 /**
  * Partial upsert of the STATIC fields — EAN and the low-stock threshold.
- * Never touches qty and never writes a stock_moves row: every quantity change
- * goes through move()/setQty() so the ledger stays the single source of truth
- * for "why is qty what it is". Creates the row (qty 0) if it does not exist
- * yet, which is exactly what tools/seed-stock.mjs relies on.
+ * Never touches qty: every quantity change goes through move()/setQty() so
+ * stock_levels.qty stays the sum of every delta in the ledger. Creates the
+ * row (qty 0) if it does not exist yet, which is exactly what
+ * tools/seed-stock.mjs relies on.
+ *
+ * `opts.note` is the sentence the owner typed under «Причина (видна в
+ * истории)» on «Склад» → «Править». Given one, a change to the card leaves
+ * its own 'edit' line in the ledger — delta 0, because nothing left or
+ * reached the shelf — so the reason beside a corrected threshold is kept
+ * exactly like the reason beside a corrected count already was. Without a
+ * note nothing is written: seed-stock.mjs and the scanner's bind fill in
+ * hundreds of barcodes and none of them is a correction anybody has to
+ * explain. See db/migrations/092_stock_move_edit.sql.
  */
 export async function setLevel(
   productId: string,
   variant: string | null | undefined,
   patch: { ean?: string | null; lowThreshold?: number },
+  opts: { note?: string | null; actor?: string | null } = {},
 ): Promise<StockLevel> {
   const pid = String(productId ?? "").trim();
   if (!pid) throw new InventoryError("bad_product");
@@ -178,7 +237,7 @@ export async function setLevel(
     } else {
       const e = normEan(patch.ean);
       if (!e) throw new InventoryError("bad_ean", String(patch.ean));
-      const existing = await byEan(e);
+      const existing = await levelByEan(e);
       if (existing && (existing.productId !== pid || existing.variant !== v)) {
         throw new InventoryError("ean_taken", existing.productId);
       }
@@ -204,6 +263,22 @@ export async function setLevel(
        on conflict (product_id, variant) do update set updated_at = now()
        returning *`;
   const rows = await query<StockLevelRow>(sql, params);
+
+  const note = cleanRef(opts.note);
+  if (note && keys.length) {
+    /* Best effort and after the write: the card change is saved either way,
+       and a shop whose 092 migration has not run yet refuses the reason
+       rather than the barcode. */
+    try {
+      await query(
+        `insert into stock_moves (product_id, variant, delta, reason, ref, actor)
+         values ($1, $2, 0, $3, $4, $5)`,
+        [pid, v, EDIT_REASON, note, cleanActor(opts.actor)],
+      );
+    } catch (err) {
+      console.error("[inventory] the reason for a card change was not recorded:", err);
+    }
+  }
   return mapLevel(rows[0]);
 }
 
@@ -640,7 +715,7 @@ export type MoveRow = {
   productId: string;
   variant: string;
   delta: number;
-  reason: MoveReason;
+  reason: LedgerReason;
   ref: string | null;
   actor: string | null;
   brand: string;
@@ -648,7 +723,7 @@ export type MoveRow = {
 };
 
 export async function listMoves(
-  opts: { productId?: string; reason?: MoveReason; since?: string; limit?: number } = {},
+  opts: { productId?: string; reason?: LedgerReason; since?: string; limit?: number } = {},
 ): Promise<MoveRow[]> {
   const where: string[] = [];
   const params: unknown[] = [];
@@ -656,7 +731,7 @@ export async function listMoves(
     params.push(opts.productId);
     where.push(`product_id = $${params.length}`);
   }
-  if (opts.reason && MOVE_REASONS.includes(opts.reason)) {
+  if (opts.reason && (LEDGER_REASONS as readonly string[]).includes(opts.reason)) {
     params.push(opts.reason);
     where.push(`reason = $${params.length}`);
   }
@@ -676,7 +751,7 @@ export async function listMoves(
     product_id: string;
     variant: string;
     delta: number;
-    reason: MoveReason;
+    reason: LedgerReason;
     ref: string | null;
     actor: string | null;
   }>(
@@ -685,8 +760,14 @@ export async function listMoves(
      order by at desc, id desc limit $${params.length}`,
     params,
   );
+  /* The owner's own products are rows in a table, not entries in the
+     catalogue file, so BY_ID alone printed «c-kevin-murphy-beard-balm» where
+     the history is supposed to say what was received or sold. One lookup for
+     the whole page, best effort. */
+  const own = await customNames(rows.map((r) => r.product_id));
   return rows.map((r) => {
     const p = BY_ID.get(r.product_id);
+    const mine = own.get(r.product_id);
     return {
       id: Number(r.id),
       at: new Date(r.at as string).toISOString(),
@@ -696,10 +777,24 @@ export async function listMoves(
       reason: r.reason,
       ref: r.ref,
       actor: r.actor,
-      brand: p?.b ?? "",
-      name: p?.n ?? r.product_id,
+      brand: p?.b ?? mine?.b ?? "",
+      name: p?.n ?? mine?.n ?? r.product_id,
     };
   });
+}
+
+/** brand/name for whichever of these ids are the owner's own products. */
+async function customNames(ids: string[]): Promise<Map<string, MinProduct>> {
+  const out = new Map<string, MinProduct>();
+  const want = [...new Set(ids.filter((id) => !BY_ID.has(id)))];
+  if (!want.length) return out;
+  try {
+    const { customMinByIds } = await import("@/lib/custom-products");
+    for (const [id, m] of await customMinByIds(want)) out.set(id, m.min);
+  } catch (err) {
+    console.error("[inventory] custom product names not loaded:", err);
+  }
+  return out;
 }
 
 /* `todaysMoves(limit)` — listMoves() with `since` set to UTC midnight — had no

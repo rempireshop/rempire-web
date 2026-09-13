@@ -844,4 +844,97 @@ test.describe("scanner app", () => {
     w.serverErrors.length = 0;   // the mocked 503 above, forgiven
     await assertClean(page, w, "«Склад» history after a failure");
   });
+
+  /* «I had a product with scanned code, then I went to salon -> scan, scanned
+     the same product and it did not find it» (Renat, acceptance run
+     13.09.2026). Two screens, two different places searched: «Склад» looked
+     at the shelf rows, which carry the codes, and «Салон» at CATALOGUE, which
+     carries none at all — while its own box promised «Название, бренд или
+     штрихкод». Both search the same two places now, typed or scanned. */
+  scenario(226, "«Салон»: the code that finds a bottle in «Склад» finds it at the register too — typed, and scanned", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const ean = `24${Date.now().toString().slice(-10)}`;
+    const variant = "40 мл";
+
+    await openAdmin(page);
+    await bind(page, PRODUCT_2.id, variant, ean);
+    // the register reads the shelf copy for the codes, so it must be fetched
+    // after the bind — a reload is what the owner's own next visit does
+    await page.reload();
+    await tab(page, "stock");
+    await page.locator("[data-stockq]").fill(ean);
+    await expect(page.locator(`[data-stockedit="${PRODUCT_2.id} ${variant}"]`), "«Склад» lost the code it binds by").toBeVisible();
+
+    await tab(page, "pos");
+    await page.locator("[data-posq]").fill(ean);
+    const chip = page.locator(`[data-posadd^="${PRODUCT_2.id}:"]`).first();
+    await expect(chip, "the register found nothing for a code «Склад» finds").toBeVisible();
+    await expect(page.locator("#poslist")).not.toContainText("Ничего не найдено");
+    await assertClean(page, w, "«Салон» search by barcode");
+
+    // …and the same code through the camera door: the card, then the basket
+    await page.locator("[data-posq]").fill("");
+    await page.locator("[data-scanopen]").first().click();
+    await expect(page.locator(".scanoverlay")).toBeVisible();
+    await page.locator("[data-scanmanual]").fill(ean);
+    await page.locator("[data-scanmanualsubmit]").click();
+    await expect(page.locator("#scanpanel"), "the salon scan did not recognise the code").toContainText("Найдено");
+    await page.locator('[data-scanmove="cart"]').click();
+    expect(await toastText(page)).toMatch(/корзин/i);
+    await clearToast(page);
+    await expect(page.locator(".adm-posline"), "«Добавить в продажу» left the basket empty").toHaveCount(1);
+    await expect(page.locator(".adm-posline").first()).toContainText(variant);
+    expect(await sidewaysOverflow(page), "«Салон» scrolls sideways on a phone").toBeLessThanOrEqual(1);
+    await assertClean(page, w, "«Салон» scan → basket");
+  });
+
+  /* «Reason is not stored» (Renat). The box says «Причина (видна в истории)»
+     and only a changed COUNT ever wrote a ledger row, so the sentence typed
+     beside a corrected «мало» threshold went nowhere — under a «Сохранено ✓».
+     db/migrations/092_stock_move_edit.sql gave a card change a line of its
+     own. The same screen is where the volume moved out of the grey line into
+     a box of its own, so both are checked together. */
+  scenario(227, "«Склад»: a reason typed beside a threshold change reaches the history, and the volume has its own place on the row", async ({ page }) => {
+    test.setTimeout(120_000);
+    const w = watch(page);
+    const variant = "150 мл";
+    const key = `${PRODUCT_2.id} ${variant}`;
+    const why = `порог поднял ${Date.now().toString().slice(-5)}`;
+
+    await openAdmin(page);
+    await tab(page, "stock");
+    await expect(page.locator("#stocklist")).toBeVisible();
+    await page.locator("[data-stockq]").fill(PRODUCT_2.id);
+    const row = page.locator(`[data-stockedit="${key}"]`).locator("xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' adm-row ')][1]");
+    await expect(row).toBeVisible();
+
+    // the volume is an element of its own, not the head of the grey line under
+    // a name the row cuts off — «the sizes seem to be at the end of the
+    // product name, so it's hard to understand»
+    await expect(row.locator(".adm-row__sz"), "the volume has no place of its own on the row").toHaveText(variant);
+    await expect(row.locator(".adm-row__sub"), "the volume is still trailing the product name").not.toContainText(variant);
+
+    await page.locator(`[data-stockedit="${key}"]`).click();
+    /* A number this size does not already hold — the desktop and mobile
+       projects share one database, and «Сохранить» on a form that changes
+       nothing says «Изменений нет» and writes nothing, rightly. */
+    const low = await page.locator("[data-stocklowinput]").inputValue();
+    await page.locator("[data-stocklowinput]").fill(low === "6" ? "5" : "6");
+    await page.locator("[data-stockreasoninput]").fill(why);
+    await page.locator(`[data-stocksave="${key}"]`).click();
+    expect(await toastText(page)).toMatch(/Сохранено/);
+    await clearToast(page);
+
+    await page.locator('[data-stockmovesopen="1"]').click();
+    await expect(page.locator(".adm-sec__t")).toContainText("История");
+    const line = page.locator(".adm-row", { hasText: why });
+    await expect(line, "the reason typed beside the threshold was lost").toBeVisible();
+    // the panel runs in Russian in this suite (playwright.config.ts pins the locale)
+    expect(isRussian(await line.innerText())).toBe(true);
+    await expect(line).toContainText("правка карточки");
+    // nothing left the shelf, so the row carries no number
+    await expect(line.locator(".adm-row__amt")).toHaveText("");
+    await assertClean(page, w, "«Склад» history after a card change");
+  });
 });
