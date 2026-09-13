@@ -650,6 +650,70 @@ async function qAttention(): Promise<OverviewSummary["attention"]> {
   };
 }
 
+/* ---------- the parcels waiting to go out, by name ------------------------
+ *
+ * Renat's acceptance run, 13.09.2026: «I am asking in english which orders are
+ * waiting to be shipped and get russian answer that such information is not
+ * loaded» — while «Обзор», on the very same screen, was showing «N заказов
+ * ждут отправки». The count was in the panel and in qAttention() above; it was
+ * never in the admin assistant's prompt, which said in so many words that «the
+ * orders waiting to be shipped are not in this prompt».
+ *
+ * So the assistant gets the same queue the overview counts, and it gets it by
+ * name: he asks WHICH orders, not how many. Same predicate as `to_ship` above
+ * — paid, not the salon counter, not an all-gift-card basket — spelled the
+ * same way so the number the assistant says and the number «Обзор» shows can
+ * never drift apart. Oldest first: the parcel that has waited longest is the
+ * one he needs to hear about.
+ *
+ * `labeled` is the Montonio sticker, exactly as admOrderVM() in
+ * public/shop2/app.js reads it: a registered shipment that the journal has not
+ * taken back. A label is not a hand-over — a labelled order is still on the
+ * shelf — so it stays in the queue, and the flag is only there so the reply
+ * can tell the owner which ones are ready to drop off.
+ */
+export type ToShipRow = {
+  number: string;
+  who: string;
+  at: string;
+  total: number;
+  labeled: boolean;
+};
+
+export async function toShipOrders(limit = 10): Promise<{ total: number; rows: ToShipRow[] }> {
+  const cap = Math.min(Math.max(Math.trunc(limit) || 0, 1), 50);
+  const rows = await query<{
+    number: string;
+    name: string | null;
+    email: string | null;
+    created_at: string | Date;
+    total: string | number;
+    labeled: boolean | null;
+    over: string;
+  }>(
+    `select number, name, email, created_at, total,
+            ((shipping -> 'montonio' ->> 'shipmentId') is not null
+              and coalesce(shipping -> 'montonio' ->> 'dismissed', 'false') <> 'true') as labeled,
+            count(*) over () as over
+       from orders
+      where status = 'paid' and channel <> 'pos'
+        and coalesce(shipping->>'method', '') <> 'digital'
+      order by created_at asc
+      limit $1`,
+    [cap],
+  );
+  return {
+    total: rows.length ? int(rows[0].over) : 0,
+    rows: rows.map((r) => ({
+      number: String(r.number || ""),
+      who: String(r.name || r.email || "").trim(),
+      at: new Date(r.created_at).toISOString().slice(0, 10),
+      total: Number(r.total) || 0,
+      labeled: r.labeled === true,
+    })),
+  };
+}
+
 export async function getOverviewSummary(now: Date = new Date()): Promise<OverviewSummary> {
   const dayStart = startOfUtcDay(now);
   const prevStart = new Date(dayStart.getTime() - 86_400_000);

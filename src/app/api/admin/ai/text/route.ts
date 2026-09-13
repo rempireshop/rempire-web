@@ -55,7 +55,7 @@
  * token usage OpenAI reports, so cost is auditable from the same journal
  * every other admin action lands in.
  */
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { clientIp, rateLimit, requireAdmin } from "@/lib/auth";
 import { getOverrides, getSettings, writeAuditSafe, type Override } from "@/lib/orders";
 import { mergeContent, pickLang, type ShopContent } from "@/lib/content";
@@ -319,6 +319,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: code }, { status: 400 });
   }
 
+  /* "reply": the shop's signature is pasted under the draft, and it is read
+     from settings — one database round trip that depends on nothing the model
+     says. It used to be awaited AFTER the answer came back, so it was pure
+     added latency in front of the owner; started here, it runs while the model
+     writes and has long landed by the time it is wanted. */
+  const settingsSoon = task === "reply" ? getSettings().catch((err) => {
+    console.error("[admin/ai/text] signature lookup failed", err);
+    return null;
+  }) : null;
+
   let r: Response;
   try {
     r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -371,13 +381,9 @@ export async function POST(req: NextRequest) {
   if (task === "reply") {
     const p = (parsed && typeof parsed === "object" ? parsed : {}) as Record<string, unknown>;
     const replyText = str(p.reply, 4000);
-    let signature = "";
-    try {
-      const settings = await getSettings();
-      signature = buildSignature(mergeContent(settings.content), lang);
-    } catch (err) {
-      console.error("[admin/ai/text] signature lookup failed", err);
-    }
+    // started before the model call (settingsSoon above); null when it failed
+    const settings = await settingsSoon;
+    const signature = settings ? buildSignature(mergeContent(settings.content), lang) : "";
     result = { text: signature ? `${replyText}\n\n${signature}` : replyText };
   } else {
     result = shapeNonReply(task, lang, parsed);
@@ -402,14 +408,32 @@ export async function POST(req: NextRequest) {
   }
 
   const usage = (data.usage ?? {}) as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-  await writeAuditSafe("admin", "ai.text", {
+  /* The audit line still goes in, and it no longer stands between the model's
+     answer and the owner's screen (Renat, 13.09.2026: writing a product
+     description «works but takes time»). It is bookkeeping — nothing on screen
+     reads it, and writeAuditSafe already swallows its own failures — but it is
+     an insert against a database in another datacentre, awaited after the work
+     was finished, on every single one of these calls: the RU draft, its ET/EN
+     translation, and each of the three Google snippets.
+
+     after() runs it once the response has been sent, and keeps the function
+     alive until it lands — a plain floating promise would be gambling on the
+     lambda not freezing first. Called outside a request scope (a unit test
+     invoking POST() directly) it throws rather than silently dropping the
+     write, and the line is written inline there instead. */
+  const audit = {
     task,
     lang,
     model: data.model ?? MODEL,
     promptTokens: usage.prompt_tokens ?? null,
     completionTokens: usage.completion_tokens ?? null,
     totalTokens: usage.total_tokens ?? null,
-  });
+  };
+  try {
+    after(() => writeAuditSafe("admin", "ai.text", audit));
+  } catch {
+    await writeAuditSafe("admin", "ai.text", audit);
+  }
 
   return NextResponse.json({ ok: true, ...result, model: data.model ?? MODEL });
 }

@@ -14,6 +14,7 @@ import {
   intentPromptBlock,
   type DiscountIntent,
 } from "./intent";
+import { answerLang, type Lang3 } from "./reply-lang";
 
 /* The shop chat's brain. Rule-based fallback lives in the client
    (public/shop2/chat.js); when OPENAI_API_KEY is set on Vercel this route
@@ -31,7 +32,7 @@ import {
    and hands back panel actions. See the check in POST(). */
 
 const MODEL = process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
-const PROMPT_V = 20; // echoed in responses so a stale deployment is visible from outside
+const PROMPT_V = 21; // echoed in responses so a stale deployment is visible from outside
 
 /* Output room. 350 was enough for a sentence and a price — and exactly what
    cut a set_hero with five trilingual slides, a set_content patch or the
@@ -176,6 +177,36 @@ async function stockSummaryForPrompt(): Promise<string> {
    customer card. Dynamically imported and best-effort, same posture as
    every other optional neighbour: a customers-list hiccup must never be the
    reason the assistant stops answering. */
+/* orders: the parcels waiting to go out, fetched fresh on every admin call —
+   the queue «Обзор» counts as «N заказов ждут отправки» (src/lib/analytics.ts
+   qAttention, `to_ship`), now by name as well as by number.
+
+   Renat, 13.09.2026: «which orders are waiting to be shipped … such
+   information is not loaded», said while the overview on the same screen was
+   showing exactly that figure. It was true — the prompt below used to state
+   outright that this queue was not in it — and it is the one thing an owner
+   opens the panel to ask. One indexed read (orders_status_idx), best-effort
+   like every other optional neighbour here: an orders hiccup must never be the
+   reason the assistant stops answering. */
+const TO_SHIP_MAX = 10;
+async function toShipForPrompt(): Promise<string> {
+  try {
+    const { toShipOrders } = await import("@/lib/analytics");
+    const { total, rows } = await toShipOrders(TO_SHIP_MAX);
+    if (!total) return "0 — nothing is waiting to go out right now.";
+    const head = `${total} waiting${rows.length < total ? `, the ${rows.length} oldest listed` : ""}:`;
+    return [
+      head,
+      ...rows.map(
+        (r) =>
+          `${r.number} | ${r.who || "(без имени)"} | paid ${r.at} | ${r.total.toFixed(2)} € | ${r.labeled ? "label ready" : "no label yet"}`,
+      ),
+    ].join("\n");
+  } catch {
+    return "(not available right now — say so rather than guessing, and point to «Заказы»)";
+  }
+}
+
 const CUSTOMERS_TRIGGER = /балл|клиент|партнёр/i;
 async function customersSummaryForPrompt(): Promise<string> {
   try {
@@ -258,6 +289,7 @@ function adminPrompt(
   attachments: AttachmentBrief[] = [],
   bundleLines = "",
   intent: DiscountIntent = "",
+  toShipSummary = "",
 ) {
   return `CATALOGUE of the shop (id|brand|name|category|price|stock; the products the owner created himself have an id starting with «c-» and carry their sizes after «|sizes:» — those are the only ones update_product may change):
 ${catalogueLines()}${customLines.length ? "\n" + customLines.join("\n") : ""}
@@ -291,9 +323,12 @@ Top internal search terms: ${analytics.topSearchTerms.length ? analytics.topSear
 STOCK — tracked products reading мало/нет right now, real numbers from the shop's own database (inventory agent; a product not listed here is either well-stocked or not numerically tracked yet):
 ${stockSummary}
 
+ORDERS WAITING TO BE SHIPPED right now — real rows from the shop's own database, the very same queue «Обзор» counts as «N заказов ждут отправки» (order number | customer | date paid | total | whether the parcel label is made). A label is not a hand-over: a labelled order is still on the shelf and still waiting. This is the answer to «какие заказы ждут отправки», «what do I have to send», «сколько отправить» — answer it from these rows, never say it is not loaded, and point to the «Заказы» tab afterwards:
+${toShipSummary || "(not available right now — say so rather than guessing, and point to «Заказы»)"}
+
 You are the admin assistant inside the REMPIRE shop's admin panel, talking to the shop owner (Renat, non-technical, prefers simple Russian). The panel runs on the shop's real database: the catalogue, the orders, the customers, the stock and every figure in this prompt are real. Never call anything here a demo, a test or fictional, and never quote a number that is not in this prompt — when something is not here, say it is not loaded and point to the tab that has it.
 
-Answer in ${LANG_NAME[lang] ?? "Russian"}, plainly, no jargon, 1-3 short sentences. When the owner asks where something is or wants an action, point to the right tab by ending your JSON with the "tab" field: over (обзор), orders (заказы), goods (товары), stock (склад), pos (продажа в салоне), people (клиенты), promos (промокоды), blog (блог), stats (аналитика), mail (письма), apps (подключения), setup (настройки).
+ANSWER IN ${(LANG_NAME[lang] ?? "Russian").toUpperCase()}. That is the language of the owner's own last message, read from his words before you saw them — not a preference and not a guess. Every sentence you write him goes in ${LANG_NAME[lang] ?? "Russian"}, whatever language these instructions, the data blocks above or the earlier turns of this conversation happen to be written in. Plainly, no jargon, 1-3 short sentences. When the owner asks where something is or wants an action, point to the right tab by ending your JSON with the "tab" field: over (обзор), orders (заказы), goods (товары), stock (склад), pos (продажа в салоне), people (клиенты), promos (промокоды), blog (блог), stats (аналитика), mail (письма), apps (подключения), setup (настройки).
 
 What the panel really does (say so when relevant, and never promise more): photos are stored exactly as uploaded and shown on a white background — there is no automatic background removal and no watermark (a per-photo «Убрать фон» button exists only when the shop has switched it on); texts — product descriptions, Google titles, blog articles — can be written in Russian, Estonian and English, by you here or by the editor's own buttons; every destructive action asks for confirmation first.
 
@@ -370,7 +405,7 @@ EXAMPLE — owner: «напиши статью о том, как ухажива�
 EXAMPLE — owner: «вот фото для Bio Botanical Shampoo, сделай главным» (with a photo attached)
 {"reply":"Ставлю это фото главным у System 4 Bio Botanical Shampoo — оно появится в каталоге, в поиске и в письмах. Подтвердите; отменить можно в журнале.","product_ids":[],"tab":"goods","action":{"type":"add_product_photo","id":"system-4-bio-botanical-shampoo","key":"${attachments[0].key}","main":true}}` : ""}
 
-FIGURES: revenue, orders, average order, conversion and search terms come ONLY from the SALES block above, stock ONLY from the STOCK block — real numbers, never a placeholder. If SALES says it is not loaded, say the figures are not available right now and point to «Аналитика». Traffic sources and the orders waiting to be shipped are not in this prompt: for «откуда приходят» point to «Аналитика», for «что отправить» point to «Заказы» — without inventing counts, order numbers or percentages.
+FIGURES: revenue, orders, average order, conversion and search terms come ONLY from the SALES block above, stock ONLY from the STOCK block, and the parcels waiting to go out ONLY from the ORDERS WAITING TO BE SHIPPED block — real numbers, never a placeholder. If SALES says it is not loaded, say the figures are not available right now and point to «Аналитика». Traffic sources are the one thing that is not in this prompt: for «откуда приходят» point to «Аналитика» without inventing percentages.
 
 Routing examples: «сколько заказов на неделе», «какая выручка», «откуда приходят» → tab "stats". «что отправить», «покажи заказ» → "orders". «поменять цену», «добавить товар», «переименуй товар», «поменяй название», «добавь объём» → "goods". «письма клиентам», «брошенная корзина» → "mail". «что подключено», «google» → "apps". «промокод», «скидка для покупателей», «код на скидку» → "promos". «статья», «блог», «напиши про», «опубликуй статью» → "blog". «доставка», «тарифы», «сколько стоит доставка», «реквизиты», «языки», «баннер», «главная страница», «слайд», «телефон», «адрес», «часы работы», «инстаграм», «верхняя полоска», «контакты» → "setup". «клиенты», «салоны», «партнёр», «баллы», «лояльность», «оптовая скидка», «кто одобрен» → "people". «что заканчивается», «остаток», «сколько штук», «приход», «списать», «пересчитали», «штрихкод» → "stock". «продать в салоне», «касса», «продажа наличными» → "pos". Answer the question first, then route.
 
@@ -478,40 +513,58 @@ export async function POST(req: NextRequest) {
 
   const lastUser = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
   const isMini = (body as { debug?: string }).debug === "mini";
-  // blog: only the real customer prompt needs it — one extra query the admin
-  // panel (its own catalogue already inlined) and the debug prompt skip
-  const blogLines = !isAdmin && !isMini ? await blogLinesForPrompt() : "";
-  // inventory: only the admin prompt needs it — same reasoning as blogLines
-  const stockSummary = isAdmin && !isMini ? await stockSummaryForPrompt() : "";
-  // integration: only fetched when the owner's own message plausibly needs
-  // it — see CUSTOMERS_TRIGGER/customersSummaryForPrompt() above
-  const customersSummary =
-    isAdmin && !isMini && CUSTOMERS_TRIGGER.test(lastUser) ? await customersSummaryForPrompt() : "";
-  // product creation: the owner's own rows, so their ids are known to the
-  // prompt and to sanitizeAction() alike — see customForPrompt()
-  const custom: CustomForPrompt = isAdmin && !isMini ? await customForPrompt() : { rows: [], lines: [] };
-  // photos attached in the panel (keys the upload route answered with), and
-  // the blog list when the message is about the blog or a photo is here
+  // photos attached in the panel (keys the upload route answered with)
   const attachments = isAdmin ? briefAttachments(body.attachments) : [];
-  const adminBlogLines =
-    isAdmin && !isMini && (attachments.length || BLOG_TRIGGER.test(lastUser)) ? await adminBlogLinesForPrompt() : "";
   /* «набор» or «промокод» — read off the owner's own words before the model
      sees them (src/app/api/assistant/intent.ts). It goes into the prompt as a
      plain instruction AND is checked again against whatever the model
      answered, below: a live promo code for a sentence that said «набор» is
      Dim's own bug, and a prompt alone is only a request. */
   const intent: DiscountIntent = isAdmin && !isMini ? discountIntent(lastUser) : "";
-  // «Наборы»: only when the owner is talking about them (bundleLinesForPrompt)
-  const adminBundleLines =
-    isAdmin && !isMini && (intent === "bundle" || intent === "ask" || BUNDLE_TRIGGER.test(lastUser))
-      ? await bundleLinesForPrompt()
-      : "";
-  const lang = body.lang === "ET" || body.lang === "EN" ? body.lang : "RU";
+
+  /* Every optional block the prompt carries, at once rather than one after
+     another (Renat, 13.09.2026: «works but takes time»). Each of these is an
+     independent read — stock, the waiting parcels, the owner's own products,
+     and the three that only some questions pay for at all — and nothing here
+     needs anything from the one before it, so five round trips in a row were
+     five latencies in a row before the model was even asked. `Promise.all`
+     makes them one. Each keeps its own try/catch, so the slowest or the
+     unluckiest of them still cannot stop the assistant answering. */
+  const [blogLines, stockSummary, toShipSummary, customersSummary, custom, adminBlogLines, adminBundleLines] =
+    await Promise.all([
+      // blog: only the real customer prompt needs it — one query the admin
+      // panel (its own catalogue already inlined) and the debug prompt skip
+      !isAdmin && !isMini ? blogLinesForPrompt() : "",
+      // inventory: only the admin prompt needs it — same reasoning as blogLines
+      isAdmin && !isMini ? stockSummaryForPrompt() : "",
+      // orders: the parcels waiting to go out — what «Обзор» counts, by name
+      isAdmin && !isMini ? toShipForPrompt() : "",
+      // integration: only fetched when the owner's own message plausibly needs
+      // it — see CUSTOMERS_TRIGGER/customersSummaryForPrompt() above
+      isAdmin && !isMini && CUSTOMERS_TRIGGER.test(lastUser) ? customersSummaryForPrompt() : "",
+      // product creation: the owner's own rows, so their ids are known to the
+      // prompt and to sanitizeAction() alike — see customForPrompt()
+      isAdmin && !isMini ? customForPrompt() : ({ rows: [], lines: [] } as CustomForPrompt),
+      // the blog list when the message is about the blog or a photo is here
+      isAdmin && !isMini && (attachments.length || BLOG_TRIGGER.test(lastUser)) ? adminBlogLinesForPrompt() : "",
+      // «Наборы»: only when the owner is talking about them (bundleLinesForPrompt)
+      isAdmin && !isMini && (intent === "bundle" || intent === "ask" || BUNDLE_TRIGGER.test(lastUser))
+        ? bundleLinesForPrompt()
+        : "",
+    ]);
+
+  /* The panel's own language, and then the language the owner actually wrote
+     in — see ./reply-lang.ts for why the question wins and what happens when
+     it says nothing. `panelLang` is still what the storefront chat answers in:
+     there the customer picked the site's language and is reading a page
+     written in it. */
+  const panelLang: Lang3 = body.lang === "ET" || body.lang === "EN" ? body.lang : "RU";
+  const lang: Lang3 = isAdmin ? answerLang(lastUser, panelLang) : panelLang;
   const system =
     isMini
       ? `You are the shopping assistant of a grooming shop. Answer in Russian, helpfully. Respond ONLY with JSON: {"reply":"...","product_ids":[]}`
       : isAdmin
-        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent)
+        ? adminPrompt(lang, briefHero(body.hero), briefContent(mergeContent(body.content)), briefAnalytics(body.analytics), stockSummary, customersSummary, custom.lines, adminBlogLines, attachments, adminBundleLines, intent, toShipSummary)
         : shopPrompt(lang, lastUser, blogLines);
 
   const r = await fetch("https://api.openai.com/v1/chat/completions", {
