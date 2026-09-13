@@ -152,8 +152,11 @@ test.describe("admin — the browser's Back closes an open card", () => {
     await expect(page.locator("[data-admgoods]").first(), "Back left the panel").toBeVisible();
     await assertClean(page, w, "Back through the editor");
 
-    // closing with the button spends the parked entry, so the next Back is
-    // not a press that does nothing: it really leaves the panel
+    /* Closing with the button leaves no press that does nothing: the next
+       Back really moves. Since round 15 it moves out of «Товары» and into the
+       section behind it — «Настройки», where this test came from — rather
+       than out of the panel (app.js ADM_TRAIL); either way the goods list is
+       gone, which is what a press that did something means here. */
     await first.click();
     await expect(page.locator("[data-admsavegoods]")).toBeVisible();
     await page.locator("[data-admclose]").first().click();

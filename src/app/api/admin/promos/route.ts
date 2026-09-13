@@ -7,18 +7,23 @@
  *                                      → { ok, promo }   (create or edit)
  * PATCH  /api/admin/promos/  {code, active}
  *                                      → { ok, promo }   (switch one on/off)
+ * DELETE /api/admin/promos/?code=SUVI10
+ *                                      → { ok, code }    (a code nobody used)
  *
- * There is no DELETE: a code that has been used is part of the order history,
- * and «deactivate» is what the owner actually means. Everything is validated
- * by validatePromo() in src/lib/promos.ts — the same door the assistant's
- * create_promo goes through, so a code typed here and a code proposed by the
- * model are held to identical bounds.
+ * DELETE is narrow on purpose (Renat, 12.09.2026): a code that has already
+ * been used is part of the order history, so deletePromo() refuses it with
+ * `in_use` and the panel leaves the owner the switch. Everything else is
+ * validated by validatePromo() in src/lib/promos.ts — the same door the
+ * assistant's create_promo goes through, so a code typed here and a code
+ * proposed by the model are held to identical bounds.
  *
  * NB: trailing slash on all of them (next.config has trailingSlash: true).
  */
 import { requireAdmin } from "@/lib/auth";
 import { writeAuditSafe } from "@/lib/orders";
-import { listPromos, normalisePromoCode, setPromoActive, upsertPromo, validatePromo } from "@/lib/promos";
+import {
+  deletePromo, listPromos, normalisePromoCode, setPromoActive, upsertPromo, validatePromo,
+} from "@/lib/promos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -88,6 +93,36 @@ export async function PATCH(req: Request) {
     return Response.json({ ok: true, promo }, { headers: NO_STORE });
   } catch (err) {
     console.error("[api/admin/promos] patch failed:", err);
+    return Response.json({ ok: false, error: "db_unavailable" }, { status: 503, headers: NO_STORE });
+  }
+}
+
+/**
+ * Delete a code nobody has used yet. The code rides in the query string, the
+ * way the sets endpoint takes its id — a DELETE with a body is awkward for
+ * every client there is, and a promo code is not secret.
+ *
+ * 409 `in_use` is the interesting answer: it is not a failure, it is the rule
+ * (see deletePromo). The panel turns it into one sentence and leaves the
+ * switch where it is.
+ */
+export async function DELETE(req: Request) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
+
+  const code = normalisePromoCode(new URL(req.url).searchParams.get("code"));
+  if (!code) return Response.json({ ok: false, error: "bad_code" }, { status: 400, headers: NO_STORE });
+
+  try {
+    const gone = await deletePromo(code);
+    if (!gone.ok) {
+      const status = gone.error === "not_found" ? 404 : gone.error === "in_use" ? 409 : 400;
+      return Response.json({ ok: false, error: gone.error }, { status, headers: NO_STORE });
+    }
+    await writeAuditSafe("admin", "promo.delete", { code });
+    return Response.json({ ok: true, code }, { headers: NO_STORE });
+  } catch (err) {
+    console.error("[api/admin/promos] delete failed:", err);
     return Response.json({ ok: false, error: "db_unavailable" }, { status: 503, headers: NO_STORE });
   }
 }

@@ -12,6 +12,7 @@ import { exec, query } from "@/lib/db";
 import { createOrder } from "@/lib/orders";
 import {
   consumePromo,
+  deletePromo,
   getPromo,
   listPromos,
   looksLikeGiftCode,
@@ -161,6 +162,63 @@ describe("promo codes", () => {
     expect((await setPromoActive("suvi10", false))!.active).toBe(false);
     expect(await setPromoActive("NOPE", false)).toBe(null);
     expect(await listPromos()).toHaveLength(1);
+  });
+
+  /* ---------- deleting, and the three reasons not to ---------- *
+     Renat, 12.09.2026: «хочу удалять промокод, а не только выключать». A code
+     nobody has used is a row nothing points at; a code that IS on an order is
+     part of its history — `promo_code_uses` would cascade away with it and
+     the order card would name a code that no longer exists. */
+
+  it("deletes a code nobody has used", async () => {
+    await make({ code: "TYPO", kind: "percent", value: 10 });
+    expect(await deletePromo("typo")).toEqual({ ok: true, code: "TYPO" });
+    expect(await getPromo("TYPO")).toBe(null);
+    expect(await listPromos()).toHaveLength(0);
+  });
+
+  it("refuses a code that has been paid with", async () => {
+    await make({ code: "SPENT", kind: "percent", value: 10 });
+    await consumePromo("SPENT", "33333333-3333-4333-8333-333333333333", 4);
+
+    expect(await deletePromo("SPENT")).toEqual({ ok: false, error: "in_use" });
+    expect((await getPromo("SPENT"))!.used).toBe(1);
+    // …and the trail the counter is explained by is still there
+    const uses = await query<{ code: string }>("select code from promo_code_uses where code = 'SPENT'");
+    expect(uses).toHaveLength(1);
+  });
+
+  it("refuses a code whose counter was put back but whose redemption row stands", async () => {
+    await make({ code: "RESET", kind: "percent", value: 10 });
+    await consumePromo("RESET", "44444444-4444-4444-8444-444444444444", 4);
+    await exec("update promo_codes set used = 0 where code = 'RESET'");
+
+    expect(await deletePromo("RESET")).toEqual({ ok: false, error: "in_use" });
+    expect(await getPromo("RESET")).not.toBe(null);
+  });
+
+  it("refuses a code an order carries, even when the order was never paid", async () => {
+    await make({ code: "ONORDER", kind: "percent", value: 10 });
+    // the customer typed it in lower case, with a space in the middle — which
+    // is what `orders.discount_code` stores, verbatim
+    const o = await createOrder({
+      lang: "ru",
+      items: [{ id: plain.id, qty: 1 }],
+      customer,
+      shipping: { method: "parcel", country: "EE" },
+      discountCode: "on order",
+    });
+    expect(o.discountCode).toBe("on order");
+    expect((await getPromo("ONORDER"))!.used).toBe(0);   // nothing paid, nothing spent
+
+    expect(await deletePromo("ONORDER")).toEqual({ ok: false, error: "in_use" });
+    expect(await getPromo("ONORDER")).not.toBe(null);
+  });
+
+  it("says which kind of nothing it found", async () => {
+    expect(await deletePromo("NOSUCHCODE")).toEqual({ ok: false, error: "not_found" });
+    expect(await deletePromo("ПРОМО10")).toEqual({ ok: false, error: "bad_code" });
+    expect(await deletePromo("")).toEqual({ ok: false, error: "bad_code" });
   });
 
   /* ---------- consuming ---------- */

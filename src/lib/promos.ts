@@ -425,3 +425,56 @@ export async function setPromoActive(code: unknown, active: boolean): Promise<Pr
   );
   return rows.length ? toPromo(rows[0]) : null;
 }
+
+export type PromoDelete =
+  | { ok: true; code: string }
+  | { ok: false; error: "bad_code" | "not_found" | "in_use" };
+
+/**
+ * Delete one code — and refuse the moment it is part of somebody's order.
+ *
+ * Renat, 12.09.2026: a code typed wrong, or made for a weekend that never
+ * came, had no way off the screen but the switch. A code nobody has used is
+ * exactly that — a row nothing points at — and it goes. A code that HAS been
+ * used is a line on an order: `promo_code_uses` would cascade away with it
+ * (migration 060) and `orders.discount_code` would name a code that no longer
+ * exists, so for those the panel keeps the switch and says why.
+ *
+ * Three questions, all inside one transaction and with the row locked, so a
+ * payment landing between the check and the delete cannot slip a use past it:
+ *   · the counter itself, which the paid transition bumps (consumePromo);
+ *   · a redemption row, in case that counter was ever put back by hand;
+ *   · an order carrying the code, which is what the order card reads.
+ */
+export async function deletePromo(code: unknown): Promise<PromoDelete> {
+  const norm = normalisePromoCode(code);
+  if (!norm) return { ok: false, error: "bad_code" };
+
+  return withTx(async (q) => {
+    const rows = await q<{ used: number | string }>(
+      "select used from promo_codes where code = $1 for update",
+      [norm],
+    );
+    if (!rows.length) return { ok: false, error: "not_found" as const };
+    if (Math.trunc(num(rows[0].used)) > 0) return { ok: false, error: "in_use" as const };
+
+    const redeemed = await q<{ id: string }>(
+      "select id from promo_code_uses where code = $1 limit 1",
+      [norm],
+    );
+    if (redeemed.length) return { ok: false, error: "in_use" as const };
+
+    /* `orders.discount_code` keeps the string the customer TYPED — «suvi 10»
+       for the code SUVI10 (createOrder stores it raw, so the order card and
+       the receipt show what was entered) — so the comparison folds the same
+       way normalisePromoCode does rather than matching the stored case. */
+    const onOrder = await q<{ id: string }>(
+      "select id from orders where upper(replace(discount_code, ' ', '')) = $1 limit 1",
+      [norm],
+    );
+    if (onOrder.length) return { ok: false, error: "in_use" as const };
+
+    await q("delete from promo_codes where code = $1", [norm]);
+    return { ok: true as const, code: norm };
+  });
+}

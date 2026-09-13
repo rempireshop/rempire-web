@@ -151,6 +151,68 @@ test.describe("admin — «Назад» closes what is open", () => {
     await expect(page.locator("[data-admsetback]"), "Back did not close the settings page on a phone").toHaveCount(0);
   });
 
+  /* ---------------------------------------------------------------------- *
+   * The floor those cards stand on
+   *
+   * Renat, 12.09.2026: «в приложении назад закрывает приложение, а в браузере
+   * выкидывает из админки в магазин». The cards were the round before this
+   * one; the SECTIONS they sit in had nothing behind them at all, because all
+   * thirteen share one address — and a panel opened from the home screen has
+   * exactly one history entry, so Back closed the app outright.
+   *
+   * Since round 15 the panel keeps its own trail (app.js ADM_TRAIL) and it is
+   * a layer like every other: Back walks back through the sections the owner
+   * came through, «Обзор» is the floor, and only from there does it leave.
+   * ---------------------------------------------------------------------- */
+
+  test("phone: a section hands back to the one before it, and «Обзор» is the floor", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "the bottom bar and «Ещё» are the phone's own navigation");
+    test.setTimeout(120_000);
+
+    // into the panel from the shop, so leaving it has somewhere to land
+    await page.goto(shopUrl("", "/"));
+    await waitForScreen(page, "home");
+    await loginAsAdmin(page);
+    await expect(page.locator('[data-admtab="over"][aria-current="true"]:visible'),
+      "the panel did not open on «Обзор»").toBeVisible();
+
+    await adminSection(page, "orders");
+    await expect(page.locator("[data-admorderq]")).toBeVisible();
+    await adminSection(page, "people");          // through «Ещё», the way the owner gets there
+    await expect(page.locator("[data-admcustq]")).toBeVisible();
+
+    // «Клиенты» → «Заказы» → «Обзор», one press each, panel intact
+    await back(page);
+    await expect(page.locator("[data-admcustq]"), "Back did not leave «Клиенты»").toHaveCount(0);
+    await expect(page.locator("[data-admorderq]"), "Back did not hand «Клиенты» back to «Заказы»").toBeVisible();
+    await back(page);
+    await expect(page.locator('[data-admtab="over"][aria-current="true"]:visible'),
+      "Back did not hand «Заказы» back to «Обзор»").toBeVisible();
+
+    // …and only «Обзор» gives way to the shop
+    await page.goBack();
+    await waitForScreen(page, "home");
+  });
+
+  test("phone: a card inside a section closes first, the section only after it", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile", "«Ещё» is the phone's own sheet");
+    test.setTimeout(120_000);
+    await loginAsAdmin(page);
+
+    await adminSection(page, "setup");
+    await page.locator('[data-admsetpage="company"]').click();
+    await expect(page.locator("[data-admsetback]")).toBeVisible();
+
+    // the settings page first…
+    await back(page);
+    await expect(page.locator("[data-admsetback]"), "Back did not close the settings page").toHaveCount(0);
+    await expect(page.locator('[data-admsetpage="company"]'), "the settings index did not come back").toBeVisible();
+    // …and «Настройки» itself only on the next press
+    await back(page);
+    await expect(page.locator('[data-admtab="over"][aria-current="true"]:visible'),
+      "Back did not hand «Настройки» back to «Обзор»").toBeVisible();
+  });
+
   test("closing with the button leaves no press that does nothing", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "history bookkeeping, not layout");
 
@@ -167,10 +229,21 @@ test.describe("admin — «Назад» closes what is open", () => {
     await expect(page.locator("[data-admsavegoods]")).toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first()).toBeVisible();
 
-    // …so the NEXT Back is a real navigation out of the panel, not a no-op
+    /* …so the NEXT Back moves for real. Round 15 changed where to: «Товары»
+       is a section the owner walked into, and the trail behind it (app.js
+       ADM_TRAIL) is a layer of its own now, so this press hands back «Обзор»
+       rather than the shop. What is being measured is unchanged — that the
+       press does something. */
+    await page.goBack();
+    await expect(page.locator("[data-admgoods]"),
+      "Back after a button-close did nothing at all").toHaveCount(0);
+    await expect(page.locator('[data-admtab="over"][aria-current="true"]:visible'),
+      "Back did not hand «Товары» back to «Обзор»").toBeVisible();
+
+    // …and from «Обзор», the panel's front door, the next one does leave
     await page.goBack();
     await expect(page.locator('body[data-screen="admin"]'),
-      "Back after a button-close did nothing at all").toHaveCount(0);
+      "Back from «Обзор» did not leave the panel").toHaveCount(0);
   });
 
   /* ---------------------------------------------------------------------- *
@@ -238,9 +311,14 @@ test.describe("admin — «Назад» closes what is open", () => {
     await expect(page.locator("[data-admsavegoods]"), "the editor did not close").toHaveCount(0);
     await expect(page.locator("[data-admgoods]").first()).toBeVisible();
 
-    // the entry the editor parked is gone, so this Back is a real navigation
+    /* The entry the editor parked is gone, so this Back is a real navigation:
+       out of «Товары» and back to «Обзор» — the section trail of round 15 is
+       what is behind the panel now, the shop is one press further (see the
+       test above). A press that did nothing would leave the goods list up. */
     await page.goBack();
-    await expect(page.locator('body[data-screen="admin"]'),
+    await expect(page.locator("[data-admgoods]"),
       "Back did nothing: the entry the card parked was never spent").toHaveCount(0);
+    await expect(page.locator('[data-admtab="over"][aria-current="true"]:visible'),
+      "Back did not hand «Товары» back to «Обзор»").toBeVisible();
   });
 });
